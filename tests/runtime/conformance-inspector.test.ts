@@ -131,7 +131,7 @@ describe("Conformance inspector snapshot", () => {
     const environment = createTestRuntimeEnvironment();
     environment.randomUUID.mockReturnValue("repeating-inspector-capture-nonce");
     const runtime = createTestRuntime({ id: "runtime:conformance-salted-references", environment });
-    runtime.apps.register(createTestManifest({ id: "same-private-identity" }));
+    runtime.apps.register(createTestManifest({ bundleIdentifier: "com.example.same-private-identity" }));
 
     const first = createConformanceInspectorSnapshot(runtime);
     const second = createConformanceInspectorSnapshot(runtime);
@@ -174,7 +174,7 @@ describe("Conformance inspector snapshot", () => {
   it("uses the live PolicyKit decision when no legacy override is present", () => {
     const runtime = createTestRuntime({ id: "runtime:conformance-policy" });
     runtime.apps.register(createTestManifest({
-      id: "requires-login",
+      bundleIdentifier: "com.example.requires-login",
       policy: { requiresLogin: true },
     }));
 
@@ -191,7 +191,7 @@ describe("Conformance inspector snapshot", () => {
     runtime.documents.registerType(noteType);
     const document = await runtime.documents.newDocument({ documentId: "inspector-note", typeId: noteType.id });
     document.update((model) => ({ ...model, body: "Dirty but never exported" }), { actionName: "Type" });
-    const content = { rendererId: "application", parameters: { appId: "inspector" } } as const;
+    const content = { rendererId: "application", parameters: { appId: "com.example.inspector" } } as const;
     const panel = runtime.windows.create(standardWindow("inspector-panel", {
       role: "panel",
       level: "floating",
@@ -243,7 +243,7 @@ describe("Conformance inspector snapshot", () => {
       cancel: () => undefined,
     });
     runtime.colourPanel.open();
-    runtime.apps.register(createTestManifest({ id: "metadata-app" }));
+    runtime.apps.register(createTestManifest({ bundleIdentifier: "com.example.metadata-app" }));
 
     const snapshot = createConformanceInspectorSnapshot(runtime, { limits: { data: 0 } });
 

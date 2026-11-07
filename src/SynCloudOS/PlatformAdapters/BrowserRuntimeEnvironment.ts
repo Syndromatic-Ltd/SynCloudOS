@@ -18,7 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { createBrowserViewportFeaturesSource } from "./BrowserViewportFeatures";
 import { createBrowserFilePickerPort } from "./BrowserFilePickerPort";
+import { createBrowserFileSystemAccessPanelPort } from "./BrowserFileSystemAccessPanelPort";
+import { createBrowserDownloadFilePanelPort } from "./BrowserDownloadFilePanelPort";
 import { BrowserAudioCaptureAdapter, createBrowserAudioCapturePlatform } from "./BrowserAudioCaptureAdapter";
 import { BrowserVideoCaptureAdapter, createBrowserVideoCapturePlatform } from "./BrowserVideoCaptureAdapter";
 import { BrowserVideoDecoder } from "./BrowserVideoDecoder";
@@ -40,7 +43,7 @@ import type {
   RuntimeImageGeometryPort,
   SynCloudOSRuntimeEnvironment,
 } from "../Runtime/runtimeInstanceTypes";
-import { BrowserClipboardAdapter } from "./BrowserClipboardAdapter";
+import { BrowserClipboardAdapter, type BrowserClipboardAdapterOptions } from "./BrowserClipboardAdapter";
 import { BrowserPointerAdapter } from "./BrowserPointerAdapter";
 import { BrowserTextLayoutAdapterFactory } from "./BrowserTextLayoutAdapter";
 import { createBrowserFontFaceRegistrationPort } from "./BrowserFontFaceRegistration";
@@ -457,15 +460,22 @@ function readScreen(): RuntimeScreenSnapshot {
  */
 const unavailableBrowserSafeArea = Object.freeze({ top: 0, right: 0, bottom: 0, left: 0 });
 
+/**
+ * Windows are laid out in the page, so the area they may occupy is the layout
+ * viewport. The screen's available rectangle is in desktop coordinates: a
+ * browser on a second monitor reports that monitor's origin, which would put
+ * every window beyond the page's right edge.
+ */
 function readWorkArea(): RuntimeWorkAreaSnapshot {
-  const screen = readScreen();
+  const viewport = readLayoutViewport();
   return {
-    x: screen.availableLeft,
-    y: screen.availableTop,
-    width: screen.availableWidth,
-    height: screen.availableHeight,
+    x: 0,
+    y: 0,
+    width: viewport.width,
+    height: viewport.height,
     devicePixelRatio: typeof window === "undefined" ? 1 : window.devicePixelRatio || 1,
     safeArea: unavailableBrowserSafeArea,
+    safeAreaAvailability: "unavailable",
   };
 }
 
@@ -527,14 +537,15 @@ export function createBrowserRuntimeEnvironment(options: { readonly cursorImages
   const imageGeometry = createBrowserImageGeometryPort(browserWindow);
   const filePicker = createBrowserFilePickerPort(browserWindow);
   const browserNavigator = typeof navigator === "undefined" ? null : navigator;
-  const clipboard = new BrowserClipboardAdapter({
+  const clipboardOptions: BrowserClipboardAdapterOptions = {
     clipboard: browserNavigator?.clipboard ?? null,
     isSecureContext: () => browserWindow?.isSecureContext ?? false,
     isUserActive: () => browserNavigator?.userActivation?.isActive ?? false,
     createItem: typeof ClipboardItem !== "undefined"
       ? (values) => new ClipboardItem(values)
       : null,
-  });
+  };
+  const clipboard = new BrowserClipboardAdapter(clipboardOptions);
   const pointer = new BrowserPointerAdapter({
     cursorImages: options.cursorImages,
     createResizeObserver: (callback) => typeof ResizeObserver === "undefined" ? null : new ResizeObserver((entries) => callback(entries)),
@@ -656,12 +667,17 @@ export function createBrowserRuntimeEnvironment(options: { readonly cursorImages
     visualViewport,
     screen,
     workArea,
+    viewportFeatures: createBrowserViewportFeaturesSource(browserWindow),
     clipboard,
+    createClipboardAdapter: nativeActivity => new BrowserClipboardAdapter({ ...clipboardOptions, nativeActivity }),
     pointer,
     textLayout,
     images,
     imageGeometry,
     filePicker,
+    fileSystemAccess: createBrowserFileSystemAccessPanelPort(browserWindow),
+    createFileSystemAccessPanelPort: activity => createBrowserFileSystemAccessPanelPort(browserWindow, activity),
+    downloadExport: createBrowserDownloadFilePanelPort(browserWindow),
     animation,
     animationFrames: browserWindow ? createBrowserAFXFrameScheduler(browserWindow, browserWindow.document) : undefined,
     animationLayers: browserWindow ? createBrowserAnimationLayerHost(browserWindow.document, createBrowserAFXFrameScheduler(browserWindow, browserWindow.document)) : undefined,

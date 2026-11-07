@@ -423,7 +423,7 @@ describe("selected-set precommit compensation", () => {
     const document = await fixture.runtime.documents.newDocument<NoteModel>({
       documentId: "selected-save-as-document",
       typeId: noteType.id,
-      applicationId: "selected-save-as-app",
+      applicationId: "com.example.selected-save-as-app",
     });
     document.update((model) => ({ ...model, body: "save through the exact transaction" }), { actionName: "Type" });
     fixture.runtime.documents.registerCloseReviewer({ review: async () => "save" });
@@ -431,7 +431,7 @@ describe("selected-set precommit compensation", () => {
       chooseDestination: async () => ({ destination }),
     });
 
-    await expect(fixture.manager.requestCloseApplication("selected-save-as-app", {
+    await expect(fixture.manager.requestCloseApplication("com.example.selected-save-as-app", {
       reason: "application-quit",
     })).resolves.toMatchObject({ outcome: "closed" });
 
@@ -455,13 +455,13 @@ describe("selected-set precommit compensation", () => {
     const first = await fixture.runtime.documents.openDocument<NoteModel>({
       documentId: "captured-binding-document",
       typeId: noteType.id,
-      applicationId: "captured-binding-app",
+      applicationId: "com.example.captured-binding-app",
       location: originalLocation,
     });
     const second = await fixture.runtime.documents.openDocument<NoteModel>({
       documentId: "later-binding-document",
       typeId: noteType.id,
-      applicationId: "captured-binding-app",
+      applicationId: "com.example.captured-binding-app",
       location: failingLocation,
     });
     originalRegistration.dispose();
@@ -472,7 +472,7 @@ describe("selected-set precommit compensation", () => {
     failing.failWriteKey = "second";
     const before = original.inspect(originalLocation);
 
-    await expect(fixture.manager.requestCloseApplication("captured-binding-app", {
+    await expect(fixture.manager.requestCloseApplication("com.example.captured-binding-app", {
       reason: "application-quit",
     })).rejects.toThrow("second provider save failed");
 
@@ -502,7 +502,7 @@ describe("selected-set precommit compensation", () => {
     const document = await fixture.runtime.documents.openDocument<NoteModel>({
       documentId: "non-transactional-document",
       typeId: noteType.id,
-      applicationId: "non-transactional-app",
+      applicationId: "com.example.non-transactional-app",
       location,
     });
     document.update((model) => ({ ...model, body: "dirty" }), { actionName: "Type" });
@@ -531,7 +531,7 @@ describe("selected-set precommit compensation", () => {
     const document = await fixture.runtime.documents.openDocument<NoteModel>({
       documentId: "post-callback-document",
       typeId: noteType.id,
-      applicationId: "post-callback-app",
+      applicationId: "com.example.post-callback-app",
       location,
     });
     document.update((model) => ({ ...model, body: "committed body" }), { actionName: "Type" });
@@ -660,13 +660,13 @@ describe("selected-set precommit compensation", () => {
     const document = await fixture.runtime.documents.newDocument<NoteModel>({
       documentId: "held-provider-finalisation-document",
       typeId: noteType.id,
-      applicationId: "held-provider-finalisation-app",
+      applicationId: "com.example.held-provider-finalisation-app",
       location,
     });
     document.update((model) => ({ ...model, body: "save before close" }), { actionName: "Type" });
     fixture.runtime.documents.registerCloseReviewer({ review: async () => "save" });
 
-    const closeOutcome = fixture.manager.requestCloseApplication("held-provider-finalisation-app", {
+    const closeOutcome = fixture.manager.requestCloseApplication("com.example.held-provider-finalisation-app", {
       reason: "application-quit",
     }).then(
       () => "settled" as const,
@@ -846,8 +846,8 @@ describe("application-session close lease", () => {
     const runtime = createTestRuntime();
     cleanups.push(async () => { await runtime.dispose("registry-lease-test"); });
     const harness = createRuntimeHarness(runtime);
-    const appId = "registry-close-lease";
-    harness.AppRegistry.registerBundle(createTestBundle({ id: appId }, {
+    const appId = "com.example.registry-close-lease";
+    harness.AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: appId }, {
       lifecycleHooks: {
         applicationWillUnregister: async () => {
           applicationWillUnregister.resolve();
@@ -858,7 +858,7 @@ describe("application-session close lease", () => {
 
     const unregistering = harness.AppRegistry.unregister(appId);
     await applicationWillUnregister.promise;
-    expect(() => harness.AppRegistry.registerBundle(createTestBundle({ id: appId })))
+    expect(() => harness.AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: appId })))
       .toThrow(/reserved|close/i);
     await expect(runtime.documents.newDocument({ typeId: noteType.id, applicationId: appId }))
       .rejects.toThrow(/reserved|close/i);
@@ -871,8 +871,8 @@ describe("application-session close lease", () => {
     const runtime = createTestRuntime();
     cleanups.push(async () => { await runtime.dispose("launch-lease-test"); });
     const harness = createRuntimeHarness(runtime);
-    const appId = "launch-close-lease";
-    harness.AppRegistry.registerBundle(createTestBundle({ id: appId }));
+    const appId = "com.example.launch-close-lease";
+    harness.AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: appId }));
     const manager = harness.AppManagerController.createManagerForApp(harness.AppRegistry.getApp(appId));
     let lateAdmissionError: unknown = null;
     vi.spyOn(manager, "suspendForApplicationClose").mockImplementation(async () => {
@@ -900,9 +900,9 @@ describe("application-session close lease", () => {
     cleanups.push(async () => { await runtime.dispose("stale-launch-test"); });
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
     const harness = createRuntimeHarness(runtime);
-    const appId = "stale-held-launch";
+    const appId = "com.example.stale-held-launch";
     harness.PolicyKit.setAccessMode("public");
-    harness.AppRegistry.registerBundle(createTestBundle({ id: appId, policy: { public: true } }, {
+    harness.AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: appId, policy: { public: true } }, {
       loadModule: async () => {
         moduleLoadEntered.resolve();
         return releaseModule.promise;
@@ -926,8 +926,8 @@ describe("application-session close lease", () => {
     const runtime = createTestRuntime();
     cleanups.push(async () => { await runtime.dispose("queued-close-test"); });
     const harness = createRuntimeHarness(runtime);
-    const appId = "queued-before-close";
-    harness.AppRegistry.registerBundle(createTestBundle({ id: appId, policy: { public: true } }));
+    const appId = "com.example.queued-before-close";
+    harness.AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: appId, policy: { public: true } }));
     expect(harness.LaunchServices.queueLaunch(appId, { source: "developer", hold: true })).not.toBeNull();
     expect(harness.LaunchServices.inspect().queued).toHaveLength(1);
 
@@ -945,8 +945,8 @@ describe("application-session close lease", () => {
     cleanups.push(async () => { await runtime.dispose("awaited-suspend-test"); });
     runtime.documents.registerType(noteType);
     const harness = createRuntimeHarness(runtime);
-    const appId = "awaited-suspend-close";
-    harness.AppRegistry.registerBundle(createTestBundle({ id: appId }, {
+    const appId = "com.example.awaited-suspend-close";
+    harness.AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: appId }, {
       lifecycleHooks: {
         applicationWillSuspend: async () => {
           suspendEntered.resolve();
@@ -970,9 +970,9 @@ describe("application-session close lease", () => {
     const runtime = createTestRuntime();
     cleanups.push(async () => { await runtime.dispose("reentrant-registration-test"); });
     const harness = createRuntimeHarness(runtime);
-    const appId = "reentrant-register-close";
+    const appId = "com.example.reentrant-register-close";
     let closing: Promise<unknown> | null = null;
-    const bundle = createTestBundle({ id: appId }, {
+    const bundle = createTestBundle({ bundleIdentifier: appId }, {
       lifecycleHooks: {
         applicationWillRegister: () => {
           closing = harness.LaunchServices.closeApp(appId);
@@ -989,20 +989,20 @@ describe("application-session close lease", () => {
     const runtime = createTestRuntime();
     cleanups.push(async () => { await runtime.dispose("atomic-registration-publication-test"); });
     const harness = createRuntimeHarness(runtime);
-    const appId = "atomic-registration-publication";
+    const appId = "com.example.atomic-registration-publication";
     let observed: { app: boolean; manager: boolean; store: boolean } | null = null;
     let closing: Promise<unknown> | null = null;
     runtime.events.subscribe("bundle.register", (event) => {
       if ((event.payload as { appId?: unknown }).appId !== appId) return;
       observed = {
-        app: harness.AppRegistry.getApp(appId)?.id === appId,
-        manager: harness.AppManagerController.getManagerForApp(appId)?.id === appId,
-        store: harness.RuntimeStore.getSnapshot().appInfo[appId]?.id === appId,
+        app: harness.AppRegistry.getApp(appId)?.bundleIdentifier === appId,
+        manager: harness.AppManagerController.getManagerForApp(appId)?.bundleIdentifier === appId,
+        store: harness.RuntimeStore.getSnapshot().appInfo[appId]?.bundleIdentifier === appId,
       };
       closing = harness.LaunchServices.closeApp(appId);
     });
 
-    expect(harness.AppRegistry.registerBundle(createTestBundle({ id: appId }))).toMatchObject({ id: appId });
+    expect(harness.AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: appId }))).toMatchObject({ bundleIdentifier: appId });
     expect(observed).toEqual({ app: true, manager: true, store: true });
     await closing;
   });
@@ -1011,8 +1011,8 @@ describe("application-session close lease", () => {
     const runtime = createTestRuntime();
     cleanups.push(async () => { await runtime.dispose("atomic-registration-update-test"); });
     const harness = createRuntimeHarness(runtime);
-    const appId = "atomic-registration-update";
-    harness.AppRegistry.registerBundle(createTestBundle({ id: appId, displayName: "Generation A" }));
+    const appId = "com.example.atomic-registration-update";
+    harness.AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: appId, displayName: "Generation A" }));
     const observations: Array<{ event: string; app: string | null; manager: string | null; store: string | null }> = [];
     const observe = (event: string) => observations.push({
       event,
@@ -1027,7 +1027,7 @@ describe("application-session close lease", () => {
       if ((event.payload as { appId?: unknown }).appId === appId) observe("app.manager.replace");
     });
 
-    expect(harness.AppRegistry.registerBundle(createTestBundle({ id: appId, displayName: "Generation B" })))
+    expect(harness.AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: appId, displayName: "Generation B" })))
       .toMatchObject({ displayName: "Generation B" });
     expect(observations).toEqual([
       { event: "bundle.update", app: "Generation B", manager: "Generation B", store: "Generation B" },
@@ -1039,7 +1039,7 @@ describe("application-session close lease", () => {
     const runtime = createTestRuntime();
     cleanups.push(async () => { await runtime.dispose("registration-manager-failure-test"); });
     const harness = createRuntimeHarness(runtime);
-    const appId = "registration-manager-failure";
+    const appId = "com.example.registration-manager-failure";
     const publications = vi.fn();
     runtime.events.subscribe("bundle.register", (event) => {
       if ((event.payload as { appId?: unknown }).appId === appId) publications();
@@ -1047,7 +1047,7 @@ describe("application-session close lease", () => {
     vi.spyOn(harness.AppManagerController, "createManagerForApp")
       .mockImplementationOnce(() => { throw new Error("manager construction failed"); });
 
-    expect(harness.AppRegistry.registerBundle(createTestBundle({ id: appId }))).toBeNull();
+    expect(harness.AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: appId }))).toBeNull();
     expect(harness.BundleLoader.getBundle(appId)).toBeNull();
     expect(harness.AppRegistry.getApp(appId)).toBeNull();
     expect(harness.AppManagerController.getManagerForApp(appId)).toBeNull();
@@ -1058,8 +1058,8 @@ describe("application-session close lease", () => {
     const runtime = createTestRuntime();
     cleanups.push(async () => { await runtime.dispose("registration-update-failure-test"); });
     const harness = createRuntimeHarness(runtime);
-    const appId = "registration-update-failure";
-    harness.AppRegistry.registerBundle(createTestBundle({ id: appId, displayName: "Stable Generation" }));
+    const appId = "com.example.registration-update-failure";
+    harness.AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: appId, displayName: "Stable Generation" }));
     const previousBundle = harness.BundleLoader.getBundle(appId);
     const previousLoaded = await harness.BundleLoader.loadBundle(appId);
     const previousManager = harness.AppManagerController.getManagerForApp(appId);
@@ -1070,7 +1070,7 @@ describe("application-session close lease", () => {
     vi.spyOn(harness.AppManagerController, "createManagerForApp")
       .mockImplementationOnce(() => { throw new Error("replacement manager construction failed"); });
 
-    expect(harness.AppRegistry.registerBundle(createTestBundle({ id: appId, displayName: "Broken Generation" }))).toBeNull();
+    expect(harness.AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: appId, displayName: "Broken Generation" }))).toBeNull();
     expect(harness.BundleLoader.getBundle(appId)).toBe(previousBundle);
     expect(harness.BundleLoader.getLoadedBundle(appId)).toBe(previousLoaded);
     expect(harness.AppManagerController.getManagerForApp(appId)).toBe(previousManager);
@@ -1099,8 +1099,8 @@ describe("application-session close lease", () => {
     });
     cleanups.push(source.cleanup);
     source.manager.create(standardWindow("stale-restoration-window", {
-      applicationId: "restoration-close-app",
-      applicationSessionId: "restoration-close-app",
+      applicationId: "com.example.restoration-close-app",
+      applicationSessionId: "com.example.restoration-close-app",
     }));
     const snapshot = JSON.parse(JSON.stringify(source.manager.createRestorationSnapshot())) as WindowRestorationSnapshot;
     let restoreAttempts = 0;
@@ -1120,7 +1120,7 @@ describe("application-session close lease", () => {
 
     const restoring = target.manager.restoreWorkspace(snapshot);
     await restoreEntered.promise;
-    await expect(target.manager.requestCloseApplication("restoration-close-app", {
+    await expect(target.manager.requestCloseApplication("com.example.restoration-close-app", {
       reason: "application-quit",
     })).resolves.toBeNull();
     releaseRestore.resolve();
@@ -1130,7 +1130,7 @@ describe("application-session close lease", () => {
     expect(staleReport.failures).toEqual([expect.objectContaining({
       windowControllerId: "stale-restoration-window",
     })]);
-    expect(target.manager.list({ applicationId: "restoration-close-app" })).toEqual([]);
+    expect(target.manager.list({ applicationId: "com.example.restoration-close-app" })).toEqual([]);
 
     const retried = await target.manager.restoreWorkspace(snapshot);
     expect(retried.failures).toEqual([]);
@@ -1148,12 +1148,12 @@ describe("application-session close lease", () => {
     await source.documents.newDocument({
       documentId: "shared-restoration-document",
       typeId: noteType.id,
-      applicationId: "restoration-owner-a",
+      applicationId: "com.example.restoration-owner-a",
     });
     const targetDocument = await target.documents.newDocument({
       documentId: "shared-restoration-document",
       typeId: noteType.id,
-      applicationId: "restoration-owner-b",
+      applicationId: "com.example.restoration-owner-b",
     });
 
     const report = await target.documents.restoreSession(source.documents.createRestorationSnapshot());
@@ -1163,7 +1163,7 @@ describe("application-session close lease", () => {
       documentId: targetDocument.id,
       code: "document-requested-id-conflict",
     })]);
-    expect(targetDocument.applicationId).toBe("restoration-owner-b");
+    expect(targetDocument.applicationId).toBe("com.example.restoration-owner-b");
     expect(targetDocument.windowAssociations).toEqual([]);
   });
 
@@ -1178,12 +1178,12 @@ describe("application-session close lease", () => {
     await source.documents.newDocument({
       documentId: "shared-restoration-type-document",
       typeId: alternateType.id,
-      applicationId: "restoration-type-owner",
+      applicationId: "com.example.restoration-type-owner",
     });
     const targetDocument = await target.documents.newDocument({
       documentId: "shared-restoration-type-document",
       typeId: noteType.id,
-      applicationId: "restoration-type-owner",
+      applicationId: "com.example.restoration-type-owner",
     });
 
     const report = await target.documents.restoreSession(source.documents.createRestorationSnapshot());
@@ -1254,9 +1254,9 @@ describe("application-session close lease", () => {
     cleanups.push(async () => { await runtime.dispose("active-lifecycle-close-test"); });
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
     const harness = createRuntimeHarness(runtime);
-    const appId = "active-lifecycle-close";
+    const appId = "com.example.active-lifecycle-close";
     harness.PolicyKit.setAccessMode("public");
-    harness.AppRegistry.registerBundle(createTestBundle({ id: appId }, {
+    harness.AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: appId }, {
       lifecycleHooks: {
         applicationWillLaunch: async () => {
           launchEntered.resolve();
@@ -1289,11 +1289,11 @@ describe("application-session close lease", () => {
     const runtime = createTestRuntime();
     cleanups.push(async () => { await runtime.dispose("replacement-registration-launch-test"); });
     const harness = createRuntimeHarness(runtime);
-    const appId = "replacement-registration-launch";
+    const appId = "com.example.replacement-registration-launch";
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
     harness.PolicyKit.setAccessMode("public");
     harness.AppRegistry.registerBundle(createTestBundle({
-      id: appId,
+      bundleIdentifier: appId,
       displayName: "Generation A",
       policy: { public: true },
     }));
@@ -1305,7 +1305,7 @@ describe("application-session close lease", () => {
 
     await harness.AppRegistry.unregister(appId);
     harness.AppRegistry.registerBundle(createTestBundle({
-      id: appId,
+      bundleIdentifier: appId,
       displayName: "Generation B",
       policy: { public: true },
     }));
@@ -1328,9 +1328,9 @@ describe("application-session close lease", () => {
     cleanups.push(async () => { await runtime.dispose("cancelled-readiness-test"); });
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
     const harness = createRuntimeHarness(runtime);
-    const appId = "cancelled-readiness";
+    const appId = "com.example.cancelled-readiness";
     harness.PolicyKit.setAccessMode("public");
-    harness.AppRegistry.registerBundle(createTestBundle({ id: appId, policy: { public: true } }, {
+    harness.AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: appId, policy: { public: true } }, {
       loadModule: async () => {
         loadEntered.resolve();
         return releaseLoad.promise;
@@ -1524,7 +1524,7 @@ describe("document structural cleanup diagnostics", () => {
       diagnostics.push({ context: String(payload.context), message: String(payload.message) });
     });
     const location = { kind: "memory", namespace: "selected-transaction", key: "diagnostic" } as const;
-    const document = await runtime.documents.newDocument({ documentId: "diagnostic-document", typeId: noteType.id, location, applicationId: "diagnostic-app" });
+    const document = await runtime.documents.newDocument({ documentId: "diagnostic-document", typeId: noteType.id, location, applicationId: "com.example.diagnostic-app" });
     document.associateWindow({ windowControllerId: "diagnostic-window", role: "primary" });
     runtime.documents.registerCloseReviewer({ review: async () => "discard" });
     runtime.documents.registerPresentationCloseCoordinator({

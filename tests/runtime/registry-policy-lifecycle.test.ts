@@ -24,14 +24,14 @@ import { asPolicySubject, createTestRuntime, createTestManifest, createRuntimeHa
 describe("runtime registry, PolicyKit, Lifecycle, and PluginRegistry contracts", () => {
   it("registers AppInfo, manager state, display ordering, and route lookup from a manifest", async () => {
     const { AppRegistry, RuntimeController } = createRuntimeHarness(createTestRuntime());
-    const first = createTestManifest({
-      id: "alpha",
+    const first = createTestManifest({ version: "1.0.0",
+      bundleIdentifier: "com.example.alpha",
       displayName: "Alpha",
       route: "/alpha",
       webspring: { order: 20 }
     });
-    const second = createTestManifest({
-      id: "beta",
+    const second = createTestManifest({ version: "1.0.0",
+      bundleIdentifier: "com.example.beta",
       displayName: "Beta",
       route: "/beta",
       webspring: { defaultSelected: true, order: 5 }
@@ -40,20 +40,20 @@ describe("runtime registry, PolicyKit, Lifecycle, and PluginRegistry contracts",
     const registered = AppRegistry.registerMany([first, second]);
 
     expect(registered).toHaveLength(2);
-    expect(AppRegistry.getApp("alpha")?.capitalizedName).toBe("Alpha");
-    expect(AppRegistry.getDisplayApps().map((app) => app.id)).toEqual(["beta", "alpha"]);
-    expect(AppRegistry.getAppForRoute("/beta")?.id).toBe("beta");
-    expect(RuntimeController.getSnapshot().lifecycle.beta).toBe("registered");
-    expect(RuntimeController.getSnapshot().webspring.selectedAppId).toBe("beta");
+    expect(AppRegistry.getApp("com.example.alpha")?.capitalizedName).toBe("Com.example.alpha");
+    expect(AppRegistry.getDisplayApps().map((app) => app.bundleIdentifier)).toEqual(["com.example.beta", "com.example.alpha"]);
+    expect(AppRegistry.getAppForRoute("/beta")?.bundleIdentifier).toBe("com.example.beta");
+    expect(RuntimeController.getSnapshot().lifecycle["com.example.beta"]).toBe("registered");
+    expect(RuntimeController.getSnapshot().webspring.selectedAppId).toBe("com.example.beta");
     expect(RuntimeController.getHistory().map((entry) => entry.label)).toEqual(
-      expect.arrayContaining(["AppRegistry.register:alpha", "AppRegistry.register:beta"])
+      expect.arrayContaining(["AppRegistry.register:com.example.alpha", "AppRegistry.register:com.example.beta"])
     );
     expect(AppRegistry.getRegistrationHistory().map((entry) => entry.action)).toEqual(["register", "register"]);
   });
 
   it("rejects malformed manifests without mutating the registry", async () => {
     const { AppRegistry, RuntimeController } = createRuntimeHarness(createTestRuntime());
-    const invalidManifest = createTestManifest({ id: "", bundleId: "", packageName: "" });
+    const invalidManifest = createTestManifest({ bundleIdentifier: "", packageName: "" });
 
     expect(AppRegistry.register(invalidManifest)).toBeNull();
     expect(AppRegistry.getAllApps()).toEqual([]);
@@ -107,13 +107,13 @@ describe("runtime registry, PolicyKit, Lifecycle, and PluginRegistry contracts",
       capabilities: PolicyKit.getRoleCapabilities("founder"),
       isAuthenticated: true
     };
-    const publicApp = createTestManifest({ id: "public-mode-app", policy: { public: true } });
+    const publicApp = createTestManifest({ bundleIdentifier: "com.example.public-mode-app", policy: { public: true } });
     const protectedApp = createTestManifest({
-      id: "protected-mode-app",
+      bundleIdentifier: "com.example.protected-mode-app",
       policy: { requiresLogin: true, requiredCapabilities: ["app.open.protected"] }
     });
     const enterpriseApp = createTestManifest({
-      id: "enterprise-mode-app",
+      bundleIdentifier: "com.example.enterprise-mode-app",
       policy: { requiresLogin: true, requiredRoles: ["founder"], requiredCapabilities: ["runtime.system"] }
     });
 
@@ -157,12 +157,12 @@ describe("runtime registry, PolicyKit, Lifecycle, and PluginRegistry contracts",
 
   it("guards lifecycle transitions and records manager lifecycle events", async () => {
     const { AppLifecycle, AppRegistry, AppManagerController, Lifecycle, RuntimeController } = createRuntimeHarness(createTestRuntime());
-    const manifest = createTestManifest({ id: "lifecycle-app" });
+    const manifest = createTestManifest({ bundleIdentifier: "com.example.lifecycle-app" });
     const listener = vi.fn();
     Lifecycle.on("app.register", listener);
 
     AppRegistry.register(manifest);
-    const manager = AppManagerController.getManagerForApp("lifecycle-app");
+    const manager = AppManagerController.getManagerForApp("com.example.lifecycle-app");
 
     expect(AppLifecycle.canTransition("registered", "loading")).toBe(true);
     expect(AppLifecycle.canTransition("registered", "active")).toBe(false);
@@ -171,7 +171,7 @@ describe("runtime registry, PolicyKit, Lifecycle, and PluginRegistry contracts",
     expect(manager?.transition("ready", "prepared")).toBe(true);
 
     const snapshot = RuntimeController.getSnapshot();
-    expect(snapshot.lifecycle["lifecycle-app"]).toBe("ready");
+    expect(snapshot.lifecycle["com.example.lifecycle-app"]).toBe("ready");
     expect(snapshot.lifecycleEvents.map((event) => `${event.from}->${event.to}`)).toEqual([
       "registered->loading",
       "loading->ready"
@@ -181,7 +181,7 @@ describe("runtime registry, PolicyKit, Lifecycle, and PluginRegistry contracts",
 
   it("registers trusted bundles, plugins, and invokes lifecycle hooks", async () => {
     const { BundleLoader, PluginRegistry, RuntimeController } = createRuntimeHarness(createTestRuntime());
-    const manifest = createTestManifest({ id: "bundle-app", requiredServices: ["internalContent"] });
+    const manifest = createTestManifest({ bundleIdentifier: "com.example.bundle-app", requiredServices: ["internalContent"] });
     const applicationDidLaunch = vi.fn();
     const register = vi.fn();
     const enable = vi.fn();
@@ -195,14 +195,14 @@ describe("runtime registry, PolicyKit, Lifecycle, and PluginRegistry contracts",
       lifecycleHooks: { applicationDidLaunch }
     });
 
-    await BundleLoader.invokeLifecycleHook("bundle-app", "applicationDidLaunch", { reason: "test" });
+    await BundleLoader.invokeLifecycleHook("com.example.bundle-app", "applicationDidLaunch", { reason: "test" });
     const plugin = await PluginRegistry.register({ id: "qa-plugin", name: "QA Plugin", version: "1.0.0", register, enable, disable }, {});
     await PluginRegistry.disable("qa-plugin");
     await PluginRegistry.enable("qa-plugin");
 
-    expect(BundleLoader.getBundle("bundle-app")?.permissions).toEqual(["app.open.public"]);
+    expect(BundleLoader.getBundle("com.example.bundle-app")?.permissions).toEqual(["app.open.public"]);
     expect(applicationDidLaunch).toHaveBeenCalledWith({
-      appId: "bundle-app",
+      appId: "com.example.bundle-app",
       packageName: manifest.packageName,
       reason: "test"
     });

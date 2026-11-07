@@ -26,8 +26,12 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEScroller, NSEScrollView, NSEScrollViewController, computeScrollRectTarget, normalizeRTLScrollLeft } from "../../../src/NSE/Scroll";
 import { NSEProgressIndicator } from "../../../src/NSE/Progress";
-import { NSEProgressBar, NSEProgressButton, NSEProgressItem, NSEProgressSlider, NSESpinner } from "../../../src/NSE/Progress";
-import { NSEAccordionView, NSETabGroup, NSETabView } from "../../../src/NSE/Navigation";
+import { NSESpinner } from "../../../src/NSE/Progress/spinnerSprite";
+import { NSEAnimationEnvironmentProvider } from "../../../src/NSE/Animation/NSEAnimationEnvironment";
+import { NSETabView } from "../../../src/NSE/Navigation";
+import { NSESegmentedControl } from "../../../src/NSE/Controls/Values";
+import { NSEButton } from "../../../src/NSE/Controls/Buttons/NSEButton";
+import { NSEStackItem, NSEStackView } from "../../../src/NSE/Layout";
 import { NSEOverlayProvider } from "../../../src/NSE/Overlays";
 import { NSEControlRuntimeProvider } from "../../../src/NSE/Controls/Core";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
@@ -41,19 +45,27 @@ function NavigationOverlay({ children }: { readonly children: React.ReactNode })
 }
 
 describe("scroll progress and navigation", () => {
-  it("collapses an expanded item in multiple accordion mode and follows controlled replacement", () => {
+  it("shows and hides a stack view section from its disclosure button, and follows a controlled state", () => {
     function Harness() {
-      const [expanded, setExpanded] = React.useState<ReadonlySet<string>>(new Set());
-      return <><NSEAccordionView aria-label="Multiple sections" mode="multiple" expandedIds={expanded} onExpandedIdsChange={setExpanded} items={[{ id: "a", label: "A", render: () => "Alpha" }]} /><output data-testid="expanded-count">{expanded.size}</output><button type="button" onClick={() => setExpanded(new Set(["a"]))}>Replace expanded</button></>;
+      const [open, setOpen] = React.useState(false);
+      return <>
+        <NSEStackView orientation="vertical" aria-label="Sections">
+          <NSEStackItem id="a-header"><NSEButton bezelStyle="disclosure" buttonType="pushOnPushOff" title="A" state={open ? "on" : "off"} onStateChange={(state) => setOpen(state === "on")} /></NSEStackItem>
+          <NSEStackItem id="a" hidden={!open} detachedWhenHidden><span>Alpha</span></NSEStackItem>
+        </NSEStackView>
+        <button type="button" onClick={() => setOpen(true)}>Open from model</button>
+      </>;
     }
     render(<Harness />);
     const disclosure = screen.getByRole("button", { name: "A" });
     expect(disclosure.getAttribute("aria-expanded")).toBe("false");
+    expect(disclosure.querySelector(".nse-control-disclosure-triangle")).not.toBeNull();
     fireEvent.click(disclosure);
     expect(disclosure.getAttribute("aria-expanded")).toBe("true");
+    expect(screen.getByText("Alpha")).not.toBeNull();
     fireEvent.click(disclosure);
     expect(disclosure.getAttribute("aria-expanded")).toBe("false");
-    fireEvent.click(screen.getByRole("button", { name: "Replace expanded" }));
+    fireEvent.click(screen.getByRole("button", { name: "Open from model" }));
     expect(disclosure.getAttribute("aria-expanded")).toBe("true");
   });
 
@@ -109,12 +121,6 @@ describe("scroll progress and navigation", () => {
     expect(scrollTo).toHaveBeenLastCalledWith(expect.objectContaining({ left: 0, top: 0 }));
   });
 
-  it("allows the initially expanded item in single accordion mode to collapse", () => {
-    const change = vi.fn();
-    render(<NSEAccordionView aria-label="Sections" items={[{ id: "a", label: "A", render: () => "Alpha" }]} expandedIds={new Set(["a"])} mode="single" onExpandedIdsChange={change} />);
-    fireEvent.click(screen.getByRole("button", { name: "A" }));
-    expect([...change.mock.calls[0][0]]).toEqual([]);
-  });
   it("normalizes RTL geometry and scrolls rectangles into view", () => { expect(normalizeRTLScrollLeft(-20, 100, "negative")).toBe(20); const node = { scrollLeft: 0, scrollTop: 0, clientWidth: 100, clientHeight: 100, scrollWidth: 300, scrollHeight: 300, scrollTo: vi.fn() } as unknown as HTMLElement; const controller = new NSEScrollViewController(node); controller.scrollRectToVisible({ x: 150, y: 160, width: 20, height: 20 }); expect(node.scrollTo).toHaveBeenCalledWith({ left: 70, top: 80, behavior: "auto" }); });
   it("computes bounded inset-aware scroll geometry for zero and oversized content", () => { expect(computeScrollRectTarget({ position: { left: 0, top: 0 }, viewport: { width: 100, height: 100 }, content: { width: 0, height: 0 }, rect: { x: 20, y: 30, width: 10, height: 10 }, insets: { top: 4, right: 5, bottom: 6, left: 7 } })).toEqual({ left: 0, top: 0 }); expect(computeScrollRectTarget({ position: { left: 10, top: 20 }, viewport: { width: 100, height: 100 }, content: { width: 300, height: 300 }, rect: { x: 180, y: 190, width: 20, height: 20 }, insets: { top: 4, right: 5, bottom: 6, left: 7 } })).toEqual({ left: 105, top: 116 }); });
   it("claims nested ownership and installs one passive coalesced observer", () => { const node = document.createElement("div"); const add = vi.spyOn(node, "addEventListener"); const remove = vi.spyOn(node, "removeEventListener"); const first = new NSEScrollViewController(node).connect(() => {}); const second = new NSEScrollViewController(node).connect(() => {}); expect(add.mock.calls.filter(([name, , options]) => name === "scroll" && (options as AddEventListenerOptions)?.passive)).toHaveLength(1); expect(add.mock.calls.filter(([name, , options]) => name === "wheel" && !(options as AddEventListenerOptions)?.passive)).toHaveLength(0); expect(NSEScrollViewController.claim(node, 7)).toBe(true); expect(NSEScrollViewController.claim(node, 8)).toBe(false); NSEScrollViewController.release(node, 7); expect(NSEScrollViewController.claim(node, 8)).toBe(true); first(); expect(remove).not.toHaveBeenCalled(); second(); expect(remove.mock.calls.filter(([name]) => name === "scroll")).toHaveLength(1); });
@@ -162,74 +168,69 @@ describe("scroll progress and navigation", () => {
     view.unmount();
   });
   it("keeps an always-visible zero-range scroller disabled", () => { render(<NSEScroller orientation="vertical" policy="always" value={0} maximum={0} onValueChange={() => {}} />); expect(screen.getByRole("slider")).toHaveProperty("disabled", true); });
-  it("exposes the spinner's accessible status and visual variant", () => {
+  it("exposes the system chrome spinner's accessible status and visual variant", () => {
     render(<NSESpinner size="large" tone="dark" label="Loading records" />);
     const spinner = screen.getByRole("status", { name: "Loading records" });
     expect(spinner.getAttribute("data-size")).toBe("large");
     expect(spinner.getAttribute("data-tone")).toBe("dark");
     expect(spinner.querySelector(".nse-control-spinner-sprite")?.getAttribute("aria-hidden")).toBe("true");
   });
-  it("keeps value tabs separate from panel-owning tab views", () => {
+  it("draws capsule and textured segment styles and reports the tracked selection", () => {
     const change = vi.fn();
+    const tools = vi.fn();
     render(
       <>
-        <NSETabGroup
-          label="Choices"
-          defaultValue="first"
-          selectionHaptic={false}
-          options={[{ value: "first", label: "First" }, { value: "second", label: "Second" }]}
-          onValueChange={change}
-        />
-        <NSETabView
-          aria-label="Pages"
-          selectedId="first"
-          items={[{ id: "first", label: "First", render: () => "First panel" }]}
-        />
+        <NSESegmentedControl aria-label="Choices" segmentStyle="capsule" selection={{ mode: "select-one", selectedIds: new Set(["first"]), allowsEmpty: false }}
+          items={[{ id: "first", label: "First" }, { id: "second", label: "Second", width: 90 }]} onSelectionChange={change} />
+        <NSESegmentedControl aria-label="Tools" segmentStyle="texturedRounded" selection={{ mode: "select-any", selectedIds: new Set(["bold"]) }}
+          items={[{ id: "bold", label: "Bold", image: <b>B</b> }, { id: "italic", label: "Italic", image: <i>I</i> }]} onSelectionChange={tools} />
       </>,
     );
-    const group = screen.getByRole("tablist", { name: "Choices" });
-    expect(within(group).queryByRole("tabpanel")).toBeNull();
-    fireEvent.keyDown(within(group).getByRole("tab", { name: "First" }), { key: "ArrowRight" });
-    expect(change).toHaveBeenCalledWith("second");
-    expect(screen.getByRole("tabpanel").textContent).toBe("First panel");
+    const second = screen.getByRole("button", { name: "Second" });
+    expect(second.closest("[data-nse-control='segmented-control']")?.getAttribute("data-segment-style")).toBe("capsule");
+    expect(second.style.inlineSize).toBe("90px");
+    fireEvent.click(second);
+    expect([...change.mock.calls[0][0].selectedIds]).toEqual(["second"]);
+    const bold = screen.getByRole("button", { name: "Bold" });
+    expect(bold.getAttribute("aria-pressed")).toBe("true");
+    fireEvent.click(screen.getByRole("button", { name: "Italic" }));
+    expect([...tools.mock.calls[0][0].selectedIds]).toEqual(["bold", "italic"]);
+    expect(bold.closest("[data-segment-style]")?.getAttribute("data-segment-style")).toBe("texturedRounded");
   });
 
-  it("uses one normalized progress contract for bars, buttons, items, and locked sliders", () => {
-    const cancel = vi.fn();
-    const { container } = render(
-      <>
-        <NSEProgressBar value={23} min={10} max={40} snap={5} altValue={35} label="Transfer" content="Transfer" animatePosition={false} />
-        <NSEProgressButton value={58} max={100} label="Transfer action" onCancel={cancel}>Transfer</NSEProgressButton>
-        <NSEProgressItem value={42} max={100} variant="pill" label="Transfer item">Item</NSEProgressItem>
-        <NSEProgressSlider value={20} min={10} max={30} snap={5} lockBar altBarPosition={28} progressLabel="Buffer" />
-      </>,
-    );
+  it("is NSProgressIndicator: a determinate bar clamps and reflects its value", () => {
+    render(<NSEProgressIndicator aria-label="Transfer" value={25} minimum={10} maximum={40} />);
     const bar = screen.getByRole("progressbar", { name: "Transfer" });
     expect(bar.getAttribute("aria-valuemin")).toBe("10");
     expect(bar.getAttribute("aria-valuemax")).toBe("40");
     expect(bar.getAttribute("aria-valuenow")).toBe("25");
+    expect(bar.getAttribute("data-variant")).toBe("bar");
+    expect(bar.getAttribute("data-state")).toBe("determinate");
     expect(bar.style.getPropertyValue("--nse-control-progress")).toBe("50%");
-    expect(Number.parseFloat(bar.style.getPropertyValue("--nse-control-progress-alt"))).toBeCloseTo((25 / 30) * 100, 12);
-    expect(bar.getAttribute("data-animate")).toBe("false");
-    expect(screen.getByRole("button", { name: "Transfer action" }).style.getPropertyValue("--nse-control-progress")).toBe("58%");
-    expect(screen.getByRole("progressbar", { name: "Transfer item" }).getAttribute("data-variant")).toBe("pill");
-    const sliderBar = screen.getByRole("progressbar", { name: "Buffer" });
-    expect(sliderBar.getAttribute("aria-valuemin")).toBe("10");
-    expect(sliderBar.getAttribute("aria-valuemax")).toBe("30");
-    expect(sliderBar.getAttribute("aria-valuenow")).toBe("20");
-    expect(sliderBar.style.getPropertyValue("--nse-control-progress-alt")).toBe("90%");
-    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
-    expect(cancel).toHaveBeenCalledOnce();
-    expect(container.querySelector(".nse-control-progress-button-fill")).not.toBeNull();
   });
-
-  it("renders determinate, suspended, error and hidden progress semantically", () => { const { rerender } = render(<NSEProgressIndicator aria-label="Load" state={{ kind: "determinate", value: 5, minimum: 0, maximum: 10 }} />); expect(screen.getByRole("progressbar").getAttribute("aria-valuenow")).toBe("5"); rerender(<NSEProgressIndicator aria-label="Load" state={{ kind: "error", message: "Failed" }} />); expect(screen.getByRole("status").textContent).toContain("Failed"); rerender(<NSEProgressIndicator aria-label="Load" state={{ kind: "hidden" }} />); expect(screen.queryByRole("progressbar")).toBeNull(); });
-  it("uses a static indeterminate fallback under reduced motion", () => { render(<NSEProgressIndicator aria-label="Load" state={{ kind: "indeterminate" }} reducedMotion />); expect(screen.getByRole("progressbar").getAttribute("data-motion")).toBe("static"); });
+  it("is indeterminate without a value, or when isIndeterminate says so", () => {
+    const { rerender } = render(<NSEProgressIndicator aria-label="Load" />);
+    expect(screen.getByRole("progressbar").getAttribute("data-state")).toBe("indeterminate");
+    expect(screen.getByRole("progressbar").getAttribute("aria-valuenow")).toBeNull();
+    rerender(<NSEProgressIndicator aria-label="Load" value={5} isIndeterminate />);
+    expect(screen.getByRole("progressbar").getAttribute("data-state")).toBe("indeterminate");
+  });
+  it("sizes a spinning indicator by controlSize, and fills it as a ring when it has a value", () => {
+    const { rerender } = render(<NSEProgressIndicator aria-label="Load" style="spinning" controlSize="small" />);
+    const spinner = screen.getByRole("progressbar");
+    expect(spinner.getAttribute("data-variant")).toBe("spinner");
+    expect(spinner.getAttribute("data-size")).toBe("16");
+    rerender(<NSEProgressIndicator aria-label="Load" style="spinning" />);
+    expect(screen.getByRole("progressbar").getAttribute("data-size")).toBe("32");
+    rerender(<NSEProgressIndicator aria-label="Load" style="spinning" controlSize="large" value={30} />);
+    expect(screen.getByRole("progressbar").getAttribute("data-variant")).toBe("circular");
+    expect(screen.getByRole("progressbar").getAttribute("data-size")).toBe("64");
+  });
+  it("uses a static indeterminate fallback under reduced motion", () => { render(<NSEAnimationEnvironmentProvider reducedMotion><NSEProgressIndicator aria-label="Load" /></NSEAnimationEnvironmentProvider>); expect(screen.getByRole("progressbar").getAttribute("data-motion")).toBe("static"); });
   it("moves tab focus with roving keys and lazily renders content", () => { const change = vi.fn(); render(<NSETabView aria-label="Pages" items={[{ id: "a", label: "A", render: () => "Alpha" }, { id: "b", label: "B", render: () => "Beta" }]} selectedId="a" onSelectedIdChange={change} />); fireEvent.keyDown(screen.getByRole("tab", { name: "A" }), { key: "ArrowRight" }); expect(change).toHaveBeenCalledWith("b", "keyboard"); expect(screen.getByRole("tabpanel").textContent).toBe("Alpha"); });
   it("supports tab Home/End and keep-alive panel lifecycle", () => { const change = vi.fn(); render(<NSETabView aria-label="Pages" keepAlive items={[{ id: "a", label: "A", render: () => "Alpha" }, { id: "off", label: "Off", disabled: true, render: () => "Off" }, { id: "b", label: "B", render: () => "Beta" }]} selectedId="a" onSelectedIdChange={change} />); fireEvent.keyDown(screen.getByRole("tab", { name: "A" }), { key: "End" }); expect(change).toHaveBeenLastCalledWith("b", "keyboard"); expect(screen.getAllByRole("tabpanel", { hidden: true })).toHaveLength(2); });
   it("hosts tab overflow in an overlay and selects an overflow item", () => { const change = vi.fn(); render(<NavigationOverlay><NSETabView aria-label="Pages" maximumVisibleTabs={2} items={[{ id: "a", label: "A", render: () => "Alpha" }, { id: "b", label: "B", render: () => "Beta" }, { id: "c", label: "C", render: () => "Gamma" }]} selectedId="a" onSelectedIdChange={change} /></NavigationOverlay>); fireEvent.click(screen.getByRole("button", { name: "More Pages" })); expect(screen.getByRole("listbox")).not.toBeNull(); fireEvent.click(screen.getByRole("option", { name: "C" })); expect(change).toHaveBeenCalledWith("c", "pointer"); });
   it("requests tab close and keyboard reorder with deterministic focus", () => { const close = vi.fn(); const reorder = vi.fn(); const change = vi.fn(); render(<NSETabView aria-label="Pages" items={[{ id: "a", label: "A", closable: true, render: () => "Alpha" }, { id: "b", label: "B", closable: true, render: () => "Beta" }]} selectedId="a" onSelectedIdChange={change} onRequestClose={close} onRequestReorder={reorder} />); const tab = screen.getByRole("tab", { name: "A" }); fireEvent.keyDown(tab, { key: "ArrowRight", altKey: true }); expect(reorder).toHaveBeenCalledWith("a", 1); fireEvent.click(screen.getByRole("button", { name: "Close A" })); expect(change).toHaveBeenCalledWith("b", "keyboard"); expect(close).toHaveBeenCalledWith("a"); });
   it("selects command tabs only after canonical command execution", async () => { const change = vi.fn(); const dispatch = vi.fn(async () => ({ status: "executed" as const, commandId: "tabs.open", responderId: "workspace", operationId: "op", correlationId: "correlation", value: undefined })); const port = { signal: new AbortController().signal, commands: { getPresentationGeneration: () => ({ registryGeneration: 1, responderGeneration: 1 }), validate: vi.fn(async () => ({ commandId: "tabs.open", responderId: "workspace", title: "Open B", enabled: true, denied: false, hidden: false, state: "off" as const })), prepareDispatch: vi.fn(async () => ({ status: "accepted" as const, acceptance: { commandId: "tabs.open", responderId: "workspace" } as never })), dispatch } }; render(<NSEControlRuntimeProvider port={port}><NSETabView aria-label="Pages" items={[{ id: "a", label: "A", render: () => "Alpha" }, { id: "b", label: "B", commandId: "tabs.open", commandPayload: { id: "b" }, render: () => "Beta" }]} selectedId="a" onSelectedIdChange={change} /></NSEControlRuntimeProvider>); const tab = screen.getByRole("tab", { name: "B" }); await waitFor(() => expect((tab as HTMLButtonElement).disabled).toBe(false)); fireEvent.click(tab); await waitFor(() => expect(dispatch).toHaveBeenCalled()); expect(change).toHaveBeenCalledWith("b", "pointer"); });
-  it("uses per-instance tab and accordion relationship ids", () => { render(<><NSETabView aria-label="First pages" items={[{ id: "a", label: "A", render: () => "Alpha" }]} selectedId="a" onSelectedIdChange={() => {}} /><NSETabView aria-label="Second pages" items={[{ id: "a", label: "A", render: () => "Alpha" }]} selectedId="a" onSelectedIdChange={() => {}} /><NSEAccordionView aria-label="First sections" items={[{ id: "a", label: "Section", render: () => "Body" }]} expandedIds={new Set(["a"])} mode="single" onExpandedIdsChange={() => {}} /><NSEAccordionView aria-label="Second sections" items={[{ id: "a", label: "Section", render: () => "Body" }]} expandedIds={new Set(["a"])} mode="single" onExpandedIdsChange={() => {}} /></>); const ids = [...document.querySelectorAll("[id]")].map((node) => node.id); expect(new Set(ids).size).toBe(ids.length); });
-  it("implements accessible single and multiple accordions", () => { const change = vi.fn(); render(<NSEAccordionView aria-label="Sections" items={[{ id: "a", label: "A", render: () => "Alpha" }, { id: "b", label: "B", render: () => "Beta" }]} expandedIds={new Set(["a"])} mode="single" onExpandedIdsChange={change} />); expect(screen.getByRole("button", { name: "A" }).getAttribute("aria-expanded")).toBe("true"); fireEvent.click(screen.getByRole("button", { name: "B" })); expect([...change.mock.calls[0][0]]).toEqual(["b"]); });
+  it("uses per-instance tab relationship ids", () => { render(<><NSETabView aria-label="First pages" items={[{ id: "a", label: "A", render: () => "Alpha" }]} selectedId="a" onSelectedIdChange={() => {}} /><NSETabView aria-label="Second pages" items={[{ id: "a", label: "A", render: () => "Alpha" }]} selectedId="a" onSelectedIdChange={() => {}} /></>); const ids = [...document.querySelectorAll("[id]")].map((node) => node.id); expect(new Set(ids).size).toBe(ids.length); });
 });

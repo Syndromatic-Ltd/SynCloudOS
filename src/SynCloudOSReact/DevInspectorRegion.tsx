@@ -45,7 +45,7 @@ function EnabledInspectorRegion({ runtime, appId, mountSignal, enabled, routes, 
   const [active, setActive] = useState<{ request: typeof request; session: InspectorSession } | null>(null);
   useEffect(() => {
     setActive(null);
-    const authorized = () => enabled && appId === "diagnostics" && !mountSignal.aborted && !runtime.signal.aborted
+    const authorized = () => enabled && !mountSignal.aborted && !runtime.signal.aborted
       && hasTrustedBundlePrivilege(runtime, appId, "diagnostics", "diagnostics.view");
     if (!authorized()) return;
     const bundle = runtime.bundles.getBundle(appId);

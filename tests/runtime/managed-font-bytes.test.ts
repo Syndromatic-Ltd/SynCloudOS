@@ -43,11 +43,11 @@ describe("managed byte-backed font resolution",()=>{
     const bundleLoader = vi.fn(async () => ({ bytes: readNotoSans(), mimeType: "font/ttf" as const }));
     const hostLoader = vi.fn(async () => ({ bytes: readNotoSans(), mimeType: "font/ttf" as const }));
     const catalogue = { manager: new NSEFontManager({ families: declaration.families, library: null }), declaration, loadResource: hostLoader };
-    const bundle = createTestBundle({ id: "managed-font-composition" }, { fontResourceLoader: bundleLoader });
+    const bundle = createTestBundle({ bundleIdentifier: "com.example.managed-font-composition" }, { fontResourceLoader: bundleLoader });
     const runtime = createTestRuntime({ initialBundles: [bundle] });
-    const responderId = `application:${bundle.manifest.id}`;
+    const responderId = `application:${bundle.manifest.bundleIdentifier}`;
     runtime.responders.register({ id: responderId, kind: "application", parentId: "runtime", scopeId: responderId });
-    const mount = createMountedSynWareRuntime({ runtime, app: runtime.apps.getApp(bundle.manifest.id)!, responderId, hostFontResourceLoader: createFontCatalogueResourceLoader(catalogue) });
+    const mount = createMountedSynWareRuntime({ runtime, app: runtime.apps.getApp(bundle.manifest.bundleIdentifier)!, responderId, hostFontResourceLoader: createFontCatalogueResourceLoader(catalogue) });
     const access = createSynWareFontAccess(catalogue, mount.runtime.textLayout, mount.runtime.signal);
     try {
       const managed = await access.loadFace("example.book", new TFXFontDescriptor({ size: 14 }));
@@ -60,8 +60,8 @@ describe("managed byte-backed font resolution",()=>{
       expect(hostLoader).toHaveBeenCalledTimes(1);
       expect(bundleLoader).toHaveBeenCalledTimes(1);
       mount.dispose();
-      expect(() => managed.font.shape("A")).toThrow(/disposed/);
-      expect(() => ordinary.font.shape("A")).toThrow(/disposed/);
+      expect(() => managed.font.shape("A")).toThrow(expect.objectContaining({ code: "TFX_FONT_DISPOSED" }));
+      expect(() => ordinary.font.shape("A")).toThrow(expect.objectContaining({ code: "TFX_FONT_DISPOSED" }));
     } finally { mount.dispose(); await runtime.dispose("test"); }
   });
   it("shares pending resource capacity with ordinary mount font registrations", async () => {
@@ -102,7 +102,7 @@ describe("managed byte-backed font resolution",()=>{
       expect(paths).toEqual(["Resources/Face.ttf","Resources/Face.ttf"]);
       expect(first.font.shape("office").glyphs.length).toBeLessThan(6);
       first.dispose(); expect(second.font.shape("A").glyphs).toHaveLength(1);
-      owner.abort(); expect(()=>second.font.shape("A")).toThrow(/disposed/);
+      owner.abort(); expect(()=>second.font.shape("A")).toThrow(expect.objectContaining({ code: "TFX_FONT_DISPOSED" }));
       await expect(access.loadFace("example.book",new TFXFontDescriptor({size:18}))).rejects.toMatchObject({name:"AbortError"});
     } finally {host.dispose();}
   });
@@ -112,7 +112,7 @@ describe("managed byte-backed font resolution",()=>{
     const imported=await library.addFonts([{name:"Imported.ttf",size:source.length,arrayBuffer:async()=>source.slice().buffer as ArrayBuffer}]);
     const manager=new NSEFontManager({families:declaration.families,library});
     const access=createSynWareFontAccess({manager,declaration},scope,owner.signal);
-    try { const registration=await access.loadFace(imported.added[0]!.id,new TFXFontDescriptor({size:14})); expect(registration.font.shape("A").glyphs).toHaveLength(1); owner.abort();expect(()=>registration.font.shape("A")).toThrow(/disposed/); }
+    try { const registration=await access.loadFace(imported.added[0]!.id,new TFXFontDescriptor({size:14})); expect(registration.font.shape("A").glyphs).toHaveLength(1); owner.abort();expect(()=>registration.font.shape("A")).toThrow(expect.objectContaining({ code: "TFX_FONT_DISPOSED" })); }
     finally {host.dispose();}
   });
   it("aborts pending host loads promptly and cannot publish readiness after unmount",async()=>{

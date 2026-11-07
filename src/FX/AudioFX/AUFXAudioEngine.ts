@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SynCloudOSLifecycleRecord } from "../../SynCloudOS/fxRuntimeContracts";
 import { AUFXAudioFormat } from "./AUFXAudioFormat";
 import { AUFXAudioNode } from "./AUFXAudioNode";
 import { AUFXAudioMixerNode } from "./AUFXAudioMixerNode";
@@ -41,6 +42,7 @@ type AUFXGraphSnapshot = Readonly<{
 
 /** Deterministic portable graph. Audible playback remains owned by the scoped host client. */
 export class AUFXAudioEngine {
+  readonly #lifecycle = new SynCloudOSLifecycleRecord({ kind: "AUFXAudioEngine" });
   readonly mainMixerNode: AUFXAudioMixerNode;
   private readonly nodes = new Set<AUFXAudioNode>();
   private readonly graphConnections = new Set<AUFXAudioConnection>();
@@ -70,14 +72,14 @@ export class AUFXAudioEngine {
   get isRunning() { return this.#live !== null; }
   get lastError() { return this.#lastError; }
   get connections(): readonly AUFXAudioConnection[] { return Object.freeze([...this.graphConnections]); }
-  observeOutputClock() { this.assertActive(); return this.#output?.observeClock?.() ?? null; }
+  observeOutputClock() { this.assertActive("observeOutputClock"); return this.#output?.observeClock?.() ?? null; }
 
   constructor(readonly format: AUFXAudioFormat, output?: AUFXAudioGraphOutput, inputCapability?: object) { this.#output = output ?? null; this.#inputCapability = inputCapability ?? null; this.mainMixerNode = new AUFXAudioMixerNode(format); this.attach(this.mainMixerNode); }
-  private assertActive() { if (this.disposed) throw new Error("Audio engine is disposed."); if (this.rendering) throw new Error("Audio graph is rendering."); }
+  private assertActive(operation: string) { if (this.disposed) throw this.#lifecycle.error({ code: "AUFX_AUDIO_ENGINE_DISPOSED", operation: operation }); if (this.rendering) throw new Error("Audio graph is rendering."); }
   private nodeForId(id: number) { for (const [node, candidate] of this.nodeIds) if (candidate === id) return node; return null; }
 
   async start(signal?: AbortSignal) {
-    this.assertActive(); signal?.throwIfAborted(); if (!this.#output) throw new Error("Live audio output is unavailable."); if (this.#live) throw new Error("Audio engine is already running.");
+    this.assertActive("start"); signal?.throwIfAborted(); if (!this.#output) throw new Error("Live audio output is unavailable."); if (this.#live) throw new Error("Audio engine is already running.");
     const initialPlan = this.compilePlan(); validateAUFXRenderPlan(initialPlan); const inputSignature = this.inputSignature(initialPlan);
     const controller = new AbortController(); this.#live = controller; this.#lastError = null; this.#liveInputSignature = inputSignature; this.refreshSubscriptions();
     const abort = () => controller.abort(signal?.reason); signal?.addEventListener("abort", abort, { once: true });
@@ -105,7 +107,7 @@ export class AUFXAudioEngine {
 
   /** One exclusive lease per selected player; implicit selection is single-player only. */
   createTimelineTransport(selected?: readonly AUFXAudioPlayerNode[], signal?: AbortSignal): AUFXAudioTimelineTransport {
-    this.assertActive(); signal?.throwIfAborted();
+    this.assertActive("createTimelineTransport"); signal?.throwIfAborted();
     if (this.offlineStreamOwner) throw new DOMException("An offline chunk stream owns the current graph snapshot.", "InvalidStateError");
     if (this.timelineReleases.size >= 8) throw new DOMException("Audio timeline transport limit exceeded.", "QuotaExceededError");
     const initial = this.compilePlan();
@@ -130,7 +132,7 @@ export class AUFXAudioEngine {
     this.timelineReleases.add(dispose); signal?.addEventListener("abort", dispose, { once: true });
     if (signal?.aborted || this.disposed) { dispose(); throw new DOMException("Timeline acquisition was revoked.", "AbortError"); }
     const apply = (command: AUFXAudioTimelineCommand): AUFXAudioTimelineReceipt | Promise<AUFXAudioTimelineReceipt> => {
-      lease.signal.throwIfAborted(); this.assertActive();
+      lease.signal.throwIfAborted(); this.assertActive("apply");
       if (this.offlineStreamOwner) throw new DOMException("An offline chunk stream owns the current graph snapshot.", "InvalidStateError");
       if (pending) throw new DOMException("Await the pending audio timeline transition before another transition.", "InvalidStateError");
       if (!players.length) throw new DOMException("No audio player is bound to this clock-only coordinator.", "NotSupportedError");
@@ -218,7 +220,7 @@ export class AUFXAudioEngine {
   }
 
   private renderLiveBlock(frames: number, signal: AbortSignal) {
-    signal.throwIfAborted(); this.assertActive(); const cost = [...this.nodes].reduce((sum, node) => sum + node.processingCost, 0); if (frames * this.format.channelCount * cost > 4194304) throw new RangeError("Live audio graph exceeds its work budget.");
+    signal.throwIfAborted(); this.assertActive("renderFallback"); const cost = [...this.nodes].reduce((sum, node) => sum + node.processingCost, 0); if (frames * this.format.channelCount * cost > 4194304) throw new RangeError("Live audio graph exceeds its work budget.");
     const plan = this.compilePlan(false);
     if (this.liveFallbackRuntime) this.liveFallbackRuntime.setPlan(plan, true); else { this.liveFallbackRuntime = new AUFXAudioRenderRuntime(plan); (this.liveFallbackRuntime as any).sampleTime = this.sampleTime; }
     const result = this.liveFallbackRuntime.process(frames), output = new AUFXAudioPCMBuffer(this.format, frames); output.frameLength = frames;
@@ -228,10 +230,10 @@ export class AUFXAudioEngine {
     return output;
   }
 
-  attach(node: AUFXAudioNode) { this.assertActive(); if (this.nodes.size >= 128) throw new RangeError("Audio graph node limit exceeded."); const owner = nodeOwners.get(node); if (owner && owner !== this) throw new Error("Audio node belongs to another engine."); nodeOwners.set(node, this); this.nodes.add(node); if (!this.nodeIds.has(node)) this.nodeIds.set(node, this.nextNodeId++); if (this.#live) { this.refreshSubscriptions(); this.publishPlan(); } }
-  detach(node: AUFXAudioNode) { this.assertActive(); if (node === this.mainMixerNode) throw new Error("Cannot detach main mixer."); this.preflightLiveMutation((connections, taps, nodes, ids) => { nodes.delete(node); taps.delete(node); ids.delete(node); for (const connection of [...connections]) if (connection.source === node || connection.destination === node) connections.delete(connection); }); if (nodeOwners.get(node) === this) nodeOwners.delete(node); this.nodes.delete(node); this.taps.delete(node); this.nodeIds.delete(node); for (const connection of [...this.graphConnections]) if (connection.source === node || connection.destination === node) this.graphConnections.delete(connection); if (this.#live) { this.refreshSubscriptions(); this.publishPlan(); } }
+  attach(node: AUFXAudioNode) { this.assertActive("attach"); if (this.nodes.size >= 128) throw new RangeError("Audio graph node limit exceeded."); const owner = nodeOwners.get(node); if (owner && owner !== this) throw new Error("Audio node belongs to another engine."); nodeOwners.set(node, this); this.nodes.add(node); if (!this.nodeIds.has(node)) this.nodeIds.set(node, this.nextNodeId++); if (this.#live) { this.refreshSubscriptions(); this.publishPlan(); } }
+  detach(node: AUFXAudioNode) { this.assertActive("detach"); if (node === this.mainMixerNode) throw new Error("Cannot detach main mixer."); this.preflightLiveMutation((connections, taps, nodes, ids) => { nodes.delete(node); taps.delete(node); ids.delete(node); for (const connection of [...connections]) if (connection.source === node || connection.destination === node) connections.delete(connection); }); if (nodeOwners.get(node) === this) nodeOwners.delete(node); this.nodes.delete(node); this.taps.delete(node); this.nodeIds.delete(node); for (const connection of [...this.graphConnections]) if (connection.source === node || connection.destination === node) this.graphConnections.delete(connection); if (this.#live) { this.refreshSubscriptions(); this.publishPlan(); } }
   connect(source: AUFXAudioNode, destination: AUFXAudioNode, options: AUFXAudioConnectionOptions = {}) {
-    this.assertActive(); if (!this.nodes.has(source) || !this.nodes.has(destination)) throw new Error("Node is not attached to this engine.");
+    this.assertActive("connect"); if (!this.nodes.has(source) || !this.nodes.has(destination)) throw new Error("Node is not attached to this engine.");
     const sourceBus = options.sourceBus ?? 0, destinationBus = options.destinationBus ?? 0;
     if ([...this.graphConnections].some(connection => connection.source === source && connection.destination === destination && connection.sourceBus === sourceBus && connection.destinationBus === destinationBus)) throw new Error("Duplicate audio graph connection.");
     const connection = new AUFXAudioConnection(this.nextConnectionId, source, destination, sourceBus, destinationBus, source.format, destination.format, options.channelMap);
@@ -251,16 +253,16 @@ export class AUFXAudioEngine {
   disconnect(connection: AUFXAudioConnection): void;
   disconnect(source: AUFXAudioNode, destination?: AUFXAudioNode): void;
   disconnect(sourceOrConnection: AUFXAudioNode | AUFXAudioConnection, destination?: AUFXAudioNode) {
-    this.assertActive();
+    this.assertActive("disconnect");
     const matches = (connection: AUFXAudioConnection) => sourceOrConnection instanceof AUFXAudioConnection ? connection === sourceOrConnection : connection.source === sourceOrConnection && (!destination || connection.destination === destination);
     const removed = [...this.graphConnections].filter(matches); if (!removed.length) return;
     this.preflightLiveMutation(connections => { for (const connection of removed) connections.delete(connection); });
     for (const connection of removed) this.graphConnections.delete(connection); this.publishPlan();
   }
-  installTap(node: AUFXAudioNode, callback: (buffer: AUFXAudioPCMBuffer) => void): AUFXAudioTap { this.assertActive(); if (!this.nodes.has(node)) throw new Error("Tap node is not attached to this engine."); if ([...this.taps.values()].reduce((sum, taps) => sum + taps.size, 0) >= 32) throw new RangeError("Audio tap budget exceeded."); this.preflightLiveMutation((_connections, taps) => { if (!taps.has(node)) taps.set(node, new Set()); taps.get(node)!.add(callback); }); if (!this.taps.has(node)) this.taps.set(node, new Set()); const taps = this.taps.get(node)!; taps.add(callback); this.publishPlan(); let disposed = false; return Object.freeze({ dispose: () => { if (disposed) return; this.preflightLiveMutation((_connections, candidateTaps) => { const values = candidateTaps.get(node); values?.delete(callback); if (!values?.size) candidateTaps.delete(node); }); disposed = true; taps.delete(callback); if (!taps.size) this.taps.delete(node); this.publishPlan(); } }); }
+  installTap(node: AUFXAudioNode, callback: (buffer: AUFXAudioPCMBuffer) => void): AUFXAudioTap { this.assertActive("installTap"); if (!this.nodes.has(node)) throw new Error("Tap node is not attached to this engine."); if ([...this.taps.values()].reduce((sum, taps) => sum + taps.size, 0) >= 32) throw new RangeError("Audio tap budget exceeded."); this.preflightLiveMutation((_connections, taps) => { if (!taps.has(node)) taps.set(node, new Set()); taps.get(node)!.add(callback); }); if (!this.taps.has(node)) this.taps.set(node, new Set()); const taps = this.taps.get(node)!; taps.add(callback); this.publishPlan(); let disposed = false; return Object.freeze({ dispose: () => { if (disposed) return; this.preflightLiveMutation((_connections, candidateTaps) => { const values = candidateTaps.get(node); values?.delete(callback); if (!values?.size) candidateTaps.delete(node); }); disposed = true; taps.delete(callback); if (!taps.size) this.taps.delete(node); this.publishPlan(); } }); }
 
   async renderOffline(frames: number, signal?: AbortSignal): Promise<AUFXAudioPCMBuffer> {
-    this.assertActive(); signal?.throwIfAborted(); if (this.#live) throw new Error("Audio engine is running."); if (this.offlineStreamOwner) throw new DOMException("An offline audio chunk stream is active.", "InvalidStateError"); const cost = [...this.nodes].reduce((sum, node) => sum + node.processingCost, 0); if (!Number.isSafeInteger(frames) || frames < 0 || frames * this.format.channelCount > 16777216 || frames * this.format.channelCount * cost > 67108864) throw new RangeError("Offline render exceeds frame/memory/work budget."); const plan = this.compilePlan(true); if (plan.nodes.some(node => node.kind === "input")) { const error = new Error("Live audio input cannot be rendered offline."); error.name = "AUFXUnsupportedOfflineInputError"; throw error; }
+    this.assertActive("renderOffline"); signal?.throwIfAborted(); if (this.#live) throw new Error("Audio engine is running."); if (this.offlineStreamOwner) throw new DOMException("An offline audio chunk stream is active.", "InvalidStateError"); const cost = [...this.nodes].reduce((sum, node) => sum + node.processingCost, 0); if (!Number.isSafeInteger(frames) || frames < 0 || frames * this.format.channelCount > 16777216 || frames * this.format.channelCount * cost > 67108864) throw new RangeError("Offline render exceeds frame/memory/work budget."); const plan = this.compilePlan(true); if (plan.nodes.some(node => node.kind === "input")) { const error = new Error("Live audio input cannot be rendered offline."); error.name = "AUFXUnsupportedOfflineInputError"; throw error; }
     const controller = new AbortController(), abort = () => controller.abort(signal?.reason); signal?.addEventListener("abort", abort, { once: true }); this.renderAbort = controller;
     const external = (nodeId: number, inputChannels: Float32Array[][], outputChannels: Float32Array[], blockFrames: number, blockSampleTime: number) => { const node = this.nodeForId(nodeId); if (!node) throw new Error("Detached external audio node."); controller.signal.throwIfAborted(); const inputs = inputChannels.map(channels => { const pcm = new AUFXAudioPCMBuffer(node.format, blockFrames); pcm.frameLength = blockFrames; for (let channel = 0; channel < channels.length; channel++) for (let frame = 0; frame < blockFrames; frame++) pcm.setSample(channel, frame, channels[channel]![frame]!); return pcm; }), rendered = node.render(inputs, blockFrames, blockSampleTime / node.format.sampleRate, controller.signal); if (!rendered.format.isEqual(node.format) || rendered.frameLength < blockFrames) throw new RangeError("External audio node returned an invalid bus."); for (let channel = 0; channel < outputChannels.length; channel++) for (let frame = 0; frame < blockFrames; frame++) outputChannels[channel]![frame] = rendered.getSample(channel, frame); };
     if (this.offlineRuntime) { this.offlineRuntime.setExternalRenderer(external); this.offlineRuntime.setPlan(plan, true); } else { this.offlineRuntime = new AUFXAudioRenderRuntime(plan, external); (this.offlineRuntime as any).sampleTime = this.sampleTime; } const runtime = this.offlineRuntime;
@@ -268,7 +270,7 @@ export class AUFXAudioEngine {
     try { const output = new AUFXAudioPCMBuffer(this.format, frames); output.frameLength = frames; for (let offset = 0; offset < frames; offset += 128) { if (offset % 1024 === 0) await new Promise<void>(resolve => setTimeout(resolve, 0)); controller.signal.throwIfAborted(); const count = Math.min(128, frames - offset), result = runtime.process(count); for (let channel = 0; channel < this.format.channelCount; channel++) for (let frame = 0; frame < count; frame++) output.setSample(channel, offset + frame, result.channels[channel]![frame]!); for (const completion of result.completed) this.receiveRealtime({ type: "complete", ...completion }); this.receiveRealtime({ type: "state", sampleTime: result.sampleTime, players: result.players }); for (const nodeId of runtime.plan.tapIds) { const tapFrames = runtime.frameCounts.get(nodeId) ?? count; this.receiveRealtime({ type: "tap", nodeId, channels: runtime.scratch.get(nodeId)!.map(channel => channel.slice(0, tapFrames)), dropped: 0 }); } } return output; } finally { signal?.removeEventListener("abort", abort); this.renderAbort = null; this.rendering = false; }
   }
   renderOfflineChunks(frames: number, options: AUFXAudioChunkStreamOptions = {}) {
-    this.assertActive();
+    this.assertActive("renderOfflineChunks");
     if (this.#live) throw new Error("Audio engine is running.");
     const chunkFrames = options.chunkFrames ?? AUFX_RENDER_MAX_FRAMES;
     if (!Number.isSafeInteger(frames) || frames < 0) throw new RangeError("Invalid offline audio stream frame count.");
@@ -321,6 +323,6 @@ export class AUFXAudioEngine {
       }
     }, options.signal);
   }
-  reset() { this.assertActive(); this.stop(); this.offlineRuntime = null; this.liveFallbackRuntime = null; this.discontinuityGeneration++; for (const node of this.nodes) node.reset(); this.sampleTime = 0; }
-  dispose() { if (this.disposed) return; this.disposed = true; const output = this.#output, live = this.#live, render = this.renderAbort, nodes = [...this.nodes]; this.offlineRuntime = null; this.liveFallbackRuntime = null; this.#output = null; this.#live = null; this.renderAbort = null; this.clearSubscriptions(); this.taps.clear(); this.graphConnections.clear(); this.nodes.clear(); this.nodeIds.clear(); for (const node of nodes) nodeOwners.delete(node); const errors: unknown[] = [], cleanup = (action: () => void) => { try { action(); } catch (error) { errors.push(error); } }; for (const release of [...this.timelineReleases]) cleanup(release); cleanup(() => live?.abort()); cleanup(() => render?.abort(new Error("Audio engine disposed during rendering."))); cleanup(() => output?.stop()); cleanup(() => output?.dispose()); for (const node of nodes) cleanup(() => node.dispose()); if (errors.length) this.#lastError = new AggregateError(errors, "Audio graph cleanup encountered errors."); }
+  reset() { this.assertActive("reset"); this.stop(); this.offlineRuntime = null; this.liveFallbackRuntime = null; this.discontinuityGeneration++; for (const node of this.nodes) node.reset(); this.sampleTime = 0; }
+  dispose() { if (this.disposed) return; this.#lifecycle.markDisposed("explicit"); this.disposed = true; const output = this.#output, live = this.#live, render = this.renderAbort, nodes = [...this.nodes]; this.offlineRuntime = null; this.liveFallbackRuntime = null; this.#output = null; this.#live = null; this.renderAbort = null; this.clearSubscriptions(); this.taps.clear(); this.graphConnections.clear(); this.nodes.clear(); this.nodeIds.clear(); for (const node of nodes) nodeOwners.delete(node); const errors: unknown[] = [], cleanup = (action: () => void) => { try { action(); } catch (error) { errors.push(error); } }; for (const release of [...this.timelineReleases]) cleanup(release); cleanup(() => live?.abort()); cleanup(() => render?.abort(new Error("Audio engine disposed during rendering."))); cleanup(() => output?.stop()); cleanup(() => output?.dispose()); for (const node of nodes) cleanup(() => node.dispose()); if (errors.length) this.#lastError = new AggregateError(errors, "Audio graph cleanup encountered errors."); }
 }

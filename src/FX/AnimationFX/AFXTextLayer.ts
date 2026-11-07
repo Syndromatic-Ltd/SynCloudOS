@@ -43,6 +43,7 @@ export class AFXTextLayer extends AFXLayer {
       ? TFXGlyphDrawing.pathsForLine(value, this.#origin)
       : Object.freeze([]);
     this.setLayerContent(
+      "line",
       Object.freeze({ kind: "text", glyphs, foregroundColour: this.#colour }),
     );
     this.#line = value;
@@ -57,6 +58,7 @@ export class AFXTextLayer extends AFXLayer {
         ? TFXGlyphDrawing.pathsForLine(this.#line, origin)
         : Object.freeze([]);
     this.setLayerContent(
+      "baselineOrigin",
       Object.freeze({ kind: "text", glyphs, foregroundColour: this.#colour }),
     );
     this.#origin = origin;
@@ -69,6 +71,7 @@ export class AFXTextLayer extends AFXLayer {
     if (!value) throw new TypeError("Text foreground requires GFXColour.");
     const colour = layerColour(value)!;
     this.setLayerContent(
+      "foregroundColour",
       Object.freeze({
         kind: "text",
         glyphs: this.#glyphs,

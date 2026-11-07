@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { SynCloudOSRuntime } from "./runtimeInstanceTypes";
 import type { RuntimePostCommitEffect, RuntimeTransactionCallback, RuntimeTransactionOptions } from "./runtimeTypes";
 import { createRuntimeTransactions } from "./transactions";
@@ -57,7 +58,7 @@ export function createRuntimeController(runtime: SynCloudOSRuntime) {
     assertInvariant() {
       const snapshot = runtime.store.getSnapshot();
       const activeAppId = snapshot.application.activeAppId;
-      if (activeAppId && !snapshot.appInfo[activeAppId]) throw new Error(`Active app "${activeAppId}" is not registered.`);
+      if (activeAppId && !snapshot.appInfo[normalizeBundleIdentifier(activeAppId)]) throw new Error(`Active app "${activeAppId}" is not registered.`);
       return true as const;
     },
     markBooted() {

@@ -65,8 +65,8 @@ const mountedClientTargets = new Map([
   ["trusted", ["trusted-client", "trusted-mount"]],
 ]);
 const mountedHooks = new Map([
-  ["useSynWare", "mounted"], ["useSynApp", "mounted"],
-  ["useSynWareNSEMenuPort", "mounted"], ["useSynWareFonts", "mounted.fonts"],
+  ["useSCOS", "mounted"], ["useSynApp", "mounted"],
+  ["useNSEMenuPort", "mounted"], ["useFonts", "mounted.fonts"],
 ]);
 
 function lexicalChecker(files) {
@@ -84,7 +84,7 @@ function mountedHookPath(expression, checker) {
     if (!ts.isImportSpecifier(declaration) || declaration.isTypeOnly) continue;
     const owner = declaration.parent.parent.parent;
     if (ts.isImportDeclaration(owner) && !owner.importClause?.isTypeOnly &&
-        staticString(owner.moduleSpecifier) === "@syndromatic/syncloudos/sdk") {
+        ["@syndromatic/syncloudos", "@syndromatic/syncloudos/sdk"].includes(staticString(owner.moduleSpecifier))) {
       return mountedHooks.get(declaration.propertyName?.text ?? declaration.name.text) ?? null;
     }
   }
@@ -191,9 +191,11 @@ function stableRecords(records) {
     left.target.localeCompare(right.target));
 }
 
-function manifestId(infoPath, fallback) {
+// The audit reports on apps whose Info.ts the validator would reject (e.g. computed permissions), so it
+// reads the identifier leniently instead of deriving the strict manifest.
+function manifestBundleIdentifier(infoPath, fallback) {
   if (!existsSync(infoPath)) return fallback;
-  const match = readFileSync(infoPath, "utf8").match(/\bid\s*:\s*["']([^"']+)["']/u);
+  const match = readFileSync(infoPath, "utf8").match(/\bbundleIdentifier\s*:\s*["']([^"']+)["']/u);
   return match?.[1] ?? fallback;
 }
 
@@ -244,7 +246,7 @@ function appRoots(root) {
         .map((extension) => resolve(appRoot, "Contents", `index${extension}`))
         .find((candidate) => existsSync(candidate));
       return {
-        id: manifestId(resolve(appRoot, "Contents", "Info.ts"), entry.name.slice(0, -4)),
+        id: manifestBundleIdentifier(resolve(appRoot, "Contents", "Info.ts"), entry.name.slice(0, -4)),
         entry: entryPath ?? resolve(appRoot, "Contents", "index.tsx"),
       };
     })
@@ -561,10 +563,10 @@ function auditApp(root, descriptor, synWareRoot) {
 // Deliberately separate from the historical runtime inventory: provenance comes
 // from lexical symbols and actual public imports, never from matching client names.
 const fxHooks = new Map([
-  ["useSynWare", "context"], ["useSynApp", "context"],
-  ["useSynWareMedia", "media.client"], ["useSynWareVideo", "video.session"],
-  ["useSynWareMIDI", "midi.session"], ["useSynWareLocation", "location.session"],
-  ["useSynWareLumina", "lumina.client"],
+  ["useSCOS", "context"], ["useSynApp", "context"],
+  ["useMedia", "media.client"], ["useVideo", "video.session"],
+  ["useMIDI", "midi.session"], ["useLocation", "location.session"],
+  ["useLumina", "lumina.client"],
 ]);
 const newFxFamilies = new Set(["media", "video", "midi", "location", "lumina"]);
 
@@ -597,7 +599,7 @@ function auditFxApp(root, descriptor, synWareRoot) {
     return node;
   };
   function exported(from, specifier, name, seen) {
-    if (specifier === "@syndromatic/syncloudos/sdk") return singleton(name === "*" ? "sdk" : `sdk.${name}`);
+    if (specifier === "@syndromatic/syncloudos" || specifier === "@syndromatic/syncloudos/sdk") return singleton(name === "*" ? "sdk" : `sdk.${name}`);
     if (specifier.startsWith("@syndromatic/syncloudos/fx/")) {
       const family = specifier.slice("@syndromatic/syncloudos/fx/".length);
       return newFxFamilies.has(family) ? singleton(`value:${family}.${name}`) : empty();
@@ -755,7 +757,7 @@ function auditFxApp(root, descriptor, synWareRoot) {
   };
   for (const call of calls) for (const tag of value(call.expression)) {
     if (tag.startsWith("value:")) { const operation = tag.slice(6); record(call, operation.split(".")[0], operation); continue; }
-    if (tag === "sdk.useSynWareLocation") { record(call, "location", "location.createManager", ["location.read"]); continue; }
+    if (tag === "sdk.useLocation") { record(call, "location", "location.createManager", ["location.read"]); continue; }
     if (tag.startsWith("context.") && tag.includes("*")) { record(call, "context", tag, [], false, true); continue; }
     const [family, owner, method] = tag.split(".");
     if (!newFxFamilies.has(family) || !["client", "session"].includes(owner)) continue;

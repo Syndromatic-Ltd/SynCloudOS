@@ -22,7 +22,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { NSEPopup, reportNSEWindowSurfaceError, useNSEWindowSurfaceLifecycle, useOptionalNSEWindowSurfaceBridge, type NSEOverlayDismissReason, type NSEWindowSurfaceBridge } from "../Overlays";
 import { useNSEPresentedContent } from "../Overlays/useNSEPresentedContent";
 import { NSEWindowFittingContent, centredWindowBounds, type NSEWindowFittingSize } from "../Overlays/NSEWindowFittingContent";
-import { NSEPushButton } from "../Controls/Buttons/NSEButtons";
+import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { NSESearchField } from "../Controls/Fields/NSESearchField";
 import { NSESegmentedControl } from "../Controls/Values/NSESegmentedControl";
 import type { MediaPanelItem, MediaPanelQuery, MediaPanelResult, MediaPanelService } from "../../SynCloudOS/SynCloudOS";
@@ -295,15 +295,39 @@ export function NSEMediaPanel({
             />
           </div>
         ) : null}
-        <NSESearchField className="nse-media-panel-search" aria-label={labels.search} placeholder={labels.search} value={search} onValueChange={setSearch} disabled={Boolean(provider?.requiresUserActivation)} />
-        {provider?.requiresUserActivation ? <NSEPushButton tone="light" data-nse-part="choose-files" data-nse-initial-focus="" onClick={() => void load(null, true)} disabled={loading}>{labels.chooseFiles}</NSEPushButton> : null}
+        <NSESearchField className="nse-media-panel-search" aria-label={labels.search} placeholder={labels.search} value={search} onValueChange={setSearch} isEnabled={!(Boolean(provider?.requiresUserActivation))} />
+        {provider?.requiresUserActivation ? <NSEButton
+          appearance="aqua"
+          title={labels.chooseFiles}
+          isEnabled={!loading}
+          data-nse-part="choose-files"
+          data-nse-initial-focus=""
+          onClick={() => void load(null, true)}
+        /> : null}
         {loading ? <p role="status" data-state="loading">Loading media…</p> : null}
         {message ? <p role="status" data-state={result?.kind}>{message}</p> : null}
         {result?.kind === "empty" ? <p role="status" data-state="empty">{labels.empty}</p> : null}
         {items.length > 0 ? <CollectionPresenter items={items} selectedIds={selectedIds} selection={selection} direction={direction} onSelectionChange={setSelectedIds} onActivate={activate} /> : null}
         {preview ? <aside className="nse-media-panel-preview" aria-label="Media preview"><strong>{preview.name}</strong><span>{preview.kind}</span><span>{preview.mimeType}</span></aside> : null}
-        {nextCursor ? <NSEPushButton tone="light" data-nse-part="load-more" onClick={() => void load(nextCursor, false)} disabled={loading}>{labels.loadMore}</NSEPushButton> : null}
-        <div className="nse-media-panel-actions"><NSEPushButton tone="light" data-nse-part="cancel" onClick={() => void requestDismiss("programmatic")}>{labels.cancel}</NSEPushButton><NSEPushButton tone="affirmative" data-nse-part="insert" onClick={() => void insert()} disabled={selectedItems.length === 0 || inserting}>{labels.insertSelected}</NSEPushButton></div>
+        {nextCursor ? <NSEButton
+          appearance="aqua"
+          title={labels.loadMore}
+          isEnabled={!loading}
+          data-nse-part="load-more"
+          onClick={() => void load(nextCursor, false)}
+        /> : null}
+        <div className="nse-media-panel-actions"><NSEButton
+          appearance="aqua"
+          title={labels.cancel}
+          data-nse-part="cancel"
+          onClick={() => void requestDismiss("programmatic")}
+        /><NSEButton
+                                                                                                                                                                                         keyEquivalent={"\r"}
+                                                                                                                                                                                         title={labels.insertSelected}
+                                                                                                                                                                                         isEnabled={!(selectedItems.length === 0 || inserting)}
+                                                                                                                                                                                         data-nse-part="insert"
+                                                                                                                                                                                         onClick={() => void insert()}
+                                                                                                                                                                                       /></div>
       </section>
   );
   const [fitting, setFitting] = useState<NSEWindowFittingSize | null>(null);

@@ -38,6 +38,18 @@ function runtimeFor(platform: "mac" | "windows" | "linux") {
 }
 
 describe("KeyBindingManager", () => {
+  it("presents a command's effective binding as its menu item's key equivalent", async () => {
+    const runtime = runtimeFor("windows");
+    runtime.commands.register(bindingCommand("document.export", "runtime", { key: "e", modifiers: ["primary", "shift"], scope: "runtime" }));
+    runtime.commands.register({ ...bindingCommand("document.unbound", "runtime", { key: "u", modifiers: ["primary"], scope: "runtime" }), defaultKeyBindings: [] });
+    expect((await runtime.commands.validate("document.export")).keyBinding?.display).toBe("Ctrl+Shift+E");
+    expect((await runtime.commands.validate("document.unbound")).keyBinding).toBeUndefined();
+    runtime.keyBindings.setOverride("document.export", { key: "x", modifiers: ["alt"], scope: "runtime" });
+    expect(runtime.keyBindings.bindingFor("document.export", "runtime")).toMatchObject({ display: "Alt+X", source: "user" });
+    runtime.keyBindings.setOverride("document.export", null);
+    expect((await runtime.commands.validate("document.export")).keyBinding).toBeUndefined();
+  });
+
   it("settles asynchronous validation into a one-shot acceptance without validating twice", async () => {
     const runtime = runtimeFor("windows");
     let release!: (value: { enabled: boolean }) => void;

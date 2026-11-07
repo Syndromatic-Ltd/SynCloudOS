@@ -1,0 +1,39 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import type { SynCloudOSPresentationTraits } from "../../SynCloudOS/SynCloudOS";
+import { selectViewportFoldRegion } from "../../SynCloudOS/nseRuntimeContracts";
+
+export type NSEOverlayRegionBounds = SynCloudOSPresentationTraits["contentBounds"];
+export type NSEOverlayPresentationSource = Readonly<{
+  getSnapshot(): SynCloudOSPresentationTraits;
+  subscribe(listener: () => void): () => void;
+}>;
+
+/** Selection shares the same pure Windows geometry used by physical hosts. */
+export function resolveNSEOverlayRegion(traits: SynCloudOSPresentationTraits, origin?: NSEOverlayRegionBounds | null,
+  direction: "ltr" | "rtl" = "ltr", purpose: "contextual" | "alert" = "contextual"): NSEOverlayRegionBounds | null {
+  return selectViewportFoldRegion(traits, traits.contentBounds, origin, direction, purpose);
+}
+
+export function nseOverlayRegionInsets(region: NSEOverlayRegionBounds, host: NSEOverlayRegionBounds) {
+  return Object.freeze({ top: Math.max(0, region.y - host.y), left: Math.max(0, region.x - host.x),
+    right: Math.max(0, host.x + host.width - region.x - region.width), bottom: Math.max(0, host.y + host.height - region.y - region.height) });
+}

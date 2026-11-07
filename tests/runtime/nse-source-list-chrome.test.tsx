@@ -22,14 +22,15 @@
 import * as React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSESidebar, NSESourceListScene, SourceListFrameProvider, type SourceListFrameContextValue } from "../../src/NSE/Navigation/SourceList";
+import { NSESidebar } from "../../src/NSE/Navigation/SourceList/NSESidebar";
+import { NSESourceListScene, SourceListFrameProvider, type SourceListFrameContextValue } from "../../src/NSE/Navigation/SourceList";
 import { defineNSEAppearance, NSEAppearanceProvider } from "../../src/NSE/Appearance";
 
 afterEach(cleanup);
 
 describe("source-list chrome ownership", () => {
   it("honours an explicit appearance override inside a differently themed frame", () => {
-    const frame: SourceListFrameContextValue = { railWidth: 254, defaultWidth: 254, minWidth: 220, maxWidth: 320, setRailWidth: vi.fn(), railLabel: "Gallery", scheme: "dark", setBarTitle: vi.fn() };
+    const frame: SourceListFrameContextValue = { railWidth: 254, defaultWidth: 254, minWidth: 220, maxWidth: 320, setRailWidth: vi.fn(), railLabel: "Gallery", scheme: "dark" };
     const view = render(<SourceListFrameProvider value={frame}>
       <NSEAppearanceProvider appearance={defineNSEAppearance({ id: "atmo", displayName: "Atmo" })} colourScheme="light">
         <NSESourceListScene sidebar={<p>Rows</p>}><p>Light content</p></NSESourceListScene>
@@ -71,9 +72,8 @@ describe("source-list chrome ownership", () => {
   });
 
   it("uses the frame width for its sole split footer and retains the content when compact", () => {
-    const setBarTitle = vi.fn();
-    const frame: SourceListFrameContextValue = { railWidth: 254, defaultWidth: 254, minWidth: 220, maxWidth: 320, setRailWidth: vi.fn(), railLabel: "Gallery", scheme: "dark", setBarTitle };
-    const fixture = (compact: boolean, railWidth: number) => <SourceListFrameProvider value={{ ...frame, railWidth }}><NSESourceListScene compact={compact} title="Buttons" sidebar={<p>Rows</p>} status={{ rail: "25 sections", leading: "Ready" }}><input aria-label="Retained draft" defaultValue="Draft" /></NSESourceListScene></SourceListFrameProvider>;
+    const frame: SourceListFrameContextValue = { railWidth: 254, defaultWidth: 254, minWidth: 220, maxWidth: 320, setRailWidth: vi.fn(), railLabel: "Gallery", scheme: "dark" };
+    const fixture = (compact: boolean, railWidth: number) => <SourceListFrameProvider value={{ ...frame, railWidth }}><NSESourceListScene compact={compact} sidebar={<p>Rows</p>} status={{ rail: "25 sections", leading: "Ready" }}><input aria-label="Retained draft" defaultValue="Draft" /></NSESourceListScene></SourceListFrameProvider>;
     const view = render(fixture(false, 254));
     const draft = screen.getByRole("textbox");
     fireEvent.change(draft, { target: { value: "Edited draft" } });
@@ -81,7 +81,6 @@ describe("source-list chrome ownership", () => {
     const footer = view.container.querySelector<HTMLElement>(".nse-statusbar")!;
     expect(footer.style.getPropertyValue("--nse-app-topbar-rail")).toBe("254px");
     expect(footer.querySelector(".nse-statusbar-metal-rail-content")?.textContent).toBe("25 sections");
-    expect(setBarTitle).toHaveBeenCalledWith("Buttons");
     view.rerender(fixture(true, 254));
     expect(view.container.querySelector("footer")).toBeNull();
     expect(view.container.querySelector('.nse-source-list-scene')?.getAttribute('data-navigation-compact')).toBe("true");

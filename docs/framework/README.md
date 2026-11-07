@@ -8,11 +8,18 @@ SynCloudOS is an application framework for the web, in the tradition of Cocoa. T
 | --- | --- |
 | [Getting started](getting-started.md) | Build a site with a launcher and one application |
 | [Overview](overview.md) | See how the layers fit together and which package entries exist |
+| [Beta.2 migration](migration-beta2.md) | Replace beta.1 identity, authoring, hook, ownership and shell APIs |
+| [Developer MCP](developer-mcp.md) | Give AI coding agents version-matched offline SDK tools |
+| [Errors and outcomes](errors.md) | Handle typed outcomes, lifecycle diagnostics and stable error codes |
 
 ## Building applications
 
 | Guide | Read it to |
 | --- | --- |
+| [Applications](applications.md) | Build application, window and view-controller classes with actions and observable state |
+| [Cocoa authoring](cocoa-authoring.md) | Connect class views, bindings, actions, tasks and managed outlets |
+| [Authoring contract](authoring-contract.md) | Which API to use for each job; shipped to coding agents as AGENTS.md |
+| [Preferences and observations](authoring-preferences.md) | Declare persistent state, scoped observations and navigation restoration |
 | [SynWare SDK](synware-sdk.md) | Learn the bundle format, the session, hooks, services, routes and tooling |
 | [Manifest reference](synware-manifest.md) | Look up every `Info.ts` field |
 | [Commands, responders and undo](commands-responders-undo.md) | Route user intent to code, and reverse it |
@@ -47,6 +54,7 @@ The [FX overview](fx/README.md) introduces the twelve frameworks and how they re
 | Guide | Read it to |
 | --- | --- |
 | [The runtime and the host](runtime.md) | Mount the runtime, and configure policy and contributions |
+| [Read-only storage diagnostics](storage-diagnostics.md) | Inspect approximate origin usage, quota and current persistence status |
 | [Webspring](webspring.md) | Define the shell, the Board launcher, branding and content |
 | [Authentication](authentication.md) | Add sign-in, server handlers and roles |
 | [Google sign-in setup](google-oidc-setup.md) | Connect Google as the identity provider |

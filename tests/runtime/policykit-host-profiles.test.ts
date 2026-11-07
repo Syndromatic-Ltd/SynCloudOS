@@ -70,11 +70,11 @@ function policyKitFor(profile: SynCloudOSPolicyProfile | undefined, session: Ses
 }
 
 const membersApp = createTestManifest({
-  id: "members-room",
+  bundleIdentifier: "com.example.members-room",
   policy: { requiresLogin: true, requiredRoles: ["member"] },
 });
 const staffApp = createTestManifest({
-  id: "staff-room",
+  bundleIdentifier: "com.example.staff-room",
   policy: { requiresLogin: true, requiredRoles: ["employee"] },
 });
 
@@ -101,6 +101,17 @@ describe("PolicyKit host policy profiles", () => {
     const atelierTeam = policyKitFor(atelierProfile, { isAuthorised: true, accessClass: "team" }).getCurrentSubject();
     expect(atelierTeam.role).toBe("member");
     expect(atelierTeam.capabilities).not.toContain("diagnostics.view");
+  });
+
+  it("names the missing capabilities and the role that lacks them in a denial", () => {
+    const decision = policyKitFor(atelierProfile, { isAuthorised: false }).evaluate({
+      action: "documentStore.getDraft",
+      requiredCapabilities: ["documentStore.drafts.read", "route.open.public"],
+    } as never);
+    expect(decision.allowed).toBe(false);
+    expect(decision.reason).toContain("requires additional capabilities: documentStore.drafts.read.");
+    expect(decision.reason).toContain("The role \"visitor\" does not hold it");
+    expect(decision.reason).toContain("policyProfile.roles");
   });
 
   it("authorises the same manifests differently on each host", () => {

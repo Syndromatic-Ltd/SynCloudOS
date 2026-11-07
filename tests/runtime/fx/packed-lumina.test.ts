@@ -133,7 +133,7 @@ import type {
   LUFXTokenizerOptions,
   LUFXVisibility,
 } from "@syndromatic/syncloudos/fx/lumina";
-import { useSynWareLumina } from "@syndromatic/syncloudos/sdk";
+import { useLumina } from "@syndromatic/syncloudos/sdk";
 const activation: LUFXActivation = createLUFXActivation({ version: 1, kind: "named-route", routeName: "journal.post", parameters: { postId: "42" } });
 const visibility: LUFXVisibility = "app-only";
 const descriptor: LUFXSearchableItemDescriptor = { id: "42", domain: "journal", contentType: "article", title: "Title", activation, revision: "1", visibility };
@@ -166,7 +166,7 @@ const tokenizerOptions: LUFXTokenizerOptions = { locale: "en" };
 const resultEntry = {} as LUFXQueryResultEntry;
 const snippet = resultEntry.snippet as LUFXSnippet;
 const range: LUFXMatchRange | undefined = snippet.matches[0];
-const hook: typeof useSynWareLumina = useSynWareLumina;
+const hook: typeof useLumina = useLumina;
 void json; void query; void client; void snapshotPromise; void queryPromise; void suggestionPromise; void token; void tokenizerOptions; void range; void hook;
 `);
   writeFileSync(join(consumer.root, "tsconfig.json"), JSON.stringify({

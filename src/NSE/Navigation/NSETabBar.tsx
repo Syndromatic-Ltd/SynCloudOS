@@ -32,6 +32,8 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
+import { NSELabelHelp } from "../Tooltips/NSELabelHelp";
+import { useOptionalNSETooltipProvider } from "../Tooltips/NSETooltipProvider";
 import {
   nseAppearanceSlot,
   projectNSEAppearanceSlot,
@@ -181,6 +183,8 @@ export interface NSETabBarProps {
   readonly "aria-label": string;
   readonly className?: string;
   readonly dir?: "ltr" | "rtl";
+  /** Same tabs and retained panels, projected into an independently scrollable rail. */
+  readonly orientation?: "horizontal" | "vertical";
   /** Structural hook only in NavigationFoundation; appearance work is deferred to AppearanceAuthority. */
   readonly reducedMotion?: boolean;
   /** A source-list projection supplies one external stable host instead. */
@@ -198,7 +202,8 @@ export function NSETabBar({
   controller,
   "aria-label": ariaLabel,
   className,
-  dir = "ltr",
+  dir,
+  orientation = "horizontal",
   reducedMotion = false,
   renderPanels = true,
   idScope,
@@ -221,6 +226,7 @@ export function NSETabBar({
     ...(overflowDestinations.length > 0 ? [NSETabBarMoreDestinationId] : []),
   ];
   const overflowOpen = snapshot.moreStack?.currentDestinationId === NSETabBarMoreDestinationId;
+  const tooltips = useOptionalNSETooltipProvider();
   const [focusedTabId, setFocusedTabId] = useState(snapshot.activeTabId);
   const [paintFocusedTabId, setPaintFocusedTabId] = useState<string | null>(null);
   const [hoveredTabId, setHoveredTabId] = useState<string | null>(null);
@@ -239,24 +245,29 @@ export function NSETabBar({
   }, [controller]);
 
   const openOverflow = useCallback((source: string) => {
+    tooltips?.dismissActive();
     setFocusedTabId(NSETabBarMoreDestinationId);
     void controller.openOverflow({ source }).catch(() => undefined);
-  }, [controller]);
+  }, [controller, tooltips]);
 
   const closeOverflow = useCallback(() => {
+    tooltips?.dismissActive();
     controller.closeOverflow();
-  }, [controller]);
+  }, [controller, tooltips]);
 
   const focusControl = useCallback((controlId: string, source: string, activate: boolean) => {
     setFocusedTabId(controlId);
-    tabRefs.current.get(controlId)?.focus();
+    const control = tabRefs.current.get(controlId);
+    // Keyboard roving retains visible intent even after programmatic entry.
+    control?.focus({ focusVisible: true } as FocusOptions);
+    if (orientation === "vertical") control?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
     if (!activate) return;
     if (controlId === NSETabBarMoreDestinationId) {
       openOverflow(source);
       return;
     }
     selectDestination(controlId, source);
-  }, [openOverflow, selectDestination]);
+  }, [openOverflow, orientation, selectDestination]);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>, controlId: string) => {
     const enabledControls = controls.filter((id) => {
@@ -267,9 +278,11 @@ export function NSETabBar({
     const index = currentIndex < 0 ? 0 : currentIndex;
     const nextForDelta = (delta: number) => enabledControls[(index + delta + enabledControls.length) % enabledControls.length];
 
-    if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+    const vertical = orientation === "vertical";
+    if (vertical ? event.key === "ArrowDown" || event.key === "ArrowUp" : event.key === "ArrowRight" || event.key === "ArrowLeft") {
       event.preventDefault();
-      const forward = event.key === "ArrowRight" ? dir !== "rtl" : dir === "rtl";
+      const rtl = getComputedStyle(event.currentTarget).direction === "rtl";
+      const forward = vertical ? event.key === "ArrowDown" : event.key === "ArrowRight" ? !rtl : rtl;
       const target = nextForDelta(forward ? 1 : -1);
       if (target) focusControl(target, "keyboard", true);
       return;
@@ -350,6 +363,7 @@ export function NSETabBar({
       <div
         className={classes("nse-tab-bar-safe-area", className)}
         data-nse-tab-bar="true"
+        data-orientation={orientation}
         data-safe-area-wrapper="true"
         data-reduced-motion={reducedMotion ? "true" : "false"}
         data-nse-tab-chrome-status={chromeStatus}
@@ -362,10 +376,11 @@ export function NSETabBar({
         <div
           className={classes("nse-tab-bar", usesTallTabChrome && "nse-control-toolbar")}
           role="tablist"
+          aria-orientation={orientation}
           aria-label={ariaLabel}
           data-position={usesTallTabChrome ? "inline" : undefined}
           data-grouped={usesTallTabChrome ? "true" : undefined}
-          data-nse-tab-layout="floating-bottom"
+          data-nse-tab-layout={orientation === "vertical" ? "side-rail" : "floating-bottom"}
           data-nse-tab-chrome-family={usesTallTabChrome ? "grouped-toolbutton" : undefined}
           data-nse-tab-chrome-variant={usesTallTabChrome ? "tall" : undefined}
           data-nse-tab-chrome-size={usesTallTabChrome ? "tall" : undefined}
@@ -399,10 +414,10 @@ export function NSETabBar({
             : projectNSEAppearanceSlot(nseAppearanceSlot("tab-bar", "badge", state), appearance);
           const icon = projectNSENavigationIcon(destination.icon, state);
           const iconStyle = tabIconStyle(destination.icon);
-          const segment = tabChromeSegment(index, controls.length);
+          const segment = tabChromeSegment(index, orientation === "vertical" ? 1 : controls.length);
           const chromeState = tabChromeState(state, selected, pressed);
           return (
-            <button
+            <NSELabelHelp key={destination.id} label={destination.accessibleLabel ?? destination.label}><button
               className={classes("nse-tab-bar-tab", usesTallTabChrome && "nse-control-button")}
               key={destination.id}
               type="button"
@@ -469,11 +484,11 @@ export function NSETabBar({
                   <span className="nse-tab-bar-badge" data-nse-tab-badge="true" aria-hidden="true" {...badgeAppearance.attributes}>{destination.badge}</span>
                 ) : null}
               </span>
-            </button>
+            </button></NSELabelHelp>
           );
         })}
         {overflowDestinations.length > 0 ? (
-          <button
+          <NSELabelHelp label="More destinations"><button
             className={classes("nse-tab-bar-tab", "nse-tab-bar-more", usesTallTabChrome && "nse-control-button")}
             type="button"
             role="tab"
@@ -493,7 +508,7 @@ export function NSETabBar({
             data-nse-tab-visual-state={tabVisualState(moreState, moreSelected, morePressed)}
             {...tabChromeMetadata(
               moreAppearance,
-              tabChromeSegment(controls.length - 1, controls.length),
+              tabChromeSegment(controls.length - 1, orientation === "vertical" ? 1 : controls.length),
               tabChromeState(moreState, moreSelected, morePressed),
             )}
             {...moreAppearance.attributes}
@@ -538,7 +553,7 @@ export function NSETabBar({
               </span>
               <span className="nse-tab-bar-label" {...moreLabelAppearance.attributes}>More</span>
             </span>
-          </button>
+          </button></NSELabelHelp>
         ) : null}
           </div>
         </div>
@@ -719,7 +734,7 @@ export function NSETabBarOverflowList({
                   }}
                   role="button"
                   selected={selected}
-                  disabled={Boolean(destination.disabled)}
+                  isEnabled={!destination.disabled}
                   aria-label={destination.accessibleLabel ?? asText(destination.label)}
                   aria-current={selected ? "page" : undefined}
                   tabIndex={destination.disabled ? -1 : focusedDestinationId === destination.id ? 0 : -1}

@@ -75,7 +75,7 @@ describe("heritage producer redaction", () => {
     ] });
     const operation = inspector.getPage("Operations").rows[0];
     const app = inspector.getPage("Applications").rows[0];
-    expect(operation.id).not.toBe(app.id);
+    expect(operation.id).not.toBe(app.bundleIdentifier);
     expect(operation.id).not.toBe(inspector.getSnapshot().runtimeId);
     inspector.dispose();
   });

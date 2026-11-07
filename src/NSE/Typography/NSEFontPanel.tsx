@@ -21,25 +21,24 @@
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { GFXColour } from "../../FX/GraphicsFX/public";
 import { useNSEColourPanelContextCarrier, useOptionalNSEColourPanelController, useOptionalNSEColourPanelResponderId } from "../Colour/ColourPanel/NSEColourPanelProvider";
-import { NSEToolButton, NSEToolButtonGroup } from "../Controls/Buttons/NSEButtonFamilies";
-import { NSEPushButton } from "../Controls/Buttons/NSEButtons";
+import { NSEToolButtonGroup } from "../Controls/Buttons/NSEButtonFamilies";
+import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { NSETextField } from "../Controls/Fields/NSEFields";
 import { NSESearchField } from "../Controls/Fields/NSESearchField";
-import { NSECircularSlider } from "../Controls/Values/NSECircularSlider";
 import { NSESlider } from "../Controls/Values/NSESlider";
-import { NSEArrayController } from "../Controllers";
-import { NSETable, type NSEDataViewAdapter, type NSETableColumn } from "../DataViews";
+import { useNSEArrayController } from "../Controllers";
+import { NSETableView, type NSEDataViewAdapter, type NSETableColumn } from "../DataViews";
 import type { NSEFontFamily, NSEFontPreset } from "../Text/fontDescriptors";
 import { useNSEDeferredDisposal, type NSEDisposalScheduler } from "../interactionLifecycle";
-import { NSEMenu } from "../Menus/NSEMenu";
+import { NSEMenuView } from "../Menus/NSEMenuView";
 import type { NSEMenuItemDefinition } from "../Menus/menuTypes";
 import { useNSEOverlayProvider } from "../Overlays/NSEOverlayProvider";
 import { NSEUtilityPanel } from "../Overlays/NSEUtilityPanel";
-import { NSEToolbar } from "../Toolbars/NSEToolbar";
+import { NSESegmentedControl } from "../Controls/Values/NSESegmentedControl";
 import { DocumentColourGlyph, GearGlyph, MinusGlyph, PlusGlyph, ShadowGlyph, StrikethroughGlyph, TextColourGlyph, UnderlineGlyph } from "./fontPanelIcons";
 import type { NSEFontLibrary, NSEFontLibrarySnapshot } from "./NSEFontLibrary";
 import { NSEFontManager } from "./NSEFontManager";
-import { NSERuler } from "./NSERuler";
+import { NSERulerView } from "./NSERulerView";
 import {
   cssForTextShadow,
   normaliseParagraphStyle,
@@ -167,7 +166,7 @@ const sizeListRows = 4.1;
 /* The column the scroller takes, so a list's one column fills beside it. */
 const scrollerGutter = 15;
 
-/** One of the panel's lists: an NSETable of a single, fixed column. */
+/** One of the panel's lists: an NSETableView of a single, fixed column. */
 function FontPanelList({ title, label, items, selectedId, width, rows, headerHidden = false, readOnly, onSelect }: {
   readonly title: string;
   readonly label: string;
@@ -180,15 +179,13 @@ function FontPanelList({ title, label, items, selectedId, width, rows, headerHid
   onSelect(id: string): void;
 }) {
   const instanceId = useId().replace(/:/g, "");
-  const controller = useMemo(() => new NSEArrayController<FontListItem, string>({
+  // The controller lives as long as the list; content follows in the effect.
+  const controller = useNSEArrayController<FontListItem, string>({
     id: `font-panel-list-${instanceId}`,
     content: items,
     getId: (item) => item.id,
     selection: { mode: "single", allowsEmpty: true, preservesSelection: true },
-  // The controller lives as long as the list; content follows in the effect.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [instanceId]);
-  useNSEDeferredDisposal(controller, disposalScheduler);
+  });
   useEffect(() => {
     controller.setContent(items);
     controller.select(selectedId !== null && items.some((item) => item.id === selectedId) ? [selectedId] : []);
@@ -204,7 +201,7 @@ function FontPanelList({ title, label, items, selectedId, width, rows, headerHid
   }], [columnWidth, title]);
   const selectedRef = useRef(selectedId);
   selectedRef.current = selectedId;
-  return <NSETable
+  return <NSETableView
     aria-label={label}
     adapter={adapter}
     columns={columns}
@@ -256,13 +253,15 @@ function EffectColourButton({ id, label, glyph, value, automatic, disabled, onPr
   const shown = preview ?? value;
   // The Colours panel places itself beside the element bearing its target's
   // id, and presents only once it finds it.
-  return <NSEToolButton
+  return <NSEButton
+    bezelStyle="texturedRounded"
+    title={label}
+    image={<span data-nse-part="effect-colour-face">{glyph}<span ref={chipRef} data-nse-part="colour-chip" data-automatic={shown ? undefined : automatic} style={shown ? { "--nse-font-panel-chip": shown.toCSS() } as CSSProperties : undefined} /></span>}
+    imagePosition="imageOnly"
+    isEnabled={!(disabled || !controller)}
+    toolTip={controller ? label : `${label}: this app has no colour panel`}
     id={id}
-    label={label}
-    title={controller ? label : `${label}: this app has no colour panel`}
-    disabled={disabled || !controller}
     data-nse-part="effect-colour"
-    icon={<span data-nse-part="effect-colour-face">{glyph}<span ref={chipRef} data-nse-part="colour-chip" data-automatic={shown ? undefined : automatic} style={shown ? { "--nse-font-panel-chip": shown.toCSS() } as CSSProperties : undefined} /></span>}
     onClick={() => {
       if (!controller) return;
       releaseRef.current?.();
@@ -288,7 +287,7 @@ function EffectColourButton({ id, label, glyph, value, automatic, disabled, onPr
  */
 function FontActionsMenu({ fallbackParentResponderId, items, onSelect }: { readonly fallbackParentResponderId?: string; readonly items: readonly NSEMenuItemDefinition[]; onSelect(value: string): void }) {
   const overlays = useNSEOverlayProvider();
-  return <NSEMenu label={<GearGlyph />} trigger="tool" triggerLabel="Font actions" controlSize="small" parentResponderId={overlays.defaultParentResponderId ?? fallbackParentResponderId} items={items} data-nse-part="action-menu" onSelect={onSelect} />;
+  return <NSEMenuView label={<GearGlyph />} trigger="tool" triggerLabel="Font actions" controlSize="small" parentResponderId={overlays.defaultParentResponderId ?? fallbackParentResponderId} items={items} data-nse-part="action-menu" onSelect={onSelect} />;
 }
 
 function familyMatchesQuery(family: NSEFontFamily, query: string): boolean {
@@ -553,24 +552,54 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
 
       {showsEffects ? <div role="toolbar" aria-label="Text effects" data-nse-part="effects">
         <NSEToolButtonGroup controlSize="small" label="Lines">
-          <NSEToolButton label="Underline" icon={<UnderlineGlyph />} selected={underline} aria-pressed={underline} disabled={effectsDisabled} onClick={() => { const next = !underline; setUnderline(next); applyAttributes({ underline: next }); }} />
-          <NSEToolButton label="Strikethrough" icon={<StrikethroughGlyph />} selected={strike} aria-pressed={strike} disabled={effectsDisabled} onClick={() => { const next = !strike; setStrike(next); applyAttributes({ strike: next }); }} />
+          <NSEButton
+            bezelStyle="texturedRounded"
+            buttonType="pushOnPushOff"
+            title="Underline"
+            image={<UnderlineGlyph />}
+            imagePosition="imageOnly"
+            state={underline ? "on" : "off"}
+            isEnabled={!effectsDisabled}
+            aria-pressed={underline}
+            onClick={() => { const next = !underline; setUnderline(next); applyAttributes({ underline: next }); }}
+          />
+          <NSEButton
+            bezelStyle="texturedRounded"
+            buttonType="pushOnPushOff"
+            title="Strikethrough"
+            image={<StrikethroughGlyph />}
+            imagePosition="imageOnly"
+            state={strike ? "on" : "off"}
+            isEnabled={!effectsDisabled}
+            aria-pressed={strike}
+            onClick={() => { const next = !strike; setStrike(next); applyAttributes({ strike: next }); }}
+          />
         </NSEToolButtonGroup>
         <NSEToolButtonGroup controlSize="small" label="Colours">
           <EffectColourButton id={`font-panel-${instanceId}-text-colour`} label="Text colour" glyph={<TextColourGlyph />} value={textColour} automatic="ink" disabled={effectsDisabled} onPreview={(colour) => setColourPreview((current) => ({ ...current, text: colour }))} onCommit={(colour) => { setTextColour(colour); applyAttributes({ foregroundColour: colour.toHex({ includeAlpha: colour.components.a < 1 }) }); }} />
           <EffectColourButton id={`font-panel-${instanceId}-document-colour`} label="Document colour" glyph={<DocumentColourGlyph />} value={documentColour} automatic="ground" disabled={effectsDisabled} onPreview={(colour) => setColourPreview((current) => ({ ...current, document: colour }))} onCommit={(colour) => { setDocumentColour(colour); applyAttributes({ documentColour: colour.toHex({ includeAlpha: colour.components.a < 1 }) }); }} />
         </NSEToolButtonGroup>
         <NSEToolButtonGroup controlSize="small" label="Shadow">
-          <NSEToolButton label="Text shadow" icon={<ShadowGlyph />} selected={shadow.enabled} aria-pressed={shadow.enabled} disabled={effectsDisabled} onClick={() => {
+          <NSEButton
+            bezelStyle="texturedRounded"
+            buttonType="pushOnPushOff"
+            title="Text shadow"
+            image={<ShadowGlyph />}
+            imagePosition="imageOnly"
+            state={shadow.enabled ? "on" : "off"}
+            isEnabled={!effectsDisabled}
+            aria-pressed={shadow.enabled}
+            onClick={() => {
             const next = { ...shadow, enabled: !shadow.enabled };
             setShadow(next);
             applyAttributes(shadowPayload(next));
-          }} />
+          }}
+          />
         </NSEToolButtonGroup>
-        <NSESlider controlSize="mini" length={36} aria-label="Shadow opacity" value={shadow.opacity} minimum={0} maximum={100} step={1} disabled={effectsDisabled || !shadow.enabled} tooltip={(value) => `Opacity ${value}%`} onValueChange={(value, phase) => changeShadow({ opacity: value }, phase)} />
-        <NSESlider controlSize="mini" length={36} aria-label="Shadow blur" value={shadow.blur} minimum={0} maximum={20} step={1} disabled={effectsDisabled || !shadow.enabled} tooltip={(value) => `Blur ${value}`} onValueChange={(value, phase) => changeShadow({ blur: value }, phase)} />
-        <NSESlider controlSize="mini" length={36} aria-label="Shadow offset" value={shadow.offset} minimum={0} maximum={20} step={1} disabled={effectsDisabled || !shadow.enabled} tooltip={(value) => `Offset ${value}`} onValueChange={(value, phase) => changeShadow({ offset: value }, phase)} />
-        <NSECircularSlider controlSize="small" aria-label="Shadow angle" value={angleToDial(shadow.angle)} minimum={0} maximum={360} step={5} wraps disabled={effectsDisabled || !shadow.enabled} valueText={(dial) => `${dialToAngle(dial)} degrees`} onValueChange={(dial, phase) => changeShadow({ angle: dialToAngle(dial) }, phase)} />
+        <NSESlider controlSize="mini" length={36} aria-label="Shadow opacity" value={shadow.opacity} minimum={0} maximum={100} step={1} isEnabled={!(effectsDisabled || !shadow.enabled)} tooltip={(value) => `Opacity ${value}%`} onValueChange={(value, phase) => changeShadow({ opacity: value }, phase)} />
+        <NSESlider controlSize="mini" length={36} aria-label="Shadow blur" value={shadow.blur} minimum={0} maximum={20} step={1} isEnabled={!(effectsDisabled || !shadow.enabled)} tooltip={(value) => `Blur ${value}`} onValueChange={(value, phase) => changeShadow({ blur: value }, phase)} />
+        <NSESlider controlSize="mini" length={36} aria-label="Shadow offset" value={shadow.offset} minimum={0} maximum={20} step={1} isEnabled={!(effectsDisabled || !shadow.enabled)} tooltip={(value) => `Offset ${value}`} onValueChange={(value, phase) => changeShadow({ offset: value }, phase)} />
+        <NSESlider sliderType="circular" controlSize="small" aria-label="Shadow angle" value={angleToDial(shadow.angle)} minimum={0} maximum={360} step={5} wraps isEnabled={!(effectsDisabled || !shadow.enabled)} valueText={(dial) => `${dialToAngle(dial)} degrees`} onValueChange={(dial, phase) => changeShadow({ angle: dialToAngle(dial) }, phase)} />
         <output data-nse-part="shadow-angle" aria-hidden="true">{shadow.angle}°</output>
       </div> : null}
 
@@ -580,13 +609,13 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
         <FontPanelList title="Typeface" label="Typeface" items={typefaceItems} selectedId={typefaces.some((candidate) => candidate.id === fontId) ? fontId : null} width={118} rows={6} readOnly={readOnly} onSelect={chooseTypeface} />
         <div data-nse-part="size-column" role="group" aria-label="Size">
           <span data-nse-part="column-caption" aria-hidden="true">Size</span>
-          <NSETextField controlSize="mini" aria-label="Font size" type="number" inputMode="decimal" min={minimumSize} max={maximumSize} disabled={readOnly || !preset} value={sizeText}
+          <NSETextField controlSize="mini" aria-label="Font size" type="number" inputMode="decimal" min={minimumSize} max={maximumSize} isEnabled={!(readOnly || !preset)} value={sizeText}
             onChange={(event) => setSizeText(event.currentTarget.value)}
             onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); chooseSize(Number(sizeText)); } }}
             onBlur={() => { if (Number(sizeText) !== size) chooseSize(Number(sizeText)); }} />
           <div data-nse-part="size-list">
             <FontPanelList title="Size" label="Font sizes" items={sizeItems} selectedId={standardSizes.includes(size as typeof standardSizes[number]) ? String(size) : null} width={42} rows={sizeListRows} headerHidden readOnly={readOnly || !preset} onSelect={(id) => chooseSize(Number(id))} />
-            <NSESlider controlSize="mini" orientation="vertical" length={sizeListRows * listRowHeight} aria-label="Font size slider" value={sizeToSlider(size)} minimum={0} maximum={100} step={1} disabled={readOnly || !preset}
+            <NSESlider controlSize="mini" orientation="vertical" length={sizeListRows * listRowHeight} aria-label="Font size slider" value={sizeToSlider(size)} minimum={0} maximum={100} step={1} isEnabled={!(readOnly || !preset)}
               onValueChange={(value, phase) => {
                 const next = sliderToSize(value);
                 setSize(next);
@@ -599,8 +628,22 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
 
       <div data-nse-part="footer">
         <NSEToolButtonGroup controlSize="small" label="Add or remove fonts">
-          <NSEToolButton label="Add fonts" icon={<PlusGlyph />} disabled={readOnly || !library?.canAddFonts} onClick={() => fileInputRef.current?.click()} />
-          <NSEToolButton label={removable === "favourite" ? "Remove from Favourites" : "Remove font"} icon={<MinusGlyph />} disabled={removable === null} onClick={() => { void remove(); }} />
+          <NSEButton
+            bezelStyle="texturedRounded"
+            title="Add fonts"
+            image={<PlusGlyph />}
+            imagePosition="imageOnly"
+            isEnabled={!(readOnly || !library?.canAddFonts)}
+            onClick={() => fileInputRef.current?.click()}
+          />
+          <NSEButton
+            bezelStyle="texturedRounded"
+            title={removable === "favourite" ? "Remove from Favourites" : "Remove font"}
+            image={<MinusGlyph />}
+            imagePosition="imageOnly"
+            isEnabled={!(removable === null)}
+            onClick={() => { void remove(); }}
+          />
         </NSEToolButtonGroup>
         <FontActionsMenu fallbackParentResponderId={parentResponderId} items={menuItems} onSelect={(value) => {
           if (value === "favourite" && library) { if (isFavourite) library.removeFavourite(fontId); else library.addFavourite(fontId); }
@@ -619,10 +662,15 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
 
       {showsRuler ? <fieldset data-nse-part="paragraph" disabled={readOnly}>
         <legend className="nse-control-visually-hidden">Paragraph</legend>
-        <NSEToolbar composition="children" position="inline" grouped aria-label="Paragraph alignment" aria-disabled={readOnly || undefined}>
-          {alignmentLabels.map(([alignment, text]) => <NSEPushButton key={alignment} tone="dark" selected={style.alignment === alignment} disabled={readOnly} aria-label={text} title={text.replace(" paragraph", "")} aria-pressed={style.alignment === alignment} onClick={() => updateParagraph(normaliseParagraphStyleMutation({ ...style, alignment }))}><AlignmentGlyph alignment={alignment} /></NSEPushButton>)}
-        </NSEToolbar>
-        <NSERuler value={style} direction={direction} readOnly={readOnly} onChange={updateParagraph} />
+        <NSESegmentedControl
+          aria-label="Paragraph alignment"
+          segmentStyle="texturedRounded"
+          readOnly={readOnly}
+          items={alignmentLabels.map(([alignment, text]) => ({ id: alignment, label: text, image: <AlignmentGlyph alignment={alignment} />, accessibleLabel: text, toolTip: text.replace(" paragraph", "") }))}
+          selection={{ mode: "select-one", selectedIds: new Set([style.alignment]), allowsEmpty: false }}
+          onSelectionChange={({ selectedIds }) => { const [alignment] = selectedIds; if (alignment) updateParagraph(normaliseParagraphStyleMutation({ ...style, alignment: alignment as typeof style.alignment })); }}
+        />
+        <NSERulerView value={style} direction={direction} readOnly={readOnly} onChange={updateParagraph} />
       </fieldset> : null}
       <p role="status" data-nse-part="notice">{!preset ? "No fonts available." : notice}</p>
       {status !== "idle" && status !== "executed" ? <p role="alert">Typography command {status}.</p> : null}

@@ -25,7 +25,7 @@ import { createInspectorOwnerSources, type InspectorRouteInspectionPort } from "
 import { createInspectorProjection } from "./inspectorProjection";
 import type { InspectorClient, InspectorSource } from "./inspectorTypes";
 import type { InspectorLocalization } from "./inspectorLocalization";
-import { translateSynWareText } from "../AppSDK/useSynWareLocalisedStrings";
+import { translateSynWareText } from "../AppSDK/useStrings";
 
 export interface InspectorDevHostOptions {
   readonly enabled: boolean;
@@ -60,8 +60,8 @@ export function createDevInspector(options: InspectorDevHostOptions): Readonly<{
         runtimeId: runtime.runtimeId,
         read: () => ({ current: { route: runtime.routes.routeGraph.current(), latestOperationId: runtime.routes.getCurrentOperationId() },
           graphs: runtime.apps.getAllApps().flatMap(app => {
-            const graph = runtime.bundles.getLoadedBundle(app.id)?.definition.routes;
-            return graph ? [{ id: graph.id, appId: app.id, routes: graph.routes }] : [];
+            const graph = runtime.bundles.getLoadedBundle(app.bundleIdentifier)?.definition.routes;
+            return graph ? [{ id: graph.id, appId: app.bundleIdentifier, routes: graph.routes }] : [];
           }), transitions: runtime.routes.inspectTransitions() }),
         subscribe: listener => {
           const removeOperations = runtime.operations.subscribe(listener);
@@ -70,7 +70,7 @@ export function createDevInspector(options: InspectorDevHostOptions): Readonly<{
         },
       }, settlement: options.settlement }),
     { panel: "Applications", subscribe: events(["app.register", "app.register.update", "app.unregister"]),
-      read: () => runtime.apps.getAllApps().map(app => ({ id: app.id, kind: "application", status: "available" })) },
+      read: () => runtime.apps.getAllApps().map(app => ({ id: app.bundleIdentifier, kind: "application", status: "available" })) },
     { panel: "Services", subscribe: events(["service.available", "service.unavailable"]),
       read: () => runtime.services.getHealthReport().services.map(service => ({ id: service.serviceId, kind: "service", status: service.available ? "available" : "unavailable" })) },
     { panel: "Policy", subscribe: events(["policy.decision"]),

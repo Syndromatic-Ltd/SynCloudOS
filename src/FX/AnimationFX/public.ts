@@ -58,7 +58,7 @@ export type {
 export { AFXTransform3D, AFXSingularTransformError } from "./AFXTransform3D";
 export type { AFXPoint3D } from "./AFXTransform3D";
 export type * from "./animationTypes";
-export type { AFXLayerStyle, AFXLayerCorner } from "./AFXLayerStyle";
+export type { AFXLayerStyle, AFXLayerCorner, AFXLayerContentsFilter } from "./AFXLayerStyle";
 export { AFXEdgeAntialiasingMask } from './AFXLayerStyle';
 
 export { AFXShapeLayer } from "./AFXShapeLayer";
@@ -78,6 +78,7 @@ export type {
 
 export { AFXTextLayer } from "./AFXTextLayer";
 export { AFXReplicatorLayer } from "./AFXReplicatorLayer";
+export { AFXTransformLayer } from "./AFXTransformLayer";
 export type {
   AFXReplication,
   AFXReplicaPresentation,

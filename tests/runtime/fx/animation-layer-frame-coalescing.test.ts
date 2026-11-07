@@ -19,14 +19,15 @@
  */
 
 import { expect, it, vi } from "vitest";
-import { AFXLayer, AFXTransaction, AFXTransform3D, type AFXFrameScheduler } from "../../../src/FX/AnimationFX/public";
+import { AFXTransaction, AFXTransform3D, type AFXFrameScheduler } from "../../../src/FX/AnimationFX/public";
+import { createAFXLayer } from "../../../src/FX/AnimationFX/host";
 import { AFXAnimation, AFXBasicAnimation } from '../../../src/FX/AnimationFX/public';
 
 it('advances delayed and constant animation time without resubmitting unchanged presentation', async () => {
   let now = 0;
   const pending = new Set<(time: number) => void>();
   const apply = vi.fn();
-  const layer = new AFXLayer({ supportedProperties: ['opacity'], supportedContentKinds: ['image'],
+  const layer = createAFXLayer({ supportedProperties: ['opacity'], supportedContentKinds: ['image'],
     apply, attach() {}, detach() {}, setMask() {}, dispose() {},
   }, { now: () => now, reducedMotion: false, suspended: false,
     requestFrame(callback) { pending.add(callback); return () => { pending.delete(callback); }; } });
@@ -60,7 +61,7 @@ it("coalesces concurrent JS-backed layer properties into one frame tick and one 
     suspended: false,
   };
   const applied: Array<{ opacity: number; x: number }> = [];
-  const layer = new AFXLayer({
+  const layer = createAFXLayer({
     supportedProperties: ["frame", "opacity", "transform"],
     supportedContentKinds: ["image"],
     apply(snapshot) { applied.push({ opacity: snapshot.opacity, x: snapshot.position.x }); },
@@ -102,7 +103,7 @@ it("reuses a parsed sampled transform across repeated presentation reads", () =>
     reducedMotion: false,
     suspended: false,
   };
-  const layer = new AFXLayer({
+  const layer = createAFXLayer({
     supportedProperties: ["transform"],
     supportedContentKinds: ["image"],
     apply() {}, attach() {}, detach() {}, setMask() {}, dispose() {},

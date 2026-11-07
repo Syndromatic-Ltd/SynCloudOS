@@ -32,7 +32,7 @@ import { TFXAttributedString, TFXFont, TFXFontDescriptor } from "@syndromatic/sy
 | --- | --- |
 | Prefix | `TFX` |
 | Entry | `@syndromatic/syncloudos/fx/text` |
-| Hook | `useSynWareTextLayout`, from `@syndromatic/syncloudos/sdk` |
+| Hook | `useTextLayout`, from `@syndromatic/syncloudos/sdk` |
 | Permissions | None |
 | Analogue | Core Text (`CTFont`, `CTFontDescriptor`, `CTFontCollection`, `CTTypesetter`, `CTFramesetter`, `CTFrame`, `CTLine`, `CTRunDelegate`, `CTRubyAnnotation`) |
 
@@ -405,7 +405,7 @@ new TFXRunDelegate({ width, ascent, descent, attachment: { image: GFXImage, acce
 
 The metrics are each from 0 to 32,768. The image must be an owned [GraphicsFX](graphics.md) `GFXImage` of at most 8 MiB. The accessibility label is required, non-blank and at most 4,096 units, because the object stands in for text that a screen reader would otherwise miss. Layout never runs application code. The delegate is a snapshot of these values, and the properties `width`, `ascent`, `descent` and `attachment` read them back.
 
-In an application, `useSynWareTextLayout().resolveRunDelegate(request)` builds a delegate from an image that belongs to one of your documents, and the client reports when the image becomes ready.
+In an application, `useTextLayout().resolveRunDelegate(request)` builds a delegate from an image that belongs to one of your documents, and the client reports when the image becomes ready.
 
 ### Ruby annotations
 
@@ -541,7 +541,7 @@ planner.plan(input, containers): Promise<TFXTextLayoutResult>
 
 ## In a SynWare
 
-`useSynWareTextLayout()` returns a client that owns fonts for your application and reports when they are ready. It is a `TFXFontClient` with a few extras.
+`useTextLayout()` returns a client that owns fonts for your application and reports when they are ready. It is a `TFXFontClient` with a few extras.
 
 | Member | Description |
 | --- | --- |
@@ -558,10 +558,10 @@ planner.plan(input, containers): Promise<TFXTextLayoutResult>
 ```tsx
 import { useEffect, useState } from "react";
 import { TFXFontDescriptor, type TFXFontRegistration } from "@syndromatic/syncloudos/fx/text";
-import { useSynWareTextLayout } from "@syndromatic/syncloudos/sdk";
+import { useTextLayout } from "@syndromatic/syncloudos/sdk";
 
 export function useBundledFont(path: string, size: number) {
-  const textLayout = useSynWareTextLayout();
+  const textLayout = useTextLayout();
   const [registration, setRegistration] = useState<TFXFontRegistration | null>(null);
 
   useEffect(() => {

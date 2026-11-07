@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEViewController, type NSEViewControllerOptions } from "../Application/NSEViewController";
+import { sameViewportFeatures } from "../../SynCloudOS/SynCloudOS";
 import type { SynCloudOSPresentationTraits } from "../../SynCloudOS/SynCloudOS";
 import { NSENavigationStackController } from "./NSENavigationStackController";
 import { NSETabBarController } from "./NSETabBarController";
@@ -28,7 +30,9 @@ import type {
   NSEAdaptiveNavigationSnapshot,
 } from "./navigationTypes";
 
-export interface NSEAdaptiveNavigationControllerOptions<TContent = unknown> {
+import { resolveNSEBookRegions } from "./bookRegions";
+
+export interface NSEAdaptiveNavigationControllerOptions<TContent = unknown> extends NSEViewControllerOptions {
   readonly id: string;
   readonly model: NSEAdaptiveNavigationModel;
   readonly presentation?: NSEAdaptiveNavigationPresentation;
@@ -45,6 +49,7 @@ function requireId(value: string): string {
 function cloneTraits(source: SynCloudOSPresentationTraits): SynCloudOSPresentationTraits {
   return Object.freeze({
     ...source,
+    viewportFeatures: source.viewportFeatures ? Object.freeze({ ...source.viewportFeatures, segments: source.viewportFeatures.segments ? Object.freeze(source.viewportFeatures.segments.map(rect => Object.freeze({ ...rect }))) : null }) : undefined,
     contentBounds: Object.freeze({ ...source.contentBounds }),
     hostViewportBounds: Object.freeze({ ...source.hostViewportBounds }),
     workArea: Object.freeze({ ...source.workArea }),
@@ -61,7 +66,9 @@ function sameBounds(
 }
 
 function sameTraits(left: SynCloudOSPresentationTraits, right: SynCloudOSPresentationTraits): boolean {
-  return left.revision === right.revision &&
+  return sameViewportFeatures(left.viewportFeatures, right.viewportFeatures) && left.revision === right.revision &&
+    left.geometryState === right.geometryState &&
+    left.safeAreaAvailability === right.safeAreaAvailability &&
     sameBounds(left.contentBounds, right.contentBounds) &&
     sameBounds(left.hostViewportBounds, right.hostViewportBounds) &&
     left.horizontalSizeClass === right.horizontalSizeClass &&
@@ -82,18 +89,35 @@ function sameTraits(left: SynCloudOSPresentationTraits, right: SynCloudOSPresent
     left.forcedColours === right.forcedColours;
 }
 
+/** CSS-pixel budgets for the shared peer projection. Rail targets keep the
+ * existing 72px height; its 104px allocation includes inline safe padding.
+ * These are content budgets, never device/posture or physical-screen rules. */
+export const NSEAdaptiveNavigationMetrics = Object.freeze({
+  railWidth: 104,
+  minimumRailContentWidth: 360,
+  maximumRailHeight: 480,
+  sidebarMinimumWidth: 768,
+});
+
 function rendererFor(
   model: NSEAdaptiveNavigationModel,
   presentation: NSEAdaptiveNavigationPresentation,
   traits: SynCloudOSPresentationTraits,
+  previous?: NSEAdaptiveNavigationRenderer,
 ): NSEAdaptiveNavigationRenderer {
-  if (model === "peer") return presentation === "bottom-tabs" || traits.horizontalSizeClass === "compact" ? "tabs" : "source-list-content";
-  return traits.horizontalSizeClass === "compact" ? "stack" : "list-detail";
+  if (traits.geometryState !== "current") return previous ?? (model === "peer" ? "tabs" : "stack");
+  const { width, height } = traits.contentBounds;
+  if (model === "hierarchy") return width < NSEAdaptiveNavigationMetrics.sidebarMinimumWidth ? "stack" : "list-detail";
+  if (presentation === "bottom-tabs") return "tabs";
+  if (height <= NSEAdaptiveNavigationMetrics.maximumRailHeight && width > height &&
+      width - NSEAdaptiveNavigationMetrics.railWidth >= NSEAdaptiveNavigationMetrics.minimumRailContentWidth) return "rail";
+  return width < NSEAdaptiveNavigationMetrics.sidebarMinimumWidth ? "tabs" : "source-list-content";
 }
 
 function freezeSnapshot(input: NSEAdaptiveNavigationSnapshot): NSEAdaptiveNavigationSnapshot {
   return Object.freeze({
     ...input,
+    layoutBounds: Object.freeze({ ...input.layoutBounds }),
     traits: cloneTraits(input.traits),
     stack: input.stack ? Object.freeze({ ...input.stack, path: Object.freeze([...input.stack.path]) }) : null,
   });
@@ -101,28 +125,21 @@ function freezeSnapshot(input: NSEAdaptiveNavigationSnapshot): NSEAdaptiveNaviga
 
 /** Chooses a renderer policy from canonical traits while retaining semantic
  * controllers and their content objects across every transition. */
-export interface NSEAdaptiveNavigationController {
-  getSnapshot(): NSEAdaptiveNavigationSnapshot;
-  subscribe(listener: () => void): () => void;
-  setTraits(traits: SynCloudOSPresentationTraits): void;
-  dispose(): void;
-}
-
-export class NSEAdaptiveNavigationController<TContent = unknown> {
+export class NSEAdaptiveNavigationController<TContent = unknown> extends NSEViewController<NSEAdaptiveNavigationSnapshot> {
   readonly id: string;
   readonly model: NSEAdaptiveNavigationModel;
   readonly presentation: NSEAdaptiveNavigationPresentation;
   readonly tabController: NSETabBarController<TContent>;
   readonly stackController: NSENavigationStackController | null;
-  readonly #listeners = new Set<() => void>();
   readonly #unsubscribeTab: () => void;
   readonly #unsubscribeStack: (() => void) | null;
   #traits: SynCloudOSPresentationTraits;
+  #contentBounds: SynCloudOSPresentationTraits["contentBounds"] | null = null;
   #snapshot: NSEAdaptiveNavigationSnapshot;
   #revision = 0;
-  #disposed = false;
 
   constructor(options: NSEAdaptiveNavigationControllerOptions<TContent>) {
+    super(options);
     this.id = requireId(options.id);
     this.model = options.model;
     this.presentation = options.presentation ?? "adaptive";
@@ -147,43 +164,44 @@ export class NSEAdaptiveNavigationController<TContent = unknown> {
     this.#snapshot = this.#makeSnapshot();
     this.#unsubscribeTab = this.tabController.subscribe(() => this.#publish());
     this.#unsubscribeStack = this.stackController?.subscribe(() => this.#publish()) ?? null;
-  }
-
-  getSnapshot = (): NSEAdaptiveNavigationSnapshot => this.#snapshot;
-
-  subscribe(listener: () => void): () => void {
-    if (this.#disposed) return () => undefined;
-    this.#listeners.add(listener);
-    let active = true;
-    return () => {
-      if (!active) return;
-      active = false;
-      this.#listeners.delete(listener);
-    };
+    this.getSnapshot = () => this.#snapshot;
   }
 
   setTraits(traits: SynCloudOSPresentationTraits): void {
-    if (this.#disposed || sameTraits(this.#traits, traits)) return;
+    if (this.isDisposed || sameTraits(this.#traits, traits)) return;
     this.#traits = cloneTraits(traits);
     this.#publish();
   }
 
-  dispose(): void {
-    if (this.#disposed) return;
-    this.#disposed = true;
+  /** View-owned allocation, in untransformed CSS pixels. Invalid/hidden
+   * measurements retain the last allocation; null releases the view binding.
+   * Host facts and their trust state still come from canonical traits. */
+  setContentBounds(bounds: SynCloudOSPresentationTraits["contentBounds"] | null): void {
+    if (this.isDisposed) return;
+    if (bounds && (!Number.isFinite(bounds.x) || !Number.isFinite(bounds.y) ||
+      !Number.isFinite(bounds.width) || !Number.isFinite(bounds.height) || bounds.width <= 0 || bounds.height <= 0)) return;
+    if (bounds === null ? this.#contentBounds === null : this.#contentBounds && sameBounds(this.#contentBounds, bounds)) return;
+    this.#contentBounds = bounds ? Object.freeze({ ...bounds }) : null;
+    this.#publish();
+  }
+
+  protected override didDispose(): void {
     this.#unsubscribeTab();
     this.#unsubscribeStack?.();
-    this.#listeners.clear();
   }
 
   #makeSnapshot(): NSEAdaptiveNavigationSnapshot {
     const tabSnapshot = this.tabController.getSnapshot();
+    const layoutBounds = this.#contentBounds ?? this.#traits.contentBounds;
+    const bookRegions = this.presentation === "adaptive" ? resolveNSEBookRegions(this.#traits, layoutBounds) : null;
     return freezeSnapshot({
       revision: this.#revision,
       id: this.id,
       model: this.model,
       presentation: this.presentation,
-      renderer: rendererFor(this.model, this.presentation, this.#traits),
+      bookRegions,
+      renderer: bookRegions ? (this.model === "hierarchy" ? "list-detail" : "source-list-content") : rendererFor(this.model, this.presentation, { ...this.#traits, contentBounds: layoutBounds }, this.#snapshot?.renderer),
+      layoutBounds,
       traits: this.#traits,
       selectedDestinationId: tabSnapshot.selectedDestinationId,
       stack: this.stackController?.getSnapshot() ?? null,
@@ -191,9 +209,9 @@ export class NSEAdaptiveNavigationController<TContent = unknown> {
   }
 
   #publish(): void {
-    if (this.#disposed) return;
+    if (this.isDisposed) return;
     this.#revision += 1;
     this.#snapshot = this.#makeSnapshot();
-    for (const listener of [...this.#listeners]) listener();
+    this.notifyObservers();
   }
 }

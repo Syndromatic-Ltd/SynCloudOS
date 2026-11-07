@@ -126,7 +126,7 @@
   border-radius: 999px;
   color: #fff;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 24px;
   background: linear-gradient(#ff7676, #d72128);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.65);
@@ -186,7 +186,7 @@
   overflow: hidden;
   font-family: inherit;
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0;
   text-align: center;
   text-overflow: ellipsis;
@@ -291,7 +291,7 @@
   color: #f4f7fb;
   font-family: inherit;
   font-size: 20px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1;
   text-shadow:
     0 -1px 0 rgba(0, 0, 0, 0.95),
@@ -323,10 +323,12 @@
   inset: 0;
   z-index: 10000;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   place-items: center;
   box-sizing: border-box;
   overflow: hidden;
-  padding: clamp(10px, 4vw, 22px);
+  padding: max(clamp(10px, 4vw, 22px), env(safe-area-inset-top)) max(clamp(10px, 4vw, 22px), env(safe-area-inset-right)) max(clamp(10px, 4vw, 22px), env(safe-area-inset-bottom)) max(clamp(10px, 4vw, 22px), env(safe-area-inset-left));
   background: rgba(0, 0, 0, 0.42);
   -webkit-backdrop-filter: blur(5px) saturate(0.85);
   backdrop-filter: blur(5px) saturate(0.85);
@@ -347,6 +349,8 @@
   width: min(620px, calc(100vw - 22px));
   max-width: calc(100vw - 22px);
   max-height: calc(100vh - 22px);
+  max-inline-size: 100%;
+  max-block-size: 100%;
   min-height: 250px;
   padding: 28px;
   overflow: hidden;
@@ -375,6 +379,7 @@
 .nse-system-alert-content {
   display: grid;
   grid-template-columns: 116px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   gap: 8px;
   align-items: start;
   text-align: left;
@@ -422,10 +427,12 @@
 }
 
 .nse-system-alert-copy {
+  align-self: stretch;
   min-width: 0;
   min-height: 0;
   max-width: 100%;
-  overflow: hidden;
+  overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .nse-system-alert-copy h2 {
@@ -457,7 +464,7 @@
   color: var(--nse-alert-link-text);
   background: transparent;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
   cursor: pointer;
 }
 
@@ -539,12 +546,13 @@
 @media (max-width: 680px) {
   .nse-control-alert {
     width: min(100%, calc(100vw - 18px));
-    max-height: calc(100vh - 20px);
+    max-block-size: 100%;
     border-width: 34px;
     border-image-width: 34px;
   }
 
   .nse-alert-actions {
+    grid-template-columns: minmax(0, 1fr);
     margin-right: 0;
     margin-left: 0;
   }
@@ -647,4 +655,27 @@
     gap: 8px;
     margin-top: 12px;
   }
+}
+
+/* The backdrop still covers both halves. Its content box is the selected
+   region; no wrapper/reparenting or second focus trap is introduced. */
+.nse-control-alert-backdrop[data-nse-overlay-region="true"] {
+  padding-top: calc(var(--nse-overlay-region-top) + max(clamp(10px, 4vw, 22px), env(safe-area-inset-top)));
+  padding-right: calc(var(--nse-overlay-region-right) + max(clamp(10px, 4vw, 22px), env(safe-area-inset-right)));
+  padding-bottom: calc(var(--nse-overlay-region-bottom) + max(clamp(10px, 4vw, 22px), env(safe-area-inset-bottom)));
+  padding-left: calc(var(--nse-overlay-region-left) + max(clamp(10px, 4vw, 22px), env(safe-area-inset-left)));
+}
+.nse-control-alert-backdrop[data-nse-overlay-region="true"] > .nse-control-alert {
+  min-block-size: 0;
+  max-inline-size: 100%;
+  max-block-size: 100%;
+  overflow: auto;
+}
+
+/* A view controller presented as a sheet (presentAsSheet) draws its title above its view. */
+.nse-sheet-title {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
 }

@@ -18,14 +18,23 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* Rendered bar heights, one place per chrome variant. The bar reads its own token, and a host can
+   pass the same value on to anything that must reserve the bar's band (Webspring exposes it to app
+   content), so the bar and its surroundings can never disagree — including the compact breakpoint
+   below. */
+:root {
+  --nse-topbar-height-cumulus: 68px;
+  --nse-topbar-height-metal: 56px;
+}
+
 .nse-app-topbar {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   z-index: 8;
-  height: var(--nse-app-topbar-height, 68px);
-  min-height: var(--nse-app-topbar-height, 68px);
+  height: var(--nse-app-topbar-height, var(--nse-topbar-height-cumulus));
+  min-height: var(--nse-app-topbar-height, var(--nse-topbar-height-cumulus));
   color: #f4f7fb;
   user-select: none;
 }
@@ -105,7 +114,7 @@
   display: grid;
   grid-template-columns: minmax(116px, 15vw) minmax(0, 1fr) minmax(116px, 15vw);
   align-items: center;
-  height: 68px;
+  height: var(--nse-app-topbar-height, var(--nse-topbar-height-cumulus));
   padding: 0;
 }
 
@@ -179,7 +188,7 @@
   color: #f6f8fb;
   font-family: inherit;
   font-size: 22px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0;
   line-height: 1.1;
   text-align: center;
@@ -277,7 +286,27 @@
   transform: translate3d(0, 0, 0);
 }
 
+/* Every top-bar glyph is one solid-shape SVG used as a CSS mask over a themed fill, so the
+   normal, pressed and selected looks come from colour tokens for any icon. The element that
+   carries the mask is clipped by it, so the shadow filters live on its wrapper. */
+.nse-app-topbar-glyph-shape {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--nse-app-topbar-glyph-fill, currentColor);
+  -webkit-mask-image: var(--nse-app-topbar-glyph);
+  mask-image: var(--nse-app-topbar-glyph);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
 .nse-app-topbar-button {
+  --nse-app-topbar-glyph-fill: linear-gradient(180deg, rgb(247 249 252 / 94%) 0%, rgb(188 196 207 / 90%) 100%);
+  --nse-app-topbar-glyph-shadow: drop-shadow(0 1px 1px rgb(0 0 0 / 55%));
   position: relative;
   display: grid;
   width: 108px;
@@ -373,9 +402,9 @@
   grid-area: 1 / 1;
   width: 32px;
   height: 32px;
-  object-fit: contain;
   pointer-events: none;
   transform: translateY(-2px);
+  filter: var(--nse-app-topbar-glyph-shadow);
 }
 
 .nse-app-topbar-button[data-position="right"] .nse-app-topbar-button-icon {
@@ -383,27 +412,25 @@
   height: 32.5px;
 }
 
-.nse-app-topbar-button-icon-selected {
-  opacity: 0;
+/* Held and selected: the blue glass fills the well and the glyph lights up. */
+.nse-app-topbar-button[data-selected="true"],
+.nse-app-topbar-button:active:not(:disabled) {
+  --nse-app-topbar-glyph-fill: linear-gradient(180deg, #ffffff 0%, #dcebf8 100%);
+  --nse-app-topbar-glyph-shadow: drop-shadow(0 1px 1px rgb(0 22 48 / 62%));
 }
 
 .nse-app-topbar-button[data-selected="true"] .nse-app-topbar-button-well-selected,
-.nse-app-topbar-button:active:not(:disabled) .nse-app-topbar-button-well-selected,
-.nse-app-topbar-button[data-selected="true"] .nse-app-topbar-button-icon-selected,
-.nse-app-topbar-button:active .nse-app-topbar-button-icon-selected {
+.nse-app-topbar-button:active:not(:disabled) .nse-app-topbar-button-well-selected {
   opacity: 1;
 }
 
-.nse-app-topbar-button[data-selected="true"] .nse-app-topbar-button-icon-normal,
-.nse-app-topbar-button:active .nse-app-topbar-button-icon-normal {
-  opacity: 0;
-}
-
 @media (max-width: 760px) {
+  :root {
+    --nse-topbar-height-cumulus: 56px;
+  }
+
   .nse-app-topbar {
     --nse-app-topbar-glass-height: 52px;
-    height: 56px;
-    min-height: 56px;
   }
 
   .nse-app-topbar::before {
@@ -414,7 +441,6 @@
 
   .nse-app-topbar-content {
     grid-template-columns: 90px minmax(0, 1fr) 90px;
-    height: 56px;
   }
 
   .nse-app-topbar-slot-left {
@@ -496,6 +522,30 @@
   }
 }
 
+/* Chrome corner contract. Edge chrome that reaches a surface's outer corners
+   (the metal top bar and footer) reads the corner radius of the surface it sits
+   on from these two properties instead of assuming one. A smooth surface (a
+   rounded app frame or window) publishes its radius; a themed window frame
+   publishes --nse-window-radius; anything else is square. A window's title bar
+   owns its top corners, so content below it is square at the top. */
+.nse-smooth-surface {
+  --nse-chrome-top-corner-radius: var(--nse-smooth-surface-active-radius, var(--nse-smooth-surface-radius, 0px));
+  --nse-chrome-bottom-corner-radius: var(--nse-smooth-surface-active-radius, var(--nse-smooth-surface-radius, 0px));
+}
+
+.nse-window-view:not([data-window-custom-chrome-active="true"]):not([data-window-chrome-mode="frameless"]) > .nse-window__surface:not(.nse-smooth-surface) {
+  --nse-chrome-top-corner-radius: var(--nse-window-radius, 8px);
+  --nse-chrome-bottom-corner-radius: var(--nse-window-radius, 8px);
+}
+
+.nse-window__surface > :not(:first-child) {
+  --nse-chrome-top-corner-radius: 0px;
+}
+
+.nse-window__surface > :not(:last-child) {
+  --nse-chrome-bottom-corner-radius: 0px;
+}
+
 /* Film grain shared by the metal chrome surfaces (top bar, source list, footer). */
 :root {
   --nse-metal-grain-tile: 56px 56px;
@@ -505,21 +555,26 @@
 /* ===========================================================================
    atmoMetal — reusable brushed-metal source-list chrome.
    A rail cell (sidebar-aligned) and a main cell meet at the source-list seam, with
-   film grain, raised/cast seam shadows, spliced curve/endcap/middle PNGs, and metal
-   pill buttons. Atmo ships light + dark chrome (Onyx is a separate theme, not a dark
+   film grain, raised/cast seam shadows, spliced curve/endcap/middle PNGs, and CSS-drawn
+   aluminium pill buttons. Atmo ships light + dark chrome (Onyx is a separate theme, not a dark
    mode), selected by [data-mode]. NSE owns the assets under /assets/nse/chrome/metal.
    Adapted from the hand-spliced Software.app chrome into a first-party NSE variant.
    =========================================================================== */
 .nse-app-topbar-metal {
-  --nse-metal-header-curve-l: url("/assets/nse/chrome/metal/light/header-curve-left.png");
-  --nse-metal-header-curve-r: url("/assets/nse/chrome/metal/light/header-curve-right.png");
   --nse-metal-header-mid: url("/assets/nse/chrome/metal/light/header-middle.png");
   --nse-metal-header-endcap-l: url("/assets/nse/chrome/metal/light/header-endcap-left.png");
   --nse-metal-header-endcap-r: url("/assets/nse/chrome/metal/light/header-endcap-right.png");
-  --nse-metal-pill: url("/assets/nse/chrome/metal/light/topbar-button.png");
-  --nse-metal-glyph-return: url("/assets/nse/chrome/metal/glyphs/return-to-webspring.png");
-  --nse-metal-glyph-userinfo: url("/assets/nse/chrome/metal/glyphs/user-info.png");
-  --nse-metal-glyph-settings: url("/assets/nse/chrome/metal/glyphs/settings.svg");
+  /* Pill button: raised aluminium, and the deep inset press (darker gradient running the
+     other way, soft inner shadows, outer lip kept). The glyph is a mask over --nse-metal-glyph-fill. */
+  --nse-metal-pill-fill: linear-gradient(180deg, #fdfdfe 0%, #eceef1 46%, #d6dae0 54%, #e2e5ea 100%);
+  --nse-metal-pill-edge: rgb(78 88 100 / 70%);
+  --nse-metal-pill-shadow: 0 1px 0 rgb(255 255 255 / 80%), inset 0 1px 0 rgb(255 255 255 / 95%), inset 0 -2px 3px rgb(96 106 118 / 30%);
+  --nse-metal-pill-fill-pressed: linear-gradient(180deg, #a7aeb8 0%, #bfc5cd 55%, #cdd2d9 100%);
+  --nse-metal-pill-shadow-pressed: 0 1px 0 rgb(255 255 255 / 80%), inset 0 2px 4px rgb(36 44 56 / 48%), inset 0 0 2px rgb(36 44 56 / 42%);
+  --nse-metal-glyph-fill: linear-gradient(180deg, #4c5560 0%, #727c88 100%);
+  --nse-metal-glyph-fill-pressed: linear-gradient(180deg, #5a636e 0%, #7c8692 100%);
+  --nse-metal-glyph-shadow: drop-shadow(0 1px 0 rgb(255 255 255 / 85%)) drop-shadow(0 -1px 0 rgb(24 32 42 / 40%));
+  --nse-metal-glyph-shadow-pressed: drop-shadow(0 1px 0 rgb(255 255 255 / 55%)) drop-shadow(0 -1px 0 rgb(24 32 42 / 28%));
 
   --nse-metal-title: #2b333c;
   --nse-metal-text-emboss: 0 1px 0 rgba(255, 255, 255, 0.75);
@@ -533,13 +588,28 @@
   z-index: 5;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  height: 56px;
-  min-height: 56px;
+  height: var(--nse-app-topbar-height, var(--nse-topbar-height-metal));
+  min-height: var(--nse-app-topbar-height, var(--nse-topbar-height-metal));
   color: var(--nse-metal-title);
   isolation: isolate;
   overflow: hidden;
   box-shadow: 0 6px 11px -5px var(--nse-metal-cast-shadow);
   backdrop-filter: none;
+  /* The bar's outer corners are the corners of the surface it sits on (see the
+     chrome corner contract): square unless that window or app frame is actually
+     rounded at its top edge. The middle strip is clipped to that radius rather
+     than painted under curved artwork, and the edge sheen is drawn as inset
+     highlights, so it follows any radius, including none. */
+  --nse-metal-corner: var(--nse-chrome-top-corner-radius, 0px);
+  --nse-metal-rim-edge: min(var(--nse-metal-corner), 1px);
+  --nse-metal-rim: rgb(255 255 255 / 18%);
+  --nse-metal-rim-soft: rgb(255 255 255 / 15%);
+  --nse-metal-rim-top: rgb(252 252 252);
+  --nse-metal-rim-left: inset var(--nse-metal-rim-edge) 0 0 var(--nse-metal-rim), inset calc(2 * var(--nse-metal-rim-edge)) 0 0 var(--nse-metal-rim-soft);
+  --nse-metal-rim-right: inset calc(-1 * var(--nse-metal-rim-edge)) 0 0 var(--nse-metal-rim), inset calc(-2 * var(--nse-metal-rim-edge)) 0 0 var(--nse-metal-rim-soft);
+  --nse-metal-rim-crest: inset 0 1px 0 var(--nse-metal-rim-top);
+  border-top-left-radius: var(--nse-metal-corner);
+  border-top-right-radius: var(--nse-metal-corner);
 }
 
 .nse-app-topbar-metal::before {
@@ -551,17 +621,26 @@
 }
 
 .nse-app-topbar-metal[data-mode="dark"] {
-  --nse-metal-header-curve-l: url("/assets/nse/chrome/metal/dark/header-curve-left.png");
-  --nse-metal-header-curve-r: url("/assets/nse/chrome/metal/dark/header-curve-right.png");
   --nse-metal-header-mid: url("/assets/nse/chrome/metal/dark/header-middle.png");
   --nse-metal-header-endcap-l: url("/assets/nse/chrome/metal/dark/header-endcap-left.png");
   --nse-metal-header-endcap-r: url("/assets/nse/chrome/metal/dark/header-endcap-right.png");
-  --nse-metal-pill: url("/assets/nse/chrome/metal/dark/topbar-button.png");
+  --nse-metal-pill-fill: linear-gradient(180deg, #666d78 0%, #4a5059 46%, #3a3f47 54%, #444a53 100%);
+  --nse-metal-pill-edge: rgb(4 6 8 / 85%);
+  --nse-metal-pill-shadow: 0 1px 0 rgb(255 255 255 / 14%), inset 0 1px 0 rgb(255 255 255 / 30%), inset 0 -2px 3px rgb(0 0 0 / 38%);
+  --nse-metal-pill-fill-pressed: linear-gradient(180deg, #1b1e23 0%, #272b32 55%, #30353c 100%);
+  --nse-metal-pill-shadow-pressed: 0 1px 0 rgb(255 255 255 / 14%), inset 0 2px 4px rgb(0 0 0 / 72%), inset 0 0 2px rgb(0 0 0 / 62%);
+  --nse-metal-glyph-fill: linear-gradient(180deg, #f1f4f8 0%, #b3bcc8 100%);
+  --nse-metal-glyph-fill-pressed: linear-gradient(180deg, #d9dfe7 0%, #98a2af 100%);
+  --nse-metal-glyph-shadow: drop-shadow(0 -1px 0 rgb(0 0 0 / 70%)) drop-shadow(0 1px 0 rgb(255 255 255 / 10%));
+  --nse-metal-glyph-shadow-pressed: drop-shadow(0 -1px 0 rgb(0 0 0 / 80%));
   --nse-metal-title: #f1f4f8;
   --nse-metal-text-emboss: 0 -1px 0 rgba(0, 0, 0, 0.78), 0 -1px 2px rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255, 255, 255, 0.05);
   --nse-metal-cast-shadow: rgba(0, 0, 0, 0.52);
   --nse-metal-content-shadow: rgba(0, 0, 0, 0.42);
   --nse-metal-grain-opacity: 0.95;
+  --nse-metal-rim: rgb(255 255 255 / 9%);
+  --nse-metal-rim-soft: rgb(255 255 255 / 8%);
+  --nse-metal-rim-top: rgb(124 126 129);
 }
 
 .nse-app-topbar-metal-rail {
@@ -570,11 +649,11 @@
   display: grid;
   place-items: center;
   min-width: 0;
+  border-top-left-radius: var(--nse-metal-corner);
   background:
-    var(--nse-metal-header-curve-l) left top / auto 100% no-repeat,
     var(--nse-metal-header-endcap-r) right top / auto 100% no-repeat,
     var(--nse-metal-header-mid) left top / auto 100% repeat-x;
-  box-shadow: inset -14px 0 18px -10px var(--nse-metal-content-shadow);
+  box-shadow: var(--nse-metal-rim-left), var(--nse-metal-rim-crest), inset -14px 0 18px -10px var(--nse-metal-content-shadow);
 }
 
 .nse-app-topbar-metal-main {
@@ -585,22 +664,22 @@
   justify-content: center;
   min-width: 0;
   padding: 0 16px;
+  border-top-right-radius: var(--nse-metal-corner);
   background:
     var(--nse-metal-header-endcap-l) left top / auto 100% no-repeat,
-    var(--nse-metal-header-curve-r) right top / auto 100% no-repeat,
     var(--nse-metal-header-mid) left top / auto 100% repeat-x;
+  box-shadow: var(--nse-metal-rim-right), var(--nse-metal-rim-crest);
 }
 
 .nse-app-topbar-metal[data-has-rail="true"] .nse-app-topbar-metal-main {
-  box-shadow: -10px 0 18px -6px var(--nse-metal-content-shadow);
+  box-shadow: var(--nse-metal-rim-right), var(--nse-metal-rim-crest), -10px 0 18px -6px var(--nse-metal-content-shadow);
 }
 
-/* Single bar (no rail): both ends rounded. */
+/* Single bar (no rail): the bar reaches both outer corners. */
 .nse-app-topbar-metal[data-has-rail="false"] .nse-app-topbar-metal-main {
-  background:
-    var(--nse-metal-header-curve-l) left top / auto 100% no-repeat,
-    var(--nse-metal-header-curve-r) right top / auto 100% no-repeat,
-    var(--nse-metal-header-mid) left top / auto 100% repeat-x;
+  border-top-left-radius: var(--nse-metal-corner);
+  background: var(--nse-metal-header-mid) left top / auto 100% repeat-x;
+  box-shadow: var(--nse-metal-rim-left), var(--nse-metal-rim-right), var(--nse-metal-rim-crest);
 }
 
 .nse-app-topbar-metal-grain {
@@ -624,7 +703,7 @@
   padding: 0 14px;
   font-family: inherit;
   font-size: 19px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--nse-metal-title);
   text-shadow: var(--nse-metal-text-emboss);
 }
@@ -639,7 +718,7 @@
   white-space: nowrap;
   font-family: inherit;
   font-size: 20px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.1;
   text-align: center;
   color: var(--nse-metal-title);
@@ -689,44 +768,37 @@
 .nse-app-topbar-metal-pill-shell {
   position: absolute;
   inset: 0;
-  background: var(--nse-metal-pill) center / 100% 100% no-repeat;
-  transition: transform 90ms ease;
+  box-sizing: border-box;
+  border: 1px solid var(--nse-metal-pill-edge);
+  border-radius: 17px;
+  background: var(--nse-metal-pill-fill);
+  box-shadow: var(--nse-metal-pill-shadow);
+  transition: box-shadow 90ms ease;
 }
 
-.nse-app-topbar-metal-pill:active .nse-app-topbar-metal-pill-shell {
-  transform: scaleY(-1);
+.nse-app-topbar-metal-pill:is(:active:not(:disabled), [aria-expanded="true"], [data-selected="true"]) .nse-app-topbar-metal-pill-shell {
+  background: var(--nse-metal-pill-fill-pressed);
+  box-shadow: var(--nse-metal-pill-shadow-pressed);
 }
 
+/* The glyph wrapper carries the emboss as drop-shadow filters (the mask clips anything painted
+   on the masked element itself); the shape inside is filled by --nse-metal-glyph-fill. */
 .nse-app-topbar-metal-pill-glyph {
+  --nse-app-topbar-glyph-fill: var(--nse-metal-glyph-fill);
   position: absolute;
   top: 50%;
   left: 50%;
   width: 22px;
   height: 22px;
   transform: translate(-50%, -50%);
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
+  filter: var(--nse-metal-glyph-shadow);
+  pointer-events: none;
 }
 
-.nse-app-topbar-metal-pill-glyph-return {
-  background-image: var(--nse-metal-glyph-return);
-}
-
-.nse-app-topbar-metal-pill-glyph-userinfo {
-  width: 24px;
-  height: 24px;
-  background-image: var(--nse-metal-glyph-userinfo);
-}
-
-.nse-app-topbar-metal-pill-glyph-settings {
-  width: 23px;
-  height: 23px;
-  background-image: var(--nse-metal-glyph-settings);
-}
-
-.nse-app-topbar-metal-pill-glyph-custom {
-  background-image: var(--nse-app-topbar-metal-pill-glyph);
+.nse-app-topbar-metal-pill:is(:active:not(:disabled), [aria-expanded="true"], [data-selected="true"]) .nse-app-topbar-metal-pill-glyph {
+  --nse-app-topbar-glyph-fill: var(--nse-metal-glyph-fill-pressed);
+  transform: translate(-50%, calc(-50% + 1px));
+  filter: var(--nse-metal-glyph-shadow-pressed);
 }
 
 /* A document window's title: the app's name beside its return control, the document in the
@@ -775,11 +847,9 @@
   }
 
   .nse-app-topbar-metal[data-has-rail="true"] .nse-app-topbar-metal-main {
-    box-shadow: none;
-    background:
-      var(--nse-metal-header-curve-l) left top / auto 100% no-repeat,
-      var(--nse-metal-header-curve-r) right top / auto 100% no-repeat,
-      var(--nse-metal-header-mid) left top / auto 100% repeat-x;
+    border-top-left-radius: var(--nse-metal-corner);
+    box-shadow: var(--nse-metal-rim-left), var(--nse-metal-rim-right), var(--nse-metal-rim-crest);
+    background: var(--nse-metal-header-mid) left top / auto 100% repeat-x;
   }
 }
 
@@ -863,6 +933,12 @@
   overflow: hidden;
 }
 
+/* A two-item split view controller's panes fill the split view's grid cells, so their content divides the pane's
+   height rather than growing to its own. */
+.nse-split-view-controller-view > :is(.nse-split-view-sidebar, .nse-split-view-main) > [data-nse-part="split-pane"] {
+  block-size: 100%;
+}
+
 .nse-split-view[data-sidebar-position="trailing"] .nse-split-view-sidebar {
   grid-column: 2;
   grid-row: 1;
@@ -917,6 +993,78 @@
 .nse-split-view-resizer:focus-visible {
   outline: 2px solid rgba(134, 214, 255, 0.9);
   outline-offset: -2px;
+}
+
+/* An NSESplitViewController with three or more items, or stacked vertically. Item
+   thicknesses sum to the split view's measured size, so a
+   divider takes no space: its hairline and its 8px hit area overlay the seam. */
+.nse-split-view-controller-view[data-presentation="split"][data-orientation] {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.nse-split-view-controller-view > [data-nse-part="split-pane"],
+.nse-split-view-controller-view > * > [data-nse-part="split-pane"],
+.nse-split-view-controller-view > :is(.nse-split-view-sidebar, .nse-split-view-main) > [data-nse-part="split-pane"] {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* A split view controller fills the view frame its parent gives it, and each item's view frame fills
+   its pane, laying its own content out as a column. */
+[data-nse-view-controller] > .nse-split-view-controller-view {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+.nse-split-view-controller-view [data-nse-part="split-pane"] > [data-nse-part="split-pane-slot"] > .nse-split-view-pane-host > [data-nse-view-controller] {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+[data-nse-part="split-divider"] {
+  position: relative;
+  z-index: 3;
+  flex: 0 0 0;
+  touch-action: none;
+}
+
+[data-nse-part="split-divider"]::before {
+  content: "";
+  position: absolute;
+  background: var(--nse-app-separator);
+}
+
+[data-nse-part="split-divider"]::after {
+  content: "";
+  position: absolute;
+}
+
+[data-nse-part="split-divider"][data-orientation="horizontal"] { cursor: col-resize; }
+[data-nse-part="split-divider"][data-orientation="horizontal"]::before { inset-block: 0; inset-inline-start: -0.5px; inline-size: 1px; }
+[data-nse-part="split-divider"][data-orientation="horizontal"]::after { inset-block: 0; inset-inline-start: -4px; inline-size: 8px; }
+[data-nse-part="split-divider"][data-orientation="vertical"] { cursor: row-resize; }
+[data-nse-part="split-divider"][data-orientation="vertical"]::before { inset-inline: 0; inset-block-start: -0.5px; block-size: 1px; }
+[data-nse-part="split-divider"][data-orientation="vertical"]::after { inset-inline: 0; inset-block-start: -4px; block-size: 8px; }
+
+[data-nse-part="split-divider"]:hover::before,
+[data-nse-part="split-divider"]:focus-visible::before {
+  background: var(--nse-app-accent);
+}
+
+[data-nse-part="split-divider"]:focus-visible {
+  outline: none;
 }
 
 .nse-sidebar {
@@ -1030,7 +1178,7 @@
   margin-right: 9px;
   color: var(--nse-sidebar-section-label, #3a78c2);
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.58);
@@ -1230,8 +1378,6 @@
 
 /* --- Metal footer status bar (mirror of the metal top bar) ------------------- */
 .nse-statusbar-metal {
-  --nse-metal-footer-curve-l: url("/assets/nse/chrome/metal/light/footer-curve-left.png");
-  --nse-metal-footer-curve-r: url("/assets/nse/chrome/metal/light/footer-curve-right.png");
   --nse-metal-header-endcap-l: url("/assets/nse/chrome/metal/light/header-endcap-left.png");
   --nse-metal-header-endcap-r: url("/assets/nse/chrome/metal/light/header-endcap-right.png");
   --nse-metal-header-mid: url("/assets/nse/chrome/metal/light/header-middle.png");
@@ -1257,6 +1403,10 @@
   overflow: hidden;
   box-shadow: 0 -6px 11px -5px var(--nse-metal-cast-shadow);
   text-shadow: none;
+  /* Bottom corners follow the surface's real bottom radius, as the top bar's do. */
+  --nse-metal-corner: var(--nse-chrome-bottom-corner-radius, 0px);
+  border-bottom-left-radius: var(--nse-metal-corner);
+  border-bottom-right-radius: var(--nse-metal-corner);
 }
 
 .nse-statusbar-metal[data-has-rail="true"] {
@@ -1264,8 +1414,6 @@
 }
 
 .nse-statusbar-metal[data-mode="dark"] {
-  --nse-metal-footer-curve-l: url("/assets/nse/chrome/metal/dark/footer-curve-left.png");
-  --nse-metal-footer-curve-r: url("/assets/nse/chrome/metal/dark/footer-curve-right.png");
   --nse-metal-header-endcap-l: url("/assets/nse/chrome/metal/dark/header-endcap-left.png");
   --nse-metal-header-endcap-r: url("/assets/nse/chrome/metal/dark/header-endcap-right.png");
   --nse-metal-header-mid: url("/assets/nse/chrome/metal/dark/header-middle.png");
@@ -1286,8 +1434,8 @@
   min-width: 0;
   height: 100%;
   padding: 0 14px;
+  border-bottom-left-radius: var(--nse-metal-corner);
   background:
-    var(--nse-metal-footer-curve-l) left bottom / auto 100% no-repeat,
     var(--nse-metal-header-endcap-r) right bottom / auto 100% no-repeat,
     var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
   box-shadow: inset -14px 0 18px -10px var(--nse-metal-content-shadow);
@@ -1302,9 +1450,9 @@
   min-width: 0;
   height: 100%;
   padding: 0 16px;
+  border-bottom-right-radius: var(--nse-metal-corner);
   background:
     var(--nse-metal-header-endcap-l) left bottom / auto 100% no-repeat,
-    var(--nse-metal-footer-curve-r) right bottom / auto 100% no-repeat,
     var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
 }
 
@@ -1313,10 +1461,8 @@
 }
 
 .nse-statusbar-metal[data-has-rail="false"] .nse-statusbar-metal-main {
-  background:
-    var(--nse-metal-footer-curve-l) left bottom / auto 100% no-repeat,
-    var(--nse-metal-footer-curve-r) right bottom / auto 100% no-repeat,
-    var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
+  border-bottom-left-radius: var(--nse-metal-corner);
+  background: var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
 }
 
 .nse-statusbar-metal-grain {
@@ -1370,9 +1516,80 @@
 
   .nse-statusbar-metal[data-has-rail="true"] .nse-statusbar-metal-rail {
     box-shadow: none;
-    background:
-      var(--nse-metal-footer-curve-l) left bottom / auto 100% no-repeat,
-      var(--nse-metal-footer-curve-r) right bottom / auto 100% no-repeat,
-      var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
+    border-bottom-right-radius: var(--nse-metal-corner);
+    background: var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
   }
 }
+
+/* --- A window's bottom content border (setContentBorderThickness(_:for: .minY)) ----------------
+   A tall border is the metal footer; a short one is the compact strip. The content's controls sit
+   over it; its edge casts the footer's shadow up onto the content. */
+.nse-window-content-border[data-size="large"] {
+  --nse-metal-header-mid: url("/assets/nse/chrome/metal/light/header-middle.png");
+  background: var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
+  border-bottom-left-radius: var(--nse-chrome-bottom-corner-radius, 0px);
+  border-bottom-right-radius: var(--nse-chrome-bottom-corner-radius, 0px);
+}
+
+.nse-window-content-border[data-size="large"][data-mode="dark"] {
+  --nse-metal-header-mid: url("/assets/nse/chrome/metal/dark/header-middle.png");
+}
+
+.nse-window-content-border[data-size="large"] > .nse-window-content-border-grain {
+  position: absolute;
+  inset: 0;
+  background: var(--nse-metal-grain) repeat;
+  background-size: var(--nse-metal-grain-tile);
+  opacity: 0.9;
+  mix-blend-mode: overlay;
+}
+
+.nse-window-content-border[data-size="large"][data-mode="dark"] > .nse-window-content-border-grain {
+  opacity: 0.95;
+}
+
+.nse-window-content-border-edge[data-size="large"] {
+  border-bottom-left-radius: var(--nse-chrome-bottom-corner-radius, 0px);
+  border-bottom-right-radius: var(--nse-chrome-bottom-corner-radius, 0px);
+  box-shadow: 0 -6px 11px -5px rgba(0, 0, 0, 0.26);
+}
+
+.nse-window-content-border-edge[data-size="large"][data-mode="dark"] {
+  box-shadow: 0 -6px 11px -5px rgba(0, 0, 0, 0.52);
+}
+
+.nse-window-content-border[data-size="small"] {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0)),
+    var(--nse-statusbar-background, linear-gradient(180deg, #d9dbde, #bfc3c8));
+  border-top: 1px solid rgba(70, 76, 84, 0.46);
+}
+
+/* Fixed chrome deliberately ellipsizes from the end; provider-owned help
+   reveals the complete caption without moving or replacing the action. */
+.nse-app-topbar .nse-control-button { grid-auto-columns: minmax(0, max-content); }
+
+/* A centred metal title clips its label; keep keyboard focus inside that clip. */
+.nse-app-topbar-metal-title:not(.nse-app-topbar-metal-leading-title) .nse-app-topbar-title-button:focus-visible {
+  outline-offset: -3px;
+}
+
+/* Region placement is geometry, independent of Atmo material and motion.
+   Physical CSS coordinates remain physical in RTL; child text stays inherited. */
+.nse-split-view[data-book-regions="true"] {
+  grid-template-columns: var(--nse-book-left) var(--nse-book-left-width) var(--nse-book-gap) var(--nse-book-right-width) minmax(0, 1fr);
+  grid-template-rows: var(--nse-book-top) var(--nse-book-height) minmax(0, 1fr);
+}
+.nse-split-view[data-book-regions="true"] > :is(.nse-split-view-sidebar, .nse-split-view-main) { grid-row: 2; }
+.nse-split-view[data-book-regions="true"][data-book-sidebar-side="left"] > .nse-split-view-sidebar,
+.nse-split-view[data-book-regions="true"][data-book-sidebar-side="right"] > .nse-split-view-main { grid-column: 2; }
+.nse-split-view[data-book-regions="true"][data-book-sidebar-side="right"] > .nse-split-view-sidebar,
+.nse-split-view[data-book-regions="true"][data-book-sidebar-side="left"] > .nse-split-view-main { grid-column: 4; }
+/* CSS grid line numbers follow direction; reverse physical tracks for RTL. */
+.nse-split-view[data-book-regions="true"]:dir(rtl) {
+  grid-template-columns: minmax(0, 1fr) var(--nse-book-right-width) var(--nse-book-gap) var(--nse-book-left-width) var(--nse-book-left);
+}
+.nse-split-view[data-book-regions="true"][data-book-sidebar-side="left"]:dir(rtl) > .nse-split-view-sidebar,
+.nse-split-view[data-book-regions="true"][data-book-sidebar-side="right"]:dir(rtl) > .nse-split-view-main { grid-column: 4; }
+.nse-split-view[data-book-regions="true"][data-book-sidebar-side="right"]:dir(rtl) > .nse-split-view-sidebar,
+.nse-split-view[data-book-regions="true"][data-book-sidebar-side="left"]:dir(rtl) > .nse-split-view-main { grid-column: 2; }

@@ -20,7 +20,7 @@
 
 import {
   NSEObjectController, NSEDictionaryController, NSEArrayController, NSETreeController,
-  NSEDataViewCellContent, IndexPath, IndexSet, Predicate, SortDescriptor, NumberFormatter,
+  NSETableCellView, IndexPath, IndexSet, Predicate, SortDescriptor, NumberFormatter,
   type ObjectControllerOptions, type DictionaryControllerOptions, type ControllerEditTransaction,
   type ChangeSet, type NSEDictionaryEntry, type Formatter, type FormatterContext,
   type FormatterResult, type NSEControlValidation,
@@ -86,7 +86,7 @@ const tree = new NSETreeController({ id: "tree", content: [{ id: "one" }], getId
 check(tree.nodeAt(IndexPath.from(0))?.id === "one", "Public index paths work with public tree controllers");
 tree.dispose();
 check(IndexSet.fromIndexes([1, 2, 2]).count === 2, "Index set construction");
-check(NSEDataViewCellContent({ primary: "Name", secondary: "Detail" }).props["data-nse-part"] === "cell-content", "Public cell rendering");
+check(NSETableCellView({ primary: "Name", secondary: "Detail" }).props["data-nse-part"] === "cell-content", "Public cell rendering");
 
 // @ts-expect-error Mutable image storage is not a public graphics capability.
 void graphics.borrowGFXImageBytes;

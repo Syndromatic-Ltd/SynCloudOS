@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type {
   AFXAnimationDefinition,
   AFXAnimationHandle,
@@ -400,7 +401,7 @@ export function createRuntimeAnimationService(input: {
             ? undefined
             : text(ownerRecord.windowControllerId, "owner.windowControllerId"),
       });
-      const key = `${owner.appId}\u0000${owner.windowControllerId ?? ""}\u0000${owner.viewId}`;
+      const key = `${normalizeBundleIdentifier(owner.appId)}\u0000${owner.windowControllerId ?? ""}\u0000${owner.viewId}`;
       const previous = currentOwnerLeases.get(key);
       if (previous)
         revokeOwnerLease(previous, "animation owner lease superseded");
@@ -471,7 +472,7 @@ export function createRuntimeAnimationService(input: {
       );
       const collisionKeys = request.animations.map(
         ({ targetId, keyPath }) =>
-          `${owner.appId}\u0000${owner.windowControllerId ?? ""}\u0000${owner.viewId}\u0000${targetId}\u0000${keyPath}`,
+          `${normalizeBundleIdentifier(owner.appId)}\u0000${owner.windowControllerId ?? ""}\u0000${owner.viewId}\u0000${targetId}\u0000${keyPath}`,
       );
       for (const key of collisionKeys) {
         const previous = collisionIndex.get(key);
@@ -501,8 +502,16 @@ export function createRuntimeAnimationService(input: {
         get state() {
           return entry.state;
         },
-        cancel: (reason = "animation cancelled") =>
-          entry.settle("cancelled", reason),
+        cancel: (reason = "animation cancelled") => {
+          if (entry.state === "completed") {
+            // Completion settles once, but a held native fill still belongs
+            // to this handle until its presentation is superseded/removed.
+            const completed = playback; playback = null;
+            try { completed?.cancel(); } catch { /* cleanup is best effort */ }
+            return;
+          }
+          entry.settle("cancelled", reason);
+        },
         seek(seconds: number) {
           finite(
             seconds,
@@ -615,15 +624,15 @@ export function createRuntimeAnimationService(input: {
     },
     suspendOwner(appId) {
       for (const entry of active.values())
-        if (entry.owner.appId === appId) entry.handle.pause();
+        if (normalizeBundleIdentifier(entry.owner.appId) === normalizeBundleIdentifier(appId)) entry.handle.pause();
     },
     resumeOwner(appId) {
       for (const entry of active.values())
-        if (entry.owner.appId === appId) entry.handle.resume();
+        if (normalizeBundleIdentifier(entry.owner.appId) === normalizeBundleIdentifier(appId)) entry.handle.resume();
     },
     closeOwner(appId, reason = "animation owner closed") {
       for (const record of currentOwnerLeases.values())
-        if (record.owner.appId === appId) revokeOwnerLease(record, reason);
+        if (normalizeBundleIdentifier(record.owner.appId) === normalizeBundleIdentifier(appId)) revokeOwnerLease(record, reason);
     },
     closeWindowController(
       windowControllerId,
@@ -635,7 +644,7 @@ export function createRuntimeAnimationService(input: {
     },
     cancelView(appId, viewId, reason = "animation view released") {
       for (const record of currentOwnerLeases.values())
-        if (record.owner.appId === appId && record.owner.viewId === viewId)
+        if (normalizeBundleIdentifier(record.owner.appId) === normalizeBundleIdentifier(appId) && record.owner.viewId === viewId)
           revokeOwnerLease(record, reason);
     },
     diagnostics() {

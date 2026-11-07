@@ -24,8 +24,10 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 import * as cssTree from "css-tree";
 import { afterEach, describe, expect, it } from "vitest";
-import { NSEAppearanceProvider, NSEMenu } from "@syndromatic/syncloudos/nse";
-import { NSEStandaloneControlHost } from "@syndromatic/syncloudos/nse/controls";
+import { NSEAppearanceProvider } from "../../../src/NSE/Appearance";
+import { NSEListboxPopup } from "../../../src/NSE/Overlays/NSEListboxPopup";
+import { NSEMenuView } from "../../../src/NSE/Menus/NSEMenuView";
+import { NSEStandaloneControlHost } from "../../../src/NSE/Overlays";
 import { atmoAppearance } from "@syndromatic/syncloudos/nse/themes/atmo";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 
@@ -49,7 +51,7 @@ function selectorsFor(file: string, property: string, value: string): string[] {
 async function mountPopup(contrast: "normal" | "forced" = "normal") {
   render(<NSEAppearanceProvider appearance={atmoAppearance} contrast={contrast}>
     <NSEStandaloneControlHost document={document} window={window} presentation={presentation}>
-      <NSEMenu label="Actions" defaultOpen items={[{ value: "save", label: "Save" }]} />
+      <NSEMenuView label="Actions" defaultOpen items={[{ value: "save", label: "Save" }]} />
     </NSEStandaloneControlHost>
   </NSEAppearanceProvider>);
   return screen.findByRole("menu");
@@ -67,5 +69,35 @@ describe("popup variants retain their selected appearance", () => {
     expect(menu.getAttribute("data-nse-contrast")).toBe("forced");
     const selectors = selectorsFor("src/NSE/Appearance/nse-appearance.css", "background-color", "Canvas");
     expect(selectors.some((selector) => menu.matches(selector))).toBe(true);
+  });
+});
+
+describe("adaptive menu family paint", () => {
+  it.each([390, 1024])("retains the desktop command-menu material at %ipx without changing modality", async (width) => {
+    render(<NSEAppearanceProvider appearance={atmoAppearance}>
+      <NSEStandaloneControlHost document={document} window={window} presentation={createStaticPresentationPort({ width, height: 768 })}>
+        <NSEMenuView label="File" defaultOpen items={[{ value: "save", label: "Save" }]} />
+      </NSEStandaloneControlHost>
+    </NSEAppearanceProvider>);
+    const menu = await screen.findByRole("menu");
+    const surface = menu.closest(".nse-overlay-popup")!;
+    expect(surface.classList.contains("nse-overlay-popup--menu")).toBe(true);
+    expect(surface.classList.contains("nse-overlay-popup--action-sheet")).toBe(false);
+    expect(surface.getAttribute("data-nse-overlay-kind")).toBe(width === 390 ? "action-sheet" : "menu");
+    expect(surface.getAttribute("aria-modal")).toBe(width === 390 ? "true" : null);
+  });
+  it.each([390, 1024])("retains the desktop picker surface and selected-row recipe at %ipx", async (width) => {
+    render(<NSEAppearanceProvider appearance={atmoAppearance}>
+      <NSEStandaloneControlHost document={document} window={window} presentation={createStaticPresentationPort({ width, height: 768 })}>
+        <NSEListboxPopup defaultOpen options={[{ id: "body", label: "Body", value: "body" }]} selectedId="body" />
+      </NSEStandaloneControlHost>
+    </NSEAppearanceProvider>);
+    const list = await screen.findByRole("listbox");
+    const surface = list.closest(".nse-overlay-popup")!;
+    expect(surface.classList.contains("nse-overlay-popup--listbox")).toBe(true);
+    expect(surface.classList.contains("nse-overlay-popup--action-sheet")).toBe(false);
+    expect(surface.getAttribute("data-nse-overlay-kind")).toBe(width === 390 ? "action-sheet" : "listbox");
+    expect(surface.getAttribute("aria-modal")).toBe(width === 390 ? "true" : null);
+    expect(screen.getByRole("option", { name: "Body" }).getAttribute("aria-selected")).toBe("true");
   });
 });

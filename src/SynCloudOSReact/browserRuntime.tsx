@@ -18,33 +18,41 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { getSynWareNamespace } from "../SynCloudOS/AppSDK/useStrings";
 import "../SynCloudOS/styles/runtime.css";
 import { StrictMode, type PropsWithChildren } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { App } from "../App";
+import type { App as ShellApp } from "../App";
+import { ApplicationHost, applicationRecoveryError } from "./ApplicationHost";
+import { createApplicationHostHome, type ApplicationHostHome } from "./applicationHome";
 import { NSEAppearanceProvider, type NSEAppearanceDefinition } from "../NSE/Appearance";
 import { atmoAppearance } from "../NSE/Themes/Atmo";
 import { NSERubberBandProvider } from "../NSE/Scroll";
 import { NSEAlertBackdrop } from "../NSE/SystemUI";
 import { SystemAlert } from "./SystemAlert";
+import { SCOSAlertPresenter } from "./SCOSAlertPresenter";
 import { HostSiteBrandingProvider } from "./siteBrandingContext";
 import { HostFontsProvider } from "./hostFontsContext";
 import { NSEFontManager } from "../NSE/Typography/NSEFontManager";
 import { captureFontDeclaration, type FontDeclaration } from "../NSE/Typography/fontDeclaration.mjs";
-import type { SynWareFontCatalogue } from "../SynCloudOS/AppSDK/fontAccess";
+import { runtimeFontCatalogue, type SynWareFontCatalogue } from "../SynCloudOS/AppSDK/fontAccess";
 import { useActiveLocale, useResolvedMode } from "./serviceHooks";
 import { resolveSiteBranding, type ResolvedSiteBranding } from "../SynCloudOS/Branding/siteBranding";
 import { exposeSynCloudOS } from "../SynCloudOS/Developer/exposeSynCloudOS";
 import { createSynWareBundle } from "../SynCloudOS/AppSDK/createSynWare";
+import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { captureSynWareManifest, projectRuntimeManifest, type SynWareManifestV1 } from "../SynCloudOS/AppSDK";
 import type { SynWareDefinition } from "../SynCloudOS/AppSDK/appDefinitionTypes";
+import type { SynWareRuntimeManifestContext } from "../SynCloudOS/AppSDK/manifest/manifestTypes";
 import { createRegisteredFontResourceLoader, fontResourceMimeTypeForPath } from "../SynCloudOS/BundleLoader/fontResourceLoader";
 import type { SynCloudOSAppModule, TrustedSynWareBundle } from "../SynCloudOS/BundleLoader/bundleTypes";
+import { trustSynWareBundleForProject } from "../SynCloudOS/BundleLoader/trustedBundleProvenance";
 import { SynCloudOSWatchdog } from "../SynCloudOS/ErrorManager/SynCloudOSWatchdog";
 import type { CapturedSynCloudOSError } from "../SynCloudOS/ErrorManager/errorTypes";
 import type { OperationResult } from "../SynCloudOS/Operations/operationTypes";
 import type { SynCloudOSLocaleBundleResourceInput } from "../SynCloudOS/LocaleServices/localeTypes";
 import { createBrowserRuntimeEnvironment } from "../SynCloudOS/PlatformAdapters/BrowserRuntimeEnvironment";
+import { createBrowserDocumentAssetEnvironment } from "../SynCloudOS/PlatformAdapters/BrowserDocumentAssetEnvironment";
 import { createBrowserRoutePlatform } from "../SynCloudOS/PlatformAdapters/BrowserRoutePlatform";
 import { createBrowserRecoveryWatchdog } from "../SynCloudOS/PlatformAdapters/BrowserRecoveryWatchdog";
 import { createBrowserRouteCoordinator, type CoordinatedRouteResolution } from "../SynCloudOS/Routing/BrowserRouteCoordinator";
@@ -52,11 +60,11 @@ import { createSynCloudOS } from "../SynCloudOS/Runtime/createSynCloudOS";
 import type { RuntimeDisposalResult } from "../SynCloudOS/Runtime/disposalTypes";
 import type { SynCloudOSRuntime, SynCloudOSRuntimeConfig } from "../SynCloudOS/Runtime/runtimeInstanceTypes";
 import type { SynCloudOSPolicyProfile } from "../SynCloudOS/PolicyKit/policyTypes";
-import { createSynCloudOSFacade, toTechnicalReport } from "../SynCloudOS/SynCloudOS";
+import { singleApplicationPolicyProfile } from "../SynCloudOS/PolicyKit/singleApplicationPolicyProfile";
+import { createSynCloudOSFacade } from "../SynCloudOS/SynCloudOS";
 import type { AuthenticationInput, WebspringDefinition } from "../Webspring/webspringTypes";
 import type { SynCloudOSShellResources } from "../Webspring/WebspringController";
 import { getWebspringLocaleResourceLoader } from "../Webspring/webspringLocale";
-import type { WebspringContentSource, WebspringContentSources } from "../Webspring/webspringContent";
 import { webspringPresentationRoles } from "../SynCloudOS/SynCloudOS";
 import { FocusScope, RuntimeInputBoundary, SynCloudOSProvider } from "./index";
 import {
@@ -66,27 +74,24 @@ import {
   type SynCloudOSHostCompositionInput,
   type SynCloudOSHostContribution,
 } from "./browserHostContributions";
-export interface SynCloudOSDiscoveredBundleDescriptor {
-  readonly manifest: unknown;
-  readonly modulePath: string;
-  readonly loadModule: () => Promise<SynCloudOSAppModule>;
-  readonly resourceUrls?: Readonly<Record<string, string>>;
-  readonly localeResources?: SynCloudOSLocaleBundleResourceInput;
-  readonly fontResourceUrls?: Readonly<Record<string, string>>;
-}
+import {
+  emptyProjectComposition,
+  type SynCloudOSDiscoveredBundleDescriptor,
+  type SynCloudOSProjectComposition,
+} from "./projectComposition";
+import { defineWebspring, withDiscoveredWebspringItems } from "../Webspring/Webspring";
+/** One application folder as the project discovered it; see projectComposition.ts. */
+export type { SynCloudOSDiscoveredBundleDescriptor, SynCloudOSProjectComposition } from "./projectComposition";
 
 export type SynCloudOSBrowserBundle = Readonly<SynWareDefinition> | SynCloudOSDiscoveredBundleDescriptor;
 
-export interface MountSynCloudOSOptions {
+interface BrowserHostOptions {
   readonly element: Element;
   readonly bundles?: readonly SynCloudOSBrowserBundle[];
-  readonly shell: WebspringDefinition;
   /** Browser deployment prefix, such as `/nested/product/`. Runtime/app routes remain rooted at `/`. */
   readonly deploymentBasePath?: string;
-  readonly shellResources?: SynCloudOSShellResources;
   /** One host-owned declaration, with URLs generated by the Vite typography module. */
   readonly fonts?: { readonly declaration: FontDeclaration; readonly resourceUrls: Readonly<Record<string, string>> };
-  readonly contentSources?: WebspringContentSources;
   readonly authentication?: AuthenticationInput;
   /** This host's role taxonomy. Defaults to the built-in profile. */
   readonly policyProfile?: SynCloudOSPolicyProfile;
@@ -94,13 +99,101 @@ export interface MountSynCloudOSOptions {
    * Import the theme's stylesheet alongside it. Defaults to Atmo. */
   readonly appearance?: NSEAppearanceDefinition;
   readonly contributions?: readonly SynCloudOSHostContribution[];
+  /** Host-owned legal attribution for each application's standard About panel.
+   * Its display name and version remain the application's Info.ts identity. */
+  readonly about?: SynWareRuntimeManifestContext["about"];
+  /** What the project's folders declare. Defaults to `virtual:syncloudos/project`,
+   * which the Vite plugin generates; pass one to host a build without it. */
+  readonly composition?: SynCloudOSProjectComposition;
 }
+
+/** How an application-only host presents its primary application:
+ * `fullscreen` (the default) fills the page with the app's content and no
+ * system top bar; `declared` keeps the manifest's presentation and frame, so a
+ * page-filling primary with `topBar: "standard"` draws the standard bar above it,
+ * with its window's title, subtitle and titlebar accessories.
+ * A primary that fills the page under `optional` or `required` authentication
+ * must declare `applicationMenu: { trigger: "content" }` and open the menu
+ * from its content with `useApplicationMenuTrigger()`: that menu is the
+ * only way to reach Preferences > Account, Sign In and Log Out. */
+export type SynCloudOSApplicationFrameMode = "fullscreen" | "declared";
+
+/** A host chooses its Webspring shell, one primary application, or — with
+ * neither — its project's shell or the neutral framework Board. */
+export type MountSynCloudOSOptions = BrowserHostOptions & (
+  | { readonly shell: WebspringDefinition; readonly application?: never;
+      readonly shellResources?: SynCloudOSShellResources }
+  | { readonly application: Readonly<{ bundleIdentifier: string; frame?: SynCloudOSApplicationFrameMode }>; readonly shell?: never;
+      readonly shellResources?: never }
+  | { readonly shell?: undefined; readonly application?: undefined;
+      readonly shellResources?: SynCloudOSShellResources }
+);
 
 export interface MountedSynCloudOSHost {
   dispose(reason?: string): Promise<RuntimeDisposalResult>;
 }
 
-interface InternalMountOptions extends MountSynCloudOSOptions { readonly persistenceNamespace?: string; }
+type InternalMountOptions = MountSynCloudOSOptions & { readonly persistenceNamespace?: string };
+
+/** The options after the project composition filled in what the host omitted. */
+interface ResolvedHostOptions extends BrowserHostOptions {
+  readonly shell?: WebspringDefinition;
+  readonly application?: Readonly<{ bundleIdentifier: string; frame?: SynCloudOSApplicationFrameMode }>;
+  readonly shellResources?: SynCloudOSShellResources;
+  readonly composition: SynCloudOSProjectComposition;
+}
+
+function validateHostMode(options: MountSynCloudOSOptions): void {
+  if (options.shell !== undefined && options.application !== undefined) {
+    throw new TypeError("mountSynCloudOS requires at most one of shell or application; these modes are mutually exclusive.");
+  }
+  if (options.application !== undefined) {
+    const application = options.application;
+    if (!application || typeof application !== "object" || Array.isArray(application)
+      || Object.keys(application).some(key => key !== "bundleIdentifier" && key !== "frame")
+      || typeof application.bundleIdentifier !== "string" || application.bundleIdentifier.trim() !== application.bundleIdentifier || !application.bundleIdentifier) {
+      throw new TypeError("mountSynCloudOS application.bundleIdentifier must be a non-empty application identifier.");
+    }
+    if (application.frame !== undefined && application.frame !== "fullscreen" && application.frame !== "declared") {
+      throw new TypeError('mountSynCloudOS application.frame must be "fullscreen" or "declared".');
+    }
+    if (options.shellResources !== undefined) {
+      throw new TypeError("Application-only hosting cannot include Webspring shell resources.");
+    }
+  }
+}
+
+type ResolvedMountOptions = InternalMountOptions & ResolvedHostOptions;
+
+/**
+ * Fills what the host omitted from the project composition: the shell its
+ * folders declare (with their panes and widgets), its applications and its
+ * integrations. Hosts without the Vite plugin pass a composition.
+ */
+function resolveHostOptions(input: InternalMountOptions): ResolvedMountOptions {
+  const composition = input.composition ?? emptyProjectComposition;
+  const declaredShell = input.shell;
+  const shell = declaredShell === undefined || declaredShell === composition.shell
+    ? composition.shell
+    : withDiscoveredWebspringItems(declaredShell, composition);
+  return {
+    ...input,
+    composition,
+    bundles: input.bundles ?? composition.bundles,
+    contributions: [...composition.contributions, ...(input.contributions ?? [])],
+    ...(input.application === undefined && shell !== null ? { shell } : {}),
+    ...(input.shellResources === undefined ? { shellResources: composition.shellResources } : {}),
+  } as ResolvedMountOptions;
+}
+
+function hostBranding(options: ResolvedHostOptions, runtime: SynCloudOSRuntime): ResolvedSiteBranding {
+  if (options.shell) return resolveSiteBranding(options.shell.manifest.webspringShell.branding,
+    options.shellResources?.resourceUrls ?? {}, runtime.locale, getSynWareNamespace(options.shell.manifest.bundleIdentifier));
+  const app = options.application ? runtime.apps.getApp(options.application.bundleIdentifier) : undefined;
+  const name = app?.displayName ?? options.application?.bundleIdentifier ?? "SynCloudOS";
+  return Object.freeze({ name, logoUrl: null, logoAlt: name, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null });
+}
+
 
 function componentKeyFromPackageName(value: string): string {
   const compact = value
@@ -174,19 +267,7 @@ function descriptorData(descriptor: object, key: string, required = false): unkn
   return property.value;
 }
 
-function captureContentSources(input: WebspringContentSources | undefined) {
-  const sources: Record<string, WebspringContentSource> = Object.create(null) as Record<string, WebspringContentSource>;
-  for (const key of Reflect.ownKeys(input ?? {})) {
-    if (typeof key !== "string") throw new TypeError("Webspring content source IDs must be strings.");
-    const descriptor = Object.getOwnPropertyDescriptor(input ?? {}, key);
-    if (!descriptor || !("value" in descriptor) || !descriptor.enumerable) throw new TypeError(`Webspring content source ${key} must be an enumerable data property.`);
-    if (!key || typeof descriptor.value !== "object" || descriptor.value === null || typeof descriptor.value.read !== "function") throw new TypeError(`Webspring content source ${key} requires a read function.`);
-    Object.defineProperty(sources, key, { configurable: true, enumerable: true, writable: true, value: descriptor.value });
-  }
-  return sources;
-}
-
-function descriptorBundle(descriptor: SynCloudOSDiscoveredBundleDescriptor): TrustedSynWareBundle {
+function descriptorBundle(descriptor: SynCloudOSDiscoveredBundleDescriptor, about: BrowserHostOptions["about"]): TrustedSynWareBundle {
   const modulePath = descriptorData(descriptor, "modulePath", true);
   const loadModule = descriptorData(descriptor, "loadModule", true);
   if (typeof modulePath !== "string" || !modulePath) throw new TypeError("A discovered bundle modulePath must be a non-empty string.");
@@ -196,18 +277,20 @@ function descriptorBundle(descriptor: SynCloudOSDiscoveredBundleDescriptor): Tru
   const declaredIcon = manifest.webspring?.icon;
   const icon = declaredIcon === undefined ? undefined : resourceUrls[declaredIcon];
   if (declaredIcon !== undefined && icon === undefined) {
-    throw new TypeError(`SynWare icon resource ${declaredIcon} is not registered for ${manifest.id}.`);
+    throw new TypeError(`SynWare icon resource ${declaredIcon} is not registered for ${manifest.bundleIdentifier}.`);
   }
   const projected = icon === undefined ? manifest : Object.freeze({
     ...manifest,
     webspring: Object.freeze({ ...manifest.webspring, icon }),
   });
-  const appRoot = `./${manifest.id}.app`;
-  const packageName = manifest.id;
+  const appRoot = modulePath.replaceAll("\\", "/").replace(/\/Contents\/.*$/u, "");
+  const packageName = appRoot.slice(appRoot.lastIndexOf("/") + 1);
   const runtimeManifest = projectRuntimeManifest(projected, {
+    about,
     appRoot,
     packageName,
     path: `${appRoot}/`,
+    resourceUrls,
     componentKey: componentKeyFromPackageName(packageName),
   });
   const fontUrls = validatedResourceMap(descriptorData(descriptor, "fontResourceUrls") as Readonly<Record<string, string>> | undefined, "Bundle fonts");
@@ -233,11 +316,19 @@ function isDiscoveredBundle(value: SynCloudOSBrowserBundle): value is SynCloudOS
   return Object.prototype.hasOwnProperty.call(value, "loadModule");
 }
 
-function browserBundles(inputs: readonly SynCloudOSBrowserBundle[]): readonly TrustedSynWareBundle[] {
-  const bundles = inputs.map((input) => isDiscoveredBundle(input) ? descriptorBundle(input) : createSynWareBundle(input));
+function browserBundles(
+  inputs: readonly SynCloudOSBrowserBundle[],
+  firstParty: boolean,
+  about: BrowserHostOptions["about"],
+): readonly TrustedSynWareBundle[] {
+  const bundles = inputs.map((input) => {
+    if (!isDiscoveredBundle(input)) return createSynWareBundle(input, { about });
+    const bundle = descriptorBundle(input, about);
+    return firstParty ? trustSynWareBundleForProject(bundle, input.modulePath) : bundle;
+  });
   const ids = new Set<string>();
   for (const bundle of bundles) {
-    const id = bundle.synWareManifest?.id ?? bundle.manifest.id;
+    const id = normalizeBundleIdentifier(bundle.synWareManifest?.bundleIdentifier ?? bundle.manifest.bundleIdentifier);
     if (ids.has(id)) throw new TypeError(`Duplicate SynWare manifest ID ${id}.`);
     ids.add(id);
   }
@@ -245,24 +336,23 @@ function browserBundles(inputs: readonly SynCloudOSBrowserBundle[]): readonly Tr
 }
 
 
-function RootRecoveryBoundary({ runtime, shell, shellResources, fontCatalogue, children }: PropsWithChildren<{
+function RootRecoveryBoundary({ runtime, options, fontCatalogue, children }: PropsWithChildren<{
   runtime: SynCloudOSRuntime;
-  shell: WebspringDefinition;
-  shellResources: SynCloudOSShellResources | undefined;
+  options: ResolvedHostOptions;
   fontCatalogue: SynWareFontCatalogue;
 }>) {
   const appearance = useResolvedMode();
   useActiveLocale();
-  const branding = resolveSiteBranding(shell.manifest.webspringShell.branding, shellResources?.resourceUrls ?? {}, runtime.locale, shell.manifest.id);
+  const branding = hostBranding(options, runtime);
   return <HostSiteBrandingProvider value={branding}><HostFontsProvider catalogue={fontCatalogue}>
     <SynCloudOSWatchdog runtime={runtime} watchdogName="SynCloudOS root" scope="root" fallback={(error) => {
       if (!error) return null;
       const browserWindow = runtime.environment.browser.getWindow();
       return <FocusScope scopeId={`root-system-alert:${error.id}`} kind="modal" parentResponderId="runtime" trapFocus>
         <div className="syncloudos-root-error-shell"><NSEAlertBackdrop><SystemAlert
-          error={error} technicalReport={toTechnicalReport(error)} appearance={appearance}
+          error={options.application ? applicationRecoveryError(error) : error} appearance={appearance}
           onDismiss={() => browserWindow?.location.reload()} onReload={() => browserWindow?.location.reload()}
-          onReturn={() => browserWindow?.location.assign("/")}
+          onReturn={() => options.shell ? browserWindow?.location.assign("/") : browserWindow?.location.reload()}
           onOpenMailClient={(destination) => { browserWindow?.location.assign(destination); }}
         /></NSEAlertBackdrop></div>
       </FocusScope>;
@@ -273,12 +363,11 @@ function RootRecoveryBoundary({ runtime, shell, shellResources, fontCatalogue, c
 function renderHost(
   element: Element,
   runtime: SynCloudOSRuntime,
-  shell: WebspringDefinition,
-  shellResources: SynCloudOSShellResources | undefined,
-  authentication: AuthenticationInput | undefined,
-  contentSources: WebspringContentSources,
+  options: ResolvedHostOptions,
   fontCatalogue: SynWareFontCatalogue,
   appearance: NSEAppearanceDefinition,
+  home: ApplicationHostHome | null,
+  Shell: typeof ShellApp | undefined,
 ): Root {
   const root = createRoot(element);
   root.render(
@@ -286,8 +375,11 @@ function renderHost(
       <SynCloudOSProvider runtime={runtime}>
         <NSEAppearanceProvider appearance={appearance} appearanceService={runtime.appearance}>
           <RuntimeInputBoundary>
-            <RootRecoveryBoundary runtime={runtime} shell={shell} shellResources={shellResources} fontCatalogue={fontCatalogue}>
-              <NSERubberBandProvider><App shell={shell} shellResources={shellResources} authentication={authentication} contentSources={contentSources} /></NSERubberBandProvider>
+            <RootRecoveryBoundary runtime={runtime} options={options} fontCatalogue={fontCatalogue}>
+              <NSERubberBandProvider>{home
+                ? <ApplicationHost applicationId={home.primaryId} authentication={options.authentication ?? "disabled"} home={home} />
+                : Shell && <Shell shell={options.shell!} shellResources={options.shellResources} authentication={options.authentication} />}</NSERubberBandProvider>
+              {!home ? <SCOSAlertPresenter center={runtime.alerts} presentation={runtime.presentationTraits} /> : null}
             </RootRecoveryBoundary>
           </RuntimeInputBoundary>
         </NSEAppearanceProvider>
@@ -373,7 +465,6 @@ async function beginBrowserMount(element: Element): Promise<BrowserMountAttempt>
 
 interface BootstrapRecovery {
   readonly error: CapturedSynCloudOSError;
-  readonly technicalReport: string;
   readonly branding: ResolvedSiteBranding;
   readonly appearance: "light" | "dark";
   readonly applicationIcon: string | null;
@@ -394,17 +485,15 @@ function captureBootstrapFailure(runtime: SynCloudOSRuntime, error: unknown, rou
   // Route preload already captures the app's classified error and import cause.
   const latest = runtime.errors.getLatest();
   const resolution = runtime.routes.resolveRoute(route);
-  if (latest && resolution.kind === "app" && latest.appId === resolution.app.id
+  if (latest && resolution.kind === "app" && normalizeBundleIdentifier(latest.appId) === normalizeBundleIdentifier(resolution.app.bundleIdentifier)
     && latest.source === "SynCloudOS.RouteManager.openRoute"
     && (latest.context?.phase === "route-preload" || latest.context?.phase === "route-preparation")) {
     return latest;
   }
   return runtime.errors.capture({
     code: "UNKNOWN_RUNTIME_ERROR", title: "SynCloudOS could not start.",
-    message: "The browser host could not finish starting.",
-    technicalMessage: error instanceof Error ? error.message : String(error),
-    technicalDetails: error instanceof Error ? error.stack : String(error),
-    source: context.source, severity: "fatal", recoverable: false,
+    message: "Something prevented SynCloudOS from starting. Reload the page to try again.",
+    error, source: context.source, severity: "fatal", recoverable: false,
     suggestedActions: ["reload", "returnToWebspring"], context,
   });
 }
@@ -423,7 +512,7 @@ function renderBootstrapRecovery(element: Element, attempt: BrowserMountAttempt,
   root.render(<HostSiteBrandingProvider value={recovery.branding}>
     <NSEAppearanceProvider appearance={appearance} colourScheme={recovery.appearance}>
       <div className="syncloudos-root-error-shell"><NSEAlertBackdrop>
-        <SystemAlert error={recovery.error} technicalReport={recovery.technicalReport}
+        <SystemAlert error={recovery.error}
           appearance={recovery.appearance} applicationIcon={recovery.applicationIcon}
           onDismiss={() => navigate(home)} onReturn={() => navigate(home)} onReload={() => navigate()}
           onOpenMailClient={(destination) => navigate(destination)} />
@@ -432,17 +521,16 @@ function renderBootstrapRecovery(element: Element, attempt: BrowserMountAttempt,
   </HostSiteBrandingProvider>);
 }
 
-async function mountInternal(options: InternalMountOptions): Promise<MountedSynCloudOSHost> {
-  if (!(options.element instanceof Element)) throw new TypeError("mountSynCloudOS requires a browser Element.");
-  if (options.shell === undefined) throw new TypeError("mountSynCloudOS requires a Webspring shell.");
+async function mountInternal(options: ResolvedMountOptions, projectBundles: boolean): Promise<MountedSynCloudOSHost> {
   validatedResourceMap(options.shellResources?.resourceUrls, "Shell resources");
   validatedResourceMap(options.shellResources?.fontResourceUrls, "Shell fonts");
   const shellResourceUrls = options.shellResources?.resourceUrls ?? {};
   for (const reference of [
-    options.shell.manifest.webspringShell.branding.logo,
-    options.shell.manifest.webspringShell.branding.lightLogo,
-    options.shell.manifest.webspringShell.branding.darkLogo,
-    options.shell.manifest.webspringShell.branding.compactLogo,
+    options.shell?.manifest.webspringShell.branding.logo,
+    options.shell?.manifest.webspringShell.branding.lightLogo,
+    options.shell?.manifest.webspringShell.branding.darkLogo,
+    options.shell?.manifest.webspringShell.branding.compactLogo,
+    options.shell?.manifest.webspringShell.branding.homeIcon,
   ]) {
     if (reference && !shellResourceUrls[reference.resource]) {
       throw new TypeError(`Site branding resource ${reference.resource} is not registered.`);
@@ -470,11 +558,12 @@ async function mountInternal(options: InternalMountOptions): Promise<MountedSynC
   const environment = createBrowserRuntimeEnvironment();
   const prepared = await prepareSynCloudOSHostContributions(options.contributions ?? [], environment);
   assertMountCurrent(options.element, attempt);
-  const contentSources = captureContentSources(options.contentSources);
   const baseRuntimeConfig: SynCloudOSHostCompositionInput["runtimeConfig"] = {
     authenticationPolicy: authenticationPolicy ?? "disabled",
-    presentationRolesForRoute: webspringPresentationRoles,
-    ...(options.persistenceNamespace === undefined ? {} : { persistenceNamespace: options.persistenceNamespace }),
+    presentationRolesForRoute: options.application ? () => [] : webspringPresentationRoles,
+    ...(options.persistenceNamespace !== undefined
+      ? { persistenceNamespace: options.persistenceNamespace }
+      : options.application ? { persistenceNamespace: `SynCloudOS:application:${normalizeBundleIdentifier(options.application.bundleIdentifier)}` } : {}),
     ...(options.policyProfile === undefined ? {} : { policyProfile: options.policyProfile }),
     ...(typeof options.authentication === "object"
       ? { identity: { sessionAdapter: options.authentication.service.sessionAdapter } }
@@ -482,16 +571,63 @@ async function mountInternal(options: InternalMountOptions): Promise<MountedSynC
   };
   const composition = composeSynCloudOSHostContributions(prepared, {
     runtimeConfig: baseRuntimeConfig,
-    initialBundles: browserBundles(options.bundles ?? []),
+    initialBundles: browserBundles(options.bundles ?? [], projectBundles, options.about),
   });
+  let initialBundles = composition.initialBundles;
+  let applicationPolicyProfile: SynCloudOSPolicyProfile | undefined;
+  if (options.application) {
+    const primaryId = normalizeBundleIdentifier(options.application.bundleIdentifier);
+    if (!initialBundles.some(bundle => normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) === primaryId)) {
+      throw new TypeError(`Application ${primaryId} is not registered in this host.`);
+    }
+    for (const bundle of initialBundles) {
+      if (bundle.manifest.route === "/") {
+        throw new TypeError(`Application ${bundle.manifest.bundleIdentifier} needs a non-root entry route; / is the host's alias for ${primaryId}.`);
+      }
+      if (normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) !== primaryId && (bundle.manifest.presentation ?? "appView") === "appView") {
+        throw new TypeError(`Application ${bundle.manifest.bundleIdentifier} declares the appView presentation; only the primary application fills an application-only host, so other applications must present in windows.`);
+      }
+    }
+    if ((options.application.frame ?? "fullscreen") === "fullscreen") {
+      initialBundles = initialBundles.map(bundle => normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) !== primaryId ? bundle : Object.freeze({ ...bundle,
+        manifest: Object.freeze({ ...bundle.manifest, presentation: "appView" as const,
+          frame: Object.freeze({ ...bundle.manifest.frame, topBar: "none" as const, presentationMotion: "content" as const }),
+        }) }));
+    }
+    if ((authenticationPolicy ?? "disabled") === "disabled") {
+      // Without sign-in nobody can hold a session, so gating the primary application behind one only
+      // stops it opening. It is public here; asking for sign-in explicitly contradicts the host.
+      initialBundles = initialBundles.map(bundle => {
+        if (normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) !== primaryId) return bundle;
+        if (bundle.manifest.policy?.requiresLogin === true) {
+          throw new TypeError(`Application ${primaryId} declares runtime.policy.requiresLogin, but this host mounts it with authentication "disabled", so nobody could ever open it. Enable authentication, or remove requiresLogin.`);
+        }
+        return Object.freeze({ ...bundle, manifest: Object.freeze({ ...bundle.manifest, policy: Object.freeze({ ...bundle.manifest.policy, public: true }) }) });
+      });
+    }
+    const primary = initialBundles.find(bundle => normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) === primaryId)!.manifest;
+    // Without sign-in everyone is the anonymous role, so a single application that brings no policy
+    // profile gets the document-store capabilities it declares; otherwise its documents are denied.
+    if ((authenticationPolicy ?? "disabled") === "disabled" && composition.runtimeConfig.policyProfile === undefined) {
+      const primaryBundle = initialBundles.find(bundle => normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) === primaryId) as { readonly synWareManifest?: { readonly permissions?: readonly string[] } } | undefined;
+      applicationPolicyProfile = singleApplicationPolicyProfile(primaryBundle?.synWareManifest?.permissions ?? []);
+    }
+    if (authenticationPolicy !== undefined && authenticationPolicy !== "disabled"
+      && (primary.presentation ?? "appView") === "appView" && primary.applicationMenu?.trigger !== "content") {
+      throw new TypeError(`Application ${primaryId} fills the page with ${authenticationPolicy} sign-in but declares no content application-menu trigger. Declare applicationMenu: { trigger: "content" } and open the menu with useApplicationMenuTrigger(), so people can reach Preferences > Account, Sign In and Log Out.`);
+    }
+  }
   const config: SynCloudOSRuntimeConfig = {
     environment,
     ...composition.runtimeConfig,
-    initialBundles: composition.initialBundles,
+    ...(applicationPolicyProfile === undefined ? {} : { policyProfile: applicationPolicyProfile }),
+    initialBundles,
     trustedDocumentKinds: composition.trustedDocumentKinds,
-    ...(composition.applicationDocuments === undefined ? {} : { applicationDocuments: composition.applicationDocuments }),
+    // Memory and IndexedDB locations work out of the box; an adapter the host registers still wins.
+    applicationDocuments: { ...composition.applicationDocuments, defaultAdapters: { indexedDB: createBrowserDocumentAssetEnvironment().indexedDB } },
   };
   const runtime = createSynCloudOS(config);
+  runtimeFontCatalogue(runtime, fontCatalogue);
   const disposeHost = (reason: string): Promise<RuntimeDisposalResult> => {
     const disposal = runtime.dispose({ reason, inFlight: "cancel" });
     void disposal.then(result => {
@@ -547,19 +683,45 @@ async function mountInternal(options: InternalMountOptions): Promise<MountedSynC
     id: "browser-host",
     prepare: ({ reason }) => ({ status: "ready", commit: () => releaseHost(reason) }),
   });
+  const home = options.application ? createApplicationHostHome(runtime, options.application.bundleIdentifier, authenticationPolicy === "required") : null;
+  if (home) {
+    runtime.registerDisposalParticipant({
+      id: "application-host-home",
+      prepare: () => ({ status: "ready", commit: () => home.dispose() }),
+    });
+  }
   let initialPathname = `${environment.browser.getLocation().pathname}${environment.browser.getLocation().search}${environment.browser.getLocation().hash}`;
   try {
-    const shellLocaleResources = await getWebspringLocaleResourceLoader()();
-    if (shellLocaleResources) runtime.locale.registerBundleLocaleResources("webspring", shellLocaleResources);
-    if (options.shellResources?.localeResources) {
-      runtime.locale.registerBundleLocaleResources("webspring", options.shellResources.localeResources);
+    if (!options.shell && !options.application) {
+      // Resolve the actual Board after acquiring this mount's lifetime. Application-only
+      // hosts never load launcher assets; a replaced mount cannot publish a late Board.
+      const { WebspringBoardView } = await import("../Webspring/Contents/Views/WebspringBoardView/WebspringBoardView");
+      assertMountCurrent(options.element, attempt);
+      options = { ...options, shell: withDiscoveredWebspringItems(defineWebspring({
+        manifest: {
+          bundleIdentifier: "org.syncloudos.webspring", displayName: "SynCloudOS", version: "1.0.0",
+          webspringShell: {
+            views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
+            defaults: { desktop: "board", tablet: "board", mobile: "board" }, homeRoute: "/",
+            branding: { name: { key: "site.name", fallback: "SynCloudOS" } },
+          },
+        },
+        components: { board: WebspringBoardView },
+      }), options.composition) };
     }
+    const loadShellLocale = getWebspringLocaleResourceLoader();
+    runtime.locale.registerBundleLocaleResourceLoader("webspring", async activeLocale => {
+      const resources = await loadShellLocale(activeLocale);
+      if (resources) runtime.locale.registerBundleLocaleResources("webspring", resources);
+      // Site-owned strings must retain precedence over built-in defaults,
+      // including after a language change reloads those defaults.
+      return options.shellResources?.localeResources;
+    });
     for (const contribution of prepared) {
       assertHostInstallLive(installSignal);
       const handle = createSynCloudOSHostInstallContext(
         contribution,
         runtime,
-        contentSources,
         options.shellResources?.resourceUrls,
         installSignal,
       );
@@ -589,6 +751,9 @@ async function mountInternal(options: InternalMountOptions): Promise<MountedSynC
     const browserRoutePlatform = createBrowserRoutePlatform(environment, {
       deploymentBasePath: options.deploymentBasePath,
     });
+    const isApplicationRoot = (href: string) => Boolean(options.application && /^\/(?:[?#]|$)/u.test(href));
+    const applicationPath = (href: string) => isApplicationRoot(href)
+      ? `${runtime.apps.getApp(options.application!.bundleIdentifier)!.route}${href.slice(1)}` : href;
     const browserRoutes = createBrowserRouteCoordinator({
       platform: browserRoutePlatform,
       getRuntimeSnapshot: runtime.store.getSnapshot,
@@ -605,8 +770,9 @@ async function mountInternal(options: InternalMountOptions): Promise<MountedSynC
           });
         }
       }),
-      resolveRoute: (pathname) => runtime.routes.resolveRoute(pathname) as CoordinatedRouteResolution,
-        openRoute: runtime.routes.openRoute,
+      resolveRoute: (pathname) => runtime.routes.resolveRoute(applicationPath(pathname)) as CoordinatedRouteResolution,
+        openRoute: (pathname, routeOptions) => runtime.routes.openRoute(applicationPath(pathname),
+          isApplicationRoot(pathname) ? { ...routeOptions, syncRoute: false } : routeOptions),
         getRedirectSuccessor: runtime.routes.getRedirectSuccessor,
       waitForPresentationSettlement: async (id) => { await runtime.presentationSettlements.get(id)?.result; },
       cancelPresentationSettlement: (id, reason) => { runtime.presentationSettlements.get(id)?.cancel(reason); },
@@ -616,7 +782,7 @@ async function mountInternal(options: InternalMountOptions): Promise<MountedSynC
     const frameworkTestPath = import.meta.env.DEV && location.pathname.startsWith("/__framework-tests/");
     initialPathname = frameworkTestPath
       ? "/"
-      : `${location.pathname}${location.search}${location.hash}`;
+      : `${applicationPath(location.pathname)}${location.search}${location.hash}`;
 
     // Framework fixtures intentionally boot the canonical Webspring runtime at
     // `/` while keeping their own browser URL so App can mount the fixture.
@@ -630,8 +796,7 @@ async function mountInternal(options: InternalMountOptions): Promise<MountedSynC
     });
     runtime.globalWatchdog.install();
     const recoveryWatchdog = createBrowserRecoveryWatchdog(runtime, {
-      getSiteName: () => resolveSiteBranding(options.shell.manifest.webspringShell.branding,
-        shellResourceUrls, runtime.locale, options.shell.manifest.id).name,
+      getSiteName: () => hostBranding(options, runtime).name,
       authentication: typeof options.authentication === "object" ? options.authentication.service : undefined,
     });
     runtime.registerDisposalParticipant({
@@ -651,15 +816,18 @@ async function mountInternal(options: InternalMountOptions): Promise<MountedSynC
       browserRoutes.start();
     }
     assertMountCurrent(options.element, attempt);
+    // Load the optional shell only for shell hosts; awaiting it keeps mounting
+    // and bootstrap recovery atomic without attaching launcher CSS to apps.
+    const Shell = options.shell ? (await import("../App")).App : undefined;
+    assertMountCurrent(options.element, attempt);
     root = renderHost(
       options.element,
       runtime,
-      options.shell,
-      options.shellResources,
-      options.authentication,
-      Object.freeze({ ...contentSources }),
+      options,
       fontCatalogue,
       options.appearance ?? atmoAppearance,
+      home,
+      Shell,
     );
     if (!frameworkTestPath) await runtime.boot({ initialPathname });
     assertMountCurrent(options.element, attempt);
@@ -674,10 +842,10 @@ async function mountInternal(options: InternalMountOptions): Promise<MountedSynC
       // retries through a fresh browser mount instead of invoking that owner.
       const { retry: _retry, ...capturedData } = captured;
       recovery = {
-        error: capturedData, technicalReport: toTechnicalReport(captured),
-        branding: resolveSiteBranding(options.shell.manifest.webspringShell.branding, shellResourceUrls, runtime.locale, options.shell.manifest.id),
+        error: options.application ? applicationRecoveryError(capturedData) : capturedData,
+        branding: hostBranding(options, runtime),
         appearance: runtime.appearance.resolved(),
-        applicationIcon: captured.appId ? runtime.store.getSnapshot().appInfo[captured.appId]?.icon.src ?? null : null,
+        applicationIcon: captured.appId ? runtime.store.getSnapshot().appInfo[normalizeBundleIdentifier(captured.appId)]?.icon.src ?? null : null,
         browserWindow: environment.browser.getWindow(),
       };
     }
@@ -707,8 +875,9 @@ async function mountInternal(options: InternalMountOptions): Promise<MountedSynC
 }
 
 export function mountSynCloudOS(options: MountSynCloudOSOptions): Promise<MountedSynCloudOSHost> {
-  if (options.shell === undefined) throw new TypeError("mountSynCloudOS requires a Webspring shell.");
-  return mountInternal(options);
+  if (!(options.element instanceof Element)) throw new TypeError("mountSynCloudOS requires a browser Element.");
+  validateHostMode(options);
+  return mountInternal(resolveHostOptions(options), options.bundles === undefined);
 }
 
 export type { SynCloudOSHostContribution } from "./browserHostContributions";

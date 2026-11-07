@@ -38,6 +38,10 @@ export function assertTwelveFxPackageExports(exports) {
   assert.deepEqual(exports["./fx/video/webm"],
     { types: "./fx/video/webm.d.ts", import: "./fx/video/webm.js" }, "Invalid WebM extension targets.");
   for (const key of Object.keys(exports)) {
+    if (key === ".") {
+      assert.deepEqual(exports["."], { types: "./index.d.ts", import: "./index.js" }, "The root export must be the SynCloudOS package entry.");
+      continue;
+    }
     assert(key.startsWith("./") && !key.includes("*") && !/\/(?:src|types|internal|private)(?:\/|$)/u.test(key), `Private SDK export is forbidden: ${key}`);
     assertSdkRelativePath(key.slice(2));
   }
@@ -84,10 +88,10 @@ export function sdkDirectoryFiles(root, prefix = "") {
   }).sort();
 }
 
-/** Include untracked implementation and build inputs, exclude tests/docs/receipts. */
+/** Include implementation, shipped documentation and build inputs; exclude tests/receipts. */
 export function captureSdkSourceFingerprint(repositoryRoot) {
   const paths = execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard", "-z", "--",
-    "src", "public", "scripts/synware", "package.json", "package-lock.json", "LICENSE", "NOTICE", "THIRD_PARTY.md", "ARTWORK.md", "licenses", ":(glob)tsconfig*.json", ".npmrc"],
+    "src", "public", "docs/framework", "scripts/synware", "scripts/developer-mcp", "package.json", "package-lock.json", "LICENSE", "NOTICE", "THIRD_PARTY.md", "ARTWORK.md", "licenses", ":(glob)tsconfig*.json", ".npmrc"],
   { cwd: repositoryRoot, encoding: "utf8", maxBuffer: 32 * 1024 * 1024 }).split("\0").filter(Boolean);
   // Tracked deletions remain in the inventory so they cannot retain the old hash.
   const missing = paths.filter(path => {
@@ -122,7 +126,7 @@ export function assertSdkFingerprint(value, label) {
 export function createSdkPackageManifest({ name, exports, files, peerDependencies, dependencies = undefined }) {
   return {
     name,
-    version: "1.0.0-beta.1",
+    version: "1.0.0-beta.2",
     private: false,
     type: "module",
     license: "AGPL-3.0-or-later AND Apache-2.0",
@@ -143,7 +147,15 @@ export function assertReviewedPackageFiles(files) {
       throw new TypeError(`SDK package contains an unsafe file path: ${file}`);
     }
     if (file.startsWith("types/FrameworkTests/")) throw new TypeError(`SDK package contains a test fixture: ${file}`);
-    if (["LICENSE", "NOTICE", "THIRD_PARTY.md", "ARTWORK.md", "sdk/LICENSE", "sdk/NOTICE", "sdk/package.json", "licenses/dependencies.json"].includes(file)) continue;
+    if (file.endsWith(".js.map")) {
+      // Reuse the reviewed JavaScript policy, rather than admitting arbitrary
+      // maps or introducing a second list that can drift from its artifacts.
+      assertReviewedPackageFiles([file.slice(0, -4)]);
+      continue;
+    }
+    if (["LICENSE", "NOTICE", "THIRD_PARTY.md", "ARTWORK.md", "AGENTS.md", "sdk/LICENSE", "sdk/NOTICE", "sdk/package.json", "licenses/dependencies.json"].includes(file)) continue;
+    if (["index.js","index.d.ts","app-module-source.mjs","project-derivation.mjs","manifest-source.mjs","manifest-validator.mjs","bundleIdentifier.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs","bundle-paths.mjs"].includes(file) || /^tooling\/(?:manifest\.schema|error-catalogue|build-receipt)\.json$/u.test(file)) continue;
+    if (/^docs\/framework\/(?:[A-Za-z0-9][A-Za-z0-9._-]*\/)*[A-Za-z0-9][A-Za-z0-9._-]*\.(?:md|json|png|webp|svg|jpg|jpeg|gif)$/u.test(file)) continue;
     if (/^licenses\/(?:dependencies\/)?[A-Za-z0-9._-]+\/(?:(?:MIT|APACHE|BSD)[.-])?(?:LICENSE|LICENCE|COPYING|NOTICE)(?:[.-][A-Za-z0-9._-]+)?$/iu.test(file)) continue;
     if (/^licenses\/[A-Za-z0-9._-]+\.(?:txt|md)$/u.test(file)) continue;
     if (/^licenses\/(?:harfbuzzjs\.txt|harfbuzzjs-provenance\.json|pdfjs-dist\.txt|woff2-encoder\.txt|woff2-third-party\.txt)$/u.test(file)) continue;

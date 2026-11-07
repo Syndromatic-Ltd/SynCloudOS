@@ -27,7 +27,7 @@ import { pathToFileURL } from "node:url";
 import ts from "typescript";
 import { forwardRef, memo } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { defineWebspring, type WebspringViewProps } from "../../src/Webspring/public";
+import { defineWebspring, defineWidget, type WebspringViewProps } from "../../src/Webspring/public";
 
 const repositoryRoot = process.cwd();
 const temporaryDirectories: string[] = [];
@@ -143,9 +143,9 @@ describe("portable SynWare SDK packages", () => {
     });
     const manifest = {
       schemaVersion: 1,
-      id: "com.example.webspring",
+      bundleIdentifier: "com.example.webspring",
       version: "1.0.0",
-      title: "Example Webspring",
+      displayName: "Example Webspring",
       webspringShell: {
         views: [{ id: "website", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
         defaults: { desktop: "website", tablet: "website", mobile: "website" },
@@ -161,11 +161,13 @@ describe("portable SynWare SDK packages", () => {
     expect(componentCalls).toBe(0);
     expect(Object.isFrozen(definition)).toBe(true);
     expect(Object.isFrozen(definition.manifest.webspringShell.views)).toBe(true);
-    const content = { sections: [{ id: "news", title: { key: "news.title" }, sourceId: "news", limit: 2, empty: "hide" as const }] };
-    const contentDefinition = defineWebspring({ manifest, components: { website: WebsiteView }, content });
-    content.sections[0].id = "changed-after-capture";
-    expect(contentDefinition.content?.sections[0].id).toBe("news");
-    expect(Object.isFrozen(contentDefinition.content?.sections)).toBe(true);
+    const news = defineWidget({ id: "news", title: "News", load: () => [], view: () => null, whenEmpty: "hide" });
+    const widgets = [news];
+    const widgetDefinition = defineWebspring({ manifest, components: { website: WebsiteView }, widgets });
+    widgets.length = 0;
+    expect(widgetDefinition.widgets).toEqual([news]);
+    expect(Object.isFrozen(widgetDefinition.widgets)).toBe(true);
+    expect("content" in widgetDefinition).toBe(false);
     const MemoWebsiteView = memo(WebsiteView);
     const ForwardWebsiteView = forwardRef<HTMLElement, WebspringViewProps>(() => null);
     expect(defineWebspring({ manifest, components: { website: MemoWebsiteView } }).components.website).toBe(MemoWebsiteView);
@@ -177,9 +179,9 @@ describe("portable SynWare SDK packages", () => {
     const WebsiteView = () => null;
     const manifest = {
       schemaVersion: 1,
-      id: "com.example.webspring",
+      bundleIdentifier: "com.example.webspring",
       version: "1.0.0",
-      title: "Example Webspring",
+      displayName: "Example Webspring",
       webspringShell: {
         views: [{ id: "website", presentations: ["desktop"], mode: "launcher" }],
         defaults: { desktop: "website", tablet: "website", mobile: "website" },
@@ -226,7 +228,7 @@ describe("portable SynWare SDK packages", () => {
     expect(packageManifest.exports["./vite"]).toEqual({ types: "./types/vite.d.mts", import: "./vite.mjs" });
     expect(Object.keys(packageManifest.exports).every((key) => !key.includes("*"))).toBe(true);
     expect(packageManifest.exports["./nse/animation"]).toBeUndefined();
-    expect(packageManifest.exports["."]).toBeUndefined();
+    expect(packageManifest.exports["."]).toEqual({ types: "./index.d.ts", import: "./index.js" });
     expect(directoryFiles(join(repositoryRoot, ".artifacts", "synapp-sdk", "packages", "syncloudos"))
       .filter((path) => /^chunks\/(?:FrameworkTestHost|inspectorDev(?:Entry|Host))-/u.test(path))).toEqual([]);
     const emittedRouterDeclaration = readFileSync(join(
@@ -239,7 +241,7 @@ describe("portable SynWare SDK packages", () => {
       "SynCloudOS",
       "AppSDK",
       "hooks",
-      "useSynWareRouter.d.ts",
+      "useRouter.d.ts",
     ), "utf8");
     expect(emittedRouterDeclaration).not.toMatch(/AppRouteSession|MountedSynWareRouter|createMountedSynWareRouter/u);
     const emittedSdkDeclaration = readFileSync(join(
@@ -297,28 +299,51 @@ assert.equal(typeof nse.NSEStackView, "function");
 assert.equal(nse.NSEStackView, layout.NSEStackView);
 assert.equal(nse.NSEAppearanceProvider, appearance.NSEAppearanceProvider);
 assert.deepEqual(Object.keys(webspring), [
-  "LowerContentShelfView",
+  "WEBSPRING_DRAG_FOLDER_CATCH_MARGIN",
+  "WEBSPRING_DRAG_FOLDER_REST_MS",
+  "WEBSPRING_DRAG_MERGE_REST_MS",
+  "WEBSPRING_DRAG_REORDER_REST_MS",
+  "WEBSPRING_DRAG_SPRING_OPEN_MS",
   "WEBSPRING_STAGE",
   "WebspringBoardView",
   "WebspringDragProxy",
+  "WebspringFolderTile",
   "WebspringIconArtwork",
   "WebspringIconEffect",
   "WebspringLaunchDim",
+  "WebspringSurface",
+  "WebspringWidgetShelf",
+  "captureWebspringDragArtworkRects",
   "captureWebspringDragReorderSlots",
+  "createIntegrationContribution",
   "createWebspringBoardView",
+  "createWebspringDragArbiter",
+  "createWebspringFolderSplitPresentation",
+  "defineIntegration",
+  "definePreferencePane",
   "defineWebspring",
+  "defineWidget",
   "getDesktopWebspringLayout",
-  "getDialLayoutForApp",
+  "getWebspringDragGrabOffset",
   "getWebspringDragReorderTargetFromPoint",
   "getWebspringRadialExitForIcon",
   "getWebspringSelectorTransform",
+  "integrationOwners",
+  "isDefinedWebspring",
+  "isDefinedWebspringWidget",
+  "isIntegrationDefinition",
+  "isPreferencePaneDefinition",
   "resolveWebspringIconPresentation",
   "resolveWebspringLaunchDimMotion",
   "resolveWebspringOrbPresentation",
   "stagePointStyle",
   "useWebspringDragProxyPosition",
+  "useWebspringFolderAppearance",
+  "useWebspringHapticEngine",
   "useWebspringMotion",
   "webspringIconSprings",
+  "webspringSurfaceStyle",
+  "withDiscoveredWebspringItems",
 ]);
 assert.deepEqual(Object.keys(browser), [
   "BrowserImageProcessingWorker",
@@ -359,221 +384,7 @@ for (const privatePath of ["nse/NSE", "nse/private", "sdk/internal/runtime", "ty
     }, null, 2)}\n`, "utf8");
     const sourceDirectory = join(fixture, "src");
     mkdirSync(sourceDirectory, { recursive: true });
-    writeFileSync(join(sourceDirectory, "index.tsx"), `import {
-  createSynWare,
-  useSynWare,
-  useSynWareCommands,
-  useSynWareDocument,
-  useSynWarePersistence,
-  useSynWareScheduler,
-  useSynWareService,
-  defineSynWareServiceToken,
-  useSynWareTrustedClient,
-  useSynWareWindow,
-} from "@syndromatic/syncloudos/sdk";
-import {
-  createDeterministicScheduler,
-  createFakeCapabilityPort,
-  createSynWareTestHost,
-  type SynWareFakeWebContentOperation,
-  type SynWareTestDisposalReport,
-} from "@syndromatic/syncloudos/sdk/testing";
-import { defineWebspring, type LocalisedText, type WebspringViewProps } from "@syndromatic/syncloudos/webspring";
-import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
-import { createRoot } from "react-dom/client";
-import {
-  NSEAnimationDefaults,
-  NSEAnimationEnvironmentProvider,
-  NSEStackItem,
-  NSEStackView,
-  NSEVirtualList,
-  useNSEAnimationEnvironment,
-} from "@syndromatic/syncloudos/nse";
-
-function AnimationEnvironmentProbe({ label }: { label: string }) {
-  const environment = useNSEAnimationEnvironment();
-  return <span data-animation-root={label} data-reduced-motion={String(environment.reducedMotion)} />;
-}
-
-export function mountAnimationRoots(firstElement: Element, secondElement: Element) {
-  const firstRoot = createRoot(firstElement);
-  const secondRoot = createRoot(secondElement);
-  firstRoot.render(
-    <NSEAnimationEnvironmentProvider reducedMotion>
-      <AnimationEnvironmentProbe label="first" />
-    </NSEAnimationEnvironmentProvider>,
-  );
-  secondRoot.render(
-    <NSEAnimationEnvironmentProvider reducedMotion={false}>
-      <AnimationEnvironmentProbe label="second" />
-    </NSEAnimationEnvironmentProvider>,
-  );
-  return {
-    defaultsDeeplyFrozen:
-      Object.isFrozen(NSEAnimationDefaults) &&
-      Object.isFrozen(NSEAnimationDefaults.easing) &&
-      Object.isFrozen(NSEAnimationDefaults.durationSeconds) &&
-      Object.values(NSEAnimationDefaults.easing).every(Object.isFrozen),
-    dispose() {
-      firstRoot.unmount();
-      secondRoot.unmount();
-    },
-  };
-}
-
-const manifest = {
-  schemaVersion: 1,
-  id: "com.example.external.fixture",
-  version: "0.1.0",
-  title: "External Fixture",
-  routes: [{ path: "/external", primary: true }],
-  commands: [{ id: "com.example.external.fixture.save", title: "Save" }],
-  services: [{ id: "com.example.external.search", required: false }],
-  documentTypes: [{ id: "com.example.external.document", extensions: ["fixture"] }],
-  runtime: { policy: { public: true } },
-  webspring: { visible: true, order: 1 },
-} as const;
-
-const externalSearchToken = defineSynWareServiceToken({ id: "com.example.external.search" });
-
-function ExternalFixture() {
-  const app = useSynWare();
-  if ("resolve" in app.services || "routeState" in app) throw new Error("Retired public API leaked into the installed SDK.");
-  const persistence = useSynWarePersistence();
-  const scheduler = useSynWareScheduler();
-  const documents = useSynWareDocument();
-  const window = useSynWareWindow();
-  const trusted = useSynWareTrustedClient();
-  const service = useSynWareService(externalSearchToken);
-  useSynWareCommands([{
-    id: "com.example.external.fixture.save",
-    title: "Save",
-    payload: { description: "No payload", parse: (value) => value === undefined ? { ok: true, value } : { ok: false, issues: ["No payload"] } },
-    execute: () => undefined,
-  }]);
-  const everyClientCategory = [
-    app.lifecycle, app.commands, app.responders, app.undo, app.documents, app.windows,
-    app.pasteboards, app.drag, app.colourPanel, app.audio, app.services,
-    app.navigation, app.locale, app.appearance, documents.workspaceDocuments, persistence, scheduler, window.snapshot, service.available,
-    trusted.diagnostics, trusted.conformance,
-  ];
-  if (false) {
-    void app.lifecycle.closeSelf();
-    void app.commands.createPayload("fixture", true);
-    void app.responders.getFocusedResponderId();
-    void app.undo.get({} as never);
-    void app.documents.workspaceDocuments.getDocument;
-    void app.windows.getSnapshot();
-    void app.pasteboards;
-    void app.drag.endpoint();
-    void app.colourPanel.getSnapshot();
-    void app.audio.play;
-    void app.services.optional(externalSearchToken);
-    // @ts-expect-error String service lookup is retired from the installed public SDK.
-    void app.services.resolve("com.example.external.search");
-    // @ts-expect-error Required acquisition accepts a token.
-    void app.services.require("com.example.external.search");
-    // @ts-expect-error Raw query state is retired; use a mounted named graph.
-    void app.routeState.getQuery();
-    void app.navigation.openRoute;
-    void app.locale.getActiveLocale();
-    void app.appearance.resolved();
-    void trusted.diagnostics?.refreshConformanceSnapshot();
-    void trusted.conformance?.registerAppearanceFact({ slot: "fixture", status: "covered" });
-  }
-  return <NSEStackView
-    aria-label="External SDK fixture"
-    orientation="horizontal"
-    distribution="gravity-areas"
-    alignment="centre"
-    availableSize={240}
-    spacing={8}
-    edgeInsets={{ inlineStart: 4, inlineEnd: 4, blockStart: 2, blockEnd: 2 }}
-    overflowPolicy="menu"
-    overflowLabel="More fixture actions"
-    resizeObserverFactory={() => null}
-    frameScheduler={{ requestFrame: () => 0, cancelFrame: () => undefined }}
-    reducedMotion
-    onOverflowChange={(ids) => { void ids; }}
-  >
-    <NSEStackItem id="summary" minimumSize={48} preferredSize={120} maximumSize={180} weight={2} gravity="leading" spacingAfter={4} overflowLabel="Fixture summary" onOverflowActivate={() => undefined}>Clients: {everyClientCategory.length}; Brand: {app.branding.name}</NSEStackItem>
-    <NSEStackItem id="records" minimumSize={48} preferredSize={96} maximumSize={144} weight={1} visibilityPriority={10} detachedWhenHidden gravity="trailing" overflowLabel="Fixture records" onOverflowActivate={() => undefined}>
-      <NSEVirtualList items={["one", "two"]} rowHeight={24} renderRow={({ item }) => item ?? "missing"} />
-    </NSEStackItem>
-  </NSEStackView>;
-}
-
-function WebsiteView({ model, applicationOutlet }: WebspringViewProps) {
-  const items = model.sections.flatMap((section) => section.state.status === "ready" ? section.state.items : []);
-  return <main data-logo={model.branding.logoUrl ?? ""}>{model.apps.map(({ id }) => <span key={id}>{id}</span>)}{items.map((item) => <span key={item.id}>{item.title}</span>)}{applicationOutlet}</main>;
-}
-
-const siteName: LocalisedText = { key: "site.name", fallback: "Example" };
-export const webspring = defineWebspring({
-  manifest: {
-    schemaVersion: 1,
-    id: "com.example.webspring",
-    version: "0.1.0",
-    title: "Example Webspring",
-    webspringShell: {
-      views: [{ id: "website", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
-      defaults: { desktop: "website", tablet: "website", mobile: "website" },
-      homeRoute: "/",
-      branding: { name: siteName, logo: { resource: "./Resources/SiteLogo.svg", alternativeText: { key: "site.logo", fallback: "Example logo" } } },
-    },
-  },
-  components: { website: WebsiteView },
-  content: { sections: [{ id: "news", title: { key: "news", fallback: "News" }, sourceId: "news", limit: 2, empty: "hide" }] },
-});
-export const app = createSynWare({ manifest, root: ExternalFixture });
-export const contactApp = createSynWare({
-  manifest: {
-    schemaVersion: 1,
-    id: "com.example.contact",
-    version: "0.1.0",
-    title: "Contact",
-    routes: [{ path: "/contact", primary: true }],
-    presentations: ["desktop", "tablet", "mobile"],
-    runtime: { policy: { public: true } },
-    webspring: { visible: true, order: 2 },
-  },
-  root: () => <p>Contact</p>,
-});
-export function mountFixture(element: Element) {
-  return mountSynCloudOS({ element, bundles: [app, contactApp], shell: webspring, shellResources: { resourceUrls: { "./Resources/SiteLogo.svg": "/site-logo.svg" }, fontResourceUrls: { "./Resources/Site.woff2": "/site.woff2" } }, contentSources: { news: { read: async () => [{ id: "public-news", title: "Public content", destination: { appId: "com.example.external.fixture", route: "/external" } }] } } });
-}
-export function mountFixtureWithoutContact(element: Element) {
-  return mountSynCloudOS({ element, bundles: [app], shell: webspring, shellResources: { resourceUrls: { "./Resources/SiteLogo.svg": "/site-logo.svg" } } });
-}
-export const testHost = createSynWareTestHost({ app });
-export const disposal: Promise<SynWareTestDisposalReport> = testHost.dispose();
-function BrandingProbe() {
-  const app = useSynWare();
-  return <output data-branding-name={app.branding.name}>{app.branding.name}</output>;
-}
-const brandingProbeApp = createSynWare({
-  manifest: {
-    schemaVersion: 1,
-    id: "com.example.external.branding-probe",
-    version: "0.1.0",
-    title: "Branding Probe",
-    routes: [{ path: "/branding-probe", primary: true }],
-    runtime: { policy: { public: true } },
-    webspring: { visible: false, order: 3 },
-  },
-  root: BrandingProbe,
-});
-export async function readBrandingFromMountedApp(container: HTMLElement) {
-  const host = createSynWareTestHost({ app: brandingProbeApp, container, branding: { name: "Example", logoUrl: "/site-logo.svg", lightLogoUrl: "/site-logo.svg", darkLogoUrl: "/site-logo.svg", compactLogoUrl: "/site-logo.svg", logoAlt: "Example logo" } });
-  await host.render();
-  const name = container.querySelector("[data-branding-name]")?.getAttribute("data-branding-name");
-  await host.dispose();
-  if (!name) throw new Error("The mounted branding probe did not render a branding name.");
-  return name;
-}
-const webContentControl = createFakeCapabilityPort<SynWareFakeWebContentOperation>(createDeterministicScheduler());
-void webContentControl.run("web-content.load");
-`, "utf8");
+    writeFileSync(join(sourceDirectory, "index.tsx"), "import {\n  useSCOS,\n  useCommands,\n  useDocument,\n  usePersistence,\n  useScheduler,\n  useService,\n  defineSynWareServiceToken,\n  useTrustedClient,\n  useWindow,\n} from \"@syndromatic/syncloudos/sdk\";\nimport {\n  createDeterministicScheduler,\n  createSynWare,\n  createFakeCapabilityPort,\n  createSynWareTestHost,\n  type SynWareFakeWebContentOperation,\n  type SynWareTestDisposalReport,\n} from \"@syndromatic/syncloudos/sdk/testing\";\nimport { WebspringWidgetShelf, defineWebspring, defineWidget, type LocalisedText, type WebspringViewProps } from \"@syndromatic/syncloudos/webspring\";\nimport { mountSynCloudOS } from \"@syndromatic/syncloudos/browser\";\nimport { createRoot } from \"react-dom/client\";\nimport {\n  NSEAnimationContext,\n  NSEAnimationEnvironmentProvider,\n  NSEStackItem,\n  NSEStackView,\n  NSETableView,\n  useNSEAnimationEnvironment,\n  useNSEArrayController,\n} from \"@syndromatic/syncloudos/nse\";\n\nfunction AnimationEnvironmentProbe({ label }: { label: string }) {\n  const environment = useNSEAnimationEnvironment();\n  return <span data-animation-root={label} data-reduced-motion={String(environment.reducedMotion)} />;\n}\n\nexport function mountAnimationRoots(firstElement: Element, secondElement: Element) {\n  const firstRoot = createRoot(firstElement);\n  const secondRoot = createRoot(secondElement);\n  firstRoot.render(\n    <NSEAnimationEnvironmentProvider reducedMotion>\n      <AnimationEnvironmentProbe label=\"first\" />\n    </NSEAnimationEnvironmentProvider>,\n  );\n  secondRoot.render(\n    <NSEAnimationEnvironmentProvider reducedMotion={false}>\n      <AnimationEnvironmentProbe label=\"second\" />\n    </NSEAnimationEnvironmentProvider>,\n  );\n  return {\n    defaultsDeeplyFrozen:\n      Object.isFrozen(NSEAnimationContext.current) &&\n      NSEAnimationContext.current.duration > 0,\n    dispose() {\n      firstRoot.unmount();\n      secondRoot.unmount();\n    },\n  };\n}\n\nconst manifest = {\n  schemaVersion: 1,\n  bundleIdentifier: \"com.example.external.fixture\",\n  version: \"0.1.0\",\n  displayName: \"External Fixture\",\n  routes: [{ path: \"/external\", primary: true }],\n  commands: [{ id: \"com.example.external.fixture.save\", title: \"Save\" }],\n  services: [{ id: \"com.example.external.search\", required: false }],\n  documentTypes: [{ id: \"com.example.external.document\", extensions: [\"fixture\"] }],\n  runtime: { policy: { public: true } },\n  webspring: { visible: true, order: 1 },\n} as const;\n\nconst externalSearchToken = defineSynWareServiceToken({ id: \"com.example.external.search\" });\n\nfunction ExternalFixture() {\n  const app = useSCOS();\n  if (\"resolve\" in app.services || \"routeState\" in app) throw new Error(\"Retired public API leaked into the installed SDK.\");\n  const persistence = usePersistence();\n  const scheduler = useScheduler();\n  const documents = useDocument();\n  const window = useWindow();\n  const trusted = useTrustedClient();\n  const service = useService(externalSearchToken);\n  useCommands([{\n    id: \"com.example.external.fixture.save\",\n    title: \"Save\",\n    payload: { description: \"No payload\", parse: (value) => value === undefined ? { ok: true, value } : { ok: false, issues: [\"No payload\"] } },\n    execute: () => undefined,\n  }]);\n  const everyClientCategory = [\n    app.lifecycle, app.commands, app.responders, app.undo, app.documents, app.windows,\n    app.pasteboards, app.drag, app.colourPanel, app.audio, app.services,\n    app.navigation, app.locale, app.appearance, documents.workspaceDocuments, persistence, scheduler, window.snapshot, service.available,\n    trusted.diagnostics, trusted.conformance,\n  ];\n  if (false) {\n    void app.lifecycle.closeSelf();\n    void app.commands.createPayload(\"fixture\", true);\n    void app.responders.getFocusedResponderId();\n    void app.undo.get({} as never);\n    void app.documents.workspaceDocuments.getDocument;\n    void app.windows.getSnapshot();\n    void app.pasteboards;\n    void app.drag.endpoint();\n    void app.colourPanel.getSnapshot();\n    void app.audio.play;\n    void app.services.optional(externalSearchToken);\n    // @ts-expect-error String service lookup is retired from the installed public SDK.\n    void app.services.resolve(\"com.example.external.search\");\n    // @ts-expect-error Required acquisition accepts a token.\n    void app.services.require(\"com.example.external.search\");\n    // @ts-expect-error Raw query state is retired; use a mounted named graph.\n    void app.routeState.getQuery();\n    void app.navigation.openRoute;\n    void app.locale.getActiveLocale();\n    void app.appearance.resolved();\n    void trusted.diagnostics?.refreshConformanceSnapshot();\n    void trusted.conformance?.registerAppearanceFact({ slot: \"fixture\", status: \"covered\" });\n  }\n  return <NSEStackView\n    aria-label=\"External SDK fixture\"\n    orientation=\"horizontal\"\n    distribution=\"gravity-areas\"\n    alignment=\"centre\"\n    availableSize={240}\n    spacing={8}\n    edgeInsets={{ inlineStart: 4, inlineEnd: 4, blockStart: 2, blockEnd: 2 }}\n    overflowPolicy=\"menu\"\n    overflowLabel=\"More fixture actions\"\n    resizeObserverFactory={() => null}\n    frameScheduler={{ requestFrame: () => 0, cancelFrame: () => undefined }}\n    reducedMotion\n    onOverflowChange={(ids) => { void ids; }}\n  >\n    <NSEStackItem id=\"summary\" minimumSize={48} preferredSize={120} maximumSize={180} weight={2} gravity=\"leading\" spacingAfter={4} overflowLabel=\"Fixture summary\" onOverflowActivate={() => undefined}>Clients: {everyClientCategory.length}; Brand: {app.branding.name}</NSEStackItem>\n    <NSEStackItem id=\"records\" minimumSize={48} preferredSize={96} maximumSize={144} weight={1} visibilityPriority={10} detachedWhenHidden gravity=\"trailing\" overflowLabel=\"Fixture records\" onOverflowActivate={() => undefined}>\n      <FixtureRecords />\n    </NSEStackItem>\n  </NSEStackView>;\n}\n\nfunction FixtureRecords() {\n  const records = useNSEArrayController<string, string>({ id: \"fixture:records\", content: [\"one\", \"two\"], getId: (item) => item });\n  return <NSETableView aria-label=\"Fixture records\" headerHidden rowHeight={24} adapter={{ controller: records, idForItem: (item) => item, labelForItem: (item) => item }} columns={[{ id: \"record\", title: \"Record\", value: (item: string) => item, width: { min: 48, ideal: 96, max: 144 } }]} />;\n}\n\nconst news = defineWidget({\n  id: \"news\",\n  title: \"News\",\n  load: async () => [\"Public content\"],\n  view: ({ data }) => <ul>{data.map((title) => <li key={title}>{title}</li>)}</ul>,\n  whenEmpty: \"hide\",\n});\n\nfunction WebsiteView({ model, applicationOutlet }: WebspringViewProps) {\n  return <main data-logo={model.branding.logoUrl ?? \"\"}>{model.apps.map(({ bundleIdentifier }) => <span key={bundleIdentifier}>{bundleIdentifier}</span>)}{model.widgets.length > 0 ? <WebspringWidgetShelf entries={model.widgets} surface={model.background.shelf} /> : null}{applicationOutlet}</main>;\n}\n\nconst siteName: LocalisedText = { key: \"site.name\", fallback: \"Example\" };\nexport const webspring = defineWebspring({\n  manifest: {\n    schemaVersion: 1,\n    bundleIdentifier: \"com.example.webspring\",\n    version: \"0.1.0\",\n    displayName: \"Example Webspring\",\n    webspringShell: {\n      views: [{ id: \"website\", presentations: [\"desktop\", \"tablet\", \"mobile\"], mode: \"persistent\" }],\n      defaults: { desktop: \"website\", tablet: \"website\", mobile: \"website\" },\n      homeRoute: \"/\",\n      branding: { name: siteName, logo: { resource: \"./Resources/SiteLogo.svg\", alternativeText: { key: \"site.logo\", fallback: \"Example logo\" } } },\n    },\n  },\n  components: { website: WebsiteView },\n  widgets: [news],\n});\nexport const app = createSynWare({ manifest, root: ExternalFixture });\nexport const contactApp = createSynWare({\n  manifest: {\n    schemaVersion: 1,\n    bundleIdentifier: \"com.example.contact\",\n    version: \"0.1.0\",\n    displayName: \"Contact\",\n    routes: [{ path: \"/contact\", primary: true }],\n    presentations: [\"desktop\", \"tablet\", \"mobile\"],\n    runtime: { policy: { public: true } },\n    webspring: { visible: true, order: 2 },\n  },\n  root: () => <p>Contact</p>,\n});\nexport function mountFixture(element: Element) {\n  return mountSynCloudOS({ element, bundles: [app, contactApp], shell: webspring, shellResources: { resourceUrls: { \"./Resources/SiteLogo.svg\": \"/site-logo.svg\" }, fontResourceUrls: { \"./Resources/Site.woff2\": \"/site.woff2\" } } });\n}\nexport function mountFixtureWithoutContact(element: Element) {\n  return mountSynCloudOS({ element, bundles: [app], shell: webspring, shellResources: { resourceUrls: { \"./Resources/SiteLogo.svg\": \"/site-logo.svg\" } } });\n}\nexport const testHost = createSynWareTestHost({ app });\nexport const disposal: Promise<SynWareTestDisposalReport> = testHost.dispose();\nfunction BrandingProbe() {\n  const app = useSCOS();\n  return <output data-branding-name={app.branding.name}>{app.branding.name}</output>;\n}\nconst brandingProbeApp = createSynWare({\n  manifest: {\n    schemaVersion: 1,\n    bundleIdentifier: \"com.example.external.branding-probe\",\n    version: \"0.1.0\",\n    displayName: \"Branding Probe\",\n    routes: [{ path: \"/branding-probe\", primary: true }],\n    runtime: { policy: { public: true } },\n    webspring: { visible: false, order: 3 },\n  },\n  root: BrandingProbe,\n});\nexport async function readBrandingFromMountedApp(container: HTMLElement) {\n  const host = createSynWareTestHost({ app: brandingProbeApp, container, branding: { name: \"Example\", logoUrl: \"/site-logo.svg\", lightLogoUrl: \"/site-logo.svg\", darkLogoUrl: \"/site-logo.svg\", compactLogoUrl: \"/site-logo.svg\", logoAlt: \"Example logo\" } });\n  await host.render();\n  const name = container.querySelector(\"[data-branding-name]\")?.getAttribute(\"data-branding-name\");\n  await host.dispose();\n  if (!name) throw new Error(\"The mounted branding probe did not render a branding name.\");\n  return name;\n}\nconst webContentControl = createFakeCapabilityPort<SynWareFakeWebContentOperation>(createDeterministicScheduler());\nvoid webContentControl.run(\"web-content.load\");\n", "utf8");
     writeFileSync(join(sourceDirectory, "assets.d.ts"), `declare module "*.css";
 declare module "*.svg" { const url: string; export default url; }
 declare module "*.png" { const url: string; export default url; }
@@ -586,20 +397,8 @@ interface ImportMeta { glob(pattern: string, options: { eager: true; query?: str
     if (externalCompile.status !== 0) {
       throw new Error(`External package fixture failed to compile:\n${externalCompile.stdout}\n${externalCompile.stderr}`);
     }
-    writeFileSync(join(sourceDirectory, "retired-manifest.ts"), `import { createSynWare } from "@syndromatic/syncloudos/sdk";
-
-createSynWare({
-  manifest: {
-    schemaVersion: 1,
-    id: "com.example.retired",
-    version: "0.1.0",
-    title: "Retired manifest fixture",
-    retiredManifestKey: true,
-  },
-  root: () => null,
-});
-`, "utf8");
-    const retiredManifest = spawnSync(process.execPath, [resolve(repositoryRoot, "node_modules", "typescript", "bin", "tsc"), "--noEmit", "--target", "ES2022", "--module", "NodeNext", "--moduleResolution", "NodeNext", "--jsx", "react-jsx", "--strict", "--skipLibCheck", "false", "retired-manifest.ts"], { cwd: sourceDirectory, encoding: "utf8" });
+    writeFileSync(join(sourceDirectory, "retired-manifest.ts"), "import { createSynWare } from \"@syndromatic/syncloudos/sdk/testing\";\n\ncreateSynWare({\n  manifest: {\n    schemaVersion: 1,\n    bundleIdentifier: \"com.example.retired\",\n    version: \"0.1.0\",\n    displayName: \"Retired manifest fixture\",\n    retiredManifestKey: true,\n  },\n  root: () => null,\n});\n", "utf8");
+    const retiredManifest = spawnSync(process.execPath, [resolve(repositoryRoot, "node_modules", "typescript", "bin", "tsc"), "--ignoreConfig", "--noEmit", "--target", "ES2022", "--module", "NodeNext", "--moduleResolution", "NodeNext", "--jsx", "react-jsx", "--strict", "--skipLibCheck", "false", "retired-manifest.ts"], { cwd: sourceDirectory, encoding: "utf8" });
     expect(retiredManifest.status).not.toBe(0);
     expect(`${retiredManifest.stdout}${retiredManifest.stderr}`).toMatch(/retiredManifestKey|never/iu);
     writeFileSync(join(fixture, "vite.config.mjs"), `export default { build: { outDir: "dist", lib: { entry: { fixture: "src/index.tsx" }, formats: ["es"], fileName: (_format, entryName) => entryName + ".js" }, sourcemap: false } };\n`, "utf8");
@@ -645,18 +444,18 @@ createSynWare({
     expect(consoleError).not.toHaveBeenCalled();
     await mounted.dispose("external consumer test complete");
     const reduced = await consumer.mountFixtureWithoutContact(element);
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await waitForText(element, "com.example.external.fixture");
     expect(element.textContent).toContain("com.example.external.fixture");
     expect(element.textContent).not.toContain("com.example.contact");
     await reduced.dispose("external consumer remove test complete");
     element.remove();
 
     writeFileSync(join(sourceDirectory, "forbidden.ts"), 'import { runtime } from "@syndromatic/syncloudos/sdk/internal/runtime";\nexport { runtime };\n', "utf8");
-    const deepImport = spawnSync(process.execPath, [resolve(repositoryRoot, "node_modules", "typescript", "bin", "tsc"), "--noEmit", "--module", "NodeNext", "--moduleResolution", "NodeNext", "forbidden.ts"], { cwd: sourceDirectory, encoding: "utf8" });
+    const deepImport = spawnSync(process.execPath, [resolve(repositoryRoot, "node_modules", "typescript", "bin", "tsc"), "--ignoreConfig", "--noEmit", "--module", "NodeNext", "--moduleResolution", "NodeNext", "forbidden.ts"], { cwd: sourceDirectory, encoding: "utf8" });
     expect(deepImport.status).not.toBe(0);
     expect(`${deepImport.stdout}${deepImport.stderr}`).toMatch(/cannot find module|does not exist/iu);
     writeFileSync(join(sourceDirectory, "physical-internal.ts"), 'import type { RuntimeStore } from "@syndromatic/syncloudos/types/SynCloudOS/Runtime/RuntimeStore.js";\nexport type { RuntimeStore };\n', "utf8");
-    const physicalInternal = spawnSync(process.execPath, [resolve(repositoryRoot, "node_modules", "typescript", "bin", "tsc"), "--noEmit", "--module", "NodeNext", "--moduleResolution", "NodeNext", "physical-internal.ts"], { cwd: sourceDirectory, encoding: "utf8" });
+    const physicalInternal = spawnSync(process.execPath, [resolve(repositoryRoot, "node_modules", "typescript", "bin", "tsc"), "--ignoreConfig", "--noEmit", "--module", "NodeNext", "--moduleResolution", "NodeNext", "physical-internal.ts"], { cwd: sourceDirectory, encoding: "utf8" });
     expect(physicalInternal.status).not.toBe(0);
     expect(`${physicalInternal.stdout}${physicalInternal.stderr}`).toMatch(/cannot find module|does not exist/iu);
 
@@ -717,11 +516,12 @@ createSynWare({
 
   it("uses exact portable package aliases and keeps public client contracts host-free", () => {
     const expectedAliases = {
-      "@syndromatic/syncloudos/sdk": ["src/SynCloudOS/AppSDK/sdkPackageEntry.ts"],
-      "@syndromatic/syncloudos/sdk/testing": ["src/SynCloudOS/AppSDK/testing/sdkPackageEntry.ts"],
-      "@syndromatic/syncloudos/webspring": ["src/Webspring/public.ts"],
-      "@syndromatic/syncloudos/browser": ["src/SynCloudOSReact/browser.tsx"],
-      "@syndromatic/syncloudos/nse": ["src/NSE/sdkPackageEntry.ts"],
+      "@syndromatic/syncloudos": ["./src/SynCloudOS/AppSDK/rootPackageEntry.ts"],
+      "@syndromatic/syncloudos/sdk": ["./src/SynCloudOS/AppSDK/sdkPackageEntry.ts"],
+      "@syndromatic/syncloudos/sdk/testing": ["./src/SynCloudOS/AppSDK/testing/sdkPackageEntry.ts"],
+      "@syndromatic/syncloudos/webspring": ["./src/Webspring/public.ts"],
+      "@syndromatic/syncloudos/browser": ["./src/SynCloudOSReact/browser.tsx"],
+      "@syndromatic/syncloudos/nse": ["./src/NSE/sdkPackageEntry.ts"],
     };
     const appConfig = JSON.parse(readFileSync(join(repositoryRoot, "tsconfig.app.json"), "utf8"));
 
@@ -751,7 +551,7 @@ createSynWare({
       "src/SynCloudOSReact/index.ts",
     ];
     for (const path of publicBarrels) {
-      expect(readFileSync(join(repositoryRoot, path), "utf8")).not.toMatch(/\buseSynWareRuntime\b/u);
+      expect(readFileSync(join(repositoryRoot, path), "utf8")).not.toMatch(/\buseSynWare(?!Context\b)[A-Z]/u);
     }
 
   });

@@ -1,6 +1,6 @@
 /*
  * SynCloudOS
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ * Copyright Â© 2026 Syndromatic Ltd. All rights reserved.
  *
  * Designed by Kavish Krishnakumar in Manchester.
  *
@@ -351,6 +351,12 @@ class BrowserAnimationAdapter implements RuntimeAnimationAdapter {
                   : cssTiming(request.timing)),
             }),
           );
+    let nativeCancelled = false;
+    const cancelNative = () => {
+      if (nativeCancelled) return;
+      nativeCancelled = true;
+      native?.cancel();
+    };
     let settled = false;
     let paused = false;
     let finishListenerInstalled = false;
@@ -533,7 +539,7 @@ class BrowserAnimationAdapter implements RuntimeAnimationAdapter {
           return true;
         } catch {
           try {
-            native?.cancel();
+            cancelNative();
           } catch {
             /* settlement still owns cleanup */
           }
@@ -550,7 +556,7 @@ class BrowserAnimationAdapter implements RuntimeAnimationAdapter {
           return true;
         } catch {
           try {
-            native?.cancel();
+            cancelNative();
           } catch {
             /* settlement still owns cleanup */
           }
@@ -583,18 +589,18 @@ class BrowserAnimationAdapter implements RuntimeAnimationAdapter {
         if (!paused) scheduleCompletion();
       },
       cancel() {
-        if (!settled) {
-          try {
-            native?.cancel();
-          } finally {
-            settle("cancelled");
-          }
+        // A finished forwards fill is still a native presentation effect.
+        // Explicit cancellation removes it without changing settled facts.
+        try {
+          cancelNative();
+        } finally {
+          if (!settled) settle("cancelled");
         }
       },
       dispose() {
         if (!settled) {
           try {
-            native?.cancel();
+            cancelNative();
           } finally {
             settle("cancelled");
           }
@@ -610,7 +616,7 @@ class BrowserAnimationAdapter implements RuntimeAnimationAdapter {
           (compiled.scroll && !this.#platform.applyScrollPosition)
         ) {
           settle("cancelled");
-          native?.cancel();
+          cancelNative();
           return;
         }
         native?.pause();
@@ -625,11 +631,11 @@ class BrowserAnimationAdapter implements RuntimeAnimationAdapter {
             scrollSample(request, compiled, terminalProgress(request)),
           );
         settle("completed");
-        native?.cancel();
+        cancelNative();
       } catch {
         settle("cancelled");
         try {
-          native?.cancel();
+          cancelNative();
         } catch {
           /* Teardown remains terminal. */
         }
@@ -660,7 +666,7 @@ class BrowserAnimationAdapter implements RuntimeAnimationAdapter {
       }
     } catch (error) {
       try {
-        native?.cancel();
+        cancelNative();
       } catch {
         /* preserve the startup failure */
       }
@@ -798,10 +804,13 @@ export class BrowserAnimationLayerSurface implements AFXLayerSurface {
   #mask: BrowserAnimationLayerSurface | null = null;
   #maskRelease: (() => void) | null = null;
   #disposed = false;
-  constructor(element: HTMLElement) {
+  #ownsElement = false;
+  readonly #layout: "layer" | "css";
+  constructor(element: HTMLElement, layout: "layer" | "css" = "layer") {
     if (!element || !element.style || !element.ownerDocument)
       throw new TypeError("Layer surface requires a real DOM element.");
     this.#element = element;
+    this.#layout = layout;
     this.#originalStyle = element.getAttribute("style");
   }
   replicationCapability() {
@@ -825,6 +834,13 @@ export class BrowserAnimationLayerSurface implements AFXLayerSurface {
     )
       return Object.freeze({ state: "unsupported" as const, reason: "unmanaged-dom-background-image" });
     return Object.freeze({ state: "portable-owned" as const });
+  }
+  /** Allocates the projection for a detached layer added under this one: a new element owned by the surface and removed with it. */
+  createSublayerSurface(): AFXLayerSurface {
+    if (this.#disposed) throw new DOMException("The layer surface is disposed.", "InvalidStateError");
+    const surface = new BrowserAnimationLayerSurface(this.#element.ownerDocument.createElement("div"));
+    surface.#ownsElement = true;
+    return surface;
   }
   startCompositorAnimation(input: AFXLayerCompositorRequest): AFXLayerCompositorPlayback | null {
     const snapshot = this.#snapshot;
@@ -889,11 +905,13 @@ export class BrowserAnimationLayerSurface implements AFXLayerSurface {
     this.#snapshot = snapshot;
     const { bounds, position, anchorPoint, transform, values } = snapshot;
     const style = this.#element.style;
-    style.position = "absolute";
-    style.left = "0px";
-    style.top = "0px";
-    style.width = `${bounds.width}px`;
-    style.height = `${bounds.height}px`;
+    if (this.#layout === "layer") {
+      style.position = "absolute";
+      style.left = "0px";
+      style.top = "0px";
+      style.width = `${bounds.width}px`;
+      style.height = `${bounds.height}px`;
+    }
     style.transformOrigin = "0 0";
     style.opacity = String(snapshot.opacity);
     style.transform = snapshot.inheritedTransform
@@ -934,7 +952,7 @@ export class BrowserAnimationLayerSurface implements AFXLayerSurface {
     style.borderStyle = "solid";
     style.borderWidth = `${snapshot.style.borderWidth}px`;
     style.borderColor = snapshot.style.borderColour?.toCSS() ?? "transparent";
-    style.boxSizing = "border-box";
+    if (this.#layout === "layer") style.boxSizing = "border-box";
     const corners = snapshot.style.maskedCorners;
     style.borderTopLeftRadius = `${corners.includes("top-left") ? snapshot.style.cornerRadius : 0}px`;
     style.borderTopRightRadius = `${corners.includes("top-right") ? snapshot.style.cornerRadius : 0}px`;
@@ -1461,7 +1479,8 @@ export class BrowserAnimationLayerSurface implements AFXLayerSurface {
     this.#contentElement = null;
     this.#replicationElement?.remove();
     this.#replicationElement = null;
-    if (this.#originalStyle === null) this.#element.removeAttribute("style");
+    if (this.#ownsElement) this.#element.remove();
+    else if (this.#originalStyle === null) this.#element.removeAttribute("style");
     else this.#element.setAttribute("style", this.#originalStyle);
   }
 }

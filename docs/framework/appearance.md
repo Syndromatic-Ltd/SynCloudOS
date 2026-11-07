@@ -6,24 +6,24 @@ You choose an appearance once, at the root of your site, and every control below
 
 ## Load Atmo
 
-Import the base styles and the Atmo styles next to your entry point:
+What you import depends on whether the page runs the SynCloudOS host.
 
-```tsx
-import "@syndromatic/syncloudos/nse/styles.css";
-import "@syndromatic/syncloudos/nse/themes/atmo/styles.css";
-```
+| Page | Imports | Appearance |
+| --- | --- | --- |
+| A site or single application on `mountSynCloudOS` | `@syndromatic/syncloudos/nse/styles.css` and `@syndromatic/syncloudos/browser/styles.css`, once, in the host entry | The host installs Atmo for the shell and every SynWare it hosts. Don't import the Atmo theme stylesheet or wrap anything in `NSEAppearanceProvider`. |
+| A standalone React page without the host | `@syndromatic/syncloudos/nse/styles.css` and `@syndromatic/syncloudos/nse/themes/atmo/styles.css` | Wrap the page in `NSEAppearanceProvider`, as below. |
 
-`mountSynCloudOS` installs the Atmo appearance for the shell and every SynWare it hosts, so a site built on the host needs nothing more. A standalone React page provides it directly:
+A SynWare never imports these stylesheets itself; the page that hosts it does. A standalone React page provides the appearance directly:
 
 ```tsx
 import { NSEAppearanceProvider } from "@syndromatic/syncloudos/nse/appearance";
 import { atmoAppearance } from "@syndromatic/syncloudos/nse/themes/atmo";
-import { NSEPushButton } from "@syndromatic/syncloudos/nse";
+import { NSEButton } from "@syndromatic/syncloudos/nse";
 
 export function Page() {
   return (
     <NSEAppearanceProvider appearance={atmoAppearance} colourScheme="auto">
-      <NSEPushButton tone="affirmative">Continue</NSEPushButton>
+      <NSEButton title="Continue" keyEquivalent={"\r"} />
     </NSEAppearanceProvider>
   );
 }
@@ -43,6 +43,49 @@ Appearance combines several independent settings. Each one can change without di
 
 Theme and colour scheme are separate choices. Atmo ships in both light and dark, and switching one leaves the other alone.
 
+Atmo is the one theme SynCloudOS ships. It is drawn as vectors, and it styles both NSE controls and the window and application chrome around them. Dark mode is Atmo's `"dark"` colour scheme, not a different theme: request it with `colourScheme`, or leave `"auto"` to follow the system.
+
+Atmo-Heritage and Atmo-Onyx are obsolete raster themes from earlier releases. Don't use them, don't mistake either for a dark mode, and don't copy their colours into your own stylesheet. You can still build your own SynCloudOS theme as an appearance; a custom theme replaces Atmo's look, it doesn't sit beside a hand-written palette.
+
+Hard-coded colours work against this. An application stylesheet with its own hex palette doesn't follow the colour scheme, contrast or transparency settings, and the Developer MCP `validate` tool reports it as an `idiom.atmo-appearance` warning. Use NSE controls for controls, the tokens below for your own surfaces, and `[data-mode="dark"]` only where your own content needs a different treatment.
+
+## Tokens for your own content
+
+These custom properties are the public vocabulary for content you draw yourself: your own panels, captions, dividers and highlights. NSE controls and chrome are already styled by the theme; these are for everything else.
+
+Each colour has a light and a dark value and follows the resolved colour scheme. SynCloudOS defines theme-neutral defaults, and the active theme redefines them: under Atmo they come from Atmo's own inks and materials. A custom theme sets the same names to restyle every application's content.
+
+| Colour token | Use it for |
+| --- | --- |
+| `--nse-app-background` | The plain application background. |
+| `--nse-app-foreground` | Body text and icons on that background. |
+| `--nse-app-foreground-secondary` | Secondary text: captions, labels, metadata. |
+| `--nse-app-surface` | The fill of a panel, card or inset group drawn on the background. |
+| `--nse-app-surface-border` | The edge of that panel or card. |
+| `--nse-app-separator` | Divider lines between rows or sections. |
+| `--nse-app-accent` | Highlights, links and the active state of your own controls. |
+| `--nse-app-accent-foreground` | Text or icons drawn on an `--nse-app-accent` fill. |
+| `--nse-app-selection` | The fill behind selected rows or items. |
+| `--nse-app-critical` | Errors and destructive states. |
+
+The text colours keep at least 4.5:1 contrast against `--nse-app-background`, and the accent at least 3:1, in both schemes.
+
+```css
+.readout { background: var(--nse-app-surface); border: 1px solid var(--nse-app-surface-border); }
+.readout-caption { color: var(--nse-app-foreground-secondary); }
+.readout-row + .readout-row { border-top: 1px solid var(--nse-app-separator); }
+.readout-value[data-alarm] { color: var(--nse-app-critical); }
+```
+
+| Purpose | Tokens |
+| --- | --- |
+| Type | `--nse-text-body-size`, `--nse-text-body-line`, `--nse-text-callout-size`, `--nse-text-caption-size`, `--nse-text-footnote-size`, `--nse-text-headline-size`, `--nse-text-headline-weight`, `--nse-text-label-size`, `--nse-text-label-weight` and `--nse-text-secondary-opacity`. |
+| Spacing | `--nse-space-1` to `--nse-space-8` (4 to 40 px), `--nse-spacing-tight`, `--nse-spacing-standard`, `--nse-spacing-inline`, `--nse-spacing-related`, `--nse-spacing-group`, `--nse-content-margin` and `--nse-content-spacing`. |
+
+For a tint the set does not name, mix from a token rather than inventing a colour, so it still follows the scheme and theme: `color-mix(in srgb, var(--nse-app-accent) 12%, transparent)`.
+
+Other `--nse-*` properties belong to individual controls and themes and may change between releases. A name that isn't defined at all, such as `--nse-label-primary`, resolves to its `var()` fallback or the property's initial value, so it never follows Atmo; `validate` reports it as `idiom.nse-token`.
+
 ## Read the appearance
 
 Components read the resolved appearance from context:
@@ -56,7 +99,7 @@ export function SchemeLabel() {
 }
 ```
 
-Inside a SynWare, `useSynWareAppearance()` returns the requested appearance and the resolved mode, and it re-renders when either changes. The projection adds `data-nse-*` attributes on the boundary element (`data-mode` holds `light` or `dark`), so your own CSS can respond to the scheme with a plain selector:
+Inside a SynWare, `useAppearance()` returns the requested appearance and the resolved mode, and it re-renders when either changes. The projection adds `data-nse-*` attributes on the boundary element (`data-mode` holds `light` or `dark`), so your own CSS can respond to the scheme with a plain selector:
 
 ```css
 [data-mode="dark"] .note-surface {

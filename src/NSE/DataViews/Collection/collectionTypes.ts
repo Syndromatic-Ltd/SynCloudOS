@@ -23,6 +23,8 @@ import type { HTMLAttributes, ReactNode, Ref } from "react";
 import type { NSEDataViewAdapter, NSEDataViewKey, NSEDataViewSelectionEvent, NSEDataViewState } from "../Core";
 import type { NSEDataViewDragBinding } from "../Drag";
 import type { DragEndpoint } from "../../../SynCloudOS/SynCloudOS";
+import type { IFXImageResource } from "../../../FX/ImageFX/IFXImageResource";
+import type { NSECollectionViewCoverFlowLayout } from "./coverFlowLayout";
 
 export interface NSECollectionLayoutItem {
   readonly index: number;
@@ -68,13 +70,19 @@ export interface NSECollectionDropProposal<TId> {
   readonly insertionIndex: number;
 }
 
-export interface NSECollectionViewProps<T, TId extends NSEDataViewKey>
+interface NSECollectionViewCommonProps<T, TId extends NSEDataViewKey>
   extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
   readonly adapter: NSEDataViewAdapter<T, TId>;
-  readonly layout: NSECollectionLayout;
-  readonly renderItem: (props: NSECollectionViewItemProps<T, TId>) => ReactNode;
   readonly state?: NSEDataViewState;
   readonly selectionMode?: "none" | "single" | "multiple";
+  readonly onSelectionChange?: (event: NSEDataViewSelectionEvent<TId>) => void;
+  readonly onActivate?: (id: TId, item: T) => void;
+}
+
+/** A collection view laid out in a grid or list (`NSCollectionViewGridLayout`, `NSCollectionViewFlowLayout`). */
+export interface NSECollectionViewGridProps<T, TId extends NSEDataViewKey> extends NSECollectionViewCommonProps<T, TId> {
+  readonly layout: NSECollectionLayout;
+  readonly renderItem: (props: NSECollectionViewItemProps<T, TId>) => ReactNode;
   /** Whether a primary pointer click activates after NSE has made the item active and selected. */
   readonly pointerActivation?: "double-click" | "single-click";
   readonly viewportInlineSize?: number;
@@ -83,11 +91,29 @@ export interface NSECollectionViewProps<T, TId extends NSEDataViewKey>
   readonly viewportRef?: Ref<HTMLDivElement>;
   readonly canvasRef?: Ref<HTMLDivElement>;
   readonly editableLabels?: boolean;
-  readonly onSelectionChange?: (event: NSEDataViewSelectionEvent<TId>) => void;
-  readonly onActivate?: (id: TId, item: T) => void;
   readonly onRequestReorder?: (ids: readonly TId[], insertionIndex: number) => void;
   readonly onValidateDrop?: (proposal: NSECollectionDropProposal<TId>) => boolean | Promise<boolean>;
   readonly onAcceptDrop?: (proposal: NSECollectionDropProposal<TId>) => void | Promise<void>;
   readonly dragBinding?: NSEDataViewDragBinding<TId>;
   readonly dragEndpoint?: DragEndpoint;
 }
+
+/**
+ * A collection view in Cover Flow: the selected item faces the viewer and the others turn inward on either side,
+ * mirrored on the floor. AnimationFX draws it; each item's picture comes from ImageFX.
+ */
+export interface NSECollectionViewCoverFlowProps<T, TId extends NSEDataViewKey> extends NSECollectionViewCommonProps<T, TId> {
+  readonly layout: NSECollectionViewCoverFlowLayout;
+  /** The item's picture, after `IKImageBrowserItem.imageRepresentation`; undefined while it has none. */
+  readonly imageForItem: (item: T) => IFXImageResource | undefined;
+  /** The line under the title, after `IKImageBrowserItem.imageSubtitle`; the title is the adapter's label. */
+  readonly subtitleForItem?: (item: T) => string | undefined;
+  /** Show the selected item's title and subtitle under it (default true). */
+  readonly showsTitles?: boolean;
+  /** Mirror the items on the floor (default true). */
+  readonly showsReflections?: boolean;
+}
+
+export type NSECollectionViewProps<T, TId extends NSEDataViewKey> =
+  | NSECollectionViewGridProps<T, TId>
+  | NSECollectionViewCoverFlowProps<T, TId>;

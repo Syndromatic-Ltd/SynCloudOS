@@ -18,11 +18,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SynCloudOSLifecycleRecord } from "../../SynCloudOS/fxRuntimeContracts";
 import { HFXHapticParameterCurve } from "./HFXHapticParameterCurve";
 import type { HFXHapticEngine } from "./HFXHapticEngine";
 import type { HFXHapticPattern } from "./HFXHapticPattern";
 import type { HFXHapticDynamicParameter, HFXHapticParameterID } from "./HFXHapticEvent";
 export class HFXHapticAdvancedPatternPlayer {
+  readonly #lifecycle = new SynCloudOSLifecycleRecord({ kind: "HFXHapticAdvancedPatternPlayer" });
   loopEnabled = false;
   completionHandler?: (reason: "completed" | "cancelled" | "error") => void;
   readonly #engine: HFXHapticEngine;
@@ -60,8 +62,8 @@ export class HFXHapticAdvancedPatternPlayer {
     this.#curveTimer = setTimeout(() => this.sampleCurves(), 16);
   }
   start(delay = 0) { this.begin(delay, true); }
-  private begin(delay: number, renewOwnership: boolean) {
-    this.#engine.assertActive(); if (this.#disposed) throw new Error("Haptic player is disposed.");
+  private begin(delay: number, renewOwnership: boolean, operation = "start") {
+    this.#engine.assertActive(); if (this.#disposed) throw this.#lifecycle.error({ code: "HFX_HAPTIC_ADVANCED_PATTERN_PLAYER_DISPOSED", operation: operation });
     if (!Number.isFinite(delay) || delay < 0) throw new RangeError("Invalid player timing.");
     if (renewOwnership && this.#running) this.#engine.stopOutput(this);
     this.clear(); this.#running = true;
@@ -102,7 +104,7 @@ export class HFXHapticAdvancedPatternPlayer {
     }, (delay + Math.max(0, boundary - this.#offset) / this.#rate) * 1000));
   }
   sendParameters(parameters: readonly HFXHapticDynamicParameter[]) {
-    this.#engine.assertActive(); if (this.#disposed) throw new Error("Haptic player is disposed.");
+    this.#engine.assertActive(); if (this.#disposed) throw this.#lifecycle.error({ code: "HFX_HAPTIC_ADVANCED_PATTERN_PLAYER_DISPOSED", operation: "sendParameters" });
     if (parameters.length > 128 || this.#timers.length + parameters.length > 8192) throw new RangeError("Dynamic parameter scheduling budget exceeded.");
     for (const parameter of parameters) new HFXHapticParameterCurve(parameter.parameterID, [{ time: 0, value: parameter.value }], parameter.relativeTime);
     for (const input of parameters) {
@@ -119,7 +121,7 @@ export class HFXHapticAdvancedPatternPlayer {
   private finish(reason: "completed" | "cancelled" | "error") { this.clear(); this.#running = false; this.#offset = 0; if (this.#settled) return; this.#settled = true; if (reason !== "completed") { try { this.#engine.stopOutput(this); } catch { /* Backend cancellation cannot leave the player unsettled. */ } } try { this.#engine.playerDidFinish(this); } catch { /* Host lifecycle hooks cannot prevent local settlement. */ } try { this.completionHandler?.(reason); } catch { /* Completion handlers cannot prevent host teardown. */ } }
   stop() { this.finish("cancelled"); }
   pause() { if (!this.#running) return; this.#offset = Math.min(this.pattern.duration, this.position()); this.clear(); this.#running = false; this.#engine.stopOutput(this); }
-  resume() { if (!this.#running) this.start(); }
+  resume() { if (!this.#running) this.begin(0, true, "resume"); }
   seek(offset: number) { if (!Number.isFinite(offset) || offset < 0 || offset > this.pattern.duration) throw new RangeError("Invalid seek offset."); this.#offset = offset; if (this.#running) this.start(); }
-  dispose() { if (this.#disposed) return; this.stop(); this.#disposed = true; this.#overrides.clear(); this.#engine.releasePlayer(this); }
+  dispose() { if (this.#disposed) return; this.#lifecycle.markDisposed("explicit"); this.stop(); this.#disposed = true; this.#overrides.clear(); this.#engine.releasePlayer(this); }
 }

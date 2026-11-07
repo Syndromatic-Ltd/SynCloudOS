@@ -30,6 +30,9 @@ import type {
   RuntimeTestCapabilityControls,
   SynCloudOSRuntimeEnvironment,
 } from "../../SynCloudOS";
+import { BrowserPointerAdapter } from "../../PlatformAdapters/BrowserPointerAdapter";
+import { createBrowserAnimationLayerHost } from "../../PlatformAdapters/BrowserAnimationLayerHost";
+import type { AFXFrameScheduler } from "../../../FX/AnimationFX/AFXLayer";
 import type {
   SynWareFakeAnimationOperation,
   SynWareFakeAudioOperation,
@@ -396,6 +399,9 @@ export interface DeterministicRuntimeEnvironment {
   readonly environment: SynCloudOSRuntimeEnvironment;
   readonly clock: DeterministicScheduler;
   readonly mediaClock: SynWareTestMediaClock;
+  readonly mediaQueries: Readonly<{
+    setMatches(query: string, matches: boolean): void;
+  }>;
   readonly clipboard: FakeClipboardAdapter;
   readonly adapters: SynWareTestAdapters;
   /** The production runtime reads window persistence during construction.
@@ -562,6 +568,7 @@ export function createDeterministicRuntimeEnvironment(options: {
     audio: control<SynWareFakeAudioOperation>(clock, denied),
     webContent: control<SynWareFakeWebContentOperation>(clock, denied),
   });
+  const exportedFiles:import('../../FilePanels').FilePanelExportPayload[]=[];
   const adapters: SynWareTestAdapters = Object.freeze({
     browser: publicPort(controls.browser),
     media: publicPort(controls.media),
@@ -571,7 +578,10 @@ export function createDeterministicRuntimeEnvironment(options: {
     clipboard: clipboard.control,
     drag: publicPort(controls.drag),
     credentials: publicPort(controls.credentials),
-    files: publicPort(controls.files),
+    files: Object.freeze({...publicPort(controls.files),
+      exported:()=>Object.freeze([...exportedFiles]),
+      reset(){controls.files.reset();exportedFiles.splice(0);},
+    }),
     documents: publicPort(controls.documents),
     recovery: publicPort(controls.recovery),
     windows: publicPort(controls.windows),
@@ -625,8 +635,21 @@ export function createDeterministicRuntimeEnvironment(options: {
   const workArea = snapshotSource<RuntimeWorkAreaSnapshot>(Object.freeze({
     x: 0, y: 0, width: 1440, height: 900, devicePixelRatio: 1,
     safeArea: Object.freeze({ top: 0, right: 0, bottom: 0, left: 0 }),
+    safeAreaAvailability: "available",
   }));
-  const mediaQueries = new Set<RuntimeMediaQuery>();
+  const mediaQueries = new Map<RuntimeMediaQuery, Set<(matches: boolean) => void>>();
+  const mediaQueryMatches = new Map<string, boolean>();
+  const mediaQueryControl = Object.freeze({
+    setMatches(query: string, matches: boolean) {
+      if (mediaDisposed) throw abortError("The deterministic media queries are disposed.");
+      if ((mediaQueryMatches.get(query) ?? false) === matches) return;
+      mediaQueryMatches.set(query, matches);
+      for (const [media, subscribers] of [...mediaQueries]) {
+        if (media.media !== query) continue;
+        for (const listener of [...subscribers]) listener(matches);
+      }
+    },
+  });
   const browser = Object.freeze({
     getLocation() {
       return controls.browser.runSync("browser.location", () => {
@@ -671,7 +694,25 @@ export function createDeterministicRuntimeEnvironment(options: {
       return Object.freeze({ requestedHref: href, browserHref, pathname: target.pathname, changed: true, replaced: replace, dispatchedPopState: dispatchPopState });
     },
   });
+  // Use the production DOM layer projection with the host's deterministic
+  // clock. Canvas/GPU capability stays truthful to the supplied document.
+  const animationOrigin=clock.now();
+  const animationFrames:AFXFrameScheduler=Object.freeze({
+    now:()=> (clock.now()-animationOrigin)/1000,
+    reducedMotion:false,
+    suspended:false,
+    requestFrame(callback:(time:number)=>void){
+      const handle=clock.requestAnimationFrame(time=>callback((time-animationOrigin)/1000));
+      return()=>clock.cancelAnimationFrame(handle);
+    },
+  });
   const environment = Object.freeze({
+    animationFrames,
+    animationLayers: options.document ? createBrowserAnimationLayerHost(options.document,animationFrames) : undefined,
+    pointer: options.document ? new BrowserPointerAdapter({
+      createResizeObserver: () => null,
+      createIntersectionObserver: () => null,
+    }) : undefined,
     navigation: null,
     testControls,
     browser,
@@ -684,6 +725,12 @@ export function createDeterministicRuntimeEnvironment(options: {
     screen: gatedSnapshotSource(screen, testControls.viewport, "viewport.screen"),
     workArea: gatedSnapshotSource(workArea, testControls.viewport, "viewport.work-area"),
     clipboard: clipboard.adapter,
+    downloadExport: Object.freeze({id:'deterministic-download',
+      export:(payload:import('../../FilePanels').FilePanelExportPayload,signal?:AbortSignal)=>controls.files.run('file.write',signal,()=>{
+        exportedFiles.push(Object.freeze({...payload}));
+        return {kind:'exported' as const,fileName:payload.fileName};
+      }),
+    }),
     location: locationAdapter,
     midi: midiAdapter,
     videoCapture: videoCapture.host,
@@ -702,7 +749,7 @@ export function createDeterministicRuntimeEnvironment(options: {
         const queryListeners = new Set<(matches: boolean) => void>();
         const match = Object.freeze({
           media: query,
-          matches: false,
+          get matches() { return mediaQueryMatches.get(query) ?? false; },
           subscribe(listener: (matches: boolean) => void) {
             return controls.media.runSync("media.subscribe", () => {
               queryListeners.add(listener);
@@ -711,7 +758,7 @@ export function createDeterministicRuntimeEnvironment(options: {
           },
           dispose() { queryListeners.clear(); mediaQueries.delete(match); },
         } satisfies RuntimeMediaQuery);
-        mediaQueries.add(match);
+        mediaQueries.set(match, queryListeners);
         return match;
       });
     },
@@ -733,6 +780,7 @@ export function createDeterministicRuntimeEnvironment(options: {
     environment,
     clock,
     mediaClock,
+    mediaQueries: mediaQueryControl,
     clipboard,
     adapters,
     prepareRuntimeBootstrap() {
@@ -755,7 +803,8 @@ export function createDeterministicRuntimeEnvironment(options: {
     dispose() {
       mediaDisposed = true;
       clock.dispose();
-      for (const media of mediaQueries) media.dispose();
+      for (const media of mediaQueries.keys()) media.dispose();
+      mediaQueryMatches.clear();
       listeners.clear();
     },
   });

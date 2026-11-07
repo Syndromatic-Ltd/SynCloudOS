@@ -28,8 +28,8 @@ import { createRuntimeHapticsHostService } from "../../../src/SynCloudOS/Haptics
 import { AUFXSystemFeedbackBus } from "../../../src/SynCloudOS/AudioFX/AUFXSystemFeedbackBus";
 
 const context = vi.hoisted(() => ({ client: null as HFXHapticClient | null }));
-vi.mock("../../../src/SynCloudOS/AppSDK/SynWareContext", () => ({ useSynWare: () => ({ haptics: context.client }) }));
-import { useSynWareHaptics } from "../../../src/SynCloudOS/AppSDK/hooks/useSynWareHaptics";
+vi.mock("../../../src/SynCloudOS/AppSDK/scos/useSCOS", () => ({ useSCOS: () => ({ haptics: context.client }) }));
+import { useHaptics } from "../../../src/SynCloudOS/AppSDK/hooks/useHaptics";
 afterEach(cleanup);
 
 it("owns one committed engine after StrictMode replay and revokes it on unmount", () => {
@@ -37,7 +37,7 @@ it("owns one committed engine after StrictMode replay and revokes it on unmount"
   const sessions: HFXHapticSession[] = [];
   context.client = { createEngine: () => { const engine = host.createSession(); sessions.push(engine); return engine; } };
   let facade!: HFXHapticSession;
-  function Probe() { facade = useSynWareHaptics(); return null; }
+  function Probe() { facade = useHaptics(); return null; }
   const view = render(<StrictMode><Probe /></StrictMode>);
   expect(sessions).toHaveLength(2);
   expect(sessions[0].capabilities.state).toBe("disposed");
@@ -51,7 +51,7 @@ it("owns one committed engine after StrictMode replay and revokes it on unmount"
 it("does not acquire engines for abandoned renders", () => {
   const createEngine = vi.fn(); context.client = { createEngine };
   const pending = new Promise<never>(() => {});
-  function Pending() { useSynWareHaptics(); throw pending; }
+  function Pending() { useHaptics(); throw pending; }
   const view = render(<Suspense fallback={null}><Pending /></Suspense>);
   expect(createEngine).not.toHaveBeenCalled();
   view.unmount();

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { RuntimeResourceLedger } from "../Resources/RuntimeResourceLedger";
 import type { RuntimePerformancePolicy } from "../Performance/RuntimePerformancePolicy";
 import { createAppLifecycleRules } from "../AppManager/AppLifecycle";
@@ -26,6 +27,7 @@ import type { AppLifecycleEvent, AppManagerRuntimeRecord, SynCloudOSAppLifecycle
 import type { SynCloudOSBundleLifecycleHook, SynCloudOSBundleLifecycleHookName, TrustedSynWareBundle } from "../BundleLoader/bundleTypes";
 import type { SynCloudOSRuntimeEventType } from "../EventBus/eventTypes";
 import type { OperationContext } from "../Operations/operationTypes";
+import { OwnedWorkObservations } from "../Operations/OwnedWorkObservations";
 import type { WindowCloseResult, WindowManager } from "../Windows";
 import type { SynCloudOSStateTransitionRecord } from "../Statechart/statechartTypes";
 import type {
@@ -60,6 +62,8 @@ import type {
   SynCloudOSLifecycleTransitionOptions,
   SynCloudOSLifecycleTransitionResult,
 } from "./lifecycleTypes";
+import { SynCloudOSLifecycleVeto } from "./lifecycleTypes";
+import { applicationLifecycleFor } from "./applicationLifecycleHooks";
 
 type LifecycleErrorManager = Pick<SynCloudOSErrorManager, "capture" | "createAppNotFoundError">;
 type LifecycleBundleLoader = Pick<SynCloudOSBundleLoader, "getBundle" | "getLoadedBundle" | "loadBundle">;
@@ -80,6 +84,7 @@ export interface SynCloudOSLifecycleDependencies {
   readonly appManagerController: LifecycleAppManagerController;
   readonly policyKit: LifecyclePolicyKit;
   readonly windows: LifecycleWindowManager;
+  readonly revokeApplicationMounts: (appId: string) => void;
   readonly operations: LifecycleOperationCoordinator;
   readonly caches: LifecycleCacheRegistry;
   /** Aggregate resource relief for memory warnings. */
@@ -199,6 +204,7 @@ export function createLifecycle(
   const Caches = dependencies.caches;
   const lifecycleHistoryLimit = Math.max(1, dependencies.operationHistoryLimit ?? 160);
   const activeOperations = new Set<CancellableLifecycleOperation>();
+  const hookWork = new OwnedWorkObservations();
   let disposed = false;
 
   const aliases: Readonly<Record<string, SynCloudOSRuntimeEventType | string>> = {
@@ -217,7 +223,7 @@ export function createLifecycle(
   }
 
   function createRecord(appId: string, state: SynCloudOSAppLifecycleState): AppManagerRuntimeRecord | null {
-    const appInfo = RuntimeStore.getSnapshot().appInfo[appId];
+    const appInfo = RuntimeStore.getSnapshot().appInfo[normalizeBundleIdentifier(appId)];
     if (!appInfo) return null;
     return {
       appId,
@@ -305,6 +311,7 @@ export function createLifecycle(
 
   function resolveLifecycleHook<TPayload>(
     bundle: TrustedSynWareBundle,
+    appId: string,
     stage: SynCloudOSLifecycleStage,
     phase: "will" | "did",
   ): {
@@ -323,7 +330,16 @@ export function createLifecycle(
 
     const hookName = namedHookByStage[stage]?.[phase];
     const namedHook = hookName && bundle.lifecycleHooks ? bundle.lifecycleHooks[hookName] : undefined;
-    if (!hookName || !isNamedLifecycleHook(namedHook)) return null;
+    if (!hookName || !isNamedLifecycleHook(namedHook)) {
+      // An application written as an NSEApplication class carries its hooks on the root component of its definition.
+      const root = (bundle.synWareDefinition ?? BundleLoader.getLoadedBundle(appId)?.definition)?.root;
+      const application = applicationLifecycleFor(root);
+      const applicationHook = application?.hookFor(stage, phase);
+      return applicationHook ? { invoke: (context) => {
+        application?.prepare?.(runtime, appId, stage);
+        return applicationHook(context);
+      } } : null;
+    }
     return {
       hookName,
       invoke: (context) => namedHook({
@@ -344,7 +360,7 @@ export function createLifecycle(
   ): Promise<void> {
     const bundle = BundleLoader.getBundle(appId);
     if (!bundle) return;
-    const candidate = resolveLifecycleHook<TPayload>(bundle, stage, phase);
+    const candidate = resolveLifecycleHook<TPayload>(bundle, appId, stage, phase);
     if (!candidate) return;
     const startedAt = runtime.environment.now();
     const context: SynCloudOSLifecycleHookContext<TPayload> = {
@@ -360,7 +376,10 @@ export function createLifecycle(
       payload,
     };
     try {
-      await awaitLifecycleHook(candidate.invoke(context), operation.signal);
+      await awaitLifecycleHook(hookWork.track(() => {
+        operation.throwIfCancelled();
+        return candidate.invoke(context);
+      }), operation.signal);
       operation.throwIfCancelled();
       const endedAt = runtime.environment.now();
       recordLifecycleOperation({
@@ -378,8 +397,36 @@ export function createLifecycle(
         reason,
       });
     } catch (error) {
+      if (error instanceof SynCloudOSLifecycleVeto) {
+        const vetoedAt = runtime.environment.now();
+        recordLifecycleOperation({
+          runtimeId: runtime.runtimeId,
+          appId,
+          packageName: bundle.manifest.packageName,
+          operationId: operation.operationId,
+          correlationId: operation.correlationId,
+          stage,
+          phase,
+          startedAt,
+          endedAt: vetoedAt,
+          durationMs: Math.max(0, vetoedAt - startedAt),
+          outcome: "cancelled",
+          reason,
+          error: error.message,
+        });
+        operation.cancel(error.message);
+      }
       const endedAt = runtime.environment.now();
       const cancelled = operation.signal.aborted;
+      if (!cancelled && !(error instanceof SynCloudOSLifecycleVeto)) {
+        runtime.errors?.recordLifecycleFailure?.({
+          appId,
+          stage,
+          phase,
+          hookName: candidate.hookName ?? `${stage}:${phase}`,
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
       recordLifecycleOperation({
         runtimeId: runtime.runtimeId,
         appId,
@@ -426,22 +473,19 @@ export function createLifecycle(
       const app = AppRegistry.getApp(appId);
       const expectedCancellation = signal?.aborted || runtime.signal.aborted || disposed;
       if (app && !expectedCancellation) {
-        const message = error instanceof Error && error.message ? error.message : String(error);
         ErrorManager.capture({
           code: "APP_LAUNCH_FAILED",
-          title: `Webspring could not open ${app.packageName}.`,
+          title: `Webspring could not open ${app.displayName}.`,
           message: "SynCloudOS could not load the requested content.",
-          appId: app.id,
+          error,
+          appId: app.bundleIdentifier,
           packageName: app.packageName,
-          technicalMessage: message,
-          technicalDetails: error instanceof Error ? error.stack ?? message : message,
           source,
           suggestedActions: ["returnToWebspring", "dismiss"],
           category: "app",
           context: {
-            requestedAppId: app.id,
+            requestedAppId: app.bundleIdentifier,
             requestedPackage: app.packageName,
-            cause: message,
           },
         });
       }
@@ -501,7 +545,7 @@ export function createLifecycle(
       message: error,
       appId,
       source: options.source ?? "SynCloudOS.Lifecycle.transition",
-      technicalDetails: result.code,
+      technicalMessage: `Policy result: ${result.code}`,
       context: { appId, to, stage, options, code: result.code },
     });
     return error;
@@ -515,21 +559,22 @@ export function createLifecycle(
     establishCommit?: (transition: T) => void,
     routePath?: string,
   ): LifecycleCommitResult<T> {
+    appId = AppRegistry.getApp(appId)?.bundleIdentifier ?? appId;
     const before = RuntimeStore.getSnapshot();
-    const from = before.lifecycle[appId] ?? "registered";
+    const from = before.lifecycle[normalizeBundleIdentifier(appId)] ?? "registered";
     const at = runtime.environment.now();
     const event: AppLifecycleEvent = { appId, from, to, reason, at };
-    const previousActiveAppId = to === "active" && before.application.activeAppId !== appId
+    const previousActiveAppId = to === "active" && normalizeBundleIdentifier(before.application.activeAppId) !== normalizeBundleIdentifier(appId)
       ? before.application.activeAppId
       : null;
-    const previousFrom = previousActiveAppId ? before.lifecycle[previousActiveAppId] ?? "registered" : null;
+    const previousFrom = previousActiveAppId ? before.lifecycle[normalizeBundleIdentifier(previousActiveAppId)] ?? "registered" : null;
     const previousEvent: AppLifecycleEvent | null = previousActiveAppId && previousFrom === "active"
       ? { appId: previousActiveAppId, from: previousFrom, to: "suspended", reason, at }
       : null;
     const app = AppRegistry.getApp(appId);
     const reconcilePresentation = to === "active" || (
       (to === "suspended" || to === "closed") &&
-      (before.application.activeAppId === appId || before.application.currentAppId === appId)
+      (normalizeBundleIdentifier(before.application.activeAppId) === normalizeBundleIdentifier(appId) || normalizeBundleIdentifier(before.application.currentAppId) === normalizeBundleIdentifier(appId))
     );
     const transition = { runtimeId: runtime.runtimeId, appId, from, to, stage, reason } as T;
     establishCommit?.(transition);
@@ -547,11 +592,14 @@ export function createLifecycle(
           ok: true,
         }
       : null;
+    // Retained exit trees can still observe state. Revoke their capabilities
+    // before publishing the terminal state or any close-time invalidations.
+    if (to === "closed") dependencies.revokeApplicationMounts(appId);
     RuntimeStore.mutate((draft: RuntimeSnapshot) => {
       if (previousEvent) {
-        draft.lifecycle[previousEvent.appId] = "suspended";
+        draft.lifecycle[normalizeBundleIdentifier(previousEvent.appId)] = "suspended";
         draft.lifecycleEvents = [...draft.lifecycleEvents, previousEvent].slice(-lifecycleHistoryLimit);
-        const previousManager = draft.managers[previousEvent.appId];
+        const previousManager = draft.managers[normalizeBundleIdentifier(previousEvent.appId)];
         if (previousManager) {
           previousManager.lifecycleState = "suspended";
           previousManager.suspendedAt = at;
@@ -559,10 +607,10 @@ export function createLifecycle(
         }
         draft.application.suspendedAppIds = Array.from(new Set([...draft.application.suspendedAppIds, previousEvent.appId]));
       }
-      draft.lifecycle[appId] = to;
+      draft.lifecycle[normalizeBundleIdentifier(appId)] = to;
       draft.lifecycleEvents = [...draft.lifecycleEvents, event].slice(-lifecycleHistoryLimit);
-      const previousRecord = draft.managers[appId] ?? createRecord(appId, from);
-      if (previousRecord) draft.managers[appId] = updateManagerRecord(previousRecord, appId, from, to, reason, at);
+      const previousRecord = draft.managers[normalizeBundleIdentifier(appId)] ?? createRecord(appId, from);
+      if (previousRecord) draft.managers[normalizeBundleIdentifier(appId)] = updateManagerRecord(previousRecord, appId, from, to, reason, at);
       draft.application.lastLifecycleEvent = `${appId}:${from}->${to}`;
       if (to === "active") {
         draft.application.activeAppId = appId;
@@ -571,7 +619,7 @@ export function createLifecycle(
         draft.application.lastActiveAppId = appId;
         draft.application.routePath = routePath ?? app?.route ?? draft.application.routePath;
         draft.application.openAppIds = Array.from(new Set([...draft.application.openAppIds, appId]));
-        draft.application.suspendedAppIds = draft.application.suspendedAppIds.filter((id) => id !== appId);
+        draft.application.suspendedAppIds = draft.application.suspendedAppIds.filter((id) => normalizeBundleIdentifier(id) !== normalizeBundleIdentifier(appId));
         draft.application.launchingAppId = null;
         draft.application.pendingAppId = null;
         draft.webspring.selectedAppId = appId;
@@ -582,9 +630,9 @@ export function createLifecycle(
       } else if (to === "failed") {
         draft.application.failedAppIds = Array.from(new Set([...draft.application.failedAppIds, appId]));
       } else if (to === "closed") {
-        draft.application.openAppIds = draft.application.openAppIds.filter((id) => id !== appId);
-        draft.application.suspendedAppIds = draft.application.suspendedAppIds.filter((id) => id !== appId);
-        if (draft.application.activeAppId === appId) draft.application.activeAppId = null;
+        draft.application.openAppIds = draft.application.openAppIds.filter((id) => normalizeBundleIdentifier(id) !== normalizeBundleIdentifier(appId));
+        draft.application.suspendedAppIds = draft.application.suspendedAppIds.filter((id) => normalizeBundleIdentifier(id) !== normalizeBundleIdentifier(appId));
+        if (normalizeBundleIdentifier(draft.application.activeAppId) === normalizeBundleIdentifier(appId)) draft.application.activeAppId = null;
       }
       if (reconcilePresentation && to !== "active") {
         draft.application.activeAppId = null;
@@ -614,15 +662,27 @@ export function createLifecycle(
         draft.statechart.isTransitioning = false;
         draft.statechart.history = [...draft.statechart.history, statechartRecord].slice(-80);
       }
-      const appInfo = draft.appInfo[appId];
+      const appInfo = draft.appInfo[normalizeBundleIdentifier(appId)];
       if (appInfo) {
-        draft.appInfo[appId] = {
+        draft.appInfo[normalizeBundleIdentifier(appId)] = {
           ...appInfo,
           isReady: to === "ready" || to === "launching" || to === "active" || to === "suspended",
           isFailed: to === "failed",
         };
       }
     });
+    // A direct close or suspend of the presented app (SDK closeSelf, quit) owns
+    // no enclosing statechart return, so the shell motion that Webspring
+    // would have been given by Statechart.returnToWebspring is driven here.
+    // Launch phases cannot outlive the app that produced them. Deep-linked
+    // apps never ran a launch (phase idle) and need no return motion.
+    if (statechartRecord && to !== "active") {
+      const phase = RuntimeStore.getSnapshot().webspring.launchPhase;
+      if (phase === "staging" || phase === "launching" || phase === "covered") {
+        if (app?.presentation === "appView" && app.frame.presentationMotion !== "content") runtime.webspringChoreography.beginReturn(appId);
+        else runtime.webspring.coverForApp(null);
+      }
+    }
     if (previousEvent) EventBus.publish("app.lifecycle", { runtimeId: runtime.runtimeId, ...previousEvent, stage: "suspend" }, previousEvent.appId);
     EventBus.publish("app.lifecycle", { runtimeId: runtime.runtimeId, ...event, stage }, appId);
     if (statechartRecord) EventBus.publish("statechart.transition.complete", statechartRecord, `${statechartRecord.from} -> ${statechartRecord.to}`);
@@ -664,7 +724,7 @@ export function createLifecycle(
     transaction?: LifecycleRequestOptions["closeTransaction"],
   ): Promise<WindowCloseResult | null> {
     if (transaction) {
-      if (transaction.authority.applicationId !== appId || transaction.preparation.applicationId !== appId) {
+      if (normalizeBundleIdentifier(transaction.authority.applicationId) !== normalizeBundleIdentifier(appId) || normalizeBundleIdentifier(transaction.preparation.applicationId) !== normalizeBundleIdentifier(appId)) {
         throw new Error("Prepared application close belongs to another application.");
       }
       signal?.throwIfAborted();
@@ -691,7 +751,7 @@ export function createLifecycle(
     const will: LifecycleOperationHook<T>[] = [
       async (context) => {
         previousActiveAppId = stage === "activate" ? RuntimeStore.getSnapshot().application.activeAppId : null;
-        if (previousActiveAppId && previousActiveAppId !== appId && getState(previousActiveAppId) === "active") {
+        if (previousActiveAppId && normalizeBundleIdentifier(previousActiveAppId) !== normalizeBundleIdentifier(appId) && getState(previousActiveAppId) === "active") {
           await invokeLifecycleHook("suspend", "will", previousActiveAppId, context, payload, reason);
         }
       },
@@ -725,7 +785,7 @@ export function createLifecycle(
       did.push({
         onError: "continue",
         run: async (context) => {
-          if (previousActiveAppId && previousActiveAppId !== appId) {
+          if (previousActiveAppId && normalizeBundleIdentifier(previousActiveAppId) !== normalizeBundleIdentifier(appId)) {
             await invokeLifecycleHook("suspend", "did", previousActiveAppId, context, payload, reason);
           }
         },
@@ -785,7 +845,7 @@ export function createLifecycle(
     });
   }
 
-  const getState = (appId: string): SynCloudOSAppLifecycleState => RuntimeStore.getSnapshot().lifecycle[appId] ?? "registered";
+  const getState = (appId: string): SynCloudOSAppLifecycleState => RuntimeStore.getSnapshot().lifecycle[normalizeBundleIdentifier(appId)] ?? "registered";
 
   function launch(appId: string, options: LifecycleRequestOptions = {}): RuntimeOperationHandle<AppLaunchResult> {
     const reason = options.reason ?? "runtime.launch";
@@ -797,7 +857,7 @@ export function createLifecycle(
       },
       async (context) => {
         previousActiveAppId = RuntimeStore.getSnapshot().application.activeAppId;
-        if (previousActiveAppId && previousActiveAppId !== appId && getState(previousActiveAppId) === "active") {
+        if (previousActiveAppId && normalizeBundleIdentifier(previousActiveAppId) !== normalizeBundleIdentifier(appId) && getState(previousActiveAppId) === "active") {
           await invokeLifecycleHook("suspend", "will", previousActiveAppId, context, payload, reason);
         }
       },
@@ -811,7 +871,7 @@ export function createLifecycle(
       {
         onError: "continue",
         run: async (context) => {
-          if (previousActiveAppId && previousActiveAppId !== appId) {
+          if (previousActiveAppId && normalizeBundleIdentifier(previousActiveAppId) !== normalizeBundleIdentifier(appId)) {
             await invokeLifecycleHook("suspend", "did", previousActiveAppId, context, payload, reason);
           }
         },
@@ -1019,18 +1079,18 @@ export function createLifecycle(
     getState,
 
     getRecord(appId) {
-      return RuntimeStore.getSnapshot().managers[appId] ?? null;
+      return RuntimeStore.getSnapshot().managers[normalizeBundleIdentifier(appId)] ?? null;
     },
 
     getEvents(appId, limit) {
       const events = appId
-        ? RuntimeStore.getSnapshot().lifecycleEvents.filter((event) => event.appId === appId)
+        ? RuntimeStore.getSnapshot().lifecycleEvents.filter((event) => normalizeBundleIdentifier(event.appId) === normalizeBundleIdentifier(appId))
         : RuntimeStore.getSnapshot().lifecycleEvents;
       return typeof limit === "number" ? events.slice(-limit) : events;
     },
 
     transition(appId, to, options: SynCloudOSLifecycleTransitionOptions = {}): SynCloudOSLifecycleTransitionResult {
-      const appInfo = RuntimeStore.getSnapshot().appInfo[appId];
+      const appInfo = RuntimeStore.getSnapshot().appInfo[normalizeBundleIdentifier(appId)];
       if (!appInfo) {
         const error = `No registered app found for ${appId}.`;
         EventBus.publish("lifecycle.transition.failed", { appId, to, error, options }, appId);
@@ -1054,11 +1114,11 @@ export function createLifecycle(
         EventBus.publish("lifecycle.transition.failed", { appId, from, to, error, options }, appInfo.packageName);
         ErrorManager.capture({
           code: "APP_LAUNCH_FAILED",
-          title: `${appInfo.packageName} refused a lifecycle transition.`,
+          title: `${appInfo.displayName} refused a lifecycle transition.`,
           message: `SynCloudOS could not move ${appInfo.displayName} from ${from} to ${to}.`,
           appId,
           source: options.source ?? "SynCloudOS.Lifecycle.transition",
-          technicalDetails: options.reason ?? error,
+          technicalMessage: options.reason ?? error,
           context: { appId, from, to, options },
         });
         return { ok: false, error };
@@ -1087,7 +1147,7 @@ export function createLifecycle(
       return EventBus.subscribe("app.lifecycle.transition", (runtimeEvent) => {
         const event = eventFromPayload(runtimeEvent.payload, runtimeEvent.at);
         if (!event) return;
-        if (options.appId && event.appId !== options.appId) return;
+        if (options.appId && normalizeBundleIdentifier(event.appId) !== normalizeBundleIdentifier(options.appId)) return;
         listener(event, runtimeEvent);
       });
     },
@@ -1121,8 +1181,10 @@ export function createLifecycle(
       disposed = true;
       for (const operation of activeOperations) operation.cancel("runtime-disposed");
       activeOperations.clear();
+      hookWork.end();
     },
   };
 
+  hookWork.bind(ownedLifecycle);
   return ownedLifecycle;
 }

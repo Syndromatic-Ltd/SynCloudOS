@@ -38,14 +38,27 @@ describe("SynWare NSE public framework boundary", () => {
   it("exports complete controller, model and control authoring contracts", () => {
     expect(publicExports().names).toEqual(expect.arrayContaining([
       "NSEObjectController", "NSEDictionaryController", "ObjectControllerOptions",
+      "PreferenceValidationError", "PreferencePersistenceError",
       "DictionaryControllerOptions", "ControllerEditTransaction", "ControllerCommitResult",
       "IndexPath", "IndexSet", "Predicate", "ChangeSet", "SortDescriptor", "TreeNode",
       "NSEControlValidation", "Formatter", "FormatterContext", "FormatterResult",
-      "NSEDataViewCellContent", "NSEDataViewCellContentProps",
+      "NSETableCellView", "NSETableCellViewProps",
     ]));
     expect(publicExports(resolve("src/NSE/public/controls.ts")).names).toEqual(expect.arrayContaining([
       "NSEControlValidation", "Formatter", "FormatterContext", "FormatterResult",
     ]));
+  });
+
+  it("exports managed controller lifetimes and the lifecycle error contract without its internal record", () => {
+    const { names } = publicExports();
+    expect(names).toEqual(expect.arrayContaining([
+      "useNSEArrayController", "useNSETreeController", "NSEControllerOwnership", "NSEControllerDisposalReason",
+      "SynCloudOSLifecycleError", "SynCloudOSLifecycleErrorOptions", "SynCloudOSLifecycleResource",
+      "SynCloudOSLifecycleDisposal", "SynCloudOSLifecycleDisposalReason",
+    ]));
+    for (const internal of ["SynCloudOSLifecycleRecord", "declareSynCloudOSLifecycleSignal", "synCloudOSLifecycleSignalReason", "nseDeferredDisposalMicrotaskScheduler"]) {
+      expect(names).not.toContain(internal);
+    }
   });
 
   it("supports Portfolio navigation and popup imports through the public framework entry", () => {
@@ -59,7 +72,7 @@ describe("SynWare NSE public framework boundary", () => {
       "NSETabBarController",
       "useNSEDeferredDisposal",
       "NSEDisposalScheduler",
-      "NSEAnimationDefaults",
+      "NSEAnimationContext",
       "NSEAnimationEnvironment",
       "NSEAnimationEnvironmentProvider",
       "NSEAnimationEnvironmentProviderProps",
@@ -81,7 +94,7 @@ describe("SynWare NSE public framework boundary", () => {
   it("keeps host machinery and the internal namespace outside the public export contract", () => {
     const { declarations, names } = publicExports();
     expect(declarations.every((declaration) => declaration.exportClause && ts.isNamedExports(declaration.exportClause))).toBe(true);
-    for (const forbidden of ["NSE", "WindowManager", "WindowController", "NSEWindowController", "SynWareProvider", "SynWareRuntimeMount", "nseRegistry", "NSEStandardWindowSpecimen", "NSEStandardWindowSpecimenProps", "nseControlVariantCount", "useOptionalNSEWindowSurfaceBridge"]) {
+    for (const forbidden of ["NSE", "WindowManager", "WindowController", "SynWareProvider", "SynWareRuntimeMount", "nseRegistry", "NSEStandardWindowSpecimen", "NSEStandardWindowSpecimenProps", "nseControlVariantCount", "useOptionalNSEWindowSurfaceBridge"]) {
       expect(names).not.toContain(forbidden);
     }
     const controls = publicExports(resolve("src/NSE/public/controls.ts"));

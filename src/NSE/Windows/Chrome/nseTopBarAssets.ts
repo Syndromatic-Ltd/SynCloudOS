@@ -18,17 +18,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import webspringReturn from "./Resources/AtmoTopBar/webspring-return.svg?url&no-inline";
-import webspringReturnSelected from "./Resources/AtmoTopBar/webspring-return-selected.svg?url&no-inline";
+import home from "./Resources/AtmoTopBar/home.svg?url&no-inline";
+import settings from "./Resources/AtmoTopBar/settings.svg?url&no-inline";
 import userInfo from "./Resources/AtmoTopBar/user-info.svg?url&no-inline";
-import userInfoSelected from "./Resources/AtmoTopBar/user-info-selected.svg?url&no-inline";
 
 /**
- * The Cumulus bar and its inset controls are painted in CSS (nse-chrome.css);
- * only the two item glyphs are assets, each a vector with a resting (engraved
- * metal) and a selected (lit) rendering.
+ * The bars and their buttons are painted in CSS (nse-chrome.css); the only assets are the
+ * built-in item glyphs. Each is a single solid shape whose alpha is used as a CSS mask, so the
+ * theme colours it. An item's own `icon` (any single-shape SVG) takes the same route.
  */
-export const atmoCumulusGlyphs = Object.freeze({
-  webspring: Object.freeze({ normal: webspringReturn, selected: webspringReturnSelected }),
-  userInfo: Object.freeze({ normal: userInfo, selected: userInfoSelected }),
+export const nseTopBarGlyphs = Object.freeze({
+  webspring: home,
+  userInfo,
+  settings
 });

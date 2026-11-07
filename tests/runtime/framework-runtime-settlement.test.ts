@@ -65,24 +65,24 @@ describe("host-private runtime settlement association", () => {
     const { AppRegistry, LaunchServices, LoginServices, Statechart } = createRuntimeHarness(owner);
     const registry = getRuntimeSettlement(owner);
     AppRegistry.registerMany([
-      createTestBundle({ id: "journal", route: "/journal" }),
-      createTestBundle({ id: "studio", route: "/studio" }),
+      createTestBundle({ bundleIdentifier: "com.example.journal", route: "/journal" }),
+      createTestBundle({ bundleIdentifier: "com.example.studio", route: "/studio" }),
     ]);
     unlockRuntime(LoginServices);
     Statechart.gotoState("active.webspring", { source: "settlement-multiswitch" });
 
-    LaunchServices.openApp("journal", { source: "settlement-multiswitch" });
+    LaunchServices.openApp("com.example.journal", { source: "settlement-multiswitch" });
     await flushLaunchTimers();
-    LaunchServices.openApp("studio", { source: "settlement-multiswitch" });
+    LaunchServices.openApp("com.example.studio", { source: "settlement-multiswitch" });
     await flushMultiSwitchLaunch();
 
     const switching = owner.store.getSnapshot().application.multiSwitch;
-    expect(switching).toMatchObject({ status: "switching", fromAppId: "journal", toAppId: "studio" });
+    expect(switching).toMatchObject({ status: "switching", fromAppId: "com.example.journal", toAppId: "com.example.studio" });
     expect(registry.getState().pending).toContainEqual(expect.objectContaining({
       id: switching.id,
       owner: "application",
       kind: "multiswitch",
-      label: "journal -> studio",
+      label: "com.example.journal -> com.example.studio",
     }));
     expect(owner.operations.inspectPending()).toEqual([]);
 

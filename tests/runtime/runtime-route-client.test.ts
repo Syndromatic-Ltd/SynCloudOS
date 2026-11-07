@@ -25,7 +25,7 @@ import { createTestBundle, createTestRuntime } from "./helpers";
 
 describe("runtime route client", () => {
   it("preserves the caller's query and fragment when synchronising a committed route", async () => {
-    const runtime = createTestRuntime({ initialBundles: [createTestBundle({ id: "studio", route: "/studio" })] });
+    const runtime = createTestRuntime({ initialBundles: [createTestBundle({ bundleIdentifier: "com.example.studio", route: "/studio" })] });
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
     window.history.replaceState({}, "", "/");
 

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { LUFXQuery, LUFXQueryDescriptor } from "../../FX/LuminaFX/LUFXQuery";
 import { LUFXQueryPlanner, type LUFXQueryExecutionOptions, type LUFXQueryResultEntry, type LUFXQueryResultPage } from "../../FX/LuminaFX/LUFXQueryPlanner";
 import type { LUFXSuggestionOptions, LUFXSuggestionResult } from "../../FX/LuminaFX/LUFXSuggestions";
@@ -83,9 +84,9 @@ interface LUFXHostServiceOptions {
   readonly eligibility: LuminaEligibilityRegistry;
   readonly policy: LUFXHostPolicyPort;
   readonly subscribeState: (listener: () => void) => () => void;
-  readonly apps: { getApp(appId: string): { readonly id: string } | null };
+  readonly apps: { getApp(appId: string): { readonly bundleIdentifier: string } | null };
   readonly routes: {
-    getAppForRoute(pathname: string): { readonly id: string } | null;
+    getAppForRoute(pathname: string): { readonly bundleIdentifier: string } | null;
     openRoute(pathname: string, options?: Record<string, unknown>): any;
   };
   readonly presentationSettlements: { get(id: string): any };
@@ -165,7 +166,7 @@ export class LUFXHostService {
     input: Omit<LuminaDonationCoordinatorOptions<TValue>, "indexes" | "eligibility">,
   ): LuminaDonationCoordinator<TValue> {
     this.#assertLive();
-    if (this.#erasingOwners.has(input.ownerAppId)) {
+    if (this.#erasingOwners.has(normalizeBundleIdentifier(input.ownerAppId))) {
       throw new DOMException("Lumina owner erasure is in progress.", "InvalidStateError");
     }
     const coordinator = new LuminaDonationCoordinator<TValue>({
@@ -181,10 +182,11 @@ export class LUFXHostService {
     this.#assertLive();
     const signal = this.#operationSignal(options.signal);
     signal.throwIfAborted();
-    this.#erasingOwners.add(ownerAppId);
+    const erasingOwner = normalizeBundleIdentifier(ownerAppId);
+    this.#erasingOwners.add(erasingOwner);
     this.#options.eligibility.eraseOwner(ownerAppId);
     try {
-      const owned = [...this.#donationCoordinators].filter(([, owner]) => owner === ownerAppId);
+      const owned = [...this.#donationCoordinators].filter(([, owner]) => normalizeBundleIdentifier(owner) === normalizeBundleIdentifier(ownerAppId));
       await Promise.all(owned.map(async ([coordinator]) => {
         await coordinator.prepareForOwnerErasure();
         this.#donationCoordinators.delete(coordinator);
@@ -203,7 +205,7 @@ export class LUFXHostService {
         maintenance.dispose();
       }
     } finally {
-      this.#erasingOwners.delete(ownerAppId);
+      this.#erasingOwners.delete(erasingOwner);
     }
   }
 

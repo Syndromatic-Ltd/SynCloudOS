@@ -31,16 +31,9 @@ export function SynWareProvider({ value, children }: SynWareProviderProps) {
 }
 
 /** Internal framework consumer for components which can also be hosted by a
- * kernel surface. Public app code should use useSynWare(), which makes the
+ * kernel surface. Public app code should use useSCOS(), which makes the
  * active mount requirement explicit. */
 export function useSynWareContext(): SynWareContextValue | null {
   return useContext(SynWareContext);
 }
 
-export function useSynWare(): SynWareContextValue {
-  const context = useSynWareContext();
-  if (!context) {
-    throw new Error("useSynWare must be used within a SynWareProvider for an active SynWare session.");
-  }
-  return context;
-}

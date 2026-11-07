@@ -1,6 +1,6 @@
 /*
  * SynCloudOS
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ * Copyright Â© 2026 Syndromatic Ltd. All rights reserved.
  *
  * Designed by Kavish Krishnakumar in Manchester.
  *
@@ -18,12 +18,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { cloneElement, isValidElement, useContext, useLayoutEffect, useRef, type KeyboardEvent as ReactKeyboardEvent, type PropsWithChildren, type ReactElement } from "react";
-import { type FocusScopeKind, type UndoOwner } from "../SynCloudOS/SynCloudOS";
+import { revealKeyboardTarget } from "./focusVisibility";
+import { cloneElement, isValidElement, useContext, useInsertionEffect, useLayoutEffect, useMemo, useRef, type KeyboardEvent as ReactKeyboardEvent, type PropsWithChildren, type ReactElement } from "react";
+import { getMountedAppDOMRuntimeId, type FocusScopeKind, type UndoOwner } from "../SynCloudOS/SynCloudOS";
 import { useKernelSynCloudOS } from "./SynCloudOSProvider";
 import { retainUndoOwner } from "./undoOwnerLease";
 import { createRuntimeInputProtocol, useRuntimeInputProtocol } from "./runtimeInputProtocol";
 import { AppFocusScope } from "./AppFocusScope";
+import { FocusScopeIdContext } from "./focusScopeContext";
 import { SynWareRuntimeContext, SynCloudOSRuntimeContext } from "./runtimeContext";
 import { resolveNSEFocusReturnTarget, isWithinNSEFocusOrigin } from "../NSE/hostComposition";
 
@@ -33,25 +35,27 @@ function belongsToRuntime(element: HTMLElement, runtimeId: string): boolean {
   return element.closest<HTMLElement>("[data-syncloudos-runtime-owner]")?.dataset.syncloudosRuntimeOwner === runtimeId;
 }
 
+function isAvailableFocusTarget(element: HTMLElement, runtimeId: string): boolean {
+  return belongsToRuntime(element, runtimeId) &&
+    !element.hasAttribute("disabled") &&
+    !element.closest("[inert], [aria-hidden='true']");
+}
+
 /** Surface chrome (a window's title-bar controls) is tabbable but never the
  * first responder a scope picks; it is the fallback when nothing else is. */
 const focusChromeSelector = "[data-syncloudos-focus-chrome]";
 
 function focusableTarget(root: HTMLElement, runtimeId: string): HTMLElement | null {
-  if (root.matches(focusableSelector) && belongsToRuntime(root, runtimeId)) return root;
+  if (root.matches(focusableSelector) && isAvailableFocusTarget(root, runtimeId)) return root;
   const candidates = Array.from(root.querySelectorAll<HTMLElement>(focusableSelector))
-    .filter((target) => belongsToRuntime(target, runtimeId));
+    .filter((target) => isAvailableFocusTarget(target, runtimeId));
   return candidates.find((target) => !target.closest(focusChromeSelector)) ?? candidates[0] ?? null;
 }
 
 function focusableTargets(root: HTMLElement, runtimeId: string): HTMLElement[] {
   const targets = Array.from(root.querySelectorAll<HTMLElement>(focusableSelector));
   if (root.matches(focusableSelector)) targets.unshift(root);
-  return targets.filter((target) => (
-    belongsToRuntime(target, runtimeId) &&
-    !target.hasAttribute("disabled") &&
-    target.getAttribute("aria-hidden") !== "true"
-  ));
+  return targets.filter((target) => isAvailableFocusTarget(target, runtimeId));
 }
 
 function scopeRoot(document: Document | null, runtimeId: string, scopeId: string): HTMLElement | null {
@@ -88,21 +92,31 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
   const fallbackProtocolRef = useRef<ReturnType<typeof createRuntimeInputProtocol> | null>(null);
   if (!fallbackProtocolRef.current || fallbackProtocolRef.current.runtimeId !== runtime.runtimeId) fallbackProtocolRef.current = createRuntimeInputProtocol(runtime.runtimeId);
   const protocol = inheritedProtocol?.runtimeId === runtime.runtimeId ? inheritedProtocol : fallbackProtocolRef.current;
+  const scopeLease = useRef<ReturnType<typeof runtime.focus.openScope> | null>(null);
+  const configuration = useMemo(() => ({ runtime, scopeId, parentScopeId, parentResponderId, externallyManagedScope }), [runtime, scopeId, kind, parentScopeId, parentResponderId, modal, trapFocus, restoreFocus, undoOwner, externallyManagedScope, externallyManagedInert]);
+  const latestConfiguration = useRef(configuration);
+  useInsertionEffect(() => { latestConfiguration.current = configuration; }, [configuration]);
+  const focusReturn = useRef<{ runtimeId: string; scopeId: string; target: HTMLElement | null } | null>(null);
   useLayoutEffect(() => {
     let live = true;
-    const handle = externallyManagedScope
-      ? null
-      : runtime.focus.openScope({ id: scopeId, kind, parentScopeId, parentResponderId, modal, trapFocus });
-    if (!externallyManagedScope) runtime.focus.requestFocus(parentResponderId);
+    const newlyOpened = !externallyManagedScope && scopeLease.current === null;
+    const handle = externallyManagedScope ? null : scopeLease.current ?? runtime.focus.openScope({ id: scopeId, kind, parentScopeId, parentResponderId, modal, trapFocus });
+    scopeLease.current = handle;
+    handle?.updatePresentation({ kind, modal, trapFocus });
+    if (newlyOpened) runtime.focus.requestFocus(parentResponderId);
     const undoLease = undoOwner ? retainUndoOwner(runtime, undoOwner) : null;
     const document = runtime.environment.browser.getDocument();
     const root = scopeRoot(document, runtime.runtimeId, scopeId);
     // The control this scope was opened from. A scope opened by a menu
     // command sees the menu row as focused; that row will be gone, so resolve
     // it to the control that opened the menu.
-    const openedFrom = document?.activeElement && !root?.contains(document.activeElement)
+    const candidateReturnTarget = document?.activeElement && !root?.contains(document.activeElement)
       ? resolveNSEFocusReturnTarget(document.activeElement)
       : null;
+    if (focusReturn.current?.runtimeId !== runtime.runtimeId || focusReturn.current?.scopeId !== scopeId) {
+      focusReturn.current = { runtimeId: runtime.runtimeId, scopeId, target: candidateReturnTarget };
+    }
+    const openedFrom = focusReturn.current.target;
     // NSEAlertBackdrop already owns sibling inertness and restores the exact
     // prior state. A second owner would make parent/child effect cleanup order
     // restore the modal's captured `true` state after this scope restores it.
@@ -148,7 +162,7 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
       // than recursively redirecting the same transition.
       redirectingFocus = true;
       try {
-        target.focus({ preventScroll: true });
+        target.focus({ preventScroll: true, focusVisible: true } as FocusOptions);
       } finally {
         queueMicrotask(() => {
           redirectingFocus = false;
@@ -170,7 +184,7 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
           belongsToRuntime(element, runtime.runtimeId) &&
           focusableTarget(element, runtime.runtimeId)
         ));
-      if (scopeRoot) focusableTarget(scopeRoot, runtime.runtimeId)?.focus({ preventScroll: true });
+      if (scopeRoot) focusableTarget(scopeRoot, runtime.runtimeId)?.focus({ preventScroll: true, focusVisible: true } as FocusOptions);
     });
     return () => {
       live = false;
@@ -181,9 +195,18 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
         if (ariaHidden === null) element.removeAttribute("aria-hidden");
         else element.setAttribute("aria-hidden", ariaHidden);
       }
-      const result = handle?.close({ restore: restoreFocus }) ?? {
+      // Reconfiguring one live scope (e.g. popover -> sheet) is not a close.
+      // Restoring its trigger here can dismiss the newly configured overlay
+      // as focus-left. The final detach still restores the original target.
+      const next = latestConfiguration.current;
+      const reconfiguring = next !== configuration && next.runtime === runtime && next.scopeId === scopeId &&
+        next.parentScopeId === parentScopeId && next.parentResponderId === parentResponderId && next.externallyManagedScope === externallyManagedScope;
+      const shouldRestore = restoreFocus && !reconfiguring;
+      if (!reconfiguring) focusReturn.current = null;
+      if (!reconfiguring) scopeLease.current = null;
+      const result = (reconfiguring ? null : handle?.close({ restore: shouldRestore })) ?? {
         status: "closed" as const,
-        restoredResponderId: restoreFocus ? runtime.focus.getFocusedResponderId() : null,
+        restoredResponderId: shouldRestore ? runtime.focus.getFocusedResponderId() : null,
       };
       undoLease?.release();
       if (result.status === "closed" && result.restoredResponderId) {
@@ -233,7 +256,11 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
         if (index < 0 || (!event.shiftKey && index === targets.length - 1) || (event.shiftKey && index === 0)) {
           event.preventDefault();
           event.stopPropagation();
-          targets[event.shiftKey ? targets.length - 1 : 0]?.focus({ preventScroll: true });
+          const target = targets[event.shiftKey ? targets.length - 1 : 0];
+          if (target && root) {
+            target.focus({ preventScroll: true, focusVisible: true } as FocusOptions);
+            revealKeyboardTarget(root, target);
+          }
           return;
         }
       }
@@ -252,22 +279,22 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
   if (asChild) {
     if (!isValidElement(children)) throw new Error("FocusScope asChild requires exactly one host element.");
     const child = children as ReactElement<{ onKeyDownCapture?: (event: ReactKeyboardEvent<HTMLDivElement>) => void }>;
-    return cloneElement(child, {
+    return <FocusScopeIdContext value={scopeId}>{cloneElement(child, {
       ...scopeProps,
       onKeyDownCapture: (event: ReactKeyboardEvent<HTMLDivElement>) => {
         handleKeyDownCapture(event);
         if (!event.defaultPrevented) child.props.onKeyDownCapture?.(event);
       },
-    });
+    })}</FocusScopeIdContext>;
   }
-  return <div {...scopeProps}>{children}</div>;
+  return <FocusScopeIdContext value={scopeId}><div {...scopeProps}>{children}</div></FocusScopeIdContext>;
 }
 
 export function FocusScope(props: FocusScopeProps) {
   const appRuntime = useContext(SynWareRuntimeContext);
   const kernelRuntime = useContext(SynCloudOSRuntimeContext);
   if (appRuntime) {
-    return <AppFocusScope runtime={appRuntime} runtimeId={`app:${appRuntime.app.id}`} options={props}>{props.children}</AppFocusScope>;
+    return <AppFocusScope runtime={appRuntime} runtimeId={getMountedAppDOMRuntimeId(appRuntime)} options={props}>{props.children}</AppFocusScope>;
   }
   if (!kernelRuntime) throw new Error("FocusScope must be used within SynCloudOSProvider or a mounted SynWare.");
   return <KernelFocusScope {...props} />;

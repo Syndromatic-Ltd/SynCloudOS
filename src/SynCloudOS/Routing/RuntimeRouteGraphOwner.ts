@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
 import type { SynCloudOSRouteInfo, SynWareRouteGraph, SynWareRouteLoadContext } from "./appRouteTypes";
 import { createRouteModuleLoader, type RouteModuleLoader } from "./RouteModuleLoader";
@@ -53,14 +54,14 @@ export function createRuntimeRouteGraphOwner(runtime: SynCloudOSRuntime, prepara
 
   const graphFor = (appId: string) => runtime.bundles.getLoadedBundle(appId)?.definition.routes ?? null;
   const loaderFor = (appId: string, graph: SynWareRouteGraph) => {
-    const existing = modules.get(appId);
+    const existing = modules.get(normalizeBundleIdentifier(appId));
     if (existing?.graph === graph) return existing.loader;
     const bundle = runtime.bundles.getBundle(appId);
     const loader = createRouteModuleLoader({
       getBundleGeneration: () => runtime.bundles.getBundle(appId) === bundle ? 0 : 1,
       isOwnerLive: () => !runtime.signal.aborted,
     });
-    modules.set(appId, { graph, loader });
+    modules.set(normalizeBundleIdentifier(appId), { graph, loader });
     return loader;
   };
   // An unregistered application's graph and route-module loader are
@@ -69,9 +70,9 @@ export function createRuntimeRouteGraphOwner(runtime: SynCloudOSRuntime, prepara
   // is outside framework control; the active route authority (`current`) is
   // left to the route manager.
   const releaseApplication = (appId: string) => {
-    const entry = modules.get(appId);
+    const entry = modules.get(normalizeBundleIdentifier(appId));
     if (!entry) return;
-    modules.delete(appId);
+    modules.delete(normalizeBundleIdentifier(appId));
     entry.loader.invalidate();
   };
   const removeUnregisterRelease = runtime.events.subscribe("bundle.unregister", (event) => {
@@ -111,7 +112,7 @@ export function createRuntimeRouteGraphOwner(runtime: SynCloudOSRuntime, prepara
       const scope = new AbortController();
       const guardSignal = AbortSignal.any([signal, scope.signal]);
       const authorizationGeneration = getAuthorizationGeneration();
-      const bundles = new Map([appId, from?.route.appId].filter((id): id is string => Boolean(id)).map(id => [id, runtime.bundles.getBundle(id)]));
+      const bundles = new Map([appId, from?.route.appId].filter((id): id is string => Boolean(id)).map(id => [normalizeBundleIdentifier(id), runtime.bundles.getBundle(id)]));
       const assertCurrent = () => {
         signal.throwIfAborted();
         if (getAuthorizationGeneration() !== authorizationGeneration) throw new DOMException("Route authorization changed during preparation.", "SecurityError");
@@ -167,7 +168,7 @@ export function createRuntimeRouteGraphOwner(runtime: SynCloudOSRuntime, prepara
       if (!graph || graph.getRoute(definition.name) !== definition) throw new DOMException("Route module graph was replaced.", "AbortError");
       return loaderFor(appId, graph).resolveDefinition(definition, { signal });
     },
-    invalidateModules(appId: string) { modules.get(appId)?.loader.invalidate(); },
+    invalidateModules(appId: string) { modules.get(normalizeBundleIdentifier(appId))?.loader.invalidate(); },
     diagnostics() { return Object.freeze({ retainedApplications: modules.size }); },
     async preload(appId: string, href: string, signal: AbortSignal, options: Readonly<{ data?: boolean }> = {}) {
       const graph = graphFor(appId);

@@ -81,7 +81,7 @@ export interface NSEPredicateEditorProps<T> extends Omit<HTMLAttributes<HTMLDivE
   readonly defaultValue?: PredicateExpression;
   readonly onChange?: (value: PredicateExpression) => void;
   readonly readOnly?: boolean;
-  readonly disabled?: boolean;
+  readonly isEnabled?: boolean;
   readonly locale?: string;
   readonly state?: NSEDataViewState;
 }
@@ -97,5 +97,5 @@ export interface NSERuleEditorProps extends Omit<HTMLAttributes<HTMLDivElement>,
   readonly locale?: string;
   readonly state?: NSEDataViewState;
   readonly readOnly?: boolean;
-  readonly disabled?: boolean;
+  readonly isEnabled?: boolean;
 }

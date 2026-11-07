@@ -40,7 +40,7 @@ function fixture() {
         children: [{ name: "music.artist.album", path: "album/:albumId" }],
       }],
     }],
-  } as const).bind("/music", "music");
+  } as const).bind("/music", "com.example.music");
   const active = graph.recognize("/music/artist/justice/album/cross");
   if (active.kind !== "match") throw new Error("fixture route missing");
   let snapshot: AppRouteSessionSnapshot = Object.freeze({
@@ -96,7 +96,7 @@ function routerForNavigationResult(result: AppNavigationTransitionResult) {
   return createMountedSynWareRouter({
     graph,
     mountedGraph: graph,
-    appId: "music",
+    appId: "com.example.music",
     sessionId: "session:music",
     signal: controller.signal,
     session,
@@ -147,7 +147,7 @@ describe("Routing II scoped AppSDK router", () => {
       correlationId: "correlation:typed-outcome",
       committed: true,
       postCommit: "cancelled",
-      route: { pathname: "/music", kind: "app", appId: "music" },
+      route: { pathname: "/music", kind: "app", appId: "com.example.music" },
       reason: "post-commit-cancelled",
     });
     await expect(router.transitionTo({ name: "music" }).result).resolves.toMatchObject({
@@ -165,7 +165,7 @@ describe("Routing II scoped AppSDK router", () => {
       correlationId: "correlation:typed-outcome",
       committed: true,
       postCommit: "failed",
-      route: { pathname: "/music", kind: "app", appId: "music" },
+      route: { pathname: "/music", kind: "app", appId: "com.example.music" },
       pendingRoles: ["route-outlet"],
       reason: "presentation timed out",
     });
@@ -184,7 +184,7 @@ describe("Routing II scoped AppSDK router", () => {
     const router = createMountedSynWareRouter({
       graph,
       mountedGraph: graph,
-      appId: "music",
+      appId: "com.example.music",
       sessionId: "session:music",
       signal: controller.signal,
       session,
@@ -228,7 +228,7 @@ describe("Routing II scoped AppSDK router", () => {
       }), controller, operationId, "original-correlation", makeHandle);
     };
     const openRoute = vi.fn<AppNavigationClient["openRoute"]>(() => makeHandle());
-    const router = createMountedSynWareRouter({ graph, mountedGraph: graph, appId: "music", sessionId: "session:music",
+    const router = createMountedSynWareRouter({ graph, mountedGraph: graph, appId: "com.example.music", sessionId: "session:music",
       signal: controller.signal, session, openRoute, preloadRoute: vi.fn(),
       getAuthoritySnapshot: () => ({ operationId: currentOperation, authorizationGeneration: 7 }),
     });
@@ -244,9 +244,9 @@ describe("Routing II scoped AppSDK router", () => {
     const authorGraph = mountedGraph.bind("", null);
     const controller = new AbortController();
     let currentOperation = "route-op";
-    const router = createMountedSynWareRouter({ graph: authorGraph, mountedGraph, appId: "music", sessionId: "session:music", signal: controller.signal, session,
+    const router = createMountedSynWareRouter({ graph: authorGraph, mountedGraph, appId: "com.example.music", sessionId: "session:music", signal: controller.signal, session,
       getAuthoritySnapshot: () => ({ operationId: currentOperation, authorizationGeneration: 9 }),
-      openRoute: () => navigationHandle(Object.freeze({ outcome: "settled", operationId: "route-op", correlationId: "correlation", committed: true, route: { pathname: "/music", kind: "app", appId: "music" }, postCommit: "completed" }), controller, "route-op", "correlation"),
+      openRoute: () => navigationHandle(Object.freeze({ outcome: "settled", operationId: "route-op", correlationId: "correlation", committed: true, route: { pathname: "/music", kind: "app", appId: "com.example.music" }, postCommit: "completed" }), controller, "route-op", "correlation"),
       preloadRoute: async () => ({ status: "ready" }),
     });
     expect(router.getSnapshot()).toBe(router.getSnapshot());
@@ -265,13 +265,13 @@ describe("Routing II scoped AppSDK router", () => {
       operationId: "route-op",
       correlationId: "correlation",
       committed: true,
-      route: { pathname: href, kind: "app", appId: "music" },
+      route: { pathname: href, kind: "app", appId: "com.example.music" },
       postCommit: "completed",
     }), controller, "route-op", "correlation"));
     const router = createMountedSynWareRouter({
       graph,
       mountedGraph: graph,
-      appId: "music",
+      appId: "com.example.music",
       sessionId: "session:music",
       getAuthoritySnapshot: () => ({ operationId: "route-op", authorizationGeneration: 7 }),
       signal: controller.signal,
@@ -297,7 +297,7 @@ describe("Routing II scoped AppSDK router", () => {
     expect(() => createMountedSynWareRouter({
       graph: foreign,
       mountedGraph: graph,
-      appId: "music",
+      appId: "com.example.music",
       sessionId: "session:music",
       getAuthoritySnapshot: () => ({ operationId: "route-op", authorizationGeneration: 7 }),
       signal: new AbortController().signal,
@@ -312,7 +312,7 @@ describe("Routing II scoped AppSDK router", () => {
     const router = createMountedSynWareRouter({
       graph,
       mountedGraph: graph,
-      appId: "music",
+      appId: "com.example.music",
       sessionId: "session:music",
       getAuthoritySnapshot: () => ({ operationId: "route-op", authorizationGeneration: 7 }),
       signal: new AbortController().signal,
@@ -335,7 +335,7 @@ describe("Routing II scoped AppSDK router", () => {
     const router = createMountedSynWareRouter({
       graph,
       mountedGraph: graph,
-      appId: "music",
+      appId: "com.example.music",
       sessionId: "session:music",
       getAuthoritySnapshot: () => ({ operationId: "route-op", authorizationGeneration: 7 }),
       signal: controller.signal,
@@ -359,7 +359,7 @@ describe("Routing II scoped AppSDK router", () => {
     const router = createMountedSynWareRouter({
       graph,
       mountedGraph: graph,
-      appId: "music",
+      appId: "com.example.music",
       sessionId: "session:music",
       getAuthoritySnapshot: () => ({ operationId: "route-op", authorizationGeneration: 7 }),
       signal: controller.signal,

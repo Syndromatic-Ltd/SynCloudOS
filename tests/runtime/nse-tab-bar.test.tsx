@@ -34,7 +34,6 @@ import {
   NSETabBar,
   NSETabBarController,
   NSETabBarOverflowList,
-  NSETabGroup,
 } from "../../src/NSE/Navigation";
 
 const customAppearance = defineNSEAppearance({ id: "custom-test", displayName: "Custom test", recipes: [
@@ -66,21 +65,16 @@ function SharedChromeBack({ controller }: { readonly controller: NSEApplicationN
 }
 
 describe("NSETabBar", () => {
-  it("keeps NSETabGroup as a selected-value strip without panel ownership", () => {
-    const change = vi.fn();
-    render(
-      <NSETabGroup
-        label="View choices"
-        defaultValue="home"
-        selectionHaptic={false}
-        options={[{ value: "home", label: "Home" }, { value: "library", label: "Library" }]}
-        onValueChange={change}
-      />,
-    );
-    const tabList = screen.getByRole("tablist", { name: "View choices" });
-    expect(within(tabList).queryByRole("tabpanel")).toBeNull();
-    fireEvent.keyDown(within(tabList).getByRole("tab", { name: "Home" }), { key: "ArrowRight" });
-    expect(change).toHaveBeenCalledWith("library");
+  it("requests visible focus for keyboard roving independently of selection paint", () => {
+    const controller = new NSETabBarController<React.ReactNode>({ id: "keyboard-visible-tabs", destinations: destinations(3) });
+    const { unmount } = render(<NSETabBar controller={controller} aria-label="Keyboard visible tabs" />);
+    const home = screen.getByRole("tab", { name: "Home destination" });
+    const library = screen.getByRole("tab", { name: "Library destination" });
+    const focus = vi.spyOn(library, "focus");
+    fireEvent.keyDown(home, { key: "ArrowRight" });
+    expect(document.activeElement).toBe(library);
+    expect(focus).toHaveBeenCalledWith({ focusVisible: true });
+    unmount(); controller.dispose();
   });
   it.each([
     [1, 1, 0],

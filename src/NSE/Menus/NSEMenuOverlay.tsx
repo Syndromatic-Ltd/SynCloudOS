@@ -21,16 +21,19 @@
 import { useCallback, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { NSEPopup, useNSEOverlayProvider } from "../Overlays";
 import type { NSEOverlayDismissReason } from "../Overlays";
-import type { NSEMenuController } from "./NSEMenuController";
+import type { NSEOverlayAnchorPoint } from "../Overlays/computeNSEOverlayPosition";
+import type { NSEMenu } from "./NSEMenu";
 import type { NSEMenuOverlayOptions } from "./menuTypes";
 import { NSEMenuOverlayPresentationScope } from "./menuPresentationContext";
 
 export interface NSEMenuOverlayProps {
   readonly overlay: NSEMenuOverlayOptions;
   /** The branch controller must be closed before the popup unmounts its semantic surface. */
-  readonly controller: Pick<NSEMenuController, "dismiss" | "snapshot"> & Partial<Pick<NSEMenuController, "subscribe">>;
+  readonly controller: Pick<NSEMenu, "dismiss" | "snapshot"> & Partial<Pick<NSEMenu, "subscribe">>;
   readonly open: boolean;
   readonly anchor: HTMLElement | null;
+  /** A context menu opened by the pointer opens at the pointer (NSMenu.popUpContextMenu(_:with:for:)). */
+  readonly anchorPoint?: NSEOverlayAnchorPoint | null;
   readonly labelledBy?: string;
   readonly kind?: "menu" | "context-menu" | "submenu";
   readonly presentationMode?: "responsive" | "anchored" | "viewport-block-start-inline-end";
@@ -49,7 +52,7 @@ export interface NSEMenuOverlayProps {
  * controller/model while their physical form changes from anchored overlay to
  * an action-sheet/drill-in boundary on a constrained runtime.
  */
-export function NSEMenuOverlay({ overlay, controller, open, anchor, labelledBy, kind = "menu", presentationMode = "responsive", viewportCornerBleed, className, exitDuration, restoreFocus = true, children, onOpenChange }: NSEMenuOverlayProps) {
+export function NSEMenuOverlay({ overlay, controller, open, anchor, anchorPoint, labelledBy, kind = "menu", presentationMode = "responsive", viewportCornerBleed, className, exitDuration, restoreFocus = true, children, onOpenChange }: NSEMenuOverlayProps) {
   const { runtime } = useNSEOverlayProvider();
   if (!overlay.id.trim()) throw new TypeError("NSE menu overlay IDs must not be empty.");
   if (!overlay.parentResponderId.trim()) throw new TypeError("NSE menu overlays require a parent responder ID.");
@@ -78,8 +81,10 @@ export function NSEMenuOverlay({ overlay, controller, open, anchor, labelledBy, 
   // plate that then grows (and, near a viewport edge, flips). Later branches
   // (submenus) validate while the menu is already showing and stay painted.
   const subscribeController = useCallback(
-    (listener: () => void) => controller.subscribe?.(listener) ?? (() => undefined),
-    [controller],
+    (listener: () => void) => controller.subscribe?.(() => {
+      if (!runtime.signal.aborted) listener();
+    }) ?? (() => undefined),
+    [controller, runtime],
   );
   const branch = useSyncExternalStore(subscribeController, () => controller.snapshot, () => controller.snapshot);
   const rowsReady = !controller.subscribe || (branch.open && !branch.validating);
@@ -117,11 +122,13 @@ export function NSEMenuOverlay({ overlay, controller, open, anchor, labelledBy, 
       id={overlay.id}
       open={open}
       anchor={anchor}
+      anchorPoint={presentation.mode === "anchored" ? anchorPoint : null}
       parentResponderId={overlay.parentResponderId}
       parentId={overlay.parentId}
       parentScopeId={overlay.parentScopeId}
       presentation={presentation}
       overlayKind={presentation.mode === "sheet" ? "action-sheet" : kind}
+      chrome={kind}
       modal={presentation.mode === "sheet"}
       keepPortalMounted
       contentPending={contentPending}
@@ -132,7 +139,7 @@ export function NSEMenuOverlay({ overlay, controller, open, anchor, labelledBy, 
       restoreFocus={restoreFocus}
       onOpenChange={handleOpenChange}
     >
-      <NSEMenuOverlayPresentationScope>{children}</NSEMenuOverlayPresentationScope>
+      <NSEMenuOverlayPresentationScope ready={!contentPending}>{children}</NSEMenuOverlayPresentationScope>
     </NSEPopup>
   );
 }

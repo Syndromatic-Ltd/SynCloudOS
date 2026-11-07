@@ -20,11 +20,13 @@
 
 // @vitest-environment jsdom
 import React, { useMemo, useState } from "react";
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
-import { NSECheckbox, NSERadioGroup, NSETextField } from "../../../src/NSE/Controls/Fields/NSEFields";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { NSERadioGroup, NSETextField } from "../../../src/NSE/Controls/Fields/NSEFields";
 import { NSEControlRuntimeProvider, useNSEControlCommand } from "../../../src/NSE/Controls/Core";
-import { NSEPushButton } from "../../../src/NSE/Controls/Buttons/NSEButtons";
+import { NSEButton } from "../../../src/NSE/Controls/Buttons/NSEButton";
+
+afterEach(cleanup);
 
 function CommandFixture({ onDispatch }: { readonly onDispatch: ReturnType<typeof vi.fn> }) {
   const binding = useMemo(() => ({
@@ -84,6 +86,82 @@ const integerFormatter = {
 };
 
 describe("NSE control contracts", () => {
+  it("prepares current availability for a custom sender even before its cached presentation updates", async () => {
+    let allowed = false;
+    const dispatch = vi.fn(async () => ({ status: "executed" as const, commandId: "current", responderId: "form", operationId: "op", correlationId: "c", value: undefined }));
+    const port = { signal: new AbortController().signal, commands: {
+      getPresentationGeneration: () => ({ registryGeneration: 0, responderGeneration: 0 }),
+      validate: async () => ({ commandId: "current", responderId: "form", title: "Current", enabled: allowed, denied: false, hidden: false, state: "off" as const, stale: false }),
+      prepareDispatch: async () => allowed ? { status: "accepted" as const, acceptance: { commandId: "current", responderId: "form" } as never } : { status: "disabled" as const, reason: "Disabled" },
+      dispatch,
+    } };
+    function Probe() {
+      const binding = useMemo(() => ({ id: "current" }), []);
+      const command = useNSEControlCommand(binding, port);
+      return <button onClick={() => void command.dispatch()}>{command.presentation ? "Ready" : "Validating"}</button>;
+    }
+    render(<Probe />);
+    await screen.findByRole("button", { name: "Ready" });
+    fireEvent.click(screen.getByRole("button", { name: "Ready" }));
+    await act(async () => {});
+    expect(dispatch).not.toHaveBeenCalled();
+    allowed = true;
+    fireEvent.click(screen.getByRole("button", { name: "Ready" }));
+    await waitFor(() => expect(dispatch).toHaveBeenCalledOnce());
+  });
+
+  it("releases validation abort listeners after each successful refresh", async () => {
+    const owner = new AbortController();
+    const add = vi.spyOn(owner.signal, "addEventListener");
+    const remove = vi.spyOn(owner.signal, "removeEventListener");
+    const port = { signal: owner.signal, commands: {
+      getPresentationGeneration: () => ({ registryGeneration: 0, responderGeneration: 0 }),
+      validate: async () => ({ commandId: "refresh", responderId: "form", title: "Refresh", enabled: true, denied: false, hidden: false, state: "off" as const, stale: false }),
+      prepareDispatch: vi.fn(), dispatch: vi.fn(),
+    } };
+    function Probe() {
+      const binding = useMemo(() => ({ id: "refresh" }), []);
+      const command = useNSEControlCommand(binding, port);
+      return <button onClick={command.refresh}>Refresh validation</button>;
+    }
+    const view = render(<Probe />);
+    await waitFor(() => expect(remove.mock.calls.length).toBe(add.mock.calls.length));
+    for (let index = 0; index < 3; index++) {
+      fireEvent.click(screen.getByRole("button", { name: "Refresh validation" }));
+      await waitFor(() => expect(remove.mock.calls.length).toBe(add.mock.calls.length));
+    }
+    expect(add).toHaveBeenCalled();
+    view.unmount();
+  });
+
+  it("reflects a radio option's canonical command availability", async () => {
+    const validate = vi.fn(async () => ({ commandId: "radio.choose", responderId: "form", title: "Restricted", enabled: false, denied: true, hidden: false, state: "off" as const, stale: false }));
+    const port = { signal: new AbortController().signal, commands: {
+      getPresentationGeneration: () => ({ registryGeneration: 0, responderGeneration: 0 }), validate,
+      prepareDispatch: vi.fn(), dispatch: vi.fn(),
+    } };
+    render(<NSEControlRuntimeProvider port={port}><NSERadioGroup label="Choice" options={[{ value: "restricted", label: "Restricted", command: { id: "radio.choose" } }]} /></NSEControlRuntimeProvider>);
+    await waitFor(() => expect(validate).toHaveBeenCalled());
+    await waitFor(() => expect((screen.getByRole("radio", { name: "Restricted" }) as HTMLInputElement).disabled).toBe(true));
+  });
+
+  it.each(["a", "b"])("skips command-disabled radios for arrows and the tab stop with %s selected", async selected => {
+    const change = vi.fn();
+    const port = { signal: new AbortController().signal, commands: {
+      getPresentationGeneration: () => ({ registryGeneration: 0, responderGeneration: 0 }),
+      validate: async () => ({ commandId: "radio.choose", responderId: "form", title: "B", enabled: false, denied: true, hidden: false, state: "off" as const, stale: false }),
+      prepareDispatch: vi.fn(), dispatch: vi.fn(),
+    } };
+    render(<NSEControlRuntimeProvider port={port}><NSERadioGroup label="Navigation" defaultValue={selected} onValueChange={change} options={[{ value: "a", label: "A" }, { value: "b", label: "B", command: { id: "radio.choose" } }, { value: "c", label: "C" }]} /></NSEControlRuntimeProvider>);
+    const a = screen.getByRole("radio", { name: "A" }) as HTMLInputElement;
+    await waitFor(() => expect((screen.getByRole("radio", { name: "B" }) as HTMLInputElement).disabled).toBe(true));
+    await waitFor(() => expect(a.tabIndex).toBe(0));
+    a.focus();
+    fireEvent.keyDown(a, { key: "ArrowRight" });
+    await waitFor(() => expect(change).toHaveBeenCalledWith("c", "commit"));
+    expect(document.activeElement).toBe(screen.getByRole("radio", { name: "C" }));
+  });
+
   it("does not commit text, checkbox, or radio values when command declines the accepted dispatch", async () => {
     const changes = vi.fn();
     const checkboxChanges = vi.fn();
@@ -115,7 +193,14 @@ describe("NSE control contracts", () => {
     render(
       <NSEControlRuntimeProvider port={port}>
         <NSETextField label="Command title" defaultValue="Base" command={{ id: "title.set", payload: "Base" }} onValueChange={changes} />
-        <NSECheckbox label="Command checkbox" defaultChecked={false} command={{ id: "flag.set", payload: true }} onCheckedChange={checkboxChanges} />
+        <NSEButton
+          buttonType="switch"
+          title="Command checkbox"
+          defaultState="off"
+          onStateChange={(state) => checkboxChanges(state === "on")}
+          action="flag.set"
+          actionPayload={true}
+        />
         <NSERadioGroup
           label="Command radio"
           defaultValue="first"
@@ -181,7 +266,7 @@ describe("NSE control contracts", () => {
           onValueChange={changes}
         />
         <NSETextField label="Read-only amount" defaultValue="7" readOnly />
-        <NSETextField label="Disabled amount" defaultValue="8" disabled />
+        <NSETextField label="Disabled amount" defaultValue="8" isEnabled={false} />
       </form>,
     );
 
@@ -253,14 +338,12 @@ describe("NSE control contracts", () => {
     expect(screen.getByRole("textbox", { name: "Regular" }).closest("label")?.getAttribute("data-size")).toBe("regular");
   });
 
-  it("sizes the push button as NSControl does: regular, small, or an explicit band height", () => {
-    render(<><NSEPushButton>Regular</NSEPushButton><NSEPushButton controlSize="small">Small</NSEPushButton><NSEPushButton height={32} style={{ marginTop: 4 }}>Custom</NSEPushButton></>);
+  it("sizes the push button as NSControl does: regular or small", () => {
+    render(<><NSEButton title="Regular" /><NSEButton title="Small" controlSize="small" style={{ marginTop: 4 }} /></>);
     expect(screen.getByRole("button", { name: "Regular" }).hasAttribute("data-size")).toBe(false);
-    expect(screen.getByRole("button", { name: "Small" }).getAttribute("data-size")).toBe("small");
-    const custom = screen.getByRole("button", { name: "Custom" });
-    expect(custom.getAttribute("data-size")).toBe("custom");
-    expect(custom.style.getPropertyValue("--nse-control-height")).toBe("32px");
-    expect(custom.style.marginTop).toBe("4px");
+    const small = screen.getByRole("button", { name: "Small" });
+    expect(small.getAttribute("data-size")).toBe("small");
+    expect(small.style.marginTop).toBe("4px");
   });
 
   it("validates and dispatches through the injected command authority", async () => {
@@ -271,6 +354,55 @@ describe("NSE control contracts", () => {
     await waitFor(() => expect(button.disabled).toBe(false));
     fireEvent.click(button);
     await waitFor(() => expect(dispatch).toHaveBeenCalledWith("amount.increment", { delta: 1 }, expect.objectContaining({ source: "api" })));
+  });
+
+  it("keeps activation live across an equivalent presentation refresh", async () => {
+    let refresh!: () => void;
+    let responderGeneration = 0;
+    const dispatch = vi.fn(async () => ({ status: "executed" as const, commandId: "amount.increment", responderId: "amount-control", operationId: "test", correlationId: "test", value: undefined }));
+    const port = {
+      signal: new AbortController().signal,
+      commands: {
+        getPresentationGeneration: () => ({ registryGeneration: 0, responderGeneration }),
+        validate: async () => ({ commandId: "amount.increment", responderId: "amount-control", title: "Increment", enabled: true, denied: false, hidden: false, state: "off" as const, stale: false }),
+        prepareDispatch: async () => { refresh(); return { status: "accepted" as const, acceptance: { commandId: "amount.increment", responderId: "amount-control" } as never }; },
+        dispatch,
+      },
+    };
+    const binding = { id: "amount.increment" };
+    function Control() {
+      const command = useNSEControlCommand(binding, port);
+      refresh = command.refresh;
+      return <button disabled={!command.presentation?.enabled} onClick={() => void command.dispatch()}>Current action</button>;
+    }
+    render(<Control />);
+    const button = screen.getByRole("button", { name: "Current action" }) as HTMLButtonElement;
+    await waitFor(() => expect(button.disabled).toBe(false));
+    responderGeneration += 1;
+    fireEvent.click(button);
+    await waitFor(() => expect(dispatch).toHaveBeenCalledOnce());
+  });
+
+  it.each(["same-target", "changed-target", "changed-command"] as const)("uses canonical acceptance across popup focus restoration: %s", async change => {
+    let registryGeneration = 0, responderGeneration = 0;
+    const dispatch = vi.fn(async () => ({ status: "executed" as const, commandId: "amount.increment", responderId: "form", operationId: "op", correlationId: "c", value: undefined }));
+    const port = { signal: new AbortController().signal, commands: {
+      getPresentationGeneration: () => ({ registryGeneration, responderGeneration }),
+      validate: async () => ({ commandId: "amount.increment", responderId: "form", title: "Select", enabled: true, denied: false, hidden: false, state: "off" as const, stale: false }),
+      prepareDispatch: async () => {
+        responderGeneration++;
+        if (change === "changed-command") registryGeneration++;
+        return { status: "accepted" as const, acceptance: { commandId: "amount.increment", responderId: change === "changed-target" ? "other" : "form" } as never };
+      }, dispatch,
+    } };
+    function Probe() {
+      const binding = useMemo(() => ({ id: "amount.increment" }), []);
+      const command = useNSEControlCommand(binding, port);
+      return <button onClick={() => void command.dispatch()}>Select option</button>;
+    }
+    render(<Probe />);
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Select option" })); });
+    expect(dispatch).toHaveBeenCalledTimes(change === "same-target" ? 1 : 0);
   });
 
   it("does not consume an accepted command after its control unmounts", async () => {

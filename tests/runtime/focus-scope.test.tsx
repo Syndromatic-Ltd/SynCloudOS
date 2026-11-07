@@ -1,6 +1,6 @@
 /*
  * SynCloudOS
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ * Copyright Â© 2026 Syndromatic Ltd. All rights reserved.
  *
  * Designed by Kavish Krishnakumar in Manchester.
  *
@@ -28,10 +28,116 @@ import { FocusScope, ResponderScope, RuntimeInputBoundary, SynCloudOSProvider } 
 import { createTestRuntime } from "./helpers";
 import { registerNSEFocusOrigin } from "../../src/NSE/Focus";
 import { registerNSEInspectorOrigin } from "../../src/NSE/Focus/focusOrigin";
+import type { FocusScopeHandle } from "../../src/SynCloudOS/Focus/focusTypes";
 
 afterEach(cleanup);
 
 describe("focus scopes", () => {
+  it("requests a visible initial focus indicator for a programmatically focused modal action", async () => {
+    const runtime = createTestRuntime();runtime.responders.register({id:"app",kind:"application",parentId:"runtime",scopeId:"root"});
+    const focus=vi.spyOn(HTMLElement.prototype,"focus");
+    try {
+      render(<SynCloudOSProvider runtime={runtime}><FocusScope scopeId="modal:initial-visible" kind="modal" parentResponderId="app"><button>Initial visible action</button></FocusScope></SynCloudOSProvider>);
+      await waitFor(()=>expect(document.activeElement).toBe(screen.getByRole("button",{name:"Initial visible action"})));
+      expect(focus).toHaveBeenCalledWith({preventScroll:true,focusVisible:true});
+    } finally {focus.mockRestore();await runtime.dispose();}
+  });
+  it("returns to a same-runtime shell control when no logical responder was previously focused", async () => {
+    const runtime = createTestRuntime();
+    const ui = (open: boolean) => <SynCloudOSProvider runtime={runtime}>
+      <button data-syncloudos-runtime-owner={runtime.runtimeId}>Generated shell origin</button>
+      {open && createPortal(<FocusScope scopeId="shell-options" kind="modal" parentResponderId="webspring"><input aria-label="Generated shell dialog" /></FocusScope>, document.body)}
+    </SynCloudOSProvider>;
+    const view = render(ui(false)); const trigger = screen.getByRole("button", { name: "Generated shell origin" }); trigger.focus();
+    expect(runtime.focus.getFocusedResponderId()).toBeNull();
+    view.rerender(ui(true)); screen.getByRole("textbox", { name: "Generated shell dialog" }).focus();
+    view.rerender(ui(false)); await waitFor(() => expect(document.activeElement).toBe(trigger));
+    await runtime.dispose();
+  });
+
+  it("updates a live scope's presentation without closing descendants or granting stale handles authority", async () => {
+    const runtime = createTestRuntime();
+    runtime.responders.register({ id: "editor", kind: "control", parentId: "runtime", scopeId: "root" });
+    const parent = runtime.focus.openScope({ id: "adaptive-parent", kind: "popover", parentResponderId: "editor", modal: false, trapFocus: false });
+    const child = runtime.focus.openScope({ id: "nested-child", kind: "menu", parentScopeId: parent.id, parentResponderId: "editor", modal: false, trapFocus: false });
+    parent.updatePresentation({ kind: "sheet", modal: true, trapFocus: true });
+    expect(runtime.focus.isScopeWithin(child.id, parent.id)).toBe(true);
+    expect(runtime.focus.inspect().scopes.map(scope => scope.id)).toEqual([parent.id, child.id]);
+    expect(runtime.focus.inspect().restorations).toEqual([]);
+    parent.close({ restore: false });
+    const replacement = runtime.focus.openScope({ id: parent.id, kind: "popover", parentResponderId: "editor", modal: false, trapFocus: false });
+    expect(() => parent.updatePresentation({ kind: "sheet", modal: true, trapFocus: true })).toThrow();
+    expect(parent.close().status).toBe("missing");
+    expect(runtime.focus.inspect().scopes).toHaveLength(1);
+    replacement.close(); await runtime.dispose();
+  });
+  it("keeps scope configuration changes from restoring its trigger before the actual close", async () => {
+    const runtime = createTestRuntime();
+    runtime.responders.register({ id: "app", kind: "application", parentId: "runtime", scopeId: "root" });
+    const ui = (open: boolean, modal: boolean) => <SynCloudOSProvider runtime={runtime}>
+      <ResponderScope responderId="editor" kind="control" parentResponderId="app" scopeId="root"><button>Open adaptive options</button></ResponderScope>
+      {open && createPortal(<FocusScope scopeId="adaptive-options" kind={modal ? "modal" : "popover"} parentResponderId="editor" modal={modal} trapFocus={modal}><input aria-label="Live options draft" /></FocusScope>, document.body)}
+    </SynCloudOSProvider>;
+    const view = render(ui(false, false));
+    const trigger = screen.getByRole("button", { name: "Open adaptive options" });
+    trigger.focus();
+    view.rerender(ui(true, false));
+    const draft = screen.getByRole("textbox", { name: "Live options draft" });
+    draft.focus();
+    const restored = vi.fn(); trigger.addEventListener("focus", restored);
+    view.rerender(ui(true, true));
+    view.rerender(ui(true, false));
+    expect(screen.getByRole("textbox", { name: "Live options draft" })).toBe(draft);
+    expect(restored).not.toHaveBeenCalled();
+    view.rerender(ui(false, false));
+    await waitFor(() => expect(document.activeElement).toBe(trigger));
+    expect(restored).toHaveBeenCalledOnce();
+    await runtime.dispose();
+  });
+  it("publishes focus authority changes and detaches disposed subscriptions", async () => {
+    const runtime = createTestRuntime();
+    runtime.responders.register({ id: "editor", kind: "control", parentId: "runtime", scopeId: "root" });
+    await Promise.resolve();
+    const changed = vi.fn();
+    const unsubscribe = runtime.focus.subscribe(changed);
+    const expectChange = async (change: () => void) => {
+      changed.mockClear();
+      const generation = runtime.focus.getGeneration();
+      change();
+      expect(runtime.focus.getGeneration()).toBeGreaterThan(generation);
+      expect(changed).not.toHaveBeenCalled();
+      await Promise.resolve();
+      expect(changed).toHaveBeenCalledOnce();
+    };
+    try {
+      expect(runtime.focus.requestFocus("missing")).toMatchObject({ status: "missing" });
+      await Promise.resolve();
+      expect(changed).not.toHaveBeenCalled();
+      await expectChange(() => { runtime.focus.requestFocus("editor"); });
+      await expectChange(() => { runtime.focus.setActiveAnchors({ runtimeResponderId: "runtime" }); });
+      let scope!: FocusScopeHandle;
+      await expectChange(() => {
+        scope = runtime.focus.openScope({ id: "panel", kind: "popover", parentResponderId: "editor", modal: false, trapFocus: false });
+      });
+      await expectChange(() => { scope.close(); });
+      await expectChange(() => { runtime.responders.remove("editor"); });
+      expect(runtime.focus.getFocusedResponderId()).toBe("runtime");
+      unsubscribe();
+      changed.mockClear();
+      runtime.focus.requestFocus("runtime");
+      await Promise.resolve();
+      expect(changed).not.toHaveBeenCalled();
+      runtime.focus.subscribe(changed);
+      runtime.focus.requestFocus("runtime");
+      runtime.focus.dispose();
+      await Promise.resolve();
+      expect(changed).not.toHaveBeenCalled();
+    } finally {
+      unsubscribe();
+      await runtime.dispose();
+    }
+  });
+
   it("returns a dismissed inspector menu to its picker instead of jumping to the owning app", async () => {
     const runtime = createTestRuntime();
     runtime.responders.register({ id: "app", kind: "application", parentId: "runtime", scopeId: "root" });
@@ -259,6 +365,32 @@ describe("focus scopes", () => {
     expect(redirect).toHaveBeenCalledOnce();
   });
 
+  it("reveals a clipped wrapped action only inside its owning scroll region", async () => {
+    const runtime = createTestRuntime();
+    runtime.responders.register({ id: "app", kind: "application", parentId: "runtime", scopeId: "root" });
+    render(<SynCloudOSProvider runtime={runtime}>
+      <div data-testid="outer-scroll" style={{ overflowY: "auto" }}>
+        <FocusScope scopeId="modal:clipped" kind="modal" parentResponderId="app">
+          <div data-testid="owned-scroll" style={{ overflowY: "auto" }}>
+            <button>Clipped first action</button><button>Clipped last action</button>
+          </div>
+        </FocusScope>
+      </div>
+    </SynCloudOSProvider>);
+    const first = screen.getByRole("button", { name: "Clipped first action" });
+    const last = screen.getByRole("button", { name: "Clipped last action" });
+    await waitFor(() => expect(document.activeElement).toBe(first));
+    const scroll = screen.getByTestId("owned-scroll");
+    Object.defineProperties(scroll, { clientHeight: { value: 80 }, scrollHeight: { value: 240 } });
+    vi.spyOn(scroll, "getBoundingClientRect").mockReturnValue({ top: 100, bottom: 180, left: 0, right: 300, width: 300, height: 80 } as DOMRect);
+    vi.spyOn(first, "getBoundingClientRect").mockReturnValue({ top: 300, bottom: 340, left: 0, right: 80, width: 80, height: 40 } as DOMRect);
+    last.focus();fireEvent.keyDown(last, { key: "Tab" });
+    expect(document.activeElement).toBe(first);
+    expect(scroll.scrollTop).toBe(160);
+    expect(screen.getByTestId("outer-scroll").scrollTop).toBe(0);
+    await runtime.dispose();
+  });
+
   it("loops Tab in both directions and restores inert background state", async () => {
     const runtime = createTestRuntime();
     runtime.responders.register({ id: "app", kind: "application", parentId: "runtime", scopeId: "root" });
@@ -275,14 +407,42 @@ describe("focus scopes", () => {
     await waitFor(() => expect(document.activeElement).toBe(first));
     expect(screen.getByTestId("background").inert).toBe(true);
     last.focus();
+    const firstFocus = vi.spyOn(first, "focus");
+    const lastFocus = vi.spyOn(last, "focus");
     fireEvent.keyDown(last, { key: "Tab" });
     expect(document.activeElement).toBe(first);
+    // The scope reveals its own scroll regions without moving the host page.
+    // Pixel/scroll behaviour is also exercised in the rendered shallow-sheet journey.
+    expect(firstFocus).toHaveBeenLastCalledWith({ preventScroll: true, focusVisible: true });
     fireEvent.keyDown(first, { key: "Tab", shiftKey: true });
     expect(document.activeElement).toBe(last);
+    expect(lastFocus).toHaveBeenLastCalledWith({ preventScroll: true, focusVisible: true });
     const background = screen.getByTestId("background");
     view.unmount();
     expect(background.inert).not.toBe(true);
     expect(background.hasAttribute("aria-hidden")).toBe(false);
+  });
+
+  it.each(["inert", "aria-hidden"] as const)("excludes controls beneath %s ancestors from modal focus and Tab wrapping", async (hidden) => {
+    const runtime = createTestRuntime();
+    const attributes = hidden === "inert" ? { inert: true } : { "aria-hidden": true as const };
+    render(
+      <SynCloudOSProvider runtime={runtime}>
+        <FocusScope scopeId="modal:hidden-content" kind="modal" parentResponderId="runtime">
+          <div {...attributes}><button>Hidden first</button></div>
+          <button>Visible first</button><button>Visible last</button>
+          <div {...attributes}><button>Hidden last</button></div>
+        </FocusScope>
+      </SynCloudOSProvider>,
+    );
+    const first = screen.getByRole("button", { name: "Visible first" });
+    const last = screen.getByRole("button", { name: "Visible last" });
+    await waitFor(() => expect(document.activeElement).toBe(first));
+    last.focus();
+    fireEvent.keyDown(last, { key: "Tab" });
+    expect(document.activeElement).toBe(first);
+    fireEvent.keyDown(first, { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(last);
   });
 
   it("releases modal-owned undo state without deleting a pre-existing owner", async () => {

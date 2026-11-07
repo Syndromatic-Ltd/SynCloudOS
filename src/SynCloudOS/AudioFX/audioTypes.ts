@@ -131,6 +131,7 @@ export interface RuntimeAudioService {
   getOwnerPolicy(appId: string): Readonly<{ volume: number; muted: boolean; paused: boolean }>;
   getMixerSnapshot(): RuntimeAudioMixerSnapshot;
   subscribeMixer(listener: () => void): () => void;
+  subscribePlayback(listener: (handleId: string) => void): () => void;
   setMasterVolume(volume: number): void;
   setAppVolume(appId: string, volume: number): void;
   setMixerLevels(masterVolume: number, appVolumes: Readonly<Record<string, number>>): void;

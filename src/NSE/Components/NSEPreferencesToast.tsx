@@ -21,7 +21,7 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState, type HTMLAttributes, type ReactNode, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import "./nsePreferencesToast.css";
-import { NSEPresence, useNSEAnimationEnvironment, useNSEPresentation } from "../Animation";
+import { NSEPresence, useNSEAnimationEnvironment, useNSEPresentation, useNSEPresenceExiting } from "../Animation";
 import {
   resolveNSEPreferencesTransitions,
   type NSEPreferencesPaneDirection,
@@ -30,7 +30,7 @@ import {
 import { NSEListItem } from "../Controls/Selection/NSEListItem";
 import { NSEFocusScope, resolveNSEFocusReturnTarget } from "../Focus";
 import { NSEPageHeader } from "../Windows/Chrome/NSEPageHeader";
-import { NSEToolButton } from "../Controls/Buttons/NSEButtonFamilies";
+import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { projectNSEAppearance, useNSEAppearance } from "../Appearance";
 
 /**
@@ -47,6 +47,8 @@ import { projectNSEAppearance, useNSEAppearance } from "../Appearance";
 export interface NSEPreferencePane {
   id: string;
   label: ReactNode;
+  /** Artwork beside the label on the list row. */
+  icon?: ReactNode;
   /** Secondary line on the list row — usually the current value. */
   meta?: ReactNode;
   /**
@@ -115,15 +117,17 @@ function PaneTitle({ children }: { children: ReactNode }) {
 
 /** A pane, pushed in and popped out as the stack moves. */
 function PaneSlide({ children }: { children: ReactNode }) {
+  const exiting = useNSEPresenceExiting();
   const ref = useRef<HTMLDivElement>(null);
   useNSEPresentation(ref, usePreferencesTransitions().pane(useContext(PaneDirectionContext)));
-  return <div ref={ref} className="nse-prefs-pane">{children}</div>;
+  return <div ref={ref} className="nse-prefs-pane" inert={exiting || undefined} aria-hidden={exiting || undefined}>{children}</div>;
 }
 
 function BackSlot({ children }: { children: ReactNode }) {
+  const exiting = useNSEPresenceExiting();
   const ref = useRef<HTMLSpanElement>(null);
   useNSEPresentation(ref, usePreferencesTransitions().back);
-  return <span ref={ref} className="nse-prefs-back-slot">{children}</span>;
+  return <span ref={ref} className="nse-prefs-back-slot" inert={exiting || undefined} aria-hidden={exiting || undefined}>{children}</span>;
 }
 
 /** The panel's body, at the height of the pane it shows, springing between
@@ -204,6 +208,9 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
   }, [contentNode]);
 
   const goToPane = useCallback((id: string | null) => {
+    // Keep keyboard ownership on the stable dialog before its outgoing pane
+    // unmounts. Otherwise focus can fall to the page and Escape stops reaching it.
+    if (dialogRef.current?.contains(document.activeElement)) dialogRef.current.focus({ preventScroll: true });
     setDirection(id === null ? "back" : "forward");
     setActiveId(id);
   }, []);
@@ -287,10 +294,12 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                 <NSEPresence initial={false}>
                   {active ? (
                     <BackSlot key="back">
-                      <NSEToolButton
+                      <NSEButton
+                        bezelStyle="texturedRounded"
+                        title={backLabel}
+                        image={BackArrow}
+                        imagePosition="imageOnly"
                         className="nse-prefs-back"
-                        icon={BackArrow}
-                        label={backLabel}
                         onClick={() => goToPane(null)}
                       />
                     </BackSlot>
@@ -312,6 +321,7 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                       {panes.map((pane) => (
                         <NSEListItem
                           key={pane.id}
+                          leading={pane.icon}
                           meta={pane.meta}
                           trailing={(
                             <span className="nse-prefs-row-tail">
@@ -332,7 +342,9 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                           )}
                           onClick={() => goToPane(pane.id)}
                         >
-                          {pane.label}
+                          {/* Native keyboard activation bubbles through the same row action.
+                              Accessories remain siblings, never children of this button. */}
+                          <button type="button" className="nse-prefs-pane-link">{pane.label}</button>
                         </NSEListItem>
                       ))}
                     </div>

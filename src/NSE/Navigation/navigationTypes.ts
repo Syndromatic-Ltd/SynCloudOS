@@ -130,7 +130,7 @@ export interface NSENavigationStackRestorationSnapshot {
 
 export type NSEAdaptiveNavigationModel = "peer" | "hierarchy";
 export type NSEAdaptiveNavigationPresentation = "adaptive" | "bottom-tabs";
-export type NSEAdaptiveNavigationRenderer = "tabs" | "source-list-content" | "list-detail" | "stack";
+export type NSEAdaptiveNavigationRenderer = "tabs" | "rail" | "source-list-content" | "list-detail" | "stack";
 
 export interface NSEAdaptiveNavigationSnapshot {
   readonly revision: number;
@@ -138,6 +138,9 @@ export interface NSEAdaptiveNavigationSnapshot {
   readonly model: NSEAdaptiveNavigationModel;
   readonly presentation: NSEAdaptiveNavigationPresentation;
   readonly renderer: NSEAdaptiveNavigationRenderer;
+  /** Actual allocated navigation scene, when supplied by its owning view. */
+  readonly layoutBounds: SynCloudOSPresentationTraits["contentBounds"];
+  readonly bookRegions: import("./bookRegions").NSEBookRegions | null;
   readonly traits: SynCloudOSPresentationTraits;
   readonly selectedDestinationId: string;
   readonly stack: NSENavigationStackSnapshot | null;
@@ -177,18 +180,3 @@ export interface NSETabViewProps {
   onRequestReorder?(id: string, toIndex: number): void;
 }
 
-export interface NSEAccordionItem {
-  readonly id: string;
-  readonly label: string;
-  readonly disabled?: boolean;
-  readonly render: () => ReactNode;
-}
-
-export interface NSEAccordionViewProps {
-  readonly "aria-label": string;
-  readonly items: readonly NSEAccordionItem[];
-  readonly expandedIds: ReadonlySet<string>;
-  readonly mode: "single" | "multiple";
-  readonly headingLevel?: number;
-  onExpandedIdsChange(ids: ReadonlySet<string>): void;
-}

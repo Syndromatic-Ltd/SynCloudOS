@@ -18,11 +18,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useId, useMemo, useRef, useState, type ReactNode } from "react";
+import { useId, useRef, useState, type ReactNode } from "react";
 import { NSEPresence, useNSEAnimationEnvironment, useNSEPresentation } from "../NSE/Animation";
 import { resolveSystemAlertDetailsMotion } from "./SystemAlert.transitions";
-import { NSEPushButton, type NSEButtonTone } from "../NSE/public/controls";
-import { NSEAlert } from "../NSE/hostComposition";
+import { NSEButton, type NSEAppearanceName } from "../NSE/public/controls";
+import { NSEAlertSurface } from "../NSE/hostComposition";
 import cautionIcon from "./Resources/AlertCautionIcon.png?url&no-inline";
 import { synCloudOSLogoUrl as synCloudOSLogo } from "../SynCloudOS/Resources/frameworkAssets";
 import type { ResolvedSiteBranding } from "../SynCloudOS/SynCloudOS";
@@ -55,12 +55,13 @@ const siteScopedErrorCodes = new Set(["ROUTE_NOT_FOUND", "UNRECOVERABLE_LOGIN_SE
 
 const systemAlertIconSources = [cautionIcon, synCloudOSLogo] as const;
 
-function ActionButton({ children, onClick, tone }: {
+function ActionButton({ children, onClick, appearance, keyEquivalent }: {
   children: ReactNode;
   onClick: () => void;
-  tone: NSEButtonTone;
+  appearance?: NSEAppearanceName;
+  keyEquivalent?: string;
 }) {
-  return <NSEPushButton className="nse-system-alert-action-button" tone={tone} onClick={onClick}>{children}</NSEPushButton>;
+  return <NSEButton title={children} appearance={appearance} keyEquivalent={keyEquivalent} className="nse-system-alert-action-button" onClick={onClick} />;
 }
 
 export function SystemAlertAssetCache() {
@@ -75,8 +76,8 @@ export function SystemAlertAssetCache() {
 
 /**
  * A view-shaped error payload deliberately does not import ErrorManager.
- * Runtime hosts own capture, redaction and richer technical reports; this
- * private recovery composition consumes their serialisable error outcome.
+ * Runtime hosts own capture and the technical details; this private recovery
+ * composition shows the plain title and message, and discloses the details.
  */
 interface SystemAlertError {
   readonly code: string;
@@ -84,7 +85,6 @@ interface SystemAlertError {
   readonly message: string;
   readonly appId?: string;
   readonly packageName?: string;
-  readonly technicalMessage?: string;
   readonly technicalDetails?: string;
   readonly suggestedActions?: readonly string[];
   readonly retry?: () => void;
@@ -92,13 +92,6 @@ interface SystemAlertError {
   readonly category?: string;
   readonly source?: string;
   readonly context?: Readonly<Record<string, unknown>>;
-}
-
-function formatTechnicalDetails(error: SystemAlertError) {
-  return error.technicalDetails ?? error.technicalMessage ?? [
-    `Exception: ${error.code}`,
-    `Message: ${error.message}`,
-  ].join("\n");
 }
 
 function capturedRecoveryScope(error: SystemAlertError): "app" | "site" | "syncloudos" | null {
@@ -142,7 +135,6 @@ export function SystemAlert({
   onReturn,
   onReload,
   onOpenMailClient,
-  technicalReport,
   appearance = "dark",
   applicationIcon = null
 }: {
@@ -152,14 +144,12 @@ export function SystemAlert({
   onReload: () => void;
   /** Host-owned navigation capability; SystemAlert never takes browser-global authority. */
   onOpenMailClient?: (destination: string) => void;
-  /** Canonical runtime diagnostics, supplied by the host after redaction. */
-  technicalReport?: string;
   appearance?: "dark" | "light";
   /** Resolved AppIcon from the host's existing app registry, never a guessed resource URL. */
   applicationIcon?: string | null;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const details = useMemo(() => technicalReport ?? formatTechnicalDetails(error), [error, technicalReport]);
+  const details = error.technicalDetails ?? `Code: ${error.code}`;
   const actions = error.suggestedActions ?? ["returnToWebspring", "dismiss"];
   const isSessionMismatch = error.code === "UNRECOVERABLE_LOGIN_SESSION_MISMATCH";
   const isNotResponding = error.code === "APP_NOT_RESPONDING" || error.code === "SITE_NOT_RESPONDING";
@@ -167,13 +157,13 @@ export function SystemAlert({
     typeof error.context?.mailtoFallback === "string"
       ? `mailto:${error.context.mailtoFallback}`
       : null;
-  const actionTone: NSEButtonTone = appearance === "dark" ? "medium" : "light";
+  const actionAppearance: NSEAppearanceName | undefined = appearance === "dark" ? undefined : "aqua";
   const titleId = useId();
   const messageId = useId();
   const icon = getSystemAlertIcon(error, useHostSiteBranding(), appearance, applicationIcon);
 
   return (
-    <NSEAlert className="syncloudos-system-alert" appearance={appearance} labelledBy={titleId} describedBy={messageId}>
+    <NSEAlertSurface className="syncloudos-system-alert" appearance={appearance} labelledBy={titleId} describedBy={messageId}>
       <div className="nse-system-alert-content">
         <div className={`syncloudos-alert-artwork${icon.src ? "" : " is-caution-only"}`} data-alert-icon={icon.kind} aria-hidden="true">
           {icon.src ? <img className="syncloudos-alert-logo" data-alert-logo={icon.src === synCloudOSLogo ? "syncloudos" : ""} src={icon.src} alt="" /> : null}
@@ -197,19 +187,19 @@ export function SystemAlert({
         </div>
       </div>
       <div className="nse-alert-actions">
-        {isSessionMismatch && actions.includes("dismiss") ? <ActionButton tone="medium" onClick={onDismiss}>Cancel</ActionButton> : null}
-        {actions.includes("reload") ? <ActionButton tone={isSessionMismatch ? "affirmative" : actionTone} onClick={onReload}>{isSessionMismatch ? "Reload Webspring" : "Reload"}</ActionButton> : null}
+        {isSessionMismatch && actions.includes("dismiss") ? <ActionButton onClick={onDismiss}>Cancel</ActionButton> : null}
+        {actions.includes("reload") ? <ActionButton keyEquivalent={isSessionMismatch ? "\r" : undefined} appearance={isSessionMismatch ? undefined : actionAppearance} onClick={onReload}>{isSessionMismatch ? "Reload Webspring" : "Reload"}</ActionButton> : null}
         {error.retry || actions.includes("retry") ? (
-          <ActionButton tone={actionTone} onClick={error.retry ?? onReload}>Try Again</ActionButton>
+          <ActionButton appearance={actionAppearance} onClick={error.retry ?? onReload}>Try Again</ActionButton>
         ) : null}
         {actions.includes("openMailClient") && mailtoFallback && onOpenMailClient ? (
-          <ActionButton tone={actionTone} onClick={() => onOpenMailClient(mailtoFallback)}>Open Mail Client</ActionButton>
+          <ActionButton appearance={actionAppearance} onClick={() => onOpenMailClient(mailtoFallback)}>Open Mail Client</ActionButton>
         ) : null}
         {actions.includes("returnToWebspring") ? (
-          <ActionButton tone={actionTone} onClick={onReturn}>Return to Webspring</ActionButton>
+          <ActionButton appearance={actionAppearance} onClick={onReturn}>Return to Webspring</ActionButton>
         ) : null}
-        {!isSessionMismatch && actions.includes("dismiss") ? <ActionButton tone={actionTone} onClick={onDismiss}>{isNotResponding ? "Continue" : "Close"}</ActionButton> : null}
+        {!isSessionMismatch && actions.includes("dismiss") ? <ActionButton appearance={actionAppearance} onClick={onDismiss}>{isNotResponding ? "Continue" : "Close"}</ActionButton> : null}
       </div>
-    </NSEAlert>
+    </NSEAlertSurface>
   );
 }

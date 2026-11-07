@@ -23,6 +23,14 @@ import type { Plugin } from "vite";
 export interface SynCloudOSViteOptions {
   /** Site-owned directory containing .app bundles. Defaults to src/SynWare. */
   appsDirectory?: string;
+  /** Folder-discovered preference panes; defaults to src/Preferences. */
+  preferencesDirectory?: string;
+  /** Folder-discovered widgets; defaults to src/Widgets. */
+  widgetsDirectory?: string;
+  /** Host contributions; defaults to src/Integrations. */
+  integrationsDirectory?: string;
+  /** Bundle identifiers included in this build (case-insensitive); otherwise SYNCLOUDOS_APPLICATIONS or all. */
+  applications?: readonly string[] | string;
   /** Site-owned Webspring definition, or false for a host without a shell. */
   webspringEntry?: string | false;
   /** Default-exported FontDeclaration; resource paths resolve beside this module. */

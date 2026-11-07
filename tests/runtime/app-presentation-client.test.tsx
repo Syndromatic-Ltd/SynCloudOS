@@ -39,24 +39,24 @@ it("projects only a mounted window's content-bound, read-only presentation trait
   vi.useFakeTimers();
   const runtime = createTestRuntime({ id: "runtime:app-presentation-client" });
   runtimes.push(runtime);
-  registerTestSynWare(runtime, { schemaVersion: 1, id: "presentation-client", version: "1.0.0", title: "Presentation client" });
-  const app = runtime.apps.getApp("presentation-client");
+  registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.presentation-client", version: "1.0.0", displayName: "Presentation client" });
+  const app = runtime.apps.getApp("com.example.presentation-client");
   if (!app) throw new Error("The presentation fixture app did not register.");
   runtime.responders.register({
-    id: `application:${app.id}`,
+    id: `application:${app.bundleIdentifier}`,
     kind: "application",
     parentId: "workspace",
-    scopeId: `application:${app.id}`,
+    scopeId: `application:${app.bundleIdentifier}`,
   });
   const window = runtime.windows.create(standardWindow("presentation-client-window", {
-    applicationId: app.id,
-    applicationSessionId: `${app.id}:window`,
+    applicationId: app.bundleIdentifier,
+    applicationSessionId: `${app.bundleIdentifier}:window`,
     bounds: { x: 80, y: 60, width: 640, height: 520 },
   }));
   const mount = createMountedSynWareRuntime({
     runtime,
     app,
-    responderId: `application:${app.id}`,
+    responderId: `application:${app.bundleIdentifier}`,
     windowControllerId: window.id,
   });
   mounts.push(mount);

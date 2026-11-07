@@ -25,7 +25,9 @@ import React, { type PropsWithChildren } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import * as appearanceModule from "../../src/NSE/public/appearance";
-import { NSEPushButton } from "../../src/NSE/Controls/Buttons/NSEButtons";
+// The provider is internal: applications set an NSEAppearance on a view.
+import { NSEAppearanceProvider as internalAppearanceProvider } from "../../src/NSE/Appearance";
+import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEOverlayProvider } from "../../src/NSE/Overlays";
 import type { NSEOverlayRuntimePort } from "../../src/NSE/Overlays/overlayTypes";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
@@ -76,7 +78,7 @@ function definitionFactory(): DefineNSEAppearance {
 }
 
 function appearanceProvider(): AppearanceProviderComponent {
-  const candidate = appearanceContract.NSEAppearanceProvider;
+  const candidate: unknown = internalAppearanceProvider;
   expect(typeof candidate).toBe("function");
   if (typeof candidate !== "function") {
     throw new Error("NSEAppearanceProvider is not available");
@@ -260,7 +262,7 @@ describe("NSE appearance definition boundary", () => {
 
     const { rerender } = render(
       <Provider {...providerProps} appearance={firstDefinition}>
-        <NSEPushButton onClick={onClick}>Continue</NSEPushButton>
+        <NSEButton title="Continue" onClick={onClick} />
       </Provider>,
     );
 
@@ -275,7 +277,7 @@ describe("NSE appearance definition boundary", () => {
 
     rerender(
       <Provider {...providerProps} appearance={secondDefinition}>
-        <NSEPushButton onClick={onClick}>Continue</NSEPushButton>
+        <NSEButton title="Continue" onClick={onClick} />
       </Provider>,
     );
 

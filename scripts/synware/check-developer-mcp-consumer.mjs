@@ -1,0 +1,77 @@
+#!/usr/bin/env node
+/* SynCloudOS — Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ * Designed by Kavish Krishnakumar in Manchester.
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { readFileSync, rmSync, writeFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { createInstalledConsumer, runNode } from "./installed-consumer.mjs";
+const repositoryRoot=resolve(import.meta.dirname,"../..");
+const consumer=createInstalledConsumer(repositoryRoot,"syncloudos-mcp-consumer-");
+const companion=consumer.manifest.developerMcp;
+assert.equal(companion?.package,"@syndromatic/syncloudos-developer-mcp");
+const archive=resolve(repositoryRoot,".artifacts/synapp-sdk",companion.archive);
+const bytes=readFileSync(archive);
+assert.equal(createHash("sha256").update(bytes).digest("hex"),companion.archiveSha256);
+assert.equal("sha512-"+createHash("sha512").update(bytes).digest("base64"),companion.integrity);
+let client;
+try {
+  runNode([consumer.npm,"install","--prefer-offline","--ignore-scripts","--package-lock=false",archive,"jsdom"],consumer.root);
+  writeFileSync(resolve(consumer.root,"vite.config.ts"),'import { synCloudOS } from "@syndromatic/syncloudos/vite"; export default {plugins:[synCloudOS({webspringEntry:false})]};\n');
+  writeFileSync(resolve(consumer.root,"tsconfig.json"),JSON.stringify({compilerOptions:{target:"ES2022",module:"ESNext",moduleResolution:"Bundler",jsx:"react-jsx",strict:true,skipLibCheck:true,noEmit:true},include:["src"]}));
+  const server=resolve(consumer.root,"node_modules/@syndromatic/syncloudos-developer-mcp/scripts/developer-mcp/server.mjs");
+  const transport=new StdioClientTransport({command:process.execPath,args:[server,"--project",consumer.root],cwd:consumer.root,stderr:"pipe"});
+  let stderr="";
+  transport.stderr?.on("data",chunk=>{stderr+=chunk;});
+  client=new Client({name:"installed-consumer-smoke",version:"1.0.0"});
+  await client.connect(transport);
+  const listed=await client.listTools();
+  assert.deepEqual(listed.tools.map(tool=>tool.name).sort(),["explain_error","inspect_project","lookup_sdk","scaffold","validate"]);
+  async function call(name,input={}) {
+    const response=await client.callTool({name,arguments:input});
+    assert(!response.isError,JSON.stringify(response));
+    return response.structuredContent ?? JSON.parse(response.content[0].text);
+  }
+  const inspected=await call("inspect_project");
+  assert.equal(inspected.sdk.version,companion.version);
+  assert.equal(inspected.sdk.buildReceipt.sourceSha256,consumer.sourceSha256);
+  const entries=await call("lookup_sdk");
+  assert(entries.entries.includes("sdk"));
+  const lookup=await call("lookup_sdk",{entry:"sdk",query:"SynWareInfo"});
+  assert.equal(lookup.symbols[0].name,"SynWareInfo");
+  assert(lookup.symbols[0].signature.includes("SynWareInfo"));
+  assert(lookup.docs.length>0,"Installed docs must be available offline.");
+  const created=await call("scaffold",{bundleIdentifier:"org.example.hello",name:"Hello",route:"/hello"});
+  // The default scaffold is class authoring: Info, index (NSEApplication), locale, test and Views/SearchView.
+  assert.equal(created.createdPaths.length,5);
+  assert(created.createdPaths.some(path=>path.endsWith("Contents/Views/SearchView.tsx")),JSON.stringify(created.createdPaths));
+  // A host entry that mounts the scaffold, so validate's launch check starts the packed app for real.
+  writeFileSync(resolve(consumer.root,"index.html"),'<!doctype html><html><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>\n');
+  const hostEntry=(bundleIdentifier)=>'import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";\nawait mountSynCloudOS({ element: document.getElementById("root")!, application: { bundleIdentifier: "'+bundleIdentifier+'" }, authentication: "disabled" });\n';
+  writeFileSync(resolve(consumer.root,"src/main.tsx"),hostEntry("org.example.missing"));
+  const broken=await call("validate",{typescript:false,idioms:false});
+  assert.equal(broken.ok,false,JSON.stringify(broken));
+  assert(broken.findings.some(finding=>finding.rule==="launch.failed" && finding.file==="src/main.tsx"),JSON.stringify(broken.findings));
+  // The scaffold is not marked public; with sign-in disabled the host still opens it.
+  writeFileSync(resolve(consumer.root,"src/main.tsx"),hostEntry("org.example.hello"));
+  const checked=await call("validate");
+  assert.equal(checked.ok,true,JSON.stringify(checked.findings));
+  assert.equal(checked.typescript.ran,true);
+  assert.equal(checked.typescript.exitCode,0);
+  assert.equal(checked.launch.ran,true,JSON.stringify(checked.launch));
+  assert.equal(checked.launch.entry,"/src/main.tsx");
+  // The packed class scaffold is idiomatic: no idiom.* warnings against the real installed SDK.
+  assert.equal(checked.idiomAudit.warnings,0,JSON.stringify(checked.findings));
+  assert.equal(checked.idiomAudit.applications[0].classAuthoring,true);
+  const explained=await call("explain_error",{query:"NSE_CONTROLLER_DISPOSED"});
+  assert.equal(explained.matches[0].code,"NSE_CONTROLLER_DISPOSED");
+  assert.equal(stderr,"");
+  process.stdout.write(JSON.stringify({ok:true,sdkVersion:companion.version,tools:listed.tools.map(tool=>tool.name),archive:companion.archive,checks:["independent SDK tgz install","independent MCP tgz install","stdio listTools","inspect_project receipt","lookup_sdk installed declarations and docs","scaffold -> validate including tsc --noEmit and a jsdom launch","explain_error canonical code"]},null,2)+"\n");
+} finally {
+  await client?.close();
+  rmSync(consumer.root,{recursive:true,force:true});
+}

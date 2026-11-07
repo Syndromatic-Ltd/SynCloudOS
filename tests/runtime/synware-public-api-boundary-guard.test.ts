@@ -43,9 +43,10 @@ function fixture(files: Record<string, string>, entries: Record<string, string> 
     moduleResolution: ts.ModuleResolutionKind.Bundler,
     noLib: true,
     types: [],
-    baseUrl: root,
+    // Untyped alias cycles are intentional specimens; preserve their non-strict fixture mode.
+    strict: false,
     paths: Object.fromEntries(Object.entries(entries).map(([entry, path]) => [
-      `@syndromatic/syncloudos/${entry}`, [path],
+      `@syndromatic/syncloudos/${entry}`, [resolve(root, path)],
     ])),
   };
   const host = ts.createCompilerHost(options);
@@ -90,7 +91,7 @@ describe("SDK build public API boundaries", () => {
     "SourceListFrameProvider", "SourceListFrameContextValue", "useSourceListFrame",
     "NSEWindowSurfaceBridge", "NSEWindowSurfaceBridgeProvider", "NSEWindowSurfaceRequest",
     "NSEWindowSurfaceDismissResult", "NSEWindowSurfaceErrorContext", "useOptionalNSEWindowSurfaceBridge",
-    "WindowManager", "WindowController", "NSEWindowController", "SynWareProvider", "SynWareProviderProps",
+    "WindowManager", "WindowController", "SynWareProvider", "SynWareProviderProps",
     "SynWareRuntimeMount", "SynWareRuntimeMountProps", "nseRegistry",
     "SystemAlert", "SystemAlertAssetCache", "NSESystemAlert", "NSESystemAlertError",
   ])("rejects an aliased type export of %s from an ordinary entry", async (name) => {
@@ -367,7 +368,9 @@ describe("SDK build public API boundaries", () => {
       "./sdk-entries.mjs": { synWareSdkEntries },
       "./sdk-package-manifest.mjs": { captureSdkSourceFingerprint },
       "./sdk-package-styles.mjs": {},
+      "./sdk-browser-dependencies.mjs": { sdkBrowserDependencies: buildWork },
       "./public-api-boundaries.mjs": { assertPublicApiBoundaries },
+      "../developer-mcp/build-package.mjs": { writeDeveloperSdkData: buildWork, writeDeveloperMcpPackage: buildWork },
     };
     let stderr = "";
     const sandbox = {

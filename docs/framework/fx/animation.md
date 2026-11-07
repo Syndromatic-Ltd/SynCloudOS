@@ -1,5 +1,7 @@
 # AnimationFX
 
+See [class authoring](../cocoa-authoring.md#outlets-and-animation) for mounted outlets, scoped layer transactions and managed renderer/frame lifetimes.
+
 Retained layers also present `IFXShader` image generators, filter their content and sublayer tree, and composite with normal or additive blending. See [image shaders in retained layers](image/shaders.md) for pass order, straight-alpha output, bounds, budgets and adapter support.
 
 AnimationFX (`AFX`) is the web-native analogue of Core Animation. It models visual content as a tree of layers, gives each layer geometry and appearance properties, and animates those properties over time with timing curves, keyframes and springs. Because it describes animation as data, every animation can be sampled at any moment, retargeted while it runs, paused, seeked, or played on a compositor thread when the browser allows.
@@ -27,7 +29,7 @@ import { AFXBasicAnimation, AFXAnimation } from "@syndromatic/syncloudos/fx/anim
 | --- | --- |
 | Prefix | `AFX` |
 | Entry | `@syndromatic/syncloudos/fx/animation` |
-| Hook | `useSynWareAnimations`, from `@syndromatic/syncloudos/sdk` |
+| Hook | `useAnimations`, from `@syndromatic/syncloudos/sdk` |
 | Permissions | None |
 | Analogue | Core Animation (`CALayer`, `CAAnimation`, `CABasicAnimation`, `CAKeyframeAnimation`, `CASpringAnimation`, `CAAnimationGroup`, `CATransaction`, `CAMediaTimingFunction`, `CATransform3D`, `CAShapeLayer`, `CAGradientLayer`, `CATextLayer`, `CAReplicatorLayer`, `CAEmitterLayer`, `CATiledLayer`) |
 
@@ -324,11 +326,11 @@ Inside `run`'s `changes` callback, call `animator(target)` with an `AFXAnimatabl
 
 ## In a SynWare
 
-`useSynWareAnimations()` returns the session's animation client. The session owns every layer and renderer it hands out and releases them when the application closes, and you can dispose of any earlier.
+`useAnimations()` returns the session's animation client. The session owns every layer and renderer it hands out and releases them when the application closes, and you can dispose of any earlier.
 
 | Method | Returns | Description |
 | --- | --- | --- |
-| `bindLayer(element, signal?)` | `AFXLayer` | Binds a layer to a page element. Each element takes one binding. The layer's properties write to the element's style, and disposing the layer restores the original inline style. |
+| `bindLayer(element, signal?, options?)` | `AFXLayer` | Binds a layer to a page element. Each element takes one binding. The layer owns frame geometry by default; `{ layout: "css" }` instead measures the element's CSS size without replacing its position or dimensions. Native `view.layer` selects CSS layout automatically. Disposing restores the original inline style. |
 | `bindShapeLayer(element, signal?)` | `AFXShapeLayer` | A layer that draws a `GFXPath`. |
 | `bindGradientLayer(element, signal?)` | `AFXGradientLayer` | A layer that draws a `GFXGradient`. |
 | `bindTextLayer(element, signal?)` | `AFXTextLayer` | A layer that draws a shaped line of text. |
@@ -342,10 +344,10 @@ Inside `run`'s `changes` callback, call `animator(target)` with an `AFXAnimatabl
 ```tsx
 import { useEffect, useRef } from "react";
 import { AFXAnimation, AFXBasicAnimation, AFXTransform3D } from "@syndromatic/syncloudos/fx/animation";
-import { useSynWareAnimations } from "@syndromatic/syncloudos/sdk";
+import { useAnimations } from "@syndromatic/syncloudos/sdk";
 
 export function SlideIn({ children }: { children: React.ReactNode }) {
-  const animations = useSynWareAnimations();
+  const animations = useAnimations();
   const element = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

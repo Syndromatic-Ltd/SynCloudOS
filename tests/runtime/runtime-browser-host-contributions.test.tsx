@@ -25,11 +25,8 @@ import {
   prepareSynCloudOSHostContributions,
 } from "../../src/SynCloudOS/HostContributions/hostContribution";
 import type { SynCloudOSPolicySubject } from "../../src/SynCloudOS/PolicyKit/policyTypes";
-import type { WebspringContentSource } from "../../src/Webspring/webspringContent";
 import { createTestRuntime, unlockRuntime } from "./helpers";
 import { noteType } from "../fixtures/noteDocumentType";
-
-const source: WebspringContentSource = { read: async () => [] };
 
 describe("runtime browser host contribution context", () => {
   it("projects scoped capabilities without exposing runtime authorities", async () => {
@@ -37,17 +34,14 @@ describe("runtime browser host contribution context", () => {
     try {
       const contribution = createSynCloudOSHostContribution("host", "tests/host", () => ({}));
       const [prepared] = await prepareSynCloudOSHostContributions([contribution], runtime.environment);
-      const contentSources: Record<string, typeof source> = {};
-      const handle = createSynCloudOSHostInstallContext(prepared!, runtime, contentSources);
+      const handle = createSynCloudOSHostInstallContext(prepared!, runtime);
 
       expect(Object.keys(handle.context)).not.toEqual(expect.arrayContaining(["runtime", "documentStore", "windows", "commands", "transfer"]));
-      expect(Object.keys(handle.context)).toEqual(expect.arrayContaining(["services", "documents", "seed", "events", "webspring", "policy"]));
+      expect(Object.keys(handle.context)).toEqual(expect.arrayContaining(["services", "documents", "seed", "events", "policy"]));
+      expect(Object.keys(handle.context)).not.toContain("webspring");
       expect((handle.context as Record<string, unknown>).runtime).toBeUndefined();
 
-      handle.context.webspring.registerContentSource("host.content", source);
-      expect(contentSources["host.content"]).toBe(source);
       await handle.cleanup();
-      expect(contentSources["host.content"]).toBeUndefined();
     } finally {
       await runtime.dispose();
     }
@@ -59,7 +53,7 @@ describe("runtime browser host contribution context", () => {
     try {
       const contribution = createSynCloudOSHostContribution("host", "tests/host", () => ({}));
       const [prepared] = await prepareSynCloudOSHostContributions([contribution], runtime.environment);
-      const handle = createSynCloudOSHostInstallContext(prepared!, runtime, {}, {}, controller.signal);
+      const handle = createSynCloudOSHostInstallContext(prepared!, runtime, {}, controller.signal);
       controller.abort();
 
       expect(() => handle.context.resources.lookup("missing")).toThrow(/aborted/iu);

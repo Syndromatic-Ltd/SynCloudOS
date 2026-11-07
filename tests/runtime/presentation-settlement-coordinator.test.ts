@@ -65,9 +65,9 @@ describe("PresentationSettlementCoordinator", () => {
     registerTestSynWare(runtime, createSynWare({
       manifest: {
         schemaVersion: 1,
-        id: "headless-route-app",
+        bundleIdentifier: "com.example.headless-route-app",
         version: "1.0.0",
-        title: "Headless route app",
+        displayName: "Headless route app",
         routes: [{ path: "/headless", primary: true }],
         permissions: ["app.open.public"],
       },
@@ -92,11 +92,11 @@ describe("PresentationSettlementCoordinator", () => {
         return roles;
       },
     });
-    configured.apps.registerBundle(createTestBundle({ id: "configured-app", route: "/configured-app" }));
+    configured.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.configured-app", route: "/configured-app" }));
     configured.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
     const mountController = new AbortController();
     const loadAndRender = vi.fn(async () => undefined);
-    const releaseMount = configured.routes.mountedRoutes.attach("configured-app", {
+    const releaseMount = configured.routes.mountedRoutes.attach("com.example.configured-app", {
       signal: mountController.signal,
       loadAndRender,
     });
@@ -127,7 +127,7 @@ describe("PresentationSettlementCoordinator", () => {
     await configured.dispose({ reason: "test", inFlight: "cancel" });
 
     const staticRuntime = createTestRuntime();
-    staticRuntime.apps.registerBundle(createTestBundle({ id: "static-app", route: "/static-app" }));
+    staticRuntime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.static-app", route: "/static-app" }));
     staticRuntime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
     const staticResult = await staticRuntime.routes.openRoute("/static-app", { source: "test", syncRoute: false }).result;
     expect(staticResult.value).not.toHaveProperty("presentationSettlementId");

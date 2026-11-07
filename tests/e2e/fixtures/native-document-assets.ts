@@ -18,6 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+// Load the runtime graph before publishing assetFixture. Loading it inside runtimeSave
+// discovers browser dependencies after Vite's initial crawl and can reload mid-save.
+import { createSynCloudOS } from "../../../src/SynCloudOS/Runtime/createSynCloudOS";
+import { createBrowserRuntimeEnvironment } from "../../../src/SynCloudOS/PlatformAdapters/BrowserRuntimeEnvironment";
 import { createIndexedDBDocumentAssetStore } from "../../../src/SynCloudOS/Documents/IndexedDBDocumentAssetStore";
 import { createDocumentAssetStorageAdapter } from "../../../src/SynCloudOS/Documents/DocumentAssetSaveCoordinator";
 import { createDocumentResourceService } from "../../../src/SynCloudOS/Documents/DocumentResourceService";
@@ -51,9 +55,6 @@ async function display(bytes: Uint8Array) {
   } finally { URL.revokeObjectURL(url); }
 }
 async function kernel() {
-  const [{ createSynCloudOS }, { createBrowserRuntimeEnvironment }] = await Promise.all([
-    import("../../../src/SynCloudOS/Runtime/createSynCloudOS"), import("../../../src/SynCloudOS/PlatformAdapters/BrowserRuntimeEnvironment"),
-  ]);
   const environment = createBrowserRuntimeEnvironment();
   const nativeLocation = { ...locationValue, database: `${prefix}:runtime-native` };
   const adapter = new IndexedDBDocumentAdapter({ indexedDB, databaseName: nativeLocation.database, environment });

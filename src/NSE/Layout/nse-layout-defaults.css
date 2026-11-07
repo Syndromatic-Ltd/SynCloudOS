@@ -104,17 +104,14 @@
   .nse-control-text-field,
   .nse-control-input-box,
   .nse-control-slider,
-  .nse-extended-progress-slider,
-  .nse-control-progress-bar,
-  .nse-control-progress-item,
   hr.nse-control-divider,
+  .nse-box-separator,
   .nse-control-divider:not(.nse-control-divider-toggle),
-  .nse-container-divider-drawer,
   .nse-list,
   .nse-list-swipeable,
   .nse-control-list-item,
   .nse-list-row,
-  .nse-container-row-group,
+  .nse-outline-container,
   .nse-control-group-box,
   .nse-container-pane,
   .nse-container-drawer,
@@ -127,13 +124,10 @@
   .nse-statusbar,
   .nse-app-topbar-base,
   .nse-control-page-header,
-  .nse-extended-header,
-  .nse-extended-prev-next-banner,
   .nse-form,
   .nse-layout-stack,
   .nse-layout-inline,
   .nse-layout-flex,
-  .nse-layout-fit,
   [data-nse-content-layout],
   [data-nse-control="search-field"],
   [data-nse-control="secure-text-field"],
@@ -148,7 +142,6 @@
   [data-nse-control="rule-editor"],
   [data-nse-control="predicate-editor"],
   [data-nse-control="tab-view"],
-  [data-nse-control="accordion-view"],
   [data-nse-control="scroll-view-frame"],
   [data-nse-control="split-view"],
   [data-nse-control="stack-view"],
@@ -186,6 +179,11 @@
   gap: 0;
 }
 
+/* A separator box spans its container along the line, as a horizontal NSBox separator does. */
+:where(.nse-box-separator) {
+  align-self: stretch;
+}
+
 /* ----------------------------------------------------------------------------
    Layout margins on containers that carry them through a custom property.
    ------------------------------------------------------------------------- */
@@ -221,23 +219,24 @@
 :where(.nse-layout-stack[data-alignment="trailing"]) { align-items: flex-end; }
 
 /* ----------------------------------------------------------------------------
-   Text roles (NSEText).
+   Labels: NSETextField with isEditable false (NSTextField(labelWithString:)).
    ------------------------------------------------------------------------- */
 
-:where(.nse-text) {
+:where(.nse-control-label-field) {
+  display: block;
   margin: 0;
   font-size: var(--nse-text-body-size);
   line-height: var(--nse-text-body-line);
 }
 
-:where(.nse-text[data-text-style="callout"]) { font-size: var(--nse-text-callout-size); }
-:where(.nse-text[data-text-style="footnote"]) { font-size: var(--nse-text-footnote-size); }
-:where(.nse-text[data-text-style="caption"]) { font-size: var(--nse-text-caption-size); line-height: 1.35; }
-:where(.nse-text[data-text-style="headline"]) { font-size: var(--nse-text-headline-size); font-weight: var(--nse-text-headline-weight); }
-:where(.nse-text[data-text-style="label"]) { font-size: var(--nse-text-label-size); font-weight: var(--nse-text-label-weight); }
-:where(.nse-text[data-tone="secondary"]) { color: color-mix(in srgb, currentColor var(--nse-text-secondary-opacity), transparent); }
-:where(.nse-text[data-numeric="true"]) { font-variant-numeric: tabular-nums; }
-:where(.nse-text[data-wrap="anywhere"]) { overflow-wrap: anywhere; }
+:where(.nse-control-label-field[data-font="callout"]) { font-size: var(--nse-text-callout-size); }
+:where(.nse-control-label-field[data-font="footnote"]) { font-size: var(--nse-text-footnote-size); }
+:where(.nse-control-label-field[data-font="caption"]) { font-size: var(--nse-text-caption-size); line-height: 1.35; }
+:where(.nse-control-label-field[data-font="headline"]) { font-size: var(--nse-text-headline-size); font-weight: var(--nse-text-headline-weight); }
+:where(.nse-control-label-field[data-font="label"]) { font-size: var(--nse-text-label-size); font-weight: var(--nse-text-label-weight); }
+:where(.nse-control-label-field[data-text-color="secondary"]) { color: color-mix(in srgb, currentColor var(--nse-text-secondary-opacity), transparent); }
+:where(.nse-control-label-field[data-monospaced-digits="true"]) { font-variant-numeric: tabular-nums; }
+:where(.nse-control-label-field[data-line-break-mode="char"]) { overflow-wrap: anywhere; }
 
 /* ----------------------------------------------------------------------------
    Forms (NSEForm / NSEFormRow): AppKit's label column. Labels are trailing

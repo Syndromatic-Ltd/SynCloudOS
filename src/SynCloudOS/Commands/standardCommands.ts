@@ -311,7 +311,7 @@ export function registerStandardCommands(runtime: SynCloudOSRuntime): { dispose(
     execute: ({ payload }) => { const appId = payload.appId ?? runtime.store.getSnapshot().application.activeAppId!; runtime.systemUI.about.open(appId); },
   }));
   register(declaration({
-    id: "system.showPreferences", responderId: "runtime", title: { key: "command.system.showPreferences", fallback: "Preferences" }, payload: noPayload,
+    id: "system.showPreferences", responderId: "runtime", title: { key: "system.preferences", fallback: "System Preferences" }, payload: noPayload,
     scope: "runtime", defaultKeyBindings: [{ key: ",", modifiers: ["primary"], scope: "runtime", repeat: "ignore" }], undo: { kind: "none" },
     validate: () => ({ enabled: runtime.disposalState === "running", disabledReason: "System Preferences is not available." }),
     execute: () => { runtime.systemUI.preferences.open(); },

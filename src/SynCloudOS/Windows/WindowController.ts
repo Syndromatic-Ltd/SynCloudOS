@@ -258,6 +258,7 @@ export class WindowController {
         commit: () => {
           if (settled) return;
           settled = true;
+          try { this.dependencies.delegate?.willClose?.(request); } catch (error) { this.#reportError(error, "close-commit"); }
           try { prepared.commit(); } catch (error) { this.#reportError(error, "close-commit"); }
           this.dispose("close-commit");
         },

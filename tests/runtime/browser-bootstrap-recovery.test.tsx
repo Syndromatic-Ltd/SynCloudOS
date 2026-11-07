@@ -37,9 +37,9 @@ vi.mock("../../src/App", () => ({ App: () => <button data-testid="mounted-browse
 const shell = defineWebspring({
   manifest: {
     schemaVersion: 1,
-    id: "com.example.bootstrap-shell",
+    bundleIdentifier: "com.example.bootstrap-shell",
     version: "1.0.0",
-    title: "Bootstrap shell",
+    displayName: "Bootstrap shell",
     webspringShell: {
       views: [{ id: "site", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
       defaults: { desktop: "site", tablet: "site", mobile: "site" },
@@ -152,7 +152,7 @@ describe("browser bootstrap recovery", () => {
     const target = element();
     const { failure, runtime } = await fail(target, { bundles: [{
       manifest: {
-        schemaVersion: 1, id: "broken", version: "1.0.0", title: "Broken app",
+        schemaVersion: 1, bundleIdentifier: "com.example.broken", version: "1.0.0", displayName: "Broken app",
         runtime: { policy: { public: true, requiresLogin: false } },
         routes: [{ path: "/broken", primary: true }],
       },
@@ -164,7 +164,7 @@ describe("browser bootstrap recovery", () => {
     expect(runtime.disposalState).toBe("disposed");
     const launchErrors = runtime.errors.getHistory().filter(error => error.code === "APP_LAUNCH_FAILED");
     expect(launchErrors).toHaveLength(1);
-    expect(launchErrors[0]?.technicalMessage).toContain(importFailure.message);
+    expect(`${launchErrors[0]?.message}\n${launchErrors[0]?.technicalDetails}`).toContain(importFailure.message);
     const alert = target.querySelector('[role="alertdialog"]');
     expect(alert?.textContent).toContain(launchErrors[0]!.title);
     await act(async () => { (alert!.querySelector("button") as HTMLButtonElement).click(); });

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { TrustedSynWareBundle } from "./bundleTypes";
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
 
@@ -51,7 +52,7 @@ export function createBundleGenerationFence(
   parentSignal?: AbortSignal,
 ): BundleGenerationFence {
   const controller = new AbortController();
-  const appId = bundle.manifest.id;
+  const appId = bundle.manifest.bundleIdentifier;
   let disposed = false;
   let unsubscribeUpdate: (() => void) | null = null;
   let unsubscribeUnregister: (() => void) | null = null;
@@ -76,7 +77,7 @@ export function createBundleGenerationFence(
   const onRuntimeAbort = () => revoke(runtime.signal.reason);
   const onParentAbort = () => revoke(parentSignal?.reason);
   const onBundleEvent = (payload: unknown) => {
-    if (eventAppId(payload) === appId) ensureCurrent();
+    if (normalizeBundleIdentifier(eventAppId(payload)) === normalizeBundleIdentifier(appId)) ensureCurrent();
   };
 
   unsubscribeUpdate = runtime.events.subscribe("bundle.update", (event) => onBundleEvent(event.payload));

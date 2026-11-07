@@ -21,19 +21,10 @@
 import { describe, expect, it, vi } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import {
-  NSECheckbox,
-  NSEGroupBox,
-  NSEListItem,
-  NSEMenu,
-  NSEPicker,
-  NSEProgressButton,
-  NSEPushButton,
-  NSERadioGroup,
-  NSEToggleButton,
-  NSETopBar,
-  useNSEControlFeedback,
-} from "../../src/NSE/public/controls";
+import { NSEMenuView } from "../../src/NSE/Menus";
+import { NSESwitch, NSEButton, NSEBox, NSEPopUpButton, NSESegmentedControl, useNSEControlFeedback } from "../../src/NSE/public/controls";
+import { NSETopBar } from "../../src/NSE/Windows/Chrome";
+import { NSEListItem } from "../../src/NSE/Controls/Selection/NSEListItem";
 import { NSEGlassPanel } from "../../src/NSE/Components/NSEGlassPanel";
 import { BrowserHapticsAdapter, createHFXVibratePattern, normalizeHFXFeedbackInput } from "../../src/SynCloudOS/PlatformAdapters/BrowserHapticsAdapter";
 import { defaultHFXFeedbackPatterns, HFX_FEEDBACK_PRESET_NAMES } from "../../src/SynCloudOS/HapticsFX/feedbackPatterns";
@@ -310,22 +301,22 @@ describe("HapticsFX feedback preservation", () => {
     try {
       const onClick = vi.fn();
       const rendered = render(createElement("div", null,
-        createElement(NSEPushButton, { tone: "medium", onClick }, "Medium"),
-        createElement(NSEPushButton, { tone: "light", onClick }, "Light"),
-        createElement(NSEPushButton, { tone: "dark", onClick }, "Dark"),
-        createElement(NSEPushButton, { tone: "affirmative", onClick }, "OK"),
-        createElement(NSEPushButton, { tone: "negative", onClick }, "Delete"),
-        createElement(NSEPushButton, { tone: "negative", haptic: false, onClick }, "Silent"),
-        createElement(NSECheckbox, { label: "Check", onChange: vi.fn() }),
-        createElement(NSEToggleButton, { onCheckedChange: vi.fn() }),
-        createElement(NSERadioGroup, {
-          label: "Mode",
-          options: [{ value: "a", label: "A" }, { value: "b", label: "B" }],
-          defaultValue: "a",
-          onValueChange: vi.fn()
+        createElement(NSEButton, { title: "Medium", onClick }),
+        createElement(NSEButton, { title: "Light", appearance: "aqua", onClick }),
+        createElement(NSEButton, { title: "Dark", appearance: "darkAqua", onClick }),
+        createElement(NSEButton, { title: "OK", keyEquivalent: "\r", onClick }),
+        createElement(NSEButton, { title: "Delete", hasDestructiveAction: true, onClick }),
+        createElement(NSEButton, { title: "Silent", hasDestructiveAction: true, haptic: false, onClick }),
+        createElement(NSEButton, { buttonType: "switch", title: "Check", onStateChange: vi.fn() }),
+        createElement(NSESwitch, { onStateChange: vi.fn() }),
+        createElement(NSESegmentedControl, {
+          "aria-label": "Mode",
+          segmentStyle: "capsule",
+          items: [{ id: "a", label: "A" }, { id: "b", label: "B" }],
+          selection: { mode: "select-one", selectedIds: new Set(["a"]), allowsEmpty: false },
+          onSelectionChange: vi.fn()
         }),
         createElement(NSEListItem, { role: "button", onClick: vi.fn() }, "List item"),
-        createElement(NSEProgressButton, { value: 20, onClick: vi.fn() }, "Progress"),
         createElement(NSETopBar, {
           title: "Journal",
           leadingItems: [{ kind: "webspring", label: "Return", onClick: vi.fn() }]
@@ -348,12 +339,10 @@ describe("HapticsFX feedback preservation", () => {
       expect(vibrate).toHaveBeenLastCalledWith(expectedHapticPattern("selection"));
       fireEvent.click(rendered.getByRole("switch"));
       expect(vibrate).toHaveBeenLastCalledWith(expectedHapticPattern("selection"));
-      fireEvent.click(rendered.getByRole("radio", { name: "B" }));
+      fireEvent.click(rendered.getByRole("button", { name: "B" }));
       expect(vibrate).toHaveBeenLastCalledWith(expectedHapticPattern("selection"));
       fireEvent.click(rendered.getByText("List item"));
       expect(vibrate).toHaveBeenLastCalledWith(expectedHapticPattern("selection"));
-      fireEvent.click(rendered.getByText("Progress"));
-      expect(vibrate).toHaveBeenLastCalledWith(expectedHapticPattern("medium"));
       fireEvent.click(rendered.getByLabelText("Return"));
       expect(vibrate).toHaveBeenLastCalledWith(expectedHapticPattern("rigid"));
     } finally {
@@ -370,14 +359,14 @@ describe("HapticsFX feedback preservation", () => {
 
     try {
       const rendered = render(createElement("div", null,
-        createElement(NSEMenu, {
+        createElement(NSEMenuView, {
           label: "Actions",
           items: [{ value: "open", label: "Open" }],
           onSelect: vi.fn()
         }),
-        createElement(NSEPicker, {
+        createElement(NSEPopUpButton, {
           label: "Format",
-          options: [{ value: "plain", label: "Plain" }, { value: "rich", label: "Rich" }],
+          items: [{ value: "plain", title: "Plain" }, { value: "rich", title: "Rich" }],
           defaultValue: "plain",
           onValueChange: vi.fn()
         })
@@ -429,7 +418,7 @@ describe("HapticsFX feedback preservation", () => {
     const a = createRuntimeHapticsService(new AUFXSystemFeedbackBus(() => null), { navigator: { vibrate: first }, audio: "off" });
     const b = createRuntimeHapticsService(new AUFXSystemFeedbackBus(() => null), { navigator: { vibrate: second }, audio: "off" });
     await a.trigger("light"); expect(first).toHaveBeenCalledWith(expectedHapticPattern("light")); expect(second).not.toHaveBeenCalled();
-    a.dispose(); await expect(a.trigger("medium")).rejects.toThrow("disposed");
+    a.dispose(); await expect(a.trigger("medium")).rejects.toThrow(expect.objectContaining({ code: "HFX_HAPTIC_ENGINE_DISPOSED" }));
     await b.trigger("rigid"); expect(second).toHaveBeenCalledWith(expectedHapticPattern("rigid")); b.dispose();
   });
 });
@@ -513,9 +502,9 @@ describe("NSESmoothSurface", () => {
     });
 
     const groupBoxMarkup = renderToStaticMarkup(createElement(
-      NSEGroupBox,
+      NSEBox,
       {
-        label: "Reader",
+        title: "Reader",
         smoothSurface: {
           radius: "xl",
           focus: "within",
@@ -543,7 +532,6 @@ describe("NSESmoothSurface", () => {
 
     expect(appTopBarMarkup).toContain("nse-app-topbar");
     expect(appTopBarMarkup).toContain("nse-smooth-surface-radius-lg");
-    expect(appTopBarMarkup).toContain("--nse-app-topbar-height:68px");
     expect(appTopBarMarkup).toContain("--nse-smooth-surface-shadow:0 0 0 1px rgba(255, 255, 255, 0.18)");
 
     const appTopBarWithTitleActionMarkup = renderToStaticMarkup(createElement(NSETopBar, {

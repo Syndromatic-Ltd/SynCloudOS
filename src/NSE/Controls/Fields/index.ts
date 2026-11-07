@@ -19,8 +19,5 @@
  */
 
 export * from "./NSEFields";
-export * from "./NSEFieldVariants";
-export * from "./NSEPasswordField";
-export * from "./NSESearchFieldController";
 export * from "./NSESecureTextField";
 import "./nse-field-extensions.css";

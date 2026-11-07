@@ -22,6 +22,7 @@ import "./nse-page.css";
 
 export { NSEPage } from "./NSEPage";
 export { NSEPageController } from "./NSEPageController";
+export type { NSEPageControllerOptions, NSEPageControllerSnapshot, NSEPageControllerTransitionStyle } from "./NSEPageController";
 export { useNSEPage } from "./useNSEPage";
 export {
   clampNSEPageProgress,

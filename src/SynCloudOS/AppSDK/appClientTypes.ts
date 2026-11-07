@@ -17,6 +17,19 @@
  * limitations under the License.
  */
 
+import type { AppPlaybackPresentationLease, AppPlaybackPresentationRequest } from "./playbackPresentationTypes";
+import type { VFXVideoClient, VFXPresentationCoordinator } from "../../FX/VideoFX/public";
+
+/** Looping video has no finite track position. Transport stays with the exact
+ * mounted coordinator and the application's validated play/pause commands. */
+export type AppVideoPlaybackPresentationRequest = Omit<AppPlaybackPresentationRequest, "commands"> & {
+  readonly commands: Readonly<Partial<Record<"play" | "pause", string>>>;
+};
+export interface AppVideoClient extends VFXVideoClient {
+  present(coordinator: VFXPresentationCoordinator, request: AppVideoPlaybackPresentationRequest, signal?: AbortSignal): AppPlaybackPresentationLease;
+}
+
+
 import type { AUFXAudioEngine } from "../../FX/AudioFX/AUFXAudioEngine";
 import type { AUFXAudioFormat } from "../../FX/AudioFX/AUFXAudioFormat";
 import type { AUFXAudioSession } from "../../FX/AudioFX/AUFXAudioSession";
@@ -56,6 +69,13 @@ export type SynCloudOSHorizontalSizeClass = "compact" | "regular" | "wide";
 /** Immutable, content-bound presentation values for the current mount. */
 export interface SynCloudOSPresentationTraits {
   readonly revision: number;
+  readonly geometryState: "current" | "retained" | "unavailable";
+  readonly safeAreaAvailability: "available" | "unavailable" | "unknown";
+  /** Actual browser capabilities, absent for older host projections. */
+  readonly viewportFeatures?: Readonly<{
+    readonly posture: "continuous" | "folded" | null;
+    readonly segments: readonly AppBounds[] | null;
+  }>;
   readonly contentBounds: AppBounds;
   readonly hostViewportBounds: AppBounds;
   readonly horizontalSizeClass: SynCloudOSHorizontalSizeClass;
@@ -95,6 +115,8 @@ export interface AppLifecycleClient {
 export interface AppCommandClient {
   /** Current command authority evidence, available only while this mount is live. */
   getPresentationGeneration(): Readonly<{ registryGeneration: number; responderGeneration: number }>;
+  /** Revalidates presentation when focus or responder authority changes. */
+  subscribePresentation(listener: () => void): () => void;
   register(declaration: object): AppClientHandle & Readonly<{ commandId: string; responderId: string }>;
   createPayload(...fields: readonly unknown[]): Readonly<Record<string, unknown>>;
   createPayloadArray(...values: readonly unknown[]): readonly unknown[];
@@ -106,7 +128,7 @@ export interface AppCommandClient {
     id: string, payload?: unknown,
     options?: Readonly<Record<string, unknown>> | Pick<CommandDispatchOptions, "source" | "correlationId" | "signal" | "acceptance">,
   ): CommandDispatchPreparation | Promise<CommandDispatchPreparation>;
-  validate(id: string, payload?: unknown, options?: Readonly<Record<string, unknown>>): Promise<AppCommandPresentation>;
+  validate(id: string, payload?: unknown, options?: Readonly<Record<string, unknown>> | Pick<CommandValidationOptions, "source" | "signal" | "generation">): Promise<AppCommandPresentation>;
   validateMany(
     requests: readonly Readonly<{ key: string; commandId: string; payload?: unknown }>[],
     options?: Readonly<Record<string, unknown>> | Pick<CommandValidationOptions, "source" | "signal" | "generation">,
@@ -128,6 +150,7 @@ export interface AppCommandPresentation {
 
 export interface AppFocusScope extends AppClientHandle {
   readonly id: string;
+  updatePresentation(presentation: Readonly<{ kind: "root" | "webspring" | "application" | "window" | "menu" | "sheet" | "popover" | "modal"; modal: boolean; trapFocus: boolean }>): void;
   close(options?: Readonly<{ restore?: boolean }>): Readonly<{ status: string; scopeId: string; restoredResponderId: string | null }>;
 }
 
@@ -165,7 +188,9 @@ export interface AppUndoReservation {
 export interface AppUndoHistory {
   readonly canUndo: boolean;
   readonly canRedo: boolean;
+  /** The complete menu title, verb included: "Undo Rename", or "Undo" when nothing can be undone. Use it as the item title; do not prefix it. */
   readonly undoTitle: string | null;
+  /** The complete menu title, verb included: "Redo Rename", or "Redo" when nothing can be redone. */
   readonly redoTitle: string | null;
   readonly isExecuting: boolean;
   register(action: AppUndoAction, options?: Readonly<{
@@ -282,6 +307,12 @@ export interface AppDocumentOpenRequest<TModel = unknown> {
   readonly documentId?: string;
   readonly typeId: string;
   readonly location: AppDocumentLocation;
+  /**
+   * The model for a document that does not exist yet. When nothing is stored at `location`,
+   * openDocument creates a new document there from this model, written on its first save. Without
+   * it, a missing document rejects with code "document-not-found". A stored document always opens
+   * with its stored model; this is never merged into it.
+   */
   readonly initialModel?: TModel;
   readonly activate?: boolean;
   readonly signal?: AbortSignal;
@@ -487,7 +518,9 @@ export interface AUFXAudioHandle {
   readonly id: string;
 }
 
+
 export interface AUFXAudioClient {
+  present(handleId: string, request: AppPlaybackPresentationRequest, signal?: AbortSignal): AppPlaybackPresentationLease;
   createEngine(format: AUFXAudioFormat, signal?: AbortSignal): AUFXAudioEngine;
   createSession(signal?: AbortSignal): AUFXAudioSession;
   fileCapabilities(): AUFXAudioFileCapabilities;
@@ -616,6 +649,12 @@ export interface AppWindowClient {
   subscribe(listener: () => void): () => void;
   openDocumentWindow(request: AppOpenDocumentWindowRequest): Promise<AppOwnedWindowSnapshot>;
   focus(windowId: string): AppOwnedWindowSnapshot;
+  /** Minimises an owned window. Does nothing for a window that is not minimisable. */
+  minimise(windowId: string): void;
+  /** Toggles an owned window between its zoomed and normal size. */
+  zoom(windowId: string): void;
+  /** Renames an owned window. */
+  setTitle(windowId: string, title: string): void;
   close(windowId: string): Promise<AppWindowCloseResult>;
 }
 

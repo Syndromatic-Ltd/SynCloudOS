@@ -27,14 +27,14 @@ function createTestRuntime(options: Parameters<typeof createRuntime>[0] = {}) {
   return authoriseTestRuntime(createRuntime({
     ...options,
     initialBundles: options.initialBundles ?? [
-      createTestBundle({ id: "studio", route: "/studio" }),
-      createTestBundle({ id: "publisher", route: "/publisher" }),
-      createTestBundle({ id: "one", route: "/one" }),
+      createTestBundle({ bundleIdentifier: "com.example.studio", route: "/studio" }),
+      createTestBundle({ bundleIdentifier: "com.example.publisher", route: "/publisher" }),
+      createTestBundle({ bundleIdentifier: "com.example.one", route: "/one" }),
     ],
   }));
 }
 
-function scopedDrag(runtime: ReturnType<typeof createTestRuntime>, appId: "studio" | "publisher" | "one") {
+function scopedDrag(runtime: ReturnType<typeof createTestRuntime>, appId: "com.example.studio" | "com.example.publisher" | "com.example.one") {
   const applicationResponderId = `application:${appId}`;
   if (!runtime.responders.get(applicationResponderId)) {
     runtime.responders.register({ id: applicationResponderId, kind: "application", parentId: "workspace", scopeId: applicationResponderId });
@@ -69,13 +69,13 @@ describe("runtime drag sessions", () => {
       authorise,
     });
     const session = manager.begin({
-      source: { appId: "studio", windowId: "studio-main", responderId: "assets" },
+      source: { appId: "com.example.studio", windowId: "studio-main", responderId: "assets" },
       representations: [{ type: "text/plain", value: "cloud" }],
       operations: ["move", "copy"],
     });
 
     const result = await manager.updateDestination(session.id, {
-      endpoint: { appId: "publisher", windowId: "publisher-main", responderId: "editor" },
+      endpoint: { appId: "com.example.publisher", windowId: "publisher-main", responderId: "editor" },
       operations: ["copy", "link"],
     });
 
@@ -97,13 +97,13 @@ describe("runtime drag sessions", () => {
       authorise: () => authorisation,
     });
     const session = manager.begin({
-      source: { appId: "source", windowId: "window", responderId: "row" },
+      source: { appId: "com.example.source", windowId: "window", responderId: "row" },
       representations: [{ type: "text/plain", value: "payload" }],
       operations: ["copy"],
     });
 
     const update = manager.updateDestination(session.id, {
-      endpoint: { appId: "target", windowId: "window", responderId: "drop" },
+      endpoint: { appId: "com.example.target", windowId: "window", responderId: "drop" },
       operations: ["copy"],
     });
     rejectAuthorisation(new Error("policy service unavailable"));
@@ -131,12 +131,12 @@ describe("runtime drag sessions", () => {
       }),
     });
     const session = manager.begin({
-      source: { appId: "source", windowId: "one", responderId: "row" },
+      source: { appId: "com.example.source", windowId: "com.example.one", responderId: "row" },
       representations: [{ type: "text/plain", value: "payload" }],
       operations: ["copy"],
     });
     const update = manager.updateDestination(session.id, {
-      endpoint: { appId: "target", windowId: "two", responderId: "row" },
+      endpoint: { appId: "com.example.target", windowId: "two", responderId: "row" },
       operations: ["copy"],
     });
     await authoriseEntered;
@@ -150,11 +150,11 @@ describe("runtime drag sessions", () => {
   it("is isolated and disposed with its owning runtime", async () => {
     const first = createTestRuntime({ id: "runtime:drag:first" });
     const second = createTestRuntime({ id: "runtime:drag:second" });
-    const firstDrag = scopedDrag(first, "one");
+    const firstDrag = scopedDrag(first, "com.example.one");
     expect(first.drag).not.toBe(second.drag);
     firstDrag.manager.begin({
-      source: firstDrag.endpoint("one"),
-      representations: [{ type: "text/plain", value: "one" }],
+      source: firstDrag.endpoint("com.example.one"),
+      representations: [{ type: "text/plain", value: "com.example.one" }],
       operations: ["copy"],
     });
     await first.dispose("drag test");
@@ -172,12 +172,12 @@ describe("runtime drag sessions", () => {
       randomUUID: () => "drag-denied",
     });
     const session = manager.begin({
-      source: { appId: "source", windowId: "source-window", responderId: "source-row" },
+      source: { appId: "com.example.source", windowId: "source-window", responderId: "source-row" },
       representations: [{ type: "text/plain", value: "payload" }],
       operations: ["copy"],
     });
     const result = await manager.updateDestination(session.id, {
-      endpoint: { appId: "target", windowId: "target-window", responderId: "target-row" },
+      endpoint: { appId: "com.example.target", windowId: "target-window", responderId: "target-row" },
       operations: ["copy"],
     });
     expect(result.operation).toBe("none");
@@ -200,12 +200,12 @@ describe("runtime drag sessions", () => {
       authorise,
     });
     const session = manager.begin({
-      source: { appId: "source", windowId: "one", responderId: "source" },
+      source: { appId: "com.example.source", windowId: "com.example.one", responderId: "com.example.source" },
       representations: [{ type: "text/plain", value: "payload" }],
       operations: ["copy"],
     });
     await manager.updateDestination(session.id, {
-      endpoint: { appId: "target", windowId: "two", responderId: "target" },
+      endpoint: { appId: "com.example.target", windowId: "two", responderId: "com.example.target" },
       operations: ["copy"],
       accept,
     });
@@ -226,7 +226,7 @@ describe("runtime drag sessions", () => {
       pasteboard: runtime.pasteboards.drag,
       randomUUID: () => "drag-hostile",
     });
-    const endpointGetter = vi.fn(() => "source");
+    const endpointGetter = vi.fn(() => "com.example.source");
     const source = Object.create(null) as Record<string, unknown>;
     Object.defineProperty(source, "appId", { enumerable: true, get: endpointGetter });
     Object.defineProperties(source, {
@@ -243,7 +243,7 @@ describe("runtime drag sessions", () => {
 
     const operations = Array(1) as unknown as ["copy"];
     expect(() => manager.begin({
-      source: { appId: "source", windowId: "window", responderId: "responder" },
+      source: { appId: "com.example.source", windowId: "window", responderId: "responder" },
       representations: [{ type: "text/plain", value: "payload" }],
       operations,
     })).toThrow(/dense|operation/i);
@@ -260,11 +260,11 @@ describe("runtime drag sessions", () => {
       authorise: () => true,
     });
     const session = manager.begin({
-      source: { appId: "source", windowId: "window", responderId: "responder" },
+      source: { appId: "com.example.source", windowId: "window", responderId: "responder" },
       representations: [{ type: "text/plain", value: "payload" }],
       operations: ["copy"],
     });
-    const endpointGetter = vi.fn(() => ({ appId: "target", windowId: "window", responderId: "target" }));
+    const endpointGetter = vi.fn(() => ({ appId: "com.example.target", windowId: "window", responderId: "com.example.target" }));
     const request = Object.create(null) as Record<string, unknown>;
     Object.defineProperty(request, "endpoint", { enumerable: true, get: endpointGetter });
     Object.defineProperty(request, "operations", { enumerable: true, value: ["copy"] });
@@ -283,13 +283,13 @@ describe("runtime drag sessions", () => {
       randomUUID: () => "drag-authoritative",
     });
     const authoritative = manager.begin({
-      source: { appId: "source", windowId: "window", responderId: "responder" },
+      source: { appId: "com.example.source", windowId: "window", responderId: "responder" },
       representations: [{ type: "text/plain", value: "payload" }],
       operations: ["copy"],
     });
 
     expect(() => manager.begin({
-      source: { appId: "source", windowId: "window", responderId: "responder" },
+      source: { appId: "com.example.source", windowId: "window", responderId: "responder" },
       representations: [{ type: "application/pdf" as never, value: "unsupported" }],
       operations: ["copy"],
     })).toThrow(/unsupported pasteboard/i);
@@ -298,8 +298,8 @@ describe("runtime drag sessions", () => {
 
   it("allows explicit same-app runtime transfer but denies cross-app transfer without capability", async () => {
     const runtime = createTestRuntime({ id: "runtime:drag:policy-integration" });
-    const studio = scopedDrag(runtime, "studio");
-    const publisher = scopedDrag(runtime, "publisher");
+    const studio = scopedDrag(runtime, "com.example.studio");
+    const publisher = scopedDrag(runtime, "com.example.publisher");
     const sameApp = studio.manager.begin({
       source: studio.endpoint("assets"),
       representations: [{ type: "text/plain", value: "payload" }],
@@ -323,8 +323,8 @@ describe("runtime drag sessions", () => {
 
   it("keeps the ordinary runtime factory deny-by-default for cross-application transfer", async () => {
     const runtime = createTestRuntime({ id: "runtime:drag:factory-default-deny" });
-    const studio = scopedDrag(runtime, "studio");
-    const publisher = scopedDrag(runtime, "publisher");
+    const studio = scopedDrag(runtime, "com.example.studio");
+    const publisher = scopedDrag(runtime, "com.example.publisher");
     const session = studio.manager.begin({
       source: studio.endpoint("assets"),
       representations: [{ type: "text/plain", value: "payload" }],
@@ -352,11 +352,11 @@ describe("runtime drag sessions", () => {
     });
     runtime.store.mutate((draft) => { draft.loginServices.accessClass = "team"; });
     const accept = vi.fn();
-    const studio = scopedDrag(runtime, "studio");
-    const publisher = scopedDrag(runtime, "publisher");
+    const studio = scopedDrag(runtime, "com.example.studio");
+    const publisher = scopedDrag(runtime, "com.example.publisher");
     const session = studio.manager.begin({
       source: studio.endpoint("assets"),
-      representations: [{ type: "application/x-syncloudos-fixture", value: { ids: ["one"] } }],
+      representations: [{ type: "application/x-syncloudos-fixture", value: { ids: ["com.example.one"] } }],
       operations: ["copy"],
     });
 
@@ -369,8 +369,8 @@ describe("runtime drag sessions", () => {
     expect(requests[0]).toMatchObject({
       phase: "negotiate",
       sessionId: session.id,
-      source: { appId: "studio", windowId: "application:studio", responderId: "studio:assets" },
-      destination: { appId: "publisher", windowId: "application:publisher", responderId: "publisher:editor" },
+      source: { appId: "com.example.studio", windowId: "application:com.example.studio", responderId: "com.example.studio:assets" },
+      destination: { appId: "com.example.publisher", windowId: "application:com.example.publisher", responderId: "com.example.publisher:editor" },
       operation: "copy",
       representationTypes: ["application/x-syncloudos-fixture"],
       capability: "transfer.cross-application",
@@ -392,16 +392,16 @@ describe("runtime drag sessions", () => {
   it("keeps session payload ownership inside the active dropping lease", async () => {
     const first = createTestRuntime({ id: "runtime:drag:payload-first" });
     const second = createTestRuntime({ id: "runtime:drag:payload-second" });
-    const firstDrag = scopedDrag(first, "studio");
-    const secondDrag = scopedDrag(second, "studio");
+    const firstDrag = scopedDrag(first, "com.example.studio");
+    const secondDrag = scopedDrag(second, "com.example.studio");
     const manager = firstDrag.manager;
     const session = manager.begin({
-      source: firstDrag.endpoint("source"),
+      source: firstDrag.endpoint("com.example.source"),
       representations: [{ type: "text/plain", value: "authoritative" }],
       operations: ["copy"],
     });
     await manager.updateDestination(session.id, {
-      endpoint: firstDrag.endpoint("target"),
+      endpoint: firstDrag.endpoint("com.example.target"),
       operations: ["copy"],
       accept: (dropping, signal) => {
         expect(() => manager.readPayload(dropping.id, ["text/plain"], new AbortController().signal)).toThrow(/lease/i);
@@ -421,8 +421,8 @@ describe("runtime drag sessions", () => {
 
   it("routes same-app and cross-app negotiation through PolicyKit allow/deny", async () => {
     const runtime = createTestRuntime({ id: "runtime:drag:policykit", dragAuthorisation: { authorise: () => true } });
-    const studio = scopedDrag(runtime, "studio");
-    const publisher = scopedDrag(runtime, "publisher");
+    const studio = scopedDrag(runtime, "com.example.studio");
+    const publisher = scopedDrag(runtime, "com.example.publisher");
     const authorise = vi.spyOn(runtime.policy, "authorise");
 
     const sameApp = studio.manager.begin({
@@ -441,7 +441,7 @@ describe("runtime drag sessions", () => {
     )).toBe(true);
 
     runtime.policy.registerPolicy("deny-studio", (request, decision) =>
-      request.app?.id === "studio" ? { ...decision, allowed: false, decision: "deny" } : decision,
+      request.app?.bundleIdentifier === "com.example.studio" ? { ...decision, allowed: false, decision: "deny" } : decision,
     );
     const deniedSame = studio.manager.begin({
       source: studio.endpoint("assets"),
@@ -470,7 +470,7 @@ describe("runtime drag sessions", () => {
     )).toBe(true);
 
     runtime.policy.registerPolicy("deny-publisher", (request, decision) =>
-      request.action === "transfer.negotiate" && request.app?.id === "publisher"
+      request.action === "transfer.negotiate" && request.app?.bundleIdentifier === "com.example.publisher"
         ? { ...decision, allowed: false, decision: "deny" }
         : decision,
     );
@@ -491,10 +491,10 @@ describe("runtime drag sessions", () => {
       dragAuthorisation: { authorise: () => true },
     });
     runtime.policy.registerPolicy("deny-publisher", (request, decision) =>
-      request.app?.id === "publisher" ? { ...decision, allowed: false, decision: "deny" } : decision,
+      request.app?.bundleIdentifier === "com.example.publisher" ? { ...decision, allowed: false, decision: "deny" } : decision,
     );
-    const studio = scopedDrag(runtime, "studio");
-    const publisher = scopedDrag(runtime, "publisher");
+    const studio = scopedDrag(runtime, "com.example.studio");
+    const publisher = scopedDrag(runtime, "com.example.publisher");
     const session = studio.manager.begin({
       source: studio.endpoint("assets"),
       representations: [{ type: "text/plain", value: "payload" }],

@@ -38,6 +38,7 @@ export interface NSEDividerProps extends HTMLAttributes<HTMLHRElement> {
   onToggle?: () => void;
 }
 
+/** @internal The theme's separator art: captioned separators, and the disclosure arrow of source-list group rows. Apps draw separators with NSEBox boxType="separator". */
 export function NSEDivider({
   variant = "plain",
   label,

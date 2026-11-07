@@ -19,21 +19,23 @@
 
 import { useMemo } from "react";
 import type { NSEMenuRuntimePort } from "../../NSE/Menus";
-import { useSynWare } from "./SynWareContext";
+import { nseActionCommandId } from "../../NSE/applicationHostInterop";
+import { useSCOS } from "./scos/useSCOS"
 import type { AppClientHandle } from "./appClientTypes";
 import type { CommandDispatchResult } from "../SynCloudOS";
+import type { SynWareContextValue } from "./appContextTypes";
 
 /**
  * Adapts the mounted app's narrow command and scheduler clients to the menu
  * control contract. The adapter deliberately has no key-binding or responder
  * manager escape hatch: those remain host-owned when a menu is presented.
  */
-export function useSynWareNSEMenuPort(): NSEMenuRuntimePort {
-  const app = useSynWare();
-  return useMemo<NSEMenuRuntimePort>(() => ({
+export function createSynWareMenuRuntime(app: Pick<SynWareContextValue, "appId" | "signal" | "commands" | "scheduler">): NSEMenuRuntimePort {
+  return Object.freeze<NSEMenuRuntimePort>({
     signal: app.signal,
     commands: {
       getPresentationGeneration: app.commands.getPresentationGeneration.bind(app.commands),
+      subscribePresentation: app.commands.subscribePresentation.bind(app.commands),
       validateMany: app.commands.validateMany.bind(app.commands),
       prepareDispatch: app.commands.prepareDispatch.bind(app.commands),
       dispatch: (id, payload, options) => app.commands.dispatch<CommandDispatchResult<unknown>>(id, payload, options),
@@ -44,5 +46,12 @@ export function useSynWareNSEMenuPort(): NSEMenuRuntimePort {
         (handle as AppClientHandle).dispose();
       },
     },
-  }), [app.commands, app.scheduler, app.signal]);
+    resolveAction: (action) => nseActionCommandId(app.appId, action),
+  });
+}
+
+export function useNSEMenuPort(): NSEMenuRuntimePort {
+  const app = useSCOS();
+  return useMemo(() => createSynWareMenuRuntime({ appId: app.app.bundleIdentifier, signal: app.signal, commands: app.commands, scheduler: app.scheduler }),
+    [app.app.bundleIdentifier, app.commands, app.scheduler, app.signal]);
 }

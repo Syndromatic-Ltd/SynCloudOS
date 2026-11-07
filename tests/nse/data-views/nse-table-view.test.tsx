@@ -29,11 +29,11 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEArrayController } from "../../../src/NSE/Controllers";
 import type { Formatter } from "../../../src/SynCloudOS/Models";
 import {
-  NSETable,
-  columnAtNSETablePoint,
-  rowAtNSETablePoint,
+  NSETableView,
+  columnAtNSETableViewPoint,
+  rowAtNSETableViewPoint,
   type NSETableColumn,
-  type NSETableProps,
+  type NSETableViewProps,
 } from "../../../src/NSE/DataViews/Table";
 import { NSEAppearanceProvider, type NSEAppearanceDefinition } from "../../../src/NSE/Appearance";
 import type { NSEDataViewAdapter } from "../../../src/NSE/DataViews/Core";
@@ -95,10 +95,10 @@ function createAdapter(content: readonly Person[] = people) {
   return { adapter, controller };
 }
 
-function renderTable(overrides: Partial<NSETableProps<Person, string>> = {}, appearance?: NSEAppearanceDefinition) {
+function renderTable(overrides: Partial<NSETableViewProps<Person, string>> = {}, appearance?: NSEAppearanceDefinition) {
   const source = createAdapter();
   const result = render(
-    <NSETable<Person, string>
+    <NSETableView<Person, string>
       aria-label="People"
       adapter={source.adapter}
       columns={columns}
@@ -115,11 +115,37 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("NSETable", () => {
-  it("keeps canonical appearance loading outside NSETable's public caller contract", () => {
+describe("NSETableView", () => {
+  it("fills its container when viewportBlockSize is \"fill\", following the container as it resizes", () => {
+    let resized: (() => void) | undefined;
+    vi.stubGlobal("ResizeObserver", class {
+      constructor(callback: () => void) { resized = callback; }
+      observe() {}
+      disconnect() {}
+    });
+    let height = 180;
+    vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockImplementation(function (this: HTMLElement) {
+      return this.getAttribute("role") === "grid" ? height : 0;
+    });
+    const { container } = renderTable({ viewportBlockSize: "fill" });
+    const grid = screen.getByRole("grid", { name: "People" });
+    expect(grid.style.blockSize).toBe("100%");
+    expect(container.querySelector(".nse-table-view-container")?.hasAttribute("data-fill")).toBe(true);
+    height = 600;
+    React.act(() => resized?.());
+    expect(screen.getAllByRole("row").length).toBeGreaterThan(1);
+    vi.unstubAllGlobals();
+  });
+
+  it("keeps a fixed pixel height for a numeric viewportBlockSize", () => {
+    renderTable({ viewportBlockSize: 230 });
+    expect(screen.getByRole("grid", { name: "People" }).style.blockSize).toBe("253px");
+  });
+
+  it("keeps canonical appearance loading outside NSETableView's public caller contract", () => {
     const typesSource = readFileSync(resolve(process.cwd(), "src/NSE/DataViews/Table/tableTypes.ts"), "utf8");
     const barrelSource = readFileSync(resolve(process.cwd(), "src/NSE/DataViews/Table/index.ts"), "utf8");
-    const tableSource = readFileSync(resolve(process.cwd(), "src/NSE/DataViews/Table/NSETable.tsx"), "utf8");
+    const tableSource = readFileSync(resolve(process.cwd(), "src/NSE/DataViews/Table/NSETableView.tsx"), "utf8");
 
     expect(typesSource).not.toMatch(/\bNSETableAppearanceLoader\b/);
     expect(typesSource).not.toMatch(/\bappearanceLoader\s*\??:/);
@@ -145,7 +171,7 @@ describe("NSETable", () => {
 
   it("does not move the active cell while IME composition owns wrapper shortcuts", () => {
     const { adapter } = createAdapter();
-    render(<NSETable aria-label="People" adapter={adapter} columns={columns} />);
+    render(<NSETableView aria-label="People" adapter={adapter} columns={columns} />);
     const grid = screen.getByRole("grid");
     const before = grid.getAttribute("aria-activedescendant");
     fireEvent.keyDown(grid, { key: "End", ctrlKey: true, isComposing: true, keyCode: 229 });
@@ -154,7 +180,7 @@ describe("NSETable", () => {
   it("renders stable semantic columns and bounds a 10,000-row data set", () => {
     const content = Array.from({ length: 10_000 }, (_, index) => ({ id: `person-${index}`, name: `Person ${index}`, age: index }));
     const { adapter } = createAdapter(content);
-    render(<NSETable aria-label="People" adapter={adapter} columns={columns} viewportBlockSize={230} />);
+    render(<NSETableView aria-label="People" adapter={adapter} columns={columns} viewportBlockSize={230} />);
 
     const grid = screen.getByRole("grid", { name: "People" });
     expect(grid.getAttribute("aria-rowcount")).toBe("10001");
@@ -190,7 +216,7 @@ describe("NSETable", () => {
     expect(screen.getByRole("columnheader", { name: /Name/ }).getAttribute("style")).toContain("180px");
 
     view.rerender(
-      <NSETable
+      <NSETableView
         aria-label="People"
         adapter={view.adapter}
         columns={columns}
@@ -281,7 +307,7 @@ describe("NSETable", () => {
   it("keeps the final active cell mounted without selecting it", () => {
     const content = Array.from({ length: 10_000 }, (_, index) => ({ id: `person-${index}`, name: `Person ${index}`, age: index }));
     const { adapter, controller } = createAdapter(content);
-    render(<NSETable aria-label="People" adapter={adapter} columns={columns} viewportBlockSize={230} />);
+    render(<NSETableView aria-label="People" adapter={adapter} columns={columns} viewportBlockSize={230} />);
     const grid = screen.getByRole("grid");
     fireEvent.keyDown(grid, { key: "End", ctrlKey: true });
     expect(document.getElementById(grid.getAttribute("aria-activedescendant")!)?.textContent).toBe("9999");
@@ -321,16 +347,16 @@ describe("NSETable", () => {
   });
 
   it("provides coordinate lookup and preserves labels through empty/loading states", () => {
-    expect(rowAtNSETablePoint({ block: 47, rowHeight: 23, rowCount: 10 })).toBe(2);
-    expect(rowAtNSETablePoint({ block: -1, rowHeight: 23, rowCount: 10 })).toBe(-1);
-    expect(columnAtNSETablePoint({ inline: 221, widths: [220, 80] })).toBe(1);
-    expect(columnAtNSETablePoint({ inline: 400, widths: [220, 80] })).toBe(-1);
+    expect(rowAtNSETableViewPoint({ block: 47, rowHeight: 23, rowCount: 10 })).toBe(2);
+    expect(rowAtNSETableViewPoint({ block: -1, rowHeight: 23, rowCount: 10 })).toBe(-1);
+    expect(columnAtNSETableViewPoint({ inline: 221, widths: [220, 80] })).toBe(1);
+    expect(columnAtNSETableViewPoint({ inline: 400, widths: [220, 80] })).toBe(-1);
 
     const empty = createAdapter([]);
-    const view = render(<NSETable aria-label="People" adapter={empty.adapter} columns={columns} state={{ kind: "empty", message: "No people" }} />);
+    const view = render(<NSETableView aria-label="People" adapter={empty.adapter} columns={columns} state={{ kind: "empty", message: "No people" }} />);
     expect(screen.getByRole("grid", { name: "People" })).not.toBeNull();
     expect(screen.getByRole("status").textContent).toContain("No people");
-    view.rerender(<NSETable aria-label="People" adapter={empty.adapter} columns={columns} state={{ kind: "loading", message: "Loading people" }} />);
+    view.rerender(<NSETableView aria-label="People" adapter={empty.adapter} columns={columns} state={{ kind: "loading", message: "Loading people" }} />);
     expect(screen.getByRole("grid").getAttribute("aria-busy")).toBe("true");
     expect(screen.getByRole("status").textContent).toContain("Loading people");
   });
@@ -342,7 +368,7 @@ describe("NSETable", () => {
       { id: "-25", name: "Dash", age: 2 },
     ]);
     render(
-      <NSETable
+      <NSETableView
         aria-label="People"
         adapter={source.adapter}
         columns={columns}

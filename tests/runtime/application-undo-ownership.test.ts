@@ -32,8 +32,8 @@ afterEach(async () => {
   await Promise.all(runtimes.splice(0).map((runtime) => runtime.dispose("test cleanup")));
 });
 
-function fixture(id = "repair-3-app") {
-  const runtime = createTestRuntime({ initialBundles: [createTestBundle({ id, route: `/${id}` })] });
+function fixture(id = "com.example.repair-3-app") {
+  const runtime = createTestRuntime({ initialBundles: [createTestBundle({ bundleIdentifier: id, route: `/${id.split(".").at(-1)}` })] });
   runtimes.push(runtime);
   const app = runtime.apps.getApp(id)!;
   const responderId = `application:${id}`;
@@ -134,7 +134,7 @@ describe("transactional generations and application undo ownership", () => {
     const mounted = createMountedSynWareRuntime({ runtime, app, responderId });
     const execute = vi.fn();
     mounted.runtime.commands.register({
-      id: "repair-3-app.array",
+      id: "com.example.repair-3-app.array",
       responderId,
       title: { key: "repair.array", fallback: "Array" },
       payload: { description: "array", parse: (value: unknown) => ({ ok: true as const, value }) },
@@ -143,24 +143,24 @@ describe("transactional generations and application undo ownership", () => {
     let reads = 0;
     const getter = [] as unknown[];
     Object.defineProperty(getter, "0", { enumerable: true, get: () => { reads += 1; return "bad"; } });
-    await expect(mounted.runtime.commands.dispatch("repair-3-app.array", getter)).rejects.toThrow(/accessor|array|payload/i);
+    await expect(mounted.runtime.commands.dispatch("com.example.repair-3-app.array", getter)).rejects.toThrow(/accessor|array|payload/i);
     const custom = ["bad"] as unknown[];
     Object.defineProperty(custom, "map", { enumerable: true, value: () => [] });
-    await expect(mounted.runtime.commands.dispatch("repair-3-app.array", custom)).rejects.toThrow(/custom|array|payload/i);
+    await expect(mounted.runtime.commands.dispatch("com.example.repair-3-app.array", custom)).rejects.toThrow(/custom|array|payload/i);
     const proxy = new Proxy(["bad"], { get() { reads += 1; throw new Error("proxy getter executed"); } });
-    await expect(mounted.runtime.commands.dispatch("repair-3-app.array", proxy)).rejects.toThrow(/proxy|array|payload/i);
+    await expect(mounted.runtime.commands.dispatch("com.example.repair-3-app.array", proxy)).rejects.toThrow(/proxy|array|payload/i);
     const sparse = [] as unknown[];
     Object.defineProperty(sparse, "length", { value: 10_000 });
-    await expect(mounted.runtime.commands.dispatch("repair-3-app.array", sparse)).rejects.toThrow(/dense|length|node|array/i);
+    await expect(mounted.runtime.commands.dispatch("com.example.repair-3-app.array", sparse)).rejects.toThrow(/dense|length|node|array/i);
     expect(reads).toBe(0);
     expect(execute).not.toHaveBeenCalled();
-    await expect(mounted.runtime.commands.dispatch("repair-3-app.array", ["safe", { nested: [1, 2] }])).resolves.toMatchObject({ status: "executed" });
+    await expect(mounted.runtime.commands.dispatch("com.example.repair-3-app.array", ["safe", { nested: [1, 2] }])).resolves.toMatchObject({ status: "executed" });
     expect(execute).toHaveBeenCalledOnce();
     mounted.dispose();
   });
 
   it("revokes a transfer mount when its responder is removed and never revives it by ID", async () => {
-    const { runtime, app, responderId } = fixture("repair-3-transfer");
+    const { runtime, app, responderId } = fixture("com.example.repair-3-transfer");
     const mount = runtime.transfers.mountApp(app, { responderId });
     const scope = mount.scope;
     const endpoint = scope.drag.endpoint();
@@ -178,7 +178,7 @@ describe("transactional generations and application undo ownership", () => {
   });
 
   it("rejects an uncompensable empty Save As before writing", async () => {
-    const { runtime, app, responderId } = fixture("repair-3-save");
+    const { runtime, app, responderId } = fixture("com.example.repair-3-save");
     const mounted = createMountedSynWareRuntime({ runtime, app, responderId });
     runtime.documents.registerType(noteType("repair-3-save.note"));
     const document = await mounted.runtime.workspaceDocuments.newDocument({ typeId: "repair-3-save.note", initialModel: { value: "draft" } });
@@ -200,7 +200,7 @@ describe("transactional generations and application undo ownership", () => {
   });
 
   it("stales new-document admissions when a type or adapter is replaced during non-cooperative read", async () => {
-    const { runtime, app, responderId } = fixture("repair-3-generation");
+    const { runtime, app, responderId } = fixture("com.example.repair-3-generation");
     const mounted = createMountedSynWareRuntime({ runtime, app, responderId });
     const type = noteType("repair-3-generation.note");
     const typeRegistration = runtime.documents.registerType(type);
@@ -232,7 +232,7 @@ describe("transactional generations and application undo ownership", () => {
   });
 
   it("compensates exactly once when the Save As adapter generation is replaced during write", async () => {
-    const { runtime, app, responderId } = fixture("repair-3-write-generation");
+    const { runtime, app, responderId } = fixture("com.example.repair-3-write-generation");
     const mounted = createMountedSynWareRuntime({ runtime, app, responderId });
     const type = noteType("repair-3-write-generation.note");
     runtime.documents.registerType(type);
@@ -262,7 +262,7 @@ describe("transactional generations and application undo ownership", () => {
   });
 
   it("restores the old document binding and removes a committed Save As when watch adoption throws", async () => {
-    const { runtime, app, responderId } = fixture("repair-3-atomic");
+    const { runtime, app, responderId } = fixture("com.example.repair-3-atomic");
     const mounted = createMountedSynWareRuntime({ runtime, app, responderId });
     runtime.documents.registerType(noteType("repair-3-atomic.note"));
     const source = { kind: "memory" as const, namespace: "repair-3", key: "source" };

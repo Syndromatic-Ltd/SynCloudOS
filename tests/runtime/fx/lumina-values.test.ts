@@ -76,7 +76,7 @@ describe("LuminaFX durable values", () => {
       kind: "named-route",
       routeName: "journal.post",
       parameters: { postId: "post:stable-42" },
-      applicationId: "foreign-app",
+      applicationId: "com.example.foreign-app",
     })).toThrow(/shape|field|owner/i);
     expect(() => createLUFXActivation({
       version: 1,

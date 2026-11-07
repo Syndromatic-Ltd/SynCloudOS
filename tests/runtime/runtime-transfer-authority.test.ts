@@ -33,8 +33,8 @@ function ownedRuntime(id: string, options: Record<string, unknown> = {}) {
   const runtime = authoriseTestRuntime(createTestRuntime({
     id,
     initialBundles: [
-      createTestBundle({ id: "source", route: "/source" }),
-      createTestBundle({ id: "destination", route: "/destination" }),
+      createTestBundle({ bundleIdentifier: "com.example.source", route: "/source" }),
+      createTestBundle({ bundleIdentifier: "com.example.destination", route: "/destination" }),
     ],
     ...options,
   } as never));
@@ -42,7 +42,7 @@ function ownedRuntime(id: string, options: Record<string, unknown> = {}) {
   return runtime;
 }
 
-function registeredScope(runtime: ReturnType<typeof ownedRuntime>, appId: "source" | "destination") {
+function registeredScope(runtime: ReturnType<typeof ownedRuntime>, appId: "com.example.source" | "com.example.destination") {
   const responderId = `application:${appId}`;
   if (!runtime.responders.get(responderId)) {
     runtime.responders.register({
@@ -58,8 +58,8 @@ function registeredScope(runtime: ReturnType<typeof ownedRuntime>, appId: "sourc
 describe("runtime-issued transfer authority", () => {
   it("settles non-cooperative pending web creation on mount disposal and disposes a late session once", async () => {
     const runtime = ownedRuntime("runtime:transfer-authority:web-pending");
-    const app = runtime.apps.getApp("source")!;
-    const responderId = "application:source";
+    const app = runtime.apps.getApp("com.example.source")!;
+    const responderId = "application:com.example.source";
     runtime.responders.register({ id: responderId, kind: "application", parentId: "workspace", scopeId: responderId });
     let releaseCreated!: (session: RuntimeWebContentSession) => void;
     const created = new Promise<RuntimeWebContentSession>((resolve) => { releaseCreated = resolve; });
@@ -110,26 +110,26 @@ describe("runtime-issued transfer authority", () => {
 
   it("requires a responder-bound canonical app scope and activates it only when that responder is live", async () => {
     const runtime = ownedRuntime("runtime:transfer-authority:responder-bound");
-    const app = runtime.apps.getApp("source")!;
+    const app = runtime.apps.getApp("com.example.source")!;
     const transfers = runtime.transfers;
-    const getter = vi.fn(() => "source");
+    const getter = vi.fn(() => "com.example.source");
     const forged = Object.create(null) as Record<string, unknown>;
-    Object.defineProperty(forged, "id", { enumerable: true, get: getter });
+    Object.defineProperty(forged, "bundleIdentifier", { enumerable: true, get: getter });
 
     expect(() => transfers.mountApp(app, undefined as never)).toThrow(/responder/i);
-    expect(() => transfers.mountApp(forged as never, { responderId: "application:source" })).toThrow(/canonical|registered|application/i);
+    expect(() => transfers.mountApp(forged as never, { responderId: "application:com.example.source" })).toThrow(/canonical|registered|application/i);
     expect(getter).not.toHaveBeenCalled();
 
-    const mount = transfers.mountApp(app, { responderId: "application:source" });
+    const mount = transfers.mountApp(app, { responderId: "application:com.example.source" });
     const scope = mount.scope;
     await expect(scope.pasteboards.find.write([{ type: "text/plain", value: "before responder registration" }]))
       .rejects.toMatchObject({ name: "SecurityError" });
 
     runtime.responders.register({
-      id: "application:source",
+      id: "application:com.example.source",
       kind: "application",
       parentId: "workspace",
-      scopeId: "application:source",
+      scopeId: "application:com.example.source",
     });
     await expect(scope.pasteboards.find.write([{ type: "text/plain", value: "after responder registration" }])).resolves.toBeUndefined();
     mount.dispose();
@@ -137,8 +137,8 @@ describe("runtime-issued transfer authority", () => {
 
   it("revokes a mounted scope generation permanently across StrictMode cleanup and same-ID responder replacement", async () => {
     const runtime = ownedRuntime("runtime:transfer-authority:mount-generation");
-    const app = runtime.apps.getApp("source")!;
-    const responderId = "application:source";
+    const app = runtime.apps.getApp("com.example.source")!;
+    const responderId = "application:com.example.source";
     const responder = runtime.responders.register({ id: responderId, kind: "application", parentId: "workspace", scopeId: responderId });
 
     const firstMount = runtime.transfers.mountApp(app, { responderId });
@@ -171,8 +171,8 @@ describe("runtime-issued transfer authority", () => {
 
   it("issues opaque live app scopes and rejects forged or foreign endpoint provenance", async () => {
     const runtime = ownedRuntime("runtime:transfer-authority");
-    const source = registeredScope(runtime, "source");
-    const destination = registeredScope(runtime, "destination");
+    const source = registeredScope(runtime, "com.example.source");
+    const destination = registeredScope(runtime, "com.example.destination");
     runtime.store.mutate((draft) => { draft.loginServices.accessClass = "team"; });
 
     expect(Reflect.get(runtime.pasteboards, "forApp")).toBeUndefined();
@@ -185,19 +185,19 @@ describe("runtime-issued transfer authority", () => {
     expect(pasteboardAudit).toEqual(expect.arrayContaining([
       expect.objectContaining({
         action: "pasteboard.read",
-        appId: "source",
-        contextSummary: expect.objectContaining({ values: expect.objectContaining({ operation: "snapshot", responderId: "application:source" }) }),
+        appId: "com.example.source",
+        contextSummary: expect.objectContaining({ values: expect.objectContaining({ operation: "snapshot", responderId: "application:com.example.source" }) }),
       }),
       expect.objectContaining({
         action: "pasteboard.write",
-        appId: "source",
-        contextSummary: expect.objectContaining({ values: expect.objectContaining({ operation: "clear", responderId: "application:source" }) }),
+        appId: "com.example.source",
+        contextSummary: expect.objectContaining({ values: expect.objectContaining({ operation: "clear", responderId: "application:com.example.source" }) }),
       }),
     ]));
 
-    const privateBoard = source.pasteboards.named("app:source");
+    const privateBoard = source.pasteboards.named("app:com.example.source");
     await privateBoard.write([{ type: "text/plain", value: "source private value" }]);
-    expect(() => destination.pasteboards.named("app:source")).toThrow(/denied/i);
+    expect(() => destination.pasteboards.named("app:com.example.source")).toThrow(/denied/i);
     await expect(privateBoard.snapshot()).resolves.toEqual([{ type: "text/plain", value: "source private value" }]);
     await expect(source.pasteboards.drag.clear()).rejects.toMatchObject({ name: "SecurityError" });
 
@@ -228,7 +228,7 @@ describe("runtime-issued transfer authority", () => {
     })).resolves.toMatchObject({ operation: "none" });
 
     const otherRuntime = ownedRuntime("runtime:transfer-authority:foreign");
-    const foreignScope = registeredScope(otherRuntime, "destination");
+    const foreignScope = registeredScope(otherRuntime, "com.example.destination");
     expect(() => source.drag.manager.begin({
       source: foreignScope.drag.endpoint(),
       representations: [{ type: "text/plain", value: "foreign" }],
@@ -238,11 +238,11 @@ describe("runtime-issued transfer authority", () => {
 
   it("revokes app transfer authority on closure and does not allow a positive legacy override to replace a missing cross-app port", async () => {
     const runtime = ownedRuntime("runtime:transfer-authority:revoked");
-    const source = registeredScope(runtime, "source");
-    const destination = registeredScope(runtime, "destination");
+    const source = registeredScope(runtime, "com.example.source");
+    const destination = registeredScope(runtime, "com.example.destination");
     runtime.store.mutate((draft) => { draft.loginServices.accessClass = "team"; });
     runtime.policy.registerPolicy("grant-source", (request, decision) =>
-      request.app?.id === "source" ? { ...decision, allowed: true } : decision,
+      request.app?.bundleIdentifier === "com.example.source" ? { ...decision, allowed: true } : decision,
     );
 
     const session = source.drag.manager.begin({
@@ -255,7 +255,7 @@ describe("runtime-issued transfer authority", () => {
       operations: ["copy"],
     })).resolves.toMatchObject({ operation: "none" });
 
-    runtime.store.mutate((draft) => { draft.lifecycle.source = "closed"; });
+    runtime.store.mutate((draft) => { draft.lifecycle["com.example.source"] = "closed"; });
     await expect(source.pasteboards.find.write([{ type: "text/plain", value: "after-close" }]))
       .rejects.toMatchObject({ name: "SecurityError" });
     expect(() => source.drag.endpoint()).toThrow(/authority|closed|security/i);
@@ -267,8 +267,8 @@ describe("runtime-issued transfer authority", () => {
       dragAuthorisation: { authorise },
     });
     runtime.store.mutate((draft) => { draft.loginServices.accessClass = "team"; });
-    const source = registeredScope(runtime, "source");
-    const destination = registeredScope(runtime, "destination");
+    const source = registeredScope(runtime, "com.example.source");
+    const destination = registeredScope(runtime, "com.example.destination");
     const accepted = vi.fn(() => true);
 
     const session = source.drag.manager.begin({
@@ -289,13 +289,13 @@ describe("runtime-issued transfer authority", () => {
     expect(policy.getAuditLog(8)).toEqual(expect.arrayContaining([
       expect.objectContaining({
         action: "transfer.negotiate",
-        appId: "source",
+        appId: "com.example.source",
         requiredCapabilities: ["transfer.cross-application"],
         contextSummary: expect.objectContaining({ values: expect.objectContaining({ policyEndpoint: "source" }) }),
       }),
       expect.objectContaining({
         action: "transfer.negotiate",
-        appId: "destination",
+        appId: "com.example.destination",
         requiredCapabilities: ["transfer.cross-application"],
         contextSummary: expect.objectContaining({ values: expect.objectContaining({ policyEndpoint: "destination" }) }),
       }),
@@ -306,7 +306,7 @@ describe("runtime-issued transfer authority", () => {
     const runtime = ownedRuntime("runtime:transfer-authority:native-cleanup", {
       dragAuthorisation: { authorise: () => true },
     });
-    const source = registeredScope(runtime, "source");
+    const source = registeredScope(runtime, "com.example.source");
     const sourceEndpoint = source.drag.endpoint();
     const destinationEndpoint = source.drag.endpoint();
     const session = source.drag.manager.begin({

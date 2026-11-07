@@ -33,7 +33,7 @@ it("revokes every host graph when the first graph has a throwing node disposer",
   const first = host.createEngine(format), second = host.createEngine(format);
   first.mainMixerNode.dispose = () => { throw new Error("Node cleanup failed."); };
   expect(() => host.dispose()).not.toThrow();
-  await expect(second.renderOffline(1)).rejects.toThrow(/disposed/);
+  await expect(second.renderOffline(1)).rejects.toThrow(expect.objectContaining({ code: "AUFX_AUDIO_ENGINE_DISPOSED" }));
   expect(() => host.dispose()).not.toThrow();
   bus.dispose();
 });
@@ -69,7 +69,7 @@ it("releases graphs even when a policy unsubscribe throws", async () => {
   const first = host.createEngine(format, undefined, "first"), second = host.createEngine(format, undefined, "second");
   expect(() => host.dispose()).not.toThrow();
   expect(unsubscribe).toHaveBeenCalledTimes(2);
-  await expect(first.renderOffline(1)).rejects.toThrow(/disposed/);
-  await expect(second.renderOffline(1)).rejects.toThrow(/disposed/);
+  await expect(first.renderOffline(1)).rejects.toThrow(expect.objectContaining({ code: "AUFX_AUDIO_ENGINE_DISPOSED" }));
+  await expect(second.renderOffline(1)).rejects.toThrow(expect.objectContaining({ code: "AUFX_AUDIO_ENGINE_DISPOSED" }));
   bus.dispose();
 });

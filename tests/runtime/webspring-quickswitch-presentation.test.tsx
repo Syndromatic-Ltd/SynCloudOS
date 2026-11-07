@@ -55,7 +55,7 @@ function recordingAnimator() {
   return { animator, played };
 }
 
-const apps = [{ id: "alpha", displayName: "Alpha", shortName: "Alpha", packageName: "com.test.alpha", route: "/alpha",
+const apps = [{ version: "1.0.0", bundleIdentifier: "com.example.alpha", displayName: "Alpha", shortName: "Alpha", packageName: "com.test.alpha", route: "/alpha",
   icon: { src: "/icons/alpha.png" }, notifications: { badgeCount: 0 }, isDisabled: false } as unknown as SynCloudOSAppInfo];
 
 it("drops the strip in and holds it until its exit settles; reduced motion only fades", async () => {
@@ -84,7 +84,7 @@ it("drops the strip in and holds it until its exit settles; reduced motion only 
   }
 });
 
-const row = ["alpha", "beta", "gamma"].map((id) => ({ ...apps[0], id, displayName: id, shortName: id, packageName: `com.test.${id}`, route: `/${id}` }) as unknown as SynCloudOSAppInfo);
+const row = ["com.example.alpha", "com.example.beta", "com.example.gamma"].map((id) => ({ version: "1.0.0", ...apps[0], bundleIdentifier: id, displayName: id, shortName: id, packageName: `com.test.${id}`, route: `/${id.split(".").at(-1)}` }) as unknown as SynCloudOSAppInfo);
 
 it("selects on hover without scrolling the row; keyboard selection only scrolls as far as needed", () => {
   const scrollIntoView = vi.fn();
@@ -124,7 +124,7 @@ it("grows to the screen edge, then shrinks icons by default or scrolls when the 
 
 it("captures the QuickSwitch overflow choice and rejects anything else", () => {
   const base = { manifest: {
-    schemaVersion: 1, id: "com.example.quickswitch", title: "QuickSwitch", version: "1.0.0",
+    schemaVersion: 1, bundleIdentifier: "com.example.quickswitch", displayName: "QuickSwitch", version: "1.0.0",
     webspringShell: { views: [{ id: "site", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }], defaults: { desktop: "site", tablet: "site", mobile: "site" }, homeRoute: "/", branding: { name: { key: "site.name", fallback: "QuickSwitch" } } },
   }, components: { site: () => null } } as const;
   expect(defineWebspring(base).quickSwitch).toBeUndefined();

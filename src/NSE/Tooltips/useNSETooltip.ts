@@ -47,9 +47,14 @@ export function useNSETooltip({
   const anchorRef = useRef<HTMLElement | null>(null);
   const hoveredRef = useRef(false);
   const focusedRef = useRef(false);
+  const surfaceHoveredRef = useRef(false);
 
   const getAnchor = useCallback(() => anchorRef.current, []);
-  useEffect(() => provider.register({ id, disabled, getAnchor, setOpen }), [disabled, getAnchor, id, provider]);
+  const applyOpen = useCallback((next: boolean) => {
+    if (!next) surfaceHoveredRef.current = false;
+    setOpen(next);
+  }, []);
+  useEffect(() => provider.register({ id, disabled, getAnchor, setOpen: applyOpen }), [applyOpen, disabled, getAnchor, id, provider]);
   useEffect(() => {
     if (!disabled) return;
     provider.dismiss(id);
@@ -64,7 +69,7 @@ export function useNSETooltip({
     provider.requestOpen(id, activationDelayMs);
   }, [disabled, id, provider]);
   const hideWhenInactive = useCallback((delay: number) => {
-    if (hoveredRef.current || focusedRef.current) return;
+    if (hoveredRef.current || surfaceHoveredRef.current || focusedRef.current) return;
     provider.requestClose(id, delay);
   }, [id, provider]);
   const onPointerEnter = useCallback((event: PointerEvent<HTMLElement>) => {
@@ -95,7 +100,9 @@ export function useNSETooltip({
     provider.dismiss(id);
   }, [id, provider]);
 
+  const dismiss = useCallback(() => provider.dismiss(id), [id, provider]);
   return {
+    dismiss,
     anchorProps: disabled ? {} : {
       "aria-describedby": open ? id : undefined,
       onPointerEnter,
@@ -108,6 +115,8 @@ export function useNSETooltip({
       onBlur,
     },
     tooltip: disabled ? null : createElement(NSETooltip, {
+      onPointerEnter: () => { surfaceHoveredRef.current = true; provider.requestOpen(id, 0); },
+      onPointerLeave: () => { surfaceHoveredRef.current = false; hideWhenInactive(provider.leaveDelayMs); },
       id,
       content,
       open,

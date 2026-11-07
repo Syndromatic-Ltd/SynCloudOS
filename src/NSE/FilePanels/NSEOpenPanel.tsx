@@ -22,7 +22,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { NSEOverlayDismissReason } from "../Overlays";
 import type { FilePanelResult, FilePanelService, OpenPanelRequest } from "../../SynCloudOS/SynCloudOS";
 import { NSEFilePanelView, type NSEFilePanelWindowBridge } from "./NSEFilePanelView";
-import { NSEPushButton } from "../Controls/Buttons/NSEButtons";
+import { NSEButton } from "../Controls/Buttons/NSEButton";
 
 export type NSEFilePanelService = Pick<FilePanelService, "open" | "save" | "release" | "dispose">;
 
@@ -121,8 +121,15 @@ export function NSEOpenPanel({
       <p className="nse-file-panel-prompt" data-nse-part="prompt">{request.selection === "multiple-files" ? "Choose files to open." : request.selection === "single-directory" ? "Choose a folder to open." : "Choose a file to open."}</p>
       {accepts.length > 0 ? <ul className="nse-file-panel-accepts" aria-label="Accepted file types">{accepts.map((summary) => <li key={summary}>{summary}</li>)}</ul> : null}
       <div className="nse-file-panel-actions">
-        <NSEPushButton tone="light" data-nse-part="cancel" onClick={() => dismiss(false, "programmatic")}>Cancel</NSEPushButton>
-        <NSEPushButton tone="affirmative" data-nse-part="choose" data-nse-initial-focus="" data-appearance-recipe="file-panel.choose" onClick={() => void choose()}>Choose files</NSEPushButton>
+        <NSEButton appearance="aqua" title="Cancel" data-nse-part="cancel" onClick={() => dismiss(false, "programmatic")} />
+        <NSEButton
+          keyEquivalent={"\r"}
+          title="Choose files"
+          data-nse-part="choose"
+          data-nse-initial-focus=""
+          data-appearance-recipe="file-panel.choose"
+          onClick={() => void choose()}
+        />
       </div>
     </NSEFilePanelView>
   );

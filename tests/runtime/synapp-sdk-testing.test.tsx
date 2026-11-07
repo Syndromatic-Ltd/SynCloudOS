@@ -22,24 +22,45 @@
 
 import React from "react";
 import { expect, it, vi } from "vitest";
-import { defineSynWareServiceToken, createSynWare, useSynWare, useSynWareCommands } from "../../src/SynCloudOS/AppSDK";
+import { defineSynWareServiceToken, createSynWare, useSCOS, useCommands } from "../../src/SynCloudOS/AppSDK";
 import {
   createDeniedFakeServiceClient,
   createDeterministicScheduler,
   createFakeClipboardAdapter,
   createSynWareTestHost,
 } from "../../src/SynCloudOS/AppSDK/testing";
+import { createDeterministicRuntimeEnvironment } from "../../src/SynCloudOS/AppSDK/testing/fakeAdapters";
+
+it("tracks pointer and keyboard entry through the test host's supplied DOM and releases the bindings", () => {
+  const environment = createDeterministicRuntimeEnvironment({ document });
+  const pointer = environment.environment.pointer;
+  expect(pointer).toBeDefined();
+  const root = document.createElement("div"), button = document.createElement("button");
+  root.append(button); document.body.append(root);
+  const events: unknown[] = [];
+  const releaseRoot = pointer!.bindRoot(root, event => events.push(event));
+  const releaseRegion = pointer!.bindRegion(root, button, "test-region");
+  button.dispatchEvent(new MouseEvent("pointerover", { bubbles: true, clientX: 12, clientY: 18 }));
+  expect(events).toContainEqual(expect.objectContaining({ kind: "update", input: "pointer", x: 12, y: 18, regionPath: ["test-region"] }));
+  button.focus();
+  expect(events).toContainEqual(expect.objectContaining({ kind: "update", input: "keyboard", regionPath: ["test-region"] }));
+  releaseRegion(); releaseRoot();
+  const count = events.length;
+  button.dispatchEvent(new MouseEvent("pointerover", { bubbles: true }));
+  expect(events).toHaveLength(count);
+  root.remove(); environment.dispose();
+});
 
 const ExampleApp = createSynWare({
   manifest: {
     schemaVersion: 1,
-    id: "com.syndromatic.testing-example",
+    bundleIdentifier: "com.syndromatic.testing-example",
     version: "1.0.0",
-    title: "Testing Example",
+    displayName: "Testing Example",
     routes: [{ path: "/testing-example", primary: true }],
   },
   root() {
-    useSynWareCommands([{ id: "com.syndromatic.testing-example.refresh", title: "Refresh", execute: () => undefined }]);
+    useCommands([{ id: "com.syndromatic.testing-example.refresh", title: "Refresh", execute: () => undefined }]);
     return <button type="button">New document</button>;
   },
 });
@@ -47,14 +68,14 @@ const ExampleApp = createSynWare({
 const MountedControlApp = createSynWare({
   manifest: {
     schemaVersion: 1,
-    id: "com.syndromatic.testing-controls",
+    bundleIdentifier: "com.syndromatic.testing-controls",
     version: "1.0.0",
-    title: "Testing Controls",
+    displayName: "Testing Controls",
     routes: [{ path: "/testing-controls", primary: true }],
     services: [{ id: "webspring.runtime", required: false }],
   },
   root() {
-    const { services, pasteboards, drag, documents } = useSynWare();
+    const { services, pasteboards, drag, documents } = useSCOS();
     const [result, setResult] = React.useState("idle");
     const run = (label: string, action: () => void | Promise<void>) => {
       void Promise.resolve().then(action).then(

@@ -27,10 +27,10 @@ import {
   trustSynWareBundleForTest,
 } from "../../src/SynCloudOS/BundleLoader/trustedBundleProvenance";
 const defaultSynWareBundles = [
-  trustSynWareBundleForTest(createSynWareBundle(trustedDefinition("diagnostics")), { sourceKey: "tests/fixtures/diagnostics", privileges: ["diagnostics"] }),
-  trustSynWareBundleForTest(createSynWareBundle(trustedDefinition("nse-control-gallery")), { sourceKey: "tests/fixtures/conformance", privileges: ["conformance"] }),
-  trustSynWareBundleForTest(createSynWareBundle(trustedDefinition("journal-publisher")), { sourceKey: "tests/fixtures/provider-admin", privileges: ["journal-provider-admin"] }),
-  createSynWareBundle(trustedDefinition("portfolio")),
+  trustSynWareBundleForTest(createSynWareBundle(trustedDefinition("com.example.diagnostics")), { sourceKey: "tests/fixtures/diagnostics", privileges: ["diagnostics"] }),
+  trustSynWareBundleForTest(createSynWareBundle(trustedDefinition("com.example.nse-control-gallery")), { sourceKey: "tests/fixtures/conformance", privileges: ["conformance"] }),
+  trustSynWareBundleForTest(createSynWareBundle(trustedDefinition("com.example.journal-publisher")), { sourceKey: "tests/fixtures/provider-admin", privileges: ["journal-provider-admin"] }),
+  createSynWareBundle(trustedDefinition("com.example.portfolio")),
 ];
 import { createTestRuntime, mountTestSynWareRuntime } from "./helpers";
 
@@ -45,9 +45,9 @@ function trustedDefinition(id: string, permissions: readonly string[] = ["diagno
   return createSynWare({
     manifest: {
       schemaVersion: 1,
-      id,
+      bundleIdentifier: id,
       version: "1.0.0",
-      title: id,
+      displayName: id,
       permissions,
     },
     root: () => null,
@@ -55,10 +55,10 @@ function trustedDefinition(id: string, permissions: readonly string[] = ["diagno
 }
 
 function mountBundle(bundle: ReturnType<typeof createSynWareBundle>) {
-  const runtime = createTestRuntime({ id: `runtime:trusted:${bundle.manifest.id}:${++trustedRuntimeSequence}`, initialBundles: [bundle] });
-  const app = runtime.apps.getApp(bundle.manifest.id);
+  const runtime = createTestRuntime({ id: `runtime:trusted:${bundle.manifest.bundleIdentifier}:${++trustedRuntimeSequence}`, initialBundles: [bundle] });
+  const app = runtime.apps.getApp(bundle.manifest.bundleIdentifier);
   if (!app) throw new Error("The trusted fixture did not register.");
-  const entry = mountTestSynWareRuntime(runtime, app.id);
+  const entry = mountTestSynWareRuntime(runtime, app.bundleIdentifier);
   mounted.push(entry);
   return { runtime, app, mounted: entry, context: createSynWareContextValue(entry.runtime) };
 }
@@ -70,10 +70,10 @@ function requireTrustedClient<T>(client: T | undefined, label: string): T {
 
 describe("SynWare trusted bundle provenance", () => {
   it("mints and retains provenance for explicit host-trusted bundles only", () => {
-    const journalBundle = defaultSynWareBundles.find((bundle) => bundle.manifest.id === "journal-publisher");
-    const diagnosticsBundle = defaultSynWareBundles.find((bundle) => bundle.manifest.id === "diagnostics");
-    const galleryBundle = defaultSynWareBundles.find((bundle) => bundle.manifest.id === "nse-control-gallery");
-    const ordinaryBundle = defaultSynWareBundles.find((bundle) => bundle.manifest.id === "portfolio");
+    const journalBundle = defaultSynWareBundles.find((bundle) => bundle.manifest.bundleIdentifier === "com.example.journal-publisher");
+    const diagnosticsBundle = defaultSynWareBundles.find((bundle) => bundle.manifest.bundleIdentifier === "com.example.diagnostics");
+    const galleryBundle = defaultSynWareBundles.find((bundle) => bundle.manifest.bundleIdentifier === "com.example.nse-control-gallery");
+    const ordinaryBundle = defaultSynWareBundles.find((bundle) => bundle.manifest.bundleIdentifier === "com.example.portfolio");
     if (!journalBundle || !diagnosticsBundle || !galleryBundle || !ordinaryBundle) {
       throw new Error("The host-trusted fixtures were not discovered.");
     }
@@ -85,13 +85,13 @@ describe("SynWare trusted bundle provenance", () => {
     expect(getTrustedSynWareBundleProvenance(ordinaryBundle)).toBeNull();
 
     const runtime = createTestRuntime({ id: "runtime:trusted-canonical-journal", initialBundles: [journalBundle] });
-    expect(runtime.bundles.getTrustedBundleProvenance("journal-publisher")).toMatchObject({
+    expect(runtime.bundles.getTrustedBundleProvenance("com.example.journal-publisher")).toMatchObject({
       sourceKey: "tests/fixtures/provider-admin",
     });
   });
 
   it("preserves host provenance through post-construction AppRegistry registration", () => {
-    const definition = trustedDefinition("post-construction-trusted", ["diagnostics.view"]);
+    const definition = trustedDefinition("com.example.post-construction-trusted", ["diagnostics.view"]);
     const bundle = trustSynWareBundleForTest(createSynWareBundle(definition), {
       sourceKey: "tests/post-construction-trusted",
       privileges: ["diagnostics"],
@@ -101,29 +101,29 @@ describe("SynWare trusted bundle provenance", () => {
     expect(getTrustedSynWareBundleProvenance(runtime.bundles.createBundle(bundle))).toMatchObject({
       sourceKey: "tests/post-construction-trusted",
     });
-    expect(runtime.apps.register(bundle)).toMatchObject({ id: "post-construction-trusted" });
-    expect(runtime.bundles.getTrustedBundleProvenance("post-construction-trusted")).toMatchObject({
+    expect(runtime.apps.register(bundle)).toMatchObject({ bundleIdentifier: "com.example.post-construction-trusted" });
+    expect(runtime.bundles.getTrustedBundleProvenance("com.example.post-construction-trusted")).toMatchObject({
       sourceKey: "tests/post-construction-trusted",
     });
   });
 
   it("does not carry host provenance across an identity-changing bundle copy", () => {
-    const bundle = trustSynWareBundleForTest(createSynWareBundle(trustedDefinition("provenance-source", ["diagnostics.view"])), {
+    const bundle = trustSynWareBundleForTest(createSynWareBundle(trustedDefinition("com.example.provenance-source", ["diagnostics.view"])), {
       sourceKey: "tests/provenance-source",
       privileges: ["diagnostics"],
     });
     const rebased = preserveTrustedSynWareBundleProvenance(bundle, {
       ...bundle,
-      manifest: { ...bundle.manifest, id: "provenance-target" },
+      manifest: { ...bundle.manifest, bundleIdentifier: "com.example.provenance-target" },
     });
 
     expect(getTrustedSynWareBundleProvenance(rebased)).toBeNull();
   });
 
   it("mints bounded trusted clients only for explicit host-trusted bundles", async () => {
-    const diagnosticsBundle = defaultSynWareBundles.find((bundle) => bundle.manifest.id === "diagnostics");
-    const galleryBundle = defaultSynWareBundles.find((bundle) => bundle.manifest.id === "nse-control-gallery");
-    const journalBundle = defaultSynWareBundles.find((bundle) => bundle.manifest.id === "journal-publisher");
+    const diagnosticsBundle = defaultSynWareBundles.find((bundle) => bundle.manifest.bundleIdentifier === "com.example.diagnostics");
+    const galleryBundle = defaultSynWareBundles.find((bundle) => bundle.manifest.bundleIdentifier === "com.example.nse-control-gallery");
+    const journalBundle = defaultSynWareBundles.find((bundle) => bundle.manifest.bundleIdentifier === "com.example.journal-publisher");
     if (!diagnosticsBundle || !galleryBundle || !journalBundle) {
       throw new Error("The canonical trusted client fixtures were not discovered.");
     }
@@ -141,7 +141,7 @@ describe("SynWare trusted bundle provenance", () => {
   });
 
   it("keeps Gallery conformance diagnostics and locale evidence host-owned", () => {
-    const galleryBundle = defaultSynWareBundles.find((bundle) => bundle.manifest.id === "nse-control-gallery");
+    const galleryBundle = defaultSynWareBundles.find((bundle) => bundle.manifest.bundleIdentifier === "com.example.nse-control-gallery");
     if (!galleryBundle) throw new Error("The canonical Gallery bundle was not discovered.");
     const gallery = mountBundle(galleryBundle);
     const conformance = requireTrustedClient(gallery.context.trusted.conformance, "conformance") as unknown as {
@@ -166,7 +166,7 @@ describe("SynWare trusted bundle provenance", () => {
   });
 
   it("denies a forged same-ID, system-type, capability-bearing manifest", async () => {
-    const definition = trustedDefinition("diagnostics", ["diagnostics.view"]);
+    const definition = trustedDefinition("com.example.diagnostics", ["diagnostics.view"]);
     const bundle = createSynWareBundle(definition);
     const forged = Object.freeze({
       ...bundle,
@@ -182,7 +182,7 @@ describe("SynWare trusted bundle provenance", () => {
   });
 
   it("requires the declared capability in addition to trusted provenance", async () => {
-    const definition = trustedDefinition("trusted-without-capability", []);
+    const definition = trustedDefinition("com.example.trusted-without-capability", []);
     const bundle = trustSynWareBundleForTest(createSynWareBundle(definition), {
       sourceKey: "tests/trusted-without-capability",
       privileges: ["diagnostics"],
@@ -193,7 +193,7 @@ describe("SynWare trusted bundle provenance", () => {
   });
 
   it("revalidates provenance against the current bundle before each privileged operation", async () => {
-    const definition = trustedDefinition("trusted-replaced", ["diagnostics.view"]);
+    const definition = trustedDefinition("com.example.trusted-replaced", ["diagnostics.view"]);
     const bundle = trustSynWareBundleForTest(createSynWareBundle(definition), {
       sourceKey: "tests/trusted-replaced",
       privileges: ["diagnostics"],
@@ -209,9 +209,9 @@ describe("SynWare trusted bundle provenance", () => {
   it.each(["same-ID bundle replacement", "mount abort"])(
     "does not deliver a deferred trusted Diagnostics result after %s",
     async (revocation) => {
-      const definition = trustedDefinition(`trusted-diagnostics-deferred-${revocation.replace(/[^a-z]+/gu, "-")}`, ["diagnostics.view"]);
+      const definition = trustedDefinition(`com.example.trusted-diagnostics-deferred-${revocation.replace(/[^a-z]+/gu, "-")}`, ["diagnostics.view"]);
       const bundle = trustSynWareBundleForTest(createSynWareBundle(definition), {
-        sourceKey: `tests/${definition.manifest.id}`,
+        sourceKey: `tests/${definition.manifest.bundleIdentifier}`,
         privileges: ["diagnostics"],
       });
       const { runtime, context, mounted: entry } = mountBundle(bundle);
@@ -234,15 +234,15 @@ describe("SynWare trusted bundle provenance", () => {
   );
 
   it("does not let a trusted client select another application identity", async () => {
-    const trusted = trustSynWareBundleForTest(createSynWareBundle(trustedDefinition("trusted-diagnostics", ["diagnostics.view"])), {
+    const trusted = trustSynWareBundleForTest(createSynWareBundle(trustedDefinition("com.example.trusted-diagnostics", ["diagnostics.view"])), {
       sourceKey: "tests/trusted-diagnostics",
       privileges: ["diagnostics"],
     });
-    const other = createSynWareBundle(trustedDefinition("other-diagnostics", ["diagnostics.view"]));
+    const other = createSynWareBundle(trustedDefinition("com.example.other-diagnostics", ["diagnostics.view"]));
     const runtime = createTestRuntime({ id: "runtime:trusted-cross-app", initialBundles: [trusted, other] });
-    const otherApp = runtime.apps.getApp("other-diagnostics");
+    const otherApp = runtime.apps.getApp("com.example.other-diagnostics");
     if (!otherApp) throw new Error("The cross-app fixture did not register.");
-    const otherMount = mountTestSynWareRuntime(runtime, otherApp.id);
+    const otherMount = mountTestSynWareRuntime(runtime, otherApp.bundleIdentifier);
     mounted.push(otherMount);
     const context = createSynWareContextValue(otherMount.runtime);
 
@@ -250,7 +250,7 @@ describe("SynWare trusted bundle provenance", () => {
   });
 
   it("fails closed after the mounted capability is revoked", async () => {
-    const bundle = trustSynWareBundleForTest(createSynWareBundle(trustedDefinition("trusted-abort", ["diagnostics.view"])), {
+    const bundle = trustSynWareBundleForTest(createSynWareBundle(trustedDefinition("com.example.trusted-abort", ["diagnostics.view"])), {
       sourceKey: "tests/trusted-abort",
       privileges: ["diagnostics"],
     });

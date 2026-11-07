@@ -123,14 +123,14 @@ describe("mounted application policy authority", () => {
       throw new Error("untrusted migration executed");
     });
     const runtime = createTestRuntime({
-      initialBundles: [createTestBundle({ id: "untrusted-docs", route: "/untrusted-docs" })],
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.untrusted-docs", route: "/untrusted-docs" })],
       trustedDocumentKinds: [{
         kind: "syncal.event",
         version: 1,
         displayName: "Trusted SynCal Event",
       }],
     });
-    const mounted = mountTestSynWareRuntime(runtime, "untrusted-docs");
+    const mounted = mountTestSynWareRuntime(runtime, "com.example.untrusted-docs");
     const documentStore = mounted.runtime.documentStore as unknown as {
       registerKind?: (metadata: unknown) => unknown;
     };
@@ -155,18 +155,18 @@ describe("mounted application policy authority", () => {
   it("projects mounted command callbacks and admits only one accessor-free snapshot", async () => {
     const runtime = createTestRuntime({
       initialBundles: [
-        createTestBundle({ id: "command-attacker", route: "/command-attacker" }),
-        createTestBundle({ id: "command-victim", route: "/command-victim" }),
+        createTestBundle({ bundleIdentifier: "com.example.command-attacker", route: "/command-attacker" }),
+        createTestBundle({ bundleIdentifier: "com.example.command-victim", route: "/command-victim" }),
       ],
     });
-    const mounted = mountTestSynWareRuntime(runtime, "command-attacker");
+    const mounted = mountTestSynWareRuntime(runtime, "com.example.command-attacker");
     const observed: Record<string, unknown> = {};
     const execute = vi.fn((context: any) => {
       observed.hasKernelRuntime = "environment" in context.runtime || "dispose" in context.runtime;
       observed.hasKernelInspector = "inspector" in context.runtime;
       observed.hasKernelUndo = context.undoManager !== null;
       observed.hasVictimTarget = typeof context.runtime.application?.closeSelf === "function";
-      return { safe: context.runtime.app.id };
+      return { safe: context.runtime.app.bundleIdentifier };
     });
     const validate = vi.fn((context: any) => {
       observed.queryHasKernelRuntime = "environment" in context.runtime;
@@ -177,8 +177,8 @@ describe("mounted application policy authority", () => {
       return { key: "command.attacker", fallback: "Attacker" };
     });
     const registration = mounted.runtime.commands.register({
-      id: "command-attacker.escape",
-      responderId: "application:command-attacker",
+      id: "com.example.command-attacker.escape",
+      responderId: "application:com.example.command-attacker",
       title,
       payload: { description: "No payload", parse: (value: unknown) => value === undefined ? { ok: true as const, value: undefined } : { ok: false as const, issues: ["No payload"] } },
       defaultKeyBindings: [],
@@ -187,8 +187,8 @@ describe("mounted application policy authority", () => {
       validate,
       execute,
     });
-    await expect(mounted.runtime.commands.validate("command-attacker.escape")).resolves.toMatchObject({ enabled: true });
-    await expect(mounted.runtime.commands.dispatch("command-attacker.escape")).resolves.toMatchObject({ status: "executed", value: { safe: "command-attacker" } });
+    await expect(mounted.runtime.commands.validate("com.example.command-attacker.escape")).resolves.toMatchObject({ enabled: true });
+    await expect(mounted.runtime.commands.dispatch("com.example.command-attacker.escape")).resolves.toMatchObject({ status: "executed", value: { safe: "com.example.command-attacker" } });
     expect(observed).toMatchObject({
       hasKernelRuntime: false,
       hasKernelInspector: false,
@@ -196,12 +196,12 @@ describe("mounted application policy authority", () => {
       queryHasKernelRuntime: false,
       titleHasKernelRuntime: false,
     });
-    expect(runtime.lifecycle.getState("command-victim")).not.toBe("closed");
+    expect(runtime.lifecycle.getState("com.example.command-victim")).not.toBe("closed");
 
     let getterReads = 0;
     const getterDeclaration = {
-      id: "command-attacker.getter",
-      responderId: "application:command-attacker",
+      id: "com.example.command-attacker.getter",
+      responderId: "application:com.example.command-attacker",
       title: { key: "getter", fallback: "Getter" },
       payload: { description: "No payload", parse: () => ({ ok: true as const, value: undefined }) },
       defaultKeyBindings: [],
@@ -209,9 +209,9 @@ describe("mounted application policy authority", () => {
       undo: { kind: "none" as const },
       execute: () => undefined,
     };
-    Object.defineProperty(getterDeclaration, "id", { enumerable: true, get: () => `command-attacker.getter.${getterReads++}` });
+    Object.defineProperty(getterDeclaration, "id", { enumerable: true, get: () => `com.example.command-attacker.getter.${getterReads++}` });
     expect(() => mounted.runtime.commands.register(getterDeclaration as never)).toThrow(/accessor-free|accessor|plain/i);
-    expect(runtime.commands.getDeclarations().some((declaration) => declaration.id.startsWith("command-attacker.getter"))).toBe(false);
+    expect(runtime.commands.getDeclarations().some((declaration) => declaration.id.startsWith("com.example.command-attacker.getter"))).toBe(false);
     expect(getterReads).toBe(0);
 
     registration.dispose();
@@ -219,10 +219,10 @@ describe("mounted application policy authority", () => {
   });
 
   it("does not restore focus from a revoked handle across a same-ID remount", async () => {
-    const runtime = createTestRuntime({ initialBundles: [createTestBundle({ id: "focus-owner", route: "/focus-owner" })] });
-    const appResponderId = "application:focus-owner";
+    const runtime = createTestRuntime({ initialBundles: [createTestBundle({ bundleIdentifier: "com.example.focus-owner", route: "/focus-owner" })] });
+    const appResponderId = "application:com.example.focus-owner";
     const childResponderId = "focus-owner:child";
-    const mounted = mountTestSynWareRuntime(runtime, "focus-owner", appResponderId);
+    const mounted = mountTestSynWareRuntime(runtime, "com.example.focus-owner", appResponderId);
     runtime.responders.register({ id: childResponderId, kind: "control", parentId: appResponderId, scopeId: appResponderId });
 
     runtime.focus.requestFocus(appResponderId);
@@ -240,7 +240,7 @@ describe("mounted application policy authority", () => {
     expect(() => retained.dispose()).not.toThrow();
     expect(runtime.focus.getFocusedResponderId()).toBe(childResponderId);
 
-    const replacement = mountTestSynWareRuntime(runtime, "focus-owner", appResponderId);
+    const replacement = mountTestSynWareRuntime(runtime, "com.example.focus-owner", appResponderId);
     runtime.focus.requestFocus(childResponderId);
     expect(() => retained.close()).not.toThrow();
     expect(runtime.focus.getFocusedResponderId()).toBe(childResponderId);

@@ -79,8 +79,8 @@ export function readVerifiedSdkArchive(repositoryRoot, {
   assert.deepEqual(Object.keys(entries).filter(key => /^fx\/[^/]+\//u.test(key.slice(manifest.package.length + 1))),
     [`${manifest.package}/fx/video/webm`], "Only reviewed FX format extensions may be installed.");
   for (const [specifier, entry] of Object.entries(entries)) {
-    assert(specifier.startsWith(`${manifest.package}/`), "Invalid SDK entry identity.");
-    const name = specifier.slice(manifest.package.length + 1);
+    assert(specifier === manifest.package || specifier.startsWith(`${manifest.package}/`), "Invalid SDK entry identity.");
+    const name = specifier === manifest.package ? "index" : specifier.slice(manifest.package.length + 1);
     assertSdkRelativePath(name);
     assert.equal(entry.archive, manifest.archive, `SDK entry ${name} does not reference the frozen archive.`);
     assert.equal(entry.index, inventory.get(`${name}.js`)?.sha256, `SDK entry ${name} JS fingerprint mismatch.`);

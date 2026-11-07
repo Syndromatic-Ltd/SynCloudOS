@@ -22,7 +22,8 @@
 import React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEDatePicker, NSETimePicker } from "../../../src/NSE/public/controls";
+import { NSEDateEntry } from "../../../src/NSE/DateTime/Pickers/dateEntry";
+import { NSETimeEntry } from "../../../src/NSE/DateTime/Pickers/timeEntry";
 
 afterEach(cleanup);
 
@@ -35,7 +36,7 @@ describe("canonical picker host and editor contracts", () => {
       editor: "segments" as const, id: "civil-host", className: "consumer-picker",
       "data-consumer": "civil", title: "Civil editor", onFocusCapture: focus, onBlurCapture: blur,
     };
-    const view = render(kind === "date" ? <NSEDatePicker {...props} mode="text" /> : <NSETimePicker {...props} />);
+    const view = render(kind === "date" ? <NSEDateEntry {...props} mode="text" /> : <NSETimeEntry {...props} />);
     const host = view.container.querySelector<HTMLElement>("#civil-host")!;
     expect(host).not.toBeNull();
     expect(host.classList.contains("consumer-picker")).toBe(true);
@@ -50,11 +51,11 @@ describe("canonical picker host and editor contracts", () => {
     expect(blur).toHaveBeenCalledOnce();
   });
 
-  it.each(["disabled", "readOnly"] as const)("rejects segment commits while %s", (gate) => {
+  it.each([{ isEnabled: false }, { readOnly: true }])("rejects segment commits while gated by %o", (gate) => {
     const change = vi.fn();
-    render(<NSETimePicker aria-label="Time" locale="en-GB" timeZone="Europe/London"
+    render(<NSETimeEntry aria-label="Time" locale="en-GB" timeZone="Europe/London"
       defaultValue={{ hour: 13, minute: 30, second: 0 }} editor="segments"
-      {...{ [gate]: true }} onValueChange={change} />);
+      {...gate} onValueChange={change} />);
     fireEvent.change(screen.getByRole("combobox", { name: "Minute" }), { target: { value: "45" } });
     expect(change).not.toHaveBeenCalled();
   });
@@ -66,13 +67,13 @@ describe("canonical picker host and editor contracts", () => {
       defaultValue: { hour: 13, minute: 30, second: 0 }, onValueChange: change,
       renderEditor: ({ commit }: { commit(value: null): void }) => <button onClick={() => commit(null)}>Clear</button>,
     };
-    const view = render(<NSETimePicker {...props} />);
+    const view = render(<NSETimeEntry {...props} />);
     fireEvent.click(screen.getByRole("button", { name: "Clear" }));
     expect(change).toHaveBeenCalledWith(null, "commit");
     expect(view.container.querySelector<HTMLInputElement>('input[name="time"]')!.value).toBe("");
-    for (const gate of ["required", "disabled", "readOnly"]) {
+    for (const gate of [{ required: true }, { isEnabled: false }, { readOnly: true }]) {
       change.mockClear();
-      view.rerender(<NSETimePicker {...props} {...{ [gate]: true }} />);
+      view.rerender(<NSETimeEntry {...props} {...gate} />);
       fireEvent.click(screen.getByRole("button", { name: "Clear" }));
       expect(change).not.toHaveBeenCalled();
     }

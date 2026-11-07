@@ -45,8 +45,11 @@ describe("browser global watchdog adapter", () => {
     } as unknown as ErrorEvent);
     expect(runtime.store.getSnapshot().errors.at(-1)).toMatchObject({
       code: "GLOBAL_SCRIPT_ERROR",
-      technicalMessage: "isolated global failure",
+      exception: "Error",
+      title: "SynCloudOS ran into a problem.",
+      suggestedActions: ["reload", "dismiss"],
     });
+    expect(runtime.store.getSnapshot().errors.at(-1)?.technicalDetails).toContain("Message: isolated global failure");
     expect(other.store.getSnapshot().errors).toEqual([]);
 
     watchdog.uninstall();

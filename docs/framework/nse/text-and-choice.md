@@ -1,26 +1,23 @@
 # Text fields and choice controls
 
-This page covers the controls people type into and choose with: text, password, secure, search, combo box and token fields, checkboxes, radio groups, and the boxes that group a form. They are native `<input>`, `<fieldset>` and `<label>` elements underneath, so labels, autofill, validation and form submission work as they do on any page.
+This page covers the controls people type into: text fields and labels, secure, search, combo box and token fields, and the boxes that group a form. They are native `<input>`, `<fieldset>` and `<label>` elements underneath, so labels, autofill, validation and form submission work as they do on any page. Checkboxes are `NSEButton`s with `buttonType="switch"` (see [Buttons](buttons.md)), and a one-of-many choice is an `NSESegmentedControl` (see [Values and progress](values-and-progress.md#nsesegmentedcontrol)).
 
 ```tsx
-import { NSECheckbox, NSERadioGroup, NSETextField } from "@syndromatic/syncloudos/nse";
+import { NSEBox, NSESearchField, NSETextField } from "@syndromatic/syncloudos/nse";
 ```
 
 ## At a glance
 
-| Component | Purpose | Needs an overlay host |
-| --- | --- | --- |
-| `NSETextField` | Single line text with prefix, suffix, validation, formatting and commands | No |
-| `NSEPasswordField`, `NSERoundedInput`, `NSEToolInput` | Text field variants | No |
-| `NSESecureTextField` | A concealed field with a reveal control and a Caps Lock notice | No |
-| `NSESearchField`, `NSESearchFieldController` | A search box with incremental queries and remembered searches | Only for recent searches |
-| `NSEComboBox` | An editable field with asynchronous completions | Yes |
-| `NSETokenField` | Tokens such as tags or recipients, with paste, reorder and completion | For completion and token menus |
-| `NSECheckbox` | A checkbox with a mixed state | No |
-| `NSERadioGroup` | A radio set with roving focus | No |
-| `NSEBox`, `NSEGroupBox`, `NSEInputBox` | Grouping and input framing | No |
+| Component | AppKit | Purpose | Needs an overlay host |
+| --- | --- | --- | --- |
+| `NSETextField` | `NSTextField` | Single line text with prefix, suffix, validation, formatting and commands; with `isEditable={false}`, a label | No |
+| `NSESecureTextField` | `NSSecureTextField` | A concealed field with a reveal control and a Caps Lock notice | No |
+| `NSESearchField` | `NSSearchField` | A search box with incremental queries and recent searches | Only for recent searches |
+| `NSEComboBox` | `NSComboBox` | An editable field with asynchronous completions | Yes |
+| `NSETokenField` | `NSTokenField` | Tokens such as tags or recipients, with paste, reorder and completion | For completion and token menus |
+| `NSEBox` | `NSBox` | Titled boxes and separators | No |
 
-Controls marked "Yes" open a floating list, so they need an *overlay host*. A mounted SynWare receives one from the runtime. Elsewhere, wrap the controls in `NSEStandaloneControlHost` from `nse/controls`, which supplies the same overlay, scheduler and focus authority. A control that needs a host and finds none throws an `Error` when it renders.
+Controls marked "Yes" open a floating list, so they need an *overlay host*. A mounted SynWare receives one from the runtime, so use these controls inside an application's views. A control that needs a host and finds none throws an `Error` when it renders.
 
 ## Shared behaviour
 
@@ -38,7 +35,7 @@ Use `"preview"` for a live readout, and `"commit"` for anything that should be s
 
 **Validation.** `validation` is `{ kind: "valid" }` or `{ kind: "invalid", code, message }`, and it is yours to compute. An invalid result sets `aria-invalid`, links the message to the field through `aria-describedby` and shows it as an alert. Command availability is separate. See below.
 
-**Commands.** Fields, the checkbox, radio options and search accept a `command` binding, `{ id, payload }` with an optional `responderId` for diagnostics. The control validates the command through the responder chain, disables itself while the command is unavailable, and dispatches it before it commits the value. When the command does not execute, the value does not commit. Bindings resolve through the host's command system and never through a registry of the control's own. See [Commands, responders and undo](../commands-responders-undo.md).
+**Commands.** Fields and search accept a `command` binding, `{ id, payload }` with an optional `responderId` for diagnostics. The control validates the command through the responder chain, disables itself while the command is unavailable, and dispatches it before it commits the value. When the command does not execute, the value does not commit. Bindings resolve through the host's command system and never through a registry of the control's own. See [Commands, responders and undo](../commands-responders-undo.md).
 
 **Control size.** `controlSize` is `"regular"` (the default), `"small"` or `"mini"`. The theme sizes the frame, the text and the affixes together.
 
@@ -63,7 +60,7 @@ Use `"preview"` for a live readout, and `"commit"` for anything that should be s
 | `validation` | `NSEControlValidation` | none | Your validation result. |
 | `invalid` | `boolean` | `false` | A shortcut for an invalid state with the message "This value needs attention." |
 | `command` | binding | none | See Shared behaviour. |
-| `disabled`, `readOnly`, `required`, `name`, `id` | | | As on `<input>`. `required` and other native constraints report through `onInvalid` and show the browser's message. |
+| `isEnabled`, `readOnly`, `required`, `name`, `id` | `boolean`, … | `true` for `isEnabled` | `isEnabled` is `NSControl.isEnabled`; the others are as on `<input>`. `required` and other native constraints report through `onInvalid` and show the browser's message. |
 
 Every other `<input>` attribute passes through, except `prefix`, which the frame uses.
 
@@ -80,7 +77,25 @@ Every other `<input>` attribute passes through, except `prefix`, which the frame
 
 The field previews a parsed value as the user types, shows a formatter's error as an alert while the text cannot parse, and on commit replaces the text with `editingText` of the parsed value.
 
-`NSEPasswordField` is a text field with `type="password"`, autocapitalisation and correction off, and a `hint` prop as an alias for `placeholder`. `NSERoundedInput` and `NSEToolInput` are text fields with different chrome for standalone and toolbar use, and they also take `hint`.
+### Labels
+
+A text field that is not editable is a label: AppKit's `NSTextField(labelWithString:)`, drawn without a bezel or background. Its children are its string value. Use it for readouts, captions and notes beside controls instead of hand-sizing paragraphs.
+
+```tsx
+<NSETextField isEditable={false} font="footnote" textColor="secondaryLabelColor" monospacedDigits role="status">
+  {count} items
+</NSETextField>
+```
+
+| Prop | Type | Default | AppKit | Description |
+| --- | --- | --- | --- | --- |
+| `isEditable` | `false` | | `isEditable` | Makes the field a label. |
+| `font` | `"body" \| "callout" \| "footnote" \| "caption" \| "headline" \| "label"` | `"body"` | `font` (`NSFont.TextStyle`) | The text style, sized by the SDK's text tokens so every theme agrees. |
+| `textColor` | `"labelColor" \| "secondaryLabelColor"` | `"labelColor"` | `textColor` | The quieter `secondaryLabelColor` suits hints and metadata. |
+| `monospacedDigits` | `boolean` | `false` | the monospaced-digit system font | Tabular figures, so changing numbers do not jitter. |
+| `lineBreakMode` | `"byWordWrapping" \| "byCharWrapping"` | `"byWordWrapping"` | `lineBreakMode` | `byCharWrapping` lets long unbroken strings (paths, URLs, hex values) wrap anywhere. |
+
+A label accepts the attributes of a `<span>`, so give a live readout `role="status"`.
 
 ## NSESecureTextField
 
@@ -98,7 +113,7 @@ The text conceals again when the control loses focus, when the user presses Esca
 
 ## NSESearchField
 
-A search box for incremental and submitted searches, with an affordance that clears the text or submits, and a list of recent searches.
+A search box for incremental and submitted searches, with an affordance that clears the text, and a menu of recent searches.
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -106,42 +121,22 @@ A search box for incremental and submitted searches, with an affordance that cle
 | `value`, `defaultValue`, `onValueChange(value)` | `string` | none | Controlled or uncontrolled text. |
 | `onQuery` | `(value, signal: AbortSignal) => void \| Promise<void>` | none | Runs the search as the user types. A new query aborts the signal of the previous one. |
 | `debounceMs` | `number` | `0` | Delay before `onQuery` runs, when the host provides a scheduler. Without one the query runs at once. |
-| `onSearch` | `(value) => void` | none | The user submitted, with Enter or the affordance. |
+| `onSearch` | `(value) => void` | none | The user submitted, with Enter. |
 | `onClear`, `onCancel` | `() => void` | none | The user cleared the text. |
 | `command` | `{ id, payload }` | none | Dispatched on submit with the payload `{ query }`. The search is remembered and reported only when the command executes. |
-| `controller` | `NSESearchFieldController` | none | Stores recent searches. |
-| `privateMode` | `boolean` | `false` | Do not remember searches from this field. |
-| `showsAffordance` | `boolean` | `true` | Show the trailing search or clear button. Hide it for fully incremental surfaces. |
-| `clearLabel`, `searchLabel` | `string` | `"Clear search"`, `"Submit search"` | The affordance's accessible names. |
+| `recentSearches` | `readonly string[]` | the field's own | `NSSearchField.recentSearches`: the searches the recents menu offers, most recent first. |
+| `maximumRecents` | `number` | `20` | `NSSearchField.maximumRecents`, from 1 to 100. |
+| `onRecentSearchesChange` | `(recents) => void` | none | Called with the new list after a search is remembered. |
+| `showsAffordance` | `boolean` | `true` | Show the trailing clear button. Hide it for fully incremental surfaces. |
+| `showsSearchIcon` | `boolean` | `false` | Show a magnifying glass before the text. |
+| `clearLabel` | `string` | `"Clear search"` | The clear button's accessible name. |
+| `controlSize`, `height`, `width` | | `"regular"` | `"small"` is the inspector and panel size. |
 | `parentResponderId` | `string` | none | The responder that owns the recents list. |
-| `disabled`, `readOnly`, `name`, `id`, `className` | | | Standard. |
+| `isEnabled`, `readOnly`, `name`, `id`, `className` | | `true` for `isEnabled` | `isEnabled` is `NSControl.isEnabled`; the others are standard. |
 
-Enter submits and Escape clears the text, or closes the recent list when the field is already empty. Recent searches appear when the empty field takes focus, and need both a `controller` and an overlay host. Choosing one fills the field and submits it. While an input method is composing, the field neither queries nor submits.
+Enter submits and Escape clears the text, or closes the recents menu when the field is already empty. Recent searches appear when the empty field takes focus, and need an overlay host. Choosing one fills the field and submits it. While an input method is composing, the field neither queries nor submits.
 
-### NSESearchFieldController
-
-Holds the recent searches and notifies the field.
-
-```text
-new NSESearchFieldController({ preferences?, maximumRecents?, now? })
-```
-
-| Option | Description |
-| --- | --- |
-| `preferences` | An `NSEPreferencesController` that persists the list, for example one from `createNSESearchFieldPreferences`. |
-| `maximumRecents` | 1 to 100, default 20. |
-| `now` | A clock returning a number, for tests. By default the controller counts up. |
-
-| Member | Description |
-| --- | --- |
-| `getSnapshot()` | `{ revision, recents }`. Each recent is `{ id, query, usedAt }`. |
-| `getRecents()` | The list, newest first. |
-| `subscribe(listener)` | Returns an unsubscribe function. Compatible with `useSyncExternalStore`. |
-| `rememberQuery(query, { privateMode? })` | Adds a search, moving an existing one to the front. It trims the text and refuses an empty string, one longer than 256 characters or a private search, returning `false` for each. |
-| `remember(recent)` | Adds a ready-made entry, with the same validation. |
-| `clear()` | Empties the list and returns whether anything changed. |
-
-`createNSESearchFieldPreferences(persistence, namespace = "nse.search-field.recents")` returns an `NSEPreferencesController` backed by an object with `getPreference(key, fallback)`, `setPreference(key, value)` (returning whether it stored) and `removePreference(key)`. It stores at most 20 entries and discards a stored list that does not validate.
+**Keeping recent searches.** Without `recentSearches`, the field keeps its own list for as long as it is shown. AppKit keeps the list between launches with `recentsAutosaveName`; in NSE, bind `recentSearches` to a `@preference` property and store the list `onRecentSearchesChange` passes you. Searches are trimmed, and an empty search or one longer than 256 characters is not remembered.
 
 ## NSEComboBox
 
@@ -179,68 +174,34 @@ A field whose values are tokens, such as tags or recipients.
 
 Enter or a separator turns the typed text into a token, and a token whose id is already present is skipped. Backspace in an empty input removes the last token. A focused token removes itself with Delete or Backspace, edits with Enter or a double click (it becomes text in the input), and moves with Alt and Arrow Left or Arrow Right, and Arrow keys move focus between tokens. Pasted text splits on the separators. Tokens copy and cut as text and drag out as text and as a `application/x-syncloudos-token` representation. Completions and token menus need an overlay host.
 
-## NSECheckbox
+## NSEBox
 
-```text
-<NSECheckbox label state? defaultState? onStateChange? command? validation? selectionHaptic? {...input attributes} />
+`NSEBox` is AppKit's `NSBox`: a `<fieldset>` with a `<legend>`, or a separator.
+
+| Prop | Type | Default | AppKit | Description |
+| --- | --- | --- | --- | --- |
+| `title` | `ReactNode` | none | `title` | The legend. |
+| `titlePosition` | `"noTitle" \| "aboveTop" \| "atTop" \| "belowTop" \| "aboveBottom" \| "atBottom" \| "belowBottom"` | `"atTop"` with a title, otherwise `"noTitle"` | `titlePosition` | Where the title sits. `"noTitle"` keeps it for assistive technology and hides it. |
+| `boxType` | `"primary" \| "secondary" \| "separator" \| "custom"` | `"primary"` | `boxType` | `"separator"` draws a rule (`role="separator"`) and takes no children. |
+| `borderType` | `"noBorder" \| "lineBorder" \| "bezelBorder" \| "grooveBorder"` | `"bezelBorder"` | `borderType` | The edge treatment. |
+| `contentViewMargins` | `{ width, height }` | standard | `contentViewMargins` | The horizontal and vertical distance from the border to the content, each 0 to 4,096 points. Without them the content sits at the standard content margin, and rows run edge to edge as in a grouped table. |
+| `fillColor` | `string` | theme | `fillColor` | One CSS background value, at most 512 characters, with no `;`, `{` or `}`. |
+| `contentLayout` | `"stack" \| "flow"` | `"stack"` | | `stack` lays the content out as a leading-aligned column at standard spacing; `flow` leaves it in plain block flow. |
+
+A separator with a `title` draws the theme's captioned separator: the title, then the rule to the edge.
+
+```tsx
+<NSEBox title="Downloads">
+  <NSEButton buttonType="switch" title="Keep offline" />
+</NSEBox>
+<NSEBox boxType="separator" title="Disciplines" />
 ```
-
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `label` | `ReactNode` | required | The visible text. |
-| `state`, `defaultState` | `false \| true \| "mixed"` | `false` | The full state, controlled or initial. |
-| `onStateChange` | `(state, "commit") => void` | none | The user changed the state. |
-| `checked`, `defaultChecked`, `onCheckedChange`, `onChange` | | | Boolean aliases and the native change event, for code that does not need the mixed state. `mixed` forces `"mixed"`. |
-| `submissionValue` | `string` | `"on"` | The value the native checkbox submits. |
-| `command` | binding | none | Dispatched before the change commits. |
-| `validation` | `NSEControlValidation` | none | Shows an error under the checkbox. |
-| `selectionHaptic` | `HFXFeedbackRequest` | `"selection"` | The tick on change. |
-| `readOnly`, `disabled`, `required`, `name` | | | `readOnly` blocks changes and shows no tick. |
-
-A `"mixed"` state sets the native `indeterminate` property and `aria-checked="mixed"`, and clicking a mixed checkbox makes it checked. A form reset restores a mixed default.
-
-## NSERadioGroup
-
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `options` | `NSERadioOption[]` | required | `{ value, label, disabled?, command? }`. Give an option a `command` to dispatch it before that option commits. |
-| `value`, `defaultValue` | `string` | first enabled option | The selected value. |
-| `onValueChange` | `(value, "commit") => void` | none | Selection changed. |
-| `label` | `string` | none | The group's accessible name. |
-| `name` | `string` | generated | The native group name. Set one when the group submits with a form. |
-| `required`, `disabled`, `validation`, `selectionHaptic` | | `selectionHaptic` is `"selection"` | |
-| `dir` | `"ltr" \| "rtl"` | | Flips the horizontal arrow keys. |
-
-The group uses native radios with roving focus: only the selected option is in the tab order. Arrow Down and Arrow Right (Arrow Left in right-to-left text) select the next enabled option and wrap around, and Arrow Up and Arrow Left select the previous.
-
-## NSEBox, NSEGroupBox and NSEInputBox
-
-`NSEBox` is a `<fieldset>` with a `<legend>`, the counterpart of `NSBox`.
-
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `title` | `ReactNode` | none | The legend. |
-| `titlePosition` | `"none" \| "above-top" \| "at-top" \| "below-top" \| "above-bottom" \| "at-bottom" \| "below-bottom"` | `"at-top"` with a title | Where the title sits. `"none"` keeps it for assistive technology and hides it. |
-| `kind` | `"primary" \| "secondary" \| "separator" \| "custom"` | `"primary"` | `"separator"` draws a rule (`role="separator"`) and takes no children. |
-| `border` | `"none" \| "line" \| "bezel" \| "groove"` | `"bezel"` | The edge treatment. |
-| `contentInsets` | `{ top, right, bottom, left }` | theme | Each 0 to 4,096 points. Out of range values throw `RangeError`. |
-| `fill` | `string` | theme | One CSS background value, at most 512 characters, with no `;`, `{` or `}`. An unsupported value throws `TypeError`. |
-| `smoothSurface` | | `false` | Smooth cornered surface rendering. |
-
-`NSEGroupBox` is the common case: a primary box with a bezel border, whose `label` becomes the title. `NSEInputBox` frames several controls, such as an icon, an input and a button, so they read as one field. It takes `label`, `invalid`, `disabled` and `alwaysLooksFocused` (draw the focused look even without focus). It shows the focused look whenever a child has focus.
 
 ## Example
 
 ```tsx
 import { useState } from "react";
-import {
-  NSECheckbox,
-  NSEGroupBox,
-  NSERadioGroup,
-  NSESearchField,
-  NSESearchFieldController,
-  NSETextField,
-} from "@syndromatic/syncloudos/nse";
+import { NSEBox, NSEButton, NSESearchField, NSESegmentedControl, NSETextField } from "@syndromatic/syncloudos/nse";
 
 // A formatter is any object with these four methods.
 const percent = {
@@ -255,18 +216,17 @@ const percent = {
   validatePartial: (text: string) => ({ valid: /^\d{0,3}%?$/.test(text) }),
 };
 
-const searches = new NSESearchFieldController({ maximumRecents: 10 });
-
 export function ExportOptions() {
   const [name, setName] = useState("Quarterly report");
   const [scale, setScale] = useState(1);
   const [layout, setLayout] = useState("portrait");
-  const [links, setLinks] = useState<boolean | "mixed">("mixed");
+  const [links, setLinks] = useState<"on" | "off" | "mixed">("mixed");
+  const [recents, setRecents] = useState<readonly string[]>([]);
 
   const nameProblem = name.trim() === "" ? ({ kind: "invalid", code: "empty", message: "Give the export a name." } as const) : undefined;
 
   return (
-    <NSEGroupBox label="Export">
+    <NSEBox title="Export">
       <NSETextField
         label="Name"
         value={name}
@@ -285,19 +245,17 @@ export function ExportOptions() {
           if (phase === "commit") setScale(value);
         }}
       />
-      <NSERadioGroup
-        label="Orientation"
-        name="layout"
-        value={layout}
-        options={[
-          { value: "portrait", label: "Portrait" },
-          { value: "landscape", label: "Landscape" },
-        ]}
-        onValueChange={(value) => setLayout(value)}
+      <NSESegmentedControl
+        aria-label="Orientation"
+        segmentStyle="capsule"
+        selection={{ mode: "select-one", selectedIds: new Set([layout]), allowsEmpty: false }}
+        items={[{ id: "portrait", label: "Portrait" }, { id: "landscape", label: "Landscape" }]}
+        onSelectionChange={(selection) => setLayout([...selection.selectedIds][0] ?? "portrait")}
       />
-      <NSECheckbox label="Include links" state={links} onStateChange={(state) => setLinks(state)} />
-      <NSESearchField aria-label="Search templates" controller={searches} onSearch={(query) => console.log(query)} />
-    </NSEGroupBox>
+      <NSEButton buttonType="switch" allowsMixedState title="Include links" state={links} onStateChange={setLinks} />
+      <NSESearchField aria-label="Search templates" recentSearches={recents} onRecentSearchesChange={setRecents} onSearch={(query) => console.log(query)} />
+      <NSETextField isEditable={false} font="footnote" textColor="secondaryLabelColor">Exports keep their links.</NSETextField>
+    </NSEBox>
   );
 }
 ```
@@ -307,9 +265,9 @@ export function ExportOptions() {
 | Situation | Result |
 | --- | --- |
 | A completion control renders with no overlay host | `Error` from the render |
-| `NSEBox` `contentInsets` outside 0 to 4,096 or not numbers | `RangeError` or `TypeError` |
-| `NSEBox` `fill` unsafe or unsupported | `TypeError` |
-| `NSEBox` with `kind="separator"` and children, in development | `TypeError` |
+| `NSEBox` `contentViewMargins` outside 0 to 4,096 or not numbers | `RangeError` or `TypeError` |
+| `NSEBox` `fillColor` unsafe or unsupported | `TypeError` |
+| `NSEBox` with `boxType="separator"` and children, in development | `TypeError` |
 | A command that is unavailable or fails | The control stays uncommitted. It reports nothing to the user by itself, so present the command's own state |
 
 ## Related
@@ -317,5 +275,4 @@ export function ExportOptions() {
 - [NSE controls](../nse-controls.md)
 - [Buttons](buttons.md)
 - [Values and progress](values-and-progress.md)
-- [Controllers](../controllers.md), for `NSEPreferencesController`
 - [Commands, responders and undo](../commands-responders-undo.md)

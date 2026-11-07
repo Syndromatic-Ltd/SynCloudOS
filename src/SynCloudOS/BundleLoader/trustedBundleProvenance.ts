@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { TrustedSynWareBundle } from "./bundleTypes";
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
 
@@ -26,6 +27,11 @@ export type SynWareTrustedPrivilege = string;
 export interface SynWareTrustedBundleProvenance {
   readonly sourceKey: string;
   readonly privileges: ReadonlySet<SynWareTrustedPrivilege>;
+  /** A bundle the project itself declares. Its manifest capabilities are its
+   * grant, so every privileged surface a capability unlocks is available to
+   * it; a bundle from outside the project holds only the privileges the host
+   * named. */
+  readonly firstParty: boolean;
 }
 
 /** Host/test minting accepts a short iterable and always seals it into the
@@ -65,7 +71,7 @@ function createTrustedProvenance(
   bundle: TrustedSynWareBundle,
   input: SynWareTrustedBundleProvenanceInput,
 ): BrandedTrustedBundleProvenance {
-  if (typeof bundle.manifest.id !== "string" || bundle.manifest.id.trim().length === 0) {
+  if (typeof bundle.manifest.bundleIdentifier !== "string" || bundle.manifest.bundleIdentifier.trim().length === 0) {
     throw new TypeError("Trusted bundle provenance requires a canonical application identity.");
   }
   if (typeof input.sourceKey !== "string" || input.sourceKey.trim().length === 0) {
@@ -81,13 +87,30 @@ function createTrustedProvenance(
   return Object.freeze({
     sourceKey: input.sourceKey,
     privileges: readonlyPrivilegeSet(privileges),
+    firstParty: false,
     [trustedBundleProvenanceBrand]: true as const,
-    registeredAppId: bundle.manifest.id,
+    registeredAppId: bundle.manifest.bundleIdentifier,
+  });
+}
+
+function createProjectProvenance(
+  bundle: TrustedSynWareBundle,
+  sourceKey: string,
+): BrandedTrustedBundleProvenance {
+  if (typeof sourceKey !== "string" || sourceKey.trim().length === 0) {
+    throw new TypeError("Project bundle provenance requires a non-empty source key.");
+  }
+  return Object.freeze({
+    sourceKey: sourceKey.trim(),
+    privileges: readonlyPrivilegeSet([]),
+    firstParty: true,
+    [trustedBundleProvenanceBrand]: true as const,
+    registeredAppId: bundle.manifest.bundleIdentifier,
   });
 }
 
 function assertCanonicalTrustedBundleCandidate(bundle: TrustedSynWareBundle): void {
-  if (!bundle.synWareManifest || bundle.synWareManifest.id !== bundle.manifest.id) {
+  if (!bundle.synWareManifest || normalizeBundleIdentifier(bundle.synWareManifest.bundleIdentifier) !== normalizeBundleIdentifier(bundle.manifest.bundleIdentifier)) {
     throw new TypeError("Trusted provenance requires a canonical V1 SynWare bundle.");
   }
 }
@@ -103,6 +126,21 @@ export function trustSynWareBundleForCanonicalHost<TBundle extends TrustedSynWar
 ): TBundle {
   assertCanonicalTrustedBundleCandidate(bundle);
   trustedBundleProvenanceByBundle.set(bundle, createTrustedProvenance(bundle, provenance));
+  return bundle;
+}
+
+/**
+ * Marks a bundle the project's own folders declare, such as every application
+ * the Vite plugin discovers under `src/SynWare`. The project is the host's own
+ * source, so no separate trusted-source table names it: each privileged call
+ * still requires the capability the app declares in `Info.ts` `permissions`.
+ */
+export function trustSynWareBundleForProject<TBundle extends TrustedSynWareBundle>(
+  bundle: TBundle,
+  sourceKey: string,
+): TBundle {
+  assertCanonicalTrustedBundleCandidate(bundle);
+  trustedBundleProvenanceByBundle.set(bundle, createProjectProvenance(bundle, sourceKey));
   return bundle;
 }
 
@@ -122,7 +160,7 @@ export function preserveTrustedSynWareBundleProvenance<TBundle extends TrustedSy
   target: TBundle,
 ): TBundle {
   const provenance = trustedBundleProvenanceByBundle.get(source);
-  if (provenance && target.manifest.id === provenance.registeredAppId) {
+  if (provenance && normalizeBundleIdentifier(target.manifest.bundleIdentifier) === normalizeBundleIdentifier(provenance.registeredAppId)) {
     trustedBundleProvenanceByBundle.set(target, provenance);
   }
   return target;
@@ -131,7 +169,7 @@ export function preserveTrustedSynWareBundleProvenance<TBundle extends TrustedSy
 export function getTrustedSynWareBundleProvenance(bundle: TrustedSynWareBundle | null | undefined): SynWareTrustedBundleProvenance | null {
   if (!bundle) return null;
   const provenance = trustedBundleProvenanceByBundle.get(bundle);
-  return provenance?.registeredAppId === bundle.manifest.id ? provenance : null;
+  return provenance && normalizeBundleIdentifier(provenance.registeredAppId) === normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) ? provenance : null;
 }
 
 /** Every privileged operation resolves the currently registered record. This
@@ -145,8 +183,8 @@ export function requireTrustedBundlePrivilege(
 ): void {
   const bundle = runtime.bundles.getBundle(appId);
   const provenance = getTrustedSynWareBundleProvenance(bundle);
-  if (!bundle || bundle.manifest.id !== appId || bundle.synWareManifest?.id !== appId ||
-      !provenance || !provenance.privileges.has(privilege)) {
+  if (!bundle || normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) !== normalizeBundleIdentifier(appId) || normalizeBundleIdentifier(bundle.synWareManifest?.bundleIdentifier) !== normalizeBundleIdentifier(appId) ||
+      !provenance || (!provenance.firstParty && !provenance.privileges.has(privilege))) {
     throw new DOMException(`SynWare ${appId} does not hold host-owned trusted provenance for ${privilege}.`, "SecurityError");
   }
   if (!bundle.synWareManifest?.permissions?.includes(capability)) {

@@ -20,6 +20,7 @@
 
 /** A view subscribes to its owner's frame source; it never creates a clock. */
 export interface EffectFrameSource {
+  /** Monotonic seconds, matching the canonical AFX frame scheduler. */
   now(): number;
   requestFrame(callback: (timestamp: number) => void): () => void;
   readonly reducedMotion: boolean;
@@ -29,7 +30,7 @@ export interface EffectFrameSource {
 
 export function observeEffectFrames(
   frames: EffectFrameSource,
-  draw: (time: number, deltaMs: number, staticFrame: boolean) => boolean,
+  draw: (timeSeconds: number, deltaSeconds: number, staticFrame: boolean) => boolean,
 ) {
   let disposed = false;
   let cancel: (() => void) | null = null;
@@ -38,7 +39,7 @@ export function observeEffectFrames(
   const tick = (time: number) => {
     cancel = null;
     if (disposed || frames.suspended) return;
-    const delta = Math.max(0, Math.min(100, time - previous));
+    const delta = Math.max(0, Math.min(0.1, time - previous));
     previous = time;
     const keepPlaying = draw(time, delta, frames.reducedMotion);
     if (!disposed && keepPlaying && !frames.reducedMotion && !frames.suspended)

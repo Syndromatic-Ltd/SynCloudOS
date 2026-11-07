@@ -28,7 +28,7 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance";
 import { atmoAppearance } from "../../src/NSE/Themes/Atmo";
-import { NSEMenu, NSEPicker } from "../../src/NSE/Menus";
+import { NSEMenuView, NSEPopUpButton } from "../../src/NSE/Menus";
 import { NSELevelIndicator, NSEStepper } from "../../src/NSE/Controls/Values";
 import { NSEComboBox } from "../../src/NSE/Controls/Completion";
 import { NSEStandaloneControlHost, NSEPopup } from "../../src/NSE/Overlays";
@@ -82,13 +82,13 @@ describe("NSE menu and picker interactions", () => {
     render(
       <InteractionHost>
         <NSEAppearanceProvider appearance={atmoAppearance}>
-          <NSEPicker
+          <NSEPopUpButton
             label="Density"
             value="balanced"
-            options={[
-              { value: "compact", label: "Compact" },
-              { value: "balanced", label: "Balanced" },
-              { value: "immersive", label: "Immersive" }
+            items={[
+              { value: "compact", title: "Compact" },
+              { value: "balanced", title: "Balanced" },
+              { value: "immersive", title: "Immersive" }
             ]}
             onValueChange={onValueChange}
           />
@@ -117,7 +117,7 @@ describe("NSE menu and picker interactions", () => {
     render(
       <InteractionHost>
         <NSEAppearanceProvider appearance={customAppearance}>
-          <NSEMenu
+          <NSEMenuView
             label="Actions"
             items={[
               { value: "pin", label: "Pin Surface", checked: true },

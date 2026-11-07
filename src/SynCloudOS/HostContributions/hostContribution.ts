@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { captureHostUpdateReadinessOptions } from '../Updates/hostReadinessTypes';
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type {
   SynCloudOSAppServiceDefinition,
   SynCloudOSAppServiceResolution,
@@ -57,7 +59,6 @@ import type {
   SynCloudOSPolicySubjectGrant,
   SynCloudOSRoleCapabilityRegistrationInput,
 } from "../PolicyKit/policyTypes";
-import type { WebspringContentSource, WebspringContentSources } from "../WebspringState/webspringContentTypes";
 import type { SynCloudOSIdentityUser } from "../Identity/identityTypes";
 import type { LUFXQuery, LUFXQueryDescriptor } from "../../FX/LuminaFX/LUFXQuery";
 import type { LUFXQueryExecutionOptions, LUFXQueryResultPage } from "../../FX/LuminaFX/LUFXQueryPlanner";
@@ -95,6 +96,8 @@ type MutableApplicationDocumentConfiguration = {
 export interface SynCloudOSHostContributionPreparation {
   readonly runtimeConfig?: Readonly<SynCloudOSHostScalarRuntimeConfig>;
   readonly initialBundles?: readonly TrustedSynWareBundle[];
+  /** Already registered applications this contribution extends, without registering their bundles again. */
+  readonly applicationOwners?: readonly string[];
   readonly trustedDocumentKinds?: readonly SynCloudOSDocumentKindMetadata[];
   readonly applicationDocuments?: Readonly<Partial<ApplicationDocumentRuntimeConfiguration>>;
   readonly install?: (
@@ -114,6 +117,7 @@ export interface PreparedSynCloudOSHostContribution {
   readonly source: string;
   readonly runtimeConfig: Readonly<SynCloudOSHostScalarRuntimeConfig>;
   readonly initialBundles: readonly TrustedSynWareBundle[];
+  readonly applicationOwners: readonly string[];
   readonly trustedDocumentKinds: readonly SynCloudOSDocumentKindMetadata[];
   readonly applicationDocuments?: Readonly<Partial<ApplicationDocumentRuntimeConfiguration>>;
   readonly install?: (
@@ -184,10 +188,6 @@ export interface SynCloudOSHostEventInstallPort {
   subscribe(type: string, listener: (event: unknown) => void): SynCloudOSHostContributionCleanup;
 }
 
-export interface SynCloudOSHostWebspringInstallPort {
-  registerContentSource(id: string, source: WebspringContentSource): SynCloudOSHostContributionCleanup;
-}
-
 export interface SynCloudOSHostPolicyInstallPort {
   declare(input: { readonly appId: string; readonly policy: SynCloudOSAppAccessPolicy }): void;
   registerRoleCapabilities(input: SynCloudOSRoleCapabilityRegistrationInput): SynCloudOSHostContributionCleanup;
@@ -242,11 +242,12 @@ export interface SynCloudOSHostInstallContext {
   readonly id: string;
   readonly source: string;
   readonly signal: AbortSignal;
+  /** Injected document-adapter clock and timers, scoped to this installation. */
+  readonly environment: Pick<SynCloudOSRuntimeEnvironment, "now" | "randomUUID" | "setTimeout" | "clearTimeout">;
   readonly services: SynCloudOSHostServiceInstallPort;
   readonly documents: SynCloudOSHostDocumentInstallPort;
   readonly seed: SynCloudOSHostSeedPort;
   readonly events: SynCloudOSHostEventInstallPort;
-  readonly webspring: SynCloudOSHostWebspringInstallPort;
   readonly policy: SynCloudOSHostPolicyInstallPort;
   readonly lumina: SynCloudOSHostLuminaInstallPort;
   readonly bootNotifications: SynCloudOSHostBootNotificationInstallPort;
@@ -344,7 +345,9 @@ const runtimeScalarKeys = new Set<string>([
   "initialPathname",
   "persistenceNamespace",
   "windowPersistenceNamespace",
+  "documentStoreLock",
   "operationHistoryLimit",
+  "updateReadiness",
   "jobs",
   "resourceSoftBudgetBytes",
   "performancePolicy",
@@ -362,6 +365,12 @@ const runtimeScalarKeys = new Set<string>([
   "policyProfile",
   "userNotifications",
 ]);
+function captureRuntimeConfig(value: unknown, label: string): Readonly<SynCloudOSHostScalarRuntimeConfig> {
+  const scalar = cloneReadonlyRecord(value, label, runtimeScalarKeys);
+  if (scalar.updateReadiness === undefined) return scalar as SynCloudOSHostScalarRuntimeConfig;
+  return Object.freeze({ ...scalar, updateReadiness: captureHostUpdateReadinessOptions(scalar.updateReadiness as never) });
+}
+
 const applicationDocumentKeys = new Set<string>(["recoveryStore", "initialAdapters", "initialTypes", "assetBacking"]);
 
 function captureRecoveryStore(value: unknown): DocumentRecoveryStore | undefined {
@@ -488,12 +497,15 @@ function cloneArray<T>(value: unknown, label: string): readonly T[] {
 
 function normalizePreparation(record: ContributionRecord, value: unknown): PreparedSynCloudOSHostContribution {
   assertPlainRecord(value, `Host contribution ${record.id} preparation`);
-  const allowed = new Set(["runtimeConfig", "initialBundles", "trustedDocumentKinds", "applicationDocuments", "install"]);
+  const allowed = new Set(["runtimeConfig", "initialBundles", "applicationOwners", "trustedDocumentKinds", "applicationDocuments", "install"]);
   for (const key of ownKeys(value, `Host contribution ${record.id} preparation`)) {
     if (!allowed.has(key)) throw new TypeError(`Host contribution ${record.id} preparation does not support ${key}.`);
   }
-  const runtimeConfig = cloneReadonlyRecord(ownData(value, "runtimeConfig", `Host contribution ${record.id} preparation`), "Host contribution runtimeConfig", runtimeScalarKeys) as SynCloudOSHostScalarRuntimeConfig;
+  const runtimeConfig = captureRuntimeConfig(ownData(value, "runtimeConfig", `Host contribution ${record.id} preparation`), "Host contribution runtimeConfig");
   const initialBundles = cloneArray<TrustedSynWareBundle>(ownData(value, "initialBundles", `Host contribution ${record.id} preparation`), "Host contribution initialBundles");
+  const applicationOwners = Object.freeze(cloneArray<string>(
+    ownData(value, "applicationOwners", `Host contribution ${record.id} preparation`), "Host contribution applicationOwners",
+  ).map(normalizeBundleIdentifier));
   const trustedDocumentKinds = cloneArray<SynCloudOSDocumentKindMetadata>(ownData(value, "trustedDocumentKinds", `Host contribution ${record.id} preparation`), "Host contribution trustedDocumentKinds");
   const applicationDocumentsValue = ownData(value, "applicationDocuments", `Host contribution ${record.id} preparation`);
   let applicationDocuments: Readonly<Partial<ApplicationDocumentRuntimeConfiguration>> | undefined;
@@ -520,6 +532,7 @@ function normalizePreparation(record: ContributionRecord, value: unknown): Prepa
     source: record.source,
     runtimeConfig,
     initialBundles,
+    applicationOwners,
     trustedDocumentKinds,
     ...(applicationDocuments === undefined ? {} : { applicationDocuments }),
     ...(install === undefined ? {} : { install: install as PreparedSynCloudOSHostContribution["install"] }),
@@ -572,10 +585,10 @@ function preparedRecord(value: PreparedSynCloudOSHostContribution): PreparedReco
 function bundleId(bundle: TrustedSynWareBundle): string {
   if (!bundle || typeof bundle !== "object") throw new TypeError("Host contribution bundles must be objects.");
   const manifest = bundle.synWareManifest ?? bundle.manifest;
-  if (!manifest || typeof manifest !== "object" || typeof manifest.id !== "string" || manifest.id.trim().length === 0) {
+  if (!manifest || typeof manifest !== "object" || typeof manifest.bundleIdentifier !== "string" || manifest.bundleIdentifier.trim().length === 0) {
     throw new TypeError("Host contribution bundles require a canonical manifest ID.");
   }
-  return manifest.id;
+  return normalizeBundleIdentifier(manifest.bundleIdentifier);
 }
 
 function kindId(kind: SynCloudOSDocumentKindMetadata): string {
@@ -632,7 +645,7 @@ function addUnique<T>(target: T[], values: readonly T[], idOf: (value: T) => str
 
 function normalizedCompositionInput(input: SynCloudOSHostCompositionInput): SynCloudOSHostComposition {
   if (!isRecord(input)) throw new TypeError("Host composition input must be a plain record.");
-  const runtimeConfig = cloneReadonlyRecord(input.runtimeConfig, "Host composition runtimeConfig", runtimeScalarKeys) as SynCloudOSHostScalarRuntimeConfig;
+  const runtimeConfig = captureRuntimeConfig(input.runtimeConfig, "Host composition runtimeConfig");
   const initialBundles = cloneArray<TrustedSynWareBundle>(input.initialBundles, "Host composition initialBundles");
   const trustedDocumentKinds = cloneArray<SynCloudOSDocumentKindMetadata>(input.trustedDocumentKinds, "Host composition trustedDocumentKinds");
   const applicationDocumentsValue = ownData(input, "applicationDocuments", "Host composition input");
@@ -786,7 +799,6 @@ interface HostInstallContextHandle {
 export function createSynCloudOSHostInstallContext(
   prepared: PreparedSynCloudOSHostContribution,
   runtime: SynCloudOSRuntime,
-  contentSources: Record<string, WebspringContentSource>,
   resources: Readonly<Record<string, string>> = {},
   signal: AbortSignal = runtime.signal,
 ): HostInstallContextHandle {
@@ -856,13 +868,17 @@ export function createSynCloudOSHostInstallContext(
   track(() => { runtime.policy.revokeSubject(seedGrant); });
   const storeContext = (operationSignal: AbortSignal) =>
     contextStoreContext(operationSignal, record.source, seedSubject, "hostContribution", seedGrant);
+  const applicationOwners = new Set([
+    ...prepared.applicationOwners,
+    ...prepared.initialBundles.map(bundle => normalizeBundleIdentifier(bundle.synWareManifest?.bundleIdentifier ?? bundle.manifest.bundleIdentifier)),
+  ]);
   const seedKinds = new Set(prepared.trustedDocumentKinds.map((kind) => kind.kind));
   const seedApplications = new Set([
-    ...prepared.initialBundles.map((bundle) => bundle.manifest.id),
+    ...applicationOwners,
     ...(prepared.applicationDocuments?.initialTypes ?? []).map((type) => type.creatingApplicationId).filter((id): id is string => typeof id === "string"),
-  ]);
+  ].map(normalizeBundleIdentifier));
   const inSeedScope = (document: Pick<SynCloudOSDocument, "kind" | "applicationId">) =>
-    seedKinds.has(document.kind) && (document.applicationId === undefined || seedApplications.has(document.applicationId));
+    seedKinds.has(document.kind) && (document.applicationId === undefined || seedApplications.has(normalizeBundleIdentifier(document.applicationId)));
   const scopedRecord = <T extends SynCloudOSDocument | null>(document: T): T => {
     if (document && !inSeedScope(document)) throw new DOMException("The document is outside this contribution's declared seed scope.", "SecurityError");
     return document;
@@ -1018,34 +1034,20 @@ export function createSynCloudOSHostInstallContext(
       return track(unsubscribe);
     },
   });
-  const webspring = Object.freeze<SynCloudOSHostWebspringInstallPort>({
-    registerContentSource(id, source) {
-      assertLive(signal);
-      if (typeof id !== "string" || !id.trim()) throw new TypeError("Webspring content source IDs must not be empty.");
-      if (!source || typeof source !== "object" || typeof source.read !== "function") throw new TypeError(`Webspring content source ${id} requires a read function.`);
-      if (Object.prototype.hasOwnProperty.call(contentSources, id)) throw new TypeError(`Duplicate Webspring content source ${id}.`);
-      Object.defineProperty(contentSources, id, { configurable: true, enumerable: true, writable: true, value: source });
-      let disposed = false;
-      return track(() => {
-        if (disposed) return;
-        disposed = true;
-        if (contentSources[id] === source) delete contentSources[id];
-      });
-    },
-  });
   const policy = Object.freeze<SynCloudOSHostPolicyInstallPort>({
     declare(input) {
       assertLive(signal);
       if (!input || typeof input.appId !== "string" || !input.appId.trim()) throw new TypeError("Host policy declarations require an application ID.");
       if (!isRecord(input.policy)) throw new TypeError("Host policy declarations require a policy record.");
-      if (!prepared.initialBundles.some((bundle) => bundle.manifest.id === input.appId)) {
+      if (!applicationOwners.has(normalizeBundleIdentifier(input.appId))) {
         throw new DOMException("A contribution may declare policy only for its own applications.", "SecurityError");
       }
       const appId = input.appId;
       const declaration = structuredClone(input.policy);
-      const policyId = `host:${record.id}:${appId}`;
+      const policyId = `host:${record.id}:${normalizeBundleIdentifier(appId)}`;
       runtime.policy.registerPolicy(policyId, (request, decision) => {
-        if (!decision.allowed || (request.app?.id ?? request.context?.appId) !== appId) return decision;
+        const requestedAppId = request.app?.bundleIdentifier ?? request.context?.appId;
+        if (!decision.allowed || typeof requestedAppId !== "string" || normalizeBundleIdentifier(requestedAppId) !== normalizeBundleIdentifier(appId)) return decision;
         const app = request.app ?? runtime.apps.getApp(appId);
         if (!app) return decision;
         const declaredDecision = runtime.policy.evaluate({ ...request, app: { ...app, policy: declaration } }, { applyRegisteredPolicies: false });
@@ -1062,9 +1064,8 @@ export function createSynCloudOSHostInstallContext(
     },
     currentSubject,
   });
-  const luminaApplicationIds = new Set(prepared.initialBundles.map((bundle) => bundle.synWareManifest?.id ?? bundle.manifest.id));
   const assertLuminaApplication = (appId: string, role: "owner" | "destination") => {
-    if (!luminaApplicationIds.has(appId)) {
+    if (!applicationOwners.has(normalizeBundleIdentifier(appId))) {
       throw new DOMException(`A host contribution may use only its own Lumina ${role} application.`, "SecurityError");
     }
   };
@@ -1165,15 +1166,36 @@ export function createSynCloudOSHostInstallContext(
       });
     },
   });
+  const timers = new Set<unknown>();
+  track(() => {
+    for (const timer of timers) runtime.environment.clearTimeout(timer);
+    timers.clear();
+  });
+  const environment = Object.freeze<SynCloudOSHostInstallContext["environment"]>({
+    now() { assertLive(signal); return runtime.environment.now(); },
+    randomUUID() { assertLive(signal); return runtime.environment.randomUUID(); },
+    setTimeout(callback, delayMs) {
+      assertLive(signal);
+      const timer = runtime.environment.setTimeout(() => {
+        timers.delete(timer);
+        if (!signal.aborted) callback();
+      }, delayMs);
+      timers.add(timer);
+      return timer;
+    },
+    clearTimeout(timer) {
+      if (timers.delete(timer)) runtime.environment.clearTimeout(timer);
+    },
+  });
   const context: SynCloudOSHostInstallContext = Object.freeze({
     id: record.id,
     source: record.source,
     signal,
+    environment,
     services,
     documents: Object.freeze({ registerType, registerAdapter, registerDocumentStoreAdapter }),
     seed: Object.freeze(seed),
     events,
-    webspring,
     policy,
     lumina,
     bootNotifications: bootPort,
@@ -1216,5 +1238,3 @@ export function createSynCloudOSHostInstallContext(
     },
   });
 }
-
-export type { WebspringContentSources };

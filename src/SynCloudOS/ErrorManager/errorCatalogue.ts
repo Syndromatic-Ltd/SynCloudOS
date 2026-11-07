@@ -1,0 +1,124 @@
+/* SynCloudOS — Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ * Designed by Kavish Krishnakumar in Manchester.
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+/** Add stable error codes here when introducing them; the build ships this data to offline developer tools. */
+export interface ErrorCatalogueEntry {
+  readonly code: string;
+  readonly title: string;
+  readonly cause: string;
+  readonly fix: string;
+  /** Version-matched path relative to the installed SDK package. */
+  readonly docs?: string;
+  readonly appliesTo?: string;
+  /** Known failures under this code, recognised by the thrown message. The first match replaces the entry's fix and docs in the report's Hint and Docs lines. */
+  readonly diagnoses?: readonly ErrorDiagnosis[];
+}
+/**
+ * A known failure that reaches a generic boundary code (such as APP_CONTENT_FAILED)
+ * because the thrown error has no code of its own. It only chooses the hint; code
+ * identity never depends on message text.
+ */
+export interface ErrorDiagnosis {
+  /** Regular-expression source, matched against the thrown message and its causes. A string, so the catalogue stays JSON for offline tools. */
+  readonly message: string;
+  readonly fix: string;
+  readonly docs?: string;
+}
+const thrownErrorDiagnoses: readonly ErrorDiagnosis[] = Object.freeze(([
+  {
+    message: "requires? an NSEOverlayProvider",
+    fix: "This control opens menus or popovers, so it needs the NSEOverlayProvider that every SynCloudOS window supplies. Render it inside the application's views. A control rendered into a separate React root or through createPortal outside the window, or in a test, needs its own NSEOverlayProvider. If the same code worked before an SDK update, the browser combined cached and new copies of the SDK: reload with the cache cleared.",
+    docs: "docs/framework/nse/menus-toolbars-and-inspectors.md#responder-provenance-for-toolbars-and-menus",
+  },
+  {
+    message: "requires an NSE (?:lifetime owner|application)",
+    fix: "This object must be created by an owner: in a field initialiser or constructor of an NSEApplication, window controller or view controller, not in a method, a callback or after an await.",
+    docs: "docs/framework/applications.md#ownership",
+  },
+  {
+    message: "Invalid hook call",
+    fix: "A hook was called outside a function component's render, or the page loaded two copies of React. In a class-based application, keep state on the view controller as @observable fields instead of calling hooks from its methods. Otherwise check that only one copy of react is installed (npm ls react).",
+    docs: "docs/framework/applications.md#observable-properties",
+  },
+  {
+    message: "Rendered (?:more|fewer) hooks than|change in the order of Hooks",
+    fix: "A hook is called conditionally or after an early return. Call hooks at the top of the component, in the same order on every render.",
+  },
+  {
+    message: "Maximum update depth exceeded",
+    fix: "A state update triggers itself in a loop: a setter called during render, or an effect that updates a value its own dependencies change on. Update state from events, or compare before setting.",
+  },
+  {
+    message: "Objects are not valid as a React child",
+    fix: "A view rendered a plain object where text or elements were expected. Render one of its fields, or format it as a string first.",
+  },
+  {
+    message: "Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module",
+    fix: "The browser could not load one of the app's modules. In development, the dev server restarted or rebuilt: reload the page. After a deployment, the page was still using files the deployment replaced: reload to get the current version.",
+    docs: "docs/framework/getting-started.md",
+  },
+] satisfies ErrorDiagnosis[]).map(diagnosis => Object.freeze(diagnosis)));
+export const errorCatalogue: readonly ErrorCatalogueEntry[] = Object.freeze([
+  {code:"APP_NOT_FOUND",title:"SynCloudOS could not find an app registered with that identifier",cause:"The requested bundle identifier is absent from the registered composition.",fix:"Check manifest.bundleIdentifier and include the bundle in the host's bundles array.",docs:"docs/framework/getting-started.md"},
+  {code:"ROUTE_NOT_FOUND",title:"SynCloudOS could not match the requested address to a registered SynWare",cause:"No registered manifest route matches the pathname.",fix:"Declare the route in Info.ts and register its bundle; check the host base path.",docs:"docs/framework/synware-sdk.md"},
+  {code:"APP_LAUNCH_FAILED",title:"SynCloudOS could not load the requested content",cause:"Loading or starting the app rejected.",fix:"Inspect the original technical message, verify the app entry export and resolve failing imports or startup operations.",docs:"docs/framework/getting-started.md",diagnoses:thrownErrorDiagnoses},
+  {code:"APP_NOT_RESPONDING",title:"Application has stopped responding",cause:"The app response deadline expired.",fix:"Inspect long synchronous work and unresolved startup operations; move expensive work off the main thread.",docs:"docs/framework/synware-sdk.md"},
+  {code:"SITE_NOT_RESPONDING",title:"Site has stopped responding",cause:"The site response deadline expired.",fix:"Inspect blocked host initialization and main-thread work before retrying.",docs:"docs/framework/getting-started.md"},
+  {code:"CONNECTION_ERROR",title:"Connection Error: could not connect to the server",cause:"The browser is offline or a server request failed.",fix:"Check connectivity, request URL, server availability and response details; retry only after resolving the connection failure.",docs:"docs/framework/getting-started.md"},
+  {code:"APP_CONTENT_FAILED",title:"An unexpected error has prevented this application from working properly",cause:"An app's rendering boundary caught an exception.",fix:"The Message line says what failed. In the React component stack, the first component from your application's Contents folder is where the failing code was rendered; fix it there.",docs:"docs/framework/synware-sdk.md",diagnoses:thrownErrorDiagnoses},
+  {code:"LIFECYCLE_HOOK_FAILED",title:"An application lifecycle method failed",cause:"An NSEApplication lifecycle method such as applicationDidFinishLaunching threw or rejected. A failure after the launch commits does not stop the window, so a later error can be the one that stops the application; the technical details of that report list the earlier lifecycle failures.",fix:"Fix the failing method. Do asynchronous setup that the windows read in applicationWillFinishLaunching, which the main window waits for.",docs:"docs/framework/applications.md",diagnoses:thrownErrorDiagnoses},
+  {code:"UNKNOWN_RUNTIME_ERROR",title:"SynCloudOS caught an unexpected rendering error before it could blank the screen",cause:"An exception reached the root runtime boundary.",fix:"Inspect the original stack and fix the failing host or framework operation.",docs:"docs/framework/getting-started.md",diagnoses:thrownErrorDiagnoses},
+  {code:"GLOBAL_SCRIPT_ERROR",title:"A browser-level script error escaped the runtime watchdogs",cause:"An uncaught browser script error reached the global watchdog.",fix:"Inspect the script URL, line and original stack; handle the failure at its source.",docs:"docs/framework/synware-sdk.md",diagnoses:thrownErrorDiagnoses},
+  {code:"UNHANDLED_PROMISE_REJECTION",title:"An asynchronous runtime operation failed without handling its rejection",cause:"A promise rejected without an attached rejection handler.",fix:"Await the operation in a try/catch or attach a rejection handler and surface the original cause.",docs:"docs/framework/synware-sdk.md",diagnoses:thrownErrorDiagnoses},
+  {code:"RUNTIME_EVENT_LISTENER_FAILED",title:"An EventBus subscriber failed while SynCloudOS was dispatching a runtime event",cause:"A runtime event listener threw or rejected.",fix:"Inspect the listener's original stack and handle failures inside the subscriber; dispose subscriptions with their owner.",docs:"docs/framework/synware-sdk.md"},
+  {code:"ASSET_LOAD_FAILED",title:"A page resource failed to load",cause:"A visual resource URL could not be loaded.",fix:"Check the resource path, emitted assets, deployment base URL and network response.",docs:"docs/framework/getting-started.md"},
+  {code:"FEATURE_NOT_IMPLEMENTED",title:"The requested feature has not been implemented yet",cause:"A system action has no registered implementation.",fix:"Register the feature implementation or avoid presenting that action until it is available.",docs:"docs/framework/synware-sdk.md"},
+  {code:"UNRECOVERABLE_LOGIN_SESSION_MISMATCH",title:"Login session mismatch",cause:"The active authentication session disagrees with the runtime's session ownership.",fix:"Inspect authentication configuration and session changes; end the invalid session and sign in again rather than reusing its resources.",docs:"docs/framework/authentication.md"},
+  {code:"NSE_CONTROLLER_DISPOSED",title:"Controller is disposed: a disposed NSE controller was used",cause:"A component disposed a controller in effect cleanup during React StrictMode replay, or a shorter-lived owner ended before its consumer.",fix:"For component ownership use useNSEArrayController(options, deps?) or useNSETreeController(options, deps?). For session ownership pass ownerSignal: useSCOS().signal to the controller constructor; do not dispose session-owned controllers in component cleanup. Never dispose module singletons.",docs:"docs/framework/controllers.md#controller-lifetimes",appliesTo:"NSE controllers"},
+  {code:"NSE_CONTROLLER_UNOWNED",title:"Controller has no owner: a controller was created outside an owner in a class-based application",cause:"While a class-based application runs, a controller (or view controller) was constructed in a method, after an await, or in a callback, where no application, window controller or view controller is constructing it, and it was given neither owner nor ownerSignal.",fix:"Pass owner: this (an NSEApplication, NSEWindowController or NSEViewController) or ownerSignal to the constructor so the controller is disposed with its owner, create it in a field initialiser or constructor, or pass owner: nseUnowned for a controller you dispose yourself.",docs:"docs/framework/applications.md#ownership",appliesTo:"NSE controllers and view controllers"},
+  {code:"NSE_VIEW_NOT_LOADED",title:"The view is not loaded: view.layer was read before the view mounted",cause:"A view controller's view.layer was read before viewDidLoad ran, or after its view unmounted.",fix:"Read this.view.layer from viewDidLoad, viewWillAppear, viewDidAppear or later while the view is mounted; do not read it in the constructor or a field initialiser.",docs:"docs/framework/applications.md#view-controllers",appliesTo:"NSEViewController"},
+  {code:"SCOS_APP_NOT_RUNNING",title:"Application is not running",cause:"An app-bound SCOS member was used before its session mounted or after it closed.",fix:"Start the app before calling SCOS. In shared React code use useSCOS() inside the app provider.",docs:"docs/framework/synware-sdk.md#scos"},
+  {code:"SCOS_AMBIGUOUS_SESSION",title:"More than one application session is running",cause:"A module-bound SCOS cannot choose between runtimes mounting the same app ID.",fix:"Use useSCOS() inside the nearest app provider to select that session explicitly.",docs:"docs/framework/synware-sdk.md#scos"},
+  {code:"SCOS_UNBOUND",title:"SCOS has no application binding",cause:"SCOS was used outside an app folder or useSCOS() was called outside a mounted app provider.",fix:"Check the file named in the error. Import SCOS inside a <Name>.app folder, or use useSCOS() from a shared component rendered by an app.",docs:"docs/framework/synware-sdk.md#scos"},
+  {code:"SCOS_APP_NOT_FOUND",title:"Application could not be found",cause:"SCOS.open received an app ID absent from the catalogue.",fix:"Check the app ID and project selection, or pass an absolute registered route.",docs:"docs/framework/synware-sdk.md#scos"},
+  {code:"APP_DISABLED",title:"Application is disabled",cause:"A required service or declared application capability is unavailable.",fix:"Inspect the registered application's availability and its required services before offering launch.",docs:"docs/framework/synware-sdk.md"},
+  {code:"POLICYKIT_AUTHORISE_THROWN",title:"Launch authorisation failed",cause:"The host's policy authorisation callback threw instead of returning a decision.",fix:"Inspect and fix the authorisation callback; return an explicit refusal for an expected denial.",docs:"docs/framework/synware-sdk.md"},
+  {code:"RUNTIME_TRANSACTION_FAILED",title:"Runtime transaction failed",cause:"A runtime command or transaction observer threw.",fix:"Inspect the original exception and transaction identity; correct the failing command or observer.",docs:"docs/framework/commands-responders-undo.md"},
+  {code:"NSE_MENU_DISPATCH_FAILED",title:"Menu command failed",cause:"The selected menu command threw or rejected.",fix:"Inspect the command's original failure and handle expected unavailability before dispatch.",docs:"docs/framework/commands-responders-undo.md"},
+  {code:"NO_FOCUSED_WINDOW",title:"No window is key",cause:"The inspector found open windows without a focused window.",fix:"Inspect window activation and the focused-window identity.",docs:"docs/framework/windows.md"},
+  {code:"FOCUSED_WINDOW_NOT_FRONT",title:"Key window is not front-most",cause:"The focused window does not match the front-most window in the stacking order.",fix:"Inspect window activation and z-order updates together.",docs:"docs/framework/windows.md"},
+  {code:"WINDOW_PRESENTATION_GEOMETRY_INVALID",title:"Window geometry is invalid",cause:"A window presentation produced invalid bounds.",fix:"Supply finite window bounds and inspect the window's layout constraints.",docs:"docs/framework/windows.md"},
+  ...([
+    ["AFX_LAYER_DISPOSED", "AFXLayer"],
+    ["AFX_EMITTER_LAYER_DISPOSED", "AFXEmitterLayer"],
+    ["AFX_TILED_LAYER_DISPOSED", "AFXTiledLayer"],
+    ["AFX_TRANSACTION_DISPOSED", "AFXTransaction"],
+    ["AUFX_AUDIO_ENGINE_DISPOSED", "AUFXAudioEngine"],
+    ["AUFX_AUDIO_FILE_DISPOSED", "AUFXAudioFile"],
+    ["AUFX_AUDIO_PLAYER_NODE_DISPOSED", "AUFXAudioPlayerNode"],
+    ["GFX_BITMAP_CONTEXT_DISPOSED", "GFXBitmapContext"],
+    ["HFX_HAPTIC_ENGINE_DISPOSED", "HFXHapticEngine"],
+    ["HFX_HAPTIC_ADVANCED_PATTERN_PLAYER_DISPOSED", "HFXHapticAdvancedPatternPlayer"],
+    ["MEFX_BLOCK_BUFFER_DISPOSED", "MEFXBlockBuffer"],
+    ["MEFX_BUFFER_QUEUE_DISPOSED", "MEFXBufferQueue"],
+    ["TFX_FONT_DISPOSED", "TFXFont"],
+    ["MFX_MOTION_MANAGER_DISPOSED", "MFXMotionManager"],
+    ["NSE_TEXT_STORAGE_DISPOSED", "NSETextStorage"],
+    ["NSE_TEXT_OWNER_DISPOSED", "NSETextOwner"],
+    ["NSE_TEXT_HISTORY_OWNER_DISPOSED", "NSETextHistoryOwner"],
+    ["NSE_TEXT_INPUT_CLIENT_DISPOSED", "NSETextInputClient"],
+    ["NSE_TEXT_EDITING_SESSION_DISPOSED", "NSETextEditingSession"],
+    ["NSE_DOCUMENT_TEXT_OWNER_DISPOSED", "NSEDocumentTextOwner"],
+    ["NSE_TEXT_INSPECTOR_BINDING_DISPOSED", "NSETextInspectorBinding"],
+    ["NSE_TOOLBAR_CONTROLLER_DISPOSED", "NSEToolbarController"],
+    ["NSE_OVERLAY_MANAGER_DISPOSED", "NSEOverlayManager"],
+  ] as const).map(([code, resource]) => ({
+    code,
+    title: `${resource} is no longer active`,
+    cause: `An operation used ${resource} after disposal or after its owner ended.`,
+    fix: "Stop using the resource once it is disposed, and do not keep it past its owner's lifetime; create a new one for the current owner. A dispose() in a useEffect cleanup also runs during React StrictMode's effect replay while the component stays mounted: let a managed hook or an owner signal own the resource instead. The error's disposal reason and development stacks show which owner ended it.",
+    docs: "docs/framework/errors.md#lifecycle-errors",
+    appliesTo: resource,
+  })),
+].map(entry => Object.freeze(entry)));

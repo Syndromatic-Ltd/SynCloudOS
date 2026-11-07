@@ -31,6 +31,7 @@ import { GFXPath } from "../../../src/FX/GraphicsFX/GFXPath";
 import { GFXColour } from "../../../src/FX/GraphicsFX/GFXColour";
 import { GFXGradient } from "../../../src/FX/GraphicsFX/GFXGradient";
 import { BrowserAnimationLayerSurface } from "../../../src/SynCloudOS/PlatformAdapters/BrowserAnimationAdapter";
+import { createAFXLayer } from "../../../src/FX/AnimationFX/host";
 import { AFXAnimation } from "../../../src/FX/AnimationFX/AFXAnimation";
 import { AFXBasicAnimation } from "../../../src/FX/AnimationFX/AFXBasicAnimation";
 import { AFXKeyframeAnimation } from "../../../src/FX/AnimationFX/AFXKeyframeAnimation";
@@ -42,15 +43,12 @@ const scheduler: AFXFrameScheduler = {
   requestFrame: () => () => {},
 };
 function layer<T extends AFXLayer>(
-  Type: new (
-    surface: BrowserAnimationLayerSurface,
-    scheduler: AFXFrameScheduler,
-  ) => T,
+  Type: new () => T,
   width = 40,
   height = 40,
 ) {
   const element = document.createElement("div"),
-    value = new Type(new BrowserAnimationLayerSurface(element), scheduler);
+    value = createAFXLayer(Type, new BrowserAnimationLayerSurface(element), scheduler);
   value.frame = { x: 0, y: 0, width, height };
   return { element, value };
 }
@@ -367,7 +365,7 @@ describe("AnimationFX specialized layer projection", () => {
     value.dispose();
 
     const reducedElement = document.createElement("div");
-    const reduced = new AFXShapeLayer(new BrowserAnimationLayerSurface(reducedElement), {
+    const reduced = createAFXLayer(AFXShapeLayer, new BrowserAnimationLayerSurface(reducedElement), {
       ...scheduler,
       reducedMotion: true,
     });
@@ -469,49 +467,50 @@ describe("AnimationFX specialized layer projection", () => {
   });
   it("composes nested shape/gradient alpha masks, propagates edits and rejects cycles", async () => {
     const owner = layer(AFXLayer),
-      gradient = layer(AFXGradientLayer),
-      shape = layer(AFXShapeLayer);
+      gradient = layer(AFXGradientLayer);
+    const shape = new AFXShapeLayer();
     owner.value.backgroundColour = GFXColour.parse("white");
     gradient.value.gradient = new GFXGradient([
       { offset: 0, colour: GFXColour.rgba(1, 0, 0, 0) },
       { offset: 1, colour: GFXColour.rgba(1, 0, 0, 1) },
     ]);
-    shape.value.path = GFXPath.ellipse({ x: 10, y: 10, width: 20, height: 20 });
-    shape.value.fillColour = GFXColour.parse("white");
-    gradient.value.setMask(shape.value);
+    shape.path = GFXPath.ellipse({ x: 10, y: 10, width: 20, height: 20 });
+    shape.fillColour = GFXColour.parse("white");
+    gradient.value.setMask(shape);
     owner.value.setMask(gradient.value);
     let pixel = await pixels(maskSVG(owner.element));
     expect(pixel(20, 20)[3]).toBeGreaterThan(115);
     expect(pixel(20, 20)[3]).toBeLessThan(145);
     expect(pixel(5, 20)[3]).toBe(0);
-    shape.value.opacity = 0.5;
+    shape.opacity = 0.5;
     pixel = await pixels(maskSVG(owner.element));
     expect(pixel(20, 20)[3]).toBeGreaterThan(55);
     expect(pixel(20, 20)[3]).toBeLessThan(75);
-    expect(() => shape.value.setMask(owner.value)).toThrow(/acyclic|cycle/);
-    expect(() => owner.value.addSublayer(shape.value)).toThrow(/mask/i);
-    shape.value.dispose();
+    expect(() => shape.setMask(owner.value)).toThrow(/acyclic|cycle/);
+    expect(() => owner.value.addSublayer(shape)).toThrow(/mask/i);
+    shape.dispose();
     expect(gradient.element.style.maskImage).toBe("");
     gradient.value.dispose();
     expect(owner.element.style.maskImage).toBe("");
     owner.value.dispose();
   });
   it("clips mask sublayers to owner bounds and rejects unsupported content ports truthfully", async () => {
-    const owner = layer(AFXLayer),
-      mask = layer(AFXLayer),
-      child = layer(AFXShapeLayer);
-    mask.value.frame = { x: 0, y: 0, width: 20, height: 40 };
-    mask.value.clipsToBounds = true;
-    child.value.path = GFXPath.rect({ x: 0, y: 0, width: 40, height: 40 });
-    child.value.fillColour = GFXColour.parse("white");
-    mask.value.addSublayer(child.value);
-    owner.value.setMask(mask.value);
+    const owner = layer(AFXLayer);
+    const mask = new AFXLayer();
+    const child = new AFXShapeLayer();
+    mask.frame = { x: 0, y: 0, width: 20, height: 40 };
+    mask.clipsToBounds = true;
+    child.path = GFXPath.rect({ x: 0, y: 0, width: 40, height: 40 });
+    child.fillColour = GFXColour.parse("white");
+    mask.addSublayer(child);
+    owner.value.setMask(mask);
     const pixel = await pixels(maskSVG(owner.element));
     expect(pixel(10, 20)[3]).toBe(255);
     expect(pixel(30, 20)[3]).toBe(0);
     owner.value.dispose();
-    mask.value.dispose();
-    const unsupported = new AFXShapeLayer(
+    mask.dispose();
+    const unsupported = createAFXLayer(
+      AFXShapeLayer,
       {
         supportedProperties: [],
         apply() {},

@@ -33,7 +33,28 @@ export { encodeOpaqueIdentity } from "./MediaPanels/opaqueIdentity";
 export { normalisePasteboardRepresentations } from "./Pasteboard/Pasteboard";
 export { normaliseRuntimeCursorDescriptor } from "./Pointer/TrackingRegionManager";
 export { saveFilePanelTarget } from "./FilePanels/FilePanelDocumentBridge";
+export { declareSynCloudOSLifecycleSignal, SynCloudOSLifecycleError, SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "./ErrorManager/lifecycleError";
+export type {
+  SynCloudOSLifecycleDisposal,
+  SynCloudOSLifecycleDisposalReason,
+  SynCloudOSLifecycleErrorOptions,
+  SynCloudOSLifecycleResource,
+} from "./ErrorManager/lifecycleError";
 
 export { canonicalDocumentJson } from "./Documents/documentTypes";
 export { createUndoManager } from "./Undo/UndoManager";
 export { createCanonicalWindowRecord, freezeWindowRecord } from "./Windows/windowTypes";
+
+// Type-only authoring projections retain their existing canonical authorities.
+export type { SynWareMigration, AppBounds, AppOwnedWindowSnapshot, SynCloudOSPresentationTraits, SynWareOwnedWindowSnapshot, SynWareWindowCloseGuard } from "./AppSDK/runtimeContracts";
+export type { SynWareRouteGraph } from "./Routing/appRouteTypes";
+export { normalizeBundleIdentifier } from "./Identity/bundleIdentifier.mjs";
+export { markHiddenCommandAcceptance, isHiddenCommandAcceptance } from "./Commands/acceptancePresentation";
+
+export { UPDATE_READINESS_PROTOCOL, updateReadinessDomains, updateReadinessBlockers } from './Updates/updateReadiness';
+export { UpdateReadinessProjection } from './Updates/UpdateReadinessProjection';
+
+// Host-only authoring observation bridge, with no runtime construction.
+export { trackOwnedWork } from "./Operations/OwnedWorkObservations";
+
+export { resolveViewportBookRegions, selectViewportFoldRegion } from "./Windows/viewportFeatures";

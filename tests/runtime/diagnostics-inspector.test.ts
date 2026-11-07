@@ -61,39 +61,39 @@ describe("Diagnostics Inspector runtime report", () => {
     PolicyKit.setAccessMode("webspringVisibleAppProtected");
     AppRegistry.registerMany([
       createTestManifest({
-        id: "inspector-app",
+        bundleIdentifier: "com.example.inspector-app",
         route: "/inspector",
         presentation: "windowedView",
         requiredServices: ["webspring", "routing"]
       }),
       createTestManifest({
-        id: "blocked-app",
+        bundleIdentifier: "com.example.blocked-app",
         route: "/blocked",
         requiredServices: ["windowing"]
       })
     ]);
 
     RouteManager.openRoute("/");
-    await WindowManager.openApplicationWindow("inspector-app");
-    LaunchServices.openApp("blocked-app", { deferUntilAuthorised: true });
+    await WindowManager.openApplicationWindow("com.example.inspector-app");
+    LaunchServices.openApp("com.example.blocked-app", { deferUntilAuthorised: true });
     LaunchServices.openApp("missing-app");
     const report = Inspector.getRuntimeReport();
 
     expect(report.apps.registered).toContain("InspectorApp.app");
     expect(report.apps.registrationHistory.map((entry) => entry.appId)).toEqual(
-      expect.arrayContaining(["inspector-app", "blocked-app"])
+      expect.arrayContaining(["com.example.inspector-app", "com.example.blocked-app"])
     );
     expect(report.policyKit.accessMode).toBe("webspringVisibleAppProtected");
     expect(report.policyKit.auditLog.at(-1)).toMatchObject({ action: "app.launch", allowed: false });
-    expect(report.launch.deferred).toEqual([expect.objectContaining({ appId: "blocked-app" })]);
+    expect(report.launch.deferred).toEqual([expect.objectContaining({ appId: "com.example.blocked-app" })]);
     expect(report.launch.history.map((entry) => ("action" in entry ? entry.action : entry.type))).toContain("deferred");
     expect(report.services.dependencyGraph.webspring).toEqual(expect.arrayContaining(["assetLoading", "responsiveMode"]));
     expect(report.services.impactSummary.affectedApps).toEqual([
-      expect.objectContaining({ appId: "blocked-app", missing: ["windowing"] })
+      expect.objectContaining({ appId: "com.example.blocked-app", missing: ["windowing"] })
     ]);
     expect(report.routing.currentExplanation).toMatchObject({ kind: "webspring", pathname: "/" });
     expect(report.routing.history.at(-1)).toMatchObject({ action: "open", pathname: "/" });
-    expect(report.windows).toMatchObject({ openWindowCount: 1, activeAppId: "inspector-app", ok: true });
+    expect(report.windows).toMatchObject({ openWindowCount: 1, activeAppId: "com.example.inspector-app", ok: true });
     expect(report.statechart.definitions["active.webspring"]).toMatchObject({ name: "active.webspring" });
     expect(report.statechart.inspection?.inspectedState).toBe(report.statechart.currentState);
     expect(report.errorReport.latest).toMatchObject({ code: "APP_NOT_FOUND" });

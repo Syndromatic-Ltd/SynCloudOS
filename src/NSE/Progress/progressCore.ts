@@ -21,7 +21,6 @@
 import { useEffect, useRef } from "react";
 
 import { clamp, type CSSVarStyle } from "../Controls/Core/nseControlsShared";
-import type { NSEProgressState } from "./progressTypes";
 
 export interface NSEProgressRangeInput {
   readonly value?: number;
@@ -43,7 +42,7 @@ export interface NSEProgressMetrics {
 }
 
 /**
- * Normalizes every numeric progress surface through the same range rules.
+ * Normalizes a progress indicator's value through the same range rules.
  * Progress snap is intentionally absolute, matching the historical progress
  * calcNormalizedPosition implementation rather than anchoring to minimum.
  */
@@ -73,25 +72,6 @@ export function normalizeNSEProgress({ value, minimum, maximum, snap, alternateV
     alternateValue: normalizedAlternateValue,
     alternatePercent,
   };
-}
-
-export type NSEProgressStateView =
-  | { readonly kind: "determinate"; readonly metrics: NSEProgressMetrics }
-  | { readonly kind: "indeterminate" }
-  | { readonly kind: "suspended"; readonly value?: number }
-  | { readonly kind: "completed" }
-  | { readonly kind: "error"; readonly message: string }
-  | { readonly kind: "hidden" };
-
-export function normalizeNSEProgressState(state: NSEProgressState): NSEProgressStateView {
-  if (state.kind === "determinate") {
-    return { kind: "determinate", metrics: normalizeNSEProgress(state) };
-  }
-  if (state.kind === "suspended") return { kind: "suspended", value: state.value };
-  if (state.kind === "error") return { kind: "error", message: state.message };
-  if (state.kind === "completed") return { kind: "completed" };
-  if (state.kind === "hidden") return { kind: "hidden" };
-  return { kind: "indeterminate" };
 }
 
 export function progressStyle(metrics: NSEProgressMetrics): CSSVarStyle {

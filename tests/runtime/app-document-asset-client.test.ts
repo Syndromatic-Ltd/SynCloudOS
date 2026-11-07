@@ -38,16 +38,16 @@ function fixture(backed = true) {
   if (backed) {
     // Trusted test injection until the coordinator wires runtime backing config.
     // Exercise the real store/service; the mounted app receives no store.
-    Object.assign(runtime.documentResources, createDocumentResourceService({ runtimeId: runtime.runtimeId, ownerToken: runtime.documentResources.ownerToken, signal: runtime.signal, randomUUID: environment.randomUUID, assetBacking: { store, scopeForDocument: (documentId) => ({ authorizationId: "asset-owner", documentId }) } }));
+    Object.assign(runtime.documentResources, createDocumentResourceService({ runtimeId: runtime.runtimeId, ownerToken: runtime.documentResources.ownerToken, signal: runtime.signal, randomUUID: environment.randomUUID, assetBacking: { store, scopeForDocument: (documentId) => ({ authorizationId: "com.example.asset-owner", documentId }) } }));
   }
   const mount = (id: string) => {
-    registerTestSynWare(runtime, { schemaVersion: 1, id, version: "1.0.0", title: id, routes: [{ path: `/${id}`, primary: true }], documentTypes: [{ id: noteType.id, displayName: noteType.displayName }] });
+    registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: id, version: "1.0.0", displayName: id, routes: [{ path: `/${id.split(".").at(-1)}`, primary: true }], documentTypes: [{ id: noteType.id, displayName: noteType.displayName }] });
     const mounted = mountTestSynWareRuntime(runtime, id);
     cleanups.push(() => mounted.dispose("test"));
     const context = createSynWareContextValue(mounted.runtime);
     return { mounted, documents: context.documents.workspaceDocuments, resources: context.documents.documentResources };
   };
-  return { runtime, store, owner: mount("asset-owner"), foreign: mount("asset-foreign"), mount };
+  return { runtime, store, owner: mount("com.example.asset-owner"), foreign: mount("com.example.asset-foreign"), mount };
 }
 
 const image = () => new Blob([new Uint8Array([1, 2, 3, 4])], { type: "image/png" });
@@ -61,7 +61,7 @@ describe("admitted document asset client", () => {
     const descriptor = await owner.resources.acquire(document.id, image());
     const reference = await owner.resources.persist(document.id, descriptor);
     expect(() => owner.resources.persist(document.id, { ...descriptor })).toThrow(/lease/i);
-    expect(reference).toMatchObject({ kind: "document-asset", scope: { authorizationId: "asset-owner", documentId: document.id }, byteLength: 4, mimeType: "image/png" });
+    expect(reference).toMatchObject({ kind: "document-asset", scope: { authorizationId: "com.example.asset-owner", documentId: document.id }, byteLength: 4, mimeType: "image/png" });
     expect(Object.isFrozen(reference.scope)).toBe(true);
     expect(reference).not.toHaveProperty("leaseId");
     expect(owner.resources.release(document.id, descriptor)).toBe(true);
@@ -76,7 +76,7 @@ describe("admitted document asset client", () => {
     const document = await owner.documents.newDocument({ typeId: noteType.id });
     const descriptor = await owner.resources.acquire(document.id, image());
     const reference = await owner.resources.persist(document.id, descriptor);
-    const sibling = mount("asset-owner");
+    const sibling = mount("com.example.asset-owner");
     sibling.documents.getDocument(document.id);
     expect(() => foreign.resources.acquireAsset(document.id, reference)).toThrow(/application/i);
     expect(() => foreign.resources.persist(document.id, descriptor)).toThrow(/application/i);

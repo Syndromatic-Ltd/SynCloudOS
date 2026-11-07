@@ -20,6 +20,7 @@
 
 /** Canonical SynWare SDK public entry points. No source-tree wildcard aliases. */
 export const synWareSdkEntries = Object.freeze({
+  "index": "src/SynCloudOS/AppSDK/rootPackageEntry.ts",
   "fx/animation": "src/FX/AnimationFX/public.ts",
   "sdk/animation-host": "src/FX/AnimationFX/host.ts",
   "fx/image": "src/FX/ImageFX/public.ts",
@@ -51,7 +52,6 @@ export const synWareSdkEntries = Object.freeze({
   "nse/scroll": "src/NSE/public/scroll.ts",
   "nse/page": "src/NSE/public/page.ts",
   "nse/layout": "src/NSE/public/layout.ts",
-  "nse/cover-flow": "src/NSE/public/cover-flow.ts",
   "nse/system-ui": "src/NSE/public/system-ui.ts",
 });
 export const synWareSdkStyles = Object.freeze({

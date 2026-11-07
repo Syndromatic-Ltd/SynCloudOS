@@ -53,18 +53,18 @@ describe("runtime instance isolation", () => {
     first.events.subscribe("*", (event) => firstEvents.push(event.type));
     second.events.subscribe("*", (event) => secondEvents.push(event.type));
 
-    first.apps.registerBundle(createTestBundle({ id: "first-only", route: "/first-only" }));
+    first.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.first-only", route: "/first-only" }));
     first.services.register({
       id: "first-service",
       version: "1.0.0",
       capabilities: [],
     });
     first.policy.registerPolicy("deny-first-only", (request, decision) =>
-      request.app?.id === "first-only" ? { ...decision, allowed: false, decision: "deny" } : decision,
+      request.app?.bundleIdentifier === "com.example.first-only" ? { ...decision, allowed: false, decision: "deny" } : decision,
     );
 
-    expect(first.apps.getApp("first-only")).toBeDefined();
-    expect(second.apps.getApp("first-only")).toBeNull();
+    expect(first.apps.getApp("com.example.first-only")).toBeDefined();
+    expect(second.apps.getApp("com.example.first-only")).toBeNull();
     expect(second.services.get("first-service")).toBeNull();
     expect(firstEvents.length).toBeGreaterThan(0);
     expect(secondEvents).toEqual([]);
@@ -94,22 +94,22 @@ describe("runtime instance isolation", () => {
   it("owns windows, documents, notifications, locale, Webspring, and state transitions", async () => {
     const first = createTestRuntime({ id: "runtime:controllers:first" });
     const second = createTestRuntime({ id: "runtime:controllers:second" });
-    const bundle = createTestBundle({ id: "controller-app", route: "/controller-app", presentation: "windowedView" });
+    const bundle = createTestBundle({ bundleIdentifier: "com.example.controller-app", route: "/controller-app", presentation: "windowedView" });
     first.apps.registerBundle(bundle);
 
-    const window = await first.windows.openApplicationWindow("controller-app");
+    const window = await first.windows.openApplicationWindow("com.example.controller-app");
     const document = await first.documentStore.saveDraft({ kind: "note", title: "First" }, systemDocumentContext(first)) as { runtimeId: string; title: string };
     const notification = await first.notifications.post({ kind: "system", title: "First", message: "Only here" }) as { runtimeId: string };
     first.locale.setLocale("fr-FR");
-    first.webspring.selectApp("controller-app");
+    first.webspring.selectApp("com.example.controller-app");
     unlockRuntime(first);
-    first.statechart.gotoState("active.application", { appId: "controller-app" });
+    first.statechart.gotoState("active.application", { appId: "com.example.controller-app" });
 
-    expect(window?.record).toMatchObject({ runtimeId: first.runtimeId, applicationId: "controller-app" });
+    expect(window?.record).toMatchObject({ runtimeId: first.runtimeId, applicationId: "com.example.controller-app" });
     expect(document).toMatchObject({ runtimeId: first.runtimeId, title: "First" });
     expect(notification.runtimeId).toBe(first.runtimeId);
     expect(first.locale.getActiveLocale()).toBe("fr-FR");
-    expect(first.webspring.getSnapshot().selectedAppId).toBe("controller-app");
+    expect(first.webspring.getSnapshot().selectedAppId).toBe("com.example.controller-app");
     expect(first.statechart.getCurrentState()).toBe("active.application");
     expect(second.windows.list()).toEqual([]);
     expect(await second.documentStore.listDrafts(undefined, systemDocumentContext(second))).toEqual([]);

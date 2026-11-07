@@ -23,9 +23,10 @@ import { createPortal } from "react-dom";
 import "./components.css";
 import "./nseSystemDialogs.css";
 import { NSEFocusScope } from "../Focus";
-import { NSEPushButton } from "../Controls/Buttons/NSEButtons";
-import { NSEAlert } from "./NSEAlert";
+import { NSEButton, nseButtonToneProps, type NSEButtonTone } from "../Controls/Buttons/NSEButton";
+import { NSEAlertSurface } from "./NSEAlertSurface";
 import { NSEAlertBackdrop } from "./NSEAlertBackdrop";
+import type { NSEOverlayPresentationSource } from "../Overlays/overlayRegion";
 import { useNSEAppearance } from "../Appearance";
 
 /** A system dialog takes the host's light or dark appearance unless told otherwise. */
@@ -37,7 +38,7 @@ function useSystemDialogAppearance(appearance: "dark" | "light" | undefined): "d
 /**
  * The two dialogs every SynWare is expected to have: About, and a confirm.
  *
- * Both sit on the SAME surface the error alerts use (NSEAlert inside
+ * Both sit on the SAME surface the error alerts use (NSEAlertSurface inside
  * NSEAlertBackdrop) rather than on a popup of their own. macOS does the same
  * thing — the About panel and a "are you sure?" sheet are the one alert widget
  * with different content — and it means focus trapping, the Escape key, the
@@ -63,6 +64,7 @@ export interface NSEAboutInfo {
 }
 
 export interface NSEAboutDialogProps {
+  readonly presentation?: NSEOverlayPresentationSource;
   open: boolean;
   info: NSEAboutInfo;
   /** Runtime hosts can provide a stable logical scope identity. */
@@ -76,6 +78,7 @@ export interface NSEAboutDialogProps {
 }
 
 export function NSEAboutDialog({
+  presentation,
   open,
   info,
   focusScopeId,
@@ -96,8 +99,8 @@ export function NSEAboutDialog({
 
   return createPortal(
     <NSEFocusScope options={{ scopeId: focusScopeId ?? `nse-system-about:${titleId}`, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
-    <NSEAlertBackdrop onSafeDismiss={onDismiss}>
-      <NSEAlert
+    <NSEAlertBackdrop presentation={presentation} onSafeDismiss={onDismiss}>
+      <NSEAlertSurface
         appearance={appearance}
         role="dialog"
         className="nse-about-dialog"
@@ -123,11 +126,14 @@ export function NSEAboutDialog({
           </div>
         </div>
         <div className="nse-alert-actions">
-          <NSEPushButton className="nse-system-alert-action-button nse-about-dismiss" tone={appearance === "dark" ? "medium" : "light"} onClick={onDismiss}>
-            {dismissLabel}
-          </NSEPushButton>
+          <NSEButton
+            title={dismissLabel}
+            {...nseButtonToneProps(appearance === "dark" ? "medium" : "light")}
+            className="nse-system-alert-action-button nse-about-dismiss"
+            onClick={onDismiss}
+          />
         </div>
-      </NSEAlert>
+      </NSEAlertSurface>
     </NSEAlertBackdrop>
     </NSEFocusScope>,
     document.body
@@ -135,14 +141,17 @@ export function NSEAboutDialog({
 }
 
 export interface NSEConfirmDialogProps {
+  readonly presentation?: NSEOverlayPresentationSource;
   open: boolean;
   /** Runtime hosts can provide a stable logical scope identity. */
   focusScopeId?: string;
   title: ReactNode;
   message?: ReactNode;
   iconSrc?: string;
-  /** The destructive choice. Rendered as the negative (red) button. */
+  /** The confirmation choice; defaults to the destructive negative tone. */
   confirmLabel: string;
+  /** Non-destructive handoffs can retain their normal action tone. */
+  confirmTone?: NSEButtonTone;
   cancelLabel: string;
   /** Defaults to the host's resolved light or dark appearance. */
   appearance?: "dark" | "light";
@@ -151,12 +160,14 @@ export interface NSEConfirmDialogProps {
 }
 
 export function NSEConfirmDialog({
+  presentation,
   open,
   focusScopeId,
   title,
   message,
   iconSrc,
   confirmLabel,
+  confirmTone = "negative",
   cancelLabel,
   onConfirm,
   onCancel,
@@ -172,8 +183,8 @@ export function NSEConfirmDialog({
     // Escape and a backdrop click both CANCEL, never confirm — the safe choice
     // is the one that happens by accident.
     <NSEFocusScope options={{ scopeId: focusScopeId ?? `nse-system-confirm:${titleId}`, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
-    <NSEAlertBackdrop onSafeDismiss={onCancel}>
-      <NSEAlert
+    <NSEAlertBackdrop presentation={presentation} onSafeDismiss={onCancel}>
+      <NSEAlertSurface
         appearance={appearance}
         labelledBy={titleId}
         describedBy={message ? messageId : undefined}
@@ -187,20 +198,21 @@ export function NSEConfirmDialog({
               <img className="nse-system-alert-icon" src={iconSrc} alt="" aria-hidden="true" />
             </div>
           ) : null}
-          <div className="nse-system-alert-copy">
+          <div className="nse-system-alert-copy" tabIndex={0}>
             <h2 id={titleId}>{title}</h2>
             {message ? <p id={messageId}>{message}</p> : null}
           </div>
         </div>
         <div className="nse-alert-actions">
-          <NSEPushButton className="nse-system-alert-action-button" tone="negative" onClick={onConfirm}>
-            {confirmLabel}
-          </NSEPushButton>
-          <NSEPushButton className="nse-system-alert-action-button nse-confirm-cancel" tone={appearance === "dark" ? "medium" : "light"} onClick={onCancel}>
-            {cancelLabel}
-          </NSEPushButton>
+          <NSEButton title={confirmLabel} {...nseButtonToneProps(confirmTone)} className="nse-system-alert-action-button" onClick={onConfirm} />
+          <NSEButton
+            title={cancelLabel}
+            {...nseButtonToneProps(appearance === "dark" ? "medium" : "light")}
+            className="nse-system-alert-action-button nse-confirm-cancel"
+            onClick={onCancel}
+          />
         </div>
-      </NSEAlert>
+      </NSEAlertSurface>
     </NSEAlertBackdrop>
     </NSEFocusScope>,
     document.body

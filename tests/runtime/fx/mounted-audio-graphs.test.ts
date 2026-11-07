@@ -90,10 +90,10 @@ it("revokes graphs at mount and runtime boundaries without revoking another owne
   const owned = createMountedAudioGraphs(host, mount.signal, () => ["audio.play"]).createEngine(format);
   const other = host.createEngine(format);
   mount.abort();
-  await expect(owned.renderOffline(4)).rejects.toThrow(/disposed/);
+  await expect(owned.renderOffline(4)).rejects.toThrow(expect.objectContaining({ code: "AUFX_AUDIO_ENGINE_DISPOSED" }));
   await expect(other.renderOffline(4)).resolves.toHaveProperty("frameLength", 4);
   runtime.abort();
-  await expect(other.renderOffline(4)).rejects.toThrow(/disposed/);
+  await expect(other.renderOffline(4)).rejects.toThrow(expect.objectContaining({ code: "AUFX_AUDIO_ENGINE_DISPOSED" }));
   expect(() => host.createEngine(format)).toThrow(/disposed/);
   bus.dispose();
 });

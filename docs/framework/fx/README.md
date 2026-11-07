@@ -44,17 +44,17 @@ const moved = offsetRect({ x: 2, y: 3, width: 4, height: 5 }, 10, 20);
 
 | Hook | Client | Permission |
 | --- | --- | --- |
-| `useSynWareAnimations` | Layers bound to page elements, canvas renderers | None |
-| `useSynWareImages` | Decoded image resources | None |
-| `useSynWareTextLayout` | Text measurement and fonts | None |
-| `useSynWareAudio` | Audio engines and sessions | `audio.play`, `audio.record` |
-| `useSynWareHaptics` | Haptic engine | `haptics.play` |
-| `useSynWareMotion` | Motion manager | `motion.read` |
-| `useSynWareMedia` | Media clocks | None |
-| `useSynWareVideo` | Capture, decode, encode | `video.capture.camera` and related |
-| `useSynWareMIDI` | MIDI access | `midi.access` |
-| `useSynWareLocation` | Location manager | `location.read`, `location.request` |
-| `useSynWareLumina` | Search index | `lumina.query` |
+| `useAnimations` | Layers bound to page elements, canvas renderers | None |
+| `useImages` | Decoded image resources | None |
+| `useTextLayout` | Text measurement and fonts | None |
+| `useAudio` | Audio engines and sessions | `audio.play`, `audio.record` |
+| `useHaptics` | Haptic engine | `haptics.play` |
+| `useMotion` | Motion manager | `motion.read` |
+| `useMedia` | Media clocks | None |
+| `useVideo` | Capture, decode, encode | `video.capture.camera` and related |
+| `useMIDI` | MIDI access | `midi.access` |
+| `useLocation` | Location manager | `location.read`, `location.request` |
+| `useLumina` | Search index | `lumina.query` |
 
 Declare the permissions an application needs in its manifest `permissions` list. A denied capability arrives as an ordinary result the application can explain to the user.
 

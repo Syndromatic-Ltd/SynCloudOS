@@ -59,7 +59,7 @@ export interface NSEPopoverProps {
   readonly presentation?: NSEPopupPresentation;
   readonly labelledBy?: string;
   readonly describedBy?: string;
-  /** Accessible name of a window-hosted popover (it has no title bar). */
+  /** The popover's accessible name (it has no title bar). */
   readonly title?: string;
   /** Size of a window-hosted popover's content, as NSPopover.contentSize. */
   readonly contentSize?: { readonly width: number; readonly height: number };
@@ -175,6 +175,7 @@ export function NSEPopover({
       parentScopeId={parentScopeId}
       labelledBy={labelledBy}
       describedBy={describedBy}
+      {...(title && !labelledBy ? { "aria-label": title } : {})}
       overlayKind={resolvedPresentation.mode === "sheet" ? "action-sheet" : "popover"}
       modal={resolvedPresentation.mode === "sheet"}
       presentation={resolvedPresentation}

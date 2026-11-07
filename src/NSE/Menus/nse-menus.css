@@ -69,8 +69,7 @@
   text-align: start;
 }
 
-.nse-menu-item:focus-visible,
-.nse-menu-item:hover {
+.nse-menu-item:is(:focus-visible, :hover, [data-nse-menu-flash="on"]):not([data-nse-menu-flash="off"]) {
   outline: none;
   background: Highlight;
   color: HighlightText;
@@ -125,7 +124,7 @@
   .nse-menu-item:focus-visible { outline: 2px solid Highlight; outline-offset: -2px; }
 }
 
-/* NSEPicker drives its button through NSEPushButton, which wraps children in
+/* NSEPicker drives its button through NSEButton, which wraps children in
    a label span. The picker lays its caption and disclosure arrow out as two
    columns of the button itself, so that wrapper must not form a box. */
 .nse-control-picker-button > .nse-control-button-label {
@@ -138,3 +137,6 @@
 .nse-menu-state-column[data-state="mixed"]::before { content: "\2013"; }
 .nse-menu-submenu-arrow::before { content: "\203A"; }
 .nse-menu-submenu-arrow[data-direction="rtl"]::before { content: "\2039"; }
+
+.nse-control-picker-caption-title { display: block; overflow: hidden; text-overflow: ellipsis; }
+.nse-control-picker-caption-sizer { display: block; block-size: 0; overflow: hidden; visibility: hidden; }

@@ -93,7 +93,11 @@ function inlineCommonJS(specifiers) {
 export function generateManifestValidatorSource(schema) {
   const ajv = new Ajv2020({ ...validatorOptions, code: { source: true, esm: true, lines: true } });
   addFormats(ajv);
-  const code = standaloneCode(ajv, ajv.compile(schema));
+  ajv.addSchema(schema);
+  const code = standaloneCode(ajv, {
+    validate: schema.$id,
+    validateBundleIdentifier: `${schema.$id}#/properties/bundleIdentifier`,
+  });
   // Ajv's ESM output still require()s its runtime helpers
   // (https://github.com/ajv-validator/ajv/issues/2209).
   const helpers = [];
@@ -114,6 +118,7 @@ export function generateManifestValidatorSource(schema) {
     inlined.code,
     ...helpers.map((helper, index) => `const ${helper.name} = ${inlined.names[index]}.default;`),
     body.trim(),
+    "export default validate;",
     "",
   ].join("\n");
 }

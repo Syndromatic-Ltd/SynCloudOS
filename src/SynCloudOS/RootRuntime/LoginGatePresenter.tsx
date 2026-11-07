@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { ComponentType, PropsWithChildren, ReactNode } from "react";
+import { useEffect, useState, type ComponentType, type PropsWithChildren, type ReactNode } from "react";
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
 import type { RuntimeSnapshot } from "../Runtime/runtimeTypes";
 import type { ResolvedSiteBranding } from "../Branding/siteBranding";
@@ -56,13 +56,29 @@ export interface LoginGatePresenterProps {
 }
 
 export function LoginGatePresenter({ runtime, snapshot, LoginWindowComponent, ModalFocusScopeComponent, BackdropComponent, PresenceComponent, title, branding, cancelLabel, authentication, ready = true, onExitComplete, restoring = false, onSignInPendingChange }: LoginGatePresenterProps) {
-  const visible = ready && (restoring || snapshot.statechart.currentState === "locked.loginWindow") && authentication !== "disabled";
+  const [cancelPhase, setCancelPhase] = useState<"idle" | "exiting" | "exited">("idle");
+  const visible = cancelPhase === "idle" && ready && (restoring || snapshot.statechart.currentState === "locked.loginWindow") && authentication !== "disabled";
   const authenticationService = typeof authentication === "object" ? authentication.service : null;
   const authenticationSnapshot = authenticationService?.getSnapshot();
   const policy = typeof authentication === "object" ? authentication.policy : authentication;
+  useEffect(() => {
+    if (cancelPhase !== "exited") return;
+    if (snapshot.statechart.currentState === "locked.loginWindow" && policy === "optional") {
+      // Presence reports completion before React unmounts the retained modal.
+      // Release the runtime only after that commit has restored sibling inertness.
+      runtime.statechart.gotoState("active.webspring", { source: "authentication-cancel", closeWindows: false, syncRoute: false });
+      return;
+    }
+    setCancelPhase("idle");
+    // Shell entrance follows the updated state, not the closing gate's snapshot.
+    onExitComplete?.();
+  }, [cancelPhase, onExitComplete, policy, runtime, snapshot.statechart.currentState]);
 
   return (
-    <PresenceComponent onExitComplete={onExitComplete}>
+    <PresenceComponent onExitComplete={() => {
+      if (cancelPhase === "exiting") setCancelPhase("exited");
+      else onExitComplete?.();
+    }}>
       {visible ? (
         <div
           key="login-gate"
@@ -75,7 +91,7 @@ export function LoginGatePresenter({ runtime, snapshot, LoginWindowComponent, Mo
               branding={branding}
               methods={authenticationService ? authenticationSnapshot?.methods ?? [] : undefined}
               authenticationStatus={authenticationSnapshot?.status}
-              onCancel={policy === "optional" ? () => runtime.statechart.gotoState("active.webspring", { source: "authentication-cancel", closeWindows: false, syncRoute: false }) : undefined}
+              onCancel={policy === "optional" ? () => setCancelPhase("exiting") : undefined}
               onMethodSignIn={async (methodId) => {
                 if (!authenticationService) return;
                 onSignInPendingChange?.(true);

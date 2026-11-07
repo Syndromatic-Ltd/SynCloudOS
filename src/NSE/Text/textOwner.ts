@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SynCloudOSLifecycleRecord } from "../../SynCloudOS/nseRuntimeContracts";
 import { attributedContent, paragraph } from "./attributedContent";
 import { applyNSETextOperations, createNSETextSnapshot } from "./textOperations";
 import type { NSETextChangeMap } from "./textChanges";
@@ -58,19 +59,20 @@ export function createInMemoryNSETextOwner(options: NSEInMemoryTextOwnerOptions 
   let snapshot = createNSETextSnapshot(options.content ?? attributedContent([paragraph([])]), options.flowId ?? "text", 0, nextStandaloneOwnerGeneration++);
   const editable=options.editable!==false;
   const lifetime=new AbortController();
+  const lifecycle=new SynCloudOSLifecycleRecord({kind:"NSETextOwner",...(options.flowId===undefined ? {} : {id:options.flowId})});
   let disposed = false;
   let publishing = false;
   const listeners = new Set<(receipt: NSETextChangeReceipt) => void>();
-  const assertLive = () => { if (disposed) throw new Error("Text owner is disposed."); };
+  const assertLive = (operation:string) => { if (disposed) throw lifecycle.error({code:"NSE_TEXT_OWNER_DISPOSED",operation}); };
   return Object.freeze({
     signal:lifetime.signal,
-    getSnapshot() { assertLive(); return snapshot; },
+    getSnapshot() { assertLive("getSnapshot"); return snapshot; },
     subscribe(listener: (receipt: NSETextChangeReceipt) => void) {
-      assertLive(); listeners.add(listener);
+      assertLive("subscribe"); listeners.add(listener);
       return () => { listeners.delete(listener); };
     },
     commit(request: NSETextCommitRequest) {
-      assertLive();
+      assertLive("commit");
       if (publishing) throw new Error("Reentrant text commit during publishing is forbidden.");
       if (!editable) throw new Error("Text owner is read-only.");
       const safe=canonicalNSETextData(request,"Text commit request",{maxDepth:24,maxNodes:100_000,maxBytes:4*1024*1024});
@@ -90,6 +92,6 @@ export function createInMemoryNSETextOwner(options: NSEInMemoryTextOwnerOptions 
       } finally { publishing = false; }
       return errors.length ? Object.freeze({ ...receipt, observerErrors: Object.freeze(errors) }) : receipt;
     },
-    dispose() { if (disposed) return; disposed = true; lifetime.abort(new Error("Text owner is disposed.")); listeners.clear(); },
+    dispose() { if (disposed) return; lifecycle.markDisposed("explicit"); disposed = true; lifetime.abort(lifecycle.error({code:"NSE_TEXT_OWNER_DISPOSED",operation:"dispose"})); listeners.clear(); },
   });
 }

@@ -19,8 +19,10 @@
  */
 
 import { createContext, useCallback, useContext, useEffectEvent, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactElement, type ReactNode } from "react";
-import { computeNSEOverlayPosition, computeNSEViewportCornerPosition, type NSEOverlayCollisionPadding, type NSEOverlayDirection } from "./computeNSEOverlayPosition";
+import { computeNSEOverlayPosition, computeNSEViewportCornerPosition, type NSEOverlayAnchorPoint, type NSEOverlayCollisionPadding, type NSEOverlayDirection } from "./computeNSEOverlayPosition";
 import { useNSEOverlayProvider } from "./NSEOverlayProvider";
+import { useNSEOverlayRegion } from "./useNSEOverlayRegion";
+import { nseOverlayRegionInsets } from "./overlayRegion";
 import { registerNSEFocusOrigin } from "../Focus/focusOrigin";
 import type {
   NSELogicalPlacement,
@@ -39,6 +41,8 @@ export interface UseNSEOverlayOptions {
   readonly parentScopeId?: string;
   readonly parentResponderId: string;
   readonly anchor: HTMLElement | null;
+  /** Place against this viewport point instead of the anchor's box (a context menu at the pointer). */
+  readonly anchorPoint?: NSEOverlayAnchorPoint | null;
   readonly open: boolean;
   readonly dismissOn?: readonly NSEOverlayDismissReason[] | ReadonlySet<NSEOverlayDismissReason>;
   readonly restoreFocus?: boolean;
@@ -69,6 +73,7 @@ export interface UseNSEOverlayResult {
     readonly "data-placement": NSELogicalPlacement;
     readonly "data-nse-viewport-limited": "true" | "false";
     readonly "data-nse-content-pending"?: "true";
+    readonly inert?: boolean;
   };
   withFocusScope(children: ReactElement): ReactNode;
 }
@@ -87,6 +92,11 @@ interface NSEOverlayParent {
 }
 
 const NSEOverlayParentContext = createContext<NSEOverlayParent | null>(null);
+
+/** Internal focus membership for controllers rendered through an overlay portal. */
+export function useNSEOverlayFocusScope(): string | undefined {
+  return useContext(NSEOverlayParentContext)?.scopeId;
+}
 
 const interactiveScopeKinds: Readonly<Record<NSEOverlayKind, "menu" | "popover" | "sheet" | null>> = {
   menu: "menu",
@@ -126,6 +136,7 @@ export function useNSEOverlay({
   parentScopeId: requestedParentScopeId,
   parentResponderId,
   anchor,
+  anchorPoint = null,
   open,
   dismissOn = ["escape", "outside-pointer", "focus-left", "anchor-removed", "programmatic", "parent-dismissed"],
   restoreFocus = true,
@@ -146,7 +157,12 @@ export function useNSEOverlay({
   const parentId = requestedParentId !== undefined ? requestedParentId : inherited?.overlayId ?? null;
   const parentScopeId = requestedParentScopeId ?? inherited?.scopeId;
   const parentRegistered = useSyncExternalStore(
-    manager.subscribe,
+    useCallback((listener: () => void) => manager.subscribe(() => {
+      // Owner abort can release the overlay graph during React's insertion
+      // cleanup. Preserve synchronous authority cleanup without repainting a
+      // tree whose presentation lease has already ended.
+      if (!runtime.signal.aborted) listener();
+    }), [manager, runtime]),
     () => parentId === null || manager.getRegistration(parentId) !== null,
     () => parentId === null,
   );
@@ -160,6 +176,7 @@ export function useNSEOverlay({
     () => runtime.environment.visualViewport.getSnapshot(),
     () => runtime.environment.visualViewport.getSnapshot(),
   );
+  const { region, hostViewport, getBoundary } = useNSEOverlayRegion({ source: runtime.environment.presentation, open, origin: anchor, document: runtime.environment.browser.getDocument(), direction });
   const [surface, setSurface] = useState<HTMLElement | null>(null);
   const [controlledDismissGeneration, setControlledDismissGeneration] = useState(0);
   const onDismissRef = useRef(onDismiss);
@@ -180,6 +197,7 @@ export function useNSEOverlay({
       left: Math.max(sidePadding(collisionPadding, "left"), workArea.safeArea.left),
     };
   }, [collisionPadding, visualViewport, workArea]);
+  const placementPadding = region ? { top: Math.max(0, sidePadding(collisionPadding, "top")), right: Math.max(0, sidePadding(collisionPadding, "right")), bottom: Math.max(0, sidePadding(collisionPadding, "bottom")), left: Math.max(0, sidePadding(collisionPadding, "left")) } : effectiveCollisionPadding;
   const placementScheduler = useMemo(() => ({
     setTimeout: (callback: () => void, delayMs: number) => runtime.environment.setTimeout(callback, delayMs),
     clearTimeout: (handle: unknown) => runtime.environment.clearTimeout(handle),
@@ -248,7 +266,9 @@ export function useNSEOverlay({
   // committed controlled state, so the scope's own teardown restoration is
   // not reclassified as a user focus-left dismissal of a closing surface.
   const managerDismiss = useEffectEvent((reason: NSEOverlayDismissReason) => {
-    if (!open) return;
+    // The manager also releases its records during owner teardown. That is
+    // authority cleanup, not a request for an obsolete UI to change state.
+    if (!open || runtime.signal.aborted) return;
     managerDismissedRef.current = true;
     if (restoreFocus && restoresOverlayFocus(reason)) {
       restoreFocusAfterClose();
@@ -292,17 +312,30 @@ export function useNSEOverlay({
       onDismiss: onManagerDismiss,
     };
     return register(initialRegistration);
-  }, [controlledDismissGeneration, id, kind, open, parentRegistered, register, runtime, surface]);
+  // Kind is presentation metadata, updated below. Releasing a live parent
+  // lease for a modality change would dismiss its still-open descendants.
+  }, [controlledDismissGeneration, id, open, parentRegistered, register, runtime, surface]);
 
   useLayoutEffect(() => {
     if (registration) manager.update(registration);
   }, [manager, registration]);
 
   useLayoutEffect(() => {
+    if (!open || !surface || !region || !hostViewport) return;
+    const insets = nseOverlayRegionInsets(region, hostViewport);
+    surface.dataset.nseOverlayRegion = "true";
+    for (const side of ["top", "right", "bottom", "left"] as const) surface.style.setProperty(`--nse-overlay-region-${side}`, `${insets[side]}px`);
+    return () => {
+      delete surface.dataset.nseOverlayRegion;
+      for (const side of ["top", "right", "bottom", "left"]) surface.style.removeProperty(`--nse-overlay-region-${side}`);
+    };
+  }, [open, surface, region?.x, region?.y, region?.width, region?.height, hostViewport?.width, hostViewport?.height]);
+
+  useLayoutEffect(() => {
     if (!open || !surface) return;
     if (kind === "action-sheet") {
-      surface.style.setProperty("--nse-overlay-available-inline-size", `${Math.max(0, workArea.width - workArea.safeArea.left - workArea.safeArea.right)}px`);
-      surface.style.setProperty("--nse-overlay-available-block-size", `${Math.max(0, workArea.height - workArea.safeArea.top - workArea.safeArea.bottom - effectiveCollisionPadding.bottom)}px`);
+      surface.style.setProperty("--nse-overlay-available-inline-size", `${Math.max(0, region ? region.width - placementPadding.left - placementPadding.right : workArea.width - workArea.safeArea.left - workArea.safeArea.right)}px`);
+      surface.style.setProperty("--nse-overlay-available-block-size", `${Math.max(0, region ? region.height - placementPadding.top - placementPadding.bottom : workArea.height - workArea.safeArea.top - workArea.safeArea.bottom - effectiveCollisionPadding.bottom)}px`);
       return () => {
         surface.style.removeProperty("--nse-overlay-available-inline-size");
         surface.style.removeProperty("--nse-overlay-available-block-size");
@@ -313,10 +346,11 @@ export function useNSEOverlay({
       return computeNSEViewportCornerPosition({
         anchor,
         floating: surface,
-        insetBlockStart: workArea.safeArea.top - (viewportCornerBleed?.blockStart ?? 0),
-        insetInlineEnd: workArea.safeArea.right - (viewportCornerBleed?.inlineEnd ?? 0),
-        availableInlineSize: workArea.width - workArea.safeArea.left - workArea.safeArea.right,
-        availableBlockSize: workArea.height - workArea.safeArea.top - workArea.safeArea.bottom,
+        boundary: region,
+        insetBlockStart: region ? placementPadding.top : workArea.safeArea.top - (viewportCornerBleed?.blockStart ?? 0),
+        insetInlineEnd: region ? placementPadding.right : workArea.safeArea.right - (viewportCornerBleed?.inlineEnd ?? 0),
+        availableInlineSize: region ? region.width - placementPadding.left - placementPadding.right : workArea.width - workArea.safeArea.left - workArea.safeArea.right,
+        availableBlockSize: region ? region.height - placementPadding.top - placementPadding.bottom : workArea.height - workArea.safeArea.top - workArea.safeArea.bottom,
         direction,
         signal: runtime.signal,
         onAnchorRemoved,
@@ -324,18 +358,20 @@ export function useNSEOverlay({
     }
     return computeNSEOverlayPosition({
       anchor,
+      anchorPoint,
       floating: surface,
       arrow,
       placement,
       direction,
       offset,
-      collisionPadding: effectiveCollisionPadding,
+      collisionPadding: placementPadding,
+      boundary: getBoundary,
       signal: runtime.signal,
       scheduler: placementScheduler,
       onAnchorRemoved,
       onError: () => runtime.reportPlacementFailure({ overlayId: id, overlayKind: kind }),
     });
-  }, [anchor, arrow, contentPending, direction, effectiveCollisionPadding, id, kind, offset, onAnchorRemoved, open, placement, placementScheduler, positioning, runtime, surface, viewportCornerBleed, workArea]);
+  }, [anchor, anchorPoint, arrow, contentPending, direction, effectiveCollisionPadding, id, kind, offset, onAnchorRemoved, open, placement, placementScheduler, positioning, runtime, surface, viewportCornerBleed, workArea, region?.x, region?.y, region?.width, region?.height, getBoundary, collisionPadding]);
 
   const setSurfaceRef = useCallback((element: HTMLElement | null) => {
     setSurface(element);
@@ -381,7 +417,7 @@ export function useNSEOverlay({
       "data-state": "open",
       "data-placement": placement,
       "data-nse-viewport-limited": viewportLimited ? "true" : "false",
-      ...(contentPending ? { "data-nse-content-pending": "true" as const } : {}),
+      ...(contentPending ? { "data-nse-content-pending": "true" as const, inert: true } : {}),
     },
     withFocusScope,
   };

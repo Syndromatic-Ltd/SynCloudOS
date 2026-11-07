@@ -68,6 +68,8 @@ export interface OperationContext<I = unknown, T = unknown> {
   checkpoint<T>(capture: () => T, restore: (checkpoint: T) => void): void;
   markCommitted(value: T): void;
   throwIfCancelled(): void;
+  /** Cancels the operation from inside one of its own steps: the result reports `cancelled` with `reason`, and nothing commits. */
+  cancel(reason?: string): never;
 }
 
 export type OperationHook<I, T = unknown> = (context: OperationContext<I, T>) => void | Promise<void>;

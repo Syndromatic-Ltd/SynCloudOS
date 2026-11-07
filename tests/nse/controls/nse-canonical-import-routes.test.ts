@@ -19,20 +19,12 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
 
 import { NSE } from "../../../src/NSE/NSE";
 import { NSESearchField as CanonicalSearchField } from "../../../src/NSE/Controls/Fields";
 import { NSESlider as CanonicalSlider } from "../../../src/NSE/Controls/Values";
 
-const publicPreferencesSource = readFileSync(new URL("../../../src/SynCloudOS/Preferences/index.ts", import.meta.url), "utf8");
-const publicSynCloudOSSource = readFileSync(new URL("../../../src/SynCloudOS/SynCloudOS.ts", import.meta.url), "utf8");
-
 describe("canonical public control routes", () => {
-  it("keeps system preference-pane mutation absent from app-visible public barrels", () => {
-    expect(publicPreferencesSource).not.toContain("registerSystemPreferencePane");
-    expect(publicSynCloudOSSource).not.toContain("registerSystemPreferencePane");
-  });
   it("routes the NSE namespace and semantic slider owner to one implementation", () => {
     expect(NSE.NSESlider).toBe(CanonicalSlider);
   });

@@ -4,13 +4,29 @@ Authentication in SynCloudOS has two halves. A small browser service tracks the 
 
 ## Choose a policy
 
-The `authentication` option of `mountSynCloudOS` takes one of three shapes:
+The `authentication` option of `mountSynCloudOS` (type `AuthenticationInput`) takes a policy string or a configuration object:
 
 | Value | Behaviour |
 | --- | --- |
-| `"disabled"` | A public site. No authentication requests are made. |
-| `{ policy: "optional", service }` | Public content stays available, and the shell offers a Sign In action. |
+| `"disabled"` (the default) | A public site. No authentication service exists and no authentication requests are made. |
+| `"optional"` | The policy alone, with no service. The runtime applies the optional policy, but nothing can sign in: the shell's account action stays pending and the sign-in window reports "Authentication is not configured." |
+| `"required"` | The policy alone, with no service. The runtime applies the required policy and presents the sign-in window, which reports "Authentication is not configured." and cannot be completed. |
+| `{ policy: "optional", service }` | Public content stays available, and the shell offers a Sign In action backed by `service`. |
 | `{ policy: "required", service, loginComponent? }` | Protected content waits for a confirmed session. The shell keeps the requested route locally and presents the sign-in window until the session is authenticated. |
+
+The shorthand strings `"optional"` and `"required"` construct no authentication service, no `/auth/*` requests and no session. They suit a host that wants the policy applied before its backend exists. To let people actually sign in, pass the object form with a `service`, normally from `createHttpAuthentication` (below). `"disabled"` is the only string that needs no further setup.
+
+### Prerequisites
+
+- `"disabled"` needs no backend.
+- The object form with `createHttpAuthentication` needs a server that answers the same-origin `/auth/methods`, `/auth/session`, `/auth/start` and `/auth/logout` endpoints: use the [server handler](#server-handler) and an OIDC provider.
+- With `"disabled"`, nobody can sign in, so the host opens the primary application publicly; it needs no `runtime.policy.public`. A primary that declares `runtime.policy.requiresLogin` fails to mount, since nobody could ever open it.
+- With `"optional"` (string or object), the primary bundle declares `runtime.policy.public` in its manifest, because it launches before anyone signs in.
+- With `"required"`, the sign-in window is presented before the primary application launches. The `application: { id }` host accepts the same `authentication` values as the Webspring shell; see [Getting started](getting-started.md#mount-one-application).
+
+In a single-application host the **Account** pane of Preferences, Sign In and Log Out live in the application menu. A primary that fills the page has no system top bar, so it must declare `applicationMenu: { trigger: "content" }` and render a button with `useApplicationMenuTrigger()`; with `"optional"` or `"required"` authentication, mounting rejects without it. See [Mount one application in Getting started](getting-started.md#mount-one-application).
+
+Optional sign-in offers **Cancel**, including when no authentication service is configured. Cancelling returns to the presentation that requested sign-in: the Board remains on the Board, while a single-application host resumes its existing application session, route and content. It does not create or authorise a session. Required sign-in has no Cancel action.
 
 The service reports one of `disabled`, `checking`, `anonymous`, `authenticating`, `authenticated`, `expired` and `error`. Disposing the host disposes the service you supplied.
 
@@ -21,7 +37,6 @@ The service reports one of `disabled`, `checking`, `anonymous`, `authenticating`
 ```ts
 import { createHttpAuthentication } from "@syndromatic/syncloudos/auth";
 import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
-import { bundles, shell, shellResources } from "virtual:syncloudos/composition";
 
 const authentication = createHttpAuthentication({
   navigate: (destination) => window.location.assign(destination),
@@ -30,14 +45,28 @@ const authentication = createHttpAuthentication({
 
 const host = await mountSynCloudOS({
   element: document.getElementById("root")!,
-  bundles,
-  shell,
-  shellResources,
   authentication: { policy: "optional", service: authentication },
 });
 ```
 
 ## Sign-in methods
+
+The authentication UI's `checking` or `authenticating` status describes a request, not a new
+identity decision. The last verified identity remains authoritative until the server replaces
+it, logout succeeds, or its existing expiry timer fires. Overlapping reads cannot overwrite a
+newer adapter notification. Identity changes reach the runtime before UI subscribers receive
+the completed authentication status.
+
+If `/auth/start` completes sign-in and returns the exact requested local return path, the client
+verifies `/auth/session` before navigating there. Browser Navigation API routing can retain the
+current document; successful sign-in must therefore update that runtime without relying on a
+reload. A missing or invalid session fails sign-in. External provider redirects retain their
+normal navigation flow, and passive browser rechecks cannot supersede a pending explicit sign-in.
+
+Explicit logout terminates all open applications, including suspended ones, through their
+normal lifecycle before locking the runtime and ending server identity. Termination vetoes or
+save failures stop logout while the login session is still authorised. A later login launches
+fresh application/controller resources instead of reusing subscriptions from revoked windows.
 
 You configure providers on the server. The server describes each one with an `AuthenticationMethod`: an `id`, the complete button `label` and an optional `iconUrl`, which must be root relative or HTTPS. `/auth/methods` publishes this description, and the sign-in window draws a button for each method without special cases for any provider.
 
@@ -145,7 +174,6 @@ Roles belong to your host. A policy profile lists the roles, the capabilities of
 
 ```ts
 import { mountSynCloudOS, type SynCloudOSPolicyProfile } from "@syndromatic/syncloudos/browser";
-import { bundles, shell, shellResources } from "virtual:syncloudos/composition";
 
 const galleryPolicy: SynCloudOSPolicyProfile = {
   id: "atelier",
@@ -161,9 +189,6 @@ const galleryPolicy: SynCloudOSPolicyProfile = {
 
 await mountSynCloudOS({
   element: document.getElementById("root")!,
-  bundles,
-  shell,
-  shellResources,
   policyProfile: galleryPolicy,
 });
 ```

@@ -20,14 +20,20 @@
 
 import { expect, it, vi } from "vitest";
 import { AFXLayer, AFXTransaction, AFXTransform3D } from "../../../src/FX/AnimationFX/public";
+import { createAFXLayer, type AFXLayerSurface } from "../../../src/FX/AnimationFX/host";
 
-function makeLayer(applied: Array<{ opacity: number; x: number }>) {
-  return new AFXLayer({
+function fakeSurface(applied: Array<{ opacity: number; x: number }> | null): AFXLayerSurface {
+  return {
     supportedProperties: ["frame", "opacity", "transform", "sublayerTransform"],
     supportedContentKinds: ["image"],
-    apply(presentation) { applied.push({ opacity: presentation.opacity, x: presentation.position.x }); },
+    apply(presentation) { applied?.push({ opacity: presentation.opacity, x: presentation.position.x }); },
     attach() {}, detach() {}, setMask() {}, dispose() {},
-  }, { now: () => 0, requestFrame: () => () => {}, reducedMotion: false, suspended: false });
+    createSublayerSurface: () => fakeSurface(null),
+  };
+}
+
+function makeLayer(applied: Array<{ opacity: number; x: number }>) {
+  return createAFXLayer(fakeSurface(applied), { now: () => 0, requestFrame: () => () => {}, reducedMotion: false, suspended: false });
 }
 
 it("batches model changes across multiple layers until the outer transaction commits", () => {
@@ -104,7 +110,7 @@ it("runs its completion block only after implicit animations settle", async () =
 
 it("animates sublayerTransform as a shared child-camera transform", () => {
   const parent = makeLayer([]);
-  const child = makeLayer([]);
+  const child = new AFXLayer();
   parent.addSublayer(child);
   parent.actions = { sublayerTransform: { duration: 1, timing: "linear" } };
 

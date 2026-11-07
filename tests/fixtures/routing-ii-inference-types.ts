@@ -19,7 +19,7 @@
  */
 
 import { defineSynWareRoutes, type SynWareNamedRouteTarget, type SynWareRouteGraph, type SynWareRouteQueryForName } from "../../src/SynCloudOS/AppSDK/defineSynWareRoutes";
-import type { SynWareRouter } from "../../src/SynCloudOS/AppSDK/hooks/useSynWareRouter";
+import type { SynWareRouter } from "../../src/SynCloudOS/AppSDK/hooks/useRouter";
 import type { SynCloudOSRouteTransitionHandle } from "../../src/SynCloudOS/Routing/RouteTransition";
 import { routeQuery } from "../../src/SynCloudOS/Routing/routeQuery";
 

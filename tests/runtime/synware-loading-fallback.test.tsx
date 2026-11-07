@@ -50,9 +50,9 @@ it.each(["webspring-app-view-loading", "webspring-window-loading"])("keeps %s wh
 
 it.each(["webspring-app-view-loading", "webspring-window-loading"])("renders the same named loading state for %s", loadingClassName => {
   const runtime = createTestRuntime();
-  runtime.apps.registerBundle(createTestBundle({ id: "loading", displayName: "Chronosphere" }));
-  const app = runtime.apps.getApp("loading")!;
-  const rendered = render(<SynWareEntryRenderer runtime={runtime} app={app} responderId="application:loading" isLoading loadingClassName={loadingClassName} loadingLabel="Loading Chronosphere" loadingPackageLabel="Loading internal.package.app" missingComponentLabel="Missing" />);
+  runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.loading", displayName: "Chronosphere" }));
+  const app = runtime.apps.getApp("com.example.loading")!;
+  const rendered = render(<SynWareEntryRenderer runtime={runtime} app={app} responderId="application:com.example.loading" isLoading loadingClassName={loadingClassName} loadingLabel="Loading Chronosphere" loadingPackageLabel="Loading internal.package.app" missingComponentLabel="Missing" />);
   expect(screen.getByText("Loading Chronosphere…")).toBeTruthy();
   expect(screen.queryByText("Loading internal.package.app")).toBeNull();
   const state = rendered.container.querySelector<HTMLElement>(".webspring-loading-state")!;

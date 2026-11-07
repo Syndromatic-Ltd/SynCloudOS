@@ -29,14 +29,14 @@ const runtimes: ReturnType<typeof createTestRuntime>[] = [];
 afterEach(async () => { for (const runtime of runtimes.splice(0)) await runtime.dispose(); });
 
 function fixture(block: () => boolean, events: string[]) {
-  const routes = defineSynWareRoutes({ id: "host.music", routes: [{ name: "music", path: "", children: [
+  const routes = defineSynWareRoutes({ id: "host.music", routes: [{ name: "com.example.music", path: "", children: [
     { name: "music.artist", path: "artist/:artistId", beforeEnter: () => {
       events.push("enter");
       return block() ? { outcome: "block", reason: "catalogue-locked" } as const : { outcome: "allow" } as const;
     }, beforeLeave: () => { events.push("leave"); return { outcome: "allow" } as const; } },
     { name: "music.album", path: "album/:albumId" },
   ] }] } as const);
-  const definition = createSynWare({ manifest: { schemaVersion: 1, id: "music", version: "1.0.0", title: "Music",
+  const definition = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "com.example.music", version: "1.0.0", displayName: "Music",
     routes: [{ path: "/music", primary: true, match: "prefix" }], permissions: ["app.open.public"] },
     root: () => null, routes });
   const runtime = createTestRuntime({ initialBundles: [createSynWareBundle(definition)] });
@@ -50,16 +50,16 @@ describe("Routing II actual host integration", () => {
     const routes = defineSynWareRoutes({
       id: "query.programmatic",
       routes: [{
-        name: "music",
+        name: "com.example.music",
         path: "",
         query: { page: routeQuery.integer({ defaultValue: 1, min: 1, max: 5 }) },
       }],
     } as const);
     const definition = createSynWare({ manifest: {
       schemaVersion: 1,
-      id: "music",
+      bundleIdentifier: "com.example.music",
       version: "1.0.0",
-      title: "Music",
+      displayName: "Music",
       routes: [{ path: "/music", primary: true, match: "prefix" }],
       permissions: ["app.open.public"],
     }, root: () => null, routes });
@@ -78,13 +78,13 @@ describe("Routing II actual host integration", () => {
   it("preserves canonical not-found identity for an unknown nested app route", async () => {
     const routes = defineSynWareRoutes({
       id: "nested.not-found",
-      routes: [{ name: "music", path: "", children: [{ name: "music.artist", path: "artist/:artistId" }] }],
+      routes: [{ name: "com.example.music", path: "", children: [{ name: "music.artist", path: "artist/:artistId" }] }],
     } as const);
     const definition = createSynWare({ manifest: {
       schemaVersion: 1,
-      id: "music",
+      bundleIdentifier: "com.example.music",
       version: "1.0.0",
-      title: "Music",
+      displayName: "Music",
       routes: [{ path: "/music", primary: true, match: "prefix" }],
       permissions: ["app.open.public"],
     }, root: () => null, routes });
@@ -110,7 +110,7 @@ describe("Routing II actual host integration", () => {
     const routes = defineSynWareRoutes({
       id: "preload.read-only",
       routes: [{
-        name: "music",
+        name: "com.example.music",
         path: "",
         preload: { data: { services: [token] } },
         load: routeLoad,
@@ -118,9 +118,9 @@ describe("Routing II actual host integration", () => {
     } as const);
     const definition = createSynWare({ manifest: {
       schemaVersion: 1,
-      id: "music",
+      bundleIdentifier: "com.example.music",
       version: "1.0.0",
-      title: "Music",
+      displayName: "Music",
       routes: [{ path: "/music", primary: true, match: "prefix" }],
       services: [{ id: "catalogue" }],
       permissions: ["app.open.public"],
@@ -128,7 +128,7 @@ describe("Routing II actual host integration", () => {
     const runtime = createTestRuntime({ initialBundles: [createSynWareBundle(definition)] });
     runtimes.push(runtime);
     runtime.store.mutate(draft => { draft.loginServices.isAuthorised = true; });
-    await runtime.bundles.loadBundle("music");
+    await runtime.bundles.loadBundle("com.example.music");
     const mountedFactory = vi.fn(() => ({ mutate: () => "forbidden" }));
     const read = vi.fn(async () => "prefetched");
     runtime.services.registerService({ id: "catalogue", displayName: "Catalogue", description: "Test catalogue", availability: "available" });
@@ -141,7 +141,7 @@ describe("Routing II actual host integration", () => {
     const launch = vi.spyOn(runtime.launchServices, "openApp");
     const sync = vi.spyOn(runtime.environment.routeSynchronization, "syncRoute");
 
-    await expect(runtime.routes.routeGraph.preload("music", "/music", new AbortController().signal, { data: true }))
+    await expect(runtime.routes.routeGraph.preload("com.example.music", "/music", new AbortController().signal, { data: true }))
       .resolves.toMatchObject({ status: "ready", dataPrefetched: true });
 
     expect(routeLoad).toHaveBeenCalledTimes(1);
@@ -156,22 +156,22 @@ describe("Routing II actual host integration", () => {
     const load = vi.fn(async () => "should-not-run");
     const routes = defineSynWareRoutes({
       id: "preload.no-data-capability",
-      routes: [{ name: "music", path: "", load }],
+      routes: [{ name: "com.example.music", path: "", load }],
     } as const);
     const definition = createSynWare({ manifest: {
       schemaVersion: 1,
-      id: "music",
+      bundleIdentifier: "com.example.music",
       version: "1.0.0",
-      title: "Music",
+      displayName: "Music",
       routes: [{ path: "/music", primary: true, match: "prefix" }],
       permissions: ["app.open.public"],
     }, root: () => null, routes });
     const runtime = createTestRuntime({ initialBundles: [createSynWareBundle(definition)] });
     runtimes.push(runtime);
     runtime.store.mutate(draft => { draft.loginServices.isAuthorised = true; });
-    await runtime.bundles.loadBundle("music");
+    await runtime.bundles.loadBundle("com.example.music");
 
-    await expect(runtime.routes.routeGraph.preload("music", "/music", new AbortController().signal, { data: true }))
+    await expect(runtime.routes.routeGraph.preload("com.example.music", "/music", new AbortController().signal, { data: true }))
       .rejects.toMatchObject({ name: "SecurityError" });
     expect(load).not.toHaveBeenCalled();
   });
@@ -183,13 +183,13 @@ describe("Routing II actual host integration", () => {
     const load = vi.fn(async ({ services }: { services: { require<T>(value: typeof undeclared): T } }) => services.require(undeclared).read());
     const routes = defineSynWareRoutes({
       id: "preload.token-boundary",
-      routes: [{ name: "music", path: "", preload: { data: { services: [allowed] } }, load }],
+      routes: [{ name: "com.example.music", path: "", preload: { data: { services: [allowed] } }, load }],
     } as const);
     const definition = createSynWare({ manifest: {
       schemaVersion: 1,
-      id: "music",
+      bundleIdentifier: "com.example.music",
       version: "1.0.0",
-      title: "Music",
+      displayName: "Music",
       routes: [{ path: "/music", primary: true, match: "prefix" }],
       services: [{ id: "catalogue" }, { id: "private-catalogue" }],
       permissions: ["app.open.public"],
@@ -197,13 +197,13 @@ describe("Routing II actual host integration", () => {
     const runtime = createTestRuntime({ initialBundles: [createSynWareBundle(definition)] });
     runtimes.push(runtime);
     runtime.store.mutate(draft => { draft.loginServices.isAuthorised = true; });
-    await runtime.bundles.loadBundle("music");
+    await runtime.bundles.loadBundle("com.example.music");
     runtime.services.registerService({ id: "catalogue", displayName: "Catalogue", description: "Allowed", availability: "available" });
     runtime.services.registerService({ id: "private-catalogue", displayName: "Private catalogue", description: "Denied", availability: "available" });
     runtime.services.register({ id: "catalogue", contractVersion: "1", createRoutePreparationClient: () => ({ read: async () => "allowed" }) });
     runtime.services.register({ id: "private-catalogue", contractVersion: "1", createRoutePreparationClient: undeclaredFactory });
 
-    await expect(runtime.routes.routeGraph.preload("music", "/music", new AbortController().signal, { data: true }))
+    await expect(runtime.routes.routeGraph.preload("com.example.music", "/music", new AbortController().signal, { data: true }))
       .rejects.toThrow(/not declared.*read-only route prefetch/i);
     expect(load).toHaveBeenCalledTimes(1);
     expect(undeclaredFactory).not.toHaveBeenCalled();
@@ -220,13 +220,13 @@ describe("Routing II actual host integration", () => {
     });
     const routes = defineSynWareRoutes({
       id: "preload.revoke",
-      routes: [{ name: "music", path: "", preload: { data: { services: [token] } }, load }],
+      routes: [{ name: "com.example.music", path: "", preload: { data: { services: [token] } }, load }],
     } as const);
     const definition = createSynWare({ manifest: {
       schemaVersion: 1,
-      id: "music",
+      bundleIdentifier: "com.example.music",
       version: "1.0.0",
-      title: "Music",
+      displayName: "Music",
       routes: [{ path: "/music", primary: true, match: "prefix" }],
       services: [{ id: "catalogue" }],
       permissions: ["app.open.public"],
@@ -234,7 +234,7 @@ describe("Routing II actual host integration", () => {
     const runtime = createTestRuntime({ initialBundles: [createSynWareBundle(definition)] });
     runtimes.push(runtime);
     runtime.store.mutate(draft => { draft.loginServices.isAuthorised = true; });
-    await runtime.bundles.loadBundle("music");
+    await runtime.bundles.loadBundle("com.example.music");
     runtime.services.registerService({ id: "catalogue", displayName: "Catalogue", description: "Test catalogue", availability: "available" });
     runtime.services.register({ id: "catalogue", contractVersion: "1", createRoutePreparationClient: () => ({ read: () => pendingRead }) });
     let generation = 1;
@@ -242,7 +242,7 @@ describe("Routing II actual host integration", () => {
     let notify: (() => void) | undefined;
     vi.spyOn(runtime.identity.session, "subscribe").mockImplementation(listener => { notify = listener; return vi.fn(); });
 
-    const prefetch = runtime.routes.routeGraph.preload("music", "/music", new AbortController().signal, { data: true });
+    const prefetch = runtime.routes.routeGraph.preload("com.example.music", "/music", new AbortController().signal, { data: true });
     await vi.waitFor(() => expect(loaderSignal).toBeDefined());
     generation++;
     notify?.();
@@ -255,11 +255,11 @@ describe("Routing II actual host integration", () => {
 
   it("revokes a never-resolving guard immediately when canonical authority changes", async () => {
     let guardSignal: AbortSignal | undefined;
-    const routes = defineSynWareRoutes({ id: "guard.pending", routes: [{ name: "music", path: "", beforeEnter: ({ signal }) => {
+    const routes = defineSynWareRoutes({ id: "guard.pending", routes: [{ name: "com.example.music", path: "", beforeEnter: ({ signal }) => {
       guardSignal = signal;
       return new Promise<never>(() => undefined);
     } }] });
-    const definition = createSynWare({ manifest: { schemaVersion: 1, id: "music", version: "1.0.0", title: "Music", routes: [{ path: "/music", primary: true, match: "prefix" }], permissions: ["app.open.public"] }, root: () => null, routes });
+    const definition = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "com.example.music", version: "1.0.0", displayName: "Music", routes: [{ path: "/music", primary: true, match: "prefix" }], permissions: ["app.open.public"] }, root: () => null, routes });
     const runtime = createTestRuntime({ initialBundles: [createSynWareBundle(definition)] });
     runtimes.push(runtime);
     runtime.store.mutate(draft => { draft.loginServices.isAuthorised = true; });
@@ -327,12 +327,12 @@ describe("Routing II actual host integration", () => {
   it("uses only declared guard-safe service projections and revokes retained preparation methods", async () => {
     const token = defineSynWareServiceToken<{ read(): string }>({ id: "catalogue", contractVersion: "1" });
     let retained: { read(): string } | undefined;
-    const routes = defineSynWareRoutes({ id: "guard-services", routes: [{ name: "music", path: "", beforeEnter: ({ services }) => {
+    const routes = defineSynWareRoutes({ id: "guard-services", routes: [{ name: "com.example.music", path: "", beforeEnter: ({ services }) => {
       retained = services.require(token);
       expect(retained.read()).toBe("safe-read");
       return { outcome: "allow" };
     } }] });
-    const definition = createSynWare({ manifest: { schemaVersion: 1, id: "music", version: "1.0.0", title: "Music", routes: [{ path: "/music", primary: true, match: "prefix" }], services: [{ id: "catalogue" }], permissions: ["app.open.public"] }, root: () => null, routes });
+    const definition = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "com.example.music", version: "1.0.0", displayName: "Music", routes: [{ path: "/music", primary: true, match: "prefix" }], services: [{ id: "catalogue" }], permissions: ["app.open.public"] }, root: () => null, routes });
     const runtime = createTestRuntime({ initialBundles: [createSynWareBundle(definition)] });
     runtimes.push(runtime);
     runtime.store.mutate(draft => { draft.loginServices.isAuthorised = true; });
@@ -372,14 +372,14 @@ describe("Routing II actual host integration", () => {
   it("does not apply the lifecycle-hook deadline to committed mounted-route settlement during boot", async () => {
     const routes = defineSynWareRoutes({
       id: "boot.mounted-settlement",
-      routes: [{ name: "music", path: "" }],
+      routes: [{ name: "com.example.music", path: "" }],
     } as const);
     const definition = createSynWare({
       manifest: {
         schemaVersion: 1,
-        id: "music",
+        bundleIdentifier: "com.example.music",
         version: "1.0.0",
-        title: "Music",
+        displayName: "Music",
         routes: [{ path: "/music", primary: true, match: "prefix" }],
         permissions: ["app.open.public"],
       },
@@ -399,7 +399,7 @@ describe("Routing II actual host integration", () => {
     const started = new Promise<void>((resolve) => { markStarted = resolve; });
     let releaseSettlement!: () => void;
     const settlement = new Promise<void>((resolve) => { releaseSettlement = resolve; });
-    const releaseMount = runtime.routes.mountedRoutes.attach("music", {
+    const releaseMount = runtime.routes.mountedRoutes.attach("com.example.music", {
       signal: mountController.signal,
       async loadAndRender(request) {
         requestSignal = request.signal;
@@ -421,11 +421,11 @@ describe("Routing II actual host integration", () => {
 
   it("projects canonical blocked and redirected route outcomes without leaking guard or target data", async () => {
     const secret = "SECRET_INSPECTOR_ROUTE";
-    const routes = defineSynWareRoutes({ id: "inspector.transitions", routes: [{ name: "music", path: "", children: [
+    const routes = defineSynWareRoutes({ id: "inspector.transitions", routes: [{ name: "com.example.music", path: "", children: [
       { name: "music.blocked", path: "blocked", beforeEnter: () => ({ outcome: "block", reason: secret }) },
       { name: "music.redirect", path: "redirect", beforeEnter: () => ({ outcome: "redirect", target: { name: "music.blocked" } }) },
     ] }] } as const);
-    const definition = createSynWare({ manifest: { schemaVersion: 1, id: "music", version: "1.0.0", title: "Music",
+    const definition = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "com.example.music", version: "1.0.0", displayName: "Music",
       routes: [{ path: "/music", primary: true, match: "prefix" }], permissions: ["app.open.public"] },
       root: () => null, routes });
     const runtime = createTestRuntime({ initialBundles: [createSynWareBundle(definition)] });
@@ -448,9 +448,9 @@ describe("Routing II actual host integration", () => {
     const transitions = runtime.routes.inspectTransitions();
     expect(transitions).toEqual(expect.arrayContaining([
       expect.objectContaining({ operationId: blockedHandle.operationId, correlationId: blockedHandle.correlationId,
-        appId: "music", outcome: "blocked", committed: false }),
+        appId: "com.example.music", outcome: "blocked", committed: false }),
       expect.objectContaining({ operationId: predecessor.operationId, correlationId: predecessor.correlationId,
-        appId: "music", outcome: "redirected", successorId, committed: false }),
+        appId: "com.example.music", outcome: "redirected", successorId, committed: false }),
     ]));
     expect(runtime.routes.inspectTransitions(1)).toHaveLength(1);
     expect(changed).toHaveBeenCalled();

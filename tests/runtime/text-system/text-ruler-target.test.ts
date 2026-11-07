@@ -23,7 +23,7 @@ import { createInMemoryNSETextOwner,plainNSETextContent } from "../../../src/NSE
 import { TextEditingSession } from "../../../src/NSE/TextEditing/TextEditingSession";
 const api=await import("../../../src/NSE/TextEditing/textTypographyAdapter").catch(()=>null);
 it("edits paragraph markers using RTL direction, zoom and explicit point conversion",()=>{
-  expect(api?.NSETextTypographyAdapter).toBeTypeOf("function");const owner=createInMemoryNSETextOwner({content:plainNSETextContent("paragraph\nnext")}),session=new TextEditingSession({id:"ruler",owner});const adapter=new api!.NSETextTypographyAdapter({session});
+  expect(api?.NSETextTypographyAdapter).toBeTypeOf("function");const owner=createInMemoryNSETextOwner({content:plainNSETextContent("paragraph\nnext")}),session=new TextEditingSession({id:"ruler",textOwner:owner});const adapter=new api!.NSETextTypographyAdapter({session});
   adapter.ruler("headIndent",20,{zoom:2,direction:"rtl"});expect(owner.getSnapshot().attributedContent.blocks[0].attributes?.headIndent).toBe(-10);
   adapter.ruler("firstLineHeadIndent",9,{zoom:1,direction:"ltr",units:"pt"});expect(owner.getSnapshot().attributedContent.blocks[0].attributes?.firstLineHeadIndent).toBe(12);
   expect(owner.getSnapshot().attributedContent.blocks[1].attributes).toBeUndefined();

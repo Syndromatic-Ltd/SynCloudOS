@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useSynWareAudio, type AUFXAudioClient } from "../../src/SynCloudOS/AppSDK/sdkPackageEntry";
+import { useAudio, type AUFXAudioClient } from "../../src/SynCloudOS/AppSDK/sdkPackageEntry";
 import { AUFXAudioChunkStream, type AUFXAudioStreamExport } from "../../src/FX/AudioFX/public";
 
 declare const source: AUFXAudioChunkStream;
@@ -27,7 +27,7 @@ declare const audio: AUFXAudioClient;
 
 const request = { source, sink, format: "opus-webm" as const, bitrate: 64_000 };
 const mountedReceipt: Promise<AUFXAudioStreamExport> = audio.exportStream(request);
-const componentReceipt: Promise<AUFXAudioStreamExport> = useSynWareAudio().exportStream(request);
+const componentReceipt: Promise<AUFXAudioStreamExport> = useAudio().exportStream(request);
 void mountedReceipt;
 void componentReceipt;
 

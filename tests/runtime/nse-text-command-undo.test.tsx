@@ -40,7 +40,7 @@ describe("current text owner command history", () => {
     const f = await fixture();
     render(<NSETextView session={f.session} label="Note" />);
     f.runtime.focus.requestFocus(f.responderId);
-    expect(f.runtime.responders.resolveChain().map(item => item.id)).toContain("application:current-text-tests");
+    expect(f.runtime.responders.resolveChain().map(item => item.id)).toContain("application:com.example.current-text-tests");
     await f.runtime.commands.dispatch("text.selectAll");
     await expect(f.runtime.commands.dispatch("text.insert", "One two")).resolves.toMatchObject({ status: "executed", responderId: f.responderId });
     expect(f.history.canUndo).toBe(true);
@@ -52,7 +52,7 @@ describe("current text owner command history", () => {
 
   it("shares the same document history with a second session and native model edits", async () => {
     const f = await fixture();
-    const second = new TextEditingSession({ id: "second-view", documentId: f.document.id, owner: f.owner, history: f.history });
+    const second = new TextEditingSession({ id: "second-view", documentId: f.document.id, textOwner: f.owner, history: f.history });
     cleanups.push(() => second.dispose());
     f.session.select(3); f.session.insertText(" two");
     expect(second.getSnapshot().model.text).toBe("One two");
@@ -98,7 +98,7 @@ describe("current text owner command history", () => {
   it("keeps standalone owner history independent of native document history", async () => {
     const f = await fixture("Document");
     const owner = createUndoableNSETextOwner({ content: attributedContent([paragraph([textRun("Standalone")])]) });
-    const session = new TextEditingSession({ id: "standalone", owner, history: owner.history });
+    const session = new TextEditingSession({ id: "standalone", textOwner: owner, history: owner.history });
     const commands = new NSETextCommands({ session, historyPresentation: () => owner.history.getSnapshot() });
     cleanups.push(() => { commands.dispose(); session.dispose(); owner.dispose(); });
     session.select(0, 10); await commands.execute("text.insert", "Changed");

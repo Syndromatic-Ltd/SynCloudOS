@@ -120,6 +120,10 @@ export function NSEOverlayProvider({
       const registration = manager.getRegistration(topmostId);
       if (!registration || !registration.dismissOn.has(reason)) return false;
       if (reason !== "escape" && isWithinNSEOverlay(nseOverlayEventPath(event), registration)) return false;
+      // Pressing an open menu's or pop-up list's own button (which also focuses it) closes the menu through
+      // that button, as a pop-up button does; dismissing here first would let the button's click open it again.
+      if ((reason === "outside-pointer" || reason === "focus-left") && (registration.kind === "menu" || registration.kind === "listbox")
+        && registration.anchor && nseOverlayEventPath(event).includes(registration.anchor)) return false;
       return manager.dismiss(topmostId, reason);
     };
     const handlePointerDown = (event: PointerEvent) => {

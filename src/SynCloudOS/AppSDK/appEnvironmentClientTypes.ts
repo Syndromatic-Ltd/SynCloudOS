@@ -18,11 +18,13 @@
  */
 
 import type { FilePanelReference, FilePanelReleaseReason, FilePanelResult, FilePanelSaveTarget, OpenPanelRequest, SavePanelRequest } from "../FilePanels";
+import type { SynCloudOSAlertRequest } from "../SystemUI/alertCenter";
 import type { IFXImageResource } from "../../FX/ImageFX/IFXImageResource";
 import type { TFXFontClient, TFXTextGeometryCapabilities } from "../../FX/TextFX/textLayoutTypes";
 import type { AppClientHandle } from "./appClientTypes";
 import type { TFXRunDelegateReadinessChange, TFXRunDelegateRequest } from "../../FX/TextFX/textLayoutTypes";
 import type { TFXRunDelegate } from "../../FX/TextFX/TFXRunDelegate";
+import type { AFXLayer } from "../../FX/AnimationFX/AFXLayer";
 
 /** Persistence is automatically partitioned by the mounted application
  * identity. A session receives only its own preference operations. */
@@ -81,6 +83,20 @@ export interface AppErrorClient {
   }>): void;
 }
 
+/** Alerts are system-modal: one shows at a time and the rest wait in order.
+ * A safe dismissal, the caller's abort signal or the app closing resolves to
+ * the cancel button instead of rejecting, so callers never need a catch. */
+export interface AppAlertClient {
+  present(request: SynCloudOSAlertRequest, signal?: AbortSignal): Promise<string>;
+}
+
+/** Read-only catalogue lookups for opening another registered app by ID
+ * instead of by route. Launching stays with the navigation client. */
+export interface AppLauncherClient {
+  routeFor(appId: string): string | null;
+  titleFor(appId: string): string | null;
+}
+
 export interface AppExternalActionClient {
   openMailto(address: string, subject?: string, body?: string): Promise<void>;
 }
@@ -89,9 +105,35 @@ export interface AppShareRequest {
   readonly title: string;
   readonly text?: string;
   readonly url?: string;
+  /** Immutable file content prepared before the action gesture. No handles or lazy producers. */
+  readonly files?: readonly File[];
 }
 
+/** Read-only facts projected by the existing service; querying never prompts. */
+export interface AppCapabilityStatus {
+  readonly availability: "available" | "unsupported" | "blocked";
+  readonly provider: "native" | "browser-input" | "download" | "none";
+  readonly reason?: "manifest" | "policy" | "insecure-context" | "permissions-policy" | "unsupported-data";
+  readonly activation: "active" | "inactive" | "unknown";
+  readonly requiresUserActivation: boolean;
+  /** Selection/runtime policy is not a persistent browser permission grant. */
+  readonly permission: "unknown";
+}
+
+export type AppShareResult =
+  /** Native promise fulfillment is platform handoff, not a recipient receipt. */
+  | { readonly kind: "shared" }
+  | { readonly kind: "cancelled" }
+  | { readonly kind: "unsupported" }
+  | { readonly kind: "aborted" }
+  | { readonly kind: "denied"; readonly reason: "manifest" | "policy" | "activation" | "browser" }
+  | { readonly kind: "invalid" }
+  | { readonly kind: "failed"; readonly reason: "busy" | "browser" | "runtime" };
+
 export interface AppShareClient {
+  getStatus(request?: Readonly<AppShareRequest>): Readonly<AppCapabilityStatus>;
+  perform(request: Readonly<AppShareRequest>, signal?: AbortSignal): Promise<AppShareResult>;
+  /** Legacy convenience surface. Use perform to distinguish unsupported and cancelled. */
   available(): boolean;
   share(request: Readonly<AppShareRequest>): Promise<"shared" | "cancelled">;
 }
@@ -165,8 +207,10 @@ export interface AppAnimationHandle extends AppClientHandle {
 }
 
 export interface AppAnimationClient {
-  createRenderer(target: object, options?: Pick<import("../../FX/AnimationFX/AFXRenderer").AFXRendererOptions, "maximumQuads" | "onRenderError">, signal?: AbortSignal): import("../../FX/AnimationFX/AFXRenderer").AFXRenderer;
-  bindLayer(target: object, signal?: AbortSignal): import("../../FX/AnimationFX/AFXLayer").AFXLayer;
+  /** CSS layout leaves authored canvas dimensions intact and resizes only the backing bitmap. */
+  createRenderer(target: object, options?: Pick<import("../../FX/AnimationFX/AFXRenderer").AFXRendererOptions, "maximumQuads" | "onRenderError"> & Readonly<{ layout?: "css" }>, signal?: AbortSignal): import("../../FX/AnimationFX/AFXRenderer").AFXRenderer;
+  /** Native view backing layers use CSS layout; explicit bindings own their frame by default. */
+  bindLayer(target: object, signal?: AbortSignal, options?: Readonly<{ layout: "css" }>): AFXLayer;
   bindShapeLayer(target: object, signal?: AbortSignal): import("../../FX/AnimationFX/AFXShapeLayer").AFXShapeLayer;
   bindGradientLayer(target: object, signal?: AbortSignal): import("../../FX/AnimationFX/AFXGradientLayer").AFXGradientLayer;
   bindTextLayer(target: object, signal?: AbortSignal): import("../../FX/AnimationFX/AFXTextLayer").AFXTextLayer;
@@ -195,6 +239,7 @@ export interface AppImageGeometryClient {
  * `NSEOpenPanel`'s service.
  */
 export interface AppFilePanelClient {
+  getStatus(): Readonly<{ open: AppCapabilityStatus; save: AppCapabilityStatus; persistentSave: AppCapabilityStatus }>;
   open(request: OpenPanelRequest, signal?: AbortSignal): Promise<FilePanelResult<FilePanelReference>>;
   save(request: SavePanelRequest, signal?: AbortSignal): Promise<FilePanelResult<FilePanelSaveTarget>>;
   release(reference: FilePanelReference, reason?: FilePanelReleaseReason): void;

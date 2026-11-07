@@ -17,14 +17,22 @@
  * limitations under the License.
  */
 
-import { createFilePanelService } from "../FilePanels";
-import { createBrowserFilePanelAdapter } from "../FilePanels";
-import type { FilePanelReference, FilePanelReleaseReason, OpenPanelRequest, SavePanelRequest } from "../FilePanels";
+import { createMountedPlaybackPresentation } from "./mountedPlaybackPresentation";
+import { createMountedScreenWakeLock } from "./mountedScreenWakeLock";
+import { createStorageDiagnosticsClient } from "../SynCloudOS";
+import type { AppPlaybackMetadata } from "./playbackPresentationTypes";
+
+
+import { createMountedShareClient } from "./mountedShareClient";
+import { createMountedFilePanelClient } from "./mountedFilePanelClient";
+import { isHiddenCommandAcceptance, markHiddenCommandAcceptance } from "../nseRuntimeContracts";
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import { createMountedServiceTerminalOperations } from "./mountedServiceTerminalOperations";
 import { registerMountedDocumentWorkflowProvider } from "./mountedDocumentWorkflowProvider";
 import { prepareMountedDocumentAssetEdit } from "./mountedDocumentAssetPreparation";
 import { DocumentAssetError } from "../Documents";
 import type { ApplicationDocument, DocumentEditOptions, DocumentEditResult } from "../Documents";
+import { declareSynCloudOSLifecycleSignal } from "../ErrorManager/lifecycleError";
 import type { DocumentEditAdmission } from "../HostServices/AppSDKHostServiceTypes";
 import type { DocumentEditingContext, DocumentEditingLifetimeOptions, DocumentEditingParticipant, DocumentEditingReason, DocumentEditingSettlementResult } from "../Documents";
 import { IFXImageResource } from "../../FX/ImageFX/IFXImageResource";
@@ -37,7 +45,7 @@ import { createMountedHapticsClient } from "./mountedHapticsClient";
 import type { AFXAnimationHandle } from "../../FX/AnimationFX/animationTypes";
 import type { TFXFontDescriptor } from "../../FX/TextFX/TFXFontDescriptor";
 import type { TFXFontReadinessChange, TFXRunDelegateReadinessChange, TFXRunDelegateRequest, TFXPackagedFontResourceLoader } from "../../FX/TextFX/textLayoutTypes";
-import { hostFontResourcePrefix } from "./fontAccess";
+import { createFontCatalogueResourceLoader, hostFontResourcePrefix, runtimeFontCatalogue } from "./fontAccess";
 import { TFXRunDelegate } from "../../FX/TextFX/TFXRunDelegate";
 import { createMountedGFXIdentifierIssuer } from "../../FX/GraphicsFX/identifierAuthority";
 import { createMountedMotionClient } from "./mountedMotionClient";
@@ -55,6 +63,7 @@ import type {
   CommandQueryContext,
   CommandValidationOptions,
   CommandPresentation,
+  LocalisedCommandTitle,
   DragEndpoint,
   FocusScopeHandle,
   ApplicationDocumentSnapshot,
@@ -101,7 +110,9 @@ import {
   type SynWareTrustedPrivilege,
 } from "../BundleLoader/trustedBundleProvenance";
 import { createBundleGenerationFence } from "../BundleLoader/bundleGenerationFence";
+import { getHostDiagnosticsProvision, type HostDiagnosticsGrant } from "../Testing/hostDiagnosticsProvision";
 import { createAppPresentationClient } from "./appPresentationClient";
+import { translateSynWareText } from "./useStrings";
 import type { AppCommandClient, AppDocumentCloseOptions, AppWorkspaceDocumentsClient } from "./appClientTypes";
 import {
   isAuthenticSynWareServiceToken,
@@ -149,6 +160,7 @@ import type {
 import type { SynWareLocaleServicesSnapshot } from "../../SynCloudOSReact";
 import type {
   AppTrustedClient,
+  AppTrustedDiagnosticsClient,
   AppTrustedConformanceAccessibilityFinding,
   AppTrustedConformanceAppearanceFact,
 } from "./appTrustedClientTypes";
@@ -402,6 +414,53 @@ function assertMountedCallbackFunction(value: unknown, label: string): (...argum
   return value as (...arguments_: readonly unknown[]) => unknown;
 }
 
+/** Capture the declared title schema without coercing or retaining app values. */
+function snapshotMountedCommandTitle(
+  value: unknown,
+  label: string,
+  isNativeProxy: ((value: object) => boolean) | undefined,
+): LocalisedCommandTitle {
+  const record = (source: unknown, field: string): Record<string, unknown> => {
+    if (typeof source === "string") throw securityError(`${field} must be a localised title record { key, fallback }, not a string. Command declarations and validations take { key: "commands.<id>.title", fallback: "Undo Typing" }; an @action validator may return the string itself.`);
+    if (!source || typeof source !== "object") throw securityError(`${field} must be a plain record.`);
+    if (isNativeProxy?.(source)) throw securityError(`${field} must not be a proxy.`);
+    const prototype = Object.getPrototypeOf(source);
+    if (prototype !== Object.prototype && prototype !== null) throw securityError(`${field} must be a plain record.`);
+    const descriptors = Object.getOwnPropertyDescriptors(source);
+    const output: Record<string, unknown> = Object.create(null);
+    for (const key of Reflect.ownKeys(descriptors)) {
+      if (typeof key !== "string") throw securityError(`${field} requires string property names.`);
+      const descriptor = descriptors[key]!;
+      if (!descriptor.enumerable || !("value" in descriptor) || descriptor.get || descriptor.set) {
+        throw securityError(`${field}.${key} must be an enumerable accessor-free data property.`);
+      }
+      output[key] = descriptor.value;
+    }
+    return output;
+  };
+  const source = record(value, label);
+  if (Object.keys(source).some(key => key !== "key" && key !== "fallback" && key !== "values")) {
+    throw securityError(`${label} contains an unsupported property.`);
+  }
+  if (typeof source.key !== "string" || typeof source.fallback !== "string") {
+    throw securityError(`${label}.key and fallback must be strings.`);
+  }
+  const values: Record<string, string | number> = Object.create(null);
+  if (source.values !== undefined) {
+    for (const [key, replacement] of Object.entries(record(source.values, `${label}.values`))) {
+      if (typeof replacement !== "string" && !(typeof replacement === "number" && Number.isFinite(replacement))) {
+        throw securityError(`${label}.values.${key} must be a string or finite number.`);
+      }
+      values[key] = replacement;
+    }
+  }
+  return Object.freeze({
+    key: source.key,
+    fallback: source.fallback,
+    ...(source.values === undefined ? {} : { values: Object.freeze(values) }),
+  });
+}
+
 /** Mounted command declarations have their own callback context.  The kernel
  * receives a detached wrapper and never calls an app callback with the raw
  * runtime, operation context or undo target. */
@@ -486,13 +545,24 @@ function canonicalCommandDeclaration<P, R>(
       } } : {}),
     } as UndoAction;
   };
+  const localiseTitle = (value: unknown): LocalisedCommandTitle => {
+    const source = snapshotMountedCommandTitle(value, "Mounted command title", isNativeProxy);
+    const appRuntime = getAppRuntime();
+    // The app namespace and interpolation belong to the mounted catalogue.
+    // Omit consumed values so the kernel does not interpolate the result twice.
+    return Object.freeze({
+      key: source.key,
+      fallback: translateSynWareText(appRuntime.app.bundleIdentifier, source.key, source.fallback, source.values, undefined, appRuntime.locale),
+    });
+  };
   const titleDeclaration = declaration.title;
   const title = typeof titleDeclaration === "function"
-    ? (context: CommandQueryContext<P>) => projectCallbackValue(titleDeclaration(queryContext(context)), "Mounted command title callback result")
-    : projected({
+    ? (context: CommandQueryContext<P>) => localiseTitle(projectCallbackValue(titleDeclaration(queryContext(context)), "Mounted command title callback result"))
+    : Object.freeze({
         key: titleDeclaration.key,
-        fallback: titleDeclaration.fallback,
-        ...(titleDeclaration.values ? { values: { ...titleDeclaration.values } } : {}),
+        // This is a manager-owned read-through accessor, never an app accessor.
+        // Keep static titles static for the invalid-payload presentation path.
+        get fallback() { return localiseTitle(titleDeclaration).fallback; },
       });
   const payload = Object.freeze({
     description: declaration.payload.description,
@@ -516,7 +586,13 @@ function canonicalCommandDeclaration<P, R>(
         return projectMountedCallbackSettlement(
           value,
           "Mounted command validation result",
-          projectCallbackValue,
+          (settled, label) => {
+            const detached = projectCallbackValue(settled, label);
+            const validation = detached as SynWareCommandValidation;
+            return (validation?.title !== undefined
+              ? Object.freeze({ ...validation, title: localiseTitle(validation.title) })
+              : detached) as typeof settled;
+          },
           isNativeProxy,
         ) as SynWareCommandValidation | Promise<SynWareCommandValidation>;
       }
@@ -753,18 +829,11 @@ function snapshotMountedCallbackValue<T>(
   return snapshotCommandValue(value, label, new Map(), 0, { count: 0 }, preserveOpaque, callbackProxyProbe, byteBudget) as T;
 }
 
-function snapshotAppCommandDeclaration<P, R>(input: SynWareCommandDeclaration<P, R>): SynWareCommandDeclaration<P, R> {
+function snapshotAppCommandDeclaration<P, R>(input: SynWareCommandDeclaration<P, R>, isNativeProxy: ((value: object) => boolean) | undefined): SynWareCommandDeclaration<P, R> {
   const declaration = snapshotOwnDataObject(input, "Command declaration");
   const title = typeof declaration.title === "function"
     ? declaration.title
-    : (() => {
-        const value = snapshotOwnDataObject(declaration.title, "Command title");
-        return Object.freeze({
-          key: String(value.key ?? ""),
-          fallback: String(value.fallback ?? ""),
-          ...(value.values === undefined ? {} : { values: Object.freeze({ ...snapshotOwnDataObject(value.values, "Command title values") }) }),
-        });
-      })();
+    : snapshotMountedCommandTitle(declaration.title, "Command title", isNativeProxy);
   const payloadValue = snapshotOwnDataObject(declaration.payload, "Command payload");
   const payload = Object.freeze({
     description: String(payloadValue.description ?? ""),
@@ -852,7 +921,7 @@ function scopedSnapshot(runtime: SynCloudOSRuntime, appId: string): SynWareRunti
   const snapshot = runtime.store.getSnapshot();
   const { activeLocale, ...localeServices } = snapshot.localeServices;
   return projected({
-    application: { activeAppId: snapshot.application.activeAppId === appId ? appId : null },
+    application: { activeAppId: normalizeBundleIdentifier(snapshot.application.activeAppId) === normalizeBundleIdentifier(appId) ? appId : null },
     localeServices: { ...localeServices, locale: activeLocale },
     loginServices: {
       isAuthorised: snapshot.loginServices.isAuthorised,
@@ -901,7 +970,7 @@ function ownedCanonicalDocumentResponder(
     return false;
   }
   const document = runtime.documents.getDocument(documentId);
-  return document?.applicationId === appId;
+  return document ? normalizeBundleIdentifier(document.applicationId) === normalizeBundleIdentifier(appId) : false;
 }
 
 function appDocumentContext(runtime: SynCloudOSRuntime, app: SynCloudOSAppInfo, value: SynCloudOSDocumentStoreContext | undefined, signal: AbortSignal): SynCloudOSDocumentStoreContext {
@@ -910,8 +979,8 @@ function appDocumentContext(runtime: SynCloudOSRuntime, app: SynCloudOSAppInfo, 
     subject: trustedSubject,
     ...(value?.origin === undefined ? {} : { origin: value.origin }),
     ...(value?.now === undefined ? {} : { now: value.now }),
-    appId: app.id,
-    source: `app:${app.id}`,
+    appId: app.bundleIdentifier,
+    source: `app:${app.bundleIdentifier}`,
     signal,
   });
 }
@@ -937,9 +1006,10 @@ function deniedCommandPresentation(commandId: string, reason: string): CommandPr
  */
 export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntimeOptions): MountedSynWareRuntime {
   const { runtime, app, responderId, windowControllerId } = options;
-  const canonical = runtime.apps.getApp(app.id);
+  const appKey = normalizeBundleIdentifier(app.bundleIdentifier);
+  const canonical = runtime.apps.getApp(app.bundleIdentifier);
   if (canonical !== app) throw securityError("Mounted app facades require the canonical registered application.");
-  const registrationAuthority = runtime.appManager.getManagerForApp(app.id);
+  const registrationAuthority = runtime.appManager.getManagerForApp(app.bundleIdentifier);
   if (!registrationAuthority) throw securityError("Mounted app facades require a live application registration authority.");
 
   const transferMount = runtime.transfers.mountApp(app, {
@@ -958,14 +1028,17 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
   transferMount.signal.addEventListener("abort", forwardTransferAbort, { once: true });
   if (transferMount.signal.aborted) forwardTransferAbort();
   const mountSignal = AbortSignal.any([controller.signal, transferMount.signal]);
-  const mountedBundle = runtime.bundles.getBundle(app.id);
+  const mountedBundle = runtime.bundles.getBundle(app.bundleIdentifier);
   const bundleGenerationFence = mountedBundle
     ? createBundleGenerationFence(runtime, mountedBundle, mountSignal)
     : null;
   const signal = bundleGenerationFence
     ? AbortSignal.any([runtime.signal, mountSignal, bundleGenerationFence.signal])
     : mergeSignals(runtime.signal, controller.signal, transferMount.signal);
-  const hostFontLoader = options.hostFontResourceLoader;
+  // Resources an application hands this signal as their owner record
+  // "application-closed" when the session ends.
+  declareSynCloudOSLifecycleSignal(signal, "application-closed");
+  const hostFontLoader = options.hostFontResourceLoader ?? createFontCatalogueResourceLoader(runtimeFontCatalogue(runtime));
   const fontResourceLoader: TFXPackagedFontResourceLoader | undefined = hostFontLoader
     ? async (path, resourceSignal) => {
       if (path.startsWith(hostFontResourcePrefix)) return hostFontLoader(path, resourceSignal);
@@ -982,12 +1055,12 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       if (transferReason instanceof Error) throw transferReason;
       throw new DOMException("Mounted application capability was revoked.", "AbortError");
     }
-    if (disposed || signal.aborted || runtime.appManager.getManagerForApp(app.id) !== registrationAuthority) throw abortError(signal.reason);
-    if (runtime.lifecycle.getState(app.id) === "closed") throw securityError("The mounted application has closed.");
+    if (disposed || signal.aborted || runtime.appManager.getManagerForApp(app.bundleIdentifier) !== registrationAuthority) throw abortError(signal.reason);
+    if (runtime.lifecycle.getState(app.bundleIdentifier) === "closed") throw securityError("The mounted application has closed.");
   };
   const requireTrustedPrivilege = (privilege: SynWareTrustedPrivilege, capability: string) => {
     assertLive();
-    requireTrustedBundlePrivilege(runtime, app.id, privilege, capability);
+    requireTrustedBundlePrivilege(runtime, app.bundleIdentifier, privilege, capability);
   };
   type TestControlCategory = keyof NonNullable<typeof runtime.environment.testControls>;
   const runTestControl = <T>(
@@ -1017,7 +1090,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
   // revocation into a watchdog error while preserving immediate capability
   // revocation for all active operations.
   let presentationSource = runtime.store.getSnapshot();
-  let presentationSnapshot = scopedSnapshot(runtime, app.id);
+  let presentationSnapshot = scopedSnapshot(runtime, app.bundleIdentifier);
   let presentationAppearanceSource = runtime.appearance.get();
   let presentationAppearance = projected(presentationAppearanceSource);
   let presentationResolvedMode = runtime.appearance.resolved();
@@ -1034,9 +1107,9 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
   });
   let settingsSnapshot = projectAppSettings(settingsSource);
   const canRefreshPresentation = () => {
-    if (disposed || signal.aborted || runtime.apps.getApp(app.id) !== app) return false;
+    if (disposed || signal.aborted || runtime.apps.getApp(app.bundleIdentifier) !== app) return false;
     try {
-      return runtime.lifecycle.getState(app.id) !== "closed";
+      return runtime.lifecycle.getState(app.bundleIdentifier) !== "closed";
     } catch {
       return false;
     }
@@ -1046,7 +1119,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     const nextSource = runtime.store.getSnapshot();
     if (nextSource !== presentationSource) {
       presentationSource = nextSource;
-      presentationSnapshot = scopedSnapshot(runtime, app.id);
+      presentationSnapshot = scopedSnapshot(runtime, app.bundleIdentifier);
     }
     const nextAppearance = runtime.appearance.get();
     if (nextAppearance !== presentationAppearanceSource) {
@@ -1065,7 +1138,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
   };
   const ownResponder = (candidate: string) => {
     assertLive();
-    if (!ownedResponder(runtime, app.id, candidate)) throw securityError("Application capabilities may only target owned responders.");
+    if (!ownedResponder(runtime, app.bundleIdentifier, candidate)) throw securityError("Application capabilities may only target owned responders.");
   };
   const cleanupOnAbort = (cleanup: () => void): (() => void) => {
     let active = true;
@@ -1096,7 +1169,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       // than manufacturing a stale or global window lookup capability.
       return { source: runtime.presentationTraits, dispose: null };
     }
-    if (mountedWindow.record.applicationId !== app.id) {
+    if (normalizeBundleIdentifier(mountedWindow.record.applicationId) !== normalizeBundleIdentifier(app.bundleIdentifier)) {
       throw securityError("Mounted presentation traits require an application-owned window.");
     }
     const source = createContentBoundPresentationTraitsService({
@@ -1116,13 +1189,13 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
 
   const callerWindowIdentity = (() => {
     if (windowControllerId === undefined) {
-      return Object.freeze({ applicationSessionId: app.id, workspaceId: "workspace-main" });
+      return Object.freeze({ applicationSessionId: app.bundleIdentifier, workspaceId: "workspace-main" });
     }
     let mountedWindow;
     try { mountedWindow = runtime.windows.select(windowControllerId); }
     catch { throw securityError("Mounted window authority is no longer live."); }
     if (
-      mountedWindow.record.applicationId !== app.id ||
+      normalizeBundleIdentifier(mountedWindow.record.applicationId) !== normalizeBundleIdentifier(app.bundleIdentifier) ||
       !mountedWindow.record.applicationSessionId ||
       !mountedWindow.record.workspaceId
     ) {
@@ -1199,7 +1272,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     applicationId: string | null;
     applicationSessionId: string | null;
     workspaceId: string;
-  }>) => record.applicationId === app.id &&
+  }>) => normalizeBundleIdentifier(record.applicationId) === normalizeBundleIdentifier(app.bundleIdentifier) &&
     record.applicationSessionId === callerWindowIdentity.applicationSessionId &&
     record.workspaceId === callerWindowIdentity.workspaceId;
   const ownedWindow = (id: string) => {
@@ -1231,7 +1304,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
   const buildWindowSnapshot = () => {
     const owned = Object.freeze(runtime.windows.list({
       workspaceId: callerWindowIdentity.workspaceId,
-      applicationId: app.id,
+      applicationId: app.bundleIdentifier,
       applicationSessionId: callerWindowIdentity.applicationSessionId,
     }).filter(({ record }) => record.state !== "closed").map(({ record }) => projectWindow(record)));
     let current = null;
@@ -1274,7 +1347,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       const title = canonicalRequestText(fields.title, "title");
       const callerRestorationKey = canonicalRequestText(fields.restorationKey, "restorationKey");
       const document = runtime.documents.getDocument(documentId);
-      if (!document || document.applicationId !== app.id || document.state === "closed" || document.state === "closing") {
+      if (!document || normalizeBundleIdentifier(document.applicationId) !== normalizeBundleIdentifier(app.bundleIdentifier) || document.state === "closed" || document.state === "closing") {
         throw securityError("Secondary document windows require a live caller-owned document.");
       }
       requireOwnedDocumentReference(documentId);
@@ -1282,10 +1355,10 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       if (typeof mobilePolicy !== "string" || !mobilePolicies.has(mobilePolicy)) {
         throw new TypeError("mobilePolicy must be a supported compact window policy.");
       }
-      const restorationKey = `application.${app.id}.document.${callerRestorationKey}`;
+      const restorationKey = `application.${appKey}.document.${callerRestorationKey}`;
       const existing = runtime.windows.list({
         workspaceId: callerWindowIdentity.workspaceId,
-        applicationId: app.id,
+        applicationId: app.bundleIdentifier,
         applicationSessionId: callerWindowIdentity.applicationSessionId,
       }).find(({ record }) => record.restorationKey === restorationKey);
       if (existing) {
@@ -1299,7 +1372,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       const bounds = canonicalBounds(fields.preferredBounds, app.window.defaultBounds);
       const created = runtime.windows.create({
         workspaceId: callerWindowIdentity.workspaceId,
-        applicationId: app.id,
+        applicationId: app.bundleIdentifier,
         applicationSessionId: callerWindowIdentity.applicationSessionId,
         documentId,
         documentAssociationRole: "secondary",
@@ -1310,7 +1383,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         chromeMode: app.window.chrome,
         smoothSurface: app.window.smoothSurface,
         title,
-        content: { rendererId: "application", parameters: { appId: app.id } },
+        content: { rendererId: "application", parameters: { appId: app.bundleIdentifier } },
         bounds,
         minimumSize: app.window.minimumSize,
         maximumSize: null,
@@ -1326,11 +1399,75 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       if (!ownsWindow(opened.record)) throw securityError("The opened window lost caller ownership.");
       return projectWindow(opened.record);
     },
+    async openWindow(request) {
+      assertLive();
+      const fields = requestRecord(request);
+      const title = canonicalRequestText(fields.title, "title");
+      const restorationKey = `application.${appKey}.window.${canonicalRequestText(fields.restorationKey, "restorationKey")}`;
+      const mobilePolicy = fields.mobilePolicy === undefined ? app.window.mobilePolicy : fields.mobilePolicy;
+      if (typeof mobilePolicy !== "string" || !mobilePolicies.has(mobilePolicy)) throw new TypeError("mobilePolicy must be a supported compact window policy.");
+      const existing = runtime.windows.list({
+        workspaceId: callerWindowIdentity.workspaceId,
+        applicationId: app.bundleIdentifier,
+        applicationSessionId: callerWindowIdentity.applicationSessionId,
+      }).find(({ record }) => record.restorationKey === restorationKey && record.state !== "closed");
+      if (existing) {
+        if (existing.record.state === "minimised") runtime.windows.restore(existing.id);
+        else runtime.windows.makeKey(existing.id);
+        return projectWindow(runtime.windows.select(existing.id).record);
+      }
+      const created = runtime.windows.create({
+        workspaceId: callerWindowIdentity.workspaceId,
+        applicationId: app.bundleIdentifier,
+        applicationSessionId: callerWindowIdentity.applicationSessionId,
+        documentId: null,
+        documentAssociationRole: null,
+        representedDocument: null,
+        toolbar: null,
+        role: "standard",
+        style: app.window.style,
+        chromeMode: app.window.chrome,
+        smoothSurface: app.window.smoothSurface,
+        title,
+        content: { rendererId: "application", parameters: { appId: app.bundleIdentifier } },
+        bounds: canonicalBounds(fields.preferredBounds, app.window.defaultBounds),
+        minimumSize: app.window.minimumSize,
+        maximumSize: null,
+        level: "normal",
+        parentWindowControllerId: null,
+        anchor: null,
+        pinned: false,
+        mobilePolicy: mobilePolicy as "fullscreen" | "sheet" | "popover-to-sheet" | "hidden",
+        restorationKey,
+      });
+      const opened = await runTestControl("windows", "window.open", signal, () => runtime.windows.open(created.id));
+      assertLive();
+      if (!ownsWindow(opened.record)) throw securityError("The opened window lost caller ownership.");
+      return projectWindow(opened.record);
+    },
+    registerCloseGuard(id, guard) {
+      const candidate = ownedWindow(id);
+      if (!guard || typeof guard.shouldClose !== "function") throw new TypeError("A close guard requires shouldClose.");
+      return cleanupOnAbort(runtime.windows.registerCloseGuard(candidate.id, {
+        shouldClose: (request) => guard.shouldClose(request.reason),
+        willClose: (request) => guard.willClose?.(request.reason),
+      }));
+    },
     focus(id) {
       const candidate = ownedWindow(id);
       if (candidate.record.state === "minimised") runtime.windows.restore(candidate.id);
       else runtime.windows.makeKey(candidate.id);
       return projectWindow(runtime.windows.select(candidate.id).record);
+    },
+    minimise(id) {
+      runtime.windows.minimise(ownedWindow(id).id);
+    },
+    zoom(id) {
+      runtime.windows.zoom(ownedWindow(id).id);
+    },
+    setTitle(id, title) {
+      const candidate = ownedWindow(id);
+      runtime.windows.updatePresentation(candidate.id, { title: canonicalRequestText(title, "title"), anchor: candidate.record.anchor });
     },
     async close(id) {
       const candidate = ownedWindow(id);
@@ -1338,7 +1475,21 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         reason: "command",
         signal,
       }));
-      assertLive();
+      // Closing this mount's own window retires its transfer authority during
+      // the commit. That must not invalidate the already-committed receipt.
+      // Cancelled/refused closes and closes of other windows still require the
+      // full live mount; runtime, application and bundle replacements remain
+      // terminal even when this window successfully closed.
+      const committedOwnClose = result.outcome === "closed"
+        && result.windowControllerId === candidate.id
+        && candidate.id === windowControllerId
+        && candidate.record.state === "closed"
+        && !runtime.signal.aborted
+        && runtime.apps.getApp(app.bundleIdentifier) === app
+        && runtime.appManager.getManagerForApp(app.bundleIdentifier) === registrationAuthority
+        && runtime.bundles.getBundle(app.bundleIdentifier) === mountedBundle
+        && runtime.lifecycle.getState(app.bundleIdentifier) !== "closed";
+      if (!committedOwnClose) assertLive();
       if (result.outcome === "refused") {
         return Object.freeze({ outcome: "refused" as const, windowId: result.windowControllerId, reason: result.reason });
       }
@@ -1604,7 +1755,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
 
     const ownedWorkspaceDocument = (documentId: string) => {
       const document = runtime.documents.getDocument(documentId);
-      if (!document || document.applicationId !== app.id) throw securityError("The document is not owned by this mounted application.");
+      if (!document || normalizeBundleIdentifier(document.applicationId) !== normalizeBundleIdentifier(app.bundleIdentifier)) throw securityError("The document is not owned by this mounted application.");
       return document;
     };
     // A document's snapshot is immutable and cached until it changes, so its
@@ -1650,14 +1801,14 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       if (existing) {
         retireMountedDocumentCaches(documentId, existing.document);
       }
-      const lease = runtime.documents.acquireDocumentReferenceLease(documentId, app.id, kind);
+      const lease = runtime.documents.acquireDocumentReferenceLease(documentId, app.bundleIdentifier, kind);
       const entry = { lease, owner: kind === "owner", document };
       documentReferenceLeases.set(documentId, entry);
       return entry;
     };
     const compensateDocumentAdmission = async <TModel, TSerialized>(document: ApplicationDocument<TModel, TSerialized>): Promise<void> => {
-      const unclaimed = () => runtime.documents.getDocument(document.id) === document && document.applicationId === app.id &&
-        !runtime.documents.hasActiveDocumentOwnerLease(document.id, app.id) && document.windowControllerIds.length === 0 &&
+      const unclaimed = () => runtime.documents.getDocument(document.id) === document && normalizeBundleIdentifier(document.applicationId) === normalizeBundleIdentifier(app.bundleIdentifier) &&
+        !runtime.documents.hasActiveDocumentOwnerLease(document.id, app.bundleIdentifier) && document.windowControllerIds.length === 0 &&
         !document.hasTerminalReconciliationLease;
       if (!unclaimed()) return;
       // The selected-close transaction owns an exact generation and rolls back
@@ -1817,11 +1968,11 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       });
     };
     type MountedWorkspaceDocuments = SynWareWorkspaceDocumentPort;
-    const documentEditingMountId = `${app.id}:${responderId}:${runtime.environment.randomUUID()}`;
+    const documentEditingMountId = `${app.bundleIdentifier}:${responderId}:${runtime.environment.randomUUID()}`;
     const workspaceDocuments: MountedWorkspaceDocuments = frozen<MountedWorkspaceDocuments>({
       hasType(typeId) {
         assertLive();
-        return runTestControlSync("workspace", "workspace.activate", () => runtime.documents.isTypeAvailableToApplication(typeId, app.id));
+        return runTestControlSync("workspace", "workspace.activate", () => runtime.documents.isTypeAvailableToApplication(typeId, app.bundleIdentifier));
       },
       subscribeDocument(documentId, listener) {
         assertLive();
@@ -1895,34 +2046,45 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       },
       async openDocument<TModel, TSerialized = TModel>(request: Parameters<SynCloudOSRuntime["documents"]["openDocument"]>[0]): Promise<ApplicationDocumentSnapshot<TModel>> {
         assertLive();
-        if (!runtime.documents.isTypeAvailableToApplication(request.typeId, app.id)) throw securityError("The document type is not provisioned for this application.");
-        return admitMountedDocument(
-          (operationSignal) => runtime.documents.openDocument<TModel, TSerialized>({ ...request, applicationId: app.id, signal: operationSignal }),
-          request.signal,
-        );
+        if (!runtime.documents.isTypeAvailableToApplication(request.typeId, app.bundleIdentifier)) throw securityError("The document type is not provisioned for this application.");
+        // Open or create: with an initialModel, a location that holds nothing yet gets a new document
+        // there from that model (written on its first save), so first launch needs no special case.
+        const { initialModel, ...openRequest } = request as typeof request & { readonly initialModel?: TModel };
+        try {
+          return await admitMountedDocument(
+            (operationSignal) => runtime.documents.openDocument<TModel, TSerialized>({ ...openRequest, applicationId: app.bundleIdentifier, signal: operationSignal }),
+            request.signal,
+          );
+        } catch (error) {
+          if (initialModel === undefined || (error as { readonly code?: unknown } | null)?.code !== "document-not-found") throw error;
+          return admitMountedDocument(
+            (operationSignal) => runtime.documents.newDocument<TModel, TSerialized>({ ...openRequest, initialModel, applicationId: app.bundleIdentifier, signal: operationSignal } as never),
+            request.signal,
+          );
+        }
       },
       async newDocument<TModel, TSerialized = TModel>(request: Parameters<SynCloudOSRuntime["documents"]["newDocument"]>[0]): Promise<ApplicationDocumentSnapshot<TModel>> {
         assertLive();
-        if (!runtime.documents.isTypeAvailableToApplication(request.typeId, app.id)) throw securityError("The document type is not provisioned for this application.");
+        if (!runtime.documents.isTypeAvailableToApplication(request.typeId, app.bundleIdentifier)) throw securityError("The document type is not provisioned for this application.");
         return admitMountedDocument(
-          (operationSignal) => runtime.documents.newDocument<TModel, TSerialized>({ ...request, applicationId: app.id, signal: operationSignal } as never),
+          (operationSignal) => runtime.documents.newDocument<TModel, TSerialized>({ ...request, applicationId: app.bundleIdentifier, signal: operationSignal } as never),
           request.signal,
         );
       },
       registerWorkflowProvider(provider): AppClientHandle {
         assertLive();
-        const applicationResponderId = `application:${app.id}`;
+        const applicationResponderId = `application:${app.bundleIdentifier}`;
         ownResponder(applicationResponderId);
-        return registerMountedDocumentWorkflowProvider({ provider, applicationId: app.id, responderId: applicationResponderId, commands, documents: workspaceDocuments, signal, assertLive,
+        return registerMountedDocumentWorkflowProvider({ provider, applicationId: app.bundleIdentifier, responderId: applicationResponderId, commands, documents: workspaceDocuments, signal, assertLive,
           targetUnavailableReason() {
             const active = runtime.documents.activeDocumentId && runtime.documents.getDocument(runtime.documents.activeDocumentId);
-            return active && active.applicationId === app.id && active.hasTerminalReconciliationLease ? "The active document is under terminal reconciliation." : undefined;
+            return active && normalizeBundleIdentifier(active.applicationId) === normalizeBundleIdentifier(app.bundleIdentifier) && active.hasTerminalReconciliationLease ? "The active document is under terminal reconciliation." : undefined;
           },
         });
       },
       async newProjectionDocument<TModel, TSerialized = TModel>(request: Parameters<SynCloudOSRuntime["documents"]["newProjectionDocument"]>[0]): Promise<ApplicationDocumentSnapshot<TModel>> {
         assertLive();
-        if (!runtime.documents.isTypeAvailableToApplication(request.typeId, app.id)) throw securityError("The document type is not provisioned for this application.");
+        if (!runtime.documents.isTypeAvailableToApplication(request.typeId, app.bundleIdentifier)) throw securityError("The document type is not provisioned for this application.");
         // Ownership is structural and exclusive: a caller-supplied
         // applicationId (ownership spoofing), location (persistence
         // smuggling), or documentKind (escalation) is rejected before the
@@ -1933,7 +2095,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         if ("location" in request && request.location !== undefined) throw securityError("Projection documents cannot carry a save location.");
         if ("documentKind" in request && request.documentKind !== undefined) throw securityError("Projection document kind is kernel-minted.");
         return admitMountedDocument(
-          (operationSignal) => runtime.documents.newProjectionDocument<TModel, TSerialized>({ ...request, applicationId: app.id, signal: operationSignal } as never),
+          (operationSignal) => runtime.documents.newProjectionDocument<TModel, TSerialized>({ ...request, applicationId: app.bundleIdentifier, signal: operationSignal } as never),
           request.signal,
         );
       },
@@ -2286,10 +2448,10 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       applicationUndoLeases.clear();
     });
     const ensureApplicationUndoLease = (): MountedDocumentUndoLease => {
-      const existing = applicationUndoLeases.get(app.id);
+      const existing = applicationUndoLeases.get(app.bundleIdentifier);
       if (existing) return existing;
-      const lease = createMountedUndoLease(runtime.undo.get({ kind: "application", id: app.id }) ?? runtime.undo.create({ kind: "application", id: app.id }), assertLive);
-      applicationUndoLeases.set(app.id, lease);
+      const lease = createMountedUndoLease(runtime.undo.get({ kind: "application", id: app.bundleIdentifier }) ?? runtime.undo.create({ kind: "application", id: app.bundleIdentifier }), assertLive);
+      applicationUndoLeases.set(app.bundleIdentifier, lease);
       return lease;
     };
 
@@ -2305,6 +2467,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         commandId: acceptance.commandId,
         responderId: acceptance.responderId,
       }) as CommandDispatchAcceptance;
+      if (isHiddenCommandAcceptance(acceptance)) markHiddenCommandAcceptance(exposed);
       mountedAcceptances.set(exposed, { acceptance, originalPayload, payloadSnapshot });
       return exposed;
     };
@@ -2346,7 +2509,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           continue;
         }
         if (!runtime.responders.get(pending.responderId)) continue;
-        if (!ownedResponder(runtime, app.id, pending.responderId)) {
+        if (!ownedResponder(runtime, app.bundleIdentifier, pending.responderId)) {
           pending.dispose();
           throw securityError("Application capabilities may only target owned responders.");
         }
@@ -2397,14 +2560,22 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     const safeColourPanelCommandIds = new Set([
       "colour-panel.show", "colour-panel.hide", "colour-panel.choose-picker", "colour-panel.copy", "colour-panel.paste", "colour-panel.commit", "colour-panel.cancel",
     ]);
+    // Standard commands an application's own objects may answer (`@action("document.save")`).
+    // They are resolved along the responder chain like any command, so an app can only
+    // answer them for its own responders, ahead of the runtime's default handling.
+    const answerableStandardCommandIds = new Set([
+      "document.save", "document.save-as", "document.revert", "document.close", "document.show-versions",
+      "window.close", "window.minimise", "window.zoom",
+    ]);
     const isSafeAppCommandId = (commandId: string): boolean => safeEditorCommandIds.has(commandId)
+      || answerableStandardCommandIds.has(commandId)
       || commandId === "document.new" || commandId === "document.open"
       || safeColourPanelCommandIds.has(commandId)
       || commandId === "nse.drag.begin"
       || commandId === "nse.drag.drop"
       || commandId === "nse.drag.cancel"
-      || commandId.startsWith(`${app.id}.`)
-      || commandId.startsWith(`${app.id}:`);
+      || normalizeBundleIdentifier(commandId).startsWith(`${appKey}.`)
+      || normalizeBundleIdentifier(commandId).startsWith(`${appKey}:`);
     type OwnedCommandPayload = Readonly<{
       readonly snapshot: object;
       readonly nodes: number;
@@ -2483,11 +2654,11 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         for (const [key, nested] of Object.entries(value)) {
           const child = nested;
           const field = child;
-          if ((key === "appId" || key === "applicationId") && typeof child === "string" && child !== app.id) throw securityError("Application commands may not target another application.");
+          if ((key === "appId" || key === "applicationId") && typeof child === "string" && normalizeBundleIdentifier(child) !== normalizeBundleIdentifier(app.bundleIdentifier)) throw securityError("Application commands may not target another application.");
           if (key === "windowControllerId" && typeof child === "string" && child !== windowControllerId) throw securityError("Application commands may not target another window.");
           if (key === "documentId" && typeof child === "string") {
           const document = runtime.documents.getDocument(child);
-          if (!document || document.applicationId !== app.id) throw securityError("Application commands may not target another document.");
+          if (!document || normalizeBundleIdentifier(document.applicationId) !== normalizeBundleIdentifier(app.bundleIdentifier)) throw securityError("Application commands may not target another document.");
           }
           visit(field);
         }
@@ -2514,7 +2685,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       const owner = runtime.responders.resolveChain(responderId).find((responder) => responder.undoOwner)?.undoOwner;
       if (owner?.kind === "document") {
         const document = runtime.documents.getDocument(owner.id);
-        if (!document || document.applicationId !== app.id) {
+        if (!document || normalizeBundleIdentifier(document.applicationId) !== normalizeBundleIdentifier(app.bundleIdentifier)) {
           throw securityError("A mounted application command cannot acquire another document's undo history.");
         }
         // A document responder is writable only through the mount's owner
@@ -2523,7 +2694,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         requireOwnedDocumentReference(owner.id);
         return ensureMountedDocumentUndoLease(owner.id).registrationLease;
       }
-      if (owner?.kind === "application" && owner.id !== app.id) {
+      if (owner?.kind === "application" && normalizeBundleIdentifier(owner.id) !== normalizeBundleIdentifier(app.bundleIdentifier)) {
         throw securityError("A mounted application command cannot acquire another application's undo history.");
       }
       return ensureApplicationUndoLease().registrationLease;
@@ -2544,13 +2715,36 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         undoRegistrationLease,
       } as T & { responderId: string; scopeToken: object; signal: AbortSignal; isLive: () => boolean; undoRegistrationLease: UndoRegistrationLease };
     };
-    const commands = frozen<SynWareCommandPort & Pick<AppCommandClient, "getPresentationGeneration">>({
+    const commands = frozen<SynWareCommandPort>({
       getPresentationGeneration() {
         assertLive();
         return Object.freeze({
           registryGeneration: runtime.commands.inspect().generation,
-          responderGeneration: runtime.responders.generation,
+          responderGeneration: runtime.responders.generation + runtime.focus.getGeneration(),
         });
+      },
+      subscribePresentation(listener: () => void) {
+        assertLive();
+        const notify = () => { if (!signal.aborted) listener(); };
+        // Validation is itself observed command work, which update readiness
+        // republishes into the store. Revalidating on that publication would
+        // validate forever, so a change confined to readiness is not one.
+        let observedState = runtime.store.getSnapshot();
+        const notifyState = () => {
+          const next = runtime.store.getSnapshot();
+          const previous = observedState;
+          observedState = next;
+          const keys = new Set([...Object.keys(previous), ...Object.keys(next)]);
+          for (const key of keys) {
+            if (key !== "updateReadiness" && previous[key as keyof typeof previous] !== next[key as keyof typeof next]) { notify(); return; }
+          }
+        };
+        const removeState = runtime.store.subscribe(notifyState);
+        const removeResponders = runtime.responders.subscribe(notify);
+        const removeCommands = runtime.commands.subscribe(notify);
+        const removeFocus = runtime.focus.subscribe(notify);
+        const removeDiagnostics = getHostDiagnosticsProvision(runtime)?.subscribe(notify);
+        return cleanupOnAbort(() => { removeState(); removeResponders(); removeCommands(); removeFocus(); removeDiagnostics?.(); });
       },
       createPayload(...fields: readonly unknown[]) {
         assertLive();
@@ -2562,7 +2756,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       },
       register(declaration: object) {
         assertLive();
-        const snapshot = snapshotAppCommandDeclaration(declaration as SynWareCommandDeclaration<unknown, unknown>);
+        const snapshot = snapshotAppCommandDeclaration(declaration as SynWareCommandDeclaration<unknown, unknown>, runtime.environment.isNativeProxy);
         if (!isSafeAppCommandId(snapshot.id)) throw securityError("This command is reserved for system-owned runtime services.");
         if (snapshot.responderId.trim().length === 0) throw securityError("Application commands require a responder owner.");
         const canonical = canonicalCommandDeclaration(
@@ -2591,6 +2785,9 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
             return removed;
           },
         };
+        // App-owned preflight reflection can synchronously revoke this mount.
+        // Never record a new lease after its abort cleanup has already run.
+        assertLive();
         if (runtime.responders.get(snapshot.responderId)) {
           ownResponder(snapshot.responderId);
           attachCommandRegistration(scopedRegistration);
@@ -2691,7 +2888,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     let colourTargetId: string | null = null;
     let colourTargetEverActivated = false;
     let disconnectColourTarget: (() => void) | null = null;
-    const colourPickerNamespace = `${app.id}:${runtime.environment.randomUUID()}`;
+    const colourPickerNamespace = `${app.bundleIdentifier}:${runtime.environment.randomUUID()}`;
     const colourPickerIds = new Map<string, string>();
     const colourPickerReleases = new Set<() => void>();
     let colourPanelSource: ReturnType<SynCloudOSRuntime["colourPanel"]["getSnapshot"]> | null = null;
@@ -2849,7 +3046,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         assertLive();
         const raw = runtime.tracking.register({
           ...input,
-          ownerId: `${app.id}:${input.ownerId}`,
+          ownerId: `${app.bundleIdentifier}:${input.ownerId}`,
           ...(windowControllerId === undefined ? {} : { windowControllerId }),
         });
         let live = true;
@@ -2894,7 +3091,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     const animations: SynWareAnimationPort = frozen<SynWareAnimationPort>({
       acquireOwner(owner) {
         assertLive();
-        if (owner.appId !== app.id || (windowControllerId !== undefined && owner.windowControllerId !== windowControllerId)) {
+        if (normalizeBundleIdentifier(owner.appId) !== normalizeBundleIdentifier(app.bundleIdentifier) || (windowControllerId !== undefined && owner.windowControllerId !== windowControllerId)) {
           throw securityError("Animation ownership must remain inside the mounted application.");
         }
         const rawLease = runtime.animations.acquireOwner(owner as RuntimeAnimationOwner);
@@ -2992,7 +3189,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         const operation = Object.freeze({});
         imageOperations.add(operation);
         const subject = Object.freeze({
-          appId: app.id,
+          appId: app.bundleIdentifier,
           capability: request.subject?.capability ?? "image.decode",
           ...(windowControllerId === undefined ? {} : { windowControllerId }),
           ...(request.subject?.documentId === undefined ? {} : { documentId: request.subject.documentId }),
@@ -3125,9 +3322,9 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     // cached attachments are dropped exactly as capacity eviction does; a
     // later layout re-requests them.
     const unregisterTextAttachmentAccounting = runtime.resources.register({
-      id: `mount:${app.id}:text-attachments`,
+      id: `mount:${app.bundleIdentifier}:text-attachments`,
       kind: "text-attachment",
-      owner: app.id,
+      owner: app.bundleIdentifier,
       *measure() {
         for (const cached of textAttachmentCache.values()) yield { key: cached, bytes: cached.bytes, state: "cache" as const };
         for (const pending of pendingTextAttachments.values())
@@ -3218,7 +3415,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           operationSignal.throwIfAborted();
           raw = runtime.images.load({
             source: Object.freeze({ kind: "document-resource", documentId: descriptor.documentId, descriptor: lease.descriptor }),
-            subject: Object.freeze({ appId: app.id, capability: "image.decode", documentId: descriptor.documentId, ...(windowControllerId === undefined ? {} : { windowControllerId }) }),
+            subject: Object.freeze({ appId: app.bundleIdentifier, capability: "image.decode", documentId: descriptor.documentId, ...(windowControllerId === undefined ? {} : { windowControllerId }) }),
             accessibleLabel: "Text attachment",
           });
           await awaitMounted(raw.ready, operationSignal, assertLive);
@@ -3283,6 +3480,72 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       return new TFXRunDelegate({ width: metrics.inline, ascent: metrics.block, descent: 0, attachment: { image: pixels.image, accessibilityLabel: inspected.accessibilityLabel } });
     };
 
+    // Browser presentation is owned by this mount, with an additional identity
+    // fence. A retained controller cannot revive a prior account's lease.
+    const presentationOwner = new AbortController();
+    const presentationSignal = AbortSignal.any([signal, presentationOwner.signal]);
+    const initialIdentity = runtime.identity.session.getSnapshot();
+    const identityKey = (value: typeof initialIdentity) => value ? `${value.id}\0${value.subjectId}\0${value.state}` : "anonymous";
+    const removePresentationIdentity = runtime.identity.session.subscribe(value => {
+      if (identityKey(value) !== identityKey(initialIdentity)) presentationOwner.abort(new DOMException("Playback/power account changed.", "AbortError"));
+    });
+    cleanupOnAbort(removePresentationIdentity);
+    const presentationVisible = () => runtime.environment.browser.getDocument()?.visibilityState === "visible";
+    const presentationForeground = () => {
+      const presentationDocument = runtime.environment.browser.getDocument();
+      if (presentationSignal.aborted || presentationDocument?.visibilityState !== "visible" || !presentationDocument.hasFocus?.() || runtime.lifecycle.getState(app.bundleIdentifier) !== "active") return false;
+      // Use the same runtime ownership marker as input dispatch. A key window
+      // in another mounted runtime is not foreground evidence for this one.
+      const active = presentationDocument.activeElement;
+      const ownerElement = active && typeof active.closest === "function" ? active.closest<HTMLElement>("[data-syncloudos-runtime-owner]") : null;
+      if (ownerElement?.dataset.syncloudosRuntimeOwner !== runtime.runtimeId) return false;
+      if (windowControllerId !== undefined) return runtime.windows.snapshot().keyWindowControllerId === windowControllerId;
+      return normalizeBundleIdentifier(runtime.store.getSnapshot().application.activeAppId ?? "") === normalizeBundleIdentifier(app.bundleIdentifier);
+    };
+    const subscribePresentationOwner = (listener: () => void) => {
+      const presentationDocument = runtime.environment.browser.getDocument();
+      const presentationWindow = runtime.environment.browser.getWindow();
+      const focusOut = () => queueMicrotask(() => { if (!presentationSignal.aborted) listener(); });
+      const removeWindows = runtime.windows.subscribe(listener);
+      const removeStore = runtime.store.subscribe(listener);
+      const removeFocus = runtime.focus.subscribe(listener);
+      presentationDocument?.addEventListener?.("visibilitychange", listener);
+      presentationDocument?.addEventListener?.("focusin", listener);
+      presentationDocument?.addEventListener?.("focusout", focusOut);
+      presentationWindow?.addEventListener?.("blur", listener);
+      presentationWindow?.addEventListener?.("focus", listener);
+      return () => {
+        removeWindows(); removeStore(); removeFocus();
+        presentationDocument?.removeEventListener?.("visibilitychange", listener);
+        presentationDocument?.removeEventListener?.("focusin", listener);
+        presentationDocument?.removeEventListener?.("focusout", focusOut);
+        presentationWindow?.removeEventListener?.("blur", listener);
+        presentationWindow?.removeEventListener?.("focus", listener);
+      };
+    };
+    // Optional browser integrations bind only on explicit feature use. Other
+    // mounted services do not need a media/power-capable browser window.
+    let screenWakeClient: ReturnType<typeof createMountedScreenWakeLock> | null = null;
+    const screenWakeLock = Object.freeze({
+      request(reason: string, callerSignal?: AbortSignal) {
+        assertLive(); presentationSignal.throwIfAborted();
+        screenWakeClient ??= createMountedScreenWakeLock({ signal: presentationSignal, navigator: runtime.environment.browser.getNavigator(), assertLive, isForeground: presentationForeground, isVisible: presentationVisible, subscribeOwner: subscribePresentationOwner, nativeActivity: runtime.nativeActivity, ownerEndReason: () => presentationOwner.signal.aborted ? "account-changed" : "owner-ended" });
+        return screenWakeClient.request(reason, callerSignal);
+      },
+    });
+    let playbackPresentation: ReturnType<typeof createMountedPlaybackPresentation> | null = null;
+    const playbackPresentationForMount = () => {
+      assertLive(); presentationSignal.throwIfAborted();
+      if (playbackPresentation) return playbackPresentation;
+      const presentationWindow = runtime.environment.browser.getWindow();
+      const MetadataConstructor = (presentationWindow as (Window & { MediaMetadata?: new(data: AppPlaybackMetadata) => MediaMetadata }) | null)?.MediaMetadata;
+      playbackPresentation = createMountedPlaybackPresentation({
+        signal: presentationSignal, navigator: runtime.environment.browser.getNavigator(), assertLive, isForeground: presentationForeground, subscribeOwner: subscribePresentationOwner,
+        metadataFactory: typeof MetadataConstructor === "function" ? data => new MetadataConstructor(data) : null,
+        subscribePlayback: runtime.audio.subscribePlayback, commands,
+      });
+      return playbackPresentation;
+    };
     const soundIds = new Set<string>();
     // Keep retired IDs distinguishable from arbitrary caller input so a
     // cleanup callback that runs after mount revocation can release its own
@@ -3296,6 +3559,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       if (!soundIds.has(handleId)) throw securityError("Sound handles are owned by the issuing mounted application.");
     };
     const audio: SynWareAudioPort = frozen<SynWareAudioPort>({
+      present(handleId, request, callerSignal) { requireSound(handleId); return playbackPresentationForMount().present(soundHandles.get(handleId)!, request, callerSignal); },
       async load(request, callerSignal) {
         assertLive();
         const pending = Object.freeze({});
@@ -3305,7 +3569,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           const handle = await runTestControl("audio", "audio.load", operationSignal, () => runtime.audio.load({
             source: request.source,
             ownerId: request.ownerId,
-            appId: app.id,
+            appId: app.bundleIdentifier,
             ...(windowControllerId === undefined ? {} : { windowControllerId }),
             ...(request.loop === undefined ? {} : { loop: request.loop }),
             ...(request.volume === undefined ? {} : { volume: request.volume }),
@@ -3343,8 +3607,8 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         soundHandles.delete(handleId);
         return runtime.audio.release(handleId, reason);
       },
-      suspend() { assertLive(); runtime.audio.suspendOwner(app.id); },
-      resume() { assertLive(); runtime.audio.resumeOwner(app.id); },
+      suspend() { assertLive(); runtime.audio.suspendOwner(app.bundleIdentifier); },
+      resume() { assertLive(); runtime.audio.resumeOwner(app.bundleIdentifier); },
       diagnostics() {
         assertLive();
         const playingCount = [...soundHandles.values()].filter((handle) => handle.state === "playing").length;
@@ -3446,7 +3710,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         assertLive();
         if (!isAuthenticSynWareServiceToken(token)) return unavailableService("SynWare services require an authentic runtime service token.");
         const { id, contractVersion } = token;
-        const bundle = runtime.bundles.getBundle(app.id);
+        const bundle = runtime.bundles.getBundle(app.bundleIdentifier);
         const declaration = bundle?.synWareManifest;
         const service = declaration?.services?.find((candidate) => candidate.id === id);
         if (!declaration || !service) {
@@ -3461,7 +3725,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           app,
           bundlePermissions: [...(declaration.permissions ?? [])],
           context: {
-            appId: app.id,
+            appId: app.bundleIdentifier,
             serviceId: id,
             declared: true,
             required: service.required !== false || required,
@@ -3478,13 +3742,13 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         let serviceTerminalOperations = terminalOperationsByService.get(id);
         if (!serviceTerminalOperations) {
           serviceTerminalOperations = createMountedServiceTerminalOperations({
-            runtime, applicationId: app.id, serviceId: id, windowControllerId: windowControllerId ?? null,
+            runtime, applicationId: app.bundleIdentifier, serviceId: id, windowControllerId: windowControllerId ?? null,
             signal, assertLive, requireOwner: requireOwnedDocumentReference,
           });
           terminalOperationsByService.set(id, serviceTerminalOperations);
         }
         const resolved = runTestControlSync("services", "service.resolve", () => runtime.services.resolveAppClient<TClient>({
-          appId: app.id,
+          appId: app.bundleIdentifier,
           serviceId: id,
           permissions: declaration.permissions ?? [],
           ...(minimumVersion === undefined ? {} : { minimumVersion }),
@@ -3548,15 +3812,19 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     function postNotification(request: UserNotificationRequest | SynCloudOSNotificationPostInput, options?: SynCloudOSNotificationPostOptions) {
       assertLive();
       if ("delivery" in request) {
-        return awaitMounted(runtime.notifications.post({ ...request, appId: app.id }), signal, assertLive).then(projected);
+        return awaitMounted(runtime.notifications.post({ ...request, appId: app.bundleIdentifier }), signal, assertLive).then(projected);
       }
-      return projected(runtime.notifications.post({ ...request, appId: app.id }, options));
+      return projected(runtime.notifications.post({ ...request, appId: app.bundleIdentifier }, options));
     }
     let cachedRuntimeFontReadinessGeneration = textFontScope.fontReadinessGeneration;
     let cachedRuntimeAttachmentReadinessGeneration = textAttachmentGeneration;
     appRuntime = frozen<SynWareRuntime>({
       id: runtime.runtimeId,
-      app: Object.freeze({ id: app.id, name: app.name, shortName: app.shortName, packageName: app.packageName, route: app.route }),
+      app: Object.freeze({
+        bundleIdentifier: app.bundleIdentifier, name: app.name, shortName: app.shortName, packageName: app.packageName, route: app.route,
+        displayName: app.displayName,
+        version: app.version,
+      }),
       responderId,
       signal,
       state,
@@ -3566,11 +3834,11 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         openRoute(pathname, routeOptions) {
           assertLive();
           const activeAppId = runtime.store.getSnapshot().application.activeAppId;
-          if (runtime.lifecycle.getState(app.id) === "suspended" || (activeAppId !== null && activeAppId !== app.id)) {
+          if (runtime.lifecycle.getState(app.bundleIdentifier) === "suspended" || (activeAppId !== null && normalizeBundleIdentifier(activeAppId) !== normalizeBundleIdentifier(app.bundleIdentifier))) {
             throw securityError("Only the foreground application may change the browser route.");
           }
           const { hostBeforeCommit: _hostBeforeCommit, ...mountedRouteOptions } = routeOptions ?? {};
-          return runTestControlSync("navigation", "navigation.navigate", () => runtime.routes.openRoute(pathname, { ...mountedRouteOptions, signal: mountedRouteOptions.signal ? mergeSignals(signal, mountedRouteOptions.signal) : signal, source: `app:${app.id}` }));
+          return runTestControlSync("navigation", "navigation.navigate", () => runtime.routes.openRoute(pathname, { ...mountedRouteOptions, signal: mountedRouteOptions.signal ? mergeSignals(signal, mountedRouteOptions.signal) : signal, source: `app:${app.bundleIdentifier}` }));
         },
       }),
       catalog: frozen<SynWareCatalogPort>({
@@ -3579,7 +3847,8 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           const descriptor = runtime.apps.getApp(appId);
           if (!descriptor) return null;
           return projected({
-            id: descriptor.id,
+            bundleIdentifier: descriptor.bundleIdentifier,
+            version: descriptor.version,
             name: descriptor.name,
             shortName: descriptor.shortName,
             packageName: descriptor.packageName,
@@ -3591,14 +3860,14 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       application: frozen<SynWareLifecyclePort>({
         closeSelf(closeOptions) {
           assertLive();
-          return runTestControlSync("windows", "window.close", () => runtime.lifecycle.close(app.id, closeOptions));
+          return runTestControlSync("windows", "window.close", () => runtime.lifecycle.close(app.bundleIdentifier, closeOptions));
         },
         subscribe(listener) {
           if (!canRefreshPresentation()) return () => undefined;
           const notify = (event: Readonly<{ payload?: unknown }>) => {
             if (signal.aborted || !event.payload || typeof event.payload !== "object") return;
             const payload = event.payload as { readonly appId?: unknown; readonly to?: unknown };
-            if (payload.appId !== app.id || (payload.to !== "suspended" && payload.to !== "closed")) return;
+            if (typeof payload.appId !== "string" || normalizeBundleIdentifier(payload.appId) !== appKey || (payload.to !== "suspended" && payload.to !== "closed")) return;
             listener(Object.freeze({ state: payload.to }));
           };
           const unsubscribeLifecycle = runtime.events.subscribe("app.lifecycle", notify);
@@ -3652,19 +3921,19 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         getPreference(key, fallback) {
           assertLive();
           return projected(runTestControlSync("credentials", "credentials.read", () => (
-            runTestControlSync("storage", "storage.read", () => runtime.persistence.getPreference(`${app.id}:${key}`, fallback))
+            runTestControlSync("storage", "storage.read", () => runtime.persistence.getPreference(`${appKey}:${key}`, fallback))
           )));
         },
         setPreference(key, value) {
           assertLive();
           return runTestControlSync("credentials", "credentials.write", () => (
-            runTestControlSync("storage", "storage.write", () => runtime.persistence.setPreference(`${app.id}:${key}`, projected(value)))
+            runTestControlSync("storage", "storage.write", () => runtime.persistence.setPreference(`${appKey}:${key}`, projected(value)))
           ));
         },
         removePreference(key) {
           assertLive();
           runTestControlSync("credentials", "credentials.remove", () => (
-            runTestControlSync("storage", "storage.remove", () => runtime.persistence.removePreference(`${app.id}:${key}`))
+            runTestControlSync("storage", "storage.remove", () => runtime.persistence.removePreference(`${appKey}:${key}`))
           ));
         },
       }),
@@ -3681,27 +3950,38 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
             throw securityError("Application focus scopes may only descend from an owned mounted scope.");
           }
            if (scope.restoreResponderId !== undefined) ownResponder(scope.restoreResponderId);
+           const focused = runtime.focus.getFocusedResponderId();
+           const restoreResponderId = focused && ownedResponder(runtime, app.bundleIdentifier, focused)
+             ? focused : scope.parentResponderId;
            const handle = runtime.focus.openScope(scope);
            focusHandles.add(handle);
            focusScopeIds.add(handle.id);
-           focusRestorations.set(handle, scope.restoreResponderId ?? scope.parentResponderId ?? null);
+           focusRestorations.set(handle, scope.restoreResponderId ?? restoreResponderId);
            const closeOwned = (options?: { readonly restore?: boolean }) => {
              const shouldRestore = options?.restore !== false;
              const restoration = focusRestorations.get(handle) ?? null;
-             const canRestore = shouldRestore && focusRestorationLive && !disposed && !signal.aborted &&
-               runtime.apps.getApp(app.id) === app && restoration !== null && ownedResponder(runtime, app.id, restoration);
              let result: ReturnType<FocusScopeHandle["close"]>;
              try { result = handle.close({ restore: false }); }
              catch { result = { status: "missing", scopeId: handle.id, restoredResponderId: null }; }
              focusHandles.delete(handle);
              focusScopeIds.delete(handle.id);
              focusRestorations.delete(handle);
-             if (!canRestore) return result;
-             const focused = runtime.focus.requestFocus(restoration);
-             return result.status === "closed" && focused.status === "focused" ? { ...result, restoredResponderId: restoration } : result;
+             const canRestore = result.status === "closed" && shouldRestore && focusRestorationLive && !disposed && !signal.aborted &&
+               runtime.apps.getApp(app.bundleIdentifier) === app && restoration !== null;
+             const target = !canRestore ? null
+               : restoration !== null && ownedResponder(runtime, app.bundleIdentifier, restoration) && runtime.responders.isEnabled(restoration) ? restoration
+               : ownedResponder(runtime, app.bundleIdentifier, scope.parentResponderId) && runtime.responders.isEnabled(scope.parentResponderId) ? scope.parentResponderId : null;
+             if (target === null) return result;
+             const focused = runtime.focus.requestFocus(target);
+             return result.status === "closed" && focused.status === "focused" ? { ...result, restoredResponderId: target } : result;
            };
            const wrapped = Object.freeze({
              id: handle.id,
+             updatePresentation(presentation: Parameters<FocusScopeHandle["updatePresentation"]>[0]) {
+               assertLive();
+               if (!focusHandles.has(handle)) throw securityError("Focus presentation requires an owned live scope.");
+               handle.updatePresentation(presentation);
+             },
              close: closeOwned,
              dispose() { return closeOwned(); },
            });
@@ -3715,13 +3995,13 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         getFocusedResponderId() {
           assertLive();
           const focused = runtime.focus.getFocusedResponderId();
-          return focused && ownedResponder(runtime, app.id, focused) ? focused : null;
+          return focused && ownedResponder(runtime, app.bundleIdentifier, focused) ? focused : null;
         },
       }),
       undo: Object.freeze({
         get(owner: UndoOwner) {
           assertLive();
-          if (owner.kind !== "application" || owner.id !== app.id) throw securityError("Undo ownership must remain inside the mounted application.");
+          if (owner.kind !== "application" || normalizeBundleIdentifier(owner.id) !== normalizeBundleIdentifier(app.bundleIdentifier)) throw securityError("Undo ownership must remain inside the mounted application.");
           const existing = applicationUndoLeases.get(owner.id);
           if (existing) return existing.manager;
           const manager = runtime.undo.get(owner);
@@ -3732,7 +4012,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         },
         create(owner: UndoOwner, undoOptions: Parameters<SynCloudOSRuntime["undo"]["create"]>[1]) {
           assertLive();
-          if (owner.kind !== "application" || owner.id !== app.id) throw securityError("Undo ownership must remain inside the mounted application.");
+          if (owner.kind !== "application" || normalizeBundleIdentifier(owner.id) !== normalizeBundleIdentifier(app.bundleIdentifier)) throw securityError("Undo ownership must remain inside the mounted application.");
           const existing = applicationUndoLeases.get(owner.id);
           if (existing) return existing.manager;
           const lease = createMountedUndoLease(runtime.undo.create(owner, undoOptions), assertLive);
@@ -3844,7 +4124,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
             };
             const payload = value?.payload && typeof value.payload === "object" ? value.payload as Record<string, unknown> : null;
             const eventAppId = appIdFromRecord(value) ?? appIdFromRecord(payload);
-            if (eventAppId !== undefined && eventAppId !== app.id) return;
+            if (eventAppId !== undefined && normalizeBundleIdentifier(eventAppId) !== normalizeBundleIdentifier(app.bundleIdentifier)) return;
             if (eventAppId === undefined && type !== "locale.changed") return;
             listener(projected(event));
           });
@@ -3853,14 +4133,14 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       }),
       notifications: Object.freeze({ post: postNotification }),
       errors: Object.freeze({
-        capture(payload) { assertLive(); return projected(runtime.errors.capture({ ...payload, appId: app.id })); },
+        capture(payload) { assertLive(); return projected(runtime.errors.capture({ ...payload, appId: app.bundleIdentifier })); },
       }),
       diagnostics: Object.freeze({
         getReport() {
           assertLive();
           return projected({
             runtimeId: runtime.runtimeId,
-            appId: app.id,
+            appId: app.bundleIdentifier,
             responderId,
             windowControllerId: windowControllerId ?? null,
             live: !signal.aborted,
@@ -3892,8 +4172,8 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         },
         subscribe(listener) { assertLive(); return cleanupOnAbort(runtime.settings.subscribe(() => { if (!signal.aborted) listener(); })); },
         supportsVibration() { assertLive(); return runtime.settings.supportsVibration(); },
-        notificationsAllowed() { assertLive(); return runtime.settings.notificationsAllowed(app.id); },
-        appNotificationsAllowed() { assertLive(); return runtime.settings.appNotificationsAllowed(app.id); },
+        notificationsAllowed() { assertLive(); return runtime.settings.notificationsAllowed(app.bundleIdentifier); },
+        appNotificationsAllowed() { assertLive(); return runtime.settings.appNotificationsAllowed(app.bundleIdentifier); },
       }),
       appearance: Object.freeze({
         get() { refreshPresentation(); return presentationAppearance; },
@@ -3911,31 +4191,75 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
 
     const requireDeclaredCapability = (capability: string, operation: string) => {
       assertLive();
-      const declaration = runtime.bundles.getBundle(app.id)?.synWareManifest;
+      const declaration = runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest;
       if (!declaration?.permissions?.includes(capability)) {
         throw securityError(`SynWare capability "${capability}" must be declared before ${operation}.`);
       }
     };
 
+    const diagnosticsProvision = getHostDiagnosticsProvision(runtime);
+    const environmentCapabilityAccess = (capability: "web.share" | "file.open" | "file.write", audit: boolean) => {
+      assertLive();
+      const declaration = runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest;
+      // Read-only file input retains its existing manifest contract. Newly wired
+      // write/handle authority requires an explicit declaration.
+      const declared = !!declaration && (capability === "file.open" || !!declaration.permissions?.includes(capability));
+      if (!declared) return { declared: false, allowed: false };
+      const request = { action: capability, origin: "runtime", source: "SynWareEnvironmentClient", app,
+        bundlePermissions: [...(declaration?.permissions ?? [])], context: Object.freeze({ appId: app.bundleIdentifier, capability }) };
+      const decision = audit
+        ? runTestControlSync("policy", "policy.evaluate", () => runtime.policy.authorise(request))
+        : runtime.policy.evaluate(request);
+      return { declared: true, allowed: decision.allowed };
+    };
+    let issuedDiagnostics: Readonly<{ grant: HostDiagnosticsGrant | undefined; client: AppTrustedDiagnosticsClient }> | undefined;
+    const createTrustedDiagnosticsClient = (grant: HostDiagnosticsGrant | undefined): AppTrustedDiagnosticsClient => {
+      const assertDiagnosticsLive = () => {
+        requireTrustedPrivilege("diagnostics", "diagnostics.view");
+        if (diagnosticsProvision && (!grant || diagnosticsProvision.current !== grant || grant.signal.aborted)) {
+          throw securityError("The host diagnostics provider was revoked or replaced.");
+        }
+      };
+      return Object.freeze({
+        async refreshConformanceSnapshot(options?: Readonly<{ signal?: AbortSignal }>) {
+          assertDiagnosticsLive();
+          const operationSignal = AbortSignal.any([
+            runtime.signal, signal,
+            ...(options?.signal ? [options.signal] : []),
+            ...(grant ? [grant.signal] : []),
+          ]);
+          if (operationSignal.aborted) throw abortError(operationSignal.reason);
+          return await awaitMounted(
+            grant
+              ? grant.client.refreshConformanceSnapshot({ signal: operationSignal })
+              : runtime.inspector.refreshConformanceSnapshot({ signal: operationSignal }),
+            operationSignal,
+            assertDiagnosticsLive,
+          );
+        },
+        exportConformanceSnapshot(snapshot: unknown) {
+          assertDiagnosticsLive();
+          return projected(grant
+            ? grant.client.exportConformanceSnapshot(snapshot)
+            : runtime.inspector.exportConformanceSnapshot(snapshot as ConformanceInspectorSnapshot));
+        },
+      });
+    };
     const trustedClients: AppTrustedClient = Object.freeze({
-      ...(hasTrustedBundlePrivilege(runtime, app.id, "diagnostics", "diagnostics.view") ? {
-        diagnostics: Object.freeze({
-          async refreshConformanceSnapshot(options?: Readonly<{ signal?: AbortSignal }>) {
-            requireTrustedPrivilege("diagnostics", "diagnostics.view");
-            const operationSignal = mergeSignals(runtime.signal, signal, options?.signal);
-            return await awaitMounted(
-              runtime.inspector.refreshConformanceSnapshot({ ...options, signal: operationSignal }),
-              operationSignal,
-              () => requireTrustedPrivilege("diagnostics", "diagnostics.view"),
-            );
-          },
-          exportConformanceSnapshot(snapshot: unknown) {
-            requireTrustedPrivilege("diagnostics", "diagnostics.view");
-            return projected(runtime.inspector.exportConformanceSnapshot(snapshot as ConformanceInspectorSnapshot));
-          },
-        }),
-      } : {}),
-      ...(hasTrustedBundlePrivilege(runtime, app.id, "conformance", "diagnostics.view") ? {
+      get diagnostics() {
+        // Capability discovery is harmless after revocation; operations on an
+        // already-issued client still enforce assertDiagnosticsLive.
+        if (transferMount.signal.aborted || !canRefreshPresentation() ||
+          runtime.appManager.getManagerForApp(app.bundleIdentifier) !== registrationAuthority) return undefined;
+        if (!hasTrustedBundlePrivilege(runtime, app.bundleIdentifier, "diagnostics", "diagnostics.view")) return undefined;
+        const grant = diagnosticsProvision?.current;
+        if (diagnosticsProvision && !grant) return undefined;
+        if (!issuedDiagnostics || issuedDiagnostics.grant !== grant) {
+          issuedDiagnostics = Object.freeze({ grant, client: createTrustedDiagnosticsClient(grant) });
+        }
+        return issuedDiagnostics.client;
+      },
+      ...(hasTrustedBundlePrivilege(runtime, app.bundleIdentifier, "conformance", "diagnostics.view") ? {
         conformance: (() => {
           const retainEvidence = (release: () => void): AppClientHandle => {
             let active = true;
@@ -4026,8 +4350,8 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     let settingsAvailabilitySource = runtime.settings.get();
     let settingsAvailabilitySnapshot = Object.freeze({
       vibration: runtime.settings.supportsVibration(),
-      notifications: runtime.settings.notificationsAllowed(app.id),
-      appNotifications: runtime.settings.appNotificationsAllowed(app.id),
+      notifications: runtime.settings.notificationsAllowed(app.bundleIdentifier),
+      appNotifications: runtime.settings.appNotificationsAllowed(app.bundleIdentifier),
     });
     const refreshSettingsAvailability = () => {
       const next = runtime.settings.get();
@@ -4035,8 +4359,8 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       settingsAvailabilitySource = next;
       settingsAvailabilitySnapshot = Object.freeze({
         vibration: runtime.settings.supportsVibration(),
-        notifications: runtime.settings.notificationsAllowed(app.id),
-        appNotifications: runtime.settings.appNotificationsAllowed(app.id),
+        notifications: runtime.settings.notificationsAllowed(app.bundleIdentifier),
+        appNotifications: runtime.settings.appNotificationsAllowed(app.bundleIdentifier),
       });
     };
 
@@ -4081,7 +4405,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
 
     const notificationActionListeners = new Set<(action: Readonly<{ notificationId: string; actionId: string }>) => void>();
     const notificationActionReleases = new Map<string, () => boolean>();
-    const rawNotificationActionId = (actionId: string) => `${app.id}:${responderId}:${actionId}`;
+    const rawNotificationActionId = (actionId: string) => `${app.bundleIdentifier}:${responderId}:${actionId}`;
     const registerNotificationAction = (actionId: string) => {
       if (actionId.trim().length === 0) throw new TypeError("Application notification action IDs must not be empty.");
       const rawId = rawNotificationActionId(actionId);
@@ -4109,23 +4433,23 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     const environmentClients = Object.freeze({
       audioGraphs: createMountedAudioGraphs(runtime.audioGraphs, signal, () => {
         assertLive();
-        return runtime.bundles.getBundle(app.id)?.synWareManifest?.permissions ?? [];
-      }, app.id, audioInputCapability, mountedSettlement),
+        return runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest?.permissions ?? [];
+      }, app.bundleIdentifier, audioInputCapability, mountedSettlement),
       audioSessions: createMountedAudioSessions(runtime.environment.audioCapture, signal, () => {
         assertLive();
-        return runtime.bundles.getBundle(app.id)?.synWareManifest?.permissions ?? [];
-      }, audioInputCapability, app.id, mountedSettlement),
+        return runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest?.permissions ?? [];
+      }, audioInputCapability, app.bundleIdentifier, mountedSettlement),
       audioFiles: createMountedAudioFiles(runtime.environment.audioFiles, signal, () => {
         assertLive();
-        return runtime.bundles.getBundle(app.id)?.synWareManifest?.permissions ?? [];
+        return runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest?.permissions ?? [];
       }),
       haptics: createMountedHapticsClient(runtime.hapticHost, signal, () => {
         assertLive();
-        return runtime.bundles.getBundle(app.id)?.synWareManifest?.permissions ?? [];
+        return runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest?.permissions ?? [];
       }),
       motion: createMountedMotionClient(runtime.motion, signal, () => {
         assertLive();
-        return runtime.bundles.getBundle(app.id)?.synWareManifest?.permissions ?? [];
+        return runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest?.permissions ?? [];
       }),
       media: createMountedMediaClient(runtime.mediaClock, signal),
       video: createMountedVideoClient(
@@ -4133,11 +4457,11 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         signal,
         () => {
           assertLive();
-          return runtime.bundles.getBundle(app.id)?.synWareManifest?.permissions ?? [];
+          return runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest?.permissions ?? [];
         },
         (capability) => {
           assertLive();
-          const declaration = runtime.bundles.getBundle(app.id)?.synWareManifest;
+          const declaration = runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest;
           if (!declaration) return false;
           try {
             const decision = runTestControlSync("permissions", "permission.request", () =>
@@ -4147,7 +4471,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
                 source: "SynWareVideoClient",
                 app,
                 bundlePermissions: [...(declaration.permissions ?? [])],
-                context: Object.freeze({ appId: app.id, capability }),
+                context: Object.freeze({ appId: app.bundleIdentifier, capability }),
               })),
             );
             return decision.allowed;
@@ -4156,23 +4480,24 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
             throw error;
           }
         },
-        app.id,
+        app.bundleIdentifier,
         videoCaptureCapability,
         runtime.audioGraphs,
         audioInputCapability,
         {},
-        { owner: app.id, register: (participant) => runtime.resources.register(participant) },
+        { owner: app.bundleIdentifier, register: (participant) => runtime.resources.register(participant) },
+        (source, request, callerSignal) => playbackPresentationForMount().present(source, request, callerSignal),
       ),
       location: createMountedLocationClient(
         runtime.location,
         signal,
         () => {
           assertLive();
-          return runtime.bundles.getBundle(app.id)?.synWareManifest?.permissions ?? [];
+          return runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest?.permissions ?? [];
         },
         (capability) => {
           assertLive();
-          const declaration = runtime.bundles.getBundle(app.id)?.synWareManifest;
+          const declaration = runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest;
           if (!declaration) return false;
           const decision = runTestControlSync("permissions", "permission.request", () =>
             runTestControlSync("policy", "policy.evaluate", () => runtime.policy.authorise({
@@ -4181,12 +4506,12 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
               source: "SynWareLocationClient",
               app,
               bundlePermissions: [...(declaration.permissions ?? [])],
-              context: Object.freeze({ appId: app.id, capability }),
+              context: Object.freeze({ appId: app.bundleIdentifier, capability }),
             })),
           );
           return decision.allowed;
         },
-        app.id,
+        app.bundleIdentifier,
         mountedSettlement,
       ),
       midi: createMountedMIDIClient(
@@ -4194,11 +4519,11 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         signal,
         () => {
           assertLive();
-          return runtime.bundles.getBundle(app.id)?.synWareManifest?.permissions ?? [];
+          return runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest?.permissions ?? [];
         },
         (capability) => {
           assertLive();
-          const declaration = runtime.bundles.getBundle(app.id)?.synWareManifest;
+          const declaration = runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest;
           if (!declaration) return false;
           try {
             const decision = runTestControlSync("permissions", "permission.request", () =>
@@ -4208,7 +4533,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
                 source: "SynWareMIDIClient",
                 app,
                 bundlePermissions: [...(declaration.permissions ?? [])],
-                context: Object.freeze({ appId: app.id, capability }),
+                context: Object.freeze({ appId: app.bundleIdentifier, capability }),
               })),
             );
             return decision.allowed;
@@ -4223,11 +4548,11 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         signal,
         () => {
           assertLive();
-          return runtime.bundles.getBundle(app.id)?.synWareManifest?.permissions ?? [];
+          return runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest?.permissions ?? [];
         },
         (capability) => {
           assertLive();
-          const declaration = runtime.bundles.getBundle(app.id)?.synWareManifest;
+          const declaration = runtime.bundles.getBundle(app.bundleIdentifier)?.synWareManifest;
           if (!declaration) return false;
           const decision = runTestControlSync("permissions", "permission.request", () =>
             runTestControlSync("policy", "policy.evaluate", () => runtime.policy.authorise({
@@ -4236,12 +4561,12 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
               source: "SynWareLuminaClient",
               app,
               bundlePermissions: [...(declaration.permissions ?? [])],
-              context: Object.freeze({ appId: app.id, capability }),
+              context: Object.freeze({ appId: app.bundleIdentifier, capability }),
             })),
           );
           return decision.allowed;
         },
-        app.id,
+        app.bundleIdentifier,
       ),
       persistence: Object.freeze({
         getPreference<T>(key: string, fallback: T): T {
@@ -4344,11 +4669,11 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
             throw new TypeError("Application notifications require a title and body.");
           }
           const result = await awaitMounted(appRuntime.notifications.post({
-            idempotencyKey: `${app.id}:${appRuntime.platform.randomUUID()}`,
+            idempotencyKey: `${app.bundleIdentifier}:${appRuntime.platform.randomUUID()}`,
             title: request.title,
             body: request.body,
             delivery: "in-app",
-            appId: app.id,
+            appId: app.bundleIdentifier,
             actions: request.actionIds?.map((id: string) => ({ id: registerNotificationAction(id), title: id })),
           }), signal, assertLive);
           const record = result as { readonly notification?: { readonly id?: unknown }; readonly id?: unknown };
@@ -4395,9 +4720,10 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
               ? runtime.errors.createNotRespondingError(app, errorContext, retry)
               : code === "CONNECTION_ERROR"
                 ? runtime.errors.createConnectionError(app, cause, errorContext, retry)
-                : runtime.errors.capture({ code: "APP_CONTENT_FAILED", title: "SynWare operation failed",
-                  message: errorContext.technicalMessage, source: errorContext.source,
-                  appId: app.id, category: "app", context: { operation, scope: "app" } });
+                : runtime.errors.capture({ code: "APP_CONTENT_FAILED", title: `${app.displayName} could not complete that action.`,
+                  message: "An unexpected error prevented the action from finishing. Please try again.",
+                  error: cause, technicalMessage: `The ${operation} operation failed.`, source: errorContext.source,
+                  appId: app.bundleIdentifier, category: "app", context: { operation, scope: "app" } });
             if (code) {
               const ownerClosed = () => runtime.errors.dismiss(captured.id);
               signal.addEventListener("abort", ownerClosed, { once: true });
@@ -4413,6 +4739,25 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           captureRecovery(error);
         },
       }),
+      alerts: Object.freeze({
+        present(request: Parameters<MountedAppEnvironmentClients["alerts"]["present"]>[0], callerSignal?: AbortSignal) {
+          assertLive();
+          // The mount's own signal dismisses its alerts when the app closes.
+          const operationSignal = callerSignal ? AbortSignal.any([signal, callerSignal]) : signal;
+          return runtime.alerts.present(request, { ownerAppId: app.bundleIdentifier, signal: operationSignal });
+        },
+      }),
+      launcher: Object.freeze({
+        routeFor(appId: string) {
+          assertLive();
+          return appRuntime.catalog.getApp(appId)?.route ?? null;
+        },
+        titleFor(appId: string) {
+          assertLive();
+          const target = appRuntime.catalog.getApp(appId);
+          return target ? target.displayName || target.name : null;
+        },
+      }),
       externalActions: Object.freeze({
         async openMailto(address: string, subject?: string, body?: string) {
           requireDeclaredCapability("external.open", "opening mail");
@@ -4426,24 +4771,11 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           }), signal, assertLive);
         },
       }),
-      share: Object.freeze({
-        available() {
-          assertLive();
-          return typeof runtime.environment.browser.getNavigator()?.share === "function";
-        },
-        async share(request: Readonly<{ title: string; text?: string; url?: string }>) {
-          requireDeclaredCapability("web.share", "sharing application content");
-          const share = runtime.environment.browser.getNavigator()?.share;
-          if (typeof share !== "function") return "cancelled";
-          try {
-            await awaitMounted(runTestControl("browser", "browser.share", signal, () => share({ ...request })), signal, assertLive);
-            return "shared" as const;
-          } catch (error) {
-            if (signal.aborted) throw error;
-            if (isAbortError(error)) return "cancelled" as const;
-            throw error;
-          }
-        },
+      storageDiagnostics: createStorageDiagnosticsClient({ signal: presentationSignal, assertLive, getNavigator: () => runtime.environment.browser.getNavigator() }),
+      screenWakeLock,
+      share: createMountedShareClient({ browser: runtime.environment.browser, signal, assertLive, nativeActivity: runtime.nativeActivity,
+        access: audit => environmentCapabilityAccess("web.share", audit),
+        invoke: (action, operationSignal) => runTestControl("browser", "browser.share", operationSignal, action),
       }),
       workArea: Object.freeze({
         getSnapshot() {
@@ -4565,12 +4897,12 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         const owners = new WeakMap<object, { readonly release: (reason?: string) => void }>();
         return Object.freeze({
           ...createMountedAnimationLayers(runtime.environment.animationLayers, signal, assertLive,
-            { owner: app.id, register: (participant) => runtime.resources.register(participant) }),
+            { owner: app.bundleIdentifier, register: (participant) => runtime.resources.register(participant) }),
           acquireOwner(viewId: string) {
             assertLive();
             // A window-scoped mount owns animations only for its own window.
             const raw = appRuntime.animations.acquireOwner({
-              appId: app.id,
+              appId: app.bundleIdentifier,
               viewId,
               ...(windowControllerId === undefined ? {} : { windowControllerId }),
             });
@@ -4624,28 +4956,11 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           geometry: appRuntime.platform.imageGeometry as never,
         } : {}),
       }),
-      filePanels: (() => {
-        const picker = runtime.environment.filePicker;
-        const service = picker ? createFilePanelService([createBrowserFilePanelAdapter(picker)]) : null;
-        if (service) cleanupOnAbort(() => service.dispose());
-        const signalFor = (callerSignal?: AbortSignal) => mergeSignals(runtime.signal, controller.signal, callerSignal);
-        return Object.freeze({
-          open(request: OpenPanelRequest, callerSignal?: AbortSignal) {
-            assertLive();
-            if (!service) return Promise.resolve({ kind: "unavailable" as const, missingCapabilities: Object.freeze(["read" as const]), message: "This host has no file chooser." });
-            return service.open(request, signalFor(callerSignal));
-          },
-          save(request: SavePanelRequest, callerSignal?: AbortSignal) {
-            assertLive();
-            if (!service) return Promise.resolve({ kind: "unavailable" as const, missingCapabilities: Object.freeze(["write" as const]), message: "This host has no file chooser." });
-            return service.save(request, signalFor(callerSignal));
-          },
-          release(reference: FilePanelReference, reason: FilePanelReleaseReason = "caller-finished") {
-            if (service) service.release(reference, reason); else reference.release(reason);
-          },
-          dispose() { /* The mount owns its panel service. */ },
-        });
-      })(),
+      filePanels: createMountedFilePanelClient({ picker: runtime.environment.filePicker, nativeActivity: runtime.nativeActivity,
+        native: runtime.environment.createFileSystemAccessPanelPort ? runtime.environment.createFileSystemAccessPanelPort(runtime.nativeActivity) : runtime.environment.fileSystemAccess, download: runtime.environment.downloadExport,
+        signal, assertLive, activation: () => runtime.environment.browser.getNavigator()?.userActivation?.isActive,
+        access: environmentCapabilityAccess,
+      }),
       webContent: Object.freeze({
         createSession(request: Readonly<Record<string, unknown>>, callerSignal?: AbortSignal) {
           assertLive();
@@ -4672,7 +4987,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           continue;
         }
         const parentId = pending.registration.parentId;
-        if (parentId && !ownedResponder(runtime, app.id, parentId)) {
+        if (parentId && !ownedResponder(runtime, app.bundleIdentifier, parentId)) {
           // A parent that appeared under another owner can never become a
           // valid app lease. Drop the pending child without touching it.
           if (runtime.responders.get(parentId)) {
@@ -4690,11 +5005,11 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     const registerAppResponder: AppResponderRegistrar = (registration) => {
       assertLive();
       if (registration.kind === "document" &&
-          registration.parentId === `application:${app.id}` &&
+          registration.parentId === `application:${app.bundleIdentifier}` &&
           registration.scopeId === registration.id &&
           registration.undoOwner?.kind === "document" &&
           registration.undoOwner.id === registration.id.slice("document:".length) &&
-          ownedCanonicalDocumentResponder(runtime, app.id, registration.id)) {
+          ownedCanonicalDocumentResponder(runtime, app.bundleIdentifier, registration.id)) {
         // A canonical document can outlive its view mount, so its standard
         // command responder may already exist under the workspace. The
         // replacement view borrows that exact responder instead of registering
@@ -4710,7 +5025,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           },
         });
       }
-      if (registration.parentId && !ownedResponder(runtime, app.id, registration.parentId)) {
+      if (registration.parentId && !ownedResponder(runtime, app.bundleIdentifier, registration.parentId)) {
         if (runtime.responders.get(registration.parentId)) {
           throw securityError("Application responder scopes may only descend from an owned responder.");
         }

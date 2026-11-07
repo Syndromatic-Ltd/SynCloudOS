@@ -18,14 +18,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { CSSProperties } from "react";
+import { isValidElement, type CSSProperties, type HTMLAttributes, type ReactElement, type ReactNode } from "react";
+import { NSELabelHelp } from "../../Tooltips/NSELabelHelp";
+
+function leadingLabelHelp(node: ReactNode) {
+  if (!isValidElement(node)) return node;
+  const props = node.props as HTMLAttributes<HTMLElement> & { children?: ReactNode };
+  const label = props["aria-label"] ?? (typeof props.children === "string" ? props.children : null);
+  return label ? <NSELabelHelp label={label}>{node as ReactElement<HTMLAttributes<HTMLElement>>}</NSELabelHelp> : node;
+}
 import {
   getOptionalNSESmoothSurfaceProps,
   type NSESmoothSurfaceStyle
 } from "../../SmoothSurface";
 import { useNSEFeedback } from "../../Feedback";
 import { NSETopBarButton } from "./NSETopBarButton";
-import { nseTopBarStyles } from "./nseTopBarStyles";
+import { nseTopBarStyles, resolveNSETopBarGlyphStyle } from "./nseTopBarStyles";
 import type { NSETopBarItem, NSETopBarItemPosition, NSETopBarProps } from "./nseTopBarTypes";
 
 type CSSVarStyle = CSSProperties & Record<`--${string}`, string>;
@@ -40,7 +48,7 @@ function NSETopBarTitle({
   if (center) return <>{center}</>;
   if (!titleAction) return <>{title}</>;
   return (
-    <button
+    <NSELabelHelp label={typeof title === "string" && title !== titleAction.label ? `${title} — ${titleAction.label}` : titleAction.label}><button
       type="button"
       className="nse-app-topbar-title-button"
       data-selected={titleAction.selected ? "true" : "false"}
@@ -60,24 +68,15 @@ function NSETopBarTitle({
         <span className="nse-app-topbar-title-arrow-glyph nse-app-topbar-title-arrow-right" />
         <span className="nse-app-topbar-title-arrow-glyph nse-app-topbar-title-arrow-down" />
       </span>
-    </button>
+    </button></NSELabelHelp>
   );
 }
 
-/** Spliced metal pill (return / user-info / custom glyph) for the `atmoMetal` chrome. */
+/** CSS-drawn metal pill (return / user-info / settings / custom glyph) for the `atmoMetal` chrome. */
 function NSETopBarMetalPill({ item, position }: { item: NSETopBarItem; position: NSETopBarItemPosition }) {
   const feedback = useNSEFeedback();
 
-  const glyphClass = item.kind === "webspring"
-    ? "nse-app-topbar-metal-pill-glyph-return"
-    : item.kind === "userInfo"
-      ? "nse-app-topbar-metal-pill-glyph-userinfo"
-      : item.kind === "settings"
-        ? "nse-app-topbar-metal-pill-glyph-settings"
-        : "nse-app-topbar-metal-pill-glyph-custom";
-  const glyphStyle = item.kind === "custom" && item.icon
-    ? ({ "--nse-app-topbar-metal-pill-glyph": `url("${item.icon}")` } as CSSVarStyle)
-    : undefined;
+  const glyphStyle = resolveNSETopBarGlyphStyle(item);
 
   return (
     <button
@@ -85,6 +84,7 @@ function NSETopBarMetalPill({ item, position }: { item: NSETopBarItem; position:
       type="button"
       className="nse-app-topbar-metal-pill"
       data-position={position}
+      data-selected={item.selected ? "true" : "false"}
       aria-label={item.label}
       aria-haspopup={item.opensMenu ? "menu" : undefined}
       aria-expanded={item.opensMenu ? Boolean(item.selected) : undefined}
@@ -96,7 +96,11 @@ function NSETopBarMetalPill({ item, position }: { item: NSETopBarItem; position:
       }}
     >
       <span className="nse-app-topbar-metal-pill-shell" aria-hidden="true" />
-      <span className={`nse-app-topbar-metal-pill-glyph ${glyphClass}`} style={glyphStyle} aria-hidden="true" />
+      {glyphStyle ? (
+        <span className="nse-app-topbar-metal-pill-glyph" style={glyphStyle} aria-hidden="true">
+          <span className="nse-app-topbar-glyph-shape" />
+        </span>
+      ) : null}
     </button>
   );
 }
@@ -125,7 +129,7 @@ function NSETopBarMetal({
       <span className="nse-app-topbar-metal-grain" aria-hidden="true" />
       {leading !== undefined || leadingItems.length || leadingTitle ? (
         <div className="nse-app-topbar-metal-cluster nse-app-topbar-metal-leading">
-          {leading !== undefined ? leading : leadingItems.map((item) => (
+          {leading !== undefined ? leadingLabelHelp(leading) : leadingItems.map((item) => (
             <NSETopBarMetalPill key={`${item.kind}-${item.label}`} item={item} position="left" />
           ))}
           {leadingTitle ? (
@@ -203,19 +207,15 @@ export function NSETopBar(props: NSETopBarProps) {
     className,
     style as NSESmoothSurfaceStyle | undefined
   );
-  const topBarStyle: CSSVarStyle = {
-    "--nse-app-topbar-height": `${styleDefinition.height}px`,
-    ...(surfaceProps.style as CSSVarStyle | undefined)
-  };
 
   return (
-    <header className={`nse-app-topbar ${surfaceProps.className ?? ""}`.trim()} data-variant="atmoCumulus" style={topBarStyle}>
+    <header className={`nse-app-topbar ${surfaceProps.className ?? ""}`.trim()} data-variant="atmoCumulus" style={surfaceProps.style as CSSProperties | undefined}>
       <div className="nse-app-topbar-base" aria-hidden="true">
         <span className="nse-app-topbar-base-glass" />
       </div>
       <div className="nse-app-topbar-content">
         <div className="nse-app-topbar-slot nse-app-topbar-slot-left">
-          {leading !== undefined ? leading : leadingItems.map((item) => (
+          {leading !== undefined ? leadingLabelHelp(leading) : leadingItems.map((item) => (
             <NSETopBarButton key={`${item.kind}-${item.label}`} item={item} position="left" styleDefinition={styleDefinition} />
           ))}
         </div>

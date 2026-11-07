@@ -48,56 +48,22 @@ export function createBrowserGlobalWatchdog(
   const handleWindowError = (event: Event) => {
     if (isResourceLoadError(event)) {
       capturedResourceErrors += 1;
-      const resource = getTarget(event) as { tagName?: string; currentSrc?: string; src?: string; href?: string } | null;
-      runtime.errors.capture({
-        code: "ASSET_LOAD_FAILED",
-        title: "A SynCloudOS resource could not be loaded.",
-        message: "A required resource failed to load.",
-        technicalMessage: resource?.currentSrc ?? resource?.src ?? resource?.href ?? resource?.tagName ?? "Unknown resource",
-        source: "SynCloudOS.GlobalWatchdog.resource",
-        severity: "error",
-        recoverable: true,
-        suggestedActions: ["retry", "dismiss"],
-        category: "resource",
-      });
+      runtime.errors.createAssetLoadFailedError(getTarget(event), { eventType: "error" });
       return;
     }
     const errorEvent = event as ErrorEvent;
     capturedGlobalErrors += 1;
-    const cause = errorEvent.error ?? errorEvent.message ?? "Unknown global script error";
-    runtime.errors.capture({
-      code: "GLOBAL_SCRIPT_ERROR",
-      title: "SynCloudOS encountered a script error.",
-      message: "An unexpected script error was captured by the runtime watchdog.",
-      technicalMessage: cause instanceof Error ? cause.message : String(cause),
-      technicalDetails: cause instanceof Error ? cause.stack : undefined,
-      source: "SynCloudOS.GlobalWatchdog.error",
-      severity: "error",
-      recoverable: true,
-      suggestedActions: ["reload", "dismiss"],
-      category: "watchdog",
-      context: {
-        filename: errorEvent.filename,
-        lineno: errorEvent.lineno,
-        colno: errorEvent.colno,
-      },
+    runtime.errors.createGlobalScriptError(errorEvent.error, {
+      eventType: "error",
+      filename: typeof errorEvent.filename === "string" ? errorEvent.filename : undefined,
+      lineno: typeof errorEvent.lineno === "number" ? errorEvent.lineno : undefined,
+      colno: typeof errorEvent.colno === "number" ? errorEvent.colno : undefined,
+      message: typeof errorEvent.message === "string" ? errorEvent.message : undefined,
     });
   };
   const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
     capturedPromiseRejections += 1;
-    const reason = event.reason;
-    runtime.errors.capture({
-      code: "UNHANDLED_PROMISE_REJECTION",
-      title: "SynCloudOS caught an unhandled promise rejection.",
-      message: "Asynchronous runtime work failed without a local handler.",
-      technicalMessage: reason instanceof Error ? reason.message : String(reason),
-      technicalDetails: reason instanceof Error ? reason.stack : undefined,
-      source: "SynCloudOS.GlobalWatchdog.unhandledrejection",
-      severity: "error",
-      recoverable: true,
-      suggestedActions: ["retry", "dismiss"],
-      category: "watchdog",
-    });
+    runtime.errors.createUnhandledPromiseRejectionError(event.reason, { eventType: "unhandledrejection" });
   };
   const getStatus = (): BrowserGlobalWatchdogStatus => ({
     capturedGlobalErrors,

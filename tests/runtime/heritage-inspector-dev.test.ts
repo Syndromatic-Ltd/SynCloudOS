@@ -30,7 +30,7 @@ describe("heritage development boundary", () => {
     const runtime = createTestRuntime();
     registerTrustedTestSynWare(runtime, diagnosticsManifest, ["diagnostics"]);
     const mount = new AbortController();
-    const inspector = (await entry.loadInspector({ enabled: true, runtime, appId: "diagnostics", mountSignal: mount.signal, now: () => 1 }))!;
+    const inspector = (await entry.loadInspector({ enabled: true, runtime, appId: "com.example.diagnostics", mountSignal: mount.signal, now: () => 1 }))!;
     const changed = vi.fn(); const remove = inspector.localization.subscribe(changed);
     const original = inspector.localization.getSnapshot();
     runtime.locale.registerTranslations("synapps.diagnostics", "en-GB", { "inspector.title": "Translated Inspector" });
@@ -63,7 +63,7 @@ describe("heritage development boundary", () => {
   it("denies ordinary apps and revokes retained readers, listeners and exports with the mount", async () => {
     const runtime = createTestRuntime();
     const mount = new AbortController();
-    const options = { enabled: true, runtime, appId: "diagnostics", mountSignal: mount.signal, now: () => 1 };
+    const options = { enabled: true, runtime, appId: "com.example.diagnostics", mountSignal: mount.signal, now: () => 1 };
     expect(await entry.loadInspector({ ...options, enabled: false })).toBeNull();
     await expect(entry.loadInspector(options)).rejects.toThrow(/provenance/i);
     registerTrustedTestSynWare(runtime, diagnosticsManifest, ["diagnostics"]);
@@ -94,9 +94,9 @@ describe("heritage development boundary", () => {
   it("revokes an open inspector when trusted bundle provenance is removed", async () => {
     const runtime = createTestRuntime();
     registerTrustedTestSynWare(runtime, diagnosticsManifest, ["diagnostics"]);
-    const inspector = (await entry.loadInspector({ enabled: true, runtime, appId: "diagnostics", mountSignal: new AbortController().signal, now: () => 1 }))!;
+    const inspector = (await entry.loadInspector({ enabled: true, runtime, appId: "com.example.diagnostics", mountSignal: new AbortController().signal, now: () => 1 }))!;
     const snapshot = inspector.client.getSnapshot();
-    await runtime.apps.unregister("diagnostics");
+    await runtime.apps.unregister("com.example.diagnostics");
     expect(() => inspector.client.getSnapshot()).toThrow(/revoked|provenance/i);
     expect(() => inspector.client.exportSnapshot(snapshot)).toThrow(/revoked|provenance/i);
     inspector.dispose(); await runtime.dispose();
@@ -108,7 +108,7 @@ describe("heritage development boundary", () => {
     const route = graph.recognize("/music/SECRET_CURRENT_ARTIST");
     if (route.kind !== "match") throw Error("fixture mismatch");
     runtime.routes.routeGraph.commit({ graph, route });
-    const inspector = (await entry.loadInspector({ enabled: true, runtime, appId: "diagnostics", mountSignal: new AbortController().signal, now: () => 1 }))!;
+    const inspector = (await entry.loadInspector({ enabled: true, runtime, appId: "com.example.diagnostics", mountSignal: new AbortController().signal, now: () => 1 }))!;
     expect(inspector.client.getPage("Routes").rows).toContainEqual(expect.objectContaining({ kind: "route", status: "committed", parameterCount: 1 }));
     expect(inspector.client.getPage("Routes").rows.some(row => row.kind === "loader" && row.status === "ready")).toBe(false);
     expect(inspector.client.getPage("Transitions").rows).toEqual([]);

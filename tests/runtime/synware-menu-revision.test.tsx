@@ -20,19 +20,20 @@
 
 // @vitest-environment jsdom
 import React from "react";
+import { nseMenuModel } from "../../src/NSE/Menus/menuTypes";
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEMenuController } from "../../src/NSE/Menus/NSEMenuController";
+import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
 import type { NSEMenuRuntimePort } from "../../src/NSE/Menus/menuTypes";
 import { SynWareProvider } from "../../src/SynCloudOS/AppSDK/SynWareContext";
-import { useSynWareNSEMenuPort } from "../../src/SynCloudOS/AppSDK/SynWareNSEMenuPort";
+import { useNSEMenuPort } from "../../src/SynCloudOS/AppSDK/SynWareNSEMenuPort";
 import { createSynWareContextValue } from "../../src/SynCloudOS/AppSDK/createSynWareContextValue";
 import { commandValidationRequestKey } from "../../src/SynCloudOS/Commands/commandTypes";
 import { createTestRuntime, mountTestSynWareRuntime, registerTestSynWare } from "./helpers";
 
 const runtimes: ReturnType<typeof createTestRuntime>[] = [];
 const mounts: ReturnType<typeof mountTestSynWareRuntime>[] = [];
-const controllers: NSEMenuController[] = [];
+const controllers: NSEMenu[] = [];
 
 afterEach(async () => {
   for (const controller of controllers.splice(0)) controller.dispose();
@@ -45,21 +46,21 @@ function fixture() {
   const runtime = createTestRuntime();
   runtimes.push(runtime);
   const app = registerTestSynWare(runtime, {
-    schemaVersion: 1, id: "menu-revision", version: "1.0.0", title: "Menu revision",
+    schemaVersion: 1, bundleIdentifier: "com.example.menu-revision", version: "1.0.0", displayName: "Menu revision",
   });
-  const mount = mountTestSynWareRuntime(runtime, app.id);
+  const mount = mountTestSynWareRuntime(runtime, app.bundleIdentifier);
   mounts.push(mount);
-  runtime.focus.requestFocus(`application:${app.id}`);
+  runtime.focus.requestFocus(`application:${app.bundleIdentifier}`);
   const context = createSynWareContextValue(mount.runtime);
   let port!: NSEMenuRuntimePort;
   function Probe() {
-    port = useSynWareNSEMenuPort();
+    port = useNSEMenuPort();
     return null;
   }
   render(<SynWareProvider value={context}><Probe /></SynWareProvider>);
   const execute = vi.fn();
   const register = (title = "Original", handler = execute) => context.commands.register({
-    id: "menu-revision.action", responderId: context.responderId,
+    id: "com.example.menu-revision.action", responderId: context.responderId,
     title: { key: "menu-revision.action", fallback: title },
     payload: {
       description: "none",
@@ -70,8 +71,8 @@ function fixture() {
     scope: "application", defaultKeyBindings: [], undo: { kind: "none" }, execute: handler,
   });
   const registration = register();
-  const controller = new NSEMenuController({
-    model: { id: "actions", entries: [{ kind: "command", id: "action", commandId: "menu-revision.action" }] },
+  const controller = new NSEMenu({
+    [nseMenuModel]: { id: "actions", entries: [{ kind: "command", id: "action", commandId: "com.example.menu-revision.action" }] },
     runtime: port,
   });
   controllers.push(controller);
@@ -86,12 +87,12 @@ describe("scoped SynWare menu revision evidence", () => {
     expect(Object.keys(initial).sort()).toEqual(["registryGeneration", "responderGeneration"]);
     expect(initial).toEqual({
       registryGeneration: runtime.commands.inspect().generation,
-      responderGeneration: runtime.responders.generation,
+      responderGeneration: runtime.responders.generation + runtime.focus.getGeneration(),
     });
     expect(Object.isFrozen(initial)).toBe(true);
     registration.dispose();
     expect(port.commands.getPresentationGeneration().registryGeneration).toBeGreaterThan(initial.registryGeneration);
-    runtime.responders.register({ id: "menu-revision:child", kind: "control", parentId: "application:menu-revision", scopeId: "application:menu-revision" });
+    runtime.responders.register({ id: "menu-revision:child", kind: "control", parentId: "application:com.example.menu-revision", scopeId: "application:com.example.menu-revision" });
     expect(port.commands.getPresentationGeneration().responderGeneration).toBeGreaterThan(initial.responderGeneration);
     expect(initial.registryGeneration).toBeLessThan(port.commands.getPresentationGeneration().registryGeneration);
     expect(initial.responderGeneration).toBeLessThan(port.commands.getPresentationGeneration().responderGeneration);
@@ -132,7 +133,7 @@ describe("scoped SynWare menu revision evidence", () => {
     const { runtime, controller, execute } = fixture();
     await controller.open();
     const generation = runtime.responders.generation;
-    runtime.responders.register({ id: "menu-revision:child", kind: "control", parentId: "application:menu-revision", scopeId: "application:menu-revision" });
+    runtime.responders.register({ id: "menu-revision:child", kind: "control", parentId: "application:com.example.menu-revision", scopeId: "application:com.example.menu-revision" });
     expect(runtime.responders.generation).toBeGreaterThan(generation);
 
     await expect(controller.dispatch("action")).resolves.toMatchObject({
@@ -160,8 +161,8 @@ describe("scoped SynWare menu revision evidence", () => {
       payload: { description: "none", parse: () => ({ ok: true, value: undefined }) },
       scope: "runtime", defaultKeyBindings: [], undo: { kind: "none" }, execute,
     });
-    const controller = new NSEMenuController({
-      model: { id: "foreign", entries: [{ kind: "command", id: "action", commandId: "foreign.action" }] },
+    const controller = new NSEMenu({
+      [nseMenuModel]: { id: "foreign", entries: [{ kind: "command", id: "action", commandId: "foreign.action" }] },
       runtime: port,
     });
     controllers.push(controller);
@@ -177,8 +178,8 @@ describe("scoped SynWare menu revision evidence", () => {
     const readSource = vi.fn(() => "menu");
     const options = Object.defineProperty({}, "source", { enumerable: true, get: readSource });
     const pending = Promise.resolve().then(() => operation === "validateMany"
-      ? port.commands.validateMany([{ key: commandValidationRequestKey("action"), commandId: "menu-revision.action" }], options)
-      : port.commands[operation]("menu-revision.action", undefined, options));
+      ? port.commands.validateMany([{ key: commandValidationRequestKey("action"), commandId: "com.example.menu-revision.action" }], options)
+      : port.commands[operation]("com.example.menu-revision.action", undefined, options));
 
     await expect(pending).rejects.toMatchObject({ name: "SecurityError" });
     expect(readSource).not.toHaveBeenCalled();

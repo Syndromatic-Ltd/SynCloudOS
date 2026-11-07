@@ -45,14 +45,14 @@ describe("TextFX scoped binary-font host", () => {
     expect(first.font.shape("office").glyphs.length).toBeLessThan("office".length);
     expect(caches.get("textfx.font.bytes")?.stats()).toMatchObject({ entries: 1, hits: 1, misses: 1 });
     first.dispose();
-    expect(() => first.font.shape("A")).toThrow(/disposed/i);
+    expect(() => first.font.shape("A")).toThrow(expect.objectContaining({ code: "TFX_FONT_DISPOSED" }));
     expect(second.font.shape("A").glyphs).toHaveLength(1);
     caches.prune({ reason: "memory-warning", targetWeight: 0 });
     expect(caches.get("textfx.font.bytes")?.stats()).toMatchObject({ entries: 0 });
     expect(second.font.shape("B").glyphs).toHaveLength(1);
 
     scope.dispose();
-    expect(() => second.font.shape("A")).toThrow(/disposed/i);
+    expect(() => second.font.shape("A")).toThrow(expect.objectContaining({ code: "TFX_FONT_DISPOSED" }));
     host.dispose();
   });
 
@@ -100,7 +100,7 @@ describe("TextFX scoped binary-font host", () => {
     const scope = host.createScope(owner.signal);
     const registration = await scope.registerFont(noto(), new TFXFontDescriptor({ size: 16 }));
     owner.abort(new DOMException("mount retired", "AbortError"));
-    expect(() => registration.font.shape("A")).toThrow(/disposed/i);
+    expect(() => registration.font.shape("A")).toThrow(expect.objectContaining({ code: "TFX_FONT_DISPOSED" }));
 
     const live = host.createScope(new AbortController().signal);
     const caller = new AbortController();
@@ -245,9 +245,9 @@ describe("TextFX scoped binary-font host", () => {
 
   it("projects registration through isolated mounted text-layout clients and revokes with the mount", async () => {
     const runtime = createTestRuntime({ id: "runtime:tfx-mounted" });
-    const app = registerTestSynWare(runtime, { schemaVersion: 1, id: "tfx-consumer", version: "1.0.0", title: "TFX consumer" });
-    const first = mountTestSynWareRuntime(runtime, app.id);
-    const second = mountTestSynWareRuntime(runtime, app.id, `application:${app.id}:second`);
+    const app = registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.tfx-consumer", version: "1.0.0", displayName: "TFX consumer" });
+    const first = mountTestSynWareRuntime(runtime, app.bundleIdentifier);
+    const second = mountTestSynWareRuntime(runtime, app.bundleIdentifier, `application:${app.bundleIdentifier}:second`);
     const firstChanges = vi.fn();
     const secondChanges = vi.fn();
     first.runtime.textLayout.subscribeFontReadiness(firstChanges);
@@ -259,7 +259,7 @@ describe("TextFX scoped binary-font host", () => {
       expect(firstChanges).toHaveBeenCalledTimes(1);
       expect(secondChanges).toHaveBeenCalledTimes(1);
       first.dispose();
-      expect(() => firstFont.font.shape("A")).toThrow(/disposed/i);
+      expect(() => firstFont.font.shape("A")).toThrow(expect.objectContaining({ code: "TFX_FONT_DISPOSED" }));
       expect(secondFont.font.shape("A").glyphs).toHaveLength(1);
     } finally {
       first.dispose();
@@ -270,8 +270,8 @@ describe("TextFX scoped binary-font host", () => {
 
   it("invalidates an NSE layout when its scoped font readiness changes", async () => {
     const runtime = createTestRuntime({ id: "runtime:tfx-invalidation" });
-    const app = registerTestSynWare(runtime, { schemaVersion: 1, id: "tfx-layout", version: "1.0.0", title: "TFX layout" });
-    const mount = mountTestSynWareRuntime(runtime, app.id);
+    const app = registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.tfx-layout", version: "1.0.0", displayName: "TFX layout" });
+    const mount = mountTestSynWareRuntime(runtime, app.bundleIdentifier);
     const scoped = createSynWareNSETextLayoutPort(mount.runtime.textLayout);
     const manager = new NSELayoutManager({ service: {
       subscribeFontReadiness: scoped.subscribeFontReadiness.bind(scoped),

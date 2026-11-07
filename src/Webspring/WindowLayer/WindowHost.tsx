@@ -24,6 +24,7 @@ import {
   NSEControlRuntimeProvider,
   NSEFocusPortProvider,
   NSEOverlayProvider,
+  NSETooltipProvider,
   NSEWindowSurfaceBridgeProvider,
   NSEBorderlessWindowView,
   NSEHUDWindowView,
@@ -35,7 +36,6 @@ import {
   type NSEWindowHost,
   useNSEDeferredDisposal,
 } from "../../NSE/NSE";
-import { nseDeferredDisposalMicrotaskScheduler } from "../../NSE/hostComposition";
 import {
   resolveWindowPresentation,
   type ScreenSnapshot,
@@ -144,7 +144,7 @@ export function WindowHost({
       ? { key: chromeHandshakeKey, ready: false, failed: true }
       : state),
   }), [chromeHandshakeKey, chromeSlotNode]);
-  const presentation = resolveWindowPresentation(record, screen);
+  const presentation = resolveWindowPresentation(record, screen, controller.geometryState);
   const focusPort = useRuntimeNSEFocusPort(controller.windowResponderId);
   const overlayPort = useRuntimeNSEOverlayPort(controller.windowResponderId);
   const controlPort = useRuntimeNSEControlPort();
@@ -167,7 +167,7 @@ export function WindowHost({
     ),
     dismiss: transientBridge.dismiss,
   } : null, [controller.id, transientBridge]);
-  useNSEDeferredDisposal(transientBridge, nseDeferredDisposalMicrotaskScheduler);
+  useNSEDeferredDisposal(transientBridge);
   const moveHandleProps = useWindowMoveResize({
     manager,
     windowControllerId: controller.id,
@@ -293,6 +293,7 @@ export function WindowHost({
         defaultParentResponderId={controller.windowResponderId}
         portalContainer={overlayLayerNode}
       >
+        <NSETooltipProvider>
         <NSEControlRuntimeProvider port={controlPort}>
           <NSEFocusPortProvider port={focusPort}>
             {childTransientBridge ? (
@@ -300,6 +301,7 @@ export function WindowHost({
             ) : hostedContent}
           </NSEFocusPortProvider>
         </NSEControlRuntimeProvider>
+      </NSETooltipProvider>
       </NSEOverlayProvider>
     </WindowChromeSlotContext.Provider>
   );

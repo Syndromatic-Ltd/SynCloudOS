@@ -309,7 +309,7 @@ function isDeveloperDisplayAction(request: SynCloudOSPolicyRequest) {
 }
 
 function resourceForRequest(request: SynCloudOSPolicyRequest) {
-  return request.app?.id ?? request.route ?? request.href ?? request.action;
+  return request.app?.bundleIdentifier ?? request.route ?? request.href ?? request.action;
 }
 
 function summariseContextValue(value: unknown): string | number | boolean | null {
@@ -338,7 +338,7 @@ function summariseOrigin(request: SynCloudOSPolicyRequest, resource?: string): S
     origin: request.origin,
     source: request.source,
     resource,
-    appId: request.app?.id,
+    appId: request.app?.bundleIdentifier,
     route: request.route,
     href: request.href
   };
@@ -451,6 +451,15 @@ function appendTrace(decision: SynCloudOSPolicyDecision, entry: SynCloudOSPolicy
   return next;
 }
 
+/**
+ * Names the missing capabilities and the role that lacks them, so a denial says what to grant: a
+ * host grants role capabilities with the policyProfile passed to mountSynCloudOS.
+ */
+function missingCapabilityReason(what: string, subject: SynCloudOSPolicySubject, missing: readonly string[]): string {
+  const names = missing.join(", ");
+  return `${what} requires additional capabilities: ${names}. The role "${subject.role}" does not hold ${missing.length === 1 ? "it" : "them"}; the host grants role capabilities in its policy profile (policyProfile.roles).`;
+}
+
 function baseDecision(
   request: SynCloudOSPolicyRequest,
   subject: SynCloudOSPolicySubject,
@@ -475,7 +484,7 @@ function baseDecision(
     subjectRole: subject.role,
     subjectId: subject.user?.id,
     resource,
-    appId: request.app?.id,
+    appId: request.app?.bundleIdentifier,
     route: request.route,
     href: request.href,
     at: Date.now(),
@@ -509,7 +518,7 @@ function decide(
   const subject = getSubject(request, registrations);
   const policy = appPolicy(request.app);
   const app = request.app ?? null;
-  const bundlePermissions = request.bundlePermissions ?? (app?.id ? BundleLoader.getBundle(app.id)?.permissions ?? [] : []);
+  const bundlePermissions = request.bundlePermissions ?? (app?.bundleIdentifier ? BundleLoader.getBundle(app.bundleIdentifier)?.permissions ?? [] : []);
   const requiredCapabilities = unique([
     ...(request.requiredCapabilities ?? []),
     ...(policy.requiredCapabilities ?? [])
@@ -581,14 +590,20 @@ function decide(
       explicitlyRequiresLogin ||
       (!isPublicByManifest && mode === "mixed");
     if (requiresLogin && !subject.isAuthenticated) {
-      return baseDecision(request, subject, false, "This app launch requires an authorised session.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
+      // When only the missing manifest flag stands in the way, say so: with sign-in disabled no
+      // session can ever exist, and the fix is one line in the app's Info.ts.
+      const onlyNotPublic = mode === "mixed" && !explicitlyRequiresLogin && !isPublicByManifest;
+      const reason = onlyNotPublic
+        ? "This app launch requires an authorised session. The app is not public: to open it without signing in, set runtime: { policy: { public: true } } in its Info.ts."
+        : "This app launch requires an authorised session.";
+      return baseDecision(request, subject, false, reason, requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
     }
     if (!hasRole(subject, requiredRoles)) {
       return baseDecision(request, subject, false, "This app launch requires a different role.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
     }
     const missingCapabilities = requiredCapabilities.filter((capability) => !hasCapability(subject, capability));
     if (missingCapabilities.length > 0) {
-      return baseDecision(request, subject, false, "This app launch requires additional capabilities.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
+      return baseDecision(request, subject, false, missingCapabilityReason("This app launch", subject, missingCapabilities), requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
     }
     return baseDecision(request, subject, true, "App launch allowed.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
   }
@@ -602,7 +617,7 @@ function decide(
   }
   const missingCapabilities = requiredCapabilities.filter((capability) => !hasCapability(subject, capability));
   if (missingCapabilities.length > 0) {
-    return baseDecision(request, subject, false, "This action requires additional capabilities.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
+    return baseDecision(request, subject, false, missingCapabilityReason("This action", subject, missingCapabilities), requiredCapabilities, requiredRoles, requiredAccessClasses, trace);
   }
 
   return baseDecision(request, subject, true, "No policy blocked this action.", requiredCapabilities, requiredRoles, requiredAccessClasses, trace);

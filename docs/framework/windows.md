@@ -9,9 +9,9 @@ The manifest's `windowDefaults` block sets the first window the host creates for
 ```ts
 export default {
   schemaVersion: 1,
-  id: "com.example.notes",
+  bundleIdentifier: "com.example.notes",
   version: "1.0.0",
-  title: "Notes",
+  displayName: "Notes",
   windowDefaults: {
     title: "Notes",
     width: 920,
@@ -43,13 +43,13 @@ A panel can become key, which makes it the target of keyboard commands, without 
 
 ## Observe your windows
 
-`useSynWareWindow()` returns the window client and a live snapshot of the windows your application owns.
+`useWindow()` returns the window client and a live snapshot of the windows your application owns.
 
 ```tsx
-import { useSynWareWindow } from "@syndromatic/syncloudos/sdk";
+import { useWindow } from "@syndromatic/syncloudos/sdk";
 
 export function WindowStatus() {
-  const { client, snapshot } = useSynWareWindow();
+  const { client, snapshot } = useWindow();
   return (
     <p>
       {snapshot.owned.length} window(s) open. Key window:{" "}
@@ -65,10 +65,10 @@ The snapshot's `state` is `"open"` or `"closed"`, `current` is the window that h
 ## Open a window for a document
 
 ```tsx
-import { useSynWareWindow } from "@syndromatic/syncloudos/sdk";
+import { useWindow } from "@syndromatic/syncloudos/sdk";
 
 export function useOpenNoteWindow() {
-  const { client } = useSynWareWindow();
+  const { client } = useWindow();
   return (documentId: string) =>
     client.openDocumentWindow({
       documentId,
@@ -95,12 +95,11 @@ On a phone or a narrow tablet the host presents each window according to its `mo
 
 ## Custom title bars
 
-Set `windowDefaults.chrome` to `"custom"` and supply a `windowChrome` component in the definition to draw the title bar yourself. The component receives the window's state and actions.
+Set `windowDefaults.chrome` to `"custom"` and export a named `windowChrome` component from the application entry to draw the title bar yourself. The component receives the window's state and actions.
 
 ```tsx
 import type { PointerEvent } from "react";
-import { createSynWare, type AppWindowChromeProps } from "@syndromatic/syncloudos/sdk";
-import manifest from "./Info";
+import type { AppWindowChromeProps } from "@syndromatic/syncloudos/sdk";
 
 function Chrome(props: AppWindowChromeProps) {
   const move = props.createMoveRegionProps();
@@ -125,7 +124,8 @@ function Chrome(props: AppWindowChromeProps) {
   );
 }
 
-export default createSynWare({ manifest, root: () => null, windowChrome: Chrome });
+export const windowChrome = Chrome;
+export default function App() { return <main>Application content</main>; }
 ```
 
 `createMoveRegionProps()` returns the pointer handler that drags the window. The handler takes a plain structural event, so a React component forwards the fields it needs, as the example shows. Use `"frameless"` when the application draws no title bar at all. Give every custom control a label and a touch target of at least 44 by 44 CSS pixels, even when the painted glyph is smaller.
@@ -152,3 +152,69 @@ The host saves each window's bounds, minimised and zoomed state, order and docum
 ## Accessibility
 
 System title bars use labelled buttons with hit targets of at least 44 by 44 CSS pixels. Modal windows and sheets expose the dialog role, trap focus and make the content behind them inert. Reduced motion removes transform travel without changing ordering, focus or completion, and forced colours mode draws visible outlines around controls and focus.
+
+## Alerts and sheets
+
+An alert is an object, after `NSAlert`. Configure it, present it as a sheet on a window, and await the response:
+
+```ts
+const alert = new NSEAlert();
+alert.messageText = `Delete “${post.title}”?`;
+alert.informativeText = "You cannot undo this action.";
+alert.addButton("Delete").hasDestructiveAction = true;
+alert.addButton("Cancel");
+if (await alert.beginSheetModal(this.window) === NSEModalResponse.alertFirstButtonReturn) this.delete(post);
+```
+
+| Member | Purpose |
+| --- | --- |
+| `messageText`, `informativeText` | The title and the text under it. `messageText` is required to present. |
+| `alertStyle` | `"warning"` (default), `"informational"` or `"critical"`. |
+| `addButton(title)` | Adds a button and returns it (`NSEAlertButton`: `title`, `keyEquivalent`, `hasDestructiveAction`). The first button takes Return; a button titled "Cancel" takes Escape. With none, the alert shows OK. |
+| `buttons` | The buttons in the order they were added. |
+| `beginSheetModal(window)` | Attaches the alert to `window` as a sheet, which blocks the window as any sheet does, and resolves with `NSEModalResponse.alertFirstButtonReturn + index` of the chosen button. Escape, or closing the window, chooses the Escape button, else the last. |
+
+`NSEModalResponse` names AppKit's responses: `OK`, `cancel`, `stop`, `abort`, `continue` and `alertFirstButtonReturn`, `alertSecondButtonReturn`, `alertThirdButtonReturn`. `window.endSheet(alert, returnCode?)` ends a presented alert (`NSWindow.endSheet(_:returnCode:)`); its promise resolves with `returnCode`, or the Escape response when omitted.
+
+A window controller passes `this.window`; a view controller passes `this.view.window` (`NSView.window`), which follows its parents and presenters to the window, or is `null` before it is in one. Present an alert from an action and return; do not await the alert inside the action. An action that fails after an `await` should show its alert once it has finished.
+
+### Sheets
+
+Custom content is a view controller presented as a sheet, after `NSViewController.presentAsSheet(_:)`:
+
+```ts
+const sheet = this.presentAsSheet(LinkSheetViewController, this);   // or presentAsSheet(instance)
+sheet.preferredContentSize = { width: 480, height: 0 };
+// later
+this.dismiss(sheet);   // or, inside the sheet, this.dismiss()
+```
+
+The sheet attaches to the window: it slides down from the top edge of the window's content, under the title bar, toolbar and accessory row, and is drawn on the alert panel. While it is attached the rest of the window takes no input (the toolbar, accessories and content are inert) and the close button and Close command are refused, as `performClose(_:)` refuses with a sheet attached. Its actions reach its presenter after itself. Its `title`, when set, is drawn above it, and `preferredContentSize.width` sets its width (capped to the window). Escape and the backdrop send the sheet `cancelOperation()` when it defines one, and otherwise dismiss it. The presenter owns its sheets: `dismiss` disposes the sheet, and disposing the presenter disposes them. `presentedViewControllers` and `presentingViewController` report the relationship.
+
+### Modal windows
+
+A view controller can also be presented as an application-modal window, centred over the application, after `NSViewController.presentAsModalWindow(_:)`. Use it for a panel that is not tied to one window's content, such as preferences or Jump To:
+
+```ts
+@action showPreferences() { this.presentAsModalWindow(PreferencesViewController); }
+```
+
+The window takes the controller's `title` as its title and `preferredContentSize.width` as its width; without one it sizes to its content. Atmo draws it on the modal plate. The rest of the application takes no input until it is dismissed. Escape sends the controller `cancelOperation()` when it defines one, and otherwise dismisses it. Its actions reach its presenter after itself, and the presenter owns it: `dismiss` disposes it.
+
+### Popovers
+
+A popover is a view controller presented next to an element, after `NSViewController.present(_:asPopoverRelativeTo:of:preferredEdge:behavior:)`:
+
+```ts
+// In a button's click handler:
+const popover = this.presentAsPopover(PublishOptionsViewController, { of: event.currentTarget }, this);
+```
+
+| `NSEPopoverPositioning` | Meaning |
+| --- | --- |
+| `of` | The element the popover points at (NSPopover's positioning view). Required. |
+| `preferredEdge` | The edge of `of` it opens from: `"maxY"` (below, the default), `"minY"` (above), `"minX"` or `"maxX"`. It moves to the other side when there is no room. |
+| `behavior` | `"transient"` (the default) closes on Escape or a click elsewhere; `"semitransient"` closes on Escape only; `"applicationDefined"` closes only when dismissed. |
+
+The popover takes the controller's `title` as its accessible name and `preferredContentSize` as its size. On a compact display it is presented as a sheet. It closes when `of` leaves the document. Closing dismisses (disposes) the controller, so a controller that tracks whether its popover is open does so in `didDispose`. To toggle a popover from its button, dismiss the open one rather than presenting a second.
+

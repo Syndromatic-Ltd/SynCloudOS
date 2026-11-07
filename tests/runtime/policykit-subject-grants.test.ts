@@ -34,7 +34,7 @@ function subject(role: SynCloudOSPolicySubject["role"], capabilities: string[]):
 const systemSubject = subject("system", ["*"]);
 const employeeSubject = subject("employee", ["app.open.protected"]);
 const protectedApp = createTestManifest({
-  id: "grant-protected-app",
+  bundleIdentifier: "com.example.grant-protected-app",
   policy: { requiresLogin: true, requiredRoles: ["employee"], requiredCapabilities: ["app.open.protected"] },
 });
 

@@ -27,38 +27,13 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance";
 import { atmoAppearance } from "../../src/NSE/Themes/Atmo";
-import {
-  NSEActivityButton,
-  NSENotificationButton,
-  NSEAppMenu,
-  NSEButtonHeader,
-  NSEEditMenu,
-  NSEHeader,
-  NSEHelpMenu,
-  NSEIntegerPicker,
-  NSEDatePicker,
-  NSEListSelector,
-  NSECroppableImage,
-  NSEImageView,
-  NSERotatingImage,
-  type NSERotatingImageHandle,
-  NSEMenu,
-  NSEStandaloneControlHost,
-  NSEInputBox,
-  NSEPasswordField,
-  NSEPickerGroup,
-  NSESearchField,
-  NSEPopupList,
-  NSEPrevNextBanner,
-  NSEProgressSlider,
-  NSERadioToolButtonGroup,
-  NSERoundedInput,
-  NSETabGroup,
-  NSETimePicker,
-  NSEToolButton,
-  NSEToolButtonGroup,
-  NSEToolInput
-} from "../../src/NSE/public/controls";
+import { NSEButton, NSEImageView, NSESearchField, NSESegmentedControl } from "../../src/NSE/public/controls";
+import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
+import { HFXHapticEngine } from "../../src/FX/HapticsFX/HFXHapticEngine";
+import { NSEFeedbackProvider } from "../../src/NSE/Feedback";
+import { NSEDateEntry } from "../../src/NSE/DateTime/Pickers/dateEntry";
+import { NSETimeEntry } from "../../src/NSE/DateTime/Pickers/timeEntry";
+import { NSEMenuView } from "../../src/NSE/Menus/NSEMenuView";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 
 afterEach(() => {
@@ -80,182 +55,51 @@ function renderWithAppearance(children: React.ReactNode) {
 
 describe("NSE extended wrapper controls", () => {
   it("renders extended control wrappers through semantic NSE owners", () => {
-    const onPrevious = vi.fn();
-    const onNext = vi.fn();
-    const onHelp = vi.fn();
-    const onAppMenuSelect = vi.fn();
-
     renderWithAppearance(
       <div>
-        <NSEActivityButton active caption="Sync" />
-        <NSENotificationButton variant="negative" label="Dismiss" />
-        <NSEButtonHeader content="Actions" />
-        <NSEToolButton label="Back" icon="/icons/back.png" />
-        <NSEToolButtonGroup label="Tools">
-          <NSEToolButton label="Refresh" showLabel>Refresh</NSEToolButton>
-        </NSEToolButtonGroup>
-        <NSERadioToolButtonGroup
-          label="Calendar view"
-          value="day"
-          options={[
-            { value: "day", label: "Day" },
-            { value: "week", label: "Week" }
-          ]}
-        />
-        <NSETabGroup
-          label="Sections"
-          value="files"
-          options={[
-            { value: "files", label: "Files" },
-            { value: "details", label: "Details" }
-          ]}
-        />
-        <NSEPasswordField label="Secret" hint="Password" />
-        <NSERoundedInput label="Name" hint="Full name" />
-        <NSEToolInput label="Filter" hint="Filter items" />
-        <NSEHeader title="Header" actions={<NSEToolButton label="Info">Info</NSEToolButton>} />
-        <NSEPrevNextBanner onPrevious={onPrevious} onNext={onNext}>Today</NSEPrevNextBanner>
-        <NSEListSelector label="Provider" value="one" items={["One", "Two"]} />
-        <NSEPopupList label="Popup actions" items={["Archive", "Pin"]} />
-        <NSEPickerGroup label="Picker family">
-          <NSEIntegerPicker label="Count" value={2} min={1} max={3} />
-        </NSEPickerGroup>
-        <NSEDatePicker aria-label="Due date" value={{ year: 2026, month: 6, day: 18 }} minimum={{ year: 2026, month: 6, day: 1 }} maximum={{ year: 2026, month: 6, day: 30 }} locale="en-GB"  timeZone="Europe/London" mode="text" editor="segments"/>
-        <NSETimePicker aria-label="Start time" value={{ hour: 9, minute: 30, second: 0 }} minimum={{ hour: 8, minute: 0, second: 0 }} maximum={{ hour: 10, minute: 0, second: 0 }} minuteStep={15}  locale="en-GB" timeZone="Europe/London" editor="segments"/>
-        <NSEProgressSlider label="Intensity" value={32} progressLabel="Download progress" />
-        <NSEAppMenu
-          open
-          title="App menu"
-          items={[{ value: "new", label: "New Card" }]}
-          onSelect={onAppMenuSelect}
-        />
-        <NSEEditMenu autoDisableItems={false} showShortcuts />
-        <NSEHelpMenu target="https://example.com/help" onOpenHelp={onHelp} />
+        <NSEButton bezelStyle="texturedRounded" title="Back" image="/icons/back.png" imagePosition="imageOnly" />
+        <NSESegmentedControl aria-label="Tools" segmentStyle="texturedRounded" selection={{ mode: "momentary", selectedIds: new Set() }} items={[{ id: "refresh", label: "Refresh", image: "/icons/refresh.png" }]} />
+        <NSESegmentedControl aria-label="Calendar view" segmentStyle="texturedRounded" selection={{ mode: "select-one", selectedIds: new Set(["day"]), allowsEmpty: false }} items={[{ id: "day", label: "Day" }, { id: "week", label: "Week" }]} />
+        <NSEDateEntry aria-label="Due date" value={{ year: 2026, month: 6, day: 18 }} minimum={{ year: 2026, month: 6, day: 1 }} maximum={{ year: 2026, month: 6, day: 30 }} locale="en-GB"  timeZone="Europe/London" mode="text" editor="segments"/>
+        <NSETimeEntry aria-label="Start time" value={{ hour: 9, minute: 30, second: 0 }} minimum={{ hour: 8, minute: 0, second: 0 }} maximum={{ hour: 10, minute: 0, second: 0 }} minuteStep={15}  locale="en-GB" timeZone="Europe/London" editor="segments"/>
       </div>
     );
 
-    expect(screen.getByRole("button", { name: /sync/i }).getAttribute("data-active")).toBe("true");
-    expect(screen.getByRole("button", { name: "Dismiss" }).getAttribute("data-variant")).toBe("negative");
-    expect(screen.getByRole("button", { name: "Actions" }).classList.contains("nse-extended-button-header")).toBe(true);
     expect(screen.getByRole("toolbar", { name: "Tools" }).classList.contains("nse-extended-tool-button-group")).toBe(true);
     expect(screen.getByRole("radio", { name: "Day" }).getAttribute("aria-checked")).toBe("true");
-    expect(screen.getByRole("tab", { name: "Files" }).getAttribute("aria-selected")).toBe("true");
-    expect(screen.getByLabelText("Secret").getAttribute("type")).toBe("password");
-    expect(screen.getByLabelText("Name").getAttribute("placeholder")).toBe("Full name");
-    expect(screen.getByLabelText("Filter").getAttribute("placeholder")).toBe("Filter items");
-    expect(screen.getByText("Header")).not.toBeNull();
-    expect(screen.getByText("Today")).not.toBeNull();
-    expect(screen.getByRole("group", { name: "Picker family" })).not.toBeNull();
     expect(screen.getByRole("group", { name: "Due date" }).getAttribute("data-locale-order")).toBe("day-month-year");
     expect(screen.getByRole("group", { name: "Start time" }).getAttribute("data-value")).toBe("09:30:00");
-    expect(screen.getByRole("progressbar", { name: "Download progress" })).not.toBeNull();
-    expect(screen.getByText("App menu")).not.toBeNull();
-    expect(screen.getByRole("menuitem", { name: "New Card" })).not.toBeNull();
-    expect(screen.getByRole("menuitem", { name: /select all\s*(?:Ctrl|Cmd)\+A/i })).not.toBeNull();
-
-    fireEvent.click(screen.getByRole("button", { name: "Previous" }));
-    fireEvent.click(screen.getByRole("button", { name: "Next" }));
-    fireEvent.click(screen.getByRole("button", { name: "Help" }));
-    fireEvent.click(screen.getByRole("menuitem", { name: "New Card" }));
-
-    expect(onPrevious).toHaveBeenCalledTimes(1);
-    expect(onNext).toHaveBeenCalledTimes(1);
-    expect(onHelp).toHaveBeenCalledWith("https://example.com/help");
-    expect(onAppMenuSelect).toHaveBeenCalledWith("new");
   });
 
-  it("maps ListSelector and PopupList selections onto current picker and menu primitives", async () => {
-    const onListValueChange = vi.fn();
-    const onListChange = vi.fn();
-    const onListSelect = vi.fn();
-    const onPopupSelect = vi.fn();
-
+  it("puts a segmented control's className on its root and plays its haptic for every segment style", () => {
+    const haptic = vi.fn();
+    const engine = new HFXHapticEngine({ supported: true, trigger: haptic, cancel: vi.fn(), dispose: vi.fn() });
+    const onSelectionChange = vi.fn();
     renderWithAppearance(
-      <div>
-        <NSEListSelector
-          label="Provider"
-          value="one"
-          items={[
-            { value: "one", label: "One" },
-            { value: "two", label: "Two" }
-          ]}
-          onValueChange={onListValueChange}
-          onChange={onListChange}
-          onSelect={onListSelect}
-        />
-        <NSEPopupList
-          label="Actions"
-          items={[
-            { value: "archive", label: "Archive" },
-            { value: "pin", label: "Pin" }
-          ]}
-          onSelect={onPopupSelect}
-        />
-      </div>
+      <NSEFeedbackProvider value={engine}>
+        <NSESegmentedControl aria-label="Edit controls" className="app-edit-controls" segmentStyle="texturedRounded" haptic="success" selection={{ mode: "momentary", selectedIds: new Set() }} items={[{ id: "done", label: "Done" }, { id: "reset", label: "Reset" }]} onSelectionChange={onSelectionChange} />
+        <NSESegmentedControl aria-label="View" className="app-view-switcher" haptic="success" selection={{ mode: "select-one", selectedIds: new Set(["list"]), allowsEmpty: false }} items={[{ id: "list", label: "List" }, { id: "grid", label: "Grid" }]} />
+      </NSEFeedbackProvider>
     );
 
-    fireEvent.click(screen.getByRole("button", { name: /provider one/i }));
-    fireEvent.click(await screen.findByRole("option", { name: "Two" }));
-
-    expect(onListValueChange).toHaveBeenCalledWith("two");
-    expect(onListChange).toHaveBeenCalledWith("two", "one");
-    expect(onListSelect).toHaveBeenCalledWith(expect.objectContaining({ value: "two" }), "two");
-
-    fireEvent.click(screen.getByRole("button", { name: "Actions" }));
-    fireEvent.click(await screen.findByRole("menuitem", { name: "Archive" }));
-
-    await waitFor(() => expect(onPopupSelect).toHaveBeenCalledWith("archive", expect.objectContaining({ value: "archive" })));
+    expect(screen.getByRole("toolbar", { name: "Edit controls" }).classList.contains("app-edit-controls")).toBe(true);
+    expect(screen.getByRole("group", { name: "View" }).classList.contains("app-view-switcher")).toBe(true);
+    const reset = screen.getByRole("button", { name: "Reset" });
+    fireEvent.pointerDown(reset);
+    fireEvent.click(reset);
+    expect(onSelectionChange).toHaveBeenCalledWith(expect.objectContaining({ selectedIds: new Set(["reset"]) }));
+    expect(haptic).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: "Grid" }));
+    expect(haptic).toHaveBeenCalledTimes(2);
   });
 
-  it("keeps tab and progress slider wrappers controlled through their aliases", async () => {
-    const onTabChange = vi.fn();
-    const onSliderValueChange = vi.fn();
-    const onPositionChange = vi.fn();
-
-    renderWithAppearance(
-      <div>
-        <NSETabGroup
-          label="Views"
-          value="day"
-          onValueChange={onTabChange}
-          options={[
-            { value: "day", label: "Day" },
-            { value: "week", label: "Week" }
-          ]}
-        />
-        <NSEProgressSlider
-          label="Volume"
-          position={10}
-          minimum={0}
-          maximum={100}
-          snap={5}
-          lockBar
-          onValueChange={onSliderValueChange}
-          onPositionChange={onPositionChange}
-          progressLabel="Volume progress"
-        />
-      </div>
-    );
-
-    fireEvent.keyDown(screen.getByRole("tab", { name: "Day" }), { key: "ArrowRight" });
-    expect(onTabChange).toHaveBeenCalledWith("week");
-
-    fireEvent.change(screen.getByRole("slider", { name: "Volume" }), { target: { value: "35" } });
-
-    await waitFor(() => expect(onSliderValueChange).toHaveBeenCalledWith(35));
-    expect(onPositionChange).toHaveBeenCalledWith(35);
-    expect(screen.getByRole("progressbar", { name: "Volume progress" }).getAttribute("aria-valuemax")).toBe("100");
-  });
-
-  it("maps integer, date, and time pickers to controlled NSE picker values", async () => {
-    const onIntegerChange = vi.fn();
+  it("maps date and time pickers to controlled NSE picker values", async () => {
     const onDateChange = vi.fn();
     const onTimeChange = vi.fn();
 
     renderWithAppearance(
       <div>
-        <NSEIntegerPicker label="Count" value={1} min={1} max={3} onValueChange={onIntegerChange} />
-        <NSEDatePicker
+        <NSEDateEntry
           aria-label="Ship date"
           value={{ year: 2026, month: 6, day: 18 }}
           minimum={{ year: 2026, month: 6, day: 1 }}
@@ -263,7 +107,7 @@ describe("NSE extended wrapper controls", () => {
           locale="en-US"
           onValueChange={onDateChange}
          timeZone="Europe/London" mode="text" editor="segments"/>
-        <NSETimePicker
+        <NSETimeEntry
           aria-label="Alarm"
           value={{ hour: 9, minute: 0, second: 0 }}
           minimum={{ hour: 8, minute: 0, second: 0 }}
@@ -273,10 +117,6 @@ describe("NSE extended wrapper controls", () => {
          locale="en-GB" timeZone="Europe/London" editor="segments"/>
       </div>
     );
-
-    fireEvent.click(screen.getByRole("button", { name: "Count 1" }));
-    fireEvent.click((await screen.findAllByRole("option", { name: "3" })).find((option) => option.tagName === "BUTTON")!);
-    expect(onIntegerChange).toHaveBeenCalledWith(3);
 
     // Segment editors are hosted Atmo pickers: open by their "{label} {value}" name.
     fireEvent.click(screen.getByRole("button", { name: "Day 18" }));
@@ -292,7 +132,7 @@ describe("NSE extended wrapper controls", () => {
     const onSelect = vi.fn();
 
     renderWithAppearance(
-      <NSEMenu
+      <NSEMenuView
         label="Nested"
         onSelect={onSelect}
         items={[
@@ -327,27 +167,31 @@ describe("NSE extended wrapper controls", () => {
     await waitFor(() => expect(onSelect).toHaveBeenCalledWith("export"));
   });
 
-  it("maps NotificationButton variants onto the button tone vocabulary", () => {
-    // Notification buttons: default = medium, alternate = dark, affirmative = green, negative = red.
+  it("draws the default, destructive and appearance buttons with the theme's art for each", () => {
     renderWithAppearance(
       <div>
-        <NSENotificationButton variant="default" label="Default note" />
-        <NSENotificationButton variant="alternate" label="Alternate note" />
-        <NSENotificationButton variant="affirmative" label="Affirm note" />
-        <NSENotificationButton variant="negative" label="Negative note" />
+        <NSEButton title="Plain" />
+        <NSEButton title="Light" appearance="aqua" />
+        <NSEButton title="Dark" appearance="darkAqua" />
+        <NSEButton title="Save" keyEquivalent={"\r"} />
+        <NSEButton title="Delete" hasDestructiveAction />
+        <NSEButton title="Tool" bezelStyle="texturedRounded" />
       </div>
     );
 
-    expect(screen.getByRole("button", { name: "Default note" }).getAttribute("data-tone")).toBe("medium");
-    expect(screen.getByRole("button", { name: "Alternate note" }).getAttribute("data-tone")).toBe("dark");
-    expect(screen.getByRole("button", { name: "Affirm note" }).getAttribute("data-tone")).toBe("affirmative");
-    expect(screen.getByRole("button", { name: "Negative note" }).getAttribute("data-tone")).toBe("negative");
+    expect(screen.getByRole("button", { name: "Plain" }).getAttribute("data-tone")).toBe("medium");
+    expect(screen.getByRole("button", { name: "Light" }).getAttribute("data-tone")).toBe("light");
+    expect(screen.getByRole("button", { name: "Dark" }).getAttribute("data-tone")).toBe("dark");
+    expect(screen.getByRole("button", { name: "Save" }).getAttribute("data-tone")).toBe("affirmative");
+    expect(screen.getByRole("button", { name: "Save" }).getAttribute("data-key-equivalent")).toBe("default");
+    expect(screen.getByRole("button", { name: "Delete" }).getAttribute("data-tone")).toBe("negative");
+    expect(screen.getByRole("button", { name: "Tool" }).getAttribute("data-tone")).toBe("dark");
   });
 
   it("renders a 12-hour TimePicker with an AM/PM field when is24HrMode is false", () => {
     // 12-hour time picker mode: hours 1–12 + AM/PM; 13:30 → 1:30 PM. The committed
     // value stays 24-hour "13:30". See controls/picker/TimePicker.js (is24HrMode + ampm field).
-    renderWithAppearance(<NSETimePicker aria-label="Alarm" value={{ hour: 13, minute: 30, second: 0 }} hourCycle="h12"  locale="en-GB" timeZone="Europe/London" editor="segments"/>);
+    renderWithAppearance(<NSETimeEntry aria-label="Alarm" value={{ hour: 13, minute: 30, second: 0 }} hourCycle="h12"  locale="en-GB" timeZone="Europe/London" editor="segments"/>);
 
     expect(screen.getByRole("group", { name: "Alarm" }).getAttribute("data-value")).toBe("13:30:00");
     expect(screen.getByRole("group", { name: "Alarm" }).getAttribute("data-hour-mode")).toBe("12");
@@ -357,40 +201,10 @@ describe("NSE extended wrapper controls", () => {
 
   it("hides DatePicker fields via hideMonth/hideDay/hideYear", () => {
     // DatePicker can omit individual fields.
-    renderWithAppearance(<NSEDatePicker aria-label="Due" value={{ year: 2026, month: 6, day: 18 }}  locale="en-GB"  hiddenFields={["year"]} timeZone="Europe/London" mode="text" editor="segments"/>);
+    renderWithAppearance(<NSEDateEntry aria-label="Due" value={{ year: 2026, month: 6, day: 18 }}  locale="en-GB"  hiddenFields={["year"]} timeZone="Europe/London" mode="text" editor="segments"/>);
 
     expect(screen.getByRole("button", { name: "Day 18" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: /^Year / })).toBeNull();
-  });
-
-  it("anchors the AppMenu top-left by default and supports top-right placement", () => {
-    // AppMenu drops from the top-left status-bar corner; "top-right" is an NSE option
-    // for wiring under the rightSlot / User Info button. See controls/menu/AppMenu.js.
-    const { rerender } = renderWithAppearance(
-      <NSEAppMenu open title="App" items={[{ value: "about", label: "About" }]} />
-    );
-    expect(
-      document.querySelector(".nse-extended-app-menu-popup")?.getAttribute("data-app-menu-placement")
-    ).toBe("top-left");
-
-    rerender(
-        <NSEAppMenu open title="App" placement="top-right" items={[{ value: "about", label: "About" }]} />
-      );
-    expect(
-      document.querySelector(".nse-extended-app-menu-popup")?.getAttribute("data-app-menu-placement")
-    ).toBe("top-right");
-  });
-
-  it("renders the ProgressSlider altBar as a secondary fill behind the primary bar", () => {
-    // ProgressSlider altBarPosition: a secondary (buffer) fill drawn behind the
-    // primary bar. Primary = barPosition.
-    const { container } = renderWithAppearance(
-      <NSEProgressSlider value={20} barPosition={40} altBarPosition={72} progressLabel="Buffer" />
-    );
-    const bar = container.querySelector(".nse-extended-progress-slider-bar") as HTMLElement;
-    expect(bar.style.getPropertyValue("--nse-control-progress").trim()).toBe("40%");
-    expect(bar.style.getPropertyValue("--nse-control-progress-alt").trim()).toBe("72%");
-    expect(container.querySelector(".nse-control-progress-alt")).not.toBeNull();
   });
 
   it("renders NSEImageView with the source image and zoom controls", () => {
@@ -400,34 +214,6 @@ describe("NSE extended wrapper controls", () => {
     expect(container.querySelector(".nse-control-sizeable-image-media")?.getAttribute("src")).toBe("/sample.jpg");
     expect(screen.getByRole("button", { name: "Zoom in" })).not.toBeNull();
     expect(screen.getByRole("button", { name: "Zoom out" })).not.toBeNull();
-  });
-
-  it("renders NSECroppableImage with a crop frame and Crop control", () => {
-    // CroppableImage: zoom/pan a SizeableImage; Crop reports the visible source region.
-    const { container } = renderWithAppearance(<NSECroppableImage src="/crop.jpg" alt="Crop" />);
-
-    expect(container.querySelector(".nse-control-croppable-image-frame")).not.toBeNull();
-    expect(screen.getByRole("button", { name: "Crop" })).not.toBeNull();
-  });
-
-  it("renders NSERotatingImage spinning by default with imageSrc, and stops via the running prop", () => {
-    // RotatingImage: imageSrc painted as background; spins while running; start()/stop() toggle it.
-    const ref = React.createRef<NSERotatingImageHandle>();
-    const { container, rerender } = renderWithAppearance(
-      <NSERotatingImage ref={ref} imageSrc="/spin.png" size={48} />
-    );
-    const el = container.querySelector(".nse-control-rotating-image") as HTMLElement;
-
-    expect(el).not.toBeNull();
-    expect(el.getAttribute("data-running")).toBe("true");
-    expect(el.style.backgroundImage).toContain("/spin.png");
-    expect(typeof ref.current?.start).toBe("function");
-    expect(typeof ref.current?.stop).toBe("function");
-
-    rerender(
-        <NSERotatingImage ref={ref} imageSrc="/spin.png" size={48} running={false} />
-      );
-    expect(el.getAttribute("data-running")).toBe("false");
   });
 
   it("gives NSESearchField an italic prompt, a clear button only while it has text, and an optional magnifier", () => {
@@ -453,33 +239,5 @@ describe("NSE extended wrapper controls", () => {
     expect(icon?.getAttribute("aria-hidden")).toBe("true");
     expect(icon?.nextElementSibling?.tagName).toBe("INPUT");
     expect((container.querySelector("input") as HTMLInputElement).placeholder).toBe("Search contacts…");
-  });
-
-  it("renders NSEInputBox as one framed box wrapping multiple controls", () => {
-    const { container } = renderWithAppearance(
-      <NSEInputBox label="URL" alwaysLooksFocused>
-        <span className="nse-control-field-affix">https://</span>
-        <input aria-label="address" />
-        <button type="button">Go</button>
-      </NSEInputBox>
-    );
-
-    const box = container.querySelector(".nse-control-input-box") as HTMLElement;
-    expect(box.getAttribute("data-always-focused")).toBe("true");
-    expect(container.querySelectorAll(".nse-control-input-box-frame")).toHaveLength(1);
-    expect(screen.getByRole("button", { name: "Go" })).not.toBeNull();
-    expect(screen.getByLabelText("address")).not.toBeNull();
-  });
-
-  it("defaults IntegerPicker to the 0–9 range and centers picker captions", async () => {
-    // IntegerPicker default range is 0–9;
-    // Picker.textAlign defaults to "center".
-    const { container } = renderWithAppearance(<NSEIntegerPicker label="Rating" defaultValue={3} />);
-
-    expect(container.querySelector(".nse-control-picker")?.getAttribute("data-text-align")).toBe("center");
-    fireEvent.click(screen.getByRole("button", { name: "Rating 3" }));
-    const options = await screen.findAllByRole("option");
-    expect(options).toHaveLength(10); // 0..9 inclusive
-    expect(options[9].textContent).toContain("9");
   });
 });

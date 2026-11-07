@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { SynCloudOSAppInfo } from "../AppInfo/appInfoTypes";
 import { AppManager, type AppManagerDependencies } from "./AppManager";
 import type { SynCloudOSAppManagerController, SynCloudOSAppRegistry, SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
@@ -34,7 +35,7 @@ const managerDependencies: AppManagerDependencies = { ...dependencies, runtime }
 function isStaleManager(manager: AppManager, appInfo: SynCloudOSAppInfo) {
   return (
     manager.appInfo.normalizedAt !== appInfo.normalizedAt ||
-    manager.appInfo.bundleId !== appInfo.bundleId ||
+    normalizeBundleIdentifier(manager.appInfo.bundleIdentifier) !== normalizeBundleIdentifier(appInfo.bundleIdentifier) ||
     manager.appInfo.packageName !== appInfo.packageName ||
     manager.appInfo.route !== appInfo.route ||
     manager.appInfo.presentation !== appInfo.presentation ||
@@ -45,16 +46,16 @@ function isStaleManager(manager: AppManager, appInfo: SynCloudOSAppInfo) {
 const appManagerController = {
   runtimeId: runtime.runtimeId,
   createManagerForApp(appInfo: SynCloudOSAppInfo, options: { replace?: boolean; reason?: string; publish?: boolean } = {}) {
-    const existing = managers.get(appInfo.id);
+    const existing = managers.get(normalizeBundleIdentifier(appInfo.bundleIdentifier));
     if (existing && !options.replace && !isStaleManager(existing, appInfo)) {
       return existing;
     }
 
     const manager = new AppManager(appInfo, managerDependencies);
-    managers.set(appInfo.id, manager);
+    managers.set(normalizeBundleIdentifier(appInfo.bundleIdentifier), manager);
     if (existing && options.publish !== false) {
       EventBus.publish("app.manager.replace", {
-        appId: appInfo.id,
+        appId: appInfo.bundleIdentifier,
         packageName: appInfo.packageName,
         reason: options.reason ?? "AppInfo changed during registration"
       }, appInfo.packageName);
@@ -64,15 +65,15 @@ const appManagerController = {
 
   publishManagerReplacement(appInfo: SynCloudOSAppInfo, reason?: string) {
     EventBus.publish("app.manager.replace", {
-      appId: appInfo.id,
+      appId: appInfo.bundleIdentifier,
       packageName: appInfo.packageName,
       reason: reason ?? "AppInfo changed during registration"
     }, appInfo.packageName);
   },
 
   restoreManagerForApp(appId: string, manager: AppManager | null) {
-    if (manager) managers.set(appId, manager);
-    else managers.delete(appId);
+    if (manager) managers.set(normalizeBundleIdentifier(appId), manager);
+    else managers.delete(normalizeBundleIdentifier(appId));
   },
 
   initializeAppManagers() {
@@ -83,11 +84,11 @@ const appManagerController = {
   },
 
   getManagerForApp(appId: string) {
-    return managers.get(appId) ?? null;
+    return managers.get(normalizeBundleIdentifier(appId)) ?? null;
   },
 
   removeManagerForApp(appId: string) {
-    const removed = managers.delete(appId);
+    const removed = managers.delete(normalizeBundleIdentifier(appId));
     if (removed) runtime.undo.remove({ kind: "application", id: appId });
     return removed;
   },

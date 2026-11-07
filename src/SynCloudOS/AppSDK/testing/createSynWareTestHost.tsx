@@ -21,20 +21,29 @@ import React from "react";
 import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 import type { TrustedSynWareBundle } from "../../BundleLoader/bundleTypes";
+import { trustSynWareBundleForTest } from "../../BundleLoader/trustedBundleProvenance";
+import { installHostDiagnosticsProvision } from "../../Testing/hostDiagnosticsProvision";
 import { createSynCloudOS } from "../../SynCloudOS";
-import { SynCloudOSProvider } from "../../../SynCloudOSReact";
+import { RuntimeInputBoundary, SynCloudOSProvider } from "../../../SynCloudOSReact";
 import { ApplicationStageView } from "../../../Webspring/ApplicationStageView";
 import { HostSiteBrandingProvider } from "../../../SynCloudOSReact";
+import { SCOSAlertPresenter } from "../../../SynCloudOSReact/SCOSAlertPresenter";
 import {
   createApplicationWindowContentRendererRegistry,
   WindowContentRendererRegistry,
   WindowLayer,
 } from "../../../Webspring/WindowLayer";
 import { createSynWare, createSynWareBundle } from "../createSynWare";
-import { useSynWare } from "../SynWareContext";
+import { useSynWareContext } from "../SynWareContext";
+import { createSynWareDefinitionFromApplicationClass } from "../../AppHosting/runtimeEntry";
+import { applicationSessionFor } from "../../AppHosting/runtimeEntry";
+import { applicationLifecycleFor, registerApplicationLifecycle } from "../../Lifecycle/applicationLifecycleHooks";
+import { normalizeBundleIdentifier } from "../../Identity/bundleIdentifier.mjs";
 import type { SynWareContextValue } from "../appContextTypes";
 import type { CreateWindowRequest } from "../../Windows";
 import { createDeterministicRuntimeEnvironment } from "./fakeAdapters";
+import { createHostDocumentProvision } from "./hostDocumentProvision";
+import { createIsolatedDocumentStoreLock } from "./isolatedDocumentStoreLock";
 import { getRuntimeSettlement, trackRuntimeSettlement, type SettlementWorkInput } from "../../Testing/appSdkTestingPort";
 import type {
   CreateSynWareTestHostOptions,
@@ -117,24 +126,15 @@ function renderResult(container: HTMLElement, unmount: () => void): SynWareTestR
   });
 }
 
-function persistence(): SynWareTestPersistence {
-  const values = new Map<string, unknown>();
-  return Object.freeze({
-    getPreference: (key: string, fallback?: unknown) => values.has(key) ? values.get(key) : fallback,
-    setPreference(key: string, value: unknown) {
-      values.set(key, value);
-      return true;
-    },
-    removePreference(key: string) { values.delete(key); },
-    entries: () => Object.freeze([...values.entries()].map(([key, value]) => Object.freeze({ key, value }))),
-  });
-}
 
 /** Creates one fully isolated, real runtime and mounts a V1 SynWare through
  * the ordinary AppRegistry, definition loader, and production application
  * stage. Kernel instances and managers remain closure-private; this factory
  * returns only test controls. */
+let hostSequence = 0;
+
 export function createSynWareTestHost(options: CreateSynWareTestHostOptions): SynWareTestHost {
+  const hostIdentity = ++hostSequence;
   const hostDocument = options.document ?? options.container?.ownerDocument ?? null;
   const environment = createDeterministicRuntimeEnvironment({
     now: options.now,
@@ -147,39 +147,55 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
   // bundle permissions, PolicyKit's app/bundle view, and the app facade all
   // observe exactly the same immutable declaration.
   let context: SynWareContextValue | null = null;
-  const declaredPermissions = [...new Set([...(options.app.manifest.permissions ?? []), ...(options.permissions ?? [])])];
-  const manifest = declaredPermissions.length === (options.app.manifest.permissions?.length ?? 0)
-    ? options.app
-    : { ...options.app, manifest: { ...options.app.manifest, permissions: declaredPermissions } };
-  const AppRoot = options.app.root;
+  const supplied = options.application
+    ? createSynWareDefinitionFromApplicationClass(options.application, options.manifest)
+    : options.app;
+  const declaredPermissions = [...new Set([...(supplied.manifest.permissions ?? []), ...(options.permissions ?? [])])];
+  const manifest = declaredPermissions.length === (supplied.manifest.permissions?.length ?? 0)
+    ? supplied
+    : { ...supplied, manifest: { ...supplied.manifest, permissions: declaredPermissions } };
+  const AppRoot = supplied.root;
   const loadGateController = new AbortController();
   const appDefinition = createSynWare({
     manifest: manifest.manifest,
     root: function SynWareTestRoot() {
-      context = useSynWare();
+      context = useSynWareContext();
       return <AppRoot />;
     },
-    ...(options.app.migrations === undefined ? {} : { migrations: options.app.migrations }),
-    ...(options.app.windowChrome === undefined ? {} : { windowChrome: options.app.windowChrome }),
-    ...(options.app.createBackgroundHandler === undefined ? {} : { createBackgroundHandler: options.app.createBackgroundHandler }),
-    ...(options.app.routes === undefined ? {} : { routes: options.app.routes }),
+    ...(supplied.migrations === undefined ? {} : { migrations: supplied.migrations }),
+    ...(supplied.windowChrome === undefined ? {} : { windowChrome: supplied.windowChrome }),
+    ...(supplied.createBackgroundHandler === undefined ? {} : { createBackgroundHandler: supplied.createBackgroundHandler }),
+    ...(supplied.routes === undefined ? {} : { routes: supplied.routes }),
   });
+  const classLifecycle = applicationLifecycleFor(AppRoot);
+  if (classLifecycle) registerApplicationLifecycle(appDefinition.root, classLifecycle);
   const bundle = createSynWareBundle(appDefinition, {
     loadModule: () => trackRuntimeSettlement(runtime, (async () => {
       await awaitLoadGate(options.loadGate, loadGateController.signal);
       if (loadGateController.signal.aborted) throw renderAbortError(loadGateController.signal.reason);
       return { default: appDefinition };
-    })(), { owner: "test-host", kind: "lazy-load", label: manifest.manifest.id }),
+    })(), { owner: "test-host", kind: "lazy-load", label: manifest.manifest.bundleIdentifier }),
   }) as TrustedSynWareBundle;
+  // The test host mints only diagnostics provenance. A declaration and a live
+  // provider are still required at the ordinary trusted-client boundary.
+  trustSynWareBundleForTest(bundle, { sourceKey: "synware-test-host:diagnostics", privileges: ["diagnostics"] });
   const runtime = (() => {
     const finishBootstrap = environment.prepareRuntimeBootstrap();
     try {
       return createSynCloudOS({
-        id: `runtime:synapp-test:${environment.clock.now()}:${bundle.manifest.id}`,
+        id: `runtime:synapp-test:${environment.clock.now()}:${hostIdentity}:${bundle.manifest.bundleIdentifier}`,
         environment: environment.environment,
-        initialBundles: [bundle],
+        documentStoreLock: createIsolatedDocumentStoreLock(),
         initialPathname: bundle.manifest.route,
-        ...(options.documentTypes ? { applicationDocuments: { initialTypes: options.documentTypes } } : {}),
+        ...(options.applicationDocuments ? {
+          applicationDocuments: {
+            initialTypes: options.applicationDocuments.initialTypes,
+            initialAdapters: options.applicationDocuments.initialAdapters,
+            recoveryStore: options.applicationDocuments.recoveryStore,
+            assetBacking: options.applicationDocuments.assetBacking,
+          },
+          trustedDocumentKinds: options.applicationDocuments.trustedDocumentKinds,
+        } : {}),
         policyProfile: {
           id: "syncloudos.testing",
           anonymousRole: "public",
@@ -211,27 +227,42 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
       finishBootstrap();
     }
   })();
-  const app = runtime.apps.getApp(bundle.manifest.id);
+  const diagnosticsProvision = installHostDiagnosticsProvision(runtime, options.diagnostics);
+  const documentProvision = createHostDocumentProvision(runtime, bundle, options.applicationDocuments);
+  for (const [token, client] of options.services ?? []) {
+    runtime.services.registerService({ id: token.id, displayName: token.id, description: "Test-host service", availability: "available" });
+    runtime.services.register({ id: token.id, version: token.minimumVersion ?? "1.0.0", contractVersion: token.contractVersion, createAppClient: () => client });
+  }
+  const app = runtime.apps.register(bundle);
   if (!app) {
     void runtime.dispose("SynWare testing host could not register its application.");
     environment.dispose();
-    throw new Error(`SynWare testing host could not register ${bundle.manifest.id}.`);
+    throw new Error(`SynWare testing host could not register ${bundle.manifest.bundleIdentifier}.`);
   }
   const settlementRegistry = getRuntimeSettlement(runtime);
   // The production stage owns the application responder lifecycle. The former
   // direct mount needed a host-side registration here; retaining it would
   // collide with ApplicationStageView's ResponderScope.
   const windowContentRegistry = options.surface === "window"
-    ? createApplicationWindowContentRendererRegistry(runtime, { [app.id]: app })
+    ? createApplicationWindowContentRendererRegistry(runtime, { [app.bundleIdentifier]: app })
     : new WindowContentRendererRegistry();
   const stage = Object.freeze({
-    id: `application-stage:synapp-test:${app.id}`,
-    appId: app.id,
+    id: `application-stage:synapp-test:${app.bundleIdentifier}`,
+    appId: app.bundleIdentifier,
     title: app.displayName,
     isFocused: true,
     zIndex: 1,
   });
-  const appPersistence = persistence();
+  const preferencePrefix = `${normalizeBundleIdentifier(app.bundleIdentifier)}:`;
+  const storagePrefix = `SynCloudOS4:${runtime.runtimeId}:${preferencePrefix}`;
+  const appPersistence: SynWareTestPersistence = Object.freeze({
+    getPreference: (key: string, fallback?: unknown) => runtime.persistence.getPreference(`${preferencePrefix}${key}`, fallback),
+    setPreference: (key: string, value: unknown) => runtime.persistence.setPreference(`${preferencePrefix}${key}`, value),
+    removePreference: (key: string) => runtime.persistence.removePreference(`${preferencePrefix}${key}`),
+    entries: () => Object.freeze(environment.adapters.storage.local.entries()
+      .filter(entry => entry.key.startsWith(storagePrefix))
+      .map(entry => Object.freeze({ key: entry.key.slice(storagePrefix.length), value: JSON.parse(entry.value) as unknown }))),
+  });
   let root: Root | null = null;
   let view: SynWareTestRenderResult | null = null;
   let rendering: Promise<SynWareTestRenderResult> | null = null;
@@ -255,10 +286,10 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
     if (windowControllerId) return windowControllerId;
     assertRenderLive(generation);
     const request: CreateWindowRequest = {
-      id: `synapp-test-window:${app.id}`,
+      id: `synapp-test-window:${app.bundleIdentifier}`,
       workspaceId: "workspace-main",
-      applicationId: app.id,
-      applicationSessionId: app.id,
+      applicationId: app.bundleIdentifier,
+      applicationSessionId: app.bundleIdentifier,
       documentId: null,
       documentAssociationRole: null,
       representedDocument: null,
@@ -268,7 +299,7 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
       chromeMode: app.window.chrome,
       smoothSurface: app.window.smoothSurface,
       title: app.window.title,
-      content: { rendererId: "application", parameters: { appId: app.id } },
+      content: { rendererId: "application", parameters: { appId: app.bundleIdentifier } },
       bounds: app.window.defaultBounds,
       minimumSize: app.window.minimumSize,
       maximumSize: null,
@@ -312,19 +343,20 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
   };
 
   const host: SynWareTestHost = {
+    get application() { return options.application ? applicationSessionFor({ runtimeId: runtime.runtimeId, appId: app.bundleIdentifier })?.app ?? null : null; },
     clock: environment.clock,
     mediaClock: environment.mediaClock,
     persistence: appPersistence,
     lifecycle: Object.freeze({
-      launch: () => runtime.lifecycle.launch(app.id).result,
-      activate: () => runtime.lifecycle.activate(app.id).result,
-      suspend: () => runtime.lifecycle.suspend(app.id).result,
-      close: () => runtime.lifecycle.close(app.id).result,
-      state: () => runtime.lifecycle.getState(app.id),
+      launch: () => runtime.lifecycle.launch(app.bundleIdentifier).result,
+      activate: () => runtime.lifecycle.activate(app.bundleIdentifier).result,
+      suspend: () => runtime.lifecycle.suspend(app.bundleIdentifier).result,
+      close: () => runtime.lifecycle.close(app.bundleIdentifier).result,
+      state: () => runtime.lifecycle.getState(app.bundleIdentifier),
     }),
     documents: Object.freeze({
       records: () => {
-        return Object.freeze(runtime.documents.applicationDocumentIds(app.id).flatMap((documentId) => {
+        return Object.freeze(runtime.documents.applicationDocumentIds(app.bundleIdentifier).flatMap((documentId) => {
           const document = runtime.documents.getDocument(documentId);
           if (!document) return [];
           const snapshot = document.snapshot();
@@ -340,6 +372,17 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
     commands: Object.freeze({
       inspect: () => Object.freeze(runtime.commands.inspect().registrations.map((entry) => Object.freeze({ id: entry.commandId, responderId: entry.responderId }))),
     }),
+    diagnostics: Object.freeze({
+      replace(provider: NonNullable<CreateSynWareTestHostOptions["diagnostics"]>) {
+        if (disposed) throw new DOMException("The SynWare test host was disposed.", "AbortError");
+        diagnosticsProvision.replace(provider);
+      },
+      revoke() {
+        if (disposed) throw new DOMException("The SynWare test host was disposed.", "AbortError");
+        diagnosticsProvision.revoke();
+      },
+    }),
+    mediaQueries: environment.mediaQueries,
     adapters: environment.adapters,
     resources: Object.freeze({
       active: () => Object.freeze([
@@ -379,6 +422,8 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
         // routing. The portable host mounts the production stage directly, so
         // perform that same session refresh here before issuing app capabilities.
         try {
+          await documentProvision?.install(renderController.signal);
+          assertRenderLive(generation);
           await runtime.identity.session.refresh({ signal: renderController.signal });
         } catch (error) {
           if (disposed || generation !== renderGeneration || renderController.signal.aborted) {
@@ -387,8 +432,18 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
           throw error;
         }
         assertRenderLive(generation);
-        await runtime.bundles.loadBundle(app.id, { signal: renderController.signal });
+        // This host mounts the production stage without booting the shell.
+        // Bind the ordinary responsive observer before class presentation so
+        // animation state receives initial and live host media preferences.
+        runtime.responsiveModeManager.observe();
+        await runtime.bundles.loadBundle(app.bundleIdentifier, { signal: renderController.signal });
         assertRenderLive(generation);
+        const applicationState = runtime.lifecycle.getState(app.bundleIdentifier);
+        if (options.application && applicationState !== "active" && applicationState !== "suspended") {
+          const launched = await runtime.lifecycle.launch(app.bundleIdentifier, { signal: renderController.signal }).result;
+          if (launched.status !== "completed") throw new Error(`The test application failed to launch: ${launched.status}.`);
+          if (launched.postCommit !== "completed") throw new Error(`The test application launch did not complete: ${launched.issues.map(issue => issue.message).join("; ") || launched.postCommit}.`);
+        }
         if (options.surface === "window") await ensurePhysicalWindow(generation);
         assertRenderLive(generation);
         const document = requireDocument(hostDocument);
@@ -402,6 +457,7 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
         const content = (
           <HostSiteBrandingProvider value={options.branding ?? Object.freeze({ name: "SynWare Test Host", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null, logoAlt: "" })}>
           <SynCloudOSProvider runtime={runtime}>
+          <RuntimeInputBoundary>
             {options.surface === "window" ? (
               <WindowLayer contentRegistry={windowContentRegistry} />
             ) : (
@@ -412,6 +468,8 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
                 lifecycle="ready"
               />
             )}
+            <SCOSAlertPresenter center={runtime.alerts} presentation={runtime.presentationTraits} />
+          </RuntimeInputBoundary>
           </SynCloudOSProvider>
           </HostSiteBrandingProvider>
         );
@@ -425,7 +483,7 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
           if (root === nextRoot) unmount();
           throw error;
         }
-      })().finally(() => { rendering = null; }), { owner: "test-host", kind: "render", label: app.id });
+      })().finally(() => { rendering = null; }), { owner: "test-host", kind: "render", label: app.bundleIdentifier });
       return rendering;
     },
     dispose() {
@@ -440,13 +498,17 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
           .filter(item => item.owner === "app-waiter")
           .map(item => `settlement:${item.id}:${item.label}`);
         disposed = true;
+        diagnosticsProvision.dispose();
         renderGeneration += 1;
         if (!renderController.signal.aborted) renderController.abort(new DOMException("SynWare test host disposed.", "AbortError"));
         if (!loadGateController.signal.aborted) loadGateController.abort(new DOMException("SynWare test host disposed.", "AbortError"));
         const activeRender = rendering;
         if (activeRender) await activeRender.catch(() => undefined);
         unmount();
+        applicationSessionFor({ runtimeId: runtime.runtimeId, appId: app.bundleIdentifier })?.dispose("explicit");
         windowContentRegistry.dispose();
+        let documentCleanupError: unknown;
+        try { await documentProvision?.dispose(); } catch (error) { documentCleanupError = error; }
         await runtime.dispose("SynWare test-host disposed.");
         // Inspect every host-owned resource only after the real runtime graph
         // finishes disposing and before the deterministic environment clears it.
@@ -462,6 +524,7 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
         environment.dispose();
         ownedResources.clear();
         if (ownsContainer && container?.parentElement) container.parentElement.removeChild(container);
+        if (documentCleanupError !== undefined) throw documentCleanupError;
         return report;
       })();
       return disposal;

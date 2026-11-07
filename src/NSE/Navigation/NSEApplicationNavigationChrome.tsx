@@ -19,6 +19,8 @@
  */
 
 import { createContext, useContext, useLayoutEffect, useRef, type ReactNode } from "react";
+import { NSEControllerLifetime } from "../Controllers/controllerLifetime";
+import type { NSEControllerOwnershipOptions } from "../Controllers/ownership";
 
 export interface NSEApplicationNavigationChromeState {
   readonly ownerId: string;
@@ -76,6 +78,14 @@ export class NSEApplicationNavigationChromeController {
   #revision = 0;
   #snapshot = freezeSnapshot(0, null);
   #disposed = false;
+  readonly #lifetime: NSEControllerLifetime;
+
+  constructor(options: NSEControllerOwnershipOptions = {}) {
+    this.#lifetime = new NSEControllerLifetime(options, { kind: "NSEApplicationNavigationChromeController", id: "navigation-chrome" });
+    this.#lifetime.bind(() => this.dispose());
+  }
+
+  get isDisposed(): boolean { return this.#disposed; }
 
   getSnapshot = (): NSEApplicationNavigationChromeSnapshot => this.#snapshot;
 
@@ -122,6 +132,7 @@ export class NSEApplicationNavigationChromeController {
   dispose(): void {
     if (this.#disposed) return;
     this.#disposed = true;
+    this.#lifetime.dispose();
     this.#claim = null;
     this.#listeners.clear();
     this.#snapshot = freezeSnapshot(this.#revision, null);

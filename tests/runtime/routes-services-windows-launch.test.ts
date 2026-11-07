@@ -59,9 +59,9 @@ describe("runtime routes, services, windows, and launch services", () => {
   it("resolves route tables without opening UI surfaces", async () => {
     const { AppRegistry, RouteManager } = createRuntimeHarness(createTestRuntime());
     AppRegistry.registerMany([
-      createTestManifest({ id: "portfolio", route: "/portfolio" }),
-      createTestManifest({ id: "memo-journal", route: "/memo-journal" }),
-      createTestManifest({ id: "github", route: "https://github.com/syndromatic", type: "external" })
+      createTestManifest({ bundleIdentifier: "com.example.portfolio", route: "/portfolio" }),
+      createTestManifest({ bundleIdentifier: "com.example.memo-journal", route: "/memo-journal" }),
+      createTestManifest({ bundleIdentifier: "com.example.github", route: "https://github.com/syndromatic", type: "external" })
     ]);
 
     expect(RouteManager.resolveRoute("/")).toMatchObject({ kind: "webspring", pathname: "/" });
@@ -69,21 +69,21 @@ describe("runtime routes, services, windows, and launch services", () => {
     expect(RouteManager.resolveRoute("/memo-journal")).toMatchObject({ kind: "app", pathname: "/memo-journal" });
     expect(RouteManager.resolveRoute("https://github.com/syndromatic")).toMatchObject({ kind: "external" });
     expect(RouteManager.resolveRoute("/nope")).toMatchObject({ kind: "notFound", pathname: "/nope" });
-    expect(RouteManager.getRouteTable().map((route) => route.appId)).toEqual(["portfolio", "memo-journal", "github"]);
-    expect(RouteManager.getAppForRoute("/portfolio")?.id).toBe("portfolio");
-    expect(RouteManager.getAppForRoute("/memo-journal")?.id).toBe("memo-journal");
+    expect(RouteManager.getRouteTable().map((route) => route.appId)).toEqual(["com.example.portfolio", "com.example.memo-journal", "com.example.github"]);
+    expect(RouteManager.getAppForRoute("/portfolio")?.bundleIdentifier).toBe("com.example.portfolio");
+    expect(RouteManager.getAppForRoute("/memo-journal")?.bundleIdentifier).toBe("com.example.memo-journal");
   });
 
   it("opens, focuses, reuses, and closes runtime windows", async () => {
     const { AppRegistry, WindowManager, RuntimeController } = createRuntimeHarness(createTestRuntime());
     AppRegistry.registerMany([
-      createTestManifest({ id: "first-window", presentation: "windowedView", window: { title: "First Window" } }),
-      createTestManifest({ id: "second-window", presentation: "windowedView", window: { title: "Second Window" } })
+      createTestManifest({ bundleIdentifier: "com.example.first-window", presentation: "windowedView", window: { title: "First Window" } }),
+      createTestManifest({ bundleIdentifier: "com.example.second-window", presentation: "windowedView", window: { title: "Second Window" } })
     ]);
 
-    const first = await WindowManager.openApplicationWindow("first-window");
-    const second = await WindowManager.openApplicationWindow("second-window");
-    const reopenedFirst = await WindowManager.openApplicationWindow("first-window");
+    const first = await WindowManager.openApplicationWindow("com.example.first-window");
+    const second = await WindowManager.openApplicationWindow("com.example.second-window");
+    const reopenedFirst = await WindowManager.openApplicationWindow("com.example.first-window");
 
     expect(reopenedFirst?.id).toBe(first?.id);
     expect(RuntimeController.getSnapshot().application.activeAppId).toBeNull();
@@ -93,7 +93,7 @@ describe("runtime routes, services, windows, and launch services", () => {
 
     await WindowManager.requestClose(first?.id ?? "", { reason: "command" });
 
-    expect(WindowManager.list().map(({ record }) => record.applicationId)).toEqual(["second-window"]);
+    expect(WindowManager.list().map(({ record }) => record.applicationId)).toEqual(["com.example.second-window"]);
     expect(WindowManager.snapshot().keyWindowControllerId).toBe(second?.id);
     expect(RuntimeController.getSnapshot().application.activeAppId).toBeNull();
   });
@@ -104,8 +104,8 @@ describe("runtime routes, services, windows, and launch services", () => {
   ])("preserves a dirty final document when %s is cancelled", async (_entryPoint, close) => {
     const runtime = createTestRuntime();
     const harness = createRuntimeHarness(runtime);
-    const appId = `document-entry-${_entryPoint.startsWith("Launch") ? "launch" : "registry"}`;
-    harness.AppRegistry.registerBundle(createTestBundle({ id: appId, presentation: "windowedView" }));
+    const appId = `com.example.document-entry-${_entryPoint.startsWith("Launch") ? "launch" : "registry"}`;
+    harness.AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: appId, presentation: "windowedView" }));
     runtime.documents.registerType(noteType);
     const document = await runtime.documents.newDocument({
       documentId: `${appId}-document`,
@@ -143,9 +143,9 @@ describe("runtime routes, services, windows, and launch services", () => {
   it("refuses protected launches until LoginServices has an authorised session", async () => {
     const { AppRegistry, LaunchServices, PolicyKit, RuntimeController } = createRuntimeHarness(createTestRuntime());
     PolicyKit.setAccessMode("webspringVisibleAppProtected");
-    AppRegistry.register(createTestManifest({ id: "locked-app" }));
+    AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.locked-app" }));
 
-    const manager = LaunchServices.openApp("locked-app");
+    const manager = LaunchServices.openApp("com.example.locked-app");
 
     expect(manager).toBeNull();
     const captured = RuntimeController.getSnapshot().errors.at(-1);
@@ -153,28 +153,28 @@ describe("runtime routes, services, windows, and launch services", () => {
       code: "UNRECOVERABLE_LOGIN_SESSION_MISMATCH",
       title: "Webspring has unexpectedly stopped.",
       message: "An unexpected error has prevented this application from working properly.",
-      context: { requestedAppId: "locked-app" },
+      context: { requestedAppId: "com.example.locked-app" },
     });
     expect(captured?.technicalDetails).toContain("This app launch requires an authorised session.");
     expect(captured?.technicalDetails).not.toMatch(/cookie|token|watchdog/iu);
     expect(RuntimeController.getSnapshot()).toMatchObject({
       application: { activeAppId: null },
-      lifecycle: { "locked-app": "registered" },
+      lifecycle: { "com.example.locked-app": "registered" },
     });
     expect(PolicyKit.getAuditLog().at(-1)).toMatchObject({
       action: "app.launch",
       allowed: false,
       mode: "webspringVisibleAppProtected",
-      resource: "locked-app"
+      resource: "com.example.locked-app"
     });
   });
 
   it("allows public-mode launches without a LoginServices session", async () => {
     const { AppRegistry, LaunchServices, PolicyKit } = createRuntimeHarness(createTestRuntime());
     PolicyKit.setAccessMode("public");
-    AppRegistry.register(createTestManifest({ id: "public-launch", policy: { public: true } }));
+    AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.public-launch", policy: { public: true } }));
 
-    expect(LaunchServices.explainLaunch("public-launch")).toMatchObject({
+    expect(LaunchServices.explainLaunch("com.example.public-launch")).toMatchObject({
       canLaunch: true,
       code: "READY",
       policy: expect.objectContaining({ allowed: true })
@@ -184,15 +184,15 @@ describe("runtime routes, services, windows, and launch services", () => {
   it("launches an authorised app through manager lifecycle, windows, and route state", async () => {
     vi.useFakeTimers();
     const { AppRegistry, LaunchServices, LoginServices, RuntimeController, WindowManager } = createRuntimeHarness(createTestRuntime());
-    AppRegistry.registerBundle(createTestBundle({ id: "studio", route: "/studio", presentation: "windowedView" }));
+    AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: "com.example.studio", route: "/studio", presentation: "windowedView" }));
     const unlock = unlockRuntime(LoginServices);
 
-    const manager = LaunchServices.openApp("studio");
+    const manager = LaunchServices.openApp("com.example.studio");
     await flushLaunchTimers();
 
     expect(unlock.ok).toBe(true);
     expect(manager?.getState()).toBe("active");
-    expect(WindowManager.list()[0]?.record).toMatchObject({ applicationId: "studio", isKey: true });
+    expect(WindowManager.list()[0]?.record).toMatchObject({ applicationId: "com.example.studio", isKey: true });
     expect(RuntimeController.getSnapshot().application.routePath).toBe("/studio");
     expect(window.location.pathname).toBe("/studio");
   });

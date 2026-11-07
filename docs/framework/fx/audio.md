@@ -20,7 +20,7 @@ import { AUFXAudioFormat, AUFXAudioPCMBuffer } from "@syndromatic/syncloudos/fx/
 | --- | --- |
 | Prefix | `AUFX` |
 | Entry | `@syndromatic/syncloudos/fx/audio` |
-| Hook | `useSynWareAudio`, from `@syndromatic/syncloudos/sdk` |
+| Hook | `useAudio`, from `@syndromatic/syncloudos/sdk` |
 | Permissions | `audio.play` to make sound, `audio.record` to capture from a microphone |
 | Analogue | AVAudioEngine (`AVAudioEngine`, `AVAudioNode`, `AVAudioPlayerNode`, `AVAudioFile`, `AVAudioSession`, `AVAudioConverter`) |
 
@@ -139,7 +139,7 @@ Owns a graph of nodes and renders it. It always contains a `mainMixerNode`, whic
 new AUFXAudioEngine(format: AUFXAudioFormat, output?: AUFXAudioGraphOutput, inputCapability?: object)
 ```
 
-Construct an engine yourself for offline rendering, which needs no permission. For live sound, use `useSynWareAudio().createEngine(format)`, which supplies the output and disposes the engine when the component unmounts.
+Construct an engine yourself for offline rendering, which needs no permission. For live sound, use `useAudio().createEngine(format)`, which supplies the output and disposes the engine when the component unmounts.
 
 | Member | Type or signature | Description |
 | --- | --- | --- |
@@ -447,7 +447,7 @@ Resamples with linear interpolation and maps channels: a stereo source downmixes
 
 ### `AUFXAudioFile`
 
-An in-memory view of PCM audio with file-like reading, writing and WAV interchange. It never touches the file system. The host opens files through `useSynWareAudio().openFile()`, which decodes compressed formats and gives you an `AUFXAudioFile`.
+An in-memory view of PCM audio with file-like reading, writing and WAV interchange. It never touches the file system. The host opens files through `useAudio().openFile()`, which decodes compressed formats and gives you an `AUFXAudioFile`.
 
 ```text
 new AUFXAudioFile(buffer, mode?: "read" | "read-write", frameCapacity?, metadata?)
@@ -541,7 +541,7 @@ export const mono = new AUFXAudioFormat(48_000, 1);
 
 ### `AUFXAudioSession`
 
-The application's capture and routing authority. It comes from `useSynWareAudio().createSession()`. Its constructor takes a host-private port, so applications never build one.
+The application's capture and routing authority. It comes from `useAudio().createSession()`. Its constructor takes a host-private port, so applications never build one.
 
 | Member | Type or signature | Description |
 | --- | --- | --- |
@@ -586,10 +586,10 @@ Records encoded audio with bounded memory.
 ```tsx
 import { useEffect, useRef, useState } from "react";
 import type { AUFXAudioRecorder, AUFXAudioSession } from "@syndromatic/syncloudos/fx/audio";
-import { useSynWareAudio } from "@syndromatic/syncloudos/sdk";
+import { useAudio } from "@syndromatic/syncloudos/sdk";
 
 export function VoiceMemo() {
-  const audio = useSynWareAudio();
+  const audio = useAudio();
   const session = useRef<AUFXAudioSession | null>(null);
   const recorder = useRef<AUFXAudioRecorder | null>(null);
   const [status, setStatus] = useState("Idle");
@@ -634,9 +634,9 @@ The manifest for this component declares both permissions it may use:
 ```ts
 export default {
   schemaVersion: 1,
-  id: "com.example.memo",
+  bundleIdentifier: "com.example.memo",
   version: "1.0.0",
-  title: "Voice Memo",
+  displayName: "Voice Memo",
   routes: [{ path: "/memo", primary: true }],
   permissions: ["audio.record"],
 } as const;
@@ -658,7 +658,7 @@ Applications that only need to start and stop sounds can skip transports and use
 
 ## In a SynWare
 
-`useSynWareAudio()` returns an `AUFXAudioClient` that is scoped to the calling component. Everything acquired through it is released when the component unmounts.
+`useAudio()` returns an `AUFXAudioClient` that is scoped to the calling component. Everything acquired through it is released when the component unmounts.
 
 | Member | Description |
 | --- | --- |
@@ -682,10 +682,10 @@ For simple sound effects, the client also offers **sound handles**, which play a
 ```tsx
 import { useEffect, useRef } from "react";
 import { AUFXAudioFormat, AUFXAudioPCMBuffer, AUFXAudioPlayerNode } from "@syndromatic/syncloudos/fx/audio";
-import { useSynWareAudio } from "@syndromatic/syncloudos/sdk";
+import { useAudio } from "@syndromatic/syncloudos/sdk";
 
 export function Beep() {
-  const audio = useSynWareAudio();
+  const audio = useAudio();
   const started = useRef(false);
 
   useEffect(() => {
@@ -726,7 +726,8 @@ export function Beep() {
 | Situation | Error |
 | --- | --- |
 | A value outside its documented range, a graph limit exceeded, an index out of bounds | `RangeError` |
-| A cycle, a duplicate connection, a node from another engine, an engine that is disposed, rendering or already running | `Error` |
+| A cycle, a duplicate connection, a node from another engine, an engine rendering or already running | `Error` |
+| A disposed audio engine, audio file or player node | `SynCloudOSLifecycleError`, respectively `AUFX_AUDIO_ENGINE_DISPOSED`, `AUFX_AUDIO_FILE_DISPOSED` or `AUFX_AUDIO_PLAYER_NODE_DISPOSED`; see [Errors and outcomes](../errors.md) |
 | A wrong argument type, unsupported WAV encoding | `TypeError` |
 | A missing permission or a capture handle from another application | `DOMException` named `SecurityError` |
 | The user refused the microphone | `DOMException` named `NotAllowedError` |

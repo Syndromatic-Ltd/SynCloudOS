@@ -39,7 +39,7 @@ describe("declared disabled applications", () => {
   it("projects the author declaration into AppInfo without hiding the icon", () => {
     const definition = createSynWare({
       manifest: {
-        schemaVersion: 1, id: "fixture.preparing", title: "Preparing", version: "1.0.0",
+        schemaVersion: 1, bundleIdentifier: "com.example.fixture.preparing", displayName: "Preparing", version: "1.0.0",
         runtime: { disabled: true, disabledReason: reason },
         lifecycle: { preload: true },
         webspring: { visible: true },
@@ -52,58 +52,58 @@ describe("declared disabled applications", () => {
     const app = runtime.apps.registerBundle(bundle)!;
     expect(app).toMatchObject({ isDisabled: true, disabled: true, disabledReason: reason, hasAccessToRequiredServices: true });
     expect(AppInfo.explain(app)).toMatchObject({ status: "disabled", reason });
-    expect(runtime.apps.getDisplayApps().map(app => app.id)).toContain(app.id);
-    expect(runtime.store.getSnapshot().lifecycle[app.id]).toBe("disabled");
+    expect(runtime.apps.getDisplayApps().map(app => app.bundleIdentifier)).toContain(app.bundleIdentifier);
+    expect(runtime.store.getSnapshot().lifecycle[app.bundleIdentifier]).toBe("disabled");
   });
 
   it("keeps declaration and unsafe-route failures disabled when required services recover", () => {
     const runtime = createRuntime();
     runtime.services.registerService({ id: "fixture.service", displayName: "Fixture", description: "Fixture service", availability: "unavailable" });
     runtime.apps.registerMany([
-      { ...createTestManifest({ id: "declared", requiredServices: ["fixture.service"] }), disabled: true, disabledReason: reason },
-      createTestManifest({ id: "unsafe", route: "javascript:alert(1)", type: "external", requiredServices: ["fixture.service"] }),
-      createTestManifest({ id: "recoverable", requiredServices: ["fixture.service"] }),
+      { ...createTestManifest({ bundleIdentifier: "com.example.declared", requiredServices: ["fixture.service"] }), disabled: true, disabledReason: reason },
+      createTestManifest({ bundleIdentifier: "com.example.unsafe", route: "javascript:alert(1)", type: "external", requiredServices: ["fixture.service"] }),
+      createTestManifest({ bundleIdentifier: "com.example.recoverable", requiredServices: ["fixture.service"] }),
     ]);
-    expect(runtime.apps.getApp("declared")?.hasAccessToRequiredServices).toBe(false);
+    expect(runtime.apps.getApp("com.example.declared")?.hasAccessToRequiredServices).toBe(false);
     runtime.services.startService("fixture.service");
-    for (const id of ["declared", "unsafe"]) {
+    for (const id of ["com.example.declared", "com.example.unsafe"]) {
       expect(runtime.apps.getApp(id)).toMatchObject({ hasAccessToRequiredServices: true, isDisabled: true });
       expect(runtime.store.getSnapshot().lifecycle[id]).toBe("disabled");
       expect(runtime.store.getSnapshot().managers[id].disabled).toBe(true);
     }
-    expect(runtime.apps.getApp("declared")?.disabledReason).toBe(reason);
-    expect(AppInfo.explain(runtime.apps.getApp("declared")!)).toMatchObject({ status: "disabled", reason });
-    expect(runtime.apps.getApp("recoverable")?.isDisabled).toBe(false);
-    expect(runtime.store.getSnapshot().lifecycle.recoverable).toBe("registered");
+    expect(runtime.apps.getApp("com.example.declared")?.disabledReason).toBe(reason);
+    expect(AppInfo.explain(runtime.apps.getApp("com.example.declared")!)).toMatchObject({ status: "disabled", reason });
+    expect(runtime.apps.getApp("com.example.recoverable")?.isDisabled).toBe(false);
+    expect(runtime.store.getSnapshot().lifecycle["com.example.recoverable"]).toBe("registered");
   });
 
   it.each(["route", "launch", "preload", "hover"] as const)("rejects a direct %s request before importing a disabled app", async (entry) => {
     const runtime = createRuntime();
     const loadModule = vi.fn(() => Promise.resolve({ default: () => null }));
-    const manifest = { ...createTestManifest({ id: "preparing", policy: { public: true } }), disabled: true, disabledReason: reason };
+    const manifest = { ...createTestManifest({ bundleIdentifier: "com.example.preparing", policy: { public: true } }), disabled: true, disabledReason: reason };
     runtime.apps.registerBundle(createTestBundle(manifest, { loadModule }));
     unlockRuntime(runtime);
     if (entry === "route") {
       await expect(runtime.routes.openRoute("/preparing").result).resolves.toMatchObject({ status: "failed", committed: false });
     } else if (entry === "launch") {
-      await expect(runtime.lifecycle.launch("preparing").result).resolves.toMatchObject({ status: "failed", committed: false });
+      await expect(runtime.lifecycle.launch("com.example.preparing").result).resolves.toMatchObject({ status: "failed", committed: false });
     } else if (entry === "preload") {
-      await expect(runtime.launchServices.preloadApp("preparing")).resolves.toBeNull();
+      await expect(runtime.launchServices.preloadApp("com.example.preparing")).resolves.toBeNull();
     } else {
       vi.useFakeTimers();
       const prefetch = await import("../../src/Webspring/webspringPrefetch");
-      prefetch.scheduleWebspringAppPrefetch(runtime, "preparing");
+      prefetch.scheduleWebspringAppPrefetch(runtime, "com.example.preparing");
       prefetch.scheduleWebspringIdlePrefetch(runtime);
       await vi.runAllTimersAsync();
     }
     expect(loadModule).not.toHaveBeenCalled();
-    expect(runtime.apps.getApp("preparing")?.isDisabled).toBe(true);
+    expect(runtime.apps.getApp("com.example.preparing")?.isDisabled).toBe(true);
   });
 
   it("keeps preload false enabled and permits an explicit launch", async () => {
     const definition = createSynWare({
       manifest: {
-        schemaVersion: 1, id: "fixture.cold", title: "Cold", version: "1.0.0",
+        schemaVersion: 1, bundleIdentifier: "com.example.fixture.cold", displayName: "Cold", version: "1.0.0",
         permissions: ["app.open.public"], lifecycle: { preload: false },
       },
       root: () => null,
@@ -112,15 +112,15 @@ describe("declared disabled applications", () => {
     const runtime = createRuntime();
     runtime.apps.registerBundle(createSynWareBundle(definition, { loadModule }));
     unlockRuntime(runtime);
-    expect(runtime.apps.getApp(definition.manifest.id)).toMatchObject({ isDisabled: false, lifecycle: { preload: false } });
+    expect(runtime.apps.getApp(definition.manifest.bundleIdentifier)).toMatchObject({ isDisabled: false, lifecycle: { preload: false } });
     vi.useFakeTimers();
     const prefetch = await import("../../src/Webspring/webspringPrefetch");
-    prefetch.scheduleWebspringAppPrefetch(runtime, definition.manifest.id);
+    prefetch.scheduleWebspringAppPrefetch(runtime, definition.manifest.bundleIdentifier);
     prefetch.scheduleWebspringIdlePrefetch(runtime);
     await vi.runAllTimersAsync();
     expect(loadModule).not.toHaveBeenCalled();
     vi.useRealTimers();
-    await expect(runtime.lifecycle.launch(definition.manifest.id).result).resolves.toMatchObject({ status: "completed" });
+    await expect(runtime.lifecycle.launch(definition.manifest.bundleIdentifier).result).resolves.toMatchObject({ status: "completed" });
     expect(loadModule).toHaveBeenCalledTimes(1);
   });
 });

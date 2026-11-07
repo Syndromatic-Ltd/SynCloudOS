@@ -1,0 +1,205 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* The split lies over the stage it copied: an underlay, the folder's panel,
+   and two clones of the stage that part to reveal it. */
+.webspring-folder-split {
+  --webspring-folder-easing: cubic-bezier(.3, .72, .18, 1);
+  /* Icons behind an open folder, from the iOS 6 reference. */
+  --webspring-folder-backdrop-icon-opacity: .22;
+  --webspring-folder-backdrop-icon-saturation: .35;
+  position: fixed;
+  z-index: 40;
+  overflow: hidden;
+  isolation: isolate;
+  opacity: 1;
+}
+
+.webspring-folder-split[data-motion="fade"] {
+  transition: opacity var(--webspring-folder-duration) ease;
+}
+
+.webspring-folder-split[data-motion="fade"]:is([data-phase="closed"], [data-phase="closing"]) {
+  opacity: 0;
+}
+
+.webspring-folder-split-backdrop {
+  background-color: var(--webspring-folder-underlay-colour);
+  background-image: var(--webspring-folder-underlay-image, url("/assets/textures/linen.webp"));
+  background-size: var(--webspring-folder-underlay-size);
+  background-position: center;
+}
+
+.webspring-folder-split-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.webspring-folder-split-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  overflow: auto;
+  overscroll-behavior: contain;
+  /* The clipped upper stage casts its shadow around the pointer's outline;
+     a straight top inset would draw an unwanted line across its base. */
+  box-shadow: inset 0 -16px 18px -12px rgba(0, 0, 0, var(--webspring-folder-edge-shadow));
+}
+
+.webspring-folder-split-content {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 18px max(16px, env(safe-area-inset-right)) 26px max(16px, env(safe-area-inset-left));
+}
+
+.webspring-folder-split-title {
+  margin: 0 0 18px;
+  color: #fff;
+  font-size: clamp(16px, 3.4vw, 21px);
+  font-weight: 700;
+  line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+}
+
+.webspring-folder-split-apps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: start;
+  row-gap: clamp(14px, 2.5svh, 24px);
+}
+
+.webspring-folder-split-cell {
+  min-width: 0;
+}
+
+.webspring-folder-split-half {
+  position: absolute;
+  left: 0;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform var(--webspring-folder-duration) var(--webspring-folder-easing);
+}
+
+/* The upper half lies over the lower one, so its shadow falls across the
+   lower edge as they rejoin, as the reference does. The clone's upward cutout
+   reveals one continuous underlay; the wrapper's light and shadow follow that
+   alpha contour along both pointer edges, and fade as the halves rejoin. */
+.webspring-folder-split-half.is-top {
+  z-index: 3;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0)) drop-shadow(0 3px 7px rgba(0, 0, 0, 0));
+  transition:
+    transform var(--webspring-folder-duration) var(--webspring-folder-easing),
+    filter var(--webspring-folder-duration) var(--webspring-folder-easing);
+}
+
+.webspring-folder-split[data-phase="open"] .webspring-folder-split-half.is-top {
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, .3)) drop-shadow(0 3px 7px rgba(0, 0, 0, .85));
+}
+
+/* The lower edge casts its shadow onto the underlay above it, following the
+   clipped clone, once the halves have parted. */
+.webspring-folder-split-half.is-bottom {
+  filter: drop-shadow(0 -2px 6px rgba(0, 0, 0, 0));
+  transition:
+    transform var(--webspring-folder-duration) var(--webspring-folder-easing),
+    filter var(--webspring-folder-duration) var(--webspring-folder-easing);
+}
+
+.webspring-folder-split[data-phase="open"] .webspring-folder-split-half.is-bottom {
+  filter: drop-shadow(0 -2px 6px rgba(0, 0, 0, calc(var(--webspring-folder-edge-shadow) * .6)));
+}
+
+/* The light each cut edge catches, just inside the stage, which makes the
+   halves read as cut from one sheet. Hidden at rest, so the shut stage shows
+   no line. */
+.webspring-folder-split-edge {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+  background: rgba(255, 255, 255, .34);
+  opacity: 0;
+  transition: opacity var(--webspring-folder-duration) var(--webspring-folder-easing);
+}
+
+.webspring-folder-split-edge.is-top {
+  top: 0;
+  height: 100%;
+}
+
+.webspring-folder-split[data-phase="open"] .webspring-folder-split-edge {
+  opacity: 1;
+}
+
+/* The pointer's piece of the stage rides on the lower half in a window the
+   size of the cutout, whose foot is the lower half's straight edge. It slides
+   down through that window as the halves part, sinking below the edge, and
+   rises back up as they rejoin. */
+.webspring-folder-split-tab {
+  position: absolute;
+  top: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.webspring-folder-split-tab-piece {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  transition: transform var(--webspring-folder-duration) var(--webspring-folder-easing);
+}
+
+/* Each clone is the stage at its own size, shifted by the depth of the half. */
+.webspring-folder-split-clone-host {
+  position: absolute;
+  left: 0;
+  width: 100%;
+}
+
+/* Every icon in a clone is backdrop except the opened folder's own, which is
+   marked as the anchor. The fade runs with the split and reverses on close. */
+.webspring-folder-split-clone [data-webspring-folder-backdrop="backdrop"] {
+  transition:
+    opacity var(--webspring-folder-duration) var(--webspring-folder-easing),
+    filter var(--webspring-folder-duration) var(--webspring-folder-easing);
+}
+
+.webspring-folder-split[data-motion="split"][data-phase="open"] .webspring-folder-split-clone [data-webspring-folder-backdrop="backdrop"],
+.webspring-folder-split[data-motion="fade"] .webspring-folder-split-clone [data-webspring-folder-backdrop="backdrop"] {
+  opacity: var(--webspring-folder-backdrop-icon-opacity);
+  filter: saturate(var(--webspring-folder-backdrop-icon-saturation));
+}
+
+.webspring-folder-split[data-motion="fade"] .webspring-folder-split-half,
+.webspring-folder-split[data-motion="fade"] .webspring-folder-split-half.is-top,
+.webspring-folder-split[data-motion="fade"] .webspring-folder-split-half.is-bottom,
+.webspring-folder-split[data-motion="fade"] .webspring-folder-split-tab-piece,
+.webspring-folder-split[data-motion="fade"] .webspring-folder-split-edge,
+.webspring-folder-split[data-motion="fade"] .webspring-folder-split-clone [data-webspring-folder-backdrop="backdrop"] {
+  transition: none;
+}

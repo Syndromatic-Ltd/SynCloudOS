@@ -19,10 +19,12 @@
  */
 
 import type { ReactNode } from "react";
+import type { NSEActionReference } from "../Controls/Core/actionReference";
+import type { NSEControllerOwnershipOptions } from "../Controllers/ownership";
 import type {
   ControllerCommitResult,
   ControllerEditTransaction,
-  NSEPreferencesController,
+  NSEUserDefaultsController,
 } from "../Controllers";
 import type {
   CommandDispatchOptions,
@@ -86,6 +88,15 @@ export type NSEToolbarOwner =
   | { readonly kind: "window"; readonly windowControllerId: string }
   | { readonly kind: "application"; readonly applicationId: string };
 
+/** An authored action uses the same validation, dispatch and overflow menu as a command item. */
+export type NSEToolbarActionItem<Payload = unknown> = Omit<Extract<NSEToolbarItem, { readonly kind: "command" }>, "commandId" | "payload"> & {
+  readonly action: string | NSEActionReference<Payload>;
+  readonly commandId?: never;
+  readonly payload?: NoInfer<Payload>;
+};
+
+export type NSEToolbarItemInput = NSEToolbarItem | NSEToolbarActionItem;
+
 export interface NSEToolbarConfiguration {
   readonly identifier: string;
   readonly owner: NSEToolbarOwner;
@@ -99,6 +110,9 @@ export interface NSEToolbarRuntimePort {
   readonly signal: AbortSignal;
   readonly commands: {
     getPresentationGeneration(): { readonly registryGeneration: number; readonly responderGeneration: number };
+    /** Notifies when command authority may have changed: the focused responder
+     * chain, the command registry, or application state a validator reads. */
+    subscribePresentation?(listener: () => void): () => void;
     validateMany(
       requests: readonly CommandValidationRequest[],
       options?: CommandValidationOptions,
@@ -118,6 +132,7 @@ export interface NSEToolbarRuntimePort {
    * key-binding and scheduling authority as an ordinary menu. */
   readonly keyBindings?: NSEMenuRuntimePort["keyBindings"];
   readonly scheduler?: NSEMenuRuntimePort["scheduler"];
+  readonly resolveAction?: NSEMenuRuntimePort["resolveAction"];
 }
 
 export type NSEToolbarPresentedItem =
@@ -163,11 +178,11 @@ export interface NSEToolbarSnapshot {
   readonly diagnostic: "validation-failed" | null;
 }
 
-export interface NSEToolbarControllerOptions {
+export interface NSEToolbarControllerOptions extends NSEControllerOwnershipOptions {
   readonly configuration: NSEToolbarConfiguration;
-  readonly items: readonly NSEToolbarItem[];
+  readonly items: readonly NSEToolbarItemInput[];
   /** The host constructs and owns this preference controller. */
-  readonly preferences: NSEPreferencesController<NSEToolbarPreferences>;
+  readonly preferences: NSEUserDefaultsController<NSEToolbarPreferences>;
   readonly runtime: NSEToolbarRuntimePort;
 }
 

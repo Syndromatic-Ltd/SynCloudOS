@@ -35,8 +35,9 @@ import {
 } from "../../src/NSE/Appearance";
 import { NSEAboutDialog } from "../../src/NSE/Components/NSESystemDialogs";
 import { NSEPreferencesToast } from "../../src/NSE/Components/NSEPreferencesToast";
-import { NSECheckbox, NSERadioGroup, NSETextField } from "../../src/NSE/Controls/Fields/NSEFields";
-import { NSEPicker } from "../../src/NSE/Menus";
+import { NSERadioGroup, NSETextField } from "../../src/NSE/Controls/Fields/NSEFields";
+import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
+import { NSEPopUpButton } from "../../src/NSE/Menus";
 import { NSEOverlayProvider, NSEPopup as NSECanonicalPopup } from "../../src/NSE/Overlays";
 import type { NSEOverlayRuntimePort } from "../../src/NSE/Overlays/overlayTypes";
 import { atmoAppearance } from "../../src/NSE/Themes/Atmo";
@@ -135,10 +136,10 @@ function CanonicalPortalSpecimens() {
         Canonical portal
       </NSECanonicalPopup>
       <NSETooltip id="p11-tooltip" open anchor={anchor} content="Projected tooltip" />
-      <NSEPicker
+      <NSEPopUpButton
         label="Canonical picker"
-        options={[{ value: "one", label: "One" }]}
-        listboxOverlay={{ id: "p11-listbox", parentResponderId: "workspace" }}
+        items={[{ value: "one", title: "One" }]}
+        overlay={{ id: "p11-listbox", parentResponderId: "workspace" }}
       />
     </>
   );
@@ -175,14 +176,14 @@ describe("NSE appearance composition", () => {
   it("keeps semantic disabled and invalid state when controls change", async () => {
     const { rerender } = render(
       <NSEAppearanceProvider appearance={atmoAppearance}>
-        <NSETextField label="Name" disabled invalid />
+        <NSETextField label="Name" isEnabled={false} invalid />
       </NSEAppearanceProvider>,
     );
     expect(screen.getByLabelText("Name").getAttribute("aria-invalid")).toBe("true");
 
     rerender(
       <NSEAppearanceProvider appearance={atmoAppearance}>
-        <NSETextField label="Name" disabled invalid />
+        <NSETextField label="Name" isEnabled={false} invalid />
       </NSEAppearanceProvider>,
     );
     expect((screen.getByLabelText("Name") as HTMLInputElement).disabled).toBe(true);
@@ -323,7 +324,7 @@ describe("NSE appearance composition", () => {
   });
 
   it("retains native mixed checkbox state and exposes stable paint state", () => {
-    render(<NSECheckbox label="Shared" state="mixed" disabled />);
+    render(<NSEButton buttonType="switch" title="Shared" state="mixed" isEnabled={false} />);
     const input = screen.getByRole("checkbox", { name: "Shared" }) as HTMLInputElement;
     expect(input.indeterminate).toBe(true);
     expect(input.getAttribute("aria-checked")).toBe("mixed");
@@ -338,7 +339,7 @@ describe("NSE appearance composition", () => {
         value="standard"
         options={[
           { value: "standard", label: "Standard" },
-          { value: "locked", label: "Locked", disabled: true },
+          { value: "locked", label: "Locked", isEnabled: false },
         ]}
       />,
     );

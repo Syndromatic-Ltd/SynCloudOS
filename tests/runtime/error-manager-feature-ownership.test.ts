@@ -29,8 +29,10 @@ describe("generic unavailable framework features", () => {
       code: "FEATURE_NOT_IMPLEMENTED", category: "runtime",
       title: "That feature is not available yet.", context: { featureId, implementationStatus: "notImplemented" },
     });
-    expect(error.technicalMessage).toBe(`SynCloudOS attempted to present "${featureId}", but no implementation is registered.`);
+    expect(error.technicalDetails).toContain(`Detail: SynCloudOS attempted to present "${featureId}", but no implementation is registered.`);
+    expect(error).not.toHaveProperty("exception");
     expect(error.context).not.toHaveProperty("stackHint");
-    expect(SynCloudOS.ErrorManager.toTechnicalReport(error)).toContain("SYN-FEATURE-501");
+    expect(SynCloudOS.ErrorManager.toTechnicalReport(error))
+      .toMatch(/^That feature is not available yet\.\n\nSynCloudOS received the system action[^\n]*\n\nCode: FEATURE_NOT_IMPLEMENTED\nReported by: /);
   });
 });

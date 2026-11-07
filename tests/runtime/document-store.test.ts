@@ -49,8 +49,8 @@ function createMemoryStorage(): Storage {
 function persistedApplicationDocument(id: string) {
   return {
     id,
-    applicationId: "journal-publisher",
-    ownership: { kind: "application" as const, applicationId: "journal-publisher" },
+    applicationId: "com.example.journal-publisher",
+    ownership: { kind: "application" as const, applicationId: "com.example.journal-publisher" },
     kind: "journal.post", version: 1, publishState: "draft" as const,
     createdAt: "2026-05-31T10:00:00.000Z", updatedAt: "2026-05-31T10:00:00.000Z",
   };
@@ -217,6 +217,111 @@ describe("SynCloudOS DocumentStore in-memory adapter", () => {
     await expect(store.listDrafts({ kind: "journal.post", includeArchived: true }, context)).resolves.toHaveLength(1);
   });
 
+  it.each(["published", "unlisted"] as const)("atomically edits an existing %s record with one conditional write", async (state) => {
+    const storage = createMemoryStorage();
+    const writes = vi.spyOn(storage, "setItem");
+    const persistence = createPersistence({ runtimeId: "runtime:publication-edit" as never, storage, namespace: "publication-edit" });
+    const events = { publish: vi.fn() };
+    const store = createPersistenceDocumentStore({
+      kinds: [journalKind], authorise, persistence, events,
+      conditionalWriteLock: { request: async (_name, _options, callback) => callback() },
+    });
+    const context = { subject: editorSubject, now: "2026-05-31T10:00:00.000Z" };
+    await store.saveDraft({ id: "live", kind: journalKind.kind, slug: "live", title: "Original", body: "Original body" }, context);
+    const original = await store.publish("live", {
+      state, publishedAt: "2026-05-30T10:00:00.000Z", canonicalUrl: "https://example.com/live",
+    }, context);
+    writes.mockClear();
+    events.publish.mockClear();
+
+    const edited = await store.saveDraft({
+      id: "live", kind: journalKind.kind, title: "Edited", body: "Edited body", publishState: state,
+    }, context, { ifMatch: original.storageVersion!.etag });
+    expect(edited).toMatchObject({
+      publishState: state, title: "Edited", body: "Edited body",
+      publishedAt: original.publishedAt, canonicalUrl: original.canonicalUrl,
+      storageVersion: { sequence: original.storageVersion!.sequence + 1 },
+    });
+    expect(edited.storageVersion.etag).not.toBe(original.storageVersion!.etag);
+    expect(writes).toHaveBeenCalledTimes(1);
+    expect(JSON.parse(writes.mock.calls[0]![1]).documents[0]).toMatchObject({ publishState: state, title: "Edited" });
+    expect(events.publish.mock.calls.map(([type]) => type)).toEqual(["documentStore.draft.save"]);
+    expect(await store.listPublished({ includeUnlisted: true })).toEqual([edited]);
+
+    const restored = createPersistenceDocumentStore({ kinds: [journalKind], authorise, persistence });
+    expect(await restored.listPublished({ includeUnlisted: true })).toEqual([edited]);
+    await expect(store.saveDraft({ ...edited, title: "Stale" }, context, { ifMatch: original.storageVersion!.etag }))
+      .rejects.toMatchObject({ code: "document-store-version-conflict" });
+    expect(writes).toHaveBeenCalledTimes(1);
+    expect(await store.listPublished({ includeUnlisted: true })).toEqual([edited]);
+    writes.mockImplementationOnce(() => { throw new DOMException("Storage full", "QuotaExceededError"); });
+    await expect(store.saveDraft({ ...edited, title: "Rejected persistence write" }, context, { ifMatch: edited.storageVersion.etag }))
+      .rejects.toMatchObject({ code: "document-store-atomicity-unavailable" });
+    expect(await store.listPublished({ includeUnlisted: true })).toEqual([edited]);
+    const afterRejection = createPersistenceDocumentStore({ kinds: [journalKind], authorise, persistence });
+    expect(await afterRejection.listPublished({ includeUnlisted: true })).toEqual([edited]);
+    writes.mockRestore();
+  });
+
+  it.each(["published", "unlisted"] as const)("checks publish authority before changing an existing %s record", async (state) => {
+    const events = { publish: vi.fn() };
+    const store = createInMemoryDocumentStore({ kinds: [journalKind], authorise, events, clock: () => new Date("2026-05-31T10:00:00.000Z") });
+    const context = { subject: editorSubject };
+    await store.saveDraft({ id: "live", kind: journalKind.kind, slug: "live", body: "Original" }, context);
+    const original = await store.publish("live", { state }, context);
+    const before = store.exportSnapshot();
+    events.publish.mockClear();
+    policyAudit.length = 0;
+    const draftOnly = createSubject(["documentStore.draft.write", "journal.draft.write"]);
+
+    await expect(store.saveDraft({
+      id: "live", kind: journalKind.kind, body: "Denied edit", publishState: state,
+    }, { subject: draftOnly }, { ifMatch: original.storageVersion!.etag, idempotencyKey: "denied-edit" }))
+      .rejects.toMatchObject({ name: "SynCloudOSDocumentStoreAccessError", operation: "publish" });
+    expect(policyAudit.map(decision => [decision.action, decision.allowed])).toEqual([
+      ["documentStore.saveDraft", true], ["documentStore.publish", false],
+    ]);
+    expect(store.exportSnapshot()).toEqual(before);
+    expect(await store.listPublished({ includeUnlisted: true })).toEqual([original]);
+    expect(events.publish).not.toHaveBeenCalled();
+
+    const publishOnly = createSubject(["documentStore.publish", "journal.publish"]);
+    await expect(store.saveDraft({ ...original, body: "Also denied" }, { subject: publishOnly }))
+      .rejects.toMatchObject({ operation: "saveDraft" });
+    expect(store.exportSnapshot()).toEqual(before);
+  });
+
+  it.each([
+    [undefined, "published"], [undefined, "unlisted"], ["draft", "published"], ["draft", "unlisted"],
+    ["published", "unlisted"], ["unlisted", "published"], ["published", undefined], ["unlisted", undefined],
+  ] as const)("stages a draft for publication intent %s → %s without invoking publish", async (existingState, requestedState) => {
+    const store = createInMemoryDocumentStore({ kinds: [journalKind], authorise });
+    if (existingState) {
+      await store.saveDraft({ id: "staged", kind: journalKind.kind, slug: "staged" }, { subject: editorSubject });
+      if (existingState !== "draft") await store.publish("staged", { state: existingState }, { subject: editorSubject });
+    }
+    policyAudit.length = 0;
+    const draftOnly = createSubject(["documentStore.draft.write", "journal.draft.write"]);
+    const staged = await store.saveDraft({
+      id: "staged", kind: journalKind.kind, slug: "staged", body: "Staged", ...(requestedState ? { publishState: requestedState } : {}),
+    }, { subject: draftOnly });
+    expect(staged.publishState).toBe("draft");
+    expect(policyAudit.map(decision => decision.action)).toEqual(["documentStore.saveDraft"]);
+    expect(await store.listPublished({ includeUnlisted: true })).toEqual([]);
+  });
+
+  it("retains explicitly supplied publication dates and canonical URLs on an authorised edit", async () => {
+    const store = createInMemoryDocumentStore({ kinds: [journalKind], authorise });
+    const context = { subject: editorSubject };
+    await store.saveDraft({ id: "live", kind: journalKind.kind, slug: "live" }, context);
+    const original = await store.publish("live", { canonicalUrl: "https://example.com/old", publishedAt: "2026-05-01T10:00:00.000Z" }, context);
+    const edited = await store.saveDraft({
+      id: "live", kind: journalKind.kind, publishState: "published",
+      publishedAt: "2026-05-02T10:00:00.000Z", canonicalUrl: "https://example.com/new",
+    }, context, { ifMatch: original.storageVersion!.etag });
+    expect(edited).toMatchObject({ publishState: "published", publishedAt: "2026-05-02T10:00:00.000Z", canonicalUrl: "https://example.com/new" });
+  });
+
   it("keeps kind migrations behind the DocumentStore boundary", async () => {
     const store = createInMemoryDocumentStore({
       authorise,
@@ -355,7 +460,7 @@ describe("SynCloudOS DocumentStore in-memory adapter", () => {
     ["schema V1", { schemaVersion: 1 }],
     ["unsupported schema", { schemaVersion: 3 }],
     ["ownerless record", { schemaVersion: 2, documents: [{ id: "ownerless", kind: "journal.post", version: 1, publishState: "draft", createdAt: "2026-05-31T10:00:00.000Z", updatedAt: "2026-05-31T10:00:00.000Z" }] }],
-    ["ambiguous application owner", { schemaVersion: 2, documents: [{ ...persistedApplicationDocument("ambiguous-owner"), applicationId: "foreign-app" }] }],
+    ["ambiguous application owner", { schemaVersion: 2, documents: [{ ...persistedApplicationDocument("ambiguous-owner"), applicationId: "com.example.foreign-app" }] }],
     ["revision ownership conflict", {
       schemaVersion: 2,
       documents: [persistedApplicationDocument("revision-conflict")],

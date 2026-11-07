@@ -31,7 +31,7 @@ function graphBundle(id: string) {
     { name: `${id}.detail`, path: "detail/:itemId" },
   ] }] } as const);
   return createSynWareBundle(createSynWare({
-    manifest: { schemaVersion: 1, id, version: "1.0.0", title: id, routes: [{ path: `/${id}`, primary: true, match: "prefix" }], permissions: ["app.open.public"] },
+    manifest: { schemaVersion: 1, bundleIdentifier: id, version: "1.0.0", displayName: id, routes: [{ path: `/${id.split(".").at(-1)}`, primary: true, match: "prefix" }], permissions: ["app.open.public"] },
     root: () => null,
     routes,
   }));
@@ -43,10 +43,10 @@ describe("route graph ownership after unregister", () => {
     runtimes.push(runtime);
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
     for (let cycle = 0; cycle < 12; cycle++) {
-      const id = `retained-${cycle}`;
+      const id = `com.example.retained-${cycle}`;
       runtime.apps.register(graphBundle(id));
       await runtime.bundles.loadBundle(id);
-      await expect(runtime.routes.routeGraph.preload(id, `/${id}/detail/7`, new AbortController().signal))
+      await expect(runtime.routes.routeGraph.preload(id, `/${id.split(".").at(-1)}/detail/7`, new AbortController().signal))
         .resolves.toMatchObject({ status: "ready" });
       expect(runtime.routes.routeGraph.diagnostics().retainedApplications).toBeGreaterThanOrEqual(1);
       await runtime.apps.unregister(id);
@@ -58,10 +58,10 @@ describe("route graph ownership after unregister", () => {
     const runtime = createTestRuntime();
     runtimes.push(runtime);
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
-    runtime.apps.register(graphBundle("kept"));
-    await runtime.bundles.loadBundle("kept");
+    runtime.apps.register(graphBundle("com.example.kept"));
+    await runtime.bundles.loadBundle("com.example.kept");
     for (let visit = 0; visit < 3; visit++)
-      await runtime.routes.routeGraph.preload("kept", `/kept/detail/${visit}`, new AbortController().signal);
+      await runtime.routes.routeGraph.preload("com.example.kept", `/kept/detail/${visit}`, new AbortController().signal);
     expect(runtime.routes.routeGraph.diagnostics().retainedApplications).toBe(1);
   });
 });

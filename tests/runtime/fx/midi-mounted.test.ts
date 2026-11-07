@@ -126,9 +126,9 @@ it("reports undeclared MIDI authorization as policy-denied without touching the 
 const MIDIProbe = createSynWare({
   manifest: {
     schemaVersion: 1,
-    id: "com.syndromatic.midi-probe",
+    bundleIdentifier: "com.syndromatic.midi-probe",
     version: "1.0.0",
-    title: "MIDI Probe",
+    displayName: "MIDI Probe",
     routes: [{ path: "/midi-probe", primary: true }],
     permissions: ["midi.access", "midi.sysex"],
   },

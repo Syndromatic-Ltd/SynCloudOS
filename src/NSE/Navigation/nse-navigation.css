@@ -18,9 +18,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-[data-nse-control="tab-view"] [role="tablist"]{display:flex;overflow:auto}[data-nse-control="accordion-view"] [role="region"]{padding:8px}
+[data-nse-control="tab-view"] [role="tablist"]{display:flex;overflow:auto}
 
 /* NavigationFoundation owns controller geometry/retention; AppearanceAuthority projects only source-bound paint. */
+/* A destination's vertical scroll boundary belongs to the app, not the host
+   document. Contain chaining while retaining local native/rubber-band
+   affordances; horizontal browser navigation remains unchanged. */
+[data-nse-navigation-scroll-surface="true"] {
+  overscroll-behavior-y: contain;
+}
+
 .nse-tab-bar-safe-area {
   --nse-tab-safe-inline-inset: clamp(
     10px,
@@ -416,6 +423,17 @@
   overflow: hidden;
 }
 
+/* A retained destination owns the child controller frame's available size.
+   An auto-sized flex item expands to its document height, leaving a nested
+   native scroller with no scroll range behind the panel's overflow clip. */
+.nse-navigation-destination-host > .nse-tab-bar-panel > [data-nse-view-controller],
+.nse-tab-bar-more-stack > [data-nse-more-destination] > [data-nse-view-controller] {
+  flex: 1 1 auto;
+  block-size: 100%;
+  min-block-size: 0;
+  min-inline-size: 0;
+}
+
 .nse-hierarchy-stack {
   min-width: 0;
 }
@@ -494,4 +512,72 @@
 
 .nse-icon-tab:disabled {
   opacity: 0.45;
+}
+
+/* A rail changes only tab orientation. Targets keep the tall tab's 72px
+   height and independent end caps; content is beside it, never underneath. */
+.nse-tab-bar-safe-area[data-orientation="vertical"] {
+  align-items: stretch;
+  block-size: 100%;
+  box-sizing: border-box;
+  inline-size: var(--nse-navigation-rail-width, 104px);
+  padding: 10px;
+  min-block-size: 0;
+}
+.nse-tab-bar-safe-area[data-orientation="vertical"] .nse-tab-bar-scroll-viewport {
+  align-items: flex-start;
+  overflow-x: hidden;
+  overflow-y: auto;
+  pointer-events: auto;
+  min-block-size: 0;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.nse-tab-bar-safe-area[data-orientation="vertical"] .nse-tab-bar {
+  flex-direction: column;
+  block-size: auto;
+  min-block-size: 0;
+  min-inline-size: 0;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  gap: 6px;
+}
+.nse-tab-bar-safe-area[data-orientation="vertical"] .nse-tab-bar > .nse-tab-bar-tab {
+  flex: 0 0 72px;
+  block-size: 72px;
+  min-block-size: 72px;
+  min-inline-size: 64px;
+}
+.nse-tab-bar-safe-area[data-orientation="vertical"] .nse-tab-bar-label {
+  max-inline-size: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Overflow destinations have room to grow vertically; keep their names readable. */
+.nse-tab-bar-overflow-option .nse-control-list-primary { white-space: normal; overflow: visible; overflow-wrap: anywhere; }
+
+/* NSETabViewController: the selected item's view above or below the tab control its tabStyle names. */
+.nse-tab-view-controller {
+  display: flex;
+  flex-direction: column;
+  block-size: 100%;
+  min-block-size: 0;
+  min-inline-size: 0;
+}
+
+.nse-tab-view-controller-content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-block-size: 0;
+  min-inline-size: 0;
+}
+
+.nse-tab-view-controller-content > [data-nse-view-controller] {
+  flex: 1 1 auto;
+  block-size: 100%;
+  min-block-size: 0;
+  min-inline-size: 0;
 }

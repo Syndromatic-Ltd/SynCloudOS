@@ -27,7 +27,7 @@ import {
   NSEChromeSurface,
   type NSEChromeVisualState,
 } from "../Appearance/NSEChromePrimitives";
-import { NSEMenu, NSEMenuController, type NSEMenuEntry, type NSEMenuModel } from "../Menus";
+import { NSEMenu, NSEMenuView, nseMenuModel, type NSEMenuEntry, type NSEMenuModel } from "../Menus";
 import { NSEMenuOverlay } from "../Menus/NSEMenuOverlay";
 import { useOptionalNSEOverlayProvider } from "../Overlays";
 import type { NSEToolbarController } from "./NSEToolbarController";
@@ -93,7 +93,7 @@ export function NSEToolbarOverflowMenu({
   const [hovered, setHovered] = useState(false);
   const [pressed, setPressed] = useState(false);
   const [focused, setFocused] = useState(false);
-  const [menuController, setMenuController] = useState<NSEMenuController | null>(null);
+  const [menuController, setMenuController] = useState<NSEMenu | null>(null);
   const localTriggerRef = useRef<HTMLButtonElement | null>(null);
   const model = useMemo(() => modelFor(controller, entries), [controller, entries]);
   const modelSignature = entries.map((entry) => entry.instanceId).join("|");
@@ -112,8 +112,9 @@ export function NSEToolbarOverflowMenu({
   if (!parentResponderId.trim()) throw new TypeError("NSE toolbar overflow menus require a parent responder ID.");
   const requestOpen = useCallback((nextOpen: boolean) => {
     if (nextOpen && !menuController) {
-      setMenuController(new NSEMenuController({
-        model,
+      setMenuController(new NSEMenu({
+        ownerSignal: controller.runtime.signal,
+        [nseMenuModel]: model,
         runtime: {
           signal: controller.runtime.signal,
           commands: controller.runtime.commands,
@@ -179,7 +180,7 @@ export function NSEToolbarOverflowMenu({
           labelledBy={undefined}
           onOpenChange={requestOpen}
         >
-          <NSEMenu model={model} controller={menuController} open={open} onOpenChange={requestOpen} />
+          <NSEMenuView model={model} controller={menuController} open={open} onOpenChange={requestOpen} />
         </NSEMenuOverlay>
       ) : null}
     </span>

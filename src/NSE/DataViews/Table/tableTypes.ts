@@ -20,7 +20,7 @@
 
 import type { HTMLAttributes, ReactNode } from "react";
 
-import type { NSEMenuController, NSEMenuModel, NSEMenuOverlayOptions } from "../../Menus";
+import type { NSEMenu, NSEMenuOverlayOptions } from "../../Menus";
 import type { Formatter, SelectionChange, SelectionSnapshot, SortDescriptor } from "../../../SynCloudOS/Models";
 import type {
   NSEDataViewAdapter,
@@ -32,7 +32,7 @@ import type { NSEDataViewDragBinding } from "../Drag";
 import type { DragEndpoint } from "../../../SynCloudOS/SynCloudOS";
 import type { NSEDragCommandPort } from "../../Drag";
 
-export interface NSETableEditContext<T, TId, TValue> {
+export interface NSETableViewEditContext<T, TId, TValue> {
   readonly item: T;
   readonly id: TId;
   readonly columnId: string;
@@ -53,10 +53,10 @@ export interface NSETableColumn<T, TId, TValue> {
   readonly format?: Formatter<TValue>;
   readonly sort?: { readonly compare: (left: TValue, right: TValue) => number };
   readonly render?: (value: TValue, item: T, id: TId) => ReactNode;
-  readonly editor?: (context: NSETableEditContext<T, TId, TValue>) => ReactNode;
+  readonly editor?: (context: NSETableViewEditContext<T, TId, TValue>) => ReactNode;
 }
 
-export interface NSETableDropProposal<TId> {
+export interface NSETableViewDropProposal<TId> {
   readonly sessionId: string;
   readonly generation: number;
   readonly signal: AbortSignal;
@@ -72,13 +72,13 @@ export interface NSETableColumnConfiguration {
   readonly widths: Readonly<Record<string, number>>;
 }
 
+/** The header view's menu (NSTableHeaderView.menu), opened from its Columns pull-down. */
 export interface NSETableColumnMenu {
-  readonly model: NSEMenuModel;
-  readonly controller: NSEMenuController;
+  readonly menu: NSEMenu;
   readonly overlay: NSEMenuOverlayOptions;
 }
 
-export interface NSETableProps<T, TId extends NSEDataViewKey>
+export interface NSETableViewProps<T, TId extends NSEDataViewKey>
   extends Omit<HTMLAttributes<HTMLDivElement>, "children" | "onDoubleClick"> {
   readonly adapter: NSEDataViewAdapter<T, TId>;
   readonly columns: readonly NSETableColumn<T, TId, unknown>[];
@@ -89,7 +89,11 @@ export interface NSETableProps<T, TId extends NSEDataViewKey>
   readonly headerHeight?: number;
   /** NSTableView with no header view: the rows alone, as a list. */
   readonly headerHidden?: boolean;
-  readonly viewportBlockSize?: number;
+  /**
+   * The rows' visible height in CSS pixels, or `"fill"` to take the height of the table's container
+   * (an NSTableView in an NSScrollView that fills its pane), measured as it resizes.
+   */
+  readonly viewportBlockSize?: number | "fill";
   readonly locale?: string;
   readonly columnVisibility?: Readonly<Record<string, boolean>>;
   readonly columnOrder?: readonly string[];
@@ -100,9 +104,9 @@ export interface NSETableProps<T, TId extends NSEDataViewKey>
   readonly onSortDescriptorsChange?: (descriptors: readonly SortDescriptor<T, unknown>[]) => void;
   readonly onSelectionChange?: (event: NSEDataViewSelectionEvent<TId>) => void;
   readonly onDoubleAction?: (id: TId, item: T) => void;
-  readonly onEditCommit?: (context: NSETableEditContext<T, TId, unknown>) => void | Promise<void>;
-  readonly onValidateDrop?: (proposal: NSETableDropProposal<TId>) => boolean | Promise<boolean>;
-  readonly onAcceptDrop?: (proposal: NSETableDropProposal<TId>) => void | Promise<void>;
+  readonly onEditCommit?: (context: NSETableViewEditContext<T, TId, unknown>) => void | Promise<void>;
+  readonly onValidateDrop?: (proposal: NSETableViewDropProposal<TId>) => boolean | Promise<boolean>;
+  readonly onAcceptDrop?: (proposal: NSETableViewDropProposal<TId>) => void | Promise<void>;
   readonly dragBinding?: NSEDataViewDragBinding<TId>;
   readonly dragEndpoint?: DragEndpoint;
   /** Optional runtime command bridge for focused keyboard drag alternatives. */
@@ -114,7 +118,7 @@ export interface NSETableProps<T, TId extends NSEDataViewKey>
   readonly onCommandFocus?: (responderId: string) => void;
 }
 
-export interface NSETableSelectionSnapshot<TId extends NSEDataViewKey> {
+export interface NSETableViewSelectionSnapshot<TId extends NSEDataViewKey> {
   readonly snapshot: SelectionSnapshot<TId>;
   readonly change: SelectionChange<TId>;
 }

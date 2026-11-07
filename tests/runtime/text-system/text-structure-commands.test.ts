@@ -99,14 +99,14 @@ describe("structure commands", () => {
     expect(effectiveNSETextCustomAttribute(snapshot, { location: 0, length: 4 }, "journal.comment")).toEqual({ state: "mixed" });
     expect(effectiveNSETextCustomAttribute(snapshot, { location: 2, length: 2 }, "journal.comment")).toEqual({ state: "unset" });
     expect(effectiveNSEParagraphCustomAttribute(snapshot, { location: 0, length: 6 }, "journal.style")).toEqual({ state: "mixed" });
-    const session = new TextEditingSession({ id: "agg", owner: createInMemoryNSETextOwner({ content }) });
+    const session = new TextEditingSession({ id: "agg", textOwner: createInMemoryNSETextOwner({ content }) });
     session.select(0, 1);
     expect(aggregateNSETextAttributes(session).paragraph.headerLevel).toEqual({ state: "uniform", value: 1 });
   });
 
   it("validates and executes list commands as one undoable formatting step", async () => {
     const owner = createUndoableNSETextOwner({ content: three() });
-    const session = new TextEditingSession({ id: "cmd", owner, history: owner.history });
+    const session = new TextEditingSession({ id: "cmd", textOwner: owner, history: owner.history });
     const commands = new NSETextCommands({ session });
     session.select(0, 7);
     expect(commands.validate("text.toggleList", "disc").state).toBe("off");

@@ -19,29 +19,19 @@
  */
 
 import {
-  Children,
   createElement,
-  forwardRef,
   useCallback,
   useEffect,
   useId,
-  useImperativeHandle,
-  useMemo,
   useRef,
   useState,
   type CSSProperties,
   type HTMLAttributes,
-  type KeyboardEvent,
   type PointerEvent as ReactPointerEvent,
   type ReactNode
 } from "react";
-import { createPortal } from "react-dom";
-import { useNSEAppearanceProjection } from "../Appearance";
-import { NSEFocusScope, resolveNSEFocusReturnTarget } from "../Focus";
-import { NSEActionSheet, useOptionalNSEOverlayProvider, type NSEActionSheetProps } from "../Overlays";
 import "../Navigation/SourceList/nse-sourcelist.css";
-import { NSEDivider } from "../Controls/Selection/NSEDivider";
-import { NSEPushButton, type NSEButtonTone } from "../Controls/Buttons/NSEButtons";
+import { NSEButton } from "../Controls/Buttons/NSEButton";
 import {
   getOptionalNSESmoothSurfaceProps,
   type NSESmoothSurfaceRequest,
@@ -52,43 +42,12 @@ type NSEStyleVars = CSSProperties & { [key: `--nse-${string}`]: string | number 
 type NSEContainerElement = "div" | "section" | "aside" | "main" | "nav" | "article" | "ul" | "ol";
 
 export type NSEDrawerPlacement = "leading" | "trailing" | "top" | "bottom";
-export type NSEPaneVariant = "plain" | "surface" | "sidebar" | "inspector" | "floating";
+export type ContainerPaneVariant = "plain" | "surface" | "sidebar" | "inspector" | "floating";
 export type NSESlidingAxis = "horizontal" | "vertical";
-export type NSEDialogVariant = "dialog" | "sheet" | "panel" | "confirm";
-export type NSEToastTone = "info" | "success" | "warning" | "critical";
-export type NSEToasterPosition =
-  | "top-leading"
-  | "top-center"
-  | "top-trailing"
-  | "bottom-leading"
-  | "bottom-center"
-  | "bottom-trailing";
-
 interface NSEDisclosureOptions {
   open?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
-}
-
-export interface NSERowGroupProps extends Omit<HTMLAttributes<HTMLElement>, "title"> {
-  as?: NSEContainerElement;
-  title?: ReactNode;
-  caption?: ReactNode;
-  footer?: ReactNode;
-  inset?: boolean;
-  /** Render the body as a "roundy" framed group with guide-line rails between rows. Default true. */
-  rails?: boolean;
-  /** Wrap each child in an Item-style row. Enables the
-      showRow/hideRow ref handle. Default false so already-row-shaped children aren't double-wrapped. */
-  wrapRows?: boolean;
-}
-
-/** Imperative handle that shows and hides individual rows (operates on wrapped rows). */
-export interface NSERowGroupHandle {
-  showRow: (index: number) => void;
-  hideRow: (index: number) => void;
-  toggleRow: (index: number) => void;
-  isRowHidden: (index: number) => boolean;
 }
 
 /**
@@ -98,13 +57,13 @@ export interface NSERowGroupHandle {
  */
 export type NSEContainerContentLayout = "stack" | "flow";
 
-export interface NSEPaneProps extends Omit<HTMLAttributes<HTMLElement>, "title"> {
+export interface ContainerPaneProps extends Omit<HTMLAttributes<HTMLElement>, "title"> {
   as?: NSEContainerElement;
   title?: ReactNode;
   subtitle?: ReactNode;
   actions?: ReactNode;
   footer?: ReactNode;
-  variant?: NSEPaneVariant;
+  variant?: ContainerPaneVariant;
   smoothSurface?: NSESmoothSurfaceRequest;
   contentLayout?: NSEContainerContentLayout;
 }
@@ -122,14 +81,7 @@ export interface NSEDrawerProps extends Omit<HTMLAttributes<HTMLElement>, "title
   contentLayout?: NSEContainerContentLayout;
 }
 
-export interface NSEDividerDrawerProps extends Omit<HTMLAttributes<HTMLDivElement>, "title">, NSEDisclosureOptions {
-  title: string;
-  dividerLabel?: string;
-  keepMounted?: boolean;
-  contentLayout?: NSEContainerContentLayout;
-}
-
-export interface NSESlidingPaneProps extends Omit<NSEPaneProps, "as">, NSEDisclosureOptions {
+export interface NSESlidingPaneProps extends Omit<ContainerPaneProps, "as">, NSEDisclosureOptions {
   placement?: NSEDrawerPlacement;
   size?: number | string;
   peekWidth?: number | string;
@@ -139,23 +91,6 @@ export interface NSESlidingPaneProps extends Omit<NSEPaneProps, "as">, NSEDisclo
   selected?: boolean;
   draggable?: boolean;
   keepMounted?: boolean;
-}
-
-export interface NSESlidingViewItem {
-  key: string;
-  label: ReactNode;
-  content: ReactNode;
-  disabled?: boolean;
-}
-
-export interface NSESlidingViewProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
-  views: readonly NSESlidingViewItem[];
-  activeKey?: string;
-  defaultActiveKey?: string;
-  onActiveKeyChange?: (key: string) => void;
-  axis?: NSESlidingAxis;
-  controls?: boolean;
-  controlLabel?: string;
 }
 
 /** One pane in a connected NSESlidingPanes group. */
@@ -186,69 +121,6 @@ export interface NSESlidingPanesProps extends Omit<HTMLAttributes<HTMLDivElement
   multiViewMinWidth?: number;
   /** Allow dragging horizontally to move between panes. Default true. */
   draggable?: boolean;
-}
-
-export interface NSEDialogProps extends Omit<HTMLAttributes<HTMLElement>, "title"> {
-  title?: ReactNode;
-  description?: ReactNode;
-  actions?: ReactNode;
-  variant?: NSEDialogVariant;
-  role?: "dialog" | "alertdialog";
-  modal?: boolean;
-  closeLabel?: string;
-  onClose?: () => void;
-  smoothSurface?: NSESmoothSurfaceRequest;
-  contentLayout?: NSEContainerContentLayout;
-}
-
-export interface NSEModalDialogProps extends NSEDialogProps {
-  open: boolean;
-  onOpenChange?: (open: boolean) => void;
-  dismissOnOutside?: boolean;
-  dismissOnEscape?: boolean;
-  portal?: boolean;
-  /**
-   * Opt into the canonical action-sheet branch. Existing standalone
-   * callers retain their compatibility presentation until their runtime host
-   * supplies an NSEOverlayProvider.
-   */
-  interaction?: Pick<NSEActionSheetProps, "id" | "anchor" | "parentResponderId" | "parentId" | "parentScopeId" | "presentation" | "restoreFocus" | "parentWindowControllerId" | "windowBridge">;
-}
-
-export interface NSEConfirmPromptProps extends Omit<NSEModalDialogProps, "actions" | "children" | "title" | "variant" | "role" | "open"> {
-  title: ReactNode;
-  message?: ReactNode;
-  confirmLabel?: ReactNode;
-  cancelLabel?: ReactNode;
-  confirmTone?: NSEButtonTone;
-  cancelTone?: NSEButtonTone;
-  onConfirm: () => void;
-  onCancel?: () => void;
-  /** Render inline within the page rather than as a scrimmed modal overlay. */
-  inline?: boolean;
-  /** Whether the modal form is open (ignored when `inline`). */
-  open?: boolean;
-}
-
-export interface NSEToastAction {
-  label: ReactNode;
-  tone?: NSEButtonTone;
-  onPress: () => void;
-}
-
-export interface NSEToast {
-  id: string;
-  title?: ReactNode;
-  message: ReactNode;
-  tone?: NSEToastTone;
-  action?: NSEToastAction;
-  dismissLabel?: string;
-}
-
-export interface NSEToasterProps extends HTMLAttributes<HTMLDivElement> {
-  toasts: readonly NSEToast[];
-  position?: NSEToasterPosition;
-  onDismiss?: (id: string) => void;
 }
 
 function classes(...values: Array<string | false | null | undefined>) {
@@ -301,91 +173,7 @@ function useControllableKey({
   return [currentValue, setValue] as const;
 }
 
-export const NSERowGroup = forwardRef<NSERowGroupHandle, NSERowGroupProps>(function NSERowGroup({
-  as = "section",
-  title,
-  caption,
-  footer,
-  inset = false,
-  rails = true,
-  wrapRows = false,
-  className = "",
-  children,
-  ...props
-}, ref) {
-  const titleId = useId();
-  const labelledBy = props["aria-labelledby"] ?? (title ? titleId : undefined);
-  const [hiddenRows, setHiddenRows] = useState<ReadonlySet<number>>(() => new Set());
-
-  useImperativeHandle(
-    ref,
-    () => ({
-      showRow: (index) =>
-        setHiddenRows((set) => {
-          if (!set.has(index)) return set;
-          const next = new Set(set);
-          next.delete(index);
-          return next;
-        }),
-      hideRow: (index) =>
-        setHiddenRows((set) => {
-          if (set.has(index)) return set;
-          const next = new Set(set);
-          next.add(index);
-          return next;
-        }),
-      toggleRow: (index) =>
-        setHiddenRows((set) => {
-          const next = new Set(set);
-          if (next.has(index)) next.delete(index);
-          else next.add(index);
-          return next;
-        }),
-      isRowHidden: (index) => hiddenRows.has(index)
-    }),
-    [hiddenRows]
-  );
-
-  // A row group can wrap each child into an item row; opt-in so already-row-shaped children aren't
-  // double-wrapped. The wrapper carries the show/hide state.
-  const body = wrapRows
-    ? Children.toArray(children).map((child, index) => (
-        <div
-          key={index}
-          className="nse-container-row-group-row"
-          role="listitem"
-          data-row-index={index}
-          hidden={hiddenRows.has(index)}
-        >
-          {child}
-        </div>
-      ))
-    : children;
-
-  return createElement(
-    as,
-    {
-      ...props,
-      className: classes("nse-container-row-group", inset && "is-inset", className),
-      "data-rails": rails ? "true" : "false",
-      "aria-labelledby": labelledBy
-    },
-    <>
-      {title || caption ? (
-        <header className="nse-container-row-group-header">
-          {title ? <h3 id={titleId}>{title}</h3> : null}
-          {caption ? <p>{caption}</p> : null}
-        </header>
-      ) : null}
-      <div className="nse-container-row-group-body" role={wrapRows ? "list" : undefined}>
-        {body}
-      </div>
-      {footer ? <footer className="nse-container-row-group-footer">{footer}</footer> : null}
-    </>
-  );
-});
-
-export function NSEPane({
+export function ContainerPane({
   as = "section",
   title,
   subtitle,
@@ -398,7 +186,7 @@ export function NSEPane({
   style,
   children,
   ...props
-}: NSEPaneProps) {
+}: ContainerPaneProps) {
   const titleId = useId();
   const labelledBy = props["aria-labelledby"] ?? (title ? titleId : undefined);
   const surfaceProps = getOptionalNSESmoothSurfaceProps(
@@ -464,15 +252,13 @@ export function NSEDrawer({
       aria-hidden={!isOpen || undefined}
       hidden={!isOpen}
     >
-      <NSEPane
+      <ContainerPane
         title={title}
         subtitle={subtitle}
         actions={(
           <>
             {actions}
-            <NSEPushButton className="nse-container-drawer-close" tone="light" onClick={() => setOpen(false)}>
-              {closeLabel}
-            </NSEPushButton>
+            <NSEButton appearance="aqua" title={closeLabel} className="nse-container-drawer-close" onClick={() => setOpen(false)} />
           </>
         )}
         footer={footer}
@@ -482,54 +268,8 @@ export function NSEDrawer({
         style={style}
       >
         {children}
-      </NSEPane>
+      </ContainerPane>
     </aside>
-  );
-}
-
-export function NSEDividerDrawer({
-  title,
-  dividerLabel,
-  keepMounted = true,
-  contentLayout = "stack",
-  open,
-  defaultOpen,
-  onOpenChange,
-  className = "",
-  children,
-  ...props
-}: NSEDividerDrawerProps) {
-  const [isOpen, setOpen] = useDisclosureState({ open, defaultOpen, onOpenChange });
-
-  // Divider-drawer grammar: caption styled as part of the divider rail, then one continuous line
-  // that runs to the edge, passing through the disclosure arrow (label -> line -> arrow -> line-end).
-  const header = (
-    <div className="nse-container-divider-drawer-header">
-      <span className="nse-container-divider-drawer-label">{title}</span>
-      <span className="nse-container-divider-drawer-line" aria-hidden="true" />
-      <NSEDivider
-        variant="arrow"
-        className="nse-container-divider-drawer-arrow"
-        label={dividerLabel ?? title}
-        expanded={isOpen}
-        onToggle={() => setOpen((value) => !value)}
-      />
-      <span className="nse-container-divider-drawer-line nse-container-divider-drawer-line-end" aria-hidden="true" />
-    </div>
-  );
-
-  return (
-    <div {...props} className={classes("nse-container-divider-drawer", className)} data-open={isOpen ? "true" : "false"}>
-      {header}
-      {keepMounted || isOpen ? (
-        // The drawer animates open and closed. A grid-rows 1fr↔0fr transition on the
-        // panel (inner content clipped) animates the height without measuring; aria-hidden + the clip
-        // keep the collapsed content out of the way.
-        <div className="nse-container-divider-drawer-panel" aria-hidden={!isOpen}>
-          <div className="nse-container-divider-drawer-panel-inner" data-nse-content-layout={contentLayout === "stack" ? "stack" : undefined}>{children}</div>
-        </div>
-      ) : null}
-    </div>
   );
 }
 
@@ -585,7 +325,7 @@ export function NSESlidingPane({
   }
 
   return (
-    <NSEPane
+    <ContainerPane
       {...props}
       className={classes("nse-container-sliding-pane", className)}
       data-placement={placement}
@@ -629,78 +369,7 @@ export function NSESlidingPane({
       }}
     >
       {children}
-    </NSEPane>
-  );
-}
-
-export function NSESlidingView({
-  views,
-  activeKey,
-  defaultActiveKey,
-  onActiveKeyChange,
-  axis = "horizontal",
-  controls = false,
-  controlLabel = "Views",
-  className = "",
-  style,
-  ...props
-}: NSESlidingViewProps) {
-  const fallbackKey = views.find((view) => !view.disabled)?.key ?? views[0]?.key ?? "";
-  const [currentKey, setCurrentKey] = useControllableKey({
-    value: activeKey,
-    defaultValue: defaultActiveKey,
-    fallback: fallbackKey,
-    onChange: onActiveKeyChange
-  });
-  const activeIndex = Math.max(0, views.findIndex((view) => view.key === currentKey));
-  const offset = `-${activeIndex * 100}%`;
-  const trackStyle = {
-    transform: axis === "horizontal"
-      ? `translate3d(${offset}, 0, 0)`
-      : `translate3d(0, ${offset}, 0)`
-  };
-
-  return (
-    <div
-      {...props}
-      className={classes("nse-container-sliding-view", className)}
-      data-axis={axis}
-      data-active-key={currentKey}
-      style={style}
-    >
-      {controls ? (
-        <div className="nse-container-sliding-view-controls" role="tablist" aria-label={controlLabel}>
-          {views.map((view) => (
-            <NSEPushButton
-              key={view.key}
-              role="tab"
-              tone="light"
-              selected={view.key === currentKey}
-              aria-selected={view.key === currentKey}
-              disabled={view.disabled}
-              onClick={() => setCurrentKey(view.key)}
-            >
-              {view.label}
-            </NSEPushButton>
-          ))}
-        </div>
-      ) : null}
-      <div className="nse-container-sliding-view-viewport">
-        <div className="nse-container-sliding-view-track" style={trackStyle}>
-          {views.map((view) => (
-            <section
-              key={view.key}
-              className="nse-container-sliding-view-panel"
-              role="tabpanel"
-              aria-hidden={view.key !== currentKey}
-              data-active={view.key === currentKey ? "true" : "false"}
-            >
-              {view.content}
-            </section>
-          ))}
-        </div>
-      </div>
-    </div>
+    </ContainerPane>
   );
 }
 
@@ -709,7 +378,7 @@ A connected, horizontally-sliding group of panes. The selected pane sits at the 
 panes after it stay visible, and the last pane flexes to fill the remaining space. Selecting a peek
 strip (click, keyboard, or horizontal drag) slides the stack so that pane expands. Below
 `multiViewMinWidth` the panes stack full-width and slide one at a time. Unlike the single-pane
-NSESlidingPane drawer / NSESlidingView carousel, the panes here stay connected.
+NSESlidingPane drawer, the panes here stay connected.
 */
 export function NSESlidingPanes({
   views,
@@ -863,261 +532,6 @@ export function NSESlidingPanes({
           );
         })}
       </div>
-    </div>
-  );
-}
-
-export function NSEDialog({
-  title,
-  description,
-  actions,
-  variant = "dialog",
-  role = "dialog",
-  modal = false,
-  closeLabel = "Close dialog",
-  onClose,
-  smoothSurface = false,
-  contentLayout = "stack",
-  className = "",
-  style,
-  children,
-  onKeyDown,
-  ...props
-}: NSEDialogProps) {
-  const titleId = useId();
-  const descriptionId = useId();
-  const surfaceProps = getOptionalNSESmoothSurfaceProps(
-    smoothSurface,
-    classes("nse-container-dialog", className),
-    style as NSESmoothSurfaceStyle | undefined
-  );
-
-  function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
-    if (event.key === "Escape" && onClose) {
-      event.preventDefault();
-      onClose();
-    }
-    onKeyDown?.(event);
-  }
-
-  return (
-    <section
-      {...props}
-      className={surfaceProps.className}
-      data-variant={variant}
-      role={role}
-      aria-modal={modal || undefined}
-      aria-labelledby={title ? titleId : undefined}
-      aria-describedby={description ? descriptionId : undefined}
-      tabIndex={props.tabIndex ?? -1}
-      style={surfaceProps.style}
-      onKeyDown={handleKeyDown}
-    >
-      {title || onClose ? (
-        <header className="nse-container-dialog-header">
-          {title ? <h2 id={titleId}>{title}</h2> : null}
-          {onClose ? (
-            <button className="nse-container-dialog-close" type="button" aria-label={closeLabel} onClick={onClose}>
-              <span aria-hidden="true">x</span>
-            </button>
-          ) : null}
-        </header>
-      ) : null}
-      {description ? <p id={descriptionId} className="nse-container-dialog-description">{description}</p> : null}
-      <div className="nse-container-dialog-body" data-nse-content-layout={contentLayout === "stack" ? "stack" : undefined}>{children}</div>
-      {actions ? <footer className="nse-container-dialog-actions">{actions}</footer> : null}
-    </section>
-  );
-}
-
-export function NSEModalDialog({
-  open,
-  onOpenChange,
-  dismissOnOutside = true,
-  dismissOnEscape = true,
-  portal = true,
-  modal = true,
-  className = "",
-  onClose,
-  interaction,
-  ...props
-}: NSEModalDialogProps) {
-  const appearanceProjection = useNSEAppearanceProjection();
-  const overlayProvider = useOptionalNSEOverlayProvider();
-  const focusScopeId = useId();
-  const shellRef = useRef<HTMLDivElement>(null);
-  const close = useCallback(() => {
-    onClose?.();
-    onOpenChange?.(false);
-  }, [onClose, onOpenChange]);
-
-  useEffect(() => {
-    if (interaction || !open) return;
-    const previousFocus = resolveNSEFocusReturnTarget(document.activeElement);
-    shellRef.current?.focus({ preventScroll: true });
-
-    return () => {
-      previousFocus?.focus({ preventScroll: true });
-    };
-  }, [interaction, open]);
-
-  if (interaction) {
-    return (
-      <NSEActionSheet
-        {...interaction}
-        open={open}
-        dismissOnOutside={dismissOnOutside}
-        dismissOnEscape={dismissOnEscape}
-        onOpenChange={(_nextOpen, _reason) => close()}
-      >
-        <NSEDialog {...props} className={className} modal={modal} onClose={close} />
-      </NSEActionSheet>
-    );
-  }
-
-  if (overlayProvider) throw new Error("NSEModalDialog inside an NSEOverlayProvider requires explicit canonical interaction provenance.");
-
-  if (!open) return null;
-
-  const content = (
-    <NSEFocusScope options={{ scopeId: `nse-modal-dialog:${focusScopeId}`, kind: "modal", modal, trapFocus: modal, asChild: true }}>
-      <div
-        className="nse-container-modal-layer nse-container-fade-in"
-        {...appearanceProjection}
-        onMouseDown={(event) => {
-          if (dismissOnOutside && event.target === event.currentTarget) close();
-        }}
-      >
-        <div
-          ref={shellRef}
-          className="nse-container-modal-shell nse-container-rise-in"
-          tabIndex={-1}
-          onKeyDown={(event) => {
-            if (dismissOnEscape && event.key === "Escape") {
-              event.preventDefault();
-              close();
-            }
-          }}
-        >
-          <NSEDialog
-            {...props}
-            className={className}
-            modal={modal}
-            onClose={close}
-          />
-        </div>
-      </div>
-    </NSEFocusScope>
-  );
-
-  return portal && typeof document !== "undefined" ? createPortal(content, document.body) : content;
-}
-
-export function NSEConfirmPrompt({
-  title,
-  message,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
-  confirmTone = "affirmative",
-  cancelTone = "light",
-  onConfirm,
-  onCancel,
-  onOpenChange,
-  inline = false,
-  open,
-  className = "",
-  ...props
-}: NSEConfirmPromptProps) {
-  function cancel() {
-    onCancel?.();
-    onOpenChange?.(false);
-  }
-
-  function confirm() {
-    onConfirm();
-    onOpenChange?.(false);
-  }
-
-  const actions = (
-    <>
-      <NSEPushButton tone={cancelTone} onClick={cancel}>{cancelLabel}</NSEPushButton>
-      <NSEPushButton tone={confirmTone} onClick={confirm}>{confirmLabel}</NSEPushButton>
-    </>
-  );
-
-  // Inline prompts render without a scrim; the default is a modal overlay.
-  if (inline) {
-    return (
-      <div
-        className={classes("nse-container-confirm-inline", className)}
-        role="alertdialog"
-        aria-label={typeof title === "string" ? title : undefined}
-      >
-        {title ? <div className="nse-container-confirm-inline-title">{title}</div> : null}
-        {message ? <p className="nse-container-confirm-inline-message">{message}</p> : null}
-        <div className="nse-container-confirm-inline-actions">{actions}</div>
-      </div>
-    );
-  }
-
-  return (
-    <NSEModalDialog
-      {...props}
-      open={open ?? false}
-      className={className}
-      title={title}
-      description={message}
-      role="alertdialog"
-      variant="confirm"
-      onOpenChange={onOpenChange}
-      actions={actions}
-    />
-  );
-}
-
-export function NSEToaster({
-  toasts,
-  position = "top-trailing",
-  onDismiss,
-  className = "",
-  ...props
-}: NSEToasterProps) {
-  const hasCriticalToast = useMemo(() => toasts.some((toast) => toast.tone === "critical"), [toasts]);
-  // Toasts fly in from the toaster's screen edge.
-  const flyInClass = position.startsWith("bottom") ? "nse-container-fly-in-bottom" : "nse-container-fly-in-top";
-
-  return (
-    <div
-      {...props}
-      className={classes("nse-container-toaster", className)}
-      data-position={position}
-      role={hasCriticalToast ? "alert" : "status"}
-      aria-live={hasCriticalToast ? "assertive" : "polite"}
-      aria-atomic="false"
-    >
-      {toasts.map((toast) => (
-        <article key={toast.id} className={classes("nse-container-toast", flyInClass)} data-tone={toast.tone ?? "info"}>
-          <span className="nse-container-toast-copy">
-            {toast.title ? <strong>{toast.title}</strong> : null}
-            <span>{toast.message}</span>
-          </span>
-          {toast.action ? (
-            <NSEPushButton tone={toast.action.tone ?? "dark"} onClick={toast.action.onPress}>
-              {toast.action.label}
-            </NSEPushButton>
-          ) : null}
-          {onDismiss ? (
-            <button
-              className="nse-container-toast-dismiss"
-              type="button"
-              aria-label={toast.dismissLabel ?? "Dismiss notification"}
-              onClick={() => onDismiss(toast.id)}
-            >
-              <span aria-hidden="true">x</span>
-            </button>
-          ) : null}
-        </article>
-      ))}
     </div>
   );
 }

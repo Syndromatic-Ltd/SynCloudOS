@@ -129,13 +129,24 @@
   background: transparent;
   font: inherit;
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 52px;
   text-align: center;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.72), 0 1px 1px rgba(255, 255, 255, 0.16);
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Ordinary action labels may wrap when text zoom or localization exhausts
+   their available width. Keep the 52px minimum target; explicit tool/tab
+   chrome retains its own sizing and single-line presentation. */
+:where([data-nse-appearance="atmo"]) .nse-control-button:where(:not(.nse-extended-tool-button, .nse-control-picker-button, .nse-tab-bar-tab, .nse-system-alert-action-button, [data-size])):where(:not(.nse-app-topbar *)) {
+  grid-auto-columns: minmax(0, max-content);
+}
+:where([data-nse-appearance="atmo"]) .nse-control-button:where(:not(.nse-extended-tool-button, .nse-control-picker-button, .nse-tab-bar-tab, .nse-system-alert-action-button, [data-size])):where(:not(.nse-app-topbar *)) > .nse-control-button-label {
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-button:where(:not(.nse-control-picker-button))[data-tone="light"] {
@@ -291,7 +302,6 @@
 /* ButtonHeader + standalone ToolButton wear the menu-button sprite directly,
    not only when nested in a toolbar. Same 5-state ladder as the non-grouped toolbar
    button above (atmo-menu-button.png, 250px tall / 5×50px state bands). */
-:where([data-nse-appearance="atmo"]) .nse-extended-button-header.nse-control-button,
 :where([data-nse-appearance="atmo"]) .nse-extended-tool-button.nse-control-button {
   height: 50px;
   min-height: 50px;
@@ -300,83 +310,18 @@
   line-height: 50px;
 }
 
-:where([data-nse-appearance="atmo"]) .nse-extended-button-header.nse-control-button:active:not([data-press-active]):not(:disabled),
-:where([data-nse-appearance="atmo"]) .nse-extended-button-header.nse-control-button[data-press-active="true"]:not(:disabled),
 :where([data-nse-appearance="atmo"]) .nse-extended-tool-button.nse-control-button:active:not([data-press-active]):not(:disabled),
 :where([data-nse-appearance="atmo"]) .nse-extended-tool-button.nse-control-button[data-press-active="true"]:not(:disabled) {
   border-image-slice: 50 25 150 25 fill;
 }
 
-:where([data-nse-appearance="atmo"]) .nse-extended-button-header.nse-control-button[data-selected="true"],
-:where([data-nse-appearance="atmo"]) .nse-extended-button-header.nse-control-button[data-pressed="true"],
 :where([data-nse-appearance="atmo"]) .nse-extended-tool-button.nse-control-button[data-selected="true"],
 :where([data-nse-appearance="atmo"]) .nse-extended-tool-button.nse-control-button[data-pressed="true"] {
   border-image-slice: 100 25 100 25 fill;
 }
 
-:where([data-nse-appearance="atmo"]) .nse-extended-button-header.nse-control-button:disabled,
 :where([data-nse-appearance="atmo"]) .nse-extended-tool-button.nse-control-button:disabled {
   border-image-slice: 200 25 0 25 fill;
-}
-
-/* ButtonHeader: a block-level header bar you
-   nest content into, with the caption left-aligned. */
-:where([data-nse-appearance="atmo"]) .nse-extended-button-header.nse-control-button {
-  display: flex;
-  width: 100%;
-  justify-content: flex-start;
-  text-align: left;
-}
-
-/* PrevNextBanner: a flex row of [prev arrow][content][next
-   arrow]. The arrows are 40x50 next-prev.png sprite buttons (not framed tool buttons);
-   6 vertical states: prev 0/-50/-100, next -150/-200/-250 (normal/down/disabled). */
-:where([data-nse-appearance="atmo"]) .nse-extended-prev-next-banner {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-  overflow: hidden;
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-prev-next-content {
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  text-align: center;
-  text-overflow: ellipsis;
-  white-space: normal;
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-prev-next-button.nse-control-button {
-  flex: 0 0 auto;
-  width: 40px;
-  min-width: 40px;
-  height: 50px;
-  min-height: 50px;
-  padding: 0;
-  border: 0;
-  border-image: none;
-  background: var(--nse-atmo-next-prev) no-repeat;
-  transform: none;
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-prev-next-button.nse-control-button[data-direction="prev"] {
-  background-position: 0 0;
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-prev-next-button.nse-control-button[data-direction="prev"]:active:not([data-press-active]):not(:disabled),
-:where([data-nse-appearance="atmo"]) .nse-extended-prev-next-button.nse-control-button[data-direction="prev"][data-press-active="true"]:not(:disabled) {
-  background-position: 0 -50px;
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-prev-next-button.nse-control-button[data-direction="prev"]:disabled {
-  background-position: 0 -100px;
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-prev-next-button.nse-control-button[data-direction="next"] {
-  background-position: 0 -150px;
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-prev-next-button.nse-control-button[data-direction="next"]:active:not([data-press-active]):not(:disabled),
-:where([data-nse-appearance="atmo"]) .nse-extended-prev-next-button.nse-control-button[data-direction="next"][data-press-active="true"]:not(:disabled) {
-  background-position: 0 -200px;
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-prev-next-button.nse-control-button[data-direction="next"]:disabled {
-  background-position: 0 -250px;
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toolbar[data-grouped="true"] > .nse-control-button {
@@ -608,7 +553,7 @@
 :where([data-nse-appearance="atmo"]) .nse-control-slider-label {
   color: var(--nse-atmo-label-ink, #314255);
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.2;
 }
 
@@ -676,7 +621,7 @@
   min-width: 24px;
   height: 34px;
   color: var(--nse-atmo-field-affix, #5d6c7a);
-  font-weight: 800;
+  font-weight: 700;
   line-height: 34px;
 }
 
@@ -729,7 +674,7 @@
 
 :where([data-nse-appearance="atmo"]) .nse-control-checkbox {
   color: var(--nse-atmo-control-ink, #243040);
-  font-weight: 800;
+  font-weight: 700;
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-checkbox.is-disabled {
@@ -753,11 +698,12 @@
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle {
+  --nse-control-toggle-unit: max(var(--nse-atmo-toggle-height), calc((var(--nse-control-toggle-label-width, 0px) + 4px) * 1.333333333));
   position: relative;
   display: inline-block;
-  width: var(--nse-atmo-toggle-width);
-  min-width: var(--nse-atmo-toggle-width);
-  height: var(--nse-atmo-toggle-height);
+  width: calc(var(--nse-control-toggle-unit) * 2);
+  min-width: calc(var(--nse-control-toggle-unit) * 2);
+  height: var(--nse-control-toggle-unit);
   margin: 1px 0;
   padding: 0;
   overflow: visible;
@@ -766,7 +712,7 @@
   background: transparent;
   font: inherit;
   font-size: 10px;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1;
   text-align: left;
   text-transform: uppercase;
@@ -780,7 +726,7 @@
   position: absolute;
   inset: 0;
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: calc(var(--nse-control-toggle-unit) / 2);
   background: transparent;
 }
 
@@ -791,14 +737,14 @@
   position: absolute;
   background-image: var(--nse-atmo-toggle);
   background-repeat: no-repeat;
-  background-size: 64px 128px;
+  background-size: calc(var(--nse-control-toggle-unit) * 2) calc(var(--nse-control-toggle-unit) * 4);
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle-rail {
   top: 0;
   z-index: 0;
-  width: 32px;
-  height: 32px;
+  width: var(--nse-control-toggle-unit);
+  height: var(--nse-control-toggle-unit);
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle-rail-start {
@@ -808,18 +754,19 @@
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle-rail-end {
   right: 0;
-  background-position: -32px -32px;
+  background-position: calc(-1 * var(--nse-control-toggle-unit)) calc(-1 * var(--nse-control-toggle-unit));
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle-thumb {
   top: 0;
   left: 0;
   z-index: 3;
-  width: 32px;
-  height: 32px;
+  width: var(--nse-control-toggle-unit);
+  height: var(--nse-control-toggle-unit);
   background-image: none;
-  transform: translateX(var(--nse-control-toggle-thumb-x, 0));
-  transition: transform 180ms cubic-bezier(0.22, 0.75, 0.28, 1), filter 140ms ease;
+  left: calc(100% * var(--nse-control-toggle-ratio, 0));
+  transform: translateX(calc(-100% * var(--nse-control-toggle-ratio, 0)));
+  transition: left 180ms cubic-bezier(0.22, 0.75, 0.28, 1), transform 180ms cubic-bezier(0.22, 0.75, 0.28, 1), filter 140ms ease;
   will-change: transform;
 }
 
@@ -831,30 +778,32 @@
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle-thumb::before {
-  background-position: 0 -32px;
+  background-position: 0 calc(-1 * var(--nse-control-toggle-unit));
   opacity: calc(1 - var(--nse-control-toggle-ratio, 0));
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle-thumb::after {
-  background-position: -32px 0;
+  background-position: calc(-1 * var(--nse-control-toggle-unit)) 0;
   opacity: var(--nse-control-toggle-ratio, 0);
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle:disabled .nse-control-toggle-rail-start {
-  background-position: 0 -64px;
+  background-position: 0 calc(-2 * var(--nse-control-toggle-unit));
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle:disabled .nse-control-toggle-rail-end {
-  background-position: -32px -96px;
+  background-position: calc(-1 * var(--nse-control-toggle-unit)) calc(-3 * var(--nse-control-toggle-unit));
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle:disabled .nse-control-toggle-thumb::before {
-  background-position: 0 -96px;
+  background-position: 0 calc(-3 * var(--nse-control-toggle-unit));
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle:disabled .nse-control-toggle-thumb::after {
-  background-position: -32px -64px;
+  background-position: calc(-1 * var(--nse-control-toggle-unit)) calc(-2 * var(--nse-control-toggle-unit));
 }
+
+:where([data-nse-appearance="atmo"]) .nse-control-toggle-state-label { display: inline-block; white-space: nowrap; }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle-text {
   position: absolute;
@@ -869,12 +818,13 @@
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle-text-on {
-  left: 9px;
+  left: calc(var(--nse-control-toggle-unit) * .28125);
   opacity: var(--nse-control-toggle-ratio, 0);
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-toggle-text-off {
-  right: 8px;
+  text-align: right;
+  right: calc(var(--nse-control-toggle-unit) / 4);
   opacity: calc(1 - var(--nse-control-toggle-ratio, 0));
   color: rgba(245, 245, 245, 0.78);
 }
@@ -921,7 +871,7 @@
   background: transparent;
   font: inherit;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 50px;
   text-align: center;
   text-overflow: ellipsis;
@@ -1007,7 +957,7 @@
   border-style: solid;
   color: #555;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 50px;
   text-transform: uppercase;
 }
@@ -1120,7 +1070,7 @@
   padding: 2px 0 14px 12px;
   color: #fff;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1.2;
   text-shadow: #646454 0 1px 0;
   text-transform: uppercase;
@@ -1220,7 +1170,7 @@
   margin: -8px -12px 8px;
   color: var(--nse-atmo-title-ink, #1d2a37);
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-popup-inner {
@@ -1535,7 +1485,6 @@
   cursor: pointer;
 }
 
-
 :where([data-nse-appearance="atmo"]) .nse-control-picker-button:active,
 :where([data-nse-appearance="atmo"]) .nse-control-picker-button[data-pressed="true"] {
   border-image-source: var(--nse-atmo-pill-down);
@@ -1564,48 +1513,10 @@
   background: var(--nse-atmo-menu-arrow) center right no-repeat;
 }
 
-/* Picker.textAlign (default "center") aligns the button caption and popup items. */
-:where([data-nse-appearance="atmo"]) .nse-control-picker[data-text-align="center"] .nse-control-picker-caption {
-  text-align: center;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-picker[data-text-align="right"] .nse-control-picker-caption {
-  text-align: right;
-}
-
-/* ListSelector knobs, wired onto the picker chrome:
-   hideItem hides the displayed value, hideArrow drops the disclosure, contentPack aligns the caption,
-   and popupAlign (forwarded onto the portaled popup) aligns the option rows. */
-:where([data-nse-appearance="atmo"]) .nse-extended-list-selector[data-hide-item="true"] .nse-control-picker-caption {
-  visibility: hidden;
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-list-selector[data-hide-arrow="true"] .nse-control-picker-button {
-  grid-template-columns: minmax(0, 1fr);
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-list-selector[data-hide-arrow="true"] .nse-control-picker-arrow {
-  display: none;
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-list-selector[data-content-pack="start"] .nse-control-picker-caption {
-  text-align: left;
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-list-selector[data-content-pack="center"] .nse-control-picker-caption {
-  text-align: center;
-}
-:where([data-nse-appearance="atmo"]) .nse-extended-list-selector[data-content-pack="end"] .nse-control-picker-caption {
-  text-align: right;
-}
 :where([data-nse-appearance="atmo"]) .nse-control-picker-list[data-popup-align="left"] .nse-control-menu-item-label {
   justify-content: flex-start;
 }
 :where([data-nse-appearance="atmo"]) .nse-control-picker-list[data-popup-align="right"] .nse-control-menu-item-label {
-  justify-content: flex-end;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-picker-list[data-text-align="center"] .nse-control-menu-item-label {
-  justify-content: center;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-picker-list[data-text-align="right"] .nse-control-menu-item-label {
   justify-content: flex-end;
 }
 
@@ -1635,36 +1546,11 @@
   white-space: nowrap;
 }
 
-:where([data-nse-appearance="atmo"]) .nse-extended-picker-group {
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px 8px;
-}
-
-/* PickerGroup carries a single blue uppercase label; the
-   member pickers render value-only pills with no per-field label. */
-:where([data-nse-appearance="atmo"]) .nse-extended-picker-group-label {
-  flex: 0 0 auto;
-  padding-right: 5px;
-  color: #1f75bf;
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: uppercase;
-  text-shadow: 0 1px 0 #fff;
-  white-space: nowrap;
-}
-
 :where([data-nse-appearance="atmo"]) .nse-extended-date-picker,
-:where([data-nse-appearance="atmo"]) .nse-extended-time-picker,
-:where([data-nse-appearance="atmo"]) .nse-extended-progress-slider {
+:where([data-nse-appearance="atmo"]) .nse-extended-time-picker {
   display: inline-flex;
   align-items: center;
   max-width: 100%;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-extended-progress-slider {
-  position: relative;
-  min-width: min(320px, 100%);
 }
 
 :where([data-nse-appearance="atmo"]) .nse-extended-progress-slider-bar {
@@ -1712,102 +1598,6 @@
 
 :where([data-nse-appearance="atmo"]) .nse-control-picker-list .nse-control-picker-option:disabled {
   color: rgba(35, 45, 55, 0.42);
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-bar {
-  position: relative;
-  height: 11px;
-  min-width: 120px;
-  box-sizing: border-box;
-}
-
-/* The track — left + right end caps with a repeating middle.
-   Lives on a pseudo-element so the fill's percentage is relative to the full (border-less) bar
-   and reaches the right cap exactly at 100%. */
-:where([data-nse-appearance="atmo"]) .nse-control-progress-bar::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  border: 0 solid transparent;
-  border-width: 0 6px;
-  border-image: var(--nse-atmo-progress-track) 0 6 0 6 fill repeat repeat;
-  box-sizing: border-box;
-  pointer-events: none;
-}
-
-/* The fill — the same cap+middle sprite; its width is the progress fraction, so both the left cap
-   (at 0) and the right cap (at the fill's edge) always render. min-width keeps both caps visible. */
-:where([data-nse-appearance="atmo"]) .nse-control-progress-inner,
-:where([data-nse-appearance="atmo"]) .nse-control-progress-alt {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 11px;
-  width: var(--nse-control-progress, 0%);
-  min-width: 12px;
-  border: 0 solid transparent;
-  border-width: 0 6px;
-  border-image: var(--nse-atmo-progress-fill) 0 6 0 6 fill repeat repeat;
-  box-sizing: border-box;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-inner {
-  z-index: 2;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-bar[data-empty="true"] .nse-control-progress-inner {
-  visibility: hidden;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-bar[data-full="true"] .nse-control-progress-inner {
-  width: 100%;
-  visibility: visible;
-}
-
-/* ProgressSlider altBar: secondary fill behind the primary progress (a buffer/
-   download-ahead indicator). Heritage has no dedicated sprite, so use a muted primary
-   fill; Onyx swaps in slider-progress-secondary.png. */
-:where([data-nse-appearance="atmo"]) .nse-control-progress-alt {
-  z-index: 1;
-  width: var(--nse-control-progress-alt, 0%);
-  opacity: 0.4;
-  transition: width 0.3s ease;
-}
-
-/* ProgressBar.animatePosition=false: snap instead of easing the width. */
-:where([data-nse-appearance="atmo"]) .nse-control-progress-bar[data-animate="true"] .nse-control-progress-inner {
-  transition: width 0.3s ease;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-bar[data-animate="false"] .nse-control-progress-alt {
-  transition: none;
-}
-
-/* ProgressBar.content: text in the client area. The bar grows to fit and the
-   fill spans the full height behind the centered caption. */
-:where([data-nse-appearance="atmo"]) .nse-control-progress-bar:has(> .nse-control-progress-content) {
-  height: auto;
-  min-height: 24px;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-bar:has(> .nse-control-progress-content) .nse-control-progress-inner,
-:where([data-nse-appearance="atmo"]) .nse-control-progress-bar:has(> .nse-control-progress-content) .nse-control-progress-alt {
-  height: 100%;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-content {
-  position: relative;
-  z-index: 11;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 24px;
-  padding: 0 10px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #fff;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-slider {
@@ -2006,7 +1796,7 @@
 :where([data-nse-appearance="atmo"]) .nse-control-page-header-kicker {
   color: var(--nse-atmo-label-ink, #5d6875);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
@@ -2014,10 +1804,10 @@
   overflow: hidden;
   color: var(--nse-atmo-title-ink, #293645);
   font-size: 32px;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-page-header-body {
@@ -2216,97 +2006,6 @@
   opacity: 0.58;
 }
 
-:where([data-nse-appearance="atmo"]) .nse-control-progress-button {
-  position: relative;
-  display: inline-grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  min-width: 170px;
-  height: 50px;
-  padding: 0 5px;
-  overflow: hidden;
-  border: 0 solid transparent;
-  border-width: 0 25px;
-  border-image: var(--nse-atmo-progress-button) 0 25 200 25 fill stretch;
-  color: #fff;
-  background: transparent;
-  font: inherit;
-  font-size: 15px;
-  font-weight: 800;
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.72);
-  cursor: pointer;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-button-fill {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: var(--nse-control-progress, 0%);
-  height: 50px;
-  margin: 0 -25px;
-  border: 0 solid transparent;
-  border-width: 0 25px;
-  border-image: var(--nse-atmo-progress-button-inner) 0 25 0 25 fill repeat repeat;
-  opacity: 0.82;
-  box-sizing: border-box;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-button-label,
-:where([data-nse-appearance="atmo"]) .nse-control-progress-button-cancel {
-  position: relative;
-  z-index: 1;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-button-label {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-button-cancel {
-  width: 24px;
-  height: 24px;
-  margin-left: 8px;
-  background: var(--nse-atmo-progress-button-cancel) center / contain no-repeat;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-item {
-  position: relative;
-  display: grid;
-  align-items: center;
-  min-height: 26px;
-  min-width: 160px;
-  overflow: hidden;
-  border: 6px solid transparent;
-  /* stretch, not repeat: the item is taller than the 11px sprite and repeat
-     tiled clipped copies of the pill above/below (heritage splice bug). */
-  border-image: var(--nse-atmo-progress-track) 0 6 0 6 fill stretch;
-  color: #243040;
-  font-size: 13px;
-  font-weight: 800;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-item[data-variant="pill"] {
-  border-radius: 13px;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-item-fill {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: var(--nse-control-progress, 0%);
-  border: 6px solid transparent;
-  border-image: var(--nse-atmo-progress-fill) 0 6 0 6 fill stretch;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-progress-item-label {
-  position: relative;
-  z-index: 1;
-  padding: 0 8px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 :where([data-nse-appearance="atmo"]) .nse-control-app-menu-surface {
   min-width: 220px;
   width: max-content;
@@ -2352,7 +2051,6 @@
   filter: none;
   animation: nse-control-app-menu-drop 0.18s ease-out;
 }
-
 
 :where([data-nse-appearance="atmo"]) .nse-control-popup.nse-extended-app-menu-popup[data-app-menu-placement="top-right"] {
   /* The box was already flush at the viewport edge — the PLATE was not. The
@@ -2406,8 +2104,14 @@
 
 @media (prefers-reduced-motion: reduce) {
   :where([data-nse-appearance="atmo"]) .nse-control-popup.nse-extended-app-menu-popup,
-:where([data-nse-appearance="atmo"]) .nse-overlay-popup--application-menu .nse-control-app-menu-surface {
+:where([data-nse-appearance="atmo"]) .nse-overlay-popup--application-menu[data-state] .nse-control-app-menu-surface {
+    /* Match the open/closing recipe's specificity so reduced motion removes
+       the keyframe, rather than shortening an off-screen first pose. */
     animation: none;
+  }
+
+  :where([data-nse-appearance="atmo"]) .nse-overlay-popup--application-menu[data-state="closing"] .nse-control-app-menu-surface {
+    opacity: 0;
   }
 }
 
@@ -2417,7 +2121,7 @@
   gap: 7px;
   align-items: center;
   margin: -12px -10px 8px;
-  font-weight: 900;
+  font-weight: 700;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.55);
 }
 
@@ -2530,8 +2234,7 @@
   background: transparent;
 }
 
-:where([data-nse-appearance="atmo"]) .nse-control-app-menu-surface.nse-application-menu .nse-application-menu-list > .nse-control-list-item:not(.is-disabled):hover,
-:where([data-nse-appearance="atmo"]) .nse-control-app-menu-surface.nse-application-menu .nse-application-menu-list > .nse-control-list-item:not(.is-disabled):focus-visible {
+:where([data-nse-appearance="atmo"]) .nse-control-app-menu-surface.nse-application-menu .nse-application-menu-list > .nse-control-list-item:not(.is-disabled):is(:hover, :focus-visible, [data-nse-menu-flash="on"]):not([data-nse-menu-flash="off"]) {
   background: rgba(255, 255, 255, 0.16);
   color: #fff;
 }
@@ -2560,7 +2263,7 @@
      in from it (24px border less 4px), not on its edge. */
   margin: -8px -4px 8px;
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-dialog-inner {
@@ -2590,38 +2293,13 @@
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-file-picker-label {
-  font-weight: 900;
+  font-weight: 700;
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-file-picker-meta {
   color: #5d6875;
   font-size: 12px;
   font-weight: 700;
-}
-
-/* Heritage has no grab-button sprite (it was an Onyx-era control), so draw a neutral grip dot field
-   instead of the wrong next-prev arrows the old rule borrowed. Onyx swaps in its grabbutton.png. */
-:where([data-nse-appearance="atmo"]) .nse-control-grab-handle {
-  display: inline-block;
-  width: 56px;
-  height: 18px;
-  background-image: radial-gradient(circle, rgba(70, 92, 122, 0.55) 1px, transparent 1.6px);
-  background-size: 6px 6px;
-  background-position: center;
-  opacity: 0.8;
-  border: 0;
-  padding: 0;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-grab-handle-draggable {
-  cursor: grab;
-  touch-action: none;
-  background-color: transparent;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-grab-handle-draggable[data-dragging="true"] {
-  cursor: grabbing;
-  opacity: 1;
 }
 
 /* Recessed rounded well — the roundy + roundy-shadow pair
@@ -2669,7 +2347,7 @@
   color: #fff;
   background: #26313c;
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-spinner {
@@ -2804,22 +2482,9 @@
   border-radius: 8px;
 }
 
-/* ScrollingImage shows the source at natural size and pans within the box (autoSize off). */
-:where([data-nse-appearance="atmo"]) .nse-control-scrolling-image {
+/* An image view at natural size (imageScaling none) pans within the box. */
+:where([data-nse-appearance="atmo"]) .nse-control-image-view[data-image-scaling="none"] .nse-control-sizeable-image {
   cursor: grab;
-}
-
-/* ViewImage: a fit-to-box image in a carousel; the wrapper captures horizontal swipes for handoff. */
-:where([data-nse-appearance="atmo"]) .nse-control-view-image {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-view-image-media {
-  width: 100%;
-  height: 100%;
 }
 
 :where([data-nse-appearance="atmo"]) .nse-control-image-view-controls {
@@ -2856,8 +2521,36 @@
   background: rgba(0, 0, 0, 0.9);
 }
 
-/* Crop frame: the visible viewport is the crop region (rule-of-thirds guide overlay). */
-:where([data-nse-appearance="atmo"]) .nse-control-croppable-image-frame {
+/* --- IFXImageView ------------------------------------- */
+:where([data-nse-appearance="atmo"]) .ifx-image-view {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  background: #0d0f12;
+  touch-action: none;
+  user-select: none;
+}
+
+:where([data-nse-appearance="atmo"]) .ifx-image-view[data-pannable="true"] {
+  cursor: grab;
+}
+
+:where([data-nse-appearance="atmo"]) .ifx-image-view[data-pannable="true"]:active {
+  cursor: grabbing;
+}
+
+:where([data-nse-appearance="atmo"]) .ifx-image-view-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  max-width: none;
+  pointer-events: none;
+}
+
+/* IFXImageView's crop tool: the visible region is the crop, with a rule-of-thirds guide. */
+:where([data-nse-appearance="atmo"]) .ifx-image-view-crop-frame {
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -2868,55 +2561,6 @@
     linear-gradient(to right, transparent calc(66.666% - 1px), rgba(255, 255, 255, 0.34) calc(66.666% - 1px), rgba(255, 255, 255, 0.34) calc(66.666% + 1px), transparent calc(66.666% + 1px)),
     linear-gradient(to bottom, transparent calc(33.333% - 1px), rgba(255, 255, 255, 0.34) calc(33.333% - 1px), rgba(255, 255, 255, 0.34) calc(33.333% + 1px), transparent calc(33.333% + 1px)),
     linear-gradient(to bottom, transparent calc(66.666% - 1px), rgba(255, 255, 255, 0.34) calc(66.666% - 1px), rgba(255, 255, 255, 0.34) calc(66.666% + 1px), transparent calc(66.666% + 1px));
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-image-view-crop {
-  display: inline-flex;
-  align-items: center;
-  height: 40px;
-  padding: 0 16px;
-  border: 0;
-  border-radius: 20px;
-  background: rgba(20, 24, 30, 0.62);
-  color: #fff;
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-  backdrop-filter: blur(6px);
-  transition: background 0.15s ease;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-image-view-crop:hover {
-  background: rgba(20, 24, 30, 0.82);
-}
-
-/* RotatingImage — a background image that spins a full turn while running. */
-@keyframes nse-control-rotating-image-rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-rotating-image {
-  display: inline-block;
-  overflow: hidden;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-origin: padding-box;
-  background-clip: content-box;
-}
-
-:where([data-nse-appearance="atmo"]) .nse-control-rotating-image[data-running="true"] {
-  animation-name: nse-control-rotating-image-rotate;
-  animation-duration: 1s;
-  animation-iteration-count: infinite;
-  animation-timing-function: linear;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :where([data-nse-appearance="atmo"]) .nse-control-rotating-image[data-running="true"] {
-    animation: none;
-  }
 }
 
 /* Semantic state repair. The native input remains authoritative; these
@@ -3257,7 +2901,7 @@
   opacity: 0.78;
 }
 
-.nse-menu:where([data-nse-appearance="atmo"]):not(.nse-application-menu-list) .nse-menu-item:is(:hover, :focus-visible):not([data-nse-menu-disabled="true"]) {
+.nse-menu:where([data-nse-appearance="atmo"]):not(.nse-application-menu-list) .nse-menu-item:is(:hover, :focus-visible, [data-nse-menu-flash="on"]):not([data-nse-menu-disabled="true"]):not([data-nse-menu-flash="off"]) {
   outline: none;
   color: inherit;
   background:
@@ -3324,7 +2968,7 @@
   font-weight: 700;
 }
 
-:where([data-nse-appearance="atmo"]) .nse-overlay-popup--listbox .nse-overlay-listbox-option:is(:hover, :focus-visible, [aria-selected="true"]):not(:disabled) {
+:where([data-nse-appearance="atmo"]) .nse-overlay-popup--listbox .nse-overlay-listbox-option:is([data-highlighted="true"], [data-nse-menu-flash="on"]):not(:disabled):not([data-nse-menu-flash="off"]) {
   outline: none;
   color: #0d253e;
   background:
@@ -3385,7 +3029,7 @@
   margin: -8px -4px 8px;
   color: var(--nse-atmo-title-ink, #1d2a37);
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .nse-overlay-popup:where([data-nse-appearance="atmo"]):is(.nse-overlay-popup--popover, .nse-overlay-popup--action-sheet) > .nse-overlay-popup-content {
@@ -3507,7 +3151,7 @@
   margin: 0;
   overflow: hidden;
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 20px;
   text-align: center;
   text-overflow: ellipsis;
@@ -3559,7 +3203,7 @@
   padding-block: 2px 5px;
   overflow: hidden;
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.05em;
   line-height: 13px;
   text-align: center;
@@ -3800,7 +3444,7 @@
 :where([data-nse-appearance="atmo"]) :is([data-nse-part="calendar-sheet"], [data-nse-control="date-time-picker"] section) > h2 {
   margin: 0;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.04em;
   line-height: 16px;
   text-transform: uppercase;
@@ -4936,6 +4580,16 @@
   stroke-linecap: round;
 }
 
+/* The alignment segments draw their glyph at its own size, not in the 24px
+   toolbar icon slot, so the capsule keeps its compact segments; they take
+   the label's 1px optical lift. */
+:where([data-nse-appearance="atmo"]) [data-nse-control="font-panel"] > fieldset[data-nse-part="paragraph"] .nse-control-button-icon {
+  width: auto;
+  height: auto;
+  margin: 0;
+  transform: translateY(-1px);
+}
+
 :where([data-nse-appearance="atmo"]) [data-nse-control="font-panel"] [dir="rtl"] [data-nse-part="alignment-glyph"],
 :where([data-nse-appearance="atmo"]) [data-nse-control="font-panel"][dir="rtl"] [data-nse-part="alignment-glyph"] {
   transform: scaleX(-1);
@@ -5072,4 +4726,105 @@
 }
 :where([data-nse-appearance="atmo"]) .nse-overlay-popup--listbox .nse-overlay-listbox-separator + .nse-overlay-listbox-option::before {
   content: none;
+}
+
+/* Preserve the established compact sheet geometry while retaining the menu
+   family's paint. Equal physical edge gaps follow the viewport safe area;
+   desktop anchored menus and the existing wide modal policy stay unchanged. */
+@media (max-width: 639px), (max-height: 419px) {
+  .nse-overlay-popup:where([data-nse-appearance="atmo"]):is(.nse-overlay-popup--menu, .nse-overlay-popup--context-menu, .nse-overlay-popup--submenu, .nse-overlay-popup--listbox)[data-nse-presentation="sheet"] {
+    inset-block-start: auto;
+    inset-block-end: max(8px, env(safe-area-inset-bottom));
+    inset-inline: max(8px, env(safe-area-inset-left)) max(8px, env(safe-area-inset-right));
+    inline-size: auto;
+    max-inline-size: none;
+    block-size: auto;
+    margin: 0;
+  }
+}
+
+/* ---- Window chrome: the document title bar and the window toolbar ---- */
+
+/* The document in a metal title bar: accessories 12px from the title; title, subtitle and trailing accessories 8px apart. */
+:where([data-nse-appearance="atmo"]) .nse-window-titlebar-document { gap: 12px; }
+:where([data-nse-appearance="atmo"]) .nse-window-titlebar-title { gap: 8px; }
+/* The subtitle is a status capsule. */
+:where([data-nse-appearance="atmo"]) .nse-window-titlebar-subtitle {
+  flex: none;
+  padding: 1px 7px 2px;
+  border-radius: 999px;
+  font: 700 10px/1.4 "Syndromatic UI", system-ui, sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(0, 0, 0, 0.32);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.35), 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+/* In a compact width the document title bar shares its row between the controls' own widths
+   (absolute clusters would let the QuickSwitch title cover the accessories) and drops the title. */
+@media (max-width: 767px) {
+  :where([data-nse-appearance="atmo"]) .nse-document-titlebar .nse-app-topbar-metal-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) max-content max-content;
+    gap: 8px;
+    padding-inline: 14px;
+  }
+  :where([data-nse-appearance="atmo"]) .nse-document-titlebar .nse-app-topbar-metal-cluster { position: relative; inset: auto; min-width: 0; transform: none; }
+  :where([data-nse-appearance="atmo"]) .nse-document-titlebar .nse-app-topbar-metal-leading-title { flex: 1; min-width: 0; }
+  :where([data-nse-appearance="atmo"]) .nse-document-titlebar .nse-app-topbar-title-button { display: flex; min-width: 0; }
+  :where([data-nse-appearance="atmo"]) .nse-document-titlebar .nse-app-topbar-title-arrow,
+  :where([data-nse-appearance="atmo"]) .nse-document-titlebar .nse-window-titlebar-back { flex: none; }
+  :where([data-nse-appearance="atmo"]) .nse-document-titlebar .nse-app-topbar-metal-centre { max-width: none; overflow: visible; }
+  :where([data-nse-appearance="atmo"]) .nse-document-titlebar .nse-window-titlebar-title { display: none; }
+}
+
+/* The window toolbar is a lit metal strip, edge to edge, with a soft fade at its foot. */
+:where([data-nse-appearance="atmo"]) .nse-window-toolbar {
+  min-height: 58px;
+  padding: 3px 10px 2px;
+  color: #1d1d1f;
+  font: 13px/1.38 "Syndromatic UI", system-ui, sans-serif;
+  background: linear-gradient(180deg, #ebecee 0%, #d9dbde 100%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.26);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+:where([data-nse-appearance="atmo"]) .nse-window-toolbar[data-mode="dark"] {
+  color: #ececee;
+  background: linear-gradient(180deg, #3a3b3f 0%, #2d2e31 100%);
+  border-bottom-color: #000;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+/* The strip is the toolbar's material, so the toolbar's own surface (which stops short of the strip's padding) is not drawn. */
+:where([data-nse-appearance="atmo"]) .nse-window-toolbar::after { content: ""; position: absolute; inset: auto 0 0; height: 27px; pointer-events: none; background: linear-gradient(to top, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0)); }
+:where([data-nse-appearance="atmo"]) .nse-window-toolbar[data-mode="dark"]::after { background: linear-gradient(to top, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0)); }
+/* Bottom titlebar accessories continue the strip under the toolbar, which hands them its foot rule. */
+:where([data-nse-appearance="atmo"]) .nse-window-titlebar-accessories {
+  min-height: 30px;
+  padding: 0 6px;
+  color: #1d1d1f;
+  background: #d9dbde;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.26);
+}
+:where([data-nse-appearance="atmo"]) .nse-window-titlebar-accessories[data-mode="dark"] {
+  color: #ececee;
+  background: #2d2e31;
+  border-bottom-color: #000;
+}
+:where([data-nse-appearance="atmo"]) .nse-window-toolbar:has(+ .nse-window-titlebar-accessories) { border-bottom-color: transparent; }
+
+/* A chosen command fades the application menu out (nse-overlays.css) instead of retracting it. */
+:where([data-nse-appearance="atmo"]) .nse-overlay-popup--application-menu[data-state="closing"][data-nse-menu-chosen] .nse-control-app-menu-surface {
+  animation: none;
+}
+
+/* The pop-up list's face is as wide as its button's (the list's face is 6px narrower than its box, the
+   button's 2px), and the button is sized to its widest item with room for the list's check column, so
+   the list never outgrows its button. */
+.nse-overlay-popup:where([data-nse-appearance="atmo"]).nse-overlay-popup--listbox {
+  min-inline-size: max(140px, calc(var(--nse-overlay-anchor-inline-size, 0px) + 4px));
+}
+
+:where([data-nse-appearance="atmo"]) .nse-control-picker-caption-sizer {
+  padding-inline-end: 13px;
 }

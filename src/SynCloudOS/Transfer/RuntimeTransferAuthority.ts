@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { SynCloudOSAppInfo } from "../AppInfo/appInfoTypes";
 import type { DragEndpoint, DragSessionManager, RuntimeDragEndpointAuthority } from "../Drag";
 import type { PasteboardAccessContext, PasteboardRegistry, PasteboardRegistryHandle } from "../Pasteboard";
@@ -78,6 +79,7 @@ export interface RuntimeTransferAuthority {
 
 /** Internal runtime wiring, deliberately not exposed through SynWareRuntime. */
 export interface RuntimeTransferAuthorityControl extends RuntimeTransferAuthority {
+  revokeApplicationMounts(appId: string): void;
   bindDrag(manager: DragSessionManager): void;
   bindWebContent(service: RuntimeWebContentService): void;
   resolveDragEndpoint(value: unknown, role: "source" | "destination"): RuntimeDragEndpointAuthority | null;
@@ -202,6 +204,7 @@ export function createRuntimeTransferAuthority(options: {
   const webLeases = new WeakMap<object, ScopeRecord>();
   const activeMounts = new Map<string, ScopeMountRecord>();
   const mountScopes = new Map<ScopeMountRecord, ScopeRecord>();
+  const revokingApplications = new Set<string>();
   let mountGeneration = 0;
   let drag: DragSessionManager | null = null;
   let webContent: RuntimeWebContentService | null = null;
@@ -217,7 +220,7 @@ export function createRuntimeTransferAuthority(options: {
     if (scope.context.windowControllerId) {
       try {
         const record = options.windows.select(scope.context.windowControllerId).record;
-        if (record.applicationId !== scope.context.appId || record.state === "closed") return false;
+        if (normalizeBundleIdentifier(record.applicationId) !== normalizeBundleIdentifier(scope.context.appId) || record.state === "closed") return false;
       } catch { return false; }
     }
     if (scope.context.responderId) {
@@ -257,7 +260,7 @@ export function createRuntimeTransferAuthority(options: {
     if (!scope.context.windowControllerId) return true;
     try {
       const record = options.windows.select(scope.context.windowControllerId).record;
-      return record.applicationId === scope.context.appId && record.state !== "closed";
+      return normalizeBundleIdentifier(record.applicationId) === normalizeBundleIdentifier(scope.context.appId) && record.state !== "closed";
     } catch { return false; }
   };
   const currentContext = (scope: ScopeRecord): PasteboardAccessContext | null => scopeLive(scope) ? scope.context : null;
@@ -406,23 +409,20 @@ export function createRuntimeTransferAuthority(options: {
     if (scope) queueMicrotask(() => disposeScopeResources(scope));
   };
 
-  const retireClosedApplication = (event: { readonly payload?: unknown }) => {
-    const payload = event.payload as { readonly appId?: unknown; readonly to?: unknown } | undefined;
-    if (payload?.to !== "closed" || typeof payload.appId !== "string") return;
-    for (const mount of [...activeMounts.values()]) {
-      const scope = mountScopes.get(mount);
-      if (scope?.context.appId === payload.appId) revokeMount(mount);
+  const revokeApplicationMounts = (appId: string) => {
+    const appKey = normalizeBundleIdentifier(appId);
+    if (revokingApplications.has(appKey)) return;
+    // Abort listeners can re-enter mount issuance before the closed state commits.
+    revokingApplications.add(appKey);
+    try {
+      for (const mount of [...activeMounts.values()]) {
+        const scope = mountScopes.get(mount);
+        if (scope && normalizeBundleIdentifier(scope.context.appId) === appKey) revokeMount(mount);
+      }
+    } finally {
+      revokingApplications.delete(appKey);
     }
   };
-  // Modern lifecycle operations publish app.lifecycle while the compatibility
-  // facade publishes app.lifecycle.transition. Both are authoritative close
-  // signals; otherwise explicit mountApp generations can retain resources.
-  const lifecycleUnsubscribes = options.events
-    ? [
-        options.events.subscribe("app.lifecycle.transition", retireClosedApplication),
-        options.events.subscribe("app.lifecycle", retireClosedApplication),
-      ]
-    : [];
   const appRegistrationUnsubscribe = options.events
     ? ["app.register", "app.register.update", "app.unregister"].map((type) => options.events!.subscribe(type, (event) => {
         const payload = event.payload as { readonly appId?: unknown } | undefined;
@@ -431,7 +431,7 @@ export function createRuntimeTransferAuthority(options: {
         const registrationAuthority = options.getRegistrationAuthority(payload.appId);
         for (const mount of [...activeMounts.values()]) {
           const scope = mountScopes.get(mount);
-          if (scope?.context.appId === payload.appId && (!canonical || registrationAuthority !== scope.registrationAuthority)) revokeMount(mount);
+          if (scope && normalizeBundleIdentifier(scope.context.appId) === normalizeBundleIdentifier(payload.appId) && (!canonical || registrationAuthority !== scope.registrationAuthority)) revokeMount(mount);
         }
       }))
     : [];
@@ -461,7 +461,7 @@ export function createRuntimeTransferAuthority(options: {
   });
 
   const createMount = (app: SynCloudOSAppInfo, scopeOptions: ReturnType<typeof transferScopeOptions>): ScopeMountRecord => {
-    const key = `${app.id}\u0000${scopeOptions.responderId}\u0000${scopeOptions.windowControllerId ?? ""}`;
+    const key = `${app.bundleIdentifier}\u0000${scopeOptions.responderId}\u0000${scopeOptions.windowControllerId ?? ""}`;
     const previous = activeMounts.get(key);
     if (previous) {
       revokeMount(
@@ -481,7 +481,7 @@ export function createRuntimeTransferAuthority(options: {
     mount: ScopeMountRecord,
   ): RuntimeAppTransferScope => {
     const { responderId, windowControllerId } = scopeOptions;
-    const context: ScopeRecord["context"] = Object.freeze({ appId: app.id, ...(windowControllerId ? { windowControllerId } : {}), responderId });
+    const context: ScopeRecord["context"] = Object.freeze({ appId: app.bundleIdentifier, ...(windowControllerId ? { windowControllerId } : {}), responderId });
     const resources: ScopeRecord["resources"] = { webSessions: new Set(), pendingWebSessions: new Set(), dragManager: null };
     const pasteboardLease = pasteboards.issueLease(context, () => {
       const current = mountScopes.get(mount);
@@ -491,7 +491,7 @@ export function createRuntimeTransferAuthority(options: {
       app,
       registrationAuthority,
       context,
-      applicationSessionId: `application:${app.id}`,
+      applicationSessionId: `application:${app.bundleIdentifier}`,
       ownerId: responderId,
       webLease: Object.freeze({}),
       pasteboardLease,
@@ -639,11 +639,11 @@ export function createRuntimeTransferAuthority(options: {
 
   const issueMount = (candidate: SynCloudOSAppInfo, suppliedScopeOptions: RuntimeAppTransferScopeOptions): RuntimeAppTransferMount => {
     const app = assertCanonicalApp(candidate);
-    const registrationAuthority = options.getRegistrationAuthority(app.id);
+    const registrationAuthority = options.getRegistrationAuthority(app.bundleIdentifier);
     if (!registrationAuthority) throw securityError("Transfer scopes require a live application registration authority.");
     const scopeOptions = transferScopeOptions(suppliedScopeOptions);
-    if (disposed || options.signal.aborted || options.lifecycle.getState(app.id) === "closed") {
-      throw securityError("Transfer scopes cannot be issued to a closed application.");
+    if (disposed || options.signal.aborted || revokingApplications.has(normalizeBundleIdentifier(app.bundleIdentifier)) || options.lifecycle.getState(app.bundleIdentifier) === "closed") {
+      throw securityError("Transfer scopes cannot be issued to a closing or closed application.");
     }
     const mount = createMount(app, scopeOptions);
     try {
@@ -664,6 +664,7 @@ export function createRuntimeTransferAuthority(options: {
     mountApp(app, suppliedScopeOptions) {
       return issueMount(app, suppliedScopeOptions);
     },
+    revokeApplicationMounts,
     bindDrag(manager) { if (disposed) throw securityError("Runtime transfer authority is disposed."); drag = manager; },
     bindWebContent(service) { if (disposed) throw securityError("Runtime transfer authority is disposed."); webContent = service; },
     resolveDragEndpoint(value, _role) {
@@ -674,13 +675,12 @@ export function createRuntimeTransferAuthority(options: {
     validateWebContentLease(lease, request) {
       const scope = lease && typeof lease === "object" ? webLeases.get(lease as object) : undefined;
       if (!scope || !scopeLive(scope)) return false;
-      return request.appId === scope.context.appId && request.applicationSessionId === scope.applicationSessionId && request.ownerId === scope.ownerId &&
+      return normalizeBundleIdentifier(request.appId) === normalizeBundleIdentifier(scope.context.appId) && request.applicationSessionId === scope.applicationSessionId && request.ownerId === scope.ownerId &&
         request.windowControllerId === scope.context.windowControllerId;
     },
     dispose() {
       if (disposed) return;
       for (const mount of [...activeMounts.values()]) revokeMount(mount);
-      for (const unsubscribe of lifecycleUnsubscribes) unsubscribe();
       for (const unsubscribe of appRegistrationUnsubscribe) unsubscribe();
       responderUnsubscribe();
       windowUnsubscribe();

@@ -21,6 +21,7 @@
 // @vitest-environment jsdom
 
 import { expect, it } from "vitest";
+import { SynCloudOSLifecycleError } from "../../../src/SynCloudOS/fxRuntimeContracts";
 import { createSynWare } from "../../../src/SynCloudOS/AppSDK";
 import { createSynWareTestHost } from "../../../src/SynCloudOS/AppSDK/testing";
 import {
@@ -44,9 +45,9 @@ type MountedMediaProbe = Readonly<{
 const MediaProbe = createSynWare({
   manifest: {
     schemaVersion: 1,
-    id: "com.syndromatic.media-probe",
+    bundleIdentifier: "com.syndromatic.media-probe",
     version: "1.0.0",
-    title: "Media Probe",
+    displayName: "Media Probe",
     routes: [{ path: "/media-probe", primary: true }],
     permissions: [],
   },
@@ -93,7 +94,7 @@ it("copies runtime-owned media blocks and keeps retained slices alive until thei
 
     await host.dispose();
     expect(slice.closed).toBe(true);
-    expect(() => bytesOf(slice)).toThrow(/closed|released|abort/i);
+    expect(() => bytesOf(slice)).toThrow(SynCloudOSLifecycleError);
   } finally {
     await host.dispose();
   }
@@ -122,7 +123,7 @@ it("creates a mounted bounded queue that is revoked with the app owner", async (
     await host.dispose();
     expect(queue.snapshot().disposed).toBe(true);
     const late = new MEFXBlockBuffer(new Uint8Array([7]));
-    await expect(queue.enqueue(late)).rejects.toThrow(/disposed|abort/i);
+    await expect(queue.enqueue(late)).rejects.toThrow(expect.objectContaining({ code: "MEFX_BUFFER_QUEUE_DISPOSED" }));
     expect(late.closed).toBe(false);
     late.close();
   } finally {

@@ -121,7 +121,7 @@ GFXContext.recording({ size, identifiers, scale? })
 | Option | Description |
 | --- | --- |
 | `size` | The logical `GFXSize` of the drawing. |
-| `identifiers` | An identifier issuer that gives every gradient, pattern, clip and shadow definition in the output a unique ID. Applications get one from `useSynWareImages().createGraphicsIdentifierIssuer()`, which keeps the IDs unique and stops working when your application closes. |
+| `identifiers` | An identifier issuer that gives every gradient, pattern, clip and shadow definition in the output a unique ID. Applications get one from `useImages().createGraphicsIdentifierIssuer()`, which keeps the IDs unique and stops working when your application closes. |
 | `scale` | The device scale, above 0 and at most 8. Used by the point conversion methods. |
 
 Unlike the bitmap context, the recording context keeps a full graphics state with fill and stroke paints (defaults are opaque black), so you set paint once and draw several times.
@@ -144,6 +144,7 @@ Unlike the bitmap context, the recording context keeps a full graphics state wit
 | `fill(path, rule?)`, `stroke(path)` | `void` | Records a fill or stroke with the current paint and state. |
 | `drawImage(image, rect)` | `void` | Records an image. Each image is limited to one megapixel. An empty rectangle records nothing. |
 | `drawLayer(layer, rect)` | `void` | Draws a `GFXLayer`. |
+| `drawDisplayList(list, rect)` | `void` | Draws another recorded display list scaled into `rect`, as `CGContext` draws a PDF page. The list keeps its own coordinate space under the current transform, clip and alpha, and its gradients, patterns and masks never collide with this context's. Only lists a `GFXContext` recorded are accepted, their commands count against the 10,000-command limit, and lists nest at most eight deep. An empty `rect` draws nothing. |
 | `drawText(text, origin, font)` | `void` | Records text as an SVG `text` element with the current fill. `font` is `{ family, size, weight?, style? }` (`GFXTextFont`): a family up to 256 characters, a size up to 512, a weight from 1 to 1000 (default 400) and a style `"normal"` (default) or `"italic"`. Text is limited to 64 KiB. The text is set by the viewer's fonts. For exact glyph shapes, draw [TextFX](../text.md) outlines as paths. |
 | `beginTransparencyGroup(options?)`, `endTransparencyGroup(group)` | | Groups, to a depth of 16. |
 | `displayList` | `GFXDisplayList` | The recording so far as an immutable value. Throws while a group is open. |
@@ -168,10 +169,10 @@ Every command carries a `GFXCommandState`, an immutable snapshot of the whole gr
 ```tsx
 import { useEffect, useState } from "react";
 import { GFXColour, GFXContext, GFXGradient, GFXPath } from "@syndromatic/syncloudos/fx/graphics";
-import { useSynWareImages } from "@syndromatic/syncloudos/sdk";
+import { useImages } from "@syndromatic/syncloudos/sdk";
 
 export function Badge() {
-  const images = useSynWareImages();
+  const images = useImages();
   const [svg, setSvg] = useState<string>("");
 
   useEffect(() => {

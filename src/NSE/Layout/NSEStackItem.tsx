@@ -51,7 +51,7 @@ export function NSEStackItem({
       data-stack-item-id={id}
       style={style as CSSProperties}
     >
-      {children}
+      <div className="nse-stack-view-item-content">{children}</div>
     </div>
   );
 }

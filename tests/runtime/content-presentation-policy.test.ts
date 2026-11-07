@@ -28,7 +28,7 @@ afterEach(() => vi.useRealTimers());
 
 describe("explicit frame presentation ownership", () => {
   it("captures and projects content motion without retaining mutable author data", () => {
-    const manifest = { schemaVersion: 1, id: "owned-motion", version: "1.0.0", title: "Owned Motion", frame: { presentationMotion: "content" } };
+    const manifest = { schemaVersion: 1, bundleIdentifier: "com.example.owned-motion", version: "1.0.0", displayName: "Owned Motion", frame: { presentationMotion: "content" } };
     const definition = createSynWare({ manifest, root: () => null } as never);
     manifest.frame.presentationMotion = "host";
     const runtime = createTestRuntime();
@@ -40,19 +40,19 @@ describe("explicit frame presentation ownership", () => {
 
   it("defaults to host motion even when the app has no top bar", () => {
     const runtime = createTestRuntime();
-    runtime.apps.registerBundle(createTestBundle({ id: "plain", frame: { topBar: "none" } as never }));
-    expect(runtime.apps.getApp("plain")!.frame).toMatchObject({ topBar: "none", presentationMotion: "host" });
+    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.plain", frame: { topBar: "none" } as never }));
+    expect(runtime.apps.getApp("com.example.plain")!.frame).toMatchObject({ topBar: "none", presentationMotion: "host" });
   });
 
   it.each(["none", true, 1])("rejects invalid SDK motion policy %s", (presentationMotion) => {
-    expect(validateSynWareManifest({ schemaVersion: 1, id: "bad-policy", version: "1.0.0", title: "Bad", frame: { presentationMotion } }).ok).toBe(false);
+    expect(validateSynWareManifest({ schemaVersion: 1, bundleIdentifier: "com.example.bad-policy", version: "1.0.0", displayName: "Bad", frame: { presentationMotion } }).ok).toBe(false);
   });
 
   it.each(["host", "content"] as const)("keeps canonical launch and return with %s motion", async (presentationMotion) => {
     vi.useFakeTimers();
     const runtime = createTestRuntime({ presentationRolesForRoute: webspringPresentationRoles });
     const { LoginServices, Statechart, RouteManager } = createRuntimeHarness(runtime);
-    runtime.apps.registerBundle(createTestBundle({ id: "curtain-app", route: "/curtain-app", frame: { presentationMotion } as never }));
+    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.curtain-app", route: "/curtain-app", frame: { presentationMotion } as never }));
     unlockRuntime(LoginServices);
     await Statechart.gotoState("active.webspring", { source: "test" });
     const phases: string[] = [];
@@ -60,18 +60,18 @@ describe("explicit frame presentation ownership", () => {
     const returns: unknown[] = [];
     const release = runtime.events.subscribe("webspring.return.begin", event => returns.push(event));
     const mounted = new AbortController();
-    const releaseMount = runtime.routes.mountedRoutes.attach("curtain-app", { signal: mounted.signal, loadAndRender: async () => undefined });
+    const releaseMount = runtime.routes.mountedRoutes.attach("com.example.curtain-app", { signal: mounted.signal, loadAndRender: async () => undefined });
     const launch = RouteManager.openRoute("/curtain-app", { syncRoute: false });
     await flushMultiSwitchLaunch();
     await launch.result;
-    expect(runtime.lifecycle.getState("curtain-app")).toBe("active");
+    expect(runtime.lifecycle.getState("com.example.curtain-app")).toBe("active");
     expect(phases).toContain("staging");
     const stage = runtime.store.getSnapshot().webspring;
     expect(stage.launchPhase).toBe("staging");
     expect(stage.presentationSettlementId).toEqual(expect.any(String));
-    expect(runtime.webspring.completeLaunchStage("obsolete-launch", "curtain-app")).toBe(false);
-    expect(runtime.webspring.completeLaunchStage(stage.launchTransitionId!, "curtain-app")).toBe(true);
-    expect(runtime.webspring.completeLaunchStage(stage.launchTransitionId!, "curtain-app")).toBe(false);
+    expect(runtime.webspring.completeLaunchStage("obsolete-launch", "com.example.curtain-app")).toBe(false);
+    expect(runtime.webspring.completeLaunchStage(stage.launchTransitionId!, "com.example.curtain-app")).toBe(true);
+    expect(runtime.webspring.completeLaunchStage(stage.launchTransitionId!, "com.example.curtain-app")).toBe(false);
     expect(runtime.presentationSettlements.inspect(stage.presentationSettlementId!)).toMatchObject({
       status: "pending",
       completedRoles: presentationMotion === "content" ? ["webspring-shell-return"] : [],
@@ -82,14 +82,14 @@ describe("explicit frame presentation ownership", () => {
       expect(runtime.store.getSnapshot().webspring.launchingAppId).toBeNull();
     } else {
       expect(runtime.store.getSnapshot().webspring.launchPhase).toBe("launching");
-      expect(runtime.webspring.completeLaunchCover(stage.launchTransitionId!, "curtain-app")).toBe(true);
+      expect(runtime.webspring.completeLaunchCover(stage.launchTransitionId!, "com.example.curtain-app")).toBe(true);
     }
     runtime.presentationSettlements.get(stage.presentationSettlementId!)!.completeRole("application-enter");
     expect(runtime.presentationSettlements.inspect(stage.presentationSettlementId!)).toEqual({ status: "settled" });
     const restore = RouteManager.openRoute("/", { source: "test:curtain-complete", syncRoute: false });
     await flushMultiSwitchLaunch();
     expect(await restore.result).toMatchObject({ status: "completed" });
-    expect(runtime.lifecycle.getState("curtain-app")).toBe("suspended");
+    expect(runtime.lifecycle.getState("com.example.curtain-app")).toBe("suspended");
     expect(runtime.store.getSnapshot().application).toMatchObject({ activeAppId: null, routePath: "/" });
     expect(returns).toHaveLength(presentationMotion === "content" ? 0 : 1);
     if (presentationMotion === "content") expect(runtime.store.getSnapshot().webspring).toMatchObject({ launchPhase: "idle", returnTransitionId: null });

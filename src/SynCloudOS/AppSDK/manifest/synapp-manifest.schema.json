@@ -4,18 +4,18 @@
   "title": "SynWare manifest V1",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "id", "version", "title"],
+  "required": ["bundleIdentifier", "version", "displayName"],
   "properties": {
-    "schemaVersion": { "const": 1 },
-    "id": {
+    "schemaVersion": { "const": 1, "default": 1 },
+    "bundleIdentifier": {
       "type": "string",
-      "pattern": "^[a-z][A-Za-z0-9]*(?:[.-][A-Za-z0-9]+)*$"
+      "pattern": "^[A-Za-z0-9-]+(?:\\.[A-Za-z0-9-]+){2,}$"
     },
     "version": {
       "type": "string",
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$"
     },
-    "title": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "displayName": { "type": "string", "minLength": 1, "maxLength": 256 },
     "routes": {
       "type": "array",
       "items": { "$ref": "#/$defs/route" }
@@ -50,7 +50,7 @@
       "uniqueItems": true,
       "items": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*(?:[.-][A-Za-z0-9]+)*$" }
     },
-    "localeResources": { "$ref": "#/$defs/localeResources" },
+    "availability": { "enum": ["development"] },
     "appearances": {
       "type": "array",
       "items": { "$ref": "#/$defs/appearance" }
@@ -147,11 +147,29 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "layout": { "enum": ["simple", "defacto"] },
         "material": { "enum": ["standard", "metal"] },
         "topBar": { "enum": ["standard", "custom", "none"] },
         "presentationMotion": { "enum": ["host", "content"] },
-        "rightSlot": { "type": "string", "minLength": 1 },
+        "rightSlot": {
+          "oneOf": [
+            { "enum": ["auto", "userInfo", "none"] },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["icon", "label"],
+              "properties": {
+                "icon": { "$ref": "#/$defs/resourceReference" },
+                "label": { "$ref": "#/$defs/localisedText" }
+              }
+            }
+          ]
+        },
+        "background": {
+          "oneOf": [
+            { "enum": ["system", "none"] },
+            { "$ref": "#/$defs/surface" }
+          ]
+        },
         "smoothSurface": {
           "oneOf": [
             { "const": "off" },
@@ -166,6 +184,62 @@
             "minWidth": { "type": "number", "minimum": 0 },
             "maxWidth": { "type": "number", "minimum": 0 },
             "defaultWidth": { "type": "number", "minimum": 0 }
+          }
+        }
+      }
+    },
+    "surface": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "colour": { "type": "string", "minLength": 1 },
+        "texture": {
+          "oneOf": [
+            { "const": "none" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["image"],
+              "properties": {
+                "image": { "type": "string", "minLength": 1 },
+                "size": { "type": "string", "minLength": 1 },
+                "repeat": { "type": "boolean" },
+                "position": { "type": "string", "minLength": 1 }
+              }
+            }
+          ]
+        },
+        "tint": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["colour", "opacity"],
+          "properties": {
+            "colour": { "type": "string", "minLength": 1 },
+            "opacity": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "vignette": {
+          "oneOf": [
+            { "const": false },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "centre": { "type": "number", "minimum": 0, "maximum": 1 },
+                "edge": { "type": "number", "minimum": 0, "maximum": 1 }
+              }
+            }
+          ]
+        },
+        "overlay": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["image"],
+          "properties": {
+            "image": { "type": "string", "minLength": 1 },
+            "size": { "type": "string", "minLength": 1 },
+            "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
+            "blend": { "type": "string", "minLength": 1 }
           }
         }
       }
@@ -235,26 +309,6 @@
         "minimumVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$" }
       }
     },
-    "localeResources": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "base": { "type": "string", "minLength": 1 },
-        "bundles": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/localeBundle" }
-        }
-      }
-    },
-    "localeBundle": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["locale", "path"],
-      "properties": {
-        "locale": { "type": "string", "pattern": "^[A-Za-z]{2,3}(?:-[A-Za-z0-9]+)*$" },
-        "path": { "type": "string", "minLength": 1 }
-      }
-    },
     "appearance": {
       "type": "object",
       "additionalProperties": false,
@@ -292,7 +346,6 @@
       "properties": {
         "disabled": { "type": "boolean" },
         "disabledReason": { "type": "string" },
-        "bundleId": { "type": "string", "minLength": 1 },
         "presentation": { "enum": ["appView", "windowedView", "systemSheet", "backgroundService"] },
         "type": { "enum": ["internal", "system", "external"] },
         "policy": {
@@ -356,6 +409,34 @@
         "mode": { "enum": ["launcher", "persistent"] }
       }
     },
+    "webspringFolder": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "order", "apps"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^folder\\.[a-z][a-z0-9-]*$" },
+        "title": { "$ref": "#/$defs/localisedText" },
+        "order": { "type": "integer", "minimum": 0 },
+        "apps": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "webspringFolders": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["editable", "initial"],
+      "properties": {
+        "editable": { "type": "boolean" },
+        "initial": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/webspringFolder" }
+        }
+      }
+    },
     "webspringShell": {
       "type": "object",
       "additionalProperties": false,
@@ -386,9 +467,11 @@
             "logo": { "$ref": "#/$defs/resourceReference" },
             "lightLogo": { "$ref": "#/$defs/resourceReference" },
             "darkLogo": { "$ref": "#/$defs/resourceReference" },
-            "compactLogo": { "$ref": "#/$defs/resourceReference" }
+            "compactLogo": { "$ref": "#/$defs/resourceReference" },
+            "homeIcon": { "$ref": "#/$defs/resourceReference" }
           }
-        }
+        },
+        "folders": { "$ref": "#/$defs/webspringFolders" }
       }
     }
   }

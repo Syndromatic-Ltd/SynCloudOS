@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { SynCloudOSAppInfo } from "../AppInfo/appInfoTypes";
 import type {
   SynCloudOSBundleLoader,
@@ -64,27 +65,23 @@ export class AppManager {
 
   constructor(appInfo: SynCloudOSAppInfo, private readonly dependencies: AppManagerDependencies) {
     this.appInfo = appInfo;
-    dependencies.runtime?.undo.create({ kind: "application", id: appInfo.id });
+    dependencies.runtime?.undo.create({ kind: "application", id: appInfo.bundleIdentifier });
   }
 
-  get id() {
-    return this.appInfo.id;
-  }
-
-  get appId() {
-    return this.id;
+  get bundleIdentifier() {
+    return this.appInfo.bundleIdentifier;
   }
 
   private getCurrentAppInfo(): SynCloudOSAppInfo {
-    return this.dependencies.store.getSnapshot().appInfo[this.id] ?? this.appInfo;
+    return this.dependencies.store.getSnapshot().appInfo[normalizeBundleIdentifier(this.bundleIdentifier)] ?? this.appInfo;
   }
 
   getState(): SynCloudOSAppLifecycleState {
-    return this.dependencies.store.getSnapshot().lifecycle[this.id] ?? "registered";
+    return this.dependencies.store.getSnapshot().lifecycle[normalizeBundleIdentifier(this.bundleIdentifier)] ?? "registered";
   }
 
   getRecord(): AppManagerRuntimeRecord {
-    return this.dependencies.store.getSnapshot().managers[this.id] ?? this.createRecord();
+    return this.dependencies.store.getSnapshot().managers[normalizeBundleIdentifier(this.bundleIdentifier)] ?? this.createRecord();
   }
 
   createRecord(previousRecord: AppManagerRuntimeRecord | null = null, lifecycleState: SynCloudOSAppLifecycleState = this.getState()): AppManagerRuntimeRecord {
@@ -102,7 +99,7 @@ export class AppManager {
               : previousRecord?.readiness ?? "cold";
 
     return {
-      appId: this.id,
+      appId: this.bundleIdentifier,
       lifecycleState,
       readiness,
       requiredServices: { ...appInfo.serviceStatus },
@@ -131,7 +128,7 @@ export class AppManager {
     }
 
     return {
-      appId: this.id,
+      appId: this.bundleIdentifier,
       canLaunch: blockers.length === 0,
       reason: blockers.length === 0 ? `${appInfo.packageName} can launch.` : blockers.join(" "),
       blockers,
@@ -151,7 +148,7 @@ export class AppManager {
     // lifecycle operation.
     if (to === "active") {
       if (!(["ready", "suspended"] as SynCloudOSAppLifecycleState[]).includes(this.getState())) {
-        return this.dependencies.lifecycle.transition(this.id, to, {
+        return this.dependencies.lifecycle.transition(this.bundleIdentifier, to, {
           reason,
           source: "SynCloudOS.AppManager.transition",
         }).ok;
@@ -159,7 +156,7 @@ export class AppManager {
       return this.resume(reason);
     }
     if (to === "launching") return false;
-    return this.dependencies.lifecycle.transition(this.id, to, {
+    return this.dependencies.lifecycle.transition(this.bundleIdentifier, to, {
       reason,
       source: "SynCloudOS.AppManager.transition"
     }).ok;
@@ -167,7 +164,7 @@ export class AppManager {
 
   getReady(applicationMutation?: ApplicationSessionMutationTicket) {
     const effectiveMutation = applicationMutation ??
-      this.dependencies.runtime?.documents.captureApplicationMutation(this.id) ??
+      this.dependencies.runtime?.documents.captureApplicationMutation(this.bundleIdentifier) ??
       null;
     this.dependencies.runtime?.documents.validateApplicationMutation(effectiveMutation);
     const appInfo = this.getCurrentAppInfo();
@@ -175,9 +172,9 @@ export class AppManager {
       this.transition("disabled", "required services unavailable");
       return Promise.reject(new Error(`${appInfo.packageName} is disabled.`));
     }
-    const lifecycleAccess = this.dependencies.lifecycle.validateAccess?.(this.id, "launch");
+    const lifecycleAccess = this.dependencies.lifecycle.validateAccess?.(this.bundleIdentifier, "launch");
     if (lifecycleAccess && !lifecycleAccess.ok) {
-      return Promise.reject(new Error(lifecycleAccess.reason ?? `SynCloudOS could not prepare ${this.id}.`));
+      return Promise.reject(new Error(lifecycleAccess.reason ?? `SynCloudOS could not prepare ${this.bundleIdentifier}.`));
     }
 
     const state = this.getState();
@@ -187,7 +184,7 @@ export class AppManager {
     if (state === "loading" && this.loadingPromise) return this.loadingPromise;
 
     this.transition("loading", "getReady");
-    this.loadingPromise = this.dependencies.bundleLoader.loadBundle(this.id)
+    this.loadingPromise = this.dependencies.bundleLoader.loadBundle(this.bundleIdentifier)
       .then(() => {
         this.dependencies.runtime?.documents.validateApplicationMutation(effectiveMutation);
         if (this.getState() === "loading") this.transition("ready", "content bundle loaded");
@@ -205,7 +202,7 @@ export class AppManager {
 
   launch(applicationMutation?: ApplicationSessionMutationTicket, options: LifecycleRequestOptions = {}): Promise<AppManager> {
     const effectiveMutation = applicationMutation ??
-      this.dependencies.runtime?.documents.captureApplicationMutation(this.id) ??
+      this.dependencies.runtime?.documents.captureApplicationMutation(this.bundleIdentifier) ??
       null;
     this.dependencies.runtime?.documents.validateApplicationMutation(effectiveMutation);
     const state = this.getState();
@@ -216,7 +213,7 @@ export class AppManager {
     }
     if (state === "active" || state === "launching") return Promise.resolve(this);
     if (this.launchPromise) return this.launchPromise;
-    const handle = this.dependencies.lifecycle.launch(this.id, {
+    const handle = this.dependencies.lifecycle.launch(this.bundleIdentifier, {
       ...options,
       reason: options.reason ?? "SynCloudOS.AppManager.launch",
       commitGuard: () => {
@@ -228,7 +225,7 @@ export class AppManager {
     const promise = handle.result.then((result: { status: string; committed: boolean; error?: { message?: string }; reason?: string }) => {
       this.dependencies.runtime?.documents.validateApplicationMutation(effectiveMutation);
       if (result.status === "completed" && result.committed) return this;
-      throw new Error(result.error?.message ?? result.reason ?? `SynCloudOS could not launch ${this.id}.`);
+      throw new Error(result.error?.message ?? result.reason ?? `SynCloudOS could not launch ${this.bundleIdentifier}.`);
     }).finally(() => {
       if (this.launchOperation === handle) this.launchOperation = null;
       if (this.launchPromise === promise) this.launchPromise = null;
@@ -256,12 +253,12 @@ export class AppManager {
   resume(reason = "resume") {
     const state = this.getState();
     if (!(["ready", "suspended"] as SynCloudOSAppLifecycleState[]).includes(state)) return false;
-    const lifecycleAccess = this.dependencies.lifecycle.validateAccess?.(this.id, "activate");
+    const lifecycleAccess = this.dependencies.lifecycle.validateAccess?.(this.bundleIdentifier, "activate");
     if (lifecycleAccess && !lifecycleAccess.ok) return false;
     const runtime = this.dependencies.runtime;
     if (!runtime?.login.getSnapshot().isAuthorised) return false;
-    if (!runtime.policy.evaluate({ action: "app.launch", app: runtime.apps.getApp(this.id), context: { appId: this.id } }).allowed) return false;
-    const handle = this.dependencies.lifecycle.activate(this.id, {
+    if (!runtime.policy.evaluate({ action: "app.launch", app: runtime.apps.getApp(this.bundleIdentifier), context: { appId: this.bundleIdentifier } }).allowed) return false;
+    const handle = this.dependencies.lifecycle.activate(this.bundleIdentifier, {
       reason: `SynCloudOS.AppManager.${reason}`,
     });
     void handle.result;
@@ -271,26 +268,26 @@ export class AppManager {
   fail(error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     const ok = this.transition("failed", message);
-    void this.dependencies.bundleLoader.invokeLifecycleHook(this.id, "applicationDidFail", { error, reason: message });
+    void this.dependencies.bundleLoader.invokeLifecycleHook(this.bundleIdentifier, "applicationDidFail", { error, reason: message });
     return ok;
   }
 
   suspend() {
-    void this.dependencies.bundleLoader.invokeLifecycleHook(this.id, "applicationWillSuspend", { reason: "WindowManager.closeWindow" });
+    void this.dependencies.bundleLoader.invokeLifecycleHook(this.bundleIdentifier, "applicationWillSuspend", { reason: "WindowManager.closeWindow" });
     const ok = this.transition("suspended", "WindowManager.closeWindow");
-    if (ok) void this.dependencies.bundleLoader.invokeLifecycleHook(this.id, "applicationDidSuspend", { reason: "WindowManager.closeWindow" });
+    if (ok) void this.dependencies.bundleLoader.invokeLifecycleHook(this.bundleIdentifier, "applicationDidSuspend", { reason: "WindowManager.closeWindow" });
   }
 
   async suspendForApplicationClose(reason = "WindowManager.closeApplication") {
-    await this.dependencies.bundleLoader.invokeLifecycleHook(this.id, "applicationWillSuspend", { reason });
+    await this.dependencies.bundleLoader.invokeLifecycleHook(this.bundleIdentifier, "applicationWillSuspend", { reason });
     const ok = this.transition("suspended", reason);
-    if (ok) await this.dependencies.bundleLoader.invokeLifecycleHook(this.id, "applicationDidSuspend", { reason });
+    if (ok) await this.dependencies.bundleLoader.invokeLifecycleHook(this.bundleIdentifier, "applicationDidSuspend", { reason });
     return ok;
   }
 
   close() {
-    void this.dependencies.bundleLoader.invokeLifecycleHook(this.id, "applicationWillClose", { reason: "close" });
+    void this.dependencies.bundleLoader.invokeLifecycleHook(this.bundleIdentifier, "applicationWillClose", { reason: "close" });
     const ok = this.transition("closed", "close");
-    if (ok) void this.dependencies.bundleLoader.invokeLifecycleHook(this.id, "applicationDidClose", { reason: "close" });
+    if (ok) void this.dependencies.bundleLoader.invokeLifecycleHook(this.bundleIdentifier, "applicationDidClose", { reason: "close" });
   }
 }

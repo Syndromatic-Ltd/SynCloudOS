@@ -1,6 +1,6 @@
 /*
  * SynCloudOS
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ * Copyright Â© 2026 Syndromatic Ltd. All rights reserved.
  *
  * Designed by Kavish Krishnakumar in Manchester.
  *
@@ -23,3 +23,5 @@ export { getRuntimeSettlement, trackRuntimeSettlement } from "./appSdkSettlement
 export { waitForSettlement } from "./waitForSettlement";
 export { browserTestingClock } from "../PlatformAdapters/BrowserTestingClock";
 export type { SettlementExclusionHandle, SettlementResult, SettlementState, SettlementWorkHandle, SettlementWorkInput } from "./appSdkSettlementPort";
+
+export type { SynCloudOSHostContributionCleanup, SynCloudOSHostInstallContext } from "../HostContributions/hostContribution";

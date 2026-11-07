@@ -20,7 +20,7 @@
 
 import "./Typography/fonts.css";
 
-import { NSEAlert } from "./Components/NSEAlert";
+import { NSEAlertSurface } from "./Components/NSEAlertSurface";
 import { NSEAlertBackdrop } from "./Components/NSEAlertBackdrop";
 import { Badge } from "./Components/Badge";
 import { IconWell } from "./Components/IconWell";
@@ -30,7 +30,7 @@ export {
   Badge,
   IconWell,
   LoadingSpinner,
-  NSEAlert,
+  NSEAlertSurface,
   NSEAlertBackdrop,
 };
 import * as NSEText from "./Text";
@@ -48,6 +48,10 @@ import { NSEFeedbackProvider, useNSEFeedback } from "./Feedback";
 import * as NSEContainers from "./Containers";
 import * as NSEControllers from "./Controllers";
 export * from "./Controllers";
+export * from "./Objects";
+export * from "./Bindings";
+export * from "./Tasks";
+export * from "./Application";
 import * as NSEDataViews from "./DataViews";
 export * from "./DataViews";
 export * from "./Drag";
@@ -88,15 +92,11 @@ import * as NSEControlButtons from "./Controls/Buttons";
 import * as NSEControlFields from "./Controls/Fields";
 import * as NSEControlImages from "./Controls/Images";
 import * as NSEControlSelection from "./Controls/Selection";
-import * as NSEControlVariants from "./Controls/Fields/NSEFieldVariants";
 import * as NSEChrome from "./Windows/Chrome";
 import * as NSEMaterial from "./Material";
-import { NSEPasswordField } from "./Controls/Fields/NSEPasswordField";
 import * as NSEAppearance from "./Appearance";
 export * from "./Appearance";
 export * from "./Controls/Images";
-export { NSEPasswordField } from "./Controls/Fields/NSEPasswordField";
-export { NSETabGroup } from "./Navigation/NSETabGroup";
 
 const NSEControlCatalogue = {
   ...NSEControlButtons,
@@ -104,7 +104,6 @@ const NSEControlCatalogue = {
   ...NSEControlImages,
   ...NSEControlSelection,
   ...NSEControlCore,
-  ...NSEControlVariants,
   ...NSEValueControls,
   ...NSEChrome,
   ...NSENavigation,
@@ -134,13 +133,11 @@ export type {
   NSEStackResolvedItem,
   NSEStackViewProps,
 } from "./Layout";
-import * as NSEList from "./List";
 import * as NSEScroll from "./Scroll";
 export * from "./Scroll";
 import { GlassPanel, LinenSurface as MaterialLinenSurface, MaterialProvider, materialTokens } from "./Material";
 import {
   NSEPage,
-  NSEPageController,
   getNSEPagePreset,
   nsePageMaterialPresets,
   nsePagePresets,
@@ -162,7 +159,6 @@ import { getNSERegistryItem, nseRegistry } from "./registry";
 export const NSE = {
   ...NSEAppearance,
   ...NSELayout,
-  ...NSEList,
   ...NSEScroll,
   ...NSEControlCore,
   ...NSEColourControls,
@@ -190,7 +186,6 @@ export const NSE = {
   Navigation: NSENavigation,
   ProgressIndicators: NSEProgressIndicators,
   Layout: NSELayout,
-  List: NSEList,
   Scroll: NSEScroll,
   Containers: NSEContainers,
   Controllers: NSEControllers,
@@ -205,15 +200,15 @@ export const NSE = {
   TypographyControls: NSETypography,
   TextLayout: NSETextLayout,
   WebContent: NSEWebContent,
-  NSEToolbarController: NSEToolbars.NSEToolbarController,
-  NSEToolbarConfigurationSheet: NSEToolbars.NSEToolbarConfigurationSheet,
   NSEArrayController: NSEControllers.NSEArrayController,
   NSEDictionaryController: NSEControllers.NSEDictionaryController,
   NSEObjectController: NSEControllers.NSEObjectController,
-  NSEPreferencesController: NSEControllers.NSEPreferencesController,
+  NSEUserDefaultsController: NSEControllers.NSEUserDefaultsController,
+  NSEUserDefaults: NSEControllers.NSEUserDefaults,
   NSETreeController: NSEControllers.NSETreeController,
+  NSEUpdateReadinessController: NSEControllers.NSEUpdateReadinessController,
   useNSEController: NSEControllers.useNSEController,
-  NSEAlert,
+  NSEAlertSurface,
   NSEAlertBackdrop,
   IconWell,
   LinenSurface,
@@ -225,7 +220,6 @@ export const NSE = {
   NSEPage,
   Page: {
     Root: NSEPage,
-    Controller: NSEPageController,
     useNSEPage,
     presets: nsePagePresets,
     materials: nsePageMaterialPresets,

@@ -34,7 +34,7 @@ import type { AppDocumentLocation } from "@syndromatic/syncloudos/sdk";
 const cleanups: Array<() => unknown | Promise<unknown>> = [];
 afterEach(async () => { for (const cleanup of cleanups.splice(0).reverse()) await cleanup(); });
 const fontBytes = new Uint8Array(readFileSync("tests/fixtures/fx/fonts/notosans-NotoSans[wdth,wght].ttf"));
-const assetScope = { authorizationId: "example.text-system", documentId: "example-native" };
+const assetScope = { authorizationId: "com.example.example.text-system", documentId: "example-native" };
 const nativeLocation = { kind: "memory", namespace: "text-system-test", key: assetScope.documentId } as const;
 async function fixture(initialModel = createExampleModel(), persistence?: { adapter: InMemoryDocumentAdapter; store: ReturnType<typeof createInMemoryDocumentAssetStore>; openLocation?: AppDocumentLocation }) {
   const environment = createTestRuntimeEnvironment();
@@ -43,8 +43,8 @@ async function fixture(initialModel = createExampleModel(), persistence?: { adap
       manifest: { enumerateReferences: value => (value as TextSystemExampleModel).assets, scopeForLocation: () => assetScope, nativeDurability: "memory" as const } },
   } : {}) } });
   cleanups.push(() => runtime.dispose("test"));
-  registerTestSynWare(runtime, { schemaVersion: 1, id: "example.text-system", version: "0.1.0", title: "Text system", routes: [{ path: "/text-system", primary: true }], documentTypes: [{ id: textSystemDocumentType.id, displayName: textSystemDocumentType.displayName }] });
-  const mounted = mountTestSynWareRuntime(runtime, "example.text-system");
+  registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.example.text-system", version: "0.1.0", displayName: "Text system", routes: [{ path: "/text-system", primary: true }], documentTypes: [{ id: textSystemDocumentType.id, displayName: textSystemDocumentType.displayName }] });
+  const mounted = mountTestSynWareRuntime(runtime, "com.example.example.text-system");
   cleanups.push(() => mounted.dispose("test"));
   const app = createSynWareContextValue(mounted.runtime);
   const { workspaceDocuments: documents, documentResources } = app.documents;

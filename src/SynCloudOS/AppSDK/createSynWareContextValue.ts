@@ -35,6 +35,7 @@ import type {
   AppWindowSnapshot,
 } from "./appClientTypes";
 import type { SynWareContextValue, SynWareRuntimeInfo } from "./appContextTypes";
+import { registerSCOSAppSession } from "./scos/scosSessionRegistry";
 
 function runtimeIdFor(runtime: SynWareRuntime): string {
   if (!runtime.id) throw new Error("Mounted SynWare facade did not provide a runtime identity.");
@@ -156,7 +157,7 @@ function windowClientFor(runtime: SynWareRuntime, sessionId: string): AppWindowC
       ? source
       : { current: null, owned: Object.freeze([]) as AppWindowSnapshot["owned"], surface: source.surface };
     return Object.freeze({
-      appId: runtime.app.id,
+      appId: runtime.app.bundleIdentifier,
       sessionId,
       state,
       current: safeSource.current,
@@ -177,22 +178,38 @@ function windowClientFor(runtime: SynWareRuntime, sessionId: string): AppWindowC
   return Object.freeze({
     getSnapshot,
     subscribe(listener: () => void) {
+      let live = true;
+      let queued = false;
       let observed = getSnapshot();
-      const notify = () => {
+      const deliver = () => {
+        if (!live) return;
         const next = getSnapshot();
         if (next === observed) return;
         observed = next;
         listener();
       };
+      const notify = () => {
+        if (!runtime.signal.aborted) { deliver(); return; }
+        // Authority and getSnapshot revoke immediately. React consumers may
+        // still be subscribed while their parent's insertion cleanup aborts
+        // this mount; publish only after that commit, and only if still live.
+        if (queued || !live) return;
+        queued = true;
+        queueMicrotask(() => { queued = false; deliver(); });
+      };
       const unsubscribe = runtime.windows.subscribe(notify);
       runtime.signal.addEventListener("abort", notify, { once: true });
       return () => {
+        live = false;
         runtime.signal.removeEventListener("abort", notify);
         unsubscribe();
       };
     },
     openDocumentWindow: runtime.windows.openDocumentWindow,
     focus: runtime.windows.focus,
+    minimise: runtime.windows.minimise,
+    zoom: runtime.windows.zoom,
+    setTitle: runtime.windows.setTitle,
     close: runtime.windows.close,
   });
 }
@@ -316,6 +333,7 @@ function audioClientFor(runtime: SynWareRuntime): AUFXAudioClient {
     openFile: files.openFile,
     exportFile: files.exportFile,
     exportStream: files.exportStream,
+    present: audio.present,
     activation: audio.activation,
     load: audio.load,
     play: audio.play,
@@ -335,12 +353,18 @@ function audioClientFor(runtime: SynWareRuntime): AUFXAudioClient {
  * The facade is intentionally consumed only while constructing individually
  * whitelisted clients; it is never stored on, or reachable from, the result. */
 export function createSynWareContextValue(runtime: SynWareRuntime, branding: SynWareContextValue["branding"] = Object.freeze({ name: "", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null, logoAlt: "" })): SynWareContextValue {
-  const sessionId = `${runtime.app.id}:${runtime.responderId}`;
+  const sessionId = `${runtime.app.bundleIdentifier}:${runtime.responderId}`;
   const environment = getMountedAppEnvironmentClients(runtime);
-  return Object.freeze({
+  const context: SynWareContextValue = Object.freeze({
     runtimeInfo: runtimeInfoFor(runtime),
     branding,
-    appId: runtime.app.id,
+    appId: runtime.app.bundleIdentifier,
+    appInfo: Object.freeze({
+      bundleIdentifier: runtime.app.bundleIdentifier,
+      version: runtime.app.version,
+      displayName: runtime.app.displayName,
+    }),
+    launcher: environment.launcher,
     responderId: runtime.responderId,
     sessionId,
     signal: runtime.signal,
@@ -365,8 +389,11 @@ export function createSynWareContextValue(runtime: SynWareRuntime, branding: Syn
     identity: environment.identity,
     notifications: environment.notifications,
     errors: environment.errors,
+    alerts: environment.alerts,
     externalActions: environment.externalActions,
     share: environment.share,
+    storageDiagnostics: environment.storageDiagnostics,
+    screenWakeLock: environment.screenWakeLock,
     workArea: environment.workArea,
     settingsAvailability: environment.settingsAvailability,
     connectivity: environment.connectivity,
@@ -386,4 +413,8 @@ export function createSynWareContextValue(runtime: SynWareRuntime, branding: Syn
     webContent: environment.webContent,
     trusted: environment.trusted,
   });
+  const unregister = registerSCOSAppSession({ appId: context.appId, ...context.appInfo, context });
+  runtime.signal.addEventListener("abort", unregister, { once: true });
+  if (runtime.signal.aborted) unregister();
+  return context;
 }

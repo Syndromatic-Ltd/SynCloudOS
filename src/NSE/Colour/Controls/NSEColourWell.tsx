@@ -26,7 +26,7 @@ import type { NSEEyeDropperAdapter } from "../Pickers/NSEEyeDropperAdapter";
 import type { NSEColourTransferAdapter } from "../Transfer";
 import { parseNSEColourTransfer, serialiseNSEColourTransfer } from "../Transfer";
 import { nseDragCommandIds, nseDragNoPayload, useNSEDragSource, useNSEDropTarget } from "../../Drag";
-import { nseDeferredDisposalMicrotaskScheduler, useNSEDeferredDisposal } from "../../interactionLifecycle";
+import { useNSEDeferredDisposal } from "../../interactionLifecycle";
 
 export interface NSEColourWellProps {
   readonly id?: string;
@@ -36,7 +36,8 @@ export interface NSEColourWellProps {
   readonly name?: string;
   readonly value?: GFXColour;
   readonly defaultValue?: GFXColour;
-  readonly disabled?: boolean;
+  /** NSControl.isEnabled (default true). */
+  readonly isEnabled?: boolean;
   readonly readOnly?: boolean;
   readonly showAlpha?: boolean;
   readonly eyeDropper?: NSEEyeDropperAdapter;
@@ -82,14 +83,14 @@ export function NSEColourWell(props: NSEColourWellProps) {
     props.onValueChange?.(colour, phase);
   };
   const activateTarget = (open: boolean) => {
-    if (props.disabled || props.readOnly) return false;
+    if ((props.isEnabled === false) || props.readOnly) return false;
     releaseRef.current?.();
     releaseRef.current = controller.activateTarget({ id, responderId: targetResponderId, showsAlpha: props.showAlpha === true, read: () => currentRef.current, preview: ({ current }) => change(current, "preview"), commit: ({ current }) => change(current, "commit"), cancel: ({ current }) => change(current, "preview") });
     if (open) controller.open();
     return true;
   };
   const claimRuntimeDrop = (nativeValues?: ReturnType<typeof transferValues>) => {
-    if (!runtimeDrag || !targetEndpoint || props.disabled || props.readOnly) return false;
+    if (!runtimeDrag || !targetEndpoint || (props.isEnabled === false) || props.readOnly) return false;
     let session = runtimeDrag.manager.snapshot().active;
     if (!session && nativeValues && nativeSourceEndpoint) {
       session = runtimeDrag.manager.begin({
@@ -110,7 +111,7 @@ export function NSEColourWell(props: NSEColourWellProps) {
     if (sessionId) runtimeDrag?.manager.cancel(sessionId, reason);
   };
   const performRuntimeDrop = async (signal: AbortSignal, nativeValues?: ReturnType<typeof transferValues>) => {
-    if (!runtimeDrag || !targetEndpoint || props.disabled || props.readOnly) return false;
+    if (!runtimeDrag || !targetEndpoint || (props.isEnabled === false) || props.readOnly) return false;
     const sessionId = claimedSessionRef.current ?? claimRuntimeDrop(nativeValues);
     if (!sessionId) return false;
     const abort = () => runtimeDrag.manager.cancel(sessionId, "colour drop owner cancelled");
@@ -163,7 +164,7 @@ export function NSEColourWell(props: NSEColourWellProps) {
   };
   const startRuntimeDropRef = useRef(startRuntimeDrop);
   startRuntimeDropRef.current = startRuntimeDrop;
-  const canDropThroughCommand = () => Boolean(runtimeDrag && targetEndpoint && !props.disabled && !props.readOnly && runtimeDrag.manager.snapshot().active);
+  const canDropThroughCommand = () => Boolean(runtimeDrag && targetEndpoint && props.isEnabled !== false && !props.readOnly && runtimeDrag.manager.snapshot().active);
   const canDropThroughCommandRef = useRef(canDropThroughCommand);
   canDropThroughCommandRef.current = canDropThroughCommand;
   useEffect(() => {
@@ -182,7 +183,7 @@ export function NSEColourWell(props: NSEColourWellProps) {
     return () => { registration.dispose(); };
   }, [commandResponderId, dragCommands, runtimeDrag, targetEndpoint]);
   const dragSource = useNSEDragSource({
-    disabled: props.disabled || props.readOnly,
+    disabled: (props.isEnabled === false) || props.readOnly,
     begin: () => {
       const representations = transferValues();
       const typed = representations[0]!;
@@ -221,7 +222,7 @@ export function NSEColourWell(props: NSEColourWellProps) {
       return sessionId ? { cancel: cancelClaimedDrop } : undefined;
     },
     accept: (types, signal) => {
-      if (props.disabled || props.readOnly ||
+      if ((props.isEnabled === false) || props.readOnly ||
         (!types.includes("application/x-syncloudos-colour") && !types.includes("text/plain"))) return false;
       return props.transfer?.authoriseDrop?.(types, signal) ?? Boolean(runtimeDrag);
     },
@@ -243,7 +244,7 @@ export function NSEColourWell(props: NSEColourWellProps) {
   // its effects (moved content replays them in development), which would
   // close the Colours panel under the user.
   const panelTarget = useMemo(() => ({ dispose: () => { releaseRef.current?.(); releaseRef.current = null; } }), []);
-  useNSEDeferredDisposal(panelTarget, nseDeferredDisposalMicrotaskScheduler);
+  useNSEDeferredDisposal(panelTarget);
 
   useEffect(() => {
     const form = hiddenRef.current?.form;
@@ -253,10 +254,10 @@ export function NSEColourWell(props: NSEColourWellProps) {
     return () => form.removeEventListener("reset", reset);
   }, [initial, props.value]);
 
-  const appearanceState = props.disabled ? "disabled" : focused || panel.activeTargetId === id ? "focused" : "normal";
+  const appearanceState = (props.isEnabled === false) ? "disabled" : focused || panel.activeTargetId === id ? "focused" : "normal";
   const appearance = useNSEAppearanceSlot(nseAppearanceSlot("colour-well", "well", appearanceState));
-  return <span data-nse-control="colour-well" data-state={props.disabled ? "disabled" : panel.activeTargetId === id ? "active" : "normal"} {...appearance.attributes} onFocusCapture={() => setFocused(true)} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false); }}>
-    <button {...dragSource} {...dropTarget} type="button" id={id} aria-label={props["aria-label"]} aria-pressed={panel.activeTargetId === id && panel.open} disabled={props.disabled} aria-readonly={props.readOnly || undefined} onClick={activate} onKeyDown={(event) => {
+  return <span data-nse-control="colour-well" data-state={(props.isEnabled === false) ? "disabled" : panel.activeTargetId === id ? "active" : "normal"} {...appearance.attributes} onFocusCapture={() => setFocused(true)} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false); }}>
+    <button {...dragSource} {...dropTarget} type="button" id={id} aria-label={props["aria-label"]} aria-pressed={panel.activeTargetId === id && panel.open} disabled={(props.isEnabled === false)} aria-readonly={props.readOnly || undefined} onClick={activate} onKeyDown={(event) => {
       if (runtimeDrag && event.altKey && event.key === "Enter") {
         event.preventDefault();
         if (dragCommands && targetEndpoint) {

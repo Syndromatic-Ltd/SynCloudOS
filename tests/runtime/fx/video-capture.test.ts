@@ -209,21 +209,21 @@ describe("scoped browser video capture", () => {
     const streams = [createStream(first.camera), createStream(second.camera)];
     const platform = { ...first.platform, getUserMedia: vi.fn(async () => streams.shift()!) };
     const service = new VideoCaptureService(new BrowserVideoCaptureAdapter(platform));
-    const a = service.createSession({ appId: "app", reauthorise: () => true });
-    const b = service.createSession({ appId: "app", reauthorise: () => true });
+    const a = service.createSession({ appId: "com.example.app", reauthorise: () => true });
+    const b = service.createSession({ appId: "com.example.app", reauthorise: () => true });
     await a.requestCamera();
     await b.requestCamera();
     a.dispose();
     expect(first.camera.track.stop).toHaveBeenCalledOnce();
     expect(second.camera.track.stop).not.toHaveBeenCalled();
 
-    service.suspendOwner("app");
+    service.suspendOwner("com.example.app");
     expect(second.camera.track.enabled).toBe(false);
     expect(b.state).toBe("suspended");
-    await service.resumeOwner("app");
+    await service.resumeOwner("com.example.app");
     expect(second.camera.track.enabled).toBe(true);
     expect(b.state).toBe("active");
-    service.closeOwner("app");
+    service.closeOwner("com.example.app");
     expect(second.camera.track.stop).toHaveBeenCalledOnce();
     service.dispose();
   });
@@ -239,7 +239,7 @@ describe("scoped browser video capture", () => {
       mount.signal,
       () => permissions,
       (capability) => authorised.has(capability),
-      "app",
+      "com.example.app",
     );
     const session = client.createCaptureSession();
     await expect(session.requestCamera()).rejects.toMatchObject({ name: "SecurityError" });

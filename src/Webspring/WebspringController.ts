@@ -18,27 +18,35 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { getSynWareNamespace } from "../SynCloudOS/AppSDK";
+import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import {
   WEBSPRING_PRESENTATION_ROLES,
+  getDesktopWebspringSlots,
+  reconcileWebspringLayout,
   resolveSiteBranding,
   type RuntimeSnapshot,
   type SynCloudOSHorizontalSizeClass,
   type SynCloudOSLocaleBundleResourceInput,
   type SynCloudOSRouteResolution,
   type SynCloudOSRuntime,
+  type WebspringDesktopSlot,
 } from "../SynCloudOS/SynCloudOS";
 import { AppInfo } from "../SynCloudOS/SynCloudOS";
-import { createWebspringLayout, getOrderedVisibleWebspringApps } from "./webspringLayout";
 import { cancelWebspringAppPrefetch, scheduleWebspringAppPrefetch } from "./webspringPrefetch";
 import type { NSEFontFamily } from "../NSE/NSE";
-import type { WebspringContentController, WebspringContentSectionSnapshot } from "./webspringContent";
 import type {
   ActionResult,
   AuthenticationInput,
+  LocalisedText,
   Presentation,
   WebspringActions,
+  WebspringApp,
   WebspringDefinition,
+  WebspringDialPlacement,
+  WebspringItem,
   WebspringViewModel,
+  WebspringWidgetEntry,
 } from "./webspringTypes";
 
 export interface SynCloudOSShellResources {
@@ -56,6 +64,15 @@ function operationResult(result: { readonly status: string; readonly error?: unk
   return { status: "failed", message: result.error instanceof Error ? result.error.message : "The operation could not be completed." };
 }
 
+function dialPlacement(slot: WebspringDesktopSlot): WebspringDialPlacement {
+  return Object.freeze({
+    angle: slot.angle,
+    iconPosition: Object.freeze({ ...slot.iconPosition }),
+    indicatorPosition: slot.indicatorPosition ? Object.freeze({ ...slot.indicatorPosition }) : null,
+    labelPosition: Object.freeze({ ...slot.labelPosition }),
+  });
+}
+
 export function presentationForSizeClass(sizeClass: SynCloudOSHorizontalSizeClass): Presentation {
   if (sizeClass === "compact") return "mobile";
   if (sizeClass === "regular") return "tablet";
@@ -71,7 +88,6 @@ export class WebspringController {
     readonly shell: WebspringDefinition,
     private readonly resources: SynCloudOSShellResources | undefined,
     readonly authentication: AuthenticationInput = "disabled",
-    private readonly contentController?: Pick<WebspringContentController, "refresh">,
   ) {
     this.assertHomeConfiguration();
     const actions: WebspringActions = {
@@ -81,13 +97,13 @@ export class WebspringController {
       previewApp: (appId) => this.runtime.webspring.hoverApp(appId),
       prefetchApp: (appId, active) => active ? scheduleWebspringAppPrefetch(this.runtime, appId) : cancelWebspringAppPrefetch(this.runtime, appId),
       beginEditing: (appId) => this.runtime.webspring.enterEditMode(appId),
-      scheduleLongPress: (appId, onRecognised) => {
+      scheduleLongPress: (itemId, onRecognised) => {
         let active = true;
         const handle = this.runtime.environment.setTimeout(() => {
           if (!active) return;
           active = false;
-          this.runtime.webspring.enterEditMode(appId);
-          this.runtime.webspring.beginDrag(appId);
+          this.runtime.webspring.enterEditMode(itemId);
+          this.runtime.webspring.beginDrag(itemId);
           onRecognised();
         }, 520);
         return () => {
@@ -98,10 +114,15 @@ export class WebspringController {
       },
       finishEditing: (commit = true) => this.runtime.webspring.exitEditMode(commit),
       resetOrder: () => this.runtime.webspring.resetLayoutOrder(),
-      moveApp: (appId, targetIndex, commit = false) => this.runtime.webspring.reorderApp(appId, targetIndex, commit),
-      moveAppByKeyboard: (appId, key, columns = 1) => this.runtime.webspring.moveEditingAppByKeyboard(appId, key, columns),
-      beginDrag: (appId) => this.runtime.webspring.beginDrag(appId),
-      finishDrag: (commit = true) => this.runtime.webspring.endDrag(commit),
+      moveItem: (itemId, targetIndex, commit = false) => this.runtime.webspring.moveItem(itemId, targetIndex, commit),
+      moveItemByKeyboard: (itemId, key, columns = 1) => this.runtime.webspring.moveItemByKeyboard(itemId, key, columns),
+      setDropTarget: (itemId) => this.runtime.webspring.setDropTarget(itemId),
+      dropOnItem: (appId, targetItemId) => this.runtime.webspring.dropOnItem(appId, targetItemId),
+      moveAppOutOfFolder: (appId, targetIndex) => this.runtime.webspring.moveAppOutOfFolder(appId, targetIndex),
+      openFolder: (folderId, options) => this.runtime.webspring.openFolder(folderId, options),
+      closeFolder: () => this.runtime.webspring.closeFolder(),
+      beginDrag: (itemId) => this.runtime.webspring.beginDrag(itemId),
+      finishDrag: (commit = true) => this.runtime.webspring.finishDrag(commit),
       completeLaunch: (transitionId, appId) => { this.completeLaunch(transitionId, appId); },
       scheduleLaunchCompletion: (transitionId, appId, delayMs) => {
         let active = true;
@@ -120,7 +141,6 @@ export class WebspringController {
       openNotificationCentre: (notificationId) => { void this.runtime.commands.dispatch("webspring.notificationCentre.open", notificationId ? { notificationId } : undefined); },
       requestSignIn: this.requestSignIn.bind(this),
       requestSignOut: this.requestSignOut.bind(this),
-      refreshContent: async () => { await this.contentController?.refresh(); },
     };
     this.actions = Object.freeze(actions);
   }
@@ -148,29 +168,56 @@ export class WebspringController {
     return this.shell.manifest.webspringShell.views.find((view) => view.id !== failedViewId && view.presentations.includes(presentation))?.id ?? null;
   }
 
-  model(snapshot: RuntimeSnapshot, presentation: Presentation, contentSections: readonly WebspringContentSectionSnapshot[] = [], entrancePhase: WebspringViewModel["entrancePhase"] = "ready"): WebspringViewModel {
+  model(snapshot: RuntimeSnapshot, presentation: Presentation, entrancePhase: WebspringViewModel["entrancePhase"] = "ready"): WebspringViewModel {
     const declaration = this.shell.manifest.webspringShell;
     const resourceUrls = this.resources?.resourceUrls ?? {};
-    const branding = resolveSiteBranding(declaration.branding, resourceUrls, this.runtime.locale, this.shell.manifest.id);
+    const namespace = getSynWareNamespace(this.shell.manifest.bundleIdentifier);
+    const branding = resolveSiteBranding(declaration.branding, resourceUrls, this.runtime.locale, namespace);
+    const resolveText = (text: LocalisedText) => resolveSiteBranding({ name: text }, {}, this.runtime.locale, namespace).name;
+    const widgets = Object.freeze(this.shell.widgets.map((widget): WebspringWidgetEntry => Object.freeze({
+      widget,
+      title: resolveText(widget.title),
+      iconUrl: widget.icon ? resourceUrls[widget.icon] ?? null : null,
+      emptyMessage: widget.whenEmpty === "hide" ? null : resolveText(widget.whenEmpty.message),
+    })));
     const traits = this.runtime.presentationTraits.getSnapshot();
-    const orderedApps = getOrderedVisibleWebspringApps(Object.values(snapshot.appInfo), snapshot.webspring.layout.preference.order);
-    const layout = createWebspringLayout(orderedApps, snapshot.webspring.layout.preference.order);
-    const apps = orderedApps
-      .map((app) => Object.freeze({
-        id: app.id,
-        title: app.displayName,
+    const projection = reconcileWebspringLayout(
+      Object.values(snapshot.appInfo),
+      snapshot.webspring.layout.preference,
+      snapshot.webspring.layout.folderConfiguration,
+    );
+    const appsById = new Map(projection.appOrder.map((appId) => {
+      const app = snapshot.appInfo[normalizeBundleIdentifier(appId)]!;
+      const viewApp: WebspringApp = Object.freeze({
+        bundleIdentifier: app.bundleIdentifier,
+        displayName: app.displayName,
         iconUrl: app.icon.src || null,
         route: app.route,
-        selected: snapshot.application.activeAppId === app.id,
-        running: snapshot.application.openAppIds.includes(app.id),
-        state: app.isDisabled ? "disabled" as const : snapshot.lifecycle[app.id] ?? "registered",
-        disabledReason: app.isDisabled || snapshot.lifecycle[app.id] === "disabled" ? AppInfo.explain(app).reason : undefined,
+        selected: normalizeBundleIdentifier(snapshot.application.activeAppId) === normalizeBundleIdentifier(app.bundleIdentifier),
+        running: snapshot.application.openAppIds.some(id => normalizeBundleIdentifier(id) === normalizeBundleIdentifier(app.bundleIdentifier)),
+        state: app.isDisabled ? "disabled" as const : snapshot.lifecycle[normalizeBundleIdentifier(app.bundleIdentifier)] ?? "registered",
+        disabledReason: app.isDisabled || snapshot.lifecycle[normalizeBundleIdentifier(app.bundleIdentifier)] === "disabled" ? AppInfo.explain(app).reason : undefined,
         badgeCount: app.notifications.badgeCount ?? 0,
         accent: app.webspring.accent ?? "#eaf6ff",
         featured: Boolean(app.webspring.featured),
         selectorAngle: app.webspring.selectorAngle ?? app.webspring.dialPosition ?? 0,
-        dialPlacement: Object.freeze({ ...layout.placements[app.id]!, iconPosition: Object.freeze({ ...layout.placements[app.id]!.iconPosition }), indicatorPosition: layout.placements[app.id]!.indicatorPosition ? Object.freeze({ ...layout.placements[app.id]!.indicatorPosition! }) : null, labelPosition: Object.freeze({ ...layout.placements[app.id]!.labelPosition }) }),
-      }));
+      });
+      return [appId, viewApp] as const;
+    }));
+    const folderTitles = new Map((declaration.folders?.initial ?? []).map((folder) => [folder.id, folder.title]));
+    const items = getDesktopWebspringSlots(projection.order).slots.map((slot): WebspringItem => {
+      const members = projection.folders[slot.id];
+      if (!members) return Object.freeze({ kind: "app", id: slot.id, app: appsById.get(slot.id)!, dialPlacement: dialPlacement(slot) });
+      const apps = Object.freeze(members.map((appId) => appsById.get(normalizeBundleIdentifier(appId))!));
+      return Object.freeze({
+        kind: "folder",
+        id: slot.id,
+        title: this.folderTitle(folderTitles.get(slot.id)),
+        apps,
+        badgeCount: apps.reduce((total, app) => total + app.badgeCount, 0),
+        dialPlacement: dialPlacement(slot),
+      });
+    });
     return Object.freeze({
       presentation,
       activeAppId: snapshot.application.activeAppId,
@@ -189,7 +236,7 @@ export class WebspringController {
       launchPhase: snapshot.webspring.launchPhase,
       layout: Object.freeze({
         editing: snapshot.webspring.layout.isEditing,
-        draggingAppId: snapshot.webspring.layout.draggingAppId,
+        draggingItemId: snapshot.webspring.layout.draggingItemId,
         board: Object.freeze({ ...snapshot.webspring.layout.preference.board }),
       }),
       presentationTraits: Object.freeze({
@@ -198,17 +245,27 @@ export class WebspringController {
         reducedMotion: traits.reducedMotion,
         safeAreaInsets: Object.freeze({ ...traits.safeAreaInsets }),
       }),
-      apps: Object.freeze(apps),
-      sections: Object.freeze(contentSections.map((section) => Object.freeze({
-        id: section.id,
-        title: resolveSiteBranding({ name: section.title }, {}, this.runtime.locale, this.shell.manifest.id).name,
-        empty: section.empty,
-        state: section.state,
-      }))),
+      apps: Object.freeze([...appsById.values()]),
+      items: Object.freeze(items),
+      folders: Object.freeze({
+        editable: snapshot.webspring.layout.folderConfiguration.editable,
+        openFolderId: snapshot.webspring.openFolderId,
+        dropTargetId: snapshot.webspring.layout.dropTargetId,
+      }),
+      widgets,
+      background: this.shell.background,
       branding,
       account: Object.freeze(this.accountAction()),
     });
   }
+  /** A manifest folder's localised title; folders visitors make share one system title. */
+  private folderTitle(title: LocalisedText | undefined) {
+    const text = title ?? { key: "webspring.folder.untitled", fallback: "Folder" };
+    const namespace = title ? getSynWareNamespace(this.shell.manifest.bundleIdentifier) : undefined;
+    const translated = this.runtime.locale.t(text.key, undefined, namespace);
+    return translated === text.key ? text.fallback ?? text.key : translated;
+  }
+
   private completeLaunch(transitionId: string, appId: string) {
     if (this.completedLaunchTransitionId === transitionId) return;
     if (!this.runtime.webspring.completeLaunchCover(transitionId, appId)) return;
@@ -223,13 +280,15 @@ export class WebspringController {
   private async openApp(appId: string, route?: string): Promise<ActionResult> {
     const app = this.runtime.apps.getApp(appId);
     if (!app) return { status: "failed", message: `Unknown application ${appId}.` };
+    // A launch from inside a folder closes the folder first.
+    this.runtime.webspring.closeFolder();
     const context = {
       launcher: "WebspringHost",
       siteName: this.model(this.runtime.store.getSnapshot(), "desktop").branding.name,
     };
     if (route !== undefined) {
       const resolution = this.runtime.routes.resolveRoute(route) as SynCloudOSRouteResolution;
-      if (resolution.kind !== "app" || resolution.app.id !== appId) {
+      if (resolution.kind !== "app" || normalizeBundleIdentifier(resolution.app.bundleIdentifier) !== normalizeBundleIdentifier(appId)) {
         return { status: "failed", message: `Route ${route} is outside ${appId}'s declared authority.` };
       }
       const result = await this.runtime.routes.openRoute(route, { source: "webspring-controller", context }).result;
@@ -251,12 +310,10 @@ export class WebspringController {
     return operationResult(await this.runtime.routes.openRoute(homeRoute, { source: "webspring-controller" }).result);
   }
 
-  private async reorder(appIds: readonly string[]): Promise<ActionResult> {
-    const currentIds = this.model(this.runtime.store.getSnapshot(), "desktop").apps.map((app) => app.id);
-    if (appIds.length !== currentIds.length || new Set(appIds).size !== appIds.length || appIds.some((id) => !currentIds.includes(id))) {
-      return { status: "failed", message: "Application order must contain every visible app exactly once." };
+  private async reorder(itemIds: readonly string[]): Promise<ActionResult> {
+    if (!this.runtime.webspring.reorder(itemIds)) {
+      return { status: "failed", message: "The top-level order must contain every Webspring entry exactly once." };
     }
-    appIds.forEach((id, index) => this.runtime.webspring.reorderApp(id, index, index === appIds.length - 1));
     return { status: "completed" };
   }
 

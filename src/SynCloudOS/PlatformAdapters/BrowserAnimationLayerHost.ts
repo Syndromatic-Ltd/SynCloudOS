@@ -19,6 +19,7 @@
  */
 
 import { AFXLayer, type AFXFrameScheduler } from "../../FX/AnimationFX/AFXLayer";
+import { createAFXLayer } from "../../FX/AnimationFX/host";
 import { AFXShapeLayer } from "../../FX/AnimationFX/AFXShapeLayer";
 import { AFXGradientLayer } from "../../FX/AnimationFX/AFXGradientLayer";
 import { AFXTextLayer } from "../../FX/AnimationFX/AFXTextLayer";
@@ -44,10 +45,11 @@ export function createBrowserAnimationLayerHost(document: Document, scheduler: A
       boundElements.add(target);
       let renderer: BrowserAFXCanvasRenderer | null = null;
       try {
-        renderer = new BrowserAFXCanvasRenderer(target);
+        const { layout, ...rendererOptions } = options;
+        renderer = new BrowserAFXCanvasRenderer(target, { layout });
         const layerRenderer = new AFXRenderer({
           target: renderer, scheduler, width: target.width, height: target.height,
-          ...options, signal,
+          ...rendererOptions, signal,
         });
         const dispose = layerRenderer.dispose.bind(layerRenderer);
         const canvasRenderer = renderer;
@@ -73,30 +75,50 @@ export function createBrowserAnimationLayerHost(document: Document, scheduler: A
         throw error;
       }
     },
-    bind<K extends keyof AnimationLayerKinds>(kind: K, target: object, signal: AbortSignal): AnimationLayerKinds[K] {
+    bind<K extends keyof AnimationLayerKinds>(kind: K, target: object, signal: AbortSignal,
+      options?: Parameters<AnimationLayerHost["bind"]>[3]): AnimationLayerKinds[K] {
       signal.throwIfAborted();
       const HTMLElementClass = document.defaultView?.HTMLElement;
       if (!HTMLElementClass || !(target instanceof HTMLElementClass) || target.ownerDocument !== document) throw new TypeError("Layer target must be an element from the owning browser document.");
       if (boundElements.has(target)) throw new DOMException("Element already has a live layer binding.", "InvalidStateError");
       const constructors = { layer: AFXLayer, shape: AFXShapeLayer, gradient: AFXGradientLayer, text: AFXTextLayer, replicator: AFXReplicatorLayer, emitter: AFXEmitterLayer, tiled: AFXTiledLayer };
       if (!Object.hasOwn(constructors, kind)) throw new TypeError("Unknown layer kind.");
-      const surface = new BrowserAnimationLayerSurface(target);
+      const surface = new BrowserAnimationLayerSurface(target, options?.layout);
       boundElements.add(target);
       let layer: AFXLayer | undefined;
+      let resizeObserver: { observe(target: Element): void; disconnect(): void } | undefined;
+      let disposed = false;
       try {
-        layer = new constructors[kind](surface, scheduler, { signal });
+        layer = createAFXLayer(constructors[kind], surface, scheduler, { signal });
+        if (options?.layout === "css") {
+          const backingLayer = layer;
+          const measure = () => {
+            if (disposed || signal.aborted) return;
+            const width = target.offsetWidth;
+            const height = target.offsetHeight;
+            if (backingLayer.bounds.width !== width || backingLayer.bounds.height !== height)
+              backingLayer.frame = { x: 0, y: 0, width, height };
+          };
+          measure();
+          const Observer = document.defaultView?.ResizeObserver;
+          if (Observer) {
+            resizeObserver = new Observer(measure);
+            resizeObserver.observe(target);
+          }
+        }
         signal.throwIfAborted();
       }
       catch (error) {
+        resizeObserver?.disconnect();
         try { if (layer) layer.dispose(); else surface.dispose(); }
         finally { boundElements.delete(target); }
         throw error;
       }
       const dispose = layer.dispose.bind(layer);
-      let disposed = false;
       const release = () => {
         if (disposed) return;
         disposed = true;
+        resizeObserver?.disconnect();
         signal.removeEventListener("abort", release);
         try { dispose(); }
         finally { boundElements.delete(target); }

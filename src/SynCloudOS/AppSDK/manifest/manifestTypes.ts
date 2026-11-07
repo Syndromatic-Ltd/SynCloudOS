@@ -44,6 +44,9 @@ export interface SynWareRuntimeManifestContext {
   readonly appRoot: string;
   readonly packageName: string;
   readonly path: string;
+  /** Resource path to URL, for the resources the manifest names (the frame's right-slot icon). Omitted for hosts that
+   *  bundle none, which use the resource path itself. */
+  readonly resourceUrls?: Readonly<Record<string, string>>;
   readonly componentKey: string;
 }
 
@@ -77,13 +80,52 @@ export interface SynWareWindowDefaultsManifest {
   readonly role?: "standard" | "panel" | "modal" | "sheet" | "hud";
 }
 
+/** A painted area for an app's background: colour, texture, tint, spotlight and an overlay, drawn in that order.
+ *  Image values are URLs. The same shape as the Webspring Board's `WebspringSurface`. */
+export interface SynWareSurfaceManifest {
+  /** The base colour, beneath the texture. */
+  readonly colour?: string;
+  readonly texture?: {
+    readonly image: string;
+    /** A CSS `background-size`. */
+    readonly size?: string;
+    /** Tile the image. Defaults to `true`. */
+    readonly repeat?: boolean;
+    /** A CSS `background-position`. */
+    readonly position?: string;
+  } | "none";
+  /** A wash of colour over the texture. `opacity` is from 0 to 1. */
+  readonly tint?: { readonly colour: string; readonly opacity: number };
+  /** A spotlight: a lighter centre (white) and darkened edges (black), each from 0 to 1. `false` draws none. */
+  readonly vignette?: { readonly centre?: number; readonly edge?: number } | false;
+  /** An image over everything else, such as a glow. */
+  readonly overlay?: {
+    readonly image: string;
+    readonly size?: string;
+    readonly opacity?: number;
+    readonly blend?: string;
+  };
+}
+
+/** What fills the app's body behind its content. `"system"` is the light or dark app background,
+ *  `"none"` leaves the body unpainted for the app to paint, and a surface paints that. */
+export type SynWareFrameBackgroundManifest = "system" | "none" | SynWareSurfaceManifest;
+
+/** The control in the standard top bar's right slot. `"auto"` is a gear; `"userInfo"` a person; `"none"` draws nothing. */
+export type SynWareFrameRightSlotManifest = "auto" | "userInfo" | "none" | {
+  readonly icon: SynWareResourceReference;
+  readonly label: SynWareLocalisedText;
+};
+
 export interface SynWareFrameManifest {
-  readonly layout?: "simple" | "defacto";
   readonly material?: "standard" | "metal";
   readonly topBar?: "standard" | "custom" | "none";
   /** Defaults to host motion. Content owns its launch and return choreography. */
   readonly presentationMotion?: "host" | "content";
-  readonly rightSlot?: string;
+  /** Defaults to `"auto"`. */
+  readonly rightSlot?: SynWareFrameRightSlotManifest;
+  /** Defaults to `"system"`. */
+  readonly background?: SynWareFrameBackgroundManifest;
   readonly smoothSurface?: "off" | { readonly radius?: number };
   readonly sourceList?: {
     readonly railLabel?: string;
@@ -128,10 +170,15 @@ export interface SynWareLocaleBundleManifest {
   readonly path: string;
 }
 
-export interface SynWareLocaleResourcesManifest {
-  readonly base?: string;
-  readonly bundles?: readonly SynWareLocaleBundleManifest[];
-}
+/**
+ * `development`: the development server and development builds serve it;
+ * production builds leave it out. Omitted: every build serves it.
+ */
+export type SynWareApplicationAvailability = "development";
+
+/** The app's Info.plist: identity is explicit; optional plumbing is discovered. */
+export type SynWareInfo = Pick<SynWareManifestV1, "bundleIdentifier" | "displayName" | "version">
+  & Partial<Omit<SynWareManifestV1, "bundleIdentifier" | "displayName" | "version">>;
 
 export interface SynWareAppearanceManifest {
   readonly id: string;
@@ -159,7 +206,6 @@ export interface SynWareRuntimeManifest {
   /** Keep the app registered while blocking launch and module preloading. */
   readonly disabled?: boolean;
   readonly disabledReason?: string;
-  readonly bundleId?: string;
   readonly presentation?: "appView" | "windowedView" | "systemSheet" | "backgroundService";
   readonly type?: "internal" | "system" | "external";
   readonly policy?: {
@@ -195,6 +241,24 @@ export interface SynWareWebspringViewManifest {
   readonly mode: "launcher" | "persistent";
 }
 
+/** A folder the Webspring shell seeds on first run. */
+export interface SynWareWebspringFolderManifest {
+  /** `folder.` followed by a lowercase slug; unique, and never an app ID. */
+  readonly id: string;
+  readonly title: SynWareLocalisedText;
+  /** Sorted with the apps' `webspring.order`; on a tie folders come first, then IDs. */
+  readonly order: number;
+  /** Member app IDs in order. An app may belong to one folder only; unknown or
+   *  invisible IDs are skipped. */
+  readonly apps: readonly string[];
+}
+
+export interface SynWareWebspringFoldersManifest {
+  /** Whether visitors create, fill and empty folders by dragging. */
+  readonly editable: boolean;
+  readonly initial: readonly SynWareWebspringFolderManifest[];
+}
+
 export interface SynWareWebspringShellManifest {
   readonly views: readonly SynWareWebspringViewManifest[];
   readonly defaults: Readonly<Record<SynWarePresentation, string>>;
@@ -205,14 +269,18 @@ export interface SynWareWebspringShellManifest {
     readonly lightLogo?: SynWareResourceReference;
     readonly darkLogo?: SynWareResourceReference;
     readonly compactLogo?: SynWareResourceReference;
+    /** A single-shape SVG for the top bar's "return to Webspring" button, drawn in the theme's colours. Omitted: a generic house. */
+    readonly homeIcon?: SynWareResourceReference;
   };
+  /** Omitted means `{ editable: false, initial: [] }`. */
+  readonly folders?: SynWareWebspringFoldersManifest;
 }
 
 export interface SynWareManifestV1 {
   readonly schemaVersion: 1;
-  readonly id: string;
+  readonly bundleIdentifier: string;
   readonly version: string;
-  readonly title: string;
+  readonly displayName: string;
   readonly routes?: readonly SynWareRouteManifest[];
   readonly presentations?: readonly SynWarePresentation[];
   readonly minimumViewport?: SynWareMinimumViewportManifest;
@@ -224,7 +292,8 @@ export interface SynWareManifestV1 {
   readonly applicationMenu?: SynWareApplicationMenuManifest;
   readonly services?: readonly SynWareServiceManifest[];
   readonly permissions?: readonly string[];
-  readonly localeResources?: SynWareLocaleResourcesManifest;
+  /** Whether the build serves this application in development only. */
+  readonly availability?: SynWareApplicationAvailability;
   readonly appearances?: readonly SynWareAppearanceManifest[];
   readonly lifecycle?: SynWareLifecycleManifest;
   readonly background?: SynWareBackgroundManifest;

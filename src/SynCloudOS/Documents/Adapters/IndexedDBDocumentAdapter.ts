@@ -43,6 +43,8 @@ export interface IndexedDBDocumentAdapterOptions {
   readonly indexedDB: IDBFactory;
   readonly databaseName: string;
   readonly environment: DocumentAdapterEnvironment;
+  /** The adapter ID; defaults to "indexed-db". */
+  readonly id?: string;
 }
 
 interface StoredRecord {
@@ -146,7 +148,7 @@ function mapIndexedDBError(error: unknown): DocumentUnavailableError | unknown {
 }
 
 export class IndexedDBDocumentAdapter implements DocumentStorageAdapter {
-  readonly id = "indexed-db";
+  readonly id: string;
   readonly atomicSynchronisationQueueAdoption = true;
   readonly atomicIntermediateSynchronisationQueueAdoption = true;
   readonly capabilities = Object.freeze({
@@ -167,6 +169,7 @@ export class IndexedDBDocumentAdapter implements DocumentStorageAdapter {
   #disposed = false;
 
   constructor(options: IndexedDBDocumentAdapterOptions) {
+    this.id = options.id ?? "indexed-db";
     this.#indexedDB = options.indexedDB;
     this.#databaseName = options.databaseName;
     this.#environment = options.environment;

@@ -35,7 +35,6 @@
 @import "../Controls/Completion/nse-completion-controls.css";
 @import "../Controls/Fields/nse-field-extensions.css";
 @import "../Controls/Values/nse-value-controls.css";
-@import "../CoverFlow/nse-coverflow.css";
 @import "../DataViews/Browser/nse-browser.css";
 @import "../DataViews/Collection/nse-collection-view.css";
 @import "../DataViews/Outline/nse-outline-view.css";
@@ -49,7 +48,6 @@
 @import "../Navigation/SourceList/nse-source-list-scene.css";
 @import "../Layout/nse-layout.css";
 @import "../Layout/nse-stack-view.css";
-@import "../List/nse-list.css";
 @import "../MediaPanels/nse-media-panels.css";
 @import "../Menus/nse-menus.css";
 @import "../Navigation/nse-navigation.css";

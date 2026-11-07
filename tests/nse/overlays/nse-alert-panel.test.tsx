@@ -23,7 +23,7 @@ import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { SystemAlert } from "../../../src/SynCloudOSReact/SystemAlert";
-import { NSEAlert } from "../../../src/NSE/Components/NSEAlert";
+import { NSEAlertSurface } from "../../../src/NSE/Components/NSEAlertSurface";
 
 const error = {
   id: "alert-1",
@@ -56,8 +56,8 @@ describe("NSE alert panel", () => {
     expect(dismiss).not.toHaveBeenCalled();
   });
 
-  it("keeps bare NSEAlert a semantic surface rather than a local focus trap", () => {
-    render(<NSEAlert labelledBy="alert-title"><h2 id="alert-title">Notice</h2></NSEAlert>);
+  it("keeps bare NSEAlertSurface a semantic surface rather than a local focus trap", () => {
+    render(<NSEAlertSurface labelledBy="alert-title"><h2 id="alert-title">Notice</h2></NSEAlertSurface>);
     const alert = screen.getByRole("alertdialog", { name: "Notice" });
     expect(alert.getAttribute("aria-modal")).toBe("true");
   });

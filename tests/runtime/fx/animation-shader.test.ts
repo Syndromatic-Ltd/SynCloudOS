@@ -82,8 +82,8 @@ it('retains image content, particles and nested filters in subtree order with gr
   expect(() => { group.compositingFilter = new imageFX.IFXFilterRegistry().create('blend', { mode: 'multiply' }); }).toThrow(/unsupported/i);
   expect(group.compositingFilter?.parameters.mode).toBe('addition');
   renderer.dispose();
-  expect(() => { group.filters = []; }).toThrow(/disposed/);
-  expect(() => { group.compositingFilter = null; }).toThrow(/disposed/);
+  expect(() => { group.filters = []; }).toThrow(expect.objectContaining({ code: "AFX_LAYER_DISPOSED" }));
+  expect(() => { group.compositingFilter = null; }).toThrow(expect.objectContaining({ code: "AFX_LAYER_DISPOSED" }));
 });
 
 it.each(['filter', 'addition'] as const)('preserves descendant picking through nested %s groups and their projected bounds', mode => {
@@ -112,7 +112,7 @@ it.each(['filter', 'addition'] as const)('preserves descendant picking through n
   renderer.dispose();
 });
 
-it('clips filtered descendant picks and keeps accepted painter/depth order', () => {
+it('clips filtered descendant picks and keeps zPosition painter order', () => {
   const renderer = new AFXRenderer({ scheduler, width: 100, height: 100, target: { render() {}, dispose() {} } });
   const image = new GFXImage({ width: 1, height: 1, alpha: 'straight', colourSpace: 'srgb', data: new Uint8Array([255, 0, 0, 255]) });
   const group = renderer.makeLayer(); group.frame = { x: 20, y: 20, width: 40, height: 40 }; group.bounds = { x: 5, y: 5, width: 40, height: 40 };
@@ -125,7 +125,8 @@ it('clips filtered descendant picks and keeps accepted painter/depth order', () 
   front.hidden = true; renderer.render(); expect(renderer.hitTest({ x: 25, y: 25 })).toBe(back);
   back.opacity = .5;
   const last = renderer.makeLayer(group); last.frame = back.frame; last.contents = image; last.opacity = .5; last.zPosition = 0;
-  renderer.setPickable(last, true); renderer.render(); expect(renderer.hitTest({ x: 25, y: 25 })).toBe(last);
+  // The lowest zPosition draws first, behind the others, however late it was added.
+  renderer.setPickable(last, true); renderer.render(); expect(renderer.hitTest({ x: 25, y: 25 })).toBe(back);
   renderer.dispose();
 });
 
