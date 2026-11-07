@@ -23,6 +23,7 @@ import type { AUFXAudioFormat } from "./AUFXAudioFormat";
 import type { AUFXAudioInputNode } from "./AUFXAudioInputNode";
 export type AUFXAudioSessionCategory = "ambient" | "soloAmbient" | "playback" | "record" | "playAndRecord";
 export type AUFXAudioSessionType = "auto" | "ambient" | "playback" | "transient" | "transient-solo" | "play-and-record";
+export type AUFXRecordPermission = "undetermined" | "denied" | "granted";
 export type AUFXAudioSessionAuthorizationStatus = "granted" | "denied" | "unavailable";
 export type AUFXAudioSessionState = "idle" | "requesting" | "authorized" | "recording" | "paused" | "interrupted" | "denied" | "unavailable" | "disposed";
 export interface AUFXAudioDevice { readonly id: string; readonly kind: "input" | "output"; readonly label: string; readonly groupId: string; }
@@ -43,6 +44,7 @@ export interface AUFXAudioSessionPort {
   readonly capabilities: Readonly<{ capture: boolean; inputSelection: boolean; outputSelection: boolean; mimeTypes: readonly string[]; sessionType?: boolean }>;
   readonly category?: AUFXAudioSessionCategory | null;
   readonly authorizationStatus?: AUFXAudioSessionAuthorizationStatus;
+  readonly recordPermission?: AUFXRecordPermission;
   setCategory?(category: AUFXAudioSessionCategory): Promise<void>;
   requestRecordAuthorization(signal?: AbortSignal): Promise<void>;
   enumerateDevices(signal?: AbortSignal): Promise<readonly AUFXAudioDevice[]>;
@@ -64,6 +66,12 @@ export class AUFXAudioSession {
   get interruptionReason() { return this.#port.interruptionReason ?? null; }
   get capabilities() { return this.#port.capabilities; }
   get category() { return this.#port.category ?? null; }
+  /** AVAudioSession recordPermission: microphone consent is independent of session category. */
+  get recordPermission(): AUFXRecordPermission {
+    if (this.#port.recordPermission) return this.#port.recordPermission;
+    if (this.state === "denied") return "denied";
+    return this.state === "authorized" || this.state === "recording" || this.state === "paused" ? "granted" : "undetermined";
+  }
   /** Category entitlement only; microphone authorisation uses requestRecordAuthorization. */
   get authorizationStatus(): AUFXAudioSessionAuthorizationStatus {
     if (this.state === "disposed" || !this.capabilities.sessionType) return "unavailable";

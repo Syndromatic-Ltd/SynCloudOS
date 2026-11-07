@@ -29,7 +29,7 @@ import type { VFXPresentationCoordinator } from "../../FX/VideoFX/VFXPresentatio
 import type { AppVideoClient, AppVideoPlaybackPresentationRequest } from "./appClientTypes";
 import type { AppPlaybackPresentationLease } from "./playbackPresentationTypes";
 import type { MountedPlaybackSource } from "./mountedPlaybackPresentation";
-import type { AudioGraphHostService, VideoCaptureService } from "../HostServices/AppSDKHostServiceTypes";
+import type { AudioGraphHostService, VideoCaptureService, PrivacyApplicationPort } from "../HostServices/AppSDKHostServiceTypes";
 import { AVPresentationCoordinator } from "../HostServices/AppSDKHostVideoPresentation";
 import { createMountedResourceScope, type MountedResourceAccounting } from "../HostServices/mountedResourceScope";
 import { normalizeVFXDecoderConfig } from "../../FX/VideoFX/VFXCodecCapabilities";
@@ -62,6 +62,7 @@ export function createMountedVideoClient(
   limits: MountedVideoResourceLimits = {},
   accounting?: MountedResourceAccounting,
   presentPlayback?: (source: MountedPlaybackSource, request: AppVideoPlaybackPresentationRequest, signal?: AbortSignal) => AppPlaybackPresentationLease,
+  privacyForKind?: (kind: VFXCaptureKind) => PrivacyApplicationPort,
 ): AppVideoClient {
   const presentationSources = new WeakMap<VFXPresentationCoordinator, MountedPlaybackSource>();
   const registerPresentation = (coordinator: AVPresentationCoordinator) => {
@@ -113,6 +114,7 @@ export function createMountedVideoClient(
   });
   const allowed = (kind: VFXCaptureKind): boolean => {
     const required = capabilityFor(kind);
+    try { privacyForKind?.(kind).assertRequestAllowed(); } catch { return false; }
     return permissions().includes(required) && authorise(required);
   };
   const requireCapability = (kind: VFXCaptureKind) => {
@@ -120,7 +122,7 @@ export function createMountedVideoClient(
     if (!permissions().includes(required))
       throw securityError(`SynWare capability ${required} must be declared.`);
     if (!authorise(required))
-      throw securityError(`ConfigurationProfiles denied SynWare capability ${required}.`);
+      throw securityError(`Privacy authorisation denied SynWare capability ${required}.`);
   };
 
   return Object.freeze({
@@ -310,9 +312,26 @@ export function createMountedVideoClient(
           reauthoriseElement: () => !lease.aborted && allowed("display") && permissions().includes("video.capture.element") && authorise("video.capture.element"),
         });
         let disposed = false;
+        const privacyBindings = new Map<VFXCaptureKind, () => void>();
+        let requestedKind: VFXCaptureKind | null = null;
+        const unsubscribePrivacy = session.subscribe(() => {
+          const kind = session.kind ?? requestedKind;
+          if (disposed || !kind) return;
+          if (session.state === "denied") privacyForKind?.(kind).observe("denied");
+          else if (session.state === "active") privacyForKind?.(kind).observe("granted");
+        });
+        const bindPrivacy = (kind: VFXCaptureKind) => {
+          const privacy = privacyForKind?.(kind);
+          privacy?.assertRequestAllowed();
+          if (privacy && !privacyBindings.has(kind)) privacyBindings.set(kind, privacy.bindResource(dispose));
+          return privacy;
+        };
         const dispose = () => {
           if (disposed) return;
           disposed = true;
+          unsubscribePrivacy();
+          for (const unbind of privacyBindings.values()) unbind();
+          privacyBindings.clear();
           try { session.dispose(); } finally { release(); }
         };
         lease.addEventListener("abort", dispose, { once: true });
@@ -321,14 +340,24 @@ export function createMountedVideoClient(
           get kind() { return session.kind; },
           get settings() { return session.settings; },
           get capabilities() { return session.capabilities; },
+          async getAuthorizationStatus(kind = "camera") {
+            if (disposed || lease.aborted) return "unavailable";
+            if (!permissions().includes(capabilityFor(kind))) return "denied";
+            const privacy = privacyForKind?.(kind);
+            return privacy ? privacy.getAuthorizationStatus(() => session.getAuthorizationStatus(kind)) : session.getAuthorizationStatus(kind);
+          },
           enumerateDevices: () => session.enumerateDevices(),
           async requestCamera(request) {
             requireCapability("camera");
-            return session.requestCamera(request);
+            requestedKind = "camera";
+            const privacy = bindPrivacy("camera");
+            return privacy ? privacy.request(signal => session.requestCamera({ ...request, signal }), { signal: request?.signal, dispose }) : session.requestCamera(request);
           },
           async requestDisplay(request) {
             requireCapability("display");
-            return session.requestDisplay(request);
+            requestedKind = "display";
+            const privacy = bindPrivacy("display");
+            return privacy ? privacy.request(signal => session.requestDisplay({ ...request, signal }), { signal: request?.signal, dispose }) : session.requestDisplay(request);
           },
           async setContentFilter(filter, signal) {
             lease.throwIfAborted();
