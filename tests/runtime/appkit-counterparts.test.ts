@@ -53,7 +53,7 @@ describe("NSE names are AppKit names", () => {
 
   it("names a counterpart or a reason for each entry", () => {
     for (const [name, value] of Object.entries(map.counterparts)) {
-      if (typeof value === "string") expect(value, name).toMatch(/^(?:NS|CA|CG|CT|WK|@IB|UndoManager$|OperationQueue$|UserDefaults$|Date$)/u);
+      if (typeof value === "string") expect(value, name).toMatch(/^(?:NS|AV|CA|CG|CT|WK|@IB|UndoManager$|OperationQueue$|UserDefaults$|Date$)/u);
       else expect(value.none.length, name).toBeGreaterThan(10);
     }
   });

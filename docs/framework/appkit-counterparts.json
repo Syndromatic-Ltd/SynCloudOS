@@ -33,6 +33,7 @@
     "NSEImage.goForwardTemplateName": "NSImage.goForwardTemplateName"
   },
   "counterparts": {
+    "NSERoutePickerView": "AVRoutePickerView",
     "NSEImage": "NSImage",
     "NSEValueTransformer": "NSValueTransformer",
     "NSENegateBooleanTransformerName": "NSValueTransformerName.negateBooleanTransformerName",
