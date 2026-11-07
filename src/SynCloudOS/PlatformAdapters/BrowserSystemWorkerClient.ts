@@ -27,14 +27,15 @@ export async function systemWorkerRequest<T>(navigator: Navigator, message: unkn
   if (!registration?.active) throw new DOMException("The installed application worker is not active.", "InvalidStateError");
   return new Promise<T>((resolve, reject) => {
     const channel = new MessageChannel();
-    const cleanup = () => { clearTimeout(timer); signal.removeEventListener("abort", abort); channel.port1.close(); };
-    const abort = () => { cleanup(); reject(signal.reason ?? new DOMException("The application closed.", "AbortError")); };
-    const timer = setTimeout(() => { cleanup(); reject(new DOMException("The system worker did not reply.", "TimeoutError")); }, 10000);
-    signal.addEventListener("abort", abort, { once: true });
+    const lifetime = AbortSignal.any([signal, AbortSignal.timeout(10000)]);
+    const cleanup = () => { lifetime.removeEventListener("abort", abort); channel.port1.close(); };
+    const abort = () => { cleanup(); reject(lifetime.reason ?? new DOMException("The application closed.", "AbortError")); };
+    lifetime.addEventListener("abort", abort, { once: true });
     channel.port1.onmessage = event => {
       cleanup(); const reply = event.data;
       if (reply?.ok) resolve(reply.value as T); else reject(new DOMException(reply?.error ?? "The worker refused this request.", "OperationError"));
     };
-    registration.active!.postMessage(message, [channel.port2]);
+    try { registration.active!.postMessage(message, [channel.port2]); }
+    catch (error) { cleanup(); reject(error); }
   });
 }

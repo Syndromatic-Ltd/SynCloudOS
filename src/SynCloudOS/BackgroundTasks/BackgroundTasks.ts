@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import type { NSEData } from "../../Foundation/NSEData";
+
 /** BackgroundTasks schedules declared, same-origin network work in the system worker. */
 export interface BGTaskRequest {
   readonly identifier: string;
@@ -35,6 +37,7 @@ export interface BGTaskScheduler {
   capabilities(): Promise<{ readonly backgroundSync: boolean; readonly backgroundFetch: boolean }>;
   submit(request: BGTaskRequest): Promise<void>;
   submitDownload(request: BGDownloadTaskRequest): Promise<{ readonly id: string; abort(): Promise<boolean> }>;
+  downloadedData(identifier: string, url: string): Promise<{ readonly data: NSEData; readonly mimeType: string } | null>;
   getPendingTaskRequests(): Promise<readonly BGTaskRequest[]>;
   cancel(identifier: string): Promise<void>;
 }

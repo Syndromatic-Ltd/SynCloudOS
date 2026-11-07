@@ -40,6 +40,18 @@ it("reports unavailable background APIs without scheduling work", async () => {
   await expect(scheduler.capabilities()).resolves.toEqual({ backgroundSync: false, backgroundFetch: false });
   await expect(scheduler.submit({ identifier: "refresh", url: "/api/refresh" })).rejects.toMatchObject({ name: "NotSupportedError" });
 });
+it("reads completed downloads only through the declared app/task namespace", async () => {
+  const match = vi.fn(async () => new Response("downloaded", { headers: { "Content-Type": "text/plain" } }));
+  const open = vi.fn(async () => ({ match }));
+  const navigator = { serviceWorker: { getRegistration: async () => ({ scope: "https://site.test/product/", active: {} }) } } as unknown as Navigator;
+  const scheduler = createBrowserBackgroundTaskScheduler(navigator, "notes", ["download"], new AbortController().signal, { open } as unknown as CacheStorage);
+  const result = await scheduler.downloadedData("download", "/product/file.txt");
+  expect(new TextDecoder().decode(result!.data.bytes)).toBe("downloaded");
+  expect(result!.mimeType).toBe("text/plain");
+  expect(open).toHaveBeenCalledWith("syncloudos:/product/:downloads");
+  expect(String(match.mock.calls[0][0])).toContain("syncloudos%3Anotes%3Adownload");
+  await expect(scheduler.downloadedData("other", "/product/file.txt")).rejects.toMatchObject({ name: "SecurityError" });
+});
 it("requires configured owner push keys and keeps remote registration on the site origin", async () => {
   const browser = { navigator: {}, location: { href: "https://site.test/", origin: "https://site.test" }, Notification: { permission: "granted" } } as unknown as Window;
   const unconfigured = createBrowserRemoteNotifications(browser, "notes", undefined, new AbortController().signal);

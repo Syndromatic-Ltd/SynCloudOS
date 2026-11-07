@@ -31,7 +31,7 @@ export function applicationSystemServices(runtime: SynCloudOSRuntime, appId: str
   const document = runtime.environment.browser.getDocument(), browserWindow = document?.defaultView;
   if (!browserWindow) throw new DOMException("These system services need a browser host.", "NotSupportedError");
   const info = runtime.bundles.getBundle(appId)?.synWareManifest;
-  const scheduler = createBrowserBackgroundTaskScheduler(browserWindow.navigator, appId, info?.background?.enabled ? info.background.tasks ?? [] : [], signal);
+  const scheduler = createBrowserBackgroundTaskScheduler(browserWindow.navigator, appId, info?.background?.enabled ? info.background.tasks ?? [] : [], signal, browserWindow.caches);
   const requireNotifications = () => {
     signal.throwIfAborted();
     if (!runtime.bundles.getBundle(appId)?.synWareManifest?.entitlements?.includes("notifications.post")) throw new DOMException("Declare notifications.post in Info.ts entitlements.", "SecurityError");

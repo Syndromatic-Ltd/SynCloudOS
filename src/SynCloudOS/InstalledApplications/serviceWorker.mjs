@@ -76,7 +76,7 @@ function runtimeServiceWorker(config) {
             if (url.username || url.password || message.request.body?.length > 1048576) throw new TypeError("The task request is invalid or too large.");
             const method = message.request.method ?? "GET";
             if (!["GET", "POST", "PUT", "DELETE"].includes(method) || (method === "GET" && message.request.body)) throw new TypeError("Invalid background request method.");
-            await set(key, { kind: "task", appId: app.bundleIdentifier, request: { ...message.request, url: url.href, method } });
+            await set(key, { kind: "task", requestId: crypto.randomUUID(), appId: app.bundleIdentifier, request: { ...message.request, url: url.href, method } });
           } else if (message.type === "background-cancel") await remove(key);
           else if (message.type === "background-list") value = (await values()).filter(value => value.kind === "task" && value.appId === app.bundleIdentifier).map(value => value.request);
         } else if (message.type === "notification-categories") {
@@ -106,7 +106,7 @@ function runtimeServiceWorker(config) {
       if (!app?.background?.enabled || !app.background.tasks?.includes(task.request.identifier)) { await remove(taskKey); return; }
       const url = new URL(task.request.url, self.location.origin);
       if (url.origin !== self.location.origin || !url.pathname.startsWith(config.base)) throw new TypeError("The task URL left the host scope.");
-      const response = await fetch(url, { method: task.request.method, body: task.request.body, credentials: "same-origin", headers: { "X-SynCloudOS-Task": event.tag } });
+      const response = await fetch(url, { method: task.request.method, body: task.request.body, credentials: "same-origin", headers: { "X-SynCloudOS-Task": task.requestId, "X-SynCloudOS-Task-Identifier": event.tag } });
       if (!response.ok) throw new Error(`Background task failed (${response.status}).`);
       await remove(taskKey);
       for (const client of await self.clients.matchAll({ type: "window" })) client.postMessage({ type: "background-completed", appId: task.appId, identifier: task.request.identifier });
@@ -118,7 +118,10 @@ function runtimeServiceWorker(config) {
       const cache = await caches.open(`${prefix}downloads`);
       for (const record of await event.registration.matchAll()) {
         const response = await record.responseReady;
-        if (response?.ok) await cache.put(record.request, response);
+        if (response?.ok) {
+          const key = new URL(`${config.base}__syncloudos/download/${encodeURIComponent(event.registration.id)}/${encodeURIComponent(record.request.url)}`, self.location.origin);
+          await cache.put(key, response);
+        }
       }
       await event.updateUI({ title: "Download complete" });
     })());
@@ -130,7 +133,9 @@ function runtimeServiceWorker(config) {
       if (!payload) throw new TypeError("A push notification needs a payload.");
       const declaration = payload.web_push === 8030 ? payload.notification : payload;
       const url = safeURL(declaration.navigate ?? declaration.url ?? config.base);
-      const app = payload.appId ? appFor(payload.appId) : apps.find(app => app.routes?.some(route => url.pathname === route.path || url.pathname.startsWith(`${route.path}/`)));
+      const app = payload.appId ? appFor(payload.appId) : apps.find(app => app.routes?.some(route => { const path = `${config.base.replace(/\/$/u, "")}${route.path}`; return url.pathname === path || url.pathname.startsWith(path.endsWith("/") ? path : `${path}/`); }));
+      const appOwnsURL = app?.routes?.some(route => { const path = `${config.base.replace(/\/$/u, "")}${route.path}`; return url.pathname === path || url.pathname.startsWith(path.endsWith("/") ? path : `${path}/`); });
+      if (!appOwnsURL) throw new TypeError("The notification URL is outside its application scope.");
       if (!app || !declaration.title || typeof declaration.title !== "string") throw new TypeError("The notification needs a declared app and title.");
       let categories = [];
       if (declaration.categoryIdentifier) categories = await get(`categories:${app.bundleIdentifier}`) ?? [];
@@ -150,8 +155,8 @@ function runtimeServiceWorker(config) {
       const url = safeURL(data.url);
       url.searchParams.set("scos-notification", data.identifier ?? "");
       if (event.action) url.searchParams.set("scos-action", event.action);
-      const client = (await self.clients.matchAll({ type: "window", includeUncontrolled: true })).find(client => new URL(client.url).origin === url.origin);
-      if (client) { await client.navigate(url.href); await client.focus(); } else await self.clients.openWindow(url.href);
+      const client = (await self.clients.matchAll({ type: "window", includeUncontrolled: true })).find(client => allowedNavigation(new URL(client.url)));
+      if (client) { client.postMessage({ type: "notification-open", url: url.href }); await client.focus(); } else await self.clients.openWindow(url.href);
     })());
   });
   self.addEventListener("install", event => {
