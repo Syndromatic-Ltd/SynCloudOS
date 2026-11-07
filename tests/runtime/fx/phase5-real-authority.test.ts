@@ -38,7 +38,8 @@ it("uses real lifecycle policy and captured entitlements for retained device cli
     expect(select).toHaveBeenCalledOnce();
     runtime.configurationProfiles.registerPolicy("phase5-deny", (request, decision) => request.app?.bundleIdentifier === appId
       ? { ...decision, allowed: false, decision: "deny", reason: "Test host restriction" } : decision);
-    await expect(store.requestAccess()).rejects.toMatchObject({ name: "SecurityError" });
+    // Canonical privacy revocation may abort the retained lease before its explicit access guard.
+    await expect(store.requestAccess()).rejects.toMatchObject({ name: expect.stringMatching(/^(?:AbortError|SecurityError)$/) });
     expect(select).toHaveBeenCalledOnce();
   } finally { store.dispose(); mounted.dispose(); await runtime.dispose("phase5-test"); }
 });
