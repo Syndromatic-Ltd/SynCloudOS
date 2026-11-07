@@ -354,7 +354,7 @@ it("retains toolbar tabs when the window replaces its active toolbar", async () 
 
 
 it("presents More while its compact list is visible and restores the latest app title on exit or resize", async () => {
-  await launch();
+  const host = await launch();
   const window = sections.view.window!;
   act(() => {
     window.title = "Company";
@@ -365,6 +365,9 @@ it("presents More while its compact list is visible and restores the latest app 
   await act(async () => { fireEvent.click(screen.getByRole("tab", { name: /More/ })); });
   expect(nseWindowPresentedTitle(window)).toBe("More");
   expect(window.title).toBe("Company");
+  act(() => { host.runtime.locale.setLocale("fr-FR"); });
+  expect(nseWindowPresentedTitle(window)).toBe("Plus");
+  act(() => { host.runtime.locale.setLocale("en-GB"); });
   act(() => { window.title = "A newer app title"; });
   expect(nseWindowPresentedTitle(window)).toBe("More");
   await act(async () => { fireEvent.click(screen.getByRole("tab", { name: /Framework/ })); });

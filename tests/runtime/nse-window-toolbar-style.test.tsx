@@ -5,8 +5,35 @@ import { afterEach, expect, it } from "vitest";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { NSEPreferencesToast } from "../../src/NSE/Components/NSEPreferencesToast";
 import { NSEWindowTitlebarContent } from "../../src/NSE/Windows/windowTitlebarContext";
+import { useNSEWindowTitlebarDocument, NSEWindowTitlebarHostContext } from "../../src/SynCloudOS/AppHosting/windowChrome";
+import { NSEStandardWindowView } from "../../src/NSE/Windows/NSEStandardWindowView";
+import { standardWindow } from "../fixtures/windowTestDependencies";
+import type { WindowRecord } from "../../src/SynCloudOS/Windows";
 
 afterEach(cleanup);
+
+function PublishWindow({ controller }: { controller: NSEWindowController }) {
+  useNSEWindowTitlebarDocument(controller, React.useContext(NSEWindowTitlebarHostContext));
+  return <p>Window content</p>;
+}
+
+it.each(["automatic", "expanded", "preference", "unified", "unifiedCompact"] as const)("projects %s through the actual standalone window title bar", toolbarStyle => {
+  const controller = new NSEWindowController();
+  controller.window.title = "Reference document";
+  controller.window.subtitle = "Work in progress";
+  controller.window.toolbarStyle = toolbarStyle;
+  const record = { ...standardWindow("reference-window"), id: "reference-window", runtimeId: "test", state: "open", isKey: true, isMain: true, zIndex: 1 } as WindowRecord;
+  const view = render(<NSEStandardWindowView record={record} dirty={false} blocked={false} dispatchCommand={async () => ({ handled: true })}
+    presentation={{ kind: "desktop-window", visible: true, bounds: record.bounds, safeAreaInsets: { blockStart: 0, inlineEnd: 0, blockEnd: 0, inlineStart: 0 }, movable: false, resizable: false, titleBarVisible: true }}>
+    <PublishWindow controller={controller} />
+  </NSEStandardWindowView>);
+  const bar = view.container.querySelector('[data-window-titlebar]')!;
+  expect(bar.getAttribute("data-toolbar-style")).toBe(toolbarStyle);
+  expect(bar.querySelector('[data-window-title]')?.textContent).toBe("Reference documentWork in progress");
+  expect(bar.querySelector('.nse-window-titlebar-subtitle')?.textContent).toBe("Work in progress");
+  view.unmount();
+  controller.dispose();
+});
 
 it.each(["automatic", "expanded", "preference", "unified", "unifiedCompact"] as const)("renders the %s title and subtitle without a parent-section label", toolbarStyle => {
   const view = render(<NSEWindowTitlebarContent toolbarStyle={toolbarStyle} title="Buttons" subtitle="Work in progress" />);
