@@ -179,7 +179,7 @@ export function NSEOpenPanelContent({ session }: { readonly session: OpenPanelSe
           {status ? <p role="status" className="nse-open-status">{status}</p> : null}
           {!busy && !status && !visibleItems.length ? <p className="nse-open-empty">{location ? "No matching items." : "Choose a source, add a folder, or use the system chooser."}</p> : null}
           {visibleItems.length ? <NSEOpenPanelCollection items={visibleItems} selectedIds={selected} multiple={session.allowsMultipleSelection} compact={compact} width={size.width} height={size.height} title={title}
-            onSelect={ids => { setSelected(ids); if (compact) { const item = items.find(item => ids.has(item.id)); if (item?.kind === "directory") activate(item); } }} onActivate={activate} /> : null}
+            onSelect={setSelected} onActivate={activate} /> : null}
         </div>
         {cursor ? <NSEButton controlSize="small" title="Load more" isEnabled={!busy} onClick={() => void loadMedia(location!.source.slice(6), cursor, false)} /> : null}
         <footer className="nse-open-footer"><span role="status">{summary}</span>{!compact ? <><span className="nse-open-footer-spacer"/><NSEButton controlSize="small" title="Cancel" onClick={session.cancel} />{openButton}</> : <NSEButton controlSize="small" title="Cancel" onClick={session.cancel} />}</footer>

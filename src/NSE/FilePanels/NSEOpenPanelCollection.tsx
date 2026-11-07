@@ -23,7 +23,8 @@ export function NSEOpenPanelCollection({ items, selectedIds, multiple, compact, 
   const picturesOnly = compact && displayed.every(item => item.kind === "media");
   const layout = useMemo(() => createAdaptiveCollectionLayout({ itemSize: { inline: itemWidth, block: compact ? itemWidth + (picturesOnly ? 0 : 26) : 92 }, minimumGap: gap }), [compact, gap, itemWidth, picturesOnly]);
   return <NSECollectionView aria-label={title} className="nse-open-collection" adapter={adapter} layout={layout} viewportInlineSize={width} viewportBlockSize={height}
-    selectionMode={multiple ? "multiple" : "single"} onSelectionChange={({ snapshot }) => onSelect(snapshot.selectedIds)} onActivate={(id) => { const item = items.find(item => item.id === id); if (item) onActivate(item); }}
+    selectionMode={multiple ? "multiple" : "single"} pointerActivation={compact ? "single-click" : "double-click"}
+    onSelectionChange={({ snapshot }) => onSelect(snapshot.selectedIds)} onActivate={(id) => { const item = items.find(item => item.id === id); if (item && (!compact || item.kind === "directory")) onActivate(item); }}
     renderItem={({ item, selected }) => <div className="nse-open-item" data-kind={item.kind} data-selected={selected || undefined}>
       <div className="nse-open-item-picture">{item.thumbnailUrl ? <img src={item.thumbnailUrl} alt="" /> : item.kind === "directory"
         ? <svg viewBox="0 0 64 52" aria-hidden="true" className="nse-open-folder"><path d="M2 8h22l5 5h33v37H2z" /><path d="M2 16h60v34H2z" /></svg>
