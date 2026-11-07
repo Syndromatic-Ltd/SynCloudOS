@@ -139,6 +139,14 @@ docs/superpowers/evidence/2026-11-07-foundation/faithful-full-framework-final-re
 docs/superpowers/evidence/2026-11-07-foundation/faithful-full-framework-final.log
 docs/superpowers/evidence/2026-11-07-foundation/faithful-full-framework-start.txt
 docs/superpowers/evidence/2026-11-07-foundation/faithful-full-framework.log
+docs/superpowers/evidence/2026-11-07-foundation/faithful-handoff-adoption.log
+docs/superpowers/evidence/2026-11-07-foundation/faithful-handoff-browser.log
+docs/superpowers/evidence/2026-11-07-foundation/faithful-handoff-build.log
+docs/superpowers/evidence/2026-11-07-foundation/faithful-handoff-checkout.json
+docs/superpowers/evidence/2026-11-07-foundation/faithful-handoff-checkout.log
+docs/superpowers/evidence/2026-11-07-foundation/faithful-handoff-preview-errors.log
+docs/superpowers/evidence/2026-11-07-foundation/faithful-handoff-preview.log
+docs/superpowers/evidence/2026-11-07-foundation/faithful-handoff-site-typecheck.log
 docs/superpowers/evidence/2026-11-07-foundation/faithful-head-adoption-retry.log
 docs/superpowers/evidence/2026-11-07-foundation/faithful-head-adoption.log
 docs/superpowers/evidence/2026-11-07-foundation/faithful-head-checkout.json
@@ -178,6 +186,9 @@ docs/superpowers/evidence/2026-11-07-foundation/faithful-native-artwork-baseline
 docs/superpowers/evidence/2026-11-07-foundation/faithful-native-artwork.json
 docs/superpowers/evidence/2026-11-07-foundation/faithful-native-artwork.log
 docs/superpowers/evidence/2026-11-07-foundation/faithful-native-artwork.mjs
+docs/superpowers/evidence/2026-11-07-foundation/faithful-peer-adoption-comparison.json
+docs/superpowers/evidence/2026-11-07-foundation/faithful-peer-preview-errors.log
+docs/superpowers/evidence/2026-11-07-foundation/faithful-peer-preview.log
 docs/superpowers/evidence/2026-11-07-foundation/faithful-predecessor-audit.log
 docs/superpowers/evidence/2026-11-07-foundation/faithful-progress.md
 docs/superpowers/evidence/2026-11-07-foundation/faithful-reduced-controlled/00.png
@@ -207,6 +218,8 @@ docs/superpowers/evidence/2026-11-07-foundation/faithful-site-final-typecheck.lo
 docs/superpowers/evidence/2026-11-07-foundation/faithful-site-full.json
 docs/superpowers/evidence/2026-11-07-foundation/faithful-site-full.log
 docs/superpowers/evidence/2026-11-07-foundation/faithful-site-gallery-recheck.log
+docs/superpowers/evidence/2026-11-07-foundation/faithful-site-handoff-full.json
+docs/superpowers/evidence/2026-11-07-foundation/faithful-site-handoff-full.log
 docs/superpowers/evidence/2026-11-07-foundation/faithful-site-last-full.json
 docs/superpowers/evidence/2026-11-07-foundation/faithful-site-last-full.log
 docs/superpowers/evidence/2026-11-07-foundation/faithful-site-resumed-typecheck.log
