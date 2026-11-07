@@ -349,7 +349,7 @@ A checkout of the framework repository includes three commands for working with 
 
 | Command | What it does |
 | --- | --- |
-| `npm run synware:create -- <directory> <app-id>` | Scaffolds a bundle with a manifest, a root component and a locale file. Add `--fx animation,graphics` (or any of the twelve FX names) to include a working example for each framework. |
+| `npm run synware:create -- <directory> <app-id>` | Scaffolds a bundle with a manifest, a root component and a locale file. Add `--fx animation,graphics` (or any of the thirteen FX names) to include a working example for each framework. |
 | `npm run synware:validate -- [directory]` | Checks a bundle's manifest against the schema and its imports against the public entries. Without an argument it validates every bundle in the repository. |
 | `npm run sdk:build` | Builds the distributable SDK package, one entry for each subpath listed in the [overview](overview.md#the-package). |
 

@@ -23,6 +23,7 @@ SynCloudOS is an application framework for the web, in the tradition of Cocoa. T
 | [SynWare SDK](synware-sdk.md) | Learn the bundle format, the session, hooks, services, routes and tooling |
 | [Manifest reference](synware-manifest.md) | Look up every `Info.ts` field |
 | [Commands, responders and undo](commands-responders-undo.md) | Route user intent to code, and reverse it |
+| [Foundation](foundation.md) | Work with immutable data, ranges, collections, predicates, sorting and formatters |
 | [Documents](documents.md) | Edit, save, recover and version user content |
 | [Chronosphere](chronosphere.md) | Present a history in the version archive, and choose or write its view |
 | [Document assets](document-assets.md) | Retain native asset bytes through editing, history, recovery and output |
@@ -45,9 +46,9 @@ SynCloudOS is an application framework for the web, in the tradition of Cocoa. T
 
 ## FX frameworks
 
-The [FX overview](fx/README.md) introduces the twelve frameworks and how they reach a SynWare. Each has its own page:
+The [FX overview](fx/README.md) introduces the thirteen frameworks and how they reach a SynWare. Each has its own page:
 
-[AnimationFX](fx/animation.md) · [GraphicsFX](fx/graphics.md) · [ImageFX](fx/image.md) · [TextFX](fx/text.md) · [AudioFX](fx/audio.md) · [HapticsFX](fx/haptics.md) · [MotionFX](fx/motion.md) · [MediaFX](fx/media.md) · [VideoFX](fx/video.md) · [MIDIFX](fx/midi.md) · [LocationFX](fx/location.md) · [LuminaFX](fx/lumina.md)
+[AnimationFX](fx/animation.md) · [GraphicsFX](fx/graphics.md) · [ImageFX](fx/image.md) · [TextFX](fx/text.md) · [AudioFX](fx/audio.md) · [HapticsFX](fx/haptics.md) · [MotionFX](fx/motion.md) · [MediaFX](fx/media.md) · [VideoFX](fx/video.md) · [MIDIFX](fx/midi.md) · [LocationFX](fx/location.md) · [LuminaFX](fx/lumina.md) · [CompressionFX](fx/compression.md)
 
 ## Hosting
 

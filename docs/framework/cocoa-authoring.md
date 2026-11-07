@@ -1,6 +1,6 @@
 # Class authoring, bindings and managed work
 
-Use classes for application/window/region ownership and ordinary React components for layout and local hook state. The root import supplies the authoring contracts; controls and all twelve FX frameworks retain their existing subpaths. TypeScript 6.0.3 uses standard TC39 decorators without `experimentalDecorators` or `emitDecoratorMetadata`.
+Use classes for application/window/region ownership and ordinary React components for layout and local hook state. The root import supplies the authoring contracts; controls and all thirteen FX frameworks retain their existing subpaths. TypeScript 6.0.3 uses standard TC39 decorators without `experimentalDecorators` or `emitDecoratorMetadata`.
 
 ## Inline and separate views
 
