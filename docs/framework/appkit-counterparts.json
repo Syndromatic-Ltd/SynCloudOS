@@ -22,6 +22,10 @@
     "Spec"
   ],
   "members": {
+    "NSEDockTile.badgeLabel": "NSDockTile.badgeLabel",
+    "NSEApplication.registerForRemoteNotifications": "NSApplication.registerForRemoteNotifications()",
+    "NSEApplicationDelegate.applicationOpen": "NSApplicationDelegate.application(_:open:)",
+    "NSEApplicationDelegate.applicationDockMenu": "NSApplicationDelegate.applicationDockMenu(_:)",
     "NSEScrollView.contentView": "NSScrollView.contentView",
     "NSEScrollView.documentVisibleRect": "NSScrollView.documentVisibleRect",
     "NSEClipView.bounds": "NSView.bounds",
@@ -37,6 +41,13 @@
     "CRFXAES.GCM.open": "AES.GCM.open(_:using:authenticating:)"
   },
   "frameworkCounterparts": {
+    "BGTaskScheduler": "BGTaskScheduler",
+    "BGTaskRequest": "BGTaskRequest",
+    "BGDownloadTaskRequest": "URLSessionDownloadTask",
+    "UNUserNotificationCenter": "UNUserNotificationCenter",
+    "UNNotificationSettings": "UNNotificationSettings",
+    "UNNotificationCategory": "UNNotificationCategory",
+    "UNNotificationAction": "UNNotificationAction",
     "BTFXCentralManager": "CBCentralManager",
     "BTFXPeripheral": "CBPeripheral",
     "BTFXService": "CBService",
@@ -92,6 +103,8 @@
     "CRFXHKDF": "HKDF"
   },
   "counterparts": {
+    "NSEDockTile": "NSDockTile",
+    "NSEApplicationDelegate": "NSApplicationDelegate",
     "NSEApplicationDelegate": "NSApplicationDelegate",
     "NSERoutePickerView": "AVRoutePickerView",
     "NSEImage": "NSImage",

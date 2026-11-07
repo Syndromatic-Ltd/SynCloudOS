@@ -20,7 +20,8 @@
 
 import "./components.css";
 
-export function Badge({ count }: { count?: number }) {
-  if (!count) return null;
-  return <span className="nse-badge" aria-label={`${count} notifications`}>{count}</span>;
+export function Badge({ count, label }: { count?: number; label?: string }) {
+  const value = label || count;
+  if (!value) return null;
+  return <span className="nse-badge" aria-label={label ? `App badge: ${label}` : `${count} notifications`}>{value}</span>;
 }

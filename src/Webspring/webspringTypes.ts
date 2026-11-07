@@ -171,6 +171,7 @@ export interface WebspringApp {
   readonly state: "registered" | "idle" | "loading" | "ready" | "launching" | "active" | "suspended" | "failed" | "closed" | "disabled";
   readonly disabledReason?: string;
   readonly badgeCount: number;
+  readonly badgeLabel?: string;
   readonly accent: string;
   readonly featured: boolean;
   readonly selectorAngle: number;

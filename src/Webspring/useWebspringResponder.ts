@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { installedApplicationForDocument } from "../SynCloudOS/PlatformAdapters/BrowserInstalledApplicationAdapter";
+import { installedApplicationForDocument } from "../SynCloudOS/SynCloudOS";
 import { useEffect, useRef } from "react";
 import type { CommandDeclaration, CommandPayloadSchema, CommandRegistration } from "../SynCloudOS/SynCloudOS";
 import { useKernelSynCloudOS } from "../SynCloudOSReact";

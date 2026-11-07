@@ -21,7 +21,7 @@
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
 import { applicationSessionFor } from "./applicationSession";
 import type { NSEMenuSection } from "../../NSE/NSE";
-import { shortcutCommandIdentifier } from "../InstalledApplications/installedApplicationLaunch";
+import { shortcutCommandIdentifier } from "../SynCloudOS";
 /** The Dock contribution is also available in the application's Webspring menu. */
 export function installedApplicationMenuSections(runtime: SynCloudOSRuntime, appId: string): readonly NSEMenuSection[] {
   const app = applicationSessionFor({ runtimeId: runtime.runtimeId, appId })?.app;

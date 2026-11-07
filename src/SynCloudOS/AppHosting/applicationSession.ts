@@ -50,7 +50,7 @@ import { installControllerServices } from "../AppSDK/controllerServices";
 import type { ResponderRegistrationHandle } from "../SynCloudOS";
 import { attachNSEAuthoringContext } from "../../NSE/applicationHostInterop";
 import { finalizeNSEAuthoringOwner } from "../../NSE/applicationHostInterop";
-import { applicationSystemServices } from "../InstalledApplications/applicationSystemServices";
+import { applicationSystemServices } from "../SynCloudOS";
 import { subscribePersistencePreferences } from "../Persistence/Persistence";
 import { trackOwnedWork } from "../nseRuntimeContracts";
 

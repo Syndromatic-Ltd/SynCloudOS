@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { InstalledApplicationTitleBar } from "./InstalledApplicationTitleBar";
+import { configureApplicationPush } from "../SynCloudOS/InstalledApplications/applicationSystemServices";
+import type { UNPushConfiguration } from "../SynCloudOS/UserNotifications/UserNotifications";
 import { installBrowserApplications } from "../SynCloudOS/InstalledApplications/installBrowserApplications";
 import { getSynWareNamespace } from "../SynCloudOS/AppSDK/useStrings";
 import "../SynCloudOS/styles/runtime.css";
@@ -87,6 +90,8 @@ export type { SynCloudOSDiscoveredBundleDescriptor, SynCloudOSProjectComposition
 export type SynCloudOSBrowserBundle = Readonly<SynWareDefinition> | SynCloudOSDiscoveredBundleDescriptor;
 
 interface BrowserHostOptions {
+  /** Public push registration configuration; private VAPID keys stay on the server. */
+  readonly push?: UNPushConfiguration;
   readonly element: Element;
   readonly bundles?: readonly SynCloudOSBrowserBundle[];
   /** Browser deployment prefix, such as `/nested/product/`. Runtime/app routes remain rooted at `/`. */
@@ -307,7 +312,7 @@ function descriptorBundle(descriptor: SynCloudOSDiscoveredBundleDescriptor, abou
     loadModule: loadModule as () => Promise<SynCloudOSAppModule>,
     services: [...runtimeManifest.requiredServices, ...(runtimeManifest.optionalServices ?? [])],
     optionalServices: [...(runtimeManifest.optionalServices ?? [])],
-    permissions: [...(manifest.permissions ?? [])],
+    entitlements: [...(manifest.entitlements ?? [])],
     localeResources: descriptorData(descriptor, "localeResources") as SynCloudOSLocaleBundleResourceInput | undefined,
     fontResourceLoader: createRegisteredFontResourceLoader(fonts),
   });
@@ -377,6 +382,7 @@ function renderHost(
         <NSEAppearanceProvider appearance={appearance} appearanceService={runtime.appearance}>
           <RuntimeInputBoundary>
             <RootRecoveryBoundary runtime={runtime} options={options} fontCatalogue={fontCatalogue}>
+              <InstalledApplicationTitleBar />
               <NSERubberBandProvider>{home
                 ? <ApplicationHost applicationId={home.primaryId} authentication={options.authentication ?? "disabled"} home={home} />
                 : Shell && <Shell shell={options.shell!} shellResources={options.shellResources} authentication={options.authentication} />}</NSERubberBandProvider>
@@ -610,8 +616,8 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
     // Without sign-in everyone is the anonymous role, so a single application that brings no policy
     // profile gets the document-store capabilities it declares; otherwise its documents are denied.
     if ((authenticationPolicy ?? "disabled") === "disabled" && composition.runtimeConfig.configurationProfile === undefined) {
-      const primaryBundle = initialBundles.find(bundle => normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) === primaryId) as { readonly synWareManifest?: { readonly permissions?: readonly string[] } } | undefined;
-      applicationPolicyProfile = singleApplicationConfigurationProfile(primaryBundle?.synWareManifest?.permissions ?? []);
+      const primaryBundle = initialBundles.find(bundle => normalizeBundleIdentifier(bundle.manifest.bundleIdentifier) === primaryId) as { readonly synWareManifest?: { readonly entitlements?: readonly string[] } } | undefined;
+      applicationPolicyProfile = singleApplicationConfigurationProfile(primaryBundle?.synWareManifest?.entitlements ?? []);
     }
     if (authenticationPolicy !== undefined && authenticationPolicy !== "disabled"
       && (primary.presentation ?? "appView") === "appView" && primary.applicationMenu?.trigger !== "content") {
@@ -628,7 +634,11 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
     applicationDocuments: { ...composition.applicationDocuments, defaultAdapters: { indexedDB: createBrowserDocumentAssetEnvironment().indexedDB } },
   };
   const runtime = createSynCloudOS(config);
+  configureApplicationPush(runtime, options.push);
   runtimeFontCatalogue(runtime, fontCatalogue);
+  let finishInstallationBootstrap!: () => void;
+  const installationBootstrap = new Promise<void>(resolve => { finishInstallationBootstrap = resolve; });
+  installBrowserApplications(runtime, installationBootstrap);
   const disposeHost = (reason: string): Promise<RuntimeDisposalResult> => {
     const disposal = runtime.dispose({ reason, inFlight: "cancel" });
     void disposal.then(result => {
@@ -832,8 +842,9 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
     );
     if (!frameworkTestPath) await runtime.boot({ initialPathname });
     assertMountCurrent(options.element, attempt);
-    installBrowserApplications(runtime);
+    finishInstallationBootstrap();
   } catch (error) {
+    finishInstallationBootstrap();
     const cancelled = browserMountAttempts.get(options.element) !== attempt || runtime.signal.aborted
       || (typeof error === "object" && error !== null && "name" in error && error.name === "AbortError")
       || bootstrapOperationResult(error)?.status === "cancelled";

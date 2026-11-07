@@ -175,7 +175,7 @@ function BoardIcon({ app, opening, ...entry }: BoardEntryProps & {
       <span className="webspring-board-icon-well" data-loading={loading ? "true" : undefined} data-drop-target={normalizeBundleIdentifier(model.folders.dropTargetId) === normalizeBundleIdentifier(app.bundleIdentifier) ? "true" : undefined}>
         {app.iconUrl ? <img src={app.iconUrl} alt="" aria-hidden="true" draggable={false} /> : <span aria-hidden="true">{app.displayName.slice(0, 1)}</span>}
         {loading ? <LoadingSpinner label={`Loading ${app.displayName}`} variant="dark" /> : null}
-        <Badge count={app.badgeCount} />
+        <Badge count={app.badgeCount} label={app.badgeLabel} />
       </span>
       <span className="webspring-board-icon-label">{app.displayName}</span>
     </BoardIconArtwork>

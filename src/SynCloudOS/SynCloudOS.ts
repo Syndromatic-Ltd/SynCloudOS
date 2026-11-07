@@ -310,3 +310,6 @@ export type { UNUserNotificationCenter, UNRemoteNotificationRegistration, UNNoti
 export { installedApplicationForDocument } from "./InstalledApplications/installedApplicationRegistry";
 export { systemCapabilityReport } from "./InstalledApplications/capabilityReport";
 export type { SystemCapabilityRow } from "./InstalledApplications/capabilityReport";
+
+export { applicationSystemServices } from "./InstalledApplications/applicationSystemServices";
+export { shortcutCommandIdentifier } from "./InstalledApplications/installedApplicationLaunch";

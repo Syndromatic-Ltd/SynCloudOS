@@ -18,16 +18,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useSyncExternalStore } from "react";
+import { systemCapabilityReport, type SystemCapabilityRow } from "../../../SynCloudOS/SynCloudOS";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { NSEBox, NSEButton } from "../../../NSE/public/controls";
 import { definePreferencePane } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS } from "../../../SynCloudOSReact";
-import { installedApplicationForDocument } from "../../../SynCloudOS/PlatformAdapters/BrowserInstalledApplicationAdapter";
+import { installedApplicationForDocument } from "../../../SynCloudOS/SynCloudOS";
 import { useSystemText } from "../useSystemText";
 const idleSubscribe = () => () => {};
 const idleSnapshot = () => null;
 export function CapabilitiesPane() {
   const runtime = useKernelSynCloudOS(), t = useSystemText();
+  const [families, setFamilies] = useState<readonly SystemCapabilityRow[]>([]);
+  useEffect(() => { let active = true; void systemCapabilityReport(runtime).then(rows => { if (active) setFamilies(rows); }); return () => { active = false; }; }, [runtime]);
   const document = runtime.environment.browser.getDocument();
   const adapter = installedApplicationForDocument(document);
   const snapshot = useSyncExternalStore(adapter?.subscribe ?? idleSubscribe, adapter?.getSnapshot ?? idleSnapshot, idleSnapshot);
@@ -50,6 +53,8 @@ export function CapabilitiesPane() {
     {snapshot?.error ? <p role="alert">{snapshot.error}</p> : null}
     <h2>{t("preferences.capabilities.browserSupport", "Browser support")}</h2>
     <dl>{capabilities.map(([name, supported]) => <div key={name} style={{ display: "flex", justifyContent: "space-between", gap: 24 }}><dt>{name}</dt><dd>{supported ? t("preferences.capabilities.available", "Available") : t("preferences.capabilities.unavailable", "Unavailable")}</dd></div>)}</dl>
+    <h2>{t("preferences.capabilities.fx", "FX frameworks")}</h2>
+    <dl>{families.map(row => <div key={row.family} style={{ marginBlock: 12 }}><dt>{row.family}</dt><dd style={{ marginInlineStart: 0, overflowWrap: "anywhere" }}>{row.value}</dd></div>)}</dl>
     <p>{t("preferences.capabilities.limit", "Support does not imply permission. Offline availability covers the application shell and bundled resources; server data still needs a connection.")}</p>
   </div></NSEBox></section>;
 }

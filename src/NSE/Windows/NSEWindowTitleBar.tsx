@@ -78,7 +78,13 @@ function NSEWindowControl({
   );
 }
 
-export function NSEWindowTitleBar({
+export function NSEWindowTitleBar(props: NSEWindowTitleBarProps | { readonly title: string; readonly isKeyWindow: boolean }) {
+  if ("title" in props) return <header className="nse-window__titlebar nse-window__titlebar--standard" data-window-titlebar="" data-window-active={props.isKeyWindow ? "true" : "false"} data-window-appearance-recipe={props.isKeyWindow ? "window.standard.head.active" : "window.standard.head.inactive"}>
+    <h2 className="nse-window__title">{props.title}</h2>
+  </header>;
+  return <NSEManagedWindowTitleBar {...props} />;
+}
+function NSEManagedWindowTitleBar({
   record,
   dirty,
   dispatchCommand,
