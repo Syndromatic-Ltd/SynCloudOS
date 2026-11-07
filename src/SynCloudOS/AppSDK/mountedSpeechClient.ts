@@ -72,7 +72,8 @@ export function createMountedSpeechClient(
             void result.catch(() => {});
             return Object.freeze({
               result,
-              finish() { requireAccess(lease); task.finish(); },
+              // Stopping microphone work must remain possible after access is revoked.
+              finish: () => task.finish(),
               cancel: () => task.cancel(),
             });
           },
