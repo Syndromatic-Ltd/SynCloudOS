@@ -114,7 +114,7 @@ describe("MIDI 2.0 UMP 1.1.2 value subset", () => {
     for (const words of [[0x00000000], [0x11f80000], [0x22933c64], [0x41923c00, 0x80000000], [0x40e00000, 0x80000000]]) {
       const packet = new MIFXUniversalPacket(words);
       expect([...packet.words]).toEqual(words);
-      expect([...MIFXUniversalPacket.fromBytes(packet.toBytes()).words]).toEqual(words);
+      expect([...MIFXUniversalPacket.fromBytes(packet.toBytes().bytes).words]).toEqual(words);
     }
     expect(() => MIFXUniversalPacket.fromBytes(new Uint8Array([0x20, 0, 0]))).toThrow(/multiple of four/i);
   });

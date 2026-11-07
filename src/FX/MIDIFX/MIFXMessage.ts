@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
+
 export type MIFXMessage =
   | { readonly kind: "note-off"; readonly channel: number; readonly note: number; readonly velocity: number }
   | { readonly kind: "note-on"; readonly channel: number; readonly note: number; readonly velocity: number }
@@ -36,7 +38,10 @@ export type MIFXMessage =
   | { readonly kind: "stop" }
   | { readonly kind: "active-sensing" }
   | { readonly kind: "reset" }
-  | { readonly kind: "sysex"; readonly data: Uint8Array };
+  | { readonly kind: "sysex"; readonly data: NSEData };
+
+/** Supplied SysEx payloads accept web bytes; parsed messages always deliver NSEData. */
+export type MIFXMessageInput = Exclude<MIFXMessage, { kind: "sysex" }> | { readonly kind: "sysex"; readonly data: NSEDataConvertible };
 
 export type MIFXParserErrorCode =
   | "unexpected-data"

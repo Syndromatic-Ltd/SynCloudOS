@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import {
   decodeMIFXFixedMessage,
   mifxFixedDataLength,
@@ -60,7 +61,8 @@ export class MIFXParser {
     return this.pendingData.length + (this.sysexData?.length ?? 0);
   }
 
-  push(bytes: Uint8Array): readonly MIFXParserEvent[] {
+  push(data: NSEDataConvertible): readonly MIFXParserEvent[] {
+    const bytes = NSEData.from(data).bytes;
     if (!(bytes instanceof Uint8Array)) throw new TypeError("MIFXParser.push requires a Uint8Array.");
     const events: MIFXParserEvent[] = [];
     for (const byte of bytes) {
@@ -180,7 +182,7 @@ export class MIFXParser {
       const data = new Uint8Array(this.sysexData!);
       const startOffset = this.sysexStartOffset;
       this.sysexData = null;
-      events.push({ kind: "message", offset: startOffset, message: { kind: "sysex", data } });
+      events.push({ kind: "message", offset: startOffset, message: { kind: "sysex", data: NSEData.from(data) } });
       return;
     }
     if (byte >= 0x80) {

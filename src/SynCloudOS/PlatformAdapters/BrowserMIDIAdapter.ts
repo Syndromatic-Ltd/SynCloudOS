@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
+
+
 import type {
   MIFXEndpointConnection,
   MIFXEndpointDirection,
@@ -300,7 +303,8 @@ export class BrowserMIDIAdapter implements MIDIAdapter {
     let active = true;
     return Object.freeze({
       endpoint,
-      send: (data: Uint8Array, timestampMilliseconds?: number) => {
+      send: (input: NSEDataConvertible, timestampMilliseconds?: number) => {
+        const data = new Uint8Array(NSEData.from(input).bytes);
         if (!active || !this.#recordIsCurrent(record)) {
           throw invalidState("The MIDI output lease is no longer current.");
         }
@@ -544,7 +548,7 @@ export class BrowserMIDIAdapter implements MIDIAdapter {
         if (!binding.active) continue;
         const packet: MIFXInputPacket = Object.freeze({
           endpoint,
-          data: new Uint8Array(data),
+          data: NSEData.from(data),
           receivedAtMilliseconds,
         });
         try {
