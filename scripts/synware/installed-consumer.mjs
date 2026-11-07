@@ -145,6 +145,12 @@ export function assertIndependentModules(root, ids) {
   }
 }
 
+/** These two device families are declaration roots; their live objects come from the session. */
+export function assertFxRuntimeEntry(family, module) {
+  assert(requiredFxFamilies.includes(family), `Unknown FX family: ${family}`);
+  assert(Object.keys(module).length > 0 || ["bluetooth", "speech"].includes(family), `Empty FX runtime entry: ${family}`);
+}
+
 /** Shared by source-side regression tests and the strict installed declaration gate. */
 export function createSdkPublicTypeProbe() {
   return [
@@ -153,6 +159,10 @@ export function createSdkPublicTypeProbe() {
     `import type { SynWareContextValue } from "@syndromatic/syncloudos/sdk";`,
     `void [${requiredFxFamilies.join(", ")}];`,
     `declare const app: SynWareContextValue;`,
+    `import type { BTFXCentralManager } from "@syndromatic/syncloudos/fx/bluetooth";`,
+    `import type { SPFXSpeechRecognizer } from "@syndromatic/syncloudos/fx/speech";`,
+    `const bluetoothManager: BTFXCentralManager = app.bluetooth.createCentralManager(); void bluetoothManager;`,
+    `const speechRecognizer: SPFXSpeechRecognizer = app.speech.createRecognizer(); void speechRecognizer;`,
     `const token = sdk.defineSynWareServiceToken<{ read(): string }>({ id: "org.example.package-proof", contractVersion: "proof.v1" });`,
     `const serviceText: string = app.services.require(token).read(); void serviceText;`,
     `// @ts-expect-error Tokens must infer the declared client, not an arbitrary caller type.`,
@@ -212,13 +222,15 @@ import { relative, isAbsolute } from "node:path";
 import { fileURLToPath } from "node:url";
 const root = realpathSync(".");
 const rows = [];
-for (const family of ${JSON.stringify(requiredFxFamilies)}) {
+const requiredFxFamilies = ${JSON.stringify(requiredFxFamilies)};
+${assertFxRuntimeEntry.toString()}
+for (const family of requiredFxFamilies) {
   const entry = "@syndromatic/syncloudos/fx/" + family;
   const path = realpathSync(fileURLToPath(import.meta.resolve(entry)));
   const local = relative(root, path);
   assert(!isAbsolute(local) && local !== ".." && !local.startsWith("../") && !local.startsWith("..\\\\"), "Package resolved outside installation");
   const module = await import(entry);
-  assert(Object.keys(module).length > 0, "Empty FX runtime entry: " + family);
+  assertFxRuntimeEntry(family, module);
   rows.push({ entry: "fx/" + family, import: "passed", types: "passed" });
 }
 const sdk = await import("@syndromatic/syncloudos/sdk");
