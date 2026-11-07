@@ -665,6 +665,13 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
       cancelToRest();
     },
     reset: () => {
+      // A new selection also ends the old pointer's ownership. It must not
+      // resume that gesture against the replacement print on move/release.
+      if (moveFrameRef.current != null) cancelFrame(moveFrameRef.current);
+      moveFrameRef.current = null;
+      pendingMoveRef.current = null;
+      if (draggingRef.current) dragMovedRef.current = true;
+      draggingRef.current = null;
       cancelActiveTurn();
       dragPointerRef.current = null;
       tearSeedRef.current = newTearSeed();

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import * as React from "react";
-import { act, cleanup, fireEvent, screen, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
 import { NSEViewController, nseUpdateTraits } from "../../src/NSE/Application/NSEViewController";
@@ -8,6 +8,7 @@ import { NSEWindowController } from "../../src/NSE/Application/NSEWindowControll
 import { useObserve } from "../../src/NSE/Objects/useObserve";
 import { NSEPageController } from "../../src/NSE/Page";
 import { pageCurlConnection } from "../../src/NSE/Page/pageCurlConnection";
+import { pageSurfaceKey } from "../../src/NSE/Page/pageSurfaceKey";
 import type { NSEPageEvent, NSEPageHandle } from "../../src/NSE/Page/nsePageTypes";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
 
@@ -26,7 +27,8 @@ class EntryPage extends NSEViewController {
     pageRenders++;
     useObserve(controller);
     const object = controller.representedObject as Entry | string | undefined;
-    return <p>{controller.kind}: {typeof object === "string" ? object : object?.name}</p>;
+    const name = typeof object === "string" ? object : object?.name ?? "";
+    return <p id={`entry-${controller.kind}-${name.replaceAll(" ", "-")}`}>{controller.kind}: {name}</p>;
   };
 }
 
@@ -117,7 +119,7 @@ it("turns spreads in both directions, gates overlapping commands, and cancels on
   const engine = pageCurlConnection(book);
   const turns: string[] = [];
   const attach = (direction: "forward" | "backward") => engine.attach(direction, {
-    reset() {}, setProgress() {}, turnTo(progress, options) { turns.push(`${direction}:${progress}:${options?.edge}`); },
+    reset() {}, setProgress() {}, getSnapshot: () => curlEvent(0, direction).snapshot, turnTo(progress, options) { turns.push(`${direction}:${progress}:${options?.edge}`); },
   } as NSEPageHandle);
   attach("forward"); attach("backward");
   book.navigateForward(); book.navigateForward();
@@ -135,6 +137,19 @@ it("turns spreads in both directions, gates overlapping commands, and cancels on
   expect(book.selectedIndex).toBe(4);
   expect(book.canNavigateForward).toBe(false);
   expect(book.transitions).toEqual(["Page 3", "Page 1"]);
+  book.dispose();
+});
+
+it("allows navigation to take over a cosmetic dog-ear peek", () => {
+  const book = new Book();
+  const engine = pageCurlConnection(book);
+  const peek = curlEvent(.01);
+  peek.snapshot.targetProgress = .025;
+  const turns: number[] = [];
+  engine.attach("forward", { reset() {}, getSnapshot: () => peek.snapshot, turnTo(progress) { turns.push(progress); } } as NSEPageHandle);
+  engine.progress(.01, peek);
+  book.navigateForward();
+  expect(turns).toEqual([1]);
   book.dispose();
 });
 
@@ -179,6 +194,11 @@ it("renders one live child per printed page and completes real reduced-motion bu
   await act(async () => { fireEvent.click(within(view).getByRole("button", { name: "Next page" })); });
   expect(liveBook.selectedIndex).toBe(1);
   expect(liveBook.transitions).toEqual(["Page 2"]);
+  await waitFor(() => {
+    const backward = view.querySelector<HTMLElement>(".nse-page-controller__leaf--backward .nse-page__face--front")!;
+    const forward = view.querySelector<HTMLElement>(".nse-page-controller__leaf--forward .nse-page__face--front")!;
+    expect(pageSurfaceKey(backward)).toBe(pageSurfaceKey(forward));
+  });
   await act(async () => { fireEvent.click(within(view).getByRole("button", { name: "Previous page" })); });
   expect(liveBook.selectedIndex).toBe(0);
   expect(liveBook.transitions).toEqual(["Page 2", "Page 1"]);
