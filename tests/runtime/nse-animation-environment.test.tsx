@@ -27,9 +27,10 @@ import { AFXTimingFunction } from "../../src/FX/AnimationFX/public";
 import {
   NSEAnimationEnvironmentProvider,
   useNSEAnimationEnvironment,
-} from "../../src/NSE/sdkPackageEntry";
+} from "../../src/NSE/Animation/NSEAnimationEnvironment";
 // Atmo's curves and durations: internal, published as atmoMotion and NSEAnimationContext.current.
 import { NSEAnimationDefaults } from "../../src/NSE/Animation/NSEAnimationDefaults";
+import { useNSETraitCollection } from "../../src/NSE/Animation/useNSETraitCollection";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import {
   createTestRuntime,
@@ -51,6 +52,16 @@ type InstalledMedia = {
 };
 
 let restoreMatchMedia: (() => void) | null = null;
+
+function TraitProbe() { return <output data-testid="motion-trait">{String(useNSETraitCollection().reducedMotion)}</output>; }
+
+it("reads and observes the live system setting in a standalone React root", () => {
+  const media = installMatchMedia(false);
+  render(<TraitProbe />);
+  expect(screen.getByTestId("motion-trait").textContent).toBe("false");
+  act(() => media.setMatches(true));
+  expect(screen.getByTestId("motion-trait").textContent).toBe("true");
+});
 
 afterEach(() => {
   cleanup();

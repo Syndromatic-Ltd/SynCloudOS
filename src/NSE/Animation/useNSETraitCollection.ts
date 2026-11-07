@@ -18,13 +18,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useMemo } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import type { NSETraitCollection } from "../Application/NSEViewController";
-import { useNSEAnimationEnvironment } from "./NSEAnimationEnvironment";
+import { getServerReducedMotion, getSystemReducedMotion, subscribeSystemReducedMotion, useProvidedNSEAnimationEnvironment } from "./NSEAnimationEnvironment";
+
+const noSubscription = () => () => {};
 
 /** Read-only animation traits for React views. Framework hosts and controllers
  * consume the same system setting; applications cannot override it per subtree. */
 export function useNSETraitCollection(): Pick<NSETraitCollection, "reducedMotion"> {
-  const { reducedMotion } = useNSEAnimationEnvironment();
+  const environment = useProvidedNSEAnimationEnvironment();
+  const reducedMotion = useSyncExternalStore(environment ? noSubscription : subscribeSystemReducedMotion,
+    environment ? () => environment.reducedMotion : getSystemReducedMotion,
+    environment ? () => environment.reducedMotion : getServerReducedMotion);
   return useMemo(() => Object.freeze({ reducedMotion }), [reducedMotion]);
 }
