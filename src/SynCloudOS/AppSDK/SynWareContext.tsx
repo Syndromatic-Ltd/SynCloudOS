@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+import { NSEOpenPanelApplicationHost } from "../AppHosting/openPanelHosting";
 import { createContext, useContext, type PropsWithChildren } from "react";
 import type { SynWareContextValue } from "./appContextTypes";
 
@@ -27,7 +28,7 @@ export interface SynWareProviderProps extends PropsWithChildren {
 }
 
 export function SynWareProvider({ value, children }: SynWareProviderProps) {
-  return <SynWareContext.Provider value={value}>{children}</SynWareContext.Provider>;
+  return <SynWareContext.Provider value={value}><NSEOpenPanelApplicationHost value={value}>{children}</NSEOpenPanelApplicationHost></SynWareContext.Provider>;
 }
 
 /** Internal framework consumer for components which can also be hosted by a

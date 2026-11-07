@@ -163,8 +163,8 @@ On a desktop (a fine pointer that hovers), choosing an item in any menu or pop-u
 | `NSEAlert`, `presentAsSheet` | An alert is an `NSEAlert` object presented on a window; a custom dialog is a view controller presented as a sheet. See [Alerts and sheets](windows.md#alerts-and-sheets). Host system UI outside any window uses `NSEConfirmDialog` from `nse/system-ui`. |
 | `presentAsModalWindow` | `NSEViewController.presentAsModalWindow(controller)` presents a view controller as a centred application-modal window. See [Modal windows](windows.md#modal-windows). |
 | `presentAsPopover` | `NSEViewController.presentAsPopover(controller, { of, preferredEdge, behavior })` presents a view controller in a popover. See [Popovers](windows.md#popovers). |
-| `NSEOpenPanel`, `NSESavePanel` | File panels. |
-| `NSEFontPanel`, `NSEMediaPanel` | The font panel and a media chooser. |
+| `NSEOpenPanel`, `NSESavePanel` | [File panels](nse/open-panel.md): granted folders, media sources and application storage. |
+| `NSEFontPanel` | The font panel. Media sources are part of `NSEOpenPanel`. |
 | `toolTip` | Every NSE view and control takes a `toolTip`, as `NSView.toolTip` does; the host shows it. Transient notices go through the notification service (`useNotifications`). |
 | `NSEHapticFeedbackManager` | `NSHapticFeedbackManager`: `NSEHapticFeedbackManager.defaultPerformer.perform("alignment")` (`generic`, `alignment`, `levelChange`; `performanceTime` `default`, `now` or `drawCompleted`) for feedback from your own views. Controls perform their own. |
 

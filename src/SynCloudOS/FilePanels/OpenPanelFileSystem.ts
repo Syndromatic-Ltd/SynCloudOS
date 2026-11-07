@@ -1,5 +1,5 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
-import type { FilePanelDirectoryHandle, FilePanelFileHandle } from "./filePanelTypes";
+import type { FilePanelAcceptType, FilePanelDirectoryHandle, FilePanelFileHandle } from "./filePanelTypes";
 
 /** A traversable browser directory, also returned for application-support storage. */
 export interface FilePanelDirectory extends FilePanelDirectoryHandle {
@@ -31,6 +31,14 @@ const extensions: Readonly<Record<string, readonly string[]>> = {
   "image/png": ["png"], "image/jpeg": ["jpg", "jpeg"], "image/gif": ["gif"], "image/webp": ["webp"],
   "video/quicktime": ["mov"], "video/mp4": ["mp4", "m4v"], "audio/mpeg": ["mp3"], "text/plain": ["txt"],
 };
+export function openPanelAcceptTypes(types: readonly string[]): readonly FilePanelAcceptType[] {
+  if (types.some(type => ["public.item", "public.data", "*/*"].includes(type))) return [];
+  return types.map(raw => {
+    const type = raw.toLowerCase();
+    const mime = type.includes("/") ? type : ({ "public.image": "image/*", "public.movie": "video/*", "public.audio": "audio/*", "public.text": "text/*" } as const)[type as "public.image"] ?? "application/octet-stream";
+    return { description: raw, mimeTypes: [mime as `${string}/${string}`], extensions: type.startsWith(".") ? [type as `.${string}`] : (extensions[type] ?? []).map(ext => `.${ext}` as `.${string}`) };
+  });
+}
 export function matchesOpenPanelContentType(name: string, mime: string, types: readonly string[]): boolean {
   if (!types.length || types.includes("public.data") || types.includes("public.item") || types.includes("*/*")) return true;
   const lower = name.toLocaleLowerCase();

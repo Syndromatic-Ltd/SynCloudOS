@@ -20,13 +20,5 @@
 
 import "./nse-media-panels.css";
 
-export { NSEMediaPanel } from "./NSEMediaPanel";
 export { NSEMediaCollectionPresenter, mediaCollectionItemId } from "./NSEMediaCollectionPresenter";
-export type {
-  NSEMediaPanelLabels,
-  NSEMediaPanelProps,
-  NSEMediaPanelWindowBridge,
-  NSEMediaPanelWindowRequest,
-  NSEMediaPanelWindowRole,
-} from "./NSEMediaPanel";
 export type { MediaCollectionPresenterProps, MediaCollectionSelectionMode } from "./NSEMediaCollectionPresenter";
