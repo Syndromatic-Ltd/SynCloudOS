@@ -96,6 +96,19 @@ function setWidth(controller: NSESplitViewController, width: number) {
 afterEach(cleanup);
 
 describe("NSESplitViewController", () => {
+  it("starts a hierarchy on its first pane until geometry is current, then retains the last presentation", () => {
+    const controller = new NSESplitViewController({ id: "initial-geometry", splitViewItems: [
+      item("sidebar", "Sources", () => null, { behavior: "sidebar" }),
+      item("detail", "Detail", () => null),
+    ] });
+    expect(controller.snapshot.presentation).toBe("single-pane");
+    expect(controller.compactItem?.identifier).toBe("sidebar");
+    const current = createStaticPresentationTraits({ width: 900, height: 700 });
+    controller[nseUpdateTraits]({ reducedMotion: false, presentation: current });
+    expect(controller.snapshot.presentation).toBe("split");
+    controller[nseUpdateTraits]({ reducedMotion: false, presentation: { ...current, geometryState: "unavailable", contentBounds: { x: 0, y: 0, width: 390, height: 700 } } });
+    expect(controller.snapshot.presentation).toBe("split");
+  });
   it("retains the compact selection while a regular-width constraint temporarily collapses its pane", () => {
     const controller = inspectorSplit("preferred-compact");
     const inspector = controller.splitViewItems[1]!;

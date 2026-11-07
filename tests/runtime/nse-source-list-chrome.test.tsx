@@ -1,92 +1,87 @@
-/*
- * SynCloudOS
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
- *
- * Designed by Kavish Krishnakumar in Manchester.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
 // @vitest-environment jsdom
-import * as React from "react";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import React from "react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSESidebar } from "../../src/NSE/Navigation/SourceList/NSESidebar";
-import { NSESourceListScene, SourceListFrameProvider, type SourceListFrameContextValue } from "../../src/NSE/Navigation/SourceList";
+import { NSEOutlineView } from "../../src/NSE/DataViews/Outline";
+import { NSETreeController } from "../../src/NSE/Controllers/NSETreeController";
+import { SourceListFrameProvider, type SourceListFrameContextValue } from "../../src/NSE/Navigation/SourceList/sourceListFrameContext";
 import { defineNSEAppearance, NSEAppearanceProvider } from "../../src/NSE/Appearance";
+import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
+import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
+import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
 
-afterEach(cleanup);
+interface Node { readonly id: string; readonly label: string; readonly children: readonly Node[]; }
+const nodes: readonly Node[] = [{ id: "controls", label: "Controls", children: [{ id: "buttons", label: "Buttons", children: [] }] }];
+function sourceList(scrolling = true) {
+  const controller = new NSETreeController({ id: "source-list", content: nodes, getId: (node: Node) => node.id, getChildren: (node: Node) => node.children, withChildren: (node: Node, children: readonly Node[]) => ({ ...node, children }), selection: { mode: "single" } });
+  controller.expand("controls");
+  const view = <NSEOutlineView controller={controller} aria-label="Sections" selectionHighlightStyle="sourceList"
+    idForItem={node => node.id} labelForItem={node => node.label} childrenForItem={node => node.children} isExpandable={node => node.children.length > 0}
+    delegate={{ isGroupItem: id => id === "controls" }} style={scrolling ? undefined : { overflow: "visible", blockSize: "auto" }} />;
+  return { controller, view };
+}
+const hosts: ClassApplicationHost[] = [];
+afterEach(async () => { cleanup(); for (const host of hosts.splice(0)) await host.dispose(); });
 
 describe("source-list chrome ownership", () => {
-  it("honours an explicit appearance override inside a differently themed frame", () => {
+  it("honours a view's explicit appearance override inside a differently themed source-list frame", () => {
     const frame: SourceListFrameContextValue = { railWidth: 254, defaultWidth: 254, minWidth: 220, maxWidth: 320, setRailWidth: vi.fn(), railLabel: "Gallery", scheme: "dark" };
-    const view = render(<SourceListFrameProvider value={frame}>
-      <NSEAppearanceProvider appearance={defineNSEAppearance({ id: "atmo", displayName: "Atmo" })} colourScheme="light">
-        <NSESourceListScene sidebar={<p>Rows</p>}><p>Light content</p></NSESourceListScene>
-      </NSEAppearanceProvider>
-    </SourceListFrameProvider>);
-    expect(view.container.querySelector('.nse-source-list-scene')?.getAttribute('data-mode')).toBe("light");
+    const list = sourceList();
+    const view = render(<SourceListFrameProvider value={frame}><NSEAppearanceProvider appearance={defineNSEAppearance({ id: "atmo", displayName: "Atmo" })} colourScheme="light">{list.view}</NSEAppearanceProvider></SourceListFrameProvider>);
+    expect(view.container.querySelector(".nse-appearance-provider")?.getAttribute("data-mode")).toBe("light");
+    expect(view.container.querySelector('[data-style="source-list"]')).not.toBeNull();
+    list.controller.dispose();
   });
 
-  it("collapses sidebar sections by default and keeps explicitly controlled sections with their caller", () => {
-    const sections = [{ id: "controls", label: "Controls", items: [{ id: "buttons", label: "Buttons" }] }];
-    const view = render(<NSESidebar sections={sections} />);
-    const toggle = screen.getByRole("button", { name: "Toggle sidebar section" });
-    fireEvent.click(toggle);
-    expect(view.container.querySelector('.nse-sidebar-section')?.getAttribute('data-collapsed')).toBe("true");
-    expect(view.container.querySelector('.nse-sidebar-section-items')?.hasAttribute('inert')).toBe(true);
-    fireEvent.click(toggle);
-    expect(view.container.querySelector('.nse-sidebar-section')?.getAttribute('data-collapsed')).toBe("false");
-    const onToggle = vi.fn();
-    view.rerender(<NSESidebar sections={sections} collapsedSectionIds={[]} onToggleSection={onToggle} />);
-    fireEvent.click(toggle);
-    expect(onToggle).toHaveBeenCalledWith(sections[0]);
-    expect(view.container.querySelector('.nse-sidebar-section')?.getAttribute('data-collapsed')).toBe("false");
-    view.rerender(<NSESidebar sections={sections} collapsedSectionIds={["controls"]} onToggleSection={onToggle} />);
-    expect(view.container.querySelector('.nse-sidebar-section')?.getAttribute('data-collapsed')).toBe("true");
-  });
-  it("places a floating header inside the row scroll surface without a second material owner", () => {
-    const view = render(<NSESidebar surface="metal" header={<input aria-label="Find sections" />} sections={[{ id: "sections", items: [{ id: "buttons", label: "Buttons" }] }]} />);
-    const scroll = view.container.querySelector(".nse-sidebar-scroll")!;
-    const header = view.container.querySelector(".nse-sidebar-header")!;
-    expect(header).not.toBeNull();
-    expect(header.parentElement).toBe(scroll);
-    expect(scroll.contains(screen.getByRole("button", { name: "Buttons" }))).toBe(true);
-    fireEvent.change(screen.getByRole("textbox"), { target: { value: "Button" } });
-    expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("Button");
-    expect(view.container.querySelectorAll('.nse-sidebar[data-surface="metal"]')).toHaveLength(1);
-    screen.getByRole("textbox").focus();
-    fireEvent.keyDown(screen.getByRole("textbox"), { key: "Home" });
-    expect(document.activeElement).toBe(screen.getByRole("textbox"));
+  it("collapses group rows while retaining their content inert, and lets the controller own expansion", () => {
+    const list = sourceList();
+    const view = render(list.view);
+    fireEvent.click(screen.getByRole("button", { name: "Collapse Controls" }));
+    expect(list.controller.getSnapshot().expandedIds.has("controls")).toBe(false);
+    const collapsed = view.container.querySelector('.nse-outline-children[data-collapsed="true"]')!;
+    expect(collapsed.hasAttribute("inert")).toBe(true);
+    expect(collapsed.textContent).toContain("Buttons");
+    act(() => list.controller.expand("controls"));
+    expect(screen.getByRole("treeitem", { name: /Buttons/ })).not.toBeNull();
+    act(() => list.controller.collapse("controls"));
+    expect(list.controller.getSnapshot().expandedIds.has("controls")).toBe(false);
+    list.controller.dispose();
   });
 
-  it("uses the frame width for its sole split footer and retains the content when compact", () => {
-    const frame: SourceListFrameContextValue = { railWidth: 254, defaultWidth: 254, minWidth: 220, maxWidth: 320, setRailWidth: vi.fn(), railLabel: "Gallery", scheme: "dark" };
-    const fixture = (compact: boolean, railWidth: number) => <SourceListFrameProvider value={{ ...frame, railWidth }}><NSESourceListScene compact={compact} sidebar={<p>Rows</p>} status={{ rail: "25 sections", leading: "Ready" }}><input aria-label="Retained draft" defaultValue="Draft" /></NSESourceListScene></SourceListFrameProvider>;
-    const view = render(fixture(false, 254));
-    const draft = screen.getByRole("textbox");
+  it("keeps a caller's search header in the outline's single scroll surface without stealing its Home key", () => {
+    const list = sourceList(false);
+    const view = render(<section data-testid="source-scroll" style={{ overflow: "auto" }}><header><input aria-label="Find sections" /></header>{list.view}</section>);
+    const scroll = screen.getByTestId("source-scroll");
+    const header = screen.getByRole("textbox");
+    expect(scroll.contains(screen.getByRole("treeitem", { name: /Buttons/ }))).toBe(true);
+    expect(screen.getByRole("tree").style.overflow).toBe("visible");
+    fireEvent.change(header, { target: { value: "Button" } }); header.focus(); fireEvent.keyDown(header, { key: "Home" });
+    expect(document.activeElement).toBe(header);
+    expect((header as HTMLInputElement).value).toBe("Button");
+    expect(view.container.querySelectorAll('.nse-outline-view[data-style="source-list"]')).toHaveLength(1);
+    list.controller.dispose();
+  });
+
+  it("owns a single footer accessory in its window border, and retains content when the accessory goes", async () => {
+    let window!: FooterWindow;
+    class FooterWindow extends NSEWindowController {
+      static override view = () => <input aria-label="Retained draft" defaultValue="Draft" />;
+      constructor() { super(); window = this; }
+      override windowDidLoad() {
+        this.window.setContentBorderThickness(56, "minY");
+        this.window.bottomBarAccessory = <footer><span>25 sections</span><span>Ready</span></footer>;
+      }
+    }
+    class FooterApp extends NSEApplication { static override mainWindow = FooterWindow; }
+    const host = createClassApplicationHost(FooterApp); hosts.push(host);
+    await host.launch(); host.mountWindows(); await host.openMainWindow();
+    const draft = await screen.findByRole("textbox", { name: "Retained draft" });
     fireEvent.change(draft, { target: { value: "Edited draft" } });
-    expect(view.container.querySelectorAll("footer")).toHaveLength(1);
-    const footer = view.container.querySelector<HTMLElement>(".nse-statusbar")!;
-    expect(footer.style.getPropertyValue("--nse-app-topbar-rail")).toBe("254px");
-    expect(footer.querySelector(".nse-statusbar-metal-rail-content")?.textContent).toBe("25 sections");
-    view.rerender(fixture(true, 254));
-    expect(view.container.querySelector("footer")).toBeNull();
-    expect(view.container.querySelector('.nse-source-list-scene')?.getAttribute('data-navigation-compact')).toBe("true");
-    expect(screen.getByRole("textbox")).toBe(draft);
-    expect((draft as HTMLInputElement).value).toBe("Edited draft");
-    view.rerender(fixture(false, 300));
-    expect(view.container.querySelector<HTMLElement>(".nse-statusbar")?.style.getPropertyValue("--nse-app-topbar-rail")).toBe("300px");
+    expect(document.querySelectorAll("footer")).toHaveLength(1);
+    expect(document.querySelector('[data-nse-part="bottom-bar-accessory"] footer')?.textContent).toContain("25 sections");
+    expect(document.querySelector('[data-nse-part="bottom-bar-accessory"]')?.getAttribute("style")).toContain("56px");
+    await act(async () => { window.window.bottomBarAccessory = null; window.window.setContentBorderThickness(0, "minY"); });
+    expect(document.querySelector("footer")).toBeNull();
+    expect(screen.getByRole("textbox")).toBe(draft); expect((draft as HTMLInputElement).value).toBe("Edited draft");
   });
 });

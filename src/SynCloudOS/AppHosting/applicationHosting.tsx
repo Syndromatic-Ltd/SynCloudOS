@@ -497,27 +497,22 @@ export function NSEWindowControllerView({ controller }: NSEWindowControllerViewP
   const { toolbar, bottomBarAccessory, titlebarAccessoryViewControllers: accessories } = controller.window;
   const renderAccessory = (accessory: NSEViewController<unknown>) => <NSEViewControllerView controller={accessory} className="nse-window-titlebar-accessory" />;
   const bottomBorder = controller.window.contentBorderThickness("minY");
-  // Content keeps its own frame unless the window draws a toolbar, an accessory row or a content border.
-  const framed = Boolean(toolbar?.isVisible) || bottomBorder > 0
-    || accessories.some((accessory) => !accessory.isHidden && (!stageTitlebar || accessory.layoutAttribute === "bottom"));
+  // Keep the content host permanent: showing chrome must not remount an editor or its draft.
+  const hasBottomAccessory = bottomBorder > 0 && bottomBarAccessory != null;
   return (
     <NSEActionScopeProvider appId={appRuntime.app.bundleIdentifier}>
       <NSEControllerResponder target={controller} kind="controller">
         {accessories.length ? <NSEWindowTitlebarAccessories accessories={accessories} renderController={renderAccessory} host={stageTitlebar} placement="titlebar" /> : null}
-        {framed ? (
           <div className="nse-window-chrome-frame">
             {toolbar ? <NSEWindowToolbar controller={controller} toolbar={toolbar} /> : null}
             <NSEWindowTitlebarAccessories accessories={accessories} renderController={renderAccessory} host={stageTitlebar} placement="row" />
             <div className="nse-window-chrome-content" data-content-border={bottomBorder > 0 ? nseContentBorderSize(bottomBorder) : undefined}>
-              {bottomBorder > 0 && bottomBarAccessory != null ? <>
-                <div className="nse-window-content-above-bottom-bar" style={{ bottom: bottomBorder }}>{content}</div>
-                <div className="nse-window-bottom-bar-accessory" data-nse-part="bottom-bar-accessory" style={{ height: bottomBorder }}>{bottomBarAccessory}</div>
-              </> : content}
+              <div className="nse-window-content-above-bottom-bar" style={{ bottom: hasBottomAccessory ? bottomBorder : 0 }}>{content}</div>
+              {hasBottomAccessory ? <div className="nse-window-bottom-bar-accessory" data-nse-part="bottom-bar-accessory" style={{ height: bottomBorder }}>{bottomBarAccessory}</div> : null}
               {bottomBorder > 0 ? <NSEWindowContentBorder thickness={bottomBorder} /> : null}
               {sheetLayer}
             </div>
           </div>
-        ) : <>{content}{sheetLayer}</>}
       </NSEControllerResponder>
     </NSEActionScopeProvider>
   );

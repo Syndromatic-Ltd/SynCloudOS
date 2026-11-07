@@ -18,11 +18,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
+import { Fragment, createContext, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import type { NSEAnyWindowController } from "../../NSE/applicationHostInterop";
 import { useObserve, NSEActionResponderContext } from "../../NSE/applicationHostInterop";
-import { nseAttachToolbar, nseEndToolbarCustomization, nseToolbarEngine, type NSEToolbar } from "../../NSE/Toolbars/NSEToolbar";
+import { nseAttachToolbar, nseEndToolbarCustomization, nseToolbarEngine, nseToolbarTabViews, type NSEToolbar } from "../../NSE/Toolbars/NSEToolbar";
 import { NSEToolbarView } from "../../NSE/Toolbars/NSEToolbarView";
 import { NSEToolbarConfigurationSheet } from "../../NSE/Toolbars/NSEToolbarConfigurationSheet";
 import type { NSETitlebarAccessoryViewController } from "../../NSE/Application/NSETitlebarAccessoryViewController";
@@ -151,6 +151,9 @@ function useWindowChromeMode(): "light" | "dark" {
  */
 export function NSEWindowToolbar({ controller, toolbar }: { readonly controller: NSEAnyWindowController; readonly toolbar: NSEToolbar }) {
   useObserve(toolbar);
+  const tabViews = toolbar[nseToolbarTabViews];
+  const tabItems = useRef<HTMLDivElement | null>(null);
+  const [tabItemsWidth, setTabItemsWidth] = useState(0);
   const appRuntime = useContext(SynWareRuntimeContext);
   const context = useSynWareContext();
   // The window controller's responder when it has actions; otherwise the application's mount.
@@ -203,6 +206,16 @@ export function NSEWindowToolbar({ controller, toolbar }: { readonly controller:
     };
   }, [toolbar.isVisible]);
   const engine = attached ? toolbar[nseToolbarEngine] : null;
+  useLayoutEffect(() => {
+    const node = tabItems.current;
+    if (!node) { setTabItemsWidth(0); return undefined; }
+    const measure = () => setTabItemsWidth(Math.ceil(node.getBoundingClientRect().width));
+    measure();
+    const Observer = node.ownerDocument.defaultView?.ResizeObserver;
+    const observer = Observer ? new Observer(measure) : null;
+    observer?.observe(node);
+    return () => observer?.disconnect();
+  }, [toolbar, tabViews.length]);
   useEffect(() => {
     if (!toolbar.customizationPaletteIsRunning || engine) return;
     toolbar[nseEndToolbarCustomization]();
@@ -210,15 +223,18 @@ export function NSEWindowToolbar({ controller, toolbar }: { readonly controller:
   if (!toolbar.isVisible || !responderId) return null;
   return (
     <>
-      <div ref={element} className="nse-window-toolbar" data-nse-part="toolbar" data-mode={mode} data-toolbar-identifier={toolbar.identifier}>
-        {engine && width > 0 ? (
+      <div ref={element} className="nse-window-toolbar" data-nse-part="toolbar" data-mode={mode} data-toolbar-identifier={toolbar.identifier} data-has-tab-items={tabViews.length ? "true" : undefined}>
+        {engine && width > 0 && (!tabViews.length || toolbar.items.length > 0) ? (
           <NSEToolbarView
             composition="configured"
             controller={engine}
-            width={width}
+            width={Math.max(0, width - tabItemsWidth)}
             interaction={{ overflowOverlayId: `${overlayId}:overflow`, parentResponderId: responderId }}
           />
         ) : null}
+        {tabViews.length ? <div ref={tabItems} className="nse-window-toolbar-tab-items">
+          {tabViews.map((view, index) => <Fragment key={index}>{view}</Fragment>)}
+        </div> : null}
       </div>
       {engine && toolbar.customizationPaletteIsRunning ? (
         <NSEToolbarConfigurationSheet

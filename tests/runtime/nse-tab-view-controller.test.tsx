@@ -8,6 +8,7 @@ import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicati
 import { createStaticPresentationTraits } from "../fixtures/presentationTraits";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { NSETabViewController, NSETabViewItem } from "../../src/NSE/Navigation/NSETabViewController";
+import { NSEToolbar } from "../../src/NSE/Toolbars/NSEToolbar";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
 import { defaultsFrom } from "../fixtures/userDefaults";
 
@@ -261,4 +262,54 @@ it("restores the selected tab and remembers each new one", async () => {
   expect(await screen.findByText("Team page")).toBeTruthy();
   await act(async () => { restored.selectedTabViewItemIndex = 0; });
   expect(stored.get("sections.tab")).toBe("company");
+});
+
+it("puts toolbar-style tabs in the window toolbar and removes its own toolbar when the style changes", async () => {
+  await launch();
+  const window = sections.view.window!;
+  expect(window.toolbar).toBeNull();
+  await act(async () => { sections.tabStyle = "toolbar" as never; });
+  expect(window.toolbar).not.toBeNull();
+  const team = screen.getByRole("button", { name: "Team" });
+  expect(team.closest('[data-nse-part="toolbar"]')).toBeTruthy();
+  await act(async () => { fireEvent.click(team); });
+  expect(sections.selectedTabViewItem?.identifier).toBe("team");
+  expect(team.getAttribute("aria-pressed")).toBe("true");
+  await act(async () => { sections.tabStyle = "segmentedControlOnBottom"; });
+  expect(window.toolbar).toBeNull();
+});
+
+it("installs an initial toolbar tab style when its view first mounts in a window", async () => {
+  class ToolbarContent extends NSEViewController {
+    readonly tabs = this.addChild(Sections);
+    constructor() { super(); this.tabs.tabStyle = "toolbar"; }
+    static override view = function ToolbarContentView({ controller }: { readonly controller: ToolbarContent }) { return <controller.tabs.view />; };
+  }
+  class ToolbarWindow extends NSEWindowController { constructor() { super(); this.contentViewController = new ToolbarContent(); } }
+  class ToolbarApplication extends NSEApplication { static override mainWindow = ToolbarWindow; }
+  const host = createClassApplicationHost(ToolbarApplication, "com.example.toolbar-tabs");
+  hosts.push(host);
+  await host.launch();
+  host.mountWindows();
+  await act(async () => { await host.openMainWindow(); });
+  expect(screen.getByRole("button", { name: "Company" }).getAttribute("aria-pressed")).toBe("true");
+  expect(screen.getByRole("button", { name: "Team" }).closest('[data-nse-part="toolbar"]')).toBeTruthy();
+});
+
+it("adds selectable toolbar tabs without replacing a window's existing toolbar or its items", async () => {
+  await launch();
+  const window = sections.view.window!;
+  const toolbar = new NSEToolbar({ identifier: "existing", items: [{ kind: "custom", id: "status", label: "Status", minimumWidth: 50, idealWidth: 80, render: () => <span>Existing item</span> }], defaultItemIdentifiers: ["status"] });
+  await act(async () => { window.toolbar = toolbar; sections.tabStyle = "toolbar" as never; });
+  expect(window.toolbar).toBe(toolbar);
+  expect(screen.getByText("Existing item")).toBeTruthy();
+  const company = screen.getByRole("button", { name: "Company" });
+  company.focus();
+  await act(async () => { fireEvent.keyDown(company, { key: "ArrowRight" }); });
+  expect(document.activeElement).toBe(screen.getByRole("button", { name: "Framework" }));
+  expect(sections.selectedTabViewItem?.identifier).toBe("framework");
+  await act(async () => { sections.tabStyle = "unspecified"; });
+  expect(window.toolbar).toBe(toolbar);
+  expect(toolbar.itemIdentifiers).toEqual(["status"]);
+  expect(screen.queryByRole("button", { name: "Framework" })).toBeNull();
 });
