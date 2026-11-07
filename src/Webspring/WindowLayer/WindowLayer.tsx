@@ -121,7 +121,11 @@ export function WindowLayer({ contentRegistry, onDiagnostic }: WindowLayerProps)
 
   const modalControllers = managerSnapshot.windowControllerIds
     .map((id) => runtime.windows.select(id))
-    .filter(({ record }) => record.state === "open" && (record.role === "modal" || record.role === "sheet"));
+    .filter(controller => {
+      const { record, contentState } = controller;
+      const request = contentState.status === "loaded" ? contentRegistry.surface(contentState.mountKey)?.request : null;
+      return record.state === "open" && (record.role === "modal" || record.role === "sheet" || record.role === "popover" && request && (screen.breakpoint === "compact" || request.presentation?.mode === "sheet"));
+    });
   const topModalZ = modalControllers.at(-1)?.record.zIndex ?? null;
 
   return (
@@ -129,7 +133,7 @@ export function WindowLayer({ contentRegistry, onDiagnostic }: WindowLayerProps)
       ref={layerRef}
       className="webspring-window-layer"
       data-window-layer=""
-      data-window-modal-active={managerSnapshot.blockedWindowControllerIds.length > 0 ? "true" : "false"}
+      data-window-modal-active={topModalZ !== null || managerSnapshot.blockedWindowControllerIds.length > 0 ? "true" : "false"}
     >
       {topModalZ !== null ? (
         <div

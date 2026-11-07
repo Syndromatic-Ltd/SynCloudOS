@@ -51,6 +51,28 @@ function geometryEnvironment() {
 }
 
 describe("window-hosted transient surface bridge", () => {
+  it("retains one popover window and its edited input while adapting to a sheet and back", async () => {
+    const runtime = createTestRuntime();
+    const renderers = new WindowContentRendererRegistry();
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "adaptive-popover", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const anchor = document.createElement("button"); document.body.append(anchor);
+    const request = { id: "adaptive", role: "popover" as const, title: "Adaptive", parentWindowControllerId: null, anchor, drawsBackground: true, bounds: { x: 20, y: 20, width: 240, height: 140 } };
+    const content = <input aria-label="Adaptive draft" defaultValue="Initial" />;
+    const id = await bridge.present({ ...request, presentation: { mode: "anchored" } }, content);
+    const view = render(<SynCloudOSProvider runtime={runtime}><WindowLayer contentRegistry={renderers} /></SynCloudOSProvider>);
+    try {
+      const draft = await screen.findByRole("textbox", { name: "Adaptive draft" });
+      fireEvent.change(draft, { target: { value: "Retained draft" } });
+      for (const mode of ["sheet", "anchored", "sheet", "anchored"] as const) {
+        await act(async () => { await bridge.present({ ...request, presentation: { mode } }, content); });
+        expect(screen.getByRole("textbox", { name: "Adaptive draft" })).toBe(draft);
+        expect((draft as HTMLInputElement).value).toBe("Retained draft");
+        expect(runtime.windows.list({ role: "popover" }).map(window => window.id)).toEqual([id]);
+        expect(screen.getByRole("dialog", { name: "Adaptive" }).getAttribute("data-nse-presentation")).toBe(mode);
+      }
+    } finally { view.unmount(); bridge.dispose(); anchor.remove(); await runtime.dispose("test"); }
+  });
+
   it("finishes the initial focus handoff when a popover's command controls become available", async () => {
     const runtime = createTestRuntime();
     const renderers = new WindowContentRendererRegistry();

@@ -29,9 +29,10 @@ import { useKernelSynCloudOS } from "../../SynCloudOSReact";
 import type { WindowSurfacePresentation } from "./WindowContentRendererRegistry";
 
 /** A real window's plate, using exactly the standalone popover's frame. */
-export function PopoverWindowSurface({ surface, windowControllerId, children }: {
+export function PopoverWindowSurface({ surface, windowControllerId, anchored, children }: {
   readonly surface: WindowSurfacePresentation;
   readonly windowControllerId: string;
+  readonly anchored: boolean;
   readonly children: ReactNode;
 }) {
   const runtime = useKernelSynCloudOS();
@@ -41,11 +42,13 @@ export function PopoverWindowSurface({ surface, windowControllerId, children }: 
   const [element, setElement] = useState<HTMLDivElement | null>(null);
   const [arrow, setArrow] = useState<HTMLSpanElement | null>(null);
   const { request, popoverPosition: position } = surface;
-  const anchored = request.role === "popover";
-  const painted = useNSEPopoverSurface(element, anchored ? arrow : null, !exiting, true);
+  const frameArrow = anchored && (position?.arrowX !== undefined || position?.arrowY !== undefined) ? arrow : null;
+  const painted = useNSEPopoverSurface(element, frameArrow, !exiting, true);
   useLayoutEffect(() => {
-    if (element && position) applyNSEPopoverPosition(element, arrow, position);
-  }, [element, arrow, position]);
+    if (!element) return;
+    if (!anchored) element.style.removeProperty("transform-origin");
+    if (position) applyNSEPopoverPosition(element, frameArrow, position);
+  }, [element, anchored, frameArrow, position]);
   useLayoutEffect(() => {
     if (!exiting || !element || !painted.current) return;
     // Disposing the presenting controller removes its live view immediately.

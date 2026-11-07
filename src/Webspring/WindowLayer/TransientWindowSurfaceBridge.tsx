@@ -152,6 +152,7 @@ async function popoverPosition(request: TransientWindowSurfaceRequest, viewport:
   return computeNSEPopoverPosition({ reference, contentSize: request.bounds, boundary: viewport,
     placement: logicalPlacementToFloatingPlacement(request.preferredEdge ? nsePopoverEdgePlacement[request.preferredEdge] : request.placement ?? "block-end", !request.preferredEdge && request.anchor.ownerDocument.defaultView?.getComputedStyle(request.anchor).direction === "rtl" ? "rtl" : "ltr"),
     collisionPadding: request.collisionPadding,
+    presentation: request.presentation?.mode === "sheet" ? "sheet" : "anchored",
   });
 }
 

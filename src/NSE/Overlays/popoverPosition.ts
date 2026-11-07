@@ -32,14 +32,16 @@ export interface NSEPopoverPosition {
 
 /** One placement engine for window-hosted and standalone popovers. Geometry
  * is independent of the animated DOM and can also run before a window opens. */
-export async function computeNSEPopoverPosition({ reference, contentSize, boundary, placement, collisionPadding = 8 }: {
+export async function computeNSEPopoverPosition({ reference, contentSize, boundary, placement, collisionPadding = 8, presentation = "anchored" }: {
   readonly reference: Rect;
   readonly contentSize: Readonly<{ width: number; height: number }>;
   readonly boundary: Rect;
   readonly placement: Placement;
   readonly collisionPadding?: number;
+  readonly presentation?: "anchored" | "sheet";
 }): Promise<NSEPopoverPosition> {
   const dimensions = { width: Math.max(1, Math.min(contentSize.width, boundary.width - collisionPadding * 2)), height: Math.max(1, Math.min(contentSize.height, boundary.height - collisionPadding * 2)) };
+  if (presentation === "sheet") return { bounds: { x: boundary.x + collisionPadding, y: boundary.y + boundary.height - collisionPadding - dimensions.height, ...dimensions }, placement: "bottom" };
   const pointer = {} as HTMLElement;
   const clipping = { rootBoundary: boundary, boundary: [] as Element[], padding: collisionPadding };
   const result = await computePosition({} as HTMLElement, {} as HTMLElement, {

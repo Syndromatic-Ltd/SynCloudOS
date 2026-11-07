@@ -20,6 +20,7 @@
 
 import { createContext, useContext, type PropsWithChildren, type ReactNode } from "react";
 import type { NSELogicalPlacement } from "./overlayTypes";
+import type { NSEPopupPresentation } from "./NSEPopup";
 
 export type NSEPopoverPreferredEdge = "minX" | "maxX" | "minY" | "maxY";
 export type NSEPopoverBehavior = "transient" | "semitransient" | "applicationDefined";
@@ -40,6 +41,7 @@ export interface NSEWindowSurfaceRequest {
   readonly preferredEdge?: NSEPopoverPreferredEdge;
   readonly drawsBackground?: boolean;
   readonly behavior?: NSEPopoverBehavior;
+  readonly presentation?: NSEPopupPresentation;
   /** Internal logical placement preserves aligned NSEPopup presentations. */
   readonly placement?: NSELogicalPlacement;
   readonly collisionPadding?: number;
