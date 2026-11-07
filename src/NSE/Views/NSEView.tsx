@@ -83,7 +83,7 @@ function NSEViewContent({ draw, layerContentsPlacement = "scaleProportionallyToF
   }, [ref]);
   const environment = useContext(NSEViewDrawingEnvironmentContext);
   if (draw && !environment) throw new Error("An NSEView with draw needs a SynCloudOSProvider.");
-  if (draw && !environment?.geometry) throw new Error("NSEView.draw needs the runtime's image geometry port.");
+  // Without the runtime's geometry port (a test runtime, a server render) the view cannot measure its bounds, so it draws nothing, as it does at zero size.
   const draws = Boolean(draw);
   const identifiers = useMemo(() => draws && environment ? environment.createGraphicsIdentifierIssuer() : null, [draws, environment]);
   // Measure in the host component's layout effect, after its div ref is attached.
