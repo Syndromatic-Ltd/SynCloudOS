@@ -1,6 +1,6 @@
 # Authentication
 
-Authentication in SynCloudOS has two halves. A small browser service tracks the signed-in session and drives the sign-in interface. A server handler owns identity: it talks to your OpenID Connect provider, validates tokens, issues sessions and enforces permissions. The browser never stores provider tokens, never accepts a role from the page and never treats a `VITE_` variable as a secret.
+Authentication in SynCloudOS has two halves. A browser service tracks the server-confirmed public session and drives sign-in. The server handler talks to the OpenID Connect provider, validates tokens, owns session identity and roles, and enforces resource permissions. Provider tokens and client secrets stay on the server. A `VITE_` variable is public configuration. [Authorisation](authorization.md) separately governs app access, administrative rights, entitlements and device consent.
 
 ## Choose a policy
 
@@ -20,8 +20,8 @@ The shorthand strings `"optional"` and `"required"` construct no authentication 
 
 - `"disabled"` needs no backend.
 - The object form with `createHttpAuthentication` needs a server that answers the same-origin `/auth/methods`, `/auth/session`, `/auth/start` and `/auth/logout` endpoints: use the [server handler](#server-handler) and an OIDC provider.
-- With `"disabled"`, nobody can sign in, so the host opens the primary application publicly; it needs no `runtime.configurationProfiles.public`. A primary that declares `runtime.configurationProfiles.requiresLogin` fails to mount, since nobody could ever open it.
-- With `"optional"` (string or object), the primary bundle declares `runtime.configurationProfiles.public` in its manifest, because it launches before anyone signs in.
+- With `"disabled"`, nobody can sign in, so the host opens the primary application publicly; it needs no `runtime.policy.public`. A primary that declares `runtime.policy.requiresLogin` fails to mount, since nobody could ever open it.
+- With `"optional"` (string or object), the primary bundle declares `runtime.policy.public` in its manifest, because it launches before anyone signs in.
 - With `"required"`, the sign-in window is presented before the primary application launches. The `application: { id }` host accepts the same `authentication` values as the Webspring shell; see [Getting started](getting-started.md#mount-one-application).
 
 In a single-application host the **Account** pane of Preferences, Sign In and Log Out live in the application menu. A primary that fills the page has no system top bar, so it must declare `applicationMenu: { trigger: "content" }` and render a button with `useApplicationMenuTrigger()`; with `"optional"` or `"required"` authentication, mounting rejects without it. See [Mount one application in Getting started](getting-started.md#mount-one-application).
@@ -74,24 +74,30 @@ The handler supports one configured OIDC issuer, with client credentials and an 
 
 When an error appears in the sign-in window, the window plays the HapticsFX error pattern once. Clearing the error re-arms the feedback for the next failed attempt. Vibration and audio follow the user's feedback settings and the browser's capabilities.
 
+## Optional passkeys
+
+Passkeys are separate, opt-in [AuthenticationServices](authentication-services.md) APIs. `@syndromatic/syncloudos/authentication-services` exports the `ASAuthorizationController` provider/request/delegate surface for an application's own relying-party server. `@syndromatic/syncloudos/auth/passkey` exports `createPasskeyAuthentication`, which composes one more method with an existing OIDC/local system service.
+
+Neither entry is re-exported by the ordinary `auth`, browser or application entry. An app that does not import passkeys carries no passkey API; a site with authentication disabled constructs no authentication service. Applications may still explicitly use passkeys for their own server without enabling system sign-in.
+
+The relying-party server verifies returned credentials. System passkeys then refresh the existing authentication service and complete only after it confirms an authenticated session. A browser assertion or successful callback alone never creates runtime identity. The built-in OIDC handler does not supply a WebAuthn relying-party database or verifier; those endpoints remain an explicit host integration.
+
 ## Custom sign-in view
 
 Pass a component as `loginComponent` when the site needs its own presentation. It receives data and actions as props and has no access to the runtime, to passwords or to tokens.
 
 ```tsx
 import type { AuthenticationViewProps } from "@syndromatic/syncloudos/auth";
+import { NSEButton } from "@syndromatic/syncloudos/nse/controls";
 
-export function SiteLogin({ methods = [], authenticationStatus, onMethodSignIn, onCancel }: AuthenticationViewProps) {
+export function SiteLogin({ methods = [], authenticationStatus, onMethodSignIn, onCancel, cancelLabel }: AuthenticationViewProps) {
   return (
     <section aria-label="Sign in">
       <p>{authenticationStatus}</p>
       {methods.map((method) => (
-        <button key={method.id} onClick={() => onMethodSignIn?.(method.id)}>
-          {method.iconUrl ? <img src={method.iconUrl} alt="" /> : null}
-          {method.label}
-        </button>
+        <NSEButton key={method.id} title={method.label} onClick={() => onMethodSignIn?.(method.id)} />
       ))}
-      {onCancel ? <button onClick={onCancel}>Cancel</button> : null}
+      {onCancel ? <NSEButton title={cancelLabel ?? "Cancel"} onClick={onCancel} /> : null}
     </section>
   );
 }
@@ -166,11 +172,11 @@ The Worker reads its settings from server-side variables and bindings: `OIDC_ISS
 
 [Google OIDC setup](google-oidc-setup.md) walks through a complete deployment with Google as the provider.
 
-## ConfigurationProfiles and roles
+## Configuration profiles and roles
 
-Server authentication decides who someone is. ConfigurationProfiles, inside the runtime, decides what the framework lets them do: launch an application, open a route, post a notification or use a service. It enforces at the framework's own entry points. It is not a sandbox against hostile scripts in the page, which can reach the DOM, storage and network directly, so data that needs protection stays behind the server.
+Server authentication establishes identity. The site configuration profile governs app/route access and role requirements. `runtime.authorization` checks administrative named rights; `Info.ts.entitlements` declares application capabilities; per-FX status and request methods use `runtime.privacy` for per-app consent. These checks run at cooperative framework entry points in the same JavaScript realm. They cannot sandbox hostile page code. Protected server resources must independently authenticate and authorise each request; downloaded assets must contain no secrets. See [Authorisation](authorization.md) for the trust boundary and audit limits.
 
-Roles belong to your host. A policy profile lists the roles, the capabilities of each, the role of an anonymous visitor and how a session maps to a role:
+Roles belong to your host. A configuration profile lists the roles, the capabilities of each, the role of an anonymous visitor and how a session maps to a role:
 
 ```ts
 import { mountSynCloudOS, type SynCloudOSConfigurationProfile } from "@syndromatic/syncloudos/browser";
@@ -193,7 +199,7 @@ await mountSynCloudOS({
 });
 ```
 
-A role the profile resolves but did not declare falls back to the anonymous role. The role `system` belongs to the framework, so a profile cannot declare it and a session never resolves to it. Applications never receive the policy engine, and a request's origin, source and subject fields never grant anything: ConfigurationProfiles evaluates the subject that it derives from the runtime's own login and identity services.
+A role the profile resolves but did not declare falls back to the anonymous role. The role `system` belongs to the framework, so a profile cannot declare it and a session never resolves to it. Applications never receive the policy engine, and a request's origin, source and subject fields never grant anything: `runtime.configurationProfiles` evaluates the subject that it derives from the runtime's own login and identity services.
 
 ## Limits
 

@@ -13,7 +13,8 @@ export default {
   windowDefaults: { title: "Notes", width: 920, height: 680, minimumWidth: 360, minimumHeight: 460, resizable: true },
   frame: { material: "standard", topBar: "standard", rightSlot: "auto", background: "system" },
   documentTypes: [{ id: "com.example.notes.note", extensions: ["note"], displayName: "Note" }],
-  permissions: ["app.open.public"],
+  entitlements: ["file.open"],
+  runtime: { policy: { public: true } },
   webspring: { visible: true, order: 1, icon: "./Resources/icon.png" },
 } as const;
 ```
@@ -110,26 +111,28 @@ The right-slot control opens the application menu. Each item appears only when i
 
 When System Preferences is the only item, the control opens it directly and no menu appears. An app that declares `applicationMenu.trigger: "content"` gets the same menu, and the same direct opening, from `useApplicationMenuTrigger()`.
 
-## Capabilities and services
+## Entitlements, privacy and services
 
-`permissions` lists the capabilities the application asks the host for, for example `"app.open.public"`, `"external.open"` or `"diagnostics.view"`. The host's policy decides what to grant. FX clients that reach devices ask for their own permissions, which the [FX guides](fx/README.md) name.
+`entitlements` lists device and service capabilities declared by the application, such as `location.read`, `location.request`, `video.capture.camera` or `file.write`. The runtime validates and captures this immutable declaration before launch. A mounted client cannot add entitlements by changing an author's array later. Each [FX guide](fx/README.md) gives its exact declaration names.
 
-### Permissions
+Declaration, user consent and the signed-in person's role are separate:
 
-Two checks apply, and an action needs whichever of them governs it:
-
-| Check | Decided by | Capabilities |
+| Check | Owner | Example |
 | --- | --- | --- |
-| What the application declares | `permissions` in `Info.ts` | File panels: `file.open` (always declared) and `file.write` (declare it to save files with `SCOS.filePanels`). Without it, a save reports "The file capability must be declared." |
-| What the person may do | The role's capabilities in the host's policy profile | Document store: `documentStore.drafts.read`, `documentStore.draft.write`, `documentStore.draft.delete`, `documentStore.publish`, `documentStore.unpublish`, `documentStore.revision.create`, `documentStore.media.write` and `documentStore.media.attach`. |
+| The app declares the capability | `entitlements` in `Info.ts`, captured for launch | `file.open` permits the declared open-panel operation; add `file.write` for saving through `SCOS.filePanels`. |
+| The app meets mandatory launch declarations | `runtime.policy.requiredEntitlements` | An absent required entitlement denies launch before application code runs. |
+| This app may use a privacy service | The per-user, per-app privacy store and the browser's permission | Location, camera, microphone, Bluetooth, NFC, speech, contacts, payment and XR expose their own status/request methods. |
+| This person may perform a role-governed operation | The host's configuration profile | DocumentStore capabilities include `documentStore.drafts.read`, `documentStore.draft.write`, `documentStore.publish` and `documentStore.revision.create`. |
 
-Declaring a document-store capability in `permissions` does not by itself grant it: the role of the person using the application must hold it, and a denial names the missing capabilities and the role. A host grants role capabilities with `configurationProfile` in `mountSynCloudOS`.
+Declaring an entitlement does not prompt, grant browser access or generally grant the person a role capability. A role grant cannot manufacture a missing device declaration. A passive `getAuthorizationStatus()` reports facts without granting app consent; requests and active sessions use the shared privacy gate. Webspring presents the current user's choices in **System Preferences → Privacy & Security**. See [Authorisation, entitlements and privacy](authorization.md).
 
-A single application without sign-in (`application` with `authentication: "disabled"`, the default) needs no policy setup. Nobody can sign in, so the host opens the application publicly without `runtime.configurationProfiles.public`; a primary that declares `runtime.configurationProfiles.requiresLogin` contradicts the host and fails to mount. Everyone using it is the anonymous role, so the host also grants that role the `documentStore.*` capabilities the application declares. Other declared capabilities are not granted this way, and a host that passes its own `configurationProfile` keeps it unchanged.
+A host grants role capabilities with the `configurationProfile` option of `mountSynCloudOS`. Its runtime evaluator is `runtime.configurationProfiles`; the application's manifest key remains `runtime.policy`.
 
-The [test host](testing-synware.md) grants declared permissions to its test subject, so a unit test can pass where the browser host denies.
+A single application without sign-in (`application` with `authentication: "disabled"`, the default) needs no site policy setup. The host opens its primary application publicly without `runtime.policy.public`; a primary that declares `runtime.policy.requiresLogin` contradicts that host and fails to mount. Its convenience profile grants the anonymous role the declared `documentStore.*` capabilities. Other declared capabilities are not granted this way, and an explicit `configurationProfile` keeps its own rules.
 
-`services` declares the host services the application depends on. Each entry has an `id`, and optionally `required` and `minimumVersion`.
+The [test host](testing-synware.md) uses fixture subject grants and denial-first adapter controls. Test grants do not establish that a browser, user or production site would allow the operation.
+
+`services` declares host dependencies. Each entry has an `id`, and optionally `required` and `minimumVersion`.
 
 ## Localisation and appearance
 
@@ -157,7 +160,7 @@ Use `runtime.disabled: true` to keep an application registered while blocking ro
 | `disabledReason` | Optional explanation shown for a disabled application. It does not itself disable the application. |
 | `presentation` | `"appView"`, `"windowedView"`, `"systemSheet"` or `"backgroundService"`. |
 | `type` | `"internal"`, `"system"` or `"external"`. |
-| `policy` | `public`, `requiresLogin`, `requiredCapabilities` and `requiredAccessClasses` (`"team"` or `"external"`). |
+| `policy` | `public`, `requiresLogin`, `requiredRoles`, `requiredCapabilities`, `requiredEntitlements` and `requiredAccessClasses` (`"team"` or `"external"`). These are app access requirements applied by the site configuration profile. |
 | `notifications` | An initial `badgeCount`. |
 
 ## Launcher presence

@@ -12,7 +12,10 @@ The SynCloudOS runtime is the kernel every other layer stands on. A host creates
 | Documents | Live editing sessions with autosave, recovery, versions and conflicts. See [documents](documents.md). |
 | Windows | Ordering, key and main state, restoration and compact presentation. See [windows](windows.md). |
 | Services | A registry of host services with availability, versions and permissions. |
-| ConfigurationProfiles | Decides whether a subject may take an action, from roles, capabilities and access modes. |
+| Entitlements | Validates bundle capability declarations and admits the immutable set before application launch. |
+| Configuration profiles | Applies the site's app visibility, login, role and access-class rules. |
+| Authorization Services | Checks named host rights through `runtime.authorization.copyRights(...)`. |
+| Privacy | Owns per-user, per-app service choices used by FX authorisation and Privacy & Security. |
 | Locale | Locale bundles, formatting and translation. |
 | Persistence | Namespaced preferences and durable storage. |
 | Scheduler | An injectable clock and frame scheduler, so time is testable. |
@@ -45,7 +48,7 @@ The options are:
 | `shell` | The [Webspring](webspring.md) definition. |
 | `shellResources` | Icons, strings and other resources for the shell. |
 | `authentication` | `"disabled"` for open sites, or an [authentication configuration](authentication.md). |
-| `configurationProfile` | Your host's role taxonomy. See [Policy](#policy). |
+| `configurationProfile` | Your host's role taxonomy and access-class mapping. See [Authorisation](authorization.md). |
 | `contributions` | Host contributions, described below. |
 | `deploymentBasePath` | A URL prefix when the site lives below the domain root, such as `/product/`. Routes inside the runtime stay rooted at `/`. |
 
@@ -109,13 +112,9 @@ instead of composing a draft save followed by republishing.
 
 ## Policy
 
-ConfigurationProfiles checks every privileged action, such as launching an application, opening a route, using a service, posting a notification or entering the shell. A decision comes from three inputs:
+Authorisation has separate owners. `Info.ts.entitlements` declares the application's device/service capabilities; launch admission validates and captures them. A site configuration profile governs app and route access. `SCAuthorization` checks the named host rights `runtime.mutate`, `diagnostics.view` and `plugin.register`. Per-FX status and request methods combine the application's privacy choice with the browser's permission through one runtime privacy store. [Authorisation, entitlements and privacy](authorization.md) documents the complete split.
 
-- the subject's **role**, resolved from the signed-in session by your policy profile
-- the subject's **capabilities**, granted by the role and by the session's access class
-- the **access mode** of the host, one of `fullyLocked`, `webspringVisibleAppProtected`, `public`, `mixed`, `developer` or `enterprisePrivate`
-
-An application states what it needs in its manifest `runtime.configurationProfiles` block: `public`, `requiresLogin`, `requiredCapabilities` and `requiredAccessClasses`. A `SynCloudOSConfigurationProfile` defines the roles your host has, the capabilities of each, the anonymous role and how a session maps to a role.
+The host option is `configurationProfile`, typed as `SynCloudOSConfigurationProfile`. The runtime service is `runtime.configurationProfiles`. Application access requirements stay in the manifest's **`runtime.policy`** block: `public`, `requiresLogin`, `requiredRoles`, `requiredCapabilities`, `requiredAccessClasses` and `requiredEntitlements`.
 
 ```ts
 import type { SynCloudOSConfigurationProfile } from "@syndromatic/syncloudos/browser";
@@ -125,14 +124,19 @@ export const configurationProfile: SynCloudOSConfigurationProfile = {
   roles: {
     guest: ["app.open.public"],
     member: ["app.open.public", "app.open.members"],
-    admin: ["*"],
+    admin: ["app.open.public", "app.open.members", "runtime.mutate", "diagnostics.view", "plugin.register"],
   },
   anonymousRole: "guest",
-  resolveRole: (session) => (session.isAuthorised ? "member" : "guest"),
+  resolveRole: (session, claimedRole) =>
+    !session.isAuthorised ? "guest" : claimedRole === "admin" ? "admin" : "member",
 };
 ```
 
-A role the profile did not declare falls back to `anonymousRole`, so an unknown claim never widens access. The wildcard `"*"` grants every capability.
+A role the profile did not declare falls back to `anonymousRole`. The `system` role is reserved for explicit host-issued authority; sessions never resolve to it. The wildcard `"*"` grants every capability and should be a deliberate host choice.
+
+A host that owns a runtime uses `runtime.authorization.copyRights([...])` for administrative rights and `runtime.privacy` for privacy records and revocation. Applications receive neither authority; they use their mounted clients. The browser host's mount handle exposes disposal, not the runtime.
+
+These checks cooperate within the page. They do not sandbox hostile JavaScript or protect static application assets. Every protected server endpoint must independently authenticate its request and check resource permissions. The runtime audit is bounded diagnostic history, not durable or tamper-proof security evidence.
 
 ## Host contributions
 
