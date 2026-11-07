@@ -51,6 +51,9 @@
     "NSEApplicationContext": {
       "none": "The SynCloudOS services an application reaches (SCOS); AppKit spreads them over NSApplication, NSWorkspace and the frameworks."
     },
+    "NSEApplicationNavigationChromeState": {
+      "none": "The host's application chrome state."
+    },
     "NSEArrayController": "NSArrayController",
     "NSEAttachmentAppearance": "NSTextAttachment",
     "NSEAttachmentBorder": "NSTextAttachment",
@@ -446,7 +449,6 @@
       "none": "Where an NSEUserDefaults keeps its values: SCOS.preferences in an application, which SynCloudOS persists the way cfprefsd does on a Mac."
     },
     "NSEView": "NSView",
-    "NSEViewLayerContentsPlacement": "NSView.LayerContentsPlacement",
     "NSEViewComponent": "NSView",
     "NSEViewController": "NSViewController",
     "NSEViewControllerClass": "NSViewController",
@@ -456,6 +458,7 @@
     "NSEViewControllerFXClients": {
       "none": "The FX framework clients a view controller owns, such as its display link. AppKit reaches Core Animation through the view's layer."
     },
+    "NSEViewLayerContentsPlacement": "NSView.LayerContentsPlacement",
     "NSEViewOutlet": "@IBOutlet",
     "NSEViewSnapshotOptions": "NSView.bitmapImageRepForCachingDisplay(in:)",
     "NSEWebContentSourceViewProps": "WKWebView.load(_:)",
