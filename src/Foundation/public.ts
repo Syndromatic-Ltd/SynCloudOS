@@ -33,3 +33,4 @@ export { NSEUserDefaults } from "./NSEUserDefaults";
 export type { NSEUserDefaultsStore } from "./NSEUserDefaults";
 export { NSEData, NSEDataCompressionAlgorithm } from "./NSEData";
 export type { NSEDataConvertible } from "./NSEData";
+export { NSEValueTransformer, NSENegateBooleanTransformerName, NSEIsNilTransformerName, NSEIsNotNilTransformerName } from "./NSEValueTransformer";

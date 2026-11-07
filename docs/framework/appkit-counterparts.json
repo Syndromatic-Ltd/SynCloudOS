@@ -34,6 +34,10 @@
   },
   "counterparts": {
     "NSEImage": "NSImage",
+    "NSEValueTransformer": "NSValueTransformer",
+    "NSENegateBooleanTransformerName": "NSValueTransformerName.negateBooleanTransformerName",
+    "NSEIsNilTransformerName": "NSValueTransformerName.isNilTransformerName",
+    "NSEIsNotNilTransformerName": "NSValueTransformerName.isNotNilTransformerName",
     "NSEImageViewHandle": "NSImageView",
     "NSEScrollViewHandle": "NSScrollView",
     "NSEClipViewHandle": "NSClipView",
