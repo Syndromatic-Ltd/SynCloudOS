@@ -121,5 +121,7 @@ export { NSEPathControl, NSEPathControlItem } from "../Controls/Values/NSEPathCo
 export type { NSEPathControlProps, NSEPathControlHandle } from "../Controls/Values/NSEPathControl";
 
 export { NSEImage } from "../Controls/Images/NSEImageResource";
+export { NSERoutePickerView } from "../Controls/Media/NSERoutePickerView";
+export type { NSERoutePickerViewProps } from "../Controls/Media/NSERoutePickerView";
 
 export type { NSEAppearanceName } from "../Appearance/nseAppearanceTypes";
