@@ -149,6 +149,8 @@ export interface AFXLayerCompositorRequest {
   readonly duration: number;
   readonly delay: number;
   readonly easing: string;
+  readonly iterations?: number;
+  readonly fill?: "forwards" | "both";
 }
 export interface AFXLayerCompositorPlayback {
   readonly currentTimeSeconds: number | null;
@@ -188,6 +190,7 @@ type Running = {
   finish(state: AFXAnimationSettlement["state"]): void;
   update(timestamp: number): void;
   needsFrame(): boolean;
+  environmentChanged(): void;
   property: string;
   value: AFXAnimationScalar | null;
   currentValue(): AFXAnimationScalar | null;
@@ -532,9 +535,8 @@ export class AFXLayer {
         throw new DOMException("Layer owner aborted during construction.", "AbortError");
       this.#unsubscribe =
         scheduler.subscribeState?.(() => {
-          if (scheduler.suspended || scheduler.reducedMotion)
-            for (const running of [...this.#running.values()])
-              running.finish("completed");
+          for (const running of [...this.#running.values()])
+            running.environmentChanged();
         }) ?? (() => {});
       if (signal?.aborted)
         throw new DOMException("Layer owner aborted during construction.", "AbortError");
@@ -1683,7 +1685,7 @@ export class AFXLayer {
     this.#assertLive("addAnimation", "call");
     const duration = animation.animation.totalDuration;
     const terminal =
-      animation.sample(duration) ?? animation.toRuntime().animations[0].to;
+      (Number.isFinite(duration) ? animation.sample(duration) : null) ?? animation.toRuntime().animations[0].to;
     this.#assertLive("addAnimation", "call");
     const initial = animation.sample(0);
     this.#assertLive("addAnimation", "call");
@@ -1721,7 +1723,21 @@ export class AFXLayer {
       property: declaredKeyPath,
       value: initial,
       compositor: null,
-      needsFrame: () => state === "running" && !running.compositor,
+      needsFrame: () => state === "running" && !running.compositor && !(duration === Infinity && this.#scheduler.suspended),
+      environmentChanged: () => {
+        if (this.#scheduler.reducedMotion || (this.#scheduler.suspended && duration !== Infinity)) {
+          running.finish("completed");
+        } else if (duration === Infinity && state === "running") {
+          if (this.#scheduler.suspended) {
+            if (running.compositor) running.compositor.pause();
+            else running.cancelFrame();
+          } else {
+            last = this.#scheduler.now();
+            running.compositor?.resume();
+            if (!running.compositor) this.#scheduleAnimationFrame();
+          }
+        }
+      },
       currentValue: () => {
         const time = running.compositor?.currentTimeSeconds;
         if (time !== null && time !== undefined && (state === "running" || state === "paused")) {
@@ -1803,7 +1819,7 @@ export class AFXLayer {
       },
       get progress() {
         running.currentValue();
-        return duration === 0 ? 1 : elapsed / duration;
+        return duration === Infinity ? 0 : duration === 0 ? 1 : elapsed / duration;
       },
       cancel: () => running.finish("cancelled"),
       pause: () => {
@@ -1825,7 +1841,7 @@ export class AFXLayer {
         if (state !== "paused") return;
         state = "running";
         if (running.compositor) {
-          running.compositor.resume();
+          if (!this.#scheduler.suspended) running.compositor.resume();
           return;
         }
         last = this.#scheduler.now();
@@ -1868,7 +1884,7 @@ export class AFXLayer {
     if (
       duration === 0 ||
       this.#scheduler.reducedMotion ||
-      this.#scheduler.suspended
+      (this.#scheduler.suspended && duration !== Infinity)
     )
       running.finish("completed");
     else {
@@ -1877,10 +1893,9 @@ export class AFXLayer {
       const eligible =
         !!definition &&
         (declaredKeyPath === "opacity" || declaredKeyPath === "transform") &&
-        definition.iterations === 1 &&
         definition.speed === 1 &&
         !definition.autoreverses &&
-        definition.fill === "forwards" &&
+        (definition.fill === "forwards" || definition.fill === "both") &&
         (typeof definition.timing === "string" || definition.timing.kind === "cubic-bezier") &&
         !this.#running.has("frame");
       if (eligible) {
@@ -1896,11 +1911,14 @@ export class AFXLayer {
           to: basic!.to as number | string,
           duration: definition!.cycleDuration,
           delay: definition!.delay,
+          iterations: definition!.iterations,
+          fill: definition!.fill as "forwards" | "both",
           easing,
         }) ?? null;
       }
       if (running.compositor) {
         const playback = running.compositor;
+        if (this.#scheduler.suspended) playback.pause();
         const releaseFinish = playback.onFinish(() => running.finish("completed"));
         const releaseUnsupported = playback.onUnsupported?.(() => {
           if (running.compositor !== playback || (state !== "running" && state !== "paused")) return;

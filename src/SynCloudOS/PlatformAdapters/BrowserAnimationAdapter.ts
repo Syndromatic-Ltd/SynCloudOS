@@ -852,7 +852,7 @@ export class BrowserAnimationLayerSurface implements AFXLayerSurface {
     try {
       native = this.#element.animate(
         [{ [input.property]: from }, { [input.property]: to }],
-        { duration: input.duration * 1000, delay: input.delay * 1000, easing: input.easing, fill: "forwards" },
+        { duration: input.duration * 1000, delay: input.delay * 1000, iterations: input.iterations ?? 1, easing: input.easing, fill: input.fill ?? "forwards" },
       );
     } catch {
       // A browser may expose Web Animations but reject this particular effect.

@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/animation tests/runtime/fx/browser-animation-layer
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  29 passed (29)
+      Tests  166 passed (166)
+   Start at  08:49:20
+   Duration  17.89s (transform 2.95s, setup 346ms, import 9.02s, tests 2.29s, environment 18.28s)
+
