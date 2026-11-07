@@ -508,7 +508,7 @@ export {
   NSEOpenPanel,
 } from "./FilePanels/NSEOpenPanel";
 export type {
-  NSEOpenPanelProps,
+  NSEOpenPanelURL,
 } from "./FilePanels/NSEOpenPanel";
 export {
   NSESavePanel,
@@ -555,12 +555,6 @@ export type {
 export {
   resolveStackLayout,
 } from "./Layout/resolveStackLayout";
-export {
-  NSEMediaPanel,
-} from "./MediaPanels/NSEMediaPanel";
-export type {
-  NSEMediaPanelProps,
-} from "./MediaPanels/NSEMediaPanel";
 export {
   NSEView,
 } from "./Views/NSEView";

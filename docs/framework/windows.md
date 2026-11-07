@@ -249,3 +249,7 @@ The internal `NSEPopover` component carries `relativeTo`, `preferredEdge`, `draw
 ### Bottom-bar accessories
 
 `window.bottomBarAccessory` is the approved NSE extension for ordinary views in the window's bottom content border. Set its height separately with `window.setContentBorderThickness(56, "minY")`; assigning `null` removes the accessory without changing that height. The window reserves space for the accessory, retains application context and includes it in sheet modality. Source-list apps can align their own footer cells with the shared sidebar width. This is window chrome: bottom navigation tabs belong to `NSETabViewController.tabStyle`.
+
+### Open panels
+
+`NSEOpenPanel.beginSheetModal(window)` uses the window-owned sheet layer below its title bar and toolbar. `begin()` and `runModal()` use application modality. See [Open panels, folders and application storage](nse/open-panel.md) for file references, media sources, directory permissions and the explicit system-chooser option.

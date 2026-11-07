@@ -427,6 +427,22 @@ class DefaultMediaPanelService implements MediaPanelService {
     }
   }
 
+  /** @internal Transfers chosen provider leases to an Open panel result. */
+  takeSelection(items: readonly MediaPanelItem[]): () => void {
+    const retained = items.flatMap(item => {
+      const ownership = this.#ownership.get(item);
+      if (!ownership) return [];
+      this.#ownership.delete(item);
+      return [ownership];
+    });
+    let released = false;
+    return () => {
+      if (released) return;
+      released = true;
+      for (const ownership of retained) this.#releaseProviderItems(this.#providersById.get(ownership.providerId)!, [ownership.rawItem]);
+    };
+  }
+
   clear(queryId: string): void {
     const id = queryId.trim();
     if (!id) return;
@@ -480,4 +496,10 @@ class DefaultMediaPanelService implements MediaPanelService {
 
 export function createMediaPanelService(providers: readonly MediaPanelProvider[]): MediaPanelService {
   return new DefaultMediaPanelService(providers);
+}
+
+/** @internal The Open panel owns accepted media until it is reused or disposed. */
+export function takeOpenPanelMediaSelection(service: MediaPanelService, items: readonly MediaPanelItem[]): () => void {
+  if (!(service instanceof DefaultMediaPanelService)) throw new TypeError("Selection transfer requires the canonical media service.");
+  return service.takeSelection(items);
 }

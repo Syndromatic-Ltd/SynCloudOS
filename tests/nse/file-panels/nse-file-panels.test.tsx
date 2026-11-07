@@ -23,7 +23,7 @@ import React, { useMemo, useRef, useState } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEOverlayProvider } from "../../../src/NSE/Overlays";
-import { NSEOpenPanel, NSESavePanel, type NSEFilePanelService } from "../../../src/NSE/FilePanels";
+import { NSESavePanel, type NSEFilePanelService } from "../../../src/NSE/FilePanels";
 import { createBrowserFilePanelAdapter, createFilePanelService, FilePanelReferenceError } from "../../../src/SynCloudOS/FilePanels";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 
@@ -61,39 +61,6 @@ function service(): NSEFilePanelService {
 }
 
 describe("NSE file panels", () => {
-  it("presents localized accepts through a window panel bridge and restores focus after a completed open", async () => {
-    const fileService = service();
-    const bridge = { open: vi.fn(), close: vi.fn() };
-    function Fixture() {
-      const [open, setOpen] = useState(false);
-      const trigger = useRef<HTMLButtonElement>(null);
-      return <OverlayHarness>
-        <button ref={trigger} type="button" onClick={() => setOpen(true)}>Open image</button>
-        <NSEOpenPanel
-          id="open-images"
-          open={open}
-          anchor={trigger.current}
-          parentResponderId="window:editor"
-          parentWindowControllerId="window:editor"
-          service={fileService}
-          windowBridge={bridge}
-          request={{ id: "open-images", accepts: [{ description: "Images", mimeTypes: ["image/png", "image/jpeg"], extensions: [".png", ".jpg"] }], selection: "single-file", access: "read", requires: [] }}
-          onOpenChange={setOpen}
-        />
-      </OverlayHarness>;
-    }
-    render(<Fixture />);
-    const trigger = screen.getByRole("button", { name: "Open image" });
-    fireEvent.click(trigger);
-    expect(await screen.findByRole("dialog", { name: "Open files" })).toBeTruthy();
-    expect(screen.getByText("Images (.png, .jpg)")).toBeTruthy();
-    expect(bridge.open).toHaveBeenCalledWith(expect.objectContaining({ role: "panel", parentWindowControllerId: "window:editor" }));
-    fireEvent.click(screen.getByRole("button", { name: "Choose files" }));
-    await waitFor(() => expect(fileService.open).toHaveBeenCalledWith(expect.objectContaining({ id: "open-images" }), expect.any(AbortSignal)));
-    await waitFor(() => expect(screen.queryByRole("dialog", { name: "Open files" })).toBeNull());
-    expect(document.activeElement).toBe(trigger);
-  });
-
   it("uses a compact sheet for save and keeps explicit confirmation in the service request", async () => {
     const fileService = service();
     const bridge = { open: vi.fn(), close: vi.fn() };
@@ -233,94 +200,6 @@ describe("NSE file panels", () => {
     expect(saveAsDocument).not.toHaveBeenCalled();
   });
 
-  it("surfaces a validator revocation, keeps the panel recoverable, and restores trigger focus after retry", async () => {
-    let validations = 0;
-    const fileService = createFilePanelService([createBrowserFilePanelAdapter({
-      pickFiles: vi.fn(async () => ({
-        kind: "accepted" as const,
-        files: [new File(["image"], "cover.png", { type: "image/png" })],
-        cleanup: () => undefined,
-      })),
-    })]);
-    const bridge = { open: vi.fn(), close: vi.fn() };
-    function Fixture() {
-      const [open, setOpen] = useState(false);
-      const trigger = useRef<HTMLButtonElement>(null);
-      return <OverlayHarness>
-        <button ref={trigger} type="button" onClick={() => setOpen(true)}>Recover open</button>
-        <NSEOpenPanel
-          id="recover-open"
-          open={open}
-          anchor={trigger.current}
-          parentResponderId="window:editor"
-          parentWindowControllerId="window:editor"
-          service={fileService}
-          windowBridge={bridge}
-          request={{
-            id: "recover-open",
-            accepts: [],
-            selection: "single-file",
-            access: "read",
-            requires: [],
-            validateContent: async () => {
-              if (++validations === 1) throw new FilePanelReferenceError("permission-revoked", "C:\\private\\cover.png");
-              return { ok: true };
-            },
-          }}
-          onOpenChange={setOpen}
-        />
-      </OverlayHarness>;
-    }
-    render(<Fixture />);
-
-    const trigger = screen.getByRole("button", { name: "Recover open" });
-    fireEvent.click(trigger);
-    const choose = await screen.findByRole("button", { name: "Choose files" });
-    fireEvent.click(choose);
-    await waitFor(() => expect(screen.getByRole("status").textContent).toContain("File permission was revoked."));
-    expect(screen.getByRole("dialog", { name: "Open files" })).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "Choose files" }));
-    await waitFor(() => expect(screen.queryByRole("dialog", { name: "Open files" })).toBeNull());
-    expect(document.activeElement).toBe(trigger);
-  });
-
-  it("surfaces content-validator rejection without closing the open panel", async () => {
-    const fileService = createFilePanelService([createBrowserFilePanelAdapter({
-      pickFiles: vi.fn(async () => ({
-        kind: "accepted" as const,
-        files: [new File(["not an image"], "cover.png", { type: "image/png" })],
-        cleanup: () => undefined,
-      })),
-    })]);
-    const bridge = { open: vi.fn(), close: vi.fn() };
-    render(
-      <OverlayHarness>
-        <NSEOpenPanel
-          id="rejected-open"
-          open
-          anchor={null}
-          parentResponderId="window:editor"
-          parentWindowControllerId="window:editor"
-          service={fileService}
-          windowBridge={bridge}
-          request={{
-            id: "rejected-open",
-            accepts: [],
-            selection: "single-file",
-            access: "read",
-            requires: [],
-            validateContent: async () => ({ ok: false, message: "The file bytes are not accepted." }),
-          }}
-          onOpenChange={vi.fn()}
-        />
-      </OverlayHarness>,
-    );
-
-    fireEvent.click(await screen.findByRole("button", { name: "Choose files" }));
-    await waitFor(() => expect(screen.getByRole("status").textContent).toContain("The file bytes are not accepted."));
-    expect(screen.getByRole("dialog", { name: "Open files" })).toBeTruthy();
-  });
-
   it("keeps a save panel open for typed choose-another and strips a rejected existing target before retry", async () => {
     const repeatedSave = vi.fn()
       .mockResolvedValueOnce({ kind: "choose-another" as const })
@@ -359,25 +238,5 @@ describe("NSE file panels", () => {
     expect(repeatedSave.mock.calls[1]![0]).not.toHaveProperty("existingTarget");
   });
 
-  it("surfaces an injected service failure without leaving the panel request pending", async () => {
-    const fileService = { ...service(), open: vi.fn(async () => { throw new Error("adapter failed"); }) };
-    const bridge = { open: vi.fn(), close: vi.fn() };
-    render(
-      <OverlayHarness>
-        <NSEOpenPanel
-          id="failed-open"
-          open
-          anchor={null}
-          parentResponderId="window:editor"
-          parentWindowControllerId="window:editor"
-          service={fileService}
-          windowBridge={bridge}
-          request={{ id: "failed-open", accepts: [], selection: "single-file", access: "read", requires: [] }}
-          onOpenChange={vi.fn()}
-        />
-      </OverlayHarness>,
-    );
-    fireEvent.click(await screen.findByRole("button", { name: "Choose files" }));
-    await waitFor(() => expect(screen.getByRole("status").textContent).toContain("could not be completed"));
-  });
+
 });

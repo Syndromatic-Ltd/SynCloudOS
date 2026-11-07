@@ -32,6 +32,7 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
+import { NSEOpenPanelWindowHost } from "./openPanelHosting";
 import { createPortal } from "react-dom";
 import { useEnclosingFocusScopeId } from "../../SynCloudOSReact/focusScopeContext";
 import { useNSEAppearance } from "../../NSE/Appearance/NSEAppearanceProvider";
@@ -506,9 +507,9 @@ export function NSEWindowControllerView({ controller }: NSEWindowControllerViewP
   if (controller.isDisposed || !loaded) return null;
   const root = controller.contentViewController;
   const View = viewComponentOf(controller);
-  const content = <NSEWindowSheetHostContext.Provider value={sheets.host}>{root
+  const content = <NSEWindowSheetHostContext.Provider value={sheets.host}><NSEOpenPanelWindowHost window={controller.window}>{root
     ? <NSEViewControllerView controller={root} />
-    : View ? <View controller={controller} /> : null}<NSEWindowAlertSheet queue={alerts} /></NSEWindowSheetHostContext.Provider>;
+    : View ? <View controller={controller} /> : null}<NSEWindowAlertSheet queue={alerts} /></NSEOpenPanelWindowHost></NSEWindowSheetHostContext.Provider>;
   const sheetLayer = <div ref={sheets.layerRef} className="nse-window-sheet-layer" data-sheet-attached={sheets.attached ? "true" : undefined} />;
   const { toolbar, bottomBarAccessory, titlebarAccessoryViewControllers: accessories } = controller.window;
   const renderAccessory = (accessory: NSEViewController<unknown>) => <NSEViewControllerView controller={accessory} className="nse-window-titlebar-accessory" />;

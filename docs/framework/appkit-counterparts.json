@@ -194,10 +194,6 @@
     "NSEManagedAFXFrame": "CADisplayLink",
     "NSEManagedAFXRenderer": "CADisplayLink",
     "NSEManagedTask": "OperationQueue",
-    "NSEMediaPanel": {
-      "none": "A Syndromatic original; D4 reshapes it as an NSOpenPanel-shaped object.",
-      "replacement": "NSOpenPanel"
-    },
     "NSEMenu": "NSMenu",
     "NSEMenuBar": "NSApplication.mainMenu",
     "NSEMenuBarOverlayOptions": "NSApplication.mainMenu",
@@ -221,6 +217,7 @@
     "NSEObservable": "NSKeyValueObserving",
     "NSEObservationOptions": "NSKeyValueObservingOptions",
     "NSEOpenPanel": "NSOpenPanel",
+    "NSEOpenPanelURL": { "none": "An Open panel result: browser file references or media-provider identities, never a fabricated filesystem URL." },
     "NSEOpenWindowOptions": "NSWindowController.showWindow(_:)",
     "NSEOutletElement": "@IBOutlet",
     "NSEOutletOptions": "@IBOutlet",
