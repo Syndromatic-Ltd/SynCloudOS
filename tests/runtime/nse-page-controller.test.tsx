@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import * as React from "react";
 import { act, cleanup, fireEvent, screen, within } from "@testing-library/react";
-import { afterEach, expect, it } from "vitest";
+import { afterEach, expect, it, vi } from "vitest";
 import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
 import { NSEViewController, nseUpdateTraits } from "../../src/NSE/Application/NSEViewController";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
@@ -193,6 +193,21 @@ it("renders one live child per printed page and completes real reduced-motion bu
     fireEvent.pointerUp(view, { pointerId: 11, button: 0, clientX: 300, clientY: 102 });
   });
   expect(liveBook.selectedIndex).toBe(0);
+});
+
+it("lays the new print flat after normal-motion button turns so every click navigates", async () => {
+  await launch();
+  const view = screen.getByLabelText("Book");
+  await act(async () => { liveBook[nseUpdateTraits]({ ...liveBook.traitCollection, reducedMotion: false }); });
+  vi.useFakeTimers();
+  try {
+    for (const selectedIndex of [1, 2]) {
+      await act(async () => { fireEvent.click(within(view).getByRole("button", { name: "Next page" })); });
+      await act(async () => { vi.runAllTimers(); });
+      expect(liveBook.selectedIndex).toBe(selectedIndex);
+      expect([...view.querySelectorAll<HTMLElement>(".nse-page")].map(page => page.dataset.progress)).toEqual(["0.000", "0.000"]);
+    }
+  } finally { vi.useRealTimers(); }
 });
 
 it("keeps a history: forward to a new page drops the pages after the selected one (stackHistory)", async () => {

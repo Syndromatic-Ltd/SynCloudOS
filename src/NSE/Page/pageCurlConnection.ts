@@ -6,6 +6,7 @@ export interface PageCurlConnection {
   attach(direction: "forward" | "backward", leaf: NSEPageHandle | null): void;
   progress(progress: number, event: NSEPageEvent): void;
   end(event: NSEPageEvent): void;
+  layFlat(): void;
   reset(): void;
 }
 const connections = new WeakMap<NSEPageController<unknown>, PageCurlConnection>();

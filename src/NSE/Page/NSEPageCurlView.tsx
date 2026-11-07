@@ -100,6 +100,10 @@ export function NSEPageCurlView({ controller }: { readonly controller: NSEPageCo
   const attachForward = useCallback((leaf: NSEPageHandle | null) => bridge.attach("forward", leaf), [bridge]);
   const attachBackward = useCallback((leaf: NSEPageHandle | null) => bridge.attach("backward", leaf), [bridge]);
   useLayoutEffect(() => () => bridge.reset(), [bridge]);
+  // The engine first paints the endpoint, then the controller changes the
+  // print. Lay the retained leaves flat after that DOM commit, as Portfolio
+  // did in viewDidLayout; resetting inside onTurnEnd races its final snapshot.
+  useLayoutEffect(() => { bridge.layFlat(); }, [bridge, index, spread]);
   const captureCorner = (direction: Direction, event: PointerEvent<HTMLElement>) => {
     if (state.turnDirection) return;
     const box = event.currentTarget.getBoundingClientRect();

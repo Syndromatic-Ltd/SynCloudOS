@@ -291,10 +291,9 @@ export class NSEPageController<T = unknown> extends NSEViewController<NSEPageCon
         this.#selectedIndex = this.#clamp(next);
         this.#update();
         this.didTransitionToObject(this.#objects[this.#selectedIndex] as T);
-        // New print lies flat; the leaf instances and their renderer survive.
-        for (const leaf of Object.values(this.#leaves)) leaf.setProgress(0);
       } else this.notifyObservers();
     },
+    layFlat: (): void => { for (const leaf of Object.values(this.#leaves)) leaf.setProgress(0, "reset"); },
     reset: (): void => { this.#resetCurl(); this.notifyObservers(); },
   };
 
