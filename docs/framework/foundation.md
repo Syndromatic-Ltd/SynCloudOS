@@ -95,3 +95,11 @@ For persistent application settings, inject the mounted application’s preferen
 ## Scope
 
 Public pasteboard, document, panel, share and FX reader byte APIs migrate separately. Existing raw-byte signatures are not changed by this layer’s introduction. Undo remains runtime-owned while a dependency-free manager contract and the mounted lease boundary are designed together; this entry does not export an undo-manager alias.
+
+## Public byte contracts
+
+Public byte payload inputs accept `NSEDataConvertible`; delivered payloads use `NSEData` while keeping their Promise, nullable, array and stream wrappers. This includes pasteboards, document assets/resources/PDF output, file-reference byte reads, prepared share files, encoded audio/image/video/container data, MIDI messages, font files and PDF readers. There are no raw-return compatibility overloads.
+
+Native `File` results retain file identity and metadata. MIME type and file name are separate fields on export/share records. Browser hosts create native Blobs, Files and codec buffers at explicit bridges. Numerical pixel/index planes, PCM/FFT samples and writable copy destinations retain their numerical typed arrays; they are not encoded byte payloads. `NSEData.read`, `.bytes` and `.blob` remain intentional web bridges. Genuine cross-realm web buffers are accepted using intrinsic brand checks.
+
+Imported font storage delivers `NSEData`, font registration accepts convertible data, and `NSEFontLibrary.fontBytes` returns `NSEData | null`. The IndexedDB font host keeps its persisted ArrayBuffer envelope private.

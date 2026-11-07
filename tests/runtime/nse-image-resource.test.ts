@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../src/Foundation/NSEData";
 import { IFXImageResource } from "../../src/FX/ImageFX/IFXImageResource";
 function loadImageResource(service: import("../../src/SynCloudOS/Images/imageTypes").RuntimeImageService, request: import("../../src/SynCloudOS/Images/imageTypes").RuntimeImageLoadRequest) {
   const resource = service.load(request);
@@ -48,7 +49,7 @@ class RecordingImageAdapter implements RuntimeImageAdapter {
   decode(request: RuntimeImageDecodeRequest): Promise<RuntimeDecodedImageLease> {
     this.decodeRequests.push(request);
     if (!this.automatic) return new Promise((resolve, reject) => this.pending.set(request.cacheKey, { resolve, reject }));
-    return Promise.resolve(this.lease(request.cacheKey, request.source.kind === "bytes" ? request.source.bytes.byteLength : 64));
+    return Promise.resolve(this.lease(request.cacheKey, request.source.kind === "bytes" ? request.source.bytes.count : 64));
   }
 
   lease(key: string, byteLength = 64, corsClean = true): RuntimeDecodedImageLease {
@@ -263,9 +264,9 @@ describe("runtime-owned image resources", () => {
     adapter.decode = async request => {
       adapter.decodeRequests.push(request);
       if (request.source.kind !== "bytes") throw new Error("Expected a byte source.");
-      decodedBytes.push(request.source.bytes[0]!);
-      request.source.bytes[0] = 77;
-      return adapter.lease(request.cacheKey, request.source.bytes.byteLength);
+      decodedBytes.push(request.source.bytes.bytes[0]!);
+      request.source.bytes.bytes[0] = 77;
+      return adapter.lease(request.cacheKey, request.source.bytes.count);
     };
     Object.defineProperty(environment, "images", { value: { acquire: () => ({ adapter, release: () => adapter.dispose() }) } });
     const runtime = createTestRuntime({
@@ -306,7 +307,7 @@ describe("runtime-owned image resources", () => {
     runtimes.push(runtime);
     const bytes = new Uint8Array([1, 2, 3, 4]);
     const descriptor = await runtime.documentResources.acquire("document:a", {
-      type: "image/png", size: bytes.byteLength, arrayBuffer: async () => bytes.slice().buffer,
+      type: "image/png", size: bytes.byteLength, data: async () => NSEData.from(await (bytes.slice().buffer)),
     }, new AbortController().signal);
     const source = { kind: "document-resource" as const, documentId: "document:a", descriptor };
     const denied = runtime.images.load({ subject, source });
@@ -334,7 +335,7 @@ describe("runtime-owned image resources", () => {
     runtimes.push(runtime);
     const bytes = new Uint8Array([1, 2, 3, 4]);
     const firstDescriptor = await runtime.documentResources.acquire("document:a", {
-      type: "image/png", size: bytes.byteLength, arrayBuffer: async () => bytes.slice().buffer,
+      type: "image/png", size: bytes.byteLength, data: async () => NSEData.from(await (bytes.slice().buffer)),
     }, new AbortController().signal);
     const first = runtime.images.load({ subject: { ...subject, documentId: "document:a" }, source: { kind: "document-resource", documentId: "document:a", descriptor: firstDescriptor } });
     expect(runtime.documentResources.release("document:a", firstDescriptor)).toBe(true);
@@ -343,7 +344,7 @@ describe("runtime-owned image resources", () => {
     first.release();
 
     const secondDescriptor = await runtime.documentResources.acquire("document:a", {
-      type: "image/png", size: bytes.byteLength, arrayBuffer: async () => bytes.slice().buffer,
+      type: "image/png", size: bytes.byteLength, data: async () => NSEData.from(await (bytes.slice().buffer)),
     }, new AbortController().signal);
     const second = runtime.images.load({ subject: { ...subject, documentId: "document:a" }, source: { kind: "document-resource", documentId: "document:a", descriptor: secondDescriptor } });
     await vi.waitFor(() => expect(adapter.decodeRequests).toHaveLength(1));
@@ -359,10 +360,10 @@ describe("runtime-owned image resources", () => {
     const { runtime, adapter } = runtimeWithImages("runtime:image-document-snapshot");
     runtimes.push(runtime);
     const firstDescriptor = await runtime.documentResources.acquire("document:a", {
-      type: "image/png", size: 1, arrayBuffer: async () => new Uint8Array([1]).buffer,
+      type: "image/png", size: 1, data: async () => NSEData.from(await (new Uint8Array([1]).buffer)),
     }, new AbortController().signal);
     const secondDescriptor = await runtime.documentResources.acquire("document:a", {
-      type: "image/png", size: 1, arrayBuffer: async () => new Uint8Array([2]).buffer,
+      type: "image/png", size: 1, data: async () => NSEData.from(await (new Uint8Array([2]).buffer)),
     }, new AbortController().signal);
     const mutableDescriptor = { ...firstDescriptor };
     const image = runtime.images.load({
@@ -381,7 +382,7 @@ describe("runtime-owned image resources", () => {
     const { runtime, adapter } = runtimeWithImages("runtime:image-mounted-close");
     runtimes.push(runtime);
     const descriptor = await runtime.documentResources.acquire("document:a", {
-      type: "image/png", size: 1, arrayBuffer: async () => new Uint8Array([1]).buffer,
+      type: "image/png", size: 1, data: async () => NSEData.from(await (new Uint8Array([1]).buffer)),
     }, new AbortController().signal);
     const image = runtime.images.load({ subject: { ...subject, documentId: "document:a" }, source: { kind: "document-resource", documentId: "document:a", descriptor } });
     await image.ready;
@@ -397,7 +398,7 @@ describe("runtime-owned image resources", () => {
     const { runtime } = runtimeWithImages("runtime:image-observable-close");
     runtimes.push(runtime);
     const descriptor = await runtime.documentResources.acquire("document:a", {
-      type: "image/png", size: 1, arrayBuffer: async () => new Uint8Array([1]).buffer,
+      type: "image/png", size: 1, data: async () => NSEData.from(await (new Uint8Array([1]).buffer)),
     }, new AbortController().signal);
     const image = loadImageResource(runtime.images, {
       subject: { ...subject, documentId: "document:a" },
@@ -441,7 +442,7 @@ describe("runtime-owned image resources", () => {
     const { runtime, adapter } = runtimeWithImages("runtime:image-invalidated-dispose");
     runtimes.push(runtime);
     const descriptor = await runtime.documentResources.acquire("document:a", {
-      type: "image/png", size: 1, arrayBuffer: async () => new Uint8Array([1]).buffer,
+      type: "image/png", size: 1, data: async () => NSEData.from(await (new Uint8Array([1]).buffer)),
     }, new AbortController().signal);
     const image = loadImageResource(runtime.images, {
       subject: { ...subject, documentId: "document:a" },
@@ -470,7 +471,7 @@ describe("runtime-owned image resources", () => {
     const { runtime, adapter } = runtimeWithImages("runtime:image-cached-close");
     runtimes.push(runtime);
     const descriptor = await runtime.documentResources.acquire("document:a", {
-      type: "image/png", size: 1, arrayBuffer: async () => new Uint8Array([1]).buffer,
+      type: "image/png", size: 1, data: async () => NSEData.from(await (new Uint8Array([1]).buffer)),
     }, new AbortController().signal);
     const image = runtime.images.load({ subject: { ...subject, documentId: "document:a" }, source: { kind: "document-resource", documentId: "document:a", descriptor } });
     await image.ready;
@@ -486,7 +487,7 @@ describe("runtime-owned image resources", () => {
     runtimes.push(runtime);
     const bytes = new Uint8Array([1, 2, 3, 4]);
     const descriptor = await runtime.documentResources.acquire("document:a", {
-      type: "image/png", size: bytes.byteLength, arrayBuffer: async () => bytes.slice().buffer,
+      type: "image/png", size: bytes.byteLength, data: async () => NSEData.from(await (bytes.slice().buffer)),
     }, new AbortController().signal);
     const image = runtime.images.load({
       subject: { ...subject, documentId: "document:a" },
@@ -660,7 +661,7 @@ describe("runtime-owned image resources", () => {
     }
     const documentBytes = new TextEncoder().encode(hostile[0]!);
     await expect(runtime.documentResources.acquire("document:svg", {
-      type: "image/svg+xml", size: documentBytes.byteLength, arrayBuffer: async () => documentBytes.slice().buffer,
+      type: "image/svg+xml", size: documentBytes.byteLength, data: async () => NSEData.from(await (documentBytes.slice().buffer)),
     }, new AbortController().signal)).rejects.toThrow(/MIME type/i);
     expect(authorise).not.toHaveBeenCalled();
     expect(platform.decode).not.toHaveBeenCalled();

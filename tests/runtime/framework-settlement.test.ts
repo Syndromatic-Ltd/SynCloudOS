@@ -44,7 +44,7 @@ import { createMountedLocationClient } from "../../src/SynCloudOS/AppSDK/mounted
 import { getRuntimeSettlement, trackRuntimeSettlement } from "../../src/SynCloudOS/Testing/runtimeSettlement";
 import { AUFXAudioFormat } from "../../src/FX/AudioFX/AUFXAudioFormat";
 import { AUFXAudioSession } from "../../src/FX/AudioFX/AUFXAudioSession";
-import { AUFXAudioRecorder } from "../../src/FX/AudioFX/AUFXAudioRecorder";
+import { createHostAUFXAudioRecorder } from "../../src/FX/AudioFX/AUFXAudioRecorder";
 import { NSEOverlayProvider, NSEPopup } from "../../src/NSE/Overlays";
 import type { NSEOverlayRuntimePort } from "../../src/NSE/Overlays/overlayTypes";
 import { HostSiteBrandingProvider, ResponderScope, SynCloudOSProvider } from "../../src/SynCloudOSReact";
@@ -748,7 +748,7 @@ describe("framework finite-work settlement", () => {
       dispose: vi.fn(),
       decode: vi.fn(async () => ({ duration: 1, frameCount: 48_000, sampleRate: 48_000, channelCount: 1 })),
     };
-    const recorder = new AUFXAudioRecorder(recorderPort);
+    const recorder = createHostAUFXAudioRecorder(recorderPort);
     const captureSession = new AUFXAudioSession({
       state: "active",
       route: { desiredInput: null, actualInput: null, desiredOutput: null, actualOutput: null },
@@ -882,7 +882,7 @@ describe("framework finite-work settlement", () => {
       start: vi.fn(), pause: vi.fn(), resume: vi.fn(), stop: vi.fn(), dispose: vi.fn(),
       decode: vi.fn(async () => ({ duration: 1, frameCount: 48_000, sampleRate: 48_000, channelCount: 1 })),
     };
-    const recorder = new AUFXAudioRecorder(recorderPort);
+    const recorder = createHostAUFXAudioRecorder(recorderPort);
     const captureSession = new AUFXAudioSession({
       state: "active",
       route: { desiredInput: null, actualInput: null, desiredOutput: null, actualOutput: null },
