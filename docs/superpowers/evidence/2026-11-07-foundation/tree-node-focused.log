@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/nse-tree-node.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  08:30:51
+   Duration  259ms (transform 51ms, setup 30ms, import 76ms, tests 4ms, environment 0ms)
