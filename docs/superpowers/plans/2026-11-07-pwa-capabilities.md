@@ -136,7 +136,7 @@ The rule that settles each new capability:
 - **Both are opt-in.** A site with `authenticationPolicy: "disabled"` or an app that never imports it carries none of it.
 - **PolicyKit needs a review of its own** before it is relied on as the security layer. The owner questioned its efficacy, and that review is out of scope here.
 
-## PolicyKit redesign (proposal)
+## PolicyKit redesign (approved 2026-11-07; efficacy review first)
 
 PolicyKit (`src/SynCloudOS/PolicyKit`, about 1,200 lines) answers one question, "may this subject do this action?", for several different things that Apple keeps apart. It mixes:
 
@@ -161,5 +161,4 @@ The name "PolicyKit" goes away. Its evaluator, audit trace and tests survive ins
 
 ## Open questions for the owner (remaining)
 
-- Approve the PolicyKit split above, and whether to do the efficacy review first (recommended).
 - Compression: `ZFX` was an invention (from zlib), not an Apple name. Apple ships compression two ways: `NSData.compressed(using:)` in Foundation, and the streaming Compression framework. There is no Foundation layer here, so the closest honest home is CompressionFX with a two-letter-plus-FX prefix that is free and isn't Core Media's `CM`: `CPFX` (recommended).
