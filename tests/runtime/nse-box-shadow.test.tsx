@@ -65,6 +65,7 @@ describe("custom NSBox property projection for themes", () => {
         <NSEBox aria-label="Override" boxType="custom" borderWidth={2} borderColor="#123" />
       </div>);
       expect(getComputedStyle(screen.getByRole("group", { name: "Well" })).borderImage).toContain("--nse-atmo-roundy-shadow");
+      expect(getComputedStyle(screen.getByRole("group", { name: "Well" })).margin).toBe("0px");
       expect(getComputedStyle(screen.getByRole("group", { name: "Frame" })).borderImage).toContain("--nse-atmo-rb-frame");
       expect(getComputedStyle(screen.getByRole("group", { name: "Floating" })).borderImage).toContain("--nse-atmo-rb-shadow");
       expect(getComputedStyle(screen.getByRole("group", { name: "Override" })).borderImage).toBe("none");

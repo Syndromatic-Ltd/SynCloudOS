@@ -1642,6 +1642,7 @@
   --nse-box-margin-left: 12px;
   min-width: 0;
   min-height: 74px;
+  margin: 0;
   border: 14px solid transparent;
   border-image: var(--nse-atmo-roundy-shadow) 14 stretch;
   border-radius: var(--nse-corner-radius);
