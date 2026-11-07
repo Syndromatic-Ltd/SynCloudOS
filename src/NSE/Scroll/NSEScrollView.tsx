@@ -18,11 +18,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useRef, useState, type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
 import { useNSERubberBandScroll } from "./index";
 import { NSEScroller } from "./NSEScroller";
 import { NSEScrollViewController, type NSEScrollerPolicy, type NSEScrollInsets } from "./scrollTypes";
 import { nseUnowned } from "../Controllers/ownership";
+import { NSEClipView } from "./NSEClipView";
+import type { NSEClipViewHandle, NSEScrollRect } from "./scrollTypes";
+
+/** The NSScrollView object reached through a committed React ref. */
+export interface NSEScrollViewHandle {
+  readonly contentView: NSEClipViewHandle;
+  readonly documentVisibleRect: NSEScrollRect;
+  scrollRectToVisible(rect: NSEScrollRect, behavior?: ScrollBehavior): void;
+}
 
 export interface NSEScrollViewGeometrySnapshot {
   readonly viewport: { readonly width: number; readonly height: number };
@@ -45,7 +54,7 @@ export interface NSEScrollViewProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 /** Canonical scroll surface with distinct passive observation and rubber-band ownership. */
-export function NSEScrollView({
+export const NSEScrollView = forwardRef<NSEScrollViewHandle, NSEScrollViewProps>(function NSEScrollView({
   children,
   rubberBand = true,
   rubberBandCoeff = 0.55,
@@ -61,9 +70,10 @@ export function NSEScrollView({
   onKeyDown,
   tabIndex,
   ...props
-}: NSEScrollViewProps) {
+}: NSEScrollViewProps, ref) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const controller = useRef<NSEScrollViewController | null>(null);
   const callbacks = useRef({ onScrollSnapshot, onGeometryChange });
   const [geometry, setGeometry] = useState<NSEScrollViewGeometrySnapshot>(() => ({ viewport: { width: 0, height: 0 }, content: { width: 0, height: 0 }, position: { left: 0, top: 0 }, insets: { top: 0, right: 0, bottom: 0, left: 0 } }));
   callbacks.current = { onScrollSnapshot, onGeometryChange };
@@ -88,18 +98,23 @@ export function NSEScrollView({
     callbacks.current.onGeometryChange?.(next);
   };
   useNSERubberBandScroll(scrollRef, contentRef, { enabled: rubberBand, coeff: rubberBandCoeff, axis });
-  useEffect(() => {
+  useLayoutEffect(() => {
     const host = scrollRef.current;
     if (!host) return;
-    const controller = new NSEScrollViewController(host, insetsRef.current, { owner: nseUnowned });
-    controllerRef?.(controller);
-    const disconnect = controller.connect(() => {
+    const instance = new NSEScrollViewController(host, insetsRef.current, { owner: nseUnowned });
+    controller.current = instance;
+    const disconnect = instance.connect(() => {
       callbacks.current.onScrollSnapshot?.();
       publishGeometry();
     });
     publishGeometry();
-    return () => { disconnect(); controller.dispose(); controllerRef?.(null); };
+    return () => { disconnect(); instance.dispose(); controller.current = null; };
   }, []);
+  useImperativeHandle(ref, () => controller.current!, []);
+  useLayoutEffect(() => {
+    controllerRef?.(controller.current);
+    return () => controllerRef?.(null);
+  }, [controllerRef]);
   useEffect(() => {
     const host = scrollRef.current;
     const content = contentRef.current;
@@ -119,7 +134,7 @@ export function NSEScrollView({
   const maximumLeft = Math.max(0, geometry.content.width - geometry.viewport.width);
   const maximumTop = Math.max(0, geometry.content.height - geometry.viewport.height);
   return <div className="nse-scroll-view-frame" data-nse-control="scroll-view-frame">
-  <div {...props} ref={scrollRef} className={["nse-scroll-view", className].filter(Boolean).join(" ")} data-axis={axis} data-horizontal-scroller-policy={horizontalScrollerPolicy} data-vertical-scroller-policy={verticalScrollerPolicy} style={hostStyle} tabIndex={tabIndex ?? 0} onKeyDown={(event) => {
+  <NSEClipView mode="scroll" {...props} ref={scrollRef} className={["nse-scroll-view", className].filter(Boolean).join(" ")} data-axis={axis} data-horizontal-scroller-policy={horizontalScrollerPolicy} data-vertical-scroller-policy={verticalScrollerPolicy} style={hostStyle} tabIndex={tabIndex ?? 0} onKeyDown={(event) => {
     onKeyDown?.(event);
     if (event.defaultPrevented) return;
     const host = event.currentTarget;
@@ -134,9 +149,9 @@ export function NSEScrollView({
     }
   }}>
     <div ref={contentRef} className="nse-scroll-view-content" style={contentStyle}>{children}</div>
-  </div>
+  </NSEClipView>
   {axis !== "y" ? <NSEScroller orientation="horizontal" policy={horizontalScrollerPolicy} value={geometry.position.left} maximum={maximumLeft} onValueChange={(left) => scrollRef.current?.scrollTo({ left, top: scrollRef.current.scrollTop, behavior: "auto" })} /> : null}
   {axis !== "x" ? <NSEScroller orientation="vertical" policy={verticalScrollerPolicy} value={geometry.position.top} maximum={maximumTop} onValueChange={(top) => scrollRef.current?.scrollTo({ left: scrollRef.current.scrollLeft, top, behavior: "auto" })} /> : null}
   {axis === "both" && horizontalScrollerPolicy !== "hidden" && verticalScrollerPolicy !== "hidden" ? <span aria-hidden="true" data-nse-part="scroller-corner" /> : null}
   </div>;
-}
+});

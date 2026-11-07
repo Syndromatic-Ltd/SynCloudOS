@@ -37,6 +37,14 @@ export interface NSEScrollRect {
   readonly height: number;
 }
 
+/** NSClipView: the scrolling viewport, with bounds in document coordinates. */
+export interface NSEClipViewHandle {
+  readonly element: HTMLElement;
+  readonly bounds: NSEScrollRect;
+  postsBoundsChangedNotifications: boolean;
+  observeBoundsChanges(observer: (bounds: NSEScrollRect) => void): () => void;
+}
+
 export type NSERTLScrollModel = "negative" | "reverse" | "default";
 
 export interface NSEScrollGeometry {
@@ -106,10 +114,43 @@ function cancel(frame: number) {
 export class NSEScrollViewController {
   readonly #lifetime: NSEControllerLifetime;
   readonly #connections = new Set<() => void>();
+  readonly contentView: NSEClipViewHandle;
 
   constructor(readonly host: HTMLElement, readonly insets: NSEScrollInsets = ZERO_INSETS, options: NSEControllerOwnershipOptions = {}) {
     this.#lifetime = new NSEControllerLifetime(options, { kind: "NSEScrollViewController", id: host.id || "scroll-view" });
     this.#lifetime.bind(() => this.dispose());
+    const controller = this;
+    this.contentView = {
+      element: host,
+      get bounds() { return controller.documentVisibleRect; },
+      postsBoundsChangedNotifications: false,
+      observeBoundsChanges(observer) {
+        controller.#lifetime.assertLive("observeBoundsChanges");
+        let previous = controller.documentVisibleRect;
+        const publish = () => {
+          const next = controller.documentVisibleRect;
+          if (next.x === previous.x && next.y === previous.y && next.width === previous.width && next.height === previous.height) return;
+          previous = next;
+          if (controller.contentView.postsBoundsChangedNotifications) observer(next);
+        };
+        const disconnectScroll = controller.connect(publish);
+        const Resize = host.ownerDocument.defaultView?.ResizeObserver;
+        const resize = Resize ? new Resize(publish) : null;
+        resize?.observe(host);
+        const disconnect = () => {
+          controller.#connections.delete(disconnect);
+          disconnectScroll();
+          resize?.disconnect();
+        };
+        controller.#connections.add(disconnect);
+        return disconnect;
+      },
+    };
+  }
+
+  /** NSScrollView.documentVisibleRect, in the document's coordinate system. */
+  get documentVisibleRect(): NSEScrollRect {
+    return { x: this.host.scrollLeft, y: this.host.scrollTop, width: this.host.clientWidth, height: this.host.clientHeight };
   }
 
   get isDisposed(): boolean { return this.#lifetime.isDisposed; }

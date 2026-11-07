@@ -22,12 +22,22 @@
     "Spec"
   ],
   "members": {
+    "NSEScrollView.contentView": "NSScrollView.contentView",
+    "NSEScrollView.documentVisibleRect": "NSScrollView.documentVisibleRect",
+    "NSEClipView.bounds": "NSView.bounds",
+    "NSEClipView.postsBoundsChangedNotifications": "NSView.postsBoundsChangedNotifications",
+    "NSEImageView.wantsLayer": "NSView.wantsLayer",
+    "NSEImageView.layer": "NSView.layer",
     "NSEImage.named": "NSImage.init(named:)",
     "NSEImage.goBackTemplateName": "NSImage.goBackTemplateName",
     "NSEImage.goForwardTemplateName": "NSImage.goForwardTemplateName"
   },
   "counterparts": {
     "NSEImage": "NSImage",
+    "NSEImageViewHandle": "NSImageView",
+    "NSEScrollViewHandle": "NSScrollView",
+    "NSEClipViewHandle": "NSClipView",
+    "NSEScrollRect": "NSRect",
     "NSEWorkspace": "NSWorkspace",
     "NSEPathControl": "NSPathControl",
     "NSEPathControlItem": "NSPathControlItem",
