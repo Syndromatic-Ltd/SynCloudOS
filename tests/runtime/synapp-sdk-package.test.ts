@@ -228,7 +228,11 @@ describe("portable SynWare SDK packages", () => {
     expect(packageManifest.exports["./vite"]).toEqual({ types: "./types/vite.d.mts", import: "./vite.mjs" });
     expect(Object.keys(packageManifest.exports).every((key) => !key.includes("*"))).toBe(true);
     expect(packageManifest.exports["./nse/animation"]).toBeUndefined();
-    expect(readFileSync(join(repositoryRoot, ".artifacts", "synapp-sdk", "packages", "syncloudos", "nse", "styles.css"), "utf8")).toContain("[data-nse-view-drawing-layer]");
+    // nse/styles.css is a list of @imports of the bundled assets; the drawing layer's rule ships in one of them.
+    const packagedNSEStyles = join(repositoryRoot, ".artifacts", "synapp-sdk", "packages", "syncloudos", "nse", "styles.css");
+    const packagedNSEStylesheet = readFileSync(packagedNSEStyles, "utf8");
+    const importedNSEStyles = [...packagedNSEStylesheet.matchAll(/@import "([^"]+)";/g)].map((match) => readFileSync(join(dirname(packagedNSEStyles), match[1]!), "utf8"));
+    expect([packagedNSEStylesheet, ...importedNSEStyles].join("\n")).toContain("[data-nse-view-drawing-layer]");
     const viewDeclarations = readFileSync(join(repositoryRoot, ".artifacts", "synapp-sdk", "packages", "syncloudos", "types", "NSE", "Views", "NSEView.d.ts"), "utf8");
     expect(viewDeclarations).toMatch(/draw\?:.*GFXContext/u);
     expect(viewDeclarations).toContain("NSEViewLayerContentsPlacement");
