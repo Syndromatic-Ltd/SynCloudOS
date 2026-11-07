@@ -324,7 +324,7 @@ export function ApplicationStageView({
       variant={frame.material === "metal" ? "atmoMetal" : "atmoCumulus"}
       scheme={resolvedMode}
       rail={showsSourceListRail ? { width: railWidth, content: railLabel, titleAction: quickSwitchAction } : undefined}
-      titleAction={activeNavigationChrome ? null : showsSourceListRail ? null : quickSwitchAction}
+      titleAction={titlebarDocument?.toolbarStyle === "expanded" || activeNavigationChrome || showsSourceListRail ? null : quickSwitchAction}
       leadingItems={[{
         kind: "webspring",
         label: returnToWebspringLabel,
@@ -332,8 +332,8 @@ export function ApplicationStageView({
         selected: false,
         onClick: () => { void runtime.commands.dispatch("workspace.returnToWebspring", undefined, { source: "toolbar" }); }
       }]}
-      leading={activeNavigationChrome?.back ? (
-        <NavigationChromeSlot className="webspring-application-navigation-back-slot" enter={stageMotion.navigationBack}>
+      leading={activeNavigationChrome?.back || titlebarDocument?.toolbarStyle === "expanded" ? <>
+        {activeNavigationChrome?.back ? <NavigationChromeSlot className="webspring-application-navigation-back-slot" enter={stageMotion.navigationBack}>
           <NSEButton
             bezelStyle="texturedRounded"
             title={activeNavigationChrome.back.label}
@@ -343,9 +343,13 @@ export function ApplicationStageView({
             data-nse-application-navigation-back="true"
             onClick={activeNavigationChrome.back.onActivate}
           />
-        </NavigationChromeSlot>
-      ) : undefined}
-      trailing={activeNavigationChrome?.back ? <span className="webspring-application-navigation-chrome-balance" aria-hidden="true" /> : undefined}
+        </NavigationChromeSlot> : null}
+        {titlebarDocument?.toolbarStyle === "expanded" ? <span ref={setLeadingAccessories} className="nse-window-titlebar-accessory-slot" data-layout-attribute="leading" /> : null}
+      </> : undefined}
+      trailing={activeNavigationChrome?.back || titlebarDocument?.toolbarStyle === "expanded" ? <>
+        {activeNavigationChrome?.back ? <span className="webspring-application-navigation-chrome-balance" aria-hidden="true" /> : null}
+        {titlebarDocument?.toolbarStyle === "expanded" ? <span ref={setTrailingAccessories} className="nse-window-titlebar-accessory-slot" data-layout-attribute="trailing" /> : null}
+      </> : undefined}
       center={activeNavigationChrome?.back ? (
         <NavigationChromeSlot className="webspring-application-navigation-title" enter={stageMotion.navigationTitle}>
           {activeNavigationChrome.title}
