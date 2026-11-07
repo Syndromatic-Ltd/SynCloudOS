@@ -20,11 +20,14 @@ Use native `URL`, `Date`, `Error`, `crypto.randomUUID()` and `JSON` for the web 
 | `NSEFormatter`, `NSEFormatterContext`, `NSEFormatterError`, `NSEFormatterResult` | NSFormatter | Object/string conversion and partial-input validation |
 | `NSENumberFormatter`, `NSENumberFormatterOptions` | NSNumberFormatter | Locale-aware number display and parsing |
 | `NSEByteCountFormatter` and its option/unit types | NSByteCountFormatter | Decimal or binary byte quantities |
+| `NSEDateFormatter`, `NSEDateFormatterOptions`, `NSEDateFormatterStyle` | NSDateFormatter | Intl date/time styles, patterns and Date/string conversion |
+| `NSEDecimalNumber`, `NSEDecimalNumberHandler`, `NSEDecimalNumberBehaviors`, `NSEDecimalRoundingMode` | NSDecimalNumber / NSDecimalNumberHandler / NSDecimalNumberBehaviors | Bounded decimal arithmetic and rounding policies |
 | `NSEPredicate` and its expression/schema types | NSPredicate | Block evaluation and bounded declarative predicates |
 | `NSESortDescriptor` and its option/comparator types | NSSortDescriptor | Stable comparison with reversible ordering |
 | `NSECharacterSet`, `NSEUnicodePropertyName` | NSCharacterSet | Unicode scalar membership and set operations |
 | `NSEUserDefaults`, `NSEUserDefaultsStore` | NSUserDefaults | Keyed preferences through an injected store |
 | `NSEValueTransformer` and the three built-in transformer names | NSValueTransformer | Named subclass registration, forward and reverse value transformations |
+| `NSEUndoManager` | NSUndoManager | Target-based inverse registration, nested groups, action names and undo levels |
 
 Supporting TypeScript option, schema and result types describe the web API; they are not additional Apple classes. `NSETreeNode` belongs to AppKit and is exported by `nse`. Formatters and `NSEUserDefaults` are exported only from `foundation`.
 
@@ -79,6 +82,50 @@ if (parsed.ok) console.log(parsed.value);
 ```
 
 Subclass `NSEFormatter<T>` to provide `string`, `editingString`, `getObjectValue` and `isPartialStringValid`. The methods follow NSFormatter’s conversion and editing responsibilities. Locale and time-zone context is explicit; parse results represent Cocoa’s output/error parameters as a discriminated result.
+
+### Dates
+
+`NSEDateFormatter` converts native `Date` values with `string(date)` and `date(text)`, returning `null` for invalid date text. Mutable `dateStyle` and `timeStyle` use `none`, `short`, `medium`, `long` and `full`. `locale`, `timeZone` and `calendar` configure Intl. An explicit `dateFormat` takes precedence over styles; supported Unicode pattern tokens are `yyyy`, `MM`, `dd`, `HH`, `mm` and `ss`, with quoted literals and doubled apostrophes. Unsupported tokens throw instead of being interpreted as literals.
+
+```ts
+const dates = new NSEDateFormatter({ locale: "en-GB", timeZone: "Europe/London", dateStyle: "long", timeStyle: "short" });
+const text = dates.string(new Date("2026-11-07T12:30:00Z"));
+const date = dates.date(text);
+```
+
+Intl formats any supported calendar in style mode. Parsing and explicit patterns currently support the Gregorian calendar and positive-era years; other calendars/eras reject explicitly. Localized style parsing uses Intl parts and verifies the formatted result, including month/weekday names, digits, day periods and time-zone labels. Missing date fields default to 1 January 2001, missing time fields to midnight, and two-digit style years to 2000–2099. Impossible dates and daylight-saving gaps return `null`. Ambiguous repeated wall times use the formatter's deterministic zone resolution; there is no locale-independent `Date.parse` fallback. Style output without seconds cannot recover seconds; formatting does not preserve milliseconds. These limits describe this API's supported conversion surface, rather than the full ICU pattern language.
+
+### Decimal numbers
+
+`NSEDecimalNumber.fromString` constructs immutable decimal values. `adding`, `subtracting`, `multiplying`, `dividing`, `rounding`, `compare` and `toString` keep arithmetic in bigint coefficient/exponent form. Representation is bounded to 38 significant digits and a decimal exponent from −128 through 127; operations round to that representation, rather than using binary floating-point or arbitrary precision. `zero`, `one` and `notANumber` are shared values.
+
+```ts
+const cents = new NSEDecimalNumberHandler({ scale: 2, roundingMode: "bankers" });
+const amount = NSEDecimalNumber.fromString("0.1").adding(NSEDecimalNumber.fromString("0.2"));
+const eighth = NSEDecimalNumber.one.dividing(NSEDecimalNumber.fromString("8"), cents); // 0.12
+```
+
+Rounding modes are `plain` (nearest, ties away from zero), `bankers` (nearest, ties to even), `down` (toward negative infinity) and `up` (toward positive infinity). A handler's optional `scale` is decimal places, with an omitted scale retaining the bounded precision. `raiseOnExactness`, `raiseOnOverflow`, `raiseOnUnderflow` and `raiseOnDivideByZero` control arithmetic errors. Defaults tolerate inexactness and raise the other three errors. A suppressed unrepresentable result becomes `notANumber`; suppressed inexactness returns the rounded result. `defaultBehavior` is replaceable. Custom `NSEDecimalNumberBehaviors.exceptionDuringOperation` can supply a replacement for a raised arithmetic error. Serialization returns decimal text, preserving the value without a binary-number bridge.
+
+### Undo
+
+`NSEUndoManager` is the worker-safe Foundation object. `registerUndo(target, handler)` records a synchronous inverse operation. While undoing or redoing, handlers register the opposite operation on the same manager. `beginUndoGrouping` / `endUndoGrouping` nest; closing the outer group creates one history entry. `setActionName` names that entry; `undoActionName` and `redoActionName` expose the frontier names. `canUndo`, `canRedo`, `isUndoing`, `isRedoing` and `groupingLevel` describe current state. `levelsOfUndo = 0` means unlimited; a positive value bounds retained groups. `removeAllActions` and `removeAllActionsWithTarget` retire registrations.
+
+```ts
+const undo = new NSEUndoManager();
+const model = { title: "Before" };
+function setTitle(target: typeof model, title: string) {
+  const previous = target.title;
+  undo.registerUndo(target, object => setTitle(object, previous));
+  target.title = title;
+}
+setTitle(model, "After");
+undo.setActionName("Change title");
+undo.undo();
+undo.redo();
+```
+
+The explicit synchronous Foundation contract does not add browser event-loop grouping or promise replay. The runtime adapter uses the same Foundation history engine for registration, groups and replay frontiers, while retaining runtime identity, responder routing, registration partitions, reservations, asynchronous compensation and revocable mounted leases. NSE controls and mounted app histories derive their narrow registration contract from Foundation's `NSEUndoRegistrationCapability`; this TypeScript support interface is not another Cocoa class. Apps holding a mounted document history continue to use that lease, with its existing authority and teardown behaviour. A raw Foundation manager never replaces a mounted history lease.
 
 ## Value transformers
 
