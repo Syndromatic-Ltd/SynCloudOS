@@ -121,7 +121,7 @@ Declaration, user consent and the signed-in person's role are separate:
 | --- | --- | --- |
 | The app declares the capability | `entitlements` in `Info.ts`, captured for launch | `file.open` permits the declared open-panel operation; add `file.write` for saving through `SCOS.filePanels`. |
 | The app meets mandatory launch declarations | `runtime.policy.requiredEntitlements` | An absent required entitlement denies launch before application code runs. |
-| This app may use a privacy service | The per-user, per-app privacy store and the browser's permission | Location, camera, microphone, Bluetooth, NFC, speech, contacts, payment and XR expose their own status/request methods. |
+| This app may use a privacy service | The per-user, per-app privacy store and the browser's permission | Location, camera, microphone, Bluetooth, NFC, speech, contacts and XR expose their own status/request methods. PassKit has no privacy-status API; payment presentation retains the shared entitlement, policy, denial and lifetime gates. |
 | This person may perform a role-governed operation | The host's configuration profile | DocumentStore capabilities include `documentStore.drafts.read`, `documentStore.draft.write`, `documentStore.publish` and `documentStore.revision.create`. |
 
 Declaring an entitlement does not prompt, grant browser access or generally grant the person a role capability. A role grant cannot manufacture a missing device declaration. A passive `getAuthorizationStatus()` reports facts without granting app consent; requests and active sessions use the shared privacy gate. Webspring presents the current user's choices in **System Preferences → Privacy & Security**. See [Authorisation, entitlements and privacy](authorization.md).

@@ -20,7 +20,7 @@ Each framework has a short prefix that appears on every public type, so a name t
 | [NFCFX](nfc.md) | `NFX` | Core NFC | `fx/nfc` | Foreground NDEF |
 | [SpeechFX](speech.md) | `SPFX` | Speech | `fx/speech` | Supplied audio requests; web sources unavailable |
 | [ContactsFX](contacts.md) | `CNFX` | Contacts | `fx/contacts` | Per-request contact picker |
-| [PassFX](pass.md) | `PKFX` | PassKit | `fx/pass` | Payment Request authorisation |
+| [PassFX](pass.md) | `PKFX` | PassKit | `fx/pass` | PassKit payment classes; browser presentation unavailable |
 | [XRFX](xr.md) | `XRFX` | ARKit sessions | `fx/xr` | WebXR poses and tracked anchors |
 | [LocationFX](location.md) | `LFX` | Core Location | `fx/location` | Position, course and authorisation |
 | [LuminaFX](lumina.md) | `LUFX` | Core Spotlight | `fx/lumina` | On-device indexing and search |
@@ -69,7 +69,7 @@ CompressionFX is also a direct library: its input/output filters use read/write 
 | `useNFC` | NDEF session factory | `nfc.read`, `nfc.write` |
 | `useSpeech` | Recognizer | `speech.recognize` |
 | `useContacts` | Real CNFXContactStore; selection via NSE-presented picker | `contacts.select` |
-| `usePayment` | Payment controller factory | `payment.request` |
+| `usePayment(request)` | Real component-owned `PKFXPaymentAuthorizationController` | `payment.request` |
 | `useXR` | WebXR session | `xr.session` |
 | `useLocation` | Location manager | `location.read`, `location.request` |
 | `useLumina` | Search index | `lumina.query` |

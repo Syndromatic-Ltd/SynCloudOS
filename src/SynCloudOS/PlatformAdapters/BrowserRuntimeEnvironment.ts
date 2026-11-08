@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { associatePaymentAdapter } from "../../FX/PassFX/internal/paymentPort";
 import { associateContactsAdapter } from "../../FX/ContactsFX/internal/contactsPort";
 import { createBrowserViewportFeaturesSource } from "./BrowserViewportFeatures";
 import { createBrowserFilePickerPort } from "./BrowserFilePickerPort";
@@ -34,7 +35,7 @@ import { BrowserBluetoothAdapter, type BrowserBluetoothOptions } from "./Browser
 import { BrowserNFCAdapter, type BrowserNFCAdapterOptions } from "./BrowserNFCAdapter";
 import { BrowserSpeechAdapter } from "./BrowserSpeechAdapter";
 import { BrowserContactsAdapter, type BrowserContactsAdapterOptions } from "./BrowserContactsAdapter";
-import { BrowserPaymentAdapter, type BrowserPaymentAdapterOptions } from "./BrowserPaymentAdapter";
+import { BrowserPaymentAdapter } from "./BrowserPaymentAdapter";
 import { BrowserXRAdapter, createBrowserXRRenderingLayerFactory, type BrowserXROptions } from "./BrowserXRAdapter";
 import { BrowserLocationAdapter } from "./BrowserLocationAdapter";
 import { associateSpeechAdapter } from "../../FX/SpeechFX/internal/speechPort";
@@ -749,8 +750,6 @@ export function createBrowserRuntimeEnvironment(options: { readonly cursorImages
     nfc: new BrowserNFCAdapter({ isSecureContext: browserWindow?.isSecureContext === true,
       NDEFReader: (browserWindow as unknown as { NDEFReader?: BrowserNFCAdapterOptions["NDEFReader"] } | null)?.NDEFReader,
       permissions: browserNavigator?.permissions as unknown as BrowserNFCAdapterOptions["permissions"] }),
-    payment: new BrowserPaymentAdapter({ isSecureContext: browserWindow?.isSecureContext === true,
-      PaymentRequest: (browserWindow as unknown as { PaymentRequest?: BrowserPaymentAdapterOptions["PaymentRequest"] } | null)?.PaymentRequest }),
     xr: new BrowserXRAdapter({ isSecureContext: browserWindow?.isSecureContext === true,
       browserNavigator: browserNavigator as unknown as BrowserXROptions["browserNavigator"],
       createRenderingLayer: browserWindow ? createBrowserXRRenderingLayerFactory(browserWindow) : undefined }),
@@ -802,6 +801,7 @@ export function createBrowserRuntimeEnvironment(options: { readonly cursorImages
     },
   };
   associateSpeechAdapter(environment, new BrowserSpeechAdapter());
+  associatePaymentAdapter(environment, new BrowserPaymentAdapter({ isSecureContext: browserWindow?.isSecureContext === true }));
   associateContactsAdapter(environment, new BrowserContactsAdapter({ isSecureContext: browserWindow?.isSecureContext === true, browserNavigator: browserNavigator as unknown as BrowserContactsAdapterOptions["browserNavigator"] }));
   associateNetworkAdapter(environment, new BrowserNetworkPathAdapter({ navigator: browserNavigator ?? undefined, eventTarget: browserWindow ?? undefined }));
   return environment;

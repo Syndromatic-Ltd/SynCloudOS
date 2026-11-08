@@ -17,6 +17,10 @@
  * limitations under the License.
  */
 
+import { associatePaymentAdapter, type PaymentAdapter, type PaymentResponse } from "../../../FX/PassFX/internal/paymentPort";
+import { PKFXPayment, PKFXPaymentMethod, PKFXPaymentToken, PKFXContact, type PKFXPaymentAuthorizationStatus } from "../../../FX/PassFX/public";
+import { paymentMethods, paymentTokens, payments } from "../../../FX/PassFX/internal/paymentValues";
+import { NSEPersonNameComponents } from "../../../Foundation/NSEPersonNameComponents";
 import { associateContactsAdapter, type ContactsAdapter } from "../../../FX/ContactsFX/internal/contactsPort";
 import { CNFXMutableContact } from "../../../FX/ContactsFX/CNFXMutableContact";
 import { NSEData } from "../../../Foundation/NSEData";
@@ -467,6 +471,37 @@ export function createDeterministicRuntimeEnvironment(options: {
       return networkControl.runSync("network.subscribe", () => { networkListeners.add(listener); return { dispose() { networkListeners.delete(listener); } }; });
     },
   });
+  const paymentControl = control<"payment.present">(clock, denied);
+  const paymentPresentations = new Set<{ resolve(value: PaymentResponse): void; reject(error: unknown): void }>();
+  const paymentStatuses: PKFXPaymentAuthorizationStatus[] = [];
+  const payment = Object.freeze({ ...publicPort(paymentControl),
+    authorize() {
+      for (const presentation of [...paymentPresentations]) {
+        const method = new PKFXPaymentMethod(); paymentMethods.set(method, { displayName: "Test Visa", network: "visa", type: "credit" });
+        const token = new PKFXPaymentToken(); paymentTokens.set(token, { paymentMethod: method, transactionIdentifier: "test-transaction", paymentData: NSEData.from(new Uint8Array([1, 2, 3])) });
+        const contact = new PKFXContact(); contact.name = new NSEPersonNameComponents(); contact.name.givenName = "Test"; contact.emailAddress = "test@example.invalid";
+        const value = new PKFXPayment(); payments.set(value, { token, billingContact: contact });
+        let finished = false; presentation.resolve({ payment: value, async finish(result) {
+          if (finished) throw new Error("The fake payment was already completed."); finished = true;
+          if (paymentControl.mode === "deny") throw new DOMException("The fake payment sheet denied completion.", "SecurityError");
+          paymentStatuses.push(result.status);
+        } });
+      }
+    },
+    cancel() { for (const presentation of [...paymentPresentations]) presentation.reject(new DOMException("The fake payment was cancelled.", "AbortError")); },
+    activePresentationCount: () => paymentPresentations.size,
+    completedStatuses: () => Object.freeze([...paymentStatuses]),
+  });
+  const paymentAdapter: PaymentAdapter = {
+    assertAvailable() {}, canMakePayments: networks => paymentControl.mode === "allow" && (networks === undefined || networks.every(network => network === "visa")),
+    open(_request, signal) {
+      let resolve!: (value: PaymentResponse) => void; let reject!: (error: unknown) => void;
+      const authorized = new Promise<PaymentResponse>((a, b) => { resolve = a; reject = b; });
+      const presentation = { resolve, reject }; paymentPresentations.add(presentation);
+      const presented = paymentControl.run("payment.present", signal, () => true).catch(error => { const denial = typeof error === "object" && error !== null && "name" in error && error.name === "SecurityError" ? new DOMException("The fake payment sheet denied presentation.", "NotAllowedError") : error; reject(denial); throw denial; });
+      return { presented, authorized, async dismiss() { paymentPresentations.delete(presentation); } };
+    },
+  };
   const contactsControl = control<"contacts.select">(clock, denied);
   let contactName = "Selected contact";
   const contacts = Object.freeze({ ...publicPort(contactsControl), setSelectedName(value: string) { contactName = value; } });
@@ -657,6 +692,7 @@ export function createDeterministicRuntimeEnvironment(options: {
     network,
     speech,
     contacts,
+    payment,
     webContent: publicPort(controls.webContent),
   });
   const testControls: RuntimeTestCapabilityControls = Object.freeze({
@@ -841,6 +877,7 @@ export function createDeterministicRuntimeEnvironment(options: {
   associateNetworkAdapter(environment, networkPaths);
   associateSpeechAdapter(environment, speechAdapter);
   associateContactsAdapter(environment, contactsAdapter);
+  associatePaymentAdapter(environment, paymentAdapter);
   return Object.freeze({
     environment,
     clock,
@@ -868,6 +905,7 @@ export function createDeterministicRuntimeEnvironment(options: {
     dispose() {
       mediaDisposed = true;
       speechListeners.clear();
+      paymentPresentations.clear();
       clock.dispose();
       for (const media of mediaQueries.keys()) media.dispose();
       mediaQueryMatches.clear();

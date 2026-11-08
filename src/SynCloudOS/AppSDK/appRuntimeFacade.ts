@@ -62,8 +62,9 @@ import { createMountedNFCClient } from "./mountedNFCClient";
 import { createMountedSpeechPort } from "./mountedSpeechPort";
 import { speechAdapterFor } from "../../FX/SpeechFX/internal/speechPort";
 import { createMountedContactsPort } from "./mountedContactsPort";
+import { paymentAdapterFor } from "../../FX/PassFX/internal/paymentPort";
 import { contactsAdapterFor } from "../../FX/ContactsFX/internal/contactsPort";
-import { createMountedPaymentClient } from "./mountedPaymentClient";
+import { createMountedPaymentPort } from "./mountedPaymentPort";
 import { createMountedXRClient } from "./mountedXRClient";
 import { createMountedLocationClient } from "./mountedLocationClient";
 import { createMountedMIDIClient } from "./mountedMIDIClient";
@@ -4519,7 +4520,11 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           runtime.environment.testControls?.permissions.subscribe?.(listener), runtime.environment.testControls?.policy.subscribe?.(listener)];
         return () => { for (const release of releases) release?.(); };
       }),
-      payment: createMountedPaymentClient(runtime.environment.payment, signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("payment")),
+      payment: createMountedPaymentPort(paymentAdapterFor(runtime.environment), signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("payment"), listener => {
+        const releases = [runtime.store.subscribe(listener), runtime.configurationProfiles.subscribe(listener), runtime.identity.session.subscribe(listener),
+          runtime.environment.testControls?.permissions.subscribe?.(listener), runtime.environment.testControls?.policy.subscribe?.(listener)];
+        return () => { for (const release of releases) release?.(); };
+      }),
       xr: createMountedXRClient(runtime.environment.xr, signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("xr")),
       audioGraphs: createMountedAudioGraphs(runtime.audioGraphs, signal, deviceEntitlements, app.bundleIdentifier, audioInputCapability, mountedSettlement),
       audioSessions: createMountedAudioSessions(runtime.environment.audioCapture, signal, deviceEntitlements, audioInputCapability, app.bundleIdentifier, mountedSettlement, privacyForService("microphone")),

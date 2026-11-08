@@ -17,29 +17,31 @@
  * limitations under the License.
  */
 
-import { useLayoutEffect, useMemo } from "react";
-import type { PKFXPaymentClient } from "../../../FX/PassFX/public";
-import { useSCOS } from "../scos/useSCOS";
-
-/** Passive client with merchant controllers revoked on component unmount. */
-export function usePayment(): PKFXPaymentClient {
-  const client = useSCOS().payment;
-  const binding = useMemo(() => {
-    let owner: AbortController | undefined;
-    return {
-      client: Object.freeze<PKFXPaymentClient>({
-        getCapabilities: () => client.getCapabilities(),
-        createAuthorizationController(request, signal) {
-          if (!owner) throw new Error("The component payment owner is not mounted.");
-          return client.createAuthorizationController(request, signal ? AbortSignal.any([owner.signal, signal]) : owner.signal);
-        },
-      }),
-      mount() {
-        const current = new AbortController(); owner = current;
-        return () => { if (owner === current) owner = undefined; current.abort(); };
-      },
-    };
-  }, [client]);
-  useLayoutEffect(() => binding.mount(), [binding]);
-  return binding.client;
+import { useInsertionEffect, useMemo } from "react";
+import { useSynWareContext } from "../SynWareContext";
+import { bindFXFamily } from "../fx/bindFXFamily";
+import { scosSessionsForApp } from "../scos/scosSessionRegistry";
+import { PKFXPaymentAuthorizationController, PKFXError, type PKFXPaymentRequest } from "../../../FX/PassFX/public";
+import { paymentSessionBindings, paymentControllers } from "../../../FX/PassFX/internal/paymentSessionBindings";
+/** A real component-owned PKPaymentAuthorizationController, presented from a user gesture. */
+export function usePayment(paymentRequest: PKFXPaymentRequest): PKFXPaymentAuthorizationController {
+  const context = useSynWareContext();
+  if (!context) throw new PKFXError("unknownError", "usePayment requires a mounted application.");
+  const controller = useMemo(() => {
+    const sessions = scosSessionsForApp(context.appId).filter(candidate => candidate.context === context
+      || (candidate.context.signal === context.signal && candidate.context.runtimeInfo.id === context.runtimeInfo.id));
+    if (sessions.length !== 1) throw new PKFXError("unknownError", `PassKit application session is ${sessions.length ? "ambiguous" : "notRunning"}.`);
+    const session = sessions[0]!;
+    const Bound = bindFXFamily({ PKFXPaymentAuthorizationController }, context.appId).PKFXPaymentAuthorizationController;
+    class ContextController extends Bound {}
+    let ended = false;
+    paymentSessionBindings.set(ContextController, { resolve() {
+      if (context.signal.aborted || !scosSessionsForApp(context.appId).includes(session)) ended = true;
+      if (ended) throw new PKFXError("unknownError", "PassKit application session is ended.");
+      return session;
+    } });
+    return new ContextController(paymentRequest);
+  }, [context, paymentRequest]);
+  useInsertionEffect(() => () => paymentControllers.get(controller)!.dispose(), [controller]);
+  return controller;
 }

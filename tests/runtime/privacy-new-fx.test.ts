@@ -22,15 +22,13 @@ import { describe, expect, it, vi } from "vitest";
 import { createPrivacyStore, type PrivacyApplicationPort, type PrivacyAuthorizationStatus } from "../../src/SynCloudOS/Privacy";
 import { createMountedBluetoothClient } from "../../src/SynCloudOS/AppSDK/mountedBluetoothClient";
 import { createMountedNFCClient } from "../../src/SynCloudOS/AppSDK/mountedNFCClient";
-import { createMountedPaymentClient } from "../../src/SynCloudOS/AppSDK/mountedPaymentClient";
 import { createMountedXRClient } from "../../src/SynCloudOS/AppSDK/mountedXRClient";
 import { NSEData } from "../../src/Foundation/NSEData";
 import { NFXNDEFMessage, type NFXNDEFReading } from "../../src/FX/NFCFX/public";
 import { XRFXConfiguration, type XRFXFrame } from "../../src/FX/XRFX/public";
-import { PKFXPaymentRequest } from "../../src/FX/PassFX/public";
 import type { BTFXPeripheral } from "../../src/FX/BluetoothFX/public";
 
-const families = ["bluetooth", "nfc", "payment", "xr"] as const;
+const families = ["bluetooth", "nfc", "xr"] as const;
 type Family = typeof families[number];
 interface Probe {
   status(): Promise<PrivacyAuthorizationStatus>;
@@ -64,13 +62,6 @@ function probe(family: Family, port: PrivacyApplicationPort, signal: AbortSignal
     const client = createMountedNFCClient({ getCapabilities: () => ({ reading: true, writing: true, makingReadOnly: true }), createReaderSession: () => ({ getAuthorizationStatus: nativeStatus, scan: nativeRequest, write: async () => {}, makeReadOnly: async () => {}, dispose: nativeDispose }) }, signal, () => ["nfc.read", "nfc.write"], () => true, port);
     const session = client.createReaderSession();
     return { capabilities: client.getCapabilities, status: session.getAuthorizationStatus, request: () => session.scan(received), dispose: session.dispose, nativeRequest, nativeDispose, nativeStatus, lateValue: undefined, received, emit: () => reading?.({ serialNumber: "tag", message: new NFXNDEFMessage([]) }) };
-  }
-  if (family === "payment") {
-    const payment = { requestId: "payment", methodName: "https://merchant.example/pay", details: null, payerName: null, payerEmail: null, payerPhone: null, complete: vi.fn(async () => {}) };
-    const nativeRequest = vi.fn(async () => payment);
-    const client = createMountedPaymentClient({ getCapabilities: () => ({ paymentRequest: true }), createAuthorizationController: () => ({ getAuthorizationStatus: nativeStatus, canMakePayments: async () => true, present: nativeRequest, dispose: nativeDispose }) }, signal, () => ["payment.request"], () => true, port);
-    const controller = client.createAuthorizationController(new PKFXPaymentRequest({ currencyCode: "GBP", paymentSummaryItems: [{ label: "Merchant", amount: "1.00" }], paymentMethodData: [{ supportedMethods: "https://merchant.example/pay" }] }));
-    return { capabilities: client.getCapabilities, status: controller.getAuthorizationStatus, request: controller.present, dispose: controller.dispose, nativeRequest, nativeDispose, nativeStatus, lateValue: payment, received };
   }
   let frame: ((value: XRFXFrame) => void) | undefined;
   const capabilities = () => ({ apiAvailable: true, worldTracking: false as const, nativeARKit: false as const });
