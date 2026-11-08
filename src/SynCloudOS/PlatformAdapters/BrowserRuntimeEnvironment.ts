@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { associateXRAdapter } from "../../FX/XRFX/internal/xrPort";
 import { associateBluetoothAdapter } from "../../FX/BluetoothFX/internal/bluetoothPort";
 import { associateNFCAdapter } from "../../FX/NFCFX/internal/nfcPort";
 import { associatePaymentAdapter } from "../../FX/PassFX/internal/paymentPort";
@@ -38,7 +39,7 @@ import { BrowserNFCAdapter, type BrowserNFCAdapterOptions } from "./BrowserNFCAd
 import { BrowserSpeechAdapter } from "./BrowserSpeechAdapter";
 import { BrowserContactsAdapter, type BrowserContactsAdapterOptions } from "./BrowserContactsAdapter";
 import { BrowserPaymentAdapter } from "./BrowserPaymentAdapter";
-import { BrowserXRAdapter, createBrowserXRRenderingLayerFactory, type BrowserXROptions } from "./BrowserXRAdapter";
+import { BrowserXRAdapter, createBrowserXRRenderingLayerFactory, createBrowserXRTransformFactory, type BrowserXROptions } from "./BrowserXRAdapter";
 import { BrowserLocationAdapter } from "./BrowserLocationAdapter";
 import { associateSpeechAdapter } from "../../FX/SpeechFX/internal/speechPort";
 import { associateNetworkAdapter } from "../../FX/NetworkFX/internal/networkPort";
@@ -747,9 +748,6 @@ export function createBrowserRuntimeEnvironment(options: { readonly cursorImages
     videoDecoder: { createBackend: (options) => new BrowserVideoDecoder(options) },
     videoEncoder: { createBackend: () => new BrowserVideoEncoder() },
     videoProcessing: { createBackend: ownerId => createBrowserVideoWorkerTransport(ownerId) },
-    xr: new BrowserXRAdapter({ isSecureContext: browserWindow?.isSecureContext === true,
-      browserNavigator: browserNavigator as unknown as BrowserXROptions["browserNavigator"],
-      createRenderingLayer: browserWindow ? createBrowserXRRenderingLayerFactory(browserWindow) : undefined }),
     location: browserWindow && browserNavigator ? new BrowserLocationAdapter(browserWindow, browserNavigator) : undefined,
     midi: browserNavigator ? new BrowserMIDIAdapter(browserNavigator) : undefined,
     luminaIndex: createBrowserLuminaIndexBackendFactory(undefined, {
@@ -797,6 +795,16 @@ export function createBrowserRuntimeEnvironment(options: { readonly cursorImages
       return () => window.removeEventListener(type, listener as EventListener, options);
     },
   };
+  const xrConstructors = browserWindow as unknown as {
+    XRRay?: new(origin: { x: number; y: number; z: number; w: number }, direction: { x: number; y: number; z: number; w: number }) => unknown;
+    XRRigidTransform?: Parameters<typeof createBrowserXRTransformFactory>[0];
+  } | null;
+  const Ray = xrConstructors?.XRRay;
+  associateXRAdapter(environment, new BrowserXRAdapter({ isSecureContext: browserWindow?.isSecureContext === true,
+    browserNavigator: browserNavigator as unknown as BrowserXROptions["browserNavigator"],
+    createRenderingLayer: browserWindow ? createBrowserXRRenderingLayerFactory(browserWindow) : undefined,
+    createRay: Ray ? (origin, direction) => new Ray({ ...origin, w: 1 }, { ...direction, w: 0 }) : undefined,
+    createTransform: createBrowserXRTransformFactory(xrConstructors?.XRRigidTransform) }));
   associateBluetoothAdapter(environment, new BrowserBluetoothAdapter({ isSecureContext: browserWindow?.isSecureContext === true,
     browserNavigator: browserNavigator as unknown as BrowserBluetoothOptions["browserNavigator"] }));
   associateNFCAdapter(environment, new BrowserNFCAdapter({ isSecureContext: browserWindow?.isSecureContext === true,

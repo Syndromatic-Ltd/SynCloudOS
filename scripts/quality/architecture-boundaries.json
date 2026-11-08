@@ -401,7 +401,7 @@
         "src/SynCloudOS/AppSDK/mountedSpeechPort.ts",
         "src/SynCloudOS/AppSDK/mountedContactsPort.ts",
         "src/SynCloudOS/AppSDK/mountedPaymentPort.ts",
-        "src/SynCloudOS/AppSDK/mountedXRClient.ts"
+        "src/SynCloudOS/AppSDK/mountedXRPort.ts"
       ],
       "mayImportLayers": [
         "app-sdk-host",

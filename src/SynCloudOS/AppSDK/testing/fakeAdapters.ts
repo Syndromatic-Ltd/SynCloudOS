@@ -17,6 +17,10 @@
  * limitations under the License.
  */
 
+import { associateXRAdapter, type XRAdapter, type XRCallbacks } from "../../../FX/XRFX/internal/xrPort";
+import { makeXRCamera, makeXRFrame, makeXRRaycastResult } from "../../../FX/XRFX/internal/xrObjects";
+import { AFXTransform3D } from "../../../FX/AnimationFX/AFXTransform3D";
+import type { XRFXAnchor } from "../../../FX/XRFX/XRFXAnchor";
 import { BTFXUUID } from "../../../FX/BluetoothFX/BTFXUUID";
 import { NSEUUID } from "../../../Foundation/NSEUUID";
 import { associateBluetoothAdapter, type BluetoothAdapter, type BTConnection, type BTCharacteristic } from "../../../FX/BluetoothFX/internal/bluetoothPort";
@@ -530,6 +534,32 @@ export function createDeterministicRuntimeEnvironment(options: {
       }),
     } })),
   };
+  const xrControl = control<"xr.start" | "xr.add" | "xr.remove" | "xr.raycast" | "xr.pause">(clock, denied);
+  const xrRuns = new Set<{ callbacks: XRCallbacks; anchors: Map<string, XRFXAnchor>; signal: AbortSignal }>();
+  const xr = Object.freeze({ ...publicPort(xrControl), activeSessionCount: () => xrRuns.size,
+    endSessions() {
+      for (const run of [...xrRuns]) { xrRuns.delete(run); run.callbacks.ended(); }
+    },
+    emitFrame() {
+      for (const run of [...xrRuns]) {
+        if (run.signal.aborted) continue;
+        run.callbacks.frame(makeXRFrame(clock.now() / 1000, makeXRCamera(AFXTransform3D.translation(1,2,3), new AFXTransform3D(), "notAvailable"), [...run.anchors.values()]));
+      }
+    },
+  });
+  const xrAdapter: XRAdapter = {
+    isSupported: async () => xrControl.mode === "allow",
+    async start(_configuration, signal, callbacks) {
+      const run = { callbacks, signal, anchors: new Map<string, XRFXAnchor>() };
+      await xrControl.run("xr.start", signal, () => { xrRuns.add(run); });
+      return {
+        add: anchor => xrControl.run("xr.add", signal, () => { run.anchors.set(anchor.identifier.uuidString, anchor); }),
+        remove: anchor => xrControl.run("xr.remove", signal, () => { run.anchors.delete(anchor.identifier.uuidString); }),
+        raycast: () => xrControl.run("xr.raycast", signal, () => [makeXRRaycastResult(AFXTransform3D.translation(0,0,-1), "estimatedPlane", "any", null)]),
+        async pause() { xrRuns.delete(run); await xrControl.run("xr.pause", signal, () => {}); },
+      };
+    },
+  };
   const nfcControl = control<"nfc.open" | "nfc.connect" | "nfc.status" | "nfc.read" | "nfc.write" | "nfc.lock">(clock, denied);
   const nfcReaders = new Set<{ events: NFCEvents; signal: AbortSignal }>();
   const nfc = Object.freeze({ ...publicPort(nfcControl), activeSessionCount: () => nfcReaders.size,
@@ -743,6 +773,7 @@ export function createDeterministicRuntimeEnvironment(options: {
     speech,
     contacts,
     bluetooth,
+    xr,
     nfc,
     payment,
     webContent: publicPort(controls.webContent),
@@ -929,6 +960,7 @@ export function createDeterministicRuntimeEnvironment(options: {
   associateNetworkAdapter(environment, networkPaths);
   associateSpeechAdapter(environment, speechAdapter);
   associateContactsAdapter(environment, contactsAdapter);
+  associateXRAdapter(environment, xrAdapter);
   associateBluetoothAdapter(environment, bluetoothAdapter);
   associateNFCAdapter(environment, nfcAdapter);
   associatePaymentAdapter(environment, paymentAdapter);
@@ -958,6 +990,7 @@ export function createDeterministicRuntimeEnvironment(options: {
     },
     dispose() {
       mediaDisposed = true;
+      xrRuns.clear();
       speechListeners.clear();
       paymentPresentations.clear();
       clock.dispose();

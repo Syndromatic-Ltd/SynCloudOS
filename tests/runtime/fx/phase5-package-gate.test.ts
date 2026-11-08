@@ -28,7 +28,7 @@ it("rejects omitted implementations in every reviewed runtime entry", () => {
   expect(() => assertFxRuntimeEntry("network", {})).toThrow(/Empty FX runtime entry/);
   expect(() => assertFxRuntimeEntry("audio", {})).toThrow(/Empty FX runtime entry/);
   expect(() => assertFxRuntimeEntry("private", { accidental: true })).toThrow(/Unknown FX family/);
-  expect(() => assertFxRuntimeEntry("xr", { XRFXConfiguration: class {} })).not.toThrow();
+  expect(() => assertFxRuntimeEntry("xr", { XRFXConfiguration: class {} })).toThrow(/Missing XR runtime class/);
 });
 
 it("requires real Bluetooth and Speech constructors in the strict installed probe", () => {
@@ -37,6 +37,8 @@ it("requires real Bluetooth and Speech constructors in the strict installed prob
   expect(probe).toContain('import { SPFXSpeechRecognizer } from "@syndromatic/syncloudos/fx/speech";');
   expect(probe).toContain("new BTFXCentralManager()");
   expect(probe).toContain("new SPFXSpeechRecognizer()");
+  expect(probe).toContain("new XRFXSession()");
+  expect(probe).toContain("app.xr");
 });
 
 it("admits the registered shared FX artifacts without allowing extra format or style entries", () => {
