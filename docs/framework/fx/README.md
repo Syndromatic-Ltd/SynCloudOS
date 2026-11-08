@@ -25,7 +25,7 @@ Each framework has a short prefix that appears on every public type, so a name t
 | [LocationFX](location.md) | `LFX` | Core Location | `fx/location` | Position, course and authorisation |
 | [LuminaFX](lumina.md) | `LUFX` | Core Spotlight | `fx/lumina` | On-device indexing and search |
 | [CompressionFX](compression.md) | `CPFX` | Compression | `fx/compression` | Apple's input/output closure filters |
-| [NetworkFX](network.md) | `NWFX` | Network | `fx/network` | Scoped path monitoring and browser connection hints |
+| [NetworkFX](network.md) | `NWFX` | Network | `fx/network` | Apple path monitors with app-scoped Dispatch delivery |
 | [CryptoFX](crypto.md) | `CRFX` | CryptoKit | `fx/crypto` | Typed SHA/HMAC/HKDF, AES.GCM, P256/P384/P521 and Curve25519 with Foundation bytes |
 | [DispatchFX](dispatch.md) | `DFX` | Dispatch | `fx/dispatch` | Time, QoS queues, work items, groups, semaphores, delayed submission, sources, specifics and execution preconditions |
 

@@ -75,6 +75,7 @@ import type {
   SynWareTestClock,
   SynWareTestMediaClock,
 } from "./testHostTypes";
+import { associateNetworkAdapter } from "../../../FX/NetworkFX/internal/networkPort";
 import { LFXCoordinate, LFXLocation } from "../../../FX/LocationFX/public";
 import type { LFXAuthorizationStatus } from "../../../FX/LocationFX/public";
 import type { LFXLocationAdapter } from "../../HostServices/AppSDKHostServiceTypes";
@@ -184,12 +185,14 @@ export function createDeterministicScheduler(initial?: string | number | Date): 
 }
 
 interface InternalFakeControl<TOperation extends string> extends SynWareFakeControl<TOperation> {
+  subscribe(listener: () => void): () => void;
   run<T>(operation: TOperation, signal: AbortSignal | undefined, action: () => T | Promise<T>): Promise<T>;
   runSync<T>(operation: TOperation, action: () => T): T;
 }
 
 function runtimeGate<TOperation extends string>(base: InternalFakeControl<TOperation>): RuntimeTestCapabilityControl {
   return Object.freeze({
+    subscribe: base.subscribe,
     run<T>(operation: string, signal: AbortSignal | undefined, action: () => T | Promise<T>) {
       return base.run(operation as TOperation, signal, action);
     },
@@ -226,6 +229,8 @@ function control<TOperation extends string>(clock: SynWareTestClock, options: Fa
   let reason = initialReason;
   let failure = new Error("The fake adapter failed this operation.");
   const history: SynWareFakeCall<TOperation>[] = [];
+  const listeners = new Set<() => void>();
+  const changed = () => { for (const listener of [...listeners]) listener(); };
   const assertAllowed = (signal: AbortSignal | undefined) => {
     if (signal?.aborted) throw abortError("The fake adapter received an aborted operation.");
     if (mode === "deny") throw new DOMException(reason, "SecurityError");
@@ -234,16 +239,18 @@ function control<TOperation extends string>(clock: SynWareTestClock, options: Fa
   };
   return Object.freeze({
     get mode() { return mode; },
-    allow() { mode = "allow"; reason = initialReason; },
-    deny(nextReason = "The fake adapter denied this operation.") { mode = "deny"; reason = nextReason; },
-    fail(error = new Error("The fake adapter failed this operation.")) { mode = "fail"; failure = error; },
-    interrupt(nextReason = "The fake adapter interrupted this operation.") { mode = "interrupt"; reason = nextReason; },
+    subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener); }; },
+    allow() { mode = "allow"; reason = initialReason; changed(); },
+    deny(nextReason = "The fake adapter denied this operation.") { mode = "deny"; reason = nextReason; changed(); },
+    fail(error = new Error("The fake adapter failed this operation.")) { mode = "fail"; failure = error; changed(); },
+    interrupt(nextReason = "The fake adapter interrupted this operation.") { mode = "interrupt"; reason = nextReason; changed(); },
     calls: () => Object.freeze(history.map((entry) => Object.freeze({ ...entry }))),
     reset() {
       mode = initialMode;
       reason = initialReason;
       failure = new Error("The fake adapter failed this operation.");
       history.splice(0);
+      changed();
     },
     async run<T>(operation: TOperation, signal: AbortSignal | undefined, action: () => T | Promise<T>): Promise<T> {
       history.push(Object.freeze({ operation, at: clock.now() }));
@@ -443,6 +450,20 @@ export function createDeterministicRuntimeEnvironment(options: {
   const sessionStorage = createFakeStorageAdapter(clock, "session");
   const denied = { initialMode: "deny" as const, denialReason: "This sensitive fake capability requires an explicit test allow()." };
   const videoCapture = createFakeVideoCapture(clock.now);
+  const networkControl = control<"network.read" | "network.subscribe">(clock, denied);
+  let networkStatus: import("../../../FX/NetworkFX/NWFXPathStatus").NWFXPathStatus = "satisfied";
+  const networkListeners = new Set<(path: import("../../../FX/NetworkFX/internal/networkPort").NetworkPathSnapshot) => void>();
+  const networkPath = () => ({ status: networkStatus, unsatisfiedReason: "notAvailable" as const, isExpensive: false, isConstrained: false,
+    supportsIPv4: true, supportsIPv6: true, supportsDNS: true, interfaceTypes: ["wifi" as const], interfaces: [{ type: "wifi" as const, name: "test0", index: 1 }] });
+  const network = Object.freeze({ ...publicPort(networkControl),
+    setStatus(status: typeof networkStatus) { networkStatus = status; for (const listener of [...networkListeners]) listener(networkPath()); },
+    activeMonitorCount: () => networkListeners.size,
+  });
+  const networkPaths = Object.freeze({ currentPath: () => networkControl.runSync("network.read", networkPath),
+    subscribe(listener: (path: import("../../../FX/NetworkFX/internal/networkPort").NetworkPathSnapshot) => void) {
+      return networkControl.runSync("network.subscribe", () => { networkListeners.add(listener); return { dispose() { networkListeners.delete(listener); } }; });
+    },
+  });
   const locationControl = control<SynWareFakeLocationOperation>(clock, denied);
   let locationStatus: LFXAuthorizationStatus = "unknown";
   const defaultLocation = () => new LFXLocation({
@@ -602,6 +623,7 @@ export function createDeterministicRuntimeEnvironment(options: {
     location,
     midi,
     video: videoCapture.control,
+    network,
     webContent: publicPort(controls.webContent),
   });
   const testControls: RuntimeTestCapabilityControls = Object.freeze({
@@ -783,6 +805,7 @@ export function createDeterministicRuntimeEnvironment(options: {
       });
     },
   } satisfies SynCloudOSRuntimeEnvironment);
+  associateNetworkAdapter(environment, networkPaths);
   return Object.freeze({
     environment,
     clock,

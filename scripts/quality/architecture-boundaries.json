@@ -372,7 +372,7 @@
         "src/SynCloudOS/AppSDK/mountedAudioGraphs.ts",
         "src/SynCloudOS/AppSDK/mountedAudioFiles.ts",
         "src/SynCloudOS/AppSDK/mountedLocationClient.ts",
-        "src/SynCloudOS/AppSDK/mountedNetworkClient.ts",
+        "src/SynCloudOS/AppSDK/mountedNetworkPort.ts",
         "src/SynCloudOS/AppSDK/mountedAudioSpeechClient.ts",
         "src/SynCloudOS/AppSDK/mountedVideoPresentationClient.ts",
         "src/SynCloudOS/AppSDK/mountedLuminaClient.ts",

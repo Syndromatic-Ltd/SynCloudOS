@@ -79,7 +79,7 @@ export interface MountedAppEnvironmentClients {
   readonly media: MEFXMediaClient;
   readonly video: AppVideoClient;
   readonly location: LFXLocationClient;
-  readonly network: import("../../FX/NetworkFX/public").NWFXPathClient;
+  readonly network: import("../../FX/NetworkFX/internal/networkPort").NetworkPort;
   readonly speechSynthesis: import("../../FX/AudioFX/AUFXSpeechSynthesizer").AUFXSpeechClient;
   readonly videoPresentation: import("../../FX/VideoFX/VFXPictureInPictureController").VFXVideoPresentationClient;
   readonly bluetooth: import("../../FX/BluetoothFX/public").BTFXBluetoothClient;

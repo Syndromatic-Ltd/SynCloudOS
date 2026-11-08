@@ -18,59 +18,49 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { NWFXCapabilities, NWFXInterfaceType, NWFXPath } from "../../FX/NetworkFX/NWFXPath";
-import type { NWFXNetworkPathAdapter } from "../../FX/NetworkFX/NWFXPathMonitor";
+import type { NWFXInterfaceType } from "../../FX/NetworkFX/NWFXInterfaceType";
+import { NWFXError } from "../../FX/NetworkFX/NWFXError";
+import type { NetworkPathAdapter, NetworkPathSnapshot } from "../../FX/NetworkFX/internal/networkPort";
 interface NetworkInformation extends Pick<EventTarget, "addEventListener" | "removeEventListener"> {
   readonly type?: string;
-  readonly effectiveType?: string;
-  readonly downlink?: number;
-  readonly rtt?: number;
   readonly saveData?: boolean;
+  readonly metered?: boolean;
 }
 export interface BrowserNetworkPathEnvironment {
   readonly navigator?: { readonly onLine?: boolean; readonly connection?: NetworkInformation };
   readonly eventTarget?: Pick<EventTarget, "addEventListener" | "removeEventListener">;
 }
-const finite = (value: number | undefined) => typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null;
-const transport = (value: string | undefined): NWFXInterfaceType | null => {
-  if (value === "wifi") return "wifi";
-  if (value === "cellular") return "cellular";
+const transport = (value: string | undefined): NWFXInterfaceType | undefined => {
+  if (value === "wifi" || value === "cellular" || value === "other") return value;
   if (value === "ethernet") return "wiredEthernet";
-  if (value === "other") return "other";
-  return null;
+  return undefined;
 };
-export class BrowserNetworkPathAdapter implements NWFXNetworkPathAdapter {
+export class BrowserNetworkPathAdapter implements NetworkPathAdapter {
   constructor(private readonly environment: BrowserNetworkPathEnvironment = {}) {}
-  capabilities(): NWFXCapabilities {
+  currentPath(): NetworkPathSnapshot {
     const nav = this.environment.navigator;
-    return Object.freeze({ pathMonitoring: typeof nav?.onLine === "boolean" && !!this.environment.eventTarget,
-      networkInformation: !!nav?.connection, interfaceType: transport(nav?.connection?.type) !== null,
-      expensive: false, constrained: false, authorizationPrompt: false });
-  }
-  currentPath(): NWFXPath | null {
-    if (!this.capabilities().pathMonitoring) return null;
-    const nav = this.environment.navigator!;
+    if (typeof nav?.onLine !== "boolean" || !this.environment.eventTarget) throw NWFXError.posix(45, "Network path monitoring is unavailable.");
     const info = nav.connection;
-    return Object.freeze({ status: nav.onLine ? "satisfied" : "unsatisfied", interfaceType: transport(info?.type),
-      isExpensive: null, isConstrained: null, saveData: typeof info?.saveData === "boolean" ? info.saveData : null,
-      effectiveType: typeof info?.effectiveType === "string" ? info.effectiveType : null,
-      downlinkMegabitsPerSecond: finite(info?.downlink), roundTripTimeMilliseconds: finite(info?.rtt), source: "browserHint" });
+    const type = transport(info?.type);
+    return Object.freeze({ status: nav.onLine ? "satisfied" : "unsatisfied",
+      ...(type ? { interfaceTypes: Object.freeze([type]) } : {}),
+      ...(type === "cellular" ? { isExpensive: true } : typeof info?.metered === "boolean" ? { isExpensive: info.metered } : {}),
+      ...(typeof info?.saveData === "boolean" ? { isConstrained: info.saveData } : {}),
+    });
   }
-  subscribe(listener: (path: NWFXPath) => void): { dispose(): void } {
-    if (!this.capabilities().pathMonitoring) throw new DOMException("Network path monitoring is unavailable.", "NotSupportedError");
+  subscribe(listener: (path: NetworkPathSnapshot) => void): { dispose(): void } {
+    this.currentPath();
     const target = this.environment.eventTarget!;
     const info = this.environment.navigator?.connection;
     let disposed = false;
-    const update = () => { if (!disposed) { const path = this.currentPath(); if (path) listener(path); } };
-    target.addEventListener("online", update);
-    target.addEventListener("offline", update);
-    info?.addEventListener("change", update);
-    return Object.freeze({ dispose() {
+    const update = () => { if (!disposed) listener(this.currentPath()); };
+    const dispose = () => {
       if (disposed) return;
       disposed = true;
-      target.removeEventListener("online", update);
-      target.removeEventListener("offline", update);
-      info?.removeEventListener("change", update);
-    } });
+      target.removeEventListener("online", update); target.removeEventListener("offline", update); info?.removeEventListener("change", update);
+    };
+    try { target.addEventListener("online", update); target.addEventListener("offline", update); info?.addEventListener("change", update); }
+    catch (error) { dispose(); throw error; }
+    return Object.freeze({ dispose });
   }
 }

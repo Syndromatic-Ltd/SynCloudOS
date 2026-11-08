@@ -36,6 +36,7 @@ import { BrowserContactsAdapter, type BrowserContactsAdapterOptions } from "./Br
 import { BrowserPaymentAdapter, type BrowserPaymentAdapterOptions } from "./BrowserPaymentAdapter";
 import { BrowserXRAdapter, createBrowserXRRenderingLayerFactory, type BrowserXROptions } from "./BrowserXRAdapter";
 import { BrowserLocationAdapter } from "./BrowserLocationAdapter";
+import { associateNetworkAdapter } from "../../FX/NetworkFX/internal/networkPort";
 import { BrowserNetworkPathAdapter } from "./BrowserNetworkPathAdapter";
 import { createBrowserSpeechSynthesisAdapter } from "./BrowserSpeechSynthesisAdapter";
 import { BrowserVideoPresentationAdapter, type BrowserElementCapturePlatform } from "./BrowserVideoPresentationAdapter";
@@ -682,7 +683,7 @@ export function createBrowserRuntimeEnvironment(options: { readonly cursorImages
   const videoPresentation = new BrowserVideoPresentationAdapter(browserWindow?.document ?? null,
     (browserWindow ?? {}) as unknown as BrowserElementCapturePlatform);
   const isNativeProxy = nativeProxyProbe();
-  return {
+  const environment: SynCloudOSRuntimeEnvironment = {
     navigation,
     browser,
     routeSynchronization,
@@ -738,7 +739,6 @@ export function createBrowserRuntimeEnvironment(options: { readonly cursorImages
     videoCapture: new BrowserVideoCaptureAdapter(browserNavigator ? createBrowserVideoCapturePlatform(browserNavigator) : null, videoPresentation),
     videoPresentation,
     speechSynthesis: createBrowserSpeechSynthesisAdapter(browserWindow),
-    networkPaths: new BrowserNetworkPathAdapter({ navigator: browserNavigator ?? undefined, eventTarget: browserWindow ?? undefined }),
     videoDecoder: { createBackend: (options) => new BrowserVideoDecoder(options) },
     videoEncoder: { createBackend: () => new BrowserVideoEncoder() },
     videoProcessing: { createBackend: ownerId => createBrowserVideoWorkerTransport(ownerId) },
@@ -803,4 +803,6 @@ export function createBrowserRuntimeEnvironment(options: { readonly cursorImages
       return () => window.removeEventListener(type, listener as EventListener, options);
     },
   };
+  associateNetworkAdapter(environment, new BrowserNetworkPathAdapter({ navigator: browserNavigator ?? undefined, eventTarget: browserWindow ?? undefined }));
+  return environment;
 }
