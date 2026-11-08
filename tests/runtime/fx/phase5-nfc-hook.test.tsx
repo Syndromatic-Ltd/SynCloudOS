@@ -1,53 +1,34 @@
-/*
- * SynCloudOS
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
- *
- * Designed by Kavish Krishnakumar in Manchester.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
 // @vitest-environment jsdom
-import { StrictMode } from "react";
-import { act, renderHook } from "@testing-library/react";
-import { expect, it, vi } from "vitest";
-import { BrowserNFCAdapter } from "../../../src/SynCloudOS/PlatformAdapters/BrowserNFCAdapter";
-import { createMountedNFCClient } from "../../../src/SynCloudOS/AppSDK/mountedNFCClient";
+import React, { StrictMode, Suspense, useLayoutEffect } from "react";
+import { render, cleanup } from "@testing-library/react";
+import { afterEach, expect, it, vi } from "vitest";
 import { useNFC } from "../../../src/SynCloudOS/AppSDK/hooks/useNFC";
-
-const facade = vi.hoisted(() => ({ current: {} as { nfc?: ReturnType<typeof createMountedNFCClient> } }));
-vi.mock("../../../src/SynCloudOS/AppSDK/scos/useSCOS", () => ({ useSCOS: () => facade.current }));
-
-it("useNFC mounts passively under StrictMode and aborts its sessions at component unmount", async () => {
-  let signal: AbortSignal | undefined;
-  let constructions = 0;
-  class Reader extends EventTarget {
-    constructor() { super(); constructions++; }
-    async scan(options: { signal: AbortSignal }) { signal = options.signal; }
-    async write() {}
-  }
-  facade.current = { nfc: createMountedNFCClient(new BrowserNFCAdapter({ isSecureContext: true, NDEFReader: Reader }), new AbortController().signal, () => ["nfc.read"], () => true) };
-  const hook = renderHook(() => useNFC(), { wrapper: StrictMode });
-  const original = hook.result.current;
-  expect(constructions).toBe(0);
-  hook.rerender();
-  expect(hook.result.current).toBe(original);
-  const session = hook.result.current.createReaderSession();
-  await act(() => session.scan(() => {}));
-  expect(signal?.aborted).toBe(false);
-  hook.unmount();
-  expect(signal?.aborted).toBe(true);
-  await expect(session.scan(() => {})).rejects.toMatchObject({ name: "AbortError" });
-  expect(() => original.createReaderSession()).toThrow("not mounted");
+import * as N from "../../../src/FX/NFCFX/public";
+import { associateNFCPort, type NFCNativeSession, type NFCEvents } from "../../../src/FX/NFCFX/internal/nfcPort";
+import { createMountedNFCPort } from "../../../src/SynCloudOS/AppSDK/mountedNFCPort";
+import { registerSCOSAppSession } from "../../../src/SynCloudOS/AppSDK/scos/scosSessionRegistry";
+import type { SynWareContextValue } from "../../../src/SynCloudOS/AppSDK/appContextTypes";
+const selection = vi.hoisted(() => ({ context: null as unknown }));
+vi.mock("../../../src/SynCloudOS/AppSDK/SynWareContext", () => ({ useSynWareContext: () => selection.context }));
+afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
+it("returns a real NFC session for a branding clone, survives StrictMode, and releases pending scan on true unmount", async () => {
+  const jobs: (() => void)[] = []; vi.stubGlobal("scheduler", { postTask: (job: () => void) => { jobs.push(job); return Promise.resolve(); } });
+  const owner = new AbortController(); let resolve!: (native: NFCNativeSession) => void; let events!: NFCEvents; const invalidate = vi.fn(async () => {});
+  const open = vi.fn((_signal: AbortSignal, value: NFCEvents) => { events = value; return new Promise<NFCNativeSession>(done => { resolve = done; }); });
+  const context = { appId: "com.example.nfc-hook", runtimeInfo: { id: "duplicate" }, signal: owner.signal } as SynWareContextValue; selection.context = { ...context };
+  associateNFCPort(context, createMountedNFCPort({ readingAvailable: true, open }, owner.signal, () => ["nfc.read"], () => true));
+  const unregister = registerSCOSAppSession({ appId: context.appId, displayName: "Hook", version: "1", context }); const other = registerSCOSAppSession({ appId: context.appId, displayName: "Other", version: "1", context: { ...context, signal: new AbortController().signal } });
+  try {
+    let held!: N.NFXNDEFReaderSession; let setups = 0; const received = vi.fn(); const delegate = { readerSessionDidInvalidateWithError: received, readerSessionDidDetectNDEFs: received };
+    function Probe() { held = useNFC(delegate, null, false); useLayoutEffect(() => { setups++; }, []); return null; }
+    const view = render(<StrictMode><Probe /></StrictMode>); expect(setups).toBe(2); expect(held).toBeInstanceOf(N.NFXNDEFReaderSession); expect(open).not.toHaveBeenCalled(); const original = held; view.rerender(<StrictMode><Probe /></StrictMode>); expect(held).toBe(original);
+    held.begin(); expect(open).toHaveBeenCalledOnce(); view.unmount(); resolve({ connect: async () => {}, restartPolling() {}, invalidate });
+    for (let i = 0; i < 30; i++) await Promise.resolve(); events.messages([new N.NFXNDEFMessage([])]); while (jobs.length) jobs.shift()!(); expect(received).not.toHaveBeenCalled(); expect(invalidate).toHaveBeenCalledOnce(); expect(() => held.begin()).toThrow(N.NFXReaderError);
+    const pending = new Promise(() => {}); function Suspended(): React.ReactNode { useNFC(delegate); throw pending; } render(<StrictMode><Suspense fallback={null}><Suspended /></Suspense></StrictMode>); expect(open).toHaveBeenCalledOnce();
+  } finally { owner.abort(); unregister(); other(); }
+});
+it("rejects ambiguous exact mounts instead of picking duplicate runtime IDs", () => {
+  const owner = new AbortController(); const context = { appId: "com.example.nfc-ambiguous", runtimeInfo: { id: "duplicate" }, signal: owner.signal } as SynWareContextValue; selection.context = { ...context };
+  const a = registerSCOSAppSession({ appId: context.appId, displayName: "A", version: "1", context }); const b = registerSCOSAppSession({ appId: context.appId, displayName: "B", version: "1", context: { ...context } });
+  function Probe() { useNFC({ readerSessionDidInvalidateWithError() {} }); return null; } try { expect(() => render(<Probe />)).toThrow(/ambiguous/); } finally { owner.abort(); a(); b(); }
 });

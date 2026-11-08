@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+import { associateNFCPort } from "../../FX/NFCFX/internal/nfcPort";
 import { associatePaymentPort } from "../../FX/PassFX/internal/paymentPort";
 import { associateContactsPort } from "../../FX/ContactsFX/internal/contactsPort";
 import { createAppFileManager } from "./fileManagerClient";
@@ -416,7 +417,6 @@ export function createSynWareContextValue(runtime: SynWareRuntime, branding: Syn
     speechSynthesis: environment.speechSynthesis,
     videoPresentation: environment.videoPresentation,
     bluetooth: environment.bluetooth,
-    nfc: environment.nfc,
     xr: environment.xr,
     midi: environment.midi,
     lumina: environment.lumina,
@@ -427,6 +427,7 @@ export function createSynWareContextValue(runtime: SynWareRuntime, branding: Syn
   associateNetworkPort(context, environment.network);
   associateSpeechPort(context, environment.speech);
   associateContactsPort(context, environment.contacts);
+  associateNFCPort(context, environment.nfc);
   associatePaymentPort(context, environment.payment);
   const unregister = registerSCOSAppSession({ appId: context.appId, ...context.appInfo, context });
   runtime.signal.addEventListener("abort", unregister, { once: true });

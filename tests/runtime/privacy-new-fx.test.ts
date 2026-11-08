@@ -21,14 +21,12 @@
 import { describe, expect, it, vi } from "vitest";
 import { createPrivacyStore, type PrivacyApplicationPort, type PrivacyAuthorizationStatus } from "../../src/SynCloudOS/Privacy";
 import { createMountedBluetoothClient } from "../../src/SynCloudOS/AppSDK/mountedBluetoothClient";
-import { createMountedNFCClient } from "../../src/SynCloudOS/AppSDK/mountedNFCClient";
 import { createMountedXRClient } from "../../src/SynCloudOS/AppSDK/mountedXRClient";
 import { NSEData } from "../../src/Foundation/NSEData";
-import { NFXNDEFMessage, type NFXNDEFReading } from "../../src/FX/NFCFX/public";
 import { XRFXConfiguration, type XRFXFrame } from "../../src/FX/XRFX/public";
 import type { BTFXPeripheral } from "../../src/FX/BluetoothFX/public";
 
-const families = ["bluetooth", "nfc", "xr"] as const;
+const families = ["bluetooth", "xr"] as const;
 type Family = typeof families[number];
 interface Probe {
   status(): Promise<PrivacyAuthorizationStatus>;
@@ -55,13 +53,6 @@ function probe(family: Family, port: PrivacyApplicationPort, signal: AbortSignal
     const manager = client.createCentralManager(); let selected: BTFXPeripheral | undefined;
     return { capabilities: client.getCapabilities, status: manager.getAuthorizationStatus, request: async () => selected = await manager.requestAuthorization({ acceptAllDevices: true }), dispose: manager.dispose, nativeRequest, nativeDispose, nativeStatus, lateValue: peripheral, received,
       startLive: async () => { const service = (await selected!.discoverServices())[0]; const value = (await service.discoverCharacteristics())[0]; await value.setNotifyValue(true, received); }, emit: () => notify?.(NSEData.from(new Uint8Array([2]))) };
-  }
-  if (family === "nfc") {
-    let reading: ((value: NFXNDEFReading) => void) | undefined;
-    const nativeRequest = vi.fn(async (listener: (value: NFXNDEFReading) => void) => { reading = listener; });
-    const client = createMountedNFCClient({ getCapabilities: () => ({ reading: true, writing: true, makingReadOnly: true }), createReaderSession: () => ({ getAuthorizationStatus: nativeStatus, scan: nativeRequest, write: async () => {}, makeReadOnly: async () => {}, dispose: nativeDispose }) }, signal, () => ["nfc.read", "nfc.write"], () => true, port);
-    const session = client.createReaderSession();
-    return { capabilities: client.getCapabilities, status: session.getAuthorizationStatus, request: () => session.scan(received), dispose: session.dispose, nativeRequest, nativeDispose, nativeStatus, lateValue: undefined, received, emit: () => reading?.({ serialNumber: "tag", message: new NFXNDEFMessage([]) }) };
   }
   let frame: ((value: XRFXFrame) => void) | undefined;
   const capabilities = () => ({ apiAvailable: true, worldTracking: false as const, nativeARKit: false as const });

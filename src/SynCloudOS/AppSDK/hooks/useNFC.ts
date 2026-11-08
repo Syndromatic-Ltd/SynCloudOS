@@ -17,29 +17,32 @@
  * limitations under the License.
  */
 
-import { useLayoutEffect, useMemo } from "react";
-import type { NFXNFCClient } from "../../../FX/NFCFX/public";
-import { useSCOS } from "../scos/useSCOS";
-
-/** Passive client with sessions revoked when the component unmounts. */
-export function useNFC(): NFXNFCClient {
-  const client = useSCOS().nfc;
-  const binding = useMemo(() => {
-    let owner: AbortController | undefined;
-    return {
-      client: Object.freeze<NFXNFCClient>({
-        getCapabilities: () => client.getCapabilities(),
-        createReaderSession(signal) {
-          if (!owner) throw new Error("The component NFC owner is not mounted.");
-          return client.createReaderSession(signal ? AbortSignal.any([owner.signal, signal]) : owner.signal);
-        },
-      }),
-      mount() {
-        const current = new AbortController(); owner = current;
-        return () => { if (owner === current) owner = undefined; current.abort(); };
-      },
-    };
-  }, [client]);
-  useLayoutEffect(() => binding.mount(), [binding]);
-  return binding.client;
+import type { DFXQueue } from "../../../FX/DispatchFX/DFXQueue";
+import { useInsertionEffect, useMemo } from "react";
+import { useSynWareContext } from "../SynWareContext";
+import { bindFXFamily } from "../fx/bindFXFamily";
+import { scosSessionsForApp } from "../scos/scosSessionRegistry";
+import { NFXNDEFReaderSession, NFXReaderError, type NFXNDEFReaderSessionDelegate } from "../../../FX/NFCFX/public";
+import { nfcSessionBindings, nfcSessions } from "../../../FX/NFCFX/internal/nfcSessionBindings";
+/** A real component-owned NFCNDEFReaderSession, begun from a user gesture. */
+export function useNFC(delegate: NFXNDEFReaderSessionDelegate, queue: DFXQueue | null = null, invalidateAfterFirstRead = true): NFXNDEFReaderSession {
+  const context = useSynWareContext();
+  if (!context) throw new NFXReaderError("readerTransceiveErrorSessionInvalidated", "useNFC requires a mounted application.");
+  const controller = useMemo(() => {
+    const sessions = scosSessionsForApp(context.appId).filter(candidate => candidate.context === context
+      || (candidate.context.signal === context.signal && candidate.context.runtimeInfo.id === context.runtimeInfo.id));
+    if (sessions.length !== 1) throw new NFXReaderError("readerTransceiveErrorSessionInvalidated", `NFC application session is ${sessions.length ? "ambiguous" : "notRunning"}.`);
+    const session = sessions[0]!;
+    const Bound = bindFXFamily({ NFXNDEFReaderSession }, context.appId).NFXNDEFReaderSession;
+    class ContextController extends Bound {}
+    let ended = false;
+    nfcSessionBindings.set(ContextController, { resolve() {
+      if (context.signal.aborted || !scosSessionsForApp(context.appId).includes(session)) ended = true;
+      if (ended) throw new NFXReaderError("readerTransceiveErrorSessionInvalidated", "NFC application session is ended.");
+      return session;
+    } });
+    return new ContextController(delegate, queue, invalidateAfterFirstRead);
+  }, [context, delegate, queue, invalidateAfterFirstRead]);
+  useInsertionEffect(() => () => nfcSessions.get(controller)!.dispose(), [controller]);
+  return controller;
 }

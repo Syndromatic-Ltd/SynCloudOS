@@ -18,136 +18,53 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { describe, expect, it, vi } from "vitest";
-import { NSEData } from "../../../src/Foundation/NSEData";
-import { NFXNDEFMessage, NFXNDEFPayload } from "../../../src/FX/NFCFX/public";
+import { expect, it, vi } from "vitest";
+import { NFXNDEFMessage, NFXReaderError } from "../../../src/FX/NFCFX/public";
 import { BrowserNFCAdapter } from "../../../src/SynCloudOS/PlatformAdapters/BrowserNFCAdapter";
-import { createMountedNFCClient } from "../../../src/SynCloudOS/AppSDK/mountedNFCClient";
-
+import type { NFCNativeTag } from "../../../src/FX/NFCFX/internal/nfcPort";
 class Reader extends EventTarget {
   static instances: Reader[] = [];
   signal?: AbortSignal;
   scan = vi.fn(async (options: { signal: AbortSignal }) => { this.signal = options.signal; });
-  write = vi.fn(async () => {});
-  makeReadOnly = vi.fn(async () => {});
+  write = vi.fn(async () => {}); makeReadOnly = vi.fn(async () => {});
   constructor() { super(); Reader.instances.push(this); }
-  reading(bytes: Uint8Array) {
-    this.dispatchEvent(Object.assign(new Event("reading"), {
-      serialNumber: "tag", message: { records: [{ recordType: "mime", mediaType: "application/octet-stream", data: new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength), toRecords() { throw new DOMException("Not nested", "NotSupportedError"); } }] },
-    }));
-  }
+  reading(records: unknown[]) { this.dispatchEvent(Object.assign(new Event("reading"), { serialNumber: "tag", message: { records } })); }
 }
+const view = (bytes: Uint8Array) => new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+it("copies browser binary byte ranges, retains opaque containers and delivers lossless text NDEF", async () => {
+  const owner = new AbortController(); const messages = vi.fn(); const error = vi.fn(); const tags = vi.fn();
+  const native = await new BrowserNFCAdapter({ isSecureContext: true, NDEFReader: Reader }).open(owner.signal, { messages, tags, error });
+  const bytes = new Uint8Array([0, 7, 8, 0]); const reader = Reader.instances.at(-1)!;
+  reader.reading([{ recordType: "mime", mediaType: "application/octet-stream", data: view(bytes.subarray(1, 3)) }, { recordType: "text", encoding: "utf-8", lang: "en", data: view(new TextEncoder().encode("Hi")) }, { recordType: "example.com:opaque", data: view(new Uint8Array([1, 2])) }, { recordType: "smart-poster", data: view(new Uint8Array([0xd1, 1, 1, 0x55, 0])) }]); bytes.fill(99);
+  const records = (messages.mock.calls[0]![0][0] as NFXNDEFMessage).records;
+  expect([...records[0]!.payload.bytes]).toEqual([7, 8]); expect([...records[1]!.payload.bytes]).toEqual([2, 101, 110, 72, 105]); expect([...records[2]!.type.bytes]).toEqual([...new TextEncoder().encode("example.com:opaque")]); expect([...records[3]!.payload.bytes]).toEqual([0xd1, 1, 1, 0x55, 0]); expect(error).not.toHaveBeenCalled(); await native.invalidate(); expect(reader.signal?.aborted).toBe(true);
+});
+it("truthfully rejects addressed operations without invoking next-presented-tag write/lock APIs", async () => {
+  const tags = vi.fn(); const native = await new BrowserNFCAdapter({ isSecureContext: true, NDEFReader: Reader }).open(new AbortController().signal, { messages() {}, tags, error() {} }); const reader = Reader.instances.at(-1)!; reader.reading([{ recordType: "empty" }]); const tag = tags.mock.calls[0]![0][0] as NFCNativeTag;
+  expect(tag.isAvailable).toBe(false); for (const action of [() => native.connect(tag), () => tag.queryNDEFStatus(), () => tag.readNDEF(), () => tag.writeNDEF(new NFXNDEFMessage([])), () => tag.writeLock()]) await expect(action()).rejects.toMatchObject({ code: "readerErrorUnsupportedFeature" });
+  expect(reader.write).not.toHaveBeenCalled(); expect(reader.makeReadOnly).not.toHaveBeenCalled(); native.restartPolling(); await native.invalidate();
+});
+it("keeps availability passive and preserves raw insecure/native denial for the privacy owner", async () => {
+  const count = Reader.instances.length; const adapter = new BrowserNFCAdapter({ isSecureContext: true, NDEFReader: Reader }); expect(adapter.readingAvailable).toBe(true); expect(Reader.instances.length).toBe(count);
+  const insecure = new BrowserNFCAdapter({ isSecureContext: false, NDEFReader: Reader }); expect(insecure.readingAvailable).toBe(false); await expect(insecure.open(new AbortController().signal, { messages() {}, tags() {}, error() {} })).rejects.toMatchObject({ name: "SecurityError" });
+  class Denied extends Reader { override scan = vi.fn(async () => { throw new DOMException("Denied", "NotAllowedError"); }); } await expect(new BrowserNFCAdapter({ isSecureContext: true, NDEFReader: Denied }).open(new AbortController().signal, { messages() {}, tags() {}, error() {} })).rejects.toMatchObject({ name: "NotAllowedError" });
+});
+it("aborts pending scans promptly and removes reading/error listeners", async () => {
+  class Pending extends Reader { override scan = vi.fn(() => new Promise<void>(() => {})); }
+  const owner = new AbortController(); const received = vi.fn(); const pending = new BrowserNFCAdapter({ isSecureContext: true, NDEFReader: Pending }).open(owner.signal, { messages: received, tags: received, error: received }); const reader = Reader.instances.at(-1)!; owner.abort(); await expect(pending).rejects.toMatchObject({ name: "AbortError" }); reader.reading([{ recordType: "empty" }]); reader.dispatchEvent(new Event("readingerror")); expect(received).not.toHaveBeenCalled();
+});
+it.each([{ recordType: "text", encoding: "utf-8", lang: "en", data: view(new Uint8Array([0xff])) }, { recordType: "mime", mediaType: "a/b", id: "\ufffd", data: view(new Uint8Array([1])) }, { recordType: "url", data: view(new TextEncoder().encode("not a URL")) }, { recordType: "unknown-local" }])("rejects malformed or unrepresentable browser records as NFXReaderError", async record => {
+  const error = vi.fn(); const messages = vi.fn(); const native = await new BrowserNFCAdapter({ isSecureContext: true, NDEFReader: Reader }).open(new AbortController().signal, { messages, tags() {}, error }); Reader.instances.at(-1)!.reading([record]); expect(error).toHaveBeenCalledWith(expect.any(NFXReaderError)); expect(messages).not.toHaveBeenCalled(); await native.invalidate();
+});
+it("forwards browser reading failure then suppresses events after invalidation", async () => {
+  const error = vi.fn(); const native = await new BrowserNFCAdapter({ isSecureContext: true, NDEFReader: Reader }).open(new AbortController().signal, { messages() {}, tags() {}, error }); const reader = Reader.instances.at(-1)!; reader.dispatchEvent(new Event("readingerror")); expect(error).toHaveBeenCalledWith(expect.objectContaining({ name: "NotReadableError" })); await native.invalidate(); reader.dispatchEvent(new Event("readingerror")); expect(error).toHaveBeenCalledOnce();
+});
 
-describe("phase 5 NFC", () => {
-  it("copies NDEF payload bytes at the value and browser event boundaries", async () => {
-    const bytes = new Uint8Array([1, 2, 3]);
-    const message = new NFXNDEFMessage([new NFXNDEFPayload({ recordType: "mime", data: bytes })]);
-    bytes[0] = 9;
-    expect((message.records[0].data as NSEData).bytes[0]).toBe(1);
-    const session = new BrowserNFCAdapter({ isSecureContext: true, NDEFReader: Reader }).createReaderSession();
-    const readings: NFXNDEFMessage[] = [];
-    await session.scan(reading => readings.push(reading.message));
-    Reader.instances.at(-1)!.reading(bytes.subarray(1));
-    bytes.fill(8);
-    expect((readings[0].records[0].data as NSEData).bytes).toEqual(new Uint8Array([2, 3]));
-    session.dispose();
-  });
-
-  it("inspection is passive and missing or insecure Web NFC is unavailable", async () => {
-    const query = vi.fn(async () => ({ state: "prompt" as const }));
-    const adapter = new BrowserNFCAdapter({ isSecureContext: true, NDEFReader: Reader, permissions: { query } });
-    const count = Reader.instances.length;
-    expect(adapter.getCapabilities().reading).toBe(true);
-    expect(Reader.instances.length).toBe(count);
-    expect(query).not.toHaveBeenCalled();
-    const session = adapter.createReaderSession();
-    expect(await session.getAuthorizationStatus()).toBe("prompt");
-    expect(Reader.instances.length).toBe(count);
-    const missing = new BrowserNFCAdapter({ isSecureContext: false, NDEFReader: Reader }).createReaderSession();
-    expect(await missing.getAuthorizationStatus()).toBe("unavailable");
-    await expect(missing.scan(() => {})).rejects.toMatchObject({ name: "SecurityError" });
-    session.dispose(); missing.dispose();
-  });
-
-  it("rechecks read/write declarations and policy, and unmount stops delivery", async () => {
-    let permissions = ["nfc.read"];
-    let allowed = true;
-    const mount = new AbortController();
-    const client = createMountedNFCClient(new BrowserNFCAdapter({ isSecureContext: true, NDEFReader: Reader }), mount.signal, () => permissions, () => allowed);
-    const session = client.createReaderSession();
-    const listener = vi.fn();
-    await session.scan(listener);
-    const reader = Reader.instances.at(-1)!;
-    await expect(session.write(new NFXNDEFMessage([]))).rejects.toMatchObject({ name: "SecurityError" });
-    permissions = ["nfc.read", "nfc.write"];
-    await session.write(new NFXNDEFMessage([new NFXNDEFPayload({ recordType: "text", data: "hello" })]));
-    expect(reader.write).toHaveBeenCalledTimes(1);
-    allowed = false;
-    await expect(session.makeReadOnly()).rejects.toMatchObject({ name: "SecurityError" });
-    reader.reading(new Uint8Array([1]));
-    expect(listener).not.toHaveBeenCalled();
-    await expect(session.makeReadOnly()).rejects.toMatchObject({ name: "AbortError" });
-    mount.abort();
-    expect(reader.signal?.aborted).toBe(true);
-    expect(await session.getAuthorizationStatus()).toBe("unavailable");
-  });
-
-  it("aborting a pending scan rejects promptly and removes event handlers", async () => {
-    class PendingReader extends Reader { override scan = vi.fn(() => new Promise<void>(() => {})); }
-    const owner = new AbortController();
-    const session = new BrowserNFCAdapter({ isSecureContext: true, NDEFReader: PendingReader }).createReaderSession(owner.signal);
-    const listener = vi.fn();
-    const pending = session.scan(listener);
-    owner.abort();
-    await expect(pending).rejects.toMatchObject({ name: "AbortError" });
-    Reader.instances.at(-1)!.reading(new Uint8Array([1]));
-    expect(listener).not.toHaveBeenCalled();
-  });
-
-  it("writes nested and binary NDEF data without starting a scan", async () => {
-    const session = new BrowserNFCAdapter({ isSecureContext: true, NDEFReader: Reader }).createReaderSession();
-    const bytes = new Uint8Array([7]);
-    await session.write(new NFXNDEFMessage([{ recordType: "smart-poster", data: new NFXNDEFMessage([{ recordType: "mime", data: bytes }]) }]), { overwrite: false });
-    const reader = Reader.instances.at(-1)!;
-    expect(reader.scan).not.toHaveBeenCalled();
-    expect(reader.write).toHaveBeenCalledWith({ records: [expect.objectContaining({ recordType: "smart-poster", data: { records: [expect.objectContaining({ recordType: "mime", data: new Uint8Array([7]) })] } })] }, expect.objectContaining({ overwrite: false, signal: expect.any(AbortSignal) }));
-    await session.makeReadOnly();
-    expect(reader.makeReadOnly).toHaveBeenCalledWith({ signal: expect.any(AbortSignal) });
-    session.dispose();
-  });
-
-  it("returns unknown for an unimplemented browser permission descriptor", async () => {
-    const session = new BrowserNFCAdapter({ isSecureContext: true, NDEFReader: Reader, permissions: { query: async () => { throw new TypeError("Unsupported permission"); } } }).createReaderSession();
-    expect(await session.getAuthorizationStatus()).toBe("unknown");
-    session.dispose();
-  });
-
-  it("forwards reading errors and forbids two active scans on a session", async () => {
-    const session = new BrowserNFCAdapter({ isSecureContext: true, NDEFReader: Reader }).createReaderSession();
-    const onError = vi.fn();
-    await session.scan(() => {}, onError);
-    Reader.instances.at(-1)!.dispatchEvent(new Event("readingerror"));
-    expect(onError).toHaveBeenCalledWith(expect.objectContaining({ name: "NotReadableError" }));
-    await expect(session.scan(() => {})).rejects.toMatchObject({ name: "InvalidStateError" });
-    session.dispose();
-  });
-
-  it("parses nested NDEF only for container types and preserves opaque external bytes", async () => {
-    const session = new BrowserNFCAdapter({ isSecureContext: true, NDEFReader: Reader }).createReaderSession();
-    const listener = vi.fn();
-    const notNested = vi.fn(() => { throw new DOMException("Not nested", "NotSupportedError"); });
-    const opaque = new DataView(new Uint8Array([7, 8]).buffer);
-    await session.scan(listener);
-    Reader.instances.at(-1)!.dispatchEvent(Object.assign(new Event("reading"), { serialNumber: "tag", message: { records: [
-      { recordType: "text", data: opaque, toRecords: notNested },
-      { recordType: "smart-poster", data: opaque, toRecords: () => [{ recordType: "url", data: opaque, toRecords: notNested }] },
-      { recordType: "example.com:opaque", data: opaque, toRecords: () => { throw new DOMException("Opaque", "SyntaxError"); } },
-    ] } }));
-    expect(notNested).not.toHaveBeenCalled();
-    expect(listener).toHaveBeenCalledOnce();
-    const message = listener.mock.calls[0][0].message as NFXNDEFMessage;
-    expect(message.records[1].data).toBeInstanceOf(NFXNDEFMessage);
-    expect((message.records[2].data as NSEData).bytes).toEqual(new Uint8Array([7, 8]));
-    session.dispose();
-  });
+it.each(["utf-16be", "utf-16"])("preserves text language casing and %s bytes without canonical re-encoding", async encoding => {
+  const messages = vi.fn(); const error = vi.fn(); const native = await new BrowserNFCAdapter({ isSecureContext: true, NDEFReader: Reader }).open(new AbortController().signal, { messages, tags() {}, error });
+  Reader.instances.at(-1)!.reading([{ recordType: "text", encoding, lang: "EN-us", data: view(new Uint8Array([0xfe, 0xff, 0, 65])) }]);
+  expect(error).not.toHaveBeenCalled(); expect([...messages.mock.calls[0]![0][0].records[0].payload.bytes]).toEqual([0x85, 69, 78, 45, 117, 115, 0xfe, 0xff, 0, 65]); await native.invalidate();
+});
+it("rejects URI normalization because original prefix bytes cannot be recovered", async () => {
+  const messages = vi.fn(); const error = vi.fn(); const native = await new BrowserNFCAdapter({ isSecureContext: true, NDEFReader: Reader }).open(new AbortController().signal, { messages, tags() {}, error }); Reader.instances.at(-1)!.reading([{ recordType: "url", data: view(new TextEncoder().encode("https://www.example.com/")) }]); expect(error).toHaveBeenCalledWith(expect.objectContaining({ code: "readerErrorUnsupportedFeature" })); expect(messages).not.toHaveBeenCalled(); await native.invalidate();
 });

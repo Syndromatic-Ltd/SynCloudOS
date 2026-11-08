@@ -403,7 +403,6 @@ export interface SynCloudOSRuntimeEnvironment {
   readonly motion?: MFXMotionAdapter;
   readonly location?: LFXLocationAdapter;
   readonly bluetooth?: import("../../FX/BluetoothFX/public").BTFXBluetoothClient;
-  readonly nfc?: import("../../FX/NFCFX/public").NFXNFCClient;
   readonly xr?: import("../../FX/XRFX/public").XRFXClient;
   readonly midi?: MIDIAdapter;
   /** Environment-owned camera/display capture authority. Mounted apps never receive this host directly. */
