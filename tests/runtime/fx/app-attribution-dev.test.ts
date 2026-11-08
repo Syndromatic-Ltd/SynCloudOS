@@ -61,6 +61,7 @@ it("keeps attributed classes and sessions in one installed SDK graph with real d
     const expectedCase = { paymentsType: "boolean", boundMonitor: true, baseMonitor: true, boundQueue: true, baseQueue: true, stableMain: true, sameQueue: true };
     expect(initial.first).toEqual({ version: "before HMR", appID: "com.example.dev-attribution", sharedPreferences: "shared session", separateBoundClasses: true, sameApplication: true, cases: [expectedCase, expectedCase, expectedCase] });
     expect(server.noDiscovery).not.toBe(true);
+    expect(server.include.filter((id: string) => id === "@syndromatic/syncloudos" || id.startsWith("@syndromatic/syncloudos/"))).toEqual([]);
     expect(requests.some(url => /\/node_modules\/.vite\/deps\/react(?:_dom_client|_jsx-runtime)?\.js/.test(url))).toBe(true);
     expect(requests.some(url => new URL(url).pathname.endsWith("/node_modules/.vite/deps/react-dom.js"))).toBe(true);
     expect(requests.filter(url => /\/node_modules\/.vite\/deps\/@syndromatic_syncloudos/.test(url))).toEqual([]);
@@ -81,7 +82,7 @@ it("keeps attributed classes and sessions in one installed SDK graph with real d
     verifyInstalledSdkResources(consumer.installed, consumer.manifest);
     writeFileSync(resolve("docs/superpowers/evidence/2026-11-08-fx-fidelity/dev-binding-installed.json"), JSON.stringify({
       archiveSha256: consumer.archiveSha256, sourceSha256: consumer.sourceSha256, resourcesSha256: consumer.resourcesSha256, integrity: consumer.integrity,
-      installedOutsideRepository: true, linked: false, browser: "chromium", realDevServer: true, optimizerEnabled: true, strictInstalledTypes: true,
+      installedOutsideRepository: true, linked: false, browser: "chromium", realDevServer: true, optimizerEnabled: true, strictInstalledTypes: true, explicitHostSDKIncludesSanitised: true,
       unrelatedReactOptimized: true, reactDomOptimized: true, sdkOptimized: false, awaitTimerCallbackCases: 3, sharedBaseIdentity: true, sharedContext: true,
       hmrLiveMethodUpdate: true, hmrPreservedPageAndApplication: true, terminalSession: true, resourceIntegrityAfterProof: true, devServerLog: serverLog,
     }, null, 2) + "\n");
