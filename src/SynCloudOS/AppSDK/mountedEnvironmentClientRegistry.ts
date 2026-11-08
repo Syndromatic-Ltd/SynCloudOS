@@ -85,7 +85,7 @@ export interface MountedAppEnvironmentClients {
   readonly bluetooth: import("../../FX/BluetoothFX/public").BTFXBluetoothClient;
   readonly nfc: import("../../FX/NFCFX/public").NFXNFCClient;
   readonly speech: import("../../FX/SpeechFX/internal/speechPort").SpeechPort;
-  readonly contacts: import("../../FX/ContactsFX/public").CNFXContactsClient;
+  readonly contacts: import("../../FX/ContactsFX/internal/contactsPort").ContactsPort;
   readonly payment: import("../../FX/PassFX/public").PKFXPaymentClient;
   readonly xr: import("../../FX/XRFX/public").XRFXClient;
   readonly midi: MIFXClient;

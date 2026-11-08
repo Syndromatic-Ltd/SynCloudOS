@@ -1,68 +1,35 @@
-/*
- * SynCloudOS
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
- *
+/* SynCloudOS - Copyright © 2026 Syndromatic Ltd. All rights reserved.
  * Designed by Kavish Krishnakumar in Manchester.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-
-import type { CNFXContact } from "./CNFXContact";
-import type { CNFXContactRequest, CNFXContactStore } from "./CNFXContactStore";
-
-/** Owns a browser system picker request; no NSE or native view is rendered. */
-export class CNFXContactPickerViewController {
-  private readonly owner = new AbortController();
-  private readonly request: CNFXContactRequest;
-  private presenting = false;
-
-  constructor(private readonly store: CNFXContactStore, request: CNFXContactRequest = {}) {
-    this.request = Object.freeze({ ...request, properties: request.properties ? Object.freeze([...request.properties]) : undefined });
+import { NSEViewController } from "../../NSE/Application/NSEViewController";
+import { nativePresentations } from "../../NSE/Application/nativePresentation";
+import { fxAttributedClass, observeFXSessionEnd } from "../../SynCloudOS/fxRuntimeContracts";
+import { dispatchQueueForSession } from "../DispatchFX/internal/sessionBinding";
+import { CNFXError } from "./CNFXError";
+import type { CNFXContactPickerDelegate } from "./CNFXContactPickerDelegate";
+import { contactBinding } from "./internal/contactsSessionBindings";
+import { contactsPortFor } from "./internal/contactsPort";
+/** CNContactPickerViewController. Present using NSEViewController's existing presentation methods.
+ * Browser dialogs cannot be dismissed programmatically; disposal drops all pending results. */
+export class CNFXContactPickerViewController extends NSEViewController {
+  #binding; #session; #port; #generation; #owner = new AbortController();
+  #releaseSession: (() => void) | undefined; #releaseAccess: (() => void) | undefined;
+  #keys: readonly string[] = Object.freeze(["givenName", "emailAddresses", "phoneNumbers"]);
+  delegate: CNFXContactPickerDelegate | null = null;
+  constructor() { const binding = contactBinding(new.target); const session = binding.resolve(); super({ ownerSignal: session.context.signal }); this.#binding = binding; this.#session = session; this.#port = contactsPortFor(this.#session.context); this.#generation = this.#port.generation; nativePresentations.set(this, () => this.#begin()); this.#releaseSession = observeFXSessionEnd(this.#session, () => this.dispose()); }
+  get displayedPropertyKeys(): readonly string[] { return this.#keys; }
+  set displayedPropertyKeys(value: readonly string[]) { this.#keys = Object.freeze([...value]); }
+  #live(): boolean { try { this.#binding.resolve(); this.#port.assertAccess(this.#generation); return !this.isDisposed && !this.#owner.signal.aborted; } catch { return false; } }
+  #begin(): void {
+    this.#binding.resolve(); this.#port.assertAccess(this.#generation);
+    if (this.isDisposed || this.#owner.signal.aborted) throw new CNFXError("communicationError", "This contact picker has ended.");
+    this.#releaseAccess = this.#port.observeAccessLoss(() => this.dispose());
+    const multiple = typeof this.delegate?.contactPickerDidSelectContacts === "function";
+    const pending = this.#port.select(this.#keys, multiple, this.#owner.signal);
+    const deliver = (work: () => void) => { if (!this.#live()) return; dispatchQueueForSession(this.#session).main.async(() => { if (!this.#live()) return; try { work(); } finally { this.dismiss(); } }); };
+    void pending.then(contacts => deliver(() => { if (!contacts.length) this.delegate?.contactPickerDidCancel?.(this); else if (multiple) this.delegate?.contactPickerDidSelectContacts?.(this, contacts); else this.delegate?.contactPickerDidSelectContact?.(this, contacts[0]!); }), () => deliver(() => this.delegate?.contactPickerDidCancel?.(this)));
   }
-
-  async present(): Promise<readonly CNFXContact[]> {
-    this.owner.signal.throwIfAborted();
-    this.request.signal?.throwIfAborted();
-    if (this.presenting) throw new DOMException("The contact picker is already presented.", "InvalidStateError");
-    this.presenting = true;
-    const operation = new AbortController();
-    return new Promise<readonly CNFXContact[]>((resolve, reject) => {
-      let settled = false;
-      const cleanup = () => {
-        this.presenting = false;
-        this.owner.signal.removeEventListener("abort", abort);
-        this.request.signal?.removeEventListener("abort", abort);
-      };
-      const fail = (error: unknown) => { if (settled) return; settled = true; cleanup(); reject(error); };
-      const abort = () => {
-        const reason = this.owner.signal.aborted ? this.owner.signal.reason : this.request.signal?.reason;
-        fail(reason);
-        operation.abort(reason);
-      };
-      this.owner.signal.addEventListener("abort", abort, { once: true });
-      this.request.signal?.addEventListener("abort", abort, { once: true });
-      try {
-        this.store.requestAccess({ ...this.request, signal: operation.signal }).then(contacts => {
-          if (settled) return;
-          settled = true; cleanup(); resolve(contacts);
-        }, fail);
-      } catch (error) { fail(error); }
-    });
-  }
-
-  /** Cancels app work; the browser may leave its system dialog visible. */
-  dispose(): void {
-    if (!this.owner.signal.aborted) this.owner.abort(new DOMException("The contact picker was disposed.", "AbortError"));
-  }
+  protected override didDispose(): void { this.#owner.abort(); this.#releaseSession?.(); this.#releaseSession = undefined; this.#releaseAccess?.(); this.#releaseAccess = undefined; nativePresentations.delete(this); super.didDispose(); }
 }
+Object.defineProperty(CNFXContactPickerViewController, fxAttributedClass, { value: true });

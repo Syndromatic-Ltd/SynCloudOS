@@ -68,7 +68,7 @@ CompressionFX is also a direct library: its input/output filters use read/write 
 | `useBluetooth` | Central manager | `bluetooth.access` |
 | `useNFC` | NDEF session factory | `nfc.read`, `nfc.write` |
 | `useSpeech` | Recognizer | `speech.recognize` |
-| `useContacts` | Contact store and picker | `contacts.select` |
+| `useContacts` | Real CNFXContactStore; selection via NSE-presented picker | `contacts.select` |
 | `usePayment` | Payment controller factory | `payment.request` |
 | `useXR` | WebXR session | `xr.session` |
 | `useLocation` | Location manager | `location.read`, `location.request` |

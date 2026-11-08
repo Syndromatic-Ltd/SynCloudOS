@@ -282,12 +282,22 @@
       }
     },
     {
+      "id": "contacts-ui",
+      "include": ["src/FX/ContactsFX/CNFXContactPickerViewController.ts"],
+      "mayImportLayers": ["fx", "runtime", "nse"],
+      "mayImportEntrypoints": {
+        "runtime": ["src/SynCloudOS/fxRuntimeContracts.ts"],
+        "nse": ["src/NSE/Application/NSEViewController.ts", "src/NSE/Application/nativePresentation.ts"]
+      }
+    },
+    {
       "id": "fx",
       "include": [
         "src/FX/**"
       ],
       "mayImportLayers": [
         "fx",
+        "contacts-ui",
         "runtime",
         "foundation"
       ],
@@ -389,7 +399,7 @@
         "src/SynCloudOS/AppSDK/mountedBluetoothClient.ts",
         "src/SynCloudOS/AppSDK/mountedNFCClient.ts",
         "src/SynCloudOS/AppSDK/mountedSpeechPort.ts",
-        "src/SynCloudOS/AppSDK/mountedContactsClient.ts",
+        "src/SynCloudOS/AppSDK/mountedContactsPort.ts",
         "src/SynCloudOS/AppSDK/mountedPaymentClient.ts",
         "src/SynCloudOS/AppSDK/mountedXRClient.ts"
       ],

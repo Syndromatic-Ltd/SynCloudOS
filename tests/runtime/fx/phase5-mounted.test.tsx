@@ -20,6 +20,7 @@
 
 // @vitest-environment jsdom
 import React from "react";
+import { CNFXContactStore } from "../../../src/FX/ContactsFX/public";
 import { expect, it } from "vitest";
 import { createSynWare, useBluetooth, useNFC, useSpeech, useContacts, usePayment, useXR, useSCOS } from "../../../src/SynCloudOS/AppSDK";
 import { createSynWareTestHost } from "../../../src/SynCloudOS/AppSDK/testing";
@@ -42,16 +43,18 @@ it("projects mounted clients and the real Speech recognizer and revokes componen
   const host = createSynWareTestHost({ app, document, strictMode: true });
   host.adapters.permissions.allow(); host.adapters.policy.allow();
   await host.render();
-  for (const name of ["bluetooth", "nfc", "contacts", "payment", "xr"] as const)
+  for (const name of ["bluetooth", "nfc", "payment", "xr"] as const)
     expect(typeof owners.session[name].getCapabilities).toBe("function");
   expect("speech" in owners.session).toBe(false);
+  expect("contacts" in owners.session).toBe(false);
+  expect(owners.contacts).toBeInstanceOf(CNFXContactStore);
   expect(await owners.bluetooth.getAuthorizationStatus()).toBe("unavailable");
   expect(owners.speech.isAvailable).toBe(false);
-  expect(await owners.contacts.getAuthorizationStatus()).toBe("unavailable");
+  expect(() => owners.contacts.unifiedContacts(null, [])).toThrow();
   expect(await owners.xr.getAuthorizationStatus()).toBe("unavailable");
   await host.dispose();
   expect(owners.bluetooth.getCapabilities().apiAvailable).toBe(false);
   expect(owners.xr.getCapabilities().apiAvailable).toBe(false);
   expect(owners.speech.isAvailable).toBe(false);
-  expect(await owners.contacts.getAuthorizationStatus()).toBe("unavailable");
+  expect(() => owners.contacts.unifiedContacts(null, [])).toThrow();
 });

@@ -19,37 +19,25 @@
  */
 
 // @vitest-environment jsdom
-import React, { StrictMode, Suspense } from "react";
-import { cleanup, render } from "@testing-library/react";
+import React, { StrictMode, Suspense, useLayoutEffect } from "react";
+import { render, cleanup } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
-import type { CNFXContactStore } from "../../../src/FX/ContactsFX/public";
 import { useContacts } from "../../../src/SynCloudOS/AppSDK/hooks/useContacts";
-
-const context = vi.hoisted(() => ({ contacts: { createContactStore: vi.fn() } }));
-vi.mock("../../../src/SynCloudOS/AppSDK/scos/useSCOS", () => ({ useSCOS: () => context }));
-afterEach(cleanup);
-
-it("creates component owners at commit and disposes Contacts through StrictMode replay", () => {
-  const contactOwners: { signal: AbortSignal; dispose: ReturnType<typeof vi.fn> }[] = [];
-  context.contacts.createContactStore.mockImplementation((signal: AbortSignal) => {
-    const dispose = vi.fn(); contactOwners.push({ signal, dispose });
-    return { dispose };
-  });
-  let contacts!: CNFXContactStore;
-  function Probe() { contacts = useContacts(); return null; }
-  const view = render(<StrictMode><Probe /></StrictMode>);
-  expect(contactOwners).toHaveLength(2);
-  expect(contactOwners[0]!.signal.aborted).toBe(true);
-  expect(contactOwners[1]!.signal.aborted).toBe(false);
-  view.unmount();
-  expect(contactOwners.every(owner => owner.dispose.mock.calls.length === 1)).toBe(true);
-  expect(contacts.getCapabilities().contactPicker).toBe(false);
+import { CNFXContactStore } from "../../../src/FX/ContactsFX/public";
+import { associateContactsPort } from "../../../src/FX/ContactsFX/internal/contactsPort";
+import { createMountedContactsPort } from "../../../src/SynCloudOS/AppSDK/mountedContactsPort";
+import { registerSCOSAppSession } from "../../../src/SynCloudOS/AppSDK/scos/scosSessionRegistry";
+import type { SynWareContextValue } from "../../../src/SynCloudOS/AppSDK/appContextTypes";
+const selection=vi.hoisted(()=>({context:null as unknown}));
+vi.mock("../../../src/SynCloudOS/AppSDK/SynWareContext",()=>({useSynWareContext:()=>selection.context}));
+afterEach(()=>{cleanup();vi.unstubAllGlobals();});
+it("retains a real per-app store through StrictMode replay and drops queued work on true unmount",()=>{
+ const jobs:(()=>void)[]=[];vi.stubGlobal("scheduler",{postTask:(job:()=>void)=>{jobs.push(job);return Promise.resolve();}});
+ const owner=new AbortController();const select=vi.fn(async()=>[]);const context={appId:"com.example.contacts-hook",runtimeInfo:{id:"hook"},signal:owner.signal} as SynWareContextValue;selection.context={...context};associateContactsPort(context,createMountedContactsPort({available:true,select},owner.signal,()=>["contacts.select"],()=>true));
+ const unregister=registerSCOSAppSession({appId:context.appId,displayName:"Hook",version:"1",context});const other=registerSCOSAppSession({appId:context.appId,displayName:"Other",version:"1",context:{...context,signal:new AbortController().signal}});
+ try{let held!:CNFXContactStore;let setups=0;const received=vi.fn();function Probe(){held=useContacts();useLayoutEffect(()=>{setups++;},[]);return null;}
+ const view=render(<StrictMode><Probe/></StrictMode>);expect(setups).toBe(2);expect(held).toBeInstanceOf(CNFXContactStore);held.requestAccess("contacts",received);while(jobs.length)jobs.shift()!();expect(received).toHaveBeenCalledOnce();held.requestAccess("contacts",received);view.unmount();while(jobs.length)jobs.shift()!();expect(received).toHaveBeenCalledOnce();expect(()=>held.requestAccess("contacts",received)).toThrow();
+ const pending=new Promise(()=>{});function Suspended():React.ReactNode{useContacts();throw pending;}render(<StrictMode><Suspense fallback={null}><Suspended/></Suspense></StrictMode>);expect(select).not.toHaveBeenCalled();
+ }finally{owner.abort();unregister();other();}
 });
-
-it("does not create owners for suspended renders", () => {
-  context.contacts.createContactStore.mockClear();
-  const pending = new Promise(() => {});
-  function Probe(): React.ReactNode { useContacts(); throw pending; }
-  render(<Suspense fallback={null}><Probe /></Suspense>);
-  expect(context.contacts.createContactStore).not.toHaveBeenCalled();
-});
+it("rejects ambiguous exact mount aliases",()=>{const owner=new AbortController();const context={appId:"com.example.ambiguous-contacts",runtimeInfo:{id:"duplicate"},signal:owner.signal} as SynWareContextValue;selection.context={...context};const a=registerSCOSAppSession({appId:context.appId,displayName:"A",version:"1",context});const b=registerSCOSAppSession({appId:context.appId,displayName:"B",version:"1",context:{...context}});function Probe(){useContacts();return null;}try{expect(()=>render(<Probe/>)).toThrow(/ambiguous/);}finally{owner.abort();a();b();}});

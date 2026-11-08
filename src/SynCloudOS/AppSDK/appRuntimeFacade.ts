@@ -61,7 +61,8 @@ import { createMountedBluetoothClient } from "./mountedBluetoothClient";
 import { createMountedNFCClient } from "./mountedNFCClient";
 import { createMountedSpeechPort } from "./mountedSpeechPort";
 import { speechAdapterFor } from "../../FX/SpeechFX/internal/speechPort";
-import { createMountedContactsClient } from "./mountedContactsClient";
+import { createMountedContactsPort } from "./mountedContactsPort";
+import { contactsAdapterFor } from "../../FX/ContactsFX/internal/contactsPort";
 import { createMountedPaymentClient } from "./mountedPaymentClient";
 import { createMountedXRClient } from "./mountedXRClient";
 import { createMountedLocationClient } from "./mountedLocationClient";
@@ -4513,7 +4514,11 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           runtime.environment.testControls?.permissions.subscribe?.(listener), runtime.environment.testControls?.policy.subscribe?.(listener)];
         return () => { for (const release of releases) release?.(); };
       }),
-      contacts: createMountedContactsClient(runtime.environment.contacts, signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("contacts")),
+      contacts: createMountedContactsPort(contactsAdapterFor(runtime.environment), signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("contacts"), listener => {
+        const releases = [runtime.store.subscribe(listener), runtime.configurationProfiles.subscribe(listener), runtime.identity.session.subscribe(listener),
+          runtime.environment.testControls?.permissions.subscribe?.(listener), runtime.environment.testControls?.policy.subscribe?.(listener)];
+        return () => { for (const release of releases) release?.(); };
+      }),
       payment: createMountedPaymentClient(runtime.environment.payment, signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("payment")),
       xr: createMountedXRClient(runtime.environment.xr, signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("xr")),
       audioGraphs: createMountedAudioGraphs(runtime.audioGraphs, signal, deviceEntitlements, app.bundleIdentifier, audioInputCapability, mountedSettlement),

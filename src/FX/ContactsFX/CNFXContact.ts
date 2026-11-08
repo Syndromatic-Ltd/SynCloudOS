@@ -1,43 +1,25 @@
-/*
- * SynCloudOS
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
- *
+/* SynCloudOS - Copyright © 2026 Syndromatic Ltd. All rights reserved.
  * Designed by Kavish Krishnakumar in Manchester.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-
-export interface CNFXContactDescriptor {
-  readonly displayNames?: readonly string[];
-  readonly emailAddresses?: readonly string[];
-  readonly phoneNumbers?: readonly string[];
-}
-
-/** An immutable selection snapshot; the web picker supplies no stable contact identifier. */
+import type { CNFXContactType } from "./CNFXContactType";
+import { CNFXLabeledValue } from "./CNFXLabeledValue";
+import { CNFXPhoneNumber } from "./CNFXPhoneNumber";
+import { CNFXPostalAddress } from "./CNFXPostalAddress";
+import type { CNFXMutableContact } from "./CNFXMutableContact";
+import { contactValues, emptyContact, mutableContactConstructor } from "./internal/contactValues";
+/** CNContact. Identifiers are snapshot-local strings, never fabricated database identifiers. */
 export class CNFXContact {
-  readonly displayNames: readonly string[];
-  readonly emailAddresses: readonly string[];
-  readonly phoneNumbers: readonly string[];
-
-  constructor(descriptor: CNFXContactDescriptor) {
-    const copy = (values: readonly string[] | undefined) => {
-      if (values?.some(value => typeof value !== "string")) throw new TypeError("Contact values must be strings.");
-      return Object.freeze([...(values ?? [])]);
-    };
-    this.displayNames = copy(descriptor.displayNames);
-    this.emailAddresses = copy(descriptor.emailAddresses);
-    this.phoneNumbers = copy(descriptor.phoneNumbers);
-    Object.freeze(this);
-  }
+  constructor() { contactValues.set(this, emptyContact()); Object.freeze(this); }
+  get identifier(): string { return contactValues.get(this)!.identifier; }
+  get contactType(): CNFXContactType { return contactValues.get(this)!.contactType; }
+  get givenName(): string { return contactValues.get(this)!.givenName; }
+  get familyName(): string { return contactValues.get(this)!.familyName; }
+  get organizationName(): string { return contactValues.get(this)!.organizationName; }
+  get emailAddresses(): readonly CNFXLabeledValue<string>[] { return contactValues.get(this)!.emailAddresses; }
+  get phoneNumbers(): readonly CNFXLabeledValue<CNFXPhoneNumber>[] { return contactValues.get(this)!.phoneNumbers; }
+  get postalAddresses(): readonly CNFXLabeledValue<CNFXPostalAddress>[] { return contactValues.get(this)!.postalAddresses; }
+  isKeyAvailable(key: string): boolean { return contactValues.get(this)!.keys.has(key); }
+  copy(): CNFXContact { const copy = new CNFXContact(); contactValues.set(copy, { ...contactValues.get(this)! }); return copy; }
+  mutableCopy(): CNFXMutableContact { const copy = new mutableContactConstructor.value(); contactValues.set(copy, { ...contactValues.get(this)! }); return copy; }
 }

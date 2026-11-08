@@ -43,3 +43,5 @@ export type { NSEOpenPanelHost } from "./FilePanels/openPanelHost";
 export { NSEPresentedContentProvider } from "./Overlays/useNSEPresentedContent";
 export { NSEMenuRuntimeProvider } from "./Menus/menuRuntimeContext";
 export { NSEControllerSheetSurface, NSEWindowAlertContent, NSEOpenPanelSheetSurface } from "./Windows/windowSheetSurfaces";
+
+export { nativePresentations } from "./Application/nativePresentation";

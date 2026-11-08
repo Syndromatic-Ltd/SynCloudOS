@@ -1,3 +1,4 @@
+import { nativePresentations } from "../../NSE/applicationHostInterop";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -288,6 +289,7 @@ export function NSEViewControllerView({ controller, className }: NSEViewControll
         <View controller={controller} />
       </NSEViewControllerRendererProvider>
       {controller.presentedViewControllers.map(presented => {
+        if (nativePresentations.has(presented)) return null;
         const style = presented[nsePresentationStyle];
         if (style === "custom") return <NSECustomPresentation key={sheetKey(presented)} controller={presented} />;
         if (style === "popover") return <NSEPresentedPopover key={sheetKey(presented)} controller={presented} />;

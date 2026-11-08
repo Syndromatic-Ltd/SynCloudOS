@@ -187,6 +187,7 @@ export interface SynWareTestDisposalReport {
 }
 
 export interface SynWareTestAdapters {
+  readonly contacts: SynWareFakeControl<"contacts.select"> & Readonly<{ setSelectedName(value: string): void }>;
   readonly speech: SynWareFakeControl<"speech.authorize" | "speech.recognize"> & Readonly<{
     emitResult(formattedString: string, isFinal: boolean): void;
     activeTaskCount(): number;
