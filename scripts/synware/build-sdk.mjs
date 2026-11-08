@@ -363,7 +363,7 @@ async function main() {
     .map(([name, source]) => [name, resolve(repositoryRoot, source)]));
   // One graph preserves React context identity. CSS is attached only to the
   // chunks that own it; importing NSE alone does not select any theme.
-  await bundle({ entry: { ...frameworkEntries, "nse/styles": neutralStyleEntry }, packageDirectory: directory, themeNames: [...themeEntryNames] });
+  await bundle({ entry: { ...frameworkEntries, "nse/styles": neutralStyleEntry, "fx-attribution-runtime": resolve(repositoryRoot, "src/SynCloudOS/AppSDK/fx/runtime.ts") }, packageDirectory: directory, themeNames: [...themeEntryNames] });
   const typesDirectory = resolve(directory, "types");
   cpSync(declarationRoot, typesDirectory, {
     recursive: true,
@@ -390,6 +390,8 @@ async function main() {
   writeFileSync(resolve(directory, "vite.mjs"), readFileSync(resolve(repositoryRoot, "scripts/synware/vite-plugin.mjs"), "utf8")
     .replace("../../src/NSE/Typography/fontDeclaration.mjs", "./types/NSE/Typography/fontDeclaration.mjs")
     .replace("../../src/SynCloudOS/AppSDK/scos/appModuleSource.mjs", "./app-module-source.mjs")
+    .replace("../../src/SynCloudOS/AppSDK/fx/fxAppModuleSource.mjs", "./fx-app-module-source.mjs")
+    .replace("../../src/SynCloudOS/AppSDK/fx/runtime.ts", "./fx-attribution-runtime.js")
     .replace("../../src/SynCloudOS/AppSDK/manifest/synappManifestValidator.generated.mjs", "./manifest-validator.mjs")
     .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs"));
   for (const file of ["bundle-paths.mjs","project-derivation.mjs","manifest-source.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs","pwa-plugin.mjs"]) {
@@ -404,6 +406,9 @@ async function main() {
   mkdirSync(resolve(typesDirectory, "SynCloudOS/Identity"), { recursive: true });
   for (const extension of ["mjs", "d.mts"]) cpSync(resolve(repositoryRoot, `src/SynCloudOS/Identity/bundleIdentifier.${extension}`), resolve(typesDirectory, `SynCloudOS/Identity/bundleIdentifier.${extension}`));
   cpSync(resolve(repositoryRoot, "src/SynCloudOS/AppSDK/scos/appModuleSource.mjs"), resolve(directory, "app-module-source.mjs"));
+  writeFileSync(resolve(directory, "fx-app-module-source.mjs"), readFileSync(resolve(repositoryRoot, "src/SynCloudOS/AppSDK/fx/fxAppModuleSource.mjs"), "utf8")
+    .replace('new URL("../../../FX/", import.meta.url)', 'new URL("./types/FX/", import.meta.url)')
+    .replace('const entryName = "public.ts"', 'const entryName = "public.d.ts"'));
   cpSync(resolve(repositoryRoot, "src/SynCloudOS/AppSDK/manifest/synappManifestValidator.generated.mjs"), resolve(directory, "manifest-validator.mjs"));
   cpSync(resolve(repositoryRoot, "scripts/synware/vite-plugin.d.mts"), resolve(typesDirectory, "vite.d.mts"));
   exports["./vite"] = { types: "./types/vite.d.mts", import: "./vite.mjs" };

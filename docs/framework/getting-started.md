@@ -141,6 +141,8 @@ Shared React components outside an application folder use `useSCOS()`. Reactive 
 
 ## Hosts without the plugin
 
+Attributed FX constructors require the SynCloudOS plugin and focused imports from inside a discovered `.app` bundle, including third-party and installed/PWA builds. Non-plugin hosts can use pure FX types and families such as Crypto and Compression, but attributed base constructors report that an application compiled with the plugin is required. Bindings carry application identity before launch; privileged work requires a live app session in the same SDK module graph. Separate SDK copies have no shared session registry, and multiple live runtimes for one app follow SCOS session ambiguity rules.
+
 Importing `@syndromatic/syncloudos/browser` does not require a virtual module. Pass `composition` explicitly when embedding the framework without the discovery plugin. A composition contains `bundles`, `preferences`, `widgets`, `contributions`, `shell` (or `null`) and `shellResources`. Each bundle contains its complete manifest, module path and lazy module loader. Its module default-exports the application component or `NSEApplication` subclass. The plugin builds exactly this shape for conventional projects.
 
 Externally supplied bundles retain the existing trusted-source allowlist boundary. In-project discovered applications receive their declared permissions; no first-party trusted-source table is needed.

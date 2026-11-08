@@ -34,6 +34,7 @@ import { installedApplicationBuild } from "./pwa-plugin.mjs";
 import { bundlePaths } from "./bundle-paths.mjs";
 import { createApplicationToolchain } from "./application-toolchain.mjs";
 import { createScosAppModuleSource } from "../../src/SynCloudOS/AppSDK/scos/appModuleSource.mjs";
+import { createFXAppModuleSource, isFXFamily } from "../../src/SynCloudOS/AppSDK/fx/fxAppModuleSource.mjs";
 import { assertExpectedDefaultExport, parseManifest } from "./manifest-source.mjs";
 import validateManifest from "../../src/SynCloudOS/AppSDK/manifest/synappManifestValidator.generated.mjs";
 import { normalizeBundleIdentifier } from "../../src/SynCloudOS/Identity/bundleIdentifier.mjs";
@@ -57,6 +58,8 @@ import {
 
 const projectModuleId = "virtual:syncloudos/project";
 const appModulePrefix = "virtual:syncloudos/app/";
+const fxRuntimeModuleId = "virtual:syncloudos/fx-runtime";
+const fxRuntimePath = fileURLToPath(new URL("../../src/SynCloudOS/AppSDK/fx/runtime.ts", import.meta.url));
 const resolvedProjectModuleId = `\0${projectModuleId}`;
 const browserModuleId = "virtual:syncloudos/browser";
 const resolvedBrowserModuleId = `\0${browserModuleId}`;
@@ -610,7 +613,7 @@ export function sdkBuildFingerprint(directory) {
   hash.update(readFileSync(resolve(directory, "package.json")));
   // Chunk names carry their content hashes; entry files are hashed by content.
   for (const name of readdirSync(chunks).sort()) hash.update(`chunk:${name}\n`);
-  for (const name of readdirSync(directory).filter(name => name.endsWith(".js")).sort()) hash.update(`entry:${name}\n`).update(readFileSync(resolve(directory, name)));
+  for (const name of readdirSync(directory).filter(name => /\.(?:js|mjs)$/u.test(name)).sort()) hash.update(`entry:${name}\n`).update(readFileSync(resolve(directory, name)));
   return hash.digest("hex").slice(0, 16);
 }
 
@@ -624,6 +627,7 @@ export function synCloudOS(options) {
   let typography = null;
   let typographyAssets = new Map();
   let typographyAssetPaths = new Map();
+  const appVirtualModules = new Set();
 
   const refreshTypography = async () => {
     if (!pluginOptions.typography) return;
@@ -661,7 +665,7 @@ export function synCloudOS(options) {
   };
 
   const invalidateVirtualModule = () => {
-    for (const id of [resolvedProjectModuleId, resolvedTypographyModuleId]) {
+    for (const id of [resolvedProjectModuleId, resolvedTypographyModuleId, ...appVirtualModules]) {
       const moduleNode = server?.moduleGraph?.getModuleById(id);
       if (moduleNode) server.moduleGraph.invalidateModule(moduleNode);
     }
@@ -727,18 +731,27 @@ export function synCloudOS(options) {
     },
 
     resolveId(id, importer) {
+      if (id === fxRuntimeModuleId) return fxRuntimePath;
       if (id === browserModuleId) return resolvedBrowserModuleId;
       if (id === "@syndromatic/syncloudos/browser" && importer !== resolvedBrowserModuleId) return resolvedBrowserModuleId;
-      if (id.startsWith(appModulePrefix)) return `\0${id}`;
-      if (id === "@syndromatic/syncloudos" && importer && !importer.startsWith("\0")) {
+      if (id.startsWith(appModulePrefix)) { const resolved = `\0${id}`; appVirtualModules.add(resolved); return resolved; }
+      const fxFamily = id.startsWith("@syndromatic/syncloudos/fx/") ? id.slice("@syndromatic/syncloudos/fx/".length) : null;
+      if ((id === "@syndromatic/syncloudos" || (fxFamily && isFXFamily(fxFamily))) && importer && !importer.startsWith("\0")) {
         const bundle = (discovery ?? refresh()).bundles.find(bundle => isPathInside(dirname(dirname(bundle.entryPath)), importer.split("?")[0]));
-        if (bundle) return `\0${appModulePrefix}${normalizeBundleIdentifier(bundle.bundleIdentifier)}`;
+        if (bundle) {
+          const resolved = `\0${appModulePrefix}${normalizeBundleIdentifier(bundle.bundleIdentifier)}${fxFamily ? `/fx/${fxFamily}` : ""}`;
+          appVirtualModules.add(resolved); return resolved;
+        }
       }
       return id === projectModuleId ? resolvedProjectModuleId : id === typographyModuleId ? resolvedTypographyModuleId : null;
     },
 
     load(id) {
-      if (id.startsWith(`\0${appModulePrefix}`)) return createScosAppModuleSource(id.slice(appModulePrefix.length + 1));
+      if (id.startsWith(`\0${appModulePrefix}`)) {
+        const app = id.slice(appModulePrefix.length + 1);
+        const separator = app.indexOf("/fx/");
+        return separator < 0 ? createScosAppModuleSource(app) : createFXAppModuleSource(app.slice(0, separator), app.slice(separator + 4), fxRuntimeModuleId);
+      }
       if (id === resolvedBrowserModuleId) return 'export * from "@syndromatic/syncloudos/browser";\nimport { mountSynCloudOS as mount } from "@syndromatic/syncloudos/browser";\nimport * as project from "virtual:syncloudos/project";\nexport function mountSynCloudOS(options) { return mount({ ...options, composition: options.composition ?? project }); }';
       if (id === resolvedTypographyModuleId) return typographyCode();
       if (id !== resolvedProjectModuleId) return null;

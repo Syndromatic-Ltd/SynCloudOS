@@ -13,7 +13,7 @@ function sdk(files: Record<string, string>): string {
   const directory = mkdtempSync(join(tmpdir(), "syncloudos-sdk-"));
   directories.push(directory);
   mkdirSync(join(directory, "chunks"));
-  for (const [path, contents] of Object.entries(files)) writeFileSync(join(directory, path), contents);
+  for (const [path, contents] of Object.entries(files)) { mkdirSync(join(directory, path, ".."), { recursive: true }); writeFileSync(join(directory, path), contents); }
   return directory;
 }
 afterEach(() => { for (const directory of directories.splice(0)) rmSync(directory, { recursive: true, force: true }); });
@@ -32,5 +32,10 @@ describe("the SDK build in Vite's pre-bundle key", () => {
     expect(sdkBuildFingerprint(join(import.meta.dirname, "../../scripts/synware"))).toBeNull();
     const plugin = synCloudOS({ webspringEntry: false });
     expect(plugin.config({}, { command: "serve", mode: "development" })).not.toHaveProperty("optimizeDeps");
+  });
+
+  it("changes when only the packed FX virtual-module generator changes", () => {
+    const base = { "package.json": "{}", "fx-app-module-source.mjs": "export const version = 1;", "nse.js": "" };
+    expect(sdkBuildFingerprint(sdk(base))).not.toBe(sdkBuildFingerprint(sdk({ ...base, "fx-app-module-source.mjs": "export const version = 2;" })));
   });
 });

@@ -18,6 +18,9 @@
  */
 
 /** Narrow host/runtime view of canonical mounted app and service contracts. */
+export { fxAttributedClass, fxApplicationID } from "./fx/fxIdentity";
+export { createFXSessionBinding } from "./fx/fxSessionBinding";
+export type { FXSessionUnavailableReason } from "./fx/fxSessionBinding";
 export type {
   SynCloudOSAppModule,
   SynWareDefinition,

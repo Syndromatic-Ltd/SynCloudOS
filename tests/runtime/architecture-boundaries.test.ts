@@ -230,14 +230,22 @@ describe("architecture dependency boundaries", () => {
     ]);
   });
 
-  it("admits only the lifecycle runtime bridge from FX", () => {
+  it("admits the private lifecycle and attributed-class runtime bridge from FX", () => {
     const root = createFixture();
-    write(root, "src/SynCloudOS/fxRuntimeContracts.ts", "export const lifecycle = 1;\n");
+    write(root, "src/SynCloudOS/fxRuntimeContracts.ts", 'export { fxApplicationID } from "./AppSDK/runtimeContracts";\nexport const lifecycle = 1;\n');
+    write(root, "src/SynCloudOS/AppSDK/runtimeContracts.ts", 'export { fxApplicationID } from "./fx/fxIdentity";\n');
+    write(root, "src/SynCloudOS/AppSDK/fx/fxIdentity.ts", 'export const fxApplicationID = () => "com.example.test";\n');
     write(root, "src/SynCloudOS/ErrorManager/lifecycleError.ts", "export const lifecycle = 1;\n");
     write(root, "src/FX/Test/example.ts", 'import { lifecycle } from "../../SynCloudOS/fxRuntimeContracts";\n');
     const candidate = fixturePolicy();
     candidate.layers = structuredClone(policy.layers);
     expect(validateImportEdges({ root, policy: candidate }).errors).toEqual([]);
+    write(root, "src/FX/Test/example.ts", 'import { fxApplicationID } from "../../SynCloudOS/fxRuntimeContracts";\n');
+    expect(validateImportEdges({ root, policy: candidate }).errors).toEqual([]);
+    write(root, "src/FX/Test/example.ts", 'import { fxApplicationID } from "../../SynCloudOS/AppSDK/fx/fxIdentity";\n');
+    expect(validateImportEdges({ root, policy: candidate }).errors).toEqual(expect.arrayContaining([
+      expect.stringContaining("fx may not import app-sdk"),
+    ]));
     write(root, "src/FX/Test/example.ts", 'import { lifecycle } from "../../SynCloudOS/ErrorManager/lifecycleError";\n');
     expect(validateImportEdges({ root, policy: candidate }).errors).toEqual(expect.arrayContaining([
       expect.stringContaining("fx must use a public runtime entrypoint"),
