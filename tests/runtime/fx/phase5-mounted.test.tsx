@@ -20,6 +20,8 @@
 
 // @vitest-environment jsdom
 import React from "react";
+import { NSEDecimalNumber } from "../../../src/Foundation/NSEDecimalNumber";
+import { PKFXPaymentAuthorizationController, PKFXPaymentRequest, PKFXPaymentSummaryItem } from "../../../src/FX/PassFX/public";
 import { CNFXContactStore } from "../../../src/FX/ContactsFX/public";
 import { expect, it } from "vitest";
 import { createSynWare, useBluetooth, useNFC, useSpeech, useContacts, usePayment, useXR, useSCOS } from "../../../src/SynCloudOS/AppSDK";
@@ -32,27 +34,32 @@ it("projects mounted clients and the real Speech recognizer and revokes componen
     payment: ReturnType<typeof usePayment>; xr: ReturnType<typeof useXR>;
     session: ReturnType<typeof useSCOS>;
   };
+  const request = new PKFXPaymentRequest();
+  Object.assign(request, { merchantIdentifier: "merchant.test", countryCode: "GB", currencyCode: "GBP", supportedNetworks: ["visa"], merchantCapabilities: 1, paymentSummaryItems: [new PKFXPaymentSummaryItem("Merchant", NSEDecimalNumber.one)] });
   const app = createSynWare({
     manifest: { schemaVersion: 1, bundleIdentifier: "com.syndromatic.phase5-probe", version: "1.0.0", displayName: "Phase 5 Probe",
       entitlements: ["bluetooth.access", "nfc.read", "nfc.write", "speech.recognize", "contacts.select", "payment.request", "xr.session"] },
     root() {
-      owners = { bluetooth: useBluetooth(), nfc: useNFC(), speech: useSpeech(), contacts: useContacts(), payment: usePayment(), xr: useXR(), session: useSCOS() };
+      owners = { bluetooth: useBluetooth(), nfc: useNFC(), speech: useSpeech(), contacts: useContacts(), payment: usePayment(request), xr: useXR(), session: useSCOS() };
       return null;
     },
   });
   const host = createSynWareTestHost({ app, document, strictMode: true });
   host.adapters.permissions.allow(); host.adapters.policy.allow();
   await host.render();
-  for (const name of ["bluetooth", "nfc", "payment", "xr"] as const)
+  for (const name of ["bluetooth", "nfc", "xr"] as const)
     expect(typeof owners.session[name].getCapabilities).toBe("function");
   expect("speech" in owners.session).toBe(false);
   expect("contacts" in owners.session).toBe(false);
+  expect("payment" in owners.session).toBe(false);
+  expect(owners.payment).toBeInstanceOf(PKFXPaymentAuthorizationController);
   expect(owners.contacts).toBeInstanceOf(CNFXContactStore);
   expect(await owners.bluetooth.getAuthorizationStatus()).toBe("unavailable");
   expect(owners.speech.isAvailable).toBe(false);
   expect(() => owners.contacts.unifiedContacts(null, [])).toThrow();
   expect(await owners.xr.getAuthorizationStatus()).toBe("unavailable");
   await host.dispose();
+  expect(() => owners.payment.present()).toThrow();
   expect(owners.bluetooth.getCapabilities().apiAvailable).toBe(false);
   expect(owners.xr.getCapabilities().apiAvailable).toBe(false);
   expect(owners.speech.isAvailable).toBe(false);

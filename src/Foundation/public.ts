@@ -40,3 +40,4 @@ export { NSEDecimalNumber, NSEDecimalNumberHandler } from "./NSEDecimalNumber";
 export type { NSEDecimalNumberBehaviors, NSEDecimalNumberHandlerOptions, NSEDecimalRoundingMode } from "./NSEDecimalNumber";
 export { NSEUndoManager } from "./NSEUndoManager";
 export type { NSEUndoRegistrationCapability } from "./NSEUndoRegistrationCapability";
+export { NSEPersonNameComponents } from "./NSEPersonNameComponents";

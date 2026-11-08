@@ -400,7 +400,7 @@
         "src/SynCloudOS/AppSDK/mountedNFCClient.ts",
         "src/SynCloudOS/AppSDK/mountedSpeechPort.ts",
         "src/SynCloudOS/AppSDK/mountedContactsPort.ts",
-        "src/SynCloudOS/AppSDK/mountedPaymentClient.ts",
+        "src/SynCloudOS/AppSDK/mountedPaymentPort.ts",
         "src/SynCloudOS/AppSDK/mountedXRClient.ts"
       ],
       "mayImportLayers": [

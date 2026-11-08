@@ -187,6 +187,12 @@ export interface SynWareTestDisposalReport {
 }
 
 export interface SynWareTestAdapters {
+  readonly payment: SynWareFakeControl<"payment.present"> & Readonly<{
+    authorize(): void;
+    cancel(): void;
+    activePresentationCount(): number;
+    completedStatuses(): readonly import("../../../FX/PassFX/PKFXPaymentAuthorizationStatus").PKFXPaymentAuthorizationStatus[];
+  }>;
   readonly contacts: SynWareFakeControl<"contacts.select"> & Readonly<{ setSelectedName(value: string): void }>;
   readonly speech: SynWareFakeControl<"speech.authorize" | "speech.recognize"> & Readonly<{
     emitResult(formattedString: string, isFinal: boolean): void;
