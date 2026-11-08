@@ -1,0 +1,3 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 boundaries:architecture
+npm notice run node scripts/quality/architecture-boundaries.mjs
+1647 files and 7425 edges: dependency boundaries validated

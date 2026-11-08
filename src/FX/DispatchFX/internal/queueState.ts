@@ -17,6 +17,8 @@ interface ObjectState {
   global: boolean;
   main: boolean;
   concurrent: boolean;
+  /** Internal Tier 0 guard; the worker pool will own this state in Task 10. */
+  workerInFlight: boolean;
   label: string;
   qos: DFXQoS;
   specifics: WeakMap<object, unknown>;
@@ -26,7 +28,7 @@ let changed: (object: DFXObject, retarget: boolean) => void = () => {};
 export function initialiseObject(object: DFXObject): void {
   states.set(object, {
     active: true, initiallyInactive: false, suspensionCount: 0, target: null,
-    global: false, main: false, concurrent: false, label: "", qos: DFXQoS.unspecified, specifics: new WeakMap(),
+    global: false, main: false, concurrent: false, workerInFlight: false, label: "", qos: DFXQoS.unspecified, specifics: new WeakMap(),
   });
 }
 export function objectState(object: DFXObject): ObjectState {

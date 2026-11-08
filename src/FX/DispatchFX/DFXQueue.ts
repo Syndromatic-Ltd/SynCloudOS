@@ -12,8 +12,9 @@ import { DFXWorkItemFlags } from "./DFXWorkItemFlags";
 import { currentExecution } from "./internal/executionStack";
 import { objectState, queueChain, resolveQoS } from "./internal/queueState";
 import { rootScheduler } from "./internal/rootScheduler";
+import { assertSyncAvailable } from "./internal/sync";
 import { checkedInteger, clientError } from "./internal/time";
-import { executeWork, prepareWork, type DFXWork, type DFXIterationWork } from "./internal/work";
+import { executeSyncWork, executeWork, prepareWork, type DFXWork, type DFXIterationWork } from "./internal/work";
 
 let main: DFXQueue | undefined;
 const globals = new Map<DFXQoSClass, DFXQueue>();
@@ -21,7 +22,7 @@ const globals = new Map<DFXQoSClass, DFXQueue>();
 export class DFXQueue extends DFXObject {
   constructor(label: string, options: {
     qos?: DFXQoS; attributes?: DFXQueueAttributes[];
-    autoreleaseFrequency?: DFXQueueAutoreleaseFrequency; target?: DFXQueue;
+    autoreleaseFrequency?: DFXQueueAutoreleaseFrequency; target?: DFXQueue | null;
   } = {}) {
     super();
     if (typeof label !== "string") clientError("queue label must be a string");
@@ -35,7 +36,7 @@ export class DFXQueue extends DFXObject {
     state.concurrent = attributes.includes(DFXQueueAttributes.concurrent);
     state.initiallyInactive = attributes.includes(DFXQueueAttributes.initiallyInactive);
     state.active = !state.initiallyInactive;
-    if (options.target !== undefined) { objectState(options.target); state.target = options.target; }
+    if (options.target != null) { objectState(options.target); state.target = options.target; }
   }
   get label(): string { return objectState(this).label; }
   get qos(): DFXQoS { return objectState(this).qos; }
@@ -70,6 +71,27 @@ export class DFXQueue extends DFXObject {
       resolveQoS: chain => resolveQoS(chain, assigned, captured, flags),
       run: prepareWork(execute, this.label),
     });
+  }
+  sync<R>(work: DFXWork<R>): R;
+  sync<R>(flags: DFXWorkItemFlags[], work: DFXWork<R>): R;
+  sync<R>(flagsOrWork: DFXWorkItemFlags[] | DFXWork<R>, work?: DFXWork<R>): R {
+    const flags = typeof flagsOrWork === "function" ? [] : flagsOrWork;
+    const execute = typeof flagsOrWork === "function" ? flagsOrWork : work;
+    if (typeof execute !== "function") clientError("work must be a function");
+    if (!Array.isArray(flags) || flags.some(flag => !Object.values(DFXWorkItemFlags).includes(flag))) clientError("invalid work item flags");
+    const chain = queueChain(this);
+    const barrier = !objectState(this).global && flags.includes(DFXWorkItemFlags.barrier);
+    assertSyncAvailable(chain);
+    const captured = currentExecution()?.qos ?? DFXQoS.unspecified;
+    let result: R;
+    const job = {
+      queue: this, qos: resolveQoS(chain, DFXQoS.unspecified, captured, flags), appId: null, barrier,
+      resolveQoS: (targets: readonly DFXQueue[]) => resolveQoS(targets, DFXQoS.unspecified, captured, flags),
+      run: () => { result = executeSyncWork(execute, this.label); },
+    };
+    const restore = rootScheduler.override(this, captured);
+    try { rootScheduler.submit(job); rootScheduler.drainInRealm(this, job); return result!; }
+    finally { restore(); }
   }
   setSpecific<T>(key: DFXSpecificKey<T>, value: T | undefined): void {
     const state = objectState(this);
