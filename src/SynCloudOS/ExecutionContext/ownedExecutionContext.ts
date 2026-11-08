@@ -19,9 +19,14 @@ export interface OwnedExecutionRecord extends OwnedExecutionLifetime {
 const records = new WeakMap<OwnedExecutionContext, OwnedExecutionRecord>();
 let current: OwnedExecutionContext | null = null;
 
-function liveRecord(context: OwnedExecutionContext): OwnedExecutionRecord {
+function authenticRecord(context: OwnedExecutionContext): OwnedExecutionRecord {
   const record = records.get(context);
   if (!record) throw new TypeError("Owned execution requires an authentic issued context.");
+  return record;
+}
+
+function liveRecord(context: OwnedExecutionContext): OwnedExecutionRecord {
+  const record = authenticRecord(context);
   record.signal.throwIfAborted();
   record.assertLive();
   record.signal.throwIfAborted();
@@ -94,6 +99,11 @@ export function assertOwnedExecutionContextLive(context: OwnedExecutionContext):
 export function ownedExecutionContextSignal(context: OwnedExecutionContext): AbortSignal { return liveRecord(context).signal; }
 export function getOwnedExecutionPort<T>(context: OwnedExecutionContext, key: symbol): T | undefined { return liveRecord(context).ports.get(key) as T | undefined; }
 export function sameOwnedExecutionProcess(first: OwnedExecutionContext, second: OwnedExecutionContext): boolean { return liveRecord(first).process === liveRecord(second).process; }
+/** Reporting alone survives revocation; it returns neither ports nor execution authority. */
+export function reportOwnedExecutionResourceError(context: OwnedExecutionContext, error: unknown): void {
+  const record = authenticRecord(context);
+  runInOwnedExecutionContext(null, () => record.reportResourceError(error));
+}
 export function registerOwnedExecutionResource(context: OwnedExecutionContext, resource: object, dispose: () => void): () => void {
   if (!resource || (typeof resource !== "object" && typeof resource !== "function") || typeof dispose !== "function") throw new TypeError("Owned execution requires an object resource and cleanup callback.");
   const record = liveRecord(context);
@@ -115,7 +125,7 @@ export function registerOwnedExecutionResource(context: OwnedExecutionContext, r
     catch (error) {
       // EventTarget would otherwise turn this into an asynchronous uncaught error.
       // A reentrant abort must not lend the reporter another owner's authority.
-      runInOwnedExecutionContext(null, () => record.reportResourceError(error));
+      reportOwnedExecutionResourceError(context, error);
     }
   };
   record.signal.addEventListener("abort", abortCleanup, { once: true });

@@ -94,6 +94,7 @@ export class NSEOwnershipScope {
   readonly #resources = new Map<object, (reason: SynCloudOSLifecycleDisposalReason) => void>();
   readonly #resourceFailures: unknown[] = [];
   #released = false;
+  #releaseCompleted = false;
   #disposing = false;
 
   constructor(readonly kind: string, readonly id: string) {
@@ -121,8 +122,12 @@ export class NSEOwnershipScope {
     return () => { this.#resources.delete(object); };
   }
 
-  /** @internal Abort cleanup reports here without throwing out of EventTarget. */
-  reportResourceError(error: unknown): void { this.#resourceFailures.push(error); }
+  /** @internal False means release fully completed: the caller must use its captured ancestor sink. */
+  reportResourceError(error: unknown): boolean {
+    if (this.#releaseCompleted) return false;
+    this.#resourceFailures.push(error);
+    return true;
+  }
 
   /** @internal Ends publication authority without changing 6C teardown order. */
   beginDisposal(reason: SynCloudOSLifecycleDisposalReason): void {
@@ -159,20 +164,24 @@ export class NSEOwnershipScope {
   /** Aborts the signal with `reason` recorded, disposing every controller it owns. */
   release(reason: SynCloudOSLifecycleDisposalReason): void {
     if (this.#released) return;
-    this.beginDisposal(reason);
     this.#released = true;
-    const failures: unknown[] = this.#resourceFailures.splice(0);
-    for (const [object, dispose] of [...this.#resources]) {
-      this.#resources.delete(object);
-      try { dispose(reason); } catch (error) { failures.push(error); }
+    try {
+      this.beginDisposal(reason);
+      const failures: unknown[] = this.#resourceFailures.splice(0);
+      for (const [object, dispose] of [...this.#resources]) {
+        this.#resources.delete(object);
+        try { dispose(reason); } catch (error) { failures.push(error); }
+      }
+      declareSynCloudOSLifecycleSignal(this.#abort.signal, reason);
+      this.#abort.abort(new DOMException(`The ${this.kind} that owned this object was released.`, "AbortError"));
+      // Recorded ownerSignal children release at this existing late boundary and
+      // may report their own aggregate after the initial resource queue drain.
+      failures.push(...this.#resourceFailures.splice(0));
+      if (failures.length === 1) throw failures[0];
+      if (failures.length > 1) throw new AggregateError(failures, "Owned resources failed to dispose.");
+    } finally {
+      this.#releaseCompleted = true;
     }
-    declareSynCloudOSLifecycleSignal(this.#abort.signal, reason);
-    this.#abort.abort(new DOMException(`The ${this.kind} that owned this object was released.`, "AbortError"));
-    // Recorded ownerSignal children release at this existing late boundary and
-    // may report their own aggregate after the initial resource queue drain.
-    failures.push(...this.#resourceFailures.splice(0));
-    if (failures.length === 1) throw failures[0];
-    if (failures.length > 1) throw new AggregateError(failures, "Owned resources failed to dispose.");
   }
 }
 
