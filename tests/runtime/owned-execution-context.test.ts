@@ -18,12 +18,14 @@ function fixture(name = "a", process: object = {}) {
   const key = Symbol(name);
   const ports = new Map<symbol, unknown>([[key, name]]);
   const dispose = new Map<object, () => void>();
+  const errors: unknown[] = [];
   const context = execution.issueOwnedExecutionContext({
     process, signal: abort.signal, ports,
     assertLive() { if (!live) throw new Error("revoked"); },
     registerResource(resource, release) { dispose.set(resource, release); return () => { dispose.delete(resource); }; },
+    reportResourceError(error: unknown) { errors.push(error); },
   });
-  return { context, abort, key, ports, process, dispose, revoke() { live = false; } };
+  return { context, abort, key, ports, process, dispose, errors, revoke() { live = false; } };
 }
 
 function owner(context = fixture().context) {
@@ -79,13 +81,13 @@ describe("authentic synchronous owned execution contexts", () => {
     expect(() => execution.assertOwnedExecutionContextLive(forged)).toThrow();
     expect(() => execution.registerOwnedExecutionResource(forged, {}, () => {})).toThrow();
     expect(() => execution.sameOwnedExecutionProcess(forged, fixture().context)).toThrow();
-    expect(() => execution.narrowOwnedExecutionContext(forged, { signal: child.signal, assertLive() {}, registerResource() { return () => {}; } })).toThrow();
+    expect(() => execution.narrowOwnedExecutionContext(forged, { signal: child.signal, assertLive() {}, reportResourceError() {}, registerResource() { return () => {}; } })).toThrow();
   });
 
   it("copies private ports and preserves the exact process identity while narrowing", () => {
     const a = fixture(); const same = fixture("same", a.process); const other = fixture();
     const childAbort = new AbortController(); const release = vi.fn();
-    const child = execution.narrowOwnedExecutionContext(a.context, { signal: childAbort.signal, assertLive() {}, registerResource: release.mockReturnValue(() => {}) });
+    const child = execution.narrowOwnedExecutionContext(a.context, { signal: childAbort.signal, assertLive() {}, reportResourceError() {}, registerResource: release.mockReturnValue(() => {}) });
     a.ports.set(a.key, "mutated");
     expect(execution.getOwnedExecutionPort(child, a.key)).toBe("a");
     expect(execution.sameOwnedExecutionProcess(child, same.context)).toBe(true);
@@ -99,7 +101,7 @@ describe("authentic synchronous owned execution contexts", () => {
 
   it.each(["signal", "validator"])("a child cannot outlive its parent %s", mode => {
     const a = fixture(); const childAbort = new AbortController();
-    const child = execution.narrowOwnedExecutionContext(a.context, { signal: childAbort.signal, assertLive() {}, registerResource() { return () => {}; } });
+    const child = execution.narrowOwnedExecutionContext(a.context, { signal: childAbort.signal, assertLive() {}, reportResourceError() {}, registerResource() { return () => {}; } });
     const signal = execution.ownedExecutionContextSignal(child);
     if (mode === "signal") { a.abort.abort(); expect(signal.aborted).toBe(true); } else a.revoke();
     expect(() => execution.runInOwnedExecutionContext(child, () => {})).toThrow();
@@ -108,7 +110,7 @@ describe("authentic synchronous owned execution contexts", () => {
 
   it("validates issuer input and liveness before publishing authority", () => {
     const a = fixture();
-    const record = { process: {}, signal: a.abort.signal, ports: new Map(), assertLive() {}, registerResource() { return () => {}; } };
+    const record = { process: {}, signal: a.abort.signal, ports: new Map(), assertLive() {}, reportResourceError() {}, registerResource() { return () => {}; } };
     expect(() => execution.issueOwnedExecutionContext({ ...record, process: null } as never)).toThrow(TypeError);
     expect(() => execution.issueOwnedExecutionContext({ ...record, ports: new Map([["forged", {}]]) } as never)).toThrow(TypeError);
     expect(() => execution.issueOwnedExecutionContext({ ...record, assertLive() { throw new Error("revoked"); } })).toThrow("revoked");
@@ -117,7 +119,7 @@ describe("authentic synchronous owned execution contexts", () => {
 
   it("rejects missing callbacks and captures issued callback identities", () => {
     const abort = new AbortController(); const register = vi.fn(() => () => {});
-    const record = { process: {}, signal: abort.signal, ports: new Map<symbol, unknown>(), assertLive() {}, registerResource: register };
+    const record = { process: {}, signal: abort.signal, ports: new Map<symbol, unknown>(), assertLive() {}, reportResourceError() {}, registerResource: register };
     expect(() => execution.issueOwnedExecutionContext({ ...record, registerResource: null } as never)).toThrow(TypeError);
     const context = execution.issueOwnedExecutionContext(record);
     record.assertLive = () => { throw new Error("replaced validator"); };
@@ -129,7 +131,7 @@ describe("authentic synchronous owned execution contexts", () => {
   it.each(["parent", "child"])("immediately cleans registered resources once on %s abort", mode => {
     const parent = fixture(); const abort = new AbortController(); const registered = new Map<object, () => void>();
     const context = execution.narrowOwnedExecutionContext(parent.context, {
-      signal: abort.signal, assertLive() {},
+      signal: abort.signal, assertLive() {}, reportResourceError() {},
       registerResource(resource, dispose) { registered.set(resource, dispose); return () => { registered.delete(resource); }; },
     });
     const resource = {}; const dispose = vi.fn();
@@ -152,11 +154,35 @@ describe("authentic synchronous owned execution contexts", () => {
   it("does not leak registration when authority is revoked before registration returns", () => {
     const abort = new AbortController(); const registered = new Set<object>(); const dispose = vi.fn(); const unregister = vi.fn();
     const context = execution.issueOwnedExecutionContext({
-      process: {}, signal: abort.signal, ports: new Map(), assertLive() {},
+      process: {}, signal: abort.signal, ports: new Map(), assertLive() {}, reportResourceError() {},
       registerResource(resource) { registered.add(resource); abort.abort(); return () => { registered.delete(resource); unregister(); }; },
     });
     expect(() => execution.registerOwnedExecutionResource(context, {}, dispose)).toThrow();
     expect(dispose).toHaveBeenCalledOnce(); expect(unregister).toHaveBeenCalledOnce(); expect(registered.size).toBe(0);
+  });
+
+  it("validates and captures issuer and narrowed reporting sinks without borrowing reentrant authority", () => {
+    const abort = new AbortController(); const seen: unknown[] = []; const errors: unknown[] = [];
+    const record = {
+      process: {}, signal: abort.signal, ports: new Map(), assertLive() {}, registerResource() { return () => {}; },
+      reportResourceError(error: unknown) { seen.push(execution.currentOwnedExecutionContext()); errors.push(error); },
+    };
+    expect(() => execution.issueOwnedExecutionContext({ ...record, reportResourceError: undefined } as never)).toThrow(TypeError);
+    const context = execution.issueOwnedExecutionContext(record);
+    record.reportResourceError = () => { throw new Error("replacement reporter"); };
+    const failure = new Error("resource cleanup"); execution.registerOwnedExecutionResource(context, {}, () => { throw failure; });
+    const childAbort = new AbortController(); const childFailures: unknown[] = [];
+    const lifetime = { signal: childAbort.signal, assertLive() {}, registerResource() { return () => {}; }, reportResourceError(error: unknown) { seen.push(execution.currentOwnedExecutionContext()); childFailures.push(error); } };
+    expect(() => execution.narrowOwnedExecutionContext(context, { ...lifetime, reportResourceError: null } as never)).toThrow(TypeError);
+    const child = execution.narrowOwnedExecutionContext(context, lifetime);
+    lifetime.reportResourceError = () => { throw new Error("replacement child reporter"); };
+    execution.registerOwnedExecutionResource(child, {}, () => { throw failure; });
+    const other = fixture();
+    execution.runInOwnedExecutionContext(other.context, () => {
+      abort.abort(); childAbort.abort();
+      expect(execution.currentOwnedExecutionContext()).toBe(other.context);
+    });
+    expect(errors).toEqual([failure]); expect(childFailures).toEqual([failure]); expect(seen).toEqual([null, null]);
   });
 });
 
@@ -254,6 +280,51 @@ describe("recorded NSE scope execution and resource admission", () => {
     expect(calls).toEqual(["stop resource", "child", "owner"]);
   });
 
+  it("collects multiple immediate cleanup failures while completing child and owner teardown", () => {
+    const calls: string[] = []; const failures = [new Error("first resource"), new Error("second resource")];
+    class Parent extends NSEViewController { protected override didDispose() { calls.push("owner"); } }
+    class Child extends NSEViewController { protected override didDispose() { calls.push("child"); } }
+    const scope = new NSEOwnershipScope("NSEViewController", "cleanup failures"); bridge.attachNSEExecutionContext(scope, fixture().context);
+    const parent = instantiateInOwnerScope(scope, () => new Parent()); owners.push(parent); const child = parent.addChild(Child);
+    for (const [index, failure] of failures.entries()) parent.own(() => {
+      const resource = {};
+      execution.registerOwnedExecutionResource(execution.requireOwnedExecutionContext("resource"), resource, () => { calls.push(`stop ${index}`); throw failure; });
+      return resource;
+    });
+    let reported: unknown;
+    try { parent.dispose(); } catch (error) { reported = error; }
+    expect(calls).toEqual(["stop 0", "stop 1", "child", "owner"]);
+    expect(child.isDisposed).toBe(true); expect(parent.isDisposed).toBe(true);
+    expect(reported).toBeInstanceOf(AggregateError); expect((reported as AggregateError).errors).toEqual(failures);
+    expect(() => parent.dispose()).not.toThrow(); expect(calls).toHaveLength(4);
+  });
+
+  it("retains abort cleanup failures for the owner's later structural release", () => {
+    const root = fixture(); const parent = owner(root.context); const failure = new Error("revoked resource"); const cleanup = vi.fn(() => { throw failure; });
+    parent.own(() => { const resource = {}; execution.registerOwnedExecutionResource(execution.requireOwnedExecutionContext("resource"), resource, cleanup); return resource; });
+    root.abort.abort(); expect(cleanup).toHaveBeenCalledOnce(); expect(parent.isDisposed).toBe(false);
+    expect(() => parent.dispose()).toThrow(failure); expect(parent.isDisposed).toBe(true); expect(cleanup).toHaveBeenCalledOnce();
+    expect(root.errors).toEqual([]);
+  });
+
+  it("collects a recorded signal child's cleanup failure during parent signal release", () => {
+    const parent = owner(); const child = new NSEViewController({ ownerSignal: parent.ownerSignal }); owners.push(child);
+    const failure = new Error("signal child resource"); const cleanup = vi.fn(() => { throw failure; });
+    child.own(() => { const resource = {}; execution.registerOwnedExecutionResource(execution.requireOwnedExecutionContext("signal child"), resource, cleanup); return resource; });
+    expect(() => parent.dispose()).toThrow(failure);
+    expect(parent.isDisposed).toBe(true); expect(child.isDisposed).toBe(true); expect(cleanup).toHaveBeenCalledOnce();
+  });
+
+  it.each(["owner", "ownerSignal"])("does not retain a partial child when revoked context inheritance rejects explicit %s", mode => {
+    const root = fixture(); const parent = owner(root.context); const scope = getNSEOwnerScope(parent)!;
+    const adopt = vi.spyOn(scope, "adopt"); const addListener = vi.spyOn(scope.signal, "addEventListener");
+    root.abort.abort(); expect(() => scope.assertLive()).not.toThrow();
+    const options = mode === "owner" ? { owner: parent } : { ownerSignal: scope.signal };
+    expect(() => new NSEViewController(options)).toThrow();
+    expect(scope.adoptedObjects).toEqual([]); expect(adopt).not.toHaveBeenCalled(); expect(addListener).not.toHaveBeenCalled();
+    expect(() => parent.dispose()).not.toThrow(); expect(parent.isDisposed).toBe(true);
+  });
+
   it("rejects foreign and inactive registrations before reading dispose", () => {
     const first = owner(); const second = owner(); const resource = first.own(() => cancelOnly());
     expect(() => second.own(() => resource)).toThrow(/another|transfer/i);
@@ -268,6 +339,15 @@ describe("recorded NSE scope execution and resource admission", () => {
     expect(() => parent.own(() => ({}))).toThrow(/registered|disposable/i);
     expect(() => parent.own((() => 1) as never)).toThrow();
     parent.dispose(); expect(resource.dispose).toHaveBeenCalledOnce();
+  });
+
+  it("preserves callable disposables and privately registered callable resources", () => {
+    const parent = owner(); const callable = Object.assign(() => 42, { dispose: vi.fn() });
+    expect(parent.own(() => callable)).toBe(callable); expect(callable()).toBe(42); parent.own(() => callable);
+    const registered = Object.assign(() => 7, { cancel: vi.fn() });
+    expect(parent.own(() => { execution.registerOwnedExecutionResource(execution.requireOwnedExecutionContext("callable resource"), registered, () => registered.cancel()); return registered; })).toBe(registered);
+    expect(registered()).toBe(7); expect(() => parent.own(() => () => {})).toThrow(/registered|disposable/i);
+    parent.dispose(); expect(callable.dispose).toHaveBeenCalledOnce(); expect(registered.cancel).toHaveBeenCalledOnce();
   });
 
   it("rejects async factories and thenables while rolling back only fresh registrations", () => {

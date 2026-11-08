@@ -15,6 +15,7 @@ export function attachNSEExecutionContext(scope: NSEOwnershipScope, parent: Owne
     signal: scope.authoritySignal,
     assertLive: () => scope.assertLive(),
     registerResource: (resource, dispose) => bindNSEOwnedResource(resource, scope.signal, dispose),
+    reportResourceError: error => scope.reportResourceError(error),
   });
   contexts.set(scope, context);
 }

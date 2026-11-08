@@ -92,6 +92,7 @@ export class NSEOwnershipScope {
   readonly #authority = new AbortController();
   readonly #adopted = new Set<NSEOwnedObject>();
   readonly #resources = new Map<object, (reason: SynCloudOSLifecycleDisposalReason) => void>();
+  readonly #resourceFailures: unknown[] = [];
   #released = false;
   #disposing = false;
 
@@ -119,6 +120,9 @@ export class NSEOwnershipScope {
     this.#resources.set(object, dispose);
     return () => { this.#resources.delete(object); };
   }
+
+  /** @internal Abort cleanup reports here without throwing out of EventTarget. */
+  reportResourceError(error: unknown): void { this.#resourceFailures.push(error); }
 
   /** @internal Ends publication authority without changing 6C teardown order. */
   beginDisposal(reason: SynCloudOSLifecycleDisposalReason): void {
@@ -157,13 +161,16 @@ export class NSEOwnershipScope {
     if (this.#released) return;
     this.beginDisposal(reason);
     this.#released = true;
-    const failures: unknown[] = [];
+    const failures: unknown[] = this.#resourceFailures.splice(0);
     for (const [object, dispose] of [...this.#resources]) {
       this.#resources.delete(object);
       try { dispose(reason); } catch (error) { failures.push(error); }
     }
     declareSynCloudOSLifecycleSignal(this.#abort.signal, reason);
     this.#abort.abort(new DOMException(`The ${this.kind} that owned this object was released.`, "AbortError"));
+    // Recorded ownerSignal children release at this existing late boundary and
+    // may report their own aggregate after the initial resource queue drain.
+    failures.push(...this.#resourceFailures.splice(0));
     if (failures.length === 1) throw failures[0];
     if (failures.length > 1) throw new AggregateError(failures, "Owned resources failed to dispose.");
   }
