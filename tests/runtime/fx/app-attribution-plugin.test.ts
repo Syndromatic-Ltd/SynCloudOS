@@ -51,9 +51,11 @@ describe("per-application FX virtual modules", () => {
   });
 });
 
-it("uses Vite's canonical path spelling for the private attribution runtime", () => {
+it("delegates the private runtime to Vite's canonical resolver including dependency version queries", async () => {
   const plugin = synCloudOS({ webspringEntry: false });
-  const runtime = plugin.resolveId("virtual:syncloudos/fx-runtime");
-  expect(runtime).toMatch(/\/src\/SynCloudOS\/AppSDK\/fx\/runtime\.ts$/);
-  expect(runtime).not.toContain("\\");
+  const resolve = vi.fn(async (id: string) => ({ id: `${id}?v=dependency-version` }));
+  const runtime = await plugin.resolveId.call({ resolve }, "virtual:syncloudos/fx-runtime", "/consumer/app.ts");
+  expect(resolve).toHaveBeenCalledWith(expect.stringMatching(/\/src\/SynCloudOS\/AppSDK\/fx\/runtime\.ts$/), "/consumer/app.ts", { skipSelf: true });
+  expect(runtime.id).toMatch(/\/src\/SynCloudOS\/AppSDK\/fx\/runtime\.ts\?v=dependency-version$/);
+  expect(runtime.id).not.toContain("\\");
 });

@@ -706,8 +706,16 @@ export function synCloudOS(options) {
       const toolchainConfig = toolchain.config(config, env);
       pluginSdkBuild ??= sdkBuildFingerprint(fileURLToPath(new URL(".", import.meta.url)));
       const build = pluginSdkBuild;
-      if (!build) return toolchainConfig;
-      return { ...toolchainConfig, optimizeDeps: { esbuildOptions: { define: { __SYNCLOUDOS_SDK_BUILD__: JSON.stringify(build) } } } };
+      return {
+        ...toolchainConfig,
+        optimizeDeps: {
+          // Vite matches subpaths too: classes, private attribution and mounted sessions must share one graph.
+          exclude: ["@syndromatic/syncloudos"],
+          // The excluded SDK imports named exports from this CommonJS peer entry.
+          include: ["react-dom"],
+          ...(build ? { esbuildOptions: { define: { __SYNCLOUDOS_SDK_BUILD__: JSON.stringify(build) } } } : {}),
+        },
+      };
     },
     api: toolchain.api,
     transform: toolchain.transform,
@@ -731,8 +739,8 @@ export function synCloudOS(options) {
     },
 
     resolveId(id, importer) {
-      // Match Vite-resolved relative imports on Windows; one file must have one module ID.
-      if (id === fxRuntimeModuleId) return displayPath(fxRuntimePath);
+      // Use the same canonical path and dependency version query as relative SDK imports.
+      if (id === fxRuntimeModuleId) return this.resolve(displayPath(fxRuntimePath), importer, { skipSelf: true });
       if (id === browserModuleId) return resolvedBrowserModuleId;
       if (id === "@syndromatic/syncloudos/browser" && importer !== resolvedBrowserModuleId) return resolvedBrowserModuleId;
       if (id.startsWith(appModulePrefix)) { const resolved = `\0${id}`; appVirtualModules.add(resolved); return resolved; }
