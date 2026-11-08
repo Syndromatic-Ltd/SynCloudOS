@@ -27,7 +27,7 @@ export function ownNSEFactory<T extends object>(owner: object, factory: (signal:
       if (asynchronous instanceof Promise) void asynchronous.catch(() => {});
       throw new TypeError("own(factory) requires synchronous construction; async/thenable results are forbidden. Use managedTask for asynchronous work.");
     }
-    if (!result || typeof result !== "object") throw new TypeError("own(factory) must return a disposable or privately registered owned resource.");
+    if (!result || (typeof result !== "object" && typeof result !== "function")) throw new TypeError("own(factory) must return a disposable or privately registered owned resource.");
     if (getNSEObjectLifetime(result)) throw new TypeError("own(factory) cannot construct application/window/view controllers; use addChild(Class, ...args) or openWindow instead.");
     const alreadyOwned = isNSEOwnedResource(result, lifetime.scope.signal);
     if (!alreadyOwned) {

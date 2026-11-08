@@ -21,6 +21,7 @@
 import {
   SynCloudOSLifecycleRecord,
   synCloudOSLifecycleSignalReason,
+  runInOwnedExecutionContext,
   type SynCloudOSLifecycleDisposalReason,
 } from "../../SynCloudOS/nseRuntimeContracts";
 import {
@@ -117,15 +118,10 @@ export class NSEObjectLifetime {
       this.constructedByFramework = false;
       const owner = resolveOwnership(options, { kind, id });
       if (owner.scope) {
-        this.#leaveOwner = owner.scope.adopt(self);
         ownerScope = owner.scope;
       } else if (owner.signal) {
-        const signal = owner.signal;
-        signal.throwIfAborted();
-        ownerSignal = signal;
-        const release = () => self[nseDisposeFor](synCloudOSLifecycleSignalReason(signal));
-        signal.addEventListener("abort", release, { once: true });
-        this.#leaveOwner = () => signal.removeEventListener("abort", release);
+        owner.signal.throwIfAborted();
+        ownerSignal = owner.signal;
       }
     }
     // An arbitrary NSEOwner getter may supply teardown, but cannot issue authority.
@@ -133,6 +129,23 @@ export class NSEObjectLifetime {
     const executionParent = pending?.ownerScope ?? ownerScope
       ?? (options.ownerSignal ? getNSEScopeForSignal(options.ownerSignal) : undefined);
     inheritNSEExecutionContext(this.scope, executionParent);
+    // Inheritance can reject a revoked mount while the structural owner is live.
+    // Validate it before retaining a not-yet-initialised object in an owner/listener.
+    if (!pending && ownerScope) this.#leaveOwner = ownerScope.adopt(self);
+    else if (!pending && ownerSignal) {
+      const signal = ownerSignal;
+      signal.throwIfAborted();
+      const recordedOwner = getNSEScopeForSignal(signal);
+      const release = () => {
+        try { self[nseDisposeFor](synCloudOSLifecycleSignalReason(signal)); }
+        catch (error) {
+          if (!recordedOwner) throw error;
+          runInOwnedExecutionContext(null, () => recordedOwner.reportResourceError(error));
+        }
+      };
+      signal.addEventListener("abort", release, { once: true });
+      this.#leaveOwner = () => signal.removeEventListener("abort", release);
+    }
     this.#ownership = { scope: this.scope, ownerScope, ownerSignal };
     ownershipByObject.set(self, this.#ownership);
     objectByScope.set(this.scope, self);
