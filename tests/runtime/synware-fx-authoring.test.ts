@@ -132,9 +132,11 @@ it("does no device work on render and shows explicit action failures rather than
   expect(states.at(-1)).toBe("Camera denied");
 });
 
-it("scaffolds the thirteenth framework as a direct permission-free capability query", () => {
+it("scaffolds Compression's exact algorithm enum without entitlements or a mounted hook", () => {
   const { app } = generate(["--fx", "compression"]);
   expect(load(join(app, "Contents/Info.ts")).default.entitlements).toBeUndefined();
-  expect(load(join(app, "Contents/recipes/compression.ts")).runRecipe()).toContain("gzip");
+  const recipe = join(app, "Contents/recipes/compression.ts");
+  expect(readFileSync(recipe, "utf8")).toContain('import { CPFXAlgorithm } from "@syndromatic/syncloudos/fx/compression";');
+  expect(load(recipe).runRecipe()).toBe("Compression algorithms: lzfse, lz4, lzma, zlib, brotli, lzbitmap");
   expect(readFileSync(join(app, "Contents/index.tsx"), "utf8")).not.toContain("useCompression");
 });

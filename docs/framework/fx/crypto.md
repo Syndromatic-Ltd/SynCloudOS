@@ -34,7 +34,13 @@ const verified = await signing.publicKey.isValidSignature(signature, data);
 - `new CRFXSymmetricKey(data)` imports bytes; `new CRFXSymmetricKey(size)` generates secure random bytes. `CRFXSymmetricKeySize` provides `bits128`, `bits192`, `bits256`, `new CRFXSymmetricKeySize(bitCount)` and `bitCount`. Keys expose `bitCount`, `bytes` and `withUnsafeBytes`; they have no invented `generate` or `rawRepresentation` member.
 - `CRFXDigest`, `CRFXHashFunction` and `CRFXMessageAuthenticationCode` are the corresponding protocols. The former string-union `CRFXHashFunction` has been deleted; its name now denotes Apple's actual protocol, never an algorithm string.
 
-Swift `static func ==` is represented literally as `Type["=="](lhs, rhs)`. JavaScript's `==` operator is not overloaded, and there is no `isEqual` alias on CryptoKit values. Digest, authentication-code, symmetric-key and shared-secret comparisons use an internal WebAssembly XOR/OR reduction whose loop count and addresses depend only on the public length. There is no data-dependent early exit; comparison storage is zeroed after use. If the host blocks this primitive, comparisons fail with `CRFXError.underlyingCoreCryptoError`. This does not claim immunity to host or hardware side channels.
+Swift `static func ==` is represented literally as:
+
+```ts
+Type["=="](lhs, rhs)
+```
+
+JavaScript's `==` operator is not overloaded, and there is no `isEqual` alias on CryptoKit values. Digest, authentication-code, symmetric-key and shared-secret comparisons use an internal WebAssembly XOR/OR reduction whose loop count and addresses depend only on the public length. There is no data-dependent early exit; comparison storage is zeroed after use. If the host blocks this primitive, comparisons fail with `CRFXError.underlyingCoreCryptoError`. This does not claim immunity to host or hardware side channels.
 
 `withUnsafeBytes` passes a defensive `NSEData` value rather than a native pointer. `bytes` similarly maps Apple's `RawSpan` to Foundation bytes. No mutable view into private key storage is exposed. JavaScript/native-provider memory cannot provide Swift's secure-memory lifetime or guaranteed erasure of all copies.
 
