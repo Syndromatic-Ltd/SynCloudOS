@@ -176,7 +176,7 @@ Browser acceptance now separates three cases: the original random key round trip
 
 ## Supplied private-point and scalar-import correction
 
-Baseline: `2dae4ec`. Targeted re-review cleared the previous corrections but found that X9.63 private-key import discarded the supplied public point before native PKCS8 import. That unnecessarily reproduced Firefox's scalar-only public-point limitation even though the caller supplied the point. Apple's [P256.Signing.PrivateKey.init(x963Representation:)](https://developer.apple.com/documentation/cryptokit/p256/signing/privatekey/init(x963representation:)) is the retained constructor contract.
+Baseline: `2dae4ec`. Implementation commit: `267f56a6d7ba8864ec7e2b1f4836cf7dad3d8a32` — `FX: Validate private EC scalars and supplied public points`. This report-only follow-up records that immutable commit without changing SDK-fingerprinted inputs. Targeted re-review cleared the previous corrections but found that X9.63 private-key import discarded the supplied public point before native PKCS8 import. That unnecessarily reproduced Firefox's scalar-only public-point limitation even though the caller supplied the point. Apple's [P256.Signing.PrivateKey.init(x963Representation:)](https://developer.apple.com/documentation/cryptokit/p256/signing/privatekey/init(x963representation:)) is the retained constructor contract.
 
 Read-only native probes preceded implementation:
 
