@@ -27,20 +27,43 @@ import { createInstalledConsumer, runNode } from "./installed-consumer.mjs";
 
 // Real browser-worker acceptance for the independently installed CryptoFX framework.
 const consumer = createInstalledConsumer(process.cwd(), "synware-crypto-browser-");
-// Deterministic test keys include their native public point, unlike scalar-only PKCS8 imports.
-const scalarOneFixtures = Object.fromEntries([["prime256v1", "P-256", 32], ["secp384r1", "P-384", 48], ["secp521r1", "P-521", 66]].map(([curve, crv, width]) => {
+const field = (tag, bytes) => Buffer.concat([Buffer.from(bytes.length < 128 ? [tag, bytes.length] : bytes.length < 256 ? [tag, 0x81, bytes.length] : [tag, 0x82, bytes.length >>> 8, bytes.length & 255]), bytes]);
+const sequence = (...parts) => field(0x30, Buffer.concat(parts));
+const adjacent = (value, change) => { const result = Buffer.from(value); for (let i = result.length - 1; i >= 0; i--) { const n = result[i] + change; result[i] = n & 255; if (n >= 0 && n < 256) break; } return result; };
+// Deterministic fixtures use native EC point generation. Only public-coordinate negation
+// is used to construct an adversarial point; no private EC arithmetic is implemented here.
+const privateImportFixtures = Object.fromEntries([
+  ["prime256v1", "P-256", 32, "06082a8648ce3d030107", "ffffffff00000001000000000000000000000000ffffffffffffffffffffffff", "ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551"],
+  ["secp384r1", "P-384", 48, "06052b81040022", "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffff0000000000000000ffffffff", "ffffffffffffffffffffffffffffffffffffffffffffffffc7634d81f4372ddf581a0db248b0a77aecec196accc52973"],
+  ["secp521r1", "P-521", 66, "06052b81040023", "01" + "ff".repeat(65), "01fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa51868783bf2f966b7fcc0148f709a5d03bb5c9b8899c47aebb6fb71e91386409"],
+].map(([curve, crv, width, oid, prime, order]) => {
   const scalar = Buffer.alloc(width); scalar[width - 1] = 1;
-  const point = createECDH(curve).setPrivateKey(scalar).getPublicKey();
-  const key = createPrivateKey({ format: "jwk", key: { kty: "EC", crv, d: scalar.toString("base64url"), x: point.subarray(1, 1 + width).toString("base64url"), y: point.subarray(1 + width).toString("base64url") } });
-  return [width, key.export({ type: "pkcs8", format: "der" }).toString("base64")];
+  const point = createECDH(curve).setPrivateKey(scalar).getPublicKey(), boundary = Buffer.from(order, "hex");
+  const encode = (secret, publicPoint) => {
+    const sec1 = sequence(Buffer.from([2, 1, 1]), field(4, secret), field(0xa0, Buffer.from(oid, "hex")), field(0xa1, field(3, Buffer.concat([Buffer.from([0]), publicPoint]))));
+    const der = sequence(Buffer.from([2, 1, 0]), sequence(Buffer.from("06072a8648ce3d0201", "hex"), Buffer.from(oid, "hex")), field(4, sec1));
+    return { raw: secret.toString("base64"), point: publicPoint.toString("base64"), x963: Buffer.concat([publicPoint, secret]).toString("base64"), der: der.toString("base64"), sec1: sec1.toString("base64") };
+  };
+  const negative = Buffer.from(point), y = BigInt("0x" + point.subarray(1 + width).toString("hex"));
+  Buffer.from((BigInt("0x" + prime) - y).toString(16).padStart(width * 2, "0"), "hex").copy(negative, 1 + width);
+  const different = createECDH(curve).setPrivateKey(adjacent(scalar, 1)).getPublicKey(), offCurve = Buffer.alloc(point.length); offCurve[0] = 4;
+  const positive = [scalar, adjacent(boundary, -1)].map(secret => {
+    const publicPoint = createECDH(curve).setPrivateKey(secret).getPublicKey();
+    const key = createPrivateKey({ format: "jwk", key: { kty: "EC", crv, d: secret.toString("base64url"), x: publicPoint.subarray(1, 1 + width).toString("base64url"), y: publicPoint.subarray(1 + width).toString("base64url") } });
+    return { ...encode(secret, publicPoint), der: key.export({ type: "pkcs8", format: "der" }).toString("base64"), sec1: key.export({ type: "sec1", format: "der" }).toString("base64") };
+  });
+  return [width, { positive, badPoints: [different, negative, offCurve].map(publicPoint => encode(scalar, publicPoint)), badScalars: [Buffer.alloc(width), boundary, adjacent(boundary, 1)].map(secret => encode(secret, point)) }];
 }));
+const scalarOneFixtures = Object.fromEntries(Object.entries(privateImportFixtures).map(([width, fixture]) => [width, fixture.positive[0].der]));
 writeFileSync(join(consumer.root, "worker.ts"), `
 import { NSEData } from "@syndromatic/syncloudos/foundation";
 import { CRFXSHA256, CRFXSymmetricKey, CRFXAES, CRFXChaChaPoly, CRFXError, CRFXP256, CRFXP384, CRFXP521, CRFXSymmetricKeySize, CRFXSharedSecret, CRFXSHA256Digest, CRFXHMAC, CRFXHKDF } from "@syndromatic/syncloudos/fx/crypto";
 const scalarOneFixtures: Record<number, string> = ${JSON.stringify(scalarOneFixtures)};
+const privateImportFixtures = ${JSON.stringify(privateImportFixtures)};
 (async () => {
   const data = NSEData.from(new TextEncoder().encode("CRFX worker"));
   const scalarOnlyPublicPoints = [];
+  let privateImportChecks = 0;
   const key = new CRFXSymmetricKey(CRFXSymmetricKeySize.bits256);
   const rejected = async (body: () => unknown, code: string, message?: string) => {
     try { await body(); } catch (error) { if (error instanceof CRFXError && error.code === code && (!message || error.message === message)) return; throw error; }
@@ -82,6 +105,31 @@ const scalarOneFixtures: Record<number, string> = ${JSON.stringify(scalarOneFixt
   for (const Curve of [CRFXP256, CRFXP384, CRFXP521]) {
     const width = Curve === CRFXP256 ? 32 : Curve === CRFXP384 ? 48 : 66;
     const scalar = new Uint8Array(width); scalar[width - 1] = 1;
+    const fixture = privateImportFixtures[width];
+    const representations = (value: { raw: string; x963: string; der: string; sec1: string }) => [
+      { rawRepresentation: NSEData.fromBase64(value.raw) }, { x963Representation: NSEData.fromBase64(value.x963) },
+      { derRepresentation: NSEData.fromBase64(value.der) }, { pemRepresentation: "-----BEGIN PRIVATE KEY-----\\n" + value.der + "\\n-----END PRIVATE KEY-----" },
+      { derRepresentation: NSEData.fromBase64(value.sec1) }, { pemRepresentation: "-----BEGIN EC PRIVATE KEY-----\\n" + value.sec1 + "\\n-----END EC PRIVATE KEY-----" },
+    ];
+    for (const Kind of [Curve.Signing, Curve.KeyAgreement]) {
+      for (const value of fixture.positive) {
+        for (const [index, input] of representations(value).entries()) {
+          const key = new Kind.PrivateKey(input);
+          if (!(await key.rawRepresentation).isEqual(NSEData.fromBase64(value.raw))) throw new Error("Private scalar round trip failed");
+          if (index && (!(await key.publicKey.x963Representation).isEqual(NSEData.fromBase64(value.point)) || !(await key.x963Representation).isEqual(NSEData.fromBase64(value.x963)))) throw new Error("Supplied X9.63 point was lost");
+          privateImportChecks++;
+        }
+      }
+      for (const value of fixture.badPoints) for (const input of representations(value).slice(1)) { await rejected(() => new Kind.PrivateKey(input).rawRepresentation, "invalidParameter"); privateImportChecks++; }
+      for (const value of fixture.badScalars) for (const input of representations(value)) { await rejected(() => new Kind.PrivateKey(input).rawRepresentation, "invalidParameter"); privateImportChecks++; }
+      const x963 = NSEData.fromBase64(fixture.positive[0].x963).bytes;
+      for (const malformed of [x963.slice(1), new Uint8Array([2, ...x963.slice(1)])]) { await rejected(() => new Kind.PrivateKey({ x963Representation: NSEData.from(malformed) }).rawRepresentation, "incorrectParameterSize"); privateImportChecks++; }
+    }
+    const directSigning = new Curve.Signing.PrivateKey({ x963Representation: NSEData.fromBase64(fixture.positive[0].x963) });
+    if (!await directSigning.publicKey.isValidSignature(await directSigning.signature(data), data)) throw new Error("Direct X9.63 signing failed");
+    const directAgreement = new Curve.KeyAgreement.PrivateKey({ x963Representation: NSEData.fromBase64(fixture.positive[0].x963) });
+    const agreementPeer = new Curve.KeyAgreement.PrivateKey({ x963Representation: NSEData.fromBase64(fixture.positive[1].x963) });
+    if (!CRFXSharedSecret["=="](await directAgreement.sharedSecretFromKeyAgreement(agreementPeer.publicKey), await agreementPeer.sharedSecretFromKeyAgreement(directAgreement.publicKey))) throw new Error("Direct X9.63 agreement failed");
     const scalarOnly = new Curve.Signing.PrivateKey({ rawRepresentation: NSEData.from(scalar) });
     if (!(await scalarOnly.rawRepresentation).isEqual(NSEData.from(scalar))) throw new Error("Native scalar export fallback failed");
     let pointState = "available";
@@ -114,7 +162,7 @@ const scalarOneFixtures: Record<number, string> = ${JSON.stringify(scalarOneFixt
       await rejected(() => new Kind.PrivateKey({ derRepresentation: trailingPrivate }).rawRepresentation, "invalidParameter");
     }
   }
-  postMessage({ hash: CRFXSHA256Digest.byteCount, hasDocument: typeof document !== "undefined", scalarOnlyPublicPoints });
+  postMessage({ hash: CRFXSHA256Digest.byteCount, hasDocument: typeof document !== "undefined", scalarOnlyPublicPoints, privateImportChecks });
 })().catch(error => postMessage({ error: String(error) }));
 `);
 writeFileSync(join(consumer.root, "entry.ts"), `
@@ -147,6 +195,7 @@ for (const [engine, launcher] of Object.entries({ chromium, firefox, webkit })) 
     assert.equal(result.hasDocument, false);
     assert.equal(result.hash, 32);
     assert.equal(result.scalarOnlyPublicPoints.length, 3);
+    assert.equal(result.privateImportChecks, 282);
     if (engine !== "firefox") assert(result.scalarOnlyPublicPoints.every(item => item.state === "available"), `${engine}: scalar-only public point unexpectedly unavailable`);
     results.push({ engine, ...result });
   } finally { await browser.close(); }

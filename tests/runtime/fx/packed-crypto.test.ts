@@ -82,6 +82,14 @@ for (const [Curve, width] of [[C.CRFXP256, 32], [C.CRFXP384, 48], [C.CRFXP521, 6
   const key = new Curve.Signing.PrivateKey({ rawRepresentation: NSEData.from(scalar) });
   check((await key.rawRepresentation).isEqual(NSEData.from(scalar)));
   check((await key.x963Representation).isEqual(NSEData.from(new Uint8Array([...(await key.publicKey.x963Representation).bytes, ...scalar]))));
+  const x963 = await key.x963Representation;
+  for (const Kind of [Curve.Signing, Curve.KeyAgreement]) {
+    const restored = new Kind.PrivateKey({ x963Representation: x963 });
+    check((await restored.rawRepresentation).isEqual(NSEData.from(scalar)));
+    check((await restored.publicKey.x963Representation).isEqual(await key.publicKey.x963Representation));
+    try { await new Kind.PrivateKey({ rawRepresentation: NSEData.from(new Uint8Array(width)) }).rawRepresentation; throw new Error("Accepted zero private scalar"); }
+    catch (error) { check(error instanceof C.CRFXError && error.code === "invalidParameter"); }
+  }
 }
 const secret = await a.sharedSecretFromKeyAgreement(b.publicKey);
 check(C.CRFXSharedSecret["=="](secret, await b.sharedSecretFromKeyAgreement(a.publicKey)));

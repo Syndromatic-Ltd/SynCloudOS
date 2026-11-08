@@ -22,9 +22,9 @@ import { CRFXError } from "../CRFXError";
 import { concat, hex, unhex } from "./bytes";
 
 export const curves = {
-  P256: { name: "P-256", size: 32, hash: "SHA-256", oid: "06082a8648ce3d030107", p: "ffffffff00000001000000000000000000000000ffffffffffffffffffffffff", b: "5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b" },
-  P384: { name: "P-384", size: 48, hash: "SHA-384", oid: "06052b81040022", p: "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffff0000000000000000ffffffff", b: "b3312fa7e23ee7e4988e056be3f82d19181d9c6efe8141120314088f5013875ac656398d8a2ed19d2a85c8edd3ec2aef" },
-  P521: { name: "P-521", size: 66, hash: "SHA-512", oid: "06052b81040023", p: "01" + "ff".repeat(65), b: "0051953eb9618e1c9a1f929a21a0b68540eea2da725b99b315f3b8b489918ef109e156193951ec7e937b1652c0bd3bb1bf073573df883d2c34f1ef451fd46b503f00" },
+  P256: { name: "P-256", size: 32, hash: "SHA-256", oid: "06082a8648ce3d030107", n: "ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551", p: "ffffffff00000001000000000000000000000000ffffffffffffffffffffffff", b: "5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b" },
+  P384: { name: "P-384", size: 48, hash: "SHA-384", oid: "06052b81040022", n: "ffffffffffffffffffffffffffffffffffffffffffffffffc7634d81f4372ddf581a0db248b0a77aecec196accc52973", p: "fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffff0000000000000000ffffffff", b: "b3312fa7e23ee7e4988e056be3f82d19181d9c6efe8141120314088f5013875ac656398d8a2ed19d2a85c8edd3ec2aef" },
+  P521: { name: "P-521", size: 66, hash: "SHA-512", oid: "06052b81040023", n: "01fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa51868783bf2f966b7fcc0148f709a5d03bb5c9b8899c47aebb6fb71e91386409", p: "01" + "ff".repeat(65), b: "0051953eb9618e1c9a1f929a21a0b68540eea2da725b99b315f3b8b489918ef109e156193951ec7e937b1652c0bd3bb1bf073573df883d2c34f1ef451fd46b503f00" },
 } as const;
 export type Curve = keyof typeof curves;
 export function compactable(raw: Uint8Array, curve: Curve): boolean {
