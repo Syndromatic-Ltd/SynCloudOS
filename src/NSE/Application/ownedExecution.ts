@@ -5,6 +5,7 @@ import {
 import { bindNSEOwnedResource, getNSEOwnerScope, isNSEOwnershipScope, type NSEOwnershipScope } from "../Controllers/ownership";
 
 const contexts = new WeakMap<NSEOwnershipScope, OwnedExecutionContext>();
+const cleanupReportParents = new WeakMap<NSEOwnershipScope, OwnedExecutionContext>();
 
 /** One attachment per real scope; callers cannot replace a retired mount's authority. */
 export function attachNSEExecutionContext(scope: NSEOwnershipScope, parent: OwnedExecutionContext): void {
@@ -20,6 +21,13 @@ export function attachNSEExecutionContext(scope: NSEOwnershipScope, parent: Owne
     },
   });
   contexts.set(scope, context);
+  cleanupReportParents.set(scope, parent);
+}
+
+/** Rollback has consumed this scope's aggregate; report through its captured parent. */
+export function reportNSEConstructionCleanupError(scope: NSEOwnershipScope, error: unknown): void {
+  const parent = cleanupReportParents.get(scope);
+  if (parent) reportOwnedExecutionResourceError(parent, error);
 }
 
 /** Inherit only exact framework scope records, never the ambient execution context. */
