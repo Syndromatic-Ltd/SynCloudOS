@@ -21,6 +21,8 @@
 /** Runtime values FX resources use without evaluating the runtime facade.
  * Keep this entry free of runtime construction, like nseRuntimeContracts. */
 export { declareSynCloudOSLifecycleSignal, SynCloudOSLifecycleError, SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "./ErrorManager/lifecycleError";
+export { issueOwnedExecutionContext, currentOwnedExecutionContext, requireOwnedExecutionContext, runInOwnedExecutionContext, narrowOwnedExecutionContext, getOwnedExecutionPort, ownedExecutionContextSignal, assertOwnedExecutionContextLive, registerOwnedExecutionResource, sameOwnedExecutionProcess } from "./ExecutionContext/ownedExecutionContext";
+export type { OwnedExecutionContext, OwnedExecutionRecord, OwnedExecutionLifetime } from "./ExecutionContext/ownedExecutionContext";
 export type {
   SynCloudOSLifecycleDisposal,
   SynCloudOSLifecycleDisposalReason,

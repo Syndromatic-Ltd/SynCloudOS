@@ -33,7 +33,7 @@ import {
 } from "../Controllers/ownership";
 import { NSEObject } from "../Objects/NSEObject";
 import { NSEObjectLifetime } from "./objectLifetime";
-import { ownNSEFactory, type NSEDisposable, type NSESynchronousDisposable } from "./ownedFactory";
+import { ownNSEFactory, type NSESynchronousDisposable } from "./ownedFactory";
 import { NSEViewActivity } from "./viewActivity";
 import { NSEChildViewControllerView } from "./viewControllerRenderer";
 import { bindNSEViewOutlets } from "./viewOutlet";
@@ -313,8 +313,8 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
     return this.#lifetime.isDisposed;
   }
 
-  /** Constructs and owns a disposable synchronously, including after await. */
-  own<T extends NSEDisposable>(factory: (signal: AbortSignal) => NSESynchronousDisposable<T>): T {
+  /** Constructs a disposable or privately registered resource synchronously, including after await. */
+  own<T extends object>(factory: (signal: AbortSignal) => NSESynchronousDisposable<T>): T {
     return ownNSEFactory(this, factory);
   }
 
@@ -456,7 +456,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
         try { this.#assertLive("addChild", "call"); }
         catch (error) { try { result[nseDisposeFor](this.disposalReason ?? "explicit"); } finally { throw error; } }
         return result;
-      })
+      }, undefined, this.#lifetime.scope)
       : child;
     const added = instance as NSEViewController<unknown>;
     if (added === (this as NSEViewController<unknown>)) throw new TypeError("A view controller cannot be its own child.");
@@ -600,7 +600,7 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
         try { this.#assertLive(operation, "call"); }
         catch (error) { try { result[nseDisposeFor](this.disposalReason ?? "explicit"); } finally { throw error; } }
         return result;
-      })
+      }, undefined, this.#lifetime.scope)
       : viewController;
     const sheet = instance as NSEViewController<unknown>;
     if (!(sheet instanceof NSEViewController)) throw new TypeError(`${operation} needs a view controller.`);

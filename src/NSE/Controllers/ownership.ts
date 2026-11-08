@@ -24,6 +24,7 @@ import {
   SynCloudOSLifecycleRecord,
   type SynCloudOSLifecycleDisposalReason,
 } from "../../SynCloudOS/nseRuntimeContracts";
+import { inheritNSEExecutionContext, runWithNSEScopeExecution } from "../Application/ownedExecution";
 
 /**
  * Something that owns the controllers created with it: an application, a
@@ -74,6 +75,11 @@ export interface NSEOwnedObject {
 }
 
 const scopesBySignal = new WeakMap<AbortSignal, NSEOwnershipScope>();
+const ownershipScopes = new WeakSet<NSEOwnershipScope>();
+/** @internal Scope authentication uses identity, not prototypes or application getters. */
+export function isNSEOwnershipScope(scope: unknown): scope is NSEOwnershipScope { return typeof scope === "object" && scope !== null && ownershipScopes.has(scope as NSEOwnershipScope); }
+/** @internal A signal can name only the exact scope that issued it. */
+export function getNSEScopeForSignal(signal: AbortSignal): NSEOwnershipScope | undefined { return scopesBySignal.get(signal); }
 
 /**
  * The lifetime of one application, window controller or view controller.
@@ -90,6 +96,7 @@ export class NSEOwnershipScope {
   #disposing = false;
 
   constructor(readonly kind: string, readonly id: string) {
+    ownershipScopes.add(this);
     scopesBySignal.set(this.signal, this);
   }
 
@@ -166,6 +173,7 @@ let ambientScope: NSEOwnershipScope | null = null;
 interface PendingSelf {
   readonly scope: NSEOwnershipScope;
   readonly context: unknown;
+  readonly ownerScope: NSEOwnershipScope | undefined;
   /** The base constructor registers itself for rollback if a derived constructor throws. */
   object?: NSEOwnedObject;
 }
@@ -244,7 +252,7 @@ export function constructNSEOwnedResource<T>(scope: NSEOwnershipScope, construct
   acquisitionJournals.push(journal);
   ambientScope = scope;
   pendingSelf = null;
-  try { return construct(); }
+  try { return runWithNSEScopeExecution(scope, construct); }
   catch (error) {
     for (const rollback of journal.reverse()) { try { rollback(); } catch { /* Preserve the construction error; finish every release. */ } }
     throw error;
@@ -262,15 +270,16 @@ export function constructNSEOwnedResource<T>(scope: NSEOwnershipScope, construct
  * `scope` as its own, together with `context` (the framework's hand-off to
  * the object it is constructing).
  */
-export function instantiateInOwnerScope<T>(scope: NSEOwnershipScope, construct: () => T, context?: unknown): T {
+export function instantiateInOwnerScope<T>(scope: NSEOwnershipScope, construct: () => T, context?: unknown, ownerScope?: NSEOwnershipScope): T {
   scope.assertLive();
+  inheritNSEExecutionContext(scope, ownerScope);
   const previousAmbient = ambientScope;
   const previousSelf = pendingSelf;
   ambientScope = scope;
-  const pending: PendingSelf = { scope, context };
+  const pending: PendingSelf = { scope, context, ownerScope };
   pendingSelf = pending;
   try {
-    return construct();
+    return runWithNSEScopeExecution(scope, construct);
   } catch (error) {
     // A derived constructor may fail after super() acquired resources. Finish
     // every cleanup step, but never replace the original construction error.
@@ -329,10 +338,11 @@ export function resolveOwnership(
     return { signal: options.ownerSignal, scope: undefined };
   }
   if (options.owner) {
+    const recorded = scopesByOwner.get(options.owner);
+    if (recorded) { recorded.assertLive(); return { signal: recorded.signal, scope: recorded }; }
     const signal = options.owner.ownerSignal;
-    const scope = signal ? scopesByOwner.get(options.owner) : undefined;
-    (scope ?? (signal ? scopesBySignal.get(signal) : undefined))?.assertLive();
-    return { signal, scope };
+    (signal ? scopesBySignal.get(signal) : undefined)?.assertLive();
+    return { signal, scope: undefined };
   }
   if (ambientScope) {
     ambientScope.assertLive();

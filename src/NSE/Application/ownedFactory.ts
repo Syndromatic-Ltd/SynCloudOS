@@ -2,11 +2,15 @@ import { bindNSEOwnedResource, constructNSEOwnedResource, isNSEOwnedResource } f
 import { getNSEObjectLifetime } from "./objectLifetime";
 
 export type NSEDisposable = { dispose(): void };
-/** A thenable disposable is still asynchronous and cannot be an owned factory result. */
-export type NSESynchronousDisposable<T extends NSEDisposable> = T & { readonly then?: never };
+/** Thenables remain asynchronous even when they also have a cleanup operation. */
+export type NSESynchronousDisposable<T extends object> = T & { readonly then?: never };
 
-/** @internal Shared implementation of application/window/view own(factory). */
-export function ownNSEFactory<T extends NSEDisposable>(owner: object, factory: (signal: AbortSignal) => NSESynchronousDisposable<T>): T {
+/**
+ * @internal Shared application/window/view own(factory) implementation.
+ * Object typing preserves Apple cleanup names on privately registered resources.
+ * Unregistered objects still need a callable dispose(); plain objects are rejected.
+ */
+export function ownNSEFactory<T extends object>(owner: object, factory: (signal: AbortSignal) => NSESynchronousDisposable<T>): T {
   const lifetime = getNSEObjectLifetime(owner);
   if (!lifetime) throw new TypeError("Owned construction requires an NSE application, window or view controller.");
   const assertLive = () => {
@@ -23,14 +27,16 @@ export function ownNSEFactory<T extends NSEDisposable>(owner: object, factory: (
       if (asynchronous instanceof Promise) void asynchronous.catch(() => {});
       throw new TypeError("own(factory) requires synchronous construction; async/thenable results are forbidden. Use managedTask for asynchronous work.");
     }
-    if (!result || typeof result.dispose !== "function") throw new TypeError("own(factory) must return a disposable resource.");
+    if (!result || typeof result !== "object") throw new TypeError("own(factory) must return a disposable or privately registered owned resource.");
     if (getNSEObjectLifetime(result)) throw new TypeError("own(factory) cannot construct application/window/view controllers; use addChild(Class, ...args) or openWindow instead.");
     const alreadyOwned = isNSEOwnedResource(result, lifetime.scope.signal);
     if (!alreadyOwned) {
+      const dispose = (result as Partial<NSEDisposable>).dispose;
+      if (typeof dispose !== "function") throw new TypeError("own(factory) must return a disposable or privately registered owned resource.");
       if (lifetime.isDisposed || lifetime.scope.authoritySignal.aborted) {
-        try { result.dispose(); } finally { assertLive(); }
+        try { dispose.call(result); } finally { assertLive(); }
       }
-      bindNSEOwnedResource(result, lifetime.scope.signal, () => result.dispose());
+      bindNSEOwnedResource(result, lifetime.scope.signal, () => dispose.call(result));
     }
     assertLive();
     return result;

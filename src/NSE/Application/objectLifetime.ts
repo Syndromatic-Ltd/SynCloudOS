@@ -28,11 +28,13 @@ import {
   journalNSEAcquisition,
   NSEOwnershipScope,
   registerOwnerScope,
+  getNSEScopeForSignal,
   resolveOwnership,
   takePendingSelf,
   type NSEControllerOwnershipOptions,
   type NSEOwnedObject,
 } from "../Controllers/ownership";
+import { inheritNSEExecutionContext } from "./ownedExecution";
 
 interface ObjectOwnership {
   readonly scope: NSEOwnershipScope;
@@ -126,6 +128,11 @@ export class NSEObjectLifetime {
         this.#leaveOwner = () => signal.removeEventListener("abort", release);
       }
     }
+    // An arbitrary NSEOwner getter may supply teardown, but cannot issue authority.
+    // Only recorded owners or an explicitly supplied, recorded signal can do that.
+    const executionParent = pending?.ownerScope ?? ownerScope
+      ?? (options.ownerSignal ? getNSEScopeForSignal(options.ownerSignal) : undefined);
+    inheritNSEExecutionContext(this.scope, executionParent);
     this.#ownership = { scope: this.scope, ownerScope, ownerSignal };
     ownershipByObject.set(self, this.#ownership);
     objectByScope.set(this.scope, self);

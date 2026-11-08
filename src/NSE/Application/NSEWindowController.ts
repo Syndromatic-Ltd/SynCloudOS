@@ -29,7 +29,7 @@ import {
 import { NSEObject } from "../Objects/NSEObject";
 import type { NSEApplication, NSEOpenWindowOptions } from "./NSEApplication";
 import { NSEObjectLifetime } from "./objectLifetime";
-import { ownNSEFactory, type NSEDisposable, type NSESynchronousDisposable } from "./ownedFactory";
+import { ownNSEFactory, type NSESynchronousDisposable } from "./ownedFactory";
 import type { NSEToolbar } from "../Toolbars/NSEToolbar";
 import type { ReactNode } from "react";
 import type { NSETitlebarAccessoryViewController } from "./NSETitlebarAccessoryViewController";
@@ -450,8 +450,8 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
     return this.#lifetime.isDisposed;
   }
 
-  /** Constructs and owns a disposable synchronously, including after await. */
-  own<T extends NSEDisposable>(factory: (signal: AbortSignal) => NSESynchronousDisposable<T>): T {
+  /** Constructs a disposable or privately registered resource synchronously, including after await. */
+  own<T extends object>(factory: (signal: AbortSignal) => NSESynchronousDisposable<T>): T {
     return ownNSEFactory(this, factory);
   }
 
