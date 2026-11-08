@@ -1,0 +1,53 @@
+{
+  "source": "e4d9730c74e9a29ed2e309cdd71f1dc5d5ad37d36f805958ccfd8999cf953eea",
+  "sourceMatchesInstalled": true,
+  "files": 10,
+  "bad": 0,
+  "checks": [
+    {
+      "path": "scripts/synware/vite-plugin.mjs",
+      "match": true
+    },
+    {
+      "path": "docs/framework/synware-sdk.md",
+      "match": true
+    },
+    {
+      "path": "tests/runtime/synware-vite-sdk-build.test.ts",
+      "match": true
+    },
+    {
+      "path": "tests/runtime/fx/app-attribution-dev.test.ts",
+      "match": true
+    },
+    {
+      "path": "tests/fixtures/fx-dev-attribution/index.html",
+      "match": true
+    },
+    {
+      "path": "tests/fixtures/fx-dev-attribution/main.ts",
+      "match": true
+    },
+    {
+      "path": "tests/fixtures/fx-dev-attribution/serve.mjs",
+      "match": true
+    },
+    {
+      "path": "tests/fixtures/fx-dev-attribution/src/SynWare/Probe.app/Contents/Info.ts",
+      "match": true
+    },
+    {
+      "path": "tests/fixtures/fx-dev-attribution/src/SynWare/Probe.app/Contents/index.tsx",
+      "match": true
+    },
+    {
+      "path": "tests/runtime/fx/app-attribution-plugin.test.ts",
+      "match": true
+    }
+  ],
+  "devReceiptSha256": "964e9e4f62231a7b23158088a2633ebeab54165d845c4776aafc0303ff4613c9",
+  "review": "Approved; actual installed Chromium/HMR GREEN and remaining three packed gates GREEN inspected",
+  "commit": "a4a929f12cc53e1da9cc0cf218d549bc124c5245",
+  "productionPacked": "3/3, 127.66 s",
+  "immutableReceipt": "dev-binding-final-dev-installed.json"
+}

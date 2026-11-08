@@ -1,0 +1,10 @@
+{
+  "framework": "a4a929f12cc53e1da9cc0cf218d549bc124c5245",
+  "site": "236ddf5f456db02dd4fdbd3a9b83d77e4cd09158",
+  "archive": "6b05b89ada8534c9140ea29294f2531d63b888460121f842db95d3d850554b5c",
+  "observation": "Protected preview host explicitly includes SDK root and SDK subpaths for dependency optimisation; Vite include wins over exclude. No config edit.",
+  "consoleErrors": [
+    "%o\n\n%s\n\n%s\n PKFXError: Payment requires a merchant, country, currency, networks, capabilities and valid decimal summary items.\n    at e (http://127.0.0.1:5199/node_modules/.vite/deps/chunk-QQNNMNUU.js?v=0fa9bc76:3461:11)\n    at k7 (http://127.0.0.1:5199/node_modules/.vite/deps/chunk-QQNNMNUU.js?v=0fa9bc76:3463:218)\n    at new z5 (http://127.0.0.1:5199/node_modules/.vite/deps/chunk-QQNNMNUU.js?v=0fa9bc76:3485:131)\n    at new i (http://127.0.0.1:5199/node_modules/.vite/deps/chunk-6UJVVGIJ.js?v=0fa9bc76:1048:5)\n    at http://127.0.0.1:5199/node_modules/.vite/deps/chunk-6UJVVGIJ.js?v=0fa9bc76:1054:11\n    at mountMemo (http://127.0.0.1:5199/node_modules/.vite/deps/chunk-T5TCG75M.js?v=0fa9bc76:6915:25)\n    at Object.useMemo (http://127.0.0.1:5199/node_modules/.vite/deps/chunk-T5TCG75M.js?v=0fa9bc76:19097:20)\n    at exports.useMemo (http://127.0.0.1:5199/node_modules/.vite/deps/chunk-FQJDLV5A.js?v=0fa9bc76:947:36)\n    at Pn (http://127.0.0.1:5199/node_modules/.vite/deps/chunk-6UJVVGIJ.js?v=0fa9bc76:1044:39)\n    at PaymentExample (http://127.0.0.1:5199/src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx:425:22) The above error occurred in the <PaymentExample> component. React will try to recreate this component tree from scratch using the error boundary you provided, _y."
+  ],
+  "pageErrors": []
+}

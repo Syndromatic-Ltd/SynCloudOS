@@ -1,0 +1,34 @@
+npm notice run @syndromatic/website@0.1.0 test:node
+npm notice run node --test tests/node/*.test.mjs
+✔ production authentication remains required even when a preview flag is set (0.451ms)
+✔ development requires an explicit true preview flag (0.1096ms)
+✔ boundary checks work in a clean layout without the obsolete empty scripts/synware directory (97.305ms)
+✔ boundary checks still reject private framework imports in application source (59.8366ms)
+✔ accepts new explicit public exports without updating a site allowlist (0.6021ms)
+✔ wildcards, private subpaths, and disabled exports do not become public entries (0.1015ms)
+✔ a root import must also be explicitly exported (0.6108ms)
+✔ the existing audio, location and entire video examples keep their source bytes (41.2736ms)
+✔ all nine rebuilt families have a public import and a reachable example (5.4669ms)
+✔ new examples add only NSE controls and keep browser contracts outside rebuilt consumers (13.8569ms)
+✔ applications do not load framework chrome or fonts from copied public directories (46.393ms)
+✔ worker migration 0001 retains the tracked schema and version (0.8956ms)
+✔ public files exactly match the site asset inventory, including attribution (45.6067ms)
+✔ Base and en-GB represent every current Publisher fallback (3.2674ms)
+✔ translated Publisher entries retain every runtime placeholder and report actual missing keys (27.8672ms)
+✔ French image and publishing controls use their specific meanings (0.5871ms)
+✔ Publisher extraction includes migrated view and controller sources (280.4112ms)
+✔ the finite image-style catalogue tracks the actual inspector choices (211.2291ms)
+✔ extraction rejects a reused key with conflicting fallbacks (0.6663ms)
+✔ new dynamic translation calls require an explicit finite catalogue inventory (0.2479ms)
+✔ catalogue preserves existing translations and reports missing or invalid placeholders (0.6846ms)
+✔ a valid dictionary entry can replace an existing placeholder mismatch (0.1314ms)
+✔ a changed English fallback does not reuse the old key's translation (0.127ms)
+✔ explicit brand and placeholder-only invariants are not English fallback translations (0.2988ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 598.8985

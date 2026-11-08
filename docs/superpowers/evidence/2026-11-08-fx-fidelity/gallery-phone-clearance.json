@@ -1,0 +1,26 @@
+{
+  "before": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "maximumScrollTop": 4502,
+    "scrollHeight": 5164,
+    "clientHeight": 662,
+    "statusBottom": 802.140625,
+    "obscured": true,
+    "approximateBarTopFromScreenshot": 766
+  },
+  "after": {
+    "status": {
+      "top": 671.921875,
+      "bottom": 709.609375
+    },
+    "bar": {
+      "top": 762,
+      "bottom": 834
+    }
+  },
+  "canonicalMarker": true,
+  "noAppearanceOverride": true
+}

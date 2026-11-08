@@ -1,0 +1,55 @@
+{
+  "commit": "f2cd9dfc268fd700f3ee3b9d375c5f5f09a3689a",
+  "frozenFilesChecked": 9,
+  "committedBytesMatch": true,
+  "archiveHashMatches": true,
+  "proof": {
+    "archiveSha256": "c3b2fa369b26da1cf0cf533a40284a2e8671977c79828a59767ab0d986e20306",
+    "integrity": "sha512-ZvYlYzeYcuLlMFYX7rRwOsLvE+SxOieVecfbd5OYFOtAhpDdBRpStMVgPMlOiOSyRVsem1rN+zBKYwQt+p37FA==",
+    "sourceSha256": "26cc6f90c8eb3cc663668253651e8da8f8bc01fd887b33785b43e061644ecf5e",
+    "resourcesSha256": "fb5ab5b91fe9a090083228545e5cec319b44ad1d6f68af3328ac7a667b6df73f",
+    "installedOutsideRepository": true,
+    "linked": false,
+    "compiledAppTests": 3,
+    "productionBuild": true,
+    "productionImports": true,
+    "strictInstalledTypes": true,
+    "sharedSDKGraph": true,
+    "declarationGraph": {
+      "index": {
+        "familyInternalModules": 0
+      },
+      "sdk": {
+        "familyInternalModules": 0
+      },
+      "sdk/testing": {
+        "familyInternalModules": 0
+      },
+      "browser": {
+        "familyInternalModules": 0
+      },
+      "fx/network": {
+        "familyInternalModules": 0
+      },
+      "fx/speech": {
+        "familyInternalModules": 0
+      },
+      "fx/contacts": {
+        "familyInternalModules": 0
+      },
+      "fx/pass": {
+        "familyInternalModules": 0
+      },
+      "fx/nfc": {
+        "familyInternalModules": 0
+      },
+      "fx/bluetooth": {
+        "familyInternalModules": 0
+      },
+      "fx/xr": {
+        "familyInternalModules": 0
+      }
+    },
+    "resourceIntegrityAfterProof": true
+  }
+}
