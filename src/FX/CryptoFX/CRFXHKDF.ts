@@ -26,10 +26,14 @@ import { CRFXError } from "./CRFXError";
 import { concat, concatCollection, copy, empty, unsupported, valueBytes } from "./internal/bytes";
 import type { HashType } from "./internal/hash";
 
+const specialisations = new WeakMap<HashType, object>();
+
 /** CryptoKit.HKDF<H>. CRFXHKDF(Hash) specialises the hash type, as Swift's HKDF<Hash>. */
 export function CRFXHKDF(Hash: HashType) {
+  const cached = specialisations.get(Hash) as typeof HKDF | undefined;
+  if (cached) return cached;
   const HMAC = CRFXHMAC(Hash);
-  return class HKDF {
+  class HKDF {
     private constructor() {}
     /** Browser-forced asynchronous counterpart of extract(inputKeyMaterial:salt:). */
     static extract(inputKeyMaterial: CRFXSymmetricKey, salt: NSEData | null = null): Promise<CRFXHashedAuthenticationCode> {
@@ -62,5 +66,7 @@ export function CRFXHKDF(Hash: HashType) {
       const salt = typeof saltOrCount === "number" ? null : saltOrCount;
       return HKDF.expand(await HKDF.extract(inputKeyMaterial, salt), info, count);
     }
-  };
+  }
+  specialisations.set(Hash, HKDF);
+  return HKDF;
 }

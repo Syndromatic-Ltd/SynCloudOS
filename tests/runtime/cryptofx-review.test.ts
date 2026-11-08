@@ -24,11 +24,47 @@ import { NSEData } from "../../src/Foundation/NSEData";
 import * as C from "../../src/FX/CryptoFX/public";
 import { makeValue } from "../../src/FX/CryptoFX/internal/bytes";
 import { canonicalDer, der, parseDer, sequence } from "../../src/FX/CryptoFX/internal/encoding";
+import { registerHash } from "../../src/FX/CryptoFX/internal/hash";
 
 const data = (text: string) => NSEData.from(new TextEncoder().encode(text));
 const zeros = (size: number) => NSEData.from(new Uint8Array(size));
 const hex = (value: { withUnsafeBytes<T>(body: (bytes: NSEData) => T): T }) => value.withUnsafeBytes(bytes => Buffer.from(bytes.bytes).toString("hex"));
 const unsupported = { code: "underlyingCoreCryptoError" };
+
+describe("runtime generic hash specialisation identity", () => {
+  for (const [name, specialise] of [["HMAC", C.CRFXHMAC], ["HKDF", C.CRFXHKDF]] as const) {
+    it(`${name} returns the same class for repeated specialisations of each supported hash`, () => {
+      for (const Hash of [C.CRFXSHA256, C.CRFXSHA384, C.CRFXSHA512, C.CRFXInsecureSHA1]) {
+        expect(specialise(Hash)).toBe(specialise(Hash));
+      }
+    });
+    it(`${name} keeps different hash specialisations distinct`, () => {
+      expect(specialise(C.CRFXSHA256)).not.toBe(specialise(C.CRFXSHA384));
+    });
+    it(`${name} keys specialisations by hash class even when algorithms match`, () => {
+      class AlternateSHA256 extends C.CRFXSHA256 {}
+      registerHash(AlternateSHA256, "SHA-256");
+      expect(specialise(AlternateSHA256)).not.toBe(specialise(C.CRFXSHA256));
+      expect(specialise(AlternateSHA256)).toBe(specialise(AlternateSHA256));
+    });
+    it(`${name} continues to reject unsupported hash classes`, () => {
+      class UnregisteredSHA256 extends C.CRFXSHA256 {}
+      for (const Hash of [C.CRFXInsecureMD5, UnregisteredSHA256]) {
+        for (let attempt = 0; attempt < 2; attempt++) {
+          expect(() => specialise(Hash)).toThrow(expect.objectContaining({
+            ...unsupported, message: "The requested hash function is unavailable.",
+          }));
+        }
+      }
+    });
+  }
+  it("recognises HMAC instances across independent specialisation call sites", () => {
+    const makeHMAC = () => new (C.CRFXHMAC(C.CRFXSHA256))(new C.CRFXSymmetricKey(data("key")));
+    const acceptsHMAC = (value: object) => value instanceof C.CRFXHMAC(C.CRFXSHA256);
+    expect(acceptsHMAC(makeHMAC())).toBe(true);
+    expect(makeHMAC()).not.toBeInstanceOf(C.CRFXHMAC(C.CRFXSHA384));
+  });
+});
 
 describe("CryptoKit mutation contracts on immutable Foundation bytes", () => {
   it("retains copyingWithZeroing without falsely promising to erase immutable bytes", () => {
