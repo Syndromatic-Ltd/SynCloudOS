@@ -37,8 +37,8 @@ describe("CompressionFX", () => {
     vi.stubGlobal("CompressionStream", compression);
     vi.stubGlobal("DecompressionStream", decompression);
     const result = CPFXCapabilities.query();
-    expect(compression.mock.calls.map((call) => call[0])).toEqual(["deflate", "gzip", "brotli", "zstd"]);
-    expect(decompression.mock.calls.map((call) => call[0])).toEqual(["deflate", "gzip", "brotli", "zstd"]);
+    expect(compression.mock.calls.map((call) => call[0])).toEqual(["deflate-raw", "gzip", "brotli", "zstd"]);
+    expect(decompression.mock.calls.map((call) => call[0])).toEqual(["deflate-raw", "gzip", "brotli", "zstd"]);
     expect(result.algorithms).toEqual(["gzip"]);
     expect(result.supported).toBe(true);
     expect(Object.isFrozen(result.algorithms)).toBe(true);

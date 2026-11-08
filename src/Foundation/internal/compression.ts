@@ -26,7 +26,8 @@ export type NSEDataCompressionAlgorithm = typeof NSEDataCompressionAlgorithm[key
 export type CompressionOperation = "compress" | "decompress";
 
 const formats: Readonly<Record<NSEDataCompressionAlgorithm, string>> = Object.freeze({
-  zlib: "deflate", gzip: "gzip", brotli: "brotli", zstd: "zstd",
+  // Apple's zlib is RFC 1951 raw DEFLATE, without the RFC 1950 wrapper.
+  zlib: "deflate-raw", gzip: "gzip", brotli: "brotli", zstd: "zstd",
 });
 
 /** The sole codec factory. Uses web streams available in windows and workers. */
