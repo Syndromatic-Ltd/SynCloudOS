@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { createHash, createHmac, diffieHellman, createPrivateKey, createPublicKey, hkdfSync, verify } from "node:crypto";
 import { readFileSync, readdirSync } from "node:fs";
 import { NSEData } from "../../src/Foundation/NSEData";
@@ -40,6 +40,22 @@ const hmacVectors = {
   sha512: "87aa7cdea5ef619d4ff0b4241a1d6cb02379f4e2ce4ec2787ad0b30545e17cdedaa833b7d6b8a702038b274eaea3f4e4be9d914eeb61f1702e696c203a126854",
 };
 afterEach(() => vi.unstubAllGlobals());
+
+let unavailableComparison: { kind: "notRun" } | { kind: "returned"; value: boolean } | { kind: "threw"; error: unknown } = { kind: "notRun" };
+beforeAll(() => {
+  // Capture before any comparison test, independently of test ordering. A cached
+  // primitive returns normally and must fail the later assertion, never skip it.
+  const descriptor = Object.getOwnPropertyDescriptor(globalThis, "WebAssembly");
+  const key = new C.CRFXSymmetricKey(zeros(16));
+  try {
+    Object.defineProperty(globalThis, "WebAssembly", { configurable: true, writable: true, value: undefined });
+    try { unavailableComparison = { kind: "returned", value: C.CRFXSymmetricKey["=="](key, key) }; }
+    catch (error) { unavailableComparison = { kind: "threw", error }; }
+  } finally {
+    if (descriptor) Object.defineProperty(globalThis, "WebAssembly", descriptor);
+    else Reflect.deleteProperty(globalThis, "WebAssembly");
+  }
+});
 
 describe("CryptoKit hash values", () => {
   for (const [name, algorithm, size] of [["CRFXSHA256", "sha256", 32], ["CRFXSHA384", "sha384", 48], ["CRFXSHA512", "sha512", 64], ["CRFXInsecureSHA1", "sha1", 20]] as const) {
@@ -225,13 +241,8 @@ it("preserves ChaChaPoly values while failing unsupported cryptographic operatio
   await expect(md5.finalize()).rejects.toMatchObject({ code: "underlyingCoreCryptoError" });
 });
 
-it("fails the literal equality member when the constant-time primitive is unavailable", async () => {
-  vi.resetModules();
-  const { CRFXSymmetricKey } = await import("../../src/FX/CryptoFX/CRFXSymmetricKey");
-  const { NSEData: Data } = await import("../../src/Foundation/NSEData");
-  const key = new CRFXSymmetricKey(Data.from(new Uint8Array(16)));
-  vi.stubGlobal("WebAssembly", undefined);
-  expect(() => CRFXSymmetricKey["=="](key, key)).toThrow(expect.objectContaining({ code: "underlyingCoreCryptoError" }));
+it("fails the literal equality member when the constant-time primitive is unavailable", () => {
+  expect(unavailableComparison).toMatchObject({ kind: "threw", error: expect.objectContaining({ name: "CRFXError", code: "underlyingCoreCryptoError" }) });
 });
 
 it("retains constructor and derived-public-key rejection until an Apple member is awaited", async () => {
