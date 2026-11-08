@@ -326,8 +326,9 @@ export class ApplicationSession {
         const Controller = this.#source.AppClass.windowControllers?.[restored.controller] ?? windowClasses.get(this.#source.AppClass)?.get(restored.controller);
         if (!Controller) throw new TypeError(`Cannot restore window controller "${restored.controller}"; declare it in static windowControllers.`);
         controller = this.#construct(Controller, restored.options);
-      } else if (current.isMain) controller = this.#mainController();
-      else {
+      } else {
+        // Main/key status can move between physical windows. Each keeps its
+        // own controller; the stage's controller belongs only to the stage.
         const Controller = applicationMainWindowClass(currentClass(this.#source.AppClass));
         controller = Controller ? this.#construct(Controller) : null;
       }

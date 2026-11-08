@@ -393,6 +393,34 @@ describe("NSEWindowController closing", () => {
 });
 
 describe("opening more windows", () => {
+  it("keeps the stage controller independent of physical windows as the main window changes", async () => {
+    class Main extends NSEWindowController { static override view = () => <p>Independent main window</p>; }
+    class Application extends NSEApplication { static override mainWindow = Main; }
+    const host = createClassApplicationHost(Application, "com.example.stage-main-window-identity");
+    hosts.push(host);
+    await host.launch();
+    const session = applicationSessionFor({ runtimeId: host.runtime.runtimeId, appId: host.appId })!;
+    const stage = session.controllerFor(null)!;
+    host.mountWindows();
+    let firstId!: string;
+    await act(async () => { firstId = await host.openMainWindow(); });
+    const first = session.windowControllers.find(controller => controller.window.id === firstId)!;
+    expect(first).toBeDefined();
+    expect(first).not.toBe(stage);
+    let secondId!: string;
+    await act(async () => { secondId = await host.openMainWindow(); });
+    const second = session.windowControllers.find(controller => controller.window.id === secondId)!;
+    expect(second).toBeDefined();
+    expect(second).not.toBe(stage);
+    expect(second).not.toBe(first);
+    await act(async () => { await second.window.close(); });
+    expect(second.isDisposed).toBe(true);
+    expect(first.isDisposed).toBe(false);
+    expect(stage.isDisposed).toBe(false);
+    expect(session.controllerFor(null)).toBe(stage);
+    expect(first.window.id).toBe(firstId);
+  });
+
   it("keeps the stage source and two different class document owners live independently", async () => {
     const appId = "com.example.class-stage-document-owners";
     let documents!: AppWorkspaceDocumentsClient;
