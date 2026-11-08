@@ -35,17 +35,17 @@ it.each([false, true])("disposes a launch cancelled by logout before its uncoope
   expect((await host.runtime.logOut().result).status).toBe("completed");
   expect((await launching).status).toBe("cancelled");
   expect(first.isDisposed).toBe(true);
-  const identity = { runtime: host.runtime, appId: host.appId };
-  expect(applicationSessionFor(identity.runtime, identity.appId)).toBeUndefined();
+  const identity = { runtimeId: host.runtime.runtimeId, appId: host.appId };
+  expect(applicationSessionFor(identity)).toBeUndefined();
 
   authoriseTestRuntime(host.runtime);
   expect((await host.launch()).status).toBe("completed");
-  const replacement = applicationSessionFor(identity.runtime, identity.appId)!;
+  const replacement = applicationSessionFor(identity)!;
   expect(applications).toHaveLength(2);
   held.resolve();
   await held.promise;
   await Promise.resolve();
-  expect(applicationSessionFor(identity.runtime, identity.appId)).toBe(replacement);
+  expect(applicationSessionFor(identity)).toBe(replacement);
   expect(replacement.app).toBe(applications[1]);
   expect(replacement.isDisposed).toBe(false);
 });
@@ -62,7 +62,7 @@ it("cleans up a failed initial launch while preserving its original failure", as
   hosts.push(host);
   expect(await host.launch()).toMatchObject({ status: "failed", error: { message: failure.message, cause: failure } });
   expect(application.isDisposed).toBe(true);
-  expect(applicationSessionFor(host.runtime, host.appId)).toBeUndefined();
+  expect(applicationSessionFor({ runtimeId: host.runtime.runtimeId, appId: host.appId })).toBeUndefined();
 });
 
 it("keeps a structurally committed launch alive when cancellation skips launch did", async () => {
@@ -75,7 +75,7 @@ it("keeps a structurally committed launch alive when cancellation skips launch d
   });
   try {
     expect(await launching.result).toMatchObject({ status: "completed", postCommit: "cancelled" });
-    const session = applicationSessionFor(host.runtime, host.appId);
+    const session = applicationSessionFor({ runtimeId: host.runtime.runtimeId, appId: host.appId });
     expect(session).toBeDefined();
     expect(session!.isDisposed).toBe(false);
     expect(host.runtime.lifecycle.getState(host.appId)).toBe("active");
@@ -86,9 +86,9 @@ it.each(["launch", "close"] as const)("settles %s cleanup after cancellation fro
   class Application extends NSEApplication {}
   const host = createClassApplicationHost(Application, `com.example.${stage}-commit-notification`);
   hosts.push(host);
-  const identity = { runtime: host.runtime, appId: host.appId };
+  const identity = { runtimeId: host.runtime.runtimeId, appId: host.appId };
   if (stage === "close") await host.launch();
-  const previous = applicationSessionFor(identity.runtime, identity.appId);
+  const previous = applicationSessionFor(identity);
   const operation = host.runtime.lifecycle[stage](host.appId);
   let cancelled = false;
   const unsubscribe = host.runtime.operations.subscribe(() => {
@@ -102,11 +102,11 @@ it.each(["launch", "close"] as const)("settles %s cleanup after cancellation fro
     expect(cancelled).toBe(true);
     if (stage === "launch") {
       expect(host.runtime.lifecycle.getState(host.appId)).toBe("active");
-      expect(applicationSessionFor(identity.runtime, identity.appId)?.isDisposed).toBe(false);
+      expect(applicationSessionFor(identity)?.isDisposed).toBe(false);
     } else {
       expect(host.runtime.lifecycle.getState(host.appId)).toBe("closed");
       expect(previous?.isDisposed).toBe(true);
-      expect(applicationSessionFor(identity.runtime, identity.appId)).toBeUndefined();
+      expect(applicationSessionFor(identity)).toBeUndefined();
     }
   } finally { unsubscribe(); }
 });
@@ -119,8 +119,8 @@ it("disposes a committed close when another logout supersedes its did hook", asy
   const host = createClassApplicationHost(Application, "com.example.superseded-logout-lifetime");
   hosts.push(host);
   await host.launch();
-  const identity = { runtime: host.runtime, appId: host.appId };
-  const first = applicationSessionFor(identity.runtime, identity.appId)!;
+  const identity = { runtimeId: host.runtime.runtimeId, appId: host.appId };
+  const first = applicationSessionFor(identity)!;
   let superseding: ReturnType<typeof host.runtime.logOut> | undefined;
   const unsubscribe = host.runtime.store.subscribe(() => {
     if (host.runtime.lifecycle.getState(host.appId) !== "closed" || superseding) return;
@@ -132,7 +132,7 @@ it("disposes a committed close when another logout supersedes its did hook", asy
     expect(superseding).toBeDefined();
     expect((await superseding!.result).status).toBe("completed");
     expect(first.isDisposed).toBe(true);
-    expect(applicationSessionFor(identity.runtime, identity.appId)).toBeUndefined();
+    expect(applicationSessionFor(identity)).toBeUndefined();
     expect(willTerminate).not.toHaveBeenCalled();
   } finally { unsubscribe(); }
 });
@@ -146,22 +146,22 @@ it("disposes a closed session on abort even while termination is stalled", async
   const host = createClassApplicationHost(Application, "com.example.stalled-termination-lifetime");
   hosts.push(host);
   await host.launch();
-  const identity = { runtime: host.runtime, appId: host.appId };
-  const first = applicationSessionFor(identity.runtime, identity.appId)!;
+  const identity = { runtimeId: host.runtime.runtimeId, appId: host.appId };
+  const first = applicationSessionFor(identity)!;
   const closing = host.runtime.lifecycle.close(host.appId);
   await entered.promise;
   closing.cancel("cancel-stalled-termination");
   expect(await closing.result).toMatchObject({ status: "completed", postCommit: "cancelled" });
   expect(first.isDisposed).toBe(true);
-  expect(applicationSessionFor(identity.runtime, identity.appId)).toBeUndefined();
+  expect(applicationSessionFor(identity)).toBeUndefined();
 
   await host.runtime.appManager.getManagerForApp(host.appId).getReady();
   expect((await host.launch()).status).toBe("completed");
-  const replacement = applicationSessionFor(identity.runtime, identity.appId)!;
+  const replacement = applicationSessionFor(identity)!;
   held.resolve();
   await held.promise;
   await Promise.resolve();
-  expect(applicationSessionFor(identity.runtime, identity.appId)).toBe(replacement);
+  expect(applicationSessionFor(identity)).toBe(replacement);
   expect(replacement.isDisposed).toBe(false);
 });
 
@@ -178,8 +178,8 @@ it("preserves the active session when termination is aborted before commit", asy
   const host = createClassApplicationHost(Application, "com.example.aborted-termination-lifetime");
   hosts.push(host);
   await host.launch();
-  const identity = { runtime: host.runtime, appId: host.appId };
-  const session = applicationSessionFor(identity.runtime, identity.appId)!;
+  const identity = { runtimeId: host.runtime.runtimeId, appId: host.appId };
+  const session = applicationSessionFor(identity)!;
   const closing = host.runtime.lifecycle.close(host.appId);
   await entered.promise;
   closing.cancel("cancel-before-close-commit");
@@ -189,7 +189,7 @@ it("preserves the active session when termination is aborted before commit", asy
   held.resolve();
   await held.promise;
   await Promise.resolve();
-  expect(applicationSessionFor(identity.runtime, identity.appId)).toBe(session);
+  expect(applicationSessionFor(identity)).toBe(session);
   shouldHold = false;
   expect((await host.quit()).status).toBe("completed");
   expect(session.isDisposed).toBe(true);

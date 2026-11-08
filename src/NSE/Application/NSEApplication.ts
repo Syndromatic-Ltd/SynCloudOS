@@ -28,7 +28,7 @@ import { NSEObject } from "../Objects/NSEObject";
 import { publishObservableChange } from "../Objects/observable";
 import type { NSEMenu } from "../Menus/NSEMenu";
 import { NSEObjectLifetime } from "./objectLifetime";
-import { ownNSEFactory, type NSESynchronousDisposable } from "./ownedFactory";
+import { ownNSEFactory, type NSEDisposable, type NSESynchronousDisposable } from "./ownedFactory";
 import type { NSEAnyWindowController, NSEWindowController, NSEWindowControllerClass } from "./NSEWindowController";
 import type { AppBounds, AppOwnedWindowSnapshot } from "../../SynCloudOS/nseRuntimeContracts";
 import type { NSEViewController, NSEViewControllerClass } from "./NSEViewController";
@@ -171,8 +171,8 @@ export class NSEApplication extends NSEObject implements NSEOwner, NSEOwnedObjec
     return this.#lifetime.isDisposed;
   }
 
-  /** Constructs a disposable or privately registered resource synchronously, including after await. */
-  own<T extends object>(factory: (signal: AbortSignal) => NSESynchronousDisposable<T>): T {
+  /** Constructs and owns a disposable synchronously, including after await. */
+  own<T extends NSEDisposable>(factory: (signal: AbortSignal) => NSESynchronousDisposable<T>): T {
     return ownNSEFactory(this, factory);
   }
 

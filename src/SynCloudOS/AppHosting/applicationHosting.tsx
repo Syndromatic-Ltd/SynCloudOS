@@ -57,7 +57,6 @@ import { bindActionResponder, hasActions } from "../AppSDK/actions";
 import { trackLiveApplicationObject } from "./applicationHotReload";
 import { NSEWindowContentBorder, NSEWindowSheetFrame, NSEWindowSheetHostContext, NSEWindowTitlebarAccessories, nseContentBorderSize, NSEWindowTitlebarHostContext, useNSEWindowSheetHost, NSEWindowToolbar, useNSEWindowTitlebarDocument } from "./windowChrome";
 import { applicationSessionFor } from "./applicationSession";
-import { ApplicationHostRuntimeContext } from "./applicationHostRuntimeContext";
 import { createNSEWindowAlertQueue, NSEWindowAlertSheet, type NSEWindowAlertQueue } from "./windowAlertSheet";
 import { useNSEAnimationEnvironment, useNSEViewActivitySource } from "../../NSE/applicationHostInterop";
 import { useNSEOverlayFocusScope } from "../../NSE/applicationHostInterop";
@@ -138,8 +137,7 @@ interface ControllerResponderProps {
 function ControllerResponder({ appRuntime, target, kind, host, children }: ControllerResponderProps) {
   const hierarchy = useResponderHierarchy();
   const bindingId = useId();
-  const publicKernel = useContext(SynCloudOSRuntimeContext);
-  const kernel = useContext(ApplicationHostRuntimeContext) ?? publicKernel;
+  const kernel = useContext(SynCloudOSRuntimeContext);
   const parentId = hierarchy.responderId ?? appRuntime.responderId;
   const overlayScopeId = useNSEOverlayFocusScope();
   // The innermost focus scope it renders in (a sheet's, a popover's), else its parent responder's.
@@ -191,8 +189,7 @@ export function NSEViewControllerView({ controller, className }: NSEViewControll
   const observation = useMemo(() => createViewObservation(controller), [controller]);
   useSyncExternalStore(observation.subscribe, observation.getSnapshot, observation.getSnapshot);
   const appRuntime = useContext(SynWareRuntimeContext);
-  const publicKernel = useContext(SynCloudOSRuntimeContext);
-  const kernel = useContext(ApplicationHostRuntimeContext) ?? publicKernel;
+  const kernel = useContext(SynCloudOSRuntimeContext);
   const context = useSynWareContext();
   const { reducedMotion, frames, layers } = useNSEAnimationEnvironment();
   const viewActivity = useNSEViewActivitySource();
@@ -223,7 +220,7 @@ export function NSEViewControllerView({ controller, className }: NSEViewControll
   useLayoutEffect(() => {
     const element = frameRef.current;
     if (!element || controller.isDisposed) return;
-    const session = appRuntime && kernel ? applicationSessionFor(kernel, appRuntime.app.bundleIdentifier) : undefined;
+    const session = appRuntime ? applicationSessionFor({ runtimeId: appRuntime.id, appId: appRuntime.app.bundleIdentifier }) : undefined;
     const untrack = session ? trackLiveApplicationObject(controller, session.live) : undefined;
     const detach = controller[nseAttachView]({
       element,

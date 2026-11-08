@@ -337,7 +337,7 @@ export function createLifecycle(
       const applicationHook = application?.hookFor(stage, phase);
       return applicationHook ? { invoke: (context) => {
         application?.prepare?.(runtime, appId, stage);
-        return applicationHook(runtime, context);
+        return applicationHook(context);
       } } : null;
     }
     return {

@@ -24,7 +24,6 @@ import {
   SynCloudOSLifecycleRecord,
   type SynCloudOSLifecycleDisposalReason,
 } from "../../SynCloudOS/nseRuntimeContracts";
-import { inheritNSEExecutionContext, reportNSEConstructionCleanupError, runWithNSEScopeExecution } from "../Application/ownedExecution";
 
 /**
  * Something that owns the controllers created with it: an application, a
@@ -75,11 +74,6 @@ export interface NSEOwnedObject {
 }
 
 const scopesBySignal = new WeakMap<AbortSignal, NSEOwnershipScope>();
-const ownershipScopes = new WeakSet<NSEOwnershipScope>();
-/** @internal Scope authentication uses identity, not prototypes or application getters. */
-export function isNSEOwnershipScope(scope: unknown): scope is NSEOwnershipScope { return typeof scope === "object" && scope !== null && ownershipScopes.has(scope as NSEOwnershipScope); }
-/** @internal A signal can name only the exact scope that issued it. */
-export function getNSEScopeForSignal(signal: AbortSignal): NSEOwnershipScope | undefined { return scopesBySignal.get(signal); }
 
 /**
  * The lifetime of one application, window controller or view controller.
@@ -92,13 +86,10 @@ export class NSEOwnershipScope {
   readonly #authority = new AbortController();
   readonly #adopted = new Set<NSEOwnedObject>();
   readonly #resources = new Map<object, (reason: SynCloudOSLifecycleDisposalReason) => void>();
-  readonly #resourceFailures: unknown[] = [];
   #released = false;
-  #releaseCompleted = false;
   #disposing = false;
 
   constructor(readonly kind: string, readonly id: string) {
-    ownershipScopes.add(this);
     scopesBySignal.set(this.signal, this);
   }
 
@@ -120,13 +111,6 @@ export class NSEOwnershipScope {
     this.assertLive();
     this.#resources.set(object, dispose);
     return () => { this.#resources.delete(object); };
-  }
-
-  /** @internal False means release fully completed: the caller must use its captured ancestor sink. */
-  reportResourceError(error: unknown): boolean {
-    if (this.#releaseCompleted) return false;
-    this.#resourceFailures.push(error);
-    return true;
   }
 
   /** @internal Ends publication authority without changing 6C teardown order. */
@@ -164,24 +148,17 @@ export class NSEOwnershipScope {
   /** Aborts the signal with `reason` recorded, disposing every controller it owns. */
   release(reason: SynCloudOSLifecycleDisposalReason): void {
     if (this.#released) return;
+    this.beginDisposal(reason);
     this.#released = true;
-    try {
-      this.beginDisposal(reason);
-      const failures: unknown[] = this.#resourceFailures.splice(0);
-      for (const [object, dispose] of [...this.#resources]) {
-        this.#resources.delete(object);
-        try { dispose(reason); } catch (error) { failures.push(error); }
-      }
-      declareSynCloudOSLifecycleSignal(this.#abort.signal, reason);
-      this.#abort.abort(new DOMException(`The ${this.kind} that owned this object was released.`, "AbortError"));
-      // Recorded ownerSignal children release at this existing late boundary and
-      // may report their own aggregate after the initial resource queue drain.
-      failures.push(...this.#resourceFailures.splice(0));
-      if (failures.length === 1) throw failures[0];
-      if (failures.length > 1) throw new AggregateError(failures, "Owned resources failed to dispose.");
-    } finally {
-      this.#releaseCompleted = true;
+    const failures: unknown[] = [];
+    for (const [object, dispose] of [...this.#resources]) {
+      this.#resources.delete(object);
+      try { dispose(reason); } catch (error) { failures.push(error); }
     }
+    declareSynCloudOSLifecycleSignal(this.#abort.signal, reason);
+    this.#abort.abort(new DOMException(`The ${this.kind} that owned this object was released.`, "AbortError"));
+    if (failures.length === 1) throw failures[0];
+    if (failures.length > 1) throw new AggregateError(failures, "Owned resources failed to dispose.");
   }
 }
 
@@ -189,7 +166,6 @@ let ambientScope: NSEOwnershipScope | null = null;
 interface PendingSelf {
   readonly scope: NSEOwnershipScope;
   readonly context: unknown;
-  readonly ownerScope: NSEOwnershipScope | undefined;
   /** The base constructor registers itself for rollback if a derived constructor throws. */
   object?: NSEOwnedObject;
 }
@@ -268,11 +244,9 @@ export function constructNSEOwnedResource<T>(scope: NSEOwnershipScope, construct
   acquisitionJournals.push(journal);
   ambientScope = scope;
   pendingSelf = null;
-  try { return runWithNSEScopeExecution(scope, construct); }
+  try { return construct(); }
   catch (error) {
-    const failures: unknown[] = [];
-    for (const rollback of journal.reverse()) { try { rollback(); } catch (failure) { failures.push(failure); } }
-    for (const failure of failures) reportNSEConstructionCleanupError(scope, failure);
+    for (const rollback of journal.reverse()) { try { rollback(); } catch { /* Preserve the construction error; finish every release. */ } }
     throw error;
   } finally {
     acquisitionJournals.pop();
@@ -288,25 +262,22 @@ export function constructNSEOwnedResource<T>(scope: NSEOwnershipScope, construct
  * `scope` as its own, together with `context` (the framework's hand-off to
  * the object it is constructing).
  */
-export function instantiateInOwnerScope<T>(scope: NSEOwnershipScope, construct: () => T, context?: unknown, ownerScope?: NSEOwnershipScope): T {
+export function instantiateInOwnerScope<T>(scope: NSEOwnershipScope, construct: () => T, context?: unknown): T {
   scope.assertLive();
-  inheritNSEExecutionContext(scope, ownerScope);
   const previousAmbient = ambientScope;
   const previousSelf = pendingSelf;
   ambientScope = scope;
-  const pending: PendingSelf = { scope, context, ownerScope };
+  const pending: PendingSelf = { scope, context };
   pendingSelf = pending;
   try {
-    return runWithNSEScopeExecution(scope, construct);
+    return construct();
   } catch (error) {
     // A derived constructor may fail after super() acquired resources. Finish
     // every cleanup step, but never replace the original construction error.
     const reason = scope.kind === "NSEApplication" ? "application-closed" : "explicit";
-    const failures: unknown[] = [];
-    try { pending.object?.[nseDisposeFor](reason); } catch (failure) { failures.push(failure); }
-    try { scope.disposeAdopted(reason); } catch (failure) { failures.push(failure); }
-    try { scope.release(reason); } catch (failure) { failures.push(failure); }
-    for (const failure of failures) reportNSEConstructionCleanupError(scope, failure);
+    try { pending.object?.[nseDisposeFor](reason); } catch { /* Preserve error. */ }
+    try { scope.disposeAdopted(reason); } catch { /* Preserve error. */ }
+    try { scope.release(reason); } catch { /* Preserve error. */ }
     throw error;
   } finally {
     ambientScope = previousAmbient;
@@ -358,11 +329,10 @@ export function resolveOwnership(
     return { signal: options.ownerSignal, scope: undefined };
   }
   if (options.owner) {
-    const recorded = scopesByOwner.get(options.owner);
-    if (recorded) { recorded.assertLive(); return { signal: recorded.signal, scope: recorded }; }
     const signal = options.owner.ownerSignal;
-    (signal ? scopesBySignal.get(signal) : undefined)?.assertLive();
-    return { signal, scope: undefined };
+    const scope = signal ? scopesByOwner.get(options.owner) : undefined;
+    (scope ?? (signal ? scopesBySignal.get(signal) : undefined))?.assertLive();
+    return { signal, scope };
   }
   if (ambientScope) {
     ambientScope.assertLive();
