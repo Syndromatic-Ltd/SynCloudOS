@@ -87,7 +87,7 @@ Implementation commit: `a17b519` — `FX: Rebuild CryptoFX around CryptoKit type
 
 ## Independent review correction wave
 
-Correction baseline: `ad9835b`; addresses all four Important and both Minor findings in `crypto-review-findings.md`. No new public type, mutable-byte framework, factory, alias or authorisation contract was introduced. The counterpart registry remains unchanged because every existing public type already has its Apple mapping.
+Correction baseline: `ad9835b`; addresses all four Important and both Minor findings in `crypto-review-findings.md`. Correction commit: `41759e74d057c554130f824e2e848cf4654bbafc` — `FX: Correct CryptoKit contracts and representation validation`. This report-only follow-up records that immutable commit; it changes no SDK-fingerprinted input. No new public type, mutable-byte framework, factory, alias or authorisation contract was introduced. The counterpart registry remains unchanged because every existing public type already has its Apple mapping.
 
 Corrections:
 
