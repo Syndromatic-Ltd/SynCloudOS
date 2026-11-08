@@ -29,8 +29,10 @@ export function useNetwork(): NWFXPathMonitor {
   const context = useSynWareContext();
   if (!context) throw NWFXError.posix(6, "useNetwork requires a mounted application.");
   const monitor = useMemo(() => {
-    const session = scosSessionsForApp(context.appId).find(candidate => candidate.context === context);
-    if (!session) throw NWFXError.posix(6, "Network application session is notRunning.");
+    const sessions = scosSessionsForApp(context.appId).filter(candidate => candidate.context === context
+      || (candidate.context.signal === context.signal && candidate.context.runtimeInfo.id === context.runtimeInfo.id));
+    if (sessions.length !== 1) throw NWFXError.posix(sessions.length ? 22 : 6, `Network application session is ${sessions.length ? "ambiguous" : "notRunning"}.`);
+    const session = sessions[0]!;
     const Bound = bindFXFamily({ NWFXPathMonitor }, context.appId).NWFXPathMonitor;
     class ContextMonitor extends Bound {}
     let ended = false;

@@ -9,7 +9,7 @@ it("installed Network entry compiles real apps and excludes old factories and pr
   runNode([consumer.npm, "install", "--prefer-offline", "--ignore-scripts", "--package-lock=false", ...versions], consumer.root);
   writeFileSync(join(consumer.root, "vitest.config.mjs"), `import { defineConfig } from "vitest/config"; import { synCloudOS } from "@syndromatic/syncloudos/vite";
 export default defineConfig({plugins:[synCloudOS({webspringEntry:false})],test:{environment:"jsdom",include:["consumer.test.tsx"]}});`);
-  expect(runNode(["node_modules/vitest/vitest.mjs", "run"], consumer.root)).toMatch(/2 passed/);
+  expect(runNode(["node_modules/vitest/vitest.mjs", "run"], consumer.root)).toMatch(/3 passed/);
   writeFileSync(join(consumer.root, "entry.ts"), 'export * from "./src/SynWare/First.app/Contents/index";');
   writeFileSync(join(consumer.root, "vite.config.mjs"), `import { synCloudOS } from "@syndromatic/syncloudos/vite";
 export default {plugins:[synCloudOS({webspringEntry:false}),{name:"record-graph",generateBundle(){this.emitFile({type:"asset",fileName:"modules.json",source:JSON.stringify([...this.getModuleIds()])});}}],build:{lib:{entry:"entry.ts",formats:["es"],fileName:"proof"},rollupOptions:{external:["react","react-dom","react-dom/client","react/jsx-runtime"]}}};`);
@@ -52,7 +52,7 @@ monitor.start(()=>{});
   writeFileSync(join(consumer.root, "tsconfig.json"), JSON.stringify({compilerOptions:{target:"ES2022",module:"ESNext",moduleResolution:"Bundler",jsx:"react-jsx",strict:true,skipLibCheck:false,noEmit:true,lib:["ES2022","DOM","DOM.Iterable"],types:["vite/client"]},files:["types.ts"]}));
   runNode(["node_modules/typescript/bin/tsc", "-p", "tsconfig.json"], consumer.root);
   verifyInstalledSdkResources(consumer.installed, consumer.manifest);
-  writeFileSync(resolve("docs/superpowers/evidence/2026-11-08-fx-fidelity/network-installed.json"), JSON.stringify({archiveSha256:consumer.archiveSha256,integrity:consumer.integrity,sourceSha256:consumer.sourceSha256,resourcesSha256:consumer.resourcesSha256,network:consumer.manifest.entries["@syndromatic/syncloudos/fx/network"],installedOutsideRepository:true,linked:false,compiledAppTests:2,productionBuild:true,productionImports:true,declarationGraph:true,strictInstalledTypes:true,sharedSDKGraph:true,resourceIntegrityAfterProof:true},null,2)+"\n");
+  writeFileSync(resolve("docs/superpowers/evidence/2026-11-08-fx-fidelity/network-installed.json"), JSON.stringify({archiveSha256:consumer.archiveSha256,integrity:consumer.integrity,sourceSha256:consumer.sourceSha256,resourcesSha256:consumer.resourcesSha256,network:consumer.manifest.entries["@syndromatic/syncloudos/fx/network"],installedOutsideRepository:true,linked:false,compiledAppTests:3,productionBuild:true,productionImports:true,declarationGraph:true,strictInstalledTypes:true,sharedSDKGraph:true,resourceIntegrityAfterProof:true},null,2)+"\n");
 }, 180_000);
 
 it("strict installed browser and testing signatures hide Network adapters", () => {
