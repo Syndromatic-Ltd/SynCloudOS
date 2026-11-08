@@ -29,7 +29,7 @@ it("uses Foundation and CPFX from an independent SDK installation in a worker an
 import assert from "node:assert/strict";
 import { parentPort } from "node:worker_threads";
 import { NSEData, NSEUserDefaults, NSEIndexSet, NSEDateFormatter, NSEDecimalNumber, NSEDecimalNumberHandler, NSEValueTransformer, NSEUndoManager } from "@syndromatic/syncloudos/foundation";
-import { CPFXCapabilities, CPFXCompress, CPFXDecompress, CPFXInputFilter } from "@syndromatic/syncloudos/fx/compression";
+import { CPFXAlgorithm, CPFXFilterOperation, CPFXInputFilter, CPFXOutputFilter } from "@syndromatic/syncloudos/fx/compression";
 assert.equal(typeof window, "undefined");
 assert.equal(typeof document, "undefined");
 const original = NSEData.from(new TextEncoder().encode("Foundation in a worker ".repeat(100)));
@@ -37,9 +37,17 @@ const copied = original.bytes;
 copied[0] = 0;
 assert.notEqual(original.bytes[0], 0);
 assert.equal(NSEData.fromBase64(original.base64EncodedString()).isEqual(original), true);
-const capabilities = CPFXCapabilities.query();
-assert.ok(capabilities.algorithms.includes("gzip"));
-assert.equal((await CPFXDecompress(await CPFXCompress(original, "gzip"), "gzip")).isEqual(original), true);
+assert.equal((await (await original.compressed("zlib")).decompressed("zlib")).isEqual(original), true);
+const compressed = [];
+const output = new CPFXOutputFilter(CPFXFilterOperation.compress, CPFXAlgorithm.zlib, 65536, data => { if (data) compressed.push(data); });
+await output.write(original); await output.write(null);
+const packed = new Uint8Array(compressed.reduce((sum, chunk) => sum + chunk.count, 0)); let offset = 0;
+for (const chunk of compressed) { packed.set(chunk.bytes, offset); offset += chunk.count; }
+let supplied = false;
+const input = new CPFXInputFilter("decompress", "zlib", () => { if (supplied) return null; supplied = true; return NSEData.from(packed); });
+const restored = [];
+for (;;) { const data = await input.readData(127); if (!data) break; restored.push(...data.bytes); }
+assert.deepEqual(new Uint8Array(restored), original.bytes);
 const defaults = new NSEUserDefaults(); defaults.set("worker", "name"); assert.equal(defaults.object("name"), "worker");
 assert.equal(NSEIndexSet.fromIndexes([1, 2, 4]).count, 3);
 const dates = new NSEDateFormatter({ locale: "en-GB", timeZone: "UTC", dateFormat: "yyyy-MM-dd" });
@@ -63,11 +71,16 @@ worker.on("error", error => { console.error(error); process.exitCode = 1; });
   expect(runNode(["specimen.mjs"], consumer.root)).toContain("Foundation and CPFX installed worker passed");
   writeFileSync(join(consumer.root, "consumer.ts"), `
 import { NSEData, NSEUserDefaults, NSEIndexSet, NSENumberFormatter, NSEDateFormatter, NSEDecimalNumber, NSEDecimalNumberHandler, NSEUndoManager, NSEValueTransformer, type NSEDataConvertible, type NSERange } from "@syndromatic/syncloudos/foundation";
-import { CPFXCompress, CPFXInputFilter, CPFXOutputFilter, CPFXAlgorithm } from "@syndromatic/syncloudos/fx/compression";
+import { CPFXFilterError, CPFXFilterOperation, CPFXInputFilter, CPFXOutputFilter, CPFXAlgorithm } from "@syndromatic/syncloudos/fx/compression";
 const range: NSERange = { location: 0, length: 1 };
 const data: NSEDataConvertible = NSEData.from(new Uint8Array([1]));
-void NSEData.from(data).subdata(range).compressed(CPFXAlgorithm.gzip);
-void [NSEUserDefaults, NSEIndexSet, NSENumberFormatter, CPFXCompress, CPFXInputFilter, CPFXOutputFilter];
+void NSEData.from(data).subdata(range).compressed(CPFXAlgorithm.zlib);
+void [NSEUserDefaults, NSEIndexSet, NSENumberFormatter, CPFXFilterError, CPFXFilterOperation];
+const input = new CPFXInputFilter("compress", "zlib", 65536, async count => count ? NSEData.from(data) : null);
+const output = new CPFXOutputFilter("compress", "zlib", chunk => { void chunk; });
+void input.readData(128); void output.write(null);
+// @ts-expect-error Browser streams are adapter internals, not public filter sources.
+new CPFXInputFilter("compress", "zlib", new ReadableStream());
 void [NSEDateFormatter, NSEDecimalNumber, NSEDecimalNumberHandler, NSEUndoManager, NSEValueTransformer];
 // @ts-expect-error NSEData byte views do not allow index assignment.
 NSEData.from(data).bytes[0] = 1;

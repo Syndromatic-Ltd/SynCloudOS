@@ -24,7 +24,7 @@ Each framework has a short prefix that appears on every public type, so a name t
 | [XRFX](xr.md) | `XRFX` | ARKit sessions | `fx/xr` | WebXR poses and tracked anchors |
 | [LocationFX](location.md) | `LFX` | Core Location | `fx/location` | Position, course and authorisation |
 | [LuminaFX](lumina.md) | `LUFX` | Core Spotlight | `fx/lumina` | On-device indexing and search |
-| [CompressionFX](compression.md) | `CPFX` | Compression | `fx/compression` | Capability-probed one-shot and streaming compression |
+| [CompressionFX](compression.md) | `CPFX` | Compression | `fx/compression` | Apple's input/output closure filters |
 | [NetworkFX](network.md) | `NWFX` | Network | `fx/network` | Scoped path monitoring and browser connection hints |
 | [CryptoFX](crypto.md) | `CRFX` | CryptoKit | `fx/crypto` | SHA, HMAC, AES.GCM, P256 and HKDF with Foundation bytes |
 
@@ -49,7 +49,7 @@ import { offsetRect } from "@syndromatic/syncloudos/fx/graphics";
 const moved = offsetRect({ x: 2, y: 3, width: 4, height: 5 }, 10, 20);
 ```
 
-CompressionFX is also a direct library: its filters process web streams without a mounted session or permission. Its shared codec implementation lives in [Foundation](../foundation.md), beneath FX, so `NSEData` and CPFX use the same algorithms.
+CompressionFX is also a direct library: its input/output filters use read/write closures without a mounted session or permission. Its internal codec implementation lives in [Foundation](../foundation.md), beneath FX. Each framework keeps Apple's own algorithm enum.
 
 **Through the session.** Anything that touches a device, the page or the user's attention comes from the mounted SynWare session. Cameras, microphones, speakers, sensors, location, layers bound to elements and decoded resources belong to the application's lifetime, so the host can enforce permissions, honour the user's settings and release everything when the application closes.
 

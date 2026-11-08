@@ -19,7 +19,7 @@
  */
 
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
-import { CPFXCapabilities } from "../../FX/CompressionFX/public";
+import { CPFXAlgorithm } from "../../FX/CompressionFX/public";
 import { CRFXCapabilities } from "../../FX/CryptoFX/public";
 export interface SystemCapabilityRow { readonly family: string; readonly query: string; readonly value: string }
 export async function systemCapabilityReport(runtime: SynCloudOSRuntime): Promise<readonly SystemCapabilityRow[]> {
@@ -41,5 +41,5 @@ export async function systemCapabilityReport(runtime: SynCloudOSRuntime): Promis
       return { family, query, value: value === undefined ? "Not reported" : JSON.stringify(await value) };
     } catch (error) { return { family, query: "Capability query", value: error instanceof Error ? error.message : String(error) }; }
   }));
-  return [...rows, { family: "CompressionFX", query: "CPFXCapabilities.query()", value: JSON.stringify(CPFXCapabilities.query()) }, { family: "CryptoFX", query: "CRFXCapabilities.query()", value: JSON.stringify(CRFXCapabilities.query()) }];
+  return [...rows, { family: "CompressionFX", query: "Compression.Algorithm", value: JSON.stringify(CPFXAlgorithm) }, { family: "CryptoFX", query: "CRFXCapabilities.query()", value: JSON.stringify(CRFXCapabilities.query()) }];
 }

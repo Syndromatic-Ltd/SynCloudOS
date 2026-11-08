@@ -18,5 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { CPFXAlgorithm, CPFXCapabilities, CPFXCompress, CPFXDecompress, CPFXInputFilter, CPFXOutputFilter } from "./CPFXCompression";
-export type { CPFXCapabilitySnapshot, CPFXOperation } from "./CPFXCompression";
+export { CPFXAlgorithm } from "./CPFXAlgorithm";
+export { CPFXFilterOperation } from "./CPFXFilterOperation";
+export { CPFXFilterError } from "./CPFXFilterError";
+export { CPFXInputFilter } from "./CPFXInputFilter";
+export { CPFXOutputFilter } from "./CPFXOutputFilter";
