@@ -23,8 +23,8 @@ import { CRFXSymmetricKey } from "./CRFXSymmetricKey";
 import { CRFXHKDF } from "./CRFXHKDF";
 import { CRFXError } from "./CRFXError";
 import type { HashType } from "./internal/hash";
-import { compareValues, concat, copy, hex, valueBytes } from "./internal/bytes";
-/** CryptoKit.SharedSecret. Created by key agreement, never a public data initializer. */
+import { compareValues, concat, concatCollection, copy, hex, valueBytes } from "./internal/bytes";
+/** CryptoKit.SharedSecret. Created by key agreement, never a public data initialiser. */
 export class CRFXSharedSecret {
   private constructor() {}
   get description(): string { return "SharedSecret: " + hex(valueBytes(this).bytes); }
@@ -42,6 +42,6 @@ export class CRFXSharedSecret {
       const count = new Uint8Array(4); new DataView(count.buffer).setUint32(0, counter, false);
       blocks.push(copy(valueBytes(await Hash.hash(NSEData.from(concat(secret, count, information))))));
     }
-    return new CRFXSymmetricKey(NSEData.from(concat(...blocks).slice(0, outputByteCount)));
+    return new CRFXSymmetricKey(NSEData.from(concatCollection(blocks).slice(0, outputByteCount)));
   }
 }

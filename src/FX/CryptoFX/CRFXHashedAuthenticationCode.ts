@@ -21,11 +21,12 @@
 import { NSEData } from "../../Foundation/NSEData";
 import type { CRFXMessageAuthenticationCode } from "./CRFXMessageAuthenticationCode";
 import { compareValues, hex, valueBytes } from "./internal/bytes";
+import { authenticationCodeHash } from "./internal/hash";
 /** CryptoKit.HashedAuthenticationCode. Produced by HMAC or HKDF.extract. */
 export class CRFXHashedAuthenticationCode implements CRFXMessageAuthenticationCode {
   private constructor() {}
   get byteCount(): number { return valueBytes(this).count; }
-  get description(): string { return "HMAC: " + hex(valueBytes(this).bytes); }
+  get description(): string { return `HMAC with ${authenticationCodeHash(this)}: ${hex(valueBytes(this).bytes)}`; }
   withUnsafeBytes<T>(body: (bytes: NSEData) => T): T { return body(valueBytes(this)); }
   [Symbol.iterator](): IterableIterator<number> { return valueBytes(this).bytes[Symbol.iterator](); }
   static ["=="](lhs: CRFXHashedAuthenticationCode, rhs: CRFXHashedAuthenticationCode | NSEData): boolean { return compareValues(lhs, rhs); }

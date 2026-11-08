@@ -21,7 +21,7 @@
 import { NSEData } from "../../Foundation/NSEData";
 import { CRFXSHA512Digest } from "./CRFXSHA512Digest";
 import type { CRFXHashFunction } from "./CRFXHashFunction";
-import { concat, copy, makeValue } from "./internal/bytes";
+import { concatCollection, copy, makeValue } from "./internal/bytes";
 import { digest, registerHash } from "./internal/hash";
 /** CryptoKit.SHA512. Updates are buffered because the browser has no streaming hash operation. */
 export class CRFXSHA512 implements CRFXHashFunction<CRFXSHA512Digest> {
@@ -31,7 +31,7 @@ export class CRFXSHA512 implements CRFXHashFunction<CRFXSHA512Digest> {
   readonly #chunks: Uint8Array[] = [];
   update(data: NSEData): void { this.#chunks.push(copy(data)); }
   /** Browser-forced asynchronous counterpart of finalize(). */
-  finalize(): Promise<CRFXSHA512Digest> { return CRFXSHA512.hash(NSEData.from(concat(...this.#chunks))); }
+  finalize(): Promise<CRFXSHA512Digest> { return CRFXSHA512.hash(NSEData.from(concatCollection(this.#chunks))); }
   /** Browser-forced asynchronous counterpart of hash(data:). */
   static async hash(data: NSEData): Promise<CRFXSHA512Digest> { return makeValue(CRFXSHA512Digest, await digest(data, "SHA-512")); }
 }

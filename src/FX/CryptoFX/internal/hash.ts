@@ -30,6 +30,13 @@ export type HashType<D extends CRFXDigest = CRFXDigest> = {
   hash(data: NSEData): Promise<D>;
 };
 const algorithms = new WeakMap<object, string>();
+const authenticationCodeHashes = new WeakMap<object, string>();
+export function registerAuthenticationCodeHash(value: object, type: HashType): void { authenticationCodeHashes.set(value, hashAlgorithm(type).replace("-", "")); }
+export function authenticationCodeHash(value: object): string {
+  const name = authenticationCodeHashes.get(value);
+  if (!name) return unsupported("The authentication code has no hash metadata.");
+  return name;
+}
 export function registerHash(type: HashType, algorithm: string): void { algorithms.set(type, algorithm); }
 export function hashAlgorithm(type: HashType): string {
   const algorithm = algorithms.get(type);

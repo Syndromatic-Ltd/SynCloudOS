@@ -38,15 +38,36 @@ check(C.CRFXSHA256Digest["=="](digest, await C.CRFXSHA256.hash(input)));
 const hash: C.CRFXHashFunction<C.CRFXSHA256Digest> = new C.CRFXSHA256(); hash.update(input);
 check(C.CRFXSHA256Digest["=="](digest, await hash.finalize()));
 const key = new C.CRFXSymmetricKey(C.CRFXSymmetricKeySize.bits256);
+const unavailable = (operation: () => unknown) => {
+  try { operation(); } catch (error) { check(error instanceof C.CRFXError && error.code === "underlyingCoreCryptoError"); return; }
+  throw new Error("Expected unavailable immutable mutation");
+};
+const unavailableAsync = async (operation: Promise<void>) => {
+  try { await operation; } catch (error) { check(error instanceof C.CRFXError && error.code === "underlyingCoreCryptoError"); return; }
+  throw new Error("Expected unavailable immutable mutation");
+};
+unavailable(() => new C.CRFXSymmetricKey({ copyingWithZeroing: input }));
+unavailable(() => new C.CRFXSymmetricKey(C.CRFXSymmetricKeySize.bits256, (_output: NSEData): void => { throw new Error("Callback must not be invoked"); }));
+for (const Cipher of [C.CRFXAES.GCM, C.CRFXChaChaPoly]) {
+  const nonce = new Cipher.Nonce();
+  await unavailableAsync(Cipher.sealInPlace(input, key, nonce, null, input));
+  await unavailableAsync(Cipher.openInPlace(input, key, nonce, null, input));
+}
 const HMAC = C.CRFXHMAC(C.CRFXSHA384), mac = new HMAC(key); mac.update(input);
 check(await HMAC.isValidAuthenticationCode(await mac.finalize(), input, key));
+check((await mac.finalize()).description.startsWith("HMAC with SHA384: "));
 const HKDF = C.CRFXHKDF(C.CRFXSHA512), prk = await HKDF.extract(key, input);
 check((await HKDF.expand(prk, input, 33)).bitCount === 264);
+await unavailableAsync(HKDF.deriveKey(key, null, null, input));
+await unavailableAsync(HKDF.expand(prk.withUnsafeBytes(bytes => bytes), null, input));
 const sealed = await C.CRFXAES.GCM.seal(input, key, new C.CRFXAES.GCM.Nonce());
 check((await C.CRFXAES.GCM.open(new C.CRFXAES.GCM.SealedBox(sealed.combined!), key)).isEqual(input));
 const signing = new C.CRFXP256.Signing.PrivateKey(false);
 const publicKey = new C.CRFXP256.Signing.PublicKey({ derRepresentation: await signing.publicKey.derRepresentation });
 check(await publicKey.isValidSignature(new C.CRFXP256.Signing.ECDSASignature({ derRepresentation: (await signing.signature(input)).derRepresentation }), input));
+const trailing = NSEData.from(new Uint8Array([...(await signing.publicKey.derRepresentation).bytes, 0]));
+try { await new C.CRFXP256.Signing.PublicKey({ derRepresentation: trailing }).rawRepresentation; throw new Error("Accepted trailing DER"); }
+catch (error) { check(error instanceof C.CRFXError && error.code === "invalidParameter"); }
 const a = new C.CRFXCurve25519.KeyAgreement.PrivateKey(), b = new C.CRFXCurve25519.KeyAgreement.PrivateKey();
 const secret = await a.sharedSecretFromKeyAgreement(b.publicKey);
 check(C.CRFXSharedSecret["=="](secret, await b.sharedSecretFromKeyAgreement(a.publicKey)));
@@ -57,7 +78,7 @@ console.log("CryptoKit packed declarations and runtime passed");
   writeFileSync(join(consumer.root, "specimen.ts"), specimen);
   writeFileSync(join(consumer.root, "negative.ts"), `
 import { NSEData } from "@syndromatic/syncloudos/foundation";
-import { CRFXSHA256, CRFXHMAC, CRFXSymmetricKey, CRFXP256, CRFXP384 } from "@syndromatic/syncloudos/fx/crypto";
+import { CRFXSHA256, CRFXHMAC, CRFXHKDF, CRFXAES, CRFXSymmetricKey, CRFXP256, CRFXP384 } from "@syndromatic/syncloudos/fx/crypto";
 // @ts-expect-error Browser hash strings are not hash types.
 CRFXHMAC("SHA-256");
 // @ts-expect-error Foundation bytes are required.
@@ -71,6 +92,14 @@ new CRFXP256.Signing.PrivateKey({ type: "private", algorithm: { name: "ECDSA" } 
 // @ts-expect-error Curve key types are distinct.
 const mismatched: InstanceType<typeof CRFXP256.KeyAgreement.PublicKey> = new CRFXP384.KeyAgreement.PrivateKey().publicKey;
 void mismatched;
+declare const bytes: NSEData, key: CRFXSymmetricKey;
+// @ts-expect-error Output-span derivation preserves Apple's void result.
+const replacement: Promise<CRFXSymmetricKey> = CRFXHKDF(CRFXSHA256).deriveKey(key, null, null, bytes);
+// @ts-expect-error In-place operations cannot accept browser arrays.
+CRFXAES.GCM.sealInPlace(new Uint8Array(), key, new CRFXAES.GCM.Nonce(), null, bytes);
+// @ts-expect-error Hash metadata stays private.
+(await CRFXHMAC(CRFXSHA256).authenticationCode(bytes, key)).hash;
+void replacement;
 `);
   writeFileSync(join(consumer.root, "tsconfig.json"), JSON.stringify({ compilerOptions: { target: "ES2022", module: "ESNext", moduleResolution: "Bundler", strict: true, skipLibCheck: false, lib: ["ES2022", "DOM"], outDir: "out" }, files: ["specimen.ts", "negative.ts"] }));
   runNode(["node_modules/typescript/bin/tsc", "-p", "tsconfig.json"], consumer.root);

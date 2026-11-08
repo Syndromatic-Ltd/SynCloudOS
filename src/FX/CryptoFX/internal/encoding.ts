@@ -41,6 +41,37 @@ export function parseDer(bytes: Uint8Array, offset = 0): { tag: number; bytes: U
   if (end > bytes.length) throw new CRFXError("invalidParameter", "Truncated DER value.");
   return { tag, bytes: bytes.slice(offset, end), end };
 }
+/** Validate the complete DER tree, including canonical primitive values, before native key import. */
+export function canonicalDer(bytes: Uint8Array): ReturnType<typeof parseDer> {
+  const root = parseDer(bytes);
+  if (root.end !== bytes.length) throw new CRFXError("invalidParameter", "Trailing DER data.");
+  const pending = [root];
+  while (pending.length) {
+    const node = pending.pop()!, value = node.bytes;
+    if (node.tag === 0 || (node.tag & 31) === 31) throw new CRFXError("invalidParameter", "Invalid DER tag.");
+    if (node.tag & 32) {
+      for (let offset = 0; offset < value.length;) {
+        const child = parseDer(value, offset); pending.push(child); offset = child.end;
+      }
+    } else if (node.tag === 2) {
+      if (!value.length || (value.length > 1 && ((value[0] === 0 && !(value[1] & 128)) || (value[0] === 255 && (value[1] & 128))))) throw new CRFXError("invalidParameter", "Noncanonical DER integer.");
+    } else if (node.tag === 3) {
+      if (!value.length || value[0] > 7 || (value.length === 1 && value[0] !== 0) || (value[value.length - 1] & ((1 << value[0]) - 1))) throw new CRFXError("invalidParameter", "Invalid DER bit string.");
+    } else if (node.tag === 5 && value.length) throw new CRFXError("invalidParameter", "Invalid DER NULL.");
+    else if (node.tag === 6) {
+      if (!value.length || (value[value.length - 1] & 128)) throw new CRFXError("invalidParameter", "Invalid DER object identifier.");
+      for (let i = 0; i < value.length; i++) if ((i === 0 || !(value[i - 1] & 128)) && value[i] === 128) throw new CRFXError("invalidParameter", "Noncanonical DER object identifier.");
+    }
+  }
+  return root;
+}
+export function derSequence(bytes: Uint8Array): ReturnType<typeof parseDer>[] {
+  const top = canonicalDer(bytes);
+  if (top.tag !== 0x30) throw new CRFXError("invalidParameter", "Expected a DER sequence.");
+  const children: ReturnType<typeof parseDer>[] = [];
+  for (let offset = 0; offset < top.bytes.length;) { const child = parseDer(top.bytes, offset); children.push(child); offset = child.end; }
+  return children;
+}
 export function signatureRaw(input: { rawRepresentation: NSEData } | { derRepresentation: NSEData }, size: number): NSEData {
   if (!input || typeof input !== "object" || Object.keys(input).length !== 1) throw new CRFXError("invalidParameter", "Supply exactly one signature representation.");
   if ("rawRepresentation" in input) {

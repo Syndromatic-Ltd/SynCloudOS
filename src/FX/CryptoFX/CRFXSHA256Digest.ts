@@ -25,7 +25,7 @@ import { compareValues, hex, valueBytes } from "./internal/bytes";
 export class CRFXSHA256Digest implements CRFXDigest {
   private constructor() {}
   static readonly byteCount = 32;
-  get description(): string { return "SHA256Digest: " + hex(valueBytes(this).bytes); }
+  get description(): string { return "SHA256 digest: " + hex(valueBytes(this).bytes); }
   withUnsafeBytes<T>(body: (bytes: NSEData) => T): T { return body(valueBytes(this)); }
   [Symbol.iterator](): IterableIterator<number> { return valueBytes(this).bytes[Symbol.iterator](); }
   static ["=="](lhs: CRFXSHA256Digest, rhs: CRFXSHA256Digest | NSEData): boolean { return compareValues(lhs, rhs); }

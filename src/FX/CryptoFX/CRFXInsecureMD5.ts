@@ -21,7 +21,7 @@
 import { NSEData } from "../../Foundation/NSEData";
 import { CRFXInsecureMD5Digest } from "./CRFXInsecureMD5Digest";
 import type { CRFXHashFunction } from "./CRFXHashFunction";
-import { concat, copy, makeValue } from "./internal/bytes";
+import { concatCollection, copy, makeValue } from "./internal/bytes";
 import { digest, registerHash } from "./internal/hash";
 /** CryptoKit.Insecure.MD5. Updates are buffered because the browser has no streaming hash operation. */
 export class CRFXInsecureMD5 implements CRFXHashFunction<CRFXInsecureMD5Digest> {
@@ -31,7 +31,7 @@ export class CRFXInsecureMD5 implements CRFXHashFunction<CRFXInsecureMD5Digest> 
   readonly #chunks: Uint8Array[] = [];
   update(data: NSEData): void { this.#chunks.push(copy(data)); }
   /** Browser-forced asynchronous counterpart of finalize(). */
-  finalize(): Promise<CRFXInsecureMD5Digest> { return CRFXInsecureMD5.hash(NSEData.from(concat(...this.#chunks))); }
+  finalize(): Promise<CRFXInsecureMD5Digest> { return CRFXInsecureMD5.hash(NSEData.from(concatCollection(this.#chunks))); }
   /** Browser-forced asynchronous counterpart of hash(data:). */
   static async hash(data: NSEData): Promise<CRFXInsecureMD5Digest> { return makeValue(CRFXInsecureMD5Digest, await digest(data, "MD5")); }
 }

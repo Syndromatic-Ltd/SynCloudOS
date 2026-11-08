@@ -28,6 +28,10 @@ export class CRFXChaChaPoly {
   private constructor() {}
   static readonly Nonce = CRFXChaChaPolyNonce;
   static readonly SealedBox = CRFXChaChaPolySealedBox;
+  /** seal(inPlace:using:nonce:authenticating:tag:). Async backend boundary; immutable NSEData mutation fails with CRFXError.underlyingCoreCryptoError. */
+  static async sealInPlace(_message: NSEData, _key: CRFXSymmetricKey, _nonce: CRFXChaChaPolyNonce, _authenticating: NSEData | null, _tag: NSEData): Promise<void> { unsupported("Immutable NSEData cannot be sealed in place or receive an output tag."); }
+  /** open(inPlace:using:nonce:authenticating:tag:). Async backend boundary; immutable NSEData mutation fails with CRFXError.underlyingCoreCryptoError. */
+  static async openInPlace(_message: NSEData, _key: CRFXSymmetricKey, _nonce: CRFXChaChaPolyNonce, _authenticating: NSEData | null, _tag: NSEData): Promise<void> { unsupported("Immutable NSEData cannot be opened in place."); }
   /** Async backend boundary; fails with CRFXError.underlyingCoreCryptoError. */
   static async seal(_data: NSEData, _key: CRFXSymmetricKey, _nonce: CRFXChaChaPolyNonce | null = null, _authenticating: NSEData = empty()): Promise<CRFXChaChaPolySealedBox> { return unsupported("ChaChaPoly is unavailable."); }
   /** Async backend boundary; fails with CRFXError.underlyingCoreCryptoError. */

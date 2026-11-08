@@ -23,10 +23,10 @@ import { CRFXSymmetricKey } from "./CRFXSymmetricKey";
 import { CRFXHashedAuthenticationCode } from "./CRFXHashedAuthenticationCode";
 import { CRFXHMAC } from "./CRFXHMAC";
 import { CRFXError } from "./CRFXError";
-import { concat, copy, empty, valueBytes } from "./internal/bytes";
+import { concat, concatCollection, copy, empty, unsupported, valueBytes } from "./internal/bytes";
 import type { HashType } from "./internal/hash";
 
-/** CryptoKit.HKDF<H>. CRFXHKDF(Hash) specializes the hash type, as Swift's HKDF<Hash>. */
+/** CryptoKit.HKDF<H>. CRFXHKDF(Hash) specialises the hash type, as Swift's HKDF<Hash>. */
 export function CRFXHKDF(Hash: HashType) {
   const HMAC = CRFXHMAC(Hash);
   return class HKDF {
@@ -36,7 +36,11 @@ export function CRFXHKDF(Hash: HashType) {
       return HMAC.authenticationCode(valueBytes(inputKeyMaterial), new CRFXSymmetricKey(salt ?? NSEData.from(new Uint8Array(Hash.byteCount))));
     }
     /** Browser-forced asynchronous counterpart of expand(pseudoRandomKey:info:outputByteCount:). */
-    static async expand(pseudoRandomKey: CRFXHashedAuthenticationCode | NSEData, info: NSEData | null, outputByteCount: number): Promise<CRFXSymmetricKey> {
+    static expand(pseudoRandomKey: CRFXHashedAuthenticationCode | NSEData, info: NSEData | null, outputByteCount: number): Promise<CRFXSymmetricKey>;
+    /** expand(pseudoRandomKey:info:into:). Async backend boundary; immutable output fails with CRFXError.underlyingCoreCryptoError. */
+    static expand(pseudoRandomKey: NSEData, info: NSEData | null, into: NSEData): Promise<void>;
+    static async expand(pseudoRandomKey: CRFXHashedAuthenticationCode | NSEData, info: NSEData | null, outputByteCount: number | NSEData): Promise<CRFXSymmetricKey | void> {
+      if (outputByteCount instanceof NSEData) unsupported("Immutable NSEData cannot receive HKDF output.");
       if (!Number.isSafeInteger(outputByteCount) || outputByteCount < 0 || outputByteCount > 255 * Hash.byteCount) throw new CRFXError("incorrectParameterSize");
       const key = new CRFXSymmetricKey(pseudoRandomKey instanceof NSEData ? pseudoRandomKey : valueBytes(pseudoRandomKey));
       const information = copy(info ?? empty()), blocks: Uint8Array[] = []; let previous = new Uint8Array();
@@ -44,13 +48,16 @@ export function CRFXHKDF(Hash: HashType) {
         previous = copy(valueBytes(await HMAC.authenticationCode(NSEData.from(concat(previous, information, Uint8Array.of(counter))), key)));
         blocks.push(previous);
       }
-      return new CRFXSymmetricKey(NSEData.from(concat(...blocks).slice(0, outputByteCount)));
+      return new CRFXSymmetricKey(NSEData.from(concatCollection(blocks).slice(0, outputByteCount)));
     }
     /** Browser-forced asynchronous deriveKey(inputKeyMaterial:outputByteCount:) overload. */
     static deriveKey(inputKeyMaterial: CRFXSymmetricKey, outputByteCount: number): Promise<CRFXSymmetricKey>;
     /** Browser-forced asynchronous deriveKey(inputKeyMaterial:salt:info:outputByteCount:); null omits salt/info. */
     static deriveKey(inputKeyMaterial: CRFXSymmetricKey, salt: NSEData | null, info: NSEData | null, outputByteCount: number): Promise<CRFXSymmetricKey>;
-    static async deriveKey(inputKeyMaterial: CRFXSymmetricKey, saltOrCount: NSEData | number | null, info: NSEData | null = null, outputByteCount?: number): Promise<CRFXSymmetricKey> {
+    /** deriveKey(inputKeyMaterial:salt:info:output:). Async backend boundary; immutable output fails with CRFXError.underlyingCoreCryptoError. */
+    static deriveKey(inputKeyMaterial: CRFXSymmetricKey, salt: NSEData | null, info: NSEData | null, output: NSEData): Promise<void>;
+    static async deriveKey(inputKeyMaterial: CRFXSymmetricKey, saltOrCount: NSEData | number | null, info: NSEData | null = null, outputByteCount?: number | NSEData): Promise<CRFXSymmetricKey | void> {
+      if (outputByteCount instanceof NSEData) unsupported("Immutable NSEData cannot receive HKDF output.");
       const count = typeof saltOrCount === "number" ? saltOrCount : outputByteCount!;
       const salt = typeof saltOrCount === "number" ? null : saltOrCount;
       return HKDF.expand(await HKDF.extract(inputKeyMaterial, salt), info, count);
