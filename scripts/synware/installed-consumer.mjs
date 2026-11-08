@@ -21,7 +21,7 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { copyFileSync, existsSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -115,10 +115,28 @@ export function verifyInstalledSdkResources(installed, manifest) {
   return actual;
 }
 
+// Only loaded inside Vitest workers; standalone scripts never import Vitest.
+const vitest = process.env.VITEST ? await import("vitest") : undefined;
+
+function removeWhenFinished(root) {
+  const remove = () => rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+  try {
+    if (vitest) return vitest.onTestFinished(remove);
+  } catch {
+    // Created outside a running test (for example in a hook); fall back to process exit.
+  }
+  process.once("exit", remove);
+}
+
 export function createInstalledConsumer(repositoryRoot, label = "synware-installed-", options = {}) {
   const verified = readVerifiedSdkArchive(repositoryRoot, options);
   assertSdkSourceUnchanged(verified.manifest.source, captureSdkSourceFingerprint(repositoryRoot));
   const root = realpathSync.native(mkdtempSync(join(tmpdir(), label)));
+  // Each consumer is a full npm installation (about 180 MB). Remove it when the test
+  // finishes (or, for scripts, when the process exits), so callers cannot fill the disk.
+  // Vitest stops workers without an exit event, hence onTestFinished. rmSync removes
+  // links without following them. Set SYNWARE_KEEP_CONSUMERS=1 to inspect one.
+  if (!process.env.SYNWARE_KEEP_CONSUMERS) removeWhenFinished(root);
   const repository = realpathSync.native(repositoryRoot);
   assert(!isWithin(repository, root), "Installed consumer must be outside the repository.");
   const frozen = copyVerifiedSdkArchive(repositoryRoot, root, { manifestPath: verified.manifestPath });
