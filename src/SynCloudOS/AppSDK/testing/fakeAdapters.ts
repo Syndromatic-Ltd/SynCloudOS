@@ -17,6 +17,9 @@
  * limitations under the License.
  */
 
+import { BTFXUUID } from "../../../FX/BluetoothFX/BTFXUUID";
+import { NSEUUID } from "../../../Foundation/NSEUUID";
+import { associateBluetoothAdapter, type BluetoothAdapter, type BTConnection, type BTCharacteristic } from "../../../FX/BluetoothFX/internal/bluetoothPort";
 import { NFXNDEFMessage, NFXNDEFPayload, NFXReaderError } from "../../../FX/NFCFX/public";
 import { associateNFCAdapter, type NFCAdapter, type NFCEvents, type NFCNativeTag } from "../../../FX/NFCFX/internal/nfcPort";
 import { associatePaymentAdapter, type PaymentAdapter, type PaymentResponse } from "../../../FX/PassFX/internal/paymentPort";
@@ -504,6 +507,29 @@ export function createDeterministicRuntimeEnvironment(options: {
       return { presented, authorized, async dismiss() { paymentPresentations.delete(presentation); } };
     },
   };
+  const bluetoothControl = control<"bluetooth.scan" | "bluetooth.connect" | "bluetooth.services" | "bluetooth.characteristics" | "bluetooth.descriptors" | "bluetooth.read" | "bluetooth.write" | "bluetooth.notify" | "bluetooth.disconnect">(clock, denied);
+  const bluetoothConnections = new Set<{ receive?: (value: NSEData) => void; stop(): void }>();
+  const bluetooth = Object.freeze({ ...publicPort(bluetoothControl), activeConnectionCount: () => bluetoothConnections.size,
+    emitValue(value: number) { for (const connection of bluetoothConnections) connection.receive?.(NSEData.from(new Uint8Array([value]))); } });
+  const bluetoothIdentifier = new NSEUUID();
+  const bluetoothAdapter: BluetoothAdapter = { get state() { return bluetoothControl.mode === "allow" ? "poweredOn" : "unsupported"; },
+    observeState: listener => bluetoothControl.subscribe(listener),
+    scan: (_services, signal) => bluetoothControl.run("bluetooth.scan", signal, () => ({ advertisementData: Object.freeze({}), rssi: 127, device: {
+      identifier: bluetoothIdentifier, name: "Sensor", connect: (owner) => bluetoothControl.run("bluetooth.connect", owner, () => {
+        let data = NSEData.from(new Uint8Array([42])); let description = "Sensor";
+        const connection: { receive?: (value: NSEData) => void; stop(): void } = { stop() { bluetoothConnections.delete(connection); owner.removeEventListener("abort", connection.stop); } };
+        bluetoothConnections.add(connection); owner.addEventListener("abort", connection.stop, { once: true });
+        const characteristic: BTCharacteristic = { uuid: new BTFXUUID("2A19"), properties: 26,
+          read: () => bluetoothControl.run("bluetooth.read", owner, () => data),
+          write: next => bluetoothControl.run("bluetooth.write", owner, () => { data = NSEData.from(next); }),
+          discoverDescriptors: () => bluetoothControl.run("bluetooth.descriptors", owner, () => [{ uuid: new BTFXUUID("2901"), read: () => bluetoothControl.run("bluetooth.read", owner, () => description), write: next => bluetoothControl.run("bluetooth.write", owner, () => { description = new TextDecoder().decode(next.bytes); }) }]),
+          setNotify: (enabled, listener) => bluetoothControl.run("bluetooth.notify", owner, () => { connection.receive = enabled ? listener : undefined; }),
+        };
+        return { discoverServices: () => bluetoothControl.run("bluetooth.services", owner, () => [{ uuid: new BTFXUUID("180F"), isPrimary: true, discoverCharacteristics: () => bluetoothControl.run("bluetooth.characteristics", owner, () => [characteristic]) }]),
+          async disconnect() { connection.stop(); await bluetoothControl.run("bluetooth.disconnect", owner, () => {}); } } satisfies BTConnection;
+      }),
+    } })),
+  };
   const nfcControl = control<"nfc.open" | "nfc.connect" | "nfc.status" | "nfc.read" | "nfc.write" | "nfc.lock">(clock, denied);
   const nfcReaders = new Set<{ events: NFCEvents; signal: AbortSignal }>();
   const nfc = Object.freeze({ ...publicPort(nfcControl), activeSessionCount: () => nfcReaders.size,
@@ -716,6 +742,7 @@ export function createDeterministicRuntimeEnvironment(options: {
     network,
     speech,
     contacts,
+    bluetooth,
     nfc,
     payment,
     webContent: publicPort(controls.webContent),
@@ -902,6 +929,7 @@ export function createDeterministicRuntimeEnvironment(options: {
   associateNetworkAdapter(environment, networkPaths);
   associateSpeechAdapter(environment, speechAdapter);
   associateContactsAdapter(environment, contactsAdapter);
+  associateBluetoothAdapter(environment, bluetoothAdapter);
   associateNFCAdapter(environment, nfcAdapter);
   associatePaymentAdapter(environment, paymentAdapter);
   return Object.freeze({

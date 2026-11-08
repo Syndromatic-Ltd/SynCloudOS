@@ -17,31 +17,22 @@
  * limitations under the License.
  */
 
-import { useLayoutEffect, useMemo } from "react";
-import type { BTFXCentralManager } from "../../../FX/BluetoothFX/public";
-import { useSCOS } from "../scos/useSCOS";
-
-/** Component-scoped passive device owner; requests remain explicit user actions. */
-export function useBluetooth(): BTFXCentralManager {
-  const client = useSCOS().bluetooth;
-  const binding = useMemo(() => {
-    let current: BTFXCentralManager | null = null;
-    const requireOwner = () => {
-      if (!current) throw new DOMException("The component device owner is not mounted.", "AbortError");
-      return current;
-    };
-    const facade: BTFXCentralManager = Object.freeze<BTFXCentralManager>({
-      getCapabilities: () => current?.getCapabilities() ?? Object.freeze({ apiAvailable: false, retrievesGrantedPeripherals: false, backgroundScanning: false, peripheralRole: false }),
-      getAuthorizationStatus: () => current?.getAuthorizationStatus() ?? Promise.resolve("unavailable"),
-      requestAuthorization: request => requireOwner().requestAuthorization(request),
-      retrievePeripherals: () => requireOwner().retrievePeripherals(),
-      dispose: () => current?.dispose(),
-    });
-    return { facade, mount() {
-      const owner = client.createCentralManager(); current = owner;
-      return () => { if (current === owner) current = null; owner.dispose(); };
-    } };
-  }, [client]);
-  useLayoutEffect(() => binding.mount(), [binding]);
-  return binding.facade;
+import { useInsertionEffect, useMemo } from "react";
+import type { DFXQueue } from "../../../FX/DispatchFX/DFXQueue";
+import { BTFXCentralManager, BTFXError, type BTFXCentralManagerDelegate } from "../../../FX/BluetoothFX/public";
+import { bluetoothBindings, bluetoothManagers, deferredBluetoothTypes } from "../../../FX/BluetoothFX/internal/bluetoothBindings";
+import { useSynWareContext } from "../SynWareContext";
+import { bindFXFamily } from "../fx/bindFXFamily";
+import { scosSessionsForApp } from "../scos/scosSessionRegistry";
+/** A real component-owned central. Native scanning remains an explicit user action. */
+export function useBluetooth(delegate: BTFXCentralManagerDelegate | null = null, queue: DFXQueue | null = null, options: Readonly<Record<string,unknown>> | null = null): BTFXCentralManager {
+  const context=useSynWareContext();if(!context)throw new BTFXError("operationCancelled","useBluetooth requires a mounted application.");
+  const central=useMemo(()=>{
+    const sessions=scosSessionsForApp(context.appId).filter(candidate=>candidate.context===context || (candidate.context.signal===context.signal && candidate.context.runtimeInfo.id===context.runtimeInfo.id));
+    if(sessions.length!==1)throw new BTFXError("operationCancelled",`Bluetooth application session is ${sessions.length?"ambiguous":"notRunning"}.`);
+    const session=sessions[0]!;const Bound=bindFXFamily({BTFXCentralManager},context.appId).BTFXCentralManager;class ContextCentral extends Bound {}
+    let ended=false;bluetoothBindings.set(ContextCentral,{resolve(){if(context.signal.aborted || !scosSessionsForApp(context.appId).includes(session))ended=true;if(ended)throw new BTFXError("operationCancelled","Bluetooth application session is ended.");return session;}});
+    deferredBluetoothTypes.add(ContextCentral);return new ContextCentral(delegate,queue,options);
+  },[context,delegate,queue,options]);
+  useInsertionEffect(()=>{bluetoothManagers.get(central)!.activate();return()=>bluetoothManagers.get(central)!.dispose();},[central]);return central;
 }

@@ -187,6 +187,10 @@ export interface SynWareTestDisposalReport {
 }
 
 export interface SynWareTestAdapters {
+  readonly bluetooth: SynWareFakeControl<"bluetooth.scan" | "bluetooth.connect" | "bluetooth.services" | "bluetooth.characteristics" | "bluetooth.descriptors" | "bluetooth.read" | "bluetooth.write" | "bluetooth.notify" | "bluetooth.disconnect"> & Readonly<{
+    emitValue(value: number): void;
+    activeConnectionCount(): number;
+  }>;
   readonly nfc: SynWareFakeControl<"nfc.open" | "nfc.connect" | "nfc.status" | "nfc.read" | "nfc.write" | "nfc.lock"> & Readonly<{
     emitText(value: string): void;
     activeSessionCount(): number;

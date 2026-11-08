@@ -142,7 +142,6 @@ export interface SynWareContextValue {
   readonly location: LFXLocationClient;
   readonly speechSynthesis: import("../../FX/AudioFX/AUFXSpeechSynthesizer").AUFXSpeechClient;
   readonly videoPresentation: import("../../FX/VideoFX/VFXPictureInPictureController").VFXVideoPresentationClient;
-  readonly bluetooth: import("../../FX/BluetoothFX/public").BTFXBluetoothClient;
   readonly xr: import("../../FX/XRFX/public").XRFXClient;
   readonly midi: MIFXClient;
   readonly lumina: LUFXIndexClient;
