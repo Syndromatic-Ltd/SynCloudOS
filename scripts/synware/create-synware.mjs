@@ -34,7 +34,7 @@ export function scaffoldBundleIdentifier(name, organisation = "com.example") {
 }
 
 const fxRecipes = {
-  compression: { imports: "CPFXCapabilities", body: 'return `Compression algorithms: ${CPFXCapabilities.query().algorithms.join(", ")}`;' },
+  compression: { imports: "CPFXAlgorithm", body: 'return `Compression algorithms: ${Object.values(CPFXAlgorithm).join(", ")}`;' },
   animation: { imports: "AFXTimingFunction", body: 'return `Timing at halfway: ${new AFXTimingFunction("linear").sample(0.5)}`;', expected: "Timing at halfway: 0.5" },
   graphics: { imports: "offsetRect", body: 'const rect = offsetRect({x:2,y:3,width:4,height:5}, 10, 20);\n  return `Offset rectangle: ${rect.x}, ${rect.y}`;', expected: "Offset rectangle: 12, 23" },
   image: { imports: "IFXImage", extra: 'import { GFXColour } from "@syndromatic/syncloudos/fx/graphics";\n', body: 'const image = IFXImage.constant(GFXColour.rgba(1,0,0)).cropped({x:0,y:0,width:32,height:16});\n  if (image.extent.kind !== "finite") throw new Error("Expected a finite crop");\n  return `Cropped extent: ${image.extent.rect.width} x ${image.extent.rect.height}`;', expected: "Cropped extent: 32 x 16" },

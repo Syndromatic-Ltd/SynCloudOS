@@ -41,8 +41,8 @@ const slice = data.subdata({ location: 1, length: 2 });
 const same = NSEData.fromBase64(slice.base64EncodedString()).isEqual(slice);
 const upload = data.blob("application/octet-stream");
 const downloaded = await NSEData.read(upload);
-const compressed = await downloaded.compressed("gzip");
-const restored = await compressed.decompressed("gzip");
+const compressed = await downloaded.compressed("zlib");
+const restored = await compressed.decompressed("zlib");
 ```
 
 `from` copies `Uint8Array`, `ArrayBuffer` and `NSEData` inputs, including typed-array subviews. `count` measures bytes. `bytes` returns a defensive copy with a read-only TypeScript view: mutating that copy, a subview or its buffer cannot change the value. Instances are frozen; typed arrays are never advertised as frozen storage. `subdata` rejects invalid or out-of-bounds ranges. Base64 uses canonical RFC 4648 encoding, including padding, and rejects malformed or non-canonical input.
@@ -51,7 +51,7 @@ const restored = await compressed.decompressed("gzip");
 
 ## Compression
 
-The algorithm values are `zlib`, `gzip`, `brotli` and `zstd`. `zlib` maps to the web’s `deflate` format. Available codecs depend on the host: query `CPFXCapabilities.query()` from `fx/compression` before presenting choices. Unsupported algorithms reject with an explanatory error.
+The algorithm values mirror `NSData.CompressionAlgorithm`: `lzfse`, `lz4`, `lzma` and `zlib`. Apple's `zlib` uses raw DEFLATE (RFC 1951), without a zlib wrapper. Native browser codecs currently implement this as `deflate-raw`. The other algorithms remain present and reject when the host cannot implement them; no codec is silently substituted. CompressionFX has its own `CPFXAlgorithm`, with Compression's additional `brotli` and `lzbitmap` cases.
 
 A single codec factory and collector live inside Foundation and use `CompressionStream` / `DecompressionStream`. CPFX builds on those helpers. Foundation never imports FX; the dependency follows the same direction as the other FX value frameworks. Methods are asynchronous because web compression streams are asynchronous.
 

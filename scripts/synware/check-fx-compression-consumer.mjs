@@ -29,23 +29,23 @@ import { createInstalledConsumer, runNode } from "./installed-consumer.mjs";
 const consumer = createInstalledConsumer(process.cwd(), "synware-compression-browser-");
 writeFileSync(join(consumer.root, "worker.ts"), `
 import { NSEData } from "@syndromatic/syncloudos/foundation";
-import { CPFXCapabilities, CPFXInputFilter, CPFXOutputFilter } from "@syndromatic/syncloudos/fx/compression";
+import { CPFXAlgorithm, CPFXInputFilter, CPFXOutputFilter } from "@syndromatic/syncloudos/fx/compression";
 (async () => {
   const data = NSEData.from(new TextEncoder().encode("Worker compression ".repeat(1024)));
-  const algorithms = CPFXCapabilities.query().algorithms;
+  const algorithms = [CPFXAlgorithm.zlib];
   const results = [];
   for (const algorithm of algorithms) {
     const compressed = await data.compressed(algorithm);
     if (!(await compressed.decompressed(algorithm)).isEqual(data)) throw new Error("Data round-trip failed");
-    const source = new ReadableStream({ start(c) { c.enqueue(compressed); c.close(); } });
-    const input = new CPFXInputFilter("decompress", algorithm, source);
+    let supplied = false;
+    const input = new CPFXInputFilter("decompress", algorithm, 65536, () => { if (supplied) return null; supplied = true; return compressed; });
     const chunks = []; let count = 0;
     for (;;) { const chunk = await input.readData(127); if (!chunk) break; chunks.push(chunk); count += chunk.count; }
     const restored = new Uint8Array(count); let offset = 0;
     for (const chunk of chunks) { restored.set(chunk.bytes, offset); offset += chunk.count; }
     if (!NSEData.from(restored).isEqual(data)) throw new Error("Input filter round-trip failed");
     const output = [];
-    const filter = new CPFXOutputFilter("compress", algorithm, new WritableStream({ write(chunk) { output.push(chunk); } }));
+    const filter = new CPFXOutputFilter("compress", algorithm, chunk => { if (chunk) output.push(chunk); });
     await filter.write(data); await filter.finalize();
     const bytes = new Uint8Array(output.reduce((sum, chunk) => sum + chunk.count, 0)); offset = 0;
     for (const chunk of output) { bytes.set(chunk.bytes, offset); offset += chunk.count; }
@@ -84,12 +84,12 @@ try {
       const result = await page.evaluate(() => globalThis.result);
       assert.equal(result.error, undefined, `${engine}: ${result.error}`);
       assert.equal(result.hasDocument, false);
-      assert(result.algorithms.includes("gzip"), `${engine}: gzip is unavailable`);
+      assert(result.algorithms.includes("zlib"), `${engine}: raw DEFLATE is unavailable`);
       results.push({ engine, ...result });
     } finally { await browser.close(); }
   }
 } finally { await new Promise(resolve => server.close(resolve)); }
-const output = resolve("docs/superpowers/evidence/2026-11-07-foundation/compression-installed-browser.json");
+const output = resolve("docs/superpowers/evidence/2026-11-08-fx-fidelity/compression-installed-browser.json");
 mkdirSync(resolve(output, ".."), { recursive: true });
 writeFileSync(output, JSON.stringify({ archiveSHA256: consumer.archiveSha256, results }, null, 2) + "\n");
 console.log(JSON.stringify(results));

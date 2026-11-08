@@ -77,7 +77,7 @@ describe("NSEData", () => {
     expect(() => NSEData.fromBase64(text)).toThrow(TypeError);
   });
 
-  it.each(["zlib", "gzip"] as const)("round-trips %s and empty data", async (algorithm) => {
+  it.each(["zlib"] as const)("round-trips %s and empty data", async (algorithm) => {
     for (const bytes of [new Uint8Array(), new TextEncoder().encode("Foundation bytes ".repeat(400))]) {
       const data = NSEData.from(bytes);
       expect((await (await data.compressed(algorithm)).decompressed(algorithm)).isEqual(data)).toBe(true);
@@ -86,9 +86,9 @@ describe("NSEData", () => {
   });
 
   it("rejects corrupted and truncated compressed bytes", async () => {
-    await expect(NSEData.from(new Uint8Array([1, 2, 3])).decompressed("gzip")).rejects.toThrow();
-    const packed = await NSEData.from(new Uint8Array([1, 2, 3])).compressed("gzip");
-    await expect(packed.subdata({ location: 0, length: packed.count - 1 }).decompressed("gzip")).rejects.toThrow();
+    await expect(NSEData.from(new Uint8Array([255])).decompressed("zlib")).rejects.toThrow();
+    const packed = await NSEData.from(new Uint8Array([1, 2, 3])).compressed("zlib");
+    await expect(packed.subdata({ location: 0, length: packed.count - 1 }).decompressed("zlib")).rejects.toThrow();
   });
 
   it("compresses zlib as RFC 1951 raw DEFLATE without an RFC 1950 header", async () => {

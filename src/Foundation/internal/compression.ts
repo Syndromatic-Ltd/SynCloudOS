@@ -19,39 +19,30 @@
  */
 
 export const NSEDataCompressionAlgorithm = Object.freeze({
-  zlib: "zlib", gzip: "gzip", brotli: "brotli", zstd: "zstd",
+  lzfse: "lzfse", lz4: "lz4", lzma: "lzma", zlib: "zlib",
 } as const);
 
 export type NSEDataCompressionAlgorithm = typeof NSEDataCompressionAlgorithm[keyof typeof NSEDataCompressionAlgorithm];
 export type CompressionOperation = "compress" | "decompress";
 
-const formats: Readonly<Record<NSEDataCompressionAlgorithm, string>> = Object.freeze({
+const formats = Object.freeze({
   // Apple's zlib is RFC 1951 raw DEFLATE, without the RFC 1950 wrapper.
-  zlib: "deflate-raw", gzip: "gzip", brotli: "brotli", zstd: "zstd",
+  zlib: "deflate-raw", brotli: "brotli",
 });
 
 /** The sole codec factory. Uses web streams available in windows and workers. */
-export function createCompressionStream(operation: CompressionOperation, algorithm: NSEDataCompressionAlgorithm): ReadableWritablePair<Uint8Array<ArrayBuffer>, BufferSource> {
-  if (!Object.hasOwn(formats, algorithm)) throw new TypeError(`Unknown compression algorithm: ${String(algorithm)}.`);
+export function createCompressionStream(operation: CompressionOperation, algorithm: NSEDataCompressionAlgorithm | "brotli" | "lzbitmap"): ReadableWritablePair<Uint8Array<ArrayBuffer>, BufferSource> {
+  if (!Object.hasOwn(NSEDataCompressionAlgorithm, algorithm) && algorithm !== "brotli" && algorithm !== "lzbitmap") throw new TypeError(`Unknown compression algorithm: ${String(algorithm)}.`);
   if (operation !== "compress" && operation !== "decompress") throw new TypeError(`Unknown compression operation: ${String(operation)}.`);
   const Codec = operation === "compress" ? globalThis.CompressionStream : globalThis.DecompressionStream;
   try {
+    if (!Object.hasOwn(formats, algorithm)) throw new TypeError("The host does not implement this codec.");
     if (typeof Codec !== "function") throw new TypeError("Codec constructor is unavailable.");
     // Extra formats are deliberately constructor-probed; TypeScript's DOM union may lag the runtime.
-    return new Codec(formats[algorithm] as CompressionFormat);
+    return new Codec(formats[algorithm as keyof typeof formats] as CompressionFormat);
   } catch (cause) {
     throw new TypeError(`${operation === "compress" ? "Compression" : "Decompression"} ${algorithm} is unsupported in this environment.`, { cause });
   }
-}
-
-export function supportedCompressionAlgorithms(): readonly NSEDataCompressionAlgorithm[] {
-  return Object.freeze(Object.values(NSEDataCompressionAlgorithm).filter((algorithm) => {
-    let compress = false;
-    let decompress = false;
-    try { createCompressionStream("compress", algorithm); compress = true; } catch { /* unavailable */ }
-    try { createCompressionStream("decompress", algorithm); decompress = true; } catch { /* unavailable */ }
-    return compress && decompress;
-  }));
 }
 
 export async function transformCompression(bytes: Uint8Array, operation: CompressionOperation, algorithm: NSEDataCompressionAlgorithm): Promise<Uint8Array<ArrayBuffer>> {

@@ -46,6 +46,11 @@
     "CRFXAES.GCM.open": "AES.GCM.open(_:using:authenticating:)"
   },
   "frameworkCounterparts": {
+    "CPFXAlgorithm": "Algorithm",
+    "CPFXFilterOperation": "FilterOperation",
+    "CPFXFilterError": "FilterError",
+    "CPFXInputFilter": "InputFilter",
+    "CPFXOutputFilter": "OutputFilter",
     "SCAuthorization": "Authorization Services",
     "PrivacyStore": { "none": "Apple's TCC database is private, with no public AppKit class. This host service stores per-app browser consent." },
     "ASAuthorization": "ASAuthorization",
