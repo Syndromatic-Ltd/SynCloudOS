@@ -18,7 +18,7 @@ Each framework has a short prefix that appears on every public type, so a name t
 | [MIDIFX](midi.md) | `MIFX` | Core MIDI | `fx/midi` | MIDI 2.0 packets, parsing and scheduling |
 | [BluetoothFX](bluetooth.md) | `BTFX` | Core Bluetooth | `fx/bluetooth` | Central-role GATT |
 | [NFCFX](nfc.md) | `NFX` | Core NFC | `fx/nfc` | Foreground NDEF |
-| [SpeechFX](speech.md) | `SPFX` | Speech | `fx/speech` | Browser recognition |
+| [SpeechFX](speech.md) | `SPFX` | Speech | `fx/speech` | Supplied audio requests; web sources unavailable |
 | [ContactsFX](contacts.md) | `CNFX` | Contacts | `fx/contacts` | Per-request contact picker |
 | [PassFX](pass.md) | `PKFX` | PassKit | `fx/pass` | Payment Request authorisation |
 | [XRFX](xr.md) | `XRFX` | ARKit sessions | `fx/xr` | WebXR poses and tracked anchors |

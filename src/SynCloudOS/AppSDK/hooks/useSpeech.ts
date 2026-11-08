@@ -17,40 +17,31 @@
  * limitations under the License.
  */
 
-import { useLayoutEffect, useMemo } from "react";
-import type { SPFXSpeechRecognizer } from "../../../FX/SpeechFX/public";
-import { useSCOS } from "../scos/useSCOS";
-
-/** A component-owned recognizer. Mounting and status queries never start recording. */
+import { useInsertionEffect, useMemo } from "react";
+import { useSynWareContext } from "../SynWareContext";
+import { bindFXFamily } from "../fx/bindFXFamily";
+import { scosSessionsForApp } from "../scos/scosSessionRegistry";
+import { SPFXSpeechRecognizer, SPFXError } from "../../../FX/SpeechFX/public";
+import { speechSessionBindings, speechRecognizers } from "../../../FX/SpeechFX/internal/speechSessionBindings";
+/** A real, passive recognizer. Insertion lifetime survives StrictMode effect replay. */
 export function useSpeech(): SPFXSpeechRecognizer {
-  const client = useSCOS().speech;
-  const binding = useMemo(() => {
-    let current: SPFXSpeechRecognizer | null = null;
-    const requireRecognizer = () => {
-      if (!current) throw new DOMException("The component speech owner is not mounted.", "InvalidStateError");
-      return current;
-    };
-    const facade = Object.freeze<SPFXSpeechRecognizer>({
-      getCapabilities: () => current?.getCapabilities() ?? Object.freeze({ recognition: false, onDeviceRecognition: false }),
-      getAuthorizationStatus: () => current?.getAuthorizationStatus() ?? Promise.resolve("unavailable"),
-      requestAuthorization: signal => requireRecognizer().requestAuthorization(signal),
-      recognitionTask: (request, listener) => requireRecognizer().recognitionTask(request, listener),
-      dispose: () => current?.dispose(),
-    });
-    return {
-      facade,
-      mount() {
-        const owner = new AbortController();
-        const recognizer = client.createRecognizer(owner.signal);
-        current = recognizer;
-        return () => {
-          if (current === recognizer) current = null;
-          owner.abort();
-          recognizer.dispose();
-        };
-      },
-    };
-  }, [client]);
-  useLayoutEffect(() => binding.mount(), [binding]);
-  return binding.facade;
+  const context = useSynWareContext();
+  if (!context) throw new SPFXError("kAFAssistantErrorDomain", 1101, "useSpeech requires a mounted application.");
+  const recognizer = useMemo(() => {
+    const sessions = scosSessionsForApp(context.appId).filter(candidate => candidate.context === context
+      || (candidate.context.signal === context.signal && candidate.context.runtimeInfo.id === context.runtimeInfo.id));
+    if (sessions.length !== 1) throw new SPFXError("kAFAssistantErrorDomain", 1101, `Speech application session is ${sessions.length ? "ambiguous" : "notRunning"}.`);
+    const session = sessions[0]!;
+    const Bound = bindFXFamily({ SPFXSpeechRecognizer }, context.appId).SPFXSpeechRecognizer;
+    class ContextRecognizer extends Bound {}
+    let ended = false;
+    speechSessionBindings.set(ContextRecognizer, { resolve() {
+      if (context.signal.aborted || !scosSessionsForApp(context.appId).includes(session)) ended = true;
+      if (ended) throw new SPFXError("kAFAssistantErrorDomain", 216, "Speech application session is ended.");
+      return session;
+    } });
+    return new ContextRecognizer();
+  }, [context]);
+  useInsertionEffect(() => () => speechRecognizers.get(recognizer)!.dispose(), [recognizer]);
+  return recognizer;
 }

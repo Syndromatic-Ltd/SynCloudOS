@@ -36,6 +36,7 @@ import type {
   AppWindowSnapshot,
 } from "./appClientTypes";
 import type { SynWareContextValue, SynWareRuntimeInfo } from "./appContextTypes";
+import { associateSpeechPort } from "../../FX/SpeechFX/internal/speechPort";
 import { associateNetworkPort } from "../../FX/NetworkFX/internal/networkPort";
 import { registerSCOSAppSession } from "./scos/scosSessionRegistry";
 
@@ -414,7 +415,6 @@ export function createSynWareContextValue(runtime: SynWareRuntime, branding: Syn
     videoPresentation: environment.videoPresentation,
     bluetooth: environment.bluetooth,
     nfc: environment.nfc,
-    speech: environment.speech,
     contacts: environment.contacts,
     payment: environment.payment,
     xr: environment.xr,
@@ -425,6 +425,7 @@ export function createSynWareContextValue(runtime: SynWareRuntime, branding: Syn
     trusted: environment.trusted,
   });
   associateNetworkPort(context, environment.network);
+  associateSpeechPort(context, environment.speech);
   const unregister = registerSCOSAppSession({ appId: context.appId, ...context.appInfo, context });
   runtime.signal.addEventListener("abort", unregister, { once: true });
   if (runtime.signal.aborted) unregister();

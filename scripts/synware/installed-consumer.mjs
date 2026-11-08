@@ -166,7 +166,7 @@ export function assertIndependentModules(root, ids) {
 /** These device families are declaration roots; their live objects come from the session. */
 export function assertFxRuntimeEntry(family, module) {
   assert(requiredFxFamilies.includes(family), `Unknown FX family: ${family}`);
-  assert(Object.keys(module).length > 0 || ["bluetooth", "speech"].includes(family), `Empty FX runtime entry: ${family}`);
+  assert(Object.keys(module).length > 0 || ["bluetooth"].includes(family), `Empty FX runtime entry: ${family}`);
 }
 
 /** Shared by source-side regression tests and the strict installed declaration gate. */
@@ -178,9 +178,9 @@ export function createSdkPublicTypeProbe() {
     `void [${requiredFxFamilies.join(", ")}];`,
     `declare const app: SynWareContextValue;`,
     `import type { BTFXCentralManager } from "@syndromatic/syncloudos/fx/bluetooth";`,
-    `import type { SPFXSpeechRecognizer } from "@syndromatic/syncloudos/fx/speech";`,
+    `import { SPFXSpeechRecognizer } from "@syndromatic/syncloudos/fx/speech";`,
     `const bluetoothManager: BTFXCentralManager = app.bluetooth.createCentralManager(); void bluetoothManager;`,
-    `const speechRecognizer: SPFXSpeechRecognizer = app.speech.createRecognizer(); void speechRecognizer;`,
+    `const speechRecognizer: SPFXSpeechRecognizer = new SPFXSpeechRecognizer(); void speechRecognizer;`,
     `import { NWFXPathMonitor } from "@syndromatic/syncloudos/fx/network";`,
     `const networkMonitor = new NWFXPathMonitor(); networkMonitor.pathUpdateHandler = path => { const status: string = path.status; void status; }; networkMonitor.start(); networkMonitor.cancel();`,
     `const token = sdk.defineSynWareServiceToken<{ read(): string }>({ id: "org.example.package-proof", contractVersion: "proof.v1" });`,
@@ -188,7 +188,7 @@ export function createSdkPublicTypeProbe() {
     `// @ts-expect-error Tokens must infer the declared client, not an arbitrary caller type.`,
     `app.services.require(token).missingMethod();`,
     ...[
-      "app.runtime", "app.services.registerClient", "app.services.resolveAppClient",
+      "app.runtime", "app.speech", "app.services.registerClient", "app.services.resolveAppClient",
       "app.lumina.createIndex().backend", "app.video.backend", "app.midi.backend", "app.location.backend",
       "sdk.createSynCloudOS", "sdk.ServiceRegistry", "sdk.createSynWareTestHost", "sdk.createMountedLuminaClient",
       "sdk.createMountedSynWareRouter", "sdk.SynWareRouteSessionProvider",

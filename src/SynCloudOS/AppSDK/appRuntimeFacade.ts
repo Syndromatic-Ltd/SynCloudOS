@@ -59,7 +59,8 @@ import { createMountedMediaClient } from "./mountedMediaClient";
 import { createMountedVideoClient } from "./mountedVideoClient";
 import { createMountedBluetoothClient } from "./mountedBluetoothClient";
 import { createMountedNFCClient } from "./mountedNFCClient";
-import { createMountedSpeechClient } from "./mountedSpeechClient";
+import { createMountedSpeechPort } from "./mountedSpeechPort";
+import { speechAdapterFor } from "../../FX/SpeechFX/internal/speechPort";
 import { createMountedContactsClient } from "./mountedContactsClient";
 import { createMountedPaymentClient } from "./mountedPaymentClient";
 import { createMountedXRClient } from "./mountedXRClient";
@@ -4507,7 +4508,11 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       videoPresentation: createMountedVideoPresentationClient(runtime.environment.videoPresentation, signal, deviceEntitlements, authoriseDeviceCapability),
       bluetooth: createMountedBluetoothClient(runtime.environment.bluetooth, signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("bluetooth")),
       nfc: createMountedNFCClient(runtime.environment.nfc, signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("nfc")),
-      speech: createMountedSpeechClient(runtime.environment.speech, signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("speech")),
+      speech: createMountedSpeechPort(speechAdapterFor(runtime.environment), signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("speech"), listener => {
+        const releases = [runtime.store.subscribe(listener), runtime.configurationProfiles.subscribe(listener), runtime.identity.session.subscribe(listener),
+          runtime.environment.testControls?.permissions.subscribe?.(listener), runtime.environment.testControls?.policy.subscribe?.(listener)];
+        return () => { for (const release of releases) release?.(); };
+      }),
       contacts: createMountedContactsClient(runtime.environment.contacts, signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("contacts")),
       payment: createMountedPaymentClient(runtime.environment.payment, signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("payment")),
       xr: createMountedXRClient(runtime.environment.xr, signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("xr")),

@@ -24,7 +24,7 @@ import { expect, it } from "vitest";
 import { createSynWare, useBluetooth, useNFC, useSpeech, useContacts, usePayment, useXR, useSCOS } from "../../../src/SynCloudOS/AppSDK";
 import { createSynWareTestHost } from "../../../src/SynCloudOS/AppSDK/testing";
 
-it("projects all six real mounted clients and revokes component owners on unmount", async () => {
+it("projects mounted clients and the real Speech recognizer and revokes component owners on unmount", async () => {
   let owners!: {
     bluetooth: ReturnType<typeof useBluetooth>; nfc: ReturnType<typeof useNFC>;
     speech: ReturnType<typeof useSpeech>; contacts: ReturnType<typeof useContacts>;
@@ -42,15 +42,16 @@ it("projects all six real mounted clients and revokes component owners on unmoun
   const host = createSynWareTestHost({ app, document, strictMode: true });
   host.adapters.permissions.allow(); host.adapters.policy.allow();
   await host.render();
-  for (const name of ["bluetooth", "nfc", "speech", "contacts", "payment", "xr"] as const)
+  for (const name of ["bluetooth", "nfc", "contacts", "payment", "xr"] as const)
     expect(typeof owners.session[name].getCapabilities).toBe("function");
+  expect("speech" in owners.session).toBe(false);
   expect(await owners.bluetooth.getAuthorizationStatus()).toBe("unavailable");
-  expect(await owners.speech.getAuthorizationStatus()).toBe("unavailable");
+  expect(owners.speech.isAvailable).toBe(false);
   expect(await owners.contacts.getAuthorizationStatus()).toBe("unavailable");
   expect(await owners.xr.getAuthorizationStatus()).toBe("unavailable");
   await host.dispose();
   expect(owners.bluetooth.getCapabilities().apiAvailable).toBe(false);
   expect(owners.xr.getCapabilities().apiAvailable).toBe(false);
-  expect(await owners.speech.getAuthorizationStatus()).toBe("unavailable");
+  expect(owners.speech.isAvailable).toBe(false);
   expect(await owners.contacts.getAuthorizationStatus()).toBe("unavailable");
 });
