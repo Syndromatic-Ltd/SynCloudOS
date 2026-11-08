@@ -37,6 +37,7 @@ export const synWareSdkEntries = Object.freeze({
   "fx/location": "src/FX/LocationFX/public.ts",
   "fx/network": "src/FX/NetworkFX/public.ts",
   "fx/crypto": "src/FX/CryptoFX/public.ts",
+  "fx/dispatch": "src/FX/DispatchFX/public.ts",
   "fx/bluetooth": "src/FX/BluetoothFX/public.ts",
   "fx/nfc": "src/FX/NFCFX/public.ts",
   "fx/speech": "src/FX/SpeechFX/public.ts",

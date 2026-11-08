@@ -1,0 +1,58 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run src/FX/DispatchFX
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ src/FX/DispatchFX/__tests__/values.test.ts (11 tests | 2 failed) 11ms
+     × returns future when host wall time exceeds Apple's 62-bit clock value range 4ms
+     × keeps finite wall raw values tagged 11 through Apple's exact overflow boundary 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/values.test.ts > Dispatch value types > returns future when host wall time exceeds Apple's 62-bit clock value range
+AssertionError: expected { Object (rawValue) } to be { Object (rawValue) } // Object.is equality
+
+- Expected
++ Received
+
+  DFXWallTime {
+-   "rawValue": 18446744073709551615n,
++   "rawValue": 13446744073709551616n,
+  }
+
+ ❯ src/FX/DispatchFX/__tests__/values.test.ts:70:33
+     68|   it("returns future when host wall time exceeds Apple's 62-bit clock …
+     69|     vi.spyOn(Date, "now").mockReturnValue(5_000_000_000_000);
+     70|     expect(D.DFXWallTime.now()).toBe(D.DFXWallTime.distantFuture);
+       |                                 ^
+     71|   });
+     72|   it("keeps finite wall raw values tagged 11 through Apple's exact ove…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/values.test.ts > Dispatch value types > keeps finite wall raw values tagged 11 through Apple's exact overflow boundary
+AssertionError: expected { Object (rawValue) } to be { Object (rawValue) } // Object.is equality
+
+- Expected
++ Received
+
+  DFXWallTime {
+-   "rawValue": 18446744073709551615n,
++   "rawValue": 13835058055282163713n,
+  }
+
+ ❯ src/FX/DispatchFX/__tests__/values.test.ts:80:66
+     78|     expect(lastFinite.rawValue >> 62n).toBe(3n);
+     79|     expect(nanoseconds(now.distance(lastFinite))).toBe(387_902);
+     80|     expect(now.advanced(D.DFXTimeInterval.nanoseconds(387_903))).toBe(…
+       |                                                                  ^
+     81|   });
+     82|   it("validates QoS priorities and exposes Apple's classes", () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 9 passed (11)
+   Start at  08:50:59
+   Duration  237ms (transform 74ms, setup 26ms, import 72ms, tests 11ms, environment 0ms)

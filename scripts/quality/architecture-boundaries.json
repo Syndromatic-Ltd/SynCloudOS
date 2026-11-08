@@ -19,6 +19,10 @@
       "replacement": "src/FX/NetworkFX/public.ts"
     },
     {
+      "find": "@syndromatic/syncloudos/fx/dispatch",
+      "replacement": "src/FX/DispatchFX/public.ts"
+    },
+    {
       "find": "@syndromatic/syncloudos/fx/crypto",
       "replacement": "src/FX/CryptoFX/public.ts"
     },
