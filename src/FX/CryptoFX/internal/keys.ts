@@ -45,8 +45,18 @@ function inputEntry(input: Input): [Representation, NSEData | string] {
   return [name, value!];
 }
 function ecAlgorithmIdentifier(curve: Curve): Uint8Array<ArrayBuffer> { return sequence(unhex("06072a8648ce3d0201"), unhex(curves[curve].oid)); }
-function wrapScalar(bytes: Uint8Array, curve: Curve): Uint8Array<ArrayBuffer> {
-  return sequence(unhex("020100"), ecAlgorithmIdentifier(curve), der(4, sequence(unhex("020101"), der(4, bytes))));
+function validateScalar(bytes: Uint8Array, curve: Curve): void {
+  if (bytes.length !== curves[curve].size) throw new CRFXError("incorrectKeySize");
+  const order = unhex(curves[curve].n);
+  let nonzero = 0, borrow = 0;
+  // Fixed-width integer input validation only: no private BigInt or elliptic-curve arithmetic.
+  for (let i = bytes.length - 1; i >= 0; i--) { nonzero |= bytes[i]; borrow = ((bytes[i] - order[i] - borrow) >> 8) & 1; }
+  if (nonzero === 0 || borrow === 0) throw new CRFXError("invalidParameter", "Private scalar must be greater than zero and less than the curve order.");
+}
+function wrapScalar(bytes: Uint8Array, curve: Curve, publicPoint?: Uint8Array): Uint8Array<ArrayBuffer> {
+  const fields = [unhex("020101"), der(4, bytes)];
+  if (publicPoint) fields.push(der(0xa1, der(3, concat(Uint8Array.of(0), publicPoint))));
+  return sequence(unhex("020100"), ecAlgorithmIdentifier(curve), der(4, sequence(...fields)));
 }
 function requireEncoding(condition: boolean): void { if (!condition) throw new CRFXError("invalidParameter", "Invalid key DER encoding."); }
 function hasEncoding(node: ReturnType<typeof parseDer> | undefined, expected: Uint8Array): boolean {
@@ -55,16 +65,20 @@ function hasEncoding(node: ReturnType<typeof parseDer> | undefined, expected: Ui
   // These comparisons inspect public algorithm/version metadata, never secret key bytes.
   return encoded.length === expected.length && encoded.every((byte, index) => byte === expected[index]);
 }
-function validateSec1(bytes: Uint8Array, curve: Curve): void {
+function validateSec1(bytes: Uint8Array, curve: Curve): Uint8Array | undefined {
   const parts = derSequence(bytes);
   requireEncoding(hasEncoding(parts[0], unhex("020101")) && parts[1]?.tag === 4);
+  validateScalar(parts[1].bytes, curve);
   let index = 2;
+  let point: Uint8Array | undefined;
   if (parts[index]?.tag === 0xa0) requireEncoding(hasEncoding(canonicalDer(parts[index++].bytes), unhex(curves[curve].oid)));
   if (parts[index]?.tag === 0xa1) {
     const publicKey = canonicalDer(parts[index++].bytes);
     requireEncoding(publicKey.tag === 3 && publicKey.bytes[0] === 0);
+    point = publicKey.bytes.slice(1);
   }
   requireEncoding(index === parts.length);
+  return point;
 }
 function ensurePkcs8(bytes: Uint8Array, curve: Curve): Uint8Array<ArrayBuffer> {
   const parts = derSequence(bytes);
@@ -93,6 +107,17 @@ async function publicFromPrivate(key: CryptoKey, curve: State["curve"], kind: Ki
   delete jwk.d; delete jwk.key_ops; delete jwk.alg;
   return provider().subtle.importKey("jwk", jwk, algorithm(curve, kind), true, kind === "signing" ? ["verify"] : []);
 }
+async function validatePrivatePoint(key: CryptoKey, curve: Curve, kind: Kind, encoded: Uint8Array<ArrayBuffer>, point: Uint8Array): Promise<void> {
+  const cryptography = provider(), subtle = cryptography.subtle, algorithm = { name: "ECDSA", namedCurve: curves[curve].name };
+  // Agreement keys keep their ECDH handle/usages. A temporary native signing handle checks
+  // the exact supplied point, including y's sign; ECDH shared-x equality cannot do that.
+  const signingKey = kind === "signing" ? key : await subtle.importKey("pkcs8", encoded, algorithm, false, ["sign"]);
+  const verifyingKey = await subtle.importKey("raw", new Uint8Array(point), algorithm, false, ["verify"]);
+  const challenge = cryptography.getRandomValues(new Uint8Array(32));
+  const signatureAlgorithm = { name: "ECDSA", hash: curves[curve].hash };
+  const signature = await subtle.sign(signatureAlgorithm, signingKey, challenge);
+  if (!await subtle.verify(signatureAlgorithm, verifyingKey, signature, challenge)) throw new CRFXError("invalidParameter", "Private and public key representations disagree.");
+}
 export function initPrivate(value: object, curve: State["curve"], kind: Kind, input?: boolean | Input): void {
   const alg = algorithm(curve, kind), usage: KeyUsage[] = kind === "signing" ? ["sign"] : ["deriveBits"];
   let selected: [Representation, NSEData | string] | undefined;
@@ -118,17 +143,22 @@ export function initPrivate(value: object, curve: State["curve"], kind: Kind, in
         expectedPublic = raw.slice(0, 1 + size * 2); raw = raw.slice(1 + size * 2);
       }
       if (format === "rawRepresentation" || format === "x963Representation") {
-        if (raw.length !== size) throw new CRFXError("incorrectKeySize");
-        raw = wrapScalar(raw, curve);
-      } else if (format === "derRepresentation" || format === "pemRepresentation") raw = ensurePkcs8(raw, curve);
+        validateScalar(raw, curve);
+        raw = wrapScalar(raw, curve, expectedPublic);
+      } else if (format === "derRepresentation" || format === "pemRepresentation") {
+        raw = ensurePkcs8(raw, curve);
+        expectedPublic = validateSec1(derSequence(raw)[2].bytes, curve);
+      }
       else throw new CRFXError("invalidParameter");
     }
-    const imported = await provider().subtle.importKey("pkcs8", raw, alg, true, usage);
-    if (expectedPublic) {
-      const actual = new Uint8Array(await provider().subtle.exportKey("raw", await publicFromPrivate(imported, curve, kind)));
-      if (actual.length !== expectedPublic.length || actual.some((n, i) => n !== expectedPublic![i])) throw new CRFXError("invalidParameter", "Private and public key representations disagree.");
+    try {
+      const imported = await provider().subtle.importKey("pkcs8", raw, alg, true, usage);
+      if (expectedPublic && curve !== "Curve25519") await validatePrivatePoint(imported, curve, kind, raw, expectedPublic);
+      return imported;
+    } catch (error) {
+      if (expectedPublic && (error as { name?: unknown } | null)?.name === "DataError") throw new CRFXError("invalidParameter", "Invalid private/public key representation.", 0, { cause: error });
+      throw error;
     }
-    return imported;
   });
   retain(value, { curve, kind, privateKey: true, key });
 }
