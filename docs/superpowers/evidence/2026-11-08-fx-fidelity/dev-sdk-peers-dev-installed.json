@@ -1,0 +1,30 @@
+{
+  "archiveSha256": "b0d6a6a298c6347834463bc84d6fb1f9a04dd4538b9005fdecd101ac190410bc",
+  "sourceSha256": "a99970151f276d4bdd65e9fd2450aac9b1e3b82520f09a497b01eb998a9959f0",
+  "resourcesSha256": "0fdec76cb7d313aebdd5b3b93edfd2bb81bceac3a7a3c9134026e4d8d8b678fe",
+  "integrity": "sha512-660BxgVTZDh4t1mUFP8LmJgE4IgTrDaempzqkJmtcwWvpbjDATohTBedp3u/FJ7T06/s4XfER6wLtUWAXWFE7w==",
+  "installedOutsideRepository": true,
+  "linked": false,
+  "browser": "chromium",
+  "realDevServer": true,
+  "optimizerEnabled": true,
+  "strictInstalledTypes": true,
+  "explicitHostSDKIncludesSanitised": true,
+  "unrelatedReactOptimized": true,
+  "reactDomOptimized": true,
+  "emittedPeerEntriesOptimized": [
+    "react",
+    "react-dom",
+    "react-dom/client",
+    "react/jsx-runtime"
+  ],
+  "sdkOptimized": false,
+  "awaitTimerCallbackCases": 3,
+  "sharedBaseIdentity": true,
+  "sharedContext": true,
+  "hmrLiveMethodUpdate": true,
+  "hmrPreservedPageAndApplication": true,
+  "terminalSession": true,
+  "resourceIntegrityAfterProof": true,
+  "devServerLog": ""
+}

@@ -1,0 +1,42 @@
+{
+  "reviewedFrozenCommittedPaths": 56,
+  "commit": "aaa69c0752f22f09445aa2554267b32122b41bf1",
+  "allCommittedBytesAndDeletionsMatch": true,
+  "archiveHashMatches": true,
+  "installedProof": {
+    "archiveSha256": "4c2b793119e0a4aed910a3d69228cbf4eb0813137dea1143b8e102f7af9e20a9",
+    "sourceSha256": "82011b34063a5997d0b29b670f9251767eadfd4ce1b560950229c78b88f5eb6e",
+    "resourcesSha256": "bcd9542c866d0c9111bcbd3175663cdcf9e8decc2f8697121e92bcf5dc48a5b8",
+    "integrity": "sha512-xyHWoPoosyiaJ5b/gtJN3yhBR+Yovt2KH06xyQa7hzpe4TNwFwHw5ZfkXRdiiWZ2c685cHhteBgbV6pLuQe8Ig==",
+    "bluetooth": {
+      "archive": "archives/syndromatic-syncloudos-1.0.0-beta.2-4c2b793119e0a4aed910a3d69228cbf4eb0813137dea1143b8e102f7af9e20a9.tgz",
+      "index": "5afb7a6b37a6320a52750450cbdbdf9c7f3fa2290c14d8a6245e418df65352cd",
+      "types": "dc5428eb24e9f4035d87ae9710bc6c5c00b5ed9af68d5b056e0b5bca6052617d"
+    },
+    "installedOutsideRepository": true,
+    "linked": false,
+    "compiledAppTests": 3,
+    "productionBuild": true,
+    "productionImports": true,
+    "strictInstalledTypes": true,
+    "sharedSDKGraph": true,
+    "declarationGraph": {
+      "index": {
+        "bluetoothInternalModules": 0
+      },
+      "sdk": {
+        "bluetoothInternalModules": 0
+      },
+      "sdk/testing": {
+        "bluetoothInternalModules": 0
+      },
+      "browser": {
+        "bluetoothInternalModules": 0
+      },
+      "fx/bluetooth": {
+        "bluetoothInternalModules": 0
+      }
+    },
+    "resourceIntegrityAfterProof": true
+  }
+}
