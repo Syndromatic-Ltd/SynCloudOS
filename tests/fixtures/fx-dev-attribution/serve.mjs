@@ -10,9 +10,9 @@ await new Promise(resolve => reservation.close(resolve));
 if ([5173, 5210, 5387, 5199].includes(port)) throw new Error("Reserved a protected port");
 const server = await createServer({
   root: process.cwd(), configFile: false, logLevel: "warn",
-  plugins: [react(), synCloudOS({ webspringEntry: false })],
+  plugins: [synCloudOS({ webspringEntry: false }), react()],
   server: { host: "127.0.0.1", port, strictPort: true },
-  optimizeDeps: { entries: ["index.html"], include: ["react", "react-dom/client", "react/jsx-runtime", "@syndromatic/syncloudos", "@syndromatic/syncloudos/sdk"] },
+  optimizeDeps: { entries: ["index.html"], include: ["@syndromatic/syncloudos", "@syndromatic/syncloudos/sdk"] },
 });
 await server.listen();
 const address = server.httpServer.address();

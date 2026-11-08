@@ -46,7 +46,7 @@ it("keeps every SDK subpath in one dev graph without disabling other dependency 
   const plugin = synCloudOS({ webspringEntry: false });
   const config = mergeConfig({ optimizeDeps: { include: ["react"], exclude: ["another-library"] } }, plugin.config({}, { command: "serve", mode: "development" }));
   expect(config.optimizeDeps.exclude).toEqual(["another-library", "@syndromatic/syncloudos"]);
-  expect(config.optimizeDeps.include).toEqual(["react", "react-dom"]);
+  expect(config.optimizeDeps.include).toEqual(["react", "react", "react-dom", "react-dom/client", "react/jsx-runtime"]);
   expect(config.optimizeDeps.noDiscovery).not.toBe(true);
 });
 
@@ -56,7 +56,7 @@ it("removes only SDK package entries from a host's explicit optimisation list be
   const config = await resolveConfig({ configFile: false, root, plugins: [synCloudOS({ webspringEntry: false })],
     optimizeDeps: { include: ["react", "@syndromatic/syncloudos", "@syndromatic/syncloudos/sdk", "@syndromatic/syncloudos/fx/pass", "@syndromatic/syncloudos-extra", "@other/syncloudos"] },
   }, "serve");
-  const expected = ["react", "@syndromatic/syncloudos-extra", "@other/syncloudos", "react-dom"];
+  const expected = ["react", "@syndromatic/syncloudos-extra", "@other/syncloudos", "react", "react-dom", "react-dom/client", "react/jsx-runtime"];
   expect(config.optimizeDeps.include).toEqual(expected);
   expect(config.environments.client.optimizeDeps.include).toEqual(expected);
   expect(config.optimizeDeps.exclude).toContain("@syndromatic/syncloudos");
