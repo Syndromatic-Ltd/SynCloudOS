@@ -19,7 +19,6 @@
  */
 
 import assert from "node:assert/strict";
-import { createServer } from "node:http";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { chromium, firefox, webkit } from "playwright";
@@ -29,18 +28,29 @@ import { createInstalledConsumer, runNode } from "./installed-consumer.mjs";
 const consumer = createInstalledConsumer(process.cwd(), "synware-crypto-browser-");
 writeFileSync(join(consumer.root, "worker.ts"), `
 import { NSEData } from "@syndromatic/syncloudos/foundation";
-import { CRFXSHA256, CRFXSymmetricKey, CRFXAES, CRFXP256, CRFXCapabilities } from "@syndromatic/syncloudos/fx/crypto";
+import { CRFXSHA256, CRFXSymmetricKey, CRFXAES, CRFXP256, CRFXP384, CRFXP521, CRFXSymmetricKeySize, CRFXSharedSecret, CRFXSHA256Digest, CRFXHMAC, CRFXHKDF } from "@syndromatic/syncloudos/fx/crypto";
 (async () => {
   const data = NSEData.from(new TextEncoder().encode("CRFX worker"));
-  if (!CRFXCapabilities.query().webCrypto) throw new Error("WebCrypto unavailable");
-  const key = CRFXSymmetricKey.generate();
+  const key = new CRFXSymmetricKey(CRFXSymmetricKeySize.bits256);
   const box = await CRFXAES.GCM.seal(data, key);
   if (!(await CRFXAES.GCM.open(box, key)).isEqual(data)) throw new Error("AES failed");
-  const signing = await CRFXP256.Signing.PrivateKey.generate();
+  const signing = new CRFXP256.Signing.PrivateKey();
   if (!await signing.publicKey.isValidSignature(await signing.signature(data), data)) throw new Error("ECDSA failed");
-  const a = await CRFXP256.KeyAgreement.PrivateKey.generate(), b = await CRFXP256.KeyAgreement.PrivateKey.generate();
-  if (!(await a.sharedSecretFromKeyAgreement(b.publicKey)).rawRepresentation.isEqual((await b.sharedSecretFromKeyAgreement(a.publicKey)).rawRepresentation)) throw new Error("ECDH failed");
-  postMessage({ hash: (await CRFXSHA256.hash(data)).count, hasDocument: typeof document !== "undefined" });
+  const a = new CRFXP256.KeyAgreement.PrivateKey(), b = new CRFXP256.KeyAgreement.PrivateKey();
+  if (!CRFXSharedSecret["=="](await a.sharedSecretFromKeyAgreement(b.publicKey), await b.sharedSecretFromKeyAgreement(a.publicKey))) throw new Error("ECDH failed");
+  const hash = new CRFXSHA256(); hash.update(data);
+  if (!CRFXSHA256Digest["=="](await hash.finalize(), await CRFXSHA256.hash(data))) throw new Error("Hash mismatch");
+  const HMAC = CRFXHMAC(CRFXSHA256), code = await HMAC.authenticationCode(data, key);
+  if (!await HMAC.isValidAuthenticationCode(code, data, key)) throw new Error("HMAC failed");
+  if ((await CRFXHKDF(CRFXSHA256).deriveKey(key, 32)).bitCount !== 256) throw new Error("HKDF failed");
+  for (const Curve of [CRFXP256, CRFXP384, CRFXP521]) {
+    const original = new Curve.Signing.PrivateKey(false);
+    const restored = new Curve.Signing.PrivateKey({ rawRepresentation: await original.rawRepresentation });
+    const sig = await restored.signature(data);
+    const publicKey = new Curve.Signing.PublicKey({ compressedRepresentation: await original.publicKey.compressedRepresentation });
+    if (!await publicKey.isValidSignature(new Curve.Signing.ECDSASignature({ derRepresentation: sig.derRepresentation }), data)) throw new Error("Curve representation failed");
+  }
+  postMessage({ hash: CRFXSHA256Digest.byteCount, hasDocument: typeof document !== "undefined" });
 })().catch(error => postMessage({ error: String(error) }));
 `);
 writeFileSync(join(consumer.root, "entry.ts"), `
@@ -54,30 +64,28 @@ writeFileSync(join(consumer.root, "index.html"), '<script type="module" src="/en
 writeFileSync(join(consumer.root, "vite.config.mjs"), 'export default { build: { outDir: "dist" } };');
 runNode(["node_modules/vite/bin/vite.js", "build"], consumer.root);
 const directory = join(consumer.root, "dist");
-const server = createServer((request, response) => {
-  const relative = decodeURIComponent(new URL(request.url, "http://localhost").pathname).replace(/^\//u, "") || "index.html";
-  if (relative.includes("..")) { response.writeHead(400).end(); return; }
-  try { response.setHeader("content-type", relative.endsWith(".js") ? "text/javascript" : "text/html"); response.end(readFileSync(join(directory, relative))); }
-  catch { response.writeHead(404).end(); }
-});
-await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
-const address = server.address();
 const results = [];
-try {
-  for (const [engine, launcher] of Object.entries({ chromium, firefox, webkit })) {
-    const browser = await launcher.launch({ headless: true });
-    try {
-      const page = await browser.newPage();
-      await page.goto(`http://127.0.0.1:${address.port}/`);
-      const result = await page.evaluate(() => globalThis.result);
-      assert.equal(result.error, undefined, `${engine}: ${result.error}`);
-      assert.equal(result.hasDocument, false);
-      assert.equal(result.hash, 32);
-      results.push({ engine, ...result });
-    } finally { await browser.close(); }
-  }
-} finally { await new Promise(resolve => server.close(resolve)); }
-const output = resolve("docs/superpowers/evidence/2026-11-07-foundation/fx-phase4-crypto-installed-browser.json");
+for (const [engine, launcher] of Object.entries({ chromium, firefox, webkit })) {
+  const browser = await launcher.launch({ headless: true });
+  try {
+    const context = await browser.newContext();
+    // Synthetic secure origin: all resources are fulfilled locally, with no server/listening port.
+    await context.route("https://cryptofx.invalid/**", route => {
+      const relative = decodeURIComponent(new URL(route.request().url()).pathname).replace(/^\//u, "") || "index.html";
+      if (relative.includes("..")) return route.fulfill({ status: 400 });
+      try { return route.fulfill({ contentType: relative.endsWith(".js") ? "text/javascript" : "text/html", body: readFileSync(join(directory, relative)) }); }
+      catch { return route.fulfill({ status: 404 }); }
+    });
+    const page = await context.newPage();
+    await page.goto("https://cryptofx.invalid/");
+    const result = await page.evaluate(() => globalThis.result);
+    assert.equal(result.error, undefined, `${engine}: ${result.error}`);
+    assert.equal(result.hasDocument, false);
+    assert.equal(result.hash, 32);
+    results.push({ engine, ...result });
+  } finally { await browser.close(); }
+}
+const output = resolve("docs/superpowers/evidence/2026-11-08-fx-fidelity/crypto-installed-browser.json");
 mkdirSync(resolve(output, ".."), { recursive: true });
 writeFileSync(output, JSON.stringify({ archiveSHA256: consumer.archiveSha256, results }, null, 2) + "\n");
 console.log(JSON.stringify(results));

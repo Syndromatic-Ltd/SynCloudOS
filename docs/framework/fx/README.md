@@ -26,7 +26,7 @@ Each framework has a short prefix that appears on every public type, so a name t
 | [LuminaFX](lumina.md) | `LUFX` | Core Spotlight | `fx/lumina` | On-device indexing and search |
 | [CompressionFX](compression.md) | `CPFX` | Compression | `fx/compression` | Apple's input/output closure filters |
 | [NetworkFX](network.md) | `NWFX` | Network | `fx/network` | Scoped path monitoring and browser connection hints |
-| [CryptoFX](crypto.md) | `CRFX` | CryptoKit | `fx/crypto` | SHA, HMAC, AES.GCM, P256 and HKDF with Foundation bytes |
+| [CryptoFX](crypto.md) | `CRFX` | CryptoKit | `fx/crypto` | Typed SHA/HMAC/HKDF, AES.GCM, P256/P384/P521 and Curve25519 with Foundation bytes |
 
 ## Where each framework is documented
 
