@@ -82,6 +82,12 @@ function validateSpki(bytes: Uint8Array, curve: Curve): void {
   const parts = derSequence(bytes);
   requireEncoding(parts.length === 2 && hasEncoding(parts[0], ecAlgorithmIdentifier(curve)) && parts[1].tag === 3 && parts[1].bytes[0] === 0);
 }
+function ecInteger(bytes: Uint8Array, width: number): Uint8Array<ArrayBuffer> {
+  if (!bytes.length || bytes.length > width) unsupported("The native EC integer has an invalid field width.");
+  const result = new Uint8Array(width);
+  result.set(bytes, width - bytes.length);
+  return result;
+}
 async function publicFromPrivate(key: CryptoKey, curve: State["curve"], kind: Kind): Promise<CryptoKey> {
   const jwk = await provider().subtle.exportKey("jwk", key);
   delete jwk.d; delete jwk.key_ops; delete jwk.alg;
@@ -162,9 +168,20 @@ export function representation(value: object, format: Exclude<Representation, "p
     const key = await entry.key;
     if (format === "derRepresentation") return NSEData.from(await provider().subtle.exportKey(entry.privateKey ? "pkcs8" : "spki", key));
     if (entry.privateKey) {
-      const jwk = await provider().subtle.exportKey("jwk", key), scalar = fromBase64url(jwk.d!);
+      let jwk: JsonWebKey;
+      try { jwk = await provider().subtle.exportKey("jwk", key); }
+      catch (error) {
+        if (entry.curve === "Curve25519" || format !== "rawRepresentation") throw error;
+        // A provider may retain the private scalar while lacking the public point needed for JWK.
+        const pkcs8 = ensurePkcs8(new Uint8Array(await provider().subtle.exportKey("pkcs8", key)), entry.curve);
+        const sec1 = derSequence(derSequence(pkcs8)[2].bytes);
+        return NSEData.from(ecInteger(sec1[1].bytes, curves[entry.curve].size));
+      }
+      // NIST EC JWK fields are unsigned integers; some providers omit leading zero bytes.
+      // Curve25519 fields are octet strings and must never receive numeric padding.
+      const scalar = entry.curve === "Curve25519" ? fromBase64url(jwk.d!) : ecInteger(fromBase64url(jwk.d!), curves[entry.curve].size);
       if (format === "rawRepresentation") return NSEData.from(scalar);
-      if (format === "x963Representation" && entry.curve !== "Curve25519") return NSEData.from(concat(Uint8Array.of(4), fromBase64url(jwk.x!), fromBase64url(jwk.y!), scalar));
+      if (format === "x963Representation" && entry.curve !== "Curve25519") return NSEData.from(concat(Uint8Array.of(4), ecInteger(fromBase64url(jwk.x!), curves[entry.curve].size), ecInteger(fromBase64url(jwk.y!), curves[entry.curve].size), scalar));
       throw new CRFXError("invalidParameter");
     }
     const raw = new Uint8Array(await provider().subtle.exportKey("raw", key));
