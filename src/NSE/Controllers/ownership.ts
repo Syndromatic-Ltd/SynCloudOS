@@ -24,7 +24,7 @@ import {
   SynCloudOSLifecycleRecord,
   type SynCloudOSLifecycleDisposalReason,
 } from "../../SynCloudOS/nseRuntimeContracts";
-import { inheritNSEExecutionContext, runWithNSEScopeExecution } from "../Application/ownedExecution";
+import { inheritNSEExecutionContext, reportNSEConstructionCleanupError, runWithNSEScopeExecution } from "../Application/ownedExecution";
 
 /**
  * Something that owns the controllers created with it: an application, a
@@ -270,7 +270,9 @@ export function constructNSEOwnedResource<T>(scope: NSEOwnershipScope, construct
   pendingSelf = null;
   try { return runWithNSEScopeExecution(scope, construct); }
   catch (error) {
-    for (const rollback of journal.reverse()) { try { rollback(); } catch { /* Preserve the construction error; finish every release. */ } }
+    const failures: unknown[] = [];
+    for (const rollback of journal.reverse()) { try { rollback(); } catch (failure) { failures.push(failure); } }
+    for (const failure of failures) reportNSEConstructionCleanupError(scope, failure);
     throw error;
   } finally {
     acquisitionJournals.pop();
@@ -300,9 +302,11 @@ export function instantiateInOwnerScope<T>(scope: NSEOwnershipScope, construct: 
     // A derived constructor may fail after super() acquired resources. Finish
     // every cleanup step, but never replace the original construction error.
     const reason = scope.kind === "NSEApplication" ? "application-closed" : "explicit";
-    try { pending.object?.[nseDisposeFor](reason); } catch { /* Preserve error. */ }
-    try { scope.disposeAdopted(reason); } catch { /* Preserve error. */ }
-    try { scope.release(reason); } catch { /* Preserve error. */ }
+    const failures: unknown[] = [];
+    try { pending.object?.[nseDisposeFor](reason); } catch (failure) { failures.push(failure); }
+    try { scope.disposeAdopted(reason); } catch (failure) { failures.push(failure); }
+    try { scope.release(reason); } catch (failure) { failures.push(failure); }
+    for (const failure of failures) reportNSEConstructionCleanupError(scope, failure);
     throw error;
   } finally {
     ambientScope = previousAmbient;

@@ -417,6 +417,41 @@ describe("recorded NSE scope execution and resource admission", () => {
     expect(resource.cancel).toHaveBeenCalledOnce(); expect(execution.currentOwnedExecutionContext()).toBeNull();
   });
 
+  it.each(["constructor", "factory"])("reports %s rollback cleanup through its captured parent without borrowing a live outer context", mode => {
+    const root = fixture(); const outer = fixture(); const primary = new Error("primary"); const secondary = new Error("cleanup");
+    const cleanup = vi.fn(() => { throw secondary; });
+    execution.runInOwnedExecutionContext(outer.context, () => {
+      if (mode === "constructor") {
+        const scope = new NSEOwnershipScope("NSEViewController", "failed"); bridge.attachNSEExecutionContext(scope, root.context);
+        class Broken extends NSEViewController {
+          constructor() { super(); execution.registerOwnedExecutionResource(execution.requireOwnedExecutionContext("resource"), {}, cleanup); throw primary; }
+        }
+        expect(() => instantiateInOwnerScope(scope, () => new Broken())).toThrow(primary);
+        expect(scope.authoritySignal.aborted).toBe(true);
+      } else {
+        const parent = owner(root.context);
+        expect(() => parent.own(() => { execution.registerOwnedExecutionResource(execution.requireOwnedExecutionContext("resource"), {}, cleanup); throw primary; })).toThrow(primary);
+        expect(parent.isDisposed).toBe(false); parent.dispose();
+      }
+      expect(execution.currentOwnedExecutionContext()).toBe(outer.context);
+    });
+    expect(cleanup).toHaveBeenCalledOnce(); expect(root.errors).toEqual([secondary]); expect(root.errorContexts).toEqual([null]); expect(outer.errors).toEqual([]);
+  });
+
+  it("keeps standalone construction rollback unowned even inside another host context", () => {
+    const outer = fixture(); const primary = new Error("standalone constructor"); const secondary = new Error("standalone cleanup");
+    const cleanup = vi.fn(() => { throw secondary; });
+    class Broken extends NSEViewController {
+      readonly resource = this.own(() => ({ dispose: cleanup }));
+      constructor() { super(); throw primary; }
+    }
+    execution.runInOwnedExecutionContext(outer.context, () => {
+      expect(() => instantiateInOwnerScope(new NSEOwnershipScope("NSEViewController", "standalone"), () => new Broken())).toThrow(primary);
+      expect(execution.currentOwnedExecutionContext()).toBe(outer.context);
+    });
+    expect(cleanup).toHaveBeenCalledOnce(); expect(outer.errors).toEqual([]);
+  });
+
   it.each([["view", NSEViewController], ["window", NSEWindowController]] as const)("continues rejecting owned %s controller results", (_name, Controller) => {
     const parent = owner(); let value!: NSEViewController | NSEWindowController;
     expect(() => parent.own(() => value = new Controller())).toThrow(/addChild|openWindow/i);
