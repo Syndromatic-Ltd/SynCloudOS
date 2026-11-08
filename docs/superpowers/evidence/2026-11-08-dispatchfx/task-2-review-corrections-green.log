@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run src/FX/DispatchFX/__tests__/queue.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  1 passed (1)
+      Tests  52 passed (52)
+   Start at  09:22:40
+   Duration  328ms (transform 126ms, setup 28ms, import 135ms, tests 24ms, environment 0ms)

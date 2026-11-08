@@ -1,0 +1,97 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run src/FX/DispatchFX/__tests__/queue.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts (52 tests | 3 failed) 31ms
+   × main queue ignores suspend and resume 5ms
+   × inactive ancestor retargeting preserves the saved active leaf prefix 1ms
+   × a leaf item behind an inactive predecessor does not reserve its new serial target 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > main queue ignores suspend and resume
+AssertionError: expected { errors: [ …(1) ], …(1) } to deeply equal { errors: [], ranWhileSuspended: 1 }
+
+- Expected
++ Received
+
+  {
+-   "errors": [],
+-   "ranWhileSuspended": 1,
++   "errors": [
++     Error {
++       "message": "BUG IN CLIENT OF LIBDISPATCH: over-resume of a dispatch object",
++     },
++   ],
++   "ranWhileSuspended": 0,
+  }
+
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:305:41
+    303|   // Also clean up the old counted implementation after observing RED.
+    304|   queue.resume(); await host.flush();
+    305|   expect({ errors, ranWhileSuspended }).toEqual({ errors: [], ranWhile…
+       |                                         ^
+    306| });
+    307| it("inactive ancestor retargeting preserves the saved active leaf pref…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > inactive ancestor retargeting preserves the saved active leaf prefix
+AssertionError: expected [ …(2) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   [
++     "old",
++     undefined,
++     "B",
++     undefined,
++   ],
++   [
++     "new",
++     undefined,
++     "B",
++     undefined,
++   ],
++ ]
+
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:318:38
+    316|   leaf.async(() => { events.push(["new", Q().getSpecific(keyA), Q().ge…
+    317|   inactive.setTarget(targetC);
+    318|   await host.flush(); expect(events).toEqual([]);
+       |                                      ^
+    319|   inactive.activate(); await host.flush();
+    320|   expect(events).toEqual([["old", "A", undefined, "C"], ["new", undefi…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > a leaf item behind an inactive predecessor does not reserve its new serial target
+AssertionError: expected [] to deeply equal [ 'direct-B' ]
+
+- Expected
++ Received
+
+- [
+-   "direct-B",
+- ]
++ []
+
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:331:38
+    329|   leaf.async(() => { events.push(["new", Q().getSpecific(keyA), Q().ge…
+    330|   targetB.async(() => { events.push("direct-B"); });
+    331|   await host.flush(); expect(events).toEqual(["direct-B"]);
+       |                                      ^
+    332|   inactive.activate(); await host.flush();
+    333|   expect(events).toEqual(["direct-B", ["old", "A", undefined], ["new",…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 49 passed (52)
+   Start at  09:21:45
+   Duration  330ms (transform 123ms, setup 27ms, import 132ms, tests 31ms, environment 0ms)

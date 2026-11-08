@@ -1,0 +1,106 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/dispatch-counterparts.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/dispatch-counterparts.test.ts (4 tests | 3 failed) 234ms
+   × maps every public Dispatch export through developer MCP counterpart lookup 6ms
+   × keeps the public entry exclusively explicit re-exports without private helpers 4ms
+   × publishes only mapped Apple types and keeps private storage out of declarations 221ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/dispatch-counterparts.test.ts > maps every public Dispatch export through developer MCP counterpart lookup
+AssertionError: expected [ 'DFXQoS', 'DFXQoSClass', …(10) ] to deeply equal [ 'DFXObject', 'DFXPredicate', …(14) ]
+
+- Expected
++ Received
+
+  [
+-   "DFXObject",
+-   "DFXPredicate",
+    "DFXQoS",
+    "DFXQoSClass",
+-   "DFXQueue",
+    "DFXQueueAttributes",
+    "DFXQueueAutoreleaseFrequency",
+    "DFXSourceMemoryPressureEvent",
+    "DFXSourceTimerFlags",
+    "DFXSpecificKey",
+    "DFXTime",
+    "DFXTimeInterval",
+    "DFXTimeoutResult",
+    "DFXWallTime",
+    "DFXWorkItemFlags",
+-   "dispatchPrecondition",
+  ]
+
+ ❯ tests/runtime/fx/dispatch-counterparts.test.ts:19:33
+     17| it("maps every public Dispatch export through developer MCP counterpar…
+     18|   const map = JSON.parse(readFileSync("docs/framework/appkit-counterpa…
+     19|   expect(Object.keys(D).sort()).toEqual(Object.keys(expected).sort());
+       |                                 ^
+     20|   for (const [name, apple] of Object.entries(expected)) expect(appkitC…
+     21| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/runtime/fx/dispatch-counterparts.test.ts > keeps the public entry exclusively explicit re-exports without private helpers
+AssertionError: expected 12 to be 16 // Object.is equality
+
+- Expected
++ Received
+
+- 16
++ 12
+
+ ❯ tests/runtime/fx/dispatch-counterparts.test.ts:32:36
+     30|   const text = readFileSync("src/FX/DispatchFX/public.ts", "utf8");
+     31|   const source = ts.createSourceFile("public.ts", text, ts.ScriptTarge…
+     32|   expect(source.statements.length).toBe(Object.keys(expected).length);
+       |                                    ^
+     33|   for (const node of source.statements) {
+     34|     expect(ts.isExportDeclaration(node)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/runtime/fx/dispatch-counterparts.test.ts > publishes only mapped Apple types and keeps private storage out of declarations
+AssertionError: expected [ 'DFXQoS', 'DFXQoSClass', …(10) ] to deeply equal [ 'DFXObject', 'DFXPredicate', …(14) ]
+
+- Expected
++ Received
+
+  [
+-   "DFXObject",
+-   "DFXPredicate",
+    "DFXQoS",
+    "DFXQoSClass",
+-   "DFXQueue",
+    "DFXQueueAttributes",
+    "DFXQueueAutoreleaseFrequency",
+    "DFXSourceMemoryPressureEvent",
+    "DFXSourceTimerFlags",
+    "DFXSpecificKey",
+    "DFXTime",
+    "DFXTimeInterval",
+    "DFXTimeoutResult",
+    "DFXWallTime",
+    "DFXWorkItemFlags",
+-   "dispatchPrecondition",
+  ]
+
+ ❯ tests/runtime/fx/dispatch-counterparts.test.ts:50:53
+     48|   const source = program.getSourceFile(path)!;
+     49|   const exports = checker.getExportsOfModule(checker.getSymbolAtLocati…
+     50|   expect(exports.map(symbol => symbol.name).sort()).toEqual(Object.key…
+       |                                                     ^
+     51|   expect(ts.getPreEmitDiagnostics(program).map(d => ts.flattenDiagnost…
+     52|   const result = program.emit(undefined, (path, text) => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 1 passed (4)
+   Start at  08:58:37
+   Duration  676ms (transform 154ms, setup 27ms, import 284ms, tests 234ms, environment 0ms)

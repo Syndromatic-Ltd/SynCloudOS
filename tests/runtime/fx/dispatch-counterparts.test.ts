@@ -12,6 +12,7 @@ const expected = {
   DFXQueueAttributes: "DispatchQueue.Attributes", DFXQueueAutoreleaseFrequency: "DispatchQueue.AutoreleaseFrequency",
   DFXWorkItemFlags: "DispatchWorkItemFlags", DFXSpecificKey: "DispatchSpecificKey",
   DFXSourceTimerFlags: "DispatchSource.TimerFlags", DFXSourceMemoryPressureEvent: "DispatchSource.MemoryPressureEvent",
+  DFXObject: "DispatchObject", DFXQueue: "DispatchQueue", DFXPredicate: "DispatchPredicate", dispatchPrecondition: "dispatchPrecondition",
 };
 it("maps every public Dispatch export through developer MCP counterpart lookup", () => {
   const map = JSON.parse(readFileSync("docs/framework/appkit-counterparts.json", "utf8"));
@@ -53,7 +54,10 @@ it("publishes only mapped Apple types and keeps private storage out of declarati
   });
   expect(result.emitSkipped).toBe(false);
   const text = declarations.join("\n");
-  expect(text).not.toMatch(/(?:from\s+["'][^"']*internal\/|initialiseInterval|safeDistance|maximumNanoseconds|clientError)/);
+  expect(text).not.toMatch(/(?:initialiseInterval|safeDistance|maximumNanoseconds|clientError|ScheduledJob|BrowserYieldHost|postTask|executionStack|queueState)/);
+  const privateImports = [...text.matchAll(/from\s+["']([^"']*internal\/[^"']+)["']/g)].map(match => match[1]);
+  expect(privateImports).toEqual(["./internal/work"]);
+  expect(text).not.toMatch(/(?:BrowserHost|createRootScheduler|rootScheduler|prepareWork|ConsoleTask|PredicateKind)/);
   expect(text).toMatch(/readonly rawValue: bigint/);
   expect(text).toMatch(/readonly uptimeNanoseconds: number/);
   expect(text).toMatch(/class DFXWallTime[\s\S]*?private constructor\(\)/);
