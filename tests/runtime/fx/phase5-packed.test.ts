@@ -49,7 +49,7 @@ console.log('phase5 installed exports passed');
 `);
   expect(runNode(["specimen.mjs"], consumer.root)).toContain("phase5 installed exports passed");
   writeFileSync(join(consumer.root, "consumer.ts"), `
-import type { BTFXBluetoothClient, BTFXCentralManager } from '@syndromatic/syncloudos/fx/bluetooth';
+import type { BTFXCentralManager } from '@syndromatic/syncloudos/fx/bluetooth';
 import type { NFXNDEFReaderSession, NFXNDEFReaderSessionDelegate } from '@syndromatic/syncloudos/fx/nfc';
 import type { SPFXSpeechRecognizer } from '@syndromatic/syncloudos/fx/speech';
 import type { CNFXContactStore } from '@syndromatic/syncloudos/fx/contacts';
@@ -62,7 +62,7 @@ const speech:()=>SPFXSpeechRecognizer=useSpeech;
 const contacts:()=>CNFXContactStore=useContacts;
 const payment:(request:PKFXPaymentRequest)=>PKFXPaymentAuthorizationController=usePayment;
 const xr:()=>XRFXSession=useXR;
-function session() { const app=useSCOS(); const clients:[BTFXBluetoothClient,XRFXClient]=[app.bluetooth,app.xr];return clients; }
+function session() { const app=useSCOS(); const clients:[XRFXClient]=[app.xr];return clients; }
 void [bluetooth,nfc,speech,contacts,payment,xr,session];
 `);
   writeFileSync(join(consumer.root, "tsconfig.json"), JSON.stringify({ compilerOptions: { target: "ES2022", module: "NodeNext", moduleResolution: "NodeNext", strict: true, noEmit: true, skipLibCheck: true }, files: ["consumer.ts"] }));

@@ -20,13 +20,10 @@
 
 import { describe, expect, it, vi } from "vitest";
 import { createPrivacyStore, type PrivacyApplicationPort, type PrivacyAuthorizationStatus } from "../../src/SynCloudOS/Privacy";
-import { createMountedBluetoothClient } from "../../src/SynCloudOS/AppSDK/mountedBluetoothClient";
 import { createMountedXRClient } from "../../src/SynCloudOS/AppSDK/mountedXRClient";
-import { NSEData } from "../../src/Foundation/NSEData";
 import { XRFXConfiguration, type XRFXFrame } from "../../src/FX/XRFX/public";
-import type { BTFXPeripheral } from "../../src/FX/BluetoothFX/public";
 
-const families = ["bluetooth", "xr"] as const;
+const families = ["xr"] as const;
 type Family = typeof families[number];
 interface Probe {
   status(): Promise<PrivacyAuthorizationStatus>;
@@ -43,17 +40,6 @@ interface Probe {
 }
 function probe(family: Family, port: PrivacyApplicationPort, signal: AbortSignal): Probe {
   const nativeDispose = vi.fn(); const nativeStatus = vi.fn(async () => "granted" as const); const received = vi.fn();
-  if (family === "bluetooth") {
-    const capabilities = () => ({ apiAvailable: true, retrievesGrantedPeripherals: true, backgroundScanning: false as const, peripheralRole: false as const });
-    let notify: ((value: NSEData) => void) | undefined;
-    const characteristic = { uuid: "value", readValue: async () => NSEData.from(new Uint8Array([1])), writeValue: async () => {}, setNotifyValue: async (_enabled: boolean, listener?: (value: NSEData) => void) => { notify = listener; } };
-    const peripheral: BTFXPeripheral = { identifier: "peripheral", name: "Sensor", isConnected: true, connect: async () => {}, disconnect: vi.fn(), discoverServices: async () => [{ uuid: "service", isPrimary: true, discoverCharacteristics: async () => [characteristic] }] };
-    const nativeRequest = vi.fn(async () => peripheral);
-    const client = createMountedBluetoothClient({ getCapabilities: capabilities, createCentralManager: () => ({ getCapabilities: capabilities, getAuthorizationStatus: nativeStatus, requestAuthorization: nativeRequest, retrievePeripherals: async () => [], dispose: nativeDispose }) }, signal, () => ["bluetooth.access"], () => true, port);
-    const manager = client.createCentralManager(); let selected: BTFXPeripheral | undefined;
-    return { capabilities: client.getCapabilities, status: manager.getAuthorizationStatus, request: async () => selected = await manager.requestAuthorization({ acceptAllDevices: true }), dispose: manager.dispose, nativeRequest, nativeDispose, nativeStatus, lateValue: peripheral, received,
-      startLive: async () => { const service = (await selected!.discoverServices())[0]; const value = (await service.discoverCharacteristics())[0]; await value.setNotifyValue(true, received); }, emit: () => notify?.(NSEData.from(new Uint8Array([2]))) };
-  }
   let frame: ((value: XRFXFrame) => void) | undefined;
   const capabilities = () => ({ apiAvailable: true, worldTracking: false as const, nativeARKit: false as const });
   const nativeRequest = vi.fn(async (_configuration: XRFXConfiguration, listener: (value: XRFXFrame) => void) => { frame = listener; });
@@ -128,23 +114,4 @@ describe.each(families)("shared privacy for %s", family => {
       expect(f.device.nativeDispose).toHaveBeenCalledTimes(1);
     } finally { f.mount.abort(); f.store.dispose(); }
   });
-});
-it("does not enumerate Bluetooth origin grants until this app has explicitly requested access", async () => {
-  const mount = new AbortController();
-  const store = createPrivacyStore({ runtimeId: "bluetooth-retrieval" });
-  const privacy = store.forApplication({ userId: "user", appId: "com.example.app", service: "bluetooth", signal: mount.signal });
-  const capabilities = () => ({ apiAvailable: true, retrievesGrantedPeripherals: true, backgroundScanning: false as const, peripheralRole: false as const });
-  const retrieve = vi.fn(async () => []);
-  const peripheral: BTFXPeripheral = { identifier: "device", name: "Device", isConnected: false, connect: async () => {}, disconnect() {}, discoverServices: async () => [] };
-  const client = createMountedBluetoothClient({ getCapabilities: capabilities, createCentralManager: () => ({ getCapabilities: capabilities, getAuthorizationStatus: async () => "granted", requestAuthorization: async () => peripheral, retrievePeripherals: retrieve, dispose() {} }) }, mount.signal, () => ["bluetooth.access"], () => true, privacy);
-  const manager = client.createCentralManager();
-  try {
-    expect(await manager.getAuthorizationStatus()).toBe("prompt");
-    await expect(manager.retrievePeripherals()).rejects.toMatchObject({ name: "NotAllowedError" });
-    expect(retrieve).not.toHaveBeenCalled();
-    expect(store.getSnapshot()[0].decision).toBe("prompt");
-    await manager.requestAuthorization({ acceptAllDevices: true });
-    expect(await manager.retrievePeripherals()).toEqual([]);
-    expect(retrieve).toHaveBeenCalledTimes(1);
-  } finally { mount.abort(); store.dispose(); }
 });

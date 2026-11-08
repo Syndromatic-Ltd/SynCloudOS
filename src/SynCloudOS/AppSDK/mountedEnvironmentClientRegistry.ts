@@ -82,7 +82,7 @@ export interface MountedAppEnvironmentClients {
   readonly network: import("../../FX/NetworkFX/internal/networkPort").NetworkPort;
   readonly speechSynthesis: import("../../FX/AudioFX/AUFXSpeechSynthesizer").AUFXSpeechClient;
   readonly videoPresentation: import("../../FX/VideoFX/VFXPictureInPictureController").VFXVideoPresentationClient;
-  readonly bluetooth: import("../../FX/BluetoothFX/public").BTFXBluetoothClient;
+  readonly bluetooth: import("../../FX/BluetoothFX/internal/bluetoothPort").BluetoothPort;
   readonly nfc: import("../../FX/NFCFX/internal/nfcPort").NFCPort;
   readonly speech: import("../../FX/SpeechFX/internal/speechPort").SpeechPort;
   readonly contacts: import("../../FX/ContactsFX/internal/contactsPort").ContactsPort;

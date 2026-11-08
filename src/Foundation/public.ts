@@ -41,3 +41,5 @@ export type { NSEDecimalNumberBehaviors, NSEDecimalNumberHandlerOptions, NSEDeci
 export { NSEUndoManager } from "./NSEUndoManager";
 export type { NSEUndoRegistrationCapability } from "./NSEUndoRegistrationCapability";
 export { NSEPersonNameComponents } from "./NSEPersonNameComponents";
+
+export { NSEUUID } from "./NSEUUID";

@@ -57,7 +57,8 @@ import { createMountedGFXIdentifierIssuer } from "../../FX/GraphicsFX/identifier
 import { createMountedMotionClient } from "./mountedMotionClient";
 import { createMountedMediaClient } from "./mountedMediaClient";
 import { createMountedVideoClient } from "./mountedVideoClient";
-import { createMountedBluetoothClient } from "./mountedBluetoothClient";
+import { createMountedBluetoothPort } from "./mountedBluetoothPort";
+import { bluetoothAdapterFor } from "../../FX/BluetoothFX/internal/bluetoothPort";
 import { createMountedNFCPort } from "./mountedNFCPort";
 import { nfcAdapterFor } from "../../FX/NFCFX/internal/nfcPort";
 import { createMountedSpeechPort } from "./mountedSpeechPort";
@@ -4509,7 +4510,11 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         return () => { for (const release of releases) release?.(); };
       }),
       videoPresentation: createMountedVideoPresentationClient(runtime.environment.videoPresentation, signal, deviceEntitlements, authoriseDeviceCapability),
-      bluetooth: createMountedBluetoothClient(runtime.environment.bluetooth, signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("bluetooth")),
+      bluetooth: createMountedBluetoothPort(bluetoothAdapterFor(runtime.environment), signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("bluetooth"), listener => {
+        const releases = [runtime.store.subscribe(listener), runtime.configurationProfiles.subscribe(listener), runtime.identity.session.subscribe(listener), runtime.privacy.subscribe(listener),
+          runtime.environment.testControls?.permissions.subscribe?.(listener), runtime.environment.testControls?.policy.subscribe?.(listener)];
+        return () => { for (const release of releases) release?.(); };
+      }),
       nfc: createMountedNFCPort(nfcAdapterFor(runtime.environment), signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("nfc"), listener => {
         const releases = [runtime.store.subscribe(listener), runtime.configurationProfiles.subscribe(listener), runtime.identity.session.subscribe(listener),
           runtime.environment.testControls?.permissions.subscribe?.(listener), runtime.environment.testControls?.policy.subscribe?.(listener)];

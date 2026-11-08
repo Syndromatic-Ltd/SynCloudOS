@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { associateBluetoothAdapter } from "../../FX/BluetoothFX/internal/bluetoothPort";
 import { associateNFCAdapter } from "../../FX/NFCFX/internal/nfcPort";
 import { associatePaymentAdapter } from "../../FX/PassFX/internal/paymentPort";
 import { associateContactsAdapter } from "../../FX/ContactsFX/internal/contactsPort";
@@ -746,8 +747,6 @@ export function createBrowserRuntimeEnvironment(options: { readonly cursorImages
     videoDecoder: { createBackend: (options) => new BrowserVideoDecoder(options) },
     videoEncoder: { createBackend: () => new BrowserVideoEncoder() },
     videoProcessing: { createBackend: ownerId => createBrowserVideoWorkerTransport(ownerId) },
-    bluetooth: new BrowserBluetoothAdapter({ isSecureContext: browserWindow?.isSecureContext === true,
-      browserNavigator: browserNavigator as unknown as BrowserBluetoothOptions["browserNavigator"] }),
     xr: new BrowserXRAdapter({ isSecureContext: browserWindow?.isSecureContext === true,
       browserNavigator: browserNavigator as unknown as BrowserXROptions["browserNavigator"],
       createRenderingLayer: browserWindow ? createBrowserXRRenderingLayerFactory(browserWindow) : undefined }),
@@ -798,6 +797,8 @@ export function createBrowserRuntimeEnvironment(options: { readonly cursorImages
       return () => window.removeEventListener(type, listener as EventListener, options);
     },
   };
+  associateBluetoothAdapter(environment, new BrowserBluetoothAdapter({ isSecureContext: browserWindow?.isSecureContext === true,
+    browserNavigator: browserNavigator as unknown as BrowserBluetoothOptions["browserNavigator"] }));
   associateNFCAdapter(environment, new BrowserNFCAdapter({ isSecureContext: browserWindow?.isSecureContext === true,
     NDEFReader: (browserWindow as unknown as { NDEFReader?: BrowserNFCAdapterOptions["NDEFReader"] } | null)?.NDEFReader }));
   associateSpeechAdapter(environment, new BrowserSpeechAdapter());
