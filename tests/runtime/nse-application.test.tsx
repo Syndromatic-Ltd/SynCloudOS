@@ -102,7 +102,7 @@ describe("NSEApplication lifecycle", () => {
 
     expect(instance?.id).toBe("com.example.identified-app");
     expect(instance?.windows).toEqual([]);
-    expect(applicationSessionFor(runtime, appId)?.app).toBe(instance);
+    expect(applicationSessionFor({ runtimeId: runtime.runtimeId, appId })?.app).toBe(instance);
   });
 
   it("keeps the application running when applicationShouldTerminate returns false", async () => {
@@ -177,7 +177,7 @@ describe("function-component application", () => {
     await created.openMainWindow();
 
     expect(await screen.findAllByText("Notes component")).toHaveLength(1);
-    const session = applicationSessionFor(runtime, appId);
+    const session = applicationSessionFor({ runtimeId: runtime.runtimeId, appId });
     expect(session?.app).toBeInstanceOf(NSEApplication);
     expect(session?.windowControllers).toHaveLength(1);
     await expect(created.quit()).resolves.toMatchObject({ committed: true });

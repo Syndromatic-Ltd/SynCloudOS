@@ -10,7 +10,6 @@ export type { NSEViewController, NSEViewControllerClass } from "./Application/NS
 export { nseAnimatePresentation, nseIsDismissing } from "./Application/NSEViewController";
 export { enterClassApplication, instantiateInOwnerScope, nseDisposeFor, NSEOwnershipScope } from "./Controllers/ownership";
 export { attachNSEAuthoringContext } from "./Application/authoringContext";
-export { attachNSEExecutionContext, runWithNSEOwnerExecution } from "./Application/ownedExecution";
 export { finalizeNSEAuthoringOwner } from "./Application/authoringLifecycle";
 export { getNSEObjectOwners } from "./Application/objectLifetime";
 export { useObserve } from "./Objects/useObserve";

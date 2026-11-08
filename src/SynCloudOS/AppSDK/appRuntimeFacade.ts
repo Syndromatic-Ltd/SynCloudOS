@@ -18,9 +18,6 @@
  */
 
 import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
-import { acquireForegroundApplicationProcess, joinApplicationProcess, type ApplicationProcessAuthority } from "./applicationProcessAuthority";
-import { applicationResourceErrorReporter, registerMountedFXExecutionContext } from "./mountedFXExecutionContext";
-import { issueOwnedExecutionContext } from "../nseRuntimeContracts";
 import { createMountedPlaybackPresentation } from "./mountedPlaybackPresentation";
 import { createMountedScreenWakeLock } from "./mountedScreenWakeLock";
 import { createStorageDiagnosticsClient } from "../SynCloudOS";
@@ -198,8 +195,6 @@ export interface CreateMountedSynWareRuntimeOptions {
   readonly windowControllerId?: string;
   /** Host composition only; shares the application's existing TextFX scope. */
   readonly hostFontResourceLoader?: TFXPackagedFontResourceLoader;
-  /** Private background host composition only; authenticated against this exact runtime. */
-  readonly process?: ApplicationProcessAuthority;
 }
 
 function securityError(message: string): DOMException {
@@ -1028,14 +1023,11 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
   const registrationAuthority = runtime.appManager.getManagerForApp(app.bundleIdentifier);
   if (!registrationAuthority) throw securityError("Mounted app facades require a live application registration authority.");
 
-  const membership = options.process ? joinApplicationProcess(runtime, app, options.process) : acquireForegroundApplicationProcess(runtime, app);
-  let transferMount: ReturnType<typeof runtime.transfers.mountApp>;
-  try { transferMount = runtime.transfers.mountApp(app, {
+  const transferMount = runtime.transfers.mountApp(app, {
     responderId,
     ...(windowControllerId === undefined ? {} : { windowControllerId }),
-  }); } catch (error) { membership.release(error); throw error; }
+  });
   const controller = new AbortController();
-  try {
   const forwardTransferAbort = () => {
     if (!controller.signal.aborted) {
       controller.abort(
@@ -1051,11 +1043,9 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
   const bundleGenerationFence = mountedBundle
     ? createBundleGenerationFence(runtime, mountedBundle, mountSignal)
     : null;
-  const signal = AbortSignal.any([runtime.signal, mountSignal, membership.process.signal,
-    ...(bundleGenerationFence ? [bundleGenerationFence.signal] : [])]);
-  const releaseProcess = () => membership.release(signal.reason);
-  signal.addEventListener("abort", releaseProcess, { once: true });
-  if (signal.aborted) releaseProcess();
+  const signal = bundleGenerationFence
+    ? AbortSignal.any([runtime.signal, mountSignal, bundleGenerationFence.signal])
+    : mergeSignals(runtime.signal, controller.signal, transferMount.signal);
   // Resources an application hands this signal as their owner record
   // "application-closed" when the session ends.
   declareSynCloudOSLifecycleSignal(signal, "application-closed");
@@ -1078,7 +1068,6 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     }
     if (disposed || signal.aborted || runtime.appManager.getManagerForApp(app.bundleIdentifier) !== registrationAuthority) throw abortError(signal.reason);
     if (runtime.lifecycle.getState(app.bundleIdentifier) === "closed") throw securityError("The mounted application has closed.");
-    membership.process.assertLive();
   };
   const requireTrustedPrivilege = (privilege: SynWareTrustedPrivilege, capability: string) => {
     assertLive();
@@ -1175,6 +1164,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     return finish;
   };
 
+  try {
   // A physical window owns its own content bounds.  Stage mounts intentionally
   // project the runtime host traits because their rendered content is the host
   // composition itself, not a synthetic application window.
@@ -5101,15 +5091,6 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
       clearMountedAppOverlayAuthority(appRuntime);
     });
 
-    const executionResources = new Set<() => void>();
-    registerMountedFXExecutionContext(appRuntime, issueOwnedExecutionContext({
-      process: membership.process.identity, signal, assertLive, ports: new Map(),
-      reportResourceError: applicationResourceErrorReporter(runtime, app.bundleIdentifier),
-      registerResource(_resource, dispose) {
-        executionResources.add(dispose);
-        return () => { executionResources.delete(dispose); };
-      },
-    }));
     return Object.freeze({
       runtime: appRuntime,
       dispose(reason?: unknown) {
@@ -5125,7 +5106,6 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
   } catch (error) {
     controller.abort(error);
     transferMount.dispose(error);
-    membership.release(error);
     throw error;
   }
 }

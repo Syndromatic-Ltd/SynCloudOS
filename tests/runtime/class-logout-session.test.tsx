@@ -25,7 +25,7 @@ it("ends class application resources on logout and constructs a fresh applicatio
   expect((await host.runtime.logOut().result).status).toBe("completed");
   expect(first.isDisposed).toBe(true);
   expect(oldWindow.isDisposed).toBe(true);
-  expect(applicationSessionFor(host.runtime, host.appId)).toBeUndefined();
+  expect(applicationSessionFor({ runtimeId: host.runtime.runtimeId, appId: host.appId })).toBeUndefined();
   authoriseTestRuntime(host.runtime);
   // LaunchServices prepares a closed application before launching it again.
   // This window-only fixture drives those lifecycle steps without a shell.
@@ -61,5 +61,5 @@ it("does not end identity when an application's save/termination preparation fai
   await host.launch();
   expect((await host.runtime.logOut().result).status).toBe("failed");
   expect(host.runtime.store.getSnapshot().loginServices.isAuthorised).toBe(true);
-  expect(applicationSessionFor(host.runtime, host.appId)?.app.isDisposed).toBe(false);
+  expect(applicationSessionFor({ runtimeId: host.runtime.runtimeId, appId: host.appId })?.app.isDisposed).toBe(false);
 });

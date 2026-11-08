@@ -62,7 +62,7 @@ async function openDocumentApplication(appId: string) {
   await host.launch();
   host.mountWindows();
   const windowId = await host.openMainWindow();
-  const original = applicationSessionFor(host.runtime, appId)!;
+  const original = applicationSessionFor({ runtimeId: host.runtime.runtimeId, appId })!;
   registerClassDocumentType(host);
   await screen.findByText("Document source window");
   const document = await documents.newDocument({
@@ -130,8 +130,8 @@ describe("NSEWindowController window", () => {
     await host.launch();
     host.mountWindows();
     await host.openMainWindow();
-    const identity = { runtime: host.runtime, appId: host.appId };
-    const original = applicationSessionFor(identity.runtime, identity.appId)!;
+    const identity = { runtimeId: host.runtime.runtimeId, appId: host.appId };
+    const original = applicationSessionFor(identity)!;
     const options = { title: "Detached note", restorationKey: "note-one", mobilePolicy: "hidden" as const, width: 640, height: 480, preferredBounds: "centred" as const };
     let detached!: NSEWindowController;
     await act(async () => { detached = await original.app.openWindow(Detached, options); });
@@ -144,7 +144,7 @@ describe("NSEWindowController window", () => {
     expect(detached.openingOptions).toEqual(options);
     host.unmountWindows();
     original.dispose("explicit");
-    const restored = ensureApplicationSession(identity.runtime, identity.runtime.apps.getApp(identity.appId)!, { AppClass: Application, appName: "Class application", strictOwnership: true });
+    const restored = ensureApplicationSession(identity, { AppClass: Application, appName: "Class application", strictOwnership: true });
     restored.prepareServices(host.runtime);
     host.mountWindows();
     await screen.findByText("Detached restoration window");
@@ -399,7 +399,7 @@ describe("opening more windows", () => {
     const host = createClassApplicationHost(Application, "com.example.stage-main-window-identity");
     hosts.push(host);
     await host.launch();
-    const session = applicationSessionFor(host.runtime, host.appId)!;
+    const session = applicationSessionFor({ runtimeId: host.runtime.runtimeId, appId: host.appId })!;
     const stage = session.controllerFor(null)!;
     host.mountWindows();
     let firstId!: string;
@@ -451,7 +451,7 @@ describe("opening more windows", () => {
       </HostSiteBrandingProvider>
     </SynCloudOSProvider>);
     await screen.findByText("Stage document source");
-    const original = applicationSessionFor(host.runtime, appId)!;
+    const original = applicationSessionFor({ runtimeId: host.runtime.runtimeId, appId })!;
     expect(original.ownsApplicationResponder).toBe(true);
     expect(host.runtime.responders.inspect().registrations.filter(
       responder => responder.id === `application:${appId}`,
@@ -547,7 +547,7 @@ describe("opening more windows", () => {
     await documents.releaseDocument(document.id);
     host.unmountWindows();
     original.dispose("explicit");
-    const restored = ensureApplicationSession(host.runtime, host.runtime.apps.getApp(host.appId)!, {
+    const restored = ensureApplicationSession({ runtimeId: host.runtime.runtimeId, appId: host.appId }, {
       AppClass: Application, appName: "Class application", strictOwnership: true,
     });
     restored.prepareServices(host.runtime);

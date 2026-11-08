@@ -21,7 +21,6 @@
 import {
   SynCloudOSLifecycleRecord,
   synCloudOSLifecycleSignalReason,
-  runInOwnedExecutionContext,
   type SynCloudOSLifecycleDisposalReason,
 } from "../../SynCloudOS/nseRuntimeContracts";
 import {
@@ -29,13 +28,11 @@ import {
   journalNSEAcquisition,
   NSEOwnershipScope,
   registerOwnerScope,
-  getNSEScopeForSignal,
   resolveOwnership,
   takePendingSelf,
   type NSEControllerOwnershipOptions,
   type NSEOwnedObject,
 } from "../Controllers/ownership";
-import { inheritNSEExecutionContext } from "./ownedExecution";
 
 interface ObjectOwnership {
   readonly scope: NSEOwnershipScope;
@@ -118,33 +115,16 @@ export class NSEObjectLifetime {
       this.constructedByFramework = false;
       const owner = resolveOwnership(options, { kind, id });
       if (owner.scope) {
+        this.#leaveOwner = owner.scope.adopt(self);
         ownerScope = owner.scope;
       } else if (owner.signal) {
-        owner.signal.throwIfAborted();
-        ownerSignal = owner.signal;
+        const signal = owner.signal;
+        signal.throwIfAborted();
+        ownerSignal = signal;
+        const release = () => self[nseDisposeFor](synCloudOSLifecycleSignalReason(signal));
+        signal.addEventListener("abort", release, { once: true });
+        this.#leaveOwner = () => signal.removeEventListener("abort", release);
       }
-    }
-    // An arbitrary NSEOwner getter may supply teardown, but cannot issue authority.
-    // Only recorded owners or an explicitly supplied, recorded signal can do that.
-    const executionParent = pending?.ownerScope ?? ownerScope
-      ?? (options.ownerSignal ? getNSEScopeForSignal(options.ownerSignal) : undefined);
-    inheritNSEExecutionContext(this.scope, executionParent);
-    // Inheritance can reject a revoked mount while the structural owner is live.
-    // Validate it before retaining a not-yet-initialised object in an owner/listener.
-    if (!pending && ownerScope) this.#leaveOwner = ownerScope.adopt(self);
-    else if (!pending && ownerSignal) {
-      const signal = ownerSignal;
-      signal.throwIfAborted();
-      const recordedOwner = getNSEScopeForSignal(signal);
-      const release = () => {
-        try { self[nseDisposeFor](synCloudOSLifecycleSignalReason(signal)); }
-        catch (error) {
-          if (!recordedOwner) throw error;
-          runInOwnedExecutionContext(null, () => recordedOwner.reportResourceError(error));
-        }
-      };
-      signal.addEventListener("abort", release, { once: true });
-      this.#leaveOwner = () => signal.removeEventListener("abort", release);
     }
     this.#ownership = { scope: this.scope, ownerScope, ownerSignal };
     ownershipByObject.set(self, this.#ownership);

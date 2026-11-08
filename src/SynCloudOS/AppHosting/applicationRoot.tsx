@@ -22,7 +22,6 @@ import { useContext, useLayoutEffect, useSyncExternalStore, type ComponentType }
 import { SynCloudOSRuntimeContext, SynWareRuntimeContext } from "../../SynCloudOSReact";
 import { NSEControllerResponder, NSEWindowControllerView } from "./applicationHosting";
 import { ensureApplicationSession, type ApplicationSessionSource } from "./applicationSession";
-import { ApplicationHostRuntimeContext } from "./applicationHostRuntimeContext";
 
 /**
  * The root component of a class-based application. Every window the host
@@ -33,15 +32,14 @@ import { ApplicationHostRuntimeContext } from "./applicationHostRuntimeContext";
 export function createApplicationRoot(source: ApplicationSessionSource): ComponentType {
   function NSEApplicationRoot() {
     const appRuntime = useContext(SynWareRuntimeContext);
-    const publicKernel = useContext(SynCloudOSRuntimeContext);
-    const kernel = useContext(ApplicationHostRuntimeContext) ?? publicKernel;
-    if (!appRuntime || !kernel) throw new Error(`${source.appName} must render inside a mounted application runtime.`);
+    const kernel = useContext(SynCloudOSRuntimeContext);
+    if (!appRuntime) throw new Error(`${source.appName} must render inside a mounted application.`);
     const windows = appRuntime.windows;
     const snapshot = useSyncExternalStore(windows.subscribe, windows.getSnapshot, windows.getSnapshot);
     // A departing tree keeps rendering for a moment after the application closed; it must not start a new one.
     const session = appRuntime.signal.aborted
       ? null
-      : ensureApplicationSession(kernel, kernel.apps.getApp(appRuntime.app.bundleIdentifier)!, source);
+      : ensureApplicationSession({ runtimeId: appRuntime.id, appId: appRuntime.app.bundleIdentifier }, source);
     useLayoutEffect(() => session?.attachMount(windows, kernel), [session, windows, kernel]);
     const controller = session?.controllerFor(snapshot.surface === "window" ? snapshot.current : null) ?? null;
     if (!session || !controller) return null;

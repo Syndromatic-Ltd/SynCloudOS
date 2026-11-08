@@ -19,7 +19,6 @@
  */
 
 import type { SynWareDefinition } from "../AppSDK/runtimeContracts";
-import { runInOwnedExecutionContext } from "../ExecutionContext/ownedExecutionContext";
 
 export function isAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === "AbortError";
@@ -76,29 +75,6 @@ export function awaitCallerSignal<T>(value: Promise<T>, signal?: AbortSignal): P
 export interface DefinitionLifecycleContext {
   readonly signal: AbortSignal;
   assertCurrent(): void;
-  prepareBackground(): DefinitionBackgroundExecution;
-}
-
-export interface DefinitionBackgroundExecution {
-  run<T>(work: () => T): T;
-  task<T>(work: (signal: AbortSignal) => T | Promise<T>): Promise<T>;
-  dispose(): void;
-}
-
-/** Explicitly isolated loaders run pure declarations without application authority. */
-export function createUnownedDefinitionBackgroundExecution(signal: AbortSignal, assertCurrent: () => void): DefinitionBackgroundExecution {
-  return {
-    run(work) { assertCurrent(); return runInOwnedExecutionContext(null, work); },
-    async task(work) {
-      assertCurrent();
-      const lifetime = new AbortController();
-      const taskSignal = AbortSignal.any([signal, lifetime.signal]);
-      try {
-        return await awaitCurrentGeneration(Promise.resolve().then(() => runInOwnedExecutionContext(null, () => work(taskSignal))), taskSignal, assertCurrent);
-      } finally { lifetime.abort(); }
-    },
-    dispose() {},
-  };
 }
 
 /**
@@ -127,10 +103,13 @@ export async function runDefinitionLifecycle(
   if (tasks.length === 0 || !definition.createBackgroundHandler) return;
 
   context.assertCurrent();
-  const execution = context.prepareBackground();
-  try {
-    const handler = execution.run(() => definition.createBackgroundHandler!());
-    context.assertCurrent();
-    for (const taskId of tasks) await execution.task(signal => handler.handle(taskId, { signal }));
-  } finally { execution.dispose(); }
+  const handler = definition.createBackgroundHandler();
+  context.assertCurrent();
+  for (const taskId of tasks) {
+    await awaitCurrentGeneration(
+      Promise.resolve().then(() => handler.handle(taskId, { signal: context.signal })),
+      context.signal,
+      context.assertCurrent,
+    );
+  }
 }
