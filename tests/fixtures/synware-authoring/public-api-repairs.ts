@@ -21,6 +21,7 @@
 import {
   NSEObjectController, NSEDictionaryController, NSEArrayController, NSETreeController,
   NSETableCellView,
+  NSEPopover, type NSEPopoverProps,
   type ObjectControllerOptions, type DictionaryControllerOptions, type ControllerEditTransaction,
   type NSEControlValidation,
 } from "@syndromatic/syncloudos/nse";
@@ -39,6 +40,9 @@ void transactionForApp;
 function check(value: unknown, message: string): asserts value {
   if (!value) throw new Error(message);
 }
+
+const popoverContentSize: NSEPopoverProps["contentSize"] = { width: 300, height: 200 };
+check(typeof NSEPopover === "function" && popoverContentSize.width === 300, "Public NSPopover surface and content size");
 
 const context: NSEFormatterContext = { locale: "en-GB" };
 const formatter: NSEFormatter<number> = new NSENumberFormatter();

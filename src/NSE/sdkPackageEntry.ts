@@ -566,6 +566,10 @@ export {
 export {
   NSEPopup,
 } from "./Overlays/NSEPopup";
+/** NSPopover's anchored surface, positioning rectangle, behaviour and content size.
+ * Use presentAsPopover for the view-controller presentation's adaptive policy. */
+export { NSEPopover } from "./Overlays/NSEPopover";
+export type { NSEPopoverProps } from "./Overlays/NSEPopover";
 export { useNSEOverlayProvider } from "./Overlays/NSEOverlayProvider";
 export type {
   NSEPopupProps,

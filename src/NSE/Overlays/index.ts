@@ -34,6 +34,8 @@ export { useNSEOverlay } from "./useNSEOverlay";
 export type { UseNSEOverlayOptions, UseNSEOverlayResult } from "./useNSEOverlay";
 export { NSEPopup, useNSEPopupOpenState } from "./NSEPopup";
 export type { NSEPopupPresentation, NSEPopupProps } from "./NSEPopup";
+export { NSEPopover } from "./NSEPopover";
+export type { NSEPopoverProps } from "./NSEPopover";
 export { NSEUtilityPanel } from "./NSEUtilityPanel";
 export type { NSEUtilityPanelProps } from "./NSEUtilityPanel";
 export { NSEListboxPopup } from "./NSEListboxPopup";

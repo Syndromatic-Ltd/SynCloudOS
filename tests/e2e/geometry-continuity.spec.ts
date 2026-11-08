@@ -19,12 +19,16 @@ for (const reducedMotion of ["no-preference", "reduce"] as const) {
     await trigger.click();
     const popover = page.getByRole("dialog", { name: "Geometry continuity popover", exact: true });
     await expect(popover).toBeVisible();
-    const popoverId = await popover.getAttribute("data-window-id");
+    const popoverHost = popover.locator("xpath=ancestor::*[@data-window-host][1]");
+    await expect(popoverHost).toHaveAttribute("data-window-host", /.+/);
+    const popoverId = await popoverHost.getAttribute("data-window-host");
     const popoverDraft = popover.getByRole("textbox", { name: "Popover draft" });
     await popoverDraft.fill("Retain this popover");
     const popoverIdentity = await popoverDraft.elementHandle();
     const authority = page.getByTestId("geometry-authority");
     await expect(authority).toHaveText(JSON.stringify({ state: "current", safeArea: "unavailable" }));
+    // Measure settled geometry, rather than a frame of the opening spring.
+    await popover.evaluate(async element => { await Promise.all(element.getAnimations({ subtree: true }).map(animation => animation.finished)); });
     const beforeInvalid = await popover.boundingBox();
     const restore = await page.evaluateHandle(() => {
       const previous = Object.getOwnPropertyDescriptor(window, "innerHeight");
@@ -52,7 +56,8 @@ for (const reducedMotion of ["no-preference", "reduce"] as const) {
       { width: 1280, height: 900 },
     ]) {
       await page.setViewportSize(viewport);
-      await expect(popover).toHaveAttribute("data-window-id", popoverId!);
+      await expect(popoverHost).toHaveAttribute("data-window-host", popoverId!);
+      await expect(popover).toHaveAttribute("data-nse-presentation", viewport.width < 768 ? "sheet" : "anchored");
       await expect(draft).toHaveValue("Retain this unsaved document");
       await expect(popoverDraft).toHaveValue("Retain this popover");
       expect(await draft.evaluate((element, original) => element === original, draftIdentity)).toBe(true);
