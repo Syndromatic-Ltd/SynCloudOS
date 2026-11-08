@@ -22,6 +22,7 @@ import { CRFXSymmetricKey } from "../CRFXSymmetricKey";
 import { CRFXError } from "../CRFXError";
 import { copy, operation, provider, valueBytes } from "./bytes";
 export async function aesKey(key: CRFXSymmetricKey): Promise<CryptoKey> {
+  if (!(key instanceof CRFXSymmetricKey)) throw new CRFXError("invalidParameter", "Expected a symmetric key.");
   if (![128, 192, 256].includes(key.bitCount)) throw new CRFXError("incorrectKeySize");
   const bytes = copy(valueBytes(key));
   return operation(() => provider().subtle.importKey("raw", bytes, "AES-GCM", false, ["encrypt", "decrypt"]));

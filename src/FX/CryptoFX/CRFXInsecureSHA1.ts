@@ -21,7 +21,7 @@
 import { NSEData } from "../../Foundation/NSEData";
 import { CRFXInsecureSHA1Digest } from "./CRFXInsecureSHA1Digest";
 import type { CRFXHashFunction } from "./CRFXHashFunction";
-import { concat, copy, makeValue } from "./internal/bytes";
+import { concatCollection, copy, makeValue } from "./internal/bytes";
 import { digest, registerHash } from "./internal/hash";
 /** CryptoKit.Insecure.SHA1. Updates are buffered because the browser has no streaming hash operation. */
 export class CRFXInsecureSHA1 implements CRFXHashFunction<CRFXInsecureSHA1Digest> {
@@ -31,7 +31,7 @@ export class CRFXInsecureSHA1 implements CRFXHashFunction<CRFXInsecureSHA1Digest
   readonly #chunks: Uint8Array[] = [];
   update(data: NSEData): void { this.#chunks.push(copy(data)); }
   /** Browser-forced asynchronous counterpart of finalize(). */
-  finalize(): Promise<CRFXInsecureSHA1Digest> { return CRFXInsecureSHA1.hash(NSEData.from(concat(...this.#chunks))); }
+  finalize(): Promise<CRFXInsecureSHA1Digest> { return CRFXInsecureSHA1.hash(NSEData.from(concatCollection(this.#chunks))); }
   /** Browser-forced asynchronous counterpart of hash(data:). */
   static async hash(data: NSEData): Promise<CRFXInsecureSHA1Digest> { return makeValue(CRFXInsecureSHA1Digest, await digest(data, "SHA-1")); }
 }

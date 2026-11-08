@@ -21,7 +21,7 @@
 import { NSEData } from "../../Foundation/NSEData";
 import { CRFXSHA384Digest } from "./CRFXSHA384Digest";
 import type { CRFXHashFunction } from "./CRFXHashFunction";
-import { concat, copy, makeValue } from "./internal/bytes";
+import { concatCollection, copy, makeValue } from "./internal/bytes";
 import { digest, registerHash } from "./internal/hash";
 /** CryptoKit.SHA384. Updates are buffered because the browser has no streaming hash operation. */
 export class CRFXSHA384 implements CRFXHashFunction<CRFXSHA384Digest> {
@@ -31,7 +31,7 @@ export class CRFXSHA384 implements CRFXHashFunction<CRFXSHA384Digest> {
   readonly #chunks: Uint8Array[] = [];
   update(data: NSEData): void { this.#chunks.push(copy(data)); }
   /** Browser-forced asynchronous counterpart of finalize(). */
-  finalize(): Promise<CRFXSHA384Digest> { return CRFXSHA384.hash(NSEData.from(concat(...this.#chunks))); }
+  finalize(): Promise<CRFXSHA384Digest> { return CRFXSHA384.hash(NSEData.from(concatCollection(this.#chunks))); }
   /** Browser-forced asynchronous counterpart of hash(data:). */
   static async hash(data: NSEData): Promise<CRFXSHA384Digest> { return makeValue(CRFXSHA384Digest, await digest(data, "SHA-384")); }
 }

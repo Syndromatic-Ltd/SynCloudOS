@@ -27,6 +27,9 @@ export function copy(data: NSEData): Uint8Array<ArrayBuffer> {
   return new Uint8Array(data.bytes);
 }
 export function concat(...parts: readonly Uint8Array[]): Uint8Array<ArrayBuffer> {
+  return concatCollection(parts);
+}
+export function concatCollection(parts: readonly Uint8Array[]): Uint8Array<ArrayBuffer> {
   const result = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
   let offset = 0; for (const part of parts) { result.set(part, offset); offset += part.length; }
   return result;

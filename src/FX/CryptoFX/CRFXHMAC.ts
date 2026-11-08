@@ -21,10 +21,10 @@
 import { NSEData } from "../../Foundation/NSEData";
 import { CRFXSymmetricKey } from "./CRFXSymmetricKey";
 import { CRFXHashedAuthenticationCode } from "./CRFXHashedAuthenticationCode";
-import { concat, copy, makeValue, operation, provider, valueBytes } from "./internal/bytes";
-import { hashAlgorithm, type HashType } from "./internal/hash";
+import { concatCollection, copy, makeValue, operation, provider, valueBytes } from "./internal/bytes";
+import { hashAlgorithm, registerAuthenticationCodeHash, type HashType } from "./internal/hash";
 
-/** CryptoKit.HMAC<H>. CRFXHMAC(Hash) is TypeScript's runtime generic specialization. */
+/** CryptoKit.HMAC<H>. CRFXHMAC(Hash) is TypeScript's runtime generic specialisation. */
 export function CRFXHMAC(Hash: HashType): {
   new(key: CRFXSymmetricKey): {
     update(data: NSEData): void;
@@ -43,14 +43,16 @@ export function CRFXHMAC(Hash: HashType): {
     constructor(key: CRFXSymmetricKey) { this.#key = new CRFXSymmetricKey(valueBytes(key)); }
     update(data: NSEData): void { this.#chunks.push(copy(data)); }
     /** Browser-forced asynchronous counterpart of finalize(). */
-    finalize(): Promise<CRFXHashedAuthenticationCode> { return HMAC.authenticationCode(NSEData.from(concat(...this.#chunks)), this.#key); }
+    finalize(): Promise<CRFXHashedAuthenticationCode> { return HMAC.authenticationCode(NSEData.from(concatCollection(this.#chunks)), this.#key); }
     /** Browser-forced asynchronous counterpart of authenticationCode(for:using:). */
     static authenticationCode(data: NSEData, key: CRFXSymmetricKey): Promise<CRFXHashedAuthenticationCode> {
       const input = copy(data), keyBytes = copy(valueBytes(key));
       return operation(async () => {
         // WebCrypto rejects an empty HMAC key; one all-zero block is the same HMAC key.
         const imported = await provider().subtle.importKey("raw", keyBytes.length ? keyBytes : new Uint8Array(Hash.blockByteCount), { name: "HMAC", hash: algorithm }, false, ["sign"]);
-        return makeValue(CRFXHashedAuthenticationCode, NSEData.from(await provider().subtle.sign("HMAC", imported, input)));
+        const value = makeValue(CRFXHashedAuthenticationCode, NSEData.from(await provider().subtle.sign("HMAC", imported, input)));
+        registerAuthenticationCodeHash(value, Hash);
+        return value;
       });
     }
     /** Browser-forced asynchronous counterpart of isValidAuthenticationCode(_:authenticating:using:). */

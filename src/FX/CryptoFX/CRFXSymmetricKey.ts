@@ -20,10 +20,17 @@
 
 import { NSEData } from "../../Foundation/NSEData";
 import { CRFXSymmetricKeySize } from "./CRFXSymmetricKeySize";
-import { compareValues, copy, random, storeBytes, valueBytes } from "./internal/bytes";
+import { compareValues, copy, random, storeBytes, unsupported, valueBytes } from "./internal/bytes";
 /** CryptoKit.SymmetricKey. RawSpan/ContiguousBytes use immutable NSEData. */
 export class CRFXSymmetricKey {
-  constructor(dataOrSize: NSEData | CRFXSymmetricKeySize) {
+  constructor(dataOrSize: NSEData | CRFXSymmetricKeySize);
+  /** init(copyingWithZeroing:). Immutable NSEData cannot be zeroed; throws CRFXError.underlyingCoreCryptoError. */
+  constructor(input: { copyingWithZeroing: NSEData });
+  /** init(size:initializingWith:). No mutable output span exists; throws CRFXError.underlyingCoreCryptoError without invoking the callback. */
+  constructor(size: CRFXSymmetricKeySize, initializingWith: (output: NSEData) => void);
+  constructor(dataOrSize: NSEData | CRFXSymmetricKeySize | { copyingWithZeroing: NSEData }, initializingWith?: (output: NSEData) => void) {
+    if (initializingWith !== undefined) unsupported("Immutable NSEData cannot initialise an output span.");
+    if (dataOrSize && typeof dataOrSize === "object" && "copyingWithZeroing" in dataOrSize) unsupported("Immutable NSEData cannot promise source-byte zeroing.");
     const data = dataOrSize instanceof CRFXSymmetricKeySize ? random(dataOrSize.bitCount / 8) : NSEData.from(copy(dataOrSize));
     storeBytes(this, data); Object.freeze(this);
   }

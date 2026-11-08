@@ -25,7 +25,7 @@ import { compareValues, hex, valueBytes } from "./internal/bytes";
 export class CRFXInsecureMD5Digest implements CRFXDigest {
   private constructor() {}
   static readonly byteCount = 16;
-  get description(): string { return "InsecureMD5Digest: " + hex(valueBytes(this).bytes); }
+  get description(): string { return "MD5 digest: " + hex(valueBytes(this).bytes); }
   withUnsafeBytes<T>(body: (bytes: NSEData) => T): T { return body(valueBytes(this)); }
   [Symbol.iterator](): IterableIterator<number> { return valueBytes(this).bytes[Symbol.iterator](); }
   static ["=="](lhs: CRFXInsecureMD5Digest, rhs: CRFXInsecureMD5Digest | NSEData): boolean { return compareValues(lhs, rhs); }

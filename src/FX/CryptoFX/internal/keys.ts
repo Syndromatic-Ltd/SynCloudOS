@@ -23,7 +23,7 @@ import type { CRFXDigest } from "../CRFXDigest";
 import { CRFXSharedSecret } from "../CRFXSharedSecret";
 import { CRFXError } from "../CRFXError";
 import { concat, copy, makeValue, operation, provider, unhex, unsupported } from "./bytes";
-import { der, fromBase64url, parseDer, parsePem, pem, sequence } from "./encoding";
+import { canonicalDer, der, derSequence, fromBase64url, parseDer, parsePem, pem, sequence } from "./encoding";
 import { compactable, curves, uncompress, type Curve } from "./curves";
 
 type Representation = "rawRepresentation" | "x963Representation" | "compressedRepresentation" | "compactRepresentation" | "derRepresentation" | "pemRepresentation";
@@ -48,12 +48,39 @@ function ecAlgorithmIdentifier(curve: Curve): Uint8Array<ArrayBuffer> { return s
 function wrapScalar(bytes: Uint8Array, curve: Curve): Uint8Array<ArrayBuffer> {
   return sequence(unhex("020100"), ecAlgorithmIdentifier(curve), der(4, sequence(unhex("020101"), der(4, bytes))));
 }
+function requireEncoding(condition: boolean): void { if (!condition) throw new CRFXError("invalidParameter", "Invalid key DER encoding."); }
+function hasEncoding(node: ReturnType<typeof parseDer> | undefined, expected: Uint8Array): boolean {
+  if (!node) return false;
+  const encoded = der(node.tag, node.bytes);
+  // These comparisons inspect public algorithm/version metadata, never secret key bytes.
+  return encoded.length === expected.length && encoded.every((byte, index) => byte === expected[index]);
+}
+function validateSec1(bytes: Uint8Array, curve: Curve): void {
+  const parts = derSequence(bytes);
+  requireEncoding(hasEncoding(parts[0], unhex("020101")) && parts[1]?.tag === 4);
+  let index = 2;
+  if (parts[index]?.tag === 0xa0) requireEncoding(hasEncoding(canonicalDer(parts[index++].bytes), unhex(curves[curve].oid)));
+  if (parts[index]?.tag === 0xa1) {
+    const publicKey = canonicalDer(parts[index++].bytes);
+    requireEncoding(publicKey.tag === 3 && publicKey.bytes[0] === 0);
+  }
+  requireEncoding(index === parts.length);
+}
 function ensurePkcs8(bytes: Uint8Array, curve: Curve): Uint8Array<ArrayBuffer> {
-  const top = parseDer(bytes);
-  if (top.tag !== 0x30 || top.end !== bytes.length) throw new CRFXError("invalidParameter");
-  const version = parseDer(top.bytes), second = parseDer(top.bytes, version.end);
-  // CryptoKit accepts both SEC1 and PKCS8; WebCrypto accepts PKCS8 only.
-  return second.tag === 4 ? sequence(unhex("020100"), ecAlgorithmIdentifier(curve), der(4, bytes)) : new Uint8Array(bytes);
+  const parts = derSequence(bytes);
+  // CryptoKit accepts both SEC1 and PKCS8; each nested encoding must be consumed completely.
+  if (parts[1]?.tag === 4) {
+    validateSec1(bytes, curve);
+    return sequence(unhex("020100"), ecAlgorithmIdentifier(curve), der(4, bytes));
+  }
+  requireEncoding(hasEncoding(parts[0], unhex("020100")) && hasEncoding(parts[1], ecAlgorithmIdentifier(curve)) && parts[2]?.tag === 4);
+  requireEncoding(parts.length === 3 || (parts.length === 4 && parts[3].tag === 0xa0));
+  validateSec1(parts[2].bytes, curve);
+  return new Uint8Array(bytes);
+}
+function validateSpki(bytes: Uint8Array, curve: Curve): void {
+  const parts = derSequence(bytes);
+  requireEncoding(parts.length === 2 && hasEncoding(parts[0], ecAlgorithmIdentifier(curve)) && parts[1].tag === 3 && parts[1].bytes[0] === 0);
 }
 async function publicFromPrivate(key: CryptoKey, curve: State["curve"], kind: Kind): Promise<CryptoKey> {
   const jwk = await provider().subtle.exportKey("jwk", key);
@@ -112,6 +139,7 @@ export function initPublic(value: object, curve: State["curve"], kind: Kind, inp
     const alg = algorithm(curve, kind), usage: KeyUsage[] = kind === "signing" ? ["verify"] : [];
     if (format === "derRepresentation" || format === "pemRepresentation") {
       if (curve === "Curve25519") throw new CRFXError("invalidParameter");
+      validateSpki(bytes, curve);
       return provider().subtle.importKey("spki", bytes, alg, true, usage);
     }
     if (curve === "Curve25519") {

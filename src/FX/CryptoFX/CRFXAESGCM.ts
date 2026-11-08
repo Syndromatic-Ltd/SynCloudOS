@@ -23,13 +23,17 @@ import { CRFXSymmetricKey } from "./CRFXSymmetricKey";
 import { CRFXAESGCMNonce } from "./CRFXAESGCMNonce";
 import { CRFXAESGCMSealedBox } from "./CRFXAESGCMSealedBox";
 import { CRFXError } from "./CRFXError";
-import { concat, copy, empty, operation, provider, valueBytes } from "./internal/bytes";
+import { concat, copy, empty, operation, provider, unsupported, valueBytes } from "./internal/bytes";
 import { aesKey } from "./internal/aes";
 /** CryptoKit.AES.GCM. */
 export class CRFXAESGCM {
   private constructor() {}
   static readonly Nonce = CRFXAESGCMNonce;
   static readonly SealedBox = CRFXAESGCMSealedBox;
+  /** seal(inPlace:using:nonce:authenticating:tag:). Async backend boundary; immutable NSEData mutation fails with CRFXError.underlyingCoreCryptoError. */
+  static async sealInPlace(_message: NSEData, _key: CRFXSymmetricKey, _nonce: CRFXAESGCMNonce, _authenticating: NSEData | null, _tag: NSEData): Promise<void> { unsupported("Immutable NSEData cannot be sealed in place or receive an output tag."); }
+  /** open(inPlace:using:nonce:authenticating:tag:). Async backend boundary; immutable NSEData mutation fails with CRFXError.underlyingCoreCryptoError. */
+  static async openInPlace(_message: NSEData, _key: CRFXSymmetricKey, _nonce: CRFXAESGCMNonce, _authenticating: NSEData | null, _tag: NSEData): Promise<void> { unsupported("Immutable NSEData cannot be opened in place."); }
   /** Browser-forced asynchronous seal(_:using:nonce:authenticating:). */
   static async seal(data: NSEData, key: CRFXSymmetricKey, nonce: CRFXAESGCMNonce | null = null, authenticating: NSEData = empty()): Promise<CRFXAESGCMSealedBox> {
     const input = copy(data), selectedNonce = nonce ?? new CRFXAESGCMNonce();
