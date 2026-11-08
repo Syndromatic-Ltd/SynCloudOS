@@ -11,12 +11,15 @@ import { DFXQueueAutoreleaseFrequency } from "./DFXQueueAutoreleaseFrequency";
 import type { DFXSpecificKey } from "./DFXSpecificKey";
 import { DFXWorkItemFlags } from "./DFXWorkItemFlags";
 import { DFXWorkItem } from "./DFXWorkItem";
+import { DFXTime } from "./DFXTime";
+import { DFXWallTime } from "./DFXWallTime";
 import { currentExecution } from "./internal/executionStack";
 import { enterGroup, groupState, leaveGroup } from "./internal/groupState";
 import { objectState, queueChain, resolveQoS } from "./internal/queueState";
 import { rootScheduler } from "./internal/rootScheduler";
 import { assertSyncAvailable } from "./internal/sync";
 import { checkedInteger, clientError } from "./internal/time";
+import { scheduleTimer } from "./internal/timerWheel";
 import { executeSyncWork, executeWork, prepareWork, type DFXWork, type DFXIterationWork } from "./internal/work";
 import { performWorkItem, workItemState } from "./internal/workItemState";
 
@@ -92,6 +95,25 @@ export class DFXQueue extends DFXObject {
     groupData?.jobs.add(job); itemData?.jobs.add(job);
     try { rootScheduler.submit(job); }
     catch (error) { itemData?.jobs.delete(job); groupData?.jobs.delete(job); if (group != null) leaveGroup(group); throw error; }
+  }
+  asyncAfter(deadline: DFXTime | DFXWallTime, execute: DFXWorkItem): void;
+  asyncAfter<R>(deadline: DFXTime | DFXWallTime, execute: DFXWork<R>): void;
+  asyncAfter<R>(deadline: DFXTime | DFXWallTime, options: { qos?: DFXQoS; flags?: DFXWorkItemFlags[] }, execute: DFXWork<R>): void;
+  asyncAfter<R>(deadline: DFXTime | DFXWallTime, optionsOrWork: DFXWorkItem | DFXWork<R> | { qos?: DFXQoS; flags?: DFXWorkItemFlags[] }, execute?: DFXWork<R>): void {
+    const item = optionsOrWork instanceof DFXWorkItem ? optionsOrWork : typeof optionsOrWork === "function" ? new DFXWorkItem(optionsOrWork) : new DFXWorkItem(optionsOrWork, execute!);
+    const state = workItemState(item); const flags = [...state.flags];
+    const captured = state.creationQoS ?? currentExecution()?.qos ?? DFXQoS.unspecified;
+    const prepared = prepareWork(state.work, this.label);
+    scheduleTimer(deadline, 0, false, () => {
+      const job = {
+        queue: this, qos: resolveQoS(queueChain(this), state.qos, captured, flags), appId: null,
+        barrier: !objectState(this).global && flags.includes(DFXWorkItemFlags.barrier),
+        resolveQoS: (chain: readonly DFXQueue[]) => resolveQoS(chain, state.qos, captured, flags),
+        run: () => { try { performWorkItem(item, prepared); } finally { state.jobs.delete(job); } },
+      };
+      state.jobs.add(job);
+      try { rootScheduler.submit(job); } catch (error) { state.jobs.delete(job); throw error; }
+    });
   }
   sync(item: DFXWorkItem): void;
   sync<R>(work: DFXWork<R>): R;
