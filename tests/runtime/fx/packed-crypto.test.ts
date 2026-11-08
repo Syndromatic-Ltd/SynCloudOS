@@ -68,7 +68,21 @@ check(await publicKey.isValidSignature(new C.CRFXP256.Signing.ECDSASignature({ d
 const trailing = NSEData.from(new Uint8Array([...(await signing.publicKey.derRepresentation).bytes, 0]));
 try { await new C.CRFXP256.Signing.PublicKey({ derRepresentation: trailing }).rawRepresentation; throw new Error("Accepted trailing DER"); }
 catch (error) { check(error instanceof C.CRFXError && error.code === "invalidParameter"); }
+let nested = new Uint8Array([5, 0]);
+for (let i = 1; i < 11; i++) nested = new Uint8Array([0x30, nested.length, ...nested]);
+for (const [Key, label] of [[C.CRFXP256.Signing.PublicKey, "PUBLIC KEY"], [C.CRFXP256.Signing.PrivateKey, "PRIVATE KEY"]] as const) {
+  for (const representation of [{ derRepresentation: NSEData.from(nested) }, { pemRepresentation: "-----BEGIN " + label + "-----\\n" + NSEData.from(nested).base64EncodedString() + "\\n-----END " + label + "-----" }]) {
+    try { await new Key(representation).rawRepresentation; throw new Error("Accepted excessive DER nesting"); }
+    catch (error) { check(error instanceof C.CRFXError && error.code === "invalidParameter" && error.message === "DER nesting exceeds the maximum depth of 10."); }
+  }
+}
 const a = new C.CRFXCurve25519.KeyAgreement.PrivateKey(), b = new C.CRFXCurve25519.KeyAgreement.PrivateKey();
+for (const [Curve, width] of [[C.CRFXP256, 32], [C.CRFXP384, 48], [C.CRFXP521, 66]] as const) {
+  const scalar = new Uint8Array(width); scalar[width - 1] = 1;
+  const key = new Curve.Signing.PrivateKey({ rawRepresentation: NSEData.from(scalar) });
+  check((await key.rawRepresentation).isEqual(NSEData.from(scalar)));
+  check((await key.x963Representation).isEqual(NSEData.from(new Uint8Array([...(await key.publicKey.x963Representation).bytes, ...scalar]))));
+}
 const secret = await a.sharedSecretFromKeyAgreement(b.publicKey);
 check(C.CRFXSharedSecret["=="](secret, await b.sharedSecretFromKeyAgreement(a.publicKey)));
 check((await secret.x963DerivedSymmetricKey(C.CRFXSHA256, input, 32)).bitCount === 256);

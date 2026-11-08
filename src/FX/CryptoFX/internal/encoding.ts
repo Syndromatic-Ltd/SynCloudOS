@@ -45,13 +45,15 @@ export function parseDer(bytes: Uint8Array, offset = 0): { tag: number; bytes: U
 export function canonicalDer(bytes: Uint8Array): ReturnType<typeof parseDer> {
   const root = parseDer(bytes);
   if (root.end !== bytes.length) throw new CRFXError("invalidParameter", "Trailing DER data.");
-  const pending = [root];
+  const pending = [{ node: root, depth: 1 }];
   while (pending.length) {
-    const node = pending.pop()!, value = node.bytes;
+    const { node, depth } = pending.pop()!, value = node.bytes;
     if (node.tag === 0 || (node.tag & 31) === 31) throw new CRFXError("invalidParameter", "Invalid DER tag.");
     if (node.tag & 32) {
+      // Apple counts the root as depth 1. Reject depth 11 before parseDer can copy its subtree.
+      if (depth >= 10 && value.length) throw new CRFXError("invalidParameter", "DER nesting exceeds the maximum depth of 10.");
       for (let offset = 0; offset < value.length;) {
-        const child = parseDer(value, offset); pending.push(child); offset = child.end;
+        const child = parseDer(value, offset); pending.push({ node: child, depth: depth + 1 }); offset = child.end;
       }
     } else if (node.tag === 2) {
       if (!value.length || (value.length > 1 && ((value[0] === 0 && !(value[1] & 128)) || (value[0] === 255 && (value[1] & 128))))) throw new CRFXError("invalidParameter", "Noncanonical DER integer.");
