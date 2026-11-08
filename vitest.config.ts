@@ -42,6 +42,7 @@ export default defineConfig({
       "tests/nse/**/*.test.{ts,tsx}",
       "tests/integration/**/*.test.{ts,tsx}",
       "tests/runtime/**/*.test.{ts,tsx}",
+      "src/FX/DispatchFX/__tests__/**/*.test.ts",
       "tests/performance/**/*.test.{ts,tsx}",
       "tests/decoupling/**/*.test.{ts,tsx}",
     ],

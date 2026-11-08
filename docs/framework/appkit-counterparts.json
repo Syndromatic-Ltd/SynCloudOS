@@ -46,6 +46,19 @@
     "CRFXAES.GCM.open": "AES.GCM.open(_:using:authenticating:)"
   },
   "frameworkCounterparts": {
+    "DFXTime": "DispatchTime",
+    "DFXWallTime": "DispatchWallTime",
+    "DFXTimeInterval": "DispatchTimeInterval",
+    "DFXTimeoutResult": "DispatchTimeoutResult",
+    "DFXQoS": "DispatchQoS",
+    "DFXQoSClass": "DispatchQoS.QoSClass",
+    "DFXQueueAttributes": "DispatchQueue.Attributes",
+    "DFXQueueAutoreleaseFrequency": "DispatchQueue.AutoreleaseFrequency",
+    "DFXWorkItemFlags": "DispatchWorkItemFlags",
+    "DFXSpecificKey": "DispatchSpecificKey",
+    "DFXSourceTimerFlags": "DispatchSource.TimerFlags",
+    "DFXSourceMemoryPressureEvent": "DispatchSource.MemoryPressureEvent",
+
     "CPFXAlgorithm": "Algorithm",
     "CPFXFilterOperation": "FilterOperation",
     "CPFXFilterError": "FilterError",
