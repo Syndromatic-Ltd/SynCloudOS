@@ -360,7 +360,7 @@ const bundleLoader = {
           definition = captureLazySynWareDefinition(module, bundle);
           await runDefinitionLifecycle(definition, { signal, assertCurrent,
             prepareBackground: () => {
-              return kernel ? prepareDefinitionBackgroundExecution(kernel, bundle, signal, assertCurrent)
+              return kernel ? prepareDefinitionBackgroundExecution(kernel, bundle, signal, assertCurrent, reason => controller.abort(reason))
                 : createUnownedDefinitionBackgroundExecution(signal, assertCurrent);
             },
           });

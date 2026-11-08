@@ -504,6 +504,96 @@ describe("BundleLoader definition execution", () => {
     expect(app.isDisposed).toBe(true);
     expect(releases).toBe(1);
   });
+
+  it.each([
+    ["manager replacement", "resolve"], ["manager replacement", "reject"],
+    ["accepted close", "resolve"], ["accepted close", "reject"],
+  ] as const)("retires a held background load on %s before its handler can %s late", async (retirement, lateSettlement) => {
+    const entered = Promise.withResolvers<void>();
+    const held = Promise.withResolvers<void>();
+    let app!: App;
+    let taskSignal!: AbortSignal;
+    let releases = 0, disposals = 0;
+    class App extends NSEApplication {
+      device = new TestDevice();
+      resource = this.own(() => ({ dispose() { releases++; } }));
+      constructor() { super(); app = this; this.onDispose(() => { disposals++; }); }
+      override async handleBackgroundTask(_taskId: string, context: { readonly signal: AbortSignal }) {
+        taskSignal = context.signal;
+        entered.resolve();
+        await held.promise;
+      }
+    }
+    const runtime = authoriseTestRuntime(createTestRuntime());
+    runtimes.push(runtime);
+    registerTestSynWare(runtime, createSynWareDefinitionFromApplicationClass(App, {
+      schemaVersion: 1, bundleIdentifier: appId, displayName: "Retired background", version: "1.0.0",
+      background: { enabled: true, tasks: [`${appId}.refresh`] },
+    }));
+    const published: string[] = [];
+    const stop = runtime.events.subscribe("bundle.load.complete", () => { published.push("loaded"); });
+    const states: string[] = [];
+    const stopStates = runtime.store.subscribe(() => { states.push(runtime.lifecycle.getState(appId)); });
+    let outcome: "pending" | "resolved" | "rejected" = "pending";
+    let error: unknown;
+    // A full close request is not admitted during getReady's loading state;
+    // direct BundleLoader work retains the registered lifecycle state.
+    const loading = retirement === "manager replacement"
+      ? runtime.appManager.getManagerForApp(appId)!.getReady()
+      : runtime.bundles.loadBundle(appId);
+    const ready = loading.then(
+      () => { outcome = "resolved"; }, reason => { outcome = "rejected"; error = reason; },
+    );
+    await entered.promise;
+    if (retirement === "manager replacement") runtime.appManager.createManagerForApp(runtime.apps.getApp(appId)!, { replace: true });
+    else expect(await runtime.lifecycle.close(appId).result).toMatchObject({ committed: true });
+    try {
+      // The old handler is still pending here: retirement must not await it.
+      expect(app.device.signal.aborted).toBe(true);
+      expect(taskSignal.aborted).toBe(true);
+      expect(app.isDisposed).toBe(true);
+      expect(releases).toBe(1);
+      expect(disposals).toBe(1);
+      expect(runtime.responders.inspect().registrations.filter(entry => entry.id.includes(":definition-task:"))).toHaveLength(0);
+      await vi.waitFor(() => { expect(outcome).toBe("rejected"); }, { timeout: 500, interval: 5 });
+      expect(error).toMatchObject({ name: "AbortError" });
+      expect(runtime.bundles.getLoadedBundle(appId)).toBeNull();
+      if (lateSettlement === "resolve") held.resolve();
+      else held.reject(new Error("late retired handler rejection"));
+      await held.promise.catch(() => {});
+      await ready;
+      await Promise.resolve();
+      expect(outcome).toBe("rejected");
+      expect(runtime.bundles.getLoadedBundle(appId)).toBeNull();
+      expect(runtime.lifecycle.getState(appId)).not.toBe("ready");
+      expect(states).not.toContain("ready");
+      expect(published).toEqual([]);
+      expect(releases).toBe(1);
+      expect(disposals).toBe(1);
+    } finally { stop(); stopStates(); held.resolve(); await ready; }
+  });
+
+  it("rejects load publication when the background owner retires during final task cleanup", async () => {
+    const runtime = authoriseTestRuntime(createTestRuntime());
+    runtimes.push(runtime);
+    let taskRuns = 0;
+    registerTestSynWare(runtime, createSynWare({ manifest: {
+      schemaVersion: 1, bundleIdentifier: appId, displayName: "Final cleanup retirement", version: "1.0.0",
+      background: { enabled: true, tasks: [`${appId}.refresh`] },
+    }, root: () => null, createBackgroundHandler() {
+      return { handle(_taskId, context) {
+        taskRuns++;
+        context.signal.addEventListener("abort", () => {
+          runtime.appManager.createManagerForApp(runtime.apps.getApp(appId)!, { replace: true });
+        }, { once: true });
+      } };
+    } }));
+    await expect(runtime.appManager.getManagerForApp(appId)!.getReady()).rejects.toMatchObject({ name: "AbortError" });
+    expect(taskRuns).toBe(1);
+    expect(runtime.bundles.getLoadedBundle(appId)).toBeNull();
+    expect(runtime.lifecycle.getState(appId)).not.toBe("ready");
+    expect(runtime.responders.inspect().registrations.filter(entry => entry.id.includes(":definition-task:"))).toHaveLength(0);
+  });
 });
 
 it("renders through createSynWareTestHost with exact class authority while the public kernel remains hidden", async () => {

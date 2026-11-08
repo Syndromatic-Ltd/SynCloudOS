@@ -6,7 +6,7 @@ import type { ApplicationProcessAuthority } from "../AppSDK/applicationProcessAu
 import type { OwnedExecutionContext } from "../nseRuntimeContracts";
 import type { ResponderRegistrationHandle } from "../SynCloudOS";
 import { assertApplicationProcessAdmission, createBackgroundApplicationProcess } from "../AppSDK/applicationProcessAuthority";
-import { narrowOwnedExecutionContext, runInOwnedExecutionContext } from "../nseRuntimeContracts";
+import { assertOwnedExecutionContextLive, narrowOwnedExecutionContext, ownedExecutionContextSignal, runInOwnedExecutionContext } from "../nseRuntimeContracts";
 import { awaitCurrentGeneration, type DefinitionBackgroundExecution } from "../BundleLoader/definitionLifecycle";
 import type { TrustedSynWareBundle } from "../SynCloudOS";
 
@@ -20,7 +20,7 @@ export interface PreparedApplicationServices {
 let backgroundSequence = 0;
 /** BundleLoader supplies the exact bundle/load, never a foreground session lookup. */
 export function prepareDefinitionBackgroundExecution(runtime: SynCloudOSRuntime, bundle: TrustedSynWareBundle,
-  loadSignal: AbortSignal, assertCurrent: () => void): DefinitionBackgroundExecution {
+  loadSignal: AbortSignal, assertCurrent: () => void, revokeLoad: (reason: unknown) => void): DefinitionBackgroundExecution {
   assertCurrent();
   const app = runtime.apps.getApp(bundle.manifest.bundleIdentifier);
   if (!app) throw new TypeError("Background work requires its registered application.");
@@ -30,17 +30,25 @@ export function prepareDefinitionBackgroundExecution(runtime: SynCloudOSRuntime,
   let prepared: PreparedApplicationServices;
   try { prepared = prepareApplicationServices(runtime, app, `controller:${app.bundleIdentifier}:definition-task:${++backgroundSequence}`, membership.process); }
   catch (error) { lifetime.abort(error); membership.release(error); throw error; }
+  let ownerSignal: AbortSignal;
+  try { ownerSignal = ownedExecutionContextSignal(prepared.execution); }
+  catch (error) { lifetime.abort(error); prepared.dispose(error); membership.release(error); throw error; }
   let disposed = false;
   const dispose = () => {
     if (disposed) return;
     disposed = true;
-    signal.removeEventListener("abort", dispose);
+    ownerSignal.removeEventListener("abort", retireLoad);
     lifetime.abort();
     prepared.dispose();
     membership.release();
   };
-  signal.addEventListener("abort", dispose, { once: true });
-  if (signal.aborted) dispose();
+  const retireLoad = () => {
+    // External mount/process retirement invalidates this exact load's final
+    // publication too. Ordinary dispose removes this listener before aborting.
+    try { revokeLoad(ownerSignal.reason); } finally { dispose(); }
+  };
+  ownerSignal.addEventListener("abort", retireLoad, { once: true });
+  if (ownerSignal.aborted) retireLoad();
   return {
     run: work => runInOwnedExecutionContext(prepared.execution, work),
     async task(work) {
@@ -52,9 +60,12 @@ export function prepareDefinitionBackgroundExecution(runtime: SynCloudOSRuntime,
         reportResourceError: applicationResourceErrorReporter(runtime, app.bundleIdentifier),
         registerResource(_resource, cleanup) { resources.add(cleanup); return () => { resources.delete(cleanup); }; },
       });
-      const taskSignal = AbortSignal.any([signal, taskLifetime.signal]);
+      const taskSignal = ownedExecutionContextSignal(task);
       try {
-        return await awaitCurrentGeneration(Promise.resolve().then(() => runInOwnedExecutionContext(task, () => work(taskSignal))), taskSignal, assertCurrent);
+        return await awaitCurrentGeneration(Promise.resolve().then(() => runInOwnedExecutionContext(task, () => work(taskSignal))), taskSignal, () => {
+          assertCurrent();
+          assertOwnedExecutionContextLive(task);
+        });
       } finally { taskLifetime.abort(); }
     },
     dispose,
