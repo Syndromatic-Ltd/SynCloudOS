@@ -66,15 +66,16 @@ CompressionFX is also a direct library: its input/output filters use read/write 
 | `useVideo` | Capture, decode, encode | `video.capture.camera` and related |
 | `useMIDI` | MIDI access | `midi.access` |
 | `useBluetooth` | Central manager | `bluetooth.access` |
-| `useNFC` | NDEF session factory | `nfc.read`, `nfc.write` |
+| `useNFC` | Real component-owned `NFXNDEFReaderSession` | `nfc.read`, `nfc.write` |
 | `useSpeech` | Recognizer | `speech.recognize` |
 | `useContacts` | Real CNFXContactStore; selection via NSE-presented picker | `contacts.select` |
 | `usePayment(request)` | Real component-owned `PKFXPaymentAuthorizationController` | `payment.request` |
 | `useXR` | Component-owned `XRFXSession` | `xr.session` |
 | `useLocation` | Location manager | `location.read`, `location.request` |
 | `useLumina` | Search index | `lumina.query` |
+| `useNetwork` | Component-owned `NWFXPathMonitor` | `network.read` |
 
-Declare the permissions an application needs in its manifest `permissions` list. A denied capability arrives as an ordinary result the application can explain to the user.
+Declare the permissions an application needs in its manifest `entitlements` list. A denied capability arrives as an ordinary result the application can explain to the user.
 
 ## Shared conventions
 

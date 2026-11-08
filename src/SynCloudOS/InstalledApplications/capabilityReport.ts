@@ -39,17 +39,30 @@ export async function systemCapabilityReport(runtime: SynCloudOSRuntime): Promis
     ["ContactsFX", contactsAdapterFor(environment)], ["PassFX", paymentAdapterFor(environment)], ["XRFX", xrAdapterFor(environment)],
   ];
   const rows = await Promise.all(families.map(async ([family, candidate]): Promise<SystemCapabilityRow> => {
-    if (family === "XRFX") return { family, query: "ARWorldTrackingConfiguration.isSupported", value: String(await xrAdapterFor(environment)?.isSupported("world") ?? false) };
-    if (family === "BluetoothFX") return { family, query: "CBManager.state", value: bluetoothAdapterFor(environment)?.state ?? "unsupported" };
-    if (family === "NFCFX") return { family, query: "NFCNDEFReaderSession.readingAvailable", value: String(nfcAdapterFor(environment)?.readingAvailable ?? false) };
-    if (family === "PassFX") return { family, query: "PKPaymentAuthorizationController.canMakePayments()", value: String(paymentAdapterFor(environment)?.canMakePayments() ?? false) };
-    if (!candidate) return { family, query: "No passive host query", value: "Not reported" };
-    const source = candidate as { getCapabilities?(): unknown; capabilities?: unknown };
+    let query = "Capability query";
     try {
-      const query = typeof source.getCapabilities === "function" ? "getCapabilities()" : typeof source.capabilities === "function" ? "capabilities()" : source.capabilities !== undefined ? "capabilities" : "No passive host query";
+      if (family === "XRFX") {
+        query = "ARWorldTrackingConfiguration.isSupported";
+        return { family, query, value: String(await xrAdapterFor(environment)?.isSupported("world") ?? false) };
+      }
+      if (family === "BluetoothFX") {
+        query = "CBManager.state";
+        return { family, query, value: bluetoothAdapterFor(environment)?.state ?? "unsupported" };
+      }
+      if (family === "NFCFX") {
+        query = "NFCNDEFReaderSession.readingAvailable";
+        return { family, query, value: String(nfcAdapterFor(environment)?.readingAvailable ?? false) };
+      }
+      if (family === "PassFX") {
+        query = "PKPaymentAuthorizationController.canMakePayments()";
+        return { family, query, value: String(paymentAdapterFor(environment)?.canMakePayments() ?? false) };
+      }
+      if (!candidate) return { family, query: "No passive host query", value: "Not reported" };
+      const source = candidate as { getCapabilities?(): unknown; capabilities?: unknown };
+      query = typeof source.getCapabilities === "function" ? "getCapabilities()" : typeof source.capabilities === "function" ? "capabilities()" : source.capabilities !== undefined ? "capabilities" : "No passive host query";
       const value = query === "getCapabilities()" ? source.getCapabilities!() : query === "capabilities()" ? (source.capabilities as () => unknown)() : source.capabilities;
       return { family, query, value: value === undefined ? "Not reported" : JSON.stringify(await value) };
-    } catch (error) { return { family, query: "Capability query", value: error instanceof Error ? error.message : String(error) }; }
+    } catch (error) { return { family, query, value: error instanceof Error ? error.message : String(error) }; }
   }));
   return [...rows, { family: "CompressionFX", query: "Compression.Algorithm", value: JSON.stringify(CPFXAlgorithm) }];
 }
