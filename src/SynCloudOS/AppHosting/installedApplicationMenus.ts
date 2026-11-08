@@ -24,7 +24,7 @@ import type { NSEMenuSection } from "../../NSE/NSE";
 import { shortcutCommandIdentifier } from "../SynCloudOS";
 /** The Dock contribution is also available in the application's Webspring menu. */
 export function installedApplicationMenuSections(runtime: SynCloudOSRuntime, appId: string): readonly NSEMenuSection[] {
-  const app = applicationSessionFor({ runtimeId: runtime.runtimeId, appId })?.app;
+  const app = applicationSessionFor(runtime, appId)?.app;
   const dockMenu = app?.delegate?.applicationDockMenu?.(app);
   const info = runtime.bundles.getBundle(appId)?.synWareManifest;
   const shortcuts = info?.shortcutItems?.map(item => ({ kind: "command" as const, id: `shortcut:${item.type}`, commandId: shortcutCommandIdentifier(appId, item.type), labelOverride: item.title })) ?? [];

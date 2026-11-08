@@ -143,7 +143,9 @@ describe("controller ownership hardening", () => {
       protected override didDispose() { throw new Error("window cleanup also failed"); }
     }
     class App extends NSEApplication { static override mainWindow = FailingWindow; }
-    const session = new ApplicationSession({ runtimeId: "failed-window", appId: "tests.failed-window" }, {
+    const fixture = createClassApplicationHost(App, "com.tests.failed-window");
+    hosts.push(fixture);
+    const session = new ApplicationSession(fixture.runtime, fixture.runtime.apps.getApp(fixture.appId)!, {
       AppClass: App, appName: "Failure", strictOwnership: true,
     });
     owned.push(session);
@@ -246,7 +248,9 @@ describe("controller ownership hardening", () => {
     }
     let caught: unknown;
     try {
-      new ApplicationSession({ runtimeId: "failed-app", appId: "tests.failed-app" }, {
+      const fixture = createClassApplicationHost(FailingApp, "com.tests.failed-app");
+      hosts.push(fixture);
+      new ApplicationSession(fixture.runtime, fixture.runtime.apps.getApp(fixture.appId)!, {
         AppClass: FailingApp, appName: "Failure", strictOwnership: true,
       });
     } catch (error) { caught = error; }
@@ -280,7 +284,9 @@ describe("controller ownership hardening", () => {
 describe("internal recorded owner observation", () => {
   it("returns target, containing views, window and application without evaluating app getters", () => {
     class App extends NSEApplication {}
-    const session = new ApplicationSession({ runtimeId: "owner-chain", appId: "tests.owner-chain" }, {
+    const fixture = createClassApplicationHost(App, "com.tests.owner-chain");
+    hosts.push(fixture);
+    const session = new ApplicationSession(fixture.runtime, fixture.runtime.apps.getApp(fixture.appId)!, {
       AppClass: App, appName: "Owners", strictOwnership: true,
     });
     owned.push(session);

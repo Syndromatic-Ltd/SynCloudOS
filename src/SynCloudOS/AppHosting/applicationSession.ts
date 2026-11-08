@@ -18,6 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import type { SynCloudOSAppInfo } from "../SynCloudOS";
+import { attachNSEExecutionContext, runWithNSEOwnerExecution } from "../../NSE/applicationHostInterop";
+import { assertOwnedExecutionContextLive, currentOwnedExecutionContext, reportOwnedExecutionResourceError, type OwnedExecutionContext } from "../nseRuntimeContracts";
+import { applicationResourceErrorReporter } from "../AppSDK/mountedFXExecutionContext";
+import { prepareApplicationServices, type PreparedApplicationServices } from "./applicationServicesPreparation";
+import { assertApplicationProcessAdmission } from "../AppSDK/applicationProcessAuthority";
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type {
   NSEApplication,
@@ -41,8 +47,8 @@ import {
 } from "../../NSE/applicationHostInterop";
 import type { SynWareOwnedWindowSnapshot, SynWareWindowPort } from "../../SynCloudOSReact";
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
-import type { ApplicationLifecycle } from "../Lifecycle/applicationLifecycleHooks";
-import { SynCloudOSLifecycleVeto, type SynCloudOSLifecycleHook } from "../Lifecycle/lifecycleTypes";
+import type { ApplicationLifecycle, ApplicationLifecycleHook } from "../Lifecycle/applicationLifecycleHooks";
+import { SynCloudOSLifecycleVeto } from "../Lifecycle/lifecycleTypes";
 import { currentClass, trackLiveApplicationObject, type LiveApplicationObject } from "./applicationHotReload";
 import { createMountedSynWareRuntime, type MountedSynWareRuntime } from "../AppSDK/appRuntimeFacade";
 import { createSynWareContextValue } from "../AppSDK/createSynWareContextValue";
@@ -84,8 +90,9 @@ interface ControllerDocumentOwner {
   readonly controllers: Set<NSEAnyWindowController>;
 }
 
-function constructApplication(source: ApplicationSessionSource, appId: string, context: NSEApplicationContext): ConstructedApplication {
+function constructApplication(source: ApplicationSessionSource, appId: string, context: NSEApplicationContext, execution: OwnedExecutionContext | null): ConstructedApplication {
   const scope = new NSEOwnershipScope("NSEApplication", appId);
+  if (execution) attachNSEExecutionContext(scope, execution);
   const leave = source.strictOwnership ? enterClassApplication() : () => {};
   try {
     const app = instantiateInOwnerScope(scope, () => new (currentClass(source.AppClass))(), context);
@@ -101,10 +108,12 @@ function constructApplication(source: ApplicationSessionSource, appId: string, c
   }
 }
 
-const sessions = new Map<string, ApplicationSession>();
-
-function keyOf({ runtimeId, appId }: ApplicationSessionIdentity): string {
-  return `${runtimeId}:${normalizeBundleIdentifier(appId)}`;
+const sessions = new WeakMap<SynCloudOSRuntime, Map<string, ApplicationSession>>();
+const preparing = new WeakMap<SynCloudOSRuntime, Set<string>>();
+function sessionsIn(runtime: SynCloudOSRuntime): Map<string, ApplicationSession> {
+  let entries = sessions.get(runtime);
+  if (!entries) sessions.set(runtime, entries = new Map());
+  return entries;
 }
 
 let windowSequence = 0;
@@ -149,31 +158,36 @@ export class ApplicationSession {
   #main: NSEAnyWindowController | null = null;
   #launchReported = false;
   #disposed = false;
-  #servicesMount: MountedSynWareRuntime | null = null;
-  #applicationResponder: ResponderRegistrationHandle | null = null;
+  readonly #prepared: PreparedApplicationServices;
+  #servicesAttached = false;
   #terminationOperationId: string | null = null;
-  #serviceResponder: ResponderRegistrationHandle | null = null;
   #removeLaunchAbort: (() => void) | null = null;
   #removeTerminationAbort: (() => void) | null = null;
   #removeRuntimeAbort: (() => void) | null = null;
   readonly live: LiveApplicationObject;
 
-  constructor(identity: ApplicationSessionIdentity, source: ApplicationSessionSource) {
+  constructor(runtime: SynCloudOSRuntime, canonicalApp: SynCloudOSAppInfo, source: ApplicationSessionSource) {
+    const identity = { runtimeId: runtime.runtimeId, appId: canonicalApp.bundleIdentifier };
     this.#identity = identity;
+    this.#kernel = runtime;
+    this.#prepared = prepareApplicationServices(runtime, canonicalApp);
     this.#source = source;
-    const constructed = constructApplication(source, identity.appId, {
+    let constructed: ConstructedApplication;
+    try { constructed = constructApplication(source, identity.appId, {
       appId: identity.appId,
       windows: () => Object.freeze([...this.#controllers]),
       backgroundTaskScheduler: () => this.#systemServices().scheduler,
       userNotificationCenter: () => this.#systemServices().notifications,
       setBadgeLabel: label => this.#systemServices().setBadgeLabel(label),
       openWindow: (Controller, options) => this.openWindow(Controller, options),
-    });
+    }, this.#prepared.execution); } catch (error) { this.#prepared.dispose(error); throw error; }
     this.app = constructed.app;
     this.#scope = constructed.scope;
     this.#leaveClassApplication = constructed.leave;
     this.live = Object.freeze({ appName: source.appName, relaunch: (notice: string) => { this.#relaunch(notice); } });
     this.#untrackApp = trackLiveApplicationObject(this.app, this.live);
+    try { this.prepareServices(runtime); }
+    catch (error) { try { this.dispose(); } catch (cleanup) { applicationResourceErrorReporter(runtime, identity.appId)(cleanup); } throw error; }
   }
 
   #systemServices() {
@@ -221,6 +235,11 @@ export class ApplicationSession {
   get isDisposed(): boolean {
     return this.#disposed;
   }
+  /** A session cannot be reused across its captured service/process generation. */
+  get hasLiveServices(): boolean {
+    try { assertOwnedExecutionContextLive(this.#prepared.execution); return true; }
+    catch { return false; }
+  }
 
   /** The window controllers in the order they were created. */
   get windowControllers(): readonly NSEAnyWindowController[] {
@@ -228,27 +247,16 @@ export class ApplicationSession {
   }
 
   /** The application responder belongs to the application, not one of its views. */
-  get ownsApplicationResponder(): boolean { return this.#applicationResponder !== null; }
+  get ownsApplicationResponder(): boolean { return this.#prepared.ownsApplicationResponder; }
 
   /** Establishes the same scoped services for headless lifecycle callbacks as for views. */
   prepareServices(runtime: SynCloudOSRuntime): void {
-    if (this.#servicesMount || this.#disposed) return;
-    this.#kernel = runtime;
+    if (this.#servicesAttached || this.#disposed) return;
+    if (runtime !== this.#kernel) throw new TypeError("Application services cannot change runtime ownership.");
+    this.#servicesAttached = true;
     const appId = this.#identity.appId;
-    const applicationId = `application:${appId}`;
-    if (!runtime.responders.get(applicationId)) {
-      this.#applicationResponder = runtime.responders.register({
-        id: applicationId, kind: "application", parentId: "workspace", scopeId: applicationId,
-        undoOwner: { kind: "application", id: appId },
-      });
-    }
-    const responderId = `controller:${appId}:application-services`;
-    this.#serviceResponder = runtime.responders.register({ id: responderId, kind: "controller", parentId: applicationId, scopeId: applicationId });
-    const app = runtime.apps.getApp(appId);
-    if (!app) throw new TypeError(`The application ${appId} is not registered.`);
-    this.#servicesMount = createMountedSynWareRuntime({ runtime, app, responderId });
-    this.attachMount(this.#servicesMount.runtime.windows, runtime);
-    const context = createSynWareContextValue(this.#servicesMount.runtime);
+    this.attachMount(this.#prepared.mount.runtime.windows, runtime);
+    const context = createSynWareContextValue(this.#prepared.mount.runtime);
     installControllerServices(context, runtime);
     attachNSEAuthoringContext(this.app, {
       observeManagedTask: work => { trackOwnedWork(runtime.lifecycle, () => work); },
@@ -260,7 +268,8 @@ export class ApplicationSession {
       }),
     });
     finalizeNSEAuthoringOwner(this.app);
-    const onRuntimeAbort = () => { this.dispose("explicit"); };
+    const report = applicationResourceErrorReporter(runtime, appId);
+    const onRuntimeAbort = () => { try { this.dispose("explicit"); } catch (error) { report(error); } };
     runtime.signal.addEventListener("abort", onRuntimeAbort, { once: true });
     this.#removeRuntimeAbort = () => runtime.signal.removeEventListener("abort", onRuntimeAbort);
   }
@@ -277,12 +286,12 @@ export class ApplicationSession {
         const assigned = result.contentViewController;
         if (assigned && !(assigned instanceof Content)) throw new TypeError("The window constructor assigned a root conflicting with contentViewControllerClass.");
         if (!assigned) result.contentViewController = instantiateInOwnerScope(
-          new NSEOwnershipScope("NSEViewController", Content.name), () => new Content(result as never),
+          new NSEOwnershipScope("NSEViewController", Content.name), () => new Content(result as never), undefined, scope,
         );
       }
       if (this.#disposed || this.app.isDisposed) throw new DOMException("The application closed during window construction.", "InvalidStateError");
       return result;
-    }, context);
+    }, context, this.#scope);
     const leaveApplication = this.#scope.adopt(controller);
     try { finalizeNSEAuthoringOwner(controller); }
     catch (error) { try { controller[nseDisposeFor]("explicit"); } finally { leaveApplication(); } throw error; }
@@ -391,8 +400,8 @@ export class ApplicationSession {
    * are pruned as it reports them. Returns the function that unregisters it.
    */
   attachMount(windows: SynWareWindowPort, kernel: SynCloudOSRuntime | null): () => void {
+    if (kernel && kernel !== this.#kernel) throw new TypeError("A session cannot attach a different runtime.");
     this.#ports.add(windows);
-    if (kernel) this.#kernel = kernel;
     for (const wake of [...this.#portWaiters]) wake();
     const unsubscribe = windows.subscribe(() => { this.pruneClosedWindows(windows.getSnapshot().owned); });
     return () => {
@@ -543,18 +552,15 @@ export class ApplicationSession {
     this.#removeLaunchAbort = null;
     this.#removeTerminationAbort = null;
     this.#removeRuntimeAbort = null;
-    sessions.delete(keyOf(this.#identity));
+    const entries = sessionsIn(this.#kernel!);
+    const key = normalizeBundleIdentifier(this.#identity.appId);
+    if (entries.get(key) === this) entries.delete(key);
     this.#untrackApp();
     try {
       this.app[nseDisposeFor](reason);
     } finally {
       this.#leaveClassApplication();
-      this.#servicesMount?.dispose("The application closed.");
-      this.#servicesMount = null;
-      this.#serviceResponder?.dispose({ cascade: true });
-      this.#applicationResponder?.dispose({ cascade: true });
-      this.#serviceResponder = null;
-      this.#applicationResponder = null;
+      this.#prepared.dispose("The application closed.");
       this.#byWindowId.clear();
       this.#pendingByRestorationKey.clear();
     }
@@ -562,18 +568,30 @@ export class ApplicationSession {
 }
 
 /** The live session of an application, if one was launched. */
-export function applicationSessionFor(identity: ApplicationSessionIdentity): ApplicationSession | undefined {
-  return sessions.get(keyOf(identity));
+export function applicationSessionFor(runtime: SynCloudOSRuntime, appId: string): ApplicationSession | undefined {
+  return sessions.get(runtime)?.get(normalizeBundleIdentifier(appId));
 }
 
-/** The session of an application, creating it when the host mounts one whose lifecycle never ran. */
-export function ensureApplicationSession(identity: ApplicationSessionIdentity, source: ApplicationSessionSource): ApplicationSession {
-  const key = keyOf(identity);
-  const existing = sessions.get(key);
-  if (existing) return existing;
-  const session = new ApplicationSession(identity, source);
-  sessions.set(key, session);
-  return session;
+/** The exact runtime owns preparation; reentrant constructors cannot publish another session. */
+export function ensureApplicationSession(runtime: SynCloudOSRuntime, canonicalApp: SynCloudOSAppInfo, source: ApplicationSessionSource): ApplicationSession {
+  const key = normalizeBundleIdentifier(canonicalApp.bundleIdentifier);
+  if (runtime.apps.getApp(key) !== canonicalApp) throw new TypeError("Application sessions require the canonical application.");
+  assertApplicationProcessAdmission(runtime, canonicalApp);
+  const entries = sessionsIn(runtime);
+  let active = preparing.get(runtime);
+  if (!active) preparing.set(runtime, active = new Set());
+  if (active.has(key)) throw new TypeError("The application session is already being prepared.");
+  active.add(key);
+  try {
+    const existing = entries.get(key);
+    if (existing && !existing.isDisposed && existing.hasLiveServices) return existing;
+    if (existing) {
+      try { existing.dispose(); } catch (error) { applicationResourceErrorReporter(runtime, canonicalApp.bundleIdentifier)(error); }
+    }
+    const session = new ApplicationSession(runtime, canonicalApp, source);
+    entries.set(key, session);
+    return session;
+  } finally { active.delete(key); }
 }
 
 /**
@@ -586,21 +604,30 @@ export async function runApplicationBackgroundTask(
   taskId: string,
   context: { readonly signal: AbortSignal },
 ): Promise<void> {
+  const execution = currentOwnedExecutionContext();
   const { app, scope, leave } = constructApplication(source, appId, {
     appId,
     windows: () => [],
     openWindow: () => Promise.reject(new TypeError("A background task has no windows to open.")),
-  });
+  }, execution);
+  let disposed = false;
+  const dispose = () => {
+    if (disposed) return;
+    disposed = true;
+    context.signal.removeEventListener("abort", onAbort);
+    try { app[nseDisposeFor]("application-closed"); }
+    finally { try { scope.release("application-closed"); } finally { leave(); } }
+  };
+  const onAbort = () => {
+    try { dispose(); }
+    catch (error) { if (execution) reportOwnedExecutionResourceError(execution, error); }
+  };
+  context.signal.addEventListener("abort", onAbort, { once: true });
+  if (context.signal.aborted) onAbort();
   try {
-    await app.handleBackgroundTask?.(taskId, context);
-  } finally {
-    try {
-      app[nseDisposeFor]("application-closed");
-    } finally {
-      scope.release("application-closed");
-      leave();
-    }
-  }
+    context.signal.throwIfAborted();
+    await runWithNSEOwnerExecution(app, () => app.handleBackgroundTask?.(taskId, context));
+  } finally { dispose(); }
 }
 
 /**
@@ -609,13 +636,13 @@ export async function runApplicationBackgroundTask(
  * terminates, and disposed after the close commits.
  */
 export function createApplicationLifecycle(source: ApplicationSessionSource): ApplicationLifecycle {
-  const sessionOf = (context: { readonly runtimeId: string; readonly appId: string }) => applicationSessionFor(context);
-  const hooks: Readonly<Record<string, SynCloudOSLifecycleHook>> = {
-    "launch:will": async (context) => {
+  const sessionOf = (runtime: SynCloudOSRuntime, context: { readonly appId: string }) => applicationSessionFor(runtime, context.appId);
+  const hooks: Readonly<Record<string, ApplicationLifecycleHook>> = {
+    "launch:will": async (runtime, context) => {
       // A suspended application that resumes keeps its instance.
-      const existing = sessionOf(context);
+      const existing = sessionOf(runtime, context);
       if (existing?.launchReported) return;
-      const session = existing ?? ensureApplicationSession(context, source);
+      const session = existing ?? ensureApplicationSession(runtime, runtime.apps.getApp(context.appId)!, source);
       const abandon = session.beginLaunch(context.operationId, context.signal);
       try {
         context.signal.throwIfAborted();
@@ -625,20 +652,20 @@ export function createApplicationLifecycle(source: ApplicationSessionSource): Ap
         try { abandon(); } finally { throw error; }
       }
     },
-    "launch:did": async (context) => {
-      const session = sessionOf(context);
+    "launch:did": async (runtime, context) => {
+      const session = sessionOf(runtime, context);
       if (!session || session.launchReported) return;
       session.markLaunchReported();
       await session.app.applicationDidFinishLaunching();
     },
-    "activate:did": async (context) => {
-      await sessionOf(context)?.app.applicationDidBecomeActive();
+    "activate:did": async (runtime, context) => {
+      await sessionOf(runtime, context)?.app.applicationDidBecomeActive();
     },
-    "suspend:will": async (context) => {
-      await sessionOf(context)?.app.applicationWillResignActive();
+    "suspend:will": async (runtime, context) => {
+      await sessionOf(runtime, context)?.app.applicationWillResignActive();
     },
-    "close:will": async (context) => {
-      const session = sessionOf(context);
+    "close:will": async (runtime, context) => {
+      const session = sessionOf(runtime, context);
       if (!session) return;
       if ((await session.app.applicationShouldTerminate()) === false) {
         throw new SynCloudOSLifecycleVeto("close", `${source.appName} declined to terminate.`);
@@ -646,8 +673,8 @@ export function createApplicationLifecycle(source: ApplicationSessionSource): Ap
       context.signal.throwIfAborted();
       session.beginTermination(context.operationId, context.signal);
     },
-    "close:did": async (context) => {
-      const session = sessionOf(context);
+    "close:did": async (runtime, context) => {
+      const session = sessionOf(runtime, context);
       if (!session) return;
       try {
         await session.app.applicationWillTerminate();
@@ -658,8 +685,7 @@ export function createApplicationLifecycle(source: ApplicationSessionSource): Ap
   };
   return {
     prepare(runtime, appId, stage) {
-      const identity = { runtimeId: runtime.runtimeId, appId };
-      const session = stage === "launch" ? ensureApplicationSession(identity, source) : applicationSessionFor(identity);
+      const session = stage === "launch" ? ensureApplicationSession(runtime, runtime.apps.getApp(appId)!, source) : applicationSessionFor(runtime, appId);
       session?.prepareServices(runtime);
     },
     hookFor: (stage, phase) => hooks[`${stage}:${phase}`] ?? null,

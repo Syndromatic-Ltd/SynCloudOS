@@ -361,6 +361,8 @@
     {
       "id": "app-sdk-host",
       "include": [
+        "src/SynCloudOS/AppSDK/applicationProcessAuthority.ts",
+        "src/SynCloudOS/AppSDK/mountedFXExecutionContext.ts",
         "src/SynCloudOS/AppSDK/mountedMotionClient.ts",
         "src/SynCloudOS/AppSDK/mountedHapticsClient.ts",
         "src/SynCloudOS/AppSDK/mountedEnvironmentClientRegistry.ts",
@@ -413,6 +415,7 @@
           "src/SynCloudOS/SynCloudOS.ts",
           "src/SynCloudOS/BundleLoader/trustedBundleProvenance.ts",
           "src/SynCloudOS/BundleLoader/bundleGenerationFence.ts",
+          "src/SynCloudOS/BundleLoader/definitionLifecycle.ts",
           "src/SynCloudOS/Routing/appSdkRoutePort.ts",
           "src/SynCloudOS/Testing/appSdkSettlementPort.ts",
           "src/SynCloudOS/Runtime/runtimeInstanceTypes.ts",
@@ -830,7 +833,8 @@
           "src/SynCloudOS/Identity/bundleIdentifier.d.mts"
         ],
         "app-sdk-host": [
-          "src/SynCloudOS/AppHosting/runtimeEntry.ts"
+          "src/SynCloudOS/AppHosting/runtimeEntry.ts",
+          "src/SynCloudOS/AppSDK/applicationProcessAuthority.ts"
         ],
         "authentication-services": [
           "src/SynCloudOS/AuthenticationServices/index.ts"

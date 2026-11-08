@@ -51,7 +51,7 @@ describe("inline class view hosting", () => {
     expect(root.view.element.isConnected).toBe(true); expect(layouts).toBe(1);
     act(() => { root.title = "Updated inline"; }); expect(screen.getByText("Updated inline")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Local 0" })); expect(screen.getByText("Local 1")).toBeTruthy();
-    const session = applicationSessionFor({ runtimeId: host.runtime.runtimeId, appId: host.appId })!;
+    const session = applicationSessionFor(host.runtime, host.appId)!;
     const main = session.windowControllers[0]; expect(main.contentViewController).toBe(root); expect(main.window.frame).not.toBeNull();
     await act(async () => { await session.app.openWindow(Secondary, { restorationKey: "secondary-inline" }); });
     expect(await screen.findByText("Secondary inline window")).toBeTruthy();
@@ -65,7 +65,7 @@ describe("inline class view hosting", () => {
     class App extends NSEApplication { static override mainWindow = Window; }
     const host = createClassApplicationHost(App); hosts.push(host); await host.launch(); host.mountWindows(); await host.openMainWindow();
     expect(await screen.findByText("Declared root")).toBeTruthy();
-    const session = applicationSessionFor({ runtimeId: host.runtime.runtimeId, appId: host.appId })!;
+    const session = applicationSessionFor(host.runtime, host.appId)!;
     const window = session.windowControllers[0]; const previous = window.contentViewController!;
     act(() => { window.contentViewController = new Next({ owner: window }); });
     expect(screen.getByText("Replacement root")).toBeTruthy(); expect(previous.isDisposed).toBe(true);
@@ -101,7 +101,7 @@ describe("inline class view hosting", () => {
     const host = createClassApplicationHost(App); hosts.push(host);
     // The constructor runs only when the main window is requested.
     return host.launch().then(() => {
-      const session = applicationSessionFor({ runtimeId: host.runtime.runtimeId, appId: host.appId })!;
+      const session = applicationSessionFor(host.runtime, host.appId)!;
       expect(() => session.controllerFor(null)).toThrow(/contentViewControllerClass|constructor/);
       expect(session.windowControllers).toEqual([]);
     });

@@ -18,8 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { SynCloudOSLifecycleHook, SynCloudOSLifecycleStage } from "./lifecycleTypes";
+import type { SynCloudOSLifecycleHookContext, SynCloudOSLifecycleStage } from "./lifecycleTypes";
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
+export type ApplicationLifecycleHook = (runtime: SynCloudOSRuntime, context: SynCloudOSLifecycleHookContext) => void | Promise<void>;
 
 /**
  * The lifecycle behaviour of an application written as an `NSEApplication`
@@ -31,7 +32,7 @@ export interface ApplicationLifecycle {
   /** Internal application-session services, established before lifecycle callbacks. */
   prepare?(runtime: SynCloudOSRuntime, appId: string, stage: SynCloudOSLifecycleStage): void;
   /** The hook for `stage` and `phase`, or `null` when the application has none there. */
-  hookFor(stage: SynCloudOSLifecycleStage, phase: "will" | "did"): SynCloudOSLifecycleHook | null;
+  hookFor(stage: SynCloudOSLifecycleStage, phase: "will" | "did"): ApplicationLifecycleHook | null;
 }
 
 const lifecycleByRoot = new WeakMap<object, ApplicationLifecycle>();

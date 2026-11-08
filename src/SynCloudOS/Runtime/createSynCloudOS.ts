@@ -142,6 +142,8 @@ import type {
   RuntimeDisposalState,
 } from "./disposalTypes";
 
+import { revokeForegroundApplicationProcess } from "../AppSDK/applicationProcessAuthority";
+
 function asRuntimeId(value: string): SynCloudOSRuntimeId {
   return value as SynCloudOSRuntimeId;
 }
@@ -1038,7 +1040,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     appManagerController: appManagerBridge,
     configurationProfiles: policy,
     windows,
-    revokeApplicationMounts: (appId) => transfers.revokeApplicationMounts(appId),
+    revokeApplicationMounts: (appId) => revokeForegroundApplicationProcess(runtime, appId, () => transfers.revokeApplicationMounts(appId)),
     operations,
     caches,
     resources,

@@ -19,6 +19,7 @@
 
 import { useInsertionEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
+import { ApplicationHostRuntimeContext } from "../AppHosting/applicationHostRuntimeContext";
 import type { SynCloudOSAppInfo, SynCloudOSRuntime } from "../SynCloudOS";
 import { SynWareRuntimeContext, SynCloudOSRuntimeContext, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEOverlayPort } from "../../SynCloudOSReact";
 import { NSEControlRuntimeProvider, NSEFocusPortProvider, NSEOverlayProvider, NSEConformanceEvidenceProvider, type NSEConformanceEvidencePort } from "../../NSE/NSE";
@@ -485,16 +486,16 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
       )
     : mountedChildren;
   const wrapPresentedContent = (content: ReactNode) => (
-    <SynCloudOSRuntimeContext.Provider value={null}>
+    <ApplicationHostRuntimeContext.Provider value={runtime}><SynCloudOSRuntimeContext.Provider value={null}>
       <SynWareRuntimeContext.Provider value={mounted.mount.runtime}>
         <SynWareProvider value={context}><NSEOpenPanelApplicationHost value={context}>
           <FontCatalogueProvider catalogue={fontCatalogue}><NSEActionScopeProvider appId={app.bundleIdentifier}><PresentedApplicationControls>{content}</PresentedApplicationControls></NSEActionScopeProvider></FontCatalogueProvider>
         </NSEOpenPanelApplicationHost></SynWareProvider>
       </SynWareRuntimeContext.Provider>
-    </SynCloudOSRuntimeContext.Provider>
+    </SynCloudOSRuntimeContext.Provider></ApplicationHostRuntimeContext.Provider>
   );
   return (
-    <SynCloudOSRuntimeContext.Provider value={null}>
+    <ApplicationHostRuntimeContext.Provider value={runtime}><SynCloudOSRuntimeContext.Provider value={null}>
       <SynWareRuntimeContext.Provider value={mounted.mount.runtime}>
         <SynWareProvider value={context}><NSEOpenPanelApplicationHost value={context}>
           <FontCatalogueProvider catalogue={fontCatalogue}>
@@ -504,6 +505,6 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
           </FontCatalogueProvider>
         </NSEOpenPanelApplicationHost></SynWareProvider>
       </SynWareRuntimeContext.Provider>
-    </SynCloudOSRuntimeContext.Provider>
+    </SynCloudOSRuntimeContext.Provider></ApplicationHostRuntimeContext.Provider>
   );
 }

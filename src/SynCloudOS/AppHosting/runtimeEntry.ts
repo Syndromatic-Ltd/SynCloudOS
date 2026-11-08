@@ -5,3 +5,4 @@ export { applicationSessionFor } from "./applicationSession";
 export { NSEViewControllerView } from "./applicationHosting";
 
 export { installedApplicationMenuSections } from "./installedApplicationMenus";
+export { prepareDefinitionBackgroundExecution } from "./applicationServicesPreparation";

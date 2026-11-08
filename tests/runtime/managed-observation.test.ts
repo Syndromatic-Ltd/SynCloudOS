@@ -73,7 +73,7 @@ describe('managed task actual work observation',()=>{
   const host=createClassApplicationHost(App,'com.example.managed-owner-chain');
   try {
    await host.launch();host.mountWindows();await host.openMainWindow();
-   const session=applicationSessionFor({runtimeId:host.runtime.runtimeId,appId:host.appId})!;const main=session.app.windows[0],view=main.contentViewController as View;
+   const session=applicationSessionFor(host.runtime, host.appId)!;const main=session.app.windows[0],view=main.contentViewController as View;
    await vi.waitFor(()=>expect(host.runtime.updateReadiness.inspect().counts.lifecycleWork).toBe(0));const run=view.task.run(undefined);expect(host.runtime.updateReadiness.inspect().counts.lifecycleWork).toBe(1);
    main.dispose();expect(await run.finished).toMatchObject({status:'cancelled',reason:'owner-disposed'});expect(host.runtime.updateReadiness.inspect().counts.lifecycleWork).toBe(1);
    gate.resolve(9);await vi.waitFor(()=>expect(host.runtime.updateReadiness.inspect().counts.lifecycleWork).toBe(0));expect(view.task.getSnapshot().value).toBeUndefined();
@@ -83,7 +83,7 @@ describe('managed task actual work observation',()=>{
   const gate=deferred<number>();class App extends NSEApplication { readonly task=managedTask(this,{lifetime:'owner',policy:'latest',run:()=>gate.promise}); }
   const host=createClassApplicationHost(App,'com.example.managed-observation');
   try {
-   await host.launch();const session=applicationSessionFor({runtimeId:host.runtime.runtimeId,appId:host.appId})!;const app=session.app as App;
+   await host.launch();const session=applicationSessionFor(host.runtime, host.appId)!;const app=session.app as App;
    await vi.waitFor(()=>expect(host.runtime.updateReadiness.inspect().counts.lifecycleWork).toBe(0));const run=app.task.run(undefined);
    expect(host.runtime.updateReadiness.inspect().counts.lifecycleWork).toBe(1);run.cancel();await run.finished;expect(host.runtime.updateReadiness.inspect().counts.lifecycleWork).toBe(1);
    host.runtime.store.mutate(draft=>{draft.loginServices.synId='generated-switched-account';});expect(host.runtime.updateReadiness.inspect().activationAuthorized).toBe(false);
