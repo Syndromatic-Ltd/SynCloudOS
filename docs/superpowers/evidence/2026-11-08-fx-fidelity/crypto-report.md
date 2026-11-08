@@ -1,6 +1,6 @@
 # CryptoFX fidelity implementation report
 
-Status: implementation and all assigned validation complete; explicit-path commit pending.
+Status: DONE. Implementation and all assigned validation complete; committed by explicit owned paths.
 
 ## Scope and files
 
@@ -83,7 +83,7 @@ No design-changing Apple/review disagreement was found. The equality-language qu
 
 ## Commit and handoff
 
-Commit pending final explicit-path staging and diff check. Root will independently review the family diff. No full-suite or broader hardware/browser-platform acceptance is implied.
+Implementation commit: `a17b519` — `FX: Rebuild CryptoFX around CryptoKit types`. This report-only follow-up records that immutable commit. Both repository typechecks and the architecture check passed again immediately before the commit; staged diff-check was clean. Root will independently review the family diff. No full-suite or broader hardware/browser-platform acceptance is implied.
 
 ## Complete file and member mapping
 
