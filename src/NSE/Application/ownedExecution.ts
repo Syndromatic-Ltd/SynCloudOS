@@ -1,5 +1,5 @@
 import {
-  assertOwnedExecutionContextLive, narrowOwnedExecutionContext, runInOwnedExecutionContext,
+  assertOwnedExecutionContextLive, narrowOwnedExecutionContext, reportOwnedExecutionResourceError, runInOwnedExecutionContext,
   type OwnedExecutionContext,
 } from "../../SynCloudOS/nseRuntimeContracts";
 import { bindNSEOwnedResource, getNSEOwnerScope, isNSEOwnershipScope, type NSEOwnershipScope } from "../Controllers/ownership";
@@ -15,7 +15,9 @@ export function attachNSEExecutionContext(scope: NSEOwnershipScope, parent: Owne
     signal: scope.authoritySignal,
     assertLive: () => scope.assertLive(),
     registerResource: (resource, dispose) => bindNSEOwnedResource(resource, scope.signal, dispose),
-    reportResourceError: error => scope.reportResourceError(error),
+    reportResourceError(error) {
+      if (!scope.reportResourceError(error)) reportOwnedExecutionResourceError(parent, error);
+    },
   });
   contexts.set(scope, context);
 }

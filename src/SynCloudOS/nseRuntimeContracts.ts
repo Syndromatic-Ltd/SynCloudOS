@@ -34,7 +34,7 @@ export { normalisePasteboardRepresentations } from "./Pasteboard/Pasteboard";
 export { normaliseRuntimeCursorDescriptor } from "./Pointer/TrackingRegionManager";
 export { saveFilePanelTarget } from "./FilePanels/FilePanelDocumentBridge";
 export { declareSynCloudOSLifecycleSignal, SynCloudOSLifecycleError, SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "./ErrorManager/lifecycleError";
-export { issueOwnedExecutionContext, currentOwnedExecutionContext, requireOwnedExecutionContext, runInOwnedExecutionContext, narrowOwnedExecutionContext, getOwnedExecutionPort, ownedExecutionContextSignal, assertOwnedExecutionContextLive, registerOwnedExecutionResource, sameOwnedExecutionProcess } from "./ExecutionContext/ownedExecutionContext";
+export { issueOwnedExecutionContext, currentOwnedExecutionContext, requireOwnedExecutionContext, runInOwnedExecutionContext, narrowOwnedExecutionContext, getOwnedExecutionPort, ownedExecutionContextSignal, assertOwnedExecutionContextLive, registerOwnedExecutionResource, reportOwnedExecutionResourceError, sameOwnedExecutionProcess } from "./ExecutionContext/ownedExecutionContext";
 export type { OwnedExecutionContext, OwnedExecutionRecord, OwnedExecutionLifetime } from "./ExecutionContext/ownedExecutionContext";
 export type {
   SynCloudOSLifecycleDisposal,

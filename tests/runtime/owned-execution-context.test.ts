@@ -19,13 +19,14 @@ function fixture(name = "a", process: object = {}) {
   const ports = new Map<symbol, unknown>([[key, name]]);
   const dispose = new Map<object, () => void>();
   const errors: unknown[] = [];
+  const errorContexts: unknown[] = [];
   const context = execution.issueOwnedExecutionContext({
     process, signal: abort.signal, ports,
     assertLive() { if (!live) throw new Error("revoked"); },
     registerResource(resource, release) { dispose.set(resource, release); return () => { dispose.delete(resource); }; },
-    reportResourceError(error: unknown) { errors.push(error); },
+    reportResourceError(error: unknown) { errors.push(error); errorContexts.push(execution.currentOwnedExecutionContext()); },
   });
-  return { context, abort, key, ports, process, dispose, errors, revoke() { live = false; } };
+  return { context, abort, key, ports, process, dispose, errors, errorContexts, revoke() { live = false; } };
 }
 
 function owner(context = fixture().context) {
@@ -184,6 +185,19 @@ describe("authentic synchronous owned execution contexts", () => {
     });
     expect(errors).toEqual([failure]); expect(childFailures).toEqual([failure]); expect(seen).toEqual([null, null]);
   });
+
+  it("allows authentic reporting after revocation without returning execution authority", () => {
+    const root = fixture(); const other = fixture(); const failure = new Error("late report"); root.abort.abort();
+    expect(() => execution.reportOwnedExecutionResourceError({} as never, failure)).toThrow(/authentic|issued|context/i);
+    execution.runInOwnedExecutionContext(other.context, () => {
+      execution.reportOwnedExecutionResourceError(root.context, failure);
+      expect(execution.currentOwnedExecutionContext()).toBe(other.context);
+    });
+    expect(root.errors).toEqual([failure]); expect(root.errorContexts).toEqual([null]);
+    expect(() => execution.runInOwnedExecutionContext(root.context, () => {})).toThrow();
+    expect(() => execution.getOwnedExecutionPort(root.context, root.key)).toThrow();
+    expect(() => execution.registerOwnedExecutionResource(root.context, {}, () => {})).toThrow();
+  });
 });
 
 describe("recorded NSE scope execution and resource admission", () => {
@@ -315,6 +329,40 @@ describe("recorded NSE scope execution and resource admission", () => {
     expect(parent.isDisposed).toBe(true); expect(child.isDisposed).toBe(true); expect(cleanup).toHaveBeenCalledOnce();
   });
 
+  it("forwards each cleanup error once after cleanup reenters and completes owner disposal", () => {
+    const root = fixture(); const other = fixture(); const failures = [new Error("first late cleanup"), new Error("second late cleanup")];
+    const values = failures.map(failure => {
+      const parent = owner(root.context); const cleanup = vi.fn(() => { parent.dispose(); throw failure; });
+      parent.own(() => { const resource = {}; execution.registerOwnedExecutionResource(execution.requireOwnedExecutionContext("reentrant resource"), resource, cleanup); return resource; });
+      return { parent, cleanup };
+    });
+    execution.runInOwnedExecutionContext(other.context, () => { root.abort.abort(); expect(execution.currentOwnedExecutionContext()).toBe(other.context); });
+    expect(root.errors).toEqual(failures); expect(root.errorContexts).toEqual([null, null]);
+    root.abort.abort();
+    for (const { parent, cleanup } of values) {
+      expect(parent.isDisposed).toBe(true); expect(() => parent.dispose()).not.toThrow(); expect(cleanup).toHaveBeenCalledOnce();
+      expect(() => bridge.runWithNSEOwnerExecution(parent, () => {})).toThrow();
+    }
+    expect(root.errors).toEqual(failures);
+  });
+
+  it("forwards a completed child's late cleanup through its completed ancestor to the host", () => {
+    const root = fixture(); const parent = owner(root.context); const child = parent.addChild(NSEViewController); const failure = new Error("late child cleanup");
+    const cleanup = vi.fn(() => { parent.dispose(); throw failure; });
+    child.own(() => { const resource = {}; execution.registerOwnedExecutionResource(execution.requireOwnedExecutionContext("child resource"), resource, cleanup); return resource; });
+    root.abort.abort();
+    expect(child.isDisposed).toBe(true); expect(parent.isDisposed).toBe(true); expect(cleanup).toHaveBeenCalledOnce();
+    expect(root.errors).toEqual([failure]); expect(root.errorContexts).toEqual([null]);
+  });
+
+  it("keeps reentrant direct scope release failures in the active outer aggregate", () => {
+    const root = fixture(); const parent = owner(root.context); const scope = getNSEOwnerScope(parent)!; const failure = new Error("active release cleanup");
+    const cleanup = vi.fn(() => { parent.dispose(); throw failure; });
+    parent.own(() => { const resource = {}; execution.registerOwnedExecutionResource(execution.requireOwnedExecutionContext("scope resource"), resource, cleanup); return resource; });
+    expect(() => scope.release("explicit")).toThrow(failure);
+    expect(root.errors).toEqual([]); expect(parent.isDisposed).toBe(true); expect(cleanup).toHaveBeenCalledOnce();
+  });
+
   it.each(["owner", "ownerSignal"])("does not retain a partial child when revoked context inheritance rejects explicit %s", mode => {
     const root = fixture(); const parent = owner(root.context); const scope = getNSEOwnerScope(parent)!;
     const adopt = vi.spyOn(scope, "adopt"); const addListener = vi.spyOn(scope.signal, "addEventListener");
@@ -387,7 +435,7 @@ describe("private execution architecture", () => {
   });
 
   it("keeps context issuers, runners and bridge declarations out of every public SDK export", () => {
-    const privateNames = new Set(["OwnedExecutionContext", "OwnedExecutionRecord", "issueOwnedExecutionContext", "currentOwnedExecutionContext", "requireOwnedExecutionContext", "runInOwnedExecutionContext", "narrowOwnedExecutionContext", "getOwnedExecutionPort", "ownedExecutionContextSignal", "registerOwnedExecutionResource", "sameOwnedExecutionProcess", "attachNSEExecutionContext", "runWithNSEOwnerExecution"]);
+    const privateNames = new Set(["OwnedExecutionContext", "OwnedExecutionRecord", "OwnedExecutionLifetime", "issueOwnedExecutionContext", "currentOwnedExecutionContext", "requireOwnedExecutionContext", "runInOwnedExecutionContext", "narrowOwnedExecutionContext", "getOwnedExecutionPort", "ownedExecutionContextSignal", "assertOwnedExecutionContextLive", "registerOwnedExecutionResource", "reportOwnedExecutionResourceError", "sameOwnedExecutionProcess", "attachNSEExecutionContext", "runWithNSEOwnerExecution"]);
     const entries = Object.values(synWareSdkEntries).map(path => resolve(path));
     const program = ts.createProgram(entries, { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext, moduleResolution: ts.ModuleResolutionKind.Bundler, jsx: ts.JsxEmit.ReactJSX, skipLibCheck: true });
     const checker = program.getTypeChecker();
