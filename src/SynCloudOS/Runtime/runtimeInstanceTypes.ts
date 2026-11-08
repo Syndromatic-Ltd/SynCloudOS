@@ -309,6 +309,8 @@ export interface RuntimeImageGeometryPort {
  * methods call it around their real action, while tests receive only their
  * narrow fake-control projection. */
 export interface RuntimeTestCapabilityControl {
+  /** Observe injected test access changes, including deny then allow before a callback. */
+  subscribe?(listener: () => void): () => void;
   run<T>(operation: string, signal: AbortSignal | undefined, action: () => T | Promise<T>): Promise<T>;
   runSync<T>(operation: string, action: () => T): T;
 }
@@ -417,7 +419,6 @@ export interface SynCloudOSRuntimeEnvironment {
   readonly luminaIndex?: LuminaIndexBackendFactory | null;
   readonly audioCapture?: { createSession(signal?: AbortSignal, capability?: object): AUFXAudioSession };
   readonly speechSynthesis?: import("../../FX/AudioFX/AUFXSpeechSynthesizer").AUFXSpeechSynthesisHost;
-  readonly networkPaths?: import("../../FX/NetworkFX/NWFXPathMonitor").NWFXNetworkPathAdapter;
   readonly videoPresentation?: import("../../FX/VideoFX/VFXPictureInPictureController").VFXVideoPresentationAdapter;
   readonly audioFiles?: RuntimeAudioFileService;
   readonly hapticFeedback?: HFXFeedbackOptions;

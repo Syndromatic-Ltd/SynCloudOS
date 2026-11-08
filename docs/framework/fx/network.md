@@ -1,24 +1,36 @@
 # NetworkFX
 
-NetworkFX is the standalone Network framework analogue, available through `@syndromatic/syncloudos/fx/network` and `useNetwork()` from the mounted SDK. Declare `network.read` in the app manifest. The host checks the declaration and current authority before monitor creation and every delivery.
+NetworkFX mirrors Apple's Network path monitoring API at `@syndromatic/syncloudos/fx/network`. Declare `network.read` in Info.ts. Import the classes inside an application bundle compiled with the SynCloudOS plugin. The plugin supplies stable per-app subclasses; constructors retain the selected app session across awaits, timers and callbacks. There is no Network authorization API or permission prompt.
 
 ```ts
-const network = useNetwork();
-// Inside an effect or command:
-if (network.requestAuthorization() === "granted") {
-  const monitor = network.createMonitor();
-  monitor.start(path => console.log(path.status));
-  // Effect cleanup:
-  monitor.cancel();
-}
+import { NWFXPathMonitor, NWFXInterfaceType } from "@syndromatic/syncloudos/fx/network";
+import { DFXQueue } from "@syndromatic/syncloudos/fx/dispatch";
+const monitor = new NWFXPathMonitor();
+monitor.pathUpdateHandler = path => console.log(path.status);
+monitor.start(DFXQueue.main);
+// When the owning operation ends:
+monitor.cancel();
 ```
 
-`authorizationStatus()` and `requestAuthorization()` return `granted`, `denied`, or `unavailable`. Browser network observation has no permission prompt. Requesting authorization checks host authority; it cannot grant a denied entitlement. `capabilities()` reports path monitoring, Network Information, transport availability, and explicit unsupported cost/constrained/prompt features. Capability inspection requires authority.
+Constructors also accept a required `NWFXInterfaceType`, or an array of prohibited types. `start(queue)` begins observation once, and readonly `queue` identifies the delivery queue. Null or omitted queue selects the already-pinned application's main queue. Repeated start on a live monitor is idempotent; cancellation is terminal. Handler deliveries are synchronous Dispatch work items, including the initial path. `currentPath` is updated immediately before each handler runs. Until the first queued observation it throws `NWFXError.posix(45)`; no unobserved route is invented. Cancelled/revoked monitors reject further path reads and starts.
 
-Constructing a client, obtaining the hook, and creating a monitor are passive. `start()` subscribes and delivers the current hint. Monitors start once; `cancel()`/`dispose()` is terminal and idempotent. Caller abort, mount abort, component cleanup, and revoked authority end observation and remove listeners. A session may own at most eight monitors.
+`useNetwork()` returns an actual passive `NWFXPathMonitor`. Set its handler and start it in an effect; the hook cancels on actual component unmount or context replacement. Its insertion lifetime survives React StrictMode's layout-effect cleanup/setup replay. A component that explicitly calls `cancel()` must acquire a new monitor instead of restarting the terminal instance.
 
-`NWFXPath.status` follows `satisfied`, `unsatisfied`, `requiresConnection`; the browser backend only produces the first two from `navigator.onLine`. This is a browser hint and never proves Internet or endpoint reachability. `interfaceType` mirrors NWInterface.InterfaceType when the browser provides a recognized transport; effective connection speed never substitutes for transport. `effectiveType`, downlink in Mbps and round-trip time in milliseconds may be absent or coarsened. Missing values are `null`.
+Both monitor construction and every native/queued delivery enforce the launch entitlement and current app authority. Revocation immediately cancels native subscriptions and advances an access generation; restoring access cannot deliver an older queued path or revive an older instance. App abort and selected-session registry removal are terminal. Up to eight active native observations per mount are admitted. Importing or constructing never starts browser observation. Host ports are private and are not available on SCOS, SynWareContextValue, browser contribution environments or exported testing environments. Native adapters are associated privately with their environment identity; no networkPaths field exposes the adapter or snapshot type.
 
-`isExpensive` and `isConstrained` remain `null`: browsers do not expose authoritative network cost or OS Low Data Mode. `saveData` is a separate browser preference, and is never promoted to either property. Slow connections do not imply expensive connections.
+| Apple member | Browser behavior |
+|---|---|
+| `NWPath.status` | `navigator.onLine` supplies a coarse satisfied/unsatisfied hint. It does not prove Internet or endpoint reachability. No active probes run. |
+| `NWPath.unsatisfiedReason` | Throws ENOTSUP when the host cannot observe the reason. An excluded observed interface produces unsatisfied/notAvailable. |
+| `NWPath.availableInterfaces`, `NWInterface.type/name/index` | Actual host interface enumeration only. Browsers cannot enumerate names/indices, so availableInterfaces throws ENOTSUP; no interfaces are fabricated. |
+| `NWPath.usesInterfaceType(type)` | Uses explicit observed transport types. Missing transport throws ENOTSUP. Connection speed never establishes transport. |
+| `NWPath.isConstrained` | Browser Save-Data maps to constrained; missing observation throws ENOTSUP. |
+| `NWPath.isExpensive` | Explicit cellular means expensive; otherwise a reliable metered boolean is used. Missing cost throws ENOTSUP. Wi-Fi alone does not establish cost. |
+| `NWPath.supportsIPv4`, `supportsIPv6`, `supportsDNS` | Actual routing/configuration observations only; ordinary browser adapters throw ENOTSUP for each. |
+| Required/prohibited interface constructors | Filtering uses observed transport types; start/update fails with ENOTSUP and cancels if transport cannot be observed. An empty prohibited list imposes no filter. |
 
-All path records are frozen plain values suitable for workers/structured clone. The browser adapter is host-only, takes an injected environment, and defaults to an unavailable environment without accessing globals. No polling, probes, or background reachability requests are performed.
+Paths and interfaces are frozen class instances; they are not structured-clone records. `NWFXPathStatus`, `NWFXPathUnsatisfiedReason` and `NWFXInterfaceType` are frozen case objects with same-named TypeScript union types. UnsatisfiedReason includes Apple's current `vpnInactive` case.
+
+`NWFXError` represents NWError's `posix`, `dns`, `tls` and `wifiAware` associated numeric cases using static case constructors, a `code` discriminant and numeric `error`. Network uses Darwin ENOTSUP (45) for unavailable properties, EACCES (13) for access denial, ECANCELED (89) for terminal monitors, ENXIO (6) for missing sessions, EINVAL (22) for ambiguity/invalid input, EMFILE (24) for the monitor quota, and EIO (5) for other host failures. Public attributed base construction explains that the class must come from a plugin-compiled application bundle.
+
+Primary references: [NWPathMonitor](https://developer.apple.com/documentation/network/nwpathmonitor), [NWPath](https://developer.apple.com/documentation/network/nwpath), [NWInterface](https://developer.apple.com/documentation/network/nwinterface), [NWError](https://developer.apple.com/documentation/network/nwerror). The implementation covers the agreed path-monitor member list, not connection/listener APIs or the newer asynchronous iterator, endpoint, gateway and link-quality additions.

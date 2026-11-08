@@ -42,7 +42,9 @@ import type { GFXImage } from "../../FX/GraphicsFX/GFXImage";
 import { createMountedAudioGraphs } from "./mountedAudioGraphs";
 import { createMountedAudioSessions } from "./mountedAudioSessions";
 import { createMountedAudioSpeechClient } from "./mountedAudioSpeechClient";
-import { createMountedNetworkClient } from "./mountedNetworkClient";
+import { networkAdapterFor } from "../../FX/NetworkFX/internal/networkPort";
+import { NWFXError } from "../../FX/NetworkFX/NWFXError";
+import { createMountedNetworkPort } from "./mountedNetworkPort";
 import { createMountedVideoPresentationClient } from "./mountedVideoPresentationClient";
 import { createMountedAudioFiles } from "./mountedAudioFiles";
 import { createMountedHapticsClient } from "./mountedHapticsClient";
@@ -4494,10 +4496,14 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     cleanupOnAbort(() => { unsubscribePrivacyIdentity(); unsubscribePrivacyProfile(); unsubscribeCanonicalPrivacySession(); privacyOwner.abort(); });
     const environmentClients = Object.freeze({
       speechSynthesis: createMountedAudioSpeechClient(runtime.environment.speechSynthesis, signal, deviceEntitlements, () => authoriseDeviceCapability("audio.speech")),
-      network: createMountedNetworkClient(runtime.environment.networkPaths ?? {
-        capabilities: () => Object.freeze({ pathMonitoring: false, networkInformation: false, interfaceType: false, expensive: false, constrained: false, authorizationPrompt: false }),
-        currentPath: () => null, subscribe: () => ({ dispose() {} }),
-      }, signal, deviceEntitlements, authoriseDeviceCapability),
+      network: createMountedNetworkPort(networkAdapterFor(runtime.environment) ?? {
+        currentPath: () => { throw NWFXError.posix(45, "Network path monitoring is unavailable."); },
+        subscribe: () => { throw NWFXError.posix(45, "Network path monitoring is unavailable."); },
+      }, signal, deviceEntitlements, authoriseDeviceCapability, listener => {
+        const releases = [runtime.store.subscribe(listener), runtime.configurationProfiles.subscribe(listener), runtime.identity.session.subscribe(listener),
+          runtime.environment.testControls?.permissions.subscribe?.(listener), runtime.environment.testControls?.policy.subscribe?.(listener)];
+        return () => { for (const release of releases) release?.(); };
+      }),
       videoPresentation: createMountedVideoPresentationClient(runtime.environment.videoPresentation, signal, deviceEntitlements, authoriseDeviceCapability),
       bluetooth: createMountedBluetoothClient(runtime.environment.bluetooth, signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("bluetooth")),
       nfc: createMountedNFCClient(runtime.environment.nfc, signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("nfc")),

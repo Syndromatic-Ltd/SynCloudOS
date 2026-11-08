@@ -19,6 +19,7 @@
  */
 
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
+import { networkAdapterFor } from "../../FX/NetworkFX/internal/networkPort";
 import { CPFXAlgorithm } from "../../FX/CompressionFX/public";
 export interface SystemCapabilityRow { readonly family: string; readonly query: string; readonly value: string }
 export async function systemCapabilityReport(runtime: SynCloudOSRuntime): Promise<readonly SystemCapabilityRow[]> {
@@ -27,7 +28,7 @@ export async function systemCapabilityReport(runtime: SynCloudOSRuntime): Promis
     ["AnimationFX", runtime.animations], ["GraphicsFX", null], ["ImageFX", runtime.images], ["TextFX", runtime.textLayout],
     ["AudioFX", environment.speechSynthesis], ["VideoFX", environment.videoPresentation], ["MediaFX", runtime.mediaClock],
     ["HapticsFX", runtime.haptics], ["MotionFX", environment.motion], ["LocationFX", environment.location],
-    ["MIDIFX", environment.midi], ["LuminaFX", runtime.lumina], ["NetworkFX", environment.networkPaths],
+    ["MIDIFX", environment.midi], ["LuminaFX", runtime.lumina], ["NetworkFX", networkAdapterFor(environment)],
     ["BluetoothFX", environment.bluetooth], ["NFCFX", environment.nfc], ["SpeechFX", environment.speech],
     ["ContactsFX", environment.contacts], ["PassFX", environment.payment], ["XRFX", environment.xr],
   ];

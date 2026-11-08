@@ -187,6 +187,10 @@ export interface SynWareTestDisposalReport {
 }
 
 export interface SynWareTestAdapters {
+  readonly network: SynWareFakeControl<"network.read" | "network.subscribe"> & Readonly<{
+    setStatus(status: import("../../../FX/NetworkFX/NWFXPathStatus").NWFXPathStatus): void;
+    activeMonitorCount(): number;
+  }>;
   readonly browser: SynWareFakePort<SynWareFakeBrowserOperation>;
   readonly media: SynWareFakePort<SynWareFakeMediaOperation>;
   readonly viewport: SynWareFakePort<SynWareFakeViewportOperation>;
