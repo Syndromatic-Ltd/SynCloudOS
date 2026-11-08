@@ -19,6 +19,7 @@
  */
 
 import { runInNewContext } from "node:vm";
+import { inflateRawSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 import { NSEData, NSEDataCompressionAlgorithm } from "../../src/Foundation/NSEData";
 
@@ -88,6 +89,24 @@ describe("NSEData", () => {
     await expect(NSEData.from(new Uint8Array([1, 2, 3])).decompressed("gzip")).rejects.toThrow();
     const packed = await NSEData.from(new Uint8Array([1, 2, 3])).compressed("gzip");
     await expect(packed.subdata({ location: 0, length: packed.count - 1 }).decompressed("gzip")).rejects.toThrow();
+  });
+
+  it("compresses zlib as RFC 1951 raw DEFLATE without an RFC 1950 header", async () => {
+    const bytes = new TextEncoder().encode("Foundation raw DEFLATE ".repeat(40));
+    const packed = await NSEData.from(bytes).compressed("zlib");
+    // RFC 1950's CMF/FLG checksum identifies a zlib wrapper independently of
+    // the compression level (78 01, 78 9c, 78 da, ...).
+    const [cmf, flg] = packed.bytes;
+    expect((cmf & 0x0f) === 8 && ((cmf << 8) + flg) % 31 === 0).toBe(false);
+    expect(new Uint8Array(inflateRawSync(packed.bytes))).toEqual(bytes);
+  });
+
+  it("decompresses a known RFC 1951 stored-block vector through zlib", async () => {
+    // Final uncompressed DEFLATE block: LEN=5, NLEN=~5, followed by 'hello'.
+    // This fixed vector is independent of our compressor and has no wrapper.
+    const vector = new Uint8Array([0x01, 0x05, 0x00, 0xfa, 0xff, 0x68, 0x65, 0x6c, 0x6c, 0x6f]);
+    const unpacked = await NSEData.from(vector).decompressed("zlib");
+    expect(new TextDecoder().decode(unpacked.bytes)).toBe("hello");
   });
 });
 
