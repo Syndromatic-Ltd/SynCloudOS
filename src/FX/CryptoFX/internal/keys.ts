@@ -1,0 +1,175 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import { NSEData } from "../../../Foundation/NSEData";
+import type { CRFXDigest } from "../CRFXDigest";
+import { CRFXSharedSecret } from "../CRFXSharedSecret";
+import { CRFXError } from "../CRFXError";
+import { concat, copy, makeValue, operation, provider, unhex, unsupported } from "./bytes";
+import { der, fromBase64url, parseDer, parsePem, pem, sequence } from "./encoding";
+import { compactable, curves, uncompress, type Curve } from "./curves";
+
+type Representation = "rawRepresentation" | "x963Representation" | "compressedRepresentation" | "compactRepresentation" | "derRepresentation" | "pemRepresentation";
+type Input = Partial<Record<Exclude<Representation, "pemRepresentation">, NSEData>> & { pemRepresentation?: string };
+type Kind = "signing" | "agreement";
+type State = { curve: Curve | "Curve25519"; kind: Kind; privateKey: boolean; key: Promise<CryptoKey> };
+const keys = new WeakMap<object, State>();
+function state(value: object): State { const found = keys.get(value); if (!found) throw new CRFXError("invalidParameter", "Invalid key."); return found; }
+function retain(value: object, entry: State): void { keys.set(value, entry); void entry.key.catch(() => {}); }
+function algorithm(curve: State["curve"], kind: Kind): EcKeyImportParams | Algorithm {
+  return curve === "Curve25519" ? { name: kind === "signing" ? "Ed25519" : "X25519" } : { name: kind === "signing" ? "ECDSA" : "ECDH", namedCurve: curves[curve].name };
+}
+function inputEntry(input: Input): [Representation, NSEData | string] {
+  if (!input || typeof input !== "object") throw new CRFXError("invalidParameter");
+  const names = Object.keys(input) as Representation[];
+  if (names.length !== 1 || !["rawRepresentation", "x963Representation", "compressedRepresentation", "compactRepresentation", "derRepresentation", "pemRepresentation"].includes(names[0])) throw new CRFXError("invalidParameter", "Supply exactly one Apple key representation.");
+  const name = names[0], value = input[name];
+  if (name === "pemRepresentation" ? typeof value !== "string" : !(value instanceof NSEData)) throw new CRFXError("invalidParameter");
+  return [name, value!];
+}
+function ecAlgorithmIdentifier(curve: Curve): Uint8Array<ArrayBuffer> { return sequence(unhex("06072a8648ce3d0201"), unhex(curves[curve].oid)); }
+function wrapScalar(bytes: Uint8Array, curve: Curve): Uint8Array<ArrayBuffer> {
+  return sequence(unhex("020100"), ecAlgorithmIdentifier(curve), der(4, sequence(unhex("020101"), der(4, bytes))));
+}
+function ensurePkcs8(bytes: Uint8Array, curve: Curve): Uint8Array<ArrayBuffer> {
+  const top = parseDer(bytes);
+  if (top.tag !== 0x30 || top.end !== bytes.length) throw new CRFXError("invalidParameter");
+  const version = parseDer(top.bytes), second = parseDer(top.bytes, version.end);
+  // CryptoKit accepts both SEC1 and PKCS8; WebCrypto accepts PKCS8 only.
+  return second.tag === 4 ? sequence(unhex("020100"), ecAlgorithmIdentifier(curve), der(4, bytes)) : new Uint8Array(bytes);
+}
+async function publicFromPrivate(key: CryptoKey, curve: State["curve"], kind: Kind): Promise<CryptoKey> {
+  const jwk = await provider().subtle.exportKey("jwk", key);
+  delete jwk.d; delete jwk.key_ops; delete jwk.alg;
+  return provider().subtle.importKey("jwk", jwk, algorithm(curve, kind), true, kind === "signing" ? ["verify"] : []);
+}
+export function initPrivate(value: object, curve: State["curve"], kind: Kind, input?: boolean | Input): void {
+  const alg = algorithm(curve, kind), usage: KeyUsage[] = kind === "signing" ? ["sign"] : ["deriveBits"];
+  let selected: [Representation, NSEData | string] | undefined;
+  if (typeof input !== "boolean" && input !== undefined) selected = inputEntry(input);
+  const key = operation(async () => {
+    if (!selected) {
+      for (let attempt = 0; attempt < 128; attempt++) {
+        const pair = await provider().subtle.generateKey(alg, true, kind === "signing" ? ["sign", "verify"] : ["deriveBits"]) as CryptoKeyPair;
+        if (curve === "Curve25519" || input === false || compactable(new Uint8Array(await provider().subtle.exportKey("raw", pair.publicKey)), curve)) return pair.privateKey;
+      }
+      return unsupported("Unable to generate a compact-representable key.");
+    }
+    const [format, encoded] = selected;
+    let raw = format === "pemRepresentation" ? copy(parsePem(encoded as string, true)) : copy(encoded as NSEData);
+    let expectedPublic: Uint8Array | undefined;
+    if (curve === "Curve25519") {
+      if (format !== "rawRepresentation" || raw.length !== 32) throw new CRFXError("incorrectParameterSize");
+      raw = concat(unhex(kind === "signing" ? "302e020100300506032b657004220420" : "302e020100300506032b656e04220420"), raw);
+    } else {
+      const size = curves[curve].size;
+      if (format === "x963Representation") {
+        if (raw.length !== 1 + size * 3 || raw[0] !== 4) throw new CRFXError("incorrectParameterSize");
+        expectedPublic = raw.slice(0, 1 + size * 2); raw = raw.slice(1 + size * 2);
+      }
+      if (format === "rawRepresentation" || format === "x963Representation") {
+        if (raw.length !== size) throw new CRFXError("incorrectKeySize");
+        raw = wrapScalar(raw, curve);
+      } else if (format === "derRepresentation" || format === "pemRepresentation") raw = ensurePkcs8(raw, curve);
+      else throw new CRFXError("invalidParameter");
+    }
+    const imported = await provider().subtle.importKey("pkcs8", raw, alg, true, usage);
+    if (expectedPublic) {
+      const actual = new Uint8Array(await provider().subtle.exportKey("raw", await publicFromPrivate(imported, curve, kind)));
+      if (actual.length !== expectedPublic.length || actual.some((n, i) => n !== expectedPublic![i])) throw new CRFXError("invalidParameter", "Private and public key representations disagree.");
+    }
+    return imported;
+  });
+  retain(value, { curve, kind, privateKey: true, key });
+}
+export function attachPublic<T extends object>(type: { prototype: T }, owner: object): T {
+  const entry = state(owner), value = Object.create(type.prototype) as T;
+  retain(value, { ...entry, privateKey: false, key: operation(async () => publicFromPrivate(await entry.key, entry.curve, entry.kind)) });
+  return Object.freeze(value);
+}
+export function initPublic(value: object, curve: State["curve"], kind: Kind, input: Input): void {
+  const [format, encoded] = inputEntry(input);
+  const raw = format === "pemRepresentation" ? copy(parsePem(encoded as string, false)) : copy(encoded as NSEData);
+  retain(value, { curve, kind, privateKey: false, key: operation(async () => {
+    let bytes = raw;
+    const alg = algorithm(curve, kind), usage: KeyUsage[] = kind === "signing" ? ["verify"] : [];
+    if (format === "derRepresentation" || format === "pemRepresentation") {
+      if (curve === "Curve25519") throw new CRFXError("invalidParameter");
+      return provider().subtle.importKey("spki", bytes, alg, true, usage);
+    }
+    if (curve === "Curve25519") {
+      if (format !== "rawRepresentation" || bytes.length !== 32) throw new CRFXError("incorrectParameterSize");
+    } else {
+      const size = curves[curve].size;
+      if (format === "rawRepresentation") {
+        if (bytes.length !== size * 2) throw new CRFXError("incorrectParameterSize");
+        bytes = concat(Uint8Array.of(4), bytes);
+      } else if (format === "compressedRepresentation" || format === "compactRepresentation") bytes = uncompress(bytes, curve, format === "compactRepresentation");
+      else if (format !== "x963Representation") throw new CRFXError("invalidParameter");
+      if (bytes.length !== 1 + size * 2 || bytes[0] !== 4) throw new CRFXError("incorrectParameterSize");
+    }
+    return provider().subtle.importKey("raw", bytes, alg, true, usage);
+  }) });
+}
+export function representation(value: object, format: Exclude<Representation, "pemRepresentation">): Promise<NSEData | null> {
+  const entry = state(value);
+  return operation(async () => {
+    const key = await entry.key;
+    if (format === "derRepresentation") return NSEData.from(await provider().subtle.exportKey(entry.privateKey ? "pkcs8" : "spki", key));
+    if (entry.privateKey) {
+      const jwk = await provider().subtle.exportKey("jwk", key), scalar = fromBase64url(jwk.d!);
+      if (format === "rawRepresentation") return NSEData.from(scalar);
+      if (format === "x963Representation" && entry.curve !== "Curve25519") return NSEData.from(concat(Uint8Array.of(4), fromBase64url(jwk.x!), fromBase64url(jwk.y!), scalar));
+      throw new CRFXError("invalidParameter");
+    }
+    const raw = new Uint8Array(await provider().subtle.exportKey("raw", key));
+    if (entry.curve === "Curve25519" || format === "x963Representation") return NSEData.from(raw);
+    if (format === "rawRepresentation") return NSEData.from(raw.slice(1));
+    if (format === "compressedRepresentation") return NSEData.from(concat(Uint8Array.of(2 + (raw[raw.length - 1] & 1)), raw.slice(1, 1 + curves[entry.curve].size)));
+    return compactable(raw, entry.curve) ? NSEData.from(raw.slice(1, 1 + curves[entry.curve].size)) : null;
+  });
+}
+export async function pemRepresentation(value: object): Promise<string> { return pem((await representation(value, "derRepresentation"))!, state(value).privateKey ? "PRIVATE KEY" : "PUBLIC KEY"); }
+export function sign(value: object, data: NSEData | CRFXDigest): Promise<NSEData> {
+  return operation(async () => {
+    if (!(data instanceof NSEData)) return unsupported("Signing an already-computed digest is unavailable in the cryptographic provider.");
+    const input = copy(data), entry = state(value);
+    if (!entry.privateKey || entry.kind !== "signing") throw new CRFXError("invalidParameter");
+    const alg = entry.curve === "Curve25519" ? { name: "Ed25519" } : { name: "ECDSA", hash: curves[entry.curve].hash };
+    return NSEData.from(await provider().subtle.sign(alg, await entry.key, input));
+  });
+}
+export function verify(value: object, signature: NSEData, data: NSEData | CRFXDigest): Promise<boolean> {
+  return operation(async () => {
+    if (!(data instanceof NSEData)) return unsupported("Verifying an already-computed digest is unavailable in the cryptographic provider.");
+    const input = copy(data), sig = copy(signature), entry = state(value);
+    if (entry.privateKey || entry.kind !== "signing") throw new CRFXError("invalidParameter");
+    const alg = entry.curve === "Curve25519" ? { name: "Ed25519" } : { name: "ECDSA", hash: curves[entry.curve].hash };
+    return provider().subtle.verify(alg, await entry.key, sig, input);
+  });
+}
+export function agree(value: object, publicValue: object): Promise<CRFXSharedSecret> {
+  return operation(async () => {
+    const entry = state(value), peer = state(publicValue);
+    if (!entry.privateKey || peer.privateKey || entry.kind !== "agreement" || peer.kind !== "agreement" || entry.curve !== peer.curve) throw new CRFXError("invalidParameter");
+    const shared = await provider().subtle.deriveBits({ name: entry.curve === "Curve25519" ? "X25519" : "ECDH", public: await peer.key }, await entry.key, entry.curve === "Curve25519" ? 256 : curves[entry.curve].size * 8);
+    return makeValue(CRFXSharedSecret, NSEData.from(shared));
+  });
+}
