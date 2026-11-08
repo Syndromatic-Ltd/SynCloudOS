@@ -14,3 +14,7 @@ export { DFXWorkItemFlags } from "./DFXWorkItemFlags";
 export { DFXSpecificKey } from "./DFXSpecificKey";
 export { DFXSourceTimerFlags } from "./DFXSourceTimerFlags";
 export { DFXSourceMemoryPressureEvent } from "./DFXSourceMemoryPressureEvent";
+export { DFXObject } from "./DFXObject";
+export { DFXQueue } from "./DFXQueue";
+export { DFXPredicate } from "./DFXPredicate";
+export { dispatchPrecondition } from "./dispatchPrecondition";

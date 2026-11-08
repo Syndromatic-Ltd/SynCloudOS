@@ -1,0 +1,390 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run src/FX/DispatchFX/__tests__/queue.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts (45 tests | 45 failed) 30ms
+   × QoS lanes drain in priority order 4ms
+   × relativePriority orders within a class, followed by FIFO 1ms
+   × serial queue runs FIFO one at a time despite later higher QoS 0ms
+   × barrier waits for earlier items and blocks later ones on a concurrent queue 0ms
+   × global queues ignore barrier 0ms
+   × target queue chain resolves QoS: 'async defaults to queue QoS' 4ms
+   × target queue chain resolves QoS: 'inherit prefers assigned queue' 1ms
+   × target queue chain resolves QoS: 'enforce raises assigned queue' 1ms
+   × target queue chain resolves QoS: 'enforce never lowers assigned queue' 1ms
+   × target queue chain resolves QoS: 'enforce wins over inherit' 1ms
+   × target queue chain resolves QoS: 'unspecified queue uses assigned item' 1ms
+   × target queue chain resolves QoS: 'target QoS is a floor' 1ms
+   × target queue chain resolves QoS: 'unspecified queue cannot lower target' 1ms
+   × target queue chain resolves QoS: 'target relative priority is a floor' 1ms
+   × submission context: 'submission captures current QoS' 1ms
+   × submission context: 'noQoS drops capture' 1ms
+   × submission context: 'detached drops capture' 1ms
+   × submission context: 'assignCurrentContext uses submitting …' 1ms
+   × submission context: 'noQoS overrides assignCurrentContext' 1ms
+   × submission context: 'explicit item QoS overrides noQoS' 1ms
+   × submission context: 'detached preserves assigned item QoS' 1ms
+   × suspend holds items; over-resume throws BUG IN CLIENT OF LIBDISPATCH 0ms
+   × initiallyInactive holds items until activate and preserves suspension count 0ms
+   × suspension of a target holds descendants and serial targets preserve shared FIFO 0ms
+   × setTarget changes inactive queued work immediately and rejects cycles 0ms
+   × main queue never re-enters, including a nested main async 0ms
+   × time slice yields at 5 ms and work items stay atomic 0ms
+   × time slice does not yield before 5 ms or between userInteractive items 0ms
+   × new interactive work pre-empts a pending lower-priority slice 0ms
+   × throwing item is reported with the queue label and the queue continues 1ms
+   × thenable return is reported once and does not hold the queue 0ms
+   × async functions are rejected by the work type and reported at runtime 0ms
+   × getSpecific reads the current stack including the target chain and clears after return 0ms
+   × dispatchPrecondition onQueue/notOnQueue/onQueueAsBarrier 0ms
+   × concurrentPerform is a synchronous ordered loop with validated iteration count 0ms
+   × maps userInteractive to postTask user-blocking 0ms
+   × maps userInitiated to postTask user-blocking 0ms
+   × maps default to postTask user-visible 0ms
+   × maps utility to postTask background 1ms
+   × maps background to postTask background 0ms
+   × falls back to shared MessageChannel tasks and background timers 0ms
+   × yield fallback uses a fresh shared MessageChannel task 0ms
+   × promotes a pending background host hop when UI work arrives (postTask=true) 0ms
+   × promotes a pending background host hop when UI work arrives (postTask=false) 0ms
+   × feature-detects console.createTask and measures developer work 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 45 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > QoS lanes drain in priority order
+TypeError: Cannot read properties of undefined (reading 'global')
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:45:7
+     43|   const events: string[] = [];
+     44|   for (const qos of [D.DFXQoSClass.background, D.DFXQoSClass.utility, …
+     45|     Q().global(qos).async(() => { events.push(qos); });
+       |       ^
+     46|   expect(events).toEqual([]);
+     47|   await host.flush();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/45]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > relativePriority orders within a class, followed by FIFO
+TypeError: Q(...) is not a constructor
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:53:5
+     51|   const events: number[] = [];
+     52|   for (const [index, relativePriority] of [-15, -2, -2, 0].entries())
+     53|     new (Q())(`relative-${index}`, { qos: new D.DFXQoS(D.DFXQoSClass.u…
+       |     ^
+     54|   await host.flush();
+     55|   expect(events).toEqual([3, 1, 2, 0]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/45]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > serial queue runs FIFO one at a time despite later higher QoS
+TypeError: Q(...) is not a constructor
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:58:17
+     56| });
+     57| it("serial queue runs FIFO one at a time despite later higher QoS", as…
+     58|   const queue = new (Q())("serial");
+       |                 ^
+     59|   const events: string[] = [];
+     60|   let running = false;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/45]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > barrier waits for earlier items and blocks later ones on a concurrent queue
+TypeError: Q(...) is not a constructor
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:71:17
+     69| });
+     70| it("barrier waits for earlier items and blocks later ones on a concurr…
+     71|   const queue = new (Q())("concurrent", { attributes: [A.concurrent] }…
+       |                 ^
+     72|   const events: number[] = [];
+     73|   queue.async(() => { events.push(1); });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/45]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > global queues ignore barrier
+TypeError: Cannot read properties of undefined (reading 'global')
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:79:19
+     77| });
+     78| it("global queues ignore barrier", async () => {
+     79|   const queue = Q().global();
+       |                   ^
+     80|   queue.async({ flags: [F.barrier] }, () => {
+     81|     D.dispatchPrecondition(D.DFXPredicate.onQueue(queue));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/45]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > target queue chain resolves QoS: 'async defaults to queue QoS'
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > target queue chain resolves QoS: 'inherit prefers assigned queue'
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > target queue chain resolves QoS: 'enforce raises assigned queue'
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > target queue chain resolves QoS: 'enforce never lowers assigned queue'
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > target queue chain resolves QoS: 'enforce wins over inherit'
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > target queue chain resolves QoS: 'unspecified queue uses assigned item'
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > target queue chain resolves QoS: 'target QoS is a floor'
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > target queue chain resolves QoS: 'unspecified queue cannot lower target'
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > target queue chain resolves QoS: 'target relative priority is a floor'
+Error: Cannot find module '/src/FX/DispatchFX/internal/executionStack' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/src/FX/DispatchFX/__tests__/queue.test.ts
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:99:32
+     97| ];
+     98| it.each(qosCases)("target queue chain resolves QoS: $name", async ({ q…
+     99|   const { currentExecution } = await import("../internal/executionStac…
+       |                                ^
+    100|   const targetQueue = new (Q())("target", { qos: target ?? D.DFXQoS.un…
+    101|   const queue = new (Q())("leaf", { qos, target: targetQueue });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/45]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > submission context: 'submission captures current QoS'
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > submission context: 'noQoS drops capture'
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > submission context: 'detached drops capture'
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > submission context: 'assignCurrentContext uses submitting …'
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > submission context: 'noQoS overrides assignCurrentContext'
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > submission context: 'explicit item QoS overrides noQoS'
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > submission context: 'detached preserves assigned item QoS'
+Error: Cannot find module '/src/FX/DispatchFX/internal/executionStack' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/src/FX/DispatchFX/__tests__/queue.test.ts
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:115:32
+    113|   { name: "detached preserves assigned item QoS", flags: [F.detached],…
+    114| ])("submission context: $name", async ({ flags, item, expected }) => {
+    115|   const { currentExecution } = await import("../internal/executionStac…
+       |                                ^
+    116|   const queue = new (Q())("captured");
+    117|   let observed: D.DFXQoS | undefined;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/45]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > suspend holds items; over-resume throws BUG IN CLIENT OF LIBDISPATCH
+TypeError: Q(...) is not a constructor
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:123:17
+    121| });
+    122| it("suspend holds items; over-resume throws BUG IN CLIENT OF LIBDISPAT…
+    123|   const queue = new (Q())("suspended"); const work = vi.fn();
+       |                 ^
+    124|   queue.suspend(); queue.suspend(); queue.async(work);
+    125|   await host.flush(); expect(work).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/45]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > initiallyInactive holds items until activate and preserves suspension count
+TypeError: Q(...) is not a constructor
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:131:17
+    129| });
+    130| it("initiallyInactive holds items until activate and preserves suspens…
+    131|   const queue = new (Q())("inactive", { attributes: [A.initiallyInacti…
+       |                 ^
+    132|   queue.async(work); await host.flush(); expect(work).not.toHaveBeenCa…
+    133|   queue.suspend(); queue.activate(); queue.activate(); await host.flus…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/45]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > suspension of a target holds descendants and serial targets preserve shared FIFO
+TypeError: Q(...) is not a constructor
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:138:18
+    136| });
+    137| it("suspension of a target holds descendants and serial targets preser…
+    138|   const target = new (Q())("target");
+       |                  ^
+    139|   const child = new (Q())("child", { target }); const events: string[]…
+    140|   target.suspend(); child.async(() => { events.push("child"); }); targ…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/45]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > setTarget changes inactive queued work immediately and rejects cycles
+TypeError: Q(...) is not a constructor
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:145:18
+    143| });
+    144| it("setTarget changes inactive queued work immediately and rejects cyc…
+    145|   const target = new (Q())("new-target", { qos: D.DFXQoS.userInitiated…
+       |                  ^
+    146|   const queue = new (Q())("inactive-target", { attributes: [A.initiall…
+    147|   const key = new D.DFXSpecificKey<string>(); target.setSpecific(key, …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/45]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > main queue never re-enters, including a nested main async
+TypeError: Cannot read properties of undefined (reading 'main')
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:156:5
+    154| it("main queue never re-enters, including a nested main async", async …
+    155|   const events: number[] = [];
+    156|   Q().main.async(() => { events.push(1); Q().main.async(() => { events…
+       |     ^
+    157|   await host.step(); expect(events).toEqual([1, 2, 3]); expect(host.sc…
+    158| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/45]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > time slice yields at 5 ms and work items stay atomic
+TypeError: Q(...) is not a constructor
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:160:17
+    158| });
+    159| it("time slice yields at 5 ms and work items stay atomic", async () =>…
+    160|   const queue = new (Q())("slice"); const events: number[] = [];
+       |                 ^
+    161|   queue.async(() => { events.push(1); host.advance(5); events.push(2);…
+    162|   queue.async(() => { events.push(3); });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/45]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > time slice does not yield before 5 ms or between userInteractive items
+TypeError: Q(...) is not a constructor
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:168:17
+    166| it("time slice does not yield before 5 ms or between userInteractive i…
+    167|   const events: number[] = [];
+    168|   const queue = new (Q())("short"); queue.async(() => { events.push(1)…
+       |                 ^
+    169|   await host.step(); expect(events).toEqual([1, 2]); expect(host.sched…
+    170|   for (let n = 0; n < 3; n++) Q().main.async(() => { events.push(n + 3…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/45]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > new interactive work pre-empts a pending lower-priority slice
+TypeError: Q(...) is not a constructor
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:174:46
+    172| });
+    173| it("new interactive work pre-empts a pending lower-priority slice", as…
+    174|   const events: string[] = []; const queue = new (Q())("lower");
+       |                                              ^
+    175|   queue.async(() => { events.push("lower-1"); host.advance(5); Q().mai…
+    176|   queue.async(() => { events.push("lower-2"); });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/45]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > throwing item is reported with the queue label and the queue continues
+TypeError: Q(...) is not a constructor
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:181:17
+    179| });
+    180| it("throwing item is reported with the queue label and the queue conti…
+    181|   const queue = new (Q())("throwing-label"); const next = vi.fn();
+       |                 ^
+    182|   queue.async(() => { throw new Error("bad work"); }); queue.async(nex…
+    183|   await host.flush(); expect(next).toHaveBeenCalledTimes(1); expect(ho…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/45]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > thenable return is reported once and does not hold the queue
+TypeError: Q(...) is not a constructor
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:187:17
+    185| });
+    186| it("thenable return is reported once and does not hold the queue", asy…
+    187|   const queue = new (Q())("thenable"); const next = vi.fn(); const the…
+       |                 ^
+    188|   // @ts-expect-error PromiseLike work is forbidden, even with a non-n…
+    189|   queue.async(() => ({ then } as PromiseLike<void>));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/45]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > async functions are rejected by the work type and reported at runtime
+TypeError: Cannot read properties of undefined (reading 'global')
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:196:5
+    194| it("async functions are rejected by the work type and reported at runt…
+    195|   // @ts-expect-error Native Promise work is forbidden.
+    196|   Q().global().async(async () => { throw new Error("async rejection");…
+       |     ^
+    197|   await host.flush(); expect(host.reportError).toHaveBeenCalledTimes(1…
+    198| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/45]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > getSpecific reads the current stack including the target chain and clears after return
+TypeError: Q(...) is not a constructor
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:200:18
+    198| });
+    199| it("getSpecific reads the current stack including the target chain and…
+    200|   const target = new (Q())("specific-target"); const child = new (Q())…
+       |                  ^
+    201|   const key = new D.DFXSpecificKey<string>(); target.setSpecific(key, …
+    202|   expect(child.getSpecific(key)).toBeUndefined(); expect(target.getSpe…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/45]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > dispatchPrecondition onQueue/notOnQueue/onQueueAsBarrier
+TypeError: Q(...) is not a constructor
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:208:18
+    206| });
+    207| it("dispatchPrecondition onQueue/notOnQueue/onQueueAsBarrier", async (…
+    208|   const target = new (Q())("predicate-target"); const queue = new (Q()…
+       |                  ^
+    209|   D.dispatchPrecondition(D.DFXPredicate.notOnQueue(queue));
+    210|   expect(() => D.dispatchPrecondition(D.DFXPredicate.onQueue(queue))).…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/45]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > concurrentPerform is a synchronous ordered loop with validated iteration count
+TypeError: Cannot read properties of undefined (reading 'concurrentPerform')
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:219:5
+    217| it("concurrentPerform is a synchronous ordered loop with validated ite…
+    218|   const events: number[] = [];
+    219|   Q().concurrentPerform(4, index => { events.push(index); }); expect(e…
+       |     ^
+    220|   Q().concurrentPerform(0, () => { throw new Error("unreachable"); });
+    221|   for (const count of [-1, 0.5, Infinity, NaN]) expect(() => Q().concu…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/45]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > maps userInteractive to postTask user-blocking
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > maps userInitiated to postTask user-blocking
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > maps default to postTask user-visible
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > maps utility to postTask background
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > maps background to postTask background
+TypeError: Cannot read properties of undefined (reading 'global')
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:229:5
+    227|   [D.DFXQoSClass.default, "user-visible"], [D.DFXQoSClass.utility, "ba…
+    228| ] as const)("maps %s to postTask %s", async (qos, priority) => {
+    229|   Q().global(qos).async(() => {}); expect(host.tasks[0]).toMatchObject…
+       |     ^
+    230| });
+    231| it("falls back to shared MessageChannel tasks and background timers", …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/45]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > falls back to shared MessageChannel tasks and background timers
+TypeError: Cannot read properties of undefined (reading 'global')
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:233:5
+    231| it("falls back to shared MessageChannel tasks and background timers", …
+    232|   vi.stubGlobal("scheduler", undefined); const events: string[] = [];
+    233|   Q().global().async(() => { events.push("default"); }); expect(host.t…
+       |     ^
+    234|   Q().global(D.DFXQoSClass.utility).async(() => { events.push("utility…
+    235|   vi.stubGlobal("MessageChannel", undefined); Q().global().async(() =>…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/45]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > yield fallback uses a fresh shared MessageChannel task
+TypeError: Q(...) is not a constructor
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:239:84
+    237| });
+    238| it("yield fallback uses a fresh shared MessageChannel task", async () …
+    239|   vi.stubGlobal("scheduler", { postTask: host.scheduler.postTask }); c…
+       |                                                                                    ^
+    240|   const work = vi.fn(); queue.async(() => { host.advance(5); }); queue…
+    241|   await host.step(); expect(work).not.toHaveBeenCalled(); expect(host.…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/45]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > promotes a pending background host hop when UI work arrives (postTask=true)
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > promotes a pending background host hop when UI work arrives (postTask=false)
+TypeError: Cannot read properties of undefined (reading 'global')
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:246:5
+    244|   if (!postTask) vi.stubGlobal("scheduler", undefined);
+    245|   const events: string[] = [];
+    246|   Q().global(D.DFXQoSClass.background).async(() => { events.push("back…
+       |     ^
+    247|   Q().main.async(() => { events.push("UI"); });
+    248|   expect(host.tasks).toHaveLength(2);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/45]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > feature-detects console.createTask and measures developer work
+TypeError: Q(...) is not a constructor
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:256:57
+    254| it("feature-detects console.createTask and measures developer work", a…
+    255|   const run = vi.fn((work: () => unknown) => work()); const createTask…
+    256|   vi.stubGlobal("console", { ...console, createTask }); new (Q())("ins…
+       |                                                         ^
+    257|   await host.flush(); expect(createTask).toHaveBeenCalledWith("DFX ins…
+    258|   expect(host.measure).toHaveBeenCalledWith("DFX instrumented", { star…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/45]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  45 failed (45)
+   Start at  09:00:21
+   Duration  303ms (transform 78ms, setup 26ms, import 77ms, tests 30ms, environment 0ms)

@@ -1,6 +1,6 @@
 # DispatchFX
 
-DispatchFX (`@syndromatic/syncloudos/fx/dispatch`) mirrors Apple's Dispatch types under `DFX`. This entry currently provides the value types below. Arguments are positional in Apple's order.
+DispatchFX (`@syndromatic/syncloudos/fx/dispatch`) mirrors Apple's Dispatch types under `DFX`. It currently provides value types and synchronous in-realm queue scheduling. Arguments are positional in Apple's order; consecutive defaulted arguments use an options object, with work last.
 
 ```ts
 import { DFXTime, DFXTimeInterval, DFXQoS, DFXQoSClass } from "@syndromatic/syncloudos/fx/dispatch";
@@ -23,6 +23,48 @@ const priority = new DFXQoS(DFXQoSClass.utility, -5);
 | `DFXSpecificKey<T>` | `DispatchSpecificKey<T>` | `new DFXSpecificKey<T>()`; identity-based key |
 | `DFXSourceTimerFlags` | `DispatchSource.TimerFlags` | `strict` |
 | `DFXSourceMemoryPressureEvent` | `DispatchSource.MemoryPressureEvent` | `normal`, `warning`, `critical`, `all` |
+| `DFXObject` | `DispatchObject` | Abstract base; `activate()`, `suspend()`, `resume()`, `setTarget(queue)` |
+| `DFXQueue` | `DispatchQueue` | `new DFXQueue(label, options?)`, `main`, `global(qosClass?)`, `concurrentPerform(iterations, execute)`, static `getSpecific(key)`; `label`, `qos`, `async(work)`, `async({ qos?, flags? }, work)`, `setSpecific(key, value)`, `getSpecific(key)` |
+| `DFXPredicate` | `DispatchPredicate` | `onQueue(queue)`, `onQueueAsBarrier(queue)`, `notOnQueue(queue)` |
+| `dispatchPrecondition` | `dispatchPrecondition` | `dispatchPrecondition(condition)` |
+
+## Queues and synchronous work
+
+```ts
+import { DFXQueue, DFXQoS, DFXQoSClass, DFXQueueAttributes, DFXWorkItemFlags } from "@syndromatic/syncloudos/fx/dispatch";
+
+const preparation = new DFXQueue("example.preparation", {
+  qos: DFXQoS.utility,
+  attributes: [DFXQueueAttributes.concurrent],
+});
+preparation.async(() => { /* one atomic synchronous step */ });
+preparation.async({ flags: [DFXWorkItemFlags.barrier] }, () => { /* commit prior steps */ });
+DFXQueue.global(DFXQoSClass.background).async(() => { /* background step */ });
+DFXQueue.main.async(() => { /* update UI after earlier main items return */ });
+DFXQueue.concurrentPerform(3, index => { /* finishes 0, 1, 2 before returning */ });
+```
+
+`global` accepts a `DFXQoSClass`, matching [Apple's signature](https://developer.apple.com/documentation/dispatch/dispatchqueue/global(qos:)). Queue options accept `qos`, `attributes`, `autoreleaseFrequency` and `target`. The default queue is serial and has `DFXQoS.unspecified`; `qos` reports that assigned value, while execution can inherit a target's QoS. `main` is serial at `userInteractive`. Concurrent queues use a legal sequential schedule in this tier; this implementation creates no workers and claims no parallel speed-up. Barriers order earlier and later work on a concurrent queue, including work arriving through its target hierarchy. Global concurrent queues ignore barriers. `concurrentPerform` requires a non-negative safe integer and runs every iteration synchronously in index order.
+
+Each realm has one private scheduler. Ready queue heads run by QoS class (`userInteractive`, `userInitiated`, `default`, `utility`, `background`), descending relative priority, then submission order. Leaf queues preserve FIFO; shared serial targets preserve exclusivity. Suspended and inactive children do not stall independent work on an otherwise runnable target. Work is atomic: after 5 ms the scheduler yields between items, except between successive `userInteractive` items. Nested main submissions run after the current main item returns. Hosts with `scheduler.postTask` receive `user-blocking`, `user-visible` or `background` priorities. Other hosts use the same MessageChannel helper as the runtime, or zero-delay timers for background tasks. A pending low-priority hop is promoted when higher-priority work becomes runnable; obsolete hops cannot drain again. Slice continuations prefer `scheduler.yield` where available.
+
+Work closures reject `PromiseLike` return values in TypeScript. Runtime thenables are reported once with `DispatchFX work items are synchronous. Use DFXGroup enter() and leave() around asynchronous work.` Their rejection is consumed so it cannot produce a second unhandled rejection. A thrown item is reported with its queue label and original error as `cause`, and later work continues. Hosts without `reportError` use `console.error`. `console.createTask` captures the submission site when supported; developer builds record `performance.measure("DFX " + label)`.
+
+## Target queues, flags and lifetime
+
+The QoS rules follow [Apple's `dispatch/block.h`](https://github.com/apple-oss-distributions/libdispatch/blob/main/dispatch/block.h). Asynchronous execution defaults to `inheritQoS`: an explicitly assigned queue QoS wins over the item's QoS. An unspecified queue uses the item's assigned or submission-time QoS. Each target's assigned QoS provides a floor. `enforceQoS` can raise the queue's QoS to the item's QoS and wins when both preference flags are supplied; it never lowers the queue or target floor. Relative priorities break ties within a class. The default class is used only if no class was assigned or captured.
+
+Ordinary `async` captures only the synchronous submitting execution stack. `noQoS` and `detached` suppress that capture; an explicitly supplied item QoS takes precedence. `noQoS` wins over `assignCurrentContext`. For ordinary submissions, `assignCurrentContext` refers to the submitting stack; WorkItem creation-time capture will be added with WorkItem itself. No queue or application context persists across an `await` or into a later microtask.
+
+`suspend` and `resume` maintain a count. An over-resume throws a plain `Error` beginning `BUG IN CLIENT OF LIBDISPATCH: `. `initiallyInactive` holds work until `activate`; activation is idempotent and does not consume suspension counts. Global and main queue suspension and resumption have no effect. `setTarget` rejects cycles and changes to main/global queues. As in [Apple's target-queue contract](https://github.com/apple-oss-distributions/libdispatch/blob/main/dispatch/queue.h), inactive retargeting affects existing submissions immediately; active retargeting affects subsequent submissions. When an inactive ancestor changes target, existing work retains its saved prefix through active queues and updates only the affected suffix. Changing the target after activating an initially inactive queue is a client error.
+
+Group/WorkItem-dependent `async` overloads are deferred until those classes are implemented; no placeholder types are exported. `sync`, timers, sources and per-application binding/lifetime cancellation belong to the following core tasks. Current scheduling items use the internal system attribution (`appId: null`). The queue API is not yet a per-application scheduling surface.
+
+## Specific values and execution preconditions
+
+`queue.setSpecific(key, value)` stores a value by key identity; `undefined` removes it. `queue.getSpecific(key)` queries that queue alone. Static `DFXQueue.getSpecific(key)` searches the current execution queue and then its target chain, returning `undefined` outside an executing item. Global queues do not store specific values. These are Apple's distinct `dispatch_queue_get_specific` and `dispatch_get_specific` behaviours.
+
+`dispatchPrecondition(DFXPredicate.onQueue(queue))` checks the synchronous execution stack, including target queues. `notOnQueue` checks its absence. `onQueueAsBarrier` succeeds for a serial queue, or for a concurrent queue's barrier item; global concurrent queues ignore barrier flags. Failed checks throw the libdispatch client-error prefix with the predicate and queue label.
 
 ## Time representation and limits
 

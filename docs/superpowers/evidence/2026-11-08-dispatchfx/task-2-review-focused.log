@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run src/FX/DispatchFX tests/runtime/fx/dispatch-counterparts.test.ts tests/runtime/browser-host-yield.test.ts tests/runtime/browser-text-layout-adapter.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  5 passed (5)
+      Tests  78 passed (78)
+   Start at  09:23:15
+   Duration  10.52s (transform 8.46s, setup 90ms, import 10.83s, tests 527ms, environment 0ms)

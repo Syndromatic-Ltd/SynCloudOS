@@ -46,6 +46,10 @@
     "CRFXAES.GCM.open": "AES.GCM.open(_:using:authenticating:)"
   },
   "frameworkCounterparts": {
+    "DFXObject": "DispatchObject",
+    "DFXQueue": "DispatchQueue",
+    "DFXPredicate": "DispatchPredicate",
+    "dispatchPrecondition": "dispatchPrecondition",
     "DFXTime": "DispatchTime",
     "DFXWallTime": "DispatchWallTime",
     "DFXTimeInterval": "DispatchTimeInterval",
