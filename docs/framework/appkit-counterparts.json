@@ -48,6 +48,9 @@
   "frameworkCounterparts": {
     "DFXObject": "DispatchObject",
     "DFXQueue": "DispatchQueue",
+    "DFXWorkItem": "DispatchWorkItem",
+    "DFXGroup": "DispatchGroup",
+    "DFXSemaphore": "DispatchSemaphore",
     "DFXPredicate": "DispatchPredicate",
     "dispatchPrecondition": "dispatchPrecondition",
     "DFXTime": "DispatchTime",

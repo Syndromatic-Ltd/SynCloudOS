@@ -7,7 +7,7 @@ import type { DFXQueue } from "../DFXQueue";
 import type { DFXQoS } from "../DFXQoS";
 import { DFXQoSClass } from "../DFXQoSClass";
 import { compareQoS, objectState, observeObjectChanges, queueChain } from "./queueState";
-import { isExecuting, withExecution } from "./executionStack";
+import { currentExecution, isExecuting, withExecution } from "./executionStack";
 import { labelChain } from "./sync";
 import { clientError } from "./time";
 import { reportDispatchError } from "./work";
@@ -28,6 +28,7 @@ interface TaskScheduler {
   yield?: () => Promise<void>;
 }
 const pending: Entry[] = [];
+const mainThreadSliceMilliseconds = 5;
 const overrides = new Map<DFXQueue, Map<object, DFXQoS>>();
 let draining = false;
 let ticket = 0;
@@ -46,7 +47,10 @@ function qos(entry: Entry): DFXQoS {
   return value;
 }
 /** The same dependency graph serves host scheduling and synchronous draining. */
-function next(upTo?: Entry): Entry | undefined {
+function next(upTo?: Entry | ReadonlySet<Entry>): Entry | undefined {
+  const limits = upTo === undefined ? undefined : "job" in upTo ? new Set([upTo]) : upTo;
+  let lastLimit: Entry | undefined;
+  if (limits) for (let index = pending.length - 1; index >= 0; index--) if (limits.has(pending[index])) { lastLimit = pending[index]; break; }
   const ready: Entry[] = [];
   const dependencies = new Map<Entry, Set<Entry>>();
   const leaves = new Map<DFXQueue, Entry>();
@@ -61,7 +65,7 @@ function next(upTo?: Entry): Entry | undefined {
     const leafHead = leaves.get(entry.job.queue);
     if (leafHead) blockers.add(leafHead); else leaves.set(entry.job.queue, entry);
     if (entry.chain.some(queue => { const state = objectState(queue); return !state.active || state.suspensionCount > 0; })) {
-      if (entry === upTo) break;
+      if (entry === lastLimit) break;
       continue;
     }
     const serialChain = entry.chain.filter(queue => { const state = objectState(queue); return !state.global && !state.concurrent; });
@@ -82,12 +86,12 @@ function next(upTo?: Entry): Entry | undefined {
     const held = isExecuting(entry.job.queue) || entry.chain.some(queue => isExecuting(queue, true) || objectState(queue).workerInFlight)
       || (entry.job.barrier && isExecuting(entry.job.queue));
     if (blockers.size === 0 && !held) ready.push(entry);
-    if (entry === upTo) break;
+    if (entry === lastLimit) break;
   }
   let required: Set<Entry> | undefined;
-  if (upTo) {
-    required = new Set([upTo]);
-    const visit = [upTo];
+  if (limits) {
+    required = new Set(limits);
+    const visit = [...limits];
     for (let entry = visit.pop(); entry; entry = visit.pop()) for (const predecessor of dependencies.get(entry) ?? []) {
       if (!required.has(predecessor)) { required.add(predecessor); visit.push(predecessor); }
     }
@@ -138,7 +142,7 @@ function drain(): void {
     for (let entry = next(); entry; entry = next()) {
       const effectiveQoS = qos(entry);
       const interactive = effectiveQoS.qosClass === DFXQoSClass.userInteractive;
-      if (performance.now() - started >= 5 && !(previousInteractive && interactive)) {
+      if (performance.now() - started >= mainThreadSliceMilliseconds && !(previousInteractive && interactive)) {
         // A higher host priority gets a new postTask rather than inheriting
         // the current background task's scheduler.yield continuation priority.
         schedule(entry, lastPriority === undefined || hostRank(priority(effectiveQoS)) <= hostRank(lastPriority));
@@ -160,6 +164,33 @@ export const rootScheduler = Object.freeze({
     const token = {}; let released = false;
     values.set(token, value);
     return () => { if (released) return; released = true; values.delete(token); if (values.size === 0) overrides.delete(queue); };
+  },
+  /** Use the existing predecessor graph; blocked waits retain their submissions. */
+  drainJobs(jobs: () => Iterable<ScheduledJob>, satisfy: () => boolean, boundToSlice = false): boolean {
+    const wasDraining = draining; draining = true;
+    const started = boundToSlice ? performance.now() : 0;
+    const releases = new Map<DFXQueue, () => void>();
+    const callerQoS = currentExecution()?.qos;
+    try {
+      while (!satisfy()) {
+        // A group can continuously enrol successors without ever becoming
+        // empty. Stop between atomic bodies; the browser cannot block here.
+        if (boundToSlice && performance.now() - started >= mainThreadSliceMilliseconds) return false;
+        const requested = new Set(jobs());
+        if (callerQoS) for (const job of requested) if (!releases.has(job.queue)) releases.set(job.queue, rootScheduler.override(job.queue, callerQoS));
+        const limits = new Set<Entry>(); let floor = callerQoS;
+        for (const limit of pending) if (requested.has(limit.job)) {
+          limits.add(limit); floor = floor ? higher(floor, qos(limit)) : qos(limit);
+        }
+        const selected = limits.size ? next(limits) : undefined;
+        if (!selected) return false;
+        try { run(selected, floor); } catch (error) { reportDispatchError(error); }
+      }
+      return true;
+    } finally {
+      for (const release of releases.values()) release();
+      draining = wasDraining; wake();
+    }
   },
   drainInRealm(queue: DFXQueue, upTo?: ScheduledJob): void {
     let limit = upTo ? pending.find(entry => entry.job === upTo) : undefined;

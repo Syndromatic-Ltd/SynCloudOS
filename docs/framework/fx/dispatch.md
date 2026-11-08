@@ -1,6 +1,6 @@
 # DispatchFX
 
-DispatchFX (`@syndromatic/syncloudos/fx/dispatch`) mirrors Apple's Dispatch types under `DFX`. It currently provides value types and synchronous in-realm queue scheduling. Arguments are positional in Apple's order; consecutive defaulted arguments use an options object, with work last.
+DispatchFX (`@syndromatic/syncloudos/fx/dispatch`) mirrors Apple's Dispatch types under `DFX`. It provides value types, synchronous in-realm queue scheduling, work items, groups and semaphores. Arguments are positional in Apple's order; consecutive defaulted arguments use an options object, with work last.
 
 ```ts
 import { DFXTime, DFXTimeInterval, DFXQoS, DFXQoSClass } from "@syndromatic/syncloudos/fx/dispatch";
@@ -24,9 +24,12 @@ const priority = new DFXQoS(DFXQoSClass.utility, -5);
 | `DFXSourceTimerFlags` | `DispatchSource.TimerFlags` | `strict` |
 | `DFXSourceMemoryPressureEvent` | `DispatchSource.MemoryPressureEvent` | `normal`, `warning`, `critical`, `all` |
 | `DFXObject` | `DispatchObject` | Abstract base; `activate()`, `suspend()`, `resume()`, `setTarget(queueOrNull)` |
-| `DFXQueue` | `DispatchQueue` | `new DFXQueue(label, options?)`, `main`, `global(qosClass?)`, `concurrentPerform(iterations, execute)`, static `getSpecific(key)`; `label`, `qos`, `async(work)`, `async({ qos?, flags? }, work)`, `sync(work)`, `sync(flags, work)`, `setSpecific(key, value)`, `getSpecific(key)` |
+| `DFXQueue` | `DispatchQueue` | `new DFXQueue(label, options?)`, `main`, `global(qosClass?)`, `concurrentPerform(iterations, execute)`, static `getSpecific(key)`; `label`, `qos`, `async(work)`, `async({ group?, qos?, flags? }, work)`, `async(item)`, `async(group, item)`, `sync(item)`, `sync(work)`, `sync(flags, work)`, `setSpecific(key, value)`, `getSpecific(key)` |
 | `DFXPredicate` | `DispatchPredicate` | `onQueue(queue)`, `onQueueAsBarrier(queue)`, `notOnQueue(queue)` |
 | `dispatchPrecondition` | `dispatchPrecondition` | `dispatchPrecondition(condition)` |
+| `DFXWorkItem` | `DispatchWorkItem` | `new DFXWorkItem(block)`, `new DFXWorkItem({ qos?, flags? }, block)`, `perform()`, `wait()`, `wait(timeout)`, `notify(queue, work)`, `notify(queue, { qos?, flags? }, work)`, `notify(queue, item)`, `cancel()`, `isCancelled` |
+| `DFXGroup` | `DispatchGroup` | `new DFXGroup()`, `enter()`, `leave()`, `wait()`, `wait(timeout)`, `notify(queue, work)`, `notify(queue, { qos?, flags? }, work)`, `notify(queue, item)`; inherits `DFXObject` |
+| `DFXSemaphore` | `DispatchSemaphore` | `new DFXSemaphore(value)`, `wait()`, `wait(timeout)`, `signal(): number`; inherits `DFXObject` |
 
 ## Queues and synchronous work
 
@@ -60,11 +63,39 @@ Sync throws a plain libdispatch-prefix error when the requested queue is already
 
 The QoS rules follow [Apple's `dispatch/block.h`](https://github.com/apple-oss-distributions/libdispatch/blob/main/dispatch/block.h). Asynchronous execution defaults to `inheritQoS`: an explicitly assigned queue QoS wins over the item's QoS. An unspecified queue uses the item's assigned or submission-time QoS. Each target's assigned QoS provides a floor. `enforceQoS` can raise the queue's QoS to the item's QoS and wins when both preference flags are supplied; it never lowers the queue or target floor. Relative priorities break ties within a class. The default class is used only if no class was assigned or captured.
 
-Ordinary `async` captures only the synchronous submitting execution stack. `noQoS` and `detached` suppress that capture; an explicitly supplied item QoS takes precedence. `noQoS` wins over `assignCurrentContext`. For ordinary submissions, `assignCurrentContext` refers to the submitting stack; WorkItem creation-time capture will be added with WorkItem itself. No queue or application context persists across an `await` or into a later microtask.
+Ordinary `async` captures only the synchronous submitting execution stack. `noQoS` and `detached` suppress that capture; an explicitly supplied item QoS takes precedence. `noQoS` wins over `assignCurrentContext`. For ordinary closures, `assignCurrentContext` refers to the submitting stack. A WorkItem with `assignCurrentContext` captures its creation QoS; other WorkItems capture QoS when submitted. `sync(item)` defaults to `enforceQoS` unless the item explicitly selects a preference. Direct `perform()` raises the caller's effective QoS when appropriate and restores its execution frame afterwards. No queue or application context persists across an `await` or into a later microtask.
 
 `suspend` and `resume` maintain a count. An over-resume throws a plain `Error` beginning `BUG IN CLIENT OF LIBDISPATCH: `. `initiallyInactive` holds work until `activate`; activation is idempotent and does not consume suspension counts. Global and main queue suspension, resumption and target changes have no effect. `setTarget` rejects cycles. Constructor `target: null` and `setTarget(null)` select the implicit default global root, as Apple's `DISPATCH_TARGET_QUEUE_DEFAULT` does; they do not select the main queue. Assigned QoS continues to apply. As in [Apple's target-queue contract](https://github.com/apple-oss-distributions/libdispatch/blob/main/dispatch/queue.h), inactive retargeting affects existing submissions immediately; active retargeting affects subsequent submissions. When an inactive ancestor changes target, existing work retains its saved prefix through active queues and updates only the affected suffix. Changing the target after activating an initially inactive queue is a client error. Apple's [`dispatch_set_target_queue` implementation](https://github.com/apple-oss-distributions/libdispatch/blob/main/src/object.c) ignores global/root/base objects, including the main queue declared as a global object in [`src/init.c`](https://github.com/apple-oss-distributions/libdispatch/blob/main/src/init.c).
 
-Group/WorkItem-dependent `async` overloads are deferred until those classes are implemented; no placeholder types are exported. Timers, sources and per-application binding/lifetime cancellation belong to the following core tasks. Current scheduling items use the internal system attribution (`appId: null`). The queue API is not yet a per-application scheduling surface.
+Timers, sources and per-application binding/lifetime cancellation belong to the following core tasks. Current scheduling items use the internal system attribution (`appId: null`). The queue API is not yet a per-application scheduling surface.
+
+## Work items, groups and semaphores
+
+```ts
+import { DFXGroup, DFXQueue, DFXTime, DFXWorkItem } from "@syndromatic/syncloudos/fx/dispatch";
+
+const group = new DFXGroup();
+const queue = new DFXQueue("example.group");
+const item: DFXWorkItem = new DFXWorkItem(() => { /* synchronous preparation */ });
+queue.async(group, item);
+queue.async({ group }, () => { /* another synchronous step */ });
+group.notify(DFXQueue.main, () => { /* all entries have left */ });
+const status = item.wait(DFXTime.now());
+```
+
+The class shapes and overloads follow Apple's [Block.swift](https://github.com/apple-oss-distributions/libdispatch/blob/main/src/swift/Block.swift), [Queue.swift](https://github.com/apple-oss-distributions/libdispatch/blob/main/src/swift/Queue.swift), [Wrapper.swift](https://github.com/apple-oss-distributions/libdispatch/blob/main/src/swift/Wrapper.swift) and [Dispatch.swift](https://github.com/apple-oss-distributions/libdispatch/blob/main/src/swift/Dispatch.swift). WorkItem is a standalone class; Group and Semaphore extend `DFXObject`. `async(group, item)` is positional because both arguments are required. Closure submission keeps the consecutive defaulted `group`, `qos` and `flags` in one options object. There is no group-and-closure positional alias or WorkItem-and-options alias. `sync(item)` returns `void`; the generic closure overloads retain their result types.
+
+TypeScript constructors cannot declare their own type parameters. `DFXWorkItem<R = unknown>` therefore uses an inferred class parameter solely to check the block's return type with the same private `Extract<R, PromiseLike<unknown>>` guard as queue closures. Native and custom thenables, including any known thenable union constituent, are rejected in both constructors and every notification closure overload. Ordinary synchronous return values are accepted and discarded, as with Swift's void block. Bare `DFXWorkItem` annotations, arrays and queue/notification parameters accept inferred instances without carrying a result type. There is no result property, factory or proxy. As with queue callbacks, explicit type erasure can hide a thenable from TypeScript; the runtime guard still reports and consumes it once.
+
+Cancelling an item prevents its body from running on future execution attempts. It does not interrupt a body already executing and does not itself complete an unsubmitted item. A queued cancellation still attempts execution, completes the item and delivers its notifications. `perform()` may be called repeatedly; wait/notify observe the first completion, matching [Apple's block contract](https://github.com/apple-oss-distributions/libdispatch/blob/main/dispatch/block.h). Notifications always submit to their requested queue, including registrations after completion. Thrown WorkItem bodies are reported once while completion and group cleanup still occur; WorkItem blocks have no throwing-result contract.
+
+Groups count manual `enter()`/`leave()` pairs and automatic queue submissions together. Every automatic entry leaves exactly once, including cancelled items and thrown work. Leaving an empty group throws `BUG IN CLIENT OF LIBDISPATCH: Unbalanced call to dispatch_group_leave()`. A notification observes the next empty transition, or submits immediately when registered on an empty group; later group generations do not redeliver that registration. Use manual pairs around external asynchronous work and notify its completion.
+
+All three `wait()` methods return `void` without a timeout. Passing a `DFXTime` or `DFXWallTime` selects the timeout form and returns `DFXTimeoutResult`. WorkItem and Group waits synchronously drain their registered in-realm jobs and required FIFO/target/barrier predecessors using the existing scheduler. Group jobs enrolled by an executing member remain eligible. Independent jobs and jobs after a WorkItem's completion stay scheduled normally. The caller's temporary QoS boost and execution frames are released even when a wait cannot finish. Pending blocked work remains queued for later activation or resumption.
+
+**Browser adaptation for `DFXGroup.wait` only:** a member can continuously enrol a successor while returning synchronously itself, keeping the group non-empty forever. Its synchronous drain therefore uses the scheduler's existing **5 ms** main-thread slice as a cooperative bound, checked between atomic items. A final item that empties the group still succeeds even if its body crosses the slice. If work remains when the slice is reached, pending entries and notifications remain intact, overrides/frames are restored, and the existing browser wait rule applies: an expired timeout returns `timedOut`; a future or omitted timeout throws the pinned main-thread error. This can return or throw before a finite group eventually empties, including with `distantFuture`; use `notify` to await such work without blocking. The safeguard also applies to Group waits executing at `userInteractive`. It does not change the host scheduler's successive-interactive-item rule or impose a slice on the fixed predecessor graphs of WorkItem waits and queue sync.
+
+A positive semaphore count is consumed immediately. A wait on a completed item or empty group also succeeds immediately. Otherwise an expired timeout, including `now()`, returns `timedOut`; a later or omitted timeout throws `BUG IN CLIENT OF LIBDISPATCH: blocking wait on the main thread cannot be satisfied in the browser; use notify(queue:)`. This includes unsubmitted/self-waiting items, outstanding manual group entries without drainable registered work, suspended/inactive predecessors and the internal worker guard. Waits do not pump browser events or pretend to service workers. A semaphore accepts a non-negative safe integer; `signal()` increments its count and returns zero because this tier has no concurrently blocked waiter to wake. Count overflow throws the libdispatch client-error prefix.
 
 ## Specific values and execution preconditions
 

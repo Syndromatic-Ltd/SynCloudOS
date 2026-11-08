@@ -13,6 +13,7 @@ const expected = {
   DFXWorkItemFlags: "DispatchWorkItemFlags", DFXSpecificKey: "DispatchSpecificKey",
   DFXSourceTimerFlags: "DispatchSource.TimerFlags", DFXSourceMemoryPressureEvent: "DispatchSource.MemoryPressureEvent",
   DFXObject: "DispatchObject", DFXQueue: "DispatchQueue", DFXPredicate: "DispatchPredicate", dispatchPrecondition: "dispatchPrecondition",
+  DFXWorkItem: "DispatchWorkItem", DFXGroup: "DispatchGroup", DFXSemaphore: "DispatchSemaphore",
 };
 it("maps every public Dispatch export through developer MCP counterpart lookup", () => {
   const map = JSON.parse(readFileSync("docs/framework/appkit-counterparts.json", "utf8"));
@@ -56,7 +57,11 @@ it("publishes only mapped Apple types and keeps private storage out of declarati
   const text = declarations.join("\n");
   expect(text).not.toMatch(/(?:initialiseInterval|safeDistance|maximumNanoseconds|clientError|ScheduledJob|BrowserYieldHost|postTask|executionStack|queueState)/);
   const privateImports = [...text.matchAll(/from\s+["']([^"']*internal\/[^"']+)["']/g)].map(match => match[1]);
-  expect(privateImports).toEqual(["./internal/work"]);
+  expect(privateImports).toEqual(["./internal/work", "./internal/work", "./internal/work"]);
+  expect(text).not.toMatch(/(?:workItemState|groupState|blockingRules|mainThreadWait|drainJobs|registerGroupJob)/);
+  expect(text).toMatch(/class DFXWorkItem<R = unknown>/);
+  expect(text).toMatch(/class DFXGroup extends DFXObject/);
+  expect(text).toMatch(/class DFXSemaphore extends DFXObject/);
   expect(text).not.toMatch(/(?:BrowserHost|createRootScheduler|rootScheduler|prepareWork|ConsoleTask|PredicateKind)/);
   expect(text).toMatch(/readonly rawValue: bigint/);
   expect(text).toMatch(/readonly uptimeNanoseconds: number/);

@@ -27,7 +27,7 @@ Each framework has a short prefix that appears on every public type, so a name t
 | [CompressionFX](compression.md) | `CPFX` | Compression | `fx/compression` | Apple's input/output closure filters |
 | [NetworkFX](network.md) | `NWFX` | Network | `fx/network` | Scoped path monitoring and browser connection hints |
 | [CryptoFX](crypto.md) | `CRFX` | CryptoKit | `fx/crypto` | Typed SHA/HMAC/HKDF, AES.GCM, P256/P384/P521 and Curve25519 with Foundation bytes |
-| [DispatchFX](dispatch.md) | `DFX` | Dispatch | `fx/dispatch` | Time, QoS queues, synchronous work, specifics and execution preconditions |
+| [DispatchFX](dispatch.md) | `DFX` | Dispatch | `fx/dispatch` | Time, QoS queues, work items, groups, semaphores, specifics and execution preconditions |
 
 ## Where each framework is documented
 

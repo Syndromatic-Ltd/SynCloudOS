@@ -18,3 +18,6 @@ export { DFXObject } from "./DFXObject";
 export { DFXQueue } from "./DFXQueue";
 export { DFXPredicate } from "./DFXPredicate";
 export { dispatchPrecondition } from "./dispatchPrecondition";
+export { DFXWorkItem } from "./DFXWorkItem";
+export { DFXGroup } from "./DFXGroup";
+export { DFXSemaphore } from "./DFXSemaphore";
