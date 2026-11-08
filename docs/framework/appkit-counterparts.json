@@ -368,6 +368,7 @@
     "NSEPlainTime": "Date",
     "NSEPopUpButton": "NSPopUpButton",
     "NSEPopUpButtonItem": "NSPopUpButton.addItem(withTitle:)",
+    "NSEPopover": "NSPopover",
     "NSEPopoverPositioning": "NSPopover.show(relativeTo:of:preferredEdge:)",
     "NSEPopup": "NSPanel",
     "NSEPredicateEditor": "NSPredicateEditor",
