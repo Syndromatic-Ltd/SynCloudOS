@@ -8,7 +8,7 @@ import { lifetimeOf } from "../../../src/FX/DispatchFX/internal/lifetime";
 import { systemDispatch } from "../../../src/FX/DispatchFX/internal/systemBinding";
 import { scosSessionsForApp } from "../../../src/SynCloudOS/AppSDK/scos/scosSessionRegistry";
 import { currentExecution } from "../../../src/FX/DispatchFX/internal/executionStack";
-import { registerSCOSAppSession } from "../../../src/SynCloudOS/AppSDK/scos/scosSessionRegistry";
+import { observeSCOSSessionEnd, registerSCOSAppSession } from "../../../src/SynCloudOS/AppSDK/scos/scosSessionRegistry";
 
 const cleanup: (() => unknown)[] = [];
 const tasks: (() => void)[] = [];
@@ -241,4 +241,52 @@ it("pending notifications still suppress on owner end before privileged cancel W
   const first = await mount(); const source = D.DFXSource.makeUserDataAddSource(); const cancelled = vi.fn(); const notified = vi.fn();
   const item = new D.DFXWorkItem(cancelled); item.notify(systemDispatch().DFXQueue.main, notified); source.setCancelHandler(item);
   first.mounted.dispose(); flush(); expect(cancelled).toHaveBeenCalledOnce(); expect(notified).not.toHaveBeenCalled();
+});
+
+it("finishes every registry removal observer despite a reentrant throwing cleanup", async () => {
+  const first = await mount();
+  const survivingQueue = D.DFXQueue.main;
+  const session = { appId: "com.example.dispatch", displayName: "Transient", version: "1", context: first.context };
+  const unregister = registerSCOSAppSession(session);
+  cleanup.push(unregister);
+  const calls: string[] = [];
+  const failure = new Error("First cleanup failed");
+  observeSCOSSessionEnd(session, () => {
+    calls.push("first");
+    unregister();
+    throw failure;
+  });
+  const queue = D.DFXQueue.main;
+  queue.async(() => { calls.push("stale work"); });
+  observeSCOSSessionEnd(session, () => { calls.push("later cleanup"); });
+  survivingQueue.async(() => { calls.push("surviving work"); });
+
+  expect(() => unregister()).toThrow(failure);
+  expect(first.context.signal.aborted).toBe(false);
+  expect(scosSessionsForApp(session.appId)).not.toContain(session);
+  flush();
+  expect(calls).toEqual(["first", "later cleanup", "surviving work"]);
+  expect(() => queue.async(() => {})).toThrow(/ended/);
+  expect(() => unregister()).not.toThrow();
+  expect(calls).toHaveLength(3);
+});
+
+it("preserves every registry removal failure after all observers finish", async () => {
+  const first = await mount();
+  const session = { appId: "com.example.dispatch", displayName: "Transient", version: "1", context: first.context };
+  const unregister = registerSCOSAppSession(session);
+  cleanup.push(unregister);
+  const firstFailure = new Error("First cleanup failed");
+  const last = vi.fn();
+  observeSCOSSessionEnd(session, () => { throw firstFailure; });
+  observeSCOSSessionEnd(session, () => { throw "Second cleanup failed"; });
+  observeSCOSSessionEnd(session, last);
+
+  let failure: unknown;
+  try { unregister(); } catch (error) { failure = error; }
+  expect(last).toHaveBeenCalledOnce();
+  expect(failure).toBeInstanceOf(AggregateError);
+  expect((failure as AggregateError).errors).toEqual([firstFailure, "Second cleanup failed"]);
+  expect(() => unregister()).not.toThrow();
+  expect(last).toHaveBeenCalledOnce();
 });

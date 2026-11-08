@@ -49,7 +49,12 @@ export function registerSCOSAppSession(session: SCOSAppSession): () => void {
     else sessionsByApp.set(key, remaining);
     const observers = removalObservers.get(session);
     removalObservers.delete(session);
-    for (const end of observers ?? []) end();
+    const errors: unknown[] = [];
+    for (const end of [...(observers ?? [])]) {
+      try { end(); } catch (error) { errors.push(error); }
+    }
+    if (errors.length === 1) throw errors[0];
+    if (errors.length > 1) throw new AggregateError(errors, "App session cleanup failed.");
   };
 }
 

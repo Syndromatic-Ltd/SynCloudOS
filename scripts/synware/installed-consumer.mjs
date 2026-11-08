@@ -75,7 +75,7 @@ export function readVerifiedSdkArchive(repositoryRoot, {
   const entries = manifest.entries;
   assert(entries && typeof entries === "object", "Missing SDK entry fingerprints.");
   assert.deepEqual(Object.keys(entries).filter(key => /^fx\/[^/]+$/u.test(key.slice(manifest.package.length + 1))).sort(),
-    requiredFxFamilies.map(family => `${manifest.package}/fx/${family}`).sort(), "SDK manifest must contain all thirteen FX entries.");
+    requiredFxFamilies.map(family => `${manifest.package}/fx/${family}`).sort(), "SDK manifest must contain every required FX entry.");
   assert.deepEqual(Object.keys(entries).filter(key => /^fx\/[^/]+\//u.test(key.slice(manifest.package.length + 1))),
     [`${manifest.package}/fx/video/webm`], "Only reviewed FX format extensions may be installed.");
   for (const [specifier, entry] of Object.entries(entries)) {
