@@ -1,31 +1,23 @@
-/*
- * SynCloudOS
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
- *
+/* SynCloudOS - Copyright © 2026 Syndromatic Ltd. All rights reserved.
  * Designed by Kavish Krishnakumar in Manchester.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-
 export { CNFXContact } from "./CNFXContact";
+export { CNFXMutableContact } from "./CNFXMutableContact";
+export { CNFXContactStore } from "./CNFXContactStore";
 export { CNFXContactPickerViewController } from "./CNFXContactPickerViewController";
-export type { CNFXContactDescriptor } from "./CNFXContact";
-export type {
-  CNFXAuthorizationStatus,
-  CNFXCapabilities,
-  CNFXContactProperty,
-  CNFXContactRequest,
-  CNFXContactStore,
-  CNFXContactsClient,
-} from "./CNFXContactStore";
+export { CNFXLabeledValue } from "./CNFXLabeledValue";
+export { CNFXPhoneNumber } from "./CNFXPhoneNumber";
+export { CNFXPostalAddress } from "./CNFXPostalAddress";
+export { CNFXContactFormatter } from "./CNFXContactFormatter";
+export { CNFXContactFetchRequest } from "./CNFXContactFetchRequest";
+export { CNFXError } from "./CNFXError";
+export { CNFXAuthorizationStatus } from "./CNFXAuthorizationStatus";
+export { CNFXEntityType } from "./CNFXEntityType";
+export { CNFXContactType } from "./CNFXContactType";
+export { CNFXContactFormatterStyle } from "./CNFXContactFormatterStyle";
+export { CNFXContactSortOrder } from "./CNFXContactSortOrder";
+export { CNFXContactIdentifierKey, CNFXContactTypeKey, CNFXContactGivenNameKey, CNFXContactFamilyNameKey, CNFXContactOrganizationNameKey, CNFXContactEmailAddressesKey, CNFXContactPhoneNumbersKey, CNFXContactPostalAddressesKey } from "./CNFXContactKeys";
+export { CNFXLabelHome, CNFXLabelWork, CNFXLabelOther, CNFXLabelPhoneNumberMobile, CNFXLabelPhoneNumberiPhone, CNFXLabelPhoneNumberMain, CNFXLabelPhoneNumberHomeFax, CNFXLabelPhoneNumberWorkFax, CNFXLabelPhoneNumberOtherFax, CNFXLabelPhoneNumberPager } from "./CNFXLabels";
+export type { CNFXContactPickerDelegate } from "./CNFXContactPickerDelegate";
+export type { CNFXKeyDescriptor } from "./CNFXKeyDescriptor";

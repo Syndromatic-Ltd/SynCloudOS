@@ -17,6 +17,8 @@
  * limitations under the License.
  */
 
+import { associateContactsAdapter, type ContactsAdapter } from "../../../FX/ContactsFX/internal/contactsPort";
+import { CNFXMutableContact } from "../../../FX/ContactsFX/CNFXMutableContact";
 import { NSEData } from "../../../Foundation/NSEData";
 import { normalisePasteboardRepresentations } from "../../Pasteboard/Pasteboard";
 import type {
@@ -465,6 +467,10 @@ export function createDeterministicRuntimeEnvironment(options: {
       return networkControl.runSync("network.subscribe", () => { networkListeners.add(listener); return { dispose() { networkListeners.delete(listener); } }; });
     },
   });
+  const contactsControl = control<"contacts.select">(clock, denied);
+  let contactName = "Selected contact";
+  const contacts = Object.freeze({ ...publicPort(contactsControl), setSelectedName(value: string) { contactName = value; } });
+  const contactsAdapter: ContactsAdapter = { available: true, select: (_keys, _multiple, signal) => contactsControl.run("contacts.select", signal, () => { const contact = new CNFXMutableContact(); contact.givenName = contactName; return Object.freeze([contact.copy()]); }).catch(error => { if (typeof error === "object" && error !== null && "name" in error && error.name === "SecurityError") throw new DOMException("The fake contact picker denied selection.", "NotAllowedError"); throw error; }) };
   const speechControl = control<"speech.authorize" | "speech.recognize">(clock, denied);
   const speechListeners = new Set<(event: SpeechEvent) => void>();
   let speechBufferCount = 0;
@@ -650,6 +656,7 @@ export function createDeterministicRuntimeEnvironment(options: {
     video: videoCapture.control,
     network,
     speech,
+    contacts,
     webContent: publicPort(controls.webContent),
   });
   const testControls: RuntimeTestCapabilityControls = Object.freeze({
@@ -833,6 +840,7 @@ export function createDeterministicRuntimeEnvironment(options: {
   } satisfies SynCloudOSRuntimeEnvironment);
   associateNetworkAdapter(environment, networkPaths);
   associateSpeechAdapter(environment, speechAdapter);
+  associateContactsAdapter(environment, contactsAdapter);
   return Object.freeze({
     environment,
     clock,

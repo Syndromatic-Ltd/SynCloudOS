@@ -1,48 +1,33 @@
-/*
- * SynCloudOS
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
- *
+/* SynCloudOS - Copyright © 2026 Syndromatic Ltd. All rights reserved.
  * Designed by Kavish Krishnakumar in Manchester.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
-
+import type { NSEPredicate } from "../../Foundation/NSEPredicate";
+import { fxAttributedClass } from "../../SynCloudOS/fxRuntimeContracts";
+import { dispatchQueueForSession } from "../DispatchFX/internal/sessionBinding";
 import type { CNFXContact } from "./CNFXContact";
-
-export type CNFXAuthorizationStatus = "unknown" | "prompt" | "granted" | "denied" | "unavailable";
-export type CNFXContactProperty = "name" | "email" | "tel";
-
-export interface CNFXCapabilities {
-  readonly contactPicker: boolean;
-  readonly persistentAccess: false;
+import type { CNFXEntityType } from "./CNFXEntityType";
+import type { CNFXAuthorizationStatus } from "./CNFXAuthorizationStatus";
+import type { CNFXKeyDescriptor } from "./CNFXKeyDescriptor";
+import type { CNFXContactFetchRequest } from "./CNFXContactFetchRequest";
+import { CNFXError } from "./CNFXError";
+import { contactsPortFor, contactsFailure } from "./internal/contactsPort";
+import { contactBinding, contactStores } from "./internal/contactsSessionBindings";
+/** CNContactStore. Browser selection never creates a persistent contact database. */
+export class CNFXContactStore {
+  #binding; #session; #port; #generation; #disposed = false;
+  constructor() { this.#binding = contactBinding(new.target); this.#session = this.#binding.resolve(); this.#port = contactsPortFor(this.#session.context); this.#generation = this.#port.generation; contactStores.set(this, { dispose: () => { this.#disposed = true; } }); }
+  static authorizationStatus(entityType: CNFXEntityType): CNFXAuthorizationStatus { if (entityType !== "contacts") throw new CNFXError("validationTypeMismatch", "Unknown Contacts entity type."); return contactsPortFor(contactBinding(this).resolve().context).authorizationStatus(); }
+  /** Completion is asynchronous on the selected application's main queue. No picker is opened. */
+  requestAccess(entityType: CNFXEntityType, completion: (granted: boolean, error: CNFXError | null) => void): void {
+    this.#assertLive(); if (entityType !== "contacts") throw new CNFXError("validationTypeMismatch", "Unknown Contacts entity type.");
+    let error: CNFXError = new CNFXError("featureNotAvailable", "This browser cannot authorize a persistent Contacts database; present CNFXContactPickerViewController to select contacts.");
+    try { this.#port.bindAccessLifetime(this.#generation); } catch (failure) { error = contactsFailure(failure); }
+    dispatchQueueForSession(this.#session).main.async(() => { try { this.#assertLive(); } catch { return; } completion(false, error); });
+  }
+  unifiedContacts(_predicate: NSEPredicate<CNFXContact> | null, _keysToFetch: readonly CNFXKeyDescriptor[]): readonly CNFXContact[] { this.#databaseUnavailable(); }
+  enumerateContacts(_fetchRequest: CNFXContactFetchRequest, _block: (contact: CNFXContact, stop: { value: boolean }) => void): void { this.#databaseUnavailable(); }
+  #assertLive(): void { if (this.#disposed || this.#generation !== this.#port.generation) throw new CNFXError("communicationError", "The Contacts object has ended."); this.#binding.resolve(); }
+  #databaseUnavailable(): never { this.#assertLive(); this.#port.assertAccess(this.#generation); throw new CNFXError("featureNotAvailable", "The browser provides selected contacts only, not a Contacts database."); }
 }
-
-export interface CNFXContactRequest {
-  readonly properties?: readonly CNFXContactProperty[];
-  readonly multiple?: boolean;
-  readonly signal?: AbortSignal;
-}
-
-/** Each request opens the browser's picker. No address-book enumeration or lasting grant. */
-export interface CNFXContactStore {
-  getCapabilities(): CNFXCapabilities;
-  getAuthorizationStatus(): Promise<CNFXAuthorizationStatus>;
-  requestAccess(options?: CNFXContactRequest): Promise<readonly CNFXContact[]>;
-  dispose(): void;
-}
-
-export interface CNFXContactsClient {
-  getCapabilities(): CNFXCapabilities;
-  createContactStore(signal?: AbortSignal): CNFXContactStore;
-}
+Object.defineProperty(CNFXContactStore, fxAttributedClass, { value: true });

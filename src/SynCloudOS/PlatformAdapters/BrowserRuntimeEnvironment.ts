@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { associateContactsAdapter } from "../../FX/ContactsFX/internal/contactsPort";
 import { createBrowserViewportFeaturesSource } from "./BrowserViewportFeatures";
 import { createBrowserFilePickerPort } from "./BrowserFilePickerPort";
 import { createBrowserOpenPanelStoragePort } from "./BrowserOpenPanelStoragePort";
@@ -745,8 +746,6 @@ export function createBrowserRuntimeEnvironment(options: { readonly cursorImages
     videoProcessing: { createBackend: ownerId => createBrowserVideoWorkerTransport(ownerId) },
     bluetooth: new BrowserBluetoothAdapter({ isSecureContext: browserWindow?.isSecureContext === true,
       browserNavigator: browserNavigator as unknown as BrowserBluetoothOptions["browserNavigator"] }),
-    contacts: new BrowserContactsAdapter({ isSecureContext: browserWindow?.isSecureContext === true,
-      browserNavigator: browserNavigator as unknown as BrowserContactsAdapterOptions["browserNavigator"] }),
     nfc: new BrowserNFCAdapter({ isSecureContext: browserWindow?.isSecureContext === true,
       NDEFReader: (browserWindow as unknown as { NDEFReader?: BrowserNFCAdapterOptions["NDEFReader"] } | null)?.NDEFReader,
       permissions: browserNavigator?.permissions as unknown as BrowserNFCAdapterOptions["permissions"] }),
@@ -803,6 +802,7 @@ export function createBrowserRuntimeEnvironment(options: { readonly cursorImages
     },
   };
   associateSpeechAdapter(environment, new BrowserSpeechAdapter());
+  associateContactsAdapter(environment, new BrowserContactsAdapter({ isSecureContext: browserWindow?.isSecureContext === true, browserNavigator: browserNavigator as unknown as BrowserContactsAdapterOptions["browserNavigator"] }));
   associateNetworkAdapter(environment, new BrowserNetworkPathAdapter({ navigator: browserNavigator ?? undefined, eventTarget: browserWindow ?? undefined }));
   return environment;
 }

@@ -22,7 +22,6 @@ import { describe, expect, it, vi } from "vitest";
 import { createPrivacyStore, type PrivacyApplicationPort, type PrivacyAuthorizationStatus } from "../../src/SynCloudOS/Privacy";
 import { createMountedBluetoothClient } from "../../src/SynCloudOS/AppSDK/mountedBluetoothClient";
 import { createMountedNFCClient } from "../../src/SynCloudOS/AppSDK/mountedNFCClient";
-import { createMountedContactsClient } from "../../src/SynCloudOS/AppSDK/mountedContactsClient";
 import { createMountedPaymentClient } from "../../src/SynCloudOS/AppSDK/mountedPaymentClient";
 import { createMountedXRClient } from "../../src/SynCloudOS/AppSDK/mountedXRClient";
 import { NSEData } from "../../src/Foundation/NSEData";
@@ -31,7 +30,7 @@ import { XRFXConfiguration, type XRFXFrame } from "../../src/FX/XRFX/public";
 import { PKFXPaymentRequest } from "../../src/FX/PassFX/public";
 import type { BTFXPeripheral } from "../../src/FX/BluetoothFX/public";
 
-const families = ["bluetooth", "nfc", "contacts", "payment", "xr"] as const;
+const families = ["bluetooth", "nfc", "payment", "xr"] as const;
 type Family = typeof families[number];
 interface Probe {
   status(): Promise<PrivacyAuthorizationStatus>;
@@ -65,12 +64,6 @@ function probe(family: Family, port: PrivacyApplicationPort, signal: AbortSignal
     const client = createMountedNFCClient({ getCapabilities: () => ({ reading: true, writing: true, makingReadOnly: true }), createReaderSession: () => ({ getAuthorizationStatus: nativeStatus, scan: nativeRequest, write: async () => {}, makeReadOnly: async () => {}, dispose: nativeDispose }) }, signal, () => ["nfc.read", "nfc.write"], () => true, port);
     const session = client.createReaderSession();
     return { capabilities: client.getCapabilities, status: session.getAuthorizationStatus, request: () => session.scan(received), dispose: session.dispose, nativeRequest, nativeDispose, nativeStatus, lateValue: undefined, received, emit: () => reading?.({ serialNumber: "tag", message: new NFXNDEFMessage([]) }) };
-  }
-  if (family === "contacts") {
-    const capabilities = () => ({ contactPicker: true, persistentAccess: false as const }); const nativeRequest = vi.fn(async () => []);
-    const client = createMountedContactsClient({ getCapabilities: capabilities, createContactStore: () => ({ getCapabilities: capabilities, getAuthorizationStatus: nativeStatus, requestAccess: nativeRequest, dispose: nativeDispose }) }, signal, () => ["contacts.select"], () => true, port);
-    const store = client.createContactStore();
-    return { capabilities: client.getCapabilities, status: store.getAuthorizationStatus, request: () => store.requestAccess(), dispose: store.dispose, nativeRequest, nativeDispose, nativeStatus, lateValue: [], received };
   }
   if (family === "payment") {
     const payment = { requestId: "payment", methodName: "https://merchant.example/pay", details: null, payerName: null, payerEmail: null, payerPhone: null, complete: vi.fn(async () => {}) };

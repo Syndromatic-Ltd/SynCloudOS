@@ -144,7 +144,6 @@ export interface SynWareContextValue {
   readonly videoPresentation: import("../../FX/VideoFX/VFXPictureInPictureController").VFXVideoPresentationClient;
   readonly bluetooth: import("../../FX/BluetoothFX/public").BTFXBluetoothClient;
   readonly nfc: import("../../FX/NFCFX/public").NFXNFCClient;
-  readonly contacts: import("../../FX/ContactsFX/public").CNFXContactsClient;
   readonly payment: import("../../FX/PassFX/public").PKFXPaymentClient;
   readonly xr: import("../../FX/XRFX/public").XRFXClient;
   readonly midi: MIFXClient;

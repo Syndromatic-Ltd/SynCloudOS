@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+import { associateContactsPort } from "../../FX/ContactsFX/internal/contactsPort";
 import { createAppFileManager } from "./fileManagerClient";
 import { Config } from "../SynCloudOS";
 import type { SynWareRuntime } from "./appRuntimeTypes";
@@ -415,7 +416,6 @@ export function createSynWareContextValue(runtime: SynWareRuntime, branding: Syn
     videoPresentation: environment.videoPresentation,
     bluetooth: environment.bluetooth,
     nfc: environment.nfc,
-    contacts: environment.contacts,
     payment: environment.payment,
     xr: environment.xr,
     midi: environment.midi,
@@ -426,6 +426,7 @@ export function createSynWareContextValue(runtime: SynWareRuntime, branding: Syn
   });
   associateNetworkPort(context, environment.network);
   associateSpeechPort(context, environment.speech);
+  associateContactsPort(context, environment.contacts);
   const unregister = registerSCOSAppSession({ appId: context.appId, ...context.appInfo, context });
   runtime.signal.addEventListener("abort", unregister, { once: true });
   if (runtime.signal.aborted) unregister();

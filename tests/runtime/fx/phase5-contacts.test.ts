@@ -18,111 +18,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { describe, expect, it, vi } from "vitest";
+import { expect, it, vi } from "vitest";
 import { BrowserContactsAdapter } from "../../../src/SynCloudOS/PlatformAdapters/BrowserContactsAdapter";
-import { createMountedContactsClient } from "../../../src/SynCloudOS/AppSDK/mountedContactsClient";
-import { CNFXContactPickerViewController } from "../../../src/FX/ContactsFX/public";
-
-describe("ContactsFX per-request browser picker", () => {
-  it("presents the named browser picker controller and freezes request fields", async () => {
-    const select = vi.fn(async () => [{ name: ["Ada"] }]);
-    const store = new BrowserContactsAdapter({ isSecureContext: true, browserNavigator: { contacts: { select } } }).createContactStore();
-    const properties: ("name" | "email")[] = ["name"];
-    const controller = new CNFXContactPickerViewController(store, { properties });
-    properties.push("email");
-    const selected = await controller.present();
-    expect(selected[0]!.displayNames).toEqual(["Ada"]);
-    expect(select).toHaveBeenCalledWith(["name"], { multiple: false });
-    controller.dispose();
-    await expect(controller.present()).rejects.toMatchObject({ name: "AbortError" });
-  });
-  it("promptly cancels picker controller work while the browser dialog remains pending", async () => {
-    let finish!: (value: { name: string[] }[]) => void;
-    const select = () => new Promise<{ name: string[] }[]>(resolve => { finish = resolve; });
-    const store = new BrowserContactsAdapter({ isSecureContext: true, browserNavigator: { contacts: { select } } }).createContactStore();
-    const controller = new CNFXContactPickerViewController(store);
-    const selected = controller.present().catch(error => error);
-    controller.dispose();
-    expect((await selected).name).toBe("AbortError");
-    finish([{ name: ["late"] }]);
-  });
-  it("inspects capability and authorization without selecting contacts", async () => {
-    const select = vi.fn();
-    const adapter = new BrowserContactsAdapter({ isSecureContext: true, browserNavigator: { contacts: { select } } });
-    const store = adapter.createContactStore();
-    expect(adapter.getCapabilities().contactPicker).toBe(true);
-    expect(await store.getAuthorizationStatus()).toBe("prompt");
-    expect(select).not.toHaveBeenCalled();
-  });
-  it("returns immutable copies and keeps authorization scoped to each picker request", async () => {
-    const names = ["Ada"]; const select = vi.fn(async () => [{ name: names, email: ["ada@example.test"], tel: ["123"] }]);
-    const store = new BrowserContactsAdapter({ isSecureContext: true, browserNavigator: { contacts: { select } } }).createContactStore();
-    const contacts = await store.requestAccess({ properties: ["name", "email", "tel"], multiple: true });
-    names[0] = "changed";
-    expect(contacts[0]!.displayNames).toEqual(["Ada"]);
-    expect(Object.isFrozen(contacts)).toBe(true);
-    expect(Object.isFrozen(contacts[0]!.displayNames)).toBe(true);
-    expect(select).toHaveBeenCalledWith(["name", "email", "tel"], { multiple: true });
-    expect(await store.getAuthorizationStatus()).toBe("prompt");
-  });
-  it("cancels locally and ignores picker completion after disposal", async () => {
-    let finish!: (value: readonly { name: string[] }[]) => void;
-    const select = () => new Promise<readonly { name: string[] }[]>(resolve => { finish = resolve; });
-    const store = new BrowserContactsAdapter({ isSecureContext: true, browserNavigator: { contacts: { select } } }).createContactStore();
-    const result = store.requestAccess().catch(error => error);
-    store.dispose(); finish([{ name: ["late"] }]);
-    expect((await result).name).toBe("AbortError");
-    expect(await store.getAuthorizationStatus()).toBe("unavailable");
-  });
-  it("maps picker denial and cancellation without claiming persistent grants", async () => {
-    const select = vi.fn().mockRejectedValueOnce(new DOMException("denied", "NotAllowedError")).mockRejectedValueOnce(new DOMException("cancelled", "AbortError"));
-    const store = new BrowserContactsAdapter({ isSecureContext: true, browserNavigator: { contacts: { select } } }).createContactStore();
-    await expect(store.requestAccess()).rejects.toMatchObject({ name: "NotAllowedError" });
-    expect(await store.getAuthorizationStatus()).toBe("prompt");
-    await expect(store.requestAccess()).rejects.toMatchObject({ name: "AbortError" });
-  });
-  it("checks declaration and policy at each request and ignores late mounted results", async () => {
-    const select = vi.fn(async () => []); let permissions: readonly string[] = [];
-    const mount = new AbortController();
-    const adapter = new BrowserContactsAdapter({ isSecureContext: true, browserNavigator: { contacts: { select } } });
-    const client = createMountedContactsClient(adapter, mount.signal, () => permissions, () => true);
-    const store = client.createContactStore();
-    await expect(store.requestAccess()).rejects.toMatchObject({ name: "SecurityError" });
-    expect(select).not.toHaveBeenCalled();
-    permissions = ["contacts.select"];
-    await expect(store.requestAccess()).resolves.toEqual([]);
-    mount.abort();
-    expect(client.getCapabilities().contactPicker).toBe(false);
-    expect(await store.getAuthorizationStatus()).toBe("unavailable");
-  });
-  it("does not open a picker when insecure, absent or request-aborted", async () => {
-    const select = vi.fn();
-    const adapter = new BrowserContactsAdapter({ isSecureContext: false, browserNavigator: { contacts: { select } } });
-    expect(adapter.getCapabilities().contactPicker).toBe(false);
-    await expect(adapter.createContactStore().requestAccess()).rejects.toMatchObject({ name: "NotSupportedError" });
-    const absent = createMountedContactsClient(undefined, new AbortController().signal, () => [], () => true);
-    expect(await absent.createContactStore().getAuthorizationStatus()).toBe("unavailable");
-    expect(select).not.toHaveBeenCalled();
-  });
-  it("cancels individual requests and removes late browser values", async () => {
-    let finish!: (value: { name: string[] }[]) => void;
-    const select = vi.fn(() => new Promise<{ name: string[] }[]>(resolve => { finish = resolve; }));
-    const store = new BrowserContactsAdapter({ isSecureContext: true, browserNavigator: { contacts: { select } } }).createContactStore();
-    const signal = new AbortController();
-    const selected = store.requestAccess({ signal: signal.signal }).catch(error => error);
-    await expect(store.requestAccess()).rejects.toMatchObject({ name: "InvalidStateError" });
-    signal.abort(); finish([{ name: ["late"] }]);
-    expect((await selected).name).toBe("AbortError");
-    const alreadyAborted = new AbortController(); alreadyAborted.abort();
-    await expect(store.requestAccess({ signal: alreadyAborted.signal })).rejects.toMatchObject({ name: "AbortError" });
-    expect(select).toHaveBeenCalledOnce();
-  });
-  it("copies only the fields explicitly selected and rejects empty field requests", async () => {
-    const select = vi.fn(async () => [{ name: ["Ada"], email: ["hidden@example.test"] }]);
-    const store = new BrowserContactsAdapter({ isSecureContext: true, browserNavigator: { contacts: { select } } }).createContactStore();
-    const contacts = await store.requestAccess({ properties: ["name"] });
-    expect(contacts[0]!.emailAddresses).toEqual([]);
-    await expect(store.requestAccess({ properties: [] })).rejects.toBeInstanceOf(TypeError);
-    expect(select).toHaveBeenCalledOnce();
-  });
-});
+import { CNFXContact, CNFXLabeledValue } from "../../../src/FX/ContactsFX/public";
+const signal=()=>new AbortController().signal;
+it("inspects browser availability without selecting or claiming a database grant",()=>{const select=vi.fn();const adapter=new BrowserContactsAdapter({isSecureContext:true,browserNavigator:{contacts:{select}}});expect(adapter.available).toBe(true);expect(select).not.toHaveBeenCalled();expect("getCapabilities" in adapter).toBe(false);});
+it("copies only requested name fields without guessing family names or labels",async()=>{const names=["Ada Lovelace"];const select=vi.fn(async()=>[{name:names,email:["hidden@example.test"]}]);const adapter=new BrowserContactsAdapter({isSecureContext:true,browserNavigator:{contacts:{select}}});const contacts=await adapter.select(["givenName"],false,signal());names[0]="changed";expect(contacts[0]).toBeInstanceOf(CNFXContact);expect(contacts[0].givenName).toBe("Ada Lovelace");expect(contacts[0].familyName).toBe("");expect(contacts[0].emailAddresses).toEqual([]);expect(Object.isFrozen(contacts)).toBe(true);expect(Object.isFrozen(contacts[0])).toBe(true);expect(contacts[0].isKeyAvailable("emailAddresses")).toBe(false);});
+it("creates immutable labelled email and phone values",async()=>{const adapter=new BrowserContactsAdapter({isSecureContext:true,browserNavigator:{contacts:{select:async()=>[{email:["ada@example.test"],tel:["123"]}]}}});const [contact]=await adapter.select(["emailAddresses","phoneNumbers"],true,signal());expect(contact.emailAddresses[0]).toBeInstanceOf(CNFXLabeledValue);expect(contact.emailAddresses[0].label).toBeNull();expect(contact.phoneNumbers[0].value.stringValue).toBe("123");expect(Object.isFrozen(contact.phoneNumbers)).toBe(true);});
+it.each([false,true])("does not select in insecure/absent contexts (%s)",secure=>{const select=vi.fn();const adapter=new BrowserContactsAdapter({isSecureContext:secure,browserNavigator:secure?{}:{contacts:{select}}});expect(adapter.available).toBe(false);expect(()=>adapter.select(["givenName"],false,signal())).toThrow();expect(select).not.toHaveBeenCalled();});
+it.each([[],["familyName"],["unknown"]])("rejects unavailable keys %j before native access",keys=>{const select=vi.fn();const adapter=new BrowserContactsAdapter({isSecureContext:true,browserNavigator:{contacts:{select}}});expect(()=>adapter.select(keys,false,signal())).toThrow();expect(select).not.toHaveBeenCalled();});
+it("keeps native denial unnormalized for the shared privacy store",async()=>{const denial=new DOMException("denied","NotAllowedError");const adapter=new BrowserContactsAdapter({isSecureContext:true,browserNavigator:{contacts:{select:async()=>{throw denial;}}}});await expect(adapter.select(["givenName"],false,signal())).rejects.toBe(denial);});
+it("aborts immediately, drops the old result after replacement and rejects already-aborted calls",async()=>{let finish!:(value:{name:string[]}[])=>void;const select=vi.fn().mockImplementationOnce(()=>new Promise(done=>{finish=done;})).mockResolvedValueOnce([{name:["fresh"]}]);const adapter=new BrowserContactsAdapter({isSecureContext:true,browserNavigator:{contacts:{select}}});const owner=new AbortController();const pending=adapter.select(["givenName"],false,owner.signal);owner.abort();await expect(pending).rejects.toMatchObject({name:"AbortError"});const fresh=await adapter.select(["givenName"],false,signal());finish([{name:["stale"]}]);expect(fresh[0].givenName).toBe("fresh");expect(()=>adapter.select(["givenName"],false,owner.signal)).toThrow();expect(select).toHaveBeenCalledTimes(2);});

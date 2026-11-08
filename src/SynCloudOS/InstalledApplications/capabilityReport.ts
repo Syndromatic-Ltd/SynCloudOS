@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { contactsAdapterFor } from "../../FX/ContactsFX/internal/contactsPort";
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
 import { speechAdapterFor } from "../../FX/SpeechFX/internal/speechPort";
 import { networkAdapterFor } from "../../FX/NetworkFX/internal/networkPort";
@@ -31,7 +32,7 @@ export async function systemCapabilityReport(runtime: SynCloudOSRuntime): Promis
     ["HapticsFX", runtime.haptics], ["MotionFX", environment.motion], ["LocationFX", environment.location],
     ["MIDIFX", environment.midi], ["LuminaFX", runtime.lumina], ["NetworkFX", networkAdapterFor(environment)],
     ["BluetoothFX", environment.bluetooth], ["NFCFX", environment.nfc], ["SpeechFX", speechAdapterFor(environment)],
-    ["ContactsFX", environment.contacts], ["PassFX", environment.payment], ["XRFX", environment.xr],
+    ["ContactsFX", contactsAdapterFor(environment)], ["PassFX", environment.payment], ["XRFX", environment.xr],
   ];
   const rows = await Promise.all(families.map(async ([family, candidate]): Promise<SystemCapabilityRow> => {
     if (!candidate) return { family, query: "No passive host query", value: "Not reported" };

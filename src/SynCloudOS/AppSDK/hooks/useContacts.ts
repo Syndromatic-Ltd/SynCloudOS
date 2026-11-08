@@ -17,39 +17,31 @@
  * limitations under the License.
  */
 
-import { useLayoutEffect, useMemo } from "react";
-import type { CNFXContactStore } from "../../../FX/ContactsFX/public";
-import { useSCOS } from "../scos/useSCOS";
-
-/** A component-owned contact store. Contact access starts only in requestAccess. */
+import { useInsertionEffect, useMemo } from "react";
+import { useSynWareContext } from "../SynWareContext";
+import { bindFXFamily } from "../fx/bindFXFamily";
+import { scosSessionsForApp } from "../scos/scosSessionRegistry";
+import { CNFXContactStore, CNFXError } from "../../../FX/ContactsFX/public";
+import { contactsSessionBindings, contactStores } from "../../../FX/ContactsFX/internal/contactsSessionBindings";
+/** A real component-owned CNContactStore; native selection uses an NSE-presented picker. */
 export function useContacts(): CNFXContactStore {
-  const client = useSCOS().contacts;
-  const binding = useMemo(() => {
-    let current: CNFXContactStore | null = null;
-    const requireStore = () => {
-      if (!current) throw new DOMException("The component contact owner is not mounted.", "InvalidStateError");
-      return current;
-    };
-    const facade = Object.freeze<CNFXContactStore>({
-      getCapabilities: () => current?.getCapabilities() ?? Object.freeze({ contactPicker: false, persistentAccess: false }),
-      getAuthorizationStatus: () => current?.getAuthorizationStatus() ?? Promise.resolve("unavailable"),
-      requestAccess: options => requireStore().requestAccess(options),
-      dispose: () => current?.dispose(),
-    });
-    return {
-      facade,
-      mount() {
-        const owner = new AbortController();
-        const store = client.createContactStore(owner.signal);
-        current = store;
-        return () => {
-          if (current === store) current = null;
-          owner.abort();
-          store.dispose();
-        };
-      },
-    };
-  }, [client]);
-  useLayoutEffect(() => binding.mount(), [binding]);
-  return binding.facade;
+  const context = useSynWareContext();
+  if (!context) throw new CNFXError("communicationError", "useContacts requires a mounted application.");
+  const store = useMemo(() => {
+    const sessions = scosSessionsForApp(context.appId).filter(candidate => candidate.context === context
+      || (candidate.context.signal === context.signal && candidate.context.runtimeInfo.id === context.runtimeInfo.id));
+    if (sessions.length !== 1) throw new CNFXError("communicationError", `Contacts application session is ${sessions.length ? "ambiguous" : "notRunning"}.`);
+    const session = sessions[0]!;
+    const Bound = bindFXFamily({ CNFXContactStore }, context.appId).CNFXContactStore;
+    class ContextStore extends Bound {}
+    let ended = false;
+    contactsSessionBindings.set(ContextStore, { resolve() {
+      if (context.signal.aborted || !scosSessionsForApp(context.appId).includes(session)) ended = true;
+      if (ended) throw new CNFXError("communicationError", "Contacts application session is ended.");
+      return session;
+    } });
+    return new ContextStore();
+  }, [context]);
+  useInsertionEffect(() => () => contactStores.get(store)!.dispose(), [store]);
+  return store;
 }

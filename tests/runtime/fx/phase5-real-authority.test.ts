@@ -19,6 +19,7 @@
  */
 
 import { expect, it, vi } from "vitest";
+import { associateContactsAdapter } from "../../../src/FX/ContactsFX/internal/contactsPort";
 import { BrowserContactsAdapter } from "../../../src/SynCloudOS/PlatformAdapters/BrowserContactsAdapter";
 import { getMountedAppEnvironmentClients } from "../../../src/SynCloudOS/AppSDK/mountedEnvironmentClientRegistry";
 import { createTestBundle, createTestRuntime, createTestRuntimeEnvironment, mountTestSynWareRuntime } from "../helpers";
@@ -27,34 +28,36 @@ it("uses real lifecycle policy and captured entitlements for retained device cli
   const select = vi.fn(async () => [{ name: ["Ada"] }]);
   const contacts = new BrowserContactsAdapter({ isSecureContext: true, browserNavigator: { contacts: { select } } });
   const appId = "com.example.phase5-authority";
-  const runtime = createTestRuntime({ environment: { ...createTestRuntimeEnvironment(), contacts },
+  const runtime = createTestRuntime({ environment: createTestRuntimeEnvironment(),
     initialBundles: [createTestBundle({ bundleIdentifier: appId, policy: { public: true } }, { entitlements: ["contacts.select"] })] });
+  associateContactsAdapter(runtime.environment, contacts);
   runtime.configurationProfiles.setAccessMode("public");
   const mounted = mountTestSynWareRuntime(runtime, appId);
-  const store = getMountedAppEnvironmentClients(mounted.runtime).contacts.createContactStore();
+  const store = getMountedAppEnvironmentClients(mounted.runtime).contacts;
   try {
-    const picked = await store.requestAccess({ properties: ["name"] });
-    expect(picked[0].displayNames).toEqual(["Ada"]);
+    const picked = await store.select(["givenName"], false, mounted.runtime.signal);
+    expect(picked[0].givenName).toBe("Ada");
     expect(select).toHaveBeenCalledOnce();
     runtime.configurationProfiles.registerPolicy("phase5-deny", (request, decision) => request.app?.bundleIdentifier === appId
       ? { ...decision, allowed: false, decision: "deny", reason: "Test host restriction" } : decision);
     // Canonical privacy revocation may abort the retained lease before its explicit access guard.
-    await expect(store.requestAccess()).rejects.toMatchObject({ name: expect.stringMatching(/^(?:AbortError|SecurityError)$/) });
+    expect(() => store.select(["givenName"], false, mounted.runtime.signal)).toThrow(/denied|revoked/);
     expect(select).toHaveBeenCalledOnce();
-  } finally { store.dispose(); mounted.dispose(); await runtime.dispose("phase5-test"); }
+  } finally { mounted.dispose(); await runtime.dispose("phase5-test"); }
 });
 
 it("denies missing captured entitlements before calling a native picker", async () => {
   const select = vi.fn(async () => [{ name: ["Ada"] }]);
   const contacts = new BrowserContactsAdapter({ isSecureContext: true, browserNavigator: { contacts: { select } } });
   const appId = "com.example.phase5-no-entitlement";
-  const runtime = createTestRuntime({ environment: { ...createTestRuntimeEnvironment(), contacts },
+  const runtime = createTestRuntime({ environment: createTestRuntimeEnvironment(),
     initialBundles: [createTestBundle({ bundleIdentifier: appId, policy: { public: true } }, { entitlements: [] })] });
+  associateContactsAdapter(runtime.environment, contacts);
   runtime.configurationProfiles.setAccessMode("public");
   const mounted = mountTestSynWareRuntime(runtime, appId);
-  const store = getMountedAppEnvironmentClients(mounted.runtime).contacts.createContactStore();
+  const store = getMountedAppEnvironmentClients(mounted.runtime).contacts;
   try {
-    await expect(store.requestAccess()).rejects.toMatchObject({ name: "SecurityError" });
+    expect(() => store.select(["givenName"], false, mounted.runtime.signal)).toThrow(/denied|revoked/);
     expect(select).not.toHaveBeenCalled();
-  } finally { store.dispose(); mounted.dispose(); await runtime.dispose("phase5-test"); }
+  } finally { mounted.dispose(); await runtime.dispose("phase5-test"); }
 });

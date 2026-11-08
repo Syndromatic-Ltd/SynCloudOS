@@ -39,7 +39,7 @@ for (const hook of [useBluetooth,useNFC,useSpeech,useContacts,usePayment,useXR])
 const message=new NFXNDEFMessage([{recordType:'mime',mediaType:'application/octet-stream',data:new Uint8Array([42])}]);
 assert.ok(message.records[0].data instanceof NSEData);
 assert.equal(message.records[0].data.bytes[0],42);
-const contact=new CNFXContact({displayNames:['Kavish']});assert.ok(Object.isFrozen(contact));
+const contact=new CNFXContact();assert.ok(Object.isFrozen(contact));
 assert.equal(typeof CNFXContactPickerViewController,'function');
 const request=new PKFXPaymentRequest({currencyCode:'GBP',paymentSummaryItems:[{label:'Test merchant',amount:'1.00'}],paymentMethodData:[{supportedMethods:'https://example.test/pay',data:{challenge:new Uint8Array([1,2])}}]});
 assert.equal(request.paymentMethodData[0].data.challenge.count,2);
@@ -51,7 +51,7 @@ console.log('phase5 installed exports passed');
 import type { BTFXBluetoothClient, BTFXCentralManager } from '@syndromatic/syncloudos/fx/bluetooth';
 import type { NFXNFCClient } from '@syndromatic/syncloudos/fx/nfc';
 import type { SPFXSpeechRecognizer } from '@syndromatic/syncloudos/fx/speech';
-import type { CNFXContactsClient, CNFXContactStore } from '@syndromatic/syncloudos/fx/contacts';
+import type { CNFXContactStore } from '@syndromatic/syncloudos/fx/contacts';
 import type { PKFXPaymentClient } from '@syndromatic/syncloudos/fx/pass';
 import type { XRFXClient, XRFXSession } from '@syndromatic/syncloudos/fx/xr';
 import { useBluetooth, useNFC, useSpeech, useContacts, usePayment, useXR, useSCOS } from '@syndromatic/syncloudos/sdk';
@@ -61,7 +61,7 @@ const speech:()=>SPFXSpeechRecognizer=useSpeech;
 const contacts:()=>CNFXContactStore=useContacts;
 const payment:()=>PKFXPaymentClient=usePayment;
 const xr:()=>XRFXSession=useXR;
-function session() { const app=useSCOS(); const clients:[BTFXBluetoothClient,NFXNFCClient,CNFXContactsClient,PKFXPaymentClient,XRFXClient]=[app.bluetooth,app.nfc,app.contacts,app.payment,app.xr];return clients; }
+function session() { const app=useSCOS(); const clients:[BTFXBluetoothClient,NFXNFCClient,PKFXPaymentClient,XRFXClient]=[app.bluetooth,app.nfc,app.payment,app.xr];return clients; }
 void [bluetooth,nfc,speech,contacts,payment,xr,session];
 `);
   writeFileSync(join(consumer.root, "tsconfig.json"), JSON.stringify({ compilerOptions: { target: "ES2022", module: "NodeNext", moduleResolution: "NodeNext", strict: true, noEmit: true, skipLibCheck: true }, files: ["consumer.ts"] }));

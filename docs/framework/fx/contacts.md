@@ -1,34 +1,58 @@
 # ContactsFX
 
-ContactsFX (`CNFX`) provides `CNFXContactStore`, immutable `CNFXContact` selections and `CNFXContactPickerViewController` through the browser's Contact Picker API. It returns only what the user shares for that request; it does not enumerate or modify the address book.
+ContactsFX follows Contacts and ContactsUI, using the `CNFX` prefix. Import the classes from `@syndromatic/syncloudos/fx/contacts` inside a plugin-built `.app`. Constructors remain passive and keep their Apple argument lists. The plugin supplies stable per-app classes, including after an `await`, timer or third-party callback. An unattributed base constructor reports that it requires an application bundle; a selected app session never rebinds after ending.
 
-Declare `contacts.select` in the app's `Info.ts` entitlements. Mounted declaration and policy checks run before each picker request and before delivering its selection. The browser additionally enforces secure-context, user-activation, top-level-context and platform support requirements.
+Declare `contacts.select` in the application's entitlements. The mounted service checks the captured entitlement, host policy, shared app consent, and selected app lifetime before native access and at delivery. A browser refusal overrides saved app consent. Revoked operations remain invalid after consent is restored.
 
 ```ts
-import { useContacts } from "@syndromatic/syncloudos/sdk";
+import {
+  CNFXContactPickerViewController,
+  CNFXContactGivenNameKey,
+  CNFXContactEmailAddressesKey,
+} from "@syndromatic/syncloudos/fx/contacts";
 
-const contacts = useContacts(); // In a component; passive until requested.
-
-// In a user action handler:
-if (contacts.getCapabilities().contactPicker) {
-  const selected = await contacts.requestAccess({
-    properties: ["name", "email"],
-    multiple: true,
-  });
-  for (const contact of selected) {
-    console.log(contact.displayNames, contact.emailAddresses);
-  }
-}
+// In an NSEViewController action handler:
+const picker = new CNFXContactPickerViewController();
+picker.displayedPropertyKeys = [CNFXContactGivenNameKey, CNFXContactEmailAddressesKey];
+picker.delegate = {
+  contactPickerDidSelectContact(sender, contact) {
+    console.log(contact.givenName, contact.emailAddresses.map(item => item.value));
+  },
+  contactPickerDidCancel(sender) {
+    console.log("Selection cancelled");
+  },
+};
+this.presentAsSheet(picker);
 ```
 
-For an explicitly owned picker, construct `new CNFXContactPickerViewController(store, requestOptions)` and call `present()` from a user action. The constructor copies its request fields and is passive. `present()` forwards to the store's `requestAccess`; `dispose()` aborts the controller's pending request. This adapts the native `CNContactPickerViewController` lifetime to a browser-owned chooser: it renders no NSE view and is not a native `UIViewController`. The underlying store remains reusable after the controller is disposed.
+`CNFXContactPickerViewController` is a real `NSEViewController`. Use its presenter's existing `presentAsSheet`, `presentAsModalWindow`, `presentAsPopover`, or custom `present` method. The existing NSE path starts the native chooser synchronously, after authorization checks, and retains ordinary parent/presented ownership. The host renders no duplicate sheet over browser-owned UI. If shared app consent needs an asynchronous host prompt, that consent completes before the browser call; the browser may require another user action afterward. The framework never bypasses consent to preserve transient activation.
 
-`CNFXContactsClient.getCapabilities()` and `createContactStore(signal?)` are passive. The store also exposes `getCapabilities()` and `getAuthorizationStatus()`. A supported live browser store reports `prompt` before and after selection, because each access requires another user selection. It never reports a lasting `granted` state. An absent, insecure or disposed store reports `unavailable`; mounted declaration or host-policy denial reports `denied`. The shared vocabulary is `unknown`, `prompt`, `granted`, `denied`, `unavailable`.
+The default displayed keys are given name, email addresses and phone numbers. Postal addresses can be requested with `CNFXContactPostalAddressesKey`. Implement `contactPickerDidSelectContacts(picker, contacts)` to enable multiple selection; otherwise `contactPickerDidSelectContact(picker, contact)` receives a single selection. Delegates are queued on the selected application's main Dispatch queue. Empty selection and native cancellation use `contactPickerDidCancel`. Ordinary native failures also close through cancellation where the app remains authorized; privacy loss or app teardown suppresses callbacks entirely. Synchronous preflight failures throw `CNFXError`. ContactsUI has no invented picker-error delegate.
 
-`requestAccess({ properties?, multiple?, signal? })` invokes the system picker immediately, preserving the browser's user-activation boundary. Properties are `name`, `email` and `tel`; all three are requested by default, and `multiple` defaults to `false`. Unsupported fields are not silently substituted. Empty property requests are rejected. Fields outside the requested set are discarded even if an adapter returns them. Only one selection may be pending per store. Browser rejection, cancellation and security failures retain their DOMException names; denying or cancelling one picker does not create a persistent framework permission grant or denial.
+Dismissing or disposing the picker ends its pending work. Browser Contact Picker has no cancellable native session handle: the browser dialog may remain visible, but its late values cannot reach the application. Privacy revocation, policy loss, app teardown and registry removal also end presentation. Reusing an ended picker is not supported; create a new one.
 
-The returned array, each `CNFXContact`, and its `displayNames`, `emailAddresses` and `phoneNumbers` arrays are frozen copies. Missing fields are empty arrays. Web picker results have no stable contact identity, native labels or address-book change tracking. This initial surface does not include addresses or contact icons. It does not expose full-contact enumeration, editing, background access or synchronization.
+## Store authorization and database limits
 
-The component hook owns its store in a layout effect and disposes it on unmount. Aborted renders do not acquire a store, and StrictMode replay releases the previous owner. Component/session cancellation and request abort reject pending app work and suppress late browser results. The web API has no programmatic picker-dismiss operation: cancellation cannot close an already displayed system picker. The browser may keep that dialog visible until the user closes it.
+`new CNFXContactStore()` and `useContacts()` return actual Apple-shaped stores. The hook uses the exact mounted app session, tolerates React StrictMode effect replay, and ends queued work on true unmount.
 
-Host integration injects `BrowserContactsAdapter({ isSecureContext, browserNavigator })`, where `browserNavigator.contacts.select` is the host API. The adapter never obtains a global navigator or window. Capability presence is a feature check, not a promise that the current browser context permits a picker. Contact Picker support is limited across browsers and devices. Interactive device testing is required to verify real picker behavior; deterministic tests verify passive queries, immutable selection copies, policy checks and late-result suppression.
+`CNFXContactStore.authorizationStatus(CNFXEntityType.contacts)` returns Apple's cases: `notDetermined`, `restricted`, `denied`, `authorized`, or `limited`. The current browser service reports `notDetermined` before a successful selection and `limited` afterward within that app lifetime; a picker selection never grants a persistent address-book database. Missing or insecure browser support reports `restricted`; app entitlement, policy, or consent refusal reports `denied`. The web adapter never reports database `authorized`.
+
+`store.requestAccess(entityType, completion)` retains Apple's authorization-completion shape and never opens a picker. The completion runs asynchronously on the selected app's main queue with `false` and a `CNFXError` (`featureNotAvailable`, or `authorizationDenied` when access is refused). This method cannot manufacture database authorization from selected-contact consent. Ended or revoked instances drop queued completions.
+
+`unifiedContacts(predicate, keysToFetch)` and `enumerateContacts(fetchRequest, block)` remain synchronous members. The current web service throws `CNFXError.authorizationDenied` when denied and `CNFXError.featureNotAvailable` when the required database is unavailable. It never returns cached picker selections as a database. `NSEPredicate<CNFXContact>` is the existing Foundation predicate representation; enumeration's stop pointer uses a mutable `{ value: boolean }` box, although the browser never invokes that block.
+
+`CNFXContactFetchRequest(keysToFetch)` supports `keysToFetch`, `predicate`, `mutableObjects`, `unifyResults` and `sortOrder`. Key strings and `CNFXContactFormatter.descriptorForRequiredKeys(style)` conform to the marker protocol `CNFXKeyDescriptor`. Unknown descriptors fail with `CNFXError.unauthorizedKeys`. No new Foundation subsystem is required.
+
+## Contact values
+
+`CNFXContact` provides `identifier`, `contactType`, `givenName`, `familyName`, `organizationName`, `emailAddresses`, `phoneNumbers`, `postalAddresses`, `isKeyAvailable`, `copy` and `mutableCopy`. `CNFXMutableContact` makes the non-identifier fields writable locally; it does not persist them to the device. Contact and labeled-value identifiers are strings, matching Apple's NSString identifiers. Browser identifiers are generated for the selected snapshot and remain stable across copies; they cannot identify a device database record.
+
+Email, phone and postal fields are arrays of actual `CNFXLabeledValue` instances. Each carries `identifier`, `label` and `value`, plus `settingLabel`, `settingValue` and `settingLabelValue` copy operations. Native picker data has no labels, so its labels are `null`; no home/work labels are guessed. The exported home/work/other and phone labels correspond to Apple's constants. `CNFXPhoneNumber` keeps `stringValue` without unrequested normalization.
+
+Browser names have no trustworthy decomposition. The first selected display name is preserved whole in `givenName`; `familyName` remains empty and unavailable. There is no inverse formatter. Unrequested fields are discarded. `isKeyAvailable` distinguishes fetched fields from unavailable/default empty values. `CNFXContactFormatter.string(contact, "fullName")` and its instance equivalent format names in given/family order, or organization name for organization contacts. This is a documented subset of Apple's locale-aware formatter. Phonetic formatting is present as a style but fails with `featureNotAvailable` because phonetic fields are not provided.
+
+`CNFXPostalAddress` exposes `street`, `subLocality`, `city`, `subAdministrativeArea`, `state`, `postalCode`, `country`, and `isoCountryCode`. Browser address lines map to a newline-joined street; dependent locality, city, region, postal code and ISO country code map directly. Browser data supplies neither a localized country name nor a sub-administrative area, so those stay empty. Addresses and all returned selection arrays are immutable snapshots. No raw browser record type is public.
+
+No contact database saving, change tracking, vCard serialization, contact-property selection, contact icons, or persistent enumeration is claimed by this reviewed subset. The current browser's limited platform support and real native dialogs still require physical-device acceptance; deterministic tests cover the complete adapter, NSE, privacy and plugin paths.
+
+Primary references: [Contacts](https://developer.apple.com/documentation/contacts), [CNContact](https://developer.apple.com/documentation/contacts/cncontact), [CNContactStore](https://developer.apple.com/documentation/contacts/cncontactstore), [CNContactFetchRequest](https://developer.apple.com/documentation/contacts/cncontactfetchrequest), [CNLabeledValue](https://developer.apple.com/documentation/contacts/cnlabeledvalue), [CNPostalAddress](https://developer.apple.com/documentation/contacts/cnpostaladdress), [CNContactFormatter](https://developer.apple.com/documentation/contacts/cncontactformatter), [CNContactPickerViewController](https://developer.apple.com/documentation/contactsui/cncontactpickerviewcontroller), [CNContactPickerDelegate](https://developer.apple.com/documentation/contactsui/cncontactpickerdelegate).

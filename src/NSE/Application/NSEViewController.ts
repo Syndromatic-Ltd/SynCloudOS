@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { nativePresentations } from "./nativePresentation";
 import { createElement, type ComponentType, type ReactElement, type ReactNode } from "react";
 import type { AFXLayer } from "../../FX/AnimationFX/AFXLayer";
 import type { SynCloudOSLifecycleDisposalReason } from "../../SynCloudOS/nseRuntimeContracts";
@@ -617,6 +618,8 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
       try { finalizeNSEAuthoringOwner(sheet); }
       catch (error) { try { sheet[nseDisposeFor]("explicit"); } catch { /* Preserve finalization failure. */ } throw error; }
     }
+    try { nativePresentations.get(sheet)?.(); }
+    catch (error) { try { sheet[nseDisposeFor]("explicit"); } catch { /* Preserve the presentation failure. */ } throw error; }
     this.notifyObservers();
     return instance;
   }
