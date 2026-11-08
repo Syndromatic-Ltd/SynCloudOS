@@ -2,7 +2,7 @@
 import React, { useMemo, useState } from "react";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEPopover } from "../../../src/NSE/Overlays/NSEPopover";
+import { NSEPopover } from "../../../src/NSE/sdkPackageEntry";
 import { NSEOverlayProvider } from "../../../src/NSE/Overlays/NSEOverlayProvider";
 import { computeNSEOverlayPosition } from "../../../src/NSE/Overlays/computeNSEOverlayPosition";
 import { NSEAnimationEnvironmentProvider } from "../../../src/NSE/Animation/NSEAnimationEnvironment";
