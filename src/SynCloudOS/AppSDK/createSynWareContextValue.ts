@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+import { associateXRPort } from "../../FX/XRFX/internal/xrPort";
 import { associateBluetoothPort } from "../../FX/BluetoothFX/internal/bluetoothPort";
 import { associateNFCPort } from "../../FX/NFCFX/internal/nfcPort";
 import { associatePaymentPort } from "../../FX/PassFX/internal/paymentPort";
@@ -417,7 +418,6 @@ export function createSynWareContextValue(runtime: SynWareRuntime, branding: Syn
     location: environment.location,
     speechSynthesis: environment.speechSynthesis,
     videoPresentation: environment.videoPresentation,
-    xr: environment.xr,
     midi: environment.midi,
     lumina: environment.lumina,
     haptics: environment.haptics,
@@ -427,6 +427,7 @@ export function createSynWareContextValue(runtime: SynWareRuntime, branding: Syn
   associateNetworkPort(context, environment.network);
   associateSpeechPort(context, environment.speech);
   associateContactsPort(context, environment.contacts);
+  associateXRPort(context, environment.xr);
   associateBluetoothPort(context, environment.bluetooth);
   associateNFCPort(context, environment.nfc);
   associatePaymentPort(context, environment.payment);

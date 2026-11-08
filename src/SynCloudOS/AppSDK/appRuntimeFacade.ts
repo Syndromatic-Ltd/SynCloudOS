@@ -67,7 +67,8 @@ import { createMountedContactsPort } from "./mountedContactsPort";
 import { paymentAdapterFor } from "../../FX/PassFX/internal/paymentPort";
 import { contactsAdapterFor } from "../../FX/ContactsFX/internal/contactsPort";
 import { createMountedPaymentPort } from "./mountedPaymentPort";
-import { createMountedXRClient } from "./mountedXRClient";
+import { createMountedXRPort } from "./mountedXRPort";
+import { xrAdapterFor } from "../../FX/XRFX/internal/xrPort";
 import { createMountedLocationClient } from "./mountedLocationClient";
 import { createMountedMIDIClient } from "./mountedMIDIClient";
 import { createMountedLuminaClient } from "./mountedLuminaClient";
@@ -4535,7 +4536,11 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           runtime.environment.testControls?.permissions.subscribe?.(listener), runtime.environment.testControls?.policy.subscribe?.(listener)];
         return () => { for (const release of releases) release?.(); };
       }),
-      xr: createMountedXRClient(runtime.environment.xr, signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("xr")),
+      xr: createMountedXRPort(xrAdapterFor(runtime.environment), signal, deviceEntitlements, authoriseDeviceCapability, privacyForService("xr"), listener => {
+        const releases = [runtime.store.subscribe(listener), runtime.configurationProfiles.subscribe(listener), runtime.identity.session.subscribe(listener), runtime.privacy.subscribe(listener),
+          runtime.environment.testControls?.permissions.subscribe?.(listener), runtime.environment.testControls?.policy.subscribe?.(listener)];
+        return () => { for (const release of releases) release?.(); };
+      }),
       audioGraphs: createMountedAudioGraphs(runtime.audioGraphs, signal, deviceEntitlements, app.bundleIdentifier, audioInputCapability, mountedSettlement),
       audioSessions: createMountedAudioSessions(runtime.environment.audioCapture, signal, deviceEntitlements, audioInputCapability, app.bundleIdentifier, mountedSettlement, privacyForService("microphone")),
       audioFiles: createMountedAudioFiles(runtime.environment.audioFiles, signal, deviceEntitlements),

@@ -22,6 +22,7 @@
 import React from "react";
 import { NSEDecimalNumber } from "../../../src/Foundation/NSEDecimalNumber";
 import { PKFXPaymentAuthorizationController, PKFXPaymentRequest, PKFXPaymentSummaryItem } from "../../../src/FX/PassFX/public";
+import { XRFXSession, XRFXOrientationTrackingConfiguration } from "../../../src/FX/XRFX/public";
 import { BTFXCentralManager } from "../../../src/FX/BluetoothFX/public";
 import { NFXNDEFReaderSession } from "../../../src/FX/NFCFX/public";
 import { CNFXContactStore } from "../../../src/FX/ContactsFX/public";
@@ -49,8 +50,8 @@ it("projects mounted clients and the real Speech recognizer and revokes componen
   const host = createSynWareTestHost({ app, document, strictMode: true });
   host.adapters.permissions.allow(); host.adapters.policy.allow();
   await host.render();
-  for (const name of ["xr"] as const)
-    expect(typeof owners.session[name].getCapabilities).toBe("function");
+  expect("xr" in owners.session).toBe(false);
+  expect(owners.xr).toBeInstanceOf(XRFXSession);
   expect("nfc" in owners.session).toBe(false);
   expect(owners.nfc).toBeInstanceOf(NFXNDEFReaderSession);
   expect("speech" in owners.session).toBe(false);
@@ -63,11 +64,11 @@ it("projects mounted clients and the real Speech recognizer and revokes componen
   expect(owners.bluetooth.state).toBe("unsupported");
   expect(owners.speech.isAvailable).toBe(false);
   expect(() => owners.contacts.unifiedContacts(null, [])).toThrow();
-  expect(await owners.xr.getAuthorizationStatus()).toBe("unavailable");
+  expect(owners.xr.currentFrame).toBeNull();
   await host.dispose();
   expect(() => owners.payment.present()).toThrow();
   expect(() => owners.bluetooth.scanForPeripherals(null)).toThrow();
-  expect(owners.xr.getCapabilities().apiAvailable).toBe(false);
+  expect(() => owners.xr.run(new XRFXOrientationTrackingConfiguration())).toThrow();
   expect(owners.speech.isAvailable).toBe(false);
   expect(() => owners.contacts.unifiedContacts(null, [])).toThrow();
 });

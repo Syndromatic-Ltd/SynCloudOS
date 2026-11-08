@@ -21,7 +21,7 @@ Each framework has a short prefix that appears on every public type, so a name t
 | [SpeechFX](speech.md) | `SPFX` | Speech | `fx/speech` | Supplied audio requests; web sources unavailable |
 | [ContactsFX](contacts.md) | `CNFX` | Contacts | `fx/contacts` | Per-request contact picker |
 | [PassFX](pass.md) | `PKFX` | PassKit | `fx/pass` | PassKit payment classes; browser presentation unavailable |
-| [XRFX](xr.md) | `XRFX` | ARKit sessions | `fx/xr` | WebXR poses and tracked anchors |
+| [XRFX](xr.md) | `XRFX` | ARKit sessions | `fx/xr` | ARKit sessions, immutable frames, anchors and raycasts |
 | [LocationFX](location.md) | `LFX` | Core Location | `fx/location` | Position, course and authorisation |
 | [LuminaFX](lumina.md) | `LUFX` | Core Spotlight | `fx/lumina` | On-device indexing and search |
 | [CompressionFX](compression.md) | `CPFX` | Compression | `fx/compression` | Apple's input/output closure filters |
@@ -70,7 +70,7 @@ CompressionFX is also a direct library: its input/output filters use read/write 
 | `useSpeech` | Recognizer | `speech.recognize` |
 | `useContacts` | Real CNFXContactStore; selection via NSE-presented picker | `contacts.select` |
 | `usePayment(request)` | Real component-owned `PKFXPaymentAuthorizationController` | `payment.request` |
-| `useXR` | WebXR session | `xr.session` |
+| `useXR` | Component-owned `XRFXSession` | `xr.session` |
 | `useLocation` | Location manager | `location.read`, `location.request` |
 | `useLumina` | Search index | `lumina.query` |
 

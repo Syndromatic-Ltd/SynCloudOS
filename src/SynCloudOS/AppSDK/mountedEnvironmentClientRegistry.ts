@@ -87,7 +87,7 @@ export interface MountedAppEnvironmentClients {
   readonly speech: import("../../FX/SpeechFX/internal/speechPort").SpeechPort;
   readonly contacts: import("../../FX/ContactsFX/internal/contactsPort").ContactsPort;
   readonly payment: import("../../FX/PassFX/internal/paymentPort").PaymentPort;
-  readonly xr: import("../../FX/XRFX/public").XRFXClient;
+  readonly xr: import("../../FX/XRFX/internal/xrPort").XRPort;
   readonly midi: MIFXClient;
   readonly lumina: LUFXIndexClient;
   readonly haptics: HFXHapticClient;

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { xrAdapterFor } from "../../FX/XRFX/internal/xrPort";
 import { bluetoothAdapterFor } from "../../FX/BluetoothFX/internal/bluetoothPort";
 import { nfcAdapterFor } from "../../FX/NFCFX/internal/nfcPort";
 import { paymentAdapterFor } from "../../FX/PassFX/internal/paymentPort";
@@ -35,9 +36,10 @@ export async function systemCapabilityReport(runtime: SynCloudOSRuntime): Promis
     ["HapticsFX", runtime.haptics], ["MotionFX", environment.motion], ["LocationFX", environment.location],
     ["MIDIFX", environment.midi], ["LuminaFX", runtime.lumina], ["NetworkFX", networkAdapterFor(environment)],
     ["BluetoothFX", bluetoothAdapterFor(environment)], ["NFCFX", nfcAdapterFor(environment)], ["SpeechFX", speechAdapterFor(environment)],
-    ["ContactsFX", contactsAdapterFor(environment)], ["PassFX", paymentAdapterFor(environment)], ["XRFX", environment.xr],
+    ["ContactsFX", contactsAdapterFor(environment)], ["PassFX", paymentAdapterFor(environment)], ["XRFX", xrAdapterFor(environment)],
   ];
   const rows = await Promise.all(families.map(async ([family, candidate]): Promise<SystemCapabilityRow> => {
+    if (family === "XRFX") return { family, query: "ARWorldTrackingConfiguration.isSupported", value: String(await xrAdapterFor(environment)?.isSupported("world") ?? false) };
     if (family === "BluetoothFX") return { family, query: "CBManager.state", value: bluetoothAdapterFor(environment)?.state ?? "unsupported" };
     if (family === "NFCFX") return { family, query: "NFCNDEFReaderSession.readingAvailable", value: String(nfcAdapterFor(environment)?.readingAvailable ?? false) };
     if (family === "PassFX") return { family, query: "PKPaymentAuthorizationController.canMakePayments()", value: String(paymentAdapterFor(environment)?.canMakePayments() ?? false) };

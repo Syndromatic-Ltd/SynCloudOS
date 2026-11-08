@@ -17,32 +17,31 @@
  * limitations under the License.
  */
 
-import { useLayoutEffect, useMemo } from "react";
-import type { XRFXSession } from "../../../FX/XRFX/public";
-import { useSCOS } from "../scos/useSCOS";
-
-/** Component-scoped passive device owner; requests remain explicit user actions. */
+import { useInsertionEffect, useMemo } from "react";
+import { XRFXSession, XRFXError } from "../../../FX/XRFX/public";
+import { xrBindings, xrSessions, deferredXRTypes } from "../../../FX/XRFX/internal/xrBindings";
+import { useSynWareContext } from "../SynWareContext";
+import { bindFXFamily } from "../fx/bindFXFamily";
+import { scosSessionsForApp } from "../scos/scosSessionRegistry";
+/** A real component-owned ARSession. Native access begins only when run is called. */
 export function useXR(): XRFXSession {
-  const client = useSCOS().xr;
-  const binding = useMemo(() => {
-    let current: XRFXSession | null = null;
-    const requireOwner = () => {
-      if (!current) throw new DOMException("The component device owner is not mounted.", "AbortError");
-      return current;
-    };
-    const facade: XRFXSession = Object.freeze<XRFXSession>({
-      getCapabilities: () => current?.getCapabilities() ?? Object.freeze({ apiAvailable: false, worldTracking: false, nativeARKit: false }),
-      getAuthorizationStatus: () => current?.getAuthorizationStatus() ?? Promise.resolve("unavailable"),
-      isSupported: configuration => requireOwner().isSupported(configuration),
-      run: (configuration, listener) => requireOwner().run(configuration, listener),
-      pause: () => current?.pause() ?? Promise.resolve(),
-      dispose: () => current?.dispose(),
-    });
-    return { facade, mount() {
-      const owner = client.createSession(); current = owner;
-      return () => { if (current === owner) current = null; owner.dispose(); };
-    } };
-  }, [client]);
-  useLayoutEffect(() => binding.mount(), [binding]);
-  return binding.facade;
+  const context = useSynWareContext();
+  if (!context) throw new XRFXError("requestFailed", "useXR requires a mounted application.");
+  const session = useMemo(() => {
+    const sessions = scosSessionsForApp(context.appId).filter(candidate => candidate.context === context || (candidate.context.signal === context.signal && candidate.context.runtimeInfo.id === context.runtimeInfo.id));
+    if (sessions.length !== 1) throw new XRFXError("requestFailed", `XR application session is ${sessions.length ? "ambiguous" : "notRunning"}.`);
+    const selected = sessions[0]!;
+    const Bound = bindFXFamily({ XRFXSession }, context.appId).XRFXSession;
+    class ContextSession extends Bound {}
+    let ended = false;
+    xrBindings.set(ContextSession, { resolve() {
+      if (context.signal.aborted || !scosSessionsForApp(context.appId).includes(selected)) ended = true;
+      if (ended) throw new XRFXError("requestFailed", "XR application session is ended.");
+      return selected;
+    } });
+    deferredXRTypes.add(ContextSession);
+    return new ContextSession();
+  }, [context]);
+  useInsertionEffect(() => { xrSessions.get(session)!.activate(); return () => xrSessions.get(session)!.dispose(); }, [session]);
+  return session;
 }

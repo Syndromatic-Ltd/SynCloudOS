@@ -402,7 +402,6 @@ export interface SynCloudOSRuntimeEnvironment {
   readonly audio?: RuntimeAudioAdapterFactory | null;
   readonly motion?: MFXMotionAdapter;
   readonly location?: LFXLocationAdapter;
-  readonly xr?: import("../../FX/XRFX/public").XRFXClient;
   readonly midi?: MIDIAdapter;
   /** Environment-owned camera/display capture authority. Mounted apps never receive this host directly. */
   readonly videoCapture?: VideoCaptureSessionHost;

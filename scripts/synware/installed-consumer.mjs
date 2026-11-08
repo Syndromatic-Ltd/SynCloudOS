@@ -167,6 +167,10 @@ export function assertIndependentModules(root, ids) {
 export function assertFxRuntimeEntry(family, module) {
   assert(requiredFxFamilies.includes(family), `Unknown FX family: ${family}`);
   assert(Object.keys(module).length > 0, `Empty FX runtime entry: ${family}`);
+  if (family === "xr") {
+    for (const name of ["XRFXSession", "XRFXConfiguration", "XRFXWorldTrackingConfiguration", "XRFXOrientationTrackingConfiguration", "XRFXFrame", "XRFXCamera", "XRFXAnchor", "XRFXRaycastQuery", "XRFXRaycastResult", "XRFXError"]) assert(typeof module[name] === "function", `Missing XR runtime class: ${name}`);
+    for (const name of ["XRFXClient", "XRFXCapabilities", "XRFXAuthorizationStatus", "XRFXSessionMode", "XRFXReferenceSpace", "XRFXConfigurationOptions"]) assert(!(name in module), `Removed XR export: ${name}`);
+  }
 }
 
 /** Shared by source-side regression tests and the strict installed declaration gate. */
@@ -178,6 +182,8 @@ export function createSdkPublicTypeProbe() {
     `void [${requiredFxFamilies.join(", ")}];`,
     `declare const app: SynWareContextValue;`,
     `import { BTFXCentralManager } from "@syndromatic/syncloudos/fx/bluetooth";`,
+    `import { XRFXSession, XRFXWorldTrackingConfiguration } from "@syndromatic/syncloudos/fx/xr";`,
+    `const xrSession: XRFXSession = new XRFXSession(); const xrConfiguration = new XRFXWorldTrackingConfiguration(); xrConfiguration.isLightEstimationEnabled = false; xrSession.delegate = { sessionDidUpdateFrame(sender, frame) { const timestamp: number = frame.timestamp; void [sender, timestamp]; } }; xrSession.run(xrConfiguration); xrSession.pause();`,
     `import { SPFXSpeechRecognizer } from "@syndromatic/syncloudos/fx/speech";`,
     `const bluetoothManager: BTFXCentralManager = new BTFXCentralManager(); void bluetoothManager;`,
     `const speechRecognizer: SPFXSpeechRecognizer = new SPFXSpeechRecognizer(); void speechRecognizer;`,
@@ -188,7 +194,7 @@ export function createSdkPublicTypeProbe() {
     `// @ts-expect-error Tokens must infer the declared client, not an arbitrary caller type.`,
     `app.services.require(token).missingMethod();`,
     ...[
-      "app.runtime", "app.bluetooth", "app.speech", "app.services.registerClient", "app.services.resolveAppClient",
+      "app.runtime", "app.bluetooth", "app.speech", "app.xr", "app.services.registerClient", "app.services.resolveAppClient",
       "app.lumina.createIndex().backend", "app.video.backend", "app.midi.backend", "app.location.backend",
       "sdk.createSynCloudOS", "sdk.ServiceRegistry", "sdk.createSynWareTestHost", "sdk.createMountedLuminaClient",
       "sdk.createMountedSynWareRouter", "sdk.SynWareRouteSessionProvider",

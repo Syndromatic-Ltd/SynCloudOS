@@ -187,6 +187,11 @@ export interface SynWareTestDisposalReport {
 }
 
 export interface SynWareTestAdapters {
+  readonly xr: SynWareFakeControl<"xr.start" | "xr.add" | "xr.remove" | "xr.raycast" | "xr.pause"> & Readonly<{
+    emitFrame(): void;
+    endSessions(): void;
+    activeSessionCount(): number;
+  }>;
   readonly bluetooth: SynWareFakeControl<"bluetooth.scan" | "bluetooth.connect" | "bluetooth.services" | "bluetooth.characteristics" | "bluetooth.descriptors" | "bluetooth.read" | "bluetooth.write" | "bluetooth.notify" | "bluetooth.disconnect"> & Readonly<{
     emitValue(value: number): void;
     activeConnectionCount(): number;
