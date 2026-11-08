@@ -9,6 +9,7 @@ import { DFXSourceTimerFlags } from "../../DFXSourceTimerFlags";
 import { DFXTime } from "../../DFXTime";
 import { DFXTimeInterval } from "../../DFXTimeInterval";
 import { DFXWallTime } from "../../DFXWallTime";
+import { assertOwner } from "../lifetime";
 import { objectState } from "../queueState";
 import { clientError, maximumNanoseconds, nanoseconds } from "../time";
 import { remainingNanoseconds, scheduleTimer } from "../timerWheel";
@@ -30,6 +31,7 @@ export function timerSourceClass(Base: typeof DFXSource): new (flags: DFXSourceT
     override get data(): number { return super.data as number; }
     override get mask(): number { return super.mask as number; }
     schedule(deadline: DFXTime | DFXWallTime, options: { repeating?: DFXTimeInterval | number; leeway?: DFXTimeInterval } = {}): void {
+      assertOwner(this);
       remainingNanoseconds(deadline);
       const repeating = options.repeating ?? DFXTimeInterval.never;
       const interval = typeof repeating === "number" ? repeating === Infinity ? Infinity : Math.trunc(repeating * 1e9) : nanoseconds(repeating);

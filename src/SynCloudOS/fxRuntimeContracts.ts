@@ -29,3 +29,6 @@ export type {
   SynCloudOSLifecycleErrorOptions,
   SynCloudOSLifecycleResource,
 } from "./ErrorManager/lifecycleError";
+
+export { bindFXFamily, observeFXSessionEnd } from "./AppSDK/runtimeContracts";
+export type { FXAppSession } from "./AppSDK/runtimeContracts";

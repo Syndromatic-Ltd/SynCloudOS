@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { DFXGroup, DFXObject, DFXQoS, DFXQueue, DFXQueueAttributes, DFXSemaphore, DFXSpecificKey, DFXTime, DFXTimeInterval, DFXTimeoutResult, DFXWallTime, DFXWorkItem, DFXWorkItemFlags } from "../public";
+import { DFXGroup, DFXObject, DFXQoS, DFXQueue, DFXQueueAttributes, DFXSemaphore, DFXSpecificKey, DFXTime, DFXTimeInterval, DFXTimeoutResult, DFXWallTime, DFXWorkItem, DFXWorkItemFlags } from "./systemDispatch";
 import { currentExecution } from "../internal/executionStack";
 import { objectState } from "../internal/queueState";
 

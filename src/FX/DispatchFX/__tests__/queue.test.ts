@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import * as D from "../public";
+import * as D from "./systemDispatch";
 
 type Priority = "user-blocking" | "user-visible" | "background";
 /** Host task delivery and elapsed CPU time are independently controlled. */

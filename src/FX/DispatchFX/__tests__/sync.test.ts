@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { DFXPredicate, DFXQoS, DFXQueue, DFXQueueAttributes, DFXSpecificKey, DFXWorkItemFlags, dispatchPrecondition } from "../public";
+import { DFXPredicate, DFXQoS, DFXQueue, DFXQueueAttributes, DFXSpecificKey, DFXWorkItemFlags, dispatchPrecondition } from "./systemDispatch";
 import { currentExecution } from "../internal/executionStack";
 import { objectState } from "../internal/queueState";
 

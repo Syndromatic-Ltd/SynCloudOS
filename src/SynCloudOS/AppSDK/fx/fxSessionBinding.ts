@@ -26,3 +26,6 @@ export function createFXSessionBinding(type: Function, unavailable: (reason: FXS
     },
   });
 }
+
+export { observeSCOSSessionEnd as observeFXSessionEnd } from "../scos/scosSessionRegistry";
+export type { SCOSAppSession as FXAppSession } from "../scos/scosSessionRegistry";

@@ -2,6 +2,7 @@
  * Designed by Kavish Krishnakumar in Manchester.
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
+import { attributeDispatchClass } from "./internal/lifetime";
 import { DFXObject } from "./DFXObject";
 import { DFXGroup } from "./DFXGroup";
 import { DFXQoS } from "./DFXQoS";
@@ -13,7 +14,7 @@ import { DFXWorkItemFlags } from "./DFXWorkItemFlags";
 import { DFXWorkItem } from "./DFXWorkItem";
 import { DFXTime } from "./DFXTime";
 import { DFXWallTime } from "./DFXWallTime";
-import { currentExecution } from "./internal/executionStack";
+import { currentExecution, withExecution } from "./internal/executionStack";
 import { enterGroup, groupState, leaveGroup } from "./internal/groupState";
 import { objectState, queueChain, resolveQoS } from "./internal/queueState";
 import { rootScheduler } from "./internal/rootScheduler";
@@ -23,8 +24,11 @@ import { scheduleTimer } from "./internal/timerWheel";
 import { executeSyncWork, executeWork, prepareWork, type DFXWork, type DFXIterationWork } from "./internal/work";
 import { performWorkItem, workItemState } from "./internal/workItemState";
 
-let main: DFXQueue | undefined;
-const globals = new Map<DFXQoSClass, DFXQueue>();
+import { assertOwner, classForLifetime, onLifetimeEnd, selectLifetime, type DispatchLifetime } from "./internal/lifetime";
+const caches = new WeakMap<DispatchLifetime, { main?: DFXQueue; globals: Map<DFXQoSClass, DFXQueue> }>();
+function cache(lifetime: DispatchLifetime) {
+  let value = caches.get(lifetime); if (!value) { value = { globals: new Map() }; caches.set(lifetime, value); } return value;
+}
 /** DispatchQueue. Tier 0 schedules synchronous items on the current realm. */
 export class DFXQueue extends DFXObject {
   constructor(label: string, options: {
@@ -43,20 +47,23 @@ export class DFXQueue extends DFXObject {
     state.concurrent = attributes.includes(DFXQueueAttributes.concurrent);
     state.initiallyInactive = attributes.includes(DFXQueueAttributes.initiallyInactive);
     state.active = !state.initiallyInactive;
-    if (options.target != null) { objectState(options.target); state.target = options.target; }
+    if (options.target != null) { for (const target of queueChain(options.target)) assertOwner(target); state.target = options.target; }
   }
   get label(): string { return objectState(this).label; }
   get qos(): DFXQoS { return objectState(this).qos; }
   static get main(): DFXQueue {
-    if (!main) { main = new DFXQueue("com.apple.main-thread", { qos: DFXQoS.userInteractive }); objectState(main).main = true; }
-    return main;
+    const lifetime = selectLifetime(this), queues = cache(lifetime);
+    if (!queues.main) { const Queue = classForLifetime(this, lifetime); queues.main = new Queue("com.apple.main-thread", { qos: DFXQoS.userInteractive }); objectState(queues.main).main = true; }
+    return queues.main;
   }
   static global(qos: DFXQoSClass = DFXQoSClass.default): DFXQueue {
     if (!Object.values(DFXQoSClass).includes(qos)) clientError("invalid global queue QoS class");
     if (qos === DFXQoSClass.unspecified) qos = DFXQoSClass.default;
+    const lifetime = selectLifetime(this), globals = cache(lifetime).globals;
     let queue = globals.get(qos);
     if (!queue) {
-      queue = new DFXQueue(`com.apple.root.${qos}`, { qos: new DFXQoS(qos, 0), attributes: [DFXQueueAttributes.concurrent] });
+      const Queue = classForLifetime(this, lifetime);
+      queue = new Queue(`com.apple.root.${qos}`, { qos: new DFXQoS(qos, 0), attributes: [DFXQueueAttributes.concurrent] });
       objectState(queue).global = true; globals.set(qos, queue);
     }
     return queue;
@@ -66,13 +73,16 @@ export class DFXQueue extends DFXObject {
   async(item: DFXWorkItem): void;
   async(group: DFXGroup, item: DFXWorkItem): void;
   async<R>(optionsOrWork: DFXWorkItem | DFXGroup | DFXWork<R> | { group?: DFXGroup | null; qos?: DFXQoS; flags?: DFXWorkItemFlags[] }, work?: DFXWorkItem | DFXWork<R>): void {
+    const lifetime = assertOwner(this);
     const item = optionsOrWork instanceof DFXWorkItem ? optionsOrWork : optionsOrWork instanceof DFXGroup && work instanceof DFXWorkItem ? work : undefined;
     if (optionsOrWork instanceof DFXGroup && !item) clientError("group submission requires a dispatch work item");
     const options = item || typeof optionsOrWork === "function" ? {} : optionsOrWork as { group?: DFXGroup | null; qos?: DFXQoS; flags?: DFXWorkItemFlags[] };
     const execute = typeof optionsOrWork === "function" ? optionsOrWork : work;
     if (!item && typeof execute !== "function") clientError("work must be a function");
     const group = optionsOrWork instanceof DFXGroup ? optionsOrWork : options.group;
+    if (group != null) assertOwner(group);
     const groupData = group == null ? undefined : groupState(group);
+    if (item) assertOwner(item);
     const itemData = item ? workItemState(item) : undefined;
     const assigned = itemData?.qos ?? options.qos ?? DFXQoS.unspecified;
     if (!(assigned instanceof DFXQoS)) clientError("invalid work item QoS");
@@ -83,43 +93,52 @@ export class DFXQueue extends DFXObject {
     const prepared = prepareWork(itemData?.work ?? execute as () => unknown, this.label);
     const run = item ? () => performWorkItem(item, prepared) : prepared;
     const job = {
-      queue: this, qos: resolveQoS(queueChain(this), assigned, captured, flags), appId: null,
+      queue: this, qos: resolveQoS(queueChain(this), assigned, captured, flags), appId: lifetime.appId, lifetime,
       barrier: !objectState(this).global && flags.includes(DFXWorkItemFlags.barrier),
       resolveQoS: (chain: readonly DFXQueue[]) => resolveQoS(chain, assigned, captured, savedFlags),
+      dropped: () => { itemData?.jobs.delete(job); groupData?.jobs.delete(job); if (group != null) leaveGroup(group, true); },
       run: () => {
         try { run(); }
-        finally { itemData?.jobs.delete(job); groupData?.jobs.delete(job); if (group != null) leaveGroup(group); }
+        finally { itemData?.jobs.delete(job); groupData?.jobs.delete(job); if (group != null) leaveGroup(group, true); }
       },
     };
-    if (group != null) enterGroup(group);
+    if (group != null) enterGroup(group, true);
     groupData?.jobs.add(job); itemData?.jobs.add(job);
     try { rootScheduler.submit(job); }
-    catch (error) { itemData?.jobs.delete(job); groupData?.jobs.delete(job); if (group != null) leaveGroup(group); throw error; }
+    catch (error) { itemData?.jobs.delete(job); groupData?.jobs.delete(job); if (group != null) leaveGroup(group, true); throw error; }
   }
   asyncAfter(deadline: DFXTime | DFXWallTime, execute: DFXWorkItem): void;
   asyncAfter<R>(deadline: DFXTime | DFXWallTime, execute: DFXWork<R>): void;
   asyncAfter<R>(deadline: DFXTime | DFXWallTime, options: { qos?: DFXQoS; flags?: DFXWorkItemFlags[] }, execute: DFXWork<R>): void;
   asyncAfter<R>(deadline: DFXTime | DFXWallTime, optionsOrWork: DFXWorkItem | DFXWork<R> | { qos?: DFXQoS; flags?: DFXWorkItemFlags[] }, execute?: DFXWork<R>): void {
-    const item = optionsOrWork instanceof DFXWorkItem ? optionsOrWork : typeof optionsOrWork === "function" ? new DFXWorkItem(optionsOrWork) : new DFXWorkItem(optionsOrWork, execute!);
+    const lifetime = assertOwner(this);
+    const item = optionsOrWork instanceof DFXWorkItem ? optionsOrWork : typeof optionsOrWork === "function" ? new (classForLifetime(DFXWorkItem, lifetime))(optionsOrWork) : new (classForLifetime(DFXWorkItem, lifetime))(optionsOrWork, execute!);
+    assertOwner(item);
     const state = workItemState(item); const flags = [...state.flags];
     const captured = state.creationQoS ?? currentExecution()?.qos ?? DFXQoS.unspecified;
     const prepared = prepareWork(state.work, this.label);
-    scheduleTimer(deadline, 0, false, () => {
+    let release: () => void = () => {};
+    const cancel = scheduleTimer(deadline, 0, false, () => {
+      release(); if (lifetime.ended) return;
       const job = {
-        queue: this, qos: resolveQoS(queueChain(this), state.qos, captured, flags), appId: null,
+        queue: this, qos: resolveQoS(queueChain(this), state.qos, captured, flags), appId: lifetime.appId, lifetime,
         barrier: !objectState(this).global && flags.includes(DFXWorkItemFlags.barrier),
         resolveQoS: (chain: readonly DFXQueue[]) => resolveQoS(chain, state.qos, captured, flags),
+        dropped: () => { state.jobs.delete(job); },
         run: () => { try { performWorkItem(item, prepared); } finally { state.jobs.delete(job); } },
       };
       state.jobs.add(job);
       try { rootScheduler.submit(job); } catch (error) { state.jobs.delete(job); throw error; }
     });
+    release = onLifetimeEnd(lifetime, cancel);
   }
   sync(item: DFXWorkItem): void;
   sync<R>(work: DFXWork<R>): R;
   sync<R>(flags: DFXWorkItemFlags[], work: DFXWork<R>): R;
   sync<R>(flagsOrWork: DFXWorkItem | DFXWorkItemFlags[] | DFXWork<R>, work?: DFXWork<R>): R | void {
+    const lifetime = assertOwner(this);
     const item = flagsOrWork instanceof DFXWorkItem ? flagsOrWork : undefined;
+    if (item) assertOwner(item);
     const itemData = item ? workItemState(item) : undefined;
     const itemFlags = itemData?.flags ?? [];
     const flags = itemData ? itemFlags.some(flag => flag === DFXWorkItemFlags.inheritQoS || flag === DFXWorkItemFlags.enforceQoS) ? itemFlags : [...itemFlags, DFXWorkItemFlags.enforceQoS]
@@ -134,22 +153,23 @@ export class DFXQueue extends DFXObject {
     const captured = itemData?.creationQoS ?? callerQoS;
     const assigned = itemData?.qos ?? DFXQoS.unspecified;
     const prepared = itemData ? prepareWork(itemData.work, this.label) : undefined;
-    let result: R;
+    let result: R; let executed = false;
     const job = {
-      queue: this, qos: resolveQoS(chain, assigned, captured, flags), appId: null, barrier,
+      queue: this, qos: resolveQoS(chain, assigned, captured, flags), appId: lifetime.appId, lifetime, barrier,
       resolveQoS: (targets: readonly DFXQueue[]) => resolveQoS(targets, assigned, captured, flags),
-      run: () => { if (item) performWorkItem(item, prepared); else result = executeSyncWork(execute!, this.label); },
+      run: () => { executed = true; if (item) performWorkItem(item, prepared); else result = executeSyncWork(execute!, this.label); },
     };
     const restore = rootScheduler.override(this, callerQoS);
-    try { itemData?.jobs.add(job); rootScheduler.submit(job); rootScheduler.drainInRealm(this, job); return result!; }
+    try { itemData?.jobs.add(job); rootScheduler.submit(job); rootScheduler.drainInRealm(this, job); if (!executed) for (const target of chain) assertOwner(target); return result!; }
     finally { itemData?.jobs.delete(job); restore(); }
   }
   setSpecific<T>(key: DFXSpecificKey<T>, value: T | undefined): void {
+    assertOwner(this);
     const state = objectState(this);
     if (state.global) return;
     if (value === undefined) state.specifics.delete(key); else state.specifics.set(key, value);
   }
-  getSpecific<T>(key: DFXSpecificKey<T>): T | undefined { return objectState(this).specifics.get(key) as T | undefined; }
+  getSpecific<T>(key: DFXSpecificKey<T>): T | undefined { assertOwner(this); return objectState(this).specifics.get(key) as T | undefined; }
   static getSpecific<T>(key: DFXSpecificKey<T>): T | undefined {
     for (const queue of currentExecution()?.chain ?? []) {
       const state = objectState(queue);
@@ -158,9 +178,15 @@ export class DFXQueue extends DFXObject {
     return undefined;
   }
   static concurrentPerform<R>(iterations: number, execute: DFXIterationWork<R>): void {
+    const lifetime = selectLifetime(this);
     checkedInteger(iterations, "iterations");
     if (iterations < 0) clientError("iterations must not be negative");
     if (typeof execute !== "function") clientError("work must be a function");
-    for (let index = 0; index < iterations; index++) executeWork(() => execute(index), "concurrentPerform");
+    const current = currentExecution();
+    withExecution({ chain: current?.chain ?? [], qos: current?.qos ?? DFXQoS.unspecified, barrier: current?.barrier ?? false, appId: lifetime.appId }, () => {
+      for (let index = 0; index < iterations && !lifetime.ended; index++) executeWork(() => execute(index), "concurrentPerform");
+    });
   }
 }
+
+attributeDispatchClass(DFXQueue);

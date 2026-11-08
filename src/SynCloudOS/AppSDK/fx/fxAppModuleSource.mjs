@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import ts from "typescript";
 
 const families = Object.freeze({
-  animation: "AnimationFX", graphics: "GraphicsFX", image: "ImageFX", text: "TextFX",
+  dispatch: "DispatchFX", animation: "AnimationFX", graphics: "GraphicsFX", image: "ImageFX", text: "TextFX",
   audio: "AudioFX", haptics: "HapticsFX", motion: "MotionFX", media: "MediaFX", video: "VideoFX",
   midi: "MIDIFX", location: "LocationFX", lumina: "LuminaFX", compression: "CompressionFX",
   network: "NetworkFX", crypto: "CryptoFX", bluetooth: "BluetoothFX", nfc: "NFCFX",

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import * as D from "../public";
+import * as D from "./systemDispatch";
 import { currentExecution } from "../internal/executionStack";
 
 /** Jitter belongs to the host, independently of queue tasks and elapsed time. */

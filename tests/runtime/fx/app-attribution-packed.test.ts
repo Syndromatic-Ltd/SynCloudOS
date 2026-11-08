@@ -32,7 +32,8 @@ it("does not share mounted sessions with a separate SDK copy",async()=>{
 import { defineConfig } from "vitest/config";
 import { synCloudOS } from "@syndromatic/syncloudos/vite";
 import { resolve } from "node:path";
-export default defineConfig({ plugins:[synCloudOS({webspringEntry:false}),{name:"private-probe",enforce:"pre",resolveId(id){if(id==="private:fx-attribution-contracts")return resolve("node_modules/@syndromatic/syncloudos/fx-attribution-runtime.js");if(id==="@syndromatic/syncloudos/fx/motion")return resolve("probe.ts");}}],test:{environment:"jsdom",include:["consumer.test.tsx","copy-proof.test.ts"]} });
+import { normalizePath } from "vite";
+export default defineConfig({ plugins:[synCloudOS({webspringEntry:false}),{name:"private-probe",enforce:"pre",resolveId(id){if(id==="private:fx-attribution-contracts")return normalizePath(resolve("node_modules/@syndromatic/syncloudos/fx-attribution-runtime.js"));if(id==="@syndromatic/syncloudos/fx/motion")return normalizePath(resolve("probe.ts"));}}],test:{environment:"jsdom",include:["consumer.test.tsx","copy-proof.test.ts"]} });
 `);
   expect(runNode(["node_modules/vitest/vitest.mjs", "run"], consumer.root)).toMatch(/2 passed/);
   cpSync(resolve("tests/fixtures/synware-authoring/6e"), join(consumer.root, "six-e"), { recursive: true });
@@ -45,7 +46,8 @@ export default defineConfig({ plugins:[synCloudOS({webspringEntry:false}),{name:
   writeFileSync(join(consumer.root, "vite.config.mjs"), `
 import { synCloudOS } from "@syndromatic/syncloudos/vite";
 import { resolve } from "node:path";
-export default {base:"/nested/fx/",plugins:[synCloudOS({webspringEntry:false}),{name:"private-probe",enforce:"pre",resolveId(id){if(id==="private:fx-attribution-contracts")return resolve("node_modules/@syndromatic/syncloudos/fx-attribution-runtime.js");if(id==="@syndromatic/syncloudos/fx/motion")return resolve("probe.ts");}}],build:{lib:{entry:"entry.ts",formats:["es"],fileName:"proof"},rollupOptions:{external:["react","react-dom","react-dom/client","react/jsx-runtime"]}}};
+import { normalizePath } from "vite";
+export default {base:"/nested/fx/",plugins:[synCloudOS({webspringEntry:false}),{name:"private-probe",enforce:"pre",resolveId(id){if(id==="private:fx-attribution-contracts")return normalizePath(resolve("node_modules/@syndromatic/syncloudos/fx-attribution-runtime.js"));if(id==="@syndromatic/syncloudos/fx/motion")return normalizePath(resolve("probe.ts"));}}],build:{lib:{entry:"entry.ts",formats:["es"],fileName:"proof"},rollupOptions:{external:["react","react-dom","react-dom/client","react/jsx-runtime"]}}};
 `);
   expect(runNode(["node_modules/vite/bin/vite.js", "build"], consumer.root)).toContain("built in");
   writeFileSync(join(consumer.root, "verify.mjs"), `

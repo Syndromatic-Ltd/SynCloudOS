@@ -32,6 +32,7 @@ export interface SCOSAppSession {
 }
 
 const sessionsByApp = new Map<string, SCOSAppSession[]>();
+const removalObservers = new WeakMap<SCOSAppSession, Set<() => void>>();
 const titlesByApp = new Map<string, string>();
 
 /** Publishes a mounted session until the returned disposer runs. Several
@@ -46,6 +47,9 @@ export function registerSCOSAppSession(session: SCOSAppSession): () => void {
     const remaining = (sessionsByApp.get(key) ?? []).filter((candidate) => candidate !== session);
     if (remaining.length === 0) sessionsByApp.delete(key);
     else sessionsByApp.set(key, remaining);
+    const observers = removalObservers.get(session);
+    removalObservers.delete(session);
+    for (const end of observers ?? []) end();
   };
 }
 
@@ -61,4 +65,17 @@ export function resolveSCOSSession(appId: string, title?: string): SCOSAppSessio
   const runtimes = new Set(sessions.map(session => session.context.runtimeInfo.id));
   if (runtimes.size > 1) throw scosAmbiguousSessionError(appId, displayTitle, runtimes.size);
   return sessions[sessions.length - 1];
+}
+
+/** Private lifetime observation; registry removal is terminal even without abort. */
+export function observeSCOSSessionEnd(session: SCOSAppSession, end: () => void): () => void {
+  let observers = removalObservers.get(session);
+  if (!observers) { observers = new Set(); removalObservers.set(session, observers); }
+  let ended = false;
+  const dispose = () => { observers.delete(notify); session.context.signal.removeEventListener("abort", notify); };
+  const notify = () => { if (!ended) { ended = true; dispose(); end(); } };
+  observers.add(notify);
+  session.context.signal.addEventListener("abort", notify, { once: true });
+  if (session.context.signal.aborted || !scosSessionsForApp(session.appId).includes(session)) notify();
+  return dispose;
 }

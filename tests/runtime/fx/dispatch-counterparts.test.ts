@@ -4,7 +4,7 @@ import { expect, it } from "vitest";
 import * as D from "../../../src/FX/DispatchFX/public";
 import { appkitCounterpartFor } from "../../../scripts/developer-mcp/lookup.mjs";
 import { synWareSdkEntries } from "../../../scripts/synware/sdk-entries.mjs";
-import { assertFxPackageExports, requiredFxFamilies } from "../../../scripts/synware/sdk-package-manifest.mjs";
+import { assertFxPackageExports, assertReviewedPackageFiles, requiredFxFamilies } from "../../../scripts/synware/sdk-package-manifest.mjs";
 
 const expected = {
   DFXTime: "DispatchTime", DFXWallTime: "DispatchWallTime", DFXTimeInterval: "DispatchTimeInterval",
@@ -47,10 +47,11 @@ it("keeps the public entry exclusively explicit re-exports without private helpe
 it("publishes only mapped Apple types and keeps private storage out of declarations", () => {
   const path = "src/FX/DispatchFX/public.ts";
   const declarations: string[] = [];
-  const program = ts.createProgram([path], {
-    target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext,
-    moduleResolution: ts.ModuleResolutionKind.Bundler, types: [], skipLibCheck: true,
-    declaration: true, emitDeclarationOnly: true,
+  const config = ts.readConfigFile("tsconfig.app.json", ts.sys.readFile);
+  const parsed = ts.parseJsonConfigFileContent(config.config, ts.sys, process.cwd());
+  const program = ts.createProgram([path, ...parsed.fileNames.filter(name => name.endsWith(".d.ts"))], {
+    ...parsed.options, noEmit: false, declaration: true, emitDeclarationOnly: true,
+    incremental: false, tsBuildInfoFile: undefined,
   });
   const checker = program.getTypeChecker();
   const source = program.getSourceFile(path)!;
@@ -58,7 +59,7 @@ it("publishes only mapped Apple types and keeps private storage out of declarati
   expect(exports.map(symbol => symbol.name).sort()).toEqual(Object.keys(all).sort());
   expect(ts.getPreEmitDiagnostics(program).map(d => ts.flattenDiagnosticMessageText(d.messageText, "\n"))).toEqual([]);
   const result = program.emit(undefined, (path, text) => {
-    if (!path.includes("/internal/")) declarations.push(text);
+    if (path.includes("/DispatchFX/") && !path.includes("/internal/")) declarations.push(text);
   });
   expect(result.emitSkipped).toBe(false);
   const text = declarations.join("\n");
@@ -70,10 +71,16 @@ it("publishes only mapped Apple types and keeps private storage out of declarati
   expect(text).toMatch(/class DFXGroup extends DFXObject/);
   expect(text).toMatch(/class DFXSemaphore extends DFXObject/);
   expect(text).not.toMatch(/(?:BrowserHost|createRootScheduler|rootScheduler|prepareWork|ConsoleTask|PredicateKind)/);
+  expect(text).not.toMatch(/(?:fxAttributedClass|fxBoundApplication|fxApplicationID|FXAppSession|DispatchLifetime|classForLifetime|systemDispatch|sessionBinding|runtimeContracts)/);
   expect(text).not.toMatch(/(?:sourceState|SourceState|SourceClass|scheduleTimer|remainingNanoseconds|timerWheel)/);
   expect(text).toMatch(/class DFXSource extends DFXObject/);
   for (const name of Object.keys(protocols)) expect(text).toContain(`interface ${name}`);
   expect(text).toMatch(/readonly rawValue: bigint/);
   expect(text).toMatch(/readonly uptimeNanoseconds: number/);
   expect(text).toMatch(/class DFXWallTime[\s\S]*?private constructor\(\)/);
+}, 30_000);
+
+it("ships only the reviewed Dispatch entry files", () => {
+  expect(() => assertReviewedPackageFiles(["fx/dispatch.js", "fx/dispatch.js.map", "fx/dispatch.d.ts"])).not.toThrow();
+  for (const file of ["fx/dispatch.css", "fx/dispatch/private.js", "fx/dispatch/systemBinding.js"]) expect(() => assertReviewedPackageFiles([file])).toThrow();
 });
