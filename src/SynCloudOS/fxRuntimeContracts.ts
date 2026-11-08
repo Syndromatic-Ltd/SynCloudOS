@@ -21,6 +21,8 @@
 /** Runtime values FX resources use without evaluating the runtime facade.
  * Keep this entry free of runtime construction, like nseRuntimeContracts. */
 export { declareSynCloudOSLifecycleSignal, SynCloudOSLifecycleError, SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "./ErrorManager/lifecycleError";
+export { fxAttributedClass, fxApplicationID, createFXSessionBinding } from "./AppSDK/runtimeContracts";
+export type { FXSessionUnavailableReason } from "./AppSDK/runtimeContracts";
 export type {
   SynCloudOSLifecycleDisposal,
   SynCloudOSLifecycleDisposalReason,
