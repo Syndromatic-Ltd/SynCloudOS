@@ -14,6 +14,7 @@ export interface ExecutionFrame {
 }
 const stack: ExecutionFrame[] = [];
 export function currentExecution(): ExecutionFrame | undefined { return stack.at(-1); }
+export function executionLabelChain(): string { return stack.map(frame => frame.chain.map(queue => objectState(queue).label).join(" -> ")).join(" | "); }
 export function withExecution<R>(frame: ExecutionFrame, run: () => R): R {
   stack.push(frame);
   try { return run(); } finally { stack.pop(); }

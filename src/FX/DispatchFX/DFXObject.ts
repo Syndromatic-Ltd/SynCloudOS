@@ -18,11 +18,11 @@ export abstract class DFXObject {
     state.suspensionCount--;
     objectChanged(this);
   }
-  setTarget(queue: DFXQueue): void {
+  setTarget(queue: DFXQueue | null): void {
     const state = objectState(this);
-    if (state.global || state.main) clientError("cannot change the target of a global or main queue");
+    if (state.global || state.main) return;
     if (state.initiallyInactive && state.active) clientError("cannot change target after activation");
-    const targets: readonly DFXObject[] = queueChain(queue);
+    const targets: readonly DFXObject[] = queue === null ? [] : queueChain(queue);
     if (targets.includes(this)) clientError("target queue cycle");
     state.target = queue;
     // Active submissions retain their old target snapshots, as libdispatch

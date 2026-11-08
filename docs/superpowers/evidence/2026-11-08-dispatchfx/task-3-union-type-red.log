@@ -1,0 +1,12 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run tsc -b --pretty false
+src/FX/DispatchFX/__tests__/sync.test.ts(209,5): error TS2578: Unused '@ts-expect-error' directive.
+src/FX/DispatchFX/__tests__/sync.test.ts(211,5): error TS2578: Unused '@ts-expect-error' directive.
+src/FX/DispatchFX/__tests__/sync.test.ts(213,5): error TS2578: Unused '@ts-expect-error' directive.
+src/FX/DispatchFX/__tests__/sync.test.ts(215,5): error TS2578: Unused '@ts-expect-error' directive.
+src/FX/DispatchFX/__tests__/sync.test.ts(217,5): error TS2578: Unused '@ts-expect-error' directive.
+src/FX/DispatchFX/__tests__/sync.test.ts(219,5): error TS2578: Unused '@ts-expect-error' directive.
+src/FX/DispatchFX/__tests__/sync.test.ts(221,5): error TS2578: Unused '@ts-expect-error' directive.
+src/FX/DispatchFX/__tests__/sync.test.ts(223,5): error TS2578: Unused '@ts-expect-error' directive.
+src/FX/DispatchFX/__tests__/sync.test.ts(225,5): error TS2578: Unused '@ts-expect-error' directive.
+src/FX/DispatchFX/__tests__/sync.test.ts(227,5): error TS2578: Unused '@ts-expect-error' directive.
