@@ -12,9 +12,9 @@ const server = await createServer({
   root: process.cwd(), configFile: false, logLevel: "warn",
   plugins: [react(), synCloudOS({ webspringEntry: false })],
   server: { host: "127.0.0.1", port, strictPort: true },
-  optimizeDeps: { entries: ["index.html"], include: ["react", "react-dom/client", "react/jsx-runtime"] },
+  optimizeDeps: { entries: ["index.html"], include: ["react", "react-dom/client", "react/jsx-runtime", "@syndromatic/syncloudos", "@syndromatic/syncloudos/sdk"] },
 });
 await server.listen();
 const address = server.httpServer.address();
-writeFileSync("dev-server.json", JSON.stringify({ url: `http://127.0.0.1:${address.port}/`, cacheDir: server.config.cacheDir, exclude: server.config.optimizeDeps.exclude, noDiscovery: server.config.optimizeDeps.noDiscovery }));
+writeFileSync("dev-server.json", JSON.stringify({ url: `http://127.0.0.1:${address.port}/`, cacheDir: server.config.cacheDir, exclude: server.config.optimizeDeps.exclude, include: server.config.optimizeDeps.include, noDiscovery: server.config.optimizeDeps.noDiscovery }));
 process.on("message", async message => { if (message === "close") { await server.close(); process.exit(0); } });

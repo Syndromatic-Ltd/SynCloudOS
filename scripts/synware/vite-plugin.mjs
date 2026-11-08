@@ -703,6 +703,10 @@ export function synCloudOS(options) {
     name: "syncloudos:project",
     enforce: "pre",
     config(config, env) {
+      // Explicit includes override exclusions; remove only SDK entries before Vite merges arrays.
+      if (config.optimizeDeps?.include) {
+        config.optimizeDeps.include = config.optimizeDeps.include.filter(id => id !== "@syndromatic/syncloudos" && !id.startsWith("@syndromatic/syncloudos/"));
+      }
       const toolchainConfig = toolchain.config(config, env);
       pluginSdkBuild ??= sdkBuildFingerprint(fileURLToPath(new URL(".", import.meta.url)));
       const build = pluginSdkBuild;
