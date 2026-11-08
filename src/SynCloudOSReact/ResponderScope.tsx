@@ -61,7 +61,7 @@ export function ResponderScope({ responderId, kind, parentResponderId, scopeId, 
   useInsertionEffect(() => {
     if (disabled || appRuntime) return;
     if (kind === "application" && responderId.startsWith("application:") &&
-      applicationSessionFor({ runtimeId: kernelRuntime!.runtimeId, appId: responderId.slice("application:".length) })?.ownsApplicationResponder) return;
+      applicationSessionFor(kernelRuntime!, responderId.slice("application:".length))?.ownsApplicationResponder) return;
     const registration = kernelRuntime!.responders.register({ id: responderId, kind, parentId: resolvedParentResponderId, scopeId, undoOwner, diagnosticsLabel });
     return () => {
       clearOwnedResponderAnchor(kernelRuntime!, kind, responderId);

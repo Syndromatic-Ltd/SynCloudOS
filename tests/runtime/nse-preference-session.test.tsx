@@ -33,7 +33,7 @@ it("preserves exact app-scoped primitive keys, hydrates before launch/load, shar
   const first = createClassApplicationHost(App, "com.tests.preference-session"); hosts.push(first);
   first.runtime.persistence.setPreference(`${first.appId}:sidebar.visible`, false);
   await first.launch(); first.mountWindows(); await first.openMainWindow(); await screen.findByText("Hidden preference");
-  const session = applicationSessionFor({ runtimeId: first.runtime.runtimeId, appId: first.appId })!;
+  const session = applicationSessionFor(first.runtime, first.appId)!;
   await act(async () => { await session.app.openWindow(Window, { restorationKey: "second-preference" }); });
   expect(await screen.findAllByText("Hidden preference")).toHaveLength(2);
   expect(seen).toEqual([false, false, false, false, false]);
@@ -41,7 +41,7 @@ it("preserves exact app-scoped primitive keys, hydrates before launch/load, shar
   expect(screen.getAllByText("Visible preference")).toHaveLength(2);
   expect(first.runtime.persistence.getPreference(`${first.appId}:sidebar.visible`, false)).toBe(true);
   const other = createClassApplicationHost(App, "com.tests.preference-session"); hosts.push(other);
-  await other.launch(); expect((applicationSessionFor({ runtimeId: other.runtime.runtimeId, appId: other.appId })!.app as App).visible).toBe(true);
+  await other.launch(); expect((applicationSessionFor(other.runtime, other.appId)!.app as App).visible).toBe(true);
 });
 
 it("updates decorated fields for ordinary SCOS persistence writes and removals immediately", async () => {

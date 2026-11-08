@@ -109,7 +109,7 @@ export function createClassApplicationHost(AppClass: NSEApplicationClass | Compo
     async dispose() {
       for (const handle of mounted.splice(0)) handle.unmount();
       // Disposing a runtime does not close its applications; a session left behind would keep later tests in class-application mode.
-      applicationSessionFor({ runtimeId: runtime.runtimeId, appId })?.dispose("explicit");
+      applicationSessionFor(runtime, appId)?.dispose("explicit");
       await runtime.dispose();
     },
   };

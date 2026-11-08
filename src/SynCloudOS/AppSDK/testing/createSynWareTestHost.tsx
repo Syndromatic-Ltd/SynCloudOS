@@ -340,7 +340,7 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
   };
 
   const host: SynWareTestHost = {
-    get application() { return options.application ? applicationSessionFor({ runtimeId: runtime.runtimeId, appId: app.bundleIdentifier })?.app ?? null : null; },
+    get application() { return options.application ? applicationSessionFor(runtime, app.bundleIdentifier)?.app ?? null : null; },
     clock: environment.clock,
     mediaClock: environment.mediaClock,
     persistence: appPersistence,
@@ -502,7 +502,7 @@ export function createSynWareTestHost(options: CreateSynWareTestHostOptions): Sy
         const activeRender = rendering;
         if (activeRender) await activeRender.catch(() => undefined);
         unmount();
-        applicationSessionFor({ runtimeId: runtime.runtimeId, appId: app.bundleIdentifier })?.dispose("explicit");
+        applicationSessionFor(runtime, app.bundleIdentifier)?.dispose("explicit");
         windowContentRegistry.dispose();
         let documentCleanupError: unknown;
         try { await documentProvision?.dispose(); } catch (error) { documentCleanupError = error; }

@@ -36,7 +36,8 @@ import {
   preserveTrustedSynWareBundleProvenance,
 } from "./trustedBundleProvenance";
 import { captureLazySynWareDefinition } from "./definitionModule";
-import { awaitCallerSignal, isAbortError, runDefinitionLifecycle } from "./definitionLifecycle";
+import { awaitCallerSignal, createUnownedDefinitionBackgroundExecution, isAbortError, runDefinitionLifecycle } from "./definitionLifecycle";
+import { prepareDefinitionBackgroundExecution } from "../AppHosting/runtimeEntry";
 
 
 export class SynCloudOSBundleLoadError extends Error {
@@ -108,6 +109,7 @@ type BundleLoaderRuntimeContext = {
 };
 
 export function createBundleLoader(runtimeInput: SynCloudOSRuntime | BundleLoaderFactoryDependencies): SynCloudOSBundleLoader {
+  const kernel = "store" in runtimeInput ? runtimeInput : null;
   const runtime: BundleLoaderRuntimeContext = "store" in runtimeInput
     ? runtimeInput
     : {
@@ -356,7 +358,12 @@ const bundleLoader = {
         let definition;
         try {
           definition = captureLazySynWareDefinition(module, bundle);
-          await runDefinitionLifecycle(definition, { signal, assertCurrent });
+          await runDefinitionLifecycle(definition, { signal, assertCurrent,
+            prepareBackground: () => {
+              return kernel ? prepareDefinitionBackgroundExecution(kernel, bundle, signal, assertCurrent)
+                : createUnownedDefinitionBackgroundExecution(signal, assertCurrent);
+            },
+          });
         } catch (error) {
           if (isAbortError(error) || bundles.get(normalizeBundleIdentifier(appId)) !== bundle) throw error;
           throw new SynCloudOSBundleLoadError(

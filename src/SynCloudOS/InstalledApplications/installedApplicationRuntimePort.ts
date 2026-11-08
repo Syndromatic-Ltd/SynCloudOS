@@ -33,7 +33,7 @@ export function createInstalledApplicationRuntimePort(runtime: SynCloudOSRuntime
     },
     openDocument: request => runtime.documents.openDocument(request),
     async openURLs(appId, urls, context) {
-      const app = applicationSessionFor({ runtimeId: runtime.runtimeId, appId })?.app;
+      const app = applicationSessionFor(runtime, appId)?.app;
       if (!app || app.isDisposed) throw new Error("The receiving application is no longer available.");
       const handler = app.delegate?.applicationOpen;
       if (!handler && (context?.sharedItems || urls.some(url => !["http:", "https:"].includes(url.protocol) || url.searchParams.has("scos-action")))) throw new Error("The receiving application must implement applicationOpen for this item.");
