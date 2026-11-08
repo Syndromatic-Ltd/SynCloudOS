@@ -21,7 +21,8 @@ About menu item is not shown.
 The `synCloudOS()` Vite plugin keeps the SDK and all its subpaths outside dependency
 pre-bundling so attributed FX classes and mounted sessions share one module graph.
 Explicit host include entries for the SDK are removed; other libraries' entries are retained.
-The plugin also pre-bundles the CommonJS `react-dom` entry used by the SDK.
+The plugin also pre-bundles the SDK's CommonJS React peer entries: `react`,
+`react-dom`, `react-dom/client` and `react/jsx-runtime`.
 Other dependencies remain eligible for optimisation. Keep this plugin configuration
 in place during development; a separate SDK copy still has its own session registry.
 

@@ -715,8 +715,8 @@ export function synCloudOS(options) {
         optimizeDeps: {
           // Vite matches subpaths too: classes, private attribution and mounted sessions must share one graph.
           exclude: ["@syndromatic/syncloudos"],
-          // The excluded SDK imports named exports from this CommonJS peer entry.
-          include: ["react-dom"],
+          // These are the CommonJS React peer entries imported by the emitted SDK.
+          include: ["react", "react-dom", "react-dom/client", "react/jsx-runtime"],
           ...(build ? { esbuildOptions: { define: { __SYNCLOUDOS_SDK_BUILD__: JSON.stringify(build) } } } : {}),
         },
       };
