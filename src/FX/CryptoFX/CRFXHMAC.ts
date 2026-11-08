@@ -24,6 +24,8 @@ import { CRFXHashedAuthenticationCode } from "./CRFXHashedAuthenticationCode";
 import { concatCollection, copy, makeValue, operation, provider, valueBytes } from "./internal/bytes";
 import { hashAlgorithm, registerAuthenticationCodeHash, type HashType } from "./internal/hash";
 
+const specialisations = new WeakMap<HashType, ReturnType<typeof CRFXHMAC>>();
+
 /** CryptoKit.HMAC<H>. CRFXHMAC(Hash) is TypeScript's runtime generic specialisation. */
 export function CRFXHMAC(Hash: HashType): {
   new(key: CRFXSymmetricKey): {
@@ -36,8 +38,10 @@ export function CRFXHMAC(Hash: HashType): {
   /** Browser-forced asynchronous isValidAuthenticationCode(_:authenticating:using:). */
   isValidAuthenticationCode(code: CRFXHashedAuthenticationCode | NSEData, data: NSEData, key: CRFXSymmetricKey): Promise<boolean>;
 } {
+  const cached = specialisations.get(Hash);
+  if (cached) return cached;
   const algorithm = hashAlgorithm(Hash);
-  return class HMAC {
+  class HMAC {
     readonly #key: CRFXSymmetricKey;
     readonly #chunks: Uint8Array[] = [];
     constructor(key: CRFXSymmetricKey) { this.#key = new CRFXSymmetricKey(valueBytes(key)); }
@@ -60,5 +64,7 @@ export function CRFXHMAC(Hash: HashType): {
       const expected = await HMAC.authenticationCode(data, key);
       return CRFXHashedAuthenticationCode["=="](expected, code);
     }
-  };
+  }
+  specialisations.set(Hash, HMAC);
+  return HMAC;
 }
