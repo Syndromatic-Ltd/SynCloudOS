@@ -18,6 +18,12 @@ The host may supply About attribution with `about: { copyright, trademark, tagli
 The application's name and version still come from its own Info.ts; without attribution its
 About menu item is not shown.
 
+The `synCloudOS()` Vite plugin keeps the SDK and all its subpaths outside dependency
+pre-bundling so attributed FX classes and mounted sessions share one module graph.
+The plugin also pre-bundles the CommonJS `react-dom` entry used by the SDK.
+Other dependencies remain eligible for optimisation. Keep this plugin configuration
+in place during development; a separate SDK copy still has its own session registry.
+
 ## Anatomy of a bundle
 
 ```text

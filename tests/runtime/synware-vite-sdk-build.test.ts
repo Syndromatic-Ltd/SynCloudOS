@@ -5,6 +5,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
+import { mergeConfig } from "vite";
 // @ts-expect-error The plugin is plain ESM without declarations for this internal export.
 import { sdkBuildFingerprint, synCloudOS } from "../../scripts/synware/vite-plugin.mjs";
 
@@ -31,11 +32,20 @@ describe("the SDK build in Vite's pre-bundle key", () => {
   it("leaves the key alone in a source checkout, where no built SDK sits beside the plugin", () => {
     expect(sdkBuildFingerprint(join(import.meta.dirname, "../../scripts/synware"))).toBeNull();
     const plugin = synCloudOS({ webspringEntry: false });
-    expect(plugin.config({}, { command: "serve", mode: "development" })).not.toHaveProperty("optimizeDeps");
+    expect(plugin.config({}, { command: "serve", mode: "development" })).not.toHaveProperty("optimizeDeps.esbuildOptions.define.__SYNCLOUDOS_SDK_BUILD__");
   });
 
   it("changes when only the packed FX virtual-module generator changes", () => {
     const base = { "package.json": "{}", "fx-app-module-source.mjs": "export const version = 1;", "nse.js": "" };
     expect(sdkBuildFingerprint(sdk(base))).not.toBe(sdkBuildFingerprint(sdk({ ...base, "fx-app-module-source.mjs": "export const version = 2;" })));
   });
+});
+
+
+it("keeps every SDK subpath in one dev graph without disabling other dependency optimisation", () => {
+  const plugin = synCloudOS({ webspringEntry: false });
+  const config = mergeConfig({ optimizeDeps: { include: ["react"], exclude: ["another-library"] } }, plugin.config({}, { command: "serve", mode: "development" }));
+  expect(config.optimizeDeps.exclude).toEqual(["another-library", "@syndromatic/syncloudos"]);
+  expect(config.optimizeDeps.include).toEqual(["react", "react-dom"]);
+  expect(config.optimizeDeps.noDiscovery).not.toBe(true);
 });
