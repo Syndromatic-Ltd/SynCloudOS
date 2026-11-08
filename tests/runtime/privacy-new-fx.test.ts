@@ -22,7 +22,6 @@ import { describe, expect, it, vi } from "vitest";
 import { createPrivacyStore, type PrivacyApplicationPort, type PrivacyAuthorizationStatus } from "../../src/SynCloudOS/Privacy";
 import { createMountedBluetoothClient } from "../../src/SynCloudOS/AppSDK/mountedBluetoothClient";
 import { createMountedNFCClient } from "../../src/SynCloudOS/AppSDK/mountedNFCClient";
-import { createMountedSpeechClient } from "../../src/SynCloudOS/AppSDK/mountedSpeechClient";
 import { createMountedContactsClient } from "../../src/SynCloudOS/AppSDK/mountedContactsClient";
 import { createMountedPaymentClient } from "../../src/SynCloudOS/AppSDK/mountedPaymentClient";
 import { createMountedXRClient } from "../../src/SynCloudOS/AppSDK/mountedXRClient";
@@ -30,10 +29,9 @@ import { NSEData } from "../../src/Foundation/NSEData";
 import { NFXNDEFMessage, type NFXNDEFReading } from "../../src/FX/NFCFX/public";
 import { XRFXConfiguration, type XRFXFrame } from "../../src/FX/XRFX/public";
 import { PKFXPaymentRequest } from "../../src/FX/PassFX/public";
-import type { SPFXSpeechRecognitionResult } from "../../src/FX/SpeechFX/public";
 import type { BTFXPeripheral } from "../../src/FX/BluetoothFX/public";
 
-const families = ["bluetooth", "nfc", "speech", "contacts", "payment", "xr"] as const;
+const families = ["bluetooth", "nfc", "contacts", "payment", "xr"] as const;
 type Family = typeof families[number];
 interface Probe {
   status(): Promise<PrivacyAuthorizationStatus>;
@@ -48,7 +46,6 @@ interface Probe {
   emit?(): void;
   startLive?(): Promise<void>;
 }
-const speechResult: SPFXSpeechRecognitionResult = { bestTranscription: { formattedString: "hello", confidence: 1 }, transcriptions: [{ formattedString: "hello", confidence: 1 }], isFinal: true };
 function probe(family: Family, port: PrivacyApplicationPort, signal: AbortSignal): Probe {
   const nativeDispose = vi.fn(); const nativeStatus = vi.fn(async () => "granted" as const); const received = vi.fn();
   if (family === "bluetooth") {
@@ -68,15 +65,6 @@ function probe(family: Family, port: PrivacyApplicationPort, signal: AbortSignal
     const client = createMountedNFCClient({ getCapabilities: () => ({ reading: true, writing: true, makingReadOnly: true }), createReaderSession: () => ({ getAuthorizationStatus: nativeStatus, scan: nativeRequest, write: async () => {}, makeReadOnly: async () => {}, dispose: nativeDispose }) }, signal, () => ["nfc.read", "nfc.write"], () => true, port);
     const session = client.createReaderSession();
     return { capabilities: client.getCapabilities, status: session.getAuthorizationStatus, request: () => session.scan(received), dispose: session.dispose, nativeRequest, nativeDispose, nativeStatus, lateValue: undefined, received, emit: () => reading?.({ serialNumber: "tag", message: new NFXNDEFMessage([]) }) };
-  }
-  if (family === "speech") {
-    let listener: ((value: SPFXSpeechRecognitionResult) => void) | undefined;
-    const capabilities = () => ({ recognition: true, onDeviceRecognition: false as const });
-    const nativeRequest = vi.fn(async () => "granted" as const);
-    const client = createMountedSpeechClient({ getCapabilities: capabilities, createRecognizer: () => ({ getCapabilities: capabilities, getAuthorizationStatus: nativeStatus, requestAuthorization: nativeRequest, recognitionTask: (_request, next) => { listener = next; return { result: new Promise<SPFXSpeechRecognitionResult>(() => {}), finish() {}, cancel() {} }; }, dispose: nativeDispose }) }, signal, () => ["speech.recognize"], () => true, port);
-    const recognizer = client.createRecognizer();
-    return { capabilities: client.getCapabilities, status: recognizer.getAuthorizationStatus, request: () => recognizer.requestAuthorization(), dispose: recognizer.dispose, nativeRequest, nativeDispose, nativeStatus, lateValue: "granted", received,
-      startLive: async () => { void recognizer.recognitionTask({}, received).result.catch(() => {}); await Promise.resolve(); await Promise.resolve(); }, emit: () => listener?.(speechResult) };
   }
   if (family === "contacts") {
     const capabilities = () => ({ contactPicker: true, persistentAccess: false as const }); const nativeRequest = vi.fn(async () => []);
@@ -184,12 +172,4 @@ it("does not enumerate Bluetooth origin grants until this app has explicitly req
     expect(await manager.retrievePeripherals()).toEqual([]);
     expect(retrieve).toHaveBeenCalledTimes(1);
   } finally { mount.abort(); store.dispose(); }
-});
-it("returns a completed Speech authorisation refusal without converting it into self-cancellation", async () => {
-  const f = fixture("speech");
-  f.device.nativeRequest.mockResolvedValueOnce("denied");
-  try {
-    expect(await f.device.request()).toBe("denied");
-    expect(f.store.getSnapshot()[0]).toMatchObject({ decision: "denied", authorizationStatus: "denied" });
-  } finally { f.mount.abort(); f.store.dispose(); }
 });

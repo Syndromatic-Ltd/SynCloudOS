@@ -19,6 +19,7 @@
  */
 
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
+import { speechAdapterFor } from "../../FX/SpeechFX/internal/speechPort";
 import { networkAdapterFor } from "../../FX/NetworkFX/internal/networkPort";
 import { CPFXAlgorithm } from "../../FX/CompressionFX/public";
 export interface SystemCapabilityRow { readonly family: string; readonly query: string; readonly value: string }
@@ -29,7 +30,7 @@ export async function systemCapabilityReport(runtime: SynCloudOSRuntime): Promis
     ["AudioFX", environment.speechSynthesis], ["VideoFX", environment.videoPresentation], ["MediaFX", runtime.mediaClock],
     ["HapticsFX", runtime.haptics], ["MotionFX", environment.motion], ["LocationFX", environment.location],
     ["MIDIFX", environment.midi], ["LuminaFX", runtime.lumina], ["NetworkFX", networkAdapterFor(environment)],
-    ["BluetoothFX", environment.bluetooth], ["NFCFX", environment.nfc], ["SpeechFX", environment.speech],
+    ["BluetoothFX", environment.bluetooth], ["NFCFX", environment.nfc], ["SpeechFX", speechAdapterFor(environment)],
     ["ContactsFX", environment.contacts], ["PassFX", environment.payment], ["XRFX", environment.xr],
   ];
   const rows = await Promise.all(families.map(async ([family, candidate]): Promise<SystemCapabilityRow> => {

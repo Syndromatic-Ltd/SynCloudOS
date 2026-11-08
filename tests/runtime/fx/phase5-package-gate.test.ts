@@ -24,19 +24,19 @@ import { assertReviewedPackageFiles } from "../../../scripts/synware/sdk-package
 
 it("accepts the reviewed type-only runtime entries while rejecting omitted implementations", () => {
   expect(() => assertFxRuntimeEntry("bluetooth", {})).not.toThrow();
-  expect(() => assertFxRuntimeEntry("speech", {})).not.toThrow();
+  expect(() => assertFxRuntimeEntry("speech", {})).toThrow(/Empty FX runtime entry/);
   expect(() => assertFxRuntimeEntry("network", {})).toThrow(/Empty FX runtime entry/);
   expect(() => assertFxRuntimeEntry("audio", {})).toThrow(/Empty FX runtime entry/);
   expect(() => assertFxRuntimeEntry("private", { accidental: true })).toThrow(/Unknown FX family/);
   expect(() => assertFxRuntimeEntry("xr", { XRFXConfiguration: class {} })).not.toThrow();
 });
 
-it("requires useful declarations for the two type-only families in the strict installed probe", () => {
+it("requires useful declarations for the remaining type-only family and the real Speech class in the strict installed probe", () => {
   const probe = createSdkPublicTypeProbe();
   expect(probe).toContain('import type { BTFXCentralManager } from "@syndromatic/syncloudos/fx/bluetooth";');
-  expect(probe).toContain('import type { SPFXSpeechRecognizer } from "@syndromatic/syncloudos/fx/speech";');
+  expect(probe).toContain('import { SPFXSpeechRecognizer } from "@syndromatic/syncloudos/fx/speech";');
   expect(probe).toContain("app.bluetooth.createCentralManager()");
-  expect(probe).toContain("app.speech.createRecognizer()");
+  expect(probe).toContain("new SPFXSpeechRecognizer()");
 });
 
 it("admits the registered shared FX artifacts without allowing extra format or style entries", () => {

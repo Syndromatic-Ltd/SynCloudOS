@@ -31,11 +31,12 @@ import { createBrowserVideoWorkerTransport } from "../VideoFX/platformAdapterVid
 import { BrowserMotionAdapter } from "./BrowserMotionAdapter";
 import { BrowserBluetoothAdapter, type BrowserBluetoothOptions } from "./BrowserBluetoothAdapter";
 import { BrowserNFCAdapter, type BrowserNFCAdapterOptions } from "./BrowserNFCAdapter";
-import { BrowserSpeechAdapter, type BrowserSpeechAdapterOptions } from "./BrowserSpeechAdapter";
+import { BrowserSpeechAdapter } from "./BrowserSpeechAdapter";
 import { BrowserContactsAdapter, type BrowserContactsAdapterOptions } from "./BrowserContactsAdapter";
 import { BrowserPaymentAdapter, type BrowserPaymentAdapterOptions } from "./BrowserPaymentAdapter";
 import { BrowserXRAdapter, createBrowserXRRenderingLayerFactory, type BrowserXROptions } from "./BrowserXRAdapter";
 import { BrowserLocationAdapter } from "./BrowserLocationAdapter";
+import { associateSpeechAdapter } from "../../FX/SpeechFX/internal/speechPort";
 import { associateNetworkAdapter } from "../../FX/NetworkFX/internal/networkPort";
 import { BrowserNetworkPathAdapter } from "./BrowserNetworkPathAdapter";
 import { createBrowserSpeechSynthesisAdapter } from "./BrowserSpeechSynthesisAdapter";
@@ -744,8 +745,6 @@ export function createBrowserRuntimeEnvironment(options: { readonly cursorImages
     videoProcessing: { createBackend: ownerId => createBrowserVideoWorkerTransport(ownerId) },
     bluetooth: new BrowserBluetoothAdapter({ isSecureContext: browserWindow?.isSecureContext === true,
       browserNavigator: browserNavigator as unknown as BrowserBluetoothOptions["browserNavigator"] }),
-    speech: new BrowserSpeechAdapter({ isSecureContext: browserWindow?.isSecureContext === true,
-      browserWindow: browserWindow as unknown as BrowserSpeechAdapterOptions["browserWindow"] }),
     contacts: new BrowserContactsAdapter({ isSecureContext: browserWindow?.isSecureContext === true,
       browserNavigator: browserNavigator as unknown as BrowserContactsAdapterOptions["browserNavigator"] }),
     nfc: new BrowserNFCAdapter({ isSecureContext: browserWindow?.isSecureContext === true,
@@ -803,6 +802,7 @@ export function createBrowserRuntimeEnvironment(options: { readonly cursorImages
       return () => window.removeEventListener(type, listener as EventListener, options);
     },
   };
+  associateSpeechAdapter(environment, new BrowserSpeechAdapter());
   associateNetworkAdapter(environment, new BrowserNetworkPathAdapter({ navigator: browserNavigator ?? undefined, eventTarget: browserWindow ?? undefined }));
   return environment;
 }

@@ -187,6 +187,11 @@ export interface SynWareTestDisposalReport {
 }
 
 export interface SynWareTestAdapters {
+  readonly speech: SynWareFakeControl<"speech.authorize" | "speech.recognize"> & Readonly<{
+    emitResult(formattedString: string, isFinal: boolean): void;
+    activeTaskCount(): number;
+    appendedBufferCount(): number;
+  }>;
   readonly network: SynWareFakeControl<"network.read" | "network.subscribe"> & Readonly<{
     setStatus(status: import("../../../FX/NetworkFX/NWFXPathStatus").NWFXPathStatus): void;
     activeMonitorCount(): number;

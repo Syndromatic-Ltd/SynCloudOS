@@ -388,7 +388,7 @@
         "src/SynCloudOS/AppHosting/**",
         "src/SynCloudOS/AppSDK/mountedBluetoothClient.ts",
         "src/SynCloudOS/AppSDK/mountedNFCClient.ts",
-        "src/SynCloudOS/AppSDK/mountedSpeechClient.ts",
+        "src/SynCloudOS/AppSDK/mountedSpeechPort.ts",
         "src/SynCloudOS/AppSDK/mountedContactsClient.ts",
         "src/SynCloudOS/AppSDK/mountedPaymentClient.ts",
         "src/SynCloudOS/AppSDK/mountedXRClient.ts"

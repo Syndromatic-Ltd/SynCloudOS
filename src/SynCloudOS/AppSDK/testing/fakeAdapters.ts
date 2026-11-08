@@ -75,6 +75,7 @@ import type {
   SynWareTestClock,
   SynWareTestMediaClock,
 } from "./testHostTypes";
+import { associateSpeechAdapter, type SpeechAdapter, type SpeechEvent } from "../../../FX/SpeechFX/internal/speechPort";
 import { associateNetworkAdapter } from "../../../FX/NetworkFX/internal/networkPort";
 import { LFXCoordinate, LFXLocation } from "../../../FX/LocationFX/public";
 import type { LFXAuthorizationStatus } from "../../../FX/LocationFX/public";
@@ -464,6 +465,30 @@ export function createDeterministicRuntimeEnvironment(options: {
       return networkControl.runSync("network.subscribe", () => { networkListeners.add(listener); return { dispose() { networkListeners.delete(listener); } }; });
     },
   });
+  const speechControl = control<"speech.authorize" | "speech.recognize">(clock, denied);
+  const speechListeners = new Set<(event: SpeechEvent) => void>();
+  let speechBufferCount = 0;
+  const speech = Object.freeze({ ...publicPort(speechControl),
+    emitResult(formattedString: string, isFinal: boolean) {
+      for (const listener of [...speechListeners]) {
+        listener({ type: "result", result: { isFinal, transcriptions: [{ formattedString, segments: [] }] } });
+        if (isFinal) listener({ type: "complete" });
+      }
+    },
+    activeTaskCount: () => speechListeners.size,
+    appendedBufferCount: () => speechBufferCount,
+  });
+  const speechAdapter: SpeechAdapter = {
+    authorizationStatus: () => speechControl.mode === "allow" ? "granted" : "denied",
+    requestAuthorization: signal => speechControl.run("speech.authorize", signal, () => "granted" as const),
+    isAvailable: () => speechControl.mode === "allow", supportsOnDeviceRecognition: () => true,
+    supportedLocales: () => new Set([new Intl.Locale("en-GB")]),
+    start: (_request, listener, signal) => speechControl.run("speech.recognize", signal, () => {
+      speechListeners.add(listener);
+      return { append() { speechBufferCount++; }, endAudio() { listener({ type: "audioEnd" }); },
+        finish() { listener({ type: "audioEnd" }); }, cancel() { speechListeners.delete(listener); } };
+    }),
+  };
   const locationControl = control<SynWareFakeLocationOperation>(clock, denied);
   let locationStatus: LFXAuthorizationStatus = "unknown";
   const defaultLocation = () => new LFXLocation({
@@ -624,6 +649,7 @@ export function createDeterministicRuntimeEnvironment(options: {
     midi,
     video: videoCapture.control,
     network,
+    speech,
     webContent: publicPort(controls.webContent),
   });
   const testControls: RuntimeTestCapabilityControls = Object.freeze({
@@ -806,6 +832,7 @@ export function createDeterministicRuntimeEnvironment(options: {
     },
   } satisfies SynCloudOSRuntimeEnvironment);
   associateNetworkAdapter(environment, networkPaths);
+  associateSpeechAdapter(environment, speechAdapter);
   return Object.freeze({
     environment,
     clock,
@@ -832,6 +859,7 @@ export function createDeterministicRuntimeEnvironment(options: {
     },
     dispose() {
       mediaDisposed = true;
+      speechListeners.clear();
       clock.dispose();
       for (const media of mediaQueries.keys()) media.dispose();
       mediaQueryMatches.clear();
