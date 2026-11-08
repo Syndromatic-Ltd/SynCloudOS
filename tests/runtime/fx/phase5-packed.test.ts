@@ -29,16 +29,16 @@ it("loads all six new FX roots and hooks from an independently installed SDK arc
 import assert from 'node:assert/strict';
 import { NSEData, NSEDecimalNumber } from '@syndromatic/syncloudos/foundation';
 import * as bluetooth from '@syndromatic/syncloudos/fx/bluetooth';
-import { NFXNDEFMessage } from '@syndromatic/syncloudos/fx/nfc';
+import { NFXNDEFMessage, NFXNDEFPayload } from '@syndromatic/syncloudos/fx/nfc';
 import * as speech from '@syndromatic/syncloudos/fx/speech';
 import { CNFXContact, CNFXContactPickerViewController } from '@syndromatic/syncloudos/fx/contacts';
 import { PKFXPaymentRequest } from '@syndromatic/syncloudos/fx/pass';
 import { XRFXConfiguration } from '@syndromatic/syncloudos/fx/xr';
 import { useBluetooth, useNFC, useSpeech, useContacts, usePayment, useXR } from '@syndromatic/syncloudos/sdk';
 for (const hook of [useBluetooth,useNFC,useSpeech,useContacts,usePayment,useXR]) assert.equal(typeof hook,'function');
-const message=new NFXNDEFMessage([{recordType:'mime',mediaType:'application/octet-stream',data:new Uint8Array([42])}]);
-assert.ok(message.records[0].data instanceof NSEData);
-assert.equal(message.records[0].data.bytes[0],42);
+const message=new NFXNDEFMessage([new NFXNDEFPayload(5,NSEData.from(new Uint8Array()),NSEData.from(new Uint8Array()),NSEData.from(new Uint8Array([42])))]);
+assert.ok(message.records[0].payload instanceof NSEData);
+assert.equal(message.records[0].payload.bytes[0],42);
 const contact=new CNFXContact();assert.ok(Object.isFrozen(contact));
 assert.equal(typeof CNFXContactPickerViewController,'function');
 const request=new PKFXPaymentRequest();
@@ -50,19 +50,19 @@ console.log('phase5 installed exports passed');
   expect(runNode(["specimen.mjs"], consumer.root)).toContain("phase5 installed exports passed");
   writeFileSync(join(consumer.root, "consumer.ts"), `
 import type { BTFXBluetoothClient, BTFXCentralManager } from '@syndromatic/syncloudos/fx/bluetooth';
-import type { NFXNFCClient } from '@syndromatic/syncloudos/fx/nfc';
+import type { NFXNDEFReaderSession, NFXNDEFReaderSessionDelegate } from '@syndromatic/syncloudos/fx/nfc';
 import type { SPFXSpeechRecognizer } from '@syndromatic/syncloudos/fx/speech';
 import type { CNFXContactStore } from '@syndromatic/syncloudos/fx/contacts';
 import type { PKFXPaymentAuthorizationController, PKFXPaymentRequest } from '@syndromatic/syncloudos/fx/pass';
 import type { XRFXClient, XRFXSession } from '@syndromatic/syncloudos/fx/xr';
 import { useBluetooth, useNFC, useSpeech, useContacts, usePayment, useXR, useSCOS } from '@syndromatic/syncloudos/sdk';
 const bluetooth:()=>BTFXCentralManager=useBluetooth;
-const nfc:()=>NFXNFCClient=useNFC;
+const nfc:(delegate:NFXNDEFReaderSessionDelegate)=>NFXNDEFReaderSession=useNFC;
 const speech:()=>SPFXSpeechRecognizer=useSpeech;
 const contacts:()=>CNFXContactStore=useContacts;
 const payment:(request:PKFXPaymentRequest)=>PKFXPaymentAuthorizationController=usePayment;
 const xr:()=>XRFXSession=useXR;
-function session() { const app=useSCOS(); const clients:[BTFXBluetoothClient,NFXNFCClient,XRFXClient]=[app.bluetooth,app.nfc,app.xr];return clients; }
+function session() { const app=useSCOS(); const clients:[BTFXBluetoothClient,XRFXClient]=[app.bluetooth,app.xr];return clients; }
 void [bluetooth,nfc,speech,contacts,payment,xr,session];
 `);
   writeFileSync(join(consumer.root, "tsconfig.json"), JSON.stringify({ compilerOptions: { target: "ES2022", module: "NodeNext", moduleResolution: "NodeNext", strict: true, noEmit: true, skipLibCheck: true }, files: ["consumer.ts"] }));

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { nfcAdapterFor } from "../../FX/NFCFX/internal/nfcPort";
 import { paymentAdapterFor } from "../../FX/PassFX/internal/paymentPort";
 import { contactsAdapterFor } from "../../FX/ContactsFX/internal/contactsPort";
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
@@ -32,10 +33,11 @@ export async function systemCapabilityReport(runtime: SynCloudOSRuntime): Promis
     ["AudioFX", environment.speechSynthesis], ["VideoFX", environment.videoPresentation], ["MediaFX", runtime.mediaClock],
     ["HapticsFX", runtime.haptics], ["MotionFX", environment.motion], ["LocationFX", environment.location],
     ["MIDIFX", environment.midi], ["LuminaFX", runtime.lumina], ["NetworkFX", networkAdapterFor(environment)],
-    ["BluetoothFX", environment.bluetooth], ["NFCFX", environment.nfc], ["SpeechFX", speechAdapterFor(environment)],
+    ["BluetoothFX", environment.bluetooth], ["NFCFX", nfcAdapterFor(environment)], ["SpeechFX", speechAdapterFor(environment)],
     ["ContactsFX", contactsAdapterFor(environment)], ["PassFX", paymentAdapterFor(environment)], ["XRFX", environment.xr],
   ];
   const rows = await Promise.all(families.map(async ([family, candidate]): Promise<SystemCapabilityRow> => {
+    if (family === "NFCFX") return { family, query: "NFCNDEFReaderSession.readingAvailable", value: String(nfcAdapterFor(environment)?.readingAvailable ?? false) };
     if (family === "PassFX") return { family, query: "PKPaymentAuthorizationController.canMakePayments()", value: String(paymentAdapterFor(environment)?.canMakePayments() ?? false) };
     if (!candidate) return { family, query: "No passive host query", value: "Not reported" };
     const source = candidate as { getCapabilities?(): unknown; capabilities?: unknown };

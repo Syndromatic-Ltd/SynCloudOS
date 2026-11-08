@@ -22,6 +22,7 @@
 import React from "react";
 import { NSEDecimalNumber } from "../../../src/Foundation/NSEDecimalNumber";
 import { PKFXPaymentAuthorizationController, PKFXPaymentRequest, PKFXPaymentSummaryItem } from "../../../src/FX/PassFX/public";
+import { NFXNDEFReaderSession } from "../../../src/FX/NFCFX/public";
 import { CNFXContactStore } from "../../../src/FX/ContactsFX/public";
 import { expect, it } from "vitest";
 import { createSynWare, useBluetooth, useNFC, useSpeech, useContacts, usePayment, useXR, useSCOS } from "../../../src/SynCloudOS/AppSDK";
@@ -40,15 +41,17 @@ it("projects mounted clients and the real Speech recognizer and revokes componen
     manifest: { schemaVersion: 1, bundleIdentifier: "com.syndromatic.phase5-probe", version: "1.0.0", displayName: "Phase 5 Probe",
       entitlements: ["bluetooth.access", "nfc.read", "nfc.write", "speech.recognize", "contacts.select", "payment.request", "xr.session"] },
     root() {
-      owners = { bluetooth: useBluetooth(), nfc: useNFC(), speech: useSpeech(), contacts: useContacts(), payment: usePayment(request), xr: useXR(), session: useSCOS() };
+      owners = { bluetooth: useBluetooth(), nfc: useNFC({ readerSessionDidInvalidateWithError() {} }), speech: useSpeech(), contacts: useContacts(), payment: usePayment(request), xr: useXR(), session: useSCOS() };
       return null;
     },
   });
   const host = createSynWareTestHost({ app, document, strictMode: true });
   host.adapters.permissions.allow(); host.adapters.policy.allow();
   await host.render();
-  for (const name of ["bluetooth", "nfc", "xr"] as const)
+  for (const name of ["bluetooth", "xr"] as const)
     expect(typeof owners.session[name].getCapabilities).toBe("function");
+  expect("nfc" in owners.session).toBe(false);
+  expect(owners.nfc).toBeInstanceOf(NFXNDEFReaderSession);
   expect("speech" in owners.session).toBe(false);
   expect("contacts" in owners.session).toBe(false);
   expect("payment" in owners.session).toBe(false);

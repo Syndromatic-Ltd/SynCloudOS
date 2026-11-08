@@ -187,6 +187,10 @@ export interface SynWareTestDisposalReport {
 }
 
 export interface SynWareTestAdapters {
+  readonly nfc: SynWareFakeControl<"nfc.open" | "nfc.connect" | "nfc.status" | "nfc.read" | "nfc.write" | "nfc.lock"> & Readonly<{
+    emitText(value: string): void;
+    activeSessionCount(): number;
+  }>;
   readonly payment: SynWareFakeControl<"payment.present"> & Readonly<{
     authorize(): void;
     cancel(): void;

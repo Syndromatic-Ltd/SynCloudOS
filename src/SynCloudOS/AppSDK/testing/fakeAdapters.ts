@@ -17,6 +17,8 @@
  * limitations under the License.
  */
 
+import { NFXNDEFMessage, NFXNDEFPayload, NFXReaderError } from "../../../FX/NFCFX/public";
+import { associateNFCAdapter, type NFCAdapter, type NFCEvents, type NFCNativeTag } from "../../../FX/NFCFX/internal/nfcPort";
 import { associatePaymentAdapter, type PaymentAdapter, type PaymentResponse } from "../../../FX/PassFX/internal/paymentPort";
 import { PKFXPayment, PKFXPaymentMethod, PKFXPaymentToken, PKFXContact, type PKFXPaymentAuthorizationStatus } from "../../../FX/PassFX/public";
 import { paymentMethods, paymentTokens, payments } from "../../../FX/PassFX/internal/paymentValues";
@@ -502,6 +504,28 @@ export function createDeterministicRuntimeEnvironment(options: {
       return { presented, authorized, async dismiss() { paymentPresentations.delete(presentation); } };
     },
   };
+  const nfcControl = control<"nfc.open" | "nfc.connect" | "nfc.status" | "nfc.read" | "nfc.write" | "nfc.lock">(clock, denied);
+  const nfcReaders = new Set<{ events: NFCEvents; signal: AbortSignal }>();
+  const nfc = Object.freeze({ ...publicPort(nfcControl), activeSessionCount: () => nfcReaders.size,
+    emitText(value: string) {
+      for (const reader of [...nfcReaders]) {
+        let message = new NFXNDEFMessage([NFXNDEFPayload.wellKnownTypeTextPayload(value, new Intl.Locale("en"))!]); let locked = false;
+        const tag: NFCNativeTag = { get isAvailable() { return !reader.signal.aborted; },
+          queryNDEFStatus: () => nfcControl.run("nfc.status", reader.signal, () => ({ status: locked ? "readOnly" as const : "readWrite" as const, capacity: 4096 })),
+          readNDEF: () => nfcControl.run("nfc.read", reader.signal, () => message),
+          writeNDEF: next => nfcControl.run("nfc.write", reader.signal, () => { if (locked) throw new NFXReaderError("ndefReaderSessionErrorTagNotWritable"); if (!next.length) throw new NFXReaderError("ndefReaderSessionErrorZeroLengthMessage"); if (next.length > 4096) throw new NFXReaderError("ndefReaderSessionErrorTagSizeTooSmall"); message = new NFXNDEFMessage(next.records); }),
+          writeLock: () => nfcControl.run("nfc.lock", reader.signal, () => { locked = true; }),
+        };
+        reader.events.messages([message]); reader.events.tags([tag]);
+      }
+    },
+  });
+  const nfcAdapter: NFCAdapter = { get readingAvailable() { return nfcControl.mode === "allow"; },
+    async open(signal, events) {
+      const reader = { events, signal }; await nfcControl.run("nfc.open", signal, () => { nfcReaders.add(reader); });
+      return { connect: () => nfcControl.run("nfc.connect", signal, () => {}), restartPolling() {}, async invalidate() { nfcReaders.delete(reader); if (nfcControl.mode === "deny") throw new DOMException("Native NFC denied invalidation.", "SecurityError"); } };
+    },
+  };
   const contactsControl = control<"contacts.select">(clock, denied);
   let contactName = "Selected contact";
   const contacts = Object.freeze({ ...publicPort(contactsControl), setSelectedName(value: string) { contactName = value; } });
@@ -692,6 +716,7 @@ export function createDeterministicRuntimeEnvironment(options: {
     network,
     speech,
     contacts,
+    nfc,
     payment,
     webContent: publicPort(controls.webContent),
   });
@@ -877,6 +902,7 @@ export function createDeterministicRuntimeEnvironment(options: {
   associateNetworkAdapter(environment, networkPaths);
   associateSpeechAdapter(environment, speechAdapter);
   associateContactsAdapter(environment, contactsAdapter);
+  associateNFCAdapter(environment, nfcAdapter);
   associatePaymentAdapter(environment, paymentAdapter);
   return Object.freeze({
     environment,
