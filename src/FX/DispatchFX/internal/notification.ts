@@ -6,16 +6,18 @@ import type { DFXQueue } from "../DFXQueue";
 import type { DFXQoS } from "../DFXQoS";
 import { DFXWorkItem } from "../DFXWorkItem";
 import type { DFXWorkItemFlags } from "../DFXWorkItemFlags";
+import { assertOwner, classForLifetime } from "./lifetime";
 import { objectState } from "./queueState";
 import { clientError } from "./time";
 
 /** Validate and capture at registration; submit only when completion is observed. */
 export function notification(queue: DFXQueue, optionsOrWork: unknown, work?: () => unknown): () => void {
+  const lifetime = assertOwner(queue);
   objectState(queue);
   if (optionsOrWork instanceof DFXWorkItem) return () => queue.async(optionsOrWork);
   const options = typeof optionsOrWork === "function" ? {} : optionsOrWork as { qos?: DFXQoS; flags?: DFXWorkItemFlags[] };
   const execute = typeof optionsOrWork === "function" ? optionsOrWork as () => unknown : work;
   if (typeof execute !== "function") clientError("work must be a function");
-  const item = new DFXWorkItem(options, execute);
+  const item = new (classForLifetime(DFXWorkItem, lifetime))(options, execute);
   return () => queue.async(item);
 }

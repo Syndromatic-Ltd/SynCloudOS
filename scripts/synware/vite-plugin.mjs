@@ -731,7 +731,8 @@ export function synCloudOS(options) {
     },
 
     resolveId(id, importer) {
-      if (id === fxRuntimeModuleId) return fxRuntimePath;
+      // Match Vite-resolved relative imports on Windows; one file must have one module ID.
+      if (id === fxRuntimeModuleId) return displayPath(fxRuntimePath);
       if (id === browserModuleId) return resolvedBrowserModuleId;
       if (id === "@syndromatic/syncloudos/browser" && importer !== resolvedBrowserModuleId) return resolvedBrowserModuleId;
       if (id.startsWith(appModulePrefix)) { const resolved = `\0${id}`; appVirtualModules.add(resolved); return resolved; }

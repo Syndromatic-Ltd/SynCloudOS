@@ -30,13 +30,17 @@ describe("per-application FX virtual modules", () => {
     expect(source).toContain("bindFXFamily");
     expect(source).toContain("CRFXSHA256");
     expect(source).not.toMatch(/export const CRFXDigest\b/);
+    const dispatch = plugin.resolveId("@syndromatic/syncloudos/fx/dispatch", f.entry);
+    expect(dispatch).toBe("\0virtual:syncloudos/app/com.example.probe/fx/dispatch");
+    expect(plugin.load(dispatch)).toContain("export const DFXQueue = bound.DFXQueue");
+    expect(plugin.load(dispatch)).not.toContain("export const DFXSourceProtocol");
     expect(plugin.load("\0virtual:syncloudos/app/com.example.probe")).toContain("createAppSCOS");
   });
 
   it("invalidates every resolved per-app FX and SCOS module when discovery changes", async () => {
     const f = fixture(), plugin = synCloudOS({ webspringEntry: false });
     await plugin.configResolved({ root: f.root, command: "serve" });
-    const ids = [plugin.resolveId("@syndromatic/syncloudos/fx/crypto", f.entry), plugin.resolveId("@syndromatic/syncloudos/fx/motion", f.entry), plugin.resolveId("@syndromatic/syncloudos", f.entry)];
+    const ids = [plugin.resolveId("@syndromatic/syncloudos/fx/crypto", f.entry), plugin.resolveId("@syndromatic/syncloudos/fx/motion", f.entry), plugin.resolveId("@syndromatic/syncloudos/fx/dispatch", f.entry), plugin.resolveId("@syndromatic/syncloudos", f.entry)];
     const invalidateModule = vi.fn();
     const server = { middlewares: { use: vi.fn() }, watcher: { add: vi.fn(), on: vi.fn(), off: vi.fn(), once: vi.fn() }, moduleGraph: { getModuleById: (id: string) => ({ id }), invalidateModule }, ws: { send: vi.fn() } };
     plugin.configureServer(server);
@@ -45,4 +49,11 @@ describe("per-application FX virtual modules", () => {
     for (const id of ids) expect(invalidateModule).toHaveBeenCalledWith({ id });
     expect(plugin.resolveId("@syndromatic/syncloudos/fx/crypto", f.entry)).toBe("\0virtual:syncloudos/app/com.example.renamed/fx/crypto");
   });
+});
+
+it("uses Vite's canonical path spelling for the private attribution runtime", () => {
+  const plugin = synCloudOS({ webspringEntry: false });
+  const runtime = plugin.resolveId("virtual:syncloudos/fx-runtime");
+  expect(runtime).toMatch(/\/src\/SynCloudOS\/AppSDK\/fx\/runtime\.ts$/);
+  expect(runtime).not.toContain("\\");
 });

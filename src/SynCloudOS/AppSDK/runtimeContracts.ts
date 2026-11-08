@@ -36,3 +36,7 @@ export type { AppBounds, AppOwnedWindowSnapshot, SynCloudOSPresentationTraits } 
 export type { SynWareOwnedWindowSnapshot, SynWareWindowCloseGuard } from "../../SynCloudOSReact";
 export type { AppTrustedDiagnosticsClient } from "./appTrustedClientTypes";
 export type { AppPlaybackPresentationLease, AppPlaybackPresentationRequest } from "./playbackPresentationTypes";
+
+export { bindFXFamily } from "./fx/bindFXFamily";
+export { observeFXSessionEnd } from "./fx/fxSessionBinding";
+export type { FXAppSession } from "./fx/fxSessionBinding";

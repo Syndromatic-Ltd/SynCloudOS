@@ -12,7 +12,12 @@ import { labelChain } from "./sync";
 import { clientError } from "./time";
 import { reportDispatchError } from "./work";
 
+import { assertLifetime, lifetimeOf, onLifetimeEnd, type DispatchLifetime } from "./lifetime";
+
 export interface ScheduledJob {
+  readonly lifetime?: DispatchLifetime;
+  readonly cleanup?: boolean;
+  dropped?(): void;
   readonly queue: DFXQueue;
   readonly qos: DFXQoS;
   run(): void;
@@ -21,7 +26,7 @@ export interface ScheduledJob {
   /** Re-evaluate the floor if an inactive object's target is configured. */
   readonly resolveQoS?: (chain: readonly DFXQueue[]) => DFXQoS;
 }
-interface Entry { readonly job: ScheduledJob; chain: DFXQueue[]; }
+interface Entry { readonly job: ScheduledJob; chain: DFXQueue[]; release?: () => void; }
 type Priority = "user-blocking" | "user-visible" | "background";
 interface TaskScheduler {
   postTask?: (callback: () => void, options: { priority: Priority }) => Promise<unknown>;
@@ -46,6 +51,24 @@ function qos(entry: Entry): DFXQoS {
   for (const queue of entry.chain) for (const override of overrides.get(queue)?.values() ?? []) value = higher(value, override);
   return value;
 }
+/** A saved target chain depends on every selected lifetime it traverses. */
+function entryLifetimes(entry: Entry): Set<DispatchLifetime> {
+  const lifetimes = new Set(entry.chain.map(lifetimeOf));
+  if (entry.job.lifetime) lifetimes.add(entry.job.lifetime);
+  // Only the source's own cancellation lifetime may already be terminal.
+  if (entry.job.cleanup && entry.job.lifetime) lifetimes.delete(entry.job.lifetime);
+  return lifetimes;
+}
+function assertEntryLive(entry: Entry): void { for (const lifetime of entryLifetimes(entry)) assertLifetime(lifetime); }
+function drop(entry: Entry): void {
+  const index = pending.indexOf(entry); if (index < 0) return;
+  pending.splice(index, 1); entry.release?.(); entry.job.dropped?.(); wake();
+}
+function observeEntry(entry: Entry): void {
+  const lifetimes = entryLifetimes(entry); for (const lifetime of lifetimes) assertLifetime(lifetime);
+  const releases = [...lifetimes].map(lifetime => onLifetimeEnd(lifetime, () => drop(entry), true));
+  entry.release = () => { for (const release of releases.splice(0)) release(); };
+}
 /** The same dependency graph serves host scheduling and synchronous draining. */
 function next(upTo?: Entry | ReadonlySet<Entry>): Entry | undefined {
   const limits = upTo === undefined ? undefined : "job" in upTo ? new Set([upTo]) : upTo;
@@ -64,7 +87,7 @@ function next(upTo?: Entry | ReadonlySet<Entry>): Entry | undefined {
     const blockers = new Set<Entry>(); dependencies.set(entry, blockers);
     const leafHead = leaves.get(entry.job.queue);
     if (leafHead) blockers.add(leafHead); else leaves.set(entry.job.queue, entry);
-    if (entry.chain.some(queue => { const state = objectState(queue); return !state.active || state.suspensionCount > 0; })) {
+    if (!entry.job.cleanup && entry.chain.some(queue => { const state = objectState(queue); return !state.active || state.suspensionCount > 0; })) {
       if (entry === lastLimit) break;
       continue;
     }
@@ -101,7 +124,8 @@ function next(upTo?: Entry | ReadonlySet<Entry>): Entry | undefined {
   return selected;
 }
 function run(entry: Entry, floor?: DFXQoS): void {
-  pending.splice(pending.indexOf(entry), 1);
+  pending.splice(pending.indexOf(entry), 1); entry.release?.();
+  try { assertEntryLive(entry); } catch (error) { entry.job.dropped?.(); throw error; }
   const effectiveQoS = floor ? higher(qos(entry), floor) : qos(entry);
   withExecution({ chain: entry.chain, qos: effectiveQoS, barrier: !!entry.job.barrier, appId: entry.job.appId }, () => entry.job.run());
 }
@@ -155,7 +179,11 @@ function drain(): void {
   } finally { draining = false; }
 }
 export const rootScheduler = Object.freeze({
-  submit(job: ScheduledJob): void { pending.push({ job, chain: queueChain(job.queue) }); wake(); },
+  submit(job: ScheduledJob): void {
+    const entry: Entry = { job, chain: queueChain(job.queue) };
+    assertEntryLive(entry);
+    pending.push(entry); observeEntry(entry); wake();
+  },
   /** Return an idempotent release function; nested waiters retain their boosts. */
   override(queue: DFXQueue, value: DFXQoS): () => void {
     let values = overrides.get(queue);
@@ -208,17 +236,21 @@ export const rootScheduler = Object.freeze({
       }
     } finally {
       // A failed sync block must never be delivered later by its host task.
-      if (upTo) { const index = pending.indexOf(limit); if (index >= 0) pending.splice(index, 1); }
+      if (upTo) { const index = pending.indexOf(limit); if (index >= 0) { pending.splice(index, 1); limit.release?.(); } }
       draining = wasDraining; wake();
     }
   },
 });
 observeObjectChanges((object, retarget) => {
-  if (retarget) for (const entry of pending) {
+  if (retarget) for (const entry of [...pending]) {
     const index = entry.chain.indexOf(object as DFXQueue);
     // Earlier active queues retain their associated prefix even if their
     // current configuration has changed since this item was submitted.
-    if (index >= 0) entry.chain = entry.chain.slice(0, index).concat(queueChain(entry.chain[index]));
+    if (index >= 0) {
+      entry.release?.();
+      entry.chain = entry.chain.slice(0, index).concat(queueChain(entry.chain[index]));
+      try { observeEntry(entry); } catch (error) { drop(entry); throw error; }
+    }
   }
   wake();
 });

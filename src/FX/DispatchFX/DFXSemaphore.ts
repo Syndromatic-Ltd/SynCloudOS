@@ -2,6 +2,8 @@
  * Designed by Kavish Krishnakumar in Manchester.
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
+import { attributeDispatchClass } from "./internal/lifetime";
+import { assertOwner } from "./internal/lifetime";
 import { DFXObject } from "./DFXObject";
 import type { DFXTime } from "./DFXTime";
 import type { DFXWallTime } from "./DFXWallTime";
@@ -20,11 +22,15 @@ export class DFXSemaphore extends DFXObject {
   wait(): void;
   wait(timeout: DFXTime | DFXWallTime): DFXTimeoutResult;
   wait(timeout?: DFXTime | DFXWallTime): void | DFXTimeoutResult {
+    assertOwner(this);
     const result = mainThreadWait(() => { if (this.#value === 0) return false; this.#value--; return true; }, timeout);
     if (timeout !== undefined) return result;
   }
   signal(): number {
+    assertOwner(this);
     if (this.#value === Number.MAX_SAFE_INTEGER) clientError("Unbalanced call to dispatch_semaphore_signal()");
     this.#value++; return 0;
   }
 }
+
+attributeDispatchClass(DFXSemaphore);
