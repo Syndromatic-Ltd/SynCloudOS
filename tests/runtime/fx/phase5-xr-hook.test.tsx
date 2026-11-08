@@ -10,7 +10,6 @@ import { registerSCOSAppSession } from "../../../src/SynCloudOS/AppSDK/scos/scos
 import type { SynWareContextValue } from "../../../src/SynCloudOS/AppSDK/appContextTypes";
 const selection = vi.hoisted(() => ({ context: null as unknown }));
 vi.mock("../../../src/SynCloudOS/AppSDK/SynWareContext", () => ({ useSynWareContext: () => selection.context }));
-vi.mock("../../../src/SynCloudOS/AppSDK/scos/useSCOS", () => ({ useSCOS: () => ({ xr: { createSession: () => ({ dispose() {} }) } }) }));
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 it.each([false,true])("returns the real class for exact/branding context %s, survives StrictMode replay and ends on actual unmount", async branded => {
   const jobs: (() => void)[] = []; vi.stubGlobal("scheduler", { postTask: (work: () => void) => { jobs.push(work); return Promise.resolve(); } });

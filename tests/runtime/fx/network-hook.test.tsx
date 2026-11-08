@@ -28,3 +28,13 @@ it("returns a real monitor, survives StrictMode replay and immediately cancels o
     hook.unmount(); expect(dispose).toHaveBeenCalledOnce(); while (tasks.length) tasks.shift()!(); expect(listener).not.toHaveBeenCalled(); expect(() => held.start()).toThrow();
   } finally { owner.abort(); unregister(); other(); }
 });
+
+it("rejects multiple exact mounted sessions rather than taking the first match", () => {
+  const owner = new AbortController();
+  const context = { appId: "com.example.network-ambiguous", runtimeInfo: { id: "duplicate" }, signal: owner.signal } as SynWareContextValue;
+  selection.context = context;
+  const a = registerSCOSAppSession({ appId: context.appId, displayName: "A", version: "1", context });
+  const b = registerSCOSAppSession({ appId: context.appId, displayName: "B", version: "1", context: { ...context } });
+  function Probe() { useNetwork(); return null; }
+  try { expect(() => render(<Probe />)).toThrow(/ambiguous/); } finally { owner.abort(); a(); b(); }
+});

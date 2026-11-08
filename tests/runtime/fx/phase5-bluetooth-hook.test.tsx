@@ -11,7 +11,6 @@ import {registerSCOSAppSession} from "../../../src/SynCloudOS/AppSDK/scos/scosSe
 import type {SynWareContextValue} from "../../../src/SynCloudOS/AppSDK/appContextTypes";
 const selection=vi.hoisted(()=>({context:null as unknown}));
 vi.mock("../../../src/SynCloudOS/AppSDK/SynWareContext",()=>({useSynWareContext:()=>selection.context}));
-vi.mock("../../../src/SynCloudOS/AppSDK/scos/useSCOS",()=>({useSCOS:()=>({bluetooth:{createCentralManager:()=>({dispose(){}})}})}));
 afterEach(()=>{cleanup();vi.unstubAllGlobals();});
 it("returns a real central for a branding clone, survives StrictMode and drops delivery on true unmount",async()=>{
  const jobs:(()=>void)[]=[];vi.stubGlobal("scheduler",{postTask:(job:()=>void)=>{jobs.push(job);return Promise.resolve();}});const owner=new AbortController();const received=vi.fn();const scan=vi.fn(async()=>({device:{identifier:new NSEUUID(),name:"Sensor",connect:async()=>({discoverServices:async()=>[],disconnect:async()=>{}})},advertisementData:{},rssi:127}));
