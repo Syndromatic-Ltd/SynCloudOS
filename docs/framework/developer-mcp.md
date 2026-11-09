@@ -89,7 +89,7 @@ Broad `application menu`, `settings`, `preferences` and `account` queries priori
 
 Input: `{ projectRoot?: string, appsDirectory?: string, webspringEntry?: string | false, typescript?: boolean, idioms?: boolean, launch?: boolean }` (`typescript`, `idioms` and `launch` default to `true`).
 
-Output: `{ ok: boolean, findings: [{ file, line, column?, rule, severity?, message }], bundles: [{ directory, id, ok, error }], typescript: { ran, exitCode, projects }, launch: { ran, entry?, reason?, limits? }, host: { status: "checked" | "unresolved" | "not-found", reason?, file?, line?, application?: { id, frame } | null, authentication? }, idiomAudit: { applications: [...], stylesheets: {...}, warnings } | null }`. `ok` is false only for findings without `severity: "warning"`.
+Output: `{ ok: boolean, findings: [{ file, line, column?, rule, severity?, message }], bundles: [{ directory, id, ok, error }], typescript: { ran, exitCode, projects }, launch: { ran, entry?, reason?, limits? }, host: { status: "checked" | "unresolved" | "not-found", reason?, file?, line?, application?: { id, frame } | null, authentication? }, idiomatic: boolean | null, idiomAudit: { applications: [...], stylesheets: {...}, errors, warnings, idiomatic, optOuts, rendererExemptions } | null }`. `ok` is false for any error, including `severity: "error"` idiom findings; warnings alone do not fail validation. `idiomatic` is false for either idiom severity and null when the audit is skipped.
 
 Uses the **same static manifest parser, import checks and directory validator as the repository's `validate-synware.mjs`**, compiled against the installed SDK's manifest schema and exports. It does not evaluate `Info.ts`. It then invokes the consumer's installed TypeScript compiler with `--noEmit --pretty false`; missing TypeScript or compiler failure is a finding, never a passing check. Set `typescript: false` only when intentionally requesting manifest/bundle checks without project type checking. Schema/import findings currently identify the containing file at line 1; TypeScript findings preserve the compiler's line and column.
 
@@ -122,19 +122,22 @@ A passing launch check means the application starts and renders without an error
 
 #### Idiom audit
 
-A project can be valid and still bypass most of SynCloudOS. The idiom audit reports where an application departs from the [authoring contract](authoring-contract.md), as findings with `severity: "warning"`. Warnings never make `ok` false, but **a project with idiom warnings is not idiomatic SynCloudOS**; don't read "no errors" as done.
+The audit follows application, host and Webspring entry graphs, including relative imports outside bundles, and checks project CSS. It emits two levels: **error** for definite misuse with an existing public replacement, and **warning** for heuristics. Every error names its replacement and exact import path. `ok: false` means at least one validation error; `idiomatic: false` also includes unresolved idiom warnings.
 
-For each valid application, the audit follows the relative imports of `Contents/index.tsx`, including code outside the bundle such as `src/App.tsx`, and reports:
+The complete reconciliation of the Opus friction log, rule identifiers and limits is [Idiom rules](developer-mcp/idiom-rules.md). Definite checks cover raw controls, system images/artwork and glyph titles, UI colour and scrolling overrides, raw preferences/device APIs, forced system appearances, private NSE class selectors and all-caps eyebrows directly above titles. Heuristics cover animation curves, reduced motion, layer ownership, visibility callbacks, pixel sprites, near-complete circles, resource references and Foundation migration imports.
 
-| Rule | Finds | Use instead |
-| --- | --- | --- |
-| `idiom.cocoa-class-authoring` | An application with no `NSEApplication` subclass, with the number of `useState`/`useReducer` hooks its code uses. | An `NSEApplication` subclass and `NSEViewController` with `@observable`, `bind`, `@action` and `actionRef`. |
-| `idiom.nse-controls` | Raw `<button>`, `<input>` (except `hidden` and `file`), `<select>`, `<textarea>` and `<table>` elements, counted per file. | The named NSE control for each element. |
-| `idiom.atmo-appearance` | A project stylesheet with 12 or more hard-coded colour literals, and any mention of the obsolete Atmo-Heritage or Atmo-Onyx raster themes. Every project stylesheet is checked, including those the host entry imports. | Atmo, which draws controls and chrome in light and dark, with semantic tokens. |
-| `idiom.managed-lifecycle` | `requestAnimationFrame`, `new ResizeObserver`, `new IntersectionObserver` or `new Worker` inside a React effect. | `this.fx.animation.manageDisplayLink` or `manageRenderer`, and `managedTask`. |
-| `idiom.document-state` | `preferences.set()` with a structured (non-literal) value. | A document type opened through `workspaceDocuments`. |
+Appearance checks enforce NSE's neutral contract. Atmo is the default theme; a developer's own theme is legitimate. Theme-owned semantic values may contain colour literals. Neither `NSEColor` nor `NSEColour` exists in this SDK: UI content uses semantic appearance values and graphics use `GFXColour` from `@syndromatic/syncloudos/fx/graphics`. A raw `<video>` is a warning because the public VideoFX clients do not replace a complete player view with controls.
 
-`idiomAudit.applications` summarises each application (`classAuthoring`, `stateHooks`, `rawControls`, `legacyThemeMentions`, `unmanagedLifecycle`, `preferenceDocumentWrites`, `filesScanned`), and `idiomAudit.stylesheets` the project stylesheets. The audit is static and conservative: it reads source and never runs it. Pass `idioms: false` to skip it.
+A source file that demonstrably owns a third-party rendering surface (for example Three.js `WebGLRenderer` or a canvas WebGL context) is exempt and listed in `idiomAudit.rendererExemptions`. Importing Three.js without owning a rendering surface does not exempt ordinary UI. APIs with no framework equivalent, including `fetch`, maths and utility libraries, remain legitimate.
+
+Use a reasoned inline opt-out for deliberate exceptions:
+
+```tsx
+// syncloudos-allow idiom.nse-controls: native bridge requires this element
+const bridge = <button>Open native panel</button>;
+```
+
+The comment suppresses only the named rule on its own line or the immediately following line. CSS uses `/* // syncloudos-allow idiom.rule-id: reason */`. The reason is required. `idiomAudit.optOuts` lists every directive, its location, validity and suppressed-finding count, including unused directives; missing reasons are errors. Strings and unrelated comments cannot opt out. Pass `idioms: false` to explicitly skip the audit.
 
 Validation does not run package scripts or builds. TypeScript checks may write the compiler's incremental cache if the consumer enables it. The source repository's additional governed-source boundary audit is not applied to independent consumers.
 
@@ -153,6 +156,20 @@ For example, scaffold a deliberate public primary with `{ bundleIdentifier: "org
 For a secondary windowed inspector, choose `presentation: "windowedView"` and declare only the access policy it actually needs. Omitting presentation also returns that windowed-secondary reminder; it is distinct from the desktop/tablet/mobile device presentations.
 
 Names cannot contain path separators or Windows reserved device names. Targets must stay inside the project, cannot traverse symbolic links, and the entire target bundle must be absent. Existing bundles are never merged or overwritten. Review generated files and call `validate` before registering the app.
+
+### `scaffold_theme`
+
+Input: `{ projectRoot?: string, name: string, directory?: string }`.
+
+Creates a new theme directory (default `src/Themes/<normalised-name>`) with `theme.json`, `appearance.ts` and `styles.css`. Existing targets, paths outside the project and symbolic-link traversal are refused. The definition uses `defineNSEAppearance` from `@syndromatic/syncloudos/nse/appearance`. Its stylesheet includes every required neutral NSE appearance value for both light and dark; starter values come from the neutral provider, not Atmo. Import the generated appearance and supply it as the `theme` of `NSEAppearance`. Optional recipe artwork remains the theme author's responsibility.
+
+### `validate_theme`
+
+Input: `{ projectRoot?: string, path: string }`, naming the theme directory or its `theme.json`.
+
+Returns `{ ok, findings, checkedValues, contract }`. Checks definition metadata, recipe uniqueness and required colour values in the actual stylesheet, scoped to the appearance in each colour scheme. Missing or malformed values are errors. It reads CSS and JSON without running theme code; visual fidelity, recipe artwork and contrast still need visual review.
+
+Both tools use the installed `tooling/nse-appearance-contract.json`, generated from `src/NSE/Appearance/NSEAppearanceDefinition.ts` and the neutral `nse-appearance.css`. No concrete theme defines the required set, and optional recipe slots are not turned into mandatory Atmo artwork.
 
 ### `explain_error`
 
@@ -178,4 +195,4 @@ After a stable build, run:
 node scripts/synware/check-developer-mcp-consumer.mjs
 ```
 
-The acceptance script installs both actual archives into a temporary independent project, starts the installed server over stdio, lists all five tools, inspects the installed build receipt, looks up `SynWareInfo` from installed declarations and docs, scaffolds an app and validates it with the consumer's `tsc --noEmit`, and explains the canonical controller-disposal code. It removes the temporary consumer afterward.
+The acceptance script installs both actual archives into a temporary independent project, starts the installed server over stdio, lists all seven tools, inspects the installed build receipt, looks up `SynWareInfo` from installed declarations and docs, scaffolds an app and validates it with the consumer's `tsc --noEmit`, and explains the canonical controller-disposal code. It also checks custom-theme scaffolding/validation, an authoring error and a reasoned opt-out. It removes the temporary consumer afterward.
