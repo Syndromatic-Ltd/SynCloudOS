@@ -18,7 +18,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useCallback, useEffect, useRef, type CSSProperties, type FocusEventHandler, type ReactNode, type Ref } from "react";
+import { NSEWindowLayoutContext, NSEWindowLayoutModel, useNSEContentLayoutProperties } from "../NSE/Layout/windowChromeObstructions";
+import { useNSEDeferredDisposal } from "../NSE/interactionLifecycle";
+import type { ScreenSnapshot } from "../SynCloudOS/Windows/ScreenService";
+
+import { useCallback, useLayoutEffect, useMemo, useEffect, useRef, type CSSProperties, type FocusEventHandler, type ReactNode, type Ref } from "react";
 import { useNSEPresenceExiting, useNSEPresentation } from "../NSE/Animation";
 import { nseTopBarHeightCssValue } from "../NSE/hostComposition";
 import { isWithinNSEFocusOrigin } from "../NSE/hostComposition";
@@ -46,6 +50,7 @@ function isStandardFrame(frame: SynCloudOSAppFrameManifest) {
 }
 
 type RootProps = {
+  safeAreaInsets?: ScreenSnapshot["safeAreaInsets"];
   zIndex: number;
   multiSwitchRole?: "incoming" | "outgoing" | null;
   staged?: boolean;
@@ -64,6 +69,7 @@ type RootProps = {
 
 function Root({
   zIndex,
+  safeAreaInsets,
   multiSwitchRole,
   staged = false,
   keyWindow = false,
@@ -75,6 +81,10 @@ function Root({
   ...hostProps
 }: RootProps) {
   const frameRef = useRef<HTMLDivElement | null>(null);
+  const layout = useMemo(() => new NSEWindowLayoutModel(), []);
+  useNSEDeferredDisposal(layout);
+  useLayoutEffect(() => frameRef.current ? layout.connectRoot(frameRef.current) : undefined, [layout]);
+  useLayoutEffect(() => { if (safeAreaInsets) layout.setLogicalScreenInsets(safeAreaInsets); }, [layout, safeAreaInsets]);
   const setFrame = useCallback((element: HTMLDivElement | null) => {
     frameRef.current = element;
     if (typeof rootRef === "function") rootRef(element);
@@ -104,6 +114,7 @@ function Root({
     target.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
   }, [inactive, keyWindow]);
   return (
+    <NSEWindowLayoutContext.Provider value={layout}>
     <div
       {...hostProps}
       ref={setFrame}
@@ -119,6 +130,7 @@ function Root({
     >
       {children}
     </div>
+    </NSEWindowLayoutContext.Provider>
   );
 }
 
@@ -134,6 +146,7 @@ function Surface({
   presentation?: AppViewPresentation;
 }) {
   const surfaceRef = useRef<HTMLDivElement>(null);
+  const contentLayoutProperties = useNSEContentLayoutProperties();
   // A role change starts its presentation during layout, so the outgoing
   // plane shows its first 3D pose in the same frame its role changes.
   useStagePresentation(surfaceRef, presentation);
@@ -155,7 +168,7 @@ function Surface({
       data-frame-top-bar={frame.topBar}
       data-nse-material={frame.material}
       data-multiswitch-role={multiSwitchRole ?? undefined}
-      style={{ ...presentation?.motion.style, "--webspring-app-top-bar-height": topBarHeight } as CSSProperties}
+      style={{ ...contentLayoutProperties, ...presentation?.motion.style, "--webspring-app-top-bar-height": topBarHeight } as CSSProperties}
     >
       {children}
     </div>

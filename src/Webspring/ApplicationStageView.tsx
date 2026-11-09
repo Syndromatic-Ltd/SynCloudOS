@@ -414,6 +414,7 @@ export function ApplicationStageView({
     <NSEApplicationNavigationChromeProvider controller={navigationChromeController} standardChromeAvailable={usesStandardTopBar}>
     <ResponderScope asChild responderId={applicationResponderId} kind="application" parentResponderId="workspace" scopeId={applicationResponderId} undoOwner={applicationUndoOwner} diagnosticsLabel={appName}>
     <AppViewChrome.Root
+      safeAreaInsets={presentationTraits.safeAreaInsets}
       zIndex={stage.zIndex + 70}
       multiSwitchRole={multiSwitchRole}
       staged={staged}

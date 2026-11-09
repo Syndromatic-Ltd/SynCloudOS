@@ -766,3 +766,6 @@ export { NSEDockTile } from "./Application/NSEDockTile";
 
 export type { BGTaskScheduler, BGTaskRequest, BGDownloadTaskRequest, UNUserNotificationCenter, UNNotificationSettings, UNNotificationCategory, UNNotificationAction, UNPushConfiguration } from "../SynCloudOS/nseRuntimeContracts";
 
+
+export type { NSELayoutGuide } from "./Layout/NSELayoutGuide";
+export { useNSEWindowChromeObstruction } from "./Layout/windowChromeObstructions";

@@ -18,17 +18,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useNSEWindowChromeElement } from "../Layout/windowChromeObstructions";
+
 import React, { useState } from "react";
 import { NSEWindowView } from "./NSEWindowView";
 import { assertNSEWindowViewRole, windowEscapeCloseHandler } from "./windowRoleViewHelpers";
 import type { NSEWindowViewProps } from "./windowViewTypes";
 
 function HUDTitleBar({ record, dispatchCommand, moveHandleProps }: Pick<NSEWindowViewProps, "record" | "dispatchCommand" | "moveHandleProps">) {
+  const header = React.useRef<HTMLElement>(null);
+  useNSEWindowChromeElement(header, "top", true);
   const [highlighted, setHighlighted] = useState(false);
   const { className, ...handleProps } = moveHandleProps ?? {};
   return (
     <header
       {...handleProps}
+      ref={header}
       className={["nse-window__hud-titlebar", className].filter(Boolean).join(" ")}
       data-window-hud-titlebar=""
     >

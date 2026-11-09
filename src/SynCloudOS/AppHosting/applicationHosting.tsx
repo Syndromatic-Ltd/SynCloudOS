@@ -1,4 +1,3 @@
-import { nativePresentations } from "../../NSE/applicationHostInterop";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -18,6 +17,9 @@ import { nativePresentations } from "../../NSE/applicationHostInterop";
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
+import { NSEWindowLayoutContext } from "../../NSE/Layout/windowChromeObstructions";
+import { nativePresentations } from "../../NSE/applicationHostInterop";
 
 import { NSEWindowTitleSlotContext, NSEWindowTitlebarContent } from "../../NSE/applicationHostInterop";
 import { nseWindowPresentedTitle } from "../../NSE/applicationHostInterop";
@@ -452,7 +454,11 @@ export function NSEWindowControllerView({ controller }: NSEWindowControllerViewP
   const appRuntime = useContext(SynWareRuntimeContext);
   const alerts = useMemo(() => createNSEWindowAlertQueue(), []);
   const appAlerts = useSynWareContext()?.alerts ?? null;
-  const mount = useMemo(() => (appRuntime ? createWindowMount(appRuntime, alerts, appAlerts) : null), [appRuntime, alerts, appAlerts]);
+  const layout = useContext(NSEWindowLayoutContext);
+  const mount = useMemo(() => {
+    const mount = appRuntime ? createWindowMount(appRuntime, alerts, appAlerts) : null;
+    return mount && layout ? { ...mount, get windowId() { return mount.windowId; }, contentLayoutGuide: layout } : mount;
+  }, [appRuntime, alerts, appAlerts, layout]);
   const [loaded, setLoaded] = useState(false);
   const [titleSlot, setTitleSlot] = useState<HTMLDivElement | null>(null);
   const titleSlotHost = useMemo(() => ({ root: controller.contentViewController, setSlot: setTitleSlot }), [controller, controller.contentViewController]);

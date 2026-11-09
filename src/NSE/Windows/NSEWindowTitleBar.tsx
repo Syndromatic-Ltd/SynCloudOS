@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useNSEWindowChromeElement } from "../Layout/windowChromeObstructions";
+
 import React, { useState, type HTMLAttributes } from "react";
 import type { WindowRecord } from "../../SynCloudOS/SynCloudOS";
 import { NSEWindowTitlebarDocumentContext } from "./windowTitlebarContext";
@@ -80,7 +82,9 @@ function NSEWindowControl({
 }
 
 export function NSEWindowTitleBar(props: NSEWindowTitleBarProps | { readonly title: string; readonly isKeyWindow: boolean }) {
-  if ("title" in props) return <header className="nse-window__titlebar nse-window__titlebar--standard" data-window-titlebar="" data-window-host-titlebar="" style={{ height: "100%", minHeight: "100%" }} data-window-active={props.isKeyWindow ? "true" : "false"} data-window-appearance-recipe={props.isKeyWindow ? "window.standard.head.active" : "window.standard.head.inactive"}>
+  const header = React.useRef<HTMLElement>(null);
+  useNSEWindowChromeElement(header, "top", false, "title" in props);
+  if ("title" in props) return <header ref={header} className="nse-window__titlebar nse-window__titlebar--standard" data-window-titlebar="" data-window-host-titlebar="" style={{ height: "100%", minHeight: "100%" }} data-window-active={props.isKeyWindow ? "true" : "false"} data-window-appearance-recipe={props.isKeyWindow ? "window.standard.head.active" : "window.standard.head.inactive"}>
     <h2 className="nse-window__title">{props.title}</h2>
   </header>;
   return <NSEManagedWindowTitleBar {...props} />;
@@ -94,11 +98,14 @@ function NSEManagedWindowTitleBar({
   appearanceRecipe,
   variant = "standard",
 }: NSEWindowTitleBarProps) {
+  const header = React.useRef<HTMLElement>(null);
+  useNSEWindowChromeElement(header, "top", false);
   const document = React.useContext(NSEWindowTitlebarDocumentContext);
   const { className: moveClassName, ...handleProps } = moveHandleProps ?? {};
   return (
     <header
       {...handleProps}
+      ref={header}
       className={["nse-window__titlebar", `nse-window__titlebar--${variant}`, moveClassName].filter(Boolean).join(" ")}
       data-toolbar-style={document?.toolbarStyle ?? "automatic"}
       data-window-titlebar=""

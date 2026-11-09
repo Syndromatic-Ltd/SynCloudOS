@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useNSEContentLayoutProperties } from "../Layout/windowChromeObstructions";
+
 import React, { type KeyboardEventHandler, type ReactNode } from "react";
 import { NSEAppearanceNineSlice } from "../Appearance/NSEAppearanceNineSlice";
 import { getOptionalNSESmoothSurfaceProps, useNSESmoothSurface } from "../SmoothSurface";
@@ -85,6 +87,7 @@ export function NSEWindowView({
   // props carry the radius paint underneath. Shadow and resize handles are
   // siblings of the surface, so clipping never touches them; content scrolls
   // inside the clipped surface exactly like mounted app views.
+  const contentLayoutProperties = useNSEContentLayoutProperties();
   const [titlebarDocument, setTitlebarDocument] = React.useState<NSEWindowTitlebarDocument | null>(null);
   const titlebarHost = React.useMemo(() => ({ setDocument: setTitlebarDocument, leadingAccessories: null, trailingAccessories: null }), []);
   const [surfaceNode, setSurfaceNode] = React.useState<HTMLDivElement | null>(null);
@@ -161,7 +164,7 @@ export function NSEWindowView({
             role="presentation"
           />
         ) : null}
-        <div className="nse-window__content" data-window-content="">{children}</div>
+        <div className="nse-window__content" data-window-content="" style={contentLayoutProperties}>{children}</div>
       </div>
       {resizeHandles}
     </section>

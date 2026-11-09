@@ -44,3 +44,6 @@ export type {
   NSEStackItemProps,
   NSEStackViewProps,
 } from "../Layout/stackViewTypes";
+
+export type { NSELayoutGuide } from "../Layout/NSELayoutGuide";
+export { useNSEWindowChromeObstruction } from "../Layout/windowChromeObstructions";

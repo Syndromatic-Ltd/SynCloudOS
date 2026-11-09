@@ -18,7 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isValidElement, type CSSProperties, type HTMLAttributes, type ReactElement, type ReactNode } from "react";
+import { useNSEWindowChromeElement } from "../../Layout/windowChromeObstructions";
+
+import { useRef, isValidElement, type CSSProperties, type HTMLAttributes, type ReactElement, type ReactNode } from "react";
 import { NSELabelHelp } from "../../Tooltips/NSELabelHelp";
 
 function leadingLabelHelp(node: ReactNode) {
@@ -120,6 +122,8 @@ function NSETopBarMetal({
   center,
   className = ""
 }: NSETopBarProps) {
+  const header = useRef<HTMLElement>(null);
+  useNSEWindowChromeElement(header, "top", true);
   const railWidth = rail?.width;
   const leadingTitle = titlePlacement === "leading";
   const headerStyle: CSSVarStyle | undefined = railWidth != null
@@ -162,6 +166,7 @@ function NSETopBarMetal({
 
   return (
     <header
+      ref={header}
       className={`nse-app-topbar nse-app-topbar-metal ${className}`.trim()}
       data-variant="atmoMetal"
       data-mode={scheme}
@@ -191,6 +196,12 @@ export function NSETopBar(props: NSETopBarProps) {
     return <NSETopBarMetal {...props} />;
   }
 
+  return <NSETopBarCumulus {...props} />;
+}
+
+function NSETopBarCumulus(props: NSETopBarProps) {
+  const header = useRef<HTMLElement>(null);
+  useNSEWindowChromeElement(header, "top", true);
   const {
     title,
     leadingItems = [],
@@ -213,7 +224,7 @@ export function NSETopBar(props: NSETopBarProps) {
   );
 
   return (
-    <header className={`nse-app-topbar ${surfaceProps.className ?? ""}`.trim()} data-variant="atmoCumulus" style={surfaceProps.style as CSSProperties | undefined}>
+    <header ref={header} className={`nse-app-topbar ${surfaceProps.className ?? ""}`.trim()} data-variant="atmoCumulus" style={surfaceProps.style as CSSProperties | undefined}>
       <div className="nse-app-topbar-base" aria-hidden="true">
         <span className="nse-app-topbar-base-glass" />
       </div>
