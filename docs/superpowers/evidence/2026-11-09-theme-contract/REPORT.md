@@ -43,11 +43,19 @@ Verification: 6 current guide tests pass; the prescribed focused regression comm
 
 ### Task 4 — view safe areas
 
+Commit: `90e6e9b6` — `NSE: views expose safeAreaInsets, safeAreaRect and additionalSafeAreaInsets`.
+
 Added `NSEView.additionalSafeAreaInsets`, `onSafeAreaInsetsChange`, physical `--nse-safe-area-inset-*` properties and `useNSESafeArea`. Each view intersects the window guide with its measured bounds; ancestors' additional insets are accumulated separately so chrome is not counted twice. Controller views expose `safeAreaInsets`, `safeAreaRect`, writable `additionalSafeAreaInsets` and `viewSafeAreaInsetsDidChange()`. Measurements use the window's shared observer where available; standalone views use one observer. Controller layout callbacks share that measurement rather than adding another observer.
 
 Verification: all 33 focused tests in four files passed, including five new safe-area cases and the controller/drawing regressions. Typecheck passed. The initial 80-partition screenshot check passed; the further full comparison after observer consolidation also passed **80/80, zero differences** (`task-4-baseline-final.log`). The prior regression assertion that a released FX layer leaves no inline style now checks that FX dimensions are removed and the view's four required safe-area properties remain. No drawing was changed.
 
-### Tasks 5–19
+### Task 5 — automatic scroll content insets
+
+`NSEScrollView` defaults `automaticallyAdjustsContentInsets` to true and derives its content padding from its measured safe area. With automatic adjustment disabled, it uses explicit `contentInsets`. `scrollerInsets` adds to the content insets when sizing and placing the scroller tracks. The scrolling controller reads live inset values, so revealing a row remains correct after chrome changes. Safe-area and scroll-content measurements share the observer rather than introducing another observer. The old `scrollInsets` prop was removed and its regression fixture migrated; no alias remains.
+
+Verification: 47 focused tests in four files passed, including four new scroll-inset tests. Typecheck passed. Frozen screenshot comparison passed **80/80 partitions, zero differences**, recorded in `task-5-baseline.log`.
+
+### Tasks 6–19
 
 Pending. Final split-suite and packed SDK acceptance remain for Task 19.
 
@@ -84,6 +92,8 @@ Further diagnostic runs exposed folder-only capture interference and source-pain
 Added: `NSEEdgeInsets`, `NSEEdgeInsetsZero`, `NSEEdgeInsetsMake`. Removed: `NSEScrollInsets` (no compatibility alias). Task 3 adds `NSELayoutGuide`, `NSEWindow.contentLayoutRect`, `NSEWindow.contentLayoutGuide` and `useNSEWindowChromeObstruction`.
 
 Task 4 adds the `NSESafeArea` result type, `useNSESafeArea`, the two view props and three controller-view properties described above, and `NSEViewController.viewSafeAreaInsetsDidChange()`.
+
+Task 5 adds `NSEScrollViewProps.automaticallyAdjustsContentInsets`, `contentInsets`, `scrollerInsets` and the scroller’s optional `style` prop; removes `NSEScrollViewProps.scrollInsets`.
 
 Part-name mappings, semantic colour values without Atmo precedent and Beta 2 removals will be recorded as their tasks are completed. No visual design decision has been made.
 
