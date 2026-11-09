@@ -8,14 +8,14 @@ import { nseThemeParts } from "../../src/NSE/Theme/contract/vocabulary";
 afterEach(cleanup);
 const parts = new Set<string>(nseThemeParts);
 describe("public theme hook coverage", () => {
-  for (const surface of themeBaselineCatalogue.filter(surface => /^(button|switch)-/.test(surface.id))) {
+  for (const surface of themeBaselineCatalogue.filter(surface => /^(button|switch|slider|segmented-control|stepper|level-indicator|progress-indicator)-/.test(surface.id))) {
     it(surface.id, () => {
       const view = render(<>{surface.render()}</>);
-      const control = surface.id.startsWith("switch-") ? "switch" : "button";
+      const control = ["progress-indicator", "level-indicator", "segmented-control", "stepper", "switch", "slider"].find(control => surface.id.startsWith(`${control}-`)) ?? "button";
       const root = view.container.querySelector<HTMLElement>(`[data-nse-control="${control}"]`);
       expect(root, `${surface.id} publishes its identity`).not.toBeNull();
       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
-      expect(root!.querySelector(':scope > [data-nse-part="bezel"]')).not.toBeNull();
+      if (control === "button" || control === "switch") expect(root!.querySelector(':scope > [data-nse-part="bezel"]')).not.toBeNull();
       for (const element of root!.querySelectorAll("*")) expect(parts.has(element.closest<HTMLElement>("[data-nse-part]")?.dataset.nsePart ?? "")).toBe(true);
       if (root!.dataset.bezelStyle) expect(root!.dataset.nseBezelStyle).toBe(root!.dataset.bezelStyle);
       expect(root!.dataset.nseEnabled).toBe(surface.id.endsWith("disabled") ? "false" : undefined);
@@ -24,7 +24,7 @@ describe("public theme hook coverage", () => {
       if (surface.id.endsWith("mixed")) expect(root!.dataset.nseState).toBe("mixed");
       if (surface.interaction === "hover") { fireEvent.pointerOver(root!); expect(root!.hasAttribute("data-nse-hovered")).toBe(true); fireEvent.pointerOut(root!); expect(root!.hasAttribute("data-nse-hovered")).toBe(false); }
       if (surface.interaction === "focus") {
-        const target = root!.matches("button") ? root! : root!.querySelector<HTMLElement>("input")!;
+        const target = root!.matches("button,input") ? root! : root!.querySelector<HTMLElement>('button:not([disabled]),input:not([disabled]),[role="slider"][tabindex="0"]')!;
         fireEvent.keyDown(document.body, { key: "Tab" });
         act(() => target.focus()); expect(root!.hasAttribute("data-nse-focused")).toBe(true);
         act(() => target.blur()); expect(root!.hasAttribute("data-nse-focused")).toBe(false);

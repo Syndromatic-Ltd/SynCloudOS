@@ -1,0 +1,324 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-theme-hook-coverage.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx (418 tests | 91 failed) 470ms
+     × slider-linear-regular-normal 5ms
+     × slider-linear-regular-focused 1ms
+     × slider-linear-regular-disabled 1ms
+     × slider-linear-regular-minimum 1ms
+     × slider-linear-regular-maximum 1ms
+     × slider-circular-regular-normal 2ms
+     × slider-circular-regular-focused 1ms
+     × slider-circular-regular-disabled 1ms
+     × slider-circular-regular-minimum 1ms
+     × slider-circular-regular-maximum 1ms
+     × slider-linear-small-normal 1ms
+     × slider-linear-small-focused 1ms
+     × slider-linear-small-disabled 1ms
+     × slider-linear-small-minimum 1ms
+     × slider-linear-small-maximum 1ms
+     × slider-circular-small-normal 1ms
+     × slider-circular-small-focused 1ms
+     × slider-circular-small-disabled 1ms
+     × slider-circular-small-minimum 1ms
+     × slider-circular-small-maximum 1ms
+     × slider-linear-mini-normal 1ms
+     × slider-linear-mini-focused 1ms
+     × slider-linear-mini-disabled 1ms
+     × slider-linear-mini-minimum 1ms
+     × slider-linear-mini-maximum 1ms
+     × slider-circular-mini-normal 1ms
+     × slider-circular-mini-focused 1ms
+     × slider-circular-mini-disabled 1ms
+     × slider-circular-mini-minimum 1ms
+     × slider-circular-mini-maximum 1ms
+     × segmented-control-rounded-regular-normal 2ms
+     × segmented-control-rounded-regular-hover 1ms
+     × segmented-control-rounded-regular-press 1ms
+     × segmented-control-rounded-regular-focused 1ms
+     × segmented-control-rounded-regular-disabled 1ms
+     × segmented-control-capsule-regular-normal 1ms
+     × segmented-control-capsule-regular-hover 2ms
+     × segmented-control-capsule-regular-press 1ms
+     × segmented-control-capsule-regular-focused 1ms
+     × segmented-control-capsule-regular-disabled 1ms
+     × segmented-control-texturedRounded-regular-normal 2ms
+     × segmented-control-texturedRounded-regular-hover 1ms
+     × segmented-control-texturedRounded-regular-press 1ms
+     × segmented-control-texturedRounded-regular-focused 1ms
+     × segmented-control-texturedRounded-regular-disabled 1ms
+     × segmented-control-rounded-small-normal 1ms
+     × segmented-control-rounded-small-hover 1ms
+     × segmented-control-rounded-small-press 1ms
+     × segmented-control-rounded-small-focused 1ms
+     × segmented-control-rounded-small-disabled 1ms
+     × segmented-control-capsule-small-normal 1ms
+     × segmented-control-capsule-small-hover 1ms
+     × segmented-control-capsule-small-press 1ms
+     × segmented-control-capsule-small-focused 1ms
+     × segmented-control-capsule-small-disabled 1ms
+     × segmented-control-texturedRounded-small-normal 1ms
+     × segmented-control-texturedRounded-small-hover 1ms
+     × segmented-control-texturedRounded-small-press 1ms
+     × segmented-control-texturedRounded-small-focused 1ms
+     × segmented-control-texturedRounded-small-disabled 1ms
+     × level-indicator-continuous-normal 1ms
+     × level-indicator-continuous-warning 1ms
+     × level-indicator-continuous-critical 1ms
+     × level-indicator-continuous-disabled 1ms
+     × level-indicator-discrete-normal 1ms
+     × level-indicator-discrete-warning 1ms
+     × level-indicator-discrete-critical 1ms
+     × level-indicator-discrete-disabled 1ms
+     × level-indicator-capacity-normal 1ms
+     × level-indicator-capacity-warning 1ms
+     × level-indicator-capacity-critical 1ms
+     × level-indicator-capacity-disabled 1ms
+     × level-indicator-rating-normal 6ms
+     × level-indicator-rating-warning 4ms
+     × level-indicator-rating-critical 4ms
+     × level-indicator-rating-disabled 9ms
+     × stepper-normal 2ms
+     × stepper-disabled 1ms
+     × stepper-focused 1ms
+     × progress-indicator-bar-small-determinate 1ms
+     × progress-indicator-bar-small-indeterminate 1ms
+     × progress-indicator-spinning-small-determinate 1ms
+     × progress-indicator-spinning-small-indeterminate 1ms
+     × progress-indicator-bar-regular-determinate 1ms
+     × progress-indicator-bar-regular-indeterminate 1ms
+     × progress-indicator-spinning-regular-determinate 1ms
+     × progress-indicator-spinning-regular-indeterminate 1ms
+     × progress-indicator-bar-large-determinate 1ms
+     × progress-indicator-bar-large-indeterminate 1ms
+     × progress-indicator-spinning-large-determinate 1ms
+     × progress-indicator-spinning-large-indeterminate 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 91 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-linear-regular-normal
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-linear-regular-focused
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-linear-regular-disabled
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-linear-regular-minimum
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-linear-regular-maximum
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-circular-regular-normal
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-circular-regular-focused
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-circular-regular-disabled
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-circular-regular-minimum
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-circular-regular-maximum
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-linear-small-normal
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-linear-small-focused
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-linear-small-disabled
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-linear-small-minimum
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-linear-small-maximum
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-circular-small-normal
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-circular-small-focused
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-circular-small-disabled
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-circular-small-minimum
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-circular-small-maximum
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-linear-mini-normal
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-linear-mini-focused
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-linear-mini-disabled
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-linear-mini-minimum
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-linear-mini-maximum
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-circular-mini-normal
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-circular-mini-focused
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-circular-mini-disabled
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-circular-mini-minimum
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > slider-circular-mini-maximum
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-rounded-regular-normal
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-rounded-regular-hover
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-rounded-regular-press
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-rounded-regular-focused
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-rounded-regular-disabled
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-capsule-regular-normal
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-capsule-regular-hover
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-capsule-regular-press
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-capsule-regular-focused
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-capsule-regular-disabled
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-rounded-small-normal
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-rounded-small-hover
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-rounded-small-press
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-rounded-small-focused
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-rounded-small-disabled
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-capsule-small-normal
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-capsule-small-hover
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-capsule-small-press
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-capsule-small-focused
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-capsule-small-disabled
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > level-indicator-continuous-normal
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > level-indicator-continuous-warning
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > level-indicator-continuous-critical
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > level-indicator-continuous-disabled
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > level-indicator-discrete-normal
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > level-indicator-discrete-warning
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > level-indicator-discrete-critical
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > level-indicator-discrete-disabled
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > level-indicator-capacity-normal
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > level-indicator-capacity-warning
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > level-indicator-capacity-critical
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > level-indicator-capacity-disabled
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > level-indicator-rating-normal
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > level-indicator-rating-warning
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > level-indicator-rating-critical
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > level-indicator-rating-disabled
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > stepper-normal
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > stepper-disabled
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > stepper-focused
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > progress-indicator-bar-small-determinate
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > progress-indicator-bar-small-indeterminate
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > progress-indicator-spinning-small-determinate
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > progress-indicator-spinning-small-indeterminate
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > progress-indicator-bar-regular-determinate
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > progress-indicator-bar-regular-indeterminate
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > progress-indicator-spinning-regular-determinate
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > progress-indicator-spinning-regular-indeterminate
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > progress-indicator-bar-large-determinate
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > progress-indicator-bar-large-indeterminate
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > progress-indicator-spinning-large-determinate
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > progress-indicator-spinning-large-indeterminate
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:17:49
+     15|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     16|       expect(root, `${surface.id} publishes its identity`).not.toBeNul…
+     17|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+       |                                                 ^
+     18|       if (control === "button" || control === "switch") expect(root!.q…
+     19|       for (const element of root!.querySelectorAll("*")) expect(parts.…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/91]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-texturedRounded-regular-normal
+AssertionError: segmented-control-texturedRounded-regular-normal publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:16:64
+     14|       const control = ["progress-indicator", "level-indicator", "segme…
+     15|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     16|       expect(root, `${surface.id} publishes its identity`).not.toBeNul…
+       |                                                                ^
+     17|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     18|       if (control === "button" || control === "switch") expect(root!.q…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/91]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-texturedRounded-regular-hover
+AssertionError: segmented-control-texturedRounded-regular-hover publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:16:64
+     14|       const control = ["progress-indicator", "level-indicator", "segme…
+     15|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     16|       expect(root, `${surface.id} publishes its identity`).not.toBeNul…
+       |                                                                ^
+     17|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     18|       if (control === "button" || control === "switch") expect(root!.q…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/91]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-texturedRounded-regular-press
+AssertionError: segmented-control-texturedRounded-regular-press publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:16:64
+     14|       const control = ["progress-indicator", "level-indicator", "segme…
+     15|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     16|       expect(root, `${surface.id} publishes its identity`).not.toBeNul…
+       |                                                                ^
+     17|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     18|       if (control === "button" || control === "switch") expect(root!.q…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/91]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-texturedRounded-regular-focused
+AssertionError: segmented-control-texturedRounded-regular-focused publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:16:64
+     14|       const control = ["progress-indicator", "level-indicator", "segme…
+     15|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     16|       expect(root, `${surface.id} publishes its identity`).not.toBeNul…
+       |                                                                ^
+     17|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     18|       if (control === "button" || control === "switch") expect(root!.q…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/91]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-texturedRounded-regular-disabled
+AssertionError: segmented-control-texturedRounded-regular-disabled publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:16:64
+     14|       const control = ["progress-indicator", "level-indicator", "segme…
+     15|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     16|       expect(root, `${surface.id} publishes its identity`).not.toBeNul…
+       |                                                                ^
+     17|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     18|       if (control === "button" || control === "switch") expect(root!.q…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/91]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-texturedRounded-small-normal
+AssertionError: segmented-control-texturedRounded-small-normal publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:16:64
+     14|       const control = ["progress-indicator", "level-indicator", "segme…
+     15|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     16|       expect(root, `${surface.id} publishes its identity`).not.toBeNul…
+       |                                                                ^
+     17|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     18|       if (control === "button" || control === "switch") expect(root!.q…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/91]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-texturedRounded-small-hover
+AssertionError: segmented-control-texturedRounded-small-hover publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:16:64
+     14|       const control = ["progress-indicator", "level-indicator", "segme…
+     15|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     16|       expect(root, `${surface.id} publishes its identity`).not.toBeNul…
+       |                                                                ^
+     17|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     18|       if (control === "button" || control === "switch") expect(root!.q…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/91]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-texturedRounded-small-press
+AssertionError: segmented-control-texturedRounded-small-press publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:16:64
+     14|       const control = ["progress-indicator", "level-indicator", "segme…
+     15|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     16|       expect(root, `${surface.id} publishes its identity`).not.toBeNul…
+       |                                                                ^
+     17|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     18|       if (control === "button" || control === "switch") expect(root!.q…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/91]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-texturedRounded-small-focused
+AssertionError: segmented-control-texturedRounded-small-focused publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:16:64
+     14|       const control = ["progress-indicator", "level-indicator", "segme…
+     15|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     16|       expect(root, `${surface.id} publishes its identity`).not.toBeNul…
+       |                                                                ^
+     17|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     18|       if (control === "button" || control === "switch") expect(root!.q…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/91]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > segmented-control-texturedRounded-small-disabled
+AssertionError: segmented-control-texturedRounded-small-disabled publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:16:64
+     14|       const control = ["progress-indicator", "level-indicator", "segme…
+     15|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     16|       expect(root, `${surface.id} publishes its identity`).not.toBeNul…
+       |                                                                ^
+     17|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     18|       if (control === "button" || control === "switch") expect(root!.q…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/91]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  91 failed | 327 passed (418)
+   Start at  19:38:24
+   Duration  9.42s (transform 6.05s, setup 27ms, import 7.90s, tests 470ms, environment 875ms)

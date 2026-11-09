@@ -1612,6 +1612,7 @@
   display: grid;
   gap: 8px;
   min-width: 180px;
+  --nse-control-minimum-inline-size: 180px;
   color: var(--nse-atmo-control-ink, #283444);
 }
 
@@ -3552,6 +3553,7 @@
 
 :where([data-nse-appearance="atmo"]) .nse-control-slider:is([data-size="small"], [data-size="mini"]) {
   min-width: 0;
+  --nse-control-minimum-inline-size: 0;
   gap: 4px;
 }
 
@@ -4200,37 +4202,41 @@
   border-radius: 4.5px;
   cursor: default;
 }
-
 /* ============================================================================
    Stepper (Atmo-designed): a slim capsule split into an up and a down half,
    in the select pill's language. Regular 22x34, small 18x28, mini 14x22; the
    halves are pointer targets and the capsule is the one keyboard stop.
    ========================================================================= */
 :where([data-nse-appearance="atmo"]) [data-nse-control="stepper"] {
-  --nse-atmo-stepper-width: 22px;
-  --nse-atmo-stepper-height: 34px;
+  --nse-control-bezel-inline-size: 22px;
+  --nse-control-bezel-block-size: 34px;
+}
+
+
+
+:where([data-nse-appearance="atmo"]) [data-nse-control="stepper"] > [data-nse-part="bezel"] {
   display: inline-grid;
   grid-template-rows: 1fr 1fr;
   flex: none;
-  inline-size: var(--nse-atmo-stepper-width);
-  block-size: var(--nse-atmo-stepper-height);
+  inline-size: var(--nse-control-bezel-inline-size);
+  block-size: var(--nse-control-bezel-block-size);
   box-sizing: border-box;
-  border-radius: calc(var(--nse-atmo-stepper-width) / 2 - 2px);
+  border-radius: calc(var(--nse-control-bezel-inline-size) / 2 - 2px);
   overflow: hidden;
   vertical-align: middle;
 }
 
 :where([data-nse-appearance="atmo"]) [data-nse-control="stepper"][data-size="small"] {
-  --nse-atmo-stepper-width: 18px;
-  --nse-atmo-stepper-height: 28px;
+  --nse-control-bezel-inline-size: 18px;
+  --nse-control-bezel-block-size: 28px;
 }
 
 :where([data-nse-appearance="atmo"]) [data-nse-control="stepper"][data-size="mini"] {
-  --nse-atmo-stepper-width: 14px;
-  --nse-atmo-stepper-height: 22px;
+  --nse-control-bezel-inline-size: 14px;
+  --nse-control-bezel-block-size: 22px;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="stepper"][data-state] > button {
+:where([data-nse-appearance="atmo"]) [data-nse-control="stepper"][data-state] > [data-nse-part="bezel"] > button {
   position: relative;
   inline-size: auto;
   min-block-size: 0;
@@ -4239,7 +4245,7 @@
   cursor: pointer;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="stepper"] > button::before {
+:where([data-nse-appearance="atmo"]) [data-nse-control="stepper"] > [data-nse-part="bezel"] > button::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -4247,11 +4253,11 @@
   mask: var(--nse-atmo-stepper-glyph) center / 8px 5px no-repeat;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="stepper"] > button[data-nse-part="decrement"]::before {
+:where([data-nse-appearance="atmo"]) [data-nse-control="stepper"] > [data-nse-part="bezel"] > button[data-nse-part="decrement"]::before {
   transform: scaleY(-1);
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="stepper"] > button:disabled {
+:where([data-nse-appearance="atmo"]) [data-nse-control="stepper"] > [data-nse-part="bezel"] > button:disabled {
   cursor: default;
 }
 
@@ -4406,7 +4412,7 @@
   background: var(--nse-font-panel-chip);
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="font-panel"] > [data-nse-part="effects"] > [data-nse-control="slider-field"] {
+:where([data-nse-appearance="atmo"]) [data-nse-control="font-panel"] > [data-nse-part="effects"] > [data-nse-control="slider"][data-nse-slider-type="linear"] {
   flex: none;
 }
 
@@ -4464,7 +4470,7 @@
   gap: 2px;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="font-panel"] [data-nse-part="size-list"] > [data-nse-control="slider-field"] {
+:where([data-nse-appearance="atmo"]) [data-nse-control="font-panel"] [data-nse-part="size-list"] > [data-nse-control="slider"][data-nse-slider-type="linear"] {
   flex: none;
 }
 
@@ -4539,6 +4545,7 @@
   align-items: center;
   gap: 10px;
   min-inline-size: 0;
+  --nse-control-minimum-inline-size: 0;
 }
 
 :where([data-nse-appearance="atmo"]) [data-nse-control="ruler"] .nse-control-slider-label {

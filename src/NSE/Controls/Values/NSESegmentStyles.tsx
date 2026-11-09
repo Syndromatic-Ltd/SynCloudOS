@@ -24,6 +24,8 @@
  * tool-button band, and its radio strip for one-of-many text segments.
  */
 
+import { nseControlHooks } from "../../Theme/contract/hooks";
+import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import { useContext, useId, useMemo, useState } from "react";
 import { NSEMenu } from "../../Menus/NSEMenu";
 import { NSEMenuOverlay } from "../../Menus/NSEMenuOverlay";
@@ -68,9 +70,12 @@ function selectOne(props: NSESegmentedControlProps, id: string) {
 
 /** Text segments that track one selection, in the textured radio strip (Atmo's small uppercase tool band). */
 function NSETexturedRadioSegments({ props }: { readonly props: NSESegmentedControlProps }) {
+  const theme = useNSEThemeInteraction<HTMLDivElement>(props.isEnabled !== false, true);
   const selected = props.items.find((item) => props.selection.selectedIds.has(item.id))?.id ?? "";
   return (
     <NSERadioGroup
+      {...theme.events}
+      {...nseControlHooks({ control: "segmented-control", enabled: props.isEnabled !== false, highlighted: theme.highlighted, hovered: theme.hovered, focused: theme.focused, variants: { "segment-style": "texturedRounded", "control-size": props.controlSize ?? "regular" } })}
       className={["nse-extended-radio-tool-button-group", props.className].filter(Boolean).join(" ")}
       label={props["aria-label"]}
       name={props.name}
@@ -92,6 +97,7 @@ function NSETexturedRadioSegments({ props }: { readonly props: NSESegmentedContr
 
 /** Textured segments with images: the joined tool-button band. */
 function NSETexturedSegments({ props }: { readonly props: NSESegmentedControlProps }) {
+  const theme = useNSEThemeInteraction<HTMLDivElement>(props.isEnabled !== false, true);
   const { mode, selectedIds } = props.selection;
   const select = (id: string) => {
     if ((props.isEnabled === false) || props.readOnly) return;
@@ -105,6 +111,9 @@ function NSETexturedSegments({ props }: { readonly props: NSESegmentedControlPro
   const items = useSegmentActions(props);
   return (
     <NSEToolButtonGroup
+      data-nse-part="content"
+      {...theme.events}
+      {...nseControlHooks({ control: "segmented-control", enabled: props.isEnabled !== false, highlighted: theme.highlighted, hovered: theme.hovered, focused: theme.focused, variants: { "segment-style": "texturedRounded", "control-size": props.controlSize ?? "regular" } })}
       label={props["aria-label"]}
       controlSize={props.controlSize}
       height={props.height}

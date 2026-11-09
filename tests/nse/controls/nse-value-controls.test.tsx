@@ -112,7 +112,19 @@ describe("value controls", () => {
     expect(change.mock.calls.filter(([, phase]) => phase === "commit")).toEqual([[7, "commit"]]);
   });
   it("provides an accessible radial primary control and a named non-pointer alternative",()=>{const change=vi.fn();render(<NSESlider sliderType="circular" aria-label="Angle" value={90} minimum={0} maximum={360} step={15} onValueChange={change}/>);expect(screen.getByRole("slider",{name:"Angle"})).not.toBeNull();fireEvent.change(screen.getByRole("slider",{name:"Angle linear alternative"}),{target:{value:"105"}});expect(change).toHaveBeenCalledWith(105,"commit");});
-  it("wraps an angle dial round through its start and speaks its value",()=>{const change=vi.fn();render(<NSESlider sliderType="circular" aria-label="Shadow angle" value={345} minimum={0} maximum={360} step={15} wraps controlSize="small" valueText={(value)=>`${value} degrees`} onValueChange={change}/>);const dial=screen.getByRole("slider",{name:"Shadow angle"});expect(dial.getAttribute("aria-valuetext")).toBe("345 degrees");expect(dial.closest("[data-nse-control=\"circular-slider\"]")?.getAttribute("data-size")).toBe("small");fireEvent.keyDown(dial,{key:"ArrowRight"});expect(change).toHaveBeenLastCalledWith(0,"commit");});
+  it("routes the stepper's enlarged targets without double-dispatching its native buttons", () => {
+    const change = vi.fn();
+    render(<NSEStepper aria-label="Count" value={3} minimum={0} maximum={10} step={1} onValueChange={change} />);
+    const control = screen.getByRole("spinbutton", { name: "Count" });
+    vi.spyOn(control, "getBoundingClientRect").mockReturnValue(new DOMRect(0, 0, 24, 48));
+    fireEvent.click(control, { clientX: 23, clientY: 5, detail: 1 });
+    expect(change).toHaveBeenLastCalledWith(4, "commit");
+    fireEvent.click(control, { clientX: 23, clientY: 43, detail: 1 });
+    expect(change).toHaveBeenLastCalledWith(2, "commit");
+    change.mockClear(); fireEvent.click(screen.getByRole("button", { name: "Increment Count" }));
+    expect(change).toHaveBeenCalledExactlyOnceWith(4, "commit");
+  });
+  it("wraps an angle dial round through its start and speaks its value",()=>{const change=vi.fn();render(<NSESlider sliderType="circular" aria-label="Shadow angle" value={345} minimum={0} maximum={360} step={15} wraps controlSize="small" valueText={(value)=>`${value} degrees`} onValueChange={change}/>);const dial=screen.getByRole("slider",{name:"Shadow angle"});expect(dial.getAttribute("aria-valuetext")).toBe("345 degrees");expect(dial.closest('[data-nse-control="slider"][data-nse-slider-type="circular"]')?.getAttribute("data-nse-control-size")).toBe("small");fireEvent.keyDown(dial,{key:"ArrowRight"});expect(change).toHaveBeenLastCalledWith(0,"commit");});
   it("maps circular pointer angle rather than horizontal range position",()=>{const change=vi.fn();const{container}=render(<NSESlider sliderType="circular" aria-label="Angle" value={0} minimum={0} maximum={360} step={15} onValueChange={change}/>);const body=container.querySelector('[data-nse-part="circular-body"]') as HTMLElement;Object.assign(body,{setPointerCapture:vi.fn(),getBoundingClientRect:()=>({left:0,top:0,width:100,height:100,right:100,bottom:100,x:0,y:0,toJSON:()=>({})})});fireEvent.pointerDown(body,{pointerId:1,clientX:100,clientY:50});fireEvent.pointerUp(body,{pointerId:1,clientX:100,clientY:50});expect(change).toHaveBeenCalledWith(90,"commit");});
   it("exposes meter thresholds and interactive rating semantics",()=>{const change=vi.fn();const {rerender}=render(<NSELevelIndicator aria-label="Capacity" value={80} minimum={0} maximum={100} warningValue={70} criticalValue={90}/>);expect(screen.getByRole("meter").getAttribute("data-state")).toBe("warning");rerender(<NSELevelIndicator aria-label="Rating" value={2} minimum={0} maximum={5} mode="rating" onValueChange={change}/>);fireEvent.click(screen.getByRole("radio",{name:"4"}));expect(change).toHaveBeenCalledWith(4,"commit");});
   it("does not commit a disposed segment's selection after an asynchronous command completes", async () => {

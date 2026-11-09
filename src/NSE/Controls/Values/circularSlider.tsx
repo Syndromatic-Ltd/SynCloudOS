@@ -20,6 +20,8 @@ import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { nseControlHooks } from "../../Theme/contract/hooks";
+import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import { useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 
 import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
@@ -54,6 +56,7 @@ export function NSECircularSlider(supplied: NSEBoundValueProps<number, NSESlider
 }
 
 function NSECircularSliderControl({ __nseBindingEditor, controlSize = "regular", valueText, ...props }: NSECircularSliderProps & NSEValueBindingControlProps<number>) {
+  const theme = useNSEThemeInteraction<HTMLSpanElement>(props.isEnabled !== false, true);
   const activePointer = useRef<number | null>(null);
   const opening = useRef(props.value);
   const latest = useRef(props.value);
@@ -100,7 +103,7 @@ function NSECircularSliderControl({ __nseBindingEditor, controlSize = "regular",
     nseAppearanceSlot("circular-slider", "knob", appearanceState),
   );
 
-  return <span data-nse-control="circular-slider" data-size={controlSize} data-state={(props.isEnabled === false) ? "disabled" : props.readOnly ? "read-only" : "ready"} {...trackAppearance.attributes} style={style}>
+  return <span data-nse-part="content" {...theme.events} {...nseControlHooks({ control: "slider", enabled: props.isEnabled !== false, highlighted: theme.highlighted, hovered: theme.hovered, focused: theme.focused, variants: { "slider-type": "circular", "control-size": controlSize } })} data-size={controlSize} data-state={(props.isEnabled === false) ? "disabled" : props.readOnly ? "read-only" : "ready"} {...trackAppearance.attributes} style={style}>
     <span
       role="slider"
       aria-label={props["aria-label"]}

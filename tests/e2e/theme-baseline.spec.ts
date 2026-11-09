@@ -91,3 +91,23 @@ for (const scheme of ["light", "dark"] as const) for (let partition = 0; partiti
     }, { timeout: 60_000 });
   });
 }
+
+// A non-image acceptance check: the frozen corpus above is unchanged.
+test("stepper hit targets preserve the painted bezel", async ({ page }) => {
+  await page.goto("/tests/e2e/fixtures/theme-baseline/index.html?scheme=light&surface=stepper-normal");
+  const control = page.locator('[data-nse-control="stepper"]');
+  const bezel = control.locator(':scope > [data-nse-part="bezel"]');
+  await expect(control).toBeVisible();
+  const bounds = await control.boundingBox(), paint = await bezel.boundingBox();
+  expect(bounds).not.toBeNull(); expect(paint).not.toBeNull();
+  expect(bounds!.width).toBeGreaterThanOrEqual(24);
+  expect(bounds!.height).toBeGreaterThanOrEqual(48);
+  expect(paint!.width).toBe(22); expect(paint!.height).toBe(34);
+  for (const [part, y] of [["increment", bounds!.y + 1], ["decrement", bounds!.y + bounds!.height - 1]] as const) {
+    await page.mouse.move(bounds!.x + bounds!.width - 0.5, y);
+    await page.mouse.down();
+    await expect(control.locator(`[data-nse-part="${part}"]`)).toHaveAttribute("data-nse-highlighted", "");
+    await page.mouse.up();
+    await expect(control.locator(`[data-nse-part="${part}"]`)).not.toHaveAttribute("data-nse-highlighted");
+  }
+});

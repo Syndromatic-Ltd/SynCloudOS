@@ -20,6 +20,8 @@ import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { nseControlHooks, nseMinimumControlProperties } from "../../Theme/contract/hooks";
+import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import { NSEMetalThumb } from "../../Appearance/NSEMetalThumb";
 import { cloneElement, useEffect, useRef, useState, type CSSProperties, type InputHTMLAttributes, type ReactElement, type ReactNode } from "react";
 import { useNSEFeedback } from "../../Feedback";
@@ -67,6 +69,7 @@ function NSESliderControl({ __nseBindingEditor, sliderType: _sliderType, valueTe
   const tooltips = useOptionalNSETooltipProvider();
 
   const disabled = !isEnabled;
+  const theme = useNSEThemeInteraction<HTMLLabelElement>(isEnabled);
   const minimum = suppliedMinimum ?? 0;
   const maximum = suppliedMaximum ?? 100;
   const controlled = value !== undefined;
@@ -151,7 +154,7 @@ function NSESliderControl({ __nseBindingEditor, sliderType: _sliderType, valueTe
     dir={dir}
     disabled={disabled}
     aria-readonly={readOnly || undefined}
-    data-nse-control="slider"
+    data-nse-part="field"
     data-orientation={orientation}
     onPointerDown={(event) => {
       if (disabled || readOnly) return;
@@ -184,10 +187,10 @@ function NSESliderControl({ __nseBindingEditor, sliderType: _sliderType, valueTe
   />;
   const sliderStyle = { ...style, ...(length !== undefined ? orientation === "vertical" ? { "--nse-control-slider-length": `${length}px` } : { inlineSize: `${length}px`, minInlineSize: 0 } : {}), "--nse-control-slider-progress": `${Math.max(0, Math.min(100, ((resolvedValue - minimum) / Math.max(1, maximum - minimum)) * 100))}%` } satisfies CSSProperties & { "--nse-control-slider-length"?: string; "--nse-control-slider-progress": string };
   return (
-    <label className={["nse-control-slider", className].filter(Boolean).join(" ")} data-nse-control="slider-field" data-orientation={orientation} data-size={controlSize} data-thumb-material={thumbMaterial} data-state={disabled ? "disabled" : readOnly ? "read-only" : "ready"} data-dragging={dragging ? "true" : "false"} style={sliderStyle}>{label ? <span className="nse-control-slider-label">{label}</span> : null}
-    <span className="nse-control-slider-control">
-      <span className="nse-control-slider-track" aria-hidden="true"><span className="nse-control-slider-fill" /></span>
-      <span className="nse-control-slider-thumb-rail" aria-hidden="true"><span className="nse-control-slider-thumb-visual">{thumbMaterial === "metal" ? <NSEMetalThumb disabled={disabled} /> : null}</span></span>
+    <label className={["nse-control-slider", className].filter(Boolean).join(" ")} data-nse-part="content" {...theme.events} {...nseControlHooks({ control: "slider", enabled: isEnabled, highlighted: dragging, hovered: theme.hovered, focused: theme.focused, variants: { "slider-type": "linear", "control-size": controlSize, orientation } })} data-orientation={orientation} data-size={controlSize} data-thumb-material={thumbMaterial} data-state={disabled ? "disabled" : readOnly ? "read-only" : "ready"} data-dragging={dragging ? "true" : "false"} style={nseMinimumControlProperties(sliderStyle)}>{label ? <span data-nse-part="title" className="nse-control-slider-label">{label}</span> : null}
+    <span data-nse-part="bezel" className="nse-control-slider-control">
+      <span data-nse-part="track" className="nse-control-slider-track" aria-hidden="true"><span data-nse-part="fill" className="nse-control-slider-fill" /></span>
+      <span data-nse-part="accessory" className="nse-control-slider-thumb-rail" aria-hidden="true"><span data-nse-part="knob" className="nse-control-slider-thumb-visual">{thumbMaterial === "metal" ? <NSEMetalThumb disabled={disabled} /> : null}</span></span>
       {tooltip === undefined || !tooltips ? sliderInput : <SliderTooltipAnchor input={sliderInput} content={typeof tooltip === "function" ? tooltip(resolvedValue) : tooltip} />}
     </span>
     {ticks?.map((tick) => <i aria-hidden="true" data-nse-part="tick" key={tick} data-value={tick} />)}
