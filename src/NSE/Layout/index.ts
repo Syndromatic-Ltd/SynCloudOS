@@ -53,3 +53,6 @@ export type {
 
 export type { NSELayoutGuide } from "./NSELayoutGuide";
 export { useNSEWindowChromeObstruction } from "./windowChromeObstructions";
+
+export { useNSESafeArea } from "./useNSESafeArea";
+export type { NSESafeArea } from "./useNSESafeArea";

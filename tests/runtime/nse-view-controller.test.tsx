@@ -245,7 +245,9 @@ describe("view.layer", () => {
       await settle();
       expect(outlet.contains(projection)).toBe(false);
       expect(() => { orb.opacity = 1; }).toThrowError(expect.objectContaining({ code: "AFX_LAYER_DISPOSED" }));
-      expect(outlet.getAttribute("style")).toBeNull();
+      expect(outlet.style.width).toBe("");
+      expect(outlet.style.height).toBe("");
+      for (const edge of ["top", "left", "bottom", "right"]) expect(outlet.style.getPropertyValue(`--nse-safe-area-inset-${edge}`)).toBe("0px");
       for (const { observer } of observed.values()) expect(disconnected.has(observer)).toBe(true);
     } finally {
       vi.restoreAllMocks();
