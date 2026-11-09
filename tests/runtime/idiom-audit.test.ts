@@ -76,7 +76,7 @@ describe("integrated idiom audit", () => {
     expect(result.idiomAudit).toMatchObject({ errors: 0, warnings: 0, idiomatic: true });
   });
   it("keeps token opt-outs local even when another line repeats the token", () => {
-    put("sdk/neutral.css", ":root { --nse-app-accent: CanvasText; }");
+    put("sdk/neutral.css", ":root { --nse-colour-control-accent: CanvasText; }");
     put("app.css", '/* // syncloudos-allow idiom.nse-token: local experiment */\n.a { color: var(--nse-experiment); }\n.b { color: var(--nse-experiment); }');
     const result = auditSynWareIdioms({ root, applications: [], sdkRoot: join(root, "sdk") });
     expect(result.findings.filter(f => f.rule === "idiom.nse-token")).toEqual([expect.objectContaining({ file: "app.css", line: 3 })]);

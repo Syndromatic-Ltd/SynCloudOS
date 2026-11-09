@@ -57,24 +57,24 @@ Each colour has a light and a dark value and follows the resolved colour scheme.
 
 | Colour token | Use it for |
 | --- | --- |
-| `--nse-app-background` | The plain application background. |
-| `--nse-app-foreground` | Body text and icons on that background. |
-| `--nse-app-foreground-secondary` | Secondary text: captions, labels, metadata. |
-| `--nse-app-surface` | The fill of a panel, card or inset group drawn on the background. |
-| `--nse-app-surface-border` | The edge of that panel or card. |
-| `--nse-app-separator` | Divider lines between rows or sections. |
-| `--nse-app-accent` | Highlights, links and the active state of your own controls. |
-| `--nse-app-accent-foreground` | Text or icons drawn on an `--nse-app-accent` fill. |
-| `--nse-app-selection` | The fill behind selected rows or items. |
-| `--nse-app-critical` | Errors and destructive states. |
+| `--nse-colour-window-background` | The plain application background. |
+| `--nse-colour-label` | Body text and icons on that background. |
+| `--nse-colour-secondary-label` | Secondary text: captions, labels, metadata. |
+| `--nse-colour-control-background` | The fill of a panel, card or inset group drawn on the background. |
+| `--nse-colour-grid` | The edge of that panel or card. |
+| `--nse-colour-separator` | Divider lines between rows or sections. |
+| `--nse-colour-control-accent` | Highlights, links and the active state of your own controls. |
+| `--nse-colour-selected-control-text` | Text or icons drawn on an `--nse-colour-control-accent` fill. |
+| `--nse-colour-selected-content-background` | The fill behind selected rows or items. |
+| `--nse-colour-system-red` | Errors and destructive states. |
 
-The text colours keep at least 4.5:1 contrast against `--nse-app-background`, and the accent at least 3:1, in both schemes.
+The text colours keep at least 4.5:1 contrast against `--nse-colour-window-background`, and the accent at least 3:1, in both schemes.
 
 ```css
-.readout { background: var(--nse-app-surface); border: 1px solid var(--nse-app-surface-border); }
-.readout-caption { color: var(--nse-app-foreground-secondary); }
-.readout-row + .readout-row { border-top: 1px solid var(--nse-app-separator); }
-.readout-value[data-alarm] { color: var(--nse-app-critical); }
+.readout { background: var(--nse-colour-control-background); border: 1px solid var(--nse-colour-grid); }
+.readout-caption { color: var(--nse-colour-secondary-label); }
+.readout-row + .readout-row { border-top: 1px solid var(--nse-colour-separator); }
+.readout-value[data-alarm] { color: var(--nse-colour-system-red); }
 ```
 
 | Purpose | Tokens |
@@ -82,7 +82,7 @@ The text colours keep at least 4.5:1 contrast against `--nse-app-background`, an
 | Type | `--nse-text-body-size`, `--nse-text-body-line`, `--nse-text-callout-size`, `--nse-text-caption-size`, `--nse-text-footnote-size`, `--nse-text-headline-size`, `--nse-text-headline-weight`, `--nse-text-label-size`, `--nse-text-label-weight` and `--nse-text-secondary-opacity`. |
 | Spacing | `--nse-space-1` to `--nse-space-8` (4 to 40 px), `--nse-spacing-tight`, `--nse-spacing-standard`, `--nse-spacing-inline`, `--nse-spacing-related`, `--nse-spacing-group`, `--nse-content-margin` and `--nse-content-spacing`. |
 
-For a tint the set does not name, mix from a token rather than inventing a colour, so it still follows the scheme and theme: `color-mix(in srgb, var(--nse-app-accent) 12%, transparent)`.
+For a tint the set does not name, mix from a token rather than inventing a colour, so it still follows the scheme and theme: `color-mix(in srgb, var(--nse-colour-control-accent) 12%, transparent)`.
 
 Other `--nse-*` properties belong to individual controls and themes and may change between releases. A name that isn't defined at all, such as `--nse-label-primary`, resolves to its `var()` fallback or the property's initial value, so it never follows Atmo; `validate` reports it as `idiom.nse-token`.
 

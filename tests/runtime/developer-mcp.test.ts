@@ -363,11 +363,11 @@ describe("developer MCP tools", () => {
     expect(result.idiomAudit.applications[0].preferenceDocumentWrites).toBe(3);
   });
   it("reports var(--nse-*) tokens the installed SDK does not define", async () => {
-    put("node_modules/@syndromatic/syncloudos/nse/styles.css", ":root { --nse-app-foreground: #000; }\n");
+    put("node_modules/@syndromatic/syncloudos/nse/styles.css", ":root { --nse-colour-label: #000; }\n");
     put("node_modules/@syndromatic/syncloudos/appearance.js", 'export const set = (element) => element.style.setProperty("--nse-runtime-tint", "red");\n');
     put("lib/app.css", [
       ":root { --nse-own-gap: 4px; }",
-      ".a { color: var(--nse-app-foreground); background: var(--nse-runtime-tint); gap: var(--nse-own-gap); }",
+      ".a { color: var(--nse-colour-label); background: var(--nse-runtime-tint); gap: var(--nse-own-gap); }",
       ".b { color: var(--nse-label-primary, CanvasText); border-color: var( --nse-separator-color); }",
       "",
     ].join("\n"));

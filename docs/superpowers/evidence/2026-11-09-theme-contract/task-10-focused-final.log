@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-semantic-colours.test.ts tests/runtime/app-content-colours.test.ts tests/nse/nse-topbar-document.test.tsx tests/runtime/application-stage-right-slot.test.tsx tests/runtime/application-stage-top-bar-inset.test.tsx tests/runtime/developer-mcp-theme.test.ts tests/runtime/developer-mcp.test.ts tests/runtime/idiom-audit.test.ts tests/runtime/nse-topbar-glyphs.test.tsx tests/runtime/synware-package-styles.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  10 passed (10)
+      Tests  131 passed (131)
+   Start at  22:04:15
+   Duration  16.30s (transform 6.55s, setup 98ms, import 12.14s, tests 14.78s, environment 4.05s)

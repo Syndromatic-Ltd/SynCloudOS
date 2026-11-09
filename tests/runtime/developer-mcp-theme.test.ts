@@ -40,12 +40,12 @@ describe("developer MCP neutral theme provisioning", () => {
     await scaffoldTheme({ projectRoot: project, name: "Variables" });
     const path = join(project, "src/Themes/variables/styles.css");
     const original = readFileSync(path, "utf8");
-    writeFileSync(path, original.replace(/(--nse-app-background:)\s*[^;]+;/u, '$1 var(--paper); --paper: white;'));
+    writeFileSync(path, original.replace(/(--nse-colour-window-background:)\s*[^;]+;/u, '$1 var(--paper); --paper: white;'));
     expect((await validateTheme({ projectRoot: project, path: "src/Themes/variables" })).ok).toBe(true);
-    writeFileSync(path, original.replace(/(--nse-app-background:)\s*[^;]+;/u, '$1 var(--absent, Canvas);'));
+    writeFileSync(path, original.replace(/(--nse-colour-window-background:)\s*[^;]+;/u, '$1 var(--absent, Canvas);'));
     expect((await validateTheme({ projectRoot: project, path: "src/Themes/variables" })).ok).toBe(true);
-    for (const value of ['var(--absent)', 'var(--nse-app-background)']) {
-      writeFileSync(path, original.replace(/(--nse-app-background:)\s*[^;]+;/u, `$1 ${value};`));
+    for (const value of ['var(--absent)', 'var(--nse-colour-window-background)']) {
+      writeFileSync(path, original.replace(/(--nse-colour-window-background:)\s*[^;]+;/u, `$1 ${value};`));
       expect((await validateTheme({ projectRoot: project, path: "src/Themes/variables" })).ok).toBe(false);
     }
   });
@@ -71,7 +71,7 @@ describe("developer MCP neutral theme provisioning", () => {
   it("derives both schemes from neutral source and packages the same contract", async () => {
     const neutral = readFileSync(join(repository, "src/NSE/Appearance/nse-appearance.css"), "utf8");
     expect(contract.values.length).toBeGreaterThan(0);
-    expect(contract.values.map((value: { name: string }) => value.name)).toContain("--nse-app-background");
+    expect(contract.values.map((value: { name: string }) => value.name)).toContain("--nse-colour-window-background");
     expect(contract.values.every((value: { name: string }) => !value.name.includes("atmo"))).toBe(true);
     for (const value of contract.values) {
       expect(neutral).toContain(value.name);
@@ -99,20 +99,20 @@ describe("developer MCP neutral theme provisioning", () => {
 
   it("reports every missing scheme value", async () => {
     await scaffoldTheme({ projectRoot: project, name: "Incomplete" });
-    writeFileSync(join(project, "src/Themes/incomplete/styles.css"), '[data-nse-appearance="incomplete"][data-nse-colour-scheme-resolved="light"] { --nse-app-background: white; }');
+    writeFileSync(join(project, "src/Themes/incomplete/styles.css"), '[data-nse-appearance="incomplete"][data-nse-colour-scheme-resolved="light"] { --nse-colour-window-background: white; }');
     const result = await validateTheme({ projectRoot: project, path: "src/Themes/incomplete/theme.json" });
     expect(result.ok).toBe(false);
     expect(result.findings.filter((finding: { rule: string }) => finding.rule === "theme.missing-value")).toHaveLength(contract.values.length * 2 - 1);
-    expect(result.findings).toContainEqual(expect.objectContaining({ value: "--nse-app-background", scheme: "dark", severity: "error" }));
+    expect(result.findings).toContainEqual(expect.objectContaining({ value: "--nse-colour-window-background", scheme: "dark", severity: "error" }));
   });
 
   it("reports malformed colours and accepts a different legitimate colour palette", async () => {
     await scaffoldTheme({ projectRoot: project, name: "Ink" });
     const path = join(project, "src/Themes/ink/styles.css");
     let css = readFileSync(path, "utf8");
-    css = css.replace(/(--nse-app-background:\s*)[^;]+;/u, "$1definitely-not-a-colour;");
+    css = css.replace(/(--nse-colour-window-background:\s*)[^;]+;/u, "$1definitely-not-a-colour;");
     writeFileSync(path, css);
-    expect((await validateTheme({ projectRoot: project, path: "src/Themes/ink" })).findings).toContainEqual(expect.objectContaining({ rule: "theme.malformed-value", value: "--nse-app-background", scheme: "light" }));
+    expect((await validateTheme({ projectRoot: project, path: "src/Themes/ink" })).findings).toContainEqual(expect.objectContaining({ rule: "theme.malformed-value", value: "--nse-colour-window-background", scheme: "light" }));
     writeFileSync(path, css.replace("definitely-not-a-colour", "Canvas"));
     expect((await validateTheme({ projectRoot: project, path: "src/Themes/ink" })).ok).toBe(true);
   });

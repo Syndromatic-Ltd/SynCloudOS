@@ -127,7 +127,7 @@ function NSETopBarMetal({
   const railWidth = rail?.width;
   const leadingTitle = titlePlacement === "leading";
   const headerStyle: CSSVarStyle | undefined = railWidth != null
-    ? { "--nse-app-topbar-rail": typeof railWidth === "number" ? `${railWidth}px` : railWidth }
+    ? { "--nse-topbar-rail": typeof railWidth === "number" ? `${railWidth}px` : railWidth }
     : undefined;
 
   const main = (

@@ -1,0 +1,352 @@
+{
+  "oldNames": {
+    "--nse-app-background": "--nse-colour-window-background",
+    "--nse-app-foreground": "--nse-colour-label",
+    "--nse-app-foreground-secondary": "--nse-colour-secondary-label",
+    "--nse-app-surface": "--nse-colour-control-background",
+    "--nse-app-surface-border": "--nse-colour-grid",
+    "--nse-app-separator": "--nse-colour-separator",
+    "--nse-app-accent": "--nse-colour-control-accent",
+    "--nse-app-accent-foreground": "--nse-colour-selected-control-text",
+    "--nse-app-selection": "--nse-colour-selected-content-background",
+    "--nse-app-critical": "--nse-colour-system-red"
+  },
+  "values": {
+    "labelColour": {
+      "light": "#2a2f36",
+      "dark": "#dde3ea",
+      "precedentLight": "src/NSE/Appearance/nse-appearance.css",
+      "precedentDark": "src/NSE/Appearance/nse-appearance.css",
+      "ownerReview": false
+    },
+    "secondaryLabelColour": {
+      "light": "#4f5d6d",
+      "dark": "#c3ccd7",
+      "precedentLight": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "precedentDark": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "ownerReview": false
+    },
+    "tertiaryLabelColour": {
+      "light": "rgba(44, 56, 70, 0.54)",
+      "dark": "rgba(200, 210, 222, 0.45)",
+      "precedentLight": "src/NSE/Themes/Atmo/Resources/atmo-structure.css",
+      "precedentDark": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "ownerReview": true
+    },
+    "quaternaryLabelColour": {
+      "light": "rgba(0, 0, 0, 0.2)",
+      "dark": "rgba(255, 255, 255, 0.32)",
+      "precedentLight": "src/NSE/Windows/Chrome/nse-chrome.css",
+      "precedentDark": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "ownerReview": true
+    },
+    "textColour": {
+      "light": "#25303c",
+      "dark": "#e3e8ee",
+      "precedentLight": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "precedentDark": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "ownerReview": false
+    },
+    "placeholderTextColour": {
+      "light": "rgba(44, 56, 70, 0.54)",
+      "dark": "rgba(200, 210, 222, 0.45)",
+      "precedentLight": "src/NSE/Themes/Atmo/Resources/atmo-structure.css",
+      "precedentDark": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "ownerReview": false
+    },
+    "selectedTextColour": {
+      "light": "#ffffff",
+      "dark": "#ffffff",
+      "precedentLight": "src/NSE/Appearance/nse-appearance.css",
+      "precedentDark": "src/NSE/Appearance/nse-appearance.css",
+      "ownerReview": false
+    },
+    "textBackgroundColour": {
+      "light": "#ffffff",
+      "dark": "#1d2229",
+      "precedentLight": "src/NSE/Appearance/nse-appearance.css",
+      "precedentDark": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "ownerReview": false
+    },
+    "selectedTextBackgroundColour": {
+      "light": "rgba(99, 153, 200, 0.2)",
+      "dark": "rgba(99, 153, 200, 0.24)",
+      "precedentLight": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "precedentDark": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "ownerReview": true
+    },
+    "unemphasisedSelectedTextColour": {
+      "light": "#1f2833",
+      "dark": "#dfe5ec",
+      "precedentLight": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "precedentDark": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "ownerReview": false
+    },
+    "unemphasisedSelectedTextBackgroundColour": {
+      "light": "#d4d8de",
+      "dark": "#3c434c",
+      "precedentLight": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "precedentDark": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "ownerReview": false
+    },
+    "keyboardFocusIndicatorColour": {
+      "light": "rgba(76, 164, 255, 0.95)",
+      "dark": "rgba(76, 164, 255, 0.95)",
+      "precedentLight": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "precedentDark": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "ownerReview": false
+    },
+    "linkColour": {
+      "light": "rgb(28 112 185)",
+      "dark": "rgb(120 172 222)",
+      "precedentLight": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "precedentDark": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "ownerReview": true
+    },
+    "separatorColour": {
+      "light": "rgb(67 88 107 / 20%)",
+      "dark": "rgb(255 255 255 / 9%)",
+      "precedentLight": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "precedentDark": "src/NSE/Appearance/nse-appearance.css",
+      "ownerReview": false
+    },
+    "gridColour": {
+      "light": "rgb(67 88 107 / 28%)",
+      "dark": "rgb(255 255 255 / 11%)",
+      "precedentLight": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "precedentDark": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "ownerReview": false
+    },
+    "headerTextColour": {
+      "light": "#2b3440",
+      "dark": "#dfe5ec",
+      "precedentLight": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "precedentDark": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "ownerReview": false
+    },
+    "findHighlightColour": {
+      "light": "#ffcc00",
+      "dark": "#ffcc00",
+      "precedentLight": "src/NSE/Colour/ColourPanel/NSEColourPanel.tsx",
+      "precedentDark": "src/NSE/Colour/ColourPanel/NSEColourPanel.tsx",
+      "ownerReview": true
+    },
+    "highlightColour": {
+      "light": "rgba(255, 255, 255, 0.9)",
+      "dark": "rgba(255, 255, 255, 0.14)",
+      "precedentLight": "src/NSE/Windows/Chrome/nse-chrome.css",
+      "precedentDark": "src/NSE/Chronosphere/chronosphere.css",
+      "ownerReview": false
+    },
+    "shadowColour": {
+      "light": "rgba(0, 0, 0, 0.35)",
+      "dark": "rgba(0, 0, 0, 0.65)",
+      "precedentLight": "src/NSE/Themes/Atmo/Resources/atmo-structure.css",
+      "precedentDark": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "ownerReview": false
+    },
+    "selectedContentBackgroundColour": {
+      "light": "rgba(99, 153, 200, 0.2)",
+      "dark": "rgba(99, 153, 200, 0.24)",
+      "precedentLight": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "precedentDark": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "ownerReview": false
+    },
+    "unemphasisedSelectedContentBackgroundColour": {
+      "light": "#d4d8de",
+      "dark": "#3c434c",
+      "precedentLight": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "precedentDark": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "ownerReview": false
+    },
+    "alternatingContentBackground1": {
+      "light": "#ffffff",
+      "dark": "#1d2229",
+      "precedentLight": "src/NSE/Appearance/nse-appearance.css",
+      "precedentDark": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "ownerReview": false
+    },
+    "alternatingContentBackground2": {
+      "light": "rgba(0, 0, 0, 0.035)",
+      "dark": "rgba(255, 255, 255, 0.035)",
+      "precedentLight": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "precedentDark": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "ownerReview": false
+    },
+    "selectedMenuItemTextColour": {
+      "light": "#ffffff",
+      "dark": "#ffffff",
+      "precedentLight": "src/NSE/Appearance/nse-appearance.css",
+      "precedentDark": "src/NSE/Appearance/nse-appearance.css",
+      "ownerReview": false
+    },
+    "controlAccentColour": {
+      "light": "rgb(28 112 185)",
+      "dark": "rgb(120 172 222)",
+      "precedentLight": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "precedentDark": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "ownerReview": false
+    },
+    "controlColour": {
+      "light": "#d1d0d0",
+      "dark": "#343b44",
+      "precedentLight": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "precedentDark": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "ownerReview": true
+    },
+    "controlBackgroundColour": {
+      "light": "rgb(255 255 255 / 60%)",
+      "dark": "rgb(255 255 255 / 6%)",
+      "precedentLight": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "precedentDark": "src/NSE/Appearance/nse-appearance.css",
+      "ownerReview": false
+    },
+    "controlTextColour": {
+      "light": "#283444",
+      "dark": "#e7ecf2",
+      "precedentLight": "src/NSE/Themes/Atmo/Resources/atmo-structure.css",
+      "precedentDark": "src/NSE/Components/nsePreferencesToast.css",
+      "ownerReview": false
+    },
+    "disabledControlTextColour": {
+      "light": "rgba(44, 56, 70, 0.54)",
+      "dark": "rgba(200, 210, 222, 0.45)",
+      "precedentLight": "src/NSE/Themes/Atmo/Resources/atmo-structure.css",
+      "precedentDark": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "ownerReview": true
+    },
+    "selectedControlColour": {
+      "light": "rgb(28 112 185)",
+      "dark": "rgb(120 172 222)",
+      "precedentLight": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "precedentDark": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "ownerReview": false
+    },
+    "selectedControlTextColour": {
+      "light": "#ffffff",
+      "dark": "#0d1a2a",
+      "precedentLight": "src/NSE/Appearance/nse-appearance.css",
+      "precedentDark": "src/NSE/Appearance/nse-appearance.css",
+      "ownerReview": false
+    },
+    "alternateSelectedControlTextColour": {
+      "light": "#ffffff",
+      "dark": "#ffffff",
+      "precedentLight": "src/NSE/Appearance/nse-appearance.css",
+      "precedentDark": "src/NSE/Appearance/nse-appearance.css",
+      "ownerReview": false
+    },
+    "windowBackgroundColour": {
+      "light": "#d9dbde",
+      "dark": "#1b222c",
+      "precedentLight": "src/NSE/Appearance/nse-appearance.css",
+      "precedentDark": "src/NSE/Appearance/nse-appearance.css",
+      "ownerReview": false
+    },
+    "windowFrameTextColour": {
+      "light": "#293645",
+      "dark": "#f1f4f8",
+      "precedentLight": "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "precedentDark": "src/NSE/Windows/Chrome/nse-chrome.css",
+      "ownerReview": false
+    },
+    "underPageBackgroundColour": {
+      "light": "#d9dbde",
+      "dark": "#1b222c",
+      "precedentLight": "src/NSE/Appearance/nse-appearance.css",
+      "precedentDark": "src/NSE/Appearance/nse-appearance.css",
+      "ownerReview": true
+    },
+    "systemRed": {
+      "light": "#a52d28",
+      "dark": "#ff7b72",
+      "precedentLight": "src/NSE/Appearance/nse-appearance.css",
+      "precedentDark": "src/NSE/Appearance/nse-appearance.css",
+      "ownerReview": false
+    },
+    "systemOrange": {
+      "light": "#ff8000",
+      "dark": "#ff8000",
+      "precedentLight": "src/NSE/Colour/ColourPanel/colourPalettes.ts",
+      "precedentDark": "src/NSE/Colour/ColourPanel/colourPalettes.ts",
+      "ownerReview": true
+    },
+    "systemYellow": {
+      "light": "#ffcc00",
+      "dark": "#ffcc00",
+      "precedentLight": "src/NSE/Colour/ColourPanel/NSEColourPanel.tsx",
+      "precedentDark": "src/NSE/Colour/ColourPanel/NSEColourPanel.tsx",
+      "ownerReview": true
+    },
+    "systemGreen": {
+      "light": "#34c759",
+      "dark": "#34c759",
+      "precedentLight": "src/NSE/Colour/ColourPanel/NSEColourPanel.tsx",
+      "precedentDark": "src/NSE/Colour/ColourPanel/NSEColourPanel.tsx",
+      "ownerReview": true
+    },
+    "systemMint": {
+      "light": "#00ff80",
+      "dark": "#00ff80",
+      "precedentLight": "src/NSE/Colour/ColourPanel/colourPalettes.ts",
+      "precedentDark": "src/NSE/Colour/ColourPanel/colourPalettes.ts",
+      "ownerReview": true
+    },
+    "systemTeal": {
+      "light": "#008080",
+      "dark": "#008080",
+      "precedentLight": "src/NSE/Colour/ColourPanel/colourPalettes.ts",
+      "precedentDark": "src/NSE/Colour/ColourPanel/colourPalettes.ts",
+      "ownerReview": true
+    },
+    "systemCyan": {
+      "light": "#00ffff",
+      "dark": "#00ffff",
+      "precedentLight": "src/NSE/Colour/ColourPanel/colourPalettes.ts",
+      "precedentDark": "src/NSE/Colour/ColourPanel/colourPalettes.ts",
+      "ownerReview": true
+    },
+    "systemBlue": {
+      "light": "#007aff",
+      "dark": "#007aff",
+      "precedentLight": "src/NSE/Colour/ColourPanel/NSEColourPanel.tsx",
+      "precedentDark": "src/NSE/Colour/ColourPanel/NSEColourPanel.tsx",
+      "ownerReview": true
+    },
+    "systemIndigo": {
+      "light": "#5856d6",
+      "dark": "#5856d6",
+      "precedentLight": "src/NSE/Colour/ColourPanel/NSEColourPanel.tsx",
+      "precedentDark": "src/NSE/Colour/ColourPanel/NSEColourPanel.tsx",
+      "ownerReview": true
+    },
+    "systemPurple": {
+      "light": "#800080",
+      "dark": "#800080",
+      "precedentLight": "src/NSE/Colour/ColourPanel/colourPalettes.ts",
+      "precedentDark": "src/NSE/Colour/ColourPanel/colourPalettes.ts",
+      "ownerReview": true
+    },
+    "systemPink": {
+      "light": "#ff0080",
+      "dark": "#ff0080",
+      "precedentLight": "src/NSE/Colour/ColourPanel/colourPalettes.ts",
+      "precedentDark": "src/NSE/Colour/ColourPanel/colourPalettes.ts",
+      "ownerReview": true
+    },
+    "systemBrown": {
+      "light": "#996633",
+      "dark": "#996633",
+      "precedentLight": "src/NSE/Colour/ColourPanel/colourPalettes.ts",
+      "precedentDark": "src/NSE/Colour/ColourPanel/colourPalettes.ts",
+      "ownerReview": true
+    },
+    "systemGrey": {
+      "light": "#808080",
+      "dark": "#808080",
+      "precedentLight": "src/NSE/Colour/ColourPanel/colourPalettes.ts",
+      "precedentDark": "src/NSE/Colour/ColourPanel/colourPalettes.ts",
+      "ownerReview": true
+    }
+  }
+}

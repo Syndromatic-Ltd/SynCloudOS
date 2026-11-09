@@ -23,7 +23,7 @@ function block(css: string, selector: string): Map<string, string> {
 }
 
 /** The colour tokens the appearance guide documents for application content. */
-const documented = [...read("docs/framework/appearance.md").matchAll(/^\| `(--nse-app-[\w-]+)` \|/gmu)].map(match => match[1]!);
+const documented = [...read("docs/framework/appearance.md").matchAll(/^\| `(--nse-colour-[\w-]+)` \|/gmu)].map(match => match[1]!);
 
 const srgb = (hex: string) => [1, 3, 5].map(index => {
   const channel = Number.parseInt(hex.slice(index, index + 2), 16) / 255;
@@ -35,9 +35,9 @@ const contrast = (a: string, b: string) => { const [high, low] = [luminance(a), 
 describe("application content colours", () => {
   it("documents the full shared set", () => {
     expect(documented).toEqual([
-      "--nse-app-background", "--nse-app-foreground", "--nse-app-foreground-secondary", "--nse-app-surface",
-      "--nse-app-surface-border", "--nse-app-separator", "--nse-app-accent", "--nse-app-accent-foreground",
-      "--nse-app-selection", "--nse-app-critical",
+      "--nse-colour-window-background", "--nse-colour-label", "--nse-colour-secondary-label", "--nse-colour-control-background",
+      "--nse-colour-grid", "--nse-colour-separator", "--nse-colour-control-accent", "--nse-colour-selected-control-text",
+      "--nse-colour-selected-content-background", "--nse-colour-system-red",
     ]);
   });
 
@@ -53,7 +53,7 @@ describe("application content colours", () => {
     const css = read("src/NSE/Themes/Atmo/Resources/atmo.css");
     const light = block(css, '[data-nse-appearance="atmo"]');
     const dark = block(css, '[data-nse-appearance="atmo"][data-mode="dark"],\n[data-nse-appearance="atmo"] [data-mode="dark"]');
-    const themed = documented.filter(token => token !== "--nse-app-background" && token !== "--nse-app-foreground");
+    const themed = documented.filter(token => token !== "--nse-colour-window-background" && token !== "--nse-colour-label");
     for (const token of themed) {
       expect(light.has(token), `Atmo light ${token}`).toBe(true);
       expect(dark.has(token), `Atmo dark ${token}`).toBe(true);
@@ -64,12 +64,12 @@ describe("application content colours", () => {
     const css = read("src/NSE/Appearance/nse-appearance.css");
     for (const scheme of ["light", "dark"]) {
       const values = block(css, `:where([data-nse-colour-scheme-resolved="${scheme}"])`);
-      const background = values.get("--nse-app-background")!;
-      for (const token of ["--nse-app-foreground", "--nse-app-foreground-secondary", "--nse-app-critical"]) {
+      const background = values.get("--nse-colour-window-background")!;
+      for (const token of ["--nse-colour-label", "--nse-colour-secondary-label", "--nse-colour-system-red"]) {
         expect(contrast(values.get(token)!, background), `${token} (${scheme})`).toBeGreaterThanOrEqual(4.5);
       }
-      expect(contrast(values.get("--nse-app-accent")!, background), `accent (${scheme})`).toBeGreaterThanOrEqual(3);
-      expect(contrast(values.get("--nse-app-accent-foreground")!, values.get("--nse-app-accent")!), `accent foreground (${scheme})`).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(values.get("--nse-colour-control-accent")!, background), `accent (${scheme})`).toBeGreaterThanOrEqual(3);
+      expect(contrast(values.get("--nse-colour-selected-control-text")!, values.get("--nse-colour-control-accent")!), `accent foreground (${scheme})`).toBeGreaterThanOrEqual(4.5);
     }
   });
 });

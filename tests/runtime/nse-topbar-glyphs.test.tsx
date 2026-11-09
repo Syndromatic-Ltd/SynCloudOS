@@ -35,7 +35,7 @@ const variants: Array<{ variant: NSETopBarVariant; glyph: string }> = [
 
 function maskOf(button: HTMLElement, glyphSelector: string): string | null {
   const glyph = button.querySelector<HTMLElement>(glyphSelector);
-  return glyph ? glyph.style.getPropertyValue("--nse-app-topbar-glyph") : null;
+  return glyph ? glyph.style.getPropertyValue("--nse-topbar-glyph") : null;
 }
 
 function renderBar(variant: NSETopBarVariant, item: NSETopBarItem) {

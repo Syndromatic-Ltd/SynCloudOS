@@ -55,6 +55,6 @@ describe("NSETopBar document window placement", () => {
   it("draws a settings item on the Cumulus bar from its own icon", () => {
     const { container } = render(<NSETopBar title="App" trailingItems={[{ kind: "settings", label: "Settings", icon: "/gear.svg" }]} />);
     const glyph = container.querySelector<HTMLElement>(".nse-app-topbar-button-icon")!;
-    expect(glyph.style.getPropertyValue("--nse-app-topbar-glyph")).toBe('url("/gear.svg")');
+    expect(glyph.style.getPropertyValue("--nse-topbar-glyph")).toBe('url("/gear.svg")');
   });
 });
