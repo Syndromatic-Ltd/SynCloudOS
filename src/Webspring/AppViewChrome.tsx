@@ -119,6 +119,7 @@ function Root({
       {...hostProps}
       ref={setFrame}
       tabIndex={-1}
+      data-nse-control="app-view-chrome" data-nse-part="background" data-nse-key-window={keyWindow ? undefined : "false"}
       className={`webspring-app-view-frame ${multiSwitchRole ? `is-multiswitch-${multiSwitchRole}` : ""} ${className ?? ""}`}
       data-multiswitch-role={multiSwitchRole ?? undefined}
       // A staged frame is mounted and painted but not yet presented: it must not take pointer
@@ -163,7 +164,7 @@ function Surface({
   return (
     <div
       ref={surfaceRef}
-      className={`webspring-app-view-surface ${surfaceClass}`}
+      data-nse-part="content" className={`webspring-app-view-surface ${surfaceClass}`}
       data-frame-material={frame.material}
       data-frame-top-bar={frame.topBar}
       data-nse-material={frame.material}

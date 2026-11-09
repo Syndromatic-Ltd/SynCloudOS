@@ -85,6 +85,7 @@ for (const scheme of ["light", "dark"] as const) for (let partition = 0; partiti
         await expect(page.locator('.webspring-folder-split[data-phase="open"]')).toBeVisible();
         await testInfo.attach("folder-geometry", { body: JSON.stringify({ dpr: await page.evaluate(() => devicePixelRatio), before, after: await geometry() }, null, 2), contentType: "application/json" });
       }
+      if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
       if (surface.interaction === "press") await page.mouse.up();
       expect(errors).toEqual([]);

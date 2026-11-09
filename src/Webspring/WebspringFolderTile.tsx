@@ -88,6 +88,7 @@ export function WebspringFolderTile({ folder, dropTarget = false, className }: W
 
   return <span
     ref={setElement}
+    data-nse-control="folder-tile" data-nse-part="bezel" data-nse-highlighted={dropTarget ? "" : undefined} data-nse-style={appearance.shape.kind}
     className={`webspring-folder-tile${className ? ` ${className}` : ""}`}
     data-shape={appearance.shape.kind}
     data-fill={fill === "inset" ? "inset" : "texture"}
@@ -95,20 +96,20 @@ export function WebspringFolderTile({ folder, dropTarget = false, className }: W
     style={style}
     aria-hidden="true"
   >
-    {geometry && frame && layer ? <span className="webspring-folder-tile-rim" style={{ clipPath: `path(evenodd, "${frame}")` }}>
-      <svg className="webspring-folder-tile-lip" {...layer}><path d={geometry.path} transform="translate(0 1)" /></svg>
-      <span className="webspring-folder-tile-ring">
-        <svg className="webspring-folder-tile-ring-shadow" {...layer}><path d={geometry.path} transform="translate(0 8)" /></svg>
-        <svg className="webspring-folder-tile-ring-stroke" {...layer}><path d={geometry.path} strokeWidth="6" /></svg>
+    {geometry && frame && layer ? <span data-nse-part="border" className="webspring-folder-tile-rim" style={{ clipPath: `path(evenodd, "${frame}")` }}>
+      <svg data-nse-part="border" className="webspring-folder-tile-lip" {...layer}><path d={geometry.path} transform="translate(0 1)" /></svg>
+      <span data-nse-part="indicator" className="webspring-folder-tile-ring">
+        <svg data-nse-part="shadow" className="webspring-folder-tile-ring-shadow" {...layer}><path d={geometry.path} transform="translate(0 8)" /></svg>
+        <svg data-nse-part="border" className="webspring-folder-tile-ring-stroke" {...layer}><path d={geometry.path} strokeWidth="6" /></svg>
       </span>
     </span> : null}
-    <span className="webspring-folder-tile-surface">
+    <span data-nse-part="background" className="webspring-folder-tile-surface">
       {frame && layer ? <>
-        <svg className="webspring-folder-tile-inner-shadow" {...layer}><path d={frame} fillRule="evenodd" transform="translate(0 2)" /></svg>
-        <svg className="webspring-folder-tile-inner-highlight" {...layer}><path d={frame} fillRule="evenodd" transform="translate(0 -1)" /></svg>
+        <svg data-nse-part="shadow" className="webspring-folder-tile-inner-shadow" {...layer}><path d={frame} fillRule="evenodd" transform="translate(0 2)" /></svg>
+        <svg data-nse-part="highlight" className="webspring-folder-tile-inner-highlight" {...layer}><path d={frame} fillRule="evenodd" transform="translate(0 -1)" /></svg>
       </> : null}
     </span>
-    {folder.apps.slice(0, 9).map((app) => <span key={app.bundleIdentifier} className="webspring-folder-tile-member">
+    {folder.apps.slice(0, 9).map((app) => <span key={app.bundleIdentifier} data-nse-part="image" className="webspring-folder-tile-member">
       {app.iconUrl ? <img src={app.iconUrl} alt="" draggable={false} /> : <span>{app.displayName.slice(0, 1)}</span>}
     </span>)}
   </span>;

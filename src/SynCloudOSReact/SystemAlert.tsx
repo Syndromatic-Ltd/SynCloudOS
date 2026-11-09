@@ -166,12 +166,12 @@ export function SystemAlert({
     <NSEAlertSurface className="syncloudos-system-alert" appearance={appearance} labelledBy={titleId} describedBy={messageId}>
       <div className="nse-system-alert-content">
         <div className={`syncloudos-alert-artwork${icon.src ? "" : " is-caution-only"}`} data-alert-icon={icon.kind} aria-hidden="true">
-          {icon.src ? <img className="syncloudos-alert-logo" data-alert-logo={icon.src === synCloudOSLogo ? "syncloudos" : ""} src={icon.src} alt="" /> : null}
+          {icon.src ? <img data-nse-part="image" className="syncloudos-alert-logo" data-alert-logo={icon.src === synCloudOSLogo ? "syncloudos" : ""} src={icon.src} alt="" /> : null}
           <img className="syncloudos-alert-caution" data-alert-caution src={cautionIcon} alt="" />
         </div>
-        <div className="nse-system-alert-copy">
-          <h2 id={titleId}>{error.title}</h2>
-          <p id={messageId}>{error.message}</p>
+        <div data-nse-part="content" className="nse-system-alert-copy">
+          <h2 data-nse-part="title" id={titleId}>{error.title}</h2>
+          <p data-nse-part="label" id={messageId}>{error.message}</p>
           <button
             type="button"
             className="nse-alert-disclosure"
@@ -186,7 +186,7 @@ export function SystemAlert({
           </NSEPresence>
         </div>
       </div>
-      <div className="nse-alert-actions">
+      <div data-nse-part="actions" className="nse-alert-actions">
         {isSessionMismatch && actions.includes("dismiss") ? <ActionButton onClick={onDismiss}>Cancel</ActionButton> : null}
         {actions.includes("reload") ? <ActionButton keyEquivalent={isSessionMismatch ? "\r" : undefined} appearance={isSessionMismatch ? undefined : actionAppearance} onClick={onReload}>{isSessionMismatch ? "Reload Webspring" : "Reload"}</ActionButton> : null}
         {error.retry || actions.includes("retry") ? (

@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useRef, type CSSProperties, type ReactNode } from "react";
+import { useRef, type CSSProperties, type ReactNode, type HTMLAttributes } from "react";
 import "./components.css";
 import { useNSEAnimationEnvironment, useNSEPresentation } from "../Animation";
 import { resolveNSEAlertMotion, resolveNSESheetMotion } from "./NSEAlert.transitions";
@@ -40,7 +40,8 @@ export function NSEAlertSurface({
   initialFocusSelector,
   smoothSurface = false,
   motion = "alert",
-  style
+  style,
+  ...attributes
 }: {
   children: ReactNode;
   className?: string;
@@ -53,7 +54,7 @@ export function NSEAlertSurface({
   /** `sheet` slides the surface out from the window's top content edge, as a window sheet attaches. */
   motion?: "alert" | "sheet";
   style?: CSSProperties;
-}) {
+} & Omit<HTMLAttributes<HTMLDivElement>, "children" | "role" | "style">) {
   const { reducedMotion } = useNSEAnimationEnvironment();
   const alertRef = useRef<HTMLDivElement>(null);
   useNSEPresentation(alertRef, motion === "sheet" ? resolveNSESheetMotion(reducedMotion) : resolveNSEAlertMotion(reducedMotion));
@@ -65,6 +66,7 @@ export function NSEAlertSurface({
 
   return (
     <div
+      data-nse-control="system-alert" data-nse-part="background" {...attributes}
       ref={alertRef}
       className={`nse-control-alert is-${appearance} ${surfaceProps.className ?? ""}`.trim()}
       role={role}

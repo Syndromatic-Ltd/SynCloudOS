@@ -31,12 +31,12 @@ const civil = { locale: "en-GB", timeZone: "Europe/London" } as const;
 describe("NSEDatePicker is NSDatePicker", () => {
   it("edits a date in a text field by default, and a time or a date and time by its elements", () => {
     const { container, rerender } = render(<NSEDatePicker aria-label="Due" {...civil} presentsCalendarOverlay={false} defaultValue={date(2026, 6, 18)} />);
-    expect(container.querySelector('[data-nse-control="date-picker"]:where([data-nse-picker-mode="date"]:not([data-nse-date-picker-style="clockAndCalendar"])) [data-nse-part="date-entry"]')).not.toBeNull();
+    expect(container.querySelector('[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]) [data-nse-part="date-entry"]')).not.toBeNull();
     rerender(<NSEDatePicker aria-label="Start" {...civil} datePickerElements={["hourMinute"]} presentsCalendarOverlay={false} defaultValue={{ hour: 9, minute: 30, second: 0 }} />);
-    expect(container.querySelector('[data-nse-control="date-picker"]:where([data-nse-picker-mode="time"])[data-editor="field"]')).not.toBeNull();
+    expect(container.querySelector('[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"])[data-editor="field"]')).not.toBeNull();
     expect(container.querySelector('[data-nse-part="clock-affix"]')).toBeNull();
     rerender(<NSEDatePicker aria-label="Start" {...civil} datePickerElements={["hourMinute"]} datePickerStyle="clockAndCalendar" defaultValue={{ hour: 9, minute: 30, second: 0 }} />);
-    expect(container.querySelector('[data-nse-control="date-picker"]:where([data-nse-picker-mode="time"])[data-editor="clock"]')).not.toBeNull();
+    expect(container.querySelector('[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"])[data-editor="clock"]')).not.toBeNull();
   });
 
   it("uses segmented fields for the textField style", () => {
@@ -47,9 +47,9 @@ describe("NSEDatePicker is NSDatePicker", () => {
 
   it("maps isEnabled and isEditable onto the field", () => {
     const { container, rerender } = render(<NSEDatePicker aria-label="Due" {...civil} presentsCalendarOverlay={false} isEnabled={false} defaultValue={date(2026, 6, 18)} />);
-    expect(container.querySelector('[data-nse-control="date-picker"]:where([data-nse-picker-mode="date"]:not([data-nse-date-picker-style="clockAndCalendar"]))')?.getAttribute("data-state")).toBe("disabled");
+    expect(container.querySelector('[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])')?.getAttribute("data-state")).toBe("disabled");
     rerender(<NSEDatePicker aria-label="Due" {...civil} presentsCalendarOverlay={false} isEditable={false} defaultValue={date(2026, 6, 18)} />);
-    expect(container.querySelector('[data-nse-control="date-picker"]:where([data-nse-picker-mode="date"]:not([data-nse-date-picker-style="clockAndCalendar"]))')?.getAttribute("data-state")).toBe("read-only");
+    expect(container.querySelector('[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])')?.getAttribute("data-state")).toBe("read-only");
   });
 
   it("edits its value live in the graphical calendar, and the month arrows move the date by a month", () => {

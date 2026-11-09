@@ -53,7 +53,7 @@ export function NSEDatePicker(props: NSEDatePickerDateTimeProps): ReactElement;
 export function NSEDatePicker(props: NSEDatePickerRangeProps): ReactElement;
 export function NSEDatePicker(props: NSEDatePickerDateProps): ReactElement;
 export function NSEDatePicker(props: NSEDatePickerProps): ReactElement {
-  return <NSEDatePickerDrawingContext.Provider value={{ style: props.datePickerStyle ?? "textFieldAndStepper", enabled: props.isEnabled !== false }}><NSEDatePickerContent {...props} /></NSEDatePickerDrawingContext.Provider>;
+  return <NSEDatePickerDrawingContext.Provider value={{ style: props.datePickerStyle ?? "textFieldAndStepper", enabled: props.isEnabled !== false, datePickerMode: isRange(props) ? "range" : "single" }}><NSEDatePickerContent {...props} /></NSEDatePickerDrawingContext.Provider>;
 }
 function NSEDatePickerContent(props: NSEDatePickerProps): ReactElement {
   const { datePickerStyle = "textFieldAndStepper", presentsCalendarOverlay = true, isEnabled = true, isEditable = true } = props;

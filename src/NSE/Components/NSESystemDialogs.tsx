@@ -103,29 +103,29 @@ export function NSEAboutDialog({
       <NSEAlertSurface
         appearance={appearance}
         role="dialog"
-        className="nse-about-dialog"
+        data-nse-control="panel" data-nse-style="about" className="nse-about-dialog"
         labelledBy={titleId}
         describedBy={describedId}
         initialFocusSelector=".nse-about-dismiss"
       >
-        <div className={`nse-about-content${info.iconSrc ? "" : " nse-about-content-textonly"}`}>
+        <div data-nse-part="content" className={`nse-about-content${info.iconSrc ? "" : " nse-about-content-textonly"}`}>
           {info.iconSrc ? (
             <img
-              className="nse-about-icon"
+              data-nse-part="image" className="nse-about-icon"
               src={info.iconSrc}
               alt={info.iconAlt ?? ""}
               aria-hidden={info.iconAlt ? undefined : true}
             />
           ) : null}
-          <div className="nse-about-copy">
-            <h2 id={titleId} className="nse-about-name">{info.name}</h2>
-            {info.tagline ? <p id={describedId} className="nse-about-tagline">{info.tagline}</p> : null}
-            <p className="nse-about-version">{version}</p>
-            <p className="nse-about-legal">{info.copyright}</p>
-            <p className="nse-about-legal nse-about-trademark">{info.trademark}</p>
+          <div data-nse-part="content" className="nse-about-copy">
+            <h2 id={titleId} data-nse-part="title" className="nse-about-name">{info.name}</h2>
+            {info.tagline ? <p id={describedId} data-nse-part="label" className="nse-about-tagline">{info.tagline}</p> : null}
+            <p data-nse-part="value" className="nse-about-version">{version}</p>
+            <p data-nse-part="label" className="nse-about-legal">{info.copyright}</p>
+            <p data-nse-part="label" className="nse-about-legal nse-about-trademark">{info.trademark}</p>
           </div>
         </div>
-        <div className="nse-alert-actions">
+        <div data-nse-part="actions" className="nse-alert-actions">
           <NSEButton
             title={dismissLabel}
             {...nseButtonToneProps(appearance === "dark" ? "medium" : "light")}
@@ -192,18 +192,18 @@ export function NSEConfirmDialog({
       >
         {/* Without an icon the copy would otherwise land in the alert's fixed
             116px icon column and wrap to a ragged strip. */}
-        <div className={`nse-system-alert-content${iconSrc ? "" : " nse-confirm-content-textonly"}`}>
+        <div data-nse-part="content" className={`nse-system-alert-content${iconSrc ? "" : " nse-confirm-content-textonly"}`}>
           {iconSrc ? (
-            <div className="nse-system-alert-icon-frame">
-              <img className="nse-system-alert-icon" src={iconSrc} alt="" aria-hidden="true" />
+            <div data-nse-part="image" className="nse-system-alert-icon-frame">
+              <img data-nse-part="image" className="nse-system-alert-icon" src={iconSrc} alt="" aria-hidden="true" />
             </div>
           ) : null}
-          <div className="nse-system-alert-copy" tabIndex={0}>
-            <h2 id={titleId}>{title}</h2>
-            {message ? <p id={messageId}>{message}</p> : null}
+          <div data-nse-part="content" className="nse-system-alert-copy" tabIndex={0}>
+            <h2 data-nse-part="title" id={titleId}>{title}</h2>
+            {message ? <p data-nse-part="label" id={messageId}>{message}</p> : null}
           </div>
         </div>
-        <div className="nse-alert-actions">
+        <div data-nse-part="actions" className="nse-alert-actions">
           <NSEButton title={confirmLabel} {...nseButtonToneProps(confirmTone)} className="nse-system-alert-action-button" onClick={onConfirm} />
           <NSEButton
             title={cancelLabel}
