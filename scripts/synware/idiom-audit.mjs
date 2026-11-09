@@ -4,24 +4,17 @@
  */
 // The idiom audit tells an agent whether a valid SynWare is also an idiomatic
 // one. "0 errors" from the structural validator only means the bundle loads;
-// these findings are warnings and never make a project invalid.
+// definite misuse is an error; uncertain patterns remain warnings.
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, extname, relative, resolve, sep } from "node:path";
 import ts from "typescript";
+import { inspectIdiomErrors, inspectStyleErrors, rendererOwnedSource } from "./idiom-errors.mjs";
+import { inspectIdiomWarnings, inspectUnusedResources } from "./idiom-warnings.mjs";
 
 const SOURCE = [".tsx", ".ts", ".jsx", ".js", ".mts", ".mjs"];
 const STYLE = [".css"];
 const MAX_FILES = 400;
-const COLOUR_LITERAL_THRESHOLD = 12;
-
-/** Raw interactive HTML elements and the NSE controls that replace them. */
-export const NSE_CONTROL_REPLACEMENTS = Object.freeze({
-  button: "NSEButton",
-  input: "NSETextField, NSESearchField, NSESlider, NSEStepper, NSEButton with buttonType switch, or NSESwitch",
-  select: "NSEPopUpButton or NSESegmentedControl",
-  textarea: "NSETextView",
-  table: "NSETableView bound to an NSEArrayController",
-});
+const RAW_CONTROLS = new Set(["button", "input", "select", "textarea", "table"]);
 
 function slash(path) { return path.split(sep).join("/"); }
 function lineOf(text, index) { return text.slice(0, index).split("\n").length; }
@@ -139,7 +132,7 @@ function inspectSource(file, text) {
     }
     if (ts.isFunctionDeclaration(node) && node.modifiers?.some(modifier => modifier.kind === ts.SyntaxKind.DefaultKeyword)) facts.functionDefaultExport = true;
     if (ts.isExportAssignment(node) && !node.isExportEquals && (ts.isArrowFunction(node.expression) || ts.isFunctionExpression(node.expression))) facts.functionDefaultExport = true;
-    if ((ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) && ts.isIdentifier(node.tagName) && Object.hasOwn(NSE_CONTROL_REPLACEMENTS, node.tagName.text)) {
+    if ((ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) && ts.isIdentifier(node.tagName) && RAW_CONTROLS.has(node.tagName.text)) {
       const tag = node.tagName.text;
       const hidden = tag === "input" && node.attributes.properties.some(property => ts.isJsxAttribute(property) && property.name.getText(source) === "type" && property.initializer && ts.isStringLiteral(property.initializer) && ["hidden", "file"].includes(property.initializer.text));
       if (!hidden) {
@@ -167,10 +160,6 @@ function inspectSource(file, text) {
   return facts;
 }
 
-const LEGACY_THEME = /(?<![-\w])atmo[-_ ]?(onyx|heritage)\b/giu;
-function legacyThemeMentions(text) {
-  return [...text.matchAll(LEGACY_THEME)].map(match => ({ name: `Atmo-${match[1][0].toUpperCase()}${match[1].slice(1).toLowerCase()}`, line: lineOf(text, match.index) }));
-}
 function colourLiterals(css) {
   // Comments are not paint; strip them before counting.
   const stripped = css.replace(/\/\*[\s\S]*?\*\//gu, match => match.replace(/[^\n]/gu, " "));
@@ -205,90 +194,143 @@ export function collectSdkTokens(sdkRoot) {
   return tokens;
 }
 function unknownTokenUses(text, known) {
-  const unknown = new Map();
+  const unknown = [];
   for (const match of text.matchAll(TOKEN_USE)) {
     if (known.has(match[1])) continue;
-    unknown.set(match[1], unknown.get(match[1]) ?? lineOf(text, match.index));
+    unknown.push([match[1], lineOf(text, match.index)]);
   }
   return unknown;
 }
 
-/**
- * Audits application bundles for SynCloudOS idioms. `applications` are
- * `{ directory, bundleIdentifier }`; findings use `severity: "warning"`. With `sdkRoot`, uses of
- * `var(--nse-*)` that the installed SDK does not define are reported as `idiom.nse-token`.
- */
-export function auditSynWareIdioms({ root, applications, sdkRoot }) {
-  const findings = [], summary = [], stylesheets = new Set(), scanned = new Set();
-  const at = (file, line, rule, message) => findings.push({ file: slash(relative(root, file)), line, rule, severity: "warning", message });
+/** Actual comments only: a directive affects its own line or the immediately following line. */
+function optOutComments(file, text) {
+  const comments = [], seen = new Set();
+  const add = (pos, end) => {
+    if (seen.has(pos)) return;
+    seen.add(pos);
+    const comment = text.slice(pos, end);
+    if (!/^\/\/\s*syncloudos-allow\b/u.test(comment)) return;
+    const match = /^\/\/\s*syncloudos-allow\s+([^: \r\n]+)\s*(?::(.*))?$/u.exec(comment);
+    const rule = match?.[1] ?? "";
+    const reason = match?.[2]?.trim() ?? "";
+    comments.push({ line: lineOf(text, pos), rule, reason, valid: /^idiom\.[a-z0-9-]+$/u.test(rule) && reason.length > 0, suppressed: 0 });
+  };
+  if (file.endsWith(".css")) {
+    // CSS comments use the same directive text, with // inside a block comment.
+    for (const match of text.matchAll(/\/\*([\s\S]*?)\*\//gu)) {
+      const body = match[1].trim();
+      if (body.startsWith("// syncloudos-allow")) {
+        const offset = match.index + match[0].indexOf("//");
+        add(offset, offset + body.length);
+      }
+    }
+  } else {
+    const source = parse(file, text);
+    const visit = node => {
+      for (const range of [...(ts.getLeadingCommentRanges(text, node.pos) ?? []), ...(ts.getTrailingCommentRanges(text, node.end) ?? [])])
+        if (range.kind === ts.SyntaxKind.SingleLineCommentTrivia) add(range.pos, range.end);
+      ts.forEachChild(node, visit);
+    };
+    visit(source);
+    for (const range of ts.getLeadingCommentRanges(text, 0) ?? []) if (range.kind === ts.SyntaxKind.SingleLineCommentTrivia) add(range.pos, range.end);
+  }
+  return comments.sort((a, b) => a.line - b.line);
+}
+
+/** Audit app, Webspring and host module graphs without executing project code. */
+export function auditSynWareIdioms({ root, applications, sdkRoot, entries = [] }) {
+  const findings = [], summary = [], scanned = new Set(), rendererExemptions = [], optOuts = [];
+  const sources = new Map(), directives = new Map(), emitted = new Set();
+  const read = file => {
+    if (!sources.has(file)) {
+      const text = readFileSync(file, "utf8");
+      sources.set(file, text);
+      const items = optOutComments(file, text);
+      directives.set(file, items);
+      for (const item of items) {
+        optOuts.push({ file: slash(relative(root, file)), ...item });
+        if (!item.valid) findings.push({ file: slash(relative(root, file)), line: item.line, rule: "idiom.opt-out", severity: "error", message: "An opt-out requires // syncloudos-allow <rule-id>: <reason>; provide a non-blank reason and an idiom rule id." });
+      }
+    }
+    return sources.get(file);
+  };
+  const at = (file, line, rule, message, severity = "warning") => {
+    const key = `${file}:${line}:${rule}:${message}`;
+    if (emitted.has(key)) return;
+    emitted.add(key);
+    const directive = directives.get(file)?.find(item => item.valid && item.rule === rule && (item.line === line || item.line + 1 === line));
+    if (directive) {
+      directive.suppressed++;
+      optOuts.find(item => item.file === slash(relative(root, file)) && item.line === directive.line && item.rule === rule).suppressed++;
+      return;
+    }
+    findings.push({ file: slash(relative(root, file)), line, rule, severity, message });
+  };
+  const inspectFile = file => {
+    if (scanned.has(file)) return;
+    scanned.add(file);
+    const text = read(file);
+    if (STYLE.includes(extname(file))) return;
+    if (rendererOwnedSource(text)) { rendererExemptions.push(slash(relative(root, file))); return; }
+    for (const finding of [...inspectIdiomErrors({ file, text, sdkRoot }), ...inspectIdiomWarnings({ file, text, sdkRoot })])
+      at(file, finding.line, finding.rule, finding.message, finding.severity);
+    const facts = inspectSource(file, text);
+    for (const { api, line } of facts.unmanaged) {
+      const replacement = api === "requestAnimationFrame" ? "NSEViewController.fx.animation.manageDisplayLink (or manageRenderer)"
+        : api === "new ResizeObserver" ? "NSEViewController.fx.animation.manageDisplayLink with drawableSizeDidChange"
+        : api === "new Worker" ? "managedTask"
+        : "NSEViewController outlets";
+      at(file, line, "idiom.managed-lifecycle", `${api} inside a React effect. Use ${replacement} from @syndromatic/syncloudos/nse to bind resources to the view lifetime.`);
+    }
+    for (const line of facts.preferenceWrites)
+      at(file, line, "idiom.document-state", "This preference holds a structured list or record. Keep primary user work in workspaceDocuments through SCOS from @syndromatic/syncloudos; use NSEUserDefaults from @syndromatic/syncloudos/foundation for small settings.");
+  };
   for (const application of applications) {
     const entry = resolve(application.directory, "Contents/index.tsx");
     if (!existsSync(entry)) continue;
     const files = collectLocalModuleGraph(entry, root);
-    const report = { bundleIdentifier: application.bundleIdentifier, filesScanned: files.length, classAuthoring: false, stateHooks: 0, rawControls: 0, legacyThemeMentions: 0, unmanagedLifecycle: 0, preferenceDocumentWrites: 0 };
+    const report = { bundleIdentifier: application.bundleIdentifier, filesScanned: files.length, classAuthoring: false, stateHooks: 0, rawControls: 0, unmanagedLifecycle: 0, preferenceDocumentWrites: 0 };
     let functionRoot = false;
     for (const file of files) {
-      const text = readFileSync(file, "utf8");
-      scanned.add(file);
-      for (const mention of legacyThemeMentions(text)) {
-        report.legacyThemeMentions++;
-        at(file, mention.line, "idiom.atmo-appearance", `${mention.name} is an obsolete raster theme and must not be used, including as a dark mode. Use Atmo, the vector theme SynCloudOS ships, which supports light and dark colour schemes itself; select the scheme with colourScheme rather than a different theme.`);
+      const text = read(file);
+      if (!STYLE.includes(extname(file))) {
+        const facts = inspectSource(file, text);
+        report.classAuthoring ||= facts.nseApplication;
+        report.stateHooks += facts.stateHooks;
+        if (!rendererOwnedSource(text)) {
+          report.rawControls += [...facts.rawControls.values()].reduce((sum, item) => sum + item.count, 0);
+          report.unmanagedLifecycle += facts.unmanaged.length;
+          report.preferenceDocumentWrites += facts.preferenceWrites.length;
+        }
+        if (file === entry && facts.functionDefaultExport) functionRoot = true;
       }
-      if (STYLE.includes(extname(file))) { stylesheets.add(file); continue; }
-      const facts = inspectSource(file, text);
-      report.classAuthoring ||= facts.nseApplication;
-      report.stateHooks += facts.stateHooks;
-      if (file === entry && facts.functionDefaultExport) functionRoot = true;
-      for (const [tag, { count, line }] of facts.rawControls) {
-        report.rawControls += count;
-        at(file, line, "idiom.nse-controls", `${count} raw <${tag}> element${count === 1 ? "" : "s"}. Use ${NSE_CONTROL_REPLACEMENTS[tag]} so the control gets Atmo's appearance, light and dark, focus, keyboard, accessibility and responder-chain actions.`);
-      }
-      for (const { api, line } of facts.unmanaged) {
-        report.unmanagedLifecycle++;
-        const replacement = api === "requestAnimationFrame" ? "this.fx.animation.manageDisplayLink(outlet) (or manageRenderer for AFX layers), which pauses while the view is hidden or off screen and follows reduced motion"
-          : api === "new ResizeObserver" ? "the drawableSizeDidChange option of this.fx.animation.manageDisplayLink, or an @outlet with NSE layout"
-          : api === "new Worker" ? "managedTask(this, { lifetime, policy: \"latest\" }) on a view controller, which cancels superseded work and ends with the view"
-          : "an @outlet on a view controller, whose activity already tracks visibility";
-        at(file, line, "idiom.managed-lifecycle", `${api} inside a React effect. Use ${replacement}.`);
-      }
-      for (const line of facts.preferenceWrites) {
-        report.preferenceDocumentWrites++;
-        at(file, line, "idiom.document-state", "This preference holds a structured value (a list or record, through preferences.set, setJSON or a list- or record-typed NSEPreferenceDescriptor). Preferences are for small settings; keep primary application state (simulations, records, user work) in a document type with workspaceDocuments, which provides saving, undo and autosave.");
-      }
+      inspectFile(file);
     }
-    if (!report.classAuthoring) {
-      report.classAuthoring = false;
-      at(entry, 1, "idiom.cocoa-class-authoring", `${functionRoot ? "The application default-exports a function component instead of an NSEApplication subclass" : "The application has no NSEApplication subclass"}${report.stateHooks ? `, and its code keeps state in ${report.stateHooks} useState/useReducer hook${report.stateHooks === 1 ? "" : "s"}` : ""}. Default-export an NSEApplication subclass whose NSEViewController holds @observable state, exposes bind() bindings and @action methods, and renders NSE controls; see docs/framework/cocoa-authoring.md.`);
-    }
+    if (!report.classAuthoring) at(entry, 1, "idiom.cocoa-class-authoring", `${functionRoot ? "The application default-exports a function component" : "The application has no NSEApplication subclass"}${report.stateHooks ? `, with ${report.stateHooks} useState/useReducer hooks` : ""}. Prefer NSEApplication from @syndromatic/syncloudos and NSEViewController from @syndromatic/syncloudos/nse with observable state, bindings and actions; see docs/framework/cocoa-authoring.md.`);
     summary.push(report);
   }
-  // Stylesheets are often imported by the host entry rather than the bundle, so
-  // every project stylesheet is checked once, in addition to those reached above.
-  const stylesheetReport = { scanned: 0, colourLiterals: 0, legacyThemeMentions: 0, unknownTokens: 0 };
+  for (const entry of entries) if (existsSync(entry)) for (const file of collectLocalModuleGraph(entry, root)) inspectFile(file);
+  const stylesheets = new Set([...scanned].filter(file => STYLE.includes(extname(file))));
+  for (const file of collectProjectStylesheets(root)) { stylesheets.add(file); read(file); }
+  const stylesheetReport = { scanned: stylesheets.size, colourLiterals: 0, unknownTokens: 0 };
   const known = collectSdkTokens(sdkRoot);
-  if (known) {
-    // The project's own --nse-* definitions are not unknown either.
-    const files = new Set([...scanned, ...stylesheets, ...collectProjectStylesheets(root)]);
-    const local = new Set();
-    for (const file of files) for (const match of readFileSync(file, "utf8").matchAll(TOKEN_DEFINITION)) local.add(match[1]);
-    for (const file of files) {
-      const unknown = unknownTokenUses(readFileSync(file, "utf8"), { has: token => known.has(token) || local.has(token) });
-      if (unknown.size === 0) continue;
-      stylesheetReport.unknownTokens += unknown.size;
-      const names = [...unknown.keys()];
-      at(file, [...unknown.values()][0], "idiom.nse-token", `${names.length} --nse-* token${names.length === 1 ? "" : "s"} the installed SDK does not define: ${names.slice(0, 8).join(", ")}${names.length > 8 ? ", ..." : ""}. An undefined token falls back to its var() fallback or the property's initial value, so it never follows Atmo. Use the documented tokens in docs/framework/appearance.md (--nse-app-foreground-secondary, --nse-app-surface, --nse-app-separator, --nse-app-accent and the rest of the --nse-app-* colours), which every theme defines for light and dark, or mix a tint from one of them with color-mix().`);
-    }
+  const local = new Set();
+  for (const file of new Set([...scanned, ...stylesheets])) for (const match of read(file).matchAll(TOKEN_DEFINITION)) local.add(match[1]);
+  if (known) for (const file of new Set([...scanned, ...stylesheets])) {
+    const unknown = unknownTokenUses(read(file), { has: token => known.has(token) || local.has(token) });
+    stylesheetReport.unknownTokens += unknown.length;
+    for (const [name, line] of unknown) at(file, line, "idiom.nse-token", `The installed SDK does not define: ${name}. Use the neutral --nse-app-* semantic values described by NSEAppearanceDefinition from @syndromatic/syncloudos/nse, or supply this value in your own theme; see docs/framework/appearance.md.`);
   }
-  for (const file of new Set([...stylesheets, ...collectProjectStylesheets(root)])) {
-    const text = readFileSync(file, "utf8");
-    stylesheetReport.scanned++;
-    if (!scanned.has(file)) for (const mention of legacyThemeMentions(text)) {
-      stylesheetReport.legacyThemeMentions++;
-      at(file, mention.line, "idiom.atmo-appearance", `${mention.name} is an obsolete raster theme and must not be used, including as a dark mode. Use Atmo, the vector theme SynCloudOS ships, which supports light and dark colour schemes itself.`);
-    }
-    const lines = colourLiterals(text);
-    stylesheetReport.colourLiterals += lines.length;
-    if (lines.length >= COLOUR_LITERAL_THRESHOLD) at(file, lines[0], "idiom.atmo-appearance", `This stylesheet hard-codes ${lines.length} colour literals. Atmo, the default vector theme, already draws NSE controls and window chrome in light and dark; use NSE controls and semantic tokens (var(--nse-*)), and respond to [data-mode="dark"] only where your own content needs it, instead of a parallel palette.`);
+  for (const file of stylesheets) {
+    const text = read(file);
+    stylesheetReport.colourLiterals += colourLiterals(text).length;
+    for (const finding of inspectStyleErrors({ file, text, sdkRoot })) at(file, finding.line, finding.rule, finding.message, finding.severity);
   }
-  return { findings, idiomAudit: { applications: summary, stylesheets: stylesheetReport, warnings: findings.length } };
+  for (const finding of inspectUnusedResources({ root, applications, files: [...scanned, ...stylesheets] })) {
+    const file = resolve(root, finding.file);
+    at(file, finding.line, finding.rule, finding.message, finding.severity);
+  }
+  const errors = findings.filter(item => item.severity === "error").length;
+  const warnings = findings.filter(item => item.severity === "warning").length;
+  return { findings, idiomAudit: { applications: summary, stylesheets: stylesheetReport, errors, warnings, idiomatic: errors === 0 && warnings === 0, optOuts, rendererExemptions } };
 }

@@ -30,7 +30,7 @@ try {
   client=new Client({name:"installed-consumer-smoke",version:"1.0.0"});
   await client.connect(transport);
   const listed=await client.listTools();
-  assert.deepEqual(listed.tools.map(tool=>tool.name).sort(),["explain_error","inspect_project","lookup_sdk","scaffold","validate"]);
+  assert.deepEqual(listed.tools.map(tool=>tool.name).sort(),["explain_error","inspect_project","lookup_sdk","scaffold","scaffold_theme","validate","validate_theme"]);
   async function call(name,input={}) {
     const response=await client.callTool({name,arguments:input});
     assert(!response.isError,JSON.stringify(response));
@@ -67,10 +67,25 @@ try {
   // The packed class scaffold is idiomatic: no idiom.* warnings against the real installed SDK.
   assert.equal(checked.idiomAudit.warnings,0,JSON.stringify(checked.findings));
   assert.equal(checked.idiomAudit.applications[0].classAuthoring,true);
+  const theme=await call("scaffold_theme",{name:"Independent",directory:"src/Themes/Independent"});
+  assert(theme.createdPaths.length>=3,JSON.stringify(theme));
+  const themeChecked=await call("validate_theme",{path:"src/Themes/Independent"});
+  assert.equal(themeChecked.ok,true,JSON.stringify(themeChecked));
+  const view=resolve(consumer.root,"src/SynWare/Hello.app/Contents/Views/SearchView.tsx");
+  const originalView=readFileSync(view,"utf8");
+  writeFileSync(view,originalView+"\nconst invalidControl = <button>Save</button>;\n");
+  const misuse=await call("validate",{typescript:false,launch:false});
+  assert.equal(misuse.ok,false,JSON.stringify(misuse));
+  assert(misuse.findings.some(item=>item.rule==="idiom.nse-controls" && item.severity==="error"));
+  writeFileSync(view,originalView+"\n// syncloudos-allow idiom.nse-controls: packed opt-out acceptance\nconst nativeBridge = <button>Save</button>;\n");
+  const allowed=await call("validate",{typescript:false,launch:false});
+  assert.equal(allowed.ok,true,JSON.stringify(allowed));
+  assert(allowed.idiomAudit.optOuts.some(item=>item.reason==="packed opt-out acceptance" && item.suppressed>0));
+  writeFileSync(view,originalView);
   const explained=await call("explain_error",{query:"NSE_CONTROLLER_DISPOSED"});
   assert.equal(explained.matches[0].code,"NSE_CONTROLLER_DISPOSED");
   assert.equal(stderr,"");
-  process.stdout.write(JSON.stringify({ok:true,sdkVersion:companion.version,tools:listed.tools.map(tool=>tool.name),archive:companion.archive,checks:["independent SDK tgz install","independent MCP tgz install","stdio listTools","inspect_project receipt","lookup_sdk installed declarations and docs","scaffold -> validate including tsc --noEmit and a jsdom launch","explain_error canonical code"]},null,2)+"\n");
+  process.stdout.write(JSON.stringify({ok:true,sdkVersion:companion.version,tools:listed.tools.map(tool=>tool.name),archive:companion.archive,checks:["independent SDK tgz install","independent MCP tgz install","stdio listTools","inspect_project receipt","lookup_sdk installed declarations and docs","scaffold -> validate including tsc --noEmit and a jsdom launch","explain_error canonical code","custom theme scaffold and validation","authoring error fails validate","reasoned inline opt-out"]},null,2)+"\n");
 } finally {
   await client?.close();
   rmSync(consumer.root,{recursive:true,force:true});
