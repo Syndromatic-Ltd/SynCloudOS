@@ -33,14 +33,14 @@ export function LoadingSpinner({
   variant?: LoadingSpinnerVariant;
   className?: string;
 }) {
-  const normalizedVariant = variant === "light" ? "light" : "dark";
-  const classes = ["nse-loading-spinner", `nse-loading-spinner--${normalizedVariant}`, className]
+  const normalisedVariant = variant === "light" ? "light" : "dark";
+  const classes = ["nse-loading-spinner", `nse-loading-spinner--${normalisedVariant}`, className]
     .filter(Boolean)
     .join(" ");
 
   return (
-    <span className={classes} role="status" aria-label={ariaLabel ?? label}>
-      <span className="nse-loading-spinner-sprite" aria-hidden="true" />
+    <span data-nse-control="progress-indicator" data-nse-part="content" data-nse-role="status" data-nse-style="spinning" data-nse-control-size="regular" data-nse-fill="false" data-nse-background-style={normalisedVariant === "light" ? "emphasised" : "normal"} className={classes} role="status" aria-label={ariaLabel ?? label}>
+      <span data-nse-part="image" className="nse-loading-spinner-sprite" aria-hidden="true" />
     </span>
   );
 }
