@@ -1,0 +1,14 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-theme-system-control-coverage.test.tsx tests/runtime/nse-theme-hook-coverage.test.tsx tests/runtime/nse-theme-menu-hook-coverage.test.tsx tests/runtime/nse-theme-panel-hook-coverage.test.tsx tests/nse/controls
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+
+ Test Files  14 passed (14)
+      Tests  800 passed (800)
+   Start at  21:18:00
+   Duration  22.96s (transform 14.08s, setup 149ms, import 26.16s, tests 5.17s, environment 10.15s)
