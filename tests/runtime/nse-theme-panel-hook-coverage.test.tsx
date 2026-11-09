@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import React from "react";
+import { additionalThemeCatalogue } from "../e2e/fixtures/theme-additional/catalogue";
 import { act, cleanup, fireEvent, render, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { themeBaselineCatalogue } from "../e2e/fixtures/theme-baseline/catalogue";
@@ -14,6 +15,12 @@ const parts = new Set<string>(nseThemeParts);
 const presentation = createStaticPresentationPort({ width: 1000, height: 800, reducedMotion: true });
 function SurfaceHost({ children }: { children: React.ReactNode }) { return <NSEAppearanceProvider appearance={atmoAppearance} colourScheme="light"><NSEStandaloneControlHost document={document} window={window} presentation={presentation}>{children}</NSEStandaloneControlHost></NSEAppearanceProvider>; }
 describe("date, panel and window theme hooks", () => {
+  for (const surface of additionalThemeCatalogue.filter(surface => surface.id.startsWith("date-picker-"))) it(`AppKit metadata: ${surface.id}`, () => {
+    const view = render(<SurfaceHost>{surface.render("light")}</SurfaceHost>);
+    const root = view.container.querySelector<HTMLElement>('[data-nse-control="date-picker"]')!;
+    expect(root.dataset.nseDatePickerMode).toBe(surface.id.includes("-range-") ? "range" : "single");
+    expect(root.dataset.nseDatePickerElements).toBe(surface.id.includes("-combined-") ? "yearMonthDay hourMinute" : "yearMonthDay");
+  });
   it("publishes date pointer and keyboard-focus drawing state", () => {
     const surface = themeBaselineCatalogue.find(surface => surface.id === "date-picker-textFieldAndStepper-enabled")!;
     const view = render(<SurfaceHost>{surface.render()}</SurfaceHost>);
@@ -41,7 +48,8 @@ describe("date, panel and window theme hooks", () => {
       }
       if (surface.id.startsWith("date-picker-") || surface.id.startsWith("time-picker-")) {
         expect(root.dataset.nseDatePickerStyle).toBe(surface.id.split("-")[2]);
-        expect(root.dataset.nsePickerMode).toBe(surface.id.startsWith("time-") ? "time" : "date");
+        expect(root.dataset.nseDatePickerMode).toBe("single");
+        expect(root.dataset.nseDatePickerElements).toBe(surface.id.startsWith("time-") ? "hourMinute" : "yearMonthDay");
       }
       for (const part of root.querySelectorAll<HTMLElement>("[data-nse-part]")) expect(parts.has(part.dataset.nsePart!), part.dataset.nsePart).toBe(true);
       if (surface.id.endsWith("disabled")) expect(root.dataset.nseEnabled).toBe("false");

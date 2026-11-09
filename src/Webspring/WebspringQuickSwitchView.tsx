@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { nseControlHooks } from "../NSE/Theme/contract/hooks";
+import { useNSEThemeInteraction } from "../NSE/Theme/contract/useThemeInteraction";
 import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ComponentProps, type KeyboardEvent as ReactKeyboardEvent, type RefObject } from "react";
 import {
@@ -253,7 +255,7 @@ export function WebspringQuickSwitchView({
         <QuickSwitchSurface
           surfaceRef={rootRef}
           motion={reducedMotion ? quickSwitchMotion.reduced : quickSwitchMotion.standard}
-          className="webspring-quickswitch"
+          data-nse-control="quick-switch" data-nse-part="background" className="webspring-quickswitch"
           role="dialog"
           aria-label={locale.t("quickswitch.ariaLabel", "QuickSwitch")}
           aria-modal="false"
@@ -262,13 +264,13 @@ export function WebspringQuickSwitchView({
           style={{ ["--webspring-quickswitch-items" as string]: apps.length, ["--webspring-quickswitch-fit" as string]: fit }}
           data-overflow={overflow}
         >
-          <div className="webspring-quickswitch-strip" aria-hidden="true">
-            <span className="webspring-quickswitch-cap webspring-quickswitch-cap-left" />
-            <span className="webspring-quickswitch-middle" />
-            <span className="webspring-quickswitch-cap webspring-quickswitch-cap-right" />
+          <div data-nse-part="bezel" className="webspring-quickswitch-strip" aria-hidden="true">
+            <span data-nse-part="leading" className="webspring-quickswitch-cap webspring-quickswitch-cap-left" />
+            <span data-nse-part="background" className="webspring-quickswitch-middle" />
+            <span data-nse-part="trailing" className="webspring-quickswitch-cap webspring-quickswitch-cap-right" />
           </div>
           <div
-            className="webspring-quickswitch-items"
+            data-nse-part="content" className="webspring-quickswitch-items"
             role="listbox"
             aria-label={locale.t("quickswitch.visibleApps", "Visible Webspring apps")}
             aria-activedescendant={activeOptionId}
@@ -286,7 +288,7 @@ export function WebspringQuickSwitchView({
               const appName = locale.appName(app);
 
               return (
-                <button
+                <QuickSwitchItem selected={selected}
                   type="button"
                   key={app.bundleIdentifier}
                   id={`${quickSwitchId}-${app.bundleIdentifier}`}
@@ -327,7 +329,7 @@ export function WebspringQuickSwitchView({
                     ) : null}
                     <Badge count={app.notifications.badgeCount} />
                   </IconWell>
-                </button>
+                </QuickSwitchItem>
               );
             })}
           </div>
@@ -336,6 +338,11 @@ export function WebspringQuickSwitchView({
       ) : null}
     </NSEPresence>
   );
+}
+
+function QuickSwitchItem({ selected, ...attributes }: ComponentProps<"button"> & { selected: boolean }) {
+  const drawing = useNSEThemeInteraction<HTMLButtonElement>(!attributes.disabled, true, attributes);
+  return <button {...attributes} {...drawing.events} {...nseControlHooks({ control: "app-icon", selected, enabled: !attributes.disabled, highlighted: drawing.highlighted, focused: drawing.focused, hovered: drawing.hovered })} data-nse-part="cell" />;
 }
 
 function QuickSwitchSurface({ surfaceRef, motion, ...props }: ComponentProps<"div"> & {

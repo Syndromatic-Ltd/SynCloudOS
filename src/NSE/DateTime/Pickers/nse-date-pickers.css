@@ -18,19 +18,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-[data-nse-control="date-picker"]:where([data-nse-picker-mode="date"]:not([data-nse-date-picker-style="clockAndCalendar"])) > input[type="text"] { min-block-size: 29px; }
-[data-nse-control="date-picker"]:where([data-nse-picker-mode="date-time"]), [data-nse-control="date-picker"]:where([data-nse-picker-mode="date-range"]) { display: grid; gap: 8px; }
+[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]) > input[type="text"] { min-block-size: 29px; }
+[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]), [data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"]) { display: grid; gap: 8px; }
 
 /*
  * AppearanceAuthority removes UA chrome from the named leak slice. A surface only gains a
  * visual recipe when its source decision resolves; these neutral declarations
  * never stand in for an authority record.
  */
-[data-nse-control="date-picker"]:where([data-nse-picker-mode="date"]:not([data-nse-date-picker-style="clockAndCalendar"])) > input[type="text"],
-[data-nse-control="date-picker"]:where([data-nse-picker-mode="date"]:not([data-nse-date-picker-style="clockAndCalendar"])) > button,
-[data-nse-control="date-picker"]:where([data-nse-picker-mode="date-time"]) input[type="text"],
-[data-nse-control="date-picker"]:where([data-nse-picker-mode="date-time"]) select,
-[data-nse-control="date-picker"]:where([data-nse-picker-mode="time"]) > button {
+[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]) > input[type="text"],
+[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]) > button,
+[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]) input[type="text"],
+[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]) select,
+[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]) > button {
   appearance: none;
   -webkit-appearance: none;
   background: transparent;

@@ -26,14 +26,14 @@ export function SCOSAlertPresenter({ center, appearance: requestedAppearance, pr
     <NSEAlertBackdrop presentation={presentation} onSafeDismiss={() => center.dismiss(current.id)}>
       <NSEAlertSurface appearance={appearance} labelledBy={titleId} describedBy={current.message ? messageId : undefined} initialFocusSelector="[data-scos-alert-primary]">
         {/* Without an icon the copy would otherwise sit in the alert's fixed icon column. */}
-        <div className={`nse-system-alert-content${current.iconUrl ? "" : " nse-confirm-content-textonly"}`}>
-          {current.iconUrl ? <img className="syncloudos-alert-logo" src={current.iconUrl} alt="" /> : null}
-          <div className="nse-system-alert-copy">
-            <h2 id={titleId}>{current.title}</h2>
-            {current.message ? <p id={messageId}>{current.message}</p> : null}
+        <div data-nse-part="content" className={`nse-system-alert-content${current.iconUrl ? "" : " nse-confirm-content-textonly"}`}>
+          {current.iconUrl ? <img data-nse-part="image" className="syncloudos-alert-logo" src={current.iconUrl} alt="" /> : null}
+          <div data-nse-part="content" className="nse-system-alert-copy">
+            <h2 data-nse-part="title" id={titleId}>{current.title}</h2>
+            {current.message ? <p data-nse-part="label" id={messageId}>{current.message}</p> : null}
           </div>
         </div>
-        <div className="nse-alert-actions">
+        <div data-nse-part="actions" className="nse-alert-actions">
           {current.buttons.map(button => <NSEButton
             title={button.label}
             hasDestructiveAction={button.role === "destructive"}

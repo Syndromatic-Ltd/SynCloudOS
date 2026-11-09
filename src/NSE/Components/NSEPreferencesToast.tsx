@@ -102,7 +102,7 @@ function PreferencesVeil() {
 function PaneTitle({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLSpanElement>(null);
   useNSEPresentation(ref, usePreferencesTransitions().title(useContext(PaneDirectionContext)));
-  return <span ref={ref} className="nse-prefs-title">{children}</span>;
+  return <span ref={ref} data-nse-part="title" className="nse-prefs-title">{children}</span>;
 }
 
 /** A pane, pushed in and popped out as the stack moves. */
@@ -110,14 +110,14 @@ function PaneSlide({ children }: { children: ReactNode }) {
   const exiting = useNSEPresenceExiting();
   const ref = useRef<HTMLDivElement>(null);
   useNSEPresentation(ref, usePreferencesTransitions().pane(useContext(PaneDirectionContext)));
-  return <div ref={ref} className="nse-prefs-pane" inert={exiting || undefined} aria-hidden={exiting || undefined}>{children}</div>;
+  return <div ref={ref} data-nse-part="content" className="nse-prefs-pane" inert={exiting || undefined} aria-hidden={exiting || undefined}>{children}</div>;
 }
 
 function BackSlot({ children }: { children: ReactNode }) {
   const exiting = useNSEPresenceExiting();
   const ref = useRef<HTMLSpanElement>(null);
   useNSEPresentation(ref, usePreferencesTransitions().back);
-  return <span ref={ref} className="nse-prefs-back-slot" inert={exiting || undefined} aria-hidden={exiting || undefined}>{children}</span>;
+  return <span ref={ref} data-nse-part="leading" className="nse-prefs-back-slot" inert={exiting || undefined} aria-hidden={exiting || undefined}>{children}</span>;
 }
 
 /** The panel's body, at the height of the pane it shows, springing between
@@ -133,7 +133,7 @@ function PreferencesBody({ height, children }: { height: number | null; children
       tracks: [{ keyPath: "height", values: [Number(previous), height] }],
     },
   });
-  return <div ref={ref} className="nse-prefs-body" style={{ height: height ?? "auto" }}>{children}</div>;
+  return <div ref={ref} data-nse-part="content" className="nse-prefs-body" style={{ height: height ?? "auto" }}>{children}</div>;
 }
 
 /** The panel itself, gliding up from the lower screen. */
@@ -276,7 +276,7 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
           <PreferencesVeil />
           <PreferencesPanel
             panelRef={dialogRef}
-            className="nse-prefs-toast"
+            data-nse-control="panel" data-nse-part="background" data-nse-style="preferences" className="nse-prefs-toast"
             role="dialog"
             aria-modal="true"
             aria-label={typeof (active?.label ?? title) === "string" ? (active?.label ?? title) as string : undefined}
@@ -299,7 +299,7 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                 // Clipped and relatively positioned so the two titles can pass
                 // through each other without either escaping the plate or
                 // changing the header's height while it happens.
-                <span className="nse-prefs-title-clip">
+                <span data-nse-part="header" className="nse-prefs-title-clip">
                   <NSEPresence initial={false}>
                     <PaneTitle key={active ? active.id : "__root"}>
                       {active ? active.label : title}
@@ -329,39 +329,39 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                   in one grid cell. Waiting made the swap a two-beat — content
                   changed, THEN the box resized — and doubled how long the whole
                   move took. */}
-              <div className="nse-prefs-panes">
+              <div data-nse-part="content" className="nse-prefs-panes">
                 <NSEPresence initial={false}>
                 <PaneSlide key={active ? active.id : "__list"}>
-                  <div className="nse-prefs-pane-content" ref={trackContent}>
+                  <div data-nse-part="content" className="nse-prefs-pane-content" ref={trackContent}>
                   {active ? active.render() : (
-                    <div className="nse-prefs-list">
+                    <div data-nse-part="content" className="nse-prefs-list">
                       {panes.map((pane) => (
                         <NSEListItem
                           key={pane.id}
                           leading={pane.icon}
                           meta={pane.meta}
                           trailing={(
-                            <span className="nse-prefs-row-tail">
+                            <span data-nse-part="trailing" className="nse-prefs-row-tail">
                               {pane.accessory ? (
                                 // The switch is a control in its own right, not
                                 // part of the row's hit area — tapping it must
                                 // not also push the pane it belongs to.
                                 <span
-                                  className="nse-prefs-row-accessory"
+                                  data-nse-part="accessory" className="nse-prefs-row-accessory"
                                   onClick={(event) => event.stopPropagation()}
                                   onMouseDown={(event) => event.stopPropagation()}
                                 >
                                   {pane.accessory}
                                 </span>
                               ) : null}
-                              <span className="nse-prefs-chevron" aria-hidden="true"><NSEControlImage image={NSEImage.named(NSEImage.goForwardTemplateName)} /></span>
+                              <span data-nse-part="disclosure" className="nse-prefs-chevron" aria-hidden="true"><NSEControlImage image={NSEImage.named(NSEImage.goForwardTemplateName)} /></span>
                             </span>
                           )}
                           onClick={() => goToPane(pane.id)}
                         >
                           {/* Native keyboard activation bubbles through the same row action.
                               Accessories remain siblings, never children of this button. */}
-                          <button type="button" className="nse-prefs-pane-link">{pane.label}</button>
+                          <button type="button" data-nse-part="cell" className="nse-prefs-pane-link">{pane.label}</button>
                         </NSEListItem>
                       ))}
                     </div>

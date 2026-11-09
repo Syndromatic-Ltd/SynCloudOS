@@ -102,6 +102,8 @@ const cloneOf = (root: HTMLElement, half: "is-top" | "is-bottom") =>
 describe("Webspring folder split presentation", () => {
   it("copies the stage into both halves as it mounts, with no capture to wait for", () => {
     const { root } = renderSplit();
+    expect(root.dataset.nseControl).toBe("folder-presentation");
+    expect(root.dataset.nsePart).toBe("background");
 
     // The split never sits waiting for anything: it is at rest in the same
     // pass that mounts it, with both halves already filled.

@@ -109,7 +109,7 @@ export function NSEAlertBackdrop({
   return (
     <div
       ref={backdropRef}
-      className={["nse-control-alert-backdrop", className].filter(Boolean).join(" ")}
+      data-nse-control="system-alert" data-nse-part="backdrop" className={["nse-control-alert-backdrop", className].filter(Boolean).join(" ")}
       data-nse-overlay-region={region ? "true" : undefined}
       style={regionStyle}
       tabIndex={-1}

@@ -122,14 +122,14 @@ function ReturnDecisionDialog({
           describedBy={messageId}
           initialFocusSelector=".nse-return-keep"
         >
-          <div className="nse-system-alert-content nse-confirm-content-textonly">
-            <div className="nse-system-alert-copy">
-              <h2 id={titleId}>{title}</h2>
-              <p id={messageId}>{message}</p>
+          <div data-nse-part="content" className="nse-system-alert-content nse-confirm-content-textonly">
+            <div data-nse-part="content" className="nse-system-alert-copy">
+              <h2 data-nse-part="title" id={titleId}>{title}</h2>
+              <p data-nse-part="label" id={messageId}>{message}</p>
               {error ? <p role="alert">{error}</p> : null}
             </div>
           </div>
-          <div className="nse-alert-actions">
+          <div data-nse-part="actions" className="nse-alert-actions">
             <NSEButton
               hasDestructiveAction
               title={quitLabel}

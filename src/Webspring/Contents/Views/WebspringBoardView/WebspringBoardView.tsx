@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { nseControlHooks } from "../../../../NSE/Theme/contract/hooks";
+import { useNSEThemeInteraction } from "../../../../NSE/Theme/contract/useThemeInteraction";
 import { normalizeBundleIdentifier } from "../../../../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { WebspringLaunchDim } from "../../../WebspringLaunchDim";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent, type ReactNode, type TransitionEvent } from "react";
@@ -75,7 +77,7 @@ function BoardIconArtwork({ index, total, state, exit, children }: {
     exitDuration: webspringBoardLaunchTiming.iconExitDuration, exitStagger: 0,
   });
   useNSEPresentation(ref, presentation);
-  return <span ref={ref} className="webspring-board-icon-artwork" style={presentation.style}>{children}</span>;
+  return <span ref={ref} data-nse-part="image" className="webspring-board-icon-artwork" style={presentation.style}>{children}</span>;
 }
 
 interface BoardEntryProps {
@@ -145,6 +147,7 @@ function BoardIcon({ app, opening, ...entry }: BoardEntryProps & {
 }) {
   const { model, actions, exit, reorderMotion, index } = entry;
   const disabled = app.state === "disabled";
+  const drawing = useNSEThemeInteraction<HTMLButtonElement>(!disabled, true);
   const interaction = useBoardEntryInteraction(normalizeBundleIdentifier(app.bundleIdentifier), app.displayName, disabled, entry);
   const loading = opening || app.state === "loading" || app.state === "launching" || normalizeBundleIdentifier(model.launchingAppId) === normalizeBundleIdentifier(app.bundleIdentifier);
   const { editing, dragging } = interaction;
@@ -154,6 +157,7 @@ function BoardIcon({ app, opening, ...entry }: BoardEntryProps & {
   // its slot moves at once.
   return <NSELayoutView className="webspring-board-slot" layoutTransition={dragging ? null : reorderMotion}><button
     type="button"
+    {...drawing.events} {...nseControlHooks({ control: "app-icon", enabled: !disabled, highlighted: drawing.highlighted, hovered: drawing.hovered, focused: drawing.focused, selected: editing && dragging, variants: { type: "application" } })} data-nse-part="content"
     className={`webspring-board-icon ${editing ? "is-editing" : ""} ${dragging ? "is-dragging" : ""} ${disabled ? "is-disabled" : ""}`}
     {...interaction.dataProps}
     aria-label={editing ? `Move ${app.displayName}` : `Open ${app.displayName}`}
@@ -172,12 +176,12 @@ function BoardIcon({ app, opening, ...entry }: BoardEntryProps & {
     onClick={() => { if (!disabled && !editing) void actions.openApp(app.bundleIdentifier, app.route); }}
   >
     <BoardIconArtwork index={index} total={model.items.length} state={boardIconState(model, exit)} exit={exit}>
-      <span className="webspring-board-icon-well" data-loading={loading ? "true" : undefined} data-drop-target={normalizeBundleIdentifier(model.folders.dropTargetId) === normalizeBundleIdentifier(app.bundleIdentifier) ? "true" : undefined}>
+      <span data-nse-part="bezel" className="webspring-board-icon-well" data-loading={loading ? "true" : undefined} data-drop-target={normalizeBundleIdentifier(model.folders.dropTargetId) === normalizeBundleIdentifier(app.bundleIdentifier) ? "true" : undefined}>
         {app.iconUrl ? <img src={app.iconUrl} alt="" aria-hidden="true" draggable={false} /> : <span aria-hidden="true">{app.displayName.slice(0, 1)}</span>}
         {loading ? <LoadingSpinner label={`Loading ${app.displayName}`} variant="dark" /> : null}
         <Badge count={app.badgeCount} label={app.badgeLabel} />
       </span>
-      <span className="webspring-board-icon-label">{app.displayName}</span>
+      <span data-nse-part="title" className="webspring-board-icon-label">{app.displayName}</span>
     </BoardIconArtwork>
   </button></NSELayoutView>;
 }
@@ -190,9 +194,11 @@ function BoardFolderIcon({ folder, onOpen, ...entry }: BoardEntryProps & {
   const interaction = useBoardEntryInteraction(folder.id, folder.title, false, entry);
   const { editing, dragging } = interaction;
   const open = model.folders.openFolderId === folder.id;
+  const drawing = useNSEThemeInteraction<HTMLButtonElement>(true, true);
 
   return <NSELayoutView className="webspring-board-slot" layoutTransition={dragging ? null : reorderMotion}><button
     type="button"
+    {...drawing.events} {...nseControlHooks({ control: "app-icon", highlighted: drawing.highlighted, hovered: drawing.hovered, focused: drawing.focused, selected: open || dragging, variants: { type: "folder" } })} data-nse-part="content"
     className={`webspring-board-icon is-folder ${editing ? "is-editing" : ""} ${dragging ? "is-dragging" : ""}`}
     {...interaction.dataProps}
     aria-label={editing ? `Move folder ${folder.title}` : `Open folder ${folder.title}`}
@@ -208,11 +214,11 @@ function BoardFolderIcon({ folder, onOpen, ...entry }: BoardEntryProps & {
     onClick={(event) => onOpen(folder, event.currentTarget)}
   >
     <BoardIconArtwork index={index} total={model.items.length} state={boardIconState(model, exit)} exit={exit}>
-      <span className="webspring-board-icon-well">
+      <span data-nse-part="bezel" className="webspring-board-icon-well">
         <WebspringFolderTile folder={folder} dropTarget={model.folders.dropTargetId === folder.id} />
         <Badge count={folder.badgeCount} />
       </span>
-      <span className="webspring-board-icon-label">{folder.title}</span>
+      <span data-nse-part="title" className="webspring-board-icon-label">{folder.title}</span>
     </BoardIconArtwork>
   </button></NSELayoutView>;
 }
@@ -583,7 +589,7 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
         boardElement.current = element;
         setStageElement(element);
       }}
-      className="webspring-board"
+      data-nse-control="board" data-nse-part="background" className="webspring-board"
       style={launcherStyle}
       data-launch-phase={model.launchPhase}
       data-entrance-phase={model.entrancePhase}
@@ -598,16 +604,16 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
       }}
     >
       <section
-        className="webspring-board-launcher"
+        data-nse-part="content" className="webspring-board-launcher"
         aria-label="Webspring"
         onPointerDownCapture={pointerDown}
       >
-        <div className="webspring-board-material" aria-hidden="true" onTransitionEnd={(event: TransitionEvent<HTMLDivElement>) => {
+        <div data-nse-part="background" className="webspring-board-material" aria-hidden="true" onTransitionEnd={(event: TransitionEvent<HTMLDivElement>) => {
           if (model.launchPhase === "returning" && event.target === event.currentTarget && event.propertyName === "transform") actions.completeReturnTrack("material");
         }} />
-        <header className="webspring-board-brand">
+        <header data-nse-part="header" className="webspring-board-brand">
           {model.branding.logoUrl
-            ? <img className="webspring-board-logo" src={model.branding.logoUrl} alt={model.branding.logoAlt} />
+            ? <img data-nse-part="image" className="webspring-board-logo" src={model.branding.logoUrl} alt={model.branding.logoAlt} />
             : <span>{model.branding.name}</span>}
         </header>
         <div className={`webspring-board-controls ${model.layout.editing ? "is-editing" : ""}`}>
@@ -630,18 +636,18 @@ function WebspringBoard({ model, actions, applicationOutlet, folderPresentation:
           ? "Hold an application to reorder. Rest it on another application or a folder to group them. Use arrow keys to move it. Press Escape when finished."
           : "Hold an application to reorder. Use arrow keys to move it. Press Escape when finished."}
       </p>
-      <section className="webspring-board-pages" style={pagesStyle} aria-label="Applications">
-        <div className="webspring-board-page" data-page={activePage}>
+      <section data-nse-part="content" className="webspring-board-pages" style={pagesStyle} aria-label="Applications">
+        <div data-nse-part="group" className="webspring-board-page" data-page={activePage}>
           {board.pages[activePage]?.map((item, index) => renderEntry(item, activePage * board.pageSize + index))}
         </div>
       </section>
-      {board.pages.length > 1 ? <nav className="webspring-board-page-controls" aria-label="Application pages">
+      {board.pages.length > 1 ? <nav data-nse-part="accessory" className="webspring-board-page-controls" aria-label="Application pages">
         {board.pages.map((_items, index) => <button key={index} type="button" aria-label={`Show application page ${index + 1}`} aria-current={index === activePage ? "page" : undefined} onClick={() => setPage(index)} onPointerEnter={() => { if (model.layout.draggingItemId) setPage(index); }} />)}
       </nav> : null}
       </section>
       {model.widgets.length > 0 ? <WebspringWidgetShelf entries={model.widgets} surface={model.background.shelf} /> : null}
       {openFolder && folderAnchor && stageElement ? <div
-        className="webspring-board-folder-layer"
+        data-nse-part="content" className="webspring-board-folder-layer"
         style={folderIconSize ? { "--webspring-board-icon-size": `${folderIconSize}px` } as CSSProperties : undefined}
         onPointerDownCapture={pointerDown}
       >

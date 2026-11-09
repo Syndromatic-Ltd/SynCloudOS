@@ -1,0 +1,2271 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-theme-system-surface-coverage.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+Not implemented: Window's getComputedStyle() method: with pseudo-elements
+Not implemented: Window's getComputedStyle() method: with pseudo-elements
+ ❯ tests/runtime/nse-theme-system-surface-coverage.test.tsx (10 tests | 10 failed) 10223ms
+     × login-window-normal 1079ms
+     × login-window-error 1013ms
+     × login-window-loading 1013ms
+     × about 1012ms
+     × confirm-dialog 1012ms
+     × settings 1019ms
+     × board 1037ms
+     × notifications 1017ms
+     × notification-centre 1012ms
+     × folder-presentation 1010ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-theme-system-surface-coverage.test.tsx > system surface theme hooks > login-window-normal
+AssertionError: login-window-normal: expected null not to be null
+
+Ignored nodes: comments, script, style
+<html>
+  <head />
+  <body>
+    <div>
+      <div
+        class="nse-appearance-provider"
+        data-mode="light"
+        data-nse-appearance="atmo"
+        data-nse-chrome="standard"
+        data-nse-colour-scheme-requested="light"
+        data-nse-colour-scheme-resolved="light"
+        data-nse-contrast="normal"
+        data-nse-transparency="normal"
+      >
+        <div
+          data-nse-overlay-provider="nse-overlay-provider:nse-standalone:1:_r_0_"
+          data-syncloudos-runtime-owner="nse-standalone:1"
+          style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px; display: contents;"
+        >
+          <div
+            aria-labelledby="nse-login-window-title"
+            aria-modal="true"
+            class="nse-login-window nse-login-window--atmoPlacard is-login-step-synId  "
+            data-sheen="enter"
+            role="dialog"
+          >
+            <span
+              aria-hidden="true"
+              class="nse-login-window-top-tack"
+            >
+              <img
+                alt=""
+                draggable="false"
+                src="http://localhost:3000/assets/nse/atmo/shell/login-window/HangElements/PinElements/TackTransparent.png?no-inline"
+              />
+              <img
+                alt=""
+                draggable="false"
+                src="http://localhost:3000/assets/nse/atmo/shell/login-window/HangElements/PinElements/TackWhite.png?no-inline"
+              />
+            </span>
+            <div
+              class="nse-login-window-swing-stage"
+            >
+              <div
+                aria-hidden="true"
+                class="nse-login-window-hang"
+              >
+                <div
+                  class="nse-login-window-hang-flipper"
+                >
+                  <img
+                    alt=""
+                    class="nse-login-window-rope-shadow"
+                    draggable="false"
+                    src="http://localhost:3000/assets/nse/atmo/shell/login-window/HangElements/Rope/rope%20shadow%20MERGED.png?no-inline"
+                  />
+                  <img
+                    alt=""
+                    class="nse-login-window-rope nse-login-window-rope-left"
+                    draggable="false"
+                    src="http://localhost:3000/assets/nse/atmo/shell/login-window/HangElements/Rope/RopeLeft.png?no-inline"
+                  />
+                  <img
+                    alt=""
+                    class="nse-login-window-rope nse-login-window-rope-right"
+                    draggable="false"
+                    src="http://localhost:3000/assets/nse/atmo/shell/login-window/HangElements/Rope/RopeRight.png?no-inline"
+                  />
+                </div>
+              </div>
+              <div
+                class="nse-login-window-shake-stage"
+              >
+                <div
+                  class="nse-login-window-card-stage"
+                >
+                  <div
+                    class="nse-login-window-card-flipper is-signin"
+                  >
+                    <img
+                      alt=""
+                      aria-hidden="true"
+                      class="nse-login-window-beta-ribbon"
+                      draggable="false"
+                      src="http://localhost:3000/assets/nse/atmo/shell/login-window/BETAbanner-topRight@2x.png?no-inline"
+                    />
+                    <img
+                      alt=""
+                      aria-hidden="true"
+                      class="nse-login-window-ring nse-login-window-ring-left"
+                      draggable="false"
+                      src="http://localhost:3000/assets/nse/atmo/shell/login-window/HangElements/RingEdge/left.png?no-inline"
+                    />
+                    <img
+                      alt=""
+                      aria-hidden="true"
+                      class="nse-login-window-ring nse-login-window-ring-right"
+                      draggable="false"
+                      src="http://localhost:3000/assets/nse/atmo/shell/login-window/HangElements/RingEdge/right.png?no-inline"
+                    />
+                    <section
+                      class="nse-login-window-card nse-login-window-face nse-login-window-face-front"
+                      data-login-face="signin"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="nse-login-window-texture"
+                      />
+                      <span
+                        aria-hidden="true"
+                        class="nse-login-window-texture-turn"
+                      />
+                      <div
+                        class="nse-login-window-content"
+                      >
+                        <img
+                          alt=""
+                          aria-hidden="true"
+                          class="nse-login-window-logo"
+                          draggable="false"
+                          src="http://localhost:3000/assets/nse/atmo/shell/login-window/EmbossedSynMarksmanLogoMetalFX.png?no-inline"
+                        />
+                        <h1
+                          id="nse-login-window-title"
+                        >
+                          SynCloudOS
+                        </h1>
+                        <div
+                          aria-live="polite"
+                          class="nse-login-form"
+                        >
+                          <p
+                            class="nse-login-error"
+                            id="nse-login-window-error"
+                            role="alert"
+                          >
+
+                          </p>
+                          <div
+                            class="nse-login-action"
+                          >
+                            <button
+                              class="nse-control-button"
+                              data-bezel-style="rounded"
+                              data-nse-bezel-style="rounded"
+                              data-nse-button-type="momentaryPushIn"
+                              data-nse-control="button"
+                              data-nse-control-size="regular"
+                              data-nse-focused=""
+                              data-nse-part="background"
+                              data-nse-state="off"
+                              data-press-active="false"
+                              data-pressed="false"
+                              data-tone="light"
+                              type="button"
+                            >
+                              <span
+                                aria-hidden="true"
+                                data-nse-part="bezel"
+                                style="position: absolute; inset: 0px; pointer-events: none;"
+                              />
+                              <span
+                                class="nse-control-button-icon"
+                                data-nse-part="image"
+                              />
+                              <span
+                                class="nse-control-button-label"
+                                data-nse-part="title"
+                              >
+                                Continue
+                              </span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            data-mode="light"
+            data-nse-appearance="atmo"
+            data-nse-chrome="standard"
+            data-nse-colour-scheme-requested="light"
+            data-nse-colour-scheme-resolved="light"
+            data-nse-contrast="normal"
+            data-nse-overlay-portal-host="true"
+            data-nse-transparency="normal"
+            data-syncloudos-runtime-owner="nse-standalone:1"
+            style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px;"
+          />
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+ ❯ tests/runtime/nse-theme-system-surface-coverage.test.tsx:24:41
+     22|       const root = await waitFor(() => {
+     23|         const element = view.baseElement.querySelector<HTMLElement>(`[…
+     24|         expect(element, surface.id).not.toBeNull();
+       |                                         ^
+     25|         return element!;
+     26|       });
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+ FAIL  tests/runtime/nse-theme-system-surface-coverage.test.tsx > system surface theme hooks > login-window-error
+AssertionError: login-window-error: expected null not to be null
+
+Ignored nodes: comments, script, style
+<html>
+  <head />
+  <body>
+    <div>
+      <div
+        class="nse-appearance-provider"
+        data-mode="light"
+        data-nse-appearance="atmo"
+        data-nse-chrome="standard"
+        data-nse-colour-scheme-requested="light"
+        data-nse-colour-scheme-resolved="light"
+        data-nse-contrast="normal"
+        data-nse-transparency="normal"
+      >
+        <div
+          data-nse-overlay-provider="nse-overlay-provider:nse-standalone:2:_r_4_"
+          data-syncloudos-runtime-owner="nse-standalone:2"
+          style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px; display: contents;"
+        >
+          <div
+            aria-describedby="nse-login-window-error"
+            aria-labelledby="nse-login-window-title"
+            aria-modal="true"
+            class="nse-login-window nse-login-window--atmoPlacard is-login-step-synId has-login-error "
+            data-sheen="enter"
+            role="dialog"
+          >
+            <span
+              aria-hidden="true"
+              class="nse-login-window-top-tack"
+            >
+              <img
+                alt=""
+                draggable="false"
+                src="http://localhost:3000/assets/nse/atmo/shell/login-window/HangElements/PinElements/TackTransparent.png?no-inline"
+              />
+              <img
+                alt=""
+                draggable="false"
+                src="http://localhost:3000/assets/nse/atmo/shell/login-window/HangElements/PinElements/TackWhite.png?no-inline"
+              />
+            </span>
+            <div
+              class="nse-login-window-swing-stage"
+            >
+              <div
+                aria-hidden="true"
+                class="nse-login-window-hang"
+              >
+                <div
+                  class="nse-login-window-hang-flipper"
+                >
+                  <img
+                    alt=""
+                    class="nse-login-window-rope-shadow"
+                    draggable="false"
+                    src="http://localhost:3000/assets/nse/atmo/shell/login-window/HangElements/Rope/rope%20shadow%20MERGED.png?no-inline"
+                  />
+                  <img
+                    alt=""
+                    class="nse-login-window-rope nse-login-window-rope-left"
+                    draggable="false"
+                    src="http://localhost:3000/assets/nse/atmo/shell/login-window/HangElements/Rope/RopeLeft.png?no-inline"
+                  />
+                  <img
+                    alt=""
+                    class="nse-login-window-rope nse-login-window-rope-right"
+                    draggable="false"
+                    src="http://localhost:3000/assets/nse/atmo/shell/login-window/HangElements/Rope/RopeRight.png?no-inline"
+                  />
+                </div>
+              </div>
+              <div
+                class="nse-login-window-shake-stage"
+              >
+                <div
+                  class="nse-login-window-card-stage"
+                >
+                  <div
+                    class="nse-login-window-card-flipper is-signin"
+                  >
+                    <img
+                      alt=""
+                      aria-hidden="true"
+                      class="nse-login-window-beta-ribbon"
+                      draggable="false"
+                      src="http://localhost:3000/assets/nse/atmo/shell/login-window/BETAbanner-topRight@2x.png?no-inline"
+                    />
+                    <img
+                      alt=""
+                      aria-hidden="true"
+                      class="nse-login-window-ring nse-login-window-ring-left"
+                      draggable="false"
+                      src="http://localhost:3000/assets/nse/atmo/shell/login-window/HangElements/RingEdge/left.png?no-inline"
+                    />
+                    <img
+                      alt=""
+                      aria-hidden="true"
+                      class="nse-login-window-ring nse-login-window-ring-right"
+                      draggable="false"
+                      src="http://localhost:3000/assets/nse/atmo/shell/login-window/HangElements/RingEdge/right.png?no-inline"
+                    />
+                    <section
+                      class="nse-login-window-card nse-login-window-face nse-login-window-face-front"
+                      data-login-face="signin"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="nse-login-window-texture"
+                      />
+                      <span
+                        aria-hidden="true"
+                        class="nse-login-window-texture-turn"
+                      />
+                      <div
+                        class="nse-login-window-content"
+                      >
+                        <img
+                          alt=""
+                          aria-hidden="true"
+                          class="nse-login-window-logo"
+                          draggable="false"
+                          src="http://localhost:3000/assets/nse/atmo/shell/login-window/EmbossedSynMarksmanLogoMetalFX.png?no-inline"
+                        />
+                        <h1
+                          id="nse-login-window-title"
+                        >
+                          SynCloudOS
+                        </h1>
+                        <div
+                          aria-live="polite"
+                          class="nse-login-form"
+                        >
+                          <p
+                            class="nse-login-error"
+                            id="nse-login-window-error"
+                            role="alert"
+                          >
+                            Sign-in failed. Try again.
+                          </p>
+                          <div
+                            class="nse-login-action"
+                          >
+                            <button
+                              class="nse-control-button"
+                              data-bezel-style="rounded"
+                              data-nse-bezel-style="rounded"
+                              data-nse-button-type="momentaryPushIn"
+                              data-nse-control="button"
+                              data-nse-control-size="regular"
+                              data-nse-focused=""
+                              data-nse-part="background"
+                              data-nse-state="off"
+                              data-press-active="false"
+                              data-pressed="false"
+                              data-tone="light"
+                              type="button"
+                            >
+                              <span
+                                aria-hidden="true"
+                                data-nse-part="bezel"
+                                style="position: absolute; inset: 0px; pointer-events: none;"
+                              />
+                              <span
+                                class="nse-control-button-icon"
+                                data-nse-part="image"
+                              />
+                              <span
+                                class="nse-control-button-label"
+                                data-nse-part="title"
+                              >
+                                Continue
+                              </span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            data-mode="light"
+            data-nse-appearance="atmo"
+            data-nse-chrome="standard"
+            data-nse-colour-scheme-requested="light"
+            data-nse-colour-scheme-resolved="light"
+            data-nse-contrast="normal"
+            data-nse-overlay-portal-host="true"
+            data-nse-transparency="normal"
+            data-syncloudos-runtime-owner="nse-standalone:2"
+            style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px;"
+          />
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+ ❯ tests/runtime/nse-theme-system-surface-coverage.test.tsx:24:41
+     22|       const root = await waitFor(() => {
+     23|         const element = view.baseElement.querySelector<HTMLElement>(`[…
+     24|         expect(element, surface.id).not.toBeNull();
+       |                                         ^
+     25|         return element!;
+     26|       });
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯
+
+ FAIL  tests/runtime/nse-theme-system-surface-coverage.test.tsx > system surface theme hooks > login-window-loading
+AssertionError: login-window-loading: expected null not to be null
+
+Ignored nodes: comments, script, style
+<html>
+  <head />
+  <body>
+    <div>
+      <div
+        class="nse-appearance-provider"
+        data-mode="light"
+        data-nse-appearance="atmo"
+        data-nse-chrome="standard"
+        data-nse-colour-scheme-requested="light"
+        data-nse-colour-scheme-resolved="light"
+        data-nse-contrast="normal"
+        data-nse-transparency="normal"
+      >
+        <div
+          data-nse-overlay-provider="nse-overlay-provider:nse-standalone:3:_r_8_"
+          data-syncloudos-runtime-owner="nse-standalone:3"
+          style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px; display: contents;"
+        >
+          <div
+            aria-labelledby="nse-login-window-title"
+            aria-modal="true"
+            class="nse-login-window nse-login-window--atmoPlacard is-login-step-synId  "
+            data-sheen="enter"
+            role="dialog"
+          >
+            <span
+              aria-hidden="true"
+              class="nse-login-window-top-tack"
+            >
+              <img
+                alt=""
+                draggable="false"
+                src="http://localhost:3000/assets/nse/atmo/shell/login-window/HangElements/PinElements/TackTransparent.png?no-inline"
+              />
+              <img
+                alt=""
+                draggable="false"
+                src="http://localhost:3000/assets/nse/atmo/shell/login-window/HangElements/PinElements/TackWhite.png?no-inline"
+              />
+            </span>
+            <div
+              class="nse-login-window-swing-stage"
+            >
+              <div
+                aria-hidden="true"
+                class="nse-login-window-hang"
+              >
+                <div
+                  class="nse-login-window-hang-flipper"
+                >
+                  <img
+                    alt=""
+                    class="nse-login-window-rope-shadow"
+                    draggable="false"
+                    src="http://localhost:3000/assets/nse/atmo/shell/login-window/HangElements/Rope/rope%20shadow%20MERGED.png?no-inline"
+                  />
+                  <img
+                    alt=""
+                    class="nse-login-window-rope nse-login-window-rope-left"
+                    draggable="false"
+                    src="http://localhost:3000/assets/nse/atmo/shell/login-window/HangElements/Rope/RopeLeft.png?no-inline"
+                  />
+                  <img
+                    alt=""
+                    class="nse-login-window-rope nse-login-window-rope-right"
+                    draggable="false"
+                    src="http://localhost:3000/assets/nse/atmo/shell/login-window/HangElements/Rope/RopeRight.png?no-inline"
+                  />
+                </div>
+              </div>
+              <div
+                class="nse-login-window-shake-stage"
+              >
+                <div
+                  class="nse-login-window-card-stage"
+                >
+                  <div
+                    class="nse-login-window-card-flipper is-signin"
+                  >
+                    <img
+                      alt=""
+                      aria-hidden="true"
+                      class="nse-login-window-beta-ribbon"
+                      draggable="false"
+                      src="http://localhost:3000/assets/nse/atmo/shell/login-window/BETAbanner-topRight@2x.png?no-inline"
+                    />
+                    <img
+                      alt=""
+                      aria-hidden="true"
+                      class="nse-login-window-ring nse-login-window-ring-left"
+                      draggable="false"
+                      src="http://localhost:3000/assets/nse/atmo/shell/login-window/HangElements/RingEdge/left.png?no-inline"
+                    />
+                    <img
+                      alt=""
+                      aria-hidden="true"
+                      class="nse-login-window-ring nse-login-window-ring-right"
+                      draggable="false"
+                      src="http://localhost:3000/assets/nse/atmo/shell/login-window/HangElements/RingEdge/right.png?no-inline"
+                    />
+                    <section
+                      class="nse-login-window-card nse-login-window-face nse-login-window-face-front"
+                      data-login-face="signin"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="nse-login-window-texture"
+                      />
+                      <span
+                        aria-hidden="true"
+                        class="nse-login-window-texture-turn"
+                      />
+                      <div
+                        class="nse-login-window-content"
+                      >
+                        <img
+                          alt=""
+                          aria-hidden="true"
+                          class="nse-login-window-logo"
+                          draggable="false"
+                          src="http://localhost:3000/assets/nse/atmo/shell/login-window/EmbossedSynMarksmanLogoMetalFX.png?no-inline"
+                        />
+                        <h1
+                          id="nse-login-window-title"
+                        >
+                          SynCloudOS
+                        </h1>
+                        <div
+                          aria-live="polite"
+                          class="nse-login-form"
+                        >
+                          <p
+                            class="nse-login-error"
+                            id="nse-login-window-error"
+                            role="alert"
+                          >
+
+                          </p>
+                          <div
+                            class="nse-login-action"
+                          >
+                            <button
+                              aria-busy="true"
+                              class="nse-control-button"
+                              data-bezel-style="rounded"
+                              data-nse-bezel-style="rounded"
+                              data-nse-button-type="momentaryPushIn"
+                              data-nse-control="button"
+                              data-nse-control-size="regular"
+                              data-nse-enabled="false"
+                              data-nse-part="background"
+                              data-nse-state="off"
+                              data-press-active="false"
+                              data-pressed="false"
+                              data-tone="light"
+                              disabled=""
+                              type="button"
+                            >
+                              <span
+                                aria-hidden="true"
+                                data-nse-part="bezel"
+                                style="position: absolute; inset: 0px; pointer-events: none;"
+                              />
+                              <span
+                                class="nse-control-button-icon"
+                                data-nse-part="image"
+                              >
+                                <span
+                                  aria-label="Loading"
+                                  class="nse-control-spinner"
+                                  data-size="small"
+                                  data-tone="dark"
+                                  role="status"
+                                >
+                                  <span
+                                    aria-hidden="true"
+                                    class="nse-control-spinner-sprite"
+                                  />
+                                </span>
+                              </span>
+                              <span
+                                class="nse-control-button-label"
+                                data-nse-part="title"
+                              >
+                                Continue
+                              </span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            data-mode="light"
+            data-nse-appearance="atmo"
+            data-nse-chrome="standard"
+            data-nse-colour-scheme-requested="light"
+            data-nse-colour-scheme-resolved="light"
+            data-nse-contrast="normal"
+            data-nse-overlay-portal-host="true"
+            data-nse-transparency="normal"
+            data-syncloudos-runtime-owner="nse-standalone:3"
+            style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px;"
+          />
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+ ❯ tests/runtime/nse-theme-system-surface-coverage.test.tsx:24:41
+     22|       const root = await waitFor(() => {
+     23|         const element = view.baseElement.querySelector<HTMLElement>(`[…
+     24|         expect(element, surface.id).not.toBeNull();
+       |                                         ^
+     25|         return element!;
+     26|       });
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯
+
+ FAIL  tests/runtime/nse-theme-system-surface-coverage.test.tsx > system surface theme hooks > about
+AssertionError: about: expected null not to be null
+
+Ignored nodes: comments, script, style
+<html>
+  <head />
+  <body>
+    <div>
+      <div
+        class="nse-appearance-provider"
+        data-mode="light"
+        data-nse-appearance="atmo"
+        data-nse-chrome="standard"
+        data-nse-colour-scheme-requested="light"
+        data-nse-colour-scheme-resolved="light"
+        data-nse-contrast="normal"
+        data-nse-transparency="normal"
+      >
+        <div
+          data-nse-overlay-provider="nse-overlay-provider:nse-standalone:4:_r_c_"
+          data-syncloudos-runtime-owner="nse-standalone:4"
+          style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px; display: contents;"
+        >
+          <div
+            data-mode="light"
+            data-nse-appearance="atmo"
+            data-nse-chrome="standard"
+            data-nse-colour-scheme-requested="light"
+            data-nse-colour-scheme-resolved="light"
+            data-nse-contrast="normal"
+            data-nse-overlay-portal-host="true"
+            data-nse-transparency="normal"
+            data-syncloudos-runtime-owner="nse-standalone:4"
+            style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px;"
+          />
+        </div>
+      </div>
+    </div>
+    <div
+      data-nse-focus-scope="nse-system-about:_r_d_"
+      data-nse-focus-scope-kind="modal"
+      data-nse-focus-scope-runtime="nse-standalone:4"
+      style="display: contents;"
+    >
+      <div
+        class="nse-control-alert-backdrop"
+        data-mode="light"
+        data-nse-appearance="atmo"
+        data-nse-chrome="standard"
+        data-nse-colour-scheme-requested="light"
+        data-nse-colour-scheme-resolved="light"
+        data-nse-contrast="normal"
+        data-nse-transparency="normal"
+        tabindex="-1"
+      >
+        <div
+          aria-describedby="_r_e_"
+          aria-labelledby="_r_d_"
+          aria-modal="true"
+          class="nse-control-alert is-light nse-about-dialog"
+          data-nse-initial-focus-selector=".nse-about-dismiss"
+          role="dialog"
+          tabindex="-1"
+        >
+          <div
+            class="nse-about-content nse-about-content-textonly"
+          >
+            <div
+              class="nse-about-copy"
+            >
+              <h2
+                class="nse-about-name"
+                id="_r_d_"
+              >
+                SynCloudOS
+              </h2>
+              <p
+                class="nse-about-tagline"
+                id="_r_e_"
+              >
+                Your workspace
+              </p>
+              <p
+                class="nse-about-version"
+              >
+                Version 1.0.0 (Beta 2)
+              </p>
+              <p
+                class="nse-about-legal"
+              >
+                © 2026 Syndromatic Ltd.
+              </p>
+              <p
+                class="nse-about-legal nse-about-trademark"
+              >
+                SynCloudOS
+              </p>
+            </div>
+          </div>
+          <div
+            class="nse-alert-actions"
+          >
+            <button
+              class="nse-control-button nse-system-alert-action-button nse-about-dismiss"
+              data-bezel-style="rounded"
+              data-nse-bezel-style="rounded"
+              data-nse-button-type="momentaryPushIn"
+              data-nse-control="button"
+              data-nse-control-size="regular"
+              data-nse-part="background"
+              data-nse-state="off"
+              data-press-active="false"
+              data-pressed="false"
+              data-tone="light"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                data-nse-part="bezel"
+                style="position: absolute; inset: 0px; pointer-events: none;"
+              />
+              <span
+                class="nse-control-button-label"
+                data-nse-part="title"
+              >
+                OK
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+ ❯ tests/runtime/nse-theme-system-surface-coverage.test.tsx:24:41
+     22|       const root = await waitFor(() => {
+     23|         const element = view.baseElement.querySelector<HTMLElement>(`[…
+     24|         expect(element, surface.id).not.toBeNull();
+       |                                         ^
+     25|         return element!;
+     26|       });
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯
+
+ FAIL  tests/runtime/nse-theme-system-surface-coverage.test.tsx > system surface theme hooks > confirm-dialog
+AssertionError: confirm-dialog: expected null not to be null
+
+Ignored nodes: comments, script, style
+<html>
+  <head />
+  <body>
+    <div>
+      <div
+        class="nse-appearance-provider"
+        data-mode="light"
+        data-nse-appearance="atmo"
+        data-nse-chrome="standard"
+        data-nse-colour-scheme-requested="light"
+        data-nse-colour-scheme-resolved="light"
+        data-nse-contrast="normal"
+        data-nse-transparency="normal"
+      >
+        <div
+          data-nse-overlay-provider="nse-overlay-provider:nse-standalone:5:_r_h_"
+          data-syncloudos-runtime-owner="nse-standalone:5"
+          style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px; display: contents;"
+        >
+          <div
+            data-mode="light"
+            data-nse-appearance="atmo"
+            data-nse-chrome="standard"
+            data-nse-colour-scheme-requested="light"
+            data-nse-colour-scheme-resolved="light"
+            data-nse-contrast="normal"
+            data-nse-overlay-portal-host="true"
+            data-nse-transparency="normal"
+            data-syncloudos-runtime-owner="nse-standalone:5"
+            style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px;"
+          />
+        </div>
+      </div>
+    </div>
+    <div
+      data-nse-focus-scope="nse-system-confirm:_r_i_"
+      data-nse-focus-scope-kind="modal"
+      data-nse-focus-scope-runtime="nse-standalone:5"
+      style="display: contents;"
+    >
+      <div
+        class="nse-control-alert-backdrop"
+        data-mode="light"
+        data-nse-appearance="atmo"
+        data-nse-chrome="standard"
+        data-nse-colour-scheme-requested="light"
+        data-nse-colour-scheme-resolved="light"
+        data-nse-contrast="normal"
+        data-nse-transparency="normal"
+        tabindex="-1"
+      >
+        <div
+          aria-describedby="_r_j_"
+          aria-labelledby="_r_i_"
+          aria-modal="true"
+          class="nse-control-alert is-light"
+          data-nse-initial-focus-selector=".nse-confirm-cancel"
+          role="alertdialog"
+          tabindex="-1"
+        >
+          <div
+            class="nse-system-alert-content nse-confirm-content-textonly"
+          >
+            <div
+              class="nse-system-alert-copy"
+              tabindex="0"
+            >
+              <h2
+                id="_r_i_"
+              >
+                Delete document?
+              </h2>
+              <p
+                id="_r_j_"
+              >
+                This action cannot be undone.
+              </p>
+            </div>
+          </div>
+          <div
+            class="nse-alert-actions"
+          >
+            <button
+              class="nse-control-button nse-system-alert-action-button"
+              data-bezel-style="rounded"
+              data-nse-bezel-style="rounded"
+              data-nse-button-type="momentaryPushIn"
+              data-nse-control="button"
+              data-nse-control-size="regular"
+              data-nse-part="background"
+              data-nse-state="off"
+              data-press-active="false"
+              data-pressed="false"
+              data-tone="negative"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                data-nse-part="bezel"
+                style="position: absolute; inset: 0px; pointer-events: none;"
+              />
+              <span
+                class="nse-control-button-label"
+                data-nse-part="title"
+              >
+                Delete
+              </span>
+            </button>
+            <button
+              class="nse-control-button nse-system-alert-action-button nse-confirm-cancel"
+              data-bezel-style="rounded"
+              data-nse-bezel-style="rounded"
+              data-nse-button-type="momentaryPushIn"
+              data-nse-control="button"
+              data-nse-control-size="regular"
+              data-nse-part="background"
+              data-nse-state="off"
+              data-press-active="false"
+              data-pressed="false"
+              data-tone="light"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                data-nse-part="bezel"
+                style="position: absolute; inset: 0px; pointer-events: none;"
+              />
+              <span
+                class="nse-control-button-label"
+                data-nse-part="title"
+              >
+                Cancel
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+ ❯ tests/runtime/nse-theme-system-surface-coverage.test.tsx:24:41
+     22|       const root = await waitFor(() => {
+     23|         const element = view.baseElement.querySelector<HTMLElement>(`[…
+     24|         expect(element, surface.id).not.toBeNull();
+       |                                         ^
+     25|         return element!;
+     26|       });
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/10]⎯
+
+ FAIL  tests/runtime/nse-theme-system-surface-coverage.test.tsx > system surface theme hooks > settings
+AssertionError: settings: expected null not to be null
+
+Ignored nodes: comments, script, style
+<html>
+  <head />
+  <body>
+    <div>
+      <div
+        class="nse-appearance-provider"
+        data-mode="light"
+        data-nse-appearance="atmo"
+        data-nse-chrome="standard"
+        data-nse-colour-scheme-requested="light"
+        data-nse-colour-scheme-resolved="light"
+        data-nse-contrast="normal"
+        data-nse-transparency="normal"
+      >
+        <div
+          data-nse-overlay-provider="nse-overlay-provider:nse-standalone:6:_r_m_"
+          data-syncloudos-runtime-owner="nse-standalone:6"
+          style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px; display: contents;"
+        >
+          <div
+            data-mode="light"
+            data-nse-appearance="atmo"
+            data-nse-chrome="standard"
+            data-nse-colour-scheme-requested="light"
+            data-nse-colour-scheme-resolved="light"
+            data-nse-contrast="normal"
+            data-nse-overlay-portal-host="true"
+            data-nse-transparency="normal"
+            data-syncloudos-runtime-owner="nse-standalone:6"
+            style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px;"
+          />
+        </div>
+      </div>
+    </div>
+    <div
+      data-nse-focus-scope="nse-preferences-toast"
+      data-nse-focus-scope-kind="modal"
+      data-nse-focus-scope-runtime="nse-standalone:6"
+      style="display: contents;"
+    >
+      <div
+        class="nse-prefs-backdrop"
+        data-appearance="light"
+        data-mode="light"
+        data-nse-appearance="atmo"
+        data-nse-chrome="standard"
+        data-nse-colour-scheme-requested="light"
+        data-nse-colour-scheme-resolved="light"
+        data-nse-contrast="normal"
+        data-nse-transparency="normal"
+      >
+        <div
+          aria-hidden="true"
+          class="nse-prefs-veil"
+        />
+        <div
+          aria-label="Settings"
+          aria-modal="true"
+          class="nse-prefs-toast"
+          role="dialog"
+          tabindex="-1"
+        >
+          <header
+            class="nse-window-titlebar-content nse-prefs-header"
+            data-nse-control="window"
+            data-nse-part="header"
+            data-nse-toolbar-style="preference"
+            data-toolbar-style="preference"
+            data-window-titlebar=""
+          >
+            <span
+              class="nse-window-titlebar-leading"
+              data-layout-attribute="leading"
+              data-nse-part="leading"
+            />
+            <div
+              class="nse-window-titlebar-copy"
+            >
+              <h1
+                class="nse-window-titlebar-heading"
+                data-nse-part="title"
+                data-window-title=""
+              >
+                <span
+                  class="nse-prefs-title-clip"
+                >
+                  <span
+                    class="nse-prefs-title"
+                  >
+                    Settings
+                  </span>
+                </span>
+              </h1>
+            </div>
+            <span
+              class="nse-window-titlebar-trailing"
+              data-layout-attribute="trailing"
+              data-nse-part="trailing"
+            />
+          </header>
+          <div
+            class="nse-prefs-body"
+            style="height: 0px;"
+          >
+            <div
+              class="nse-prefs-panes"
+            >
+              <div
+                class="nse-prefs-pane"
+              >
+                <div
+                  class="nse-prefs-pane-content"
+                >
+                  <div
+                    class="nse-prefs-list"
+                  >
+                    <div
+                      class="nse-control-list-item"
+                      data-selected="false"
+                    >
+                      <span
+                        class="nse-control-list-body"
+                      >
+                        <span
+                          class="nse-control-list-primary"
+                        >
+                          <button
+                            class="nse-prefs-pane-link"
+                            type="button"
+                          >
+                            Appearance
+                          </button>
+                        </span>
+                        <span
+                          class="nse-control-list-meta"
+                        >
+                          Automatic
+                        </span>
+                      </span>
+                      <span
+                        class="nse-control-list-trailing"
+                      >
+                        <span
+                          class="nse-prefs-row-tail"
+                        >
+                          <span
+                            aria-hidden="true"
+                            class="nse-prefs-chevron"
+                          >
+                            <span
+                              aria-hidden="true"
+                              data-nse-image-template="NSGoForwardTemplate"
+                              style="display: inline-block; flex-shrink: 0; width: 17px; height: 17px; max-width: 100%; max-height: 100%; background-color: currentcolor; mask-image: url(\"data:image/svg+xml,%3c!--%20SynCloudOS%20%E2%80%94%20Copyright%20%C2%A9%202026%20Syndromatic%20Ltd.%20AGPL-3.0-or-later.%20NSImage.goForwardTemplateName.%20Original%20NSEPreferencesToast%20geometry,%20unchanged.%20--%3e%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20width='17'%20height='17'%3e%3cpath%20d='M9%204%20L17%2012%20L9%2020'%20fill='none'%20stroke='white'%20stroke-width='3'%20stroke-linecap='round'%20stroke-linejoin='round'/%3e%3c/svg%3e\"); -webkit-mask-image: url(\"data:image/svg+xml,%3c!--%20SynCloudOS%20%E2%80%94%20Copyright%20%C2%A9%202026%20Syndromatic%20Ltd.%20AGPL-3.0-or-later.%20NSImage.goForwardTemplateName.%20Original%20NSEPreferencesToast%20geometry,%20unchanged.%20--%3e%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20width='17'%20height='17'%3e%3cpath%20d='M9%204%20L17%2012%20L9%2020'%20fill='none'%20stroke='white'%20stroke-width='3'%20stroke-linecap='round'%20stroke-linejoin='round'/%3e%3c/svg%3e\"); mask-size: 100% 100%; -webkit-mask-size: 100% 100%; mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat;"
+                            />
+                          </span>
+                        </span>
+                      </span>
+                    </div>
+                    <div
+                      class="nse-control-list-item"
+                      data-selected="false"
+                    >
+                      <span
+                        class="nse-control-list-body"
+                      >
+                        <span
+                          class="nse-control-list-primary"
+                        >
+                          <button
+                            class="nse-prefs-pane-link"
+                            type="button"
+                          >
+                            Notifications
+                          </button>
+                        </span>
+                        <span
+                          class="nse-control-list-meta"
+                        >
+                          Enabled
+                        </span>
+                      </span>
+                      <span
+                        class="nse-control-list-trailing"
+                      >
+                        <span
+                          class="nse-prefs-row-tail"
+                        >
+                          <span
+                            aria-hidden="true"
+                            class="nse-prefs-chevron"
+                          >
+                            <span
+                              aria-hidden="true"
+                              data-nse-image-template="NSGoForwardTemplate"
+                              style="display: inline-block; flex-shrink: 0; width: 17px; height: 17px; max-width: 100%; max-height: 100%; background-color: currentcolor; mask-image: url(\"data:image/svg+xml,%3c!--%20SynCloudOS%20%E2%80%94%20Copyright%20%C2%A9%202026%20Syndromatic%20Ltd.%20AGPL-3.0-or-later.%20NSImage.goForwardTemplateName.%20Original%20NSEPreferencesToast%20geometry,%20unchanged.%20--%3e%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20width='17'%20height='17'%3e%3cpath%20d='M9%204%20L17%2012%20L9%2020'%20fill='none'%20stroke='white'%20stroke-width='3'%20stroke-linecap='round'%20stroke-linejoin='round'/%3e%3c/svg%3e\"); -webkit-mask-image: url(\"data:image/svg+xml,%3c!--%20SynCloudOS%20%E2%80%94%20Copyright%20%C2%A9%202026%20Syndromatic%20Ltd.%20AGPL-3.0-or-later.%20NSImage.goForwardTemplateName.%20Original%20NSEPreferencesToast%20geometry,%20unchanged.%20--%3e%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20width='17'%20height='17'%3e%3cpath%20d='M9%204%20L17%2012%20L9%2020'%20fill='none'%20stroke='white'%20stroke-width='3'%20stroke-linecap='round'%20stroke-linejoin='round'/%3e%3c/svg%3e\"); mask-size: 100% 100%; -webkit-mask-size: 100% 100%; mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat;"
+                            />
+                          </span>
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+ ❯ tests/runtime/nse-theme-system-surface-coverage.test.tsx:24:41
+     22|       const root = await waitFor(() => {
+     23|         const element = view.baseElement.querySelector<HTMLElement>(`[…
+     24|         expect(element, surface.id).not.toBeNull();
+       |                                         ^
+     25|         return element!;
+     26|       });
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/10]⎯
+
+ FAIL  tests/runtime/nse-theme-system-surface-coverage.test.tsx > system surface theme hooks > board
+AssertionError: board: expected null not to be null
+
+Ignored nodes: comments, script, style
+<html
+  dir="ltr"
+  lang="en-GB"
+>
+  <head />
+  <body>
+    <div>
+      <div
+        class="nse-appearance-provider"
+        data-mode="light"
+        data-nse-appearance="atmo"
+        data-nse-chrome="standard"
+        data-nse-colour-scheme-requested="light"
+        data-nse-colour-scheme-resolved="light"
+        data-nse-contrast="normal"
+        data-nse-transparency="normal"
+      >
+        <div
+          data-nse-overlay-provider="nse-overlay-provider:nse-standalone:7:_r_s_"
+          data-syncloudos-runtime-owner="nse-standalone:7"
+          style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px; display: contents;"
+        >
+          <div
+            data-system-baseline-ready=""
+            style="height: 100vh;"
+          >
+            <div
+              class="nse-material-provider"
+              data-nse-material="atmo"
+            >
+              <div
+                class="webspring-view-host"
+              >
+                <div
+                  class="webspring-entrance-surface"
+                >
+                  <div
+                    class="nse-material-provider"
+                    data-nse-material="atmo"
+                  >
+                    <main
+                      class="webspring-board"
+                      data-entrance-phase="ready"
+                      data-launch-phase="idle"
+                      data-layout-editing="false"
+                      data-reduced-motion="false"
+                      style="--webspring-launcher-colour: #5a6170; --webspring-launcher-image: radial-gradient(ellipse at 50% 45%, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 55%, rgba(0, 0, 0, 0.6) 100%), linear-gradient(color-mix(in srgb, #4a6fa5 10%, transparent), color-mix(in srgb, #4a6fa5 10%, transparent)), url(\"http://localhost:3000/assets/textures/NSETileCotton.jpg?no-inline\"); --webspring-launcher-size: 100% 100%, 100% 100%, 256px; --webspring-launcher-repeat: no-repeat, no-repeat, repeat; --webspring-launcher-position: center, center, 0 0; --webspring-launcher-overlay-image: none; --webspring-launcher-overlay-size: 100% auto; --webspring-launcher-overlay-opacity: 1; --webspring-launcher-overlay-blend: normal;"
+                    >
+                      <section
+                        aria-label="Webspring"
+                        class="webspring-board-launcher"
+                      >
+                        <div
+                          aria-hidden="true"
+                          class="webspring-board-material"
+                        />
+                        <header
+                          class="webspring-board-brand"
+                        >
+                          <span>
+                            SynCloudOS
+                          </span>
+                        </header>
+                        <div
+                          class="webspring-board-controls "
+                        >
+                          <button
+                            aria-describedby="webspring-board-keyboard-help"
+                            class="nse-control-button"
+                            data-bezel-style="rounded"
+                            data-nse-bezel-style="rounded"
+                            data-nse-button-type="momentaryPushIn"
+                            data-nse-control="button"
+                            data-nse-control-size="regular"
+                            data-nse-part="background"
+                            data-nse-state="off"
+                            data-press-active="false"
+                            data-pressed="false"
+                            data-tone="dark"
+                            type="button"
+                          >
+                            <span
+                              aria-hidden="true"
+                              data-nse-part="bezel"
+                              style="position: absolute; inset: 0px; pointer-events: none;"
+                            />
+                            <span
+                              class="nse-control-button-label"
+                              data-nse-part="title"
+                            >
+                              Reorder applications
+                            </span>
+                          </button>
+                        </div>
+                        <p
+                          class="webspring-reorder-announcement"
+                          id="webspring-board-keyboard-help"
+                        >
+                          Hold an application to reorder. Rest it on another application or a folder to group them. Use arrow keys to move it. Press Escape when finished.
+                        </p>
+                        <section
+                          aria-label="Applications"
+                          class="webspring-board-pages"
+                          style="--webspring-board-columns: 4; --webspring-board-rows: 4;"
+                        >
+                          <div
+                            class="webspring-board-page"
+                            data-page="0"
+                          >
+                            <div
+                              class="webspring-board-slot"
+                            >
+                              <button
+                                aria-label="Open Documents"
+                                class="webspring-board-icon   "
+                                data-order-index="0"
+                                data-webspring-item-id="com.example.theme-baseline.documents"
+                                type="button"
+                              >
+                                <span
+                                  class="webspring-board-icon-artwork"
+                                  style="opacity: 1;"
+                                >
+                                  <span
+                                    class="webspring-board-icon-well"
+                                  >
+                                    <img
+                                      alt=""
+                                      aria-hidden="true"
+                                      draggable="false"
+                                      src="/src/SynCloudOSReact/Resources/SynCloudOSLogo.png?no-inline"
+                                    />
+                                  </span>
+                                  <span
+                                    class="webspring-board-icon-label"
+                                  >
+                                    Documents
+                                  </span>
+                                </span>
+                              </button>
+                            </div>
+                            <div
+                              class="webspring-board-slot"
+                            >
+                              <button
+                                aria-expanded="false"
+                                aria-haspopup="dialog"
+                                aria-label="Open folder Tools"
+                                class="webspring-board-icon is-folder  "
+                                data-order-index="1"
+                                data-webspring-item-id="folder.tools"
+                                type="button"
+                              >
+                                <span
+                                  class="webspring-board-icon-artwork"
+                                  style="opacity: 1;"
+                                >
+                                  <span
+                                    class="webspring-board-icon-well"
+                                  >
+                                    <span
+                                      aria-hidden="true"
+                                      class="webspring-folder-tile"
+                                      data-fill="inset"
+                                      data-shape="roundedRect"
+                                    >
+                                      <span
+                                        class="webspring-folder-tile-surface"
+                                      />
+                                      <span
+                                        class="webspring-folder-tile-member"
+                                      >
+                                        <img
+                                          alt=""
+                                          draggable="false"
+                                          src="/src/SynCloudOSReact/Resources/SynCloudOSLogo.png?no-inline"
+                                        />
+                                      </span>
+                                      <span
+                                        class="webspring-folder-tile-member"
+                                      >
+                                        <img
+                                          alt=""
+                                          draggable="false"
+                                          src="/src/SynCloudOSReact/Resources/SynCloudOSLogo.png?no-inline"
+                                        />
+                                      </span>
+                                    </span>
+                                  </span>
+                                  <span
+                                    class="webspring-board-icon-label"
+                                  >
+                                    Tools
+                                  </span>
+                                </span>
+                              </button>
+                            </div>
+                          </div>
+                        </section>
+                      </section>
+                      <div
+                        class="webspring-application-outlet"
+                      >
+                        <div
+                          class="webspring-application-outlet-host"
+                        >
+                          <div
+                            class="webspring-apps-container"
+                            style="left: 0px; top: 0px; right: auto; bottom: auto; width: 1024px; height: 768px;"
+                          />
+                        </div>
+                      </div>
+                      <span
+                        aria-live="polite"
+                        class="webspring-reorder-announcement"
+                      />
+                    </main>
+                  </div>
+                </div>
+              </div>
+              <div
+                data-nse-overlay-provider="nse-overlay-provider:theme-baseline-system:_r_13_"
+                data-syncloudos-runtime-owner="theme-baseline-system"
+                style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px; display: contents;"
+              >
+                <div
+                  data-mode="light"
+                  data-nse-appearance="atmo"
+                  data-nse-chrome="standard"
+                  data-nse-colour-scheme-requested="light"
+                  data-nse-colour-scheme-resolved="light"
+                  data-nse-contrast="normal"
+                  data-nse-overlay-portal-host="true"
+                  data-nse-transparency="normal"
+                  data-syncloudos-runtime-owner="theme-baseline-system"
+                  style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px;"
+                />
+              </div>
+              <div
+                class="webspring-window-layer"
+                data-window-layer=""
+                data-window-modal-active="false"
+              />
+              <aside
+                aria-label="SynCloudOS Notification Centre"
+                class="syncloudos-notification-layer"
+                data-reduced-motion="false"
+              >
+                <div
+                  aria-atomic="true"
+                  aria-live="polite"
+                  class="syncloudos-notification-live-region"
+                  role="status"
+                />
+              </aside>
+              <div
+                aria-hidden="true"
+                data-system-alert-asset-cache="true"
+                hidden=""
+              >
+                <img
+                  alt=""
+                  decoding="async"
+                  fetchpriority="low"
+                  src="/src/SynCloudOSReact/Resources/AlertCautionIcon.png?no-inline"
+                />
+                <img
+                  alt=""
+                  decoding="async"
+                  fetchpriority="low"
+                  src="/src/SynCloudOSReact/Resources/SynCloudOSLogo.png?no-inline"
+                />
+              </div>
+            </div>
+          </div>
+          <div
+            data-mode="light"
+            data-nse-appearance="atmo"
+            data-nse-chrome="standard"
+            data-nse-colour-scheme-requested="light"
+            data-nse-colour-scheme-resolved="light"
+            data-nse-contrast="normal"
+            data-nse-overlay-portal-host="true"
+            data-nse-transparency="normal"
+            data-syncloudos-runtime-owner="nse-standalone:7"
+            style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px;"
+          />
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+ ❯ tests/runtime/nse-theme-system-surface-coverage.test.tsx:24:41
+     22|       const root = await waitFor(() => {
+     23|         const element = view.baseElement.querySelector<HTMLElement>(`[…
+     24|         expect(element, surface.id).not.toBeNull();
+       |                                         ^
+     25|         return element!;
+     26|       });
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/10]⎯
+
+ FAIL  tests/runtime/nse-theme-system-surface-coverage.test.tsx > system surface theme hooks > notifications
+AssertionError: notifications: expected null not to be null
+
+Ignored nodes: comments, script, style
+<html
+  dir="ltr"
+  lang="en-GB"
+>
+  <head />
+  <body>
+    <div>
+      <div
+        class="nse-appearance-provider"
+        data-mode="light"
+        data-nse-appearance="atmo"
+        data-nse-chrome="standard"
+        data-nse-colour-scheme-requested="light"
+        data-nse-colour-scheme-resolved="light"
+        data-nse-contrast="normal"
+        data-nse-transparency="normal"
+      >
+        <div
+          data-nse-overlay-provider="nse-overlay-provider:nse-standalone:8:_r_19_"
+          data-syncloudos-runtime-owner="nse-standalone:8"
+          style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px; display: contents;"
+        >
+          <div
+            data-system-baseline-ready=""
+            style="height: 100vh;"
+          >
+            <aside
+              aria-label="SynCloudOS Notification Centre"
+              class="syncloudos-notification-layer"
+              data-reduced-motion="false"
+            >
+              <div
+                aria-atomic="true"
+                aria-live="polite"
+                class="syncloudos-notification-live-region"
+                role="status"
+              >
+                Backup finished. All documents are safe.
+              </div>
+              <div
+                class="syncloudos-notification-banner-stage"
+                data-slice-status="fallback"
+              >
+                <div
+                  aria-hidden="true"
+                  class="syncloudos-notification-cube-void"
+                />
+                <div
+                  class="syncloudos-notification-cube"
+                >
+                  <div
+                    class="syncloudos-notification-cube-rotor"
+                    style=""
+                  >
+                    <div
+                      aria-hidden="true"
+                      class="syncloudos-notification-cube-face syncloudos-notification-screen-face uses-fallback-slice"
+                      style="opacity: 0;"
+                    >
+                      <div
+                        class="syncloudos-notification-screen-face-fallback"
+                      />
+                    </div>
+                    <div
+                      aria-hidden="true"
+                      class="syncloudos-notification-cube-face syncloudos-notification-cube-under-face"
+                      style="opacity: 0;"
+                    >
+                      <div
+                        class="syncloudos-notification-cube-under-glow"
+                      />
+                    </div>
+                    <div
+                      class="syncloudos-notification-cube-face syncloudos-notification-banner-face"
+                    >
+                      <article
+                        aria-label="SynCloudOS: Backup finished. All documents are safe."
+                        class="syncloudos-notification-banner priority-standard"
+                        role="status"
+                        tabindex="0"
+                      >
+                        <div
+                          aria-hidden="true"
+                          class="syncloudos-notification-face-shade"
+                        />
+                        <div
+                          class="syncloudos-notification-banner-content"
+                        >
+                          <button
+                            aria-controls="syncloudos-notification-centre"
+                            aria-haspopup="dialog"
+                            aria-label="Open Notification Centre"
+                            class="syncloudos-notification-app-icon-button"
+                            type="button"
+                          >
+                            <img
+                              alt=""
+                              aria-hidden="true"
+                              class="syncloudos-notification-icon"
+                              src="http://localhost:3000/assets/icons/system/news.png?no-inline"
+                            />
+                          </button>
+                          <div
+                            class="syncloudos-notification-copy"
+                          >
+                            <div
+                              class="syncloudos-notification-meta"
+                            >
+                              <span>
+                                SynCloudOS
+                              </span>
+                              <span>
+                                21:23
+                              </span>
+                            </div>
+                            <h2>
+                              Backup finished
+                            </h2>
+                            <p>
+                              All documents are safe.
+                            </p>
+                          </div>
+                          <div
+                            class="syncloudos-notification-banner-tools"
+                          >
+                            <button
+                              aria-label="Dismiss notification"
+                              class="syncloudos-notification-close-button"
+                              type="button"
+                            />
+                          </div>
+                        </div>
+                      </article>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </aside>
+          </div>
+          <div
+            data-mode="light"
+            data-nse-appearance="atmo"
+            data-nse-chrome="standard"
+            data-nse-colour-scheme-requested="light"
+            data-nse-colour-scheme-resolved="light"
+            data-nse-contrast="normal"
+            data-nse-overlay-portal-host="true"
+            data-nse-transparency="normal"
+            data-syncloudos-runtime-owner="nse-standalone:8"
+            style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px;"
+          />
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+ ❯ tests/runtime/nse-theme-system-surface-coverage.test.tsx:24:41
+     22|       const root = await waitFor(() => {
+     23|         const element = view.baseElement.querySelector<HTMLElement>(`[…
+     24|         expect(element, surface.id).not.toBeNull();
+       |                                         ^
+     25|         return element!;
+     26|       });
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/10]⎯
+
+ FAIL  tests/runtime/nse-theme-system-surface-coverage.test.tsx > system surface theme hooks > notification-centre
+AssertionError: notification-centre: expected null not to be null
+
+Ignored nodes: comments, script, style
+<html
+  dir="ltr"
+  lang="en-GB"
+>
+  <head />
+  <body>
+    <div>
+      <div
+        class="nse-appearance-provider"
+        data-mode="light"
+        data-nse-appearance="atmo"
+        data-nse-chrome="standard"
+        data-nse-colour-scheme-requested="light"
+        data-nse-colour-scheme-resolved="light"
+        data-nse-contrast="normal"
+        data-nse-transparency="normal"
+      >
+        <div
+          data-nse-overlay-provider="nse-overlay-provider:nse-standalone:9:_r_1f_"
+          data-syncloudos-runtime-owner="nse-standalone:9"
+          style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px; display: contents;"
+        >
+          <div
+            data-system-baseline-ready=""
+            style="height: 100vh;"
+          >
+            <aside
+              aria-label="SynCloudOS Notification Centre"
+              class="syncloudos-notification-layer"
+              data-reduced-motion="false"
+            >
+              <div
+                aria-atomic="true"
+                aria-live="polite"
+                class="syncloudos-notification-live-region"
+                role="status"
+              >
+                Backup finished. All documents are safe.
+              </div>
+              <div
+                data-syncloudos-focus-scope="notification-centre"
+                data-syncloudos-runtime-owner="theme-baseline-system"
+              >
+                <section
+                  aria-labelledby="syncloudos-notification-centre-title"
+                  aria-modal="false"
+                  class="syncloudos-notification-centre"
+                  id="syncloudos-notification-centre"
+                  role="dialog"
+                >
+                  <header
+                    class="syncloudos-notification-centre-head"
+                  >
+                    <div>
+                      <p>
+                        SynCloudOS
+                      </p>
+                      <h2
+                        id="syncloudos-notification-centre-title"
+                      >
+                        Notification Centre
+                      </h2>
+                    </div>
+                    <div
+                      class="syncloudos-notification-centre-tools"
+                    >
+                      <button
+                        type="button"
+                      >
+                        Clear All
+                      </button>
+                      <button
+                        aria-label="Close Notification Centre"
+                        type="button"
+                      >
+                        x
+                      </button>
+                    </div>
+                  </header>
+                  <div
+                    class="syncloudos-notification-centre-layout"
+                  >
+                    <div
+                      aria-label="Notification history"
+                      class="syncloudos-notification-groups"
+                    >
+                      <section
+                        aria-labelledby="notification-group-system:system:general:2026-11-09"
+                        class="syncloudos-notification-group"
+                      >
+                        <div
+                          class="syncloudos-notification-group-head"
+                        >
+                          <button
+                            aria-expanded="true"
+                            class="syncloudos-notification-group-toggle"
+                            id="notification-group-system:system:general:2026-11-09"
+                            type="button"
+                          >
+                            <span
+                              class="syncloudos-notification-group-title"
+                            >
+                              SynCloudOS
+                            </span>
+                            <span
+                              class="syncloudos-notification-group-meta"
+                            >
+                              1 item
+                               -
+                              1 unread
+                            </span>
+                          </button>
+                          <button
+                            class="syncloudos-notification-clear"
+                            type="button"
+                          >
+                            Clear
+                          </button>
+                        </div>
+                        <div
+                          class="syncloudos-notification-group-body"
+                        >
+                          <article
+                            aria-current="true"
+                            class="syncloudos-notification-history-item is-selected status-displayed"
+                          >
+                            <button
+                              class="syncloudos-notification-history-main"
+                              type="button"
+                            >
+                              <img
+                                alt=""
+                                aria-hidden="true"
+                                src="http://localhost:3000/assets/icons/system/news.png?no-inline"
+                              />
+                              <span>
+                                <strong>
+                                  Backup finished
+                                </strong>
+                                <span>
+                                  All documents are safe.
+                                </span>
+                              </span>
+                              <small>
+                                Unread
+                              </small>
+                            </button>
+                            <div
+                              class="syncloudos-notification-history-actions"
+                            >
+                              <button
+                                class="syncloudos-notification-action"
+                                type="button"
+                              >
+                                Mark read
+                              </button>
+                            </div>
+                          </article>
+                        </div>
+                      </section>
+                    </div>
+                    <aside
+                      aria-label="Backup finished details"
+                      class="syncloudos-notification-detail"
+                    >
+                      <div
+                        class="syncloudos-notification-detail-head"
+                      >
+                        <img
+                          alt=""
+                          aria-hidden="true"
+                          src="http://localhost:3000/assets/icons/system/news.png?no-inline"
+                        />
+                        <div>
+                          <p>
+                            SynCloudOS
+                          </p>
+                          <h3>
+                            Backup finished
+                          </h3>
+                        </div>
+                      </div>
+                      <p>
+                        All documents are safe.
+                      </p>
+                      <dl>
+                        <div>
+                          <dt>
+                            Status
+                          </dt>
+                          <dd>
+                            Unread
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>
+                            Kind
+                          </dt>
+                          <dd>
+                            system
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>
+                            Priority
+                          </dt>
+                          <dd>
+                            standard
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>
+                            Time
+                          </dt>
+                          <dd>
+                            21:23
+                          </dd>
+                        </div>
+                      </dl>
+                    </aside>
+                  </div>
+                </section>
+              </div>
+            </aside>
+          </div>
+          <div
+            data-mode="light"
+            data-nse-appearance="atmo"
+            data-nse-chrome="standard"
+            data-nse-colour-scheme-requested="light"
+            data-nse-colour-scheme-resolved="light"
+            data-nse-contrast="normal"
+            data-nse-overlay-portal-host="true"
+            data-nse-transparency="normal"
+            data-syncloudos-runtime-owner="nse-standalone:9"
+            style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px;"
+          />
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+ ❯ tests/runtime/nse-theme-system-surface-coverage.test.tsx:24:41
+     22|       const root = await waitFor(() => {
+     23|         const element = view.baseElement.querySelector<HTMLElement>(`[…
+     24|         expect(element, surface.id).not.toBeNull();
+       |                                         ^
+     25|         return element!;
+     26|       });
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/10]⎯
+
+ FAIL  tests/runtime/nse-theme-system-surface-coverage.test.tsx > system surface theme hooks > folder-presentation
+AssertionError: folder-presentation: expected null not to be null
+
+Ignored nodes: comments, script, style
+<html
+  dir="ltr"
+  lang="en-GB"
+>
+  <head />
+  <body>
+    <div>
+      <div
+        class="nse-appearance-provider"
+        data-mode="light"
+        data-nse-appearance="atmo"
+        data-nse-chrome="standard"
+        data-nse-colour-scheme-requested="light"
+        data-nse-colour-scheme-resolved="light"
+        data-nse-contrast="normal"
+        data-nse-transparency="normal"
+      >
+        <div
+          data-nse-overlay-provider="nse-overlay-provider:nse-standalone:10:_r_1n_"
+          data-syncloudos-runtime-owner="nse-standalone:10"
+          style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px; display: contents;"
+        >
+          <div
+            data-system-baseline-ready=""
+            style="height: 100vh;"
+          >
+            <div
+              class="nse-material-provider"
+              data-nse-material="atmo"
+            >
+              <div
+                class="webspring-view-host"
+              >
+                <div
+                  class="webspring-entrance-surface"
+                >
+                  <div
+                    class="nse-material-provider"
+                    data-nse-material="atmo"
+                  >
+                    <main
+                      class="webspring-board"
+                      data-entrance-phase="ready"
+                      data-launch-phase="idle"
+                      data-layout-editing="false"
+                      data-reduced-motion="false"
+                      style="--webspring-launcher-colour: #5a6170; --webspring-launcher-image: radial-gradient(ellipse at 50% 45%, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 55%, rgba(0, 0, 0, 0.6) 100%), linear-gradient(color-mix(in srgb, #4a6fa5 10%, transparent), color-mix(in srgb, #4a6fa5 10%, transparent)), url(\"http://localhost:3000/assets/textures/NSETileCotton.jpg?no-inline\"); --webspring-launcher-size: 100% 100%, 100% 100%, 256px; --webspring-launcher-repeat: no-repeat, no-repeat, repeat; --webspring-launcher-position: center, center, 0 0; --webspring-launcher-overlay-image: none; --webspring-launcher-overlay-size: 100% auto; --webspring-launcher-overlay-opacity: 1; --webspring-launcher-overlay-blend: normal;"
+                    >
+                      <section
+                        aria-label="Webspring"
+                        class="webspring-board-launcher"
+                      >
+                        <div
+                          aria-hidden="true"
+                          class="webspring-board-material"
+                        />
+                        <header
+                          class="webspring-board-brand"
+                        >
+                          <span>
+                            SynCloudOS
+                          </span>
+                        </header>
+                        <div
+                          class="webspring-board-controls "
+                        >
+                          <button
+                            aria-describedby="webspring-board-keyboard-help"
+                            class="nse-control-button"
+                            data-bezel-style="rounded"
+                            data-nse-bezel-style="rounded"
+                            data-nse-button-type="momentaryPushIn"
+                            data-nse-control="button"
+                            data-nse-control-size="regular"
+                            data-nse-part="background"
+                            data-nse-state="off"
+                            data-press-active="false"
+                            data-pressed="false"
+                            data-tone="dark"
+                            type="button"
+                          >
+                            <span
+                              aria-hidden="true"
+                              data-nse-part="bezel"
+                              style="position: absolute; inset: 0px; pointer-events: none;"
+                            />
+                            <span
+                              class="nse-control-button-label"
+                              data-nse-part="title"
+                            >
+                              Reorder applications
+                            </span>
+                          </button>
+                        </div>
+                        <p
+                          class="webspring-reorder-announcement"
+                          id="webspring-board-keyboard-help"
+                        >
+                          Hold an application to reorder. Rest it on another application or a folder to group them. Use arrow keys to move it. Press Escape when finished.
+                        </p>
+                        <section
+                          aria-label="Applications"
+                          class="webspring-board-pages"
+                          style="--webspring-board-columns: 4; --webspring-board-rows: 4;"
+                        >
+                          <div
+                            class="webspring-board-page"
+                            data-page="0"
+                          >
+                            <div
+                              class="webspring-board-slot"
+                            >
+                              <button
+                                aria-label="Open Documents"
+                                class="webspring-board-icon   "
+                                data-order-index="0"
+                                data-webspring-item-id="com.example.theme-baseline.documents"
+                                type="button"
+                              >
+                                <span
+                                  class="webspring-board-icon-artwork"
+                                  style="opacity: 1;"
+                                >
+                                  <span
+                                    class="webspring-board-icon-well"
+                                  >
+                                    <img
+                                      alt=""
+                                      aria-hidden="true"
+                                      draggable="false"
+                                      src="/src/SynCloudOSReact/Resources/SynCloudOSLogo.png?no-inline"
+                                    />
+                                  </span>
+                                  <span
+                                    class="webspring-board-icon-label"
+                                  >
+                                    Documents
+                                  </span>
+                                </span>
+                              </button>
+                            </div>
+                            <div
+                              class="webspring-board-slot"
+                            >
+                              <button
+                                aria-expanded="false"
+                                aria-haspopup="dialog"
+                                aria-label="Open folder Tools"
+                                class="webspring-board-icon is-folder  "
+                                data-order-index="1"
+                                data-webspring-item-id="folder.tools"
+                                type="button"
+                              >
+                                <span
+                                  class="webspring-board-icon-artwork"
+                                  style="opacity: 1;"
+                                >
+                                  <span
+                                    class="webspring-board-icon-well"
+                                  >
+                                    <span
+                                      aria-hidden="true"
+                                      class="webspring-folder-tile"
+                                      data-fill="inset"
+                                      data-shape="roundedRect"
+                                    >
+                                      <span
+                                        class="webspring-folder-tile-surface"
+                                      />
+                                      <span
+                                        class="webspring-folder-tile-member"
+                                      >
+                                        <img
+                                          alt=""
+                                          draggable="false"
+                                          src="/src/SynCloudOSReact/Resources/SynCloudOSLogo.png?no-inline"
+                                        />
+                                      </span>
+                                      <span
+                                        class="webspring-folder-tile-member"
+                                      >
+                                        <img
+                                          alt=""
+                                          draggable="false"
+                                          src="/src/SynCloudOSReact/Resources/SynCloudOSLogo.png?no-inline"
+                                        />
+                                      </span>
+                                    </span>
+                                  </span>
+                                  <span
+                                    class="webspring-board-icon-label"
+                                  >
+                                    Tools
+                                  </span>
+                                </span>
+                              </button>
+                            </div>
+                          </div>
+                        </section>
+                      </section>
+                      <div
+                        class="webspring-application-outlet"
+                      >
+                        <div
+                          class="webspring-application-outlet-host"
+                        >
+                          <div
+                            class="webspring-apps-container"
+                            style="left: 0px; top: 0px; right: auto; bottom: auto; width: 1024px; height: 768px;"
+                          />
+                        </div>
+                      </div>
+                      <span
+                        aria-live="polite"
+                        class="webspring-reorder-announcement"
+                      />
+                    </main>
+                  </div>
+                </div>
+              </div>
+              <div
+                data-nse-overlay-provider="nse-overlay-provider:theme-baseline-system:_r_1u_"
+                data-syncloudos-runtime-owner="theme-baseline-system"
+                style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px; display: contents;"
+              >
+                <div
+                  data-mode="light"
+                  data-nse-appearance="atmo"
+                  data-nse-chrome="standard"
+                  data-nse-colour-scheme-requested="light"
+                  data-nse-colour-scheme-resolved="light"
+                  data-nse-contrast="normal"
+                  data-nse-overlay-portal-host="true"
+                  data-nse-transparency="normal"
+                  data-syncloudos-runtime-owner="theme-baseline-system"
+                  style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px;"
+                />
+              </div>
+              <div
+                class="webspring-window-layer"
+                data-window-layer=""
+                data-window-modal-active="false"
+              />
+              <aside
+                aria-label="SynCloudOS Notification Centre"
+                class="syncloudos-notification-layer"
+                data-reduced-motion="false"
+              >
+                <div
+                  aria-atomic="true"
+                  aria-live="polite"
+                  class="syncloudos-notification-live-region"
+                  role="status"
+                />
+              </aside>
+              <div
+                aria-hidden="true"
+                data-system-alert-asset-cache="true"
+                hidden=""
+              >
+                <img
+                  alt=""
+                  decoding="async"
+                  fetchpriority="low"
+                  src="/src/SynCloudOSReact/Resources/AlertCautionIcon.png?no-inline"
+                />
+                <img
+                  alt=""
+                  decoding="async"
+                  fetchpriority="low"
+                  src="/src/SynCloudOSReact/Resources/SynCloudOSLogo.png?no-inline"
+                />
+              </div>
+            </div>
+          </div>
+          <div
+            data-mode="light"
+            data-nse-appearance="atmo"
+            data-nse-chrome="standard"
+            data-nse-colour-scheme-requested="light"
+            data-nse-colour-scheme-resolved="light"
+            data-nse-contrast="normal"
+            data-nse-overlay-portal-host="true"
+            data-nse-transparency="normal"
+            data-syncloudos-runtime-owner="nse-standalone:10"
+            style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px;"
+          />
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+ ❯ tests/runtime/nse-theme-system-surface-coverage.test.tsx:24:41
+     22|       const root = await waitFor(() => {
+     23|         const element = view.baseElement.querySelector<HTMLElement>(`[…
+     24|         expect(element, surface.id).not.toBeNull();
+       |                                         ^
+     25|         return element!;
+     26|       });
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/10]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  10 failed (10)
+   Start at  21:23:28
+   Duration  18.47s (transform 5.50s, setup 27ms, import 7.26s, tests 10.22s, environment 807ms)

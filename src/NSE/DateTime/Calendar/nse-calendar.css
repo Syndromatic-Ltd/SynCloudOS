@@ -19,9 +19,9 @@
  */
 
 /* AppearanceAuthority review: calendar and clock CSS dimensions remain explicitly unresolved. */
-[data-nse-control="date-picker"]:where([data-nse-picker-mode="date"][data-nse-date-picker-style="clockAndCalendar"]) { inline-size: 141px; min-block-size: 148px; }
-[data-nse-control="date-picker"]:where([data-nse-picker-mode="date"][data-nse-date-picker-style="clockAndCalendar"]) [data-nse-part="header"] { min-block-size: 39px; }
-[data-nse-control="date-picker"]:where([data-nse-picker-mode="date"][data-nse-date-picker-style="clockAndCalendar"]) [data-nse-part="day"] { inline-size: 20px; block-size: 18px; }
+[data-nse-control="date-picker"]:where([data-nse-role="calendar"]) { inline-size: 141px; min-block-size: 148px; }
+[data-nse-control="date-picker"]:where([data-nse-role="calendar"]) [data-nse-part="header"] { min-block-size: 39px; }
+[data-nse-control="date-picker"]:where([data-nse-role="calendar"]) [data-nse-part="day"] { inline-size: 20px; block-size: 18px; }
 [data-nse-part="clock"] [data-nse-part="face"] { inline-size: 122px; block-size: 123px; border-radius: 50%; position: relative; }
 [data-nse-part="clock"] [data-nse-part="face"] { border: 1px solid CanvasText; background: Canvas; box-sizing: border-box; }
 [data-nse-part="clock"] [data-nse-part$="hand"] { position: absolute; inset-inline-start: calc(50% - 1px); inset-block-end: 50%; inline-size: 2px; transform-origin: bottom; background: CanvasText; border-radius: 2px; }

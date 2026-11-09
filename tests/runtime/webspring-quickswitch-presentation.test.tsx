@@ -99,11 +99,14 @@ it("selects on hover without scrolling the row; keyboard selection only scrolls 
         </NSEAnimationEnvironmentProvider>
       </SynCloudOSProvider>
     );
+    expect(screen.getByRole("dialog", { name: "QuickSwitch" }).getAttribute("data-nse-control")).toBe("quick-switch");
     const options = screen.getAllByRole("option");
+    expect(options[0]!.getAttribute("data-nse-control")).toBe("app-icon");
     scrollIntoView.mockClear();
     // Hovering the end icon used to centre it, sliding the whole row under the pointer.
     fireEvent.pointerEnter(options[2]!);
     expect(options[2]!.getAttribute("aria-selected")).toBe("true");
+    expect(options[2]!.hasAttribute("data-nse-selected")).toBe(true);
     expect(scrollIntoView).not.toHaveBeenCalled();
     fireEvent.keyDown(screen.getByRole("dialog", { name: "QuickSwitch" }), { key: "ArrowLeft" });
     expect(options[1]!.getAttribute("aria-selected")).toBe("true");

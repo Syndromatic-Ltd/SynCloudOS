@@ -337,32 +337,32 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
 
   return <NSEFocusScope options={{ scopeId: `webspring-folder:${scopeId}`, kind: "modal", modal: true, trapFocus: true, restoreFocus: true, asChild: true }}>
     <div
-      className="webspring-folder-split"
+      data-nse-control="folder-presentation" data-nse-part="background" className="webspring-folder-split"
       data-phase={phase}
       data-motion={fade ? "fade" : "split"}
       style={style}
       onKeyDownCapture={onKeyDown}
     >
-      <div className="webspring-folder-split-backdrop" aria-hidden="true" onClick={close} />
+      <div data-nse-part="backdrop" className="webspring-folder-split-backdrop" aria-hidden="true" onClick={close} />
       <div
         ref={panelRef}
-        className="webspring-folder-split-panel"
+        data-nse-part="bezel" className="webspring-folder-split-panel"
         data-webspring-folder-panel={folder.id}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
         style={{ top: `${panelTop}px`, height: `${panelHeight}px` }}
       >
-        <div ref={contentRef} className="webspring-folder-split-content">
-          <h2 id={titleId} className="webspring-folder-split-title">{folder.title}</h2>
-          <div className="webspring-folder-split-apps">
+        <div ref={contentRef} data-nse-part="content" className="webspring-folder-split-content">
+          <h2 id={titleId} data-nse-part="title" className="webspring-folder-split-title">{folder.title}</h2>
+          <div data-nse-part="group" className="webspring-folder-split-apps">
             {/* Apps spring to their new places as they reorder, as on the stage. */}
-            {folder.apps.map((app, index) => <NSELayoutView key={app.bundleIdentifier} className="webspring-folder-split-cell" layoutTransition={reorder}>{renderApp(app, index)}</NSELayoutView>)}
+            {folder.apps.map((app, index) => <NSELayoutView key={app.bundleIdentifier} data-nse-part="cell" className="webspring-folder-split-cell" layoutTransition={reorder}>{renderApp(app, index)}</NSELayoutView>)}
           </div>
         </div>
       </div>
       <div
-        className="webspring-folder-split-half is-top"
+        data-nse-part="background" className="webspring-folder-split-half is-top"
         style={{
           height: `${seam}px`,
           transform: parted ? `translate3d(0, ${-overflow}px, 0)` : undefined,
@@ -372,13 +372,13 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
       >
         <div
           ref={topHostRef}
-          className="webspring-folder-split-clone-host"
+          data-nse-part="preview" className="webspring-folder-split-clone-host"
           style={{ top: 0, height: `${height}px`, clipPath: topClip }}
         />
-        <div className="webspring-folder-split-edge is-top" style={{ clipPath: topEdgeClip }} />
+        <div data-nse-part="border" className="webspring-folder-split-edge is-top" style={{ clipPath: topEdgeClip }} />
       </div>
       <div
-        className="webspring-folder-split-half is-bottom"
+        data-nse-part="background" className="webspring-folder-split-half is-bottom"
         style={{
           top: `${bottomTop}px`,
           height: `${bottomHeight}px`,
@@ -389,21 +389,21 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
       >
         <div
           ref={bottomHostRef}
-          className="webspring-folder-split-clone-host"
+          data-nse-part="preview" className="webspring-folder-split-clone-host"
           style={{ top: `${-bottomTop}px`, height: `${height}px`, clipPath: bottomClip }}
         />
-        <div className="webspring-folder-split-edge is-bottom" style={{ top: `${seam - bottomTop}px`, height: `${EDGE_HIGHLIGHT}px` }} />
+        <div data-nse-part="border" className="webspring-folder-split-edge is-bottom" style={{ top: `${seam - bottomTop}px`, height: `${EDGE_HIGHLIGHT}px` }} />
         {triangle > 0 ? <div
-          className="webspring-folder-split-tab"
+          data-nse-part="indicator" className="webspring-folder-split-tab"
           style={{ left: `${tabLeft}px`, width: `${NOTCH_HALF_BASE * 2}px`, height: `${triangle}px` }}
         >
           <div
-            className="webspring-folder-split-tab-piece"
+            data-nse-part="image" className="webspring-folder-split-tab-piece"
             style={{ transform: parted ? `translate3d(0, ${triangle}px, 0)` : undefined }}
           >
             <div
               ref={tabHostRef}
-              className="webspring-folder-split-clone-host"
+              data-nse-part="preview" className="webspring-folder-split-clone-host"
               style={{ top: `${-bottomTop}px`, left: `${-tabLeft}px`, width: `${stageRect.width}px`, height: `${height}px` }}
             />
           </div>

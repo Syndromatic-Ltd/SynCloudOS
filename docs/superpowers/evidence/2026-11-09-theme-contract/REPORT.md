@@ -109,15 +109,25 @@ The first menu screenshot gate caught the generic tab-view scroll rule clipping 
 
 Windows/overlays commit: `64f146f5` — `NSE: publish theme hooks on windows and overlays`.
 
-The date/panel/window group unifies the date, time and range renderers under `date-picker`, with `picker-mode` and `date-picker-style` variants. Drawing context adds no layout element. The calendar is the graphical date mode; the clock is a drawable part of the time mode. The old `time-picker`, `date-time-picker`, `date-range-picker`, `calendar` and `clock` control identities are removed. `route-picker` becomes `route-picker-view`; `file-panel` becomes `save-panel`. Generic `overlay` becomes the real menu, popover, tooltip or sheet identity, while `role="overlay"` identifies shared surface structure. No old identity aliases remain.
+The date/panel/window group unifies the date, time and range renderers under `date-picker`, with `date-picker-mode`, `date-picker-elements` and `date-picker-style` variants. Drawing context adds no layout element. The calendar is the graphical date mode; the clock is a drawable part of the time mode. The old `time-picker`, `date-time-picker`, `date-range-picker`, `calendar` and `clock` control identities are removed. `route-picker` becomes `route-picker-view`; `file-panel` becomes `save-panel`. Generic `overlay` becomes the real menu, popover, tooltip or sheet identity, while `role="overlay"` identifies shared surface structure. No old identity aliases remain. The initial overloaded `picker-mode` hook was corrected during the additional Task 9 probes: AppKit’s `datePickerMode` (`single`/`range`) and `datePickerElements` are published separately; no `picker-mode` alias remains.
 
 Panels, windows and overlays publish their real parts, window chrome/toolbar variants and inactive-window state. Colour/font/file panels retain their existing neutral parts. Composite button and overlay hosts now preserve the composing control's identity and named part; the existing interaction and accessibility owners remain in charge.
 
 The first full image gate found the graphical time picker receiving a calendar-only layout rule after identity unification. The calendar selector now also requires date mode, with unchanged specificity. Eight focused clock comparisons pass; failed images/traces are retained as `task-8-clock-mode-*`. The expanded regression run passed **954 tests in 30 files** and typecheck passed. Final full visual acceptance passed **82/82, zero differences** (`task-8-panels-baseline-final.log`). All 2,648 reference hashes remain unchanged.
 
+Public system-controls commit: `47893020` — `NSE: publish theme hooks on public system controls`.
+
 The final public system-control group adds the existing badge surface (`badge`) and the sprite loading indicator (`progress-indicator`, spinning style and status role). Its normal/emphasised background-style variant distinguishes the existing contrasting artwork. The image, dimensions, filter and motion stay exactly as before. The focused run passed **800 tests across 14 files** and typecheck passed; full visual acceptance passed **82/82, zero differences** (`task-8-system-controls-baseline.log`). The frozen hashes remain unchanged. The system alert presenters are explicitly assigned to Task 9.
 
-### Tasks 9–19
+### Task 9 — system surfaces
+
+Login, notifications, system alerts, About/preferences panels, Board icons, folder tiles/presentation, application-stage chrome, Quick Switch and the status-bar slot publish public identities and neutral parts. Existing native handlers, commands, focus scopes, capture geometry and framework effects retain ownership. The existing menu bar already publishes its hooks through Task 8.
+
+Separate comparisons against unchanged `a1c3617` source cover Quick Switch, disclosed recovery alerts, stage/status-bar key state and combined/range date pickers. All **40 comparisons are byte-identical**, including two identical captures per side. The same fixture bytes run against both source trees. The first accepted comparison and the repeat after the AppKit date-property correction are retained under `additional-parity/`. These are additional source comparisons; the frozen Task 1 images were not added to or replaced.
+
+The system catalogue's ten cases pass; targeted stage key-state, status-slot, Quick Switch selection and folder-rendering assertions also pass. Their added assertions were verified to fail against the previous implementations, then passed with the new hooks. **787 focused tests across 19 files**, framework typecheck and the additional fixture typecheck pass. The final frozen visual gate passed **82/82 with zero differences** (`task-9-baseline-final.log`), and all 2,648 frozen image hashes are unchanged. Login retains its existing ornamented presentation. The separate plain-login review image belongs to the later presentation-selection task.
+
+### Tasks 10–19
 
 Pending. Final split-suite and packed SDK acceptance remain for Task 19.
 
@@ -154,7 +164,7 @@ Further diagnostic runs exposed folder-only capture interference and source-pain
 
 7. The minimum interaction bound must preserve a theme’s larger minimum. `--nse-control-minimum-inline-size` and `--nse-control-minimum-block-size` supply those metrics; structural CSS clamps them to at least 24 points for regular/large controls rather than replacing a larger minimum with 24.
 
-9. Date, time, combined and range editors are all NSDatePicker modes, so they share `date-picker`; mode/style attributes distinguish their drawing. Shared overlay CSS uses an overlay role rather than a fictitious AppKit control identity.
+9. Date, time, combined and range editors are all NSDatePicker modes, so they share `date-picker`; AppKit’s mode, element and style attributes distinguish their drawing. Shared overlay CSS uses an overlay role rather than a fictitious AppKit control identity.
 
 8. Painted bezel dimensions and interaction dimensions are distinct. The stepper uses `--nse-control-bezel-inline-size` and `--nse-control-bezel-block-size` for its existing art; framework-owned hit dimensions meet the minimum without moving that art or its neighbours. Passive progress/meter surfaces do not receive hit-target sizing.
 
@@ -168,7 +178,7 @@ Task 5 adds `NSEScrollViewProps.automaticallyAdjustsContentInsets`, `contentInse
 
 Task 7 adds `NSEThemeControlName`, `NSEThemePartName`, `nseControlHooks`, `nsePartHooks` and the `@syndromatic/syncloudos/nse/theme` package entry.
 
-Catalogue limitation: the About and Settings entries exercise `NSEAboutDialog` and `NSEPreferencesToast`, respectively, rather than complete routed application sessions. They prove parity for those surfaces only.
+Catalogue limitation: the About and Settings entries exercise `NSEAboutDialog` and `NSEPreferencesToast`, respectively, rather than complete routed application sessions. They prove parity for those surfaces only. No separate routed About/Settings app bundle was found in this framework; site applications are outside scope.
 
 Part-name mappings, semantic colour values without Atmo precedent and Beta 2 removals will be recorded as their tasks are completed. No visual design decision has been made.
 
