@@ -81,11 +81,25 @@ try {
   const allowed=await call("validate",{typescript:false,launch:false});
   assert.equal(allowed.ok,true,JSON.stringify(allowed));
   assert(allowed.idiomAudit.optOuts.some(item=>item.reason==="packed opt-out acceptance" && item.suppressed>0));
+  // These fixtures intentionally exercise static authoring rules without executing them.
+  const content='\nconst sample = <pre style={{overflow:"auto"}}><table><tbody><tr><td>42</td></tr></tbody></table></pre>;\n';
+  writeFileSync(view,originalView+content);
+  const staticContent=await call("validate",{typescript:false,launch:false});
+  assert.equal(staticContent.ok,true,JSON.stringify(staticContent));
+  assert(staticContent.findings.some(item=>item.rule==="idiom.scroll-view" && item.severity==="warning"));
+  assert.equal(staticContent.idiomAudit.errors,0);
+  const renderer='\nconst canvas = document.createElement("canvas"); const gl = canvas.getContext("webgl2"); const surface = <><canvas /><button>HUD</button></>;\n';
+  writeFileSync(view,originalView+renderer);
+  const hud=await call("validate",{typescript:false,launch:false});
+  assert.equal(hud.ok,false,JSON.stringify(hud));
+  assert(hud.findings.some(item=>item.rule==="idiom.nse-controls" && item.severity==="error"));
+  writeFileSync(view,originalView+renderer.replace('<button>HUD</button>', '<NSEButton title="HUD" />'));
+  assert.equal((await call("validate",{typescript:false,launch:false})).ok,true);
   writeFileSync(view,originalView);
   const explained=await call("explain_error",{query:"NSE_CONTROLLER_DISPOSED"});
   assert.equal(explained.matches[0].code,"NSE_CONTROLLER_DISPOSED");
   assert.equal(stderr,"");
-  process.stdout.write(JSON.stringify({ok:true,sdkVersion:companion.version,tools:listed.tools.map(tool=>tool.name),archive:companion.archive,checks:["independent SDK tgz install","independent MCP tgz install","stdio listTools","inspect_project receipt","lookup_sdk installed declarations and docs","scaffold -> validate including tsc --noEmit and a jsdom launch","explain_error canonical code","custom theme scaffold and validation","authoring error fails validate","reasoned inline opt-out"]},null,2)+"\n");
+  process.stdout.write(JSON.stringify({ok:true,sdkVersion:companion.version,tools:listed.tools.map(tool=>tool.name),archive:companion.archive,checks:["independent SDK tgz install","independent MCP tgz install","stdio listTools","inspect_project receipt","lookup_sdk installed declarations and docs","scaffold -> validate including tsc --noEmit and a jsdom launch","explain_error canonical code","custom theme scaffold and validation","authoring error fails validate","reasoned inline opt-out","static content tables and overflow warnings pass","renderer surfaces retain HUD control checks"]},null,2)+"\n");
 } finally {
   await client?.close();
   rmSync(consumer.root,{recursive:true,force:true});
