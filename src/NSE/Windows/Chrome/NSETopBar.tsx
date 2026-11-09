@@ -166,6 +166,7 @@ function NSETopBarMetal({
 
   return (
     <header
+      data-nse-control="window" data-nse-part="header" data-nse-chrome="metal"
       ref={header}
       className={`nse-app-topbar nse-app-topbar-metal ${className}`.trim()}
       data-variant="atmoMetal"
@@ -224,21 +225,21 @@ function NSETopBarCumulus(props: NSETopBarProps) {
   );
 
   return (
-    <header ref={header} className={`nse-app-topbar ${surfaceProps.className ?? ""}`.trim()} data-variant="atmoCumulus" style={surfaceProps.style as CSSProperties | undefined}>
+    <header data-nse-control="window" data-nse-part="header" data-nse-chrome="standard" ref={header} className={`nse-app-topbar ${surfaceProps.className ?? ""}`.trim()} data-variant="atmoCumulus" style={surfaceProps.style as CSSProperties | undefined}>
       <div className="nse-app-topbar-base" aria-hidden="true">
         <span className="nse-app-topbar-base-glass" />
       </div>
-      <div className="nse-app-topbar-content">
-        <div className="nse-app-topbar-slot nse-app-topbar-slot-left">
+      <div data-nse-part="content" className="nse-app-topbar-content">
+        <div data-nse-part="leading" className="nse-app-topbar-slot nse-app-topbar-slot-left">
           {leading !== undefined ? leadingLabelHelp(leading) : leadingItems.map((item) => (
             <NSETopBarButton key={`${item.kind}-${item.label}`} item={item} position="left" styleDefinition={styleDefinition} />
           ))}
           {leadingAccessory}
         </div>
-        <h1 className="nse-app-topbar-title">
+        <h1 data-nse-part="title" className="nse-app-topbar-title">
           <NSETopBarTitle title={title} center={center} titleAction={titleAction} />
         </h1>
-        <div className="nse-app-topbar-slot nse-app-topbar-slot-right">
+        <div data-nse-part="trailing" className="nse-app-topbar-slot nse-app-topbar-slot-right">
           {trailing !== undefined ? trailing : trailingItems.map((item) => (
             <NSETopBarButton key={`${item.kind}-${item.label}`} item={item} position="right" styleDefinition={styleDefinition} />
           ))}

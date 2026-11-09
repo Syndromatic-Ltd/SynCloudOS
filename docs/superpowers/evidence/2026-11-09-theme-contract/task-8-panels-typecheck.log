@@ -1,0 +1,4 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 typecheck
+npm notice run tsc -b --pretty false
+src/NSE/Overlays/NSEPopup.tsx(262,7): error TS2783: 'data-nse-control' is specified more than once, so this usage will be overwritten.
+src/NSE/Overlays/NSEPopup.tsx(262,88): error TS2783: 'data-nse-part' is specified more than once, so this usage will be overwritten.

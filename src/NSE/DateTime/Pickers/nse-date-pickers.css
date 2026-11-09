@@ -18,19 +18,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-[data-nse-control="date-picker"] > input[type="text"] { min-block-size: 29px; }
-[data-nse-control="date-time-picker"], [data-nse-control="date-range-picker"] { display: grid; gap: 8px; }
+[data-nse-control="date-picker"]:where([data-nse-picker-mode="date"]:not([data-nse-date-picker-style="clockAndCalendar"])) > input[type="text"] { min-block-size: 29px; }
+[data-nse-control="date-picker"]:where([data-nse-picker-mode="date-time"]), [data-nse-control="date-picker"]:where([data-nse-picker-mode="date-range"]) { display: grid; gap: 8px; }
 
 /*
  * AppearanceAuthority removes UA chrome from the named leak slice. A surface only gains a
  * visual recipe when its source decision resolves; these neutral declarations
  * never stand in for an authority record.
  */
-[data-nse-control="date-picker"] > input[type="text"],
-[data-nse-control="date-picker"] > button,
-[data-nse-control="date-time-picker"] input[type="text"],
-[data-nse-control="date-time-picker"] select,
-[data-nse-control="time-picker"] > button {
+[data-nse-control="date-picker"]:where([data-nse-picker-mode="date"]:not([data-nse-date-picker-style="clockAndCalendar"])) > input[type="text"],
+[data-nse-control="date-picker"]:where([data-nse-picker-mode="date"]:not([data-nse-date-picker-style="clockAndCalendar"])) > button,
+[data-nse-control="date-picker"]:where([data-nse-picker-mode="date-time"]) input[type="text"],
+[data-nse-control="date-picker"]:where([data-nse-picker-mode="date-time"]) select,
+[data-nse-control="date-picker"]:where([data-nse-picker-mode="time"]) > button {
   appearance: none;
   -webkit-appearance: none;
   background: transparent;

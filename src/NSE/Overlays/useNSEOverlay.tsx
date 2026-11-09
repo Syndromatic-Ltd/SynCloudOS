@@ -68,8 +68,9 @@ export interface UseNSEOverlayResult {
   readonly portalHost: HTMLElement | null;
   readonly surfaceProps: {
     readonly ref: (element: HTMLElement | null) => void;
-    readonly "data-nse-control": "overlay";
+    readonly "data-nse-control": "menu" | "popover" | "tooltip" | "sheet";
     readonly "data-nse-part": "surface";
+    readonly "data-nse-role": "overlay";
     readonly "data-state": "open";
     readonly "data-placement": NSELogicalPlacement;
     readonly "data-nse-viewport-limited": "true" | "false";
@@ -418,8 +419,9 @@ export function useNSEOverlay({
     portalHost: parentRegistered ? portalHost : null,
     surfaceProps: {
       ref: setSurfaceRef,
-      "data-nse-control": "overlay",
+      "data-nse-control": kind === "action-sheet" ? "sheet" : kind === "popover" || kind === "tooltip" ? kind : "menu",
       "data-nse-part": "surface",
+      "data-nse-role": "overlay",
       "data-state": "open",
       "data-placement": placement,
       "data-nse-viewport-limited": viewportLimited ? "true" : "false",

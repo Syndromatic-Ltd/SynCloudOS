@@ -329,9 +329,9 @@ describe("civil date/time pickers", () => {
       </>,
     );
 
-    const datePicker = screen.getByRole("textbox", { name: "Date" }).closest('[data-nse-control="date-picker"]')!;
-    const dateTimePicker = screen.getByRole("textbox", { name: "Appointment date and time" }).closest('[data-nse-control="date-time-picker"]')!;
-    const timePicker = screen.getByRole("spinbutton", { name: "Minute" }).closest('[data-nse-control="time-picker"]')!;
+    const datePicker = screen.getByRole("textbox", { name: "Date" }).closest('[data-nse-control="date-picker"]:where([data-nse-picker-mode="date"]:not([data-nse-date-picker-style="clockAndCalendar"]))')!;
+    const dateTimePicker = screen.getByRole("textbox", { name: "Appointment date and time" }).closest('[data-nse-control="date-picker"]:where([data-nse-picker-mode="date-time"])')!;
+    const timePicker = screen.getByRole("spinbutton", { name: "Minute" }).closest('[data-nse-control="date-picker"]:where([data-nse-picker-mode="time"])')!;
     expect(datePicker.getAttribute("data-nse-appearance-slot")).toBe("date-picker.select.normal.1x");
     expect(dateTimePicker.getAttribute("data-nse-appearance-slot")).toBe("date-time-picker.select.normal.1x");
     expect(timePicker.getAttribute("data-nse-appearance-slot")).toBe("time-picker.select.normal.1x");

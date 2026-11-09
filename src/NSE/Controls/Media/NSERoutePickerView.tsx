@@ -34,7 +34,7 @@ export function NSERoutePickerView({ routeDetector, title = "Choose playback dev
   const snapshot = useCallback(() => `${routeDetector.connectionState}:${routeDetector.capabilities.remotePlayback ? "enabled" : "disabled"}`, [routeDetector]);
   const value = useSyncExternalStore(subscribe, snapshot, () => "unknown:disabled");
   const [state, capability] = value.split(":");
-  return <NSEButton {...props} title={title} data-nse-control="route-picker" data-route-state={state}
+  return <NSEButton {...props} title={title} data-nse-control="route-picker-view" data-route-state={state}
     aria-label={props["aria-label"] ?? title} aria-pressed={state === "connected"}
     isEnabled={isEnabled && capability === "enabled"}
     onClick={() => { void routeDetector.prompt().catch(error => onError?.(error)); }} />;

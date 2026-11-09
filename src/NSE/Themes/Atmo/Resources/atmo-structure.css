@@ -3046,7 +3046,7 @@
    text gives way to glyphs.
    ========================================================================= */
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="calendar"][data-calendar-variant] {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date"][data-nse-date-picker-style="clockAndCalendar"])[data-calendar-variant] {
   box-sizing: border-box;
   display: grid;
   gap: 6px;
@@ -3058,14 +3058,14 @@
   font-variant-numeric: tabular-nums;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="calendar"] > [data-nse-part="header"] {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date"][data-nse-date-picker-style="clockAndCalendar"]) > [data-nse-part="header"] {
   display: flex;
   align-items: center;
   gap: 2px;
   min-block-size: 30px;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="calendar"] > [data-nse-part="header"] > h2 {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date"][data-nse-date-picker-style="clockAndCalendar"]) > [data-nse-part="header"] > h2 {
   flex: 1 1 auto;
   min-inline-size: 0;
   margin: 0;
@@ -3078,7 +3078,7 @@
   white-space: nowrap;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="calendar"] > [data-nse-part="header"] > button {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date"][data-nse-date-picker-style="clockAndCalendar"]) > [data-nse-part="header"] > button {
   position: relative;
   flex: none;
   inline-size: 26px;
@@ -3090,7 +3090,7 @@
   cursor: pointer;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="calendar"] > [data-nse-part="header"] > button::before {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date"][data-nse-date-picker-style="clockAndCalendar"]) > [data-nse-part="header"] > button::before {
   position: absolute;
   inset: 0;
   display: grid;
@@ -3100,26 +3100,26 @@
   line-height: 1;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="calendar"] > [data-nse-part="header"] > button[data-nse-part="previous-year"]::before { content: "\00AB"; font-size: 17px; }
-:where([data-nse-appearance="atmo"]) [data-nse-control="calendar"] > [data-nse-part="header"] > button[data-nse-part="previous-month"]::before { content: "\2039"; font-size: 19px; }
-:where([data-nse-appearance="atmo"]) [data-nse-control="calendar"] > [data-nse-part="header"] > button[data-nse-part="next-month"]::before { content: "\203A"; font-size: 19px; }
-:where([data-nse-appearance="atmo"]) [data-nse-control="calendar"] > [data-nse-part="header"] > button[data-nse-part="next-year"]::before { content: "\00BB"; font-size: 17px; }
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date"][data-nse-date-picker-style="clockAndCalendar"]) > [data-nse-part="header"] > button[data-nse-part="previous-year"]::before { content: "\00AB"; font-size: 17px; }
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date"][data-nse-date-picker-style="clockAndCalendar"]) > [data-nse-part="header"] > button[data-nse-part="previous-month"]::before { content: "\2039"; font-size: 19px; }
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date"][data-nse-date-picker-style="clockAndCalendar"]) > [data-nse-part="header"] > button[data-nse-part="next-month"]::before { content: "\203A"; font-size: 19px; }
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date"][data-nse-date-picker-style="clockAndCalendar"]) > [data-nse-part="header"] > button[data-nse-part="next-year"]::before { content: "\00BB"; font-size: 17px; }
 /* Today: a dot, drawn rather than typed so it sits on the button's optical centre. */
-:where([data-nse-appearance="atmo"]) [data-nse-control="calendar"] > [data-nse-part="header"] > button[data-nse-part="today"]::before { content: ""; inset: calc(50% - 3.5px); border-radius: 50%; background: currentColor; }
-:where([data-nse-appearance="atmo"]) [data-nse-control="calendar"][dir="rtl"] > [data-nse-part="header"] > button::before { transform: scaleX(-1); }
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date"][data-nse-date-picker-style="clockAndCalendar"]) > [data-nse-part="header"] > button[data-nse-part="today"]::before { content: ""; inset: calc(50% - 3.5px); border-radius: 50%; background: currentColor; }
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date"][data-nse-date-picker-style="clockAndCalendar"])[dir="rtl"] > [data-nse-part="header"] > button::before { transform: scaleX(-1); }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="calendar"] > [role="grid"] {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date"][data-nse-date-picker-style="clockAndCalendar"]) > [role="grid"] {
   display: grid;
   gap: 1px;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="calendar"] [role="row"] {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date"][data-nse-date-picker-style="clockAndCalendar"]) [role="row"] {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 1px;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="calendar"] [role="columnheader"] {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date"][data-nse-date-picker-style="clockAndCalendar"]) [role="columnheader"] {
   padding-block: 2px 5px;
   overflow: hidden;
   font-size: 10px;
@@ -3132,13 +3132,13 @@
   white-space: nowrap;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="calendar"] [role="row"] > span {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date"][data-nse-date-picker-style="clockAndCalendar"]) [role="row"] > span {
   display: grid;
   min-inline-size: 0;
 }
 
 /* [data-calendar-variant] outranks the base sheet's 20×18 cell. */
-:where([data-nse-appearance="atmo"]) [data-nse-control="calendar"][data-calendar-variant] [data-nse-part="day"] {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date"][data-nse-date-picker-style="clockAndCalendar"])[data-calendar-variant] [data-nse-part="day"] {
   position: relative;
   inline-size: auto;
   block-size: 30px;
@@ -3156,12 +3156,12 @@
   cursor: pointer;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="calendar"] [data-nse-part="day"]:disabled {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date"][data-nse-date-picker-style="clockAndCalendar"]) [data-nse-part="day"]:disabled {
   cursor: default;
   opacity: 0.35;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="calendar"] [data-nse-part="event-indicator"] {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date"][data-nse-date-picker-style="clockAndCalendar"]) [data-nse-part="event-indicator"] {
   position: absolute;
   inset-block-end: 3px;
   inset-inline-start: calc(50% - 2px);
@@ -3176,19 +3176,19 @@
    fields. The hands keep the component's own lengths and rotation.
    ========================================================================= */
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="clock"] {
+:where([data-nse-appearance="atmo"]) [data-nse-part="clock"] {
   display: grid;
   justify-items: start;
   gap: 10px;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="clock"] > [data-nse-part="face"] {
+:where([data-nse-appearance="atmo"]) [data-nse-part="clock"] > [data-nse-part="face"] {
   isolation: isolate;
   touch-action: none;
   cursor: grab;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="clock"] > [data-nse-part="face"]::before {
+:where([data-nse-appearance="atmo"]) [data-nse-part="clock"] > [data-nse-part="face"]::before {
   content: "";
   position: absolute;
   inset: 5px;
@@ -3197,19 +3197,19 @@
   pointer-events: none;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="clock"][data-disabled="true"] > [data-nse-part="face"] {
+:where([data-nse-appearance="atmo"]) [data-nse-part="clock"][data-disabled="true"] > [data-nse-part="face"] {
   cursor: default;
   opacity: 0.5;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="clock"] > [data-nse-part="numeric"] {
+:where([data-nse-appearance="atmo"]) [data-nse-part="clock"] > [data-nse-part="numeric"] {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 6px 12px;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="clock"] > [data-nse-part="numeric"] > label {
+:where([data-nse-appearance="atmo"]) [data-nse-part="clock"] > [data-nse-part="numeric"] > label {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -3217,7 +3217,7 @@
   font-weight: 700;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="clock"] > [data-nse-part="numeric"] input {
+:where([data-nse-appearance="atmo"]) [data-nse-part="clock"] > [data-nse-part="numeric"] input {
   box-sizing: border-box;
   inline-size: 48px;
   block-size: 28px;
@@ -3233,8 +3233,8 @@
   -moz-appearance: textfield;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="clock"] > [data-nse-part="numeric"] input::-webkit-inner-spin-button,
-:where([data-nse-appearance="atmo"]) [data-nse-control="clock"] > [data-nse-part="numeric"] input::-webkit-outer-spin-button {
+:where([data-nse-appearance="atmo"]) [data-nse-part="clock"] > [data-nse-part="numeric"] input::-webkit-inner-spin-button,
+:where([data-nse-appearance="atmo"]) [data-nse-part="clock"] > [data-nse-part="numeric"] input::-webkit-outer-spin-button {
   margin: 0;
   -webkit-appearance: none;
 }
@@ -3247,7 +3247,7 @@
    caption the calendar and end in an action row of push buttons.
    ========================================================================= */
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:not(:has([data-field-editor="segments"])) {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date"]:not([data-nse-date-picker-style="clockAndCalendar"])):not(:has([data-field-editor="segments"])) {
   position: relative;
   isolation: isolate;
   display: inline-flex;
@@ -3261,7 +3261,7 @@
   vertical-align: middle;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:not(:has([data-field-editor="segments"]))::before {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date"]:not([data-nse-date-picker-style="clockAndCalendar"])):not(:has([data-field-editor="segments"]))::before {
   content: "";
   position: absolute;
   inset: 0 0 auto;
@@ -3271,7 +3271,7 @@
   pointer-events: none;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"] > [data-nse-part="date-entry"] {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date"]:not([data-nse-date-picker-style="clockAndCalendar"])) > [data-nse-part="date-entry"] {
   flex: 1 1 96px;
   min-inline-size: 0;
   block-size: 36px;
@@ -3280,14 +3280,14 @@
   outline: none;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"] > button,
-:where([data-nse-appearance="atmo"]) :is([data-nse-control="date-time-picker"], [data-nse-control="date-range-picker"]) > button {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date"]:not([data-nse-date-picker-style="clockAndCalendar"])) > button,
+:where([data-nse-appearance="atmo"]) :is([data-nse-control="date-picker"]:where([data-nse-picker-mode="date-time"]), [data-nse-control="date-picker"]:where([data-nse-picker-mode="date-range"])) > button {
   position: relative;
   flex: none;
   cursor: pointer;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"] > button {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date"]:not([data-nse-date-picker-style="clockAndCalendar"])) > button {
   inline-size: 30px;
   block-size: 28px;
   margin: 0;
@@ -3296,7 +3296,7 @@
   font-size: 0;
 }
 
-:where([data-nse-appearance="atmo"]) :is([data-nse-control="date-picker"] > button, [data-nse-control="date-time-picker"] > button, [data-nse-control="date-range-picker"] > button)::before {
+:where([data-nse-appearance="atmo"]) :is([data-nse-control="date-picker"]:where([data-nse-picker-mode="date"]:not([data-nse-date-picker-style="clockAndCalendar"])) > button, [data-nse-control="date-picker"]:where([data-nse-picker-mode="date-time"]) > button, [data-nse-control="date-picker"]:where([data-nse-picker-mode="date-range"]) > button)::before {
   content: "";
   position: absolute;
   inset-block: 0;
@@ -3306,8 +3306,8 @@
   mask: var(--nse-atmo-calendar-glyph) center / 16px 16px no-repeat;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"] > [role="alert"],
-:where([data-nse-appearance="atmo"]) [data-nse-control="date-range-picker"] > [role="alert"],
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date"]:not([data-nse-date-picker-style="clockAndCalendar"])) > [role="alert"],
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date-range"]) > [role="alert"],
 :where([data-nse-appearance="atmo"]) [data-nse-part="date-time-editor"] > [role="alert"] {
   flex-basis: 100%;
   grid-column: 1 / -1;
@@ -3318,7 +3318,7 @@
 
 /* Date-time picker trigger: the value in a field pill with a trailing
    calendar affix. */
-:where([data-nse-appearance="atmo"]) :is([data-nse-control="date-time-picker"], [data-nse-control="date-range-picker"]) > button {
+:where([data-nse-appearance="atmo"]) :is([data-nse-control="date-picker"]:where([data-nse-picker-mode="date-time"]), [data-nse-control="date-picker"]:where([data-nse-picker-mode="date-range"])) > button {
   inline-size: 100%;
   min-inline-size: 200px;
   block-size: 36px;
@@ -3330,14 +3330,14 @@
   text-align: start;
 }
 
-:where([data-nse-appearance="atmo"]) :is([data-nse-control="date-time-picker"], [data-nse-control="date-range-picker"]) > button::before {
+:where([data-nse-appearance="atmo"]) :is([data-nse-control="date-picker"]:where([data-nse-picker-mode="date-time"]), [data-nse-control="date-picker"]:where([data-nse-picker-mode="date-range"])) > button::before {
   inset-inline-start: auto;
   inset-inline-end: 12px;
 }
 
 /* Range picker: one trigger pill at rest; start and end fields side by side
    at the top of its calendar sheet (or inline, without an overlay host). */
-:where([data-nse-appearance="atmo"]) [data-nse-control="date-range-picker"] {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date-range"]) {
   display: inline-grid;
   gap: 8px;
   min-inline-size: 0;
@@ -3349,7 +3349,7 @@
   gap: 8px;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="date-range-picker"] > [data-nse-part="actions"] {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="date-range"]) > [data-nse-part="actions"] {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 8px;
@@ -3361,7 +3361,7 @@
   gap: 8px;
 }
 
-:where([data-nse-appearance="atmo"]) :is([data-nse-part="calendar-sheet"], [data-nse-control="date-time-picker"] section) > h2 {
+:where([data-nse-appearance="atmo"]) :is([data-nse-part="calendar-sheet"], [data-nse-control="date-picker"]:where([data-nse-picker-mode="date-time"]) section) > h2 {
   margin: 0;
   font-size: 12px;
   font-weight: 700;
@@ -3407,7 +3407,7 @@
 
 /* Native selects in the date/time family keep their semantics and OS list;
    their closed state is a light Atmo pill with the picker's triangle. */
-:where([data-nse-appearance="atmo"]) :is([data-nse-control="date-time-picker"], [data-nse-part="date-time-editor"], [data-nse-control="clock"], [data-nse-control="time-picker"], [data-nse-control="date-picker"]) select {
+:where([data-nse-appearance="atmo"]) :is([data-nse-control="date-picker"]:where([data-nse-picker-mode="date-time"]), [data-nse-part="date-time-editor"], [data-nse-part="clock"], [data-nse-control="date-picker"]:where([data-nse-picker-mode="time"]), [data-nse-control="date-picker"]:where([data-nse-picker-mode="date"]:not([data-nse-date-picker-style="clockAndCalendar"]))) select {
   box-sizing: border-box;
   block-size: 32px;
   min-inline-size: 64px;
@@ -3422,7 +3422,7 @@
   cursor: pointer;
 }
 
-:where([data-nse-appearance="atmo"]) :is([data-nse-control="date-picker"], [data-nse-control="time-picker"]) [data-field-editor="segments"] {
+:where([data-nse-appearance="atmo"]) :is([data-nse-control="date-picker"]:where([data-nse-picker-mode="date"]:not([data-nse-date-picker-style="clockAndCalendar"])), [data-nse-control="date-picker"]:where([data-nse-picker-mode="time"])) [data-field-editor="segments"] {
   display: inline-flex;
   flex-wrap: nowrap;
   align-items: center;
@@ -4266,7 +4266,7 @@
    minute segments (and a day period), the stepper and a clock affix. The
    focused segment wears the selection blue, as AppKit's segments do.
    ========================================================================= */
-:where([data-nse-appearance="atmo"]) [data-nse-control="time-picker"][data-editor="field"] > [data-field-editor="field"] {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="time"])[data-editor="field"] > [data-field-editor="field"] {
   position: relative;
   isolation: isolate;
   display: inline-flex;
@@ -4278,7 +4278,7 @@
   vertical-align: middle;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="time-picker"][data-editor="field"] > [data-field-editor="field"]::before {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="time"])[data-editor="field"] > [data-field-editor="field"]::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -4287,7 +4287,7 @@
   pointer-events: none;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="time-picker"] [data-nse-part="segments"] {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="time"]) [data-nse-part="segments"] {
   display: inline-flex;
   align-items: center;
   min-inline-size: 64px;
@@ -4297,18 +4297,18 @@
   white-space: nowrap;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="time-picker"] [data-nse-part$="-segment"] {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="time"]) [data-nse-part$="-segment"] {
   padding: 2px 2px;
   border-radius: 4px;
   outline: none;
   cursor: default;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="time-picker"] [data-nse-part="period-gap"] {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="time"]) [data-nse-part="period-gap"] {
   inline-size: 5px;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="time-picker"] [data-nse-part="clock-affix"] {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="time"]) [data-nse-part="clock-affix"] {
   position: relative;
   flex: none;
   inline-size: 28px;
@@ -4321,7 +4321,7 @@
   cursor: pointer;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="time-picker"] [data-nse-part="clock-affix"]::before {
+:where([data-nse-appearance="atmo"]) [data-nse-control="date-picker"]:where([data-nse-picker-mode="time"]) [data-nse-part="clock-affix"]::before {
   content: "";
   position: absolute;
   inset: calc(50% - 8px);

@@ -35,14 +35,14 @@ function HUDTitleBar({ record, dispatchCommand, moveHandleProps }: Pick<NSEWindo
       {...handleProps}
       ref={header}
       className={["nse-window__hud-titlebar", className].filter(Boolean).join(" ")}
-      data-window-hud-titlebar=""
+      data-nse-part="header" data-window-hud-titlebar=""
     >
       {record.style.includes("closable") ? (
         <button
           type="button"
           className="nse-window__control nse-window__control--hud-close"
           aria-label={`Close ${record.title}`}
-          data-window-control="close"
+          data-nse-control="button" data-nse-part="cell" data-nse-role="close" data-nse-highlighted={highlighted ? "" : undefined} data-window-control="close"
           data-window-control-state={highlighted ? "highlighted" : "normal"}
           data-window-appearance-recipe={highlighted ? "window.hud.close.highlighted" : "window.hud.close.normal"}
           data-window-no-drag=""
@@ -53,10 +53,10 @@ function HUDTitleBar({ record, dispatchCommand, moveHandleProps }: Pick<NSEWindo
           onPointerUp={() => setHighlighted(false)}
           onClick={() => void dispatchCommand("window.close", { windowControllerId: record.id })}
         >
-          <span className="nse-window__control-paint" aria-hidden="true" />
+          <span data-nse-part="bezel" className="nse-window__control-paint" aria-hidden="true" />
         </button>
       ) : null}
-      <h2 id={`${record.id}-title`} data-window-title="" className="nse-window__hud-title">{record.title}</h2>
+      <h2 id={`${record.id}-title`} data-window-title="" data-nse-part="title" className="nse-window__hud-title">{record.title}</h2>
     </header>
   );
 }

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useNSEDatePickerDrawing } from "./datePickerDrawing";
 import { useEffect, useId, useReducer, useRef, useState } from "react";
 import { useOptionalNSEOverlayProvider } from "../../Overlays";
 import { NSEPopover } from "../../Overlays/NSEPopover";
@@ -75,6 +76,7 @@ const parseTextValue = (text: string, locale: string, baseline: NSEDateTimeValue
 };
 
 export function NSEDateTimeEntry({ value, defaultValue = null, mode = "combined", onValueChange, ...props }: NSEDateTimeEntryProps) {
+  const drawing = useNSEDatePickerDrawing("date-time", props.isEnabled !== false);
   const disabled = props.isEnabled === false;
   const controlled = value !== undefined;
   const [stored, setStored] = useState(defaultValue);
@@ -249,7 +251,7 @@ export function NSEDateTimeEntry({ value, defaultValue = null, mode = "combined"
   const valueId = `date-time-picker-value-${instanceId}`;
   const appearanceState = error ? "invalid" : disabled ? "disabled" : focused || open ? "focused" : "normal";
   const appearance = useNSEAppearanceSlot(nseAppearanceSlot("date-time-picker", "select", appearanceState));
-  return <span data-nse-control="date-time-picker" data-state={error ? "invalid" : disabled ? "disabled" : props.readOnly ? "read-only" : current ? "ready" : "empty"} {...appearance.attributes} onFocusCapture={() => setFocused(true)} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false); }}>
+  return <span {...drawing.attributes} {...drawing.events} data-state={error ? "invalid" : disabled ? "disabled" : props.readOnly ? "read-only" : current ? "ready" : "empty"} {...appearance.attributes} onFocusCapture={(event) => { drawing.events.onFocusCapture?.(event); setFocused(true); }} onBlurCapture={(event) => { drawing.events.onBlurCapture?.(event); if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false); }}>
     {mode === "automatic" ? <><button ref={triggerRef} type="button" aria-label={props["aria-label"]} aria-describedby={current ? valueId : undefined} aria-expanded={open} disabled={disabled || props.readOnly} onClick={begin}><span id={valueId} data-nse-part="value">{current ? displayForValue(current, props.locale, hourCycle) : props["aria-label"]}</span></button><NSEPopover id={`date-time-picker-${instanceId}`} open={open} anchor={triggerRef.current} parentWindowControllerId="date-time-picker-window" presentation={{ mode: "automatic" }} surface="overlay" labelledBy={titleId} onOpenChange={(next) => { if (!next && open) cancel(); }}><section data-nse-part="calendar-sheet"><h2 id={titleId}>{props["aria-label"]}</h2>{editor}</section></NSEPopover></> : editor}
     {props.name ? <><input type="hidden" name={props.name} value={`${serializePlainDate(current?.date ?? null)}${current ? `T${serializePlainTime(current.time)}` : ""}`} /><input type="hidden" name={`${props.name}.timeZone`} value={current?.timeZone ?? ""} /><input type="hidden" name={`${props.name}.disambiguation`} value={current?.disambiguation ?? ""} /></> : null}
   </span>;

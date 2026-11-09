@@ -259,8 +259,8 @@ export function NSEPopup({
   const surface = createElement(
     "div",
     {
-      ...htmlAttributes,
       ...overlay.surfaceProps,
+      ...htmlAttributes,
       ...appearanceProjection,
       ref: surfaceRef,
       id: resolvedId,
@@ -281,8 +281,8 @@ export function NSEPopup({
       tabIndex: htmlAttributes.tabIndex ?? -1,
     },
     hasPopoverFrame ? createElement(NSEPopoverFrame, { arrowRef: setArrow, anchored: kind === "popover" }) : null,
-    title ? createElement("div", { id: titleId, className: "nse-overlay-popup-title" }, title) : null,
-    createElement("div", { className: "nse-overlay-popup-content" }, children),
+    title ? createElement("div", { id: titleId, "data-nse-part": "title", className: "nse-overlay-popup-title" }, title) : null,
+    createElement("div", { "data-nse-part": "content", className: "nse-overlay-popup-content" }, children),
   );
 
   // A compact action sheet owns a physical outside target. It remains outside

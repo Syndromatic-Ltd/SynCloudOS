@@ -1,0 +1,55 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-theme-panel-hook-coverage.test.tsx tests/runtime/nse-theme-hook-coverage.test.tsx tests/runtime/nse-theme-menu-hook-coverage.test.tsx tests/nse/date-time tests/nse/overlays tests/nse/colour tests/nse/file-panels tests/nse/controls/nse-button.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+ ❯ tests/runtime/nse-theme-menu-hook-coverage.test.tsx (31 tests | 1 failed) 284ms
+     × path-control 10ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-theme-menu-hook-coverage.test.tsx > menu and toolbar theme hooks > path-control
+AssertionError: path-item: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/runtime/nse-theme-menu-hook-coverage.test.tsx:37:145
+     35|       if (surface.id.startsWith("tab-bar")) expect(root!.dataset.nseSt…
+     36|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     37|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+       |                                                                                                                                                 ^
+     38|       if (surface.id.endsWith("disabled")) expect(root!.dataset.nseEna…
+     39|       for (const item of root!.querySelectorAll<HTMLElement>('[aria-se…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 24 passed (25)
+      Tests  1 failed | 888 passed (889)
+   Start at  21:03:05
+   Duration  29.63s (transform 15.70s, setup 223ms, import 31.24s, tests 8.62s, environment 15.05s)

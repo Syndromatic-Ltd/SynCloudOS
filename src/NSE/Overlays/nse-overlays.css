@@ -32,7 +32,7 @@
   pointer-events: auto;
 }
 
-[data-nse-control="overlay"][data-nse-part="surface"] {
+[data-nse-role="overlay"][data-nse-part="surface"] {
   max-inline-size: var(--nse-overlay-available-inline-size, 100%);
   max-block-size: var(--nse-overlay-available-block-size, 100%);
 }
@@ -75,7 +75,7 @@
 /* Keep pending surfaces measurable for placement. Inertness (owned by the
  * overlay hook) excludes focus and accessibility; opacity hides the whole
  * surface without inherited visibility surviving the content-ready commit. */
-[data-nse-control="overlay"][data-nse-part="surface"][data-nse-content-pending="true"] {
+[data-nse-role="overlay"][data-nse-part="surface"][data-nse-content-pending="true"] {
   opacity: 0;
   pointer-events: none;
 }
@@ -231,7 +231,7 @@
 /* Region constraints override app minimum sizes while the physical fold is
    present. Removing the attribute restores current caller/theme declarations,
    rather than replaying a stale inline style captured at opening. */
-[data-nse-control="overlay"][data-nse-part="surface"][data-nse-overlay-region="true"] {
+[data-nse-role="overlay"][data-nse-part="surface"][data-nse-overlay-region="true"] {
   min-inline-size: 0 !important;
   max-inline-size: var(--nse-overlay-available-inline-size) !important;
   max-block-size: var(--nse-overlay-available-block-size) !important;

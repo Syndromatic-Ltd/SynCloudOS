@@ -112,7 +112,7 @@ export function NSEColourPalettesMode({ colour, commit, recents }: NSEColourPick
     <NSEPopUpButton height={nseColourPanelControlHeight} label="List" items={lists.map((candidate) => ({ value: candidate.id, title: candidate.name }))} value={list.id} onValueChange={(next) => { setListId(next); setQuery(""); }} />
     <NSEScrollView data-nse-part="colour-list-scroll">
       <div ref={listRef} role="listbox" aria-label={`${list.name} colours`} tabIndex={0} aria-activedescendant={selectedIndex >= 0 ? optionId(selectedIndex) : undefined} data-nse-part="colour-list" onKeyDown={onKeyDown}>
-        {shown.map((entry, index) => <div key={`${entry.name}-${entry.hex}`} id={optionId(index)} role="option" aria-selected={index === selectedIndex} data-nse-part="colour-list-row" onClick={() => choose(entry)}>
+        {shown.map((entry, index) => <div key={`${entry.name}-${entry.hex}`} id={optionId(index)} role="option" data-nse-selected={index === selectedIndex ? "" : undefined} aria-selected={index === selectedIndex} data-nse-part="colour-list-row" onClick={() => choose(entry)}>
           <span data-nse-part="colour-list-chip" aria-hidden="true" style={{ backgroundColor: entry.hex }} />
           <span data-nse-part="colour-list-name">{entry.name}</span>
         </div>)}

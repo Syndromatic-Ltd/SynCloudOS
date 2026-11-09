@@ -85,6 +85,7 @@ function SessionView({ session, className, ownership = "parent" }: NSEWebContent
 
   return (
     <iframe
+      data-nse-control="web-view" data-nse-part="content"
       key={snapshot.navigationId}
       ref={bindFrame}
       className={["nse-web-content-view", className].filter(Boolean).join(" ")}
