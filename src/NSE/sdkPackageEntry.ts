@@ -769,3 +769,6 @@ export type { BGTaskScheduler, BGTaskRequest, BGDownloadTaskRequest, UNUserNotif
 
 export type { NSELayoutGuide } from "./Layout/NSELayoutGuide";
 export { useNSEWindowChromeObstruction } from "./Layout/windowChromeObstructions";
+
+export { useNSESafeArea } from "./Layout/useNSESafeArea";
+export type { NSESafeArea } from "./Layout/useNSESafeArea";

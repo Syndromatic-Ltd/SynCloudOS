@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEViewSafeAreaContext, useNSEViewSafeArea } from "../../NSE/Layout/useNSESafeArea";
+import { nseUpdateSafeArea } from "../../NSE/Application/NSEViewController";
 import { NSEWindowLayoutContext } from "../../NSE/Layout/windowChromeObstructions";
 import { nativePresentations } from "../../NSE/applicationHostInterop";
 
@@ -213,6 +215,11 @@ export function NSEViewControllerView({ controller, className }: NSEViewControll
     [motion, location, haptics, midi, media, video, lumina, animations, frames, layers],
   );
   const frameRef = useRef<HTMLDivElement | null>(null);
+  const safeArea = useNSEViewSafeArea(frameRef, controller.view.additionalSafeAreaInsets, undefined, () => {
+    if (controller.isDisposed || !frameRef.current) return;
+    controller.viewWillLayout(); controller.viewDidLayout();
+  });
+  useLayoutEffect(() => { if (!controller.isDisposed) controller[nseUpdateSafeArea](safeArea.value); }, [controller, safeArea.value]);
   const effectiveActivity = () => {
     const document = kernel?.environment.browser.getDocument() ?? frameRef.current?.ownerDocument;
     const state = appRuntime && kernel ? kernel.lifecycle.getState(appRuntime.app.bundleIdentifier) : "active";
@@ -270,26 +277,16 @@ export function NSEViewControllerView({ controller, className }: NSEViewControll
     controller.viewWillLayout();
     controller.viewDidLayout();
   });
-  useLayoutEffect(() => {
-    const element = frameRef.current;
-    const Observer = element?.ownerDocument.defaultView?.ResizeObserver;
-    if (!element || !Observer) return;
-    const observer = new Observer(() => {
-      if (controller.isDisposed || frameRef.current !== element) return;
-      controller.viewWillLayout();
-      controller.viewDidLayout();
-    });
-    observer.observe(element);
-    return () => { observer.disconnect(); };
-  }, [controller]);
   if (controller.isDisposed) return null;
   const View = controller.renderView ? InlineControllerView : viewComponentOf(controller);
   if (!View) throw new TypeError(`${controller.constructor.name} has no static view or renderView; declare one rendering form.`);
   const frame = (
-    <div ref={frameRef} tabIndex={-1} className={className} data-nse-view-controller="" style={{ ...(controller.parent ? {} : FRAME_STYLE), ...(controller.presentedViewControllers.some(presented => presented[nsePresentationStyle] === "custom") ? { position: "relative" as const } : {}) }}>
+    <div ref={frameRef} tabIndex={-1} className={className} data-nse-view-controller="" style={{ ...safeArea.properties, ...(controller.parent ? {} : FRAME_STYLE), ...(controller.presentedViewControllers.some(presented => presented[nsePresentationStyle] === "custom") ? { position: "relative" as const } : {}) }}>
+      <NSEViewSafeAreaContext.Provider value={safeArea.value}>
       <NSEViewControllerRendererProvider value={NSEViewControllerView}>
         <View controller={controller} />
       </NSEViewControllerRendererProvider>
+      </NSEViewSafeAreaContext.Provider>
       {controller.presentedViewControllers.map(presented => {
         if (nativePresentations.has(presented)) return null;
         const style = presented[nsePresentationStyle];

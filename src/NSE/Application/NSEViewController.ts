@@ -18,6 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEEdgeInsetsMake, NSEEdgeInsetsZero, type NSEEdgeInsets } from "../Layout/NSEEdgeInsets";
+import { nseEmptyLayoutRect } from "../Layout/NSELayoutGuide";
+import type { NSEScrollRect } from "../Scroll/scrollTypes";
+import { nseEqualInsets, type NSESafeArea } from "../Layout/useNSESafeArea";
 import { nativePresentations } from "./nativePresentation";
 import { createElement, type ComponentType, type ReactElement, type ReactNode } from "react";
 import type { AFXLayer } from "../../FX/AnimationFX/AFXLayer";
@@ -118,6 +122,9 @@ export function validateNSEViewControllerClass(Controller: NSEViewControllerClas
  * mount, inside the parent's own view.
  */
 export interface NSEControllerView {
+  readonly safeAreaInsets: NSEEdgeInsets;
+  readonly safeAreaRect: NSEScrollRect;
+  additionalSafeAreaInsets: NSEEdgeInsets;
   (props: { readonly className?: string }): ReactElement;
   /** Whether the view has mounted at least once and `viewDidLoad` has run. */
   readonly isLoaded: boolean;
@@ -147,6 +154,8 @@ export interface NSETraitCollection {
 }
 
 /** @internal Updates presentation traits without replaying appearance callbacks. */
+/** @internal Commits the measured view safe area. */
+export const nseUpdateSafeArea: unique symbol = Symbol("nse.updateSafeArea");
 export const nseUpdateTraits: unique symbol = Symbol("nse.updateTraits");
 /** @internal Effective presentation/application/browser activity from the mounted host. */
 export const nseUpdateViewActivity: unique symbol = Symbol("nse.updateViewActivity");
@@ -227,6 +236,8 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   #fx: NSEViewControllerFX | null = null;
   #fxClients: Partial<NSEViewControllerFXClients> | undefined;
   #traits: NSETraitCollection = Object.freeze({ reducedMotion: false, presentation: null });
+  #safeArea: NSESafeArea = Object.freeze({ safeAreaInsets: NSEEdgeInsetsZero, safeAreaRect: nseEmptyLayoutRect });
+  #additionalSafeArea = NSEEdgeInsetsZero;
   #title: string | undefined;
   readonly #transitionSlots = new Map<string, NSEChildTransition>();
   readonly #childViewSlots = new Map<string, NSEViewController<unknown>>();
@@ -255,6 +266,13 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
       layer: { get: () => controller.#boundLayer() },
       animator: { value: () => createNSEViewAnimator(() => controller.#requireMounted("view.animator").element, () => controller.#boundLayer(), () => controller.traitCollection.reducedMotion) },
       window: { get: () => controller.#windowOf() },
+      safeAreaInsets: { get: () => controller.#safeArea.safeAreaInsets },
+      safeAreaRect: { get: () => controller.#safeArea.safeAreaRect },
+      additionalSafeAreaInsets: { get: () => controller.#additionalSafeArea, set: (insets: NSEEdgeInsets) => {
+        const next = NSEEdgeInsetsMake(insets.top, insets.left, insets.bottom, insets.right);
+        if (nseEqualInsets(next, controller.#additionalSafeArea)) return;
+        controller.#additionalSafeArea = next; controller.notifyObservers();
+      } },
     });
     this.#view = Object.freeze(view) as unknown as NSEControllerView;
   }
@@ -285,6 +303,16 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   /** The view this controller manages. */
   get view(): NSEControllerView {
     return this.#view;
+  }
+
+  /** NSViewController.viewSafeAreaInsetsDidChange(). */
+  viewSafeAreaInsetsDidChange(): void {}
+
+  /** @internal Updates the view without firing notifications for unchanged insets. */
+  [nseUpdateSafeArea](value: NSESafeArea): void {
+    const changed = !nseEqualInsets(this.#safeArea.safeAreaInsets, value.safeAreaInsets);
+    this.#safeArea = Object.freeze({ safeAreaInsets: value.safeAreaInsets, safeAreaRect: value.safeAreaRect });
+    if (changed) this.viewSafeAreaInsetsDidChange();
   }
 
   /** Current NSE animation and content-bound presentation traits. */

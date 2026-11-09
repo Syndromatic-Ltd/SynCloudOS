@@ -35,11 +35,19 @@ Verification: 17 focused tests passed (12 new safe-area cases plus scroll regres
 
 ### Task 3 — window content layout
 
+Commit: `5bc55461` — `NSE: windows report contentLayoutRect and contentLayoutGuide`.
+
 Added the stable `NSEWindow.contentLayoutGuide` and its `contentLayoutRect`. Physical windows and application stages own a geometry model; title bars, toolbars, titlebar accessory rows and content borders register their obstruction. Their measurements share one ResizeObserver per window, publications are batched to one animation frame, and unchanged rects do not notify. The actual content elements publish physical `--nse-content-layout-inset-*` properties. Detachment and disposal release registrations and subscriptions. Navigation strips and source lists are adopted in Task 6 as planned.
 
 Verification: 6 current guide tests pass; the prescribed focused regression command passed 776 tests in 66 files (including the then-five guide tests). Framework typecheck passed. The frozen baseline comparison passed **80/80 partitions, zero differences**, recorded in `task-3-baseline-final.log`; all 2,648 reference hashes are unchanged. The first comparison was interrupted by editing a module while Vite was serving it: a notification-centre capture navigated back to the initial fixture, producing a 300px body instead of its 896px reference. Its failed trace is retained as `task-3-interrupted-trace.zip`. No baseline reference was changed.
 
-### Tasks 4–19
+### Task 4 — view safe areas
+
+Added `NSEView.additionalSafeAreaInsets`, `onSafeAreaInsetsChange`, physical `--nse-safe-area-inset-*` properties and `useNSESafeArea`. Each view intersects the window guide with its measured bounds; ancestors' additional insets are accumulated separately so chrome is not counted twice. Controller views expose `safeAreaInsets`, `safeAreaRect`, writable `additionalSafeAreaInsets` and `viewSafeAreaInsetsDidChange()`. Measurements use the window's shared observer where available; standalone views use one observer. Controller layout callbacks share that measurement rather than adding another observer.
+
+Verification: all 33 focused tests in four files passed, including five new safe-area cases and the controller/drawing regressions. Typecheck passed. The initial 80-partition screenshot check passed; the further full comparison after observer consolidation also passed **80/80, zero differences** (`task-4-baseline-final.log`). The prior regression assertion that a released FX layer leaves no inline style now checks that FX dimensions are removed and the view's four required safe-area properties remain. No drawing was changed.
+
+### Tasks 5–19
 
 Pending. Final split-suite and packed SDK acceptance remain for Task 19.
 
@@ -74,6 +82,8 @@ Further diagnostic runs exposed folder-only capture interference and source-pain
 ## Public API accounting
 
 Added: `NSEEdgeInsets`, `NSEEdgeInsetsZero`, `NSEEdgeInsetsMake`. Removed: `NSEScrollInsets` (no compatibility alias). Task 3 adds `NSELayoutGuide`, `NSEWindow.contentLayoutRect`, `NSEWindow.contentLayoutGuide` and `useNSEWindowChromeObstruction`.
+
+Task 4 adds the `NSESafeArea` result type, `useNSESafeArea`, the two view props and three controller-view properties described above, and `NSEViewController.viewSafeAreaInsetsDidChange()`.
 
 Part-name mappings, semantic colour values without Atmo precedent and Beta 2 removals will be recorded as their tasks are completed. No visual design decision has been made.
 

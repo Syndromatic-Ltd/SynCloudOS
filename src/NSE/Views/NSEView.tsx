@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEViewSafeAreaContext, useNSEViewSafeArea } from "../Layout/useNSESafeArea";
+import type { NSEEdgeInsets } from "../Layout/NSEEdgeInsets";
 import { useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type HTMLAttributes, type KeyboardEvent, type MouseEvent, type PointerEvent, type ReactNode, type Ref } from "react";
 import { NSEAppearanceProvider, useNSEAppearance } from "../Appearance/NSEAppearanceProvider";
 import type { NSEAppearance } from "../Appearance/NSEAppearance";
@@ -46,6 +48,8 @@ const layerContentsPlacements: readonly NSEViewLayerContentsPlacement[] = [
 ];
 
 export interface NSEViewProps extends HTMLAttributes<HTMLDivElement>, NSEViewLayerProperties {
+  readonly additionalSafeAreaInsets?: NSEEdgeInsets;
+  readonly onSafeAreaInsetsChange?: (insets: NSEEdgeInsets) => void;
   /** NSView.draw(_:). A React re-render redraws the whole bounds with a fresh recording context. */
   readonly draw?: (dirtyRect: GFXRect, context: GFXContext) => void;
   /** NSView.layerContentsPlacement. Defaults to scaleProportionallyToFit. */
@@ -75,9 +79,10 @@ export function NSEView({ appearance, ...props }: NSEViewProps) {
   return appearance ? <NSEViewAppearance appearance={appearance}><NSEViewContent {...props} /></NSEViewAppearance> : <NSEViewContent {...props} />;
 }
 
-function NSEViewContent({ shadow, cornerRadius, cornerCurve, style, draw, layerContentsPlacement = "scaleProportionallyToFit", menu, toolTip, menuOverlay, longPressDelayMs = 600, direction = "ltr", children, ref, ...htmlAttributes }: NSEViewProps) {
+function NSEViewContent({ additionalSafeAreaInsets, onSafeAreaInsetsChange, shadow, cornerRadius, cornerCurve, style, draw, layerContentsPlacement = "scaleProportionallyToFit", menu, toolTip, menuOverlay, longPressDelayMs = 600, direction = "ltr", children, ref, ...htmlAttributes }: NSEViewProps) {
   const layer = useNSEViewLayerProperties({ shadow, cornerRadius, cornerCurve });
   const hostRef = useRef<HTMLDivElement>(null);
+  const safeArea = useNSEViewSafeArea(hostRef, additionalSafeAreaInsets, onSafeAreaInsetsChange);
   const attachHost = useCallback((element: HTMLDivElement | null) => {
     hostRef.current = element;
     if (typeof ref === "function") return ref(element);
@@ -91,15 +96,15 @@ function NSEViewContent({ shadow, cornerRadius, cornerCurve, style, draw, layerC
   // Measure in the host component's layout effect, after its div ref is attached.
   const bounds = useIFXImageBox(hostRef, draws ? environment?.geometry ?? undefined : undefined, null, [draws, Boolean(menu)]);
   if (!layerContentsPlacements.includes(layerContentsPlacement)) throw new TypeError(`Unknown NSEView layerContentsPlacement ${String(layerContentsPlacement)}.`);
-  const content = <>
+  const content = <NSEViewSafeAreaContext.Provider value={safeArea.value}>
     {draw && identifiers && Number.isFinite(bounds.width) && Number.isFinite(bounds.height) && bounds.width > 0 && bounds.height > 0
       ? <NSEViewDrawing draw={draw} bounds={bounds} identifiers={identifiers} placement={layerContentsPlacement} accessibility={htmlAttributes.role ? {} : {
         "aria-label": htmlAttributes["aria-label"], "aria-labelledby": htmlAttributes["aria-labelledby"],
         "aria-description": htmlAttributes["aria-description"], "aria-describedby": htmlAttributes["aria-describedby"],
       }} /> : null}
     {children}
-  </>;
-  const attributes = { ...htmlAttributes, ...layer.attributes, style: { ...style, ...layer.style }, ref: attachHost, "data-nse-view-drawing": draw ? "" : undefined };
+  </NSEViewSafeAreaContext.Provider>;
+  const attributes = { ...htmlAttributes, ...layer.attributes, style: { ...safeArea.properties, ...style, ...layer.style }, ref: attachHost, "data-nse-view-drawing": draw ? "" : undefined };
   if (!menu) return <div title={toolTip} {...attributes}>{content}</div>;
   return (
     <NSEMenuHostView menu={menu} toolTip={toolTip} menuOverlay={menuOverlay} longPressDelayMs={longPressDelayMs} direction={direction} {...attributes}>
