@@ -24,7 +24,7 @@ export function useNSESafeArea(): NSESafeArea {
 }
 
 /** @internal Measures an existing view element; never inserts a layout wrapper. */
-export function useNSEViewSafeArea(ref: RefObject<HTMLElement | null>, additional: NSEEdgeInsets = NSEEdgeInsetsZero, onChange?: (insets: NSEEdgeInsets) => void, onResize?: () => void) {
+export function useNSEViewSafeArea(ref: RefObject<HTMLElement | null>, additional: NSEEdgeInsets = NSEEdgeInsetsZero, onChange?: (insets: NSEEdgeInsets) => void, onResize?: () => void, contentRef?: RefObject<HTMLElement | null>) {
   const model = useContext(NSEWindowLayoutContext);
   const parent = useContext(NSEViewSafeAreaContext);
   const window = useNSEWindowLayoutSnapshot(model);
@@ -52,13 +52,17 @@ export function useNSEViewSafeArea(ref: RefObject<HTMLElement | null>, additiona
       let initial = true;
       const stop = model.observeElement(element, () => { measure(); if (!initial) resizeCallback.current?.(); });
       initial = false;
-      return stop;
+      let initialContent = true;
+      const stopContent = contentRef?.current ? model.observeElement(contentRef.current, () => { if (!initialContent) resizeCallback.current?.(); }) : undefined;
+      initialContent = false;
+      return () => { stop(); stopContent?.(); };
     }
     const Observer = element.ownerDocument.defaultView?.ResizeObserver;
     const observer = Observer ? new Observer(() => { measure(); resizeCallback.current?.(); }) : null;
     observer?.observe(element);
+    if (contentRef?.current) observer?.observe(contentRef.current);
     return () => observer?.disconnect();
-  }, [model, ref, window.bounds]);
+  }, [model, ref, contentRef, window.bounds]);
   const value = useMemo<ViewSafeArea>(() => {
     const bounds = rect ?? nseEmptyLayoutRect;
     const overlaps = (edge: keyof NSEEdgeInsets) => !model ? 0 : edge === "top" ? window.insets.top - bounds.y : edge === "left" ? window.insets.left - bounds.x : edge === "bottom" ? bounds.y + bounds.height - (window.bounds.height - window.insets.bottom) : bounds.x + bounds.width - (window.bounds.width - window.insets.right);

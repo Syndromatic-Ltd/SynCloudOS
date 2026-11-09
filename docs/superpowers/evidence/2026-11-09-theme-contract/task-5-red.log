@@ -1,0 +1,79 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-scroll-content-insets.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+stderr | tests/runtime/nse-scroll-content-insets.test.tsx > scroll content insets > allows explicit zero content insets when automatic adjustment is disabled
+React does not recognize the `automaticallyAdjustsContentInsets` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `automaticallyadjustscontentinsets` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
+React does not recognize the `contentInsets` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `contentinsets` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
+
+stderr | tests/runtime/nse-scroll-content-insets.test.tsx > scroll content insets > adds scrollerInsets to the automatic content inset
+React does not recognize the `scrollerInsets` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `scrollerinsets` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
+
+ ❯ tests/runtime/nse-scroll-content-insets.test.tsx (4 tests | 4 failed) 38ms
+     × automatically clears a translucent bar and can reveal the entire last row above it 27ms
+     × allows explicit zero content insets when automatic adjustment is disabled 4ms
+     × adds scrollerInsets to the automatic content inset 5ms
+     × updates both the padding and scrolling controller when chrome disappears 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-scroll-content-insets.test.tsx > scroll content insets > automatically clears a translucent bar and can reveal the entire last row above it
+AssertionError: expected '0px' to be '72px' // Object.is equality
+
+Expected: "72px"
+Received: "0px"
+
+ ❯ tests/runtime/nse-scroll-content-insets.test.tsx:24:73
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/runtime/nse-scroll-content-insets.test.tsx > scroll content insets > allows explicit zero content insets when automatic adjustment is disabled
+AssertionError: expected '0px' to be '0px 0px 0px 0px' // Object.is equality
+
+Expected: "0px 0px 0px 0px"
+Received: "0px"
+
+ ❯ tests/runtime/nse-scroll-content-insets.test.tsx:33:98
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/runtime/nse-scroll-content-insets.test.tsx > scroll content insets > adds scrollerInsets to the automatic content inset
+AssertionError: expected '' to be '3px' // Object.is equality
+
+- Expected
++ Received
+
+- 3px
+
+ ❯ tests/runtime/nse-scroll-content-insets.test.tsx:41:38
+     39|     const vertical = view.container.querySelector<HTMLElement>('[data-…
+     40|     const horizontal = view.container.querySelector<HTMLElement>('[dat…
+     41|     expect(vertical.style.marginTop).toBe("3px"); expect(vertical.styl…
+       |                                      ^
+     42|     expect(horizontal.style.marginLeft).toBe("4px"); expect(horizontal…
+     43|     model.dispose();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/runtime/nse-scroll-content-insets.test.tsx > scroll content insets > updates both the padding and scrolling controller when chrome disappears
+AssertionError: expected +0 to be 72 // Object.is equality
+
+- Expected
++ Received
+
+- 72
++ 0
+
+ ❯ tests/runtime/nse-scroll-content-insets.test.tsx:48:39
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed (4)
+   Start at  18:50:54
+   Duration  1.55s (transform 247ms, setup 29ms, import 438ms, tests 38ms, environment 903ms)
