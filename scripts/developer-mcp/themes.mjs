@@ -19,11 +19,11 @@ function guardedPath(root, name) {
 }
 
 function installedContract(context) {
-  const path = resolve(context.sdkRoot, "tooling/nse-appearance-contract.json");
-  if (!existsSync(path)) throw new Error("The installed SDK has no neutral NSE appearance contract. Install a matching current SDK and developer MCP build.");
+  const path = resolve(context.sdkRoot, "tooling/nse-theme-contract.json");
+  if (!existsSync(path)) throw new Error("The installed SDK has no NSE theme contract. Install a matching current SDK and developer MCP build.");
   const contract = JSON.parse(readFileSync(path, "utf8"));
-  if (contract.schemaVersion !== 1 || !Array.isArray(contract.values) || !contract.values.length || !contract.definition?.idPattern)
-    throw new Error("The installed neutral NSE appearance contract is malformed.");
+  if (contract.themeContractVersion !== 1 || !contract.controls || !Array.isArray(contract.colours) || !contract.colours.length)
+    throw new Error("The installed NSE theme contract is malformed.");
   return contract;
 }
 

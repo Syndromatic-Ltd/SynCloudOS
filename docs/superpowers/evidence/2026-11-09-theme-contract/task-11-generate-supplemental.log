@@ -1,0 +1,57 @@
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+ ❯ tests/runtime/nse-theme-contract-drift.test.tsx (681 tests | 4 failed) 2904ms
+   × renders supplemental configured-toolbar-50-false 4ms
+   × renders supplemental configured-toolbar-50-true 1ms
+   × renders supplemental configured-toolbar-500-false 1ms
+   × renders supplemental configured-toolbar-500-true 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-theme-contract-drift.test.tsx > renders supplemental configured-toolbar-50-false
+ FAIL  tests/runtime/nse-theme-contract-drift.test.tsx > renders supplemental configured-toolbar-50-true
+ FAIL  tests/runtime/nse-theme-contract-drift.test.tsx > renders supplemental configured-toolbar-500-false
+ FAIL  tests/runtime/nse-theme-contract-drift.test.tsx > renders supplemental configured-toolbar-500-true
+TypeError: Cannot read properties of undefined (reading 'trim')
+ ❯ new NSEToolbarController src/NSE/Toolbars/NSEToolbarController.ts:231:80
+    229|       if (catalogue.has(item.id)) throw new TypeError(`NSE toolbar ite…
+    230|       if (item.kind === "command") {
+    231|         if (!item.commandId.trim() || !item.label.trim() || !item.pale…
+       |                                                                                ^
+    232|           throw new TypeError(`NSE command toolbar item "${item.id}" r…
+    233|         }
+ ❯ tests/e2e/fixtures/theme-additional/supplemental.tsx:28:12
+ ❯ mountStateImpl node_modules/react-dom/cjs/react-dom-client.development.js:8268:24
+ ❯ mountState node_modules/react-dom/cjs/react-dom-client.development.js:8289:22
+ ❯ Object.useState node_modules/react-dom/cjs/react-dom-client.development.js:26243:18
+ ❯ process.env.NODE_ENV.exports.useState node_modules/react/cjs/react.development.js:1263:34
+ ❯ Toolbar tests/e2e/fixtures/theme-additional/supplemental.tsx:24:24
+ ❯ Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25904:20
+ ❯ renderWithHooks node_modules/react-dom/cjs/react-dom-client.development.js:7662:22
+ ❯ updateFunctionComponent node_modules/react-dom/cjs/react-dom-client.development.js:10166:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 677 passed (681)
+   Start at  22:12:01
+   Duration  11.20s (transform 5.48s, setup 27ms, import 7.24s, tests 2.90s, environment 815ms)
+
+file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/scripts/synware/build-theme-contract.mjs:32
+  if (result.status !== 0) throw new Error("Theme contract generation failed.");
+                                 ^
+
+Error: Theme contract generation failed.
+    at generateNSEThemeContract (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/scripts/synware/build-theme-contract.mjs:32:34)
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/scripts/synware/build-theme-contract.mjs:35:90
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.22.1

@@ -6,6 +6,7 @@ import { cpSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import ts from "typescript";
 import { parse, generate } from "css-tree";
+import { deriveNSEThemeContract } from "../synware/build-theme-contract.mjs";
 
 /** Build the offline theme schema from NSE's neutral provider, never a concrete theme. */
 export function deriveNSEAppearanceContract(repositoryRoot) {
@@ -59,7 +60,7 @@ export async function writeDeveloperSdkData({repositoryRoot,directory,commit,sou
   const {errorCatalogue}=await import("data:text/javascript;base64,"+Buffer.from(code).toString("base64"));
   writeFileSync(resolve(tooling,"error-catalogue.json"),JSON.stringify(errorCatalogue,null,2)+"\n");
   writeFileSync(resolve(tooling,"build-receipt.json"),JSON.stringify({schemaVersion:1,commit,sourceSha256:source.sha256},null,2)+"\n");
-  writeFileSync(resolve(tooling,"nse-appearance-contract.json"),JSON.stringify(deriveNSEAppearanceContract(repositoryRoot),null,2)+"\n");
+  writeFileSync(resolve(tooling,"nse-theme-contract.json"),JSON.stringify(deriveNSEThemeContract(repositoryRoot),null,2)+"\n");
 }
 export function writeDeveloperMcpPackage({repositoryRoot,directory,sdkVersion}) {
   const repository=JSON.parse(readFileSync(resolve(repositoryRoot,"package.json"),"utf8"));
