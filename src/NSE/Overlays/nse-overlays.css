@@ -116,8 +116,8 @@
 
 .nse-overlay-popup[data-nse-overlay-kind="action-sheet"] {
   position: fixed;
-  inset-inline: max(8px, env(safe-area-inset-left)) max(8px, env(safe-area-inset-right));
-  inset-block-end: max(8px, env(safe-area-inset-bottom));
+  inset-inline: max(8px, var(--nse-screen-safe-area-inset-left, 0px)) max(8px, var(--nse-screen-safe-area-inset-right, 0px));
+  inset-block-end: max(8px, var(--nse-screen-safe-area-inset-bottom, 0px));
   max-inline-size: none;
 }
 
@@ -223,9 +223,9 @@
    Its full-screen sibling backdrop and existing modal/focus policy remain. */
 .nse-overlay-popup[data-nse-overlay-region="true"][data-nse-overlay-kind="action-sheet"] {
   inset-inline: auto;
-  left: calc(var(--nse-overlay-region-left) + max(8px, env(safe-area-inset-left)));
-  right: calc(var(--nse-overlay-region-right) + max(8px, env(safe-area-inset-right)));
-  bottom: calc(var(--nse-overlay-region-bottom) + max(8px, env(safe-area-inset-bottom)));
+  left: calc(var(--nse-overlay-region-left) + max(8px, var(--nse-screen-safe-area-inset-left, 0px)));
+  right: calc(var(--nse-overlay-region-right) + max(8px, var(--nse-screen-safe-area-inset-right, 0px)));
+  bottom: calc(var(--nse-overlay-region-bottom) + max(8px, var(--nse-screen-safe-area-inset-bottom, 0px)));
 }
 
 /* Region constraints override app minimum sizes while the physical fold is

@@ -24,7 +24,7 @@
   position: relative;
   isolation: isolate;
   box-sizing: border-box;
-  padding: clamp(28px, 4svh, 56px) max(24px, env(safe-area-inset-right)) max(28px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+  padding: clamp(28px, 4svh, 56px) max(24px, var(--nse-screen-safe-area-inset-right, 0px)) max(28px, var(--nse-screen-safe-area-inset-bottom, 0px)) max(24px, var(--nse-screen-safe-area-inset-left, 0px));
   color: #fff;
   background-color: var(--webspring-shelf-colour);
   background-image: var(--webspring-shelf-image);

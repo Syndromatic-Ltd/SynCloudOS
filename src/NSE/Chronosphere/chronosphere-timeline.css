@@ -22,9 +22,9 @@
    Specificity keeps this ruler independent of chronosphere.css import order. */
 .chronosphere-rail.chronosphere-timeline {
   position: absolute;
-  top: max(4%, env(safe-area-inset-top, 0px));
-  bottom: calc(clamp(76px, 14%, 112px) + env(safe-area-inset-bottom, 0px));
-  right: max(4px, env(safe-area-inset-right, 0px));
+  top: max(4%, var(--nse-screen-safe-area-inset-top, 0px));
+  bottom: calc(clamp(76px, 14%, 112px) + var(--nse-screen-safe-area-inset-bottom, 0px));
+  right: max(4px, var(--nse-screen-safe-area-inset-right, 0px));
   width: clamp(104px, 16vw, 184px);
   z-index: 3;
   min-height: 0;
@@ -159,8 +159,8 @@
 
 @media (max-height: 420px) {
   .chronosphere-rail.chronosphere-timeline {
-    top: max(4px, env(safe-area-inset-top, 0px));
-    bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    top: max(4px, var(--nse-screen-safe-area-inset-top, 0px));
+    bottom: calc(56px + var(--nse-screen-safe-area-inset-bottom, 0px));
   }
 }
 

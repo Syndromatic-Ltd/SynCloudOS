@@ -328,7 +328,7 @@
   place-items: center;
   box-sizing: border-box;
   overflow: hidden;
-  padding: max(clamp(10px, 4vw, 22px), env(safe-area-inset-top)) max(clamp(10px, 4vw, 22px), env(safe-area-inset-right)) max(clamp(10px, 4vw, 22px), env(safe-area-inset-bottom)) max(clamp(10px, 4vw, 22px), env(safe-area-inset-left));
+  padding: max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-top, 0px)) max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-right, 0px)) max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-bottom, 0px)) max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-left, 0px));
   background: rgba(0, 0, 0, 0.42);
   -webkit-backdrop-filter: blur(5px) saturate(0.85);
   backdrop-filter: blur(5px) saturate(0.85);
@@ -660,10 +660,10 @@
 /* The backdrop still covers both halves. Its content box is the selected
    region; no wrapper/reparenting or second focus trap is introduced. */
 .nse-control-alert-backdrop[data-nse-overlay-region="true"] {
-  padding-top: calc(var(--nse-overlay-region-top) + max(clamp(10px, 4vw, 22px), env(safe-area-inset-top)));
-  padding-right: calc(var(--nse-overlay-region-right) + max(clamp(10px, 4vw, 22px), env(safe-area-inset-right)));
-  padding-bottom: calc(var(--nse-overlay-region-bottom) + max(clamp(10px, 4vw, 22px), env(safe-area-inset-bottom)));
-  padding-left: calc(var(--nse-overlay-region-left) + max(clamp(10px, 4vw, 22px), env(safe-area-inset-left)));
+  padding-top: calc(var(--nse-overlay-region-top) + max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-top, 0px)));
+  padding-right: calc(var(--nse-overlay-region-right) + max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-right, 0px)));
+  padding-bottom: calc(var(--nse-overlay-region-bottom) + max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-bottom, 0px)));
+  padding-left: calc(var(--nse-overlay-region-left) + max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-left, 0px)));
 }
 .nse-control-alert-backdrop[data-nse-overlay-region="true"] > .nse-control-alert {
   min-block-size: 0;

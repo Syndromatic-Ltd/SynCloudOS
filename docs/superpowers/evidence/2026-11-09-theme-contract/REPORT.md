@@ -51,11 +51,21 @@ Verification: all 33 focused tests in four files passed, including five new safe
 
 ### Task 5 — automatic scroll content insets
 
+Commit: `d954aab4` — `NSE: NSEScrollView adjusts content insets automatically`.
+
 `NSEScrollView` defaults `automaticallyAdjustsContentInsets` to true and derives its content padding from its measured safe area. With automatic adjustment disabled, it uses explicit `contentInsets`. `scrollerInsets` adds to the content insets when sizing and placing the scroller tracks. The scrolling controller reads live inset values, so revealing a row remains correct after chrome changes. Safe-area and scroll-content measurements share the observer rather than introducing another observer. The old `scrollInsets` prop was removed and its regression fixture migrated; no alias remains.
 
 Verification: 47 focused tests in four files passed, including four new scroll-inset tests. Typecheck passed. Frozen screenshot comparison passed **80/80 partitions, zero differences**, recorded in `task-5-baseline.log`.
 
-### Tasks 6–19
+### Task 6 — framework layout-guide adoption
+
+Adaptive compact tabs, short-window rails and regular source lists register their measured obstructions. Leading-edge chrome resolves inside the model to a physical edge before publication, including RTL changes. Adaptive allocation shares the window observer. The compact clearance comes from the measured guide; NSEScrollView no longer receives a second pseudo-element spacer. Generic scrolling surfaces retain a guide-sized trailing spacer. App body surfaces measure their own safe-area overlap instead of consuming a top-bar height offset.
+
+Raw CSS `env(safe-area-inset-*)` uses in framework surfaces now consume ScreenService-derived screen properties, published by runtime input and overlay boundaries (including standalone and relocated overlay hosts). Screen-only padding is separate from content safe-area padding, avoiding self-referential growth of a chrome bar.
+
+Verification: 31 focused adoption/navigation tests passed, then 59 broader navigation, safe-area, focus and runtime-boundary tests passed. Typecheck passed. The first frozen screenshot comparison passed 80/80; the final comparison after standalone screen-property publication also passed **80/80, zero differences** (`task-6-baseline-final.log`). An initial broader regression found a non-cached screen getter in the new subscription; it was corrected to `ScreenService.getSnapshot` before acceptance.
+
+### Tasks 7–19
 
 Pending. Final split-suite and packed SDK acceptance remain for Task 19.
 
@@ -86,6 +96,9 @@ Further diagnostic runs exposed folder-only capture interference and source-pain
 3. Task 2 reuses the existing public `NSEScrollRect`, as the plan explicitly allows an equivalent existing rect type. The inset factory preserves finite signed geometry; safe-area resolution clips actual safe insets to view extents.
 
 4. Screen safe-area strips are intersected with a physical window’s bounds; floating windows away from the screen edge do not inherit a notch or home-indicator inset.
+
+5. Compact adaptive navigation is hidden with only one destination and appears when a second is added, as Task 6’s live-strip acceptance requires. Fixed segmented tab views retain their existing behaviour.
+6. Framework chrome uses separate `--nse-screen-safe-area-inset-*` values when sizing its own device padding. Content uses `--nse-safe-area-inset-*`; feeding the latter back into a bar’s size would create a measurement loop.
 
 ## Public API accounting
 

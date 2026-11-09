@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useRef } from "react";
+import { useNSEViewSafeArea } from "../NSE/Layout/useNSESafeArea";
 import type { CSSProperties, ReactNode } from "react";
 import {
   NSESmoothSurface,
@@ -73,6 +75,8 @@ function Surface({
   sourceList?: boolean;
   children: ReactNode;
 }) {
+  const surface = useRef<HTMLDivElement>(null);
+  const safeArea = useNSEViewSafeArea(surface);
   const request = appFrameSmoothSurfaceToNSE(smoothSurface);
   const className = sourceList
     ? "webspring-app-view-body-surface webspring-app-view-body-surface-sourcelist"
@@ -80,14 +84,15 @@ function Surface({
   const paint = {
     "data-frame-background": typeof background === "string" ? background : "surface",
     style: {
+      ...safeArea.properties,
       ...(typeof background === "string" ? {} : webspringSurfaceStyle(background, "--nse-app-surface")),
-      "--nse-app-content-inset-top": sourceList ? "0px" : "var(--webspring-app-top-bar-height, 0px)",
+      "--nse-app-content-inset-top": sourceList ? "0px" : "var(--nse-safe-area-inset-top, 0px)",
     } as CSSProperties,
   };
 
   if (!request) {
     return (
-      <div className={`${className} webspring-app-view-body-surface-off`} {...paint}>
+      <div ref={surface} className={`${className} webspring-app-view-body-surface-off`} {...paint}>
         {header}
         {children}
       </div>
@@ -96,6 +101,7 @@ function Surface({
 
   return (
     <NSESmoothSurface
+      ref={surface}
       className={className}
       smoothSurface={request}
       autoEffects={false}

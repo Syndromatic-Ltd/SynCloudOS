@@ -25,6 +25,7 @@ export class NSEWindowLayoutModel extends NSELayoutGuideStore {
   #disposed = false;
   #observer: ResizeObserver | null = null;
   #root: HTMLElement | null = null;
+  readonly #leadingChrome = new Set<symbol>();
   readonly #chrome = new Map<symbol, NSEChromeObstruction>();
   readonly #listeners = new Set<() => void>();
   readonly #measurements = new Map<HTMLElement, Set<(rect: NSEScrollRect) => void>>();
@@ -62,13 +63,14 @@ export class NSEWindowLayoutModel extends NSELayoutGuideStore {
     this.#chrome.set(token, Object.freeze({ ...obstruction })); this.#schedule();
     return () => { if (this.#chrome.delete(token)) this.#schedule(); };
   }
-  observeChrome(element: HTMLElement, edge: NSEChromeObstruction["edge"], translucent: boolean): () => void {
+  observeChrome(element: HTMLElement, edge: NSEChromeObstruction["edge"] | "leading", translucent: boolean): () => void {
     const token = Symbol("measured-window-chrome");
+    if (edge === "leading") this.#leadingChrome.add(token);
     const stop = this.observeElement(element, rect => {
       const thickness = edge === "top" || edge === "bottom" ? rect.height : rect.width;
-      this.#chrome.set(token, Object.freeze({ edge, thickness, translucent })); this.#schedule();
+      this.#chrome.set(token, Object.freeze({ edge: edge === "leading" ? this.#direction === "rtl" ? "right" : "left" : edge, thickness, translucent })); this.#schedule();
     });
-    return () => { stop(); if (this.#chrome.delete(token)) this.#schedule(); };
+    return () => { stop(); this.#leadingChrome.delete(token); if (this.#chrome.delete(token)) this.#schedule(); };
   }
   observeElement(element: HTMLElement, listener: (rect: NSEScrollRect) => void): () => void {
     let listeners = this.#measurements.get(element);
@@ -83,12 +85,14 @@ export class NSEWindowLayoutModel extends NSELayoutGuideStore {
     this.#root = element;
     const readDirection = () => {
       const direction = element.ownerDocument.defaultView?.getComputedStyle(element).direction === "rtl" ? "rtl" : "ltr";
-      if (direction !== this.#direction) { this.#direction = direction; if (this.#logicalScreen) this.setScreenInsets(physicalSafeAreaInsets(this.#logicalScreen, direction)); this.#schedule(); }
+      if (direction !== this.#direction) { this.#direction = direction;
+        for (const token of this.#leadingChrome) { const obstruction = this.#chrome.get(token); if (obstruction) this.#chrome.set(token, Object.freeze({ ...obstruction, edge: direction === "rtl" ? "right" : "left" })); }
+        if (this.#logicalScreen) this.setScreenInsets(physicalSafeAreaInsets(this.#logicalScreen, direction)); this.#schedule(); }
     };
     const stop = this.observeElement(element, rect => { if (rect.width > 0 && rect.height > 0) this.setBounds(rect); readDirection(); });
     const Mutation = element.ownerDocument.defaultView?.MutationObserver;
     const directionObserver = Mutation ? new Mutation(readDirection) : null;
-    directionObserver?.observe(element.ownerDocument.documentElement, { attributes: true, attributeFilter: ["dir"] });
+    directionObserver?.observe(element.ownerDocument.documentElement, { attributes: true, subtree: true, attributeFilter: ["dir"] });
     directionObserver?.observe(element, { attributes: true, attributeFilter: ["dir"] });
     return () => { directionObserver?.disconnect(); stop(); if (this.#root === element) this.#root = null; };
   }
@@ -97,7 +101,7 @@ export class NSEWindowLayoutModel extends NSELayoutGuideStore {
     this.#disposed = true;
     if (this.#frame !== null) this.#cancelFrame(this.#frame);
     this.#frame = null; this.#observer?.disconnect(); this.#observer = null;
-    this.#measurements.clear(); this.#chrome.clear(); this.#listeners.clear(); this.#root = null;
+    this.#measurements.clear(); this.#leadingChrome.clear(); this.#chrome.clear(); this.#listeners.clear(); this.#root = null;
     super.dispose();
   }
   #ensureObserver(element: HTMLElement): void {
@@ -151,7 +155,7 @@ export function useNSEWindowChromeObstruction(edge: NSEChromeObstruction["edge"]
   const model = useContext(NSEWindowLayoutContext);
   useLayoutEffect(() => model?.registerChrome({ edge, thickness, translucent }), [model, edge, thickness, translucent]);
 }
-export function useNSEWindowChromeElement(ref: RefObject<HTMLElement | null>, edge: NSEChromeObstruction["edge"], translucent: boolean, enabled = true): void {
+export function useNSEWindowChromeElement(ref: RefObject<HTMLElement | null>, edge: NSEChromeObstruction["edge"] | "leading", translucent: boolean, enabled = true): void {
   const model = useContext(NSEWindowLayoutContext);
   useLayoutEffect(() => model && enabled && ref.current ? model.observeChrome(ref.current, edge, translucent) : undefined, [model, ref, edge, translucent, enabled]);
 }
