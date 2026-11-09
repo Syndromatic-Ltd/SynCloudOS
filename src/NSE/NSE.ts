@@ -115,7 +115,8 @@ const NSEControlCatalogue = {
   ...NSEDateTime,
 };
 import * as NSELayout from "./Layout";
-export { NSEStackItem, NSEStackView, resolveStackLayout } from "./Layout";
+export { NSEEdgeInsetsMake, NSEEdgeInsetsZero, NSEStackItem, NSEStackView, resolveStackLayout } from "./Layout";
+export type { NSEEdgeInsets } from "./Layout";
 export type {
   NSEStackAlignment,
   NSEStackDistribution,

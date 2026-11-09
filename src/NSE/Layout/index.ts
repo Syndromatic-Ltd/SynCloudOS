@@ -20,6 +20,8 @@
 
 import "./nse-layout.css";
 import "./nse-stack-view.css";
+export { NSEEdgeInsetsMake, NSEEdgeInsetsZero } from "./NSEEdgeInsets";
+export type { NSEEdgeInsets } from "./NSEEdgeInsets";
 
 export { resolveNSESpacing } from "./layoutSpacing";
 export type { NSELayoutGap, NSESpacing } from "./layoutSpacing";

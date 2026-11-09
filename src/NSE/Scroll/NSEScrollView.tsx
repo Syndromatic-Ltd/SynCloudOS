@@ -21,7 +21,8 @@
 import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
 import { useNSERubberBandScroll } from "./index";
 import { NSEScroller } from "./NSEScroller";
-import { NSEScrollViewController, type NSEScrollerPolicy, type NSEScrollInsets } from "./scrollTypes";
+import { NSEScrollViewController, type NSEScrollerPolicy } from "./scrollTypes";
+import type { NSEEdgeInsets } from "../Layout/NSEEdgeInsets";
 import { nseUnowned } from "../Controllers/ownership";
 import { NSEClipView } from "./NSEClipView";
 import type { NSEClipViewHandle, NSEScrollRect } from "./scrollTypes";
@@ -37,7 +38,7 @@ export interface NSEScrollViewGeometrySnapshot {
   readonly viewport: { readonly width: number; readonly height: number };
   readonly content: { readonly width: number; readonly height: number };
   readonly position: { readonly left: number; readonly top: number };
-  readonly insets: NSEScrollInsets;
+  readonly insets: NSEEdgeInsets;
 }
 
 export interface NSEScrollViewProps extends HTMLAttributes<HTMLDivElement> {
@@ -47,7 +48,7 @@ export interface NSEScrollViewProps extends HTMLAttributes<HTMLDivElement> {
   axis?: "y" | "x" | "both";
   horizontalScrollerPolicy?: NSEScrollerPolicy;
   verticalScrollerPolicy?: NSEScrollerPolicy;
-  scrollInsets?: Partial<NSEScrollInsets>;
+  scrollInsets?: Partial<NSEEdgeInsets>;
   onScrollSnapshot?(): void;
   onGeometryChange?(snapshot: NSEScrollViewGeometrySnapshot): void;
   controllerRef?(controller: NSEScrollViewController | null): void;
@@ -77,7 +78,7 @@ export const NSEScrollView = forwardRef<NSEScrollViewHandle, NSEScrollViewProps>
   const callbacks = useRef({ onScrollSnapshot, onGeometryChange });
   const [geometry, setGeometry] = useState<NSEScrollViewGeometrySnapshot>(() => ({ viewport: { width: 0, height: 0 }, content: { width: 0, height: 0 }, position: { left: 0, top: 0 }, insets: { top: 0, right: 0, bottom: 0, left: 0 } }));
   callbacks.current = { onScrollSnapshot, onGeometryChange };
-  const insets: NSEScrollInsets = {
+  const insets: NSEEdgeInsets = {
     top: scrollInsets?.top ?? 0,
     right: scrollInsets?.right ?? 0,
     bottom: scrollInsets?.bottom ?? 0,

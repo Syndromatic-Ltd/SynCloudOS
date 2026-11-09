@@ -23,6 +23,8 @@ export {
   useNSETraitCollection,
 } from "./Animation";
 /** Supported SynWare SDK NSE framework surface. Concrete themes are explicit subpaths. */
+export { NSEEdgeInsetsMake, NSEEdgeInsetsZero } from "./Layout/NSEEdgeInsets";
+export type { NSEEdgeInsets } from "./Layout/NSEEdgeInsets";
 export { NSEObjectController } from "./Controllers/NSEObjectController";
 export type {
   ObjectControllerField, ObjectControllerFields, ObjectControllerSnapshot,
