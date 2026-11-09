@@ -1,0 +1,118 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-theme-hook-coverage.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx (327 tests | 8 failed) 340ms
+     × switch-standard-on-enabled 5ms
+     × switch-standard-on-disabled 2ms
+     × switch-metal-on-enabled 2ms
+     × switch-metal-on-disabled 1ms
+     × switch-standard-off-enabled 1ms
+     × switch-standard-off-disabled 1ms
+     × switch-metal-off-enabled 1ms
+     × switch-metal-off-disabled 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > switch-standard-on-enabled
+AssertionError: switch-standard-on-enabled publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:16:64
+     14|       const control = surface.id.startsWith("switch-") ? "switch" : "b…
+     15|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     16|       expect(root, `${surface.id} publishes its identity`).not.toBeNul…
+       |                                                                ^
+     17|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     18|       for (const element of root!.querySelectorAll("*")) expect(parts.…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > switch-standard-on-disabled
+AssertionError: switch-standard-on-disabled publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:16:64
+     14|       const control = surface.id.startsWith("switch-") ? "switch" : "b…
+     15|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     16|       expect(root, `${surface.id} publishes its identity`).not.toBeNul…
+       |                                                                ^
+     17|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     18|       for (const element of root!.querySelectorAll("*")) expect(parts.…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > switch-metal-on-enabled
+AssertionError: switch-metal-on-enabled publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:16:64
+     14|       const control = surface.id.startsWith("switch-") ? "switch" : "b…
+     15|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     16|       expect(root, `${surface.id} publishes its identity`).not.toBeNul…
+       |                                                                ^
+     17|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     18|       for (const element of root!.querySelectorAll("*")) expect(parts.…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > switch-metal-on-disabled
+AssertionError: switch-metal-on-disabled publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:16:64
+     14|       const control = surface.id.startsWith("switch-") ? "switch" : "b…
+     15|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     16|       expect(root, `${surface.id} publishes its identity`).not.toBeNul…
+       |                                                                ^
+     17|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     18|       for (const element of root!.querySelectorAll("*")) expect(parts.…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > switch-standard-off-enabled
+AssertionError: switch-standard-off-enabled publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:16:64
+     14|       const control = surface.id.startsWith("switch-") ? "switch" : "b…
+     15|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     16|       expect(root, `${surface.id} publishes its identity`).not.toBeNul…
+       |                                                                ^
+     17|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     18|       for (const element of root!.querySelectorAll("*")) expect(parts.…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > switch-standard-off-disabled
+AssertionError: switch-standard-off-disabled publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:16:64
+     14|       const control = surface.id.startsWith("switch-") ? "switch" : "b…
+     15|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     16|       expect(root, `${surface.id} publishes its identity`).not.toBeNul…
+       |                                                                ^
+     17|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     18|       for (const element of root!.querySelectorAll("*")) expect(parts.…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > switch-metal-off-enabled
+AssertionError: switch-metal-off-enabled publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:16:64
+     14|       const control = surface.id.startsWith("switch-") ? "switch" : "b…
+     15|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     16|       expect(root, `${surface.id} publishes its identity`).not.toBeNul…
+       |                                                                ^
+     17|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     18|       for (const element of root!.querySelectorAll("*")) expect(parts.…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > switch-metal-off-disabled
+AssertionError: switch-metal-off-disabled publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:16:64
+     14|       const control = surface.id.startsWith("switch-") ? "switch" : "b…
+     15|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     16|       expect(root, `${surface.id} publishes its identity`).not.toBeNul…
+       |                                                                ^
+     17|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     18|       for (const element of root!.querySelectorAll("*")) expect(parts.…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  8 failed | 319 passed (327)
+   Start at  19:16:44
+   Duration  9.37s (transform 6.19s, setup 26ms, import 8.06s, tests 340ms, environment 806ms)

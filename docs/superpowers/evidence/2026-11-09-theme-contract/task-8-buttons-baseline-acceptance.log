@@ -1,0 +1,143 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run playwright test tests/e2e/theme-baseline.spec.ts --project=chromium --project=chromium-high-dpr --workers=4
+[WebServer] (node:50840) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 80 tests using 4 workers
+
+(node:30644) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:31924) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:76992) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:83952) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  4 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3 (23.6s)
+  ok  2 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 4 (23.6s)
+  ok  1 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 (23.9s)
+  ok  3 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2 (24.3s)
+  ok  5 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 5 (5.9s)
+  ok  6 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 6 (6.0s)
+  ok  7 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 7 (5.8s)
+  ok  8 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 8 (5.8s)
+  ok  9 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 9 (5.8s)
+  ok 11 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 11 (5.8s)
+  ok 10 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 10 (6.1s)
+  ok 12 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 12 (5.9s)
+  ok 13 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 13 (5.3s)
+  ok 15 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 15 (5.4s)
+  ok 14 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 14 (5.8s)
+  ok 16 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 16 (5.5s)
+  ok 19 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 19 (5.3s)
+  ok 18 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 18 (5.6s)
+  ok 20 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 20 (5.5s)
+  ok 17 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 17 (6.9s)
+  ok 23 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 3 (4.9s)
+  ok 22 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 2 (5.6s)
+  ok 24 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 4 (5.0s)
+  x  21 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (10.1s)
+(node:39464) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 25 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 5 (5.2s)
+  ok 27 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 7 (4.9s)
+  ok 26 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 6 (5.3s)
+  ok 29 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 9 (5.4s)
+  ok 31 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 11 (5.2s)
+  ok 30 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 10 (5.7s)
+  ok 28 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 8 (5.8s)
+  ok 32 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 12 (5.5s)
+  ok 33 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 13 (5.2s)
+  ok 35 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 15 (5.4s)
+  ok 34 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 14 (5.7s)
+  ok 36 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 16 (5.6s)
+  ok 39 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 19 (5.1s)
+  ok 38 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 18 (5.6s)
+(node:93756) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:92500) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 37 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 17 (6.9s)
+(node:6416) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 40 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 20 (5.6s)
+(node:72548) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 41 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 (5.8s)
+  ok 42 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2 (6.2s)
+  ok 43 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3 (5.5s)
+  ok 44 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 4 (5.6s)
+  ok 45 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 5 (5.5s)
+  ok 47 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 7 (5.3s)
+  ok 46 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 6 (5.6s)
+  ok 48 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 8 (5.8s)
+  ok 49 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 9 (5.8s)
+  ok 51 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 11 (5.7s)
+  ok 50 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 10 (6.0s)
+  ok 52 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 12 (5.6s)
+  ok 53 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 13 (5.5s)
+  ok 55 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 15 (5.5s)
+  ok 54 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 14 (5.8s)
+  ok 56 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 16 (5.7s)
+  ok 59 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 19 (5.3s)
+  ok 58 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 18 (5.6s)
+  ok 57 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 17 (6.9s)
+  ok 60 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 20 (5.6s)
+  ok 63 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 3 (5.1s)
+  ok 61 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (5.5s)
+  ok 62 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 2 (5.9s)
+  ok 64 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 4 (5.3s)
+  ok 65 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 5 (5.3s)
+  ok 66 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 6 (5.5s)
+  ok 67 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 7 (5.1s)
+  ok 68 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 8 (5.3s)
+  ok 69 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 9 (5.2s)
+  ok 71 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 11 (5.2s)
+  ok 70 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 10 (5.6s)
+  ok 72 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 12 (5.4s)
+  ok 73 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 13 (5.1s)
+  ok 75 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 15 (5.3s)
+  ok 74 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 14 (5.8s)
+  ok 76 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 16 (5.6s)
+  ok 79 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 19 (5.2s)
+  ok 78 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 18 (5.5s)
+  ok 77 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 17 (6.8s)
+  ok 80 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 20 (5.4s)
+
+
+  1) [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 ────────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('#theme-baseline-surface')
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 10000ms
+      - waiting for locator('#theme-baseline-surface')
+
+
+      13 |     await page.clock.setFixedTime(new Date("2026-11-09T13:30:00.000Z"));
+      14 |     await page.goto(`/tests/e2e/fixtures/theme-baseline/index.html?scheme=${scheme}`);
+    > 15 |     await expect(page.locator("#theme-baseline-surface")).toBeVisible();
+         |                                                           ^
+      16 |     const catalogue = await page.evaluate(() => (window as unknown as { themeBaselineCatalogue: Omit<ThemeBaselineSurface, "render">[] }).themeBaselineCatalogue);
+      17 |     expect(catalogue.length).toBeGreaterThan(400);
+      18 |     const selected = process.env.THEME_BASELINE_SURFACE ? catalogue.filter(entry => new RegExp(process.env.THEME_BASELINE_SURFACE!).test(entry.id)) : catalogue;
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:15:59
+
+    Error Context: test-results\chromium\theme-baseline-dark-catalogue-partition-1-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\chromium\theme-baseline-dark-catalogue-partition-1-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\chromium\theme-baseline-dark-catalogue-partition-1-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 ─────────────────
+  79 passed (2.3m)

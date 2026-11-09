@@ -69,11 +69,21 @@ Verification: 31 focused adoption/navigation tests passed, then 59 broader navig
 
 ### Task 7 — hook vocabulary and structural limits
 
+Commit: `68c26ed7` — `NSE: the theme hook vocabulary and structural limits`.
+
 Added frozen control, part, state and variant vocabularies, `nseControlHooks`, `nsePartHooks`, and their public `nse/theme` entry. The helper emits exact AppKit-shaped state attributes and rejects unknown identities, parts, states and variant names. Structural CSS protects the 24-point regular/large minimum and the forced-colour focus outline. Normal focus retains the existing shape-specific indicator; the bundle validator and state-scoped loading protect it in Tasks 12–16. Semantic display, visibility and content restrictions are validated on theme CSS, since their correct structural values vary by part.
 
 Verification: 3 new hook tests passed; typecheck passed. The frozen screenshot gate passed **80/80, zero differences**, recorded in `task-7-baseline.log`.
 
-### Tasks 8–19
+### Task 8 — hooks on controls (in progress)
+
+The buttons group publishes button/switch identity, neutral background/bezel/title/image/indicator/track/fill/knob parts, AppKit variants and actual enabled, highlighted, on/off/mixed, hover and keyboard-focus drawing state. Interaction observers only publish state; native activation and the existing press/drag owners remain in charge. Each button/switch exposes a separate descendant bezel element, so the contract’s `[data-nse-control] [data-nse-part="bezel"]` drawing pattern has a target. The coverage test renders every corresponding frozen catalogue case (319 buttons and 8 switches).
+
+Verification: 360 focused tests passed, including the 327 catalogue cases and press, key-equivalent and scroll-control regressions; typecheck passed. The first screenshot comparison caught the initial structural minimum rule reducing existing larger minimum heights to 24. The bound now uses `max(24px, var(--nse-control-minimum-block-size))` and its inline equivalent. Atmo's existing minimum declarations publish the identical metric alongside their existing CSS. The failed actual/diff/trace are retained as `task-8-minimum-*`; no reference was changed. The follow-up found the same larger-minimum interaction in path cells; their existing 26-point/36-point metrics now publish through the bound too. A subsequent run had no pixel mismatches but one page failed to load a module with Chromium `ERR_NO_BUFFER_SPACE`; its trace is retained as `task-8-startup-buffer-trace.zip`. Final button comparison with two workers passed **80/80, zero differences**, recorded in `task-8-buttons-baseline-complete.log`. All 2,648 reference hashes remain unchanged.
+
+Remaining groups: value controls, text, containers, menus/toolbars, windows/overlays.
+
+### Tasks 9–19
 
 Pending. Final split-suite and packed SDK acceptance remain for Task 19.
 
@@ -107,6 +117,8 @@ Further diagnostic runs exposed folder-only capture interference and source-pain
 
 5. Compact adaptive navigation is hidden with only one destination and appears when a second is added, as Task 6’s live-strip acceptance requires. Fixed segmented tab views retain their existing behaviour.
 6. Framework chrome uses separate `--nse-screen-safe-area-inset-*` values when sizing its own device padding. Content uses `--nse-safe-area-inset-*`; feeding the latter back into a bar’s size would create a measurement loop.
+
+7. The minimum interaction bound must preserve a theme’s larger minimum. `--nse-control-minimum-inline-size` and `--nse-control-minimum-block-size` supply those metrics; structural CSS clamps them to at least 24 points for regular/large controls rather than replacing a larger minimum with 24.
 
 ## Public API accounting
 

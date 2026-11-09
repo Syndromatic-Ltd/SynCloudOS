@@ -114,9 +114,11 @@
   align-items: center;
   justify-content: center;
   min-width: 76px;
+  --nse-control-minimum-inline-size: 76px;
   max-width: 100%;
   height: 52px;
   min-height: 52px;
+  --nse-control-minimum-block-size: 52px;
   margin: 0;
   padding: 0 10px;
   overflow: hidden;
@@ -272,6 +274,7 @@
 :where([data-nse-appearance="atmo"]) .nse-control-toolbar:not([data-grouped="true"]) > .nse-control-button {
   height: 50px;
   min-height: 50px;
+  --nse-control-minimum-block-size: 50px;
   border-width: 0 25px;
   border-image: var(--nse-atmo-menu-button) 0 25 200 25 fill stretch;
   line-height: 50px;
@@ -304,6 +307,7 @@
 :where([data-nse-appearance="atmo"]) .nse-extended-tool-button.nse-control-button {
   height: 50px;
   min-height: 50px;
+  --nse-control-minimum-block-size: 50px;
   border-width: 0 25px;
   border-image: var(--nse-atmo-menu-button) 0 25 200 25 fill stretch;
   line-height: 50px;
@@ -325,8 +329,10 @@
 
 :where([data-nse-appearance="atmo"]) .nse-control-toolbar[data-grouped="true"] > .nse-control-button {
   min-width: calc(var(--nse-atmo-bar-h, 50px) * 0.84);
+  --nse-control-minimum-inline-size: calc(var(--nse-atmo-bar-h, 50px) * 0.84);
   height: var(--nse-atmo-bar-h, 50px);
   min-height: var(--nse-atmo-bar-h, 50px);
+  --nse-control-minimum-block-size: var(--nse-atmo-bar-h, 50px);
   margin: 0;
   padding: 0 12px;
   border-color: transparent;
@@ -949,8 +955,10 @@
 :where([data-nse-appearance="atmo"]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"] > .nse-control-button,
 :where([data-nse-appearance="atmo"]) [data-nse-control="tab-view"] > .nse-control-toolbar[data-grouped="true"] > [data-nse-part="tab-item"] > .nse-control-button {
   min-width: 54px;
+  --nse-control-minimum-inline-size: 54px;
   height: 50px;
   min-height: 50px;
+  --nse-control-minimum-block-size: 50px;
   padding: 0 13px;
   border-color: transparent;
   border-style: solid;
@@ -1470,6 +1478,7 @@
   grid-template-columns: minmax(0, 1fr) 14px;
   align-items: center;
   min-width: 136px;
+  --nse-control-minimum-inline-size: 136px;
   max-width: 100%;
   height: 52px;
   padding: 0;
@@ -3425,6 +3434,7 @@
   grid-template-columns: max-content 14px;
   gap: 6px;
   min-width: 0;
+  --nse-control-minimum-inline-size: 0;
   inline-size: max-content;
 }
 
@@ -3799,6 +3809,7 @@
 
 :where([data-nse-appearance="atmo"]) [data-nse-control="colour-panel"] .nse-control-picker-button {
   min-inline-size: 0;
+  --nse-control-minimum-inline-size: 0;
 }
 
 :where([data-nse-appearance="atmo"]) [data-nse-control="colour-panel"] > fieldset,
