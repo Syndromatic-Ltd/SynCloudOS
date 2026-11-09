@@ -1,0 +1,180 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run playwright test tests/e2e/theme-baseline.spec.ts --project=chromium --project=chromium-high-dpr --workers=4
+[WebServer] (node:78592) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 80 tests using 4 workers
+
+(node:82912) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:45268) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:50124) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:84208) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3 (25.3s)
+  ok  4 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 4 (25.3s)
+  ok  3 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 (25.5s)
+  ok  2 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2 (25.8s)
+  ok  5 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 5 (5.6s)
+  ok  7 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 7 (5.5s)
+  ok  6 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 6 (5.7s)
+  ok  8 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 8 (5.5s)
+  ok 11 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 11 (5.4s)
+  ok  9 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 9 (5.5s)
+  ok 10 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 10 (5.8s)
+  ok 12 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 12 (5.5s)
+  ok 13 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 13 (5.2s)
+  ok 15 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 15 (5.4s)
+  ok 14 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 14 (5.8s)
+  ok 16 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 16 (5.6s)
+  ok 19 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 19 (5.4s)
+  ok 18 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 18 (5.8s)
+  ok 20 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 20 (5.5s)
+  x  17 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 17 (8.3s)
+(node:29312) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 21 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (5.8s)
+  ok 23 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 3 (5.4s)
+  ok 22 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 2 (6.2s)
+  ok 24 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 4 (5.8s)
+  ok 25 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 5 (5.4s)
+  ok 26 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 6 (5.6s)
+  ok 27 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 7 (5.2s)
+  ok 28 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 8 (5.6s)
+  ok 29 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 9 (5.4s)
+  ok 31 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 11 (5.5s)
+  ok 30 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 10 (5.8s)
+  ok 32 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 12 (5.5s)
+  ok 33 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 13 (5.3s)
+  ok 35 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 15 (5.6s)
+  ok 34 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 14 (5.8s)
+  ok 36 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 16 (5.7s)
+  ok 39 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 19 (5.3s)
+  ok 38 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 18 (5.9s)
+(node:76088) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 37 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 17 (7.0s)
+(node:75800) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:80544) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 40 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 20 (5.9s)
+(node:92392) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 41 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 (6.1s)
+  ok 43 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3 (5.6s)
+  ok 42 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2 (6.3s)
+  ok 44 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 4 (5.6s)
+  ok 45 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 5 (5.4s)
+  ok 46 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 6 (5.5s)
+  ok 47 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 7 (5.2s)
+  ok 48 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 8 (5.3s)
+  ok 49 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 9 (5.3s)
+  ok 51 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 11 (5.2s)
+  ok 50 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 10 (5.6s)
+  ok 52 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 12 (5.3s)
+  ok 53 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 13 (5.3s)
+  ok 55 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 15 (5.3s)
+  ok 54 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 14 (5.7s)
+  ok 56 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 16 (5.5s)
+  ok 59 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 19 (5.3s)
+  ok 58 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 18 (5.5s)
+  ok 57 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 17 (6.8s)
+  ok 60 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 20 (5.5s)
+  ok 61 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (5.6s)
+  ok 63 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 3 (5.2s)
+  ok 62 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 2 (5.9s)
+  ok 64 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 4 (5.4s)
+  ok 65 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 5 (5.5s)
+  ok 67 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 7 (5.5s)
+  ok 66 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 6 (5.6s)
+  ok 68 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 8 (5.3s)
+  ok 69 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 9 (5.4s)
+  ok 71 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 11 (5.4s)
+  ok 70 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 10 (5.8s)
+  ok 72 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 12 (5.5s)
+  ok 73 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 13 (5.4s)
+  ok 75 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 15 (5.5s)
+  ok 74 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 14 (5.9s)
+  ok 76 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 16 (5.8s)
+  ok 79 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 19 (5.4s)
+  ok 78 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 18 (5.7s)
+  ok 77 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 17 (6.9s)
+  ok 80 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 20 (5.4s)
+
+
+  1) [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 17 › folder-presentation 
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('body')
+      24 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: light-folder-presentation.png
+
+    Call log:
+      - Expect "toHaveScreenshot(light-folder-presentation.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 40345 pixels (ratio 0.05 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 40175 pixels (ratio 0.05 of all image pixels) are different.
+      - waiting 250ms before taking screenshot
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 24 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      72 |         await testInfo.attach("folder-geometry", { body: JSON.stringify({ dpr: await page.evaluate(() => devicePixelRatio), before, after: await geometry() }, null, 2), contentType: "application/json" });
+      73 |       }
+    > 74 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      75 |       if (surface.interaction === "press") await page.mouse.up();
+      76 |       expect(errors).toEqual([]);
+      77 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:74:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #2: light-folder-presentation (image/png) ───────────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\light-folder-presentation-chromium-win32.png
+    Received: test-results\chromium\theme-baseline-light-catalogue-partition-17-chromium\light-folder-presentation-actual.png
+    Diff:     test-results\chromium\theme-baseline-light-catalogue-partition-17-chromium\light-folder-presentation-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\chromium\theme-baseline-light-catalogue-partition-17-chromium\error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\chromium\theme-baseline-light-catalogue-partition-17-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\chromium\theme-baseline-light-catalogue-partition-17-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 17 ───────────────
+  79 passed (2.3m)

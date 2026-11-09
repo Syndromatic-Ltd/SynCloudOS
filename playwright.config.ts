@@ -74,12 +74,15 @@ export default defineConfig({
     },
     {
       name: "chromium-high-dpr",
-      testMatch: highDprVisualMatrix,
+      testMatch: [highDprVisualMatrix, /theme-(?:baseline|nesting)\.spec\.ts$/],
       use: { ...devices["Desktop Chrome"], deviceScaleFactor: 2 }
     },
     {
       name: "chromium-reduced-motion",
-      testMatch: parityMatrix,
+      testMatch: [parityMatrix, /theme-(?:baseline|nesting)\.spec\.ts$/],
+      // The Atmo baseline already freezes motion. Compare DPR 1 against the
+      // original Chromium images instead of creating a second baseline.
+      expect: { toHaveScreenshot: { pathTemplate: "{testDir}/{testFilePath}-snapshots/{arg}-chromium-{platform}{ext}" } },
       use: { ...devices["Desktop Chrome"], contextOptions: { reducedMotion: "reduce" } }
     }
   ]
