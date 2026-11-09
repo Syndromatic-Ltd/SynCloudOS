@@ -145,7 +145,7 @@ export function NSEToolbarOverflowMenu({
         aria-haspopup="menu"
         aria-expanded={open}
         tabIndex={tabIndex}
-        data-nse-control="toolbar-item"
+        data-nse-control="toolbar-item" data-nse-highlighted={pressed || open ? "" : undefined} data-nse-hovered={hovered ? "" : undefined} data-nse-focused={focused ? "" : undefined}
         data-nse-part="overflow"
         data-state={open ? "open" : "normal"}
         {...appearance.attributes}

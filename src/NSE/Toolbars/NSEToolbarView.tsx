@@ -213,7 +213,7 @@ function NSEConfiguredToolbar({
       role="toolbar"
       dir={direction}
       data-nse-control="toolbar"
-      data-nse-part="root"
+      data-nse-part="background"
       data-state={snapshot.validating ? "loading" : snapshot.diagnostic ? "error" : "ready"}
       {...toolbarAppearance.attributes}
       data-nse-toolbar-owner={controller.configuration.owner.kind}
@@ -264,8 +264,8 @@ function NSEConfiguredToolbar({
               <NSEChromeBevel slot={customAppearance} state="normal" />
               <NSEChromeGloss slot={customAppearance} state="normal" />
               {item.showsLabel && snapshot.displayMode !== "icon-only" ? <>
-                <span className="nse-toolbar-custom-view">{item.render()}</span>
-                <span className="nse-toolbar-item-label" aria-hidden="true">{item.label}</span>
+                <span data-nse-part="content" className="nse-toolbar-custom-view">{item.render()}</span>
+                <span data-nse-part="title" className="nse-toolbar-item-label" aria-hidden="true">{item.label}</span>
               </> : item.render()}
             </span>
           );
@@ -298,6 +298,8 @@ function NSEConfiguredToolbar({
             // row of items fills exactly the width the layout gave it.
             style={{ inlineSize: `calc(${entry.allocatedWidth}px - 2 * var(--nse-toolbar-item-inline-margin, 0px))` }}
             data-nse-control="toolbar-item"
+            data-nse-state={item.checked} data-nse-enabled={item.enabled ? undefined : "false"} data-nse-selected={item.checked !== "off" ? "" : undefined}
+            data-nse-highlighted={pressedItemId === entry.instanceId ? "" : undefined} data-nse-hovered={hoveredItemId === entry.instanceId ? "" : undefined} data-nse-focused={focusedItemId === entry.instanceId ? "" : undefined}
             data-nse-toolbar-item-id={entry.instanceId}
             data-nse-toolbar-command={item.commandId}
             data-nse-toolbar-state={item.checked}
@@ -341,8 +343,8 @@ function NSEConfiguredToolbar({
             <NSEChromeSplice slot={itemAppearance} state={itemAppearanceState} />
             <NSEChromeGloss slot={itemAppearance} state={itemAppearanceState} />
             <NSEChromeInnerShadow slot={itemAppearance} state={itemAppearanceState} />
-            {snapshot.displayMode !== "label-only" ? <span className="nse-toolbar-item-icon" aria-hidden="true">{item.icon}</span> : null}
-            {snapshot.displayMode !== "icon-only" ? <span className="nse-toolbar-item-label">{item.label}</span> : null}
+            {snapshot.displayMode !== "label-only" ? <span data-nse-part="image" className="nse-toolbar-item-icon" aria-hidden="true">{item.icon}</span> : null}
+            {snapshot.displayMode !== "icon-only" ? <span data-nse-part="title" className="nse-toolbar-item-label">{item.label}</span> : null}
           </button>
         );
       })}
@@ -412,6 +414,7 @@ function NSEChildrenToolbar({
   return (
     <div
       className={classes("nse-control-toolbar", keyboardUp && "nse-control-toolbar-fade-in", surfaceProps.className)}
+      data-nse-control="toolbar" data-nse-part="background" data-nse-position={position}
       data-position={position}
       data-grouped={grouped ? "true" : "false"}
       data-fade-on-keyboard={fadeOnKeyboard ? "true" : undefined}

@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useNSEThemeInteraction } from "../Theme/contract/useThemeInteraction";
+import { nseControlHooks } from "../Theme/contract/hooks";
 import { useId, useMemo, useRef, useState, type MutableRefObject, type ReactNode } from "react";
 
 import type { HFXFeedbackRequest } from "../Feedback";
@@ -122,9 +124,12 @@ function TabButton({ item, selected, instanceId, tone, panelIdentity, tabStyle, 
   const commandEnabled = !item.commandId || Boolean(command.presentation?.enabled && !command.presentation.denied && !command.presentation.hidden && !command.presentation.stale);
   const panelId = item.panelId ?? (panelIdentity ? `tab-panel-${instanceId}-${item.id}` : undefined);
 
+  const theme = useNSEThemeInteraction<HTMLButtonElement>(!item.disabled && commandEnabled, true, anchorProps);
   const icons = tabStyle === "icons";
   return <button
     {...anchorProps}
+    {...theme.events}
+    {...nseControlHooks({ control: "button", enabled: !item.disabled && commandEnabled, selected, hovered: theme.hovered, focused: theme.focused, highlighted: theme.highlighted })} data-nse-part="cell"
     className={icons ? "nse-icon-tab" : "nse-control-button"}
     title={title}
     type="button"
@@ -155,7 +160,7 @@ function TabButton({ item, selected, instanceId, tone, panelIdentity, tabStyle, 
         <span data-nse-part="tab-icon" aria-hidden="true">{item.icon}</span>
         {showsCaptions ? <span data-nse-part="tab-caption">{item.label}</span> : null}
       </>
-      : <span className="nse-control-button-label">{item.label}</span>}
+      : <span data-nse-part="title" className="nse-control-button-label">{item.label}</span>}
   </button>;
 }
 
@@ -262,7 +267,7 @@ export function NSETabStrip({
   const tabListClassName = [tabStyle === "icons" ? "nse-icon-tabs" : "nse-control-toolbar", presentation?.tabListClassName].filter(Boolean).join(" ");
   const renderState: NSETabStripRenderState = { instanceId, enabled, selected };
   return <>
-    <div className={tabListClassName} role="tablist" aria-label={ariaLabel} data-position="inline" data-grouped={tabStyle === "icons" ? undefined : "true"} data-tab-style={tabStyle} data-captions={tabStyle === "icons" && presentation?.showsCaptions ? "true" : undefined}>
+    <div data-nse-control="tab-view" data-nse-part="header" data-nse-style={tabStyle} className={tabListClassName} role="tablist" aria-label={ariaLabel} data-position="inline" data-grouped={tabStyle === "icons" ? undefined : "true"} data-tab-style={tabStyle} data-captions={tabStyle === "icons" && presentation?.showsCaptions ? "true" : undefined}>
       {directTabButtons ? visible.map(tabButton) : visible.map((item) => (
         <span key={item.id} role="presentation" data-nse-part="tab-item">
           {tabButton(item)}

@@ -172,6 +172,7 @@ function NSECommandMenuSurface({
   const { portaled: portalPresentation, ready: presentationReady } = useNSEMenuOverlayPresentationScope();
   const pendingFocus = useRef<{ generation: number; prior: Element | null } | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const itemRefs = useRef(new Map<string, HTMLButtonElement>());
   const hadOpenSnapshot = useRef(false);
   const typeahead = useRef<{ prefix: string; handle: unknown | null; token: object | null }>({ prefix: "", handle: null, token: null });
@@ -414,6 +415,7 @@ function NSECommandMenuSurface({
   return (
     <div
       className={`nse-menu${applicationAppearance ? " nse-application-menu-list" : ""}`}
+      data-nse-control="menu" data-nse-part="background"
       role="menu"
       aria-labelledby={labelledBy}
       aria-busy={view.validating || undefined}
@@ -428,7 +430,7 @@ function NSECommandMenuSurface({
       <NSEAppearanceNineSlice kind="menu-surface" className="nse-menu__surface-layer" />
       {view.branchPath.length > 0 ? (
         <button
-          className={`nse-menu-item nse-menu-back${applicationAppearance ? " nse-control-list-item" : ""}`}
+          data-nse-control="menu-item" data-nse-part="cell" className={`nse-menu-item nse-menu-back${applicationAppearance ? " nse-control-list-item" : ""}`}
           type="button"
           role="menuitem"
           onClick={() => void controller.closeSubmenu()}
@@ -447,8 +449,8 @@ function NSECommandMenuSurface({
         </button>
       ) : null}
       {view.entries.map((entry) => {
-        if (entry.kind === "separator") return <div key={entry.id} className="nse-menu-separator" role="separator" />;
-        if (entry.kind === "custom") return <div key={entry.id} className="nse-menu-custom" role="presentation">{entry.render()}</div>;
+        if (entry.kind === "separator") return <div key={entry.id} data-nse-part="separator" className="nse-menu-separator" role="separator" />;
+        if (entry.kind === "custom") return <div key={entry.id} data-nse-part="content" className="nse-menu-custom" role="presentation">{entry.render()}</div>;
         const role = roleFor(entry);
         const checked = entry.kind === "command" ? entry.checked : undefined;
         return (
@@ -458,6 +460,9 @@ function NSECommandMenuSurface({
               if (element) itemRefs.current.set(entry.id, element);
               else itemRefs.current.delete(entry.id);
             }}
+            data-nse-control="menu-item" data-nse-part="cell"
+            data-nse-state={checked} data-nse-enabled={entry.enabled ? undefined : "false"}
+            data-nse-highlighted={activeId === entry.id ? "" : undefined} data-nse-focused={activeId === entry.id ? "" : undefined} data-nse-hovered={hoveredId === entry.id ? "" : undefined}
             className={`nse-menu-item${applicationAppearance ? " nse-control-list-item" : ""}${!entry.enabled ? " is-disabled" : ""}`}
             type="button"
             role={role}
@@ -472,8 +477,8 @@ function NSECommandMenuSurface({
             tabIndex={activeId === entry.id ? 0 : -1}
             title={!entry.enabled ? entry.disabledReason : undefined}
             onFocus={() => setActiveId(entry.id)}
-            onPointerEnter={() => entry.kind === "submenu" && activate(entry, true)}
-            onPointerLeave={() => controller.cancelPendingSubmenu()}
+            onPointerEnter={() => { setHoveredId(entry.id); if (entry.kind === "submenu") activate(entry, true); }}
+            onPointerLeave={() => { setHoveredId(current => current === entry.id ? null : current); controller.cancelPendingSubmenu(); }}
             onClick={() => activate(entry)}
           >
             {applicationAppearance ? (
@@ -484,7 +489,7 @@ function NSECommandMenuSurface({
                   </span>
                 ) : null}
                 <span className="nse-control-list-body">
-                  <span className="nse-control-list-primary nse-menu-item-label">{entry.label}</span>
+                  <span data-nse-part="title" className="nse-control-list-primary nse-menu-item-label">{entry.label}</span>
                 </span>
                 {(entry.kind === "command" && entry.shortcut) || entry.kind === "submenu" ? (
                   <span className="nse-control-list-trailing">
@@ -499,7 +504,7 @@ function NSECommandMenuSurface({
                   <span className="nse-menu-state-column" data-nse-part="state-column" data-state={entry.checked} aria-hidden="true" />
                 ) : <span className="nse-menu-state-column" data-nse-part="state-column" aria-hidden="true" />}
                 <span className="nse-menu-item-icon" data-nse-part="icon-column" aria-hidden="true">{entry.icon}</span>
-                <span className="nse-menu-item-label">{entry.label}</span>
+                <span data-nse-part="title" className="nse-menu-item-label">{entry.label}</span>
                 {entry.kind === "command" && entry.shortcut ? <span className="nse-menu-shortcut" data-nse-part="shortcut-column" aria-hidden="true">{entry.shortcut}</span> : null}
                 {entry.kind === "submenu" ? <span className="nse-menu-submenu-arrow" data-nse-part="submenu-arrow" data-direction={direction} aria-hidden="true" /> : null}
               </>
@@ -704,7 +709,7 @@ function NSEItemMenu({
   }, [onOpenChange, open]);
 
   return (
-    <span className={classNames("nse-menu-trigger-host", className)} data-nse-menu-smooth-surface={smoothSurface ? "true" : undefined} {...htmlAttributes}>
+    <span data-nse-control="pop-up-button" data-nse-part="background" data-nse-highlighted={isOpen ? "" : undefined} data-nse-pulls-down="true" className={classNames("nse-menu-trigger-host", className)} data-nse-menu-smooth-surface={smoothSurface ? "true" : undefined} {...htmlAttributes}>
       <NSEButton
         {...(trigger === "tool" ? {
           bezelStyle: "texturedRounded" as const,

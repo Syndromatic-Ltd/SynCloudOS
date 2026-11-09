@@ -122,7 +122,7 @@ export function NSEMenuBar({ menu: mainMenu, overlay, direction = "ltr" }: NSEMe
   };
 
   return (
-    <div className="nse-menu-bar" role="menubar" dir={direction}>
+    <div data-nse-control="menu-bar" data-nse-part="background" className="nse-menu-bar" role="menubar" dir={direction}>
       {items.map((item, index) => {
         const controller = item;
         const model = item.model;
@@ -135,10 +135,11 @@ export function NSEMenuBar({ menu: mainMenu, overlay, direction = "ltr" }: NSEMe
           id: overlay?.idForMenu?.(item, index) ?? `nse-menu-bar-${instanceId}:menu:${model.id}`,
         };
         return (
-          <span key={`${model.id}:${index}`} className="nse-menu-bar-item" onPointerEnter={() => {
+          <span data-nse-part="item" key={`${model.id}:${index}`} className="nse-menu-bar-item" onPointerEnter={() => {
             if (openIndex !== null) setOpenIndex(index);
           }}>
             <button
+              data-nse-control="menu-item" data-nse-part="title" data-nse-highlighted={open ? "" : undefined}
               id={triggerId}
               ref={(element) => { buttonRefs.current[index] = element; }}
               type="button"

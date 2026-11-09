@@ -191,7 +191,7 @@ export function NSEToolbarConfigurationSheet({
         className="nse-toolbar-configuration-content"
         aria-label="Toolbar items"
         data-nse-part="content"
-        data-nse-control="toolbar-configuration-sheet"
+        data-nse-control="toolbar-customisation-palette"
         onKeyDown={(event) => {
           if (event.nativeEvent.isComposing || event.key !== "Escape") return;
           event.preventDefault();
@@ -278,7 +278,7 @@ export function NSEToolbarConfigurationSheet({
       title={name}
       aria-label={name}
       className="nse-toolbar-configuration-sheet"
-      data-nse-control="toolbar-configuration-sheet"
+      data-nse-control="toolbar-customisation-palette"
       data-nse-part="surface"
       data-state={open ? "open" : "closed"}
       data-appearance-recipe="toolbar.configuration.sheet"

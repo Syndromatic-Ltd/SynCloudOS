@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-[data-nse-control="tab-view"] [role="tablist"]{display:flex;overflow:auto}
+[data-nse-control="tab-view"]:where(:not([data-nse-style="navigation"])) > [role="tablist"]{display:flex;overflow:auto}
 
 /* NavigationFoundation owns controller geometry/retention; AppearanceAuthority projects only source-bound paint. */
 /* A destination's vertical scroll boundary belongs to the app, not the host

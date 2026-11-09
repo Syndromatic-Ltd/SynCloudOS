@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useNSEThemeInteraction } from "../Theme/contract/useThemeInteraction";
+import { nseControlHooks } from "../Theme/contract/hooks";
 import { useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type HTMLAttributes, type ReactNode } from "react";
 import { useOptionalNSEOverlayProvider } from "../Overlays";
 import { NSEListboxPopup, type NSEListboxOption } from "../Overlays/NSEListboxPopup";
@@ -212,6 +214,8 @@ function NSEPopUpButtonControl(props: NSEPopUpButtonProps) {
     return action === undefined || available(itemCommands.get(row.rowId));
   }, [action, itemCommands]);
   const actionAvailable = menu !== undefined || action === undefined || rows.some(rowEnabled);
+  const theme = useNSEThemeInteraction<HTMLElement>(!disabled && actionAvailable, true, htmlAttributes);
+  const drawing = nseControlHooks({ control: "pop-up-button", enabled: !disabled && actionAvailable, highlighted: open || theme.highlighted, hovered: theme.hovered, focused: theme.focused, variants: { "control-size": controlSize, "bezel-style": bezelStyle ?? "rounded", "pulls-down": String(pullsDown) } });
   const actionHidden = action !== undefined && choiceRows.length > 0 && choiceRows.every((row) => itemCommands.get(row.rowId)?.presentation?.hidden);
   const { triggerNSEControlHaptic } = useNSEControlFeedback();
   const listboxOptions = useMemo<readonly NSEListboxOption<string>[]>(() => rows
@@ -254,10 +258,11 @@ function NSEPopUpButtonControl(props: NSEPopUpButtonProps) {
 
   if (!hosted) {
     return (
-      <label id={id} className={classes("nse-choice-control", className)} data-nse-choice="native" style={sizedControlStyle(style, height, width)} {...(htmlAttributes as HTMLAttributes<HTMLLabelElement>)}>
+      <label {...drawing} data-nse-part="background" id={id} className={classes("nse-choice-control", className)} data-nse-choice="native" style={sizedControlStyle(style, height, width)} {...(htmlAttributes as HTMLAttributes<HTMLLabelElement>)} {...theme.events}>
         {bindings}
         {label ? (labelHidden ? <span className="nse-control-visually-hidden">{label}</span> : label) : null}
         <select
+          data-nse-part="bezel"
           aria-label={accessibleLabel ?? (typeof label === "string" ? label : undefined)}
           value={selectedRow?.item.value ?? ""}
           disabled={disabled || !actionAvailable}
@@ -275,6 +280,7 @@ function NSEPopUpButtonControl(props: NSEPopUpButtonProps) {
   const overlayOptions = resolvedOverlay!;
   return (
     <span
+      {...drawing} data-nse-part="background"
       id={id}
       hidden={actionHidden || undefined}
       className={classes(pullsDown ? "nse-popup-button" : "nse-control-picker", className)}
@@ -283,12 +289,13 @@ function NSEPopUpButtonControl(props: NSEPopUpButtonProps) {
       data-size={height !== undefined ? "custom" : controlSize === "small" ? "small" : undefined}
       style={sizedControlStyle(style, height, width)}
       {...htmlAttributes}
+      {...theme.events}
     >
       {bindings}
       {/* Name sources for aria-labelledby only are `hidden`: they still name
           the button and listbox, but are not read again as loose text. */}
       {label ? (
-        <span id={labelId} className={labelHidden ? undefined : "nse-control-picker-label"} hidden={labelHidden || undefined}>
+        <span data-nse-part="label" id={labelId} className={labelHidden ? undefined : "nse-control-picker-label"} hidden={labelHidden || undefined}>
           {label}
         </span>
       ) : null}
@@ -299,12 +306,12 @@ function NSEPopUpButtonControl(props: NSEPopUpButtonProps) {
       )}
       <NSEButton
         title={pullsDown ? title : <>
-          <span className="nse-control-picker-caption">
-            <span className="nse-control-picker-caption-title">{selectedRow?.item.title ?? "Select"}</span>
+          <span data-nse-part="content" className="nse-control-picker-caption">
+            <span data-nse-part="title" className="nse-control-picker-caption-title">{selectedRow?.item.title ?? "Select"}</span>
             {/* Sizes the button to its widest item, as NSPopUpButton's sizeToFit does. */}
-            {choiceRows.map((row) => <span key={row.item.value} className="nse-control-picker-caption-sizer" aria-hidden="true">{row.item.title}</span>)}
+            {choiceRows.map((row) => <span key={row.item.value} data-nse-part="title-measurement" className="nse-control-picker-caption-sizer" aria-hidden="true">{row.item.title}</span>)}
           </span>
-          <span className="nse-control-picker-arrow" aria-hidden="true" />
+          <span data-nse-part="arrow" className="nse-control-picker-arrow" aria-hidden="true" />
         </>}
         appearance={appearance}
         bezelStyle={pullsDown ? bezelStyle : undefined}

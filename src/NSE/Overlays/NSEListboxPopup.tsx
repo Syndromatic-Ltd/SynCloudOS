@@ -343,7 +343,7 @@ export function NSEListboxPopup<T = unknown>({
           else optionRefs.current.delete(option.id);
         }}
         id={`${resolvedId}-option-${option.id}`}
-        className="nse-overlay-listbox-option"
+        data-nse-control="menu-item" data-nse-part="cell" data-nse-selected={option.kind !== "action" && option.id === selectedId ? "" : undefined} data-nse-enabled={option.disabled ? "false" : undefined} data-nse-highlighted={index === activeIndex && !option.disabled ? "" : undefined} className="nse-overlay-listbox-option"
         type="button"
         role="option"
         aria-selected={option.kind !== "action" && option.id === selectedId}
@@ -363,7 +363,7 @@ export function NSEListboxPopup<T = unknown>({
       </button>
     );
     return option.separatorBefore && index > 0 && !shouldVirtualize
-      ? <Fragment key={option.id}><div className="nse-overlay-listbox-separator" role="separator" />{row}</Fragment>
+      ? <Fragment key={option.id}><div data-nse-part="separator" className="nse-overlay-listbox-separator" role="separator" />{row}</Fragment>
       : row;
   });
 
@@ -389,7 +389,7 @@ export function NSEListboxPopup<T = unknown>({
       <div
         ref={listboxRef}
         id={`${resolvedId}-listbox`}
-        className="nse-overlay-listbox"
+        data-nse-control="menu" data-nse-part="background" className="nse-overlay-listbox"
         role="listbox"
         tabIndex={0}
         aria-labelledby={labelledBy}
@@ -402,8 +402,8 @@ export function NSEListboxPopup<T = unknown>({
         data-fade-bottom={fadeBottom ? "true" : "false"}
         onKeyDown={handleKeyDown}
       >
-        <div ref={scrollRef} className="nse-overlay-listbox-scroll" onScroll={updateScrollState}>
-          <div ref={attachContent} className="nse-overlay-listbox-scroll-content" style={contentStyle}>
+        <div ref={scrollRef} data-nse-part="viewport" className="nse-overlay-listbox-scroll" onScroll={updateScrollState}>
+          <div ref={attachContent} data-nse-part="content" className="nse-overlay-listbox-scroll-content" style={contentStyle}>
             {optionRows}
           </div>
         </div>

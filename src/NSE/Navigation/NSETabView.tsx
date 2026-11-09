@@ -25,7 +25,7 @@ import { NSETabStrip } from "./tabStrip";
 
 export function NSETabView(props: NSETabViewProps) {
   return (
-    <section data-nse-control="tab-view" data-appearance-recipe="tab-view" data-tab-style={props.presentation?.tabStyle ?? "capsule"}>
+    <section data-nse-control="tab-view" data-nse-part="background" data-appearance-recipe="tab-view" data-tab-style={props.presentation?.tabStyle ?? "capsule"}>
       <NSETabStrip
         aria-label={props["aria-label"]}
         items={props.items}
@@ -49,7 +49,7 @@ export function NSETabView(props: NSETabViewProps) {
           return panels.map((item): ReactNode => (
             <div
               key={item.id}
-              role="tabpanel"
+              data-nse-part="content" role="tabpanel"
               id={item.panelId ?? `tab-panel-${instanceId}-${item.id}`}
               aria-labelledby={`tab-${instanceId}-${item.id}`}
               hidden={item.id !== selected?.id}

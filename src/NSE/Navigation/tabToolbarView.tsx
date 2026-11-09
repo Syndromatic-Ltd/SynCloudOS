@@ -61,7 +61,7 @@ function NSETabToolbarView({ controller, toolbar }: { readonly controller: NSETa
     buttons.current.get(item.identifier)?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
   };
   return <div className="nse-toolbar nse-tab-toolbar-items" role="toolbar" aria-label={controller.title ?? "Tabs"}
-    data-nse-control="toolbar" data-nse-toolbar-size-mode={toolbar.sizeMode} {...surface.attributes}>
+    data-nse-control="toolbar" data-nse-part="background" data-nse-toolbar-size-mode={toolbar.sizeMode} {...surface.attributes}>
     <NSEChromeSurface slot={surface} state="normal" />
     <NSEChromeBevel slot={surface} state="normal" />
     <NSEChromeGloss slot={surface} state="normal" />
@@ -71,17 +71,17 @@ function NSETabToolbarView({ controller, toolbar }: { readonly controller: NSETa
       return <button key={item.identifier} type="button" className="nse-toolbar-item" aria-pressed={active}
         aria-label={item.toolTip ?? item.label} title={item.toolTip} tabIndex={active ? 0 : -1}
         ref={element => { if (element) buttons.current.set(item.identifier, element); else buttons.current.delete(item.identifier); }}
-        data-nse-control="toolbar-item" data-nse-part="item" data-state={active ? "selected" : "normal"}
+        data-nse-control="toolbar-item" data-nse-selected={active ? "" : undefined} data-nse-state={active ? "on" : "off"} data-nse-part="item" data-state={active ? "selected" : "normal"}
         {...slot.attributes} onClick={() => controller.selectTabViewItem(item.identifier)} onKeyDown={event => move(event, item.identifier)}>
         <NSEChromeSurface slot={slot} state={active ? "selected" : "normal"} />
         <NSEChromeBevel slot={slot} state={active ? "selected" : "normal"} />
         <NSEChromeCap slot={slot} state={active ? "selected" : "normal"} />
         <NSEChromeGloss slot={slot} state={active ? "selected" : "normal"} />
         <NSEChromeInnerShadow slot={slot} state={active ? "selected" : "normal"} />
-        {item.image && toolbar.displayMode !== "labelOnly" ? <span className="nse-toolbar-item-icon" aria-hidden="true">
+        {item.image && toolbar.displayMode !== "labelOnly" ? <span data-nse-part="image" className="nse-toolbar-item-icon" aria-hidden="true">
           {item.image.kind === "vector" ? <img src={item.image.path} alt="" /> : <span data-nse-template-image={item.image.name} />}
         </span> : null}
-        {toolbar.displayMode !== "iconOnly" ? <span className="nse-toolbar-item-label">{item.label}</span> : null}
+        {toolbar.displayMode !== "iconOnly" ? <span data-nse-part="title" className="nse-toolbar-item-label">{item.label}</span> : null}
       </button>;
     })}
   </div>;
