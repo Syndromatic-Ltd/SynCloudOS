@@ -18,7 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { NSEWindowLayoutContext, NSEWindowLayoutModel } from "../../NSE/Layout/windowChromeObstructions";
+
+import React, { useCallback, useLayoutEffect, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useNSEPresenceExiting, useNSEPresentation, type NSEPresentationSpec } from "../../NSE/Animation";
 import {
   NSEControlRuntimeProvider,
@@ -214,6 +216,10 @@ export function WindowHost({
     });
   }, [controller.id, geometryIsValid, invalidBounds, onDiagnostic]);
   const hostRef = useRef<HTMLDivElement>(null);
+  const layout = useMemo(() => new NSEWindowLayoutModel(), [controller.id]);
+  useNSEDeferredDisposal(layout);
+  useLayoutEffect(() => { layout.setLogicalScreenInsets(screen.safeAreaInsets, screen.layoutViewport); layout.setBounds(presentation.bounds); }, [layout, screen.safeAreaInsets, screen.layoutViewport, presentation.bounds]);
+  useLayoutEffect(() => hostRef.current ? layout.connectRoot(hostRef.current) : undefined, [layout, record.state, contentRendererAvailable]);
   // The window surface clips to its rounded outline, and a fixed-position
   // popup does not escape a clip-path. Menus and popovers opened from the
   // window's content mount here, beside the surface, so they can hang past
@@ -403,9 +409,10 @@ export function WindowHost({
     ...(ownsPopoverFocus ? { popoverScope: { parentScopeId, parentResponderId: popoverSurface?.request.parentResponderId ?? parentResponderId } } : {}),
   };
   return (
-    // Exit fade only (no enter animation): a closing window dissolves instead
-    // of cutting, so Quit-with-windows reads as one continuous exit rather
-    // than a flash. NSEPresence in WindowLayer owns the unmount.
+    <NSEWindowLayoutContext.Provider value={layout}>
+    {/* Exit fade only (no enter animation): a closing window dissolves instead
+     * of cutting, so Quit-with-windows reads as one continuous exit rather
+     * than a flash. NSEPresence in WindowLayer owns the unmount. */}
     <div
       ref={hostRef}
       className="webspring-window-host"
@@ -435,5 +442,6 @@ export function WindowHost({
         </FocusScope>
       ) : windowContents}
     </div>
+    </NSEWindowLayoutContext.Provider>
   );
 }

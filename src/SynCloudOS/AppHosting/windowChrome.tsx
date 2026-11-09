@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEWindowLayoutContext, useNSEWindowChromeElement, useNSEWindowChromeObstruction } from "../../NSE/Layout/windowChromeObstructions";
+
 import { Fragment, createContext, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import type { NSEAnyWindowController } from "../../NSE/applicationHostInterop";
@@ -100,8 +102,10 @@ export function NSEWindowTitlebarAccessories({ accessories, renderController, ho
 
 /** The row of bottom accessories, on the window's chrome under the toolbar. */
 function AccessoryRow({ children }: { readonly children: ReactNode }) {
+  const element = useRef<HTMLDivElement>(null);
+  useNSEWindowChromeElement(element, "top", false);
   const mode = useWindowChromeMode();
-  return <div className="nse-window-titlebar-accessories" data-nse-part="titlebar-accessories" data-mode={mode}>{children}</div>;
+  return <div ref={element} className="nse-window-titlebar-accessories" data-nse-part="titlebar-accessories" data-mode={mode}>{children}</div>;
 }
 
 /** @internal Atmo draws a tall content border as its metal footer and a short one as its compact strip. */
@@ -115,6 +119,7 @@ export function nseContentBorderSize(thickness: number): "large" | "small" {
  * shadow up onto the content, is drawn above.
  */
 export function NSEWindowContentBorder({ thickness }: { readonly thickness: number }) {
+  useNSEWindowChromeObstruction("bottom", thickness, false);
   const mode = useWindowChromeMode();
   const style = { "--nse-window-content-border-thickness": `${thickness}px` } as CSSProperties;
   const size = nseContentBorderSize(thickness);
@@ -148,6 +153,8 @@ export function NSEWindowToolbar({ controller, toolbar }: { readonly controller:
   const overlayId = `nse-window-toolbar:${useId()}`;
   const mode = useWindowChromeMode();
   const element = useRef<HTMLDivElement | null>(null);
+  const layout = useContext(NSEWindowLayoutContext);
+  useNSEWindowChromeElement(element, "top", false, toolbar.isVisible);
   const [width, setWidth] = useState(0);
   const [attached, setAttached] = useState(false);
   useLayoutEffect(() => {
@@ -176,6 +183,7 @@ export function NSEWindowToolbar({ controller, toolbar }: { readonly controller:
     const view = node.ownerDocument.defaultView;
     const measure = (width: number) => Math.floor(width || view?.innerWidth || 0);
     setWidth(measure(node.getBoundingClientRect().width));
+    if (layout) return layout.observeElement(node, rect => setWidth(measure(rect.width)));
     const Observer = view?.ResizeObserver;
     if (!view || !Observer) return undefined;
     let frame: number | null = null;
@@ -191,18 +199,19 @@ export function NSEWindowToolbar({ controller, toolbar }: { readonly controller:
       observer.disconnect();
       if (frame !== null) view.cancelAnimationFrame(frame);
     };
-  }, [toolbar.isVisible]);
+  }, [layout, toolbar.isVisible]);
   const engine = attached ? toolbar[nseToolbarEngine] : null;
   useLayoutEffect(() => {
     const node = tabItems.current;
     if (!node) { setTabItemsWidth(0); return undefined; }
     const measure = () => setTabItemsWidth(Math.ceil(node.getBoundingClientRect().width));
     measure();
+    if (layout) return layout.observeElement(node, measure);
     const Observer = node.ownerDocument.defaultView?.ResizeObserver;
     const observer = Observer ? new Observer(measure) : null;
     observer?.observe(node);
     return () => observer?.disconnect();
-  }, [toolbar, tabViews.length]);
+  }, [layout, toolbar, tabViews.length]);
   useEffect(() => {
     if (!toolbar.customizationPaletteIsRunning || engine) return;
     toolbar[nseEndToolbarCustomization]();

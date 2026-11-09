@@ -31,11 +31,17 @@ Completed on the unchanged framework at `a1c3617`. Framework source under `src/`
 
 Added `NSEEdgeInsets`, `NSEEdgeInsetsZero` and `NSEEdgeInsetsMake` to the public layout and NSE entries. Replaced `NSEScrollInsets` at its users, with no alias. The pure model adds physical screen, chrome and additional insets, rejects invalid obstruction thickness and converts ScreenService logical edges for LTR/RTL. It reuses the existing public `NSEScrollRect` rather than introducing an equivalent rect type.
 
-Verification: 17 focused tests passed (12 new safe-area cases plus scroll regressions); framework typecheck passed; obsolete type search and diff check clean. Logs: `task-2-red.log`, `task-2-green.log`, `task-2-typecheck.log`. Task 2 commit is the commit introducing these types and model.
+Verification: 17 focused tests passed (12 new safe-area cases plus scroll regressions); framework typecheck passed; obsolete type search and diff check clean. Logs: `task-2-red.log`, `task-2-green.log`, `task-2-typecheck.log`. Task 2 commit: `b3ae1018` — `NSE: NSEEdgeInsets and the safe-area model`.
 
-### Tasks 3–19
+### Task 3 — window content layout
 
-Not started at the time of this Task 2 entry. Final split-suite and packed SDK acceptance remain for Task 19.
+Added the stable `NSEWindow.contentLayoutGuide` and its `contentLayoutRect`. Physical windows and application stages own a geometry model; title bars, toolbars, titlebar accessory rows and content borders register their obstruction. Their measurements share one ResizeObserver per window, publications are batched to one animation frame, and unchanged rects do not notify. The actual content elements publish physical `--nse-content-layout-inset-*` properties. Detachment and disposal release registrations and subscriptions. Navigation strips and source lists are adopted in Task 6 as planned.
+
+Verification: 6 current guide tests pass; the prescribed focused regression command passed 776 tests in 66 files (including the then-five guide tests). Framework typecheck passed. The frozen baseline comparison passed **80/80 partitions, zero differences**, recorded in `task-3-baseline-final.log`; all 2,648 reference hashes are unchanged. The first comparison was interrupted by editing a module while Vite was serving it: a notification-centre capture navigated back to the initial fixture, producing a 300px body instead of its 896px reference. Its failed trace is retained as `task-3-interrupted-trace.zip`. No baseline reference was changed.
+
+### Tasks 4–19
+
+Pending. Final split-suite and packed SDK acceptance remain for Task 19.
 
 ## Initial capture correction and retained evidence
 
@@ -63,9 +69,11 @@ Further diagnostic runs exposed folder-only capture interference and source-pain
 2. The reduced-motion project compares the DPR 1 references, avoiding a third set of initial images that Task 1 never requested.
 3. Task 2 reuses the existing public `NSEScrollRect`, as the plan explicitly allows an equivalent existing rect type. The inset factory preserves finite signed geometry; safe-area resolution clips actual safe insets to view extents.
 
+4. Screen safe-area strips are intersected with a physical window’s bounds; floating windows away from the screen edge do not inherit a notch or home-indicator inset.
+
 ## Public API accounting
 
-Added: `NSEEdgeInsets`, `NSEEdgeInsetsZero`, `NSEEdgeInsetsMake`. Removed: `NSEScrollInsets` (no compatibility alias).
+Added: `NSEEdgeInsets`, `NSEEdgeInsetsZero`, `NSEEdgeInsetsMake`. Removed: `NSEScrollInsets` (no compatibility alias). Task 3 adds `NSELayoutGuide`, `NSEWindow.contentLayoutRect`, `NSEWindow.contentLayoutGuide` and `useNSEWindowChromeObstruction`.
 
 Part-name mappings, semantic colour values without Atmo precedent and Beta 2 removals will be recorded as their tasks are completed. No visual design decision has been made.
 

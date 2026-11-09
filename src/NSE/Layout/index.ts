@@ -50,3 +50,6 @@ export type {
   NSEStackViewProps,
 } from "./stackViewTypes";
 
+
+export type { NSELayoutGuide } from "./NSELayoutGuide";
+export { useNSEWindowChromeObstruction } from "./windowChromeObstructions";

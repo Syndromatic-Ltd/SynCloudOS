@@ -27,6 +27,8 @@ import {
   type NSEOwner,
 } from "../Controllers/ownership";
 import { NSEObject } from "../Objects/NSEObject";
+import { NSELayoutGuideStore, type NSELayoutGuide } from "../Layout/NSELayoutGuide";
+import type { NSEScrollRect } from "../Scroll/scrollTypes";
 import type { NSEApplication, NSEOpenWindowOptions } from "./NSEApplication";
 import { NSEObjectLifetime } from "./objectLifetime";
 import { ownNSEFactory, type NSEDisposable, type NSESynchronousDisposable } from "./ownedFactory";
@@ -49,6 +51,8 @@ export type NSEWindowContentBorderEdge = "minY";
 export type NSEWindowToolbarStyle = "automatic" | "expanded" | "preference" | "unified" | "unifiedCompact";
 
 export interface NSEWindow {
+  readonly contentLayoutRect: NSEScrollRect;
+  readonly contentLayoutGuide: NSELayoutGuide;
   /** The window's identity, or `null` when the application is shown on the stage. */
   readonly id: string | null;
   /** The window title; assigning it renames the window. On the stage it names the document in the title bar. */
@@ -127,6 +131,7 @@ export function validateNSEWindowControllerClass(Controller: NSEWindowController
 
 /** What the React host gives a window controller while its window is mounted. */
 export interface NSEWindowMount {
+  readonly contentLayoutGuide?: NSELayoutGuide;
   /** The window's identity, or `null` on the stage. */
   readonly windowId: string | null;
   getSnapshot(): SynWareOwnedWindowSnapshot | null;
@@ -250,6 +255,8 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
   readonly #window: NSEWindow;
   readonly #internals: NSEWindowControllerInternals;
   #mount: NSEWindowMount | null = null;
+  readonly #contentLayout = new NSELayoutGuideStore();
+  #stopContentLayout: (() => void) | null = null;
   #loaded = false;
   #key = false;
   #pendingTitle: string | null = null;
@@ -286,6 +293,8 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
       });
     };
     this.#window = Object.freeze({
+      get contentLayoutRect() { return controller.#contentLayout.frame; },
+      get contentLayoutGuide() { return controller.#contentLayout; },
       get id() { return controller.#mount?.windowId ?? null; },
       get title() { return controller.#mount?.getSnapshot()?.title ?? controller.#pendingTitle ?? ""; },
       set title(value: string) {
@@ -492,6 +501,9 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
     if (this.isDisposed) return;
     try {
       this.#lifetime.dispose(reason, () => {
+        this.#stopContentLayout?.();
+        this.#stopContentLayout = null;
+        this.#contentLayout.dispose();
         this.#mount = null;
         this.didDispose();
       });
@@ -508,12 +520,22 @@ export class NSEWindowController<TApp extends NSEApplication = NSEApplication> e
   #attach(mount: NSEWindowMount): () => void {
     this.#assertLive("window", "get");
     this.#mount = mount;
+    this.#stopContentLayout?.();
+    const updateLayout = () => {
+      const bounds = mount.getSnapshot()?.bounds;
+      this.#contentLayout.setFrame(mount.contentLayoutGuide?.frame ?? { x: 0, y: 0, width: bounds?.width ?? 0, height: bounds?.height ?? 0 });
+    };
+    updateLayout();
+    const stopLayout = mount.contentLayoutGuide ? mount.contentLayoutGuide.observe(updateLayout) : mount.subscribe(updateLayout);
+    this.#stopContentLayout = stopLayout;
     if (this.#pendingTitle !== null) mount.setTitle(this.#pendingTitle);
     if (!this.#loaded) {
       this.#loaded = true;
       this.windowDidLoad();
     }
     return () => {
+      stopLayout();
+      if (this.#stopContentLayout === stopLayout) this.#stopContentLayout = null;
       if (this.#mount === mount) this.#mount = null;
     };
   }

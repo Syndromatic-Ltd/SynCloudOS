@@ -222,3 +222,6 @@ export const NSE = {
   }
 };
 
+
+export type { NSELayoutGuide } from "./Layout/NSELayoutGuide";
+export { useNSEWindowChromeObstruction } from "./Layout/windowChromeObstructions";
