@@ -122,7 +122,8 @@ A theme draws by writing CSS against these hooks only, for example:
 ### What the framework still draws
 
 - **Structure belongs to the framework.** Layout, box model, slots, minimum hit targets, focus-ring placement and accessibility live in framework-owned **structural CSS**, which ships with NSE and isn't a theme. Much of today's `atmo-structure.css` is really structure and moves there. The builder decides line by line, and any line that's really paint goes to Atmo.
-- **The framework ships a plain, neutral rendering** of every control, so a theme that leaves a part undrawn still produces a usable, accessible control. `validate_theme` reports parts a theme leaves undrawn as warnings, never errors.
+- **Atmo is the fallback** (the owner's decision). Atmo is always loaded as the base cascade layer, and a selected theme draws on top of it in a later layer. Any part a theme doesn't draw shows Atmo's drawing. No separate neutral rendering is designed. `validate_theme` lists every part a theme leaves undrawn, as warnings, so authors can make their themes complete.
+- **Metrics belong to the theme** (my call). Padding, heights and radii are set in the theme's CSS on contract hooks. Structural CSS only lays out slots and enforces the hard limits below, which the validator checks.
 - **Hard limits a theme can't cross:**
   - a focus indicator must remain visible;
   - minimum hit-target sizes;
@@ -130,6 +131,25 @@ A theme draws by writing CSS against these hooks only, for example:
   - `display`, `visibility` and `content` on parts that carry semantics.
 
   The validator enforces these.
+
+### System UI surfaces
+
+A theme paints SynCloudOS's own system UI as well as app controls (the owner's decision: "the time for a consolidation or redesign is now"). These surfaces join the contract with `data-nse-control` names of SynCloudOS's own, because they have no AppKit class. They include:
+
+- the login window;
+- the notification centre and notification banners;
+- alerts;
+- Webspring's views and their parts: the Board, folder tiles and the folder presentation, app icons, the app view chrome and quick switch;
+- the system menu bar and status layer;
+- window chrome, including the `standard`, `metal` and `hud` window variants. `data-nse-chrome` stays in the contract as a window variant, mapping to AppKit's textured and HUD windows (my call).
+
+The builder finalises the list from what Atmo paints today, and every surface Atmo paints must be in it.
+
+**Webspring views and themes are different layers:**
+- **A view** (`WebspringBoardView`, the site's dial, or a developer's own) is structure and interaction, chosen by the developer through the existing `views`/`components` mechanism. It may be code.
+- **The theme paints whichever view is active,** through that view's published parts. A developer's own view publishes its parts the same way, by using the framework's hook helpers.
+
+**Framework-built effects:** effects that involve geometry or animation stay framework code and are chosen by the theme in `Theme.json` `presentation`. Examples are the ornamented metal login swing, the 3D screen-slicing notification banners and the material lighting on metal surfaces (`NSEMaterialLighting` and `NSEMetalThumb`). Atmo selects them. Another theme can select `plain` and draw its own look on the same parts.
 
 ### Artwork
 
@@ -174,13 +194,24 @@ Paper.scostheme/
 - **`Info.ts`** default-exports a static literal, parsed without being executed, just as an app's `Info.ts` is. Identity lives only here. `Theme.json` doesn't repeat it (my call, removing PR #1's duplication).
 - **`Theme.json`:**
   - **`colours`:** `light` and `dark` maps for the semantic colour values, plus optional `highContrast` maps for each.
-  - **`navigation`:** for each layout width class (`compact`, `regular`), a placement chosen from the framework's fixed list. The list starts with `compact`: `block-start` or `block-end` strip; `regular`: `source-list` or `block-start` strip. Each also takes `flow` (`in-flow` or `overlay`). The framework still handles the automatic switch from tab strip to sidebar as the window widens, as well as foldables, focus, overflow and keeping content clear via Part 1.
-  - **`presentation`:** purely visual choices only, starting with the login style (`plain` or `ornamented`). New entries are added only for real needs.
+  - **`navigation`:** for each layout width class (`compact`, `regular`), a placement chosen from the framework's fixed list:
+    - `compact`: a `block-start` or `block-end` strip;
+    - `regular`: a `source-list` or a `block-start` strip.
+
+    Each also takes `flow` (`in-flow` or `overlay`). All of these placements are built in this job, including the top strip, even though only Atmo uses the contract now (my call: developers must be able to put tab bars at the top). The framework still handles the automatic switch from tab strip to sidebar as the window widens, as well as foldables, focus, overflow and keeping content clear via Part 1.
+  - **`presentation`:** visual choices among framework-built effects:
+    - `login`: `plain` or `ornamented`;
+    - `notifications`: `plain` or `sliced-3d`;
+    - `materialLighting`: `off` or `on`.
+
+    New entries are added only for real needs.
+  - **`images`:** named images and artwork, as data mapping a name to bundle files and point sizes, with @2x and @3x variants. This covers `NSEImage.named` template images (back, forward and so on) and the workspace's folder and document icons, which are TypeScript in Atmo today (`namedImages.ts`, `workspaceArtwork.ts`). My call, since themes can't contain code.
 - **Discovery:** the Vite plugin discovers `*.scostheme` folders under `src/Themes` by default, with a `themesDirectory` option, as in PR #1.
 - **Validation:**
   - when a bundle is discovered or built, it's validated with PR #1's rules: paths stay inside the bundle, no symlinks or case collisions, safe SVG, size limits, and no executable files;
   - additionally, theme CSS may target only contract hooks and the framework's appearance attributes, never private `.nse-*` classes or app DOM.
 - **Scoping:** the build wraps each theme's stylesheet in a CSS `@scope` for that theme's boundary automatically, so authors write plain selectors and nested themes don't leak into each other. This is my call. PR #1 required authors to write the `@scope` themselves, which was error-prone.
+- **Loading (my call):** the Vite plugin generates a module that provides an `NSETheme` value for each discovered bundle, by bundle identifier. Only themes actually referenced (the host's theme, and any passed to `NSEAppearance`) have their CSS loaded. Atmo is always loaded, as the fallback layer.
 - **Selection:**
   - the host picks the theme by bundle identifier (the browser runtime's existing `appearance` option, defaulting to Atmo);
   - `NSEAppearance` keeps its existing per-view `theme` option, as `NSView.appearance` allows a different appearance on part of a window;
@@ -214,10 +245,16 @@ Paper.scostheme/
 - **`scaffold_theme`:** creates a complete bundle, with `Info.ts`, `Theme.json` with every colour stubbed for light and dark, and `theme.css` with a commented, empty rule for every control part in the contract.
 - **Documentation:** a theme-authoring guide (`docs/framework/themes.md`) and a generated contract reference listing every control's parts, states and variants.
 
+## Scope of clean-up
+
+- **In this job:** Webspring and the framework's own apps (About, Settings and so on) count as framework. Their CSS may use contract hooks, and they are cleaned so they no longer style private classes or use the old colour names.
+- **A separate follow-up job:** the Syndromatic site's apps, such as Journal.
+
 ## Breaking changes (Beta 2)
 
 - `defineNSEAppearance`, `NSEAppearanceDefinition` and the slot/recipe API are replaced by `NSETheme` and `.scostheme` bundles.
 - `atmoMotion` leaves the theme.
+- The login, notification and Webspring surfaces are restructured so a theme paints them.
 - Private `.nse-*` classes are no longer something themes may rely on.
 - The `--nse-app-*` colour names become the semantic `NSColor`-shaped set.
 
@@ -235,6 +272,11 @@ Paper.scostheme/
 1. The theme type is renamed `NSETheme`, and "appearance" keeps its `NSAppearance` meaning.
 2. Identity lives only in `Info.ts`, not repeated in `Theme.json`.
 3. The build wraps theme CSS in `@scope` automatically.
-4. Undrawn parts fall back to a neutral framework rendering and warn rather than fail.
+4. Undrawn parts produce a warning, not a failure. (The owner decided that Atmo is the fallback.)
 5. Semantic colours follow AppKit's `NSColor` system colour set, in British spelling.
-6. The navigation placement list starts small (two compact options, two regular options) and grows only for real needs.
+6. All four navigation placements are built now, and the list grows only for real needs.
+7. Metrics belong to the theme's CSS, and structural CSS enforces only the hard limits.
+8. Named images and workspace artwork become a data map in `Theme.json`.
+9. Window chrome (`standard`, `metal`, `hud`) stays as a contract window variant.
+10. A generated module provides themes by bundle identifier, and only referenced themes load their CSS.
+11. Webspring and framework apps are cleaned in this job. Site apps follow separately.
