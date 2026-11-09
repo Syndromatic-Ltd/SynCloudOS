@@ -2,6 +2,7 @@ import { createSynCloudOSHostContribution } from "@syndromatic/syncloudos/browse
 import { createDeterministicRuntimeEnvironment, type SynWareTestHost } from "@syndromatic/syncloudos/sdk/testing";
 import { SCOS, useNetwork, type SynWareContextValue } from "@syndromatic/syncloudos/sdk";
 import { SCOS as RootSCOS } from "@syndromatic/syncloudos";
+import { DFXQueue } from "@syndromatic/syncloudos/fx/dispatch";
 createSynCloudOSHostContribution("network-boundary", "installed-test", environment => {
   const now: number = environment.now(); void now;
   // @ts-expect-error Network adapters are private even in an inferred browser host environment.
@@ -27,4 +28,6 @@ type ContextNetwork = SynWareContextValue["network"];
 SCOS.network;
 // @ts-expect-error No factory on root SCOS.
 RootSCOS.network;
-const monitor = useNetwork(); monitor.start(); monitor.cancel();
+const monitor = useNetwork(); monitor.start(DFXQueue.main); monitor.cancel();
+// @ts-expect-error NWPathMonitor.start(queue:) requires a queue, as in Apple's API.
+monitor.start();

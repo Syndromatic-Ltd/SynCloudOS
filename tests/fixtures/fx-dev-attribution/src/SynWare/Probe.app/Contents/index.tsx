@@ -9,7 +9,7 @@ function inspect() {
   const monitor = new NWFXPathMonitor();
   const queue = DFXQueue.main;
   SCOS.preferences.set("dev-attribution", "shared session");
-  monitor.start();
+  monitor.start(DFXQueue.main);
   const sameQueue = monitor.queue === queue;
   monitor.cancel();
   return { payments, monitor, queue, sameQueue };

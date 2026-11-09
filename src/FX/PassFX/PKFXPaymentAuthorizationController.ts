@@ -76,7 +76,7 @@ export class PKFXPaymentAuthorizationController {
           let completed = false;
           const handler = (result: PKFXPaymentAuthorizationResult) => {
             this.#assertLive();
-            if (completed) throw new PKFXError("unknownError", "The payment authorization handler was already called.");
+            if (completed) throw new PKFXError("unknownError", "The payment authorisation handler was already called.");
             if (!(result instanceof PKFXPaymentAuthorizationResult))
               throw new PKFXError("invalidDataError", "The handler requires PKPaymentAuthorizationResult.");
             completed = true;

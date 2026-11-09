@@ -7,6 +7,7 @@ import { NWFXPathMonitor } from "../../../src/FX/NetworkFX/public";
 import { associateNetworkPort } from "../../../src/FX/NetworkFX/internal/networkPort";
 import { createMountedNetworkPort } from "../../../src/SynCloudOS/AppSDK/mountedNetworkPort";
 import { registerSCOSAppSession } from "../../../src/SynCloudOS/AppSDK/scos/scosSessionRegistry";
+import { dispatchQueueForSession } from "../../../src/FX/DispatchFX/internal/sessionBinding";
 import type { SynWareContextValue } from "../../../src/SynCloudOS/AppSDK/appContextTypes";
 const selection = vi.hoisted(() => ({ context: null as unknown }));
 vi.mock("../../../src/SynCloudOS/AppSDK/SynWareContext", () => ({ useSynWareContext: () => selection.context }));
@@ -17,15 +18,15 @@ it("returns a real monitor, survives StrictMode replay and immediately cancels o
   const context = { appId: "com.example.hook", runtimeInfo: { id: "hook" }, signal: owner.signal } as SynWareContextValue;
   selection.context = context;
   associateNetworkPort(context, createMountedNetworkPort({ currentPath: () => ({ status: "satisfied" }), subscribe }, owner.signal, () => ["network.read"], () => true, () => () => {}));
-  const unregister = registerSCOSAppSession({ appId: context.appId, displayName: "Hook", version: "1", context });
+  const session = { appId: context.appId, displayName: "Hook", version: "1", context }; const unregister = registerSCOSAppSession(session); const main = dispatchQueueForSession(session).main;
   const other = registerSCOSAppSession({ appId: context.appId, displayName: "Other runtime", version: "1", context: { ...context, runtimeInfo: { ...context.runtimeInfo, id: "other" } } });
   const listener = vi.fn(); let setups = 0;
   try {
     let held!: NWFXPathMonitor;
-    function Probe() { const monitor = useNetwork(); held = monitor; useLayoutEffect(() => { setups++; monitor.pathUpdateHandler = listener; monitor.start(); }, [monitor]); return null; }
+    function Probe() { const monitor = useNetwork(); held = monitor; useLayoutEffect(() => { setups++; monitor.pathUpdateHandler = listener; monitor.start(main); }, [monitor]); return null; }
     const hook = render(<StrictMode><Probe /></StrictMode>);
     expect(setups).toBe(2); expect(held).toBeInstanceOf(NWFXPathMonitor); expect(subscribe).toHaveBeenCalledOnce(); expect(dispose).not.toHaveBeenCalled();
-    hook.unmount(); expect(dispose).toHaveBeenCalledOnce(); while (tasks.length) tasks.shift()!(); expect(listener).not.toHaveBeenCalled(); expect(() => held.start()).toThrow();
+    hook.unmount(); expect(dispose).toHaveBeenCalledOnce(); while (tasks.length) tasks.shift()!(); expect(listener).not.toHaveBeenCalled(); expect(() => held.start(main)).toThrow();
   } finally { owner.abort(); unregister(); other(); }
 });
 

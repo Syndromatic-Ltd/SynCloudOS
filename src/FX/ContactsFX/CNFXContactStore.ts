@@ -41,7 +41,7 @@ export class CNFXContactStore {
     if (entityType !== "contacts") throw new CNFXError("validationTypeMismatch", "Unknown Contacts entity type.");
     let error: CNFXError = new CNFXError(
       "featureNotAvailable",
-      "This browser cannot authorize a persistent Contacts database; present CNFXContactPickerViewController to select contacts.",
+      "This browser cannot authorise a persistent Contacts database; present CNFXContactPickerViewController to select contacts.",
     );
     try {
       this.#port.bindAccessLifetime(this.#generation);

@@ -4,7 +4,7 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { mergeConfig, resolveConfig } from "vite";
 // @ts-expect-error The plugin is plain ESM without declarations for this internal export.
 import { sdkBuildFingerprint, synCloudOS } from "../../scripts/synware/vite-plugin.mjs";
@@ -53,9 +53,15 @@ it("keeps every SDK subpath in one dev graph without disabling other dependency 
 
 it("removes only SDK package entries from a host's explicit optimisation list before Vite resolves it", async () => {
   const root = sdk({ "package.json": '{"version":"1.0.0"}' });
+  const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
   const config = await resolveConfig({ configFile: false, root, plugins: [synCloudOS({ webspringEntry: false })],
     optimizeDeps: { include: ["react", "@syndromatic/syncloudos", "@syndromatic/syncloudos/sdk", "@syndromatic/syncloudos/fx/pass", "@syndromatic/syncloudos-extra", "@other/syncloudos"] },
   }, "serve");
+  expect(warn).toHaveBeenCalledExactlyOnceWith(expect.stringContaining("Removed @syndromatic/syncloudos, @syndromatic/syncloudos/sdk, @syndromatic/syncloudos/fx/pass from optimizeDeps.include"));
+  warn.mockClear();
+  await resolveConfig({ configFile: false, root, plugins: [synCloudOS({ webspringEntry: false })], optimizeDeps: { include: ["react"] } }, "serve");
+  expect(warn).not.toHaveBeenCalled();
+  warn.mockRestore();
   const expected = ["react", "@syndromatic/syncloudos-extra", "@other/syncloudos", "react", "react-dom", "react-dom/client", "react/jsx-runtime"];
   expect(config.optimizeDeps.include).toEqual(expected);
   expect(config.environments.client.optimizeDeps.include).toEqual(expected);

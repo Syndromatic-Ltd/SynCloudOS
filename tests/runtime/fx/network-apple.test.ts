@@ -9,6 +9,8 @@ import { dispatchQueueForSession } from "../../../src/FX/DispatchFX/internal/ses
 import { currentExecution } from "../../../src/FX/DispatchFX/internal/executionStack";
 
 const cleanup: (() => void)[] = [];
+let lastSession: Parameters<typeof dispatchQueueForSession>[0];
+const mainQueue = () => dispatchQueueForSession(lastSession).main;
 const tasks: (() => void)[] = [];
 const App = bindFXFamily(N, "com.example.network");
 const flush = () => { for (let n = 0; tasks.length && n < 100; n++) tasks.shift()!(); expect(tasks).toHaveLength(0); };
@@ -21,6 +23,7 @@ function mount(runtimeID = "network-test") {
   const context = { appId: "com.example.network", runtimeInfo: { id: runtimeID }, signal: owner.signal } as SynWareContextValue;
   associateNetworkPort(context, port);
   const session = { appId: context.appId, displayName: "Network", version: "1", context };
+  lastSession = session as Parameters<typeof dispatchQueueForSession>[0];
   const unregister = registerSCOSAppSession(session); cleanup.push(() => { owner.abort(); unregister(); });
   return { session, owner, read, dispose, unregister, deliver: (path = snapshot()) => deliver(path), access(value: boolean) { allowed = value; changes.forEach(fn => fn()); }, entitlements(value: string[]) { entitlements = value; changes.forEach(fn => fn()); } };
 }
@@ -43,42 +46,46 @@ describe("NetworkFX Apple monitor", () => {
     const path = calls[0]; expect(path.availableInterfaces[0]).toBeInstanceOf(N.NWFXInterface); expect(path.availableInterfaces[0]).toMatchObject({ type: "wifi", name: "en0", index: 4 });
     expect([path.supportsIPv4, path.supportsIPv6, path.supportsDNS, path.usesInterfaceType(N.NWFXInterfaceType.wifi)]).toEqual([true, false, true, true]);
     f.deliver({ ...snapshot(), status: "unsatisfied" }); flush(); expect(monitor.currentPath.status).toBe(N.NWFXPathStatus.unsatisfied);
-    monitor.cancel(); monitor.cancel(); f.deliver(); flush(); expect(calls).toHaveLength(2); expect(f.dispose).toHaveBeenCalledOnce(); expect(() => monitor.start()).toThrow(N.NWFXError);
+    monitor.cancel(); monitor.cancel(); f.deliver(); flush(); expect(calls).toHaveLength(2); expect(f.dispose).toHaveBeenCalledOnce(); expect(() => monitor.start(mainQueue())).toThrow(N.NWFXError);
   });
-  it.each([undefined, null] as const)("uses the selected main default even after a second runtime appears (%s)", defaultQueue => {
+  it.each([undefined, null] as const)("requires a Dispatch queue, as Apple's start(queue:) does (%s)", missingQueue => {
+    mount(); const monitor = new App.NWFXPathMonitor();
+    expect(() => monitor.start(missingQueue as never)).toThrow(N.NWFXError); expect(monitor.queue).toBeNull();
+  });
+  it("keeps the explicit main queue even after a second runtime appears", () => {
     const f = mount(); const monitor = new App.NWFXPathMonitor(); const main = dispatchQueueForSession(f.session).main;
-    mount("other"); monitor.start(defaultQueue); expect(monitor.queue).toBe(main); flush();
+    mount("other"); monitor.start(main); expect(monitor.queue).toBe(main); flush();
   });
   it("filters required and prohibited types and never substitutes a transport observation", () => {
     mount(); const wifi = new App.NWFXPathMonitor(N.NWFXInterfaceType.wifi); const cellular = new App.NWFXPathMonitor(N.NWFXInterfaceType.cellular); const prohibited = new App.NWFXPathMonitor([N.NWFXInterfaceType.wifi]);
-    wifi.start(); cellular.start(); prohibited.start(); flush();
+    wifi.start(mainQueue()); cellular.start(mainQueue()); prohibited.start(mainQueue()); flush();
     expect(wifi.currentPath.status).toBe("satisfied");
     for (const monitor of [cellular, prohibited]) { expect(monitor.currentPath.status).toBe("unsatisfied"); expect(monitor.currentPath.unsatisfiedReason).toBe("notAvailable"); expect(monitor.currentPath.availableInterfaces).toEqual([]); expect(monitor.currentPath.usesInterfaceType("wifi")).toBe(false); }
   });
   it("revocation invalidates both native callbacks and queued paths even after access restoration", () => {
-    const f = mount(); const old = new App.NWFXPathMonitor(); const listener = vi.fn(); old.pathUpdateHandler = listener; old.start();
+    const f = mount(); const old = new App.NWFXPathMonitor(); const listener = vi.fn(); old.pathUpdateHandler = listener; old.start(mainQueue());
     f.access(false); expect(f.dispose).toHaveBeenCalledOnce(); f.access(true);
-    const replacement = new App.NWFXPathMonitor(); replacement.pathUpdateHandler = listener; replacement.start(); flush(); expect(listener).toHaveBeenCalledOnce();
-    expect(() => old.start()).toThrow(N.NWFXError); expect(() => old.currentPath).toThrow(N.NWFXError);
+    const replacement = new App.NWFXPathMonitor(); replacement.pathUpdateHandler = listener; replacement.start(mainQueue()); flush(); expect(listener).toHaveBeenCalledOnce();
+    expect(() => old.start(mainQueue())).toThrow(N.NWFXError); expect(() => old.currentPath).toThrow(N.NWFXError);
   });
   it("revokes an idle selected instance across an access loss and restoration", () => {
-    const f = mount(); const monitor = new App.NWFXPathMonitor(); f.access(false); f.access(true); expect(() => monitor.start()).toThrow(N.NWFXError);
+    const f = mount(); const monitor = new App.NWFXPathMonitor(); f.access(false); f.access(true); expect(() => monitor.start(mainQueue())).toThrow(N.NWFXError);
   });
   it.each(["abort", "unregister"] as const)("terminates native resources and queued work on %s and cannot rebind", mode => {
-    const f = mount(); const monitor = new App.NWFXPathMonitor(); const listener = vi.fn(); monitor.pathUpdateHandler = listener; monitor.start();
+    const f = mount(); const monitor = new App.NWFXPathMonitor(); const listener = vi.fn(); monitor.pathUpdateHandler = listener; monitor.start(mainQueue());
     if (mode === "abort") f.owner.abort(); else f.unregister();
-    f.deliver(); flush(); expect(listener).not.toHaveBeenCalled(); expect(f.dispose).toHaveBeenCalledOnce(); mount(); expect(() => monitor.start()).toThrow(N.NWFXError);
+    f.deliver(); flush(); expect(listener).not.toHaveBeenCalled(); expect(f.dispose).toHaveBeenCalledOnce(); mount(); expect(() => monitor.start(mainQueue())).toThrow(N.NWFXError);
   });
   it("enforces entitlement and host denial before reading observations", () => {
     const f = mount(); f.entitlements([]); expect(() => new App.NWFXPathMonitor()).toThrow(/network.read/); expect(f.read).not.toHaveBeenCalled();
     f.entitlements(["network.read"]); f.access(false); expect(() => new App.NWFXPathMonitor()).toThrow(N.NWFXError); expect(f.read).not.toHaveBeenCalled();
   });
   it("checks access at queued delivery and cancels on a queued cancellation", () => {
-    const f = mount(); const monitor = new App.NWFXPathMonitor(); const listener = vi.fn(); monitor.pathUpdateHandler = listener; monitor.start(); monitor.cancel(); flush(); expect(listener).not.toHaveBeenCalled();
+    const f = mount(); const monitor = new App.NWFXPathMonitor(); const listener = vi.fn(); monitor.pathUpdateHandler = listener; monitor.start(mainQueue()); monitor.cancel(); flush(); expect(listener).not.toHaveBeenCalled();
   });
   it("fails terminally if filtered transport becomes unobservable and drops older queued paths", () => {
-    const f = mount(); const monitor = new App.NWFXPathMonitor("wifi"); const listener = vi.fn(); monitor.pathUpdateHandler = listener; monitor.start();
-    expect(() => f.deliver({ status: "satisfied" })).toThrow(N.NWFXError); expect(f.dispose).toHaveBeenCalledOnce(); flush(); expect(listener).not.toHaveBeenCalled(); expect(() => monitor.start()).toThrow(N.NWFXError);
+    const f = mount(); const monitor = new App.NWFXPathMonitor("wifi"); const listener = vi.fn(); monitor.pathUpdateHandler = listener; monitor.start(mainQueue());
+    expect(() => f.deliver({ status: "satisfied" })).toThrow(N.NWFXError); expect(f.dispose).toHaveBeenCalledOnce(); flush(); expect(listener).not.toHaveBeenCalled(); expect(() => monitor.start(mainQueue())).toThrow(N.NWFXError);
   });
   it("rejects an unknown interface filter without acquiring browser observations", () => {
     const f = mount(); expect(() => new App.NWFXPathMonitor("bogus" as N.NWFXInterfaceType)).toThrow(N.NWFXError); expect(f.read).not.toHaveBeenCalled();

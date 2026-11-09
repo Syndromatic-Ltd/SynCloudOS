@@ -13,7 +13,7 @@ import type { NFXNDEFTag } from "./NFXNDEFTag";
 import { nfcBinding, nfcSessions } from "./internal/nfcSessionBindings";
 import { nfcPortFor, nfcFailure, type NFCNativeSession, type NFCNativeTag } from "./internal/nfcPort";
 
-/** NFCNDEFReaderSession. Null/omitted queue uses the selected app's main queue.
+/** NFCNDEFReaderSession. A null/omitted queue makes the session create its own serial queue, as Apple does.
  * Web NFC supplies scanned messages; addressed tag operations fail explicitly. */
 export class NFXNDEFReaderSession extends NFXReaderSession {
   #binding;
@@ -40,7 +40,7 @@ export class NFXNDEFReaderSession extends NFXReaderSession {
     this.#generation = this.#port.generation;
     if (!delegate || typeof delegate.readerSessionDidInvalidateWithError !== "function")
       throw new NFXReaderError("readerErrorInvalidParameter", "An NFC invalidation delegate is required.");
-    this.#queue = queue ?? dispatchQueueForSession(this.#session).main;
+    this.#queue = queue ?? new (dispatchQueueForSession(this.#session))("com.syndromatic.nfc.reader-session");
     this.#delegate = delegate;
     this.#firstRead = invalidateAfterFirstRead;
     nfcSessions.set(this, { dispose: () => this.#end() });

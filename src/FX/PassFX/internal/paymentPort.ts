@@ -54,6 +54,6 @@ export function paymentFailure(error: unknown): PKFXError {
     "unknownError",
     typeof error === "object" && error !== null && "message" in error && typeof error.message === "string"
       ? error.message
-      : "Payment authorization failed.",
+      : "Payment authorisation failed.",
   );
 }

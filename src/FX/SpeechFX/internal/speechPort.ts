@@ -64,7 +64,7 @@ export function unsupportedSpeech(member: string): never {
   throw new SPFXError("NSCocoaErrorDomain", 3328, `${member} is unavailable on this speech service.`);
 }
 export function speechDenied(): SPFXError {
-  return new SPFXError("kAFAssistantErrorDomain", 1700, "The speech.recognize entitlement or speech authorization was denied or revoked.");
+  return new SPFXError("kAFAssistantErrorDomain", 1700, "The speech.recognize entitlement or speech authorisation was denied or revoked.");
 }
 export function speechCancelled(): SPFXError {
   return new SPFXError("kAFAssistantErrorDomain", 216, "Speech recognition was cancelled.");
