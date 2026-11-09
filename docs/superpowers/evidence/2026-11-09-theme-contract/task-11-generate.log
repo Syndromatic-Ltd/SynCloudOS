@@ -1,0 +1,244 @@
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: Window's getComputedStyle() method: with pseudo-elements
+Not implemented: Window's getComputedStyle() method: with pseudo-elements
+ ❯ tests/runtime/nse-theme-contract-drift.test.tsx (672 tests | 2 failed) 4278ms
+   × renders menu-bar-open 13ms
+   × renders web-view 1007ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-theme-contract-drift.test.tsx > renders menu-bar-open
+TestingLibraryElementError: Unable to find an accessible element with the role "button"
+
+Here are the accessible roles:
+
+  menubar:
+
+  Name "":
+  <div
+    class="nse-menu-bar"
+    data-nse-control="menu-bar"
+    data-nse-part="background"
+    dir="ltr"
+    role="menubar"
+  />
+
+  --------------------------------------------------
+  menuitem:
+
+  Name "File":
+  <button
+    aria-expanded="false"
+    aria-haspopup="menu"
+    data-active="false"
+    data-nse-control="menu-item"
+    data-nse-part="title"
+    id="nse-menu-bar-_r_17k_-0"
+    role="menuitem"
+    type="button"
+  />
+
+  Name "Edit":
+  <button
+    aria-expanded="false"
+    aria-haspopup="menu"
+    data-active="false"
+    data-nse-control="menu-item"
+    data-nse-part="title"
+    id="nse-menu-bar-_r_17k_-1"
+    role="menuitem"
+    type="button"
+  />
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="nse-appearance-provider"
+      data-mode="light"
+      data-nse-appearance="atmo"
+      data-nse-chrome="standard"
+      data-nse-colour-scheme-requested="light"
+      data-nse-colour-scheme-resolved="light"
+      data-nse-contrast="normal"
+      data-nse-transparency="normal"
+    >
+      <div
+        data-nse-overlay-provider="nse-overlay-provider:nse-standalone:644:_r_17j_"
+        data-syncloudos-runtime-owner="nse-standalone:644"
+        style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px; display: contents;"
+      >
+        <div
+          class="nse-menu-bar"
+          data-nse-control="menu-bar"
+          data-nse-part="background"
+          dir="ltr"
+          role="menubar"
+        >
+          <span
+            class="nse-menu-bar-item"
+            data-nse-part="item"
+          >
+            <button
+              aria-expanded="false"
+              aria-haspopup="menu"
+              data-active="false"
+              data-nse-control="menu-item"
+              data-nse-part="title"
+              id="nse-menu-bar-_r_17k_-0"
+              role="menuitem"
+              type="button"
+            >
+              File
+            </button>
+          </span>
+          <span
+            class="nse-menu-bar-item"
+            data-nse-part="item"
+          >
+            <button
+              aria-expanded="false"
+              aria-haspopup="menu"
+              data-active="false"
+              data-nse-control="menu-item"
+              data-nse-part="title"
+              id="nse-menu-bar-_r_17k_-1"
+              role="menuitem"
+              type="button"
+            >
+              Edit
+            </button>
+          </span>
+        </div>
+        <div
+          data-mode="light"
+          data-nse-appearance="atmo"
+          data-nse-chrome="standard"
+          data-nse-colour-scheme-requested="light"
+          data-nse-colour-scheme-resolved="light"
+          data-nse-contrast="normal"
+          data-nse-overlay-portal-host="true"
+          data-nse-transparency="normal"
+          data-syncloudos-runtime-owner="nse-standalone:644"
+          style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px;"
+        >
+          <div
+            data-nse-portal-retainer="nse-menu-bar-_r_17k_:menu:nse-menu-2:0"
+            hidden=""
+          />
+          <div
+            data-nse-portal-retainer="nse-menu-bar-_r_17k_:menu:nse-menu-2:1"
+            hidden=""
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:109:15
+ ❯ tests/runtime/nse-theme-contract-drift.test.tsx:46:85
+     44|   collect();
+     45|   if (surface.chooseTab) fireEvent.click(await view.findByRole("tab", …
+     46|   if (surface.interaction === "open" || surface.id === "menu") fireEve…
+       |                                                                                     ^
+     47|   if (surface.interaction === "folder") {
+     48|     const folder = document.querySelector<HTMLElement>('[data-nse-cont…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/runtime/nse-theme-contract-drift.test.tsx > renders web-view
+AssertionError: expected null not to be null
+
+Ignored nodes: comments, script, style
+<html
+  dir="ltr"
+  lang="en-GB"
+>
+  <head />
+  <body>
+    <div>
+      <div
+        class="nse-appearance-provider"
+        data-mode="light"
+        data-nse-appearance="atmo"
+        data-nse-chrome="standard"
+        data-nse-colour-scheme-requested="light"
+        data-nse-colour-scheme-resolved="light"
+        data-nse-contrast="normal"
+        data-nse-transparency="normal"
+      >
+        <div
+          data-nse-overlay-provider="nse-overlay-provider:nse-standalone:652:_r_184_"
+          data-syncloudos-runtime-owner="nse-standalone:652"
+          style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px; display: contents;"
+        >
+          <iframe
+            aria-busy="true"
+            aria-label="Embedded document"
+            class="nse-web-content-view"
+            data-nse-control="web-view"
+            data-nse-part="content"
+            data-nse-web-content-session="web-content:dd7ceb72-ec8f-4a7c-a991-f2d3bf0f5fb0:1"
+            data-nse-web-content-state="loading"
+            sandbox=""
+            src="blob:nodedata:ff2f2448-2c16-422a-bb12-7e886325e80b"
+            title="Embedded document"
+          />
+          <div
+            data-mode="light"
+            data-nse-appearance="atmo"
+            data-nse-chrome="standard"
+            data-nse-colour-scheme-requested="light"
+            data-nse-colour-scheme-resolved="light"
+            data-nse-contrast="normal"
+            data-nse-overlay-portal-host="true"
+            data-nse-transparency="normal"
+            data-syncloudos-runtime-owner="nse-standalone:652"
+            style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px;"
+          />
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+ ❯ tests/runtime/nse-theme-contract-drift.test.tsx:43:93
+     41| for (const surface of themeBaselineCatalogue) it(`renders ${surface.id…
+     42|   const view = render(<Host>{surface.render()}</Host>);
+     43|   if (surface.ready) await waitFor(() => expect(document.querySelector…
+       |                                                                                             ^
+     44|   collect();
+     45|   if (surface.chooseTab) fireEvent.click(await view.findByRole("tab", …
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 670 passed (672)
+   Start at  22:08:47
+   Duration  13.43s (transform 6.10s, setup 26ms, import 8.15s, tests 4.28s, environment 829ms)
+
+file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/scripts/synware/build-theme-contract.mjs:32
+  if (result.status !== 0) throw new Error("Theme contract generation failed.");
+                                 ^
+
+Error: Theme contract generation failed.
+    at generateNSEThemeContract (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/scripts/synware/build-theme-contract.mjs:32:34)
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/scripts/synware/build-theme-contract.mjs:35:90
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.22.1

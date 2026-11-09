@@ -129,11 +129,21 @@ The system catalogue's ten cases pass; targeted stage key-state, status-slot, Qu
 
 ### Task 10 — semantic colours
 
+Commit: `1aae8d50` — `NSE: semantic colours shaped like NSColor`.
+
 Published the 48 frozen British semantic/system colour names and their CSS-property mapping. Atmo supplies both palettes in colours.json for transfer to its bundle in Task 14. The ten old colour names map to their closest semantic names with their existing values preserved. Non-colour variables sharing the old prefix were also renamed; src/ and scripts/ contain no --nse-app-* uses. The exact mapping, every chosen value, source precedent and owner-review flag are retained in semantic-colour-decisions.json.
 
 Verification: **131 focused tests across 10 files passed**, framework typecheck passed, and the frozen image gate passed **82/82 with zero differences** (task-10-baseline.log). All 2,648 reference hashes are unchanged. The focused run initially exposed three pre-guide top-bar expectations and one old-prefix documentation parser; the assertions now match the already-established guide contract and the renamed properties. No rendering fix or baseline change was needed.
 
-### Tasks 11–19
+### Task 11 — generated contract and drift gate
+
+Generated tooling/nse-theme-contract.json from all 662 frozen catalogue cases, ten additional specimens, and nine supplemental public-entry specimens. The inventory contains **71 controls, 362 control/part pairs and 48 colours**, with rendered states and variant values, appearance attributes, navigation, presentation, limits and migration metadata. Supplemental specimens cover radio matrices, swatches, virtual viewports, tooltips and configured/customising toolbars without changing any frozen catalogue bytes. Unused vocabulary entries are not claimed as rendered controls.
+
+The SDK offline-data writer and reviewed package inventory publish only the new filename. The MCP contract reader recognises version 1; its old recipe-based provisioning implementation is scheduled for replacement by the bundle tooling in Task 17. No compatibility contract is emitted.
+
+Verification: **687 focused tests across three files passed**, including 681 rendered specimens; framework and additional-fixture typechecks passed. A deliberate unrendered button part made the drift comparison fail, then the original JSON was restored and the clean comparison passed. A direct offline-data writer check confirmed byte-identical new contract output and absence of the old file. jsdom reports its known canvas-context limitation for colour panels; pixel rendering remains covered by the frozen browser gate. No rendering source changed in this task.
+
+### Tasks 12–19
 
 Pending. Final split-suite and packed SDK acceptance remain for Task 19.
 
