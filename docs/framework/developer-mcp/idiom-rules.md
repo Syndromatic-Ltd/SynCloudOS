@@ -8,10 +8,9 @@ The rules use the installed SDK. Appearance-neutral NSE controls obtain their ap
 
 | Rule | Static evidence | Public direction and limits |
 | --- | --- | --- |
-| `idiom.nse-controls` | Raw button/input/select/textarea/table in application UI | Use the corresponding NSE control. Hidden/file inputs are exempt. |
+| `idiom.nse-controls` | Raw button/input/select/textarea, or a table with interactive descendants, selection semantics or click handlers | Use the corresponding NSE control; interactive lists use `NSETableView`. Static content tables and hidden/file inputs are legitimate. |
 | `idiom.system-image` | An image identifiable as a back/forward/arrow/chevron system icon | `NSEImage.named` and `NSEImageView`; an ordinary photograph is not inferred to be system artwork. |
 | `idiom.ui-colour` | UI colour literals in supported CSS/JSX/NSE attributes | Use neutral semantic appearance values; renderer-owned artwork is a separate domain. |
-| `idiom.scroll-view` | Explicit auto/scroll overflow in UI styles | `NSEScrollView`; a static rule cannot infer the intended region from screenshots. |
 | `idiom.preferences` | Application `localStorage` access | Use application preferences for settings and document APIs for user work. |
 | `idiom.device-fx` | Direct device API use with an existing FX counterpart | Use the named installed FX API and its owned lifetime/capability contract. |
 | `idiom.button-glyph` | Button titles using arrows or other artwork glyphs, excluding numeric comparison/negative-value labels | Supply `NSEButton.image` with a bundled image; use named `NSEImage` templates for the available back/forward system images. A gear/checkmark is not assumed to have a named system image. |
@@ -26,6 +25,7 @@ Warnings describe potential misuse or a missing higher-level counterpart. They d
 
 | Rule | Evidence needed | Direction and deliberate limits |
 | --- | --- | --- |
+| `idiom.scroll-view` | Explicit auto/scroll overflow in CSS or inline styles | Review whether `NSEScrollView` should own the region. Code samples and content inside a scroll view's document view can legitimately scroll; these warnings never make validation fail. |
 | `idiom.resampled-animation` | Generated `AFXKeyframeAnimation.values` that call a recognisable timing/curve sampler | Prefer `AFXBasicAnimation`/`AFXSpringAnimation`, or authored keyframes with `keyTimes` and `timingFunctions`, from `@syndromatic/syncloudos/fx/animation`. Ordinary data maps are accepted. This does not establish compositor eligibility or detect every helper that generates values. |
 | `idiom.reduced-motion` | Literal `reducedMotion: "never"` in known AFX animation constructor options | Use `"system"`, or document an essential-motion exception. Unrelated objects with a similarly named property are accepted. |
 | `idiom.backed-view-animation` | Raw animation of the exact `.element` target declared as an `NSEViewOutlet` | Animate `outlet.layer` with AFX. An arbitrary DOM element is not assumed to have a backing layer. |
@@ -49,7 +49,7 @@ new AFXAnimation({ duration: 1, reducedMotion: "never" });
 
 CSS can use `/* // syncloudos-allow idiom.rule-id: nonblank reason */` immediately before a finding. The reason must be nonblank. Directives are local, not file-wide; strings that merely contain a directive are not comments. `idiomAudit.optOuts` records valid, invalid and unused directives with `file`, `line`, `rule`, `reason`, `valid` and `suppressed`; malformed directives produce `idiom.opt-out` errors. An exception records a choice and does not establish that it was visually verified.
 
-Source that actually owns a third-party rendering surface, or a canvas WebGL context, is treated as renderer-owned and listed in `idiomAudit.rendererExemptions`. Mere imports, comments and renderer-sounding filenames do not qualify. That exemption applies to the renderer source, not unrelated inspector or toolbar UI in another file.
+Only renderer-owned canvas/Canvas/Stage subtrees and renderer calls are exempt. `idiomAudit.rendererExemptions` lists regions as `{ file, start, end, line, endLine, kind }`, with zero-based UTF-16 offsets and one-based lines; `kind` is `surface` or `call`. A raw HUD button or other ordinary UI beside the surface in the same file is still checked. Mere imports, comments and renderer-sounding filenames do not exempt a file.
 
 ## Complete reconciliation of `FRICTION-OPUS.md`
 
@@ -167,7 +167,7 @@ Classes: **a** is a static rule (named below); **b** is an implemented framework
 | About: additive mote blending | c | Artistic blend intent cannot be inferred from a particle renderer; compare reference and `IFXFilter.blend("addition")` behaviour. |
 | About: setParticles then render schedules/cancels a frame | c | Scheduling/lifetime behaviour needs a targeted animation test, not a name-only source prohibition. |
 | About: near-full circle arcs | a | `idiom.full-circle`. |
-| About: raw scroll region | a | `idiom.scroll-view`. |
+| About: raw scroll region | a | `idiom.scroll-view` is a warning: overflow alone does not establish misuse. |
 | About: raw section-art image | c | Ordinary artwork is not a system-icon violation. Use `NSEImageView` where appropriate; `idiom.system-image` only establishes identifiable system artwork. Renderer ownership/art direction needs review. |
 | About: dead bundle images | a | `idiom.unused-resource`, with explicit dynamic-reference limits. |
 | About: room CSS gradients and animated floor | c | CSS artwork is allowed; animated geometry ownership requires renderer/layout evidence, not a blanket gradient ban. |
