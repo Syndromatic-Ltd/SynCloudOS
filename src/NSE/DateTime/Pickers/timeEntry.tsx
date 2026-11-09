@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useNSEDatePickerDrawing } from "./datePickerDrawing";
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { NSEGraphicalClock } from "../Calendar/graphicalClock";
 import type { NSEPlainDate, NSEPlainTime } from "../dateTimeTypes";
@@ -290,6 +291,7 @@ export function NSETimeEntry({
   name, editor: requestedEditor, locale, timeZone, date, minimum: requestedMinimum, maximum: requestedMaximum, minuteStep: requestedMinuteStep, hourCycle: requestedHourCycle, isEnabled = true, readOnly, required, renderEditor, parentResponderId, presentsClockOverlay = true,
   "aria-label": label, onFocusCapture, onBlurCapture, ...hostProps
 }: NSETimeEntryProps) {
+  const drawing = useNSEDatePickerDrawing("time", isEnabled, undefined, hostProps);
   const disabled = !isEnabled;
   const controlled = value !== undefined;
   const [stored, setStored] = useState(defaultValue);
@@ -352,7 +354,7 @@ export function NSETimeEntry({
   const appearanceState = disabled ? "disabled" : focused ? "focused" : "normal";
   const appearance = useNSEAppearanceSlot(nseAppearanceSlot("time-picker", "select", appearanceState));
   return (
-    <span {...hostProps} data-nse-control="time-picker" data-state={disabled ? "disabled" : current ? "ready" : "empty"} data-hour-mode={hourCycle === "h12" ? "12" : "24"} data-editor={editorMode} {...appearance.attributes} onFocusCapture={(event) => { setFocused(true); onFocusCapture?.(event); }} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false); onBlurCapture?.(event); }}>
+    <span {...hostProps} {...drawing.attributes} {...drawing.events} data-state={disabled ? "disabled" : current ? "ready" : "empty"} data-hour-mode={hourCycle === "h12" ? "12" : "24"} data-editor={editorMode} {...appearance.attributes} onFocusCapture={(event) => { drawing.events.onFocusCapture?.(event); setFocused(true); onFocusCapture?.(event); }} onBlurCapture={(event) => { drawing.events.onBlurCapture?.(event); if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false); onBlurCapture?.(event); }}>
       {editor}
       <input ref={hiddenRef} type="hidden" {...(name ? { name: name } : {})} value={serializePlainTime(current ?? null)} />
     </span>

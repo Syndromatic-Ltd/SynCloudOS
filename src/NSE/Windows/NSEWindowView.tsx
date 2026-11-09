@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useNSEAppearance } from "../Appearance/NSEAppearanceProvider";
 import { useNSEContentLayoutProperties } from "../Layout/windowChromeObstructions";
 
 import React, { type KeyboardEventHandler, type ReactNode } from "react";
@@ -87,6 +88,7 @@ export function NSEWindowView({
   // props carry the radius paint underneath. Shadow and resize handles are
   // siblings of the surface, so clipping never touches them; content scrolls
   // inside the clipped surface exactly like mounted app views.
+  const appearance = useNSEAppearance();
   const contentLayoutProperties = useNSEContentLayoutProperties();
   const [titlebarDocument, setTitlebarDocument] = React.useState<NSEWindowTitlebarDocument | null>(null);
   const titlebarHost = React.useMemo(() => ({ setDocument: setTitlebarDocument, leadingAccessories: null, trailingAccessories: null }), []);
@@ -105,6 +107,7 @@ export function NSEWindowView({
   return (
     <NSEWindowTitlebarHostContext.Provider value={titlebarHost}>
     <section
+      data-nse-control="window" data-nse-part="background" data-nse-chrome={record.role === "hud" ? "hud" : appearance.chrome} data-nse-key-window={record.isKey ? undefined : "false"} data-nse-toolbar-style={titlebarDocument?.toolbarStyle ?? "automatic"}
       className={["nse-window-view", className].filter(Boolean).join(" ")}
       role={resolvedSemanticRole}
       aria-label={fallbackAccessibleName}
@@ -151,7 +154,7 @@ export function NSEWindowView({
       ) : null}
       <div
         ref={setSurfaceNode}
-        className={["nse-window__surface", smoothSurfaceProps.className].filter(Boolean).join(" ")}
+        data-nse-part="bezel" className={["nse-window__surface", smoothSurfaceProps.className].filter(Boolean).join(" ")}
         style={smoothSurfaceProps.style}
         data-window-surface=""
       >
@@ -159,12 +162,12 @@ export function NSEWindowView({
         {customTitleBarSlotRef ? (
           <div
             ref={customTitleBarSlotRef}
-            className="nse-window__custom-titlebar"
+            data-nse-part="header" className="nse-window__custom-titlebar"
             data-window-titlebar="custom"
             role="presentation"
           />
         ) : null}
-        <div className="nse-window__content" data-window-content="" style={contentLayoutProperties}>{children}</div>
+        <div data-nse-part="content" className="nse-window__content" data-window-content="" style={contentLayoutProperties}>{children}</div>
       </div>
       {resizeHandles}
     </section>

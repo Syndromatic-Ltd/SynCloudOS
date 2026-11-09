@@ -101,11 +101,19 @@ The container group adds box, view, stack, grid, split, drawer, clip/scroll, ima
 
 The first container screenshot gate found a composing colour-list clip part being overwritten by the new clip-view default. That removed the palette list's existing border in light mode (DPR 1/2). The clip now preserves the composing part. An explicit regression failed before the fix and passes afterwards. Failed images/traces are retained as `task-8-container-clip-*`; references were untouched. Four focused light/dark DPR comparisons passed. Final full acceptance passed **82/82, zero differences** (`task-8-containers-baseline-final.log`). The final focused run passed **754 tests in 19 files**; 39 additional stack/page/layout regressions and typecheck passed. All 2,648 frozen hashes are unchanged.
 
+Menus/toolbars commit: `0ccbde2d` — `NSE: publish theme hooks on menus and toolbars`.
+
 The menus/toolbars group publishes pop-up and pull-down identity (including native fallback), menu surfaces and menu items, toolbar surfaces/items/customisation palettes, path controls and tab views/navigation. Command state and the existing hovered/focused/pressed state remain authoritative. `toolbar-configuration-sheet` becomes `toolbar-customisation-palette`; the toolbar's `root` part becomes `background`. Existing neutral part names remain documented. Navigation tab views publish `style="navigation"`.
 
 The first menu screenshot gate caught the generic tab-view scroll rule clipping the compact strip's existing shadow in light mode at both DPRs. The rule now owns only direct content tab lists and excludes navigation. Eight focused tab comparisons pass. The failed actual/diff/trace are retained as `task-8-tab-shadow-*`. No reference was changed. Final menu acceptance passed **82/82, zero differences** (`task-8-menus-baseline-final.log`); **711 focused tests across 9 files** and typecheck passed. All frozen hashes remain unchanged.
 
-Remaining groups: date/panel controls, windows/overlays.
+The date/panel/window group unifies the date, time and range renderers under `date-picker`, with `picker-mode` and `date-picker-style` variants. Drawing context adds no layout element. The calendar is the graphical date mode; the clock is a drawable part of the time mode. The old `time-picker`, `date-time-picker`, `date-range-picker`, `calendar` and `clock` control identities are removed. `route-picker` becomes `route-picker-view`; `file-panel` becomes `save-panel`. Generic `overlay` becomes the real menu, popover, tooltip or sheet identity, while `role="overlay"` identifies shared surface structure. No old identity aliases remain.
+
+Panels, windows and overlays publish their real parts, window chrome/toolbar variants and inactive-window state. Colour/font/file panels retain their existing neutral parts. Composite button and overlay hosts now preserve the composing control's identity and named part; the existing interaction and accessibility owners remain in charge.
+
+The first full image gate found the graphical time picker receiving a calendar-only layout rule after identity unification. The calendar selector now also requires date mode, with unchanged specificity. Eight focused clock comparisons pass; failed images/traces are retained as `task-8-clock-mode-*`. The expanded regression run passed **954 tests in 30 files** and typecheck passed. Final full visual acceptance passed **82/82, zero differences** (`task-8-panels-baseline-final.log`). All 2,648 reference hashes remain unchanged.
+
+Remaining Task 8 group: public badge and loading indicators. The system alert presenters are explicitly assigned to Task 9.
 
 ### Tasks 9–19
 
@@ -143,6 +151,8 @@ Further diagnostic runs exposed folder-only capture interference and source-pain
 6. Framework chrome uses separate `--nse-screen-safe-area-inset-*` values when sizing its own device padding. Content uses `--nse-safe-area-inset-*`; feeding the latter back into a bar’s size would create a measurement loop.
 
 7. The minimum interaction bound must preserve a theme’s larger minimum. `--nse-control-minimum-inline-size` and `--nse-control-minimum-block-size` supply those metrics; structural CSS clamps them to at least 24 points for regular/large controls rather than replacing a larger minimum with 24.
+
+9. Date, time, combined and range editors are all NSDatePicker modes, so they share `date-picker`; mode/style attributes distinguish their drawing. Shared overlay CSS uses an overlay role rather than a fictitious AppKit control identity.
 
 8. Painted bezel dimensions and interaction dimensions are distinct. The stepper uses `--nse-control-bezel-inline-size` and `--nse-control-bezel-block-size` for its existing art; framework-owned hit dimensions meet the minimum without moving that art or its neighbours. Passive progress/meter surfaces do not receive hit-target sizing.
 

@@ -544,7 +544,7 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
     endSession(fontPanelAbort("Font panel session was closed."));
     onOpenChange(false);
   }} onDismissRefused={() => onOpenChange(true)}>
-    {carryColourPanel(<section data-nse-control="font-panel" data-state={readOnly ? "read-only" : !preset ? "unavailable" : status === "idle" || status === "executed" ? "ready" : status} dir={direction} aria-label={label}>
+    {carryColourPanel(<section data-nse-control="font-panel" data-nse-part="background" data-state={readOnly ? "read-only" : !preset ? "unavailable" : status === "idle" || status === "executed" ? "ready" : status} dir={direction} aria-label={label}>
       {showsPreview ? <div data-nse-part="preview" style={shownDocumentColour ? { "--nse-font-panel-document": shownDocumentColour.toCSS() } as CSSProperties : undefined}>
         <output data-nse-part="preview-sample" aria-label={`Preview: ${description}`} style={previewStyle}>{familyName}</output>
         <p data-nse-part="preview-description" aria-hidden="true">{description}</p>

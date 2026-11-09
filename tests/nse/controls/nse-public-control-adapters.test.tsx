@@ -60,19 +60,19 @@ const pickerOptions = (name: string) => {
 describe("canonical public control contracts", () => {
   it.each(routes)("mounts the %s date route inside the standard overlay provider", (_route, DatePicker) => {
     const { container } = render(<OverlayHarness><DatePicker aria-label="Provider date" defaultValue={{ year: 2026, month: 6, day: 18 }}  locale="en-GB" timeZone="Europe/London" datePickerStyle="textField" presentsCalendarOverlay={false}/></OverlayHarness>);
-    expect(container.querySelector('[data-nse-control="date-picker"]')).not.toBeNull();
+    expect(container.querySelector('[data-nse-control="date-picker"]:where([data-nse-picker-mode="date"]:not([data-nse-date-picker-style="clockAndCalendar"]))')).not.toBeNull();
     expect((container.querySelector('input[type="hidden"]') as HTMLInputElement).value).toBe("2026-06-18");
   });
 
   it.each(routes)("mounts the %s time route in 24-hour mode inside the standard overlay provider", (_route, DatePicker) => {
     const { container } = render(<OverlayHarness><DatePicker datePickerElements={["hourMinute"]} aria-label="Provider time" defaultValue={{ hour: 13, minute: 30, second: 0 }} hourCycle="h24"  locale="en-GB" timeZone="Europe/London"/></OverlayHarness>);
-    expect(container.querySelector('[data-nse-control="time-picker"]')).not.toBeNull();
+    expect(container.querySelector('[data-nse-control="date-picker"]:where([data-nse-picker-mode="time"])')).not.toBeNull();
     expect(container.querySelector('[data-hour-mode="24"]')).not.toBeNull();
   });
 
   it.each(routes)("mounts the %s time route in 12-hour mode inside the standard overlay provider", (_route, DatePicker) => {
     const { container } = render(<OverlayHarness><DatePicker datePickerElements={["hourMinute"]} aria-label="Provider time" locale="en-US" defaultValue={{ hour: 13, minute: 30, second: 0 }} hourCycle="h12"  timeZone="Europe/London"/></OverlayHarness>);
-    expect(container.querySelector('[data-nse-control="time-picker"]')).not.toBeNull();
+    expect(container.querySelector('[data-nse-control="date-picker"]:where([data-nse-picker-mode="time"])')).not.toBeNull();
     expect(container.querySelector('[data-hour-mode="12"]')).not.toBeNull();
   });
 
@@ -156,9 +156,9 @@ describe("canonical public control contracts", () => {
   });
   it("routes canonical date and time props through the canonical civil picker engines", () => {
     const { container } = render(<><NSEDateEntry aria-label="Legacy date" defaultValue={{ year: 2026, month: 6, day: 18 }}  locale="en-GB" timeZone="Europe/London" mode="text" editor="segments"/><NSETimeEntry aria-label="Legacy time" defaultValue={{ hour: 13, minute: 30, second: 0 }}  locale="en-GB" timeZone="Europe/London" editor="segments"/></>);
-    expect(container.querySelectorAll('[data-nse-control="date-picker"]')).toHaveLength(1);
-    expect(container.querySelectorAll('[data-nse-control="time-picker"]')).toHaveLength(1);
-    expect((container.querySelector('[data-nse-control="date-picker"] input[type="hidden"]') as HTMLInputElement).value).toBe("2026-06-18");
+    expect(container.querySelectorAll('[data-nse-control="date-picker"]:where([data-nse-picker-mode="date"]:not([data-nse-date-picker-style="clockAndCalendar"]))')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-nse-control="date-picker"]:where([data-nse-picker-mode="time"])')).toHaveLength(1);
+    expect((container.querySelector('[data-nse-control="date-picker"]:where([data-nse-picker-mode="date"]:not([data-nse-date-picker-style="clockAndCalendar"])) input[type="hidden"]') as HTMLInputElement).value).toBe("2026-06-18");
   });
 
   it("preserves canonical hidden date fields through the canonical date editor", () => {
@@ -184,7 +184,7 @@ describe("canonical public control contracts", () => {
 
   it("preserves canonical date host props and decorations", () => {
     const { container } = render(<><NSEDateEntry aria-label="Legacy date" className="consumer-date" data-consumer="calendar" defaultValue={{ year: 2026, month: 6, day: 18 }}  locale="en-GB" timeZone="Europe/London" mode="text" editor="segments"/></>);
-    expect(container.querySelector('.consumer-date[data-nse-control="date-picker"]')).not.toBeNull();
+    expect(container.querySelector('.consumer-date[data-nse-control="date-picker"]:where([data-nse-picker-mode="date"]:not([data-nse-date-picker-style="clockAndCalendar"]))')).not.toBeNull();
     expect(container.querySelector(".consumer-date")?.getAttribute("data-consumer")).toBe("calendar");
   });
 

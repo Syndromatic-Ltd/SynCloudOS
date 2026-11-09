@@ -1,0 +1,34 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-theme-panel-hook-coverage.test.tsx -t date pointer
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-theme-panel-hook-coverage.test.tsx (73 tests | 1 failed | 72 skipped) 77ms
+     × publishes date pointer and keyboard-focus drawing state 76ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-theme-panel-hook-coverage.test.tsx > date, panel and window theme hooks > publishes date pointer and keyboard-focus drawing state
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/runtime/nse-theme-panel-hook-coverage.test.tsx:22:51
+     20|     const root = view.container.querySelector<HTMLElement>('[data-nse-…
+     21|     fireEvent.pointerOver(root);
+     22|     expect(root.hasAttribute("data-nse-hovered")).toBe(true);
+       |                                                   ^
+     23|     fireEvent.keyDown(document.body, { key: "Tab" });
+     24|     act(() => root.querySelector("input")!.focus());
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 72 skipped (73)
+   Start at  21:05:11
+   Duration  8.43s (transform 5.59s, setup 27ms, import 7.38s, tests 77ms, environment 813ms)

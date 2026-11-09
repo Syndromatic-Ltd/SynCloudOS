@@ -32,6 +32,7 @@ import {
   type RefAttributes,
 } from "react";
 import { NSEControlImage } from "../Images/NSEControlImage";
+import type { NSEThemeControlName } from "../../Theme/contract/vocabulary";
 import { nseControlHooks, nseMinimumControlProperties } from "../../Theme/contract/hooks";
 import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import type { NSEImage } from "../Images/NSEImageResource";
@@ -261,8 +262,8 @@ const NSEPushButtonCell = forwardRef<HTMLButtonElement, NSEButtonProps>(function
       {...props}
       style={nseMinimumControlProperties(props.style)}
       {...theme.events}
-      {...nseControlHooks({ control: "button", state: presentation?.state ?? state ?? "off", highlighted: isHighlighted || press.active, enabled: !disabled, hovered: theme.hovered, focused: theme.focused, variants: { "bezel-style": bezelStyle, "control-size": controlSize ?? "regular", "button-type": buttonType } })}
-      data-nse-part="background"
+      {...nseControlHooks({ control: (props as { "data-nse-control"?: NSEThemeControlName })["data-nse-control"] ?? "button", state: presentation?.state ?? state ?? "off", highlighted: isHighlighted || press.active, enabled: !disabled, hovered: theme.hovered, focused: theme.focused, variants: { "bezel-style": bezelStyle, "control-size": controlSize ?? "regular", "button-type": buttonType } })}
+      data-nse-part={(props as Record<string, unknown>)["data-nse-part"] as string ?? "background"}
     >
       <span data-nse-part="bezel" aria-hidden="true" style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />
       {disclosure ? <span data-nse-part="indicator" className="nse-control-disclosure-triangle" aria-hidden="true" /> : null}
@@ -358,8 +359,8 @@ function NSESwitchButtonCell(
     <>
       <label
         {...theme.events}
-        {...nseControlHooks({ control: "button", state: fromCheckState(current.value), highlighted: isHighlighted || theme.highlighted, enabled: isEnabled, hovered: theme.hovered, focused: theme.focused, variants: { "button-type": "switch", "control-size": controlSize ?? "regular", "bezel-style": _bezelStyle ?? "rounded" } })}
-        data-nse-part="background"
+        {...nseControlHooks({ control: restAttributes["data-nse-control"] as NSEThemeControlName ?? "button", state: fromCheckState(current.value), highlighted: isHighlighted || theme.highlighted, enabled: isEnabled, hovered: theme.hovered, focused: theme.focused, variants: { "button-type": "switch", "control-size": controlSize ?? "regular", "bezel-style": _bezelStyle ?? "rounded" } })}
+        data-nse-part={restAttributes["data-nse-part"] as string ?? "background"}
         className={classes("nse-control-checkbox", disabled && "is-disabled", className)}
         htmlFor={inputId}
         title={toolTip}

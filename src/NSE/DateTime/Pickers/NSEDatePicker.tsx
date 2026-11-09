@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEDatePickerDrawingContext } from "./datePickerDrawing";
 import { useEffect, useState, type ReactElement } from "react";
 
 import { useNSEAnimationEnvironment } from "../../Animation/NSEAnimationEnvironment";
@@ -52,6 +53,9 @@ export function NSEDatePicker(props: NSEDatePickerDateTimeProps): ReactElement;
 export function NSEDatePicker(props: NSEDatePickerRangeProps): ReactElement;
 export function NSEDatePicker(props: NSEDatePickerDateProps): ReactElement;
 export function NSEDatePicker(props: NSEDatePickerProps): ReactElement {
+  return <NSEDatePickerDrawingContext.Provider value={{ style: props.datePickerStyle ?? "textFieldAndStepper", enabled: props.isEnabled !== false }}><NSEDatePickerContent {...props} /></NSEDatePickerDrawingContext.Provider>;
+}
+function NSEDatePickerContent(props: NSEDatePickerProps): ReactElement {
   const { datePickerStyle = "textFieldAndStepper", presentsCalendarOverlay = true, isEnabled = true, isEditable = true } = props;
   const disabled = !isEnabled;
   const readOnly = !isEditable;

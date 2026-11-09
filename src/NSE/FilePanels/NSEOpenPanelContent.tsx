@@ -171,7 +171,7 @@ export function NSEOpenPanelContent({ session }: { readonly session: OpenPanelSe
     <NSEButton bezelStyle="texturedRounded" controlSize="small" title="System Chooser…" className="nse-open-system" onClick={system} />
   </nav>;
   const openButton = <NSEButton controlSize="small" title={session.prompt || "Open"} keyEquivalent={"\r"} isEnabled={canOpen} onClick={() => void openItems(chosen)} />;
-  return <section className="nse-open-panel" data-nse-control="open-panel" data-compact={compact || undefined} data-page={compact && showsSources ? "sources" : "collection"} aria-label={session.prompt || "Open"}>
+  return <section className="nse-open-panel" data-nse-control="open-panel" data-nse-part="background" data-compact={compact || undefined} data-page={compact && showsSources ? "sources" : "collection"} aria-label={session.prompt || "Open"}>
     {compact ? <header className="nse-open-phone-header">
       {showsSources ? <NSEButton controlSize="small" title="Cancel" keyEquivalent={"\u001b"} onClick={session.cancel} /> : <NSEButton bezelStyle="texturedRounded" image={NSEImage.named(NSEImage.goBackTemplateName)} imagePosition="imageOnly" title={location && location.path.length > 1 ? "Back" : "Sources"} onClick={() => {
         if (location && location.path.length > 1) navigate({ ...location, path: location.path.slice(0, -1) });

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useNSEDatePickerDrawing } from "./datePickerDrawing";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { useOptionalNSEOverlayProvider } from "../../Overlays";
 import { NSEPopover } from "../../Overlays/NSEPopover";
@@ -105,6 +106,7 @@ export function NSEDateEntry({
   name, editor, hiddenFields, locale, timeZone, minimum, maximum, isEnabled = true, readOnly, required, renderEditor, normalizeValue,
   "aria-label": label, onFocusCapture, onBlurCapture, ...hostProps
 }: NSEDateEntryProps) {
+  const drawing = useNSEDatePickerDrawing("date", isEnabled, undefined, hostProps);
   const disabled = !isEnabled;
   const controlled = value !== undefined;
   const [stored, setStored] = useState<NSEPlainDate | null>(defaultValue);
@@ -203,7 +205,7 @@ export function NSEDateEntry({
   const titleId = `date-picker-title-${instanceId}`;
   const appearanceState = invalid ? "invalid" : disabled ? "disabled" : focused || open ? "focused" : "normal";
   const appearance = useNSEAppearanceSlot(nseAppearanceSlot("date-picker", "select", appearanceState));
-  return <span {...hostProps} data-nse-control="date-picker" data-state={invalid ? "invalid" : disabled ? "disabled" : readOnly ? "read-only" : open ? "open" : "ready"} {...appearance.attributes} onFocusCapture={(event) => { setFocused(true); onFocusCapture?.(event); }} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false); onBlurCapture?.(event); }}>
+  return <span {...hostProps} {...drawing.attributes} {...drawing.events} data-state={invalid ? "invalid" : disabled ? "disabled" : readOnly ? "read-only" : open ? "open" : "ready"} {...appearance.attributes} onFocusCapture={(event) => { drawing.events.onFocusCapture?.(event); setFocused(true); onFocusCapture?.(event); }} onBlurCapture={(event) => { drawing.events.onBlurCapture?.(event); if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false); onBlurCapture?.(event); }}>
     {mode === "automatic" ? <button ref={triggerRef} type="button" aria-label={`Choose ${label.toLocaleLowerCase()}`} aria-expanded={open} disabled={disabled || readOnly} onClick={() => { setCalendarDraft(current); setOpen(true); }}>▦</button> : null}
     {renderEditor ? renderEditor({ value: current, isEnabled: !disabled, readOnly: Boolean(readOnly), commit: commitEditor }) : segmentEditor ?? (!showCalendar ? <input data-nse-part="date-entry" aria-label={label} type="text" inputMode="numeric" placeholder={plainDatePlaceholder(locale)} value={draft} disabled={disabled} readOnly={readOnly} required={required} aria-invalid={invalid || undefined} onChange={(event) => { if (readOnly) return; setDraft(event.currentTarget.value); setInvalid(false); }} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); commitText(); } else if (event.key === "Escape") { if (invalid || draft !== (current ? formatPlainDate(current, locale) : "")) event.preventDefault(); setInvalid(false); setDraft(current ? formatPlainDate(current, locale) : ""); } }} onBlur={commitText} /> : null)}
     {showCalendar && !renderEditor ? calendar : null}

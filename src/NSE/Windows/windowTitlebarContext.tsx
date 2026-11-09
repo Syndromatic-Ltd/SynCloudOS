@@ -39,12 +39,12 @@ export function NSEWindowTitlebarContent({ toolbarStyle, title, subtitle, leadin
   readonly mode?: "light" | "dark";
   readonly className?: string;
 }) {
-  return <header className={`nse-window-titlebar-content ${className}`} data-window-titlebar="" data-toolbar-style={toolbarStyle} data-mode={mode}>
-    <span className="nse-window-titlebar-leading" data-layout-attribute="leading">{leading}</span>
+  return <header data-nse-control="window" data-nse-part="header" data-nse-toolbar-style={toolbarStyle} className={`nse-window-titlebar-content ${className}`} data-window-titlebar="" data-toolbar-style={toolbarStyle} data-mode={mode}>
+    <span data-nse-part="leading" className="nse-window-titlebar-leading" data-layout-attribute="leading">{leading}</span>
     <div className="nse-window-titlebar-copy">
-      <h1 className="nse-window-titlebar-heading" data-window-title="">{title}</h1>
-      {subtitle ? <span className="nse-window-titlebar-subtitle">{subtitle}</span> : null}
+      <h1 data-nse-part="title" className="nse-window-titlebar-heading" data-window-title="">{title}</h1>
+      {subtitle ? <span data-nse-part="subtitle" className="nse-window-titlebar-subtitle">{subtitle}</span> : null}
     </div>
-    <span className="nse-window-titlebar-trailing" data-layout-attribute="trailing">{trailing}</span>
+    <span data-nse-part="trailing" className="nse-window-titlebar-trailing" data-layout-attribute="trailing">{trailing}</span>
   </header>;
 }
