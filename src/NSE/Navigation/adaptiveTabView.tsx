@@ -5,7 +5,9 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-import { useCallback, useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
+import { NSEWindowLayoutContext, useNSEWindowChromeElement } from "../Layout/windowChromeObstructions";
+import { useNSEViewSafeArea } from "../Layout/useNSESafeArea";
+import { useContext, useCallback, useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { NSEOutlineView } from "../DataViews/Outline/NSEOutlineView";
 import { NSESplitView } from "../DataViews/Split/NSESplitView";
 import { NSETableCellView } from "../DataViews/Table/NSETableCellView";
@@ -41,6 +43,10 @@ const sidebarMinimumWidth = 768;
 export function NSEAdaptiveTabView({ controller, scope }: { readonly controller: NSETabViewController; readonly scope: string }) {
   const frame = useSourceListFrame();
   const root = useRef<HTMLDivElement>(null);
+  const chrome = useRef<HTMLDivElement>(null);
+  const sidebar = useRef<HTMLDivElement>(null);
+  const layout = useContext(NSEWindowLayoutContext);
+  const safeArea = useNSEViewSafeArea(root);
   const [allocation, setAllocation] = useState<Bounds | null>(null);
   const traits = controller.traitCollection.presentation;
   const previous = useRef<Renderer>("tabs");
@@ -54,6 +60,9 @@ export function NSEAdaptiveTabView({ controller, scope }: { readonly controller:
       : bounds.width < sidebarMinimumWidth ? "tabs" : "source-list-content";
     previous.current = renderer;
   }
+  const showsCompactChrome = controller.tabViewItems.length > 1 && (renderer === "tabs" || renderer === "rail");
+  useNSEWindowChromeElement(chrome, renderer === "rail" ? "leading" : "bottom", renderer !== "rail", showsCompactChrome);
+  useNSEWindowChromeElement(sidebar, "leading", false, renderer === "source-list-content");
   const compact = renderer === "tabs" || renderer === "rail";
   const selected = controller.selectedTabViewItem;
   const model = tabViewProjection(controller).control();
@@ -81,11 +90,12 @@ export function NSEAdaptiveTabView({ controller, scope }: { readonly controller:
         ? old : { x: rect.x, y: rect.y, width, height });
     };
     measure();
+    if (layout) return layout.observeElement(element, measure);
     const Observer = element.ownerDocument.defaultView?.ResizeObserver;
     const observer = Observer ? new Observer(measure) : null;
     observer?.observe(element);
     return () => observer?.disconnect();
-  }, [traits?.revision]);
+  }, [layout, traits?.revision]);
 
   useLayoutEffect(() => {
     if (!adaptive) return undefined;
@@ -111,11 +121,11 @@ export function NSEAdaptiveTabView({ controller, scope }: { readonly controller:
 
   return <div ref={root} className="nse-adaptive-tab-controller nse-compact-bottom-chrome-owner"
     data-navigation-renderer={renderer}
-    style={{ "--nse-navigation-rail-width": `${railWidth}px` } as CSSProperties}
+    style={{ ...safeArea.properties, "--nse-navigation-rail-width": `${railWidth}px` } as CSSProperties}
     onFocusCapture={event => { navigationHadFocus.current = Boolean((event.target as Element).closest('.nse-adaptive-tab-sidebar, [data-nse-adaptive-tabs-chrome]')); }}
     onBlurCapture={event => { if (event.relatedTarget instanceof Node && !event.currentTarget.contains(event.relatedTarget)) navigationHadFocus.current = false; }}>
     <NSESplitView className="nse-adaptive-tab-split"
-      sidebar={<div className="nse-adaptive-tab-sidebar" hidden={renderer !== "source-list-content"} inert={renderer !== "source-list-content"}>
+      sidebar={<div ref={sidebar} className="nse-adaptive-tab-sidebar" hidden={renderer !== "source-list-content"} inert={renderer !== "source-list-content"}>
         <NSEOutlineView controller={outline} selectionHighlightStyle="sourceList" viewportBlockSize="fill"
           aria-label={controller.title ?? "Tabs"} selectionMode="single"
           idForItem={item => item.identifier} childrenForItem={() => []} isExpandable={() => false} labelForItem={item => item.label}
@@ -143,8 +153,8 @@ export function NSEAdaptiveTabView({ controller, scope }: { readonly controller:
           : null}
       </div>
     </NSESplitView>
-    <div className={`nse-adaptive-tab-chrome${renderer === "tabs" ? " nse-compact-bottom-chrome-mount" : ""}`}
-      hidden={!compact} inert={!compact} data-nse-adaptive-tabs-chrome="true"
+    <div ref={chrome} className={`nse-adaptive-tab-chrome${renderer === "tabs" ? " nse-compact-bottom-chrome-mount" : ""}`}
+      hidden={!showsCompactChrome} inert={!showsCompactChrome} data-nse-adaptive-tabs-chrome="true"
       data-nse-compact-bottom-chrome={renderer === "tabs" ? "tabs-only" : undefined}>
       {model ? <NSETabBar controller={model} aria-label={controller.title ?? "Tabs"} renderPanels={false}
         orientation={renderer === "rail" ? "vertical" : "horizontal"} reducedMotion={controller.traitCollection.reducedMotion} idScope={scope} /> : null}

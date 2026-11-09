@@ -1,0 +1,79 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-layout-guide-adoption.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-layout-guide-adoption.test.tsx (3 tests | 3 failed) 118ms
+     × keeps compact scrolling content clear of the measured bottom strip 89ms
+     × registers an RTL source list on the right without insetting the content twice 16ms
+     × updates in one animation frame when a second destination enables the strip 13ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-layout-guide-adoption.test.tsx > framework layout-guide adoption > keeps compact scrolling content clear of the measured bottom strip
+AssertionError: expected +0 to be 92 // Object.is equality
+
+- Expected
++ Received
+
+- 92
++ 0
+
+ ❯ tests/runtime/nse-layout-guide-adoption.test.tsx:39:55
+     37|     const view = render(<NSEWindowLayoutContext.Provider value={fixtur…
+     38|     fixture.flush();
+     39|     expect(fixture.model.getSnapshot().insets.bottom).toBe(92);
+       |                                                       ^
+     40|     expect(view.container.querySelector<HTMLElement>(".nse-scroll-view…
+     41|     fixture.dispose();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/runtime/nse-layout-guide-adoption.test.tsx > framework layout-guide adoption > registers an RTL source list on the right without insetting the content twice
+AssertionError: expected { top: +0, left: +0, bottom: +0, …(1) } to deeply equal { top: +0, left: +0, bottom: +0, …(1) }
+
+- Expected
++ Received
+
+  {
+    "bottom": 0,
+    "left": 0,
+-   "right": 264,
++   "right": 0,
+    "top": 0,
+  }
+
+ ❯ tests/runtime/nse-layout-guide-adoption.test.tsx:47:48
+     45|     const view = render(<NSEWindowLayoutContext.Provider value={fixtur…
+     46|     fixture.flush();
+     47|     expect(fixture.model.getSnapshot().insets).toEqual({ top: 0, left:…
+       |                                                ^
+     48|     expect(view.container.querySelector<HTMLElement>(".nse-scroll-view…
+     49|     fixture.dispose();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/runtime/nse-layout-guide-adoption.test.tsx > framework layout-guide adoption > updates in one animation frame when a second destination enables the strip
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ tests/runtime/nse-layout-guide-adoption.test.tsx:56:36
+     54|     fixture.flush(); expect(fixture.model.getSnapshot().insets.bottom)…
+     55|     act(() => fixture.add("second"));
+     56|     expect(fixture.callbacks.size).toBe(1); fixture.flush();
+       |                                    ^
+     57|     expect(fixture.model.getSnapshot().insets.bottom).toBe(92);
+     58|     expect(fixture.callbacks.size).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed (3)
+   Start at  18:56:06
+   Duration  6.83s (transform 4.38s, setup 27ms, import 5.74s, tests 118ms, environment 811ms)

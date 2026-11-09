@@ -281,7 +281,7 @@
 
 .syncloudos-notification-banner-stage {
   position: fixed;
-  top: max(12px, env(safe-area-inset-top));
+  top: max(12px, var(--nse-screen-safe-area-inset-top, 0px));
   left: 50%;
   --syncloudos-notification-cube-height: 104px;
   --syncloudos-notification-cube-depth: 104px;
@@ -696,7 +696,7 @@
 
 .syncloudos-notification-centre {
   position: fixed;
-  top: max(18px, env(safe-area-inset-top));
+  top: max(18px, var(--nse-screen-safe-area-inset-top, 0px));
   right: 18px;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
@@ -981,7 +981,7 @@
 
 @media (max-width: 760px) {
   .syncloudos-notification-banner-stage {
-    top: max(8px, env(safe-area-inset-top));
+    top: max(8px, var(--nse-screen-safe-area-inset-top, 0px));
     width: min(100vw - 16px, 520px);
   }
 
@@ -1005,7 +1005,7 @@
   }
 
   .syncloudos-notification-centre {
-    top: max(8px, env(safe-area-inset-top));
+    top: max(8px, var(--nse-screen-safe-area-inset-top, 0px));
     right: 8px;
     left: 8px;
     width: auto;

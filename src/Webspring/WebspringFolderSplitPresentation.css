@@ -70,7 +70,7 @@
   width: 100%;
   max-width: 920px;
   margin: 0 auto;
-  padding: 18px max(16px, env(safe-area-inset-right)) 26px max(16px, env(safe-area-inset-left));
+  padding: 18px max(16px, var(--nse-screen-safe-area-inset-right, 0px)) 26px max(16px, var(--nse-screen-safe-area-inset-left, 0px));
 }
 
 .webspring-folder-split-title {

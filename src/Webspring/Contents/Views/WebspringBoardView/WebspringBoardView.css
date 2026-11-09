@@ -38,7 +38,7 @@
   box-sizing: border-box;
   /* The icons are fitted to this height, so the widget shelf, when there is one, starts below the fold. */
   min-height: 100svh;
-  padding: max(clamp(72px, 16.5svh, 180px), env(safe-area-inset-top)) max(clamp(12px, 4vw, 40px), env(safe-area-inset-right)) 0 max(clamp(12px, 4vw, 40px), env(safe-area-inset-left));
+  padding: max(clamp(72px, 16.5svh, 180px), var(--nse-screen-safe-area-inset-top, 0px)) max(clamp(12px, 4vw, 40px), var(--nse-screen-safe-area-inset-right, 0px)) 0 max(clamp(12px, 4vw, 40px), var(--nse-screen-safe-area-inset-left, 0px));
   touch-action: pan-y pinch-zoom;
 }
 
@@ -110,8 +110,8 @@
 
 .webspring-board-controls {
   position: absolute;
-  top: max(12px, env(safe-area-inset-top));
-  right: max(12px, env(safe-area-inset-right));
+  top: max(12px, var(--nse-screen-safe-area-inset-top, 0px));
+  right: max(12px, var(--nse-screen-safe-area-inset-right, 0px));
   z-index: 4;
 }
 

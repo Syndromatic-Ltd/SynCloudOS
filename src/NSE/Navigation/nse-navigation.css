@@ -40,7 +40,7 @@
   justify-content: flex-start;
   min-width: 0;
   overflow: visible;
-  padding: 10px max(var(--nse-tab-safe-inline-inset), env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(var(--nse-tab-safe-inline-inset), env(safe-area-inset-left, 0px));
+  padding: 10px max(var(--nse-tab-safe-inline-inset), var(--nse-screen-safe-area-inset-right, 0px)) calc(10px + var(--nse-screen-safe-area-inset-bottom, 0px)) max(var(--nse-tab-safe-inline-inset), var(--nse-screen-safe-area-inset-left, 0px));
   pointer-events: none;
   position: relative;
   z-index: 2;
@@ -49,7 +49,7 @@
 /* Compact chrome is a shared overlay contract. Its owner keeps the retained
    destination at full height; only the capsule accepts pointer input. */
 .nse-compact-bottom-chrome-owner {
-  --nse-compact-bottom-chrome-clearance: calc(92px + env(safe-area-inset-bottom, 0px));
+  --nse-compact-bottom-chrome-clearance: var(--nse-safe-area-inset-bottom, 0px);
   position: relative;
 }
 
@@ -70,7 +70,7 @@
 }
 
 .nse-compact-bottom-chrome-owner:has(> .nse-compact-bottom-chrome-mount)
-  [data-nse-navigation-scroll-surface="true"]::after {
+  [data-nse-navigation-scroll-surface="true"]:not(.nse-scroll-view)::after {
   block-size: var(--nse-compact-bottom-chrome-clearance);
   content: "";
   display: block;

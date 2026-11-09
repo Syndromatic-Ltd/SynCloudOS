@@ -547,9 +547,9 @@
 }
 
 /* Honour safe-area insets on notched phones for the bottom pill + rail. */
-@supports (padding: env(safe-area-inset-bottom)) {
+@supports (padding: var(--nse-screen-safe-area-inset-bottom)) {
   .chronosphere-controls {
-    bottom: calc(clamp(18px, 4vh, 40px) + env(safe-area-inset-bottom));
+    bottom: calc(clamp(18px, 4vh, 40px) + var(--nse-screen-safe-area-inset-bottom, 0px));
   }
 }
 
@@ -578,7 +578,7 @@
 .chronosphere-time-arrow-present { margin-top:7px; margin-left:34px; }
 /* Glass, lettering and control segments share one projected surface. */
 .chronosphere-floor {
-  left:12px; right:12px; bottom:calc(9px + env(safe-area-inset-bottom, 0px)); height:54px;
+  left:12px; right:12px; bottom:calc(9px + var(--nse-screen-safe-area-inset-bottom, 0px)); height:54px;
   display:grid; grid-template-columns:minmax(96px, 12%) 1fr minmax(96px, 12%); align-items:stretch;
   transform:perspective(800px) rotateX(34deg); transform-origin:50% 100%;
   border-radius:13px 13px 5px 5px;
