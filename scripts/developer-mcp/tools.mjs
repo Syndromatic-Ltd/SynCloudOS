@@ -11,11 +11,12 @@ import { createSynWareValidator, deriveManifestForFolder, discoverProjectFolders
 import { deriveSynWareManifest, kebabCase, titleFromFolderName, assertUniqueBundleIdentifiers } from "../synware/project-derivation.mjs";
 import { scaffoldProjectFiles, scaffoldBundleIdentifier } from "../synware/create-synware.mjs";
 import { auditSynWareIdioms } from "../synware/idiom-audit.mjs";
-import { runLaunchCheck } from "./launch-check.mjs";
+import { hostEntryFor, runLaunchCheck } from "./launch-check.mjs";
 import { normalizeBundleIdentifier } from "../../src/SynCloudOS/Identity/bundleIdentifier.mjs";
 import { applicationHostHints, bundlePaths, discoveryKeys, inside, json, projectContext, sdkName, slash, viteHints } from "./project.mjs";
 import { docSections, lookupSdk, similarity } from "./lookup.mjs";
 export { lookupSdk } from "./lookup.mjs";
+export { scaffoldTheme, validateTheme } from "./themes.mjs";
 const run = promisify(execFile);
 function optionsFor(context, input) {
   const hints = viteHints(context.root,Object.fromEntries(discoveryKeys.filter(key=>input[key]!==undefined).map(key=>[key,input[key]])));
@@ -105,11 +106,13 @@ export async function validateProject(input={}) {
     launch={ran:checked.ran,...(checked.entry ? {entry:checked.entry} : {}),...(checked.limits ? {limits:checked.limits} : {}),...(checked.reason ? {reason:checked.reason} : {})};
     findings.push(...checked.findings);
   }
-  // Idiom findings are warnings: they never make a valid project invalid, but an
-  // agent must not read "0 errors" as idiomatic SynCloudOS.
-  const audit=input.idioms===false ? {findings:[],idiomAudit:null} : auditSynWareIdioms({root,sdkRoot:context.sdkRoot,applications:bundles.filter(bundle=>bundle.kind==="application" && bundle.ok)});
+  // Audit the host and shell as well as applications: Webspring sites follow the same contract.
+  const hostEntry=hostEntryFor(root);
+  const shellEntry=vite.options.webspringEntry===false ? null : resolve(root,vite.options.webspringEntry || "src/Webspring/Contents/index.tsx");
+  const entries=[hostEntry ? resolve(root,"."+hostEntry) : null,shellEntry].filter(Boolean);
+  const audit=input.idioms===false ? {findings:[],idiomAudit:null} : auditSynWareIdioms({root,sdkRoot:context.sdkRoot,applications:bundles.filter(bundle=>bundle.kind==="application" && bundle.ok),entries});
   findings.push(...audit.findings);
-  return {ok:findings.every(finding=>finding.severity==="warning"),findings,bundles:bundles.map(({findings,...bundle})=>bundle),typescript,launch,host,idiomAudit:audit.idiomAudit};
+  return {ok:findings.every(finding=>finding.severity==="warning"),idiomatic:audit.idiomAudit?.idiomatic ?? null,findings,bundles:bundles.map(({findings,...bundle})=>bundle),typescript,launch,host,idiomAudit:audit.idiomAudit};
 }
 /** The TypeScript projects validate checks: the root config, or the projects a solution-style root config references. */
 function typescriptProjects(context,root) {

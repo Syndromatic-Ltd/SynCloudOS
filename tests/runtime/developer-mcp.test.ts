@@ -223,7 +223,7 @@ describe("developer MCP tools", () => {
     expect(result.findings).toEqual([]);
     expect(result.idiomAudit.applications).toEqual([expect.objectContaining({ bundleIdentifier: "org.example.field", classAuthoring: true, rawControls: 0, unmanagedLifecycle: 0, preferenceDocumentWrites: 0 })]);
   });
-  it("audits a valid but unidiomatic application with warnings that keep ok true", async () => {
+  it("fails clear-cut authoring misuse while retaining heuristic warnings", async () => {
     put("applications/Lab.app/Contents/Info.ts", 'export default { bundleIdentifier: "org.example.lab", displayName: "Lab", version: "1.0.0" } as const;\n');
     put("applications/Lab.app/Contents/index.tsx", 'import App from "../../../lib/App";\nexport default App;\n');
     put("lib/App.tsx", [
@@ -242,22 +242,23 @@ describe("developer MCP tools", () => {
     put("lib/theme.css", `/* Atmo-Onyx dark palette */\n${Array.from({ length: 14 }, (_, index) => `.c${index} { color: #${String(index).padStart(3, "0")}; }`).join("\n")}\n`);
     put("src/legacy.css", ".x { background: rgb(0 0 0); }\n");
     const result = await validateProject({ projectRoot: project, typescript: false });
-    expect(result.ok).toBe(true);
-    expect(result.findings.every((finding: { severity?: string }) => finding.severity === "warning")).toBe(true);
+    expect(result.ok).toBe(false);
+    expect(result.findings.some((finding: { severity?: string }) => finding.severity === "error")).toBe(true);
+    expect(result.idiomAudit.errors).toBeGreaterThan(0);
+    expect(result.idiomatic).toBe(false);
     const rules = result.findings.map((finding: { rule: string }) => finding.rule);
-    expect(new Set(rules)).toEqual(new Set(["idiom.cocoa-class-authoring", "idiom.nse-controls", "idiom.managed-lifecycle", "idiom.document-state", "idiom.atmo-appearance"]));
+    expect(rules).toEqual(expect.arrayContaining(["idiom.cocoa-class-authoring", "idiom.nse-controls", "idiom.managed-lifecycle", "idiom.document-state", "idiom.ui-colour"]));
+    expect(rules).not.toContain("idiom.atmo-appearance");
     const message = (rule: string, text: string) => result.findings.find((finding: { rule: string; message: string }) => finding.rule === rule && finding.message.includes(text));
     expect(message("idiom.cocoa-class-authoring", "2 useState")).toBeDefined();
     expect(message("idiom.nse-controls", "NSEButton")).toMatchObject({ file: "lib/App.tsx", line: 9 });
-    expect(message("idiom.nse-controls", "1 raw <input>")).toBeDefined();
+    expect(message("idiom.nse-controls", "<input>")).toBeDefined();
     expect(message("idiom.nse-controls", "NSETableView")).toBeDefined();
     expect(message("idiom.managed-lifecycle", "requestAnimationFrame")?.message).toContain("manageDisplayLink");
     expect(message("idiom.managed-lifecycle", "new Worker")?.message).toContain("managedTask");
     expect(rules.filter((rule: string) => rule === "idiom.document-state")).toHaveLength(1);
-    expect(message("idiom.atmo-appearance", "Atmo-Onyx is an obsolete raster theme")).toMatchObject({ file: "lib/theme.css" });
-    expect(message("idiom.atmo-appearance", "14 colour literals")).toMatchObject({ file: "lib/theme.css" });
-    expect(result.findings.some((finding: { file: string }) => finding.file === "src/legacy.css")).toBe(false);
-    expect(result.idiomAudit.applications[0]).toMatchObject({ classAuthoring: false, stateHooks: 2, rawControls: 4, unmanagedLifecycle: 2, preferenceDocumentWrites: 1, legacyThemeMentions: 1 });
+    expect(result.findings.some((finding: { file: string }) => finding.file === "src/legacy.css")).toBe(true);
+    expect(result.idiomAudit.applications[0]).toMatchObject({ classAuthoring: false, stateHooks: 2, rawControls: 4, unmanagedLifecycle: 2, preferenceDocumentWrites: 1 });
     expect(result.idiomAudit.stylesheets).toMatchObject({ scanned: 2, colourLiterals: 15 });
     expect((await validateProject({ projectRoot: project, typescript: false, idioms: false })).findings).toEqual([]);
   });
@@ -353,8 +354,9 @@ describe("developer MCP tools", () => {
     ].join("\n"));
     const result = await validateProject({ projectRoot: project, typescript: false });
     const tokens = result.findings.filter((finding: { rule: string }) => finding.rule === "idiom.nse-token");
-    expect(tokens).toEqual([expect.objectContaining({ file: "lib/app.css", line: 3, severity: "warning" })]);
-    expect(tokens[0].message).toContain("does not define: --nse-label-primary, --nse-separator-color. ");
+    expect(tokens).toHaveLength(2);
+    expect(tokens.every((finding: { file: string; line: number; severity: string }) => finding.file === "lib/app.css" && finding.line === 3 && finding.severity === "warning")).toBe(true);
+    expect(tokens[0].message).toContain("does not define: --nse-label-primary. ");
     expect(result.idiomAudit.stylesheets.unknownTokens).toBe(2);
     expect(result.ok).toBe(true);
   });
@@ -462,7 +464,7 @@ describe("developer MCP tools", () => {
     try {
       await client.connect(transport);
       const listed = await client.listTools();
-      expect(listed.tools.map(tool=>tool.name)).toHaveLength(5);
+      expect(listed.tools.map(tool=>tool.name).sort()).toEqual(["explain_error", "inspect_project", "lookup_sdk", "scaffold", "scaffold_theme", "validate", "validate_theme"]);
       expect(listed.tools.find(tool=>tool.name==="scaffold")?.inputSchema.required).toEqual(["name"]);
       expect(listed.tools.find(tool=>tool.name==="scaffold")?.inputSchema.properties?.contentApplicationMenu).toMatchObject({ type: "boolean" });
       const invalidLimit = await client.callTool({ name: "lookup_sdk", arguments: { limit: 101 } });
