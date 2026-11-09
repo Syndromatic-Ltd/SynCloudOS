@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { deriveNSEAppearanceContract, writeDeveloperSdkData } from "../../scripts/developer-mcp/build-package.mjs";
 import { scaffoldTheme, validateTheme } from "../../scripts/developer-mcp/themes.mjs";
+import { assertReviewedPackageFiles } from "../../scripts/synware/sdk-package-manifest.mjs";
 
 const repository = resolve(import.meta.dirname, "../..");
 let project: string;
@@ -20,6 +21,10 @@ beforeEach(() => {
 afterEach(() => rmSync(project, { recursive: true, force: true }));
 
 describe("developer MCP neutral theme provisioning", () => {
+  it("admits only the reviewed neutral contract as a public tooling resource", () => {
+    expect(() => assertReviewedPackageFiles(["tooling/nse-appearance-contract.json"])).not.toThrow();
+    expect(() => assertReviewedPackageFiles(["tooling/arbitrary-theme.json"])).toThrow(/unreviewed/u);
+  });
   it("requires positive appearance and scheme attributes on the same provider", async () => {
     await scaffoldTheme({ projectRoot: project, name: "Scoped" });
     const path = join(project, "src/Themes/scoped/styles.css");
