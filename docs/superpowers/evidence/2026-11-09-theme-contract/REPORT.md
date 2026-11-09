@@ -83,11 +83,17 @@ The buttons group publishes button/switch identity, neutral background/bezel/tit
 
 Verification: 360 focused tests passed, including the 327 catalogue cases and press, key-equivalent and scroll-control regressions; typecheck passed. The first screenshot comparison caught the initial structural minimum rule reducing existing larger minimum heights to 24. The bound now uses `max(24px, var(--nse-control-minimum-block-size))` and its inline equivalent. Atmo's existing minimum declarations publish the identical metric alongside their existing CSS. The failed actual/diff/trace are retained as `task-8-minimum-*`; no reference was changed. The follow-up found the same larger-minimum interaction in path cells; their existing 26-point/36-point metrics now publish through the bound too. A subsequent run had no pixel mismatches but one page failed to load a module with Chromium `ERR_NO_BUFFER_SPACE`; its trace is retained as `task-8-startup-buffer-trace.zip`. Final button comparison with two workers passed **80/80, zero differences**, recorded in `task-8-buttons-baseline-complete.log`. All 2,648 reference hashes remain unchanged.
 
+Value-controls commit: `1e31a59d` — `NSE: publish theme hooks on value controls`.
+
 The value-controls group adds state/variant hooks to linear and circular sliders, rounded/capsule/textured segmented controls, radio cells, steppers, level indicators and progress indicators. `circular-slider` becomes `slider` with `slider-type="circular"`; the linear `slider-field` wrapper becomes `slider` with `slider-type="linear"`. The native range is its `field` part. Radio-group structure uses AppKit's `matrix` identity; a segmented projection publishes `segmented-control`. No old identity alias remains.
 
 The first value screenshot gate isolated the regular stepper's 22-point bezel being widened by the 24-point interaction minimum. The actual bezel now stays 22×34, with a surrounding 24×48 interaction area, symmetric negative margins preserving its original layout footprint, and separate increment/decrement dispatch from the enlarged regions. Both pointer regions are at least 24×24. Atmo paints the same clipped bezel and glyphs. The failed image/diff/trace are retained as `task-8-stepper-minimum-*`. Twelve focused visual comparisons passed, followed by the full **82/82** acceptance (80 frozen image partitions plus two non-image hit-target checks), with zero differences. The non-image checks add assertions only; the frozen corpus and fixture are unchanged. All **479 focused tests** in six files and typecheck passed. Logs: `task-8-values-*`, `task-8-stepper-baseline.log`, `task-8-stepper-hit-targets.log`.
 
-Remaining groups: text, containers, menus/toolbars, windows/overlays.
+The text group publishes identities, parts, hover/focus and editable/enabled metadata for text, search, secure, combo and token fields, text views/input hosts and rulers. The text session remains the canonical editing owner. `ruler` becomes `ruler-view`. British API corrections remove `textColor`, `labelColor`, `secondaryLabelColor` and `emphasized`; the replacements are `textColour`, `labelColour`, `secondaryLabelColour` and `emphasised`, with no aliases.
+
+Verification: **568 focused tests across 8 files passed**, typecheck passed, and the full frozen screenshot comparison passed **82/82 with zero differences** (`task-8-text-baseline.log`). All 2,648 reference hashes were verified unchanged.
+
+Remaining groups: containers, menus/toolbars, windows/overlays.
 
 ### Tasks 9–19
 

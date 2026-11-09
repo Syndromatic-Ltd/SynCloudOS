@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { nseControlHooks } from "../Theme/contract/hooks";
+import { useNSEThemeInteraction } from "../Theme/contract/useThemeInteraction";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { NSESlider } from "../Controls/Values/NSESlider";
 import { normaliseParagraphStyle, normaliseParagraphStyleMutation, type NSEParagraphStyle } from "./typographyTypes";
@@ -36,6 +38,7 @@ function updated(style: NSEParagraphStyle, change: Partial<NSEParagraphStyle>): 
 }
 
 export function NSERulerView({ value, direction = "ltr", maximum = 1_000, step = 1, readOnly = false, onChange }: NSERulerViewProps) {
+  const theme = useNSEThemeInteraction<HTMLElement>();
   const style = normaliseParagraphStyle(value);
   const mutationDisabled = readOnly;
   const changeNumber = (key: "firstLineIndent" | "headIndent" | "tailIndent", next: number) => {
@@ -65,7 +68,7 @@ export function NSERulerView({ value, direction = "ltr", maximum = 1_000, step =
   // Indents are NSE sliders measured from their logical edge: first-line and
   // head run from the start, the tail indent from the end (its slider runs the
   // other way), so the inward arrow always grows the indent.
-  return <section data-nse-control="ruler" data-orientation="horizontal" data-direction={direction} dir={direction} aria-label="Paragraph ruler">
+  return <section data-nse-part="content" {...theme.events} {...nseControlHooks({ control: "ruler-view", hovered: theme.hovered, focused: theme.focused, variants: { orientation: "horizontal", editable: String(!readOnly) } })} data-orientation="horizontal" data-direction={direction} dir={direction} aria-label="Paragraph ruler">
     {([
       ["firstLineIndent", "First line indent"],
       ["headIndent", "Head indent"],

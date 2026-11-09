@@ -120,7 +120,7 @@ describe("definite authoring errors", () => {
     expect(inspectIdiomErrors({file:"util.ts", text:'// navigator.bluetooth\nconst prose="localStorage"; function task(navigator) { return navigator.bluetooth; }'})).toEqual([]);
   });
   it("finds colour attributes, gradients and border colours without flagging custom theme definitions", () => {
-    expect(inspectIdiomErrors({file:"view.tsx", text:'<NSEButton textColor="#123456" />'}).some(x => x.rule === "idiom.ui-colour")).toBe(true);
+    expect(inspectIdiomErrors({file:"view.tsx", text:'<NSEButton textColour="#123456" />'}).some(x => x.rule === "idiom.ui-colour")).toBe(true);
     expect(inspectStyleErrors({file:"view.css", text:'.label { border: 1px solid #123456; background: linear-gradient(#fff, #eee); }'}).filter(x => x.rule === "idiom.ui-colour")).toHaveLength(2);
   });
   it("allows source-list group headers and rejects explicit forced system appearance objects", () => {

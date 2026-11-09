@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { nseControlHooks } from "../../Theme/contract/hooks";
+import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import { useEffect, useId, useRef, useState } from "react";
 import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
 import { NSEListboxPopup, useNSEOverlayProvider } from "../../Overlays";
@@ -35,6 +37,7 @@ export function NSEComboBox<T>(props: NSEBoundValueProps<string,NSEComboBoxProps
 }
 
 function NSEComboBoxControl<T>(props: NSEComboBoxProps<T>) {
+  const theme = useNSEThemeInteraction<HTMLSpanElement>(props.isEnabled !== false);
   const disabled = props.isEnabled === false;
   useNSEOverlayProvider();
   const generatedId = useId().replace(/:/g, "");
@@ -109,8 +112,9 @@ function NSEComboBoxControl<T>(props: NSEComboBoxProps<T>) {
   const appearanceState = disabled ? "disabled" : focused ? "focused" : "normal";
   const appearance = useNSEAppearanceSlot(nseAppearanceSlot("combo-box", "well", appearanceState));
   return (
-    <span data-nse-control="combo-box" data-state={loading ? "loading" : items.length ? "ready" : "empty"} {...appearance.attributes}>
+    <span data-nse-part="bezel" {...theme.events} {...nseControlHooks({ control: "combo-box", enabled: !disabled, hovered: theme.hovered, focused: theme.focused, variants: { editable: String(!props.readOnly) } })} data-state={loading ? "loading" : items.length ? "ready" : "empty"} {...appearance.attributes}>
       <input
+        data-nse-part="field"
         ref={inputRef}
         id={inputId}
         role="combobox"

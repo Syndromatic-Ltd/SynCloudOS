@@ -144,7 +144,7 @@
   [data-nse-control="scroll-view-frame"],
   [data-nse-control="split-view"],
   [data-nse-control="stack-view"],
-  [data-nse-control="ruler"],
+  [data-nse-control="ruler-view"],
   [data-nse-fill="true"],
   textarea
 ) {
@@ -233,7 +233,7 @@
 :where(.nse-control-label-field[data-font="caption"]) { font-size: var(--nse-text-caption-size); line-height: 1.35; }
 :where(.nse-control-label-field[data-font="headline"]) { font-size: var(--nse-text-headline-size); font-weight: var(--nse-text-headline-weight); }
 :where(.nse-control-label-field[data-font="label"]) { font-size: var(--nse-text-label-size); font-weight: var(--nse-text-label-weight); }
-:where(.nse-control-label-field[data-text-color="secondary"]) { color: color-mix(in srgb, currentColor var(--nse-text-secondary-opacity), transparent); }
+:where(.nse-control-label-field[data-text-colour="secondary"]) { color: color-mix(in srgb, currentColor var(--nse-text-secondary-opacity), transparent); }
 :where(.nse-control-label-field[data-monospaced-digits="true"]) { font-variant-numeric: tabular-nums; }
 :where(.nse-control-label-field[data-line-break-mode="char"]) { overflow-wrap: anywhere; }
 

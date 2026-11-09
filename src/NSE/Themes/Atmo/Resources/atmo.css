@@ -4247,8 +4247,8 @@
   color: #dfe5ec;
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="ruler"] .nse-control-slider-label,
-[data-nse-appearance="atmo"] [data-nse-control="ruler"] [data-nse-part="tab-stops"] > p,
+[data-nse-appearance="atmo"] [data-nse-control="ruler-view"] .nse-control-slider-label,
+[data-nse-appearance="atmo"] [data-nse-control="ruler-view"] [data-nse-part="tab-stops"] > p,
 [data-nse-appearance="atmo"] [data-nse-control="font-panel"] [data-nse-part="preview-description"] {
   color: var(--nse-atmo-well-muted);
 }

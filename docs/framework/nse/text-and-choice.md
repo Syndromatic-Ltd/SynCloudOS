@@ -82,7 +82,7 @@ The field previews a parsed value as the user types, shows a formatter's error a
 A text field that is not editable is a label: AppKit's `NSTextField(labelWithString:)`, drawn without a bezel or background. Its children are its string value. Use it for readouts, captions and notes beside controls instead of hand-sizing paragraphs.
 
 ```tsx
-<NSETextField isEditable={false} font="footnote" textColor="secondaryLabelColor" monospacedDigits role="status">
+<NSETextField isEditable={false} font="footnote" textColour="secondaryLabelColour" monospacedDigits role="status">
   {count} items
 </NSETextField>
 ```
@@ -91,7 +91,7 @@ A text field that is not editable is a label: AppKit's `NSTextField(labelWithStr
 | --- | --- | --- | --- | --- |
 | `isEditable` | `false` | | `isEditable` | Makes the field a label. |
 | `font` | `"body" \| "callout" \| "footnote" \| "caption" \| "headline" \| "label"` | `"body"` | `font` (`NSFont.TextStyle`) | The text style, sized by the SDK's text tokens so every theme agrees. |
-| `textColor` | `"labelColor" \| "secondaryLabelColor"` | `"labelColor"` | `textColor` | The quieter `secondaryLabelColor` suits hints and metadata. |
+| `textColour` | `"labelColour" \| "secondaryLabelColour"` | `"labelColour"` | `textColour` | The quieter `secondaryLabelColour` suits hints and metadata. |
 | `monospacedDigits` | `boolean` | `false` | the monospaced-digit system font | Tabular figures, so changing numbers do not jitter. |
 | `lineBreakMode` | `"byWordWrapping" \| "byCharWrapping"` | `"byWordWrapping"` | `lineBreakMode` | `byCharWrapping` lets long unbroken strings (paths, URLs, hex values) wrap anywhere. |
 
@@ -254,7 +254,7 @@ export function ExportOptions() {
       />
       <NSEButton buttonType="switch" allowsMixedState title="Include links" state={links} onStateChange={setLinks} />
       <NSESearchField aria-label="Search templates" recentSearches={recents} onRecentSearchesChange={setRecents} onSearch={(query) => console.log(query)} />
-      <NSETextField isEditable={false} font="footnote" textColor="secondaryLabelColor">Exports keep their links.</NSETextField>
+      <NSETextField isEditable={false} font="footnote" textColour="secondaryLabelColour">Exports keep their links.</NSETextField>
     </NSEBox>
   );
 }

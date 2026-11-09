@@ -21,6 +21,7 @@ export const nseThemeParts = Object.freeze([
   "row", "column", "item", "group", "segment", "token", "disclosure", "divider", "handle", "viewport",
   "leading", "trailing", "footer", "field", "value", "prefix", "suffix", "status", "error", "loading",
   "preview", "sample", "channel", "day", "tick", "hour-hand", "minute-hand", "second-hand", "face",
+  "reveal", "reveal-glyph", "token-label", "token-disclosure", "indent", "tab-stop", "tab-stops",
   "circular-body", "linear-alternative", "segment-image",
   "increment", "decrement", "next", "previous", "cancel", "choose", "prompt", "recovery", "notice",
   "actions", "effects", "swatch", "palette", "wheel", "crayon", "opacity", "brightness", "focus-indicator",
@@ -30,7 +31,7 @@ export const nseThemeStates = Object.freeze(["state", "highlighted", "enabled", 
 export const nseThemeVariants = Object.freeze([
   "bezel-style", "control-size", "segment-style", "box-type", "toolbar-style", "chrome", "button-type", "slider-type",
   "orientation", "alignment", "position", "placement", "flow", "style", "role", "type", "edge", "level",
-  "text-role", "picker-mode", "navigation-placement", "navigation-flow",
+  "text-role", "text-colour", "background-style", "editable", "picker-mode", "navigation-placement", "navigation-flow",
 ] as const);
 
 export type NSEThemeControlName = typeof nseThemeControls[number];
