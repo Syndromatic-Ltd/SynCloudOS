@@ -16,6 +16,7 @@ export const nseThemeControls = Object.freeze([
 
 /** Parts name drawable structure, independently of any theme's artwork. */
 export const nseThemeParts = Object.freeze([
+  "button", "body", "cell-content", "column-resize-handle", "group-row", "page-compact-chrome", "primary-text", "scroller-corner", "secondary-text", "sidebar", "sort-glyph", "split-compact-chrome", "split-divider", "split-pane", "split-pane-slot", "subtitle", "text-content",
   "bezel", "title", "image", "track", "fill", "knob", "indicator", "separator", "cell", "header", "content",
   "border", "background", "arrow", "badge", "label", "accessory", "shadow", "scroller", "thumb",
   "row", "column", "item", "group", "segment", "token", "disclosure", "divider", "handle", "viewport",
@@ -31,7 +32,7 @@ export const nseThemeStates = Object.freeze(["state", "highlighted", "enabled", 
 export const nseThemeVariants = Object.freeze([
   "bezel-style", "control-size", "segment-style", "box-type", "toolbar-style", "chrome", "button-type", "slider-type",
   "orientation", "alignment", "position", "placement", "flow", "style", "role", "type", "edge", "level",
-  "text-role", "text-colour", "background-style", "editable", "picker-mode", "navigation-placement", "navigation-flow",
+  "title-position", "border-type", "image-scaling", "text-role", "text-colour", "background-style", "editable", "picker-mode", "navigation-placement", "navigation-flow",
 ] as const);
 
 export type NSEThemeControlName = typeof nseThemeControls[number];

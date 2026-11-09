@@ -434,13 +434,14 @@ export function NSEInputBox({
   return (
     <div
       {...props}
+      data-nse-control="text-field" data-nse-part="content" data-nse-enabled={isEnabled ? undefined : "false"}
       className={classes("nse-control-input-box", !isEnabled && "is-disabled", className)}
       data-invalid={invalid ? "true" : "false"}
       data-always-focused={alwaysLooksFocused ? "true" : "false"}
       aria-disabled={!isEnabled || undefined}
     >
       {label ? <span data-nse-part="label" className="nse-control-field-label">{label}</span> : null}
-      <div className="nse-control-field-frame nse-control-input-box-frame">{children}</div>
+      <div data-nse-part="bezel" className="nse-control-field-frame nse-control-input-box-frame">{children}</div>
     </div>
   );
 }
@@ -916,10 +917,10 @@ export interface NSEBoxProps extends Omit<HTMLAttributes<HTMLFieldSetElement>, "
   /** NSBox.contentViewMargins. Without them the content sits at the standard content margin, and rows run edge to edge. */
   contentViewMargins?: NSEBoxContentViewMargins;
   contentLayout?: NSEContentLayout;
-  /** NSBox.fillColor, as one CSS background value. */
-  fillColor?: string;
-  /** NSBox.borderColor, as one CSS colour value. */
-  borderColor?: string;
+  /** NSBox.fillColour, as one CSS background value. */
+  fillColour?: string;
+  /** NSBox.borderColour, as one CSS colour value. */
+  borderColour?: string;
   /** NSBox.borderWidth. Explicit widths override the theme's frame thickness. */
   borderWidth?: number;
   /** NSBox.isTransparent: leave the interior unpainted. */
@@ -928,14 +929,14 @@ export interface NSEBoxProps extends Omit<HTMLAttributes<HTMLFieldSetElement>, "
 
 function validateNSEBoxFill(fill: string | undefined): string | undefined {
   if (fill === undefined) return undefined;
-  if (typeof fill !== "string") throw new TypeError("NSEBox fillColor must be a CSS background string.");
+  if (typeof fill !== "string") throw new TypeError("NSEBox fillColour must be a CSS background string.");
   const value = fill.trim();
   if (!value || value.length > 512 || /[;{}]/u.test(value)) {
-    throw new TypeError("NSEBox fillColor must be one safe CSS background value.");
+    throw new TypeError("NSEBox fillColour must be one safe CSS background value.");
   }
   const css = globalThis.CSS;
   if (css && typeof css.supports === "function" && !css.supports("background", value)) {
-    throw new TypeError(`NSEBox fillColor is not a supported CSS background: ${value}`);
+    throw new TypeError(`NSEBox fillColour is not a supported CSS background: ${value}`);
   }
   return value;
 }
@@ -972,8 +973,8 @@ export function NSEBox({
   borderType = "bezelBorder",
   contentViewMargins,
   contentLayout = "stack",
-  fillColor,
-  borderColor,
+  fillColour,
+  borderColour,
   borderWidth,
   isTransparent = false,
   shadow,
@@ -985,7 +986,7 @@ export function NSEBox({
   ...props
 }: NSEBoxProps) {
   const layer = useNSEViewLayerProperties({ shadow, cornerRadius, cornerCurve });
-  const resolvedBorder = borderColor === undefined ? undefined : nseCSSValue(borderColor, "color", "NSEBox borderColor");
+  const resolvedBorder = borderColour === undefined ? undefined : nseCSSValue(borderColour, "color", "NSEBox borderColour");
   const resolvedWidth = nseNonNegative(borderWidth, "borderWidth");
   const position = titlePositionAttribute[titlePosition];
   const border = borderAttribute[borderType];
@@ -995,11 +996,12 @@ export function NSEBox({
     }
     const separatorLabel = props["aria-label"] ?? (typeof title === "string" ? title : undefined);
     if (title && titlePosition !== "noTitle") {
-      return <NSEDivider className={classes("nse-box", "nse-box-separator-titled", className)} variant="alpha" caption={title} label={separatorLabel} style={style} />;
+      return <NSEDivider data-nse-control="box" data-nse-box-type={boxType} data-nse-title-position={titlePosition} data-nse-border-type={borderType} className={classes("nse-box", "nse-box-separator-titled", className)} variant="alpha" caption={title} label={separatorLabel} style={style} />;
     }
     return (
       <div
         {...props as HTMLAttributes<HTMLDivElement>}
+        data-nse-control="box" data-nse-part="separator" data-nse-box-type={boxType} data-nse-title-position={titlePosition} data-nse-border-type={borderType}
         role="separator"
         aria-label={separatorLabel}
         className={classes("nse-box", "nse-box-separator", className)}
@@ -1012,7 +1014,7 @@ export function NSEBox({
     );
   }
 
-  const resolvedFill = validateNSEBoxFill(fillColor);
+  const resolvedFill = validateNSEBoxFill(fillColour);
   const resolvedMargins = validateNSEBoxMargins(contentViewMargins);
   const customStyle: CSSVarStyle = {
     ...style,
@@ -1040,6 +1042,7 @@ export function NSEBox({
   return (
     <fieldset
       {...props}
+      data-nse-control="box" data-nse-part="bezel" data-nse-box-type={boxType} data-nse-title-position={titlePosition} data-nse-border-type={borderType}
       {...layer.attributes}
       className={classes(
         "nse-box",
@@ -1059,6 +1062,7 @@ export function NSEBox({
     >
       {title ? (
         <legend
+          data-nse-part="title"
           className={classes(
             "nse-control-group-label",
             "nse-box-title",
@@ -1068,7 +1072,7 @@ export function NSEBox({
           {title}
         </legend>
       ) : null}
-      <div className="nse-control-group-inner nse-box-content" data-nse-content-layout={contentLayout === "stack" ? "stack" : undefined}>{children}</div>
+      <div data-nse-part="content" className="nse-control-group-inner nse-box-content" data-nse-content-layout={contentLayout === "stack" ? "stack" : undefined}>{children}</div>
     </fieldset>
   );
 }

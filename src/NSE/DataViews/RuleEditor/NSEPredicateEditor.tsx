@@ -118,14 +118,14 @@ export function NSEPredicateEditor<T>({ schema, templates: explicit, value, defa
   };
   if (expression.kind !== "comparison") {
     const ruleValue = { root: validatedRoot };
-    return (<div {...props} aria-disabled={hostDisabled || undefined} aria-busy={dataViewIsBusy(effectiveState) || undefined} className={`nse-predicate-editor ${className}`.trim()} data-nse-control="predicate-editor" data-expression-kind={expression.kind} data-state={effectiveState.kind}>
+    return (<div {...props} aria-disabled={hostDisabled || undefined} aria-busy={dataViewIsBusy(effectiveState) || undefined} className={`nse-predicate-editor ${className}`.trim()} data-nse-control="predicate-editor" data-nse-part="background" data-nse-enabled={hostDisabled ? "false" : undefined} data-expression-kind={expression.kind} data-state={effectiveState.kind}>
       {presentsContent && <NSERuleEditor aria-label="NSEPredicate expression" value={ruleValue} fields={templates.map(({ field }) => field)} templates={templates as readonly NSEPredicateTemplate<unknown>[]} locale={locale} state={effectiveState} readOnly={effectiveReadOnly} isEnabled={!effectiveDisabled} onChange={(next) => publish(compilePredicateExpression(next))} />}
       {!presentsContent && <span role="status">{"message" in effectiveState ? effectiveState.message : effectiveState.kind}</span>}
       {!presentsContent && (effectiveState.kind === "denied" || effectiveState.kind === "error") && effectiveState.retry && <NSEButton appearance="aqua" title="Retry" onClick={effectiveState.retry} />}
       {!presentsContent && effectiveState.kind === "interrupted" && effectiveState.resume && <NSEButton appearance="aqua" title="Resume" onClick={effectiveState.resume} />}
     </div>);
   }
-  return (<div {...props} aria-disabled={hostDisabled || undefined} aria-busy={dataViewIsBusy(effectiveState) || undefined} className={`nse-predicate-editor ${className}`.trim()} data-nse-control="predicate-editor" data-expression-kind="comparison" data-state={effectiveState.kind}>
+  return (<div {...props} aria-disabled={hostDisabled || undefined} aria-busy={dataViewIsBusy(effectiveState) || undefined} className={`nse-predicate-editor ${className}`.trim()} data-nse-control="predicate-editor" data-nse-part="background" data-nse-enabled={hostDisabled ? "false" : undefined} data-expression-kind="comparison" data-state={effectiveState.kind}>
     {presentsContent && <NSEComparisonPredicateEditor expression={expression} templates={templates} publish={publish} readOnly={effectiveReadOnly} disabled={effectiveDisabled} locale={locale} />}
     {effectiveState.kind !== "ready" && <span role="status">{effectiveState.message}</span>}
     {(effectiveState.kind === "denied" || effectiveState.kind === "error") && effectiveState.retry && <NSEButton appearance="aqua" title="Retry" onClick={effectiveState.retry} />}

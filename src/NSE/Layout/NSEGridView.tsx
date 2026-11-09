@@ -81,8 +81,8 @@ export function NSEGridView({ columns = [], columnSpacing, rowSpacing, className
   } as CSSProperties;
   const placements = columns.map((column) => xPlacementCSS[column.xPlacement ?? "leading"]);
   return (
-    <div {...props} className={["nse-form", className].filter(Boolean).join(" ")} data-nse-control="grid-view" data-label-alignment={columns[0]?.xPlacement === "leading" ? "leading" : "trailing"} style={gridStyle}>
-      <div className="nse-form-grid" style={template ? { gridTemplateColumns: template } : undefined}>
+    <div {...props} className={["nse-form", className].filter(Boolean).join(" ")} data-nse-control="grid-view" data-nse-part="background" data-label-alignment={columns[0]?.xPlacement === "leading" ? "leading" : "trailing"} style={gridStyle}>
+      <div data-nse-part="content" className="nse-form-grid" style={template ? { gridTemplateColumns: template } : undefined}>
         <NSEGridPlacements.Provider value={form ? null : placements}>{children}</NSEGridPlacements.Provider>
       </div>
     </div>
@@ -98,16 +98,16 @@ export function NSEGridRow({ yPlacement = "firstBaseline", mergesCells = false, 
   return (
     <div
       {...props}
-      className={["nse-form-row", className].filter(Boolean).join(" ")}
+      data-nse-part="row" className={["nse-form-row", className].filter(Boolean).join(" ")}
       data-nse-full-width={mergesCells || labelId === undefined ? "true" : undefined}
       data-label-align={yPlacement === "centre" ? "center" : yPlacement === "top" ? "top" : undefined}
     >
       {cells.map((cell, index) => {
         const position: CSSProperties | undefined = placements ? { gridColumn: mergesCells ? "1 / -1" : index + 1, justifySelf: placements[index] ?? "start" } : undefined;
-        if (index === 0 && labelId) return <div key="label" className="nse-form-label" id={labelId} style={position}>{cell}</div>;
+        if (index === 0 && labelId) return <div key="label" data-nse-part="label" className="nse-form-label" id={labelId} style={position}>{cell}</div>;
         return <div
           key={isValidElement(cell) && cell.key != null ? cell.key : index}
-          className="nse-form-control"
+          data-nse-part="cell" className="nse-form-control"
           data-nse-content-layout="stack"
           role={labelId && index === 1 ? "group" : undefined}
           aria-labelledby={labelId && index === 1 ? labelId : undefined}

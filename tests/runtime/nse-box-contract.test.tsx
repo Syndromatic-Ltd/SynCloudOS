@@ -71,12 +71,12 @@ describe("NSEBox", () => {
     }
   });
 
-  it("validates fillColor and contentViewMargins before exposing CSS variables", () => {
+  it("validates fillColour and contentViewMargins before exposing CSS variables", () => {
     render(
       <NSEBox
         aria-label="Custom"
         boxType="custom"
-        fillColor="linear-gradient(#fff, #ddd)"
+        fillColour="linear-gradient(#fff, #ddd)"
         contentViewMargins={{ width: 6, height: 3 }}
       />,
     );
@@ -89,7 +89,7 @@ describe("NSEBox", () => {
     expect(style).toContain("--nse-box-inset-left: 6px");
     expect(box.getAttribute("data-nse-layout-margins")).toBeNull();
 
-    expect(() => render(<NSEBox aria-label="Bad fill" fillColor="red; color: blue" />)).toThrow(/fillColor/i);
+    expect(() => render(<NSEBox aria-label="Bad fill" fillColour="red; color: blue" />)).toThrow(/fillColour/i);
     expect(() => render(<NSEBox aria-label="Bad margin" contentViewMargins={{ width: -1, height: 0 }} />)).toThrow(/contentViewMargins/i);
     expect(() => render(<NSEBox aria-label="Infinite margin" contentViewMargins={{ width: 0, height: Infinity }} />)).toThrow(/contentViewMargins/i);
   });

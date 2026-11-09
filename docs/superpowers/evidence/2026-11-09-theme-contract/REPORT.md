@@ -89,11 +89,17 @@ The value-controls group adds state/variant hooks to linear and circular sliders
 
 The first value screenshot gate isolated the regular stepper's 22-point bezel being widened by the 24-point interaction minimum. The actual bezel now stays 22×34, with a surrounding 24×48 interaction area, symmetric negative margins preserving its original layout footprint, and separate increment/decrement dispatch from the enlarged regions. Both pointer regions are at least 24×24. Atmo paints the same clipped bezel and glyphs. The failed image/diff/trace are retained as `task-8-stepper-minimum-*`. Twelve focused visual comparisons passed, followed by the full **82/82** acceptance (80 frozen image partitions plus two non-image hit-target checks), with zero differences. The non-image checks add assertions only; the frozen corpus and fixture are unchanged. All **479 focused tests** in six files and typecheck passed. Logs: `task-8-values-*`, `task-8-stepper-baseline.log`, `task-8-stepper-hit-targets.log`.
 
+Text commit: `510e80a6` — `NSE: publish theme hooks on text`.
+
 The text group publishes identities, parts, hover/focus and editable/enabled metadata for text, search, secure, combo and token fields, text views/input hosts and rulers. The text session remains the canonical editing owner. `ruler` becomes `ruler-view`. British API corrections remove `textColor`, `labelColor`, `secondaryLabelColor` and `emphasized`; the replacements are `textColour`, `labelColour`, `secondaryLabelColour` and `emphasised`, with no aliases.
 
 Verification: **568 focused tests across 8 files passed**, typecheck passed, and the full frozen screenshot comparison passed **82/82 with zero differences** (`task-8-text-baseline.log`). All 2,648 reference hashes were verified unchanged.
 
-Remaining groups: containers, menus/toolbars, windows/overlays.
+The container group adds box, view, stack, grid, split, drawer, clip/scroll, image, data-view and page identities and parts, including selected and disabled rows. `scroll-view-frame` becomes `scroll-view`; its clip viewport retains `clip-view`. `NSEBox.fillColor`/`borderColor` and `NSEShadow.shadowColor` become `fillColour`/`borderColour` and `shadowColour`, with owning callers and documentation migrated and no aliases.
+
+The first container screenshot gate found a composing colour-list clip part being overwritten by the new clip-view default. That removed the palette list's existing border in light mode (DPR 1/2). The clip now preserves the composing part. An explicit regression failed before the fix and passes afterwards. Failed images/traces are retained as `task-8-container-clip-*`; references were untouched. Four focused light/dark DPR comparisons passed. Final full acceptance passed **82/82, zero differences** (`task-8-containers-baseline-final.log`). The final focused run passed **754 tests in 19 files**; 39 additional stack/page/layout regressions and typecheck passed. All 2,648 frozen hashes are unchanged.
+
+Remaining groups: menus/toolbars, date/panel controls, windows/overlays.
 
 ### Tasks 9–19
 
@@ -143,6 +149,8 @@ Task 4 adds the `NSESafeArea` result type, `useNSESafeArea`, the two view props 
 Task 5 adds `NSEScrollViewProps.automaticallyAdjustsContentInsets`, `contentInsets`, `scrollerInsets` and the scroller’s optional `style` prop; removes `NSEScrollViewProps.scrollInsets`.
 
 Task 7 adds `NSEThemeControlName`, `NSEThemePartName`, `nseControlHooks`, `nsePartHooks` and the `@syndromatic/syncloudos/nse/theme` package entry.
+
+Catalogue limitation: the About and Settings entries exercise `NSEAboutDialog` and `NSEPreferencesToast`, respectively, rather than complete routed application sessions. They prove parity for those surfaces only.
 
 Part-name mappings, semantic colour values without Atmo precedent and Beta 2 removals will be recorded as their tasks are completed. No visual design decision has been made.
 

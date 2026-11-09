@@ -101,7 +101,7 @@ export function NSEFlowStackView({
     <div
       {...props}
       className={["nse-layout-flex", vertical ? "nse-layout-stack" : "nse-layout-inline", className].filter(Boolean).join(" ")}
-      data-nse-control="stack-view"
+      data-nse-control="stack-view" data-nse-part="content" data-nse-orientation={orientation} data-nse-alignment={resolvedAlignment}
       data-nse-layout={vertical ? "stack" : "inline"}
       data-direction={vertical ? "column" : "row"}
       data-wrap={wraps ? "wrap" : "nowrap"}

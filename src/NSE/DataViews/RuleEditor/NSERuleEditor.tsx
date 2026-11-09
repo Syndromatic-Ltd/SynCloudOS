@@ -251,7 +251,7 @@ export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onV
       />
     </div>;
   });
-  return <div {...props} aria-disabled={hostDisabled || undefined} aria-busy={dataViewIsBusy(effectiveState) || undefined} ref={containerRef} tabIndex={-1} data-rule-id={root.id} className={`nse-rule-editor ${className}`.trim()} data-nse-control="rule-editor" data-state={effectiveState.kind}>
+  return <div {...props} aria-disabled={hostDisabled || undefined} aria-busy={dataViewIsBusy(effectiveState) || undefined} ref={containerRef} tabIndex={-1} data-rule-id={root.id} className={`nse-rule-editor ${className}`.trim()} data-nse-control="rule-editor" data-nse-part="background" data-nse-enabled={hostDisabled ? "false" : undefined} data-state={effectiveState.kind}>
     {presentsContent && <>
       {/* The Mac's sentence: Match [all] of the following conditions. */}
       <div className="nse-rule-header">

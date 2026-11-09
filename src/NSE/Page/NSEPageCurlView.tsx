@@ -143,7 +143,7 @@ export function NSEPageCurlView({ controller }: { readonly controller: NSEPageCo
     />;
   }
   return <div className="nse-page-controller nse-page-controller--curl" aria-label={controller.title}
-    data-nse-control="page-controller" data-transition-style="pageCurl" data-spine-location={controller.spineLocation}
+    data-nse-control="page-controller" data-nse-part="content" data-transition-style="pageCurl" data-spine-location={controller.spineLocation}
     data-selected-index={index} data-turn-progress={state.turnProgress} data-turn-direction={state.turnDirection ?? undefined}
     onPointerDown={event => {
       // Edge drags already belong to the leaf. A swipe over ordinary page

@@ -1,0 +1,31 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-theme-hook-coverage.test.tsx -t composing control
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx (550 tests | 1 failed | 549 skipped) 31ms
+     × preserves a composing control's clip part 30ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > preserves a composing control's clip part
+AssertionError: expected 'viewport' to be 'colour-list-scroll' // Object.is equality
+
+Expected: "colour-list-scroll"
+Received: "viewport"
+
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:60:107
+     58|   it("preserves a composing control's clip part", () => {
+     59|     const view = render(<NSEScrollView data-nse-part="colour-list-scro…
+     60|     expect(view.container.querySelector('[data-nse-control="clip-view"…
+       |                                                                                                           ^
+     61|   });
+     62|   for (const surface of themeBaselineCatalogue) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 549 skipped (550)
+   Start at  20:39:16
+   Duration  8.41s (transform 5.56s, setup 27ms, import 7.37s, tests 31ms, environment 846ms)

@@ -319,7 +319,7 @@ describe("closed NSE graphics", () => {
     context.setFill(GFXColour.parse("#123456"));
     context.fill(GFXPath.rect({ x: 0, y: 0, width: 40, height: 24 }));
     const { container } = render(
-      <NSEView shadow={new NSEShadow({ shadowOffset: { width: 1, height: -2 }, shadowBlurRadius: 4, shadowColor: GFXColour.parse("#0008") })}>
+      <NSEView shadow={new NSEShadow({ shadowOffset: { width: 1, height: -2 }, shadowBlurRadius: 4, shadowColour: GFXColour.parse("#0008") })}>
         <NSEView draw={drawFigure(context.displayList)} aria-label="Chart" aria-description="A bounded chart" />
       </NSEView>,
     );
@@ -603,7 +603,7 @@ describe("closed NSE graphics", () => {
   });
 
   it("projects shadow properties and follows inherited appearance preferences", () => {
-    const shadow = new NSEShadow({ shadowOffset: { width: 2, height: -3 }, shadowBlurRadius: 6, shadowColor: GFXColour.parse("#112233") });
+    const shadow = new NSEShadow({ shadowOffset: { width: 2, height: -3 }, shadowBlurRadius: 6, shadowColour: GFXColour.parse("#112233") });
     const { container, rerender } = render(<NSEView shadow={shadow}><button>Focus</button></NSEView>);
     const host = () => container.querySelector("[data-nse-shadow]") as HTMLElement;
     expect(host().style.getPropertyValue("--nse-shadow-offset-x")).toBe("2px");

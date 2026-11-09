@@ -80,7 +80,7 @@ export function NSEBrowserColumn<T, TId extends NSEDataViewKey>({ label, index, 
   };
 
   return (
-    <div className="nse-browser-column" data-appearance-recipe="browser-column">
+    <div data-nse-part="column" className="nse-browser-column" data-appearance-recipe="browser-column">
       <div
         ref={viewportRef}
         role="listbox"
@@ -92,7 +92,7 @@ export function NSEBrowserColumn<T, TId extends NSEDataViewKey>({ label, index, 
         tabIndex={disabled ? -1 : 0}
         onKeyDown={handleKey}
       >
-        <div className="nse-browser-options" style={{ blockSize: virtualiser.snapshot.range.totalSize }}>
+        <div data-nse-part="content" className="nse-browser-options" style={{ blockSize: virtualiser.snapshot.range.totalSize }}>
         {virtualiser.snapshot.items.map((virtualItem) => {
           const item = state.presentation[virtualItem.index]!;
           const { id, leaf } = item;
@@ -106,7 +106,7 @@ export function NSEBrowserColumn<T, TId extends NSEDataViewKey>({ label, index, 
               aria-expanded={leaf ? undefined : Object.is(expandedId, id)}
               aria-posinset={virtualItem.index + 1}
               aria-setsize={state.items.length}
-              className="nse-browser-option"
+              data-nse-part="row" data-nse-selected={active ? "" : undefined} data-nse-enabled={disabled ? "false" : undefined} className="nse-browser-option"
               data-focused={active || undefined}
               data-leaf={leaf || undefined}
               data-appearance-recipe={leaf ? "browser-leaf" : "browser-branch"}
@@ -114,8 +114,8 @@ export function NSEBrowserColumn<T, TId extends NSEDataViewKey>({ label, index, 
               onClick={() => { if (!disabled) { onActiveChange(id); onChoose(item); } }}
             >
               {item.icon}
-              <span>{item.label}</span>
-              {!leaf && <span aria-hidden="true" data-appearance-recipe="browser-leaf-glyph" />}
+              <span data-nse-part="title">{item.label}</span>
+              {!leaf && <span data-nse-part="disclosure" aria-hidden="true" data-appearance-recipe="browser-leaf-glyph" />}
             </div>
           );
         })}

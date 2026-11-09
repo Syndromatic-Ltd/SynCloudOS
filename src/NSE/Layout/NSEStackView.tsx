@@ -516,7 +516,7 @@ function NSEArrangedStackView({
       role={role ?? "group"}
       dir={dir}
       className={["nse-stack-view", className].filter(Boolean).join(" ")}
-      data-nse-control="stack-view"
+      data-nse-control="stack-view" data-nse-part="content" data-nse-orientation={orientation} data-nse-alignment={alignment}
       data-orientation={orientation}
       data-distribution={distribution}
       data-alignment={alignment}

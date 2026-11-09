@@ -44,7 +44,7 @@ export function useNSEViewLayerProperties({ shadow, cornerRadius, cornerCurve }:
   const style = {
     ...(radius !== undefined ? { "--nse-corner-radius": `${radius}px` } : {}),
     ...(value ? {
-      "--nse-shadow-colour": value.shadowColor,
+      "--nse-shadow-colour": value.shadowColour,
       "--nse-shadow-offset-x": `${value.shadowOffset.width}px`,
       "--nse-shadow-offset-y": `${-value.shadowOffset.height}px`,
       "--nse-shadow-blur": `${value.shadowBlurRadius}px`,

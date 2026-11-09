@@ -1,0 +1,58 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-theme-hook-coverage.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx (549 tests | 4 failed) 1439ms
+     × stack-view 5ms
+     × image-view-proportionallyUpOrDown 4ms
+     × image-view-none 2ms
+     × stack-item 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > stack-view
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > stack-item
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:65:49
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+       |                                                 ^
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+     67|       for (const item of root!.querySelectorAll<HTMLElement>('[aria-se…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > image-view-proportionallyUpOrDown
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > image-view-none
+AssertionError: button: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:66:145
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+       |                                                                                                                                                 ^
+     67|       for (const item of root!.querySelectorAll<HTMLElement>('[aria-se…
+     68|       if (surface.id.endsWith("disabled")) expect(root!.dataset.nseEna…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 545 passed (549)
+   Start at  20:32:00
+   Duration  9.65s (transform 5.48s, setup 27ms, import 7.24s, tests 1.44s, environment 807ms)

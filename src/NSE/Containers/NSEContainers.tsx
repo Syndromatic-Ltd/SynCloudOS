@@ -121,21 +121,22 @@ export function ContainerPane({
       ...props,
       className: surfaceProps.className,
       "data-variant": variant,
+      "data-nse-control": "box", "data-nse-part": "background", "data-nse-box-type": "custom", "data-nse-style": variant,
       "aria-labelledby": labelledBy,
       style: surfaceProps.style
     },
     <>
       {title || subtitle || actions ? (
-        <header className="nse-container-pane-header">
+        <header data-nse-part="header" className="nse-container-pane-header">
           <span className="nse-container-pane-copy">
-            {title ? <h2 id={titleId}>{title}</h2> : null}
-            {subtitle ? <span className="nse-container-pane-subtitle">{subtitle}</span> : null}
+            {title ? <h2 data-nse-part="title" id={titleId}>{title}</h2> : null}
+            {subtitle ? <span data-nse-part="subtitle" className="nse-container-pane-subtitle">{subtitle}</span> : null}
           </span>
-          {actions ? <span className="nse-container-pane-actions">{actions}</span> : null}
+          {actions ? <span data-nse-part="actions" className="nse-container-pane-actions">{actions}</span> : null}
         </header>
       ) : null}
-      <div className="nse-container-pane-body" data-nse-content-layout={contentLayout === "stack" ? "stack" : undefined}>{children}</div>
-      {footer ? <footer className="nse-container-pane-footer">{footer}</footer> : null}
+      <div data-nse-part="content" className="nse-container-pane-body" data-nse-content-layout={contentLayout === "stack" ? "stack" : undefined}>{children}</div>
+      {footer ? <footer data-nse-part="footer" className="nse-container-pane-footer">{footer}</footer> : null}
     </>
   );
 }
@@ -165,6 +166,7 @@ export function NSEDrawer({
   return (
     <aside
       {...props}
+      data-nse-control="drawer" data-nse-part="background" data-nse-placement={placement}
       className={classes("nse-container-drawer", className)}
       data-placement={placement}
       data-open={isOpen ? "true" : "false"}

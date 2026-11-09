@@ -161,6 +161,7 @@ export function NSESplitView({
   return (
     <div
       ref={setRoot}
+      data-nse-control="split-view" data-nse-part="background" data-nse-position={sidebarPosition}
       className={classes("nse-split-view", className)}
       data-book-regions={bookRegions ? "true" : undefined}
       data-book-sidebar-side={((sidebarPosition === "leading") !== (direction === "rtl")) ? "left" : "right"}
@@ -171,10 +172,10 @@ export function NSESplitView({
       style={splitStyle}
       {...props}
     >
-      <div className="nse-split-view-sidebar">{sidebar}</div>
+      <div data-nse-part="sidebar" className="nse-split-view-sidebar">{sidebar}</div>
       {canResize ? (
         <div
-          className="nse-split-view-resizer"
+          data-nse-part="divider" data-nse-highlighted={resizing ? "" : undefined} className="nse-split-view-resizer"
           role="separator"
           aria-orientation="vertical"
           aria-label={label}
@@ -191,10 +192,10 @@ export function NSESplitView({
           onDoubleClick={() => commitWidth(null)}
           onKeyDown={onKeyDown}
         >
-          <span className="nse-split-view-resizer-grip" aria-hidden="true" />
+          <span data-nse-part="handle" className="nse-split-view-resizer-grip" aria-hidden="true" />
         </div>
       ) : null}
-      <div className="nse-split-view-main">{children}</div>
+      <div data-nse-part="content" className="nse-split-view-main">{children}</div>
     </div>
   );
 }

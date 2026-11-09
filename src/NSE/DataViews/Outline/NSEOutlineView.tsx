@@ -374,6 +374,7 @@ export function NSEOutlineView<T, TId extends string | number>({
       "aria-setsize": row.setSize,
       "aria-expanded": row.expandable ? row.expanded : undefined,
       "aria-selected": selected,
+      "data-nse-selected": selected ? "" : undefined, "data-nse-enabled": controllerDisposed ? "false" : undefined,
       "aria-disabled": controllerDisposed || undefined,
       draggable: Boolean(allowsMutation && dragBinding && dragEndpoint),
       onDragStart: (event: DragEvent<HTMLDivElement>) => dragHost.start(event, sourceIds),
@@ -466,7 +467,7 @@ export function NSEOutlineView<T, TId extends string | number>({
         aria-readonly={state.kind === "read-only" || undefined}
         className={`nse-outline-view ${className}`.trim()}
         dir={dir}
-        data-nse-control="outline-view"
+        data-nse-control="outline-view" data-nse-part="background" data-nse-enabled={dataViewIsDisabled(state) ? "false" : undefined}
         data-state={state.kind}
         data-style={sourceList ? "source-list" : undefined}
         style={{ ...style, position: "relative", overflow: "auto", blockSize: fills ? "100%" : `${viewportBlockSize}px` }}

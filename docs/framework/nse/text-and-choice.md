@@ -185,7 +185,7 @@ Enter or a separator turns the typed text into a token, and a token whose id is 
 | `boxType` | `"primary" \| "secondary" \| "separator" \| "custom"` | `"primary"` | `boxType` | `"separator"` draws a rule (`role="separator"`) and takes no children. |
 | `borderType` | `"noBorder" \| "lineBorder" \| "bezelBorder" \| "grooveBorder"` | `"bezelBorder"` | `borderType` | The edge treatment. |
 | `contentViewMargins` | `{ width, height }` | standard | `contentViewMargins` | The horizontal and vertical distance from the border to the content, each 0 to 4,096 points. Without them the content sits at the standard content margin, and rows run edge to edge as in a grouped table. |
-| `fillColor` | `string` | theme | `fillColor` | One CSS background value, at most 512 characters, with no `;`, `{` or `}`. |
+| `fillColour` | `string` | theme | `fillColour` | One CSS background value, at most 512 characters, with no `;`, `{` or `}`. |
 | `contentLayout` | `"stack" \| "flow"` | `"stack"` | | `stack` lays the content out as a leading-aligned column at standard spacing; `flow` leaves it in plain block flow. |
 
 A separator with a `title` draws the theme's captioned separator: the title, then the rule to the edge.
@@ -266,7 +266,7 @@ export function ExportOptions() {
 | --- | --- |
 | A completion control renders with no overlay host | `Error` from the render |
 | `NSEBox` `contentViewMargins` outside 0 to 4,096 or not numbers | `RangeError` or `TypeError` |
-| `NSEBox` `fillColor` unsafe or unsupported | `TypeError` |
+| `NSEBox` `fillColour` unsafe or unsupported | `TypeError` |
 | `NSEBox` with `boxType="separator"` and children, in development | `TypeError` |
 | A command that is unavailable or fails | The control stays uncommitted. It reports nothing to the user by itself, so present the command's own state |
 
