@@ -5,11 +5,12 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { basename, extname, resolve } from "node:path";
 import ts from "typescript";
+import { rendererOwnedRegions, withinRendererRegion } from "./idiom-errors.mjs";
 
 function sourceFile(file, text) {
   return ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, /\.[jt]sx$/u.test(file) ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
 }
-function walk(node, visit) { visit(node); ts.forEachChild(node, child => walk(child, visit)); }
+function walk(node, visit) { if (visit(node) === false) return; ts.forEachChild(node, child => walk(child, visit)); }
 function enclosingClass(node) {
   for (let owner = node?.parent; owner; owner = owner.parent) if (ts.isClassLike(owner)) return owner;
   return null;
@@ -41,11 +42,12 @@ function numeric(node) {
 }
 
 /** Evidence-based source warnings, independent of project validity. No source code is executed. */
-export function inspectIdiomWarnings({ file, text }) {
+export function inspectIdiomWarnings({ file, text, regions = rendererOwnedRegions({ file, text }) }) {
   if (!/\.[cm]?[jt]sx?$/u.test(file)) return [];
   const source = sourceFile(file, text), findings = [], locals = new Map(), aliases = new Map(), outlets = new Map(), paths = new Set();
-  const warn = (node, rule, message) => findings.push({ line: source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1, rule: `idiom.${rule}`, severity: "warning", message });
+  const warn = (node, rule, message) => !withinRendererRegion(node, source, regions) && findings.push({ line: source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1, rule: `idiom.${rule}`, severity: "warning", message });
   walk(source, node => {
+    if (withinRendererRegion(node, source, regions)) return false;
     if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.initializer) locals.set(node.name.text, node.initializer);
     if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier) && node.moduleSpecifier.text.startsWith("@syndromatic/syncloudos")) {
       for (const item of node.importClause?.namedBindings?.elements ?? []) aliases.set(item.name.text, item.propertyName?.text ?? item.name.text);
@@ -73,6 +75,7 @@ export function inspectIdiomWarnings({ file, text }) {
     return node && ts.isPropertyAccessExpression(node) && node.name.text === "element" && ts.isPropertyAccessExpression(node.expression) && node.expression.expression.kind === ts.SyntaxKind.ThisKeyword && outlets.get(enclosingClass(node))?.has(node.expression.name.getText(source));
   };
   walk(source, node => {
+    if (withinRendererRegion(node, source, regions)) return false;
     if ((ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) && ts.isIdentifier(node.tagName) && node.tagName.text === "video")
       warn(node, "video", 'Raw <video> has no complete AVPlayerView counterpart in the current SDK. Review the lower-level VFXVideoClient, VFXVideoPresentationClient and VFXRouteDetector types from "@syndromatic/syncloudos/fx/video" for device-owned playback/presentation. They do not supply a ready-made player view or standard player controls.');
     if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {

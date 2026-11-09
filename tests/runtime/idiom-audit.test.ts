@@ -39,10 +39,26 @@ describe("integrated idiom audit", () => {
     expect(result.idiomAudit.optOuts).toHaveLength(1);
     expect(result.findings).toContainEqual(expect.objectContaining({ rule: "idiom.opt-out", severity: "error" }));
   });
-  it("exempts renderer-owned files and reports the exemption", () => {
+  it("exempts renderer regions and reports their locations", () => {
     const result = audit('import * as THREE from "three";\nconst renderer = new THREE.WebGLRenderer({canvas});\nconst view = <canvas ref={canvasRef} />;\nconst sprite = "#ff0000";\nrequestAnimationFrame(render);');
     expect(result.findings.filter(f => f.severity === "error")).toEqual([]);
-    expect(result.idiomAudit.rendererExemptions).toContain("Example.app/Contents/index.tsx");
+    expect(result.idiomAudit.rendererExemptions).toContainEqual(expect.objectContaining({file:"Example.app/Contents/index.tsx", kind:"surface"}));
+  });
+  it("still checks HUD controls and animation warnings beside a renderer", () => {
+    const renderer = 'import * as THREE from "three";\nconst renderer = new THREE.WebGLRenderer({canvas});\nconst view = <><canvas /><button>Reset</button></>;\nnew AFXAnimation({ duration: 1, reducedMotion: "never" });';
+    const result = audit(renderer);
+    expect(result.findings).toContainEqual(expect.objectContaining({rule:"idiom.nse-controls", severity:"error"}));
+    expect(result.findings).toContainEqual(expect.objectContaining({rule:"idiom.reduced-motion", severity:"warning"}));
+    expect(result.idiomAudit.applications[0].rawControls).toBe(1);
+    const supported = audit(renderer.replace('<button>Reset</button>', '<NSEButton title="Reset" />'));
+    expect(supported.idiomAudit.errors).toBe(0);
+  });
+  it("keeps static tables and overflow samples free of errors", () => {
+    put("samples.css", 'pre { overflow: auto; }');
+    const result = audit('const view = <NSEScrollView><pre style={{overflowY:"scroll"}}>Sample</pre><table><tbody><tr><td>42</td></tr></tbody></table></NSEScrollView>;');
+    expect(result.idiomAudit.errors).toBe(0);
+    expect(result.idiomAudit.applications[0].rawControls).toBe(0);
+    expect(result.findings.filter(f => f.rule === "idiom.scroll-view")).toHaveLength(2);
   });
   it("does not exempt ordinary UI merely because Three.js is imported", () => {
     const result = audit('import * as THREE from "three";\nconst view = <button>Save</button>;');
