@@ -23,7 +23,7 @@ it("compiled Network app retains attribution after await, timer and callback wit
     host.adapters.network.setStatus("satisfied"); host.adapters.permissions.deny(); expect(host.adapters.network.activeMonitorCount()).toBe(0);
     host.adapters.permissions.allow(); flush(); expect(received).toHaveLength(6); expect(() => fromAwait.start(DFXQueue.main)).toThrow(NWFXError);
     const replacement = await afterAwait(); replacement.pathUpdateHandler = path => { received.push(path); }; replacement.start(DFXQueue.main);
-    await host.dispose(); flush(); expect(received).toHaveLength(6); expect(host.adapters.network.activeMonitorCount()).toBe(0); expect(() => replacement.start(DFXQueue.main)).toThrow(NWFXError);
+    await host.dispose(); flush(); expect(received).toHaveLength(6); expect(host.adapters.network.activeMonitorCount()).toBe(0); expect(() => replacement.start(replacement.queue!)).toThrow(NWFXError);
   } finally { await host.dispose(); flush(); vi.unstubAllGlobals(); }
 });
 it("host Network denial overrides an entitled app and maps to NWError", async () => {
@@ -46,6 +46,6 @@ it("compiled hook returns the imported app class through real branded StrictMode
     expect(host.adapters.network.activeMonitorCount()).toBe(1);
     const listener = vi.fn(); monitor.pathUpdateHandler = listener;
     view.unmount(); expect(host.adapters.network.activeMonitorCount()).toBe(0);
-    while (jobs.length) jobs.shift()!(); expect(listener).not.toHaveBeenCalled(); expect(() => monitor.start(DFXQueue.main)).toThrow(NWFXError);
+    while (jobs.length) jobs.shift()!(); expect(listener).not.toHaveBeenCalled(); expect(() => monitor.start(monitor.queue!)).toThrow(NWFXError);
   } finally { await host.dispose(); vi.unstubAllGlobals(); }
 });
