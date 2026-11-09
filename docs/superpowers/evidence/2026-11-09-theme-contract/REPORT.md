@@ -59,13 +59,21 @@ Verification: 47 focused tests in four files passed, including four new scroll-i
 
 ### Task 6 — framework layout-guide adoption
 
+Commit: `656a84b6` — `NSE: framework chrome and content use the layout guides`.
+
 Adaptive compact tabs, short-window rails and regular source lists register their measured obstructions. Leading-edge chrome resolves inside the model to a physical edge before publication, including RTL changes. Adaptive allocation shares the window observer. The compact clearance comes from the measured guide; NSEScrollView no longer receives a second pseudo-element spacer. Generic scrolling surfaces retain a guide-sized trailing spacer. App body surfaces measure their own safe-area overlap instead of consuming a top-bar height offset.
 
 Raw CSS `env(safe-area-inset-*)` uses in framework surfaces now consume ScreenService-derived screen properties, published by runtime input and overlay boundaries (including standalone and relocated overlay hosts). Screen-only padding is separate from content safe-area padding, avoiding self-referential growth of a chrome bar.
 
 Verification: 31 focused adoption/navigation tests passed, then 59 broader navigation, safe-area, focus and runtime-boundary tests passed. Typecheck passed. The first frozen screenshot comparison passed 80/80; the final comparison after standalone screen-property publication also passed **80/80, zero differences** (`task-6-baseline-final.log`). An initial broader regression found a non-cached screen getter in the new subscription; it was corrected to `ScreenService.getSnapshot` before acceptance.
 
-### Tasks 7–19
+### Task 7 — hook vocabulary and structural limits
+
+Added frozen control, part, state and variant vocabularies, `nseControlHooks`, `nsePartHooks`, and their public `nse/theme` entry. The helper emits exact AppKit-shaped state attributes and rejects unknown identities, parts, states and variant names. Structural CSS protects the 24-point regular/large minimum and the forced-colour focus outline. Normal focus retains the existing shape-specific indicator; the bundle validator and state-scoped loading protect it in Tasks 12–16. Semantic display, visibility and content restrictions are validated on theme CSS, since their correct structural values vary by part.
+
+Verification: 3 new hook tests passed; typecheck passed. The frozen screenshot gate passed **80/80, zero differences**, recorded in `task-7-baseline.log`.
+
+### Tasks 8–19
 
 Pending. Final split-suite and packed SDK acceptance remain for Task 19.
 
@@ -107,6 +115,8 @@ Added: `NSEEdgeInsets`, `NSEEdgeInsetsZero`, `NSEEdgeInsetsMake`. Removed: `NSES
 Task 4 adds the `NSESafeArea` result type, `useNSESafeArea`, the two view props and three controller-view properties described above, and `NSEViewController.viewSafeAreaInsetsDidChange()`.
 
 Task 5 adds `NSEScrollViewProps.automaticallyAdjustsContentInsets`, `contentInsets`, `scrollerInsets` and the scroller’s optional `style` prop; removes `NSEScrollViewProps.scrollInsets`.
+
+Task 7 adds `NSEThemeControlName`, `NSEThemePartName`, `nseControlHooks`, `nsePartHooks` and the `@syndromatic/syncloudos/nse/theme` package entry.
 
 Part-name mappings, semantic colour values without Atmo precedent and Beta 2 removals will be recorded as their tasks are completed. No visual design decision has been made.
 

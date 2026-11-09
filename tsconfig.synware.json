@@ -40,6 +40,7 @@
       "@syndromatic/syncloudos/nse/content": [
         "./src/NSE/public/content.ts"
       ],
+      "@syndromatic/syncloudos/nse/theme": ["./src/NSE/public/theme.ts"],
       "@syndromatic/syncloudos/nse/appearance": [
         "./src/NSE/public/appearance.ts"
       ],

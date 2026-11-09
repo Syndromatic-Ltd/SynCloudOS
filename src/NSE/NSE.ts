@@ -228,3 +228,6 @@ export { useNSEWindowChromeObstruction } from "./Layout/windowChromeObstructions
 
 export { useNSESafeArea } from "./Layout/useNSESafeArea";
 export type { NSESafeArea } from "./Layout/useNSESafeArea";
+
+export { nseControlHooks, nsePartHooks } from "./Theme/contract/hooks";
+export type { NSEThemeControlName, NSEThemePartName } from "./Theme/contract/vocabulary";
