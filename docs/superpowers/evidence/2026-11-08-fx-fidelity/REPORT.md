@@ -2457,3 +2457,12 @@ Supplementary reviewed captures: [desktop speech/errors](gallery-desktop-light-m
 - `PKFXPaymentButton` remains pending artwork approval and is excluded.
 - WebXR immersive VR has no ARKit counterpart; it remains outside XRFX pending an owner decision about any separate visionOS work.
 - Gallery's existing raw video preview remains unchanged; LocationFX, MotionFX, MIDIFX and other unreviewed families remain untouched. These exclusions are decided and do not pause this job.
+
+## Post-review corrections (Claude, 9 November 2026)
+
+- `NWFXPathMonitor.start(queue)` now requires its queue, as Apple's `start(queue:)` does; a missing or null queue throws `NWFXError` (EINVAL).
+- `NFXNDEFReaderSession` with a null or omitted queue now creates its own serial Dispatch queue, as Apple's initializer does, replacing the main-queue default from the earlier steer.
+- `BTFXCentralManagerDelegate` now uses the selector-derived names consistently: `centralManagerDidConnectPeripheral` and `centralManagerDidFailToConnectPeripheral`.
+- Error prose uses British spelling ("authorise", "authorisation"); API names keep Apple's spelling.
+- The plugin warns, naming each entry, when it removes SDK entries from a host's `optimizeDeps.include`.
+- The 72 family and DispatchFX files with overlong lines were reformatted with Prettier 3.3.3 in a separate, behaviour-free commit.

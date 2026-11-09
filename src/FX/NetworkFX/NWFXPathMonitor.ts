@@ -5,7 +5,6 @@
 import { networkSessionBindings } from "./internal/networkSessionBindings";
 import { createFXSessionBinding, fxAttributedClass, observeFXSessionEnd } from "../../SynCloudOS/fxRuntimeContracts";
 import { DFXQueue } from "../DispatchFX/DFXQueue";
-import { dispatchQueueForSession } from "../DispatchFX/internal/sessionBinding";
 import { NWFXError } from "./NWFXError";
 import type { NWFXPath } from "./NWFXPath";
 import { NWFXInterfaceType } from "./NWFXInterfaceType";
@@ -53,13 +52,13 @@ export class NWFXPathMonitor {
     this.#assertLive();
     return this.#path ?? unavailableObservation("currentPath before initial delivery");
   }
-  /** Starts once. Events run as synchronous Dispatch items. Omitted/null uses the selected app's main queue.
-   * A required/prohibited interface filter throws ENOTSUP if the browser cannot observe transport. */
-  start(queue?: DFXQueue | null): void {
+  /** Starts once. Events run as synchronous Dispatch items on `queue`, which is required, as in Apple's
+   * `start(queue:)`. A required/prohibited interface filter throws ENOTSUP if the browser cannot observe transport. */
+  start(queue: DFXQueue): void {
     this.#assertLive();
     if (this.#started) return;
-    this.#queue = queue ?? dispatchQueueForSession(this.#session).main;
-    if (!(this.#queue instanceof DFXQueue)) throw NWFXError.posix(22, "start(queue) requires a Dispatch queue.");
+    if (!(queue instanceof DFXQueue)) throw NWFXError.posix(22, "start(queue) requires a Dispatch queue, for example DFXQueue.main.");
+    this.#queue = queue;
     this.#started = true;
     this.#releaseSession = observeFXSessionEnd(this.#session, () => this.cancel());
     this.#releaseAccess = this.#port.observeAccessLoss(() => this.cancel());

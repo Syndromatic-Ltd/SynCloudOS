@@ -168,7 +168,7 @@ export class BTFXCentralManager extends BTFXManager {
           p.connection = connection;
           p.state = "connected";
           this.#enqueue(() => {
-            if (generation === p.generation) this.#delegate?.centralManagerDidConnect?.(this, peripheral);
+            if (generation === p.generation) this.#delegate?.centralManagerDidConnectPeripheral?.(this, peripheral);
           });
         },
         error => {
@@ -176,7 +176,7 @@ export class BTFXCentralManager extends BTFXManager {
           p.state = "disconnected";
           this.#enqueue(() => {
             if (generation === p.generation) {
-              this.#delegate?.centralManagerDidFailToConnect?.(this, peripheral, bluetoothFailure(error));
+              this.#delegate?.centralManagerDidFailToConnectPeripheral?.(this, peripheral, bluetoothFailure(error));
             }
           });
         },

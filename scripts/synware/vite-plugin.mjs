@@ -705,7 +705,10 @@ export function synCloudOS(options) {
     config(config, env) {
       // Explicit includes override exclusions; remove only SDK entries before Vite merges arrays.
       if (config.optimizeDeps?.include) {
-        config.optimizeDeps.include = config.optimizeDeps.include.filter(id => id !== "@syndromatic/syncloudos" && !id.startsWith("@syndromatic/syncloudos/"));
+        const isSDK = id => id === "@syndromatic/syncloudos" || id.startsWith("@syndromatic/syncloudos/");
+        const removed = config.optimizeDeps.include.filter(isSDK);
+        config.optimizeDeps.include = config.optimizeDeps.include.filter(id => !isSDK(id));
+        if (removed.length) console.warn(`[syncloudos] Removed ${removed.join(", ")} from optimizeDeps.include. The SDK must stay out of dependency pre-bundling so FX classes and app sessions share one module graph.`);
       }
       const toolchainConfig = toolchain.config(config, env);
       pluginSdkBuild ??= sdkBuildFingerprint(fileURLToPath(new URL(".", import.meta.url)));

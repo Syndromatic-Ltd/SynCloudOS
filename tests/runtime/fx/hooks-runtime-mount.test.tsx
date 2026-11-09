@@ -71,7 +71,7 @@ it("pins all real hook objects to branded mounts despite duplicate runtime IDs, 
     const selected = scosSessionsForApp(appId).filter(session => session.context.signal === context.signal);
     expect(selected).toHaveLength(1); expect(selected[0].context).not.toBe(context); expect(context.branding).toBe(branding);
     const owners = useOwners(); held[index] = owners;
-    useLayoutEffect(() => { setups[index]++; owners.NWFXPathMonitor.pathUpdateHandler = received[index]; owners.NWFXPathMonitor.start(); }, [owners.NWFXPathMonitor]);
+    useLayoutEffect(() => { setups[index]++; owners.NWFXPathMonitor.pathUpdateHandler = received[index]; owners.NWFXPathMonitor.start(dispatchQueueForSession(selected[0]).main); }, [owners.NWFXPathMonitor]);
     return null;
   }
   const firstView = render(<Mount value={first}><Probe index={0} /></Mount>);
@@ -87,7 +87,7 @@ it("pins all real hook objects to branded mounts despite duplicate runtime IDs, 
   firstView.unmount();
   expect(first.environment.adapters.network.activeMonitorCount()).toBe(0); expect(second.environment.adapters.network.activeMonitorCount()).toBe(1);
   flush(); expect(received.map(listener => listener.mock.calls.length)).toEqual([1, 2]); expect(held[1].NWFXPathMonitor.currentPath.status).toBe("requiresConnection");
-  const old = held[0]; expect(() => old.NWFXPathMonitor.start()).toThrow(); expect(old.SPFXSpeechRecognizer.isAvailable).toBe(false);
+  const old = held[0]; expect(() => old.NWFXPathMonitor.start(old.NWFXPathMonitor.queue!)).toThrow(); expect(old.SPFXSpeechRecognizer.isAvailable).toBe(false);
   expect(() => old.CNFXContactStore.requestAccess("contacts", vi.fn())).toThrow(); expect(() => old.PKFXPaymentAuthorizationController.present()).toThrow();
   expect(() => old.NFXNDEFReaderSession.begin()).toThrow(); expect(() => old.BTFXCentralManager.scanForPeripherals(null)).toThrow(); expect(() => old.XRFXSession.run(new XRFXOrientationTrackingConfiguration())).toThrow();
   secondView.unmount(); expect(second.environment.adapters.network.activeMonitorCount()).toBe(0);

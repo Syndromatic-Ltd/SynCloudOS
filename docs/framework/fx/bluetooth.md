@@ -21,7 +21,7 @@ const central = new BTFXCentralManager({
     };
     sender.connect(peripheral);
   },
-  centralManagerDidConnect(_sender, peripheral) { peripheral.discoverServices(null); },
+  centralManagerDidConnectPeripheral(_sender, peripheral) { peripheral.discoverServices(null); },
 }, null, null);
 // In a user-gesture action, after state becomes poweredOn:
 central.scanForPeripherals([new BTFXUUID("180F")], null);

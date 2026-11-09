@@ -13,7 +13,7 @@ export interface BTFXCentralManagerDelegate {
     advertisementData: Readonly<Record<string, unknown>>,
     rssi: number,
   ): void;
-  centralManagerDidConnect?(central: BTFXCentralManager, peripheral: BTFXPeripheral): void;
-  centralManagerDidFailToConnect?(central: BTFXCentralManager, peripheral: BTFXPeripheral, error: BTFXError | null): void;
+  centralManagerDidConnectPeripheral?(central: BTFXCentralManager, peripheral: BTFXPeripheral): void;
+  centralManagerDidFailToConnectPeripheral?(central: BTFXCentralManager, peripheral: BTFXPeripheral, error: BTFXError | null): void;
   centralManagerDidDisconnectPeripheral?(central: BTFXCentralManager, peripheral: BTFXPeripheral, error: BTFXError | null): void;
 }

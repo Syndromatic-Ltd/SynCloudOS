@@ -12,7 +12,7 @@ monitor.start(DFXQueue.main);
 monitor.cancel();
 ```
 
-Constructors also accept a required `NWFXInterfaceType`, or an array of prohibited types. `start(queue)` begins observation once, and readonly `queue` identifies the delivery queue. Null or omitted queue selects the already-pinned application's main queue. Repeated start on a live monitor is idempotent; cancellation is terminal. Handler deliveries are synchronous Dispatch work items, including the initial path. `currentPath` is updated immediately before each handler runs. Until the first queued observation it throws `NWFXError.posix(45)`; no unobserved route is invented. Cancelled/revoked monitors reject further path reads and starts.
+Constructors also accept a required `NWFXInterfaceType`, or an array of prohibited types. `start(queue)` begins observation once, and readonly `queue` identifies the delivery queue. The queue is required, as in Apple's `start(queue:)`; pass `DFXQueue.main` to deliver on the main queue. Repeated start on a live monitor is idempotent; cancellation is terminal. Handler deliveries are synchronous Dispatch work items, including the initial path. `currentPath` is updated immediately before each handler runs. Until the first queued observation it throws `NWFXError.posix(45)`; no unobserved route is invented. Cancelled/revoked monitors reject further path reads and starts.
 
 `useNetwork()` returns an actual passive `NWFXPathMonitor`. Set its handler and start it in an effect; the hook cancels on actual component unmount or context replacement. Its insertion lifetime survives React StrictMode's layout-effect cleanup/setup replay. A component that explicitly calls `cancel()` must acquire a new monitor instead of restarting the terminal instance.
 
