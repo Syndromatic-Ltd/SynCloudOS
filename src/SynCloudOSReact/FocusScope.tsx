@@ -128,13 +128,24 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
         const parentElement: HTMLElement = branch.parentElement;
         const parentOwner = parentElement.closest<HTMLElement>("[data-syncloudos-runtime-owner]");
         if (parentOwner && parentOwner.dataset.syncloudosRuntimeOwner !== runtime.runtimeId) break;
-        for (const sibling of Array.from(parentElement.children)) {
-          if (!(sibling instanceof HTMLElement) || sibling === branch || restoredBackground.some(({ element }) => element === sibling)) continue;
-          const siblingOwner = sibling.closest<HTMLElement>("[data-syncloudos-runtime-owner]");
-          if (siblingOwner && siblingOwner.dataset.syncloudosRuntimeOwner !== runtime.runtimeId) continue;
+        // A system alert is presented above every modal, as an NSAlert is above
+        // the window it interrupts, so it is never made part of this modal's
+        // background. A sibling that only contains one is contained child by child.
+        const containBackground = (sibling: HTMLElement): void => {
+          if (sibling.classList.contains(alertBackdropClass) || restoredBackground.some(({ element }) => element === sibling)) return;
+          if (sibling.querySelector(`.${alertBackdropClass}`)) {
+            for (const child of Array.from(sibling.children)) if (child instanceof HTMLElement) containBackground(child);
+            return;
+          }
           restoredBackground.push({ element: sibling, inert: sibling.inert, ariaHidden: sibling.getAttribute("aria-hidden") });
           sibling.inert = true;
           sibling.setAttribute("aria-hidden", "true");
+        };
+        for (const sibling of Array.from(parentElement.children)) {
+          if (!(sibling instanceof HTMLElement) || sibling === branch) continue;
+          const siblingOwner = sibling.closest<HTMLElement>("[data-syncloudos-runtime-owner]");
+          if (siblingOwner && siblingOwner.dataset.syncloudosRuntimeOwner !== runtime.runtimeId) continue;
+          containBackground(sibling);
         }
         branch = parentElement;
       }
@@ -142,6 +153,8 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
     let redirectingFocus = false;
     const containFocus = (event: FocusEvent) => {
       if (redirectingFocus || !trapFocus || !root || !(event.target instanceof Node) || isWithinNSEFocusOrigin(root, event.target)) return;
+      // Focus moving into a system alert above this modal belongs to the alert.
+      if (event.target instanceof Element && event.target.closest(`.${alertBackdropClass}`) && !root.closest(`.${alertBackdropClass}`)) return;
       const targetRuntimeOwner = event.target instanceof HTMLElement
         ? event.target.closest<HTMLElement>("[data-syncloudos-runtime-owner]")
         : null;
@@ -289,6 +302,8 @@ function KernelFocusScope({ scopeId, kind, parentScopeId, parentResponderId, mod
   }
   return <FocusScopeIdContext value={scopeId}><div {...scopeProps}>{children}</div></FocusScopeIdContext>;
 }
+
+const alertBackdropClass = "nse-control-alert-backdrop";
 
 export function FocusScope(props: FocusScopeProps) {
   const appRuntime = useContext(SynWareRuntimeContext);

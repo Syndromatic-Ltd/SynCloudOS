@@ -26,6 +26,7 @@ import { createPortal } from "react-dom";
 import React, { StrictMode } from "react";
 import { FocusScope, ResponderScope, RuntimeInputBoundary, SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { createTestRuntime } from "./helpers";
+import { NSEAlertBackdrop } from "../../src/NSE/Components/NSEAlertBackdrop";
 import { registerNSEFocusOrigin } from "../../src/NSE/Focus";
 import { registerNSEInspectorOrigin } from "../../src/NSE/Focus/focusOrigin";
 import type { FocusScopeHandle } from "../../src/SynCloudOS/Focus/focusTypes";
@@ -421,6 +422,27 @@ describe("focus scopes", () => {
     view.unmount();
     expect(background.inert).not.toBe(true);
     expect(background.hasAttribute("aria-hidden")).toBe(false);
+  });
+
+  it("leaves a system alert stacked above a modal interactive, whatever their mount order", async () => {
+    const runtime = createTestRuntime();
+    runtime.responders.register({ id: "app", kind: "application", parentId: "runtime", scopeId: "root" });
+    render(
+      <SynCloudOSProvider runtime={runtime}>
+        <NSEAlertBackdrop><button>Try again</button></NSEAlertBackdrop>
+        <div data-testid="background"><button>Outside</button></div>
+        <FocusScope scopeId="modal:sign-in" kind="modal" parentResponderId="app">
+          <button>Sign in</button>
+        </FocusScope>
+      </SynCloudOSProvider>,
+    );
+    const alertAction = screen.getByText("Try again");
+    const alert = alertAction.closest<HTMLElement>(".nse-control-alert-backdrop")!;
+    await waitFor(() => expect(screen.getByTestId("background").inert).toBe(true));
+    expect(alert.inert).not.toBe(true);
+    expect(alert.hasAttribute("aria-hidden")).toBe(false);
+    alertAction.focus();
+    expect(document.activeElement).toBe(alertAction);
   });
 
   it.each(["inert", "aria-hidden"] as const)("excludes controls beneath %s ancestors from modal focus and Tab wrapping", async (hidden) => {
