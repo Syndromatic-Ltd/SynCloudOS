@@ -188,7 +188,7 @@ export function interactiveTable(node) {
 }
 
 const COLOUR = /#[\da-f]{3,8}\b|(?:rgba?|hsla?|oklch|oklab|lab|lch|color)\(|(?:^|\s)(?:white|black|red|blue|green|grey|gray|yellow|orange|purple|pink|navy|teal|silver|maroon|lime|aqua|fuchsia|olive)(?:$|\s)/iu;
-const PAINT = /^(?:color|colour|textColor|tintColor|background|backgroundColor|border|borderColor|outline|outlineColor|textDecorationColor|boxShadow|textShadow|fill|stroke|caretColor|accentColor)$/u;
+const PAINT = /^(?:color|colour|textColor|textColour|tintColor|background|backgroundColor|border|borderColor|outline|outlineColor|textDecorationColor|boxShadow|textShadow|fill|stroke|caretColor|accentColor)$/u;
 const GLYPH = /^[\s]*[‹›«»<>←→↑↓↔↕⟨⟩⌃⌄▲▼◀▶△▽◁▷⚙⚙️☰✕✖✓✔＋−]|[‹›«»<>←→↑↓↔↕⟨⟩⌃⌄▲▼◀▶△▽◁▷⚙☰✕✖✓✔]\s*$/u;
 const SYSTEM_ICON = /(?:^|[\s_/-])(?:arrow[-_ ]?(?:back|forward|left|right)|chevron[-_ ]?(?:left|right)|(?:back|forward|left|right)[-_ ]?(?:arrow|chevron|icon)|NSGoBackTemplate|NSGoForwardTemplate)(?:[\s_./-]|$)/iu;
 const NAVIGATION_ARTWORK = /^(?:back|forward|go back|go forward|previous|next|arrow[-_ ]?(?:left|right|back|forward)|chevron[-_ ]?(?:left|right))$/iu;

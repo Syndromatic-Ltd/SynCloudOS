@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { nseControlHooks } from "../Theme/contract/hooks";
+import { useNSEThemeInteraction } from "../Theme/contract/useThemeInteraction";
 import { useId, useImperativeHandle, useLayoutEffect, useRef, useSyncExternalStore, type CSSProperties, type ReactNode, type Ref } from "react";
 import type { NSETextCompositionToken, NSETextInputClient, NSETextInputResult } from "./NSETextInputClient";
 import { isNSEUTF16Boundary } from "../Text/textPositions";
@@ -41,6 +43,7 @@ export function NSETextInputHost({ client, label, className, style, spellCheck =
   const initialText = useRef(client.getSnapshot().projection.text);
   const errorCallback = useRef(onInputError); errorCallback.current = onInputError;
   const snapshot = useSyncExternalStore(client.subscribe, client.getSnapshot, client.getSnapshot);
+  const theme = useNSEThemeInteraction<HTMLDivElement>(!snapshot.disposed);
   const descriptionId = useId();
   useImperativeHandle(ref, () => ({ focus: () => element.current?.focus(), element: () => element.current }), []);
   useLayoutEffect(() => {
@@ -226,9 +229,9 @@ export function NSETextInputHost({ client, label, className, style, spellCheck =
       if (token || recoveryToken) client.cancelMarkedText((token ?? recoveryToken)!);
     };
   }, [client]);
-  return <div className={className} style={style}>
+  return <div data-nse-part="content" {...theme.events} {...nseControlHooks({ control: "text-view", enabled: !snapshot.disposed, hovered: theme.hovered, focused: theme.focused, variants: { editable: String(snapshot.session.editable) } })} className={className} style={style}>
     {children ? <div aria-hidden="true" inert>{children}</div> : null}
-    <textarea ref={element} defaultValue={initialText.current} aria-label={label} aria-multiline="true" aria-readonly={!snapshot.session.editable || snapshot.disposed} readOnly={!snapshot.session.editable || snapshot.disposed} aria-disabled={snapshot.disposed || undefined} aria-describedby={snapshot.projection.description ? descriptionId : undefined} spellCheck={spellCheck} />
+    <textarea data-nse-part="field" ref={element} defaultValue={initialText.current} aria-label={label} aria-multiline="true" aria-readonly={!snapshot.session.editable || snapshot.disposed} readOnly={!snapshot.session.editable || snapshot.disposed} aria-disabled={snapshot.disposed || undefined} aria-describedby={snapshot.projection.description ? descriptionId : undefined} spellCheck={spellCheck} />
     {snapshot.projection.description ? <span id={descriptionId} hidden>{snapshot.projection.description}</span> : null}
   </div>;
 }

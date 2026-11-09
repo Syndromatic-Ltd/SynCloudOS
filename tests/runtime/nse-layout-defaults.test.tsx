@@ -134,13 +134,13 @@ describe("NSE default layout", () => {
   });
 
   it("draws a label text field in a font text style and colour", () => {
-    render(<NSETextField isEditable={false} role="status" font="footnote" textColor="secondaryLabelColor" monospacedDigits lineBreakMode="byCharWrapping">1,572,864 bytes</NSETextField>);
+    render(<NSETextField isEditable={false} role="status" font="footnote" textColour="secondaryLabelColour" monospacedDigits lineBreakMode="byCharWrapping">1,572,864 bytes</NSETextField>);
     const text = screen.getByRole("status");
     expect(text.textContent).toBe("1,572,864 bytes");
     expect(text.tagName).toBe("SPAN");
     expect(text.className).toBe("nse-control-label-field");
     expect(text.getAttribute("data-font")).toBe("footnote");
-    expect(text.getAttribute("data-text-color")).toBe("secondary");
+    expect(text.getAttribute("data-text-colour")).toBe("secondary");
     expect(text.getAttribute("data-monospaced-digits")).toBe("true");
     expect(text.getAttribute("data-line-break-mode")).toBe("char");
     expect(document.querySelector("input")).toBeNull();

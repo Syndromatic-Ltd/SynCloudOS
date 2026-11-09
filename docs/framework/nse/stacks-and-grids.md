@@ -49,7 +49,7 @@ A stack whose views need none of the per-view sizes, gravity or priorities is la
     {"Trip"}
     <>
       <NSEDatePicker aria-label="Trip" datePickerMode="range" locale="en-GB" timeZone="Europe/London" value={trip} onValueChange={setTrip} />
-      <NSETextField isEditable={false} font="footnote" textColor="secondaryLabelColor">{summary}</NSETextField>
+      <NSETextField isEditable={false} font="footnote" textColour="secondaryLabelColour">{summary}</NSETextField>
     </>
   </NSEGridRow>
 </NSEGridView>

@@ -20,6 +20,8 @@ import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { nseControlHooks } from "../../Theme/contract/hooks";
+import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import { useEffect, useRef, useState, type InputHTMLAttributes, type ReactNode } from "react";
 import type { NSEControlValidation } from "../Core";
 
@@ -71,6 +73,7 @@ export function NSESecureTextField(props: NSEBoundValueProps<string, NSESecureTe
 }
 
 function NSESecureTextFieldControl(props: NSESecureTextFieldProps) {
+  const theme = useNSEThemeInteraction<HTMLLabelElement>(props.isEnabled !== false);
   const controlled = props.value !== undefined;
   const [stored, setStored] = useState(props.defaultValue ?? "");
   const [revealed, setRevealed] = useState(false);
@@ -101,11 +104,12 @@ function NSESecureTextFieldControl(props: NSESecureTextFieldProps) {
 
   const { revealPolicy: _revealPolicy, invalid: _invalid, validationMessage: _validationMessage, validation: _validation, label, prefix, suffix, onValueChange: _onValueChange, value: _value, defaultValue: _defaultValue, onBlur, onKeyDown, onInvalid, onChange, ...inputProps } = props;
   return (
-    <label data-nse-control="secure-text-field" data-state={props.invalid || validationInvalid || nativeInvalid ? "invalid" : revealed ? "revealed" : "concealed"}>
+    <label data-nse-part="bezel" {...theme.events} {...nseControlHooks({ control: "secure-text-field", enabled: props.isEnabled !== false, hovered: theme.hovered, focused: theme.focused, variants: { editable: String(!props.readOnly) } })} data-state={props.invalid || validationInvalid || nativeInvalid ? "invalid" : revealed ? "revealed" : "concealed"}>
       {label ? <span data-nse-part="label">{label}</span> : null}
       {prefix ? <span data-nse-part="prefix">{prefix}</span> : null}
       <input
         {...inputProps}
+        data-nse-part="field"
         ref={inputRef}
         aria-label={props["aria-label"]}
         type={revealed ? "text" : "password"}
@@ -147,8 +151,8 @@ function NSESecureTextFieldControl(props: NSESecureTextFieldProps) {
         </button>
       ) : null}
       {suffix ? <span data-nse-part="suffix">{suffix}</span> : null}
-      {capsLock ? <span role="status">Caps Lock is on.</span> : null}
-      {props.invalid || validationInvalid || nativeInvalid ? <span role="alert">{props.validationMessage ?? (validationInvalid ? props.validation?.message : undefined) ?? "Enter a valid password."}</span> : null}
+      {capsLock ? <span data-nse-part="status" role="status">Caps Lock is on.</span> : null}
+      {props.invalid || validationInvalid || nativeInvalid ? <span data-nse-part="error" role="alert">{props.validationMessage ?? (validationInvalid ? props.validation?.message : undefined) ?? "Enter a valid password."}</span> : null}
     </label>
   );
 }

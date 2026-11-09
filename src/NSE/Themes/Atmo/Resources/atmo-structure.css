@@ -4534,13 +4534,13 @@
 
 /* Ruler: indents and tab stops as small NSE sliders, each labelled at the
    start of its row; the tail indent's slider runs from the end edge. */
-:where([data-nse-appearance="atmo"]) [data-nse-control="ruler"] {
+:where([data-nse-appearance="atmo"]) [data-nse-control="ruler-view"] {
   display: grid;
   gap: 4px;
   min-inline-size: 0;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="ruler"] .nse-control-slider {
+:where([data-nse-appearance="atmo"]) [data-nse-control="ruler-view"] .nse-control-slider {
   grid-template-columns: 100px minmax(0, 1fr);
   align-items: center;
   gap: 10px;
@@ -4548,27 +4548,27 @@
   --nse-control-minimum-inline-size: 0;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="ruler"] .nse-control-slider-label {
+:where([data-nse-appearance="atmo"]) [data-nse-control="ruler-view"] .nse-control-slider-label {
   font-size: 12px;
   font-weight: 700;
   text-align: end;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="ruler"] [data-nse-part="tab-stop"] {
+:where([data-nse-appearance="atmo"]) [data-nse-control="ruler-view"] [data-nse-part="tab-stop"] {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="ruler"] [data-nse-part="tab-stops"] {
+:where([data-nse-appearance="atmo"]) [data-nse-control="ruler-view"] [data-nse-part="tab-stops"] {
   display: flex;
   align-items: center;
   gap: 10px;
   padding-inline-start: 110px;
 }
 
-:where([data-nse-appearance="atmo"]) [data-nse-control="ruler"] [data-nse-part="tab-stops"] > p {
+:where([data-nse-appearance="atmo"]) [data-nse-control="ruler-view"] [data-nse-part="tab-stops"] > p {
   margin: 0;
   font-size: 12px;
 }

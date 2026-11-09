@@ -20,7 +20,7 @@ this.window.toolbarStyle = "expanded";
 this.window.subtitle = "";
 ```
 
-These are NSWindow names; Atmo CSS owns the appearance. Section descriptions are ordinary `NSETextField` labels with `textColor="secondaryLabelColor"` in the scroll content. Compact adaptive tabs temporarily present the localised title "More" while their More list is visible. This does not overwrite `window.title`; the latest app title returns when the list closes or leaves compact presentation. There is no new public More property.
+These are NSWindow names; Atmo CSS owns the appearance. Section descriptions are ordinary `NSETextField` labels with `textColour="secondaryLabelColour"` in the scroll content. Compact adaptive tabs temporarily present the localised title "More" while their More list is visible. This does not overwrite `window.title`; the latest app title returns when the list closes or leaves compact presentation. There is no new public More property.
 
 Titlebar accessories use `NSETitlebarAccessoryViewController.layoutAttribute` (`leading`, `trailing`, `bottom`), `window.addTitlebarAccessoryViewController(controller)` and `window.removeTitlebarAccessoryViewController(index)`. The window owns and disposes its accessories. See [Title bars and accessories](nse/menus-toolbars-and-inspectors.md#the-title-bar-title-subtitle-and-accessories).
 

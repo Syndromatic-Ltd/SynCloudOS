@@ -1,0 +1,280 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-theme-hook-coverage.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+stderr | tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > uses British semantic colour and background-style names on label fields
+React does not recognize the `textColour` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `textcolour` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
+
+stderr | tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > secure-text-field-normal
+React does not recognize the `isEnabled` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `isenabled` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
+
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx (462 tests | 43 failed) 1179ms
+     × uses British semantic colour and background-style names on label fields 15ms
+     × text-field-regular-normal 3ms
+     × text-field-regular-hover 2ms
+     × text-field-regular-focused 2ms
+     × text-field-regular-disabled 2ms
+     × text-field-regular-invalid 2ms
+     × text-field-regular-empty 2ms
+     × text-field-small-normal 2ms
+     × text-field-small-hover 2ms
+     × text-field-small-focused 2ms
+     × text-field-small-disabled 2ms
+     × text-field-small-invalid 2ms
+     × text-field-small-empty 2ms
+     × text-field-mini-normal 2ms
+     × text-field-mini-hover 2ms
+     × text-field-mini-focused 2ms
+     × text-field-mini-disabled 2ms
+     × text-field-mini-invalid 2ms
+     × text-field-mini-empty 2ms
+     × search-field-regular-normal 7ms
+     × search-field-regular-hover 2ms
+     × search-field-regular-focused 2ms
+     × search-field-regular-disabled 2ms
+     × search-field-regular-empty 2ms
+     × search-field-small-normal 2ms
+     × search-field-small-hover 2ms
+     × search-field-small-focused 2ms
+     × search-field-small-disabled 2ms
+     × search-field-small-empty 2ms
+     × secure-text-field-normal 3ms
+     × combo-box-normal 4ms
+     × token-field-normal 2ms
+     × secure-text-field-focused 2ms
+     × combo-box-focused 2ms
+     × token-field-focused 2ms
+     × secure-text-field-disabled 2ms
+     × combo-box-disabled 2ms
+     × token-field-disabled 2ms
+     × text-view-read-only-normal 12ms
+     × text-view-read-only-selected 4ms
+     × text-view-editable-normal 4ms
+     × text-view-editable-selected 3ms
+     × text-input-host 5ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 43 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > uses British semantic colour and background-style names on label fields
+AssertionError: expected undefined to be 'secondaryLabelColour' // Object.is equality
+
+- Expected:
+"secondaryLabelColour"
+
++ Received:
+undefined
+
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:21:56
+     19|     const view = render(<NSETextField isEditable={false} textColour="s…
+     20|     const root = view.container.querySelector('[data-nse-control="text…
+     21|     expect(root?.getAttribute("data-nse-text-colour")).toBe("secondary…
+       |                                                        ^
+     22|     expect(root?.getAttribute("data-nse-background-style")).toBe("emph…
+     23|     expect(root?.getAttribute("data-nse-editable")).toBe("false");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/43]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > text-field-regular-normal
+AssertionError: text-field-regular-normal publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:30:64
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/43]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > text-field-regular-hover
+AssertionError: text-field-regular-hover publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:30:64
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/43]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > text-field-regular-focused
+AssertionError: text-field-regular-focused publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:30:64
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/43]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > text-field-regular-disabled
+AssertionError: text-field-regular-disabled publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:30:64
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/43]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > text-field-regular-invalid
+AssertionError: text-field-regular-invalid publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:30:64
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/43]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > text-field-regular-empty
+AssertionError: text-field-regular-empty publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:30:64
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/43]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > text-field-small-normal
+AssertionError: text-field-small-normal publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:30:64
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/43]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > text-field-small-hover
+AssertionError: text-field-small-hover publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:30:64
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/43]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > text-field-small-focused
+AssertionError: text-field-small-focused publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:30:64
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/43]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > text-field-small-disabled
+AssertionError: text-field-small-disabled publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:30:64
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/43]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > text-field-small-invalid
+AssertionError: text-field-small-invalid publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:30:64
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/43]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > text-field-small-empty
+AssertionError: text-field-small-empty publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:30:64
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/43]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > text-field-mini-normal
+AssertionError: text-field-mini-normal publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:30:64
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/43]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > text-field-mini-hover
+AssertionError: text-field-mini-hover publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:30:64
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/43]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > text-field-mini-focused
+AssertionError: text-field-mini-focused publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:30:64
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/43]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > text-field-mini-disabled
+AssertionError: text-field-mini-disabled publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:30:64
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/43]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > text-field-mini-invalid
+AssertionError: text-field-mini-invalid publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:30:64
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/43]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > text-field-mini-empty
+AssertionError: text-field-mini-empty publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:30:64
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/43]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > search-field-regular-normal
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > search-field-regular-hover
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > search-field-regular-focused
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > search-field-regular-disabled
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > search-field-regular-empty
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > search-field-small-normal
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > search-field-small-hover
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > search-field-small-focused
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > search-field-small-disabled
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > search-field-small-empty
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > secure-text-field-normal
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > combo-box-normal
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > token-field-normal
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > secure-text-field-focused
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > combo-box-focused
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > token-field-focused
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > secure-text-field-disabled
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > combo-box-disabled
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > token-field-disabled
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:31:49
+     29|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     30|       expect(root, `${surface.id} publishes its identity`).not.toBeNul…
+     31|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+       |                                                 ^
+     32|       if (control === "button" || control === "switch") expect(root!.q…
+     33|       for (const element of root!.querySelectorAll("*")) expect(parts.…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/43]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > text-view-read-only-normal
+AssertionError: text-view-read-only-normal publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:30:64
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/43]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > text-view-read-only-selected
+AssertionError: text-view-read-only-selected publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:30:64
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/43]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > text-view-editable-normal
+AssertionError: text-view-editable-normal publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:30:64
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/43]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > text-view-editable-selected
+AssertionError: text-view-editable-selected publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:30:64
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/43]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > text-input-host
+AssertionError: text-input-host publishes its identity: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:30:64
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/43]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  43 failed | 419 passed (462)
+   Start at  20:14:59
+   Duration  9.74s (transform 5.84s, setup 27ms, import 7.59s, tests 1.18s, environment 814ms)

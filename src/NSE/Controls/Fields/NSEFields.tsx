@@ -147,8 +147,8 @@ export interface NSELabelTextFieldProps extends Omit<HTMLAttributes<HTMLSpanElem
   readonly isEditable: false;
   /** NSTextField.font, as a text style (default body). */
   readonly font?: NSEFontTextStyle;
-  /** NSTextField.textColor: `labelColor` (default), or the quieter `secondaryLabelColor` for hints and metadata. */
-  readonly textColor?: "labelColor" | "secondaryLabelColor";
+  /** NSTextField's text colour: `labelColour` (default), or the quieter `secondaryLabelColour` for hints and metadata. */
+  readonly textColour?: "labelColour" | "secondaryLabelColour";
   /** The monospaced-digit system font: tabular figures, so changing numbers do not jitter. */
   readonly monospacedDigits?: boolean;
   /** NSTextField.lineBreakMode: wrap at words (default), or anywhere for paths, URLs and hex values. */
@@ -161,15 +161,17 @@ export interface NSELabelTextFieldProps extends Omit<HTMLAttributes<HTMLSpanElem
 }
 
 /** NSView.BackgroundStyle. */
-export type NSELabelBackgroundStyle = "normal" | "emphasized" | "raised" | "lowered";
+export type NSELabelBackgroundStyle = "normal" | "emphasised" | "raised" | "lowered";
 
-function NSELabelTextField({ isEditable: _isEditable, font = "body", textColor = "labelColor", monospacedDigits = false, lineBreakMode = "byWordWrapping", backgroundStyle = "normal", className = "", children, ...props }: NSELabelTextFieldProps) {
+function NSELabelTextField({ isEditable: _isEditable, font = "body", textColour = "labelColour", monospacedDigits = false, lineBreakMode = "byWordWrapping", backgroundStyle = "normal", className = "", children, ...props }: NSELabelTextFieldProps) {
   return (
     <span
       {...props}
+      {...nseControlHooks({ control: "text-field", variants: { editable: "false", "text-colour": textColour, "background-style": backgroundStyle } })}
+      data-nse-part="title"
       className={classes("nse-control-label-field", className)}
       data-font={font}
-      data-text-color={textColor === "secondaryLabelColor" ? "secondary" : undefined}
+      data-text-colour={textColour === "secondaryLabelColour" ? "secondary" : undefined}
       data-monospaced-digits={monospacedDigits ? "true" : undefined}
       data-line-break-mode={lineBreakMode === "byCharWrapping" ? "char" : undefined}
       data-background-style={backgroundStyle === "normal" ? undefined : backgroundStyle}
@@ -222,6 +224,7 @@ function NSETextFieldControl<T = string>(props: NSETextFieldProps<T>) {
     ...inputProps
   } = props;
   const disabled = !isEnabled;
+  const theme = useNSEThemeInteraction<HTMLLabelElement>(isEnabled);
   const generatedId = useId();
   const inputId = id ?? generatedId;
   const inputRef = useRef<HTMLInputElement>(null);
@@ -308,6 +311,9 @@ function NSETextFieldControl<T = string>(props: NSETextFieldProps<T>) {
   return (
     <>
       <label
+        {...theme.events}
+        {...nseControlHooks({ control: "text-field", enabled: isEnabled, hovered: theme.hovered, focused: theme.focused, variants: { "control-size": controlSize, editable: String(!readOnly) } })}
+        data-nse-part="content"
         className={classes("nse-control-text-field", disabled && "is-disabled", className)}
         data-invalid={invalidState ? "true" : "false"}
         data-position={groupPosition}
@@ -315,11 +321,12 @@ function NSETextFieldControl<T = string>(props: NSETextFieldProps<T>) {
         style={sizedControlStyle(undefined, height, undefined)}
         htmlFor={inputId}
       >
-        {label ? <span className="nse-control-field-label">{label}</span> : null}
-        <span className="nse-control-field-frame">
-          {prefix ? <span className="nse-control-field-affix">{prefix}</span> : null}
+        {label ? <span data-nse-part="label" className="nse-control-field-label">{label}</span> : null}
+        <span data-nse-part="bezel" className="nse-control-field-frame">
+          {prefix ? <span data-nse-part="prefix" className="nse-control-field-affix">{prefix}</span> : null}
           <input
           {...inputProps}
+          data-nse-part="field"
           ref={inputRef}
           id={inputId}
           name={name}
@@ -390,10 +397,10 @@ function NSETextFieldControl<T = string>(props: NSETextFieldProps<T>) {
             onKeyDown?.(event);
           }}
           />
-          {suffix ? <span className="nse-control-field-affix">{suffix}</span> : null}
+          {suffix ? <span data-nse-part="suffix" className="nse-control-field-affix">{suffix}</span> : null}
         </span>
       </label>
-      {invalidState ? <span id={errorId} className="nse-control-field-error" role="alert">{effectiveValidation.message}</span> : null}
+      {invalidState ? <span id={errorId} data-nse-part="error" className="nse-control-field-error" role="alert">{effectiveValidation.message}</span> : null}
     </>
   );
 }
@@ -432,7 +439,7 @@ export function NSEInputBox({
       data-always-focused={alwaysLooksFocused ? "true" : "false"}
       aria-disabled={!isEnabled || undefined}
     >
-      {label ? <span className="nse-control-field-label">{label}</span> : null}
+      {label ? <span data-nse-part="label" className="nse-control-field-label">{label}</span> : null}
       <div className="nse-control-field-frame nse-control-input-box-frame">{children}</div>
     </div>
   );
@@ -863,7 +870,7 @@ function NSERadioGroupControl({
           />
         );
       })}
-      {invalid ? <span id={errorId} className="nse-control-field-error" role="alert">{validation.message}</span> : null}
+      {invalid ? <span id={errorId} data-nse-part="error" className="nse-control-field-error" role="alert">{validation.message}</span> : null}
     </div>
   );
 }
