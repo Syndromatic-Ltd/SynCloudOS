@@ -844,7 +844,7 @@
    and 0.432 against the tone's 0.44 — so it is left alone.
 
    The selector carries the window class on purpose. The skin declares these on
-   `[data-nse-appearance="atmo"] .nse-control-button[data-tone="light"]`, which scores
+   `[data-nse-theme="com.syndromatic.atmo"] .nse-control-button[data-tone="light"]`, which scores
    0-3-0; a plain `.nse-login-action > .nse-control-button` is 0-2-0 and loses, so
    an earlier version of this block was written, parsed, and silently ignored. */
 .nse-login-window .nse-login-action > .nse-control-button[data-tone="light"] {

@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { themeBaselineCatalogue } from "../e2e/fixtures/theme-baseline/catalogue";
 import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance/NSEAppearanceProvider";
-import { atmoAppearance } from "../../src/NSE/Themes/Atmo";
+import { atmoTheme } from "../../src/NSE/Themes/Atmo";
 import { NSEScrollView } from "../../src/NSE/Scroll/NSEScrollView";
 import { NSETextField } from "../../src/NSE/Controls/Fields/NSEFields";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
@@ -14,7 +14,7 @@ import { nseThemeParts } from "../../src/NSE/Theme/contract/vocabulary";
 afterEach(cleanup);
 const parts = new Set<string>(nseThemeParts);
 const presentation = createStaticPresentationPort({ width: 1000, height: 800, reducedMotion: true });
-function SurfaceHost({ children }: { children: React.ReactNode }) { return <NSEAppearanceProvider appearance={atmoAppearance} colourScheme="light"><NSEStandaloneControlHost document={document} window={window} presentation={presentation}>{children}</NSEStandaloneControlHost></NSEAppearanceProvider>; }
+function SurfaceHost({ children }: { children: React.ReactNode }) { return <NSEAppearanceProvider theme={atmoTheme} colourScheme="light"><NSEStandaloneControlHost document={document} window={window} presentation={presentation}>{children}</NSEStandaloneControlHost></NSEAppearanceProvider>; }
 describe("public theme hook coverage", () => {
   it("uses British semantic colour and background-style names on label fields", () => {
     const view = render(<NSETextField isEditable={false} textColour="secondaryLabelColour" backgroundStyle="emphasised">Readout</NSETextField>);

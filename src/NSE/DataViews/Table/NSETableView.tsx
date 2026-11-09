@@ -33,7 +33,7 @@ import { NSESortDescriptor } from "../../../Foundation/public";
 import { dataViewAllowsMutation, dataViewAnnouncement, dataViewEventIsComposing, dataViewIsBusy, encodeNSEDataViewKey, useNSEDataView } from "../Core";
 import { useNSEVirtualiser } from "../Virtualisation";
 import { nseDragCommandIds, nseDragNoPayload, useNSEDataViewDragHost } from "../../Drag";
-import { useNSEAppearanceSlot } from "../../Appearance";
+
 import { NSETableCell } from "./NSETableCell";
 import { NSETableHeaderView } from "./NSETableHeaderView";
 import type {
@@ -151,12 +151,7 @@ export function NSETableView<T, TId extends string | number>({
   const tableBlockSize = fills
     ? (measuredBlockSize !== null && measuredBlockSize > 0 ? measuredBlockSize : headerHeight + 460)
     : headerHeight + viewportBlockSize;
-  const tableHeaderAppearance = useNSEAppearanceSlot("table.header.normal.1x");
-  const tableHeaderHoverAppearance = useNSEAppearanceSlot("table.header.hover.1x");
-  const tableHeaderPressedAppearance = useNSEAppearanceSlot("table.header.pressed.1x");
-  const tableHeaderHoverPressedAppearance = useNSEAppearanceSlot("table.header.hover-pressed.1x");
-  const tableSortAscendingAppearance = useNSEAppearanceSlot("table.sort-glyph.ascending.1x");
-  const tableSortDescendingAppearance = useNSEAppearanceSlot("table.sort-glyph.descending.1x");
+
 
   const orderedColumns = useMemo(() => {
     const byId = new Map(columns.map((column) => [column.id, column]));
@@ -435,19 +430,9 @@ export function NSETableView<T, TId extends string | number>({
         className={`nse-table-view ${className}`.trim()}
         style={{ ...style, blockSize: fills ? "100%" : `${tableBlockSize}px`, overflow: "auto" }}
         data-nse-control="table-view" data-nse-part="background" data-nse-enabled={view.rootProps["aria-disabled"] ? "false" : undefined}
-        {...tableHeaderAppearance.attributes}
-        data-nse-table-header-hover-slot={tableHeaderHoverAppearance.slot}
-        data-nse-table-header-hover-recipe-id={tableHeaderHoverAppearance.recipeId}
-        data-nse-table-header-pressed-slot={tableHeaderPressedAppearance.slot}
-        data-nse-table-header-pressed-recipe-id={tableHeaderPressedAppearance.recipeId}
-        data-nse-table-header-hover-pressed-slot={tableHeaderHoverPressedAppearance.slot}
-        data-nse-table-header-hover-pressed-recipe-id={tableHeaderHoverPressedAppearance.recipeId}
-        data-nse-table-sort-ascending-slot={tableSortAscendingAppearance.slot}
-        data-nse-table-sort-ascending-recipe-id={tableSortAscendingAppearance.recipeId}
-        data-nse-table-sort-descending-slot={tableSortDescendingAppearance.slot}
-        data-nse-table-sort-descending-recipe-id={tableSortDescendingAppearance.recipeId}
+
         data-state={state.kind}
-        data-appearance-recipe="table-view"
+
         onKeyDown={handleGridKey}
       >
       {headerHidden ? null : <NSETableHeaderView
@@ -487,7 +472,7 @@ export function NSETableView<T, TId extends string | number>({
               data-nse-selected={selected ? "" : undefined}
               data-nse-part="row"
               data-state={selected ? "selected" : virtualItem.index % 2 === 0 ? "even" : "odd"}
-              data-appearance-recipe={selected ? "table-selected-row" : "table-row"}
+
               draggable={Boolean(allowsMutation && !entry.disabled && dragBinding && dragEndpoint)}
               onDragStart={entry.disabled ? undefined : (event) => dragHost.start(event, sourceIds)}
               onDragOver={entry.disabled ? undefined : (event) => dragHost.over(event, entry.id, virtualItem.index)}

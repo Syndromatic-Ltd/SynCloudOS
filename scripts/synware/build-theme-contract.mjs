@@ -19,7 +19,7 @@ export function createNSEThemeContract(rendered, vocabulary, colours) {
       variants: Object.fromEntries([...entry.variants].sort(([a], [b]) => a.localeCompare(b, "en")).map(([name, values]) => [name, sorted(values)])),
     }])),
     colours: [...colours],
-    appearance: { "colour-scheme-resolved": ["light", "dark"], contrast: ["normal", "increased", "forced"], transparency: ["normal", "reduced"] },
+    appearance: { "colour-scheme-resolved": ["light", "dark"], contrast: ["normal", "high", "forced"], transparency: ["normal", "reduced"] },
     navigation: { compact: { placement: ["block-start", "block-end"], flow: ["in-flow", "overlay"] }, regular: { placement: ["source-list", "block-start"], flow: ["in-flow", "overlay"] } },
     presentation: { login: ["plain", "ornamented"], notifications: ["plain", "sliced-3d"], materialLighting: ["off", "on"] },
     limits: { minimumHitTarget: { regular: 24, large: 24 }, visibleFocusIndicator: true, reducedMotion: true, semanticProperties: ["display", "visibility", "content"], forbiddenProperties: ["animation", "transition", "font", "font-family", "font-size", "font-weight", "line-height", "letter-spacing"] },

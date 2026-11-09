@@ -181,7 +181,7 @@ export function NSESavePanel({
           title="Choose destination"
           data-nse-part="choose"
           data-nse-initial-focus=""
-          data-appearance-recipe="file-panel.choose"
+
           onClick={() => void choose()}
         />
       </div>

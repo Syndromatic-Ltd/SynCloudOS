@@ -47,7 +47,7 @@ export function NSEProgressIndicator({ "aria-label": accessibleLabel, style = "b
       data-size={style === "bar" ? undefined : SPINNING_SIZE[controlSize]}
       data-control-size={controlSize}
       data-motion={reducedMotion ? "static" : "animated"}
-      data-appearance-recipe="progress-indicator"
+
       style={metrics ? progressStyle(metrics) : undefined}
     >
       <span data-nse-part="track"><span data-nse-part="fill" /></span>

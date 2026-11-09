@@ -24,17 +24,10 @@ export type { NSEAppearanceOptions } from "../Appearance/NSEAppearance";
 export {
   useNSEAppearance,
   useNSEAppearanceProjection,
-  useNSEAppearanceSlot,
-  resolveNSEAppearanceSlot,
-} from "../Appearance";
-export {
-  defineNSEAppearance,
 } from "../Appearance";
 export type {
   NSEAppearanceDataAttributes,
-  NSEAppearanceDefinition,
-  NSEAppearanceDefinitionInput,
-  NSEAppearanceRecipeDefinition,
+  NSETheme,
   NSEAppearanceSelection,
   NSEAppearanceServicePort,
   NSEChromeAppearance,
@@ -42,7 +35,6 @@ export type {
   NSEContrast,
   NSEResolvedAppearance,
   NSEResolvedColourScheme,
-  NSEAppearanceSlotResolution,
   NSETransparency,
 } from "../Appearance";
 

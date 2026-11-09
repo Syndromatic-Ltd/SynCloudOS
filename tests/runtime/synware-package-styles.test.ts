@@ -89,7 +89,7 @@ describe("installed SDK stylesheet ownership", () => {
       mkdirSync(join(root, "src"));
       mkdirSync(join(root, "public/assets/textures"), { recursive: true });
       writeFileSync(join(root, "src/neutral.css"), '@import "./material.css";\n');
-      writeFileSync(join(root, "src/theme.css"), '[data-nse-appearance="sample"] { color: red; }');
+      writeFileSync(join(root, "src/theme.css"), '[data-nse-theme="sample"] { color: red; }');
       writeFileSync(
         join(root, "src/material.css"),
         '.semantic { display: flex; }\n.nested-material { background-image: url("/assets/textures/nested surface.png"); }',

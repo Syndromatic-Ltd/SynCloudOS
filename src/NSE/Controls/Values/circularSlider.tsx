@@ -24,7 +24,7 @@ import { nseControlHooks } from "../../Theme/contract/hooks";
 import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import { useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 
-import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
+
 import { NSEMetalThumb } from "../../Appearance/NSEMetalThumb";
 import { NSESlider } from "./NSESlider";
 import type { NSENumericValueContract, NSESliderProps } from "./valueControlTypes";
@@ -95,15 +95,9 @@ function NSECircularSliderControl({ __nseBindingEditor, controlSize = "regular",
   };
   const progress = span === 0 ? 0 : (props.value - props.minimum) / span;
   const style = { "--nse-circular-angle": `${progress * 360}deg` } as CSSProperties;
-  const appearanceState = (props.isEnabled === false) ? "disabled" : "normal";
-  const trackAppearance = useNSEAppearanceSlot(
-    nseAppearanceSlot("circular-slider", "track", appearanceState),
-  );
-  const knobAppearance = useNSEAppearanceSlot(
-    nseAppearanceSlot("circular-slider", "knob", appearanceState),
-  );
 
-  return <span data-nse-part="content" {...theme.events} {...nseControlHooks({ control: "slider", enabled: props.isEnabled !== false, highlighted: theme.highlighted, hovered: theme.hovered, focused: theme.focused, variants: { "slider-type": "circular", "control-size": controlSize } })} data-size={controlSize} data-state={(props.isEnabled === false) ? "disabled" : props.readOnly ? "read-only" : "ready"} {...trackAppearance.attributes} style={style}>
+
+  return <span data-nse-part="content" {...theme.events} {...nseControlHooks({ control: "slider", enabled: props.isEnabled !== false, highlighted: theme.highlighted, hovered: theme.hovered, focused: theme.focused, variants: { "slider-type": "circular", "control-size": controlSize } })} data-size={controlSize} data-state={(props.isEnabled === false) ? "disabled" : props.readOnly ? "read-only" : "ready"}  style={style}>
     <span
       role="slider"
       aria-label={props["aria-label"]}
@@ -115,14 +109,14 @@ function NSECircularSliderControl({ __nseBindingEditor, controlSize = "regular",
       aria-disabled={(props.isEnabled === false) || undefined}
       tabIndex={inert ? -1 : 0}
       data-nse-part="circular-body"
-      {...trackAppearance.attributes}
+
       onPointerDown={(event) => { if (inert) return; activePointer.current = event.pointerId; opening.current = props.value; event.currentTarget.setPointerCapture?.(event.pointerId); update(event, "preview"); }}
       onPointerMove={(event) => { if (activePointer.current === event.pointerId) update(event, "preview"); }}
       onPointerUp={(event) => { if (activePointer.current !== event.pointerId || inert) return; update(event, "commit"); activePointer.current = null; event.currentTarget.releasePointerCapture?.(event.pointerId); }}
       onPointerCancel={cancel}
       onLostPointerCapture={cancel}
       onKeyDown={(event) => { if (inert || !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return; event.preventDefault(); keyChange(event.key); }}
-    ><NSEMetalThumb disabled={(props.isEnabled === false)} /><i aria-hidden="true" data-nse-part="knob" {...knobAppearance.attributes} /></span>
+    ><NSEMetalThumb disabled={(props.isEnabled === false)} /><i aria-hidden="true" data-nse-part="knob"  /></span>
     <span data-nse-part="linear-alternative">
       <NSESlider {...props} {...(__nseBindingEditor?{__nseBindingEditor}:{})} aria-label={`${props["aria-label"]} linear alternative`} orientation="horizontal" />
     </span>

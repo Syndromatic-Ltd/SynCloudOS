@@ -1,0 +1,26 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/theme-bundles.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/theme-bundles.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/theme-bundles.test.ts [ tests/runtime/theme-bundles.test.ts ]
+Error: Cannot find module '../../scripts/synware/theme-bundles.mjs' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/theme-bundles.test.ts
+ ❯ tests/runtime/theme-bundles.test.ts:5:1
+      3| import { tmpdir } from "node:os";
+      4| import { join, resolve } from "node:path";
+      5| import { readThemeBundle, discoverThemeBundles, assertThemeFileNames }…
+       | ^
+      6| const valid = resolve(import.meta.dirname, "../fixtures/themes/Valid.s…
+      7| let directory: string, bundle: string;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  22:19:40
+   Duration  182ms (transform 27ms, setup 27ms, import 0ms, tests 0ms, environment 0ms)

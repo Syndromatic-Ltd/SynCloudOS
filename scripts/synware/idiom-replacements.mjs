@@ -4,7 +4,7 @@
  */
 
 // One authority for definite raw construct → public replacement diagnostics.
-// NSEColor does not exist in this SDK. UI colours come from the neutral
+// NSEColour does not exist in this SDK. UI colours come from the neutral
 // appearance contract, not GraphicsFX colours or a mandatory concrete theme.
 export const IDIOM_REPLACEMENTS = Object.freeze({
   button: { symbol: "NSEButton", entry: "nse" },
@@ -14,7 +14,7 @@ export const IDIOM_REPLACEMENTS = Object.freeze({
   table: { symbol: "NSETableView", entry: "nse" },
   buttonImage: { symbol: "NSEButton with a text title and its image property set to a bundled image URL (use NSEImage.named for available named system images)", entry: "nse" },
   systemImage: { symbol: "NSEImage.named(NSEImage.goBackTemplateName) or NSEImage.named(NSEImage.goForwardTemplateName)", entry: "nse" },
-  uiColour: { symbol: "defineNSEAppearance / NSEAppearanceDefinition and its semantic --nse-* colour values", entry: "nse/appearance" },
+  uiColour: { symbol: "NSETheme and its semantic --nse-colour-* values", entry: "nse/appearance" },
   scroll: { symbol: "NSEScrollView", entry: "nse/scroll" },
   preferences: { symbol: "NSEUserDefaults (use a structured preference descriptor; primary documents belong in workspaceDocuments)", entry: "foundation" },
   bluetooth: { symbol: "BTFXCentralManager constructed inside the plugin-compiled application bundle", entry: "fx/bluetooth" },

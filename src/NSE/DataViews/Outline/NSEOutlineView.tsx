@@ -344,7 +344,7 @@ export function NSEOutlineView<T, TId extends string | number>({
       aria-label={`${row.expanded ? "Collapse" : "Expand"} ${labelForItem(row.item)}`}
       data-nse-part="disclosure"
       data-state={row.expanded ? "open" : "closed"}
-      data-appearance-recipe="outline-disclosure"
+
       disabled={!allowsInteraction}
       onClick={(event) => { event.stopPropagation(); if (row.expanded) collapse(row); else expand(row); }}
     />
@@ -497,7 +497,7 @@ export function NSEOutlineView<T, TId extends string | number>({
                 data-nse-part={isGroup(row) ? "group-row" : "row"}
                 data-state={selected ? "selected" : row.row % 2 === 0 ? "even" : "odd"}
                 data-kind={row.expandable ? "branch" : "leaf"}
-                data-appearance-recipe={selected ? "outline-selected-row" : "outline-row"}
+
                 style={rowStyle}
               >
                 {disclosureFor(row)}

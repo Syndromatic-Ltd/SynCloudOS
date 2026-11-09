@@ -18,34 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const NSE_WINDOW_APPEARANCE_RECIPE_IDS = Object.freeze([
-  "window.standard.frame",
-  "window.standard.head.active",
-  "window.standard.head.inactive",
-  "window.standard.head.solid",
-  "window.standard.head.sheet-solid",
-  "window.standard.divider",
-  "window.standard.close.normal",
-  "window.standard.close.inactive",
-  "window.standard.close.highlighted",
-  "window.standard.close.unsaved",
-  "window.standard.close.unsaved-inactive",
-  "window.standard.close.unsaved-highlighted",
-  "window.standard.minimise.normal",
-  "window.standard.minimise.highlighted",
-  "window.standard.zoom.normal",
-  "window.standard.zoom.highlighted",
-  "window.standard.resize",
-  "window.standard.shadow",
-  "window.sheet.shadow",
-  "window.popover.frame",
-  "window.hud.frame",
-  "window.hud.close.normal",
-  "window.hud.close.highlighted",
-] as const);
-
-export type NSEWindowAppearanceRecipeId = (typeof NSE_WINDOW_APPEARANCE_RECIPE_IDS)[number];
-
 export const NSE_WINDOW_GEOMETRY = Object.freeze({
   titleBarHeight: 31,
   controlHitTarget: 44,

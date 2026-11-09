@@ -99,7 +99,7 @@ describe("definite authoring errors", () => {
   it("rejects CSS UI colours but accepts semantic values and theme value provisioning", () => {
     expect(inspectStyleErrors({file:"view.css", text:'.label { color: #123456; }'})).toContainEqual(expect.objectContaining({rule:"idiom.ui-colour", severity:"error"}));
     expect(inspectStyleErrors({file:"view.css", text:'.label { color: var(--nse-app-label); }'})).toEqual([]);
-    expect(inspectStyleErrors({file:"custom.css", text:'[data-nse-appearance="custom"] { --nse-app-label: #123456; }'})).toEqual([]);
+    expect(inspectStyleErrors({file:"custom.css", text:'[data-nse-theme="custom"] { --nse-app-label: #123456; }'})).toEqual([]);
   });
   it("does not mistake a photo, file input, section header or ordinary browser API for misuse", () => {
     const source = '<><img src="holiday.jpg" alt="The beach"/><input type="file"/><section role="group"><h2>FOLDERS</h2></section></>; fetch("/data"); Math.sin(1); navigator.clipboard.writeText("x");';

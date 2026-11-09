@@ -133,7 +133,7 @@ function NSEViewAppearance({ appearance, children }: { readonly appearance: NSEA
   const scheme = appearance.name === "darkAqua" ? "dark" : "light";
   return (
     <NSEAppearanceProvider
-      appearance={appearance.theme ?? inherited.appearance}
+      theme={appearance.theme ?? inherited.theme}
       colourScheme={scheme}
       resolvedColourScheme={scheme}
       {...(appearance.chrome ? { chrome: appearance.chrome } : {})}

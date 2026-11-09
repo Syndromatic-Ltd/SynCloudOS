@@ -24,8 +24,8 @@ import * as cssTree from "css-tree";
 
 const structurePath = "src/NSE/Themes/Atmo/Resources/atmo-structure.css";
 const read = (path: string) => readFileSync(path, "utf8");
-const scope = ':where([data-nse-appearance="atmo"])';
-const tooltipScope = ':where([data-nse-appearance="atmo"], [data-nse-appearance="atmo"] *)';
+const scope = ':where([data-nse-theme="com.syndromatic.atmo"])';
+const tooltipScope = ':where([data-nse-theme="com.syndromatic.atmo"], [data-nse-theme="com.syndromatic.atmo"] *)';
 const tooltipSelector = `.nse-tooltip[data-nse-control="tooltip"]${tooltipScope}`;
 const tooltipArrowSelector = `.nse-tooltip${tooltipScope} > .nse-tooltip-arrow`;
 const compactSelector = (selector: string) => cssTree.generate(cssTree.parse(selector, { context: "selector" }));
@@ -57,7 +57,7 @@ describe("Atmo control structure", () => {
       enter(node: cssTree.CssNode) {
         if (node.type === "Atrule" && /keyframes$/iu.test(node.name)) keyframesDepth += 1;
         if (node.type !== "Rule" || keyframesDepth > 0) return;
-        for (const selector of cssTree.generate(node.prelude).split(/,(?![^(]*\))/u)) {
+        for (const selector of node.prelude.type === "SelectorList" ? node.prelude.children.toArray().map(cssTree.generate) : []) {
           // Ordinary overlays scope their own resolved appearance; tooltips
           // also support an ancestor scope. Both forms keep appearance inside
           // zero-specificity :where(), including portalled tooltip surfaces.
@@ -91,8 +91,8 @@ describe("Atmo control structure", () => {
     expect(structure).toContain(`.nse-overlay-popup${scope}.nse-overlay-popup--listbox`);
     // The application menu carries its own surface; the generic frame skips it
     // so it is never drawn twice.
-    expect(atmo).toContain('.nse-overlay-popup[data-nse-appearance="atmo"]:is(.nse-overlay-popup--menu, .nse-overlay-popup--submenu, .nse-overlay-popup--context-menu):not(.nse-overlay-popup--application-menu)::after');
-    expect(atmo).toContain('.nse-overlay-popup[data-nse-appearance="atmo"].nse-overlay-popup--listbox::before');
+    expect(atmo).toContain('.nse-overlay-popup[data-nse-theme="com.syndromatic.atmo"]:is(.nse-overlay-popup--menu, .nse-overlay-popup--submenu, .nse-overlay-popup--context-menu):not(.nse-overlay-popup--application-menu)::after');
+    expect(atmo).toContain('.nse-overlay-popup[data-nse-theme="com.syndromatic.atmo"].nse-overlay-popup--listbox::before');
   });
 
   it("owns the popup panel, tooltip and popover-window families", () => {
@@ -106,10 +106,10 @@ describe("Atmo control structure", () => {
     expect(declarationsFor(tooltipArrowSelector)).toMatchObject({ position: "absolute", "inline-size": "9px", "block-size": "9px", transform: "rotate(45deg)" });
     for (const edge of ["block-end", "block-start"]) expect(structure).toContain(`.nse-window-view--popover[data-window-arrow-edge="${edge}"]::before`);
     for (const alignment of ["start", "center", "end"]) expect(structure).toContain(`.nse-window-view--popover[data-window-arrow-alignment="${alignment}"]::before`);
-    expect(atmo).toContain('.nse-overlay-popup[data-nse-appearance="atmo"]:is(.nse-overlay-popup--popover, .nse-overlay-popup--action-sheet)::before');
-    expect(declarationsFor('.nse-tooltip:is([data-nse-appearance="atmo"], [data-nse-appearance="atmo"] *)::before', "src/NSE/Themes/Atmo/Resources/atmo.css")).toMatchObject({
+    expect(atmo).toContain('.nse-overlay-popup[data-nse-theme="com.syndromatic.atmo"]:is(.nse-overlay-popup--popover, .nse-overlay-popup--action-sheet)::before');
+    expect(declarationsFor('.nse-tooltip:is([data-nse-theme="com.syndromatic.atmo"], [data-nse-theme="com.syndromatic.atmo"] *)::before', "src/NSE/Themes/Atmo/Resources/atmo.css")).toMatchObject({
       content: '""', position: "absolute", inset: "0", "pointer-events": "none", "border-radius": "7px",
     });
-    expect(atmo).toContain('[data-nse-appearance="atmo"] .nse-window-view.nse-window-view--popover::before');
+    expect(atmo).toContain('[data-nse-theme="com.syndromatic.atmo"] .nse-window-view.nse-window-view--popover::before');
   });
 });

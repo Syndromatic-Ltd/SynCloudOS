@@ -324,7 +324,7 @@ export function auditSynWareIdioms({ root, applications, sdkRoot, entries = [] }
     const unknown = unknownTokenUses(read(file), { has: token => known.has(token) || local.has(token) });
     const visible = unknown.filter(([, , index]) => !regionsFor(file).some(region => region.start <= index && index < region.end));
     stylesheetReport.unknownTokens += visible.length;
-    for (const [name, line] of visible) at(file, line, "idiom.nse-token", `The installed SDK does not define: ${name}. Use the neutral --nse-colour-* semantic values described by NSEAppearanceDefinition from @syndromatic/syncloudos/nse, or supply this value in your own theme; see docs/framework/appearance.md.`);
+    for (const [name, line] of visible) at(file, line, "idiom.nse-token", `The installed SDK does not define: ${name}. Use the neutral --nse-colour-* semantic values described by NSETheme from @syndromatic/syncloudos/nse, or supply this value in your own theme; see docs/framework/appearance.md.`);
   }
   for (const file of stylesheets) {
     const text = read(file);

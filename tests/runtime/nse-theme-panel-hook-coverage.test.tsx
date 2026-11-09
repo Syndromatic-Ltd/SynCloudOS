@@ -6,14 +6,14 @@ import { afterEach, describe, expect, it } from "vitest";
 import { themeBaselineCatalogue } from "../e2e/fixtures/theme-baseline/catalogue";
 import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance/NSEAppearanceProvider";
-import { atmoAppearance } from "../../src/NSE/Themes/Atmo";
+import { atmoTheme } from "../../src/NSE/Themes/Atmo";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 import { nseThemeParts } from "../../src/NSE/Theme/contract/vocabulary";
 
 afterEach(cleanup);
 const parts = new Set<string>(nseThemeParts);
 const presentation = createStaticPresentationPort({ width: 1000, height: 800, reducedMotion: true });
-function SurfaceHost({ children }: { children: React.ReactNode }) { return <NSEAppearanceProvider appearance={atmoAppearance} colourScheme="light"><NSEStandaloneControlHost document={document} window={window} presentation={presentation}>{children}</NSEStandaloneControlHost></NSEAppearanceProvider>; }
+function SurfaceHost({ children }: { children: React.ReactNode }) { return <NSEAppearanceProvider theme={atmoTheme} colourScheme="light"><NSEStandaloneControlHost document={document} window={window} presentation={presentation}>{children}</NSEStandaloneControlHost></NSEAppearanceProvider>; }
 describe("date, panel and window theme hooks", () => {
   for (const surface of additionalThemeCatalogue.filter(surface => surface.id.startsWith("date-picker-"))) it(`AppKit metadata: ${surface.id}`, () => {
     const view = render(<SurfaceHost>{surface.render("light")}</SurfaceHost>);

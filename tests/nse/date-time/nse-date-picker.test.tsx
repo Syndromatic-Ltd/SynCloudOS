@@ -332,12 +332,11 @@ describe("civil date/time pickers", () => {
     const datePicker = screen.getByRole("textbox", { name: "Date" }).closest('[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])')!;
     const dateTimePicker = screen.getByRole("textbox", { name: "Appointment date and time" }).closest('[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"])')!;
     const timePicker = screen.getByRole("spinbutton", { name: "Minute" }).closest('[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"])')!;
-    expect(datePicker.getAttribute("data-nse-appearance-slot")).toBe("date-picker.select.normal.1x");
-    expect(dateTimePicker.getAttribute("data-nse-appearance-slot")).toBe("date-time-picker.select.normal.1x");
-    expect(timePicker.getAttribute("data-nse-appearance-slot")).toBe("time-picker.select.normal.1x");
+
+
     for (const control of [datePicker, dateTimePicker, timePicker]) {
-      expect(control.getAttribute("data-nse-appearance-authority")).toBeNull();
-      expect(control.getAttribute("data-nse-appearance-recipe-id")).toBeNull();
+      expect(control.getAttribute("data-nse-theme-authority")).toBeNull();
+
     }
     fireEvent.keyDown(screen.getByRole("spinbutton", { name: "Minute" }), { key: "ArrowUp" });
     expect(timeChange).toHaveBeenCalledWith({ hour: 13, minute: 6, second: 0 }, "commit");

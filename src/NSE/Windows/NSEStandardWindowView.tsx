@@ -62,16 +62,17 @@ export function NSEStandardWindowView(props: NSEWindowViewProps) {
       key={edge}
       className={`nse-window__resize-handle nse-window__resize-handle--${edge}`}
       data-window-resize-edge={edge}
-      data-window-appearance-recipe="window.standard.resize"
+
       aria-hidden="true"
     />
   )) : null;
   return (
     <NSEWindowView
       {...props}
+      hasShadow={paintsSystemChrome}
       className="nse-window-view--standard"
-      appearanceRecipe="window.standard.frame"
-      shadowRecipe={paintsSystemChrome ? "window.standard.shadow" : undefined}
+
+
       titleBar={titleBar}
       resizeHandles={resizeHandles}
     />

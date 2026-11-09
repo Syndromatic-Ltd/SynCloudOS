@@ -1,0 +1,26 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-theme-definition.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-theme-definition.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-theme-definition.test.ts [ tests/runtime/nse-theme-definition.test.ts ]
+Error: Cannot find module '../../src/NSE/Theme/NSETheme' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/nse-theme-definition.test.ts
+ ❯ tests/runtime/nse-theme-definition.test.ts:4:1
+      2| import * as appearance from "../../src/NSE/public/appearance";
+      3| import * as publicNSE from "../../src/NSE/sdkPackageEntry";
+      4| import { freezeNSETheme } from "../../src/NSE/Theme/NSETheme";
+       | ^
+      5| import { atmoTheme } from "../../src/NSE/Themes/Atmo";
+      6| describe("NSETheme replaces appearance definitions", () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  22:22:17
+   Duration  2.88s (transform 2.02s, setup 26ms, import 0ms, tests 0ms, environment 0ms)

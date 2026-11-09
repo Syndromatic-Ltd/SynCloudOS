@@ -196,7 +196,7 @@ function GridCollectionView<T, TId extends string | number>({
                     aria-colindex={position.column + 1}
                     aria-rowindex={position.row + 1}
                     data-nse-part="item" data-nse-selected={selected ? "" : undefined} data-nse-focused={focused ? "" : undefined} data-nse-enabled={entry.disabled ? "false" : undefined} className="nse-collection-item"
-                    data-appearance-recipe="collection-item"
+
                     data-selected={selected || undefined}
                     data-focused={focused || undefined}
                     data-editing={editing || undefined}

@@ -1008,7 +1008,7 @@ export function NSEBox({
         data-title-position={position}
         data-box-kind="separator"
         data-border-style={border}
-        data-appearance-recipe={`box.separator.${border}.${position}`}
+
         style={style}
       />
     );
@@ -1056,7 +1056,7 @@ export function NSEBox({
       data-transparent={String(isTransparent)}
       data-custom-fill={resolvedFill === undefined ? undefined : "true"}
       data-custom-border={resolvedBorder !== undefined || resolvedWidth !== undefined || cornerRadius !== undefined || cornerCurve !== undefined ? "true" : undefined}
-      data-appearance-recipe={`box.${boxType}.${border}.${position}`}
+
       data-nse-layout-margins={resolvedMargins ? undefined : "standard"}
       style={customStyle}
     >

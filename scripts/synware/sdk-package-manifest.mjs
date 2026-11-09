@@ -92,7 +92,7 @@ export function sdkDirectoryFiles(root, prefix = "") {
 /** Include implementation, shipped documentation and build inputs; exclude tests/receipts. */
 export function captureSdkSourceFingerprint(repositoryRoot) {
   const paths = execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard", "-z", "--",
-    "src", "public", "docs/framework", "scripts/synware", "scripts/developer-mcp", "package.json", "package-lock.json", "LICENSE", "NOTICE", "THIRD_PARTY.md", "ARTWORK.md", "licenses", ":(glob)tsconfig*.json", ".npmrc"],
+    "src", "public", "tooling/nse-theme-contract.json", "docs/framework", "scripts/synware", "scripts/developer-mcp", "package.json", "package-lock.json", "LICENSE", "NOTICE", "THIRD_PARTY.md", "ARTWORK.md", "licenses", ":(glob)tsconfig*.json", ".npmrc"],
   { cwd: repositoryRoot, encoding: "utf8", maxBuffer: 32 * 1024 * 1024 }).split("\0").filter(Boolean);
   // Tracked deletions remain in the inventory so they cannot retain the old hash.
   const missing = paths.filter(path => {

@@ -19,12 +19,12 @@
  */
 
 import type { NSEAppearanceName } from "./nseAppearanceTypes";
-import type { NSEAppearanceDefinition } from "./NSEAppearanceDefinition";
+import type { NSETheme } from "../Theme/NSETheme";
 import type { NSEChromeAppearance, NSEContrast, NSETransparency } from "./nseAppearanceTypes";
 
 export interface NSEAppearanceOptions {
   /** The theme that draws it. Default: the theme of the view it is set on, Atmo in an application. */
-  readonly theme?: NSEAppearanceDefinition;
+  readonly theme?: NSETheme;
   /** The window chrome the theme draws inside it. Default: inherited. */
   readonly chrome?: NSEChromeAppearance;
   /** Increased contrast (AppKit's accessibilityHighContrast appearances). Default: inherited. */
@@ -41,7 +41,7 @@ export interface NSEAppearanceOptions {
 export class NSEAppearance {
   /** NSAppearance.name: `aqua` (light) or `darkAqua` (dark). */
   readonly name: NSEAppearanceName;
-  readonly theme: NSEAppearanceDefinition | undefined;
+  readonly theme: NSETheme | undefined;
   readonly chrome: NSEChromeAppearance | undefined;
   readonly contrast: NSEContrast | undefined;
   readonly transparency: NSETransparency | undefined;

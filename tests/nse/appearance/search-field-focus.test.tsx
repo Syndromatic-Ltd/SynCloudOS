@@ -53,7 +53,7 @@ afterEach(cleanup);
 function mount(props: NSESearchFieldProps = {}, contrast = "normal") {
   const { container } = render(<>
     <style>{paint}</style>
-    <div data-nse-appearance="atmo" data-nse-contrast={contrast}>
+    <div data-nse-theme="com.syndromatic.atmo" data-nse-contrast={contrast}>
       <NSESearchField aria-label="Find" {...props} />
     </div>
     <button>Outside</button>

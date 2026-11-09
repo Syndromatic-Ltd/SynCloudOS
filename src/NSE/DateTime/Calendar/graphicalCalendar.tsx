@@ -20,7 +20,7 @@
 
 import { useNSEDatePickerDrawing } from "../Pickers/datePickerDrawing";
 import { useId, useMemo, useRef } from "react";
-import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
+
 import { addCalendarDays, addCalendarMonths, calendarWeekStart, civilToEpochDay, comparePlainDates, epochDayToCivil } from "../calendarArithmetic";
 import { plainDateToday } from "../dateTimeFormatting";
 import type { NSECalendarMonth, NSEPlainDate } from "../dateTimeTypes";
@@ -75,7 +75,7 @@ export function NSEGraphicalCalendar(props: NSEGraphicalCalendarProps) {
   }), [props.locale]);
   const localeDirection = (new Intl.Locale(props.locale) as Intl.Locale & { textInfo?: { direction: "ltr" | "rtl" } }).textInfo?.direction;
   const direction = props.dir ?? localeDirection ?? "ltr";
-  const appearance = useNSEAppearanceSlot(nseAppearanceSlot("calendar-view", "grid", "normal"));
+
   const weekdayLabels = Array.from({ length: 7 }, (_, index) => formatters.weekday.format((3 + ((start + index) % 7)) * 86_400_000));
   const navigate = (unit: NSECalendarNavigationUnit, direction: -1 | 1, reason: NSECalendarNavigationRequest["reason"]) => props.onVisibleMonthChange?.(monthBy(props.visibleMonth, unit, direction), { unit, direction, reason });
   const select = (date: NSEPlainDate, reason = "pointer") => {
@@ -90,7 +90,7 @@ export function NSEGraphicalCalendar(props: NSEGraphicalCalendarProps) {
     } else props.onSelectionChange?.({ kind: "single", value: date, reason });
   };
   const drawing = useNSEDatePickerDrawing("date", true, "clockAndCalendar", undefined, "calendar", props.selection.kind === "range" ? "range" : undefined);
-  return <section {...drawing.attributes} {...drawing.events} data-calendar-variant={props.variant ?? "full"} data-state="ready" data-motion={props.reducedMotion ? "reduced" : "full"} {...appearance.attributes} dir={direction} onPointerDown={(event) => { if (props.enableSwipeNavigation === false || (event.pointerType && event.pointerType !== "touch" && event.pointerType !== "pen")) return; swipe.current = { pointerId: event.pointerId, startX: event.clientX }; event.currentTarget.setPointerCapture?.(event.pointerId); }} onPointerUp={(event) => { const activeSwipe = swipe.current; if (!activeSwipe || activeSwipe.pointerId !== event.pointerId) return; swipe.current = null; const delta = event.clientX - activeSwipe.startX; if (Math.abs(delta) < 40) return; const logicalDirection: -1 | 1 = delta < 0 ? 1 : -1; navigate("month", direction === "rtl" ? (logicalDirection * -1) as -1 | 1 : logicalDirection, "swipe"); }} onPointerCancel={() => { swipe.current = null; }} onLostPointerCapture={() => { swipe.current = null; }}>
+  return <section {...drawing.attributes} {...drawing.events} data-calendar-variant={props.variant ?? "full"} data-state="ready" data-motion={props.reducedMotion ? "reduced" : "full"}  dir={direction} onPointerDown={(event) => { if (props.enableSwipeNavigation === false || (event.pointerType && event.pointerType !== "touch" && event.pointerType !== "pen")) return; swipe.current = { pointerId: event.pointerId, startX: event.clientX }; event.currentTarget.setPointerCapture?.(event.pointerId); }} onPointerUp={(event) => { const activeSwipe = swipe.current; if (!activeSwipe || activeSwipe.pointerId !== event.pointerId) return; swipe.current = null; const delta = event.clientX - activeSwipe.startX; if (Math.abs(delta) < 40) return; const logicalDirection: -1 | 1 = delta < 0 ? 1 : -1; navigate("month", direction === "rtl" ? (logicalDirection * -1) as -1 | 1 : logicalDirection, "swipe"); }} onPointerCancel={() => { swipe.current = null; }} onLostPointerCapture={() => { swipe.current = null; }}>
     <header data-nse-part="header">
       {props.variant !== "month" ? <button type="button" aria-label="Previous year" data-nse-part="previous-year" onClick={() => navigate("year", -1, "button")}>−y</button> : null}
       <button type="button" aria-label="Previous month" data-nse-part="previous-month" onClick={() => navigate("month", -1, "button")}>−m</button>
@@ -99,7 +99,7 @@ export function NSEGraphicalCalendar(props: NSEGraphicalCalendarProps) {
       <button type="button" aria-label="Next month" data-nse-part="next-month" onClick={() => navigate("month", 1, "button")}>+m</button>
       {props.variant !== "month" ? <button type="button" aria-label="Next year" data-nse-part="next-year" onClick={() => navigate("year", 1, "button")}>+y</button> : null}
     </header>
-    <div ref={gridRef} role="grid" aria-label={props["aria-label"]} {...appearance.attributes} onKeyDown={(event) => {
+    <div ref={gridRef} role="grid" aria-label={props["aria-label"]}  onKeyDown={(event) => {
       if (event.key === "PageDown" || event.key === "PageUp") { event.preventDefault(); navigate(event.altKey ? "decade" : event.shiftKey ? "year" : "month", event.key === "PageDown" ? 1 : -1, "keyboard"); return; }
       const inline = direction === "rtl" ? -1 : 1;
       const homeDelta = -((weekday(active) - start + 7) % 7);

@@ -51,8 +51,8 @@ describe("application content colours", () => {
 
   it("lets Atmo define every token it draws differently, in light and dark", () => {
     const css = read("src/NSE/Themes/Atmo/Resources/atmo.css");
-    const light = block(css, '[data-nse-appearance="atmo"]');
-    const dark = block(css, '[data-nse-appearance="atmo"][data-mode="dark"],\n[data-nse-appearance="atmo"] [data-mode="dark"]');
+    const light = block(css, '[data-nse-theme="com.syndromatic.atmo"]');
+    const dark = block(css, '[data-nse-theme="com.syndromatic.atmo"][data-mode="dark"],\n[data-nse-theme="com.syndromatic.atmo"] [data-mode="dark"]');
     const themed = documented.filter(token => token !== "--nse-colour-window-background" && token !== "--nse-colour-label");
     for (const token of themed) {
       expect(light.has(token), `Atmo light ${token}`).toBe(true);

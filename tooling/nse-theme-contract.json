@@ -1094,8 +1094,11 @@
     "toolbar": {
       "parts": [
         "background",
+        "border",
         "flexible-space",
+        "highlight",
         "separator",
+        "shadow",
         "space"
       ],
       "states": [],
@@ -1127,11 +1130,16 @@
     },
     "toolbar-item": {
       "parts": [
+        "background",
+        "border",
         "custom",
+        "highlight",
         "image",
         "item",
         "overflow",
         "overflow-glyph",
+        "separator",
+        "shadow",
         "title"
       ],
       "states": [
@@ -1185,6 +1193,7 @@
         "content",
         "header",
         "leading",
+        "shadow",
         "subtitle",
         "title",
         "trailing",
@@ -1266,7 +1275,7 @@
     ],
     "contrast": [
       "normal",
-      "increased",
+      "high",
       "forced"
     ],
     "transparency": [

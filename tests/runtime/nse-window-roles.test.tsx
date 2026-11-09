@@ -88,7 +88,7 @@ describe("NSE dedicated window roles", () => {
     const shadow = window.querySelector<HTMLElement>("[data-window-shadow-layer]");
     const surface = window.querySelector<HTMLElement>("[data-window-surface]");
     expect(shadow).not.toBeNull();
-    expect(shadow?.getAttribute("data-window-shadow-layer")).toBe("window.standard.shadow");
+    expect(shadow?.getAttribute("data-nse-part")).toBe("shadow");
     expect(shadow?.getAttribute("aria-hidden")).toBe("true");
     expect(shadow?.getAttribute("data-nse-nine-slice")).toBe("window-shadow");
     expect(shadow?.querySelectorAll("[data-nse-nine-slice-part]")).toHaveLength(9);
@@ -102,7 +102,7 @@ describe("NSE dedicated window roles", () => {
       <NSEHUDWindowView {...roleProps("hud", "Levels")}><p>Levels</p></NSEHUDWindowView>,
     );
     const hud = screen.getByRole("dialog", { name: "Levels" });
-    expect(hud.getAttribute("data-window-appearance-recipe")).toBe("window.hud.frame");
+
     expect(hud.querySelector("[data-window-hud-titlebar]")).not.toBeNull();
     expect(screen.queryByRole("button", { name: /Minimise/ })).toBeNull();
     expect(screen.queryByRole("button", { name: /Zoom/ })).toBeNull();
@@ -128,7 +128,7 @@ describe("NSE dedicated window roles", () => {
     const sheet = screen.getByRole("dialog", { name: "Save changes?" });
     expect(sheet.getAttribute("aria-modal")).toBe("true");
     expect(sheet.getAttribute("data-window-parent-id")).toBe("parent-window");
-    expect(sheet.getAttribute("data-window-shadow-recipe")).toBe("window.sheet.shadow");
+
   });
 
   it("retains popover anchor, arrow and outside-dismiss provenance", () => {
@@ -141,7 +141,7 @@ describe("NSE dedicated window roles", () => {
     expect(popover.getAttribute("data-window-arrow-edge")).toBe("block-end");
     expect(popover.getAttribute("data-window-arrow-alignment")).toBe("center");
     expect(popover.getAttribute("data-window-outside-dismiss")).toBe("true");
-    expect(popover.getAttribute("data-window-appearance-recipe")).toBe("window.popover.frame");
+
     expect(popover.querySelector("[data-window-titlebar]")).toBeNull();
   });
 

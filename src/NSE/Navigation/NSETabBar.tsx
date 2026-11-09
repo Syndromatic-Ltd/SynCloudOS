@@ -34,13 +34,8 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { NSELabelHelp } from "../Tooltips/NSELabelHelp";
+import { useNSEAppearance } from "../Appearance";
 import { useOptionalNSETooltipProvider } from "../Tooltips/NSETooltipProvider";
-import {
-  nseAppearanceSlot,
-  projectNSEAppearanceSlot,
-  useNSEAppearance,
-  type NSEAppearanceSlotProjection,
-} from "../Appearance";
 import {
   getNSETabBarPanelId,
   getNSETabBarTabId,
@@ -134,16 +129,15 @@ function tabChromeState(
 }
 
 function tabChromeMetadata(
-  slot: NSEAppearanceSlotProjection,
   segment: NSETabChromeSegment,
   state: NSETabChromeState,
 ) {
   return {
-    "data-nse-tab-chrome-family": slot.recipeId ? "grouped-toolbutton" : undefined,
-    "data-nse-tab-chrome-variant": slot.recipeId ? "tall" : undefined,
+    "data-nse-tab-chrome-family": "grouped-toolbutton",
+    "data-nse-tab-chrome-variant": "tall",
     "data-nse-tab-chrome-segment": segment,
     "data-nse-tab-chrome-state": state,
-    "data-nse-tab-chrome-active": slot.recipeId ? "true" : "false",
+    "data-nse-tab-chrome-active": "true",
   };
 }
 
@@ -211,7 +205,7 @@ export function NSETabBar({
 }: NSETabBarProps) {
   const subscribe = useCallback((listener: () => void) => controller.subscribe(listener), [controller]);
   const snapshot = useSyncExternalStore(subscribe, controller.getSnapshot, controller.getSnapshot);
-  const appearance = useNSEAppearance();
+
   const generatedIdScope = useId().replace(/:/g, "");
   const resolvedIdScope = idScope ?? generatedIdScope;
   const directDestinations = snapshot.directDestinationIds.flatMap((id) => {
@@ -327,32 +321,12 @@ export function NSETabBar({
   const moreSelected = snapshot.activeTabId === NSETabBarMoreDestinationId;
   const morePressed = pressedTabId === NSETabBarMoreDestinationId;
   const moreState = stateForTab(NSETabBarMoreDestinationId, moreSelected, false);
-  const moreAppearance = projectNSEAppearanceSlot(
-    nseAppearanceSlot("tab-bar", "tab", moreState),
-    appearance,
-  );
-  const moreLabelAppearance = projectNSEAppearanceSlot(
-    nseAppearanceSlot("tab-bar", "label", moreState),
-    appearance,
-  );
-  const moreIconAppearance = projectNSEAppearanceSlot(
-    nseAppearanceSlot("tab-bar", "icon", moreState),
-    appearance,
-  );
+
+
   const moreIcon = projectNSENavigationIcon(nseTabBarMoreIcon, moreState);
   const moreIconStyle = tabIconStyle(nseTabBarMoreIcon);
-  const unresolvedChromeSlots = [
-    ...directDestinations.map((destination) => {
-      const selected = snapshot.activeTabId === destination.id;
-      const state = stateForTab(destination.id, selected, Boolean(destination.disabled));
-      return projectNSEAppearanceSlot(nseAppearanceSlot("tab-bar", "tab", state), appearance);
-    }),
-    ...(overflowDestinations.length > 0 ? [moreAppearance] : []),
-  ].filter((projection) => projection.recipeId === null)
-    .map((projection) => projection.slot);
-  const unresolvedChromeSlotList = [...new Set(unresolvedChromeSlots)];
-  const usesTallTabChrome = unresolvedChromeSlotList.length === 0;
-  const chromeStatus = unresolvedChromeSlotList.length > 0 ? "unresolved" : "resolved";
+
+  const usesTallTabChrome = true;
   const iconMaterialId = `${resolvedIdScope.replace(/[^\w-]/g, "")}-nse-tab-icon-material`;
   const tabListStyle = {
     "--nse-tab-visible-count": controls.length,
@@ -369,8 +343,6 @@ export function NSETabBar({
         data-orientation={orientation}
         data-safe-area-wrapper="true"
         data-reduced-motion={reducedMotion ? "true" : "false"}
-        data-nse-tab-chrome-status={chromeStatus}
-        data-nse-tab-unresolved-chrome-slots={unresolvedChromeSlotList.join(",") || undefined}
         dir={dir}
         style={tabListStyle}
       >
@@ -392,29 +364,14 @@ export function NSETabBar({
           data-nse-tab-overflow-count={overflowDestinations.length}
           data-nse-tab-overflow-open={overflowOpen ? "true" : "false"}
           data-reduced-motion={reducedMotion ? "true" : "false"}
-          data-nse-tab-chrome-status={chromeStatus}
-          data-nse-tab-unresolved-chrome-slots={unresolvedChromeSlotList.join(",") || undefined}
           style={tabListStyle}
         >
         {directDestinations.map((destination, index) => {
           const selected = snapshot.activeTabId === destination.id;
           const pressed = pressedTabId === destination.id;
           const state = stateForTab(destination.id, selected, Boolean(destination.disabled));
-          const tabAppearance = projectNSEAppearanceSlot(
-            nseAppearanceSlot("tab-bar", "tab", state),
-            appearance,
-          );
-          const iconAppearance = projectNSEAppearanceSlot(
-            nseAppearanceSlot("tab-bar", "icon", state),
-            appearance,
-          );
-          const labelAppearance = projectNSEAppearanceSlot(
-            nseAppearanceSlot("tab-bar", "label", state),
-            appearance,
-          );
-          const badgeAppearance = destination.badge === undefined
-            ? null
-            : projectNSEAppearanceSlot(nseAppearanceSlot("tab-bar", "badge", state), appearance);
+
+
           const icon = projectNSENavigationIcon(destination.icon, state);
           const iconStyle = tabIconStyle(destination.icon);
           const segment = tabChromeSegment(index, orientation === "vertical" ? 1 : controls.length);
@@ -442,8 +399,8 @@ export function NSETabBar({
               data-nse-tab-destination={destination.id}
               data-nse-tab-presentation-state={state}
               data-nse-tab-visual-state={tabVisualState(state, selected, pressed)}
-              {...tabChromeMetadata(tabAppearance, segment, chromeState)}
-              {...tabAppearance.attributes}
+              {...tabChromeMetadata(segment, chromeState)}
+
               onFocus={() => {
                 setFocusedTabId(destination.id);
                 setPaintFocusedTabId(destination.id);
@@ -479,13 +436,13 @@ export function NSETabBar({
                   data-nse-tab-icon-ready={icon.kind === "vector" ? "true" : "false"}
                   data-nse-tab-icon-state={icon.state}
                   style={iconStyle}
-                  {...iconAppearance.attributes}
+
                 >
                   <span data-nse-part="indicator" className="nse-tab-bar-icon-glyph" data-nse-tab-icon-glyph="true" />
                 </span>
-                <span data-nse-part="title" className="nse-tab-bar-label" {...labelAppearance.attributes}>{destination.compactLabel ?? destination.label}</span>
-                {destination.badge !== undefined && badgeAppearance ? (
-                  <span data-nse-part="badge" className="nse-tab-bar-badge" data-nse-tab-badge="true" aria-hidden="true" {...badgeAppearance.attributes}>{destination.badge}</span>
+                <span data-nse-part="title" className="nse-tab-bar-label" >{destination.compactLabel ?? destination.label}</span>
+                {destination.badge !== undefined ? (
+                  <span data-nse-part="badge" className="nse-tab-bar-badge" data-nse-tab-badge="true" aria-hidden="true" >{destination.badge}</span>
                 ) : null}
               </span>
             </button></NSELabelHelp>
@@ -512,11 +469,10 @@ export function NSETabBar({
             data-nse-tab-presentation-state={moreState}
             data-nse-tab-visual-state={tabVisualState(moreState, moreSelected, morePressed)}
             {...tabChromeMetadata(
-              moreAppearance,
               tabChromeSegment(controls.length - 1, orientation === "vertical" ? 1 : controls.length),
               tabChromeState(moreState, moreSelected, morePressed),
             )}
-            {...moreAppearance.attributes}
+
             onFocus={() => {
               setFocusedTabId(NSETabBarMoreDestinationId);
               setPaintFocusedTabId(NSETabBarMoreDestinationId);
@@ -552,11 +508,11 @@ export function NSETabBar({
                 data-nse-tab-icon-ready="true"
                 data-nse-tab-icon-state={moreIcon.state}
                 style={moreIconStyle}
-                {...moreIconAppearance.attributes}
+
               >
                 <span data-nse-part="indicator" className="nse-tab-bar-icon-glyph" data-nse-tab-icon-glyph="true" />
               </span>
-              <span data-nse-part="title" className="nse-tab-bar-label" {...moreLabelAppearance.attributes}>{moreTitle}</span>
+              <span data-nse-part="title" className="nse-tab-bar-label" >{moreTitle}</span>
             </span>
           </button></NSELabelHelp>
         ) : null}

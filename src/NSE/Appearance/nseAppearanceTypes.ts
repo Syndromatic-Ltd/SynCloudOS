@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { NSEAppearanceDefinition } from "./NSEAppearanceDefinition";
+import type { NSETheme } from "../Theme/NSETheme";
 
 export type NSEAppearanceName = "aqua" | "darkAqua";
 
@@ -36,7 +36,7 @@ export interface NSEAppearanceServicePort {
 }
 
 export interface NSEAppearanceSelection {
-  readonly appearance: NSEAppearanceDefinition;
+  readonly theme: NSETheme;
   readonly chrome: NSEChromeAppearance;
   readonly requestedColourScheme: NSEColourScheme;
   readonly resolvedColourScheme: NSEResolvedColourScheme;
@@ -47,7 +47,7 @@ export interface NSEAppearanceSelection {
 export type NSEResolvedAppearance = NSEAppearanceSelection;
 
 export interface NSEAppearanceDataAttributes {
-  readonly "data-nse-appearance": string;
+  readonly "data-nse-theme": string;
   readonly "data-nse-chrome": NSEChromeAppearance;
   readonly "data-nse-colour-scheme-requested": NSEColourScheme;
   readonly "data-nse-colour-scheme-resolved": NSEResolvedColourScheme;

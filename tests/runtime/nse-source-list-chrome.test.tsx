@@ -1,3 +1,4 @@
+import { createTestTheme } from "../fixtures/themes";
 // @vitest-environment jsdom
 import React from "react";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
@@ -5,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEOutlineView } from "../../src/NSE/DataViews/Outline";
 import { NSETreeController } from "../../src/NSE/Controllers/NSETreeController";
 import { SourceListFrameProvider, type SourceListFrameContextValue } from "../../src/NSE/Navigation/SourceList/sourceListFrameContext";
-import { defineNSEAppearance, NSEAppearanceProvider } from "../../src/NSE/Appearance";
+import { NSEAppearanceProvider } from "../../src/NSE/Appearance";
 import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
 import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
@@ -27,7 +28,7 @@ describe("source-list chrome ownership", () => {
   it("honours a view's explicit appearance override inside a differently themed source-list frame", () => {
     const frame: SourceListFrameContextValue = { railWidth: 254, defaultWidth: 254, minWidth: 220, maxWidth: 320, setRailWidth: vi.fn(), railLabel: "Gallery", scheme: "dark" };
     const list = sourceList();
-    const view = render(<SourceListFrameProvider value={frame}><NSEAppearanceProvider appearance={defineNSEAppearance({ id: "atmo", displayName: "Atmo" })} colourScheme="light">{list.view}</NSEAppearanceProvider></SourceListFrameProvider>);
+    const view = render(<SourceListFrameProvider value={frame}><NSEAppearanceProvider theme={createTestTheme("com.syndromatic.atmo", "Atmo")} colourScheme="light">{list.view}</NSEAppearanceProvider></SourceListFrameProvider>);
     expect(view.container.querySelector(".nse-appearance-provider")?.getAttribute("data-mode")).toBe("light");
     expect(view.container.querySelector('[data-style="source-list"]')).not.toBeNull();
     list.controller.dispose();

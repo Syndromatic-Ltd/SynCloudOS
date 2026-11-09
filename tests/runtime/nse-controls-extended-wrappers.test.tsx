@@ -26,7 +26,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance";
-import { atmoAppearance } from "../../src/NSE/Themes/Atmo";
+import { atmoTheme } from "../../src/NSE/Themes/Atmo";
 import { NSEButton, NSEImageView, NSESearchField, NSESegmentedControl } from "../../src/NSE/public/controls";
 import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
 import { HFXHapticEngine } from "../../src/FX/HapticsFX/HFXHapticEngine";
@@ -43,7 +43,7 @@ afterEach(() => {
 
 const presentation = createStaticPresentationPort({ width: 1024, height: 768 });
 function AppearanceHost({ children }: React.PropsWithChildren) {
-  return <NSEAppearanceProvider appearance={atmoAppearance}>
+  return <NSEAppearanceProvider theme={atmoTheme}>
     <NSEStandaloneControlHost document={document} window={window} presentation={presentation} parentResponderId="application:nse-control-gallery">
       {children}
     </NSEStandaloneControlHost>

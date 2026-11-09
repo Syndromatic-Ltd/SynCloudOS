@@ -236,7 +236,7 @@ export function NSEBrowser<T, TId extends string | number>({
       {presentation === "compact" && columns.length > 1 && (
         <button type="button" className="nse-browser-back" onClick={() => back(columns.length - 1)}>Back to {columns.length === 2 ? label : columns.at(-2)?.presentation.find((item) => Object.is(item.id, effectivePath.at(-2)?.id))?.label ?? label}</button>
       )}
-      <div className="nse-browser-columns" data-testid="browser-columns" dir={dir} data-appearance-recipe="browser-scroller">
+      <div className="nse-browser-columns" data-testid="browser-columns" dir={dir} >
         {visibleIndices.map((columnIndex) => {
           const column = columns[columnIndex]!;
           return (
@@ -261,7 +261,7 @@ export function NSEBrowser<T, TId extends string | number>({
                 aria-disabled={!allowsMutation || undefined}
                 tabIndex={allowsMutation ? 0 : -1}
                 className="nse-browser-resize"
-                data-appearance-recipe="browser-resize-grip"
+
                 onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
                   if (event.key === "ArrowRight") { event.preventDefault(); resize(columnIndex, dir === "rtl" ? -8 : 8); }
                   if (event.key === "ArrowLeft") { event.preventDefault(); resize(columnIndex, dir === "rtl" ? 8 : -8); }

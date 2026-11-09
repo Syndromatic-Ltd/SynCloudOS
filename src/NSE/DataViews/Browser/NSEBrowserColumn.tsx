@@ -80,7 +80,7 @@ export function NSEBrowserColumn<T, TId extends NSEDataViewKey>({ label, index, 
   };
 
   return (
-    <div data-nse-part="column" className="nse-browser-column" data-appearance-recipe="browser-column">
+    <div data-nse-part="column" className="nse-browser-column" >
       <div
         ref={viewportRef}
         role="listbox"
@@ -109,13 +109,13 @@ export function NSEBrowserColumn<T, TId extends NSEDataViewKey>({ label, index, 
               data-nse-part="row" data-nse-selected={active ? "" : undefined} data-nse-enabled={disabled ? "false" : undefined} className="nse-browser-option"
               data-focused={active || undefined}
               data-leaf={leaf || undefined}
-              data-appearance-recipe={leaf ? "browser-leaf" : "browser-branch"}
+
               style={{ insetBlockStart: virtualItem.start, blockSize: virtualItem.size }}
               onClick={() => { if (!disabled) { onActiveChange(id); onChoose(item); } }}
             >
               {item.icon}
               <span data-nse-part="title">{item.label}</span>
-              {!leaf && <span data-nse-part="disclosure" aria-hidden="true" data-appearance-recipe="browser-leaf-glyph" />}
+              {!leaf && <span data-nse-part="disclosure" aria-hidden="true"  />}
             </div>
           );
         })}

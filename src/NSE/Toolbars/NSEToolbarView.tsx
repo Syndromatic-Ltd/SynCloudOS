@@ -34,11 +34,6 @@ import {
 import type { NSESmoothSurfaceRequest } from "../SmoothSurface";
 import { classes, getControlSmoothSurfaceProps } from "../Controls/Core/nseControlsShared";
 import {
-  nseAppearanceSlot,
-  projectNSEAppearanceSlot,
-  useNSEAppearance,
-} from "../Appearance";
-import {
   NSEChromeBevel,
   NSEChromeCap,
   NSEChromeGloss,
@@ -199,11 +194,8 @@ function NSEConfiguredToolbar({
       itemRefs.current.get(last)?.focus({ preventScroll: true });
     }
   };
-  const appearance = useNSEAppearance();
-  const toolbarAppearance = projectNSEAppearanceSlot(
-    nseAppearanceSlot("toolbar", "surface", snapshot.diagnostic ? "disabled" : "normal"),
-    appearance,
-  );
+
+
   const toolbarChromeState: NSEChromeVisualState = snapshot.diagnostic ? "disabled" : "normal";
 
   return (
@@ -215,7 +207,7 @@ function NSEConfiguredToolbar({
       data-nse-control="toolbar"
       data-nse-part="background"
       data-state={snapshot.validating ? "loading" : snapshot.diagnostic ? "error" : "ready"}
-      {...toolbarAppearance.attributes}
+
       data-nse-toolbar-owner={controller.configuration.owner.kind}
       data-nse-toolbar-identifier={controller.configuration.identifier}
       data-nse-toolbar-display-mode={snapshot.displayMode}
@@ -225,17 +217,17 @@ function NSEConfiguredToolbar({
       data-nse-toolbar-clipped={layout.clipped ? "true" : undefined}
       onKeyDown={handleKeyDown}
     >
-      <NSEChromeSurface slot={toolbarAppearance} state={toolbarChromeState} />
-      <NSEChromeBevel slot={toolbarAppearance} state={toolbarChromeState} />
-      <NSEChromeGloss slot={toolbarAppearance} state={toolbarChromeState} />
-      <NSEChromeInnerShadow slot={toolbarAppearance} state={toolbarChromeState} />
+      <NSEChromeSurface  state={toolbarChromeState} />
+      <NSEChromeBevel  state={toolbarChromeState} />
+      <NSEChromeGloss  state={toolbarChromeState} />
+      <NSEChromeInnerShadow  state={toolbarChromeState} />
       {snapshot.diagnostic === "validation-failed" ? (
         <p
           role="status"
           className="nse-toolbar-validation-status"
           data-nse-part="validation-status"
           data-state="error"
-          data-appearance-recipe="toolbar.validation.error"
+
         >
           Toolbar commands are temporarily unavailable.
         </p>
@@ -244,25 +236,19 @@ function NSEConfiguredToolbar({
         const item = entry.item;
         const geometry = { inlineSize: `${entry.allocatedWidth}px` };
         if (item.kind === "space" || item.kind === "flexible-space") {
-          return <span key={entry.instanceId} className="nse-toolbar-space" style={geometry} aria-hidden="true" data-nse-part={item.kind} data-appearance-recipe={`toolbar.${item.kind}`} />;
+          return <span key={entry.instanceId} className="nse-toolbar-space" style={geometry} aria-hidden="true" data-nse-part={item.kind}  />;
         }
         if (item.kind === "separator") {
-          const separatorAppearance = projectNSEAppearanceSlot(
-            nseAppearanceSlot("toolbar", "separator", "normal"),
-            appearance,
-          );
-          return <span key={entry.instanceId} className="nse-toolbar-separator" style={geometry} aria-hidden="true" data-nse-part="separator" {...separatorAppearance.attributes}><NSEChromeSeparator slot={separatorAppearance} state="normal" /></span>;
+
+          return <span key={entry.instanceId} className="nse-toolbar-separator" style={geometry} aria-hidden="true" data-nse-part="separator" ><NSEChromeSeparator  state="normal" /></span>;
         }
         if (item.kind === "custom") {
-          const customAppearance = projectNSEAppearanceSlot(
-            nseAppearanceSlot("toolbar", "item", "normal"),
-            appearance,
-          );
+
           return (
-            <span key={entry.instanceId} className="nse-toolbar-custom" style={geometry} role="group" aria-label={item.label} data-nse-control="toolbar-item" data-nse-part="custom" data-state="ready" data-nse-toolbar-item-id={entry.instanceId} data-nse-toolbar-labelled={item.showsLabel && snapshot.displayMode !== "icon-only" ? "true" : undefined} {...customAppearance.attributes}>
-              <NSEChromeSurface slot={customAppearance} state="normal" />
-              <NSEChromeBevel slot={customAppearance} state="normal" />
-              <NSEChromeGloss slot={customAppearance} state="normal" />
+            <span key={entry.instanceId} className="nse-toolbar-custom" style={geometry} role="group" aria-label={item.label} data-nse-control="toolbar-item" data-nse-part="custom" data-state="ready" data-nse-toolbar-item-id={entry.instanceId} data-nse-toolbar-labelled={item.showsLabel && snapshot.displayMode !== "icon-only" ? "true" : undefined} >
+              <NSEChromeSurface  state="normal" />
+              <NSEChromeBevel  state="normal" />
+              <NSEChromeGloss  state="normal" />
               {item.showsLabel && snapshot.displayMode !== "icon-only" ? <>
                 <span data-nse-part="content" className="nse-toolbar-custom-view">{item.render()}</span>
                 <span data-nse-part="title" className="nse-toolbar-item-label" aria-hidden="true">{item.label}</span>
@@ -281,10 +267,7 @@ function NSEConfiguredToolbar({
                 : hoveredItemId === entry.instanceId
                   ? "hover"
                   : "normal";
-        const itemAppearance = projectNSEAppearanceSlot(
-          nseAppearanceSlot("toolbar", "item", itemAppearanceState),
-          appearance,
-        );
+
         return (
           <button
             key={entry.instanceId}
@@ -306,7 +289,7 @@ function NSEConfiguredToolbar({
             data-nse-toolbar-bordered={item.bordered ? undefined : "false"}
             data-nse-part="item"
             data-state={!item.enabled ? "disabled" : item.checked === "on" || item.checked === "mixed" ? "selected" : "normal"}
-            {...itemAppearance.attributes}
+
             aria-label={item.label}
             aria-pressed={item.checked === "mixed" ? "mixed" : item.checked === "on"}
             aria-disabled={!item.enabled || undefined}
@@ -337,12 +320,12 @@ function NSEConfiguredToolbar({
               if (validation.status === "published") await controller.dispatch(entry.instanceId);
             }}
           >
-            <NSEChromeSurface slot={itemAppearance} state={itemAppearanceState} />
-            <NSEChromeBevel slot={itemAppearance} state={itemAppearanceState} />
-            <NSEChromeCap slot={itemAppearance} state={itemAppearanceState} />
-            <NSEChromeSplice slot={itemAppearance} state={itemAppearanceState} />
-            <NSEChromeGloss slot={itemAppearance} state={itemAppearanceState} />
-            <NSEChromeInnerShadow slot={itemAppearance} state={itemAppearanceState} />
+            <NSEChromeSurface  state={itemAppearanceState} />
+            <NSEChromeBevel  state={itemAppearanceState} />
+            <NSEChromeCap  state={itemAppearanceState} />
+            <NSEChromeSplice  state={itemAppearanceState} />
+            <NSEChromeGloss  state={itemAppearanceState} />
+            <NSEChromeInnerShadow  state={itemAppearanceState} />
             {snapshot.displayMode !== "label-only" ? <span data-nse-part="image" className="nse-toolbar-item-icon" aria-hidden="true">{item.icon}</span> : null}
             {snapshot.displayMode !== "icon-only" ? <span data-nse-part="title" className="nse-toolbar-item-label">{item.label}</span> : null}
           </button>

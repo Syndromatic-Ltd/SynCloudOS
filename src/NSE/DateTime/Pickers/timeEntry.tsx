@@ -23,7 +23,7 @@ import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode 
 import { NSEGraphicalClock } from "../Calendar/graphicalClock";
 import type { NSEPlainDate, NSEPlainTime } from "../dateTimeTypes";
 import type { NSETimeEntryEditorMode, NSETimeEntryProps } from "./datePickerTypes";
-import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
+
 import { NSEButton } from "../../Controls/Buttons/NSEButton";
 import { NSEStepper } from "../../Controls/Values/NSEStepper";
 import { NSEPopUpButton } from "../../Menus/NSEPopUpButton";
@@ -351,10 +351,10 @@ export function NSETimeEntry({
       onClick={() => change(minimum, "commit")}
     />
   ));
-  const appearanceState = disabled ? "disabled" : focused ? "focused" : "normal";
-  const appearance = useNSEAppearanceSlot(nseAppearanceSlot("time-picker", "select", appearanceState));
+
+
   return (
-    <span {...hostProps} {...drawing.attributes} {...drawing.events} data-state={disabled ? "disabled" : current ? "ready" : "empty"} data-hour-mode={hourCycle === "h12" ? "12" : "24"} data-editor={editorMode} {...appearance.attributes} onFocusCapture={(event) => { drawing.events.onFocusCapture?.(event); setFocused(true); onFocusCapture?.(event); }} onBlurCapture={(event) => { drawing.events.onBlurCapture?.(event); if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false); onBlurCapture?.(event); }}>
+    <span {...hostProps} {...drawing.attributes} {...drawing.events} data-state={disabled ? "disabled" : current ? "ready" : "empty"} data-hour-mode={hourCycle === "h12" ? "12" : "24"} data-editor={editorMode}  onFocusCapture={(event) => { drawing.events.onFocusCapture?.(event); setFocused(true); onFocusCapture?.(event); }} onBlurCapture={(event) => { drawing.events.onBlurCapture?.(event); if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false); onBlurCapture?.(event); }}>
       {editor}
       <input ref={hiddenRef} type="hidden" {...(name ? { name: name } : {})} value={serializePlainTime(current ?? null)} />
     </span>

@@ -26,8 +26,9 @@ import {
   useSyncExternalStore,
   type PropsWithChildren,
 } from "react";
-import { defineNSEAppearance, type NSEAppearanceDefinition } from "./NSEAppearanceDefinition";
-import { projectNSEAppearance, projectNSEAppearanceSlot } from "./appearanceProjection";
+import type { NSETheme } from "../Theme/NSETheme";
+import { atmoTheme } from "../Themes/Atmo/appearance";
+import { projectNSEAppearance } from "./appearanceProjection";
 import type {
   NSEAppearanceServicePort,
   NSEChromeAppearance,
@@ -39,13 +40,9 @@ import type {
 } from "./nseAppearanceTypes";
 import "./nse-appearance.css";
 
-const defaultAppearance = defineNSEAppearance({
-  id: "default",
-  displayName: "NSE",
-});
 
 const defaultResolvedAppearance: NSEResolvedAppearance = Object.freeze({
-  appearance: defaultAppearance,
+  theme: atmoTheme,
   chrome: "standard",
   requestedColourScheme: "auto",
   resolvedColourScheme: "light",
@@ -57,7 +54,7 @@ const NSEAppearanceContext = createContext<NSEResolvedAppearance>(defaultResolve
 const emptySubscribe = () => () => undefined;
 
 export interface NSEAppearanceProviderProps extends PropsWithChildren {
-  readonly appearance: NSEAppearanceDefinition;
+  readonly theme: NSETheme;
   readonly chrome?: NSEChromeAppearance;
   readonly colourScheme?: NSEColourScheme;
   readonly resolvedColourScheme?: NSEResolvedColourScheme;
@@ -69,7 +66,7 @@ export interface NSEAppearanceProviderProps extends PropsWithChildren {
 }
 
 export function NSEAppearanceProvider({
-  appearance,
+  theme,
   chrome,
   colourScheme,
   resolvedColourScheme,
@@ -100,14 +97,14 @@ export function NSEAppearanceProvider({
     ? (resolvedColourScheme ?? (appearanceService ? serviceResolved : inherited.resolvedColourScheme))
     : requestedScheme;
   const value = useMemo<NSEResolvedAppearance>(() => Object.freeze({
-    appearance,
+    theme,
     chrome: chrome ?? inherited.chrome,
     requestedColourScheme: requestedScheme,
     resolvedColourScheme: resolvedScheme,
     contrast: contrast ?? inherited.contrast,
     transparency: transparency ?? inherited.transparency,
   }), [
-    appearance,
+    theme,
     chrome,
     contrast,
     inherited.chrome,
@@ -141,10 +138,4 @@ export function useNSEAppearance(): NSEResolvedAppearance {
 export function useNSEAppearanceProjection() {
   const appearance = useNSEAppearance();
   return useMemo(() => projectNSEAppearance(appearance), [appearance]);
-}
-
-/** Resolves one semantic control part without assigning presentation state ownership. */
-export function useNSEAppearanceSlot(slot: string) {
-  const appearance = useNSEAppearance();
-  return useMemo(() => projectNSEAppearanceSlot(slot, appearance), [appearance, slot]);
 }
