@@ -1,0 +1,4 @@
+/* Catalogue framing only. Control drawing is the unmodified framework's. */
+html, body { margin: 0; min-height: 100%; }
+body { font-family: Arial, sans-serif; font-size: 14px; }
+#theme-baseline-surface { margin: 80px; padding: 48px; width: 800px; min-height: 300px; }

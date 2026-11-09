@@ -1,0 +1,82 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run playwright test tests/e2e/theme-baseline.spec.ts --project=chromium --project=chromium-high-dpr --grep catalogue partition 1$ --repeat-each=3 --workers=4
+[WebServer] (node:24472) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 12 tests using 4 workers
+
+(node:44688) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:3472) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:50076) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:85216) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  4 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (26.3s)
+  ok  1 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 (26.4s)
+  ok  3 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 (26.4s)
+(node:90928) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:89532) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:30840) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  6 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (3.1s)
+  ok  5 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 (3.1s)
+  ok  7 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 (3.2s)
+(node:14504) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:38556) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:87320) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  8 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (3.1s)
+  ok  9 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 (3.1s)
+  ok 10 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (3.1s)
+(node:76272) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:78656) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   2 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (35.5s)
+  ok 11 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 (2.7s)
+  ok 12 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (2.7s)
+
+
+  1) [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 › folder-presentation 
+
+    Error: expect(locator).toHaveAttribute(expected) failed
+
+    Locator: locator('#theme-baseline-surface')
+    Expected: "folder-presentation"
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toHaveAttribute" with timeout 10000ms
+      - waiting for locator('#theme-baseline-surface')
+
+
+      26 |       else await page.evaluate(id => (window as unknown as { renderThemeBaselineSurface(id: string): void }).renderThemeBaselineSurface(id), surface.id);
+      27 |       const frame = page.locator("#theme-baseline-surface");
+    > 28 |       await expect(frame).toHaveAttribute("data-baseline-surface", surface.id);
+         |                           ^
+      29 |       if (surface.ready) await expect(page.locator(surface.ready).first()).toBeVisible();
+      30 |       if (surface.chooseTab) await page.getByRole("tab", { name: surface.chooseTab, exact: true }).click();
+      31 |       await page.evaluate(async () => {
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:28:27)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    Error Context: test-results\chromium\theme-baseline-dark-catalogue-partition-1-chromium-repeat1\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\chromium\theme-baseline-dark-catalogue-partition-1-chromium-repeat1\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\chromium\theme-baseline-dark-catalogue-partition-1-chromium-repeat1\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 ─────────────────
+  11 passed (39.6s)
