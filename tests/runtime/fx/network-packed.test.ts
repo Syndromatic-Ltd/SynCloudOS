@@ -34,8 +34,11 @@ console.log("Installed Network attribution passed");`);
   for (const name of ["appContextTypes.d.ts", "scos/scosFacade.d.ts"]) expect(readFileSync(join(consumer.installed, "types/SynCloudOS/AppSDK", name), "utf8")).not.toMatch(/network[?:]|NetworkPort|NWFXPathClient|mountedNetwork/);
   writeFileSync(join(consumer.root, "types.ts"), `import {NWFXPathMonitor,NWFXPath,NWFXInterface,NWFXError,NWFXPathStatus,NWFXPathUnsatisfiedReason,NWFXInterfaceType} from "@syndromatic/syncloudos/fx/network";
 import {SCOS,useNetwork} from "@syndromatic/syncloudos/sdk";
+import {DFXQueue} from "@syndromatic/syncloudos/fx/dispatch";
 const monitor: NWFXPathMonitor=useNetwork(); const filtered=new NWFXPathMonitor(NWFXInterfaceType.wifi); const prohibited=new NWFXPathMonitor([NWFXInterfaceType.cellular]);
-monitor.pathUpdateHandler=path=>{const status:NWFXPathStatus=path.status;const reason:NWFXPathUnsatisfiedReason=path.unsatisfiedReason;const interfaces:readonly NWFXInterface[]=path.availableInterfaces;const supported:boolean=path.supportsDNS&&path.supportsIPv4&&path.supportsIPv6;void [status,reason,interfaces,supported];};monitor.start(null);monitor.cancel();void [filtered,prohibited,NWFXError.posix(13)];
+monitor.pathUpdateHandler=path=>{const status:NWFXPathStatus=path.status;const reason:NWFXPathUnsatisfiedReason=path.unsatisfiedReason;const interfaces:readonly NWFXInterface[]=path.availableInterfaces;const supported:boolean=path.supportsDNS&&path.supportsIPv4&&path.supportsIPv6;void [status,reason,interfaces,supported];};monitor.start(DFXQueue.main);monitor.cancel();
+// @ts-expect-error NWPathMonitor.start(queue:) requires a queue.
+monitor.start(null);void [filtered,prohibited,NWFXError.posix(13)];
 // @ts-expect-error Removed public factory.
 SCOS.network;
 // @ts-expect-error Removed client type.
