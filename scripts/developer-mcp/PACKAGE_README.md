@@ -58,10 +58,10 @@ On Windows, forward slashes work in these paths (`C:/Projects/my-site/...`).
 
 Start from `scaffold`: it generates an `NSEApplication` subclass with an `NSEViewController` and NSE controls, the same template as the framework's `create-synware`. Read `node_modules/@syndromatic/syncloudos/AGENTS.md`, the authoring contract, before writing application code:
 
-- Atmo is the one theme SynCloudOS ships. It is a vector theme that draws NSE controls and window and application chrome, and it supports light and dark colour schemes itself. Atmo-Heritage and Atmo-Onyx are obsolete raster themes; never use them or mistake either for a dark mode.
+- Use NSE appearance values in light and dark. Atmo is the default, and custom themes are legitimate. `scaffold_theme` creates every required neutral value; `validate_theme` checks the actual theme stylesheet and definition without executing code.
 - Use NSE controls rather than raw `<button>`, `<input>`, `<select>`, `<textarea>` and `<table>` elements, documents rather than preferences for primary state, `managedTask` for asynchronous work, `this.fx.animation.manageDisplayLink` for Three.js, WebGL2 or WebGPU, and `NSEView.draw` for plots.
 
-`validate` reports these as `idiom.*` warnings in its `idiomAudit`. A warning never makes `ok` false, but a project with idiom warnings is not finished.
+`validate` reports definite misuse as `idiom.*` errors and heuristics as warnings. Errors make `ok` false; either severity makes `idiomatic` false. Findings name public replacements and exact imports. Reasoned `// syncloudos-allow <rule-id>: <reason>` comments apply to their own or the next line and are all listed in `idiomAudit.optOuts`. Renderer-owned surfaces and ordinary APIs without equivalents are exempt. Read the installed `docs/framework/developer-mcp/idiom-rules.md` for the reconciliation and static-analysis limits.
 
 ## Tools and full guide
 
