@@ -1,0 +1,44 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/theme-bundles.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/theme-bundles.test.ts (30 tests | 2 failed) 325ms
+     × rejects unknown colours with a file-specific rule 12ms
+     × rejects external import with a file-specific rule 9ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/theme-bundles.test.ts > static .scostheme bundles > rejects unknown colours with a file-specific rule
+AssertionError: expected [Function] to throw error matching /Theme.json.*colour|colour.*Theme.json/i but got 'C:\Users\KAVISH~1\AppData\Local\Temp\…'
+
+- Expected:
+/Theme.json.*colour|colour.*Theme.json/i
+
++ Received:
+"C:\\Users\\KAVISH~1\\AppData\\Local\\Temp\\scos-bundle-xV42XR\\Paper.scostheme\\Contents\\Theme.json: unknown-key: C:\\Users\\KAVISH~1\\AppData\\Local\\Temp\\scos-bundle-xV42XR\\Paper.scostheme\\Contents\\Theme.json contains unsupported field labelColor."
+
+ ❯ tests/runtime/theme-bundles.test.ts:46:152
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/runtime/theme-bundles.test.ts > static .scostheme bundles > rejects external import with a file-specific rule
+AssertionError: expected [Function] to throw error matching /theme.css.*local|local.*theme.css/i but got 'Theme URL must be package-local: http…'
+
+- Expected:
+/theme.css.*local|local.*theme.css/i
+
++ Received:
+"Theme URL must be package-local: https://example.com/a.css"
+
+ ❯ tests/runtime/theme-bundles.test.ts:46:152
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 28 passed (30)
+   Start at  22:21:51
+   Duration  815ms (transform 92ms, setup 27ms, import 325ms, tests 325ms, environment 0ms)

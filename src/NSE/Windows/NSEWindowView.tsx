@@ -24,7 +24,7 @@ import { useNSEContentLayoutProperties } from "../Layout/windowChromeObstruction
 import React, { type KeyboardEventHandler, type ReactNode } from "react";
 import { NSEAppearanceNineSlice } from "../Appearance/NSEAppearanceNineSlice";
 import { getOptionalNSESmoothSurfaceProps, useNSESmoothSurface } from "../SmoothSurface";
-import type { NSEWindowAppearanceRecipeId } from "./windowAppearanceContract";
+
 import type { NSESmoothSurfaceRequest } from "../SmoothSurface";
 import type { SynCloudOSAppFrameSmoothSurfaceManifest } from "../../SynCloudOS/SynCloudOS";
 import type { NSEWindowViewProps } from "./windowViewTypes";
@@ -32,7 +32,8 @@ import "./nse-windows.css";
 import { NSEWindowTitlebarHostContext, NSEWindowTitlebarDocumentContext, type NSEWindowTitlebarDocument } from "./windowTitlebarContext";
 
 export interface NSEWindowFrameProps extends NSEWindowViewProps {
-  readonly appearanceRecipe?: NSEWindowAppearanceRecipeId | null;
+  readonly hasShadow?: boolean;
+
   readonly className?: string;
   readonly titleBar?: ReactNode;
   readonly resizeHandles?: ReactNode;
@@ -40,7 +41,7 @@ export interface NSEWindowFrameProps extends NSEWindowViewProps {
   readonly accessibleName?: string;
   readonly focusScope?: "modal";
   readonly outsideDismiss?: boolean;
-  readonly shadowRecipe?: NSEWindowAppearanceRecipeId;
+
   readonly arrowEdge?: string;
   readonly arrowAlignment?: string;
   readonly onKeyDown?: KeyboardEventHandler<HTMLElement>;
@@ -67,7 +68,7 @@ export function NSEWindowView({
   zoomed = false,
   blocked,
   dirty,
-  appearanceRecipe,
+  hasShadow = false,
   className = "",
   titleBar,
   resizeHandles,
@@ -75,7 +76,6 @@ export function NSEWindowView({
   accessibleName,
   focusScope,
   outsideDismiss,
-  shadowRecipe,
   arrowEdge,
   arrowAlignment,
   onKeyDown,
@@ -102,7 +102,7 @@ export function NSEWindowView({
   const fallbackAccessibleName = resolvedSemanticRole === "dialog" && !accessibleName && !labelledTitlePresent
     ? record.title
     : accessibleName;
-  const resolvedAppearanceRecipe = appearanceRecipe === undefined ? "window.standard.frame" : appearanceRecipe;
+
   const smoothSurfaceProps = getOptionalNSESmoothSurfaceProps(smoothSurfaceRequest);
   return (
     <NSEWindowTitlebarHostContext.Provider value={titlebarHost}>
@@ -128,14 +128,14 @@ export function NSEWindowView({
       data-window-blocked={blocked ? "true" : "false"}
       data-window-chrome-mode={record.chromeMode}
       data-window-custom-chrome-active={customChromeActive ? "true" : "false"}
-      data-window-appearance-recipe={resolvedAppearanceRecipe ?? undefined}
+
       data-window-parent-id={record.parentWindowControllerId ?? undefined}
       data-window-anchor-id={record.anchor?.id}
       data-window-anchor-edge={record.anchor?.edge}
       data-window-anchor-alignment={record.anchor?.alignment}
       data-window-focus-scope={focusScope}
       data-window-outside-dismiss={outsideDismiss === undefined ? undefined : outsideDismiss ? "true" : "false"}
-      data-window-shadow-recipe={shadowRecipe}
+
       data-window-arrow-edge={arrowEdge}
       data-window-arrow-alignment={arrowAlignment}
       style={{
@@ -145,11 +145,11 @@ export function NSEWindowView({
         height: "100%",
       }}
     >
-      {shadowRecipe ? (
+      {hasShadow ? (
         <NSEAppearanceNineSlice
           kind="window-shadow"
           className="nse-window__shadow-layer"
-          data-window-shadow-layer={shadowRecipe}
+          data-window-shadow-layer="" data-nse-part="shadow"
         />
       ) : null}
       <div

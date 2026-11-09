@@ -18,40 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { NSEAppearanceDefinition } from "./NSEAppearanceDefinition";
-import { resolveNSEAppearanceSlot } from "./appearanceSlotResolver";
 import type { NSEAppearanceDataAttributes, NSEResolvedAppearance } from "./nseAppearanceTypes";
 
-export interface NSEAppearanceSlotDescriptor {
-  readonly component: string;
-  readonly part: string;
-  readonly state?: string;
-  readonly density?: 1 | 2;
-}
-
-export interface NSEAppearanceSlotProjection {
-  readonly slot: string;
-  readonly recipeId: string | null;
-  readonly attributes: Readonly<{
-    "data-nse-appearance-slot": string;
-    "data-nse-appearance-recipe-id": string | null;
-    "data-nse-appearance-state": string;
-  }>;
-}
-
-export function nseAppearanceSlot(
-  component: string,
-  part: string,
-  state = "normal",
-  density: 1 | 2 = 1,
-): string {
-  return `${component}.${part}.${state}.${density}x`;
-}
-
-/** Projects one complete environment boundary for controls and portals. */
+/** Projects the appearance environment onto views and relocated portal boundaries. */
 export function projectNSEAppearance(appearance: NSEResolvedAppearance): NSEAppearanceDataAttributes {
   return Object.freeze({
-    "data-nse-appearance": appearance.appearance.id,
+    "data-nse-theme": appearance.theme.bundleIdentifier,
     "data-nse-chrome": appearance.chrome,
     "data-nse-colour-scheme-requested": appearance.requestedColourScheme,
     "data-nse-colour-scheme-resolved": appearance.resolvedColourScheme,
@@ -60,22 +32,3 @@ export function projectNSEAppearance(appearance: NSEResolvedAppearance): NSEAppe
     "data-mode": appearance.resolvedColourScheme,
   });
 }
-
-/** Resolves one semantic control part solely from the selected definition. */
-export function projectNSEAppearanceSlot(
-  slot: string,
-  appearance: NSEResolvedAppearance,
-): NSEAppearanceSlotProjection {
-  const resolution = resolveNSEAppearanceSlot(slot, appearance.appearance);
-  return Object.freeze({
-    slot,
-    recipeId: resolution.recipeId,
-    attributes: Object.freeze({
-      "data-nse-appearance-slot": slot,
-      "data-nse-appearance-recipe-id": resolution.recipeId,
-      "data-nse-appearance-state": slot.split(".")[2] ?? "normal",
-    }),
-  });
-}
-
-export type { NSEAppearanceDefinition };

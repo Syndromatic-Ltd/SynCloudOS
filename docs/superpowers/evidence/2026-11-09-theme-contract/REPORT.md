@@ -137,13 +137,27 @@ Verification: **131 focused tests across 10 files passed**, framework typecheck 
 
 ### Task 11 — generated contract and drift gate
 
+Commit: `3d2cb143` — `NSE: publish the theme contract and guard it against drift`.
+
 Generated tooling/nse-theme-contract.json from all 662 frozen catalogue cases, ten additional specimens, and nine supplemental public-entry specimens. The inventory contains **71 controls, 362 control/part pairs and 48 colours**, with rendered states and variant values, appearance attributes, navigation, presentation, limits and migration metadata. Supplemental specimens cover radio matrices, swatches, virtual viewports, tooltips and configured/customising toolbars without changing any frozen catalogue bytes. Unused vocabulary entries are not claimed as rendered controls.
 
 The SDK offline-data writer and reviewed package inventory publish only the new filename. The MCP contract reader recognises version 1; its old recipe-based provisioning implementation is scheduled for replacement by the bundle tooling in Task 17. No compatibility contract is emitted.
 
 Verification: **687 focused tests across three files passed**, including 681 rendered specimens; framework and additional-fixture typechecks passed. A deliberate unrendered button part made the drift comparison fail, then the original JSON was restored and the clean comparison passed. A direct offline-data writer check confirmed byte-identical new contract output and absence of the old file. jsdom reports its known canvas-context limitation for colour panels; pixel rendering remains covered by the frozen browser gate. No rendering source changed in this task.
 
-### Tasks 12–19
+### Task 12 — NSETheme and bundle validation
+
+Added the readonly NSETheme, NSEThemeNavigation, NSEThemePresentation and NSEThemeImage interfaces. Framework-created theme values own deeply frozen copies. Atmo is now selected by atmoTheme with bundle identifier com.syndromatic.atmo. Appearance selection carries theme; provider.theme and data-nse-theme replace the definition-valued provider prop and boundary identity. No old name is re-exported.
+
+Removed the definition factory, definition/input/recipe types, slot resolver and projections, chrome-slot type and props, and window-recipe registry/props. Controls draw through their existing public parts and states. The window frame uses the AppKit-shaped hasShadow flag instead of an artwork recipe identifier. CSS selectors changed identity at equal specificity, with their declarations retained. The catalogue imports and providers were migrated to the new API; all frozen images remain untouched.
+
+Ported only the static bundle discovery/validation from origin/feature/theme-packages-metro at f6866cf1753a929614dfc206f1615c4028c7c690, read with git show. Fonts and motion were excluded. Validation covers metadata, known colours and both palettes, navigation/presentation choices, local resources, symlinks/case collisions, executable content, safe SVG, missing image/resolution files, slice bounds, contract selectors, focus/semantic limits, import cycles, and the PR's file/bundle/count/depth limits. Saxes is now an explicit dependency for the ported SVG parser. Rejected bundles and portable limit/link/collision descriptors are committed under tests/fixtures/themes/.
+
+Verification: **1,691 focused tests across 32 files passed**, including 33 bundle cases and the rendered contract drift gate. Framework and catalogue typechecks pass. Both the first and final frozen browser gates passed **82/82, zero differences** (task-12-baseline.log and task-12-baseline-final.log). All 2,648 image hashes are unchanged. The initial wider regression run exposed escaped old identity expectations, a recipe-valued shadow expectation and a naive comma splitter that misparsed nested selectors; these assertions now test the current identifiers, shadow part and CSS parser's real selector list.
+
+The MCP recipe scaffolder and its old tests await their explicitly scheduled bundle-tooling replacement in Task 17; packed validation remains for Tasks 17 and 19. No compatibility implementation was introduced.
+
+### Tasks 13–19
 
 Pending. Final split-suite and packed SDK acceptance remain for Task 19.
 
@@ -169,6 +183,10 @@ Further diagnostic runs exposed folder-only capture interference and source-pain
 
 ## Calls made by Codex
 
+- Theme metrics remain in CSS, following the detailed schema and spec call 7; Theme.json has the four concrete data fields in Task 12.
+- The retained contrast spelling is high, as the existing API and emitted attribute use; Task 11’s reference metadata was corrected from increased to high.
+- Bundle identity is projected directly, so the old definition identity attribute and Atmo export are migrated now with the type removal. This avoids a temporary compatibility mapping.
+
 1. The folder's capture gets a fresh document so prior catalogue surfaces cannot leave queued document work in the stage being copied. Its source CSS resources, finite animations and measured geometry settle before cloning. No framework rendering or artwork changed.
 2. The reduced-motion project compares the DPR 1 references, avoiding a third set of initial images that Task 1 never requested.
 3. Task 2 reuses the existing public `NSEScrollRect`, as the plan explicitly allows an equivalent existing rect type. The inset factory preserves finite signed geometry; safe-area resolution clips actual safe insets to view extents.
@@ -185,6 +203,8 @@ Further diagnostic runs exposed folder-only capture interference and source-pain
 8. Painted bezel dimensions and interaction dimensions are distinct. The stepper uses `--nse-control-bezel-inline-size` and `--nse-control-bezel-block-size` for its existing art; framework-owned hit dimensions meet the minimum without moving that art or its neighbours. Passive progress/meter surfaces do not receive hit-target sizing.
 
 ## Public API accounting
+
+Task 12 adds NSETheme, NSEThemeNavigation, NSEThemePresentation, NSEThemeImage, atmoTheme, provider.theme, selection.theme and data-nse-theme. It removes atmoAppearance, provider.appearance, selection.appearance, data-nse-appearance, defineNSEAppearance, NSEAppearanceDefinition, NSEAppearanceDefinitionInput, NSEAppearanceRecipeDefinition, useNSEAppearanceSlot, resolveNSEAppearanceSlot, nseAppearanceSlot, projectNSEAppearanceSlot, NSEAppearanceSlotDescriptor, NSEAppearanceSlotProjection, NSEAppearanceSlotResolution, NSEChromeSlot, NSEChromePrimitiveProps.slot, NSEWindowAppearanceRecipeId, NSE_WINDOW_APPEARANCE_RECIPE_IDS, NSEWindowFrameProps.appearanceRecipe/shadowRecipe and NSEWindowTitleBarProps.appearanceRecipe. NSEWindowFrameProps.hasShadow replaces the recipe-valued shadow selection. There are no aliases.
 
 Added: `NSEEdgeInsets`, `NSEEdgeInsetsZero`, `NSEEdgeInsetsMake`. Removed: `NSEScrollInsets` (no compatibility alias). Task 3 adds `NSELayoutGuide`, `NSEWindow.contentLayoutRect`, `NSEWindow.contentLayoutGuide` and `useNSEWindowChromeObstruction`.
 

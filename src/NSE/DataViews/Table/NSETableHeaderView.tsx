@@ -60,7 +60,7 @@ export function NSETableHeaderView({ columns, height, width, menu, isEnabled = t
         >
           {column.sortable ? (
             <button data-nse-part="title" type="button" aria-label={`Sort by ${column.title}`} disabled={disabled} onClick={column.onSort}>
-              {column.title}<span aria-hidden="true" data-nse-part="sort-glyph" data-appearance-recipe="table-sort-glyph" />
+              {column.title}<span aria-hidden="true" data-nse-part="sort-glyph"  />
             </button>
           ) : <span>{column.title}</span>}
           {/* A column fixed at one width (NSTableColumn with no resizing mask)

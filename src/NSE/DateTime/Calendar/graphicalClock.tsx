@@ -21,7 +21,7 @@
 import { useRef } from "react";
 import { NSEPopUpButton } from "../../Menus/NSEPopUpButton";
 import { NSETextField } from "../../Controls/Fields/NSEFields";
-import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
+
 import { resolveZonedDateTime } from "../calendarArithmetic";
 import type { NSEPlainTime } from "../dateTimeTypes";
 import type { NSEGraphicalClockProps } from "./calendarTypes";
@@ -51,9 +51,9 @@ export function NSEGraphicalClock({ value, date, timeZone, disambiguation = "rej
   const hourRotation = (value.hour % 12) * 30 + value.minute * 0.5 + value.second / 120;
   const minuteRotation = value.minute * 6 + value.second * 0.1;
   const secondRotation = value.second * 6;
-  const appearance = useNSEAppearanceSlot(nseAppearanceSlot("clock-view", "face", disabled ? "disabled" : "normal"));
-  return <section aria-label={props["aria-label"]} data-nse-part="clock" data-nse-enabled={disabled ? "false" : undefined} data-state={resolution.kind} data-disabled={disabled ? "true" : "false"} data-motion={props.reducedMotion ? "reduced" : "full"} {...appearance.attributes}>
-    <div role="img" aria-label="Analogue clock" data-nse-part="face" tabIndex={disabled ? -1 : 0} {...appearance.attributes}
+
+  return <section aria-label={props["aria-label"]} data-nse-part="clock" data-nse-enabled={disabled ? "false" : undefined} data-state={resolution.kind} data-disabled={disabled ? "true" : "false"} data-motion={props.reducedMotion ? "reduced" : "full"} >
+    <div role="img" aria-label="Analogue clock" data-nse-part="face" tabIndex={disabled ? -1 : 0}
       onPointerDown={(event) => { if (disabled) return; const latest = timeFromPointer(event.currentTarget, event.clientX, event.clientY); pointer.current = { pointerId: event.pointerId, opening: value, latest }; event.currentTarget.setPointerCapture?.(event.pointerId); onValueChange(latest, "preview"); }}
       onPointerMove={(event) => { const active = pointer.current; if (!active || active.pointerId !== event.pointerId || disabled) return; const latest = timeFromPointer(event.currentTarget, event.clientX, event.clientY); pointer.current = { ...active, latest }; onValueChange(latest, "preview"); }}
       onPointerUp={(event) => { const active = pointer.current; if (!active || active.pointerId !== event.pointerId) return; const latest = timeFromPointer(event.currentTarget, event.clientX, event.clientY); pointer.current = null; event.currentTarget.releasePointerCapture?.(event.pointerId); onValueChange(latest, "commit"); }}

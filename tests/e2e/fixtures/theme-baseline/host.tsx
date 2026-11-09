@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import { NSEAppearanceProvider } from "../../../../src/NSE/Appearance/NSEAppearanceProvider";
-import { atmoAppearance } from "../../../../src/NSE/Themes/Atmo";
+import { atmoTheme } from "../../../../src/NSE/Themes/Atmo";
 import { NSEStandaloneControlHost } from "../../../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../../../fixtures/presentationTraits";
 import { themeBaselineCatalogue } from "./catalogue";
@@ -24,7 +24,7 @@ function renderSurface(id: string) {
   if (!surface) throw new Error(`Unknown theme baseline surface: ${id}`);
   flushSync(() => root.render(
   <div key={id}>
-  <NSEAppearanceProvider appearance={atmoAppearance} colourScheme={scheme}>
+  <NSEAppearanceProvider theme={atmoTheme} colourScheme={scheme}>
     <NSEStandaloneControlHost document={document} window={window} presentation={presentation}>
       <main id="theme-baseline-surface" data-baseline-surface={surface.id}>{surface.render()}</main>
     </NSEStandaloneControlHost>

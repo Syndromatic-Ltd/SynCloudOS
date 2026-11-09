@@ -1,14 +1,15 @@
+import { createTestTheme } from "../../fixtures/themes";
 import React, { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { NSEPopover } from "../../../src/NSE/Overlays/NSEPopover";
 import { NSEOverlayProvider } from "../../../src/NSE/Overlays/NSEOverlayProvider";
 import { NSEAppearanceProvider } from "../../../src/NSE/Appearance/NSEAppearanceProvider";
-import { defineNSEAppearance } from "../../../src/NSE/Appearance/NSEAppearanceDefinition";
+
 import { NSEAnimationEnvironmentProvider } from "../../../src/NSE/Animation/NSEAnimationEnvironment";
 import { createStaticPresentationTraits } from "../../fixtures/presentationTraits";
 import type { NSELogicalPlacement } from "../../../src/NSE/Overlays/overlayTypes";
 
-const appearance = defineNSEAppearance({ id: "atmo", displayName: "Atmo" });
+const appearance = createTestTheme("com.syndromatic.atmo", "Atmo");
 type Options = { open: boolean; mounted: boolean; dark: boolean; paper: boolean; reducedMotion: boolean; tall: boolean; placement: NSELogicalPlacement; x: number; y: number; region?: { x: number; y: number; width: number; height: number } };
 const initial: Options = { open: true, mounted: true, dark: false, paper: false, reducedMotion: false, tall: false, placement: "block-end", x: 440, y: 160 };
 
@@ -33,7 +34,7 @@ function Fixture() {
       wrapFocusScope: (_options: unknown, node: React.ReactNode) => node,
     };
   }, [options.region]);
-  return <NSEAppearanceProvider appearance={appearance} colourScheme={options.dark ? "dark" : "light"}>
+  return <NSEAppearanceProvider theme={appearance} colourScheme={options.dark ? "dark" : "light"}>
     <NSEAnimationEnvironmentProvider reducedMotion={options.reducedMotion}><NSEOverlayProvider runtimePort={runtimePort}>
       <button ref={setAnchor} id="anchor" style={{ position: "fixed", left: options.x, top: options.y, width: 80, height: 32 }}>Options</button>
       {options.mounted ? <NSEPopover id="browser-popover" open={options.open} anchor={anchor} surface="overlay" parentWindowControllerId={null} parentResponderId="fixture" title="Publish options" drawsBackground={!options.paper}

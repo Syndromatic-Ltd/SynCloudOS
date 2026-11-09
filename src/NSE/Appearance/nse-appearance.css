@@ -185,11 +185,11 @@
   }
 }
 
-.nse-toolbar[data-nse-appearance-authority],
-.nse-toolbar-item[data-nse-appearance-authority],
-.nse-tab-bar[data-nse-appearance-authority],
-.nse-tab-bar-tab[data-nse-appearance-authority],
-.nse-tab-bar-more-option[data-nse-appearance-authority] {
+.nse-toolbar[data-nse-theme-authority],
+.nse-toolbar-item[data-nse-theme-authority],
+.nse-tab-bar[data-nse-theme-authority],
+.nse-tab-bar-tab[data-nse-theme-authority],
+.nse-tab-bar-more-option[data-nse-theme-authority] {
   isolation: isolate;
   position: relative;
 }
@@ -343,11 +343,11 @@
 }
 
 @media (forced-colors: active) {
-  :where([data-nse-appearance]) {
+  :where([data-nse-theme]) {
     forced-color-adjust: auto;
   }
 
-  :where([data-nse-appearance]):where(
+  :where([data-nse-theme]):where(
     .nse-control-group-box,
     .nse-control-popup,
     .nse-overlay-popup,
@@ -355,7 +355,7 @@
     .nse-menu[data-nse-menu-variant="popup"],
     .nse-window-view
   ),
-  :where([data-nse-appearance]) :where(
+  :where([data-nse-theme]) :where(
     .nse-control-group-box,
     .nse-control-popup,
     .nse-overlay-popup,
@@ -377,14 +377,14 @@
     filter: none !important;
   }
 
-  :where([data-nse-appearance]) :where(.nse-control-checkbox-art, .nse-control-radio) {
+  :where([data-nse-theme]) :where(.nse-control-checkbox-art, .nse-control-radio) {
     border: 2px solid CanvasText !important;
     border-image: none !important;
     background: Canvas !important;
     box-shadow: none !important;
   }
 
-  :where([data-nse-appearance]) :where(
+  :where([data-nse-theme]) :where(
     .nse-menu[data-nse-menu-variant="popup"] .nse-menu-item:hover,
     .nse-menu[data-nse-menu-variant="popup"] .nse-menu-item:focus-visible,
     .nse-control-radio[data-selected="true"]
@@ -393,13 +393,13 @@
     color: HighlightText !important;
   }
 
-  :where([data-nse-appearance]) :where(button, input, [tabindex]):focus-visible,
-  :where([data-nse-appearance]) .nse-menu[data-nse-menu-variant="popup"] .nse-menu-item:focus-visible {
+  :where([data-nse-theme]) :where(button, input, [tabindex]):focus-visible,
+  :where([data-nse-theme]) .nse-menu[data-nse-menu-variant="popup"] .nse-menu-item:focus-visible {
     outline: 2px solid Highlight !important;
     outline-offset: 2px;
   }
 
-  :where([data-nse-appearance]) :where(:disabled, [aria-disabled="true"], [data-disabled="true"]) {
+  :where([data-nse-theme]) :where(:disabled, [aria-disabled="true"], [data-disabled="true"]) {
     border-color: GrayText !important;
     color: GrayText !important;
     opacity: 1 !important;

@@ -9,7 +9,7 @@ import { supplementalThemeCatalogue } from "../e2e/fixtures/theme-additional/sup
 import { additionalThemeCatalogue } from "../e2e/fixtures/theme-additional/catalogue";
 import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance/NSEAppearanceProvider";
-import { atmoAppearance } from "../../src/NSE/Themes/Atmo";
+import { atmoTheme } from "../../src/NSE/Themes/Atmo";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 import { nseThemeControls, nseThemeParts, nseThemeStates, nseThemeVariants } from "../../src/NSE/Theme/contract/vocabulary";
 import { nseThemeColourNames } from "../../src/NSE/Theme/contract/colours";
@@ -39,7 +39,7 @@ function collect() {
     }
   }
 }
-function Host({ children }: { children: React.ReactNode }) { return <NSEAppearanceProvider appearance={atmoAppearance} colourScheme="light"><NSEStandaloneControlHost document={document} window={window} presentation={presentation}>{children}</NSEStandaloneControlHost></NSEAppearanceProvider>; }
+function Host({ children }: { children: React.ReactNode }) { return <NSEAppearanceProvider theme={atmoTheme} colourScheme="light"><NSEStandaloneControlHost document={document} window={window} presentation={presentation}>{children}</NSEStandaloneControlHost></NSEAppearanceProvider>; }
 afterEach(cleanup);
 for (const surface of themeBaselineCatalogue) it(`renders ${surface.id}`, async () => {
   const view = render(<Host>{surface.render()}</Host>);

@@ -51,13 +51,13 @@
 .nse-open-phone-header > :last-child { justify-self: end; }
 .nse-open-phone-header strong { min-width: 0; text-align: center; font-size: 16px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 /* Reuse NSEMenuOverlay's actual menu plate, frame, dimming and shadow, ending at the bottom edge. */
-.nse-overlay-popup.nse-open-compact-sheet[data-nse-presentation="sheet"][data-nse-overlay-kind="action-sheet"][data-nse-appearance] {
+.nse-overlay-popup.nse-open-compact-sheet[data-nse-presentation="sheet"][data-nse-overlay-kind="action-sheet"][data-nse-theme] {
   inset-block: auto 0; inset-inline: 8px; inline-size: auto; max-inline-size: none; min-inline-size: 0;
   block-size: min(640px, 78dvh); max-block-size: calc(100dvh - 100px); margin: 0;
   display: flex; flex-direction: column; border-width: 30px 28px 0; padding: 0; box-sizing: border-box;
 }
-.nse-overlay-popup.nse-open-compact-sheet[data-nse-presentation="sheet"][data-nse-overlay-kind="action-sheet"][data-nse-appearance]::before { inset: -28px -22px 0; border-radius: 22px 22px 0 0; }
-.nse-overlay-popup.nse-open-compact-sheet[data-nse-presentation="sheet"][data-nse-overlay-kind="action-sheet"][data-nse-appearance]::after { inset: -27px -21px 0; border-radius: 21px 21px 0 0; }
+.nse-overlay-popup.nse-open-compact-sheet[data-nse-presentation="sheet"][data-nse-overlay-kind="action-sheet"][data-nse-theme]::before { inset: -28px -22px 0; border-radius: 22px 22px 0 0; }
+.nse-overlay-popup.nse-open-compact-sheet[data-nse-presentation="sheet"][data-nse-overlay-kind="action-sheet"][data-nse-theme]::after { inset: -27px -21px 0; border-radius: 21px 21px 0 0; }
 .nse-overlay-popup.nse-open-compact-sheet > .nse-overlay-popup-content { flex: 1; min-height: 0; display: flex; margin: -16px -20px 0; }
 .nse-open-panel[data-compact] { background: none; --open-ink: #fff; --open-muted: #d4d5d8; --open-line: #0005; }
 .nse-open-panel[data-compact] .nse-open-sources { width: 100%; border: 0; }

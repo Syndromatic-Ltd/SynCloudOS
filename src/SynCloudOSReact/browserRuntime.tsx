@@ -30,8 +30,8 @@ import { createRoot, type Root } from "react-dom/client";
 import type { App as ShellApp } from "../App";
 import { ApplicationHost, applicationRecoveryError } from "./ApplicationHost";
 import { createApplicationHostHome, type ApplicationHostHome } from "./applicationHome";
-import { NSEAppearanceProvider, type NSEAppearanceDefinition } from "../NSE/Appearance";
-import { atmoAppearance } from "../NSE/Themes/Atmo";
+import { NSEAppearanceProvider, type NSETheme } from "../NSE/Appearance";
+import { atmoTheme } from "../NSE/Themes/Atmo";
 import { NSERubberBandProvider } from "../NSE/Scroll";
 import { NSEAlertBackdrop } from "../NSE/SystemUI";
 import { SystemAlert } from "./SystemAlert";
@@ -104,7 +104,7 @@ interface BrowserHostOptions {
   readonly configurationProfile?: SynCloudOSConfigurationProfile;
   /** The NSE appearance (theme) that paints the shell, windows and controls.
    * Import the theme's stylesheet alongside it. Defaults to Atmo. */
-  readonly appearance?: NSEAppearanceDefinition;
+  readonly appearance?: NSETheme;
   readonly contributions?: readonly SynCloudOSHostContribution[];
   /** Host-owned legal attribution for each application's standard About panel.
    * Its display name and version remain the application's Info.ts identity. */
@@ -372,7 +372,7 @@ function renderHost(
   runtime: SynCloudOSRuntime,
   options: ResolvedHostOptions,
   fontCatalogue: SynWareFontCatalogue,
-  appearance: NSEAppearanceDefinition,
+  appearance: NSETheme,
   home: ApplicationHostHome | null,
   Shell: typeof ShellApp | undefined,
 ): Root {
@@ -380,7 +380,7 @@ function renderHost(
   root.render(
     <StrictMode>
       <SynCloudOSProvider runtime={runtime}>
-        <NSEAppearanceProvider appearance={appearance} appearanceService={runtime.appearance}>
+        <NSEAppearanceProvider theme={appearance} appearanceService={runtime.appearance}>
           <RuntimeInputBoundary>
             <RootRecoveryBoundary runtime={runtime} options={options} fontCatalogue={fontCatalogue}>
               <InstalledApplicationTitleBar />
@@ -506,7 +506,7 @@ function captureBootstrapFailure(runtime: SynCloudOSRuntime, error: unknown, rou
   });
 }
 
-function renderBootstrapRecovery(element: Element, attempt: BrowserMountAttempt, recovery: BootstrapRecovery, home: string, appearance: NSEAppearanceDefinition) {
+function renderBootstrapRecovery(element: Element, attempt: BrowserMountAttempt, recovery: BootstrapRecovery, home: string, appearance: NSETheme) {
   if (browserMountAttempts.get(element) !== attempt) return;
   const navigate = (destination?: string) => {
     if (browserMountAttempts.get(element) !== attempt) return;
@@ -518,7 +518,7 @@ function renderBootstrapRecovery(element: Element, attempt: BrowserMountAttempt,
   // Only captured data and browser navigation survive teardown. The existing
   // NSE backdrop owns physical focus; no disposed kernel provider is retained.
   root.render(<HostSiteBrandingProvider value={recovery.branding}>
-    <NSEAppearanceProvider appearance={appearance} colourScheme={recovery.appearance}>
+    <NSEAppearanceProvider theme={appearance} colourScheme={recovery.appearance}>
       <div className="syncloudos-root-error-shell"><NSEAlertBackdrop>
         <SystemAlert error={recovery.error}
           appearance={recovery.appearance} applicationIcon={recovery.applicationIcon}
@@ -838,7 +838,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
       runtime,
       options,
       fontCatalogue,
-      options.appearance ?? atmoAppearance,
+      options.appearance ?? atmoTheme,
       home,
       Shell,
     );
@@ -872,7 +872,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
     }
     attempt.dispose = undefined;
     attempt.mounting = false;
-    if (recovery) renderBootstrapRecovery(options.element, attempt, recovery, options.deploymentBasePath ?? "/", options.appearance ?? atmoAppearance);
+    if (recovery) renderBootstrapRecovery(options.element, attempt, recovery, options.deploymentBasePath ?? "/", options.appearance ?? atmoTheme);
     else if (browserMountAttempts.get(options.element) === attempt) browserMountAttempts.delete(options.element);
     if (result.errors.length > 0) {
       throw new AggregateError([error, ...result.errors], "Browser host initialization and cleanup failed.", { cause: error });

@@ -20,7 +20,7 @@
 
 import { nseControlHooks, nseStateHooks } from "../../Theme/contract/hooks";
 import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
-import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
+
 import type { NSELevelIndicatorProps } from "./valueControlTypes";
 
 function levelState(props: NSELevelIndicatorProps): "normal" | "warning" | "critical" {
@@ -37,14 +37,7 @@ export function NSELevelIndicator(props: NSELevelIndicatorProps) {
   const theme = useNSEThemeInteraction<HTMLElement>(props.isEnabled !== false);
   const hooks = nseControlHooks({ control: "level-indicator", enabled: props.isEnabled !== false, hovered: theme.hovered, focused: theme.focused, variants: { type: props.mode ?? "continuous" } });
   const state = levelState(props);
-  const trackState = (props.isEnabled === false) ? "disabled" : "normal";
-  const segmentState = (props.isEnabled === false) ? "disabled" : state;
-  const trackAppearance = useNSEAppearanceSlot(
-    nseAppearanceSlot("level-indicator", "track", trackState),
-  );
-  const segmentAppearance = useNSEAppearanceSlot(
-    nseAppearanceSlot("level-indicator", "segment", segmentState),
-  );
+
 
   if (props.mode === "rating") {
     return (
@@ -53,7 +46,7 @@ export function NSELevelIndicator(props: NSELevelIndicatorProps) {
         aria-label={props["aria-label"]}
         data-nse-part="track" {...hooks} {...theme.events}
         data-state={state}
-        {...trackAppearance.attributes}
+
       >
         {Array.from({ length: Math.max(0, Math.floor(props.maximum - props.minimum)) }, (_, index) => {
           const value = props.minimum + index + 1;
@@ -67,7 +60,7 @@ export function NSELevelIndicator(props: NSELevelIndicatorProps) {
               disabled={(props.isEnabled === false)}
               data-nse-part="segment"
               {...nseStateHooks({ selected: value === props.value, enabled: props.isEnabled !== false })}
-              {...segmentAppearance.attributes}
+
               onClick={() => props.onValueChange?.(value, "commit")}
             >
               ★
@@ -86,9 +79,9 @@ export function NSELevelIndicator(props: NSELevelIndicatorProps) {
       value={props.value}
       data-nse-part="track" {...hooks} {...theme.events}
       data-state={state}
-      {...trackAppearance.attributes}
+
     >
-      <span data-nse-part="segment" {...segmentAppearance.attributes}>{props.value}</span>
+      <span data-nse-part="segment" >{props.value}</span>
     </meter>
   );
 }

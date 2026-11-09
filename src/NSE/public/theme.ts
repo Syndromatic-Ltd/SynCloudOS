@@ -4,3 +4,5 @@ export type { NSEThemeControlName, NSEThemePartName } from "../Theme/contract/vo
 
 export { nseThemeColourNames, nseThemeColourProperties } from "../Theme/contract/colours";
 export type { NSEThemeColourName } from "../Theme/contract/colours";
+
+export type { NSETheme, NSEThemeNavigation, NSEThemePresentation, NSEThemeImage } from "../Theme/NSETheme";

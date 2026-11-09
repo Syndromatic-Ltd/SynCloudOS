@@ -37,7 +37,7 @@ export function NSEBorderlessWindowView({ interactive = false, accessibleName, .
     <NSEWindowView
       {...props}
       className="nse-window-view--borderless"
-      appearanceRecipe={null}
+
       semanticRole={interactive ? "dialog" : "presentation"}
       accessibleName={interactive ? accessibleName : undefined}
     />

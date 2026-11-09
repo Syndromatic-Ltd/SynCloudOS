@@ -58,7 +58,7 @@ describe("custom NSBox property projection for themes", () => {
     sheet.textContent = readFileSync("src/NSE/Themes/Atmo/Resources/atmo.css", "utf8");
     document.head.append(sheet);
     try {
-      render(<div data-nse-appearance="atmo">
+      render(<div data-nse-theme="com.syndromatic.atmo">
         <NSEBox aria-label="Well" boxType="custom" />
         <NSEBox aria-label="Frame" boxType="custom" borderType="lineBorder" />
         <NSEBox aria-label="Floating" boxType="custom" shadow={new NSEShadow()} />

@@ -19,7 +19,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, type RefCallback } from "react";
-import { nseAppearanceSlot, useNSEAppearanceSlot } from "../Appearance";
+
 import {
   NSEChromeBevel,
   NSEChromeGloss,
@@ -130,7 +130,7 @@ export function NSEToolbarOverflowMenu({
     setOpen(nextOpen);
   }, [controller.runtime, menuController, model]);
   const appearanceState: NSEChromeVisualState = pressed || open ? "pressed" : focused ? "focused" : hovered ? "hover" : "normal";
-  const appearance = useNSEAppearanceSlot(nseAppearanceSlot("toolbar", "item", appearanceState));
+
 
   return (
     <span className="nse-toolbar-overflow-menu">
@@ -148,7 +148,7 @@ export function NSEToolbarOverflowMenu({
         data-nse-control="toolbar-item" data-nse-highlighted={pressed || open ? "" : undefined} data-nse-hovered={hovered ? "" : undefined} data-nse-focused={focused ? "" : undefined}
         data-nse-part="overflow"
         data-state={open ? "open" : "normal"}
-        {...appearance.attributes}
+
         data-nse-toolbar-item-id="overflow"
         onFocus={() => {
           setFocused(true);
@@ -165,10 +165,10 @@ export function NSEToolbarOverflowMenu({
         onPointerCancel={() => setPressed(false)}
         onClick={() => requestOpen(!open)}
       >
-        <NSEChromeSurface slot={appearance} state={appearanceState} />
-        <NSEChromeBevel slot={appearance} state={appearanceState} />
-        <NSEChromeGloss slot={appearance} state={appearanceState} />
-        <NSEChromeInnerShadow slot={appearance} state={appearanceState} />
+        <NSEChromeSurface  state={appearanceState} />
+        <NSEChromeBevel  state={appearanceState} />
+        <NSEChromeGloss  state={appearanceState} />
+        <NSEChromeInnerShadow  state={appearanceState} />
         <span aria-hidden="true" data-nse-part="overflow-glyph" />
       </button>
       {menuController ? (

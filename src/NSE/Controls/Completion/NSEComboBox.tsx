@@ -21,7 +21,7 @@
 import { nseControlHooks } from "../../Theme/contract/hooks";
 import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import { useEffect, useId, useRef, useState } from "react";
-import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
+
 import { NSEListboxPopup, useNSEOverlayProvider } from "../../Overlays";
 import type { NSEComboBoxProps } from "./completionTypes";
 import { useNSEValueBinding } from "../Core/useNSEValueBinding";
@@ -109,10 +109,10 @@ function NSEComboBoxControl<T>(props: NSEComboBoxProps<T>) {
   const activeItem = active >= 0 ? items[active] : undefined;
   const activeOptionId = activeItem ? `${popupId}-option-${props.dataSource.idForItem(activeItem)}` : undefined;
   const options = items.map((item) => ({ id: props.dataSource.idForItem(item), label: props.dataSource.labelForItem(item), value: item }));
-  const appearanceState = disabled ? "disabled" : focused ? "focused" : "normal";
-  const appearance = useNSEAppearanceSlot(nseAppearanceSlot("combo-box", "well", appearanceState));
+
+
   return (
-    <span data-nse-part="bezel" {...theme.events} {...nseControlHooks({ control: "combo-box", enabled: !disabled, hovered: theme.hovered, focused: theme.focused, variants: { editable: String(!props.readOnly) } })} data-state={loading ? "loading" : items.length ? "ready" : "empty"} {...appearance.attributes}>
+    <span data-nse-part="bezel" {...theme.events} {...nseControlHooks({ control: "combo-box", enabled: !disabled, hovered: theme.hovered, focused: theme.focused, variants: { editable: String(!props.readOnly) } })} data-state={loading ? "loading" : items.length ? "ready" : "empty"} >
       <input
         data-nse-part="field"
         ref={inputRef}

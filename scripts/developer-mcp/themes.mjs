@@ -92,7 +92,7 @@ export async function scaffoldTheme({ projectRoot, name, directory } = {}) {
   const manifest = { ...definition, stylesheet: "styles.css" };
   const appearance = `import { defineNSEAppearance } from "${contract.definition.import}";\nimport "./styles.css";\n\nexport const appearance = defineNSEAppearance(${JSON.stringify(definition, null, 2)});\n`;
   const stylesheet = "/* Starter values from NSE's neutral contract. Replace these with your own palette. */\n" + contract.schemes.map(scheme =>
-    `[data-nse-appearance="${id}"][data-nse-colour-scheme-resolved="${scheme}"] {\n` +
+    `[data-nse-theme="${id}"][data-nse-colour-scheme-resolved="${scheme}"] {\n` +
     contract.values.map(value => `  ${value.name}: ${value.defaults[scheme]};`).join("\n") + "\n}",
   ).join("\n\n") + "\n";
   mkdirSync(target, { recursive: true });
@@ -152,7 +152,7 @@ export async function validateTheme({ projectRoot, path } = {}) {
       if (rule.type !== "Rule") return;
       rule.prelude.children.forEach(selector => {
         const attributes = providerAttributes(selector);
-        if (!attributes || attributes.get("data-nse-appearance") !== definition.id) return;
+        if (!attributes || attributes.get("data-nse-theme") !== definition.id) return;
         const scheme = attributes.get("data-nse-colour-scheme-resolved");
         const selected = scheme ? (modes[scheme] ? [scheme] : []) : contract.schemes;
         for (const mode of selected) rule.block.children.forEach(declaration => {

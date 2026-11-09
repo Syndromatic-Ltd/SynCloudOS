@@ -19,7 +19,7 @@
  */
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
+
 import { GFXColour, type GFXCMYKAComponents } from "../../../FX/GraphicsFX/public";
 import { NSESlider } from "../../Controls/Values/NSESlider";
 import { NSETextField } from "../../Controls/Fields/NSEFields";
@@ -155,9 +155,9 @@ export function NSEColourSliderPicker({ model, colour, showAlpha, controlHeight,
     if (phase === "cancel") return;
     if (text.trim() !== "" && Number.isFinite(Number(text))) apply(Number(text));
   };
-  const appearance = useNSEAppearanceSlot(nseAppearanceSlot("colour-slider", "track", "normal"));
+
   const alphaTrack = `linear-gradient(to right, ${draft.withAlpha(0).toCSS()}, ${css(draft)})`;
-  return <fieldset data-nse-control="colour-sliders" data-nse-part="content" data-model={model} data-state="ready" {...appearance.attributes}><legend>{legends[model]}</legend>
+  return <fieldset data-nse-control="colour-sliders" data-nse-part="content" data-model={model} data-state="ready" ><legend>{legends[model]}</legend>
     {channels.map((channel, index) => <div key={channel.name} data-nse-part="channel" data-unit={channel.unit} style={{ "--nse-colour-channel-track": channel.track } as CSSProperties}>
       <span data-nse-part="channel-key" aria-hidden="true">{channel.key}</span>
       <span data-nse-part="channel-name" aria-hidden="true">{channel.name}</span>

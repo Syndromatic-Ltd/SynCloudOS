@@ -25,7 +25,7 @@ import { NSETabStrip } from "./tabStrip";
 
 export function NSETabView(props: NSETabViewProps) {
   return (
-    <section data-nse-control="tab-view" data-nse-part="background" data-appearance-recipe="tab-view" data-tab-style={props.presentation?.tabStyle ?? "capsule"}>
+    <section data-nse-control="tab-view" data-nse-part="background"  data-tab-style={props.presentation?.tabStyle ?? "capsule"}>
       <NSETabStrip
         aria-label={props["aria-label"]}
         items={props.items}

@@ -44,7 +44,7 @@ describe("Atmo vector coverage", () => {
       css.indexOf("/* End tall tab material. */"),
     );
 
-    expect(css).toContain("[data-nse-appearance=\"atmo\"] .nse-tab-bar.nse-control-toolbar[data-grouped=\"true\"][data-nse-tab-chrome-active=\"true\"][data-nse-tab-chrome-size=\"tall\"]");
+    expect(css).toContain("[data-nse-theme=\"com.syndromatic.atmo\"] .nse-tab-bar.nse-control-toolbar[data-grouped=\"true\"][data-nse-tab-chrome-active=\"true\"][data-nse-tab-chrome-size=\"tall\"]");
     for (const segment of ["first", "middle", "last", "only"]) {
       for (const state of ["up", "down", "sel", "seldown", "dis"]) {
         for (const piece of ["start", "body", "end"]) {
@@ -92,7 +92,7 @@ describe("Atmo vector coverage", () => {
     // The tab-only variant preserves the shared dark gt control's caption
     // paint rather than inheriting the unrelated light-radio tab-label token.
     expect(css).toContain(
-      "[data-nse-appearance=\"atmo\"] .nse-tab-bar.nse-control-toolbar[data-grouped=\"true\"][data-nse-tab-chrome-active=\"true\"][data-nse-tab-chrome-size=\"tall\"] > .nse-tab-bar-tab.nse-control-button > .nse-tab-bar-content > .nse-tab-bar-label {\n  color: inherit;\n}",
+      "[data-nse-theme=\"com.syndromatic.atmo\"] .nse-tab-bar.nse-control-toolbar[data-grouped=\"true\"][data-nse-tab-chrome-active=\"true\"][data-nse-tab-chrome-size=\"tall\"] > .nse-tab-bar-tab.nse-control-button > .nse-tab-bar-content > .nse-tab-bar-label {\n  color: inherit;\n}",
     );
   });
 
@@ -174,7 +174,7 @@ describe("Atmo vector coverage", () => {
     const css = readVectorCss();
     const defined = [...new Set([...css.matchAll(/(--nse-atmo-svg-[\w-]+):\s*url\(/gu)].map((match) => match[1]))];
     expect(defined.length).toBeGreaterThan(0);
-    const selector = "[data-nse-appearance=\"atmo\"].nse-appearance-provider::before {";
+    const selector = "[data-nse-theme=\"com.syndromatic.atmo\"].nse-appearance-provider::before {";
     const start = css.indexOf(selector);
     expect(start, "missing appearance-boundary residency rule").toBeGreaterThanOrEqual(0);
     const rule = css.slice(start, css.indexOf("}", start));

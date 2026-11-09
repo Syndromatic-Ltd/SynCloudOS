@@ -44,7 +44,7 @@ function HUDTitleBar({ record, dispatchCommand, moveHandleProps }: Pick<NSEWindo
           aria-label={`Close ${record.title}`}
           data-nse-control="button" data-nse-part="cell" data-nse-role="close" data-nse-highlighted={highlighted ? "" : undefined} data-window-control="close"
           data-window-control-state={highlighted ? "highlighted" : "normal"}
-          data-window-appearance-recipe={highlighted ? "window.hud.close.highlighted" : "window.hud.close.normal"}
+
           data-window-no-drag=""
           data-syncloudos-focus-chrome=""
           onPointerEnter={() => setHighlighted(true)}
@@ -75,7 +75,7 @@ export function NSEHUDWindowView(props: NSEWindowViewProps) {
     <NSEWindowView
       {...props}
       className="nse-window-view--hud"
-      appearanceRecipe="window.hud.frame"
+
       titleBar={titleBar}
       onKeyDown={windowEscapeCloseHandler(props, props.record.style.includes("closable"))}
     />

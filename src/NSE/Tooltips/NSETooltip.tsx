@@ -57,9 +57,9 @@ export function NSETooltip({ id, content, open, anchor, placement = "block-end-i
       data-nse-control="tooltip"
       data-nse-part="surface"
       data-state="open"
-      data-appearance-recipe="tooltip.background"
+
     >
-      <span ref={setArrow} className="nse-tooltip-arrow" aria-hidden="true" data-nse-part="arrow" data-appearance-recipe="tooltip.arrow" />
+      <span ref={setArrow} className="nse-tooltip-arrow" aria-hidden="true" data-nse-part="arrow"  />
       <span className="nse-tooltip-content" data-nse-part="content">{content}</span>
     </div>
   );

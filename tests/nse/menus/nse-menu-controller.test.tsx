@@ -1,3 +1,4 @@
+import { createTestTheme } from "../../fixtures/themes";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -37,13 +38,13 @@ import {
 import { NSEOverlayProvider } from "../../../src/NSE/Overlays";
 import { NSEView } from "../../../src/NSE/Views/NSEView";
 import { NSEMenuRuntimeProvider } from "../../../src/NSE/Menus/menuRuntimeContext";
-import { defineNSEAppearance, NSEAppearanceProvider } from "../../../src/NSE/Appearance";
+import { NSEAppearanceProvider } from "../../../src/NSE/Appearance";
 import { NSEPopUpButton, NSEPopup } from "../../../src/NSE/Menus";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 
 import { NSEMenuOverlayPresentationScope } from "../../../src/NSE/Menus/menuPresentationContext";
 
-const customAppearance = defineNSEAppearance({ id: "test-custom", displayName: "Test custom" });
+const customAppearance = createTestTheme("com.example.test-custom", "Test custom");
 
 afterEach(() => {
   document.body.replaceChildren();
@@ -791,7 +792,7 @@ describe("NSEMenu", () => {
     const onValueChange = vi.fn();
     render(
       <MenuOverlayHarness>
-        <NSEAppearanceProvider appearance={customAppearance}>
+        <NSEAppearanceProvider theme={customAppearance}>
           <NSEPopUpButton
             label="Density"
             value="balanced"
@@ -805,7 +806,7 @@ describe("NSEMenu", () => {
     fireEvent.click(screen.getByRole("button", { name: /balanced/i }));
     const listbox = await screen.findByRole("listbox");
     expect(listbox.getAttribute("data-nse-overlay-kind")).toBe("listbox");
-    expect(listbox.closest(".nse-overlay-popup")?.getAttribute("data-nse-appearance")).toBe("test-custom");
+    expect(listbox.closest(".nse-overlay-popup")?.getAttribute("data-nse-theme")).toBe("com.example.test-custom");
     fireEvent.click(screen.getByRole("option", { name: "Compact" }));
     expect(onValueChange).toHaveBeenCalledWith("compact");
   });
@@ -813,7 +814,7 @@ describe("NSEMenu", () => {
   it("propagates a custom appearance and keeps listbox semantics inside the mobile action sheet", async () => {
     render(
       <MenuOverlayHarness mode="mobile">
-        <NSEAppearanceProvider appearance={customAppearance}>
+        <NSEAppearanceProvider theme={customAppearance}>
           <NSEPopUpButton
             label="Density"
             value="balanced"
@@ -825,7 +826,7 @@ describe("NSEMenu", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: /balanced/i }));
     const listbox = await screen.findByRole("listbox");
-    expect(listbox.closest(".nse-overlay-popup")?.getAttribute("data-nse-appearance")).toBe("test-custom");
+    expect(listbox.closest(".nse-overlay-popup")?.getAttribute("data-nse-theme")).toBe("com.example.test-custom");
     expect(listbox.closest("[data-nse-overlay-kind]")?.getAttribute("data-nse-overlay-kind")).toBe("action-sheet");
     expect(listbox.closest("[aria-modal]")?.getAttribute("aria-modal")).toBe("true");
   });

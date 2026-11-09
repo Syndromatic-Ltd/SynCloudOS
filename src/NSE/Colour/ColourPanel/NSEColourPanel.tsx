@@ -215,7 +215,7 @@ export function NSEColourPanel({ controller: supplied, "aria-label": label = "Co
     // An inspector: it stays open while the user works elsewhere, and its
     // close control keeps the colour shown, as NSColorPanel does.
     <NSEUtilityPanel id={`colour-panel-${instanceId}`} open={presents && snapshot.open} title={title} anchor={anchor} contentInset="none" onClose={() => { if (controller.getSnapshot().open) controller.close("commit"); }}>
-    <section data-nse-control="colour-panel" data-nse-part="background" data-state={hexError ? "invalid" : contentState === "ready" ? snapshot.status : contentState} data-appearance-recipe="colour-panel" aria-label={label} aria-busy={contentState === "loading" || undefined}>
+    <section data-nse-control="colour-panel" data-nse-part="background" data-state={hexError ? "invalid" : contentState === "ready" ? snapshot.status : contentState}  aria-label={label} aria-busy={contentState === "loading" || undefined}>
       {contentState !== "ready" ? <p role={contentState === "loading" || contentState === "empty" || contentState === "disabled" || contentState === "read-only" ? "status" : "alert"} data-nse-part="content-message">{contentMessages[contentState]}</p> : null}
       <fieldset disabled={disabled}>
         <NSETabView

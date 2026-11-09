@@ -5,51 +5,8 @@
 import { cpSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import ts from "typescript";
-import { parse, generate } from "css-tree";
 import { deriveNSEThemeContract } from "../synware/build-theme-contract.mjs";
 
-/** Build the offline theme schema from NSE's neutral provider, never a concrete theme. */
-export function deriveNSEAppearanceContract(repositoryRoot) {
-  const cssFile = "src/NSE/Appearance/nse-appearance.css";
-  const definitionFile = "src/NSE/Appearance/NSEAppearanceDefinition.ts";
-  const css = parse(readFileSync(resolve(repositoryRoot, cssFile), "utf8"), { positions: true });
-  const modes = { light: new Map(), dark: new Map() };
-  css.children.forEach(rule => {
-    if (rule.type !== "Rule") return;
-    const selector = generate(rule.prelude);
-    const scheme = /\[data-nse-colour-scheme-resolved=(?:"|')?(light|dark)(?:"|')?\]/u.exec(selector)?.[1];
-    if (!scheme) return;
-    rule.block.children.forEach(declaration => {
-      if (declaration.type === "Declaration" && declaration.property.startsWith("--nse-")) {
-        modes[scheme].set(declaration.property, { value: generate(declaration.value), line: declaration.loc?.start.line });
-      }
-    });
-  });
-  if (!modes.light.size || [...modes.light.keys()].some(name => !modes.dark.has(name)) || modes.light.size !== modes.dark.size)
-    throw new Error("The neutral NSE appearance contract must declare the same values in light and dark.");
-  const text = readFileSync(resolve(repositoryRoot, definitionFile), "utf8");
-  const source = ts.createSourceFile(definitionFile, text, ts.ScriptTarget.Latest, true);
-  const interfaces = source.statements.filter(ts.isInterfaceDeclaration);
-  const fields = name => {
-    const declaration = interfaces.find(node => node.name.text === name);
-    if (!declaration) throw new Error(`Neutral NSE appearance interface ${name} is missing.`);
-    return declaration.members.filter(ts.isPropertySignature).map(member => ({ name: member.name.getText(source), required: !member.questionToken, type: member.type.getText(source) }));
-  };
-  let idPattern;
-  for (const statement of source.statements) if (ts.isVariableStatement(statement)) {
-    for (const declaration of statement.declarationList.declarations)
-      if (declaration.name.getText(source) === "NSE_APPEARANCE_ID") idPattern = declaration.initializer?.getText(source).replace(/^\//u, "").replace(/\/[a-z]*$/u, "");
-  }
-  if (!idPattern) throw new Error("Neutral NSE appearance id validation is missing.");
-  return {
-    schemaVersion: 1,
-    sources: [cssFile, definitionFile],
-    definition: { import: "@syndromatic/syncloudos/nse/appearance", factory: "defineNSEAppearance", idPattern, fields: fields("NSEAppearanceDefinitionInput"), recipeFields: fields("NSEAppearanceRecipeDefinition") },
-    schemes: ["light", "dark"],
-    values: [...modes.light].map(([name, light]) => ({ name, type: "colour", source: { file: cssFile, line: light.line }, defaults: { light: light.value, dark: modes.dark.get(name).value } })),
-    recipesRequired: false,
-  };
-}
 /** Add only version-matched offline inputs; the build receipt excludes its own eventual archive hash. */
 export async function writeDeveloperSdkData({repositoryRoot,directory,commit,source}) {
   cpSync(resolve(repositoryRoot,"docs/framework"),resolve(directory,"docs/framework"),{recursive:true});

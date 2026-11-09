@@ -100,7 +100,7 @@ describe("NSEStandardWindowView", () => {
     expect(dialog.getAttribute("data-window-presentation")).toBe("desktop-window");
     expect(dialog.getAttribute("data-window-level")).toBe("floating");
     expect(dialog.getAttribute("data-window-blocked")).toBe("true");
-    expect(dialog.getAttribute("data-window-appearance-recipe")).toBe("window.standard.frame");
+
     expect(dialog.getAttribute("aria-labelledby")).toBe("window-1-title");
     expect(dialog.hasAttribute("inert")).toBe(true);
     expect(dialog.style.left).toBe("0px");
@@ -116,10 +116,10 @@ describe("NSEStandardWindowView", () => {
 
     expect(close.getAttribute("data-window-control")).toBe("close");
     expect(close.getAttribute("data-window-control-state")).toBe("unsaved-inactive");
-    expect(close.getAttribute("data-window-appearance-recipe")).toBe("window.standard.close.unsaved-inactive");
+
     fireEvent.pointerEnter(close);
     expect(close.getAttribute("data-window-control-state")).toBe("unsaved-highlighted");
-    expect(close.getAttribute("data-window-appearance-recipe")).toBe("window.standard.close.unsaved-highlighted");
+
     fireEvent.pointerLeave(close);
     expect(close.getAttribute("data-window-control-state")).toBe("unsaved-inactive");
   });

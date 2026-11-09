@@ -22,23 +22,9 @@ export {
   NSEAppearanceProvider,
   useNSEAppearance,
   useNSEAppearanceProjection,
-  useNSEAppearanceSlot,
   type NSEAppearanceProviderProps,
 } from "./NSEAppearanceProvider";
-export {
-  defineNSEAppearance,
-  type NSEAppearanceDefinition,
-  type NSEAppearanceDefinitionInput,
-  type NSEAppearanceRecipeDefinition,
-} from "./NSEAppearanceDefinition";
-export {
-  nseAppearanceSlot,
-  projectNSEAppearance,
-  projectNSEAppearanceSlot,
-  type NSEAppearanceSlotDescriptor,
-  type NSEAppearanceSlotProjection,
-} from "./appearanceProjection";
-export { resolveNSEAppearanceSlot, type NSEAppearanceSlotResolution } from "./appearanceSlotResolver";
+export { projectNSEAppearance } from "./appearanceProjection";
 export type {
   NSEAppearanceDataAttributes,
   NSEAppearanceSelection,
@@ -61,6 +47,7 @@ export {
   NSEChromeInnerShadow,
   type NSEChromePrimitiveKind,
   type NSEChromePrimitiveProps,
-  type NSEChromeSlot,
   type NSEChromeVisualState,
 } from "./NSEChromePrimitives";
+
+export type { NSETheme, NSEThemeNavigation, NSEThemePresentation, NSEThemeImage } from "../Theme/NSETheme";

@@ -29,8 +29,8 @@ describe("developer MCP neutral theme provisioning", () => {
     await scaffoldTheme({ projectRoot: project, name: "Scoped" });
     const path = join(project, "src/Themes/scoped/styles.css");
     const original = readFileSync(path, "utf8");
-    for (const selector of ['[data-nse-appearance="scoped"] [data-nse-colour-scheme-resolved=', ':not([data-nse-appearance="scoped"])[data-nse-colour-scheme-resolved=', '[data-nse-appearance="scoped"], [data-nse-colour-scheme-resolved=']) {
-      writeFileSync(path, original.replaceAll('[data-nse-appearance="scoped"][data-nse-colour-scheme-resolved=', selector));
+    for (const selector of ['[data-nse-theme="scoped"] [data-nse-colour-scheme-resolved=', ':not([data-nse-theme="scoped"])[data-nse-colour-scheme-resolved=', '[data-nse-theme="scoped"], [data-nse-colour-scheme-resolved=']) {
+      writeFileSync(path, original.replaceAll('[data-nse-theme="scoped"][data-nse-colour-scheme-resolved=', selector));
       expect((await validateTheme({ projectRoot: project, path: "src/Themes/scoped" })).ok).toBe(false);
     }
     writeFileSync(path, original);
@@ -88,7 +88,7 @@ describe("developer MCP neutral theme provisioning", () => {
     expect(result.createdPaths).toEqual(["src/Themes/paper-studio/theme.json", "src/Themes/paper-studio/appearance.ts", "src/Themes/paper-studio/styles.css"]);
     const css = readFileSync(join(project, "src/Themes/paper-studio/styles.css"), "utf8");
     expect(css).not.toContain("atmo");
-    expect(css).toContain('[data-nse-appearance="paper-studio"]');
+    expect(css).toContain('[data-nse-theme="paper-studio"]');
     for (const value of contract.values) expect(css.split(value.name + ":")).toHaveLength(3);
     const checked = await validateTheme({ projectRoot: project, path: "src/Themes/paper-studio" });
     expect(checked.ok).toBe(true);
@@ -99,7 +99,7 @@ describe("developer MCP neutral theme provisioning", () => {
 
   it("reports every missing scheme value", async () => {
     await scaffoldTheme({ projectRoot: project, name: "Incomplete" });
-    writeFileSync(join(project, "src/Themes/incomplete/styles.css"), '[data-nse-appearance="incomplete"][data-nse-colour-scheme-resolved="light"] { --nse-colour-window-background: white; }');
+    writeFileSync(join(project, "src/Themes/incomplete/styles.css"), '[data-nse-theme="incomplete"][data-nse-colour-scheme-resolved="light"] { --nse-colour-window-background: white; }');
     const result = await validateTheme({ projectRoot: project, path: "src/Themes/incomplete/theme.json" });
     expect(result.ok).toBe(false);
     expect(result.findings.filter((finding: { rule: string }) => finding.rule === "theme.missing-value")).toHaveLength(contract.values.length * 2 - 1);

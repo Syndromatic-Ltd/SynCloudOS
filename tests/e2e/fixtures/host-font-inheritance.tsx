@@ -30,7 +30,7 @@ function HostTypography() {
   const [family, setFamily] = useState("monospace");
   const [clicks, setClicks] = useState(0);
   const inheritedRole = new URLSearchParams(window.location.search).has("root-role");
-  return <main data-nse-appearance="atmo" style={{ fontFamily: inheritedRole ? undefined : family, maxWidth: 640 }}>
+  return <main data-nse-theme="com.syndromatic.atmo" style={{ fontFamily: inheritedRole ? undefined : family, maxWidth: 640 }}>
     <NSETopBar title="Host title" variant="atmoMetal" />
     <NSEButton title="Host button" onClick={() => setClicks(value => value + 1)} />
     <button onClick={() => setFamily("serif")}>Change host font</button>

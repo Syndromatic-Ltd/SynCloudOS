@@ -158,7 +158,7 @@ export function NSEFilePanelView({
       data-nse-control="save-panel"
       data-nse-part="surface"
       data-state={status}
-      data-appearance-recipe={`file-panel.${compact ? "sheet" : "panel"}`}
+
       onOpenChange={dismiss}
     >
       {content}

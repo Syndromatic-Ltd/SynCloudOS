@@ -30,6 +30,6 @@ it("projects material semantics without source-path or implementation-lineage di
   const { container } = render(<NSEMetalSurface mode="light">Content</NSEMetalSurface>);
   const surface = container.querySelector('[data-nse-material="metal"]')!;
   expect(surface.textContent).toBe("Content");
-  expect(surface.getAttribute("data-nse-metal-surface-recipe")).toBe("nse.sidebar.metal.surface");
+
   expect(Array.from(surface.attributes, (attribute) => attribute.name).filter((name) => /source-path|lineage/.test(name))).toEqual([]);
 });

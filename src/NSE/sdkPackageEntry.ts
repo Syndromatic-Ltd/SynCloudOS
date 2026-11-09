@@ -63,17 +63,15 @@ export type { NSEControlValidation, NSEControlInteractionPhase, NSEControlValueP
 export { NSETableCellView } from "./DataViews/Table/NSETableCellView";
 
 export {
-  defineNSEAppearance,
   useNSEAppearanceProjection,
   useNSEAppearance,
-  useNSEAppearanceSlot,
-  resolveNSEAppearanceSlot,
 } from "./Appearance";
 export type {
   NSEAppearanceDataAttributes,
-  NSEAppearanceDefinition,
-  NSEAppearanceDefinitionInput,
-  NSEAppearanceRecipeDefinition,
+  NSETheme,
+  NSEThemeNavigation,
+  NSEThemePresentation,
+  NSEThemeImage,
   NSEAppearanceSelection,
   NSEAppearanceServicePort,
   NSEChromeAppearance,

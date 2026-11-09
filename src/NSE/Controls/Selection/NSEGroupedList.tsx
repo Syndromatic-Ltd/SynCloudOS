@@ -53,7 +53,7 @@ export function NSEGroupedList({ children, className = "", ...props }: NSEGroupe
       className={classes("nse-control-grouped-list", className)}
       data-nse-grouped-list="true"
       data-nse-grouped-list-inner-radius="frame-minus-row-inset"
-      data-nse-grouped-list-seam-recipe="nse.list-item.paired-bevel"
+
     >
       {items.map((item, index) => cloneElement(item, {
         "data-nse-grouped-list-edge": edgeFor(index, items.length),

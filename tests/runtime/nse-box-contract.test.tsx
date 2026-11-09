@@ -65,7 +65,7 @@ describe("NSEBox", () => {
       for (const [borderType, border] of borderTypes) {
         const { unmount } = render(<NSEBox aria-label={`${boxType}-${borderType}`} boxType={boxType} borderType={borderType} />);
         const box = screen.getByRole("group", { name: `${boxType}-${borderType}` });
-        expect(box.getAttribute("data-appearance-recipe")).toBe(`box.${boxType}.${border}.none`);
+
         unmount();
       }
     }

@@ -27,7 +27,7 @@ import { formatPlainDate, parsePlainDate, plainDatePlaceholder, plainDateToday }
 import type { NSECalendarMonth, NSEPlainDate } from "../dateTimeTypes";
 import { NSEGraphicalCalendar } from "../Calendar/graphicalCalendar";
 import { NSEPopUpButton } from "../../Menus/NSEPopUpButton";
-import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
+
 import type { NSEDateEntryEditorMode, NSEDateEntryField, NSEDateEntryProps } from "./datePickerTypes";
 
 export const serializePlainDate = (value: NSEPlainDate | null) => value ? `${String(value.year).padStart(4, "0")}-${String(value.month).padStart(2, "0")}-${String(value.day).padStart(2, "0")}` : "";
@@ -203,9 +203,9 @@ export function NSEDateEntry({
   ) : null;
   const showCalendar = mode === "calendar";
   const titleId = `date-picker-title-${instanceId}`;
-  const appearanceState = invalid ? "invalid" : disabled ? "disabled" : focused || open ? "focused" : "normal";
-  const appearance = useNSEAppearanceSlot(nseAppearanceSlot("date-picker", "select", appearanceState));
-  return <span {...hostProps} {...drawing.attributes} {...drawing.events} data-state={invalid ? "invalid" : disabled ? "disabled" : readOnly ? "read-only" : open ? "open" : "ready"} {...appearance.attributes} onFocusCapture={(event) => { drawing.events.onFocusCapture?.(event); setFocused(true); onFocusCapture?.(event); }} onBlurCapture={(event) => { drawing.events.onBlurCapture?.(event); if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false); onBlurCapture?.(event); }}>
+
+
+  return <span {...hostProps} {...drawing.attributes} {...drawing.events} data-state={invalid ? "invalid" : disabled ? "disabled" : readOnly ? "read-only" : open ? "open" : "ready"}  onFocusCapture={(event) => { drawing.events.onFocusCapture?.(event); setFocused(true); onFocusCapture?.(event); }} onBlurCapture={(event) => { drawing.events.onBlurCapture?.(event); if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false); onBlurCapture?.(event); }}>
     {mode === "automatic" ? <button ref={triggerRef} type="button" aria-label={`Choose ${label.toLocaleLowerCase()}`} aria-expanded={open} disabled={disabled || readOnly} onClick={() => { setCalendarDraft(current); setOpen(true); }}>▦</button> : null}
     {renderEditor ? renderEditor({ value: current, isEnabled: !disabled, readOnly: Boolean(readOnly), commit: commitEditor }) : segmentEditor ?? (!showCalendar ? <input data-nse-part="date-entry" aria-label={label} type="text" inputMode="numeric" placeholder={plainDatePlaceholder(locale)} value={draft} disabled={disabled} readOnly={readOnly} required={required} aria-invalid={invalid || undefined} onChange={(event) => { if (readOnly) return; setDraft(event.currentTarget.value); setInvalid(false); }} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); commitText(); } else if (event.key === "Escape") { if (invalid || draft !== (current ? formatPlainDate(current, locale) : "")) event.preventDefault(); setInvalid(false); setDraft(current ? formatPlainDate(current, locale) : ""); } }} onBlur={commitText} /> : null)}
     {showCalendar && !renderEditor ? calendar : null}

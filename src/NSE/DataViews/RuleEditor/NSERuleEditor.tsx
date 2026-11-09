@@ -235,7 +235,7 @@ export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onV
         onClick={() => { repairFocus(rows, index, parentPath); publishChildren(replaceAtPath(root.children, path, null)); }}
       />
     </div>;
-    return <div key={row.id} role="group" aria-label={`Rule ${label}`} tabIndex={-1} data-rule-id={row.id} className="nse-rule-row" data-appearance-recipe="rule-row" data-alternating={index % 2 === 1 || undefined} onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
+    return <div key={row.id} role="group" aria-label={`Rule ${label}`} tabIndex={-1} data-rule-id={row.id} className="nse-rule-row"  data-alternating={index % 2 === 1 || undefined} onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
       if (event.altKey && event.key === "ArrowUp") { event.preventDefault(); move(parentPath, index, -1); }
       else if (event.altKey && event.key === "ArrowDown") { event.preventDefault(); move(parentPath, index, 1); }
     }}>
@@ -246,7 +246,7 @@ export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onV
         isEnabled={!locked}
         className="nse-rule-remove"
         aria-label="Remove rule"
-        data-appearance-recipe="rule-remove"
+
         onClick={() => { repairFocus(rows, index, parentPath); publishChildren(replaceAtPath(root.children, path, null)); }}
       />
     </div>;
@@ -266,7 +266,7 @@ export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onV
           title="Add Rule"
           isEnabled={!(locked || fields.length === 0)}
           aria-label="Add rule"
-          data-appearance-recipe="rule-add"
+
           onClick={() => addRule([])}
         />
         <NSEButton appearance="aqua" title="Add Group" isEnabled={!locked} aria-label="Add group" onClick={() => addGroup([])} />
