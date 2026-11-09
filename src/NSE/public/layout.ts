@@ -19,6 +19,8 @@
  */
 
 /** Supported SynWare SDK NSE layout surface. Host machinery stays private. */
+export { NSEEdgeInsetsMake, NSEEdgeInsetsZero } from "../Layout/NSEEdgeInsets";
+export type { NSEEdgeInsets } from "../Layout/NSEEdgeInsets";
 export {
   NSEStackItem,
 } from "../Layout/NSEStackItem";

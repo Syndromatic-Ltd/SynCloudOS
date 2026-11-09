@@ -23,13 +23,19 @@ Completed on the unchanged framework at `a1c3617`. Framework source under `src/`
 - Two consecutive full comparisons **without snapshot updates passed 80/80 partitions each**. Logs: `theme-baseline-final-1.log` and `theme-baseline-final-2.log`.
 - Catalogue TypeScript check and `git diff --check` passed.
 - The high-DPR and reduced-motion Playwright project filters include the new specs. Reduced motion uses the existing DPR 1 references.
-- Task 1 commit: the commit introducing this catalogue (`test(theme): record the Atmo visual baseline`); its SHA will be recorded in the next task entry.
+- Task 1 commit: `af93e18a` — `test(theme): record the Atmo visual baseline`.
 
 **The images are frozen from the Task 1 commit. They must not be updated during Tasks 2–19.**
 
-### Tasks 2–19
+### Task 2 — geometry types and safe-area model
 
-Not started at the time of this Task 1 report. The final typecheck, split full suite, serial packed SDK acceptance and final browser matrix remain for Task 19.
+Added `NSEEdgeInsets`, `NSEEdgeInsetsZero` and `NSEEdgeInsetsMake` to the public layout and NSE entries. Replaced `NSEScrollInsets` at its users, with no alias. The pure model adds physical screen, chrome and additional insets, rejects invalid obstruction thickness and converts ScreenService logical edges for LTR/RTL. It reuses the existing public `NSEScrollRect` rather than introducing an equivalent rect type.
+
+Verification: 17 focused tests passed (12 new safe-area cases plus scroll regressions); framework typecheck passed; obsolete type search and diff check clean. Logs: `task-2-red.log`, `task-2-green.log`, `task-2-typecheck.log`. Task 2 commit is the commit introducing these types and model.
+
+### Tasks 3–19
+
+Not started at the time of this Task 2 entry. Final split-suite and packed SDK acceptance remain for Task 19.
 
 ## Initial capture correction and retained evidence
 
@@ -55,10 +61,11 @@ Further diagnostic runs exposed folder-only capture interference and source-pain
 
 1. The folder's capture gets a fresh document so prior catalogue surfaces cannot leave queued document work in the stage being copied. Its source CSS resources, finite animations and measured geometry settle before cloning. No framework rendering or artwork changed.
 2. The reduced-motion project compares the DPR 1 references, avoiding a third set of initial images that Task 1 never requested.
+3. Task 2 reuses the existing public `NSEScrollRect`, as the plan explicitly allows an equivalent existing rect type. The inset factory preserves finite signed geometry; safe-area resolution clips actual safe insets to view extents.
 
 ## Public API accounting
 
-Added: **none yet**. Removed: **none yet**.
+Added: `NSEEdgeInsets`, `NSEEdgeInsetsZero`, `NSEEdgeInsetsMake`. Removed: `NSEScrollInsets` (no compatibility alias).
 
 Part-name mappings, semantic colour values without Atmo precedent and Beta 2 removals will be recorded as their tasks are completed. No visual design decision has been made.
 

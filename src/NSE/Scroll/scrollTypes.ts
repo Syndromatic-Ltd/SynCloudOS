@@ -20,15 +20,9 @@
 
 import { NSEControllerLifetime } from "../Controllers/controllerLifetime";
 import type { NSEControllerOwnershipOptions } from "../Controllers/ownership";
+import { NSEEdgeInsetsZero, type NSEEdgeInsets } from "../Layout/NSEEdgeInsets";
 
 export type NSEScrollerPolicy = "automatic" | "always" | "hidden";
-
-export interface NSEScrollInsets {
-  readonly top: number;
-  readonly right: number;
-  readonly bottom: number;
-  readonly left: number;
-}
 
 export interface NSEScrollRect {
   readonly x: number;
@@ -52,10 +46,8 @@ export interface NSEScrollGeometry {
   readonly viewport: { readonly width: number; readonly height: number };
   readonly content: { readonly width: number; readonly height: number };
   readonly rect: NSEScrollRect;
-  readonly insets?: NSEScrollInsets;
+  readonly insets?: NSEEdgeInsets;
 }
-
-const ZERO_INSETS: NSEScrollInsets = Object.freeze({ top: 0, right: 0, bottom: 0, left: 0 });
 
 const finite = (value: number) => Number.isFinite(value) ? value : 0;
 const clamp = (value: number, minimum: number, maximum: number) => Math.min(maximum, Math.max(minimum, value));
@@ -64,7 +56,7 @@ export const normalizeRTLScrollLeft = (value: number, maximum: number, model: NS
   model === "negative" ? -value : model === "reverse" ? maximum - value : value;
 
 export function computeScrollRectTarget(geometry: NSEScrollGeometry) {
-  const insets = geometry.insets ?? ZERO_INSETS;
+  const insets = geometry.insets ?? NSEEdgeInsetsZero;
   const viewportWidth = Math.max(0, finite(geometry.viewport.width));
   const viewportHeight = Math.max(0, finite(geometry.viewport.height));
   const contentWidth = Math.max(0, finite(geometry.content.width));
@@ -116,7 +108,7 @@ export class NSEScrollViewController {
   readonly #connections = new Set<() => void>();
   readonly contentView: NSEClipViewHandle;
 
-  constructor(readonly host: HTMLElement, readonly insets: NSEScrollInsets = ZERO_INSETS, options: NSEControllerOwnershipOptions = {}) {
+  constructor(readonly host: HTMLElement, readonly insets: NSEEdgeInsets = NSEEdgeInsetsZero, options: NSEControllerOwnershipOptions = {}) {
     this.#lifetime = new NSEControllerLifetime(options, { kind: "NSEScrollViewController", id: host.id || "scroll-view" });
     this.#lifetime.bind(() => this.dispose());
     const controller = this;
