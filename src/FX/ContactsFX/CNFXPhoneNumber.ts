@@ -5,5 +5,9 @@
 /** CNPhoneNumber.init(stringValue:). No invented normalization is applied. */
 export class CNFXPhoneNumber {
   readonly stringValue: string;
-  constructor(stringValue: string) { if (typeof stringValue !== "string") throw new TypeError("A phone number requires a string."); this.stringValue = stringValue; Object.freeze(this); }
+  constructor(stringValue: string) {
+    if (typeof stringValue !== "string") throw new TypeError("A phone number requires a string.");
+    this.stringValue = stringValue;
+    Object.freeze(this);
+  }
 }

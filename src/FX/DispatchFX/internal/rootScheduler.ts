@@ -26,7 +26,11 @@ export interface ScheduledJob {
   /** Re-evaluate the floor if an inactive object's target is configured. */
   readonly resolveQoS?: (chain: readonly DFXQueue[]) => DFXQoS;
 }
-interface Entry { readonly job: ScheduledJob; chain: DFXQueue[]; release?: () => void; }
+interface Entry {
+  readonly job: ScheduledJob;
+  chain: DFXQueue[];
+  release?: () => void;
+}
 type Priority = "user-blocking" | "user-visible" | "background";
 interface TaskScheduler {
   postTask?: (callback: () => void, options: { priority: Priority }) => Promise<unknown>;
@@ -41,11 +45,18 @@ let scheduled: { token: number; rank: number } | undefined;
 const signal = new AbortController().signal;
 const hostScheduler = () => (globalThis as typeof globalThis & { scheduler?: TaskScheduler }).scheduler;
 function priority(qos: DFXQoS): Priority {
-  return qos.qosClass === DFXQoSClass.userInteractive || qos.qosClass === DFXQoSClass.userInitiated ? "user-blocking"
-    : qos.qosClass === DFXQoSClass.utility || qos.qosClass === DFXQoSClass.background ? "background" : "user-visible";
+  return qos.qosClass === DFXQoSClass.userInteractive || qos.qosClass === DFXQoSClass.userInitiated
+    ? "user-blocking"
+    : qos.qosClass === DFXQoSClass.utility || qos.qosClass === DFXQoSClass.background
+      ? "background"
+      : "user-visible";
 }
-function hostRank(value: Priority): number { return value === "user-blocking" ? 2 : value === "user-visible" ? 1 : 0; }
-function higher(left: DFXQoS, right: DFXQoS): DFXQoS { return compareQoS(left, right) >= 0 ? left : right; }
+function hostRank(value: Priority): number {
+  return value === "user-blocking" ? 2 : value === "user-visible" ? 1 : 0;
+}
+function higher(left: DFXQoS, right: DFXQoS): DFXQoS {
+  return compareQoS(left, right) >= 0 ? left : right;
+}
 function qos(entry: Entry): DFXQoS {
   let value = entry.job.resolveQoS?.(entry.chain) ?? entry.job.qos;
   for (const queue of entry.chain) for (const override of overrides.get(queue)?.values() ?? []) value = higher(value, override);
@@ -59,21 +70,35 @@ function entryLifetimes(entry: Entry): Set<DispatchLifetime> {
   if (entry.job.cleanup && entry.job.lifetime) lifetimes.delete(entry.job.lifetime);
   return lifetimes;
 }
-function assertEntryLive(entry: Entry): void { for (const lifetime of entryLifetimes(entry)) assertLifetime(lifetime); }
+function assertEntryLive(entry: Entry): void {
+  for (const lifetime of entryLifetimes(entry)) assertLifetime(lifetime);
+}
 function drop(entry: Entry): void {
-  const index = pending.indexOf(entry); if (index < 0) return;
-  pending.splice(index, 1); entry.release?.(); entry.job.dropped?.(); wake();
+  const index = pending.indexOf(entry);
+  if (index < 0) return;
+  pending.splice(index, 1);
+  entry.release?.();
+  entry.job.dropped?.();
+  wake();
 }
 function observeEntry(entry: Entry): void {
-  const lifetimes = entryLifetimes(entry); for (const lifetime of lifetimes) assertLifetime(lifetime);
+  const lifetimes = entryLifetimes(entry);
+  for (const lifetime of lifetimes) assertLifetime(lifetime);
   const releases = [...lifetimes].map(lifetime => onLifetimeEnd(lifetime, () => drop(entry), true));
-  entry.release = () => { for (const release of releases.splice(0)) release(); };
+  entry.release = () => {
+    for (const release of releases.splice(0)) release();
+  };
 }
 /** The same dependency graph serves host scheduling and synchronous draining. */
 function next(upTo?: Entry | ReadonlySet<Entry>): Entry | undefined {
   const limits = upTo === undefined ? undefined : "job" in upTo ? new Set([upTo]) : upTo;
   let lastLimit: Entry | undefined;
-  if (limits) for (let index = pending.length - 1; index >= 0; index--) if (limits.has(pending[index])) { lastLimit = pending[index]; break; }
+  if (limits)
+    for (let index = pending.length - 1; index >= 0; index--)
+      if (limits.has(pending[index])) {
+        lastLimit = pending[index];
+        break;
+      }
   const ready: Entry[] = [];
   const dependencies = new Map<Entry, Set<Entry>>();
   const leaves = new Map<DFXQueue, Entry>();
@@ -84,16 +109,33 @@ function next(upTo?: Entry | ReadonlySet<Entry>): Entry | undefined {
   // every preceding item for every candidate. A suspended child has not
   // reached its target and cannot hold up independent work on that target.
   for (const entry of pending) {
-    const blockers = new Set<Entry>(); dependencies.set(entry, blockers);
+    const blockers = new Set<Entry>();
+    dependencies.set(entry, blockers);
     const leafHead = leaves.get(entry.job.queue);
-    if (leafHead) blockers.add(leafHead); else leaves.set(entry.job.queue, entry);
-    if (!entry.job.cleanup && entry.chain.some(queue => { const state = objectState(queue); return !state.active || state.suspensionCount > 0; })) {
+    if (leafHead) blockers.add(leafHead);
+    else leaves.set(entry.job.queue, entry);
+    if (
+      !entry.job.cleanup &&
+      entry.chain.some(queue => {
+        const state = objectState(queue);
+        return !state.active || state.suspensionCount > 0;
+      })
+    ) {
       if (entry === lastLimit) break;
       continue;
     }
-    const serialChain = entry.chain.filter(queue => { const state = objectState(queue); return !state.global && !state.concurrent; });
-    for (const queue of serialChain) { const earlier = serials.get(queue); if (earlier) blockers.add(earlier); }
-    for (const queue of entry.chain) { const barrier = barriers.get(queue); if (barrier) blockers.add(barrier); }
+    const serialChain = entry.chain.filter(queue => {
+      const state = objectState(queue);
+      return !state.global && !state.concurrent;
+    });
+    for (const queue of serialChain) {
+      const earlier = serials.get(queue);
+      if (earlier) blockers.add(earlier);
+    }
+    for (const queue of entry.chain) {
+      const barrier = barriers.get(queue);
+      if (barrier) blockers.add(barrier);
+    }
     if (entry.job.barrier) for (const earlier of earlierChains.get(entry.job.queue) ?? []) blockers.add(earlier);
     // Only a leaf head can reach and reserve its target chain. Its pending
     // barrier still gates later descendants of that barrier's own queue.
@@ -101,13 +143,18 @@ function next(upTo?: Entry | ReadonlySet<Entry>): Entry | undefined {
       for (const queue of serialChain) if (!serials.has(queue)) serials.set(queue, entry);
       for (const queue of entry.chain) {
         let earlier = earlierChains.get(queue);
-        if (!earlier) { earlier = new Set(); earlierChains.set(queue, earlier); }
+        if (!earlier) {
+          earlier = new Set();
+          earlierChains.set(queue, earlier);
+        }
         earlier.add(entry);
       }
     }
     if (entry.job.barrier && !barriers.has(entry.job.queue)) barriers.set(entry.job.queue, entry);
-    const held = isExecuting(entry.job.queue) || entry.chain.some(queue => isExecuting(queue, true) || objectState(queue).workerInFlight)
-      || (entry.job.barrier && isExecuting(entry.job.queue));
+    const held =
+      isExecuting(entry.job.queue) ||
+      entry.chain.some(queue => isExecuting(queue, true) || objectState(queue).workerInFlight) ||
+      (entry.job.barrier && isExecuting(entry.job.queue));
     if (blockers.size === 0 && !held) ready.push(entry);
     if (entry === lastLimit) break;
   }
@@ -115,17 +162,28 @@ function next(upTo?: Entry | ReadonlySet<Entry>): Entry | undefined {
   if (limits) {
     required = new Set(limits);
     const visit = [...limits];
-    for (let entry = visit.pop(); entry; entry = visit.pop()) for (const predecessor of dependencies.get(entry) ?? []) {
-      if (!required.has(predecessor)) { required.add(predecessor); visit.push(predecessor); }
-    }
+    for (let entry = visit.pop(); entry; entry = visit.pop())
+      for (const predecessor of dependencies.get(entry) ?? []) {
+        if (!required.has(predecessor)) {
+          required.add(predecessor);
+          visit.push(predecessor);
+        }
+      }
   }
   let selected: Entry | undefined;
-  for (const entry of ready) if ((!required || required.has(entry)) && (!selected || compareQoS(qos(entry), qos(selected)) > 0)) selected = entry;
+  for (const entry of ready)
+    if ((!required || required.has(entry)) && (!selected || compareQoS(qos(entry), qos(selected)) > 0)) selected = entry;
   return selected;
 }
 function run(entry: Entry, floor?: DFXQoS): void {
-  pending.splice(pending.indexOf(entry), 1); entry.release?.();
-  try { assertEntryLive(entry); } catch (error) { entry.job.dropped?.(); throw error; }
+  pending.splice(pending.indexOf(entry), 1);
+  entry.release?.();
+  try {
+    assertEntryLive(entry);
+  } catch (error) {
+    entry.job.dropped?.();
+    throw error;
+  }
   const effectiveQoS = floor ? higher(qos(entry), floor) : qos(entry);
   withExecution({ chain: entry.chain, qos: effectiveQoS, barrier: !!entry.job.barrier, appId: entry.job.appId }, () => entry.job.run());
 }
@@ -137,9 +195,16 @@ function freshTask(callback: () => void, value: Priority): void {
         reportDispatchError(error);
         globalThis.setTimeout(callback, 0);
       });
-    } catch (error) { reportDispatchError(error); globalThis.setTimeout(callback, 0); }
+    } catch (error) {
+      reportDispatchError(error);
+      globalThis.setTimeout(callback, 0);
+    }
   } else if (value === "background") globalThis.setTimeout(callback, 0);
-  else void createBrowserHostYield({ MessageChannel: globalThis.MessageChannel, setTimeout: (run, delay) => globalThis.setTimeout(run, delay) })(signal).then(callback, reportDispatchError);
+  else
+    void createBrowserHostYield({
+      MessageChannel: globalThis.MessageChannel,
+      setTimeout: (run, delay) => globalThis.setTimeout(run, delay),
+    })(signal).then(callback, reportDispatchError);
 }
 function schedule(entry: Entry, continuation: boolean): void {
   const value = priority(qos(entry));
@@ -147,15 +212,29 @@ function schedule(entry: Entry, continuation: boolean): void {
   if (scheduled && scheduled.rank >= rank) return;
   const token = ++ticket;
   scheduled = { token, rank };
-  const run = () => { if (scheduled?.token !== token) return; scheduled = undefined; drain(); };
+  const run = () => {
+    if (scheduled?.token !== token) return;
+    scheduled = undefined;
+    drain();
+  };
   if (continuation) {
     const scheduler = hostScheduler();
-    void createBrowserHostYield({ scheduler, MessageChannel: globalThis.MessageChannel, setTimeout: (callback, delay) => globalThis.setTimeout(callback, delay) })(signal).then(run, error => {
-      reportDispatchError(error); freshTask(run, value);
+    void createBrowserHostYield({
+      scheduler,
+      MessageChannel: globalThis.MessageChannel,
+      setTimeout: (callback, delay) => globalThis.setTimeout(callback, delay),
+    })(signal).then(run, error => {
+      reportDispatchError(error);
+      freshTask(run, value);
     });
   } else freshTask(run, value);
 }
-function wake(): void { if (!draining) { const entry = next(); if (entry) schedule(entry, false); } }
+function wake(): void {
+  if (!draining) {
+    const entry = next();
+    if (entry) schedule(entry, false);
+  }
+}
 function drain(): void {
   if (draining) return;
   draining = true;
@@ -172,30 +251,48 @@ function drain(): void {
         schedule(entry, lastPriority === undefined || hostRank(priority(effectiveQoS)) <= hostRank(lastPriority));
         return;
       }
-      try { run(entry); } catch (error) { reportDispatchError(error); }
+      try {
+        run(entry);
+      } catch (error) {
+        reportDispatchError(error);
+      }
       previousInteractive = interactive;
       lastPriority = priority(effectiveQoS);
     }
-  } finally { draining = false; }
+  } finally {
+    draining = false;
+  }
 }
 export const rootScheduler = Object.freeze({
   submit(job: ScheduledJob): void {
     const entry: Entry = { job, chain: queueChain(job.queue) };
     assertEntryLive(entry);
-    pending.push(entry); observeEntry(entry); wake();
+    pending.push(entry);
+    observeEntry(entry);
+    wake();
   },
   /** Return an idempotent release function; nested waiters retain their boosts. */
   override(queue: DFXQueue, value: DFXQoS): () => void {
     let values = overrides.get(queue);
-    if (!values) { values = new Map(); overrides.set(queue, values); }
+    if (!values) {
+      values = new Map();
+      overrides.set(queue, values);
+    }
     // A distinct token lets nested equal-QoS overrides release independently.
-    const token = {}; let released = false;
+    const token = {};
+    let released = false;
     values.set(token, value);
-    return () => { if (released) return; released = true; values.delete(token); if (values.size === 0) overrides.delete(queue); };
+    return () => {
+      if (released) return;
+      released = true;
+      values.delete(token);
+      if (values.size === 0) overrides.delete(queue);
+    };
   },
   /** Use the existing predecessor graph; blocked waits retain their submissions. */
   drainJobs(jobs: () => Iterable<ScheduledJob>, satisfy: () => boolean, boundToSlice = false): boolean {
-    const wasDraining = draining; draining = true;
+    const wasDraining = draining;
+    draining = true;
     const started = boundToSlice ? performance.now() : 0;
     const releases = new Map<DFXQueue, () => void>();
     const callerQoS = currentExecution()?.qos;
@@ -205,52 +302,83 @@ export const rootScheduler = Object.freeze({
         // empty. Stop between atomic bodies; the browser cannot block here.
         if (boundToSlice && performance.now() - started >= mainThreadSliceMilliseconds) return false;
         const requested = new Set(jobs());
-        if (callerQoS) for (const job of requested) if (!releases.has(job.queue)) releases.set(job.queue, rootScheduler.override(job.queue, callerQoS));
-        const limits = new Set<Entry>(); let floor = callerQoS;
-        for (const limit of pending) if (requested.has(limit.job)) {
-          limits.add(limit); floor = floor ? higher(floor, qos(limit)) : qos(limit);
-        }
+        if (callerQoS)
+          for (const job of requested) if (!releases.has(job.queue)) releases.set(job.queue, rootScheduler.override(job.queue, callerQoS));
+        const limits = new Set<Entry>();
+        let floor = callerQoS;
+        for (const limit of pending)
+          if (requested.has(limit.job)) {
+            limits.add(limit);
+            floor = floor ? higher(floor, qos(limit)) : qos(limit);
+          }
         const selected = limits.size ? next(limits) : undefined;
         if (!selected) return false;
-        try { run(selected, floor); } catch (error) { reportDispatchError(error); }
+        try {
+          run(selected, floor);
+        } catch (error) {
+          reportDispatchError(error);
+        }
       }
       return true;
     } finally {
       for (const release of releases.values()) release();
-      draining = wasDraining; wake();
+      draining = wasDraining;
+      wake();
     }
   },
   drainInRealm(queue: DFXQueue, upTo?: ScheduledJob): void {
     let limit = upTo ? pending.find(entry => entry.job === upTo) : undefined;
-    if (!upTo) for (let index = pending.length - 1; index >= 0; index--) {
-      if (pending[index].job.queue === queue) { limit = pending[index]; break; }
-    }
+    if (!upTo)
+      for (let index = pending.length - 1; index >= 0; index--) {
+        if (pending[index].job.queue === queue) {
+          limit = pending[index];
+          break;
+        }
+      }
     if (!limit) return;
-    const wasDraining = draining; draining = true;
+    const wasDraining = draining;
+    draining = true;
     try {
       while (pending.includes(limit)) {
         const entry = next(limit);
         if (!entry) clientError(`dispatch_sync cannot synchronously drain pending queue chain: ${labelChain(limit.chain)}`);
-        try { run(entry, qos(limit)); }
-        catch (error) { if (entry === limit && upTo) throw error; reportDispatchError(error); }
+        try {
+          run(entry, qos(limit));
+        } catch (error) {
+          if (entry === limit && upTo) throw error;
+          reportDispatchError(error);
+        }
       }
     } finally {
       // A failed sync block must never be delivered later by its host task.
-      if (upTo) { const index = pending.indexOf(limit); if (index >= 0) { pending.splice(index, 1); limit.release?.(); } }
-      draining = wasDraining; wake();
+      if (upTo) {
+        const index = pending.indexOf(limit);
+        if (index >= 0) {
+          pending.splice(index, 1);
+          limit.release?.();
+        }
+      }
+      draining = wasDraining;
+      wake();
     }
   },
 });
 observeObjectChanges((object, retarget) => {
-  if (retarget) for (const entry of [...pending]) {
-    const index = entry.chain.indexOf(object as DFXQueue);
-    // Earlier active queues retain their associated prefix even if their
-    // current configuration has changed since this item was submitted.
-    if (index >= 0) {
-      entry.release?.();
-      entry.chain = entry.chain.slice(0, index).concat(queueChain(entry.chain[index]));
-      try { observeEntry(entry); } catch (error) { drop(entry); throw error; }
+  if (retarget)
+    for (const entry of [...pending]) {
+      const index = entry.chain.indexOf(object as DFXQueue);
+      // Earlier active queues retain their associated prefix even if their
+      // current configuration has changed since this item was submitted.
+      if (index >= 0) {
+        entry.release?.();
+        entry.chain = entry.chain.slice(0, index).concat(queueChain(entry.chain[index]));
+        try {
+          observeEntry(entry);
+        } catch (error) {
+          drop(entry);
+          throw error;
+        }
+      }
     }
-  }
   wake();
 });

@@ -7,4 +7,6 @@ import { PKFXError } from "../PKFXError";
 import type { PKFXPaymentAuthorizationController } from "../PKFXPaymentAuthorizationController";
 export const paymentSessionBindings = new WeakMap<Function, Readonly<{ resolve(): FXAppSession }>>();
 export const paymentControllers = new WeakMap<PKFXPaymentAuthorizationController, { dispose(): void }>();
-export const paymentBinding = (type: Function) => paymentSessionBindings.get(type) ?? createFXSessionBinding(type, reason => new PKFXError("unknownError", `PassKit application session is ${reason}.`));
+export const paymentBinding = (type: Function) =>
+  paymentSessionBindings.get(type) ??
+  createFXSessionBinding(type, reason => new PKFXError("unknownError", `PassKit application session is ${reason}.`));

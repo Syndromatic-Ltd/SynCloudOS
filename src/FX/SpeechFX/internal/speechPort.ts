@@ -10,9 +10,28 @@ import type { RecognitionObservation } from "./transcriptionValues";
 import { SPFXError } from "../SPFXError";
 export type SpeechAuthorization = "unknown" | "prompt" | "granted" | "denied" | "unavailable";
 export type SpeechAudio = AUFXAudioPCMBuffer | MEFXSampleBuffer;
-export interface SpeechRequest { readonly locale: Intl.Locale; readonly source: "buffers" | "url"; readonly url?: URL; readonly requiresOnDeviceRecognition: boolean; readonly shouldReportPartialResults: boolean; readonly addsPunctuation: boolean; readonly taskHint: SPFXSpeechRecognitionTaskHint; readonly contextualStrings: readonly string[]; }
-export type SpeechEvent = { readonly type: "speech" | "audioEnd" | "complete" } | { readonly type: "duration"; readonly duration: number } | { readonly type: "result"; readonly result: RecognitionObservation } | { readonly type: "error"; readonly error: unknown };
-export interface SpeechSession { readonly nativeAudioFormat?: AUFXAudioFormat; append(buffer: SpeechAudio): void; endAudio(): void; finish(): void; cancel(): void; }
+export interface SpeechRequest {
+  readonly locale: Intl.Locale;
+  readonly source: "buffers" | "url";
+  readonly url?: URL;
+  readonly requiresOnDeviceRecognition: boolean;
+  readonly shouldReportPartialResults: boolean;
+  readonly addsPunctuation: boolean;
+  readonly taskHint: SPFXSpeechRecognitionTaskHint;
+  readonly contextualStrings: readonly string[];
+}
+export type SpeechEvent =
+  | { readonly type: "speech" | "audioEnd" | "complete" }
+  | { readonly type: "duration"; readonly duration: number }
+  | { readonly type: "result"; readonly result: RecognitionObservation }
+  | { readonly type: "error"; readonly error: unknown };
+export interface SpeechSession {
+  readonly nativeAudioFormat?: AUFXAudioFormat;
+  append(buffer: SpeechAudio): void;
+  endAudio(): void;
+  finish(): void;
+  cancel(): void;
+}
 export interface SpeechAdapter {
   authorizationStatus(): SpeechAuthorization;
   requestAuthorization(signal: AbortSignal): Promise<SpeechAuthorization>;
@@ -29,11 +48,33 @@ export interface SpeechPort extends SpeechAdapter {
 }
 const ports = new WeakMap<object, SpeechPort>();
 const adapters = new WeakMap<object, SpeechAdapter>();
-export function associateSpeechPort(context: object, port: SpeechPort): void { ports.set(context, port); }
-export function speechPortFor(context: object): SpeechPort { return ports.get(context) ?? unsupportedSpeech("Speech service"); }
-export function associateSpeechAdapter(environment: object, adapter: SpeechAdapter): void { adapters.set(environment, adapter); }
-export function speechAdapterFor(environment: object): SpeechAdapter | undefined { return adapters.get(environment); }
-export function unsupportedSpeech(member: string): never { throw new SPFXError("NSCocoaErrorDomain", 3328, `${member} is unavailable on this speech service.`); }
-export function speechDenied(): SPFXError { return new SPFXError("kAFAssistantErrorDomain", 1700, "The speech.recognize entitlement or speech authorization was denied or revoked."); }
-export function speechCancelled(): SPFXError { return new SPFXError("kAFAssistantErrorDomain", 216, "Speech recognition was cancelled."); }
-export function speechFailure(error: unknown): SPFXError { return error instanceof SPFXError ? error : error instanceof DOMException && (error.name === "NotAllowedError" || error.name === "SecurityError") ? speechDenied() : error instanceof DOMException && error.name === "AbortError" ? speechCancelled() : new SPFXError("kAFAssistantErrorDomain", 203, error instanceof Error ? error.message : "Speech recognition failed."); }
+export function associateSpeechPort(context: object, port: SpeechPort): void {
+  ports.set(context, port);
+}
+export function speechPortFor(context: object): SpeechPort {
+  return ports.get(context) ?? unsupportedSpeech("Speech service");
+}
+export function associateSpeechAdapter(environment: object, adapter: SpeechAdapter): void {
+  adapters.set(environment, adapter);
+}
+export function speechAdapterFor(environment: object): SpeechAdapter | undefined {
+  return adapters.get(environment);
+}
+export function unsupportedSpeech(member: string): never {
+  throw new SPFXError("NSCocoaErrorDomain", 3328, `${member} is unavailable on this speech service.`);
+}
+export function speechDenied(): SPFXError {
+  return new SPFXError("kAFAssistantErrorDomain", 1700, "The speech.recognize entitlement or speech authorization was denied or revoked.");
+}
+export function speechCancelled(): SPFXError {
+  return new SPFXError("kAFAssistantErrorDomain", 216, "Speech recognition was cancelled.");
+}
+export function speechFailure(error: unknown): SPFXError {
+  return error instanceof SPFXError
+    ? error
+    : error instanceof DOMException && (error.name === "NotAllowedError" || error.name === "SecurityError")
+      ? speechDenied()
+      : error instanceof DOMException && error.name === "AbortError"
+        ? speechCancelled()
+        : new SPFXError("kAFAssistantErrorDomain", 203, error instanceof Error ? error.message : "Speech recognition failed.");
+}

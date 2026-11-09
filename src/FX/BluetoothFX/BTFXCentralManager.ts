@@ -17,44 +17,126 @@ import { bluetoothPortFor, bluetoothFailure } from "./internal/bluetoothPort";
 import { peripherals, peripheralRecord, services, characteristics, descriptors, type PeripheralOwner } from "./internal/bluetoothObjects";
 /** CBCentralManager. Construction is passive; scan presents one browser chooser. */
 export class BTFXCentralManager extends BTFXManager {
-  #binding; #session; #port; #generation; #queue; #delegate: BTFXCentralManagerDelegate | null;
-  #watched=false; #stateQueued=false; #ended=false; #owner=new AbortController(); #scan: AbortController | undefined; #scanGeneration=0;
-  #releaseState: (()=>void) | undefined; #releaseSession: (()=>void) | undefined; #releaseAccess: (()=>void) | undefined;
-  #known=new Map<string,BTFXPeripheral>(); #peripheralOwner: PeripheralOwner;
-  constructor(delegate: BTFXCentralManagerDelegate | null = null, queue: DFXQueue | null = null, options: Readonly<Record<string,unknown>> | null = null) {
-    super(); this.#binding=bluetoothBinding(new.target);this.#session=this.#binding.resolve();this.#port=bluetoothPortFor(this.#session.context);this.#generation=this.#port.generation;
-    if(options && Object.keys(options).length)throw new BTFXError("operationNotSupported","Native Bluetooth manager options are unavailable.");
-    if(delegate && typeof delegate.centralManagerDidUpdateState!=="function")throw new BTFXError("invalidParameters","A central state delegate is required.");
-    this.#delegate=delegate;this.#queue=queue??dispatchQueueForSession(this.#session).main;
-    this.#peripheralOwner={live:()=>this.#live(),assert:()=>this.#assert(),enqueue:(p,work)=>{const generation=peripheralRecord(p).generation;this.#enqueue(()=>{if(generation===peripheralRecord(p).generation)work();});},operation:(p,action,complete)=>{
-      this.#assert();const record=this.#owned(p), generation=record.generation;
-      const deliver=(value: unknown,error:BTFXError|null)=>this.#enqueue(()=>{if(generation===record.generation)complete(value as never,error);});
-      try { if(record.state!=="connected" || !record.connection)throw new BTFXError("notConnected");void action().then(value=>deliver(value,null),error=>deliver(null,bluetoothFailure(error))); } catch(error) { deliver(null,bluetoothFailure(error)); }
-    }};
-    bluetoothManagers.set(this,{activate:()=>this.#watch(),dispose:()=>this.#end()});if(!deferredBluetoothTypes.has(new.target))this.#watch();
-  }
-  get state(): BTFXManagerState { return this.#ended ? "unknown" : this.#port.state; }
-  get delegate(): BTFXCentralManagerDelegate | null { return this.#delegate; }
-  set delegate(value: BTFXCentralManagerDelegate | null) { this.#assert();this.#delegate=value; }
-  get isScanning(): boolean { return !this.#ended && this.#scan!==undefined; }
-  scanForPeripherals(serviceUUIDs: readonly BTFXUUID[] | null, options: Readonly<Record<string,unknown>> | null = null): void {
-    this.#assert();if(options && Object.keys(options).length)throw new BTFXError("operationNotSupported","Native scan options are unavailable.");if(this.#port.state!=="poweredOn")throw new BTFXError("operationNotSupported","Bluetooth scanning is unavailable.");this.stopScan();const owner=new AbortController();this.#scan=owner;const generation=++this.#scanGeneration;
-    void this.#port.scan(serviceUUIDs,AbortSignal.any([owner.signal,this.#owner.signal])).then(result=>{
-      if(!this.#live() || generation!==this.#scanGeneration)return;
-      let peripheral=this.#known.get(result.device.identifier.uuidString);
-      if (!peripheral) {
-        peripheral = Object.create(BTFXPeripheral.prototype) as BTFXPeripheral;
-        peripherals.set(peripheral, {
-          owner: this.#peripheralOwner, native: result.device, state: "disconnected",
-          delegate: null, services: null, generation: 0, notificationCharacteristics: new Set(),
+  #binding;
+  #session;
+  #port;
+  #generation;
+  #queue;
+  #delegate: BTFXCentralManagerDelegate | null;
+  #watched = false;
+  #stateQueued = false;
+  #ended = false;
+  #owner = new AbortController();
+  #scan: AbortController | undefined;
+  #scanGeneration = 0;
+  #releaseState: (() => void) | undefined;
+  #releaseSession: (() => void) | undefined;
+  #releaseAccess: (() => void) | undefined;
+  #known = new Map<string, BTFXPeripheral>();
+  #peripheralOwner: PeripheralOwner;
+  constructor(
+    delegate: BTFXCentralManagerDelegate | null = null,
+    queue: DFXQueue | null = null,
+    options: Readonly<Record<string, unknown>> | null = null,
+  ) {
+    super();
+    this.#binding = bluetoothBinding(new.target);
+    this.#session = this.#binding.resolve();
+    this.#port = bluetoothPortFor(this.#session.context);
+    this.#generation = this.#port.generation;
+    if (options && Object.keys(options).length)
+      throw new BTFXError("operationNotSupported", "Native Bluetooth manager options are unavailable.");
+    if (delegate && typeof delegate.centralManagerDidUpdateState !== "function")
+      throw new BTFXError("invalidParameters", "A central state delegate is required.");
+    this.#delegate = delegate;
+    this.#queue = queue ?? dispatchQueueForSession(this.#session).main;
+    this.#peripheralOwner = {
+      live: () => this.#live(),
+      assert: () => this.#assert(),
+      enqueue: (p, work) => {
+        const generation = peripheralRecord(p).generation;
+        this.#enqueue(() => {
+          if (generation === peripheralRecord(p).generation) work();
         });
-        this.#known.set(result.device.identifier.uuidString, peripheral);
-      }
-      const selected=peripheral;this.#scan=undefined;this.#enqueue(()=>{if(generation===this.#scanGeneration)this.#delegate?.centralManagerDidDiscoverPeripheral?.(this,selected,result.advertisementData,result.rssi);});
-    },()=>{if(generation===this.#scanGeneration)this.#scan=undefined;});
+      },
+      operation: (p, action, complete) => {
+        this.#assert();
+        const record = this.#owned(p),
+          generation = record.generation;
+        const deliver = (value: unknown, error: BTFXError | null) =>
+          this.#enqueue(() => {
+            if (generation === record.generation) complete(value as never, error);
+          });
+        try {
+          if (record.state !== "connected" || !record.connection) throw new BTFXError("notConnected");
+          void action().then(
+            value => deliver(value, null),
+            error => deliver(null, bluetoothFailure(error)),
+          );
+        } catch (error) {
+          deliver(null, bluetoothFailure(error));
+        }
+      },
+    };
+    bluetoothManagers.set(this, { activate: () => this.#watch(), dispose: () => this.#end() });
+    if (!deferredBluetoothTypes.has(new.target)) this.#watch();
   }
-  stopScan(): void { this.#scanGeneration++;this.#scan?.abort();this.#scan=undefined; }
-  connect(peripheral: BTFXPeripheral, options: Readonly<Record<string,unknown>> | null = null): void {
+  get state(): BTFXManagerState {
+    return this.#ended ? "unknown" : this.#port.state;
+  }
+  get delegate(): BTFXCentralManagerDelegate | null {
+    return this.#delegate;
+  }
+  set delegate(value: BTFXCentralManagerDelegate | null) {
+    this.#assert();
+    this.#delegate = value;
+  }
+  get isScanning(): boolean {
+    return !this.#ended && this.#scan !== undefined;
+  }
+  scanForPeripherals(serviceUUIDs: readonly BTFXUUID[] | null, options: Readonly<Record<string, unknown>> | null = null): void {
+    this.#assert();
+    if (options && Object.keys(options).length) throw new BTFXError("operationNotSupported", "Native scan options are unavailable.");
+    if (this.#port.state !== "poweredOn") throw new BTFXError("operationNotSupported", "Bluetooth scanning is unavailable.");
+    this.stopScan();
+    const owner = new AbortController();
+    this.#scan = owner;
+    const generation = ++this.#scanGeneration;
+    void this.#port.scan(serviceUUIDs, AbortSignal.any([owner.signal, this.#owner.signal])).then(
+      result => {
+        if (!this.#live() || generation !== this.#scanGeneration) return;
+        let peripheral = this.#known.get(result.device.identifier.uuidString);
+        if (!peripheral) {
+          peripheral = Object.create(BTFXPeripheral.prototype) as BTFXPeripheral;
+          peripherals.set(peripheral, {
+            owner: this.#peripheralOwner,
+            native: result.device,
+            state: "disconnected",
+            delegate: null,
+            services: null,
+            generation: 0,
+            notificationCharacteristics: new Set(),
+          });
+          this.#known.set(result.device.identifier.uuidString, peripheral);
+        }
+        const selected = peripheral;
+        this.#scan = undefined;
+        this.#enqueue(() => {
+          if (generation === this.#scanGeneration)
+            this.#delegate?.centralManagerDidDiscoverPeripheral?.(this, selected, result.advertisementData, result.rssi);
+        });
+      },
+      () => {
+        if (generation === this.#scanGeneration) this.#scan = undefined;
+      },
+    );
+  }
+  stopScan(): void {
+    this.#scanGeneration++;
+    this.#scan?.abort();
+    this.#scan = undefined;
+  }
+  connect(peripheral: BTFXPeripheral, options: Readonly<Record<string, unknown>> | null = null): void {
     this.#assert();
     const p = this.#owned(peripheral);
     if (options && Object.keys(options).length) {
@@ -64,36 +146,41 @@ export class BTFXCentralManager extends BTFXManager {
     p.controller = new AbortController();
     p.state = "connecting";
     const generation = ++p.generation;
-    void p.native.connect(AbortSignal.any([this.#owner.signal, p.controller.signal]), error => {
-      if (!this.#live() || generation !== p.generation) return;
-      this.#retireNotifications(peripheral, generation);
-      const disconnectedGeneration = ++p.generation;
-      p.state = "disconnected";
-      p.connection = undefined;
-      this.#enqueue(() => {
-        if (disconnectedGeneration === p.generation) {
-          this.#delegate?.centralManagerDidDisconnectPeripheral?.(this, peripheral, error ? bluetoothFailure(error) : null);
-        }
-      });
-    }).then(connection => {
-      if (!this.#live() || generation !== p.generation) {
-        void connection.disconnect().catch(() => {});
-        return;
-      }
-      p.connection = connection;
-      p.state = "connected";
-      this.#enqueue(() => {
-        if (generation === p.generation) this.#delegate?.centralManagerDidConnect?.(this, peripheral);
-      });
-    }, error => {
-      if (!this.#live() || generation !== p.generation) return;
-      p.state = "disconnected";
-      this.#enqueue(() => {
-        if (generation === p.generation) {
-          this.#delegate?.centralManagerDidFailToConnect?.(this, peripheral, bluetoothFailure(error));
-        }
-      });
-    });
+    void p.native
+      .connect(AbortSignal.any([this.#owner.signal, p.controller.signal]), error => {
+        if (!this.#live() || generation !== p.generation) return;
+        this.#retireNotifications(peripheral, generation);
+        const disconnectedGeneration = ++p.generation;
+        p.state = "disconnected";
+        p.connection = undefined;
+        this.#enqueue(() => {
+          if (disconnectedGeneration === p.generation) {
+            this.#delegate?.centralManagerDidDisconnectPeripheral?.(this, peripheral, error ? bluetoothFailure(error) : null);
+          }
+        });
+      })
+      .then(
+        connection => {
+          if (!this.#live() || generation !== p.generation) {
+            void connection.disconnect().catch(() => {});
+            return;
+          }
+          p.connection = connection;
+          p.state = "connected";
+          this.#enqueue(() => {
+            if (generation === p.generation) this.#delegate?.centralManagerDidConnect?.(this, peripheral);
+          });
+        },
+        error => {
+          if (!this.#live() || generation !== p.generation) return;
+          p.state = "disconnected";
+          this.#enqueue(() => {
+            if (generation === p.generation) {
+              this.#delegate?.centralManagerDidFailToConnect?.(this, peripheral, bluetoothFailure(error));
+            }
+          });
+        },
+      );
   }
   cancelPeripheralConnection(peripheral: BTFXPeripheral): void {
     this.#assert();
@@ -115,14 +202,29 @@ export class BTFXCentralManager extends BTFXManager {
       });
     };
     if (connection) {
-      void connection.disconnect().then(() => finish(null), error => finish(bluetoothFailure(error)));
+      void connection.disconnect().then(
+        () => finish(null),
+        error => finish(bluetoothFailure(error)),
+      );
     } else {
       p.controller?.abort();
       finish(null);
     }
   }
-  retrievePeripherals(identifiers: readonly NSEUUID[]): readonly BTFXPeripheral[] { this.#assert();this.#port.assertAccess(this.#generation,true);return Object.freeze(identifiers.flatMap(identifier=>{const p=this.#known.get(identifier.uuidString);return p?[p]:[];})); }
-  retrieveConnectedPeripherals(_serviceUUIDs: readonly BTFXUUID[]): readonly BTFXPeripheral[] {this.#assert();throw new BTFXError("operationNotSupported","System-wide connected peripheral enumeration is unavailable.");}
+  retrievePeripherals(identifiers: readonly NSEUUID[]): readonly BTFXPeripheral[] {
+    this.#assert();
+    this.#port.assertAccess(this.#generation, true);
+    return Object.freeze(
+      identifiers.flatMap(identifier => {
+        const p = this.#known.get(identifier.uuidString);
+        return p ? [p] : [];
+      }),
+    );
+  }
+  retrieveConnectedPeripherals(_serviceUUIDs: readonly BTFXUUID[]): readonly BTFXPeripheral[] {
+    this.#assert();
+    throw new BTFXError("operationNotSupported", "System-wide connected peripheral enumeration is unavailable.");
+  }
   #retireNotifications(peripheral: BTFXPeripheral, generation: number): void {
     const p = this.#owned(peripheral);
     for (const characteristic of p.notificationCharacteristics) {
@@ -150,11 +252,39 @@ export class BTFXCentralManager extends BTFXManager {
       if (this.#sessionLive()) this.#delegate?.centralManagerDidUpdateState(this);
     });
   }
-  #owned(peripheral:BTFXPeripheral){const p=peripheralRecord(peripheral);if(p.owner!==this.#peripheralOwner)throw new BTFXError("invalidHandle");return p;}
-  #sessionLive():boolean{try{if(this.#ended || this.#generation!==this.#port.generation)return false;this.#binding.resolve();return true;}catch{return false;}}
-  #assert():void{if(!this.#sessionLive())throw new BTFXError("operationCancelled","Bluetooth manager lifetime ended.");this.#port.assertAccess(this.#generation);this.#watch();}
-  #live():boolean{try{this.#assert();return true;}catch{return false;}}
-  #enqueue(work:()=>void):void{if(this.#live())this.#queue.async(()=>{if(this.#live())work();});}
+  #owned(peripheral: BTFXPeripheral) {
+    const p = peripheralRecord(peripheral);
+    if (p.owner !== this.#peripheralOwner) throw new BTFXError("invalidHandle");
+    return p;
+  }
+  #sessionLive(): boolean {
+    try {
+      if (this.#ended || this.#generation !== this.#port.generation) return false;
+      this.#binding.resolve();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  #assert(): void {
+    if (!this.#sessionLive()) throw new BTFXError("operationCancelled", "Bluetooth manager lifetime ended.");
+    this.#port.assertAccess(this.#generation);
+    this.#watch();
+  }
+  #live(): boolean {
+    try {
+      this.#assert();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  #enqueue(work: () => void): void {
+    if (this.#live())
+      this.#queue.async(() => {
+        if (this.#live()) work();
+      });
+  }
   #end(): void {
     if (this.#ended) return;
     this.#ended = true;
@@ -185,4 +315,4 @@ export class BTFXCentralManager extends BTFXManager {
     this.#releaseAccess = undefined;
   }
 }
-Object.defineProperty(BTFXCentralManager,fxAttributedClass,{value:true});
+Object.defineProperty(BTFXCentralManager, fxAttributedClass, { value: true });

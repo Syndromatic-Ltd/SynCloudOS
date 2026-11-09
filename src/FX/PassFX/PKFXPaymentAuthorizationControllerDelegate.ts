@@ -6,6 +6,10 @@ import type { PKFXPaymentAuthorizationController } from "./PKFXPaymentAuthorizat
 import type { PKFXPayment } from "./PKFXPayment";
 import type { PKFXPaymentAuthorizationResult } from "./PKFXPaymentAuthorizationResult";
 export interface PKFXPaymentAuthorizationControllerDelegate {
-  paymentAuthorizationControllerDidAuthorizePayment(controller: PKFXPaymentAuthorizationController, payment: PKFXPayment, handler: (result: PKFXPaymentAuthorizationResult) => void): void;
+  paymentAuthorizationControllerDidAuthorizePayment(
+    controller: PKFXPaymentAuthorizationController,
+    payment: PKFXPayment,
+    handler: (result: PKFXPaymentAuthorizationResult) => void,
+  ): void;
   paymentAuthorizationControllerDidFinish(controller: PKFXPaymentAuthorizationController): void;
 }
