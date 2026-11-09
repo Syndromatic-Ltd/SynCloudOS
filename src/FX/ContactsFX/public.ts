@@ -17,7 +17,27 @@ export { CNFXEntityType } from "./CNFXEntityType";
 export { CNFXContactType } from "./CNFXContactType";
 export { CNFXContactFormatterStyle } from "./CNFXContactFormatterStyle";
 export { CNFXContactSortOrder } from "./CNFXContactSortOrder";
-export { CNFXContactIdentifierKey, CNFXContactTypeKey, CNFXContactGivenNameKey, CNFXContactFamilyNameKey, CNFXContactOrganizationNameKey, CNFXContactEmailAddressesKey, CNFXContactPhoneNumbersKey, CNFXContactPostalAddressesKey } from "./CNFXContactKeys";
-export { CNFXLabelHome, CNFXLabelWork, CNFXLabelOther, CNFXLabelPhoneNumberMobile, CNFXLabelPhoneNumberiPhone, CNFXLabelPhoneNumberMain, CNFXLabelPhoneNumberHomeFax, CNFXLabelPhoneNumberWorkFax, CNFXLabelPhoneNumberOtherFax, CNFXLabelPhoneNumberPager } from "./CNFXLabels";
+export {
+  CNFXContactIdentifierKey,
+  CNFXContactTypeKey,
+  CNFXContactGivenNameKey,
+  CNFXContactFamilyNameKey,
+  CNFXContactOrganizationNameKey,
+  CNFXContactEmailAddressesKey,
+  CNFXContactPhoneNumbersKey,
+  CNFXContactPostalAddressesKey,
+} from "./CNFXContactKeys";
+export {
+  CNFXLabelHome,
+  CNFXLabelWork,
+  CNFXLabelOther,
+  CNFXLabelPhoneNumberMobile,
+  CNFXLabelPhoneNumberiPhone,
+  CNFXLabelPhoneNumberMain,
+  CNFXLabelPhoneNumberHomeFax,
+  CNFXLabelPhoneNumberWorkFax,
+  CNFXLabelPhoneNumberOtherFax,
+  CNFXLabelPhoneNumberPager,
+} from "./CNFXLabels";
 export type { CNFXContactPickerDelegate } from "./CNFXContactPickerDelegate";
 export type { CNFXKeyDescriptor } from "./CNFXKeyDescriptor";

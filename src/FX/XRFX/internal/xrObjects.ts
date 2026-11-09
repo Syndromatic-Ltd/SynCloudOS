@@ -8,7 +8,19 @@ import type { XRFXTrackingState } from "../XRFXTrackingState";
 import type { XRFXRaycastTarget } from "../XRFXRaycastTarget";
 import type { XRFXRaycastTargetAlignment } from "../XRFXRaycastTargetAlignment";
 const value = <T>(prototype: object, properties: object): T => Object.freeze(Object.assign(Object.create(prototype), properties)) as T;
-export const makeXRCamera = (transform: AFXTransform3D, projectionMatrix: AFXTransform3D, trackingState: XRFXTrackingState): XRFXCamera => value(XRFXCamera.prototype, { transform, projectionMatrix, trackingState: typeof trackingState === "string" ? trackingState : Object.freeze({ ...trackingState }) });
-export const makeXRFrame = (timestamp: number, camera: XRFXCamera, anchors: readonly XRFXAnchor[]): XRFXFrame => value(XRFXFrame.prototype, { timestamp, camera, anchors: Object.freeze([...anchors]) });
-export const makeXRAnchor = (identifier: NSEUUID, transform: AFXTransform3D, name: string | null = null): XRFXAnchor => value(XRFXAnchor.prototype, { identifier, transform, name });
-export const makeXRRaycastResult = (worldTransform: AFXTransform3D, target: XRFXRaycastTarget, targetAlignment: XRFXRaycastTargetAlignment, anchor: XRFXAnchor | null): XRFXRaycastResult => value(XRFXRaycastResult.prototype, { worldTransform, target, targetAlignment, anchor });
+export const makeXRCamera = (transform: AFXTransform3D, projectionMatrix: AFXTransform3D, trackingState: XRFXTrackingState): XRFXCamera =>
+  value(XRFXCamera.prototype, {
+    transform,
+    projectionMatrix,
+    trackingState: typeof trackingState === "string" ? trackingState : Object.freeze({ ...trackingState }),
+  });
+export const makeXRFrame = (timestamp: number, camera: XRFXCamera, anchors: readonly XRFXAnchor[]): XRFXFrame =>
+  value(XRFXFrame.prototype, { timestamp, camera, anchors: Object.freeze([...anchors]) });
+export const makeXRAnchor = (identifier: NSEUUID, transform: AFXTransform3D, name: string | null = null): XRFXAnchor =>
+  value(XRFXAnchor.prototype, { identifier, transform, name });
+export const makeXRRaycastResult = (
+  worldTransform: AFXTransform3D,
+  target: XRFXRaycastTarget,
+  targetAlignment: XRFXRaycastTargetAlignment,
+  anchor: XRFXAnchor | null,
+): XRFXRaycastResult => value(XRFXRaycastResult.prototype, { worldTransform, target, targetAlignment, anchor });

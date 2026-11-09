@@ -11,6 +11,20 @@ import type { PKFXPaymentNetwork } from "../PKFXPaymentNetwork";
 import type { PKFXPaymentMethodType } from "../PKFXPaymentMethodType";
 import type { PKFXContact } from "../PKFXContact";
 import type { PKFXShippingMethod } from "../PKFXShippingMethod";
-export const paymentMethods = new WeakMap<PKFXPaymentMethod, { displayName?: string | null; network?: PKFXPaymentNetwork | null; type?: PKFXPaymentMethodType; billingAddress?: CNFXContact | null }>();
-export const paymentTokens = new WeakMap<PKFXPaymentToken, { paymentMethod: PKFXPaymentMethod; transactionIdentifier: string; paymentData: NSEData }>();
-export const payments = new WeakMap<PKFXPayment, { token: PKFXPaymentToken; billingContact?: PKFXContact | null; shippingContact?: PKFXContact | null; shippingMethod?: PKFXShippingMethod | null }>();
+export const paymentMethods = new WeakMap<
+  PKFXPaymentMethod,
+  { displayName?: string | null; network?: PKFXPaymentNetwork | null; type?: PKFXPaymentMethodType; billingAddress?: CNFXContact | null }
+>();
+export const paymentTokens = new WeakMap<
+  PKFXPaymentToken,
+  { paymentMethod: PKFXPaymentMethod; transactionIdentifier: string; paymentData: NSEData }
+>();
+export const payments = new WeakMap<
+  PKFXPayment,
+  {
+    token: PKFXPaymentToken;
+    billingContact?: PKFXContact | null;
+    shippingContact?: PKFXContact | null;
+    shippingMethod?: PKFXShippingMethod | null;
+  }
+>();
