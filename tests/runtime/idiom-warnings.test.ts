@@ -17,6 +17,10 @@ const fixtures = [
 ] as const;
 
 describe("conservative authoring warnings", () => {
+  it("exempts the renderer subtree while checking neighbouring animation code", () => {
+    const source = 'import { Canvas } from "@react-three/fiber"; const surface = <Canvas>{new AFXAnimation({duration:1,reducedMotion:"never"})}</Canvas>;\nnew AFXAnimation({duration:1,reducedMotion:"never"});';
+    expect(inspect(source)).toEqual([expect.objectContaining({rule:"idiom.reduced-motion", line:2})]);
+  });
   it.each(fixtures)("reports %s with actionable guidance", (rule, failing) => {
     const warnings = inspect(failing);
     expect(warnings).toContainEqual(expect.objectContaining({ line: 1, rule: `idiom.${rule}`, severity: "warning" }));

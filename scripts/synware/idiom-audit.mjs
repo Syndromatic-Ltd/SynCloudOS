@@ -8,7 +8,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, extname, relative, resolve, sep } from "node:path";
 import ts from "typescript";
-import { inspectIdiomErrors, inspectStyleErrors, rendererOwnedSource } from "./idiom-errors.mjs";
+import { inspectIdiomErrors, inspectStyleErrors, rendererOwnedRegions, withinRendererRegion, interactiveTable } from "./idiom-errors.mjs";
 import { inspectIdiomWarnings, inspectUnusedResources } from "./idiom-warnings.mjs";
 
 const SOURCE = [".tsx", ".ts", ".jsx", ".js", ".mts", ".mjs"];
@@ -117,7 +117,7 @@ function isStructuredType(node) {
 }
 
 /** Facts about one source file that the idiom rules read. */
-function inspectSource(file, text) {
+function inspectSource(file, text, regions = []) {
   const facts = { nseApplication: false, functionDefaultExport: false, stateHooks: 0, rawControls: new Map(), unmanaged: [], preferenceWrites: [], legacyTheme: [] };
   const source = parse(file, text);
   const locals = new Map();
@@ -127,6 +127,7 @@ function inspectSource(file, text) {
   };
   collect(source);
   const visit = (node, inEffect) => {
+    if (withinRendererRegion(node, source, regions)) return;
     if (ts.isClassLike(node)) {
       for (const clause of node.heritageClauses ?? []) for (const type of clause.types) if (/(^|\.)NSEApplication$/u.test(type.expression.getText(source))) facts.nseApplication = true;
     }
@@ -135,7 +136,7 @@ function inspectSource(file, text) {
     if ((ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) && ts.isIdentifier(node.tagName) && RAW_CONTROLS.has(node.tagName.text)) {
       const tag = node.tagName.text;
       const hidden = tag === "input" && node.attributes.properties.some(property => ts.isJsxAttribute(property) && property.name.getText(source) === "type" && property.initializer && ts.isStringLiteral(property.initializer) && ["hidden", "file"].includes(property.initializer.text));
-      if (!hidden) {
+      if (!hidden && (tag !== "table" || interactiveTable(node))) {
         const entry = facts.rawControls.get(tag) ?? { count: 0, line: source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1 };
         entry.count++; facts.rawControls.set(tag, entry);
       }
@@ -197,7 +198,7 @@ function unknownTokenUses(text, known) {
   const unknown = [];
   for (const match of text.matchAll(TOKEN_USE)) {
     if (known.has(match[1])) continue;
-    unknown.push([match[1], lineOf(text, match.index)]);
+    unknown.push([match[1], lineOf(text, match.index), match.index]);
   }
   return unknown;
 }
@@ -240,7 +241,11 @@ function optOutComments(file, text) {
 /** Audit app, Webspring and host module graphs without executing project code. */
 export function auditSynWareIdioms({ root, applications, sdkRoot, entries = [] }) {
   const findings = [], summary = [], scanned = new Set(), rendererExemptions = [], optOuts = [];
-  const sources = new Map(), directives = new Map(), emitted = new Set();
+  const sources = new Map(), directives = new Map(), emitted = new Set(), rendererRegions = new Map();
+  const regionsFor = file => {
+    if (!rendererRegions.has(file)) rendererRegions.set(file, STYLE.includes(extname(file)) ? [] : rendererOwnedRegions({ file, text: read(file) }));
+    return rendererRegions.get(file);
+  };
   const read = file => {
     if (!sources.has(file)) {
       const text = readFileSync(file, "utf8");
@@ -271,10 +276,11 @@ export function auditSynWareIdioms({ root, applications, sdkRoot, entries = [] }
     scanned.add(file);
     const text = read(file);
     if (STYLE.includes(extname(file))) return;
-    if (rendererOwnedSource(text)) { rendererExemptions.push(slash(relative(root, file))); return; }
-    for (const finding of [...inspectIdiomErrors({ file, text, sdkRoot }), ...inspectIdiomWarnings({ file, text, sdkRoot })])
+    const regions = regionsFor(file);
+    for (const region of regions) rendererExemptions.push({ file: slash(relative(root, file)), ...region });
+    for (const finding of [...inspectIdiomErrors({ file, text, sdkRoot, regions }), ...inspectIdiomWarnings({ file, text, sdkRoot, regions })])
       at(file, finding.line, finding.rule, finding.message, finding.severity);
-    const facts = inspectSource(file, text);
+    const facts = inspectSource(file, text, regionsFor(file));
     for (const { api, line } of facts.unmanaged) {
       const replacement = api === "requestAnimationFrame" ? "NSEViewController.fx.animation.manageDisplayLink (or manageRenderer)"
         : api === "new ResizeObserver" ? "NSEViewController.fx.animation.manageDisplayLink with drawableSizeDidChange"
@@ -294,14 +300,12 @@ export function auditSynWareIdioms({ root, applications, sdkRoot, entries = [] }
     for (const file of files) {
       const text = read(file);
       if (!STYLE.includes(extname(file))) {
-        const facts = inspectSource(file, text);
+        const facts = inspectSource(file, text, regionsFor(file));
         report.classAuthoring ||= facts.nseApplication;
         report.stateHooks += facts.stateHooks;
-        if (!rendererOwnedSource(text)) {
-          report.rawControls += [...facts.rawControls.values()].reduce((sum, item) => sum + item.count, 0);
-          report.unmanagedLifecycle += facts.unmanaged.length;
-          report.preferenceDocumentWrites += facts.preferenceWrites.length;
-        }
+        report.rawControls += [...facts.rawControls.values()].reduce((sum, item) => sum + item.count, 0);
+        report.unmanagedLifecycle += facts.unmanaged.length;
+        report.preferenceDocumentWrites += facts.preferenceWrites.length;
         if (file === entry && facts.functionDefaultExport) functionRoot = true;
       }
       inspectFile(file);
@@ -318,8 +322,9 @@ export function auditSynWareIdioms({ root, applications, sdkRoot, entries = [] }
   for (const file of new Set([...scanned, ...stylesheets])) for (const match of read(file).matchAll(TOKEN_DEFINITION)) local.add(match[1]);
   if (known) for (const file of new Set([...scanned, ...stylesheets])) {
     const unknown = unknownTokenUses(read(file), { has: token => known.has(token) || local.has(token) });
-    stylesheetReport.unknownTokens += unknown.length;
-    for (const [name, line] of unknown) at(file, line, "idiom.nse-token", `The installed SDK does not define: ${name}. Use the neutral --nse-app-* semantic values described by NSEAppearanceDefinition from @syndromatic/syncloudos/nse, or supply this value in your own theme; see docs/framework/appearance.md.`);
+    const visible = unknown.filter(([, , index]) => !regionsFor(file).some(region => region.start <= index && index < region.end));
+    stylesheetReport.unknownTokens += visible.length;
+    for (const [name, line] of visible) at(file, line, "idiom.nse-token", `The installed SDK does not define: ${name}. Use the neutral --nse-app-* semantic values described by NSEAppearanceDefinition from @syndromatic/syncloudos/nse, or supply this value in your own theme; see docs/framework/appearance.md.`);
   }
   for (const file of stylesheets) {
     const text = read(file);

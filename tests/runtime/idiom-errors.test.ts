@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import ts from "typescript";
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
-import { inspectIdiomErrors, inspectStyleErrors, rendererOwnedSource } from "../../scripts/synware/idiom-errors.mjs";
+import { inspectIdiomErrors, inspectStyleErrors, rendererOwnedRegions } from "../../scripts/synware/idiom-errors.mjs";
 import { IDIOM_REPLACEMENTS } from "../../scripts/synware/idiom-replacements.mjs";
 import { synWareSdkEntries } from "../../scripts/synware/sdk-entries.mjs";
 
@@ -11,10 +11,9 @@ const pairs = [
   ["raw input", "idiom.nse-controls", '<input type="range" />', '<NSESlider />'],
   ["raw select", "idiom.nse-controls", '<select />', '<NSEPopUpButton />'],
   ["raw textarea", "idiom.nse-controls", '<textarea />', '<NSETextView />'],
-  ["raw table", "idiom.nse-controls", '<table />', '<NSETableView />'],
+  ["interactive table", "idiom.nse-controls", '<table><tbody><tr onClick={selectRow}><td>Row</td></tr></tbody></table>', '<NSETableView />'],
   ["system icon", "idiom.system-image", '<img className="back-icon" src="arrow-back.svg" />', '<NSEImageView image={NSEImage.named(NSEImage.goBackTemplateName)} />'],
   ["UI colour", "idiom.ui-colour", '<NSEButton style={{ color: "#fff" }} />', '<NSEButton style={{ color: "var(--nse-app-label)" }} />'],
-  ["scroll view", "idiom.scroll-view", '<div style={{overflowY: "auto"}} />', '<NSEScrollView />'],
   ["storage", "idiom.preferences", 'localStorage.setItem("theme", "dark")', 'defaults.set("dark", "theme")'],
   ["Bluetooth", "idiom.device-fx", 'navigator.bluetooth.requestDevice({})', 'central.scanForPeripherals()'],
   ["NFC", "idiom.device-fx", 'new NDEFReader()', 'new NFXNDEFReaderSession()'],
@@ -48,16 +47,57 @@ describe("definite authoring errors", () => {
     expect(inspectIdiomErrors({ file: "view.tsx", text: pass })).toEqual([]);
   });
   it("rejects class selectors into NSE internals but accepts an app class", () => {
-    expect(inspectStyleErrors({file:"view.css", text:'.lab .nse-button__label { font-size: 20px; }'}).some(x => x.rule === "idiom.control-internals")).toBe(true);
+    expect(inspectStyleErrors({file:"view.css", text:'.lab .nse-button__label { font-size: 20px; }'})).toContainEqual(expect.objectContaining({rule:"idiom.control-internals", severity:"error"}));
     expect(inspectStyleErrors({file:"view.css", text:'.lab-label { font-size: 20px; }'})).toEqual([]);
     expect(inspectStyleErrors({file:"view.css", text:'.label[data-copy=".nse-button"] { font-size: 20px; }'})).toEqual([]);
   });
-  it("rejects hand-rolled CSS scrolling and accepts framework layout", () => {
-    expect(inspectStyleErrors({file:"view.css", text:'.pane { overflow-y: auto; }'}).some(x => x.rule === "idiom.scroll-view")).toBe(true);
+  it("warns about CSS scrolling without failing legitimate code samples", () => {
+    expect(inspectStyleErrors({file:"view.css", text:'pre { overflow: auto; }'})).toEqual([expect.objectContaining({rule: "idiom.scroll-view", severity: "warning"})]);
     expect(inspectStyleErrors({file:"view.css", text:'.pane { min-height: 0; }'})).toEqual([]);
   });
+  it("warns about inline scrolling inside a document view without emitting errors", () => {
+    const findings = inspectIdiomErrors({file:"view.tsx", text:'<NSEScrollView><pre style={{overflow: "auto"}}>A code sample</pre></NSEScrollView>'});
+    expect(findings).toEqual([expect.objectContaining({rule: "idiom.scroll-view", severity: "warning"})]);
+    expect(inspectIdiomErrors({file:"view.tsx", text:'<NSEScrollView><pre>A code sample</pre></NSEScrollView>'})).toEqual([]);
+  });
+  it.each([
+    '<table><caption>Results</caption><tbody><tr><th>Sample</th><td>42</td></tr></tbody></table>',
+    '<table />',
+    '<div><table /><NSEButton title="Save" /></div>',
+    '<table><tbody><tr><td>42<input type="hidden" name="id" /></td></tr></tbody></table>',
+  ])("accepts a static content table: %s", text => {
+    expect(inspectIdiomErrors({file:"view.tsx", text})).toEqual([]);
+  });
+  it.each([
+    '<table onClick={selectRow}><tbody><tr><td>Row</td></tr></tbody></table>',
+    '<table onClickCapture={selectRow}><tbody><tr><td>Row</td></tr></tbody></table>',
+    '<table><tbody><tr aria-selected={selected}><td>Row</td></tr></tbody></table>',
+    '<table><tbody><tr><td><NSEButton title="Edit" /></td></tr></tbody></table>',
+    '<table><tbody><tr><td><a href="/edit">Edit</a></td></tr></tbody></table>',
+  ])("rejects an interactive table: %s", text => {
+    expect(inspectIdiomErrors({file:"view.tsx", text})).toContainEqual(expect.objectContaining({rule: "idiom.nse-controls", severity: "error", message: expect.stringContaining("NSETableView")}));
+  });
+  it("checks a raw HUD button beside the renderer surface in the same file", () => {
+    const renderer = 'import * as THREE from "three"; const renderer = new THREE.WebGLRenderer({canvas}); renderer.render(scene, camera);';
+    expect(inspectIdiomErrors({file:"scene.tsx", text: renderer + 'const view=<main><canvas /><div><button>Reset</button></div></main>;'})).toEqual([expect.objectContaining({rule: "idiom.nse-controls", severity: "error"})]);
+    expect(inspectIdiomErrors({file:"scene.tsx", text: renderer + 'const view=<main><canvas /><div><NSEButton title="Reset" /></div></main>;'})).toEqual([]);
+  });
+  it.each([
+    ['import { Canvas } from "@react-three/fiber";', 'Canvas'],
+    ['import { Stage } from "react-konva";', 'Stage'],
+  ])("exempts only the imported renderer subtree: %s", (imports, surface) => {
+    const body = `${imports} const view=<><${surface}><button>Surface-owned</button></${surface}><button>HUD</button></>;`;
+    expect(inspectIdiomErrors({file:"scene.tsx", text:body})).toEqual([expect.objectContaining({rule:"idiom.nse-controls", severity:"error"})]);
+    expect(inspectIdiomErrors({file:"scene.tsx", text:`${imports} const view=<main><${surface}/><button>HUD</button></main>;`})).toEqual([expect.objectContaining({rule:"idiom.nse-controls", severity:"error"})]);
+  });
+  it("does not share renderer handles across lexical bindings", () => {
+    const source = 'import * as THREE from "three"; function scene(canvas) { const renderer = new THREE.WebGLRenderer({canvas}); return renderer; } function ui(renderer) { return renderer.render(<button>Save</button>); }';
+    expect(inspectIdiomErrors({file:"scene.tsx", text:source})).toEqual([expect.objectContaining({rule:"idiom.nse-controls", severity:"error"})]);
+    const loop = 'import * as THREE from "three"; const renderer = new THREE.WebGLRenderer({canvas}); for (let renderer of views) { renderer.render(<button>HUD</button>); }';
+    expect(inspectIdiomErrors({file:"scene.tsx", text:loop})).toEqual([expect.objectContaining({rule:"idiom.nse-controls", severity:"error"})]);
+  });
   it("rejects CSS UI colours but accepts semantic values and theme value provisioning", () => {
-    expect(inspectStyleErrors({file:"view.css", text:'.label { color: #123456; }'}).some(x => x.rule === "idiom.ui-colour")).toBe(true);
+    expect(inspectStyleErrors({file:"view.css", text:'.label { color: #123456; }'})).toContainEqual(expect.objectContaining({rule:"idiom.ui-colour", severity:"error"}));
     expect(inspectStyleErrors({file:"view.css", text:'.label { color: var(--nse-app-label); }'})).toEqual([]);
     expect(inspectStyleErrors({file:"custom.css", text:'[data-nse-appearance="custom"] { --nse-app-label: #123456; }'})).toEqual([]);
   });
@@ -70,10 +110,10 @@ describe("definite authoring errors", () => {
   });
   it("exempts a Three.js canvas surface but not an unused renderer import", () => {
     const source = 'import * as THREE from "three"; const renderer = new THREE.WebGLRenderer({canvas}); renderer.setClearColor("#000"); const view=<canvas style={{background:"#fff"}}/>;';
-    expect(rendererOwnedSource(source)).toBe(true);
+    expect(rendererOwnedRegions({file:"scene.tsx", text:source}).some(region => region.kind === "surface")).toBe(true);
     expect(inspectIdiomErrors({file:"scene.tsx", text:source})).toEqual([]);
     const unused = 'import * as THREE from "three"; const view=<button>Run</button>;';
-    expect(rendererOwnedSource(unused)).toBe(false);
+    expect(rendererOwnedRegions({file:"view.tsx", text:unused})).toEqual([]);
     expect(inspectIdiomErrors({file:"view.tsx", text:unused})).not.toEqual([]);
   });
   it("ignores comments, strings and locally shadowed browser names", () => {

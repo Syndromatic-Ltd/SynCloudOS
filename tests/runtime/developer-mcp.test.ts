@@ -223,6 +223,25 @@ describe("developer MCP tools", () => {
     expect(result.findings).toEqual([]);
     expect(result.idiomAudit.applications).toEqual([expect.objectContaining({ bundleIdentifier: "org.example.field", classAuthoring: true, rawControls: 0, unmanagedLifecycle: 0, preferenceDocumentWrites: 0 })]);
   });
+  it("allows static tables and overflow warnings but fails a renderer's raw HUD control", async () => {
+    put("package.json", JSON.stringify({ name:"consumer", dependencies:{ "@syndromatic/syncloudos":"1.0.0-beta.2", three:"^0.181.2" } }));
+    put("applications/Lab.app/Contents/Info.ts", 'export default { bundleIdentifier: "org.example.lab", displayName: "Lab", version: "1.0.0" };');
+    const application = 'import { NSEApplication } from "@syndromatic/syncloudos"; export default class Lab extends NSEApplication {}\n';
+    put("applications/Lab.app/Contents/index.tsx", application + 'const view = <pre style={{overflow:"auto"}}><table><tbody><tr><td>42</td></tr></tbody></table></pre>;');
+    put("samples.css", 'pre { overflow: auto; }');
+    const content = await validateProject({projectRoot:project, typescript:false, launch:false});
+    expect(content.ok).toBe(true);
+    expect(content.idiomAudit.errors).toBe(0);
+    expect(content.findings.filter((finding: { rule: string }) => finding.rule === "idiom.scroll-view")).toHaveLength(2);
+    const renderer = 'import * as THREE from "three"; const renderer = new THREE.WebGLRenderer({canvas}); const view = <main><canvas /><button>Reset</button></main>;';
+    put("applications/Lab.app/Contents/index.tsx", application + 'import "./Scene";');
+    put("applications/Lab.app/Contents/Scene.tsx", renderer);
+    const hud = await validateProject({projectRoot:project, typescript:false, launch:false});
+    expect(hud.ok).toBe(false);
+    expect(hud.findings).toContainEqual(expect.objectContaining({rule:"idiom.nse-controls", severity:"error"}));
+    put("applications/Lab.app/Contents/Scene.tsx", renderer.replace('<button>Reset</button>', '<NSEButton title="Reset" />'));
+    expect((await validateProject({projectRoot:project, typescript:false, launch:false})).ok).toBe(true);
+  });
   it("fails clear-cut authoring misuse while retaining heuristic warnings", async () => {
     put("applications/Lab.app/Contents/Info.ts", 'export default { bundleIdentifier: "org.example.lab", displayName: "Lab", version: "1.0.0" } as const;\n');
     put("applications/Lab.app/Contents/index.tsx", 'import App from "../../../lib/App";\nexport default App;\n');
@@ -235,7 +254,7 @@ describe("developer MCP tools", () => {
       '  const [rows] = useState<number[]>([]);',
       '  useEffect(() => { const frame = requestAnimationFrame(() => {}); const worker = new Worker("x.js"); return () => { cancelAnimationFrame(frame); worker.terminate(); }; }, []);',
       '  useEffect(() => { SCOS.preferences.set("runs", { rows, count }); SCOS.preferences.set("theme", "light"); }, [rows, count]);',
-      '  return <main><button onClick={() => setCount(count + 1)}>Run</button><input type="range" /><input type="hidden" /><select /><table /></main>;',
+      '  return <main><button onClick={() => setCount(count + 1)}>Run</button><input type="range" /><input type="hidden" /><select /><table onClick={() => {}} /></main>;',
       '}',
       '',
     ].join("\n"));

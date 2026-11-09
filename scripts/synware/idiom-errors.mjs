@@ -10,7 +10,7 @@ function parse(file, text) {
   return ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, /\.[jt]sx$/u.test(file) ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
 }
 function walk(node, visitor) {
-  visitor(node);
+  if (visitor(node) === false) return;
   ts.forEachChild(node, child => walk(child, visitor));
 }
 function unwrap(node) {
@@ -29,6 +29,7 @@ function accessPath(node) {
   node = unwrap(node);
   if (!node) return null;
   if (ts.isIdentifier(node)) return node.text;
+  if (node.kind === ts.SyntaxKind.ThisKeyword) return "this";
   if (ts.isPropertyAccessExpression(node)) {
     const parent = accessPath(node.expression);
     return parent ? `${parent}.${node.name.text}` : null;
@@ -49,14 +50,14 @@ function lexicalBindings(source) {
   const scopes = new Map();
   const scopeOf = (node, functionOnly = false) => {
     for (let scope = node; scope; scope = scope.parent)
-      if (ts.isSourceFile(scope) || ts.isFunctionLike(scope) || (!functionOnly && (ts.isBlock(scope) || ts.isCatchClause(scope)))) return scope;
+      if (ts.isSourceFile(scope) || ts.isFunctionLike(scope) || (!functionOnly && (ts.isBlock(scope) || ts.isCatchClause(scope) || ts.isForStatement(scope) || ts.isForOfStatement(scope) || ts.isForInStatement(scope) || ts.isCaseBlock(scope)))) return scope;
     return source;
   };
   const add = (scope, name) => {
     if (!name) return;
     if (ts.isIdentifier(name)) {
-      if (!scopes.has(scope)) scopes.set(scope, new Set());
-      scopes.get(scope).add(name.text);
+      if (!scopes.has(scope)) scopes.set(scope, new Map());
+      scopes.get(scope).set(name.text, name);
     } else if (ts.isObjectBindingPattern(name) || ts.isArrayBindingPattern(name)) for (const item of name.elements) if (ts.isBindingElement(item)) add(scope, item.name);
   };
   walk(source, node => {
@@ -70,8 +71,8 @@ function lexicalBindings(source) {
     else if (ts.isImportClause(node) || ts.isImportSpecifier(node) || ts.isNamespaceImport(node)) add(source, node.name);
   });
   return (name, node) => {
-    for (let scope = node; scope; scope = scope.parent) if (scopes.get(scope)?.has(name)) return true;
-    return false;
+    for (let scope = node; scope; scope = scope.parent) if (scopes.get(scope)?.has(name)) return scopes.get(scope).get(name);
+    return null;
   };
 }
 function identifierReference(node) {
@@ -81,32 +82,109 @@ function identifierReference(node) {
   return !ts.isImportSpecifier(parent) && !ts.isExportSpecifier(parent) && !ts.isJsxAttribute(parent);
 }
 
-/** A renderer import alone grants no exemption: the file must own its surface. */
-export function rendererOwnedSource(text) {
-  const source = parse("renderer.tsx", text);
-  const imports = new Set(), componentSurfaces = new Set();
+/** Renderer ownership is local to its JSX surface and calls, never the containing file. */
+export function rendererOwnedRegions({ file, text }) {
+  const source = parse(file, text);
+  const imports = new Map(), componentSurfaces = new Map(), handles = [], canvasTargets = new Set();
+  const bindingFor = lexicalBindings(source);
+  const owner = (path, node) => {
+    const base = path?.split(".")[0];
+    if (base !== "this") return bindingFor(base, node);
+    for (let ancestor = node.parent; ancestor; ancestor = ancestor.parent)
+      if (ts.isClassLike(ancestor) || ts.isObjectLiteralExpression(ancestor)) return ancestor;
+    return source;
+  };
+  const regions = [], canvases = [];
+  let ownsRenderer = false;
   for (const node of source.statements) {
     if (!ts.isImportDeclaration(node) || !ts.isStringLiteral(node.moduleSpecifier)) continue;
-    if (!/^(?:three(?:\/|$)|@react-three\/fiber$|pixi\.js$|@pixi\/|@babylonjs\/|babylonjs$|regl$|p5$|konva$|react-konva$|ogl$)/u.test(node.moduleSpecifier.text)) continue;
+    const library = node.moduleSpecifier.text;
+    if (!/^(?:three(?:\/|$)|@react-three\/fiber$|pixi\.js$|@pixi\/|@babylonjs\/|babylonjs$|regl$|p5$|konva$|react-konva$|ogl$)/u.test(library)) continue;
     const bindings = node.importClause?.namedBindings;
-    if (node.importClause?.name) imports.add(node.importClause.name.text);
-    if (bindings && ts.isNamespaceImport(bindings)) imports.add(bindings.name.text);
+    if (node.importClause?.name) imports.set(node.importClause.name.text, bindingFor(node.importClause.name.text, source));
+    if (bindings && ts.isNamespaceImport(bindings)) {
+      imports.set(bindings.name.text, bindingFor(bindings.name.text, source));
+      if (library === "@react-three/fiber") componentSurfaces.set(`${bindings.name.text}.Canvas`, imports.get(bindings.name.text));
+      if (library === "react-konva") componentSurfaces.set(`${bindings.name.text}.Stage`, imports.get(bindings.name.text));
+    }
     if (bindings && ts.isNamedImports(bindings)) for (const binding of bindings.elements) {
-      imports.add(binding.name.text);
-      if (["Canvas", "Stage"].includes((binding.propertyName ?? binding.name).text)) componentSurfaces.add(binding.name.text);
+      imports.set(binding.name.text, bindingFor(binding.name.text, source));
+      if ((library === "@react-three/fiber" && (binding.propertyName ?? binding.name).text === "Canvas") || (library === "react-konva" && (binding.propertyName ?? binding.name).text === "Stage")) componentSurfaces.set(binding.name.text, imports.get(binding.name.text));
     }
   }
-  let owns = false;
+  const add = (node, kind) => {
+    const start = node.getStart(source), end = node.end;
+    regions.push({ start, end, line: source.getLineAndCharacterOfPosition(start).line + 1, endLine: source.getLineAndCharacterOfPosition(end).line + 1, kind });
+  };
+  const target = node => {
+    const path = accessPath(node);
+    if (path) canvasTargets.add(path.replace(/\.current$/u, ""));
+  };
+  const handle = node => {
+    const parent = node.parent;
+    const receiver = ts.isVariableDeclaration(parent) ? accessPath(parent.name)
+      : ts.isPropertyDeclaration(parent) ? `this.${parent.name.getText(source)}`
+      : ts.isBinaryExpression(parent) && parent.operatorToken.kind === ts.SyntaxKind.EqualsToken ? accessPath(parent.left) : null;
+    if (receiver) handles.push({ receiver, binding: owner(receiver, node) });
+  };
   walk(source, node => {
-    if ((ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) && componentSurfaces.has(jsxTag(node))) owns = true;
-    if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression) && node.expression.name.text === "getContext" && /^webgl2?$/u.test(literal(node.arguments[0]) ?? "")) owns = true;
-    if ((ts.isNewExpression(node) || ts.isCallExpression(node)) && imports.has((accessPath(node.expression) ?? "").split(".")[0])) {
-      const hasSurface = node.arguments?.some(argument => ts.isObjectLiteralExpression(argument) && argument.properties.some(property => ["canvas", "view", "context"].includes(propertyName(property.name))));
-      const name = accessPath(node.expression) ?? "";
-      if (hasSurface || /(?:WebGLRenderer|WebGPURenderer|Renderer|Application|Engine)$/u.test(name)) owns = true;
+    if ((ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) && jsxTag(node) === "canvas") canvases.push(node);
+    if (!ts.isNewExpression(node) && !ts.isCallExpression(node)) return;
+    const name = accessPath(node.expression) ?? "";
+    const base = name.split(".")[0];
+    const imported = imports.has(base) && imports.get(base) === bindingFor(base, node);
+    if (imported) {
+      add(node, "call");
+      handle(node);
+      const surfaceOptions = node.arguments?.filter(ts.isObjectLiteralExpression).flatMap(argument => argument.properties.filter(property => ["canvas", "view", "context"].includes(propertyName(property.name)))) ?? [];
+      if (surfaceOptions.length || /(?:WebGLRenderer|WebGPURenderer|Renderer|Application|Engine)$/u.test(name)) ownsRenderer = true;
+      for (const property of surfaceOptions) target(ts.isShorthandPropertyAssignment(property) ? property.name : property.initializer);
+    }
+    if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression) && node.expression.name.text === "getContext" && /^webgl2?$/u.test(literal(node.arguments[0]) ?? "")) {
+      ownsRenderer = true;
+      target(node.expression.expression);
+      handle(node);
+      add(node, "call");
     }
   });
-  return owns;
+  walk(source, node => {
+    if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {
+      const receiver = accessPath(node.expression.expression);
+      if (handles.some(handle => handle.receiver === receiver && handle.binding === owner(receiver, node))) add(node, "call");
+    }
+    if (!ts.isJsxOpeningElement(node) && !ts.isJsxSelfClosingElement(node)) return;
+    const tag = jsxTag(node), ref = accessPath(attribute(node, "ref"));
+    if ((componentSurfaces.has(tag) && componentSurfaces.get(tag) === bindingFor(tag.split(".")[0], node)) || (tag === "canvas" && ((ref && canvasTargets.has(ref.replace(/\.current$/u, ""))) || (ownsRenderer && canvases.length === 1)))) add(ts.isJsxOpeningElement(node) && ts.isJsxElement(node.parent) ? node.parent : node, "surface");
+  });
+  const result = [];
+  for (const region of regions.sort((left, right) => left.start - right.start || right.end - left.end))
+    if (!result.some(outer => outer.start <= region.start && outer.end >= region.end)) result.push(region);
+  return result;
+}
+
+export function withinRendererRegion(node, source, regions) {
+  const start = node.getStart(source);
+  return regions.some(region => region.start <= start && region.end >= node.end);
+}
+
+/** A content table is not a control unless source establishes interaction or selection. */
+export function interactiveTable(node) {
+  const table = ts.isJsxOpeningElement(node) && ts.isJsxElement(node.parent) ? node.parent : node;
+  let interactive = false;
+  walk(table, child => {
+    if (!ts.isJsxOpeningElement(child) && !ts.isJsxSelfClosingElement(child)) return;
+    const tag = jsxTag(child);
+    if ((["button", "input", "select", "textarea", "summary"].includes(tag) && !(tag === "input" && literal(attribute(child, "type")) === "hidden")) || /^(?:NSEButton|NSESwitch|NSETextField|NSESearchField|NSESlider|NSEStepper|NSESegmentedControl|NSEPopUpButton|NSETextView)$/u.test(tag)) interactive = true;
+    if (tag === "a" && attribute(child, "href")) interactive = true;
+    if (["grid", "treegrid", "listbox", "button", "checkbox", "radio", "link", "slider", "combobox", "option", "textbox"].includes(literal(attribute(child, "role")))) interactive = true;
+    for (const property of child.attributes.properties) {
+      if (!ts.isJsxAttribute(property)) continue;
+      const name = property.name.getText();
+      if (/^on(?:Click|DoubleClick|PointerDown|PointerUp|MouseDown|MouseUp|KeyDown|KeyUp|Change|Input|Select|SelectionChange)(?:Capture)?$/u.test(name) || /^(?:aria-selected|aria-multiselectable|selection|selectedRow|selectedRows|selectedRowIds)$/u.test(name)) interactive = true;
+      if (name === "contentEditable" && literal(attribute(child, name)) !== "false" && attribute(child, name)?.kind !== ts.SyntaxKind.FalseKeyword) interactive = true;
+    }
+  });
+  return interactive;
 }
 
 const COLOUR = /#[\da-f]{3,8}\b|(?:rgba?|hsla?|oklch|oklab|lab|lch|color)\(|(?:^|\s)(?:white|black|red|blue|green|grey|gray|yellow|orange|purple|pink|navy|teal|silver|maroon|lime|aqua|fuchsia|olive)(?:$|\s)/iu;
@@ -116,21 +194,21 @@ const SYSTEM_ICON = /(?:^|[\s_/-])(?:arrow[-_ ]?(?:back|forward|left|right)|chev
 const NAVIGATION_ARTWORK = /^(?:back|forward|go back|go forward|previous|next|arrow[-_ ]?(?:left|right|back|forward)|chevron[-_ ]?(?:left|right))$/iu;
 const GRAPHICS_TAGS = new Set(["svg", "path", "circle", "ellipse", "rect", "line", "polygon", "polyline", "stop", "g", "canvas"]);
 
-/** Definite source misuse; unknown APIs and custom artwork remain legitimate. */
-export function inspectIdiomErrors({ file, text }) {
-  if (rendererOwnedSource(text)) return [];
+/** Source findings: definite misuse errors; uncertain overflow remains a warning. */
+export function inspectIdiomErrors({ file, text, regions = rendererOwnedRegions({ file, text }) }) {
   const source = parse(file, text), findings = [], isShadowed = lexicalBindings(source), seen = new Set();
-  const at = (node, rule, key, message) => {
+  const at = (node, rule, key, message, severity = "error") => {
     const line = source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1;
     const identity = `${node.pos}:${rule}`;
     if (seen.has(identity)) return;
     seen.add(identity);
-    findings.push({ line, rule, severity: "error", message: `${message} ${replacementMessage(key)}` });
+    findings.push({ line, rule, severity, message: `${message} ${replacementMessage(key)}` });
   };
   walk(source, node => {
+    if (withinRendererRegion(node, source, regions)) return false;
     if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
       const tag = jsxTag(node);
-      if (["button", "input", "select", "textarea", "table"].includes(tag) && !(tag === "input" && ["hidden", "file"].includes(literal(attribute(node, "type"))))) at(node, "idiom.nse-controls", tag, `1 raw <${tag}> element bypasses NSE control semantics.`);
+      if (["button", "input", "select", "textarea", "table"].includes(tag) && (tag !== "table" || interactiveTable(node)) && !(tag === "input" && ["hidden", "file"].includes(literal(attribute(node, "type"))))) at(node, "idiom.nse-controls", tag, `1 raw <${tag}> element bypasses NSE control semantics.`);
       if (tag === "img") {
         const identity = ["src", "className", "id", "alt", "aria-label"].map(name => literal(attribute(node, name)) ?? "").join(" ");
         if (SYSTEM_ICON.test(identity)) at(node, "idiom.system-image", "systemImage", "A navigation icon is loaded as a private image.");
@@ -155,7 +233,7 @@ export function inspectIdiomErrors({ file, text }) {
         if (!ts.isPropertyAssignment(property)) continue;
         const key = propertyName(property.name), value = literal(property.initializer);
         if (key && value && PAINT.test(key) && COLOUR.test(value) && !GRAPHICS_TAGS.has(tag)) at(property, "idiom.ui-colour", "uiColour", "A UI colour is hard-coded instead of supplied by the selected NSE appearance.");
-        if (key && value && /^(?:overflow|overflowY|overflowX)$/u.test(key) && /^(?:auto|scroll)$/u.test(value) && !/^NSE/u.test(tag)) at(property, "idiom.scroll-view", "scroll", "A hand-rolled scrolling container bypasses NSE scrolling.");
+        if (key && value && /^(?:overflow|overflowY|overflowX)$/u.test(key) && /^(?:auto|scroll)$/u.test(value) && !/^NSE/u.test(tag)) at(property, "idiom.scroll-view", "scroll", "Explicit overflow may be appropriate for a code sample or document-view content. Review whether this region needs framework-owned scrolling.", "warning");
       }
       if (tag === "svg" && ts.isJsxElement(node.parent)) {
         const identity = literal(attribute(node, "aria-label")) ?? literal(attribute(node, "data-icon")) ?? literal(attribute(node, "id")) ?? "";
@@ -197,11 +275,14 @@ export function inspectIdiomErrors({ file, text }) {
   return findings;
 }
 
-/** CSS rules concern consumer UI declarations, not theme-owned semantic values. */
+/** CSS rules concern consumer UI declarations, not theme-owned semantic values.
+ * The stylesheet control-internals and UI-colour policies are intentionally unchanged:
+ * theme authoring is being redesigned around a public control-recipe contract and .scostheme bundles.
+ */
 export function inspectStyleErrors({ text }) {
   const css = text.replace(/\/\*[\s\S]*?\*\//gu, value => value.replace(/[^\n]/gu, " "));
   const findings = [];
-  const at = (index, rule, key, message) => findings.push({ line: css.slice(0, index).split("\n").length, rule, severity: "error", message: `${message} ${replacementMessage(key)}` });
+  const at = (index, rule, key, message, severity = "error") => findings.push({ line: css.slice(0, index).split("\n").length, rule, severity, message: `${message} ${replacementMessage(key)}` });
   for (const block of css.matchAll(/([^{}]+)\{([^{}]*)\}/gu)) {
     const selector = block[1].trim(), declarations = block[2];
     if (selector.startsWith("@")) continue;
@@ -215,7 +296,7 @@ export function inspectStyleErrors({ text }) {
       const property = declaration[1], value = declaration[2].trim();
       if (property.startsWith("--")) continue;
       const index = block.index + block[0].indexOf("{") + 1 + declaration.index;
-      if (/^overflow(?:-[xy])?$/iu.test(property) && /^(?:auto|scroll)$/u.test(value)) at(index, "idiom.scroll-view", "scroll", "A hand-rolled CSS scrolling container bypasses NSE scrolling.");
+      if (/^overflow(?:-[xy])?$/iu.test(property) && /^(?:auto|scroll)$/u.test(value)) at(index, "idiom.scroll-view", "scroll", "Explicit CSS overflow may be appropriate for a code sample or document-view content. Review whether this region needs framework-owned scrolling.", "warning");
       if (/^(?:color|background(?:-color)?|border(?:-(?:top|bottom|left|right))?(?:-color)?|outline(?:-color)?|text-decoration-color|box-shadow|text-shadow|caret-color|accent-color)$/iu.test(property) && COLOUR.test(value)) at(index, "idiom.ui-colour", "uiColour", "A UI colour is hard-coded instead of supplied by the selected NSE appearance.");
     }
   }
