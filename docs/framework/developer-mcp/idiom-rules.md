@@ -65,17 +65,17 @@ Classes: **a** is a static rule (named below); **b** is an implemented framework
 | O2: constructing responsive authority for an adapter | b | Adapter replaced by controller-owned view and traits, `e12638f`, `NSESplitViewController.ts`. |
 | O3: repetitive split preference schema / autosave-name proposal | c | `splitViewTypes.ts` still exposes preference state; no safe static rule can create the missing autosave API or judge a migration schema. |
 | O4: split preference types unavailable publicly | b | `NSESplitViewPreferences` and controller options are exported by `src/NSE/sdkPackageEntry.ts`; old pane/adapter vocabulary is superseded by `NSESplitViewItem`. |
-| O5: item-menu commands bypass validation | b | Current menu/command path is `src/NSE/Menus`; removed legacy menu APIs are checked by installed declarations. End-to-end validator/first-responder behavior still needs interaction tests. |
+| O5: item-menu commands bypass validation | b | Current menu/command path is `src/NSE/Menus`; removed legacy menu APIs are checked by installed declarations. End-to-end validator/first-responder behaviour still needs interaction tests. |
 | O6: checkbox/radio control sizing | b | Unified `NSEButton` with `buttonType` and `controlSize`, `44c2cc5`; radio artwork is separately O15. |
 | O7: table cannot fill its pane | b | Current `NSETableView` inherits measured viewport support; `src/NSE/DataViews/Table`, `docs/framework/data-views.md`. Browser layout is not inferred from source. |
 | O8: invented source-list control | b | `NSEOutlineView` with source-list selection and group items; `8c3bae5`, `src/NSE/DataViews/Outline`. |
 | O8: invented accordion / inspector grouping | b | Disclosure `NSEButton` and `NSEStackView`; `d604f57`, `src/NSE/Layout`. No static composition-quality claim follows. |
-| O9: Vite keeps previous installed SDK | c | Development-server cache behavior needs installed-consumer runtime verification; app-source lint cannot invalidate a running server. |
+| O9: Vite keeps previous installed SDK | c | Development-server cache behaviour needs installed-consumer runtime verification; app-source lint cannot invalidate a running server. |
 | O9: installers guess archive by modification time | b | `scripts/synware/build-sdk.mjs` writes exact SDK/companion archive paths in `build-manifest.json`; install that pair. |
 | O10: split view content and forced nested desktop mode | b | Child `NSESplitViewItem.viewController` and trait-owned outer collapse; `e12638f`, `3a53599`, `splitViewControllerView.tsx`. |
 | O11: unspecified stack item fixed to 60 px | b | Fitting-size measurements, `d5497db`, `src/NSE/Layout/NSEStackView.tsx`. |
 | O11: fill distribution versus fitting size / hugging | c | AppKit layout parity needs a solver/API decision and measured layout cases; current fitting-size code is not proof of hugging-priority parity. |
-| O12: menu text loaded as image / size overwritten | b | Unified button/menu migration; `44c2cc5`, current `src/NSE/Menus/NSEPopUpButton.tsx`. Fetch and size behavior remains runtime-verifiable. |
+| O12: menu text loaded as image / size overwritten | b | Unified button/menu migration; `44c2cc5`, current `src/NSE/Menus/NSEPopUpButton.tsx`. Fetch and size behaviour remains runtime-verifiable. |
 | O13: arbitrary toolbar height versus control size | b | `NSEButton.controlSize`, including large; `src/NSE/Controls/Buttons`. |
 | O14: segment sends unwanted payload | b | Current action/payload path in `src/NSE/Controls/Values/NSESegmentedControl.tsx`; the runtime command signature is also enforced. |
 | O15: missing round Atmo radio art | c | Owner artwork decision; a linter cannot supply approved radio assets or declare capsule art equivalent. |
@@ -104,7 +104,7 @@ Classes: **a** is a static rule (named below); **b** is an implemented framework
 | View-menu actions, second bullet: route from first responder | c | Verify menu/toolbar routing against actual focused content; static idiom checks do not assert complete routing parity. |
 | Click-to-rename, first bullet: standard title is text | c | Document-title interaction is a framework feature decision; absent click handlers are not inherently wrong. |
 | Click-to-rename, second bullet: title menu / NSDocument proposal | c | Needs a document-title API and interaction acceptance; no invented API is recommended. |
-| `NSETopBar` drops data attributes | c | Internal component DOM behavior requires a focused component regression; it is no longer public app chrome. |
+| `NSETopBar` drops data attributes | c | Internal component DOM behaviour requires a focused component regression; it is no longer public app chrome. |
 | FieldLab design note: off-state toolbar ink | c | Appearance design decision and rendered contrast evidence. |
 | FieldLab design note: compact document title hidden | c | Responsive composition and owner decision. |
 | FieldLab design note: title/edited gap | c | Measured visual spacing, not a semantic source error. |
@@ -149,7 +149,7 @@ Classes: **a** is a static rule (named below); **b** is an implemented framework
 | Application objects: image scaling and internal/removed helpers | b | `src/NSE/Controls/Images`, `src/NSE/sdkPackageEntry.ts`; installed declarations define the current image surface. |
 | Application objects: animation environment retained for evidence | c | Per-view reduced-motion evidence is an owner/API decision; do not outlaw the remaining supported provider. |
 | Application objects: MemoJournal presentation animator | b | Animator API now exists, `c016bd6`, `NSEViewController.ts`; app adoption remains unverified. |
-| Application objects: ImageFX crop/view / fit zoom | b | `src/FX/ImageFX/IFXImageView.tsx` and image viewport implementation; image load/fit behavior still needs runtime geometry tests. |
+| Application objects: ImageFX crop/view / fit zoom | b | `src/FX/ImageFX/IFXImageView.tsx` and image viewport implementation; image load/fit behaviour still needs runtime geometry tests. |
 | Application objects: NSEView draw replaces graphics view | b | `8c69dd0`, `34fe71c`; current view drawing contract and GraphicsFX context. |
 | Application objects: Open panel media sources | b | `397f881`, `eef4ed8`, `src/NSE/FilePanels/NSEOpenPanelSources.tsx`. |
 | Application objects: pageCurl / spine location | b | `2532057`, `a6536c1`, `NSEPageController.tsx`; existing approved implementation is not a proposed missing API. |
@@ -164,15 +164,15 @@ Classes: **a** is a static rule (named below); **b** is an implemented framework
 | About: endless animation missing / 1000 iteration cap | b | Stale: `c0d5ecc`; `AFXAnimation.ts` accepts infinite iterations/repeatDuration and `AFXLayer.ts` supports endless compositor layers. Do not advise a workaround for the old limitation. |
 | About: backing layer loses origin and clipping | b | Recorded fix `07a4ac3`; `src/FX/AnimationFX/AFXLayer.ts` adopts authored origin/clipping. |
 | About: byte-by-byte sprite | a | `idiom.pixel-sprite` is a review warning, not proof all numeric image buffers are wrong. |
-| About: additive mote blending | c | Artistic blend intent cannot be inferred from a particle renderer; compare reference and `IFXFilter.blend("addition")` behavior. |
-| About: setParticles then render schedules/cancels a frame | c | Scheduling/lifetime behavior needs a targeted animation test, not a name-only source prohibition. |
+| About: additive mote blending | c | Artistic blend intent cannot be inferred from a particle renderer; compare reference and `IFXFilter.blend("addition")` behaviour. |
+| About: setParticles then render schedules/cancels a frame | c | Scheduling/lifetime behaviour needs a targeted animation test, not a name-only source prohibition. |
 | About: near-full circle arcs | a | `idiom.full-circle`. |
 | About: raw scroll region | a | `idiom.scroll-view`. |
 | About: raw section-art image | c | Ordinary artwork is not a system-icon violation. Use `NSEImageView` where appropriate; `idiom.system-image` only establishes identifiable system artwork. Renderer ownership/art direction needs review. |
 | About: dead bundle images | a | `idiom.unused-resource`, with explicit dynamic-reference limits. |
 | About: room CSS gradients and animated floor | c | CSS artwork is allowed; animated geometry ownership requires renderer/layout evidence, not a blanket gradient ban. |
 | About: unconfirmed alpha clamp / absent keyframes / arc count | c | Explicitly unconfirmed historical claims; no rule should assert those defects exist. |
-| About: legitimate particle layer | c | Valid custom particle behavior must not be prohibited because a native emitter lacks the same public behavior. |
+| About: legitimate particle layer | c | Valid custom particle behaviour must not be prohibited because a native emitter lacks the same public behaviour. |
 | About: dashed-path sampling / proposed point-at-length | c | Public path sampling remains an API proposal; do not invent a sampler name or outlaw legitimate dashing. |
 | Invented controls: raw buttons | a | `idiom.nse-controls`; supported control-size/bezel/path-control APIs are the replacements. |
 | Invented controls: arrow glyphs in titles | a | `idiom.button-glyph`; named navigation images exist. |
