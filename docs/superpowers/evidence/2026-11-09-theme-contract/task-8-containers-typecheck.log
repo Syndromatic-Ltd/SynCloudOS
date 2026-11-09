@@ -1,0 +1,8 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 typecheck
+npm notice run tsc -b --pretty false
+src/NSE/Controls/Selection/NSEDivider.tsx(55,8): error TS2322: Type '{ className: string; "data-variant": "alpha" | "soft" | "plain" | "gray" | "arrow"; "data-expanded": string; "aria-expanded": boolean | undefined; "aria-label": string | undefined; style: CSSProperties | undefined; ... 274 more ...; "data-nse-part": string; }' is not assignable to type 'DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>'.
+  Type '{ className: string; "data-variant": "alpha" | "soft" | "plain" | "gray" | "arrow"; "data-expanded": string; "aria-expanded": boolean | undefined; "aria-label": string | undefined; style: CSSProperties | undefined; ... 274 more ...; "data-nse-part": string; }' is not assignable to type 'ButtonHTMLAttributes<HTMLButtonElement>'.
+    Types of property 'onCopy' are incompatible.
+      Type 'ClipboardEventHandler<HTMLHRElement> | undefined' is not assignable to type 'ClipboardEventHandler<HTMLButtonElement> | undefined'.
+        Type 'ClipboardEventHandler<HTMLHRElement>' is not assignable to type 'ClipboardEventHandler<HTMLButtonElement>'.
+          Type 'HTMLHRElement' is missing the following properties from type 'HTMLButtonElement': command, commandForElement, disabled, form, and 17 more.

@@ -8,7 +8,7 @@ import { NSEBox, NSEShadow, NSEView } from "@syndromatic/syncloudos/nse";
 <NSEBox boxType="custom" titlePosition="noTitle">A well</NSEBox>
 <NSEBox boxType="custom" borderType="lineBorder">A frame</NSEBox>
 <NSEBox boxType="custom" shadow={new NSEShadow({
-  shadowColor: "#0004", shadowOffset: { width: 0, height: -4 }, shadowBlurRadius: 12,
+  shadowColour: "#0004", shadowOffset: { width: 0, height: -4 }, shadowBlurRadius: 12,
 })}>A floating plate</NSEBox>
 
 <NSEView cornerRadius={18} cornerCurve="continuous">Continuous corners</NSEView>
@@ -24,17 +24,17 @@ The framework sets `data-box-kind`, `data-border-style`, `data-nse-shadow`, `dat
 | `boxType="custom"`, `borderType="lineBorder"` or `"grooveBorder"`, no shadow | Frame: the existing raised frame artwork, 18-slice. |
 | `boxType="custom"`, non-null `shadow` | Floating plate: the 18-slice plate artwork plus the requested shadow. Takes precedence over the border recipe. |
 | `boxType="custom"`, `borderType="noBorder"` | Plain interior; the border is omitted, including on a shadowed plate. |
-| Explicit `fillColor`, `borderColor`, `borderWidth`, `cornerRadius` or `cornerCurve` | Property values win: the fixed artwork is replaced with a scalable CSS fill and border. An assigned shadow still draws the floating treatment. |
+| Explicit `fillColour`, `borderColour`, `borderWidth`, `cornerRadius` or `cornerCurve` | Property values win: the fixed artwork is replaced with a scalable CSS fill and border. An assigned shadow still draws the floating treatment. |
 | `isTransparent={true}` | No interior fill or opaque sprite centre. The border and assigned shadow remain. |
 | `contentViewMargins={{ width, height }}` | Exact horizontal and vertical content insets, including zero. The default custom-box inset is 12 px. |
 | `title` and `titlePosition` | The existing NSBox title positions and fieldset/legend grouping are preserved. |
 | Reduced transparency, forced-colour appearance or the corresponding media query | Decorative shadows and shadow-bearing sprite artwork are suppressed; focus is not clipped. |
 
-`fillColor` follows the existing NSEBox CSS background convention, including gradients. `borderColor` and `shadowColor` are CSS colour values; a shadow also accepts a `GFXColour`. `borderWidth`, `cornerRadius` and shadow blur are finite non-negative pixels. AppKit's own names retain `Color`; other identifiers and prose use British spelling.
+`fillColour` follows the existing NSEBox CSS background convention, including gradients. `borderColour` and `shadowColour` are CSS colour values; a shadow also accepts a `GFXColour`. `borderWidth`, `cornerRadius` and shadow blur are finite non-negative pixels. SynCloudOS uses British spelling for these AppKit-shaped properties.
 
 ## NSEShadow
 
-`new NSEShadow({ shadowColor?, shadowOffset?, shadowBlurRadius? })` copies and freezes its value. The default is one-third-opacity black, zero offset and zero blur. `shadowOffset` is an `NSSize` (`width`, `height`), with positive height upwards; NSE reverses its vertical sign for CSS. A view also accepts the same property record directly, or `null` to remove the shadow. There is no GraphicsFX-only spread field.
+`new NSEShadow({ shadowColour?, shadowOffset?, shadowBlurRadius? })` copies and freezes its value. The default is one-third-opacity black, zero offset and zero blur. `shadowOffset` is an `NSSize` (`width`, `height`), with positive height upwards; NSE reverses its vertical sign for CSS. A view also accepts the same property record directly, or `null` to remove the shadow. There is no GraphicsFX-only spread field.
 
 ## Layer corners
 

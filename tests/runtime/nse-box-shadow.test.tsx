@@ -14,7 +14,7 @@ afterEach(cleanup);
 describe("NSShadow values and view properties", () => {
   it("copies and freezes AppKit's size offset and rejects invalid values", () => {
     const offset = { width: 2, height: -3 };
-    const shadow = new NSEShadow({ shadowColor: "#1238", shadowOffset: offset, shadowBlurRadius: 6 });
+    const shadow = new NSEShadow({ shadowColour: "#1238", shadowOffset: offset, shadowBlurRadius: 6 });
     offset.width = 99;
     expect(shadow.shadowOffset).toEqual({ width: 2, height: -3 });
     expect(Object.isFrozen(shadow)).toBe(true);
@@ -22,11 +22,11 @@ describe("NSShadow values and view properties", () => {
     expect(new NSEShadow().shadowBlurRadius).toBe(0);
     expect(() => new NSEShadow({ shadowBlurRadius: -1 })).toThrow(/shadowBlurRadius/);
     expect(() => new NSEShadow({ shadowOffset: { width: NaN, height: 0 } })).toThrow(/shadowOffset/);
-    expect(() => new NSEShadow({ shadowColor: "red;display:none" })).toThrow(/shadowColor/);
+    expect(() => new NSEShadow({ shadowColour: "red;display:none" })).toThrow(/shadowColour/);
   });
 
   it("projects a shadow onto the view itself, without clipping focus or leaking props", () => {
-    const shadow = new NSEShadow({ shadowColor: "#1238", shadowOffset: { width: 2, height: -3 }, shadowBlurRadius: 6 });
+    const shadow = new NSEShadow({ shadowColour: "#1238", shadowOffset: { width: 2, height: -3 }, shadowBlurRadius: 6 });
     const { rerender } = render(<NSEView data-testid="view" shadow={shadow} cornerRadius={12} cornerCurve="continuous"><button>Focus</button></NSEView>);
     const view = screen.getByTestId("view");
     expect(view.dataset.nseShadow).toBe("true");
@@ -62,7 +62,7 @@ describe("custom NSBox property projection for themes", () => {
         <NSEBox aria-label="Well" boxType="custom" />
         <NSEBox aria-label="Frame" boxType="custom" borderType="lineBorder" />
         <NSEBox aria-label="Floating" boxType="custom" shadow={new NSEShadow()} />
-        <NSEBox aria-label="Override" boxType="custom" borderWidth={2} borderColor="#123" />
+        <NSEBox aria-label="Override" boxType="custom" borderWidth={2} borderColour="#123" />
       </div>);
       expect(getComputedStyle(screen.getByRole("group", { name: "Well" })).borderImage).toContain("--nse-atmo-roundy-shadow");
       expect(getComputedStyle(screen.getByRole("group", { name: "Well" })).margin).toBe("0px");
@@ -73,7 +73,7 @@ describe("custom NSBox property projection for themes", () => {
   });
 
   it("publishes properties without choosing an Atmo look in JavaScript", () => {
-    render(<NSEBox aria-label="Plate" boxType="custom" borderType="lineBorder" borderColor="#123" borderWidth={2} fillColor="#fff" cornerRadius={10} cornerCurve="continuous" isTransparent contentViewMargins={{ width: 5, height: 3 }} shadow={new NSEShadow({ shadowBlurRadius: 8 })}>Content</NSEBox>);
+    render(<NSEBox aria-label="Plate" boxType="custom" borderType="lineBorder" borderColour="#123" borderWidth={2} fillColour="#fff" cornerRadius={10} cornerCurve="continuous" isTransparent contentViewMargins={{ width: 5, height: 3 }} shadow={new NSEShadow({ shadowBlurRadius: 8 })}>Content</NSEBox>);
     const box = screen.getByRole("group", { name: "Plate" });
     expect(box.dataset.boxKind).toBe("custom");
     expect(box.dataset.borderStyle).toBe("line");
@@ -91,6 +91,6 @@ describe("custom NSBox property projection for themes", () => {
     expect(screen.getByRole("group").style.getPropertyValue("--nse-box-border-width")).toBe("0px");
     expect(() => render(<NSEBox borderWidth={-1} />)).toThrow(/borderWidth/);
     expect(() => render(<NSEBox cornerRadius={Infinity} />)).toThrow(/cornerRadius/);
-    expect(() => render(<NSEBox borderColor="red; color: blue" />)).toThrow(/borderColor/);
+    expect(() => render(<NSEBox borderColour="red; color: blue" />)).toThrow(/borderColour/);
   });
 });

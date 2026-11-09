@@ -228,7 +228,7 @@ export function NSESplitViewControllerView({ controller }: { readonly controller
     className: "nse-split-view-controller-view",
     "aria-label": ariaLabel,
     "aria-disabled": hostDisabled || undefined,
-    "data-nse-control": "split-view",
+    "data-nse-control": "split-view", "data-nse-part": "background", "data-nse-enabled": hostDisabled ? "false" : undefined,
     "data-state": state.kind,
     onFocusCapture: (event: FocusEvent<HTMLDivElement>) => { lastFocused.current = event.target; },
   } as const;

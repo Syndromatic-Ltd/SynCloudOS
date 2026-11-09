@@ -232,7 +232,7 @@ export function NSEBrowser<T, TId extends string | number>({
   };
 
   return (
-    <div {...props} ref={browserRef} className={`nse-browser ${className}`.trim()} data-nse-control="browser" data-presentation={presentation} data-state={state.kind} aria-busy={dataViewIsBusy(state) || undefined} aria-disabled={disabled || undefined}>
+    <div {...props} ref={browserRef} className={`nse-browser ${className}`.trim()} data-nse-control="browser" data-nse-part="background" data-nse-enabled={disabled ? "false" : undefined} data-presentation={presentation} data-state={state.kind} aria-busy={dataViewIsBusy(state) || undefined} aria-disabled={disabled || undefined}>
       {presentation === "compact" && columns.length > 1 && (
         <button type="button" className="nse-browser-back" onClick={() => back(columns.length - 1)}>Back to {columns.length === 2 ? label : columns.at(-2)?.presentation.find((item) => Object.is(item.id, effectivePath.at(-2)?.id))?.label ?? label}</button>
       )}

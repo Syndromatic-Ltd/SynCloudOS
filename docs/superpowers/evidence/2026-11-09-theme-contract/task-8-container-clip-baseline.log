@@ -1,0 +1,21 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run playwright test tests/e2e/theme-baseline.spec.ts --project=chromium --project=chromium-high-dpr --workers=2 --grep catalogue partition 1$
+[WebServer] (node:38836) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 4 tests using 2 workers
+
+(node:81880) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:76028) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 (18.7s)
+  ok 2 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (18.7s)
+(node:79988) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:92356) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 3 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 (1.5s)
+  ok 4 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (1.5s)
+
+  4 passed (22.8s)

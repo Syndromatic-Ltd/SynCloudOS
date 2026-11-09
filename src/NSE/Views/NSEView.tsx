@@ -104,7 +104,7 @@ function NSEViewContent({ additionalSafeAreaInsets, onSafeAreaInsetsChange, shad
       }} /> : null}
     {children}
   </NSEViewSafeAreaContext.Provider>;
-  const attributes = { ...htmlAttributes, ...layer.attributes, style: { ...safeArea.properties, ...style, ...layer.style }, ref: attachHost, "data-nse-view-drawing": draw ? "" : undefined };
+  const attributes = { "data-nse-control": "view", "data-nse-part": "content", ...htmlAttributes, ...layer.attributes, style: { ...safeArea.properties, ...style, ...layer.style }, ref: attachHost, "data-nse-view-drawing": draw ? "" : undefined };
   if (!menu) return <div title={toolTip} {...attributes}>{content}</div>;
   return (
     <NSEMenuHostView menu={menu} toolTip={toolTip} menuOverlay={menuOverlay} longPressDelayMs={longPressDelayMs} direction={direction} {...attributes}>
@@ -122,7 +122,7 @@ function NSEViewDrawing({ draw, bounds, identifiers, placement, accessibility }:
 }) {
   const context = GFXContext.recording({ size: bounds, identifiers });
   draw(Object.freeze({ x: 0, y: 0, ...bounds }), context);
-  return <div data-nse-view-drawing-layer="">
+  return <div data-nse-part="image" data-nse-view-drawing-layer="">
     <NSEViewDisplayList displayList={context.displayList} placement={placement} accessibility={accessibility} />
   </div>;
 }

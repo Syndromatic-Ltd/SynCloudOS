@@ -615,7 +615,7 @@ export function CoverFlowCollectionView<T, TId extends NSEDataViewKey>({
         role="listbox"
         aria-orientation="horizontal"
         className={`nse-collection-view ${className}`.trim()}
-        data-nse-control="collection-view"
+        data-nse-control="collection-view" data-nse-part="background" data-nse-enabled={view.rootProps["aria-disabled"] ? "false" : undefined}
         data-layout="cover-flow"
         data-rendering={rendering}
         data-failure={failure}
@@ -631,7 +631,7 @@ export function CoverFlowCollectionView<T, TId extends NSEDataViewKey>({
         {fallback ? <img className="nse-collection-cover-flow-fallback" src={fallback} alt="" draggable={false} /> : null}
         <div className="nse-collection-cover-flow-items">
           {items.map(({ id, item, disabled }) => (
-            <div key={view.itemDomId(id)} id={view.itemDomId(id)} role="option" aria-selected={Object.is(id, currentEntry?.id)} aria-disabled={disabled || undefined}>
+            <div key={view.itemDomId(id)} id={view.itemDomId(id)} role="option" data-nse-part="item" data-nse-selected={Object.is(id, currentEntry?.id) ? "" : undefined} data-nse-enabled={disabled ? "false" : undefined} aria-selected={Object.is(id, currentEntry?.id)} aria-disabled={disabled || undefined}>
               {adapter.labelForItem(item)}
             </div>
           ))}

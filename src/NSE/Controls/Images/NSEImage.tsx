@@ -316,13 +316,13 @@ export const NSEImageView = forwardRef<NSEImageViewHandle, NSEImageViewProps>(fu
   }), [wantsLayer, layers]);
 
   return (
-    <div ref={host} className={classes("nse-control-image-view", className)} data-image-scaling={imageScaling}>
-      <NSESizeableImage ref={imageRef} autoSize={imageScaling !== "none"} {...props} />
+    <div data-nse-control="image-view" data-nse-part="background" data-nse-image-scaling={imageScaling} ref={host} className={classes("nse-control-image-view", className)} data-image-scaling={imageScaling}>
+      <NSESizeableImage data-nse-part="image" ref={imageRef} autoSize={imageScaling !== "none"} {...props} />
       {controls ? (
-        <div className="nse-control-image-view-controls" role="group" aria-label="Zoom">
+        <div data-nse-part="accessory" className="nse-control-image-view-controls" role="group" aria-label="Zoom">
           <button
             type="button"
-            className="nse-control-image-view-zoom"
+            data-nse-part="button" className="nse-control-image-view-zoom"
             aria-label={zoomOutLabel}
             onClick={() => imageRef.current?.zoomOut()}
           >
@@ -330,7 +330,7 @@ export const NSEImageView = forwardRef<NSEImageViewHandle, NSEImageViewProps>(fu
           </button>
           <button
             type="button"
-            className="nse-control-image-view-zoom"
+            data-nse-part="button" className="nse-control-image-view-zoom"
             aria-label={zoomInLabel}
             onClick={() => imageRef.current?.zoomIn()}
           >

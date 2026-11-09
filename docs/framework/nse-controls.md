@@ -122,7 +122,7 @@ Focused entries include `NSEDrawer` and `NSESplitViewController` in `nse/control
 | --- | --- |
 | `NSEStackView`, `NSEStackItem` | `NSStackView`: views in a row or a column, with distribution, alignment, spacing and visibility priorities. Views below `mustHold` that no longer fit detach into an overflow menu, in priority order, and stay reachable from the keyboard. See [Stacks and grids](nse/stacks-and-grids.md). |
 | `NSEGridView`, `NSEGridRow` | `NSGridView`: views in rows and columns. A trailing label column and a fill column make a Mac form. |
-| `NSEBox` | `NSBox`: titled boxes, separators, and custom boxes with `fillColor`, `borderColor`, `borderWidth`, `cornerRadius`, `contentViewMargins`, `isTransparent` and `shadow`. See [Boxes and shadows](nse/boxes-and-shadows.md). |
+| `NSEBox` | `NSBox`: titled boxes, separators, and custom boxes with `fillColour`, `borderColour`, `borderWidth`, `cornerRadius`, `contentViewMargins`, `isTransparent` and `shadow`. See [Boxes and shadows](nse/boxes-and-shadows.md). |
 | `NSESplitView` | Two resizable panes, a sidebar beside the main view. |
 | `NSEScrollView`, `NSEClipView` | Scrolling with momentum and rubber banding. |
 | `NSETabView`, `NSETabViewController` | Tabbed content and owned child view controllers; fixed or `sidebarAdaptable` placement. |
@@ -175,7 +175,7 @@ On a desktop (a fine pointer that hovers), choosing an item in any menu or pop-u
 | `NSEImageView` | Displays an image fitted to the view or at natural size (`imageScaling`). A carousel is an `NSEPageController` of image views; to crop, use ImageFX's `IFXImageView`. |
 | `NSEView` | `draw(dirtyRect, context)` records GraphicsFX content at the view’s measured bounds; `layerContentsPlacement` places its layer contents. Also carries `menu`, `toolTip` and `appearance`. |
 | `snapshotNSEView` | Draws a view your app owns into a PNG data URL, for a version card, a drag image or a thumbnail. Canvas content is left out. |
-| `NSEShadow` | `NSShadow`: `shadowColor`, `shadowOffset` and `shadowBlurRadius`, set as `shadow` on a view or box. Smooth corners are `cornerRadius` and `cornerCurve: "continuous"` on views and AFX layers; material renderers are theme internals. |
+| `NSEShadow` | `NSShadow`: `shadowColour`, `shadowOffset` and `shadowBlurRadius`, set as `shadow` on a view or box. Smooth corners are `cornerRadius` and `cornerCurve: "continuous"` on views and AFX layers; material renderers are theme internals. |
 
 ## Navigation controllers
 

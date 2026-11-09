@@ -170,14 +170,14 @@ function GridCollectionView<T, TId extends string | number>({
         aria-colcount={columnCount}
         aria-readonly={state.kind === "read-only" || undefined}
         className={`nse-collection-view ${className}`.trim()}
-        data-nse-control="collection-view"
+        data-nse-control="collection-view" data-nse-part="background" data-nse-enabled={view.rootProps["aria-disabled"] ? "false" : undefined}
         style={rootStyle}
         onKeyDown={handleKey}
       >
-        <div className="nse-collection-canvas-sizer">
-          <div ref={canvasRef} className="nse-collection-canvas" style={{ blockSize: totalBlockSize, inlineSize: viewportInlineSize }}>
+        <div data-nse-part="viewport" className="nse-collection-canvas-sizer">
+          <div ref={canvasRef} data-nse-part="content" className="nse-collection-canvas" style={{ blockSize: totalBlockSize, inlineSize: viewportInlineSize }}>
             {[...renderedRows].sort((a, b) => a - b).map((row) => (
-              <div key={row} role="row" className="nse-collection-row">
+              <div key={row} role="row" data-nse-part="row" className="nse-collection-row">
                 {Array.from({ length: Math.max(0, Math.min(columnCount, view.snapshot.items.length - row * columnCount)) }, (_, column) => layout.itemAt(row * columnCount + column, layoutInput)!).map((position) => {
                 const entry = view.snapshot.items[position.index]!;
                 const itemProps = view.itemProps(entry.id);
@@ -195,7 +195,7 @@ function GridCollectionView<T, TId extends string | number>({
                     role="gridcell"
                     aria-colindex={position.column + 1}
                     aria-rowindex={position.row + 1}
-                    className="nse-collection-item"
+                    data-nse-part="item" data-nse-selected={selected ? "" : undefined} data-nse-focused={focused ? "" : undefined} data-nse-enabled={entry.disabled ? "false" : undefined} className="nse-collection-item"
                     data-appearance-recipe="collection-item"
                     data-selected={selected || undefined}
                     data-focused={focused || undefined}

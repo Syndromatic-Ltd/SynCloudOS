@@ -400,7 +400,7 @@ function NSEPageNavigationView({ controller }: { readonly controller: NSEPageCon
     <div
       className={strip ? "nse-page-controller nse-container-sliding-view" : "nse-page-controller"}
       aria-label={controller.title}
-      data-nse-control="page-controller"
+      data-nse-control="page-controller" data-nse-part="content"
       data-transition-style={controller.transitionStyle}
       data-axis="horizontal"
       data-selected-index={index}

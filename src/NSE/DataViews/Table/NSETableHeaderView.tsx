@@ -51,7 +51,7 @@ export function NSETableHeaderView({ columns, height, width, menu, isEnabled = t
       {columns.map((column, index) => (
         <div
           key={column.id}
-          role="columnheader"
+          data-nse-part="column" data-nse-enabled={disabled ? "false" : undefined} role="columnheader"
           aria-colindex={index + 1}
           aria-sort={column.sortDirection ?? undefined}
           data-column-id={column.id}
@@ -59,7 +59,7 @@ export function NSETableHeaderView({ columns, height, width, menu, isEnabled = t
           style={{ flex: `0 0 ${column.width}px`, inlineSize: `${column.width}px` }}
         >
           {column.sortable ? (
-            <button type="button" aria-label={`Sort by ${column.title}`} disabled={disabled} onClick={column.onSort}>
+            <button data-nse-part="title" type="button" aria-label={`Sort by ${column.title}`} disabled={disabled} onClick={column.onSort}>
               {column.title}<span aria-hidden="true" data-nse-part="sort-glyph" data-appearance-recipe="table-sort-glyph" />
             </button>
           ) : <span>{column.title}</span>}

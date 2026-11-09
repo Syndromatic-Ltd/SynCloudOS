@@ -115,10 +115,10 @@ export const NSEVirtualViewport = forwardRef<HTMLDivElement, NSEVirtualViewportP
       aria-activedescendant={activeDescendantId}
       aria-busy={busy}
       style={{ overflow: "auto", ...style }}
-      data-nse-control="virtual-viewport"
+      data-nse-control="virtual-viewport" data-nse-part="viewport"
       data-axis={axis}
     >
-      <div className="nse-virtual-viewport-content" style={containerStyle}>
+      <div data-nse-part="content" className="nse-virtual-viewport-content" style={containerStyle}>
         {virtualiser.snapshot.items.map((item) => (
           <NSEMeasuredVirtualItem
             key={item.key}

@@ -434,7 +434,7 @@ export function NSETableView<T, TId extends string | number>({
         aria-colcount={orderedColumns.length}
         className={`nse-table-view ${className}`.trim()}
         style={{ ...style, blockSize: fills ? "100%" : `${tableBlockSize}px`, overflow: "auto" }}
-        data-nse-control="table-view"
+        data-nse-control="table-view" data-nse-part="background" data-nse-enabled={view.rootProps["aria-disabled"] ? "false" : undefined}
         {...tableHeaderAppearance.attributes}
         data-nse-table-header-hover-slot={tableHeaderHoverAppearance.slot}
         data-nse-table-header-hover-recipe-id={tableHeaderHoverAppearance.recipeId}
@@ -484,6 +484,7 @@ export function NSETableView<T, TId extends string | number>({
               role="row"
               aria-rowindex={virtualItem.index + (headerHidden ? 1 : 2)}
               aria-selected={selected}
+              data-nse-selected={selected ? "" : undefined}
               data-nse-part="row"
               data-state={selected ? "selected" : virtualItem.index % 2 === 0 ? "even" : "odd"}
               data-appearance-recipe={selected ? "table-selected-row" : "table-row"}

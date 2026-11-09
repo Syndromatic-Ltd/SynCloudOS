@@ -6,6 +6,7 @@ import { themeBaselineCatalogue } from "../e2e/fixtures/theme-baseline/catalogue
 import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance/NSEAppearanceProvider";
 import { atmoAppearance } from "../../src/NSE/Themes/Atmo";
+import { NSEScrollView } from "../../src/NSE/Scroll/NSEScrollView";
 import { NSETextField } from "../../src/NSE/Controls/Fields/NSEFields";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 import { nseThemeParts } from "../../src/NSE/Theme/contract/vocabulary";
@@ -45,6 +46,32 @@ describe("public theme hook coverage", () => {
         act(() => target.blur()); expect(root!.hasAttribute("data-nse-focused")).toBe(false);
       }
       if (surface.interaction === "press") { fireEvent.keyDown(root!, { key: "Enter" }); expect(root!.hasAttribute("data-nse-highlighted")).toBe(true); fireEvent.keyUp(root!, { key: "Enter" }); }
+    });
+  }
+});
+
+const containerIdentities: Readonly<Record<string, string>> = {
+  "source-list": "outline-view", "container-pane": "box", "stack-item": "stack-view", "input-box": "text-field",
+};
+const containerNames = ["box", "stack-view", "grid-view", "split-view", "drawer", "scroll-view", "clip-view", "view", "image-view", "table-view", "table-cell-view", "outline-view", "collection-view", "browser", "rule-editor", "predicate-editor", "virtual-viewport", "page-controller"];
+describe("container theme hooks", () => {
+  it("preserves a composing control's clip part", () => {
+    const view = render(<NSEScrollView data-nse-part="colour-list-scroll">Content</NSEScrollView>);
+    expect(view.container.querySelector('[data-nse-control="clip-view"]')?.getAttribute("data-nse-part")).toBe("colour-list-scroll");
+  });
+  for (const surface of themeBaselineCatalogue) {
+    const name = [...Object.keys(containerIdentities), ...containerNames].find(name => surface.id === name || surface.id.startsWith(`${name}-`));
+    if (!name) continue;
+    const identity = containerIdentities[name] ?? name;
+    it(surface.id, () => {
+      const view = render(<SurfaceHost>{surface.render()}</SurfaceHost>);
+      const root = view.container.querySelector<HTMLElement>(`[data-nse-control="${identity}"]`);
+      expect(root, `${surface.id} publishes ${identity}`).not.toBeNull();
+      expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+      for (const part of root!.querySelectorAll<HTMLElement>("[data-nse-part]")) expect(parts.has(part.dataset.nsePart!), part.dataset.nsePart).toBe(true);
+      for (const item of root!.querySelectorAll<HTMLElement>('[aria-selected="true"]')) expect(item.hasAttribute("data-nse-selected")).toBe(true);
+      if (surface.id.endsWith("disabled")) expect(root!.dataset.nseEnabled).toBe("false");
+      if (surface.id.endsWith("selected")) expect(root!.querySelector("[data-nse-selected]")).not.toBeNull();
     });
   }
 });

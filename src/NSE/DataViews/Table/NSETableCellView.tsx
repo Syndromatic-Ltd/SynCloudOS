@@ -28,7 +28,7 @@ export function NSETableCellView({
   accessory,
 }: NSETableCellViewProps) {
   return (
-    <span data-nse-part="cell-content">
+    <span data-nse-control="table-cell-view" data-nse-part="cell-content">
       {image ? <img data-nse-part="image" src={image.src} alt={image.alt} /> : null}
       <span data-nse-part="text-content">
         <span data-nse-part="primary-text">{primary}</span>

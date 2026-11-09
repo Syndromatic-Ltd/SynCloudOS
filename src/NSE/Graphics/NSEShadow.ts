@@ -22,7 +22,7 @@ import { GFXColour } from "../../FX/GraphicsFX/GFXColour";
 
 /** NSShadow's properties. shadowOffset is an NSSize: positive height points upwards. */
 export interface NSEShadowOptions {
-  readonly shadowColor?: string | GFXColour;
+  readonly shadowColour?: string | GFXColour;
   readonly shadowOffset?: { readonly width: number; readonly height: number };
   readonly shadowBlurRadius?: number;
 }
@@ -41,13 +41,13 @@ export function nseCSSValue(value: string, property: string, name: string): stri
 
 /** NSShadow: an immutable shadow value assigned to NSView.shadow, with no extra view. */
 export class NSEShadow {
-  readonly shadowColor: string;
+  readonly shadowColour: string;
   readonly shadowOffset: { readonly width: number; readonly height: number };
   readonly shadowBlurRadius: number;
 
   constructor(options: NSEShadowOptions = {}) {
-    const colour = options.shadowColor ?? "rgba(0, 0, 0, 0.333333)";
-    this.shadowColor = nseCSSValue(colour instanceof GFXColour ? colour.toCSS() : colour, "color", "NSEShadow shadowColor");
+    const colour = options.shadowColour ?? "rgba(0, 0, 0, 0.333333)";
+    this.shadowColour = nseCSSValue(colour instanceof GFXColour ? colour.toCSS() : colour, "color", "NSEShadow shadowColour");
     const offset = options.shadowOffset ?? { width: 0, height: 0 };
     if (!Number.isFinite(offset.width) || !Number.isFinite(offset.height)) {
       throw new RangeError("NSEShadow shadowOffset must have finite width and height.");
