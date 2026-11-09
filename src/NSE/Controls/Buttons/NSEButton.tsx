@@ -32,7 +32,7 @@ import {
   type RefAttributes,
 } from "react";
 import { NSEControlImage } from "../Images/NSEControlImage";
-import { nseControlHooks } from "../../Theme/contract/hooks";
+import { nseControlHooks, nseMinimumControlProperties } from "../../Theme/contract/hooks";
 import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import type { NSEImage } from "../Images/NSEImageResource";
 import type { HFXFeedbackPresetName, HFXFeedbackRequest } from "../../Feedback";
@@ -259,6 +259,7 @@ const NSEPushButtonCell = forwardRef<HTMLButtonElement, NSEButtonProps>(function
         triggerNSEControlHapticForEvent(resolveNSEControlHaptic(haptic, TONE_HAPTICS[tone]), event, !disabled);
       }}
       {...props}
+      style={nseMinimumControlProperties(props.style)}
       {...theme.events}
       {...nseControlHooks({ control: "button", state: presentation?.state ?? state ?? "off", highlighted: isHighlighted || press.active, enabled: !disabled, hovered: theme.hovered, focused: theme.focused, variants: { "bezel-style": bezelStyle, "control-size": controlSize ?? "regular", "button-type": buttonType } })}
       data-nse-part="background"

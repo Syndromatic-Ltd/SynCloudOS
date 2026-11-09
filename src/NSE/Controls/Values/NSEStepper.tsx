@@ -20,6 +20,8 @@ import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { nseControlHooks, nseStateHooks } from "../../Theme/contract/hooks";
+import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import { useEffect, useRef, useState } from "react";
 import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
 import { useOptionalNSEControlRuntimePort } from "../Core";
@@ -58,6 +60,8 @@ export function NSEStepper<T = number>(props: NSEBoundValueProps<T, NSEStepperPr
 }
 
 function NSEStepperControl<T = number>(props: NSEStepperProps<T> & NSEValueBindingControlProps<T>) {
+  const theme = useNSEThemeInteraction<HTMLSpanElement>(props.isEnabled !== false);
+  const bezel = useRef<HTMLSpanElement>(null);
   const runtime = useOptionalNSEControlRuntimePort();
   const contract = (props.contract ?? numericContract(props as NumericStepperOptions)) as NSEStepperValueContract<T>;
   const propsRef = useRef(props);
@@ -148,7 +152,7 @@ function NSEStepperControl<T = number>(props: NSEStepperProps<T> & NSEValueBindi
     if ((props.isEnabled === false) || props.readOnly) finishHold();
   }, [(props.isEnabled === false), props.readOnly]);
 
-  const startHold = (direction: 1 | -1, event: React.PointerEvent<HTMLButtonElement>) => {
+  const startHold = (direction: 1 | -1, event: React.PointerEvent<HTMLElement>) => {
     if (!runtime?.scheduler || runtime.signal.aborted || (props.isEnabled === false) || props.readOnly) return;
     finishHold();
     event.preventDefault();
@@ -200,16 +204,33 @@ function NSEStepperControl<T = number>(props: NSEStepperProps<T> & NSEValueBindi
     props.__nseBindingEditor.cancel();
   };
 
+  const expandedPart = (event: { target: EventTarget; currentTarget: HTMLElement; clientX: number; clientY: number }): "increment" | "decrement" | null => {
+    if (props.isEnabled === false || props.readOnly) return null;
+    if (event.target !== event.currentTarget && event.target !== bezel.current) return null;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    if (event.clientX < bounds.left || event.clientX >= bounds.right || event.clientY < bounds.top || event.clientY >= bounds.bottom) return null;
+    return event.clientY < bounds.top + bounds.height / 2 ? "increment" : "decrement";
+  };
+
   return (
-    <span role="spinbutton" aria-label={props["aria-label"]} aria-valuenow={typeof props.value === "number" ? props.value : undefined} aria-valuetext={props.formatValue?.(props.value)} tabIndex={(props.isEnabled === false) ? -1 : 0} data-nse-control="stepper" data-state={(props.isEnabled === false) ? "disabled" : props.readOnly ? "read-only" : "ready"} data-size={props.size ?? "regular"} {...incrementAppearance.attributes} onKeyDown={(event) => {
+    <span onPointerDown={event => { const part = expandedPart(event); if (!part || event.button !== 0) return; setPressedPart(part); startHold(part === "increment" ? 1 : -1, event); }}
+      onPointerMove={event => { const part = expandedPart(event); if (part) setHoveredPart(part); }}
+      onPointerLeave={() => setHoveredPart(null)}
+      onPointerUp={event => { if (event.target === event.currentTarget || event.target === bezel.current) { setPressedPart(null); finishHold(); } }}
+      onPointerCancel={event => { if (event.target === event.currentTarget || event.target === bezel.current) { cancelPresentation("increment"); cancelPresentation("decrement"); } }}
+      onLostPointerCapture={event => { if (event.target === event.currentTarget || event.target === bezel.current) { cancelPresentation("increment"); cancelPresentation("decrement"); } }}
+      onClick={event => { if (event.detail === 0) return; const part = expandedPart(event); if (part) click(part === "increment" ? 1 : -1); }}
+      role="spinbutton" aria-label={props["aria-label"]} aria-valuenow={typeof props.value === "number" ? props.value : undefined} aria-valuetext={props.formatValue?.(props.value)} tabIndex={(props.isEnabled === false) ? -1 : 0} data-nse-part="content" {...theme.events} {...nseControlHooks({ control: "stepper", enabled: props.isEnabled !== false, highlighted: pressedPart !== null, hovered: theme.hovered, focused: theme.focused, variants: { "control-size": props.size ?? "regular" } })} data-state={(props.isEnabled === false) ? "disabled" : props.readOnly ? "read-only" : "ready"} data-size={props.size ?? "regular"} {...incrementAppearance.attributes} onKeyDown={(event) => {
       if (event.key === "ArrowUp" || event.key === "ArrowRight") { event.preventDefault(); valueRef.current = props.value; move(1); }
       else if (event.key === "ArrowDown" || event.key === "ArrowLeft") { event.preventDefault(); valueRef.current = props.value; move(-1); }
       else if ((event.key === "PageUp" || event.key === "PageDown") && typeof props.value === "number" && !props.contract) { event.preventDefault(); const direction = event.key === "PageUp" ? 1 : -1; const next = Math.max((props as NumericStepperOptions).minimum, Math.min((props as NumericStepperOptions).maximum, props.value + direction * (props.pageStep ?? (props as NumericStepperOptions).step * 10))); publishCommit(props.value, next as T); }
       else if (event.key === "Home") { event.preventDefault(); setBoundary("minimum"); }
       else if (event.key === "End") { event.preventDefault(); setBoundary("maximum"); }
     }}>
-      <button type="button" aria-label={`Increment ${props["aria-label"]}`} data-nse-part="increment" tabIndex={-1} disabled={(props.isEnabled === false)} {...incrementAppearance.attributes} onFocus={() => setFocusedPart("increment")} onBlur={() => { setFocusedPart((current) => current === "increment" ? null : current); endPresentation("increment"); }} onPointerEnter={() => setHoveredPart("increment")} onPointerLeave={() => setHoveredPart((current) => current === "increment" ? null : current)} onPointerDown={(event) => { setPressedPart("increment"); startHold(1, event); }} onPointerUp={() => endPresentation("increment")} onPointerCancel={() => cancelPresentation("increment")} onLostPointerCapture={() => cancelPresentation("increment")} onClick={() => click(1)}>+</button>
-      <button type="button" aria-label={`Decrement ${props["aria-label"]}`} data-nse-part="decrement" tabIndex={-1} disabled={(props.isEnabled === false)} {...decrementAppearance.attributes} onFocus={() => setFocusedPart("decrement")} onBlur={() => { setFocusedPart((current) => current === "decrement" ? null : current); endPresentation("decrement"); }} onPointerEnter={() => setHoveredPart("decrement")} onPointerLeave={() => setHoveredPart((current) => current === "decrement" ? null : current)} onPointerDown={(event) => { setPressedPart("decrement"); startHold(-1, event); }} onPointerUp={() => endPresentation("decrement")} onPointerCancel={() => cancelPresentation("decrement")} onLostPointerCapture={() => cancelPresentation("decrement")} onClick={() => click(-1)}>−</button>
+      <span ref={bezel} data-nse-part="bezel">
+      <button type="button" aria-label={`Increment ${props["aria-label"]}`} data-nse-part="increment" {...nseStateHooks({ enabled: props.isEnabled !== false, highlighted: pressedPart === "increment", hovered: hoveredPart === "increment", focused: focusedPart === "increment" })} tabIndex={-1} disabled={(props.isEnabled === false)} {...incrementAppearance.attributes} onFocus={() => setFocusedPart("increment")} onBlur={() => { setFocusedPart((current) => current === "increment" ? null : current); endPresentation("increment"); }} onPointerEnter={() => setHoveredPart("increment")} onPointerLeave={() => setHoveredPart((current) => current === "increment" ? null : current)} onPointerDown={(event) => { setPressedPart("increment"); startHold(1, event); }} onPointerUp={() => endPresentation("increment")} onPointerCancel={() => cancelPresentation("increment")} onLostPointerCapture={() => cancelPresentation("increment")} onClick={() => click(1)}>+</button>
+      <button type="button" aria-label={`Decrement ${props["aria-label"]}`} data-nse-part="decrement" {...nseStateHooks({ enabled: props.isEnabled !== false, highlighted: pressedPart === "decrement", hovered: hoveredPart === "decrement", focused: focusedPart === "decrement" })} tabIndex={-1} disabled={(props.isEnabled === false)} {...decrementAppearance.attributes} onFocus={() => setFocusedPart("decrement")} onBlur={() => { setFocusedPart((current) => current === "decrement" ? null : current); endPresentation("decrement"); }} onPointerEnter={() => setHoveredPart("decrement")} onPointerLeave={() => setHoveredPart((current) => current === "decrement" ? null : current)} onPointerDown={(event) => { setPressedPart("decrement"); startHold(-1, event); }} onPointerUp={() => endPresentation("decrement")} onPointerCancel={() => cancelPresentation("decrement")} onLostPointerCapture={() => cancelPresentation("decrement")} onClick={() => click(-1)}>−</button>
+      </span>
       {props.name ? <input type="hidden" name={props.name} value={String(props.value)} /> : null}
     </span>
   );

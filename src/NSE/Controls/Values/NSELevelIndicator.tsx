@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { nseControlHooks, nseStateHooks } from "../../Theme/contract/hooks";
+import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
 import type { NSELevelIndicatorProps } from "./valueControlTypes";
 
@@ -32,6 +34,8 @@ function levelState(props: NSELevelIndicatorProps): "normal" | "warning" | "crit
  * independent track and segment presentation slots it consumes.
  */
 export function NSELevelIndicator(props: NSELevelIndicatorProps) {
+  const theme = useNSEThemeInteraction<HTMLElement>(props.isEnabled !== false);
+  const hooks = nseControlHooks({ control: "level-indicator", enabled: props.isEnabled !== false, hovered: theme.hovered, focused: theme.focused, variants: { type: props.mode ?? "continuous" } });
   const state = levelState(props);
   const trackState = (props.isEnabled === false) ? "disabled" : "normal";
   const segmentState = (props.isEnabled === false) ? "disabled" : state;
@@ -47,7 +51,7 @@ export function NSELevelIndicator(props: NSELevelIndicatorProps) {
       <div
         role="radiogroup"
         aria-label={props["aria-label"]}
-        data-nse-control="level-indicator"
+        data-nse-part="track" {...hooks} {...theme.events}
         data-state={state}
         {...trackAppearance.attributes}
       >
@@ -62,6 +66,7 @@ export function NSELevelIndicator(props: NSELevelIndicatorProps) {
               aria-checked={value === props.value}
               disabled={(props.isEnabled === false)}
               data-nse-part="segment"
+              {...nseStateHooks({ selected: value === props.value, enabled: props.isEnabled !== false })}
               {...segmentAppearance.attributes}
               onClick={() => props.onValueChange?.(value, "commit")}
             >
@@ -79,7 +84,7 @@ export function NSELevelIndicator(props: NSELevelIndicatorProps) {
       min={props.minimum}
       max={props.maximum}
       value={props.value}
-      data-nse-control="level-indicator"
+      data-nse-part="track" {...hooks} {...theme.events}
       data-state={state}
       {...trackAppearance.attributes}
     >

@@ -20,7 +20,7 @@ import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { nseControlHooks } from "../../Theme/contract/hooks";
+import { nseControlHooks, nseStateHooks } from "../../Theme/contract/hooks";
 import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import { NSEMetalThumb, type NSEThumbMaterial } from "../../Appearance/NSEMetalThumb";
 import { NSEDivider } from "../Selection/NSEDivider";
@@ -686,6 +686,7 @@ interface NSERadioOptionControlProps {
 function NSERadioOptionControl({ option, selected, position, name, required, disabled, tabStop, onAvailabilityChange, inputRef, onCommit, onKeyDown }: NSERadioOptionControlProps) {
   const command = useNSEControlCommand(option.command);
   const presentation = command.presentation;
+  const theme = useNSEThemeInteraction<HTMLLabelElement>(!disabled && option.isEnabled !== false, true);
   const optionDisabled = disabled || option.isEnabled === false || Boolean(option.command && (!presentation?.enabled || presentation.denied || presentation.hidden || presentation.stale));
   useEffect(() => {
     onAvailabilityChange(option.value, !optionDisabled);
@@ -693,6 +694,10 @@ function NSERadioOptionControl({ option, selected, position, name, required, dis
   }, [onAvailabilityChange, option.value, optionDisabled]);
   return (
     <label
+      data-nse-part="cell"
+      data-nse-button-type="radio"
+      {...theme.events}
+      {...nseStateHooks({ state: selected ? "on" : "off", selected, enabled: !optionDisabled, highlighted: theme.highlighted, hovered: theme.hovered, focused: theme.focused })}
       className="nse-control-radio"
       data-position={position}
       data-selected={selected ? "true" : "false"}
@@ -722,7 +727,7 @@ function NSERadioOptionControl({ option, selected, position, name, required, dis
         }}
         onKeyDown={onKeyDown}
       />
-      {option.label}
+      <span data-nse-part="title">{option.label}</span>
     </label>
   );
 }
@@ -750,6 +755,7 @@ function NSERadioGroupControl({
   const disabled = !isEnabled;
   const { triggerNSEControlHaptic, triggerNSEControlHapticForEvent } = useNSEControlFeedback();
 
+  const theme = useNSEThemeInteraction<HTMLDivElement>(isEnabled, false, props);
   const generatedName = useId();
   const groupName = name ?? generatedName;
   const firstInputRef = useRef<HTMLInputElement>(null);
@@ -804,6 +810,8 @@ function NSERadioGroupControl({
 
   return (
     <div
+      data-nse-part="content"
+      {...nseControlHooks({ control: "matrix", enabled: isEnabled, hovered: theme.hovered, focused: theme.focused })}
       className={classes("nse-control-radio-group", className)}
       role="radiogroup"
       aria-label={label}
@@ -811,6 +819,7 @@ function NSERadioGroupControl({
       aria-describedby={describedBy}
       dir={dir}
       {...props}
+      {...theme.events}
     >
       {options.map((option, index) => {
         const selected = option.value === currentValue.value;

@@ -3890,7 +3890,7 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="colour-well"] > button:active:not(:disabled),
+[data-nse-appearance="atmo"] [data-nse-control="colour-well"] > button:is(:active, [data-nse-highlighted]):not(:disabled),
 [data-nse-appearance="atmo"] [data-nse-control="colour-well"] > button[aria-pressed="true"] {
   background: var(--nse-atmo-well-pressed) padding-box;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
@@ -4145,32 +4145,32 @@
   --nse-atmo-clock-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='6.6' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3Cpath d='M8 4v4.3l2.8 1.7' fill='none' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="stepper"] {
+[data-nse-appearance="atmo"] [data-nse-control="stepper"] > [data-nse-part="bezel"] {
   border: 1px solid;
   border-color: var(--nse-atmo-select-stroke);
   background: var(--nse-atmo-select-fill) padding-box;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="stepper"] > button[data-nse-part="increment"] {
+[data-nse-appearance="atmo"] [data-nse-control="stepper"] > [data-nse-part="bezel"] > button[data-nse-part="increment"] {
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.16);
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="stepper"] > button::before {
+[data-nse-appearance="atmo"] [data-nse-control="stepper"] > [data-nse-part="bezel"] > button::before {
   background: var(--nse-atmo-well-ink);
   opacity: 0.72;
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="stepper"] > button:active:not(:disabled) {
+[data-nse-appearance="atmo"] [data-nse-control="stepper"] > [data-nse-part="bezel"] > button:is(:active, [data-nse-highlighted]):not(:disabled) {
   background: rgba(0, 0, 0, 0.14);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="stepper"] > button:disabled::before {
+[data-nse-appearance="atmo"] [data-nse-control="stepper"] > [data-nse-part="bezel"] > button:disabled::before {
   opacity: 0.3;
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="stepper"]:focus-visible {
+[data-nse-appearance="atmo"] [data-nse-control="stepper"]:focus-visible > [data-nse-part="bezel"] {
   outline: none;
   box-shadow: var(--nse-atmo-focus-ring);
 }
@@ -4947,29 +4947,29 @@
    between, the selected cell in the translucent black ink with a white
    engraved label. Typography matches the radio group (13px, 900, #555).
    ========================================================================= */
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) {
   display: inline-flex;
   align-items: stretch;
   block-size: 50px;
   max-inline-size: 100%;
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] > [data-nse-part="segment"] {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) > [data-nse-part="segment"] {
   display: contents;
 }
 
 /* segmentDistribution = fillEqually: the capsule spans its container and the
    segments share that width, as an inspector's alignment control does. */
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-distribution="fill-equally"] {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-distribution="fill-equally"] {
   display: flex;
   inline-size: 100%;
 }
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-distribution="fill-equally"] button {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-distribution="fill-equally"] button {
   flex: 1 1 0;
   min-inline-size: 0;
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] button {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button {
   position: relative;
   isolation: isolate;
   box-sizing: border-box;
@@ -4988,14 +4988,14 @@
   cursor: default;
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] button[aria-expanded] {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button[aria-expanded] {
   min-inline-size: 30px;
   padding: 0 9px;
   font-size: 11px;
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] button::before,
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] button::after {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button::before,
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button::after {
   content: "";
   position: absolute;
   z-index: -1;
@@ -5003,7 +5003,7 @@
 }
 
 /* Middle cell (the default): seams both sides. */
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] button::before {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button::before {
   inset: 2px 0;
   border: solid;
   border-width: 2px 1px;
@@ -5011,7 +5011,7 @@
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] button::after {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button::after {
   inset: 4px 1px;
   border: 2px solid;
   border-color: var(--nse-atmo-rg-ring-t) var(--nse-atmo-rg-ring-seam) var(--nse-atmo-rg-ring-b);
@@ -5019,19 +5019,19 @@
 }
 
 /* First cell: the start cap. */
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] > :first-child > button:first-child,
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] > button:first-child {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) > :first-child > button:first-child,
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) > button:first-child {
   padding-inline-start: 18px;
 }
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] > :first-child > button:first-child::before,
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] > button:first-child::before {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) > :first-child > button:first-child::before,
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) > button:first-child::before {
   border-width: 2px 1px 2px 2px;
   border-inline-start-color: rgba(0, 0, 0, 0.3);
   border-start-start-radius: 13px;
   border-end-start-radius: 13px;
 }
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] > :first-child > button:first-child::after,
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] > button:first-child::after {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) > :first-child > button:first-child::after,
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) > button:first-child::after {
   inset-inline-start: 2px;
   border-inline-start-color: var(--nse-atmo-rg-ring-s);
   border-start-start-radius: 11px;
@@ -5039,19 +5039,19 @@
 }
 
 /* Last cell (the overflow button, or the last segment's last button). */
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] > button:is(:last-child, :has(+ input[type="hidden"]:last-child)),
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] > [data-nse-part="segment"]:is(:last-child, :has(+ input[type="hidden"]:last-child)) > button:last-child {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) > button:is(:last-child, :has(+ input[type="hidden"]:last-child)),
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) > [data-nse-part="segment"]:is(:last-child, :has(+ input[type="hidden"]:last-child)) > button:last-child {
   padding-inline-end: 18px;
 }
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] > button:is(:last-child, :has(+ input[type="hidden"]:last-child))::before,
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] > [data-nse-part="segment"]:is(:last-child, :has(+ input[type="hidden"]:last-child)) > button:last-child::before {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) > button:is(:last-child, :has(+ input[type="hidden"]:last-child))::before,
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) > [data-nse-part="segment"]:is(:last-child, :has(+ input[type="hidden"]:last-child)) > button:last-child::before {
   border-width: 2px 2px 2px 1px;
   border-inline-end-color: rgba(0, 0, 0, 0.3);
   border-start-end-radius: 13px;
   border-end-end-radius: 13px;
 }
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] > button:is(:last-child, :has(+ input[type="hidden"]:last-child))::after,
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] > [data-nse-part="segment"]:is(:last-child, :has(+ input[type="hidden"]:last-child)) > button:last-child::after {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) > button:is(:last-child, :has(+ input[type="hidden"]:last-child))::after,
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) > [data-nse-part="segment"]:is(:last-child, :has(+ input[type="hidden"]:last-child)) > button:last-child::after {
   inset-inline-end: 2px;
   border-inline-end-color: var(--nse-atmo-rg-ring-s);
   border-start-end-radius: 11px;
@@ -5059,15 +5059,15 @@
 }
 
 /* Selected segment (and an open menu/overflow): the black ink. */
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] button:is([aria-pressed="true"], [aria-expanded="true"]) {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button:is([aria-pressed="true"], [aria-expanded="true"]) {
   color: #fff;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.58);
 }
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] button:is([aria-pressed="true"], [aria-expanded="true"])::before {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button:is([aria-pressed="true"], [aria-expanded="true"])::before {
   border-top-color: rgba(0, 0, 0, 0.68);
   border-bottom-color: rgba(58, 58, 58, 0.42);
 }
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] button:is([aria-pressed="true"], [aria-expanded="true"])::after {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button:is([aria-pressed="true"], [aria-expanded="true"])::after {
   border-color: var(--nse-atmo-rg-ring-sel-t) var(--nse-atmo-rg-ring-sel-s) var(--nse-atmo-rg-ring-sel-b);
   background:
     var(--nse-atmo-rg-edge-l) padding-box,
@@ -5075,36 +5075,36 @@
     var(--nse-atmo-rg-sel) padding-box;
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] button:active:not(:disabled)::after {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button:active:not(:disabled)::after {
   background: var(--nse-atmo-rg-sel) padding-box;
   opacity: 0.8;
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] button:focus-visible {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button:focus-visible {
   outline: none;
   z-index: 1;
 }
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] button:focus-visible::before {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button:focus-visible::before {
   box-shadow: var(--nse-atmo-focus-ring);
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"] button:disabled,
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-state="disabled"] button {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button:disabled,
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-state="disabled"] button {
   opacity: 0.5;
 }
 
 @media (forced-colors: active) {
-  [data-nse-appearance="atmo"] [data-nse-control="segmented-control"] button {
+  [data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button {
     border: 1px solid ButtonText;
     forced-color-adjust: none;
     color: ButtonText;
     background: ButtonFace;
   }
-  [data-nse-appearance="atmo"] [data-nse-control="segmented-control"] button::before,
-  [data-nse-appearance="atmo"] [data-nse-control="segmented-control"] button::after {
+  [data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button::before,
+  [data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button::after {
     content: none;
   }
-  [data-nse-appearance="atmo"] [data-nse-control="segmented-control"] button:is([aria-pressed="true"], [aria-expanded="true"]) {
+  [data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button:is([aria-pressed="true"], [aria-expanded="true"]) {
     color: HighlightText;
     background: Highlight;
   }
@@ -5591,12 +5591,12 @@
    spun metal as the slider thumbs, and a dimple pressed near its rim that
    the knob carries round to the angle. It shows no fill: a dial reads by
    where its mark points, not by how much of it is coloured. */
-[data-nse-appearance="atmo"] [data-nse-control="circular-slider"] {
+[data-nse-appearance="atmo"] [data-nse-control="slider"][data-nse-slider-type="circular"] {
   display: inline-flex;
   align-items: center;
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="circular-slider"] [data-nse-part="circular-body"] {
+[data-nse-appearance="atmo"] [data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="circular-body"] {
   --nse-atmo-dial-size: 32px;
   inline-size: var(--nse-atmo-dial-size);
   block-size: var(--nse-atmo-dial-size);
@@ -5605,16 +5605,16 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.42), 0 0 0 0.5px rgba(0, 0, 0, 0.3);
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="circular-slider"][data-size="small"] [data-nse-part="circular-body"] {
+[data-nse-appearance="atmo"] [data-nse-control="slider"][data-nse-slider-type="circular"][data-size="small"] [data-nse-part="circular-body"] {
   --nse-atmo-dial-size: 22px;
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="circular-slider"] [data-nse-part="circular-body"] > .nse-metal-thumb {
+[data-nse-appearance="atmo"] [data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="circular-body"] > .nse-metal-thumb {
   display: block;
   inset: 0;
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="circular-slider"] [data-nse-part="knob"] {
+[data-nse-appearance="atmo"] [data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="knob"] {
   z-index: 1;
   inset: 0;
   inline-size: auto;
@@ -5627,7 +5627,7 @@
 
 /* The dimple: dark at its upper lip where the rim shades it, caught by the
    light on its lower lip. */
-[data-nse-appearance="atmo"] [data-nse-control="circular-slider"] [data-nse-part="knob"]::before {
+[data-nse-appearance="atmo"] [data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="knob"]::before {
   content: "";
   position: absolute;
   inset-block-start: 17%;
@@ -5635,7 +5635,9 @@
   inline-size: 19%;
   block-size: 19%;
   min-inline-size: 4px;
+  --nse-control-minimum-inline-size: 4px;
   min-block-size: 4px;
+  --nse-control-minimum-block-size: 4px;
   border-radius: 50%;
   background: radial-gradient(circle at 50% 30%, #1b2027, #535b65 75%);
   box-shadow: inset 0 0.5px 1px rgba(0, 0, 0, 0.7), 0 0.75px 0 rgba(255, 255, 255, 0.85);
@@ -5643,18 +5645,18 @@
   transform: translateX(-50%) rotate(calc(var(--nse-circular-angle) * -1));
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="circular-slider"] [data-nse-part="circular-body"]:focus-visible {
+[data-nse-appearance="atmo"] [data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="circular-body"]:focus-visible {
   outline: none;
   box-shadow: var(--nse-atmo-focus-ring);
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="circular-slider"][data-state="disabled"] [data-nse-part="circular-body"] {
+[data-nse-appearance="atmo"] [data-nse-control="slider"][data-nse-slider-type="circular"][data-state="disabled"] [data-nse-part="circular-body"] {
   opacity: 0.55;
 }
 
 /* The linear alternative serves assistive technology; a click on the knob
    already turns it to any angle without a drag. */
-[data-nse-appearance="atmo"] [data-nse-control="circular-slider"] [data-nse-part="linear-alternative"] {
+[data-nse-appearance="atmo"] [data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="linear-alternative"] {
   position: absolute;
   inline-size: 1px;
   block-size: 1px;
@@ -5813,30 +5815,30 @@
    with the radio strip's cell insets (15px caps, 14px/15px between seams) and
    no emboss under unselected labels. A sized capsule keeps the band's own
    fractional insets below. */
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"] button {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"] button {
   min-inline-size: 54px;
   text-transform: uppercase;
 }
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"] button:not([aria-pressed="true"], [aria-expanded="true"]) {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"] button:not([aria-pressed="true"], [aria-expanded="true"]) {
   text-shadow: none;
 }
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"]:not([data-size]) > [data-nse-part="segment"] > button:not([aria-expanded]) {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]:not([data-size]) > [data-nse-part="segment"] > button:not([aria-expanded]) {
   padding-inline: 14px 15px;
 }
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"]:not([data-size]) > :first-child > button:first-child {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]:not([data-size]) > :first-child > button:first-child {
   padding-inline-start: 15px;
 }
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"]:not([data-size]) > [data-nse-part="segment"]:is(:last-child, :has(+ input[type="hidden"]:last-child)) > button:last-child {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]:not([data-size]) > [data-nse-part="segment"]:is(:last-child, :has(+ input[type="hidden"]:last-child)) > button:last-child {
   padding-inline-end: 15px;
 }
 
 /* A selected capsule cell sits inset, as the radio strip draws it: no bright
    rim or seam columns, the ink running to the seams (or the stroke at a cap)
    under the edge and cap cast overlays. */
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"] button[aria-pressed="true"]::before {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"] button[aria-pressed="true"]::before {
   border-inline-color: transparent;
 }
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"] button[aria-pressed="true"]::after {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"] button[aria-pressed="true"]::after {
   inset-inline: 0;
   border-inline-width: 0;
   background:
@@ -5844,27 +5846,27 @@
     var(--nse-atmo-rg-edge-r) padding-box,
     var(--nse-atmo-rg-sel) padding-box;
 }
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"] > :first-child > button:first-child[aria-pressed="true"]::before {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"] > :first-child > button:first-child[aria-pressed="true"]::before {
   border-inline-start-color: rgba(0, 0, 0, 0.3);
 }
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"] > :first-child > button:first-child[aria-pressed="true"]::after {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"] > :first-child > button:first-child[aria-pressed="true"]::after {
   inset-inline-start: 2px;
   background:
     var(--nse-atmo-rg-cap-l) padding-box,
     var(--nse-atmo-rg-edge-r) padding-box,
     var(--nse-atmo-rg-sel) padding-box;
 }
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"] > [data-nse-part="segment"]:is(:last-child, :has(+ input[type="hidden"]:last-child)) > button:last-child[aria-pressed="true"]::before {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"] > [data-nse-part="segment"]:is(:last-child, :has(+ input[type="hidden"]:last-child)) > button:last-child[aria-pressed="true"]::before {
   border-inline-end-color: rgba(0, 0, 0, 0.3);
 }
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"] > [data-nse-part="segment"]:is(:last-child, :has(+ input[type="hidden"]:last-child)) > button:last-child[aria-pressed="true"]::after {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"] > [data-nse-part="segment"]:is(:last-child, :has(+ input[type="hidden"]:last-child)) > button:last-child[aria-pressed="true"]::after {
   inset-inline-end: 2px;
   background:
     var(--nse-atmo-rg-edge-l) padding-box,
     var(--nse-atmo-rg-cap-r) padding-box,
     var(--nse-atmo-rg-sel) padding-box;
 }
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"] > [data-nse-part="segment"]:only-child > button:only-child[aria-pressed="true"]::after {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"] > [data-nse-part="segment"]:only-child > button:only-child[aria-pressed="true"]::after {
   background:
     var(--nse-atmo-rg-cap-l) padding-box,
     var(--nse-atmo-rg-cap-r) padding-box,
@@ -5877,17 +5879,17 @@
    the regular 50px one: cell insets 2/50 and 4/50, rings 2/50, cap radii 13/50
    and 11/50, cell padding 14/50 (caps 18/50), type 13px at 50 and never under
    11px. The seams stay a single pixel, as they are at every size. */
-[data-nse-appearance="atmo"] :is([data-nse-control="segmented-control"], [data-nse-control="tab-group"])[data-size] {
+[data-nse-appearance="atmo"] :is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])), [data-nse-control="tab-group"])[data-size] {
   --nse-atmo-rg-band: var(--nse-control-height, 24px);
   --nse-atmo-rg-line: max(1px, calc(var(--nse-atmo-rg-band) * 0.04));
   --nse-atmo-bar-h: var(--nse-atmo-rg-band);
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-size] {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] {
   block-size: var(--nse-atmo-rg-band);
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-size] button,
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button,
 [data-nse-appearance="atmo"] [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"] > .nse-control-button:nth-child(n) {
   min-inline-size: calc(var(--nse-atmo-rg-band) * 0.88);
   --nse-control-minimum-inline-size: calc(var(--nse-atmo-rg-band) * 0.88);
@@ -5900,13 +5902,13 @@
   line-height: var(--nse-atmo-rg-band);
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-size] button::before,
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button::before,
 [data-nse-appearance="atmo"] [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"] > .nse-control-button:nth-child(n)::before {
   inset-block: calc(var(--nse-atmo-rg-band) * 0.04);
   border-block-width: var(--nse-atmo-rg-line);
 }
 
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-size] button::after,
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button::after,
 [data-nse-appearance="atmo"] [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"] > .nse-control-button:nth-child(n)::after {
   inset-block: calc(var(--nse-atmo-rg-band) * 0.08);
   border-width: var(--nse-atmo-rg-line);
@@ -5914,7 +5916,7 @@
 }
 
 /* The start cap. */
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-size] > :first-child > button:first-child,
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] > :first-child > button:first-child,
 [data-nse-appearance="atmo"] [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"] > .nse-control-button:first-child:nth-child(n) {
   padding-inline-start: calc(var(--nse-atmo-rg-band) * 0.36);
   /* The cell clips its own paint, so its corner must be the ring's: the regular cap's
@@ -5922,13 +5924,13 @@
   border-start-start-radius: calc(var(--nse-atmo-rg-band) * 0.26);
   border-end-start-radius: calc(var(--nse-atmo-rg-band) * 0.26);
 }
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-size] > :first-child > button:first-child::before,
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] > :first-child > button:first-child::before,
 [data-nse-appearance="atmo"] [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"] > .nse-control-button:first-child:nth-child(n)::before {
   border-inline-start-width: var(--nse-atmo-rg-line);
   border-start-start-radius: calc(var(--nse-atmo-rg-band) * 0.26);
   border-end-start-radius: calc(var(--nse-atmo-rg-band) * 0.26);
 }
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-size] > :first-child > button:first-child::after,
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] > :first-child > button:first-child::after,
 [data-nse-appearance="atmo"] [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"] > .nse-control-button:first-child:nth-child(n)::after {
   inset-inline-start: calc(var(--nse-atmo-rg-band) * 0.04);
   border-inline-start-width: var(--nse-atmo-rg-line);
@@ -5937,22 +5939,22 @@
 }
 
 /* The end cap. */
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-size] > [data-nse-part="segment"]:is(:last-child, :has(+ input[type="hidden"]:last-child)) > button:last-child,
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-size] > button:is(:last-child, :has(+ input[type="hidden"]:last-child)),
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] > [data-nse-part="segment"]:is(:last-child, :has(+ input[type="hidden"]:last-child)) > button:last-child,
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] > button:is(:last-child, :has(+ input[type="hidden"]:last-child)),
 [data-nse-appearance="atmo"] [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"] > .nse-control-button:last-child:nth-child(n) {
   padding-inline-end: calc(var(--nse-atmo-rg-band) * 0.36);
   border-start-end-radius: calc(var(--nse-atmo-rg-band) * 0.26);
   border-end-end-radius: calc(var(--nse-atmo-rg-band) * 0.26);
 }
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-size] > [data-nse-part="segment"]:is(:last-child, :has(+ input[type="hidden"]:last-child)) > button:last-child::before,
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-size] > button:is(:last-child, :has(+ input[type="hidden"]:last-child))::before,
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] > [data-nse-part="segment"]:is(:last-child, :has(+ input[type="hidden"]:last-child)) > button:last-child::before,
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] > button:is(:last-child, :has(+ input[type="hidden"]:last-child))::before,
 [data-nse-appearance="atmo"] [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"] > .nse-control-button:last-child:nth-child(n)::before {
   border-inline-end-width: var(--nse-atmo-rg-line);
   border-start-end-radius: calc(var(--nse-atmo-rg-band) * 0.26);
   border-end-end-radius: calc(var(--nse-atmo-rg-band) * 0.26);
 }
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-size] > [data-nse-part="segment"]:is(:last-child, :has(+ input[type="hidden"]:last-child)) > button:last-child::after,
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-size] > button:is(:last-child, :has(+ input[type="hidden"]:last-child))::after,
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] > [data-nse-part="segment"]:is(:last-child, :has(+ input[type="hidden"]:last-child)) > button:last-child::after,
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] > button:is(:last-child, :has(+ input[type="hidden"]:last-child))::after,
 [data-nse-appearance="atmo"] [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"] > .nse-control-button:last-child:nth-child(n)::after {
   inset-inline-end: calc(var(--nse-atmo-rg-band) * 0.04);
   border-inline-end-width: var(--nse-atmo-rg-line);
@@ -5962,15 +5964,15 @@
 
 /* A sized capsule's selected cell keeps the inset ink: no ring columns at its
    seams, the cap ring's start inside the stroke. */
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"][data-size] button[aria-pressed="true"]::after {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size] button[aria-pressed="true"]::after {
   inset-inline: 0;
   border-inline-width: 0;
 }
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"][data-size] > :first-child > button:first-child[aria-pressed="true"]::after {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size] > :first-child > button:first-child[aria-pressed="true"]::after {
   inset-inline-start: calc(var(--nse-atmo-rg-band) * 0.04);
   border-inline-start-width: 0;
 }
-[data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-segment-style="capsule"][data-size] > [data-nse-part="segment"]:is(:last-child, :has(+ input[type="hidden"]:last-child)) > button:last-child[aria-pressed="true"]::after {
+[data-nse-appearance="atmo"] [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size] > [data-nse-part="segment"]:is(:last-child, :has(+ input[type="hidden"]:last-child)) > button:last-child[aria-pressed="true"]::after {
   inset-inline-end: calc(var(--nse-atmo-rg-band) * 0.04);
   border-inline-end-width: 0;
 }

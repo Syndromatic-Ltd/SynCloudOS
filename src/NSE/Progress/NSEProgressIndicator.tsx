@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { nseControlHooks } from "../Theme/contract/hooks";
 import { useNSEAnimationEnvironment } from "../Animation/NSEAnimationEnvironment";
 import type { NSEProgressIndicatorProps } from "./progressTypes";
 import { normalizeNSEProgress, progressStyle } from "./progressCore";
@@ -40,7 +41,7 @@ export function NSEProgressIndicator({ "aria-label": accessibleLabel, style = "b
       aria-valuemin={metrics?.minimum}
       aria-valuemax={metrics?.maximum}
       aria-valuenow={metrics?.value}
-      data-nse-control="progress-indicator"
+      data-nse-part="content" {...nseControlHooks({ control: "progress-indicator", variants: { "control-size": controlSize, style } })}
       data-state={metrics ? "determinate" : "indeterminate"}
       data-variant={style === "bar" ? "bar" : metrics ? "circular" : "spinner"}
       data-size={style === "bar" ? undefined : SPINNING_SIZE[controlSize]}

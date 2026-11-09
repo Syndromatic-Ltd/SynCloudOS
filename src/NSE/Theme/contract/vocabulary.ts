@@ -4,9 +4,9 @@
 export const nseThemeControls = Object.freeze([
   "button", "switch", "pop-up-button", "segmented-control", "slider", "stepper", "level-indicator",
   "progress-indicator", "text-field", "secure-text-field", "search-field", "combo-box", "token-field", "text-view",
-  "box", "image-view", "stack-view", "split-view", "drawer", "grid-view", "scroll-view", "clip-view", "scroller",
+  "box", "matrix", "image-view", "stack-view", "split-view", "drawer", "grid-view", "scroll-view", "clip-view", "scroller",
   "table-view", "table-cell-view", "outline-view", "collection-view", "browser", "rule-editor", "predicate-editor",
-  "date-picker", "date-range-picker", "date-time-picker", "time-picker", "calendar", "clock", "slider-field",
+  "date-picker", "date-range-picker", "date-time-picker", "time-picker", "calendar", "clock",
   "menu", "menu-item", "menu-bar", "toolbar", "toolbar-item", "toolbar-customisation-palette", "path-control",
   "tab-view", "page-controller", "ruler-view", "window", "panel", "sheet", "popover", "alert", "tooltip",
   "colour-panel", "colour-well", "colour-sliders", "colour-swatches", "colour-wheel", "font-panel", "open-panel", "file-panel",
@@ -21,6 +21,7 @@ export const nseThemeParts = Object.freeze([
   "row", "column", "item", "group", "segment", "token", "disclosure", "divider", "handle", "viewport",
   "leading", "trailing", "footer", "field", "value", "prefix", "suffix", "status", "error", "loading",
   "preview", "sample", "channel", "day", "tick", "hour-hand", "minute-hand", "second-hand", "face",
+  "circular-body", "linear-alternative", "segment-image",
   "increment", "decrement", "next", "previous", "cancel", "choose", "prompt", "recovery", "notice",
   "actions", "effects", "swatch", "palette", "wheel", "crayon", "opacity", "brightness", "focus-indicator",
 ] as const);

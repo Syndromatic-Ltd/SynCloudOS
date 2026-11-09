@@ -7,9 +7,29 @@
     --nse-control-minimum-inline-size: 0px;
     --nse-control-minimum-block-size: 0px;
   }
-  [data-nse-control]:is([data-nse-control-size="regular"], [data-nse-control-size="large"]) {
+  [data-nse-control]:where(:not(meter, [role="progressbar"])):is([data-nse-control-size="regular"], [data-nse-control-size="large"]) {
     min-inline-size: max(24px, var(--nse-control-minimum-inline-size)) !important;
     min-block-size: max(24px, var(--nse-control-minimum-block-size)) !important;
+  }
+
+  /* The stepper's two targets extend around its bezel. Negative margins keep
+     its painted footprint and neighbouring layout exactly where they were. */
+  [data-nse-control="stepper"] {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    vertical-align: middle;
+    inline-size: var(--nse-control-bezel-inline-size, max-content);
+    block-size: var(--nse-control-bezel-block-size, max-content);
+  }
+  [data-nse-control="stepper"]:is([data-nse-control-size="regular"], [data-nse-control-size="large"]) {
+    --nse-stepper-hit-inline-size: max(24px, var(--nse-control-bezel-inline-size, 24px)) !important;
+    --nse-stepper-hit-block-size: max(48px, var(--nse-control-bezel-block-size, 48px)) !important;
+    inline-size: var(--nse-stepper-hit-inline-size);
+    block-size: var(--nse-stepper-hit-block-size);
+    min-block-size: var(--nse-stepper-hit-block-size) !important;
+    margin-inline: calc((var(--nse-control-bezel-inline-size, 24px) - var(--nse-stepper-hit-inline-size)) / 2);
+    margin-block: calc((var(--nse-control-bezel-block-size, 48px) - var(--nse-stepper-hit-block-size)) / 2);
   }
 
   /* Normal focus uses the existing control-shaped indicator. Theme selectors
