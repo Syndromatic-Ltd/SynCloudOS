@@ -32,6 +32,8 @@ import {
   type RefAttributes,
 } from "react";
 import { NSEControlImage } from "../Images/NSEControlImage";
+import { nseControlHooks } from "../../Theme/contract/hooks";
+import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import type { NSEImage } from "../Images/NSEImageResource";
 import type { HFXFeedbackPresetName, HFXFeedbackRequest } from "../../Feedback";
 import type { NSEBinding } from "../../Bindings/bindingTypes";
@@ -210,6 +212,7 @@ const NSEPushButtonCell = forwardRef<HTMLButtonElement, NSEButtonProps>(function
   );
   const disabled = !isEnabled || !actionAvailable;
   const press = useNSEButtonPress(disabled);
+  const theme = useNSEThemeInteraction<HTMLButtonElement>(!disabled, false, props);
   useNSEKeyEquivalent(element, keyEquivalent, keyEquivalentModifierMask, !disabled && !presentation?.hidden);
   if (presentation?.hidden) return null;
 
@@ -256,13 +259,17 @@ const NSEPushButtonCell = forwardRef<HTMLButtonElement, NSEButtonProps>(function
         triggerNSEControlHapticForEvent(resolveNSEControlHaptic(haptic, TONE_HAPTICS[tone]), event, !disabled);
       }}
       {...props}
+      {...theme.events}
+      {...nseControlHooks({ control: "button", state: presentation?.state ?? state ?? "off", highlighted: isHighlighted || press.active, enabled: !disabled, hovered: theme.hovered, focused: theme.focused, variants: { "bezel-style": bezelStyle, "control-size": controlSize ?? "regular", "button-type": buttonType } })}
+      data-nse-part="background"
     >
-      {disclosure ? <span className="nse-control-disclosure-triangle" aria-hidden="true" /> : null}
-      {shownImage && position !== "imageTrailing" ? <span className="nse-control-button-icon">{shownImage}</span> : null}
+      <span data-nse-part="bezel" aria-hidden="true" style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />
+      {disclosure ? <span data-nse-part="indicator" className="nse-control-disclosure-triangle" aria-hidden="true" /> : null}
+      {shownImage && position !== "imageTrailing" ? <span data-nse-part="image" className="nse-control-button-icon">{shownImage}</span> : null}
       {position === "imageOnly"
         ? (label === undefined && title !== undefined ? <span className="nse-control-visually-hidden">{title}</span> : null)
-        : title !== undefined ? <span className="nse-control-button-label">{title}</span> : null}
-      {shownImage && position === "imageTrailing" ? <span className="nse-control-button-icon">{shownImage}</span> : null}
+        : title !== undefined ? <span data-nse-part="title" className="nse-control-button-label">{title}</span> : null}
+      {shownImage && position === "imageTrailing" ? <span data-nse-part="image" className="nse-control-button-icon">{shownImage}</span> : null}
     </button>
   );
 });
@@ -287,7 +294,7 @@ function NSESwitchButtonCell(
     defaultState,
     allowsMixedState = false,
     onStateChange,
-    isHighlighted: _isHighlighted,
+    isHighlighted,
     isEnabled = true,
     keyEquivalent: _keyEquivalent,
     keyEquivalentModifierMask: _keyEquivalentModifierMask,
@@ -315,6 +322,7 @@ function NSESwitchButtonCell(
   const inputId = id ?? generatedId;
   const input = useRef<HTMLInputElement>(null);
   const disabled = !isEnabled;
+  const theme = useNSEThemeInteraction<HTMLLabelElement>(isEnabled, true);
   const initial = toCheckState(defaultState) ?? false;
   const current = useNSEControlValue<boolean | "mixed">({
     value: toCheckState(state),
@@ -348,6 +356,9 @@ function NSESwitchButtonCell(
   return (
     <>
       <label
+        {...theme.events}
+        {...nseControlHooks({ control: "button", state: fromCheckState(current.value), highlighted: isHighlighted || theme.highlighted, enabled: isEnabled, hovered: theme.hovered, focused: theme.focused, variants: { "button-type": "switch", "control-size": controlSize ?? "regular", "bezel-style": _bezelStyle ?? "rounded" } })}
+        data-nse-part="background"
         className={classes("nse-control-checkbox", disabled && "is-disabled", className)}
         htmlFor={inputId}
         title={toolTip}
@@ -355,6 +366,7 @@ function NSESwitchButtonCell(
         data-disabled={disabled ? "true" : "false"}
         data-size={controlSize === "regular" ? undefined : controlSize}
       >
+        <span data-nse-part="bezel" aria-hidden="true" style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />
         <span className="nse-control-checkbox-control">
           <input
             {...(rest as Record<string, unknown>)}
@@ -385,9 +397,9 @@ function NSESwitchButtonCell(
               })();
             }}
           />
-          <span className="nse-control-checkbox-art" aria-hidden="true" />
+          <span data-nse-part="indicator" className="nse-control-checkbox-art" aria-hidden="true" />
         </span>
-        {title !== undefined ? <span className="nse-control-checkbox-label">{title}</span> : null}
+        {title !== undefined ? <span data-nse-part="title" className="nse-control-checkbox-label">{title}</span> : null}
       </label>
       {invalid ? <span id={errorId} className="nse-control-field-error" role="alert">{validation.message}</span> : null}
     </>

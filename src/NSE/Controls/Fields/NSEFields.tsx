@@ -20,6 +20,8 @@ import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { nseControlHooks } from "../../Theme/contract/hooks";
+import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import { NSEMetalThumb, type NSEThumbMaterial } from "../../Appearance/NSEMetalThumb";
 import { NSEDivider } from "../Selection/NSEDivider";
 import { nseCSSValue } from "../../Graphics/NSEShadow";
@@ -498,6 +500,7 @@ function NSESwitchControl({
   ...props
 }: NSESwitchControlProps) {
   const disabled = !isEnabled;
+  const theme = useNSEThemeInteraction<HTMLButtonElement>(isEnabled, true, props);
   const { triggerNSEControlHaptic, triggerNSEControlHapticForEvent } = useNSEControlFeedback();
 
   const toggleRef = useRef<HTMLButtonElement>(null);
@@ -594,6 +597,9 @@ function NSESwitchControl({
       ref={toggleRef}
       className={classes("nse-control-toggle", className)}
       {...props}
+      {...theme.events}
+      {...nseControlHooks({ control: "switch", state: isChecked ? "on" : "off", highlighted: theme.highlighted || isDragging, enabled: isEnabled, hovered: theme.hovered, focused: theme.focused })}
+      data-nse-part="background"
       type={type}
       role="switch"
       title={toolTip}
@@ -629,13 +635,14 @@ function NSESwitchControl({
       onPointerUp={finishPointer}
       onPointerCancel={cancelPointer}
     >
+      <span data-nse-part="bezel" aria-hidden="true" style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />
       <span className="nse-control-visually-hidden">{isChecked ? onLabel : offLabel}</span>
-      <span className="nse-control-toggle-track" aria-hidden="true">
-        <span className="nse-control-toggle-rail nse-control-toggle-rail-start" />
-        <span className="nse-control-toggle-rail nse-control-toggle-rail-end" />
-        <span className="nse-control-toggle-text nse-control-toggle-text-on"><span className="nse-control-toggle-state-label" ref={onTextRef}>{onLabel}</span></span>
-        <span className="nse-control-toggle-text nse-control-toggle-text-off"><span className="nse-control-toggle-state-label" ref={offTextRef}>{offLabel}</span></span>
-        <span className="nse-control-toggle-thumb" ref={thumbRef}>{thumbMaterial === "metal" ? <NSEMetalThumb disabled={disabled} /> : null}</span>
+      <span data-nse-part="track" className="nse-control-toggle-track" aria-hidden="true">
+        <span data-nse-part="fill" className="nse-control-toggle-rail nse-control-toggle-rail-start" />
+        <span data-nse-part="fill" className="nse-control-toggle-rail nse-control-toggle-rail-end" />
+        <span data-nse-part="title" className="nse-control-toggle-text nse-control-toggle-text-on"><span className="nse-control-toggle-state-label" ref={onTextRef}>{onLabel}</span></span>
+        <span data-nse-part="title" className="nse-control-toggle-text nse-control-toggle-text-off"><span className="nse-control-toggle-state-label" ref={offTextRef}>{offLabel}</span></span>
+        <span data-nse-part="knob" className="nse-control-toggle-thumb" ref={thumbRef}>{thumbMaterial === "metal" ? <NSEMetalThumb disabled={disabled} /> : null}</span>
       </span>
     </button>
   );

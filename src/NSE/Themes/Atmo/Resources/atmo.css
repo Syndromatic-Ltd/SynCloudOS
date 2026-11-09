@@ -128,10 +128,12 @@
   /* Content layout (inline grid, icon margins, label ellipsis) is the shared
      Atmo control structure's; this rule only sets the vector face's box. */
   min-width: 76px;
+  --nse-control-minimum-inline-size: 76px;
   max-width: 100%;
   margin: 0;
   height: var(--nse-atmo-control-h);
   min-height: var(--nse-atmo-control-h);
+  --nse-control-minimum-block-size: var(--nse-atmo-control-h);
   padding: 0 27px; /* 17px sprite cap + 10px content padding */
   border: 0;
   border-image: none;
@@ -435,6 +437,7 @@
   grid-auto-columns: minmax(0, 1fr);
   padding-block: 10px;
   min-height: 52px;
+  --nse-control-minimum-block-size: 52px;
   color: #fff;
   font-size: 18px;
   font-weight: 700;
@@ -692,6 +695,7 @@
 [data-nse-appearance="atmo"] [data-nse-control="tab-view"] > .nse-control-toolbar[data-grouped="true"] > [data-nse-part="tab-item"]:nth-child(n) > .nse-control-button:where(:not(.nse-control-picker-button)) {
   height: var(--nse-atmo-bar-h);
   min-height: var(--nse-atmo-bar-h);
+  --nse-control-minimum-block-size: var(--nse-atmo-bar-h);
   line-height: var(--nse-atmo-bar-h);
   border: 0;
   border-image: none;
@@ -2090,6 +2094,7 @@
 :where([data-nse-appearance="atmo"]) .nse-extended-radio-tool-button-group .nse-control-radio {
   height: var(--nse-atmo-bar-h);
   min-height: var(--nse-atmo-bar-h);
+  --nse-control-minimum-block-size: var(--nse-atmo-bar-h);
   line-height: var(--nse-atmo-bar-h);
 }
 [data-nse-appearance="atmo"] .nse-control-toolbar:not([data-grouped="true"]) > .nse-control-button::before, [data-nse-appearance="atmo"] .nse-control-toolbar:not([data-grouped="true"]) > .nse-control-button::after,
@@ -2111,6 +2116,7 @@
    band. */
 [data-nse-appearance="atmo"] .nse-control-button.nse-control-icon-button:where(:not(.nse-control-picker-button)) {
   min-width: calc(var(--nse-atmo-bar-h) * 1.04);
+  --nse-control-minimum-inline-size: calc(var(--nse-atmo-bar-h) * 1.04);
   padding-inline: calc(var(--nse-atmo-bar-h) * 0.38); /* 17px cap + 2px */
 }
 [data-nse-appearance="atmo"] .nse-control-toolbar:not([data-grouped="true"]) > .nse-control-button.nse-control-icon-button {
@@ -5535,6 +5541,7 @@
   display: flex;
   inline-size: 100%;
   min-block-size: 36px;
+  --nse-control-minimum-block-size: 36px;
   padding: 0 4px;
   border-block-end: 1px solid var(--nse-atmo-panel-rule, rgba(0, 0, 0, 0.14));
   font-size: 14px;
@@ -5704,6 +5711,7 @@
    are half the height wide, and the type scales with them. */
 [data-nse-appearance="atmo"] .nse-control-picker[data-size] .nse-control-picker-button {
   min-width: 0;
+  --nse-control-minimum-inline-size: 0;
   height: var(--nse-control-height, 24px);
   padding: 0 calc(var(--nse-control-height, 24px) * 0.33) 0 calc(var(--nse-control-height, 24px) * 0.42);
   border: 0;
@@ -5777,8 +5785,10 @@
   --nse-atmo-btn-band: var(--nse-control-height, 24px);
   --nse-atmo-btn-ring: max(1px, calc(var(--nse-atmo-btn-band) * 0.0385));
   min-width: calc(var(--nse-atmo-btn-band) * 1.46);
+  --nse-control-minimum-inline-size: calc(var(--nse-atmo-btn-band) * 1.46);
   height: var(--nse-atmo-btn-band);
   min-height: var(--nse-atmo-btn-band);
+  --nse-control-minimum-block-size: var(--nse-atmo-btn-band);
   padding: 0 calc(var(--nse-atmo-btn-band) * 0.52);
   border-radius: calc(var(--nse-atmo-btn-band) * 0.346);
   font-size: calc(var(--nse-atmo-btn-band) * 0.25 + 5px);
@@ -5880,9 +5890,11 @@
 [data-nse-appearance="atmo"] [data-nse-control="segmented-control"][data-size] button,
 [data-nse-appearance="atmo"] [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"] > .nse-control-button:nth-child(n) {
   min-inline-size: calc(var(--nse-atmo-rg-band) * 0.88);
+  --nse-control-minimum-inline-size: calc(var(--nse-atmo-rg-band) * 0.88);
   block-size: var(--nse-atmo-rg-band);
   height: var(--nse-atmo-rg-band);
   min-height: var(--nse-atmo-rg-band);
+  --nse-control-minimum-block-size: var(--nse-atmo-rg-band);
   padding: 0 calc(var(--nse-atmo-rg-band) * 0.28);
   font-size: max(11px, calc(var(--nse-atmo-rg-band) * 0.16 + 5px));
   line-height: var(--nse-atmo-rg-band);
@@ -5979,6 +5991,7 @@
 /* The push button's 76px minimum, in proportion. */
 [data-nse-appearance="atmo"] .nse-extended-tool-button[data-size] {
   min-width: calc(var(--nse-atmo-bar-h) * 1.52);
+  --nse-control-minimum-inline-size: calc(var(--nse-atmo-bar-h) * 1.52);
   font-size: max(11px, calc(var(--nse-atmo-bar-h) * 0.4));
 }
 
@@ -5988,6 +6001,7 @@
 [data-nse-appearance="atmo"] :is(.nse-extended-tool-button[data-size], :is(.nse-extended-tool-button-group, .nse-extended-radio-tool-button-group)[data-size] .nse-control-button) .nse-control-button-icon {
   width: auto;
   min-width: calc(var(--nse-atmo-bar-h) * 0.66);
+  --nse-control-minimum-inline-size: calc(var(--nse-atmo-bar-h) * 0.66);
   height: calc(var(--nse-atmo-bar-h) * 0.66);
   margin: 0 calc(var(--nse-atmo-bar-h) * 0.1);
 }
