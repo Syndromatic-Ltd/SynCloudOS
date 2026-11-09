@@ -73,13 +73,13 @@ describe("installed SDK stylesheet ownership", () => {
   it("keeps app topbar disclosure paint owned by explicit themes", () => {
     const chrome = readFileSync(join(process.cwd(), "src/NSE/Windows/Chrome/nse-chrome.css"), "utf8");
     expect(chrome).not.toContain("/assets/nse/atmo/");
-    expect(chrome).toContain("var(--nse-app-topbar-title-arrow-image, none)");
+    expect(chrome).toContain("var(--nse-topbar-title-arrow-image, none)");
 
     for (const stylesheet of [
       "src/NSE/Themes/Atmo/Resources/atmo.css",
     ]) {
       expect(readFileSync(join(process.cwd(), stylesheet), "utf8"), stylesheet)
-        .toContain("--nse-app-topbar-title-arrow-image");
+        .toContain("--nse-topbar-title-arrow-image");
     }
   });
 

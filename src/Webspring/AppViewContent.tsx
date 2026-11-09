@@ -85,8 +85,8 @@ function Surface({
     "data-frame-background": typeof background === "string" ? background : "surface",
     style: {
       ...safeArea.properties,
-      ...(typeof background === "string" ? {} : webspringSurfaceStyle(background, "--nse-app-surface")),
-      "--nse-app-content-inset-top": sourceList ? "0px" : "var(--nse-safe-area-inset-top, 0px)",
+      ...(typeof background === "string" ? {} : webspringSurfaceStyle(background, "--nse-surface")),
+      "--nse-content-inset-top": sourceList ? "0px" : "var(--nse-safe-area-inset-top, 0px)",
     } as CSSProperties,
   };
 

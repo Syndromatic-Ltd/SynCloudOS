@@ -97,20 +97,20 @@ describe("the standard top bar's overlay and content-inset contract", () => {
     renderStage({ topBar: "standard", material: "standard" });
     const { bar, content, background } = stageElements();
 
-    expect(stageElements().root?.style.getPropertyValue("--webspring-app-top-bar-height")).toBe("var(--nse-app-topbar-height, var(--nse-topbar-height-cumulus))");
+    expect(stageElements().root?.style.getPropertyValue("--webspring-app-top-bar-height")).toBe("var(--nse-topbar-height, var(--nse-topbar-height-cumulus))");
     expect(bar).not.toBeNull();
     expect(content).not.toBeNull();
     // The content sits in the body, which still fills the whole frame behind the floating bar.
     expect(background).not.toBeNull();
     expect(background!.contains(content!)).toBe(true);
-    expect(background!.style.getPropertyValue("--nse-app-content-inset-top")).toBe("var(--webspring-app-top-bar-height, 0px)");
+    expect(background!.style.getPropertyValue("--nse-content-inset-top")).toBe("var(--nse-safe-area-inset-top, 0px)");
     expect(bar!.contains(content!)).toBe(false);
   });
 
   it("exposes the metal overlay inset for a metal frame", () => {
     renderStage({ topBar: "standard", material: "metal" });
 
-    expect(stageElements().root?.style.getPropertyValue("--webspring-app-top-bar-height")).toBe("var(--nse-app-topbar-height, var(--nse-topbar-height-metal))");
+    expect(stageElements().root?.style.getPropertyValue("--webspring-app-top-bar-height")).toBe("var(--nse-topbar-height, var(--nse-topbar-height-metal))");
     expect(stageElements().bar).not.toBeNull();
   });
 
@@ -121,7 +121,7 @@ describe("the standard top bar's overlay and content-inset contract", () => {
     expect(stageElements().root?.style.getPropertyValue("--webspring-app-top-bar-height")).toBe("0px");
     expect(bar).toBeNull();
     expect(background!.contains(content!)).toBe(true);
-    expect(background!.style.getPropertyValue("--nse-app-content-inset-top")).toBe("var(--webspring-app-top-bar-height, 0px)");
+    expect(background!.style.getPropertyValue("--nse-content-inset-top")).toBe("var(--nse-safe-area-inset-top, 0px)");
   });
 
   it("keeps the bar in the body's own flow for a source list, as before", () => {
@@ -132,6 +132,6 @@ describe("the standard top bar's overlay and content-inset contract", () => {
     // The source list draws the bar as the body's header, so both share the same clipped surface.
     expect(bar!.closest("[data-frame-background]")).toBe(background);
     expect(background!.contains(content!)).toBe(true);
-    expect(background!.style.getPropertyValue("--nse-app-content-inset-top")).toBe("0px");
+    expect(background!.style.getPropertyValue("--nse-content-inset-top")).toBe("0px");
   });
 });

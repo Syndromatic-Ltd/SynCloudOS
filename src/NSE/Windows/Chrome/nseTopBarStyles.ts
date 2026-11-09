@@ -39,15 +39,15 @@ export const nseTopBarStyles = {
 /**
  * A chrome variant's rendered height, as the CSS value to reserve above app content: the exact
  * expression the bar itself uses, so the bar and the content below it can never disagree —
- * including a host override of `--nse-app-topbar-height` and the compact breakpoint.
+ * including a host override of `--nse-topbar-height` and the compact breakpoint.
  */
 export function nseTopBarHeightCssValue(variant: NSETopBarVariant): string {
   const token = variant === "atmoMetal" ? "--nse-topbar-height-metal" : "--nse-topbar-height-cumulus";
-  return `var(--nse-app-topbar-height, var(${token}))`;
+  return `var(--nse-topbar-height, var(${token}))`;
 }
 
 /**
- * The inline style that points a glyph's mask at an SVG through `--nse-app-topbar-glyph`: the
+ * The inline style that points a glyph's mask at an SVG through `--nse-topbar-glyph`: the
  * item's own `icon`, else its kind's built-in glyph. Undefined when neither exists (a `custom`
  * item with no icon), so the caller renders no glyph rather than an unmasked block.
  */
@@ -56,5 +56,5 @@ export function resolveNSETopBarGlyphStyle(
   icons: NSETopBarStyleDefinition["icons"] = nseTopBarGlyphs
 ): CSSProperties | undefined {
   const url = item.icon ?? (item.kind === "custom" ? undefined : icons[item.kind]);
-  return url ? ({ "--nse-app-topbar-glyph": `url(${JSON.stringify(url)})` } as CSSProperties) : undefined;
+  return url ? ({ "--nse-topbar-glyph": `url(${JSON.stringify(url)})` } as CSSProperties) : undefined;
 }

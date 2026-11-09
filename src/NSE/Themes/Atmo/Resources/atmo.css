@@ -59,14 +59,14 @@
   --nse-atmo-material-shadow-key: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3)) drop-shadow(0 12px 22px rgba(0, 0, 0, 0.32));
   --nse-atmo-material-shadow-rest: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2)) drop-shadow(0 5px 10px rgba(0, 0, 0, 0.16));
   /* Atmo's values for the public app content colours (nse-appearance.css), drawn from its own inks. */
-  --nse-app-foreground-secondary: var(--nse-atmo-label-ink);
-  --nse-app-surface: rgb(255 255 255 / 60%);
-  --nse-app-surface-border: rgb(67 88 107 / 28%);
-  --nse-app-separator: rgb(67 88 107 / 20%);
-  --nse-app-accent: rgb(28 112 185);
-  --nse-app-accent-foreground: #ffffff;
-  --nse-app-selection: var(--nse-atmo-material-selection-fill);
-  --nse-app-critical: #a52d28;
+  --nse-colour-secondary-label: var(--nse-atmo-label-ink);
+  --nse-colour-control-background: rgb(255 255 255 / 60%);
+  --nse-colour-grid: rgb(67 88 107 / 28%);
+  --nse-colour-separator: rgb(67 88 107 / 20%);
+  --nse-colour-control-accent: rgb(28 112 185);
+  --nse-colour-selected-control-text: #ffffff;
+  --nse-colour-selected-content-background: var(--nse-atmo-material-selection-fill);
+  --nse-colour-system-red: #a52d28;
 }
 
 [data-nse-appearance="atmo"][data-mode="dark"],
@@ -85,14 +85,14 @@
   --nse-atmo-material-selection-ring: rgba(120, 172, 222, 0.9);
   --nse-atmo-material-shadow-key: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5)) drop-shadow(0 14px 26px rgba(0, 0, 0, 0.55));
   --nse-atmo-material-shadow-rest: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.4)) drop-shadow(0 6px 12px rgba(0, 0, 0, 0.35));
-  --nse-app-foreground-secondary: var(--nse-atmo-label-ink);
-  --nse-app-surface: rgb(255 255 255 / 6%);
-  --nse-app-surface-border: rgb(255 255 255 / 11%);
-  --nse-app-separator: rgb(255 255 255 / 9%);
-  --nse-app-accent: rgb(120 172 222);
-  --nse-app-accent-foreground: #0d1a2a;
-  --nse-app-selection: var(--nse-atmo-material-selection-fill);
-  --nse-app-critical: #ff7b72;
+  --nse-colour-secondary-label: var(--nse-atmo-label-ink);
+  --nse-colour-control-background: rgb(255 255 255 / 6%);
+  --nse-colour-grid: rgb(255 255 255 / 11%);
+  --nse-colour-separator: rgb(255 255 255 / 9%);
+  --nse-colour-control-accent: rgb(120 172 222);
+  --nse-colour-selected-control-text: #0d1a2a;
+  --nse-colour-selected-content-background: var(--nse-atmo-material-selection-fill);
+  --nse-colour-system-red: #ff7b72;
 }
 
 /* An appearance boundary supplies readable body ink as well as control paint. */
@@ -2041,7 +2041,7 @@
 /* App topbar disclosure chevron paint. Generic chrome owns the mechanics while
    the explicit appearance supplies the two-cell 24x48 image. */
 [data-nse-appearance="atmo"] {
-  --nse-app-topbar-title-arrow-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 48"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="%23e4e4e4"/><stop offset="1" stop-color="%23a3a3a3"/></linearGradient></defs><path d="M9 5.5 L16 12 L9 18.5" fill="none" stroke="url(%23g)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/><path d="M5.5 33 L12 40 L18.5 33" fill="none" stroke="url(%23g)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/></svg>');
+  --nse-topbar-title-arrow-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 48"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="%23e4e4e4"/><stop offset="1" stop-color="%23a3a3a3"/></linearGradient></defs><path d="M9 5.5 L16 12 L9 18.5" fill="none" stroke="url(%23g)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/><path d="M5.5 33 L12 40 L18.5 33" fill="none" stroke="url(%23g)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/></svg>');
 }
 
 /* app-menu-icon-meta.png remains a Heritage-owned raster resource. The

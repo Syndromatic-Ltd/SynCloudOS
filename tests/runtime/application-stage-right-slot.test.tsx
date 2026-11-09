@@ -161,7 +161,7 @@ describe("the right-slot control", () => {
 
     renderStage({ frame: { rightSlot: { icon: "/help.svg", label: { key: "help.label", fallback: "Help" } } } });
     const custom = screen.getByRole("button", { name: "Help" });
-    expect(custom.querySelector<HTMLElement>(".nse-app-topbar-button-icon")?.style.getPropertyValue("--nse-app-topbar-glyph")).toBe('url("/help.svg")');
+    expect(custom.querySelector<HTMLElement>(".nse-app-topbar-button-icon")?.style.getPropertyValue("--nse-topbar-glyph")).toBe('url("/help.svg")');
   });
 
   it("follows the same menu rule for userInfo", async () => {
@@ -209,9 +209,9 @@ describe("the default app look", () => {
     const body = container.querySelector<HTMLElement>(".webspring-app-view-body-surface")!;
 
     expect(body.getAttribute("data-frame-background")).toBe("surface");
-    expect(body.style.getPropertyValue("--nse-app-surface-colour")).toBe("#223344");
-    expect(body.style.getPropertyValue("--nse-app-surface-image")).toContain("/grain.png");
-    expect(body.style.getPropertyValue("--nse-app-surface-size")).toContain("128px");
+    expect(body.style.getPropertyValue("--nse-surface-colour")).toBe("#223344");
+    expect(body.style.getPropertyValue("--nse-surface-image")).toContain("/grain.png");
+    expect(body.style.getPropertyValue("--nse-surface-size")).toContain("128px");
   });
 
   it("uses the same background rule for an app that draws its own top bar", () => {

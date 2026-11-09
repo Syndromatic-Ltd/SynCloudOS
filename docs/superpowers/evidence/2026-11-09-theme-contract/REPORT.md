@@ -127,7 +127,13 @@ Separate comparisons against unchanged `a1c3617` source cover Quick Switch, disc
 
 The system catalogue's ten cases pass; targeted stage key-state, status-slot, Quick Switch selection and folder-rendering assertions also pass. Their added assertions were verified to fail against the previous implementations, then passed with the new hooks. **787 focused tests across 19 files**, framework typecheck and the additional fixture typecheck pass. The final frozen visual gate passed **82/82 with zero differences** (`task-9-baseline-final.log`), and all 2,648 frozen image hashes are unchanged. Login retains its existing ornamented presentation. The separate plain-login review image belongs to the later presentation-selection task.
 
-### Tasks 10–19
+### Task 10 — semantic colours
+
+Published the 48 frozen British semantic/system colour names and their CSS-property mapping. Atmo supplies both palettes in colours.json for transfer to its bundle in Task 14. The ten old colour names map to their closest semantic names with their existing values preserved. Non-colour variables sharing the old prefix were also renamed; src/ and scripts/ contain no --nse-app-* uses. The exact mapping, every chosen value, source precedent and owner-review flag are retained in semantic-colour-decisions.json.
+
+Verification: **131 focused tests across 10 files passed**, framework typecheck passed, and the frozen image gate passed **82/82 with zero differences** (task-10-baseline.log). All 2,648 reference hashes are unchanged. The focused run initially exposed three pre-guide top-bar expectations and one old-prefix documentation parser; the assertions now match the already-established guide contract and the renamed properties. No rendering fix or baseline change was needed.
+
+### Tasks 11–19
 
 Pending. Final split-suite and packed SDK acceptance remain for Task 19.
 

@@ -30,30 +30,106 @@
 /* The colours an application uses for content it draws itself, switched by the resolved light or dark
    mode. Light follows the aluminium metal family and dark the blue-hued one. These are theme-neutral
    defaults: a theme (Atmo among them) redefines them, so content drawn with them follows the theme.
-   Text tokens keep at least 4.5:1 against --nse-app-background; the accent at least 3:1. */
+   Text tokens keep at least 4.5:1 against --nse-colour-window-background; the accent at least 3:1. */
 :where([data-nse-colour-scheme-resolved="light"]) {
-  --nse-app-background: #d9dbde;
-  --nse-app-foreground: #2a2f36;
-  --nse-app-foreground-secondary: #555d66;
-  --nse-app-surface: rgb(255 255 255 / 55%);
-  --nse-app-surface-border: rgb(0 0 0 / 16%);
-  --nse-app-separator: rgb(0 0 0 / 12%);
-  --nse-app-accent: #2c6fc2;
-  --nse-app-accent-foreground: #ffffff;
-  --nse-app-selection: rgb(44 111 194 / 20%);
-  --nse-app-critical: #a52d28;
+  --nse-colour-label: #2a2f36;
+  --nse-colour-secondary-label: #555d66;
+  --nse-colour-tertiary-label: rgba(44, 56, 70, 0.54);
+  --nse-colour-quaternary-label: rgba(0, 0, 0, 0.2);
+  --nse-colour-text: #25303c;
+  --nse-colour-placeholder-text: rgba(44, 56, 70, 0.54);
+  --nse-colour-selected-text: #ffffff;
+  --nse-colour-text-background: #ffffff;
+  --nse-colour-selected-text-background: rgba(99, 153, 200, 0.2);
+  --nse-colour-unemphasised-selected-text: #1f2833;
+  --nse-colour-unemphasised-selected-text-background: #d4d8de;
+  --nse-colour-keyboard-focus-indicator: rgba(76, 164, 255, 0.95);
+  --nse-colour-link: rgb(28 112 185);
+  --nse-colour-separator: rgb(0 0 0 / 12%);
+  --nse-colour-grid: rgb(0 0 0 / 16%);
+  --nse-colour-header-text: #2b3440;
+  --nse-colour-find-highlight: #ffcc00;
+  --nse-colour-highlight: rgba(255, 255, 255, 0.9);
+  --nse-colour-shadow: rgba(0, 0, 0, 0.35);
+  --nse-colour-selected-content-background: rgb(44 111 194 / 20%);
+  --nse-colour-unemphasised-selected-content-background: #d4d8de;
+  --nse-colour-alternating-content-background-1: #ffffff;
+  --nse-colour-alternating-content-background-2: rgba(0, 0, 0, 0.035);
+  --nse-colour-selected-menu-item-text: #ffffff;
+  --nse-colour-control-accent: #2c6fc2;
+  --nse-colour-control: #d1d0d0;
+  --nse-colour-control-background: rgb(255 255 255 / 55%);
+  --nse-colour-control-text: #283444;
+  --nse-colour-disabled-control-text: rgba(44, 56, 70, 0.54);
+  --nse-colour-selected-control: rgb(28 112 185);
+  --nse-colour-selected-control-text: #ffffff;
+  --nse-colour-alternate-selected-control-text: #ffffff;
+  --nse-colour-window-background: #d9dbde;
+  --nse-colour-window-frame-text: #293645;
+  --nse-colour-under-page-background: #d9dbde;
+  --nse-colour-system-red: #a52d28;
+  --nse-colour-system-orange: #ff8000;
+  --nse-colour-system-yellow: #ffcc00;
+  --nse-colour-system-green: #34c759;
+  --nse-colour-system-mint: #00ff80;
+  --nse-colour-system-teal: #008080;
+  --nse-colour-system-cyan: #00ffff;
+  --nse-colour-system-blue: #007aff;
+  --nse-colour-system-indigo: #5856d6;
+  --nse-colour-system-purple: #800080;
+  --nse-colour-system-pink: #ff0080;
+  --nse-colour-system-brown: #996633;
+  --nse-colour-system-grey: #808080;
 }
 :where([data-nse-colour-scheme-resolved="dark"]) {
-  --nse-app-background: #1b222c;
-  --nse-app-foreground: #dde3ea;
-  --nse-app-foreground-secondary: #a7afba;
-  --nse-app-surface: rgb(255 255 255 / 6%);
-  --nse-app-surface-border: rgb(255 255 255 / 10%);
-  --nse-app-separator: rgb(255 255 255 / 9%);
-  --nse-app-accent: #7fb2f0;
-  --nse-app-accent-foreground: #0d1a2a;
-  --nse-app-selection: rgb(127 178 240 / 24%);
-  --nse-app-critical: #ff7b72;
+  --nse-colour-label: #dde3ea;
+  --nse-colour-secondary-label: #a7afba;
+  --nse-colour-tertiary-label: rgba(200, 210, 222, 0.45);
+  --nse-colour-quaternary-label: rgba(255, 255, 255, 0.32);
+  --nse-colour-text: #e3e8ee;
+  --nse-colour-placeholder-text: rgba(200, 210, 222, 0.45);
+  --nse-colour-selected-text: #ffffff;
+  --nse-colour-text-background: #1d2229;
+  --nse-colour-selected-text-background: rgba(99, 153, 200, 0.24);
+  --nse-colour-unemphasised-selected-text: #dfe5ec;
+  --nse-colour-unemphasised-selected-text-background: #3c434c;
+  --nse-colour-keyboard-focus-indicator: rgba(76, 164, 255, 0.95);
+  --nse-colour-link: rgb(120 172 222);
+  --nse-colour-separator: rgb(255 255 255 / 9%);
+  --nse-colour-grid: rgb(255 255 255 / 10%);
+  --nse-colour-header-text: #dfe5ec;
+  --nse-colour-find-highlight: #ffcc00;
+  --nse-colour-highlight: rgba(255, 255, 255, 0.14);
+  --nse-colour-shadow: rgba(0, 0, 0, 0.65);
+  --nse-colour-selected-content-background: rgb(127 178 240 / 24%);
+  --nse-colour-unemphasised-selected-content-background: #3c434c;
+  --nse-colour-alternating-content-background-1: #1d2229;
+  --nse-colour-alternating-content-background-2: rgba(255, 255, 255, 0.035);
+  --nse-colour-selected-menu-item-text: #ffffff;
+  --nse-colour-control-accent: #7fb2f0;
+  --nse-colour-control: #343b44;
+  --nse-colour-control-background: rgb(255 255 255 / 6%);
+  --nse-colour-control-text: #e7ecf2;
+  --nse-colour-disabled-control-text: rgba(200, 210, 222, 0.45);
+  --nse-colour-selected-control: rgb(120 172 222);
+  --nse-colour-selected-control-text: #0d1a2a;
+  --nse-colour-alternate-selected-control-text: #ffffff;
+  --nse-colour-window-background: #1b222c;
+  --nse-colour-window-frame-text: #f1f4f8;
+  --nse-colour-under-page-background: #1b222c;
+  --nse-colour-system-red: #ff7b72;
+  --nse-colour-system-orange: #ff8000;
+  --nse-colour-system-yellow: #ffcc00;
+  --nse-colour-system-green: #34c759;
+  --nse-colour-system-mint: #00ff80;
+  --nse-colour-system-teal: #008080;
+  --nse-colour-system-cyan: #00ffff;
+  --nse-colour-system-blue: #007aff;
+  --nse-colour-system-indigo: #5856d6;
+  --nse-colour-system-purple: #800080;
+  --nse-colour-system-pink: #ff0080;
+  --nse-colour-system-brown: #996633;
+  --nse-colour-system-grey: #808080;
 }
 
 .nse-control-appearance-provider {

@@ -1246,8 +1246,8 @@
   display: block;
   min-width: 0;
   min-height: 0;
-  color: var(--nse-app-foreground);
-  background-color: var(--nse-app-background);
+  color: var(--nse-colour-label);
+  background-color: var(--nse-colour-window-background);
   isolation: isolate;
 }
 
@@ -1258,11 +1258,11 @@
 
 /* A developer surface: one rule per layer, read from the custom properties set on the element. */
 .webspring-app-view-body-surface[data-frame-background="surface"] {
-  background-color: var(--nse-app-surface-colour);
-  background-image: var(--nse-app-surface-image);
-  background-size: var(--nse-app-surface-size);
-  background-repeat: var(--nse-app-surface-repeat);
-  background-position: var(--nse-app-surface-position);
+  background-color: var(--nse-surface-colour);
+  background-image: var(--nse-surface-image);
+  background-size: var(--nse-surface-size);
+  background-repeat: var(--nse-surface-repeat);
+  background-position: var(--nse-surface-position);
 }
 
 .webspring-app-view-body-surface[data-frame-background="surface"]::before {
@@ -1271,12 +1271,12 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background-image: var(--nse-app-surface-overlay-image);
-  background-size: var(--nse-app-surface-overlay-size);
+  background-image: var(--nse-surface-overlay-image);
+  background-size: var(--nse-surface-overlay-size);
   background-position: center;
   background-repeat: no-repeat;
-  opacity: var(--nse-app-surface-overlay-opacity);
-  mix-blend-mode: var(--nse-app-surface-overlay-blend);
+  opacity: var(--nse-surface-overlay-opacity);
+  mix-blend-mode: var(--nse-surface-overlay-blend);
 }
 
 .webspring-app-view-body-surface-off {
@@ -1300,7 +1300,7 @@
    moving the entire viewport below the bar creates a blank band and prevents
    content from passing beneath the glass. Source-list headers stay in flow. */
 .webspring-app-view-fullbleed-content [data-nse-navigation-scroll-surface="true"] {
-  scroll-padding-block-start: var(--nse-app-content-inset-top, 0px);
+  scroll-padding-block-start: var(--nse-content-inset-top, 0px);
 }
 
 /* Source-list windows render the metal bar INSIDE the rounded body surface as a non-scrolling
