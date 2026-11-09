@@ -95,11 +95,17 @@ The text group publishes identities, parts, hover/focus and editable/enabled met
 
 Verification: **568 focused tests across 8 files passed**, typecheck passed, and the full frozen screenshot comparison passed **82/82 with zero differences** (`task-8-text-baseline.log`). All 2,648 reference hashes were verified unchanged.
 
+Containers commit: `87f48457` — `NSE: publish theme hooks on containers`.
+
 The container group adds box, view, stack, grid, split, drawer, clip/scroll, image, data-view and page identities and parts, including selected and disabled rows. `scroll-view-frame` becomes `scroll-view`; its clip viewport retains `clip-view`. `NSEBox.fillColor`/`borderColor` and `NSEShadow.shadowColor` become `fillColour`/`borderColour` and `shadowColour`, with owning callers and documentation migrated and no aliases.
 
 The first container screenshot gate found a composing colour-list clip part being overwritten by the new clip-view default. That removed the palette list's existing border in light mode (DPR 1/2). The clip now preserves the composing part. An explicit regression failed before the fix and passes afterwards. Failed images/traces are retained as `task-8-container-clip-*`; references were untouched. Four focused light/dark DPR comparisons passed. Final full acceptance passed **82/82, zero differences** (`task-8-containers-baseline-final.log`). The final focused run passed **754 tests in 19 files**; 39 additional stack/page/layout regressions and typecheck passed. All 2,648 frozen hashes are unchanged.
 
-Remaining groups: menus/toolbars, date/panel controls, windows/overlays.
+The menus/toolbars group publishes pop-up and pull-down identity (including native fallback), menu surfaces and menu items, toolbar surfaces/items/customisation palettes, path controls and tab views/navigation. Command state and the existing hovered/focused/pressed state remain authoritative. `toolbar-configuration-sheet` becomes `toolbar-customisation-palette`; the toolbar's `root` part becomes `background`. Existing neutral part names remain documented. Navigation tab views publish `style="navigation"`.
+
+The first menu screenshot gate caught the generic tab-view scroll rule clipping the compact strip's existing shadow in light mode at both DPRs. The rule now owns only direct content tab lists and excludes navigation. Eight focused tab comparisons pass. The failed actual/diff/trace are retained as `task-8-tab-shadow-*`. No reference was changed. Final menu acceptance passed **82/82, zero differences** (`task-8-menus-baseline-final.log`); **711 focused tests across 9 files** and typecheck passed. All frozen hashes remain unchanged.
+
+Remaining groups: date/panel controls, windows/overlays.
 
 ### Tasks 9–19
 

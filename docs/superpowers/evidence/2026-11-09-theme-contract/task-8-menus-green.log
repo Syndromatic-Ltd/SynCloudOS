@@ -1,0 +1,79 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-theme-menu-hook-coverage.test.tsx tests/runtime/nse-theme-hook-coverage.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-theme-menu-hook-coverage.test.tsx (30 tests | 20 failed) 245ms
+     × pop-up-button-regular-pop-up-normal 16ms
+     × pop-up-button-regular-pop-up-hover 2ms
+     × pop-up-button-regular-pop-up-focused 2ms
+     × pop-up-button-regular-pop-up-disabled 1ms
+     × pop-up-button-regular-pop-up-open 2ms
+     × pop-up-button-regular-pull-down-normal 1ms
+     × pop-up-button-regular-pull-down-hover 1ms
+     × pop-up-button-regular-pull-down-focused 1ms
+     × pop-up-button-regular-pull-down-disabled 1ms
+     × pop-up-button-regular-pull-down-open 1ms
+     × pop-up-button-small-pop-up-normal 1ms
+     × pop-up-button-small-pop-up-hover 1ms
+     × pop-up-button-small-pop-up-focused 1ms
+     × pop-up-button-small-pop-up-disabled 1ms
+     × pop-up-button-small-pop-up-open 1ms
+     × pop-up-button-small-pull-down-normal 1ms
+     × pop-up-button-small-pull-down-hover 1ms
+     × pop-up-button-small-pull-down-focused 1ms
+     × pop-up-button-small-pull-down-disabled 1ms
+     × pop-up-button-small-pull-down-open 1ms
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx (550 tests | 2 failed) 1421ms
+     × rule-editor 5ms
+     × predicate-editor 3ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 22 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > rule-editor
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > predicate-editor
+ FAIL  tests/runtime/nse-theme-menu-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-regular-pop-up-normal
+ FAIL  tests/runtime/nse-theme-menu-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-regular-pop-up-hover
+ FAIL  tests/runtime/nse-theme-menu-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-regular-pop-up-focused
+ FAIL  tests/runtime/nse-theme-menu-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-regular-pop-up-disabled
+ FAIL  tests/runtime/nse-theme-menu-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-regular-pop-up-open
+ FAIL  tests/runtime/nse-theme-menu-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-regular-pull-down-normal
+ FAIL  tests/runtime/nse-theme-menu-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-regular-pull-down-hover
+ FAIL  tests/runtime/nse-theme-menu-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-regular-pull-down-focused
+ FAIL  tests/runtime/nse-theme-menu-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-regular-pull-down-disabled
+ FAIL  tests/runtime/nse-theme-menu-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-regular-pull-down-open
+ FAIL  tests/runtime/nse-theme-menu-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-small-pop-up-normal
+ FAIL  tests/runtime/nse-theme-menu-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-small-pop-up-hover
+ FAIL  tests/runtime/nse-theme-menu-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-small-pop-up-focused
+ FAIL  tests/runtime/nse-theme-menu-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-small-pop-up-disabled
+ FAIL  tests/runtime/nse-theme-menu-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-small-pop-up-open
+ FAIL  tests/runtime/nse-theme-menu-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-small-pull-down-normal
+ FAIL  tests/runtime/nse-theme-menu-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-small-pull-down-hover
+ FAIL  tests/runtime/nse-theme-menu-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-small-pull-down-focused
+ FAIL  tests/runtime/nse-theme-menu-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-small-pull-down-disabled
+ FAIL  tests/runtime/nse-theme-menu-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-small-pull-down-open
+TypeError: Unknown or invalid theme variant: bezel-style.
+ ❯ nseControlHooks src/NSE/Theme/contract/hooks.ts:35:75
+     33|   const attributes: Record<`data-nse-${string}`, string> = { "data-nse…
+     34|   for (const [name, value] of Object.entries(input.variants ?? {})) {
+     35|     if (!variants.has(name) || typeof value !== "string" || !value) th…
+       |                                                                           ^
+     36|     attributes[`data-nse-${name}`] = value;
+     37|   }
+ ❯ NSEPopUpButtonControl src/NSE/Menus/NSEPopUpButton.tsx:218:19
+ ❯ Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25904:20
+ ❯ renderWithHooks node_modules/react-dom/cjs/react-dom-client.development.js:7662:22
+ ❯ updateFunctionComponent node_modules/react-dom/cjs/react-dom-client.development.js:10166:19
+ ❯ beginWork node_modules/react-dom/cjs/react-dom-client.development.js:11778:18
+ ❯ runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:874:13
+ ❯ performUnitOfWork node_modules/react-dom/cjs/react-dom-client.development.js:17641:22
+ ❯ workLoopSync node_modules/react-dom/cjs/react-dom-client.development.js:17469:41
+ ❯ renderRootSync node_modules/react-dom/cjs/react-dom-client.development.js:17450:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/22]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  22 failed | 558 passed (580)
+   Start at  20:46:35
+   Duration  9.77s (transform 10.79s, setup 51ms, import 14.66s, tests 1.67s, environment 1.64s)

@@ -364,6 +364,7 @@ export function NSETabBar({
     <>
       <div
         className={classes("nse-tab-bar-safe-area", className)}
+        data-nse-control="tab-view" data-nse-part="background" data-nse-style="navigation" data-nse-orientation={orientation}
         data-nse-tab-bar="true"
         data-orientation={orientation}
         data-safe-area-wrapper="true"
@@ -374,10 +375,10 @@ export function NSETabBar({
         style={tabListStyle}
       >
         {usesTallTabChrome ? <NSETabIconMaterial id={iconMaterialId} /> : null}
-        <div className="nse-tab-bar-scroll-viewport" data-nse-tab-scroll-viewport="true">
+        <div className="nse-tab-bar-scroll-viewport" data-nse-part="viewport" data-nse-tab-scroll-viewport="true">
         <div
           className={classes("nse-tab-bar", usesTallTabChrome && "nse-control-toolbar")}
-          role="tablist"
+          data-nse-part="header" role="tablist"
           aria-orientation={orientation}
           aria-label={ariaLabel}
           data-position={usesTallTabChrome ? "inline" : undefined}
@@ -431,6 +432,7 @@ export function NSETabBar({
               }}
               aria-label={destination.accessibleLabel}
               aria-controls={getNSETabBarPanelId(resolvedIdScope, destination.id)}
+              data-nse-part="cell" data-nse-selected={selected ? "" : undefined} data-nse-highlighted={pressed ? "" : undefined} data-nse-enabled={destination.disabled ? "false" : undefined} data-nse-hovered={hoveredTabId === destination.id ? "" : undefined} data-nse-focused={paintFocusedTabId === destination.id ? "" : undefined}
               aria-selected={selected}
               aria-disabled={destination.disabled || undefined}
               tabIndex={destination.disabled ? -1 : focusedTabId === destination.id ? 0 : -1}
@@ -463,14 +465,14 @@ export function NSETabBar({
             >
               {usesTallTabChrome ? (
                 <span
-                  className="nse-tab-bar-chrome-surface"
+                  data-nse-part="bezel" className="nse-tab-bar-chrome-surface"
                   aria-hidden="true"
                   data-nse-tab-chrome-surface="true"
                 />
               ) : null}
-              <span className="nse-tab-bar-content" data-nse-tab-content="true">
+              <span data-nse-part="content" className="nse-tab-bar-content" data-nse-tab-content="true">
                 <span
-                  className="nse-tab-bar-icon"
+                  data-nse-part="image" className="nse-tab-bar-icon"
                   aria-hidden="true"
                   data-icon-kind={icon.kind}
                   data-nse-tab-icon-source={icon.source}
@@ -479,11 +481,11 @@ export function NSETabBar({
                   style={iconStyle}
                   {...iconAppearance.attributes}
                 >
-                  <span className="nse-tab-bar-icon-glyph" data-nse-tab-icon-glyph="true" />
+                  <span data-nse-part="indicator" className="nse-tab-bar-icon-glyph" data-nse-tab-icon-glyph="true" />
                 </span>
-                <span className="nse-tab-bar-label" {...labelAppearance.attributes}>{destination.compactLabel ?? destination.label}</span>
+                <span data-nse-part="title" className="nse-tab-bar-label" {...labelAppearance.attributes}>{destination.compactLabel ?? destination.label}</span>
                 {destination.badge !== undefined && badgeAppearance ? (
-                  <span className="nse-tab-bar-badge" data-nse-tab-badge="true" aria-hidden="true" {...badgeAppearance.attributes}>{destination.badge}</span>
+                  <span data-nse-part="badge" className="nse-tab-bar-badge" data-nse-tab-badge="true" aria-hidden="true" {...badgeAppearance.attributes}>{destination.badge}</span>
                 ) : null}
               </span>
             </button></NSELabelHelp>
@@ -502,6 +504,7 @@ export function NSETabBar({
             aria-label="More destinations"
             aria-controls={morePanelId}
             aria-expanded={overflowOpen}
+            data-nse-part="cell" data-nse-selected={moreSelected ? "" : undefined} data-nse-highlighted={morePressed ? "" : undefined} data-nse-hovered={hoveredTabId === NSETabBarMoreDestinationId ? "" : undefined} data-nse-focused={paintFocusedTabId === NSETabBarMoreDestinationId ? "" : undefined}
             aria-selected={moreSelected}
             tabIndex={focusedTabId === NSETabBarMoreDestinationId ? 0 : -1}
             data-selected={moreSelected ? "true" : "false"}
@@ -535,14 +538,14 @@ export function NSETabBar({
           >
             {usesTallTabChrome ? (
               <span
-                className="nse-tab-bar-chrome-surface"
+                data-nse-part="bezel" className="nse-tab-bar-chrome-surface"
                 aria-hidden="true"
                 data-nse-tab-chrome-surface="true"
               />
             ) : null}
-            <span className="nse-tab-bar-content" data-nse-tab-content="true">
+            <span data-nse-part="content" className="nse-tab-bar-content" data-nse-tab-content="true">
               <span
-                className="nse-tab-bar-icon"
+                data-nse-part="image" className="nse-tab-bar-icon"
                 aria-hidden="true"
                 data-icon-kind={moreIcon.kind}
                 data-nse-tab-icon-source={moreIcon.source}
@@ -551,9 +554,9 @@ export function NSETabBar({
                 style={moreIconStyle}
                 {...moreIconAppearance.attributes}
               >
-                <span className="nse-tab-bar-icon-glyph" data-nse-tab-icon-glyph="true" />
+                <span data-nse-part="indicator" className="nse-tab-bar-icon-glyph" data-nse-tab-icon-glyph="true" />
               </span>
-              <span className="nse-tab-bar-label" {...moreLabelAppearance.attributes}>{moreTitle}</span>
+              <span data-nse-part="title" className="nse-tab-bar-label" {...moreLabelAppearance.attributes}>{moreTitle}</span>
             </span>
           </button></NSELabelHelp>
         ) : null}
@@ -745,7 +748,7 @@ export function NSETabBarOverflowList({
                   data-pressed={pressed ? "true" : "false"}
                   leading={(
                     <span
-                      className="nse-tab-bar-icon"
+                      data-nse-part="image" className="nse-tab-bar-icon"
                       aria-hidden="true"
                       data-icon-kind={icon.kind}
                       data-nse-tab-icon-source={icon.source}
@@ -755,7 +758,7 @@ export function NSETabBarOverflowList({
                     />
                   )}
                   trailing={destination.badge !== undefined ? (
-                    <span className="nse-tab-bar-badge" data-nse-tab-badge="true">{destination.badge}</span>
+                    <span data-nse-part="badge" className="nse-tab-bar-badge" data-nse-tab-badge="true">{destination.badge}</span>
                   ) : undefined}
                   onFocus={() => {
                     setFocusedDestinationId(destination.id);

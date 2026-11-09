@@ -1,0 +1,407 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-theme-hook-coverage.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx (579 tests | 30 failed) 1946ms
+     × pop-up-button-regular-pop-up-normal 5ms
+     × pop-up-button-regular-pop-up-hover 4ms
+     × pop-up-button-regular-pop-up-focused 3ms
+     × pop-up-button-regular-pop-up-disabled 3ms
+     × pop-up-button-regular-pop-up-open 3ms
+     × pop-up-button-regular-pull-down-normal 3ms
+     × pop-up-button-regular-pull-down-hover 3ms
+     × pop-up-button-regular-pull-down-focused 3ms
+     × pop-up-button-regular-pull-down-disabled 3ms
+     × pop-up-button-regular-pull-down-open 3ms
+     × pop-up-button-small-pop-up-normal 3ms
+     × pop-up-button-small-pop-up-hover 3ms
+     × pop-up-button-small-pop-up-focused 4ms
+     × pop-up-button-small-pop-up-disabled 3ms
+     × pop-up-button-small-pop-up-open 3ms
+     × pop-up-button-small-pull-down-normal 3ms
+     × pop-up-button-small-pull-down-hover 3ms
+     × pop-up-button-small-pull-down-focused 3ms
+     × pop-up-button-small-pull-down-disabled 4ms
+     × pop-up-button-small-pull-down-open 4ms
+     × path-control 8ms
+     × toolbar-top 3ms
+     × toolbar-bottom 2ms
+     × toolbar-inline 2ms
+     × tab-view 4ms
+     × tab-bar-more 8ms
+     × tab-bar-rail 9ms
+     × menu 43ms
+     × menu-bar 27ms
+     × menu-bar-open 6ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 30 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-regular-pop-up-normal
+AssertionError: pop-up-button-regular-pop-up-normal: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-regular-pop-up-hover
+AssertionError: pop-up-button-regular-pop-up-hover: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-regular-pop-up-focused
+AssertionError: pop-up-button-regular-pop-up-focused: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-regular-pop-up-disabled
+AssertionError: pop-up-button-regular-pop-up-disabled: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-regular-pop-up-open
+AssertionError: pop-up-button-regular-pop-up-open: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-regular-pull-down-normal
+AssertionError: pop-up-button-regular-pull-down-normal: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-regular-pull-down-hover
+AssertionError: pop-up-button-regular-pull-down-hover: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-regular-pull-down-focused
+AssertionError: pop-up-button-regular-pull-down-focused: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-regular-pull-down-disabled
+AssertionError: pop-up-button-regular-pull-down-disabled: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-regular-pull-down-open
+AssertionError: pop-up-button-regular-pull-down-open: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-small-pop-up-normal
+AssertionError: pop-up-button-small-pop-up-normal: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-small-pop-up-hover
+AssertionError: pop-up-button-small-pop-up-hover: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-small-pop-up-focused
+AssertionError: pop-up-button-small-pop-up-focused: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-small-pop-up-disabled
+AssertionError: pop-up-button-small-pop-up-disabled: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-small-pop-up-open
+AssertionError: pop-up-button-small-pop-up-open: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-small-pull-down-normal
+AssertionError: pop-up-button-small-pull-down-normal: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-small-pull-down-hover
+AssertionError: pop-up-button-small-pull-down-hover: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-small-pull-down-focused
+AssertionError: pop-up-button-small-pull-down-focused: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-small-pull-down-disabled
+AssertionError: pop-up-button-small-pull-down-disabled: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > pop-up-button-small-pull-down-open
+AssertionError: pop-up-button-small-pull-down-open: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > path-control
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > tab-view
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:83:49
+     81|       expect(root, surface.id).not.toBeNull();
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+       |                                                 ^
+     84|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+     85|       if (surface.id.endsWith("disabled")) expect(root!.dataset.nseEna…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > toolbar-top
+AssertionError: toolbar-top: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > toolbar-bottom
+AssertionError: toolbar-bottom: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > toolbar-inline
+AssertionError: toolbar-inline: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > tab-bar-more
+AssertionError: tab-bar-more: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > tab-bar-rail
+AssertionError: tab-bar-rail: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > menu
+AssertionError: expected null to be 'menu' // Object.is equality
+
+- Expected:
+"menu"
+
++ Received:
+null
+
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:82:54
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+       |                                                      ^
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     84|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > menu-bar
+AssertionError: menu-bar: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/30]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > menu and toolbar theme hooks > menu-bar-open
+AssertionError: menu-bar-open: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:81:36
+     79|       if (surface.id === "menu") fireEvent.click(view.getByRole("butto…
+     80|       const root = identity === "menu" ? await view.findByRole("menu")…
+     81|       expect(root, surface.id).not.toBeNull();
+       |                                    ^
+     82|       expect(root!.getAttribute("data-nse-control")).toBe(identity);
+     83|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/30]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  30 failed | 549 passed (579)
+   Start at  20:35:33
+   Duration  11.38s (transform 6.33s, setup 26ms, import 8.38s, tests 1.95s, environment 868ms)
