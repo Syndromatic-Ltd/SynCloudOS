@@ -1,0 +1,23 @@
+/* Framework limits. A theme supplies paint; it cannot remove semantic parts,
+   focus feedback or the control's minimum interaction area. The bundle
+   validator also rejects semantic display/visibility/content declarations. */
+@layer nse.structure {
+  [data-nse-control]:is([data-nse-control-size="regular"], [data-nse-control-size="large"]) {
+    min-inline-size: 24px !important;
+    min-block-size: 24px !important;
+  }
+
+  /* Normal focus uses the existing control-shaped indicator. Theme selectors
+     are state-scoped and validation requires a replacement if it is removed.
+     Forced colours always retain a system-colour outline. */
+  @media (forced-colors: active) {
+    [data-nse-control]:is(:focus-visible, [data-nse-focused]) {
+      outline: 2px solid Highlight !important;
+      outline-offset: 2px !important;
+    }
+  }
+  [data-nse-contrast="forced"] [data-nse-control]:is(:focus-visible, [data-nse-focused]) {
+    outline: 2px solid Highlight !important;
+    outline-offset: 2px !important;
+  }
+}

@@ -60,6 +60,7 @@ export const synWareSdkEntries = Object.freeze({
   "nse/controls": "src/NSE/public/controls.ts",
   "nse/text": "src/NSE/public/text.ts",
   "nse/content": "src/NSE/public/content.ts",
+  "nse/theme": "src/NSE/public/theme.ts",
   "nse/appearance": "src/NSE/public/appearance.ts",
   "nse/themes/atmo": "src/NSE/Themes/Atmo/index.ts",
   "nse/scroll": "src/NSE/public/scroll.ts",

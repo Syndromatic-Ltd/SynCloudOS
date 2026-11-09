@@ -20,6 +20,7 @@
 
 /* SynWare SDK NSE structure and semantic hooks. Hosts select a concrete theme explicitly. */
 /* Layout margins, spacing and text roles first: every sheet below may use them. */
+@import "../Structure/limits.css";
 @import "../Layout/nse-layout-defaults.css";
 @import "../Appearance/nse-appearance.css";
 @import "../Appearance/nse-chrome-primitives.css";
