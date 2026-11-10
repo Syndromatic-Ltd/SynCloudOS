@@ -1,0 +1,94 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-text-drawing-state.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-text-drawing-state.test.tsx (4 tests | 4 failed) 25ms
+   × publishes grouped-field geometry and validation without replacing native input semantics 18ms
+   × publishes an input group's retained highlight separately from keyboard focus 2ms
+   × updates search drawing state when its existing clear action runs 2ms
+   × publishes secure-field validation alongside the existing error semantics 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-text-drawing-state.test.tsx > publishes grouped-field geometry and validation without replacing native input semantics
+AssertionError: expected null to be 'first' // Object.is equality
+
+- Expected:
+"first"
+
++ Received:
+null
+
+ ❯ tests/runtime/nse-text-drawing-state.test.tsx:13:50
+     11|   const { container } = render(<NSETextField aria-label="Name" groupPo…
+     12|   const root = container.querySelector('[data-nse-control="text-field"…
+     13|   expect(root.getAttribute("data-nse-position")).toBe("first");
+       |                                                  ^
+     14|   expect(root.getAttribute("data-nse-height")).toBe("40");
+     15|   expect(root.getAttribute("data-nse-validation")).toBe("invalid");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/runtime/nse-text-drawing-state.test.tsx > publishes an input group's retained highlight separately from keyboard focus
+AssertionError: expected null to be 'group' // Object.is equality
+
+- Expected:
+"group"
+
++ Received:
+null
+
+ ❯ tests/runtime/nse-text-drawing-state.test.tsx:21:46
+     19|   const { container } = render(<NSEInputBox alwaysLooksFocused><input …
+     20|   const root = container.firstElementChild!;
+     21|   expect(root.getAttribute("data-nse-role")).toBe("group");
+       |                                              ^
+     22|   expect(root.hasAttribute("data-nse-highlighted")).toBe(true);
+     23|   expect(root.hasAttribute("data-nse-focused")).toBe(false);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/runtime/nse-text-drawing-state.test.tsx > updates search drawing state when its existing clear action runs
+AssertionError: expected null to be 'populated' // Object.is equality
+
+- Expected:
+"populated"
+
++ Received:
+null
+
+ ❯ tests/runtime/nse-text-drawing-state.test.tsx:27:77
+     25| it("updates search drawing state when its existing clear action runs",…
+     26|   const { container } = render(<NSESearchField aria-label="Find" defau…
+     27|   expect(container.firstElementChild?.getAttribute("data-nse-value-sta…
+       |                                                                             ^
+     28|   fireEvent.click(screen.getByRole("button", { name: "Clear search" })…
+     29|   expect(container.firstElementChild?.getAttribute("data-nse-value-sta…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/runtime/nse-text-drawing-state.test.tsx > publishes secure-field validation alongside the existing error semantics
+AssertionError: expected null to be 'invalid' // Object.is equality
+
+- Expected:
+"invalid"
+
++ Received:
+null
+
+ ❯ tests/runtime/nse-text-drawing-state.test.tsx:33:76
+     31| it("publishes secure-field validation alongside the existing error sem…
+     32|   const { container } = render(<NSESecureTextField aria-label="Passwor…
+     33|   expect(container.firstElementChild?.getAttribute("data-nse-validatio…
+       |                                                                            ^
+     34|   expect(screen.getByRole("alert")).toBeTruthy();
+     35| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed (4)
+   Start at  01:46:17
+   Duration  1.84s (transform 589ms, setup 27ms, import 836ms, tests 25ms, environment 817ms)

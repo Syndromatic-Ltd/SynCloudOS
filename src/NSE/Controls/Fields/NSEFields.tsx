@@ -27,6 +27,10 @@ import { NSEDivider } from "../Selection/NSEDivider";
 import { nseCSSValue } from "../../Graphics/NSEShadow";
 import { nseNonNegative, useNSEViewLayerProperties, type NSEViewLayerProperties } from "../../Views/viewLayerProperties";
 import {
+  Children,
+  Fragment,
+  cloneElement,
+  isValidElement,
   useCallback,
   useEffect,
   useId,
@@ -312,11 +316,12 @@ function NSETextFieldControl<T = string>(props: NSETextFieldProps<T>) {
     <>
       <label
         {...theme.events}
-        {...nseControlHooks({ control: "text-field", enabled: isEnabled, hovered: theme.hovered, focused: theme.focused, variants: { "control-size": controlSize, editable: String(!readOnly) } })}
+        {...nseControlHooks({ control: "text-field", enabled: isEnabled, hovered: theme.hovered, focused: theme.focused, variants: { "control-size": controlSize, position: groupPosition, validation: invalidState ? "invalid" : "valid", editable: String(!readOnly) } })}
         data-nse-part="content"
         className={classes("nse-control-text-field", disabled && "is-disabled", className)}
         data-invalid={invalidState ? "true" : "false"}
         data-position={groupPosition}
+        data-nse-height={height === undefined ? undefined : String(height)}
         data-size={height !== undefined ? "custom" : controlSize}
         style={sizedControlStyle(undefined, height, undefined)}
         htmlFor={inputId}
@@ -414,6 +419,19 @@ export interface NSEInputBoxProps extends HTMLAttributes<HTMLDivElement> {
   alwaysLooksFocused?: boolean;
 }
 
+/** Native editing slots in this composite belong to the input group. Nested
+ * NSE controls and custom components publish their own drawing contract. */
+function inputBoxFieldParts(children: ReactNode): ReactNode {
+  return Children.map(children, child => {
+    if (!isValidElement<{ children?: ReactNode; type?: string; "data-nse-control"?: string; "data-nse-part"?: string }>(child)) return child;
+    if (child.props["data-nse-control"] || (typeof child.type !== "string" && child.type !== Fragment)) return child;
+    if ((child.type === "input" && child.props.type !== "hidden") || child.type === "textarea") {
+      return child.props["data-nse-part"] ? child : cloneElement(child, { "data-nse-part": "field" });
+    }
+    return child.props.children === undefined ? child : cloneElement(child, { children: inputBoxFieldParts(child.props.children) });
+  });
+}
+
 /**
 @internal The developer Inspector's export box. Apps compose a field's affixes with NSETextField's
 `prefix` and `suffix`.
@@ -434,14 +452,14 @@ export function NSEInputBox({
   return (
     <div
       {...props}
-      data-nse-control="text-field" data-nse-part="content" data-nse-enabled={isEnabled ? undefined : "false"}
+      {...nseControlHooks({ control: "text-field", enabled: isEnabled, highlighted: alwaysLooksFocused, variants: { role: "group", validation: invalid ? "invalid" : "valid" } })} data-nse-part="content"
       className={classes("nse-control-input-box", !isEnabled && "is-disabled", className)}
       data-invalid={invalid ? "true" : "false"}
       data-always-focused={alwaysLooksFocused ? "true" : "false"}
       aria-disabled={!isEnabled || undefined}
     >
       {label ? <span data-nse-part="label" className="nse-control-field-label">{label}</span> : null}
-      <div data-nse-part="bezel" className="nse-control-field-frame nse-control-input-box-frame">{children}</div>
+      <div data-nse-part="bezel" className="nse-control-field-frame nse-control-input-box-frame">{inputBoxFieldParts(children)}</div>
     </div>
   );
 }

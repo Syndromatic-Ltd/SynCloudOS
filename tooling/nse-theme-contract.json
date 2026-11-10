@@ -746,6 +746,7 @@
     "ruler-view": {
       "parts": [
         "content",
+        "status",
         "tab-stop",
         "tab-stops"
       ],
@@ -817,6 +818,14 @@
         ],
         "editable": [
           "true"
+        ],
+        "height": [
+          "24",
+          "28"
+        ],
+        "value-state": [
+          "empty",
+          "populated"
         ]
       }
     },
@@ -834,6 +843,12 @@
       "variants": {
         "editable": [
           "true"
+        ],
+        "revealed": [
+          "false"
+        ],
+        "validation": [
+          "valid"
         ]
       }
     },
@@ -1122,11 +1137,13 @@
         "field",
         "label",
         "prefix",
+        "suffix",
         "title"
       ],
       "states": [
         "enabled=false",
         "focused",
+        "highlighted",
         "hovered"
       ],
       "variants": {
@@ -1142,8 +1159,21 @@
           "false",
           "true"
         ],
+        "height": [
+          "24"
+        ],
+        "position": [
+          "single"
+        ],
+        "role": [
+          "group"
+        ],
         "text-colour": [
           "labelColour"
+        ],
+        "validation": [
+          "invalid",
+          "valid"
         ]
       }
     },
@@ -1165,6 +1195,7 @@
         "bezel",
         "field",
         "token",
+        "token-disclosure",
         "token-label"
       ],
       "states": [
