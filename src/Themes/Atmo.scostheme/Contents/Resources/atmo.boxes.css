@@ -1,0 +1,184 @@
+:scope [data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style]):not([data-nse-style]),
+:scope:is([data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style]):not([data-nse-style])),
+:scope[data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style]):not([data-nse-style]) {
+  background:var(--nse-atmo-onyx-dv-line) left center/100% 4px no-repeat;
+}
+
+:scope [data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-style="soft"],
+:scope:is([data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-style="soft"]),
+:scope[data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-style="soft"] {
+  background:var(--nse-atmo-dv-line) left center/100% 7px no-repeat;
+}
+
+:scope [data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-style="grey"],
+:scope:is([data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-style="grey"]),
+:scope[data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-style="grey"] {
+  border:0;
+  border-image:none;
+  border-radius:3px;
+  background:linear-gradient(to right,rgba(226,226,225,0.9)0 1px,rgba(226,226,225,0) 2px),linear-gradient(to left,rgba(199,199,198,0.9)0 1px,rgba(199,199,198,0) 2px),linear-gradient(#acacab 0 1px,#b2b2b1 1px 2px,#babab9 2px 3px,#c0c0bf 3px 4px,#c4c4c4 4px 5px,#c5c5c4 5px 6px,#f9f9f8 6px 7px);
+}
+
+:scope [data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-style="alpha"],
+:scope:is([data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-style="alpha"]),
+:scope[data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-style="alpha"] {
+  background:var(--nse-atmo-dv-alpha-tile) left center repeat-x;
+}
+
+:scope [data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style="alpha"]):has(>[data-nse-part="title"]),
+:scope:is([data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style="alpha"]):has(>[data-nse-part="title"])),
+:scope[data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style="alpha"]):has(>[data-nse-part="title"]) {
+  background:none;
+}
+
+:scope [data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-part="separator"]:where([data-nse-control="box"]):where(:not([data-nse-style="alpha"])):has(>[data-nse-part="title"]),
+:scope:is([data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-part="separator"]:where([data-nse-control="box"]):where(:not([data-nse-style="alpha"])):has(>[data-nse-part="title"])),
+:scope[data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-part="separator"]:where([data-nse-control="box"]):where(:not([data-nse-style="alpha"])):has(>[data-nse-part="title"]) {
+  border:0;
+  border-image:none;
+  border-radius:0;
+  background:none;
+}
+
+:scope [data-nse-part="separator"]:where([data-nse-control="box"]):where(:not([data-nse-style="alpha"])):has(>[data-nse-part="title"])[data-nse-style="soft"] [data-nse-part="border"]:where([data-nse-control="box"]>*),
+:scope:is([data-nse-part="separator"]:where([data-nse-control="box"]):where(:not([data-nse-style="alpha"])):has(>[data-nse-part="title"])[data-nse-style="soft"]) [data-nse-part="border"]:where([data-nse-control="box"]>*),
+:scope[data-nse-part="separator"]:where([data-nse-control="box"]):where(:not([data-nse-style="alpha"])):has(>[data-nse-part="title"])[data-nse-style="soft"] [data-nse-part="border"]:where([data-nse-control="box"]>*) {
+  height:7px;
+  background:var(--nse-atmo-dv-line) left center/100% 7px no-repeat;
+}
+
+:scope [data-nse-part="separator"]:where([data-nse-control="box"]):where(:not([data-nse-style="alpha"])):has(>[data-nse-part="title"])[data-nse-style="grey"] [data-nse-part="title"]:where([data-nse-control="box"]>*):where(:not([data-nse-style="alpha"])>*),
+:scope:is([data-nse-part="separator"]:where([data-nse-control="box"]):where(:not([data-nse-style="alpha"])):has(>[data-nse-part="title"])[data-nse-style="grey"]) [data-nse-part="title"]:where([data-nse-control="box"]>*):where(:not([data-nse-style="alpha"])>*),
+:scope[data-nse-part="separator"]:where([data-nse-control="box"]):where(:not([data-nse-style="alpha"])):has(>[data-nse-part="title"])[data-nse-style="grey"] [data-nse-part="title"]:where([data-nse-control="box"]>*):where(:not([data-nse-style="alpha"])>*) {
+  color:#7d7d7c;
+}
+
+:scope [data-nse-part="separator"]:where([data-nse-control="box"]):where(:not([data-nse-style="alpha"])):has(>[data-nse-part="title"])[data-nse-style="grey"] [data-nse-part="border"]:where([data-nse-control="box"]>*),
+:scope:is([data-nse-part="separator"]:where([data-nse-control="box"]):where(:not([data-nse-style="alpha"])):has(>[data-nse-part="title"])[data-nse-style="grey"]) [data-nse-part="border"]:where([data-nse-control="box"]>*),
+:scope[data-nse-part="separator"]:where([data-nse-control="box"]):where(:not([data-nse-style="alpha"])):has(>[data-nse-part="title"])[data-nse-style="grey"] [data-nse-part="border"]:where([data-nse-control="box"]>*) {
+  height:7px;
+  border-radius:3px;
+  background:linear-gradient(to right,rgba(226,226,225,0.9)0 1px,rgba(226,226,225,0) 2px),linear-gradient(to left,rgba(199,199,198,0.9)0 1px,rgba(199,199,198,0) 2px),linear-gradient(#acacab 0 1px,#b2b2b1 1px 2px,#babab9 2px 3px,#c0c0bf 3px 4px,#c4c4c4 4px 5px,#c5c5c4 5px 6px,#f9f9f8 6px 7px);
+}
+
+:scope [data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style="alpha"]):has(>[data-nse-part="title"])::after,
+:scope:is([data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style="alpha"]):has(>[data-nse-part="title"])::after),
+:scope[data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style="alpha"]):has(>[data-nse-part="title"])::after {
+  background:var(--nse-atmo-dv-alpha-tile) left center repeat-x;
+}
+
+:scope [data-nse-control="box"]:where([data-nse-part="bezel"]),
+:scope:is([data-nse-control="box"]:where([data-nse-part="bezel"])),
+:scope[data-nse-control="box"]:where([data-nse-part="bezel"]) {
+  margin:8px 3px;
+  border-width:14px;
+  border-image:var(--nse-atmo-onyx-gb-frame)14 fill stretch;
+}
+
+:scope [data-nse-control="box"]:where([data-nse-part="bezel"]):where([data-nse-title-position="atTop"]):has(>[data-nse-part="title"]),
+:scope:is([data-nse-control="box"]:where([data-nse-part="bezel"]):where([data-nse-title-position="atTop"]):has(>[data-nse-part="title"])),
+:scope[data-nse-control="box"]:where([data-nse-part="bezel"]):where([data-nse-title-position="atTop"]):has(>[data-nse-part="title"]) {
+  border-width:36px 14px 14px;
+  border-image:var(--nse-atmo-onyx-gb-frame-labeled)36 14 14 14 fill stretch;
+}
+
+:scope [data-nse-control="box"]:where([data-nse-part="bezel"]) [data-nse-part="title"]:where([data-nse-control="box"]>*):where([data-nse-part="bezel"]>*),
+:scope:is([data-nse-control="box"]:where([data-nse-part="bezel"])) [data-nse-part="title"]:where([data-nse-control="box"]>*):where([data-nse-part="bezel"]>*),
+:scope[data-nse-control="box"]:where([data-nse-part="bezel"]) [data-nse-part="title"]:where([data-nse-control="box"]>*):where([data-nse-part="bezel"]>*) {
+  height:44px;
+  padding:1px 0 15px 10px;
+}
+
+:scope [data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-style="arrow"],
+:scope:is([data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-style="arrow"]),
+:scope[data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-style="arrow"] {
+  min-height:0;
+  background-image:var(--nse-atmo-divider-arrow),var(--nse-atmo-divider);
+  background-repeat:no-repeat,repeat-x;
+  background-position:center 0%,left center;
+  background-size:auto 400%,auto var(--nse-atmo-divider-arrow-line);
+}
+
+:scope [data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-style="arrow"]:active,
+:scope:is([data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-style="arrow"]:active),
+:scope[data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-style="arrow"]:active {
+  background-position:center 33.3333%,left center;
+}
+
+:scope [data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-style="arrow"][data-nse-expanded="true"],
+:scope:is([data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-style="arrow"][data-nse-expanded="true"]),
+:scope[data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-style="arrow"][data-nse-expanded="true"] {
+  background-position:center 66.6667%,left center;
+}
+
+:scope [data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-style="arrow"][data-nse-expanded="true"]:active,
+:scope:is([data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-style="arrow"][data-nse-expanded="true"]:active),
+:scope[data-nse-part="separator"]:where([data-nse-control="box"]):where([data-nse-style])[data-nse-style="arrow"][data-nse-expanded="true"]:active {
+  background-position:center 100%,left center;
+}
+
+:scope [data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="custom"],
+:scope:is([data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="custom"]),
+:scope[data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="custom"] {
+  --nse-corner-radius:11px;
+  --nse-box-margin-top:12px;
+  --nse-box-margin-right:12px;
+  --nse-box-margin-bottom:12px;
+  --nse-box-margin-left:12px;
+  min-width:0;
+  min-height:74px;
+  margin:0;
+  border:14px solid transparent;
+  border-image:var(--nse-atmo-roundy-shadow)14 stretch;
+  border-radius:var(--nse-corner-radius);
+  background:var(--nse-box-fill,transparent);
+  color:var(--nse-atmo-content-ink,#273446);
+}
+
+:scope [data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="custom"]>[data-nse-part="content"]:where([data-nse-control="box"]>*):where([data-nse-part="bezel"]>*),
+:scope:is([data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="custom"])>[data-nse-part="content"]:where([data-nse-control="box"]>*):where([data-nse-part="bezel"]>*),
+:scope[data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="custom"]>[data-nse-part="content"]:where([data-nse-control="box"]>*):where([data-nse-part="bezel"]>*) {
+  margin:0;
+  background:none;
+}
+
+:scope [data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="custom"]:is([data-nse-border-type="lineBorder"],[data-nse-border-type="grooveBorder"]),
+:scope:is([data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="custom"]:is([data-nse-border-type="lineBorder"],[data-nse-border-type="grooveBorder"])),
+:scope[data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="custom"]:is([data-nse-border-type="lineBorder"],[data-nse-border-type="grooveBorder"]) {
+  border-width:18px;
+  border-image:var(--nse-atmo-rb-frame)18 fill stretch;
+}
+
+:scope [data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="custom"][data-nse-shadow="true"],
+:scope:is([data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="custom"][data-nse-shadow="true"]),
+:scope[data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="custom"][data-nse-shadow="true"] {
+  border-width:18px;
+  border-image:var(--nse-atmo-rb-shadow)18 fill stretch;
+}
+
+:scope [data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="custom"]:is([data-nse-custom-border="true"],[data-nse-custom-fill="true"],[data-nse-transparent="true"]),
+:scope:is([data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="custom"]:is([data-nse-custom-border="true"],[data-nse-custom-fill="true"],[data-nse-transparent="true"])),
+:scope[data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="custom"]:is([data-nse-custom-border="true"],[data-nse-custom-fill="true"],[data-nse-transparent="true"]) {
+  border-image:none;
+  border-color:var(--nse-box-border-colour,var(--nse-atmo-box-border,#89939c));
+  border-width:var(--nse-box-border-width,1px);
+}
+
+:scope [data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="custom"][data-nse-border-type="noBorder"],
+:scope:is([data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="custom"][data-nse-border-type="noBorder"]),
+:scope[data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="custom"][data-nse-border-type="noBorder"] {
+  border-image:none;
+  border:0;
+}
+
+:scope [data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="custom"][data-nse-transparent="true"],
+:scope:is([data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="custom"][data-nse-transparent="true"]),
+:scope[data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="custom"][data-nse-transparent="true"] {
+  background:transparent;
+}
+
+:scope [data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="custom"][data-nse-shadow="true"]:not([data-nse-shadow-suppressed="true"]),
+:scope:is([data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="custom"][data-nse-shadow="true"]:not([data-nse-shadow-suppressed="true"])),
+:scope[data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"])[data-nse-box-type="custom"][data-nse-shadow="true"]:not([data-nse-shadow-suppressed="true"]) {
+  box-shadow:var(--nse-shadow-offset-x) var(--nse-shadow-offset-y) var(--nse-shadow-blur) var(--nse-shadow-colour);
+}

@@ -1,0 +1,54 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/atmo-theme-bundle.test.ts tests/runtime/nse-container-drawing-state.test.tsx tests/runtime/nse-box-shadow.test.tsx tests/nse/controls/nse-public-control-adapters.test.tsx tests/nse/layout/nse-layout-primitives.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-box-shadow.test.tsx (7 tests | 1 failed) 1024ms
+     × lets Atmo CSS select the well, frame and floating recipes from real box properties 987ms
+ ❯ tests/runtime/atmo-theme-bundle.test.ts (2 tests | 1 failed) 93ms
+     × is a valid static bundle with Atmo's existing navigation and presentation 84ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/atmo-theme-bundle.test.ts > Atmo's public theme bundle > is a valid static bundle with Atmo's existing navigation and presentation
+TypeError: C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\src\Themes\Atmo.scostheme\Contents\Resources\atmo.boxes.css: css-selector: Unknown contract attribute data-nse-shadow-suppressed.
+ ❯ fail scripts/synware/theme-bundles.mjs:121:47
+    119| }
+    120| const freeze = value => { if (value && typeof value === "object") { fo…
+    121| const fail = (file, rule, message) => { throw new TypeError(`${file}: …
+       |                                               ^
+    122| const record = (value, allowed, file) => { try { keys(value, allowed, …
+    123| export function imageDimensions(file) {
+ ❯ Object.<anonymous> scripts/synware/theme-bundles.mjs:228:38
+ ❯ walkNode ../../../../../../Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/css-tree/lib/walker/create.js:169:36
+ ❯ List.walkReducer ../../../../../../Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/css-tree/lib/walker/create.js:195:61
+ ❯ List.reduce ../../../../../../Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/css-tree/lib/utils/List.js:174:22
+ ❯ Object.Selector ../../../../../../Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/css-tree/lib/walker/create.js:103:31
+ ❯ walkNode ../../../../../../Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/css-tree/lib/walker/create.js:180:41
+ ❯ List.walkReducer ../../../../../../Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/css-tree/lib/walker/create.js:195:61
+ ❯ List.reduce ../../../../../../Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/css-tree/lib/utils/List.js:174:22
+ ❯ Object.SelectorList ../../../../../../Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/css-tree/lib/walker/create.js:103:31
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/runtime/nse-box-shadow.test.tsx > custom NSBox property projection for themes > lets Atmo CSS select the well, frame and floating recipes from real box properties
+AssertionError: expected 'none' to contain '--nse-atmo-roundy-shadow'
+
+Expected: "--nse-atmo-roundy-shadow"
+Received: "none"
+
+ ❯ tests/runtime/nse-box-shadow.test.tsx:67:89
+     65|         <NSEBox aria-label="Override" boxType="custom" borderWidth={2}…
+     66|       </div>);
+     67|       expect(getComputedStyle(screen.getByRole("group", { name: "Well"…
+       |                                                                                         ^
+     68|       expect(getComputedStyle(screen.getByRole("group", { name: "Well"…
+     69|       expect(getComputedStyle(screen.getByRole("group", { name: "Frame…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed | 2 passed (4)
+      Tests  2 failed | 32 passed (34)
+   Start at  02:12:11
+   Duration  6.42s (transform 3.83s, setup 78ms, import 6.48s, tests 1.79s, environment 2.90s)

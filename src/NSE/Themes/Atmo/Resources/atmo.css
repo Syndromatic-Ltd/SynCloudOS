@@ -1,3 +1,4 @@
+@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo.boxes.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo.text.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo.values.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo.selection.css";
@@ -1312,17 +1313,9 @@
 /* :not([data-variant]) — this must never leak onto the variant dividers:
    it ties with their consumer rules on specificity but loads later, and a
    background SHORTHAND would clobber e.g. the arrow variant's sprite sizing. */
-:scope .nse-control-divider:not([data-variant]),
-:scope:is(.nse-control-divider:not([data-variant])),
-:scope.nse-control-divider:not([data-variant]) {
-  background: var(--nse-atmo-onyx-dv-line) left center / 100% 4px no-repeat;
-}
 
-:scope .nse-control-divider[data-variant="soft"],
-:scope:is(.nse-control-divider[data-variant="soft"]),
-:scope.nse-control-divider[data-variant="soft"] {
-  background: var(--nse-atmo-dv-line) left center / 100% 7px no-repeat;
-}
+
+
 
 :scope {
   --nse-atmo-dv-line-scaled: linear-gradient(
@@ -1335,105 +1328,37 @@
 
 /* Opaque bar, so the cap-rim overlays composite safely (single translucent
    layer over opaque paint — no double-darkening). */
-:scope .nse-control-divider[data-variant="gray"],
-:scope:is(.nse-control-divider[data-variant="gray"]),
-:scope.nse-control-divider[data-variant="gray"] {
-  border: 0;
-  border-image: none;
-  border-radius: 3px;
-  background:
-    linear-gradient(to right, rgba(226, 226, 225, 0.9) 0 1px, rgba(226, 226, 225, 0) 2px),
-    linear-gradient(to left, rgba(199, 199, 198, 0.9) 0 1px, rgba(199, 199, 198, 0) 2px),
-    linear-gradient(
-      #acacab 0 1px, #b2b2b1 1px 2px, #babab9 2px 3px, #c0c0bf 3px 4px,
-      #c4c4c4 4px 5px, #c5c5c4 5px 6px, #f9f9f8 6px 7px
-    );
-}
 
-:scope .nse-control-divider[data-variant="alpha"],
-:scope:is(.nse-control-divider[data-variant="alpha"]),
-:scope.nse-control-divider[data-variant="alpha"] {
-  background: var(--nse-atmo-dv-alpha-tile) left center repeat-x;
-}
 
-:scope .nse-control-divider.nse-control-divider-alpha-captioned,
-:scope:is(.nse-control-divider.nse-control-divider-alpha-captioned),
-:scope.nse-control-divider.nse-control-divider-alpha-captioned {
-  background: none;
-}
+
+
+
 
 /* A captioned divider is [caption][line to the edge]: the line is the cap,
    never the host. The variant rules above paint the whole element, which ran
    the soft and grey lines straight through the caption; the host is cleared
    here (same specificity, later) and the cap carries each variant's line. */
-:scope .nse-control-divider.nse-control-divider-captioned,
-:scope:is(.nse-control-divider.nse-control-divider-captioned),
-:scope.nse-control-divider.nse-control-divider-captioned {
-  border: 0;
-  border-image: none;
-  border-radius: 0;
-  background: none;
-}
 
-:scope .nse-control-divider-captioned[data-variant="soft"] .nse-control-divider-cap,
-:scope:is(.nse-control-divider-captioned[data-variant="soft"]) .nse-control-divider-cap,
-:scope.nse-control-divider-captioned[data-variant="soft"] .nse-control-divider-cap {
-  height: 7px;
-  background: var(--nse-atmo-dv-line) left center / 100% 7px no-repeat;
-}
 
-:scope .nse-control-divider-captioned[data-variant="gray"] .nse-control-divider-caption,
-:scope:is(.nse-control-divider-captioned[data-variant="gray"]) .nse-control-divider-caption,
-:scope.nse-control-divider-captioned[data-variant="gray"] .nse-control-divider-caption {
-  color: #7d7d7c;
-}
 
-:scope .nse-control-divider-captioned[data-variant="gray"] .nse-control-divider-cap,
-:scope:is(.nse-control-divider-captioned[data-variant="gray"]) .nse-control-divider-cap,
-:scope.nse-control-divider-captioned[data-variant="gray"] .nse-control-divider-cap {
-  height: 7px;
-  border-radius: 3px;
-  background:
-    linear-gradient(to right, rgba(226, 226, 225, 0.9) 0 1px, rgba(226, 226, 225, 0) 2px),
-    linear-gradient(to left, rgba(199, 199, 198, 0.9) 0 1px, rgba(199, 199, 198, 0) 2px),
-    linear-gradient(
-      #acacab 0 1px, #b2b2b1 1px 2px, #babab9 2px 3px, #c0c0bf 3px 4px,
-      #c4c4c4 4px 5px, #c5c5c4 5px 6px, #f9f9f8 6px 7px
-    );
-}
 
-:scope .nse-control-divider-alpha-captioned::after,
-:scope:is(.nse-control-divider-alpha-captioned::after),
-:scope.nse-control-divider-alpha-captioned::after {
-  background: var(--nse-atmo-dv-alpha-tile) left center repeat-x;
-}
 
-:scope .nse-control-group-box,
-:scope:is(.nse-control-group-box),
-:scope.nse-control-group-box {
-  margin: 8px 3px;
-  border-width: 14px;
-  border-image: var(--nse-atmo-onyx-gb-frame) 14 fill stretch;
-}
 
-:scope .nse-control-group-box.is-labeled,
-:scope:is(.nse-control-group-box.is-labeled),
-:scope.nse-control-group-box.is-labeled {
-  border-width: 36px 14px 14px;
-  border-image: var(--nse-atmo-onyx-gb-frame-labeled) 36 14 14 14 fill stretch;
-}
+
+
+
+
+
+
+
 
 /* The label's capitals centre in the band the frame draws (its top 29px, under
    a 1px rim): measured, 4px of top padding left them 3px low, 12px of band above
    the caps and 6px below. 1px sets them 8px under the rim and 9px over the band's
    foot. */
-:scope .nse-control-group-box .nse-control-group-label,
-:scope:is(.nse-control-group-box) .nse-control-group-label,
-:scope.nse-control-group-box .nse-control-group-label {
-  height: 44px;
-  padding: 1px 0 15px 10px;
-  font-size: 14px;
-  font-weight: 700;
+:scope .nse-control-group-box .nse-control-group-label,:scope:is(.nse-control-group-box) .nse-control-group-label,:scope.nse-control-group-box .nse-control-group-label {
+  font-size:14px;
+  font-weight:700;
 }
 
 :scope {
@@ -1547,15 +1472,7 @@
   --nse-atmo-divider-arrow-line: 4px;
 }
 
-:scope .nse-control-divider[data-variant="arrow"],
-:scope:is(.nse-control-divider[data-variant="arrow"]),
-:scope.nse-control-divider[data-variant="arrow"] {
-  min-height: 0;
-  background-image: var(--nse-atmo-divider-arrow), var(--nse-atmo-divider);
-  background-repeat: no-repeat, repeat-x;
-  background-position: center 0%, left center;
-  background-size: auto 400%, auto var(--nse-atmo-divider-arrow-line);
-}
+
 
 :scope .nse-control-divider[data-variant="arrow"]::before,
 :scope:is(.nse-control-divider[data-variant="arrow"]::before),
@@ -1566,96 +1483,38 @@
   content: none;
 }
 
-:scope .nse-control-divider[data-variant="arrow"]:active,
-:scope:is(.nse-control-divider[data-variant="arrow"]:active),
-:scope.nse-control-divider[data-variant="arrow"]:active,
+
 :scope .nse-control-divider[data-variant="arrow"][data-pressed="true"],
 :scope:is(.nse-control-divider[data-variant="arrow"][data-pressed="true"]),
 :scope.nse-control-divider[data-variant="arrow"][data-pressed="true"] {
-  background-position: center 33.3333%, left center;
+  background-position:center 33.3333%,left center;
 }
 
-:scope .nse-control-divider[data-variant="arrow"][data-expanded="true"],
-:scope:is(.nse-control-divider[data-variant="arrow"][data-expanded="true"]),
-:scope.nse-control-divider[data-variant="arrow"][data-expanded="true"] {
-  background-position: center 66.6667%, left center;
-}
 
-:scope .nse-control-divider[data-variant="arrow"][data-expanded="true"]:active,
-:scope:is(.nse-control-divider[data-variant="arrow"][data-expanded="true"]:active),
-:scope.nse-control-divider[data-variant="arrow"][data-expanded="true"]:active,
+
+
 :scope .nse-control-divider[data-variant="arrow"][data-expanded="true"][data-pressed="true"],
 :scope:is(.nse-control-divider[data-variant="arrow"][data-expanded="true"][data-pressed="true"]),
 :scope.nse-control-divider[data-variant="arrow"][data-expanded="true"][data-pressed="true"] {
-  background-position: center 100%, left center;
+  background-position:center 100%,left center;
 }
 
-:scope .nse-box[data-box-kind="custom"],
-:scope:is(.nse-box[data-box-kind="custom"]),
-:scope.nse-box[data-box-kind="custom"] {
-  --nse-corner-radius: 11px;
-  --nse-box-margin-top: 12px;
-  --nse-box-margin-right: 12px;
-  --nse-box-margin-bottom: 12px;
-  --nse-box-margin-left: 12px;
-  min-width: 0;
-  min-height: 74px;
-  margin: 0;
-  border: 14px solid transparent;
-  border-image: var(--nse-atmo-roundy-shadow) 14 stretch;
-  border-radius: var(--nse-corner-radius);
-  background: var(--nse-box-fill, transparent);
-  color: var(--nse-atmo-content-ink, #273446);
-}
 
-:scope .nse-box[data-box-kind="custom"]>.nse-box-content,
-:scope:is(.nse-box[data-box-kind="custom"])>.nse-box-content,
-:scope.nse-box[data-box-kind="custom"]>.nse-box-content {
-  margin: 0;
-  background: none;
-}
 
-:scope .nse-box[data-box-kind="custom"]:is([data-border-style="line"],[data-border-style="groove"]),
-:scope:is(.nse-box[data-box-kind="custom"]:is([data-border-style="line"],[data-border-style="groove"])),
-:scope.nse-box[data-box-kind="custom"]:is([data-border-style="line"],[data-border-style="groove"]) {
-  border-width: 18px;
-  border-image: var(--nse-atmo-rb-frame) 18 fill stretch;
-}
 
-:scope .nse-box[data-box-kind="custom"][data-nse-shadow="true"],
-:scope:is(.nse-box[data-box-kind="custom"][data-nse-shadow="true"]),
-:scope.nse-box[data-box-kind="custom"][data-nse-shadow="true"] {
-  border-width: 18px;
-  border-image: var(--nse-atmo-rb-shadow) 18 fill stretch;
-}
+
+
+
+
 
 /* NSBox properties override the theme art, including its opaque centre. */
-:scope .nse-box[data-box-kind="custom"]:is([data-custom-border="true"],[data-custom-fill="true"],[data-transparent="true"]),
-:scope:is(.nse-box[data-box-kind="custom"]:is([data-custom-border="true"],[data-custom-fill="true"],[data-transparent="true"])),
-:scope.nse-box[data-box-kind="custom"]:is([data-custom-border="true"],[data-custom-fill="true"],[data-transparent="true"]) {
-  border-image: none;
-  border-color: var(--nse-box-border-colour, var(--nse-atmo-box-border, #89939c));
-  border-width: var(--nse-box-border-width, 1px);
-}
 
-:scope .nse-box[data-box-kind="custom"][data-border-style="none"],
-:scope:is(.nse-box[data-box-kind="custom"][data-border-style="none"]),
-:scope.nse-box[data-box-kind="custom"][data-border-style="none"] {
-  border-image: none;
-  border: 0;
-}
 
-:scope .nse-box[data-box-kind="custom"][data-transparent="true"],
-:scope:is(.nse-box[data-box-kind="custom"][data-transparent="true"]),
-:scope.nse-box[data-box-kind="custom"][data-transparent="true"] {
-  background: transparent;
-}
 
-:scope .nse-box[data-box-kind="custom"][data-nse-shadow="true"]:not([data-nse-shadow-suppressed="true"]),
-:scope:is(.nse-box[data-box-kind="custom"][data-nse-shadow="true"]:not([data-nse-shadow-suppressed="true"])),
-:scope.nse-box[data-box-kind="custom"][data-nse-shadow="true"]:not([data-nse-shadow-suppressed="true"]) {
-  box-shadow: var(--nse-shadow-offset-x) var(--nse-shadow-offset-y) var(--nse-shadow-blur) var(--nse-shadow-colour);
-}
+
+
+
+
 
 :scope [data-nse-view-layer],
 :scope:is([data-nse-view-layer]),

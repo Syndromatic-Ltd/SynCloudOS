@@ -52,6 +52,7 @@
         "actions",
         "background",
         "bezel",
+        "border",
         "content",
         "header",
         "separator",
@@ -60,7 +61,8 @@
       "states": [],
       "variants": {
         "border-type": [
-          "bezelBorder"
+          "bezelBorder",
+          "grooveBorder"
         ],
         "box-type": [
           "custom",
@@ -68,11 +70,33 @@
           "secondary",
           "separator"
         ],
+        "custom-border": [
+          "true"
+        ],
+        "custom-fill": [
+          "true"
+        ],
+        "expanded": [
+          "true"
+        ],
+        "role": [
+          "disclosure"
+        ],
+        "shadow": [
+          "true"
+        ],
+        "shadow-suppressed": [
+          "true"
+        ],
         "style": [
+          "alpha",
+          "arrow",
           "floating",
+          "grey",
           "inspector",
           "plain",
           "sidebar",
+          "soft",
           "surface"
         ],
         "title-position": [
@@ -83,6 +107,10 @@
           "belowBottom",
           "belowTop",
           "noTitle"
+        ],
+        "transparent": [
+          "false",
+          "true"
         ]
       }
     },

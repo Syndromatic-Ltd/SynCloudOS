@@ -193,13 +193,19 @@ The value-control slice (`0a34f6d4`) moves **173 drawing rules / 536 selectors**
 
 Verification: **78 focused tests in five files**, **693 rendered contract specimens**, framework and both catalogue typechecks, and bundle validation passed. Paired computed-style checks of **172 value specimens** found zero differences. The frozen image gate passed **82/82, zero differences**, in `task-14-values-baseline.log`. All **2,648 PNG hashes remain unchanged**. Early validator runs exposed a cross-owner colour-panel selector and menu hooks absent from the rendered inventory; those were resolved through ownership and real supplementary specimens, with logs retained.
 
-The text slice moves **84 drawing rules / 249 selectors** for text, search, secure, combo and token fields, plus ruler status paint. Fields publish their existing group position, explicit height, validation and value state. Native editors supplied to the internal input group gain `field` parts declaratively; their refs, values and native edits are preserved, and nested controls keep their own hooks. Part selectors are bounded to their owning slots. Supplementary specimens cover input groups, field affixes and token menus.
+The text slice (`f88a7507`) moves **84 drawing rules / 249 selectors** for text, search, secure, combo and token fields, plus ruler status paint. Fields publish their existing group position, explicit height, validation and value state. Native editors supplied to the internal input group gain `field` parts declaratively; their refs, values and native edits are preserved, and nested controls keep their own hooks. Part selectors are bounded to their owning slots. Supplementary specimens cover input groups, field affixes and token menus.
 
 Verification: **751 tests in six files passed** (54 focused cases and 697 rendered specimens); the native-ref check passed all five cases after its added assertions. Typechecks and bundle validation passed. Paired computed-style checks of **158 text/form specimens** found zero differences. Four focused input-group image checks passed, followed by the complete frozen **82/82, zero differences**, in `task-14-text-baseline-final.log`. All **2,648 PNG hashes are unchanged**.
 
 The first full image run passed 78/82 and caught the input group's missing native field part. Its original expected/actual/diff images and traces remain under `task-14-text-input-box-failure`. Earlier style probes caught disabled search fields incorrectly acquiring paint that their old selectors never applied; predicates now preserve that behaviour. No baseline image was changed.
 
-Remaining Task 14 slices: containers, menus/toolbars, windows, overlays and system UI; final built-in data connection, structure split and removal of the old theme directory.
+The box/separator/image container slice moves **64 drawing rules / 155 selectors** onto public hooks. NSBox publishes its transparency and custom fill/border facts; the separator publishes its drawing style and disclosure state; the image's media element publishes its image part. The old `gray` separator variant is removed in favour of `grey`, with no alias. The corresponding private artwork token uses the same British spelling. Supplementary specimens cover the existing separator variants, custom box overrides and shadow suppression.
+
+Verification: **34 focused tests across four files**, **704 rendered contract specimens**, framework and supplementary catalogue typechecks, and bundle validation passed. Paired computed-style checks of **50 cases** found zero differences after narrowing fieldset-title selectors to their bezel owner. The old source-path box-paint test now reads the actual bundle CSS and exercises public selectors.
+
+The initial full screenshot gate passed 81/82 with no pixel mismatch; one navigation failed before rendering with Chromium `ERR_NO_BUFFER_SPACE`. Its trace is retained as `task-14-boxes-startup-trace.zip`. The complete standalone rerun with one worker passed **82/82, zero differences**, in `task-14-boxes-baseline-final.log`. All **2,648 frozen PNG hashes are unchanged**.
+
+Remaining Task 14 slices: data views and remaining containers, menus/toolbars, windows, overlays and system UI; final built-in data connection, structure split and removal of the old theme directory.
 
 ### Tasks 15–19
 
@@ -259,6 +265,8 @@ Further diagnostic runs exposed folder-only capture interference and source-pain
 8. Painted bezel dimensions and interaction dimensions are distinct. The stepper uses `--nse-control-bezel-inline-size` and `--nse-control-bezel-block-size` for its existing art; framework-owned hit dimensions meet the minimum without moving that art or its neighbours. Passive progress/meter surfaces do not receive hit-target sizing.
 
 ## Public API accounting
+
+Task 14 additionally publishes validation, value-state, revealed, height, expanded, transparent, custom-fill, custom-border, shadow and shadow-suppressed variants, plus existing group/position and native editing parts. The separator variant `gray` is removed and `grey` replaces it without an alias.
 
 Task 14's push-button slice adds `nseControlHooks`' optional `tracking` field and `data-nse-tracking` values, plus the `appearance-name`, `key-equivalent`, `has-destructive-action` and `image-position` variants. The generated contract records their actual emitted values. All existing logical button states and interaction properties retain their behaviour.
 

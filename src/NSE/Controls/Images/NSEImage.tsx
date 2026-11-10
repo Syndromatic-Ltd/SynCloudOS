@@ -198,7 +198,7 @@ export const NSESizeableImage = forwardRef<NSESizeableImageHandle, NSESizeableIm
       >
         {resolvedSrc ? (
           <img
-            className="nse-control-sizeable-image-media"
+            className="nse-control-sizeable-image-media" data-nse-part="image"
             src={resolvedSrc}
             alt={renderedTemplate ? "" : resolvedAlt}
             aria-hidden={renderedTemplate || undefined}

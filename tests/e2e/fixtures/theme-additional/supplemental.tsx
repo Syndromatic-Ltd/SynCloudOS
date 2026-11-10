@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { NSEInputBox, NSETextField, NSERadioGroup } from "../../../../src/NSE/Controls/Fields/NSEFields";
+import { NSEBox, NSEInputBox, NSETextField, NSERadioGroup } from "../../../../src/NSE/Controls/Fields/NSEFields";
+import { NSEDivider } from "../../../../src/NSE/Controls/Selection/NSEDivider";
+import { NSEShadow } from "../../../../src/NSE/Graphics/NSEShadow";
 import { NSETokenField } from "../../../../src/NSE/Controls/Completion/NSETokenField";
 import { NSESegmentedControl } from "../../../../src/NSE/Controls/Values/NSESegmentedControl";
 import { NSEColourSwatches } from "../../../../src/NSE/Colour/Pickers/NSEColourSwatches";
@@ -44,6 +46,9 @@ import { createStaticPresentationTraits } from "../../../fixtures/presentationTr
 const plainTheme = freezeNSETheme({ ...atmoTheme, presentation: { login: "plain", notifications: "plain", materialLighting: "off" } });
 const colour = GFXColour.parse("#336699");
 export const supplementalThemeCatalogue: readonly { id: string; render: () => ReactNode }[] = [
+  ...(["plain", "soft", "grey", "alpha", "arrow"] as const).map(variant => ({ id: `separator-${variant}`, render: () => <NSEDivider variant={variant} caption={variant === "alpha" ? "A" : "Section"} expanded onToggle={variant === "arrow" ? noop : undefined} /> })),
+  { id: "box-reduced-transparency", render: () => <NSEAppearanceProvider theme={atmoTheme} transparency="reduced"><NSEBox boxType="custom" shadow={new NSEShadow()}>Content</NSEBox></NSEAppearanceProvider> },
+  { id: "box-overrides", render: () => <NSEBox boxType="custom" borderType="grooveBorder" isTransparent fillColour="#123" borderColour="#456" borderWidth={2} shadow={new NSEShadow()}>Content</NSEBox> },
   { id: "token-menu", render: () => <NSETokenField aria-label="Tags" values={[{ id: "work", label: "Work", representedObject: "work" }]} createToken={label => ({ id: label, label, representedObject: label })} onValuesChange={noop} tokenMenu={() => [{ id: "remove", label: "Remove" }]} /> },
   { id: "field-affixes", render: () => <NSETextField label="Amount" prefix="$" suffix="units" defaultValue="10" /> },
   ...[true, false].map(highlighted => ({ id: `input-group-${highlighted}`, render: () => <NSEInputBox label="Export" invalid={highlighted} alwaysLooksFocused={highlighted}><input aria-label="Export value" /></NSEInputBox> })),

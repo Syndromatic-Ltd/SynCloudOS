@@ -22,7 +22,7 @@ import type { HTMLAttributes, ReactNode } from "react";
 import { classes } from "../Core/nseControlsShared";
 
 export interface NSEDividerProps extends HTMLAttributes<HTMLHRElement> {
-  variant?: "plain" | "soft" | "gray" | "alpha" | "arrow";
+  variant?: "plain" | "soft" | "grey" | "alpha" | "arrow";
   label?: string;
   /** Visible inline caption — renders the divider grammar: [caption][line-to-edge]. */
   caption?: ReactNode;
@@ -50,7 +50,7 @@ export function NSEDivider({
   style,
   ...props
 }: NSEDividerProps) {
-  const drawing = { "data-nse-control": "box", "data-nse-box-type": "separator", ...Object.fromEntries(Object.entries(props).filter(([name]) => name.startsWith("data-nse-"))) };
+  const drawing = { "data-nse-control": "box", "data-nse-box-type": "separator", "data-nse-style": variant, "data-nse-role": onToggle ? "disclosure" : undefined, "data-nse-expanded": expanded === undefined ? undefined : String(expanded), ...Object.fromEntries(Object.entries(props).filter(([name]) => name.startsWith("data-nse-"))) };
   if (onToggle) {
     return (
       <button
