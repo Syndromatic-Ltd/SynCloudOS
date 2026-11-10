@@ -1,3 +1,4 @@
+@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.values.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.selection.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.buttons.css";
 @layer nse.atmo {
@@ -490,102 +491,32 @@
    from the radio family comes from Tabs + RadioGroup using the radiobutton sprite instead.
    Map the radio's data-position onto the grouped-toolbutton ladder (grouped-toolbutton.png,
    1000px / 50px cells — same slices the grouped toolbar uses above). */
-:where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio,
-:where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio {
-  height: var(--nse-atmo-bar-h, 50px);
-  min-height: var(--nse-atmo-bar-h, 50px);
-  border-style: solid;
-  border-color: transparent;
-  color: #ededed;
-  font-size: max(11px, calc(var(--nse-atmo-bar-h, 50px) * 0.4));
-  line-height: var(--nse-atmo-bar-h, 50px);
+:where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio,:where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio {
+  font-size:max(11px,calc(var(--nse-atmo-bar-h,50px)*0.4));
+  line-height:var(--nse-atmo-bar-h,50px);
 }
-:where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio[data-position="first"],
-:where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="first"] {
-  border-width: 0 1px 0 23px;
-  border-image: var(--nse-atmo-grouped-toolbutton) 0 1 950 23 fill stretch;
-}
-:where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio[data-position="middle"],
-:where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="middle"] {
-  border-width: 0 1px;
-  border-image: var(--nse-atmo-grouped-toolbutton) 250 1 700 1 fill stretch;
-}
-:where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio[data-position="last"],
-:where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="last"] {
-  border-width: 0 23px 0 1px;
-  border-image: var(--nse-atmo-grouped-toolbutton) 500 23 450 1 fill stretch;
-}
-:where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio[data-position="single"],
-:where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="single"] {
-  border-width: 0 23px;
-  border-image: var(--nse-atmo-grouped-toolbutton) 750 23 200 23 fill stretch;
-}
-:where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio[data-position="first"][data-selected="true"],
-:where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="first"][data-selected="true"] {
-  border-image-slice: 100 1 850 23 fill;
-}
-:where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio[data-position="middle"][data-selected="true"],
-:where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="middle"][data-selected="true"] {
-  border-image-slice: 350 1 600 1 fill;
-}
-:where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio[data-position="last"][data-selected="true"],
-:where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="last"][data-selected="true"] {
-  border-image-slice: 600 23 350 1 fill;
-}
-:where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio[data-position="single"][data-selected="true"],
-:where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="single"][data-selected="true"] {
-  border-image-slice: 850 23 100 23 fill;
-}
-:where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio[data-position="first"]:disabled,
-:where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="first"]:disabled {
-  border-image-slice: 200 1 750 23 fill;
-}
-:where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio[data-position="middle"]:disabled,
-:where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="middle"]:disabled {
-  border-image-slice: 450 1 500 1 fill;
-}
-:where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio[data-position="last"]:disabled,
-:where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="last"]:disabled {
-  border-image-slice: 700 23 250 1 fill;
-}
-:where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio[data-position="single"]:disabled,
-:where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="single"]:disabled {
-  border-image-slice: 950 23 0 23 fill;
-}
+
+
+
+
+
+
+
+
+
+
+
+
 /* momentary press (down) — grouped-toolbutton active band, like the Tools buttons */
-:where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio[data-position="first"]:active:not(:disabled),
-:where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="first"]:active:not(:disabled) {
-  border-image-slice: 50 1 900 23 fill;
-}
-:where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio[data-position="middle"]:active:not(:disabled),
-:where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="middle"]:active:not(:disabled) {
-  border-image-slice: 300 1 650 1 fill;
-}
-:where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio[data-position="last"]:active:not(:disabled),
-:where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="last"]:active:not(:disabled) {
-  border-image-slice: 550 23 400 1 fill;
-}
-:where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio[data-position="single"]:active:not(:disabled),
-:where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="single"]:active:not(:disabled) {
-  border-image-slice: 800 23 150 23 fill;
-}
+
+
+
+
 /* selected + press */
-:where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio[data-position="first"][data-selected="true"]:active:not(:disabled),
-:where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="first"][data-selected="true"]:active:not(:disabled) {
-  border-image-slice: 150 1 800 23 fill;
-}
-:where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio[data-position="middle"][data-selected="true"]:active:not(:disabled),
-:where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="middle"][data-selected="true"]:active:not(:disabled) {
-  border-image-slice: 400 1 550 1 fill;
-}
-:where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio[data-position="last"][data-selected="true"]:active:not(:disabled),
-:where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="last"][data-selected="true"]:active:not(:disabled) {
-  border-image-slice: 650 23 300 1 fill;
-}
-:where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio[data-position="single"][data-selected="true"]:active:not(:disabled),
-:where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="single"][data-selected="true"]:active:not(:disabled) {
-  border-image-slice: 900 23 50 23 fill;
-}
+
+
+
+
 
 :where(:scope) .nse-control-text-field,
 :where(:scope):is(.nse-control-text-field) {
@@ -595,16 +526,16 @@
   color: var(--nse-atmo-control-ink, #283444);
 }
 
+:where(:scope) .nse-control-field-label,:where(:scope):is(.nse-control-field-label),:where(:scope) .nse-control-picker-label,:where(:scope):is(.nse-control-picker-label),:where(:scope) .nse-control-slider-label,:where(:scope):is(.nse-control-slider-label) {
+  font-size:13px;
+  font-weight:700;
+  line-height:1.2;
+}
 :where(:scope) .nse-control-field-label,
 :where(:scope):is(.nse-control-field-label),
 :where(:scope) .nse-control-picker-label,
-:where(:scope):is(.nse-control-picker-label),
-:where(:scope) .nse-control-slider-label,
-:where(:scope):is(.nse-control-slider-label) {
-  color: var(--nse-atmo-label-ink, #314255);
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1.2;
+:where(:scope):is(.nse-control-picker-label) {
+  color:var(--nse-atmo-label-ink,#314255);
 }
 
 /* Geometry only: the pill (Heritage's border-image fill, Atmo's vector
@@ -753,87 +684,50 @@
 
 
 
-:where(:scope) .nse-control-toggle,
-:where(:scope):is(.nse-control-toggle) {
-  --nse-control-toggle-unit: max(var(--nse-atmo-toggle-height), calc((var(--nse-control-toggle-label-width, 0px) + 4px) * 1.333333333));
-  position: relative;
-  display: inline-block;
-  width: calc(var(--nse-control-toggle-unit) * 2);
-  min-width: calc(var(--nse-control-toggle-unit) * 2);
-  height: var(--nse-control-toggle-unit);
-  margin: 1px 0;
-  padding: 0;
-  overflow: visible;
-  border: 0;
-  color: rgba(255, 255, 255, 0.94);
-  background: transparent;
-  font: inherit;
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 1;
-  text-align: left;
-  text-transform: uppercase;
-  cursor: pointer;
-  touch-action: pan-y;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
+:where(:scope) .nse-control-toggle,:where(:scope):is(.nse-control-toggle) {
+  position:relative;
+  display:inline-block;
+  overflow:visible;
+  font:inherit;
+  font-size:10px;
+  font-weight:700;
+  line-height:1;
+  text-align:left;
+  text-transform:uppercase;
+  cursor:pointer;
+  touch-action:pan-y;
+  user-select:none;
 }
 
-:where(:scope) .nse-control-toggle-track,
-:where(:scope):is(.nse-control-toggle-track) {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  border-radius: calc(var(--nse-control-toggle-unit) / 2);
-  background: transparent;
+:where(:scope) .nse-control-toggle-track,:where(:scope):is(.nse-control-toggle-track) {
+  position:absolute;
+  inset:0;
+  overflow:hidden;
 }
 
-:where(:scope) .nse-control-toggle-rail,
-:where(:scope):is(.nse-control-toggle-rail),
-:where(:scope) .nse-control-toggle-thumb,
-:where(:scope):is(.nse-control-toggle-thumb),
-:where(:scope) .nse-control-toggle-thumb::before,
-:where(:scope):is(.nse-control-toggle-thumb::before),
-:where(:scope) .nse-control-toggle-thumb::after,
-:where(:scope):is(.nse-control-toggle-thumb::after) {
-  position: absolute;
-  background-image: var(--nse-atmo-toggle);
-  background-repeat: no-repeat;
-  background-size: calc(var(--nse-control-toggle-unit) * 2) calc(var(--nse-control-toggle-unit) * 4);
+:where(:scope) .nse-control-toggle-rail,:where(:scope):is(.nse-control-toggle-rail),:where(:scope) .nse-control-toggle-thumb,:where(:scope):is(.nse-control-toggle-thumb),:where(:scope) .nse-control-toggle-thumb::before,:where(:scope):is(.nse-control-toggle-thumb::before),:where(:scope) .nse-control-toggle-thumb::after,:where(:scope):is(.nse-control-toggle-thumb::after) {
+  position:absolute;
 }
 
-:where(:scope) .nse-control-toggle-rail,
-:where(:scope):is(.nse-control-toggle-rail) {
-  top: 0;
-  z-index: 0;
-  width: var(--nse-control-toggle-unit);
-  height: var(--nse-control-toggle-unit);
+:where(:scope) .nse-control-toggle-rail,:where(:scope):is(.nse-control-toggle-rail) {
+  top:0;
+  z-index:0;
 }
 
-:where(:scope) .nse-control-toggle-rail-start,
-:where(:scope):is(.nse-control-toggle-rail-start) {
-  left: 0;
-  background-position: 0 0;
+:where(:scope) .nse-control-toggle-rail-start,:where(:scope):is(.nse-control-toggle-rail-start) {
+  left:0;
 }
 
-:where(:scope) .nse-control-toggle-rail-end,
-:where(:scope):is(.nse-control-toggle-rail-end) {
-  right: 0;
-  background-position: calc(-1 * var(--nse-control-toggle-unit)) calc(-1 * var(--nse-control-toggle-unit));
+:where(:scope) .nse-control-toggle-rail-end,:where(:scope):is(.nse-control-toggle-rail-end) {
+  right:0;
 }
 
-:where(:scope) .nse-control-toggle-thumb,
-:where(:scope):is(.nse-control-toggle-thumb) {
-  top: 0;
-  left: 0;
-  z-index: 3;
-  width: var(--nse-control-toggle-unit);
-  height: var(--nse-control-toggle-unit);
-  background-image: none;
-  left: calc(100% * var(--nse-control-toggle-ratio, 0));
-  transform: translateX(calc(-100% * var(--nse-control-toggle-ratio, 0)));
-  transition: left 180ms cubic-bezier(0.22, 0.75, 0.28, 1), transform 180ms cubic-bezier(0.22, 0.75, 0.28, 1), filter 140ms ease;
-  will-change: transform;
+:where(:scope) .nse-control-toggle-thumb,:where(:scope):is(.nse-control-toggle-thumb) {
+  top:0;
+  left:0;
+  z-index:3;
+  left:calc(100%*var(--nse-control-toggle-ratio,0));
+  transition:left 180ms cubic-bezier(0.22,0.75,0.28,1),transform 180ms cubic-bezier(0.22,0.75,0.28,1),filter 140ms ease;
 }
 
 :where(:scope) .nse-control-toggle-thumb::before,
@@ -845,76 +739,40 @@
   transition: opacity 180ms cubic-bezier(0.22, 0.75, 0.28, 1);
 }
 
-:where(:scope) .nse-control-toggle-thumb::before,
-:where(:scope):is(.nse-control-toggle-thumb::before) {
-  background-position: 0 calc(-1 * var(--nse-control-toggle-unit));
-  opacity: calc(1 - var(--nse-control-toggle-ratio, 0));
-}
 
-:where(:scope) .nse-control-toggle-thumb::after,
-:where(:scope):is(.nse-control-toggle-thumb::after) {
-  background-position: calc(-1 * var(--nse-control-toggle-unit)) 0;
-  opacity: var(--nse-control-toggle-ratio, 0);
-}
 
-:where(:scope) .nse-control-toggle:disabled .nse-control-toggle-rail-start,
-:where(:scope):is(.nse-control-toggle:disabled) .nse-control-toggle-rail-start {
-  background-position: 0 calc(-2 * var(--nse-control-toggle-unit));
-}
 
-:where(:scope) .nse-control-toggle:disabled .nse-control-toggle-rail-end,
-:where(:scope):is(.nse-control-toggle:disabled) .nse-control-toggle-rail-end {
-  background-position: calc(-1 * var(--nse-control-toggle-unit)) calc(-3 * var(--nse-control-toggle-unit));
-}
 
-:where(:scope) .nse-control-toggle:disabled .nse-control-toggle-thumb::before,
-:where(:scope):is(.nse-control-toggle:disabled) .nse-control-toggle-thumb::before {
-  background-position: 0 calc(-3 * var(--nse-control-toggle-unit));
-}
 
-:where(:scope) .nse-control-toggle:disabled .nse-control-toggle-thumb::after,
-:where(:scope):is(.nse-control-toggle:disabled) .nse-control-toggle-thumb::after {
-  background-position: calc(-1 * var(--nse-control-toggle-unit)) calc(-2 * var(--nse-control-toggle-unit));
-}
+
+
+
+
+
+
 
 :where(:scope) .nse-control-toggle-state-label,
 :where(:scope):is(.nse-control-toggle-state-label) { display: inline-block; white-space: nowrap; }
 
-:where(:scope) .nse-control-toggle-text,
-:where(:scope):is(.nse-control-toggle-text) {
-  position: absolute;
-  top: 50%;
-  z-index: 2;
-  min-width: 26px;
-  color: rgba(255, 255, 255, 0.86);
-  line-height: 1;
-  pointer-events: none;
-  transform: translateY(-48%);
-  transition: opacity 160ms ease, text-shadow 160ms ease, color 160ms ease;
+:where(:scope) .nse-control-toggle-text,:where(:scope):is(.nse-control-toggle-text) {
+  position:absolute;
+  top:50%;
+  z-index:2;
+  line-height:1;
+  pointer-events:none;
+  transition:opacity 160ms ease,text-shadow 160ms ease,color 160ms ease;
 }
 
-:where(:scope) .nse-control-toggle-text-on,
-:where(:scope):is(.nse-control-toggle-text-on) {
-  left: calc(var(--nse-control-toggle-unit) * .28125);
-  opacity: var(--nse-control-toggle-ratio, 0);
+:where(:scope) .nse-control-toggle-text-on,:where(:scope):is(.nse-control-toggle-text-on) {
+  left:calc(var(--nse-control-toggle-unit)*.28125);
 }
 
-:where(:scope) .nse-control-toggle-text-off,
-:where(:scope):is(.nse-control-toggle-text-off) {
-  text-align: right;
-  right: calc(var(--nse-control-toggle-unit) / 4);
-  opacity: calc(1 - var(--nse-control-toggle-ratio, 0));
-  color: rgba(245, 245, 245, 0.78);
+:where(:scope) .nse-control-toggle-text-off,:where(:scope):is(.nse-control-toggle-text-off) {
+  text-align:right;
+  right:calc(var(--nse-control-toggle-unit)/4);
 }
 
-:where(:scope) .nse-control-toggle[data-state="on"] .nse-control-toggle-text-on,
-:where(:scope):is(.nse-control-toggle[data-state="on"]) .nse-control-toggle-text-on {
-  color: #fff;
-  text-shadow:
-    0 0 4px rgba(255, 255, 255, 0.95),
-    0 0 10px rgba(126, 216, 255, 0.78),
-    0 1px 1px rgba(0, 0, 0, 0.46);
-}
+
 
 :where(:scope) .nse-control-toggle[data-dragging="true"] .nse-control-toggle-thumb,
 :where(:scope):is(.nse-control-toggle[data-dragging="true"]) .nse-control-toggle-thumb,
@@ -925,16 +783,11 @@
   transition: none;
 }
 
-:where(:scope) .nse-control-toggle:disabled,
-:where(:scope):is(.nse-control-toggle:disabled) {
-  cursor: default;
-  opacity: 0.62;
+:where(:scope) .nse-control-toggle:disabled,:where(:scope):is(.nse-control-toggle:disabled) {
+  cursor:default;
 }
 
-:where(:scope) .nse-control-toggle:active:not(:disabled) .nse-control-toggle-thumb,
-:where(:scope):is(.nse-control-toggle:active:not(:disabled)) .nse-control-toggle-thumb {
-  filter: brightness(1.06);
-}
+
 
 :where(:scope) .nse-control-radio-group,:where(:scope):is(.nse-control-radio-group) {
   display:inline-flex;
@@ -1759,36 +1612,22 @@
   color: rgba(35, 45, 55, 0.42);
 }
 
-:where(:scope) .nse-control-slider,
-:where(:scope):is(.nse-control-slider) {
-  display: grid;
-  gap: 8px;
-  min-width: 180px;
-  --nse-control-minimum-inline-size: 180px;
-  color: var(--nse-atmo-control-ink, #283444);
+:where(:scope) .nse-control-slider,:where(:scope):is(.nse-control-slider) {
+  display:grid;
 }
 
-:where(:scope) .nse-control-slider-control,
-:where(:scope):is(.nse-control-slider-control) {
-  position: relative;
-  display: block;
-  height: 50px;
-  overflow: visible;
-  cursor: pointer;
+:where(:scope) .nse-control-slider-control,:where(:scope):is(.nse-control-slider-control) {
+  position:relative;
+  display:block;
+  overflow:visible;
+  cursor:pointer;
 }
 
-:where(:scope) .nse-control-slider-track,
-:where(:scope):is(.nse-control-slider-track) {
-  position: absolute;
-  top: 50%;
-  left: calc(var(--nse-atmo-slider-thumb-size) / 2);
-  right: calc(var(--nse-atmo-slider-thumb-size) / 2);
-  height: 7px;
-  border-color: transparent;
-  border-style: solid;
-  border-width: 0 4px;
-  border-image: var(--nse-atmo-slider-track) 0 4 0 4 fill repeat repeat;
-  transform: translateY(-50%);
+:where(:scope) .nse-control-slider-track,:where(:scope):is(.nse-control-slider-track) {
+  position:absolute;
+  top:50%;
+  left:calc(var(--nse-atmo-slider-thumb-size)/2);
+  right:calc(var(--nse-atmo-slider-thumb-size)/2);
 }
 
 :where(:scope) .nse-control-slider-fill,
@@ -1796,80 +1635,44 @@
   display: none;
 }
 
-:where(:scope) .nse-control-slider-thumb-rail,
-:where(:scope):is(.nse-control-slider-thumb-rail) {
-  position: absolute;
-  top: 50%;
-  left: calc(var(--nse-atmo-slider-thumb-size) / 2);
-  right: calc(var(--nse-atmo-slider-thumb-size) / 2);
-  z-index: 1;
-  height: 0;
-  overflow: visible;
-  transform: translateY(-50%);
+:where(:scope) .nse-control-slider-thumb-rail,:where(:scope):is(.nse-control-slider-thumb-rail) {
+  position:absolute;
+  top:50%;
+  left:calc(var(--nse-atmo-slider-thumb-size)/2);
+  right:calc(var(--nse-atmo-slider-thumb-size)/2);
+  z-index:1;
+  overflow:visible;
 }
 
-:where(:scope) .nse-control-slider input,
-:where(:scope):is(.nse-control-slider) input {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 50px;
-  margin: 0;
-  background: transparent;
-  appearance: none;
-  cursor: pointer;
+:where(:scope) .nse-control-slider input,:where(:scope):is(.nse-control-slider) input {
+  position:absolute;
+  inset:0;
+  appearance:none;
+  cursor:pointer;
 }
 
-:where(:scope) .nse-control-slider input::-webkit-slider-runnable-track,
-:where(:scope):is(.nse-control-slider) input::-webkit-slider-runnable-track {
-  height: 50px;
-  background: transparent;
+
+
+:where(:scope) .nse-control-slider input::-webkit-slider-thumb,:where(:scope):is(.nse-control-slider) input::-webkit-slider-thumb {
+  appearance:none;
+  cursor:pointer;
 }
 
-:where(:scope) .nse-control-slider input::-webkit-slider-thumb,
-:where(:scope):is(.nse-control-slider) input::-webkit-slider-thumb {
-  width: var(--nse-atmo-slider-thumb-visible-size);
-  height: 50px;
-  margin-top: 0;
-  border: 0;
-  background: transparent;
-  appearance: none;
-  cursor: pointer;
+
+
+
+
+:where(:scope) .nse-control-slider input::-moz-range-thumb,:where(:scope):is(.nse-control-slider) input::-moz-range-thumb {
+  cursor:pointer;
 }
 
-:where(:scope) .nse-control-slider input::-moz-range-track,
-:where(:scope):is(.nse-control-slider) input::-moz-range-track {
-  height: 50px;
-  background: transparent;
-}
-
-:where(:scope) .nse-control-slider input::-moz-range-progress,
-:where(:scope):is(.nse-control-slider) input::-moz-range-progress {
-  height: 7px;
-  background: transparent;
-}
-
-:where(:scope) .nse-control-slider input::-moz-range-thumb,
-:where(:scope):is(.nse-control-slider) input::-moz-range-thumb {
-  width: var(--nse-atmo-slider-thumb-visible-size);
-  height: 50px;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-}
-
-:where(:scope) .nse-control-slider-thumb-visual,
-:where(:scope):is(.nse-control-slider-thumb-visual) {
-  position: absolute;
-  top: 0;
-  left: var(--nse-control-slider-progress, 0%);
-  z-index: 1;
-  width: var(--nse-atmo-slider-thumb-size);
-  height: 50px;
-  pointer-events: none;
-  background: var(--nse-atmo-slider-thumb) 0 0 / 50px 100px no-repeat;
-  transform: translateX(calc(var(--nse-atmo-slider-thumb-size) / -2)) translateY(-50%);
-  transition: filter 120ms ease;
+:where(:scope) .nse-control-slider-thumb-visual,:where(:scope):is(.nse-control-slider-thumb-visual) {
+  position:absolute;
+  top:0;
+  left:var(--nse-control-slider-progress,0%);
+  z-index:1;
+  pointer-events:none;
+  transition:filter 120ms ease;
 }
 
 :where(:scope) .nse-control-slider input,
@@ -1879,24 +1682,11 @@
 
 /* Vertical slider: the control is turned -90°; the thumb turns back so its
    artwork stays top-lit. */
-:where(:scope) .nse-control-slider[data-orientation="vertical"] .nse-control-slider-thumb-visual,
-:where(:scope):is(.nse-control-slider[data-orientation="vertical"]) .nse-control-slider-thumb-visual {
-  transform: translateX(calc(var(--nse-atmo-slider-thumb-size) / -2)) translateY(-50%) rotate(90deg);
-}
 
-:where(:scope) .nse-control-slider:has(input:active) .nse-control-slider-thumb-visual,
-:where(:scope):is(.nse-control-slider:has(input:active)) .nse-control-slider-thumb-visual,
-:where(:scope) .nse-control-slider[data-dragging="true"] .nse-control-slider-thumb-visual,
-:where(:scope):is(.nse-control-slider[data-dragging="true"]) .nse-control-slider-thumb-visual {
-  background-position: 0 -50px;
-  filter: brightness(1.03);
-}
 
-:where(:scope) .nse-control-slider:has(input:disabled) .nse-control-slider-thumb-visual,
-:where(:scope):is(.nse-control-slider:has(input:disabled)) .nse-control-slider-thumb-visual {
-  opacity: 0.58;
-  filter: grayscale(0.35);
-}
+
+
+
 
 :where(:scope) .nse-control-slider:has(input:disabled) .nse-control-slider-control,
 :where(:scope):is(.nse-control-slider:has(input:disabled)) .nse-control-slider-control {
@@ -3874,73 +3664,23 @@
 }
 
 /* Slider: row height, ball size (sprite cell = ball / 0.54), ball inset. */
-:where(:scope) .nse-control-slider[data-size="small"],
-:where(:scope):is(.nse-control-slider[data-size="small"]) {
-  --nse-atmo-slider-row: 30px;
-  --nse-atmo-slider-cell: 38px;
-  --nse-atmo-slider-thumb-size: 20px;
-  --nse-atmo-slider-thumb-visible-size: 20px;
-  --nse-control-slider-control-size: var(--nse-atmo-slider-row);
-}
 
-:where(:scope) .nse-control-slider[data-size="mini"],
-:where(:scope):is(.nse-control-slider[data-size="mini"]) {
-  --nse-atmo-slider-row: 22px;
-  --nse-atmo-slider-cell: 30px;
-  --nse-atmo-slider-thumb-size: 16px;
-  --nse-atmo-slider-thumb-visible-size: 16px;
-  --nse-control-slider-control-size: var(--nse-atmo-slider-row);
-}
 
-:where(:scope) .nse-control-slider:is([data-size="small"],[data-size="mini"]),
-:where(:scope):is(.nse-control-slider:is([data-size="small"],[data-size="mini"])) {
-  min-width: 0;
-  --nse-control-minimum-inline-size: 0;
-  gap: 4px;
-}
 
-:where(:scope) .nse-control-slider:is([data-size="small"],[data-size="mini"]) .nse-control-slider-control,
-:where(:scope):is(.nse-control-slider:is([data-size="small"],[data-size="mini"])) .nse-control-slider-control,
-:where(:scope) .nse-control-slider:is([data-size="small"],[data-size="mini"]) input,
-:where(:scope):is(.nse-control-slider:is([data-size="small"],[data-size="mini"])) input {
-  height: var(--nse-atmo-slider-row);
-}
 
-:where(:scope) .nse-control-slider:is([data-size="small"],[data-size="mini"]) input::-webkit-slider-runnable-track,
-:where(:scope):is(.nse-control-slider:is([data-size="small"],[data-size="mini"])) input::-webkit-slider-runnable-track,
-:where(:scope) .nse-control-slider:is([data-size="small"],[data-size="mini"]) input::-webkit-slider-thumb,
-:where(:scope):is(.nse-control-slider:is([data-size="small"],[data-size="mini"])) input::-webkit-slider-thumb,
-:where(:scope) .nse-control-slider:is([data-size="small"],[data-size="mini"]) input::-moz-range-track,
-:where(:scope):is(.nse-control-slider:is([data-size="small"],[data-size="mini"])) input::-moz-range-track,
-:where(:scope) .nse-control-slider:is([data-size="small"],[data-size="mini"]) input::-moz-range-thumb,
-:where(:scope):is(.nse-control-slider:is([data-size="small"],[data-size="mini"])) input::-moz-range-thumb {
-  height: var(--nse-atmo-slider-row);
-}
 
-:where(:scope) .nse-control-slider:is([data-size="small"],[data-size="mini"]) .nse-control-slider-thumb-visual,
-:where(:scope):is(.nse-control-slider:is([data-size="small"],[data-size="mini"])) .nse-control-slider-thumb-visual {
-  width: var(--nse-atmo-slider-cell);
-  height: var(--nse-atmo-slider-cell);
-  background-size: var(--nse-atmo-slider-cell) calc(var(--nse-atmo-slider-cell) * 2);
-  transform: translate(calc(var(--nse-atmo-slider-cell) / -2), -50%);
-}
 
-:where(:scope) .nse-control-slider[data-orientation="vertical"]:is([data-size="small"],[data-size="mini"]) .nse-control-slider-thumb-visual,
-:where(:scope):is(.nse-control-slider[data-orientation="vertical"]:is([data-size="small"],[data-size="mini"])) .nse-control-slider-thumb-visual {
-  transform: translate(calc(var(--nse-atmo-slider-cell) / -2), -50%) rotate(90deg);
-}
 
-:where(:scope) .nse-control-slider:is([data-size="small"],[data-size="mini"]):has(input:active) .nse-control-slider-thumb-visual,
-:where(:scope):is(.nse-control-slider:is([data-size="small"],[data-size="mini"]):has(input:active)) .nse-control-slider-thumb-visual,
-:where(:scope) .nse-control-slider:is([data-size="small"],[data-size="mini"])[data-dragging="true"] .nse-control-slider-thumb-visual,
-:where(:scope):is(.nse-control-slider:is([data-size="small"],[data-size="mini"])[data-dragging="true"]) .nse-control-slider-thumb-visual {
-  background-position: 0 calc(var(--nse-atmo-slider-cell) * -1);
-}
 
-:where(:scope) .nse-control-slider[data-size="mini"] .nse-control-slider-track,
-:where(:scope):is(.nse-control-slider[data-size="mini"]) .nse-control-slider-track {
-  height: 6px;
-}
+
+
+
+
+
+
+
+
+
 
 /* ============================================================================
    Colour controls (Atmo-designed; AppearanceAuthority slots stay unresolved
@@ -4637,37 +4377,20 @@
    in the select pill's language. Regular 22x34, small 18x28, mini 14x22; the
    halves are pointer targets and the capsule is the one keyboard stop.
    ========================================================================= */
-:where(:scope) [data-nse-control="stepper"],
-:where(:scope):is([data-nse-control="stepper"]) {
-  --nse-control-bezel-inline-size: 22px;
-  --nse-control-bezel-block-size: 34px;
+
+
+
+:where(:scope) [data-nse-control="stepper"]>[data-nse-part="bezel"],:where(:scope):is([data-nse-control="stepper"])>[data-nse-part="bezel"] {
+  display:inline-grid;
+  grid-template-rows:1fr 1fr;
+  flex:none;
+  box-sizing:border-box;
+  overflow:hidden;
 }
 
 
-:where(:scope) [data-nse-control="stepper"]>[data-nse-part="bezel"],
-:where(:scope):is([data-nse-control="stepper"])>[data-nse-part="bezel"] {
-  display: inline-grid;
-  grid-template-rows: 1fr 1fr;
-  flex: none;
-  inline-size: var(--nse-control-bezel-inline-size);
-  block-size: var(--nse-control-bezel-block-size);
-  box-sizing: border-box;
-  border-radius: calc(var(--nse-control-bezel-inline-size) / 2 - 2px);
-  overflow: hidden;
-  vertical-align: middle;
-}
 
-:where(:scope) [data-nse-control="stepper"][data-size="small"],
-:where(:scope):is([data-nse-control="stepper"][data-size="small"]) {
-  --nse-control-bezel-inline-size: 18px;
-  --nse-control-bezel-block-size: 28px;
-}
 
-:where(:scope) [data-nse-control="stepper"][data-size="mini"],
-:where(:scope):is([data-nse-control="stepper"][data-size="mini"]) {
-  --nse-control-bezel-inline-size: 14px;
-  --nse-control-bezel-block-size: 22px;
-}
 
 :where(:scope) [data-nse-control="stepper"][data-state]>[data-nse-part="bezel"]>button,
 :where(:scope):is([data-nse-control="stepper"][data-state])>[data-nse-part="bezel"]>button {
@@ -4679,19 +4402,13 @@
   cursor: pointer;
 }
 
-:where(:scope) [data-nse-control="stepper"]>[data-nse-part="bezel"]>button::before,
-:where(:scope):is([data-nse-control="stepper"])>[data-nse-part="bezel"]>button::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  -webkit-mask: var(--nse-atmo-stepper-glyph) center / 8px 5px no-repeat;
-  mask: var(--nse-atmo-stepper-glyph) center / 8px 5px no-repeat;
+:where(:scope) [data-nse-control="stepper"]>[data-nse-part="bezel"]>button::before,:where(:scope):is([data-nse-control="stepper"])>[data-nse-part="bezel"]>button::before {
+  content:"";
+  position:absolute;
+  inset:0;
 }
 
-:where(:scope) [data-nse-control="stepper"]>[data-nse-part="bezel"]>button[data-nse-part="decrement"]::before,
-:where(:scope):is([data-nse-control="stepper"])>[data-nse-part="bezel"]>button[data-nse-part="decrement"]::before {
-  transform: scaleY(-1);
-}
+
 
 :where(:scope) [data-nse-control="stepper"]>[data-nse-part="bezel"]>button:disabled,
 :where(:scope):is([data-nse-control="stepper"])>[data-nse-part="bezel"]>button:disabled {

@@ -75,6 +75,11 @@ for (const surface of supplementalThemeCatalogue) it(`renders supplemental ${sur
   render(<Host>{surface.render()}</Host>);
   await act(async () => { await Promise.resolve(); });
   collect();
+  if (surface.id === "segment-menu" || surface.id === "segment-overflow") {
+    fireEvent.click(document.querySelector<HTMLElement>('[data-nse-expanded="false"]')!);
+    await act(async () => { await Promise.resolve(); });
+    collect();
+  }
 });
 afterAll(() => {
   const contract = createNSEThemeContract(controls, { controls: nseThemeControls, parts: nseThemeParts, states: nseThemeStates, variants: nseThemeVariants }, nseThemeColourNames);

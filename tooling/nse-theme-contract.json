@@ -417,6 +417,11 @@
         "selected"
       ],
       "variants": {
+        "level": [
+          "critical",
+          "normal",
+          "warning"
+        ],
         "type": [
           "capacity",
           "continuous",
@@ -681,6 +686,10 @@
           "regular",
           "small"
         ],
+        "indeterminate": [
+          "false",
+          "true"
+        ],
         "role": [
           "status"
         ],
@@ -833,7 +842,9 @@
         "bezel",
         "cell",
         "content",
+        "disclosure",
         "field",
+        "overflow",
         "segment",
         "title"
       ],
@@ -853,6 +864,13 @@
         "control-size": [
           "regular",
           "small"
+        ],
+        "expanded": [
+          "false",
+          "true"
+        ],
+        "height": [
+          "40"
         ],
         "position": [
           "first",
@@ -898,7 +916,8 @@
       ],
       "states": [
         "enabled=false",
-        "focused"
+        "focused",
+        "tracking=false"
       ],
       "variants": {
         "control-size": [
@@ -976,15 +995,22 @@
         "bezel",
         "fill",
         "knob",
+        "label",
         "title",
         "track"
       ],
       "states": [
         "enabled=false",
         "state=off",
-        "state=on"
+        "state=on",
+        "tracking=false"
       ],
-      "variants": {}
+      "variants": {
+        "position": [
+          "leading",
+          "trailing"
+        ]
+      }
     },
     "system-alert": {
       "parts": [

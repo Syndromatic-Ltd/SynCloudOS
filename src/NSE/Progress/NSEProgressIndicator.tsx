@@ -41,7 +41,7 @@ export function NSEProgressIndicator({ "aria-label": accessibleLabel, style = "b
       aria-valuemin={metrics?.minimum}
       aria-valuemax={metrics?.maximum}
       aria-valuenow={metrics?.value}
-      data-nse-part="content" {...nseControlHooks({ control: "progress-indicator", variants: { "control-size": controlSize, style } })}
+      data-nse-part="content" {...nseControlHooks({ control: "progress-indicator", variants: { "control-size": controlSize, style, indeterminate: String(isIndeterminate) } })}
       data-state={metrics ? "determinate" : "indeterminate"}
       data-variant={style === "bar" ? "bar" : metrics ? "circular" : "spinner"}
       data-size={style === "bar" ? undefined : SPINNING_SIZE[controlSize]}

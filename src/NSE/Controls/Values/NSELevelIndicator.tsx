@@ -45,7 +45,7 @@ export function NSELevelIndicator(props: NSELevelIndicatorProps) {
         role="radiogroup"
         aria-label={props["aria-label"]}
         data-nse-part="track" {...hooks} {...theme.events}
-        data-state={state}
+        data-state={state} data-nse-level={state}
 
       >
         {Array.from({ length: Math.max(0, Math.floor(props.maximum - props.minimum)) }, (_, index) => {
@@ -78,7 +78,7 @@ export function NSELevelIndicator(props: NSELevelIndicatorProps) {
       max={props.maximum}
       value={props.value}
       data-nse-part="track" {...hooks} {...theme.events}
-      data-state={state}
+      data-state={state} data-nse-level={state}
 
     >
       <span data-nse-part="segment" >{props.value}</span>
