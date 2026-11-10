@@ -1,0 +1,43 @@
+:where(:scope) [data-nse-style="list"]:where([data-nse-control]),
+:where(:scope):is([data-nse-style="list"]:where([data-nse-control])) {
+  gap:10px;
+  min-height:52px;
+  padding:8px 10px;
+  color:#1d2734;
+  border-top:1px solid rgba(255,255,255,0.92);
+  border-bottom:1px solid rgba(140,150,160,0.58);
+  background:rgba(242,242,240,0.5);
+  text-shadow:0 1px 0 rgba(255,255,255,0.7);
+}
+
+:where(:scope) [data-nse-style="list"]:where([data-nse-control]):first-child,
+:where(:scope):is([data-nse-style="list"]:where([data-nse-control]):first-child) {
+  border-top:0;
+}
+
+:where(:scope) [data-nse-style="list"]:where([data-nse-control]):last-child,
+:where(:scope):is([data-nse-style="list"]:where([data-nse-control]):last-child) {
+  border-bottom:0;
+}
+
+:where(:scope) [data-nse-style="list"]:where([data-nse-control])[data-nse-selected],
+:where(:scope):is([data-nse-style="list"]:where([data-nse-control])[data-nse-selected]) {
+  color:#fff;
+  background:linear-gradient(#555,#888);
+  text-shadow:0-1px 0 rgba(0,0,0,0.56);
+}
+
+:where(:scope) [data-nse-style="list"]:where([data-nse-control])[data-nse-enabled="false"],
+:where(:scope):is([data-nse-style="list"]:where([data-nse-control])[data-nse-enabled="false"]) {
+  color:gray;
+}
+
+:where(:scope) [data-nse-part="secondary-text"]:where([data-nse-style="list"]>[data-nse-part="text-content"]>*),
+:where(:scope):is([data-nse-part="secondary-text"]:where([data-nse-style="list"]>[data-nse-part="text-content"]>*)) {
+  color:rgba(42,55,70,0.68);
+}
+
+:where(:scope) [data-nse-style="list"]:where([data-nse-control])[data-nse-selected] [data-nse-part="secondary-text"]:where([data-nse-style="list"]>[data-nse-part="text-content"]>*),
+:where(:scope):is([data-nse-style="list"]:where([data-nse-control])[data-nse-selected]) [data-nse-part="secondary-text"]:where([data-nse-style="list"]>[data-nse-part="text-content"]>*) {
+  color:rgba(255,255,255,0.78);
+}

@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { NSEBox, NSEInputBox, NSETextField, NSERadioGroup } from "../../../../src/NSE/Controls/Fields/NSEFields";
+import { NSEArrayController } from "../../../../src/NSE/Controllers/NSEArrayController";
+import { NSETreeController } from "../../../../src/NSE/Controllers/NSETreeController";
+import { nseUnowned } from "../../../../src/NSE/Controllers/ownership";
+import { NSETableView } from "../../../../src/NSE/DataViews/Table";
+import { NSEOutlineView } from "../../../../src/NSE/DataViews/Outline";
+import { NSEBrowser } from "../../../../src/NSE/DataViews/Browser";
 import { NSEDivider } from "../../../../src/NSE/Controls/Selection/NSEDivider";
 import { NSEShadow } from "../../../../src/NSE/Graphics/NSEShadow";
 import { NSETokenField } from "../../../../src/NSE/Controls/Completion/NSETokenField";
@@ -15,6 +21,17 @@ import { NSEUserDefaultsController } from "../../../../src/NSE/Controllers";
 import type { NSEToolbarPreferences, NSEToolbarRuntimePort } from "../../../../src/NSE/Toolbars/toolbarTypes";
 import { defaultsFrom } from "../../../fixtures/userDefaults";
 const noop = () => undefined;
+interface DrawingRow { readonly id: string; readonly children: readonly DrawingRow[] }
+function LoadingOutline() {
+  const [controller] = useState(() => new NSETreeController<DrawingRow, string>({ owner: nseUnowned, id: "drawing-loading-outline", content: [{ id: "Remote", children: [] }], getId: row => row.id, getChildren: row => row.children, withChildren: (row, children) => ({ ...row, children }), loadChildren: () => new Promise<readonly DrawingRow[]>(() => undefined), selection: { mode: "multiple", allowsEmpty: true } }));
+  useEffect(() => () => controller.dispose(), [controller]);
+  return <NSEOutlineView aria-label="Remote files" controller={controller} idForItem={row => row.id} childrenForItem={row => row.children} labelForItem={row => row.id} isExpandable={() => true} />;
+}
+function SortableTable() {
+  const [controller] = useState(() => new NSEArrayController({ owner: nseUnowned, id: "drawing-sorted-table", content: [{ id: "One" }, { id: "Two" }], getId: row => row.id, selection: { mode: "multiple", allowsEmpty: true } }));
+  useEffect(() => () => controller.dispose(), [controller]);
+  return <NSETableView aria-label="Sorted files" adapter={{ controller, idForItem: row => row.id, labelForItem: row => row.id }} columns={[{ id: "name", title: "Name", value: row => row.id, width: { min: 80, ideal: 120, max: 200 }, sort: { compare: (left, right) => String(left).localeCompare(String(right)) } }]} viewportBlockSize={120} />;
+}
 function Virtual() {
   const viewportRef = useRef<HTMLDivElement>(null);
   const virtualiser = useNSEVirtualiser({ count: 20, axis: "block", overscan: 1, estimateSize: 24, getKey: String, viewportRef, viewportSize: 100 });
@@ -45,7 +62,10 @@ import { NSETabViewController, NSETabViewItem } from "../../../../src/NSE/Naviga
 import { createStaticPresentationTraits } from "../../../fixtures/presentationTraits";
 const plainTheme = freezeNSETheme({ ...atmoTheme, presentation: { login: "plain", notifications: "plain", materialLighting: "off" } });
 const colour = GFXColour.parse("#336699");
-export const supplementalThemeCatalogue: readonly { id: string; render: () => ReactNode }[] = [
+export const supplementalThemeCatalogue: readonly { id: string; ready?: string; activate?: string; activeReady?: string; render: () => ReactNode }[] = [
+  { id: "loading-outline", activate: '[data-nse-part="disclosure"]', activeReady: '[data-nse-part="loading"]', render: () => <LoadingOutline /> },
+  { id: "sortable-table", activate: '[data-nse-role="sort"]', render: () => <SortableTable /> },
+  { id: "loaded-browser", ready: '[data-nse-control="browser"] [data-nse-part="row"]', render: () => <NSEBrowser aria-label="Loaded files" presentation="columns" dataSource={{ rootItems: async () => [{ id: "Folder", leaf: false }, { id: "File", leaf: true }], children: async () => [], idForItem: item => item.id, labelForItem: item => item.id, isLeaf: item => item.leaf }} /> },
   ...(["plain", "soft", "grey", "alpha", "arrow"] as const).map(variant => ({ id: `separator-${variant}`, render: () => <NSEDivider variant={variant} caption={variant === "alpha" ? "A" : "Section"} expanded onToggle={variant === "arrow" ? noop : undefined} /> })),
   { id: "box-reduced-transparency", render: () => <NSEAppearanceProvider theme={atmoTheme} transparency="reduced"><NSEBox boxType="custom" shadow={new NSEShadow()}>Content</NSEBox></NSEAppearanceProvider> },
   { id: "box-overrides", render: () => <NSEBox boxType="custom" borderType="grooveBorder" isTransparent fillColour="#123" borderColour="#456" borderWidth={2} shadow={new NSEShadow()}>Content</NSEBox> },

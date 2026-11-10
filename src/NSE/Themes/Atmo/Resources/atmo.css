@@ -1,3 +1,4 @@
+@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo.data.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo.boxes.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo.text.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo.values.css";
@@ -1381,18 +1382,8 @@
   );
 }
 
-:scope .nse-control-list-item,
-:scope:is(.nse-control-list-item),
-:scope.nse-control-list-item {
-  min-height: 48px;
-  padding: 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.5);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
-  background: transparent;
-  font-size: 16px;
-  /* Onyx rows are unembossed — the Heritage row's white text-shadow belongs to
-     its opaque light cell and smears on a transparent one. */
-  text-shadow: none;
+:scope .nse-control-list-item,:scope:is(.nse-control-list-item),:scope.nse-control-list-item {
+  font-size:16px;
 }
 
 /* Colour is split out and withheld from the metal material, which owns its own
@@ -1430,26 +1421,14 @@
   color: #5a6b7d;
 }
 
-:scope .nse-control-list-item:first-child,
-:scope:is(.nse-control-list-item:first-child),
-:scope.nse-control-list-item:first-child {
-  border-top: 0;
-}
 
-:scope .nse-control-list-item:last-child,
-:scope:is(.nse-control-list-item:last-child),
-:scope.nse-control-list-item:last-child {
-  border-bottom: 0;
-}
+
+
 
 /* Same shadowing problem, same fix: the row sets `color`, which outranks
    atmo-controls.css's `.nse-control-list-item.is-disabled { color: gray }` and made
    disabled rows render at full strength. */
-:scope .nse-control-list-item.is-disabled,
-:scope:is(.nse-control-list-item.is-disabled),
-:scope.nse-control-list-item.is-disabled {
-  color: gray;
-}
+
 
 /* ============================================================================
    Page header — the one control here that does NOT trace its sprite.
@@ -4748,86 +4727,44 @@
   --nse-atmo-table-selection-inactive: #3c434c;
 }
 
-:scope .nse-table-view,
-:scope:is(.nse-table-view),
-:scope.nse-table-view {
-  box-sizing: border-box;
-  border: 1px solid var(--nse-atmo-table-edge);
-  color: var(--nse-atmo-table-ink);
-  background: var(--nse-atmo-table-fill);
-  font-size: 12px;
+:scope .nse-table-view,:scope:is(.nse-table-view),:scope.nse-table-view {
+  box-sizing:border-box;
+  font-size:12px;
 }
 
-:scope .nse-table-view:focus-visible,
-:scope:is(.nse-table-view:focus-visible),
-:scope.nse-table-view:focus-visible {
-  outline: none;
-  box-shadow: var(--nse-atmo-focus-ring);
+:scope .nse-table-view:focus-visible,:scope:is(.nse-table-view:focus-visible),:scope.nse-table-view:focus-visible {
+  outline:none;
 }
 
-:scope .nse-table-view [data-nse-part="header"],
-:scope:is(.nse-table-view) [data-nse-part="header"],
-:scope.nse-table-view [data-nse-part="header"] {
-  background: var(--nse-atmo-table-header);
-  box-shadow: inset 0 -1px 0 var(--nse-atmo-table-header-rule);
+
+
+:scope .nse-table-view [role="columnheader"],:scope:is(.nse-table-view) [role="columnheader"],:scope.nse-table-view [role="columnheader"] {
+  display:flex;
+  align-items:center;
+  font-size:11px;
 }
 
-:scope .nse-table-view [role="columnheader"],
-:scope:is(.nse-table-view) [role="columnheader"],
-:scope.nse-table-view [role="columnheader"] {
-  display: flex;
-  align-items: center;
-  padding-inline: 6px;
-  color: var(--nse-atmo-table-header-ink);
-  font-size: 11px;
-  box-shadow: inset -1px 0 0 var(--nse-atmo-table-header-rule);
+:scope .nse-table-view [role="columnheader"]>button,:scope:is(.nse-table-view) [role="columnheader"]>button,:scope.nse-table-view [role="columnheader"]>button {
+  display:flex;
+  align-items:center;
+  font:inherit;
+  text-align:start;
 }
 
-:scope .nse-table-view [role="columnheader"]>button,
-:scope:is(.nse-table-view) [role="columnheader"]>button,
-:scope.nse-table-view [role="columnheader"]>button {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  inline-size: 100%;
-  padding: 0;
-  border: 0;
-  color: inherit;
-  background: none;
-  font: inherit;
-  text-align: start;
+:scope .nse-table-view [data-nse-part="cell"],:scope:is(.nse-table-view) [data-nse-part="cell"],:scope.nse-table-view [data-nse-part="cell"] {
+  display:flex;
+  align-items:center;
+  white-space:nowrap;
+  cursor:default;
 }
 
-:scope .nse-table-view [data-nse-part="cell"],
-:scope:is(.nse-table-view) [data-nse-part="cell"],
-:scope.nse-table-view [data-nse-part="cell"] {
-  display: flex;
-  align-items: center;
-  padding-inline: 6px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  cursor: default;
+:scope .nse-table-view [data-nse-part="cell"]>*,:scope:is(.nse-table-view) [data-nse-part="cell"]>*,:scope.nse-table-view [data-nse-part="cell"]>* {
+  overflow:hidden;
 }
 
-:scope .nse-table-view [data-nse-part="cell"]>*,
-:scope:is(.nse-table-view) [data-nse-part="cell"]>*,
-:scope.nse-table-view [data-nse-part="cell"]>* {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 
-:scope .nse-table-view [data-nse-part="row"][data-state="selected"],
-:scope:is(.nse-table-view) [data-nse-part="row"][data-state="selected"],
-:scope.nse-table-view [data-nse-part="row"][data-state="selected"] {
-  background: var(--nse-atmo-table-selection-inactive);
-}
 
-:scope .nse-table-view:focus-within [data-nse-part="row"][data-state="selected"],
-:scope:is(.nse-table-view:focus-within) [data-nse-part="row"][data-state="selected"],
-:scope.nse-table-view:focus-within [data-nse-part="row"][data-state="selected"] {
-  color: #fff;
-  background: var(--nse-atmo-table-selection);
-}
+
 
 /* ============================================================================
    Windows (Atmo-designed). System-chrome roles share one material: a body
@@ -5190,19 +5127,9 @@
    well inside a 2px ring, never the system Highlight slab), and the
    keyboard cursor shows only while the collection holds focus, as the focus
    glow's ring. Media tiles without a thumbnail get a quiet well. */
-:scope .nse-collection-item,
-:scope:is(.nse-collection-item),
-:scope.nse-collection-item {
-  border-radius: 6px;
-}
 
-:scope .nse-collection-item[data-selected],
-:scope:is(.nse-collection-item[data-selected]),
-:scope.nse-collection-item[data-selected] {
-  color: inherit;
-  background: var(--nse-atmo-material-selection-fill);
-  box-shadow: inset 0 0 0 2px var(--nse-atmo-material-selection-ring);
-}
+
+
 
 :scope .nse-collection-item[data-focused],
 :scope:is(.nse-collection-item[data-focused]),
@@ -5210,11 +5137,7 @@
   outline: none;
 }
 
-:scope .nse-collection-view:focus-within .nse-collection-item[data-focused],
-:scope:is(.nse-collection-view:focus-within) .nse-collection-item[data-focused],
-:scope.nse-collection-view:focus-within .nse-collection-item[data-focused] {
-  box-shadow: inset 0 0 0 2px rgba(76, 164, 255, 0.95), inset 0 0 0 4px rgba(108, 188, 255, 0.34);
-}
+
 
 :scope .nse-media-grid-item[data-selected="true"],
 :scope:is(.nse-media-grid-item[data-selected="true"]),
@@ -6476,69 +6399,34 @@ input:scope[data-nse-control="scroller"]:disabled {
    not, as NSOutlineView and NSBrowser do. The disclosure is the disclosure button's
    triangle, turned a quarter when open. Rows keep the Mac's 23px.
    ========================================================================= */
-:scope .nse-outline-view:not([data-style="source-list"]),
-:scope:is(.nse-outline-view:not([data-style="source-list"])),
-:scope.nse-outline-view:not([data-style="source-list"]),
-:scope .nse-browser-columns,
-:scope:is(.nse-browser-columns),
-:scope.nse-browser-columns {
-  box-sizing: border-box;
-  border: 1px solid var(--nse-atmo-table-edge);
-  color: var(--nse-atmo-table-ink);
-  background: var(--nse-atmo-table-fill);
-  font-size: 13px;
+:scope .nse-outline-view:not([data-style="source-list"]),:scope:is(.nse-outline-view:not([data-style="source-list"])),:scope.nse-outline-view:not([data-style="source-list"]),:scope .nse-browser-columns,:scope:is(.nse-browser-columns),:scope.nse-browser-columns {
+  box-sizing:border-box;
+  font-size:13px;
 }
 
-:scope .nse-outline-view:not([data-style="source-list"]):focus-visible,
-:scope:is(.nse-outline-view:not([data-style="source-list"]):focus-visible),
-:scope.nse-outline-view:not([data-style="source-list"]):focus-visible,
-:scope .nse-browser-column [role="listbox"]:focus-visible,
-:scope:is(.nse-browser-column) [role="listbox"]:focus-visible,
-:scope.nse-browser-column [role="listbox"]:focus-visible {
-  outline: none;
-  box-shadow: var(--nse-atmo-focus-ring);
+:scope .nse-outline-view:not([data-style="source-list"]):focus-visible,:scope:is(.nse-outline-view:not([data-style="source-list"]):focus-visible),:scope.nse-outline-view:not([data-style="source-list"]):focus-visible,:scope .nse-browser-column [role="listbox"]:focus-visible,:scope:is(.nse-browser-column) [role="listbox"]:focus-visible,:scope.nse-browser-column [role="listbox"]:focus-visible {
+  outline:none;
 }
 
-:scope .nse-outline-view:not([data-style="source-list"]) [data-nse-part="row"],
-:scope:is(.nse-outline-view:not([data-style="source-list"])) [data-nse-part="row"],
-:scope.nse-outline-view:not([data-style="source-list"]) [data-nse-part="row"] {
-  --nse-atmo-outline-disclosure: 14px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding-inline: calc(6px + var(--nse-outline-level, 0) * var(--nse-outline-indentation, 16px)) 6px;
-  white-space: nowrap;
-  cursor: default;
+:scope .nse-outline-view:not([data-style="source-list"]) [data-nse-part="row"],:scope:is(.nse-outline-view:not([data-style="source-list"])) [data-nse-part="row"],:scope.nse-outline-view:not([data-style="source-list"]) [data-nse-part="row"] {
+  display:flex;
+  align-items:center;
+  white-space:nowrap;
+  cursor:default;
 }
 
 /* Leaves line their labels up with their siblings' labels, past the
    disclosure column a branch spends on its triangle. */
-:scope .nse-outline-view:not([data-style="source-list"]) [data-nse-part="row"][data-kind="leaf"],
-:scope:is(.nse-outline-view:not([data-style="source-list"])) [data-nse-part="row"][data-kind="leaf"],
-:scope.nse-outline-view:not([data-style="source-list"]) [data-nse-part="row"][data-kind="leaf"] {
-  padding-inline-start: calc(6px + var(--nse-atmo-outline-disclosure) + 4px + var(--nse-outline-level, 0) * var(--nse-outline-indentation, 16px));
+
+
+:scope .nse-outline-view:not([data-style="source-list"]) [data-nse-part="label"],:scope:is(.nse-outline-view:not([data-style="source-list"])) [data-nse-part="label"],:scope.nse-outline-view:not([data-style="source-list"]) [data-nse-part="label"] {
+  overflow:hidden;
 }
 
-:scope .nse-outline-view:not([data-style="source-list"]) [data-nse-part="label"],
-:scope:is(.nse-outline-view:not([data-style="source-list"])) [data-nse-part="label"],
-:scope.nse-outline-view:not([data-style="source-list"]) [data-nse-part="label"] {
-  min-inline-size: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-:scope .nse-outline-view [data-nse-part="disclosure"],
-:scope:is(.nse-outline-view) [data-nse-part="disclosure"],
-:scope.nse-outline-view [data-nse-part="disclosure"] {
-  position: relative;
-  flex: none;
-  inline-size: var(--nse-atmo-outline-disclosure);
-  block-size: var(--nse-atmo-outline-disclosure);
-  padding: 0;
-  border: 0;
-  color: inherit;
-  background: none;
-  cursor: default;
+:scope .nse-outline-view [data-nse-part="disclosure"],:scope:is(.nse-outline-view) [data-nse-part="disclosure"],:scope.nse-outline-view [data-nse-part="disclosure"] {
+  position:relative;
+  flex:none;
+  cursor:default;
 }
 
 /* The glyph is small; its hit area is not (44px, the touch minimum). */
@@ -6550,85 +6438,39 @@ input:scope[data-nse-control="scroller"]:disabled {
   inset: -15px;
 }
 
-:scope .nse-outline-view [data-nse-part="disclosure"]::before,
-:scope:is(.nse-outline-view) [data-nse-part="disclosure"]::before,
-:scope.nse-outline-view [data-nse-part="disclosure"]::before {
-  content: "";
-  position: absolute;
-  inset: 2px;
-  background: currentColor;
-  opacity: 0.62;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M3 1.5L7.5 5 3 8.5z'/%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M3 1.5L7.5 5 3 8.5z'/%3E%3C/svg%3E") center / contain no-repeat;
-  transition: transform 140ms ease;
+:scope .nse-outline-view [data-nse-part="disclosure"]::before,:scope:is(.nse-outline-view) [data-nse-part="disclosure"]::before,:scope.nse-outline-view [data-nse-part="disclosure"]::before {
+  content:"";
+  position:absolute;
+  inset:2px;
+  transition:transform 140ms ease;
 }
 
-:scope .nse-outline-view [data-nse-part="disclosure"][data-state="open"]::before,
-:scope:is(.nse-outline-view) [data-nse-part="disclosure"][data-state="open"]::before,
-:scope.nse-outline-view [data-nse-part="disclosure"][data-state="open"]::before {
-  transform: rotate(90deg);
+
+
+
+
+:scope .nse-outline-view [data-nse-part="disclosure"]:focus-visible,:scope:is(.nse-outline-view) [data-nse-part="disclosure"]:focus-visible,:scope.nse-outline-view [data-nse-part="disclosure"]:focus-visible {
+  outline:none;
 }
 
-:scope .nse-outline-view[dir="rtl"] [data-nse-part="disclosure"][data-state="closed"]::before,
-:scope:is(.nse-outline-view[dir="rtl"]) [data-nse-part="disclosure"][data-state="closed"]::before,
-:scope.nse-outline-view[dir="rtl"] [data-nse-part="disclosure"][data-state="closed"]::before {
-  transform: scaleX(-1);
-}
 
-:scope .nse-outline-view [data-nse-part="disclosure"]:focus-visible,
-:scope:is(.nse-outline-view) [data-nse-part="disclosure"]:focus-visible,
-:scope.nse-outline-view [data-nse-part="disclosure"]:focus-visible {
-  outline: none;
-  border-radius: 3px;
-  box-shadow: var(--nse-atmo-focus-ring);
-}
 
-:scope .nse-outline-view:not([data-style="source-list"]) [data-nse-part="row"][data-state="selected"],
-:scope:is(.nse-outline-view:not([data-style="source-list"])) [data-nse-part="row"][data-state="selected"],
-:scope.nse-outline-view:not([data-style="source-list"]) [data-nse-part="row"][data-state="selected"] {
-  background: var(--nse-atmo-table-selection-inactive);
-}
 
-:scope .nse-outline-view:not([data-style="source-list"]):focus-within [data-nse-part="row"][data-state="selected"],
-:scope:is(.nse-outline-view:not([data-style="source-list"]):focus-within) [data-nse-part="row"][data-state="selected"],
-:scope.nse-outline-view:not([data-style="source-list"]):focus-within [data-nse-part="row"][data-state="selected"] {
-  color: #fff;
-  background: var(--nse-atmo-table-selection);
-}
 
-:scope .nse-outline-view [data-nse-part="loading"],
-:scope:is(.nse-outline-view) [data-nse-part="loading"],
-:scope.nse-outline-view [data-nse-part="loading"],
-:scope .nse-outline-view [data-nse-part="error"],
-:scope:is(.nse-outline-view) [data-nse-part="error"],
-:scope.nse-outline-view [data-nse-part="error"] {
-  margin-inline-start: 6px;
-  font-size: 11px;
-  opacity: 0.7;
+:scope .nse-outline-view [data-nse-part="loading"],:scope:is(.nse-outline-view) [data-nse-part="loading"],:scope.nse-outline-view [data-nse-part="loading"],:scope .nse-outline-view [data-nse-part="error"],:scope:is(.nse-outline-view) [data-nse-part="error"],:scope.nse-outline-view [data-nse-part="error"] {
+  font-size:11px;
 }
 
 /* Browser columns: one well, split by the table header's rule; the column
    holding focus shows its choice in blue, the path behind it in grey. */
-:scope .nse-browser-column-shell,
-:scope:is(.nse-browser-column-shell),
-:scope.nse-browser-column-shell {
-  box-shadow: inset -1px 0 0 var(--nse-atmo-table-header-rule);
-}
 
-:scope .nse-browser-column [role="listbox"],
-:scope:is(.nse-browser-column) [role="listbox"],
-:scope.nse-browser-column [role="listbox"] {
-  block-size: 100%;
-}
 
-:scope .nse-browser-option,
-:scope:is(.nse-browser-option),
-:scope.nse-browser-option {
-  box-sizing: border-box;
-  gap: 6px;
-  padding-inline: 8px 6px;
-  white-space: nowrap;
-  cursor: default;
+
+
+:scope .nse-browser-option,:scope:is(.nse-browser-option),:scope.nse-browser-option {
+  box-sizing:border-box;
+  white-space:nowrap;
+  cursor:default;
 }
 
 :scope .nse-browser-option>span:first-of-type,
@@ -6640,38 +6482,16 @@ input:scope[data-nse-control="scroller"]:disabled {
   text-overflow: ellipsis;
 }
 
-:scope .nse-browser-option[data-focused],
-:scope:is(.nse-browser-option[data-focused]),
-:scope.nse-browser-option[data-focused] {
-  color: inherit;
-  background: var(--nse-atmo-table-selection-inactive);
-}
 
-:scope .nse-browser-column [role="listbox"]:focus .nse-browser-option[data-focused],
-:scope:is(.nse-browser-column) [role="listbox"]:focus .nse-browser-option[data-focused],
-:scope.nse-browser-column [role="listbox"]:focus .nse-browser-option[data-focused] {
-  color: #fff;
-  background: var(--nse-atmo-table-selection);
-}
+
+
 
 /* A branch carries the Mac browser's trailing chevron. */
-:scope .nse-browser-option [data-nse-part="disclosure"],
-:scope:is(.nse-browser-option) [data-nse-part="disclosure"],
-:scope.nse-browser-option [data-nse-part="disclosure"] {
-  flex: none;
-  inline-size: 8px;
-  block-size: 10px;
-  background: currentColor;
-  opacity: 0.55;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 10'%3E%3Cpath d='M1.5 1l5 4-5 4z'/%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 10'%3E%3Cpath d='M1.5 1l5 4-5 4z'/%3E%3C/svg%3E") center / contain no-repeat;
+:scope .nse-browser-option [data-nse-part="disclosure"],:scope:is(.nse-browser-option) [data-nse-part="disclosure"],:scope.nse-browser-option [data-nse-part="disclosure"] {
+  flex:none;
 }
 
-:scope .nse-browser-columns[dir="rtl"] [data-nse-part="disclosure"],
-:scope:is(.nse-browser-columns[dir="rtl"]) [data-nse-part="disclosure"],
-:scope.nse-browser-columns[dir="rtl"] [data-nse-part="disclosure"] {
-  transform: scaleX(-1);
-}
+
 
 :scope .nse-browser-resize,
 :scope:is(.nse-browser-resize),
@@ -6679,55 +6499,23 @@ input:scope[data-nse-control="scroller"]:disabled {
   cursor: col-resize;
 }
 
-:scope .nse-browser-resize:focus-visible,
-:scope:is(.nse-browser-resize:focus-visible),
-:scope.nse-browser-resize:focus-visible {
-  outline: none;
-  box-shadow: inset 2px 0 0 rgba(76, 164, 255, 0.95);
+:scope .nse-browser-resize:focus-visible,:scope:is(.nse-browser-resize:focus-visible),:scope.nse-browser-resize:focus-visible {
+  outline:none;
 }
 
-:scope .nse-browser-column [role="status"],
-:scope:is(.nse-browser-column) [role="status"],
-:scope.nse-browser-column [role="status"] {
-  padding: 8px;
-  font-size: 12px;
-  opacity: 0.7;
+:scope .nse-browser-column [role="status"],:scope:is(.nse-browser-column) [role="status"],:scope.nse-browser-column [role="status"] {
+  font-size:12px;
 }
 
 /* Collection tiles: a padded, rounded cell, so tile content never touches
    the selection ring the collection block above draws. */
-:scope .nse-collection-item,
-:scope:is(.nse-collection-item),
-:scope.nse-collection-item {
-  padding: 8px;
-}
 
-:scope .nse-collection-view,
-:scope:is(.nse-collection-view),
-:scope.nse-collection-view {
-  color: var(--nse-atmo-table-ink);
-}
+
+
 
 @media (forced-colors: active) {
-  :scope .nse-outline-view:not([data-style="source-list"]) [data-nse-part="row"][data-state="selected"],
-:scope:is(.nse-outline-view:not([data-style="source-list"])) [data-nse-part="row"][data-state="selected"],
-:scope.nse-outline-view:not([data-style="source-list"]) [data-nse-part="row"][data-state="selected"],
-:scope .nse-browser-option[data-focused],
-:scope:is(.nse-browser-option[data-focused]),
-:scope.nse-browser-option[data-focused] {
-    forced-color-adjust: none;
-    color: HighlightText;
-    background: Highlight;
-  }
-  :scope .nse-outline-view [data-nse-part="disclosure"]::before,
-:scope:is(.nse-outline-view) [data-nse-part="disclosure"]::before,
-:scope.nse-outline-view [data-nse-part="disclosure"]::before,
-:scope .nse-browser-option [data-nse-part="disclosure"],
-:scope:is(.nse-browser-option) [data-nse-part="disclosure"],
-:scope.nse-browser-option [data-nse-part="disclosure"] {
-    forced-color-adjust: none;
-    background: CanvasText;
-  }
+
+
 }
 
 :scope .nse-control-search-frame,:scope:is(.nse-control-search-frame),:scope.nse-control-search-frame,:scope .nse-control-search-field[data-size] .nse-control-search-frame,:scope:is(.nse-control-search-field[data-size]) .nse-control-search-frame,:scope.nse-control-search-field[data-size] .nse-control-search-frame,:scope .nse-control-search-field[data-size]:focus-within .nse-control-search-frame,:scope:is(.nse-control-search-field[data-size]:focus-within) .nse-control-search-frame,:scope.nse-control-search-field[data-size]:focus-within .nse-control-search-frame {
