@@ -104,7 +104,7 @@ function NSESecureTextFieldControl(props: NSESecureTextFieldProps) {
 
   const { revealPolicy: _revealPolicy, invalid: _invalid, validationMessage: _validationMessage, validation: _validation, label, prefix, suffix, onValueChange: _onValueChange, value: _value, defaultValue: _defaultValue, onBlur, onKeyDown, onInvalid, onChange, ...inputProps } = props;
   return (
-    <label data-nse-part="bezel" {...theme.events} {...nseControlHooks({ control: "secure-text-field", enabled: props.isEnabled !== false, hovered: theme.hovered, focused: theme.focused, variants: { editable: String(!props.readOnly) } })} data-state={props.invalid || validationInvalid || nativeInvalid ? "invalid" : revealed ? "revealed" : "concealed"}>
+    <label data-nse-part="bezel" {...theme.events} {...nseControlHooks({ control: "secure-text-field", enabled: props.isEnabled !== false, hovered: theme.hovered, focused: theme.focused, variants: { editable: String(!props.readOnly), validation: props.invalid || validationInvalid || nativeInvalid ? "invalid" : "valid" } })} data-state={props.invalid || validationInvalid || nativeInvalid ? "invalid" : revealed ? "revealed" : "concealed"}>
       {label ? <span data-nse-part="label">{label}</span> : null}
       {prefix ? <span data-nse-part="prefix">{prefix}</span> : null}
       <input
@@ -145,7 +145,7 @@ function NSESecureTextFieldControl(props: NSESecureTextFieldProps) {
           onBlur={conceal}
           onKeyDown={(event) => { if (event.key === "Escape") conceal(); }}
           data-nse-part="reveal"
-          data-revealed={revealed ? "true" : "false"}
+          data-nse-revealed={String(revealed)} data-revealed={revealed ? "true" : "false"}
         >
           <span data-nse-part="reveal-glyph" aria-hidden="true" />
         </button>

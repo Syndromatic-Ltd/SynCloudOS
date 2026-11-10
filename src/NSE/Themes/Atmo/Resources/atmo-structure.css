@@ -1,3 +1,4 @@
+@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.text.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.values.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.selection.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.buttons.css";
@@ -518,12 +519,8 @@
 
 
 
-:where(:scope) .nse-control-text-field,
-:where(:scope):is(.nse-control-text-field) {
-  display: grid;
-  gap: 5px;
-  min-width: 0;
-  color: var(--nse-atmo-control-ink, #283444);
+:where(:scope) .nse-control-text-field,:where(:scope):is(.nse-control-text-field) {
+  display:grid;
 }
 
 :where(:scope) .nse-control-field-label,:where(:scope):is(.nse-control-field-label),:where(:scope) .nse-control-picker-label,:where(:scope):is(.nse-control-picker-label),:where(:scope) .nse-control-slider-label,:where(:scope):is(.nse-control-slider-label) {
@@ -531,8 +528,7 @@
   font-weight:700;
   line-height:1.2;
 }
-:where(:scope) .nse-control-field-label,
-:where(:scope):is(.nse-control-field-label),
+
 :where(:scope) .nse-control-picker-label,
 :where(:scope):is(.nse-control-picker-label) {
   color:var(--nse-atmo-label-ink,#314255);
@@ -541,104 +537,50 @@
 /* Geometry only: the pill (Heritage's border-image fill, Atmo's vector
    ::before) is the field's one surface. A frame tint here showed as a pale
    rectangle around every rounded Atmo pill. */
-:where(:scope) .nse-control-field-frame,
-:where(:scope):is(.nse-control-field-frame) {
-  position: relative;
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  height: 50px;
-  min-height: 50px;
-  padding: 0 12px;
-  border: 14px solid transparent;
-  border-image: var(--nse-atmo-field-image, var(--nse-atmo-pill-input)) var(--nse-atmo-field-slice, 19) fill stretch;
-  box-sizing: border-box;
-  transition: background 140ms ease, box-shadow 140ms ease, filter 140ms ease;
+:where(:scope) .nse-control-field-frame,:where(:scope):is(.nse-control-field-frame) {
+  position:relative;
+  display:flex;
+  align-items:center;
+  box-sizing:border-box;
+  transition:background 140ms ease,box-shadow 140ms ease,filter 140ms ease;
 }
 
-:where(:scope) .nse-control-text-field[data-position="single"]:focus-within,
-:where(:scope):is(.nse-control-text-field[data-position="single"]:focus-within) {
-  --nse-atmo-field-image: var(--nse-atmo-pill-focus);
-  --nse-atmo-field-slice: 19;
+
+
+
+
+
+
+
+
+:where(:scope) .nse-control-field-frame input,:where(:scope):is(.nse-control-field-frame) input {
+  flex:1 1 auto;
+  outline:0;
+  font:inherit;
+  font-size:17px;
+  line-height:34px;
 }
 
-:where(:scope) .nse-control-text-field[data-position="first"],
-:where(:scope):is(.nse-control-text-field[data-position="first"]) {
-  --nse-atmo-field-image: var(--nse-atmo-input-first-focus);
-  --nse-atmo-field-slice: 14 14 3 14;
+
+
+:where(:scope) .nse-control-field-affix,:where(:scope):is(.nse-control-field-affix) {
+  display:inline-grid;
+  place-items:center;
+  flex:0 0 auto;
+  font-weight:700;
+  line-height:34px;
 }
 
-:where(:scope) .nse-control-text-field[data-position="middle"],
-:where(:scope):is(.nse-control-text-field[data-position="middle"]) {
-  --nse-atmo-field-image: var(--nse-atmo-input-middle-focus);
-  --nse-atmo-field-slice: 14;
-}
 
-:where(:scope) .nse-control-text-field[data-position="last"],
-:where(:scope):is(.nse-control-text-field[data-position="last"]) {
-  --nse-atmo-field-image: var(--nse-atmo-input-last-focus);
-  --nse-atmo-field-slice: 3 14 14 14;
-}
 
-:where(:scope) .nse-control-field-frame input,
-:where(:scope):is(.nse-control-field-frame) input {
-  flex: 1 1 auto;
-  width: 100%;
-  min-width: 0;
-  height: 34px;
-  margin: -5px 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  color: var(--nse-atmo-field-ink, #111820);
-  background: transparent;
-  font: inherit;
-  font-size: 17px;
-  line-height: 34px;
-}
 
-:where(:scope) .nse-control-field-frame input::placeholder,
-:where(:scope):is(.nse-control-field-frame) input::placeholder {
-  color: var(--nse-atmo-field-placeholder, rgba(44, 56, 70, 0.54));
-}
-
-:where(:scope) .nse-control-field-affix,
-:where(:scope):is(.nse-control-field-affix) {
-  display: inline-grid;
-  place-items: center;
-  flex: 0 0 auto;
-  min-width: 24px;
-  height: 34px;
-  color: var(--nse-atmo-field-affix, #5d6c7a);
-  font-weight: 700;
-  line-height: 34px;
-}
-
-:where(:scope) .nse-control-text-field[data-invalid="true"] .nse-control-field-frame,
-:where(:scope):is(.nse-control-text-field[data-invalid="true"]) .nse-control-field-frame {
-  box-shadow:
-    inset 0 0 0 1px rgba(225, 28, 44, 0.64),
-    0 0 0 1px rgba(225, 28, 44, 0.18),
-    0 0 8px rgba(225, 28, 44, 0.28);
-}
-
-:where(:scope) .nse-control-text-field.is-disabled,
-:where(:scope):is(.nse-control-text-field.is-disabled) {
-  opacity: 0.58;
-}
 
 /* NSEInputBox — a frame that wraps several controls to look like one input. */
-:where(:scope) .nse-control-input-box,
-:where(:scope):is(.nse-control-input-box) {
-  display: grid;
-  gap: 5px;
-  min-width: 0;
+:where(:scope) .nse-control-input-box,:where(:scope):is(.nse-control-input-box) {
+  display:grid;
 }
 
-:where(:scope) .nse-control-input-box-frame,
-:where(:scope):is(.nse-control-input-box-frame) {
-  gap: 8px;
-}
+
 
 /* Controls set into an input box keep their natural width; only the text
    input yields space. Without this a push button shrinks to its minimum and
@@ -648,26 +590,12 @@
   flex: none;
 }
 
-:where(:scope) .nse-control-input-box:focus-within,
-:where(:scope):is(.nse-control-input-box:focus-within),
-:where(:scope) .nse-control-input-box[data-always-focused="true"],
-:where(:scope):is(.nse-control-input-box[data-always-focused="true"]) {
-  --nse-atmo-field-image: var(--nse-atmo-pill-focus);
-  --nse-atmo-field-slice: 19;
-}
 
-:where(:scope) .nse-control-input-box[data-invalid="true"] .nse-control-input-box-frame,
-:where(:scope):is(.nse-control-input-box[data-invalid="true"]) .nse-control-input-box-frame {
-  box-shadow:
-    inset 0 0 0 1px rgba(225, 28, 44, 0.64),
-    0 0 0 1px rgba(225, 28, 44, 0.18),
-    0 0 8px rgba(225, 28, 44, 0.28);
-}
 
-:where(:scope) .nse-control-input-box.is-disabled,
-:where(:scope):is(.nse-control-input-box.is-disabled) {
-  opacity: 0.58;
-  pointer-events: none;
+
+
+:where(:scope) .nse-control-input-box.is-disabled,:where(:scope):is(.nse-control-input-box.is-disabled) {
+  pointer-events:none;
 }
 
 :where(:scope) .nse-control-checkbox,:where(:scope):is(.nse-control-checkbox) {
@@ -1837,44 +1765,22 @@
 /* Atmo search fields span their row. The neutral control sheet makes
    [data-nse-control="search-field"] inline-flex at (0,1,0); the attribute here
    outranks it instead of tying on import order. */
-:where(:scope) .nse-control-search-field,
-:where(:scope):is(.nse-control-search-field),
-:where(:scope) .nse-control-search-field[data-nse-control="search-field"],
-:where(:scope):is(.nse-control-search-field[data-nse-control="search-field"]) {
-  display: grid;
-  gap: 5px;
-  min-width: 0;
+:where(:scope) .nse-control-search-field,:where(:scope):is(.nse-control-search-field),:where(:scope) .nse-control-search-field[data-nse-control="search-field"],:where(:scope):is(.nse-control-search-field[data-nse-control="search-field"]) {
+  display:grid;
 }
 
-:where(:scope) .nse-control-search-frame,
-:where(:scope):is(.nse-control-search-frame) {
-  display: grid;
-  /* Single trailing affordance: input then one morphing search/clear icon. */
-  grid-template-columns: minmax(0, 1fr) 28px;
-  align-items: center;
-  height: 50px;
-  min-height: 50px;
-  padding: 0 8px;
-  border: 0 solid transparent;
-  border-width: 0 25px;
-  border-image: var(--nse-atmo-menu-input) 0 25 50 25 fill stretch;
-  box-sizing: border-box;
+:where(:scope) .nse-control-search-frame,:where(:scope):is(.nse-control-search-frame) {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 28px;
+  align-items:center;
+  box-sizing:border-box;
 }
 
-:where(:scope) .nse-control-search-field:focus-within .nse-control-search-frame,
-:where(:scope):is(.nse-control-search-field:focus-within) .nse-control-search-frame {
-  border-image-slice: 50 25 0 25 fill;
-}
+
 
 /* One affordance that morphs from the search glyph (empty) to a clear ✕ (has text). */
-:where(:scope) .nse-control-search-affordance,
-:where(:scope):is(.nse-control-search-affordance) {
-  display: block;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: 0;
-  background: transparent center / contain no-repeat;
+:where(:scope) .nse-control-search-affordance,:where(:scope):is(.nse-control-search-affordance) {
+  display:block;
 }
 
 :where(:scope) .nse-control-search-affordance[data-state="search"],
@@ -1885,24 +1791,14 @@
   cursor: text;
 }
 
-:where(:scope) .nse-control-search-affordance[data-state="clear"],
-:where(:scope):is(.nse-control-search-affordance[data-state="clear"]) {
-  background-image: var(--nse-atmo-menu-button-clear);
-  opacity: 1;
-  cursor: pointer;
+:where(:scope) .nse-control-search-affordance[data-state="clear"],:where(:scope):is(.nse-control-search-affordance[data-state="clear"]) {
+  cursor:pointer;
 }
 
-:where(:scope) .nse-control-search-frame input,
-:where(:scope):is(.nse-control-search-frame) input {
-  width: 100%;
-  min-width: 0;
-  height: 30px;
-  border: 0;
-  outline: 0;
-  color: #111820;
-  background: transparent;
-  font: inherit;
-  font-size: 16px;
+:where(:scope) .nse-control-search-frame input,:where(:scope):is(.nse-control-search-frame) input {
+  outline:0;
+  font:inherit;
+  font-size:16px;
 }
 
 :where(:scope) .nse-control-search-field.is-disabled,
@@ -3560,32 +3456,17 @@
    narrower borders, the slider keeps its thumb sprite scaled whole (never
    cropped) and its ball centre on the native thumb path.
    ========================================================================= */
-:where(:scope) .nse-control-text-field[data-size="small"],
-:where(:scope):is(.nse-control-text-field[data-size="small"]) {
-  gap: 4px;
+
+
+
+
+:where(:scope) .nse-control-text-field[data-size="small"] .nse-control-field-frame input,:where(:scope):is(.nse-control-text-field[data-size="small"]) .nse-control-field-frame input {
+  font-size:14px;
+  line-height:26px;
 }
 
-:where(:scope) .nse-control-text-field[data-size="small"] .nse-control-field-frame,
-:where(:scope):is(.nse-control-text-field[data-size="small"]) .nse-control-field-frame {
-  height: 36px;
-  min-height: 36px;
-  padding: 0 4px;
-  border-width: 10px;
-}
-
-:where(:scope) .nse-control-text-field[data-size="small"] .nse-control-field-frame input,
-:where(:scope):is(.nse-control-text-field[data-size="small"]) .nse-control-field-frame input {
-  height: 26px;
-  margin: -5px 0;
-  font-size: 14px;
-  line-height: 26px;
-}
-
-:where(:scope) .nse-control-text-field[data-size="small"] .nse-control-field-affix,
-:where(:scope):is(.nse-control-text-field[data-size="small"]) .nse-control-field-affix {
-  min-width: 18px;
-  height: 26px;
-  line-height: 26px;
+:where(:scope) .nse-control-text-field[data-size="small"] .nse-control-field-affix,:where(:scope):is(.nse-control-text-field[data-size="small"]) .nse-control-field-affix {
+  line-height:26px;
 }
 
 :where(:scope) .nse-control-text-field[data-size="small"] .nse-control-field-label,
@@ -3593,32 +3474,17 @@
   font-size: 12px;
 }
 
-:where(:scope) .nse-control-text-field[data-size="mini"],
-:where(:scope):is(.nse-control-text-field[data-size="mini"]) {
-  gap: 3px;
+
+
+
+
+:where(:scope) .nse-control-text-field[data-size="mini"] .nse-control-field-frame input,:where(:scope):is(.nse-control-text-field[data-size="mini"]) .nse-control-field-frame input {
+  font-size:12px;
+  line-height:20px;
 }
 
-:where(:scope) .nse-control-text-field[data-size="mini"] .nse-control-field-frame,
-:where(:scope):is(.nse-control-text-field[data-size="mini"]) .nse-control-field-frame {
-  height: 28px;
-  min-height: 28px;
-  padding: 0 2px;
-  border-width: 8px;
-}
-
-:where(:scope) .nse-control-text-field[data-size="mini"] .nse-control-field-frame input,
-:where(:scope):is(.nse-control-text-field[data-size="mini"]) .nse-control-field-frame input {
-  height: 20px;
-  margin: -4px 0;
-  font-size: 12px;
-  line-height: 20px;
-}
-
-:where(:scope) .nse-control-text-field[data-size="mini"] .nse-control-field-affix,
-:where(:scope):is(.nse-control-text-field[data-size="mini"]) .nse-control-field-affix {
-  min-width: 14px;
-  height: 20px;
-  line-height: 20px;
+:where(:scope) .nse-control-text-field[data-size="mini"] .nse-control-field-affix,:where(:scope):is(.nse-control-text-field[data-size="mini"]) .nse-control-field-affix {
+  line-height:20px;
 }
 
 :where(:scope) .nse-control-text-field[data-size="mini"] .nse-control-field-label,
@@ -3629,33 +3495,18 @@
 /* A custom height draws the same field in proportion, by the ratios small
    (36px) and mini (28px) share: a border of 0.28 of the height, an input
    line of 0.72 set over the frame's content box, type at half the height. */
-:where(:scope) .nse-control-text-field[data-size="custom"],
-:where(:scope):is(.nse-control-text-field[data-size="custom"]) {
-  gap: calc(var(--nse-control-height) * 0.11);
+
+
+
+
+:where(:scope) .nse-control-text-field[data-size="custom"] .nse-control-field-frame input,:where(:scope):is(.nse-control-text-field[data-size="custom"]) .nse-control-field-frame input {
+  font-size:max(11px,calc(var(--nse-control-height)*0.46));
+  line-height:calc(var(--nse-control-height)*0.72);
 }
 
-:where(:scope) .nse-control-text-field[data-size="custom"] .nse-control-field-frame,
-:where(:scope):is(.nse-control-text-field[data-size="custom"]) .nse-control-field-frame {
-  height: var(--nse-control-height);
-  min-height: var(--nse-control-height);
-  padding: 0 calc(var(--nse-control-height) * 0.08);
-  border-width: calc(var(--nse-control-height) * 0.28);
-}
-
-:where(:scope) .nse-control-text-field[data-size="custom"] .nse-control-field-frame input,
-:where(:scope):is(.nse-control-text-field[data-size="custom"]) .nse-control-field-frame input {
-  height: calc(var(--nse-control-height) * 0.72);
-  margin: calc(var(--nse-control-height) * -0.14) 0;
-  font-size: max(11px, calc(var(--nse-control-height) * 0.46));
-  line-height: calc(var(--nse-control-height) * 0.72);
-}
-
-:where(:scope) .nse-control-text-field[data-size="custom"] .nse-control-field-affix,
-:where(:scope):is(.nse-control-text-field[data-size="custom"]) .nse-control-field-affix {
-  min-width: calc(var(--nse-control-height) * 0.5);
-  height: calc(var(--nse-control-height) * 0.72);
-  font-size: max(11px, calc(var(--nse-control-height) * 0.46));
-  line-height: calc(var(--nse-control-height) * 0.72);
+:where(:scope) .nse-control-text-field[data-size="custom"] .nse-control-field-affix,:where(:scope):is(.nse-control-text-field[data-size="custom"]) .nse-control-field-affix {
+  font-size:max(11px,calc(var(--nse-control-height)*0.46));
+  line-height:calc(var(--nse-control-height)*0.72);
 }
 
 :where(:scope) .nse-control-text-field[data-size="custom"] .nse-control-field-label,
@@ -4724,11 +4575,8 @@
 
 /* Ruler: indents and tab stops as small NSE sliders, each labelled at the
    start of its row; the tail indent's slider runs from the end edge. */
-:where(:scope) [data-nse-control="ruler-view"],
-:where(:scope):is([data-nse-control="ruler-view"]) {
-  display: grid;
-  gap: 4px;
-  min-inline-size: 0;
+:where(:scope) [data-nse-control="ruler-view"],:where(:scope):is([data-nse-control="ruler-view"]) {
+  display:grid;
 }
 
 :where(:scope) [data-nse-control="ruler-view"] .nse-control-slider,
@@ -4747,26 +4595,19 @@
   text-align: end;
 }
 
-:where(:scope) [data-nse-control="ruler-view"] [data-nse-part="tab-stop"],
-:where(:scope):is([data-nse-control="ruler-view"]) [data-nse-part="tab-stop"] {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 8px;
+:where(:scope) [data-nse-control="ruler-view"] [data-nse-part="tab-stop"],:where(:scope):is([data-nse-control="ruler-view"]) [data-nse-part="tab-stop"] {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
 }
 
-:where(:scope) [data-nse-control="ruler-view"] [data-nse-part="tab-stops"],
-:where(:scope):is([data-nse-control="ruler-view"]) [data-nse-part="tab-stops"] {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding-inline-start: 110px;
+:where(:scope) [data-nse-control="ruler-view"] [data-nse-part="tab-stops"],:where(:scope):is([data-nse-control="ruler-view"]) [data-nse-part="tab-stops"] {
+  display:flex;
+  align-items:center;
 }
 
-:where(:scope) [data-nse-control="ruler-view"] [data-nse-part="tab-stops"]>p,
-:where(:scope):is([data-nse-control="ruler-view"]) [data-nse-part="tab-stops"]>p {
-  margin: 0;
-  font-size: 12px;
+:where(:scope) [data-nse-control="ruler-view"] [data-nse-part="tab-stops"]>p,:where(:scope):is([data-nse-control="ruler-view"]) [data-nse-part="tab-stops"]>p {
+  font-size:12px;
 }
 
 /* ============================================================================

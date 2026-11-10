@@ -91,7 +91,7 @@ export function NSERulerView({ value, direction = "ltr", maximum = 1_000, step =
         isEnabled={!(readOnly || style.tabStops.length >= 64)}
         onClick={addTabStop}
       />
-      <p role="status" aria-live="polite">{style.tabStops.length ? `${style.tabStops.length} custom tab stop${style.tabStops.length === 1 ? "" : "s"}.` : "No custom tab stops."}</p>
+      <p data-nse-part="status" role="status" aria-live="polite">{style.tabStops.length ? `${style.tabStops.length} custom tab stop${style.tabStops.length === 1 ? "" : "s"}.` : "No custom tab stops."}</p>
     </div>
   </section>;
 }

@@ -189,11 +189,17 @@ The checkbox/radio slice is complete (`703a4492`). Moved **65 drawing rules / 16
 
 Verification: **67 focused tests in eight files**, **691 rendered contract specimens**, framework typecheck and static bundle validation passed. The full frozen comparison passed **82/82, zero differences**, in `task-14-selection-baseline.log`. All **2,648 PNG hashes remain unchanged**. The initial browser command found the existing task-owned fixture server on port 5377; the accepted command explicitly reused that server. No reference was updated.
 
-The value-control slice moves **173 drawing rules / 536 selectors** for switches, sliders, textured/rounded/capsule segments, steppers, progress and level indicators. Public hooks distinguish the switch's fill ends and captions, native progress indeterminacy, the level classification, custom segment heights and expanded menu buttons. Supplementary menu/overflow specimens exercise closed and open hooks without changing the frozen catalogue. Cross-component colour-panel and form rules remain with their owning later slices.
+The value-control slice (`0a34f6d4`) moves **173 drawing rules / 536 selectors** for switches, sliders, textured/rounded/capsule segments, steppers, progress and level indicators. Public hooks distinguish the switch's fill ends and captions, native progress indeterminacy, the level classification, custom segment heights and expanded menu buttons. Supplementary menu/overflow specimens exercise closed and open hooks without changing the frozen catalogue. Cross-component colour-panel and form rules remain with their owning later slices.
 
 Verification: **78 focused tests in five files**, **693 rendered contract specimens**, framework and both catalogue typechecks, and bundle validation passed. Paired computed-style checks of **172 value specimens** found zero differences. The frozen image gate passed **82/82, zero differences**, in `task-14-values-baseline.log`. All **2,648 PNG hashes remain unchanged**. Early validator runs exposed a cross-owner colour-panel selector and menu hooks absent from the rendered inventory; those were resolved through ownership and real supplementary specimens, with logs retained.
 
-Remaining Task 14 slices: text, containers, menus/toolbars, windows, overlays and system UI; final built-in data connection, structure split and removal of the old theme directory.
+The text slice moves **84 drawing rules / 249 selectors** for text, search, secure, combo and token fields, plus ruler status paint. Fields publish their existing group position, explicit height, validation and value state. Native editors supplied to the internal input group gain `field` parts declaratively; their refs, values and native edits are preserved, and nested controls keep their own hooks. Part selectors are bounded to their owning slots. Supplementary specimens cover input groups, field affixes and token menus.
+
+Verification: **751 tests in six files passed** (54 focused cases and 697 rendered specimens); the native-ref check passed all five cases after its added assertions. Typechecks and bundle validation passed. Paired computed-style checks of **158 text/form specimens** found zero differences. Four focused input-group image checks passed, followed by the complete frozen **82/82, zero differences**, in `task-14-text-baseline-final.log`. All **2,648 PNG hashes are unchanged**.
+
+The first full image run passed 78/82 and caught the input group's missing native field part. Its original expected/actual/diff images and traces remain under `task-14-text-input-box-failure`. Earlier style probes caught disabled search fields incorrectly acquiring paint that their old selectors never applied; predicates now preserve that behaviour. No baseline image was changed.
+
+Remaining Task 14 slices: containers, menus/toolbars, windows, overlays and system UI; final built-in data connection, structure split and removal of the old theme directory.
 
 ### Tasks 15–19
 
@@ -220,6 +226,9 @@ Further diagnostic runs exposed folder-only capture interference and source-pain
 - Continue autonomous implementation. Stop an affected slice only for an unavoidable visible difference or a genuine spec/plan contradiction affecting public API; commit passing work and continue independent tasks.
 
 ## Calls made by Codex
+
+- Native focus-shadow resets remain framework-owned focus placement; Atmo draws the bezel indicator. This avoids a second indicator on the inner native editor.
+- The internal input group publishes native editor slots declaratively, without new DOM wrappers or changing editing ownership. Opaque child components and nested NSE controls retain their own contract.
 
 - The drawing contract publishes cell tracking separately from a retained highlight. Existing Atmo distinguishes the two; exposing the framework-owned tracking fact preserves both looks without allowing themes to control interaction.
 - Public part selectors are bounded to their owning slots. In particular, a push button's title selector does not also target its nested pop-up caption or a checkbox's title.
