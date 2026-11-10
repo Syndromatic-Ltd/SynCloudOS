@@ -81,6 +81,7 @@ function NSETexturedRadioSegments({ props }: { readonly props: NSESegmentedContr
       name={props.name}
       isEnabled={props.isEnabled !== false && !props.readOnly}
       data-size={sizeAttribute(props)}
+      data-nse-height={props.height === undefined ? undefined : String(props.height)}
       data-segment-style="texturedRounded"
       style={sizedControlStyle(undefined, props.height, undefined)}
       options={props.items.map((item) => ({
@@ -169,7 +170,7 @@ function NSEMenuSegment({ item, menu, props }: { readonly item: NSESegmentedItem
         isEnabled={!disabled}
         haptic={props.haptic ?? "soft"}
         aria-haspopup="menu"
-        aria-expanded={open}
+        data-nse-expanded={String(open)} aria-expanded={open}
         onClick={() => setOpen((current) => !current)}
         style={item.width === undefined ? undefined : { boxSizing: "border-box", inlineSize: item.width, minInlineSize: item.width }}
       />

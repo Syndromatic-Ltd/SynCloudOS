@@ -606,7 +606,7 @@ function NSESwitchControl({
       className={classes("nse-control-toggle", className)}
       {...props}
       {...theme.events}
-      {...nseControlHooks({ control: "switch", state: isChecked ? "on" : "off", highlighted: theme.highlighted || isDragging, enabled: isEnabled, hovered: theme.hovered, focused: theme.focused })}
+      {...nseControlHooks({ control: "switch", tracking: isDragging, state: isChecked ? "on" : "off", highlighted: theme.highlighted || isDragging, enabled: isEnabled, hovered: theme.hovered, focused: theme.focused })}
       data-nse-part="background"
       type={type}
       role="switch"
@@ -646,10 +646,10 @@ function NSESwitchControl({
       <span data-nse-part="bezel" aria-hidden="true" style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />
       <span className="nse-control-visually-hidden">{isChecked ? onLabel : offLabel}</span>
       <span data-nse-part="track" className="nse-control-toggle-track" aria-hidden="true">
-        <span data-nse-part="fill" className="nse-control-toggle-rail nse-control-toggle-rail-start" />
-        <span data-nse-part="fill" className="nse-control-toggle-rail nse-control-toggle-rail-end" />
-        <span data-nse-part="title" className="nse-control-toggle-text nse-control-toggle-text-on"><span className="nse-control-toggle-state-label" ref={onTextRef}>{onLabel}</span></span>
-        <span data-nse-part="title" className="nse-control-toggle-text nse-control-toggle-text-off"><span className="nse-control-toggle-state-label" ref={offTextRef}>{offLabel}</span></span>
+        <span data-nse-part="fill" data-nse-position="leading" className="nse-control-toggle-rail nse-control-toggle-rail-start" />
+        <span data-nse-part="fill" data-nse-position="trailing" className="nse-control-toggle-rail nse-control-toggle-rail-end" />
+        <span data-nse-part="title" data-nse-state="on" className="nse-control-toggle-text nse-control-toggle-text-on"><span data-nse-part="label" className="nse-control-toggle-state-label" ref={onTextRef}>{onLabel}</span></span>
+        <span data-nse-part="title" data-nse-state="off" className="nse-control-toggle-text nse-control-toggle-text-off"><span data-nse-part="label" className="nse-control-toggle-state-label" ref={offTextRef}>{offLabel}</span></span>
         <span data-nse-part="knob" className="nse-control-toggle-thumb" ref={thumbRef}>{thumbMaterial === "metal" ? <NSEMetalThumb disabled={disabled} /> : null}</span>
       </span>
     </button>

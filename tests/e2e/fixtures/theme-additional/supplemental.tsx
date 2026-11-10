@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { NSERadioGroup } from "../../../../src/NSE/Controls/Fields/NSEFields";
+import { NSESegmentedControl } from "../../../../src/NSE/Controls/Values/NSESegmentedControl";
 import { NSEColourSwatches } from "../../../../src/NSE/Colour/Pickers/NSEColourSwatches";
 import { GFXColour } from "../../../../src/FX/GraphicsFX/GFXColour";
 import { NSETooltip } from "../../../../src/NSE/Tooltips/NSETooltip";
@@ -42,6 +43,8 @@ import { createStaticPresentationTraits } from "../../../fixtures/presentationTr
 const plainTheme = freezeNSETheme({ ...atmoTheme, presentation: { login: "plain", notifications: "plain", materialLighting: "off" } });
 const colour = GFXColour.parse("#336699");
 export const supplementalThemeCatalogue: readonly { id: string; render: () => ReactNode }[] = [
+  { id: "segment-menu", render: () => <NSESegmentedControl selection={{ mode: "select-one", selectedIds: new Set<string>(), allowsEmpty: true }} aria-label="Actions" height={40} name="actions" items={[{ id: "save", label: "Save", menu: [{ id: "copy", label: "Save copy" }] }, { id: "open", label: "Open" }]} /> },
+  { id: "segment-overflow", render: () => <NSESegmentedControl selection={{ mode: "select-one", selectedIds: new Set<string>(), allowsEmpty: true }} aria-label="Views" maximumVisibleSegments={1} items={[{ id: "list", label: "List" }, { id: "grid", label: "Grid" }]} /> },
   { id: "plain-login", render: () => <NSEAppearanceProvider theme={plainTheme}><LoginWindow title="Sign in" methods={[{ id: "account", label: "Continue" }]} /></NSEAppearanceProvider> },
   { id: "plain-notification", render: () => <NSEAppearanceProvider theme={plainTheme}><SystemSurface kind="notifications" /></NSEAppearanceProvider> },
   ...(["compact", "regular"] as const).flatMap(widthClass => (widthClass === "compact" ? ["block-start", "block-end"] : ["source-list", "block-start"]).flatMap(placement => (["in-flow", "overlay"] as const).map(flow => ({ id: `navigation-${widthClass}-${placement}-${flow}`, render: () => <ThemeNavigation widthClass={widthClass} placement={placement} flow={flow} /> })))),

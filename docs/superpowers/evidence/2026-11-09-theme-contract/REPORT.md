@@ -185,11 +185,15 @@ Verification: **55 focused tests in seven files**, **691 rendered contract speci
 
 The earlier screenshot run passed 78/82 and exposed CSS background/mask artwork captured before decoding (metal header/glyphs and folder texture). The fixture now waits for CSS image decoding after selecting each interaction state, in addition to HTML images. The unchanged references then passed completely. Original expected/actual/diff PNGs and traces from that run are retained in `task-14-button-capture-failures`. This is a fixture readiness fix, not a baseline replacement or parity exception.
 
-The checkbox/radio slice is complete. Moved **65 drawing rules / 169 selectors** to public hooks. Native selection inputs publish the `field` part, the checkbox's enclosing slot publishes `content`, and radio cells publish their existing `position`. The native checked, mixed, disabled and keyboard semantics are unchanged. Focus placement, typography and interaction layout remain framework-owned.
+The checkbox/radio slice is complete (`703a4492`). Moved **65 drawing rules / 169 selectors** to public hooks. Native selection inputs publish the `field` part, the checkbox's enclosing slot publishes `content`, and radio cells publish their existing `position`. The native checked, mixed, disabled and keyboard semantics are unchanged. Focus placement, typography and interaction layout remain framework-owned.
 
 Verification: **67 focused tests in eight files**, **691 rendered contract specimens**, framework typecheck and static bundle validation passed. The full frozen comparison passed **82/82, zero differences**, in `task-14-selection-baseline.log`. All **2,648 PNG hashes remain unchanged**. The initial browser command found the existing task-owned fixture server on port 5377; the accepted command explicitly reused that server. No reference was updated.
 
-Remaining Task 14 slices: value, text, containers, menus/toolbars, windows, overlays and system UI; final built-in data connection, structure split and removal of the old theme directory.
+The value-control slice moves **173 drawing rules / 536 selectors** for switches, sliders, textured/rounded/capsule segments, steppers, progress and level indicators. Public hooks distinguish the switch's fill ends and captions, native progress indeterminacy, the level classification, custom segment heights and expanded menu buttons. Supplementary menu/overflow specimens exercise closed and open hooks without changing the frozen catalogue. Cross-component colour-panel and form rules remain with their owning later slices.
+
+Verification: **78 focused tests in five files**, **693 rendered contract specimens**, framework and both catalogue typechecks, and bundle validation passed. Paired computed-style checks of **172 value specimens** found zero differences. The frozen image gate passed **82/82, zero differences**, in `task-14-values-baseline.log`. All **2,648 PNG hashes remain unchanged**. Early validator runs exposed a cross-owner colour-panel selector and menu hooks absent from the rendered inventory; those were resolved through ownership and real supplementary specimens, with logs retained.
+
+Remaining Task 14 slices: text, containers, menus/toolbars, windows, overlays and system UI; final built-in data connection, structure split and removal of the old theme directory.
 
 ### Tasks 15–19
 

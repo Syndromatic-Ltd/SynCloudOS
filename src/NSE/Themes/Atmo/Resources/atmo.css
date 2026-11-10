@@ -1,3 +1,4 @@
+@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo.values.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo.selection.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo.buttons.css";
 @import "./path-control.css";
@@ -1126,25 +1127,14 @@
    overflow+radius clip to the pill), follows the thumb via the same
    --nse-control-toggle-thumb-x variable and transition. Visible only where it
    peeks past the sphere's rim — a soft occlusion ring on the track. */
-:scope .nse-control-toggle-track::after,
-:scope:is(.nse-control-toggle-track::after),
-:scope.nse-control-toggle-track::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: var(--nse-control-toggle-unit);
-  height: var(--nse-control-toggle-unit);
-  background: radial-gradient(
-    ellipse 47% 44% at 50% 58%,
-    rgba(22, 30, 40, 0.26),
-    rgba(22, 30, 40, 0.11) 58%,
-    transparent 74%
-  );
-  left: calc(100% * var(--nse-control-toggle-ratio, 0));
-  transform: translateX(calc(-100% * var(--nse-control-toggle-ratio, 0)));
-  transition: left 180ms cubic-bezier(0.22, 0.75, 0.28, 1), transform 180ms cubic-bezier(0.22, 0.75, 0.28, 1);
-  pointer-events: none;
+:scope .nse-control-toggle-track::after,:scope:is(.nse-control-toggle-track::after),:scope.nse-control-toggle-track::after {
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  left:calc(100%*var(--nse-control-toggle-ratio,0));
+  transition:left 180ms cubic-bezier(0.22,0.75,0.28,1),transform 180ms cubic-bezier(0.22,0.75,0.28,1);
+  pointer-events:none;
 }
 
 :scope .nse-control-toggle[data-dragging="true"] .nse-control-toggle-track::after,
@@ -1153,11 +1143,7 @@
   transition: none;
 }
 
-:scope .nse-control-toggle:disabled .nse-control-toggle-track::after,
-:scope:is(.nse-control-toggle:disabled) .nse-control-toggle-track::after,
-:scope.nse-control-toggle:disabled .nse-control-toggle-track::after {
-  opacity: 0.5;
-}
+
 
 /* ============================================================================
    Picker pill — background-pill.png (outline-only white pill), pill-downstate
@@ -2301,15 +2287,13 @@
 }
 
 
+
 :scope .nse-control-toolbar:not([data-grouped="true"])>.nse-control-button,
 :scope:is(.nse-control-toolbar:not([data-grouped="true"]))>.nse-control-button,
 :scope.nse-control-toolbar:not([data-grouped="true"])>.nse-control-button,
 :scope .nse-control-toolbar[data-grouped="true"]:not(.nse-extended-tab-group)>.nse-control-button,
 :scope:is(.nse-control-toolbar[data-grouped="true"]:not(.nse-extended-tab-group))>.nse-control-button,
 :scope.nse-control-toolbar[data-grouped="true"]:not(.nse-extended-tab-group)>.nse-control-button,
-:scope .nse-extended-radio-tool-button-group .nse-control-radio,
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio,
-:scope.nse-extended-radio-tool-button-group .nse-control-radio,
 :scope .nse-control-search-frame,
 :scope:is(.nse-control-search-frame),
 :scope.nse-control-search-frame {
@@ -2321,15 +2305,13 @@
 :where(:scope) .nse-control-toolbar:not([data-grouped="true"])>.nse-control-button,:where(:scope):is(.nse-control-toolbar:not([data-grouped="true"]))>.nse-control-button,:where(:scope).nse-control-toolbar:not([data-grouped="true"])>.nse-control-button,:where(:scope) .nse-extended-tool-button.nse-control-button,:where(:scope):is(.nse-extended-tool-button.nse-control-button),:where(:scope).nse-extended-tool-button.nse-control-button,:where(:scope) .nse-control-toolbar[data-grouped="true"]:not(.nse-extended-tab-group)>.nse-control-button,:where(:scope):is(.nse-control-toolbar[data-grouped="true"]:not(.nse-extended-tab-group))>.nse-control-button,:where(:scope).nse-control-toolbar[data-grouped="true"]:not(.nse-extended-tab-group)>.nse-control-button,:where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio,:where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio,:where(:scope).nse-extended-radio-tool-button-group .nse-control-radio {
   line-height:var(--nse-atmo-bar-h);
 }
+
 :where(:scope) .nse-control-toolbar:not([data-grouped="true"])>.nse-control-button,
 :where(:scope):is(.nse-control-toolbar:not([data-grouped="true"]))>.nse-control-button,
 :where(:scope).nse-control-toolbar:not([data-grouped="true"])>.nse-control-button,
 :where(:scope) .nse-control-toolbar[data-grouped="true"]:not(.nse-extended-tab-group)>.nse-control-button,
 :where(:scope):is(.nse-control-toolbar[data-grouped="true"]:not(.nse-extended-tab-group))>.nse-control-button,
-:where(:scope).nse-control-toolbar[data-grouped="true"]:not(.nse-extended-tab-group)>.nse-control-button,
-:where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio,
-:where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio,
-:where(:scope).nse-extended-radio-tool-button-group .nse-control-radio {
+:where(:scope).nse-control-toolbar[data-grouped="true"]:not(.nse-extended-tab-group)>.nse-control-button {
   height:var(--nse-atmo-bar-h);
   min-height:var(--nse-atmo-bar-h);
   --nse-control-minimum-block-size:var(--nse-atmo-bar-h);
@@ -2680,194 +2662,26 @@
   background: none;
   box-shadow: none;
 }
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="first"],
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="first"],
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="first"] {
-  border-width: 0 1px 0 calc(var(--nse-atmo-bar-h) * 0.46);
-  border-image: var(--nse-atmo-svg-gt-first-up) 0 1 0 23 fill stretch;
-  padding: 0 calc(var(--nse-atmo-bar-h) * 0.26) 0 0;
-  background: none;
-  box-shadow: none;
-}
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="first"]:active:not(:disabled),
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="first"]:active:not(:disabled),
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="first"]:active:not(:disabled) {
-  border-width: 0 1px 0 calc(var(--nse-atmo-bar-h) * 0.46);
-  border-image: var(--nse-atmo-svg-gt-first-down) 0 1 0 23 fill stretch;
-  background: none;
-  box-shadow: none;
-}
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="first"][data-selected="true"],
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="first"][data-selected="true"],
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="first"][data-selected="true"],
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="first"][data-pressed="true"],
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="first"][data-pressed="true"],
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="first"][data-pressed="true"] {
-  border-width: 0 1px 0 calc(var(--nse-atmo-bar-h) * 0.46);
-  border-image: var(--nse-atmo-svg-gt-first-sel) 0 1 0 23 fill stretch;
-  background: none;
-  box-shadow: none;
-}
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="first"][data-selected="true"]:active:not(:disabled),
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="first"][data-selected="true"]:active:not(:disabled),
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="first"][data-selected="true"]:active:not(:disabled),
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="first"][data-pressed="true"]:active:not(:disabled),
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="first"][data-pressed="true"]:active:not(:disabled),
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="first"][data-pressed="true"]:active:not(:disabled) {
-  border-width: 0 1px 0 calc(var(--nse-atmo-bar-h) * 0.46);
-  border-image: var(--nse-atmo-svg-gt-first-seldown) 0 1 0 23 fill stretch;
-  background: none;
-  box-shadow: none;
-}
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="first"]:disabled,
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="first"]:disabled,
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="first"]:disabled {
-  border-width: 0 1px 0 calc(var(--nse-atmo-bar-h) * 0.46);
-  border-image: var(--nse-atmo-svg-gt-first-dis) 0 1 0 23 fill stretch;
-  background: none;
-  box-shadow: none;
-}
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="middle"],
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="middle"],
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="middle"] {
-  border-width: 0 1px;
-  border-image: var(--nse-atmo-svg-gt-middle-up) 0 1 0 1 fill stretch;
-  padding: 0 calc(var(--nse-atmo-bar-h) * 0.26);
-  background: none;
-  box-shadow: none;
-}
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="middle"]:active:not(:disabled),
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="middle"]:active:not(:disabled),
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="middle"]:active:not(:disabled) {
-  border-width: 0 1px;
-  border-image: var(--nse-atmo-svg-gt-middle-down) 0 1 0 1 fill stretch;
-  background: none;
-  box-shadow: none;
-}
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="middle"][data-selected="true"],
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="middle"][data-selected="true"],
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="middle"][data-selected="true"],
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="middle"][data-pressed="true"],
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="middle"][data-pressed="true"],
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="middle"][data-pressed="true"] {
-  border-width: 0 1px;
-  border-image: var(--nse-atmo-svg-gt-middle-sel) 0 1 0 1 fill stretch;
-  background: none;
-  box-shadow: none;
-}
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="middle"][data-selected="true"]:active:not(:disabled),
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="middle"][data-selected="true"]:active:not(:disabled),
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="middle"][data-selected="true"]:active:not(:disabled),
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="middle"][data-pressed="true"]:active:not(:disabled),
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="middle"][data-pressed="true"]:active:not(:disabled),
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="middle"][data-pressed="true"]:active:not(:disabled) {
-  border-width: 0 1px;
-  border-image: var(--nse-atmo-svg-gt-middle-seldown) 0 1 0 1 fill stretch;
-  background: none;
-  box-shadow: none;
-}
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="middle"]:disabled,
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="middle"]:disabled,
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="middle"]:disabled {
-  border-width: 0 1px;
-  border-image: var(--nse-atmo-svg-gt-middle-dis) 0 1 0 1 fill stretch;
-  background: none;
-  box-shadow: none;
-}
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="last"],
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="last"],
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="last"] {
-  border-width: 0 calc(var(--nse-atmo-bar-h) * 0.46) 0 1px;
-  border-image: var(--nse-atmo-svg-gt-last-up) 0 23 0 1 fill stretch;
-  padding: 0 0 0 calc(var(--nse-atmo-bar-h) * 0.26);
-  background: none;
-  box-shadow: none;
-}
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="last"]:active:not(:disabled),
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="last"]:active:not(:disabled),
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="last"]:active:not(:disabled) {
-  border-width: 0 calc(var(--nse-atmo-bar-h) * 0.46) 0 1px;
-  border-image: var(--nse-atmo-svg-gt-last-down) 0 23 0 1 fill stretch;
-  background: none;
-  box-shadow: none;
-}
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="last"][data-selected="true"],
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="last"][data-selected="true"],
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="last"][data-selected="true"],
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="last"][data-pressed="true"],
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="last"][data-pressed="true"],
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="last"][data-pressed="true"] {
-  border-width: 0 calc(var(--nse-atmo-bar-h) * 0.46) 0 1px;
-  border-image: var(--nse-atmo-svg-gt-last-sel) 0 23 0 1 fill stretch;
-  background: none;
-  box-shadow: none;
-}
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="last"][data-selected="true"]:active:not(:disabled),
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="last"][data-selected="true"]:active:not(:disabled),
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="last"][data-selected="true"]:active:not(:disabled),
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="last"][data-pressed="true"]:active:not(:disabled),
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="last"][data-pressed="true"]:active:not(:disabled),
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="last"][data-pressed="true"]:active:not(:disabled) {
-  border-width: 0 calc(var(--nse-atmo-bar-h) * 0.46) 0 1px;
-  border-image: var(--nse-atmo-svg-gt-last-seldown) 0 23 0 1 fill stretch;
-  background: none;
-  box-shadow: none;
-}
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="last"]:disabled,
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="last"]:disabled,
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="last"]:disabled {
-  border-width: 0 calc(var(--nse-atmo-bar-h) * 0.46) 0 1px;
-  border-image: var(--nse-atmo-svg-gt-last-dis) 0 23 0 1 fill stretch;
-  background: none;
-  box-shadow: none;
-}
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="single"],
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="single"],
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="single"] {
-  border-width: 0 calc(var(--nse-atmo-bar-h) * 0.46);
-  border-image: var(--nse-atmo-svg-gt-only-up) 0 23 0 23 fill stretch;
-  padding: 0 calc(var(--nse-atmo-bar-h) * 0.26);
-  background: none;
-  box-shadow: none;
-}
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="single"]:active:not(:disabled),
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="single"]:active:not(:disabled),
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="single"]:active:not(:disabled) {
-  border-width: 0 calc(var(--nse-atmo-bar-h) * 0.46);
-  border-image: var(--nse-atmo-svg-gt-only-down) 0 23 0 23 fill stretch;
-  background: none;
-  box-shadow: none;
-}
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="single"][data-selected="true"],
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="single"][data-selected="true"],
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="single"][data-selected="true"],
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="single"][data-pressed="true"],
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="single"][data-pressed="true"],
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="single"][data-pressed="true"] {
-  border-width: 0 calc(var(--nse-atmo-bar-h) * 0.46);
-  border-image: var(--nse-atmo-svg-gt-only-sel) 0 23 0 23 fill stretch;
-  background: none;
-  box-shadow: none;
-}
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="single"][data-selected="true"]:active:not(:disabled),
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="single"][data-selected="true"]:active:not(:disabled),
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="single"][data-selected="true"]:active:not(:disabled),
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="single"][data-pressed="true"]:active:not(:disabled),
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="single"][data-pressed="true"]:active:not(:disabled),
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="single"][data-pressed="true"]:active:not(:disabled) {
-  border-width: 0 calc(var(--nse-atmo-bar-h) * 0.46);
-  border-image: var(--nse-atmo-svg-gt-only-seldown) 0 23 0 23 fill stretch;
-  background: none;
-  box-shadow: none;
-}
-:scope .nse-extended-radio-tool-button-group .nse-control-radio[data-position="single"]:disabled,
-:scope:is(.nse-extended-radio-tool-button-group) .nse-control-radio[data-position="single"]:disabled,
-:scope.nse-extended-radio-tool-button-group .nse-control-radio[data-position="single"]:disabled {
-  border-width: 0 calc(var(--nse-atmo-bar-h) * 0.46);
-  border-image: var(--nse-atmo-svg-gt-only-dis) 0 23 0 23 fill stretch;
-  background: none;
-  box-shadow: none;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 :scope .nse-control-search-frame,
 :scope:is(.nse-control-search-frame),
 :scope.nse-control-search-frame {
@@ -2910,17 +2724,7 @@
 :scope {
   --nse-atmo-toggle-sheet: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='128' viewBox='0 0 64 128'><defs><linearGradient id='tb' x1='0' y1='1' x2='0' y2='31' gradientUnits='userSpaceOnUse'><stop offset='0.0167' stop-color='rgb(102,102,102)'/><stop offset='0.5000' stop-color='rgb(121,121,121)'/><stop offset='0.9833' stop-color='rgb(146,146,146)'/></linearGradient><linearGradient id='ti' x1='0' y1='2' x2='0' y2='30' gradientUnits='userSpaceOnUse'><stop offset='0.0179' stop-color='rgb(126,126,126)'/><stop offset='0.1607' stop-color='rgb(147,147,147)'/><stop offset='0.2321' stop-color='rgb(159,159,159)'/><stop offset='0.3393' stop-color='rgb(171,171,171)'/><stop offset='0.4821' stop-color='rgb(179,179,179)'/><stop offset='0.9107' stop-color='rgb(178,178,178)'/><stop offset='0.9821' stop-color='rgb(173,173,173)'/></linearGradient><filter id='tcf' x='-80%25' y='-80%25' width='260%25' height='260%25'><feGaussianBlur stdDeviation='2.8'/></filter><clipPath id='tclip'><rect x='2.02' y='2.02' width='59.96' height='27.96' rx='13.38' ry='13.98'/></clipPath><filter id='tkf' x='-60%25' y='-60%25' width='220%25' height='220%25'><feGaussianBlur stdDeviation='0.6'/></filter><linearGradient id='tu' x1='0.5' y1='0' x2='63.5' y2='0' gradientUnits='userSpaceOnUse'><stop offset='0.0000' stop-color='rgb(255,255,255)' stop-opacity='0.000'/><stop offset='0.0397' stop-color='rgb(255,255,255)' stop-opacity='0.275'/><stop offset='0.0873' stop-color='rgb(255,255,255)' stop-opacity='0.392'/><stop offset='0.1508' stop-color='rgb(255,255,255)' stop-opacity='0.412'/><stop offset='0.2381' stop-color='rgb(255,255,255)' stop-opacity='0.302'/><stop offset='0.3651' stop-color='rgb(255,255,255)' stop-opacity='0.310'/><stop offset='0.4762' stop-color='rgb(255,255,255)' stop-opacity='0.365'/><stop offset='0.5873' stop-color='rgb(255,255,255)' stop-opacity='0.325'/><stop offset='0.7143' stop-color='rgb(255,255,255)' stop-opacity='0.310'/><stop offset='0.7619' stop-color='rgb(255,255,255)' stop-opacity='0.302'/><stop offset='0.8492' stop-color='rgb(255,255,255)' stop-opacity='0.412'/><stop offset='0.9127' stop-color='rgb(255,255,255)' stop-opacity='0.392'/><stop offset='0.9603' stop-color='rgb(255,255,255)' stop-opacity='0.275'/><stop offset='1.0000' stop-color='rgb(255,255,255)' stop-opacity='0.000'/></linearGradient><linearGradient id='nr' x1='0' y1='1' x2='0' y2='31' gradientUnits='userSpaceOnUse'><stop offset='0.0167' stop-color='rgb(72,88,102)'/><stop offset='0.5000' stop-color='rgb(56,84,107)'/><stop offset='0.9833' stop-color='rgb(83,102,118)'/></linearGradient><linearGradient id='nb' x1='0' y1='17' x2='0' y2='30' gradientUnits='userSpaceOnUse'><stop offset='0.0385' stop-color='rgb(136,193,242)'/><stop offset='0.2692' stop-color='rgb(130,190,241)'/><stop offset='0.6538' stop-color='rgb(124,187,241)'/><stop offset='0.7308' stop-color='rgb(125,187,240)'/><stop offset='0.8077' stop-color='rgb(140,195,242)'/><stop offset='0.8846' stop-color='rgb(168,209,245)'/><stop offset='0.9615' stop-color='rgb(170,210,244)'/></linearGradient><radialGradient id='no' cx='48' cy='16' r='13.98' gradientUnits='userSpaceOnUse'><stop offset='0.66' stop-color='rgb(128,185,235)' stop-opacity='0'/><stop offset='0.88' stop-color='rgb(128,185,235)' stop-opacity='0.30'/><stop offset='1' stop-color='rgb(128,185,235)' stop-opacity='0.48'/></radialGradient><linearGradient id='na' x1='0' y1='18.29' x2='0' y2='29.2' gradientUnits='userSpaceOnUse'><stop offset='0.0000' stop-color='rgb(121,175,228)'/><stop offset='0.4840' stop-color='rgb(149,196,237)'/><stop offset='0.8379' stop-color='rgb(167,207,242)'/><stop offset='1.0000' stop-color='rgb(170,210,244)'/></linearGradient><filter id='naf' x='-30%25' y='-30%25' width='160%25' height='160%25'><feGaussianBlur stdDeviation='0.7'/></filter><linearGradient id='ng' x1='0' y1='1.75' x2='0' y2='30.25' gradientUnits='userSpaceOnUse'><stop offset='0.0245' stop-color='rgb(89,102,115)'/><stop offset='0.1170' stop-color='rgb(89,106,121)'/><stop offset='0.2887' stop-color='rgb(86,107,125)'/><stop offset='0.5000' stop-color='rgb(56,84,107)'/><stop offset='0.7113' stop-color='rgb(91,112,129)'/><stop offset='0.9830' stop-color='rgb(109,125,138)'/><stop offset='0.9997' stop-color='rgb(81,101,117)'/></linearGradient><filter id='nf' x='-20%25' y='-20%25' width='140%25' height='140%25'><feGaussianBlur stdDeviation='0.55'/></filter><filter id='nff' x='-40%25' y='-40%25' width='180%25' height='180%25'><feGaussianBlur stdDeviation='0.6'/></filter><linearGradient id='nh' x1='0' y1='4' x2='0' y2='17' gradientUnits='userSpaceOnUse'><stop offset='0.0385' stop-color='rgb(199,219,239)'/><stop offset='0.1154' stop-color='rgb(191,214,238)'/><stop offset='0.2692' stop-color='rgb(186,212,239)'/><stop offset='0.5000' stop-color='rgb(179,212,243)'/><stop offset='0.7308' stop-color='rgb(167,209,245)'/><stop offset='0.8077' stop-color='rgb(162,207,246)'/><stop offset='0.9615' stop-color='rgb(151,202,244)'/></linearGradient><clipPath id='nk'><rect x='33' y='0' width='30' height='17'/></clipPath><filter id='ncf' x='-30%25' y='-30%25' width='160%25' height='160%25'><feGaussianBlur stdDeviation='0.8'/></filter><linearGradient id='fr' x1='0' y1='1' x2='0' y2='31' gradientUnits='userSpaceOnUse'><stop offset='0.0167' stop-color='rgb(71,71,71)'/><stop offset='0.5000' stop-color='rgb(104,104,104)'/><stop offset='0.9833' stop-color='rgb(81,81,81)'/></linearGradient><linearGradient id='fb' x1='0' y1='17' x2='0' y2='30' gradientUnits='userSpaceOnUse'><stop offset='0.0385' stop-color='rgb(161,161,161)'/><stop offset='0.3462' stop-color='rgb(155,155,155)'/><stop offset='0.7308' stop-color='rgb(151,151,151)'/><stop offset='0.8077' stop-color='rgb(164,164,164)'/><stop offset='0.8846' stop-color='rgb(186,186,186)'/><stop offset='0.9615' stop-color='rgb(188,188,188)'/></linearGradient><radialGradient id='fo' cx='16' cy='16' r='13.98' gradientUnits='userSpaceOnUse'><stop offset='0.66' stop-color='rgb(157,157,157)' stop-opacity='0'/><stop offset='0.88' stop-color='rgb(157,157,157)' stop-opacity='0.30'/><stop offset='1' stop-color='rgb(157,157,157)' stop-opacity='0.48'/></radialGradient><linearGradient id='fa' x1='0' y1='18.29' x2='0' y2='29.2' gradientUnits='userSpaceOnUse'><stop offset='0.0000' stop-color='rgb(157,157,157)'/><stop offset='0.4840' stop-color='rgb(173,173,173)'/><stop offset='0.8379' stop-color='rgb(186,186,186)'/><stop offset='1.0000' stop-color='rgb(188,188,188)'/></linearGradient><filter id='faf' x='-30%25' y='-30%25' width='160%25' height='160%25'><feGaussianBlur stdDeviation='0.7'/></filter><linearGradient id='fg' x1='0' y1='1.75' x2='0' y2='30.25' gradientUnits='userSpaceOnUse'><stop offset='0.0245' stop-color='rgb(93,93,93)'/><stop offset='0.1170' stop-color='rgb(93,93,93)'/><stop offset='0.2887' stop-color='rgb(102,102,102)'/><stop offset='0.5000' stop-color='rgb(104,104,104)'/><stop offset='0.7113' stop-color='rgb(120,120,120)'/><stop offset='0.8830' stop-color='rgb(120,120,120)'/><stop offset='0.9830' stop-color='rgb(127,127,127)'/><stop offset='0.9997' stop-color='rgb(81,81,81)'/></linearGradient><filter id='ff' x='-20%25' y='-20%25' width='140%25' height='140%25'><feGaussianBlur stdDeviation='0.55'/></filter><filter id='fff' x='-40%25' y='-40%25' width='180%25' height='180%25'><feGaussianBlur stdDeviation='0.6'/></filter><linearGradient id='fh' x1='0' y1='4' x2='0' y2='17' gradientUnits='userSpaceOnUse'><stop offset='0.0385' stop-color='rgb(218,218,218)'/><stop offset='0.1154' stop-color='rgb(212,212,212)'/><stop offset='0.3462' stop-color='rgb(205,205,205)'/><stop offset='0.6538' stop-color='rgb(192,192,192)'/><stop offset='0.9615' stop-color='rgb(174,174,174)'/></linearGradient><clipPath id='fk'><rect x='1' y='0' width='30' height='17'/></clipPath><filter id='fcf' x='-30%25' y='-30%25' width='160%25' height='160%25'><feGaussianBlur stdDeviation='0.8'/></filter><clipPath id='railL'><rect x='0' y='0' width='32' height='32'/></clipPath><clipPath id='railR'><rect x='32' y='0' width='32' height='32'/></clipPath><g id='bandOn'><g clip-path='url(%23railL)'><rect x='1' y='1' width='62' height='30' rx='14.4' ry='15' fill='url(%23tb)'/><rect x='2.02' y='2.02' width='59.96' height='27.96' rx='13.38' ry='13.98' fill='url(%23ti)'/><g clip-path='url(%23tclip)'><path d='M 15.4 1.6 A 13.8 14.4 0 0 0 15.4 30.4' fill='none' stroke='rgb(70,70,70)' stroke-opacity='0.55' stroke-width='2.6' filter='url(%23tcf)'/><path d='M 48.6 1.6 A 13.8 14.4 0 0 1 48.6 30.4' fill='none' stroke='rgb(70,70,70)' stroke-opacity='0.55' stroke-width='2.6' filter='url(%23tcf)'/></g><path d='M 11.11 2.21 A 13.9 14.5 0 0 0 1.71 13.48' fill='none' stroke='rgb(75,75,75)' stroke-opacity='0.55' stroke-width='1.1' filter='url(%23tkf)'/><path d='M 52.89 2.21 A 13.9 14.5 0 0 1 62.29 13.48' fill='none' stroke='rgb(75,75,75)' stroke-opacity='0.55' stroke-width='1.1' filter='url(%23tkf)'/><path d='M 0.5 16 A 14.9 15.5 0 0 0 15.4 31.5 L 48.6 31.5 A 14.9 15.5 0 0 0 63.5 16' fill='none' stroke='url(%23tu)' stroke-width='1' stroke-linecap='round'/></g><circle cx='48' cy='16' r='15' fill='url(%23nr)'/><circle cx='48' cy='16' r='13.98' fill='url(%23nb)'/><circle cx='48' cy='16' r='13.98' fill='url(%23no)'/><path d='M 35 18.29 A 13.2 13.2 0 0 0 61 18.29' fill='none' stroke='url(%23na)' stroke-width='1.7' stroke-linecap='round' filter='url(%23naf)'/><path d='M 43.6 2.45 A 14.25 14.25 0 0 0 48 30.25 A 14.25 14.25 0 0 0 52.4 2.45' fill='none' stroke='url(%23ng)' stroke-width='1.35' stroke-linecap='round' filter='url(%23nf)'/><path d='M 36.72 8.95 A 13.3 13.3 0 0 0 34.9 18.31' fill='none' stroke='rgb(82,123,162)' stroke-width='1.9' stroke-linecap='round' filter='url(%23nff)'/><path d='M 59.28 8.95 A 13.3 13.3 0 0 1 61.1 18.31' fill='none' stroke='rgb(82,123,162)' stroke-width='1.9' stroke-linecap='round' filter='url(%23nff)'/><circle cx='48' cy='16' r='13.98' fill='url(%23nh)' clip-path='url(%23nk)'/><path d='M 35.42 14.23 A 12.7 12.7 0 0 1 60.58 14.23' fill='none' stroke='rgb(227,236,247)' stroke-opacity='0.7' stroke-width='2.5' stroke-linecap='round' filter='url(%23ncf)' clip-path='url(%23nk)'/></g><g id='bandOff'><g clip-path='url(%23railR)'><rect x='1' y='1' width='62' height='30' rx='14.4' ry='15' fill='url(%23tb)'/><rect x='2.02' y='2.02' width='59.96' height='27.96' rx='13.38' ry='13.98' fill='url(%23ti)'/><g clip-path='url(%23tclip)'><path d='M 15.4 1.6 A 13.8 14.4 0 0 0 15.4 30.4' fill='none' stroke='rgb(70,70,70)' stroke-opacity='0.55' stroke-width='2.6' filter='url(%23tcf)'/><path d='M 48.6 1.6 A 13.8 14.4 0 0 1 48.6 30.4' fill='none' stroke='rgb(70,70,70)' stroke-opacity='0.55' stroke-width='2.6' filter='url(%23tcf)'/></g><path d='M 11.11 2.21 A 13.9 14.5 0 0 0 1.71 13.48' fill='none' stroke='rgb(75,75,75)' stroke-opacity='0.55' stroke-width='1.1' filter='url(%23tkf)'/><path d='M 52.89 2.21 A 13.9 14.5 0 0 1 62.29 13.48' fill='none' stroke='rgb(75,75,75)' stroke-opacity='0.55' stroke-width='1.1' filter='url(%23tkf)'/><path d='M 0.5 16 A 14.9 15.5 0 0 0 15.4 31.5 L 48.6 31.5 A 14.9 15.5 0 0 0 63.5 16' fill='none' stroke='url(%23tu)' stroke-width='1' stroke-linecap='round'/></g><circle cx='16' cy='16' r='15' fill='url(%23fr)'/><circle cx='16' cy='16' r='13.98' fill='url(%23fb)'/><circle cx='16' cy='16' r='13.98' fill='url(%23fo)'/><path d='M 3 18.29 A 13.2 13.2 0 0 0 29 18.29' fill='none' stroke='url(%23fa)' stroke-width='1.7' stroke-linecap='round' filter='url(%23faf)'/><path d='M 11.6 2.45 A 14.25 14.25 0 0 0 16 30.25 A 14.25 14.25 0 0 0 20.4 2.45' fill='none' stroke='url(%23fg)' stroke-width='1.35' stroke-linecap='round' filter='url(%23ff)'/><path d='M 4.72 8.95 A 13.3 13.3 0 0 0 2.9 18.31' fill='none' stroke='rgb(127,127,127)' stroke-width='1.9' stroke-linecap='round' filter='url(%23fff)'/><path d='M 27.28 8.95 A 13.3 13.3 0 0 1 29.1 18.31' fill='none' stroke='rgb(127,127,127)' stroke-width='1.9' stroke-linecap='round' filter='url(%23fff)'/><circle cx='16' cy='16' r='13.98' fill='url(%23fh)' clip-path='url(%23fk)'/><path d='M 3.42 14.23 A 12.7 12.7 0 0 1 28.58 14.23' fill='none' stroke='rgb(237,237,237)' stroke-opacity='0.7' stroke-width='2.5' stroke-linecap='round' filter='url(%23fcf)' clip-path='url(%23fk)'/></g></defs><use href='%23bandOn'/><use href='%23bandOff' y='32'/><use href='%23bandOn' y='64' opacity='.502'/><use href='%23bandOff' y='96' opacity='.502'/></svg>");
 }
-:scope .nse-control-toggle-rail,
-:scope:is(.nse-control-toggle-rail),
-:scope.nse-control-toggle-rail,
-:scope .nse-control-toggle-thumb::before,
-:scope:is(.nse-control-toggle-thumb::before),
-:scope.nse-control-toggle-thumb::before,
-:scope .nse-control-toggle-thumb::after,
-:scope:is(.nse-control-toggle-thumb::after),
-:scope.nse-control-toggle-thumb::after {
-  background-image: var(--nse-atmo-toggle-sheet);
-}
+
 
 :scope {
   --nse-atmo-gb-frame: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'><defs><linearGradient id='s' x1='0' y1='0' x2='0' y2='40' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgb(141,141,134)'/><stop offset='0.045' stop-color='rgb(146,146,140)'/><stop offset='0.28' stop-color='rgb(152,152,146)'/><stop offset='0.72' stop-color='rgb(152,152,146)'/><stop offset='0.935' stop-color='rgb(141,141,134)'/><stop offset='0.97' stop-color='rgb(146,146,140)'/></linearGradient><linearGradient id='b' x1='0' y1='0' x2='0' y2='40' gradientUnits='userSpaceOnUse'><stop offset='0.05' stop-color='rgb(242,242,241)'/><stop offset='0.35' stop-color='rgb(228,228,225)'/><stop offset='1' stop-color='rgb(212,212,209)'/></linearGradient><mask id='bm' maskUnits='userSpaceOnUse' x='0' y='0' width='40' height='40'><rect width='40' height='40' fill='url(%23bmg)'/></mask><linearGradient id='bmg' x1='0' y1='0' x2='0' y2='40' gradientUnits='userSpaceOnUse'><stop offset='0.05' stop-color='rgb(255,255,255)'/><stop offset='0.36' stop-color='rgb(215,215,215)'/><stop offset='0.41' stop-color='rgb(0,0,0)'/><stop offset='0.56' stop-color='rgb(0,0,0)'/><stop offset='0.61' stop-color='rgb(175,175,175)'/><stop offset='0.9' stop-color='rgb(165,165,165)'/><stop offset='0.94' stop-color='rgb(0,0,0)'/></linearGradient><mask id='om' maskUnits='userSpaceOnUse' x='0' y='0' width='40' height='40'><rect width='40' height='40' fill='url(%23omg)'/><rect x='9' y='0' width='22' height='3' fill='rgb(0,0,0)'/></mask><linearGradient id='omg' x1='0' y1='0' x2='0' y2='40' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgb(255,255,255)'/><stop offset='0.2' stop-color='rgb(200,200,200)'/><stop offset='0.3' stop-color='rgb(0,0,0)'/><stop offset='0.62' stop-color='rgb(0,0,0)'/><stop offset='0.78' stop-color='rgb(160,160,160)'/><stop offset='0.93' stop-color='rgb(250,250,250)'/><stop offset='1' stop-color='rgb(255,255,255)'/></linearGradient><clipPath id='cl'><path clip-rule='evenodd' d='M 14 0 L 26 0 C 33.73 0 40 6.27 40 14 L 40 26 C 40 33.73 33.73 40 26 40 L 14 40 C 6.27 40 0 33.73 0 26 L 0 14 C 0 6.27 6.27 0 14 0 Z M 16 3 L 24 3 C 31 3 38 10 38 17 L 38 23 C 38 30 31 37 24 37 L 16 37 C 9 37 2 30 2 23 L 2 17 C 2 10 9 3 16 3 Z'/></clipPath><filter id='f4' x='-30%25' y='-30%25' width='160%25' height='160%25'><feGaussianBlur stdDeviation='0.25'/></filter></defs><g clip-path='url(%23cl)'><path d='M 14 0 L 26 0 C 33.73 0 40 6.27 40 14 L 40 26 C 40 33.73 33.73 40 26 40 L 14 40 C 6.27 40 0 33.73 0 26 L 0 14 C 0 6.27 6.27 0 14 0 Z' fill='url(%23s)'/><g><path d='M 16 3 L 24 3 C 31 3 38 10 38 17 L 38 23 C 38 30 31 37 24 37 L 16 37 C 9 37 2 30 2 23 L 2 17 C 2 10 9 3 16 3 Z' fill='none' stroke='url(%23b)' stroke-width='2' mask='url(%23bm)'/></g><g filter='url(%23f4)'><path d='M 14 0.15 L 26 0.15 C 33.65 0.15 39.85 6.35 39.85 14 L 39.85 26 C 39.85 33.65 33.65 39.85 26 39.85 L 14 39.85 C 6.35 39.85 0.15 33.65 0.15 26 L 0.15 14 C 0.15 6.35 6.35 0.15 14 0.15 Z' fill='none' stroke='rgb(240,240,238)' stroke-width='1.8' mask='url(%23om)'/></g></g></svg>");
@@ -2944,19 +2748,11 @@
   --nse-atmo-sl-thumb: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='50' height='100' viewBox='0 0 50 100'><defs><linearGradient id='tbc' x1='0' y1='11.2' x2='0' y2='38.2' gradientUnits='userSpaceOnUse'><stop offset='0.1' stop-color='rgb(199,218,239)'/><stop offset='0.14' stop-color='rgb(189,213,237)'/><stop offset='0.215' stop-color='rgb(183,211,239)'/><stop offset='0.326' stop-color='rgb(174,209,242)'/><stop offset='0.437' stop-color='rgb(161,206,245)'/><stop offset='0.511' stop-color='rgb(150,201,244)'/><stop offset='0.548' stop-color='rgb(136,193,242)'/><stop offset='0.696' stop-color='rgb(128,189,241)'/><stop offset='0.845' stop-color='rgb(124,187,240)'/><stop offset='1' stop-color='rgb(124,187,240)'/></linearGradient><radialGradient id='tbe' cx='24.5' cy='24.7' r='13.45' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgba(35,95,165,0)'/><stop offset='0.62' stop-color='rgba(35,95,165,0)'/><stop offset='0.87' stop-color='rgba(35,95,165,0.1)'/><stop offset='1' stop-color='rgba(35,95,165,0.22)'/></radialGradient><linearGradient id='tcr' x1='0' y1='11.2' x2='0' y2='22' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgba(243,247,252,0.97)'/><stop offset='0.2' stop-color='rgba(241,246,251,0.92)'/><stop offset='0.32' stop-color='rgba(238,244,250,0.35)'/><stop offset='0.6' stop-color='rgba(238,244,250,0.15)'/><stop offset='1' stop-color='rgba(238,244,250,0)'/></linearGradient><linearGradient id='trf' x1='0' y1='30' x2='0' y2='38.4' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgba(172,211,245,0)'/><stop offset='1' stop-color='rgba(172,211,245,0.9)'/></linearGradient><radialGradient id='tshA' cx='24.5' cy='26.4' r='16' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgb(70,70,70)'/><stop offset='0.75' stop-color='rgb(70,70,70)'/><stop offset='0.84' stop-color='rgb(54,54,54)'/><stop offset='0.9' stop-color='rgb(25,25,25)'/><stop offset='1' stop-color='rgb(0,0,0)'/></radialGradient><circle id='tsh' cx='24.5' cy='26.4' r='16'/><linearGradient id='gski' x1='0' y1='9.3' x2='0' y2='41.1' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgba(0,0,0,0)'/><stop offset='0.1' stop-color='rgba(0,0,0,0)'/><stop offset='0.18' stop-color='rgb(148,148,148)'/><stop offset='0.32' stop-color='rgb(175,175,175)'/><stop offset='0.5' stop-color='rgb(182,182,182)'/><stop offset='0.75' stop-color='rgb(180,180,180)'/><stop offset='1' stop-color='rgb(175,175,175)'/></linearGradient><linearGradient id='gsko' x1='0' y1='6.8' x2='0' y2='44.2' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgba(0,0,0,0)'/><stop offset='0.5' stop-color='rgba(0,0,0,0)'/><stop offset='0.6' stop-color='rgba(0,0,0,0)'/><stop offset='0.75' stop-color='rgb(120,120,120)'/><stop offset='1' stop-color='rgb(135,135,135)'/></linearGradient><linearGradient id='csed' x1='0' y1='10.35' x2='0' y2='39.45' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgba(0,0,0,0)'/><stop offset='0.12' stop-color='rgba(0,0,0,0)'/><stop offset='0.2' stop-color='rgb(170,170,170)'/><stop offset='0.35' stop-color='rgb(150,150,150)'/><stop offset='0.5' stop-color='rgb(112,112,112)'/><stop offset='0.75' stop-color='rgb(100,100,100)'/><stop offset='1' stop-color='rgb(95,95,95)'/></linearGradient><linearGradient id='cski' x1='0' y1='8.3' x2='0' y2='42.1' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgba(0,0,0,0)'/><stop offset='0.15' stop-color='rgba(0,0,0,0)'/><stop offset='0.25' stop-color='rgb(190,190,190)'/><stop offset='0.5' stop-color='rgb(187,187,187)'/><stop offset='0.7' stop-color='rgb(160,160,160)'/><stop offset='0.85' stop-color='rgb(135,135,135)'/><stop offset='1' stop-color='rgb(125,125,125)'/></linearGradient><linearGradient id='csko' x1='0' y1='6.8' x2='0' y2='44.2' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgba(0,0,0,0)'/><stop offset='0.5' stop-color='rgba(0,0,0,0)'/><stop offset='0.6' stop-color='rgba(0,0,0,0)'/><stop offset='0.75' stop-color='rgb(150,150,150)'/><stop offset='1' stop-color='rgb(142,142,142)'/></linearGradient><g id='tball'><circle cx='24.5' cy='24.7' r='13.45' fill='url(%23tbc)'/><circle cx='24.5' cy='24.7' r='13.45' fill='url(%23tbe)'/><path d='M12.94 20.55 A12.3 12.3 0 0 1 36.06 20.55' fill='none' stroke='url(%23tcr)' stroke-width='2.6'/><path d='M36.06 28.85 A12.3 12.3 0 0 1 12.94 28.85' fill='none' stroke='url(%23trf)' stroke-width='2.6'/><path d='M11.05 24.7 A13.45 13.45 0 0 1 37.95 24.7 C37.95 32.6 32.6 38.35 24.5 38.35 C16.4 38.35 11.05 32.6 11.05 24.7 Z' fill='none' stroke='rgb(5,73,131)' stroke-width='1'/></g><g id='tballA'><circle cx='24.5' cy='24.7' r='13.45' fill='white'/><path d='M11.05 24.7 A13.45 13.45 0 0 1 37.95 24.7 C37.95 32.6 32.6 38.35 24.5 38.35 C16.4 38.35 11.05 32.6 11.05 24.7 Z' fill='none' stroke='rgb(195,195,195)' stroke-width='1.1'/></g><radialGradient id='tgh' cx='24.5' cy='24.7' r='26' gradientUnits='userSpaceOnUse'><stop offset='0.5' stop-color='rgb(210,210,210)'/><stop offset='0.558' stop-color='rgb(152,152,152)'/><stop offset='0.596' stop-color='rgb(133,133,133)'/><stop offset='0.635' stop-color='rgb(122,122,122)'/><stop offset='0.673' stop-color='rgb(108,108,108)'/><stop offset='0.712' stop-color='rgb(88,88,88)'/><stop offset='0.75' stop-color='rgb(68,68,68)'/><stop offset='0.788' stop-color='rgb(50,50,50)'/><stop offset='0.827' stop-color='rgb(33,33,33)'/><stop offset='0.865' stop-color='rgb(21,21,21)'/><stop offset='0.904' stop-color='rgb(15,15,15)'/><stop offset='0.942' stop-color='rgb(9,9,9)'/><stop offset='1' stop-color='rgb(3,3,3)'/></radialGradient><radialGradient id='tghC' cx='24.5' cy='24.7' r='26' gradientUnits='userSpaceOnUse'><stop offset='0.5' stop-color='rgb(180,180,180)'/><stop offset='0.558' stop-color='rgb(188,188,188)'/><stop offset='0.596' stop-color='rgb(190,190,190)'/><stop offset='0.654' stop-color='rgb(189,189,189)'/><stop offset='0.712' stop-color='rgb(176,176,176)'/><stop offset='0.75' stop-color='rgb(158,158,158)'/><stop offset='0.788' stop-color='rgb(134,134,134)'/><stop offset='0.827' stop-color='rgb(105,105,105)'/><stop offset='0.865' stop-color='rgb(55,55,55)'/><stop offset='0.904' stop-color='rgb(27,27,27)'/><stop offset='1' stop-color='rgb(22,22,22)'/></radialGradient><linearGradient id='gr1o' x1='0' y1='5.3' x2='0' y2='47.9' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgb(126,126,126)'/><stop offset='0.052' stop-color='rgb(122,122,122)'/><stop offset='0.139' stop-color='rgb(117,117,117)'/><stop offset='0.167' stop-color='rgb(113,113,113)'/><stop offset='0.265' stop-color='rgb(100,100,100)'/><stop offset='0.35' stop-color='rgba(0,0,0,0)'/><stop offset='0.5' stop-color='rgba(0,0,0,0)'/><stop offset='0.6' stop-color='rgba(0,0,0,0)'/><stop offset='0.735' stop-color='rgb(95,95,95)'/><stop offset='0.861' stop-color='rgb(118,118,118)'/><stop offset='1' stop-color='rgb(124,124,124)'/></linearGradient><linearGradient id='gr1c' x1='0' y1='5.9' x2='0' y2='47.3' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgb(145,145,145)'/><stop offset='0.044' stop-color='rgb(140,140,140)'/><stop offset='0.128' stop-color='rgb(123,123,123)'/><stop offset='0.157' stop-color='rgb(117,117,117)'/><stop offset='0.258' stop-color='rgb(98,98,98)'/><stop offset='0.35' stop-color='rgba(0,0,0,0)'/><stop offset='0.5' stop-color='rgba(0,0,0,0)'/><stop offset='0.584' stop-color='rgba(0,0,0,0)'/><stop offset='0.742' stop-color='rgb(100,100,100)'/><stop offset='0.872' stop-color='rgb(122,122,122)'/><stop offset='1' stop-color='rgb(128,128,128)'/></linearGradient><linearGradient id='gvly' x1='0' y1='3.7' x2='0' y2='47.3' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgb(88,88,88)'/><stop offset='0.044' stop-color='rgb(82,82,82)'/><stop offset='0.128' stop-color='rgb(76,76,76)'/><stop offset='0.157' stop-color='rgb(73,73,73)'/><stop offset='0.264' stop-color='rgb(55,55,55)'/><stop offset='0.32' stop-color='rgba(0,0,0,0)'/><stop offset='0.5' stop-color='rgba(0,0,0,0)'/><stop offset='0.5' stop-color='rgba(0,0,0,0)'/><stop offset='1' stop-color='rgba(0,0,0,0)'/></linearGradient><linearGradient id='gr2o' x1='0' y1='1.6' x2='0' y2='49.6' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgb(130,130,130)'/><stop offset='0.058' stop-color='rgb(126,126,126)'/><stop offset='0.14' stop-color='rgb(115,115,115)'/><stop offset='0.167' stop-color='rgb(107,107,107)'/><stop offset='0.266' stop-color='rgb(82,82,82)'/><stop offset='0.398' stop-color='rgba(0,0,0,0)'/><stop offset='0.5' stop-color='rgba(0,0,0,0)'/><stop offset='0.602' stop-color='rgba(0,0,0,0)'/><stop offset='0.734' stop-color='rgb(95,95,95)'/><stop offset='0.86' stop-color='rgb(128,128,128)'/><stop offset='0.942' stop-color='rgb(155,155,155)'/><stop offset='1' stop-color='rgb(160,160,160)'/></linearGradient><linearGradient id='gr2c' x1='0' y1='2.5' x2='0' y2='48.7' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgb(190,190,190)'/><stop offset='0.04' stop-color='rgb(182,182,182)'/><stop offset='0.125' stop-color='rgb(146,146,146)'/><stop offset='0.154' stop-color='rgb(124,124,124)'/><stop offset='0.255' stop-color='rgb(92,92,92)'/><stop offset='0.415' stop-color='rgba(0,0,0,0)'/><stop offset='0.5' stop-color='rgba(0,0,0,0)'/><stop offset='0.585' stop-color='rgba(0,0,0,0)'/><stop offset='0.745' stop-color='rgb(102,102,102)'/><stop offset='0.875' stop-color='rgb(132,132,132)'/><stop offset='0.96' stop-color='rgb(158,158,158)'/><stop offset='1' stop-color='rgb(163,163,163)'/></linearGradient><linearGradient id='cr1o' x1='0' y1='5.3' x2='0' y2='47.9' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgb(190,190,190)'/><stop offset='0.167' stop-color='rgb(185,185,185)'/><stop offset='0.265' stop-color='rgb(180,180,180)'/><stop offset='0.35' stop-color='rgba(0,0,0,0)'/><stop offset='0.5' stop-color='rgba(0,0,0,0)'/><stop offset='0.6' stop-color='rgba(0,0,0,0)'/><stop offset='0.735' stop-color='rgb(195,195,195)'/><stop offset='1' stop-color='rgb(208,208,208)'/></linearGradient><linearGradient id='cr1c' x1='0' y1='5.9' x2='0' y2='47.3' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgb(210,210,210)'/><stop offset='0.157' stop-color='rgb(194,194,194)'/><stop offset='0.258' stop-color='rgb(185,185,185)'/><stop offset='0.35' stop-color='rgba(0,0,0,0)'/><stop offset='0.5' stop-color='rgba(0,0,0,0)'/><stop offset='0.584' stop-color='rgba(0,0,0,0)'/><stop offset='0.742' stop-color='rgb(198,198,198)'/><stop offset='1' stop-color='rgb(212,212,212)'/></linearGradient><linearGradient id='cvly' x1='0' y1='3.7' x2='0' y2='47.3' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgb(160,160,160)'/><stop offset='0.157' stop-color='rgb(150,150,150)'/><stop offset='0.264' stop-color='rgb(140,140,140)'/><stop offset='0.32' stop-color='rgba(0,0,0,0)'/><stop offset='0.5' stop-color='rgba(0,0,0,0)'/><stop offset='0.5' stop-color='rgba(0,0,0,0)'/><stop offset='1' stop-color='rgba(0,0,0,0)'/></linearGradient><linearGradient id='cr2o' x1='0' y1='1.6' x2='0' y2='49.6' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgb(222,222,222)'/><stop offset='0.167' stop-color='rgb(215,215,215)'/><stop offset='0.266' stop-color='rgb(205,205,205)'/><stop offset='0.398' stop-color='rgba(0,0,0,0)'/><stop offset='0.5' stop-color='rgba(0,0,0,0)'/><stop offset='0.602' stop-color='rgba(0,0,0,0)'/><stop offset='0.734' stop-color='rgb(210,210,210)'/><stop offset='0.86' stop-color='rgb(222,222,222)'/><stop offset='1' stop-color='rgb(230,230,230)'/></linearGradient><linearGradient id='cr2c' x1='0' y1='2.5' x2='0' y2='48.7' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgb(240,240,240)'/><stop offset='0.154' stop-color='rgb(226,226,226)'/><stop offset='0.255' stop-color='rgb(215,215,215)'/><stop offset='0.415' stop-color='rgba(0,0,0,0)'/><stop offset='0.5' stop-color='rgba(0,0,0,0)'/><stop offset='0.585' stop-color='rgba(0,0,0,0)'/><stop offset='0.745' stop-color='rgb(222,222,222)'/><stop offset='0.96' stop-color='rgb(238,238,238)'/><stop offset='1' stop-color='rgb(241,241,241)'/></linearGradient><linearGradient id='cbot' x1='0' y1='0.1' x2='0' y2='50.7' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgba(0,0,0,0)'/><stop offset='0.58' stop-color='rgba(0,0,0,0)'/><stop offset='0.66' stop-color='rgb(180,180,180)'/><stop offset='0.78' stop-color='rgb(205,205,205)'/><stop offset='0.9' stop-color='rgb(218,218,218)'/><stop offset='1' stop-color='rgb(225,225,225)'/><stop offset='1' stop-color='rgb(225,225,225)'/></linearGradient><g id='tglow'><circle cx='24.5' cy='24.7' r='24' fill='url(%23tghC)'/><ellipse cx='24.5' cy='49' rx='11' ry='2.5' fill='rgb(197,197,197)'/><circle cx='24.5' cy='24.9' r='14' fill='none' stroke='url(%23csed)' stroke-width='1.1'/><circle cx='24.5' cy='25.2' r='15.6' fill='none' stroke='url(%23cski)' stroke-width='2.6'/><circle cx='24.5' cy='25.5' r='17.3' fill='none' stroke='url(%23csko)' stroke-width='2.8'/><circle cx='24.5' cy='25.4' r='22.3' fill='none' stroke='url(%23cbot)' stroke-width='6'/><circle cx='24.5' cy='26.05' r='19.85' fill='none' stroke='url(%23cr1o)' stroke-width='2.4'/><circle cx='24.5' cy='26.05' r='19.85' fill='none' stroke='url(%23cr1c)' stroke-width='1.2'/><circle cx='24.5' cy='25.5' r='21.15' fill='none' stroke='url(%23cvly)' stroke-width='1.3'/><circle cx='24.5' cy='25.6' r='22.6' fill='none' stroke='url(%23cr2o)' stroke-width='2.4'/><circle cx='24.5' cy='25.6' r='22.6' fill='none' stroke='url(%23cr2c)' stroke-width='1'/></g><g id='tglowA'><circle cx='24.5' cy='24.7' r='24' fill='url(%23tgh)'/><ellipse cx='24.5' cy='49' rx='11' ry='2.5' fill='rgb(46,46,46)'/><circle cx='24.5' cy='25.2' r='14.6' fill='none' stroke='url(%23gski)' stroke-width='2.6'/><circle cx='24.5' cy='25.5' r='17.3' fill='none' stroke='url(%23gsko)' stroke-width='2.8'/><circle cx='24.5' cy='26.05' r='19.85' fill='none' stroke='url(%23gr1o)' stroke-width='2.4'/><circle cx='24.5' cy='26.05' r='19.85' fill='none' stroke='url(%23gr1c)' stroke-width='1.2'/><circle cx='24.5' cy='25.5' r='21.15' fill='none' stroke='url(%23gvly)' stroke-width='1.3'/><circle cx='24.5' cy='25.6' r='22.6' fill='none' stroke='url(%23gr2o)' stroke-width='2.4'/><circle cx='24.5' cy='25.6' r='22.6' fill='none' stroke='url(%23gr2c)' stroke-width='1'/></g><mask id='Mth' maskUnits='userSpaceOnUse' x='0' y='0' width='50' height='100' style='color-interpolation:sRGB'><rect width='50' height='100' fill='black'/><use href='%23tsh' fill='url(%23tshA)'/><use href='%23tballA'/><use href='%23tglowA' y='50'/><use href='%23tballA' y='50'/></mask></defs><g mask='url(%23Mth)'><use href='%23tsh' fill='black'/><use href='%23tball'/><use href='%23tglow' y='50'/><use href='%23tball' y='50'/></g></svg>");
 }
 
-:scope .nse-control-slider-track,
-:scope:is(.nse-control-slider-track),
-:scope.nse-control-slider-track {
-  border-image: var(--nse-atmo-sl-track) 0 4 0 4 fill stretch;
-}
+
 
 /* Swap only the image layer — position/size state splicing (0 0 idle,
    0 -50px active at 50px 100px) stays with the consumer rules. */
-:scope .nse-control-slider-thumb-visual,
-:scope:is(.nse-control-slider-thumb-visual),
-:scope.nse-control-slider-thumb-visual {
-  background-image: var(--nse-atmo-sl-thumb);
-}
+
 
 :scope {
   --nse-atmo-spinner: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='384' viewBox='0 0 32 384'><defs><linearGradient id='ssaA' x1='4.25' y1='0' x2='27.75' y2='0' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgb(243,243,243)'/><stop offset='0.1' stop-color='rgb(238,238,238)'/><stop offset='0.2' stop-color='rgb(232,232,232)'/><stop offset='0.35' stop-color='rgb(225,225,225)'/><stop offset='0.5' stop-color='rgb(222,222,222)'/><stop offset='0.65' stop-color='rgb(212,212,212)'/><stop offset='0.8' stop-color='rgb(209,209,209)'/><stop offset='0.9' stop-color='rgb(204,204,204)'/><stop offset='1' stop-color='rgb(201,201,201)'/></linearGradient><linearGradient id='ssaB' x1='4.25' y1='0' x2='27.75' y2='0' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgb(201,201,201)'/><stop offset='0.09999999999999998' stop-color='rgb(204,204,204)'/><stop offset='0.19999999999999996' stop-color='rgb(209,209,209)'/><stop offset='0.35' stop-color='rgb(212,212,212)'/><stop offset='0.5' stop-color='rgb(222,222,222)'/><stop offset='0.65' stop-color='rgb(225,225,225)'/><stop offset='0.8' stop-color='rgb(232,232,232)'/><stop offset='0.9' stop-color='rgb(238,238,238)'/><stop offset='1' stop-color='rgb(243,243,243)'/></linearGradient><linearGradient id='sscA' x1='4.25' y1='0' x2='27.75' y2='0' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgb(236,236,236)'/><stop offset='0.1' stop-color='rgb(228,228,228)'/><stop offset='0.2' stop-color='rgb(220,220,220)'/><stop offset='0.3' stop-color='rgb(211,211,211)'/><stop offset='0.4' stop-color='rgb(209,209,209)'/><stop offset='0.5' stop-color='rgb(206,206,206)'/><stop offset='0.6' stop-color='rgb(196,196,196)'/><stop offset='0.7' stop-color='rgb(183,183,183)'/><stop offset='0.8' stop-color='rgb(180,180,180)'/><stop offset='0.9' stop-color='rgb(172,172,172)'/><stop offset='1' stop-color='rgb(166,166,166)'/></linearGradient><linearGradient id='sscB' x1='4.25' y1='0' x2='27.75' y2='0' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgb(166,166,166)'/><stop offset='0.09999999999999998' stop-color='rgb(172,172,172)'/><stop offset='0.19999999999999996' stop-color='rgb(180,180,180)'/><stop offset='0.30000000000000004' stop-color='rgb(183,183,183)'/><stop offset='0.4' stop-color='rgb(196,196,196)'/><stop offset='0.5' stop-color='rgb(206,206,206)'/><stop offset='0.6' stop-color='rgb(209,209,209)'/><stop offset='0.7' stop-color='rgb(211,211,211)'/><stop offset='0.8' stop-color='rgb(220,220,220)'/><stop offset='0.9' stop-color='rgb(228,228,228)'/><stop offset='1' stop-color='rgb(236,236,236)'/></linearGradient><linearGradient id='ssr0A' x1='0' y1='6.050000000000001' x2='0' y2='25.95' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgb(185,185,185)'/><stop offset='0.35' stop-color='rgb(160,160,160)'/><stop offset='0.5' stop-color='rgb(150,150,150)'/><stop offset='0.75' stop-color='rgb(120,120,120)'/><stop offset='1' stop-color='rgb(95,95,95)'/></linearGradient><linearGradient id='ssr0C' x1='0' y1='6.050000000000001' x2='0' y2='25.95' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgb(245,245,245)'/><stop offset='0.3' stop-color='rgb(200,200,200)'/><stop offset='0.5' stop-color='rgb(133,133,133)'/><stop offset='0.75' stop-color='rgb(60,60,60)'/><stop offset='1' stop-color='rgb(20,20,20)'/></linearGradient><linearGradient id='ssr1A' x1='0' y1='1.25' x2='0' y2='31.049999999999997' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgb(124,124,124)'/><stop offset='0.5' stop-color='rgb(205,205,205)'/><stop offset='1' stop-color='rgb(211,211,211)'/></linearGradient><linearGradient id='ssr1C' x1='0' y1='1.25' x2='0' y2='31.049999999999997' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgb(30,30,30)'/><stop offset='0.5' stop-color='rgb(120,120,120)'/><stop offset='1' stop-color='rgb(126,126,126)'/></linearGradient><linearGradient id='ssr2A' x1='0' y1='1.1500000000000004' x2='0' y2='32.050000000000004' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgba(0,0,0,0)'/><stop offset='0.35' stop-color='rgba(0,0,0,0)'/><stop offset='0.5' stop-color='rgb(103,103,103)'/><stop offset='0.8' stop-color='rgb(180,180,180)'/><stop offset='1' stop-color='rgb(190,190,190)'/></linearGradient><linearGradient id='ssr2C' x1='0' y1='1.1500000000000004' x2='0' y2='32.050000000000004' gradientUnits='userSpaceOnUse'><stop offset='0' stop-color='rgba(0,0,0,0)'/><stop offset='0.35' stop-color='rgba(0,0,0,0)'/><stop offset='0.5' stop-color='rgb(113,113,113)'/><stop offset='0.75' stop-color='rgb(200,200,200)'/><stop offset='1' stop-color='rgb(255,255,255)'/></linearGradient><g id='ssbA'><path d='M4.25 16 A11.75 11.75 0 0 0 27.75 16' fill='none' stroke='url(%23ssaA)' stroke-width='4.9'/><path d='M4.25 16 A11.75 11.75 0 0 1 27.75 16' fill='none' stroke='url(%23ssaB)' stroke-width='4.9'/><path d='M24.63 14.28 L30.42 13.13 A14.7 14.7 0 0 1 30.53 13.76 L24.70 14.66 A8.8 8.8 0 0 0 24.63 14.28 Z' fill='rgb(242,242,242)'/><path d='M7.37 17.72 L1.58 18.87 A14.7 14.7 0 0 1 1.47 18.24 L7.30 17.34 A8.8 8.8 0 0 0 7.37 17.72 Z' fill='rgb(242,242,242)'/><path d='M24.70 14.66 L30.53 13.76 A14.7 14.7 0 0 1 30.61 14.40 L24.75 15.04 A8.8 8.8 0 0 0 24.70 14.66 Z' fill='rgb(243,243,243)'/><path d='M7.30 17.34 L1.47 18.24 A14.7 14.7 0 0 1 1.39 17.60 L7.25 16.96 A8.8 8.8 0 0 0 7.30 17.34 Z' fill='rgb(243,243,243)'/><path d='M24.75 15.04 L30.61 14.40 A14.7 14.7 0 0 1 30.67 15.04 L24.78 15.42 A8.8 8.8 0 0 0 24.75 15.04 Z' fill='rgb(237,237,237)'/><path d='M7.25 16.96 L1.39 17.60 A14.7 14.7 0 0 1 1.33 16.96 L7.22 16.58 A8.8 8.8 0 0 0 7.25 16.96 Z' fill='rgb(237,237,237)'/><path d='M24.78 15.42 L30.67 15.04 A14.7 14.7 0 0 1 30.70 15.68 L24.80 15.81 A8.8 8.8 0 0 0 24.78 15.42 Z' fill='rgb(229,229,229)'/><path d='M7.22 16.58 L1.33 16.96 A14.7 14.7 0 0 1 1.30 16.32 L7.20 16.19 A8.8 8.8 0 0 0 7.22 16.58 Z' fill='rgb(229,229,229)'/><path d='M24.80 15.81 L30.70 15.68 A14.7 14.7 0 0 1 30.70 16.32 L24.80 16.19 A8.8 8.8 0 0 0 24.80 15.81 Z' fill='rgb(221,221,221)'/><path d='M7.20 16.19 L1.30 16.32 A14.7 14.7 0 0 1 1.30 15.68 L7.20 15.81 A8.8 8.8 0 0 0 7.20 16.19 Z' fill='rgb(221,221,221)'/><path d='M24.80 16.19 L30.70 16.32 A14.7 14.7 0 0 1 30.67 16.96 L24.78 16.58 A8.8 8.8 0 0 0 24.80 16.19 Z' fill='rgb(213,213,213)'/><path d='M7.20 15.81 L1.30 15.68 A14.7 14.7 0 0 1 1.33 15.04 L7.22 15.42 A8.8 8.8 0 0 0 7.20 15.81 Z' fill='rgb(213,213,213)'/><path d='M24.78 16.58 L30.67 16.96 A14.7 14.7 0 0 1 30.61 17.60 L24.75 16.96 A8.8 8.8 0 0 0 24.78 16.58 Z' fill='rgb(207,207,207)'/><path d='M7.22 15.42 L1.33 15.04 A14.7 14.7 0 0 1 1.39 14.40 L7.25 15.04 A8.8 8.8 0 0 0 7.22 15.42 Z' fill='rgb(207,207,207)'/><path d='M24.75 16.96 L30.61 17.60 A14.7 14.7 0 0 1 30.53 18.24 L24.70 17.34 A8.8 8.8 0 0 0 24.75 16.96 Z' fill='rgb(201,201,201)'/><path d='M7.25 15.04 L1.39 14.40 A14.7 14.7 0 0 1 1.47 13.76 L7.30 14.66 A8.8 8.8 0 0 0 7.25 15.04 Z' fill='rgb(201,201,201)'/></g><g id='ssbC'><path d='M4.25 16 A11.75 11.75 0 0 0 27.75 16' fill='none' stroke='url(%23sscA)' stroke-width='4.9'/><path d='M4.25 16 A11.75 11.75 0 0 1 27.75 16' fill='none' stroke='url(%23sscB)' stroke-width='4.9'/><path d='M24.63 14.28 L30.42 13.13 A14.7 14.7 0 0 1 30.53 13.76 L24.70 14.66 A8.8 8.8 0 0 0 24.63 14.28 Z' fill='rgb(236,236,236)'/><path d='M7.37 17.72 L1.58 18.87 A14.7 14.7 0 0 1 1.47 18.24 L7.30 17.34 A8.8 8.8 0 0 0 7.37 17.72 Z' fill='rgb(236,236,236)'/><path d='M24.70 14.66 L30.53 13.76 A14.7 14.7 0 0 1 30.61 14.40 L24.75 15.04 A8.8 8.8 0 0 0 24.70 14.66 Z' fill='rgb(238,238,238)'/><path d='M7.30 17.34 L1.47 18.24 A14.7 14.7 0 0 1 1.39 17.60 L7.25 16.96 A8.8 8.8 0 0 0 7.30 17.34 Z' fill='rgb(238,238,238)'/><path d='M24.75 15.04 L30.61 14.40 A14.7 14.7 0 0 1 30.67 15.04 L24.78 15.42 A8.8 8.8 0 0 0 24.75 15.04 Z' fill='rgb(229,229,229)'/><path d='M7.25 16.96 L1.39 17.60 A14.7 14.7 0 0 1 1.33 16.96 L7.22 16.58 A8.8 8.8 0 0 0 7.25 16.96 Z' fill='rgb(229,229,229)'/><path d='M24.78 15.42 L30.67 15.04 A14.7 14.7 0 0 1 30.70 15.68 L24.80 15.81 A8.8 8.8 0 0 0 24.78 15.42 Z' fill='rgb(218,218,218)'/><path d='M7.22 16.58 L1.33 16.96 A14.7 14.7 0 0 1 1.30 16.32 L7.20 16.19 A8.8 8.8 0 0 0 7.22 16.58 Z' fill='rgb(218,218,218)'/><path d='M24.80 15.81 L30.70 15.68 A14.7 14.7 0 0 1 30.70 16.32 L24.80 16.19 A8.8 8.8 0 0 0 24.80 15.81 Z' fill='rgb(206,206,206)'/><path d='M7.20 16.19 L1.30 16.32 A14.7 14.7 0 0 1 1.30 15.68 L7.20 15.81 A8.8 8.8 0 0 0 7.20 16.19 Z' fill='rgb(206,206,206)'/><path d='M24.80 16.19 L30.70 16.32 A14.7 14.7 0 0 1 30.67 16.96 L24.78 16.58 A8.8 8.8 0 0 0 24.80 16.19 Z' fill='rgb(193,193,193)'/><path d='M7.20 15.81 L1.30 15.68 A14.7 14.7 0 0 1 1.33 15.04 L7.22 15.42 A8.8 8.8 0 0 0 7.20 15.81 Z' fill='rgb(193,193,193)'/><path d='M24.78 16.58 L30.67 16.96 A14.7 14.7 0 0 1 30.61 17.60 L24.75 16.96 A8.8 8.8 0 0 0 24.78 16.58 Z' fill='rgb(180,180,180)'/><path d='M7.22 15.42 L1.33 15.04 A14.7 14.7 0 0 1 1.39 14.40 L7.25 15.04 A8.8 8.8 0 0 0 7.22 15.42 Z' fill='rgb(180,180,180)'/><path d='M24.75 16.96 L30.61 17.60 A14.7 14.7 0 0 1 30.53 18.24 L24.70 17.34 A8.8 8.8 0 0 0 24.75 16.96 Z' fill='rgb(167,167,167)'/><path d='M7.25 15.04 L1.39 14.40 A14.7 14.7 0 0 1 1.47 13.76 L7.30 14.66 A8.8 8.8 0 0 0 7.25 15.04 Z' fill='rgb(167,167,167)'/></g><g id='ssrA'><circle cx='16' cy='16' r='9.2' fill='none' stroke='url(%23ssr0A)' stroke-width='1.5'/><circle cx='16' cy='16.15' r='14.45' fill='none' stroke='url(%23ssr1A)' stroke-width='0.9'/><circle cx='16' cy='16.6' r='14.9' fill='none' stroke='url(%23ssr2A)' stroke-width='1.1'/></g><g id='ssrC'><circle cx='16' cy='16' r='9.2' fill='none' stroke='url(%23ssr0C)' stroke-width='1.5'/><circle cx='16' cy='16.15' r='14.45' fill='none' stroke='url(%23ssr1C)' stroke-width='0.9'/><circle cx='16' cy='16.6' r='14.9' fill='none' stroke='url(%23ssr2C)' stroke-width='1.1'/></g><mask id='Mss' maskUnits='userSpaceOnUse' x='0' y='0' width='32' height='384' style='color-interpolation:sRGB'><rect width='32' height='384' fill='black'/><g transform='translate(0 0)'><g transform='rotate(0 16 16)'><use href='%23ssbA'/></g><use href='%23ssrA'/></g><g transform='translate(0 32)'><g transform='rotate(15 16 16)'><use href='%23ssbA'/></g><use href='%23ssrA'/></g><g transform='translate(0 64)'><g transform='rotate(30 16 16)'><use href='%23ssbA'/></g><use href='%23ssrA'/></g><g transform='translate(0 96)'><g transform='rotate(45 16 16)'><use href='%23ssbA'/></g><use href='%23ssrA'/></g><g transform='translate(0 128)'><g transform='rotate(60 16 16)'><use href='%23ssbA'/></g><use href='%23ssrA'/></g><g transform='translate(0 160)'><g transform='rotate(75 16 16)'><use href='%23ssbA'/></g><use href='%23ssrA'/></g><g transform='translate(0 192)'><g transform='rotate(90 16 16)'><use href='%23ssbA'/></g><use href='%23ssrA'/></g><g transform='translate(0 224)'><g transform='rotate(105 16 16)'><use href='%23ssbA'/></g><use href='%23ssrA'/></g><g transform='translate(0 256)'><g transform='rotate(120 16 16)'><use href='%23ssbA'/></g><use href='%23ssrA'/></g><g transform='translate(0 288)'><g transform='rotate(135 16 16)'><use href='%23ssbA'/></g><use href='%23ssrA'/></g><g transform='translate(0 320)'><g transform='rotate(150 16 16)'><use href='%23ssbA'/></g><use href='%23ssrA'/></g><g transform='translate(0 352)'><g transform='rotate(165 16 16)'><use href='%23ssbA'/></g><use href='%23ssrA'/></g></mask></defs><g mask='url(%23Mss)'><g transform='translate(0 0)'><g transform='rotate(0 16 16)'><use href='%23ssbC'/></g><use href='%23ssrC'/></g><g transform='translate(0 32)'><g transform='rotate(15 16 16)'><use href='%23ssbC'/></g><use href='%23ssrC'/></g><g transform='translate(0 64)'><g transform='rotate(30 16 16)'><use href='%23ssbC'/></g><use href='%23ssrC'/></g><g transform='translate(0 96)'><g transform='rotate(45 16 16)'><use href='%23ssbC'/></g><use href='%23ssrC'/></g><g transform='translate(0 128)'><g transform='rotate(60 16 16)'><use href='%23ssbC'/></g><use href='%23ssrC'/></g><g transform='translate(0 160)'><g transform='rotate(75 16 16)'><use href='%23ssbC'/></g><use href='%23ssrC'/></g><g transform='translate(0 192)'><g transform='rotate(90 16 16)'><use href='%23ssbC'/></g><use href='%23ssrC'/></g><g transform='translate(0 224)'><g transform='rotate(105 16 16)'><use href='%23ssbC'/></g><use href='%23ssrC'/></g><g transform='translate(0 256)'><g transform='rotate(120 16 16)'><use href='%23ssbC'/></g><use href='%23ssrC'/></g><g transform='translate(0 288)'><g transform='rotate(135 16 16)'><use href='%23ssbC'/></g><use href='%23ssrC'/></g><g transform='translate(0 320)'><g transform='rotate(150 16 16)'><use href='%23ssbC'/></g><use href='%23ssrC'/></g><g transform='translate(0 352)'><g transform='rotate(165 16 16)'><use href='%23ssbC'/></g><use href='%23ssrC'/></g></g></svg>");
@@ -4076,12 +3872,7 @@
 }
 
 /* Toggle: the 64×32 pill is the button's own box. */
-:scope .nse-control-toggle:focus-visible,
-:scope:is(.nse-control-toggle:focus-visible),
-:scope.nse-control-toggle:focus-visible {
-  border-radius: 16px;
-  box-shadow: var(--nse-atmo-focus-ring);
-}
+
 
 /* Picker: around its stroke ring (::before, r=10). */
 
@@ -4107,19 +3898,12 @@
 }
 
 /* Slider: around the knob (27px, centred in the 50px thumb cell). */
-:scope .nse-control-slider:has(input:focus-visible) .nse-control-slider-thumb-visual::after,
-:scope:is(.nse-control-slider:has(input:focus-visible)) .nse-control-slider-thumb-visual::after,
-:scope.nse-control-slider:has(input:focus-visible) .nse-control-slider-thumb-visual::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 49.4%;
-  width: 54%;
-  height: 54%;
-  border-radius: 50%;
-  box-shadow: var(--nse-atmo-focus-ring);
-  transform: translate(-50%, -50%);
-  pointer-events: none;
+:scope .nse-control-slider:has(input:focus-visible) .nse-control-slider-thumb-visual::after,:scope:is(.nse-control-slider:has(input:focus-visible)) .nse-control-slider-thumb-visual::after,:scope.nse-control-slider:has(input:focus-visible) .nse-control-slider-thumb-visual::after {
+  content:"";
+  position:absolute;
+  left:50%;
+  top:49.4%;
+  pointer-events:none;
 }
 
 /* ============================================================================
@@ -5031,46 +4815,18 @@
   --nse-atmo-clock-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='6.6' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3Cpath d='M8 4v4.3l2.8 1.7' fill='none' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
-:scope [data-nse-control="stepper"]>[data-nse-part="bezel"],
-:scope:is([data-nse-control="stepper"])>[data-nse-part="bezel"],
-:scope[data-nse-control="stepper"]>[data-nse-part="bezel"] {
-  border: 1px solid;
-  border-color: var(--nse-atmo-select-stroke);
-  background: var(--nse-atmo-select-fill) padding-box;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 1px 0 rgba(255, 255, 255, 0.35);
-}
 
-:scope [data-nse-control="stepper"]>[data-nse-part="bezel"]>button[data-nse-part="increment"],
-:scope:is([data-nse-control="stepper"])>[data-nse-part="bezel"]>button[data-nse-part="increment"],
-:scope[data-nse-control="stepper"]>[data-nse-part="bezel"]>button[data-nse-part="increment"] {
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.16);
-}
 
-:scope [data-nse-control="stepper"]>[data-nse-part="bezel"]>button::before,
-:scope:is([data-nse-control="stepper"])>[data-nse-part="bezel"]>button::before,
-:scope[data-nse-control="stepper"]>[data-nse-part="bezel"]>button::before {
-  background: var(--nse-atmo-well-ink);
-  opacity: 0.72;
-}
 
-:scope [data-nse-control="stepper"]>[data-nse-part="bezel"]>button:is(:active,[data-nse-highlighted]):not(:disabled),
-:scope:is([data-nse-control="stepper"])>[data-nse-part="bezel"]>button:is(:active,[data-nse-highlighted]):not(:disabled),
-:scope[data-nse-control="stepper"]>[data-nse-part="bezel"]>button:is(:active,[data-nse-highlighted]):not(:disabled) {
-  background: rgba(0, 0, 0, 0.14);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
-}
 
-:scope [data-nse-control="stepper"]>[data-nse-part="bezel"]>button:disabled::before,
-:scope:is([data-nse-control="stepper"])>[data-nse-part="bezel"]>button:disabled::before,
-:scope[data-nse-control="stepper"]>[data-nse-part="bezel"]>button:disabled::before {
-  opacity: 0.3;
-}
 
-:scope [data-nse-control="stepper"]:focus-visible>[data-nse-part="bezel"],
-:scope:is([data-nse-control="stepper"]:focus-visible)>[data-nse-part="bezel"],
-:scope[data-nse-control="stepper"]:focus-visible>[data-nse-part="bezel"] {
-  outline: none;
-  box-shadow: var(--nse-atmo-focus-ring);
+
+
+
+
+
+:scope [data-nse-control="stepper"]:focus-visible>[data-nse-part="bezel"],:scope:is([data-nse-control="stepper"]:focus-visible)>[data-nse-part="bezel"],:scope[data-nse-control="stepper"]:focus-visible>[data-nse-part="bezel"] {
+  outline:none;
 }
 
 :scope [data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"])[data-editor="field"]>[data-field-editor="field"]::before,
@@ -6086,13 +5842,9 @@
    between, the selected cell in the translucent black ink with a white
    engraved label. Typography matches the radio group (13px, 900, #555).
    ========================================================================= */
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])),
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))),
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) {
-  display: inline-flex;
-  align-items: stretch;
-  block-size: 50px;
-  max-inline-size: 100%;
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])),:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))),:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) {
+  display:inline-flex;
+  align-items:stretch;
 }
 
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>[data-nse-part="segment"],
@@ -6116,33 +5868,19 @@
   min-inline-size: 0;
 }
 
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button {
-  position: relative;
-  isolation: isolate;
-  box-sizing: border-box;
-  min-inline-size: 44px;
-  block-size: 50px;
-  margin: 0;
-  padding: 0 14px;
-  border: 0;
-  color: #555;
-  background: transparent;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 50px;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
-  cursor: default;
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button {
+  position:relative;
+  isolation:isolate;
+  box-sizing:border-box;
+  font:inherit;
+  font-size:13px;
+  font-weight:700;
+  line-height:50px;
+  cursor:default;
 }
 
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button[aria-expanded],
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button[aria-expanded],
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button[aria-expanded] {
-  min-inline-size: 30px;
-  padding: 0 9px;
-  font-size: 11px;
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button[aria-expanded],:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button[aria-expanded],:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button[aria-expanded] {
+  font-size:11px;
 }
 
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button::before,
@@ -6158,118 +5896,34 @@
 }
 
 /* Middle cell (the default): seams both sides. */
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button::before,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button::before,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button::before {
-  inset: 2px 0;
-  border: solid;
-  border-width: 2px 1px;
-  border-color: rgba(0, 0, 0, 0.34) #a2a2a2 rgba(0, 0, 0, 0.49) #efefef;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button::before,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button::before,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button::before {
+  inset:2px 0;
 }
 
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button::after {
-  inset: 4px 1px;
-  border: 2px solid;
-  border-color: var(--nse-atmo-rg-ring-t) var(--nse-atmo-rg-ring-seam) var(--nse-atmo-rg-ring-b);
-  background: var(--nse-atmo-rg-up) padding-box;
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button::after,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button::after,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button::after {
+  inset:4px 1px;
 }
 
 /* First cell: the start cap. */
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>:first-child>button:first-child,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>:first-child>button:first-child,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>:first-child>button:first-child,
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>button:first-child,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>button:first-child,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>button:first-child {
-  padding-inline-start: 18px;
-}
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>:first-child>button:first-child::before,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>:first-child>button:first-child::before,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>:first-child>button:first-child::before,
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>button:first-child::before,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>button:first-child::before,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>button:first-child::before {
-  border-width: 2px 1px 2px 2px;
-  border-inline-start-color: rgba(0, 0, 0, 0.3);
-  border-start-start-radius: 13px;
-  border-end-start-radius: 13px;
-}
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>:first-child>button:first-child::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>:first-child>button:first-child::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>:first-child>button:first-child::after,
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>button:first-child::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>button:first-child::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>button:first-child::after {
-  inset-inline-start: 2px;
-  border-inline-start-color: var(--nse-atmo-rg-ring-s);
-  border-start-start-radius: 11px;
-  border-end-start-radius: 11px;
+
+
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>:first-child>button:first-child::after,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>:first-child>button:first-child::after,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>:first-child>button:first-child::after,:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>button:first-child::after,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>button:first-child::after,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>button:first-child::after {
+  inset-inline-start:2px;
 }
 
 /* Last cell (the overflow button, or the last segment's last button). */
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>button:is(:last-child,:has(+input[type="hidden"]:last-child)),
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>button:is(:last-child,:has(+input[type="hidden"]:last-child)),
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>button:is(:last-child,:has(+input[type="hidden"]:last-child)),
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child {
-  padding-inline-end: 18px;
-}
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>button:is(:last-child,:has(+input[type="hidden"]:last-child))::before,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>button:is(:last-child,:has(+input[type="hidden"]:last-child))::before,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>button:is(:last-child,:has(+input[type="hidden"]:last-child))::before,
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::before,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::before,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::before {
-  border-width: 2px 2px 2px 1px;
-  border-inline-end-color: rgba(0, 0, 0, 0.3);
-  border-start-end-radius: 13px;
-  border-end-end-radius: 13px;
-}
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>button:is(:last-child,:has(+input[type="hidden"]:last-child))::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>button:is(:last-child,:has(+input[type="hidden"]:last-child))::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>button:is(:last-child,:has(+input[type="hidden"]:last-child))::after,
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::after {
-  inset-inline-end: 2px;
-  border-inline-end-color: var(--nse-atmo-rg-ring-s);
-  border-start-end-radius: 11px;
-  border-end-end-radius: 11px;
+
+
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>button:is(:last-child,:has(+input[type="hidden"]:last-child))::after,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>button:is(:last-child,:has(+input[type="hidden"]:last-child))::after,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>button:is(:last-child,:has(+input[type="hidden"]:last-child))::after,:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::after,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::after,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::after {
+  inset-inline-end:2px;
 }
 
 /* Selected segment (and an open menu/overflow): the black ink. */
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button:is([aria-pressed="true"],[aria-expanded="true"]),
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button:is([aria-pressed="true"],[aria-expanded="true"]),
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button:is([aria-pressed="true"],[aria-expanded="true"]) {
-  color: #fff;
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.58);
-}
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button:is([aria-pressed="true"],[aria-expanded="true"])::before,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button:is([aria-pressed="true"],[aria-expanded="true"])::before,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button:is([aria-pressed="true"],[aria-expanded="true"])::before {
-  border-top-color: rgba(0, 0, 0, 0.68);
-  border-bottom-color: rgba(58, 58, 58, 0.42);
-}
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button:is([aria-pressed="true"],[aria-expanded="true"])::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button:is([aria-pressed="true"],[aria-expanded="true"])::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button:is([aria-pressed="true"],[aria-expanded="true"])::after {
-  border-color: var(--nse-atmo-rg-ring-sel-t) var(--nse-atmo-rg-ring-sel-s) var(--nse-atmo-rg-ring-sel-b);
-  background:
-    var(--nse-atmo-rg-edge-l) padding-box,
-    var(--nse-atmo-rg-edge-r) padding-box,
-    var(--nse-atmo-rg-sel) padding-box;
-}
 
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button:active:not(:disabled)::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button:active:not(:disabled)::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button:active:not(:disabled)::after {
-  background: var(--nse-atmo-rg-sel) padding-box;
-  opacity: 0.8;
-}
+
+
+
+
 
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button:focus-visible,
 :scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button:focus-visible,
@@ -6277,30 +5931,12 @@
   outline: none;
   z-index: 1;
 }
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button:focus-visible::before,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button:focus-visible::before,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button:focus-visible::before {
-  box-shadow: var(--nse-atmo-focus-ring);
-}
 
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button:disabled,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button:disabled,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button:disabled,
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-state="disabled"] button,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-state="disabled"]) button,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-state="disabled"] button {
-  opacity: 0.5;
-}
+
+
 
 @media (forced-colors: active) {
-  :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button {
-    border: 1px solid ButtonText;
-    forced-color-adjust: none;
-    color: ButtonText;
-    background: ButtonFace;
-  }
+
   :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button::before,
 :scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button::before,
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button::before,
@@ -6309,12 +5945,7 @@
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button::after {
     content: none;
   }
-  :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button:is([aria-pressed="true"],[aria-expanded="true"]),
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button:is([aria-pressed="true"],[aria-expanded="true"]),
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) button:is([aria-pressed="true"],[aria-expanded="true"]) {
-    color: HighlightText;
-    background: Highlight;
-  }
+
 }
 
 /* ============================================================================
@@ -6328,60 +5959,30 @@
    arc at data-size. The level indicator is the same track with its fill in
    blue (normal), amber (warning) or red (critical).
    ========================================================================= */
-:scope [data-nse-control="progress-indicator"][data-variant="bar"],
-:scope:is([data-nse-control="progress-indicator"][data-variant="bar"]),
-:scope[data-nse-control="progress-indicator"][data-variant="bar"] {
-  --nse-atmo-progress-bar-height: 14px;
-  display: grid;
-  grid-template-columns: minmax(80px, 1fr) auto;
-  align-items: center;
-  gap: 10px;
-  min-inline-size: 0;
+:scope [data-nse-control="progress-indicator"][data-variant="bar"],:scope:is([data-nse-control="progress-indicator"][data-variant="bar"]),:scope[data-nse-control="progress-indicator"][data-variant="bar"] {
+  display:grid;
+  grid-template-columns:minmax(80px,1fr) auto;
+  align-items:center;
 }
 
 /* The recessed track: the measured grey well, darkening into each cap, with
    the white lip under it. */
-:scope [data-nse-control="progress-indicator"][data-variant="bar"]>[data-nse-part="track"],
-:scope:is([data-nse-control="progress-indicator"][data-variant="bar"])>[data-nse-part="track"],
-:scope[data-nse-control="progress-indicator"][data-variant="bar"]>[data-nse-part="track"] {
-  position: relative;
-  display: block;
-  block-size: var(--nse-atmo-progress-bar-height);
-  border-radius: calc(var(--nse-atmo-progress-bar-height) / 2);
-  background: linear-gradient(to bottom, rgba(114, 114, 115, 0.78) 5%, rgba(128, 128, 129, 0.78) 18%, rgba(147, 147, 148, 0.76) 30%, rgba(162, 162, 163, 0.74) 42%, rgba(174, 174, 175, 0.72) 53%, rgba(180, 180, 181, 0.71) 65%, rgba(180, 180, 181, 0.71) 87%, rgba(174, 174, 175, 0.72));
-  box-shadow:
-    inset 4px 0 4px -3px rgba(110, 110, 111, 0.55),
-    inset -4px 0 4px -3px rgba(110, 110, 111, 0.55),
-    inset 0 1px 1px rgba(40, 40, 42, 0.28),
-    0 1px 0 rgba(255, 255, 255, 0.85);
-  overflow: hidden;
+:scope [data-nse-control="progress-indicator"][data-variant="bar"]>[data-nse-part="track"],:scope:is([data-nse-control="progress-indicator"][data-variant="bar"])>[data-nse-part="track"],:scope[data-nse-control="progress-indicator"][data-variant="bar"]>[data-nse-part="track"] {
+  position:relative;
+  display:block;
+  overflow:hidden;
 }
 
 /* The glossy blue fill sits one pixel inside the well, its own ends round. */
-:scope [data-nse-control="progress-indicator"][data-variant="bar"] [data-nse-part="fill"],
-:scope:is([data-nse-control="progress-indicator"][data-variant="bar"]) [data-nse-part="fill"],
-:scope[data-nse-control="progress-indicator"][data-variant="bar"] [data-nse-part="fill"] {
-  position: absolute;
-  inset-block: 1px;
-  inset-inline-start: 1px;
-  inline-size: calc(var(--nse-control-progress, 0%) - 2px);
-  min-inline-size: calc(var(--nse-atmo-progress-bar-height) - 2px);
-  max-inline-size: calc(100% - 2px);
-  box-sizing: border-box;
-  border-radius: calc(var(--nse-atmo-progress-bar-height) / 2 - 1px);
-  background: linear-gradient(to bottom, rgb(172, 211, 244) 8%, rgb(138, 192, 239) 24%, rgb(131, 187, 238) 37%, rgb(123, 181, 236) 50%, rgb(113, 174, 234) 63%, rgb(104, 169, 232) 76%, rgb(97, 164, 231) 92%);
-  box-shadow:
-    0 0 0 0.5px rgba(45, 62, 80, 0.55),
-    inset 3px 0 3px -2px rgba(45, 62, 80, 0.42),
-    inset -3px 0 3px -2px rgba(45, 62, 80, 0.42),
-    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+:scope [data-nse-control="progress-indicator"][data-variant="bar"] [data-nse-part="fill"],:scope:is([data-nse-control="progress-indicator"][data-variant="bar"]) [data-nse-part="fill"],:scope[data-nse-control="progress-indicator"][data-variant="bar"] [data-nse-part="fill"] {
+  position:absolute;
+  inset-block:1px;
+  inset-inline-start:1px;
+  box-sizing:border-box;
 }
 
-:scope [data-nse-control="progress-indicator"][data-variant="bar"][data-state="indeterminate"] [data-nse-part="fill"],
-:scope:is([data-nse-control="progress-indicator"][data-variant="bar"][data-state="indeterminate"]) [data-nse-part="fill"],
-:scope[data-nse-control="progress-indicator"][data-variant="bar"][data-state="indeterminate"] [data-nse-part="fill"] {
-  inline-size: 34%;
-  animation: nse-atmo-progress-sweep 1.4s ease-in-out infinite alternate;
+:scope [data-nse-control="progress-indicator"][data-variant="bar"][data-state="indeterminate"] [data-nse-part="fill"],:scope:is([data-nse-control="progress-indicator"][data-variant="bar"][data-state="indeterminate"]) [data-nse-part="fill"],:scope[data-nse-control="progress-indicator"][data-variant="bar"][data-state="indeterminate"] [data-nse-part="fill"] {
+  animation:nse-atmo-progress-sweep 1.4s ease-in-out infinite alternate;
 }
 
 :scope [data-nse-control="progress-indicator"][data-variant="bar"][data-state="indeterminate"][data-motion="static"] [data-nse-part="fill"],
@@ -6405,46 +6006,25 @@
   }
 }
 
-:scope [data-nse-control="progress-indicator"]>[data-nse-part="status"],
-:scope:is([data-nse-control="progress-indicator"])>[data-nse-part="status"],
-:scope[data-nse-control="progress-indicator"]>[data-nse-part="status"] {
-  color: var(--nse-atmo-label-ink, #314255);
-  font-size: 12px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
+:scope [data-nse-control="progress-indicator"]>[data-nse-part="status"],:scope:is([data-nse-control="progress-indicator"])>[data-nse-part="status"],:scope[data-nse-control="progress-indicator"]>[data-nse-part="status"] {
+  font-size:12px;
+  font-weight:700;
+  font-variant-numeric:tabular-nums;
 }
 
-:scope [data-nse-control="progress-indicator"]:is([data-variant="circular"],[data-variant="spinner"]),
-:scope:is([data-nse-control="progress-indicator"]:is([data-variant="circular"],[data-variant="spinner"])),
-:scope[data-nse-control="progress-indicator"]:is([data-variant="circular"],[data-variant="spinner"]) {
-  --nse-atmo-progress-size: 16px;
-  display: inline-grid;
-  place-items: center;
-}
-:scope [data-nse-control="progress-indicator"][data-size="32"],
-:scope:is([data-nse-control="progress-indicator"][data-size="32"]),
-:scope[data-nse-control="progress-indicator"][data-size="32"] { --nse-atmo-progress-size: 32px; }
-:scope [data-nse-control="progress-indicator"][data-size="64"],
-:scope:is([data-nse-control="progress-indicator"][data-size="64"]),
-:scope[data-nse-control="progress-indicator"][data-size="64"] { --nse-atmo-progress-size: 64px; }
-
-:scope [data-nse-control="progress-indicator"]:is([data-variant="circular"],[data-variant="spinner"])>[data-nse-part="track"],
-:scope:is([data-nse-control="progress-indicator"]:is([data-variant="circular"],[data-variant="spinner"]))>[data-nse-part="track"],
-:scope[data-nse-control="progress-indicator"]:is([data-variant="circular"],[data-variant="spinner"])>[data-nse-part="track"] {
-  display: block;
-  inline-size: var(--nse-atmo-progress-size);
-  block-size: var(--nse-atmo-progress-size);
-  border-radius: 50%;
-  background: conic-gradient(#5b8db8 var(--nse-control-progress, 0%), rgba(0, 0, 0, 0.14) 0);
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - max(2px, var(--nse-atmo-progress-size) / 7)), #000 0);
-  mask: radial-gradient(farthest-side, transparent calc(100% - max(2px, var(--nse-atmo-progress-size) / 7)), #000 0);
+:scope [data-nse-control="progress-indicator"]:is([data-variant="circular"],[data-variant="spinner"]),:scope:is([data-nse-control="progress-indicator"]:is([data-variant="circular"],[data-variant="spinner"])),:scope[data-nse-control="progress-indicator"]:is([data-variant="circular"],[data-variant="spinner"]) {
+  display:inline-grid;
+  place-items:center;
 }
 
-:scope [data-nse-control="progress-indicator"]:is([data-variant="spinner"],[data-state="indeterminate"]):not([data-variant="bar"])>[data-nse-part="track"],
-:scope:is([data-nse-control="progress-indicator"]:is([data-variant="spinner"],[data-state="indeterminate"]):not([data-variant="bar"]))>[data-nse-part="track"],
-:scope[data-nse-control="progress-indicator"]:is([data-variant="spinner"],[data-state="indeterminate"]):not([data-variant="bar"])>[data-nse-part="track"] {
-  background: conic-gradient(rgba(91, 141, 184, 0) 0, #5b8db8 75%, rgba(91, 141, 184, 0) 0);
-  animation: nse-atmo-progress-turn 0.9s linear infinite;
+
+
+:scope [data-nse-control="progress-indicator"]:is([data-variant="circular"],[data-variant="spinner"])>[data-nse-part="track"],:scope:is([data-nse-control="progress-indicator"]:is([data-variant="circular"],[data-variant="spinner"]))>[data-nse-part="track"],:scope[data-nse-control="progress-indicator"]:is([data-variant="circular"],[data-variant="spinner"])>[data-nse-part="track"] {
+  display:block;
+}
+
+:scope [data-nse-control="progress-indicator"]:is([data-variant="spinner"],[data-state="indeterminate"]):not([data-variant="bar"])>[data-nse-part="track"],:scope:is([data-nse-control="progress-indicator"]:is([data-variant="spinner"],[data-state="indeterminate"]):not([data-variant="bar"]))>[data-nse-part="track"],:scope[data-nse-control="progress-indicator"]:is([data-variant="spinner"],[data-state="indeterminate"]):not([data-variant="bar"])>[data-nse-part="track"] {
+  animation:nse-atmo-progress-turn 0.9s linear infinite;
 }
 
 :scope [data-nse-control="progress-indicator"][data-motion="static"]>[data-nse-part="track"],
@@ -6457,76 +6037,27 @@
   to { transform: rotate(1turn); }
 }
 
-:scope [data-nse-control="progress-indicator"]:is([data-variant="circular"],[data-variant="spinner"])>[data-nse-part="status"],
-:scope:is([data-nse-control="progress-indicator"]:is([data-variant="circular"],[data-variant="spinner"]))>[data-nse-part="status"],
-:scope[data-nse-control="progress-indicator"]:is([data-variant="circular"],[data-variant="spinner"])>[data-nse-part="status"] {
-  position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
+:scope [data-nse-control="progress-indicator"]:is([data-variant="circular"],[data-variant="spinner"])>[data-nse-part="status"],:scope:is([data-nse-control="progress-indicator"]:is([data-variant="circular"],[data-variant="spinner"]))>[data-nse-part="status"],:scope[data-nse-control="progress-indicator"]:is([data-variant="circular"],[data-variant="spinner"])>[data-nse-part="status"] {
+  position:absolute;
+  overflow:hidden;
 }
 
-:scope meter[data-nse-control="level-indicator"],
-:scope:is(meter[data-nse-control="level-indicator"]),
-meter:scope[data-nse-control="level-indicator"] {
-  display: block;
-  min-block-size: 11px;
-  box-sizing: border-box;
-  inline-size: 160px;
-  max-inline-size: 100%;
-  block-size: 11px;
-  border: solid transparent;
-  border-width: 0 6px;
-  border-image: var(--nse-atmo-pg-track) 0 6 0 6 fill stretch;
-  --nse-atmo-level-tint: none;
+:scope meter[data-nse-control="level-indicator"],:scope:is(meter[data-nse-control="level-indicator"]),meter:scope[data-nse-control="level-indicator"] {
+  display:block;
+  box-sizing:border-box;
 }
 
-:scope meter[data-nse-control="level-indicator"][data-state="warning"],
-:scope:is(meter[data-nse-control="level-indicator"][data-state="warning"]),
-meter:scope[data-nse-control="level-indicator"][data-state="warning"] { --nse-atmo-level-tint: hue-rotate(185deg) saturate(1.9) brightness(1.08); }
-:scope meter[data-nse-control="level-indicator"][data-state="critical"],
-:scope:is(meter[data-nse-control="level-indicator"][data-state="critical"]),
-meter:scope[data-nse-control="level-indicator"][data-state="critical"] { --nse-atmo-level-tint: hue-rotate(150deg) saturate(2.4) brightness(0.92); }
 
-:scope meter[data-nse-control="level-indicator"]::-webkit-meter-inner-element,
-:scope:is(meter[data-nse-control="level-indicator"]::-webkit-meter-inner-element),
-meter:scope[data-nse-control="level-indicator"]::-webkit-meter-inner-element,
-:scope meter[data-nse-control="level-indicator"]::-webkit-meter-bar,
-:scope:is(meter[data-nse-control="level-indicator"]::-webkit-meter-bar),
-meter:scope[data-nse-control="level-indicator"]::-webkit-meter-bar {
-  margin-inline: -6px;
-  background: transparent;
-  border: 0;
+
+
+
+
+:scope meter[data-nse-control="level-indicator"]::-webkit-meter-optimum-value,:scope:is(meter[data-nse-control="level-indicator"]::-webkit-meter-optimum-value),meter:scope[data-nse-control="level-indicator"]::-webkit-meter-optimum-value,:scope meter[data-nse-control="level-indicator"]::-webkit-meter-suboptimum-value,:scope:is(meter[data-nse-control="level-indicator"]::-webkit-meter-suboptimum-value),meter:scope[data-nse-control="level-indicator"]::-webkit-meter-suboptimum-value,:scope meter[data-nse-control="level-indicator"]::-webkit-meter-even-less-good-value,:scope:is(meter[data-nse-control="level-indicator"]::-webkit-meter-even-less-good-value),meter:scope[data-nse-control="level-indicator"]::-webkit-meter-even-less-good-value {
+  box-sizing:border-box;
 }
 
-:scope meter[data-nse-control="level-indicator"]::-webkit-meter-optimum-value,
-:scope:is(meter[data-nse-control="level-indicator"]::-webkit-meter-optimum-value),
-meter:scope[data-nse-control="level-indicator"]::-webkit-meter-optimum-value,
-:scope meter[data-nse-control="level-indicator"]::-webkit-meter-suboptimum-value,
-:scope:is(meter[data-nse-control="level-indicator"]::-webkit-meter-suboptimum-value),
-meter:scope[data-nse-control="level-indicator"]::-webkit-meter-suboptimum-value,
-:scope meter[data-nse-control="level-indicator"]::-webkit-meter-even-less-good-value,
-:scope:is(meter[data-nse-control="level-indicator"]::-webkit-meter-even-less-good-value),
-meter:scope[data-nse-control="level-indicator"]::-webkit-meter-even-less-good-value {
-  box-sizing: border-box;
-  min-inline-size: 12px;
-  border: solid transparent;
-  border-width: 0 6px;
-  border-image: var(--nse-atmo-pg-fill) 0 6 0 6 fill stretch;
-  background: none;
-  filter: var(--nse-atmo-level-tint);
-}
-
-:scope meter[data-nse-control="level-indicator"]::-moz-meter-bar,
-:scope:is(meter[data-nse-control="level-indicator"]::-moz-meter-bar),
-meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
-  box-sizing: border-box;
-  border: solid transparent;
-  border-width: 0 6px;
-  border-image: var(--nse-atmo-pg-fill) 0 6 0 6 fill stretch;
-  background: none;
-  filter: var(--nse-atmo-level-tint);
+:scope meter[data-nse-control="level-indicator"]::-moz-meter-bar,:scope:is(meter[data-nse-control="level-indicator"]::-moz-meter-bar),meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
+  box-sizing:border-box;
 }
 
 /* ============================================================================
@@ -6912,22 +6443,9 @@ input:scope[data-nse-control="scroller"]:disabled {
   align-items: center;
 }
 
-:scope [data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="circular-body"],
-:scope:is([data-nse-control="slider"][data-nse-slider-type="circular"]) [data-nse-part="circular-body"],
-:scope[data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="circular-body"] {
-  --nse-atmo-dial-size: 32px;
-  inline-size: var(--nse-atmo-dial-size);
-  block-size: var(--nse-atmo-dial-size);
-  border: 0;
-  background: none;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.42), 0 0 0 0.5px rgba(0, 0, 0, 0.3);
-}
 
-:scope [data-nse-control="slider"][data-nse-slider-type="circular"][data-size="small"] [data-nse-part="circular-body"],
-:scope:is([data-nse-control="slider"][data-nse-slider-type="circular"][data-size="small"]) [data-nse-part="circular-body"],
-:scope[data-nse-control="slider"][data-nse-slider-type="circular"][data-size="small"] [data-nse-part="circular-body"] {
-  --nse-atmo-dial-size: 22px;
-}
+
+
 
 :scope [data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="circular-body"]>.nse-metal-thumb,
 :scope:is([data-nse-control="slider"][data-nse-slider-type="circular"]) [data-nse-part="circular-body"]>.nse-metal-thumb,
@@ -6936,65 +6454,32 @@ input:scope[data-nse-control="scroller"]:disabled {
   inset: 0;
 }
 
-:scope [data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="knob"],
-:scope:is([data-nse-control="slider"][data-nse-slider-type="circular"]) [data-nse-part="knob"],
-:scope[data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="knob"] {
-  z-index: 1;
-  inset: 0;
-  inline-size: auto;
-  block-size: auto;
-  border-radius: 50%;
-  background: none;
-  transform-origin: 50% 50%;
-  transform: rotate(var(--nse-circular-angle));
+:scope [data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="knob"],:scope:is([data-nse-control="slider"][data-nse-slider-type="circular"]) [data-nse-part="knob"],:scope[data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="knob"] {
+  z-index:1;
+  inset:0;
 }
 
 /* The dimple: dark at its upper lip where the rim shades it, caught by the
    light on its lower lip. */
-:scope [data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="knob"]::before,
-:scope:is([data-nse-control="slider"][data-nse-slider-type="circular"]) [data-nse-part="knob"]::before,
-:scope[data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="knob"]::before {
-  content: "";
-  position: absolute;
-  inset-block-start: 17%;
-  inset-inline-start: 50%;
-  inline-size: 19%;
-  block-size: 19%;
-  min-inline-size: 4px;
-  --nse-control-minimum-inline-size: 4px;
-  min-block-size: 4px;
-  --nse-control-minimum-block-size: 4px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 50% 30%, #1b2027, #535b65 75%);
-  box-shadow: inset 0 0.5px 1px rgba(0, 0, 0, 0.7), 0 0.75px 0 rgba(255, 255, 255, 0.85);
-  /* The light stays put while the knob turns: counter-rotate the shading. */
-  transform: translateX(-50%) rotate(calc(var(--nse-circular-angle) * -1));
+:scope [data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="knob"]::before,:scope:is([data-nse-control="slider"][data-nse-slider-type="circular"]) [data-nse-part="knob"]::before,:scope[data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="knob"]::before {
+  content:"";
+  position:absolute;
+  inset-block-start:17%;
+  inset-inline-start:50%;
 }
 
-:scope [data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="circular-body"]:focus-visible,
-:scope:is([data-nse-control="slider"][data-nse-slider-type="circular"]) [data-nse-part="circular-body"]:focus-visible,
-:scope[data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="circular-body"]:focus-visible {
-  outline: none;
-  box-shadow: var(--nse-atmo-focus-ring);
+:scope [data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="circular-body"]:focus-visible,:scope:is([data-nse-control="slider"][data-nse-slider-type="circular"]) [data-nse-part="circular-body"]:focus-visible,:scope[data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="circular-body"]:focus-visible {
+  outline:none;
 }
 
-:scope [data-nse-control="slider"][data-nse-slider-type="circular"][data-state="disabled"] [data-nse-part="circular-body"],
-:scope:is([data-nse-control="slider"][data-nse-slider-type="circular"][data-state="disabled"]) [data-nse-part="circular-body"],
-:scope[data-nse-control="slider"][data-nse-slider-type="circular"][data-state="disabled"] [data-nse-part="circular-body"] {
-  opacity: 0.55;
-}
+
 
 /* The linear alternative serves assistive technology; a click on the knob
    already turns it to any angle without a drag. */
-:scope [data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="linear-alternative"],
-:scope:is([data-nse-control="slider"][data-nse-slider-type="circular"]) [data-nse-part="linear-alternative"],
-:scope[data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="linear-alternative"] {
-  position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
+:scope [data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="linear-alternative"],:scope:is([data-nse-control="slider"][data-nse-slider-type="circular"]) [data-nse-part="linear-alternative"],:scope[data-nse-control="slider"][data-nse-slider-type="circular"] [data-nse-part="linear-alternative"] {
+  position:absolute;
+  overflow:hidden;
+  white-space:nowrap;
 }
 
 /* Icon tabs: the chosen icon sits in a recessed well pressed into the bar,
@@ -7170,87 +6655,30 @@ input:scope[data-nse-control="scroller"]:disabled {
    with the radio strip's cell insets (15px caps, 14px/15px between seams) and
    no emboss under unselected labels. A sized capsule keeps the band's own
    fractional insets below. */
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"] button,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]) button,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"] button {
-  min-inline-size: 54px;
-  text-transform: uppercase;
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"] button,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]) button,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"] button {
+  text-transform:uppercase;
 }
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"] button:not([aria-pressed="true"],[aria-expanded="true"]),
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]) button:not([aria-pressed="true"],[aria-expanded="true"]),
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"] button:not([aria-pressed="true"],[aria-expanded="true"]) {
-  text-shadow: none;
-}
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]:not([data-size])>[data-nse-part="segment"]>button:not([aria-expanded]),
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]:not([data-size]))>[data-nse-part="segment"]>button:not([aria-expanded]),
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]:not([data-size])>[data-nse-part="segment"]>button:not([aria-expanded]) {
-  padding-inline: 14px 15px;
-}
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]:not([data-size])>:first-child>button:first-child,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]:not([data-size]))>:first-child>button:first-child,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]:not([data-size])>:first-child>button:first-child {
-  padding-inline-start: 15px;
-}
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]:not([data-size])>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]:not([data-size]))>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]:not([data-size])>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child {
-  padding-inline-end: 15px;
-}
+
+
+
+
 
 /* A selected capsule cell sits inset, as the radio strip draws it: no bright
    rim or seam columns, the ink running to the seams (or the stroke at a cap)
    under the edge and cap cast overlays. */
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"] button[aria-pressed="true"]::before,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]) button[aria-pressed="true"]::before,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"] button[aria-pressed="true"]::before {
-  border-inline-color: transparent;
+
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"] button[aria-pressed="true"]::after,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]) button[aria-pressed="true"]::after,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"] button[aria-pressed="true"]::after {
+  inset-inline:0;
 }
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"] button[aria-pressed="true"]::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]) button[aria-pressed="true"]::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"] button[aria-pressed="true"]::after {
-  inset-inline: 0;
-  border-inline-width: 0;
-  background:
-    var(--nse-atmo-rg-edge-l) padding-box,
-    var(--nse-atmo-rg-edge-r) padding-box,
-    var(--nse-atmo-rg-sel) padding-box;
+
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]>:first-child>button:first-child[aria-pressed="true"]::after,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"])>:first-child>button:first-child[aria-pressed="true"]::after,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]>:first-child>button:first-child[aria-pressed="true"]::after {
+  inset-inline-start:2px;
 }
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]>:first-child>button:first-child[aria-pressed="true"]::before,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"])>:first-child>button:first-child[aria-pressed="true"]::before,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]>:first-child>button:first-child[aria-pressed="true"]::before {
-  border-inline-start-color: rgba(0, 0, 0, 0.3);
+
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child[aria-pressed="true"]::after,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"])>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child[aria-pressed="true"]::after,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child[aria-pressed="true"]::after {
+  inset-inline-end:2px;
 }
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]>:first-child>button:first-child[aria-pressed="true"]::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"])>:first-child>button:first-child[aria-pressed="true"]::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]>:first-child>button:first-child[aria-pressed="true"]::after {
-  inset-inline-start: 2px;
-  background:
-    var(--nse-atmo-rg-cap-l) padding-box,
-    var(--nse-atmo-rg-edge-r) padding-box,
-    var(--nse-atmo-rg-sel) padding-box;
-}
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child[aria-pressed="true"]::before,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"])>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child[aria-pressed="true"]::before,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child[aria-pressed="true"]::before {
-  border-inline-end-color: rgba(0, 0, 0, 0.3);
-}
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child[aria-pressed="true"]::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"])>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child[aria-pressed="true"]::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child[aria-pressed="true"]::after {
-  inset-inline-end: 2px;
-  background:
-    var(--nse-atmo-rg-edge-l) padding-box,
-    var(--nse-atmo-rg-cap-r) padding-box,
-    var(--nse-atmo-rg-sel) padding-box;
-}
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]>[data-nse-part="segment"]:only-child>button:only-child[aria-pressed="true"]::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"])>[data-nse-part="segment"]:only-child>button:only-child[aria-pressed="true"]::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]>[data-nse-part="segment"]:only-child>button:only-child[aria-pressed="true"]::after {
-  background:
-    var(--nse-atmo-rg-cap-l) padding-box,
-    var(--nse-atmo-rg-cap-r) padding-box,
-    var(--nse-atmo-rg-sel) padding-box;
-}
+
 
 /* The radio-group capsule, sized: segmented controls and capsule tabs.
    controlSize="small" or an explicit height sets --nse-control-height (24px
@@ -7266,146 +6694,109 @@ input:scope[data-nse-control="scroller"]:disabled {
   --nse-atmo-bar-h: var(--nse-atmo-rg-band);
 }
 
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size],
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]),
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] {
-  block-size: var(--nse-atmo-rg-band);
-}
 
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]) button,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button,
+
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]) button,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button,:scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n),:scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n),:scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n) {
+  font-size:max(11px,calc(var(--nse-atmo-rg-band)*0.16 + 5px));
+  line-height:var(--nse-atmo-rg-band);
+}
 :scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n),
 :scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n),
 :scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n) {
-  min-inline-size: calc(var(--nse-atmo-rg-band) * 0.88);
-  --nse-control-minimum-inline-size: calc(var(--nse-atmo-rg-band) * 0.88);
-  block-size: var(--nse-atmo-rg-band);
-  height: var(--nse-atmo-rg-band);
-  min-height: var(--nse-atmo-rg-band);
-  --nse-control-minimum-block-size: var(--nse-atmo-rg-band);
-  padding: 0 calc(var(--nse-atmo-rg-band) * 0.28);
-  font-size: max(11px, calc(var(--nse-atmo-rg-band) * 0.16 + 5px));
-  line-height: var(--nse-atmo-rg-band);
+  min-inline-size:calc(var(--nse-atmo-rg-band)*0.88);
+  --nse-control-minimum-inline-size:calc(var(--nse-atmo-rg-band)*0.88);
+  block-size:var(--nse-atmo-rg-band);
+  height:var(--nse-atmo-rg-band);
+  min-height:var(--nse-atmo-rg-band);
+  --nse-control-minimum-block-size:var(--nse-atmo-rg-band);
+  padding:0 calc(var(--nse-atmo-rg-band)*0.28);
 }
 
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button::before,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]) button::before,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button::before,
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button::before,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]) button::before,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button::before,:scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n)::before,:scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n)::before,:scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n)::before {
+  inset-block:calc(var(--nse-atmo-rg-band)*0.04);
+}
 :scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n)::before,
 :scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n)::before,
 :scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n)::before {
-  inset-block: calc(var(--nse-atmo-rg-band) * 0.04);
-  border-block-width: var(--nse-atmo-rg-line);
+  border-block-width:var(--nse-atmo-rg-line);
 }
 
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]) button::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button::after,
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button::after,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]) button::after,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button::after,:scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n)::after,:scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n)::after,:scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n)::after {
+  inset-block:calc(var(--nse-atmo-rg-band)*0.08);
+}
 :scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n)::after,
 :scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n)::after,
 :scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n)::after {
-  inset-block: calc(var(--nse-atmo-rg-band) * 0.08);
-  border-width: var(--nse-atmo-rg-line);
-  border-inline-width: 1px;
+  border-width:var(--nse-atmo-rg-line);
+  border-inline-width:1px;
 }
 
 /* The start cap. */
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>:first-child>button:first-child,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size])>:first-child>button:first-child,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>:first-child>button:first-child,
+
 :scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:nth-child(n),
 :scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:nth-child(n),
 :scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:nth-child(n) {
-  padding-inline-start: calc(var(--nse-atmo-rg-band) * 0.36);
-  /* The cell clips its own paint, so its corner must be the ring's: the regular cap's
-     fixed 13px would trim a small cap into a pill and cut its ring away. */
-  border-start-start-radius: calc(var(--nse-atmo-rg-band) * 0.26);
-  border-end-start-radius: calc(var(--nse-atmo-rg-band) * 0.26);
+  padding-inline-start:calc(var(--nse-atmo-rg-band)*0.36);
+  border-start-start-radius:calc(var(--nse-atmo-rg-band)*0.26);
+  border-end-start-radius:calc(var(--nse-atmo-rg-band)*0.26);
 }
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>:first-child>button:first-child::before,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size])>:first-child>button:first-child::before,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>:first-child>button:first-child::before,
+
 :scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:nth-child(n)::before,
 :scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:nth-child(n)::before,
 :scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:nth-child(n)::before {
-  border-inline-start-width: var(--nse-atmo-rg-line);
-  border-start-start-radius: calc(var(--nse-atmo-rg-band) * 0.26);
-  border-end-start-radius: calc(var(--nse-atmo-rg-band) * 0.26);
+  border-inline-start-width:var(--nse-atmo-rg-line);
+  border-start-start-radius:calc(var(--nse-atmo-rg-band)*0.26);
+  border-end-start-radius:calc(var(--nse-atmo-rg-band)*0.26);
 }
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>:first-child>button:first-child::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size])>:first-child>button:first-child::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>:first-child>button:first-child::after,
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>:first-child>button:first-child::after,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size])>:first-child>button:first-child::after,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>:first-child>button:first-child::after,:scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:nth-child(n)::after,:scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:nth-child(n)::after,:scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:nth-child(n)::after {
+  inset-inline-start:calc(var(--nse-atmo-rg-band)*0.04);
+}
 :scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:nth-child(n)::after,
 :scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:nth-child(n)::after,
 :scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:nth-child(n)::after {
-  inset-inline-start: calc(var(--nse-atmo-rg-band) * 0.04);
-  border-inline-start-width: var(--nse-atmo-rg-line);
-  border-start-start-radius: calc(var(--nse-atmo-rg-band) * 0.22);
-  border-end-start-radius: calc(var(--nse-atmo-rg-band) * 0.22);
+  border-inline-start-width:var(--nse-atmo-rg-line);
+  border-start-start-radius:calc(var(--nse-atmo-rg-band)*0.22);
+  border-end-start-radius:calc(var(--nse-atmo-rg-band)*0.22);
 }
 
 /* The end cap. */
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size])>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child,
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>button:is(:last-child,:has(+input[type="hidden"]:last-child)),
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size])>button:is(:last-child,:has(+input[type="hidden"]:last-child)),
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>button:is(:last-child,:has(+input[type="hidden"]:last-child)),
+
 :scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:nth-child(n),
 :scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:nth-child(n),
 :scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:nth-child(n) {
-  padding-inline-end: calc(var(--nse-atmo-rg-band) * 0.36);
-  border-start-end-radius: calc(var(--nse-atmo-rg-band) * 0.26);
-  border-end-end-radius: calc(var(--nse-atmo-rg-band) * 0.26);
+  padding-inline-end:calc(var(--nse-atmo-rg-band)*0.36);
+  border-start-end-radius:calc(var(--nse-atmo-rg-band)*0.26);
+  border-end-end-radius:calc(var(--nse-atmo-rg-band)*0.26);
 }
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::before,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size])>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::before,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::before,
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>button:is(:last-child,:has(+input[type="hidden"]:last-child))::before,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size])>button:is(:last-child,:has(+input[type="hidden"]:last-child))::before,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>button:is(:last-child,:has(+input[type="hidden"]:last-child))::before,
+
 :scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:nth-child(n)::before,
 :scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:nth-child(n)::before,
 :scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:nth-child(n)::before {
-  border-inline-end-width: var(--nse-atmo-rg-line);
-  border-start-end-radius: calc(var(--nse-atmo-rg-band) * 0.26);
-  border-end-end-radius: calc(var(--nse-atmo-rg-band) * 0.26);
+  border-inline-end-width:var(--nse-atmo-rg-line);
+  border-start-end-radius:calc(var(--nse-atmo-rg-band)*0.26);
+  border-end-end-radius:calc(var(--nse-atmo-rg-band)*0.26);
 }
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size])>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::after,
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>button:is(:last-child,:has(+input[type="hidden"]:last-child))::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size])>button:is(:last-child,:has(+input[type="hidden"]:last-child))::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>button:is(:last-child,:has(+input[type="hidden"]:last-child))::after,
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::after,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size])>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::after,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::after,:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>button:is(:last-child,:has(+input[type="hidden"]:last-child))::after,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size])>button:is(:last-child,:has(+input[type="hidden"]:last-child))::after,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>button:is(:last-child,:has(+input[type="hidden"]:last-child))::after,:scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:nth-child(n)::after,:scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:nth-child(n)::after,:scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:nth-child(n)::after {
+  inset-inline-end:calc(var(--nse-atmo-rg-band)*0.04);
+}
 :scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:nth-child(n)::after,
 :scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:nth-child(n)::after,
 :scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:nth-child(n)::after {
-  inset-inline-end: calc(var(--nse-atmo-rg-band) * 0.04);
-  border-inline-end-width: var(--nse-atmo-rg-line);
-  border-start-end-radius: calc(var(--nse-atmo-rg-band) * 0.22);
-  border-end-end-radius: calc(var(--nse-atmo-rg-band) * 0.22);
+  border-inline-end-width:var(--nse-atmo-rg-line);
+  border-start-end-radius:calc(var(--nse-atmo-rg-band)*0.22);
+  border-end-end-radius:calc(var(--nse-atmo-rg-band)*0.22);
 }
 
 /* A sized capsule's selected cell keeps the inset ink: no ring columns at its
    seams, the cap ring's start inside the stroke. */
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size] button[aria-pressed="true"]::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size]) button[aria-pressed="true"]::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size] button[aria-pressed="true"]::after {
-  inset-inline: 0;
-  border-inline-width: 0;
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size] button[aria-pressed="true"]::after,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size]) button[aria-pressed="true"]::after,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size] button[aria-pressed="true"]::after {
+  inset-inline:0;
 }
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size]>:first-child>button:first-child[aria-pressed="true"]::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size])>:first-child>button:first-child[aria-pressed="true"]::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size]>:first-child>button:first-child[aria-pressed="true"]::after {
-  inset-inline-start: calc(var(--nse-atmo-rg-band) * 0.04);
-  border-inline-start-width: 0;
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size]>:first-child>button:first-child[aria-pressed="true"]::after,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size])>:first-child>button:first-child[aria-pressed="true"]::after,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size]>:first-child>button:first-child[aria-pressed="true"]::after {
+  inset-inline-start:calc(var(--nse-atmo-rg-band)*0.04);
 }
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child[aria-pressed="true"]::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size])>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child[aria-pressed="true"]::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child[aria-pressed="true"]::after {
-  inset-inline-end: calc(var(--nse-atmo-rg-band) * 0.04);
-  border-inline-end-width: 0;
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child[aria-pressed="true"]::after,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size])>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child[aria-pressed="true"]::after,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child[aria-pressed="true"]::after {
+  inset-inline-end:calc(var(--nse-atmo-rg-band)*0.04);
 }
 
 /* NSControl.ControlSize.large: the 28px band. Small is the 24px default band. */
