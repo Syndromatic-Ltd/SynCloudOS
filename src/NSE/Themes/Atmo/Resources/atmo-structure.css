@@ -1,3 +1,4 @@
+@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.boxes.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.text.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.values.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.selection.css";
@@ -44,7 +45,7 @@
   --nse-atmo-divider: none;
   --nse-atmo-divider-arrow: none;
   --nse-atmo-divider-border: none;
-  --nse-atmo-divider-border-gray: none;
+  --nse-atmo-divider-border-grey: none;
   --nse-atmo-divider-soft: none;
   --nse-atmo-flat-shadow: none;
   --nse-atmo-frame: none;
@@ -923,37 +924,19 @@
   border-image-slice: 500 15 50 15 fill;
 }
 
-:where(:scope) .nse-control-group-box,
-:where(:scope):is(.nse-control-group-box) {
-  min-width: 0;
-  margin: 8px 0;
-  border: 14px solid transparent;
-  border-image: var(--nse-atmo-group) 14 fill stretch;
+
+
+
+
+:where(:scope) .nse-control-group-label,:where(:scope):is(.nse-control-group-label) {
+  font-size:13px;
+  font-weight:700;
+  line-height:1.2;
+  text-transform:uppercase;
 }
 
-:where(:scope) .nse-control-group-box.is-labeled,
-:where(:scope):is(.nse-control-group-box.is-labeled) {
-  border-width: 36px 14px 14px;
-  border-image: var(--nse-atmo-group-labeled) 36 14 14 14 fill stretch;
-}
-
-:where(:scope) .nse-control-group-label,
-:where(:scope):is(.nse-control-group-label) {
-  height: 42px;
-  margin: -34px -12px 0;
-  padding: 2px 0 14px 12px;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1.2;
-  text-shadow: #646454 0 1px 0;
-  text-transform: uppercase;
-}
-
-:where(:scope) .nse-control-group-inner,
-:where(:scope):is(.nse-control-group-inner) {
-  margin: -12px;
-  overflow: visible;
+:where(:scope) .nse-control-group-inner,:where(:scope):is(.nse-control-group-inner) {
+  overflow:visible;
 }
 
 :where(:scope) .nse-control-list-item,
@@ -1621,70 +1604,35 @@
   cursor: default;
 }
 
-:where(:scope) .nse-control-divider,
-:where(:scope):is(.nse-control-divider) {
-  width: 100%;
-  height: 10px;
-  margin: 8px 0;
-  border: 0;
-  /* The heritage divider is a fine line tile repeated at its natural size — do NOT
-     stretch it (the old `16px 10px` distorted it into chunky dashes). Onyx overrides the
-     var with its own line tile, which also tiles correctly at natural size. */
-  background: var(--nse-atmo-divider) left center repeat-x;
-}
 
-:where(:scope) .nse-control-divider[data-variant="soft"],
-:where(:scope):is(.nse-control-divider[data-variant="soft"]) {
-  height: 8px;
-  background-image: var(--nse-atmo-divider-soft);
-}
 
-/* The gray divider uses atmo-divider-border-gray.png — a 13x7 cap/border sprite. The original renders this
+
+
+/* The gray divider uses atmo-divider-border-grey.png — a 13x7 cap/border sprite. The original renders this
    `*-border` family as a BORDER-IMAGE (heritage divider: `border-image: divider-border.png
    0 6 0 6 repeat`): 6px end caps + a repeating 1px middle. Tiling it as a repeat-x background (the
    old approach) repeats the whole 13px sprite — caps and all — into broken dashes. */
-:where(:scope) .nse-control-divider[data-variant="gray"],
-:where(:scope):is(.nse-control-divider[data-variant="gray"]) {
-  box-sizing: border-box;
-  height: 7px;
-  background: none;
-  border: 0 solid transparent;
-  border-width: 0 6px;
-  border-image: var(--nse-atmo-divider-border-gray) 0 6 0 6 fill repeat;
+:where(:scope) .nse-control-divider[data-variant="grey"],:where(:scope):is(.nse-control-divider[data-variant="grey"]) {
+  box-sizing:border-box;
 }
 
-:where(:scope) .nse-control-divider[data-variant="alpha"],
-:where(:scope):is(.nse-control-divider[data-variant="alpha"]) {
-  height: 12px;
-  background-image: var(--nse-atmo-alpha-divider);
-}
+
 
 /* AlphaDivider: a single-letter index caption sitting in a
    left gutter, then the divider line runs to the edge. Blue bold letter (#4299ea, per Onyx). */
-:where(:scope) .nse-control-divider.nse-control-divider-alpha-captioned,
-:where(:scope):is(.nse-control-divider.nse-control-divider-alpha-captioned) {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 30px;
-  margin: 0;
-  padding: 0 0 0 7px;
-  background: none;
+:where(:scope) .nse-control-divider.nse-control-divider-alpha-captioned,:where(:scope):is(.nse-control-divider.nse-control-divider-alpha-captioned) {
+  display:flex;
+  align-items:center;
 }
-:where(:scope) .nse-control-divider-alpha-caption,
-:where(:scope):is(.nse-control-divider-alpha-caption) {
-  flex: 0 0 auto;
-  color: #4299ea;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 30px;
+:where(:scope) .nse-control-divider-alpha-caption,:where(:scope):is(.nse-control-divider-alpha-caption) {
+  flex:0 0 auto;
+  font-size:16px;
+  font-weight:700;
+  line-height:30px;
 }
-:where(:scope) .nse-control-divider-alpha-captioned::after,
-:where(:scope):is(.nse-control-divider-alpha-captioned::after) {
-  content: "";
-  flex: 1 1 auto;
-  height: 4px;
-  background: var(--nse-atmo-alpha-divider) left center repeat-x;
+:where(:scope) .nse-control-divider-alpha-captioned::after,:where(:scope):is(.nse-control-divider-alpha-captioned::after) {
+  content:"";
+  flex:1 1 auto;
 }
 
 /* Arrow disclosure — the divider-arrow sprite (56×132): a 4-cell vertical sprite (row 0
@@ -1703,24 +1651,14 @@
    sprite width (56/33 of the box) so the segments stop exactly at the knob's edges, and every segment
    + the baked line is the same 7/33-of-box thickness. Lower the token and the whole thing shrinks
    together. (The button/disclosure form drops the segments — its header supplies the line.) */
-:where(:scope) .nse-control-divider[data-variant="arrow"],
-:where(:scope):is(.nse-control-divider[data-variant="arrow"]) {
-  display: flex;
-  align-items: center;
-  gap: var(--nse-atmo-divider-arrow-width);
-  height: var(--nse-atmo-divider-arrow-size);
-  min-height: var(--nse-atmo-divider-arrow-size);
-  background: var(--nse-atmo-divider-arrow) center 0% / auto 400% no-repeat;
+:where(:scope) .nse-control-divider[data-variant="arrow"],:where(:scope):is(.nse-control-divider[data-variant="arrow"]) {
+  display:flex;
+  align-items:center;
 }
 
-:where(:scope) .nse-control-divider[data-variant="arrow"]::before,
-:where(:scope):is(.nse-control-divider[data-variant="arrow"]::before),
-:where(:scope) .nse-control-divider[data-variant="arrow"]::after,
-:where(:scope):is(.nse-control-divider[data-variant="arrow"]::after) {
-  content: "";
-  flex: 1 1 0;
-  height: var(--nse-atmo-divider-arrow-line);
-  background: var(--nse-atmo-divider) left center / auto var(--nse-atmo-divider-arrow-line) repeat-x;
+:where(:scope) .nse-control-divider[data-variant="arrow"]::before,:where(:scope):is(.nse-control-divider[data-variant="arrow"]::before),:where(:scope) .nse-control-divider[data-variant="arrow"]::after,:where(:scope):is(.nse-control-divider[data-variant="arrow"]::after) {
+  content:"";
+  flex:1 1 0;
 }
 
 /* The disclosure-button form (NSEDivider with onToggle: sidebar section toggles, gallery disclosure,
@@ -1733,33 +1671,25 @@
   content: none;
 }
 
-:where(:scope) .nse-control-divider[data-variant="arrow"]:active,
-:where(:scope):is(.nse-control-divider[data-variant="arrow"]:active),
+
 :where(:scope) .nse-control-divider[data-variant="arrow"][data-pressed="true"],
 :where(:scope):is(.nse-control-divider[data-variant="arrow"][data-pressed="true"]) {
-  background-position: center 33.3333%;
+  background-position:center 33.3333%;
 }
 
-:where(:scope) .nse-control-divider[data-variant="arrow"][data-expanded="true"],
-:where(:scope):is(.nse-control-divider[data-variant="arrow"][data-expanded="true"]) {
-  background-position: center 66.6667%;
-}
+
+
 
 :where(:scope) .nse-control-divider[data-variant="arrow"][data-expanded="true"][data-pressed="true"],
-:where(:scope):is(.nse-control-divider[data-variant="arrow"][data-expanded="true"][data-pressed="true"]),
-:where(:scope) .nse-control-divider[data-variant="arrow"][data-expanded="true"]:active,
-:where(:scope):is(.nse-control-divider[data-variant="arrow"][data-expanded="true"]:active) {
-  background-position: center 100%;
+:where(:scope):is(.nse-control-divider[data-variant="arrow"][data-expanded="true"][data-pressed="true"]) {
+  background-position:center 100%;
 }
 
 /* Interactive disclosure renders as a real <button>; reset its native chrome. */
-:where(:scope) .nse-control-divider.nse-control-divider-toggle,
-:where(:scope):is(.nse-control-divider.nse-control-divider-toggle) {
-  -webkit-appearance: none;
-  appearance: none;
-  padding: 0;
-  border: 0;
-  cursor: pointer;
+:where(:scope) .nse-control-divider.nse-control-divider-toggle,:where(:scope):is(.nse-control-divider.nse-control-divider-toggle) {
+  -webkit-appearance:none;
+  appearance:none;
+  cursor:pointer;
 }
 
 /* Atmo search fields span their row. The neutral control sheet makes
@@ -2156,32 +2086,13 @@
 
    The frame and shadow variants keep 18: their sprites are 64×64 and 44×44, so
    18 is within bounds and is the slice they were authored for. */
-:where(:scope) .nse-box[data-box-kind="custom"],
-:where(:scope):is(.nse-box[data-box-kind="custom"]) {
-  position: relative;
-  min-width: 0;
-  max-width: 100%;
-  margin: 0;
-  padding: 0;
-  min-inline-size: 0;
-  border: 14px solid transparent;
-  border-radius: 11px;
-  border-image: var(--nse-atmo-roundy-shadow) 14 stretch;
-  background-color: transparent;
-  color: #273446;
+:where(:scope) .nse-box[data-box-kind="custom"],:where(:scope):is(.nse-box[data-box-kind="custom"]) {
+  position:relative;
 }
 
-:where(:scope) .nse-box[data-box-kind="custom"]:is([data-border-style="line"],[data-border-style="groove"]),
-:where(:scope):is(.nse-box[data-box-kind="custom"]:is([data-border-style="line"],[data-border-style="groove"])) {
-  border-width: 18px;
-  border-image: var(--nse-atmo-frame) 18 fill stretch;
-}
 
-:where(:scope) .nse-box[data-box-kind="custom"][data-nse-shadow="true"],
-:where(:scope):is(.nse-box[data-box-kind="custom"][data-nse-shadow="true"]) {
-  border-width: 18px;
-  border-image: var(--nse-atmo-shadow) 18 fill stretch;
-}
+
+
 
 :where(:scope) .nse-control-hash-badge,
 :where(:scope):is(.nse-control-hash-badge) {
@@ -2309,15 +2220,11 @@
 }
 
 /* --- NSESizeableImage / NSEImageView ------------------- */
-:where(:scope) .nse-control-sizeable-image,
-:where(:scope):is(.nse-control-sizeable-image) {
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-  height: 100%;
-  background: #0d0f12;
-  touch-action: none;
-  user-select: none;
+:where(:scope) .nse-control-sizeable-image,:where(:scope):is(.nse-control-sizeable-image) {
+  position:relative;
+  overflow:hidden;
+  touch-action:none;
+  user-select:none;
 }
 
 :where(:scope) .nse-control-sizeable-image[data-pannable="true"],
@@ -2330,23 +2237,17 @@
   cursor: grabbing;
 }
 
-:where(:scope) .nse-control-sizeable-image-media,
-:where(:scope):is(.nse-control-sizeable-image-media) {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  max-width: none;
-  pointer-events: none;
+:where(:scope) .nse-control-sizeable-image-media,:where(:scope):is(.nse-control-sizeable-image-media) {
+  position:absolute;
+  top:50%;
+  left:50%;
+  pointer-events:none;
 }
 
-:where(:scope) .nse-control-image-view,
-:where(:scope):is(.nse-control-image-view) {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  border-radius: 8px;
+:where(:scope) .nse-control-image-view,:where(:scope):is(.nse-control-image-view) {
+  position:relative;
+  display:block;
+  overflow:hidden;
 }
 
 /* An image view at natural size (imageScaling none) pans within the box. */
@@ -2355,43 +2256,26 @@
   cursor: grab;
 }
 
-:where(:scope) .nse-control-image-view-controls,
-:where(:scope):is(.nse-control-image-view-controls) {
-  position: absolute;
-  right: 12px;
-  bottom: 12px;
-  z-index: 2;
-  display: inline-flex;
-  gap: 6px;
+:where(:scope) .nse-control-image-view-controls,:where(:scope):is(.nse-control-image-view-controls) {
+  position:absolute;
+  right:12px;
+  bottom:12px;
+  z-index:2;
+  display:inline-flex;
 }
 
-:where(:scope) .nse-control-image-view-zoom,
-:where(:scope):is(.nse-control-image-view-zoom) {
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: rgba(20, 24, 30, 0.62);
-  color: #fff;
-  font-size: 24px;
-  line-height: 1;
-  cursor: pointer;
-  backdrop-filter: blur(6px);
-  transition: background 0.15s ease;
+:where(:scope) .nse-control-image-view-zoom,:where(:scope):is(.nse-control-image-view-zoom) {
+  display:grid;
+  place-items:center;
+  font-size:24px;
+  line-height:1;
+  cursor:pointer;
+  transition:background 0.15s ease;
 }
 
-:where(:scope) .nse-control-image-view-zoom:hover,
-:where(:scope):is(.nse-control-image-view-zoom:hover) {
-  background: rgba(20, 24, 30, 0.82);
-}
 
-:where(:scope) .nse-control-image-view-zoom:active,
-:where(:scope):is(.nse-control-image-view-zoom:active) {
-  background: rgba(0, 0, 0, 0.9);
-}
+
+
 
 /* --- IFXImageView ------------------------------------- */
 :where(:scope) .ifx-image-view,
@@ -2476,38 +2360,25 @@
 
 /* Native fieldset/legend defaults are fully neutralised before the existing
    14px/36px measured group slices are applied. */
-:where(:scope) .nse-control-group-box.nse-box,
-:where(:scope):is(.nse-control-group-box.nse-box) {
-  position: relative;
-  min-inline-size: 0;
-  padding: 0;
-  appearance: none;
+:where(:scope) .nse-control-group-box.nse-box,:where(:scope):is(.nse-control-group-box.nse-box) {
+  position:relative;
+  appearance:none;
 }
 
-:where(:scope) .nse-control-group-box.nse-box>.nse-box-title:where(legend.nse-control-group-label),
-:where(:scope):is(.nse-control-group-box.nse-box)>.nse-box-title:where(legend.nse-control-group-label) {
-  position: absolute;
-  z-index: 1;
-  display: block;
-  float: none;
-  width: auto;
-  max-width: calc(100% + 24px);
-  height: auto;
-  margin: 0;
-  padding: 2px 12px;
-  overflow: hidden;
-  line-height: 20px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+:where(:scope) .nse-control-group-box.nse-box>.nse-box-title:where(legend.nse-control-group-label),:where(:scope):is(.nse-control-group-box.nse-box)>.nse-box-title:where(legend.nse-control-group-label) {
+  position:absolute;
+  z-index:1;
+  display:block;
+  float:none;
+  overflow:hidden;
+  line-height:20px;
+  white-space:nowrap;
 }
 
 /* The legend is out of flow, but the label it replaced was not: its 42px band
    under a -34px margin pushed the content 8px below the 36px frame. Hand
    those 8px back so content clears the band as it did before the fieldset. */
-:where(:scope) .nse-control-group-box.nse-box.is-labeled[data-title-position="at-top"]>.nse-control-group-inner,
-:where(:scope):is(.nse-control-group-box.nse-box.is-labeled[data-title-position="at-top"])>.nse-control-group-inner {
-  margin-top: -4px;
-}
+
 
 :where(:scope) .nse-box[data-title-position="above-top"]>.nse-box-title,
 :where(:scope):is(.nse-box[data-title-position="above-top"])>.nse-box-title {
@@ -2547,54 +2418,21 @@
   left: -12px;
 }
 
-:where(:scope) .nse-box>.nse-box-content,
-:where(:scope):is(.nse-box)>.nse-box-content {
-  padding: var(--nse-box-inset-top, 0) var(--nse-box-inset-right, 0)
-    var(--nse-box-inset-bottom, 0) var(--nse-box-inset-left, 0);
-  background: var(--nse-box-fill, transparent);
-}
 
-:where(:scope) .nse-box[data-title-position="below-top"]>.nse-box-content,
-:where(:scope):is(.nse-box[data-title-position="below-top"])>.nse-box-content {
-  padding-top: calc(var(--nse-box-inset-top, 0px) + 24px);
-}
 
-:where(:scope) .nse-box[data-title-position="above-bottom"]>.nse-box-content,
-:where(:scope):is(.nse-box[data-title-position="above-bottom"])>.nse-box-content {
-  padding-bottom: calc(var(--nse-box-inset-bottom, 0px) + 24px);
-}
 
-:where(:scope) .nse-box[data-border-style="none"],
-:where(:scope):is(.nse-box[data-border-style="none"]) {
-  border: 0;
-  border-image: none;
-}
 
-:where(:scope) .nse-box[data-border-style="line"],
-:where(:scope):is(.nse-box[data-border-style="line"]) {
-  border: 1px solid rgba(50, 58, 66, 0.55);
-  border-image: none;
-}
 
-:where(:scope) .nse-box[data-border-style="groove"],
-:where(:scope):is(.nse-box[data-border-style="groove"]) {
-  border: 2px groove rgba(80, 88, 96, 0.62);
-  border-image: none;
-}
 
-:where(:scope) .nse-box[data-box-kind="secondary"],
-:where(:scope):is(.nse-box[data-box-kind="secondary"]) {
-  opacity: 0.94;
-}
 
-:where(:scope) .nse-box-separator,
-:where(:scope):is(.nse-box-separator) {
-  min-width: 1px;
-  min-height: 1px;
-  margin: 8px 0;
-  border: 0;
-  border-block-start: 1px solid rgba(55, 62, 70, 0.45);
-}
+
+
+
+
+
+
+
+
 
 @media (forced-colors: active) {
 
@@ -2616,10 +2454,7 @@
 
 
 
-  :where(:scope) .nse-box-separator,
-:where(:scope):is(.nse-box-separator) {
-    border-color: CanvasText;
-  }
+
 }
 
 /* ============================================================================

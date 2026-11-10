@@ -55,7 +55,7 @@ describe("NSShadow values and view properties", () => {
 describe("custom NSBox property projection for themes", () => {
   it("lets Atmo CSS select the well, frame and floating recipes from real box properties", () => {
     const sheet = document.createElement("style");
-    sheet.textContent = readFileSync("src/NSE/Themes/Atmo/Resources/atmo.css", "utf8");
+    sheet.textContent = readFileSync("src/Themes/Atmo.scostheme/Contents/Resources/atmo.boxes.css", "utf8");
     document.head.append(sheet);
     try {
       render(<div data-nse-theme="com.syndromatic.atmo">

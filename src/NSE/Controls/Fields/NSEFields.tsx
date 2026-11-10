@@ -1074,8 +1074,11 @@ export function NSEBox({
       data-box-kind={boxType}
       data-border-style={border}
       data-transparent={String(isTransparent)}
+      data-nse-transparent={String(isTransparent)}
       data-custom-fill={resolvedFill === undefined ? undefined : "true"}
+      data-nse-custom-fill={resolvedFill === undefined ? undefined : "true"}
       data-custom-border={resolvedBorder !== undefined || resolvedWidth !== undefined || cornerRadius !== undefined || cornerCurve !== undefined ? "true" : undefined}
+      data-nse-custom-border={resolvedBorder !== undefined || resolvedWidth !== undefined || cornerRadius !== undefined || cornerCurve !== undefined ? "true" : undefined}
 
       data-nse-layout-margins={resolvedMargins ? undefined : "standard"}
       style={customStyle}
