@@ -1,0 +1,196 @@
+settings [
+  {
+    "selector": ".nse-prefs-backdrop",
+    "scope": "nse-prefs-backdrop",
+    "outer": "<div class=\"nse-prefs-backdrop\" data-nse-theme=\"com.syndromatic.atmo\" data-nse-chrome=\"standard\" data-nse-colour-scheme-requested=\"light\" data-nse-colour-scheme-resolved=\"light\" data-nse-contrast=\"normal\" data-nse-transparency=\"normal\" data-mode=\"light\" data-appearance=\"light\" style=\"--nse-colour-label: #2a2f36; --nse-colour-secondary-label: #4f5d6d; --nse-colour-tertiary-label: rgba(44, 56, 70, 0.54); --nse-colour-quaternary-label: rgba(0, 0, 0, 0.2); --nse-colour-text: #25303c; --nse-colour-placeholder-text: rgba(44, 56, 70, 0.54); --nse-colour-selected-text: #ffffff; --nse-colour-text-background: #ffffff; --nse-colour-selected-text-background: rgba(99, 153, 200, 0.2); --nse-colour-unempha",
+    "fontWeight": "400",
+    "fontSize": "14px",
+    "position": "static",
+    "display": "block",
+    "box": {
+      "x": 0,
+      "y": 460,
+      "width": 1000,
+      "height": 178,
+      "top": 460,
+      "right": 1000,
+      "bottom": 638,
+      "left": 0
+    },
+    "matches": [
+      {
+        "selector": ".nse-prefs-backdrop",
+        "fontWeight": "",
+        "font": "",
+        "position": "fixed",
+        "display": "grid",
+        "parents": [
+          "CSSLayerBlockRule:nse.atmo",
+          "CSSScopeRule:[data-nse-theme]"
+        ]
+      },
+      {
+        "selector": ".nse-prefs-backdrop",
+        "fontWeight": "",
+        "font": "",
+        "position": "fixed",
+        "display": "grid",
+        "parents": [
+          "CSSLayerBlockRule:nse.atmo",
+          "CSSScopeRule:[data-nse-theme]"
+        ]
+      }
+    ]
+  },
+  {
+    "selector": ".nse-prefs-toast",
+    "scope": "nse-prefs-backdrop",
+    "outer": "<div data-nse-control=\"panel\" data-nse-part=\"background\" data-nse-style=\"preferences\" class=\"nse-prefs-toast\" role=\"dialog\" aria-modal=\"true\" aria-label=\"Settings\" tabindex=\"-1\"><header data-nse-control=\"window\" data-nse-part=\"header\" data-nse-toolbar-style=\"preference\" class=\"nse-window-titlebar-content nse-prefs-header\" data-window-titlebar=\"\" data-toolbar-style=\"preference\"><span data-nse-part=\"leading\" class=\"nse-window-titlebar-leading\" data-layout-attribute=\"leading\"></span><div class=\"nse-window-titlebar-copy\"><h1 data-nse-part=\"title\" class=\"nse-window-titlebar-heading\" data-window-title=\"\"><span data-nse-part=\"header\" class=\"nse-prefs-title-clip\"><span data-nse-part=\"title\" class=\"n",
+    "fontWeight": "400",
+    "fontSize": "14px",
+    "position": "relative",
+    "display": "flex",
+    "box": {
+      "x": 0,
+      "y": 460,
+      "width": 400,
+      "height": 178,
+      "top": 460,
+      "right": 400,
+      "bottom": 638,
+      "left": 0
+    },
+    "matches": [
+      {
+        "selector": ".nse-prefs-toast",
+        "fontWeight": "",
+        "font": "",
+        "position": "relative",
+        "display": "flex",
+        "parents": [
+          "CSSLayerBlockRule:nse.atmo",
+          "CSSScopeRule:[data-nse-theme]"
+        ]
+      },
+      {
+        "selector": ".nse-prefs-toast",
+        "fontWeight": "",
+        "font": "",
+        "position": "relative",
+        "display": "flex",
+        "parents": [
+          "CSSLayerBlockRule:nse.atmo",
+          "CSSScopeRule:[data-nse-theme]"
+        ]
+      }
+    ]
+  }
+]
+login-window-normal [
+  {
+    "selector": ".nse-login-window",
+    "scope": "nse-appearance-provider",
+    "outer": "<div data-nse-control=\"login-window\" data-nse-part=\"background\" class=\"nse-login-window nse-login-window--atmoPlacard is-login-step-synId  \" data-sheen=\"enter\" data-nse-login-presentation=\"ornamented\" role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"nse-login-window-title\"><span data-nse-part=\"attachment\" class=\"nse-login-window-top-tack\" aria-hidden=\"true\"><img alt=\"\" draggable=\"false\" src=\"http://127.0.0.1:5377/assets/nse/atmo/shell/login-window/HangElements/PinElements/TackTransparent.png?no-inline\"><img alt=\"\" draggable=\"false\" src=\"http://127.0.0.1:5377/assets/nse/atmo/shell/login-window/HangElements/PinElements/TackWhite.png?no-inline\"></span><div data-nse-part=\"effects\" class=\"nse-log",
+    "fontWeight": "400",
+    "fontSize": "14px",
+    "position": "relative",
+    "display": "block",
+    "box": {
+      "x": 128,
+      "y": 128,
+      "width": 430,
+      "height": 571.125,
+      "top": 128,
+      "right": 558,
+      "bottom": 699.125,
+      "left": 128
+    },
+    "matches": [
+      {
+        "selector": ".nse-login-window",
+        "fontWeight": "",
+        "font": "",
+        "position": "relative",
+        "display": "",
+        "parents": [
+          "CSSLayerBlockRule:nse.atmo",
+          "CSSScopeRule:[data-nse-theme]"
+        ]
+      }
+    ]
+  },
+  {
+    "selector": ".nse-login-action button",
+    "scope": "nse-appearance-provider",
+    "outer": "<button class=\"nse-control-button\" type=\"button\" data-tone=\"light\" data-bezel-style=\"rounded\" data-pressed=\"false\" data-press-active=\"false\" data-nse-control=\"button\" data-nse-state=\"off\" data-nse-bezel-style=\"rounded\" data-nse-control-size=\"regular\" data-nse-button-type=\"momentaryPushIn\" data-nse-part=\"background\" data-nse-focused=\"\"><span data-nse-part=\"bezel\" aria-hidden=\"true\" style=\"position: absolute; inset: 0px; pointer-events: none;\"></span><span data-nse-part=\"image\" class=\"nse-control-button-icon\"></span><span data-nse-part=\"title\" class=\"nse-control-button-label\">Continue</span></button>",
+    "fontWeight": "400",
+    "fontSize": "18.017px",
+    "position": "relative",
+    "display": "inline-flex",
+    "box": {
+      "x": 147.3167266845703,
+      "y": 633.1665649414062,
+      "width": 391.36651611328125,
+      "height": 52.0228271484375,
+      "top": 633.1665649414062,
+      "right": 538.6832427978516,
+      "bottom": 685.1893920898438,
+      "left": 147.3167266845703
+    },
+    "matches": [
+      {
+        "selector": ":where(:scope) .nse-control-button:where(:not(.nse-control-picker-button)), :where(:scope).nse-control-button:where(:not(.nse-control-picker-button))",
+        "fontWeight": "700",
+        "font": "",
+        "position": "relative",
+        "display": "inline-grid",
+        "parents": [
+          "CSSLayerBlockRule:nse.atmo",
+          "CSSScopeRule:[data-nse-theme]"
+        ]
+      },
+      {
+        "selector": ":scope .nse-control-button:where(:not(.nse-control-picker-button)), :scope.nse-control-button:where(:not(.nse-control-picker-button))",
+        "fontWeight": "700",
+        "font": "",
+        "position": "relative",
+        "display": "",
+        "parents": [
+          "CSSLayerBlockRule:nse.atmo",
+          "CSSScopeRule:[data-nse-theme]"
+        ]
+      },
+      {
+        "selector": ".nse-login-action > .nse-control-button",
+        "fontWeight": "400",
+        "font": "",
+        "position": "",
+        "display": "inline-flex",
+        "parents": [
+          "CSSLayerBlockRule:nse.atmo",
+          "CSSScopeRule:[data-nse-theme]"
+        ]
+      },
+      {
+        "selector": ":where([data-nse-control]:has(> [data-nse-part=\"bezel\"]))",
+        "fontWeight": "",
+        "font": "",
+        "position": "relative",
+        "display": "",
+        "parents": [
+          "CSSLayerBlockRule:nse.structure"
+        ]
+      },
+      {
+        "selector": "button, input, textarea",
+        "fontWeight": "inherit",
+        "font": "inherit",
+        "position": "",
+        "display": "",
+        "parents": [
+          "CSSLayerBlockRule:nse.structure"
+        ]
+      }
+    ]
+  }
+]

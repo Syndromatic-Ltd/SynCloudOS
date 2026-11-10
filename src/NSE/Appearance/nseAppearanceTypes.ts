@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import type { CSSProperties } from "react";
 import type { NSETheme } from "../Theme/NSETheme";
 
 export type NSEAppearanceName = "aqua" | "darkAqua";
@@ -47,6 +48,7 @@ export interface NSEAppearanceSelection {
 export type NSEResolvedAppearance = NSEAppearanceSelection;
 
 export interface NSEAppearanceDataAttributes {
+  readonly style: CSSProperties;
   readonly "data-nse-theme": string;
   readonly "data-nse-chrome": NSEChromeAppearance;
   readonly "data-nse-colour-scheme-requested": NSEColourScheme;

@@ -111,9 +111,9 @@ export function NSEAlertBackdrop({
       ref={backdropRef}
       data-nse-control="system-alert" data-nse-part="backdrop" className={["nse-control-alert-backdrop", className].filter(Boolean).join(" ")}
       data-nse-overlay-region={region ? "true" : undefined}
-      style={regionStyle}
       tabIndex={-1}
       {...appearanceProjection}
+      style={{ ...appearanceProjection.style, ...regionStyle }}
       data-syncloudos-runtime-owner={runtimeOwner}
       data-syncloudos-focus-scope={focusScope}
       onKeyDownCapture={onKeyDownCapture}

@@ -2,7 +2,7 @@
    focus feedback or the control's minimum interaction area. The bundle
    validator also rejects semantic display/visibility/content declarations. */
 @layer nse.structure {
-  [data-nse-control]:has(> [data-nse-part="bezel"]) { position: relative; }
+  :where([data-nse-control]:has(> [data-nse-part="bezel"])) { position: relative; }
   [data-nse-control] {
     --nse-control-minimum-inline-size: 0px;
     --nse-control-minimum-block-size: 0px;

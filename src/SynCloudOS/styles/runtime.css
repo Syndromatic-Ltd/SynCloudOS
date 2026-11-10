@@ -1,3 +1,4 @@
+@layer nse.atmo {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -51,10 +52,8 @@ body,
   overflow-x: clip;
 }
 
-button,
-input,
-textarea {
-  font: inherit;
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
+button, input, textarea { font: inherit; }
 }
 
 button {
@@ -128,4 +127,6 @@ button {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
+}
+
 }

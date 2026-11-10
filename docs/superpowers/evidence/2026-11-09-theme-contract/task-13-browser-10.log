@@ -1,0 +1,37 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run playwright test tests/e2e/theme-baseline.spec.ts tests/e2e/theme-nesting.spec.ts --project=chromium --project=chromium-high-dpr --workers=4
+
+Running 118 tests using 4 workers
+
+(node:91840) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:78156) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:91260) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:75016) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok   3 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3 (6.7s)
+  ok   2 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 (6.9s)
+  x    1 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 4 (7.0s)
+  ok   4 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2 (7.5s)
+(node:77880) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x    5 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 5 (4.7s)
+(node:25780) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x    6 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 6 (6.6s)
+  x    7 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 8 (6.2s)
+(node:8292) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok   8 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 7 (6.0s)
+(node:69116) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok   9 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 9 (6.0s)
+  x   10 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 10 (5.2s)
+  ok  11 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 12 (6.0s)
+(node:51236) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   12 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 11 (5.9s)
+(node:16852) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)

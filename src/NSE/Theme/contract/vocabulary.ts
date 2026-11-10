@@ -33,6 +33,7 @@ export const nseThemeParts = Object.freeze([
 export const nseThemeStates = Object.freeze(["state", "highlighted", "enabled", "selected", "hovered", "focused", "key-window"] as const);
 export const nseThemeVariants = Object.freeze([
   "bezel-style", "control-size", "segment-style", "box-type", "toolbar-style", "chrome", "button-type", "slider-type",
+  "login-presentation", "notification-presentation",
   "orientation", "alignment", "position", "placement", "flow", "style", "role", "type", "edge", "level",
   "pulls-down", "title-position", "border-type", "image-scaling", "text-role", "text-colour", "background-style", "editable", "date-picker-style", "date-picker-mode", "date-picker-elements", "navigation-placement", "navigation-flow",
 ] as const);

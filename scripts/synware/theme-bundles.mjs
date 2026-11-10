@@ -182,7 +182,7 @@ function validateDefinition(input, contract, file, root) {
 const semanticParts = new Set(["title", "label", "content", "field", "cell", "row", "item", "segment", "value", "text-content", "primary-text", "secondary-text"]);
 /** Shared by bundle validation and the idiom audit. Throws a file-specific rule violation. */
 export function validateThemeCSS(source, { file, root, contract, onImport = () => undefined } = {}) {
-  const ast = cssTree.parse(source, { positions: true, onParseError(error) { fail(file, "css-syntax", error.message); } });
+  const ast = cssTree.parse(source, { parseCustomProperty: true, positions: true, onParseError(error) { fail(file, "css-syntax", error.message); } });
   const attributes = new Set(["control", "part", "state", "highlighted", "enabled", "selected", "hovered", "focused", "key-window", "colour-scheme-resolved", "contrast", "transparency", ...Object.values(contract.controls).flatMap(control => Object.keys(control.variants))].map(name => `data-nse-${name}`));
   const valueText = node => cssTree.generate(node.value);
   const checkSlice = (declarations, label) => {

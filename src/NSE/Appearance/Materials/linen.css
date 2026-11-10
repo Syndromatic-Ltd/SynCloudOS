@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -18,7 +21,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-:where(.atmo-linen, .nse-material-linen) {
+:where(.atmo-linen,.nse-material-linen),
+:where(:scope):is(:where(.atmo-linen,.nse-material-linen)) {
   background:
     linear-gradient(180deg, rgba(21, 31, 43, 0.93), rgba(5, 8, 13, 0.98)),
     url("/assets/textures/linen.webp");
@@ -27,7 +31,8 @@
   color: white;
 }
 
-:where(.atmo-linen, .nse-material-linen)::before {
+:where(.atmo-linen,.nse-material-linen)::before,
+:where(:scope):is(:where(.atmo-linen,.nse-material-linen))::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -37,4 +42,8 @@
     linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%),
     linear-gradient(-45deg, rgba(255, 255, 255, 0.035) 25%, transparent 25%);
   background-size: 5px 5px;
+}
+
+}
+
 }

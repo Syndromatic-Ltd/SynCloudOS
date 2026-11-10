@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -30,32 +33,37 @@
       as `sn-*`, now a reusable system material.
    ============================================================================================= */
 
-:where(.nse-control-divider-captioned) {
+:where(.nse-control-divider-captioned),
+:where(:scope):is(:where(.nse-control-divider-captioned)) {
   --nse-sourcelist-divider: var(--nse-atmo-divider);
 }
 
 /* --- Captioned divider --------------------------------- */
-.nse-control-divider-captioned {
+.nse-control-divider-captioned,
+:where(:scope):is(.nse-control-divider-captioned) {
   display: flex;
   align-items: center;
   height: auto;
   border: 0;
   background: none;
 }
-.nse-control-divider-captioned .nse-control-divider-icon {
+.nse-control-divider-captioned .nse-control-divider-icon,
+:where(:scope):is(.nse-control-divider-captioned) .nse-control-divider-icon {
   flex: 0 0 auto;
   width: 16px;
   height: 16px;
   margin-right: 6px;
   background: center / contain no-repeat;
 }
-.nse-control-divider-captioned .nse-control-divider-caption {
+.nse-control-divider-captioned .nse-control-divider-caption,
+:where(:scope):is(.nse-control-divider-captioned) .nse-control-divider-caption {
   flex: 0 0 auto;
   margin-right: 9px;
   font-weight: 700;
   color: #3a8bcb;
 }
-.nse-control-divider-captioned .nse-control-divider-cap {
+.nse-control-divider-captioned .nse-control-divider-cap,
+:where(:scope):is(.nse-control-divider-captioned) .nse-control-divider-cap {
   flex: 1 1 0;
   height: 4px;
   background: var(--nse-sourcelist-divider) left center / auto 4px repeat-x;
@@ -65,42 +73,54 @@
    METAL MATERIAL — the steel source list (ported from Software's `sn-*`, keyed by global data-mode)
    ============================================================================================= */
 
-:where([data-nse-material="metal"]) .nse-control-list-item {
+:where([data-nse-material="metal"]) .nse-control-list-item,
+:where(:scope):is(:where([data-nse-material="metal"])) .nse-control-list-item {
   cursor: pointer;
   padding: 10px 12px;
   color: #1b2733;
 }
 
-:where([data-nse-material="metal"]) .nse-control-list-item:focus-visible {
+:where([data-nse-material="metal"]) .nse-control-list-item:focus-visible,
+:where(:scope):is(:where([data-nse-material="metal"])) .nse-control-list-item:focus-visible {
   outline: 2px solid rgba(90, 150, 215, 0.85);
   outline-offset: -2px;
 }
 
 /* Dark rail: row text + softened bevel so seams settle into the sidebar. */
-[data-mode="dark"] :where([data-nse-material="metal"]) .nse-control-list-item {
+[data-mode="dark"] :where([data-nse-material="metal"]) .nse-control-list-item,
+:where(:scope):is([data-mode="dark"]) :where([data-nse-material="metal"]) .nse-control-list-item,
+[data-mode="dark"]:is(:where([data-nse-material="metal"])) .nse-control-list-item {
   color: #cdd9e6;
   border-top-color: rgba(150, 180, 214, 0.14);
   border-bottom-color: rgba(0, 0, 0, 0.22);
 }
 
 /* Embossed labels on unselected rows: raised in light, engraved in dark. */
-[data-mode="light"] :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="false"] .nse-control-list-primary {
+[data-mode="light"] :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="false"] .nse-control-list-primary,
+:where(:scope):is([data-mode="light"]) :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="false"] .nse-control-list-primary,
+[data-mode="light"]:is(:where([data-nse-material="metal"])) .nse-control-list-item[data-selected="false"] .nse-control-list-primary {
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
 }
-[data-mode="dark"] :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="false"] .nse-control-list-primary {
+[data-mode="dark"] :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="false"] .nse-control-list-primary,
+:where(:scope):is([data-mode="dark"]) :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="false"] .nse-control-list-primary,
+[data-mode="dark"]:is(:where([data-nse-material="metal"])) .nse-control-list-item[data-selected="false"] .nse-control-list-primary {
   color: #cdd9e6;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.78);
 }
 
 /* Selection: stock pale Onyx gloss in light; deeper steel gradient + engraved text in dark. */
-[data-mode="light"] :where([data-nse-material="metal"]) .nse-control-list-item:not(.is-disabled):is([data-selected="true"], [data-pressed="true"], :active) {
+[data-mode="light"] :where([data-nse-material="metal"]) .nse-control-list-item:not(.is-disabled):is([data-selected="true"],[data-pressed="true"],:active),
+:where(:scope):is([data-mode="light"]) :where([data-nse-material="metal"]) .nse-control-list-item:not(.is-disabled):is([data-selected="true"],[data-pressed="true"],:active),
+[data-mode="light"]:is(:where([data-nse-material="metal"])) .nse-control-list-item:not(.is-disabled):is([data-selected="true"],[data-pressed="true"],:active) {
   background: linear-gradient(180deg, rgba(218, 235, 251, 0.85) 0%, rgba(197, 224, 249, 0.85) 100%);
   /* Stated, not inherited. atmo-controls paints selected rows white for Heritage's
      DARK selection; on this pale gloss that is invisible, and the material owns
      both halves of the pair or neither. */
   color: #1b2733;
 }
-[data-mode="dark"] :where([data-nse-material="metal"]) .nse-control-list-item:not(.is-disabled):is([data-selected="true"], [data-pressed="true"], :active) {
+[data-mode="dark"] :where([data-nse-material="metal"]) .nse-control-list-item:not(.is-disabled):is([data-selected="true"],[data-pressed="true"],:active),
+:where(:scope):is([data-mode="dark"]) :where([data-nse-material="metal"]) .nse-control-list-item:not(.is-disabled):is([data-selected="true"],[data-pressed="true"],:active),
+[data-mode="dark"]:is(:where([data-nse-material="metal"])) .nse-control-list-item:not(.is-disabled):is([data-selected="true"],[data-pressed="true"],:active) {
   background: linear-gradient(180deg, #5c6f7f 0%, #233242 100%);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.22),
@@ -114,34 +134,40 @@
    More (or any application) own a private list/card skin. The inner radius is
    deliberately expressed as the group vector frame radius minus the real row
    inset; selected, held, and focus paint all inherit the same row geometry. */
-.nse-control-group-box.nse-control-grouped-list {
+.nse-control-group-box.nse-control-grouped-list,
+:where(:scope):is(.nse-control-group-box.nse-control-grouped-list) {
   --nse-grouped-list-frame-radius: 14px;
   --nse-grouped-list-row-inset: 2px;
   --nse-grouped-list-inner-radius: calc(var(--nse-grouped-list-frame-radius) - var(--nse-grouped-list-row-inset));
 }
 
-.nse-control-group-box.nse-control-grouped-list > .nse-control-group-inner > .nse-control-list-item {
+.nse-control-group-box.nse-control-grouped-list>.nse-control-group-inner>.nse-control-list-item,
+:where(:scope):is(.nse-control-group-box.nse-control-grouped-list)>.nse-control-group-inner>.nse-control-list-item {
   border-radius: 0;
   margin: 0;
 }
 
-.nse-control-group-box.nse-control-grouped-list > .nse-control-group-inner > .nse-control-list-item[data-nse-grouped-list-edge="first"] {
+.nse-control-group-box.nse-control-grouped-list>.nse-control-group-inner>.nse-control-list-item[data-nse-grouped-list-edge="first"],
+:where(:scope):is(.nse-control-group-box.nse-control-grouped-list)>.nse-control-group-inner>.nse-control-list-item[data-nse-grouped-list-edge="first"] {
   border-start-end-radius: var(--nse-grouped-list-inner-radius);
   border-start-start-radius: var(--nse-grouped-list-inner-radius);
 }
 
-.nse-control-group-box.nse-control-grouped-list > .nse-control-group-inner > .nse-control-list-item[data-nse-grouped-list-edge="last"] {
+.nse-control-group-box.nse-control-grouped-list>.nse-control-group-inner>.nse-control-list-item[data-nse-grouped-list-edge="last"],
+:where(:scope):is(.nse-control-group-box.nse-control-grouped-list)>.nse-control-group-inner>.nse-control-list-item[data-nse-grouped-list-edge="last"] {
   border-end-end-radius: var(--nse-grouped-list-inner-radius);
   border-end-start-radius: var(--nse-grouped-list-inner-radius);
 }
 
-.nse-control-group-box.nse-control-grouped-list > .nse-control-group-inner > .nse-control-list-item[data-nse-grouped-list-edge="only"] {
+.nse-control-group-box.nse-control-grouped-list>.nse-control-group-inner>.nse-control-list-item[data-nse-grouped-list-edge="only"],
+:where(:scope):is(.nse-control-group-box.nse-control-grouped-list)>.nse-control-group-inner>.nse-control-list-item[data-nse-grouped-list-edge="only"] {
   border-radius: var(--nse-grouped-list-inner-radius);
 }
 
 /* Keep the interaction outline inside the same silhouette as selected/held
    paint, including under forced colours where the system owns its colour. */
-.nse-control-group-box.nse-control-grouped-list > .nse-control-group-inner > .nse-control-list-item:focus-visible {
+.nse-control-group-box.nse-control-grouped-list>.nse-control-group-inner>.nse-control-list-item:focus-visible,
+:where(:scope):is(.nse-control-group-box.nse-control-grouped-list)>.nse-control-group-inner>.nse-control-list-item:focus-visible {
   outline-offset: -2px;
 }
 
@@ -155,7 +181,9 @@
    rgba(42,55,70,.68) — a dark slate authored for a light rail, which on the dark
    one leaves badges and counts almost invisible against the steel. Mirrors what
    the row's primary line already does per mode just above. */
-[data-mode="dark"] :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="false"] .nse-control-list-meta {
+[data-mode="dark"] :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="false"] .nse-control-list-meta,
+:where(:scope):is([data-mode="dark"]) :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="false"] .nse-control-list-meta,
+[data-mode="dark"]:is(:where([data-nse-material="metal"])) .nse-control-list-item[data-selected="false"] .nse-control-list-meta {
   color: rgba(205, 217, 230, 0.62);
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.6);
 }
@@ -166,9 +194,17 @@
    Onyx lineage hit on 2026-07-29; it surfaced here once the vector layer stopped
    overriding metal's selection (canonical Atmo). (0,4,0) so it clears
    atmo-controls' (0,3,0). */
-[data-mode="light"] :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="true"] .nse-control-list-meta {
+[data-mode="light"] :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="true"] .nse-control-list-meta,
+:where(:scope):is([data-mode="light"]) :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="true"] .nse-control-list-meta,
+[data-mode="light"]:is(:where([data-nse-material="metal"])) .nse-control-list-item[data-selected="true"] .nse-control-list-meta {
   color: #5a6b7d;
 }
-[data-mode="dark"] :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="true"] .nse-control-list-meta {
+[data-mode="dark"] :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="true"] .nse-control-list-meta,
+:where(:scope):is([data-mode="dark"]) :where([data-nse-material="metal"]) .nse-control-list-item[data-selected="true"] .nse-control-list-meta,
+[data-mode="dark"]:is(:where([data-nse-material="metal"])) .nse-control-list-item[data-selected="true"] .nse-control-list-meta {
   color: rgba(241, 246, 251, 0.72);
+}
+
+}
+
 }

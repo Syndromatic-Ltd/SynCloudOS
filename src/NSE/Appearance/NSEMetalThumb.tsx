@@ -50,6 +50,7 @@ export function NSEMetalThumb({ disabled = false }: { disabled?: boolean }) {
     appearance = useNSEAppearance();
   const active =
     !disabled &&
+    appearance.theme.presentation.materialLighting === "on" &&
     appearance.contrast !== "forced";
   const light = useSyncExternalStore(
     active && lighting ? lighting.subscribe : subscribeStatic,

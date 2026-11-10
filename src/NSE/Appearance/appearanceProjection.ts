@@ -18,12 +18,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { nseThemeColourStyle } from "../Theme/themeColourStyle";
 import type { NSEAppearanceDataAttributes, NSEResolvedAppearance } from "./nseAppearanceTypes";
 
 /** Projects the appearance environment onto views and relocated portal boundaries. */
 export function projectNSEAppearance(appearance: NSEResolvedAppearance): NSEAppearanceDataAttributes {
   return Object.freeze({
     "data-nse-theme": appearance.theme.bundleIdentifier,
+    style: nseThemeColourStyle(appearance.theme, appearance.resolvedColourScheme, appearance.contrast),
     "data-nse-chrome": appearance.chrome,
     "data-nse-colour-scheme-requested": appearance.requestedColourScheme,
     "data-nse-colour-scheme-resolved": appearance.resolvedColourScheme,

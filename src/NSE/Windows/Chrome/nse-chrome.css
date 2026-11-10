@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -22,12 +25,10 @@
    pass the same value on to anything that must reserve the bar's band (Webspring exposes it to app
    content), so the bar and its surroundings can never disagree — including the compact breakpoint
    below. */
-:root {
-  --nse-topbar-height-cumulus: 68px;
-  --nse-topbar-height-metal: 56px;
-}
 
-.nse-app-topbar {
+
+.nse-app-topbar,
+:where(:scope):is(.nse-app-topbar) {
   position: absolute;
   top: 0;
   left: 0;
@@ -39,7 +40,8 @@
   user-select: none;
 }
 
-.nse-app-topbar::before {
+.nse-app-topbar::before,
+:where(:scope):is(.nse-app-topbar)::before {
   content: "";
   position: absolute;
   left: 0;
@@ -54,7 +56,8 @@
   pointer-events: none;
 }
 
-.nse-app-topbar-content {
+.nse-app-topbar-content,
+:where(:scope):is(.nse-app-topbar-content) {
   position: absolute;
   inset: 0;
 }
@@ -64,7 +67,8 @@
    falling to black at the horizon line, and a faint lift towards the lower
    lip. The capsule radius follows the bar height, so it is exact at any
    width or pixel ratio. */
-.nse-app-topbar-base {
+.nse-app-topbar-base,
+:where(:scope):is(.nse-app-topbar-base) {
   position: absolute;
   z-index: 1;
   top: -1px;
@@ -74,7 +78,8 @@
   pointer-events: none;
 }
 
-.nse-app-topbar-base-glass {
+.nse-app-topbar-base-glass,
+:where(:scope):is(.nse-app-topbar-base-glass) {
   position: absolute;
   inset: 0;
   box-sizing: border-box;
@@ -101,7 +106,8 @@
 }
 
 /* A soft specular sheet over the upper half, clipped to the capsule. */
-.nse-app-topbar-base-glass::after {
+.nse-app-topbar-base-glass::after,
+:where(:scope):is(.nse-app-topbar-base-glass)::after {
   content: "";
   position: absolute;
   inset: 1px 1px 50%;
@@ -109,7 +115,8 @@
   background: linear-gradient(180deg, rgb(255 255 255 / 12%), rgb(255 255 255 / 2%) 80%, rgb(255 255 255 / 0%));
 }
 
-.nse-app-topbar-content {
+.nse-app-topbar-content,
+:where(:scope):is(.nse-app-topbar-content) {
   z-index: 2;
   display: grid;
   grid-template-columns: minmax(116px, 15vw) minmax(0, 1fr) minmax(116px, 15vw);
@@ -118,29 +125,35 @@
   padding: 0;
 }
 
-.nse-app-topbar-slot {
+.nse-app-topbar-slot,
+:where(:scope):is(.nse-app-topbar-slot) {
   display: flex;
   align-items: center;
 }
 
-.nse-app-topbar-slot-left {
+.nse-app-topbar-slot-left,
+:where(:scope):is(.nse-app-topbar-slot-left) {
   justify-content: flex-start;
   transform: translateX(-6px);
 }
 
-.nse-app-topbar-slot-right {
+.nse-app-topbar-slot-right,
+:where(:scope):is(.nse-app-topbar-slot-right) {
   justify-content: flex-end;
   transform: translateX(6px);
 }
 
-.webspring-application-navigation-back-slot {
+.webspring-application-navigation-back-slot,
+:where(:scope):is(.webspring-application-navigation-back-slot) {
   display: grid;
   place-items: center;
 }
 
 /* Same 50px circular end-cap geometry as the NSE Preferences Back control. */
 .nse-app-topbar-slot-left .webspring-application-navigation-back.nse-control-button.nse-extended-tool-button,
-.nse-app-topbar-metal-leading .webspring-application-navigation-back.nse-control-button.nse-extended-tool-button {
+:where(:scope):is(.nse-app-topbar-slot-left) .webspring-application-navigation-back.nse-control-button.nse-extended-tool-button,
+.nse-app-topbar-metal-leading .webspring-application-navigation-back.nse-control-button.nse-extended-tool-button,
+:where(:scope):is(.nse-app-topbar-metal-leading) .webspring-application-navigation-back.nse-control-button.nse-extended-tool-button {
   position: relative;
   width: 50px;
   min-width: 50px;
@@ -152,7 +165,9 @@
 }
 
 .nse-app-topbar-slot-left .webspring-application-navigation-back .nse-control-button-icon,
-.nse-app-topbar-metal-leading .webspring-application-navigation-back .nse-control-button-icon {
+:where(:scope):is(.nse-app-topbar-slot-left) .webspring-application-navigation-back .nse-control-button-icon,
+.nse-app-topbar-metal-leading .webspring-application-navigation-back .nse-control-button-icon,
+:where(:scope):is(.nse-app-topbar-metal-leading) .webspring-application-navigation-back .nse-control-button-icon {
   position: absolute;
   inset: 0 -25px;
   width: auto;
@@ -165,14 +180,16 @@
   pointer-events: none;
 }
 
-.webspring-application-navigation-chrome-balance {
+.webspring-application-navigation-chrome-balance,
+:where(:scope):is(.webspring-application-navigation-chrome-balance) {
   display: block;
   width: 50px;
   height: 50px;
   pointer-events: none;
 }
 
-.webspring-application-navigation-title {
+.webspring-application-navigation-title,
+:where(:scope):is(.webspring-application-navigation-title) {
   display: block;
   min-width: 0;
   overflow: hidden;
@@ -180,7 +197,8 @@
   white-space: nowrap;
 }
 
-.nse-app-topbar-title {
+.nse-app-topbar-title,
+:where(:scope):is(.nse-app-topbar-title) {
   align-self: center;
   min-width: 0;
   margin: 0;
@@ -202,7 +220,8 @@
   transform: translateY(-5px);
 }
 
-.nse-app-topbar-title-button {
+.nse-app-topbar-title-button,
+:where(:scope):is(.nse-app-topbar-title-button) {
   position: relative;
   display: inline-grid;
   grid-auto-flow: column;
@@ -220,25 +239,29 @@
   cursor: pointer;
 }
 
-.nse-app-topbar-title-button:disabled {
+.nse-app-topbar-title-button:disabled,
+:where(:scope):is(.nse-app-topbar-title-button:disabled) {
   cursor: default;
   opacity: 0.58;
 }
 
-.nse-app-topbar-title-button:focus-visible {
+.nse-app-topbar-title-button:focus-visible,
+:where(:scope):is(.nse-app-topbar-title-button:focus-visible) {
   outline: 2px solid rgba(134, 214, 255, 0.9);
   outline-offset: 2px;
   border-radius: 999px;
 }
 
-.nse-app-topbar-title-text {
+.nse-app-topbar-title-text,
+:where(:scope):is(.nse-app-topbar-title-text) {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.nse-app-topbar-title-arrow {
+.nse-app-topbar-title-arrow,
+:where(:scope):is(.nse-app-topbar-title-arrow) {
   position: relative;
   display: block;
   width: 24px;
@@ -249,7 +272,8 @@
   transform: translateY(1px);
 }
 
-.nse-app-topbar-title-arrow-glyph {
+.nse-app-topbar-title-arrow-glyph,
+:where(:scope):is(.nse-app-topbar-title-arrow-glyph) {
   position: absolute;
   inset: 0;
   display: block;
@@ -264,24 +288,28 @@
     transform 230ms ease;
 }
 
-.nse-app-topbar-title-arrow-right {
+.nse-app-topbar-title-arrow-right,
+:where(:scope):is(.nse-app-topbar-title-arrow-right) {
   background-position: 0 0;
   opacity: 0.9;
   transform: translate3d(0, 0, 0);
 }
 
-.nse-app-topbar-title-arrow-down {
+.nse-app-topbar-title-arrow-down,
+:where(:scope):is(.nse-app-topbar-title-arrow-down) {
   background-position: 0 -24px;
   opacity: 0;
   transform: translate3d(0, 7px, 0);
 }
 
-.nse-app-topbar-title-button[data-selected="true"] .nse-app-topbar-title-arrow-right {
+.nse-app-topbar-title-button[data-selected="true"] .nse-app-topbar-title-arrow-right,
+:where(:scope):is(.nse-app-topbar-title-button[data-selected="true"]) .nse-app-topbar-title-arrow-right {
   opacity: 0;
   transform: translate3d(3px, -7px, 0);
 }
 
-.nse-app-topbar-title-button[data-selected="true"] .nse-app-topbar-title-arrow-down {
+.nse-app-topbar-title-button[data-selected="true"] .nse-app-topbar-title-arrow-down,
+:where(:scope):is(.nse-app-topbar-title-button[data-selected="true"]) .nse-app-topbar-title-arrow-down {
   opacity: 0.92;
   transform: translate3d(0, 0, 0);
 }
@@ -289,7 +317,8 @@
 /* Every top-bar glyph is one solid-shape SVG used as a CSS mask over a themed fill, so the
    normal, pressed and selected looks come from colour tokens for any icon. The element that
    carries the mask is clipped by it, so the shadow filters live on its wrapper. */
-.nse-app-topbar-glyph-shape {
+.nse-app-topbar-glyph-shape,
+:where(:scope):is(.nse-app-topbar-glyph-shape) {
   display: block;
   width: 100%;
   height: 100%;
@@ -304,7 +333,8 @@
   mask-size: contain;
 }
 
-.nse-app-topbar-button {
+.nse-app-topbar-button,
+:where(:scope):is(.nse-app-topbar-button) {
   --nse-topbar-glyph-fill: linear-gradient(180deg, rgb(247 249 252 / 94%) 0%, rgb(188 196 207 / 90%) 100%);
   --nse-topbar-glyph-shadow: drop-shadow(0 1px 1px rgb(0 0 0 / 55%));
   position: relative;
@@ -320,12 +350,14 @@
   transform: translateY(-3.5px);
 }
 
-.nse-app-topbar-button:disabled {
+.nse-app-topbar-button:disabled,
+:where(:scope):is(.nse-app-topbar-button:disabled) {
   cursor: default;
   opacity: 0.54;
 }
 
-.nse-app-topbar-button:focus-visible {
+.nse-app-topbar-button:focus-visible,
+:where(:scope):is(.nse-app-topbar-button:focus-visible) {
   outline: 2px solid rgba(134, 214, 255, 0.9);
   outline-offset: 2px;
   border-radius: 999px;
@@ -334,7 +366,8 @@
 /* The inset tool button: a pill cut into the glass with a dark ring, a
    glazed top lip and a faint lower lift, so the bar reads through it. Held
    and selected states fill it with pressed-in blue glass. */
-.nse-app-topbar-button-well {
+.nse-app-topbar-button-well,
+:where(:scope):is(.nse-app-topbar-button-well) {
   position: absolute;
   top: var(--nse-topbar-well-top, 7px);
   left: var(--nse-topbar-well-inline, 11px);
@@ -365,7 +398,8 @@
   transition: box-shadow 140ms ease, background-color 140ms ease;
 }
 
-.nse-app-topbar-button:hover:not(:disabled) .nse-app-topbar-button-well {
+.nse-app-topbar-button:hover:not(:disabled) .nse-app-topbar-button-well,
+:where(:scope):is(.nse-app-topbar-button:hover:not(:disabled)) .nse-app-topbar-button-well {
   background-color: rgb(255 255 255 / 5%);
   box-shadow:
     0 1px 0 rgb(255 255 255 / 16%),
@@ -375,7 +409,8 @@
     inset 0 -1px 0 rgb(255 255 255 / 10%);
 }
 
-.nse-app-topbar-button-well-selected {
+.nse-app-topbar-button-well-selected,
+:where(:scope):is(.nse-app-topbar-button-well-selected) {
   position: absolute;
   inset: 0;
   border-radius: inherit;
@@ -396,7 +431,8 @@
   transition: opacity 120ms ease;
 }
 
-.nse-app-topbar-button-icon {
+.nse-app-topbar-button-icon,
+:where(:scope):is(.nse-app-topbar-button-icon) {
   position: relative;
   z-index: 2;
   grid-area: 1 / 1;
@@ -407,117 +443,139 @@
   filter: var(--nse-topbar-glyph-shadow);
 }
 
-.nse-app-topbar-button[data-position="right"] .nse-app-topbar-button-icon {
+.nse-app-topbar-button[data-position="right"] .nse-app-topbar-button-icon,
+:where(:scope):is(.nse-app-topbar-button[data-position="right"]) .nse-app-topbar-button-icon {
   width: 35px;
   height: 32.5px;
 }
 
 /* Held and selected: the blue glass fills the well and the glyph lights up. */
 .nse-app-topbar-button[data-selected="true"],
-.nse-app-topbar-button:active:not(:disabled) {
+:where(:scope):is(.nse-app-topbar-button[data-selected="true"]),
+.nse-app-topbar-button:active:not(:disabled),
+:where(:scope):is(.nse-app-topbar-button:active:not(:disabled)) {
   --nse-topbar-glyph-fill: linear-gradient(180deg, #ffffff 0%, #dcebf8 100%);
   --nse-topbar-glyph-shadow: drop-shadow(0 1px 1px rgb(0 22 48 / 62%));
 }
 
 .nse-app-topbar-button[data-selected="true"] .nse-app-topbar-button-well-selected,
-.nse-app-topbar-button:active:not(:disabled) .nse-app-topbar-button-well-selected {
+:where(:scope):is(.nse-app-topbar-button[data-selected="true"]) .nse-app-topbar-button-well-selected,
+.nse-app-topbar-button:active:not(:disabled) .nse-app-topbar-button-well-selected,
+:where(:scope):is(.nse-app-topbar-button:active:not(:disabled)) .nse-app-topbar-button-well-selected {
   opacity: 1;
 }
 
 @media (max-width: 760px) {
-  :root {
-    --nse-topbar-height-cumulus: 56px;
-  }
 
-  .nse-app-topbar {
+
+  .nse-app-topbar,
+:where(:scope):is(.nse-app-topbar) {
     --nse-topbar-glass-height: 52px;
   }
 
-  .nse-app-topbar::before {
+  .nse-app-topbar::before,
+:where(:scope):is(.nse-app-topbar)::before {
     height: 52px;
     border-radius: 28px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.34);
   }
 
-  .nse-app-topbar-content {
+  .nse-app-topbar-content,
+:where(:scope):is(.nse-app-topbar-content) {
     grid-template-columns: 90px minmax(0, 1fr) 90px;
   }
 
-  .nse-app-topbar-slot-left {
+  .nse-app-topbar-slot-left,
+:where(:scope):is(.nse-app-topbar-slot-left) {
     transform: translateX(-4px);
   }
 
-  .nse-app-topbar-slot-right {
+  .nse-app-topbar-slot-right,
+:where(:scope):is(.nse-app-topbar-slot-right) {
     transform: translateX(4px);
   }
 
-  .nse-app-topbar-title {
+  .nse-app-topbar-title,
+:where(:scope):is(.nse-app-topbar-title) {
     font-size: clamp(17px, 5.4vw, 21px);
     line-height: 1.08;
     transform: translateY(-4px);
   }
 
-  .nse-app-topbar-title-button {
+  .nse-app-topbar-title-button,
+:where(:scope):is(.nse-app-topbar-title-button) {
     min-height: 30px;
   }
 
-  .nse-app-topbar-title-arrow {
+  .nse-app-topbar-title-arrow,
+:where(:scope):is(.nse-app-topbar-title-arrow) {
     width: 18px;
     height: 18px;
     margin-left: 1px;
   }
 
-  .nse-app-topbar-title-arrow-glyph {
+  .nse-app-topbar-title-arrow-glyph,
+:where(:scope):is(.nse-app-topbar-title-arrow-glyph) {
     background-size: 18px 36px;
   }
 
-  .nse-app-topbar-title-arrow-down {
+  .nse-app-topbar-title-arrow-down,
+:where(:scope):is(.nse-app-topbar-title-arrow-down) {
     background-position: 0 -18px;
   }
 
-  .nse-app-topbar-button {
+  .nse-app-topbar-button,
+:where(:scope):is(.nse-app-topbar-button) {
     width: 90px;
     height: 60px;
     transform: translateY(-3px);
   }
 
-  .nse-app-topbar-button {
+  .nse-app-topbar-button,
+:where(:scope):is(.nse-app-topbar-button) {
     --nse-topbar-well-top: 5.5px;
     --nse-topbar-well-inline: 9.5px;
     --nse-topbar-well-height: 43px;
   }
 
-  .nse-app-topbar-button-icon {
+  .nse-app-topbar-button-icon,
+:where(:scope):is(.nse-app-topbar-button-icon) {
     width: 26px;
     height: 26px;
     transform: translateY(-1px);
   }
 
-  .nse-app-topbar-button[data-position="right"] .nse-app-topbar-button-icon {
+  .nse-app-topbar-button[data-position="right"] .nse-app-topbar-button-icon,
+:where(:scope):is(.nse-app-topbar-button[data-position="right"]) .nse-app-topbar-button-icon {
     width: 28.5px;
     height: 26.5px;
   }
 }
 
 @media (max-width: 360px) {
-  .nse-app-topbar-title {
+  .nse-app-topbar-title,
+:where(:scope):is(.nse-app-topbar-title) {
     font-size: clamp(14px, 4.4vw, 16px);
   }
 
-  .nse-app-topbar-title-button {
+  .nse-app-topbar-title-button,
+:where(:scope):is(.nse-app-topbar-title-button) {
     padding-inline: 2px;
   }
 
-  .nse-app-topbar-title-arrow {
+  .nse-app-topbar-title-arrow,
+:where(:scope):is(.nse-app-topbar-title-arrow) {
     width: 14px;
     height: 14px;
   }
 
-  .nse-app-topbar-title-arrow-glyph {
+  .nse-app-topbar-title-arrow-glyph,
+:where(:scope):is(.nse-app-topbar-title-arrow-glyph) {
     background-size: 14px 28px;
   }
 
-  .nse-app-topbar-title-arrow-down {
+  .nse-app-topbar-title-arrow-down,
+:where(:scope):is(.nse-app-topbar-title-arrow-down) {
     background-position: 0 -14px;
   }
 }
@@ -528,29 +586,30 @@
    rounded app frame or window) publishes its radius; a themed window frame
    publishes --nse-window-radius; anything else is square. A window's title bar
    owns its top corners, so content below it is square at the top. */
-.nse-smooth-surface {
+.nse-smooth-surface,
+:where(:scope):is(.nse-smooth-surface) {
   --nse-chrome-top-corner-radius: var(--nse-smooth-surface-active-radius, var(--nse-smooth-surface-radius, 0px));
   --nse-chrome-bottom-corner-radius: var(--nse-smooth-surface-active-radius, var(--nse-smooth-surface-radius, 0px));
 }
 
-.nse-window-view:not([data-window-custom-chrome-active="true"]):not([data-window-chrome-mode="frameless"]) > .nse-window__surface:not(.nse-smooth-surface) {
+.nse-window-view:not([data-window-custom-chrome-active="true"]):not([data-window-chrome-mode="frameless"])>.nse-window__surface:not(.nse-smooth-surface),
+:where(:scope):is(.nse-window-view:not([data-window-custom-chrome-active="true"]):not([data-window-chrome-mode="frameless"]))>.nse-window__surface:not(.nse-smooth-surface) {
   --nse-chrome-top-corner-radius: var(--nse-window-radius, 8px);
   --nse-chrome-bottom-corner-radius: var(--nse-window-radius, 8px);
 }
 
-.nse-window__surface > :not(:first-child) {
+.nse-window__surface>:not(:first-child),
+:where(:scope):is(.nse-window__surface)>:not(:first-child) {
   --nse-chrome-top-corner-radius: 0px;
 }
 
-.nse-window__surface > :not(:last-child) {
+.nse-window__surface>:not(:last-child),
+:where(:scope):is(.nse-window__surface)>:not(:last-child) {
   --nse-chrome-bottom-corner-radius: 0px;
 }
 
 /* Film grain shared by the metal chrome surfaces (top bar, source list, footer). */
-:root {
-  --nse-metal-grain-tile: 56px 56px;
-  --nse-metal-grain: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiDAAAAUVBMVEWFhYWDg4N3d3dtbW17e3t1dXWBgYGHh4d5eXlzc3OLi4ubm5uVlZWPj4+NjY19fX2JiYl/f39ra2uRkZGZmZlpaWmXl5dvb29xcXGTk5NnZ2c8TV1mAAAAG3RSTlNAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAvEOwtAAAFVklEQVR4XpWWB67c2BUFb3g557T/hRo9/WUMZHlgr4Bg8Z4qQgQJlHI4A8SzFVrapvmTF9O7dmYRFZ60YiBhJRCgh1FYhiLAmdvX0CzTOpNE77ME0Zty/nWWzchDtiqrmQDeuv3powQ5ta2eN0FY0InkqDD73lT9c9lEzwUNqgFHs9VQce3TVClFCQrSTfOiYkVJQBmpbq2L6iZavPnAPcoU0dSw0SUTqz/GtrGuXfbyyBniKykOWQWGqwwMA7QiYAxi+IlPdqo+hYHnUt5ZPfnsHJyNiDtnpJyayNBkF6cWoYGAMY92U2hXHF/C1M8uP/ZtYdiuj26UdAdQQSXQErwSOMzt/XWRWAz5GuSBIkwG1H3FabJ2OsUOUhGC6tK4EMtJO0ttC6IBD3kM0ve0tJwMdSfjZo+EEISaeTr9P3wYrGjXqyC1krcKdhMpxEnt5JetoulscpyzhXN5FRpuPHvbeQaKxFAEB6EN+cYN6xD7RYGpXpNndMmZgM5Dcs3YSNFDHUo2LGfZuukSWyUYirJAdYbF3MfqEKmjM+I2EfhA94iG3L7uKrR+GdWD73ydlIB+6hgref1QTlmgmbM3/LeX5GI1Ux1RWpgxpLuZ2+I+IjzZ8wqE4nilvQdkUdfhzI5QDWy+kw5Wgg2pGpeEVeCCA7b85BO3F9DzxB3cdqvBzWcmzbyMiqhzuYqtHRVG2y4x+KOlnyqla8AoWWpuBoYRxzXrfKuILl6SfiWCbjxoZJUaCBj1CjH7GIaDbc9kqBY3W/Rgjda1iqQcOJu2WW+76pZC9QG7M00dffe9hNnseupFL53r8F7YHSwJWUKP2q+k7RdsxyOB11n0xtOvnW4irMMFNV4H0uqwS5ExsmP9AxbDTc9JwgneAT5vTiUSm1E7BSflSt3bfa1tv8Di3R8n3Af7MNWzs49hmauE2wP+ttrq+AsWpFG2awvsuOqbipWHgtuvuaAE+A1Z/7gC9hesnr+7wqCwG8c5yAg3AL1fm8T9AZtp/bbJGwl1pNrE7RuOX7PeMRUERVaPpEs+yqeoSmuOlokqw49pgomjLeh7icHNlG19yjs6XXOMedYm5xH2YxpV2tc0Ro2jJfxC50ApuxGob7lMsxfTbeUv07TyYxpeLucEH1gNd4IKH2LAg5TdVhlCafZvpskfncCfx8pOhJzd76bJWeYFnFciwcYfubRc12Ip/ppIhA1/mSZ/RxjFDrJC5xifFjJpY2Xl5zXdguFqYyTR1zSp1Y9p+tktDYYSNflcxI0iyO4TPBdlRcpeqjK/piF5bklq77VSEaA+z8qmJTFzIWiitbnzR794USKBUaT0NTEsVjZqLaFVqJoPN9ODG70IPbfBHKK+/q/AWR0tJzYHRULOa4MP+W/HfGadZUbfw177G7j/OGbIs8TahLyynl4X4RinF793Oz+BU0saXtUHrVBFT/DnA3ctNPoGbs4hRIjTok8i+algT1lTHi4SxFvONKNrgQFAq2/gFnWMXgwffgYMJpiKYkmW3tTg3ZQ9Jq+f8XN+A5eeUKHWvJWJ2sgJ1Sop+wwhqFVijqWaJhwtD8MNlSBeWNNWTa5Z5kPZw5+LbVT99wqTdx29lMUH4OIG/D86ruKEauBjvH5xy6um/Sfj7ei6UUVk4AIl3MyD4MSSTOFgSwsH/QJWaQ5as7ZcmgBZkzjjU1UrQ74ci1gWBCSGHtuV1H2mhSnO3Wp/3fEV5a+4wz//6qy8JxjZsmxxy5+4w9CDNJY09T072iKG0EnOS0arEYgXqYnXcYHwjTtUNAcMelOd4xpkoqiTYICWFq0JSiPfPDQdnt+4/wuqcXY47QILbgAAAABJRU5ErkJggg==");
-}
+
 
 /* ===========================================================================
    atmoMetal — reusable brushed-metal source-list chrome.
@@ -560,7 +619,8 @@
    mode), selected by [data-mode]. NSE owns the assets under /assets/nse/chrome/metal.
    Adapted from the hand-spliced Software.app chrome into a first-party NSE variant.
    =========================================================================== */
-.nse-app-topbar-metal {
+.nse-app-topbar-metal,
+:where(:scope):is(.nse-app-topbar-metal) {
   --nse-metal-header-mid: url("/assets/nse/chrome/metal/light/header-middle.png");
   --nse-metal-header-endcap-l: url("/assets/nse/chrome/metal/light/header-endcap-left.png");
   --nse-metal-header-endcap-r: url("/assets/nse/chrome/metal/light/header-endcap-right.png");
@@ -612,15 +672,18 @@
   border-top-right-radius: var(--nse-metal-corner);
 }
 
-.nse-app-topbar-metal::before {
+.nse-app-topbar-metal::before,
+:where(:scope):is(.nse-app-topbar-metal)::before {
   content: none;
 }
 
-.nse-app-topbar-metal[data-has-rail="true"] {
+.nse-app-topbar-metal[data-has-rail="true"],
+:where(:scope):is(.nse-app-topbar-metal[data-has-rail="true"]) {
   grid-template-columns: var(--nse-topbar-rail, 264px) minmax(0, 1fr);
 }
 
-.nse-app-topbar-metal[data-mode="dark"] {
+.nse-app-topbar-metal[data-mode="dark"],
+:where(:scope):is(.nse-app-topbar-metal[data-mode="dark"]) {
   --nse-metal-header-mid: url("/assets/nse/chrome/metal/dark/header-middle.png");
   --nse-metal-header-endcap-l: url("/assets/nse/chrome/metal/dark/header-endcap-left.png");
   --nse-metal-header-endcap-r: url("/assets/nse/chrome/metal/dark/header-endcap-right.png");
@@ -643,7 +706,8 @@
   --nse-metal-rim-top: rgb(124 126 129);
 }
 
-.nse-app-topbar-metal-rail {
+.nse-app-topbar-metal-rail,
+:where(:scope):is(.nse-app-topbar-metal-rail) {
   position: relative;
   z-index: 1;
   display: grid;
@@ -656,7 +720,8 @@
   box-shadow: var(--nse-metal-rim-left), var(--nse-metal-rim-crest), inset -14px 0 18px -10px var(--nse-metal-content-shadow);
 }
 
-.nse-app-topbar-metal-main {
+.nse-app-topbar-metal-main,
+:where(:scope):is(.nse-app-topbar-metal-main) {
   position: relative;
   z-index: 2;
   display: flex;
@@ -671,18 +736,21 @@
   box-shadow: var(--nse-metal-rim-right), var(--nse-metal-rim-crest);
 }
 
-.nse-app-topbar-metal[data-has-rail="true"] .nse-app-topbar-metal-main {
+.nse-app-topbar-metal[data-has-rail="true"] .nse-app-topbar-metal-main,
+:where(:scope):is(.nse-app-topbar-metal[data-has-rail="true"]) .nse-app-topbar-metal-main {
   box-shadow: var(--nse-metal-rim-right), var(--nse-metal-rim-crest), -10px 0 18px -6px var(--nse-metal-content-shadow);
 }
 
 /* Single bar (no rail): the bar reaches both outer corners. */
-.nse-app-topbar-metal[data-has-rail="false"] .nse-app-topbar-metal-main {
+.nse-app-topbar-metal[data-has-rail="false"] .nse-app-topbar-metal-main,
+:where(:scope):is(.nse-app-topbar-metal[data-has-rail="false"]) .nse-app-topbar-metal-main {
   border-top-left-radius: var(--nse-metal-corner);
   background: var(--nse-metal-header-mid) left top / auto 100% repeat-x;
   box-shadow: var(--nse-metal-rim-left), var(--nse-metal-rim-right), var(--nse-metal-rim-crest);
 }
 
-.nse-app-topbar-metal-grain {
+.nse-app-topbar-metal-grain,
+:where(:scope):is(.nse-app-topbar-metal-grain) {
   position: absolute;
   inset: 0;
   z-index: 3;
@@ -693,7 +761,8 @@
   mix-blend-mode: var(--nse-metal-grain-blend);
 }
 
-.nse-app-topbar-metal-rail-content {
+.nse-app-topbar-metal-rail-content,
+:where(:scope):is(.nse-app-topbar-metal-rail-content) {
   position: relative;
   z-index: 4;
   display: flex;
@@ -708,7 +777,8 @@
   text-shadow: var(--nse-metal-text-emboss);
 }
 
-.nse-app-topbar-metal-title {
+.nse-app-topbar-metal-title,
+:where(:scope):is(.nse-app-topbar-metal-title) {
   position: relative;
   z-index: 4;
   margin: 0;
@@ -725,12 +795,14 @@
   text-shadow: var(--nse-metal-text-emboss);
 }
 
-.nse-app-topbar-metal .nse-app-topbar-title-button {
+.nse-app-topbar-metal .nse-app-topbar-title-button,
+:where(:scope):is(.nse-app-topbar-metal) .nse-app-topbar-title-button {
   color: var(--nse-metal-title);
   text-shadow: var(--nse-metal-text-emboss);
 }
 
-.nse-app-topbar-metal-cluster {
+.nse-app-topbar-metal-cluster,
+:where(:scope):is(.nse-app-topbar-metal-cluster) {
   position: absolute;
   top: 50%;
   z-index: 5;
@@ -740,15 +812,18 @@
   transform: translateY(-50%);
 }
 
-.nse-app-topbar-metal-leading {
+.nse-app-topbar-metal-leading,
+:where(:scope):is(.nse-app-topbar-metal-leading) {
   left: 14px;
 }
 
-.nse-app-topbar-metal-trailing {
+.nse-app-topbar-metal-trailing,
+:where(:scope):is(.nse-app-topbar-metal-trailing) {
   right: 14px;
 }
 
-.nse-app-topbar-metal-pill {
+.nse-app-topbar-metal-pill,
+:where(:scope):is(.nse-app-topbar-metal-pill) {
   position: relative;
   width: 56px;
   height: 34px;
@@ -760,12 +835,14 @@
   appearance: none;
 }
 
-.nse-app-topbar-metal-pill:disabled {
+.nse-app-topbar-metal-pill:disabled,
+:where(:scope):is(.nse-app-topbar-metal-pill:disabled) {
   cursor: default;
   opacity: 0.5;
 }
 
-.nse-app-topbar-metal-pill-shell {
+.nse-app-topbar-metal-pill-shell,
+:where(:scope):is(.nse-app-topbar-metal-pill-shell) {
   position: absolute;
   inset: 0;
   box-sizing: border-box;
@@ -776,14 +853,16 @@
   transition: box-shadow 90ms ease;
 }
 
-.nse-app-topbar-metal-pill:is(:active:not(:disabled), [aria-expanded="true"], [data-selected="true"]) .nse-app-topbar-metal-pill-shell {
+.nse-app-topbar-metal-pill:is(:active:not(:disabled),[aria-expanded="true"],[data-selected="true"]) .nse-app-topbar-metal-pill-shell,
+:where(:scope):is(.nse-app-topbar-metal-pill:is(:active:not(:disabled),[aria-expanded="true"],[data-selected="true"])) .nse-app-topbar-metal-pill-shell {
   background: var(--nse-metal-pill-fill-pressed);
   box-shadow: var(--nse-metal-pill-shadow-pressed);
 }
 
 /* The glyph wrapper carries the emboss as drop-shadow filters (the mask clips anything painted
    on the masked element itself); the shape inside is filled by --nse-metal-glyph-fill. */
-.nse-app-topbar-metal-pill-glyph {
+.nse-app-topbar-metal-pill-glyph,
+:where(:scope):is(.nse-app-topbar-metal-pill-glyph) {
   --nse-topbar-glyph-fill: var(--nse-metal-glyph-fill);
   position: absolute;
   top: 50%;
@@ -795,7 +874,8 @@
   pointer-events: none;
 }
 
-.nse-app-topbar-metal-pill:is(:active:not(:disabled), [aria-expanded="true"], [data-selected="true"]) .nse-app-topbar-metal-pill-glyph {
+.nse-app-topbar-metal-pill:is(:active:not(:disabled),[aria-expanded="true"],[data-selected="true"]) .nse-app-topbar-metal-pill-glyph,
+:where(:scope):is(.nse-app-topbar-metal-pill:is(:active:not(:disabled),[aria-expanded="true"],[data-selected="true"])) .nse-app-topbar-metal-pill-glyph {
   --nse-topbar-glyph-fill: var(--nse-metal-glyph-fill-pressed);
   transform: translate(-50%, calc(-50% + 1px));
   filter: var(--nse-metal-glyph-shadow-pressed);
@@ -803,7 +883,8 @@
 
 /* A document window's title: the app's name beside its return control, the document in the
    middle. In dark chrome the name glows white, as a lit sign on the metal. */
-.nse-app-topbar-metal-leading-title {
+.nse-app-topbar-metal-leading-title,
+:where(:scope):is(.nse-app-topbar-metal-leading-title) {
   max-width: none;
   margin-inline-start: 6px;
   overflow: visible;
@@ -812,12 +893,15 @@
 }
 /* The text still clips for its ellipsis, so its clip box reaches past the glyphs by
    the glow's 16px radius; the equal negative margin keeps the layout unchanged. */
-.nse-app-topbar-metal-leading-title .nse-app-topbar-title-text {
+.nse-app-topbar-metal-leading-title .nse-app-topbar-title-text,
+:where(:scope):is(.nse-app-topbar-metal-leading-title) .nse-app-topbar-title-text {
   padding: 18px;
   margin: -18px;
 }
 .nse-app-topbar-metal[data-mode="dark"] .nse-app-topbar-metal-leading-title,
-.nse-app-topbar-metal[data-mode="dark"] .nse-app-topbar-metal-leading-title .nse-app-topbar-title-button {
+:where(:scope):is(.nse-app-topbar-metal[data-mode="dark"]) .nse-app-topbar-metal-leading-title,
+.nse-app-topbar-metal[data-mode="dark"] .nse-app-topbar-metal-leading-title .nse-app-topbar-title-button,
+:where(:scope):is(.nse-app-topbar-metal[data-mode="dark"]) .nse-app-topbar-metal-leading-title .nse-app-topbar-title-button {
   color: #ffffff;
   text-shadow:
     0 0 1px rgba(255, 255, 255, 0.9),
@@ -825,28 +909,33 @@
     0 0 16px rgba(196, 222, 255, 0.4),
     0 -1px 0 rgba(0, 0, 0, 0.6);
 }
-.nse-app-topbar-metal-centre {
+.nse-app-topbar-metal-centre,
+:where(:scope):is(.nse-app-topbar-metal-centre) {
   max-width: 44%;
   font-size: 15px;
   font-weight: 700;
 }
 
-.nse-app-topbar-metal-pill:focus-visible {
+.nse-app-topbar-metal-pill:focus-visible,
+:where(:scope):is(.nse-app-topbar-metal-pill:focus-visible) {
   outline: 2px solid rgba(90, 150, 215, 0.85);
   outline-offset: 2px;
   border-radius: 18px;
 }
 
 @media (max-width: 767px) {
-  .nse-app-topbar-metal[data-has-rail="true"] {
+  .nse-app-topbar-metal[data-has-rail="true"],
+:where(:scope):is(.nse-app-topbar-metal[data-has-rail="true"]) {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .nse-app-topbar-metal[data-has-rail="true"] .nse-app-topbar-metal-rail {
+  .nse-app-topbar-metal[data-has-rail="true"] .nse-app-topbar-metal-rail,
+:where(:scope):is(.nse-app-topbar-metal[data-has-rail="true"]) .nse-app-topbar-metal-rail {
     display: none;
   }
 
-  .nse-app-topbar-metal[data-has-rail="true"] .nse-app-topbar-metal-main {
+  .nse-app-topbar-metal[data-has-rail="true"] .nse-app-topbar-metal-main,
+:where(:scope):is(.nse-app-topbar-metal[data-has-rail="true"]) .nse-app-topbar-metal-main {
     border-top-left-radius: var(--nse-metal-corner);
     box-shadow: var(--nse-metal-rim-left), var(--nse-metal-rim-right), var(--nse-metal-rim-crest);
     background: var(--nse-metal-header-mid) left top / auto 100% repeat-x;
@@ -854,12 +943,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nse-app-topbar-metal-pill-shell {
+  .nse-app-topbar-metal-pill-shell,
+:where(:scope):is(.nse-app-topbar-metal-pill-shell) {
     transition: none;
   }
 }
 
-.nse-app-frame {
+.nse-app-frame,
+:where(:scope):is(.nse-app-frame) {
   position: relative;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
@@ -871,47 +962,58 @@
   isolation: isolate;
 }
 
-.nse-app-frame-body {
+.nse-app-frame-body,
+:where(:scope):is(.nse-app-frame-body) {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   min-height: 0;
 }
 
-.nse-app-frame-topbar > .nse-app-topbar {
+.nse-app-frame-topbar>.nse-app-topbar,
+:where(:scope):is(.nse-app-frame-topbar)>.nse-app-topbar {
   position: relative;
   inset: auto;
 }
 
-.nse-app-frame-sidebar + .nse-app-frame-content {
+.nse-app-frame-sidebar+.nse-app-frame-content,
+:where(:scope):is(.nse-app-frame-sidebar)+.nse-app-frame-content {
   min-width: 0;
 }
 
 .nse-app-frame-content,
-.nse-app-frame-sidebar {
+:where(:scope):is(.nse-app-frame-content),
+.nse-app-frame-sidebar,
+:where(:scope):is(.nse-app-frame-sidebar) {
   min-height: 0;
   min-width: 0;
 }
 
-.nse-app-frame-statusbar {
+.nse-app-frame-statusbar,
+:where(:scope):is(.nse-app-frame-statusbar) {
   min-width: 0;
   min-height: 0;
   height: var(--nse-status-bar-size, auto);
 }
 
-.nse-app-frame-statusbar > .nse-statusbar {
+.nse-app-frame-statusbar>.nse-statusbar,
+:where(:scope):is(.nse-app-frame-statusbar)>.nse-statusbar {
   height: 100%;
 }
 
-.nse-app-frame[data-variant="canvas"] .nse-app-frame-content {
+.nse-app-frame[data-variant="canvas"] .nse-app-frame-content,
+:where(:scope):is(.nse-app-frame[data-variant="canvas"]) .nse-app-frame-content {
   overflow: hidden;
 }
 
 .nse-app-frame[data-variant="document"] .nse-app-frame-content,
-.nse-app-frame[data-variant="standard"] .nse-app-frame-content {
+:where(:scope):is(.nse-app-frame[data-variant="document"]) .nse-app-frame-content,
+.nse-app-frame[data-variant="standard"] .nse-app-frame-content,
+:where(:scope):is(.nse-app-frame[data-variant="standard"]) .nse-app-frame-content {
   overflow: auto;
 }
 
-.nse-split-view {
+.nse-split-view,
+:where(:scope):is(.nse-split-view) {
   position: relative;
   display: grid;
   grid-template-columns: var(--nse-split-sidebar, 280px) minmax(0, 1fr);
@@ -922,12 +1024,15 @@
   overflow: hidden;
 }
 
-.nse-split-view[data-sidebar-position="trailing"] {
+.nse-split-view[data-sidebar-position="trailing"],
+:where(:scope):is(.nse-split-view[data-sidebar-position="trailing"]) {
   grid-template-columns: minmax(0, 1fr) var(--nse-split-sidebar, 280px);
 }
 
 .nse-split-view-sidebar,
-.nse-split-view-main {
+:where(:scope):is(.nse-split-view-sidebar),
+.nse-split-view-main,
+:where(:scope):is(.nse-split-view-main) {
   min-width: 0;
   min-height: 0;
   overflow: hidden;
@@ -935,26 +1040,31 @@
 
 /* A two-item split view controller's panes fill the split view's grid cells, so their content divides the pane's
    height rather than growing to its own. */
-.nse-split-view-controller-view > :is(.nse-split-view-sidebar, .nse-split-view-main) > [data-nse-part="split-pane"] {
+.nse-split-view-controller-view>:is(.nse-split-view-sidebar,.nse-split-view-main)>[data-nse-part="split-pane"],
+:where(:scope):is(.nse-split-view-controller-view)>:is(.nse-split-view-sidebar,.nse-split-view-main)>[data-nse-part="split-pane"] {
   block-size: 100%;
 }
 
-.nse-split-view[data-sidebar-position="trailing"] .nse-split-view-sidebar {
+.nse-split-view[data-sidebar-position="trailing"] .nse-split-view-sidebar,
+:where(:scope):is(.nse-split-view[data-sidebar-position="trailing"]) .nse-split-view-sidebar {
   grid-column: 2;
   grid-row: 1;
 }
 
-.nse-split-view[data-sidebar-position="trailing"] .nse-split-view-main {
+.nse-split-view[data-sidebar-position="trailing"] .nse-split-view-main,
+:where(:scope):is(.nse-split-view[data-sidebar-position="trailing"]) .nse-split-view-main {
   grid-column: 1;
   grid-row: 1;
 }
 
-.nse-split-view[data-sidebar-position="trailing"] .nse-split-view-resizer {
+.nse-split-view[data-sidebar-position="trailing"] .nse-split-view-resizer,
+:where(:scope):is(.nse-split-view[data-sidebar-position="trailing"]) .nse-split-view-resizer {
   grid-column: 2;
   grid-row: 1;
 }
 
-.nse-split-view-resizer {
+.nse-split-view-resizer,
+:where(:scope):is(.nse-split-view-resizer) {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -968,12 +1078,14 @@
   touch-action: none;
 }
 
-.nse-split-view[data-sidebar-position="trailing"] .nse-split-view-resizer {
+.nse-split-view[data-sidebar-position="trailing"] .nse-split-view-resizer,
+:where(:scope):is(.nse-split-view[data-sidebar-position="trailing"]) .nse-split-view-resizer {
   left: auto;
   right: calc(var(--nse-split-sidebar, 280px) - 4px);
 }
 
-.nse-split-view-resizer-grip {
+.nse-split-view-resizer-grip,
+:where(:scope):is(.nse-split-view-resizer-grip) {
   width: 2px;
   height: 100%;
   background: rgba(72, 78, 86, 0.36);
@@ -984,13 +1096,17 @@
 }
 
 .nse-split-view-resizer:hover .nse-split-view-resizer-grip,
+:where(:scope):is(.nse-split-view-resizer:hover) .nse-split-view-resizer-grip,
 .nse-split-view-resizer:focus-visible .nse-split-view-resizer-grip,
-.nse-split-view[data-resizing="true"] .nse-split-view-resizer-grip {
+:where(:scope):is(.nse-split-view-resizer:focus-visible) .nse-split-view-resizer-grip,
+.nse-split-view[data-resizing="true"] .nse-split-view-resizer-grip,
+:where(:scope):is(.nse-split-view[data-resizing="true"]) .nse-split-view-resizer-grip {
   background: rgba(80, 146, 222, 0.78);
   opacity: 1;
 }
 
-.nse-split-view-resizer:focus-visible {
+.nse-split-view-resizer:focus-visible,
+:where(:scope):is(.nse-split-view-resizer:focus-visible) {
   outline: 2px solid rgba(134, 214, 255, 0.9);
   outline-offset: -2px;
 }
@@ -998,7 +1114,8 @@
 /* An NSESplitViewController with three or more items, or stacked vertically. Item
    thicknesses sum to the split view's measured size, so a
    divider takes no space: its hairline and its 8px hit area overlay the seam. */
-.nse-split-view-controller-view[data-presentation="split"][data-orientation] {
+.nse-split-view-controller-view[data-presentation="split"][data-orientation],
+:where(:scope):is(.nse-split-view-controller-view[data-presentation="split"][data-orientation]) {
   width: 100%;
   height: 100%;
   min-width: 0;
@@ -1006,9 +1123,12 @@
   overflow: hidden;
 }
 
-.nse-split-view-controller-view > [data-nse-part="split-pane"],
-.nse-split-view-controller-view > * > [data-nse-part="split-pane"],
-.nse-split-view-controller-view > :is(.nse-split-view-sidebar, .nse-split-view-main) > [data-nse-part="split-pane"] {
+.nse-split-view-controller-view>[data-nse-part="split-pane"],
+:where(:scope):is(.nse-split-view-controller-view)>[data-nse-part="split-pane"],
+.nse-split-view-controller-view>*>[data-nse-part="split-pane"],
+:where(:scope):is(.nse-split-view-controller-view)>*>[data-nse-part="split-pane"],
+.nse-split-view-controller-view>:is(.nse-split-view-sidebar,.nse-split-view-main)>[data-nse-part="split-pane"],
+:where(:scope):is(.nse-split-view-controller-view)>:is(.nse-split-view-sidebar,.nse-split-view-main)>[data-nse-part="split-pane"] {
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -1018,14 +1138,16 @@
 
 /* A split view controller fills the view frame its parent gives it, and each item's view frame fills
    its pane, laying its own content out as a column. */
-[data-nse-view-controller] > .nse-split-view-controller-view {
+[data-nse-view-controller]>.nse-split-view-controller-view,
+:where(:scope):is([data-nse-view-controller])>.nse-split-view-controller-view {
   width: 100%;
   height: 100%;
   min-width: 0;
   min-height: 0;
 }
 
-.nse-split-view-controller-view [data-nse-part="split-pane"] > [data-nse-part="split-pane-slot"] > .nse-split-view-pane-host > [data-nse-view-controller] {
+.nse-split-view-controller-view [data-nse-part="split-pane"]>[data-nse-part="split-pane-slot"]>.nse-split-view-pane-host>[data-nse-view-controller],
+:where(:scope):is(.nse-split-view-controller-view) [data-nse-part="split-pane"]>[data-nse-part="split-pane-slot"]>.nse-split-view-pane-host>[data-nse-view-controller] {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
@@ -1033,41 +1155,54 @@
   min-height: 0;
 }
 
-[data-nse-part="split-divider"] {
+[data-nse-part="split-divider"],
+:where(:scope):is([data-nse-part="split-divider"]) {
   position: relative;
   z-index: 3;
   flex: 0 0 0;
   touch-action: none;
 }
 
-[data-nse-part="split-divider"]::before {
+[data-nse-part="split-divider"]::before,
+:where(:scope):is([data-nse-part="split-divider"])::before {
   content: "";
   position: absolute;
   background: var(--nse-colour-separator);
 }
 
-[data-nse-part="split-divider"]::after {
+[data-nse-part="split-divider"]::after,
+:where(:scope):is([data-nse-part="split-divider"])::after {
   content: "";
   position: absolute;
 }
 
-[data-nse-part="split-divider"][data-orientation="horizontal"] { cursor: col-resize; }
-[data-nse-part="split-divider"][data-orientation="horizontal"]::before { inset-block: 0; inset-inline-start: -0.5px; inline-size: 1px; }
-[data-nse-part="split-divider"][data-orientation="horizontal"]::after { inset-block: 0; inset-inline-start: -4px; inline-size: 8px; }
-[data-nse-part="split-divider"][data-orientation="vertical"] { cursor: row-resize; }
-[data-nse-part="split-divider"][data-orientation="vertical"]::before { inset-inline: 0; inset-block-start: -0.5px; block-size: 1px; }
-[data-nse-part="split-divider"][data-orientation="vertical"]::after { inset-inline: 0; inset-block-start: -4px; block-size: 8px; }
+[data-nse-part="split-divider"][data-orientation="horizontal"],
+:where(:scope):is([data-nse-part="split-divider"][data-orientation="horizontal"]) { cursor: col-resize; }
+[data-nse-part="split-divider"][data-orientation="horizontal"]::before,
+:where(:scope):is([data-nse-part="split-divider"][data-orientation="horizontal"])::before { inset-block: 0; inset-inline-start: -0.5px; inline-size: 1px; }
+[data-nse-part="split-divider"][data-orientation="horizontal"]::after,
+:where(:scope):is([data-nse-part="split-divider"][data-orientation="horizontal"])::after { inset-block: 0; inset-inline-start: -4px; inline-size: 8px; }
+[data-nse-part="split-divider"][data-orientation="vertical"],
+:where(:scope):is([data-nse-part="split-divider"][data-orientation="vertical"]) { cursor: row-resize; }
+[data-nse-part="split-divider"][data-orientation="vertical"]::before,
+:where(:scope):is([data-nse-part="split-divider"][data-orientation="vertical"])::before { inset-inline: 0; inset-block-start: -0.5px; block-size: 1px; }
+[data-nse-part="split-divider"][data-orientation="vertical"]::after,
+:where(:scope):is([data-nse-part="split-divider"][data-orientation="vertical"])::after { inset-inline: 0; inset-block-start: -4px; block-size: 8px; }
 
 [data-nse-part="split-divider"]:hover::before,
-[data-nse-part="split-divider"]:focus-visible::before {
+:where(:scope):is([data-nse-part="split-divider"]:hover)::before,
+[data-nse-part="split-divider"]:focus-visible::before,
+:where(:scope):is([data-nse-part="split-divider"]:focus-visible)::before {
   background: var(--nse-colour-control-accent);
 }
 
-[data-nse-part="split-divider"]:focus-visible {
+[data-nse-part="split-divider"]:focus-visible,
+:where(:scope):is([data-nse-part="split-divider"]:focus-visible) {
   outline: none;
 }
 
-.nse-sidebar {
+.nse-sidebar,
+:where(:scope):is(.nse-sidebar) {
   position: relative;
   display: flex;
   height: 100%;
@@ -1083,7 +1218,8 @@
 /* The raised main content area to the right casts a soft shadow back over the rail along the seam,
    matching Software.app's sidebar. Painted as an overlay above the rows (positive z-index over the
    non-positioned scroll content) so it falls on the items too, not just the rail background. */
-.nse-sidebar::after {
+.nse-sidebar::after,
+:where(:scope):is(.nse-sidebar)::after {
   content: "";
   position: absolute;
   inset: 0 0 0 auto;
@@ -1094,25 +1230,30 @@
 }
 
 /* Deeper cast on the dark metal rail (mirrors Software's --sn-content-shadow light/dark split). */
-.nse-sidebar[data-mode="dark"] {
+.nse-sidebar[data-mode="dark"],
+:where(:scope):is(.nse-sidebar[data-mode="dark"]) {
   --nse-sidebar-seam-shadow: rgba(0, 0, 0, 0.42);
 }
 
 /* The plain (floating, borderless) variant has no content seam to cast from. */
-.nse-sidebar[data-variant="plain"]::after {
+.nse-sidebar[data-variant="plain"]::after,
+:where(:scope):is(.nse-sidebar[data-variant="plain"])::after {
   content: none;
 }
 
-.nse-sidebar[data-variant="inspector"] {
+.nse-sidebar[data-variant="inspector"],
+:where(:scope):is(.nse-sidebar[data-variant="inspector"]) {
   --nse-sidebar-background: linear-gradient(180deg, #eef0f2 0%, #d9dde1 100%);
 }
 
-.nse-sidebar[data-variant="plain"] {
+.nse-sidebar[data-variant="plain"],
+:where(:scope):is(.nse-sidebar[data-variant="plain"]) {
   --nse-sidebar-background: transparent;
   border-right: 0;
 }
 
-.nse-sidebar-scroll {
+.nse-sidebar-scroll,
+:where(:scope):is(.nse-sidebar-scroll) {
   width: 100%;
   min-height: 0;
   overflow-y: auto;
@@ -1121,7 +1262,8 @@
   scrollbar-width: none;
 }
 
-.nse-sidebar-scroll::-webkit-scrollbar {
+.nse-sidebar-scroll::-webkit-scrollbar,
+:where(:scope):is(.nse-sidebar-scroll)::-webkit-scrollbar {
   width: 0;
   height: 0;
 }
@@ -1130,39 +1272,46 @@
    Its in-flow height reserves the initial row position; sticky placement lets
    rows pass underneath as the same scroll surface moves. Never paint another
    metal rectangle here: the owning sidebar supplies the grain and gradient. */
-.nse-sidebar-header {
+.nse-sidebar-header,
+:where(:scope):is(.nse-sidebar-header) {
   position: sticky;
   inset-block-start: 0;
   z-index: 2;
   padding: 4px 3px 18px;
 }
 
-.nse-sidebar-section + .nse-sidebar-section {
+.nse-sidebar-section+.nse-sidebar-section,
+:where(:scope):is(.nse-sidebar-section)+.nse-sidebar-section {
   margin-top: 10px;
 }
 
 /* Divider drawer open/close (same recipe as nse-containers.css): the items region is a single
    grid row animating 1fr -> 0fr while the inner wrapper clips, so collapse slides instead of
    snapping. The outline makes collapsed content inert, so it cannot take focus mid-transition. */
-.nse-sidebar-section-items {
+.nse-sidebar-section-items,
+:where(:scope):is(.nse-sidebar-section-items) {
   display: grid;
   grid-template-rows: 1fr;
   transition: grid-template-rows 0.26s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
-.nse-sidebar-section[data-collapsed="true"] .nse-sidebar-section-items {
+.nse-sidebar-section[data-collapsed="true"] .nse-sidebar-section-items,
+:where(:scope):is(.nse-sidebar-section[data-collapsed="true"]) .nse-sidebar-section-items {
   grid-template-rows: 0fr;
 }
-.nse-sidebar-section-items-inner {
+.nse-sidebar-section-items-inner,
+:where(:scope):is(.nse-sidebar-section-items-inner) {
   min-block-size: 0;
   overflow: hidden;
 }
 @media (prefers-reduced-motion: reduce) {
-  .nse-sidebar-section-items {
+  .nse-sidebar-section-items,
+:where(:scope):is(.nse-sidebar-section-items) {
     transition: none;
   }
 }
 
-.nse-sidebar-section-header {
+.nse-sidebar-section-header,
+:where(:scope):is(.nse-sidebar-section-header) {
   display: flex;
   align-items: center;
   min-height: 26px;
@@ -1173,7 +1322,8 @@
   margin-right: -10px;
 }
 
-.nse-sidebar-section-label {
+.nse-sidebar-section-label,
+:where(:scope):is(.nse-sidebar-section-label) {
   flex: 0 0 auto;
   margin-right: 9px;
   color: var(--nse-sidebar-section-label, #3a78c2);
@@ -1188,25 +1338,30 @@
    (7px Heritage / 4px Onyx via the remapped var, rendered at `auto` not squished) and vertically
    centred so they meet the knob's baked line as one continuous run: label → line → knob → line. */
 .nse-sidebar-section-header::after,
-.nse-sidebar-section-line {
+:where(:scope):is(.nse-sidebar-section-header)::after,
+.nse-sidebar-section-line,
+:where(:scope):is(.nse-sidebar-section-line) {
   align-self: center;
   height: var(--nse-atmo-divider-arrow-line);
   min-width: 10px;
   background: var(--nse-atmo-divider) left center / auto var(--nse-atmo-divider-arrow-line) repeat-x;
 }
 
-.nse-sidebar-section-line {
+.nse-sidebar-section-line,
+:where(:scope):is(.nse-sidebar-section-line) {
   flex: 4 1 0;
 }
 
-.nse-sidebar-section-header::after {
+.nse-sidebar-section-header::after,
+:where(:scope):is(.nse-sidebar-section-header)::after {
   content: "";
   flex: 1 1 0;
 }
 
 /* Sized off the shared arrow tokens so the knob shows its complete pill-cap and matches the standalone
    divider (a narrower box clips the cap and the knob reads as a different size). */
-.nse-sidebar-section-toggle.nse-control-divider[data-variant="arrow"] {
+.nse-sidebar-section-toggle.nse-control-divider[data-variant="arrow"],
+:where(:scope):is(.nse-sidebar-section-toggle.nse-control-divider[data-variant="arrow"]) {
   flex: 0 0 auto;
   width: var(--nse-atmo-divider-arrow-width);
   min-width: var(--nse-atmo-divider-arrow-width);
@@ -1214,7 +1369,8 @@
   margin: 0;
 }
 
-.nse-sidebar-row.nse-control-list-item {
+.nse-sidebar-row.nse-control-list-item,
+:where(:scope):is(.nse-sidebar-row.nse-control-list-item) {
   margin: 0;
   /* The −10px node bleed (below) pulls the row box out to both rail edges so its selection band
      spans the full sidebar, like the section divider line. Re-add that inset as content padding so
@@ -1226,19 +1382,23 @@
 /* Bleed the animated items wrapper to both rail edges (cancel the scroll's 10px horizontal inset)
    so selection bands span the full sidebar. The bleed lives on the wrapper — not the row nodes —
    because the wrapper is the animation's overflow clip: a node-level bleed would be clipped away. */
-.nse-sidebar-section-items {
+.nse-sidebar-section-items,
+:where(:scope):is(.nse-sidebar-section-items) {
   margin-inline: -10px;
 }
 
-.nse-sidebar-item-node[data-level="1"] {
+.nse-sidebar-item-node[data-level="1"],
+:where(:scope):is(.nse-sidebar-item-node[data-level="1"]) {
   margin-left: 12px;
 }
 
-.nse-sidebar-item-node[data-level="2"] {
+.nse-sidebar-item-node[data-level="2"],
+:where(:scope):is(.nse-sidebar-item-node[data-level="2"]) {
   margin-left: 24px;
 }
 
-.nse-sidebar-row.nse-control-list-item:focus-visible {
+.nse-sidebar-row.nse-control-list-item:focus-visible,
+:where(:scope):is(.nse-sidebar-row.nse-control-list-item:focus-visible) {
   outline: 2px solid rgba(89, 150, 212, 0.86);
   outline-offset: 1px;
 }
@@ -1248,33 +1408,41 @@
    edges are re-derived from the wrapper nodes. Only the top border paints — a bottom border on
    the row above would stack a second line into every seam. Light uses the engine value; the dark
    metal dial-down mirrors nse-sourcelist.css. */
-.nse-sidebar-section-items .nse-sidebar-item-node:not(:first-child) .nse-sidebar-row.nse-control-list-item {
+.nse-sidebar-section-items .nse-sidebar-item-node:not(:first-child) .nse-sidebar-row.nse-control-list-item,
+:where(:scope):is(.nse-sidebar-section-items) .nse-sidebar-item-node:not(:first-child) .nse-sidebar-row.nse-control-list-item {
   border-top: 1px solid rgba(255, 255, 255, 0.5);
 }
-[data-mode="dark"] .nse-sidebar[data-surface="metal"] .nse-sidebar-section-items .nse-sidebar-item-node:not(:first-child) .nse-sidebar-row.nse-control-list-item {
+[data-mode="dark"] .nse-sidebar[data-surface="metal"] .nse-sidebar-section-items .nse-sidebar-item-node:not(:first-child) .nse-sidebar-row.nse-control-list-item,
+:where(:scope):is([data-mode="dark"]) .nse-sidebar[data-surface="metal"] .nse-sidebar-section-items .nse-sidebar-item-node:not(:first-child) .nse-sidebar-row.nse-control-list-item,
+[data-mode="dark"]:is(.nse-sidebar[data-surface="metal"]) .nse-sidebar-section-items .nse-sidebar-item-node:not(:first-child) .nse-sidebar-row.nse-control-list-item {
   border-top-color: rgba(150, 180, 214, 0.14);
 }
 
 .nse-sidebar-item-icon,
-.nse-sidebar-item-glyph {
+:where(:scope):is(.nse-sidebar-item-icon),
+.nse-sidebar-item-glyph,
+:where(:scope):is(.nse-sidebar-item-glyph) {
   display: block;
   width: 24px;
   height: 24px;
   flex: 0 0 auto;
 }
 
-.nse-sidebar-item-glyph {
+.nse-sidebar-item-glyph,
+:where(:scope):is(.nse-sidebar-item-glyph) {
   background-position: center;
   background-repeat: no-repeat;
   background-size: contain;
 }
 
-.nse-sidebar-item-glyph-large {
+.nse-sidebar-item-glyph-large,
+:where(:scope):is(.nse-sidebar-item-glyph-large) {
   width: 30px;
   height: 30px;
 }
 
-.nse-sidebar-item-glyph-framed {
+.nse-sidebar-item-glyph-framed,
+:where(:scope):is(.nse-sidebar-item-glyph-framed) {
   border-radius: 7px;
   background-color: rgba(255, 255, 255, 0.42);
   box-shadow:
@@ -1283,7 +1451,8 @@
     0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-.nse-statusbar {
+.nse-statusbar,
+:where(:scope):is(.nse-statusbar) {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
@@ -1299,17 +1468,20 @@
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.62);
 }
 
-.nse-statusbar-leading {
+.nse-statusbar-leading,
+:where(:scope):is(.nse-statusbar-leading) {
   justify-self: start;
   min-width: 0;
 }
 
-.nse-statusbar-center {
+.nse-statusbar-center,
+:where(:scope):is(.nse-statusbar-center) {
   justify-self: center;
   min-width: 0;
 }
 
-.nse-statusbar-trailing {
+.nse-statusbar-trailing,
+:where(:scope):is(.nse-statusbar-trailing) {
   justify-self: end;
   min-width: 0;
 }
@@ -1318,7 +1490,8 @@
    NSEMetalSurface is the layout-neutral surface projection. It shares this
    exact material rule with source-list outlines, but deliberately does not inherit their
    desktop-only border/seam geometry. */
-:is(.nse-sidebar[data-surface="metal"], .nse-metal-surface) {
+:is(.nse-sidebar[data-surface="metal"],.nse-metal-surface),
+:where(:scope):is(:is(.nse-sidebar[data-surface="metal"],.nse-metal-surface)) {
   --nse-sidebar-metal-bg: linear-gradient(180deg, #dfe0e2 0%, #cdcfd2 100%);
   --nse-sidebar-metal-text: #2a2f36;
   --nse-sidebar-metal-label: #3a78c2;
@@ -1336,14 +1509,16 @@
   background-blend-mode: var(--nse-sidebar-metal-grain-blend), normal;
 }
 
-.nse-sidebar[data-surface="metal"] {
+.nse-sidebar[data-surface="metal"],
+:where(:scope):is(.nse-sidebar[data-surface="metal"]) {
   border-right: 1px solid var(--nse-sidebar-metal-edge);
   box-shadow:
     inset -14px 0 18px -10px var(--nse-sidebar-metal-content-shadow),
     inset -1px 0 0 rgba(255, 255, 255, 0.1);
 }
 
-:is(.nse-sidebar[data-surface="metal"], .nse-metal-surface)[data-mode="dark"] {
+:is(.nse-sidebar[data-surface="metal"],.nse-metal-surface)[data-mode="dark"],
+:where(:scope):is(:is(.nse-sidebar[data-surface="metal"],.nse-metal-surface)[data-mode="dark"]) {
   --nse-sidebar-metal-bg: linear-gradient(180deg, #3a3d44 0%, #202227 100%);
   --nse-sidebar-metal-text: #dde3ea;
   --nse-sidebar-metal-label: #6aa9e6;
@@ -1354,13 +1529,15 @@
   --nse-sidebar-metal-line: rgba(106, 169, 230, 0.45);
 }
 
-.nse-metal-surface {
+.nse-metal-surface,
+:where(:scope):is(.nse-metal-surface) {
   min-block-size: 0;
   min-inline-size: 0;
   position: relative;
 }
 
-.nse-sidebar[data-surface="metal"] .nse-sidebar-section-label {
+.nse-sidebar[data-surface="metal"] .nse-sidebar-section-label,
+:where(:scope):is(.nse-sidebar[data-surface="metal"]) .nse-sidebar-section-label {
   color: var(--nse-sidebar-metal-label);
   text-shadow: var(--nse-sidebar-metal-emboss);
 }
@@ -1371,13 +1548,15 @@
    continuous line → knob → line. The sprite line already carries its own highlight, so no emboss. */
 
 /* Embossed row labels on the metal rail (selected rows keep their own appearance). */
-.nse-sidebar[data-surface="metal"] .nse-sidebar-row[data-selected="false"] .nse-control-list-primary {
+.nse-sidebar[data-surface="metal"] .nse-sidebar-row[data-selected="false"] .nse-control-list-primary,
+:where(:scope):is(.nse-sidebar[data-surface="metal"]) .nse-sidebar-row[data-selected="false"] .nse-control-list-primary {
   color: var(--nse-sidebar-metal-text);
   text-shadow: var(--nse-sidebar-metal-emboss);
 }
 
 /* --- Metal footer status bar (mirror of the metal top bar) ------------------- */
-.nse-statusbar-metal {
+.nse-statusbar-metal,
+:where(:scope):is(.nse-statusbar-metal) {
   --nse-metal-header-endcap-l: url("/assets/nse/chrome/metal/light/header-endcap-left.png");
   --nse-metal-header-endcap-r: url("/assets/nse/chrome/metal/light/header-endcap-right.png");
   --nse-metal-header-mid: url("/assets/nse/chrome/metal/light/header-middle.png");
@@ -1409,11 +1588,13 @@
   border-bottom-right-radius: var(--nse-metal-corner);
 }
 
-.nse-statusbar-metal[data-has-rail="true"] {
+.nse-statusbar-metal[data-has-rail="true"],
+:where(:scope):is(.nse-statusbar-metal[data-has-rail="true"]) {
   grid-template-columns: var(--nse-topbar-rail, 264px) minmax(0, 1fr);
 }
 
-.nse-statusbar-metal[data-mode="dark"] {
+.nse-statusbar-metal[data-mode="dark"],
+:where(:scope):is(.nse-statusbar-metal[data-mode="dark"]) {
   --nse-metal-header-endcap-l: url("/assets/nse/chrome/metal/dark/header-endcap-left.png");
   --nse-metal-header-endcap-r: url("/assets/nse/chrome/metal/dark/header-endcap-right.png");
   --nse-metal-header-mid: url("/assets/nse/chrome/metal/dark/header-middle.png");
@@ -1425,7 +1606,8 @@
   --nse-metal-grain-opacity: 0.95;
 }
 
-.nse-statusbar-metal-rail {
+.nse-statusbar-metal-rail,
+:where(:scope):is(.nse-statusbar-metal-rail) {
   position: relative;
   z-index: 1;
   display: flex;
@@ -1441,7 +1623,8 @@
   box-shadow: inset -14px 0 18px -10px var(--nse-metal-content-shadow);
 }
 
-.nse-statusbar-metal-main {
+.nse-statusbar-metal-main,
+:where(:scope):is(.nse-statusbar-metal-main) {
   position: relative;
   z-index: 2;
   display: grid;
@@ -1456,16 +1639,19 @@
     var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
 }
 
-.nse-statusbar-metal[data-has-rail="true"] .nse-statusbar-metal-main {
+.nse-statusbar-metal[data-has-rail="true"] .nse-statusbar-metal-main,
+:where(:scope):is(.nse-statusbar-metal[data-has-rail="true"]) .nse-statusbar-metal-main {
   box-shadow: -10px 0 18px -6px var(--nse-metal-content-shadow);
 }
 
-.nse-statusbar-metal[data-has-rail="false"] .nse-statusbar-metal-main {
+.nse-statusbar-metal[data-has-rail="false"] .nse-statusbar-metal-main,
+:where(:scope):is(.nse-statusbar-metal[data-has-rail="false"]) .nse-statusbar-metal-main {
   border-bottom-left-radius: var(--nse-metal-corner);
   background: var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
 }
 
-.nse-statusbar-metal-grain {
+.nse-statusbar-metal-grain,
+:where(:scope):is(.nse-statusbar-metal-grain) {
   position: absolute;
   inset: 0;
   z-index: 3;
@@ -1477,9 +1663,13 @@
 }
 
 .nse-statusbar-metal-rail-content,
+:where(:scope):is(.nse-statusbar-metal-rail-content),
 .nse-statusbar-metal-leading,
+:where(:scope):is(.nse-statusbar-metal-leading),
 .nse-statusbar-metal-center,
-.nse-statusbar-metal-trailing {
+:where(:scope):is(.nse-statusbar-metal-center),
+.nse-statusbar-metal-trailing,
+:where(:scope):is(.nse-statusbar-metal-trailing) {
   position: relative;
   z-index: 4;
   min-width: 0;
@@ -1493,28 +1683,34 @@
   text-shadow: var(--nse-metal-text-emboss);
 }
 
-.nse-statusbar-metal-leading {
+.nse-statusbar-metal-leading,
+:where(:scope):is(.nse-statusbar-metal-leading) {
   justify-self: start;
 }
 
-.nse-statusbar-metal-center {
+.nse-statusbar-metal-center,
+:where(:scope):is(.nse-statusbar-metal-center) {
   justify-self: center;
 }
 
-.nse-statusbar-metal-trailing {
+.nse-statusbar-metal-trailing,
+:where(:scope):is(.nse-statusbar-metal-trailing) {
   justify-self: end;
 }
 
 @media (max-width: 767px) {
-  .nse-statusbar-metal[data-has-rail="true"] {
+  .nse-statusbar-metal[data-has-rail="true"],
+:where(:scope):is(.nse-statusbar-metal[data-has-rail="true"]) {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .nse-statusbar-metal[data-has-rail="true"] .nse-statusbar-metal-main {
+  .nse-statusbar-metal[data-has-rail="true"] .nse-statusbar-metal-main,
+:where(:scope):is(.nse-statusbar-metal[data-has-rail="true"]) .nse-statusbar-metal-main {
     display: none;
   }
 
-  .nse-statusbar-metal[data-has-rail="true"] .nse-statusbar-metal-rail {
+  .nse-statusbar-metal[data-has-rail="true"] .nse-statusbar-metal-rail,
+:where(:scope):is(.nse-statusbar-metal[data-has-rail="true"]) .nse-statusbar-metal-rail {
     box-shadow: none;
     border-bottom-right-radius: var(--nse-metal-corner);
     background: var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
@@ -1524,18 +1720,21 @@
 /* --- A window's bottom content border (setContentBorderThickness(_:for: .minY)) ----------------
    A tall border is the metal footer; a short one is the compact strip. The content's controls sit
    over it; its edge casts the footer's shadow up onto the content. */
-.nse-window-content-border[data-size="large"] {
+.nse-window-content-border[data-size="large"],
+:where(:scope):is(.nse-window-content-border[data-size="large"]) {
   --nse-metal-header-mid: url("/assets/nse/chrome/metal/light/header-middle.png");
   background: var(--nse-metal-header-mid) left bottom / auto 100% repeat-x;
   border-bottom-left-radius: var(--nse-chrome-bottom-corner-radius, 0px);
   border-bottom-right-radius: var(--nse-chrome-bottom-corner-radius, 0px);
 }
 
-.nse-window-content-border[data-size="large"][data-mode="dark"] {
+.nse-window-content-border[data-size="large"][data-mode="dark"],
+:where(:scope):is(.nse-window-content-border[data-size="large"][data-mode="dark"]) {
   --nse-metal-header-mid: url("/assets/nse/chrome/metal/dark/header-middle.png");
 }
 
-.nse-window-content-border[data-size="large"] > .nse-window-content-border-grain {
+.nse-window-content-border[data-size="large"]>.nse-window-content-border-grain,
+:where(:scope):is(.nse-window-content-border[data-size="large"])>.nse-window-content-border-grain {
   position: absolute;
   inset: 0;
   background: var(--nse-metal-grain) repeat;
@@ -1544,21 +1743,25 @@
   mix-blend-mode: overlay;
 }
 
-.nse-window-content-border[data-size="large"][data-mode="dark"] > .nse-window-content-border-grain {
+.nse-window-content-border[data-size="large"][data-mode="dark"]>.nse-window-content-border-grain,
+:where(:scope):is(.nse-window-content-border[data-size="large"][data-mode="dark"])>.nse-window-content-border-grain {
   opacity: 0.95;
 }
 
-.nse-window-content-border-edge[data-size="large"] {
+.nse-window-content-border-edge[data-size="large"],
+:where(:scope):is(.nse-window-content-border-edge[data-size="large"]) {
   border-bottom-left-radius: var(--nse-chrome-bottom-corner-radius, 0px);
   border-bottom-right-radius: var(--nse-chrome-bottom-corner-radius, 0px);
   box-shadow: 0 -6px 11px -5px rgba(0, 0, 0, 0.26);
 }
 
-.nse-window-content-border-edge[data-size="large"][data-mode="dark"] {
+.nse-window-content-border-edge[data-size="large"][data-mode="dark"],
+:where(:scope):is(.nse-window-content-border-edge[data-size="large"][data-mode="dark"]) {
   box-shadow: 0 -6px 11px -5px rgba(0, 0, 0, 0.52);
 }
 
-.nse-window-content-border[data-size="small"] {
+.nse-window-content-border[data-size="small"],
+:where(:scope):is(.nse-window-content-border[data-size="small"]) {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0)),
     var(--nse-statusbar-background, linear-gradient(180deg, #d9dbde, #bfc3c8));
@@ -1567,29 +1770,46 @@
 
 /* Fixed chrome deliberately ellipsizes from the end; provider-owned help
    reveals the complete caption without moving or replacing the action. */
-.nse-app-topbar .nse-control-button { grid-auto-columns: minmax(0, max-content); }
+.nse-app-topbar .nse-control-button,
+:where(:scope):is(.nse-app-topbar) .nse-control-button { grid-auto-columns: minmax(0, max-content); }
 
 /* A centred metal title clips its label; keep keyboard focus inside that clip. */
-.nse-app-topbar-metal-title:not(.nse-app-topbar-metal-leading-title) .nse-app-topbar-title-button:focus-visible {
+.nse-app-topbar-metal-title:not(.nse-app-topbar-metal-leading-title) .nse-app-topbar-title-button:focus-visible,
+:where(:scope):is(.nse-app-topbar-metal-title:not(.nse-app-topbar-metal-leading-title)) .nse-app-topbar-title-button:focus-visible {
   outline-offset: -3px;
 }
 
 /* Region placement is geometry, independent of Atmo material and motion.
    Physical CSS coordinates remain physical in RTL; child text stays inherited. */
-.nse-split-view[data-book-regions="true"] {
+.nse-split-view[data-book-regions="true"],
+:where(:scope):is(.nse-split-view[data-book-regions="true"]) {
   grid-template-columns: var(--nse-book-left) var(--nse-book-left-width) var(--nse-book-gap) var(--nse-book-right-width) minmax(0, 1fr);
   grid-template-rows: var(--nse-book-top) var(--nse-book-height) minmax(0, 1fr);
 }
-.nse-split-view[data-book-regions="true"] > :is(.nse-split-view-sidebar, .nse-split-view-main) { grid-row: 2; }
-.nse-split-view[data-book-regions="true"][data-book-sidebar-side="left"] > .nse-split-view-sidebar,
-.nse-split-view[data-book-regions="true"][data-book-sidebar-side="right"] > .nse-split-view-main { grid-column: 2; }
-.nse-split-view[data-book-regions="true"][data-book-sidebar-side="right"] > .nse-split-view-sidebar,
-.nse-split-view[data-book-regions="true"][data-book-sidebar-side="left"] > .nse-split-view-main { grid-column: 4; }
+.nse-split-view[data-book-regions="true"]>:is(.nse-split-view-sidebar,.nse-split-view-main),
+:where(:scope):is(.nse-split-view[data-book-regions="true"])>:is(.nse-split-view-sidebar,.nse-split-view-main) { grid-row: 2; }
+.nse-split-view[data-book-regions="true"][data-book-sidebar-side="left"]>.nse-split-view-sidebar,
+:where(:scope):is(.nse-split-view[data-book-regions="true"][data-book-sidebar-side="left"])>.nse-split-view-sidebar,
+.nse-split-view[data-book-regions="true"][data-book-sidebar-side="right"]>.nse-split-view-main,
+:where(:scope):is(.nse-split-view[data-book-regions="true"][data-book-sidebar-side="right"])>.nse-split-view-main { grid-column: 2; }
+.nse-split-view[data-book-regions="true"][data-book-sidebar-side="right"]>.nse-split-view-sidebar,
+:where(:scope):is(.nse-split-view[data-book-regions="true"][data-book-sidebar-side="right"])>.nse-split-view-sidebar,
+.nse-split-view[data-book-regions="true"][data-book-sidebar-side="left"]>.nse-split-view-main,
+:where(:scope):is(.nse-split-view[data-book-regions="true"][data-book-sidebar-side="left"])>.nse-split-view-main { grid-column: 4; }
 /* CSS grid line numbers follow direction; reverse physical tracks for RTL. */
-.nse-split-view[data-book-regions="true"]:dir(rtl) {
+.nse-split-view[data-book-regions="true"]:dir(rtl),
+:where(:scope):is(.nse-split-view[data-book-regions="true"]:dir(rtl)) {
   grid-template-columns: minmax(0, 1fr) var(--nse-book-right-width) var(--nse-book-gap) var(--nse-book-left-width) var(--nse-book-left);
 }
-.nse-split-view[data-book-regions="true"][data-book-sidebar-side="left"]:dir(rtl) > .nse-split-view-sidebar,
-.nse-split-view[data-book-regions="true"][data-book-sidebar-side="right"]:dir(rtl) > .nse-split-view-main { grid-column: 4; }
-.nse-split-view[data-book-regions="true"][data-book-sidebar-side="right"]:dir(rtl) > .nse-split-view-sidebar,
-.nse-split-view[data-book-regions="true"][data-book-sidebar-side="left"]:dir(rtl) > .nse-split-view-main { grid-column: 2; }
+.nse-split-view[data-book-regions="true"][data-book-sidebar-side="left"]:dir(rtl)>.nse-split-view-sidebar,
+:where(:scope):is(.nse-split-view[data-book-regions="true"][data-book-sidebar-side="left"]:dir(rtl))>.nse-split-view-sidebar,
+.nse-split-view[data-book-regions="true"][data-book-sidebar-side="right"]:dir(rtl)>.nse-split-view-main,
+:where(:scope):is(.nse-split-view[data-book-regions="true"][data-book-sidebar-side="right"]:dir(rtl))>.nse-split-view-main { grid-column: 4; }
+.nse-split-view[data-book-regions="true"][data-book-sidebar-side="right"]:dir(rtl)>.nse-split-view-sidebar,
+:where(:scope):is(.nse-split-view[data-book-regions="true"][data-book-sidebar-side="right"]:dir(rtl))>.nse-split-view-sidebar,
+.nse-split-view[data-book-regions="true"][data-book-sidebar-side="left"]:dir(rtl)>.nse-split-view-main,
+:where(:scope):is(.nse-split-view[data-book-regions="true"][data-book-sidebar-side="left"]:dir(rtl))>.nse-split-view-main { grid-column: 2; }
+
+}
+
+}

@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -18,11 +21,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-[data-nse-overlay-provider] {
+[data-nse-overlay-provider],
+:where(:scope):is([data-nse-overlay-provider]) {
   position: relative;
 }
 
-[data-nse-overlay-portal-host] {
+[data-nse-overlay-portal-host],
+:where(:scope):is([data-nse-overlay-portal-host]) {
   position: relative;
   z-index: var(--nse-overlay-z-index, 1000);
   /* Webspring's application stage intentionally disables pointer events on
@@ -32,34 +37,40 @@
   pointer-events: auto;
 }
 
-[data-nse-role="overlay"][data-nse-part="surface"] {
+[data-nse-role="overlay"][data-nse-part="surface"],
+:where(:scope):is([data-nse-role="overlay"][data-nse-part="surface"]) {
   max-inline-size: var(--nse-overlay-available-inline-size, 100%);
   max-block-size: var(--nse-overlay-available-block-size, 100%);
 }
 
 /* A utility panel's content sits inset from its window edges, in a window
    host and in a standalone host alike. */
-.nse-utility-panel-body {
+.nse-utility-panel-body,
+:where(:scope):is(.nse-utility-panel-body) {
   box-sizing: border-box;
   padding: 12px 14px 14px;
 }
 
-.nse-utility-panel-body[data-content-inset="none"] {
+.nse-utility-panel-body[data-content-inset="none"],
+:where(:scope):is(.nse-utility-panel-body[data-content-inset="none"]) {
   padding: 0;
 }
 
 /* A closing utility panel fades out, as a closing window dissolves. */
-.nse-utility-panel {
+.nse-utility-panel,
+:where(:scope):is(.nse-utility-panel) {
   transition: opacity 160ms linear;
 }
 
-.nse-utility-panel[data-state="closing"] {
+.nse-utility-panel[data-state="closing"],
+:where(:scope):is(.nse-utility-panel[data-state="closing"]) {
   opacity: 0;
   pointer-events: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nse-utility-panel {
+  .nse-utility-panel,
+:where(:scope):is(.nse-utility-panel) {
     transition: none;
   }
 
@@ -67,7 +78,9 @@
      pending/ready opacity and size changes. Popup readiness and its reduced
      closing pose must commit immediately; owned entry/exit motion is separate. */
   .nse-overlay-popup,
-  .nse-overlay-popup .nse-control-app-menu-surface {
+:where(:scope):is(.nse-overlay-popup),
+.nse-overlay-popup .nse-control-app-menu-surface,
+:where(:scope):is(.nse-overlay-popup) .nse-control-app-menu-surface {
     transition-property: none;
   }
 }
@@ -75,12 +88,14 @@
 /* Keep pending surfaces measurable for placement. Inertness (owned by the
  * overlay hook) excludes focus and accessibility; opacity hides the whole
  * surface without inherited visibility surviving the content-ready commit. */
-[data-nse-role="overlay"][data-nse-part="surface"][data-nse-content-pending="true"] {
+[data-nse-role="overlay"][data-nse-part="surface"][data-nse-content-pending="true"],
+:where(:scope):is([data-nse-role="overlay"][data-nse-part="surface"][data-nse-content-pending="true"]) {
   opacity: 0;
   pointer-events: none;
 }
 
-.nse-overlay-popup {
+.nse-overlay-popup,
+:where(:scope):is(.nse-overlay-popup) {
   box-sizing: border-box;
   display: grid;
   gap: 10px;
@@ -98,7 +113,9 @@
 }
 
 .nse-overlay-popup.nse-overlay-popup--application-menu,
-.nse-overlay-popup.nse-overlay-popup--content {
+:where(:scope):is(.nse-overlay-popup.nse-overlay-popup--application-menu),
+.nse-overlay-popup.nse-overlay-popup--content,
+:where(:scope):is(.nse-overlay-popup.nse-overlay-popup--content) {
   display: block;
   min-inline-size: 0;
   max-inline-size: none;
@@ -108,13 +125,16 @@
   overflow: visible;
 }
 
-.nse-overlay-popup--application-menu > .nse-overlay-popup-content,
-.nse-overlay-popup--content > .nse-overlay-popup-content {
+.nse-overlay-popup--application-menu>.nse-overlay-popup-content,
+:where(:scope):is(.nse-overlay-popup--application-menu)>.nse-overlay-popup-content,
+.nse-overlay-popup--content>.nse-overlay-popup-content,
+:where(:scope):is(.nse-overlay-popup--content)>.nse-overlay-popup-content {
   display: block;
   overflow: visible;
 }
 
-.nse-overlay-popup[data-nse-overlay-kind="action-sheet"] {
+.nse-overlay-popup[data-nse-overlay-kind="action-sheet"],
+:where(:scope):is(.nse-overlay-popup[data-nse-overlay-kind="action-sheet"]) {
   position: fixed;
   inset-inline: max(8px, var(--nse-screen-safe-area-inset-left, 0px)) max(8px, var(--nse-screen-safe-area-inset-right, 0px));
   inset-block-end: max(8px, var(--nse-screen-safe-area-inset-bottom, 0px));
@@ -123,39 +143,47 @@
 
 /* The sibling backdrop is deliberately not an overlay registration: pointer
    capture reaches the provider, which dismisses only the current top branch. */
-.nse-overlay-popup-backdrop {
+.nse-overlay-popup-backdrop,
+:where(:scope):is(.nse-overlay-popup-backdrop) {
   position: fixed;
   inset: 0;
   background: color-mix(in srgb, CanvasText 18%, transparent);
 }
 
 .nse-overlay-popup-host,
-.nse-overlay-popup-modal-host {
+:where(:scope):is(.nse-overlay-popup-host),
+.nse-overlay-popup-modal-host,
+:where(:scope):is(.nse-overlay-popup-modal-host) {
   display: contents;
 }
 
-.nse-overlay-popup-title {
+.nse-overlay-popup-title,
+:where(:scope):is(.nse-overlay-popup-title) {
   font-weight: 700;
 }
 
-.nse-overlay-popup-content {
+.nse-overlay-popup-content,
+:where(:scope):is(.nse-overlay-popup-content) {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   min-inline-size: 0;
   gap: 8px;
 }
 
-.nse-overlay-listbox-option {
+.nse-overlay-listbox-option,
+:where(:scope):is(.nse-overlay-listbox-option) {
   min-block-size: 32px;
   text-align: start;
 }
-.nse-overlay-listbox {
+.nse-overlay-listbox,
+:where(:scope):is(.nse-overlay-listbox) {
   display: grid;
   min-inline-size: 0;
   outline: none;
 }
 
-.nse-overlay-listbox-scroll {
+.nse-overlay-listbox-scroll,
+:where(:scope):is(.nse-overlay-listbox-scroll) {
   max-block-size: min(360px, 60vi);
   overflow: auto;
   scrollbar-width: none;
@@ -175,23 +203,28 @@
   );
 }
 
-.nse-overlay-listbox-scroll::-webkit-scrollbar {
+.nse-overlay-listbox-scroll::-webkit-scrollbar,
+:where(:scope):is(.nse-overlay-listbox-scroll)::-webkit-scrollbar {
   display: none;
 }
 
-.nse-overlay-listbox[data-fade-top="true"] .nse-overlay-listbox-scroll {
+.nse-overlay-listbox[data-fade-top="true"] .nse-overlay-listbox-scroll,
+:where(:scope):is(.nse-overlay-listbox[data-fade-top="true"]) .nse-overlay-listbox-scroll {
   --nse-listbox-fade-top: 18px;
 }
 
-.nse-overlay-listbox[data-fade-bottom="true"] .nse-overlay-listbox-scroll {
+.nse-overlay-listbox[data-fade-bottom="true"] .nse-overlay-listbox-scroll,
+:where(:scope):is(.nse-overlay-listbox[data-fade-bottom="true"]) .nse-overlay-listbox-scroll {
   --nse-listbox-fade-bottom: 18px;
 }
 
-.nse-overlay-listbox-scroll-content {
+.nse-overlay-listbox-scroll-content,
+:where(:scope):is(.nse-overlay-listbox-scroll-content) {
   display: block;
 }
 
-.nse-overlay-listbox-option {
+.nse-overlay-listbox-option,
+:where(:scope):is(.nse-overlay-listbox-option) {
   box-sizing: border-box;
   display: block;
   inline-size: 100%;
@@ -202,26 +235,30 @@
   text-align: start;
 }
 
-.nse-overlay-listbox-option:is([data-highlighted="true"], [data-nse-menu-flash="on"]):not([data-nse-menu-flash="off"]) {
+.nse-overlay-listbox-option:is([data-highlighted="true"],[data-nse-menu-flash="on"]):not([data-nse-menu-flash="off"]),
+:where(:scope):is(.nse-overlay-listbox-option:is([data-highlighted="true"],[data-nse-menu-flash="on"]):not([data-nse-menu-flash="off"])) {
   outline: none;
   background: color-mix(in srgb, Highlight 18%, transparent);
 }
 
 /* A rule between groups of rows (1px plus 4px either side: the 9px the listbox allows). */
-.nse-overlay-listbox-separator {
+.nse-overlay-listbox-separator,
+:where(:scope):is(.nse-overlay-listbox-separator) {
   block-size: 1px;
   margin: 4px 0;
   background: color-mix(in srgb, currentColor 22%, transparent);
 }
 
 /* Commands under the values ("Show Fonts…") read as commands, not choices. */
-.nse-overlay-listbox-option[data-kind="action"] {
+.nse-overlay-listbox-option[data-kind="action"],
+:where(:scope):is(.nse-overlay-listbox-option[data-kind="action"]) {
   font-style: italic;
 }
 
 /* Only explicit validated book geometry changes the sheet's physical bounds.
    Its full-screen sibling backdrop and existing modal/focus policy remain. */
-.nse-overlay-popup[data-nse-overlay-region="true"][data-nse-overlay-kind="action-sheet"] {
+.nse-overlay-popup[data-nse-overlay-region="true"][data-nse-overlay-kind="action-sheet"],
+:where(:scope):is(.nse-overlay-popup[data-nse-overlay-region="true"][data-nse-overlay-kind="action-sheet"]) {
   inset-inline: auto;
   left: calc(var(--nse-overlay-region-left) + max(8px, var(--nse-screen-safe-area-inset-left, 0px)));
   right: calc(var(--nse-overlay-region-right) + max(8px, var(--nse-screen-safe-area-inset-right, 0px)));
@@ -231,7 +268,8 @@
 /* Region constraints override app minimum sizes while the physical fold is
    present. Removing the attribute restores current caller/theme declarations,
    rather than replaying a stale inline style captured at opening. */
-[data-nse-role="overlay"][data-nse-part="surface"][data-nse-overlay-region="true"] {
+[data-nse-role="overlay"][data-nse-part="surface"][data-nse-overlay-region="true"],
+:where(:scope):is([data-nse-role="overlay"][data-nse-part="surface"][data-nse-overlay-region="true"]) {
   min-inline-size: 0 !important;
   max-inline-size: var(--nse-overlay-available-inline-size) !important;
   max-block-size: var(--nse-overlay-available-block-size) !important;
@@ -239,13 +277,16 @@
 }
 
 /* A menu or list whose row was chosen fades out as it closes (desktop; see menuSelectionFlash). */
-.nse-overlay-popup[data-state="closing"] { pointer-events: none; }
-.nse-overlay-popup[data-state="closing"][data-nse-menu-chosen] { animation: nse-menu-chosen-fade 0.2s ease-in forwards; }
+.nse-overlay-popup[data-state="closing"],
+:where(:scope):is(.nse-overlay-popup[data-state="closing"]) { pointer-events: none; }
+.nse-overlay-popup[data-state="closing"][data-nse-menu-chosen],
+:where(:scope):is(.nse-overlay-popup[data-state="closing"][data-nse-menu-chosen]) { animation: nse-menu-chosen-fade 0.2s ease-in forwards; }
 @keyframes nse-menu-chosen-fade { to { opacity: 0; } }
 
 /* NSEPopover's frame is one continuous outline, including the anchor arrow.
    Only the content scrolls/clips; the arrow and its shared shadow stay outside. */
-.nse-overlay-popup.nse-popover[data-nse-part="surface"][data-nse-popover-draws-background] {
+.nse-overlay-popup.nse-popover[data-nse-part="surface"][data-nse-popover-draws-background],
+:where(:scope):is(.nse-overlay-popup.nse-popover[data-nse-part="surface"][data-nse-popover-draws-background]) {
   display: flex;
   flex-direction: column;
   isolation: isolate;
@@ -263,9 +304,12 @@
   transform-origin: center bottom;
 }
 
-.nse-overlay-popup.nse-popover[data-nse-part="surface"][data-nse-popover-draws-background]::before { content: none; }
-.nse-popover:not([data-nse-positioned="true"]) { visibility: hidden; }
-.nse-popover-frame {
+.nse-overlay-popup.nse-popover[data-nse-part="surface"][data-nse-popover-draws-background]::before,
+:where(:scope):is(.nse-overlay-popup.nse-popover[data-nse-part="surface"][data-nse-popover-draws-background])::before { content: none; }
+.nse-popover:not([data-nse-positioned="true"]),
+:where(:scope):is(.nse-popover:not([data-nse-positioned="true"])) { visibility: hidden; }
+.nse-popover-frame,
+:where(:scope):is(.nse-popover-frame) {
   position: absolute;
   inset: -12px;
   width: calc(100% + 24px);
@@ -274,18 +318,24 @@
   pointer-events: none;
   z-index: -1;
 }
-.nse-popover-frame [data-nse-part="popover-outline"] {
+.nse-popover-frame [data-nse-part="popover-outline"],
+:where(:scope):is(.nse-popover-frame) [data-nse-part="popover-outline"] {
   fill: var(--nse-popover-fill, Canvas);
   stroke: var(--nse-popover-border-colour, #0005);
   stroke-width: 1;
   stroke-linejoin: round;
 }
-.nse-popover-frame [data-nse-part="popover-arrow-fill"] { fill: none; }
-.nse-popover[data-nse-popover-draws-background="false"] [data-nse-part="popover-outline"] { fill: none; }
-.nse-popover[data-nse-popover-draws-background="false"] [data-nse-part="popover-arrow-fill"] { fill: var(--nse-popover-arrow-fill, Canvas); }
-.nse-popover-arrow { position: absolute; width: 20px; height: 20px; pointer-events: none; }
+.nse-popover-frame [data-nse-part="popover-arrow-fill"],
+:where(:scope):is(.nse-popover-frame) [data-nse-part="popover-arrow-fill"] { fill: none; }
+.nse-popover[data-nse-popover-draws-background="false"] [data-nse-part="popover-outline"],
+:where(:scope):is(.nse-popover[data-nse-popover-draws-background="false"]) [data-nse-part="popover-outline"] { fill: none; }
+.nse-popover[data-nse-popover-draws-background="false"] [data-nse-part="popover-arrow-fill"],
+:where(:scope):is(.nse-popover[data-nse-popover-draws-background="false"]) [data-nse-part="popover-arrow-fill"] { fill: var(--nse-popover-arrow-fill, Canvas); }
+.nse-popover-arrow,
+:where(:scope):is(.nse-popover-arrow) { position: absolute; width: 20px; height: 20px; pointer-events: none; }
 
-.nse-overlay-popup.nse-popover[data-nse-part="surface"] > .nse-overlay-popup-content {
+.nse-overlay-popup.nse-popover[data-nse-part="surface"]>.nse-overlay-popup-content,
+:where(:scope):is(.nse-overlay-popup.nse-popover[data-nse-part="surface"])>.nse-overlay-popup-content {
   position: relative;
   flex: 1 1 auto;
   min-block-size: 0;
@@ -295,18 +345,29 @@
   overflow: auto;
   border-radius: inherit;
 }
-.nse-overlay-popup.nse-popover[data-nse-popover-draws-background="false"] > .nse-overlay-popup-content { padding: 0; }
-.nse-popover[data-nse-positioned="true"][data-state="open"] {
+.nse-overlay-popup.nse-popover[data-nse-popover-draws-background="false"]>.nse-overlay-popup-content,
+:where(:scope):is(.nse-overlay-popup.nse-popover[data-nse-popover-draws-background="false"])>.nse-overlay-popup-content { padding: 0; }
+.nse-popover[data-nse-positioned="true"][data-state="open"],
+:where(:scope):is(.nse-popover[data-nse-positioned="true"][data-state="open"]) {
   animation: nse-popover-scale-in 320ms var(--nse-popover-spring, ease-out) both, nse-popover-fade-in 120ms ease-out both;
 }
-.nse-popover[data-state="closing"] { animation: nse-popover-out 150ms ease-in both; }
-.nse-popover[data-nse-reduced-motion="true"][data-state="open"] { animation: nse-popover-fade-in 100ms linear both; }
-.nse-popover[data-nse-reduced-motion="true"][data-state="closing"] { animation: nse-popover-fade-out 100ms linear both; }
+.nse-popover[data-state="closing"],
+:where(:scope):is(.nse-popover[data-state="closing"]) { animation: nse-popover-out 150ms ease-in both; }
+.nse-popover[data-nse-reduced-motion="true"][data-state="open"],
+:where(:scope):is(.nse-popover[data-nse-reduced-motion="true"][data-state="open"]) { animation: nse-popover-fade-in 100ms linear both; }
+.nse-popover[data-nse-reduced-motion="true"][data-state="closing"],
+:where(:scope):is(.nse-popover[data-nse-reduced-motion="true"][data-state="closing"]) { animation: nse-popover-fade-out 100ms linear both; }
 @keyframes nse-popover-scale-in { from { transform: scale(0.85); } to { transform: scale(1); } }
 @keyframes nse-popover-fade-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes nse-popover-out { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.94); } }
 @keyframes nse-popover-fade-out { from { opacity: 1; } to { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
-  .nse-popover[data-nse-positioned="true"][data-state="open"] { animation: nse-popover-fade-in 100ms linear both; }
-  .nse-popover[data-state="closing"] { animation: nse-popover-fade-out 100ms linear both; }
+  .nse-popover[data-nse-positioned="true"][data-state="open"],
+:where(:scope):is(.nse-popover[data-nse-positioned="true"][data-state="open"]) { animation: nse-popover-fade-in 100ms linear both; }
+  .nse-popover[data-state="closing"],
+:where(:scope):is(.nse-popover[data-state="closing"]) { animation: nse-popover-fade-out 100ms linear both; }
+}
+
+}
+
 }

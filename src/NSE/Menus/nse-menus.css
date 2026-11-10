@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -18,7 +21,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-.nse-menu {
+.nse-menu,
+:where(:scope):is(.nse-menu) {
   /* Semantic recipe hooks only; the appearance layer owns bitmap/9-slice assets. */
   --nse-menu-row-min-block-size: 28px;
   --nse-menu-row-inline-padding: 8px;
@@ -31,7 +35,8 @@
   color: CanvasText;
 }
 
-.nse-menu__surface-layer {
+.nse-menu__surface-layer,
+:where(:scope):is(.nse-menu__surface-layer) {
   position: absolute;
   z-index: 0;
   inset: 0;
@@ -39,12 +44,14 @@
   pointer-events: none;
 }
 
-.nse-menu > :not(.nse-menu__surface-layer) {
+.nse-menu>:not(.nse-menu__surface-layer),
+:where(:scope):is(.nse-menu)>:not(.nse-menu__surface-layer) {
   position: relative;
   z-index: 1;
 }
 
-.nse-application-menu .nse-menu {
+.nse-application-menu .nse-menu,
+:where(:scope):is(.nse-application-menu) .nse-menu {
   min-inline-size: 0;
   padding: 0;
   border-radius: 0;
@@ -52,11 +59,13 @@
   color: inherit;
 }
 
-.nse-application-menu .nse-menu-item {
+.nse-application-menu .nse-menu-item,
+:where(:scope):is(.nse-application-menu) .nse-menu-item {
   border-radius: 0;
 }
 
-.nse-menu-item {
+.nse-menu-item,
+:where(:scope):is(.nse-menu-item) {
   display: grid;
   grid-template-columns: 1.1rem 1.25rem minmax(0, 1fr) auto auto;
   gap: 8px;
@@ -69,38 +78,51 @@
   text-align: start;
 }
 
-.nse-menu-item:is(:focus-visible, :hover, [data-nse-menu-flash="on"]):not([data-nse-menu-flash="off"]) {
+.nse-menu-item:is(:focus-visible,:hover,[data-nse-menu-flash="on"]):not([data-nse-menu-flash="off"]),
+:where(:scope):is(.nse-menu-item:is(:focus-visible,:hover,[data-nse-menu-flash="on"]):not([data-nse-menu-flash="off"])) {
   outline: none;
   background: Highlight;
   color: HighlightText;
 }
 
-.nse-menu-item[data-nse-menu-disabled="true"] {
+.nse-menu-item[data-nse-menu-disabled="true"],
+:where(:scope):is(.nse-menu-item[data-nse-menu-disabled="true"]) {
   cursor: not-allowed;
   opacity: 0.55;
 }
 
 .nse-menu-state-column,
+:where(:scope):is(.nse-menu-state-column),
 .nse-menu-item-icon,
+:where(:scope):is(.nse-menu-item-icon),
 .nse-menu-shortcut,
-.nse-menu-submenu-arrow {
+:where(:scope):is(.nse-menu-shortcut),
+.nse-menu-submenu-arrow,
+:where(:scope):is(.nse-menu-submenu-arrow) {
   align-self: center;
 }
 
 .nse-menu-state-column,
+:where(:scope):is(.nse-menu-state-column),
 .nse-menu-item-icon,
-.nse-menu-submenu-arrow { text-align: center; }
-.nse-menu-shortcut { color: color-mix(in srgb, currentColor 68%, transparent); font-variant-numeric: tabular-nums; }
+:where(:scope):is(.nse-menu-item-icon),
+.nse-menu-submenu-arrow,
+:where(:scope):is(.nse-menu-submenu-arrow) { text-align: center; }
+.nse-menu-shortcut,
+:where(:scope):is(.nse-menu-shortcut) { color: color-mix(in srgb, currentColor 68%, transparent); font-variant-numeric: tabular-nums; }
 
-.nse-menu-separator {
+.nse-menu-separator,
+:where(:scope):is(.nse-menu-separator) {
   block-size: 1px;
   margin: 4px;
   background: color-mix(in srgb, currentColor 18%, transparent);
 }
 
-.nse-menu-bar { display: flex; align-items: center; gap: 2px; min-inline-size: 0; }
+.nse-menu-bar,
+:where(:scope):is(.nse-menu-bar) { display: flex; align-items: center; gap: 2px; min-inline-size: 0; }
 /* Menu bar titles are text, not buttons: no native chrome in any theme. */
-.nse-menu-bar-item > button {
+.nse-menu-bar-item>button,
+:where(:scope):is(.nse-menu-bar-item)>button {
   appearance: none;
   margin: 0;
   padding: 4px 10px;
@@ -113,30 +135,54 @@
   white-space: nowrap;
   cursor: default;
 }
-.nse-menu-bar-item > button[data-active="true"],
-.nse-menu-bar-item > button:hover { background: color-mix(in srgb, Highlight 18%, transparent); }
-.nse-menu-bar-item, .nse-popup-button, .nse-context-menu-host { position: relative; }
-.nse-menu-bar-item > .nse-menu, .nse-popup-button > .nse-menu { position: absolute; inset-block-start: 100%; inset-inline-start: 0; z-index: var(--nse-menu-z-index, 1100); }
-.nse-menu-submenu-arrow { justify-self: end; }
+.nse-menu-bar-item>button[data-active="true"],
+:where(:scope):is(.nse-menu-bar-item)>button[data-active="true"],
+.nse-menu-bar-item>button:hover,
+:where(:scope):is(.nse-menu-bar-item)>button:hover { background: color-mix(in srgb, Highlight 18%, transparent); }
+.nse-menu-bar-item,
+:where(:scope):is(.nse-menu-bar-item),
+.nse-popup-button,
+:where(:scope):is(.nse-popup-button),
+.nse-context-menu-host,
+:where(:scope):is(.nse-context-menu-host) { position: relative; }
+.nse-menu-bar-item>.nse-menu,
+:where(:scope):is(.nse-menu-bar-item)>.nse-menu,
+.nse-popup-button>.nse-menu,
+:where(:scope):is(.nse-popup-button)>.nse-menu { position: absolute; inset-block-start: 100%; inset-inline-start: 0; z-index: var(--nse-menu-z-index, 1100); }
+.nse-menu-submenu-arrow,
+:where(:scope):is(.nse-menu-submenu-arrow) { justify-self: end; }
 
 @media (forced-colors: active) {
-  .nse-menu { border-color: CanvasText; }
-  .nse-menu-item:focus-visible { outline: 2px solid Highlight; outline-offset: -2px; }
+  .nse-menu,
+:where(:scope):is(.nse-menu) { border-color: CanvasText; }
+  .nse-menu-item:focus-visible,
+:where(:scope):is(.nse-menu-item:focus-visible) { outline: 2px solid Highlight; outline-offset: -2px; }
 }
 
 /* NSEPicker drives its button through NSEButton, which wraps children in
    a label span. The picker lays its caption and disclosure arrow out as two
    columns of the button itself, so that wrapper must not form a box. */
-.nse-control-picker-button > .nse-control-button-label {
+.nse-control-picker-button>.nse-control-button-label,
+:where(:scope):is(.nse-control-picker-button)>.nse-control-button-label {
   display: contents;
 }
 
 /* State and disclosure are semantic cues, so the neutral sheet draws them;
    an appearance replaces the glyphs with its own art. */
-.nse-menu-state-column[data-state="on"]::before { content: "\2713"; }
-.nse-menu-state-column[data-state="mixed"]::before { content: "\2013"; }
-.nse-menu-submenu-arrow::before { content: "\203A"; }
-.nse-menu-submenu-arrow[data-direction="rtl"]::before { content: "\2039"; }
+.nse-menu-state-column[data-state="on"]::before,
+:where(:scope):is(.nse-menu-state-column[data-state="on"])::before { content: "\2713"; }
+.nse-menu-state-column[data-state="mixed"]::before,
+:where(:scope):is(.nse-menu-state-column[data-state="mixed"])::before { content: "\2013"; }
+.nse-menu-submenu-arrow::before,
+:where(:scope):is(.nse-menu-submenu-arrow)::before { content: "\203A"; }
+.nse-menu-submenu-arrow[data-direction="rtl"]::before,
+:where(:scope):is(.nse-menu-submenu-arrow[data-direction="rtl"])::before { content: "\2039"; }
 
-.nse-control-picker-caption-title { display: block; overflow: hidden; text-overflow: ellipsis; }
-.nse-control-picker-caption-sizer { display: block; block-size: 0; overflow: hidden; visibility: hidden; }
+.nse-control-picker-caption-title,
+:where(:scope):is(.nse-control-picker-caption-title) { display: block; overflow: hidden; text-overflow: ellipsis; }
+.nse-control-picker-caption-sizer,
+:where(:scope):is(.nse-control-picker-caption-sizer) { display: block; block-size: 0; overflow: hidden; visibility: hidden; }
+
+}
+
+}

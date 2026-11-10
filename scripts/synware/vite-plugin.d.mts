@@ -1,3 +1,4 @@
+/// <reference path="./virtual-themes.d.ts" />
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -21,6 +22,8 @@
 import type { Plugin } from "vite";
 
 export interface SynCloudOSViteOptions {
+  /** Static theme bundles; defaults to src/Themes. false disables discovery. */
+  themesDirectory?: string | false;
   /** Site-owned directory containing .app bundles. Defaults to src/SynWare. */
   appsDirectory?: string;
   /** Folder-discovered preference panes; defaults to src/Preferences. */

@@ -102,9 +102,9 @@ interface BrowserHostOptions {
   readonly authentication?: AuthenticationInput;
   /** This host's role taxonomy. Defaults to the built-in profile. */
   readonly configurationProfile?: SynCloudOSConfigurationProfile;
-  /** The NSE appearance (theme) that paints the shell, windows and controls.
-   * Import the theme's stylesheet alongside it. Defaults to Atmo. */
-  readonly appearance?: NSETheme;
+  /** The theme that paints the shell, windows and controls.
+   * Bundle discovery loads its stylesheet. Defaults to Atmo. */
+  readonly theme?: NSETheme;
   readonly contributions?: readonly SynCloudOSHostContribution[];
   /** Host-owned legal attribution for each application's standard About panel.
    * Its display name and version remain the application's Info.ts identity. */
@@ -838,7 +838,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
       runtime,
       options,
       fontCatalogue,
-      options.appearance ?? atmoTheme,
+      options.theme ?? atmoTheme,
       home,
       Shell,
     );
@@ -872,7 +872,7 @@ async function mountInternal(options: ResolvedMountOptions, projectBundles: bool
     }
     attempt.dispose = undefined;
     attempt.mounting = false;
-    if (recovery) renderBootstrapRecovery(options.element, attempt, recovery, options.deploymentBasePath ?? "/", options.appearance ?? atmoTheme);
+    if (recovery) renderBootstrapRecovery(options.element, attempt, recovery, options.deploymentBasePath ?? "/", options.theme ?? atmoTheme);
     else if (browserMountAttempts.get(options.element) === attempt) browserMountAttempts.delete(options.element);
     if (result.errors.length > 0) {
       throw new AggregateError([error, ...result.errors], "Browser host initialization and cleanup failed.", { cause: error });

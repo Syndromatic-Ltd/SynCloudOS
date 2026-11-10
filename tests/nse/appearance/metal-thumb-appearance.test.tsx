@@ -52,6 +52,13 @@ function lightingPort() {
 }
 
 describe("explicit metal thumbs are independent of theme identity", () => {
+  it("uses static material light when the selected theme disables the effect", () => {
+    const light = lightingPort();
+    const theme = { ...atmoTheme, presentation: { ...atmoTheme.presentation, materialLighting: "off" as const } };
+    const view = render(<NSEAppearanceProvider theme={theme}><NSEMaterialLightingProvider value={light}><NSEMetalThumb /></NSEMaterialLightingProvider></NSEAppearanceProvider>);
+    expect(light.listeners.size).toBe(0);
+    expect(view.container.querySelector(".nse-metal-thumb")?.getAttribute("data-lighting")).toBe("static");
+  });
   it.each([undefined, ...themes])("subscribes under $id, including the neutral default", (appearance) => {
     const light = lightingPort();
     const thumb = <NSEMaterialLightingProvider value={light}><NSEMetalThumb /></NSEMaterialLightingProvider>;

@@ -1,0 +1,316 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run playwright test tests/e2e/theme-baseline.spec.ts tests/e2e/theme-nesting.spec.ts --project=chromium --project=chromium-high-dpr --workers=4
+
+Running 118 tests using 4 workers
+
+(node:78992) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:19132) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:87188) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:78040) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x    3 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 (6.9s)
+  x    2 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3 (7.1s)
+(node:77760) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:75736) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x    4 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 4 (8.4s)
+  x    1 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2 (9.0s)
+(node:59984) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:50388) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x    6 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 6 (4.5s)
+  x    5 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 5 (4.6s)
+(node:86564) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:78272) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x    7 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 7 (4.2s)
+(node:75864) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x    8 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 8 (4.5s)
+(node:33028) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x    9 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 9 (4.6s)
+  x   10 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 10 (4.8s)
+(node:89708) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:41668) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   11 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 11 (4.2s)
+(node:84652) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   12 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 12 (4.4s)
+(node:89652) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   13 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 13 (4.4s)
+(node:59904) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   14 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 14 (4.6s)
+(node:68000) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   15 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 15 (5.0s)
+(node:84088) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  16 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 16 (6.6s)
+  x   17 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 17 (5.3s)
+(node:58404) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   18 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 18 (7.1s)
+  x   19 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 19 (5.4s)
+(node:34912) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:63380) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   20 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 20 (5.8s)
+(node:83384) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   21 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (5.9s)
+(node:55960) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   23 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 3 (4.8s)
+(node:59244) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   22 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 2 (6.8s)
+(node:18216) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   24 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 4 (6.3s)
+(node:76260) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   25 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 5 (4.6s)
+(node:67884) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   26 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 6 (4.6s)
+(node:69600) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   27 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 7 (4.2s)
+(node:87696) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   28 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 8 (4.4s)
+(node:65880) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   29 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 9 (4.2s)
+(node:60708) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   30 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 10 (4.5s)
+(node:52248) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   31 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 11 (4.2s)
+(node:41264) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   32 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 12 (4.2s)
+(node:2248) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   33 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 13 (4.0s)
+(node:76120) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   34 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 14 (4.4s)
+(node:37184) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   35 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 15 (4.7s)
+(node:34836) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   37 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 17 (4.8s)
+(node:69572) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  36 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 16 (6.4s)
+  ok  41 [chromium] › tests\e2e\theme-baseline.spec.ts:97:1 › stepper hit targets preserve the painted bezel (2.8s)
+  x   38 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 18 (6.5s)
+(node:76364) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   39 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 19 (5.6s)
+  x   40 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 20 (3.4s)
+(node:30868) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:80436) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   43 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 (4.8s)
+(node:82044) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   45 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3 (6.1s)
+(node:43764) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   44 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2 (6.9s)
+(node:40096) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   42 [chromium] › tests\e2e\theme-nesting.spec.ts:4:1 › nested themes isolate paint and colours; omitted highlighted paint falls back to Atmo (10.1s)
+(node:20080) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   47 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 5 (3.4s)
+  x   46 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 4 (5.8s)
+(node:53188) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:87760) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   48 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 6 (3.5s)
+(node:57404) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   50 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 7 (4.3s)
+  x   51 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 8 (4.4s)
+(node:62180) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:91312) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   52 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 9 (6.6s)
+(node:87392) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   49 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start in-flow ltr keeps content clear (10.6s)
+(node:79336) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   54 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 11 (5.3s)
+  x   53 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 10 (5.6s)
+(node:89412) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:93396) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   55 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 12 (3.2s)
+(node:77664) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   57 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 13 (4.5s)
+  x   58 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 14 (4.7s)
+(node:28988) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:85928) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   56 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start in-flow rtl keeps content clear (10.6s)
+(node:48584) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   59 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 15 (7.9s)
+(node:38920) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   61 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 17 (4.6s)
+(node:48020) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   64 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 19 (5.0s)
+(node:13400) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   63 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 18 (7.0s)
+(node:89412) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   62 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start overlay ltr keeps content clear (10.7s)
+(node:73684) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   65 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 20 (4.6s)
+(node:71148) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   68 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 2 (6.0s)
+(node:89652) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   67 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start overlay rtl keeps content clear (10.5s)
+(node:18800) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   69 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 3 (3.2s)
+(node:80372) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   71 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 4 (5.7s)
+(node:76988) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   70 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end in-flow ltr keeps content clear (10.3s)
+(node:63052) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   72 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 5 (3.8s)
+(node:48992) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   74 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 6 (4.3s)
+(node:18348) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   73 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end in-flow rtl keeps content clear (10.3s)
+(node:90612) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   75 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 7 (4.0s)
+(node:47316) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   77 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 8 (4.1s)
+(node:42728) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   78 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 9 (4.0s)
+(node:86784) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   76 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end overlay ltr keeps content clear (10.3s)
+(node:30644) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   60 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 16 (1.1m)
+(node:92624) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   81 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 11 (3.7s)
+(node:57944) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   80 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end overlay rtl keeps content clear (10.3s)
+(node:76432) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   82 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 12 (1.7s)
+(node:50380) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   84 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 13 (3.6s)
+  x   66 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (1.1m)
+(node:14332) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:44788) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   85 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 14 (4.1s)
+(node:85224) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   83 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list in-flow ltr keeps content clear (10.4s)
+(node:3332) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   86 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 15 (4.5s)
+(node:61228) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   87 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 16 (1.7s)
+(node:77008) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   89 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 17 (4.7s)
+(node:60668) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   90 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 18 (6.7s)
+  x   91 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 19 (3.3s)
+(node:59840) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:92484) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   88 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list in-flow rtl keeps content clear (10.3s)
+(node:62088) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  93 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:97:1 › stepper hit targets preserve the painted bezel (1.3s)
+  x   92 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 20 (2.1s)
+  x   95 [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:4:1 › nested themes isolate paint and colours; omitted highlighted paint falls back to Atmo (10.1s)
+  x   94 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list overlay ltr keeps content clear (10.3s)
+(node:80640) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:29760) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   96 [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start in-flow ltr keeps content clear (10.3s)
+  x   97 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list overlay rtl keeps content clear (10.3s)
+(node:46012) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:78312) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   79 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 10 (1.0m)
+  x   98 [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start in-flow rtl keeps content clear (10.3s)
+  x   99 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start in-flow ltr keeps content clear (10.3s)
+(node:54428) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:69472) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  100 [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start overlay ltr keeps content clear (10.3s)
+  x  101 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start in-flow rtl keeps content clear (10.3s)
+(node:88360) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:65292) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  102 [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start overlay rtl keeps content clear (10.3s)
+  x  103 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start overlay ltr keeps content clear (10.3s)
+(node:6200) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:67312) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  104 [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end in-flow ltr keeps content clear (10.3s)
+  x  105 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start overlay rtl keeps content clear (10.3s)
+(node:29712) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:86284) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)

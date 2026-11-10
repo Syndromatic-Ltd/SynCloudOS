@@ -147,6 +147,8 @@ Verification: **687 focused tests across three files passed**, including 681 ren
 
 ### Task 12 — NSETheme and bundle validation
 
+Commit: `ec5bd191`.
+
 Added the readonly NSETheme, NSEThemeNavigation, NSEThemePresentation and NSEThemeImage interfaces. Framework-created theme values own deeply frozen copies. Atmo is now selected by atmoTheme with bundle identifier com.syndromatic.atmo. Appearance selection carries theme; provider.theme and data-nse-theme replace the definition-valued provider prop and boundary identity. No old name is re-exported.
 
 Removed the definition factory, definition/input/recipe types, slot resolver and projections, chrome-slot type and props, and window-recipe registry/props. Controls draw through their existing public parts and states. The window frame uses the AppKit-shaped hasShadow flag instead of an artwork recipe identifier. CSS selectors changed identity at equal specificity, with their declarations retained. The catalogue imports and providers were migrated to the new API; all frozen images remain untouched.
@@ -157,7 +159,19 @@ Verification: **1,691 focused tests across 32 files passed**, including 33 bundl
 
 The MCP recipe scaffolder and its old tests await their explicitly scheduled bundle-tooling replacement in Task 17; packed validation remains for Tasks 17 and 19. No compatibility implementation was introduced.
 
-### Tasks 13–19
+### Task 13 — discovery, loading, layers and selection
+
+Implemented bundle discovery, `themesDirectory` (including `false`), the typed `virtual:syncloudos/themes` registry, build-time CSS selection, automatic theme scoping and layer declarations. Unreferenced themes do not emit CSS; static unknown identifiers fail the build and dynamic unknown lookup throws. A theme boundary resets every semantic colour. Browser host selection now takes `theme?: NSETheme`.
+
+Named images resolve against the view's selected theme with Atmo fallback, point sizes, template tint and resolution variants. Login ornaments, notification slicing and reactive material lighting follow the theme's presentation data. All four navigation placements support both flows, measure their physical obstruction, and preserve content clearance in LTR and RTL.
+
+The existing mixed control sheets are temporarily retained in the Atmo fallback layer to preserve their cascade while Task 14 separates structure, typography, motion and paint declaration by declaration. Scope-root alternatives preserve existing portal drawing; a popup has one theme boundary on its host, with appearance attributes on the inner surface and menu. Document defaults remain inherited from the document root, so they cannot overwrite theme spacing at each boundary. This task introduces no new drawing.
+
+Verification: **807 focused tests across nine files passed**, including **691 rendered contract specimens**. Framework typecheck passed. The final standalone browser run passed **118/118 checks**: 82 baseline checks and 36 nesting, navigation and plain-login checks across DPR 1 and 2. Log: `task-13-browser-verified.log`. All **2,648 frozen PNG hashes are unchanged**. Earlier unaccepted cascade differences and corrected loader/type errors are retained in the task logs; no reference image was updated. The preceding run passed 117/118 with a fixture-startup timeout before its catalogue appeared, then the complete standalone rerun passed. No rendering source was edited during the accepted run.
+
+Owner review: `plain-login-chromium.png` and `plain-login-chromium-high-dpr.png` show the existing login window with ornaments switched off. They are separate evidence, not parity baselines. No plain-login design was added.
+
+### Tasks 14–19
 
 Pending. Final split-suite and packed SDK acceptance remain for Task 19.
 
@@ -183,6 +197,11 @@ Further diagnostic runs exposed folder-only capture interference and source-pain
 
 ## Calls made by Codex
 
+- `NSEImage.named(name, theme?)` accepts an explicit theme for model-side lookup. Controls resolve symbolic named images from view context; there is no mutable global active theme.
+- Dynamic indexing of the theme registry loads all discoverable candidates conservatively. Discovery scans host source, excluding test, documentation, script and generated-output directories.
+- Short-window leading rails and book/fold region adaptations retain the framework's existing geometry; ordinary compact/regular windows honour the theme's placement and flow. These adaptations add no public placement.
+- Portal descendants retain appearance attributes but share their host's theme boundary, allowing cross-part fallback drawing without crossing an unrelated theme boundary.
+
 - Theme metrics remain in CSS, following the detailed schema and spec call 7; Theme.json has the four concrete data fields in Task 12.
 - The retained contrast spelling is high, as the existing API and emitted attribute use; Task 11’s reference metadata was corrected from increased to high.
 - Bundle identity is projected directly, so the old definition identity attribute and Atmo export are migrated now with the type removal. This avoids a temporary compatibility mapping.
@@ -203,6 +222,8 @@ Further diagnostic runs exposed folder-only capture interference and source-pain
 8. Painted bezel dimensions and interaction dimensions are distinct. The stepper uses `--nse-control-bezel-inline-size` and `--nse-control-bezel-block-size` for its existing art; framework-owned hit dimensions meet the minimum without moving that art or its neighbours. Passive progress/meter surfaces do not receive hit-target sizing.
 
 ## Public API accounting
+
+Task 13 adds `SynCloudOSViteOptions.themesDirectory`, `virtual:syncloudos/themes` with its readonly `themes` registry, `BrowserHostOptions.theme`, optional `NSEImage.named` theme selection and readonly resolution `files`. It removes the browser host's definition-valued `appearance` option. The generated contract now records login/notification presentation variants and every navigation placement/flow.
 
 Task 12 adds NSETheme, NSEThemeNavigation, NSEThemePresentation, NSEThemeImage, atmoTheme, provider.theme, selection.theme and data-nse-theme. It removes atmoAppearance, provider.appearance, selection.appearance, data-nse-appearance, defineNSEAppearance, NSEAppearanceDefinition, NSEAppearanceDefinitionInput, NSEAppearanceRecipeDefinition, useNSEAppearanceSlot, resolveNSEAppearanceSlot, nseAppearanceSlot, projectNSEAppearanceSlot, NSEAppearanceSlotDescriptor, NSEAppearanceSlotProjection, NSEAppearanceSlotResolution, NSEChromeSlot, NSEChromePrimitiveProps.slot, NSEWindowAppearanceRecipeId, NSE_WINDOW_APPEARANCE_RECIPE_IDS, NSEWindowFrameProps.appearanceRecipe/shadowRecipe and NSEWindowTitleBarProps.appearanceRecipe. NSEWindowFrameProps.hasShadow replaces the recipe-valued shadow selection. There are no aliases.
 

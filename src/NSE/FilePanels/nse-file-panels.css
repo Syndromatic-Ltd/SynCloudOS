@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -21,7 +24,8 @@
 /* A file panel is a short prompt, what it accepts, and its actions on the
    trailing edge (Cancel, then the default action), laid out at a readable
    measure; the hosting window fits itself to this. */
-.nse-file-panel-content {
+.nse-file-panel-content,
+:where(:scope):is(.nse-file-panel-content) {
   box-sizing: border-box;
   display: grid;
   gap: 10px;
@@ -29,12 +33,22 @@
   max-inline-size: 100%;
   padding: 16px 20px 18px;
 }
-.nse-file-panel-status { margin: 0; }
-.nse-file-panel-prompt { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
-.nse-file-panel-accepts { margin: 0; padding: 0; list-style: none; opacity: 0.72; font-size: 0.92em; }
-.nse-file-panel-suggested-name { overflow-wrap: anywhere; }
-.nse-file-panel-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-block-start: 6px; }
+.nse-file-panel-status,
+:where(:scope):is(.nse-file-panel-status) { margin: 0; }
+.nse-file-panel-prompt,
+:where(:scope):is(.nse-file-panel-prompt) { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.nse-file-panel-accepts,
+:where(:scope):is(.nse-file-panel-accepts) { margin: 0; padding: 0; list-style: none; opacity: 0.72; font-size: 0.92em; }
+.nse-file-panel-suggested-name,
+:where(:scope):is(.nse-file-panel-suggested-name) { overflow-wrap: anywhere; }
+.nse-file-panel-actions,
+:where(:scope):is(.nse-file-panel-actions) { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-block-start: 6px; }
 
 @media (forced-colors: active) {
-  .nse-file-panel [data-nse-part="choose"]:focus-visible { outline: 2px solid Highlight; outline-offset: 2px; }
+  .nse-file-panel [data-nse-part="choose"]:focus-visible,
+:where(:scope):is(.nse-file-panel) [data-nse-part="choose"]:focus-visible { outline: 2px solid Highlight; outline-offset: 2px; }
+}
+
+}
+
 }

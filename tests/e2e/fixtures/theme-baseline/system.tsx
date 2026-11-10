@@ -26,7 +26,7 @@ const shell = defineWebspring({
   components: { board: WebspringBoardView },
 });
 
-function SystemSurface({ kind }: { kind: "board" | "notifications" | "notification-centre" }) {
+export function SystemSurface({ kind }: { kind: "board" | "notifications" | "notification-centre" }) {
   const [runtime] = useState(() => createSynCloudOS({ id: "theme-baseline-system", environment: createBrowserRuntimeEnvironment(), authenticationPolicy: "disabled",
     initialBundles: ["documents", "pictures", "music"].map((name, order) => createSynWareBundle(createSynWare({
       manifest: { schemaVersion: 1, bundleIdentifier: `com.example.theme-baseline.${name}`, version: "1.0.0", displayName: name[0].toUpperCase() + name.slice(1),

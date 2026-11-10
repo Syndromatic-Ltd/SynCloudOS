@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -38,7 +41,9 @@
    Selection: --nse-prefs-selection-background, --nse-prefs-selection-shadow,
               --nse-prefs-selection-colour, --nse-prefs-selection-meta-colour (dark) */
 
-.nse-prefs-backdrop {
+.nse-prefs-backdrop,
+:where(:scope):is(.nse-prefs-backdrop),
+:where(:scope).nse-prefs-backdrop {
   position: fixed;
   inset: 0;
   z-index: 10000;
@@ -52,7 +57,9 @@
    panel's rise. On the container they would have taken the panel's opacity with
    them; the blurred backdrop is composited at this element's alpha, so one
    opacity animation brings both in together. */
-.nse-prefs-veil {
+.nse-prefs-veil,
+:where(:scope):is(.nse-prefs-veil),
+:where(:scope).nse-prefs-veil {
   position: absolute;
   inset: 0;
   background: var(--nse-prefs-veil-background, rgba(0, 0, 0, 0.42));
@@ -61,7 +68,9 @@
   pointer-events: none;
 }
 
-.nse-prefs-toast {
+.nse-prefs-toast,
+:where(:scope):is(.nse-prefs-toast),
+:where(:scope).nse-prefs-toast {
   /* Above the veil, which is absolutely positioned over the same box. */
   position: relative;
   box-sizing: border-box;
@@ -83,7 +92,9 @@
    contributes no intrinsic size, so the clip collapsed to zero width and the
    header went blank. Stacked grid children size it normally and it still holds
    one line tall while the pair passes through. */
-.nse-prefs-title-clip {
+.nse-prefs-title-clip,
+:where(:scope):is(.nse-prefs-title-clip),
+:where(:scope).nse-prefs-title-clip {
   display: grid;
   overflow: hidden;
   /* The clip sizes to the title's line box, and a line box does not include the
@@ -94,7 +105,9 @@
   margin-block: -5px;
 }
 
-.nse-prefs-title {
+.nse-prefs-title,
+:where(:scope):is(.nse-prefs-title),
+:where(:scope).nse-prefs-title {
   grid-area: 1 / 1;
   justify-self: center;
   /* Stated rather than inherited, so the box the clip measures always has room
@@ -107,7 +120,9 @@
 /* The animated wrapper. Its own box has to be the button's, or the 50px control
    would sit inside a shrink-wrapped inline span and lose its centring while it
    travels. */
-.nse-prefs-back-slot {
+.nse-prefs-back-slot,
+:where(:scope):is(.nse-prefs-back-slot),
+:where(:scope).nse-prefs-back-slot {
   display: grid;
   place-items: center;
 }
@@ -117,7 +132,8 @@
    real tool-button art, just at its shortest possible width.
    Four classes deep because the vector layer sets this button's padding at
    (0,3,0) — at (0,2,0) the 10px side padding survived and made it 70×52. */
-.nse-prefs-header .nse-prefs-back.nse-control-button.nse-extended-tool-button {
+.nse-prefs-header .nse-prefs-back.nse-control-button.nse-extended-tool-button,
+:where(:scope):is(.nse-prefs-header) .nse-prefs-back.nse-control-button.nse-extended-tool-button {
   position: relative;
   width: 50px;
   min-width: 50px;
@@ -134,7 +150,8 @@
    the padding box is literally ZERO wide. Absolute positioning resolves against
    that padding box, so `inset: 0` gave a 0×50 area and the arrow never showed.
    The negative side insets grow it back over the two caps to a full 50×50. */
-.nse-prefs-header .nse-prefs-back .nse-control-button-icon {
+.nse-prefs-header .nse-prefs-back .nse-control-button-icon,
+:where(:scope):is(.nse-prefs-header) .nse-prefs-back .nse-control-button-icon {
   position: absolute;
   inset: 0 -25px;
   /* The base icon rule pins 24×24 with 6px side margins. A fixed width beats
@@ -156,7 +173,9 @@
    height being animated to, and a scrollbar appearing for a fifth of a second
    is worse than clipping something already on its way out. The scroll belongs
    to the pane, which is only ever as tall as the box allows. */
-.nse-prefs-body {
+.nse-prefs-body,
+:where(:scope):is(.nse-prefs-body),
+:where(:scope).nse-prefs-body {
   position: relative;
   flex: 0 1 auto;
   min-height: 0;
@@ -165,12 +184,16 @@
 
 /* One cell, both panes. Stacking them here is what lets the box resize WHILE the
    content crosses instead of after it. */
-.nse-prefs-panes {
+.nse-prefs-panes,
+:where(:scope):is(.nse-prefs-panes),
+:where(:scope).nse-prefs-panes {
   display: grid;
   height: 100%;
 }
 
-.nse-prefs-pane {
+.nse-prefs-pane,
+:where(:scope):is(.nse-prefs-pane),
+:where(:scope).nse-prefs-pane {
   grid-area: 1 / 1;
   min-height: 0;
   overflow-y: auto;
@@ -180,7 +203,9 @@
    the animated height — measuring it would feed the animation its own output.
    No padding of its own: the root list runs to the panel's edges and each
    detail pane insets its own content. */
-.nse-prefs-pane-content {
+.nse-prefs-pane-content,
+:where(:scope):is(.nse-prefs-pane-content),
+:where(:scope).nse-prefs-pane-content {
   padding: 0;
 }
 
@@ -189,12 +214,15 @@
    "list" and "panel" to notice and no margin for a selection to stop short of —
    the highlight reaches both sides of the panel. The toast's own overflow
    clipping rounds the last row into the bottom corners. */
-.nse-prefs-list {
+.nse-prefs-list,
+:where(:scope):is(.nse-prefs-list),
+:where(:scope).nse-prefs-list {
   display: flex;
   flex-direction: column;
 }
 
-.nse-prefs-list .nse-control-list-item {
+.nse-prefs-list .nse-control-list-item,
+:where(:scope):is(.nse-prefs-list) .nse-control-list-item {
   padding-inline: 16px;
   background: transparent;
 }
@@ -202,7 +230,9 @@
 /* Preferences labels identify destinations, so retain their full copy when
    enlarged or localized instead of the generic list's one-line ellipsis. */
 .nse-prefs-list .nse-control-list-primary,
-.nse-prefs-list .nse-control-list-meta {
+:where(:scope):is(.nse-prefs-list) .nse-control-list-primary,
+.nse-prefs-list .nse-control-list-meta,
+:where(:scope):is(.nse-prefs-list) .nse-control-list-meta {
   white-space: normal;
   overflow: visible;
   overflow-wrap: anywhere;
@@ -210,7 +240,9 @@
 
 /* Retain the list typography while making pane navigation a native keyboard
    action. The optional master switch remains a separate control. */
-.nse-prefs-pane-link {
+.nse-prefs-pane-link,
+:where(:scope):is(.nse-prefs-pane-link),
+:where(:scope).nse-prefs-pane-link {
   appearance: none;
   border: 0;
   padding: 0;
@@ -220,7 +252,9 @@
   text-align: start;
   cursor: pointer;
 }
-.nse-prefs-pane-link:focus-visible {
+.nse-prefs-pane-link:focus-visible,
+:where(:scope):is(.nse-prefs-pane-link:focus-visible),
+:where(:scope).nse-prefs-pane-link:focus-visible {
   outline: 2px solid Highlight;
   outline-offset: 2px;
   border-radius: 2px;
@@ -233,12 +267,14 @@
    (first and last rounded items), and the
    container has to keep overflow visible for anything that escapes it.
    12px = the frame's 14px outer radius less the 2px the rows are inset by. */
-.nse-prefs-pane .nse-control-group-inner > .nse-control-list-item:first-child {
+.nse-prefs-pane .nse-control-group-inner>.nse-control-list-item:first-child,
+:where(:scope):is(.nse-prefs-pane) .nse-control-group-inner>.nse-control-list-item:first-child {
   border-top-left-radius: 12px;
   border-top-right-radius: 12px;
 }
 
-.nse-prefs-pane .nse-control-group-inner > .nse-control-list-item:last-child {
+.nse-prefs-pane .nse-control-group-inner>.nse-control-list-item:last-child,
+:where(:scope):is(.nse-prefs-pane) .nse-control-group-inner>.nse-control-list-item:last-child {
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
 }
@@ -247,13 +283,17 @@
    master switch, then the chevron hard against the row's inner edge. The list
    item pins this to the right for us; all this owns is the gap between the two
    and a fixed chevron column, so the arrows line up whatever sits beside them. */
-.nse-prefs-row-tail {
+.nse-prefs-row-tail,
+:where(:scope):is(.nse-prefs-row-tail),
+:where(:scope).nse-prefs-row-tail {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.nse-prefs-chevron {
+.nse-prefs-chevron,
+:where(:scope):is(.nse-prefs-chevron),
+:where(:scope).nse-prefs-chevron {
   display: inline-grid;
   place-items: center;
   width: 10px;
@@ -265,13 +305,17 @@
 }
 
 .nse-prefs-list .nse-control-list-item[data-selected="true"] .nse-prefs-chevron,
-.nse-prefs-list .nse-control-list-item:active .nse-prefs-chevron {
+:where(:scope):is(.nse-prefs-list) .nse-control-list-item[data-selected="true"] .nse-prefs-chevron,
+.nse-prefs-list .nse-control-list-item:active .nse-prefs-chevron,
+:where(:scope):is(.nse-prefs-list) .nse-control-list-item:active .nse-prefs-chevron {
   color: var(--nse-prefs-chevron-selected-colour, rgba(255, 255, 255, 0.72));
 }
 
 /* An empty group box is a bug that looks like a design. Say what would be here
    instead of showing a frame with nothing in it. */
-.nse-prefs-empty {
+.nse-prefs-empty,
+:where(:scope):is(.nse-prefs-empty),
+:where(:scope).nse-prefs-empty {
   display: grid;
   justify-items: center;
   gap: 4px;
@@ -279,14 +323,18 @@
   text-align: center;
 }
 
-.nse-prefs-empty-title {
+.nse-prefs-empty-title,
+:where(:scope):is(.nse-prefs-empty-title),
+:where(:scope).nse-prefs-empty-title {
   color: var(--nse-prefs-empty-title-colour, rgba(42, 55, 70, 0.72));
   font-size: 15px;
   font-weight: 700;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
-.nse-prefs-empty-detail {
+.nse-prefs-empty-detail,
+:where(:scope):is(.nse-prefs-empty-detail),
+:where(:scope).nse-prefs-empty-detail {
   max-width: 26ch;
   color: var(--nse-prefs-empty-detail-colour, rgba(42, 55, 70, 0.55));
   font-size: 12px;
@@ -295,14 +343,16 @@
 
 /* Per-app rows stay readable when the master switch is off — dimmed, not
    hidden, so it is obvious WHY they cannot be changed. */
-.nse-prefs-section[data-muted="true"] .nse-control-group-box {
+.nse-prefs-section[data-muted="true"] .nse-control-group-box,
+:where(:scope):is(.nse-prefs-section[data-muted="true"]) .nse-control-group-box {
   opacity: 0.48;
   filter: saturate(0.55);
 }
 
 /* Detail panes stack their controls; the group box inside supplies its own
    frame, so this owns rhythm and the inset the root list does without. */
-.nse-prefs-pane .nse-prefs-section {
+.nse-prefs-pane .nse-prefs-section,
+:where(:scope):is(.nse-prefs-pane) .nse-prefs-section {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -311,7 +361,8 @@
 
 /* Centred: it explains the pane as a whole rather than any one row, so ranging
    it left against the group box above reads as a caption for the last row. */
-.nse-prefs-pane .nse-prefs-note {
+.nse-prefs-pane .nse-prefs-note,
+:where(:scope):is(.nse-prefs-pane) .nse-prefs-note {
   margin: 12px auto 0;
   max-width: 32ch;
   color: var(--nse-prefs-note-colour, rgba(42, 55, 70, 0.62));
@@ -323,7 +374,8 @@
 /* A note that introduces the group below it rather than explaining the one
    above — "View notifications from:" in the iOS 5 sense. Stays ranged left: it
    is a list heading, and it has to line up with the rows it heads. */
-.nse-prefs-pane .nse-prefs-note-lead {
+.nse-prefs-pane .nse-prefs-note-lead,
+:where(:scope):is(.nse-prefs-pane) .nse-prefs-note-lead {
   max-width: none;
   margin: 2px 2px 8px;
   font-weight: 700;
@@ -331,14 +383,18 @@
   text-align: left;
 }
 
-.nse-prefs-app-icon {
+.nse-prefs-app-icon,
+:where(:scope):is(.nse-prefs-app-icon),
+:where(:scope).nse-prefs-app-icon {
   width: 30px;
   height: 30px;
   object-fit: contain;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nse-prefs-toast {
+  .nse-prefs-toast,
+:where(:scope):is(.nse-prefs-toast),
+:where(:scope).nse-prefs-toast {
     transform: none;
   }
 }
@@ -359,7 +415,8 @@
    sheet being imported last. Import order has already produced two visible
    regressions in this codebase; see the tie list in TODO.md. */
 
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-toast {
+.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-toast,
+:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-toast {
   /* Blue-black, the tone Software.app's stage takes in dark.
      FLAT, not a gradient. A gradient here put a second gradient (the group box)
      inside a first, and the two crossed — matching in one band and separating in
@@ -369,7 +426,8 @@
   box-shadow: var(--nse-prefs-panel-shadow, 0 0 0 1px rgba(0, 0, 0, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 22px 44px rgba(0, 0, 0, 0.62));
 }
 
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-veil {
+.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-veil,
+:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-veil {
   background: var(--nse-prefs-veil-background, rgba(0, 0, 0, 0.56));
 }
 
@@ -392,19 +450,22 @@
    So the only thing stated here is what sits BEHIND it: a faint lift so the
    group reads as slightly raised off the panel. The frame paints over it, and
    its own engraved edge does the rest — no added shadow. */
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-pane .nse-control-group-box {
+.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-pane .nse-control-group-box,
+:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-pane .nse-control-group-box {
   border-radius: 14px;
   background: var(--nse-prefs-group-background, rgba(255, 255, 255, 0.045));
 }
 
 /* Softened so they read as divisions within one plate rather than as more
    edges competing with the box's own. */
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-pane .nse-control-group-inner > .nse-control-list-item {
+.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-pane .nse-control-group-inner>.nse-control-list-item,
+:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-pane .nse-control-group-inner>.nse-control-list-item {
   border-top-color: rgba(255, 255, 255, 0.06);
   border-bottom-color: rgba(0, 0, 0, 0.3);
 }
 
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-pane .nse-control-list-item {
+.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-pane .nse-control-list-item,
+:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-pane .nse-control-list-item {
   color: var(--nse-prefs-row-colour, #e7ecf2);
   border-top-color: rgba(255, 255, 255, 0.08);
   border-bottom-color: rgba(0, 0, 0, 0.52);
@@ -417,28 +478,35 @@
 
 
 .nse-prefs-backdrop[data-mode="dark"] .nse-prefs-pane .nse-control-list-meta,
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-list .nse-control-list-meta {
+:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-pane .nse-control-list-meta,
+.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-list .nse-control-list-meta,
+:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-list .nse-control-list-meta {
   color: var(--nse-prefs-meta-colour, rgba(190, 200, 212, 0.72));
 }
 
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-chevron {
+.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-chevron,
+:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-chevron {
   color: var(--nse-prefs-chevron-colour, rgba(190, 200, 212, 0.5));
 }
 
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-pane .nse-prefs-note {
+.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-pane .nse-prefs-note,
+:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-pane .nse-prefs-note {
   color: var(--nse-prefs-note-colour, rgba(178, 188, 200, 0.66));
 }
 
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-pane .nse-prefs-note-lead {
+.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-pane .nse-prefs-note-lead,
+:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-pane .nse-prefs-note-lead {
   color: var(--nse-prefs-note-lead-colour, rgba(206, 214, 224, 0.82));
 }
 
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-empty-title {
+.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-empty-title,
+:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-empty-title {
   color: var(--nse-prefs-empty-title-colour, rgba(224, 231, 240, 0.86));
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.6);
 }
 
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-empty-detail {
+.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-empty-detail,
+:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-empty-detail {
   color: var(--nse-prefs-empty-detail-colour, rgba(178, 188, 200, 0.62));
 }
 
@@ -453,7 +521,9 @@
    ties would be decided by import order, which is the failure mode catalogued in
    TODO.md. These clear both outright. */
 .nse-prefs-backdrop[data-mode="dark"] .nse-prefs-toast .nse-prefs-pane .nse-control-group-inner .nse-control-list-item[data-selected="true"],
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-toast .nse-prefs-body .nse-prefs-pane .nse-control-list-item:not(.is-disabled):not([data-tap-highlight="false"]):active {
+:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-toast .nse-prefs-pane .nse-control-group-inner .nse-control-list-item[data-selected="true"],
+.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-toast .nse-prefs-body .nse-prefs-pane .nse-control-list-item:not(.is-disabled):not([data-tap-highlight="false"]):active,
+:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-toast .nse-prefs-body .nse-prefs-pane .nse-control-list-item:not(.is-disabled):not([data-tap-highlight="false"]):active {
   background: var(--nse-prefs-selection-background, linear-gradient(180deg, #5c6f7f 0%, #233242 100%));
   box-shadow: var(--nse-prefs-selection-shadow, inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 -1px 0 rgba(0, 0, 0, 0.5));
   color: var(--nse-prefs-selection-colour, #f1f6fb);
@@ -461,10 +531,17 @@
 }
 
 .nse-prefs-backdrop[data-mode="dark"] .nse-prefs-toast .nse-prefs-pane .nse-control-list-item[data-selected="true"] .nse-control-list-meta,
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-toast .nse-prefs-pane .nse-control-list-item:active .nse-control-list-meta {
+:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-toast .nse-prefs-pane .nse-control-list-item[data-selected="true"] .nse-control-list-meta,
+.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-toast .nse-prefs-pane .nse-control-list-item:active .nse-control-list-meta,
+:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-toast .nse-prefs-pane .nse-control-list-item:active .nse-control-list-meta {
   color: var(--nse-prefs-selection-meta-colour, rgba(241, 246, 251, 0.72));
 }
 
-.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-toast .nse-prefs-pane .nse-control-list-item:active .nse-prefs-chevron {
+.nse-prefs-backdrop[data-mode="dark"] .nse-prefs-toast .nse-prefs-pane .nse-control-list-item:active .nse-prefs-chevron,
+:where(:scope):is(.nse-prefs-backdrop[data-mode="dark"]) .nse-prefs-toast .nse-prefs-pane .nse-control-list-item:active .nse-prefs-chevron {
   color: var(--nse-prefs-chevron-selected-colour, rgba(241, 246, 251, 0.7));
+}
+
+}
+
 }

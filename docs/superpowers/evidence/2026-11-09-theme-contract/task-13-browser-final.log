@@ -1,0 +1,179 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run playwright test tests/e2e/theme-baseline.spec.ts tests/e2e/theme-nesting.spec.ts --project=chromium --project=chromium-high-dpr --workers=4
+
+Running 118 tests using 4 workers
+
+(node:76156) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:80368) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:30920) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:36348) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok   4 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3 (6.3s)
+  ok   2 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 4 (6.4s)
+  ok   1 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 (6.4s)
+  ok   3 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2 (7.0s)
+  ok   5 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 5 (5.9s)
+  ok   7 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 7 (6.1s)
+  ok   6 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 6 (6.3s)
+  ok   8 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 8 (5.9s)
+  ok   9 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 9 (6.2s)
+  ok  11 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 11 (6.2s)
+  ok  10 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 10 (6.6s)
+  ok  12 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 12 (6.4s)
+  ok  13 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 13 (6.1s)
+  ok  15 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 15 (6.3s)
+  ok  14 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 14 (6.5s)
+  ok  16 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 16 (6.6s)
+  ok  19 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 19 (6.0s)
+  ok  18 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 18 (6.3s)
+  ok  20 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 20 (6.0s)
+  ok  17 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 17 (7.8s)
+  ok  21 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (5.6s)
+  ok  23 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 3 (5.1s)
+  ok  22 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 2 (5.9s)
+  ok  25 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 5 (5.1s)
+  ok  26 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 6 (5.3s)
+  ok  27 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 7 (5.1s)
+  x   24 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 4 (10.1s)
+(node:8152) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  28 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 8 (5.4s)
+  ok  29 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 9 (5.3s)
+  ok  30 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 10 (5.7s)
+  ok  31 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 11 (5.6s)
+  ok  33 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 13 (5.3s)
+  ok  32 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 12 (5.4s)
+  ok  34 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 14 (5.8s)
+  ok  35 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 15 (5.3s)
+  ok  36 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 16 (5.8s)
+  ok  38 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 18 (5.7s)
+  ok  39 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 19 (5.4s)
+  ok  37 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 17 (7.1s)
+(node:77424) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  42 [chromium] › tests\e2e\theme-nesting.spec.ts:4:1 › nested themes isolate paint and colours; omitted highlighted paint falls back to Atmo (1.2s)
+  ok  41 [chromium] › tests\e2e\theme-baseline.spec.ts:97:1 › stepper hit targets preserve the painted bezel (1.3s)
+(node:15700) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  44 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start in-flow ltr keeps content clear (1.2s)
+  ok  46 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start in-flow rtl keeps content clear (1.1s)
+  ok  47 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start overlay ltr keeps content clear (1.0s)
+  ok  40 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 20 (6.2s)
+  ok  48 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start overlay rtl keeps content clear (1.0s)
+(node:70088) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  49 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end in-flow ltr keeps content clear (1.1s)
+  ok  43 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 (6.5s)
+  ok  51 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end in-flow rtl keeps content clear (1.1s)
+  ok  53 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end overlay ltr keeps content clear (1.1s)
+  ok  45 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2 (6.9s)
+  ok  54 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end overlay rtl keeps content clear (1.1s)
+  ok  56 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list in-flow ltr keeps content clear (1.0s)
+  ok  57 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list in-flow rtl keeps content clear (1.1s)
+  ok  50 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3 (6.1s)
+  ok  58 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list overlay ltr keeps content clear (1.1s)
+  ok  52 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 4 (6.0s)
+  ok  60 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list overlay rtl keeps content clear (1.1s)
+  ok  55 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 5 (6.1s)
+  ok  62 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start in-flow ltr keeps content clear (1.1s)
+  ok  64 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start in-flow rtl keeps content clear (1.1s)
+  ok  65 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start overlay ltr keeps content clear (987ms)
+  ok  59 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 6 (6.1s)
+  ok  66 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start overlay rtl keeps content clear (1.0s)
+  ok  61 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 7 (5.8s)
+  ok  68 [chromium] › tests\e2e\theme-nesting.spec.ts:29:1 › plain login keeps the existing window without ornaments for owner review (1.1s)
+(node:78820) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  63 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 8 (5.9s)
+  ok  67 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 9 (5.7s)
+  ok  69 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 10 (5.9s)
+  ok  70 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 11 (6.0s)
+  ok  71 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 12 (5.8s)
+  ok  72 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 13 (5.3s)
+  ok  73 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 14 (5.9s)
+  ok  74 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 15 (5.7s)
+  ok  75 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 16 (5.9s)
+  ok  76 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 17 (7.0s)
+  ok  77 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 18 (6.0s)
+  ok  78 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 19 (5.4s)
+  ok  79 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 20 (5.8s)
+  ok  80 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (5.6s)
+  ok  82 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 3 (5.3s)
+  ok  81 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 2 (5.8s)
+  ok  83 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 4 (5.5s)
+  ok  84 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 5 (5.3s)
+  ok  86 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 7 (5.2s)
+  ok  85 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 6 (5.4s)
+  ok  87 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 8 (5.5s)
+  ok  88 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 9 (5.4s)
+  ok  90 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 11 (5.3s)
+  ok  89 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 10 (5.7s)
+  ok  91 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 12 (5.4s)
+  ok  92 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 13 (5.4s)
+  ok  94 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 15 (5.7s)
+  ok  93 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 14 (6.1s)
+  ok  95 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 16 (5.9s)
+  ok  96 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 17 (7.2s)
+  ok  98 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 19 (5.6s)
+  ok  97 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 18 (5.8s)
+  ok 100 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:97:1 › stepper hit targets preserve the painted bezel (1.4s)
+  ok 101 [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:4:1 › nested themes isolate paint and colours; omitted highlighted paint falls back to Atmo (1.3s)
+  ok  99 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 20 (6.0s)
+  ok 102 [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start in-flow ltr keeps content clear (976ms)
+  ok 103 [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start in-flow rtl keeps content clear (910ms)
+  ok 104 [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start overlay ltr keeps content clear (911ms)
+  ok 105 [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start overlay rtl keeps content clear (905ms)
+  ok 106 [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end in-flow ltr keeps content clear (906ms)
+  ok 107 [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end in-flow rtl keeps content clear (938ms)
+  ok 108 [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end overlay ltr keeps content clear (909ms)
+  ok 109 [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end overlay rtl keeps content clear (886ms)
+  ok 110 [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list in-flow ltr keeps content clear (874ms)
+  ok 111 [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list in-flow rtl keeps content clear (914ms)
+  ok 112 [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list overlay ltr keeps content clear (898ms)
+  ok 113 [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list overlay rtl keeps content clear (954ms)
+  ok 114 [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start in-flow ltr keeps content clear (891ms)
+  ok 115 [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start in-flow rtl keeps content clear (888ms)
+  ok 116 [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start overlay ltr keeps content clear (909ms)
+  ok 117 [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start overlay rtl keeps content clear (931ms)
+  ok 118 [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:29:1 › plain login keeps the existing window without ornaments for owner review (967ms)
+
+
+  1) [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 4 ────────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('#theme-baseline-surface')
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 10000ms
+      - waiting for locator('#theme-baseline-surface')
+
+
+      13 |     await page.clock.setFixedTime(new Date("2026-11-09T13:30:00.000Z"));
+      14 |     await page.goto(`/tests/e2e/fixtures/theme-baseline/index.html?scheme=${scheme}`);
+    > 15 |     await expect(page.locator("#theme-baseline-surface")).toBeVisible();
+         |                                                           ^
+      16 |     const catalogue = await page.evaluate(() => (window as unknown as { themeBaselineCatalogue: Omit<ThemeBaselineSurface, "render">[] }).themeBaselineCatalogue);
+      17 |     expect(catalogue.length).toBeGreaterThan(400);
+      18 |     const selected = process.env.THEME_BASELINE_SURFACE ? catalogue.filter(entry => new RegExp(process.env.THEME_BASELINE_SURFACE!).test(entry.id)) : catalogue;
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:15:59
+
+    Error Context: test-results\chromium\theme-baseline-dark-catalogue-partition-4-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\chromium\theme-baseline-dark-catalogue-partition-4-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\chromium\theme-baseline-dark-catalogue-partition-4-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 4 ─────────────────
+  117 passed (2.4m)

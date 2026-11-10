@@ -26,7 +26,7 @@ import {
   useSyncExternalStore,
   type PropsWithChildren,
 } from "react";
-import type { NSETheme } from "../Theme/NSETheme";
+import { freezeNSETheme, type NSETheme } from "../Theme/NSETheme";
 import { atmoTheme } from "../Themes/Atmo/appearance";
 import { projectNSEAppearance } from "./appearanceProjection";
 import type {
@@ -38,6 +38,12 @@ import type {
   NSEResolvedColourScheme,
   NSETransparency,
 } from "./nseAppearanceTypes";
+import "../Structure/layers.css";
+import "../Structure/defaults.css";
+import "../Themes/Atmo/Resources/atmo-structure.css";
+import "../Themes/Atmo/Resources/atmo.css";
+import "../Themes/Atmo/Resources/chrome.css";
+import "../Themes/Atmo/Resources/window-titlebar.css";
 import "./nse-appearance.css";
 
 
@@ -77,6 +83,7 @@ export function NSEAppearanceProvider({
   children,
 }: NSEAppearanceProviderProps) {
   const inherited = useContext(NSEAppearanceContext);
+  const frozenTheme = useMemo(() => freezeNSETheme(theme), [theme]);
   const subscribe = useCallback(
     (listener: () => void) => appearanceService?.subscribe(listener) ?? emptySubscribe(),
     [appearanceService],
@@ -97,14 +104,14 @@ export function NSEAppearanceProvider({
     ? (resolvedColourScheme ?? (appearanceService ? serviceResolved : inherited.resolvedColourScheme))
     : requestedScheme;
   const value = useMemo<NSEResolvedAppearance>(() => Object.freeze({
-    theme,
+    theme: frozenTheme,
     chrome: chrome ?? inherited.chrome,
     requestedColourScheme: requestedScheme,
     resolvedColourScheme: resolvedScheme,
     contrast: contrast ?? inherited.contrast,
     transparency: transparency ?? inherited.transparency,
   }), [
-    theme,
+    frozenTheme,
     chrome,
     contrast,
     inherited.chrome,
