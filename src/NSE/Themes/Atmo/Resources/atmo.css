@@ -523,9 +523,6 @@
 /* --- Tabs: grouped toolbar buttons wearing the radio-group ladder -------- */
 /* The PNG skin's per-position tab rules are (0,6,0); :nth-child(n) lifts this
    kill to the same weight so the later file (this one) wins the tie. */
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):nth-child(n),
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):nth-child(n),
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):nth-child(n),
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:nth-child(n)>.nse-control-button:where(:not(.nse-control-picker-button)),
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:nth-child(n)>.nse-control-button:where(:not(.nse-control-picker-button)),
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:nth-child(n)>.nse-control-button:where(:not(.nse-control-picker-button)) {
@@ -541,25 +538,16 @@
   font-weight: 700;
   text-transform: uppercase;
 }
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):first-child,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):first-child,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):first-child,
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child>.nse-control-button:where(:not(.nse-control-picker-button)),
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child>.nse-control-button:where(:not(.nse-control-picker-button)),
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child>.nse-control-button:where(:not(.nse-control-picker-button)) {
   padding: 0 15px;
 }
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):last-child,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):last-child,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):last-child,
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child>.nse-control-button:where(:not(.nse-control-picker-button)),
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child>.nse-control-button:where(:not(.nse-control-picker-button)),
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child>.nse-control-button:where(:not(.nse-control-picker-button)) {
   padding: 0 15px 0 14px;
 }
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):only-child,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):only-child,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):only-child,
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:only-child>.nse-control-button:where(:not(.nse-control-picker-button)),
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:only-child>.nse-control-button:where(:not(.nse-control-picker-button)),
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:only-child>.nse-control-button:where(:not(.nse-control-picker-button)) {
@@ -568,9 +556,6 @@
 
 /* Tabs wear the radio cell anatomy: ::before = strokes/seams + underline,
    ::after = 2px rim ring + silver fill. */
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button))::before,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button))::before,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button))::before,
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button:where(:not(.nse-control-picker-button))::before,
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button:where(:not(.nse-control-picker-button))::before,
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button:where(:not(.nse-control-picker-button))::before {
@@ -583,9 +568,6 @@
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button))::after,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button))::after,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button))::after,
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button:where(:not(.nse-control-picker-button))::after,
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button:where(:not(.nse-control-picker-button))::after,
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button:where(:not(.nse-control-picker-button))::after {
@@ -601,9 +583,6 @@
   mask: none;
 }
 
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):first-child::before,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):first-child::before,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):first-child::before,
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child>.nse-control-button:where(:not(.nse-control-picker-button))::before,
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child>.nse-control-button:where(:not(.nse-control-picker-button))::before,
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child>.nse-control-button:where(:not(.nse-control-picker-button))::before {
@@ -612,9 +591,6 @@
   border-width: 2px 1px 2px 2px;
   border-right-color: #a2a2a2;
 }
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):first-child::after,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):first-child::after,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):first-child::after,
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child>.nse-control-button:where(:not(.nse-control-picker-button))::after,
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child>.nse-control-button:where(:not(.nse-control-picker-button))::after,
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child>.nse-control-button:where(:not(.nse-control-picker-button))::after {
@@ -622,9 +598,6 @@
   border-radius: 11px 0 0 11px;
   border-left-color: var(--nse-atmo-rg-ring-s);
 }
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):not(:first-child):not(:last-child)::before,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):not(:first-child):not(:last-child)::before,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):not(:first-child):not(:last-child)::before,
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:not(:first-child):not(:last-child)>.nse-control-button:where(:not(.nse-control-picker-button))::before,
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:not(:first-child):not(:last-child)>.nse-control-button:where(:not(.nse-control-picker-button))::before,
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:not(:first-child):not(:last-child)>.nse-control-button:where(:not(.nse-control-picker-button))::before {
@@ -632,9 +605,6 @@
   border-left-color: #efefef;
   border-right-color: #a2a2a2;
 }
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):last-child::before,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):last-child::before,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):last-child::before,
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child>.nse-control-button:where(:not(.nse-control-picker-button))::before,
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child>.nse-control-button:where(:not(.nse-control-picker-button))::before,
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child>.nse-control-button:where(:not(.nse-control-picker-button))::before {
@@ -643,9 +613,6 @@
   border-width: 2px 2px 2px 1px;
   border-left-color: #efefef;
 }
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):last-child::after,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):last-child::after,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):last-child::after,
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child>.nse-control-button:where(:not(.nse-control-picker-button))::after,
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child>.nse-control-button:where(:not(.nse-control-picker-button))::after,
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child>.nse-control-button:where(:not(.nse-control-picker-button))::after {
@@ -653,18 +620,12 @@
   border-radius: 0 11px 11px 0;
   border-right-color: var(--nse-atmo-rg-ring-s);
 }
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):only-child::before,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):only-child::before,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):only-child::before,
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:only-child>.nse-control-button:where(:not(.nse-control-picker-button))::before,
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:only-child>.nse-control-button:where(:not(.nse-control-picker-button))::before,
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:only-child>.nse-control-button:where(:not(.nse-control-picker-button))::before {
   border-radius: 13px;
   border-width: 2px;
 }
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):only-child::after,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):only-child::after,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):only-child::after,
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:only-child>.nse-control-button:where(:not(.nse-control-picker-button))::after,
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:only-child>.nse-control-button:where(:not(.nse-control-picker-button))::after,
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:only-child>.nse-control-button:where(:not(.nse-control-picker-button))::after {
@@ -674,15 +635,6 @@
   border-right-color: var(--nse-atmo-rg-ring-s);
 }
 
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::before,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::before,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::before,
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):active:not([data-press-active]):not(:disabled)::before,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):active:not([data-press-active]):not(:disabled)::before,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):active:not([data-press-active]):not(:disabled)::before,
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button))[data-press-active="true"]:not(:disabled)::before,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button))[data-press-active="true"]:not(:disabled)::before,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button))[data-press-active="true"]:not(:disabled)::before,
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::before,
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::before,
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::before,
@@ -695,15 +647,6 @@
   border-top-color: rgba(0, 0, 0, 0.68);
   border-bottom-color: rgba(58, 58, 58, 0.42);
 }
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::after,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::after,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::after,
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):active:not([data-press-active]):not(:disabled)::after,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):active:not([data-press-active]):not(:disabled)::after,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):active:not([data-press-active]):not(:disabled)::after,
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button))[data-press-active="true"]:not(:disabled)::after,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button))[data-press-active="true"]:not(:disabled)::after,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button))[data-press-active="true"]:not(:disabled)::after,
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::after,
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::after,
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::after,
@@ -717,15 +660,6 @@
   background: var(--nse-atmo-rg-sel) padding-box;
 }
 
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"],
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"],
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"],
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):active:not([data-press-active]):not(:disabled),
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):active:not([data-press-active]):not(:disabled),
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):active:not([data-press-active]):not(:disabled),
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button))[data-press-active="true"]:not(:disabled),
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button))[data-press-active="true"]:not(:disabled),
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button))[data-press-active="true"]:not(:disabled),
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"],
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"],
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"],
@@ -741,15 +675,6 @@
 
 /* Selected tab cells: inset like the radio cells — dark own-seam columns,
    soft neighbour casts, no bright rim/ring (see the radio-group notes). */
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):not(:first-child):not(:last-child)[data-selected="true"]::before,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):not(:first-child):not(:last-child)[data-selected="true"]::before,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):not(:first-child):not(:last-child)[data-selected="true"]::before,
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):not(:first-child):not(:last-child):active:not([data-press-active]):not(:disabled)::before,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):not(:first-child):not(:last-child):active:not([data-press-active]):not(:disabled)::before,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):not(:first-child):not(:last-child):active:not([data-press-active]):not(:disabled)::before,
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):not(:first-child):not(:last-child)[data-press-active="true"]:not(:disabled)::before,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):not(:first-child):not(:last-child)[data-press-active="true"]:not(:disabled)::before,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):not(:first-child):not(:last-child)[data-press-active="true"]:not(:disabled)::before,
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:not(:first-child):not(:last-child)>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::before,
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:not(:first-child):not(:last-child)>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::before,
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:not(:first-child):not(:last-child)>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::before,
@@ -762,15 +687,6 @@
   border-left-color: transparent;
   border-right-color: transparent;
 }
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):not(:first-child):not(:last-child)[data-selected="true"]::after,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):not(:first-child):not(:last-child)[data-selected="true"]::after,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):not(:first-child):not(:last-child)[data-selected="true"]::after,
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):not(:first-child):not(:last-child):active:not([data-press-active]):not(:disabled)::after,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):not(:first-child):not(:last-child):active:not([data-press-active]):not(:disabled)::after,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):not(:first-child):not(:last-child):active:not([data-press-active]):not(:disabled)::after,
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):not(:first-child):not(:last-child)[data-press-active="true"]:not(:disabled)::after,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):not(:first-child):not(:last-child)[data-press-active="true"]:not(:disabled)::after,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):not(:first-child):not(:last-child)[data-press-active="true"]:not(:disabled)::after,
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:not(:first-child):not(:last-child)>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::after,
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:not(:first-child):not(:last-child)>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::after,
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:not(:first-child):not(:last-child)>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::after,
@@ -787,15 +703,6 @@
     var(--nse-atmo-rg-edge-r) padding-box,
     var(--nse-atmo-rg-sel) padding-box;
 }
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):first-child:not(:only-child)[data-selected="true"]::before,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):first-child:not(:only-child)[data-selected="true"]::before,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):first-child:not(:only-child)[data-selected="true"]::before,
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):first-child:not(:only-child):active:not([data-press-active]):not(:disabled)::before,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):first-child:not(:only-child):active:not([data-press-active]):not(:disabled)::before,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):first-child:not(:only-child):active:not([data-press-active]):not(:disabled)::before,
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):first-child:not(:only-child)[data-press-active="true"]:not(:disabled)::before,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):first-child:not(:only-child)[data-press-active="true"]:not(:disabled)::before,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):first-child:not(:only-child)[data-press-active="true"]:not(:disabled)::before,
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child:not(:only-child)>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::before,
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child:not(:only-child)>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::before,
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child:not(:only-child)>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::before,
@@ -807,15 +714,6 @@
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child:not(:only-child)>.nse-control-button:where(:not(.nse-control-picker-button))[data-press-active="true"]:not(:disabled)::before {
   border-right-color: transparent;
 }
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):first-child:not(:only-child)[data-selected="true"]::after,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):first-child:not(:only-child)[data-selected="true"]::after,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):first-child:not(:only-child)[data-selected="true"]::after,
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):first-child:not(:only-child):active:not([data-press-active]):not(:disabled)::after,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):first-child:not(:only-child):active:not([data-press-active]):not(:disabled)::after,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):first-child:not(:only-child):active:not([data-press-active]):not(:disabled)::after,
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):first-child:not(:only-child)[data-press-active="true"]:not(:disabled)::after,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):first-child:not(:only-child)[data-press-active="true"]:not(:disabled)::after,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):first-child:not(:only-child)[data-press-active="true"]:not(:disabled)::after,
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child:not(:only-child)>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::after,
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child:not(:only-child)>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::after,
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child:not(:only-child)>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::after,
@@ -832,15 +730,6 @@
     var(--nse-atmo-rg-edge-r) padding-box,
     var(--nse-atmo-rg-sel) padding-box;
 }
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):last-child:not(:only-child)[data-selected="true"]::before,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):last-child:not(:only-child)[data-selected="true"]::before,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):last-child:not(:only-child)[data-selected="true"]::before,
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):last-child:not(:only-child):active:not([data-press-active]):not(:disabled)::before,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):last-child:not(:only-child):active:not([data-press-active]):not(:disabled)::before,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):last-child:not(:only-child):active:not([data-press-active]):not(:disabled)::before,
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):last-child:not(:only-child)[data-press-active="true"]:not(:disabled)::before,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):last-child:not(:only-child)[data-press-active="true"]:not(:disabled)::before,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):last-child:not(:only-child)[data-press-active="true"]:not(:disabled)::before,
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child:not(:only-child)>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::before,
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child:not(:only-child)>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::before,
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child:not(:only-child)>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::before,
@@ -852,15 +741,6 @@
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child:not(:only-child)>.nse-control-button:where(:not(.nse-control-picker-button))[data-press-active="true"]:not(:disabled)::before {
   border-left-color: transparent;
 }
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):last-child:not(:only-child)[data-selected="true"]::after,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):last-child:not(:only-child)[data-selected="true"]::after,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):last-child:not(:only-child)[data-selected="true"]::after,
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):last-child:not(:only-child):active:not([data-press-active]):not(:disabled)::after,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):last-child:not(:only-child):active:not([data-press-active]):not(:disabled)::after,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):last-child:not(:only-child):active:not([data-press-active]):not(:disabled)::after,
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):last-child:not(:only-child)[data-press-active="true"]:not(:disabled)::after,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):last-child:not(:only-child)[data-press-active="true"]:not(:disabled)::after,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):last-child:not(:only-child)[data-press-active="true"]:not(:disabled)::after,
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child:not(:only-child)>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::after,
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child:not(:only-child)>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::after,
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child:not(:only-child)>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::after,
@@ -877,15 +757,6 @@
     var(--nse-atmo-rg-cap-r) padding-box,
     var(--nse-atmo-rg-sel) padding-box;
 }
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):only-child[data-selected="true"]::after,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):only-child[data-selected="true"]::after,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):only-child[data-selected="true"]::after,
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):only-child:active:not([data-press-active]):not(:disabled)::after,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):only-child:active:not([data-press-active]):not(:disabled)::after,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):only-child:active:not([data-press-active]):not(:disabled)::after,
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):only-child[data-press-active="true"]:not(:disabled)::after,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):only-child[data-press-active="true"]:not(:disabled)::after,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):only-child[data-press-active="true"]:not(:disabled)::after,
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:only-child>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::after,
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:only-child>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::after,
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:only-child>.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::after,
@@ -902,12 +773,6 @@
     var(--nse-atmo-rg-sel) padding-box;
 }
 
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):disabled::before,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):disabled::before,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):disabled::before,
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):disabled::after,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:where(:not(.nse-control-picker-button)):disabled::after,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:where(:not(.nse-control-picker-button)):disabled::after,
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button:where(:not(.nse-control-picker-button)):disabled::before,
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button:where(:not(.nse-control-picker-button)):disabled::before,
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button:where(:not(.nse-control-picker-button)):disabled::before,
@@ -1006,20 +871,6 @@
   --nse-atmo-mi-ring-focus-s: rgba(45, 45, 45, 0.9);
 }
 
-
-
-
-
-
-
-
-
-:scope .nse-control-menu-check,
-:scope:is(.nse-control-menu-check),
-:scope.nse-control-menu-check {
-  background: var(--nse-atmo-check-glyph) center / contain no-repeat;
-}
-
 /* Thumb cast shadow, relegated to the well: lives INSIDE the track (whose
    overflow+radius clip to the pill), follows the thumb via the same
    --nse-control-toggle-thumb-x variable and transition. Visible only where it
@@ -1111,141 +962,24 @@
 
 /* The element keeps the skin's transparent 30/28/35 border for layout (and
    its drop-shadow filter); only the border-image paint is replaced. */
-:scope .nse-control-menu,
-:scope:is(.nse-control-menu),
-:scope.nse-control-menu {
-  border-image: none;
-  isolation: isolate;
-}
 
 /* Outer black stroke ring + the sprite's baked soft shadow. Insets are
    relative to the padding box (absolute-positioning containing block), so
    they subtract the element's 30/28/35 transparent layout border to land at
    border-box coords 2px 6px 10px. */
-:scope .nse-control-menu::before,
-:scope:is(.nse-control-menu::before),
-:scope.nse-control-menu::before {
-  content: "";
-  position: absolute;
-  inset: -28px -22px -25px;
-  z-index: -1;
-  pointer-events: none;
-  border-radius: 22px;
-  border: 1px solid;
-  border-color: rgba(0, 0, 0, 0.5) rgba(0, 0, 0, 0.67) rgba(0, 0, 0, 0.8);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.55);
-}
 
 /* Concentric light bevel ring + the slate fill. The px-anchored gradient
    stops mirror the 9-slice stretch: fixed ramps in the 30px top / 35px
    bottom slices, linear through the stretched middle. */
-:scope .nse-control-menu::after,
-:scope:is(.nse-control-menu::after),
-:scope.nse-control-menu::after {
-  content: "";
-  position: absolute;
-  inset: -27px -21px -24px;
-  z-index: -1;
-  pointer-events: none;
-  border-radius: 21px;
-  border: 1px solid;
-  border-color: rgba(208, 208, 211, 0.98) rgba(113, 115, 118, 0.96) rgba(88, 89, 91, 0.96);
-  background: linear-gradient(
-    rgba(142, 145, 150, 0.95) 0,
-    rgba(125, 127, 131, 0.95) 25px,
-    rgba(72, 73, 76, 0.95) calc(100% - 22px),
-    rgba(61, 62, 64, 0.95) 100%
-  ) padding-box;
-}
 
 /* Picker list — popup-picker.png: the grey focus-pill art as a light panel
    (19px layout border, so insets subtract 19 to land at 4px 1px). */
-:scope .nse-control-picker-list,
-:scope:is(.nse-control-picker-list),
-:scope.nse-control-picker-list {
-  border-image: none;
-  isolation: isolate;
-}
-
-:scope .nse-control-picker-list::before,
-:scope:is(.nse-control-picker-list::before),
-:scope.nse-control-picker-list::before {
-  content: "";
-  position: absolute;
-  inset: -15px -18px;
-  z-index: -1;
-  pointer-events: none;
-  border-radius: 10px;
-  border: 1px solid;
-  border-color: rgba(0, 0, 0, 0.32) rgba(0, 0, 0, 0.41) rgba(0, 0, 0, 0.59);
-  background: linear-gradient(
-    #f4f4f4 0, #f4f4f4 1px, #dadada 1px, #dadada 2px, #e3e3e3 3px,
-    #e9e8e8 7px, #e2e1e1 14px, #dbdada calc(100% - 14px),
-    #d1d0d0 calc(100% - 2px), #dcdbdb calc(100% - 2px), #dcdbdb 100%
-  ) padding-box;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-}
 
 /* Light-panel option highlight: white wash under the blue/white sheen (the
    skin's picker-list-specific rule, re-authored so it outranks the generic
    dark-menu highlight above). */
-:scope .nse-control-picker-list .nse-control-picker-option:hover:not(:disabled),
-:scope:is(.nse-control-picker-list) .nse-control-picker-option:hover:not(:disabled),
-:scope.nse-control-picker-list .nse-control-picker-option:hover:not(:disabled),
-:scope .nse-control-picker-list .nse-control-picker-option:not(:disabled)[aria-selected="true"],
-:scope:is(.nse-control-picker-list) .nse-control-picker-option:not(:disabled)[aria-selected="true"],
-:scope.nse-control-picker-list .nse-control-picker-option:not(:disabled)[aria-selected="true"] {
-  background:
-    linear-gradient(
-      rgba(91, 141, 184, 0.75) 0, rgba(91, 141, 184, 0.75) 1px,
-      rgba(99, 153, 200, 0.74) 1px, rgba(99, 153, 200, 0.74) 2px,
-      rgba(255, 255, 255, 0.58) 2px, rgba(255, 255, 255, 0.58) 3px,
-      rgba(0, 0, 0, 0) 3px
-    ),
-    rgba(255, 255, 255, 0.78);
-}
-
-:scope .nse-control-menu-separator,
-:scope:is(.nse-control-menu-separator),
-:scope.nse-control-menu-separator,
-:scope .nse-control-menu-item:not(:first-child)::before,
-:scope:is(.nse-control-menu-item:not(:first-child)::before),
-:scope.nse-control-menu-item:not(:first-child)::before,
-:scope .nse-control-picker-option:not(:first-child)::before,
-:scope:is(.nse-control-picker-option:not(:first-child)::before),
-:scope.nse-control-picker-option:not(:first-child)::before {
-  background: linear-gradient(to right,
-    rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0.35) 15%, rgba(0, 0, 0, 0.47) 38%,
-    rgba(0, 0, 0, 0.51) 50%, rgba(0, 0, 0, 0.47) 62%, rgba(0, 0, 0, 0.35) 85%,
-    rgba(0, 0, 0, 0) 100%
-  ) center top / 236px 1px repeat-x;
-}
-
-:scope .nse-control-menu-item:hover:not(:disabled),
-:scope:is(.nse-control-menu-item:hover:not(:disabled)),
-:scope.nse-control-menu-item:hover:not(:disabled),
-:scope .nse-control-picker-option:hover:not(:disabled),
-:scope:is(.nse-control-picker-option:hover:not(:disabled)),
-:scope.nse-control-picker-option:hover:not(:disabled),
-:scope .nse-control-picker-option:not(:disabled)[aria-selected="true"],
-:scope:is(.nse-control-picker-option:not(:disabled)[aria-selected="true"]),
-:scope.nse-control-picker-option:not(:disabled)[aria-selected="true"] {
-  background:
-    linear-gradient(
-      rgba(91, 141, 184, 0.75) 0, rgba(91, 141, 184, 0.75) 1px,
-      rgba(99, 153, 200, 0.74) 1px, rgba(99, 153, 200, 0.74) 2px,
-      rgba(255, 255, 255, 0.58) 2px, rgba(255, 255, 255, 0.58) 3px,
-      rgba(0, 0, 0, 0) 3px
-    ),
-    rgba(40, 65, 82, 0.74);
-}
 
 /* Sub-menu chevron: the silver menuitem-arrow glyph. */
-:scope .nse-control-menu-child-indicator,
-:scope:is(.nse-control-menu-child-indicator),
-:scope.nse-control-menu-child-indicator {
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="%23e4e4e4"/><stop offset="1" stop-color="%23a3a3a3"/></linearGradient></defs><path d="M9 5.5 L16 12 L9 18.5" fill="none" stroke="url(%23g)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/></svg>') center / contain no-repeat;
-}
 
 /* ============================================================================
    Popup panel — popup-panel.png (50×49): the grey focus-pill family as a
@@ -1253,36 +987,8 @@
    baked shadow (the skin adds its own big drop-shadow filter on top).
    ========================================================================= */
 
-:scope .nse-control-popup,
-:scope:is(.nse-control-popup),
-:scope.nse-control-popup {
-  position: relative;
-  isolation: isolate;
-  border-image: none;
-}
-
 /* Insets subtract the 24px transparent layout border (see menu note) to land
    at border-box coords 8px 7px. */
-:scope .nse-control-popup::before,
-:scope:is(.nse-control-popup::before),
-:scope.nse-control-popup::before {
-  content: "";
-  position: absolute;
-  inset: -16px -17px;
-  z-index: -1;
-  pointer-events: none;
-  border-radius: 8px;
-  border: 1px solid;
-  border-color: rgba(0, 0, 0, 0.32) rgba(0, 0, 0, 0.41) rgba(0, 0, 0, 0.59);
-  background:
-    linear-gradient(
-      #f4f4f4 0, #f4f4f4 1px, #dadada 1px, #dadada 2px, #e3e3e3 3px,
-      #e7e7e7 5px, #e9e8e8 7px, #e2e1e1 14px, #dfdede 16px,
-      #dfdede calc(100% - 15px), #dcdbdb calc(100% - 14px),
-      #d1d0d0 calc(100% - 2px), #dcdbdb calc(100% - 2px), #dcdbdb 100%
-    ) padding-box;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-}
 
 /* Search/clear affordance glyphs → inline SVG (menuitem-arrow chevron and
    the glassy clear circle), traced from the sprites. */
@@ -1573,15 +1279,6 @@
     rgba(255, 255, 255, 0.6835) 0,
     rgba(255, 255, 255, 0) 26.5px
   );
-}
-
-:scope .nse-control-popup.nse-extended-app-menu-popup::before,
-:scope:is(.nse-control-popup.nse-extended-app-menu-popup::before),
-:scope.nse-control-popup.nse-extended-app-menu-popup::before,
-:scope .nse-control-popup.nse-extended-app-menu-popup::after,
-:scope:is(.nse-control-popup.nse-extended-app-menu-popup::after),
-:scope.nse-control-popup.nse-extended-app-menu-popup::after {
-  content: none;
 }
 
 /* App menu — the same 30/28/35-sliced system-menu frame as .nse-control-menu, but
@@ -1914,66 +1611,6 @@
    a 17px transparent border. It gets the push-button pill recipe with the LIGHT
    tone tokens; the pseudo insets subtract that 17px border so the pill lands at
    the same border-box coords as a real button (3px 1px outer, 5px 3px inner). */
-:scope .nse-control-file-picker-button,
-:scope:is(.nse-control-file-picker-button),
-:scope.nse-control-file-picker-button {
-  position: relative;
-  isolation: isolate;
-  border-image: none;
-  background: transparent;
-  --nse-atmo-btn-stroke-t: rgba(0, 0, 0, 0.44);
-  --nse-atmo-btn-stroke-side: rgba(0, 0, 0, 0.4);
-  --nse-atmo-btn-stroke-b: rgba(0, 0, 0, 0.57);
-  --nse-atmo-btn-bevel: rgba(232, 232, 232, 0.77);
-  --nse-atmo-btn-shoe: rgba(171, 171, 171, 0.77);
-  --nse-atmo-btn-fill-a: rgba(185, 185, 185, 0.88);
-  --nse-atmo-btn-fill-b: rgba(222, 222, 222, 0.88);
-  --nse-atmo-btn-shadow: 0 1.5px 1.5px rgba(0, 0, 0, 0.24);
-}
-
-:scope .nse-control-file-picker-button::before,
-:scope:is(.nse-control-file-picker-button::before),
-:scope.nse-control-file-picker-button::before,
-:scope .nse-control-file-picker-button::after,
-:scope:is(.nse-control-file-picker-button::after),
-:scope.nse-control-file-picker-button::after {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  pointer-events: none;
-}
-
-:scope .nse-control-file-picker-button::before,
-:scope:is(.nse-control-file-picker-button::before),
-:scope.nse-control-file-picker-button::before {
-  inset: -14px -16px;
-  border-radius: 16px;
-  border: 2px solid;
-  border-color: var(--nse-atmo-btn-stroke-t) var(--nse-atmo-btn-stroke-side) var(--nse-atmo-btn-stroke-b);
-  padding: 2px;
-  background: linear-gradient(var(--nse-atmo-btn-fill-a), var(--nse-atmo-btn-fill-b)) content-box;
-  box-shadow: var(--nse-atmo-btn-shadow);
-}
-
-:scope .nse-control-file-picker-button::after,
-:scope:is(.nse-control-file-picker-button::after),
-:scope.nse-control-file-picker-button::after {
-  inset: -12px -14px;
-  border-radius: 14px;
-  border: 2px solid transparent;
-  background: linear-gradient(
-    var(--nse-atmo-btn-bevel) 0, var(--nse-atmo-btn-bevel) 2px,
-    color-mix(in srgb, var(--nse-atmo-btn-bevel) 70%, var(--nse-atmo-btn-fill-a)) 10px,
-    color-mix(in srgb, var(--nse-atmo-btn-fill-b) 42%, var(--nse-atmo-btn-fill-a)) 17px,
-    color-mix(in srgb, var(--nse-atmo-btn-fill-b) 72%, var(--nse-atmo-btn-fill-a)) calc(100% - 12px),
-    var(--nse-atmo-btn-fill-b) calc(100% - 3px),
-    var(--nse-atmo-btn-shoe) calc(100% - 2px), var(--nse-atmo-btn-shoe) 100%
-  ) border-box;
-  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-}
 
 /* App topbar disclosure chevron paint. Generic chrome owns the mechanics while
    the explicit appearance supplies the two-cell 24x48 image. */
@@ -5791,26 +5428,17 @@
 /* Grouped tab cells clip to the capsule, not to a pill each: the push
    button's own 18px radius (with overflow: hidden) was cutting every cell's
    seams into rounded corners, so the capsule read as separate buttons. */
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button,
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button,
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button,
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button {
   border-radius: 0;
 }
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:first-child,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child,
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child>.nse-control-button,
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child>.nse-control-button,
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child>.nse-control-button {
   border-start-start-radius: 13px;
   border-end-start-radius: 13px;
 }
-:scope .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child,
-:scope:is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:last-child,
-:scope.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child,
 :scope [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child>.nse-control-button,
 :scope:is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child>.nse-control-button,
 :scope[data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child>.nse-control-button {
@@ -6148,95 +5776,40 @@
 
 
 
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]) button,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button,:scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n),:scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n),:scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n) {
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]) button,
+:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button {
   font-size:max(11px,calc(var(--nse-atmo-rg-band)*0.16 + 5px));
   line-height:var(--nse-atmo-rg-band);
 }
-:scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n),
-:scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n),
-:scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n) {
-  min-inline-size:calc(var(--nse-atmo-rg-band)*0.88);
-  --nse-control-minimum-inline-size:calc(var(--nse-atmo-rg-band)*0.88);
-  block-size:var(--nse-atmo-rg-band);
-  height:var(--nse-atmo-rg-band);
-  min-height:var(--nse-atmo-rg-band);
-  --nse-control-minimum-block-size:var(--nse-atmo-rg-band);
-  padding:0 calc(var(--nse-atmo-rg-band)*0.28);
-}
 
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button::before,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]) button::before,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button::before,:scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n)::before,:scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n)::before,:scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n)::before {
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button::before,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]) button::before,
+:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button::before {
   inset-block:calc(var(--nse-atmo-rg-band)*0.04);
 }
-:scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n)::before,
-:scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n)::before,
-:scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n)::before {
-  border-block-width:var(--nse-atmo-rg-line);
-}
 
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button::after,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]) button::after,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button::after,:scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n)::after,:scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n)::after,:scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n)::after {
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]) button::after,
+:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size] button::after {
   inset-block:calc(var(--nse-atmo-rg-band)*0.08);
-}
-:scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n)::after,
-:scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n)::after,
-:scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:nth-child(n)::after {
-  border-width:var(--nse-atmo-rg-line);
-  border-inline-width:1px;
 }
 
 /* The start cap. */
-
-:scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:nth-child(n),
-:scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:nth-child(n),
-:scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:nth-child(n) {
-  padding-inline-start:calc(var(--nse-atmo-rg-band)*0.36);
-  border-start-start-radius:calc(var(--nse-atmo-rg-band)*0.26);
-  border-end-start-radius:calc(var(--nse-atmo-rg-band)*0.26);
-}
-
-:scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:nth-child(n)::before,
-:scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:nth-child(n)::before,
-:scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:nth-child(n)::before {
-  border-inline-start-width:var(--nse-atmo-rg-line);
-  border-start-start-radius:calc(var(--nse-atmo-rg-band)*0.26);
-  border-end-start-radius:calc(var(--nse-atmo-rg-band)*0.26);
-}
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>:first-child>button:first-child::after,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size])>:first-child>button:first-child::after,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>:first-child>button:first-child::after,:scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:nth-child(n)::after,:scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:nth-child(n)::after,:scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:nth-child(n)::after {
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>:first-child>button:first-child::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size])>:first-child>button:first-child::after,
+:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>:first-child>button:first-child::after {
   inset-inline-start:calc(var(--nse-atmo-rg-band)*0.04);
-}
-:scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:nth-child(n)::after,
-:scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:nth-child(n)::after,
-:scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:nth-child(n)::after {
-  border-inline-start-width:var(--nse-atmo-rg-line);
-  border-start-start-radius:calc(var(--nse-atmo-rg-band)*0.22);
-  border-end-start-radius:calc(var(--nse-atmo-rg-band)*0.22);
 }
 
 /* The end cap. */
-
-:scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:nth-child(n),
-:scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:nth-child(n),
-:scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:nth-child(n) {
-  padding-inline-end:calc(var(--nse-atmo-rg-band)*0.36);
-  border-start-end-radius:calc(var(--nse-atmo-rg-band)*0.26);
-  border-end-end-radius:calc(var(--nse-atmo-rg-band)*0.26);
-}
-
-:scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:nth-child(n)::before,
-:scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:nth-child(n)::before,
-:scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:nth-child(n)::before {
-  border-inline-end-width:var(--nse-atmo-rg-line);
-  border-start-end-radius:calc(var(--nse-atmo-rg-band)*0.26);
-  border-end-end-radius:calc(var(--nse-atmo-rg-band)*0.26);
-}
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::after,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size])>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::after,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::after,:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>button:is(:last-child,:has(+input[type="hidden"]:last-child))::after,:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size])>button:is(:last-child,:has(+input[type="hidden"]:last-child))::after,:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>button:is(:last-child,:has(+input[type="hidden"]:last-child))::after,:scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:nth-child(n)::after,:scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:nth-child(n)::after,:scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:nth-child(n)::after {
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size])>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::after,
+:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::after,
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>button:is(:last-child,:has(+input[type="hidden"]:last-child))::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size])>button:is(:last-child,:has(+input[type="hidden"]:last-child))::after,
+:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>button:is(:last-child,:has(+input[type="hidden"]:last-child))::after {
   inset-inline-end:calc(var(--nse-atmo-rg-band)*0.04);
-}
-:scope [data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:nth-child(n)::after,
-:scope:is([data-nse-control="tab-group"][data-size]) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:nth-child(n)::after,
-:scope[data-nse-control="tab-group"][data-size] .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:nth-child(n)::after {
-  border-inline-end-width:var(--nse-atmo-rg-line);
-  border-start-end-radius:calc(var(--nse-atmo-rg-band)*0.22);
-  border-end-end-radius:calc(var(--nse-atmo-rg-band)*0.22);
 }
 
 /* A sized capsule's selected cell keeps the inset ink: no ring columns at its
@@ -6871,11 +6444,6 @@
 }
 
 /* Swipeable rows slide over their action trays on the row's own white. */
-:scope .nse-list-swipeable,
-:scope:is(.nse-list-swipeable),
-:scope.nse-list-swipeable {
-  --nse-list-swipe-surface: var(--nse-atmo-table-fill);
-}
 
 /* ============================================================================
    Layout metrics (nse-layout-defaults.css) for Atmo's controls. A form

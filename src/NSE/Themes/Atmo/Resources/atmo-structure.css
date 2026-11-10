@@ -172,10 +172,6 @@
 :where(:scope):is(.nse-control-button:where(:not(.nse-control-picker-button)):focus-visible),
 :where(:scope) .nse-control-picker-button:focus-visible,
 :where(:scope):is(.nse-control-picker-button:focus-visible),
-:where(:scope) .nse-control-menu-item:focus-visible,
-:where(:scope):is(.nse-control-menu-item:focus-visible),
-:where(:scope) .nse-control-picker-option:focus-visible,
-:where(:scope):is(.nse-control-picker-option:focus-visible),
 :where(:scope) .nse-control-radio:focus-visible,
 :where(:scope):is(.nse-control-radio:focus-visible),
 :where(:scope) .nse-control-toggle:focus-visible,
@@ -245,12 +241,6 @@
 /* The editor splits its bar into five small toolbars so they can wrap. Each
    one painting the top fade gave five pale plates floating above their
    capsules; they are groups on one bar, so they sit flat like inline ones. */
-:where(:scope) .nse-editor-toolbar-stack>.nse-control-toolbar,
-:where(:scope):is(.nse-editor-toolbar-stack)>.nse-control-toolbar {
-  min-height: 0;
-  padding: 0;
-  background: transparent;
-}
 
 :where(:scope) .nse-control-toolbar:not([data-grouped="true"])>.nse-control-button,
 :where(:scope):is(.nse-control-toolbar:not([data-grouped="true"]))>.nse-control-button {
@@ -771,8 +761,6 @@
    sprite, NOT the grouped-toolbutton sheet. Re-skin the grouped tab buttons onto the
    radio-group ladder (radio-group.png, 600px / 50px cells) so Tabs join the light radio
    family (RadioGroup) and stay distinct from the dark tool family (Tools, RadioTools). */
-:where(:scope) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button,
-:where(:scope):is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button,
 :where(:scope) [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button,
 :where(:scope):is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button {
   min-width: 54px;
@@ -789,95 +777,65 @@
   line-height: 50px;
   text-transform: uppercase;
 }
-:where(:scope) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button[data-selected="true"],
-:where(:scope):is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button[data-selected="true"],
 :where(:scope) [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button[data-selected="true"],
 :where(:scope):is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button[data-selected="true"] {
   color: #fff;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.58);
 }
-:where(:scope) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:not(:last-child),
-:where(:scope):is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:first-child:not(:last-child),
 :where(:scope) [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child:not(:last-child)>.nse-control-button,
 :where(:scope):is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child:not(:last-child)>.nse-control-button {
   border-width: 0 2px 0 15px;
   border-image: var(--nse-atmo-radio-group) 0 2 550 15 fill stretch;
 }
-:where(:scope) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:not(:last-child)[data-selected="true"],
-:where(:scope):is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:first-child:not(:last-child)[data-selected="true"],
 :where(:scope) [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child:not(:last-child)>.nse-control-button[data-selected="true"],
 :where(:scope):is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child:not(:last-child)>.nse-control-button[data-selected="true"] {
   border-image-slice: 50 2 500 15 fill;
 }
-:where(:scope) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:not(:last-child):disabled,
-:where(:scope):is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:first-child:not(:last-child):disabled,
 :where(:scope) [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child:not(:last-child)>.nse-control-button:disabled,
 :where(:scope):is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child:not(:last-child)>.nse-control-button:disabled {
   border-image-slice: 100 2 450 15 fill;
 }
-:where(:scope) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:not(:first-child):not(:last-child),
-:where(:scope):is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:not(:first-child):not(:last-child),
 :where(:scope) [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:not(:first-child):not(:last-child)>.nse-control-button,
 :where(:scope):is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:not(:first-child):not(:last-child)>.nse-control-button {
   border-width: 0 2px 0 1px;
   border-image: var(--nse-atmo-radio-group) 150 2 400 1 fill stretch;
 }
-:where(:scope) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:not(:first-child):not(:last-child)[data-selected="true"],
-:where(:scope):is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:not(:first-child):not(:last-child)[data-selected="true"],
 :where(:scope) [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:not(:first-child):not(:last-child)>.nse-control-button[data-selected="true"],
 :where(:scope):is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:not(:first-child):not(:last-child)>.nse-control-button[data-selected="true"] {
   border-image-slice: 200 2 350 1 fill;
 }
-:where(:scope) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:not(:first-child):not(:last-child):disabled,
-:where(:scope):is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:not(:first-child):not(:last-child):disabled,
 :where(:scope) [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:not(:first-child):not(:last-child)>.nse-control-button:disabled,
 :where(:scope):is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:not(:first-child):not(:last-child)>.nse-control-button:disabled {
   border-image-slice: 250 2 300 1 fill;
 }
-:where(:scope) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:not(:first-child),
-:where(:scope):is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:last-child:not(:first-child),
 :where(:scope) [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child:not(:first-child)>.nse-control-button,
 :where(:scope):is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child:not(:first-child)>.nse-control-button {
   border-width: 0 15px 0 1px;
   border-image: var(--nse-atmo-radio-group) 300 15 250 1 fill stretch;
 }
-:where(:scope) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:not(:first-child)[data-selected="true"],
-:where(:scope):is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:last-child:not(:first-child)[data-selected="true"],
 :where(:scope) [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child:not(:first-child)>.nse-control-button[data-selected="true"],
 :where(:scope):is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child:not(:first-child)>.nse-control-button[data-selected="true"] {
   border-image-slice: 350 15 200 1 fill;
 }
-:where(:scope) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:not(:first-child):disabled,
-:where(:scope):is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:last-child:not(:first-child):disabled,
 :where(:scope) [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child:not(:first-child)>.nse-control-button:disabled,
 :where(:scope):is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child:not(:first-child)>.nse-control-button:disabled {
   border-image-slice: 400 15 150 1 fill;
 }
-:where(:scope) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:only-child,
-:where(:scope):is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:only-child,
 :where(:scope) [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:only-child>.nse-control-button,
 :where(:scope):is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:only-child>.nse-control-button {
   border-width: 0 15px;
   border-image: var(--nse-atmo-radio-group) 450 15 100 15 fill stretch;
 }
-:where(:scope) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:only-child[data-selected="true"],
-:where(:scope):is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:only-child[data-selected="true"],
 :where(:scope) [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:only-child>.nse-control-button[data-selected="true"],
 :where(:scope):is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:only-child>.nse-control-button[data-selected="true"] {
   border-image-slice: 500 15 50 15 fill;
 }
-:where(:scope) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:only-child:disabled,
-:where(:scope):is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:only-child:disabled,
 :where(:scope) [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:only-child>.nse-control-button:disabled,
 :where(:scope):is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:only-child>.nse-control-button:disabled {
   border-image-slice: 550 15 0 15 fill;
 }
 /* momentary press (down): the button-down state shares the radio sprite's depressed band,
    so a pressed tab shows the selected-band slice (not a blank). White caption on press. */
-:where(:scope) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:active:not([data-press-active]):not(:disabled),
-:where(:scope):is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:active:not([data-press-active]):not(:disabled),
-:where(:scope) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button[data-press-active="true"]:not(:disabled),
-:where(:scope):is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button[data-press-active="true"]:not(:disabled),
 :where(:scope) [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button:active:not([data-press-active]):not(:disabled),
 :where(:scope):is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button:active:not([data-press-active]):not(:disabled),
 :where(:scope) [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]>.nse-control-button[data-press-active="true"]:not(:disabled),
@@ -885,40 +843,24 @@
   color: #fff;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.58);
 }
-:where(:scope) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:not(:last-child):active:not([data-press-active]):not(:disabled),
-:where(:scope):is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:first-child:not(:last-child):active:not([data-press-active]):not(:disabled),
-:where(:scope) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:first-child:not(:last-child)[data-press-active="true"]:not(:disabled),
-:where(:scope):is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:first-child:not(:last-child)[data-press-active="true"]:not(:disabled),
 :where(:scope) [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child:not(:last-child)>.nse-control-button:active:not([data-press-active]):not(:disabled),
 :where(:scope):is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child:not(:last-child)>.nse-control-button:active:not([data-press-active]):not(:disabled),
 :where(:scope) [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child:not(:last-child)>.nse-control-button[data-press-active="true"]:not(:disabled),
 :where(:scope):is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:first-child:not(:last-child)>.nse-control-button[data-press-active="true"]:not(:disabled) {
   border-image-slice: 50 2 500 15 fill;
 }
-:where(:scope) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:not(:first-child):not(:last-child):active:not([data-press-active]):not(:disabled),
-:where(:scope):is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:not(:first-child):not(:last-child):active:not([data-press-active]):not(:disabled),
-:where(:scope) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:not(:first-child):not(:last-child)[data-press-active="true"]:not(:disabled),
-:where(:scope):is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:not(:first-child):not(:last-child)[data-press-active="true"]:not(:disabled),
 :where(:scope) [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:not(:first-child):not(:last-child)>.nse-control-button:active:not([data-press-active]):not(:disabled),
 :where(:scope):is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:not(:first-child):not(:last-child)>.nse-control-button:active:not([data-press-active]):not(:disabled),
 :where(:scope) [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:not(:first-child):not(:last-child)>.nse-control-button[data-press-active="true"]:not(:disabled),
 :where(:scope):is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:not(:first-child):not(:last-child)>.nse-control-button[data-press-active="true"]:not(:disabled) {
   border-image-slice: 200 2 350 1 fill;
 }
-:where(:scope) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:not(:first-child):active:not([data-press-active]):not(:disabled),
-:where(:scope):is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:last-child:not(:first-child):active:not([data-press-active]):not(:disabled),
-:where(:scope) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:last-child:not(:first-child)[data-press-active="true"]:not(:disabled),
-:where(:scope):is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:last-child:not(:first-child)[data-press-active="true"]:not(:disabled),
 :where(:scope) [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child:not(:first-child)>.nse-control-button:active:not([data-press-active]):not(:disabled),
 :where(:scope):is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child:not(:first-child)>.nse-control-button:active:not([data-press-active]):not(:disabled),
 :where(:scope) [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child:not(:first-child)>.nse-control-button[data-press-active="true"]:not(:disabled),
 :where(:scope):is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:last-child:not(:first-child)>.nse-control-button[data-press-active="true"]:not(:disabled) {
   border-image-slice: 350 15 200 1 fill;
 }
-:where(:scope) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:only-child:active:not([data-press-active]):not(:disabled),
-:where(:scope):is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:only-child:active:not([data-press-active]):not(:disabled),
-:where(:scope) .nse-extended-tab-group.nse-control-toolbar[data-grouped="true"]>.nse-control-button:only-child[data-press-active="true"]:not(:disabled),
-:where(:scope):is(.nse-extended-tab-group.nse-control-toolbar[data-grouped="true"])>.nse-control-button:only-child[data-press-active="true"]:not(:disabled),
 :where(:scope) [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:only-child>.nse-control-button:active:not([data-press-active]):not(:disabled),
 :where(:scope):is([data-nse-control="tab-view"])>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:only-child>.nse-control-button:active:not([data-press-active]):not(:disabled),
 :where(:scope) [data-nse-control="tab-view"]>.nse-control-toolbar[data-grouped="true"]>[data-nse-part="tab-item"]:only-child>.nse-control-button[data-press-active="true"]:not(:disabled),
@@ -973,357 +915,31 @@
   font-weight:700;
 }
 
-
-
-:where(:scope) .nse-control-popup-layer,
-:where(:scope):is(.nse-control-popup-layer) {
-  position: fixed;
-  inset: 0;
-  z-index: 160;
-  display: grid;
-  place-items: center;
-  padding: 22px;
-  pointer-events: auto;
-}
-
-:where(:scope) .nse-control-popup-layer.is-modal,
-:where(:scope):is(.nse-control-popup-layer.is-modal) {
-  background: rgba(0, 0, 0, 0.26);
-}
-
-:where(:scope) .nse-control-popup,
-:where(:scope):is(.nse-control-popup) {
-  min-width: min(340px, calc(100vw - 34px));
-  max-width: min(560px, calc(100vw - 34px));
-  border: 24px solid transparent;
-  border-image: var(--nse-atmo-popup) 24 fill stretch;
-  color: #182334;
-  filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.42));
-}
-
-:where(:scope) .nse-control-popup-title,
-:where(:scope):is(.nse-control-popup-title) {
-  margin: -8px -12px 8px;
-  color: var(--nse-atmo-title-ink, #1d2a37);
-  font-size: 18px;
-  font-weight: 700;
-}
-
-:where(:scope) .nse-control-popup-inner,
-:where(:scope):is(.nse-control-popup-inner) {
-  margin: -7px -16px;
-  padding: 4px 8px;
-}
-
-:where(:scope) .nse-control-menu-host,:where(:scope):is(.nse-control-menu-host),:where(:scope) .nse-control-picker,:where(:scope):is(.nse-control-picker) {
+:where(:scope) .nse-control-picker,
+:where(:scope):is(.nse-control-picker) {
   position:relative;
   display:inline-flex;
   align-items:center;
 }
-:where(:scope) .nse-control-menu-host,
-:where(:scope):is(.nse-control-menu-host) {
-  gap:8px;
-  max-width:100%;
-}
-
-:where(:scope) .nse-control-menu,
-:where(:scope):is(.nse-control-menu),
-:where(:scope) .nse-control-picker-list,
-:where(:scope):is(.nse-control-picker-list) {
-  position: fixed;
-  z-index: 180;
-  min-width: 180px;
-  max-width: min(320px, calc(100vw - 36px));
-  border-color: transparent;
-  border-style: solid;
-  border-width: 30px 28px 35px;
-  border-image: var(--nse-atmo-system-menu) 30 28 35 28 fill stretch;
-  color: #fff;
-  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.42));
-}
 
 /* The dropdown menu is a non-scrolling frame; its inner .nse-control-menu-scroll scrolls and
    bleeds into the frame so rows reach (and fade at) the absolute top/bottom edges. */
-:where(:scope) .nse-control-menu,
-:where(:scope):is(.nse-control-menu) {
-  overflow: visible;
-}
-
-:where(:scope) .nse-control-menu-scroll,
-:where(:scope):is(.nse-control-menu-scroll) {
-  display: block;
-  /* Bleed up/down over the frame's top/bottom border (sides stay framed) so rows reach
-     the absolute top/bottom edges. Top/bottom bleed kept symmetric so the first and last
-     rows get the same tiny gap below the rounded corners (the bottom used to bleed 4px more,
-     so a selected last row rode right up against the bottom edge). */
-  margin: -16px 0 -16px;
-  max-height: min(60vh, 420px);
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  /* The edge fade is the scroll affordance, so hide the native scrollbar (scroll still
-     works via wheel/drag/keyboard). */
-  scrollbar-width: none;
-  /* Fade the rows right at the absolute top/bottom edge (stops toggled via CSS vars). */
-  --nse-atmo-menu-fade-top: 0px;
-  --nse-atmo-menu-fade-bottom: 0px;
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    #000 var(--nse-atmo-menu-fade-top),
-    #000 calc(100% - var(--nse-atmo-menu-fade-bottom)),
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    #000 var(--nse-atmo-menu-fade-top),
-    #000 calc(100% - var(--nse-atmo-menu-fade-bottom)),
-    transparent 100%
-  );
-}
 
 /* Inner content strip the rubber-band hook translates; the scroll box clips the bounce. */
-:where(:scope) .nse-control-menu-scroll-content,
-:where(:scope):is(.nse-control-menu-scroll-content) {
-  display: block;
-}
-
-:where(:scope) .nse-control-menu[data-fade-top="true"] .nse-control-menu-scroll,
-:where(:scope):is(.nse-control-menu[data-fade-top="true"]) .nse-control-menu-scroll {
-  --nse-atmo-menu-fade-top: 26px;
-}
-
-:where(:scope) .nse-control-menu[data-fade-bottom="true"] .nse-control-menu-scroll,
-:where(:scope):is(.nse-control-menu[data-fade-bottom="true"]) .nse-control-menu-scroll {
-  --nse-atmo-menu-fade-bottom: 26px;
-}
-
-:where(:scope) .nse-control-menu-scroll::-webkit-scrollbar,
-:where(:scope):is(.nse-control-menu-scroll::-webkit-scrollbar) {
-  width: 0;
-  height: 0;
-}
 
 /* The picker popup is a non-scrolling sprite frame; its inner .nse-control-picker-scroll scrolls,
    bleeds over the frame's top/bottom border, hides its scrollbar and fades at the edges, and
    rubber-bands — the same grammar as the dropdown menu. */
-:where(:scope) .nse-control-picker-list,
-:where(:scope):is(.nse-control-picker-list) {
-  overflow: visible;
-}
-
-:where(:scope) .nse-control-picker-scroll,
-:where(:scope):is(.nse-control-picker-scroll) {
-  display: block;
-  /* Bleed up/down over the frame's top/bottom border so rows reach (and fade at) the edges,
-     leaving a small symmetric gap below the rounded corners. */
-  margin: -11px 0;
-  max-height: min(60vh, 420px);
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  /* The edge fade is the scroll affordance, so hide the native scrollbar (scroll still works
-     via wheel/drag/keyboard, with rubber-band overscroll). */
-  scrollbar-width: none;
-  --nse-atmo-picker-fade-top: 0px;
-  --nse-atmo-picker-fade-bottom: 0px;
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    #000 var(--nse-atmo-picker-fade-top),
-    #000 calc(100% - var(--nse-atmo-picker-fade-bottom)),
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    #000 var(--nse-atmo-picker-fade-top),
-    #000 calc(100% - var(--nse-atmo-picker-fade-bottom)),
-    transparent 100%
-  );
-}
 
 /* Inner content strip the rubber-band hook translates; the scroll box clips the bounce. */
-:where(:scope) .nse-control-picker-scroll-content,
-:where(:scope):is(.nse-control-picker-scroll-content) {
-  display: block;
-}
-
-:where(:scope) .nse-control-picker-list[data-fade-top="true"] .nse-control-picker-scroll,
-:where(:scope):is(.nse-control-picker-list[data-fade-top="true"]) .nse-control-picker-scroll {
-  --nse-atmo-picker-fade-top: 22px;
-}
-
-:where(:scope) .nse-control-picker-list[data-fade-bottom="true"] .nse-control-picker-scroll,
-:where(:scope):is(.nse-control-picker-list[data-fade-bottom="true"]) .nse-control-picker-scroll {
-  --nse-atmo-picker-fade-bottom: 22px;
-}
-
-:where(:scope) .nse-control-picker-scroll::-webkit-scrollbar,
-:where(:scope):is(.nse-control-picker-scroll::-webkit-scrollbar) {
-  width: 0;
-  height: 0;
-}
-
-:where(:scope) .nse-control-menu-item,
-:where(:scope):is(.nse-control-menu-item),
-:where(:scope) .nse-control-picker-option,
-:where(:scope):is(.nse-control-picker-option) {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 34px;
-  column-gap: 8px;
-  align-items: center;
-  width: calc(100% + 40px);
-  min-height: 42px;
-  margin: 0 -20px;
-  padding: 0 16px;
-  overflow: hidden;
-  border: 0;
-  color: inherit;
-  background: transparent;
-  font: inherit;
-  line-height: 20px;
-  text-align: left;
-  cursor: pointer;
-  box-sizing: border-box;
-}
-
-:where(:scope) .nse-control-menu-item,
-:where(:scope):is(.nse-control-menu-item) {
-  /* Icon column is `auto` so it collapses to 0 for icon-less menus, leaving the label room. */
-  grid-template-columns: auto minmax(0, 1fr) auto 14px 32px;
-  column-gap: 6px;
-}
-
-:where(:scope) .nse-control-menu-item-icon,
-:where(:scope):is(.nse-control-menu-item-icon),
-:where(:scope) .nse-control-menu-shortcut,
-:where(:scope):is(.nse-control-menu-shortcut),
-:where(:scope) .nse-control-menu-child-indicator,
-:where(:scope):is(.nse-control-menu-child-indicator) {
-  display: inline-flex;
-  align-items: center;
-  min-width: 0;
-  opacity: 0.74;
-}
-
-:where(:scope) .nse-control-menu-item-icon:empty,
-:where(:scope):is(.nse-control-menu-item-icon:empty),
-:where(:scope) .nse-control-menu-shortcut:empty,
-:where(:scope):is(.nse-control-menu-shortcut:empty) {
-  display: none;
-}
-
-:where(:scope) .nse-control-menu-item-icon img,
-:where(:scope):is(.nse-control-menu-item-icon) img {
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
-}
-
-:where(:scope) .nse-control-menu-shortcut,
-:where(:scope):is(.nse-control-menu-shortcut) {
-  justify-content: flex-end;
-  font-size: 12px;
-  letter-spacing: 0;
-  white-space: nowrap;
-}
 
 /* Sub-menu disclosure: the real menuitem-arrow sprite (chevron), not a literal "›".
    menuitem-arrow.png is a 24x48 TWO-cell vertical sprite (top = collapsed chevron, bottom = expanded);
    show only the top cell — `background-size: 16px 32px` scales the pair to two 16x16 cells and
    `position: center top` clips to the first. (`contain` showed the whole sprite — both cells at once.)
    The collapsed chevron then rotates 90deg on expand for a clean tween. */
-:where(:scope) .nse-control-menu-child-indicator,
-:where(:scope):is(.nse-control-menu-child-indicator) {
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  background: var(--nse-atmo-menuitem-arrow) center top / 16px 32px no-repeat;
-  transition: transform 0.15s ease;
-}
 
 /* Collapsible sub-items: the parent's chevron rotates down when expanded. */
-:where(:scope) .nse-control-menu-item[data-expanded="true"] .nse-control-menu-child-indicator,
-:where(:scope):is(.nse-control-menu-item[data-expanded="true"]) .nse-control-menu-child-indicator {
-  transform: rotate(90deg);
-}
-
-:where(:scope) .nse-control-menu-separator,
-:where(:scope):is(.nse-control-menu-separator) {
-  display: block;
-  width: calc(100% + 40px);
-  height: 1px;
-  margin: 4px -20px;
-  background: var(--nse-atmo-system-menu-divider) center top / 236px 1px repeat-x;
-  opacity: 0.78;
-}
-
-:where(:scope) .nse-control-menu-item:not(:first-child)::before,
-:where(:scope):is(.nse-control-menu-item:not(:first-child)::before),
-:where(:scope) .nse-control-picker-option:not(:first-child)::before,
-:where(:scope):is(.nse-control-picker-option:not(:first-child)::before) {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  height: 1px;
-  background: var(--nse-atmo-system-menu-divider) center top / 236px 1px repeat-x;
-  opacity: 0.78;
-  pointer-events: none;
-}
-
-:where(:scope) .nse-control-menu-item:hover:not(:disabled),
-:where(:scope):is(.nse-control-menu-item:hover:not(:disabled)),
-:where(:scope) .nse-control-picker-option:hover:not(:disabled),
-:where(:scope):is(.nse-control-picker-option:hover:not(:disabled)),
-:where(:scope) .nse-control-picker-option:not(:disabled)[aria-selected="true"],
-:where(:scope):is(.nse-control-picker-option:not(:disabled)[aria-selected="true"]) {
-  background:
-    var(--nse-atmo-filter-highlight) left top / 1px 3px repeat-x,
-    rgba(40, 65, 82, 0.74);
-}
-
-:where(:scope) .nse-control-menu-item:disabled,
-:where(:scope):is(.nse-control-menu-item:disabled),
-:where(:scope) .nse-control-picker-option:disabled,
-:where(:scope):is(.nse-control-picker-option:disabled) {
-  color: rgba(255, 255, 255, 0.48);
-  cursor: default;
-  opacity: 1;
-}
-
-:where(:scope) .nse-control-menu-item-label,
-:where(:scope):is(.nse-control-menu-item-label) {
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  min-height: 24px;
-  overflow: hidden;
-  padding: 2px 0;
-  line-height: 22px;
-  text-align: left;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-:where(:scope) .nse-control-menu-check-slot,
-:where(:scope):is(.nse-control-menu-check-slot) {
-  display: grid;
-  width: 34px;
-  height: 25px;
-  place-items: center;
-}
-
-:where(:scope) .nse-control-menu-check,
-:where(:scope):is(.nse-control-menu-check) {
-  width: 32px;
-  height: 25px;
-  background: var(--nse-atmo-checkmark) center / contain no-repeat;
-}
 
 :where(:scope) .nse-control-picker,
 :where(:scope):is(.nse-control-picker) {
@@ -1384,15 +1000,6 @@
   background: var(--nse-atmo-menu-arrow) center right no-repeat;
 }
 
-:where(:scope) .nse-control-picker-list[data-popup-align="left"] .nse-control-menu-item-label,
-:where(:scope):is(.nse-control-picker-list[data-popup-align="left"]) .nse-control-menu-item-label {
-  justify-content: flex-start;
-}
-:where(:scope) .nse-control-picker-list[data-popup-align="right"] .nse-control-menu-item-label,
-:where(:scope):is(.nse-control-picker-list[data-popup-align="right"]) .nse-control-menu-item-label {
-  justify-content: flex-end;
-}
-
 :where(:scope) .nse-extended-option,
 :where(:scope):is(.nse-extended-option) {
   display: inline-flex;
@@ -1424,69 +1031,7 @@
   white-space: nowrap;
 }
 
-:where(:scope) .nse-extended-date-picker,
-:where(:scope):is(.nse-extended-date-picker),
-:where(:scope) .nse-extended-time-picker,
-:where(:scope):is(.nse-extended-time-picker) {
-  display: inline-flex;
-  align-items: center;
-  max-width: 100%;
-}
-
-:where(:scope) .nse-extended-progress-slider-bar,
-:where(:scope):is(.nse-extended-progress-slider-bar) {
-  position: absolute;
-  right: 18px;
-  left: 18px;
-  z-index: 0;
-  pointer-events: none;
-}
-
-:where(:scope) .nse-extended-progress-slider-input,
-:where(:scope):is(.nse-extended-progress-slider-input) {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-}
-
-:where(:scope) .nse-control-picker-list,
-:where(:scope):is(.nse-control-picker-list) {
-  z-index: 181;
-  border-width: 19px;
-  border-image: var(--nse-atmo-picker-popup) 19 fill stretch;
-  color: #1b2734;
-  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.34));
-}
-
-:where(:scope) .nse-control-picker-list .nse-control-picker-option,
-:where(:scope):is(.nse-control-picker-list) .nse-control-picker-option {
-  width: calc(100% + 22px);
-  min-height: 40px;
-  margin: 0 -11px;
-  padding: 0 10px;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.58);
-}
-
-:where(:scope) .nse-control-picker-list .nse-control-picker-option:hover:not(:disabled),
-:where(:scope):is(.nse-control-picker-list) .nse-control-picker-option:hover:not(:disabled),
-:where(:scope) .nse-control-picker-list .nse-control-picker-option:not(:disabled)[aria-selected="true"],
-:where(:scope):is(.nse-control-picker-list) .nse-control-picker-option:not(:disabled)[aria-selected="true"] {
-  color: #0d253e;
-  background:
-    var(--nse-atmo-filter-highlight) left top / 1px 3px repeat-x,
-    rgba(255, 255, 255, 0.78);
-}
-
 /* Selected picker item: the chosen row is bold. */
-:where(:scope) .nse-control-picker-list .nse-control-picker-option[aria-selected="true"],
-:where(:scope):is(.nse-control-picker-list) .nse-control-picker-option[aria-selected="true"] {
-  font-weight: 700;
-}
-
-:where(:scope) .nse-control-picker-list .nse-control-picker-option:disabled,
-:where(:scope):is(.nse-control-picker-list) .nse-control-picker-option:disabled {
-  color: rgba(35, 45, 55, 0.42);
-}
 
 :where(:scope) .nse-control-slider,:where(:scope):is(.nse-control-slider) {
   display:grid;
@@ -1731,58 +1276,12 @@
 /* AppMenu: a dark system menu fixed at the top-left of the screen that slides
    down (Heritage top:-2px left:4px). It supplies its own dark frame via
    .nse-control-app-menu-surface, so the generic light popup frame + centering is stripped. */
-:where(:scope) .nse-control-popup-layer:has(>.nse-extended-app-menu-popup),
-:where(:scope):is(.nse-control-popup-layer:has(>.nse-extended-app-menu-popup)) {
-  place-items: start;
-  padding: 0;
-}
 
 /* Optional top-right placement (e.g. wired under the rightSlot / User Info button). */
-:where(:scope) .nse-control-popup-layer:has(>[data-app-menu-placement="top-right"]),
-:where(:scope):is(.nse-control-popup-layer:has(>[data-app-menu-placement="top-right"])) {
-  place-items: start end;
-}
-
-:where(:scope) .nse-control-popup.nse-extended-app-menu-popup,
-:where(:scope):is(.nse-control-popup.nse-extended-app-menu-popup) {
-  min-width: 0;
-  max-width: none;
-  margin: -2px 0 0 4px;
-  border: 0;
-  border-image: none;
-  filter: none;
-  animation: nse-control-app-menu-drop 0.18s ease-out;
-}
-
-:where(:scope) .nse-control-popup.nse-extended-app-menu-popup[data-app-menu-placement="top-right"],
-:where(:scope):is(.nse-control-popup.nse-extended-app-menu-popup[data-app-menu-placement="top-right"]) {
-  /* The box was already flush at the viewport edge — the PLATE was not. The
-     surface's frame carries 6px of transparent edge on the right, so the dark
-     art stopped at 1393 of 1400 and read as a gap that no amount of removing
-     margin could close. Measured, not guessed: scan a scanline through the menu
-     right-to-left for the first pixel it actually paints. Pulling the box out by
-     exactly that width lands the paint on the edge. */
-  margin: -2px -6px 0 0;
-}
-
-:where(:scope) .nse-control-popup.nse-extended-app-menu-popup .nse-control-popup-inner,
-:where(:scope):is(.nse-control-popup.nse-extended-app-menu-popup) .nse-control-popup-inner {
-  margin: 0;
-  padding: 0;
-}
 
 /* Retracts the way it arrived. NSEPopup holds the mount open for exitDuration so
    this has something to play on; without that the menu unmounted on the same
    frame the flag flipped and simply ceased to exist. */
-:where(:scope) .nse-control-popup-layer[data-state="closing"],
-:where(:scope):is(.nse-control-popup-layer[data-state="closing"]) {
-  pointer-events: none;
-}
-
-:where(:scope) .nse-control-popup-layer[data-state="closing"] .nse-control-popup.nse-extended-app-menu-popup,
-:where(:scope):is(.nse-control-popup-layer[data-state="closing"]) .nse-control-popup.nse-extended-app-menu-popup {
-  animation: nse-control-app-menu-retract 0.16s ease-in forwards;
-}
 
 @keyframes nse-control-app-menu-retract {
   from {
@@ -1809,9 +1308,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :where(:scope) .nse-control-popup.nse-extended-app-menu-popup,
-:where(:scope):is(.nse-control-popup.nse-extended-app-menu-popup),
-:where(:scope) .nse-overlay-popup--application-menu[data-state] .nse-control-app-menu-surface,
+  :where(:scope) .nse-overlay-popup--application-menu[data-state] .nse-control-app-menu-surface,
 :where(:scope):is(.nse-overlay-popup--application-menu[data-state]) .nse-control-app-menu-surface {
     /* Match the open/closing recipe's specificity so reduced motion removes
        the keyframe, rather than shortening an off-screen first pose. */
@@ -2004,40 +1501,6 @@
   margin: -7px -4px;
 }
 
-:where(:scope) .nse-control-file-picker-button,
-:where(:scope):is(.nse-control-file-picker-button) {
-  display: grid;
-  min-height: 52px;
-  min-width: 220px;
-  align-items: center;
-  border: 17px solid transparent;
-  border-image: var(--nse-atmo-button-light) 0 17 104 17 fill repeat;
-  color: #2d3440;
-  background: transparent;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-:where(:scope) .nse-control-file-picker-copy,
-:where(:scope):is(.nse-control-file-picker-copy) {
-  display: grid;
-  gap: 2px;
-  margin: -8px;
-}
-
-:where(:scope) .nse-control-file-picker-label,
-:where(:scope):is(.nse-control-file-picker-label) {
-  font-weight: 700;
-}
-
-:where(:scope) .nse-control-file-picker-meta,
-:where(:scope):is(.nse-control-file-picker-meta) {
-  color: #5d6875;
-  font-size: 12px;
-  font-weight: 700;
-}
-
 /* Recessed rounded well — the roundy + roundy-shadow pair
    (Heritage Recessed.css), which is `border-width: 14px`, `border-image:
    roundy-shadow.png 14 14` with NO fill, over `border-radius: 11px`.
@@ -2053,24 +1516,6 @@
    18 is within bounds and is the slice they were authored for. */
 :where(:scope) .nse-box[data-box-kind="custom"],:where(:scope):is(.nse-box[data-box-kind="custom"]) {
   position:relative;
-}
-
-
-
-
-
-:where(:scope) .nse-control-hash-badge,
-:where(:scope):is(.nse-control-hash-badge) {
-  display: inline-grid;
-  min-width: 34px;
-  height: 30px;
-  place-items: center;
-  padding: 0 8px;
-  border-radius: 6px;
-  color: #fff;
-  background: #26313c;
-  font-size: 13px;
-  font-weight: 700;
 }
 
 :where(:scope) .nse-control-spinner,
@@ -2171,14 +1616,6 @@
 
   :where(:scope) .nse-control-picker,:where(:scope):is(.nse-control-picker) {
   grid-template-columns:1fr;
-}
-
-
-:where(:scope) .nse-control-menu-host,
-:where(:scope):is(.nse-control-menu-host),
-:where(:scope) .nse-control-menu-host>.nse-control-button,
-:where(:scope):is(.nse-control-menu-host)>.nse-control-button {
-  width:100%;
 }
 }
 
@@ -4555,9 +3992,7 @@
   :where(:scope) .nse-document-titlebar .nse-app-topbar-title-button,
 :where(:scope):is(.nse-document-titlebar) .nse-app-topbar-title-button { display: flex; min-width: 0; }
   :where(:scope) .nse-document-titlebar .nse-app-topbar-title-arrow,
-:where(:scope):is(.nse-document-titlebar) .nse-app-topbar-title-arrow,
-:where(:scope) .nse-document-titlebar .nse-window-titlebar-back,
-:where(:scope):is(.nse-document-titlebar) .nse-window-titlebar-back { flex: none; }
+:where(:scope):is(.nse-document-titlebar) .nse-app-topbar-title-arrow { flex: none; }
   :where(:scope) .nse-document-titlebar .nse-app-topbar-metal-centre,
 :where(:scope):is(.nse-document-titlebar) .nse-app-topbar-metal-centre { max-width: none; overflow: visible; }
   :where(:scope) .nse-document-titlebar .nse-window-titlebar-title,
