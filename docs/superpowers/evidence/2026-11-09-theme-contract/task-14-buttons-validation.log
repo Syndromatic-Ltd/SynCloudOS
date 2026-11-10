@@ -1,0 +1,17 @@
+file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/scripts/synware/theme-bundles.mjs:121
+const fail = (file, rule, message) => { throw new TypeError(`${file}: ${rule}: ${message}`); };
+                                              ^
+
+TypeError: C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\src\Themes\Atmo.scostheme\Contents\Resources\atmo-structure.buttons.css: css-selector: A selector needs a control, part or :scope hook: [data-nse-button-type]:where(:not([data-nse-button-type="switch"],[data-nse-button-type="radio"],[data-nse-bezel-style="disclosure"]))
+    at fail (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/scripts/synware/theme-bundles.mjs:121:47)
+    at Object.enter (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/scripts/synware/theme-bundles.mjs:222:24)
+    at walkNode (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/css-tree/lib/walker/create.js:169:36)
+    at List.walkReducer (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/css-tree/lib/walker/create.js:195:61)
+    at List.reduce (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/css-tree/lib/utils/List.js:174:22)
+    at Object.SelectorList (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/css-tree/lib/walker/create.js:103:31)
+    at walkNode (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/css-tree/lib/walker/create.js:180:41)
+    at List.walkReducer (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/css-tree/lib/walker/create.js:195:61)
+    at List.reduce (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/css-tree/lib/utils/List.js:174:22)
+    at Object.PseudoClassSelector (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/css-tree/lib/walker/create.js:103:31)
+
+Node.js v24.22.1

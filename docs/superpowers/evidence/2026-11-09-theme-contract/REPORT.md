@@ -161,6 +161,8 @@ The MCP recipe scaffolder and its old tests await their explicitly scheduled bun
 
 ### Task 13 — discovery, loading, layers and selection
 
+Commit: `b2d81a26`.
+
 Implemented bundle discovery, `themesDirectory` (including `false`), the typed `virtual:syncloudos/themes` registry, build-time CSS selection, automatic theme scoping and layer declarations. Unreferenced themes do not emit CSS; static unknown identifiers fail the build and dynamic unknown lookup throws. A theme boundary resets every semantic colour. Browser host selection now takes `theme?: NSETheme`.
 
 Named images resolve against the view's selected theme with Atmo fallback, point sizes, template tint and resolution variants. Login ornaments, notification slicing and reactive material lighting follow the theme's presentation data. All four navigation placements support both flows, measure their physical obstruction, and preserve content clearance in LTR and RTL.
@@ -171,7 +173,21 @@ Verification: **807 focused tests across nine files passed**, including **691 re
 
 Owner review: `plain-login-chromium.png` and `plain-login-chromium-high-dpr.png` show the existing login window with ornaments switched off. They are separate evidence, not parity baselines. No plain-login design was added.
 
-### Tasks 14–19
+### Task 14 — Atmo bundle (in progress)
+
+The push-button slice is complete. Created the static `Atmo.scostheme` metadata, colour maps, image data and byte-preserved artwork. Ported **58 drawing rules / 189 selectors** for push, image, textured and disclosure buttons into two bundle stylesheets. Their selectors use public hooks. Typography, motion and interaction layout remain framework-owned; later slices continue the separation and connect the bundle as the built-in value.
+
+The source-build CSS compiler scopes built-in drawings into `nse.atmo`; emitted SDK CSS retains its wrapper without requiring a host plugin. The bundle validator now accepts state predicates nested inside an anchored selector and rejects negative-only or unanchored universal alternatives.
+
+Published the existing button configuration as `appearance-name`, `key-equivalent`, `has-destructive-action` and `image-position` variants. Cell tracking is a separate drawing state (`data-nse-tracking="true"/"false"`), and retained highlights publish the selected drawing flag. This preserves the existing distinction between a retained highlight, logical state and an active press. Native tab cells publish their existing appearance and bezel configuration; navigation cells publish their role and resolved control size. No interaction behaviour or artwork changed.
+
+Verification: **55 focused tests in seven files**, **691 rendered contract specimens**, framework typecheck and bundle validation passed. The complete frozen baseline passed **82/82, zero differences**, in `task-14-buttons-browser-css-ready.log`. All **2,648 PNG hashes remain unchanged**. Earlier selector collisions were corrected; a paired original/current-style diagnostic found no non-transient differences across the catalogue after those corrections.
+
+The earlier screenshot run passed 78/82 and exposed CSS background/mask artwork captured before decoding (metal header/glyphs and folder texture). The fixture now waits for CSS image decoding after selecting each interaction state, in addition to HTML images. The unchanged references then passed completely. Original expected/actual/diff PNGs and traces from that run are retained in `task-14-button-capture-failures`. This is a fixture readiness fix, not a baseline replacement or parity exception.
+
+Remaining Task 14 slices: checkbox/radio, value, text, containers, menus/toolbars, windows, overlays and system UI; final built-in data connection, structure split and removal of the old theme directory.
+
+### Tasks 15–19
 
 Pending. Final split-suite and packed SDK acceptance remain for Task 19.
 
@@ -196,6 +212,10 @@ Further diagnostic runs exposed folder-only capture interference and source-pain
 - Continue autonomous implementation. Stop an affected slice only for an unavoidable visible difference or a genuine spec/plan contradiction affecting public API; commit passing work and continue independent tasks.
 
 ## Calls made by Codex
+
+- The drawing contract publishes cell tracking separately from a retained highlight. Existing Atmo distinguishes the two; exposing the framework-owned tracking fact preserves both looks without allowing themes to control interaction.
+- Public part selectors are bounded to their owning slots. In particular, a push button's title selector does not also target its nested pop-up caption or a checkbox's title.
+- Screenshot readiness includes decoded CSS backgrounds, masks and border images after interaction. No reference image is changed by this wait.
 
 - `NSEImage.named(name, theme?)` accepts an explicit theme for model-side lookup. Controls resolve symbolic named images from view context; there is no mutable global active theme.
 - Dynamic indexing of the theme registry loads all discoverable candidates conservatively. Discovery scans host source, excluding test, documentation, script and generated-output directories.
@@ -222,6 +242,8 @@ Further diagnostic runs exposed folder-only capture interference and source-pain
 8. Painted bezel dimensions and interaction dimensions are distinct. The stepper uses `--nse-control-bezel-inline-size` and `--nse-control-bezel-block-size` for its existing art; framework-owned hit dimensions meet the minimum without moving that art or its neighbours. Passive progress/meter surfaces do not receive hit-target sizing.
 
 ## Public API accounting
+
+Task 14's push-button slice adds `nseControlHooks`' optional `tracking` field and `data-nse-tracking` values, plus the `appearance-name`, `key-equivalent`, `has-destructive-action` and `image-position` variants. The generated contract records their actual emitted values. All existing logical button states and interaction properties retain their behaviour.
 
 Task 13 adds `SynCloudOSViteOptions.themesDirectory`, `virtual:syncloudos/themes` with its readonly `themes` registry, `BrowserHostOptions.theme`, optional `NSEImage.named` theme selection and readonly resolution `files`. It removes the browser host's definition-valued `appearance` option. The generated contract now records login/notification presentation variants and every navigation placement/flow.
 

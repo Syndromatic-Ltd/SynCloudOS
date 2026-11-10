@@ -389,7 +389,7 @@ export function NSETabBar({
               }}
               aria-label={destination.accessibleLabel}
               aria-controls={getNSETabBarPanelId(resolvedIdScope, destination.id)}
-              data-nse-part="cell" data-nse-selected={selected ? "" : undefined} data-nse-highlighted={pressed ? "" : undefined} data-nse-enabled={destination.disabled ? "false" : undefined} data-nse-hovered={hoveredTabId === destination.id ? "" : undefined} data-nse-focused={paintFocusedTabId === destination.id ? "" : undefined}
+              data-nse-part="cell" data-nse-role="tab" data-nse-control-size={usesTallTabChrome ? "large" : "regular"} data-nse-selected={selected ? "" : undefined} data-nse-highlighted={pressed ? "" : undefined} data-nse-enabled={destination.disabled ? "false" : undefined} data-nse-hovered={hoveredTabId === destination.id ? "" : undefined} data-nse-focused={paintFocusedTabId === destination.id ? "" : undefined}
               aria-selected={selected}
               aria-disabled={destination.disabled || undefined}
               tabIndex={destination.disabled ? -1 : focusedTabId === destination.id ? 0 : -1}
@@ -461,7 +461,7 @@ export function NSETabBar({
             aria-label="More destinations"
             aria-controls={morePanelId}
             aria-expanded={overflowOpen}
-            data-nse-part="cell" data-nse-selected={moreSelected ? "" : undefined} data-nse-highlighted={morePressed ? "" : undefined} data-nse-hovered={hoveredTabId === NSETabBarMoreDestinationId ? "" : undefined} data-nse-focused={paintFocusedTabId === NSETabBarMoreDestinationId ? "" : undefined}
+            data-nse-part="cell" data-nse-role="tab" data-nse-control-size={usesTallTabChrome ? "large" : "regular"} data-nse-selected={moreSelected ? "" : undefined} data-nse-highlighted={morePressed ? "" : undefined} data-nse-hovered={hoveredTabId === NSETabBarMoreDestinationId ? "" : undefined} data-nse-focused={paintFocusedTabId === NSETabBarMoreDestinationId ? "" : undefined}
             aria-selected={moreSelected}
             tabIndex={focusedTabId === NSETabBarMoreDestinationId ? 0 : -1}
             data-selected={moreSelected ? "true" : "false"}

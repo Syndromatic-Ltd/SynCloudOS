@@ -13,11 +13,14 @@ interface DrawingState {
   hovered?: boolean;
   focused?: boolean;
   keyWindow?: boolean;
+  /** Cell tracking is distinct from a retained programmatic highlight. */
+  tracking?: boolean;
 }
 
 /** @internal State on a composite control's cells, without inventing child controls. */
 export function nseStateHooks(input: DrawingState): Record<`data-nse-${string}`, string> {
   const attributes: Record<`data-nse-${string}`, string> = {};
+  if (input.tracking !== undefined) attributes["data-nse-tracking"] = String(input.tracking);
   if (input.state !== undefined) {
     if (!["on", "off", "mixed"].includes(input.state)) throw new TypeError(`Unknown control state: ${String(input.state)}.`);
     attributes["data-nse-state"] = input.state;

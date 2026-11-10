@@ -36,6 +36,7 @@ import { fileURLToPath } from "node:url";
 import { build } from "vite";
 import { synWareSdkEntries, synWareSdkGeneratedStyles, synWareSdkStyles, synWarePackageName } from "./sdk-entries.mjs";
 import react from "@vitejs/plugin-react";
+import { builtInThemeCSS } from "./built-in-theme-css.mjs";
 import {
   assertReviewedPackageFiles, assertSdkSourceUnchanged, assertFxPackageExports,
   captureSdkSourceFingerprint, createSdkPackageManifest, fingerprintSdkFiles, sdkDirectoryFiles,
@@ -150,6 +151,7 @@ async function bundle({ entry, packageDirectory, themeNames }) {
       define: { "process.env.NODE_ENV": JSON.stringify("production") },
       resolve: { alias: publicAliases },
       esbuild: { jsxDev: false },
+      css: { postcss: { plugins: [builtInThemeCSS()] } },
       plugins: [react(), bundledDependencyNotices(), sdkPackageStyles({
         themeNames,
         publicStyleEntries: synWareSdkGeneratedStyles,
@@ -394,7 +396,7 @@ async function main() {
     .replace("../../src/SynCloudOS/AppSDK/fx/runtime.ts", "./fx-attribution-runtime.js")
     .replace("../../src/SynCloudOS/AppSDK/manifest/synappManifestValidator.generated.mjs", "./manifest-validator.mjs")
     .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs"));
-  for (const file of ["theme-bundles.mjs","theme-loading.mjs","bundle-paths.mjs","project-derivation.mjs","manifest-source.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs","pwa-plugin.mjs"]) {
+  for (const file of ["theme-bundles.mjs","theme-loading.mjs","built-in-theme-css.mjs","bundle-paths.mjs","project-derivation.mjs","manifest-source.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs","pwa-plugin.mjs"]) {
     writeFileSync(resolve(directory, file), readFileSync(resolve(repositoryRoot, "scripts/synware", file), "utf8")
       .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs")
       .replace("../../src/SynCloudOS/InstalledApplications/webAppManifest.mjs", "./web-app-manifest.mjs")

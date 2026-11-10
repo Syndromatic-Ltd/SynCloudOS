@@ -30,7 +30,7 @@ function collect() {
       if (part.closest("[data-nse-control]") !== root) continue;
       const partName = part.getAttribute("data-nse-part");
       if (partName) { expect(nseThemeParts as readonly string[], `unknown part ${name}.${partName}`).toContain(partName); entry.parts.add(partName); }
-      for (const state of nseThemeStates) if (part.hasAttribute(`data-nse-${state}`)) entry.states.add(state === "state" || state === "enabled" || state === "key-window" ? `${state}=${part.getAttribute(`data-nse-${state}`)}` : state);
+      for (const state of nseThemeStates) if (part.hasAttribute(`data-nse-${state}`)) entry.states.add(state === "state" || state === "enabled" || state === "key-window" || state === "tracking" ? `${state}=${part.getAttribute(`data-nse-${state}`)}` : state);
       for (const variant of nseThemeVariants) {
         const value = part.getAttribute(`data-nse-${variant}`);
         if (value === null) continue;

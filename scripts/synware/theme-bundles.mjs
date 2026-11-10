@@ -180,10 +180,21 @@ function validateDefinition(input, contract, file, root) {
   }
 }
 const semanticParts = new Set(["title", "label", "content", "field", "cell", "row", "item", "segment", "value", "text-content", "primary-text", "secondary-text"]);
+/** Negative predicates cannot anchor a drawing; every positive alternative must. */
+function selectorHasAnchor(selector) {
+  return selector.children.toArray().some(node => {
+    if (node.type === "AttributeSelector") return ["data-nse-control", "data-nse-part"].includes(cssTree.generate(node.name));
+    if (node.type !== "PseudoClassSelector") return false;
+    if (node.name === "scope") return true;
+    if (!["is", "where"].includes(node.name) || !node.children) return false;
+    const alternatives = node.children.toArray().flatMap(child => child.type === "SelectorList" ? child.children.toArray() : child.type === "Selector" ? [child] : []);
+    return alternatives.length > 0 && alternatives.every(selectorHasAnchor);
+  });
+}
 /** Shared by bundle validation and the idiom audit. Throws a file-specific rule violation. */
 export function validateThemeCSS(source, { file, root, contract, onImport = () => undefined } = {}) {
   const ast = cssTree.parse(source, { parseCustomProperty: true, positions: true, onParseError(error) { fail(file, "css-syntax", error.message); } });
-  const attributes = new Set(["control", "part", "state", "highlighted", "enabled", "selected", "hovered", "focused", "key-window", "colour-scheme-resolved", "contrast", "transparency", ...Object.values(contract.controls).flatMap(control => Object.keys(control.variants))].map(name => `data-nse-${name}`));
+  const attributes = new Set(["control", "part", "state", "highlighted", "enabled", "selected", "hovered", "focused", "key-window", "tracking", "colour-scheme-resolved", "contrast", "transparency", ...Object.values(contract.controls).flatMap(control => Object.keys(control.variants))].map(name => `data-nse-${name}`));
   const valueText = node => cssTree.generate(node.value);
   const checkSlice = (declarations, label) => {
     const find = name => declarations.find(node => cssTree.ident.decode(node.property).toLowerCase() === name);
@@ -219,7 +230,8 @@ export function validateThemeCSS(source, { file, root, contract, onImport = () =
           if (name === "data-nse-control") { anchored = true; if (value && !contract.controls[value]) fail(file, "css-control", `Unknown control ${value}.`); }
           if (name === "data-nse-part") { anchored = true; if (value && !Object.values(contract.controls).some(control => control.parts.includes(value))) fail(file, "css-part", `Unknown part ${value}.`); if (semanticParts.has(value)) semantic = true; }
         });
-        if (!anchored) fail(file, "css-selector", `A selector needs a control, part or :scope hook: ${selector}`);
+        if (!selectorHasAnchor(node)) fail(file, "css-selector", `A selector needs a control, part or :scope hook: ${selector}`);
+        return cssTree.walk.skip;
       }
       if (node.type === "Rule") {
         const declarations = node.block.children.toArray().filter(child => child.type === "Declaration"); checkSlice(declarations, "border-image");

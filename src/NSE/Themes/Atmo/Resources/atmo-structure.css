@@ -1,3 +1,4 @@
+@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.buttons.css";
 @layer nse.atmo {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
@@ -108,38 +109,21 @@
   --nse-atmo-toggle-height: 32px;
 }
 
-:where(:scope) .nse-control-button:where(:not(.nse-control-picker-button)),
-:where(:scope):is(.nse-control-button:where(:not(.nse-control-picker-button))) {
-  position: relative;
-  display: inline-grid;
-  grid-auto-flow: column;
-  grid-auto-columns: max-content;
-  align-items: center;
-  justify-content: center;
-  min-width: 76px;
-  --nse-control-minimum-inline-size: 76px;
-  max-width: 100%;
-  height: 52px;
-  min-height: 52px;
-  --nse-control-minimum-block-size: 52px;
-  margin: 0;
-  padding: 0 10px;
-  overflow: hidden;
-  border-color: transparent;
-  border-style: solid;
-  border-width: 0 17px;
-  border-image: var(--nse-atmo-button-medium) 0 17 104 17 fill repeat repeat;
-  color: #fff;
-  background: transparent;
-  font: inherit;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 52px;
-  text-align: center;
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.72), 0 1px 1px rgba(255, 255, 255, 0.16);
-  cursor: pointer;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
+:where(:scope) .nse-control-button:where(:not(.nse-control-picker-button)),:where(:scope):is(.nse-control-button:where(:not(.nse-control-picker-button))) {
+  position:relative;
+  display:inline-grid;
+  grid-auto-flow:column;
+  grid-auto-columns:max-content;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  font:inherit;
+  font-size:18px;
+  font-weight:700;
+  line-height:52px;
+  text-align:center;
+  cursor:pointer;
+  user-select:none;
 }
 
 /* Ordinary action labels may wrap when text zoom or localization exhausts
@@ -155,57 +139,28 @@
   overflow-wrap: anywhere;
 }
 
-:where(:scope) .nse-control-button:where(:not(.nse-control-picker-button))[data-tone="light"],
-:where(:scope):is(.nse-control-button:where(:not(.nse-control-picker-button))[data-tone="light"]) {
-  border-image-source: var(--nse-atmo-button-light);
-  color: #332;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.76);
-}
 
-:where(:scope) .nse-control-button:where(:not(.nse-control-picker-button))[data-tone="dark"],
-:where(:scope):is(.nse-control-button:where(:not(.nse-control-picker-button))[data-tone="dark"]) {
-  border-image-source: var(--nse-atmo-button-dark);
-}
 
-:where(:scope) .nse-control-button:where(:not(.nse-control-picker-button))[data-tone="affirmative"],
-:where(:scope):is(.nse-control-button:where(:not(.nse-control-picker-button))[data-tone="affirmative"]) {
-  border-image-source: var(--nse-atmo-button-affirmative);
-}
 
-:where(:scope) .nse-control-button:where(:not(.nse-control-picker-button))[data-tone="negative"],
-:where(:scope):is(.nse-control-button:where(:not(.nse-control-picker-button))[data-tone="negative"]) {
-  border-image-source: var(--nse-atmo-button-negative);
-}
 
-:where(:scope) .nse-control-button:where(:not(.nse-control-picker-button)):hover:not(:disabled),
-:where(:scope):is(.nse-control-button:where(:not(.nse-control-picker-button)):hover:not(:disabled)) {
-  filter: brightness(1.08);
-}
 
-:where(:scope) .nse-control-button:where(:not(.nse-control-picker-button)):active:not([data-press-active]):not(:disabled),
-:where(:scope):is(.nse-control-button:where(:not(.nse-control-picker-button)):active:not([data-press-active]):not(:disabled)),
-:where(:scope) .nse-control-button:where(:not(.nse-control-picker-button))[data-press-active="true"]:not(:disabled),
-:where(:scope):is(.nse-control-button:where(:not(.nse-control-picker-button))[data-press-active="true"]:not(:disabled)),
+
+
+
+
+
+
 :where(:scope) .nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"],
-:where(:scope):is(.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]),
-:where(:scope) .nse-control-button:where(:not(.nse-control-picker-button))[data-pressed="true"],
-:where(:scope):is(.nse-control-button:where(:not(.nse-control-picker-button))[data-pressed="true"]) {
-  border-image-slice: 52 17 52 17 fill;
-  transform: translateY(1px);
+:where(:scope):is(.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]) {
+  border-image-slice:52 17 52 17 fill;
+  transform:translateY(1px);
 }
 
-:where(:scope) .nse-control-button:where(:not(.nse-control-picker-button)):disabled,
-:where(:scope):is(.nse-control-button:where(:not(.nse-control-picker-button)):disabled) {
-  border-image-slice: 104 17 0 17 fill;
-  color: rgba(255, 255, 255, 0.56);
-  cursor: default;
-  filter: saturate(0.72);
+:where(:scope) .nse-control-button:where(:not(.nse-control-picker-button)):disabled,:where(:scope):is(.nse-control-button:where(:not(.nse-control-picker-button)):disabled) {
+  cursor:default;
 }
 
-:where(:scope) .nse-control-button:where(:not(.nse-control-picker-button))[data-tone="light"]:disabled,
-:where(:scope):is(.nse-control-button:where(:not(.nse-control-picker-button))[data-tone="light"]:disabled) {
-  color: #777;
-}
+
 
 :where(:scope) .nse-control-button:where(:not(.nse-control-picker-button)):focus-visible,
 :where(:scope):is(.nse-control-button:where(:not(.nse-control-picker-button)):focus-visible),
@@ -230,14 +185,10 @@
 /* line-height 1: the button's own line-height is its whole band (50–52px),
    so a text glyph used as an icon (★, ↻) inherited a line box twice the
    icon's height and sat on the icon's bottom edge. */
-:where(:scope) .nse-control-button-icon,
-:where(:scope):is(.nse-control-button-icon) {
-  display: inline-grid;
-  width: 24px;
-  height: 24px;
-  place-items: center;
-  margin: 0 6px;
-  line-height: 1;
+:where(:scope) .nse-control-button-icon,:where(:scope):is(.nse-control-button-icon) {
+  display:inline-grid;
+  place-items:center;
+  line-height:1;
 }
 
 :where(:scope) .nse-control-button-icon img,
@@ -247,21 +198,12 @@
   object-fit: contain;
 }
 
-:where(:scope) .nse-control-button-label,
-:where(:scope):is(.nse-control-button-label) {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  transform: translateY(-1px);
+:where(:scope) .nse-control-button-label,:where(:scope):is(.nse-control-button-label) {
+  overflow:hidden;
+  white-space:nowrap;
 }
 
-:where(:scope) .nse-control-icon-button,
-:where(:scope):is(.nse-control-icon-button) {
-  min-width: 52px;
-  padding-right: 2px;
-  padding-left: 2px;
-}
+
 
 :where(:scope) .nse-control-toolbar,
 :where(:scope):is(.nse-control-toolbar) {
@@ -347,34 +289,19 @@
 /* ButtonHeader + standalone ToolButton wear the menu-button sprite directly,
    not only when nested in a toolbar. Same 5-state ladder as the non-grouped toolbar
    button above (atmo-menu-button.png, 250px tall / 5×50px state bands). */
-:where(:scope) .nse-extended-tool-button.nse-control-button,
-:where(:scope):is(.nse-extended-tool-button.nse-control-button) {
-  height: 50px;
-  min-height: 50px;
-  --nse-control-minimum-block-size: 50px;
-  border-width: 0 25px;
-  border-image: var(--nse-atmo-menu-button) 0 25 200 25 fill stretch;
-  line-height: 50px;
+:where(:scope) .nse-extended-tool-button.nse-control-button,:where(:scope):is(.nse-extended-tool-button.nse-control-button) {
+  line-height:50px;
 }
 
-:where(:scope) .nse-extended-tool-button.nse-control-button:active:not([data-press-active]):not(:disabled),
-:where(:scope):is(.nse-extended-tool-button.nse-control-button:active:not([data-press-active]):not(:disabled)),
-:where(:scope) .nse-extended-tool-button.nse-control-button[data-press-active="true"]:not(:disabled),
-:where(:scope):is(.nse-extended-tool-button.nse-control-button[data-press-active="true"]:not(:disabled)) {
-  border-image-slice: 50 25 150 25 fill;
-}
+
+
 
 :where(:scope) .nse-extended-tool-button.nse-control-button[data-selected="true"],
-:where(:scope):is(.nse-extended-tool-button.nse-control-button[data-selected="true"]),
-:where(:scope) .nse-extended-tool-button.nse-control-button[data-pressed="true"],
-:where(:scope):is(.nse-extended-tool-button.nse-control-button[data-pressed="true"]) {
-  border-image-slice: 100 25 100 25 fill;
+:where(:scope):is(.nse-extended-tool-button.nse-control-button[data-selected="true"]) {
+  border-image-slice:100 25 100 25 fill;
 }
 
-:where(:scope) .nse-extended-tool-button.nse-control-button:disabled,
-:where(:scope):is(.nse-extended-tool-button.nse-control-button:disabled) {
-  border-image-slice: 200 25 0 25 fill;
-}
+
 
 :where(:scope) .nse-control-toolbar[data-grouped="true"]>.nse-control-button,
 :where(:scope):is(.nse-control-toolbar[data-grouped="true"])>.nse-control-button {
@@ -1765,33 +1692,18 @@
   white-space: nowrap;
 }
 
-:where(:scope) .nse-control-picker-button,
-:where(:scope):is(.nse-control-picker-button) {
-  display: inline-grid;
-  grid-template-columns: minmax(0, 1fr) 14px;
-  align-items: center;
-  min-width: 136px;
-  --nse-control-minimum-inline-size: 136px;
-  max-width: 100%;
-  height: 52px;
-  padding: 0;
-  border: 19px solid transparent;
-  border-image: var(--nse-atmo-pill) 19 fill stretch;
-  box-sizing: border-box;
-  color: var(--nse-atmo-picker-ink, #000);
-  background: transparent;
-  font: inherit;
-  font-size: 16px;
-  line-height: normal;
-  cursor: pointer;
+:where(:scope) .nse-control-picker-button,:where(:scope):is(.nse-control-picker-button) {
+  display:inline-grid;
+  grid-template-columns:minmax(0,1fr) 14px;
+  align-items:center;
+  box-sizing:border-box;
+  font:inherit;
+  font-size:16px;
+  line-height:normal;
+  cursor:pointer;
 }
 
-:where(:scope) .nse-control-picker-button:active,
-:where(:scope):is(.nse-control-picker-button:active),
-:where(:scope) .nse-control-picker-button[data-pressed="true"],
-:where(:scope):is(.nse-control-picker-button[data-pressed="true"]) {
-  border-image-source: var(--nse-atmo-pill-down);
-}
+
 
 :where(:scope) .nse-control-picker-button[aria-expanded="true"],
 :where(:scope):is(.nse-control-picker-button[aria-expanded="true"]) {
@@ -2777,14 +2689,13 @@
     width: 100%;
   }
 
-  :where(:scope) .nse-control-picker-button,
-:where(:scope):is(.nse-control-picker-button),
+
 :where(:scope) .nse-control-menu-host,
 :where(:scope):is(.nse-control-menu-host),
 :where(:scope) .nse-control-menu-host>.nse-control-button,
 :where(:scope):is(.nse-control-menu-host)>.nse-control-button {
-    width: 100%;
-  }
+  width:100%;
+}
 }
 
 /* --- NSESizeableImage / NSEImageView ------------------- */
@@ -4404,11 +4315,7 @@
   grid-template-columns: var(--nse-colour-panel-label) minmax(0, 1fr);
 }
 
-:where(:scope) [data-nse-control="colour-panel"] .nse-control-picker-button,
-:where(:scope):is([data-nse-control="colour-panel"]) .nse-control-picker-button {
-  min-inline-size: 0;
-  --nse-control-minimum-inline-size: 0;
-}
+
 
 :where(:scope) [data-nse-control="colour-panel"]>fieldset,
 :where(:scope):is([data-nse-control="colour-panel"])>fieldset,

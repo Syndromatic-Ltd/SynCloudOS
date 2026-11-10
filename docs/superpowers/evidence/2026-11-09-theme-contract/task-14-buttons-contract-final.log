@@ -1,0 +1,12 @@
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+
+ Test Files  1 passed (1)
+      Tests  691 passed (691)
+   Start at  00:28:25
+   Duration  12.57s (transform 6.06s, setup 27ms, import 7.86s, tests 3.74s, environment 808ms)

@@ -1,3 +1,4 @@
+@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo.buttons.css";
 @import "./path-control.css";
 @layer nse.atmo {
 @scope ([data-nse-theme]) to ([data-nse-theme]) {
@@ -126,54 +127,15 @@
    Label paints above both.
    ========================================================================= */
 
-:scope .nse-control-button:where(:not(.nse-control-picker-button)),
-:scope:is(.nse-control-button:where(:not(.nse-control-picker-button))),
-:scope.nse-control-button:where(:not(.nse-control-picker-button)) {
-  position: relative;
-  isolation: isolate;
-  /* Content layout (inline grid, icon margins, label ellipsis) is the shared
-     Atmo control structure's; this rule only sets the vector face's box. */
-  min-width: 76px;
-  --nse-control-minimum-inline-size: 76px;
-  max-width: 100%;
-  margin: 0;
-  height: var(--nse-atmo-control-h);
-  min-height: var(--nse-atmo-control-h);
-  --nse-control-minimum-block-size: var(--nse-atmo-control-h);
-  padding: 0 27px; /* 17px sprite cap + 10px content padding */
-  border: 0;
-  border-image: none;
-  border-radius: 18px;
-  background: transparent;
-  color: #fff;
-  font-family: inherit;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: var(--nse-atmo-control-h);
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.72), 0 1px 1px rgba(255, 255, 255, 0.16);
-  cursor: pointer;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-  /* stroke ring (per-side border colours; measured pairs averaged) */
-  --nse-atmo-btn-stroke-t: rgba(0, 0, 0, 0.57);
-  --nse-atmo-btn-stroke-side: rgba(0, 0, 0, 0.53);
-  --nse-atmo-btn-stroke-b: rgba(0, 0, 0, 0.66);
-  /* rim ring (bevel top / fill-toned sides / shoe bottom) + fill gradient */
-  --nse-atmo-btn-bevel: rgba(167, 167, 167, 0.82);
-  --nse-atmo-btn-rim-side: rgba(125, 125, 125, 0.82);
-  --nse-atmo-btn-shoe: rgba(97, 97, 97, 0.82);
-  --nse-atmo-btn-fill-a: rgba(107, 107, 107, 0.91);
-  --nse-atmo-btn-fill-b: rgba(149, 149, 149, 0.91);
-  --nse-atmo-btn-shadow: 0 1.5px 1.5px rgba(0, 0, 0, 0.24);
-  /* down (pressed/selected) band */
-  --nse-atmo-btn-down-stroke-t: rgba(0, 0, 0, 0.68);
-  --nse-atmo-btn-down-stroke-side: rgba(0, 0, 0, 0.6);
-  --nse-atmo-btn-down-stroke-b: rgba(0, 0, 0, 0.58);
-  --nse-atmo-btn-down-a: rgba(39, 39, 39, 0.87);
-  --nse-atmo-btn-down-a2: rgba(51, 51, 51, 0.87);
-  --nse-atmo-btn-down-b: rgba(68, 68, 68, 0.87);
-  --nse-atmo-btn-down-b2: rgba(64, 64, 64, 0.87);
-  --nse-atmo-btn-down-side: rgba(59, 59, 59, 0.87);
+:scope .nse-control-button:where(:not(.nse-control-picker-button)),:scope:is(.nse-control-button:where(:not(.nse-control-picker-button))),:scope.nse-control-button:where(:not(.nse-control-picker-button)) {
+  position:relative;
+  isolation:isolate;
+  font-family:inherit;
+  font-size:18px;
+  font-weight:700;
+  line-height:var(--nse-atmo-control-h);
+  cursor:pointer;
+  user-select:none;
 }
 
 /* The vector material owns the final control height. Ordinary action copy
@@ -192,36 +154,18 @@
   outline: none;
 }
 
-:scope .nse-control-button:where(:not(.nse-control-picker-button)):focus-visible::before,
-:scope:is(.nse-control-button:where(:not(.nse-control-picker-button)):focus-visible::before),
-:scope.nse-control-button:where(:not(.nse-control-picker-button)):focus-visible::before {
-  box-shadow: var(--nse-atmo-btn-shadow),
-    0 0 0 2px rgba(76, 164, 255, 0.95),
-    0 0 0 4px rgba(108, 188, 255, 0.34),
-    0 0 9px 4px rgba(62, 151, 247, 0.55);
-}
+
 
 /* Disabled labels dim with the face, as the raster skin's do: white tones to
    56% white, the light tone to #777. The paint rules above restate `color`,
    so without these a disabled button kept its enabled, full-white label. */
-:scope .nse-control-button:where(:not(.nse-control-picker-button)):disabled,
-:scope:is(.nse-control-button:where(:not(.nse-control-picker-button)):disabled),
-:scope.nse-control-button:where(:not(.nse-control-picker-button)):disabled {
-  cursor: default;
-  color: rgba(255, 255, 255, 0.56);
+:scope .nse-control-button:where(:not(.nse-control-picker-button)):disabled,:scope:is(.nse-control-button:where(:not(.nse-control-picker-button)):disabled),:scope.nse-control-button:where(:not(.nse-control-picker-button)):disabled {
+  cursor:default;
 }
 
-:scope .nse-control-button:where(:not(.nse-control-picker-button))[data-tone="light"]:disabled,
-:scope:is(.nse-control-button:where(:not(.nse-control-picker-button))[data-tone="light"]:disabled),
-:scope.nse-control-button:where(:not(.nse-control-picker-button))[data-tone="light"]:disabled {
-  color: #777;
-}
 
-:scope .nse-control-button:where(:not(.nse-control-picker-button))[data-tone="dark"]:disabled,
-:scope:is(.nse-control-button:where(:not(.nse-control-picker-button))[data-tone="dark"]:disabled),
-:scope.nse-control-button:where(:not(.nse-control-picker-button))[data-tone="dark"]:disabled {
-  color: rgba(255, 255, 255, 0.56);
-}
+
+
 
 :scope .nse-control-button:where(:not(.nse-control-picker-button))::before,
 :scope:is(.nse-control-button:where(:not(.nse-control-picker-button))::before),
@@ -239,16 +183,8 @@
    so the rim band between stroke and fill stays unpainted for ::after —
    every translucent ink still composites exactly once). 1px horizontal inset
    matches the sprite (its outermost column is ~transparent). */
-:scope .nse-control-button:where(:not(.nse-control-picker-button))::before,
-:scope:is(.nse-control-button:where(:not(.nse-control-picker-button))::before),
-:scope.nse-control-button:where(:not(.nse-control-picker-button))::before {
-  inset: 3px 1px;
-  border-radius: 16px;
-  border: 2px solid;
-  border-color: var(--nse-atmo-btn-stroke-t) var(--nse-atmo-btn-stroke-side) var(--nse-atmo-btn-stroke-b);
-  padding: 2px;
-  background: linear-gradient(var(--nse-atmo-btn-fill-a), var(--nse-atmo-btn-fill-b)) content-box;
-  box-shadow: var(--nse-atmo-btn-shadow);
+:scope .nse-control-button:where(:not(.nse-control-picker-button))::before,:scope:is(.nse-control-button:where(:not(.nse-control-picker-button))::before),:scope.nse-control-button:where(:not(.nse-control-picker-button))::before {
+  inset:3px 1px;
 }
 
 /* Inner pill: the rim as a masked 2px gradient BAND — constant thickness
@@ -256,143 +192,35 @@
    border), but painted as a vertical gradient so the bright bevel rolls
    down the cap arcs (sprite col 6: bright #99–#74 until y≈13) and dissolves
    into the fill tone, rather than joining side colours in hard diagonals. */
-:scope .nse-control-button:where(:not(.nse-control-picker-button))::after,
-:scope:is(.nse-control-button:where(:not(.nse-control-picker-button))::after),
-:scope.nse-control-button:where(:not(.nse-control-picker-button))::after {
-  inset: 5px 3px;
-  border-radius: 14px;
-  border: 2px solid transparent;
-  /* Below the bright hold, the stops reproduce the FILL's own ramp at the
-     same absolute heights (band box sits 2px outside the content box), so
-     the band vanishes against the fill at mid-height and only the wrap
-     reads. */
-  background: linear-gradient(
-    var(--nse-atmo-btn-bevel) 0, var(--nse-atmo-btn-bevel) 2px,
-    color-mix(in srgb, var(--nse-atmo-btn-bevel) 70%, var(--nse-atmo-btn-fill-a)) 10px,
-    color-mix(in srgb, var(--nse-atmo-btn-fill-b) 42%, var(--nse-atmo-btn-fill-a)) 17px,
-    color-mix(in srgb, var(--nse-atmo-btn-fill-b) 72%, var(--nse-atmo-btn-fill-a)) calc(100% - 12px),
-    var(--nse-atmo-btn-fill-b) calc(100% - 3px),
-    var(--nse-atmo-btn-shoe) calc(100% - 2px), var(--nse-atmo-btn-shoe) 100%
-  ) border-box;
-  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-  mask-composite: exclude;
+:scope .nse-control-button:where(:not(.nse-control-picker-button))::after,:scope:is(.nse-control-button:where(:not(.nse-control-picker-button))::after),:scope.nse-control-button:where(:not(.nse-control-picker-button))::after {
+  inset:5px 3px;
 }
 
-:scope .nse-control-button:where(:not(.nse-control-picker-button))[data-tone="light"],
-:scope:is(.nse-control-button:where(:not(.nse-control-picker-button))[data-tone="light"]),
-:scope.nse-control-button:where(:not(.nse-control-picker-button))[data-tone="light"] {
-  --nse-atmo-btn-stroke-t: rgba(0, 0, 0, 0.44);
-  --nse-atmo-btn-stroke-side: rgba(0, 0, 0, 0.4);
-  --nse-atmo-btn-stroke-b: rgba(0, 0, 0, 0.57);
-  --nse-atmo-btn-bevel: rgba(232, 232, 232, 0.77);
-  --nse-atmo-btn-rim-side: rgba(207, 207, 207, 0.77);
-  --nse-atmo-btn-shoe: rgba(171, 171, 171, 0.77);
-  --nse-atmo-btn-fill-a: rgba(185, 185, 185, 0.88);
-  --nse-atmo-btn-fill-b: rgba(222, 222, 222, 0.88);
-  --nse-atmo-btn-down-stroke-t: rgba(0, 0, 0, 0.58);
-  --nse-atmo-btn-down-stroke-side: rgba(0, 0, 0, 0.48);
-  --nse-atmo-btn-down-stroke-b: rgba(0, 0, 0, 0.44);
-  --nse-atmo-btn-down-a: rgba(89, 89, 89, 0.83);
-  --nse-atmo-btn-down-a2: rgba(116, 116, 116, 0.83);
-  --nse-atmo-btn-down-b: rgba(145, 145, 145, 0.83);
-  --nse-atmo-btn-down-b2: rgba(136, 136, 136, 0.83);
-  --nse-atmo-btn-down-side: rgba(127, 127, 127, 0.83);
-  color: #332;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.76);
-}
 
-:scope .nse-control-button:where(:not(.nse-control-picker-button))[data-tone="dark"],
-:scope:is(.nse-control-button:where(:not(.nse-control-picker-button))[data-tone="dark"]),
-:scope.nse-control-button:where(:not(.nse-control-picker-button))[data-tone="dark"] {
-  --nse-atmo-btn-bevel: rgba(85, 85, 85, 0.82);
-  --nse-atmo-btn-rim-side: rgba(56, 56, 56, 0.82);
-  --nse-atmo-btn-shoe: rgba(38, 38, 38, 0.82);
-  --nse-atmo-btn-fill-a: rgba(42, 42, 42, 0.91);
-  --nse-atmo-btn-fill-b: rgba(70, 70, 70, 0.91);
-  color: #fff;
-}
 
-:scope .nse-control-button:where(:not(.nse-control-picker-button))[data-tone="affirmative"],
-:scope:is(.nse-control-button:where(:not(.nse-control-picker-button))[data-tone="affirmative"]),
-:scope.nse-control-button:where(:not(.nse-control-picker-button))[data-tone="affirmative"] {
-  --nse-atmo-btn-stroke-t: rgba(0, 0, 0, 0.57);
-  --nse-atmo-btn-stroke-side: rgba(0, 0, 0, 0.59);
-  --nse-atmo-btn-stroke-b: rgba(0, 0, 0, 0.78);
-  --nse-atmo-btn-bevel: #6ad056;
-  --nse-atmo-btn-rim-side: #46a337;
-  --nse-atmo-btn-shoe: #227116;
-  --nse-atmo-btn-fill-a: #248b12;
-  --nse-atmo-btn-fill-b: #4bb239;
-  --nse-atmo-btn-shadow: 0 1.5px 1.5px rgba(0, 0, 0, 0.33);
-  --nse-atmo-btn-down-a: #125805;
-  --nse-atmo-btn-down-a2: #177009;
-  --nse-atmo-btn-down-b: #358f25;
-  --nse-atmo-btn-down-b2: #328623;
-  --nse-atmo-btn-down-side: #2a831b;
-}
 
-:scope .nse-control-button:where(:not(.nse-control-picker-button))[data-tone="negative"],
-:scope:is(.nse-control-button:where(:not(.nse-control-picker-button))[data-tone="negative"]),
-:scope.nse-control-button:where(:not(.nse-control-picker-button))[data-tone="negative"] {
-  --nse-atmo-btn-stroke-t: rgba(0, 0, 0, 0.57);
-  --nse-atmo-btn-stroke-side: rgba(0, 0, 0, 0.59);
-  --nse-atmo-btn-stroke-b: rgba(0, 0, 0, 0.78);
-  --nse-atmo-btn-bevel: #e6928a;
-  --nse-atmo-btn-rim-side: #c84d43;
-  --nse-atmo-btn-shoe: #a8342c;
-  --nse-atmo-btn-fill-a: #c7342a;
-  --nse-atmo-btn-fill-b: #ea5f51;
-  --nse-atmo-btn-shadow: 0 1.5px 1.5px rgba(0, 0, 0, 0.33);
-  --nse-atmo-btn-down-a: #801c16;
-  --nse-atmo-btn-down-a2: #a4261c;
-  --nse-atmo-btn-down-b: #c1463a;
-  --nse-atmo-btn-down-b2: #b54236;
-  --nse-atmo-btn-down-side: #b03a2f;
-}
+
+
+
+
 
 /* Down (pressed / selected): stroke ring swaps alpha ladder; the rim ring
    disappears (fill reaches the stroke), so the inner pill's border wears the
    fill's own end colours; no baked drop shadow. */
-:scope .nse-control-button:where(:not(.nse-control-picker-button)):active:not([data-press-active]):not(:disabled)::before,
-:scope:is(.nse-control-button:where(:not(.nse-control-picker-button)):active:not([data-press-active]):not(:disabled)::before),
-:scope.nse-control-button:where(:not(.nse-control-picker-button)):active:not([data-press-active]):not(:disabled)::before,
-:scope .nse-control-button:where(:not(.nse-control-picker-button))[data-press-active="true"]:not(:disabled)::before,
-:scope:is(.nse-control-button:where(:not(.nse-control-picker-button))[data-press-active="true"]:not(:disabled)::before),
-:scope.nse-control-button:where(:not(.nse-control-picker-button))[data-press-active="true"]:not(:disabled)::before,
+
 :scope .nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::before,
 :scope:is(.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::before),
-:scope.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::before,
-:scope .nse-control-button:where(:not(.nse-control-picker-button))[data-pressed="true"]::before,
-:scope:is(.nse-control-button:where(:not(.nse-control-picker-button))[data-pressed="true"]::before),
-:scope.nse-control-button:where(:not(.nse-control-picker-button))[data-pressed="true"]::before {
-  border-color: var(--nse-atmo-btn-down-stroke-t) var(--nse-atmo-btn-down-stroke-side) var(--nse-atmo-btn-down-stroke-b);
-  background: linear-gradient(
-    var(--nse-atmo-btn-down-a) 0,
-    var(--nse-atmo-btn-down-a2) 2px,
-    var(--nse-atmo-btn-down-b) 100%
-  ) content-box;
-  box-shadow: none;
+:scope.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::before {
+  border-color:var(--nse-atmo-btn-down-stroke-t) var(--nse-atmo-btn-down-stroke-side) var(--nse-atmo-btn-down-stroke-b);
+  background:linear-gradient(var(--nse-atmo-btn-down-a)0,var(--nse-atmo-btn-down-a2) 2px,var(--nse-atmo-btn-down-b) 100%) content-box;
+  box-shadow:none;
 }
 
-:scope .nse-control-button:where(:not(.nse-control-picker-button)):active:not([data-press-active]):not(:disabled)::after,
-:scope:is(.nse-control-button:where(:not(.nse-control-picker-button)):active:not([data-press-active]):not(:disabled)::after),
-:scope.nse-control-button:where(:not(.nse-control-picker-button)):active:not([data-press-active]):not(:disabled)::after,
-:scope .nse-control-button:where(:not(.nse-control-picker-button))[data-press-active="true"]:not(:disabled)::after,
-:scope:is(.nse-control-button:where(:not(.nse-control-picker-button))[data-press-active="true"]:not(:disabled)::after),
-:scope.nse-control-button:where(:not(.nse-control-picker-button))[data-press-active="true"]:not(:disabled)::after,
+
 :scope .nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::after,
 :scope:is(.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::after),
-:scope.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::after,
-:scope .nse-control-button:where(:not(.nse-control-picker-button))[data-pressed="true"]::after,
-:scope:is(.nse-control-button:where(:not(.nse-control-picker-button))[data-pressed="true"]::after),
-:scope.nse-control-button:where(:not(.nse-control-picker-button))[data-pressed="true"]::after {
-  background: linear-gradient(
-    var(--nse-atmo-btn-down-a) 0,
-    var(--nse-atmo-btn-down-side) 50%,
-    var(--nse-atmo-btn-down-b2) 100%
-  ) border-box;
+:scope.nse-control-button:where(:not(.nse-control-picker-button))[data-selected="true"]::after {
+  background:linear-gradient(var(--nse-atmo-btn-down-a)0,var(--nse-atmo-btn-down-side) 50%,var(--nse-atmo-btn-down-b2) 100%) border-box;
 }
 
 /* WebKit can retain the native :active state after a held pointer leaves a
@@ -431,14 +259,7 @@
 }
 
 /* Disabled band = the up-state art at ≈40% opacity (measured 0.36/0.91). */
-:scope .nse-control-button:where(:not(.nse-control-picker-button)):disabled::before,
-:scope:is(.nse-control-button:where(:not(.nse-control-picker-button)):disabled::before),
-:scope.nse-control-button:where(:not(.nse-control-picker-button)):disabled::before,
-:scope .nse-control-button:where(:not(.nse-control-picker-button)):disabled::after,
-:scope:is(.nse-control-button:where(:not(.nse-control-picker-button)):disabled::after),
-:scope.nse-control-button:where(:not(.nse-control-picker-button)):disabled::after {
-  opacity: 0.4;
-}
+
 
 /* ============================================================================
    System alert, traced from Popup{Dark,Light}Background.png (1071×700, sliced
@@ -1499,69 +1320,38 @@
    (grey pressed fill), pill-focus (grey expanded pill, shared with fields).
    ========================================================================= */
 
-:scope .nse-control-picker-button,
-:scope:is(.nse-control-picker-button),
-:scope.nse-control-picker-button {
-  position: relative;
-  isolation: isolate;
-  border: 0;
-  padding: 19px; /* replaces the sprite skin's 19px transparent border */
+:scope .nse-control-picker-button,:scope:is(.nse-control-picker-button),:scope.nse-control-picker-button {
+  position:relative;
+  isolation:isolate;
 }
 
 /* Outer stroke ring + white underline (interior stays transparent). */
-:scope .nse-control-picker-button::before,
-:scope:is(.nse-control-picker-button::before),
-:scope.nse-control-picker-button::before {
-  content: "";
-  position: absolute;
-  inset: 4px 1px;
-  z-index: -1;
-  pointer-events: none;
-  border-radius: 10px;
-  border: 1px solid;
-  border-color: var(--nse-atmo-picker-stroke, rgba(0, 0, 0, 0.22) rgba(0, 0, 0, 0.24) rgba(0, 0, 0, 0.27));
-  background: var(--nse-atmo-picker-fill, none) padding-box;
-  box-shadow: 0 1px 0 var(--nse-atmo-picker-under, rgba(255, 255, 255, 0.4));
+:scope .nse-control-picker-button::before,:scope:is(.nse-control-picker-button::before),:scope.nse-control-picker-button::before {
+  content:"";
+  position:absolute;
+  inset:4px 1px;
+  z-index:-1;
+  pointer-events:none;
 }
 
 /* Concentric white bevel ring just inside the stroke. */
-:scope .nse-control-picker-button::after,
-:scope:is(.nse-control-picker-button::after),
-:scope.nse-control-picker-button::after {
-  content: "";
-  position: absolute;
-  inset: 5px 2px;
-  z-index: -1;
-  pointer-events: none;
-  border-radius: 9px;
-  border: 1px solid;
-  border-color: rgba(255, 255, 255, 0.48) rgba(255, 255, 255, 0.11) rgba(255, 255, 255, 0.11);
+:scope .nse-control-picker-button::after,:scope:is(.nse-control-picker-button::after),:scope.nse-control-picker-button::after {
+  content:"";
+  position:absolute;
+  inset:5px 2px;
+  z-index:-1;
+  pointer-events:none;
 }
 
 /* Pressed: pill-downstate's opaque grey fill (its own bevel/floor rows
    replace the outline bevel ring). */
-:scope .nse-control-picker-button:active::before,
-:scope:is(.nse-control-picker-button:active::before),
-:scope.nse-control-picker-button:active::before,
-:scope .nse-control-picker-button[data-pressed="true"]::before,
-:scope:is(.nse-control-picker-button[data-pressed="true"]::before),
-:scope.nse-control-picker-button[data-pressed="true"]::before {
-  background: var(--nse-atmo-picker-pressed-fill, linear-gradient(
-    #dbdbdb 0, #dbdbdb 1px, #bbbbbb 1px,
-    #bbbbbb calc(100% - 1px), #c2c2c2 100%
-  )) padding-box;
-}
 
-:scope .nse-control-picker-button:active::after,
-:scope:is(.nse-control-picker-button:active::after),
-:scope.nse-control-picker-button:active::after,
-:scope .nse-control-picker-button[data-pressed="true"]::after,
-:scope:is(.nse-control-picker-button[data-pressed="true"]::after),
-:scope.nse-control-picker-button[data-pressed="true"]::after,
+
+
 :scope .nse-control-picker-button[aria-expanded="true"]::after,
 :scope:is(.nse-control-picker-button[aria-expanded="true"]::after),
 :scope.nse-control-picker-button[aria-expanded="true"]::after {
-  opacity: 0;
+  opacity:0;
 }
 
 /* Expanded: the grey focus pill (background-pill-focus.png). */
@@ -2666,12 +2456,10 @@
   --nse-atmo-svg-si-only-focus: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='51' height='50' viewBox='0 0 51 50'><defs><linearGradient id='r1' x1='0' y1='0' x2='0' y2='50' gradientUnits='userSpaceOnUse'><stop offset='9%25' stop-color='rgb(0,0,0)'/><stop offset='11%25' stop-color='rgb(27,27,27)'/><stop offset='17%25' stop-color='rgb(42,42,42)'/><stop offset='23%25' stop-color='rgb(34,34,34)'/><stop offset='29%25' stop-color='rgb(20,20,20)'/><stop offset='35%25' stop-color='rgb(9,9,9)'/><stop offset='41%25' stop-color='rgb(1,1,1)'/><stop offset='47%25' stop-color='rgb(0,0,0)'/><stop offset='53%25' stop-color='rgb(1,1,1)'/><stop offset='59%25' stop-color='rgb(4,4,4)'/><stop offset='65%25' stop-color='rgb(4,4,4)'/><stop offset='71%25' stop-color='rgb(7,7,7)'/><stop offset='77%25' stop-color='rgb(8,8,8)'/><stop offset='83%25' stop-color='rgb(9,9,9)'/><stop offset='89%25' stop-color='rgb(5,5,5)'/><stop offset='91%25' stop-color='rgb(0,0,0)'/></linearGradient><linearGradient id='r1a' x1='0' y1='0' x2='0' y2='50' gradientUnits='userSpaceOnUse'><stop offset='9%25' stop-color='rgb(218,218,218)'/><stop offset='11%25' stop-color='rgb(198,198,198)'/><stop offset='17%25' stop-color='rgb(198,198,198)'/><stop offset='23%25' stop-color='rgb(199,199,199)'/><stop offset='29%25' stop-color='rgb(192,192,192)'/><stop offset='35%25' stop-color='rgb(195,195,195)'/><stop offset='41%25' stop-color='rgb(183,183,183)'/><stop offset='47%25' stop-color='rgb(200,200,200)'/><stop offset='53%25' stop-color='rgb(198,198,198)'/><stop offset='59%25' stop-color='rgb(178,178,178)'/><stop offset='65%25' stop-color='rgb(185,185,185)'/><stop offset='71%25' stop-color='rgb(181,181,181)'/><stop offset='77%25' stop-color='rgb(183,183,183)'/><stop offset='83%25' stop-color='rgb(177,177,177)'/><stop offset='89%25' stop-color='rgb(181,181,181)'/><stop offset='91%25' stop-color='rgb(203,203,203)'/></linearGradient><path id='b0' d='M25.5 4L26.5 4L27.5 4L28.5 4L29.5 4.4L30.5 4.6L31.5 4.9L32.4 5.1L33.4 5.5L34.3 5.9L35.2 6.3L36.1 6.8L37 7.3L37.8 7.9L38.7 8.5L39.5 9.1L40.2 9.8L41 10.5L41.7 11.2L42.3 12L43 12.8L43.6 13.7L44.1 14.6L44.6 15.5L45.1 16.4L45.5 17.4L45.8 18.3L46.1 19.3L46.4 20.3L46.6 21.4L46.8 22.4L46.9 23.4L46.9 24.5L47 25.6L46.9 26.6L46.8 27.7L46.7 28.7L46.5 29.7L46.2 30.8L45.9 31.8L45.5 32.8L45.1 33.8L44.7 34.7L44.2 35.7L43.6 36.6L43 37.5L42.3 38.3L41.6 39.1L40.9 39.9L40.1 40.6L39.3 41.3L38.5 42L37.6 42.7L36.7 43.2L35.8 43.8L34.8 44.2L33.9 44.7L32.9 45L31.8 45.4L30.8 45.7L29.8 46L28.7 46L27.6 46L26.6 46L25.5 46L24.4 46L23.4 46L22.3 46L21.2 46L20.2 45.7L19.2 45.4L18.1 45L17.1 44.7L16.2 44.2L15.2 43.8L14.3 43.2L13.4 42.7L12.5 42L11.7 41.3L10.9 40.6L10.1 39.9L9.4 39.1L8.7 38.3L8 37.5L7.4 36.6L6.8 35.7L6.3 34.7L5.9 33.8L5.5 32.8L5.1 31.8L4.8 30.8L4.5 29.7L4.3 28.7L4.2 27.7L4.1 26.6L4 25.6L4.1 24.5L4.1 23.4L4.2 22.4L4.4 21.4L4.6 20.3L4.9 19.3L5.2 18.3L5.5 17.4L5.9 16.4L6.4 15.5L6.9 14.6L7.4 13.7L8 12.8L8.7 12L9.3 11.2L10 10.5L10.8 9.8L11.5 9.1L12.3 8.5L13.2 7.9L14 7.3L14.9 6.8L15.8 6.3L16.7 5.9L17.6 5.5L18.6 5.2L19.5 4.9L20.5 4.6L21.5 4L22.5 4L23.5 4L24.5 4L25.5 4Z'/><linearGradient id='r2' x1='0' y1='0' x2='0' y2='50' gradientUnits='userSpaceOnUse'><stop offset='11%25' stop-color='rgb(177,177,177)'/><stop offset='17%25' stop-color='rgb(133,133,133)'/><stop offset='23%25' stop-color='rgb(114,114,114)'/><stop offset='29%25' stop-color='rgb(93,93,93)'/><stop offset='35%25' stop-color='rgb(67,67,67)'/><stop offset='41%25' stop-color='rgb(46,46,46)'/><stop offset='47%25' stop-color='rgb(17,17,17)'/><stop offset='53%25' stop-color='rgb(19,19,19)'/><stop offset='59%25' stop-color='rgb(30,30,30)'/><stop offset='65%25' stop-color='rgb(32,32,32)'/><stop offset='71%25' stop-color='rgb(41,41,41)'/><stop offset='77%25' stop-color='rgb(53,53,53)'/><stop offset='83%25' stop-color='rgb(57,57,57)'/><stop offset='89%25' stop-color='rgb(91,91,91)'/></linearGradient><linearGradient id='r2a' x1='0' y1='0' x2='0' y2='50' gradientUnits='userSpaceOnUse'><stop offset='11%25' stop-color='rgb(242,242,242)'/><stop offset='17%25' stop-color='rgb(234,234,234)'/><stop offset='23%25' stop-color='rgb(231,231,231)'/><stop offset='29%25' stop-color='rgb(227,227,227)'/><stop offset='35%25' stop-color='rgb(222,222,222)'/><stop offset='41%25' stop-color='rgb(218,218,218)'/><stop offset='47%25' stop-color='rgb(212,212,212)'/><stop offset='53%25' stop-color='rgb(211,211,211)'/><stop offset='59%25' stop-color='rgb(212,212,212)'/><stop offset='65%25' stop-color='rgb(212,212,212)'/><stop offset='71%25' stop-color='rgb(213,213,213)'/><stop offset='77%25' stop-color='rgb(216,216,216)'/><stop offset='83%25' stop-color='rgb(217,217,217)'/><stop offset='89%25' stop-color='rgb(227,227,227)'/></linearGradient><path id='b1' d='M25.5 5L26.4 5L27.4 5L28.4 5L29.3 5.4L30.2 5.6L31.2 5.8L32.1 6.1L33 6.4L33.9 6.8L34.8 7.2L35.6 7.6L36.5 8.1L37.3 8.7L38.1 9.3L38.8 9.9L39.5 10.5L40.3 11.2L40.9 11.9L41.6 12.6L42.2 13.4L42.7 14.2L43.2 15.1L43.7 15.9L44.1 16.8L44.5 17.7L44.9 18.7L45.2 19.6L45.4 20.6L45.7 21.5L45.8 22.5L45.9 23.5L45.9 24.5L46 25.5L45.9 26.5L45.8 27.5L45.7 28.5L45.5 29.5L45.2 30.5L44.9 31.5L44.6 32.4L44.2 33.4L43.8 34.3L43.3 35.2L42.8 36L42.2 36.9L41.6 37.7L40.9 38.5L40.2 39.2L39.4 39.9L38.7 40.6L37.9 41.2L37.1 41.8L36.2 42.4L35.3 42.9L34.4 43.3L33.5 43.7L32.5 44.1L31.6 44.4L30.6 44.7L29.6 45L28.6 45L27.6 45L26.6 45L25.5 45L24.4 45L23.4 45L22.4 45L21.4 45L20.4 44.7L19.4 44.4L18.5 44.1L17.5 43.7L16.6 43.3L15.7 42.9L14.8 42.4L13.9 41.8L13.1 41.2L12.3 40.6L11.6 39.9L10.8 39.2L10.1 38.5L9.4 37.7L8.8 36.9L8.2 36L7.7 35.2L7.2 34.3L6.8 33.4L6.4 32.4L6.1 31.5L5.8 30.5L5.5 29.5L5.3 28.5L5.2 27.5L5.1 26.5L5 25.5L5.1 24.5L5.1 23.5L5.2 22.5L5.3 21.5L5.6 20.6L5.8 19.6L6.1 18.7L6.5 17.7L6.9 16.8L7.3 15.9L7.8 15.1L8.3 14.2L8.8 13.4L9.4 12.6L10.1 11.9L10.7 11.2L11.5 10.5L12.2 9.9L12.9 9.3L13.7 8.7L14.5 8.1L15.4 7.6L16.2 7.2L17.1 6.8L18 6.4L18.9 6.1L19.8 5.8L20.8 5.6L21.7 5L22.6 5L23.6 5L24.5 5L25.5 5Z'/><linearGradient id='r3' x1='0' y1='0' x2='0' y2='50' gradientUnits='userSpaceOnUse'><stop offset='13%25' stop-color='rgb(112,112,112)'/><stop offset='17%25' stop-color='rgb(90,90,90)'/><stop offset='23%25' stop-color='rgb(91,91,91)'/><stop offset='29%25' stop-color='rgb(93,93,93)'/><stop offset='35%25' stop-color='rgb(94,94,94)'/><stop offset='41%25' stop-color='rgb(94,94,94)'/><stop offset='47%25' stop-color='rgb(107,107,107)'/><stop offset='53%25' stop-color='rgb(103,103,103)'/><stop offset='59%25' stop-color='rgb(76,76,76)'/><stop offset='65%25' stop-color='rgb(78,78,78)'/><stop offset='71%25' stop-color='rgb(72,72,72)'/><stop offset='77%25' stop-color='rgb(77,77,77)'/><stop offset='83%25' stop-color='rgb(81,81,81)'/><stop offset='87%25' stop-color='rgb(119,119,119)'/></linearGradient><linearGradient id='r3a' x1='0' y1='0' x2='0' y2='50' gradientUnits='userSpaceOnUse'><stop offset='13%25' stop-color='rgb(229,229,229)'/><stop offset='17%25' stop-color='rgb(238,238,238)'/><stop offset='23%25' stop-color='rgb(238,238,238)'/><stop offset='29%25' stop-color='rgb(235,235,235)'/><stop offset='35%25' stop-color='rgb(234,234,234)'/><stop offset='41%25' stop-color='rgb(232,232,232)'/><stop offset='47%25' stop-color='rgb(227,227,227)'/><stop offset='53%25' stop-color='rgb(225,225,225)'/><stop offset='59%25' stop-color='rgb(226,226,226)'/><stop offset='65%25' stop-color='rgb(221,221,221)'/><stop offset='71%25' stop-color='rgb(220,220,220)'/><stop offset='77%25' stop-color='rgb(221,221,221)'/><stop offset='83%25' stop-color='rgb(223,223,223)'/><stop offset='87%25' stop-color='rgb(233,233,233)'/></linearGradient><path id='b2' d='M25.5 6L26.3 6L27.3 6L28.2 6L29.1 6.4L30 6.6L30.8 6.8L31.8 7L32.7 7.3L33.5 7.7L34.3 8.1L35.1 8.5L35.9 9L36.7 9.5L37.4 10L38.2 10.6L38.9 11.3L39.5 11.9L40.2 12.6L40.8 13.3L41.4 14L41.9 14.8L42.4 15.6L42.8 16.4L43.2 17.2L43.6 18.1L43.9 19L44.2 19.9L44.5 20.8L44.7 21.7L44.8 22.7L44.9 23.6L44.9 24.6L45 25.5L44.9 26.5L44.9 27.4L44.7 28.4L44.5 29.3L44.3 30.2L44 31.2L43.7 32.1L43.3 33L42.9 33.8L42.4 34.7L41.9 35.5L41.4 36.3L40.8 37L40.1 37.8L39.5 38.5L38.8 39.2L38 39.8L37.3 40.4L36.5 41L35.7 41.5L34.9 42L34 42.4L33.1 42.8L32.2 43.2L31.3 43.4L30.4 43.7L29.5 44L28.5 44L27.5 44L26.6 44L25.5 44L24.4 44L23.5 44L22.5 44L21.5 44L20.6 43.7L19.7 43.4L18.8 43.2L17.9 42.8L17 42.4L16.1 42L15.3 41.5L14.5 41L13.7 40.4L13 39.8L12.2 39.2L11.5 38.5L10.9 37.8L10.2 37L9.6 36.3L9.1 35.5L8.6 34.7L8.1 33.8L7.7 33L7.3 32.1L7 31.2L6.7 30.2L6.5 29.3L6.3 28.4L6.1 27.4L6.1 26.5L6 25.5L6.1 24.6L6.1 23.6L6.2 22.7L6.3 21.7L6.5 20.8L6.8 19.9L7.1 19L7.4 18.1L7.8 17.2L8.2 16.4L8.6 15.6L9.1 14.8L9.6 14L10.2 13.3L10.8 12.6L11.5 11.9L12.1 11.2L12.8 10.6L13.6 10L14.3 9.5L15.1 9L15.9 8.5L16.7 8.1L17.5 7.7L18.3 7.3L19.3 7L20.2 6.8L21 6.6L21.9 6L22.8 6L23.7 6L24.5 6L25.5 6Z'/><linearGradient id='r4' x1='0' y1='0' x2='0' y2='50' gradientUnits='userSpaceOnUse'><stop offset='15%25' stop-color='rgb(49,49,49)'/><stop offset='17%25' stop-color='rgb(52,52,52)'/><stop offset='23%25' stop-color='rgb(56,56,56)'/><stop offset='29%25' stop-color='rgb(59,59,59)'/><stop offset='35%25' stop-color='rgb(64,64,64)'/><stop offset='41%25' stop-color='rgb(68,68,68)'/><stop offset='47%25' stop-color='rgb(67,67,67)'/><stop offset='53%25' stop-color='rgb(68,68,68)'/><stop offset='59%25' stop-color='rgb(78,78,78)'/><stop offset='65%25' stop-color='rgb(81,81,81)'/><stop offset='71%25' stop-color='rgb(83,83,83)'/><stop offset='77%25' stop-color='rgb(84,84,84)'/><stop offset='83%25' stop-color='rgb(82,82,82)'/><stop offset='85%25' stop-color='rgb(78,78,78)'/></linearGradient><linearGradient id='r4a' x1='0' y1='0' x2='0' y2='50' gradientUnits='userSpaceOnUse'><stop offset='15%25' stop-color='rgb(255,255,255)'/><stop offset='17%25' stop-color='rgb(253,253,253)'/><stop offset='23%25' stop-color='rgb(253,253,253)'/><stop offset='29%25' stop-color='rgb(252,252,252)'/><stop offset='35%25' stop-color='rgb(251,251,251)'/><stop offset='41%25' stop-color='rgb(252,252,252)'/><stop offset='47%25' stop-color='rgb(253,253,253)'/><stop offset='53%25' stop-color='rgb(253,253,253)'/><stop offset='59%25' stop-color='rgb(249,249,249)'/><stop offset='65%25' stop-color='rgb(246,246,246)'/><stop offset='71%25' stop-color='rgb(246,246,246)'/><stop offset='77%25' stop-color='rgb(246,246,246)'/><stop offset='83%25' stop-color='rgb(246,246,246)'/><stop offset='85%25' stop-color='rgb(255,255,255)'/></linearGradient><path id='b3' d='M25.5 7L26.3 7L27.1 7L28.1 7L28.9 7.3L29.7 7.5L30.5 7.7L31.5 8L32.3 8.3L33.1 8.6L33.9 9L34.7 9.4L35.4 9.8L36.1 10.3L36.8 10.8L37.5 11.4L38.2 12L38.8 12.6L39.4 13.2L40 13.9L40.5 14.6L41 15.3L41.5 16.1L41.9 16.8L42.3 17.6L42.7 18.5L43 19.3L43.2 20.2L43.5 21L43.7 21.9L43.8 22.8L43.9 23.7L44 24.6L44 25.5L43.9 26.4L43.9 27.3L43.7 28.2L43.5 29.1L43.3 30L43 30.8L42.7 31.7L42.4 32.6L42 33.4L41.6 34.2L41.1 35L40.6 35.7L40 36.4L39.4 37.1L38.8 37.8L38.1 38.4L37.4 39L36.7 39.6L35.9 40.2L35.2 40.7L34.4 41.1L33.6 41.5L32.7 41.9L31.8 42.2L31 42.5L30.2 42.7L29.3 43L28.4 43L27.5 43L26.6 43L25.5 43L24.4 43L23.5 43L22.6 43L21.7 43L20.8 42.7L20 42.5L19.2 42.2L18.3 41.9L17.4 41.5L16.6 41.1L15.8 40.7L15.1 40.2L14.3 39.6L13.6 39L12.9 38.4L12.2 37.8L11.6 37.1L11 36.4L10.4 35.7L9.9 35L9.4 34.2L9 33.4L8.6 32.6L8.3 31.7L8 30.8L7.7 30L7.5 29.1L7.3 28.2L7.1 27.3L7.1 26.4L7 25.5L7 24.6L7.1 23.7L7.2 22.8L7.3 21.9L7.5 21L7.8 20.2L8 19.3L8.3 18.5L8.7 17.6L9.1 16.8L9.5 16.1L10 15.3L10.5 14.6L11 13.9L11.6 13.2L12.2 12.6L12.8 12L13.5 11.4L14.2 10.8L14.9 10.3L15.6 9.8L16.3 9.4L17.1 9L17.9 8.6L18.7 8.3L19.7 7.9L20.5 7.7L21.3 7.5L22.1 6.9L22.9 7L23.9 7L24.5 7L25.5 7Z'/><linearGradient id='r5' x1='0' y1='0' x2='0' y2='50' gradientUnits='userSpaceOnUse'><stop offset='17%25' stop-color='rgb(77,77,77)'/><stop offset='23%25' stop-color='rgb(73,73,73)'/><stop offset='29%25' stop-color='rgb(75,75,75)'/><stop offset='35%25' stop-color='rgb(78,78,78)'/><stop offset='41%25' stop-color='rgb(84,84,84)'/><stop offset='47%25' stop-color='rgb(92,92,92)'/><stop offset='53%25' stop-color='rgb(100,100,100)'/><stop offset='59%25' stop-color='rgb(104,104,104)'/><stop offset='65%25' stop-color='rgb(108,108,108)'/><stop offset='71%25' stop-color='rgb(114,114,114)'/><stop offset='77%25' stop-color='rgb(118,118,118)'/><stop offset='83%25' stop-color='rgb(136,136,136)'/></linearGradient><linearGradient id='r5a' x1='0' y1='0' x2='0' y2='50' gradientUnits='userSpaceOnUse'><stop offset='17%25' stop-color='rgb(255,255,255)'/><stop offset='23%25' stop-color='rgb(255,255,255)'/><stop offset='29%25' stop-color='rgb(255,255,255)'/><stop offset='35%25' stop-color='rgb(255,255,255)'/><stop offset='41%25' stop-color='rgb(255,255,255)'/><stop offset='47%25' stop-color='rgb(255,255,255)'/><stop offset='53%25' stop-color='rgb(255,255,255)'/><stop offset='59%25' stop-color='rgb(255,255,255)'/><stop offset='65%25' stop-color='rgb(255,255,255)'/><stop offset='71%25' stop-color='rgb(255,255,255)'/><stop offset='77%25' stop-color='rgb(255,255,255)'/><stop offset='83%25' stop-color='rgb(255,255,255)'/></linearGradient><path id='b4' d='M25.5 8L26.2 8L27 8L27.9 8L28.7 8.3L29.5 8.5L30.2 8.7L31.2 8.9L32 9.2L32.7 9.5L33.4 9.9L34.2 10.3L34.9 10.7L35.6 11.1L36.2 11.6L36.9 12.2L37.5 12.7L38.1 13.3L38.7 13.9L39.2 14.5L39.7 15.2L40.2 15.9L40.6 16.6L41.1 17.3L41.4 18.1L41.8 18.8L42 19.6L42.3 20.5L42.5 21.3L42.7 22.1L42.8 22.9L42.9 23.8L43 24.6L43 25.5L42.9 26.3L42.9 27.2L42.7 28L42.6 28.9L42.3 29.7L42.1 30.5L41.8 31.3L41.5 32.2L41.1 32.9L40.7 33.7L40.2 34.4L39.8 35.1L39.2 35.8L38.7 36.4L38.1 37.1L37.4 37.7L36.7 38.3L36.1 38.8L35.4 39.3L34.6 39.8L33.9 40.2L33.1 40.6L32.3 41L31.5 41.3L30.7 41.5L30 41.7L29.2 42L28.3 42L27.4 42L26.6 42L25.5 42L24.4 42L23.6 42L22.7 42L21.8 42L21 41.7L20.3 41.5L19.5 41.3L18.7 41L17.9 40.6L17.1 40.2L16.4 39.8L15.6 39.3L14.9 38.8L14.3 38.3L13.6 37.7L12.9 37.1L12.3 36.4L11.8 35.8L11.2 35.1L10.8 34.4L10.3 33.7L9.9 32.9L9.5 32.2L9.2 31.4L8.9 30.5L8.7 29.7L8.4 28.9L8.3 28L8.1 27.2L8.1 26.3L8 25.5L8 24.6L8.1 23.8L8.2 22.9L8.3 22.1L8.5 21.3L8.7 20.5L9 19.6L9.3 18.8L9.6 18.1L9.9 17.3L10.4 16.6L10.8 15.9L11.3 15.2L11.8 14.5L12.3 13.9L12.9 13.3L13.5 12.7L14.1 12.2L14.8 11.6L15.4 11.1L16.1 10.7L16.8 10.3L17.6 9.9L18.3 9.5L19 9.2L20.1 8.9L20.8 8.7L21.5 8.5L22.3 7.9L23.1 8L24 8L24.5 8L25.5 8Z'/><path id='b5' d='M25.5 9L26.1 9L26.9 9L27.8 9L28.5 9.3L29.3 9.5L29.9 9.6L30.9 9.9L31.6 10.1L32.3 10.4L33 10.8L33.7 11.1L34.3 11.5L35 11.9L35.6 12.4L36.2 12.9L36.8 13.5L37.4 14L38 14.6L38.5 15.2L38.9 15.8L39.4 16.4L39.8 17.1L40.2 17.8L40.5 18.5L40.8 19.2L41.1 20L41.3 20.7L41.5 21.5L41.7 22.3L41.9 23.1L41.9 23.9L42 24.7L42 25.5L41.9 26.3L41.9 27.1L41.8 27.9L41.6 28.7L41.4 29.4L41.1 30.2L40.9 31L40.6 31.7L40.2 32.5L39.8 33.2L39.4 33.9L38.9 34.5L38.4 35.2L37.9 35.8L37.3 36.4L36.7 37L36.1 37.5L35.5 38L34.8 38.5L34.1 39L33.4 39.4L32.7 39.7L32 40L31.1 40.4L30.5 40.6L29.8 40.8L29 41L28.2 41L27.4 41L26.6 41L25.5 41L24.4 41L23.6 41L22.8 41L22 41L21.2 40.8L20.5 40.6L19.9 40.4L19 40L18.3 39.7L17.6 39.4L16.9 39L16.2 38.5L15.5 38L14.9 37.5L14.3 37L13.7 36.4L13.1 35.8L12.6 35.2L12.1 34.5L11.6 33.9L11.2 33.2L10.8 32.5L10.4 31.7L10.1 31L9.9 30.2L9.6 29.4L9.4 28.7L9.2 27.9L9.1 27.1L9.1 26.3L9 25.5L9 24.7L9.1 23.9L9.1 23.1L9.3 22.3L9.5 21.5L9.7 20.7L9.9 20L10.2 19.2L10.5 18.5L10.8 17.8L11.2 17.1L11.6 16.4L12.1 15.8L12.5 15.2L13.1 14.6L13.6 14L14.2 13.5L14.8 12.9L15.4 12.4L16 12L16.7 11.5L17.3 11.1L18 10.8L18.7 10.4L19.4 10.2L20.4 9.8L21.1 9.6L21.7 9.5L22.5 8.9L23.2 9L24.1 9L24.5 9L25.5 9Z'/><linearGradient id='f' x1='0' y1='0' x2='0' y2='50' gradientUnits='userSpaceOnUse'><stop offset='19%25' stop-color='rgb(91,91,91)'/><stop offset='21%25' stop-color='rgb(102,102,102)'/><stop offset='23%25' stop-color='rgb(111,111,111)'/><stop offset='25%25' stop-color='rgb(115,115,115)'/><stop offset='27%25' stop-color='rgb(117,117,117)'/><stop offset='29%25' stop-color='rgb(117,117,117)'/><stop offset='31%25' stop-color='rgb(119,119,119)'/><stop offset='33%25' stop-color='rgb(120,120,120)'/><stop offset='35%25' stop-color='rgb(121,121,121)'/><stop offset='37%25' stop-color='rgb(122,122,122)'/><stop offset='39%25' stop-color='rgb(123,123,123)'/><stop offset='41%25' stop-color='rgb(125,125,125)'/><stop offset='43%25' stop-color='rgb(126,126,126)'/><stop offset='45%25' stop-color='rgb(127,127,127)'/><stop offset='47%25' stop-color='rgb(129,129,129)'/><stop offset='49%25' stop-color='rgb(130,130,130)'/><stop offset='51%25' stop-color='rgb(132,132,132)'/><stop offset='53%25' stop-color='rgb(133,133,133)'/><stop offset='55%25' stop-color='rgb(134,134,134)'/><stop offset='57%25' stop-color='rgb(136,136,136)'/><stop offset='59%25' stop-color='rgb(137,137,137)'/><stop offset='61%25' stop-color='rgb(138,138,138)'/><stop offset='63%25' stop-color='rgb(140,140,140)'/><stop offset='65%25' stop-color='rgb(141,141,141)'/><stop offset='67%25' stop-color='rgb(142,142,142)'/><stop offset='69%25' stop-color='rgb(143,143,143)'/><stop offset='71%25' stop-color='rgb(144,144,144)'/><stop offset='73%25' stop-color='rgb(146,146,146)'/><stop offset='75%25' stop-color='rgb(147,147,147)'/><stop offset='77%25' stop-color='rgb(146,146,146)'/><stop offset='79%25' stop-color='rgb(145,145,145)'/><stop offset='81%25' stop-color='rgb(141,141,141)'/><stop offset='83%25' stop-color='rgb(136,136,136)'/></linearGradient><linearGradient id='fa' x1='0' y1='0' x2='0' y2='50' gradientUnits='userSpaceOnUse'><stop offset='19%25' stop-color='rgb(255,255,255)'/><stop offset='21%25' stop-color='rgb(255,255,255)'/><stop offset='23%25' stop-color='rgb(255,255,255)'/><stop offset='25%25' stop-color='rgb(255,255,255)'/><stop offset='27%25' stop-color='rgb(255,255,255)'/><stop offset='29%25' stop-color='rgb(255,255,255)'/><stop offset='31%25' stop-color='rgb(255,255,255)'/><stop offset='33%25' stop-color='rgb(255,255,255)'/><stop offset='35%25' stop-color='rgb(255,255,255)'/><stop offset='37%25' stop-color='rgb(255,255,255)'/><stop offset='39%25' stop-color='rgb(255,255,255)'/><stop offset='41%25' stop-color='rgb(255,255,255)'/><stop offset='43%25' stop-color='rgb(255,255,255)'/><stop offset='45%25' stop-color='rgb(255,255,255)'/><stop offset='47%25' stop-color='rgb(255,255,255)'/><stop offset='49%25' stop-color='rgb(255,255,255)'/><stop offset='51%25' stop-color='rgb(255,255,255)'/><stop offset='53%25' stop-color='rgb(255,255,255)'/><stop offset='55%25' stop-color='rgb(255,255,255)'/><stop offset='57%25' stop-color='rgb(255,255,255)'/><stop offset='59%25' stop-color='rgb(255,255,255)'/><stop offset='61%25' stop-color='rgb(255,255,255)'/><stop offset='63%25' stop-color='rgb(255,255,255)'/><stop offset='65%25' stop-color='rgb(255,255,255)'/><stop offset='67%25' stop-color='rgb(255,255,255)'/><stop offset='69%25' stop-color='rgb(255,255,255)'/><stop offset='71%25' stop-color='rgb(255,255,255)'/><stop offset='73%25' stop-color='rgb(255,255,255)'/><stop offset='75%25' stop-color='rgb(255,255,255)'/><stop offset='77%25' stop-color='rgb(255,255,255)'/><stop offset='79%25' stop-color='rgb(255,255,255)'/><stop offset='81%25' stop-color='rgb(255,255,255)'/><stop offset='83%25' stop-color='rgb(255,255,255)'/></linearGradient><clipPath id='oc' clip-rule='evenodd'><path d='M-8 -8H59V58H-8Z M25.5 4L26.5 4L27.5 4L28.5 4L29.5 4.4L30.5 4.6L31.5 4.9L32.4 5.1L33.4 5.5L34.3 5.9L35.2 6.3L36.1 6.8L37 7.3L37.8 7.9L38.7 8.5L39.5 9.1L40.2 9.8L41 10.5L41.7 11.2L42.3 12L43 12.8L43.6 13.7L44.1 14.6L44.6 15.5L45.1 16.4L45.5 17.4L45.8 18.3L46.1 19.3L46.4 20.3L46.6 21.4L46.8 22.4L46.9 23.4L46.9 24.5L47 25.6L46.9 26.6L46.8 27.7L46.7 28.7L46.5 29.7L46.2 30.8L45.9 31.8L45.5 32.8L45.1 33.8L44.7 34.7L44.2 35.7L43.6 36.6L43 37.5L42.3 38.3L41.6 39.1L40.9 39.9L40.1 40.6L39.3 41.3L38.5 42L37.6 42.7L36.7 43.2L35.8 43.8L34.8 44.2L33.9 44.7L32.9 45L31.8 45.4L30.8 45.7L29.8 46L28.7 46L27.6 46L26.6 46L25.5 46L24.4 46L23.4 46L22.3 46L21.2 46L20.2 45.7L19.2 45.4L18.1 45L17.1 44.7L16.2 44.2L15.2 43.8L14.3 43.2L13.4 42.7L12.5 42L11.7 41.3L10.9 40.6L10.1 39.9L9.4 39.1L8.7 38.3L8 37.5L7.4 36.6L6.8 35.7L6.3 34.7L5.9 33.8L5.5 32.8L5.1 31.8L4.8 30.8L4.5 29.7L4.3 28.7L4.2 27.7L4.1 26.6L4 25.6L4.1 24.5L4.1 23.4L4.2 22.4L4.4 21.4L4.6 20.3L4.9 19.3L5.2 18.3L5.5 17.4L5.9 16.4L6.4 15.5L6.9 14.6L7.4 13.7L8 12.8L8.7 12L9.3 11.2L10 10.5L10.8 9.8L11.5 9.1L12.3 8.5L13.2 7.9L14 7.3L14.9 6.8L15.8 6.3L16.7 5.9L17.6 5.5L18.6 5.2L19.5 4.9L20.5 4.6L21.5 4L22.5 4L23.5 4L24.5 4L25.5 4Z' clip-rule='evenodd'/></clipPath><filter id='sf' x='-15%25' y='-15%25' width='130%25' height='130%25'><feGaussianBlur stdDeviation='0.8'/></filter><mask id='M' maskUnits='userSpaceOnUse' x='0' y='0' width='51' height='50' color-interpolation='sRGB' style='color-interpolation:sRGB'><use href='%23b0' fill='url(%23r1a)'/><use href='%23b1' fill='url(%23r2a)'/><use href='%23b2' fill='url(%23r3a)'/><use href='%23b3' fill='url(%23r4a)'/><use href='%23b4' fill='url(%23r5a)'/><use href='%23b5' fill='url(%23fa)'/></mask></defs><g><g clip-path='url(%23oc)'><g filter='url(%23sf)'><path d='M25.5 4L26.5 4L27.5 4L28.5 4L29.5 4.4L30.5 4.6L31.5 4.9L32.4 5.1L33.4 5.5L34.3 5.9L35.2 6.3L36.1 6.8L37 7.3L37.8 7.9L38.7 8.5L39.5 9.1L40.2 9.8L41 10.5L41.7 11.2L42.3 12L43 12.8L43.6 13.7L44.1 14.6L44.6 15.5L45.1 16.4L45.5 17.4L45.8 18.3L46.1 19.3L46.4 20.3L46.6 21.4L46.8 22.4L46.9 23.4L46.9 24.5L47 25.6L46.9 26.6L46.8 27.7L46.7 28.7L46.5 29.7L46.2 30.8L45.9 31.8L45.5 32.8L45.1 33.8L44.7 34.7L44.2 35.7L43.6 36.6L43 37.5L42.3 38.3L41.6 39.1L40.9 39.9L40.1 40.6L39.3 41.3L38.5 42L37.6 42.7L36.7 43.2L35.8 43.8L34.8 44.2L33.9 44.7L32.9 45L31.8 45.4L30.8 45.7L29.8 46L28.7 46L27.6 46L26.6 46L25.5 46L24.4 46L23.4 46L22.3 46L21.2 46L20.2 45.7L19.2 45.4L18.1 45L17.1 44.7L16.2 44.2L15.2 43.8L14.3 43.2L13.4 42.7L12.5 42L11.7 41.3L10.9 40.6L10.1 39.9L9.4 39.1L8.7 38.3L8 37.5L7.4 36.6L6.8 35.7L6.3 34.7L5.9 33.8L5.5 32.8L5.1 31.8L4.8 30.8L4.5 29.7L4.3 28.7L4.2 27.7L4.1 26.6L4 25.6L4.1 24.5L4.1 23.4L4.2 22.4L4.4 21.4L4.6 20.3L4.9 19.3L5.2 18.3L5.5 17.4L5.9 16.4L6.4 15.5L6.9 14.6L7.4 13.7L8 12.8L8.7 12L9.3 11.2L10 10.5L10.8 9.8L11.5 9.1L12.3 8.5L13.2 7.9L14 7.3L14.9 6.8L15.8 6.3L16.7 5.9L17.6 5.5L18.6 5.2L19.5 4.9L20.5 4.6L21.5 4L22.5 4L23.5 4L24.5 4L25.5 4Z' transform='translate(0 1)' fill='%23000' fill-opacity='0.147'/><path d='M25.5 4L26.5 4L27.5 4L28.5 4L29.5 4.4L30.5 4.6L31.5 4.9L32.4 5.1L33.4 5.5L34.3 5.9L35.2 6.3L36.1 6.8L37 7.3L37.8 7.9L38.7 8.5L39.5 9.1L40.2 9.8L41 10.5L41.7 11.2L42.3 12L43 12.8L43.6 13.7L44.1 14.6L44.6 15.5L45.1 16.4L45.5 17.4L45.8 18.3L46.1 19.3L46.4 20.3L46.6 21.4L46.8 22.4L46.9 23.4L46.9 24.5L47 25.6L46.9 26.6L46.8 27.7L46.7 28.7L46.5 29.7L46.2 30.8L45.9 31.8L45.5 32.8L45.1 33.8L44.7 34.7L44.2 35.7L43.6 36.6L43 37.5L42.3 38.3L41.6 39.1L40.9 39.9L40.1 40.6L39.3 41.3L38.5 42L37.6 42.7L36.7 43.2L35.8 43.8L34.8 44.2L33.9 44.7L32.9 45L31.8 45.4L30.8 45.7L29.8 46L28.7 46L27.6 46L26.6 46L25.5 46L24.4 46L23.4 46L22.3 46L21.2 46L20.2 45.7L19.2 45.4L18.1 45L17.1 44.7L16.2 44.2L15.2 43.8L14.3 43.2L13.4 42.7L12.5 42L11.7 41.3L10.9 40.6L10.1 39.9L9.4 39.1L8.7 38.3L8 37.5L7.4 36.6L6.8 35.7L6.3 34.7L5.9 33.8L5.5 32.8L5.1 31.8L4.8 30.8L4.5 29.7L4.3 28.7L4.2 27.7L4.1 26.6L4 25.6L4.1 24.5L4.1 23.4L4.2 22.4L4.4 21.4L4.6 20.3L4.9 19.3L5.2 18.3L5.5 17.4L5.9 16.4L6.4 15.5L6.9 14.6L7.4 13.7L8 12.8L8.7 12L9.3 11.2L10 10.5L10.8 9.8L11.5 9.1L12.3 8.5L13.2 7.9L14 7.3L14.9 6.8L15.8 6.3L16.7 5.9L17.6 5.5L18.6 5.2L19.5 4.9L20.5 4.6L21.5 4L22.5 4L23.5 4L24.5 4L25.5 4Z' transform='translate(0 2)' fill='%23000' fill-opacity='0.1761'/><path d='M25.5 4L26.5 4L27.5 4L28.5 4L29.5 4.4L30.5 4.6L31.5 4.9L32.4 5.1L33.4 5.5L34.3 5.9L35.2 6.3L36.1 6.8L37 7.3L37.8 7.9L38.7 8.5L39.5 9.1L40.2 9.8L41 10.5L41.7 11.2L42.3 12L43 12.8L43.6 13.7L44.1 14.6L44.6 15.5L45.1 16.4L45.5 17.4L45.8 18.3L46.1 19.3L46.4 20.3L46.6 21.4L46.8 22.4L46.9 23.4L46.9 24.5L47 25.6L46.9 26.6L46.8 27.7L46.7 28.7L46.5 29.7L46.2 30.8L45.9 31.8L45.5 32.8L45.1 33.8L44.7 34.7L44.2 35.7L43.6 36.6L43 37.5L42.3 38.3L41.6 39.1L40.9 39.9L40.1 40.6L39.3 41.3L38.5 42L37.6 42.7L36.7 43.2L35.8 43.8L34.8 44.2L33.9 44.7L32.9 45L31.8 45.4L30.8 45.7L29.8 46L28.7 46L27.6 46L26.6 46L25.5 46L24.4 46L23.4 46L22.3 46L21.2 46L20.2 45.7L19.2 45.4L18.1 45L17.1 44.7L16.2 44.2L15.2 43.8L14.3 43.2L13.4 42.7L12.5 42L11.7 41.3L10.9 40.6L10.1 39.9L9.4 39.1L8.7 38.3L8 37.5L7.4 36.6L6.8 35.7L6.3 34.7L5.9 33.8L5.5 32.8L5.1 31.8L4.8 30.8L4.5 29.7L4.3 28.7L4.2 27.7L4.1 26.6L4 25.6L4.1 24.5L4.1 23.4L4.2 22.4L4.4 21.4L4.6 20.3L4.9 19.3L5.2 18.3L5.5 17.4L5.9 16.4L6.4 15.5L6.9 14.6L7.4 13.7L8 12.8L8.7 12L9.3 11.2L10 10.5L10.8 9.8L11.5 9.1L12.3 8.5L13.2 7.9L14 7.3L14.9 6.8L15.8 6.3L16.7 5.9L17.6 5.5L18.6 5.2L19.5 4.9L20.5 4.6L21.5 4L22.5 4L23.5 4L24.5 4L25.5 4Z' transform='translate(0 3)' fill='%23000' fill-opacity='0.0531'/><path d='M25.5 4L26.5 4L27.5 4L28.5 4L29.5 4.4L30.5 4.6L31.5 4.9L32.4 5.1L33.4 5.5L34.3 5.9L35.2 6.3L36.1 6.8L37 7.3L37.8 7.9L38.7 8.5L39.5 9.1L40.2 9.8L41 10.5L41.7 11.2L42.3 12L43 12.8L43.6 13.7L44.1 14.6L44.6 15.5L45.1 16.4L45.5 17.4L45.8 18.3L46.1 19.3L46.4 20.3L46.6 21.4L46.8 22.4L46.9 23.4L46.9 24.5L47 25.6L46.9 26.6L46.8 27.7L46.7 28.7L46.5 29.7L46.2 30.8L45.9 31.8L45.5 32.8L45.1 33.8L44.7 34.7L44.2 35.7L43.6 36.6L43 37.5L42.3 38.3L41.6 39.1L40.9 39.9L40.1 40.6L39.3 41.3L38.5 42L37.6 42.7L36.7 43.2L35.8 43.8L34.8 44.2L33.9 44.7L32.9 45L31.8 45.4L30.8 45.7L29.8 46L28.7 46L27.6 46L26.6 46L25.5 46L24.4 46L23.4 46L22.3 46L21.2 46L20.2 45.7L19.2 45.4L18.1 45L17.1 44.7L16.2 44.2L15.2 43.8L14.3 43.2L13.4 42.7L12.5 42L11.7 41.3L10.9 40.6L10.1 39.9L9.4 39.1L8.7 38.3L8 37.5L7.4 36.6L6.8 35.7L6.3 34.7L5.9 33.8L5.5 32.8L5.1 31.8L4.8 30.8L4.5 29.7L4.3 28.7L4.2 27.7L4.1 26.6L4 25.6L4.1 24.5L4.1 23.4L4.2 22.4L4.4 21.4L4.6 20.3L4.9 19.3L5.2 18.3L5.5 17.4L5.9 16.4L6.4 15.5L6.9 14.6L7.4 13.7L8 12.8L8.7 12L9.3 11.2L10 10.5L10.8 9.8L11.5 9.1L12.3 8.5L13.2 7.9L14 7.3L14.9 6.8L15.8 6.3L16.7 5.9L17.6 5.5L18.6 5.2L19.5 4.9L20.5 4.6L21.5 4L22.5 4L23.5 4L24.5 4L25.5 4Z' transform='translate(0 4)' fill='%23000' fill-opacity='0.0882'/></g></g></g><g mask='url(%23M)'><rect x='0' y='0' width='51' height='50' fill='%23000'/><use href='%23b0' fill='url(%23r1)'/><use href='%23b1' fill='url(%23r2)'/><use href='%23b2' fill='url(%23r3)'/><use href='%23b3' fill='url(%23r4)'/><use href='%23b4' fill='url(%23r5)'/><use href='%23b5' fill='url(%23f)'/></g></svg>");
 }
 
+
 :scope .nse-control-toolbar:not([data-grouped="true"])>.nse-control-button,
 :scope:is(.nse-control-toolbar:not([data-grouped="true"]))>.nse-control-button,
 :scope.nse-control-toolbar:not([data-grouped="true"])>.nse-control-button,
-:scope .nse-extended-tool-button.nse-control-button,
-:scope:is(.nse-extended-tool-button.nse-control-button),
-:scope.nse-extended-tool-button.nse-control-button,
 :scope .nse-control-toolbar[data-grouped="true"]:not(.nse-extended-tab-group)>.nse-control-button,
 :scope:is(.nse-control-toolbar[data-grouped="true"]:not(.nse-extended-tab-group))>.nse-control-button,
 :scope.nse-control-toolbar[data-grouped="true"]:not(.nse-extended-tab-group)>.nse-control-button,
@@ -2681,27 +2469,26 @@
 :scope .nse-control-search-frame,
 :scope:is(.nse-control-search-frame),
 :scope.nse-control-search-frame {
-  border-style: solid;
-  border-color: transparent;
-  background: none;
-  box-shadow: none;
+  border-style:solid;
+  border-color:transparent;
+  background:none;
+  box-shadow:none;
+}
+:where(:scope) .nse-control-toolbar:not([data-grouped="true"])>.nse-control-button,:where(:scope):is(.nse-control-toolbar:not([data-grouped="true"]))>.nse-control-button,:where(:scope).nse-control-toolbar:not([data-grouped="true"])>.nse-control-button,:where(:scope) .nse-extended-tool-button.nse-control-button,:where(:scope):is(.nse-extended-tool-button.nse-control-button),:where(:scope).nse-extended-tool-button.nse-control-button,:where(:scope) .nse-control-toolbar[data-grouped="true"]:not(.nse-extended-tab-group)>.nse-control-button,:where(:scope):is(.nse-control-toolbar[data-grouped="true"]:not(.nse-extended-tab-group))>.nse-control-button,:where(:scope).nse-control-toolbar[data-grouped="true"]:not(.nse-extended-tab-group)>.nse-control-button,:where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio,:where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio,:where(:scope).nse-extended-radio-tool-button-group .nse-control-radio {
+  line-height:var(--nse-atmo-bar-h);
 }
 :where(:scope) .nse-control-toolbar:not([data-grouped="true"])>.nse-control-button,
 :where(:scope):is(.nse-control-toolbar:not([data-grouped="true"]))>.nse-control-button,
 :where(:scope).nse-control-toolbar:not([data-grouped="true"])>.nse-control-button,
-:where(:scope) .nse-extended-tool-button.nse-control-button,
-:where(:scope):is(.nse-extended-tool-button.nse-control-button),
-:where(:scope).nse-extended-tool-button.nse-control-button,
 :where(:scope) .nse-control-toolbar[data-grouped="true"]:not(.nse-extended-tab-group)>.nse-control-button,
 :where(:scope):is(.nse-control-toolbar[data-grouped="true"]:not(.nse-extended-tab-group))>.nse-control-button,
 :where(:scope).nse-control-toolbar[data-grouped="true"]:not(.nse-extended-tab-group)>.nse-control-button,
 :where(:scope) .nse-extended-radio-tool-button-group .nse-control-radio,
 :where(:scope):is(.nse-extended-radio-tool-button-group) .nse-control-radio,
 :where(:scope).nse-extended-radio-tool-button-group .nse-control-radio {
-  height: var(--nse-atmo-bar-h);
-  min-height: var(--nse-atmo-bar-h);
-  --nse-control-minimum-block-size: var(--nse-atmo-bar-h);
-  line-height: var(--nse-atmo-bar-h);
+  height:var(--nse-atmo-bar-h);
+  min-height:var(--nse-atmo-bar-h);
+  --nse-control-minimum-block-size:var(--nse-atmo-bar-h);
 }
 :scope .nse-control-toolbar:not([data-grouped="true"])>.nse-control-button::before,
 :scope:is(.nse-control-toolbar:not([data-grouped="true"]))>.nse-control-button::before,
@@ -2747,13 +2534,7 @@
 /* Icon-only buttons keep master's compact metrics (52px minimum, 2px
    content padding inside the caps) in and out of a toolbar, scaled with the
    band. */
-:scope .nse-control-button.nse-control-icon-button:where(:not(.nse-control-picker-button)),
-:scope:is(.nse-control-button.nse-control-icon-button:where(:not(.nse-control-picker-button))),
-:scope.nse-control-button.nse-control-icon-button:where(:not(.nse-control-picker-button)) {
-  min-width: calc(var(--nse-atmo-bar-h) * 1.04);
-  --nse-control-minimum-inline-size: calc(var(--nse-atmo-bar-h) * 1.04);
-  padding-inline: calc(var(--nse-atmo-bar-h) * 0.38); /* 17px cap + 2px */
-}
+
 :scope .nse-control-toolbar:not([data-grouped="true"])>.nse-control-button.nse-control-icon-button,
 :scope:is(.nse-control-toolbar:not([data-grouped="true"]))>.nse-control-button.nse-control-icon-button,
 :scope.nse-control-toolbar:not([data-grouped="true"])>.nse-control-button.nse-control-icon-button {
@@ -2807,62 +2588,30 @@
   box-shadow: none;
 }
 
-:scope .nse-extended-tool-button.nse-control-button,
-:scope:is(.nse-extended-tool-button.nse-control-button),
-:scope.nse-extended-tool-button.nse-control-button {
-  border-width: 0 calc(var(--nse-atmo-bar-h) * 0.5);
-  border-image: var(--nse-atmo-svg-mb-only-up) 0 25 0 25 fill stretch;
-  padding: 0 calc(var(--nse-atmo-bar-h) * 0.2);
-  background: none;
-  box-shadow: none;
-}
-:scope .nse-extended-tool-button.nse-control-button:active:not([data-press-active]):not(:disabled),
-:scope:is(.nse-extended-tool-button.nse-control-button:active:not([data-press-active]):not(:disabled)),
-:scope.nse-extended-tool-button.nse-control-button:active:not([data-press-active]):not(:disabled),
-:scope .nse-extended-tool-button.nse-control-button[data-press-active="true"]:not(:disabled),
-:scope:is(.nse-extended-tool-button.nse-control-button[data-press-active="true"]:not(:disabled)),
-:scope.nse-extended-tool-button.nse-control-button[data-press-active="true"]:not(:disabled) {
-  border-width: 0 calc(var(--nse-atmo-bar-h) * 0.5);
-  border-image: var(--nse-atmo-svg-mb-only-down) 0 25 0 25 fill stretch;
-  background: none;
-  box-shadow: none;
-}
+
+
+
 :scope .nse-extended-tool-button.nse-control-button[data-selected="true"],
 :scope:is(.nse-extended-tool-button.nse-control-button[data-selected="true"]),
-:scope.nse-extended-tool-button.nse-control-button[data-selected="true"],
-:scope .nse-extended-tool-button.nse-control-button[data-pressed="true"],
-:scope:is(.nse-extended-tool-button.nse-control-button[data-pressed="true"]),
-:scope.nse-extended-tool-button.nse-control-button[data-pressed="true"] {
-  border-width: 0 calc(var(--nse-atmo-bar-h) * 0.5);
-  border-image: var(--nse-atmo-svg-mb-only-sel) 0 25 0 25 fill stretch;
-  background: none;
-  box-shadow: none;
+:scope.nse-extended-tool-button.nse-control-button[data-selected="true"] {
+  border-width:0 calc(var(--nse-atmo-bar-h)*0.5);
+  border-image:var(--nse-atmo-svg-mb-only-sel)0 25 0 25 fill stretch;
+  background:none;
+  box-shadow:none;
 }
+
 :scope .nse-extended-tool-button.nse-control-button[data-selected="true"]:active:not([data-press-active]):not(:disabled),
 :scope:is(.nse-extended-tool-button.nse-control-button[data-selected="true"]:active:not([data-press-active]):not(:disabled)),
 :scope.nse-extended-tool-button.nse-control-button[data-selected="true"]:active:not([data-press-active]):not(:disabled),
-:scope .nse-extended-tool-button.nse-control-button[data-pressed="true"]:active:not([data-press-active]):not(:disabled),
-:scope:is(.nse-extended-tool-button.nse-control-button[data-pressed="true"]:active:not([data-press-active]):not(:disabled)),
-:scope.nse-extended-tool-button.nse-control-button[data-pressed="true"]:active:not([data-press-active]):not(:disabled),
 :scope .nse-extended-tool-button.nse-control-button[data-selected="true"][data-press-active="true"]:not(:disabled),
 :scope:is(.nse-extended-tool-button.nse-control-button[data-selected="true"][data-press-active="true"]:not(:disabled)),
-:scope.nse-extended-tool-button.nse-control-button[data-selected="true"][data-press-active="true"]:not(:disabled),
-:scope .nse-extended-tool-button.nse-control-button[data-pressed="true"][data-press-active="true"]:not(:disabled),
-:scope:is(.nse-extended-tool-button.nse-control-button[data-pressed="true"][data-press-active="true"]:not(:disabled)),
-:scope.nse-extended-tool-button.nse-control-button[data-pressed="true"][data-press-active="true"]:not(:disabled) {
-  border-width: 0 calc(var(--nse-atmo-bar-h) * 0.5);
-  border-image: var(--nse-atmo-svg-mb-only-seldown) 0 25 0 25 fill stretch;
-  background: none;
-  box-shadow: none;
+:scope.nse-extended-tool-button.nse-control-button[data-selected="true"][data-press-active="true"]:not(:disabled) {
+  border-width:0 calc(var(--nse-atmo-bar-h)*0.5);
+  border-image:var(--nse-atmo-svg-mb-only-seldown)0 25 0 25 fill stretch;
+  background:none;
+  box-shadow:none;
 }
-:scope .nse-extended-tool-button.nse-control-button:disabled,
-:scope:is(.nse-extended-tool-button.nse-control-button:disabled),
-:scope.nse-extended-tool-button.nse-control-button:disabled {
-  border-width: 0 calc(var(--nse-atmo-bar-h) * 0.5);
-  border-image: var(--nse-atmo-svg-mb-only-dis) 0 25 0 25 fill stretch;
-  background: none;
-  box-shadow: none;
-}
+
 :scope .nse-control-toolbar[data-grouped="true"]:not(.nse-extended-tab-group)>.nse-control-button:first-child:not(:last-child),
 :scope:is(.nse-control-toolbar[data-grouped="true"]:not(.nse-extended-tab-group))>.nse-control-button:first-child:not(:last-child),
 :scope.nse-control-toolbar[data-grouped="true"]:not(.nse-extended-tab-group)>.nse-control-button:first-child:not(:last-child) {
@@ -4491,11 +4240,7 @@
 }
 
 /* Picker: around its stroke ring (::before, r=10). */
-:scope .nse-control-picker-button:focus-visible::before,
-:scope:is(.nse-control-picker-button:focus-visible::before),
-:scope.nse-control-picker-button:focus-visible::before {
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4), var(--nse-atmo-focus-ring);
-}
+
 
 /* Segment: the group clips anything outside a cell, so the ring runs just
    inside the focused cell's rim, over its fill. */
@@ -7276,46 +7021,23 @@ input:scope[data-nse-control="scroller"]:disabled {
    view below it. With a title it is drawn as an inspector section header,
    after Motion's: a bold label over a rule, the triangle turning down while
    the section shows. */
-:scope .nse-control-disclosure-button,
-:scope:is(.nse-control-disclosure-button),
-:scope.nse-control-disclosure-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  color: var(--nse-atmo-title-ink, #1f2833);
-  background: transparent;
-  font: inherit;
-  cursor: default;
+:scope .nse-control-disclosure-button,:scope:is(.nse-control-disclosure-button),:scope.nse-control-disclosure-button {
+  display:inline-flex;
+  align-items:center;
+  font:inherit;
+  cursor:default;
 }
 
-:scope .nse-control-disclosure-button:has(>.nse-control-button-label),
-:scope:is(.nse-control-disclosure-button:has(>.nse-control-button-label)),
-:scope.nse-control-disclosure-button:has(>.nse-control-button-label) {
-  display: flex;
-  inline-size: 100%;
-  min-block-size: 36px;
-  --nse-control-minimum-block-size: 36px;
-  padding: 0 4px;
-  border-block-end: 1px solid var(--nse-atmo-panel-rule, rgba(0, 0, 0, 0.14));
-  font-size: 14px;
-  font-weight: 700;
-  text-align: start;
+:scope .nse-control-disclosure-button:has(>.nse-control-button-label),:scope:is(.nse-control-disclosure-button:has(>.nse-control-button-label)),:scope.nse-control-disclosure-button:has(>.nse-control-button-label) {
+  display:flex;
+  font-size:14px;
+  font-weight:700;
+  text-align:start;
 }
 
-:scope .nse-control-disclosure-triangle,
-:scope:is(.nse-control-disclosure-triangle),
-:scope.nse-control-disclosure-triangle {
-  flex: none;
-  inline-size: 10px;
-  block-size: 10px;
-  background: currentColor;
-  opacity: 0.7;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M3 1.5L7.5 5 3 8.5z'/%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M3 1.5L7.5 5 3 8.5z'/%3E%3C/svg%3E") center / contain no-repeat;
-  transition: transform 140ms ease;
+:scope .nse-control-disclosure-triangle,:scope:is(.nse-control-disclosure-triangle),:scope.nse-control-disclosure-triangle {
+  flex:none;
+  transition:transform 140ms ease;
 }
 
 :scope .nse-control-disclosure-button[aria-expanded="true"]>.nse-control-disclosure-triangle,
@@ -7333,24 +7055,12 @@ input:scope[data-nse-control="scroller"]:disabled {
   transform: scaleX(-1);
 }
 
-:scope .nse-control-disclosure-button:has(>.nse-control-button-label):hover:not(:disabled),
-:scope:is(.nse-control-disclosure-button:has(>.nse-control-button-label):hover:not(:disabled)),
-:scope.nse-control-disclosure-button:has(>.nse-control-button-label):hover:not(:disabled) {
-  background: rgba(0, 0, 0, 0.04);
-}
 
-:scope .nse-control-disclosure-button:disabled,
-:scope:is(.nse-control-disclosure-button:disabled),
-:scope.nse-control-disclosure-button:disabled {
-  opacity: 0.5;
-}
 
-:scope .nse-control-disclosure-button:focus-visible,
-:scope:is(.nse-control-disclosure-button:focus-visible),
-:scope.nse-control-disclosure-button:focus-visible {
-  outline: none;
-  box-shadow: var(--nse-atmo-focus-ring);
-  border-radius: 6px;
+
+
+:scope .nse-control-disclosure-button:focus-visible,:scope:is(.nse-control-disclosure-button:focus-visible),:scope.nse-control-disclosure-button:focus-visible {
+  outline:none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -7610,38 +7320,18 @@ input:scope[data-nse-control="scroller"]:disabled {
    that band's fraction of the regular 52px one (insets 3/52 and 5/52, rings
    2/52, radii 18, 16 and 14/52), so the pill keeps its proportions at any size.
    Tool buttons size their own capsules below and are left alone. */
-:scope .nse-control-button[data-size]:where(:not(.nse-control-picker-button,.nse-extended-tool-button)),
-:scope:is(.nse-control-button[data-size]:where(:not(.nse-control-picker-button,.nse-extended-tool-button))),
-:scope.nse-control-button[data-size]:where(:not(.nse-control-picker-button,.nse-extended-tool-button)) {
-  --nse-atmo-btn-band: var(--nse-control-height, 24px);
-  --nse-atmo-btn-ring: max(1px, calc(var(--nse-atmo-btn-band) * 0.0385));
-  min-width: calc(var(--nse-atmo-btn-band) * 1.46);
-  --nse-control-minimum-inline-size: calc(var(--nse-atmo-btn-band) * 1.46);
-  height: var(--nse-atmo-btn-band);
-  min-height: var(--nse-atmo-btn-band);
-  --nse-control-minimum-block-size: var(--nse-atmo-btn-band);
-  padding: 0 calc(var(--nse-atmo-btn-band) * 0.52);
-  border-radius: calc(var(--nse-atmo-btn-band) * 0.346);
-  font-size: calc(var(--nse-atmo-btn-band) * 0.25 + 5px);
-  font-weight: 700;
-  line-height: var(--nse-atmo-btn-band);
+:scope .nse-control-button[data-size]:where(:not(.nse-control-picker-button,.nse-extended-tool-button)),:scope:is(.nse-control-button[data-size]:where(:not(.nse-control-picker-button,.nse-extended-tool-button))),:scope.nse-control-button[data-size]:where(:not(.nse-control-picker-button,.nse-extended-tool-button)) {
+  font-size:calc(var(--nse-atmo-btn-band)*0.25 + 5px);
+  font-weight:700;
+  line-height:var(--nse-atmo-btn-band);
 }
 
-:scope .nse-control-button[data-size]:where(:not(.nse-control-picker-button,.nse-extended-tool-button))::before,
-:scope:is(.nse-control-button[data-size]:where(:not(.nse-control-picker-button,.nse-extended-tool-button))::before),
-:scope.nse-control-button[data-size]:where(:not(.nse-control-picker-button,.nse-extended-tool-button))::before {
-  inset: calc(var(--nse-atmo-btn-band) * 0.0577) max(0.5px, calc(var(--nse-atmo-btn-band) * 0.0192));
-  border-width: var(--nse-atmo-btn-ring);
-  padding: var(--nse-atmo-btn-ring);
-  border-radius: calc(var(--nse-atmo-btn-band) * 0.307);
+:scope .nse-control-button[data-size]:where(:not(.nse-control-picker-button,.nse-extended-tool-button))::before,:scope:is(.nse-control-button[data-size]:where(:not(.nse-control-picker-button,.nse-extended-tool-button))::before),:scope.nse-control-button[data-size]:where(:not(.nse-control-picker-button,.nse-extended-tool-button))::before {
+  inset:calc(var(--nse-atmo-btn-band)*0.0577) max(0.5px,calc(var(--nse-atmo-btn-band)*0.0192));
 }
 
-:scope .nse-control-button[data-size]:where(:not(.nse-control-picker-button,.nse-extended-tool-button))::after,
-:scope:is(.nse-control-button[data-size]:where(:not(.nse-control-picker-button,.nse-extended-tool-button))::after),
-:scope.nse-control-button[data-size]:where(:not(.nse-control-picker-button,.nse-extended-tool-button))::after {
-  inset: calc(var(--nse-atmo-btn-band) * 0.0577 + var(--nse-atmo-btn-ring)) calc(var(--nse-atmo-btn-band) * 0.0192 + var(--nse-atmo-btn-ring));
-  border-width: var(--nse-atmo-btn-ring);
-  border-radius: calc(var(--nse-atmo-btn-band) * 0.27);
+:scope .nse-control-button[data-size]:where(:not(.nse-control-picker-button,.nse-extended-tool-button))::after,:scope:is(.nse-control-button[data-size]:where(:not(.nse-control-picker-button,.nse-extended-tool-button))::after),:scope.nse-control-button[data-size]:where(:not(.nse-control-picker-button,.nse-extended-tool-button))::after {
+  inset:calc(var(--nse-atmo-btn-band)*0.0577 + var(--nse-atmo-btn-ring)) calc(var(--nse-atmo-btn-band)*0.0192 + var(--nse-atmo-btn-ring));
 }
 
 /* segmentStyle "capsule": the same silver capsule set in its uppercase type,
@@ -7906,12 +7596,8 @@ input:scope[data-nse-control="scroller"]:disabled {
 }
 
 /* The push button's 76px minimum, in proportion. */
-:scope .nse-extended-tool-button[data-size],
-:scope:is(.nse-extended-tool-button[data-size]),
-:scope.nse-extended-tool-button[data-size] {
-  min-width: calc(var(--nse-atmo-bar-h) * 1.52);
-  --nse-control-minimum-inline-size: calc(var(--nse-atmo-bar-h) * 1.52);
-  font-size: max(11px, calc(var(--nse-atmo-bar-h) * 0.4));
+:scope .nse-extended-tool-button[data-size],:scope:is(.nse-extended-tool-button[data-size]),:scope.nse-extended-tool-button[data-size] {
+  font-size:max(11px,calc(var(--nse-atmo-bar-h)*0.4));
 }
 
 /* The icon slot follows the band: a small capsule's glyph box is 16px of its
