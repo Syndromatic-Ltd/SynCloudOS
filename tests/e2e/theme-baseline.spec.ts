@@ -86,6 +86,22 @@ for (const scheme of ["light", "dark"] as const) for (let partition = 0; partiti
         await testInfo.attach("folder-geometry", { body: JSON.stringify({ dpr: await page.evaluate(() => devicePixelRatio), before, after: await geometry() }, null, 2), contentType: "application/json" });
       }
       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
+      // CSS artwork is not represented by document.images. Wait for both
+      // backgrounds and masks after interaction has selected their state.
+      await page.evaluate(async () => {
+        const resources = new Set<string>();
+        for (const element of document.querySelectorAll("*")) for (const pseudo of [null, "::before", "::after"]) {
+          const style = getComputedStyle(element, pseudo);
+          for (const property of ["background-image", "mask-image", "border-image-source"]) {
+            for (const match of style.getPropertyValue(property).matchAll(/url\((?:"((?:\\.|[^"])*)"|'((?:\\.|[^'])*)'|([^)]*))\)/g)) {
+              const source = (match[1] ?? match[2] ?? match[3]).replace(/\\(["'\\])/g, "$1");
+              if (source && !source.startsWith("#")) resources.add(source);
+            }
+          }
+        }
+        await Promise.all(Array.from(resources, async source => { const image = new Image(); image.src = source; await image.decode().catch(() => undefined); }));
+        await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+      });
       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
       if (surface.interaction === "press") await page.mouse.up();
       expect(errors).toEqual([]);

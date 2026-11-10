@@ -19,6 +19,7 @@
  */
 
 import { discoverThemeBundles } from "./theme-bundles.mjs";
+import { builtInThemeCSS } from "./built-in-theme-css.mjs";
 import { referencedThemeIdentifiers, themeModuleSource, themeStylesheet } from "./theme-loading.mjs";
 import {
   createReadStream,
@@ -726,6 +727,7 @@ export function synCloudOS(options) {
       const build = pluginSdkBuild;
       return {
         ...toolchainConfig,
+        css: { postcss: { plugins: [builtInThemeCSS()] } },
         optimizeDeps: {
           // Vite matches subpaths too: classes, private attribution and mounted sessions must share one graph.
           exclude: ["@syndromatic/syncloudos"],

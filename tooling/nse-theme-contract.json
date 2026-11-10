@@ -124,9 +124,15 @@
         "selected",
         "state=mixed",
         "state=off",
-        "state=on"
+        "state=on",
+        "tracking=false",
+        "tracking=true"
       ],
       "variants": {
+        "appearance-name": [
+          "aqua",
+          "darkAqua"
+        ],
         "bezel-style": [
           "disclosure",
           "rounded",
@@ -143,8 +149,22 @@
           "regular",
           "small"
         ],
+        "has-destructive-action": [
+          "true"
+        ],
+        "image-position": [
+          "imageLeading",
+          "imageOnly",
+          "imageTrailing",
+          "noImage"
+        ],
+        "key-equivalent": [
+          "\r",
+          "\u001b"
+        ],
         "role": [
           "close",
+          "default",
           "minimise",
           "zoom"
         ]
@@ -683,7 +703,8 @@
       ],
       "states": [
         "enabled=false",
-        "state=off"
+        "state=off",
+        "tracking=false"
       ],
       "variants": {
         "bezel-style": [
@@ -694,6 +715,9 @@
         ],
         "control-size": [
           "regular"
+        ],
+        "image-position": [
+          "noImage"
         ]
       }
     },
@@ -995,6 +1019,9 @@
         "selected"
       ],
       "variants": {
+        "control-size": [
+          "large"
+        ],
         "navigation-flow": [
           "in-flow",
           "overlay"
@@ -1007,6 +1034,9 @@
         "orientation": [
           "horizontal",
           "vertical"
+        ],
+        "role": [
+          "tab"
         ],
         "style": [
           "capsule",

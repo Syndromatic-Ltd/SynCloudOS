@@ -262,7 +262,7 @@ const NSEPushButtonCell = forwardRef<HTMLButtonElement, NSEButtonProps>(function
       {...props}
       style={nseMinimumControlProperties(props.style)}
       {...theme.events}
-      {...nseControlHooks({ control: (props as { "data-nse-control"?: NSEThemeControlName })["data-nse-control"] ?? "button", state: presentation?.state ?? state ?? "off", highlighted: isHighlighted || press.active, enabled: !disabled, hovered: theme.hovered, focused: theme.focused, variants: { "bezel-style": bezelStyle, "control-size": controlSize ?? "regular", "button-type": buttonType } })}
+      {...nseControlHooks({ control: (props as { "data-nse-control"?: NSEThemeControlName })["data-nse-control"] ?? "button", state: presentation?.state ?? state ?? "off", highlighted: isHighlighted || press.active, selected: drawnPressed, tracking: press.active, enabled: !disabled, hovered: theme.hovered, focused: theme.focused, variants: { "bezel-style": bezelStyle, "control-size": controlSize ?? "regular", "button-type": buttonType, "image-position": position, ...(appearance ? { "appearance-name": appearance } : {}), ...(keyEquivalent ? { "key-equivalent": keyEquivalent, ...(keyEquivalent === "\r" ? { role: "default" } : {}) } : {}), ...(hasDestructiveAction ? { "has-destructive-action": "true" } : {}) } })}
       data-nse-part={(props as Record<string, unknown>)["data-nse-part"] as string ?? "background"}
     >
       <span data-nse-part="bezel" aria-hidden="true" style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />

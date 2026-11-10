@@ -129,7 +129,7 @@ function TabButton({ item, selected, instanceId, tone, panelIdentity, tabStyle, 
   return <button
     {...anchorProps}
     {...theme.events}
-    {...nseControlHooks({ control: "button", enabled: !item.disabled && commandEnabled, selected, hovered: theme.hovered, focused: theme.focused, highlighted: theme.highlighted })} data-nse-part="cell"
+    {...nseControlHooks({ control: "button", enabled: !item.disabled && commandEnabled, selected, hovered: theme.hovered, focused: theme.focused, highlighted: theme.highlighted, variants: { ...(icons ? {} : { "bezel-style": "rounded" }), ...(tone === "light" ? { "appearance-name": "aqua" } : tone === "dark" ? { "appearance-name": "darkAqua" } : {}), ...(tone === "affirmative" ? { role: "default" } : {}), ...(tone === "negative" ? { "has-destructive-action": "true" } : {}) } })} data-nse-part="cell"
     className={icons ? "nse-icon-tab" : "nse-control-button"}
     title={title}
     type="button"
@@ -284,4 +284,3 @@ export function NSETabStrip({
     {children?.(renderState)}
   </>;
 }
-
