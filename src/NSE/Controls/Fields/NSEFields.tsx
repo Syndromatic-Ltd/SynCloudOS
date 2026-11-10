@@ -704,6 +704,7 @@ function NSERadioOptionControl({ option, selected, position, name, required, dis
     <label
       data-nse-part="cell"
       data-nse-button-type="radio"
+      data-nse-position={position}
       {...theme.events}
       {...nseStateHooks({ state: selected ? "on" : "off", selected, enabled: !optionDisabled, highlighted: theme.highlighted, hovered: theme.hovered, focused: theme.focused })}
       className="nse-control-radio"
@@ -714,6 +715,7 @@ function NSERadioOptionControl({ option, selected, position, name, required, dis
     >
       <input
         ref={inputRef}
+        data-nse-part="field"
         className="nse-control-visually-hidden"
         type="radio"
         name={name}

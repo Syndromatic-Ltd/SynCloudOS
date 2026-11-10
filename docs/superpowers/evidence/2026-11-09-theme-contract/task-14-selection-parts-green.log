@@ -1,0 +1,34 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-selection-field-parts.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-selection-field-parts.test.tsx (2 tests | 1 failed) 77ms
+     × publishes a radio field's native disabled and checked semantics 14ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-selection-field-parts.test.tsx > native selection field drawing parts > publishes a radio field's native disabled and checked semantics
+AssertionError: expected null to be 'field' // Object.is equality
+
+- Expected:
+"field"
+
++ Received:
+null
+
+ ❯ tests/runtime/nse-selection-field-parts.test.tsx:19:48
+     17|     render(<NSERadioGroup label="Layout" options={[{value:"list",label…
+     18|     const [list, grid] = screen.getAllByRole("radio") as HTMLInputElem…
+     19|     expect(list.getAttribute("data-nse-part")).toBe("field");
+       |                                                ^
+     20|     expect(grid.getAttribute("data-nse-part")).toBe("field");
+     21|     expect(list.checked).toBe(true); expect(grid.disabled).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  01:22:41
+   Duration  2.00s (transform 611ms, setup 26ms, import 892ms, tests 77ms, environment 871ms)

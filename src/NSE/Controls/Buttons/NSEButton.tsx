@@ -369,11 +369,12 @@ function NSESwitchButtonCell(
         data-size={controlSize === "regular" ? undefined : controlSize}
       >
         <span data-nse-part="bezel" aria-hidden="true" style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />
-        <span className="nse-control-checkbox-control">
+        <span data-nse-part="content" className="nse-control-checkbox-control">
           <input
             {...(rest as Record<string, unknown>)}
             ref={input}
             id={inputId}
+            data-nse-part="field"
             type="checkbox"
             disabled={disabled}
             readOnly={readOnly}

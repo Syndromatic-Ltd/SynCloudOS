@@ -109,6 +109,7 @@
         "effect-colour",
         "effect-colour-face",
         "effect-glyph",
+        "field",
         "image",
         "indicator",
         "path-item",
@@ -454,6 +455,7 @@
       "parts": [
         "cell",
         "content",
+        "field",
         "title"
       ],
       "states": [
@@ -465,6 +467,10 @@
       "variants": {
         "button-type": [
           "radio"
+        ],
+        "position": [
+          "first",
+          "last"
         ]
       }
     },
@@ -827,6 +833,7 @@
         "bezel",
         "cell",
         "content",
+        "field",
         "segment",
         "title"
       ],
@@ -848,7 +855,10 @@
           "small"
         ],
         "position": [
-          "inline"
+          "first",
+          "inline",
+          "last",
+          "middle"
         ],
         "segment-style": [
           "capsule",
