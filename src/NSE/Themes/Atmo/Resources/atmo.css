@@ -1,3 +1,4 @@
+@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo.selection.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo.buttons.css";
 @import "./path-control.css";
 @layer nse.atmo {
@@ -442,14 +443,9 @@
     rgba(0, 0, 0, 0) 8px);
 }
 
-:scope .nse-control-radio,
-:scope:is(.nse-control-radio),
-:scope.nse-control-radio {
-  position: relative;
-  isolation: isolate;
-  border: 0;
-  border-image: none;
-  background: transparent;
+:scope .nse-control-radio,:scope:is(.nse-control-radio),:scope.nse-control-radio {
+  position:relative;
+  isolation:isolate;
 }
 
 :scope .nse-control-radio::before,
@@ -467,187 +463,57 @@
 
 /* ::before — strokes/seams + the 1px 50%-white underline below the pill;
    ::after — the 2px rim ring (border) + silver fill, one px inside. */
-:scope .nse-control-radio::before,
-:scope:is(.nse-control-radio::before),
-:scope.nse-control-radio::before {
-  border-style: solid;
-  /* top stroke | side | bottom stroke | side (side colours per position) */
-  border-color: rgba(0, 0, 0, 0.34) rgba(0, 0, 0, 0.3) rgba(0, 0, 0, 0.49) rgba(0, 0, 0, 0.3);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
-}
 
-:scope .nse-control-radio::after,
-:scope:is(.nse-control-radio::after),
-:scope.nse-control-radio::after {
-  border: 2px solid;
-  border-color: var(--nse-atmo-rg-ring-t) var(--nse-atmo-rg-ring-seam) var(--nse-atmo-rg-ring-b);
-  background: var(--nse-atmo-rg-up) padding-box;
-}
+
+
 
 /* Position ladder: caps + seams. Paddings mirror the sprite skin's
    border+padding so labels sit identically. */
-:scope .nse-control-radio[data-position="first"],
-:scope:is(.nse-control-radio[data-position="first"]),
-:scope.nse-control-radio[data-position="first"] {
-  padding: 0 15px;
+
+
+:scope .nse-control-radio[data-position="first"]::after,:scope:is(.nse-control-radio[data-position="first"]::after),:scope.nse-control-radio[data-position="first"]::after {
+  inset:4px 1px 4px 2px;
 }
-:scope .nse-control-radio[data-position="first"]::before,
-:scope:is(.nse-control-radio[data-position="first"]::before),
-:scope.nse-control-radio[data-position="first"]::before {
-  border-radius: 13px 0 0 13px;
-  border-width: 2px 1px 2px 2px;
-  border-right-color: #a2a2a2;
-}
-:scope .nse-control-radio[data-position="first"]::after,
-:scope:is(.nse-control-radio[data-position="first"]::after),
-:scope.nse-control-radio[data-position="first"]::after {
-  inset: 4px 1px 4px 2px;
-  border-radius: 11px 0 0 11px;
-  border-left-color: var(--nse-atmo-rg-ring-s);
-}
-:scope .nse-control-radio[data-position="middle"],
-:scope:is(.nse-control-radio[data-position="middle"]),
-:scope.nse-control-radio[data-position="middle"] {
-  padding: 0 15px 0 14px; /* 1px seam + 13px | 2px seam + 13px (sprite skin) */
-}
-:scope .nse-control-radio[data-position="middle"]::before,
-:scope:is(.nse-control-radio[data-position="middle"]::before),
-:scope.nse-control-radio[data-position="middle"]::before {
-  border-width: 2px 1px;
-  border-left-color: #efefef;
-  border-right-color: #a2a2a2;
-}
+
+
 :scope .nse-control-radio[data-position="middle"]::after,
 :scope:is(.nse-control-radio[data-position="middle"]::after),
 :scope.nse-control-radio[data-position="middle"]::after {
   inset: 4px 1px;
 }
-:scope .nse-control-radio[data-position="last"],
-:scope:is(.nse-control-radio[data-position="last"]),
-:scope.nse-control-radio[data-position="last"] {
-  padding: 0 15px 0 14px;
-}
-:scope .nse-control-radio[data-position="last"]::before,
-:scope:is(.nse-control-radio[data-position="last"]::before),
-:scope.nse-control-radio[data-position="last"]::before {
-  border-radius: 0 13px 13px 0;
-  border-width: 2px 2px 2px 1px;
-  border-left-color: #efefef;
-}
-:scope .nse-control-radio[data-position="last"]::after,
-:scope:is(.nse-control-radio[data-position="last"]::after),
-:scope.nse-control-radio[data-position="last"]::after {
-  inset: 4px 2px 4px 1px;
-  border-radius: 0 11px 11px 0;
-  border-right-color: var(--nse-atmo-rg-ring-s);
-}
-:scope .nse-control-radio[data-position="single"],
-:scope:is(.nse-control-radio[data-position="single"]),
-:scope.nse-control-radio[data-position="single"] {
-  padding: 0 28px;
-}
-:scope .nse-control-radio[data-position="single"]::before,
-:scope:is(.nse-control-radio[data-position="single"]::before),
-:scope.nse-control-radio[data-position="single"]::before {
-  border-radius: 13px;
-  border-width: 2px;
-}
-:scope .nse-control-radio[data-position="single"]::after,
-:scope:is(.nse-control-radio[data-position="single"]::after),
-:scope.nse-control-radio[data-position="single"]::after {
-  inset: 4px 2px;
-  border-radius: 11px;
-  border-left-color: var(--nse-atmo-rg-ring-s);
-  border-right-color: var(--nse-atmo-rg-ring-s);
+
+
+:scope .nse-control-radio[data-position="last"]::after,:scope:is(.nse-control-radio[data-position="last"]::after),:scope.nse-control-radio[data-position="last"]::after {
+  inset:4px 2px 4px 1px;
 }
 
-:scope .nse-control-radio[data-selected="true"]::before,
-:scope:is(.nse-control-radio[data-selected="true"]::before),
-:scope.nse-control-radio[data-selected="true"]::before {
-  border-top-color: rgba(0, 0, 0, 0.68);
-  border-bottom-color: rgba(58, 58, 58, 0.42);
+
+:scope .nse-control-radio[data-position="single"]::after,:scope:is(.nse-control-radio[data-position="single"]::after),:scope.nse-control-radio[data-position="single"]::after {
+  inset:4px 2px;
 }
-:scope .nse-control-radio[data-selected="true"]::after,
-:scope:is(.nse-control-radio[data-selected="true"]::after),
-:scope.nse-control-radio[data-selected="true"]::after {
-  border-color: var(--nse-atmo-rg-ring-sel-t) var(--nse-atmo-rg-ring-sel-s) var(--nse-atmo-rg-ring-sel-b);
-  background: var(--nse-atmo-rg-sel) padding-box;
-}
+
+
+
 
 /* Selected cells: no bright rim/ring columns — the dark ink runs to the
    seams (straight sides) or the stroke (cap arcs) wearing the edge + cast
    overlays; ::before's seam borders go transparent so nothing brightens
    beneath the translucent ink. */
-:scope .nse-control-radio[data-position="middle"][data-selected="true"]::before,
-:scope:is(.nse-control-radio[data-position="middle"][data-selected="true"]::before),
-:scope.nse-control-radio[data-position="middle"][data-selected="true"]::before {
-  border-left-color: transparent;
-  border-right-color: transparent;
-}
-:scope .nse-control-radio[data-position="middle"][data-selected="true"]::after,
-:scope:is(.nse-control-radio[data-position="middle"][data-selected="true"]::after),
-:scope.nse-control-radio[data-position="middle"][data-selected="true"]::after {
-  inset: 4px 0;
-  border-width: 2px 0;
-  background:
-    var(--nse-atmo-rg-edge-l) padding-box,
-    var(--nse-atmo-rg-edge-r) padding-box,
-    var(--nse-atmo-rg-sel) padding-box;
-}
-:scope .nse-control-radio[data-position="first"][data-selected="true"]::before,
-:scope:is(.nse-control-radio[data-position="first"][data-selected="true"]::before),
-:scope.nse-control-radio[data-position="first"][data-selected="true"]::before {
-  border-right-color: transparent;
-}
-:scope .nse-control-radio[data-position="first"][data-selected="true"]::after,
-:scope:is(.nse-control-radio[data-position="first"][data-selected="true"]::after),
-:scope.nse-control-radio[data-position="first"][data-selected="true"]::after {
-  inset: 4px 0 4px 2px;
-  border-width: 2px 0;
-  background:
-    var(--nse-atmo-rg-cap-l) padding-box,
-    var(--nse-atmo-rg-edge-r) padding-box,
-    var(--nse-atmo-rg-sel) padding-box;
-}
-:scope .nse-control-radio[data-position="last"][data-selected="true"]::before,
-:scope:is(.nse-control-radio[data-position="last"][data-selected="true"]::before),
-:scope.nse-control-radio[data-position="last"][data-selected="true"]::before {
-  border-left-color: transparent;
-}
-:scope .nse-control-radio[data-position="last"][data-selected="true"]::after,
-:scope:is(.nse-control-radio[data-position="last"][data-selected="true"]::after),
-:scope.nse-control-radio[data-position="last"][data-selected="true"]::after {
-  inset: 4px 2px 4px 0;
-  border-width: 2px 0;
-  background:
-    var(--nse-atmo-rg-edge-l) padding-box,
-    var(--nse-atmo-rg-cap-r) padding-box,
-    var(--nse-atmo-rg-sel) padding-box;
-}
-:scope .nse-control-radio[data-position="single"][data-selected="true"]::after,
-:scope:is(.nse-control-radio[data-position="single"][data-selected="true"]::after),
-:scope.nse-control-radio[data-position="single"][data-selected="true"]::after {
-  border-width: 2px 0;
-  background:
-    var(--nse-atmo-rg-cap-l) padding-box,
-    var(--nse-atmo-rg-cap-r) padding-box,
-    var(--nse-atmo-rg-sel) padding-box;
+
+:scope .nse-control-radio[data-position="middle"][data-selected="true"]::after,:scope:is(.nse-control-radio[data-position="middle"][data-selected="true"]::after),:scope.nse-control-radio[data-position="middle"][data-selected="true"]::after {
+  inset:4px 0;
 }
 
-:scope .nse-control-radio:disabled::before,
-:scope:is(.nse-control-radio:disabled::before),
-:scope.nse-control-radio:disabled::before,
-:scope .nse-control-radio:disabled::after,
-:scope:is(.nse-control-radio:disabled::after),
-:scope.nse-control-radio:disabled::after,
-:scope .nse-control-radio[data-disabled="true"]::before,
-:scope:is(.nse-control-radio[data-disabled="true"]::before),
-:scope.nse-control-radio[data-disabled="true"]::before,
-:scope .nse-control-radio[data-disabled="true"]::after,
-:scope:is(.nse-control-radio[data-disabled="true"]::after),
-:scope.nse-control-radio[data-disabled="true"]::after {
-  opacity: 0.5;
+:scope .nse-control-radio[data-position="first"][data-selected="true"]::after,:scope:is(.nse-control-radio[data-position="first"][data-selected="true"]::after),:scope.nse-control-radio[data-position="first"][data-selected="true"]::after {
+  inset:4px 0 4px 2px;
 }
+
+:scope .nse-control-radio[data-position="last"][data-selected="true"]::after,:scope:is(.nse-control-radio[data-position="last"][data-selected="true"]::after),:scope.nse-control-radio[data-position="last"][data-selected="true"]::after {
+  inset:4px 2px 4px 0;
+}
+
+
+
 
 /* --- Tabs: grouped toolbar buttons wearing the radio-group ladder -------- */
 /* The PNG skin's per-position tab rules are (0,6,0); :nth-child(n) lifts this
@@ -1242,35 +1108,13 @@
   --nse-atmo-mi-ring-focus-s: rgba(45, 45, 45, 0.9);
 }
 
-:scope .nse-control-checkbox-art,
-:scope:is(.nse-control-checkbox-art),
-:scope.nse-control-checkbox-art {
-  background: var(--nse-atmo-check-well) 0 0 / 100% 100% no-repeat;
-}
 
-:scope .nse-control-checkbox input:checked+.nse-control-checkbox-art,
-:scope:is(.nse-control-checkbox) input:checked+.nse-control-checkbox-art,
-:scope.nse-control-checkbox input:checked+.nse-control-checkbox-art {
-  background:
-    var(--nse-atmo-check-mark) 0 0 / 100% 100% no-repeat,
-    var(--nse-atmo-check-well) 0 0 / 100% 100% no-repeat;
-}
 
-:scope .nse-control-checkbox input:disabled+.nse-control-checkbox-art,
-:scope:is(.nse-control-checkbox) input:disabled+.nse-control-checkbox-art,
-:scope.nse-control-checkbox input:disabled+.nse-control-checkbox-art {
-  background: var(--nse-atmo-check-well) 0 0 / 100% 100% no-repeat;
-  opacity: 0.4;
-}
 
-:scope .nse-control-checkbox input:disabled:checked+.nse-control-checkbox-art,
-:scope:is(.nse-control-checkbox) input:disabled:checked+.nse-control-checkbox-art,
-:scope.nse-control-checkbox input:disabled:checked+.nse-control-checkbox-art {
-  background:
-    var(--nse-atmo-check-mark) 0 0 / 100% 100% no-repeat,
-    var(--nse-atmo-check-well) 0 0 / 100% 100% no-repeat;
-  opacity: 0.4;
-}
+
+
+
+
 
 :scope .nse-control-menu-check,
 :scope:is(.nse-control-menu-check),
@@ -4244,13 +4088,7 @@
 
 /* Segment: the group clips anything outside a cell, so the ring runs just
    inside the focused cell's rim, over its fill. */
-:scope .nse-control-radio:has(input:focus-visible)::after,
-:scope:is(.nse-control-radio:has(input:focus-visible)::after),
-:scope.nse-control-radio:has(input:focus-visible)::after {
-  box-shadow:
-    inset 0 0 0 2px rgba(76, 164, 255, 0.95),
-    inset 0 0 6px 2px rgba(62, 151, 247, 0.5);
-}
+
 
 /* Checkbox: around the well (x0 y2, 25×25.5, r=4 in the 33×28 cell), not the
    cell the check overflows into. */
@@ -4260,18 +4098,12 @@
   position: relative;
 }
 
-:scope .nse-control-checkbox input:focus-visible+.nse-control-checkbox-art::after,
-:scope:is(.nse-control-checkbox) input:focus-visible+.nse-control-checkbox-art::after,
-:scope.nse-control-checkbox input:focus-visible+.nse-control-checkbox-art::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 2px;
-  width: 25px;
-  height: 25.5px;
-  border-radius: 4px;
-  box-shadow: var(--nse-atmo-focus-ring);
-  pointer-events: none;
+:scope .nse-control-checkbox input:focus-visible+.nse-control-checkbox-art::after,:scope:is(.nse-control-checkbox) input:focus-visible+.nse-control-checkbox-art::after,:scope.nse-control-checkbox input:focus-visible+.nse-control-checkbox-art::after {
+  content:"";
+  position:absolute;
+  left:0;
+  top:2px;
+  pointer-events:none;
 }
 
 /* Slider: around the knob (27px, centred in the 50px thumb cell). */

@@ -1,0 +1,54 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-selection-field-parts.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-selection-field-parts.test.tsx (2 tests | 2 failed) 77ms
+     × publishes the switch field and its enclosing content slot without changing its checked semantics 65ms
+     × publishes a radio field's native disabled and checked semantics 11ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-selection-field-parts.test.tsx > native selection field drawing parts > publishes the switch field and its enclosing content slot without changing its checked semantics
+AssertionError: expected null to be 'field' // Object.is equality
+
+- Expected:
+"field"
+
++ Received:
+null
+
+ ❯ tests/runtime/nse-selection-field-parts.test.tsx:12:49
+     10|     render(<NSEButton buttonType="switch" title="Updates" state="on" /…
+     11|     const field = screen.getByRole("checkbox");
+     12|     expect(field.getAttribute("data-nse-part")).toBe("field");
+       |                                                 ^
+     13|     expect(field.parentElement?.getAttribute("data-nse-part")).toBe("c…
+     14|     expect((field as HTMLInputElement).checked).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/runtime/nse-selection-field-parts.test.tsx > native selection field drawing parts > publishes a radio field's native disabled and checked semantics
+AssertionError: expected null to be 'field' // Object.is equality
+
+- Expected:
+"field"
+
++ Received:
+null
+
+ ❯ tests/runtime/nse-selection-field-parts.test.tsx:19:48
+     17|     render(<NSERadioGroup label="Layout" options={[{value:"list",label…
+     18|     const [list, grid] = screen.getAllByRole("radio") as HTMLInputElem…
+     19|     expect(list.getAttribute("data-nse-part")).toBe("field");
+       |                                                ^
+     20|     expect(grid.getAttribute("data-nse-part")).toBe("field");
+     21|     expect(list.checked).toBe(true); expect(grid.disabled).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  01:18:52
+   Duration  2.00s (transform 615ms, setup 27ms, import 889ms, tests 77ms, environment 874ms)
