@@ -51,12 +51,13 @@ export function NSEGroupedList({ children, className = "", ...props }: NSEGroupe
     <NSEBox
       {...props}
       className={classes("nse-control-grouped-list", className)}
-      data-nse-grouped-list="true"
+      data-nse-style="grouped" data-nse-grouped-list="true"
       data-nse-grouped-list-inner-radius="frame-minus-row-inset"
 
     >
       {items.map((item, index) => cloneElement(item, {
         "data-nse-grouped-list-edge": edgeFor(index, items.length),
+        "data-nse-position": items.length === 1 ? "single" : edgeFor(index, items.length),
         key: item.key ?? `nse-grouped-list-item-${index}`,
       }))}
     </NSEBox>

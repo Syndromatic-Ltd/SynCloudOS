@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { nseControlHooks } from "../../Theme/contract/hooks";
 import { forwardRef, type HTMLAttributes, type ReactNode } from "react";
 import "./nse-list-item.css";
 import "../../Navigation/SourceList/nse-sourcelist.css";
@@ -60,6 +61,8 @@ export const NSEListItem = forwardRef<HTMLDivElement, NSEListItemProps>(function
   return (
     <div
       ref={ref}
+      {...nseControlHooks({ control: "table-cell-view", selected, enabled: isEnabled, highlighted: (props as Record<string, unknown>)["data-pressed"] === "true", variants: { style: "list", "highlight-style": tapHighlight ? "regular" : "none" } })}
+      data-nse-part="cell-content"
       className={classes("nse-control-list-item", disabled && "is-disabled", surfaceProps.className)}
       data-selected={selected ? "true" : "false"}
       data-tap-highlight={tapHighlight ? undefined : "false"}
@@ -71,12 +74,12 @@ export const NSEListItem = forwardRef<HTMLDivElement, NSEListItemProps>(function
       }}
       {...props}
     >
-      {leading ? <span className="nse-control-list-leading">{leading}</span> : null}
-      <span className="nse-control-list-body">
-        <span className="nse-control-list-primary">{children}</span>
-        {meta ? <span className="nse-control-list-meta">{meta}</span> : null}
+      {leading ? <span data-nse-part="leading" className="nse-control-list-leading">{leading}</span> : null}
+      <span data-nse-part="text-content" className="nse-control-list-body">
+        <span data-nse-part="primary-text" className="nse-control-list-primary">{children}</span>
+        {meta ? <span data-nse-part="secondary-text" className="nse-control-list-meta">{meta}</span> : null}
       </span>
-      {trailing ? <span className="nse-control-list-trailing">{trailing}</span> : null}
+      {trailing ? <span data-nse-part="trailing" className="nse-control-list-trailing">{trailing}</span> : null}
     </div>
   );
 });

@@ -1,3 +1,4 @@
+@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.data.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.boxes.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.text.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.values.css";
@@ -939,50 +940,18 @@
   overflow:visible;
 }
 
-:where(:scope) .nse-control-list-item,
-:where(:scope):is(.nse-control-list-item) {
-  /* Flex, not a three-column grid. Grid auto-placement fills columns in child
-     order, so a row with no leading slot dropped its label into the leading
-     column and left the trailing slot floating in the flexible middle — which
-     is why chevrons and switches landed wherever the label happened to end.
-     Flex has no such fixed tracks: absent slots take no space and produce no
-     gap, so the trailing content sits on the right edge either way. */
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  min-height: 52px;
-  padding: 8px 10px;
-  color: #1d2734;
-  border-top: 1px solid rgba(255, 255, 255, 0.92);
-  border-bottom: 1px solid rgba(140, 150, 160, 0.58);
-  background: rgba(242, 242, 240, 0.5);
-  /* Dark label on a light cell: emboss with a light highlight below (lit from
-     above), not a dark shadow. Without this, list items inherit a dark
-     text-shadow from a surrounding panel and read as pressed/selected. */
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+:where(:scope) .nse-control-list-item,:where(:scope):is(.nse-control-list-item) {
+  display:flex;
+  align-items:center;
 }
 
-:where(:scope) .nse-control-list-item:first-child,
-:where(:scope):is(.nse-control-list-item:first-child) {
-  border-top: 0;
-}
 
-:where(:scope) .nse-control-list-item:last-child,
-:where(:scope):is(.nse-control-list-item:last-child) {
-  border-bottom: 0;
-}
 
-:where(:scope) .nse-control-list-item[data-selected="true"],
-:where(:scope):is(.nse-control-list-item[data-selected="true"]) {
-  color: #fff;
-  background: linear-gradient(#555, #888);
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.56);
-}
 
-:where(:scope) .nse-control-list-item.is-disabled,
-:where(:scope):is(.nse-control-list-item.is-disabled) {
-  color: gray;
-}
+
+
+
+
 
 /* Item held/tap-highlight: pressing a row shows the #555→#888
    gradient (held), the same gradient as the selected state.
@@ -998,17 +967,12 @@
   color: rgba(255, 255, 255, 0.78);
 }
 
-:where(:scope) .nse-control-list-meta,
-:where(:scope):is(.nse-control-list-meta) {
-  color: rgba(42, 55, 70, 0.68);
-  font-size: 13px;
-  font-weight: 700;
+:where(:scope) .nse-control-list-meta,:where(:scope):is(.nse-control-list-meta) {
+  font-size:13px;
+  font-weight:700;
 }
 
-:where(:scope) .nse-control-list-item[data-selected="true"] .nse-control-list-meta,
-:where(:scope):is(.nse-control-list-item[data-selected="true"]) .nse-control-list-meta {
-  color: rgba(255, 255, 255, 0.78);
-}
+
 
 :where(:scope) .nse-control-popup-layer,
 :where(:scope):is(.nse-control-popup-layer) {

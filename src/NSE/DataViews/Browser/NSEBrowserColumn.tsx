@@ -83,7 +83,7 @@ export function NSEBrowserColumn<T, TId extends NSEDataViewKey>({ label, index, 
     <div data-nse-part="column" className="nse-browser-column" >
       <div
         ref={viewportRef}
-        role="listbox"
+        data-nse-part="viewport" role="listbox"
         aria-label={label}
         aria-busy={state.status === "loading"}
         aria-disabled={disabled || undefined}
@@ -107,6 +107,8 @@ export function NSEBrowserColumn<T, TId extends NSEDataViewKey>({ label, index, 
               aria-posinset={virtualItem.index + 1}
               aria-setsize={state.items.length}
               data-nse-part="row" data-nse-selected={active ? "" : undefined} data-nse-enabled={disabled ? "false" : undefined} className="nse-browser-option"
+              data-nse-expanded={leaf ? undefined : String(Object.is(expandedId, id))}
+              data-nse-type={leaf ? "leaf" : "branch"}
               data-focused={active || undefined}
               data-leaf={leaf || undefined}
 
@@ -121,9 +123,9 @@ export function NSEBrowserColumn<T, TId extends NSEDataViewKey>({ label, index, 
         })}
         </div>
       </div>
-      {state.status !== "ready" && state.status !== "empty" && <div role="status">{state.message ?? "Loading"}</div>}
+      {state.status !== "ready" && state.status !== "empty" && <div data-nse-part="status" role="status">{state.message ?? "Loading"}</div>}
       {state.status === "empty" && <div role="status">{state.message ?? "No items"}</div>}
-      {state.retry && <button type="button" onClick={state.retry}>Retry</button>}
+      {state.retry && <button data-nse-part="recovery" type="button" onClick={state.retry}>Retry</button>}
     </div>
   );
 }

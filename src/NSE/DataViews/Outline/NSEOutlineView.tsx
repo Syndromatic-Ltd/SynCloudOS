@@ -343,7 +343,7 @@ export function NSEOutlineView<T, TId extends string | number>({
       type="button"
       aria-label={`${row.expanded ? "Collapse" : "Expand"} ${labelForItem(row.item)}`}
       data-nse-part="disclosure"
-      data-state={row.expanded ? "open" : "closed"}
+      data-nse-expanded={String(row.expanded)} data-state={row.expanded ? "open" : "closed"}
 
       disabled={!allowsInteraction}
       onClick={(event) => { event.stopPropagation(); if (row.expanded) collapse(row); else expand(row); }}
@@ -467,7 +467,7 @@ export function NSEOutlineView<T, TId extends string | number>({
         aria-readonly={state.kind === "read-only" || undefined}
         className={`nse-outline-view ${className}`.trim()}
         dir={dir}
-        data-nse-control="outline-view" data-nse-part="background" data-nse-enabled={dataViewIsDisabled(state) ? "false" : undefined}
+        data-nse-control="outline-view" data-nse-part="background" data-nse-selection-highlight-style={selectionHighlightStyle} data-nse-enabled={dataViewIsDisabled(state) ? "false" : undefined}
         data-state={state.kind}
         data-style={sourceList ? "source-list" : undefined}
         style={{ ...style, position: "relative", overflow: "auto", blockSize: fills ? "100%" : `${viewportBlockSize}px` }}
@@ -496,7 +496,7 @@ export function NSEOutlineView<T, TId extends string | number>({
                 {...rowProps(row, selected)}
                 data-nse-part={isGroup(row) ? "group-row" : "row"}
                 data-state={selected ? "selected" : row.row % 2 === 0 ? "even" : "odd"}
-                data-kind={row.expandable ? "branch" : "leaf"}
+                data-nse-type={row.expandable ? "branch" : "leaf"} data-kind={row.expandable ? "branch" : "leaf"}
 
                 style={rowStyle}
               >

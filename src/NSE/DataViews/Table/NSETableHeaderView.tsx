@@ -55,14 +55,14 @@ export function NSETableHeaderView({ columns, height, width, menu, isEnabled = t
           aria-colindex={index + 1}
           aria-sort={column.sortDirection ?? undefined}
           data-column-id={column.id}
-          data-state={column.sortDirection ? `sorted-${column.sortDirection}` : "normal"}
+          data-nse-sort-direction={column.sortDirection ?? "none"} data-state={column.sortDirection ? `sorted-${column.sortDirection}` : "normal"}
           style={{ flex: `0 0 ${column.width}px`, inlineSize: `${column.width}px` }}
         >
           {column.sortable ? (
-            <button data-nse-part="title" type="button" aria-label={`Sort by ${column.title}`} disabled={disabled} onClick={column.onSort}>
+            <button data-nse-role="sort" data-nse-part="title" type="button" aria-label={`Sort by ${column.title}`} disabled={disabled} onClick={column.onSort}>
               {column.title}<span aria-hidden="true" data-nse-part="sort-glyph"  />
             </button>
-          ) : <span>{column.title}</span>}
+          ) : <span data-nse-part="title">{column.title}</span>}
           {/* A column fixed at one width (NSTableColumn with no resizing mask)
               offers no handle to resize it by. */}
           {column.minimum === column.maximum ? null : <div

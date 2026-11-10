@@ -1,0 +1,34 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-data-view-drawing-parts.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-data-view-drawing-parts.test.tsx (3 tests | 1 failed) 103ms
+   × publishes outline branch classification and expanded state without changing native activation 15ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-data-view-drawing-parts.test.tsx > publishes outline branch classification and expanded state without changing native activation
+AssertionError: expected null to be 'regular' // Object.is equality
+
+- Expected:
+"regular"
+
++ Received:
+null
+
+ ❯ tests/runtime/nse-data-view-drawing-parts.test.tsx:39:126
+     37|     const { container } = render(<NSEOutlineView aria-label="Outline" …
+     38|     const disclosure = screen.getByRole("button", { name: "Expand Fold…
+     39|     expect(container.querySelector('[data-nse-control="outline-view"]'…
+       |                                                                                                                              ^
+     40|     expect(disclosure.getAttribute("data-nse-expanded")).toBe("false");
+     41|     expect(container.querySelector('[data-nse-part="row"]')?.getAttrib…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  02:42:25
+   Duration  1.84s (transform 517ms, setup 27ms, import 756ms, tests 103ms, environment 822ms)

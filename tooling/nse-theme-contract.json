@@ -118,10 +118,28 @@
       "parts": [
         "background",
         "column",
-        "content"
+        "columns",
+        "content",
+        "disclosure",
+        "group",
+        "handle",
+        "row",
+        "status",
+        "title",
+        "viewport"
       ],
-      "states": [],
-      "variants": {}
+      "states": [
+        "selected"
+      ],
+      "variants": {
+        "expanded": [
+          "false"
+        ],
+        "type": [
+          "branch",
+          "leaf"
+        ]
+      }
     },
     "button": {
       "parts": [
@@ -597,13 +615,26 @@
         "background",
         "disclosure",
         "label",
+        "loading",
         "row"
       ],
       "states": [
         "enabled=false",
         "selected"
       ],
-      "variants": {}
+      "variants": {
+        "expanded": [
+          "false",
+          "true"
+        ],
+        "selection-highlight-style": [
+          "regular",
+          "sourceList"
+        ],
+        "type": [
+          "branch"
+        ]
+      }
     },
     "page-controller": {
       "parts": [
@@ -616,12 +647,9 @@
       "parts": [
         "actions",
         "background",
-        "cell",
         "content",
-        "disclosure",
         "label",
         "title",
-        "trailing",
         "value"
       ],
       "states": [],
@@ -1128,13 +1156,30 @@
       "parts": [
         "accessory",
         "badge",
+        "cell",
         "cell-content",
+        "disclosure",
+        "leading",
         "primary-text",
+        "row",
         "secondary-text",
-        "text-content"
+        "text-content",
+        "trailing"
       ],
-      "states": [],
-      "variants": {}
+      "states": [
+        "selected"
+      ],
+      "variants": {
+        "expanded": [
+          "false"
+        ],
+        "highlight-style": [
+          "regular"
+        ],
+        "style": [
+          "list"
+        ]
+      }
     },
     "table-view": {
       "parts": [
@@ -1145,7 +1190,9 @@
         "column-resize-handle",
         "font-list-label",
         "header",
-        "row"
+        "row",
+        "sort-glyph",
+        "title"
       ],
       "states": [
         "enabled=false",
@@ -1155,6 +1202,13 @@
       "variants": {
         "alignment": [
           "start"
+        ],
+        "role": [
+          "sort"
+        ],
+        "sort-direction": [
+          "ascending",
+          "none"
         ]
       }
     },

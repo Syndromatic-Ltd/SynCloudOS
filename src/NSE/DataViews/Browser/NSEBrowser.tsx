@@ -234,13 +234,13 @@ export function NSEBrowser<T, TId extends string | number>({
   return (
     <div {...props} ref={browserRef} className={`nse-browser ${className}`.trim()} data-nse-control="browser" data-nse-part="background" data-nse-enabled={disabled ? "false" : undefined} data-presentation={presentation} data-state={state.kind} aria-busy={dataViewIsBusy(state) || undefined} aria-disabled={disabled || undefined}>
       {presentation === "compact" && columns.length > 1 && (
-        <button type="button" className="nse-browser-back" onClick={() => back(columns.length - 1)}>Back to {columns.length === 2 ? label : columns.at(-2)?.presentation.find((item) => Object.is(item.id, effectivePath.at(-2)?.id))?.label ?? label}</button>
+        <button type="button" data-nse-part="previous" className="nse-browser-back" onClick={() => back(columns.length - 1)}>Back to {columns.length === 2 ? label : columns.at(-2)?.presentation.find((item) => Object.is(item.id, effectivePath.at(-2)?.id))?.label ?? label}</button>
       )}
-      <div className="nse-browser-columns" data-testid="browser-columns" dir={dir} >
+      <div data-nse-part="columns" className="nse-browser-columns" data-testid="browser-columns" dir={dir} >
         {visibleIndices.map((columnIndex) => {
           const column = columns[columnIndex]!;
           return (
-            <div key={`${columnIndex}-${column.parentId === null ? "root" : encodeNSEDataViewKey(column.parentId)}`} className="nse-browser-column-shell" style={{ inlineSize: widths[columnIndex] }}>
+            <div key={`${columnIndex}-${column.parentId === null ? "root" : encodeNSEDataViewKey(column.parentId)}`} data-nse-part="group" className="nse-browser-column-shell" style={{ inlineSize: widths[columnIndex] }}>
               <NSEBrowserColumn
                 label={`${label} column ${columnIndex + 1}`}
                 index={columnIndex}
@@ -260,7 +260,7 @@ export function NSEBrowser<T, TId extends string | number>({
                 aria-valuenow={widths[columnIndex]}
                 aria-disabled={!allowsMutation || undefined}
                 tabIndex={allowsMutation ? 0 : -1}
-                className="nse-browser-resize"
+                data-nse-part="handle" className="nse-browser-resize"
 
                 onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
                   if (event.key === "ArrowRight") { event.preventDefault(); resize(columnIndex, dir === "rtl" ? -8 : 8); }
@@ -273,8 +273,8 @@ export function NSEBrowser<T, TId extends string | number>({
           );
         })}
       </div>
-      {state.kind !== "ready" && <div role="status">{state.message}</div>}
-      {(state.kind === "denied" || state.kind === "error") && state.retry && <button type="button" onClick={state.retry}>Retry</button>}
+      {state.kind !== "ready" && <div data-nse-part="status" role="status">{state.message}</div>}
+      {(state.kind === "denied" || state.kind === "error") && state.retry && <button data-nse-part="recovery" type="button" onClick={state.retry}>Retry</button>}
       {state.kind === "interrupted" && state.resume && <button type="button" onClick={state.resume}>Resume</button>}
     </div>
   );

@@ -74,7 +74,14 @@ for (const surface of additionalThemeCatalogue) it(`renders additional ${surface
 for (const surface of supplementalThemeCatalogue) it(`renders supplemental ${surface.id}`, async () => {
   render(<Host>{surface.render()}</Host>);
   await act(async () => { await Promise.resolve(); });
+  if (surface.ready) await waitFor(() => expect(document.querySelector(surface.ready!)).not.toBeNull());
   collect();
+  if (surface.activate) {
+    fireEvent.click(document.querySelector<HTMLElement>(surface.activate)!);
+    if (surface.activeReady) await waitFor(() => expect(document.querySelector(surface.activeReady!)).not.toBeNull());
+    await act(async () => { await Promise.resolve(); });
+    collect();
+  }
   if (surface.id === "segment-menu" || surface.id === "segment-overflow") {
     fireEvent.click(document.querySelector<HTMLElement>('[data-nse-expanded="false"]')!);
     await act(async () => { await Promise.resolve(); });
