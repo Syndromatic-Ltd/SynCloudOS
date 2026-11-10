@@ -1,3 +1,4 @@
+@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.core.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.data.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.boxes.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.text.css";
@@ -1014,15 +1015,15 @@
   padding: 4px 8px;
 }
 
+:where(:scope) .nse-control-menu-host,:where(:scope):is(.nse-control-menu-host),:where(:scope) .nse-control-picker,:where(:scope):is(.nse-control-picker) {
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+}
 :where(:scope) .nse-control-menu-host,
-:where(:scope):is(.nse-control-menu-host),
-:where(:scope) .nse-control-picker,
-:where(:scope):is(.nse-control-picker) {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  max-width: 100%;
+:where(:scope):is(.nse-control-menu-host) {
+  gap:8px;
+  max-width:100%;
 }
 
 :where(:scope) .nse-control-menu,
@@ -2168,11 +2169,9 @@
     flex-wrap: wrap;
   }
 
-  :where(:scope) .nse-control-picker,
-:where(:scope):is(.nse-control-picker) {
-    grid-template-columns: 1fr;
-    width: 100%;
-  }
+  :where(:scope) .nse-control-picker,:where(:scope):is(.nse-control-picker) {
+  grid-template-columns:1fr;
+}
 
 
 :where(:scope) .nse-control-menu-host,
@@ -3564,12 +3563,10 @@
 }
 
 /* The panel's popups span their rows, a label (when shown) in the column. */
-:where(:scope) [data-nse-control="colour-panel"] .nse-control-picker,
-:where(:scope):is([data-nse-control="colour-panel"]) .nse-control-picker {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: center;
-  gap: 0;
+:where(:scope) [data-nse-control="colour-panel"] .nse-control-picker,:where(:scope):is([data-nse-control="colour-panel"]) .nse-control-picker {
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  align-items:center;
 }
 
 :where(:scope) [data-nse-control="colour-panel"] .nse-control-picker:has(>.nse-control-picker-label),
@@ -4279,12 +4276,11 @@
   font-size: 11px;
 }
 
-:where(:scope) [data-nse-control="font-panel"] [data-nse-part="size-column"]>.nse-control-text-field,
-:where(:scope):is([data-nse-control="font-panel"]) [data-nse-part="size-column"]>.nse-control-text-field,
+
 :where(:scope) [data-nse-control="font-panel"] [data-nse-part="size-column"]>.nse-control-text-field :is(.nse-control-field-frame,input),
 :where(:scope):is([data-nse-control="font-panel"]) [data-nse-part="size-column"]>.nse-control-text-field :is(.nse-control-field-frame,input) {
-  inline-size: 100%;
-  min-inline-size: 0;
+  inline-size:100%;
+  min-inline-size:0;
 }
 
 /* The size reads centred in its field, over the list of sizes. */

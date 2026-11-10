@@ -205,13 +205,17 @@ Verification: **34 focused tests across four files**, **704 rendered contract sp
 
 The initial full screenshot gate passed 81/82 with no pixel mismatch; one navigation failed before rendering with Chromium `ERR_NO_BUFFER_SPACE`. Its trace is retained as `task-14-boxes-startup-trace.zip`. The complete standalone rerun with one worker passed **82/82, zero differences**, in `task-14-boxes-baseline-final.log`. All **2,648 frozen PNG hashes are unchanged**.
 
-The data-view slice moves **49 drawing rules / 155 selectors** for tables, outlines, browsers, collection items and list cells. Browser structure publishes columns, groups, viewports, rows and resize handles. Outline and browser disclosures publish their existing expanded/leaf facts; outlines publish AppKit's `selectionHighlightStyle` on their actual control element. Sortable headers publish their existing role and sort direction. List cells use the existing `table-cell-view` identity with a list style and neutral text/accessory parts; grouped rows publish neutral positions. No selection, activation, focus, drag or loading behaviour changed.
+The data-view slice (`354504a4`) moves **49 drawing rules / 155 selectors** for tables, outlines, browsers, collection items and list cells. Browser structure publishes columns, groups, viewports, rows and resize handles. Outline and browser disclosures publish their existing expanded/leaf facts; outlines publish AppKit's `selectionHighlightStyle` on their actual control element. Sortable headers publish their existing role and sort direction. List cells use the existing `table-cell-view` identity with a list style and neutral text/accessory parts; grouped rows publish neutral positions. No selection, activation, focus, drag or loading behaviour changed.
 
 Supplementary real controls cover loaded browser rows, pending outline loading and a sortable header. The contract collector waits for their actual async parts and exercises their existing actions. **707 rendered specimens** pass, alongside **618 focused tests in six files**, framework and supplementary catalogue typechecks and bundle validation. The paired style comparison of **39 data-view cases** found zero differences. The full frozen gate passed **82/82, zero differences**, in `task-14-data-baseline.log`; all **2,648 frozen PNG hashes are unchanged**.
 
 An early probe caught the outline's new style hook on its wrapper rather than its control. A failing ownership assertion proved the issue; the hook now sits on the control, preserving source-list paint. Its style diff log is retained. One subsequent paired probe timed out before fixture readiness; a separate readiness probe succeeded and the standalone rerun passed. No baseline reference was changed.
 
-Remaining Task 14 slices: remaining drawing rules and containers, menus/toolbars, windows, overlays and system UI; final built-in data connection, structure split and removal of the old theme directory.
+The remaining scroller, disclosure-orientation and form-metric slice moves **22 rules / 69 selectors** onto existing hooks. Native scroller pseudo-elements are anchored to their public identity; disclosure rotation follows the existing AppKit on/off state; form-row metrics use grid parts and control identities. This adds no API or DOM.
+
+Verification: **38 focused tests in four files**, bundle validation and typecheck passed. **99 paired style cases** showed zero differences. The complete frozen screenshot gate passed **82/82, zero differences**, in `task-14-core-baseline.log`; all **2,648 PNG hashes remain unchanged**.
+
+Remaining Task 14 slices: menus/toolbars, windows, overlays and system UI; final built-in data connection, structure split and removal of the old theme directory.
 
 ### Tasks 15–19
 
