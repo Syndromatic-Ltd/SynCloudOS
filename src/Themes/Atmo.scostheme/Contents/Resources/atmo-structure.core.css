@@ -1,0 +1,23 @@
+:where(:scope) [data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]),
+:where(:scope):is([data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"])) {
+  gap:8px;
+  max-width:100%;
+}
+
+@media (max-width:760px) {
+:where(:scope) [data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]),
+:where(:scope):is([data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"])) {
+  width:100%;
+}
+}
+
+:where(:scope) [data-nse-control="colour-panel"] [data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]),
+:where(:scope):is([data-nse-control="colour-panel"]) [data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]) {
+  gap:0;
+}
+
+:where(:scope) [data-nse-control="font-panel"] [data-nse-part="size-column"]>[data-nse-control="text-field"]:where(:not([data-nse-role="group"],[data-nse-part="title"])),
+:where(:scope):is([data-nse-control="font-panel"]) [data-nse-part="size-column"]>[data-nse-control="text-field"]:where(:not([data-nse-role="group"],[data-nse-part="title"])) {
+  inline-size:100%;
+  min-inline-size:0;
+}

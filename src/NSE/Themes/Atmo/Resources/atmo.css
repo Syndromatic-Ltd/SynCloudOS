@@ -1,3 +1,4 @@
+@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo.core.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo.data.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo.boxes.css";
 @import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo.text.css";
@@ -5826,107 +5827,38 @@
    Circular slider: a silver dial with a recessed rim, the value swept as a
    translucent blue arc and a dark pointer.
    ========================================================================= */
-:scope input[data-nse-control="scroller"],
-:scope:is(input[data-nse-control="scroller"]),
-input:scope[data-nse-control="scroller"] {
-  appearance: none;
-  -webkit-appearance: none;
-  box-sizing: border-box;
-  margin: 3px;
-  width: calc(100% - 6px);
-  height: 11px;
-  border: 1px solid rgba(0, 0, 0, 0.22);
-  border-radius: 6px;
-  background: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.03) 60%, rgba(255, 255, 255, 0.2));
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2), 0 1px 0 rgba(255, 255, 255, 0.45);
+:scope input[data-nse-control="scroller"],:scope:is(input[data-nse-control="scroller"]),input:scope[data-nse-control="scroller"] {
+  appearance:none;
+  -webkit-appearance:none;
+  box-sizing:border-box;
 }
 
 /* Physical sizes: the vertical scroller runs in vertical-lr, where the
    logical axes swap. */
-:scope input[data-nse-control="scroller"][data-orientation="vertical"],
-:scope:is(input[data-nse-control="scroller"][data-orientation="vertical"]),
-input:scope[data-nse-control="scroller"][data-orientation="vertical"] {
-  width: 11px;
-  height: calc(100% - 6px);
+
+
+
+
+:scope input[data-nse-control="scroller"]::-webkit-slider-thumb,:scope:is(input[data-nse-control="scroller"]::-webkit-slider-thumb),input:scope[data-nse-control="scroller"]::-webkit-slider-thumb {
+  -webkit-appearance:none;
+  appearance:none;
 }
 
-:scope input[data-nse-control="scroller"]::-webkit-slider-runnable-track,
-:scope:is(input[data-nse-control="scroller"]::-webkit-slider-runnable-track),
-input:scope[data-nse-control="scroller"]::-webkit-slider-runnable-track {
-  background: transparent;
-  border: 0;
+
+
+
+
+
+
+:scope input[data-nse-control="scroller"]:focus-visible,:scope:is(input[data-nse-control="scroller"]:focus-visible),input:scope[data-nse-control="scroller"]:focus-visible {
+  outline:none;
 }
 
-:scope input[data-nse-control="scroller"]::-webkit-slider-thumb,
-:scope:is(input[data-nse-control="scroller"]::-webkit-slider-thumb),
-input:scope[data-nse-control="scroller"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 36px;
-  height: 9px;
-  border: 0;
-  border-radius: 5px;
-  background: linear-gradient(#8a8e93, #b0b4b9);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.35);
-}
 
-:scope input[data-nse-control="scroller"][data-orientation="vertical"]::-webkit-slider-thumb,
-:scope:is(input[data-nse-control="scroller"][data-orientation="vertical"]::-webkit-slider-thumb),
-input:scope[data-nse-control="scroller"][data-orientation="vertical"]::-webkit-slider-thumb {
-  width: 9px;
-  height: 36px;
-  /* Lit from above like every Atmo thumb: an upright capsule shades evenly
-     across its width (no side is nearer the light) and keeps its top glint. */
-  background: linear-gradient(to right, #92969b, #b4b8bd 50%, #92969b);
-}
 
-:scope input[data-nse-control="scroller"]::-moz-range-thumb,
-:scope:is(input[data-nse-control="scroller"]::-moz-range-thumb),
-input:scope[data-nse-control="scroller"]::-moz-range-thumb {
-  width: 36px;
-  height: 9px;
-  border: 0;
-  border-radius: 5px;
-  background: linear-gradient(#8a8e93, #b0b4b9);
-}
 
-:scope input[data-nse-control="scroller"]:hover::-webkit-slider-thumb,
-:scope:is(input[data-nse-control="scroller"]:hover::-webkit-slider-thumb),
-input:scope[data-nse-control="scroller"]:hover::-webkit-slider-thumb {
-  background: linear-gradient(#6f7378, #969a9f);
-}
 
-:scope input[data-nse-control="scroller"]:focus-visible,
-:scope:is(input[data-nse-control="scroller"]:focus-visible),
-input:scope[data-nse-control="scroller"]:focus-visible {
-  outline: none;
-  box-shadow: var(--nse-atmo-focus-ring);
-}
 
-:scope input[data-nse-control="scroller"]:disabled,
-:scope:is(input[data-nse-control="scroller"]:disabled),
-input:scope[data-nse-control="scroller"]:disabled {
-  opacity: 0.45;
-}
-
-:scope[data-mode="dark"] input[data-nse-control="scroller"],
-:scope[data-mode="dark"]:is(input[data-nse-control="scroller"]),
-:scope [data-mode="dark"] input[data-nse-control="scroller"],
-:scope:is([data-mode="dark"]) input[data-nse-control="scroller"],
-:scope:is([data-mode="dark"]):is(input[data-nse-control="scroller"]) {
-  border-color: rgba(0, 0, 0, 0.6);
-  background: linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.2));
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5), 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-
-:scope[data-mode="dark"] input[data-nse-control="scroller"]::-webkit-slider-thumb,
-:scope[data-mode="dark"]:is(input[data-nse-control="scroller"]::-webkit-slider-thumb),
-:scope [data-mode="dark"] input[data-nse-control="scroller"]::-webkit-slider-thumb,
-:scope:is([data-mode="dark"]) input[data-nse-control="scroller"]::-webkit-slider-thumb,
-:scope:is([data-mode="dark"]):is(input[data-nse-control="scroller"]::-webkit-slider-thumb) {
-  background: linear-gradient(#5c646e, #444b54);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-}
 
 /* NSButton.BezelStyle.disclosure: the triangle that shows and hides the
    view below it. With a title it is drawn as an inspector section header,
@@ -5951,20 +5883,9 @@ input:scope[data-nse-control="scroller"]:disabled {
   transition:transform 140ms ease;
 }
 
-:scope .nse-control-disclosure-button[aria-expanded="true"]>.nse-control-disclosure-triangle,
-:scope:is(.nse-control-disclosure-button[aria-expanded="true"])>.nse-control-disclosure-triangle,
-:scope.nse-control-disclosure-button[aria-expanded="true"]>.nse-control-disclosure-triangle {
-  transform: rotate(90deg);
-}
 
-:scope [dir="rtl"] .nse-control-disclosure-button[aria-expanded="false"]>.nse-control-disclosure-triangle,
-:scope:is([dir="rtl"]) .nse-control-disclosure-button[aria-expanded="false"]>.nse-control-disclosure-triangle,
-:scope[dir="rtl"] .nse-control-disclosure-button[aria-expanded="false"]>.nse-control-disclosure-triangle,
-:scope .nse-control-disclosure-button[dir="rtl"][aria-expanded="false"]>.nse-control-disclosure-triangle,
-:scope:is(.nse-control-disclosure-button[dir="rtl"][aria-expanded="false"])>.nse-control-disclosure-triangle,
-:scope.nse-control-disclosure-button[dir="rtl"][aria-expanded="false"]>.nse-control-disclosure-triangle {
-  transform: scaleX(-1);
-}
+
+
 
 
 
@@ -6969,35 +6890,15 @@ input:scope[data-nse-control="scroller"]:disabled {
   --nse-spacing-inline: 12px;
 }
 
-:scope .nse-form-row:has(>.nse-form-control>:first-child:is(.nse-control-button,.nse-control-picker,.nse-menu-trigger-host,.nse-popup-button)),
-:scope:is(.nse-form-row:has(>.nse-form-control>:first-child:is(.nse-control-button,.nse-control-picker,.nse-menu-trigger-host,.nse-popup-button))),
-:scope.nse-form-row:has(>.nse-form-control>:first-child:is(.nse-control-button,.nse-control-picker,.nse-menu-trigger-host,.nse-popup-button)) {
-  --nse-form-line: var(--nse-atmo-control-h);
-}
 
-:scope .nse-form-row:has(>.nse-form-control>:first-child.nse-control-checkbox),
-:scope:is(.nse-form-row:has(>.nse-form-control>:first-child.nse-control-checkbox)),
-:scope.nse-form-row:has(>.nse-form-control>:first-child.nse-control-checkbox) {
-  --nse-form-line: 28px;
-}
 
-:scope .nse-form-row:has(>.nse-form-control>:first-child.nse-control-toggle),
-:scope:is(.nse-form-row:has(>.nse-form-control>:first-child.nse-control-toggle)),
-:scope.nse-form-row:has(>.nse-form-control>:first-child.nse-control-toggle) {
-  --nse-form-line: 32px;
-}
 
-:scope .nse-form-row:has(>.nse-form-control>:first-child:is(.nse-control-text-field[data-size="small"],.nse-control-search-field[data-size="small"])),
-:scope:is(.nse-form-row:has(>.nse-form-control>:first-child:is(.nse-control-text-field[data-size="small"],.nse-control-search-field[data-size="small"]))),
-:scope.nse-form-row:has(>.nse-form-control>:first-child:is(.nse-control-text-field[data-size="small"],.nse-control-search-field[data-size="small"])) {
-  --nse-form-line: 36px;
-}
 
-:scope .nse-form-row:has(>.nse-form-control>:first-child.nse-control-text-field[data-size="mini"]),
-:scope:is(.nse-form-row:has(>.nse-form-control>:first-child.nse-control-text-field[data-size="mini"])),
-:scope.nse-form-row:has(>.nse-form-control>:first-child.nse-control-text-field[data-size="mini"]) {
-  --nse-form-line: 28px;
-}
+
+
+
+
+
 
 /* A text glyph used as a sized tool button's icon (↺, ✎) is drawn at the
    icon slot's scale, not the caption's small type. */
