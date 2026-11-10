@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useNSEAppearance } from "../NSE/Appearance/NSEAppearanceProvider";
 import { nseStateHooks } from "../NSE/Theme/contract/hooks";
 import { useNSEThemeInteraction } from "../NSE/Theme/contract/useThemeInteraction";
 import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
@@ -371,11 +372,12 @@ function NotificationBanner({
   onOpenCentre: (notificationId?: string) => void;
   onRunAction: (notification: SynCloudOSNotification, action?: SynCloudOSNotificationAction | null) => void;
 }) {
+  const plain = useNSEAppearance().theme.presentation.notifications === "plain";
   const stageRef = useRef<HTMLDivElement>(null);
   const articleRef = useRef<HTMLElement>(null);
   const { reducedMotion } = useNSEAnimationEnvironment();
   const notificationMotion = useNotificationMotion();
-  const screenSlice = useNotificationScreenSlice(notification.id, stageRef, reducedMotion);
+  const screenSlice = useNotificationScreenSlice(notification.id, stageRef, reducedMotion || plain);
   const { t, activeLocale } = useWebspringLocale();
   const [displayedNotification, setDisplayedNotification] = useState(notification);
   const [visibleScreenSlice, setVisibleScreenSlice] = useState<NotificationScreenSlice>(screenSlice);
@@ -407,6 +409,7 @@ function NotificationBanner({
 
   useEffect(() => {
     if (displayedNotification.id === notification.id) return;
+    if (plain) { setDisplayedNotification(notification); return; }
     const sequence = replacementSequenceRef.current + 1;
     replacementSequenceRef.current = sequence;
 
@@ -428,37 +431,9 @@ function NotificationBanner({
     };
 
     void replaceBanner();
-  }, [displayedNotification.id, notification.id]);
+  }, [displayedNotification.id, notification.id, plain]);
 
-  return (
-    <div
-      ref={stageRef}
-      data-nse-control="notification-banner" data-nse-part="background" className="syncloudos-notification-banner-stage"
-      data-slice-status={activeScreenSlice.status}
-    >
-      {activeScreenSlice.status === "capturing" ? <div data-nse-part="effects" className="syncloudos-notification-stage-measure" aria-hidden="true" /> : (
-        <>
-          <div data-nse-part="background" className="syncloudos-notification-cube-void" aria-hidden="true" />
-          <div data-nse-part="effects" className="syncloudos-notification-cube">
-            <NotificationRotor key={`notification-cube-rotor-${rotorVersion}`} state={rotorState} motion={notificationMotion}>
-              <NotificationCubeFace
-                className={`syncloudos-notification-cube-face syncloudos-notification-screen-face ${activeScreenSlice.src ? "has-captured-slice" : "uses-fallback-slice"}`}
-                presentation={notificationMotion.bannerScreenFace}
-              >
-                {activeScreenSlice.src ? (
-                  <img data-nse-part="preview" className="syncloudos-notification-screen-face-image" src={activeScreenSlice.src} alt="" draggable={false} />
-                ) : (
-                  <div data-nse-part="background" className="syncloudos-notification-screen-face-fallback" />
-                )}
-              </NotificationCubeFace>
-              <NotificationCubeFace
-                data-nse-part="background" className="syncloudos-notification-cube-face syncloudos-notification-cube-under-face"
-                presentation={notificationMotion.bannerStatusStrip}
-              >
-                <div data-nse-part="shadow" className="syncloudos-notification-cube-under-glow" />
-              </NotificationCubeFace>
-              <div data-nse-part="content" className="syncloudos-notification-cube-face syncloudos-notification-banner-face">
-                <article
+  const banner = (<article
                   ref={articleRef}
                   data-nse-part="bezel" className={`syncloudos-notification-banner priority-${displayedNotification.priority}`}
                   role={displayedNotification.priority === "timeSensitive" || displayedNotification.priority === "critical" ? "alert" : "status"}
@@ -519,7 +494,37 @@ function NotificationBanner({
                       ))}
                     </div>
                   ) : null}
-                </article>
+                </article>);
+
+  return (
+    <div
+      ref={stageRef}
+      data-nse-control="notification-banner" data-nse-part="background" data-nse-notification-presentation={plain ? "plain" : "sliced-3d"} className="syncloudos-notification-banner-stage"
+      data-slice-status={activeScreenSlice.status}
+    >
+      {plain ? banner : activeScreenSlice.status === "capturing" ? <div data-nse-part="effects" className="syncloudos-notification-stage-measure" aria-hidden="true" /> : (
+        <>
+          <div data-nse-part="background" className="syncloudos-notification-cube-void" aria-hidden="true" />
+          <div data-nse-part="effects" className="syncloudos-notification-cube">
+            <NotificationRotor key={`notification-cube-rotor-${rotorVersion}`} state={rotorState} motion={notificationMotion}>
+              <NotificationCubeFace
+                className={`syncloudos-notification-cube-face syncloudos-notification-screen-face ${activeScreenSlice.src ? "has-captured-slice" : "uses-fallback-slice"}`}
+                presentation={notificationMotion.bannerScreenFace}
+              >
+                {activeScreenSlice.src ? (
+                  <img data-nse-part="preview" className="syncloudos-notification-screen-face-image" src={activeScreenSlice.src} alt="" draggable={false} />
+                ) : (
+                  <div data-nse-part="background" className="syncloudos-notification-screen-face-fallback" />
+                )}
+              </NotificationCubeFace>
+              <NotificationCubeFace
+                data-nse-part="background" className="syncloudos-notification-cube-face syncloudos-notification-cube-under-face"
+                presentation={notificationMotion.bannerStatusStrip}
+              >
+                <div data-nse-part="shadow" className="syncloudos-notification-cube-under-glow" />
+              </NotificationCubeFace>
+              <div data-nse-part="content" className="syncloudos-notification-cube-face syncloudos-notification-banner-face">
+                {banner}
               </div>
             </NotificationRotor>
           </div>

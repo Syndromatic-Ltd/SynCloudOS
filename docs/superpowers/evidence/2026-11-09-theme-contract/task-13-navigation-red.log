@@ -1,0 +1,84 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/theme-navigation.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/theme-navigation.test.tsx (8 tests | 8 failed) 222ms
+     × compact block-start in-flow 104ms
+     × compact block-start overlay 19ms
+     × compact block-end in-flow 18ms
+     × compact block-end overlay 16ms
+     × regular source-list in-flow 17ms
+     × regular source-list overlay 18ms
+     × regular block-start in-flow 15ms
+     × regular block-start overlay 15ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/theme-navigation.test.tsx > theme navigation placement and chrome registration > compact block-start in-flow
+ FAIL  tests/runtime/theme-navigation.test.tsx > theme navigation placement and chrome registration > compact block-start overlay
+ FAIL  tests/runtime/theme-navigation.test.tsx > theme navigation placement and chrome registration > regular block-start in-flow
+ FAIL  tests/runtime/theme-navigation.test.tsx > theme navigation placement and chrome registration > regular block-start overlay
+AssertionError: expected undefined to be 'block-start' // Object.is equality
+
+- Expected:
+"block-start"
+
++ Received:
+undefined
+
+ ❯ tests/runtime/theme-navigation.test.tsx:35:54
+     33|       act(() => { const work = [...callbacks.values()]; callbacks.clea…
+     34|       const element = view.container.querySelector<HTMLElement>(".nse-…
+     35|       expect(element.dataset.nseNavigationPlacement).toBe(placement); …
+       |                                                      ^
+     36|       expect(model.getSnapshot().insets).toEqual({ top: placement === …
+     37|     } finally { tabs.dispose(); stop(); model.dispose(); root.remove()…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  tests/runtime/theme-navigation.test.tsx > theme navigation placement and chrome registration > compact block-end in-flow
+ FAIL  tests/runtime/theme-navigation.test.tsx > theme navigation placement and chrome registration > compact block-end overlay
+AssertionError: expected undefined to be 'block-end' // Object.is equality
+
+- Expected:
+"block-end"
+
++ Received:
+undefined
+
+ ❯ tests/runtime/theme-navigation.test.tsx:35:54
+     33|       act(() => { const work = [...callbacks.values()]; callbacks.clea…
+     34|       const element = view.container.querySelector<HTMLElement>(".nse-…
+     35|       expect(element.dataset.nseNavigationPlacement).toBe(placement); …
+       |                                                      ^
+     36|       expect(model.getSnapshot().insets).toEqual({ top: placement === …
+     37|     } finally { tabs.dispose(); stop(); model.dispose(); root.remove()…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  tests/runtime/theme-navigation.test.tsx > theme navigation placement and chrome registration > regular source-list in-flow
+ FAIL  tests/runtime/theme-navigation.test.tsx > theme navigation placement and chrome registration > regular source-list overlay
+AssertionError: expected undefined to be 'source-list' // Object.is equality
+
+- Expected:
+"source-list"
+
++ Received:
+undefined
+
+ ❯ tests/runtime/theme-navigation.test.tsx:35:54
+     33|       act(() => { const work = [...callbacks.values()]; callbacks.clea…
+     34|       const element = view.container.querySelector<HTMLElement>(".nse-…
+     35|       expect(element.dataset.nseNavigationPlacement).toBe(placement); …
+       |                                                      ^
+     36|       expect(model.getSnapshot().insets).toEqual({ top: placement === …
+     37|     } finally { tabs.dispose(); stop(); model.dispose(); root.remove()…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  8 failed (8)
+   Start at  23:11:54
+   Duration  7.69s (transform 4.83s, setup 29ms, import 6.39s, tests 222ms, environment 907ms)

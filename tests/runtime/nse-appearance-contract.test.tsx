@@ -106,7 +106,7 @@ const completeProjection = {
 
 function expectCompleteProjection(element: Element) {
   for (const [name, value] of Object.entries(completeProjection)) {
-    expect(element.getAttribute(name)).toBe(value);
+    expect((name === "data-nse-theme" ? element.closest("[data-nse-theme]") : element)?.getAttribute(name)).toBe(value);
   }
 }
 

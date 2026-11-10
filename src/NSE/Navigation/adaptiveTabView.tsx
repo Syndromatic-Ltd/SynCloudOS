@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
+import { useNSEAppearance } from "../Appearance/NSEAppearanceProvider";
 import { NSEWindowLayoutContext, useNSEWindowChromeElement } from "../Layout/windowChromeObstructions";
 import { useNSEViewSafeArea } from "../Layout/useNSESafeArea";
 import { useContext, useCallback, useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
@@ -42,6 +43,7 @@ const sidebarMinimumWidth = 768;
 /** @internal The sidebar-adaptable theme projection of NSTabViewController's items. */
 export function NSEAdaptiveTabView({ controller, scope }: { readonly controller: NSETabViewController; readonly scope: string }) {
   const frame = useSourceListFrame();
+  const { theme } = useNSEAppearance();
   const root = useRef<HTMLDivElement>(null);
   const chrome = useRef<HTMLDivElement>(null);
   const sidebar = useRef<HTMLDivElement>(null);
@@ -60,9 +62,15 @@ export function NSEAdaptiveTabView({ controller, scope }: { readonly controller:
       : bounds.width < sidebarMinimumWidth ? "tabs" : "source-list-content";
     previous.current = renderer;
   }
+  const widthClass = renderer === "source-list-content" ? "regular" : "compact";
+  const navigation = theme.navigation[widthClass];
+  // Existing book/short-window projections remain framework adaptations.
+  if (adaptive && navigation.placement === "block-start" && !bookRegions) renderer = "tabs";
+  const placement = renderer === "source-list-content" ? "source-list" : navigation.placement;
+  const flow = bookRegions || renderer === "rail" ? "in-flow" : navigation.flow;
   const showsCompactChrome = controller.tabViewItems.length > 1 && (renderer === "tabs" || renderer === "rail");
-  useNSEWindowChromeElement(chrome, renderer === "rail" ? "leading" : "bottom", renderer !== "rail", showsCompactChrome);
-  useNSEWindowChromeElement(sidebar, "leading", false, renderer === "source-list-content");
+  useNSEWindowChromeElement(chrome, renderer === "rail" ? "leading" : placement === "block-start" ? "top" : "bottom", flow === "overlay", showsCompactChrome);
+  useNSEWindowChromeElement(sidebar, "leading", flow === "overlay", renderer === "source-list-content");
   const compact = renderer === "tabs" || renderer === "rail";
   const selected = controller.selectedTabViewItem;
   const model = tabViewProjection(controller).control();
@@ -120,6 +128,8 @@ export function NSEAdaptiveTabView({ controller, scope }: { readonly controller:
   }, [renderer]);
 
   return <div ref={root} className="nse-adaptive-tab-controller nse-compact-bottom-chrome-owner"
+    data-nse-control="tab-view" data-nse-part="content" data-nse-style="navigation"
+    data-nse-navigation-placement={placement} data-nse-navigation-flow={flow}
     data-navigation-renderer={renderer}
     style={{ ...safeArea.properties, "--nse-navigation-rail-width": `${railWidth}px` } as CSSProperties}
     onFocusCapture={event => { navigationHadFocus.current = Boolean((event.target as Element).closest('.nse-adaptive-tab-sidebar, [data-nse-adaptive-tabs-chrome]')); }}
@@ -153,9 +163,9 @@ export function NSEAdaptiveTabView({ controller, scope }: { readonly controller:
           : null}
       </div>
     </NSESplitView>
-    <div ref={chrome} className={`nse-adaptive-tab-chrome${renderer === "tabs" ? " nse-compact-bottom-chrome-mount" : ""}`}
+    <div ref={chrome} className={`nse-adaptive-tab-chrome${renderer === "tabs" && placement === "block-end" && flow === "overlay" ? " nse-compact-bottom-chrome-mount" : ""}`}
       hidden={!showsCompactChrome} inert={!showsCompactChrome} data-nse-adaptive-tabs-chrome="true"
-      data-nse-compact-bottom-chrome={renderer === "tabs" ? "tabs-only" : undefined}>
+      data-nse-compact-bottom-chrome={renderer === "tabs" && placement === "block-end" && flow === "overlay" ? "tabs-only" : undefined}>
       {model ? <NSETabBar controller={model} aria-label={controller.title ?? "Tabs"} renderPanels={false}
         orientation={renderer === "rail" ? "vertical" : "horizontal"} reducedMotion={controller.traitCollection.reducedMotion} idScope={scope} /> : null}
     </div>

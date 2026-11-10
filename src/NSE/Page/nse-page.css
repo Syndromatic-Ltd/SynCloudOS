@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -18,7 +21,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-.nse-page {
+.nse-page,
+:where(:scope):is(.nse-page) {
   position: relative;
   display: grid;
   isolation: isolate;
@@ -32,7 +36,8 @@
   touch-action: pan-x pan-y;
 }
 
-.nse-page[data-interactive="true"] {
+.nse-page[data-interactive="true"],
+:where(:scope):is(.nse-page[data-interactive="true"]) {
   touch-action: none;
   user-select: none;
 }
@@ -40,21 +45,27 @@
 /* A book leaf crosses the spine into the neighbouring page's visual space,
    and a torn sheet flies clear of its page. */
 .nse-page[data-projection="spread"],
-.nse-page[data-mode="tear"] {
+:where(:scope):is(.nse-page[data-projection="spread"]),
+.nse-page[data-mode="tear"],
+:where(:scope):is(.nse-page[data-mode="tear"]) {
   contain: layout style;
   overflow: visible;
 }
 
 .nse-page__inside,
+:where(:scope):is(.nse-page__inside),
 .nse-page__cast-shadow,
-.nse-page__sheet {
+:where(:scope):is(.nse-page__cast-shadow),
+.nse-page__sheet,
+:where(:scope):is(.nse-page__sheet) {
   grid-area: 1 / 1;
   min-width: 0;
   min-height: 0;
   border-radius: var(--nse-page-radius);
 }
 
-.nse-page__inside {
+.nse-page__inside,
+:where(:scope):is(.nse-page__inside) {
   position: absolute;
   inset: 0;
   z-index: 0;
@@ -67,11 +78,13 @@
     filter var(--nse-page-duration) var(--nse-page-ease);
 }
 
-.nse-page__inside[data-interactive="true"] {
+.nse-page__inside[data-interactive="true"],
+:where(:scope):is(.nse-page__inside[data-interactive="true"]) {
   pointer-events: auto;
 }
 
-.nse-page[data-book-surface="true"] .nse-page__cast-shadow {
+.nse-page[data-book-surface="true"] .nse-page__cast-shadow,
+:where(:scope):is(.nse-page[data-book-surface="true"]) .nse-page__cast-shadow {
   inset: 0 auto 0 calc(var(--nse-page-book-shadow-x) - 18px);
   width: 36px;
   opacity: var(--nse-page-book-shadow-opacity);
@@ -80,7 +93,8 @@
   background: linear-gradient(90deg, transparent, rgba(48, 35, 19, .65), transparent);
 }
 
-.nse-page__cast-shadow {
+.nse-page__cast-shadow,
+:where(:scope):is(.nse-page__cast-shadow) {
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -96,7 +110,8 @@
     transform var(--nse-page-duration) var(--nse-page-ease);
 }
 
-.nse-page__sheet {
+.nse-page__sheet,
+:where(:scope):is(.nse-page__sheet) {
   position: relative;
   z-index: 2;
   display: grid;
@@ -110,17 +125,22 @@
   will-change: transform;
 }
 
-.nse-page:is([data-phase="dragging"], [data-phase="turning"], [data-phase="settling"], [data-phase="canceling"], [data-controlled="true"]) .nse-page__sheet,
-.nse-page:is([data-phase="dragging"], [data-phase="turning"], [data-phase="settling"], [data-phase="canceling"], [data-controlled="true"]) .nse-page__cast-shadow,
-.nse-page:is([data-phase="dragging"], [data-phase="turning"], [data-phase="settling"], [data-phase="canceling"], [data-controlled="true"]) .nse-page__inside {
+.nse-page:is([data-phase="dragging"],[data-phase="turning"],[data-phase="settling"],[data-phase="canceling"],[data-controlled="true"]) .nse-page__sheet,
+:where(:scope):is(.nse-page:is([data-phase="dragging"],[data-phase="turning"],[data-phase="settling"],[data-phase="canceling"],[data-controlled="true"])) .nse-page__sheet,
+.nse-page:is([data-phase="dragging"],[data-phase="turning"],[data-phase="settling"],[data-phase="canceling"],[data-controlled="true"]) .nse-page__cast-shadow,
+:where(:scope):is(.nse-page:is([data-phase="dragging"],[data-phase="turning"],[data-phase="settling"],[data-phase="canceling"],[data-controlled="true"])) .nse-page__cast-shadow,
+.nse-page:is([data-phase="dragging"],[data-phase="turning"],[data-phase="settling"],[data-phase="canceling"],[data-controlled="true"]) .nse-page__inside,
+:where(:scope):is(.nse-page:is([data-phase="dragging"],[data-phase="turning"],[data-phase="settling"],[data-phase="canceling"],[data-controlled="true"])) .nse-page__inside {
   transition: none;
 }
 
-.nse-page[data-revealed="true"] .nse-page__sheet {
+.nse-page[data-revealed="true"] .nse-page__sheet,
+:where(:scope):is(.nse-page[data-revealed="true"]) .nse-page__sheet {
   pointer-events: none;
 }
 
-.nse-page__face {
+.nse-page__face,
+:where(:scope):is(.nse-page__face) {
   grid-area: 1 / 1;
   position: relative;
   contain: layout style;
@@ -138,7 +158,8 @@
   -webkit-backface-visibility: hidden;
 }
 
-.nse-page__backstop {
+.nse-page__backstop,
+:where(:scope):is(.nse-page__backstop) {
   grid-area: 1 / 1;
   position: absolute;
   inset: 0;
@@ -154,12 +175,14 @@
   will-change: clip-path;
 }
 
-.nse-page__face--front {
+.nse-page__face--front,
+:where(:scope):is(.nse-page__face--front) {
   z-index: 2;
   opacity: var(--nse-page-front-opacity);
 }
 
-.nse-page__face--back {
+.nse-page__face--back,
+:where(:scope):is(.nse-page__face--back) {
   z-index: 1;
   opacity: var(--nse-page-back-opacity);
   transform: var(--nse-page-face-back-transform);
@@ -169,7 +192,8 @@
 
 /* Snapshot-backed flexible book leaf. The semantic sheet stays mounted once
    and is only hidden while these inert image strips represent it in flight. */
-.nse-page__book-surface {
+.nse-page__book-surface,
+:where(:scope):is(.nse-page__book-surface) {
   position: absolute;
   inset: 0;
   z-index: 3;
@@ -178,7 +202,8 @@
   transform-style: preserve-3d;
 }
 
-.nse-page__book-strip {
+.nse-page__book-strip,
+:where(:scope):is(.nse-page__book-strip) {
   position: absolute;
   inset-block: 0;
   left: 0;
@@ -186,7 +211,8 @@
   will-change: transform;
 }
 
-.nse-page__book-strip-face {
+.nse-page__book-strip-face,
+:where(:scope):is(.nse-page__book-strip-face) {
   position: absolute;
   inset-block: 0;
   left: 0;
@@ -196,33 +222,39 @@
   -webkit-backface-visibility: hidden;
 }
 
-.nse-page__book-strip[data-hinge="right"] .nse-page__book-strip-face {
+.nse-page__book-strip[data-hinge="right"] .nse-page__book-strip-face,
+:where(:scope):is(.nse-page__book-strip[data-hinge="right"]) .nse-page__book-strip-face {
   left: auto;
   right: 0;
 }
 
-.nse-page__book-strip-face--back {
+.nse-page__book-strip-face--back,
+:where(:scope):is(.nse-page__book-strip-face--back) {
   background-color: var(--nse-page-back-background);
 }
 
-.nse-page[data-book-surface="true"] .nse-page__sheet {
+.nse-page[data-book-surface="true"] .nse-page__sheet,
+:where(:scope):is(.nse-page[data-book-surface="true"]) .nse-page__sheet {
   visibility: hidden;
 }
 
 /* A narrow cast shadow starts at the spine and falls across the destination
    page instead of floating under the turning leaf's outside edge. */
-.nse-page[data-book-turn="true"] .nse-page__cast-shadow {
+.nse-page[data-book-turn="true"] .nse-page__cast-shadow,
+:where(:scope):is(.nse-page[data-book-turn="true"]) .nse-page__cast-shadow {
   width: 22%;
   filter: blur(10px);
   transform: none;
 }
 
-.nse-page[data-book-turn="true"][data-edge="right"] .nse-page__cast-shadow {
+.nse-page[data-book-turn="true"][data-edge="right"] .nse-page__cast-shadow,
+:where(:scope):is(.nse-page[data-book-turn="true"][data-edge="right"]) .nse-page__cast-shadow {
   inset: 0 100% 0 auto;
   background: linear-gradient(90deg, transparent 22%, var(--nse-page-shadow-colour));
 }
 
-.nse-page[data-book-turn="true"][data-edge="left"] .nse-page__cast-shadow {
+.nse-page[data-book-turn="true"][data-edge="left"] .nse-page__cast-shadow,
+:where(:scope):is(.nse-page[data-book-turn="true"][data-edge="left"]) .nse-page__cast-shadow {
   inset: 0 auto 0 100%;
   background: linear-gradient(90deg, var(--nse-page-shadow-colour), transparent 78%);
 }
@@ -238,8 +270,10 @@
  * crease, with a bulged silhouette, underside shading, and a silhouette
  * drop shadow.
  */
-.nse-page:is([data-mode="curl"], [data-mode="tear"]) .nse-page__sheet,
-.nse-page:is([data-mode="curl"], [data-mode="tear"]) .nse-page__inside {
+.nse-page:is([data-mode="curl"],[data-mode="tear"]) .nse-page__sheet,
+:where(:scope):is(.nse-page:is([data-mode="curl"],[data-mode="tear"])) .nse-page__sheet,
+.nse-page:is([data-mode="curl"],[data-mode="tear"]) .nse-page__inside,
+:where(:scope):is(.nse-page:is([data-mode="curl"],[data-mode="tear"])) .nse-page__inside {
   transition: none;
 }
 
@@ -258,55 +292,71 @@
  *
  * Reduced motion uses neither: the curl becomes a crossfade (further down).
  */
-.nse-page:is([data-mode="curl"], [data-mode="tear"]) {
+.nse-page:is([data-mode="curl"],[data-mode="tear"]),
+:where(:scope):is(.nse-page:is([data-mode="curl"],[data-mode="tear"])) {
   perspective: none;
 }
 
 /* Curl poses are set every frame; nothing may ease between them. */
-.nse-page:is([data-mode="curl"], [data-mode="tear"]) .nse-page__sheet,
-.nse-page:is([data-mode="curl"], [data-mode="tear"]) .nse-page__inside {
+.nse-page:is([data-mode="curl"],[data-mode="tear"]) .nse-page__sheet,
+:where(:scope):is(.nse-page:is([data-mode="curl"],[data-mode="tear"])) .nse-page__sheet,
+.nse-page:is([data-mode="curl"],[data-mode="tear"]) .nse-page__inside,
+:where(:scope):is(.nse-page:is([data-mode="curl"],[data-mode="tear"])) .nse-page__inside {
   transition: none;
 }
 
-.nse-page:is([data-mode="curl"], [data-mode="tear"]) .nse-page__sheet {
+.nse-page:is([data-mode="curl"],[data-mode="tear"]) .nse-page__sheet,
+:where(:scope):is(.nse-page:is([data-mode="curl"],[data-mode="tear"])) .nse-page__sheet {
   transform-style: flat;
 }
 
-.nse-page:is([data-mode="curl"], [data-mode="tear"]) .nse-page__cast-shadow {
+.nse-page:is([data-mode="curl"],[data-mode="tear"]) .nse-page__cast-shadow,
+:where(:scope):is(.nse-page:is([data-mode="curl"],[data-mode="tear"])) .nse-page__cast-shadow {
   display: none;
 }
 
-.nse-page__curl-carrier { display: contents; }
+.nse-page__curl-carrier,
+:where(:scope):is(.nse-page__curl-carrier) { display: contents; }
 
-.nse-page:is([data-mode="curl"], [data-mode="tear"]) .nse-page__edge,
-.nse-page:is([data-mode="curl"], [data-mode="tear"]) .nse-page__curl,
-.nse-page:is([data-mode="curl"], [data-mode="tear"]) .nse-page__crease,
-.nse-page:is([data-mode="curl"], [data-mode="tear"]) .nse-page__grain {
+.nse-page:is([data-mode="curl"],[data-mode="tear"]) .nse-page__edge,
+:where(:scope):is(.nse-page:is([data-mode="curl"],[data-mode="tear"])) .nse-page__edge,
+.nse-page:is([data-mode="curl"],[data-mode="tear"]) .nse-page__curl,
+:where(:scope):is(.nse-page:is([data-mode="curl"],[data-mode="tear"])) .nse-page__curl,
+.nse-page:is([data-mode="curl"],[data-mode="tear"]) .nse-page__crease,
+:where(:scope):is(.nse-page:is([data-mode="curl"],[data-mode="tear"])) .nse-page__crease,
+.nse-page:is([data-mode="curl"],[data-mode="tear"]) .nse-page__grain,
+:where(:scope):is(.nse-page:is([data-mode="curl"],[data-mode="tear"])) .nse-page__grain {
   display: none;
 }
 
 /* ---- 3D: the page's layers lie flat; the canvas draws every curl. ---- */
 
-.nse-page__curl-canvas {
+.nse-page__curl-canvas,
+:where(:scope):is(.nse-page__curl-canvas) {
   position: absolute;
   z-index: 6;
   display: none;
   pointer-events: none;
 }
 
-.nse-page[data-curl-renderer="webgl"] .nse-page__face--front {
+.nse-page[data-curl-renderer="webgl"] .nse-page__face--front,
+:where(:scope):is(.nse-page[data-curl-renderer="webgl"]) .nse-page__face--front {
   clip-path: none;
 }
 
 .nse-page[data-curl-renderer="webgl"] .nse-page__backstop,
+:where(:scope):is(.nse-page[data-curl-renderer="webgl"]) .nse-page__backstop,
 .nse-page[data-curl-renderer="webgl"] .nse-page__curl-shadow,
-.nse-page[data-curl-renderer="webgl"] .nse-page__curl-ghost {
+:where(:scope):is(.nse-page[data-curl-renderer="webgl"]) .nse-page__curl-shadow,
+.nse-page[data-curl-renderer="webgl"] .nse-page__curl-ghost,
+:where(:scope):is(.nse-page[data-curl-renderer="webgl"]) .nse-page__curl-ghost {
   display: none;
 }
 
 /* The underside stays laid out, clipped from view, as the snapshot source for
    the roll's reverse. */
-.nse-page.nse-page[data-curl-renderer="webgl"] .nse-page__curl-flap {
+.nse-page.nse-page[data-curl-renderer="webgl"] .nse-page__curl-flap,
+:where(:scope):is(.nse-page.nse-page[data-curl-renderer="webgl"]) .nse-page__curl-flap {
   position: absolute;
   inset: 0;
   z-index: 0;
@@ -318,23 +368,27 @@
   pointer-events: none;
 }
 
-.nse-page[data-curl-surface="webgl"] .nse-page__curl-canvas {
+.nse-page[data-curl-surface="webgl"] .nse-page__curl-canvas,
+:where(:scope):is(.nse-page[data-curl-surface="webgl"]) .nse-page__curl-canvas {
   display: block;
 }
 
 /* Opacity, not visibility: visibility is inherited, and the page's layers
    must stay drawable for the snapshots while the canvas stands in. */
-.nse-page[data-curl-surface="webgl"] .nse-page__sheet {
+.nse-page[data-curl-surface="webgl"] .nse-page__sheet,
+:where(:scope):is(.nse-page[data-curl-surface="webgl"]) .nse-page__sheet {
   opacity: 0;
 }
 
 /* ---- 2D: the fold drawn by the page's own layers. ---- */
 
-.nse-page[data-curl-renderer="css"] .nse-page__backstop {
+.nse-page[data-curl-renderer="css"] .nse-page__backstop,
+:where(:scope):is(.nse-page[data-curl-renderer="css"]) .nse-page__backstop {
   display: block;
 }
 
-.nse-page[data-curl-renderer="css"] .nse-page__face--front {
+.nse-page[data-curl-renderer="css"] .nse-page__face--front,
+:where(:scope):is(.nse-page[data-curl-renderer="css"]) .nse-page__face--front {
   clip-path: var(--nse-page-front-clip-path);
   /* Promote the front face the same way the flap is promoted so their
      per-frame clip updates commit together. Without this the front repainted on
@@ -343,7 +397,8 @@
   will-change: clip-path;
 }
 
-.nse-page[data-curl-renderer="css"] .nse-page__curl-shadow {
+.nse-page[data-curl-renderer="css"] .nse-page__curl-shadow,
+:where(:scope):is(.nse-page[data-curl-renderer="css"]) .nse-page__curl-shadow {
   position: absolute;
   inset: 0;
   z-index: 3;
@@ -356,7 +411,8 @@
  * Doubled class wins over consumer back-face skins: the underside of a
  * curling page is always paper, never the app's own back styling.
  */
-.nse-page.nse-page[data-curl-renderer="css"] .nse-page__curl-flap {
+.nse-page.nse-page[data-curl-renderer="css"] .nse-page__curl-flap,
+:where(:scope):is(.nse-page.nse-page[data-curl-renderer="css"]) .nse-page__curl-flap {
   position: absolute;
   inset: 0;
   z-index: 5;
@@ -378,13 +434,15 @@
   will-change: transform, clip-path;
 }
 
-.nse-page[data-curl-renderer="css"][data-phase="dragging"] .nse-page__curl-flap {
+.nse-page[data-curl-renderer="css"][data-phase="dragging"] .nse-page__curl-flap,
+:where(:scope):is(.nse-page[data-curl-renderer="css"][data-phase="dragging"]) .nse-page__curl-flap {
   filter: var(--nse-page-curl-flap-drag-filter);
 }
 
 /* Filter the already clipped paper through an unclipped parent. Applying a
    drop-shadow on the clipped element itself cuts off its external shadow. */
-.nse-page-preset-book-curl[data-curl-renderer="css"] .nse-page__curl-carrier {
+.nse-page-preset-book-curl[data-curl-renderer="css"] .nse-page__curl-carrier,
+:where(:scope):is(.nse-page-preset-book-curl[data-curl-renderer="css"]) .nse-page__curl-carrier {
   display: block;
   position: absolute;
   inset: 0;
@@ -395,31 +453,36 @@
   filter: var(--nse-page-curl-flap-filter);
 }
 
-.nse-page.nse-page-preset-book-curl[data-curl-renderer="css"] .nse-page__curl-flap {
+.nse-page.nse-page-preset-book-curl[data-curl-renderer="css"] .nse-page__curl-flap,
+:where(:scope):is(.nse-page.nse-page-preset-book-curl[data-curl-renderer="css"]) .nse-page__curl-flap {
   transform: none;
   filter: none;
 }
 
 /* ---- 2D tear: the 2D fold, then the sheet sliding away once free. ---- */
 
-.nse-page[data-mode="tear"][data-curl-renderer="css"] .nse-page__sheet {
+.nse-page[data-mode="tear"][data-curl-renderer="css"] .nse-page__sheet,
+:where(:scope):is(.nse-page[data-mode="tear"][data-curl-renderer="css"]) .nse-page__sheet {
   transform-origin: 0 0;
   transform: var(--nse-page-tear-sheet-transform);
   opacity: var(--nse-page-tear-sheet-opacity);
 }
 
-.nse-page[data-mode="tear"][data-curl-renderer="css"][data-curling="true"] .nse-page__sheet {
+.nse-page[data-mode="tear"][data-curl-renderer="css"][data-curling="true"] .nse-page__sheet,
+:where(:scope):is(.nse-page[data-mode="tear"][data-curl-renderer="css"][data-curling="true"]) .nse-page__sheet {
   filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.26));
 }
 
 /* A torn sheet's underside is its own paper. */
-.nse-page.nse-page[data-mode="tear"][data-curl-renderer="css"] .nse-page__curl-flap {
+.nse-page.nse-page[data-mode="tear"][data-curl-renderer="css"] .nse-page__curl-flap,
+:where(:scope):is(.nse-page.nse-page[data-mode="tear"][data-curl-renderer="css"]) .nse-page__curl-flap {
   background-color: var(--nse-page-tear-paper, #e7ebf1);
   background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.06));
 }
 
 /* The ragged stub of paper a tear leaves bound in place. */
-.nse-page__tear-stub {
+.nse-page__tear-stub,
+:where(:scope):is(.nse-page__tear-stub) {
   position: absolute;
   inset: 0;
   z-index: 3;
@@ -429,18 +492,22 @@
   clip-path: var(--nse-page-tear-stub-clip-path);
 }
 
-.nse-page[data-mode="tear"][data-curl-renderer="css"] .nse-page__tear-stub {
+.nse-page[data-mode="tear"][data-curl-renderer="css"] .nse-page__tear-stub,
+:where(:scope):is(.nse-page[data-mode="tear"][data-curl-renderer="css"]) .nse-page__tear-stub {
   display: block;
 }
 
 /* Torn away: the sheet has gone, and the page's stubs take over its stub. */
 .nse-page[data-mode="tear"][data-torn="true"] .nse-page__sheet,
-.nse-page[data-mode="tear"][data-torn="true"] .nse-page__tear-stub {
+:where(:scope):is(.nse-page[data-mode="tear"][data-torn="true"]) .nse-page__sheet,
+.nse-page[data-mode="tear"][data-torn="true"] .nse-page__tear-stub,
+:where(:scope):is(.nse-page[data-mode="tear"][data-torn="true"]) .nse-page__tear-stub {
   opacity: 0;
 }
 
 /* The stubs of sheets torn away, above the sheets beneath them. */
-.nse-page__tear-stubs {
+.nse-page__tear-stubs,
+:where(:scope):is(.nse-page__tear-stubs) {
   position: absolute;
   inset: 0;
   z-index: 7;
@@ -451,7 +518,8 @@
 }
 
 /* Faint mirrored ghost of the front content showing through the paper. */
-.nse-page__curl-ghost {
+.nse-page__curl-ghost,
+:where(:scope):is(.nse-page__curl-ghost) {
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -463,11 +531,13 @@
 
 /* The ghost stays mounted (so WebGL children initialise once) but is fully
    idle until the page actually curls. */
-.nse-page[data-curling="false"] .nse-page__curl-ghost {
+.nse-page[data-curling="false"] .nse-page__curl-ghost,
+:where(:scope):is(.nse-page[data-curling="false"]) .nse-page__curl-ghost {
   display: none;
 }
 
-.nse-page[data-curl-renderer="css"] .nse-page__curl-flap::before {
+.nse-page[data-curl-renderer="css"] .nse-page__curl-flap::before,
+:where(:scope):is(.nse-page[data-curl-renderer="css"]) .nse-page__curl-flap::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -481,7 +551,8 @@
  * the page's own resting fold (restProgress); hovering here drives a small
  * peek of real geometry and click/drag peels the page.
  */
-.nse-page__dogear {
+.nse-page__dogear,
+:where(:scope):is(.nse-page__dogear) {
   position: absolute;
   z-index: 7;
   margin: 0;
@@ -493,26 +564,33 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.nse-page__dogear[data-active="false"] {
+.nse-page__dogear[data-active="false"],
+:where(:scope):is(.nse-page__dogear[data-active="false"]) {
   pointer-events: none;
 }
 
-.nse-page__dogear:focus-visible {
+.nse-page__dogear:focus-visible,
+:where(:scope):is(.nse-page__dogear:focus-visible) {
   outline: 2px solid rgba(120, 170, 255, 0.85);
   outline-offset: -3px;
   border-radius: 8px;
 }
 
-.nse-page__dogear[data-corner="bottom-right"] { right: 0; bottom: 0; }
-.nse-page__dogear[data-corner="bottom-left"] { left: 0; bottom: 0; }
-.nse-page__dogear[data-corner="top-right"] { right: 0; top: 0; }
-.nse-page__dogear[data-corner="top-left"] { left: 0; top: 0; }
+.nse-page__dogear[data-corner="bottom-right"],
+:where(:scope):is(.nse-page__dogear[data-corner="bottom-right"]) { right: 0; bottom: 0; }
+.nse-page__dogear[data-corner="bottom-left"],
+:where(:scope):is(.nse-page__dogear[data-corner="bottom-left"]) { left: 0; bottom: 0; }
+.nse-page__dogear[data-corner="top-right"],
+:where(:scope):is(.nse-page__dogear[data-corner="top-right"]) { right: 0; top: 0; }
+.nse-page__dogear[data-corner="top-left"],
+:where(:scope):is(.nse-page__dogear[data-corner="top-left"]) { left: 0; top: 0; }
 
 /*
  * While the page is actively curling it floats above surrounding app chrome
  * (top bar, tab bar). Consumers can tune or disable via --nse-page-curl-z.
  */
-.nse-page.nse-page[data-curling="true"] {
+.nse-page.nse-page[data-curling="true"],
+:where(:scope):is(.nse-page.nse-page[data-curling="true"]) {
   z-index: var(--nse-page-curl-z, 80);
 }
 
@@ -521,23 +599,31 @@
  * plain crossfade between the front face and the revealed content.
  */
 .nse-page[data-reduced="true"] .nse-page__curl-flap,
-.nse-page[data-reduced="true"] .nse-page__curl-shadow {
+:where(:scope):is(.nse-page[data-reduced="true"]) .nse-page__curl-flap,
+.nse-page[data-reduced="true"] .nse-page__curl-shadow,
+:where(:scope):is(.nse-page[data-reduced="true"]) .nse-page__curl-shadow {
   display: none;
 }
 
-.nse-page[data-reduced="true"]:is([data-mode="curl"], [data-mode="tear"]) .nse-page__face--front {
+.nse-page[data-reduced="true"]:is([data-mode="curl"],[data-mode="tear"]) .nse-page__face--front,
+:where(:scope):is(.nse-page[data-reduced="true"]:is([data-mode="curl"],[data-mode="tear"])) .nse-page__face--front {
   clip-path: none;
   transition: opacity var(--nse-page-reduced-duration) ease;
 }
 
-.nse-page[data-reduced="true"]:is([data-mode="curl"], [data-mode="tear"]) .nse-page__inside {
+.nse-page[data-reduced="true"]:is([data-mode="curl"],[data-mode="tear"]) .nse-page__inside,
+:where(:scope):is(.nse-page[data-reduced="true"]:is([data-mode="curl"],[data-mode="tear"])) .nse-page__inside {
   transition: opacity var(--nse-page-reduced-duration) ease;
 }
 
 .nse-page__edge,
+:where(:scope):is(.nse-page__edge),
 .nse-page__curl,
+:where(:scope):is(.nse-page__curl),
 .nse-page__crease,
-.nse-page__grain {
+:where(:scope):is(.nse-page__crease),
+.nse-page__grain,
+:where(:scope):is(.nse-page__grain) {
   position: absolute;
   inset: 0;
   z-index: 4;
@@ -545,14 +631,16 @@
   border-radius: inherit;
 }
 
-.nse-page__edge {
+.nse-page__edge,
+:where(:scope):is(.nse-page__edge) {
   opacity: calc(0.22 + var(--nse-page-progress) * 0.28);
   box-shadow:
     inset 0 0 0 var(--nse-page-thickness) var(--nse-page-edge-colour),
     inset 0 -18px 28px rgba(255, 255, 255, 0.08);
 }
 
-.nse-page__curl {
+.nse-page__curl,
+:where(:scope):is(.nse-page__curl) {
   opacity: var(--nse-page-crease-opacity);
   clip-path: inset(var(--nse-page-curl-inset));
   mix-blend-mode: multiply;
@@ -560,23 +648,27 @@
     linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.52) 22%, rgba(0,0,0,0.22) 66%, transparent 100%);
 }
 
-.nse-page[data-axis="x"] .nse-page__curl {
+.nse-page[data-axis="x"] .nse-page__curl,
+:where(:scope):is(.nse-page[data-axis="x"]) .nse-page__curl {
   background:
     linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.46) 26%, rgba(0,0,0,0.20) 72%, transparent 100%);
 }
 
-.nse-page__crease {
+.nse-page__crease,
+:where(:scope):is(.nse-page__crease) {
   opacity: var(--nse-page-crease-opacity);
   background:
     linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.48) 43%, rgba(0,0,0,0.24) 52%, transparent 100%);
 }
 
-.nse-page[data-axis="x"] .nse-page__crease {
+.nse-page[data-axis="x"] .nse-page__crease,
+:where(:scope):is(.nse-page[data-axis="x"]) .nse-page__crease {
   background:
     linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.42) 47%, rgba(0,0,0,0.22) 51%, transparent 100%);
 }
 
-.nse-page__grain {
+.nse-page__grain,
+:where(:scope):is(.nse-page__grain) {
   opacity: var(--nse-page-grain-opacity);
   background-image:
     repeating-linear-gradient(0deg, rgba(255,255,255,0.24) 0 1px, transparent 1px 3px),
@@ -585,43 +677,61 @@
 }
 
 .nse-page[data-mode="flip"] .nse-page__curl,
-.nse-page[data-mode="flip"] .nse-page__crease {
+:where(:scope):is(.nse-page[data-mode="flip"]) .nse-page__curl,
+.nse-page[data-mode="flip"] .nse-page__crease,
+:where(:scope):is(.nse-page[data-mode="flip"]) .nse-page__crease {
   opacity: calc(var(--nse-page-crease-opacity) * 0.42);
 }
 
-.nse-page[data-mode="peel"] .nse-page__sheet {
+.nse-page[data-mode="peel"] .nse-page__sheet,
+:where(:scope):is(.nse-page[data-mode="peel"]) .nse-page__sheet {
   filter: drop-shadow(0 14px 22px rgba(0, 0, 0, calc(var(--nse-page-shadow-opacity) * 0.42)));
 }
 
 .nse-page[data-mode="tear"][data-revealed="true"] .nse-page__sheet,
-.nse-page[data-torn="true"] .nse-page__sheet {
+:where(:scope):is(.nse-page[data-mode="tear"][data-revealed="true"]) .nse-page__sheet,
+.nse-page[data-torn="true"] .nse-page__sheet,
+:where(:scope):is(.nse-page[data-torn="true"]) .nse-page__sheet {
   pointer-events: none;
 }
 
-.nse-page-preset-sheet {
+.nse-page-preset-sheet,
+:where(:scope):is(.nse-page-preset-sheet) {
   --nse-page-min-height: 160px;
 }
 
 .nse-page-preset-settings-peel .nse-page__inside,
-.nse-page-preset-sheet .nse-page__inside {
+:where(:scope):is(.nse-page-preset-settings-peel) .nse-page__inside,
+.nse-page-preset-sheet .nse-page__inside,
+:where(:scope):is(.nse-page-preset-sheet) .nse-page__inside {
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.15),
     inset 0 18px 30px rgba(255,255,255,0.08);
 }
 
-.nse-page-preset-card-flip .nse-page__sheet {
+.nse-page-preset-card-flip .nse-page__sheet,
+:where(:scope):is(.nse-page-preset-card-flip) .nse-page__sheet {
   filter: drop-shadow(0 24px 34px rgba(0, 0, 0, calc(var(--nse-page-shadow-opacity) * 0.6)));
 }
 
 @media (prefers-reduced-motion: reduce) {
   .nse-page__sheet,
-  .nse-page__inside,
-  .nse-page__cast-shadow {
+:where(:scope):is(.nse-page__sheet),
+.nse-page__inside,
+:where(:scope):is(.nse-page__inside),
+.nse-page__cast-shadow,
+:where(:scope):is(.nse-page__cast-shadow) {
     transition-duration: var(--nse-page-reduced-duration);
   }
 
   .nse-page__curl,
-  .nse-page__crease {
+:where(:scope):is(.nse-page__curl),
+.nse-page__crease,
+:where(:scope):is(.nse-page__crease) {
     display: none;
   }
+}
+
+}
+
 }

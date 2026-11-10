@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import type { NSETheme } from "../../Theme/NSETheme";
+import { atmoTheme } from "../../Themes/Atmo/appearance";
 import { atmoNamedImages } from "../../Themes/Atmo/namedImages";
 
 /** NSImage: a named system image. Atmo supplies its artwork; controls supply its content colour. */
@@ -26,21 +28,24 @@ export class NSEImage {
   static readonly goBackTemplateName = "NSGoBackTemplate";
   /** NSImage.goForwardTemplateName (NSImage.Name). */
   static readonly goForwardTemplateName = "NSGoForwardTemplate";
-  static readonly #named = new Map<string, NSEImage>();
-  readonly isTemplate = true;
+  static readonly #named = new WeakMap<NSETheme, Map<string, NSEImage>>();
 
-  private constructor(readonly name: string, readonly src: string, readonly size: Readonly<{ width: number; height: number }>) {
+
+  private constructor(readonly name: string, readonly src: string, readonly size: Readonly<{ width: number; height: number }>, readonly isTemplate = true, readonly files: Readonly<Record<string, string>> = Object.freeze({ "1x": src })) {
     Object.freeze(this);
   }
 
   /** NSImage(named:): returns the shared system image, or null when the name is unknown. */
-  static named(name: string): NSEImage | null {
-    if (!Object.hasOwn(atmoNamedImages, name)) return null;
-    let image = this.#named.get(name);
+  static named(name: string, theme: NSETheme = atmoTheme): NSEImage | null {
+    const artwork = theme.images[name] ?? atmoTheme.images[name];
+    const fallback = Object.hasOwn(atmoNamedImages, name) ? atmoNamedImages[name as keyof typeof atmoNamedImages] : null;
+    if (!artwork && !fallback) return null;
+    let cache = this.#named.get(theme);
+    if (!cache) this.#named.set(theme, cache = new Map());
+    let image = cache.get(name);
     if (!image) {
-      const artwork = atmoNamedImages[name as keyof typeof atmoNamedImages];
-      image = new NSEImage(name, artwork.src, artwork.size);
-      this.#named.set(name, image);
+      image = artwork ? new NSEImage(name, artwork.files["1x"], artwork.pointSize, artwork.template ?? false, artwork.files) : new NSEImage(name, fallback!.src, fallback!.size);
+      cache.set(name, image);
     }
     return image;
   }

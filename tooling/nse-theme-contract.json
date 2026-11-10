@@ -423,7 +423,12 @@
         "trailing"
       ],
       "states": [],
-      "variants": {}
+      "variants": {
+        "login-presentation": [
+          "ornamented",
+          "plain"
+        ]
+      }
     },
     "matrix": {
       "parts": [
@@ -494,7 +499,12 @@
         "shadow"
       ],
       "states": [],
-      "variants": {}
+      "variants": {
+        "notification-presentation": [
+          "plain",
+          "sliced-3d"
+        ]
+      }
     },
     "notification-centre": {
       "parts": [
@@ -985,6 +995,15 @@
         "selected"
       ],
       "variants": {
+        "navigation-flow": [
+          "in-flow",
+          "overlay"
+        ],
+        "navigation-placement": [
+          "block-end",
+          "block-start",
+          "source-list"
+        ],
         "orientation": [
           "horizontal",
           "vertical"

@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -24,7 +27,9 @@
    here: the icon-left layout and the legal type scale. */
 
 /* The About box's quieter type steps, in both appearances. */
-.nse-about-dialog {
+.nse-about-dialog,
+:where(:scope):is(.nse-about-dialog),
+:where(:scope).nse-about-dialog {
   --nse-about-tagline-text: rgba(255, 255, 255, 0.86);
   --nse-about-version-text: rgba(255, 255, 255, 0.72);
   --nse-about-legal-text: rgba(255, 255, 255, 0.56);
@@ -32,7 +37,9 @@
   --nse-about-icon-shadow: rgba(0, 0, 0, 0.45);
 }
 
-.nse-about-dialog.is-light {
+.nse-about-dialog.is-light,
+:where(:scope):is(.nse-about-dialog.is-light),
+:where(:scope).nse-about-dialog.is-light {
   --nse-about-tagline-text: rgba(24, 35, 50, 0.86);
   --nse-about-version-text: rgba(24, 35, 50, 0.72);
   --nse-about-legal-text: rgba(24, 35, 50, 0.76);
@@ -42,24 +49,32 @@
 
 /* An About box carries far less than an error alert, so the 250px floor the
    error surface needs would leave it half empty. */
-.nse-control-alert.nse-about-dialog {
+.nse-control-alert.nse-about-dialog,
+:where(:scope):is(.nse-control-alert.nse-about-dialog),
+:where(:scope).nse-control-alert.nse-about-dialog {
   width: min(520px, calc(100vw - 22px));
   min-height: 0;
 }
 
 /* A confirm with no icon is one column, not an empty 116px gutter plus one. */
-.nse-system-alert-content.nse-confirm-content-textonly {
+.nse-system-alert-content.nse-confirm-content-textonly,
+:where(:scope):is(.nse-system-alert-content.nse-confirm-content-textonly),
+:where(:scope).nse-system-alert-content.nse-confirm-content-textonly {
   grid-template-columns: minmax(0, 1fr);
 }
 
 /* `anywhere` is right for an error alert, which may carry an unbroken
    identifier. A sentence should break between words. */
 .nse-confirm-content-textonly h2,
-.nse-confirm-content-textonly p {
+:where(:scope):is(.nse-confirm-content-textonly) h2,
+.nse-confirm-content-textonly p,
+:where(:scope):is(.nse-confirm-content-textonly) p {
   overflow-wrap: break-word;
 }
 
-.nse-about-content {
+.nse-about-content,
+:where(:scope):is(.nse-about-content),
+:where(:scope).nse-about-content {
   display: grid;
   grid-template-columns: 96px minmax(0, 1fr);
   gap: 20px;
@@ -69,11 +84,15 @@
 }
 
 /* Without an icon the copy takes the whole width, not the icon's column. */
-.nse-about-content.nse-about-content-textonly {
+.nse-about-content.nse-about-content-textonly,
+:where(:scope):is(.nse-about-content.nse-about-content-textonly),
+:where(:scope).nse-about-content.nse-about-content-textonly {
   grid-template-columns: minmax(0, 1fr);
 }
 
-.nse-about-icon {
+.nse-about-icon,
+:where(:scope):is(.nse-about-icon),
+:where(:scope).nse-about-icon {
   width: 96px;
   height: 96px;
   align-self: start;
@@ -83,11 +102,15 @@
   filter: drop-shadow(0 6px 10px var(--nse-about-icon-shadow));
 }
 
-.nse-about-copy {
+.nse-about-copy,
+:where(:scope):is(.nse-about-copy),
+:where(:scope).nse-about-copy {
   min-width: 0;
 }
 
-.nse-about-name {
+.nse-about-name,
+:where(:scope):is(.nse-about-name),
+:where(:scope).nse-about-name {
   margin: 0;
   font-family: inherit;
   font-size: 26px;
@@ -95,14 +118,18 @@
   overflow-wrap: anywhere;
 }
 
-.nse-about-tagline {
+.nse-about-tagline,
+:where(:scope):is(.nse-about-tagline),
+:where(:scope).nse-about-tagline {
   margin: 6px 0 14px;
   color: var(--nse-about-tagline-text);
   font-size: 15px;
   line-height: 1.4;
 }
 
-.nse-about-version {
+.nse-about-version,
+:where(:scope):is(.nse-about-version),
+:where(:scope).nse-about-version {
   margin: 0 0 14px;
   color: var(--nse-about-version-text);
   font-size: 13px;
@@ -111,7 +138,9 @@
 
 /* Legal type is deliberately the quietest thing in the box: present, readable,
    and never competing with the app's own name. */
-.nse-about-legal {
+.nse-about-legal,
+:where(:scope):is(.nse-about-legal),
+:where(:scope).nse-about-legal {
   margin: 0;
   color: var(--nse-about-legal-text);
   font-size: 11px;
@@ -119,26 +148,37 @@
   overflow-wrap: anywhere;
 }
 
-.nse-about-trademark {
+.nse-about-trademark,
+:where(:scope):is(.nse-about-trademark),
+:where(:scope).nse-about-trademark {
   margin-top: 6px;
   color: var(--nse-about-trademark-text);
 }
 
 /* A one-button dialog should not stretch that button the full width of the
    surface the way a three-action error alert does. */
-.nse-about-dialog .nse-alert-actions {
+.nse-about-dialog .nse-alert-actions,
+:where(:scope):is(.nse-about-dialog) .nse-alert-actions {
   grid-template-columns: minmax(140px, 200px);
   justify-content: end;
 }
 
 @media (max-width: 520px) {
-  .nse-about-content:not(.nse-about-content-textonly) {
+  .nse-about-content:not(.nse-about-content-textonly),
+:where(:scope):is(.nse-about-content:not(.nse-about-content-textonly)),
+:where(:scope).nse-about-content:not(.nse-about-content-textonly) {
     grid-template-columns: 72px minmax(0, 1fr);
     gap: 14px;
   }
 
-  .nse-about-icon {
+  .nse-about-icon,
+:where(:scope):is(.nse-about-icon),
+:where(:scope).nse-about-icon {
     width: 72px;
     height: 72px;
   }
+}
+
+}
+
 }

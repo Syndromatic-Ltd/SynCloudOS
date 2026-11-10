@@ -1,0 +1,27 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run playwright test tests/e2e/theme-nesting.spec.ts --project=chromium --workers=2
+
+Running 18 tests using 1 worker
+
+(node:8352) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [chromium] › tests\e2e\theme-nesting.spec.ts:4:1 › nested themes isolate paint and colours; omitted highlighted paint falls back to Atmo (1.3s)
+  ok  2 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start in-flow ltr keeps content clear (4.0s)
+  ok  3 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start in-flow rtl keeps content clear (1.2s)
+  ok  4 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start overlay ltr keeps content clear (981ms)
+  ok  5 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start overlay rtl keeps content clear (962ms)
+  ok  6 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end in-flow ltr keeps content clear (1.0s)
+  ok  7 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end in-flow rtl keeps content clear (1.3s)
+  ok  8 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end overlay ltr keeps content clear (1.8s)
+  ok  9 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end overlay rtl keeps content clear (1.1s)
+  ok 10 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list in-flow ltr keeps content clear (1.0s)
+  ok 11 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list in-flow rtl keeps content clear (1.0s)
+  ok 12 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list overlay ltr keeps content clear (2.6s)
+  ok 13 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list overlay rtl keeps content clear (1.3s)
+  ok 14 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start in-flow ltr keeps content clear (1.1s)
+  ok 15 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start in-flow rtl keeps content clear (1.1s)
+  ok 16 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start overlay ltr keeps content clear (3.6s)
+  ok 17 [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start overlay rtl keeps content clear (1.3s)
+  ok 18 [chromium] › tests\e2e\theme-nesting.spec.ts:29:1 › plain login keeps the existing window without ornaments for owner review (1.2s)
+
+  18 passed (29.1s)

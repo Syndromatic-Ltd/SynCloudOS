@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -39,49 +42,7 @@
      readable width    the widest a column of running text should be
    ========================================================================= */
 
-:root {
-  /* The scale. Semantic tokens point here; apps may use it directly. */
-  --nse-space-1: 4px;
-  --nse-space-2: 8px;
-  --nse-space-3: 12px;
-  --nse-space-4: 16px;
-  --nse-space-5: 20px;
-  --nse-space-6: 24px;
-  --nse-space-7: 32px;
-  --nse-space-8: 40px;
 
-  /* Margins (AppKit: 20pt window edge, 14pt under a title or toolbar, 16pt
-     inside a box or tab view; UIKit: 16pt root margins on compact widths). */
-  --nse-layout-margin: var(--nse-space-5);
-  --nse-layout-margin-top: 14px;
-  --nse-layout-margin-compact: var(--nse-space-4);
-  --nse-content-margin: var(--nse-space-4);
-
-  /* Spacing between things. */
-  --nse-spacing-tight: var(--nse-space-1);
-  --nse-spacing-standard: var(--nse-space-2);
-  /* Controls side by side on one line (a row of push buttons). Themes whose
-     art bleeds to its edges widen it. */
-  --nse-spacing-inline: var(--nse-space-2);
-  --nse-spacing-related: var(--nse-space-3);
-  --nse-spacing-group: var(--nse-space-5);
-  --nse-form-label-spacing: var(--nse-space-2);
-  --nse-form-row-spacing: var(--nse-space-3);
-
-  --nse-readable-width: 42rem;
-
-  /* Text roles (SwiftUI's body / callout / footnote / caption / headline). */
-  --nse-text-body-size: 14px;
-  --nse-text-body-line: 1.45;
-  --nse-text-callout-size: 13px;
-  --nse-text-footnote-size: 12px;
-  --nse-text-caption-size: 11px;
-  --nse-text-headline-size: 15px;
-  --nse-text-headline-weight: 700;
-  --nse-text-label-size: 13px;
-  --nse-text-label-weight: 700;
-  --nse-text-secondary-opacity: 66%;
-}
 
 /* ----------------------------------------------------------------------------
    Content stacks. A container's content lays out as a leading-aligned column
@@ -92,7 +53,8 @@
 
 /* :not([hidden]): an author display beats the UA's [hidden] rule whatever its
    specificity, and tab panels and drawers toggle with the hidden attribute. */
-:where([data-nse-content-layout="stack"]:not([hidden])) {
+:where([data-nse-content-layout="stack"]:not([hidden])),
+:where(:scope):is(:where([data-nse-content-layout="stack"]:not([hidden]))) {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -100,86 +62,46 @@
   min-inline-size: 0;
 }
 
-:where([data-nse-content-layout="stack"]) > :where(
-  .nse-control-text-field,
-  .nse-control-input-box,
-  .nse-control-slider,
-  hr.nse-control-divider,
-  .nse-box-separator,
-  .nse-control-divider:not(.nse-control-divider-toggle),
-  .nse-list,
-  .nse-list-swipeable,
-  .nse-control-list-item,
-  .nse-list-row,
-  .nse-outline-container,
-  .nse-control-group-box,
-  .nse-container-pane,
-  .nse-container-drawer,
-  .nse-container-dialog,
-  .nse-control-image-view,
-  .nse-editor,
-  .nse-toolbar,
-  .nse-menu-bar,
-  .nse-statusbar,
-  .nse-app-topbar-base,
-  .nse-window-titlebar-content,
-  .nse-form,
-  .nse-layout-stack,
-  .nse-layout-inline,
-  .nse-layout-flex,
-  [data-nse-content-layout],
-  [data-nse-control="search-field"],
-  [data-nse-control="secure-text-field"],
-  [data-nse-control="combo-box"],
-  [data-nse-control="token-field"],
-  [data-nse-control="progress-indicator"],
-  [data-nse-control="level-indicator"],
-  [data-nse-control="table-view"],
-  [data-nse-control="outline-view"],
-  [data-nse-control="browser"],
-  [data-nse-control="collection-view"],
-  [data-nse-control="rule-editor"],
-  [data-nse-control="predicate-editor"],
-  [data-nse-control="tab-view"],
-  [data-nse-control="scroll-view"],
-  [data-nse-control="split-view"],
-  [data-nse-control="stack-view"],
-  [data-nse-control="ruler-view"],
-  [data-nse-fill="true"],
-  textarea
-) {
+:where([data-nse-content-layout="stack"])>:where(.nse-control-text-field,.nse-control-input-box,.nse-control-slider,hr.nse-control-divider,.nse-box-separator,.nse-control-divider:not(.nse-control-divider-toggle),.nse-list,.nse-list-swipeable,.nse-control-list-item,.nse-list-row,.nse-outline-container,.nse-control-group-box,.nse-container-pane,.nse-container-drawer,.nse-container-dialog,.nse-control-image-view,.nse-editor,.nse-toolbar,.nse-menu-bar,.nse-statusbar,.nse-app-topbar-base,.nse-window-titlebar-content,.nse-form,.nse-layout-stack,.nse-layout-inline,.nse-layout-flex,[data-nse-content-layout],[data-nse-control="search-field"],[data-nse-control="secure-text-field"],[data-nse-control="combo-box"],[data-nse-control="token-field"],[data-nse-control="progress-indicator"],[data-nse-control="level-indicator"],[data-nse-control="table-view"],[data-nse-control="outline-view"],[data-nse-control="browser"],[data-nse-control="collection-view"],[data-nse-control="rule-editor"],[data-nse-control="predicate-editor"],[data-nse-control="tab-view"],[data-nse-control="scroll-view"],[data-nse-control="split-view"],[data-nse-control="stack-view"],[data-nse-control="ruler-view"],[data-nse-fill="true"],textarea),
+:where(:scope):is(:where([data-nse-content-layout="stack"]))>:where(.nse-control-text-field,.nse-control-input-box,.nse-control-slider,hr.nse-control-divider,.nse-box-separator,.nse-control-divider:not(.nse-control-divider-toggle),.nse-list,.nse-list-swipeable,.nse-control-list-item,.nse-list-row,.nse-outline-container,.nse-control-group-box,.nse-container-pane,.nse-container-drawer,.nse-container-dialog,.nse-control-image-view,.nse-editor,.nse-toolbar,.nse-menu-bar,.nse-statusbar,.nse-app-topbar-base,.nse-window-titlebar-content,.nse-form,.nse-layout-stack,.nse-layout-inline,.nse-layout-flex,[data-nse-content-layout],[data-nse-control="search-field"],[data-nse-control="secure-text-field"],[data-nse-control="combo-box"],[data-nse-control="token-field"],[data-nse-control="progress-indicator"],[data-nse-control="level-indicator"],[data-nse-control="table-view"],[data-nse-control="outline-view"],[data-nse-control="browser"],[data-nse-control="collection-view"],[data-nse-control="rule-editor"],[data-nse-control="predicate-editor"],[data-nse-control="tab-view"],[data-nse-control="scroll-view"],[data-nse-control="split-view"],[data-nse-control="stack-view"],[data-nse-control="ruler-view"],[data-nse-fill="true"],textarea) {
   align-self: stretch;
   min-inline-size: 0;
 }
 
 /* An app can pin any control to its natural size, or stretch any control. */
-:where([data-nse-content-layout="stack"]) > :where([data-nse-fill="false"]) {
+:where([data-nse-content-layout="stack"])>:where([data-nse-fill="false"]),
+:where(:scope):is(:where([data-nse-content-layout="stack"]))>:where([data-nse-fill="false"]) {
   align-self: flex-start;
 }
 
 /* Running text inside a content stack: no browser margins (the stack's gap is
    the rhythm), body size, and never wider than a comfortable measure. */
-:where([data-nse-content-layout="stack"]) > :where(p, ul, ol, dl, blockquote, output, figure) {
+:where([data-nse-content-layout="stack"])>:where(p,ul,ol,dl,blockquote,output,figure),
+:where(:scope):is(:where([data-nse-content-layout="stack"]))>:where(p,ul,ol,dl,blockquote,output,figure) {
   margin: 0;
   max-inline-size: var(--nse-readable-width);
   font-size: var(--nse-text-body-size);
   line-height: var(--nse-text-body-line);
 }
 
-:where([data-nse-content-layout="stack"]) > :where(h1, h2, h3, h4, h5, h6) {
+:where([data-nse-content-layout="stack"])>:where(h1,h2,h3,h4,h5,h6),
+:where(:scope):is(:where([data-nse-content-layout="stack"]))>:where(h1,h2,h3,h4,h5,h6) {
   margin: 0;
 }
 
 /* Rows run edge to edge with no gap between them, like the cells of a grouped
    table section; their own hairlines and bevels are the separation. */
 :where([data-nse-content-layout="stack"][data-nse-content-rows="true"]),
-:where([data-nse-content-layout="stack"]):has(> :first-child:is(.nse-control-list-item, .nse-list-row, .nse-list-swipeable, .nse-virtual-list-row)) {
+:where(:scope):is(:where([data-nse-content-layout="stack"][data-nse-content-rows="true"])),
+:where([data-nse-content-layout="stack"]):has(>:first-child:is(.nse-control-list-item,.nse-list-row,.nse-list-swipeable,.nse-virtual-list-row)),
+:where(:scope):is(:where([data-nse-content-layout="stack"]):has(>:first-child:is(.nse-control-list-item,.nse-list-row,.nse-list-swipeable,.nse-virtual-list-row))) {
   align-items: stretch;
   gap: 0;
 }
 
 /* A separator box spans its container along the line, as a horizontal NSBox separator does. */
-:where(.nse-box-separator) {
+:where(.nse-box-separator),
+:where(:scope):is(:where(.nse-box-separator)) {
   align-self: stretch;
 }
 
@@ -187,21 +109,24 @@
    Layout margins on containers that carry them through a custom property.
    ------------------------------------------------------------------------- */
 
-:where([data-nse-layout-margins="standard"]) {
+:where([data-nse-layout-margins="standard"]),
+:where(:scope):is(:where([data-nse-layout-margins="standard"])) {
   --nse-box-margin-top: var(--nse-content-margin);
   --nse-box-margin-right: var(--nse-content-margin);
   --nse-box-margin-bottom: var(--nse-content-margin);
   --nse-box-margin-left: var(--nse-content-margin);
 }
 
-:where([data-nse-layout-margins="standard"]):has(> [data-nse-content-layout="stack"] > :first-child:is(.nse-control-list-item, .nse-list-row, .nse-list-swipeable, .nse-virtual-list-row)) {
+:where([data-nse-layout-margins="standard"]):has(>[data-nse-content-layout="stack"]>:first-child:is(.nse-control-list-item,.nse-list-row,.nse-list-swipeable,.nse-virtual-list-row)),
+:where(:scope):is(:where([data-nse-layout-margins="standard"]):has(>[data-nse-content-layout="stack"]>:first-child:is(.nse-control-list-item,.nse-list-row,.nse-list-swipeable,.nse-virtual-list-row))) {
   --nse-box-margin-top: 0px;
   --nse-box-margin-right: 0px;
   --nse-box-margin-bottom: 0px;
   --nse-box-margin-left: 0px;
 }
 
-:where([data-nse-layout-margins="none"]) {
+:where([data-nse-layout-margins="none"]),
+:where(:scope):is(:where([data-nse-layout-margins="none"])) {
   --nse-box-margin-top: 0px;
   --nse-box-margin-right: 0px;
   --nse-box-margin-bottom: 0px;
@@ -213,29 +138,41 @@
    A leading stack behaves as a content stack: flexible views still fill.
    ------------------------------------------------------------------------- */
 
-:where(.nse-layout-stack[data-alignment="leading"]) { align-items: flex-start; }
-:where(.nse-layout-stack[data-alignment="center"]) { align-items: center; }
-:where(.nse-layout-stack[data-alignment="trailing"]) { align-items: flex-end; }
+:where(.nse-layout-stack[data-alignment="leading"]),
+:where(:scope):is(:where(.nse-layout-stack[data-alignment="leading"])) { align-items: flex-start; }
+:where(.nse-layout-stack[data-alignment="center"]),
+:where(:scope):is(:where(.nse-layout-stack[data-alignment="center"])) { align-items: center; }
+:where(.nse-layout-stack[data-alignment="trailing"]),
+:where(:scope):is(:where(.nse-layout-stack[data-alignment="trailing"])) { align-items: flex-end; }
 
 /* ----------------------------------------------------------------------------
    Labels: NSETextField with isEditable false (NSTextField(labelWithString:)).
    ------------------------------------------------------------------------- */
 
-:where(.nse-control-label-field) {
+:where(.nse-control-label-field),
+:where(:scope):is(:where(.nse-control-label-field)) {
   display: block;
   margin: 0;
   font-size: var(--nse-text-body-size);
   line-height: var(--nse-text-body-line);
 }
 
-:where(.nse-control-label-field[data-font="callout"]) { font-size: var(--nse-text-callout-size); }
-:where(.nse-control-label-field[data-font="footnote"]) { font-size: var(--nse-text-footnote-size); }
-:where(.nse-control-label-field[data-font="caption"]) { font-size: var(--nse-text-caption-size); line-height: 1.35; }
-:where(.nse-control-label-field[data-font="headline"]) { font-size: var(--nse-text-headline-size); font-weight: var(--nse-text-headline-weight); }
-:where(.nse-control-label-field[data-font="label"]) { font-size: var(--nse-text-label-size); font-weight: var(--nse-text-label-weight); }
-:where(.nse-control-label-field[data-text-colour="secondary"]) { color: color-mix(in srgb, currentColor var(--nse-text-secondary-opacity), transparent); }
-:where(.nse-control-label-field[data-monospaced-digits="true"]) { font-variant-numeric: tabular-nums; }
-:where(.nse-control-label-field[data-line-break-mode="char"]) { overflow-wrap: anywhere; }
+:where(.nse-control-label-field[data-font="callout"]),
+:where(:scope):is(:where(.nse-control-label-field[data-font="callout"])) { font-size: var(--nse-text-callout-size); }
+:where(.nse-control-label-field[data-font="footnote"]),
+:where(:scope):is(:where(.nse-control-label-field[data-font="footnote"])) { font-size: var(--nse-text-footnote-size); }
+:where(.nse-control-label-field[data-font="caption"]),
+:where(:scope):is(:where(.nse-control-label-field[data-font="caption"])) { font-size: var(--nse-text-caption-size); line-height: 1.35; }
+:where(.nse-control-label-field[data-font="headline"]),
+:where(:scope):is(:where(.nse-control-label-field[data-font="headline"])) { font-size: var(--nse-text-headline-size); font-weight: var(--nse-text-headline-weight); }
+:where(.nse-control-label-field[data-font="label"]),
+:where(:scope):is(:where(.nse-control-label-field[data-font="label"])) { font-size: var(--nse-text-label-size); font-weight: var(--nse-text-label-weight); }
+:where(.nse-control-label-field[data-text-colour="secondary"]),
+:where(:scope):is(:where(.nse-control-label-field[data-text-colour="secondary"])) { color: color-mix(in srgb, currentColor var(--nse-text-secondary-opacity), transparent); }
+:where(.nse-control-label-field[data-monospaced-digits="true"]),
+:where(:scope):is(:where(.nse-control-label-field[data-monospaced-digits="true"])) { font-variant-numeric: tabular-nums; }
+:where(.nse-control-label-field[data-line-break-mode="char"]),
+:where(:scope):is(:where(.nse-control-label-field[data-line-break-mode="char"])) { overflow-wrap: anywhere; }
 
 /* ----------------------------------------------------------------------------
    Forms (NSEForm / NSEFormRow): AppKit's label column. Labels are trailing
@@ -244,13 +181,15 @@
    does.
    ------------------------------------------------------------------------- */
 
-:where(.nse-form) {
+:where(.nse-form),
+:where(:scope):is(:where(.nse-form)) {
   min-inline-size: 0;
   container-type: inline-size;
   container-name: nse-form;
 }
 
-:where(.nse-form-grid) {
+:where(.nse-form-grid),
+:where(:scope):is(:where(.nse-form-grid)) {
   display: grid;
   grid-template-columns: var(--nse-form-label-column, max-content) minmax(0, 1fr);
   column-gap: var(--nse-form-label-spacing);
@@ -259,11 +198,13 @@
   min-inline-size: 0;
 }
 
-:where(.nse-form-row) {
+:where(.nse-form-row),
+:where(:scope):is(:where(.nse-form-row)) {
   display: contents;
 }
 
-:where(.nse-form-label) {
+:where(.nse-form-label),
+:where(:scope):is(:where(.nse-form-label)) {
   grid-column: 1;
   justify-self: end;
   text-align: end;
@@ -278,16 +219,19 @@
   margin-block-start: max(0px, calc((var(--nse-form-line, 32px) - 1lh) / 2));
 }
 
-:where(.nse-form-row[data-label-align="center"]) > :where(.nse-form-label) {
+:where(.nse-form-row[data-label-align="center"])>:where(.nse-form-label),
+:where(:scope):is(:where(.nse-form-row[data-label-align="center"]))>:where(.nse-form-label) {
   align-self: center;
   margin-block-start: 0;
 }
 
-:where(.nse-form-row[data-label-align="top"]) > :where(.nse-form-label) {
+:where(.nse-form-row[data-label-align="top"])>:where(.nse-form-label),
+:where(:scope):is(:where(.nse-form-row[data-label-align="top"]))>:where(.nse-form-label) {
   margin-block-start: 0;
 }
 
-:where(.nse-form[data-label-alignment="leading"]) :where(.nse-form-label) {
+:where(.nse-form[data-label-alignment="leading"]) :where(.nse-form-label),
+:where(:scope):is(:where(.nse-form[data-label-alignment="leading"])) :where(.nse-form-label) {
   justify-self: start;
   text-align: start;
 }
@@ -295,21 +239,24 @@
 /* The control cell is a content stack (the component sets
    data-nse-content-layout), so flexible controls fill the column and the
    rest keep their natural size. */
-:where(.nse-form-control) {
+:where(.nse-form-control),
+:where(:scope):is(:where(.nse-form-control)) {
   grid-column: 2;
   --nse-content-spacing: var(--nse-spacing-standard);
 }
 
 /* Several peer controls on one row: checkboxes of one setting, a field and
    its unit, buttons. They wrap rather than overflow. */
-:where(.nse-form-row[data-nse-inline="true"]) > :where(.nse-form-control) {
+:where(.nse-form-row[data-nse-inline="true"])>:where(.nse-form-control),
+:where(:scope):is(:where(.nse-form-row[data-nse-inline="true"]))>:where(.nse-form-control) {
   flex-direction: row;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--nse-spacing-inline);
 }
 
-:where(.nse-form-help) {
+:where(.nse-form-help),
+:where(:scope):is(:where(.nse-form-help)) {
   margin: calc(var(--nse-spacing-tight) - var(--nse-content-spacing, 0px)) 0 0;
   max-inline-size: var(--nse-readable-width);
   font-size: var(--nse-text-footnote-size);
@@ -317,15 +264,18 @@
   color: color-mix(in srgb, currentColor var(--nse-text-secondary-opacity), transparent);
 }
 
-:where(.nse-form-row[data-nse-inline="true"]) > :where(.nse-form-control) > :where(.nse-form-help) {
+:where(.nse-form-row[data-nse-inline="true"])>:where(.nse-form-control)>:where(.nse-form-help),
+:where(:scope):is(:where(.nse-form-row[data-nse-inline="true"]))>:where(.nse-form-control)>:where(.nse-form-help) {
   flex-basis: 100%;
 }
 
-:where(.nse-form-row[data-nse-full-width="true"]) > :where(.nse-form-control) {
+:where(.nse-form-row[data-nse-full-width="true"])>:where(.nse-form-control),
+:where(:scope):is(:where(.nse-form-row[data-nse-full-width="true"]))>:where(.nse-form-control) {
   grid-column: 1 / -1;
 }
 
-:where(.nse-form-separator) {
+:where(.nse-form-separator),
+:where(:scope):is(:where(.nse-form-separator)) {
   grid-column: 1 / -1;
   block-size: 1px;
   /* The UA's auto inline margins shrink an hr to nothing in a grid. */
@@ -340,19 +290,26 @@
 }
 
 @container nse-form (max-width: 420px) {
-  :where(.nse-form-grid) {
+  :where(.nse-form-grid),
+:where(:scope):is(:where(.nse-form-grid)) {
     grid-template-columns: minmax(0, 1fr);
     row-gap: var(--nse-spacing-standard);
   }
 
-  :where(.nse-form-label) {
+  :where(.nse-form-label),
+:where(:scope):is(:where(.nse-form-label)) {
     grid-column: 1;
     justify-self: start;
     text-align: start;
     margin-block-start: var(--nse-spacing-standard);
   }
 
-  :where(.nse-form-control) {
+  :where(.nse-form-control),
+:where(:scope):is(:where(.nse-form-control)) {
     grid-column: 1;
   }
+}
+
+}
+
 }

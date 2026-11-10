@@ -262,6 +262,8 @@ export function NSEPopup({
       ...overlay.surfaceProps,
       ...htmlAttributes,
       ...appearanceProjection,
+      "data-nse-theme": undefined,
+      style: { ...appearanceProjection.style, ...htmlAttributes.style },
       ref: surfaceRef,
       id: resolvedId,
       "data-state": closing || !state.open ? "closing" : "open",
@@ -269,7 +271,7 @@ export function NSEPopup({
       ...(hasPopoverFrame ? {
         "data-nse-popover-draws-background": String(drawsBackground),
         "data-nse-reduced-motion": String(reducedMotion),
-        style: { ...htmlAttributes.style, "--nse-popover-spring": nsePopoverSpringEasing },
+        style: { ...appearanceProjection.style, ...htmlAttributes.style, "--nse-popover-spring": nsePopoverSpringEasing },
       } : {}),
       className: surfaceClassName,
       role: surfaceRole,

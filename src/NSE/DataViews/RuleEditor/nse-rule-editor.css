@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -23,8 +26,11 @@
    pickers, fields and buttons so every theme paints them. Spacing is the
    SDK's (nse-layout-defaults.css). */
 .nse-rule-editor,
+:where(:scope):is(.nse-rule-editor),
 .nse-rule-group,
-.nse-rule-rows {
+:where(:scope):is(.nse-rule-group),
+.nse-rule-rows,
+:where(:scope):is(.nse-rule-rows) {
   display: flex;
   flex-direction: column;
   gap: var(--nse-spacing-standard, 8px);
@@ -32,9 +38,13 @@
 }
 
 .nse-rule-header,
+:where(:scope):is(.nse-rule-header),
 .nse-rule-footer,
+:where(:scope):is(.nse-rule-footer),
 .nse-rule-row,
-.nse-predicate-editor[data-expression-kind="comparison"] {
+:where(:scope):is(.nse-rule-row),
+.nse-predicate-editor[data-expression-kind="comparison"],
+:where(:scope):is(.nse-predicate-editor[data-expression-kind="comparison"]) {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -42,25 +52,30 @@
   min-inline-size: 0;
 }
 
-.nse-rule-phrase {
+.nse-rule-phrase,
+:where(:scope):is(.nse-rule-phrase) {
   font-size: var(--nse-text-body-size, 14px);
   white-space: nowrap;
 }
 
 /* The value takes the rest of the row, and wraps to its own line before it
    gets too narrow to type in. */
-.nse-rule-row > .nse-rule-value,
-.nse-predicate-editor[data-expression-kind="comparison"] > .nse-rule-value {
+.nse-rule-row>.nse-rule-value,
+:where(:scope):is(.nse-rule-row)>.nse-rule-value,
+.nse-predicate-editor[data-expression-kind="comparison"]>.nse-rule-value,
+:where(:scope):is(.nse-predicate-editor[data-expression-kind="comparison"])>.nse-rule-value {
   flex: 1 1 10rem;
   min-inline-size: 8rem;
 }
 
-.nse-rule-row[data-alternating] {
+.nse-rule-row[data-alternating],
+:where(:scope):is(.nse-rule-row[data-alternating]) {
   background: var(--nse-alternating-row-background, transparent);
 }
 
 /* A nested group indents under a quiet rule, as the Mac's compound rows do. */
-.nse-rule-group {
+.nse-rule-group,
+:where(:scope):is(.nse-rule-group) {
   margin: 0;
   padding: var(--nse-spacing-standard, 8px) 0 var(--nse-spacing-standard, 8px) var(--nse-spacing-group, 20px);
   border: 0;
@@ -68,12 +83,18 @@
   min-inline-size: 0;
 }
 
-.nse-rule-error {
+.nse-rule-error,
+:where(:scope):is(.nse-rule-error) {
   flex-basis: 100%;
   font-size: var(--nse-text-footnote-size, 12px);
   color: var(--nse-error-colour, #c0392b);
 }
 
-.nse-predicate-editor [aria-invalid="true"] {
+.nse-predicate-editor [aria-invalid="true"],
+:where(:scope):is(.nse-predicate-editor) [aria-invalid="true"] {
   outline: 1px solid var(--nse-error-colour, currentColor);
+}
+
+}
+
 }

@@ -163,8 +163,8 @@ function NSECommandMenuSurface({
   submenuDelayMs = 180,
   appearance = "default",
 }: NSECommandMenuProps) {
-  const applicationAppearance = appearance === "application-menu";
   const appearanceProjection = useNSEAppearanceProjection();
+  const applicationAppearance = appearance === "application-menu";
   const subscribe = useCallback((listener: () => void) => controller.subscribe(() => {
     if (!controller.runtime.signal.aborted) listener();
   }), [controller]);
@@ -423,6 +423,7 @@ function NSECommandMenuSurface({
       data-nse-menu-id={model.id}
       data-nse-menu-generation={view.generation}
       {...appearanceProjection}
+      data-nse-theme={undefined}
       data-nse-menu-variant={applicationAppearance ? "application-menu" : "popup"}
       dir={direction}
       onKeyDown={handleKeyDown}

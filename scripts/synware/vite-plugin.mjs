@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { discoverThemeBundles } from "./theme-bundles.mjs";
+import { referencedThemeIdentifiers, themeModuleSource, themeStylesheet } from "./theme-loading.mjs";
 import {
   createReadStream,
   existsSync,
@@ -56,6 +58,9 @@ import {
   posix,
 } from "node:path";
 
+const themesModuleId = "virtual:syncloudos/themes";
+const resolvedThemesModuleId = "\0" + themesModuleId;
+const themeStylePrefix = "virtual:syncloudos/theme-style/";
 const projectModuleId = "virtual:syncloudos/project";
 const appModulePrefix = "virtual:syncloudos/app/";
 const fxRuntimeModuleId = "virtual:syncloudos/fx-runtime";
@@ -377,10 +382,10 @@ function normaliseOptions(options) {
   if (!options || typeof options !== "object" || Array.isArray(options)) {
     throw new TypeError("synCloudOS options must be an object when provided.");
   }
-  for (const key of ["appsDirectory", "preferencesDirectory", "widgetsDirectory", "integrationsDirectory", "webspringEntry"]) {
+  for (const key of ["appsDirectory", "preferencesDirectory", "widgetsDirectory", "integrationsDirectory", "webspringEntry", "themesDirectory"]) {
     const value = options[key];
     if (value === undefined) continue;
-    if (key === "webspringEntry" && value === false) continue;
+    if ((key === "webspringEntry" || key === "themesDirectory") && value === false) continue;
     if (typeof value !== "string") throw new TypeError(`synCloudOS options.${key} must be a string when provided.`);
     if (value.length === 0) throw new TypeError(`synCloudOS options.${key} must not be empty.`);
   }
@@ -393,6 +398,7 @@ function normaliseOptions(options) {
     integrationsDirectory: options.integrationsDirectory,
     webspringEntry: options.webspringEntry,
     typography: options.typography,
+    themesDirectory: options.themesDirectory,
     applications,
   });
 }
@@ -624,6 +630,8 @@ export function synCloudOS(options) {
   let installationBuild = null;
   let server = null;
   let watcherCleanup = null;
+  let themeBundles = [];
+  let selectedThemes = new Set();
   let typography = null;
   let typographyAssets = new Map();
   let typographyAssetPaths = new Map();
@@ -653,6 +661,8 @@ export function synCloudOS(options) {
 
   const refresh = () => {
     discovery = discover(resolvedConfig.root, pluginOptions);
+    themeBundles = pluginOptions.themesDirectory === false ? [] : discoverThemeBundles(resolve(resolvedConfig.root, pluginOptions.themesDirectory ?? "src/Themes"));
+    selectedThemes = referencedThemeIdentifiers(resolvedConfig.root, themeBundles);
     installationBuild = null;
     return discovery;
   };
@@ -665,7 +675,7 @@ export function synCloudOS(options) {
   };
 
   const invalidateVirtualModule = () => {
-    for (const id of [resolvedProjectModuleId, resolvedTypographyModuleId, ...appVirtualModules]) {
+    for (const id of [resolvedProjectModuleId, resolvedTypographyModuleId, resolvedThemesModuleId, ...themeBundles.map(bundle => "\0" + themeStylePrefix + bundle.theme.bundleIdentifier + ".css"), ...appVirtualModules]) {
       const moduleNode = server?.moduleGraph?.getModuleById(id);
       if (moduleNode) server.moduleGraph.invalidateModule(moduleNode);
     }
@@ -685,7 +695,8 @@ export function synCloudOS(options) {
 
   const refreshFromWatcher = (file) => {
     const current = discovery ?? refresh();
-    if (!isWatchedFile(file, current.watchRoots)) return false;
+    const themesRoot = pluginOptions.themesDirectory === false ? null : resolve(resolvedConfig.root, pluginOptions.themesDirectory ?? "src/Themes");
+    if (!isWatchedFile(file, current.watchRoots) && !(themesRoot && isPathInside(themesRoot, file)) && !(isPathInside(resolvedConfig.root, file) && /\.(?:tsx?|jsx?|mjs|mts)$/u.test(file))) return false;
     try {
       const next = refresh();
       server?.watcher.add(next.watchPaths);
@@ -736,6 +747,7 @@ export function synCloudOS(options) {
     async buildStart() {
       const current = refresh();
       addWatchFiles(this, current.watchPaths);
+      addWatchFiles(this, themeBundles.flatMap(bundle => bundle.files));
       if (typography) {
         addWatchFiles(this, typography.watchPaths);
         if (resolvedConfig.command === "build") {
@@ -748,6 +760,7 @@ export function synCloudOS(options) {
     resolveId(id, importer) {
       // Use the same canonical path and dependency version query as relative SDK imports.
       if (id === fxRuntimeModuleId) return this.resolve(displayPath(fxRuntimePath), importer, { skipSelf: true });
+      if (id === themesModuleId || id.startsWith(themeStylePrefix)) return "\0" + id;
       if (id === browserModuleId) return resolvedBrowserModuleId;
       if (id === "@syndromatic/syncloudos/browser" && importer !== resolvedBrowserModuleId) return resolvedBrowserModuleId;
       if (id.startsWith(appModulePrefix)) { const resolved = `\0${id}`; appVirtualModules.add(resolved); return resolved; }
@@ -763,6 +776,8 @@ export function synCloudOS(options) {
     },
 
     load(id) {
+      if (id === resolvedThemesModuleId) return themeModuleSource(themeBundles, selectedThemes, toViteFileImport, themeStylePrefix);
+      if (id.startsWith("\0" + themeStylePrefix)) { const bundleIdentifier = id.slice(themeStylePrefix.length + 1, -4); const bundle = themeBundles.find(bundle => bundle.theme.bundleIdentifier === bundleIdentifier); if (!bundle) throw new Error("Unknown theme: " + bundleIdentifier); return themeStylesheet(bundle, toViteFileImport); }
       if (id.startsWith(`\0${appModulePrefix}`)) {
         const app = id.slice(appModulePrefix.length + 1);
         const separator = app.indexOf("/fx/");
@@ -781,6 +796,8 @@ export function synCloudOS(options) {
       mountPackedSdkAssets(devServer, resolvedConfig.root, resolvedConfig.base, resolvedConfig.cacheDir);
       const current = discovery ?? refresh();
       devServer.watcher.add(current.watchPaths);
+      if (pluginOptions.themesDirectory !== false) devServer.watcher.add(resolve(resolvedConfig.root, pluginOptions.themesDirectory ?? "src/Themes"));
+      devServer.watcher.add(themeBundles.flatMap(bundle => bundle.files));
       if (typography) devServer.watcher.add(typography.watchPaths);
       const watcher = devServer.watcher;
       const eventNames = ["add", "addDir", "unlink", "unlinkDir"];

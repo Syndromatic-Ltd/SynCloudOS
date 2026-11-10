@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import "../../Structure/layers.css";
 import "./Resources/atmo-structure.css";
 import "./Resources/atmo.css";
 import "./Resources/chrome.css";

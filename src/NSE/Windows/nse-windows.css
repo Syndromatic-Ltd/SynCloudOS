@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -18,7 +21,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-.nse-window-view {
+.nse-window-view,
+:where(:scope):is(.nse-window-view) {
   --nse-window-titlebar-height: 31px;
   --nse-window-control-hit-target: 44px;
   --nse-window-control-paint-size: 16px;
@@ -35,7 +39,8 @@
   overflow: visible;
 }
 
-.nse-window__surface {
+.nse-window__surface,
+:where(:scope):is(.nse-window__surface) {
   position: absolute;
   z-index: 1;
   inset: 0;
@@ -50,13 +55,15 @@
   border-radius: inherit;
 }
 
-.nse-window__shadow-layer {
+.nse-window__shadow-layer,
+:where(:scope):is(.nse-window__shadow-layer) {
   position: absolute;
   z-index: 0;
   pointer-events: none;
 }
 
-.nse-window-view[inert] {
+.nse-window-view[inert],
+:where(:scope):is(.nse-window-view[inert]) {
   pointer-events: none;
   user-select: none;
 }
@@ -64,7 +71,8 @@
 /* Theme-neutral fallback paint for window roles. A selected NSE theme can
    override these semantic hooks with higher-specificity appearance rules.
    Custom-active and frameless windows suppress the generic system surface. */
-.nse-window-view:not([data-window-custom-chrome-active="true"]):not([data-window-chrome-mode="frameless"]) {
+.nse-window-view:not([data-window-custom-chrome-active="true"]):not([data-window-chrome-mode="frameless"]),
+:where(:scope):is(.nse-window-view:not([data-window-custom-chrome-active="true"]):not([data-window-chrome-mode="frameless"])) {
   color: var(--nse-window-foreground, #17202a);
   background: var(--nse-window-background, #f4f5f6);
   border: 1px solid var(--nse-window-border, rgba(31, 41, 55, 0.42));
@@ -72,22 +80,27 @@
   box-shadow: none;
 }
 
-.nse-window-view:not([data-window-custom-chrome-active="true"]):not([data-window-chrome-mode="frameless"]) .nse-window__surface {
+.nse-window-view:not([data-window-custom-chrome-active="true"]):not([data-window-chrome-mode="frameless"]) .nse-window__surface,
+:where(:scope):is(.nse-window-view:not([data-window-custom-chrome-active="true"]):not([data-window-chrome-mode="frameless"])) .nse-window__surface {
   box-shadow: var(--nse-window-shadow, 0 14px 42px rgba(15, 23, 42, 0.26));
 }
 
 .nse-window-view[data-window-chrome-mode="frameless"],
-.nse-window-view[data-window-chrome-mode="frameless"] .nse-window__surface {
+:where(:scope):is(.nse-window-view[data-window-chrome-mode="frameless"]),
+.nse-window-view[data-window-chrome-mode="frameless"] .nse-window__surface,
+:where(:scope):is(.nse-window-view[data-window-chrome-mode="frameless"]) .nse-window__surface {
   background: none;
   border: 0;
   box-shadow: none;
 }
 
-.nse-window-view--sheet {
+.nse-window-view--sheet,
+:where(:scope):is(.nse-window-view--sheet) {
   --nse-window-shadow: var(--nse-window-sheet-shadow, 0 18px 48px rgba(15, 23, 42, 0.32));
 }
 
-.nse-window-view--popover {
+.nse-window-view--popover,
+:where(:scope):is(.nse-window-view--popover) {
   --nse-window-shadow: var(--nse-window-popover-shadow, 0 10px 32px rgba(15, 23, 42, 0.28));
 }
 /* Custom-chrome windows paint their own bar artwork; the host applies a
@@ -98,17 +111,20 @@
    the clipped surface's alpha. Custom shadows only apply while custom
    chrome is actually active — a fallback window paints the active
    theme's system titlebar instead, never both. Values are visual-tuning constants. */
-.nse-window-view[data-window-custom-chrome-active="true"] {
+.nse-window-view[data-window-custom-chrome-active="true"],
+:where(:scope):is(.nse-window-view[data-window-custom-chrome-active="true"]) {
   filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.22)) drop-shadow(0 6px 22px rgba(0, 0, 0, 0.14));
   transition: filter 160ms ease;
 }
 
-.nse-window-view[data-window-custom-chrome-active="true"][data-window-key="true"] {
+.nse-window-view[data-window-custom-chrome-active="true"][data-window-key="true"],
+:where(:scope):is(.nse-window-view[data-window-custom-chrome-active="true"][data-window-key="true"]) {
   filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.3)) drop-shadow(0 18px 48px rgba(0, 0, 0, 0.22));
   transition: filter 160ms ease;
 }
 
-.nse-window-view[data-window-custom-chrome-active="true"] .nse-window__surface {
+.nse-window-view[data-window-custom-chrome-active="true"] .nse-window__surface,
+:where(:scope):is(.nse-window-view[data-window-custom-chrome-active="true"]) .nse-window__surface {
   /* Host-owned 1px perimeter edge. A border (not a box-shadow) follows the
    * SmoothSurface outline through the inline border-radius, and unlike a
    * stylesheet box-shadow it survives the record-driven inline box-shadow
@@ -122,18 +138,21 @@
    second bar on top of the system titlebar. Corner geometry and clipping
    come from the record's smoothSurface via inline style — never from a
    hard-coded radius here. */
-.nse-window__custom-titlebar {
+.nse-window__custom-titlebar,
+:where(:scope):is(.nse-window__custom-titlebar) {
   display: none;
   position: relative;
   flex: none;
   min-width: 0;
 }
 
-.nse-window-view[data-window-custom-chrome-active="true"] .nse-window__custom-titlebar {
+.nse-window-view[data-window-custom-chrome-active="true"] .nse-window__custom-titlebar,
+:where(:scope):is(.nse-window-view[data-window-custom-chrome-active="true"]) .nse-window__custom-titlebar {
   display: block;
 }
 
-.nse-window__titlebar {
+.nse-window__titlebar,
+:where(:scope):is(.nse-window__titlebar) {
   position: relative;
   box-sizing: border-box;
   height: var(--nse-window-titlebar-height);
@@ -143,16 +162,19 @@
   user-select: none;
 }
 
-.nse-window__titlebar {
+.nse-window__titlebar,
+:where(:scope):is(.nse-window__titlebar) {
   background: var(--nse-window-title-background, #e5e8eb);
   border-block-end: 1px solid var(--nse-window-divider, rgba(31, 41, 55, 0.3));
 }
 
-.nse-window__titlebar--panel {
+.nse-window__titlebar--panel,
+:where(:scope):is(.nse-window__titlebar--panel) {
   --nse-window-titlebar-height: 26px;
 }
 
-.nse-window__title {
+.nse-window__title,
+:where(:scope):is(.nse-window__title) {
   min-width: 0;
   margin: 0;
   padding: 6px 108px 0;
@@ -164,7 +186,8 @@
   user-select: none;
 }
 
-.nse-window__controls {
+.nse-window__controls,
+:where(:scope):is(.nse-window__controls) {
   position: absolute;
   z-index: 1;
   inset-block-start: 0;
@@ -172,7 +195,8 @@
   display: flex;
 }
 
-.nse-window__control {
+.nse-window__control,
+:where(:scope):is(.nse-window__control) {
   position: relative;
   box-sizing: border-box;
   width: var(--nse-window-control-hit-target);
@@ -186,7 +210,8 @@
   cursor: default;
 }
 
-.nse-window__control-paint {
+.nse-window__control-paint,
+:where(:scope):is(.nse-window__control-paint) {
   position: absolute;
   inset-block-start: var(--nse-window-control-paint-block-origin);
   inset-inline-start: var(--nse-window-control-paint-inline-origin);
@@ -196,33 +221,40 @@
   border-radius: 50%;
 }
 
-.nse-window__control:focus-visible {
+.nse-window__control:focus-visible,
+:where(:scope):is(.nse-window__control:focus-visible) {
   outline: 2px solid var(--nse-window-focus-ring, Highlight);
   outline-offset: -6px;
 }
 
-.nse-window__control-paint {
+.nse-window__control-paint,
+:where(:scope):is(.nse-window__control-paint) {
   border: 1px solid currentColor;
   background: var(--nse-window-control-background, #c5cbd1);
 }
 
-.nse-window__control--close .nse-window__control-paint {
+.nse-window__control--close .nse-window__control-paint,
+:where(:scope):is(.nse-window__control--close) .nse-window__control-paint {
   background: var(--nse-window-close-background, #d46a63);
 }
 
-.nse-window__control--minimise .nse-window__control-paint {
+.nse-window__control--minimise .nse-window__control-paint,
+:where(:scope):is(.nse-window__control--minimise) .nse-window__control-paint {
   background: var(--nse-window-minimise-background, #d8ad4d);
 }
 
-.nse-window__control--zoom .nse-window__control-paint {
+.nse-window__control--zoom .nse-window__control-paint,
+:where(:scope):is(.nse-window__control--zoom) .nse-window__control-paint {
   background: var(--nse-window-zoom-background, #6aa873);
 }
 
-.nse-window__control:is(:hover, :active) .nse-window__control-paint {
+.nse-window__control:is(:hover,:active) .nse-window__control-paint,
+:where(:scope):is(.nse-window__control:is(:hover,:active)) .nse-window__control-paint {
   filter: brightness(0.86);
 }
 
-.nse-window__content {
+.nse-window__content,
+:where(:scope):is(.nse-window__content) {
   min-width: 0;
   min-height: 0;
   flex: 1;
@@ -230,13 +262,15 @@
   overscroll-behavior: contain;
 }
 
-.nse-window-view--hud {
+.nse-window-view--hud,
+:where(:scope):is(.nse-window-view--hud) {
   color: var(--nse-window-hud-foreground, #f8fafc);
   background: var(--nse-window-hud-background, #28313b);
   border-color: var(--nse-window-hud-border, #111820);
 }
 
-.nse-window__hud-titlebar {
+.nse-window__hud-titlebar,
+:where(:scope):is(.nse-window__hud-titlebar) {
   position: relative;
   box-sizing: border-box;
   height: 26px;
@@ -245,12 +279,14 @@
   user-select: none;
 }
 
-.nse-window__hud-titlebar {
+.nse-window__hud-titlebar,
+:where(:scope):is(.nse-window__hud-titlebar) {
   background: var(--nse-window-hud-title-background, #343f4b);
   border-block-end: 1px solid var(--nse-window-hud-divider, #111820);
 }
 
-.nse-window__hud-title {
+.nse-window__hud-title,
+:where(:scope):is(.nse-window__hud-title) {
   margin: 0;
   padding: 4px 44px 0;
   overflow: hidden;
@@ -261,18 +297,21 @@
   user-select: none;
 }
 
-.nse-window__control--hud-close {
+.nse-window__control--hud-close,
+:where(:scope):is(.nse-window__control--hud-close) {
   position: absolute;
   z-index: 1;
   inset-block-start: 0;
   inset-inline-start: 0;
 }
 
-.nse-window__control--hud-close .nse-window__control-paint {
+.nse-window__control--hud-close .nse-window__control-paint,
+:where(:scope):is(.nse-window__control--hud-close) .nse-window__control-paint {
   background: var(--nse-window-hud-close-background, #cbd5df);
 }
 
-.nse-window-view--popover::before {
+.nse-window-view--popover::before,
+:where(:scope):is(.nse-window-view--popover)::before {
   position: absolute;
   width: 10px;
   height: 10px;
@@ -282,7 +321,8 @@
   transform: rotate(45deg);
 }
 
-.nse-window-view--borderless {
+.nse-window-view--borderless,
+:where(:scope):is(.nse-window-view--borderless) {
   --nse-window-shadow: none;
   color: inherit;
   background: transparent;
@@ -291,56 +331,84 @@
   box-shadow: none;
 }
 
-.nse-window__resize-handle {
+.nse-window__resize-handle,
+:where(:scope):is(.nse-window__resize-handle) {
   position: absolute;
   z-index: 2;
   touch-action: none;
 }
 
 .nse-window__resize-handle--block-start,
-.nse-window__resize-handle--block-end {
+:where(:scope):is(.nse-window__resize-handle--block-start),
+.nse-window__resize-handle--block-end,
+:where(:scope):is(.nse-window__resize-handle--block-end) {
   inset-inline: 8px;
   height: 8px;
 }
 
-.nse-window__resize-handle--block-start { inset-block-start: -4px; cursor: ns-resize; }
-.nse-window__resize-handle--block-end { inset-block-end: -4px; cursor: ns-resize; }
+.nse-window__resize-handle--block-start,
+:where(:scope):is(.nse-window__resize-handle--block-start) { inset-block-start: -4px; cursor: ns-resize; }
+.nse-window__resize-handle--block-end,
+:where(:scope):is(.nse-window__resize-handle--block-end) { inset-block-end: -4px; cursor: ns-resize; }
 
 .nse-window__resize-handle--inline-start,
-.nse-window__resize-handle--inline-end {
+:where(:scope):is(.nse-window__resize-handle--inline-start),
+.nse-window__resize-handle--inline-end,
+:where(:scope):is(.nse-window__resize-handle--inline-end) {
   inset-block: 8px;
   width: 8px;
 }
 
-.nse-window__resize-handle--inline-start { inset-inline-start: -4px; cursor: ew-resize; }
-.nse-window__resize-handle--inline-end { inset-inline-end: -4px; cursor: ew-resize; }
+.nse-window__resize-handle--inline-start,
+:where(:scope):is(.nse-window__resize-handle--inline-start) { inset-inline-start: -4px; cursor: ew-resize; }
+.nse-window__resize-handle--inline-end,
+:where(:scope):is(.nse-window__resize-handle--inline-end) { inset-inline-end: -4px; cursor: ew-resize; }
 
 .nse-window__resize-handle--block-start-inline-start,
+:where(:scope):is(.nse-window__resize-handle--block-start-inline-start),
 .nse-window__resize-handle--block-start-inline-end,
+:where(:scope):is(.nse-window__resize-handle--block-start-inline-end),
 .nse-window__resize-handle--block-end-inline-start,
-.nse-window__resize-handle--block-end-inline-end {
+:where(:scope):is(.nse-window__resize-handle--block-end-inline-start),
+.nse-window__resize-handle--block-end-inline-end,
+:where(:scope):is(.nse-window__resize-handle--block-end-inline-end) {
   width: var(--nse-window-resize-glyph-size);
   height: var(--nse-window-resize-glyph-size);
 }
 
-.nse-window__resize-handle--block-start-inline-start { inset-block-start: -4px; inset-inline-start: -4px; cursor: nwse-resize; }
-.nse-window__resize-handle--block-start-inline-end { inset-block-start: -4px; inset-inline-end: -4px; cursor: nesw-resize; }
-.nse-window__resize-handle--block-end-inline-start { inset-block-end: -4px; inset-inline-start: -4px; cursor: nesw-resize; }
-.nse-window__resize-handle--block-end-inline-end { inset-block-end: -4px; inset-inline-end: -4px; cursor: nwse-resize; }
+.nse-window__resize-handle--block-start-inline-start,
+:where(:scope):is(.nse-window__resize-handle--block-start-inline-start) { inset-block-start: -4px; inset-inline-start: -4px; cursor: nwse-resize; }
+.nse-window__resize-handle--block-start-inline-end,
+:where(:scope):is(.nse-window__resize-handle--block-start-inline-end) { inset-block-start: -4px; inset-inline-end: -4px; cursor: nesw-resize; }
+.nse-window__resize-handle--block-end-inline-start,
+:where(:scope):is(.nse-window__resize-handle--block-end-inline-start) { inset-block-end: -4px; inset-inline-start: -4px; cursor: nesw-resize; }
+.nse-window__resize-handle--block-end-inline-end,
+:where(:scope):is(.nse-window__resize-handle--block-end-inline-end) { inset-block-end: -4px; inset-inline-end: -4px; cursor: nwse-resize; }
 
 @media (forced-colors: active) {
   .nse-window-view,
-  .nse-window__titlebar,
-  .nse-window__control-paint {
+:where(:scope):is(.nse-window-view),
+.nse-window__titlebar,
+:where(:scope):is(.nse-window__titlebar),
+.nse-window__control-paint,
+:where(:scope):is(.nse-window__control-paint) {
     border-color: CanvasText;
     forced-color-adjust: auto;
   }
 
-  .nse-window__control:focus-visible { outline-color: Highlight; }
+  .nse-window__control:focus-visible,
+:where(:scope):is(.nse-window__control:focus-visible) { outline-color: Highlight; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .nse-window-view,
-  .nse-window__control,
-  .nse-window__control-paint { transition: none !important; }
+:where(:scope):is(.nse-window-view),
+.nse-window__control,
+:where(:scope):is(.nse-window__control),
+.nse-window__control-paint,
+:where(:scope):is(.nse-window__control-paint) { transition: none !important; }
+}
+
+}
+
 }

@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -18,7 +21,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-:where(.atmo-metal, .nse-material-metal) {
+:where(.atmo-metal,.nse-material-metal),
+:where(:scope):is(:where(.atmo-metal,.nse-material-metal)) {
   background:
     radial-gradient(circle at 50% 50%, #fbfdff 0, #d9e1e9 19%, #667283 45%, #050912 73%, #dce7f1 100%);
   box-shadow:
@@ -27,7 +31,8 @@
     0 24px 44px rgba(0, 0, 0, 0.58);
 }
 
-:where(.atmo-window-chrome, .nse-material-window-chrome) {
+:where(.atmo-window-chrome,.nse-material-window-chrome),
+:where(:scope):is(:where(.atmo-window-chrome,.nse-material-window-chrome)) {
   background:
     linear-gradient(180deg, rgba(245, 249, 253, 0.9), rgba(170, 185, 202, 0.9) 45%, rgba(72, 85, 104, 0.88)),
     url("/assets/webspring/brushed-metal.webp");
@@ -36,4 +41,8 @@
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.9),
     0 24px 80px rgba(0, 0, 0, 0.54);
+}
+
+}
+
 }

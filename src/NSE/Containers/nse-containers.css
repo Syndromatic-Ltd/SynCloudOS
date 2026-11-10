@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -19,117 +22,150 @@
  */
 
 .nse-container-pane,
+:where(:scope):is(.nse-container-pane),
 .nse-container-drawer,
-.nse-container-sliding-view {
+:where(:scope):is(.nse-container-drawer),
+.nse-container-sliding-view,
+:where(:scope):is(.nse-container-sliding-view) {
   box-sizing: border-box;
   min-inline-size: 0;
 }
 
 .nse-container-pane-header,
-.nse-container-pane-footer{
+:where(:scope):is(.nse-container-pane-header),
+.nse-container-pane-footer,
+:where(:scope):is(.nse-container-pane-footer){
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.nse-container-pane-header{
+.nse-container-pane-header,
+:where(:scope):is(.nse-container-pane-header){
   justify-content: space-between;
 }
 
-.nse-container-pane-header h2{
+.nse-container-pane-header h2,
+:where(:scope):is(.nse-container-pane-header) h2{
   margin: 0;
   font: inherit;
   font-weight: 700;
 }
 
-.nse-container-pane-subtitle{
+.nse-container-pane-subtitle,
+:where(:scope):is(.nse-container-pane-subtitle){
   margin: 0;
   color: color-mix(in srgb, currentColor 66%, transparent);
 }
 
-.nse-container-pane-body{
+.nse-container-pane-body,
+:where(:scope):is(.nse-container-pane-body){
   min-inline-size: 0;
 }
 
-.nse-container-pane {
+.nse-container-pane,
+:where(:scope):is(.nse-container-pane) {
   display: flex;
   flex-direction: column;
   gap: var(--nse-spacing-related);
   padding: var(--nse-content-margin);
 }
 
-.nse-container-pane[data-variant="plain"] {
+.nse-container-pane[data-variant="plain"],
+:where(:scope):is(.nse-container-pane[data-variant="plain"]) {
   padding: 0;
 }
 
 .nse-container-pane[data-variant="surface"],
-.nse-container-pane[data-variant="floating"] {
+:where(:scope):is(.nse-container-pane[data-variant="surface"]),
+.nse-container-pane[data-variant="floating"],
+:where(:scope):is(.nse-container-pane[data-variant="floating"]) {
   background: color-mix(in srgb, canvas 76%, white 8%);
   border: 1px solid color-mix(in srgb, currentColor 16%, transparent);
 }
 
 .nse-container-pane[data-variant="sidebar"],
-.nse-container-pane[data-variant="inspector"] {
+:where(:scope):is(.nse-container-pane[data-variant="sidebar"]),
+.nse-container-pane[data-variant="inspector"],
+:where(:scope):is(.nse-container-pane[data-variant="inspector"]) {
   background: color-mix(in srgb, canvas 82%, currentColor 4%);
 }
 
-.nse-container-pane-actions {
+.nse-container-pane-actions,
+:where(:scope):is(.nse-container-pane-actions) {
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
 
-.nse-container-drawer {
+.nse-container-drawer,
+:where(:scope):is(.nse-container-drawer) {
   position: relative;
   inline-size: 100%;
 }
 
-.nse-container-drawer[hidden] {
+.nse-container-drawer[hidden],
+:where(:scope):is(.nse-container-drawer[hidden]) {
   display: none;
 }
 
-.nse-container-sliding-view {
+.nse-container-sliding-view,
+:where(:scope):is(.nse-container-sliding-view) {
   display: grid;
   gap: 8px;
 }
 
-.nse-container-sliding-view-controls {
+.nse-container-sliding-view-controls,
+:where(:scope):is(.nse-container-sliding-view-controls) {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
 
-.nse-container-sliding-view-viewport {
+.nse-container-sliding-view-viewport,
+:where(:scope):is(.nse-container-sliding-view-viewport) {
   overflow: hidden;
   min-inline-size: 0;
 }
 
-.nse-container-sliding-view-track {
+.nse-container-sliding-view-track,
+:where(:scope):is(.nse-container-sliding-view-track) {
   display: flex;
   transition: transform 220ms ease;
 }
 
-.nse-container-sliding-view[data-axis="vertical"] .nse-container-sliding-view-track {
+.nse-container-sliding-view[data-axis="vertical"] .nse-container-sliding-view-track,
+:where(:scope):is(.nse-container-sliding-view[data-axis="vertical"]) .nse-container-sliding-view-track {
   flex-direction: column;
 }
 
-.nse-container-sliding-view-panel {
+.nse-container-sliding-view-panel,
+:where(:scope):is(.nse-container-sliding-view-panel) {
   flex: 0 0 100%;
   min-inline-size: 0;
 }
 
 /* An NSEPageController fills its superview: in a container with a set height its pages take that
    height; otherwise they size to their content. */
-.nse-page-controller {
+.nse-page-controller,
+:where(:scope):is(.nse-page-controller) {
   block-size: 100%;
 }
 
-.nse-page-controller.nse-container-sliding-view {
+.nse-page-controller.nse-container-sliding-view,
+:where(:scope):is(.nse-page-controller.nse-container-sliding-view) {
   grid-template-rows: minmax(0, 1fr);
 }
 
 .nse-page-controller .nse-container-sliding-view-viewport,
+:where(:scope):is(.nse-page-controller) .nse-container-sliding-view-viewport,
 .nse-page-controller .nse-container-sliding-view-track,
-.nse-page-controller .nse-container-sliding-view-panel > * {
+:where(:scope):is(.nse-page-controller) .nse-container-sliding-view-track,
+.nse-page-controller .nse-container-sliding-view-panel>*,
+:where(:scope):is(.nse-page-controller) .nse-container-sliding-view-panel>* {
   block-size: 100%;
+}
+
+}
+
 }

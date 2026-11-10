@@ -209,7 +209,7 @@ export function NSEOverlayProvider({
     <div
       ref={setPortalHost}
       {...appearanceProjection}
-      style={screenSafeArea.properties}
+      style={{ ...appearanceProjection.style, ...screenSafeArea.properties }}
       // Mounted away from the provider element, the host carries the provider
       // marker itself so events from its overlays still resolve here.
       data-nse-overlay-provider={relocated ? providerId : undefined}

@@ -394,11 +394,12 @@ async function main() {
     .replace("../../src/SynCloudOS/AppSDK/fx/runtime.ts", "./fx-attribution-runtime.js")
     .replace("../../src/SynCloudOS/AppSDK/manifest/synappManifestValidator.generated.mjs", "./manifest-validator.mjs")
     .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs"));
-  for (const file of ["bundle-paths.mjs","project-derivation.mjs","manifest-source.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs","pwa-plugin.mjs"]) {
+  for (const file of ["theme-bundles.mjs","theme-loading.mjs","bundle-paths.mjs","project-derivation.mjs","manifest-source.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs","pwa-plugin.mjs"]) {
     writeFileSync(resolve(directory, file), readFileSync(resolve(repositoryRoot, "scripts/synware", file), "utf8")
       .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs")
       .replace("../../src/SynCloudOS/InstalledApplications/webAppManifest.mjs", "./web-app-manifest.mjs")
-      .replace("../../src/SynCloudOS/InstalledApplications/serviceWorker.mjs", "./service-worker.mjs"));
+      .replace("../../src/SynCloudOS/InstalledApplications/serviceWorker.mjs", "./service-worker.mjs")
+      .replace('new URL("../../tooling/nse-theme-contract.json", import.meta.url)', 'new URL("./tooling/nse-theme-contract.json", import.meta.url)'));
   }
   cpSync(resolve(repositoryRoot, "src/SynCloudOS/InstalledApplications/webAppManifest.mjs"), resolve(directory, "web-app-manifest.mjs"));
   cpSync(resolve(repositoryRoot, "src/SynCloudOS/InstalledApplications/serviceWorker.mjs"), resolve(directory, "service-worker.mjs"));
@@ -410,6 +411,7 @@ async function main() {
     .replace('new URL("../../../FX/", import.meta.url)', 'new URL("./types/FX/", import.meta.url)')
     .replace('const entryName = "public.ts"', 'const entryName = "public.d.ts"'));
   cpSync(resolve(repositoryRoot, "src/SynCloudOS/AppSDK/manifest/synappManifestValidator.generated.mjs"), resolve(directory, "manifest-validator.mjs"));
+  cpSync(resolve(repositoryRoot, "scripts/synware/virtual-themes.d.ts"), resolve(typesDirectory, "virtual-themes.d.ts"));
   cpSync(resolve(repositoryRoot, "scripts/synware/vite-plugin.d.mts"), resolve(typesDirectory, "vite.d.mts"));
   exports["./vite"] = { types: "./types/vite.d.mts", import: "./vite.mjs" };
   if (!existsSync(resolve(directory, "nse/styles.css"))) throw new Error("SynWare SDK did not emit its required NSE stylesheet.");
@@ -420,6 +422,8 @@ async function main() {
   // These libraries occur in emitted public declarations even when runtime code is bundled.
   const dependencies = Object.fromEntries(["@floating-ui/dom", "@tiptap/pm", "framer-motion", "harfbuzzjs", "oauth4webapi", "pdf-lib", "woff2-encoder"].map((name) => [name, repositoryManifest.dependencies[name]]));
   dependencies.typescript = repositoryManifest.devDependencies.typescript;
+  dependencies["css-tree"] = repositoryManifest.devDependencies["css-tree"];
+  dependencies.saxes = repositoryManifest.devDependencies.saxes;
   assertFxPackageExports(exports);
   await writeDeveloperSdkData({ repositoryRoot, directory, commit, source });
   writePackage({ directory, name: synWarePackageName, exports, dependencies });

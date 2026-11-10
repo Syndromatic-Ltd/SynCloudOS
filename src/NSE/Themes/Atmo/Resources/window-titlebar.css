@@ -1,6 +1,11 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /* Atmo owns NSWindow.ToolbarStyle appearance. The expanded geometry follows Main/Phone.dc.html. */
-[data-nse-theme="com.syndromatic.atmo"] { --nse-atmo-window-titlebar-radius: 14px; }
-[data-nse-theme="com.syndromatic.atmo"] .nse-window-titlebar-content[data-toolbar-style="expanded"] {
+:scope { --nse-atmo-window-titlebar-radius: 14px; }
+:scope .nse-window-titlebar-content[data-toolbar-style="expanded"],
+:scope:is(.nse-window-titlebar-content[data-toolbar-style="expanded"]),
+:scope.nse-window-titlebar-content[data-toolbar-style="expanded"] {
   padding: 2px 28px 18px;
   background: linear-gradient(#e6e8eb, #c9ccd1);
   border-bottom: 1px solid #9ea2a9;
@@ -8,32 +13,61 @@
   color: #2b3546;
   text-shadow: 0 1px 0 rgb(255 255 255 / 70%);
 }
-[data-nse-theme="com.syndromatic.atmo"] .nse-window-titlebar-heading { margin: 0; font: 600 30px/40px "Syndromatic UI", "Segoe UI", sans-serif; }
-[data-nse-theme="com.syndromatic.atmo"] .nse-window-titlebar-content[data-toolbar-style="preference"],
-[data-nse-theme="com.syndromatic.atmo"] .nse-window__titlebar[data-toolbar-style="preference"] {
+:scope .nse-window-titlebar-heading,
+:scope:is(.nse-window-titlebar-heading),
+:scope.nse-window-titlebar-heading { margin: 0; font: 600 30px/40px "Syndromatic UI", "Segoe UI", sans-serif; }
+:scope .nse-window-titlebar-content[data-toolbar-style="preference"],
+:scope:is(.nse-window-titlebar-content[data-toolbar-style="preference"]),
+:scope.nse-window-titlebar-content[data-toolbar-style="preference"],
+:scope .nse-window__titlebar[data-toolbar-style="preference"],
+:scope:is(.nse-window__titlebar[data-toolbar-style="preference"]),
+:scope.nse-window__titlebar[data-toolbar-style="preference"] {
   min-height: 66px; padding: 8px; gap: 10px;
   border: 0; border-radius: 14px 14px 0 0;
   color: var(--nse-prefs-header-title-colour, #f7f8f9);
   text-shadow: var(--nse-prefs-header-title-shadow, 0 -1px 0 rgb(0 0 0 / 55%));
 }
-[data-nse-theme="com.syndromatic.atmo"] .nse-window-titlebar-content[data-toolbar-style="preference"] .nse-window-titlebar-heading { font-size: 19px; font-weight: 700; line-height: 1.35; }
-[data-nse-theme="com.syndromatic.atmo"] .nse-window-titlebar-content[data-toolbar-style="preference"] .nse-window-titlebar-leading { min-height: 50px; }
-[data-nse-theme="com.syndromatic.atmo"] .nse-window-titlebar-content .nse-window-titlebar-subtitle { text-transform: none; letter-spacing: normal; }
-[data-nse-theme="com.syndromatic.atmo"] [data-toolbar-style="expanded"] > .nse-window__title { position: absolute; width: 1px; height: 1px; clip-path: inset(50%); overflow: hidden; }
-[data-nse-theme="com.syndromatic.atmo"] .nse-window__titlebar[data-toolbar-style="preference"] { height: 66px; min-height: 66px; }
-[data-nse-theme="com.syndromatic.atmo"] .nse-window__titlebar[data-toolbar-style="preference"] .nse-window__title { font-size: 19px; color: #f7f8f9; text-shadow: 0 -1px 0 rgb(0 0 0 / 55%); }
-[data-nse-theme="com.syndromatic.atmo"][data-mode="dark"] .nse-window-titlebar-content[data-toolbar-style="expanded"],
-[data-nse-theme="com.syndromatic.atmo"] [data-mode="dark"] .nse-window-titlebar-content[data-toolbar-style="expanded"] {
+:scope .nse-window-titlebar-content[data-toolbar-style="preference"] .nse-window-titlebar-heading,
+:scope:is(.nse-window-titlebar-content[data-toolbar-style="preference"]) .nse-window-titlebar-heading,
+:scope.nse-window-titlebar-content[data-toolbar-style="preference"] .nse-window-titlebar-heading { font-size: 19px; font-weight: 700; line-height: 1.35; }
+:scope .nse-window-titlebar-content[data-toolbar-style="preference"] .nse-window-titlebar-leading,
+:scope:is(.nse-window-titlebar-content[data-toolbar-style="preference"]) .nse-window-titlebar-leading,
+:scope.nse-window-titlebar-content[data-toolbar-style="preference"] .nse-window-titlebar-leading { min-height: 50px; }
+:scope .nse-window-titlebar-content .nse-window-titlebar-subtitle,
+:scope:is(.nse-window-titlebar-content) .nse-window-titlebar-subtitle,
+:scope.nse-window-titlebar-content .nse-window-titlebar-subtitle { text-transform: none; letter-spacing: normal; }
+:scope [data-toolbar-style="expanded"]>.nse-window__title,
+:scope:is([data-toolbar-style="expanded"])>.nse-window__title,
+:scope[data-toolbar-style="expanded"]>.nse-window__title { position: absolute; width: 1px; height: 1px; clip-path: inset(50%); overflow: hidden; }
+:scope .nse-window__titlebar[data-toolbar-style="preference"],
+:scope:is(.nse-window__titlebar[data-toolbar-style="preference"]),
+:scope.nse-window__titlebar[data-toolbar-style="preference"] { height: 66px; min-height: 66px; }
+:scope .nse-window__titlebar[data-toolbar-style="preference"] .nse-window__title,
+:scope:is(.nse-window__titlebar[data-toolbar-style="preference"]) .nse-window__title,
+:scope.nse-window__titlebar[data-toolbar-style="preference"] .nse-window__title { font-size: 19px; color: #f7f8f9; text-shadow: 0 -1px 0 rgb(0 0 0 / 55%); }
+:scope[data-mode="dark"] .nse-window-titlebar-content[data-toolbar-style="expanded"],
+:scope[data-mode="dark"]:is(.nse-window-titlebar-content[data-toolbar-style="expanded"]),
+:scope [data-mode="dark"] .nse-window-titlebar-content[data-toolbar-style="expanded"],
+:scope:is([data-mode="dark"]) .nse-window-titlebar-content[data-toolbar-style="expanded"],
+:scope:is([data-mode="dark"]):is(.nse-window-titlebar-content[data-toolbar-style="expanded"]) {
   background: linear-gradient(#434a55, #303741); border-bottom-color: #14181e; color: #edf1f6;
   text-shadow: 0 -1px 0 rgb(0 0 0 / 55%);
 }
 @media (max-width: 767px) {
-  [data-nse-theme="com.syndromatic.atmo"] .nse-window-titlebar-content[data-toolbar-style="expanded"] { padding: 0 20px 14px; }
-  [data-nse-theme="com.syndromatic.atmo"] .nse-window-titlebar-content[data-toolbar-style="expanded"] .nse-window-titlebar-heading { font-size: 28px; line-height: 37px; }
+  :scope .nse-window-titlebar-content[data-toolbar-style="expanded"],
+:scope:is(.nse-window-titlebar-content[data-toolbar-style="expanded"]),
+:scope.nse-window-titlebar-content[data-toolbar-style="expanded"] { padding: 0 20px 14px; }
+  :scope .nse-window-titlebar-content[data-toolbar-style="expanded"] .nse-window-titlebar-heading,
+:scope:is(.nse-window-titlebar-content[data-toolbar-style="expanded"]) .nse-window-titlebar-heading,
+:scope.nse-window-titlebar-content[data-toolbar-style="expanded"] .nse-window-titlebar-heading { font-size: 28px; line-height: 37px; }
 }
 
-[data-nse-theme="com.syndromatic.atmo"] .nse-window-titlebar-content[data-toolbar-style="preference"],
-[data-nse-theme="com.syndromatic.atmo"] .nse-window__titlebar[data-toolbar-style="preference"] {
+:scope .nse-window-titlebar-content[data-toolbar-style="preference"],
+:scope:is(.nse-window-titlebar-content[data-toolbar-style="preference"]),
+:scope.nse-window-titlebar-content[data-toolbar-style="preference"],
+:scope .nse-window__titlebar[data-toolbar-style="preference"],
+:scope:is(.nse-window__titlebar[data-toolbar-style="preference"]),
+:scope.nse-window__titlebar[data-toolbar-style="preference"] {
 
   border-image: none;
   border-radius: var(--nse-atmo-window-titlebar-radius) var(--nse-atmo-window-titlebar-radius) 0 0;
@@ -68,8 +102,11 @@
 }
 
 
-[data-nse-theme="com.syndromatic.atmo"][data-mode="dark"] .nse-window-titlebar-content[data-toolbar-style="preference"],
-[data-nse-theme="com.syndromatic.atmo"] [data-mode="dark"] .nse-window-titlebar-content[data-toolbar-style="preference"] {
+:scope[data-mode="dark"] .nse-window-titlebar-content[data-toolbar-style="preference"],
+:scope[data-mode="dark"]:is(.nse-window-titlebar-content[data-toolbar-style="preference"]),
+:scope [data-mode="dark"] .nse-window-titlebar-content[data-toolbar-style="preference"],
+:scope:is([data-mode="dark"]) .nse-window-titlebar-content[data-toolbar-style="preference"],
+:scope:is([data-mode="dark"]):is(.nse-window-titlebar-content[data-toolbar-style="preference"]) {
   background:
     linear-gradient(90deg, rgba(0, 0, 0, 0.28) 0.5px, rgba(0, 0, 0, 0.14) 3.5px, rgba(0, 0, 0, 0.06) 5.5px, rgba(0, 0, 0, 0) 9px)
       left top / 9px calc(100% - 3px) no-repeat,
@@ -98,4 +135,7 @@
     );
   /* After the shorthand, which resets it — same trap as the light plate. */
   background-origin: border-box;
+}
+
+}
 }

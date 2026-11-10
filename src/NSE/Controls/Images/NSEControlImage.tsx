@@ -19,15 +19,21 @@
  */
 
 import React, { type ReactNode } from "react";
+import { useNSEAppearance } from "../../Appearance/NSEAppearanceProvider";
 import { NSEImage } from "./NSEImageResource";
 
 /** @internal The image cell shared by buttons and segments. Template tint inherits the control's colour. */
 export function NSEControlImage({ image }: { readonly image: ReactNode | NSEImage }): ReactNode {
-  if (image instanceof NSEImage) return <span aria-hidden="true" data-nse-image-template={image.name} style={{
-    display: "inline-block", flexShrink: 0, width: image.size.width, height: image.size.height,
+  const { theme } = useNSEAppearance();
+  const resolved = image instanceof NSEImage ? NSEImage.named(image.name, theme) ?? image : null;
+  const source = resolved ? Object.keys(resolved.files).length > 1 ? `image-set(${Object.entries(resolved.files).map(([scale, path]) => `url("${path}") ${scale}`).join(", ")})` : `url("${resolved.src}")` : "";
+  const maskSource = typeof CSS !== "undefined" && CSS.supports?.("mask-image", source) ? source : resolved ? `url("${resolved.src}")` : "";
+  if (resolved && !resolved.isTemplate) return <img src={resolved.src} srcSet={Object.entries(resolved.files).map(([scale, path]) => `${path} ${scale}`).join(", ")} alt="" draggable={false} width={resolved.size.width} height={resolved.size.height} />;
+  if (resolved) return <span aria-hidden="true" data-nse-image-template={resolved.name} style={{
+    display: "inline-block", flexShrink: 0, width: resolved.size.width, height: resolved.size.height,
     maxWidth: "100%", maxHeight: "100%", backgroundColor: "currentColor",
-    maskImage: `url("${image.src}")`, WebkitMaskImage: `url("${image.src}")`,
+    maskImage: maskSource, WebkitMaskImage: maskSource,
     maskSize: "100% 100%", WebkitMaskSize: "100% 100%", maskRepeat: "no-repeat", WebkitMaskRepeat: "no-repeat",
   }} />;
-  return typeof image === "string" ? <img src={image} alt="" draggable={false} /> : image;
+  return typeof image === "string" ? <img src={image} alt="" draggable={false} /> : image as ReactNode;
 }

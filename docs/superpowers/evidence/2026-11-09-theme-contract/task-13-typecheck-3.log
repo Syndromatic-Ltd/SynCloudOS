@@ -1,0 +1,5 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 typecheck
+npm notice run tsc -b --pretty false
+src/NSE/Overlays/NSEPopup.tsx(265,71): error TS2339: Property 'style' does not exist on type '{ readonly ref: (element: HTMLElement | null) => void; readonly "data-nse-control": "sheet" | "popover" | "menu" | "tooltip"; readonly "data-nse-part": "surface"; readonly "data-nse-role": "overlay"; ... 4 more ...; readonly inert?: boolean | undefined; }'.
+src/NSE/Overlays/NSEPopup.tsx(273,73): error TS2339: Property 'style' does not exist on type '{ readonly ref: (element: HTMLElement | null) => void; readonly "data-nse-control": "sheet" | "popover" | "menu" | "tooltip"; readonly "data-nse-part": "surface"; readonly "data-nse-role": "overlay"; ... 4 more ...; readonly inert?: boolean | undefined; }'.
+src/NSE/Tooltips/NSETooltip.tsx(52,71): error TS2339: Property 'style' does not exist on type '{ readonly ref: (element: HTMLElement | null) => void; readonly "data-nse-control": "sheet" | "popover" | "menu" | "tooltip"; readonly "data-nse-part": "surface"; readonly "data-nse-role": "overlay"; ... 4 more ...; readonly inert?: boolean | undefined; }'.

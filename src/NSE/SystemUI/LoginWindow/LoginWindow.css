@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -34,7 +37,9 @@
  * composite baked in so the browser only has to multiply.
  */
 
-.nse-login-window {
+.nse-login-window,
+:where(:scope):is(.nse-login-window),
+:where(:scope).nse-login-window {
   position: relative;
   z-index: 1;
   container-type: inline-size;
@@ -95,7 +100,9 @@
 
 /* ---------------------------------------------------------------- hardware */
 
-.nse-login-window-hang {
+.nse-login-window-hang,
+:where(:scope):is(.nse-login-window-hang),
+:where(:scope).nse-login-window-hang {
   position: absolute;
   left: 50%;
   top: 0;
@@ -106,7 +113,9 @@
   pointer-events: none;
 }
 
-.nse-login-window-hang-flipper {
+.nse-login-window-hang-flipper,
+:where(:scope):is(.nse-login-window-hang-flipper),
+:where(:scope).nse-login-window-hang-flipper {
   position: absolute;
   inset: 0;
   -webkit-transform-style: preserve-3d;
@@ -114,7 +123,9 @@
   transform-origin: 50% var(--login-apex-y);
 }
 
-.nse-login-window-swing-stage {
+.nse-login-window-swing-stage,
+:where(:scope):is(.nse-login-window-swing-stage),
+:where(:scope).nse-login-window-swing-stage {
   display: flow-root;
   position: relative;
   z-index: 2;
@@ -123,7 +134,9 @@
   transform-style: preserve-3d;
 }
 
-.nse-login-window-rope-shadow {
+.nse-login-window-rope-shadow,
+:where(:scope):is(.nse-login-window-rope-shadow),
+:where(:scope).nse-login-window-rope-shadow {
   position: absolute;
   left: 50%;
   top: 18.4cqw;
@@ -133,7 +146,9 @@
   filter: blur(1px);
 }
 
-.nse-login-window-rope {
+.nse-login-window-rope,
+:where(:scope):is(.nse-login-window-rope),
+:where(:scope).nse-login-window-rope {
   position: absolute;
   top: var(--login-apex-y);
   z-index: 8;
@@ -145,14 +160,20 @@
     drop-shadow(0 4px 3px rgba(0, 0, 0, 0.62));
 }
 
-.nse-login-window-rope-left { left: var(--login-eyelet-center-x); }
-.nse-login-window-rope-right {
+.nse-login-window-rope-left,
+:where(:scope):is(.nse-login-window-rope-left),
+:where(:scope).nse-login-window-rope-left { left: var(--login-eyelet-center-x); }
+.nse-login-window-rope-right,
+:where(:scope):is(.nse-login-window-rope-right),
+:where(:scope).nse-login-window-rope-right {
   left: 50cqw;
   /* Its own anchor, because the right grommet is not the left one mirrored. */
   width: calc(50cqw - var(--login-eyelet-center-x-right));
 }
 
-.nse-login-window-top-tack {
+.nse-login-window-top-tack,
+:where(:scope):is(.nse-login-window-top-tack),
+:where(:scope).nse-login-window-top-tack {
   position: absolute;
   left: 50%;
   top: var(--login-apex-y);
@@ -163,34 +184,42 @@
 }
 
 .nse-login-window-top-tack img:first-child,
-.nse-login-window-top-tack img:last-child {
+:where(:scope):is(.nse-login-window-top-tack) img:first-child,
+.nse-login-window-top-tack img:last-child,
+:where(:scope):is(.nse-login-window-top-tack) img:last-child {
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
 }
 
-.nse-login-window-top-tack img:first-child {
+.nse-login-window-top-tack img:first-child,
+:where(:scope):is(.nse-login-window-top-tack) img:first-child {
   width: 10.2cqw;
   height: 10.2cqw;
   filter: drop-shadow(0 5px 6px rgba(0, 0, 0, 0.5));
 }
 
-.nse-login-window-top-tack img:last-child {
+.nse-login-window-top-tack img:last-child,
+:where(:scope):is(.nse-login-window-top-tack) img:last-child {
   width: 5.5cqw;
   height: auto;
 }
 
 /* ------------------------------------------------------------------ plate */
 
-.nse-login-window-shake-stage {
+.nse-login-window-shake-stage,
+:where(:scope):is(.nse-login-window-shake-stage),
+:where(:scope).nse-login-window-shake-stage {
   position: relative;
   z-index: 4;
   margin-top: var(--login-card-top);
   transform-style: preserve-3d;
 }
 
-.nse-login-window-card-stage {
+.nse-login-window-card-stage,
+:where(:scope):is(.nse-login-window-card-stage),
+:where(:scope).nse-login-window-card-stage {
   position: relative;
   width: 100%;
   aspect-ratio: var(--login-plate-aspect);
@@ -199,7 +228,9 @@
   perspective: 1400px;
 }
 
-.nse-login-window-card-flipper {
+.nse-login-window-card-flipper,
+:where(:scope):is(.nse-login-window-card-flipper),
+:where(:scope).nse-login-window-card-flipper {
   position: absolute;
   inset: 0;
   -webkit-transform-style: preserve-3d;
@@ -207,7 +238,9 @@
   transform-origin: 50% 50%;
 }
 
-.nse-login-window-card {
+.nse-login-window-card,
+:where(:scope):is(.nse-login-window-card),
+:where(:scope).nse-login-window-card {
   position: absolute;
   inset: 0;
   /* `hidden` still creates a programmatically scrollable box. Autofocusing the
@@ -236,7 +269,9 @@
    mockup's own order: the turning runs across the bevel like it runs across
    the metal. Painted above it instead, the rim came out ten levels bright —
    exactly the 0.945 the multiply takes out. */
-.nse-login-window-card::after {
+.nse-login-window-card::after,
+:where(:scope):is(.nse-login-window-card)::after,
+:where(:scope).nse-login-window-card::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -246,16 +281,24 @@
   pointer-events: none;
 }
 
-.nse-login-window-face-front { transform: rotateY(0deg) translateZ(0.1px); }
-.nse-login-window-face-back { transform: rotateY(180deg) translateZ(0.1px); }
+.nse-login-window-face-front,
+:where(:scope):is(.nse-login-window-face-front),
+:where(:scope).nse-login-window-face-front { transform: rotateY(0deg) translateZ(0.1px); }
+.nse-login-window-face-back,
+:where(:scope):is(.nse-login-window-face-back),
+:where(:scope).nse-login-window-face-back { transform: rotateY(180deg) translateZ(0.1px); }
 
 .nse-login-window-card-flipper.is-signin .nse-login-window-face-front,
-.nse-login-window-card-flipper.is-recovery .nse-login-window-face-back {
+:where(:scope):is(.nse-login-window-card-flipper.is-signin) .nse-login-window-face-front,
+.nse-login-window-card-flipper.is-recovery .nse-login-window-face-back,
+:where(:scope):is(.nse-login-window-card-flipper.is-recovery) .nse-login-window-face-back {
   pointer-events: auto;
 }
 
 .nse-login-window-card-flipper.is-signin .nse-login-window-face-back,
-.nse-login-window-card-flipper.is-recovery .nse-login-window-face-front {
+:where(:scope):is(.nse-login-window-card-flipper.is-signin) .nse-login-window-face-back,
+.nse-login-window-card-flipper.is-recovery .nse-login-window-face-front,
+:where(:scope):is(.nse-login-window-card-flipper.is-recovery) .nse-login-window-face-front {
   pointer-events: none;
 }
 
@@ -278,7 +321,9 @@
    about its own origin — but leaves the browser magnifying a gradient it
    rasterised at layout size. A square that cannot be uncovered needs no scale
    term at all, so this rasterises once, at its own size, and only rotates. */
-.nse-login-window-texture {
+.nse-login-window-texture,
+:where(:scope):is(.nse-login-window-texture),
+:where(:scope).nse-login-window-texture {
   position: absolute;
   left: var(--login-sheen-left);
   top: var(--login-sheen-top);
@@ -304,15 +349,18 @@
    Both faces carry a texture layer and both get the same rule. The one turned
    away is not on screen to disagree, and it needs to have moved by the time it
    comes round. `both` holds the end value, which is what makes the pair chain. */
-.nse-login-window[data-sheen="enter"] .nse-login-window-texture {
+.nse-login-window[data-sheen="enter"] .nse-login-window-texture,
+:where(:scope):is(.nse-login-window[data-sheen="enter"]) .nse-login-window-texture {
   animation: login-window-metal-settle 1180ms cubic-bezier(0.2, 0.9, 0.18, 1) both;
 }
 
-.nse-login-window[data-sheen="flip-out"] .nse-login-window-texture {
+.nse-login-window[data-sheen="flip-out"] .nse-login-window-texture,
+:where(:scope):is(.nse-login-window[data-sheen="flip-out"]) .nse-login-window-texture {
   animation: login-window-metal-flip-out 500ms cubic-bezier(0.2, 0.9, 0.18, 1) both;
 }
 
-.nse-login-window[data-sheen="flip-back"] .nse-login-window-texture {
+.nse-login-window[data-sheen="flip-back"] .nse-login-window-texture,
+:where(:scope):is(.nse-login-window[data-sheen="flip-back"]) .nse-login-window-texture {
   animation: login-window-metal-flip-back 500ms cubic-bezier(0.2, 0.9, 0.18, 1) both;
 }
 
@@ -333,7 +381,9 @@
    the metal's convergence point at every size: this is one image cropped to the
    exact region the mockup used, not a repeat. The composite is baked in, so the
    layer multiplies at full strength. */
-.nse-login-window-texture-turn {
+.nse-login-window-texture-turn,
+:where(:scope):is(.nse-login-window-texture-turn),
+:where(:scope).nse-login-window-texture-turn {
   position: absolute;
   inset: 0;
   z-index: 30;
@@ -343,7 +393,9 @@
   pointer-events: none;
 }
 
-.nse-login-window-beta-ribbon {
+.nse-login-window-beta-ribbon,
+:where(:scope):is(.nse-login-window-beta-ribbon),
+:where(:scope).nse-login-window-beta-ribbon {
   /* Outside the card, so it can overhang the corner the way the mockup's does
      rather than being sliced off by the plate's radius.
 
@@ -365,7 +417,9 @@
   pointer-events: none;
 }
 
-.nse-login-window-ring {
+.nse-login-window-ring,
+:where(:scope):is(.nse-login-window-ring),
+:where(:scope).nse-login-window-ring {
   position: absolute;
   top: var(--login-eyelet-top);
   z-index: 16;
@@ -378,8 +432,12 @@
   filter: drop-shadow(0 0.25cqw 0.3cqw rgba(0, 0, 0, 0.42));
 }
 
-.nse-login-window-ring-left { left: var(--login-eyelet-inset); }
-.nse-login-window-ring-right { right: var(--login-eyelet-inset-right); }
+.nse-login-window-ring-left,
+:where(:scope):is(.nse-login-window-ring-left),
+:where(:scope).nse-login-window-ring-left { left: var(--login-eyelet-inset); }
+.nse-login-window-ring-right,
+:where(:scope):is(.nse-login-window-ring-right),
+:where(:scope).nse-login-window-ring-right { right: var(--login-eyelet-inset-right); }
 
 /* Dropping backface-visibility was not enough on its own. Once the placard
    turns, translateZ(1.2px) is pointing AWAY from the viewer, so the grommets
@@ -387,13 +445,16 @@
    back with its ropes ending in mid-air. Pushing them the other way keeps them
    in front from either side, which is what a hole through a plate does. The
    ring art mirrors with the flip, and a grommet is round, so nothing shows. */
-.nse-login-window-card-flipper.is-recovery .nse-login-window-ring {
+.nse-login-window-card-flipper.is-recovery .nse-login-window-ring,
+:where(:scope):is(.nse-login-window-card-flipper.is-recovery) .nse-login-window-ring {
   transform: translateZ(-1.2px);
 }
 
 /* ---------------------------------------------------------------- content */
 
-.nse-login-window-content {
+.nse-login-window-content,
+:where(:scope):is(.nse-login-window-content),
+:where(:scope).nse-login-window-content {
   position: relative;
   /* Deliberately no z-index: that would make this a stacking context and trap
      .nse-login-action below the turned overlay. Positioned with z-index auto it
@@ -413,7 +474,9 @@
    a 30% black disc with white α25 highlights and black α80 shadows on the
    strokes — so the metal shows through it on its own. Muting it, which is what
    the old `opacity: .76` did, is what made it read as a grey sticker. */
-.nse-login-window-logo {
+.nse-login-window-logo,
+:where(:scope):is(.nse-login-window-logo),
+:where(:scope).nse-login-window-logo {
   width: 27.82cqw;
   height: auto;
   flex: 0 0 auto;
@@ -421,7 +484,9 @@
 }
 
 .nse-login-window h1,
-.nse-login-recovery-content h2 {
+:where(:scope):is(.nse-login-window) h1,
+.nse-login-recovery-content h2,
+:where(:scope):is(.nse-login-recovery-content) h2 {
   margin: 0;
   color: #555759;
   font-family: inherit;
@@ -444,20 +509,26 @@
 
    Reproduced because matching the mockup is the brief. Delete these two rules
    for a centred heading and mark. */
-.nse-login-window h1 {
+.nse-login-window h1,
+:where(:scope):is(.nse-login-window) h1 {
   transform: translateX(0.36cqw);
 }
 
-.nse-login-window-logo {
+.nse-login-window-logo,
+:where(:scope):is(.nse-login-window-logo),
+:where(:scope).nse-login-window-logo {
   transform: translateX(0.24cqw);
 }
 
-.nse-login-recovery-content h2 {
+.nse-login-recovery-content h2,
+:where(:scope):is(.nse-login-recovery-content) h2 {
   font-size: 3.6cqw;
   white-space: normal;
 }
 
-.nse-login-form {
+.nse-login-form,
+:where(:scope):is(.nse-login-form),
+:where(:scope).nse-login-form {
   display: flex;
   position: relative;
   flex: 1;
@@ -490,9 +561,13 @@
    two margins instead of cutting. The button does not move at either step —
    it is pinned to the plate's bottom — so what the reader sees is the Syn ID
    well rising and the password arriving under it. */
-.nse-login-form--password { margin-top: 3.4cqw; }
+.nse-login-form--password,
+:where(:scope):is(.nse-login-form--password),
+:where(:scope).nse-login-form--password { margin-top: 3.4cqw; }
 
-.nse-login-form {
+.nse-login-form,
+:where(:scope):is(.nse-login-form),
+:where(:scope).nse-login-form {
   transition: margin-top 420ms cubic-bezier(0.2, 0.9, 0.18, 1);
 }
 
@@ -500,8 +575,10 @@
    cannot glide from anywhere — they ease out from behind the Syn ID well
    instead, which is where they would have come from. Slightly behind the
    glide so the space is opening as they fill it. */
-.nse-login-form--password .nse-login-field + .nse-login-field,
-.nse-login-form--password .nse-login-form-row {
+.nse-login-form--password .nse-login-field+.nse-login-field,
+:where(:scope):is(.nse-login-form--password) .nse-login-field+.nse-login-field,
+.nse-login-form--password .nse-login-form-row,
+:where(:scope):is(.nse-login-form--password) .nse-login-form-row {
   animation: login-window-row-arrive 380ms cubic-bezier(0.2, 0.9, 0.18, 1) 90ms both;
 }
 
@@ -510,16 +587,21 @@
   to { opacity: 1; transform: none; }
 }
 
-.nse-login-field + .nse-login-field { margin-top: 2.4cqw; }
+.nse-login-field+.nse-login-field,
+:where(:scope):is(.nse-login-field)+.nse-login-field { margin-top: 2.4cqw; }
 
 /* ------------------------------------------------------------------ fields */
 
-.nse-login-field {
+.nse-login-field,
+:where(:scope):is(.nse-login-field),
+:where(:scope).nse-login-field {
   display: block;
   width: 100%;
 }
 
-.nse-login-field-label {
+.nse-login-field-label,
+:where(:scope):is(.nse-login-field-label),
+:where(:scope).nse-login-field-label {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -532,7 +614,8 @@
    does — its interior is the plate's own luminance times 0.70 at every point
    across the width. Painting a flat grey there instead is what made the old
    field look pasted on. */
-.nse-login-field input {
+.nse-login-field input,
+:where(:scope):is(.nse-login-field) input {
   display: block;
   width: 100%;
   height: var(--login-field-height);
@@ -555,7 +638,8 @@
   appearance: none;
 }
 
-.nse-login-field input::placeholder {
+.nse-login-field input::placeholder,
+:where(:scope):is(.nse-login-field) input::placeholder {
   color: rgba(255, 255, 255, 0.72);
   opacity: 1;
 }
@@ -565,7 +649,9 @@
    at the top is deep and long (16px over an 834px plate) because the field is
    read as pressed into the metal, not floated on it. */
 .nse-login-field input:focus,
-.nse-login-field input:focus-visible {
+:where(:scope):is(.nse-login-field) input:focus,
+.nse-login-field input:focus-visible,
+:where(:scope):is(.nse-login-field) input:focus-visible {
   color: #26292d;
   background: #fbfbf9;
   box-shadow:
@@ -575,17 +661,20 @@
   text-shadow: none;
 }
 
-.nse-login-field input:focus::placeholder {
+.nse-login-field input:focus::placeholder,
+:where(:scope):is(.nse-login-field) input:focus::placeholder {
   color: rgba(60, 64, 70, 0.5);
 }
 
-.nse-login-field.is-invalid input {
+.nse-login-field.is-invalid input,
+:where(:scope):is(.nse-login-field.is-invalid) input {
   box-shadow:
     inset 0 0.2cqw 0.24cqw rgba(0, 0, 0, 0.42),
     0 0 0 0.24cqw rgba(196, 84, 84, 0.92);
 }
 
-.nse-login-field.is-invalid input:focus {
+.nse-login-field.is-invalid input:focus,
+:where(:scope):is(.nse-login-field.is-invalid) input:focus {
   box-shadow:
     inset 0 1.9cqw 1.9cqw -1.2cqw rgba(0, 0, 0, 0.52),
     0 0 0 0.24cqw rgba(196, 84, 84, 0.95),
@@ -594,7 +683,8 @@
 
 /* The Syn ID, held above the password once it has been accepted. Same well,
    but inert — it is a record of what was entered, not a control. */
-.nse-login-field--confirmed input {
+.nse-login-field--confirmed input,
+:where(:scope):is(.nse-login-field--confirmed) input {
   color: rgba(255, 255, 255, 0.82);
   cursor: default;
 }
@@ -604,7 +694,9 @@
 /* The mockup has nothing between the password and the button, so this row has
    to earn its place on bare metal rather than sit on it: engraved grey type at
    the plate's own weight, no bright blue anywhere. */
-.nse-login-form-row {
+.nse-login-form-row,
+:where(:scope):is(.nse-login-form-row),
+:where(:scope).nse-login-form-row {
   display: flex;
   position: relative;
   align-items: center;
@@ -619,7 +711,9 @@
   padding: 0 1cqw;
 }
 
-.nse-checkbox {
+.nse-checkbox,
+:where(:scope):is(.nse-checkbox),
+:where(:scope).nse-checkbox {
   display: inline-flex;
   align-items: center;
   gap: 2.2cqw;
@@ -631,12 +725,16 @@
   cursor: pointer;
 }
 
-.nse-checkbox.is-disabled {
+.nse-checkbox.is-disabled,
+:where(:scope):is(.nse-checkbox.is-disabled),
+:where(:scope).nse-checkbox.is-disabled {
   opacity: 0.55;
   cursor: default;
 }
 
-.nse-checkbox-control {
+.nse-checkbox-control,
+:where(:scope):is(.nse-checkbox-control),
+:where(:scope).nse-checkbox-control {
   position: relative;
   display: inline-grid;
   width: 5cqw;
@@ -645,7 +743,8 @@
   flex: 0 0 auto;
 }
 
-.nse-checkbox-control input {
+.nse-checkbox-control input,
+:where(:scope):is(.nse-checkbox-control) input {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -655,13 +754,16 @@
   cursor: inherit;
 }
 
-.nse-checkbox-art {
+.nse-checkbox-art,
+:where(:scope):is(.nse-checkbox-art),
+:where(:scope).nse-checkbox-art {
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
 
-.nse-checkbox-art img {
+.nse-checkbox-art img,
+:where(:scope):is(.nse-checkbox-art) img {
   position: absolute;
   inset: 0;
   width: 5cqw;
@@ -669,17 +771,24 @@
   transition: opacity 160ms ease;
 }
 
-.nse-checkbox-art-checked { opacity: 0; }
-.nse-checkbox input:checked + .nse-checkbox-art .nse-checkbox-art-unchecked { opacity: 0; }
-.nse-checkbox input:checked + .nse-checkbox-art .nse-checkbox-art-checked { opacity: 1; }
+.nse-checkbox-art-checked,
+:where(:scope):is(.nse-checkbox-art-checked),
+:where(:scope).nse-checkbox-art-checked { opacity: 0; }
+.nse-checkbox input:checked+.nse-checkbox-art .nse-checkbox-art-unchecked,
+:where(:scope):is(.nse-checkbox) input:checked+.nse-checkbox-art .nse-checkbox-art-unchecked { opacity: 0; }
+.nse-checkbox input:checked+.nse-checkbox-art .nse-checkbox-art-checked,
+:where(:scope):is(.nse-checkbox) input:checked+.nse-checkbox-art .nse-checkbox-art-checked { opacity: 1; }
 
-.nse-checkbox input:focus-visible + .nse-checkbox-art {
+.nse-checkbox input:focus-visible+.nse-checkbox-art,
+:where(:scope):is(.nse-checkbox) input:focus-visible+.nse-checkbox-art {
   outline: 2px solid rgba(134, 214, 255, 0.92);
   outline-offset: 3px;
   border-radius: 5px;
 }
 
-.nse-login-recovery-link {
+.nse-login-recovery-link,
+:where(:scope):is(.nse-login-recovery-link),
+:where(:scope).nse-login-recovery-link {
   padding: 0;
   border: 0;
   color: #55585b;
@@ -694,16 +803,24 @@
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
-.nse-login-recovery-link:hover { color: #3d4043; }
+.nse-login-recovery-link:hover,
+:where(:scope):is(.nse-login-recovery-link:hover),
+:where(:scope).nse-login-recovery-link:hover { color: #3d4043; }
 
 .nse-login-recovery-link:focus-visible,
-.nse-login-recovery-return:focus-visible {
+:where(:scope):is(.nse-login-recovery-link:focus-visible),
+:where(:scope).nse-login-recovery-link:focus-visible,
+.nse-login-recovery-return:focus-visible,
+:where(:scope):is(.nse-login-recovery-return:focus-visible),
+:where(:scope).nse-login-recovery-return:focus-visible {
   outline: 2px solid rgba(134, 214, 255, 0.9);
   outline-offset: 3px;
   border-radius: 8px;
 }
 
-.nse-login-error {
+.nse-login-error,
+:where(:scope):is(.nse-login-error),
+:where(:scope).nse-login-error {
   min-height: 2.7cqw;
   margin: 1.4cqw 0 0;
   color: #8e2424;
@@ -714,7 +831,9 @@
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.68);
 }
 
-.nse-login-welcome {
+.nse-login-welcome,
+:where(:scope):is(.nse-login-welcome),
+:where(:scope).nse-login-welcome {
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -722,7 +841,8 @@
   margin-top: 3cqw;
 }
 
-.nse-login-welcome p {
+.nse-login-welcome p,
+:where(:scope):is(.nse-login-welcome) p {
   margin: 0;
   color: rgba(45, 51, 59, 0.9);
   font-size: clamp(14px, 2.4cqw, 19px);
@@ -732,9 +852,11 @@
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.76);
 }
 
-.nse-login-welcome p span { display: block; }
+.nse-login-welcome p span,
+:where(:scope):is(.nse-login-welcome) p span { display: block; }
 
-.nse-login-window.is-login-step-welcome .nse-login-window-logo {
+.nse-login-window.is-login-step-welcome .nse-login-window-logo,
+:where(:scope):is(.nse-login-window.is-login-step-welcome) .nse-login-window-logo {
   margin-bottom: 3.2cqw;
 }
 
@@ -744,7 +866,9 @@
    α90, a white α197 rim, then an interior ramping 185 -> 222 top to bottom, and
    the mockup measures 100 / 227 / 178 -> 234. Same control, so it is used
    rather than redrawn. */
-.nse-login-action {
+.nse-login-action,
+:where(:scope):is(.nse-login-action),
+:where(:scope).nse-login-action {
   position: relative;
   /* Above .nse-login-window-texture-turn. A button is hardware resting on the
      plate, so the machining marks do not run across it — the mockup's button
@@ -780,7 +904,8 @@
    0.348. Copying the mockup's radius across in absolute pixels would have
    over-rounded a control less than half the size; copying its proportion means
    changing nothing. */
-.nse-login-action > .nse-control-button {
+.nse-login-action>.nse-control-button,
+:where(:scope):is(.nse-login-action)>.nse-control-button {
   /* LoginWindow owns the provider row's structural layout.  Do not rely on
      the active appearance stylesheet to make this a flex row: during a
      production chunk/theme hand-off that stylesheet can briefly be absent,
@@ -803,7 +928,8 @@
   line-height: 12.1cqw;
 }
 
-.nse-login-action > .nse-control-button .nse-control-button-icon {
+.nse-login-action>.nse-control-button .nse-control-button-icon,
+:where(:scope):is(.nse-login-action)>.nse-control-button .nse-control-button-icon {
   display: inline-flex;
   flex: 0 0 24px;
   align-items: center;
@@ -813,12 +939,15 @@
   margin: 0;
 }
 
-.nse-login-action > .nse-control-button .nse-control-button-label {
+.nse-login-action>.nse-control-button .nse-control-button-label,
+:where(:scope):is(.nse-login-action)>.nse-control-button .nse-control-button-label {
   min-width: 0;
   line-height: 1.2;
 }
 
-.nse-login-provider-icon {
+.nse-login-provider-icon,
+:where(:scope):is(.nse-login-provider-icon),
+:where(:scope).nse-login-provider-icon {
   display: block;
   width: 20px;
   height: 20px;
@@ -847,7 +976,8 @@
    `[data-nse-theme="com.syndromatic.atmo"] .nse-control-button[data-tone="light"]`, which scores
    0-3-0; a plain `.nse-login-action > .nse-control-button` is 0-2-0 and loses, so
    an earlier version of this block was written, parsed, and silently ignored. */
-.nse-login-window .nse-login-action > .nse-control-button[data-tone="light"] {
+.nse-login-window .nse-login-action>.nse-control-button[data-tone="light"],
+:where(:scope):is(.nse-login-window) .nse-login-action>.nse-control-button[data-tone="light"] {
   --nse-atmo-btn-bevel: #f9f9f9;
   --nse-atmo-btn-fill-a: #b2b2b2;
   --nse-atmo-btn-fill-b: #e9e9e9;
@@ -865,17 +995,21 @@
    reads perfectly well against this face, so the filter comes off and the
    standard spinner shows through. Only here: on the toolbar and in dialogs the
    dark tone is doing its job over paler chrome. */
-.nse-login-action .nse-control-spinner[data-tone="dark"] {
+.nse-login-action .nse-control-spinner[data-tone="dark"],
+:where(:scope):is(.nse-login-action) .nse-control-spinner[data-tone="dark"] {
   filter: none;
 }
 
-.nse-login-recovery-content {
+.nse-login-recovery-content,
+:where(:scope):is(.nse-login-recovery-content),
+:where(:scope).nse-login-recovery-content {
   justify-content: flex-start;
   gap: 2cqw;
   width: 100%;
 }
 
-.nse-login-recovery-content p {
+.nse-login-recovery-content p,
+:where(:scope):is(.nse-login-recovery-content) p {
   max-width: 440px;
   margin: 0;
   color: rgba(43, 49, 58, 0.78);
@@ -885,7 +1019,9 @@
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.72);
 }
 
-.nse-login-action--recovery { margin: auto 0 0; }
+.nse-login-action--recovery,
+:where(:scope):is(.nse-login-action--recovery),
+:where(:scope).nse-login-action--recovery { margin: auto 0 0; }
 
 /* The enter preset's own swing, negated and amplified. Its six rotate values are
    spread evenly across the duration by framer-motion, which is what these
@@ -942,24 +1078,30 @@
      0-3-0 now that which animation runs is chosen by data-sheen, and a bare
      `.nse-login-window-texture` is 0-1-0 — it would parse, sit here looking
      correct, and lose every time. A media query adds nothing to specificity. */
-  .nse-login-window[data-sheen] .nse-login-window-texture {
+  .nse-login-window[data-sheen] .nse-login-window-texture,
+:where(:scope):is(.nse-login-window[data-sheen]) .nse-login-window-texture {
     animation: none;
     transform: none;
   }
 
   /* The step-two glide and the rows that arrive with it. */
-  .nse-login-window .nse-login-form {
+  .nse-login-window .nse-login-form,
+:where(:scope):is(.nse-login-window) .nse-login-form {
     transition: none;
   }
 
-  .nse-login-window .nse-login-form--password .nse-login-field + .nse-login-field,
-  .nse-login-window .nse-login-form--password .nse-login-form-row {
+  .nse-login-window .nse-login-form--password .nse-login-field+.nse-login-field,
+:where(:scope):is(.nse-login-window) .nse-login-form--password .nse-login-field+.nse-login-field,
+.nse-login-window .nse-login-form--password .nse-login-form-row,
+:where(:scope):is(.nse-login-window) .nse-login-form--password .nse-login-form-row {
     animation: none;
   }
 }
 
 @media (max-width: 760px) {
-  .nse-login-window {
+  .nse-login-window,
+:where(:scope):is(.nse-login-window),
+:where(:scope).nse-login-window {
     width: min(86vw, calc((100vh - 36px) * 0.56));
     min-width: 284px;
   }
@@ -975,7 +1117,9 @@
      transform, the ropes end up behind the metal and run under the top edge
      instead of into the grommets. Restated in full so the Z cannot go missing
      again if the centring is ever changed. */
-  .nse-login-window-hang {
+  .nse-login-window-hang,
+:where(:scope):is(.nse-login-window-hang),
+:where(:scope).nse-login-window-hang {
     transform: translateX(-50%) translateZ(var(--login-hardware-depth));
   }
 
@@ -988,4 +1132,8 @@
      every width or at none; it fits. Anything given a px floor here — the error
      line has one — would break that, and would have to be checked at 284px, the
      narrowest the placard goes. */
+}
+
+}
+
 }

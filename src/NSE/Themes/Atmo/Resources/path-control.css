@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -19,26 +22,65 @@
  */
 
 /* NSPathControl.standard: Atmo's inset path bezel; these are path cells, not push-button bezels. */
-:where([data-nse-theme="com.syndromatic.atmo"]) .nse-path-control {
+:where(:scope) .nse-path-control,
+:where(:scope):is(.nse-path-control),
+:where(:scope).nse-path-control {
   display: flex; align-items: stretch; min-width: 0; overflow: auto; border: 1px solid #92969c; border-radius: 5px;
   background: linear-gradient(#c6c9cd, #e5e6e8); box-shadow: inset 0 1px 2px #0003, 0 1px #fff9; color: #303741;
 }
-:is([data-nse-theme="com.syndromatic.atmo"]) .nse-path-control > .nse-path-item.nse-control-button {
+:is(:scope) .nse-path-control>.nse-path-item.nse-control-button,
+:is(:scope):is(.nse-path-control)>.nse-path-item.nse-control-button,
+:is(:scope).nse-path-control>.nse-path-item.nse-control-button {
   flex: 0 1 auto; min-width: 36px; --nse-control-minimum-inline-size: 36px; max-width: 180px; height: 26px; min-height: 26px; --nse-control-minimum-block-size: 26px; line-height: 26px; margin: 0; padding: 0 9px;
   background: none; box-shadow: none; border: 0; border-radius: 0; font: inherit; font-size: 11px; color: inherit; text-shadow: 0 1px #fff8;
 }
-:is([data-nse-theme="com.syndromatic.atmo"]) .nse-path-control > .nse-path-item.nse-control-button::before,
-:is([data-nse-theme="com.syndromatic.atmo"]) .nse-path-control > .nse-path-item.nse-control-button::after { content: none; display: none; }
-:where([data-nse-theme="com.syndromatic.atmo"]) .nse-path-item + .nse-path-item { border-inline-start: 1px solid #969ba366; }
-:where([data-nse-theme="com.syndromatic.atmo"]) .nse-path-item > .nse-control-button-label { display: flex; align-items: center; gap: 4px; min-width: 0; --nse-control-minimum-inline-size: 0; }
-:where([data-nse-theme="com.syndromatic.atmo"]) .nse-path-item .nse-control-button-label > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-:where([data-nse-theme="com.syndromatic.atmo"]) .nse-path-item .nse-control-image-view { width: 18px; height: 18px; flex: none; }
-:where([data-nse-theme="com.syndromatic.atmo"]) .nse-path-item .nse-control-sizeable-image { width: 100%; height: 100%; background: none; border: 0; box-shadow: none; }
-:where([data-nse-theme="com.syndromatic.atmo"]) .nse-path-item img { width: 100%; height: 100%; object-fit: contain; }
-:where([data-nse-theme="com.syndromatic.atmo"]) .nse-path-item[aria-current] { font-weight: 600; }
-:where([data-nse-theme="com.syndromatic.atmo"]) .nse-path-control .nse-path-item:is(:hover, :focus-visible) { background: #fff3; }
-:is([data-nse-theme="com.syndromatic.atmo"]) .nse-path-control > .nse-path-item.nse-control-button:focus-visible { outline: 2px solid #438edf; outline-offset: -2px; background: #fff3; }
-:where([data-nse-theme="com.syndromatic.atmo"])[data-mode="dark"] .nse-path-control,
-:where([data-nse-theme="com.syndromatic.atmo"]) [data-nse-colour-scheme-resolved="dark"] .nse-path-control { background: linear-gradient(#292d33, #444950); color: #fff; border-color: #171a20; box-shadow: inset 0 1px 2px #0008, 0 1px #fff2; }
-:where([data-nse-theme="com.syndromatic.atmo"])[data-mode="dark"] .nse-path-item,
-:where([data-nse-theme="com.syndromatic.atmo"]) [data-nse-colour-scheme-resolved="dark"] .nse-path-item { text-shadow: 0 -1px #0008; }
+:is(:scope) .nse-path-control>.nse-path-item.nse-control-button::before,
+:is(:scope):is(.nse-path-control)>.nse-path-item.nse-control-button::before,
+:is(:scope).nse-path-control>.nse-path-item.nse-control-button::before,
+:is(:scope) .nse-path-control>.nse-path-item.nse-control-button::after,
+:is(:scope):is(.nse-path-control)>.nse-path-item.nse-control-button::after,
+:is(:scope).nse-path-control>.nse-path-item.nse-control-button::after { content: none; display: none; }
+:where(:scope) .nse-path-item+.nse-path-item,
+:where(:scope):is(.nse-path-item)+.nse-path-item,
+:where(:scope).nse-path-item+.nse-path-item { border-inline-start: 1px solid #969ba366; }
+:where(:scope) .nse-path-item>.nse-control-button-label,
+:where(:scope):is(.nse-path-item)>.nse-control-button-label,
+:where(:scope).nse-path-item>.nse-control-button-label { display: flex; align-items: center; gap: 4px; min-width: 0; --nse-control-minimum-inline-size: 0; }
+:where(:scope) .nse-path-item .nse-control-button-label>span,
+:where(:scope):is(.nse-path-item) .nse-control-button-label>span,
+:where(:scope).nse-path-item .nse-control-button-label>span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+:where(:scope) .nse-path-item .nse-control-image-view,
+:where(:scope):is(.nse-path-item) .nse-control-image-view,
+:where(:scope).nse-path-item .nse-control-image-view { width: 18px; height: 18px; flex: none; }
+:where(:scope) .nse-path-item .nse-control-sizeable-image,
+:where(:scope):is(.nse-path-item) .nse-control-sizeable-image,
+:where(:scope).nse-path-item .nse-control-sizeable-image { width: 100%; height: 100%; background: none; border: 0; box-shadow: none; }
+:where(:scope) .nse-path-item img,
+:where(:scope):is(.nse-path-item) img,
+:where(:scope).nse-path-item img { width: 100%; height: 100%; object-fit: contain; }
+:where(:scope) .nse-path-item[aria-current],
+:where(:scope):is(.nse-path-item[aria-current]),
+:where(:scope).nse-path-item[aria-current] { font-weight: 600; }
+:where(:scope) .nse-path-control .nse-path-item:is(:hover,:focus-visible),
+:where(:scope):is(.nse-path-control) .nse-path-item:is(:hover,:focus-visible),
+:where(:scope).nse-path-control .nse-path-item:is(:hover,:focus-visible) { background: #fff3; }
+:is(:scope) .nse-path-control>.nse-path-item.nse-control-button:focus-visible,
+:is(:scope):is(.nse-path-control)>.nse-path-item.nse-control-button:focus-visible,
+:is(:scope).nse-path-control>.nse-path-item.nse-control-button:focus-visible { outline: 2px solid #438edf; outline-offset: -2px; background: #fff3; }
+:where(:scope)[data-mode="dark"] .nse-path-control,
+:where(:scope)[data-mode="dark"]:is(.nse-path-control),
+:where(:scope) [data-nse-colour-scheme-resolved="dark"] .nse-path-control,
+:where(:scope):is([data-nse-colour-scheme-resolved="dark"]) .nse-path-control,
+:where(:scope):is([data-nse-colour-scheme-resolved="dark"]):is(.nse-path-control),
+:where(:scope)[data-nse-colour-scheme-resolved="dark"] .nse-path-control,
+:where(:scope)[data-nse-colour-scheme-resolved="dark"]:is(.nse-path-control) { background: linear-gradient(#292d33, #444950); color: #fff; border-color: #171a20; box-shadow: inset 0 1px 2px #0008, 0 1px #fff2; }
+:where(:scope)[data-mode="dark"] .nse-path-item,
+:where(:scope)[data-mode="dark"]:is(.nse-path-item),
+:where(:scope) [data-nse-colour-scheme-resolved="dark"] .nse-path-item,
+:where(:scope):is([data-nse-colour-scheme-resolved="dark"]) .nse-path-item,
+:where(:scope):is([data-nse-colour-scheme-resolved="dark"]):is(.nse-path-item),
+:where(:scope)[data-nse-colour-scheme-resolved="dark"] .nse-path-item,
+:where(:scope)[data-nse-colour-scheme-resolved="dark"]:is(.nse-path-item) { text-shadow: 0 -1px #0008; }
+
+}
+}

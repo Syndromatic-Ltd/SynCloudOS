@@ -30,11 +30,38 @@ function Toolbar({ width, customising }: { width: number; customising: boolean }
   useEffect(() => () => controller.dispose(), [controller]);
   return <><NSEToolbarView composition="configured" controller={controller} width={width} interaction={{ parentResponderId: "contract" }} />{customising ? <NSEToolbarConfigurationSheet id="contract-toolbar-palette" open anchor={null} parentResponderId="contract" parentWindowControllerId={null} controller={controller} onOpenChange={noop} /> : null}</>;
 }
+import { NSEAppearanceProvider } from "../../../../src/NSE/Appearance/NSEAppearanceProvider";
+import { atmoTheme } from "../../../../src/NSE/Themes/Atmo";
+import { freezeNSETheme } from "../../../../src/NSE/Theme/NSETheme";
+import { LoginWindow } from "../../../../src/NSE/SystemUI/LoginWindow";
+import { SystemSurface } from "../theme-baseline/system";
+import { NSEViewController, nseUpdateTraits } from "../../../../src/NSE/Application/NSEViewController";
+import { NSEViewControllerView } from "../../../../src/SynCloudOS/AppHosting/applicationHosting";
+import { NSETabViewController, NSETabViewItem } from "../../../../src/NSE/Navigation/NSETabViewController";
+import { createStaticPresentationTraits } from "../../../fixtures/presentationTraits";
+const plainTheme = freezeNSETheme({ ...atmoTheme, presentation: { login: "plain", notifications: "plain", materialLighting: "off" } });
 const colour = GFXColour.parse("#336699");
 export const supplementalThemeCatalogue: readonly { id: string; render: () => ReactNode }[] = [
+  { id: "plain-login", render: () => <NSEAppearanceProvider theme={plainTheme}><LoginWindow title="Sign in" methods={[{ id: "account", label: "Continue" }]} /></NSEAppearanceProvider> },
+  { id: "plain-notification", render: () => <NSEAppearanceProvider theme={plainTheme}><SystemSurface kind="notifications" /></NSEAppearanceProvider> },
+  ...(["compact", "regular"] as const).flatMap(widthClass => (widthClass === "compact" ? ["block-start", "block-end"] : ["source-list", "block-start"]).flatMap(placement => (["in-flow", "overlay"] as const).map(flow => ({ id: `navigation-${widthClass}-${placement}-${flow}`, render: () => <ThemeNavigation widthClass={widthClass} placement={placement} flow={flow} /> })))),
   ...[true, false].map(isEnabled => ({ id: `matrix-${isEnabled}`, render: () => <NSERadioGroup label="Layout" options={[{ label: "List", value: "list" }, { label: "Grid", value: "grid" }]} defaultValue="list" isEnabled={isEnabled} /> })),
   { id: "colour-swatches", render: () => <NSEColourSwatches colours={[colour]} selected={colour} onSelect={noop} /> },
   { id: "virtual-viewport", render: () => <Virtual /> },
   { id: "tooltip", render: () => <Tooltip /> },
   ...[50, 500].flatMap(width => [false, true].map(customising => ({ id: `configured-toolbar-${width}-${customising}`, render: () => <Toolbar width={width} customising={customising} /> }))),
 ];
+
+
+class ContractPage extends NSEViewController { static override view = () => <p>Document</p>; }
+function ThemeNavigation({ widthClass, placement, flow }: { widthClass: "compact" | "regular"; placement: string; flow: "in-flow" | "overlay" }) {
+  const [tabs] = useState(() => {
+    const tabs = new NSETabViewController(); tabs.tabStyle = "sidebarAdaptable";
+    tabs[nseUpdateTraits]({ reducedMotion: true, presentation: createStaticPresentationTraits({ width: widthClass === "compact" ? 390 : 1000, height: 844 }) });
+    for (const id of ["first", "second"]) tabs.addTabViewItem(new NSETabViewItem({ identifier: id, viewController: tabs.addChild(ContractPage, { title: id }) }));
+    return tabs;
+  });
+  useEffect(() => () => tabs.dispose(), [tabs]);
+  const theme = freezeNSETheme({ ...atmoTheme, navigation: { ...atmoTheme.navigation, [widthClass]: { placement, flow } } } as typeof atmoTheme);
+  return <NSEAppearanceProvider theme={theme}><NSEViewControllerView controller={tabs} /></NSEAppearanceProvider>;
+}

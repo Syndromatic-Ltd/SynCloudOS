@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -20,7 +23,8 @@
 
 /* The legacy class remains exclusively for the stage's entrance choreography.
    Specificity keeps this ruler independent of chronosphere.css import order. */
-.chronosphere-rail.chronosphere-timeline {
+.chronosphere-rail.chronosphere-timeline,
+:where(:scope):is(.chronosphere-rail.chronosphere-timeline) {
   position: absolute;
   top: max(4%, var(--nse-screen-safe-area-inset-top, 0px));
   bottom: calc(clamp(76px, 14%, 112px) + var(--nse-screen-safe-area-inset-bottom, 0px));
@@ -34,9 +38,11 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.chronosphere-timeline[inert] { pointer-events: none; }
+.chronosphere-timeline[inert],
+:where(:scope):is(.chronosphere-timeline[inert]) { pointer-events: none; }
 
-.chronosphere-timeline-viewport {
+.chronosphere-timeline-viewport,
+:where(:scope):is(.chronosphere-timeline-viewport) {
   position: absolute;
   inset: 0;
   overflow-x: hidden;
@@ -49,7 +55,8 @@
   scroll-behavior: auto;
 }
 
-.chronosphere-timeline-track {
+.chronosphere-timeline-track,
+:where(:scope):is(.chronosphere-timeline-track) {
   position: relative;
   box-sizing: border-box;
   width: 100%;
@@ -58,12 +65,14 @@
   list-style: none;
 }
 
-.chronosphere-timeline-track::before {
+.chronosphere-timeline-track::before,
+:where(:scope):is(.chronosphere-timeline-track)::before {
   content: ""; position: absolute; top: 0; bottom: 0; right: 6px; width: 11px; pointer-events: none;
   background: repeating-linear-gradient(180deg, rgba(222, 237, 238, .36) 0 1px, transparent 1px 15px);
 }
 
-.chronosphere-timeline-tick {
+.chronosphere-timeline-tick,
+:where(:scope):is(.chronosphere-timeline-tick) {
   position: absolute;
   left: 3px;
   right: 3px;
@@ -72,7 +81,8 @@
   padding: 0;
 }
 
-.chronosphere-timeline-hit {
+.chronosphere-timeline-hit,
+:where(:scope):is(.chronosphere-timeline-hit) {
   position: absolute;
   right: 0;
   top: 0;
@@ -95,7 +105,8 @@
   transform: translateY(-50%);
 }
 
-.chronosphere-timeline-label {
+.chronosphere-timeline-label,
+:where(:scope):is(.chronosphere-timeline-label) {
   display: block;
   min-width: 0;
   overflow: hidden;
@@ -112,7 +123,8 @@
   pointer-events: none;
 }
 
-.chronosphere-timeline-mark {
+.chronosphere-timeline-mark,
+:where(:scope):is(.chronosphere-timeline-mark) {
   flex: 0 0 auto;
   width: calc(12px + var(--timeline-magnify, 0) * 19px);
   height: 1px;
@@ -121,23 +133,33 @@
   pointer-events: none;
 }
 
-.chronosphere-timeline-tick[data-labelled="true"] .chronosphere-timeline-label { opacity: 0.82; }
-.chronosphere-timeline-tick[data-labelled="true"] .chronosphere-timeline-mark { width: calc(20px + var(--timeline-magnify, 0) * 19px); }
+.chronosphere-timeline-tick[data-labelled="true"] .chronosphere-timeline-label,
+:where(:scope):is(.chronosphere-timeline-tick[data-labelled="true"]) .chronosphere-timeline-label { opacity: 0.82; }
+.chronosphere-timeline-tick[data-labelled="true"] .chronosphere-timeline-mark,
+:where(:scope):is(.chronosphere-timeline-tick[data-labelled="true"]) .chronosphere-timeline-mark { width: calc(20px + var(--timeline-magnify, 0) * 19px); }
 .chronosphere-timeline-hit:hover,
+:where(:scope):is(.chronosphere-timeline-hit:hover),
 .chronosphere-timeline-hit:focus-visible,
-.chronosphere-timeline-tick[data-active="true"] .chronosphere-timeline-hit { color: #fff; }
+:where(:scope):is(.chronosphere-timeline-hit:focus-visible),
+.chronosphere-timeline-tick[data-active="true"] .chronosphere-timeline-hit,
+:where(:scope):is(.chronosphere-timeline-tick[data-active="true"]) .chronosphere-timeline-hit { color: #fff; }
 .chronosphere-timeline-hit:hover .chronosphere-timeline-label,
+:where(:scope):is(.chronosphere-timeline-hit:hover) .chronosphere-timeline-label,
 .chronosphere-timeline-hit:focus-visible .chronosphere-timeline-label,
-.chronosphere-timeline-tick[data-active="true"] .chronosphere-timeline-label { opacity: 1; }
+:where(:scope):is(.chronosphere-timeline-hit:focus-visible) .chronosphere-timeline-label,
+.chronosphere-timeline-tick[data-active="true"] .chronosphere-timeline-label,
+:where(:scope):is(.chronosphere-timeline-tick[data-active="true"]) .chronosphere-timeline-label { opacity: 1; }
 
-.chronosphere-timeline-tick[data-active="true"] .chronosphere-timeline-mark {
+.chronosphere-timeline-tick[data-active="true"] .chronosphere-timeline-mark,
+:where(:scope):is(.chronosphere-timeline-tick[data-active="true"]) .chronosphere-timeline-mark {
   width: calc(32px + var(--timeline-magnify, 0) * 14px);
   height: 2px;
   background: #fff;
   box-shadow: 0 0 6px rgb(255 255 255 / 80%), 0 1px 3px #000;
 }
 
-.chronosphere-timeline-hit:focus-visible {
+.chronosphere-timeline-hit:focus-visible,
+:where(:scope):is(.chronosphere-timeline-hit:focus-visible) {
   outline: 2px solid #fff;
   outline-offset: -2px;
   background: rgb(0 0 0 / 30%);
@@ -146,27 +168,42 @@
 @media (max-width: 759px) {
   /* On a phone the paper occupies the ruler's label column. Keep the marks,
      and reveal dates only for the selected or directly explored version. */
-  .chronosphere-timeline-tick[data-labelled="true"]:not([data-active="true"]) .chronosphere-timeline-label { opacity: 0; }
+  .chronosphere-timeline-tick[data-labelled="true"]:not([data-active="true"]) .chronosphere-timeline-label,
+:where(:scope):is(.chronosphere-timeline-tick[data-labelled="true"]:not([data-active="true"])) .chronosphere-timeline-label { opacity: 0; }
   .chronosphere-timeline-tick .chronosphere-timeline-hit:hover .chronosphere-timeline-label,
-  .chronosphere-timeline-tick .chronosphere-timeline-hit:focus-visible .chronosphere-timeline-label { opacity: 1; }
-  .chronosphere-timeline-label { background:rgba(3,10,13,.72); border-radius:3px; padding:1px 3px; }
+:where(:scope):is(.chronosphere-timeline-tick) .chronosphere-timeline-hit:hover .chronosphere-timeline-label,
+.chronosphere-timeline-tick .chronosphere-timeline-hit:focus-visible .chronosphere-timeline-label,
+:where(:scope):is(.chronosphere-timeline-tick) .chronosphere-timeline-hit:focus-visible .chronosphere-timeline-label { opacity: 1; }
+  .chronosphere-timeline-label,
+:where(:scope):is(.chronosphere-timeline-label) { background:rgba(3,10,13,.72); border-radius:3px; padding:1px 3px; }
 }
 
 @media (max-width: 480px) {
-  .chronosphere-rail.chronosphere-timeline { width: 128px; }
-  .chronosphere-timeline-label { font-size: 10px; }
+  .chronosphere-rail.chronosphere-timeline,
+:where(:scope):is(.chronosphere-rail.chronosphere-timeline) { width: 128px; }
+  .chronosphere-timeline-label,
+:where(:scope):is(.chronosphere-timeline-label) { font-size: 10px; }
 }
 
 @media (max-height: 420px) {
-  .chronosphere-rail.chronosphere-timeline {
+  .chronosphere-rail.chronosphere-timeline,
+:where(:scope):is(.chronosphere-rail.chronosphere-timeline) {
     top: max(4px, var(--nse-screen-safe-area-inset-top, 0px));
     bottom: calc(56px + var(--nse-screen-safe-area-inset-bottom, 0px));
   }
 }
 
 @media (forced-colors: active) {
-  .chronosphere-timeline-hit { color: ButtonText; }
-  .chronosphere-timeline-tick[data-active="true"] .chronosphere-timeline-hit { color: Highlight; }
-  .chronosphere-timeline-tick[data-active="true"] .chronosphere-timeline-mark { background: Highlight; }
-  .chronosphere-timeline-hit:focus-visible { outline-color: Highlight; }
+  .chronosphere-timeline-hit,
+:where(:scope):is(.chronosphere-timeline-hit) { color: ButtonText; }
+  .chronosphere-timeline-tick[data-active="true"] .chronosphere-timeline-hit,
+:where(:scope):is(.chronosphere-timeline-tick[data-active="true"]) .chronosphere-timeline-hit { color: Highlight; }
+  .chronosphere-timeline-tick[data-active="true"] .chronosphere-timeline-mark,
+:where(:scope):is(.chronosphere-timeline-tick[data-active="true"]) .chronosphere-timeline-mark { background: Highlight; }
+  .chronosphere-timeline-hit:focus-visible,
+:where(:scope):is(.chronosphere-timeline-hit:focus-visible) { outline-color: Highlight; }
+}
+
+}
+
 }

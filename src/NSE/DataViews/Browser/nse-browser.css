@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -18,13 +21,27 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-.nse-browser { min-inline-size: 0; }
-.nse-browser-columns { display: flex; max-inline-size: 100%; overflow: auto; }
-.nse-browser-column-shell { display: flex; flex: 0 0 auto; min-block-size: 120px; }
-.nse-browser-column { flex: 1; min-inline-size: 0; }
-.nse-browser-column [role="listbox"] { block-size: min(360px, 100%); min-block-size: 120px; outline: none; overflow: auto; }
-.nse-browser-options { min-inline-size: 100%; position: relative; }
-.nse-browser-option { align-items: center; display: flex; inline-size: 100%; min-block-size: 23px; padding-inline: var(--nse-space-2, 8px); position: absolute; }
-.nse-browser-option[data-focused] { background: var(--nse-selection-background, Highlight); color: var(--nse-selection-foreground, HighlightText); }
-.nse-browser-resize { inline-size: 8px; min-inline-size: 8px; touch-action: none; }
-.nse-browser-back { min-block-size: 44px; }
+.nse-browser,
+:where(:scope):is(.nse-browser) { min-inline-size: 0; }
+.nse-browser-columns,
+:where(:scope):is(.nse-browser-columns) { display: flex; max-inline-size: 100%; overflow: auto; }
+.nse-browser-column-shell,
+:where(:scope):is(.nse-browser-column-shell) { display: flex; flex: 0 0 auto; min-block-size: 120px; }
+.nse-browser-column,
+:where(:scope):is(.nse-browser-column) { flex: 1; min-inline-size: 0; }
+.nse-browser-column [role="listbox"],
+:where(:scope):is(.nse-browser-column) [role="listbox"] { block-size: min(360px, 100%); min-block-size: 120px; outline: none; overflow: auto; }
+.nse-browser-options,
+:where(:scope):is(.nse-browser-options) { min-inline-size: 100%; position: relative; }
+.nse-browser-option,
+:where(:scope):is(.nse-browser-option) { align-items: center; display: flex; inline-size: 100%; min-block-size: 23px; padding-inline: var(--nse-space-2, 8px); position: absolute; }
+.nse-browser-option[data-focused],
+:where(:scope):is(.nse-browser-option[data-focused]) { background: var(--nse-selection-background, Highlight); color: var(--nse-selection-foreground, HighlightText); }
+.nse-browser-resize,
+:where(:scope):is(.nse-browser-resize) { inline-size: 8px; min-inline-size: 8px; touch-action: none; }
+.nse-browser-back,
+:where(:scope):is(.nse-browser-back) { min-block-size: 44px; }
+
+}
+
+}
