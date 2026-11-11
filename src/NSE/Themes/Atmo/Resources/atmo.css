@@ -1201,10 +1201,7 @@
    kept. Only its CORNER is dropped — see the rule below.
    ========================================================================= */
 
-:scope,
-:scope [data-nse-theme],
-:scope:is([data-nse-theme]),
-:scope[data-nse-theme] {
+:scope {
   --nse-atmo-divider: var(--nse-atmo-onyx-dv-line);
   --nse-atmo-divider-arrow: var(--nse-atmo-onyx-dva-sheet);
   --nse-atmo-divider-arrow-size: 30px;
@@ -1262,15 +1259,15 @@
   border-radius: var(--nse-corner-radius, 0px);
 }
 
-:scope [data-corner-curve="continuous"],
-:scope:is([data-corner-curve="continuous"]),
-:scope[data-corner-curve="continuous"] {
+:scope [data-nse-corner-curve="continuous"],
+:scope:is([data-nse-corner-curve="continuous"]),
+:scope[data-nse-corner-curve="continuous"] {
   corner-shape: squircle;
 }
 
-:scope [data-corner-curve="circular"],
-:scope:is([data-corner-curve="circular"]),
-:scope[data-corner-curve="circular"] {
+:scope [data-nse-corner-curve="circular"],
+:scope:is([data-nse-corner-curve="circular"]),
+:scope[data-nse-corner-curve="circular"] {
   corner-shape: round;
 }
 
@@ -3812,9 +3809,9 @@
 :scope :is([data-nse-part="calendar-sheet"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]) :where(:is([data-nse-control="date-picker"],[data-nse-part="clock"],[data-nse-part="date-time-editor"],[data-nse-part="clock-sheet"])))>:where([data-nse-part="title"]),
 :scope:is(:is([data-nse-part="calendar-sheet"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]) :where(:is([data-nse-control="date-picker"],[data-nse-part="clock"],[data-nse-part="date-time-editor"],[data-nse-part="clock-sheet"]))))>:where([data-nse-part="title"]),
 :scope:is([data-nse-part="calendar-sheet"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]) :where(:is([data-nse-control="date-picker"],[data-nse-part="clock"],[data-nse-part="date-time-editor"],[data-nse-part="clock-sheet"])))>:where([data-nse-part="title"]),
-:scope [data-nse-part="date-time-editor"]>label,
-:scope:is([data-nse-part="date-time-editor"])>label,
-:scope[data-nse-part="date-time-editor"]>label {
+:scope [data-nse-part="date-time-editor"]>:where([data-nse-control="pop-up-button"][data-nse-type="native"]),
+:scope:is([data-nse-part="date-time-editor"])>:where([data-nse-control="pop-up-button"][data-nse-type="native"]),
+:scope[data-nse-part="date-time-editor"]>:where([data-nse-control="pop-up-button"][data-nse-type="native"]) {
   color: var(--nse-atmo-well-muted);
 }
 
@@ -5152,9 +5149,9 @@
   display: flex;
   inline-size: 100%;
 }
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-distribution="fill-equally"] :where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])),
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-distribution="fill-equally"]) :where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])),
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-distribution="fill-equally"] :where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])) {
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-distribution="fill-equally"] :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"])),
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-distribution="fill-equally"]) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"])),
+:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-distribution="fill-equally"] :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"])) {
   flex: 1 1 0;
   min-inline-size: 0;
 }
@@ -5173,7 +5170,7 @@
 }
 
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :where([data-nse-expanded="false"])[data-nse-expanded],
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) :where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"]))[data-nse-expanded],
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"]))[data-nse-expanded],
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :where([data-nse-expanded="false"])[data-nse-expanded] {
   font-size:11px;
 }
@@ -5209,9 +5206,9 @@
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>:first-child>:where([data-nse-part="bezel"]):first-child::after,
 :scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>:first-child>:where([data-nse-part="bezel"]):first-child::after,
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>:first-child>:where([data-nse-part="bezel"]):first-child::after,
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>:where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])):first-child::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>:where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])):first-child::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>:where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])):first-child::after {
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>:where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"])):first-child::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>:where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"])):first-child::after,
+:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>:where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"])):first-child::after {
   inset-inline-start:2px;
 }
 
@@ -5235,7 +5232,7 @@
 
 
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"])):focus-visible,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) :where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])):focus-visible,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"])):focus-visible,
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"])):focus-visible {
   outline: none;
   z-index: 1;
@@ -5427,9 +5424,9 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
   padding-inline-end: 34px;
 }
 
-:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>[data-nse-part="tab-item"]>:where(:is([data-nse-control="button"], [data-nse-part="button"])):not(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"]))),
-:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>[data-nse-part="tab-item"]>:where(:is([data-nse-control="button"], [data-nse-part="button"])):not(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"]))),
-:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>[data-nse-part="tab-item"]>:where(:is([data-nse-control="button"], [data-nse-part="button"])):not(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"]))) {
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>[data-nse-part="tab-item"]>:where(:is([data-nse-control="button"],[data-nse-part="button"])):not(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"]))),
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>[data-nse-part="tab-item"]>:where(:is([data-nse-control="button"],[data-nse-part="button"])):not(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"]))),
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>[data-nse-part="tab-item"]>:where(:is([data-nse-control="button"],[data-nse-part="button"])):not(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"]))) {
   position: absolute;
   z-index: 2;
   inset-block-start: 50%;
@@ -5454,17 +5451,17 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
   background: rgba(255, 255, 255, 0.18);
 }
 
-:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>[data-nse-part="tab-item"]>:where(:is([data-nse-control="button"], [data-nse-part="button"])):not(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"]))):focus-visible,
-:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>[data-nse-part="tab-item"]>:where(:is([data-nse-control="button"], [data-nse-part="button"])):not(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"]))):focus-visible,
-:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>[data-nse-part="tab-item"]>:where(:is([data-nse-control="button"], [data-nse-part="button"])):not(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"]))):focus-visible {
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>[data-nse-part="tab-item"]>:where(:is([data-nse-control="button"],[data-nse-part="button"])):not(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"]))):focus-visible,
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>[data-nse-part="tab-item"]>:where(:is([data-nse-control="button"],[data-nse-part="button"])):not(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"]))):focus-visible,
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>[data-nse-part="tab-item"]>:where(:is([data-nse-control="button"],[data-nse-part="button"])):not(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"]))):focus-visible {
   outline: none;
   box-shadow: var(--nse-atmo-focus-ring);
 }
 
 /* The overflow cell: the capsule's end cap on the silver material. */
-:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"])),
-:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"])),
-:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"])) {
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"])),
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"])),
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"])) {
   position: relative;
   isolation: isolate;
   min-inline-size: 44px;
@@ -5482,21 +5479,21 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
   cursor: default;
 }
 
-:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::before,
-:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::before,
-:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::before,
-:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::after,
-:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::after,
-:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::after {
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"]))::before,
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"]))::before,
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"]))::before,
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"]))::after,
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"]))::after,
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"]))::after {
   content: "";
   position: absolute;
   z-index: -1;
   pointer-events: none;
 }
 
-:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::before,
-:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::before,
-:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::before {
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"]))::before,
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"]))::before,
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"]))::before {
   inset: 2px 0;
   border: solid;
   border-width: 2px 2px 2px 1px;
@@ -5506,9 +5503,9 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
-:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::after,
-:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::after,
-:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::after {
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"]))::after,
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"]))::after,
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"]))::after {
   inset: 4px 2px 4px 1px;
   border: 2px solid;
   border-color: var(--nse-atmo-rg-ring-t) var(--nse-atmo-rg-ring-s) var(--nse-atmo-rg-ring-b) var(--nse-atmo-rg-ring-seam);
@@ -5517,29 +5514,29 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
   background: var(--nse-atmo-rg-up) padding-box;
 }
 
-:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))[data-nse-expanded="true"],
-:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))[data-nse-expanded="true"],
-:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))[data-nse-expanded="true"] {
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"]))[data-nse-expanded="true"],
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"]))[data-nse-expanded="true"],
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"]))[data-nse-expanded="true"] {
   color: #fff;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.58);
 }
 
-:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))[data-nse-expanded="true"]::after,
-:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))[data-nse-expanded="true"]::after,
-:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))[data-nse-expanded="true"]::after {
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"]))[data-nse-expanded="true"]::after,
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"]))[data-nse-expanded="true"]::after,
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"]))[data-nse-expanded="true"]::after {
   border-color: var(--nse-atmo-rg-ring-sel-t) var(--nse-atmo-rg-ring-sel-s) var(--nse-atmo-rg-ring-sel-b);
   background: var(--nse-atmo-rg-edge-l) padding-box, var(--nse-atmo-rg-sel) padding-box;
 }
 
-:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"])):focus-visible,
-:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"])):focus-visible,
-:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"])):focus-visible {
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"])):focus-visible,
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"])):focus-visible,
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"])):focus-visible {
   outline: none;
 }
 
-:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"])):focus-visible::before,
-:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"])):focus-visible::before,
-:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"])):focus-visible::before {
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"])):focus-visible::before,
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"])):focus-visible::before,
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"])):focus-visible::before {
   box-shadow: var(--nse-atmo-focus-ring);
 }
 
@@ -5560,20 +5557,20 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
 }
 
 @media (forced-colors: active) {
-  :scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"])),
-:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"])),
-:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"])) {
+  :scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"])),
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"])),
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"])) {
     border: 1px solid ButtonText;
     forced-color-adjust: none;
     color: ButtonText;
     background: ButtonFace;
   }
-  :scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::before,
-:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::before,
-:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::before,
-:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::after,
-:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::after,
-:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::after {
+  :scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"]))::before,
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"]))::before,
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"]))::before,
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"]))::after,
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"]))::after,
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]),[data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])),[data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"],[data-nse-part="overflow"]))::after {
     content: none;
   }
 }
@@ -5938,13 +5935,13 @@ input:scope[data-nse-control="scroller"]:focus-visible {
    under the edge and cap cast overlays. */
 
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"] :where([data-nse-part="bezel"][data-nse-selected])[data-nse-selected]::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]) :where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"]))[data-nse-selected]::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"]))[data-nse-selected]::after,
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"] :where([data-nse-part="bezel"][data-nse-selected])[data-nse-selected]::after {
   inset-inline:0;
 }
 
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]>:first-child>:where([data-nse-part="bezel"][data-nse-selected]):first-child[data-nse-selected]::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"])>:first-child>:where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])):first-child[data-nse-selected]::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"])>:first-child>:where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"])):first-child[data-nse-selected]::after,
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]>:first-child>:where([data-nse-part="bezel"][data-nse-selected]):first-child[data-nse-selected]::after {
   inset-inline-start:2px;
 }
@@ -5962,9 +5959,9 @@ input:scope[data-nse-control="scroller"]:focus-visible {
    the regular 50px one: cell insets 2/50 and 4/50, rings 2/50, cap radii 13/50
    and 11/50, cell padding 14/50 (caps 18/50), type 13px at 50 and never under
    11px. The seams stay a single pixel, as they are at every size. */
-:scope :is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))):is([data-nse-height], [data-nse-control-size="small"]),
-:scope:is(:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))):is([data-nse-height], [data-nse-control-size="small"])),
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))):is([data-nse-height], [data-nse-control-size="small"]) {
+:scope :is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))):is([data-nse-height],[data-nse-control-size="small"]),
+:scope:is(:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))):is([data-nse-height],[data-nse-control-size="small"])),
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))):is([data-nse-height],[data-nse-control-size="small"]) {
   --nse-atmo-rg-band: var(--nse-control-height, 24px);
   --nse-atmo-rg-line: max(1px, calc(var(--nse-atmo-rg-band) * 0.04));
   --nse-atmo-bar-h: var(--nse-atmo-rg-band);
@@ -6010,14 +6007,14 @@ input:scope[data-nse-control="scroller"]:focus-visible {
 
 /* A sized capsule's selected cell keeps the inset ink: no ring columns at its
    seams, the cap ring's start inside the stroke. */
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]:is([data-nse-height], [data-nse-control-size="small"]) :where([data-nse-part="bezel"][data-nse-selected])[data-nse-selected]::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]:is([data-nse-height], [data-nse-control-size="small"])) :where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"]))[data-nse-selected]::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]:is([data-nse-height], [data-nse-control-size="small"]) :where([data-nse-part="bezel"][data-nse-selected])[data-nse-selected]::after {
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]:is([data-nse-height],[data-nse-control-size="small"]) :where([data-nse-part="bezel"][data-nse-selected])[data-nse-selected]::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]:is([data-nse-height],[data-nse-control-size="small"])) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"]))[data-nse-selected]::after,
+:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]:is([data-nse-height],[data-nse-control-size="small"]) :where([data-nse-part="bezel"][data-nse-selected])[data-nse-selected]::after {
   inset-inline:0;
 }
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]:is([data-nse-height], [data-nse-control-size="small"])>:first-child>:where([data-nse-part="bezel"][data-nse-selected]):first-child[data-nse-selected]::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]:is([data-nse-height], [data-nse-control-size="small"]))>:first-child>:where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])):first-child[data-nse-selected]::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]:is([data-nse-height], [data-nse-control-size="small"])>:first-child>:where([data-nse-part="bezel"][data-nse-selected]):first-child[data-nse-selected]::after {
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]:is([data-nse-height],[data-nse-control-size="small"])>:first-child>:where([data-nse-part="bezel"][data-nse-selected]):first-child[data-nse-selected]::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]:is([data-nse-height],[data-nse-control-size="small"]))>:first-child>:where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"])):first-child[data-nse-selected]::after,
+:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]:is([data-nse-height],[data-nse-control-size="small"])>:first-child>:where([data-nse-part="bezel"][data-nse-selected]):first-child[data-nse-selected]::after {
   inset-inline-start:calc(var(--nse-atmo-rg-band)*0.04);
 }
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child[aria-pressed="true"]::after,

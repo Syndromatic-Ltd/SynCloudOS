@@ -2244,8 +2244,8 @@
 
 /* A tooltip is portalled to the overlay layer, which can sit outside the
    Atmo scope; it carries its appearance itself, so it matches either way. */
-.nse-tooltip[data-nse-control="tooltip"]:where([data-nse-theme],[data-nse-theme] *),
-:where(:scope):is(.nse-tooltip[data-nse-control="tooltip"]:where([data-nse-theme],[data-nse-theme] *)) {
+[data-nse-control="tooltip"]:where([data-nse-part="surface"])[data-nse-control="tooltip"],
+:where(:scope):is([data-nse-control="tooltip"]:where([data-nse-part="surface"])[data-nse-control="tooltip"]) {
   position: fixed;
   isolation: isolate;
   box-sizing: border-box;
@@ -2258,8 +2258,8 @@
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.45);
 }
 
-.nse-tooltip:where([data-nse-theme],[data-nse-theme] *)>.nse-tooltip-arrow,
-:where(:scope):is(.nse-tooltip:where([data-nse-theme],[data-nse-theme] *))>.nse-tooltip-arrow {
+[data-nse-control="tooltip"]:where([data-nse-part="surface"])>[data-nse-part="arrow"]:where([data-nse-control="tooltip"] *),
+:where(:scope):is([data-nse-control="tooltip"]:where([data-nse-part="surface"]))>[data-nse-part="arrow"]:where([data-nse-control="tooltip"] *) {
   position: absolute;
   z-index: -2;
   box-sizing: border-box;
@@ -2617,8 +2617,8 @@
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]))>[data-nse-part="error"],
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"])>[data-nse-part="error"],
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"]))>[data-nse-part="error"],
-:where(:scope) [data-nse-part="date-time-editor"]>[role="alert"],
-:where(:scope):is([data-nse-part="date-time-editor"])>[role="alert"] {
+:where(:scope) [data-nse-part="date-time-editor"]>[data-nse-part="error"],
+:where(:scope):is([data-nse-part="date-time-editor"])>[data-nse-part="error"] {
   flex-basis: 100%;
   grid-column: 1 / -1;
   padding: 4px 4px 0;
@@ -2713,8 +2713,8 @@
   font-size: 15px;
 }
 
-:where(:scope) [data-nse-part="date-time-editor"]>label,
-:where(:scope):is([data-nse-part="date-time-editor"])>label {
+:where(:scope) [data-nse-part="date-time-editor"]>:where([data-nse-control="pop-up-button"][data-nse-type="native"]),
+:where(:scope):is([data-nse-part="date-time-editor"])>:where([data-nse-control="pop-up-button"][data-nse-type="native"]) {
   display: inline-flex;
   align-items: center;
   gap: 8px;

@@ -62,12 +62,14 @@ import { NSETabViewController, NSETabViewItem } from "../../../../src/NSE/Naviga
 import { createStaticPresentationTraits } from "../../../fixtures/presentationTraits";
 import { windowSpecimens } from "./windowSpecimens";
 import { MaterialProvider } from "../../../../src/NSE/Material/MaterialProvider";
+import { NSEView } from "../../../../src/NSE/Views/NSEView";
+import { NSEPopUpButton } from "../../../../src/NSE/Menus/NSEPopUpButton";
 import { NSEListItem } from "../../../../src/NSE/Controls/Selection/NSEListItem";
 import { NSEDatePicker } from "../../../../src/NSE/DateTime/Pickers/NSEDatePicker";
 import { SpecimenApplicationMenu, SpecimenContextMenu, SpecimenMenuBar } from "./menuSpecimens";
 const plainTheme = freezeNSETheme({ ...atmoTheme, presentation: { login: "plain", notifications: "plain", materialLighting: "off" } });
 const colour = GFXColour.parse("#336699");
-export const supplementalThemeCatalogue: readonly { id: string; ready?: string; activate?: string; activeReady?: string; context?: string; hover?: string; render: () => ReactNode }[] = [
+export const supplementalThemeCatalogue: readonly { id: string; ready?: string; activate?: string; activeReady?: string; context?: string; hover?: string; bare?: boolean; render: () => ReactNode }[] = [
   { id: "loading-outline", activate: '[data-nse-part="disclosure"]', activeReady: '[data-nse-part="loading"]', render: () => <LoadingOutline /> },
   { id: "sortable-table", activate: '[data-nse-role="sort"]', render: () => <SortableTable /> },
   { id: "loaded-browser", ready: '[data-nse-control="browser"] [data-nse-part="row"]', render: () => <NSEBrowser aria-label="Loaded files" presentation="columns" dataSource={{ rootItems: async () => [{ id: "Folder", leaf: false }, { id: "File", leaf: true }], children: async () => [], idForItem: item => item.id, labelForItem: item => item.id, isLeaf: item => item.leaf }} /> },
@@ -92,6 +94,9 @@ export const supplementalThemeCatalogue: readonly { id: string; ready?: string; 
   { id: "application-menu-open", ready: '[data-nse-application-menu]', render: () => <SpecimenApplicationMenu open /> },
   { id: "application-menu-submenu", ready: '[data-nse-application-menu]', hover: '[data-nse-application-menu] [aria-haspopup]', render: () => <SpecimenApplicationMenu open id="specimen-app-submenu" /> },
   { id: "context-menu", context: '[data-specimen-context]', render: () => <SpecimenContextMenu /> },
+  { id: "view-layer-continuous", render: () => <NSEView cornerRadius={8} cornerCurve="continuous">Layer</NSEView> },
+  { id: "view-layer-circular", render: () => <NSEView cornerRadius={8} cornerCurve="circular">Layer</NSEView> },
+  { id: "surface-ink-light", render: () => <NSEView><section data-nse-surface-ink="light">Paper</section></NSEView> },  { id: "pop-up-native", bare: true, render: () => <NSEPopUpButton label="Zone" value="a" items={[{ value: "a", title: "A" }, { value: "b", title: "B" }]} onValueChange={noop} /> },
   { id: "label-raised", render: () => <NSETextField isEditable={false} backgroundStyle="raised">Raised</NSETextField> },
   { id: "list-item-no-highlight", render: () => <NSEListItem tapHighlight={false}>Static row</NSEListItem> },
   { id: "segment-fill-equally", render: () => <NSESegmentedControl selection={{ mode: "select-one", selectedIds: new Set(["a"]), allowsEmpty: false }} aria-label="Fill" distribution="fill-equally" name="fill" items={[{ id: "a", label: "A" }, { id: "b", label: "Longer" }]} onSelectionChange={noop} /> },

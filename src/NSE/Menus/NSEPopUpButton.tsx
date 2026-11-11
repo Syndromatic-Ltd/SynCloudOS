@@ -258,7 +258,7 @@ function NSEPopUpButtonControl(props: NSEPopUpButtonProps) {
 
   if (!hosted) {
     return (
-      <label {...drawing} data-nse-part="background" id={id} className={classes("nse-choice-control", className)} data-nse-choice="native" style={sizedControlStyle(style, height, width)} {...(htmlAttributes as HTMLAttributes<HTMLLabelElement>)} {...theme.events}>
+      <label {...drawing} data-nse-part="background" id={id} className={classes("nse-choice-control", className)} data-nse-choice="native" data-nse-type="native" style={sizedControlStyle(style, height, width)} {...(htmlAttributes as HTMLAttributes<HTMLLabelElement>)} {...theme.events}>
         {bindings}
         {label ? (labelHidden ? <span className="nse-control-visually-hidden">{label}</span> : label) : null}
         <select

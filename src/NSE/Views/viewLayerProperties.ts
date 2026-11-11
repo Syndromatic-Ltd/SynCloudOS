@@ -54,6 +54,7 @@ export function useNSEViewLayerProperties({ shadow, cornerRadius, cornerCurve }:
     attributes: {
       "data-nse-view-layer": value || radius !== undefined || cornerCurve ? "" : undefined,
       "data-corner-curve": cornerCurve,
+      "data-nse-corner-curve": cornerCurve,
       "data-nse-shadow": value ? "true" : undefined,
       "data-nse-shadow-suppressed": value && (appearance.transparency === "reduced" || appearance.contrast === "forced") ? "true" : undefined,
     },

@@ -72,7 +72,8 @@ for (const surface of additionalThemeCatalogue) it(`renders additional ${surface
   collect();
 });
 for (const surface of supplementalThemeCatalogue) it(`renders supplemental ${surface.id}`, async () => {
-  render(<Host>{surface.render()}</Host>);
+  // A bare surface has no overlay host, so controls draw their native fallbacks.
+  render(surface.bare ? <NSEAppearanceProvider theme={atmoTheme} colourScheme="light">{surface.render()}</NSEAppearanceProvider> : <Host>{surface.render()}</Host>);
   await act(async () => { await Promise.resolve(); });
   if (surface.ready) await waitFor(() => expect(document.querySelector(surface.ready!)).not.toBeNull());
   collect();
