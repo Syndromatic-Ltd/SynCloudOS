@@ -21,6 +21,7 @@
 // @vitest-environment jsdom
 
 import { cleanup } from "@testing-library/react";
+import { withoutScopeTwins } from "../fixtures/atmoStylesheets";
 import React from "react";
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
@@ -46,7 +47,7 @@ import { createWindowTestDependencies, standardWindow } from "../fixtures/window
 import { projectChromeCloseError, projectChromeCloseResult } from "../../src/Webspring/WindowLayer/windowChromeResults";
 import type { CommandDispatchResult, WindowCloseResult } from "../../src/SynCloudOS/SynCloudOS";
 
-const windowCSS = readFileSync("src/NSE/Windows/nse-windows.css", "utf8");
+const windowCSS = withoutScopeTwins(readFileSync("src/NSE/Windows/nse-windows.css", "utf8"));
 
 afterEach(cleanup);
 

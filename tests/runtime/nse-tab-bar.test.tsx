@@ -1,4 +1,5 @@
 import { createTestTheme } from "../fixtures/themes";
+import { withoutScopeTwins } from "../fixtures/atmoStylesheets";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -477,11 +478,11 @@ describe("NSETabBar", () => {
     expect(home.querySelector(":scope > .nse-tab-bar-icon")).toBeNull();
     expect(library.querySelector(":scope > .nse-tab-bar-badge")).toBeNull();
     expect(library.querySelector(".nse-tab-bar-content > .nse-tab-bar-badge")).not.toBeNull();
-    const navigationCss = readFileSync(resolve(process.cwd(), "src/NSE/Navigation/nse-navigation.css"), "utf8");
+    const navigationCss = withoutScopeTwins(readFileSync(resolve(process.cwd(), "src/NSE/Navigation/nse-navigation.css"), "utf8"));
     expect(navigationCss).toContain(".nse-tab-bar-content");
     expect(navigationCss).toContain("pointer-events: none");
-    expect(navigationCss).toMatch(/\[data-nse-tab-chrome-segment="first"\] > \.nse-tab-bar-content \{\s*inset-inline-start: 6px;/u);
-    expect(navigationCss).toMatch(/\[data-nse-tab-chrome-segment="last"\] > \.nse-tab-bar-content \{\s*inset-inline-start: -6px;/u);
+    expect(navigationCss).toMatch(/\[data-nse-tab-chrome-segment="first"\]\s*>\s*\.nse-tab-bar-content \{\s*inset-inline-start: 6px;/u);
+    expect(navigationCss).toMatch(/\[data-nse-tab-chrome-segment="last"\]\s*>\s*\.nse-tab-bar-content \{\s*inset-inline-start: -6px;/u);
 
     fireEvent.pointerEnter(library);
 
@@ -516,7 +517,7 @@ describe("NSETabBar", () => {
 
     const homeIcon = screen.getByRole("tab", { name: "Home destination" }).querySelector<HTMLElement>(".nse-tab-bar-icon");
     const templateIcon = screen.getByRole("tab", { name: "Template destination" }).querySelector<HTMLElement>(".nse-tab-bar-icon");
-    const navigationCss = readFileSync(resolve(process.cwd(), "src/NSE/Navigation/nse-navigation.css"), "utf8");
+    const navigationCss = withoutScopeTwins(readFileSync(resolve(process.cwd(), "src/NSE/Navigation/nse-navigation.css"), "utf8"));
 
     expect(homeIcon?.getAttribute("data-nse-tab-icon-source")).toBe("vector:/fixture/home.svg");
     expect(homeIcon?.getAttribute("data-nse-tab-icon-ready")).toBe("true");
@@ -592,7 +593,7 @@ describe("NSETabBar", () => {
   });
 
   it("keeps labels and badges present under theme-neutral navigation structure", () => {
-    const css = readFileSync("src/NSE/Navigation/nse-navigation.css", "utf8");
+    const css = withoutScopeTwins(readFileSync("src/NSE/Navigation/nse-navigation.css", "utf8"));
     expect(css).toContain(".nse-tab-bar-label {");
     expect(css).toContain(".nse-tab-bar-badge {");
     const controller = new NSETabBarController<React.ReactNode>({ id: "neutral-tabs", destinations: destinations(2, { badge: "library" }) });

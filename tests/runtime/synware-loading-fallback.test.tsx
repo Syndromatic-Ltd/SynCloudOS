@@ -20,6 +20,7 @@
 
 // @vitest-environment jsdom
 import React from "react";
+import { withoutScopeTwins } from "../fixtures/atmoStylesheets";
 import { readFileSync } from "node:fs";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
@@ -29,7 +30,7 @@ import { createTestBundle, createTestRuntime } from "./helpers";
 afterEach(cleanup);
 
 it.each(["webspring-app-view-loading", "webspring-window-loading"])("keeps %s white and centered in a short surface after the host CSS cascade", loadingClassName => {
-  const css = readFileSync("src/Webspring/WebspringHost.css", "utf8");
+  const css = withoutScopeTwins(readFileSync("src/Webspring/WebspringHost.css", "utf8"));
   const style = document.createElement("style");
   // Load the actual competing rules in source order; unrelated host styles are
   // not needed to verify this loading state's colour and sizing.
@@ -63,8 +64,8 @@ it.each(["webspring-app-view-loading", "webspring-window-loading"])("renders the
 });
 
 it("shares the existing cotton image through the neutral loading token", () => {
-  const components = readFileSync("src/NSE/Components/components.css", "utf8");
-  const host = readFileSync("src/Webspring/WebspringHost.css", "utf8");
+  const components = withoutScopeTwins(readFileSync("src/NSE/Structure/defaults.css", "utf8"));
+  const host = withoutScopeTwins(readFileSync("src/Webspring/WebspringHost.css", "utf8"));
   expect(components).toMatch(/--nse-loading-background-image:\s*url\(["']?\/assets\/textures\/NSETileCotton\.jpg/);
   expect(host).toMatch(/\.webspring-loading-state\s*\{[^}]*background-image:\s*var\(--nse-loading-background-image\)/);
   expect(host).toMatch(/\.webspring-loading-state\s*\{[^}]*color:\s*#fff/);

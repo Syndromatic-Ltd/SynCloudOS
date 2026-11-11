@@ -20,3 +20,5 @@ export const atmoPaintCSS = (): string => atmoBundleFiles.map(read).join("\n");
 export const atmoStructurePaintCSS = (): string => atmoBundleFiles.filter(file => file.includes("/atmo-structure.")).map(read).join("\n");
 /** Everything Atmo loads: structure, then paint. */
 export const atmoCSS = (): string => [read(atmoStructureFile), atmoPaintCSS()].join("\n");
+/** A framework stylesheet as written, before scoping: drops the `:where(:scope):is(…)` twin each selector gains inside its @scope block. */
+export const withoutScopeTwins = (css: string): string => css.replace(/,\r?\n:where\(:scope\)[^\n]*?(?=\s*\{|,\r?\n)/gu, "");

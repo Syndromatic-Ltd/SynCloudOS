@@ -218,7 +218,8 @@ export function WindowHost({
   const hostRef = useRef<HTMLDivElement>(null);
   const layout = useMemo(() => new NSEWindowLayoutModel(), [controller.id]);
   useNSEDeferredDisposal(layout);
-  useLayoutEffect(() => { layout.setLogicalScreenInsets(screen.safeAreaInsets, screen.layoutViewport); layout.setBounds(presentation.bounds); }, [layout, screen.safeAreaInsets, screen.layoutViewport, presentation.bounds]);
+  // A host with invalid geometry is omitted and reported, so it has no bounds to lay out against.
+  useLayoutEffect(() => { layout.setLogicalScreenInsets(screen.safeAreaInsets, screen.layoutViewport); if (geometryIsValid) layout.setBounds(presentation.bounds); }, [layout, screen.safeAreaInsets, screen.layoutViewport, presentation.bounds, geometryIsValid]);
   useLayoutEffect(() => hostRef.current ? layout.connectRoot(hostRef.current) : undefined, [layout, record.state, contentRendererAvailable]);
   // The window surface clips to its rounded outline, and a fixed-position
   // popup does not escape a clip-path. Menus and popovers opened from the
