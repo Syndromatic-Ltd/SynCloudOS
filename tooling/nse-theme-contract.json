@@ -214,6 +214,9 @@
           "default",
           "minimise",
           "zoom"
+        ],
+        "style": [
+          "edited"
         ]
       }
     },
@@ -528,9 +531,12 @@
     "menu": {
       "parts": [
         "background",
+        "bezel",
+        "body",
         "content",
         "separator",
         "surface",
+        "title",
         "viewport"
       ],
       "states": [],
@@ -539,9 +545,12 @@
           "standard"
         ],
         "role": [
+          "application-menu",
           "overlay"
         ],
         "style": [
+          "application-menu",
+          "context-menu",
           "listbox",
           "menu"
         ]
@@ -557,11 +566,16 @@
     },
     "menu-item": {
       "parts": [
+        "back-indicator",
         "cell",
+        "icon-column",
+        "state-column",
+        "submenu-arrow",
         "title"
       ],
       "states": [
         "enabled=false",
+        "focused",
         "highlighted",
         "selected"
       ],
@@ -1376,7 +1390,11 @@
       "states": [
         "state=off"
       ],
-      "variants": {}
+      "variants": {
+        "style": [
+          "borderless"
+        ]
+      }
     },
     "tooltip": {
       "parts": [
@@ -1434,17 +1452,33 @@
         "key-window=false"
       ],
       "variants": {
+        "alignment": [
+          "center",
+          "end",
+          "start"
+        ],
         "chrome": [
           "hud",
           "metal",
           "standard"
         ],
+        "edge": [
+          "block-end",
+          "block-start",
+          "inline-end",
+          "inline-start"
+        ],
         "role": [
+          "borderless",
           "hud",
+          "modal",
           "panel",
+          "popover",
+          "sheet",
           "standard"
         ],
         "style": [
+          "custom",
           "panel",
           "standard"
         ],
@@ -1456,6 +1490,8 @@
           "unifiedCompact"
         ],
         "type": [
+          "custom",
+          "frameless",
           "system"
         ]
       }
