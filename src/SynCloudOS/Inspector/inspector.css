@@ -19,12 +19,12 @@
  */
 
 .syncloudos-inspector { min-inline-size: 0; max-inline-size: 100%; overflow-wrap: anywhere; }
-.syncloudos-inspector .nse-container-pane-body { min-inline-size: 0; }
+.syncloudos-inspector [data-nse-part="content"]:where([data-nse-control="box"][data-nse-box-type="custom"] > *) { min-inline-size: 0; }
 .syncloudos-inspector__actions,
 .syncloudos-inspector__navigation { display: flex; flex-wrap: wrap; gap: 0.5rem; min-inline-size: 0; }
 .syncloudos-inspector__navigation { margin-block: 1rem; }
-.syncloudos-inspector .nse-control-button { max-inline-size: 100%; }
-.syncloudos-inspector .nse-control-button-label { white-space: normal; overflow-wrap: anywhere; }
+.syncloudos-inspector [data-nse-control="button"]:where([data-nse-bezel-style]):where(:not([data-nse-bezel-style="disclosure"])) { max-inline-size: 100%; }
+.syncloudos-inspector [data-nse-part="title"]:where([data-nse-control="button"] *) { white-space: normal; overflow-wrap: anywhere; }
 .syncloudos-inspector__record { margin-block: 0.75rem; min-inline-size: 0; }
 .syncloudos-inspector__record:focus-visible { outline: 2px solid Highlight; outline-offset: 2px; }
 .syncloudos-inspector__record dd { margin-inline-start: 1rem; }

@@ -229,7 +229,7 @@
 .webspring-board-icon-well > img,
 .webspring-board-icon-well > span[aria-hidden="true"],
 .webspring-board-icon-well > .webspring-folder-tile,
-.webspring-board-icon-well > .nse-loading-spinner {
+.webspring-board-icon-well > [data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]) {
   grid-area: 1 / 1;
 }
 
@@ -238,7 +238,7 @@
   transform: scale(1.12);
 }
 
-.webspring-board-icon-well > .nse-loading-spinner {
+.webspring-board-icon-well > [data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]) {
   z-index: 2;
   place-self: center;
 }
