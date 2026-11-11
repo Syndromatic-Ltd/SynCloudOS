@@ -43,6 +43,23 @@ export function nseLayoutOrigin(element: HTMLElement): { readonly x: number; rea
   return { x, y };
 }
 
+/**
+ * @internal Whether a CSS transform sits on the view or an ancestor up to its
+ * window root. Only then does the client rectangle differ from the laid-out
+ * frame; otherwise it is the frame, at sub-pixel precision offsets lack.
+ */
+function nseTransformedWithin(element: HTMLElement, root: HTMLElement | null | undefined): boolean {
+  const view = element.ownerDocument.defaultView;
+  if (!view) return false;
+  const set = (value: string) => value !== "" && value !== "none";
+  for (let node: HTMLElement | null = element; node; node = node.parentElement) {
+    const style = view.getComputedStyle(node);
+    if (set(style.transform) || set(style.translate) || set(style.scale) || set(style.rotate)) return true;
+    if (node === root) break;
+  }
+  return false;
+}
+
 /** @internal Measures an existing view element; never inserts a layout wrapper. */
 export function useNSEViewSafeArea(ref: RefObject<HTMLElement | null>, additional: NSEEdgeInsets = NSEEdgeInsetsZero, onChange?: (insets: NSEEdgeInsets) => void, onResize?: () => void, contentRef?: RefObject<HTMLElement | null>) {
   const model = useContext(NSEWindowLayoutContext);
@@ -55,7 +72,8 @@ export function useNSEViewSafeArea(ref: RefObject<HTMLElement | null>, additiona
   const measure = () => {
     const element = ref.current;
     if (!element) return;
-    const origin = nseLayoutOrigin(element);
+    const transformed = nseTransformedWithin(element, model?.root);
+    const origin = transformed ? nseLayoutOrigin(element) : null;
     const rootOrigin = model?.root ? nseLayoutOrigin(model.root) : { x: window.bounds.x, y: window.bounds.y };
     if (origin && rootOrigin) {
       const laidOut = Object.freeze({ x: origin.x - rootOrigin.x, y: origin.y - rootOrigin.y, width: element.offsetWidth, height: element.offsetHeight });
