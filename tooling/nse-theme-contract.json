@@ -235,6 +235,7 @@
       "parts": [
         "colour-list",
         "colour-list-chip",
+        "colour-list-empty",
         "colour-list-name",
         "colour-list-row",
         "colour-list-scroll",
@@ -265,10 +266,14 @@
       "parts": [
         "background",
         "body",
+        "content-message",
         "current-colour",
         "eyedropper",
+        "eyedropper-status",
         "hex-row",
         "image",
+        "opacity-row",
+        "opacity-value",
         "row",
         "row-label",
         "sample-row",
@@ -352,6 +357,7 @@
     "date-picker": {
       "parts": [
         "actions",
+        "ampm-segment",
         "bezel",
         "body",
         "button",
@@ -363,6 +369,7 @@
         "date-entry",
         "date-time-editor",
         "day",
+        "event-indicator",
         "face",
         "field",
         "header",
@@ -373,6 +380,7 @@
         "next-month",
         "next-year",
         "numeric",
+        "period-gap",
         "previous-month",
         "previous-year",
         "row",
@@ -644,6 +652,7 @@
         "back-indicator",
         "cell",
         "icon-column",
+        "shortcut-column",
         "state-column",
         "submenu-arrow",
         "title"
@@ -652,7 +661,8 @@
         "enabled=false",
         "focused",
         "highlighted",
-        "selected"
+        "selected",
+        "state=off"
       ],
       "variants": {
         "menu-flash": [
@@ -808,12 +818,23 @@
     },
     "popover": {
       "parts": [
+        "actions",
         "arrow",
+        "calendar-sheet",
+        "centre",
+        "clock",
+        "clock-sheet",
         "content",
+        "face",
+        "hour-hand",
+        "minute-hand",
+        "numeric",
         "popover-arrow-fill",
         "popover-frame",
         "popover-outline",
-        "surface"
+        "range-fields",
+        "surface",
+        "title"
       ],
       "states": [],
       "variants": {
@@ -821,7 +842,8 @@
           "standard"
         ],
         "placement": [
-          "block-end-inline-start"
+          "block-end-inline-start",
+          "bottom-start"
         ],
         "presentation": [
           "anchored"
@@ -1265,13 +1287,16 @@
         "crayon-box",
         "crayon-box-front",
         "crayons-mode",
+        "grey-presets",
         "header",
         "image",
+        "image-marker",
         "image-mode",
         "image-palette",
         "indicator",
         "palettes-mode",
         "sliders-mode",
+        "swatch",
         "tab-item",
         "title",
         "viewport",

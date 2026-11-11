@@ -69,6 +69,7 @@ import { createApplicationMenuStore } from "../../../../src/SynCloudOSReact/Appl
 import { NSEPopUpButton } from "../../../../src/NSE/Menus/NSEPopUpButton";
 import { NSEListItem } from "../../../../src/NSE/Controls/Selection/NSEListItem";
 import { NSEDatePicker } from "../../../../src/NSE/DateTime/Pickers/NSEDatePicker";
+import { NSEMenuView } from "../../../../src/NSE/Menus/NSEMenuView";
 import { SpecimenApplicationMenu, SpecimenContextMenu, SpecimenMenuBar } from "./menuSpecimens";
 const plainTheme = freezeNSETheme({ ...atmoTheme, presentation: { login: "plain", notifications: "plain", materialLighting: "off" } });
 const colour = GFXColour.parse("#336699");
@@ -101,6 +102,11 @@ export const supplementalThemeCatalogue: readonly { id: string; ready?: string; 
   { id: "context-menu", context: '[data-specimen-context]', render: () => <SpecimenContextMenu /> },
   ...(["metal", "cumulus"] as const).map(material => ({ id: `host-titlebar-${material}`, render: () => <ApplicationHostTitlebar title="Documents" iconSrc={null} material={material} scheme="light" menuStore={createApplicationMenuStore()} menuLabel="Documents"><p>Body</p></ApplicationHostTitlebar> })),
   { id: "media-grid", render: () => <NSEMediaCollectionPresenter items={["Beach", "Forest"].map((name, index) => ({ id: `m${index}`, providerId: "local", name, kind: "image", mimeType: "image/png", thumbnailUrl: "/assets/webspring/Panel.png" }))} selectedIds={new Set(["5:local2:m1"])} selection="multiple" direction="ltr" onSelectionChange={() => undefined} onActivate={() => undefined} /> },
+  { id: "date-picker-calendar-sheet", activate: '[data-nse-control="date-picker"] button[aria-label^="Choose"]', activeReady: '[data-nse-part="calendar-sheet"]', render: () => <NSEDatePicker aria-label="Date" locale="en-GB" timeZone="Europe/London" defaultValue={{ year: 2026, month: 11, day: 9 }} /> },
+  { id: "time-picker-clock-sheet", activate: '[data-nse-part="clock-affix"]', activeReady: '[data-nse-part="clock-sheet"]', render: () => <NSEDatePicker aria-label="Time" locale="en-US" timeZone="America/New_York" datePickerElements={["hourMinute"]} defaultValue={{ hour: 13, minute: 30, second: 0 }} /> },
+  { id: "date-range-fields", activate: '[data-nse-control="date-picker"] button[aria-label^="Choose"]', activeReady: '[data-nse-part="range-fields"]', render: () => <NSEDatePicker aria-label="Stay" locale="en-GB" timeZone="Europe/London" datePickerMode="range" defaultValue={{ start: { year: 2026, month: 11, day: 9 }, end: { year: 2026, month: 11, day: 12 } }} /> },
+  { id: "calendar-events", render: () => <NSEDatePicker aria-label="Date" locale="en-GB" timeZone="Europe/London" datePickerStyle="clockAndCalendar" defaultValue={{ year: 2026, month: 11, day: 9 }} eventIndicatorsForDate={(date) => date.day === 12 ? [{ id: "review", label: "Review", tone: "accent" }] : []} /> },
+  { id: "menu-shortcuts", activate: '[data-nse-control="pop-up-button"] button, button[aria-haspopup]', activeReady: '[data-nse-part="shortcut-column"]', render: () => <NSEMenuView label="Edit" onSelect={() => undefined} items={[{ value: "copy", label: "Copy", shortcut: "⌘C" }, { value: "paste", label: "Paste", shortcut: "⌘V" }]} /> },
   { id: "view-layer-continuous", render: () => <NSEView cornerRadius={8} cornerCurve="continuous">Layer</NSEView> },
   { id: "view-layer-circular", render: () => <NSEView cornerRadius={8} cornerCurve="circular">Layer</NSEView> },
   { id: "surface-ink-light", render: () => <NSEView><section data-nse-surface-ink="light">Paper</section></NSEView> },  { id: "pop-up-native", bare: true, render: () => <NSEPopUpButton label="Zone" value="a" items={[{ value: "a", title: "A" }, { value: "b", title: "B" }]} onValueChange={noop} /> },

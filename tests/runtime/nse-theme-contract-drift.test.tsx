@@ -21,6 +21,12 @@ import { NSETitlebarAccessoryViewController } from "../../src/NSE/Application/NS
 import { NSEToolbar } from "../../src/NSE/Toolbars/NSEToolbar";
 import { createClassApplicationHost } from "./fixtures/classApplicationHost";
 import { nseFlashMenuSelection } from "../../src/NSE/Menus/menuSelectionFlash";
+import { createSynCloudOS } from "../../src/SynCloudOS/Runtime/createSynCloudOS";
+import { createBrowserRuntimeEnvironment } from "../../src/SynCloudOS/PlatformAdapters/BrowserRuntimeEnvironment";
+import { NSEColourPanelController } from "../../src/NSE/Colour/ColourPanel/NSEColourPanelController";
+import { NSEColourPanel } from "../../src/NSE/Colour/ColourPanel/NSEColourPanel";
+import { GFXColour } from "../../src/FX/GraphicsFX/GFXColour";
+import { nseUnowned } from "../../src/NSE/Controllers/ownership";
 
 const repository = resolve(import.meta.dirname, "../..");
 const presentation = createStaticPresentationPort({ width: 1000, height: 800, reducedMotion: true });
@@ -154,6 +160,46 @@ it("renders a hosted application window", async () => {
   } finally {
     cleanup();
     await host.dispose();
+  }
+});
+it("renders colour panel states", async () => {
+  const runtime = createSynCloudOS({ id: "contract-colour-panel", environment: createBrowserRuntimeEnvironment(), authenticationPolicy: "disabled" });
+  const controller = new NSEColourPanelController(runtime, { owner: nseUnowned });
+  const noop = () => undefined;
+  const release = controller.activateTarget({ id: "contract-colour-anchor", responderId: "contract", read: () => GFXColour.parse("#336699"), preview: noop, commit: noop, cancel: noop, showsAlpha: true });
+  controller.open();
+  try {
+    const view = render(<Host><button id="contract-colour-anchor">Accent</button><NSEColourPanel controller={controller} eyeDropper={{ availability: () => "available" as const, pick: async () => ({ kind: "unavailable" as const }) }} /></Host>);
+    await waitFor(() => expect(document.querySelector('[data-nse-part="opacity-row"]')).not.toBeNull());
+    collect();
+    // An unavailable eyedropper: the panel reports it.
+    fireEvent.click(document.querySelector<HTMLElement>('[data-nse-part="eyedropper"]')!);
+    await waitFor(() => expect(document.querySelector('[data-nse-part="eyedropper-status"]')).not.toBeNull());
+    collect();
+    fireEvent.click(await view.findByRole("tab", { name: "Colour Sliders" }));
+    fireEvent.click(await view.findByRole("button", { name: /Slider model/u }));
+    fireEvent.click(await view.findByRole("option", { name: "Grey Scale Slider" }));
+    await waitFor(() => expect(document.querySelector('[data-nse-part="grey-presets"]')).not.toBeNull());
+    collect();
+    fireEvent.click(await view.findByRole("tab", { name: "Colour Palettes" }));
+    const search = await view.findByRole("searchbox");
+    fireEvent.change(search, { target: { value: "no colour is called this" } });
+    await waitFor(() => expect(document.querySelector('[data-nse-part="colour-list-empty"]')).not.toBeNull());
+    collect();
+    fireEvent.click(await view.findByRole("tab", { name: "Image Palettes" }));
+    const canvas = await waitFor(() => { const element = document.querySelector<HTMLCanvasElement>('[data-nse-control="colour-panel"] canvas'); expect(element).not.toBeNull(); return element!; });
+    fireEvent.pointerDown(canvas, { clientX: 4, clientY: 4, pointerId: 1 });
+    await waitFor(() => expect(document.querySelector('[data-nse-part="image-marker"]')).not.toBeNull());
+    collect();
+    cleanup();
+    render(<Host><NSEColourPanel controller={controller} contentState="empty" /></Host>);
+    await waitFor(() => expect(document.querySelector('[data-nse-part="content-message"]')).not.toBeNull());
+    collect();
+  } finally {
+    cleanup();
+    release();
+    controller.dispose();
+    await runtime.dispose("contract test finished");
   }
 });
 // A chosen menu row flashes before its menu acts and fades: drive the real flash on each open menu's first row.
