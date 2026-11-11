@@ -43,7 +43,7 @@ export function NSEMetalSurface({
     <div
       {...props}
       className={classes("nse-metal-surface", className)}
-      data-nse-material="metal"
+      data-nse-control="visual-effect-view" data-nse-part="background" data-nse-material="metal"
       data-mode={mode}
       data-nse-colour-scheme-resolved={mode}
 

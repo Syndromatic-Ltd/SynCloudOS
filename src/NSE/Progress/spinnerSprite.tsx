@@ -40,8 +40,8 @@ export function NSESpinner({ size = "small", tone = "light", label = "Loading", 
   const rootRef = useNSEProgressVisibility<HTMLSpanElement>();
 
   return (
-    <span ref={rootRef} className={classes("nse-control-spinner", className)} data-size={size} data-tone={tone} role="status" aria-label={label} {...props}>
-      <span className="nse-control-spinner-sprite" aria-hidden="true" />
+    <span ref={rootRef} data-nse-control="progress-indicator" data-nse-part="content" data-nse-style="spinning" data-nse-control-size={size} className={classes("nse-control-spinner", className)} data-size={size} data-tone={tone} role="status" aria-label={label} {...props}>
+      <span data-nse-part="image" className="nse-control-spinner-sprite" aria-hidden="true" />
     </span>
   );
 }

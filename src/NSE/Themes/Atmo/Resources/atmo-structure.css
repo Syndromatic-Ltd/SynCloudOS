@@ -1022,8 +1022,8 @@
   border-image-source: var(--nse-atmo-pill-focus);
 }
 
-:where(:scope) [data-nse-part="content"]:where([data-nse-control="button"] *):where([data-nse-button-type="momentaryPushIn"] *),
-:where(:scope):is([data-nse-part="content"]:where([data-nse-control="button"] *):where([data-nse-button-type="momentaryPushIn"] *)) {
+:where(:scope) [data-nse-part="content"]:where([data-nse-control="button"] *):where([data-nse-button-type="momentaryPushIn"] *):where(:not([data-nse-control])),
+:where(:scope):is([data-nse-part="content"]:where([data-nse-control="button"] *):where([data-nse-button-type="momentaryPushIn"] *):where(:not([data-nse-control]))) {
   display: block;
   min-width: 24px;
   margin: -15px -8px -17px -11px;
@@ -1173,8 +1173,8 @@
    `*-border` family as a BORDER-IMAGE (heritage divider: `border-image: divider-border.png
    0 6 0 6 repeat`): 6px end caps + a repeating 1px middle. Tiling it as a repeat-x background (the
    old approach) repeats the whole 13px sprite — caps and all — into broken dashes. */
-:where(:scope) .nse-control-divider[data-variant="grey"],
-:where(:scope):is(.nse-control-divider[data-variant="grey"]) {
+:where(:scope) [data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style])[data-nse-style="grey"]:where([data-nse-box-type="separator"]),
+:where(:scope):is([data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style])[data-nse-style="grey"]:where([data-nse-box-type="separator"])) {
   box-sizing:border-box;
 }
 
@@ -1216,16 +1216,16 @@
    sprite width (56/33 of the box) so the segments stop exactly at the knob's edges, and every segment
    + the baked line is the same 7/33-of-box thickness. Lower the token and the whole thing shrinks
    together. (The button/disclosure form drops the segments — its header supplies the line.) */
-:where(:scope) .nse-control-divider[data-variant="arrow"],
-:where(:scope):is(.nse-control-divider[data-variant="arrow"]) {
+:where(:scope) [data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style])[data-nse-style="arrow"]:where([data-nse-box-type="separator"]),
+:where(:scope):is([data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style])[data-nse-style="arrow"]:where([data-nse-box-type="separator"])) {
   display:flex;
   align-items:center;
 }
 
-:where(:scope) .nse-control-divider[data-variant="arrow"]::before,
-:where(:scope):is(.nse-control-divider[data-variant="arrow"]::before),
-:where(:scope) .nse-control-divider[data-variant="arrow"]::after,
-:where(:scope):is(.nse-control-divider[data-variant="arrow"]::after) {
+:where(:scope) [data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style])[data-nse-style="arrow"]:where([data-nse-box-type="separator"])::before,
+:where(:scope):is([data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style])[data-nse-style="arrow"]:where([data-nse-box-type="separator"])::before),
+:where(:scope) [data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style])[data-nse-style="arrow"]:where([data-nse-box-type="separator"])::after,
+:where(:scope):is([data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style])[data-nse-style="arrow"]:where([data-nse-box-type="separator"])::after) {
   content:"";
   flex:1 1 0;
 }
@@ -1233,24 +1233,24 @@
 /* The disclosure-button form (NSEDivider with onToggle: sidebar section toggles, gallery disclosure,
    DividerDrawer) is JUST the knob — its surrounding header supplies the flanking line — so drop the
    standalone divider's own line segments to avoid a double line. */
-:where(:scope) .nse-control-divider-toggle[data-variant="arrow"]::before,
-:where(:scope):is(.nse-control-divider-toggle[data-variant="arrow"]::before),
-:where(:scope) .nse-control-divider-toggle[data-variant="arrow"]::after,
-:where(:scope):is(.nse-control-divider-toggle[data-variant="arrow"]::after) {
+:where(:scope) [data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-role="disclosure"])[data-nse-style="arrow"]:where([data-nse-box-type="separator"])::before,
+:where(:scope):is([data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-role="disclosure"])[data-nse-style="arrow"]:where([data-nse-box-type="separator"])::before),
+:where(:scope) [data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-role="disclosure"])[data-nse-style="arrow"]:where([data-nse-box-type="separator"])::after,
+:where(:scope):is([data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-role="disclosure"])[data-nse-style="arrow"]:where([data-nse-box-type="separator"])::after) {
   content: none;
 }
 
 
-:where(:scope) .nse-control-divider[data-variant="arrow"][data-pressed="true"],
-:where(:scope):is(.nse-control-divider[data-variant="arrow"][data-pressed="true"]) {
+:where(:scope) [data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style])[data-nse-style="arrow"]:where([data-nse-box-type="separator"])[data-nse-highlighted],
+:where(:scope):is([data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style])[data-nse-style="arrow"]:where([data-nse-box-type="separator"])[data-nse-highlighted]) {
   background-position:center 33.3333%;
 }
 
 
 
 
-:where(:scope) .nse-control-divider[data-variant="arrow"][data-expanded="true"][data-pressed="true"],
-:where(:scope):is(.nse-control-divider[data-variant="arrow"][data-expanded="true"][data-pressed="true"]) {
+:where(:scope) [data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style])[data-nse-style="arrow"]:where([data-nse-box-type="separator"])[data-nse-expanded="true"][data-nse-highlighted],
+:where(:scope):is([data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style])[data-nse-style="arrow"]:where([data-nse-box-type="separator"])[data-nse-expanded="true"][data-nse-highlighted]) {
   background-position:center 100%;
 }
 
@@ -1586,8 +1586,8 @@
   position:relative;
 }
 
-:where(:scope) .nse-control-spinner,
-:where(:scope):is(.nse-control-spinner) {
+:where(:scope) [data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]:is([data-nse-control-size="small"], [data-nse-control-size="large"]):not([data-nse-indeterminate])),
+:where(:scope):is([data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]:is([data-nse-control-size="small"], [data-nse-control-size="large"]):not([data-nse-indeterminate]))) {
   display: inline-grid;
   width: 32px;
   height: 32px;
@@ -1596,14 +1596,14 @@
   vertical-align: middle;
 }
 
-:where(:scope) .nse-control-spinner[data-size="large"],
-:where(:scope):is(.nse-control-spinner[data-size="large"]) {
+:where(:scope) [data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]:is([data-nse-control-size="small"], [data-nse-control-size="large"]):not([data-nse-indeterminate]))[data-nse-control-size="large"],
+:where(:scope):is([data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]:is([data-nse-control-size="small"], [data-nse-control-size="large"]):not([data-nse-indeterminate]))[data-nse-control-size="large"]) {
   width: 128px;
   height: 128px;
 }
 
-:where(:scope) .nse-control-spinner-sprite,
-:where(:scope):is(.nse-control-spinner-sprite) {
+:where(:scope) [data-nse-part="image"]:where([data-nse-control="progress-indicator"][data-nse-style="spinning"]:is([data-nse-control-size="small"], [data-nse-control-size="large"]):not([data-nse-indeterminate]) > *),
+:where(:scope):is([data-nse-part="image"]:where([data-nse-control="progress-indicator"][data-nse-style="spinning"]:is([data-nse-control-size="small"], [data-nse-control-size="large"]):not([data-nse-indeterminate]) > *)) {
   display: block;
   width: 32px;
   height: 32px;
@@ -1611,8 +1611,8 @@
   animation: nse-control-spinner 0.9s steps(12) infinite;
 }
 
-:where(:scope) .nse-control-spinner[data-size="large"] .nse-control-spinner-sprite,
-:where(:scope):is(.nse-control-spinner[data-size="large"]) .nse-control-spinner-sprite {
+:where(:scope) [data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]:is([data-nse-control-size="small"], [data-nse-control-size="large"]):not([data-nse-indeterminate]))[data-nse-control-size="large"] [data-nse-part="image"]:where([data-nse-control="progress-indicator"][data-nse-style="spinning"]:is([data-nse-control-size="small"], [data-nse-control-size="large"]):not([data-nse-indeterminate]) > *),
+:where(:scope):is([data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]:is([data-nse-control-size="small"], [data-nse-control-size="large"]):not([data-nse-indeterminate]))[data-nse-control-size="large"]) [data-nse-part="image"]:where([data-nse-control="progress-indicator"][data-nse-style="spinning"]:is([data-nse-control-size="small"], [data-nse-control-size="large"]):not([data-nse-indeterminate]) > *) {
   width: 128px;
   height: 128px;
   background-image: var(--nse-atmo-spinner-large);
@@ -1624,8 +1624,8 @@
   filter: invert(1) saturate(0.2) brightness(0.72);
 }
 
-:where(:scope) .nse-control-button:where(:not(.nse-control-picker-button))>.nse-control-spinner,
-:where(:scope):is(.nse-control-button:where(:not(.nse-control-picker-button)))>.nse-control-spinner {
+:where(:scope) :is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *)))>[data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]:is([data-nse-control-size="small"], [data-nse-control-size="large"]):not([data-nse-indeterminate])),
+:where(:scope):is(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *))))>[data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]:is([data-nse-control-size="small"], [data-nse-control-size="large"]):not([data-nse-indeterminate])) {
   position: absolute;
   left: 12px;
   transform: scale(0.62);
@@ -1659,14 +1659,14 @@
 /* A frozen spinner reads as a hang, so slow the cadence right down
    instead of stopping it. */
 @media (prefers-reduced-motion: reduce) {
-  :where(:scope) .nse-control-spinner-sprite,
-:where(:scope):is(.nse-control-spinner-sprite) {
+  :where(:scope) [data-nse-part="image"]:where([data-nse-control="progress-indicator"][data-nse-style="spinning"]:is([data-nse-control-size="small"], [data-nse-control-size="large"]):not([data-nse-indeterminate]) > *),
+:where(:scope):is([data-nse-part="image"]:where([data-nse-control="progress-indicator"][data-nse-style="spinning"]:is([data-nse-control-size="small"], [data-nse-control-size="large"]):not([data-nse-indeterminate]) > *)) {
     animation-duration: 3.6s;
   }
 }
 
-:where(:scope) .nse-control-spinner[data-size="large"] .nse-control-spinner-sprite,
-:where(:scope):is(.nse-control-spinner[data-size="large"]) .nse-control-spinner-sprite {
+:where(:scope) [data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]:is([data-nse-control-size="small"], [data-nse-control-size="large"]):not([data-nse-indeterminate]))[data-nse-control-size="large"] [data-nse-part="image"]:where([data-nse-control="progress-indicator"][data-nse-style="spinning"]:is([data-nse-control-size="small"], [data-nse-control-size="large"]):not([data-nse-indeterminate]) > *),
+:where(:scope):is([data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]:is([data-nse-control-size="small"], [data-nse-control-size="large"]):not([data-nse-indeterminate]))[data-nse-control-size="large"]) [data-nse-part="image"]:where([data-nse-control="progress-indicator"][data-nse-style="spinning"]:is([data-nse-control-size="small"], [data-nse-control-size="large"]):not([data-nse-indeterminate]) > *) {
   animation-name: nse-control-spinner-large;
 }
 

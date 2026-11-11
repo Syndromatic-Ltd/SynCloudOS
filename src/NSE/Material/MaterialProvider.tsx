@@ -35,7 +35,7 @@ export function MaterialProvider({
   appearance?: MaterialAppearance;
 }) {
   return (
-    <div className="nse-material-provider" data-nse-material={appearance}>
+    <div className="nse-material-provider" data-nse-control="visual-effect-view" data-nse-part="background" data-nse-material={appearance}>
       {children}
     </div>
   );

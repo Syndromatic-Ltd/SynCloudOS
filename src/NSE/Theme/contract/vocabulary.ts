@@ -4,7 +4,7 @@
 export const nseThemeControls = Object.freeze([
   "button", "switch", "pop-up-button", "segmented-control", "slider", "stepper", "level-indicator",
   "progress-indicator", "text-field", "secure-text-field", "search-field", "combo-box", "token-field", "text-view",
-  "box", "matrix", "image-view", "stack-view", "split-view", "drawer", "grid-view", "scroll-view", "clip-view", "scroller",
+  "box", "visual-effect-view", "matrix", "image-view", "stack-view", "split-view", "drawer", "grid-view", "scroll-view", "clip-view", "scroller",
   "table-view", "table-cell-view", "outline-view", "collection-view", "browser", "rule-editor", "predicate-editor",
   "date-picker",
   "menu", "menu-item", "menu-bar", "toolbar", "toolbar-item", "toolbar-customisation-palette", "path-control",
@@ -35,7 +35,7 @@ export const nseThemeVariants = Object.freeze([
   "bezel-style", "control-size", "segment-style", "box-type", "toolbar-style", "chrome", "button-type", "slider-type",
   "login-presentation", "notification-presentation", "appearance-name", "key-equivalent", "has-destructive-action", "image-position",
   "sort-direction", "selection-highlight-style", "highlight-style", "material", "transparent", "custom-fill", "custom-border", "shadow", "shadow-suppressed", "validation", "value-state", "revealed", "indeterminate", "height", "expanded", "orientation", "alignment", "position", "placement", "flow", "style", "role", "type", "edge", "level",
-  "pulls-down", "title-position", "border-type", "image-scaling", "text-role", "text-colour", "background-style", "editable", "date-picker-style", "date-picker-mode", "date-picker-elements", "navigation-placement", "navigation-flow",
+  "pulls-down", "title-position", "border-type", "image-scaling", "text-role", "text-colour", "background-style", "editable", "date-picker-style", "date-picker-mode", "date-picker-elements", "navigation-placement", "navigation-flow", "distribution",
 ] as const);
 
 export type NSEThemeControlName = typeof nseThemeControls[number];

@@ -61,6 +61,7 @@ import { NSEViewControllerView } from "../../../../src/SynCloudOS/AppHosting/app
 import { NSETabViewController, NSETabViewItem } from "../../../../src/NSE/Navigation/NSETabViewController";
 import { createStaticPresentationTraits } from "../../../fixtures/presentationTraits";
 import { windowSpecimens } from "./windowSpecimens";
+import { MaterialProvider } from "../../../../src/NSE/Material/MaterialProvider";
 import { SpecimenApplicationMenu, SpecimenContextMenu, SpecimenMenuBar } from "./menuSpecimens";
 const plainTheme = freezeNSETheme({ ...atmoTheme, presentation: { login: "plain", notifications: "plain", materialLighting: "off" } });
 const colour = GFXColour.parse("#336699");
@@ -89,6 +90,7 @@ export const supplementalThemeCatalogue: readonly { id: string; ready?: string; 
   { id: "application-menu-open", ready: '[data-nse-application-menu]', render: () => <SpecimenApplicationMenu open /> },
   { id: "application-menu-submenu", ready: '[data-nse-application-menu]', hover: '[data-nse-application-menu] [aria-haspopup]', render: () => <SpecimenApplicationMenu open id="specimen-app-submenu" /> },
   { id: "context-menu", context: '[data-specimen-context]', render: () => <SpecimenContextMenu /> },
+  { id: "material-metal", render: () => <MaterialProvider appearance="metal"><p>Metal</p></MaterialProvider> },
   ...windowSpecimens,
 ];
 
