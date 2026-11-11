@@ -294,7 +294,10 @@ export function WindowHost({
   ) {
     const lastFrame = lastFrameRef.current;
     if (!exiting || !lastFrame) return null;
+    // The same provider as the open frame keeps the tree's shape, so the exit
+    // keeps the mounted contents rather than remounting them empty.
     return (
+      <NSEWindowLayoutContext.Provider value={layout}>
       <div
         ref={hostRef}
         className="webspring-window-host"
@@ -312,6 +315,7 @@ export function WindowHost({
           externallyManagedScope externallyManagedInert
         >{lastFrame.contents}</FocusScope> : lastFrame.contents}
       </div>
+      </NSEWindowLayoutContext.Provider>
     );
   }
 

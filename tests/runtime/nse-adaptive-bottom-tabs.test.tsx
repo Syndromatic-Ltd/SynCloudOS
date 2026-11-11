@@ -8,7 +8,7 @@ import { tabViewController, renderTabController, updateTraits } from "../fixture
 afterEach(cleanup);
 describe("tab view control placement", () => {
   it("projects each item's vector image in a source-list cell without changing its compact icon identity", () => {
-    const tabs = tabViewController({ ids: ["Overview"] });
+    const tabs = tabViewController({ ids: ["Overview", "Library"] });
     const view = renderTabController(tabs, createStaticPresentationTraits({ width: 1440, height: 900 }));
     const image = screen.getByRole("tree").querySelector("img");
     expect(image?.getAttribute("src")).toContain("/navigation/overview.svg");
