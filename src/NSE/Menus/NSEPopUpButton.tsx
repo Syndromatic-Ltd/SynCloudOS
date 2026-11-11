@@ -223,7 +223,7 @@ function NSEPopUpButtonControl(props: NSEPopUpButtonProps) {
     .map((row) => ({
       id: row.rowId,
       label: row.item.image
-        ? <span className="nse-extended-option"><span className="nse-extended-option-icon">{row.item.image}</span><span className="nse-extended-option-label">{row.item.title}</span></span>
+        ? <span data-nse-part="cell-content" className="nse-extended-option"><span data-nse-part="image" className="nse-extended-option-icon">{row.item.image}</span><span data-nse-part="label" className="nse-extended-option-label">{row.item.title}</span></span>
         : row.item.title,
       value: row.item.value,
       disabled: !rowEnabled(row),

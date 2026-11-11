@@ -126,6 +126,7 @@ export function NSEWindowView({
       data-window-zoomed={zoomed ? "true" : "false"}
       data-window-level={record.level}
       data-window-blocked={blocked ? "true" : "false"}
+      data-nse-enabled={blocked ? "false" : undefined}
       data-window-chrome-mode={record.chromeMode}
       data-window-custom-chrome-active={customChromeActive ? "true" : "false"}
 

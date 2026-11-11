@@ -608,6 +608,11 @@
         "menu-chosen": [
           ""
         ],
+        "placement": [
+          "block-end-inline-start",
+          "bottom-start",
+          "viewport-block-start-inline-end"
+        ],
         "role": [
           "application-menu",
           "overlay"
@@ -809,6 +814,9 @@
         "chrome": [
           "standard"
         ],
+        "placement": [
+          "block-end-inline-start"
+        ],
         "role": [
           "overlay"
         ],
@@ -834,6 +842,9 @@
       ],
       "states": [],
       "variants": {
+        "appearance-name": [
+          "aqua"
+        ],
         "background-style": [
           "normal"
         ],
@@ -928,6 +939,9 @@
       "variants": {
         "chrome": [
           "standard"
+        ],
+        "placement": [
+          "block-end-inline-start"
         ],
         "role": [
           "overlay"
@@ -1079,6 +1093,9 @@
       "variants": {
         "chrome": [
           "standard"
+        ],
+        "placement": [
+          "block-end-inline-start"
         ],
         "role": [
           "overlay"
@@ -1470,6 +1487,9 @@
         "chrome": [
           "standard"
         ],
+        "placement": [
+          "block-end-inline-start"
+        ],
         "role": [
           "overlay"
         ],
@@ -1519,6 +1539,9 @@
       "variants": {
         "chrome": [
           "standard"
+        ],
+        "placement": [
+          "bottom-start"
         ],
         "role": [
           "overlay"

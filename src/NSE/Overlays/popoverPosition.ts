@@ -86,6 +86,7 @@ export const nsePopoverEdgePlacement = { minX: "inline-start", maxX: "inline-end
 /** Shared arrow coordinates, animation origin and continuous outline. */
 export function applyNSEPopoverPosition(surface: HTMLElement, pointer: HTMLElement | null, position: NSEPopoverPosition): void {
   surface.dataset.placement = position.placement;
+  surface.dataset.nsePlacement = position.placement;
   const { width, height } = position.bounds;
   const side = position.placement.split("-")[0] as "top" | "bottom" | "left" | "right";
   if (pointer) {
