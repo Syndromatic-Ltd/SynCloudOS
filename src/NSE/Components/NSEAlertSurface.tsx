@@ -66,7 +66,7 @@ export function NSEAlertSurface({
 
   return (
     <div
-      data-nse-control="system-alert" data-nse-part="background" {...attributes}
+      data-nse-control="system-alert" data-nse-part="background" data-nse-appearance-name={appearance === "light" ? "aqua" : "darkAqua"} {...attributes}
       ref={alertRef}
       className={`nse-control-alert is-${appearance} ${surfaceProps.className ?? ""}`.trim()}
       role={role}

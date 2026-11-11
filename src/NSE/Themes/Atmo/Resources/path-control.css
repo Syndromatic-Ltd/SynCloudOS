@@ -43,12 +43,12 @@
 :where(:scope) [data-nse-control="button"]:where([data-nse-part="path-item"])+[data-nse-control="button"]:where([data-nse-part="path-item"]),
 :where(:scope):is([data-nse-control="button"]:where([data-nse-part="path-item"]))+[data-nse-control="button"]:where([data-nse-part="path-item"]),
 :where(:scope)[data-nse-control="button"]:where([data-nse-part="path-item"])+[data-nse-control="button"]:where([data-nse-part="path-item"]) { border-inline-start: 1px solid #969ba366; }
-:where(:scope) .nse-path-item>.nse-control-button-label,
-:where(:scope):is(.nse-path-item)>.nse-control-button-label,
-:where(:scope).nse-path-item>.nse-control-button-label { display: flex; align-items: center; gap: 4px; min-width: 0; --nse-control-minimum-inline-size: 0; }
-:where(:scope) .nse-path-item .nse-control-button-label>span,
-:where(:scope):is(.nse-path-item) .nse-control-button-label>span,
-:where(:scope).nse-path-item .nse-control-button-label>span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+:where(:scope) [data-nse-control="button"]:where([data-nse-part="path-item"])>[data-nse-part="title"]:where(:is([data-nse-control="button"]:not([data-nse-button-type="switch"]), [data-nse-image-position]) > *),
+:where(:scope):is([data-nse-control="button"]:where([data-nse-part="path-item"]))>[data-nse-part="title"]:where(:is([data-nse-control="button"]:not([data-nse-button-type="switch"]), [data-nse-image-position]) > *),
+:where(:scope)[data-nse-control="button"]:where([data-nse-part="path-item"])>[data-nse-part="title"]:where(:is([data-nse-control="button"]:not([data-nse-button-type="switch"]), [data-nse-image-position]) > *) { display: flex; align-items: center; gap: 4px; min-width: 0; --nse-control-minimum-inline-size: 0; }
+:where(:scope) [data-nse-control="button"]:where([data-nse-part="path-item"]) [data-nse-part="title"]:where(:is([data-nse-control="button"]:not([data-nse-button-type="switch"]), [data-nse-image-position]) > *)>:where([data-nse-part="label"]),
+:where(:scope):is([data-nse-control="button"]:where([data-nse-part="path-item"])) [data-nse-part="title"]:where(:is([data-nse-control="button"]:not([data-nse-button-type="switch"]), [data-nse-image-position]) > *)>:where([data-nse-part="label"]),
+:where(:scope)[data-nse-control="button"]:where([data-nse-part="path-item"]) [data-nse-part="title"]:where(:is([data-nse-control="button"]:not([data-nse-button-type="switch"]), [data-nse-image-position]) > *)>:where([data-nse-part="label"]) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 :where(:scope) [data-nse-control="button"]:where([data-nse-part="path-item"]) [data-nse-control="image-view"]:where([data-nse-part="background"]),
 :where(:scope):is([data-nse-control="button"]:where([data-nse-part="path-item"])) [data-nse-control="image-view"]:where([data-nse-part="background"]),
 :where(:scope)[data-nse-control="button"]:where([data-nse-part="path-item"]) [data-nse-control="image-view"]:where([data-nse-part="background"]) { width: 18px; height: 18px; flex: none; }
@@ -58,9 +58,9 @@
 :where(:scope) [data-nse-control="button"]:where([data-nse-part="path-item"]) :where([data-nse-part="image"]:not(:has(*))),
 :where(:scope):is([data-nse-control="button"]:where([data-nse-part="path-item"])) :where([data-nse-part="image"]:not(:has(*))),
 :where(:scope)[data-nse-control="button"]:where([data-nse-part="path-item"]) :where([data-nse-part="image"]:not(:has(*))) { width: 100%; height: 100%; object-fit: contain; }
-:where(:scope) .nse-path-item[aria-current],
-:where(:scope):is(.nse-path-item[aria-current]),
-:where(:scope).nse-path-item[aria-current] { font-weight: 600; }
+:where(:scope) [data-nse-control="button"]:where([data-nse-part="path-item"])[data-nse-role="current"],
+:where(:scope):is([data-nse-control="button"]:where([data-nse-part="path-item"])[data-nse-role="current"]),
+:where(:scope)[data-nse-control="button"]:where([data-nse-part="path-item"])[data-nse-role="current"] { font-weight: 600; }
 :where(:scope) [data-nse-control="path-control"]:where([data-nse-part="background"]) [data-nse-control="button"]:where([data-nse-part="path-item"]):is(:hover,:focus-visible),
 :where(:scope):is([data-nse-control="path-control"]:where([data-nse-part="background"])) [data-nse-control="button"]:where([data-nse-part="path-item"]):is(:hover,:focus-visible),
 :where(:scope)[data-nse-control="path-control"]:where([data-nse-part="background"]) [data-nse-control="button"]:where([data-nse-part="path-item"]):is(:hover,:focus-visible) { background: #fff3; }

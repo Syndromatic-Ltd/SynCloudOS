@@ -397,5 +397,5 @@ export function NSEWindowSheetFrame({ reducedMotion, frozen = false, holdsContro
       });
     };
   }, [host]);
-  return <div ref={frameRef} className="nse-window-sheet">{children}</div>;
+  return <div ref={frameRef} data-nse-part="sheet" className="nse-window-sheet">{children}</div>;
 }

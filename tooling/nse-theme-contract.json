@@ -161,6 +161,7 @@
         "field",
         "image",
         "indicator",
+        "label",
         "path-item",
         "tab-icon",
         "title",
@@ -199,6 +200,10 @@
           "regular",
           "small"
         ],
+        "expanded": [
+          "false",
+          "true"
+        ],
         "has-destructive-action": [
           "true"
         ],
@@ -214,6 +219,7 @@
         ],
         "role": [
           "close",
+          "current",
           "default",
           "ground",
           "ink",
@@ -735,6 +741,9 @@
       ],
       "states": [],
       "variants": {
+        "appearance-name": [
+          "aqua"
+        ],
         "style": [
           "about",
           "preferences"
@@ -1204,6 +1213,9 @@
       ],
       "states": [],
       "variants": {
+        "appearance-name": [
+          "aqua"
+        ],
         "chrome": [
           "standard"
         ]
@@ -1570,9 +1582,11 @@
         "centre",
         "content",
         "document",
+        "handle",
         "header",
         "leading",
         "shadow",
+        "sheet",
         "subtitle",
         "title",
         "titlebar-accessories",
@@ -1596,7 +1610,11 @@
         ],
         "edge": [
           "block-end",
+          "block-end-inline-end",
+          "block-end-inline-start",
           "block-start",
+          "block-start-inline-end",
+          "block-start-inline-start",
           "inline-end",
           "inline-start"
         ],
