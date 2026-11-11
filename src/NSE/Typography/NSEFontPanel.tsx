@@ -256,7 +256,7 @@ function EffectColourButton({ id, label, glyph, value, automatic, disabled, onPr
   return <NSEButton
     bezelStyle="texturedRounded"
     title={label}
-    image={<span data-nse-part="effect-colour-face">{glyph}<span ref={chipRef} data-nse-part="colour-chip" data-automatic={shown ? undefined : automatic} style={shown ? { "--nse-font-panel-chip": shown.toCSS() } as CSSProperties : undefined} /></span>}
+    image={<span data-nse-part="effect-colour-face">{glyph}<span ref={chipRef} data-nse-part="colour-chip" data-nse-role={shown ? undefined : automatic} data-automatic={shown ? undefined : automatic} style={shown ? { "--nse-font-panel-chip": shown.toCSS() } as CSSProperties : undefined} /></span>}
     imagePosition="imageOnly"
     isEnabled={!(disabled || !controller)}
     toolTip={controller ? label : `${label}: this app has no colour panel`}
@@ -544,7 +544,7 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
     endSession(fontPanelAbort("Font panel session was closed."));
     onOpenChange(false);
   }} onDismissRefused={() => onOpenChange(true)}>
-    {carryColourPanel(<section data-nse-control="font-panel" data-nse-part="background" data-state={readOnly ? "read-only" : !preset ? "unavailable" : status === "idle" || status === "executed" ? "ready" : status} dir={direction} aria-label={label}>
+    {carryColourPanel(<section data-nse-control="font-panel" data-nse-part="background" data-state={readOnly ? "read-only" : !preset ? "unavailable" : status === "idle" || status === "executed" ? "ready" : status} data-nse-flow={direction} dir={direction} aria-label={label}>
       {showsPreview ? <div data-nse-part="preview" style={shownDocumentColour ? { "--nse-font-panel-document": shownDocumentColour.toCSS() } as CSSProperties : undefined}>
         <output data-nse-part="preview-sample" aria-label={`Preview: ${description}`} style={previewStyle}>{familyName}</output>
         <p data-nse-part="preview-description" aria-hidden="true">{description}</p>
@@ -673,7 +673,7 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
         <NSERulerView value={style} direction={direction} readOnly={readOnly} onChange={updateParagraph} />
       </fieldset> : null}
       <p role="status" data-nse-part="notice">{!preset ? "No fonts available." : notice}</p>
-      {status !== "idle" && status !== "executed" ? <p role="alert">Typography command {status}.</p> : null}
+      {status !== "idle" && status !== "executed" ? <p role="alert" data-nse-part="error">Typography command {status}.</p> : null}
     </section>)}
   </NSEUtilityPanel>;
 }
