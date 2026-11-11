@@ -163,13 +163,6 @@
    so a text glyph used as an icon (★, ↻) inherited a line box twice the
    icon's height and sat on the icon's bottom edge. */
 
-:where(:scope) .nse-control-button-icon img,
-:where(:scope):is(.nse-control-button-icon) img {
-  max-width: 24px;
-  max-height: 24px;
-  object-fit: contain;
-}
-
 
 
 :where(:scope) :is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-style="navigation"] *),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"])),
@@ -714,14 +707,6 @@
   gap: 8px;
 }
 
-:where(:scope) [data-nse-part="image"]:where([data-nse-part="cell-content"]>*),
-:where(:scope):is([data-nse-part="image"]:where([data-nse-part="cell-content"]>*)),
-:where(:scope) .nse-extended-option-icon img,
-:where(:scope):is(.nse-extended-option-icon) img {
-  width: 20px;
-  height: 20px;
-}
-
 :where(:scope) [data-nse-part="label"]:where([data-nse-part="cell-content"]>*),
 :where(:scope):is([data-nse-part="label"]:where([data-nse-part="cell-content"]>*)) {
   min-width: 0;
@@ -839,14 +824,6 @@
 /* Retracts the way it arrived. NSEPopup holds the mount open for exitDuration so
    this has something to play on; without that the menu unmounted on the same
    frame the flag flipped and simply ceased to exist. */
-
-@media (prefers-reduced-motion: reduce) {
-
-  :where(:scope) .nse-overlay-popup--application-menu[data-state="closing"] .nse-control-app-menu-surface,
-:where(:scope):is(.nse-overlay-popup--application-menu[data-state="closing"]) .nse-control-app-menu-surface {
-    opacity: 0;
-  }
-}
 
 :where(:scope) [data-nse-part="title"]:where([data-nse-role="application-menu"]>*),
 :where(:scope):is([data-nse-part="title"]:where([data-nse-role="application-menu"]>*)) {
@@ -1082,29 +1059,8 @@
 
 
 /* --- IFXImageView ------------------------------------- */
-:where(:scope) .ifx-image-view,
-:where(:scope):is(.ifx-image-view) {
-  width: 100%;
-  height: 100%;
-  border-radius: 8px;
-  background: #0d0f12;
-}
-
-:where(:scope) .ifx-image-view-image,
-:where(:scope):is(.ifx-image-view-image) {
-  max-width: none;
-}
 
 /* IFXImageView's crop tool: the visible region is the crop, with a rule-of-thirds guide. */
-:where(:scope) .ifx-image-view-crop-frame,
-:where(:scope):is(.ifx-image-view-crop-frame) {
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.82);
-  background:
-    linear-gradient(to right, transparent calc(33.333% - 1px), rgba(255, 255, 255, 0.34) calc(33.333% - 1px), rgba(255, 255, 255, 0.34) calc(33.333% + 1px), transparent calc(33.333% + 1px)),
-    linear-gradient(to right, transparent calc(66.666% - 1px), rgba(255, 255, 255, 0.34) calc(66.666% - 1px), rgba(255, 255, 255, 0.34) calc(66.666% + 1px), transparent calc(66.666% + 1px)),
-    linear-gradient(to bottom, transparent calc(33.333% - 1px), rgba(255, 255, 255, 0.34) calc(33.333% - 1px), rgba(255, 255, 255, 0.34) calc(33.333% + 1px), transparent calc(33.333% + 1px)),
-    linear-gradient(to bottom, transparent calc(66.666% - 1px), rgba(255, 255, 255, 0.34) calc(66.666% - 1px), rgba(255, 255, 255, 0.34) calc(66.666% + 1px), transparent calc(66.666% + 1px));
-}
 
 /* Semantic state repair. The native input remains authoritative; these
    stable state hooks only make that state reachable to the appearance layer. */
@@ -1385,14 +1341,6 @@
 :where(:scope) :scope:where([data-nse-role="modal"])>[data-nse-part="backdrop"]:where([data-nse-chrome="standard"] *):where(:not([data-nse-control="system-alert"])):where(:not([data-nse-control="folder-presentation"] > *)),
 :where(:scope):is(:scope:where([data-nse-role="modal"]))>[data-nse-part="backdrop"]:where([data-nse-chrome="standard"] *):where(:not([data-nse-control="system-alert"])):where(:not([data-nse-control="folder-presentation"] > *)) {
   background: rgba(0, 0, 0, 0.26);
-}
-
-@media (min-width: 640px) and (min-height: 420px) {
-  .nse-overlay-popup:where([data-nse-part="surface"])[data-nse-overlay-kind="action-sheet"][data-nse-presentation="sheet"] {
-    inline-size: fit-content;
-    block-size: fit-content;
-    margin: auto;
-  }
 }
 
 /* ============================================================================
@@ -2241,7 +2189,7 @@
 
 
 :where(:scope) [data-nse-control="stepper"][data-nse-part="content"]>[data-nse-part="bezel"]>:where(:is([data-nse-part="increment"],[data-nse-part="decrement"])),
-:where(:scope):is([data-nse-control="stepper"][data-state])>[data-nse-part="bezel"]>button {
+:where(:scope):is([data-nse-control="stepper"][data-nse-part="content"])>[data-nse-part="bezel"]>:where(:is([data-nse-part="increment"],[data-nse-part="decrement"])) {
   inline-size: auto;
   min-block-size: 0;
   margin: 0;
@@ -2276,8 +2224,8 @@
   min-inline-size: 64px;
 }
 
-:where(:scope) [data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]) [data-nse-part$="-segment"],
-:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"])) [data-nse-part$="-segment"] {
+:where(:scope) [data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]) :is([data-nse-part="hour-segment"],[data-nse-part="minute-segment"],[data-nse-part="ampm-segment"]),
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"])) :is([data-nse-part="hour-segment"],[data-nse-part="minute-segment"],[data-nse-part="ampm-segment"]) {
   padding: 2px 2px;
   border-radius: 4px;
   outline: none;
