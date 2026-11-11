@@ -60,6 +60,7 @@ export function NSEStandardWindowView(props: NSEWindowViewProps) {
     <div
       {...resizeHandleProps?.[edge]}
       key={edge}
+      data-nse-part="handle" data-nse-edge={edge}
       className={`nse-window__resize-handle nse-window__resize-handle--${edge}`}
       data-window-resize-edge={edge}
 

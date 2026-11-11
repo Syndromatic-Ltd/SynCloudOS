@@ -112,7 +112,13 @@ it("renders a hosted application window", async () => {
   class Accessory extends NSETitlebarAccessoryViewController {
     static override view = function AccessoryView() { return <span>Filter</span>; };
   }
+  class Sheet extends NSEViewController {
+    override title = "Rename";
+    static override view = function SheetView() { return <p>Sheet</p>; };
+  }
+  let content!: Content;
   class Content extends NSEViewController {
+    constructor() { super(); content = this; }
     static override view = function ContentView() { return <p>Body</p>; };
   }
   class MainWindow extends NSEWindowController {
@@ -130,6 +136,9 @@ it("renders a hosted application window", async () => {
     host.mountWindows();
     await act(async () => { await host.openMainWindow(); });
     await waitFor(() => expect(document.querySelector('[data-nse-part="titlebar-accessories"]')).not.toBeNull());
+    // A sheet attaches under the toolbar, in the window's sheet frame.
+    await act(async () => { content.presentAsSheet(Sheet); });
+    await waitFor(() => expect(document.querySelector('[data-nse-part="sheet"]')).not.toBeNull());
     // Production draws a hosted window's content inside its NSEWindowView; the class host renders the content alone.
     // Move the host's container into a window section so its chrome parts are recorded under the window, as they draw.
     const container = document.querySelector('[data-nse-part="toolbar"]')!.closest("body > div")!;

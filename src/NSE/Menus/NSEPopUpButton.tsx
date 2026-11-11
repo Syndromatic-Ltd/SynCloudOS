@@ -327,6 +327,7 @@ function NSEPopUpButtonControl(props: NSEPopUpButtonProps) {
         aria-label={pullsDown ? accessibleLabel : undefined}
         aria-haspopup={menu ? "menu" : "listbox"}
         aria-expanded={open}
+        data-nse-expanded={open ? "true" : "false"}
         aria-controls={menu ? undefined : listboxId}
         aria-labelledby={pullsDown ? undefined : accessibleLabelId}
         onKeyDown={(event) => {

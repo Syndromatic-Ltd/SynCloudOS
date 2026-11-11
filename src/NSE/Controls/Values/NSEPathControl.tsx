@@ -68,8 +68,8 @@ export const NSEPathControl = forwardRef<NSEPathControlHandle, NSEPathControlPro
   const sender = useMemo<NSEPathControlHandle>(() => ({ url: url ?? items.at(-1)?.url ?? null, pathItems: items, get clickedPathItem() { return clicked.current; } }), [items, url]);
   useImperativeHandle(ref, () => sender, [sender]);
   return <nav {...props} aria-label={props["aria-label"] ?? "Path"} className={["nse-path-control", className].filter(Boolean).join(" ")} data-nse-control="path-control" data-nse-part="background" data-nse-style={pathStyle} data-nse-enabled={isEnabled ? undefined : "false"} data-path-style={pathStyle}>
-    {items.map((item, index) => <NSEButton key={`${String(item.url)}:${index}`} title={<>{item.image ? <NSEImageView src={item.image} controls={false} wheelZoom={false} pannable={false} alt="" /> : null}<span>{item.title}</span></>}
-      className="nse-path-item" data-nse-part="path-item" aria-label={item.title} aria-current={index === items.length - 1 ? "location" : undefined} isEnabled={isEnabled}
+    {items.map((item, index) => <NSEButton key={`${String(item.url)}:${index}`} title={<>{item.image ? <NSEImageView src={item.image} controls={false} wheelZoom={false} pannable={false} alt="" /> : null}<span data-nse-part="label">{item.title}</span></>}
+      className="nse-path-item" data-nse-part="path-item" aria-label={item.title} aria-current={index === items.length - 1 ? "location" : undefined} data-nse-role={index === items.length - 1 ? "current" : undefined} isEnabled={isEnabled}
       action={action} actionPayload={actionPayload ?? item} onClick={() => { clicked.current = item; onAction?.(sender); }} />)}
   </nav>;
 });
