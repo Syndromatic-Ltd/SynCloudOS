@@ -1041,6 +1041,9 @@
         ],
         "style": [
           "grouped"
+        ],
+        "type": [
+          "tool-button-group"
         ]
       }
     },
@@ -1408,6 +1411,9 @@
       ],
       "states": [],
       "variants": {
+        "control-size": [
+          "small"
+        ],
         "position": [
           "bottom",
           "inline",
@@ -1420,6 +1426,9 @@
           "inner-shadow",
           "separator",
           "surface"
+        ],
+        "type": [
+          "tool-button-group"
         ]
       }
     },
@@ -1448,6 +1457,7 @@
       "parts": [
         "background",
         "border",
+        "content",
         "custom",
         "highlight",
         "image",
@@ -1468,6 +1478,7 @@
           "cap",
           "gloss",
           "inner-shadow",
+          "labelled",
           "splice",
           "surface"
         ]
@@ -1543,11 +1554,14 @@
         "background",
         "bezel",
         "content",
+        "document",
         "header",
         "leading",
         "shadow",
         "subtitle",
         "title",
+        "titlebar-accessories",
+        "toolbar",
         "trailing",
         "window-fitting-content"
       ],
@@ -1573,6 +1587,7 @@
         ],
         "role": [
           "borderless",
+          "document",
           "hud",
           "modal",
           "panel",

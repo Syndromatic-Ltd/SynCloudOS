@@ -289,7 +289,7 @@ export function ApplicationStageView({
       title={standardBarTitle}
       titlePlacement="leading"
       className="nse-document-titlebar"
-      data-nse-titlebar-document="true"
+      documentTitlebar
       variant={frame.material === "metal" ? "atmoMetal" : "atmoCumulus"}
       scheme={resolvedMode}
       titleAction={quickSwitchAction}
@@ -306,9 +306,9 @@ export function ApplicationStageView({
         </NavigationChromeSlot>
       ) : undefined}
       center={(
-        <span className="nse-window-titlebar-document">
+        <span data-nse-part="document" className="nse-window-titlebar-document">
           <span ref={setLeadingAccessories} className="nse-window-titlebar-accessory-slot" data-layout-attribute="leading" />
-          <span className="nse-window-titlebar-title" data-document-edited={documentTitlebar.documentEdited || undefined}>
+          <span data-nse-part="title" className="nse-window-titlebar-title" data-document-edited={documentTitlebar.documentEdited || undefined}>
             {documentTitlebar.title ? <span className="nse-window-titlebar-title-text">{documentTitlebar.title}</span> : null}
             {documentTitlebar.subtitle ? <span className="nse-window-titlebar-subtitle">{documentTitlebar.subtitle}</span> : null}
             <span ref={setTrailingAccessories} className="nse-window-titlebar-accessory-slot" data-layout-attribute="trailing" />
@@ -509,8 +509,7 @@ function ApplicationStageTopBar({
   menuStore,
   rightSlot,
   ...props
-}: Pick<TopBarProps, "title" | "titlePlacement" | "className" | "variant" | "scheme" | "rail" | "titleAction" | "leadingItems" | "leading" | "trailing" | "center" | "leadingAccessory" | "trailingAccessory"> & {
-  readonly "data-nse-titlebar-document"?: "true";
+}: Pick<TopBarProps, "title" | "titlePlacement" | "className" | "variant" | "scheme" | "rail" | "titleAction" | "leadingItems" | "leading" | "trailing" | "center" | "leadingAccessory" | "trailingAccessory" | "documentTitlebar"> & {
   readonly menuStore: ApplicationMenuStore;
   readonly rightSlot: RightSlotControl | null;
 }) {

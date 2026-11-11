@@ -14,6 +14,12 @@ import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 import { nseThemeControls, nseThemeParts, nseThemeStates, nseThemeVariants } from "../../src/NSE/Theme/contract/vocabulary";
 import { nseThemeColourNames } from "../../src/NSE/Theme/contract/colours";
 import { createNSEThemeContract } from "../../scripts/synware/build-theme-contract.mjs";
+import { NSEApplication } from "../../src/NSE/Application/NSEApplication";
+import { NSEViewController } from "../../src/NSE/Application/NSEViewController";
+import { NSEWindowController } from "../../src/NSE/Application/NSEWindowController";
+import { NSETitlebarAccessoryViewController } from "../../src/NSE/Application/NSETitlebarAccessoryViewController";
+import { NSEToolbar } from "../../src/NSE/Toolbars/NSEToolbar";
+import { createClassApplicationHost } from "./fixtures/classApplicationHost";
 
 const repository = resolve(import.meta.dirname, "../..");
 const presentation = createStaticPresentationPort({ width: 1000, height: 800, reducedMotion: true });
@@ -97,6 +103,45 @@ for (const surface of supplementalThemeCatalogue) it(`renders supplemental ${sur
     fireEvent.click(document.querySelector<HTMLElement>('[data-nse-expanded="false"]')!);
     await act(async () => { await Promise.resolve(); });
     collect();
+  }
+});
+// A hosted application window draws its toolbar and titlebar accessories in the window chrome.
+it("renders a hosted application window", async () => {
+  class Accessory extends NSETitlebarAccessoryViewController {
+    static override view = function AccessoryView() { return <span>Filter</span>; };
+  }
+  class Content extends NSEViewController {
+    static override view = function ContentView() { return <p>Body</p>; };
+  }
+  class MainWindow extends NSEWindowController {
+    readonly accessory: Accessory;
+    constructor() { super(); this.contentViewController = new Content(); this.accessory = new Accessory(); }
+    override windowDidLoad() {
+      this.window.toolbar = new NSEToolbar({ identifier: "main", items: [{ id: "share", kind: "button", label: "Share" }], defaultItemIdentifiers: ["share"] });
+      this.window.addTitlebarAccessoryViewController(this.accessory);
+    }
+  }
+  class Application extends NSEApplication { static override mainWindow = MainWindow; }
+  const host = createClassApplicationHost(Application, "com.example.theme-contract");
+  try {
+    await host.launch();
+    host.mountWindows();
+    await act(async () => { await host.openMainWindow(); });
+    await waitFor(() => expect(document.querySelector('[data-nse-part="titlebar-accessories"]')).not.toBeNull());
+    // Production draws a hosted window's content inside its NSEWindowView; the class host renders the content alone.
+    // Move the host's container into a window section so its chrome parts are recorded under the window, as they draw.
+    const container = document.querySelector('[data-nse-part="toolbar"]')!.closest("body > div")!;
+    const windowView = document.createElement("section");
+    windowView.setAttribute("data-nse-control", "window");
+    windowView.setAttribute("data-nse-part", "content");
+    container.before(windowView);
+    windowView.append(container);
+    collect();
+    windowView.before(container);
+    windowView.remove();
+  } finally {
+    cleanup();
+    await host.dispose();
   }
 });
 afterAll(() => {

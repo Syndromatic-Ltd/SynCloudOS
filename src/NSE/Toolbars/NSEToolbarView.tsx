@@ -245,7 +245,7 @@ function NSEConfiguredToolbar({
         if (item.kind === "custom") {
 
           return (
-            <span key={entry.instanceId} className="nse-toolbar-custom" style={geometry} role="group" aria-label={item.label} data-nse-control="toolbar-item" data-nse-part="custom" data-state="ready" data-nse-toolbar-item-id={entry.instanceId} data-nse-toolbar-labelled={item.showsLabel && snapshot.displayMode !== "icon-only" ? "true" : undefined} >
+            <span key={entry.instanceId} className="nse-toolbar-custom" style={geometry} role="group" aria-label={item.label} data-nse-control="toolbar-item" data-nse-part="custom" data-state="ready" data-nse-toolbar-item-id={entry.instanceId} data-nse-toolbar-labelled={item.showsLabel && snapshot.displayMode !== "icon-only" ? "true" : undefined} data-nse-style={item.showsLabel && snapshot.displayMode !== "icon-only" ? "labelled" : undefined} >
               <NSEChromeSurface  state="normal" />
               <NSEChromeBevel  state="normal" />
               <NSEChromeGloss  state="normal" />
