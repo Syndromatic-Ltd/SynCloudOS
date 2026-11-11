@@ -256,7 +256,7 @@ export function NSEColourWell(props: NSEColourWellProps) {
 
 
   return <span data-nse-control="colour-well" data-nse-part="bezel" data-nse-enabled={props.isEnabled === false ? "false" : undefined} data-nse-focused={focused ? "" : undefined} data-nse-selected={panel.activeTargetId === id ? "" : undefined} data-state={(props.isEnabled === false) ? "disabled" : panel.activeTargetId === id ? "active" : "normal"}  onFocusCapture={() => setFocused(true)} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false); }}>
-    <button {...dragSource} {...dropTarget} type="button" id={id} aria-label={props["aria-label"]} aria-pressed={panel.activeTargetId === id && panel.open} disabled={(props.isEnabled === false)} aria-readonly={props.readOnly || undefined} onClick={activate} onKeyDown={(event) => {
+    <button {...dragSource} {...dropTarget} type="button" data-nse-part="button" data-nse-state={panel.activeTargetId === id && panel.open ? "on" : "off"} id={id} aria-label={props["aria-label"]} aria-pressed={panel.activeTargetId === id && panel.open} disabled={(props.isEnabled === false)} aria-readonly={props.readOnly || undefined} onClick={activate} onKeyDown={(event) => {
       if (runtimeDrag && event.altKey && event.key === "Enter") {
         event.preventDefault();
         if (dragCommands && targetEndpoint) {

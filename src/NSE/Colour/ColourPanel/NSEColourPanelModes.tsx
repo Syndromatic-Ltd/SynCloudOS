@@ -65,7 +65,7 @@ export function NSEColourSlidersMode({ colour, preview, commit }: NSEColourPicke
     <NSEPopUpButton height={nseColourPanelControlHeight} label="Slider model" labelHidden items={sliderModels} value={model} onValueChange={(next) => setModel(next as NSEColourSliderModel)} />
     <NSEColourSliderPicker model={model} colour={current} controlHeight={nseColourPanelControlHeight} onPreview={(next) => preview(next, "pointer")} onCommit={(next) => commit(next, "pointer")} />
     {model === "grey" ? <div role="group" aria-label="Greys" data-nse-part="grey-presets">
-      {greyPresets.map((white) => <button key={white} type="button" aria-label={`${Math.round(white * 100)}% brightness`} style={{ "--nse-colour-sample": GFXColour.grayscale(white).toCSS() } as CSSProperties} onClick={() => commit(GFXColour.grayscale(white, current.components.a), "swatch")} />)}
+      {greyPresets.map((white) => <button key={white} type="button" data-nse-part="swatch" aria-label={`${Math.round(white * 100)}% brightness`} style={{ "--nse-colour-sample": GFXColour.grayscale(white).toCSS() } as CSSProperties} onClick={() => commit(GFXColour.grayscale(white, current.components.a), "swatch")} />)}
     </div> : null}
   </div>;
 }
@@ -206,7 +206,7 @@ export function NSEColourImageMode({ colour, preview, commit }: NSEColourPickerC
     }} />
     <input ref={fileRef} type="file" accept="image/*" hidden onChange={(event) => { openImage(event.currentTarget.files?.[0]); event.currentTarget.value = ""; }} />
     <div data-nse-part="image-palette">
-      <canvas ref={canvasRef} width={480} height={340} role="img" aria-label={`${image.name}: click or drag to pick a colour`}
+      <canvas ref={canvasRef} data-nse-part="image" width={480} height={340} role="img" aria-label={`${image.name}: click or drag to pick a colour`}
         onPointerDown={(event) => {
           if (event.button !== 0) return;
           active.current = event.pointerId;

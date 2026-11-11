@@ -251,23 +251,35 @@
     "colour-panel": {
       "parts": [
         "background",
+        "body",
         "current-colour",
         "eyedropper",
         "hex-row",
+        "image",
+        "row",
         "row-label",
         "sample-row",
+        "swatch",
         "swatch-grip",
         "swatch-strip"
       ],
-      "states": [],
-      "variants": {}
+      "states": [
+        "state=off"
+      ],
+      "variants": {
+        "value-state": [
+          "empty",
+          "populated"
+        ]
+      }
     },
     "colour-sliders": {
       "parts": [
         "channel",
         "channel-key",
         "channel-name",
-        "content"
+        "content",
+        "title"
       ],
       "states": [],
       "variants": {}
@@ -285,17 +297,20 @@
     "colour-well": {
       "parts": [
         "bezel",
+        "button",
         "colour-sample",
         "colour-value"
       ],
       "states": [
-        "enabled=false"
+        "enabled=false",
+        "state=off"
       ],
       "variants": {}
     },
     "colour-wheel": {
       "parts": [
         "bezel",
+        "wheel",
         "wheel-surface"
       ],
       "states": [],
@@ -1081,6 +1096,9 @@
       "variants": {
         "position": [
           "leading"
+        ],
+        "role": [
+          "tabpanel"
         ]
       }
     },
@@ -1212,7 +1230,8 @@
           "only"
         ],
         "role": [
-          "tab"
+          "tab",
+          "tabpanel"
         ],
         "style": [
           "capsule",
