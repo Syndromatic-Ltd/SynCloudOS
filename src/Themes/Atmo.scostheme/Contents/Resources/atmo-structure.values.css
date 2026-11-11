@@ -171,7 +171,6 @@
   height:var(--nse-control-toggle-unit);
   background-image:none;
   transform:translateX(calc(-100%*var(--nse-control-toggle-ratio,0)));
-  will-change:transform;
 }
 
 :where(:scope) [data-nse-part="knob"]:where([data-nse-control="switch"] *)::before,
@@ -418,7 +417,6 @@
   inline-size:var(--nse-control-bezel-inline-size);
   block-size:var(--nse-control-bezel-block-size);
   border-radius:calc(var(--nse-control-bezel-inline-size)/2 - 2px);
-  vertical-align:middle;
 }
 
 :where(:scope) [data-nse-control="stepper"][data-nse-control-size="small"],

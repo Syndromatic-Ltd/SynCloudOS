@@ -43,7 +43,6 @@
   border-style:solid;
   color:#555;
   background:transparent;
-  text-overflow:ellipsis;
 }
 
 :where(:scope) [data-nse-button-type="radio"][data-nse-position="first"],

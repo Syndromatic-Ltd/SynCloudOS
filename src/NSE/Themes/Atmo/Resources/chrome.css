@@ -45,9 +45,6 @@
 }
 
 :scope[data-nse-style="separator"]:where([data-nse-part="separator"]) {
-  inset-block: 9px;
-  inset-inline-start: 50%;
-  inset-inline-end: auto;
   inline-size: 1px;
   background: linear-gradient(180deg, transparent, rgb(38 59 76 / 55%), transparent);
 }

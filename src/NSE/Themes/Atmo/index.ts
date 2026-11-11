@@ -19,6 +19,7 @@
  */
 
 import "../../Structure/layers.css";
+import "../../Structure/controls.css";
 import "./Resources/atmo-structure.css";
 import "./Resources/atmo.css";
 import "./Resources/chrome.css";

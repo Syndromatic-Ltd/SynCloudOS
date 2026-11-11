@@ -198,7 +198,6 @@
   height:auto;
   margin:0;
   padding:2px 12px;
-  text-overflow:ellipsis;
 }
 
 :where(:scope) [data-nse-control="box"]:where([data-nse-part="bezel"])[data-nse-control="box"]:where([data-nse-part="bezel"],[data-nse-part="separator"]):where([data-nse-title-position="atTop"]):has(>[data-nse-part="title"])[data-nse-title-position="atTop"]>[data-nse-part="content"]:where([data-nse-control="box"]>*):where([data-nse-part="bezel"]>*),
