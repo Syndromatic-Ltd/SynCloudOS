@@ -159,17 +159,27 @@ Names cannot contain path separators or Windows reserved device names. Targets m
 
 ### `scaffold_theme`
 
-Input: `{ projectRoot?: string, name: string, directory?: string }`.
+Input: `{ projectRoot?: string, bundleIdentifier: string, displayName: string, directory?: string }`.
 
-Creates a new theme directory (default `src/Themes/<normalised-name>`) with `theme.json`, `appearance.ts` and `styles.css`. Existing targets, paths outside the project and symbolic-link traversal are refused. The definition uses `defineNSEAppearance` from `@syndromatic/syncloudos/nse/appearance`. Its stylesheet includes every required neutral NSE appearance value for both light and dark; starter values come from the neutral provider, not Atmo. Import the generated appearance and supply it as the `theme` of `NSEAppearance`. Optional recipe artwork remains the theme author's responsibility.
+Creates `<directory>/<displayName>.scostheme` (default directory `src/Themes`), a complete theme bundle:
+
+- `Contents/Info.ts`: the bundle identifier, display name, version and theme contract version. It is read statically; a theme contains no code.
+- `Contents/Theme.json`: every contract colour in light and dark, starting from Atmo's values and marked for replacement, with Atmo's navigation and presentation choices.
+- `Contents/Resources/theme.css`: an empty rule for every control and every part in the installed contract, grouped by control, with each control's states noted.
+
+Existing bundles, paths outside the project and symbolic-link traversal are refused, and nothing is ever overwritten. The new bundle validates with zero errors; every part is listed as undrawn until the theme draws it.
 
 ### `validate_theme`
 
-Input: `{ projectRoot?: string, path: string }`, naming the theme directory or its `theme.json`.
+Input: `{ projectRoot?: string, path: string }`, naming a `.scostheme` bundle.
 
-Returns `{ ok, findings, checkedValues, contract }`. Checks definition metadata, recipe uniqueness and required colour values in the actual stylesheet, scoped to the appearance in each colour scheme. Missing or malformed values are errors. It reads CSS and JSON without running theme code; visual fidelity, recipe artwork and contrast still need visual review.
+Returns `{ ok, errors, warnings, coverage }`:
 
-Both tools use the installed `tooling/nse-appearance-contract.json`, generated from `src/NSE/Appearance/NSEAppearanceDefinition.ts` and the neutral `nse-appearance.css`. No concrete theme defines the required set, and optional recipe slots are not turned into mandatory Atmo artwork.
+- `errors`: bundle rule violations (unknown hooks, classes or tags, typography or motion, code or fonts in the bundle, invalid colours or images) and hard-limit violations (`idiom.theme-limit`, `idiom.theme-private-class`). Any error makes `ok` false.
+- `warnings`: contract parts the theme does not draw, as `control.part`. Atmo draws them instead, so they never make `ok` false.
+- `coverage`: drawn and total parts.
+
+Both tools read the installed `tooling/nse-theme-contract.json`, generated from the rendered controls, and read CSS, JSON and `Info.ts` without running theme code. The SDK's own `themes/Atmo.scostheme` validates with zero errors and zero undrawn parts.
 
 ### `explain_error`
 

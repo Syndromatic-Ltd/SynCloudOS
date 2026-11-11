@@ -67,10 +67,16 @@ try {
   // The packed class scaffold is idiomatic: no idiom.* warnings against the real installed SDK.
   assert.equal(checked.idiomAudit.warnings,0,JSON.stringify(checked.findings));
   assert.equal(checked.idiomAudit.applications[0].classAuthoring,true);
-  const theme=await call("scaffold_theme",{name:"Independent",directory:"src/Themes/Independent"});
-  assert(theme.createdPaths.length>=3,JSON.stringify(theme));
-  const themeChecked=await call("validate_theme",{path:"src/Themes/Independent"});
-  assert.equal(themeChecked.ok,true,JSON.stringify(themeChecked));
+  // A scaffolded theme is a complete bundle: it validates with zero errors, every part still listed as undrawn.
+  const theme=await call("scaffold_theme",{bundleIdentifier:"com.example.independent",displayName:"Independent"});
+  assert.equal(theme.createdPaths.length,3,JSON.stringify(theme));
+  const themeChecked=await call("validate_theme",{path:"src/Themes/Independent.scostheme"});
+  assert.equal(themeChecked.ok,true,JSON.stringify(themeChecked.errors));
+  assert(themeChecked.warnings.length>0&&themeChecked.coverage.drawn===0,JSON.stringify(themeChecked.coverage));
+  // The SDK's own Atmo draws every part with zero errors.
+  const atmo=await call("validate_theme",{path:"node_modules/@syndromatic/syncloudos/themes/Atmo.scostheme"});
+  assert.equal(atmo.ok,true,JSON.stringify(atmo.errors));
+  assert.deepEqual(atmo.warnings,[],JSON.stringify(atmo.warnings.slice(0,20)));
   const view=resolve(consumer.root,"src/SynWare/Hello.app/Contents/Views/SearchView.tsx");
   const originalView=readFileSync(view,"utf8");
   writeFileSync(view,originalView+"\nconst invalidControl = <button>Save</button>;\n");
