@@ -65,6 +65,8 @@ describe("view safe areas", () => {
   it("reads a laid-out view's frame from layout, so a window zooming open does not move it", () => {
     const model = fixture();
     const root = document.createElement("div"); root.dataset.testid = "root"; document.body.append(root);
+    // The window's content zooms open under a transform.
+    root.style.transform = "scale(0.5)";
     // Layout puts every view at the window's origin, full size...
     vi.spyOn(HTMLElement.prototype, "offsetWidth", "get").mockReturnValue(800);
     vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockReturnValue(600);
@@ -73,7 +75,7 @@ describe("view safe areas", () => {
       return this.dataset.testid === "root" ? new DOMRect(0, 0, 800, 600) : new DOMRect(200, 150, 400, 300);
     });
     const stop = model.connectRoot(root);
-    render(<NSEWindowLayoutContext.Provider value={model}><NSEView data-testid="zooming"><Read id="zooming-read" /></NSEView></NSEWindowLayoutContext.Provider>);
+    render(<NSEWindowLayoutContext.Provider value={model}><NSEView data-testid="zooming"><Read id="zooming-read" /></NSEView></NSEWindowLayoutContext.Provider>, { container: root.appendChild(document.createElement("div")) });
     expect(JSON.parse(screen.getByTestId("zooming-read").textContent!).safeAreaInsets).toEqual({ top: 82, left: 0, bottom: 0, right: 0 });
     stop(); root.remove(); model.dispose();
   });
