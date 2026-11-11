@@ -4779,9 +4779,9 @@
 /* With an overflow cell after it, the last tab is a middle cell, not a cap:
    the tab-item :last-child rules above do not match it, so it keeps its
    right seam and the capsule closes on the overflow. */
-:scope [data-nse-control="tab-view"] [data-nse-role="tabpanel"][data-nse-part="content"],
-:scope:is([data-nse-control="tab-view"]) [data-nse-role="tabpanel"][data-nse-part="content"],
-:scope[data-nse-control="tab-view"] [data-nse-role="tabpanel"][data-nse-part="content"] {
+:scope [data-nse-control="tab-view"] [data-nse-role="tabpanel"]:where([data-nse-part="content"]),
+:scope:is([data-nse-control="tab-view"]) [data-nse-role="tabpanel"]:where([data-nse-part="content"]),
+:scope[data-nse-control="tab-view"] [data-nse-role="tabpanel"]:where([data-nse-part="content"]) {
   padding-block-start: 12px;
 }
 
