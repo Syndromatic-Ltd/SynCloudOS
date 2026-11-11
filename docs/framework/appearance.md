@@ -1,8 +1,8 @@
 # Appearance and Atmo
 
-NSE separates what a control does from how it looks. A control declares its role, its state and its accessibility. An appearance decides the visual treatment. Atmo is the default appearance, a tactile material language of glossy buttons, brushed surfaces and soft depth that plays the part Aqua played on Mac OS X.
+NSE separates what a control does from how it looks. A control declares its role, its state and its accessibility. A theme decides the visual treatment. Atmo is the default theme, a tactile material language of glossy buttons, brushed surfaces and soft depth that plays the part Aqua played on Mac OS X.
 
-You choose an appearance once, at the root of your site, and every control below it follows.
+You choose a theme once, at the root of your site, and every control below it follows. To write your own, see [Themes](themes.md).
 
 ## Load Atmo
 
@@ -17,12 +17,12 @@ A SynWare never imports these stylesheets itself; the page that hosts it does. A
 
 ```tsx
 import { NSEAppearanceProvider } from "@syndromatic/syncloudos/nse/appearance";
-import { atmoAppearance } from "@syndromatic/syncloudos/nse/themes/atmo";
+import { atmoTheme } from "@syndromatic/syncloudos/nse/themes/atmo";
 import { NSEButton } from "@syndromatic/syncloudos/nse";
 
 export function Page() {
   return (
-    <NSEAppearanceProvider appearance={atmoAppearance} colourScheme="auto">
+    <NSEAppearanceProvider theme={atmoTheme} colourScheme="auto">
       <NSEButton title="Continue" keyEquivalent={"\r"} />
     </NSEAppearanceProvider>
   );
@@ -35,7 +35,7 @@ Appearance combines several independent settings. Each one can change without di
 
 | Axis | Values | Meaning |
 | --- | --- | --- |
-| Theme | `atmoAppearance` | The visual language. |
+| Theme | `atmoTheme`, or any `NSETheme` from `virtual:syncloudos/themes` | The visual language. |
 | Colour scheme | `"auto"`, `"light"`, `"dark"` | The requested scheme. `auto` follows the system and resolves to light or dark. |
 | Chrome | `"standard"`, `"metal"`, `"hud"` | The material of window furniture: the standard aluminium, brushed metal or a translucent heads-up panel. |
 | Contrast | `"normal"`, `"high"`, `"forced"` | Increased contrast, or the operating system's forced colours. |
@@ -45,7 +45,7 @@ Theme and colour scheme are separate choices. Atmo ships in both light and dark,
 
 Atmo is the one theme SynCloudOS ships. It is drawn as vectors, and it styles both NSE controls and the window and application chrome around them. Dark mode is Atmo's `"dark"` colour scheme, not a different theme: request it with `colourScheme`, or leave `"auto"` to follow the system.
 
-Atmo-Heritage and Atmo-Onyx are obsolete raster themes from earlier releases. Don't use them, don't mistake either for a dark mode, and don't copy their colours into your own stylesheet. You can still build your own SynCloudOS theme as an appearance; a custom theme replaces Atmo's look, it doesn't sit beside a hand-written palette.
+Atmo-Heritage and Atmo-Onyx are obsolete raster themes from earlier releases. Don't use them, don't mistake either for a dark mode, and don't copy their colours into your own stylesheet. You can build your own theme as a `.scostheme` bundle ([Themes](themes.md)); a custom theme replaces Atmo's look, it doesn't sit beside a hand-written palette.
 
 Hard-coded colours work against this. An application stylesheet with its own hex palette doesn't follow the colour scheme, contrast or transparency settings, and the Developer MCP `validate` tool reports it as an `idiom.atmo-appearance` warning. Use NSE controls for controls, the tokens below for your own surfaces, and `[data-mode="dark"]` only where your own content needs a different treatment.
 
@@ -107,27 +107,9 @@ Inside a SynWare, `useAppearance()` returns the requested appearance and the res
 }
 ```
 
-## Slots and recipes
+## Custom themes
 
-Each themed control part has a **slot**, a semantic name such as `toolbar.item.pressed.1x`. An appearance maps slots to **recipes**, which describe the artwork or vector construction for that part in that state. `useNSEAppearanceSlot(slot)` resolves one slot for the current appearance, and `resolveNSEAppearanceSlot` does the same outside React. Custom controls use slots to pick up the theme without knowing which one is active.
-
-Atmo draws most of its surfaces as vectors, which keeps edges sharp at every pixel density and lets one definition serve light and dark.
-
-## Define an appearance
-
-`defineNSEAppearance` validates and freezes an appearance definition:
-
-```ts
-import { defineNSEAppearance } from "@syndromatic/syncloudos/nse/appearance";
-
-export const brandAppearance = defineNSEAppearance({
-  id: "brand",
-  displayName: "Brand",
-  recipes: [{ slot: "toolbar.surface.normal.1x", recipeId: "brand.toolbar.surface.normal.1x" }],
-});
-```
-
-The `id` uses lowercase letters, digits and hyphens. Recipes named in a definition must be supplied by the styles you load with it.
+A theme is a `.scostheme` bundle: an identity, a `Theme.json` with colours, navigation, presentation and images, and stylesheets that draw controls through the public theme contract. Themes contain no code, and they don't change typography, motion or layout. [Themes](themes.md) covers writing, loading, nesting and validating one; the [theme contract reference](theme-contract.md) lists every control part, state, variant and colour a theme can draw.
 
 ## Materials and lighting
 
