@@ -262,8 +262,7 @@
 }
 
 /* --- Brushed-metal rail, under an app frame whose material is metal ------------------------- */
-:where([data-nse-material="metal"]) .nse-outline-container[data-style="source-list"],
-:where(:scope):is(:where([data-nse-material="metal"])) .nse-outline-container[data-style="source-list"] {
+.nse-outline-container[data-style="source-list"]:where([data-nse-material="metal"] *) {
   --nse-sidebar-metal-bg: linear-gradient(180deg, #dfe0e2 0%, #cdcfd2 100%);
   --nse-sidebar-metal-text: #2a2f36;
   --nse-sidebar-metal-label: #3a78c2;
@@ -282,9 +281,8 @@
     inset -1px 0 0 rgba(255, 255, 255, 0.1);
 }
 
-[data-mode="dark"] :where([data-nse-material="metal"]) .nse-outline-container[data-style="source-list"],
-:where(:scope):is([data-mode="dark"]) :where([data-nse-material="metal"]) .nse-outline-container[data-style="source-list"],
-[data-mode="dark"]:is(:where([data-nse-material="metal"])) .nse-outline-container[data-style="source-list"] {
+[data-mode="dark"] .nse-outline-container[data-style="source-list"]:where([data-nse-material="metal"] *),
+:where(:scope):is([data-mode="dark"]) .nse-outline-container[data-style="source-list"]:where([data-nse-material="metal"] *) {
   --nse-sidebar-metal-bg: linear-gradient(180deg, #3a3d44 0%, #202227 100%);
   --nse-sidebar-metal-text: #dde3ea;
   --nse-sidebar-metal-label: #6aa9e6;
@@ -294,21 +292,18 @@
   --nse-sidebar-seam-shadow: rgba(0, 0, 0, 0.42);
 }
 
-:where([data-nse-material="metal"]) .nse-outline-container[data-style="source-list"] .nse-outline-group-label,
-:where(:scope):is(:where([data-nse-material="metal"])) .nse-outline-container[data-style="source-list"] .nse-outline-group-label {
+.nse-outline-container[data-style="source-list"]:where([data-nse-material="metal"] *) .nse-outline-group-label {
   color: var(--nse-sidebar-metal-label);
   text-shadow: var(--nse-sidebar-metal-emboss);
 }
 
-:where([data-nse-material="metal"]) .nse-outline-source-row[data-selected="false"] .nse-control-list-primary,
-:where(:scope):is(:where([data-nse-material="metal"])) .nse-outline-source-row[data-selected="false"] .nse-control-list-primary {
+.nse-outline-source-row[data-selected="false"]:where([data-nse-material="metal"] *) .nse-control-list-primary {
   color: var(--nse-sidebar-metal-text);
   text-shadow: var(--nse-sidebar-metal-emboss);
 }
 
-[data-mode="dark"] :where([data-nse-material="metal"]) .nse-outline-children-inner>.nse-outline-node:not(:first-child)>.nse-outline-source-row.nse-control-list-item,
-:where(:scope):is([data-mode="dark"]) :where([data-nse-material="metal"]) .nse-outline-children-inner>.nse-outline-node:not(:first-child)>.nse-outline-source-row.nse-control-list-item,
-[data-mode="dark"]:is(:where([data-nse-material="metal"])) .nse-outline-children-inner>.nse-outline-node:not(:first-child)>.nse-outline-source-row.nse-control-list-item {
+[data-mode="dark"] .nse-outline-children-inner:where([data-nse-material="metal"] *)>.nse-outline-node:not(:first-child)>.nse-outline-source-row.nse-control-list-item,
+:where(:scope):is([data-mode="dark"]) .nse-outline-children-inner:where([data-nse-material="metal"] *)>.nse-outline-node:not(:first-child)>.nse-outline-source-row.nse-control-list-item {
   border-block-start-color: rgba(150, 180, 214, 0.14);
 }
 
