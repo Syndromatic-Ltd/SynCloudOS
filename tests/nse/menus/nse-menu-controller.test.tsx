@@ -806,7 +806,8 @@ describe("NSEMenu", () => {
     fireEvent.click(screen.getByRole("button", { name: /balanced/i }));
     const listbox = await screen.findByRole("listbox");
     expect(listbox.getAttribute("data-nse-overlay-kind")).toBe("listbox");
-    expect(listbox.closest(".nse-overlay-popup")?.getAttribute("data-nse-theme")).toBe("com.example.test-custom");
+    // The popup host is the theme root; the surface inside it draws in that theme.
+    expect(listbox.closest(".nse-overlay-popup")?.closest("[data-nse-theme]")?.getAttribute("data-nse-theme")).toBe("com.example.test-custom");
     fireEvent.click(screen.getByRole("option", { name: "Compact" }));
     expect(onValueChange).toHaveBeenCalledWith("compact");
   });
@@ -826,7 +827,8 @@ describe("NSEMenu", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: /balanced/i }));
     const listbox = await screen.findByRole("listbox");
-    expect(listbox.closest(".nse-overlay-popup")?.getAttribute("data-nse-theme")).toBe("com.example.test-custom");
+    // The popup host is the theme root; the surface inside it draws in that theme.
+    expect(listbox.closest(".nse-overlay-popup")?.closest("[data-nse-theme]")?.getAttribute("data-nse-theme")).toBe("com.example.test-custom");
     expect(listbox.closest("[data-nse-overlay-kind]")?.getAttribute("data-nse-overlay-kind")).toBe("action-sheet");
     expect(listbox.closest("[aria-modal]")?.getAttribute("aria-modal")).toBe("true");
   });
