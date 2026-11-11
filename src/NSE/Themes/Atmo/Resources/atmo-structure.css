@@ -2340,8 +2340,8 @@
   min-block-size: 30px;
 }
 
-:where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="header"]>h2,
-:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>h2 {
+:where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="header"]>:where([data-nse-part="title"]),
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>:where([data-nse-part="title"]) {
   flex: 1 1 auto;
   min-inline-size: 0;
   margin: 0;
@@ -2355,7 +2355,7 @@
 }
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="header"]>:where(:is([data-nse-part="previous-month"],[data-nse-part="today"],[data-nse-part="next-month"],[data-nse-part="previous-year"],[data-nse-part="next-year"])),
-:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>button {
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>:where(:is([data-nse-part="previous-year"], [data-nse-part="previous-month"], [data-nse-part="today"], [data-nse-part="next-month"], [data-nse-part="next-year"])) {
   position: relative;
   flex: none;
   inline-size: 26px;
@@ -2368,7 +2368,7 @@
 }
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="header"]>:where(:is([data-nse-part="previous-month"],[data-nse-part="today"],[data-nse-part="next-month"],[data-nse-part="previous-year"],[data-nse-part="next-year"]))::before,
-:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>button::before {
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>:where(:is([data-nse-part="previous-year"], [data-nse-part="previous-month"], [data-nse-part="today"], [data-nse-part="next-month"], [data-nse-part="next-year"]))::before {
   position: absolute;
   inset: 0;
   display: grid;
@@ -2379,34 +2379,34 @@
 }
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="header"]>:where([data-nse-part="previous-year"])[data-nse-part="previous-year"]::before,
-:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>button[data-nse-part="previous-year"]::before { content: "\00AB"; font-size: 17px; }
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>[data-nse-part="previous-year"]::before { content: "\00AB"; font-size: 17px; }
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="header"]>:where([data-nse-part="previous-month"])[data-nse-part="previous-month"]::before,
-:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>button[data-nse-part="previous-month"]::before { content: "\2039"; font-size: 19px; }
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>[data-nse-part="previous-month"]::before { content: "\2039"; font-size: 19px; }
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="header"]>:where([data-nse-part="next-month"])[data-nse-part="next-month"]::before,
-:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>button[data-nse-part="next-month"]::before { content: "\203A"; font-size: 19px; }
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>[data-nse-part="next-month"]::before { content: "\203A"; font-size: 19px; }
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="header"]>:where([data-nse-part="next-year"])[data-nse-part="next-year"]::before,
-:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>button[data-nse-part="next-year"]::before { content: "\00BB"; font-size: 17px; }
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>[data-nse-part="next-year"]::before { content: "\00BB"; font-size: 17px; }
 /* Today: a dot, drawn rather than typed so it sits on the button's optical centre. */
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="header"]>:where([data-nse-part="today"])[data-nse-part="today"]::before,
-:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>button[data-nse-part="today"]::before { content: ""; inset: calc(50% - 3.5px); border-radius: 50%; background: currentColor; }
-:where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])[dir="rtl"]>[data-nse-part="header"]>button::before,
-:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"])[dir="rtl"])>[data-nse-part="header"]>button::before { transform: scaleX(-1); }
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>[data-nse-part="today"]::before { content: ""; inset: calc(50% - 3.5px); border-radius: 50%; background: currentColor; }
+:where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])[data-nse-flow="rtl"]>[data-nse-part="header"]>:where(:is([data-nse-part="previous-year"], [data-nse-part="previous-month"], [data-nse-part="today"], [data-nse-part="next-month"], [data-nse-part="next-year"]))::before,
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"])[data-nse-flow="rtl"])>[data-nse-part="header"]>:where(:is([data-nse-part="previous-year"], [data-nse-part="previous-month"], [data-nse-part="today"], [data-nse-part="next-month"], [data-nse-part="next-year"]))::before { transform: scaleX(-1); }
 
-:where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[role="grid"],
-:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[role="grid"] {
+:where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="body"],
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="body"] {
   display: grid;
   gap: 1px;
 }
 
-:where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"]) [role="row"],
-:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"])) [role="row"] {
+:where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"]) [data-nse-part="row"],
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"])) [data-nse-part="row"] {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 1px;
 }
 
-:where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"]) [role="columnheader"],
-:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"])) [role="columnheader"] {
+:where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"]) [data-nse-part="column-caption"],
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"])) [data-nse-part="column-caption"] {
   padding-block: 2px 5px;
   overflow: hidden;
   font-size: 10px;
@@ -2419,8 +2419,8 @@
   white-space: nowrap;
 }
 
-:where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"]) [role="row"]>span,
-:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"])) [role="row"]>span {
+:where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"]) [data-nse-part="row"]>:where(:is([data-nse-part="cell"], [data-nse-part="column-caption"])),
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"])) [data-nse-part="row"]>:where(:is([data-nse-part="cell"], [data-nse-part="column-caption"])) {
   display: grid;
   min-inline-size: 0;
 }
@@ -2515,7 +2515,7 @@
 }
 
 :where(:scope) [data-nse-part="clock"]>[data-nse-part="numeric"] :where([data-nse-part="field"]),
-:where(:scope):is([data-nse-part="clock"])>[data-nse-part="numeric"] input {
+:where(:scope):is([data-nse-part="clock"])>[data-nse-part="numeric"] :where([data-nse-part="field"]) {
   box-sizing: border-box;
   inline-size: 48px;
   block-size: 28px;
@@ -2532,9 +2532,9 @@
 }
 
 :where(:scope) [data-nse-part="clock"]>[data-nse-part="numeric"] :where([data-nse-part="field"])::-webkit-inner-spin-button,
-:where(:scope):is([data-nse-part="clock"])>[data-nse-part="numeric"] input::-webkit-inner-spin-button,
+:where(:scope):is([data-nse-part="clock"])>[data-nse-part="numeric"] :where([data-nse-part="field"])::-webkit-inner-spin-button,
 :where(:scope) [data-nse-part="clock"]>[data-nse-part="numeric"] :where([data-nse-part="field"])::-webkit-outer-spin-button,
-:where(:scope):is([data-nse-part="clock"])>[data-nse-part="numeric"] input::-webkit-outer-spin-button {
+:where(:scope):is([data-nse-part="clock"])>[data-nse-part="numeric"] :where([data-nse-part="field"])::-webkit-outer-spin-button {
   margin: 0;
   -webkit-appearance: none;
 }
@@ -2583,17 +2583,17 @@
   outline: none;
 }
 
-:where(:scope) [data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])>button,
-:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]))>button,
-:where(:scope) :is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"]))>button,
-:where(:scope):is(:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"])))>button {
+:where(:scope) [data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])>:where([data-nse-part="button"]),
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]))>:where([data-nse-part="button"]),
+:where(:scope) :is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"]))>:where([data-nse-part="button"]),
+:where(:scope):is(:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"])))>:where([data-nse-part="button"]) {
   position: relative;
   flex: none;
   cursor: pointer;
 }
 
-:where(:scope) [data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])>button,
-:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]))>button {
+:where(:scope) [data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])>:where([data-nse-part="button"]),
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]))>:where([data-nse-part="button"]) {
   inline-size: 30px;
   block-size: 28px;
   margin: 0;
@@ -2602,8 +2602,8 @@
   font-size: 0;
 }
 
-:where(:scope) :is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])>button,[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"])>button,[data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"])>button)::before,
-:where(:scope):is(:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])>button,[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"])>button,[data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"])>button)::before) {
+:where(:scope) :is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])>:where([data-nse-part="button"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"])>:where([data-nse-part="button"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"])>:where([data-nse-part="button"]))::before,
+:where(:scope):is(:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])>:where([data-nse-part="button"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"])>:where([data-nse-part="button"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"])>:where([data-nse-part="button"]))::before) {
   content: "";
   position: absolute;
   inset-block: 0;
@@ -2613,10 +2613,10 @@
   mask: var(--nse-atmo-calendar-glyph) center / 16px 16px no-repeat;
 }
 
-:where(:scope) [data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])>[role="alert"],
-:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]))>[role="alert"],
-:where(:scope) [data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"])>[role="alert"],
-:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"]))>[role="alert"],
+:where(:scope) [data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])>[data-nse-part="error"],
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]))>[data-nse-part="error"],
+:where(:scope) [data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"])>[data-nse-part="error"],
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"]))>[data-nse-part="error"],
 :where(:scope) [data-nse-part="date-time-editor"]>[role="alert"],
 :where(:scope):is([data-nse-part="date-time-editor"])>[role="alert"] {
   flex-basis: 100%;
@@ -2628,8 +2628,8 @@
 
 /* Date-time picker trigger: the value in a field pill with a trailing
    calendar affix. */
-:where(:scope) :is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"]))>button,
-:where(:scope):is(:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"])))>button {
+:where(:scope) :is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"]))>:where([data-nse-part="button"]),
+:where(:scope):is(:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"])))>:where([data-nse-part="button"]) {
   inline-size: 100%;
   min-inline-size: 200px;
   block-size: 36px;
@@ -2641,8 +2641,8 @@
   text-align: start;
 }
 
-:where(:scope) :is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"]))>button::before,
-:where(:scope):is(:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"])))>button::before {
+:where(:scope) :is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"]))>:where([data-nse-part="button"])::before,
+:where(:scope):is(:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"])))>:where([data-nse-part="button"])::before {
   inset-inline-start: auto;
   inset-inline-end: 12px;
 }
@@ -2677,8 +2677,8 @@
   gap: 8px;
 }
 
-:where(:scope) :is([data-nse-part="calendar-sheet"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]) section)>h2,
-:where(:scope):is(:is([data-nse-part="calendar-sheet"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]) section))>h2 {
+:where(:scope) :is([data-nse-part="calendar-sheet"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]) :where(:is([data-nse-control="date-picker"], [data-nse-part="clock"], [data-nse-part="date-time-editor"], [data-nse-part="clock-sheet"])))>:where([data-nse-part="title"]),
+:where(:scope):is(:is([data-nse-part="calendar-sheet"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]) :where(:is([data-nse-control="date-picker"], [data-nse-part="clock"], [data-nse-part="date-time-editor"], [data-nse-part="clock-sheet"]))))>:where([data-nse-part="title"]) {
   margin: 0;
   font-size: 12px;
   font-weight: 700;
@@ -2703,8 +2703,8 @@
   gap: 12px 16px;
 }
 
-:where(:scope) [data-nse-part="date-time-editor"]>input[type="text"],
-:where(:scope):is([data-nse-part="date-time-editor"])>input[type="text"] {
+:where(:scope) [data-nse-part="date-time-editor"]>[data-nse-part="field"],
+:where(:scope):is([data-nse-part="date-time-editor"])>[data-nse-part="field"] {
   box-sizing: border-box;
   flex: 1 1 100%;
   block-size: 36px;
@@ -2729,8 +2729,8 @@
 
 /* Native selects in the date/time family keep their semantics and OS list;
    their closed state is a light Atmo pill with the picker's triangle. */
-:where(:scope) :is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-part="date-time-editor"],[data-nse-part="clock"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])) select,
-:where(:scope):is(:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-part="date-time-editor"],[data-nse-part="clock"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]))) select {
+:where(:scope) :is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-part="date-time-editor"],[data-nse-part="clock"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])) :where([data-nse-control="pop-up-button"] > [data-nse-part="bezel"]),
+:where(:scope):is(:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-part="date-time-editor"],[data-nse-part="clock"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]))) :where([data-nse-control="pop-up-button"] > [data-nse-part="bezel"]) {
   box-sizing: border-box;
   block-size: 32px;
   min-inline-size: 64px;
@@ -2781,8 +2781,8 @@
   line-height:26px;
 }
 
-:where(:scope) [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-control-size="small"]:where(:not([data-nse-height])) [data-nse-part]:where([data-nse-control="text-field"] *):where([data-nse-part="bezel"] > *):where(:not([data-nse-part="field"])),
-:where(:scope):is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-control-size="small"]:where(:not([data-nse-height]))) [data-nse-part]:where([data-nse-control="text-field"] *):where([data-nse-part="bezel"] > *):where(:not([data-nse-part="field"])) {
+:where(:scope) [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-control-size="small"]:where(:not([data-nse-height])) [data-nse-part]:where([data-nse-control="text-field"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-part="field"])),
+:where(:scope):is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-control-size="small"]:where(:not([data-nse-height]))) [data-nse-part]:where([data-nse-control="text-field"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-part="field"])) {
   line-height:26px;
 }
 
@@ -2801,8 +2801,8 @@
   line-height:20px;
 }
 
-:where(:scope) [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-control-size="mini"]:where(:not([data-nse-height])) [data-nse-part]:where([data-nse-control="text-field"] *):where([data-nse-part="bezel"] > *):where(:not([data-nse-part="field"])),
-:where(:scope):is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-control-size="mini"]:where(:not([data-nse-height]))) [data-nse-part]:where([data-nse-control="text-field"] *):where([data-nse-part="bezel"] > *):where(:not([data-nse-part="field"])) {
+:where(:scope) [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-control-size="mini"]:where(:not([data-nse-height])) [data-nse-part]:where([data-nse-control="text-field"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-part="field"])),
+:where(:scope):is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-control-size="mini"]:where(:not([data-nse-height]))) [data-nse-part]:where([data-nse-control="text-field"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-part="field"])) {
   line-height:20px;
 }
 
@@ -2824,8 +2824,8 @@
   line-height:calc(var(--nse-control-height)*0.72);
 }
 
-:where(:scope) [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-height] [data-nse-part]:where([data-nse-control="text-field"] *):where([data-nse-part="bezel"] > *):where(:not([data-nse-part="field"])),
-:where(:scope):is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-height]) [data-nse-part]:where([data-nse-control="text-field"] *):where([data-nse-part="bezel"] > *):where(:not([data-nse-part="field"])) {
+:where(:scope) [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-height] [data-nse-part]:where([data-nse-control="text-field"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-part="field"])),
+:where(:scope):is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-height]) [data-nse-part]:where([data-nse-control="text-field"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-part="field"])) {
   font-size:max(11px,calc(var(--nse-control-height)*0.46));
   line-height:calc(var(--nse-control-height)*0.72);
 }

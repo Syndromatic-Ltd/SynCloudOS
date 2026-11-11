@@ -172,7 +172,7 @@ export function NSEDateRangeEntry({ value, defaultValue = null, onValueChange, .
     </div>
   );
   return <section ref={hostRef} {...drawing.attributes} {...drawing.events} data-state={invalid ? "invalid" : disabled ? "disabled" : props.readOnly ? "read-only" : open ? "open" : "ready"} data-nse-validation={invalid ? "invalid" : undefined}>
-    {overlay ? <button ref={triggerRef} type="button" aria-label={`Choose ${props["aria-label"].toLowerCase()} dates`} aria-describedby={current ? valueId : undefined} aria-expanded={open} disabled={disabled || props.readOnly} onClick={openCalendar} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openCalendar(); } }} onKeyUp={(event) => { if (event.key === " ") event.preventDefault(); }}><span id={valueId} data-nse-part="value" data-placeholder={current ? undefined : "true"}>{current ? displayRange(current, props.locale) : `${plainDatePlaceholder(props.locale)} – ${plainDatePlaceholder(props.locale)}`}</span></button> : <>
+    {overlay ? <button ref={triggerRef} type="button" data-nse-part="button" aria-label={`Choose ${props["aria-label"].toLowerCase()} dates`} aria-describedby={current ? valueId : undefined} aria-expanded={open} disabled={disabled || props.readOnly} onClick={openCalendar} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openCalendar(); } }} onKeyUp={(event) => { if (event.key === " ") event.preventDefault(); }}><span id={valueId} data-nse-part="value" data-placeholder={current ? undefined : "true"}>{current ? displayRange(current, props.locale) : `${plainDatePlaceholder(props.locale)} – ${plainDatePlaceholder(props.locale)}`}</span></button> : <>
       {fields}
       <span data-nse-part="actions">
         <NSEButton
@@ -198,6 +198,6 @@ export function NSEDateRangeEntry({ value, defaultValue = null, onValueChange, .
       onClick={applyCalendar}
     /><NSEButton appearance="aqua" title="Cancel" onClick={cancel} /></div></section></NSEPopover> : null}
     {props.name ? <input type="hidden" name={props.name} value={serialise(current)} /> : null}
-    {invalid && !open ? <span role="alert">Enter a valid date range.</span> : null}
+    {invalid && !open ? <span role="alert" data-nse-part="error">Enter a valid date range.</span> : null}
   </section>;
 }

@@ -278,7 +278,7 @@ function NSETimeFieldEditor({ value, minimum, maximum, locale, timeZone, date, h
       <NSEStepper size="small" aria-label={`Step ${label.toLowerCase()} ${segment === "ampm" ? "AM/PM" : segment}`} value={minutes} minimum={lowest} maximum={highest} step={stepSize} isEnabled={!disabled} readOnly={readOnly} formatValue={(total) => `${String(Math.floor(total / 60)).padStart(2, "0")}${separator}${String(total % 60).padStart(2, "0")}`} onValueChange={(total, phase) => commit(total, phase)} />
       {overlay ? <button ref={clockButton} type="button" data-nse-part="clock-affix" aria-label={`Show ${label.toLowerCase()} clock`} aria-expanded={open} disabled={inert} onClick={() => setOpen(true)} /> : null}
       {overlay ? <NSEPopover id={`time-field-${instanceId}`} open={open} anchor={clockButton.current} parentWindowControllerId="time-picker-window" parentResponderId={parentResponderId} presentation={{ mode: "automatic" }} surface="overlay" labelledBy={titleId} onOpenChange={(next) => { if (!next) { setOpen(false); queueMicrotask(() => clockButton.current?.focus({ preventScroll: true })); } }}>
-        <section data-nse-part="clock-sheet"><h2 id={titleId} className="nse-control-visually-hidden">{label} clock</h2>
+        <section data-nse-part="clock-sheet"><h2 data-nse-part="title" id={titleId} className="nse-control-visually-hidden">{label} clock</h2>
           <NSEGraphicalClock aria-label={label} locale={locale} timeZone={timeZone} date={date ?? { year: 1970, month: 1, day: 1 }} value={value} isEnabled={!inert} minuteStep={minuteStep} hourCycle={hourCycle} onValueChange={(next, phase) => commit(next.hour * 60 + next.minute, phase)} />
         </section>
       </NSEPopover> : null}
