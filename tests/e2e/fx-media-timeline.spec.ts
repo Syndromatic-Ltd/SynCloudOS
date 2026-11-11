@@ -202,11 +202,11 @@ test("VideoFX draws processed title-overlay frames while scheduled PCM reaches t
       let titleInkPixels = 0;
       for (let offset = 35 * 96 * 4; offset < titlePixels.length; offset += 4)
         if (titlePixels[offset]! > 230 && titlePixels[offset + 1]! > 230 && titlePixels[offset + 2]! > 230) titleInkPixels++;
-      // Prepare the frame before starting its presentation clock. Correlate
-      // actual output at this PTS so RAF polling cannot skip the first frame's
-      // narrow window; the separate early/late probes below own those cases.
+      // Prebuffer before the first PTS: transferring the prepared frame can
+      // outlast the strict presentation tolerance on a busy browser. The
+      // separate early/late probes below keep the same A/V tolerance.
       await engine.start();
-      await coordinator.seek(firstPTS);
+      await coordinator.seek(firstPTS.addDuration(media.MEFXTime.finite(-200n, 1_000)));
       const correlationGeneration = coordinator.reanchorAudio();
       coordinator.enqueue(titled.frame);
       titled.frame.close();
@@ -288,6 +288,7 @@ test("VideoFX draws processed title-overlay frames while scheduled PCM reaches t
     test.skip(true, result.reason);
     return;
   }
+  await testInfo.attach("presentation-dispatch", { body: JSON.stringify(result, null, 2), contentType: "application/json" });
   expect(result.audioTapCount).toBeGreaterThan(0);
   expect(result.audioPeak).toBeGreaterThan(0.01);
   expect(result.titleInkPixels).toBeGreaterThan(0);

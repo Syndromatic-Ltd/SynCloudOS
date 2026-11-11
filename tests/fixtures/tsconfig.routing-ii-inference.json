@@ -1,5 +1,5 @@
 {
   "extends": "../../tsconfig.app.json",
   "compilerOptions": { "noEmit": true, "skipLibCheck": false, "types": ["vite/client", "emscripten"] },
-  "include": ["routing-ii-types.ts", "routing-ii-inference-types.ts"]
+  "include": ["routing-ii-types.ts", "routing-ii-inference-types.ts", "../../src/FX/TextFX/textBackendTypes.d.ts"]
 }

@@ -20,13 +20,7 @@
 
 import { expect, it } from "vitest";
 
-import {
-  MAX_INCREMENTAL_COLLECTION_CHANGES,
-  SelectionModel,
-  diffCollection,
-  emptyChangeSet,
-  type CollectionChange,
-} from "../../src/SynCloudOS/Models";
+import { MAX_INCREMENTAL_COLLECTION_CHANGES, SelectionModel, diffCollection, emptyChangeSet, type CollectionChange } from "../../src/SynCloudOS/Models";
 
 function applyOrderedChanges<T extends { readonly id: string }>(
   before: readonly T[],

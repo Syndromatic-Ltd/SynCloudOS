@@ -271,6 +271,8 @@ export interface CommandInspection {
 export interface CommandSystem {
   readonly runtimeId: SynCloudOSRuntimeId;
   register<P, R>(declaration: CommandDeclaration<P, R>): CommandRegistration;
+  /** Observes registry changes, coalesced after registration mutations settle. */
+  subscribe(listener: () => void): () => void;
   dispatch<R = unknown>(id: CommandId, payload?: unknown, options?: CommandDispatchOptions): Promise<CommandDispatchResult<R>>;
   prepareDispatch(id: CommandId, payload?: unknown, options?: CommandDispatchOptions): CommandDispatchPreparation | Promise<CommandDispatchPreparation>;
   validate(id: CommandId, payload?: unknown, options?: CommandValidationOptions): Promise<CommandPresentation>;

@@ -19,6 +19,8 @@
  */
 
 import type { ReactNode } from "react";
+import type { NSEActionReference, NSEActionPayloadCheck } from "../Controls/Core/actionReference";
+import type { NSEControllerOwnershipOptions } from "../Controllers/ownership";
 import type {
   CommandDispatchOptions,
   CommandDispatchResult,
@@ -35,7 +37,39 @@ import type {
 } from "../../SynCloudOS/SynCloudOS";
 import type { NSELogicalPlacement } from "../Overlays/overlayTypes";
 
-/** A menu entry has one unambiguous presentation kind. */
+/**
+ * An item of an NSEMenu (NSMenuItem). A command item sends its `action` along
+ * the responder chain, and the action's validation decides whether it is
+ * enabled, hidden or checked (`validateMenuItem`). A bare action name belongs
+ * to the application that shows the menu; a dotted command id is taken as
+ * written. Its key equivalent is the action's key binding, the one authority
+ * for keys, so the menu shows the binding the action declared.
+ */
+export type NSEMenuItem<Payload = unknown> =
+  | { readonly isSeparatorItem: true; readonly identifier?: string }
+  | {
+      readonly title?: ReactNode;
+      readonly action: string | NSEActionReference<Payload>;
+      readonly actionPayload?: NoInfer<Payload>;
+      readonly image?: ReactNode;
+      readonly identifier?: string;
+    }
+  | {
+      readonly title: ReactNode;
+      readonly submenu: readonly NSEMenuItem[];
+      readonly image?: ReactNode;
+      readonly isEnabled?: boolean;
+      readonly toolTip?: string;
+      readonly identifier?: string;
+    }
+  | {
+      /** NSMenuItem.view: a row the menu draws but never validates or sends. */
+      readonly view: () => ReactNode;
+      readonly title: ReactNode;
+      readonly identifier?: string;
+    };
+
+/** @internal A menu entry has one unambiguous presentation kind. */
 export type NSEMenuEntry =
   | {
       readonly kind: "command";
@@ -60,6 +94,28 @@ export type NSEMenuEntry =
   | { readonly kind: "separator"; readonly id: string }
   | { readonly kind: "custom"; readonly id: string; readonly label: ReactNode; readonly render: () => ReactNode };
 
+/**
+ * A command entry named by an action (`{ action: "newNote" }`) instead of a
+ * command ID. The menu's runtime port turns the name into the command ID of the
+ * application that declared the action.
+ */
+export interface NSEMenuActionEntry<Payload = unknown> {
+  readonly kind: "command";
+  readonly id: string;
+  readonly action: string | NSEActionReference<Payload>;
+  readonly payload?: NoInfer<Payload>;
+  readonly labelOverride?: ReactNode;
+  readonly iconOverride?: ReactNode;
+  readonly shortcutOverride?: string;
+  readonly selectionKind?: "checkbox" | "radio";
+}
+
+/** An entry as authored: command entries may name an action instead of a command ID. */
+export type NSEMenuEntryInput =
+  | Exclude<NSEMenuEntry, { readonly kind: "submenu" }>
+  | NSEMenuActionEntry
+  | (Omit<Extract<NSEMenuEntry, { readonly kind: "submenu" }>, "entries"> & { readonly entries: readonly NSEMenuEntryInput[] });
+
 export interface NSEMenuItemDefinition {
   readonly value: string;
   readonly label: ReactNode;
@@ -76,7 +132,7 @@ export interface NSEMenuItemDefinition {
 export interface NSEMenuModel {
   readonly id: string;
   readonly label: string;
-  readonly entries: readonly NSEMenuEntry[];
+  readonly entries: readonly NSEMenuEntryInput[];
   /**
    * Optional contributions are inserted deterministically by their stable
    * section ID and weight. They are a presentation extension point only: all
@@ -85,9 +141,30 @@ export interface NSEMenuModel {
   readonly sections?: readonly NSEMenuSection[];
 }
 
-export interface NSEMenuSection {
+/** @internal Preserve payload correlation for each inferred authored entry, including submenus/sections. */
+type CheckedMenuEntries<Entries extends readonly NSEMenuEntryInput[]> = {
+  readonly [K in keyof Entries]: NSEMenuEntryInput extends Entries[K] ? Entries[K]
+    : Entries[K] & NSEActionPayloadCheck<Entries[K], "payload"> &
+      (Entries[K] extends { readonly entries: infer Children extends readonly NSEMenuEntryInput[] }
+        ? { readonly entries: CheckedMenuEntries<Children> } : unknown);
+};
+export type NSEMenuModelActionCheck<Model extends NSEMenuModel> = {
+  readonly entries: CheckedMenuEntries<Model["entries"]>;
+} & (Model extends { readonly sections: infer Sections extends readonly NSEMenuSection[] }
+  ? { readonly sections: { readonly [K in keyof Sections]: Sections[K] & { readonly entries: CheckedMenuEntries<Sections[K]["entries"]> } } }
+  : unknown);
+
+/** @internal Preserve payload correlation for each authored item, including submenus. */
+export type NSECheckedMenuItems<Items extends readonly NSEMenuItem[]> = {
+  readonly [K in keyof Items]: NSEMenuItem extends Items[K] ? Items[K]
+    : Items[K] & NSEActionPayloadCheck<Items[K], "actionPayload"> &
+      (Items[K] extends { readonly submenu: infer Children extends readonly NSEMenuItem[] }
+        ? { readonly submenu: NSECheckedMenuItems<Children> } : unknown);
+};
+
+export interface NSEMenuSection<TEntry = NSEMenuEntryInput> {
   readonly id: string;
-  readonly entries: readonly NSEMenuEntry[];
+  readonly entries: readonly TEntry[];
   readonly weight?: number;
   readonly beforeId?: string;
   readonly afterId?: string;
@@ -115,6 +192,9 @@ export interface NSEMenuRuntimePort {
   readonly signal: AbortSignal;
   readonly commands: {
     getPresentationGeneration(): { readonly registryGeneration: number; readonly responderGeneration: number };
+    /** Notifies when command authority may have changed: the focused responder
+     * chain, the command registry, or application state a validator reads. */
+    subscribePresentation?(listener: () => void): () => void;
     validateMany(
       requests: readonly CommandValidationRequest[],
       options?: CommandValidationOptions,
@@ -134,6 +214,8 @@ export interface NSEMenuRuntimePort {
   readonly keyBindings?: Pick<KeyBindingManager, "claimKeyboardEvent" | "handleKeyboardEvent">;
   /** Optional injected scheduler for submenu aim delay. No ambient timer use. */
   readonly scheduler?: NSEMenuScheduler;
+  /** Turns an action name into the command ID of the application that declared it. Required for menus with `{ action }` entries. */
+  readonly resolveAction?: (action: string) => CommandId;
 }
 
 export type NSEMenuPresentedEntry =
@@ -178,8 +260,22 @@ export interface NSEMenuSnapshot {
 
 export type NSEMenuDismissReason = "escape" | "selection" | "programmatic" | "parent-dismissed";
 
-export interface NSEMenuControllerOptions {
-  readonly model: NSEMenuModel;
+/** @internal The menu's internal model, for the framework's own menus (application menus, item menus). */
+export const nseMenuModel: unique symbol = Symbol("nse.menuModel");
+
+export interface NSEMenuOptions extends NSEControllerOwnershipOptions {
+  /** NSMenu.title: the menu's name in a menu bar and for assistive technology. */
+  readonly title: string;
+  readonly items: readonly NSEMenuItem[];
+  /** A stable identifier; one is generated otherwise. */
+  readonly identifier?: string;
+  /** The command authority the menu validates and sends through. A SynWare gets it from `SCOS.menus.runtime`. */
+  readonly runtime: NSEMenuRuntimePort;
+}
+
+/** @internal */
+export interface NSEMenuModelOptions extends NSEControllerOwnershipOptions {
+  readonly [nseMenuModel]: NSEMenuModel;
   readonly runtime: NSEMenuRuntimePort;
 }
 

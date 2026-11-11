@@ -19,7 +19,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, type RefCallback } from "react";
-import { nseAppearanceSlot, useNSEAppearanceSlot } from "../Appearance";
+
 import {
   NSEChromeBevel,
   NSEChromeGloss,
@@ -27,7 +27,7 @@ import {
   NSEChromeSurface,
   type NSEChromeVisualState,
 } from "../Appearance/NSEChromePrimitives";
-import { NSEMenu, NSEMenuController, type NSEMenuEntry, type NSEMenuModel } from "../Menus";
+import { NSEMenu, NSEMenuView, nseMenuModel, type NSEMenuEntry, type NSEMenuModel } from "../Menus";
 import { NSEMenuOverlay } from "../Menus/NSEMenuOverlay";
 import { useOptionalNSEOverlayProvider } from "../Overlays";
 import type { NSEToolbarController } from "./NSEToolbarController";
@@ -93,7 +93,7 @@ export function NSEToolbarOverflowMenu({
   const [hovered, setHovered] = useState(false);
   const [pressed, setPressed] = useState(false);
   const [focused, setFocused] = useState(false);
-  const [menuController, setMenuController] = useState<NSEMenuController | null>(null);
+  const [menuController, setMenuController] = useState<NSEMenu | null>(null);
   const localTriggerRef = useRef<HTMLButtonElement | null>(null);
   const model = useMemo(() => modelFor(controller, entries), [controller, entries]);
   const modelSignature = entries.map((entry) => entry.instanceId).join("|");
@@ -112,8 +112,9 @@ export function NSEToolbarOverflowMenu({
   if (!parentResponderId.trim()) throw new TypeError("NSE toolbar overflow menus require a parent responder ID.");
   const requestOpen = useCallback((nextOpen: boolean) => {
     if (nextOpen && !menuController) {
-      setMenuController(new NSEMenuController({
-        model,
+      setMenuController(new NSEMenu({
+        ownerSignal: controller.runtime.signal,
+        [nseMenuModel]: model,
         runtime: {
           signal: controller.runtime.signal,
           commands: controller.runtime.commands,
@@ -129,7 +130,7 @@ export function NSEToolbarOverflowMenu({
     setOpen(nextOpen);
   }, [controller.runtime, menuController, model]);
   const appearanceState: NSEChromeVisualState = pressed || open ? "pressed" : focused ? "focused" : hovered ? "hover" : "normal";
-  const appearance = useNSEAppearanceSlot(nseAppearanceSlot("toolbar", "item", appearanceState));
+
 
   return (
     <span className="nse-toolbar-overflow-menu">
@@ -144,10 +145,10 @@ export function NSEToolbarOverflowMenu({
         aria-haspopup="menu"
         aria-expanded={open}
         tabIndex={tabIndex}
-        data-nse-control="toolbar-item"
+        data-nse-control="toolbar-item" data-nse-highlighted={pressed || open ? "" : undefined} data-nse-hovered={hovered ? "" : undefined} data-nse-focused={focused ? "" : undefined}
         data-nse-part="overflow"
         data-state={open ? "open" : "normal"}
-        {...appearance.attributes}
+
         data-nse-toolbar-item-id="overflow"
         onFocus={() => {
           setFocused(true);
@@ -164,10 +165,10 @@ export function NSEToolbarOverflowMenu({
         onPointerCancel={() => setPressed(false)}
         onClick={() => requestOpen(!open)}
       >
-        <NSEChromeSurface slot={appearance} state={appearanceState} />
-        <NSEChromeBevel slot={appearance} state={appearanceState} />
-        <NSEChromeGloss slot={appearance} state={appearanceState} />
-        <NSEChromeInnerShadow slot={appearance} state={appearanceState} />
+        <NSEChromeSurface  state={appearanceState} />
+        <NSEChromeBevel  state={appearanceState} />
+        <NSEChromeGloss  state={appearanceState} />
+        <NSEChromeInnerShadow  state={appearanceState} />
         <span aria-hidden="true" data-nse-part="overflow-glyph" />
       </button>
       {menuController ? (
@@ -179,7 +180,7 @@ export function NSEToolbarOverflowMenu({
           labelledBy={undefined}
           onOpenChange={requestOpen}
         >
-          <NSEMenu model={model} controller={menuController} open={open} onOpenChange={requestOpen} />
+          <NSEMenuView model={model} controller={menuController} open={open} onOpenChange={requestOpen} />
         </NSEMenuOverlay>
       ) : null}
     </span>

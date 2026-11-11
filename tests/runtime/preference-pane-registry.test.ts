@@ -19,66 +19,123 @@
  */
 
 import { describe, expect, it, vi } from "vitest";
-import type { PreferencePaneDescriptor } from "../../src/SynCloudOS/Preferences";
-import { registerSystemPreferencePane } from "../../src/SynCloudOS/Preferences/preferencePaneRegistry";
+import {
+  definePreferencePane,
+  registerPreferencePane,
+  resolvePreferencePanes,
+  type PreferencePaneDefinition,
+} from "../../src/SynCloudOS/Preferences";
 import { createTestRuntime } from "./helpers";
 
-function pane(id: string, order: number): PreferencePaneDescriptor {
-  return { id, order, bundleIdentifier: `com.syndromatic.syncloudos.preference.${id}.prefpane`, create: () => id };
+const noView = (): null => null;
+
+function pane(id: string, order: number): PreferencePaneDefinition {
+  return definePreferencePane({ id, title: id, order, view: () => null });
 }
 
-describe("runtime Preference Pane registry", () => {
-  it("does not expose system pane registration to arbitrary runtime consumers", () => {
-    const runtime = createTestRuntime();
-    expect((runtime.preferencePanes as unknown as { register?: unknown }).register).toBeUndefined();
+describe("definePreferencePane", () => {
+  it("returns an immutable definition with the declared fields", () => {
+    const View = () => null;
+    const definition = definePreferencePane({ id: " billing ", title: "Billing", icon: "./billing.svg", order: 600, view: View });
+    expect(definition).toMatchObject({ id: "billing", title: "Billing", icon: "./billing.svg", order: 600, view: View });
+    expect(Object.isFrozen(definition)).toBe(true);
   });
+
+  it("accepts a localisable title", () => {
+    expect(definePreferencePane({ id: "billing", title: { key: "billing.title", fallback: "Billing" }, order: 1, view: () => null }).title)
+      .toEqual({ key: "billing.title", fallback: "Billing" });
+  });
+
+  it.each([
+    ["an empty id", { id: " ", title: "x", order: 1, view: noView }],
+    ["a missing title", { id: "a", title: "", order: 1, view: noView }],
+    ["a non-finite order", { id: "a", title: "x", order: Number.NaN, view: noView }],
+    ["a view that is not a component", { id: "a", title: "x", order: 1, view: "nope" }],
+    ["an icon that is not a URL string", { id: "a", title: "x", order: 1, view: noView, icon: 3 }],
+  ])("rejects %s", (_label, input) => {
+    expect(() => definePreferencePane(input as never)).toThrow(TypeError);
+  });
+
+  it("rejects accessors without evaluating them", () => {
+    const getter = vi.fn(() => "billing");
+    const input = Object.defineProperty({ title: "Billing", order: 1, view: () => null }, "id", { enumerable: true, get: getter });
+    expect(() => definePreferencePane(input as never)).toThrow(/accessor/);
+    expect(getter).not.toHaveBeenCalled();
+  });
+});
+
+describe("resolvePreferencePanes", () => {
+  const builtIn = [pane("appearance", 100), pane("sounds", 200), pane("language", 500)];
+
+  it("lists the built-ins and the developer panes", () => {
+    const billing = pane("billing", 600);
+    expect(resolvePreferencePanes({ builtIn, developer: [billing] }).map(({ id }) => id)).toEqual(["appearance", "sounds", "language", "billing"]);
+  });
+
+  it("hides built-ins by id", () => {
+    expect(resolvePreferencePanes({ builtIn, hide: ["sounds"] }).map(({ id }) => id)).toEqual(["appearance", "language"]);
+  });
+
+  it("lets a developer pane replace the built-in with the same id", () => {
+    const replacement = pane("sounds", 250);
+    const resolved = resolvePreferencePanes({ builtIn, developer: [replacement] });
+    expect(resolved.filter(({ id }) => id === "sounds")).toEqual([replacement]);
+    expect(resolved).toHaveLength(3);
+  });
+
+  it("never hides a developer pane", () => {
+    const billing = pane("billing", 600);
+    expect(resolvePreferencePanes({ builtIn, developer: [billing], hide: ["billing"] })).toContain(billing);
+  });
+});
+
+describe("runtime Preference Pane registry", () => {
   it("publishes an immutable stable order and rejects duplicate IDs", () => {
     const runtime = createTestRuntime();
-    registerSystemPreferencePane(runtime.preferencePanes, pane("language", 500));
-    registerSystemPreferencePane(runtime.preferencePanes, pane("appearance", 100));
+    registerPreferencePane(runtime.preferencePanes, pane("language", 500));
+    registerPreferencePane(runtime.preferencePanes, pane("appearance", 100));
     const snapshot = runtime.preferencePanes.getSnapshot();
     expect(Object.isFrozen(snapshot)).toBe(true);
     expect(snapshot.map(({ id }) => id)).toEqual(["appearance", "language"]);
-    expect(() => registerSystemPreferencePane(runtime.preferencePanes, pane("appearance", 900))).toThrow(/already registered/);
-    expect(() => registerSystemPreferencePane(runtime.preferencePanes, { ...pane("other", 900), bundleIdentifier: "com.syndromatic.syncloudos.preference.appearance.prefpane" })).toThrow(/bundle identifier/);
+    expect(() => registerPreferencePane(runtime.preferencePanes, pane("appearance", 900))).toThrow(/already registered/);
   });
 
-  it("contains throwing descriptors and stale cleanup without corrupting a later registration", () => {
+  it("breaks ties in order by id", () => {
+    const runtime = createTestRuntime();
+    registerPreferencePane(runtime.preferencePanes, pane("b", 10));
+    registerPreferencePane(runtime.preferencePanes, pane("a", 10));
+    expect(runtime.preferencePanes.getSnapshot().map(({ id }) => id)).toEqual(["a", "b"]);
+  });
+
+  it("refuses anything not made with definePreferencePane", () => {
+    const runtime = createTestRuntime();
+    const forged = { id: "forged", title: "Forged", order: 1, view: () => null } as PreferencePaneDefinition;
+    expect(() => registerPreferencePane(runtime.preferencePanes, forged)).toThrow(/definePreferencePane/);
+    expect(runtime.preferencePanes.getSnapshot()).toEqual([]);
+  });
+
+  it("lets a stale registration dispose without corrupting a later one", () => {
     const runtime = createTestRuntime();
     const changed = vi.fn();
     runtime.preferencePanes.subscribe(changed);
-    const first = registerSystemPreferencePane(runtime.preferencePanes, pane("motion", 300));
+    const first = registerPreferencePane(runtime.preferencePanes, pane("motion", 300));
     first.dispose();
-    const second = registerSystemPreferencePane(runtime.preferencePanes, pane("motion", 300));
+    const second = registerPreferencePane(runtime.preferencePanes, pane("motion", 300));
     first.dispose();
-    expect(runtime.preferencePanes.getSnapshot().map(({ id }) => id)).toEqual(["motion"]);
-    const idGetter = vi.fn(() => "failure");
-    const accessorDescriptor = Object.create(null, {
-      id: { get: idGetter },
-      order: { value: 1 },
-      bundleIdentifier: { value: "com.syndromatic.syncloudos.preference.failure.prefpane" },
-      create: { value: () => null },
-    }) as PreferencePaneDescriptor;
-    expect(() => registerSystemPreferencePane(runtime.preferencePanes, accessorDescriptor)).toThrow(/data properties/);
-    expect(idGetter).not.toHaveBeenCalled();
     expect(runtime.preferencePanes.getSnapshot().map(({ id }) => id)).toEqual(["motion"]);
     second.dispose();
+    expect(runtime.preferencePanes.getSnapshot()).toEqual([]);
     expect(changed).toHaveBeenCalledTimes(4);
   });
 
   it("isolates two runtimes and deterministically refuses work after disposal", async () => {
     const first = createTestRuntime({ id: "runtime:preferences:first" });
     const second = createTestRuntime({ id: "runtime:preferences:second" });
-    registerSystemPreferencePane(first.preferencePanes, pane("appearance", 100));
+    registerPreferencePane(first.preferencePanes, pane("appearance", 100));
     expect(second.preferencePanes.getSnapshot()).toEqual([]);
     await first.dispose("test");
     expect(first.preferencePanes.getSnapshot()).toEqual([]);
-    expect(() => registerSystemPreferencePane(first.preferencePanes, pane("motion", 300))).toThrow(/disposed|foreign/);
+    expect(() => registerPreferencePane(first.preferencePanes, pane("motion", 300))).toThrow(/disposed|foreign/);
     expect(second.preferencePanes.getSnapshot()).toEqual([]);
-  });
-
-  it("keeps .prefpane exclusive to valid system bundle identifiers", () => {
-    const runtime = createTestRuntime();
-    expect(() => registerSystemPreferencePane(runtime.preferencePanes, { ...pane("bad", 1), bundleIdentifier: "com.example.third-party.prefpane" })).toThrow(/system-owned/);
   });
 });

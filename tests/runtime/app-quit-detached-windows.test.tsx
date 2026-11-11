@@ -57,8 +57,8 @@ const quitWindowDocumentType: DocumentType<QuitWindowDocumentModel> = Object.fre
   schemaVersion: 1,
   extensions: Object.freeze([".app-quit-detached-test"]),
   mimeTypes: Object.freeze(["application/x-syncloudos-app-quit-detached-test"]),
-  creatingApplicationId: "window-owner",
-  openingApplicationIds: Object.freeze(["window-owner"]),
+  creatingApplicationId: "com.example.window-owner",
+  openingApplicationIds: Object.freeze(["com.example.window-owner"]),
   capabilities: Object.freeze({ versions: true, conflicts: true }),
   autosave: "disabled",
   create: () => Object.freeze({ version: 1, text: "Untitled" }),
@@ -92,9 +92,9 @@ function createWindowedAppFixture(runtimeId: string) {
   activeRuntimes.push(runtime);
   registerTestSynWare(runtime, {
     schemaVersion: 1,
-    id: "window-owner",
+    bundleIdentifier: "com.example.window-owner",
     version: "1.0.0",
-    title: "Window Owner",
+    displayName: "Window Owner",
     routes: [{ path: "/window-owner", primary: true }],
     windowDefaults: {
       title: "Window Owner",
@@ -106,7 +106,7 @@ function createWindowedAppFixture(runtimeId: string) {
     },
     documentTypes: [{ id: quitWindowDocumentType.id, displayName: quitWindowDocumentType.displayName }],
   });
-  const mount = mountTestSynWareRuntime(runtime, "window-owner");
+  const mount = mountTestSynWareRuntime(runtime, "com.example.window-owner");
   activeMounts.push(mount);
   return { runtime, owner: createSynWareContextValue(mount.runtime) };
 }
@@ -148,11 +148,11 @@ describe("application quit with detached windows", () => {
     const opened = await openDetachedWindow(fixture);
     expect(fixture.runtime.windows.select(opened.id).record.state).toBe("open");
 
-    const result = await fixture.runtime.lifecycle.close("window-owner", { reason: "test" }).result;
+    const result = await fixture.runtime.lifecycle.close("com.example.window-owner", { reason: "test" }).result;
     expect(result).toMatchObject({ status: "completed", committed: true });
     expect(fixture.runtime.windows.list().map(({ id }) => id)).not.toContain(opened.id);
     expect(fixture.runtime.windows.snapshot().windowControllerIds).toHaveLength(0);
-    expect(fixture.runtime.lifecycle.getState("window-owner")).toBe("closed");
+    expect(fixture.runtime.lifecycle.getState("com.example.window-owner")).toBe("closed");
   });
 
   it("fails the quit and keeps windows when the window close is refused", async () => {
@@ -160,17 +160,17 @@ describe("application quit with detached windows", () => {
     fixture.runtime.documents.registerCloseReviewer(cancelCloseReviewer);
     const opened = await openDetachedWindow(fixture);
 
-    const result = await fixture.runtime.lifecycle.close("window-owner", { reason: "test" }).result;
+    const result = await fixture.runtime.lifecycle.close("com.example.window-owner", { reason: "test" }).result;
 
     expect(result).toMatchObject({ status: "failed", committed: false });
-    expect(fixture.runtime.lifecycle.getState("window-owner")).not.toBe("closed");
+    expect(fixture.runtime.lifecycle.getState("com.example.window-owner")).not.toBe("closed");
     expect(fixture.runtime.windows.select(opened.id).record.state).toBe("open");
   });
 
   it("renders nothing and reports no error when unregister tears down a mounted detached window", async () => {
     const fixture = createWindowedAppFixture("runtime:app-quit-detached-c");
     fixture.runtime.documents.registerCloseReviewer(discardCloseReviewer);
-    const app = fixture.runtime.apps.getApp("window-owner");
+    const app = fixture.runtime.apps.getApp("com.example.window-owner");
     if (!app) throw new Error("The window-owner fixture app did not register.");
     const opened = await openDetachedWindow(fixture);
     const harness = createRuntimeHarness(fixture.runtime);
@@ -178,7 +178,7 @@ describe("application quit with detached windows", () => {
     expect(view.getByTestId("app-content")).toBeTruthy();
 
     await act(async () => {
-      await harness.AppRegistry.unregister("window-owner");
+      await harness.AppRegistry.unregister("com.example.window-owner");
     });
     // Production flush: the window host re-renders the still-composed mount
     // while the registry entry is already gone (the stale app prop object
@@ -195,11 +195,11 @@ describe("application quit with detached windows", () => {
 
   it("surfaces registry corruption when the app is removed while its lifecycle is active", async () => {
     const fixture = createWindowedAppFixture("runtime:app-quit-detached-d");
-    const app = fixture.runtime.apps.getApp("window-owner");
+    const app = fixture.runtime.apps.getApp("com.example.window-owner");
     if (!app) throw new Error("The window-owner fixture app did not register.");
     const view = render(
       <SynCloudOSWatchdog runtime={fixture.runtime} watchdogName="app-quit-detached-windows test">
-        <SynWareRuntimeMount runtime={fixture.runtime} app={app} responderId="application:window-owner">
+        <SynWareRuntimeMount runtime={fixture.runtime} app={app} responderId="application:com.example.window-owner">
           <span data-testid="app-content">mounted content</span>
         </SynWareRuntimeMount>
       </SynCloudOSWatchdog>,
@@ -210,12 +210,12 @@ describe("application quit with detached windows", () => {
     // still reports the application as running.
     act(() => {
       fixture.runtime.store.mutate((draft: { lifecycle: Record<string, string>; appInfo: Record<string, unknown> }) => {
-        draft.lifecycle["window-owner"] = "active";
-        delete draft.appInfo["window-owner"];
+        draft.lifecycle["com.example.window-owner"] = "active";
+        delete draft.appInfo["com.example.window-owner"];
       });
       view.rerender(
         <SynCloudOSWatchdog runtime={fixture.runtime} watchdogName="app-quit-detached-windows test">
-          <SynWareRuntimeMount runtime={fixture.runtime} app={app} responderId="application:window-owner">
+          <SynWareRuntimeMount runtime={fixture.runtime} app={app} responderId="application:com.example.window-owner">
             <span data-testid="app-content">mounted content</span>
           </SynWareRuntimeMount>
         </SynCloudOSWatchdog>,
@@ -228,11 +228,11 @@ describe("application quit with detached windows", () => {
 
   it("treats an unregister during runtime disposal as teardown, not corruption", async () => {
     const fixture = createWindowedAppFixture("runtime:app-quit-detached-e");
-    const app = fixture.runtime.apps.getApp("window-owner");
+    const app = fixture.runtime.apps.getApp("com.example.window-owner");
     if (!app) throw new Error("The window-owner fixture app did not register.");
     const view = render(
       <SynCloudOSWatchdog runtime={fixture.runtime} watchdogName="app-quit-detached-windows test">
-        <SynWareRuntimeMount runtime={fixture.runtime} app={app} responderId="application:window-owner">
+        <SynWareRuntimeMount runtime={fixture.runtime} app={app} responderId="application:com.example.window-owner">
           <span data-testid="app-content">mounted content</span>
         </SynWareRuntimeMount>
       </SynCloudOSWatchdog>,
@@ -242,12 +242,12 @@ describe("application quit with detached windows", () => {
     Object.defineProperty(fixture.runtime, "disposalState", { configurable: true, get: () => "disposing" });
     act(() => {
       fixture.runtime.store.mutate((draft: { lifecycle: Record<string, string>; appInfo: Record<string, unknown> }) => {
-        draft.lifecycle["window-owner"] = "active";
-        delete draft.appInfo["window-owner"];
+        draft.lifecycle["com.example.window-owner"] = "active";
+        delete draft.appInfo["com.example.window-owner"];
       });
       view.rerender(
         <SynCloudOSWatchdog runtime={fixture.runtime} watchdogName="app-quit-detached-windows test">
-          <SynWareRuntimeMount runtime={fixture.runtime} app={app} responderId="application:window-owner">
+          <SynWareRuntimeMount runtime={fixture.runtime} app={app} responderId="application:com.example.window-owner">
             <span data-testid="app-content">mounted content</span>
           </SynWareRuntimeMount>
         </SynCloudOSWatchdog>,
@@ -264,13 +264,13 @@ describe("application quit with detached windows", () => {
     fixture.runtime.documents.registerCloseReviewer(discardCloseReviewer);
     const opened = await openDetachedWindow(fixture);
     fixture.runtime.store.mutate((draft: { application: { activeAppId: string | null } }) => {
-      draft.application.activeAppId = "window-owner";
+      draft.application.activeAppId = "com.example.window-owner";
     });
 
     await fixture.runtime.commands.dispatch("workspace.returnToWebspring", undefined, { source: "test" });
 
-    expect(fixture.runtime.systemUI.getSnapshot().returnDecision).toEqual({ appId: "window-owner" });
-    expect(fixture.runtime.store.getSnapshot().application.activeAppId).toBe("window-owner");
+    expect(fixture.runtime.systemUI.getSnapshot().returnDecision).toEqual({ appId: "com.example.window-owner" });
+    expect(fixture.runtime.store.getSnapshot().application.activeAppId).toBe("com.example.window-owner");
     expect(fixture.runtime.windows.select(opened.id).record.state).toBe("open");
   });
 
@@ -280,15 +280,15 @@ describe("application quit with detached windows", () => {
       runtime: fixture.runtime,
       renderers: new WindowContentRendererRegistry(),
       physicalHostId: "stage:window-owner",
-      owner: { workspaceId: "workspace:default", applicationId: "window-owner", applicationSessionId: "window-owner" },
+      owner: { workspaceId: "workspace:default", applicationId: "com.example.window-owner", applicationSessionId: "com.example.window-owner" },
     });
     const panel = await bridge.present(
       { id: "colours", role: "panel", title: "Colours", parentWindowControllerId: null, anchor: null, bounds: { x: 0, y: 0, width: 240, height: 320 } },
       <p>Colours</p>,
     );
-    expect(fixture.runtime.windows.select(panel).record).toMatchObject({ applicationId: "window-owner", role: "panel", state: "open" });
+    expect(fixture.runtime.windows.select(panel).record).toMatchObject({ applicationId: "com.example.window-owner", role: "panel", state: "open" });
     fixture.runtime.store.mutate((draft: { application: { activeAppId: string | null } }) => {
-      draft.application.activeAppId = "window-owner";
+      draft.application.activeAppId = "com.example.window-owner";
     });
 
     await fixture.runtime.commands.dispatch("workspace.returnToWebspring", undefined, { source: "test" });
@@ -301,7 +301,7 @@ describe("application quit with detached windows", () => {
   it("returns directly without a decision when the active app owns no windows", async () => {
     const fixture = createWindowedAppFixture("runtime:app-quit-decision-b");
     fixture.runtime.store.mutate((draft: { application: { activeAppId: string | null } }) => {
-      draft.application.activeAppId = "window-owner";
+      draft.application.activeAppId = "com.example.window-owner";
     });
 
     await fixture.runtime.commands.dispatch("workspace.returnToWebspring", undefined, { source: "test" });

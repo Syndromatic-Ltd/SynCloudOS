@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import type { NSEUndoRegistrationCapability } from "../../Foundation/NSEUndoRegistrationCapability";
 import type { SynCloudOSRuntimeId } from "../Runtime/runtimeInstanceTypes";
 
 export interface UndoOwner {
@@ -89,7 +90,9 @@ export interface UndoCommandTarget {
   readonly owner: UndoOwner;
   readonly canUndo: boolean;
   readonly canRedo: boolean;
+  /** The complete menu title, verb included: "Undo Rename", or "Undo" when nothing can be undone. Use it as the item title; do not prefix it. */
   readonly undoTitle: string;
+  /** The complete menu title, verb included: "Redo Rename", or "Redo" when nothing can be redone. */
   readonly redoTitle: string;
 }
 
@@ -108,7 +111,9 @@ export interface UndoRegistrationLease {
    * entry when that lease owns the current global undo/redo frontier. */
   readonly canUndo: boolean;
   readonly canRedo: boolean;
+  /** The complete menu title, verb included: "Undo Rename", or "Undo" when nothing can be undone. Use it as the item title; do not prefix it. */
   readonly undoTitle: string;
+  /** The complete menu title, verb included: "Redo Rename", or "Redo" when nothing can be redone. */
   readonly redoTitle: string;
   readonly isExecuting: boolean;
   register(action: UndoAction, options?: { readonly automaticGroup?: AutomaticUndoGroup }): string;
@@ -139,12 +144,9 @@ export interface UndoManagerInspection {
   readonly entries: readonly { readonly id: string; readonly name: string; readonly actionCount: number; readonly estimatedBytes: number; readonly poisoned?: boolean }[];
   readonly lastFailure: { readonly code: string; readonly message: string } | null;
 }
-export interface UndoManager extends UndoCommandTarget {
-  readonly isExecuting: boolean;
+export interface UndoManager extends UndoCommandTarget, NSEUndoRegistrationCapability<UndoAction, UndoReservation, { readonly automaticGroup?: AutomaticUndoGroup }> {
   readonly isDirty: boolean;
   assertCanRegister(): void;
-  register(action: UndoAction, options?: { readonly automaticGroup?: AutomaticUndoGroup }): string;
-  reserve(): UndoReservation;
   createRegistrationLease(): UndoRegistrationLease;
   beginGroup(name: string, options?: UndoGroupOptions): void;
   endGroup(): UndoGroup | null;

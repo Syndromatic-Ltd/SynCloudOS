@@ -1,0 +1,31 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/host-contribution-composition.test.ts tests/runtime/browser-host-contributions.test.ts tests/runtime/lifecycle-launch-authority.test.ts tests/runtime/runtime-transfer-authority.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/browser-host-contributions.test.ts (5 tests | 1 failed) 56ms
+     × reads absent seeds without exposing another contribution's documents 10ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/browser-host-contributions.test.ts > browser host contributions > reads absent seeds without exposing another contribution's documents
+SynCloudOSDocumentStoreAccessError: DocumentStore saveDraft denied: Unknown action requires an explicit named capability.
+ ❯ SynCloudOSInMemoryDocumentStore.authorise src/SynCloudOS/DocumentStore/InMemoryDocumentStore.ts:906:13
+    904|
+    905|     if (decision && !decision.allowed) {
+    906|       throw new SynCloudOSDocumentStoreAccessError(operation, decision…
+       |             ^
+    907|     }
+    908|
+ ❯ SynCloudOSInMemoryDocumentStore.saveDraft src/SynCloudOS/DocumentStore/InMemoryDocumentStore.ts:550:10
+ ❯ mutateStore.draft.id.options.ifMatch.documentId src/SynCloudOS/DocumentStore/PersistenceDocumentStore.ts:631:33
+ ❯ execute src/SynCloudOS/DocumentStore/PersistenceDocumentStore.ts:783:29
+ ❯ src/SynCloudOS/DocumentStore/PersistenceDocumentStore.ts:792:83
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 25 passed (26)
+   Start at  19:26:37
+   Duration  10.13s (transform 5.17s, setup 49ms, import 9.25s, tests 309ms, environment 0ms)

@@ -22,7 +22,8 @@ import { describe, expect, it } from "vitest";
 import { createTestRuntime, createTestManifest, createRuntimeHarness } from "./helpers";
 import { getSystemAlertIcon } from "../../src/SynCloudOSReact/SystemAlert";
 import type { CapturedSynCloudOSError } from "../../src/SynCloudOS/ErrorManager/errorTypes";
-import { createAppContentFailedError, createRuntimeRenderError } from "../../src/SynCloudOS/ErrorManager/ErrorManager";
+import { SynCloudOSLifecycleRecord } from "../../src/SynCloudOS/ErrorManager/lifecycleError";
+import { toTechnicalReport } from "../../src/SynCloudOS/ErrorManager/errorReport";
 
 function createCapturedError(overrides: Partial<CapturedSynCloudOSError>): CapturedSynCloudOSError {
   return {
@@ -36,19 +37,24 @@ function createCapturedError(overrides: Partial<CapturedSynCloudOSError>): Captu
   };
 }
 
+function disposedLayerError() {
+  const record = new SynCloudOSLifecycleRecord({ kind: "AFXLayer" });
+  record.markDisposed("explicit");
+  return record.error({ code: "AFX_LAYER_DISPOSED", operation: "hidden", access: "set" });
+}
+
 describe("ErrorManager watchdog captures", () => {
   it("captures app render failures without treating them as Webspring fatal errors", async () => {
     const { AppRegistry, RuntimeController, SynCloudOS } = createRuntimeHarness(createTestRuntime());
-    const app = AppRegistry.register(createTestManifest({
-      id: "memo-journal",
+    const app = AppRegistry.register(createTestManifest({ version: "1.0.0",
+      bundleIdentifier: "com.example.memo-journal",
       packageName: "MemoJournal.app",
       displayName: "MemoJournal",
       route: "/memo-journal",
       componentKey: "MemoJournal"
     }));
 
-    const captured = createAppContentFailedError(SynCloudOS.ErrorManager, app, new TypeError("Cannot read properties of null (reading 'value')"), {
-      source: "SynCloudOS.AppWatchdog",
+    const captured = SynCloudOS.ErrorManager.createAppContentFailedError(app, new TypeError("Cannot read properties of null (reading 'value')"), {
       watchdog: "MemoJournal.app presentation",
       componentStack: "\n    at MemoJournalApp (index.tsx:88:31)",
       windowId: "window-memo-journal"
@@ -56,13 +62,19 @@ describe("ErrorManager watchdog captures", () => {
 
     expect(captured).toMatchObject({
       code: "APP_CONTENT_FAILED",
-      appId: "memo-journal",
+      exception: "TypeError",
+      title: `${app.displayName} stopped unexpectedly.`,
+      message: "An unexpected error has prevented this application from working properly.",
+      source: "SynCloudOS.AppWatchdog",
+      appId: "com.example.memo-journal",
       packageName: "MemoJournal.app",
       recoverable: false,
       severity: "fatal",
       suggestedActions: ["returnToWebspring"]
     });
+    expect(captured.technicalDetails).toContain("Message: Cannot read properties of null (reading 'value')");
     expect(captured.technicalDetails).toContain("MemoJournalApp");
+    expect(captured.technicalDetails).toContain("Window: window-memo-journal");
     expect(RuntimeController.getSnapshot().errors.at(-1)?.id).toBe(captured.id);
     expect(RuntimeController.getSnapshot().webspring.lowerShelfMode).toBe("error");
   });
@@ -70,26 +82,77 @@ describe("ErrorManager watchdog captures", () => {
   it("captures root render failures as fatal reloadable alerts", async () => {
     const { RuntimeController, SynCloudOS } = createRuntimeHarness(createTestRuntime());
 
-    const captured = createRuntimeRenderError(SynCloudOS.ErrorManager, new Error("Root render failed"), {
-      source: "SynCloudOS.RootWatchdog",
+    const captured = SynCloudOS.ErrorManager.createRuntimeRenderError(new Error("Root render failed"), {
       watchdog: "SynCloudOS root",
       componentStack: "\n    at App"
     });
 
     expect(captured).toMatchObject({
       code: "UNKNOWN_RUNTIME_ERROR",
+      exception: "Error",
+      title: "SynCloudOS stopped unexpectedly.",
+      message: "An unexpected error has prevented SynCloudOS from working properly.",
+      source: "SynCloudOS.RootWatchdog",
       recoverable: false,
       severity: "fatal",
       suggestedActions: ["reload"]
     });
-    expect(captured.technicalDetails).toContain("Root render failed");
+    expect(captured.technicalDetails?.startsWith("Exception: Error\nCode: UNKNOWN_RUNTIME_ERROR\nMessage: Root render failed\nCaught by: SynCloudOS.RootWatchdog")).toBe(true);
     expect(RuntimeController.getSnapshot().errors.at(-1)?.id).toBe(captured.id);
+  });
+
+  it("keeps a thrown lifecycle error's own code and class instead of the watchdog's generic code", () => {
+    const { AppRegistry, SynCloudOS } = createRuntimeHarness(createTestRuntime());
+    const app = AppRegistry.register(createTestManifest({ version: "1.0.0", bundleIdentifier: "com.example.fx-demo", packageName: "FXDemo.app", displayName: "FX Demo", route: "/fx-demo", componentKey: "FXDemo" }));
+
+    for (const captured of [
+      SynCloudOS.ErrorManager.createRuntimeRenderError(disposedLayerError()),
+      SynCloudOS.ErrorManager.createAppContentFailedError(app, disposedLayerError()),
+    ]) {
+      expect(captured).toMatchObject({ code: "AFX_LAYER_DISPOSED", exception: "SynCloudOSLifecycleError" });
+      expect(captured.message).not.toContain("AFXLayer");
+      expect(captured.technicalDetails).toContain("Message: Cannot set AFXLayer.hidden after disposal.");
+      expect(captured.technicalDetails).toContain("Disposal reason: an explicit dispose() call");
+      expect(captured.technicalDetails).toContain("StrictMode");
+      expect(captured.technicalDetails).not.toMatch(/\bnone\b|undefined|null/);
+    }
+  });
+
+  it("keeps the alert's plain text first and the identity at the head of the technical details", () => {
+    const { SynCloudOS } = createRuntimeHarness(createTestRuntime());
+    const captured = SynCloudOS.ErrorManager.createRuntimeRenderError(disposedLayerError(), { watchdog: "SynCloudOS root" });
+    const report = toTechnicalReport(captured);
+
+    expect(report.startsWith([
+      "SynCloudOS stopped unexpectedly.",
+      "",
+      "An unexpected error has prevented SynCloudOS from working properly.",
+      "",
+      "Exception: SynCloudOSLifecycleError",
+      "Code: AFX_LAYER_DISPOSED",
+      "Message: Cannot set AFXLayer.hidden after disposal.",
+      "Caught by: SynCloudOS.RootWatchdog",
+    ].join("\n"))).toBe(true);
+    expect(report).not.toMatch(/: none$|SYN-|UNKNOWN_RUNTIME_ERROR/m);
+    expect(report.split("Cannot set AFXLayer.hidden after disposal.")).toHaveLength(2);
+    expect(SynCloudOS.ErrorManager.toTechnicalReport(captured)).toBe(report);
+  });
+
+  it("applies the generic code to an error without a catalogue code and to a thrown non-Error value", () => {
+    const { SynCloudOS } = createRuntimeHarness(createTestRuntime());
+    const coded = Object.assign(new Error("x"), { code: "ERR_SOMETHING_LOCAL" });
+
+    expect(SynCloudOS.ErrorManager.createRuntimeRenderError(new Error("x"))).toMatchObject({ code: "UNKNOWN_RUNTIME_ERROR", exception: "Error" });
+    expect(SynCloudOS.ErrorManager.createRuntimeRenderError(coded)).toMatchObject({ code: "UNKNOWN_RUNTIME_ERROR" });
+    const primitive = SynCloudOS.ErrorManager.createRuntimeRenderError("plain failure");
+    expect(primitive).toMatchObject({ code: "UNKNOWN_RUNTIME_ERROR", exception: "Non-Error value (string)" });
+    expect(primitive.technicalDetails).toContain("Message: plain failure");
   });
 
   it("uses plain caution for app recovery without an app icon and system branding for root failures", () => {
     expect(getSystemAlertIcon(createCapturedError({
       code: "APP_CONTENT_FAILED",
-      appId: "journal-publisher",
+      appId: "com.example.journal-publisher",
       packageName: "JournalPublisher.app",
       suggestedActions: ["returnToWebspring"]
     }))).toMatchObject({

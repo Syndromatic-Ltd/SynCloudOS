@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useNSEMoreTitle } from "./compactMoreTitle";
 import {
   useCallback,
   useEffect,
@@ -32,12 +33,9 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import {
-  nseAppearanceSlot,
-  projectNSEAppearanceSlot,
-  useNSEAppearance,
-  type NSEAppearanceSlotProjection,
-} from "../Appearance";
+import { NSELabelHelp } from "../Tooltips/NSELabelHelp";
+import { useNSEAppearance } from "../Appearance";
+import { useOptionalNSETooltipProvider } from "../Tooltips/NSETooltipProvider";
 import {
   getNSETabBarPanelId,
   getNSETabBarTabId,
@@ -131,16 +129,15 @@ function tabChromeState(
 }
 
 function tabChromeMetadata(
-  slot: NSEAppearanceSlotProjection,
   segment: NSETabChromeSegment,
   state: NSETabChromeState,
 ) {
   return {
-    "data-nse-tab-chrome-family": slot.recipeId ? "grouped-toolbutton" : undefined,
-    "data-nse-tab-chrome-variant": slot.recipeId ? "tall" : undefined,
+    "data-nse-tab-chrome-family": "grouped-toolbutton",
+    "data-nse-tab-chrome-variant": "tall",
     "data-nse-tab-chrome-segment": segment,
     "data-nse-tab-chrome-state": state,
-    "data-nse-tab-chrome-active": slot.recipeId ? "true" : "false",
+    "data-nse-tab-chrome-active": "true",
   };
 }
 
@@ -181,6 +178,8 @@ export interface NSETabBarProps {
   readonly "aria-label": string;
   readonly className?: string;
   readonly dir?: "ltr" | "rtl";
+  /** Same tabs and retained panels, projected into an independently scrollable rail. */
+  readonly orientation?: "horizontal" | "vertical";
   /** Structural hook only in NavigationFoundation; appearance work is deferred to AppearanceAuthority. */
   readonly reducedMotion?: boolean;
   /** A source-list projection supplies one external stable host instead. */
@@ -198,14 +197,15 @@ export function NSETabBar({
   controller,
   "aria-label": ariaLabel,
   className,
-  dir = "ltr",
+  dir,
+  orientation = "horizontal",
   reducedMotion = false,
   renderPanels = true,
   idScope,
 }: NSETabBarProps) {
   const subscribe = useCallback((listener: () => void) => controller.subscribe(listener), [controller]);
   const snapshot = useSyncExternalStore(subscribe, controller.getSnapshot, controller.getSnapshot);
-  const appearance = useNSEAppearance();
+
   const generatedIdScope = useId().replace(/:/g, "");
   const resolvedIdScope = idScope ?? generatedIdScope;
   const directDestinations = snapshot.directDestinationIds.flatMap((id) => {
@@ -221,6 +221,7 @@ export function NSETabBar({
     ...(overflowDestinations.length > 0 ? [NSETabBarMoreDestinationId] : []),
   ];
   const overflowOpen = snapshot.moreStack?.currentDestinationId === NSETabBarMoreDestinationId;
+  const tooltips = useOptionalNSETooltipProvider();
   const [focusedTabId, setFocusedTabId] = useState(snapshot.activeTabId);
   const [paintFocusedTabId, setPaintFocusedTabId] = useState<string | null>(null);
   const [hoveredTabId, setHoveredTabId] = useState<string | null>(null);
@@ -239,24 +240,29 @@ export function NSETabBar({
   }, [controller]);
 
   const openOverflow = useCallback((source: string) => {
+    tooltips?.dismissActive();
     setFocusedTabId(NSETabBarMoreDestinationId);
     void controller.openOverflow({ source }).catch(() => undefined);
-  }, [controller]);
+  }, [controller, tooltips]);
 
   const closeOverflow = useCallback(() => {
+    tooltips?.dismissActive();
     controller.closeOverflow();
-  }, [controller]);
+  }, [controller, tooltips]);
 
   const focusControl = useCallback((controlId: string, source: string, activate: boolean) => {
     setFocusedTabId(controlId);
-    tabRefs.current.get(controlId)?.focus();
+    const control = tabRefs.current.get(controlId);
+    // Keyboard roving retains visible intent even after programmatic entry.
+    control?.focus({ focusVisible: true } as FocusOptions);
+    if (orientation === "vertical") control?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
     if (!activate) return;
     if (controlId === NSETabBarMoreDestinationId) {
       openOverflow(source);
       return;
     }
     selectDestination(controlId, source);
-  }, [openOverflow, selectDestination]);
+  }, [openOverflow, orientation, selectDestination]);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>, controlId: string) => {
     const enabledControls = controls.filter((id) => {
@@ -267,9 +273,11 @@ export function NSETabBar({
     const index = currentIndex < 0 ? 0 : currentIndex;
     const nextForDelta = (delta: number) => enabledControls[(index + delta + enabledControls.length) % enabledControls.length];
 
-    if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+    const vertical = orientation === "vertical";
+    if (vertical ? event.key === "ArrowDown" || event.key === "ArrowUp" : event.key === "ArrowRight" || event.key === "ArrowLeft") {
       event.preventDefault();
-      const forward = event.key === "ArrowRight" ? dir !== "rtl" : dir === "rtl";
+      const rtl = getComputedStyle(event.currentTarget).direction === "rtl";
+      const forward = vertical ? event.key === "ArrowDown" : event.key === "ArrowRight" ? !rtl : rtl;
       const target = nextForDelta(forward ? 1 : -1);
       if (target) focusControl(target, "keyboard", true);
       return;
@@ -309,35 +317,16 @@ export function NSETabBar({
     focused: paintFocusedTabId === controlId,
     hovered: hoveredTabId === controlId,
   });
+  const moreTitle = useNSEMoreTitle();
   const moreSelected = snapshot.activeTabId === NSETabBarMoreDestinationId;
   const morePressed = pressedTabId === NSETabBarMoreDestinationId;
   const moreState = stateForTab(NSETabBarMoreDestinationId, moreSelected, false);
-  const moreAppearance = projectNSEAppearanceSlot(
-    nseAppearanceSlot("tab-bar", "tab", moreState),
-    appearance,
-  );
-  const moreLabelAppearance = projectNSEAppearanceSlot(
-    nseAppearanceSlot("tab-bar", "label", moreState),
-    appearance,
-  );
-  const moreIconAppearance = projectNSEAppearanceSlot(
-    nseAppearanceSlot("tab-bar", "icon", moreState),
-    appearance,
-  );
+
+
   const moreIcon = projectNSENavigationIcon(nseTabBarMoreIcon, moreState);
   const moreIconStyle = tabIconStyle(nseTabBarMoreIcon);
-  const unresolvedChromeSlots = [
-    ...directDestinations.map((destination) => {
-      const selected = snapshot.activeTabId === destination.id;
-      const state = stateForTab(destination.id, selected, Boolean(destination.disabled));
-      return projectNSEAppearanceSlot(nseAppearanceSlot("tab-bar", "tab", state), appearance);
-    }),
-    ...(overflowDestinations.length > 0 ? [moreAppearance] : []),
-  ].filter((projection) => projection.recipeId === null)
-    .map((projection) => projection.slot);
-  const unresolvedChromeSlotList = [...new Set(unresolvedChromeSlots)];
-  const usesTallTabChrome = unresolvedChromeSlotList.length === 0;
-  const chromeStatus = unresolvedChromeSlotList.length > 0 ? "unresolved" : "resolved";
+
+  const usesTallTabChrome = true;
   const iconMaterialId = `${resolvedIdScope.replace(/[^\w-]/g, "")}-nse-tab-icon-material`;
   const tabListStyle = {
     "--nse-tab-visible-count": controls.length,
@@ -349,23 +338,24 @@ export function NSETabBar({
     <>
       <div
         className={classes("nse-tab-bar-safe-area", className)}
+        data-nse-control="tab-view" data-nse-part="background" data-nse-style="navigation" data-nse-orientation={orientation}
         data-nse-tab-bar="true"
+        data-orientation={orientation}
         data-safe-area-wrapper="true"
         data-reduced-motion={reducedMotion ? "true" : "false"}
-        data-nse-tab-chrome-status={chromeStatus}
-        data-nse-tab-unresolved-chrome-slots={unresolvedChromeSlotList.join(",") || undefined}
         dir={dir}
         style={tabListStyle}
       >
         {usesTallTabChrome ? <NSETabIconMaterial id={iconMaterialId} /> : null}
-        <div className="nse-tab-bar-scroll-viewport" data-nse-tab-scroll-viewport="true">
+        <div className="nse-tab-bar-scroll-viewport" data-nse-part="viewport" data-nse-tab-scroll-viewport="true">
         <div
           className={classes("nse-tab-bar", usesTallTabChrome && "nse-control-toolbar")}
-          role="tablist"
+          data-nse-part="header" data-nse-control-size={usesTallTabChrome ? "large" : "regular"} role="tablist"
+          aria-orientation={orientation}
           aria-label={ariaLabel}
           data-position={usesTallTabChrome ? "inline" : undefined}
           data-grouped={usesTallTabChrome ? "true" : undefined}
-          data-nse-tab-layout="floating-bottom"
+          data-nse-tab-layout={orientation === "vertical" ? "side-rail" : "floating-bottom"}
           data-nse-tab-chrome-family={usesTallTabChrome ? "grouped-toolbutton" : undefined}
           data-nse-tab-chrome-variant={usesTallTabChrome ? "tall" : undefined}
           data-nse-tab-chrome-size={usesTallTabChrome ? "tall" : undefined}
@@ -374,35 +364,20 @@ export function NSETabBar({
           data-nse-tab-overflow-count={overflowDestinations.length}
           data-nse-tab-overflow-open={overflowOpen ? "true" : "false"}
           data-reduced-motion={reducedMotion ? "true" : "false"}
-          data-nse-tab-chrome-status={chromeStatus}
-          data-nse-tab-unresolved-chrome-slots={unresolvedChromeSlotList.join(",") || undefined}
           style={tabListStyle}
         >
         {directDestinations.map((destination, index) => {
           const selected = snapshot.activeTabId === destination.id;
           const pressed = pressedTabId === destination.id;
           const state = stateForTab(destination.id, selected, Boolean(destination.disabled));
-          const tabAppearance = projectNSEAppearanceSlot(
-            nseAppearanceSlot("tab-bar", "tab", state),
-            appearance,
-          );
-          const iconAppearance = projectNSEAppearanceSlot(
-            nseAppearanceSlot("tab-bar", "icon", state),
-            appearance,
-          );
-          const labelAppearance = projectNSEAppearanceSlot(
-            nseAppearanceSlot("tab-bar", "label", state),
-            appearance,
-          );
-          const badgeAppearance = destination.badge === undefined
-            ? null
-            : projectNSEAppearanceSlot(nseAppearanceSlot("tab-bar", "badge", state), appearance);
+
+
           const icon = projectNSENavigationIcon(destination.icon, state);
           const iconStyle = tabIconStyle(destination.icon);
-          const segment = tabChromeSegment(index, controls.length);
+          const segment = tabChromeSegment(index, orientation === "vertical" ? 1 : controls.length);
           const chromeState = tabChromeState(state, selected, pressed);
           return (
-            <button
+            <NSELabelHelp key={destination.id} label={destination.accessibleLabel ?? destination.label}><button
               className={classes("nse-tab-bar-tab", usesTallTabChrome && "nse-control-button")}
               key={destination.id}
               type="button"
@@ -414,6 +389,7 @@ export function NSETabBar({
               }}
               aria-label={destination.accessibleLabel}
               aria-controls={getNSETabBarPanelId(resolvedIdScope, destination.id)}
+              data-nse-part="cell" data-nse-role="tab" data-nse-control-size={usesTallTabChrome ? "large" : "regular"} data-nse-position={segment} data-nse-selected={selected ? "" : undefined} data-nse-highlighted={pressed ? "" : undefined} data-nse-enabled={destination.disabled ? "false" : undefined} data-nse-hovered={hoveredTabId === destination.id ? "" : undefined} data-nse-focused={paintFocusedTabId === destination.id ? "" : undefined}
               aria-selected={selected}
               aria-disabled={destination.disabled || undefined}
               tabIndex={destination.disabled ? -1 : focusedTabId === destination.id ? 0 : -1}
@@ -423,8 +399,8 @@ export function NSETabBar({
               data-nse-tab-destination={destination.id}
               data-nse-tab-presentation-state={state}
               data-nse-tab-visual-state={tabVisualState(state, selected, pressed)}
-              {...tabChromeMetadata(tabAppearance, segment, chromeState)}
-              {...tabAppearance.attributes}
+              {...tabChromeMetadata(segment, chromeState)}
+
               onFocus={() => {
                 setFocusedTabId(destination.id);
                 setPaintFocusedTabId(destination.id);
@@ -446,34 +422,34 @@ export function NSETabBar({
             >
               {usesTallTabChrome ? (
                 <span
-                  className="nse-tab-bar-chrome-surface"
+                  data-nse-part="bezel" className="nse-tab-bar-chrome-surface"
                   aria-hidden="true"
                   data-nse-tab-chrome-surface="true"
                 />
               ) : null}
-              <span className="nse-tab-bar-content" data-nse-tab-content="true">
+              <span data-nse-part="content" className="nse-tab-bar-content" data-nse-tab-content="true">
                 <span
-                  className="nse-tab-bar-icon"
+                  data-nse-part="image" data-nse-type={icon.kind} className="nse-tab-bar-icon"
                   aria-hidden="true"
                   data-icon-kind={icon.kind}
                   data-nse-tab-icon-source={icon.source}
                   data-nse-tab-icon-ready={icon.kind === "vector" ? "true" : "false"}
                   data-nse-tab-icon-state={icon.state}
                   style={iconStyle}
-                  {...iconAppearance.attributes}
+
                 >
-                  <span className="nse-tab-bar-icon-glyph" data-nse-tab-icon-glyph="true" />
+                  <span data-nse-part="indicator" className="nse-tab-bar-icon-glyph" data-nse-tab-icon-glyph="true" />
                 </span>
-                <span className="nse-tab-bar-label" {...labelAppearance.attributes}>{destination.compactLabel ?? destination.label}</span>
-                {destination.badge !== undefined && badgeAppearance ? (
-                  <span className="nse-tab-bar-badge" data-nse-tab-badge="true" aria-hidden="true" {...badgeAppearance.attributes}>{destination.badge}</span>
+                <span data-nse-part="title" className="nse-tab-bar-label" >{destination.compactLabel ?? destination.label}</span>
+                {destination.badge !== undefined ? (
+                  <span data-nse-part="badge" className="nse-tab-bar-badge" data-nse-tab-badge="true" aria-hidden="true" >{destination.badge}</span>
                 ) : null}
               </span>
-            </button>
+            </button></NSELabelHelp>
           );
         })}
         {overflowDestinations.length > 0 ? (
-          <button
+          <NSELabelHelp label="More destinations"><button
             className={classes("nse-tab-bar-tab", "nse-tab-bar-more", usesTallTabChrome && "nse-control-button")}
             type="button"
             role="tab"
@@ -485,6 +461,7 @@ export function NSETabBar({
             aria-label="More destinations"
             aria-controls={morePanelId}
             aria-expanded={overflowOpen}
+            data-nse-part="cell" data-nse-role="tab" data-nse-control-size={usesTallTabChrome ? "large" : "regular"} data-nse-position={tabChromeSegment(controls.length - 1, orientation === "vertical" ? 1 : controls.length)} data-nse-selected={moreSelected ? "" : undefined} data-nse-highlighted={morePressed ? "" : undefined} data-nse-hovered={hoveredTabId === NSETabBarMoreDestinationId ? "" : undefined} data-nse-focused={paintFocusedTabId === NSETabBarMoreDestinationId ? "" : undefined}
             aria-selected={moreSelected}
             tabIndex={focusedTabId === NSETabBarMoreDestinationId ? 0 : -1}
             data-selected={moreSelected ? "true" : "false"}
@@ -492,11 +469,10 @@ export function NSETabBar({
             data-nse-tab-presentation-state={moreState}
             data-nse-tab-visual-state={tabVisualState(moreState, moreSelected, morePressed)}
             {...tabChromeMetadata(
-              moreAppearance,
-              tabChromeSegment(controls.length - 1, controls.length),
+              tabChromeSegment(controls.length - 1, orientation === "vertical" ? 1 : controls.length),
               tabChromeState(moreState, moreSelected, morePressed),
             )}
-            {...moreAppearance.attributes}
+
             onFocus={() => {
               setFocusedTabId(NSETabBarMoreDestinationId);
               setPaintFocusedTabId(NSETabBarMoreDestinationId);
@@ -518,27 +494,27 @@ export function NSETabBar({
           >
             {usesTallTabChrome ? (
               <span
-                className="nse-tab-bar-chrome-surface"
+                data-nse-part="bezel" className="nse-tab-bar-chrome-surface"
                 aria-hidden="true"
                 data-nse-tab-chrome-surface="true"
               />
             ) : null}
-            <span className="nse-tab-bar-content" data-nse-tab-content="true">
+            <span data-nse-part="content" className="nse-tab-bar-content" data-nse-tab-content="true">
               <span
-                className="nse-tab-bar-icon"
+                data-nse-part="image" data-nse-type="vector" className="nse-tab-bar-icon"
                 aria-hidden="true"
                 data-icon-kind={moreIcon.kind}
                 data-nse-tab-icon-source={moreIcon.source}
                 data-nse-tab-icon-ready="true"
                 data-nse-tab-icon-state={moreIcon.state}
                 style={moreIconStyle}
-                {...moreIconAppearance.attributes}
+
               >
-                <span className="nse-tab-bar-icon-glyph" data-nse-tab-icon-glyph="true" />
+                <span data-nse-part="indicator" className="nse-tab-bar-icon-glyph" data-nse-tab-icon-glyph="true" />
               </span>
-              <span className="nse-tab-bar-label" {...moreLabelAppearance.attributes}>More</span>
+              <span data-nse-part="title" className="nse-tab-bar-label" >{moreTitle}</span>
             </span>
-          </button>
+          </button></NSELabelHelp>
         ) : null}
           </div>
         </div>
@@ -719,7 +695,7 @@ export function NSETabBarOverflowList({
                   }}
                   role="button"
                   selected={selected}
-                  disabled={Boolean(destination.disabled)}
+                  isEnabled={!destination.disabled}
                   aria-label={destination.accessibleLabel ?? asText(destination.label)}
                   aria-current={selected ? "page" : undefined}
                   tabIndex={destination.disabled ? -1 : focusedDestinationId === destination.id ? 0 : -1}
@@ -728,7 +704,7 @@ export function NSETabBarOverflowList({
                   data-pressed={pressed ? "true" : "false"}
                   leading={(
                     <span
-                      className="nse-tab-bar-icon"
+                      data-nse-part="image" data-nse-type={icon.kind} className="nse-tab-bar-icon"
                       aria-hidden="true"
                       data-icon-kind={icon.kind}
                       data-nse-tab-icon-source={icon.source}
@@ -738,7 +714,7 @@ export function NSETabBarOverflowList({
                     />
                   )}
                   trailing={destination.badge !== undefined ? (
-                    <span className="nse-tab-bar-badge" data-nse-tab-badge="true">{destination.badge}</span>
+                    <span data-nse-part="badge" className="nse-tab-bar-badge" data-nse-tab-badge="true">{destination.badge}</span>
                   ) : undefined}
                   onFocus={() => {
                     setFocusedDestinationId(destination.id);
@@ -797,6 +773,7 @@ export function NSETabBarOverflowList({
           id={morePanelId}
           className={classes("nse-tab-bar-panel nse-tab-bar-more-panel", className)}
           role="tabpanel"
+          data-nse-role="tabpanel"
           aria-label="More destinations"
           aria-labelledby={moreTabId}
           aria-hidden={snapshot.activeTabId !== NSETabBarMoreDestinationId || undefined}

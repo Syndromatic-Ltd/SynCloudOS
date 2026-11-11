@@ -211,11 +211,11 @@ describe("owned AudioFX timeline transport", () => {
   it("does not grant a different mount transport authority over a same-host engine", () => {
     const output = { start: vi.fn(async () => {}), stop: vi.fn(), dispose: vi.fn(), setOwnerPolicy: vi.fn() };
     const host = createAudioGraphHostService({ createGraphOutput: () => output } as any, new AbortController().signal);
-    const capability = Object.freeze({}), engine = host.createEngine(new AUFXAudioFormat(8, 1), undefined, "one", capability);
+    const capability = Object.freeze({}), engine = host.createEngine(new AUFXAudioFormat(8, 1), undefined, "com.example.one", capability);
     try {
-      expect(() => host.createTimelineTransport(engine, { capability: Object.freeze({}), appId: "one" }))
+      expect(() => host.createTimelineTransport(engine, { capability: Object.freeze({}), appId: "com.example.one" }))
         .toThrow(expect.objectContaining({ name: "InvalidAccessError" }));
-      expect(() => host.createTimelineTransport(engine, { capability, appId: "two" }))
+      expect(() => host.createTimelineTransport(engine, { capability, appId: "com.example.two" }))
         .toThrow(expect.objectContaining({ name: "InvalidAccessError" }));
     } finally { engine.dispose(); host.dispose(); }
   });

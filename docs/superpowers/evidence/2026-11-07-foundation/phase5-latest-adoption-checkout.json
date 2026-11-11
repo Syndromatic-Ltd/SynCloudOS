@@ -1,0 +1,9 @@
+{
+  "framework": "C:\\Users\\Kavish Krishnakumar\\Developer\\SynCloudOS-Workspace\\.worktrees\\webspring-folders\\framework",
+  "commit": "41a47defaadd162b4804047ae34a25e638386008",
+  "scratch": "C:\\Users\\Kavish Krishnakumar\\AppData\\Local\\Temp\\syncloudos-phase5-adopt-41a47defaa-afa18047",
+  "junction": "C:\\Users\\Kavish Krishnakumar\\AppData\\Local\\Temp\\syncloudos-phase5-adopt-41a47defaa-afa18047\\node_modules",
+  "junctionTarget": "C:\\Users\\Kavish Krishnakumar\\Developer\\SynCloudOS-Workspace\\.worktrees\\webspring-folders\\framework\\node_modules",
+  "clean": true,
+  "createdAt": "2026-11-07T21:38:13.9408435+00:00"
+}

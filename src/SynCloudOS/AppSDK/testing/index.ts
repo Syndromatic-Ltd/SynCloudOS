@@ -18,6 +18,7 @@
  */
 
 export { createSynWareTestHost } from "./createSynWareTestHost";
+export { createSynWare } from "../createSynWare";
 export { createSynWareTesting } from "./createSynWareTesting";
 export type {
   CreateSynWareTestingOptions,
@@ -58,6 +59,7 @@ export type {
   SynWareFakeDocumentOperation,
   SynWareFakeDragOperation,
   SynWareFakeFileOperation,
+  SynWareFakeFiles,
   SynWareFakeImageOperation,
   SynWareFakeLocation,
   SynWareFakeLocationOperation,
@@ -83,11 +85,13 @@ export type {
   SynWareFakeWindowOperation,
   SynWareFakeWorkspaceOperation,
   SynWareTestAdapters,
+  SynWareTestApplicationDocumentsConfiguration,
   SynWareTestClock,
   SynWareTestMediaClock,
   SynWareTestCommandInspection,
   SynWareTestDisposalReport,
   SynWareTestDocumentInspection,
+  SynWareTestDocumentInstallContext,
   SynWareTestHost,
   SynWareTestLifecycle,
   SynWareTestPersistence,

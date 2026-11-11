@@ -1,0 +1,30 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run src/FX/DispatchFX/__tests__/queue.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts (47 tests | 1 failed) 26ms
+   × feature-detects console.createTask and measures developer work 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > feature-detects console.createTask and measures developer work
+AssertionError: expected "vi.fn()" to be called with arguments: [ 'DFX instrumented' ]
+
+Number of calls: 0
+
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:265:22
+    263|   const run = vi.fn((work: () => unknown) => work()); const createTask…
+    264|   vi.stubGlobal("console", { ...console, createTask }); new (Q())("ins…
+    265|   expect(createTask).toHaveBeenCalledWith("DFX instrumented"); expect(…
+       |                      ^
+    266|   await host.flush(); expect(createTask).toHaveBeenCalledWith("DFX ins…
+    267|   expect(host.measure).toHaveBeenCalledWith("DFX instrumented", { star…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 46 passed (47)
+   Start at  09:07:00
+   Duration  336ms (transform 121ms, setup 26ms, import 132ms, tests 26ms, environment 0ms)

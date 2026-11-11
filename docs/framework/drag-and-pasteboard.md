@@ -6,7 +6,7 @@ Both clients belong to the session, so an application only ever transfers conten
 
 ## Pasteboards
 
-`useSynWarePasteboard()` returns the pasteboards your application can use:
+`usePasteboard()` returns the pasteboards your application can use:
 
 | Pasteboard | Purpose |
 | --- | --- |
@@ -18,10 +18,10 @@ Both clients belong to the session, so an application only ever transfers conten
 Each pasteboard offers `write(values)`, `read(types)`, `readFirst(types)`, `snapshot()` and `clear()`. Reads take the types you understand, in order of preference. Every operation accepts an `AbortSignal`, and `changeCount` increases with each write so you can tell whether the content changed since you last looked.
 
 ```tsx
-import { useSynWarePasteboard } from "@syndromatic/syncloudos/sdk";
+import { usePasteboard } from "@syndromatic/syncloudos/sdk";
 
 export function CopyTitle({ title }: { title: string }) {
-  const pasteboards = useSynWarePasteboard();
+  const pasteboards = usePasteboard();
 
   async function copy() {
     await pasteboards.system.write([{ type: "text/plain", value: title }]);
@@ -44,15 +44,27 @@ The system pasteboard reaches the browser clipboard, which needs a user gesture 
 
 Write several representations of the same content, richest first, for example an internal type, then `text/html`, then `text/plain`. The receiving application picks the first type it accepts.
 
+Binary representations accept `NSEDataConvertible` (`NSEData`, `Uint8Array` or `ArrayBuffer`) on writes, including lazy providers. Reads, snapshots and adapter deliveries contain immutable `NSEData`; the representation's `type` carries its MIME type. The browser adapter alone converts clipboard Blobs.
+
+```ts
+import { NSEData } from "@syndromatic/syncloudos/foundation";
+
+await pasteboards.system.write([{ type: "image/png", value: pngData }]);
+const image = await pasteboards.system.readFirst(["image/png"]);
+if (image?.value instanceof NSEData) {
+  const download = image.value.blob(image.type); // explicit browser bridge
+}
+```
+
 ## Drag sessions
 
-`useSynWareDrag()` returns the drag client. A drag moves between **endpoints**, each identified by an application, a window and a responder. `endpoint()` creates one for the current responder.
+`useDrag()` returns the drag client. A drag moves between **endpoints**, each identified by an application, a window and a responder. `endpoint()` creates one for the current responder.
 
 ```tsx
-import { useSynWareDrag } from "@syndromatic/syncloudos/sdk";
+import { useDrag } from "@syndromatic/syncloudos/sdk";
 
 export function useNoteDrag() {
-  const drag = useSynWareDrag();
+  const drag = useDrag();
 
   return {
     start(noteId: string) {
@@ -88,7 +100,7 @@ The lifecycle runs in order:
 
 ## Data views and drag
 
-NSE data views handle these steps for you. Pass a `dragBinding` and `onValidateDrop` and `onAcceptDrop` to `NSETable`, and the table starts sessions, shows insertion feedback and reports drop proposals. `createSynWareNSEDataViewDragBinding` and `createSynWareNSEDragCommandPort` from the SDK entry connect a data view to your session.
+NSE data views handle these steps for you. Pass a `dragBinding` and `onValidateDrop` and `onAcceptDrop` to `NSETableView`, and the table starts sessions, shows insertion feedback and reports drop proposals. `createSynWareNSEDataViewDragBinding` and `createSynWareNSEDragCommandPort` from the SDK entry connect a data view to your session.
 
 ## Keyboard and touch
 

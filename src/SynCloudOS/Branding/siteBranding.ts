@@ -28,6 +28,8 @@ export interface ResolvedSiteBranding {
   readonly lightLogoUrl: string | null;
   readonly darkLogoUrl: string | null;
   readonly compactLogoUrl: string | null;
+  /** The developer's SVG for the top bar's "return to Webspring" button. Absent or null: the generic house. */
+  readonly homeIconUrl?: string | null;
 }
 
 function localise(text: SynWareLocalisedText, locale: Pick<RuntimeLocaleServices, "t">, namespace: string) {
@@ -57,5 +59,6 @@ export function resolveSiteBranding(
     lightLogoUrl: resolveLogo(declaration.lightLogo) ?? primary,
     darkLogoUrl: resolveLogo(declaration.darkLogo) ?? primary,
     compactLogoUrl: resolveLogo(declaration.compactLogo) ?? primary,
+    homeIconUrl: resolveLogo(declaration.homeIcon),
   });
 }

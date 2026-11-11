@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../../Foundation/NSEData";
 import type { GFXPoint, GFXRect } from "../../GraphicsFX/GFXGeometry";
 
 export type IFXFeatureKind = "rectangle" | "qr" | "text-region" | "face";
@@ -38,7 +39,7 @@ export interface IFXRectangleFeature extends IFXFeatureBase {
 export interface IFXQRCodeFeature extends IFXFeatureBase {
   readonly kind: "qr";
   readonly payload: string;
-  readonly rawBytes: Uint8Array;
+  readonly rawBytes: NSEData;
 }
 
 export interface IFXTextRegionFeature extends IFXFeatureBase {

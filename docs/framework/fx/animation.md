@@ -1,5 +1,7 @@
 # AnimationFX
 
+See [class authoring](../cocoa-authoring.md#outlets-and-animation) for mounted outlets, scoped layer transactions and managed renderer/frame lifetimes.
+
 Retained layers also present `IFXShader` image generators, filter their content and sublayer tree, and composite with normal or additive blending. See [image shaders in retained layers](image/shaders.md) for pass order, straight-alpha output, bounds, budgets and adapter support.
 
 AnimationFX (`AFX`) is the web-native analogue of Core Animation. It models visual content as a tree of layers, gives each layer geometry and appearance properties, and animates those properties over time with timing curves, keyframes and springs. Because it describes animation as data, every animation can be sampled at any moment, retargeted while it runs, paused, seeked, or played on a compositor thread when the browser allows.
@@ -27,7 +29,7 @@ import { AFXBasicAnimation, AFXAnimation } from "@syndromatic/syncloudos/fx/anim
 | --- | --- |
 | Prefix | `AFX` |
 | Entry | `@syndromatic/syncloudos/fx/animation` |
-| Hook | `useSynWareAnimations`, from `@syndromatic/syncloudos/sdk` |
+| Hook | `useAnimations`, from `@syndromatic/syncloudos/sdk` |
 | Permissions | None |
 | Analogue | Core Animation (`CALayer`, `CAAnimation`, `CABasicAnimation`, `CAKeyframeAnimation`, `CASpringAnimation`, `CAAnimationGroup`, `CATransaction`, `CAMediaTimingFunction`, `CATransform3D`, `CAShapeLayer`, `CAGradientLayer`, `CATextLayer`, `CAReplicatorLayer`, `CAEmitterLayer`, `CATiledLayer`) |
 
@@ -324,11 +326,11 @@ Inside `run`'s `changes` callback, call `animator(target)` with an `AFXAnimatabl
 
 ## In a SynWare
 
-`useSynWareAnimations()` returns the session's animation client. The session owns every layer and renderer it hands out and releases them when the application closes, and you can dispose of any earlier.
+`useAnimations()` returns the session's animation client. The session owns every layer and renderer it hands out and releases them when the application closes, and you can dispose of any earlier.
 
 | Method | Returns | Description |
 | --- | --- | --- |
-| `bindLayer(element, signal?)` | `AFXLayer` | Binds a layer to a page element. Each element takes one binding. The layer's properties write to the element's style, and disposing the layer restores the original inline style. |
+| `bindLayer(element, signal?, options?)` | `AFXLayer` | Binds a layer to a page element. Each element takes one binding. The layer owns frame geometry by default; `{ layout: "css" }` instead measures the element's CSS size without replacing its position or dimensions. Native `view.layer` selects CSS layout automatically. Disposing restores the original inline style. |
 | `bindShapeLayer(element, signal?)` | `AFXShapeLayer` | A layer that draws a `GFXPath`. |
 | `bindGradientLayer(element, signal?)` | `AFXGradientLayer` | A layer that draws a `GFXGradient`. |
 | `bindTextLayer(element, signal?)` | `AFXTextLayer` | A layer that draws a shaped line of text. |
@@ -342,10 +344,10 @@ Inside `run`'s `changes` callback, call `animator(target)` with an `AFXAnimatabl
 ```tsx
 import { useEffect, useRef } from "react";
 import { AFXAnimation, AFXBasicAnimation, AFXTransform3D } from "@syndromatic/syncloudos/fx/animation";
-import { useSynWareAnimations } from "@syndromatic/syncloudos/sdk";
+import { useAnimations } from "@syndromatic/syncloudos/sdk";
 
 export function SlideIn({ children }: { children: React.ReactNode }) {
-  const animations = useSynWareAnimations();
+  const animations = useAnimations();
   const element = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -373,9 +375,11 @@ export function SlideIn({ children }: { children: React.ReactNode }) {
 
 **Ownership.** A bound layer owns its element's children. Sublayers attach as child elements, and layer content draws into an element the layer manages. Adding your own child nodes or a CSS background image to a bound element leaves the layer's `compositionCapability` at `"unsupported"` (reason `"unmanaged-dom"` or `"unmanaged-dom-background-image"`), and `render()` refuses such a layer. Bind leaf elements, or elements whose children are all layers. Disposing a layer restores the element's original `style` attribute.
 
-**Compositor playback.** Where the browser allows, an `AFXBasicAnimation` on `"opacity"` or `"transform"` runs through `Element.animate()`, so it progresses on the compositor even when JavaScript is busy. The layer keeps its model and presentation values, retargeting, cancellation and completion. The animation qualifies with one iteration, a speed of 1, no autoreverse, the default `"forwards"` fill and a named or cubic-Bézier timing, and only while no frame animation is running on the layer. Keyframe animations, springs, spring timing and every other key path use frame sampling.
+**Compositor playback.** Where the browser allows, an `AFXBasicAnimation` on `"opacity"` or `"transform"` runs through `Element.animate()`, so it progresses on the compositor even when JavaScript is busy. The layer keeps its model and presentation values, retargeting, cancellation and completion. The animation qualifies with finite or infinite iterations, a speed of 1, no autoreverse, `"forwards"` or `"both"` fill and a named or cubic-Bézier timing, and only while no frame animation is running on the layer. Keyframe animations, springs, spring timing and every other key path use frame sampling.
 
-**Reduced motion and suspension.** When the host reports reduced motion, or the page is suspended, a layer animation completes at once in its final state and the settlement's `reduced` flag is true. A zero duration also completes at once. The `reducedMotion` policy on `AFXAnimation` applies to element animations started with `animate`. Content that carries meaning through motion should also present that meaning statically.
+**Reduced motion and suspension.** The `reducedMotion` policy applies to layer animations at start and when the preference changes. `"always"` settles at once, `"never"` preserves authored playback, and `"system"` settles spatial effects and repeating animations when the host reports reduced motion. A single opacity animation (exactly one iteration, without autoreverse) keeps its authored crossfade under `"system"`, including an explicitly paused fade. This preserves visual continuity without spatial motion. A settlement caused by reduction has `reduced: true`. Finite layer animations also complete when the page is suspended. Endless layer animations pause while the document is hidden and resume from that presentation time when visible; an explicitly paused handle stays paused. No app visibility listener is needed. A zero duration also completes at once. Content that carries meaning through motion should also present that meaning statically.
+
+**Endless CoreAnimation loops.** Use `new AFXAnimation({ duration: 2, iterations: Infinity, timing: "linear" })` for an endless cycle. `repeatDuration: Infinity` is also supported, with the existing restriction that it cannot be combined with `iterations`. An endless animation requires a nonzero duration. Its `totalDuration` is `Infinity`, its handle's overall `progress` remains 0, and `finished` remains pending until cancellation, replacement, disposal or an applicable reduced-motion policy. The model value is the authored destination; presentation continues cycling. Seek accepts finite, nonnegative times. Shape and gradient content animations retain their finite-duration restriction.
 
 **Limits and errors.** One session holds at most 64 live layers and renderers at a time, and releases a slot when you dispose one. `bind*` throws `TypeError` for a target that is not an element of the app's own document, and `createRenderer` throws `TypeError` unless the target is a canvas of that document. Binding an element or canvas that already has a live binding throws `DOMException` `InvalidStateError`. A host without animation layer support throws `DOMException` `NotSupportedError`. Every method takes an optional `AbortSignal` that disposes the layer when it aborts.
 

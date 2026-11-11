@@ -58,7 +58,7 @@ export function SynWareEntryRenderer({
       </div>
     );
   }
-  const definition = runtime.bundles.getLoadedBundle(app.id)?.definition;
+  const definition = runtime.bundles.getLoadedBundle(app.bundleIdentifier)?.definition;
   if (!definition) {
     return (
       <div className={loadingClassName}>

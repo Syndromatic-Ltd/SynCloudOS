@@ -1,0 +1,26 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-semantic-colours.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-semantic-colours.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-semantic-colours.test.ts [ tests/runtime/nse-semantic-colours.test.ts ]
+Error: Cannot find module '../../src/NSE/Theme/contract/colours' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/nse-semantic-colours.test.ts
+ ❯ tests/runtime/nse-semantic-colours.test.ts:3:1
+      1| import { describe, expect, it } from "vitest";
+      2| import { readFileSync } from "node:fs";
+      3| import { nseThemeColourNames, nseThemeColourProperties } from "../../s…
+       | ^
+      4| import atmoColours from "../../src/NSE/Themes/Atmo/colours.json";
+      5| const expected = [
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  21:57:57
+   Duration  179ms (transform 26ms, setup 28ms, import 0ms, tests 0ms, environment 0ms)

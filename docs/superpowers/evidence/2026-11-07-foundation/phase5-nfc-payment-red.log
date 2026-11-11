@@ -1,0 +1,39 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/fx/phase5-nfc.test.ts tests/runtime/fx/phase5-payment.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/phase5-nfc.test.ts (0 test)
+ ❯ tests/runtime/fx/phase5-payment.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/phase5-nfc.test.ts [ tests/runtime/fx/phase5-nfc.test.ts ]
+Error: Cannot find module '../../../src/FX/NFCFX/public' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/fx/phase5-nfc.test.ts
+ ❯ tests/runtime/fx/phase5-nfc.test.ts:3:1
+      1| import { describe, expect, it, vi } from "vitest";
+      2| import { NSEData } from "../../../src/Foundation/NSEData";
+      3| import { NFXNDEFMessage, NFXNDEFPayload } from "../../../src/FX/NFCFX/…
+       | ^
+      4| import { BrowserNFCAdapter } from "../../../src/SynCloudOS/PlatformAda…
+      5| import { createMountedNFCClient } from "../../../src/SynCloudOS/AppSDK…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/runtime/fx/phase5-payment.test.ts [ tests/runtime/fx/phase5-payment.test.ts ]
+Error: Cannot find module '../../../src/FX/PassFX/public' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/fx/phase5-payment.test.ts
+ ❯ tests/runtime/fx/phase5-payment.test.ts:2:1
+      1| import { describe, expect, it, vi } from "vitest";
+      2| import { PKFXPaymentRequest } from "../../../src/FX/PassFX/public";
+       | ^
+      3| import { BrowserPaymentAdapter } from "../../../src/SynCloudOS/Platfor…
+      4| import { createMountedPaymentClient } from "../../../src/SynCloudOS/Ap…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  no tests
+   Start at  19:03:06
+   Duration  210ms (transform 73ms, setup 63ms, import 0ms, tests 0ms, environment 0ms)
+

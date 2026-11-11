@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -18,11 +21,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-:root {
-  --nse-loading-background-image: url('/assets/textures/NSETileCotton.jpg');
-}
 
-.nse-icon-well {
+
+.nse-icon-well,
+:where(:scope):is(.nse-icon-well),
+:where(:scope).nse-icon-well {
   position: relative;
   display: grid;
   width: 72px;
@@ -32,7 +35,9 @@
   filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.52));
 }
 
-.nse-icon-well::before {
+.nse-icon-well::before,
+:where(:scope):is(.nse-icon-well)::before,
+:where(:scope).nse-icon-well::before {
   content: "";
   position: absolute;
   inset: -12px;
@@ -42,11 +47,14 @@
   transition: opacity 180ms ease;
 }
 
-.nse-icon-well.is-active::before {
+.nse-icon-well.is-active::before,
+:where(:scope):is(.nse-icon-well.is-active)::before,
+:where(:scope).nse-icon-well.is-active::before {
   opacity: 1;
 }
 
-.nse-icon-well > img {
+.nse-icon-well>img,
+:where(:scope):is(.nse-icon-well)>img {
   width: 72px;
   height: 72px;
   object-fit: contain;
@@ -55,7 +63,9 @@
     opacity 160ms ease;
 }
 
-.nse-loading-spinner {
+.nse-loading-spinner,
+:where(:scope):is(.nse-loading-spinner),
+:where(:scope).nse-loading-spinner {
   position: relative;
   display: grid;
   place-items: center;
@@ -63,14 +73,17 @@
   filter: drop-shadow(0 4px 8px rgba(0,0,0,0.88));
 }
 
-.nse-icon-well .nse-loading-spinner {
+.nse-icon-well .nse-loading-spinner,
+:where(:scope):is(.nse-icon-well) .nse-loading-spinner {
   position: absolute;
   inset: 0;
   z-index: 4;
   border-radius: 50%;
 }
 
-.nse-loading-spinner-sprite {
+.nse-loading-spinner-sprite,
+:where(:scope):is(.nse-loading-spinner-sprite),
+:where(:scope).nse-loading-spinner-sprite {
   display: block;
   flex: 0 0 auto;
   width: var(--nse-loading-spinner-frame-width);
@@ -82,14 +95,18 @@
   animation: nse-loading-sprite-spinner 0.9s steps(12) infinite;
 }
 
-.nse-loading-spinner--dark {
+.nse-loading-spinner--dark,
+:where(:scope):is(.nse-loading-spinner--dark),
+:where(:scope).nse-loading-spinner--dark {
   --nse-loading-spinner-frame-width: 42px;
   --nse-loading-spinner-frame-height: 42px;
   --nse-loading-spinner-sprite-image: url("./Resources/spinner.png?no-inline");
   --nse-loading-spinner-sprite-end: 0 -504px;
 }
 
-.nse-loading-spinner--light {
+.nse-loading-spinner--light,
+:where(:scope):is(.nse-loading-spinner--light),
+:where(:scope).nse-loading-spinner--light {
   --nse-loading-spinner-frame-width: 35px;
   --nse-loading-spinner-frame-height: 35px;
   --nse-loading-spinner-sprite-image: url("./Resources/spinner_signin.png?no-inline");
@@ -106,17 +123,23 @@
   to { opacity: 1; }
 }
 
-.nse-control-toolbar-fade-in {
+.nse-control-toolbar-fade-in,
+:where(:scope):is(.nse-control-toolbar-fade-in),
+:where(:scope).nse-control-toolbar-fade-in {
   animation: nse-component-fade-in 0.18s ease both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nse-control-toolbar-fade-in {
+  .nse-control-toolbar-fade-in,
+:where(:scope):is(.nse-control-toolbar-fade-in),
+:where(:scope).nse-control-toolbar-fade-in {
     animation: none;
   }
 }
 
-.nse-badge {
+.nse-badge,
+:where(:scope):is(.nse-badge),
+:where(:scope).nse-badge {
   position: absolute;
   top: 7px;
   right: 5px;
@@ -126,24 +149,30 @@
   border-radius: 999px;
   color: #fff;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 24px;
   background: linear-gradient(#ff7676, #d72128);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.65);
 }
 
-.nse-window {
+.nse-window,
+:where(:scope):is(.nse-window),
+:where(:scope).nse-window {
   position: relative;
   border-radius: 28px;
   overflow: hidden;
   color: #111b28;
 }
 
-.nse-window:focus {
+.nse-window:focus,
+:where(:scope):is(.nse-window:focus),
+:where(:scope).nse-window:focus {
   outline: none;
 }
 
-.nse-window-titlebar {
+.nse-window-titlebar,
+:where(:scope):is(.nse-window-titlebar),
+:where(:scope).nse-window-titlebar {
   position: absolute;
   left: 0;
   right: 0;
@@ -166,7 +195,9 @@
     0 2px 4px rgba(0, 0, 0, 0.72);
 }
 
-.nse-window-titlebar::before {
+.nse-window-titlebar::before,
+:where(:scope):is(.nse-window-titlebar)::before,
+:where(:scope).nse-window-titlebar::before {
   content: "";
   position: absolute;
   left: 0;
@@ -179,14 +210,15 @@
   pointer-events: none;
 }
 
-.nse-window-titlebar h2 {
+.nse-window-titlebar h2,
+:where(:scope):is(.nse-window-titlebar) h2 {
   position: relative;
   z-index: 1;
   margin: 0;
   overflow: hidden;
   font-family: inherit;
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0;
   text-align: center;
   text-overflow: ellipsis;
@@ -194,7 +226,9 @@
   transform: translateY(2px);
 }
 
-.nse-window-close {
+.nse-window-close,
+:where(:scope):is(.nse-window-close),
+:where(:scope).nse-window-close {
   position: relative;
   z-index: 1;
   display: grid;
@@ -210,13 +244,17 @@
   transform: translateY(2px);
 }
 
-.nse-window-close:focus-visible {
+.nse-window-close:focus-visible,
+:where(:scope):is(.nse-window-close:focus-visible),
+:where(:scope).nse-window-close:focus-visible {
   outline: 2px solid rgba(134, 214, 255, 0.9);
   outline-offset: 2px;
   border-radius: 999px;
 }
 
-.nse-window-close-slices {
+.nse-window-close-slices,
+:where(:scope):is(.nse-window-close-slices),
+:where(:scope).nse-window-close-slices {
   position: absolute;
   inset: 0;
   display: flex;
@@ -225,7 +263,9 @@
   pointer-events: none;
 }
 
-.nse-window-close-selected-slices {
+.nse-window-close-selected-slices,
+:where(:scope):is(.nse-window-close-selected-slices),
+:where(:scope).nse-window-close-selected-slices {
   position: absolute;
   inset: 1px;
   z-index: 1;
@@ -237,7 +277,9 @@
   pointer-events: none;
 }
 
-.nse-window-close-selected-cap {
+.nse-window-close-selected-cap,
+:where(:scope):is(.nse-window-close-selected-cap),
+:where(:scope).nse-window-close-selected-cap {
   width: 18px;
   min-width: 18px;
   background-position: center;
@@ -245,21 +287,29 @@
   background-size: 100% 100%;
 }
 
-.nse-window-close-selected-cap-left {
+.nse-window-close-selected-cap-left,
+:where(:scope):is(.nse-window-close-selected-cap-left),
+:where(:scope).nse-window-close-selected-cap-left {
   background-image: url("/assets/nse/atmo/chrome/topbar/TopBar-ButtonSELECTOR-Left-Curve@2x.png");
 }
 
-.nse-window-close-selected-cap-right {
+.nse-window-close-selected-cap-right,
+:where(:scope):is(.nse-window-close-selected-cap-right),
+:where(:scope).nse-window-close-selected-cap-right {
   background-image: url("/assets/nse/atmo/chrome/topbar/TopBar-ButtonSELECTOR-Right-Curve@2x.png");
 }
 
-.nse-window-close-selected-middle {
+.nse-window-close-selected-middle,
+:where(:scope):is(.nse-window-close-selected-middle),
+:where(:scope).nse-window-close-selected-middle {
   flex: 1;
   min-width: 0;
   background: url("/assets/nse/atmo/chrome/topbar/TopBar-ButtonSELECTOR-Left-Middle@2x.png") top left / 8px 100% repeat-x;
 }
 
-.nse-window-close-cap {
+.nse-window-close-cap,
+:where(:scope):is(.nse-window-close-cap),
+:where(:scope).nse-window-close-cap {
   width: 20px;
   min-width: 20px;
   background-position: center;
@@ -267,31 +317,40 @@
   background-size: 100% 100%;
 }
 
-.nse-window-close-cap-left {
+.nse-window-close-cap-left,
+:where(:scope):is(.nse-window-close-cap-left),
+:where(:scope).nse-window-close-cap-left {
   background-image: url("/assets/nse/atmo/chrome/topbar/TopBar-LeftCurve-SELECTOR@2x.png");
 }
 
-.nse-window-close-cap-right {
+.nse-window-close-cap-right,
+:where(:scope):is(.nse-window-close-cap-right),
+:where(:scope).nse-window-close-cap-right {
   background-image: url("/assets/nse/atmo/chrome/topbar/TopBar-RightCurve-SELECTOR@2x.png");
 }
 
-.nse-window-close-middle {
+.nse-window-close-middle,
+:where(:scope):is(.nse-window-close-middle),
+:where(:scope).nse-window-close-middle {
   flex: 1;
   min-width: 0;
   background: url("/assets/nse/atmo/chrome/topbar/TopBar-Middle-SELECTOR@2x.png") top left / 8px 100% repeat-x;
 }
 
-.nse-window-close:active .nse-window-close-selected-slices {
+.nse-window-close:active .nse-window-close-selected-slices,
+:where(:scope):is(.nse-window-close:active) .nse-window-close-selected-slices {
   opacity: 1;
 }
 
-.nse-window-close-glyph {
+.nse-window-close-glyph,
+:where(:scope):is(.nse-window-close-glyph),
+:where(:scope).nse-window-close-glyph {
   position: relative;
   z-index: 2;
   color: #f4f7fb;
   font-family: inherit;
   font-size: 20px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1;
   text-shadow:
     0 -1px 0 rgba(0, 0, 0, 0.95),
@@ -300,7 +359,9 @@
   transform: translateY(0);
 }
 
-.nse-window-titlebar-spacer {
+.nse-window-titlebar-spacer,
+:where(:scope):is(.nse-window-titlebar-spacer),
+:where(:scope).nse-window-titlebar-spacer {
   position: relative;
   z-index: 1;
   width: 68px;
@@ -308,7 +369,9 @@
   justify-self: end;
 }
 
-.nse-window-content {
+.nse-window-content,
+:where(:scope):is(.nse-window-content),
+:where(:scope).nse-window-content {
   max-height: 68vh;
   padding: 76px 22px 22px;
   overflow: auto;
@@ -318,21 +381,27 @@
   background-size: cover;
 }
 
-.nse-control-alert-backdrop {
+.nse-control-alert-backdrop,
+:where(:scope):is(.nse-control-alert-backdrop),
+:where(:scope).nse-control-alert-backdrop {
   position: fixed;
   inset: 0;
   z-index: 10000;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   place-items: center;
   box-sizing: border-box;
   overflow: hidden;
-  padding: clamp(10px, 4vw, 22px);
+  padding: max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-top, 0px)) max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-right, 0px)) max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-bottom, 0px)) max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-left, 0px));
   background: rgba(0, 0, 0, 0.42);
   -webkit-backdrop-filter: blur(5px) saturate(0.85);
   backdrop-filter: blur(5px) saturate(0.85);
 }
 
-.nse-control-alert {
+.nse-control-alert,
+:where(:scope):is(.nse-control-alert),
+:where(:scope).nse-control-alert {
   /* Secondary text is tokenised so the light plate can redefine it; each
      value was written for the dark plate. */
   --nse-alert-body-text: rgba(255,255,255,0.86);
@@ -347,6 +416,8 @@
   width: min(620px, calc(100vw - 22px));
   max-width: calc(100vw - 22px);
   max-height: calc(100vh - 22px);
+  max-inline-size: 100%;
+  max-block-size: 100%;
   min-height: 250px;
   padding: 28px;
   overflow: hidden;
@@ -359,7 +430,9 @@
   box-shadow: 0 28px 42px rgba(0,0,0,0.64), inset 0 1px 0 rgba(255,255,255,0.16);
 }
 
-.nse-control-alert.is-light {
+.nse-control-alert.is-light,
+:where(:scope):is(.nse-control-alert.is-light),
+:where(:scope).nse-control-alert.is-light {
   --nse-alert-body-text: rgba(24,35,50,0.86);
   --nse-alert-link-text: #24497a;
   --nse-alert-details-text: #1d2b3b;
@@ -372,9 +445,12 @@
   background: linear-gradient(180deg, rgba(248, 251, 255, 0.98), rgba(198, 211, 226, 0.98));
 }
 
-.nse-system-alert-content {
+.nse-system-alert-content,
+:where(:scope):is(.nse-system-alert-content),
+:where(:scope).nse-system-alert-content {
   display: grid;
   grid-template-columns: 116px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   gap: 8px;
   align-items: start;
   text-align: left;
@@ -386,7 +462,9 @@
   overflow: visible;
 }
 
-.nse-system-alert-icon-frame {
+.nse-system-alert-icon-frame,
+:where(:scope):is(.nse-system-alert-icon-frame),
+:where(:scope).nse-system-alert-icon-frame {
   display: grid;
   width: 116px;
   min-height: 126px;
@@ -396,7 +474,9 @@
   overflow: visible;
 }
 
-.nse-system-alert-icon {
+.nse-system-alert-icon,
+:where(:scope):is(.nse-system-alert-icon),
+:where(:scope).nse-system-alert-icon {
   box-sizing: border-box;
   display: block;
   width: 94px;
@@ -409,26 +489,35 @@
   filter: drop-shadow(0 5px 8px rgba(0,0,0,0.5));
 }
 
-.nse-system-alert-icon--webspring {
+.nse-system-alert-icon--webspring,
+:where(:scope):is(.nse-system-alert-icon--webspring),
+:where(:scope).nse-system-alert-icon--webspring {
   width: 104px;
   height: 138px;
   margin-top: -12px;
 }
 
-.nse-system-alert-icon--syncloudos {
+.nse-system-alert-icon--syncloudos,
+:where(:scope):is(.nse-system-alert-icon--syncloudos),
+:where(:scope).nse-system-alert-icon--syncloudos {
   width: 92px;
   height: 122px;
   margin-top: 2px;
 }
 
-.nse-system-alert-copy {
+.nse-system-alert-copy,
+:where(:scope):is(.nse-system-alert-copy),
+:where(:scope).nse-system-alert-copy {
+  align-self: stretch;
   min-width: 0;
   min-height: 0;
   max-width: 100%;
-  overflow: hidden;
+  overflow: auto;
+  overscroll-behavior: contain;
 }
 
-.nse-system-alert-copy h2 {
+.nse-system-alert-copy h2,
+:where(:scope):is(.nse-system-alert-copy) h2 {
   margin: 0;
   font-family: inherit;
   font-weight: 700;
@@ -437,7 +526,8 @@
   overflow-wrap: anywhere;
 }
 
-.nse-system-alert-copy p {
+.nse-system-alert-copy p,
+:where(:scope):is(.nse-system-alert-copy) p {
   margin: 7px 0 9px;
   font-family: inherit;
   font-weight: 500;
@@ -447,7 +537,9 @@
   overflow-wrap: anywhere;
 }
 
-.nse-alert-disclosure {
+.nse-alert-disclosure,
+:where(:scope):is(.nse-alert-disclosure),
+:where(:scope).nse-alert-disclosure {
   display: inline-flex;
   max-width: 100%;
   gap: 5px;
@@ -457,11 +549,13 @@
   color: var(--nse-alert-link-text);
   background: transparent;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
   cursor: pointer;
 }
 
-.nse-alert-details {
+.nse-alert-details,
+:where(:scope):is(.nse-alert-details),
+:where(:scope).nse-alert-details {
   box-sizing: border-box;
   width: 100%;
   max-width: 100%;
@@ -479,16 +573,22 @@
 }
 
 /* WebKit/Blink equivalent of the thin overlay scrollbar (transparent track, faint translucent thumb). */
-.nse-alert-details::-webkit-scrollbar {
+.nse-alert-details::-webkit-scrollbar,
+:where(:scope):is(.nse-alert-details)::-webkit-scrollbar,
+:where(:scope).nse-alert-details::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
-.nse-alert-details::-webkit-scrollbar-track {
+.nse-alert-details::-webkit-scrollbar-track,
+:where(:scope):is(.nse-alert-details)::-webkit-scrollbar-track,
+:where(:scope).nse-alert-details::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.nse-alert-details::-webkit-scrollbar-thumb {
+.nse-alert-details::-webkit-scrollbar-thumb,
+:where(:scope):is(.nse-alert-details)::-webkit-scrollbar-thumb,
+:where(:scope).nse-alert-details::-webkit-scrollbar-thumb {
   border: 2px solid transparent;
   border-radius: 8px;
   background-clip: content-box;
@@ -497,7 +597,9 @@
 
 /* The single child the rubber-band provider translates; carries the text styling + padding (so the
    bounce moves the padded text, and the rounded box clips cleanly). */
-.nse-alert-details-text {
+.nse-alert-details-text,
+:where(:scope):is(.nse-alert-details-text),
+:where(:scope).nse-alert-details-text {
   margin: 0;
   padding: 9px;
   color: var(--nse-alert-details-text);
@@ -507,7 +609,9 @@
   font: 11px/1.38 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 }
 
-.nse-alert-actions {
+.nse-alert-actions,
+:where(:scope):is(.nse-alert-actions),
+:where(:scope).nse-alert-actions {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(184px, 100%), 1fr));
   justify-content: stretch;
@@ -518,7 +622,8 @@
   margin: 18px -2px 0;
 }
 
-.nse-alert-actions .nse-system-alert-action-button.nse-control-button {
+.nse-alert-actions .nse-system-alert-action-button.nse-control-button,
+:where(:scope):is(.nse-alert-actions) .nse-system-alert-action-button.nse-control-button {
   width: 100%;
   min-width: 0;
   max-width: 100%;
@@ -527,124 +632,195 @@
   line-height: 1.12;
 }
 
-.nse-alert-actions .nse-system-alert-action-button.nse-control-button:first-child {
+.nse-alert-actions .nse-system-alert-action-button.nse-control-button:first-child,
+:where(:scope):is(.nse-alert-actions) .nse-system-alert-action-button.nse-control-button:first-child {
   width: 100%;
 }
 
-.nse-alert-actions .nse-system-alert-action-button .nse-control-button-label {
+.nse-alert-actions .nse-system-alert-action-button .nse-control-button-label,
+:where(:scope):is(.nse-alert-actions) .nse-system-alert-action-button .nse-control-button-label {
   white-space: normal;
   overflow-wrap: anywhere;
 }
 
 @media (max-width: 680px) {
-  .nse-control-alert {
+  .nse-control-alert,
+:where(:scope):is(.nse-control-alert),
+:where(:scope).nse-control-alert {
     width: min(100%, calc(100vw - 18px));
-    max-height: calc(100vh - 20px);
+    max-block-size: 100%;
     border-width: 34px;
     border-image-width: 34px;
   }
 
-  .nse-alert-actions {
+  .nse-alert-actions,
+:where(:scope):is(.nse-alert-actions),
+:where(:scope).nse-alert-actions {
+    grid-template-columns: minmax(0, 1fr);
     margin-right: 0;
     margin-left: 0;
   }
 
-  .nse-system-alert-content {
+  .nse-system-alert-content,
+:where(:scope):is(.nse-system-alert-content),
+:where(:scope).nse-system-alert-content {
     grid-template-columns: 1fr;
     justify-items: center;
     text-align: center;
     margin: 0;
   }
 
-  .nse-system-alert-icon-frame {
+  .nse-system-alert-icon-frame,
+:where(:scope):is(.nse-system-alert-icon-frame),
+:where(:scope).nse-system-alert-icon-frame {
     width: 104px;
     min-height: 112px;
   }
 
-  .nse-system-alert-icon {
+  .nse-system-alert-icon,
+:where(:scope):is(.nse-system-alert-icon),
+:where(:scope).nse-system-alert-icon {
     width: 84px;
     height: 112px;
     padding: 0;
     transform: none;
   }
 
-  .nse-system-alert-icon--webspring {
+  .nse-system-alert-icon--webspring,
+:where(:scope):is(.nse-system-alert-icon--webspring),
+:where(:scope).nse-system-alert-icon--webspring {
     width: 94px;
     height: 126px;
     margin-top: -10px;
   }
 
-  .nse-system-alert-icon--syncloudos {
+  .nse-system-alert-icon--syncloudos,
+:where(:scope):is(.nse-system-alert-icon--syncloudos),
+:where(:scope).nse-system-alert-icon--syncloudos {
     width: 82px;
     height: 108px;
     margin-top: 0;
   }
 
-  .nse-alert-actions .nse-system-alert-action-button.nse-control-button {
+  .nse-alert-actions .nse-system-alert-action-button.nse-control-button,
+:where(:scope):is(.nse-alert-actions) .nse-system-alert-action-button.nse-control-button {
     width: 100%;
   }
 
-  .nse-alert-actions .nse-system-alert-action-button.nse-control-button:first-child {
+  .nse-alert-actions .nse-system-alert-action-button.nse-control-button:first-child,
+:where(:scope):is(.nse-alert-actions) .nse-system-alert-action-button.nse-control-button:first-child {
     width: 100%;
   }
 
-  .nse-alert-details {
+  .nse-alert-details,
+:where(:scope):is(.nse-alert-details),
+:where(:scope).nse-alert-details {
     max-height: 132px;
   }
 }
 
 @media (max-height: 560px) {
-  .nse-control-alert {
+  .nse-control-alert,
+:where(:scope):is(.nse-control-alert),
+:where(:scope).nse-control-alert {
     min-height: 0;
     border-width: 26px;
     border-image-width: 26px;
   }
 
-  .nse-system-alert-content {
+  .nse-system-alert-content,
+:where(:scope):is(.nse-system-alert-content),
+:where(:scope).nse-system-alert-content {
     grid-template-columns: 84px minmax(0, 1fr);
     gap: 8px;
     margin: 0;
   }
 
-  .nse-system-alert-icon-frame {
+  .nse-system-alert-icon-frame,
+:where(:scope):is(.nse-system-alert-icon-frame),
+:where(:scope).nse-system-alert-icon-frame {
     width: 84px;
     min-height: 88px;
   }
 
-  .nse-system-alert-icon {
+  .nse-system-alert-icon,
+:where(:scope):is(.nse-system-alert-icon),
+:where(:scope).nse-system-alert-icon {
     width: 66px;
     height: 88px;
     padding: 0;
     transform: none;
   }
 
-  .nse-system-alert-icon--webspring {
+  .nse-system-alert-icon--webspring,
+:where(:scope):is(.nse-system-alert-icon--webspring),
+:where(:scope).nse-system-alert-icon--webspring {
     width: 74px;
     height: 98px;
     margin-top: -8px;
   }
 
-  .nse-system-alert-icon--syncloudos {
+  .nse-system-alert-icon--syncloudos,
+:where(:scope):is(.nse-system-alert-icon--syncloudos),
+:where(:scope).nse-system-alert-icon--syncloudos {
     width: 64px;
     height: 86px;
     margin-top: 0;
   }
 
-  .nse-system-alert-copy h2 {
+  .nse-system-alert-copy h2,
+:where(:scope):is(.nse-system-alert-copy) h2 {
     font-size: 21px;
   }
 
-  .nse-system-alert-copy p {
+  .nse-system-alert-copy p,
+:where(:scope):is(.nse-system-alert-copy) p {
     margin: 5px 0 7px;
     font-size: 14px;
   }
 
-  .nse-alert-details {
+  .nse-alert-details,
+:where(:scope):is(.nse-alert-details),
+:where(:scope).nse-alert-details {
     max-height: 76px;
   }
 
-  .nse-alert-actions {
+  .nse-alert-actions,
+:where(:scope):is(.nse-alert-actions),
+:where(:scope).nse-alert-actions {
     gap: 8px;
     margin-top: 12px;
   }
+}
+
+/* The backdrop still covers both halves. Its content box is the selected
+   region; no wrapper/reparenting or second focus trap is introduced. */
+.nse-control-alert-backdrop[data-nse-overlay-region="true"],
+:where(:scope):is(.nse-control-alert-backdrop[data-nse-overlay-region="true"]),
+:where(:scope).nse-control-alert-backdrop[data-nse-overlay-region="true"] {
+  padding-top: calc(var(--nse-overlay-region-top) + max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-top, 0px)));
+  padding-right: calc(var(--nse-overlay-region-right) + max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-right, 0px)));
+  padding-bottom: calc(var(--nse-overlay-region-bottom) + max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-bottom, 0px)));
+  padding-left: calc(var(--nse-overlay-region-left) + max(clamp(10px, 4vw, 22px), var(--nse-screen-safe-area-inset-left, 0px)));
+}
+.nse-control-alert-backdrop[data-nse-overlay-region="true"]>.nse-control-alert,
+:where(:scope):is(.nse-control-alert-backdrop[data-nse-overlay-region="true"])>.nse-control-alert {
+  min-block-size: 0;
+  max-inline-size: 100%;
+  max-block-size: 100%;
+  overflow: auto;
+}
+
+/* A view controller presented as a sheet (presentAsSheet) draws its title above its view. */
+.nse-sheet-title,
+:where(:scope):is(.nse-sheet-title),
+:where(:scope).nse-sheet-title {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+}
+
 }

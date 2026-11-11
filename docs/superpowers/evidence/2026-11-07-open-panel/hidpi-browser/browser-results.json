@@ -1,0 +1,519 @@
+[
+  {
+    "name": "phone-dark",
+    "receipt": {
+      "commit": "b963a00c33bcb55983a487c180afd3cb6efb037c",
+      "archiveSha256": "58a1ced906b95c95c5b7cc6f47fe80bbb997468c61369047006ae51fdd846990"
+    },
+    "seeded": {
+      "root": "Projects",
+      "permission": "granted"
+    },
+    "sources": {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "dpr": 2,
+      "panel": {
+        "x": 0,
+        "y": 56,
+        "width": 390,
+        "height": 788,
+        "top": 56,
+        "right": 390,
+        "bottom": 844,
+        "left": 0
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 108,
+        "width": 390,
+        "height": 736,
+        "top": 108,
+        "right": 390,
+        "bottom": 844,
+        "left": 0
+      },
+      "controls": [
+        {
+          "name": "Cancel",
+          "bounds": {
+            "x": 12,
+            "y": 65.5,
+            "width": 75.25,
+            "height": 32,
+            "top": 65.5,
+            "right": 87.25,
+            "bottom": 97.5,
+            "left": 12
+          }
+        },
+        {
+          "name": "System Chooser…",
+          "bounds": {
+            "x": 14,
+            "y": 802,
+            "width": 362,
+            "height": 30,
+            "top": 802,
+            "right": 376,
+            "bottom": 832,
+            "left": 14
+          }
+        }
+      ],
+      "cells": [],
+      "mode": "dark",
+      "compact": true,
+      "outsideViewport": []
+    },
+    "folders": {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "dpr": 2,
+      "panel": {
+        "x": 0,
+        "y": 56,
+        "width": 390,
+        "height": 788,
+        "top": 56,
+        "right": 390,
+        "bottom": 844,
+        "left": 0
+      },
+      "toolbar": {
+        "x": 0,
+        "y": 108,
+        "width": 390,
+        "height": 86,
+        "top": 108,
+        "right": 390,
+        "bottom": 194,
+        "left": 0
+      },
+      "footer": {
+        "x": 0,
+        "y": 788,
+        "width": 390,
+        "height": 56,
+        "top": 788,
+        "right": 390,
+        "bottom": 844,
+        "left": 0
+      },
+      "controls": [
+        {
+          "name": "‹ Sources",
+          "bounds": {
+            "x": 12,
+            "y": 65.5,
+            "width": 92.75,
+            "height": 32,
+            "top": 65.5,
+            "right": 104.75,
+            "bottom": 97.5,
+            "left": 12
+          }
+        },
+        {
+          "name": "Open",
+          "bounds": {
+            "x": 308.4375,
+            "y": 65.5,
+            "width": 69.5625,
+            "height": 32,
+            "top": 65.5,
+            "right": 378,
+            "bottom": 97.5,
+            "left": 308.4375
+          }
+        },
+        {
+          "name": "‹",
+          "bounds": {
+            "x": 14,
+            "y": 120,
+            "width": 43.796875,
+            "height": 30,
+            "top": 120,
+            "right": 57.796875,
+            "bottom": 150,
+            "left": 14
+          }
+        },
+        {
+          "name": "›",
+          "bounds": {
+            "x": 59.796875,
+            "y": 120,
+            "width": 43.796875,
+            "height": 30,
+            "top": 120,
+            "right": 103.59375,
+            "bottom": 150,
+            "left": 59.796875
+          }
+        },
+        {
+          "name": "Projects",
+          "bounds": {
+            "x": 111.59375,
+            "y": 124,
+            "width": 47.125,
+            "height": 22,
+            "top": 124,
+            "right": 158.71875,
+            "bottom": 146,
+            "left": 111.59375
+          }
+        },
+        {
+          "name": "Coastline",
+          "bounds": {
+            "x": 176,
+            "y": 124,
+            "width": 54.03125,
+            "height": 22,
+            "top": 124,
+            "right": 230.03125,
+            "bottom": 146,
+            "left": 176
+          }
+        },
+        {
+          "name": "Footage",
+          "bounds": {
+            "x": 247.3125,
+            "y": 124,
+            "width": 49.96875,
+            "height": 22,
+            "top": 124,
+            "right": 297.28125,
+            "bottom": 146,
+            "left": 247.3125
+          }
+        }
+      ],
+      "cells": [
+        {
+          "name": "B-Roll",
+          "bounds": {
+            "x": 14,
+            "y": 208,
+            "width": 115.328125,
+            "height": 141.328125,
+            "top": 208,
+            "right": 129.328125,
+            "bottom": 349.328125,
+            "left": 14
+          }
+        },
+        {
+          "name": "Drone",
+          "bounds": {
+            "x": 137.328125,
+            "y": 208,
+            "width": 115.328125,
+            "height": 141.328125,
+            "top": 208,
+            "right": 252.65625,
+            "bottom": 349.328125,
+            "left": 137.328125
+          }
+        },
+        {
+          "name": "cliffs-03.jpg",
+          "bounds": {
+            "x": 260.65625,
+            "y": 208,
+            "width": 115.328125,
+            "height": 141.328125,
+            "top": 208,
+            "right": 375.984375,
+            "bottom": 349.328125,
+            "left": 260.65625
+          }
+        },
+        {
+          "name": "harbour-01.png",
+          "bounds": {
+            "x": 14,
+            "y": 357.328125,
+            "width": 115.328125,
+            "height": 141.328125,
+            "top": 357.328125,
+            "right": 129.328125,
+            "bottom": 498.65625,
+            "left": 14
+          }
+        },
+        {
+          "name": "sunset-02.png",
+          "bounds": {
+            "x": 137.328125,
+            "y": 357.328125,
+            "width": 115.328125,
+            "height": 141.328125,
+            "top": 357.328125,
+            "right": 252.65625,
+            "bottom": 498.65625,
+            "left": 137.328125
+          }
+        },
+        {
+          "name": "tide.jpg",
+          "bounds": {
+            "x": 260.65625,
+            "y": 357.328125,
+            "width": 115.328125,
+            "height": 141.328125,
+            "top": 357.328125,
+            "right": 375.984375,
+            "bottom": 498.65625,
+            "left": 260.65625
+          }
+        }
+      ],
+      "mode": "dark",
+      "compact": true,
+      "outsideViewport": []
+    },
+    "media": {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "dpr": 2,
+      "panel": {
+        "x": 0,
+        "y": 56,
+        "width": 390,
+        "height": 788,
+        "top": 56,
+        "right": 390,
+        "bottom": 844,
+        "left": 0
+      },
+      "toolbar": {
+        "x": 0,
+        "y": 108,
+        "width": 390,
+        "height": 53,
+        "top": 108,
+        "right": 390,
+        "bottom": 161,
+        "left": 0
+      },
+      "footer": {
+        "x": 0,
+        "y": 788,
+        "width": 390,
+        "height": 56,
+        "top": 788,
+        "right": 390,
+        "bottom": 844,
+        "left": 0
+      },
+      "controls": [
+        {
+          "name": "‹ Sources",
+          "bounds": {
+            "x": 12,
+            "y": 65.5,
+            "width": 92.75,
+            "height": 32,
+            "top": 65.5,
+            "right": 104.75,
+            "bottom": 97.5,
+            "left": 12
+          }
+        },
+        {
+          "name": "Open",
+          "bounds": {
+            "x": 308.4375,
+            "y": 65.5,
+            "width": 69.5625,
+            "height": 32,
+            "top": 65.5,
+            "right": 378,
+            "bottom": 97.5,
+            "left": 308.4375
+          }
+        }
+      ],
+      "cells": [
+        {
+          "name": "Desktop",
+          "bounds": {
+            "x": 14,
+            "y": 175,
+            "width": 115.328125,
+            "height": 115.328125,
+            "top": 175,
+            "right": 129.328125,
+            "bottom": 290.328125,
+            "left": 14
+          }
+        },
+        {
+          "name": "Cloud workspace",
+          "bounds": {
+            "x": 137.328125,
+            "y": 175,
+            "width": 115.328125,
+            "height": 115.328125,
+            "top": 175,
+            "right": 252.65625,
+            "bottom": 290.328125,
+            "left": 137.328125
+          }
+        },
+        {
+          "name": "Weather",
+          "bounds": {
+            "x": 260.65625,
+            "y": 175,
+            "width": 115.328125,
+            "height": 115.328125,
+            "top": 175,
+            "right": 375.984375,
+            "bottom": 290.328125,
+            "left": 260.65625
+          }
+        }
+      ],
+      "mode": "dark",
+      "compact": true,
+      "outsideViewport": []
+    },
+    "storage": {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "dpr": 2,
+      "panel": {
+        "x": 0,
+        "y": 56,
+        "width": 390,
+        "height": 788,
+        "top": 56,
+        "right": 390,
+        "bottom": 844,
+        "left": 0
+      },
+      "toolbar": {
+        "x": 0,
+        "y": 108,
+        "width": 390,
+        "height": 86,
+        "top": 108,
+        "right": 390,
+        "bottom": 194,
+        "left": 0
+      },
+      "footer": {
+        "x": 0,
+        "y": 788,
+        "width": 390,
+        "height": 56,
+        "top": 788,
+        "right": 390,
+        "bottom": 844,
+        "left": 0
+      },
+      "controls": [
+        {
+          "name": "‹ Sources",
+          "bounds": {
+            "x": 12,
+            "y": 65.5,
+            "width": 92.75,
+            "height": 32,
+            "top": 65.5,
+            "right": 104.75,
+            "bottom": 97.5,
+            "left": 12
+          }
+        },
+        {
+          "name": "Open",
+          "bounds": {
+            "x": 308.4375,
+            "y": 65.5,
+            "width": 69.5625,
+            "height": 32,
+            "top": 65.5,
+            "right": 378,
+            "bottom": 97.5,
+            "left": 308.4375
+          }
+        },
+        {
+          "name": "‹",
+          "bounds": {
+            "x": 14,
+            "y": 120,
+            "width": 43.796875,
+            "height": 30,
+            "top": 120,
+            "right": 57.796875,
+            "bottom": 150,
+            "left": 14
+          }
+        },
+        {
+          "name": "›",
+          "bounds": {
+            "x": 59.796875,
+            "y": 120,
+            "width": 43.796875,
+            "height": 30,
+            "top": 120,
+            "right": 103.59375,
+            "bottom": 150,
+            "left": 59.796875
+          }
+        },
+        {
+          "name": "Application Support",
+          "bounds": {
+            "x": 111.59375,
+            "y": 124,
+            "width": 119.4375,
+            "height": 22,
+            "top": 124,
+            "right": 231.03125,
+            "bottom": 146,
+            "left": 111.59375
+          }
+        }
+      ],
+      "cells": [
+        {
+          "name": "Scratch Disk",
+          "bounds": {
+            "x": 14,
+            "y": 208,
+            "width": 115.328125,
+            "height": 141.328125,
+            "top": 208,
+            "right": 129.328125,
+            "bottom": 349.328125,
+            "left": 14
+          }
+        }
+      ],
+      "mode": "dark",
+      "compact": true,
+      "outsideViewport": []
+    },
+    "bookmarkRestoredAfterReload": true,
+    "focusRestored": true,
+    "errors": []
+  }
+]

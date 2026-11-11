@@ -1,0 +1,22 @@
+{
+  "theme-baseline-dark-catalogue-partition-1-chromium-dark-input-box-actual.png": "dpr1-dark-actual.png",
+  "theme-baseline-dark-catalogue-partition-1-chromium-dark-input-box-diff.png": "dpr1-dark-diff.png",
+  "theme-baseline-dark-catalogue-partition-1-chromium-dark-input-box-expected.png": "dpr1-dark-expected.png",
+  "theme-baseline-dark-catalogue-partition-1-chromium-error-context.md": "dpr1-dark-context.md",
+  "theme-baseline-dark-catalogue-partition-1-chromium-high-dpr-dark-input-box-actual.png": "dpr2-dark-actual.png",
+  "theme-baseline-dark-catalogue-partition-1-chromium-high-dpr-dark-input-box-diff.png": "dpr2-dark-diff.png",
+  "theme-baseline-dark-catalogue-partition-1-chromium-high-dpr-dark-input-box-expected.png": "dpr2-dark-expected.png",
+  "theme-baseline-dark-catalogue-partition-1-chromium-high-dpr-error-context.md": "dpr2-dark-context.md",
+  "theme-baseline-dark-catalogue-partition-1-chromium-high-dpr-trace.zip": "dpr2-dark-trace.zip",
+  "theme-baseline-dark-catalogue-partition-1-chromium-trace.zip": "dpr1-dark-trace.zip",
+  "theme-baseline-light-catalogue-partition-1-chromium-error-context.md": "dpr1-light-context.md",
+  "theme-baseline-light-catalogue-partition-1-chromium-high-dpr-error-context.md": "dpr2-light-context.md",
+  "theme-baseline-light-catalogue-partition-1-chromium-high-dpr-light-input-box-actual.png": "dpr2-light-actual.png",
+  "theme-baseline-light-catalogue-partition-1-chromium-high-dpr-light-input-box-diff.png": "dpr2-light-diff.png",
+  "theme-baseline-light-catalogue-partition-1-chromium-high-dpr-light-input-box-expected.png": "dpr2-light-expected.png",
+  "theme-baseline-light-catalogue-partition-1-chromium-high-dpr-trace.zip": "dpr2-light-trace.zip",
+  "theme-baseline-light-catalogue-partition-1-chromium-light-input-box-actual.png": "dpr1-light-actual.png",
+  "theme-baseline-light-catalogue-partition-1-chromium-light-input-box-diff.png": "dpr1-light-diff.png",
+  "theme-baseline-light-catalogue-partition-1-chromium-light-input-box-expected.png": "dpr1-light-expected.png",
+  "theme-baseline-light-catalogue-partition-1-chromium-trace.zip": "dpr1-light-trace.zip"
+}

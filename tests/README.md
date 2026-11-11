@@ -37,7 +37,7 @@ npm run fx:installed
 ## Helpers
 
 `runtime/helpers.ts` holds framework runtime, bundle, identity, host-installation
-and policy-grant utilities. It supplies `runtime/testPolicyProfile.ts`
+and policy-grant utilities. It supplies `runtime/testConfigurationProfile.ts`
 explicitly, so production defaults are never bent to suit a test. Default
 document types and trusted document kinds are empty; each test registers the
 document types and contributions it needs.

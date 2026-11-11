@@ -1,0 +1,9 @@
+file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/docs/superpowers/evidence/2026-11-07-foundation/check-heritage-baseline.mjs:51
+      console.log(JSON.stringify({entry,revision:baseline?base:"current",result:"failed",errors:error.errors.map(item=>({text:item.text,file:item.location?.file}))}));
+                                                                                                             ^
+
+TypeError: Cannot read properties of undefined (reading 'map')
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/docs/superpowers/evidence/2026-11-07-foundation/check-heritage-baseline.mjs:51:110
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+
+Node.js v24.22.1

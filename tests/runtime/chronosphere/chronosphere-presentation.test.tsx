@@ -25,15 +25,15 @@ import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { GFXImage } from "../../../src/FX/GraphicsFX/GFXImage";
 
 const host = vi.hoisted(() => ({ app: {} as Record<string, any>, reducedMotion: false, portalHost: null as HTMLElement | null, vortexMounts: [] as object[] }));
-vi.mock("../../../src/SynCloudOS/AppSDK/SynWareContext", () => ({ useSynWare: () => host.app }));
+vi.mock("../../../src/SynCloudOS/AppSDK/scos/useSCOS", () => ({ useSCOS: () => host.app }));
 vi.mock("../../../src/NSE/Overlays/NSEOverlayProvider", () => ({ useNSEOverlayProvider: () => ({ portalHost: host.portalHost }) }));
 vi.mock("../../../src/NSE/Animation/NSEAnimationEnvironment", () => ({ useNSEAnimationEnvironment: () => ({ reducedMotion: host.reducedMotion }) }));
 vi.mock("../../../src/NSE/Focus/NSEFocusPort", () => ({ NSEFocusScope: ({ children }: { children: React.ReactNode }) => children }));
 vi.mock("../../../src/NSE/Components/LoadingSpinner", () => ({
   LoadingSpinner: ({ label, variant }: { label: string; variant: string }) => <span data-spinner-variant={variant}>{label}</span>,
 }));
-vi.mock("../../../src/NSE/Controls/Buttons/NSEButtons", () => ({
-  NSEPushButton: ({ children, tone: _tone, ...props }: Record<string, any>) => <button {...props}>{children}</button>,
+vi.mock("../../../src/NSE/Controls/Buttons/NSEButton", () => ({
+  NSEButton: ({ title, appearance: _appearance, isEnabled, ...props }: Record<string, any>) => <button disabled={isEnabled === false} {...props}>{title}</button>,
 }));
 vi.mock("../../../src/NSE/Chronosphere/Vortex/VortexEffect", () => ({ VortexEffect: (props: { preparedImages?: object }) => {
   useLayoutEffect(() => { host.vortexMounts.push(props); }, []);

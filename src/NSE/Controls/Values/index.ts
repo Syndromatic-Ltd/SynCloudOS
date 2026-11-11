@@ -18,4 +18,5 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export * from "./valueControlTypes";export * from "./NSEStepper";export * from "./NSESlider";export * from "./NSECircularSlider";export * from "./NSELevelIndicator";export * from "./NSESegmentedControl";import"./nse-value-controls.css";
+export * from "./valueControlTypes";export * from "./NSEStepper";export * from "./NSESlider";export * from "./NSELevelIndicator";export * from "./NSESegmentedControl";import"./nse-value-controls.css";
+export * from "./NSEPathControl";

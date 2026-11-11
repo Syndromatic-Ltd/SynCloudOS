@@ -1,0 +1,29 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/open-panel-sheet-attachment.test.tsx tests/integration/nse-open-panel.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/open-panel-sheet-attachment.test.tsx (4 tests | 1 failed) 5191ms
+   × draws Open in its owned sheet and restores focus (compact=false, escape=true) 5004ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/open-panel-sheet-attachment.test.tsx > draws Open in its owned sheet and restores focus (compact=false, escape=true)
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/runtime/open-panel-sheet-attachment.test.tsx:16:69
+     14| afterEach(cleanup);
+     15|
+     16| it.each([[false, false], [true, false], [false, true], [true, true]])(…
+       |                                                                     ^
+     17|   const bridge = { present: vi.fn(async () => "modal"), dismiss: vi.fn…
+     18|   const filePanels = { getStatus: () => ({ open: { activation: "active…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 12 passed (13)
+   Start at  10:03:31
+   Duration  12.47s (transform 5.80s, setup 61ms, import 7.95s, tests 5.89s, environment 1.86s)
+

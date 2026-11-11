@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -18,20 +21,30 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-.nse-tooltip {
+.nse-tooltip,
+:where(:scope):is(.nse-tooltip) {
   /* Structure only; the active appearance paints the tooltip. */
   --nse-tooltip-source-border-width: 1px;
   --nse-tooltip-source-radius: 2px;
   --nse-tooltip-source-background: #FFFFCA;
   display: inline-flex;
-  pointer-events: none;
+  pointer-events: auto;
   max-inline-size: var(--nse-overlay-available-inline-size, 100%);
   max-block-size: var(--nse-overlay-available-block-size, 100%);
 }
 
-.nse-tooltip-arrow { inline-size: 0; block-size: 0; }
-.nse-tooltip-content { min-inline-size: 0; overflow-wrap: anywhere; }
+.nse-tooltip-arrow,
+:where(:scope):is(.nse-tooltip-arrow) { inline-size: 0; block-size: 0; }
+.nse-tooltip-content,
+:where(:scope):is(.nse-tooltip-content) { min-inline-size: 0; overflow-wrap: anywhere; }
 
 @media (prefers-reduced-motion: reduce) {
-  .nse-tooltip, .nse-tooltip * { transition-duration: 0ms !important; animation-duration: 0ms !important; }
+  .nse-tooltip,
+:where(:scope):is(.nse-tooltip),
+.nse-tooltip *,
+:where(:scope):is(.nse-tooltip) * { transition-duration: 0ms !important; animation-duration: 0ms !important; }
+}
+
+}
+
 }

@@ -23,6 +23,7 @@ import { flushSync } from "react-dom";
 import { renderNSEViewSnapshot } from "../Graphics/snapshotNSEView";
 import { NSEPageCurlRenderer, type NSEPageCurlFrame, type NSEPageCurlMargin } from "./NSEPageCurlRenderer";
 import { getNSEPageTearMargin } from "./nsePageGeometry";
+import { pageSurfaceKey } from "./pageSurfaceKey";
 import type { NSEPageCurlCylinder, NSEPageEdge, NSEPageGeometry, NSEPageMotionPreset, NSEPageTearPose } from "./nsePageTypes";
 
 /** How long the page's content must hold still before it is redrawn for the curl. */
@@ -325,8 +326,8 @@ export function useNSEPageCurlSurface({ enabled, geometry, motion, frontRef, bac
   const adoptDrawn = useCallback(() => {
     const front = frontRef.current, back = backRef.current, renderer = rendererRef.current;
     if (!front || !back || !renderer) return false;
-    const frontPage = recall(front.innerHTML);
-    const backPage = undersideRef.current === "back" ? recall(back.innerHTML) : frontPage;
+    const frontPage = recall(pageSurfaceKey(front));
+    const backPage = undersideRef.current === "back" ? recall(pageSurfaceKey(back)) : frontPage;
     if (!frontPage || !backPage) return false;
     renderer.setSurfaces(frontPage.canvas, backPage.canvas, frontPage.paper);
     setHasSurface(true);
@@ -346,7 +347,7 @@ export function useNSEPageCurlSurface({ enabled, geometry, motion, frontRef, bac
       prefetchRef.current = null;
       const inside = insideRef.current;
       if (!inside?.isConnected || phaseRef.current !== "idle" || generation !== generationRef.current) return;
-      const key = inside.innerHTML;
+      const key = pageSurfaceKey(inside);
       if (cacheRef.current.has(key)) return;
       const abort = new AbortController();
       prefetchAbortRef.current = abort;
@@ -375,7 +376,7 @@ export function useNSEPageCurlSurface({ enabled, geometry, motion, frontRef, bac
     }
     const generation = generationRef.current;
     const paper = getComputedStyle(front).backgroundColor;
-    const frontKey = front.innerHTML, backKey = back.innerHTML;
+    const frontKey = pageSurfaceKey(front), backKey = pageSurfaceKey(back);
     const withBack = undersideRef.current === "back";
     void (async () => {
       remember(frontKey, recall(frontKey) ?? await drawPage(front, paper));

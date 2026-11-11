@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import { GFXColour } from "./GFXColour";
 import { GFXImage, type GFXImageDescriptor } from "./GFXImage";
 import type { GFXRGBAComponents } from "./colourTypes";
@@ -119,7 +120,8 @@ export class GFXColourProfile {
     readonly #curves: readonly Curve[];
     readonly #a2b: LUTTransform | null;
     readonly #b2a: LUTTransform | null;
-    constructor(data: Uint8Array) {
+    constructor(input: NSEDataConvertible) {
+        const data = NSEData.from(input).bytes;
         if (!(data instanceof Uint8Array) || data.length < 132 || data.length > 4 * 1024 * 1024)
             throw new RangeError("ICC profile requires 132 bytes to 4 MiB.");
         const bytes = data.slice(), view = new DataView(bytes.buffer), signature = (offset: number) => String.fromCharCode(...bytes.subarray(offset, offset + 4));
@@ -237,8 +239,8 @@ export class GFXColourProfile {
             throw new TypeError("ICC LUT profiles require paired A2B0/B2A0 transforms for reversible conversion.");
         Object.freeze(this);
     }
-    copyData(): Uint8Array {
-        return this.#bytes.slice();
+    copyData(): NSEData {
+        return NSEData.from(this.#bytes);
     }
     toSRGB(value: GFXRGBAComponents): GFXRGBAComponents {
         const c = components(value);

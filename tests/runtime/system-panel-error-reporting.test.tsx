@@ -47,7 +47,7 @@ it("reports failed system panel presentation through the runtime error manager",
     await act(async () => { await runtime.commands.dispatch("system.showFonts", undefined, { source: "toolbar" }); });
     await waitFor(() => expect(capture).toHaveBeenCalledWith(expect.objectContaining({
       code: "APP_CONTENT_FAILED", source: "Webspring.SystemPanelsLayer",
-      technicalMessage: "Panel host unavailable", recoverable: true,
+      error: expect.objectContaining({ message: "Panel host unavailable" }), recoverable: true,
       context: expect.objectContaining({ operation: "present" }),
     })));
   } finally {

@@ -29,6 +29,8 @@ synCloudOS({ typography: "src/Typography.ts" });
 
 This alone generates early website CSS. The `ui` role sets `--font-ui` and the root `font-family`; descendants inherit it. Other role names produce `--font-<name>` for explicit use in CSS. Resources resolve relative to the declaration module. Absolute nested bases and relative `./` bases in nested HTML are supported. Development changes to declarations, their dependencies and font bytes invalidate the virtual typography module and reload its owning host.
 
+Without a declaration, SynCloudOS ships no font file: the UI uses the platform font (`system-ui`, so Segoe UI on Windows and San Francisco on Apple systems). System UI asks for weights up to 700 and never heavier, so a UI role only needs faces up to Bold. If your UI family has no 700 face, the browser substitutes the nearest heavier one.
+
 The declaration's filename is your choice: `Typography.ts`, `fonts.ts`, or any other module passed to `synCloudOS({ typography })`. No product-specific name or location is required. Do not maintain a second list of CSS faces or handwritten preloads in HTML.
 
 For an OS host, pass that same declaration and Vite's URLs to the browser composition:
@@ -54,11 +56,11 @@ declare module "virtual:syncloudos/typography" {
 Mounted apps obtain the host's manager through AppSDK, without importing shell-private configuration:
 
 ```tsx
-import { useSynWareFonts } from "@syndromatic/syncloudos/sdk";
+import { useFonts } from "@syndromatic/syncloudos/sdk";
 import { NSEFontPanel, type NSEFontPanelProps } from "@syndromatic/syncloudos/nse";
 
 function FontPicker(props: Omit<NSEFontPanelProps, "manager">) {
-  const { manager } = useSynWareFonts();
+  const { manager } = useFonts();
   return <NSEFontPanel {...props} manager={manager} />;
 }
 ```
@@ -77,8 +79,8 @@ This lets a UI alias cap its strongest face at Bold while the document catalogue
 Catalogue availability is metadata, not ready glyph data. For byte-backed document layout or output, use the active mount's supported font access:
 
 ```ts
-import { TFXFontDescriptor, useSynWareFonts } from "@syndromatic/syncloudos/sdk";
-const fonts = useSynWareFonts();
+import { TFXFontDescriptor, useFonts } from "@syndromatic/syncloudos/sdk";
+const fonts = useFonts();
 const registration = await fonts.loadFace(savedFaceId, new TFXFontDescriptor({ size: 18 }), signal);
 // Use registration.font through the existing TextFX/NSE layout contracts.
 registration.dispose();

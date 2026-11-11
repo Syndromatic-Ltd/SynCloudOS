@@ -30,15 +30,16 @@ it("rejects framework barrels and host imports even when they resolve", async ()
     const files = {
       "tsconfig.json": JSON.stringify({ compilerOptions: { baseUrl: ".", paths: { "@host/*": ["src/SynCloudOS/*"] } } }),
       "src/NSE/NSE.ts": "export const NSEPopup = 1;",
-      "src/NSE/Private/index.ts": "export const NSEPushButton = 1;",
+      "src/NSE/Private/index.ts": "export const NSEButton = 1;",
       "src/SynCloudOS/Runtime/private.ts": "export const secret = 1;",
       "src/SynCloudOSReact/index.ts": "export const provider = 1;",
       "src/SynWare/Example.app/Contents/helper.js": 'export { secret } from "../../../SynCloudOS/Runtime/private";',
       "src/SynWare/Example.app/Contents/private.css": '@import "../../../NSE/internal.css";',
       "src/SynWare/Example.app/Contents/root.css": '@import "/src/NSE/Private/internal.css";',
+      "src/SynWare/Example.app/Contents/Info.ts": 'export default { bundleIdentifier: "com.example.example", displayName: "Example", version: "1.0.0" };\n',
       "src/SynWare/Example.app/Contents/index.ts": [
         'import { NSEPopup } from "../../../NSE/NSE";',
-        'export { NSEPushButton } from "../../../NSE/Private";',
+        'export { NSEButton } from "../../../NSE/Private";',
         'void import("@host/Runtime/private");',
         'import "../../../SynCloudOSReact";',
         'const modules = import.meta.glob("../../../NSE/**/*.tsx");',

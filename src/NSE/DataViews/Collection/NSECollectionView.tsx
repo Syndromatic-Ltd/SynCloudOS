@@ -23,14 +23,24 @@ import { useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, type C
 import { dataViewAllowsMutation, dataViewAnnouncement, dataViewEventIsComposing, encodeNSEDataViewKey, useNSEDataView } from "../Core";
 import { useNSEVirtualiser } from "../Virtualisation";
 import { useNSEDataViewDragHost } from "../../Drag";
-import type { NSECollectionViewProps } from "./collectionTypes";
+import type { NSECollectionViewCoverFlowProps, NSECollectionViewGridProps, NSECollectionViewProps } from "./collectionTypes";
+import { CoverFlowCollectionView } from "./CoverFlowCollectionView";
 import "./nse-collection-view.css";
 
-export function NSECollectionView<T, TId extends string | number>({
+/**
+ * NSCollectionView: items laid out by `layout`. A grid or list layout renders each item with `renderItem`;
+ * the Cover Flow layout draws the items' pictures with AnimationFX.
+ */
+export function NSECollectionView<T, TId extends string | number>(props: NSECollectionViewProps<T, TId>) {
+  if ("kind" in props.layout && props.layout.kind === "coverFlow") return <CoverFlowCollectionView {...props as NSECollectionViewCoverFlowProps<T, TId>} />;
+  return <GridCollectionView {...props as NSECollectionViewGridProps<T, TId>} />;
+}
+
+function GridCollectionView<T, TId extends string | number>({
   adapter,
   layout,
   renderItem,
-  state = { kind: "ready" },
+  state: requestedState = { kind: "ready" },
   selectionMode = "multiple",
   pointerActivation = "double-click",
   viewportInlineSize = 640,
@@ -50,13 +60,14 @@ export function NSECollectionView<T, TId extends string | number>({
   style,
   onKeyDown,
   ...props
-}: NSECollectionViewProps<T, TId>) {
+}: NSECollectionViewGridProps<T, TId>) {
   const view = useNSEDataView(adapter, {
     selectionMode,
-    state,
+    state: requestedState,
     onSelectionChange,
     delegate: { didActivate: onActivate },
   });
+  const state = view.state;
   const layoutInput = useMemo(() => ({ count: view.snapshot.items.length, viewportInlineSize }), [view.snapshot.items.length, viewportInlineSize]);
   const columnCount = layout.columnCount(layoutInput);
   const rowCount = layout.rowCount(layoutInput);
@@ -159,14 +170,14 @@ export function NSECollectionView<T, TId extends string | number>({
         aria-colcount={columnCount}
         aria-readonly={state.kind === "read-only" || undefined}
         className={`nse-collection-view ${className}`.trim()}
-        data-nse-control="collection-view"
+        data-nse-control="collection-view" data-nse-part="background" data-nse-enabled={view.rootProps["aria-disabled"] ? "false" : undefined}
         style={rootStyle}
         onKeyDown={handleKey}
       >
-        <div className="nse-collection-canvas-sizer">
-          <div ref={canvasRef} className="nse-collection-canvas" style={{ blockSize: totalBlockSize, inlineSize: viewportInlineSize }}>
+        <div data-nse-part="viewport" className="nse-collection-canvas-sizer">
+          <div ref={canvasRef} data-nse-part="content" className="nse-collection-canvas" style={{ blockSize: totalBlockSize, inlineSize: viewportInlineSize }}>
             {[...renderedRows].sort((a, b) => a - b).map((row) => (
-              <div key={row} role="row" className="nse-collection-row">
+              <div key={row} role="row" data-nse-part="row" className="nse-collection-row">
                 {Array.from({ length: Math.max(0, Math.min(columnCount, view.snapshot.items.length - row * columnCount)) }, (_, column) => layout.itemAt(row * columnCount + column, layoutInput)!).map((position) => {
                 const entry = view.snapshot.items[position.index]!;
                 const itemProps = view.itemProps(entry.id);
@@ -184,8 +195,8 @@ export function NSECollectionView<T, TId extends string | number>({
                     role="gridcell"
                     aria-colindex={position.column + 1}
                     aria-rowindex={position.row + 1}
-                    className="nse-collection-item"
-                    data-appearance-recipe="collection-item"
+                    data-nse-part="item" data-nse-selected={selected ? "" : undefined} data-nse-focused={focused ? "" : undefined} data-nse-enabled={entry.disabled ? "false" : undefined} className="nse-collection-item"
+
                     data-selected={selected || undefined}
                     data-focused={focused || undefined}
                     data-editing={editing || undefined}

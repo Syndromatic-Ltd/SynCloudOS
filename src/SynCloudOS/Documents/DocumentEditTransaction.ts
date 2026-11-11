@@ -35,8 +35,18 @@ export function stageDocumentEdit<TModel, TSerialized>(
     throw new DocumentSchemaError(type.id, "Document transformations must be synchronous and pure.");
   }
   const next = immutableDocumentValue(candidate, type.id);
-  const serialized = immutableDocumentValue(type.write(next, { typeId: type.id, schemaVersion: type.schemaVersion }), type.id);
-  if (!type.validate(serialized)) throw new DocumentSchemaError(type.id);
+  const written = type.write(next, { typeId: type.id, schemaVersion: type.schemaVersion });
+  if (written && typeof (written as { then?: unknown }).then === "function") {
+    void Promise.resolve(written).catch(() => undefined);
+    throw new DocumentSchemaError(type.id, "Document writers must finish before synchronous commitment.");
+  }
+  const serialized = immutableDocumentValue(written, type.id);
+  const valid = type.validate(serialized) as unknown;
+  if (valid && typeof (valid as { then?: unknown }).then === "function") {
+    void Promise.resolve(valid).catch(() => undefined);
+    throw new DocumentSchemaError(type.id, "Document schema validators must finish before synchronous commitment.");
+  }
+  if (!valid) throw new DocumentSchemaError(type.id);
   const validation = validateModel?.(next) as unknown;
   if (validation && typeof (validation as { then?: unknown }).then === "function") {
     void Promise.resolve(validation).catch(() => undefined);

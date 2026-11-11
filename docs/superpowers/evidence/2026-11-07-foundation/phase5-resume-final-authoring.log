@@ -1,0 +1,3 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run tsc -b tsconfig.authoring.json --pretty false
+error TS5083: Cannot read file 'C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tsconfig.authoring.json'.

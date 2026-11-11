@@ -111,7 +111,12 @@ function visualViewportFromPresentation(
   snapshot: SynCloudOSPresentationTraits,
 ) {
   const viewport = browserWindow.visualViewport;
-  if (viewport) {
+  // Standalone hosts may provide live browser geometry between presentation
+  // publications. It must not override a retained sample or publish an invalid
+  // intermediate viewport; use the canonical presentation in those cases.
+  if (viewport && snapshot.geometryState === "current" &&
+    [viewport.width, viewport.height, viewport.offsetLeft, viewport.offsetTop].every(Number.isFinite) &&
+    viewport.width > 0 && viewport.height > 0) {
     return Object.freeze({
       width: finite(viewport.width),
       height: finite(viewport.height),

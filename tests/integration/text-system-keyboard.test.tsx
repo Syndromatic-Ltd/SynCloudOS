@@ -19,6 +19,7 @@
  */
 
 // @vitest-environment jsdom
+import { NSEData } from "@syndromatic/syncloudos/foundation";
 import React from "react";
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
@@ -61,7 +62,7 @@ function fixture() {
   const example = {
     getSnapshot: () => state, subscribe: () => () => {},
     sessions: { body: session, caption: session, bodyMirror: session },
-    resources: { image: { toPNG: () => new Uint8Array([0]) } },
+    resources: { image: { toPNG: () => NSEData.from(new Uint8Array([0])) } },
     layoutFor: () => null, setPresentation: () => {}, activate: vi.fn(),
     transformsFor: () => ({ client: {
       from: { name: "container:0", units: "css-pixels" },

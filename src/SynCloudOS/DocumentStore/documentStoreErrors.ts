@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { SynCloudOSPolicyDecision } from "../PolicyKit/policyTypes";
+import type { SynCloudOSPolicyDecision } from "../ConfigurationProfiles/policyTypes";
 import type { SynCloudOSDocumentStoreOperation } from "./documentStoreTypes";
 
 export class SynCloudOSDocumentStoreAccessError extends Error {

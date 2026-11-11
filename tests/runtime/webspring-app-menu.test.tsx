@@ -43,19 +43,21 @@ vi.mock("../../src/Webspring/webspringLocale", () => ({
 
 function createAppInfo(): SynCloudOSAppInfo {
   return {
-    id: "test-app",
+    bundleIdentifier: "com.example.test-app",
     displayName: "Test App",
     shortName: "Test",
     packageName: "com.test.app",
     frame: {
-      layout: "defacto",
       material: "standard",
       rightSlot: "userInfo",
+      background: "system",
       smoothSurface: "off",
       sourceList: undefined,
       topBar: "standard",
     },
     icon: { src: "/test.png" },
+    version: "1.0.0",
+    about: { copyright: "© Test", trademark: "", tagline: "A test app" },
     isDisabled: false,
     notifications: { badgeCount: 0, showsNotifications: false },
     presentation: "appView",
@@ -74,7 +76,7 @@ function createAppInfo(): SynCloudOSAppInfo {
 
 function renderAppMenu(mode: "desktop" | "mobile" = "desktop", strict = false) {
   const runtime = createTestRuntime();
-  runtime.apps.registerBundle(createTestBundle({ id: "test-app", displayName: "Test App", route: "/test" }));
+  runtime.apps.registerBundle(createTestBundle({ version: "1.0.0", bundleIdentifier: "com.example.test-app", displayName: "Test App", route: "/test" }));
   runtime.statechart.gotoState("active.application.active");
   runtime.store.mutate((draft) => { draft.responsive.mode = mode; });
   const validation = vi.spyOn(runtime.commands, "validateMany");
@@ -83,7 +85,7 @@ function renderAppMenu(mode: "desktop" | "mobile" = "desktop", strict = false) {
       <ApplicationStageView
         app={createAppInfo()}
         lifecycle="ready"
-        stage={{ appId: "test-app", id: "application-stage:test-app", title: "Test App", isFocused: true, zIndex: 10 }}
+        stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
       />
     </SynCloudOSProvider>
   );
@@ -110,7 +112,7 @@ describe("Webspring app menu", () => {
     expect(document.querySelector('[data-nse-overlay-kind="menu"]')).toBeTruthy();
     fireEvent.click(about);
 
-    await waitFor(() => expect(runtime.systemUI.getSnapshot().aboutAppId).toBe("test-app"));
+    await waitFor(() => expect(runtime.systemUI.getSnapshot().aboutAppId).toBe("com.example.test-app"));
     await waitFor(() => expect(document.querySelector('[data-nse-overlay-kind="menu"]')).toBeNull());
     expect(document.activeElement).toBe(trigger);
   });

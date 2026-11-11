@@ -1,0 +1,148 @@
+desktop-light: panel, sources, collection and three decoded thumbnails captured
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for getByText('Menus & Popups', { exact: true }).filter({ visible: true }).first()
+    - locator resolved to <span class="nse-control-list-primary">Menus & Popups</span>
+  - attempting click action
+    - waiting for element to be visible, enabled and stable
+    - element is visible, enabled and stable
+    - scrolling into view if needed
+    - done scrolling
+    - <div dir="ltr" role="tree" tabindex="0" aria-busy="false" data-state="ready" data-style="source-list" data-nse-rubberband="managed" data-nse-control="outline-view" aria-label="NSE control sections" class="nse-outline-view gallery-sidebar-list" aria-activedescendant="nse-outline-_r_19_-s12x00670072006f00750070003a00700061006e0065006c0073">…</div> intercepts pointer events
+  - retrying click action
+    - waiting for element to be visible, enabled and stable
+    - element is visible, enabled and stable
+    - scrolling into view if needed
+    - done scrolling
+    - <span class="nse-outline-group-label">Windows & Menus</span> from <div aria-level="1" role="treeitem" aria-setsize="1" aria-posinset="1" draggable="false" aria-expanded="false" data-nse-part="group-row" class="nse-outline-group-row" id="nse-outline-_r_19_-s12x00670072006f00750070003a00700061006e0065006c0073">…</div> subtree intercepts pointer events
+  - retrying click action
+    - waiting 20ms
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div dir="ltr" role="tree" tabindex="0" aria-busy="false" data-state="ready" data-style="source-list" data-nse-rubberband="managed" data-nse-control="outline-view" aria-label="NSE control sections" class="nse-outline-view gallery-sidebar-list" aria-activedescendant="nse-outline-_r_19_-s12x00670072006f00750070003a00700061006e0065006c0073">…</div> intercepts pointer events
+    - retrying click action
+      - waiting 100ms
+    14 × waiting for element to be visible, enabled and stable
+       - element is visible, enabled and stable
+       - scrolling into view if needed
+       - done scrolling
+       - <div dir="ltr" role="tree" tabindex="0" aria-busy="false" data-state="ready" data-style="source-list" data-nse-rubberband="managed" data-nse-control="outline-view" aria-label="NSE control sections" class="nse-outline-view gallery-sidebar-list" aria-activedescendant="nse-outline-_r_19_-s12x00670072006f00750070003a00700061006e0065006c0073">…</div> intercepts pointer events
+     - retrying click action
+       - waiting 500ms
+       - waiting for element to be visible, enabled and stable
+       - element is visible, enabled and stable
+       - scrolling into view if needed
+       - done scrolling
+       - <span class="nse-outline-group-label">Windows & Menus</span> from <div aria-level="1" role="treeitem" aria-setsize="1" aria-posinset="1" draggable="false" aria-expanded="false" data-nse-part="group-row" class="nse-outline-group-row" id="nse-outline-_r_19_-s12x00670072006f00750070003a00700061006e0065006c0073">…</div> subtree intercepts pointer events
+     - retrying click action
+       - waiting 500ms
+       - waiting for element to be visible, enabled and stable
+       - element is visible, enabled and stable
+       - scrolling into view if needed
+       - done scrolling
+       - <div dir="ltr" role="tree" tabindex="0" aria-busy="false" data-state="ready" data-style="source-list" data-nse-rubberband="managed" data-nse-control="outline-view" aria-label="NSE control sections" class="nse-outline-view gallery-sidebar-list" aria-activedescendant="nse-outline-_r_19_-s12x00670072006f00750070003a00700061006e0065006c0073">…</div> intercepts pointer events
+     - retrying click action
+       - waiting 500ms
+       - waiting for element to be visible, enabled and stable
+       - element is visible, enabled and stable
+       - scrolling into view if needed
+       - done scrolling
+       - <div dir="ltr" role="tree" tabindex="0" aria-busy="false" data-state="ready" data-style="source-list" data-nse-rubberband="managed" data-nse-control="outline-view" aria-label="NSE control sections" class="nse-outline-view gallery-sidebar-list" aria-activedescendant="nse-outline-_r_19_-s12x00670072006f00750070003a00700061006e0065006c0073">…</div> intercepts pointer events
+     - retrying click action
+       - waiting 500ms
+    - waiting for element to be visible, enabled and stable
+    - element is visible, enabled and stable
+    - scrolling into view if needed
+    - done scrolling
+    - <div dir="ltr" role="tree" tabindex="0" aria-busy="false" data-state="ready" data-style="source-list" data-nse-rubberband="managed" data-nse-control="outline-view" aria-label="NSE control sections" class="nse-outline-view gallery-sidebar-list" aria-activedescendant="nse-outline-_r_19_-s12x00670072006f00750070003a00700061006e0065006c0073">…</div> intercepts pointer events
+  - retrying click action
+    - waiting 500ms
+    - waiting for element to be visible, enabled and stable
+    - element is visible, enabled and stable
+    - scrolling into view if needed
+    - done scrolling
+    - <span class="nse-outline-group-label">Windows & Menus</span> from <div aria-level="1" role="treeitem" aria-setsize="1" aria-posinset="1" draggable="false" aria-expanded="false" data-nse-part="group-row" class="nse-outline-group-row" id="nse-outline-_r_19_-s12x00670072006f00750070003a00700061006e0065006c0073">…</div> subtree intercepts pointer events
+  - retrying click action
+    - waiting 500ms
+
+    at navigate (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\docs\superpowers\evidence\2026-11-07-foundation\open-ui-capture.mjs:28:88)
+    at async file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/docs/superpowers/evidence/2026-11-07-foundation/open-ui-capture.mjs:131:7 {
+  log: [
+    "  - waiting for getByText('Menus & Popups', { exact: true }).filter({ visible: true }).first()",
+    '    - locator resolved to <span class="nse-control-list-primary">Menus & Popups</span>',
+    '  - attempting click action',
+    '    - waiting for element to be visible, enabled and stable',
+    '    - element is visible, enabled and stable',
+    '    - scrolling into view if needed',
+    '    - done scrolling',
+    '    - <div dir="ltr" role="tree" tabindex="0" aria-busy="false" data-state="ready" data-style="source-list" data-nse-rubberband="managed" data-nse-control="outline-view" aria-label="NSE control sections" class="nse-outline-view gallery-sidebar-list" aria-activedescendant="nse-outline-_r_19_-s12x00670072006f00750070003a00700061006e0065006c0073">…</div> intercepts pointer events',
+    '  - retrying click action',
+    '    - waiting for element to be visible, enabled and stable',
+    '    - element is visible, enabled and stable',
+    '    - scrolling into view if needed',
+    '    - done scrolling',
+    '    - <span class="nse-outline-group-label">Windows & Menus</span> from <div aria-level="1" role="treeitem" aria-setsize="1" aria-posinset="1" draggable="false" aria-expanded="false" data-nse-part="group-row" class="nse-outline-group-row" id="nse-outline-_r_19_-s12x00670072006f00750070003a00700061006e0065006c0073">…</div> subtree intercepts pointer events',
+    '  - retrying click action',
+    '    - waiting 20ms',
+    '    2 × waiting for element to be visible, enabled and stable',
+    '      - element is visible, enabled and stable',
+    '      - scrolling into view if needed',
+    '      - done scrolling',
+    '      - <div dir="ltr" role="tree" tabindex="0" aria-busy="false" data-state="ready" data-style="source-list" data-nse-rubberband="managed" data-nse-control="outline-view" aria-label="NSE control sections" class="nse-outline-view gallery-sidebar-list" aria-activedescendant="nse-outline-_r_19_-s12x00670072006f00750070003a00700061006e0065006c0073">…</div> intercepts pointer events',
+    '    - retrying click action',
+    '      - waiting 100ms',
+    '    14 × waiting for element to be visible, enabled and stable',
+    '       - element is visible, enabled and stable',
+    '       - scrolling into view if needed',
+    '       - done scrolling',
+    '       - <div dir="ltr" role="tree" tabindex="0" aria-busy="false" data-state="ready" data-style="source-list" data-nse-rubberband="managed" data-nse-control="outline-view" aria-label="NSE control sections" class="nse-outline-view gallery-sidebar-list" aria-activedescendant="nse-outline-_r_19_-s12x00670072006f00750070003a00700061006e0065006c0073">…</div> intercepts pointer events',
+    '     - retrying click action',
+    '       - waiting 500ms',
+    '       - waiting for element to be visible, enabled and stable',
+    '       - element is visible, enabled and stable',
+    '       - scrolling into view if needed',
+    '       - done scrolling',
+    '       - <span class="nse-outline-group-label">Windows & Menus</span> from <div aria-level="1" role="treeitem" aria-setsize="1" aria-posinset="1" draggable="false" aria-expanded="false" data-nse-part="group-row" class="nse-outline-group-row" id="nse-outline-_r_19_-s12x00670072006f00750070003a00700061006e0065006c0073">…</div> subtree intercepts pointer events',
+    '     - retrying click action',
+    '       - waiting 500ms',
+    '       - waiting for element to be visible, enabled and stable',
+    '       - element is visible, enabled and stable',
+    '       - scrolling into view if needed',
+    '       - done scrolling',
+    '       - <div dir="ltr" role="tree" tabindex="0" aria-busy="false" data-state="ready" data-style="source-list" data-nse-rubberband="managed" data-nse-control="outline-view" aria-label="NSE control sections" class="nse-outline-view gallery-sidebar-list" aria-activedescendant="nse-outline-_r_19_-s12x00670072006f00750070003a00700061006e0065006c0073">…</div> intercepts pointer events',
+    '     - retrying click action',
+    '       - waiting 500ms',
+    '       - waiting for element to be visible, enabled and stable',
+    '       - element is visible, enabled and stable',
+    '       - scrolling into view if needed',
+    '       - done scrolling',
+    '       - <div dir="ltr" role="tree" tabindex="0" aria-busy="false" data-state="ready" data-style="source-list" data-nse-rubberband="managed" data-nse-control="outline-view" aria-label="NSE control sections" class="nse-outline-view gallery-sidebar-list" aria-activedescendant="nse-outline-_r_19_-s12x00670072006f00750070003a00700061006e0065006c0073">…</div> intercepts pointer events',
+    '     - retrying click action',
+    '       - waiting 500ms',
+    '    - waiting for element to be visible, enabled and stable',
+    '    - element is visible, enabled and stable',
+    '    - scrolling into view if needed',
+    '    - done scrolling',
+    '    - <div dir="ltr" role="tree" tabindex="0" aria-busy="false" data-state="ready" data-style="source-list" data-nse-rubberband="managed" data-nse-control="outline-view" aria-label="NSE control sections" class="nse-outline-view gallery-sidebar-list" aria-activedescendant="nse-outline-_r_19_-s12x00670072006f00750070003a00700061006e0065006c0073">…</div> intercepts pointer events',
+    '  - retrying click action',
+    '    - waiting 500ms',
+    '    - waiting for element to be visible, enabled and stable',
+    '    - element is visible, enabled and stable',
+    '    - scrolling into view if needed',
+    '    - done scrolling',
+    '    - <span class="nse-outline-group-label">Windows & Menus</span> from <div aria-level="1" role="treeitem" aria-setsize="1" aria-posinset="1" draggable="false" aria-expanded="false" data-nse-part="group-row" class="nse-outline-group-row" id="nse-outline-_r_19_-s12x00670072006f00750070003a00700061006e0065006c0073">…</div> subtree intercepts pointer events',
+    '  - retrying click action',
+    '    - waiting 500ms'
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v24.22.1
+
+exit: 1

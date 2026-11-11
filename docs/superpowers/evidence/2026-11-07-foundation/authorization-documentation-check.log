@@ -1,0 +1,3 @@
+docs/framework/authorization.md: manifest example valid
+docs/framework/synware-manifest.md: manifest example valid
+All five documents: relative links, stale API names and NSE button examples checked.

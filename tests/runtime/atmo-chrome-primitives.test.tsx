@@ -1,3 +1,4 @@
+import { createTestTheme } from "../fixtures/themes";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -19,65 +20,55 @@
  */
 
 // @vitest-environment jsdom
-import { defineNSEAppearance } from "@syndromatic/syncloudos/nse/appearance";
+
 import React from "react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import {
-  NSEAppearanceProvider, NSEChromeBevel, NSEChromeCap, NSEChromeGloss,
-  NSEChromeInnerShadow, NSEChromeSeparator, NSEChromeSplice, NSEChromeSurface,
-  useNSEAppearanceSlot, type NSEAppearanceDefinition,
-} from "../../src/NSE/Appearance";
-import { atmoAppearance } from "@syndromatic/syncloudos/nse/themes/atmo";
+import { NSEAppearanceProvider, NSEChromeBevel, NSEChromeCap, NSEChromeGloss, NSEChromeInnerShadow, NSEChromeSeparator, NSEChromeSplice, NSEChromeSurface, type NSETheme } from "../../src/NSE/Appearance";
+import { atmoTheme } from "@syndromatic/syncloudos/nse/themes/atmo";
 
-const customAppearance = defineNSEAppearance({ id: "custom-test", displayName: "Custom test", recipes: [
-  { slot: "toolbar.item.normal.1x", recipeId: "custom-test.toolbar.normal" },
-  { slot: "toolbar.item.selected.1x", recipeId: "custom-test.toolbar.selected" },
-] });
+const customAppearance = createTestTheme("com.example.custom-test", "Custom test");
 
 afterEach(cleanup);
-function Layers({ slotName = "toolbar.item.selected.1x" }: { slotName?: string }) {
-  const slot = useNSEAppearanceSlot(slotName);
+function Layers() {
   return <>
-    <NSEChromeSurface data-testid="surface" slot={slot} state="selected" />
-    <NSEChromeBevel data-testid="bevel" slot={slot} state="focused" />
-    <NSEChromeCap data-testid="cap" slot={slot} state="normal" />
-    <NSEChromeSplice data-testid="splice" slot={slot} state="normal" />
-    <NSEChromeSeparator data-testid="separator" slot={slot} state="disabled" />
-    <NSEChromeGloss data-testid="gloss" slot={slot} state="pressed" />
-    <NSEChromeInnerShadow data-testid="inner-shadow" slot={slot} state="selected" />
+    <NSEChromeSurface data-testid="surface" state="selected" />
+    <NSEChromeBevel data-testid="bevel" state="focused" />
+    <NSEChromeCap data-testid="cap" state="normal" />
+    <NSEChromeSplice data-testid="splice" state="normal" />
+    <NSEChromeSeparator data-testid="separator" state="disabled" />
+    <NSEChromeGloss data-testid="gloss" state="pressed" />
+    <NSEChromeInnerShadow data-testid="inner-shadow" state="selected" />
   </>;
 }
 
 describe("appearance-neutral chrome primitives", () => {
   it("projects inert semantic paint layers and keeps interaction state with the owner", () => {
-    render(<NSEAppearanceProvider appearance={atmoAppearance}><Layers /></NSEAppearanceProvider>);
+    render(<NSEAppearanceProvider theme={atmoTheme}><Layers /></NSEAppearanceProvider>);
     for (const id of ["surface", "bevel", "cap", "splice", "separator", "gloss", "inner-shadow"]) {
       const layer = screen.getByTestId(id);
       expect(layer.tagName).toBe("SPAN");
       expect(layer.getAttribute("aria-hidden")).toBe("true");
-      expect(layer.getAttribute("data-nse-appearance-slot")).toBe("toolbar.item.selected.1x");
+
       expect(layer.getAttribute("data-nse-chrome-primitive")).toBe(id);
+      expect(layer.hasAttribute("data-nse-part")).toBe(true);
       expect(layer.getAttribute("data-nse-chrome-active")).toBe("true");
       expect(layer.getAttribute("tabindex")).toBeNull();
-      expect(layer.getAttribute("data-nse-appearance-authority")).toBeNull();
+      expect(layer.getAttribute("data-nse-theme-authority")).toBeNull();
       expect(layer.getAttributeNames().some((name) => /source|lineage|provenance/.test(name))).toBe(false);
     }
     expect(screen.getByTestId("surface").getAttribute("data-nse-chrome-state")).toBe("selected");
     expect(screen.getByTestId("gloss").getAttribute("data-nse-chrome-state")).toBe("pressed");
   });
 
-  it("updates the selected recipe in place and disables paint for an unresolved slot", () => {
-    const fixture = (appearance: NSEAppearanceDefinition, slotName?: string) =>
-      <NSEAppearanceProvider appearance={appearance}><Layers slotName={slotName} /></NSEAppearanceProvider>;
-    const view = render(fixture(atmoAppearance));
+  it("retains inert paint layers when a different theme uses Atmo fallback", () => {
+    const fixture = (theme: NSETheme) => <NSEAppearanceProvider theme={theme}><Layers /></NSEAppearanceProvider>;
+    const view = render(fixture(atmoTheme));
     const layer = screen.getByTestId("surface");
     view.rerender(fixture(customAppearance));
     expect(screen.getByTestId("surface")).toBe(layer);
-    expect(layer.getAttribute("data-nse-chrome-appearance")).toBe("custom-test");
-    expect(layer.getAttribute("data-nse-appearance-recipe-id")).toBe("custom-test.toolbar.selected");
-    view.rerender(fixture(customAppearance, "tab-bar.tab.selected.1x"));
-    expect(layer.getAttribute("data-nse-chrome-active")).toBe("false");
-    expect(layer.getAttribute("data-nse-appearance-recipe-id")).toBeNull();
+    expect(layer.closest("[data-nse-theme]")?.getAttribute("data-nse-theme")).toBe("com.example.custom-test");
+    expect(layer.getAttribute("data-nse-chrome-active")).toBe("true");
+    expect(layer.getAttribute("data-nse-part")).toBe("background");
   });
 });

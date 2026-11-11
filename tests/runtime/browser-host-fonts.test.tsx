@@ -34,7 +34,7 @@ vi.mock("../../src/NSE/NSE", async importOriginal => ({
 }));
 
 const shell = defineWebspring({ manifest: {
-  schemaVersion: 1, id: "com.example.host-fonts", title: "Host fonts", version: "1.0.0",
+  schemaVersion: 1, bundleIdentifier: "com.example.host-fonts", displayName: "Host fonts", version: "1.0.0",
   webspringShell: { views: [{ id: "site", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }], defaults: { desktop: "site", tablet: "site", mobile: "site" }, homeRoute: "/", branding: { name: { key: "site.name", fallback: "Host fonts" } } },
 }, components: { site: () => null } });
 const families = [{ id: "example", label: "Example Site Typeface", defaultPresetId: "example-regular", presets: [{ id: "example-regular", label: "Regular", familyId: "example", family: '"Example Site Typeface", sans-serif', weight: 400, style: "normal" as const }] }];

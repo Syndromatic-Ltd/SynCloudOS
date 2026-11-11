@@ -28,6 +28,7 @@ import { sameNSETextGeometryRevision, snapshotNSETextGeometryRevision, type NSET
 import { sameNSETextCoordinateSpace } from "../TextLayout/textCoordinateSpaces";
 import { invertNSETextGeometryTransform, projectNSETextGeometryPoint, projectNSETextGeometryRect, type NSETextGeometryTransform } from "../TextLayout/textGeometryTransforms";
 import { normaliseRect } from "../../FX/GraphicsFX/GFXGeometry";
+import { SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "../../SynCloudOS/nseRuntimeContracts";
 
 export interface NSETextCompositionToken {
   readonly sessionId: string;
@@ -66,6 +67,11 @@ const activeInputHosts = new WeakMap<TextEditingSession, NSETextInputClient>();
 /** Platform input cooperation over a supplied canonical session; this class owns no content/history. */
 export class NSETextInputClient {
   readonly #options: NSETextInputClientOptions;
+  readonly #lifecycle = new SynCloudOSLifecycleRecord({ kind: "NSETextInputClient" });
+  readonly #ownerAbort = (event: Event): void => {
+    this.#lifecycle.markDisposed(synCloudOSLifecycleSignalReason(event.target as AbortSignal));
+    this.dispose();
+  };
   readonly #listeners = new Set<() => void>();
   readonly #unsubscribe: () => void;
   #snapshot: NSETextInputClientSnapshot;
@@ -82,9 +88,10 @@ export class NSETextInputClient {
     this.#options = options;
     this.#snapshot = this.#makeSnapshot();
     this.#unsubscribe = options.session.subscribe(() => this.#refresh());
-    options.signal?.addEventListener("abort", this.dispose, { once: true });
-    options.session.signal.addEventListener("abort", this.dispose, { once: true });
-    if (options.signal?.aborted || options.session.signal.aborted) this.dispose();
+    options.signal?.addEventListener("abort", this.#ownerAbort, { once: true });
+    options.session.signal.addEventListener("abort", this.#ownerAbort, { once: true });
+    const aborted = options.signal?.aborted ? options.signal : options.session.signal.aborted ? options.session.signal : undefined;
+    if (aborted) { this.#lifecycle.markDisposed(synCloudOSLifecycleSignalReason(aborted)); this.dispose(); }
   }
   getSnapshot = (): NSETextInputClientSnapshot => this.#snapshot;
   subscribe = (listener: () => void): (() => void) => {
@@ -126,7 +133,7 @@ export class NSETextInputClient {
   }
   beginComposition(): NSETextCompositionToken {
     const snapshot = this.#options.session.getSnapshot();
-    if (this.#disposed || snapshot.disposed) throw new Error("Text input client is disposed.");
+    if (this.#disposed || snapshot.disposed) throw this.#lifecycle.error({ code: "NSE_TEXT_INPUT_CLIENT_DISPOSED", operation: "beginComposition" });
     if (snapshot.marked) throw new Error("A marked draft is already active.");
     const range = snapshot.selection.range;
     const text = snapshot.model.text.slice(range.location, range.location + range.length);
@@ -223,7 +230,7 @@ export class NSETextInputClient {
     } catch (error) { return this.#pending(error instanceof Error ? error.message : String(error)); }
   }
   attachInputHost(provisionalRect: () => NSETextSpatialRect | null): () => void {
-    if (this.#disposed || this.#options.session.getSnapshot().disposed) throw new Error("Text input client is disposed.");
+    if (this.#disposed || this.#options.session.getSnapshot().disposed) throw this.#lifecycle.error({ code: "NSE_TEXT_INPUT_CLIENT_DISPOSED", operation: "attachInputHost" });
     if (this.#host || activeInputHosts.has(this.#options.session)) throw new Error("A text editing session already has an active input host.");
     this.#host = provisionalRect;
     activeInputHosts.set(this.#options.session, this);
@@ -236,11 +243,12 @@ export class NSETextInputClient {
   }
   dispose = (): void => {
     if (this.#disposed) return;
+    this.#lifecycle.markDisposed("explicit");
     if (this.#ownsMarked && !this.#options.session.getSnapshot().disposed) this.#options.session.cancelMarkedText();
     this.#disposed = true; this.#generation++; this.#token = null; this.#host = null;
     if (activeInputHosts.get(this.#options.session) === this) activeInputHosts.delete(this.#options.session);
-    this.#unsubscribe(); this.#options.signal?.removeEventListener("abort", this.dispose);
-    this.#options.session.signal.removeEventListener("abort", this.dispose);
+    this.#unsubscribe(); this.#options.signal?.removeEventListener("abort", this.#ownerAbort);
+    this.#options.session.signal.removeEventListener("abort", this.#ownerAbort);
     this.#refresh(); this.#listeners.clear();
   };
 

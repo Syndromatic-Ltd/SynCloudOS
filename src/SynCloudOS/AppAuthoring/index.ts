@@ -19,16 +19,16 @@
  */
 
 export {
-  useSynWareAppearance,
-  useSynWareColourPanel,
-  useSynWareCommands,
-  useSynWareDocument,
-  useSynWareDrag,
-  useSynWareLifecycle,
-  useSynWarePasteboard,
-  useSynWareService,
-  useSynWareAudio,
-  useSynWareWindow,
+  useAppearance,
+  useColourPanel,
+  useCommands,
+  useDocument,
+  useDrag,
+  useLifecycle,
+  usePasteboard,
+  useService,
+  useAudio,
+  useWindow,
 } from "../AppSDK";
 export type {
   SynWareAppearanceState,

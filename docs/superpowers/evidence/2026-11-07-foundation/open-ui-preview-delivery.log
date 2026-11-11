@@ -1,0 +1,4 @@
+11:06:10 [vite] (client) Forced re-optimization of dependencies
+  ➜  Local:   http://127.0.0.1:5199/
+11:07:17 [vite] (client) ✨ new dependencies optimized: @syndromatic/syncloudos/foundation
+11:07:17 [vite] (client) ✨ optimized dependencies changed. reloading

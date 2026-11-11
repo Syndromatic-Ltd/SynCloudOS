@@ -1,0 +1,33 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/theme-loading.test.tsx tests/runtime/nse-named-images.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/theme-loading.test.tsx (3 tests | 1 failed) 91ms
+     × resolves a named image against the view's theme and falls back part by part 12ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/theme-loading.test.tsx > theme boundaries > resolves a named image against the view's theme and falls back part by part
+AssertionError: expected '' to contain '/inner.svg'
+
+- Expected
++ Received
+
+- /inner.svg
+
+ ❯ tests/runtime/theme-loading.test.tsx:29:37
+     27|     render(<NSEAppearanceProvider theme={inner}><NSEControlImage image…
+     28|     const element = document.querySelector<HTMLElement>('[data-nse-ima…
+     29|     expect(element.style.maskImage).toContain("/inner.svg"); expect(el…
+       |                                     ^
+     30|     expect(element.style.width).toBe("17px"); expect(element.style.hei…
+     31|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 6 passed (7)
+   Start at  22:50:45
+   Duration  2.08s (transform 1.28s, setup 55ms, import 1.91s, tests 177ms, environment 1.64s)

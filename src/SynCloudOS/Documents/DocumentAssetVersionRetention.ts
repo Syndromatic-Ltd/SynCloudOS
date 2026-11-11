@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
+
+
 import type { DocumentStorageAdapter } from "./Adapters/documentAdapterTypes";
 import type { DocumentAssetRetentionRoot, DocumentAssetScope, DocumentAssetStore } from "./documentAssetTypes";
 import { assertDocumentAssetNotAborted, DocumentAssetError } from "./documentAssetErrors";
@@ -26,10 +29,10 @@ import { createBrowserDocumentAssetEnvironment } from "../PlatformAdapters/Brows
 import { documentAssetHash } from "./documentAssetValidation";
 
 async function identity(value: string, hash = createBrowserDocumentAssetEnvironment().hash): Promise<string> {
-  return documentAssetHash(await hash(new TextEncoder().encode(value))).slice("sha256:".length);
+  return documentAssetHash(await hash(NSEData.from(new TextEncoder().encode(value)))).slice("sha256:".length);
 }
 /** Stable root identity survives wrapper/kernel recreation; native providers own eviction. */
-export async function documentAssetNativeVersionRoot(adapterId: string, scope: DocumentAssetScope, record: Pick<DocumentRecord<unknown>, "location" | "version">, hash?: (bytes: Uint8Array) => Promise<string>): Promise<DocumentAssetRetentionRoot> {
+export async function documentAssetNativeVersionRoot(adapterId: string, scope: DocumentAssetScope, record: Pick<DocumentRecord<unknown>, "location" | "version">, hash?: (bytes: NSEData) => Promise<string>): Promise<DocumentAssetRetentionRoot> {
   const owner = await identity(JSON.stringify([adapterId, canonicalDocumentLocation(record.location)]), hash);
   const version = encodeURIComponent(canonicalDocumentJson(record.version));
   return Object.freeze({ scope, kind: "version", id: `native-version:${owner}:${version}` });
@@ -40,7 +43,7 @@ export async function reconcileDocumentAssetVersions(options: {
   readonly adapter: DocumentStorageAdapter;
   readonly store: DocumentAssetStore;
   readonly scopeForLocation: (location: DocumentLocation) => DocumentAssetScope;
-  readonly hash?: (bytes: Uint8Array) => Promise<string>;
+  readonly hash?: (bytes: NSEData) => Promise<string>;
 }, location: DocumentLocation, signal?: AbortSignal): Promise<number> {
   const capturedLocation = immutableDocumentValue(location);
   const scope = options.scopeForLocation(capturedLocation);
@@ -72,7 +75,7 @@ export async function releaseEvictedDocumentAssetVersions(options: {
   readonly adapter: DocumentStorageAdapter;
   readonly store: DocumentAssetStore;
   readonly scopeForLocation: (location: DocumentLocation) => DocumentAssetScope;
-  readonly hash?: (bytes: Uint8Array) => Promise<string>;
+  readonly hash?: (bytes: NSEData) => Promise<string>;
 }, location: DocumentLocation, versions: readonly DocumentVersion[], signal?: AbortSignal): Promise<number> {
   const capturedLocation = immutableDocumentValue(location);
   const capturedVersions = immutableDocumentValue(versions);

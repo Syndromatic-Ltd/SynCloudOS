@@ -36,12 +36,15 @@ import { fileURLToPath } from "node:url";
 import { build } from "vite";
 import { synWareSdkEntries, synWareSdkGeneratedStyles, synWareSdkStyles, synWarePackageName } from "./sdk-entries.mjs";
 import react from "@vitejs/plugin-react";
+import { builtInThemeCSS } from "./built-in-theme-css.mjs";
 import {
-  assertReviewedPackageFiles, assertSdkSourceUnchanged, assertTwelveFxPackageExports,
+  assertReviewedPackageFiles, assertSdkSourceUnchanged, assertFxPackageExports,
   captureSdkSourceFingerprint, createSdkPackageManifest, fingerprintSdkFiles, sdkDirectoryFiles,
 } from "./sdk-package-manifest.mjs";
 import { sdkNeutralStyleModuleSource, sdkPackageStyles } from "./sdk-package-styles.mjs";
+import { sdkBrowserDependencies } from "./sdk-browser-dependencies.mjs";
 import { assertPublicApiBoundaries } from "./public-api-boundaries.mjs";
+import { writeDeveloperSdkData, writeDeveloperMcpPackage } from "../developer-mcp/build-package.mjs";
 
 const repositoryRoot = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const outputRoot = resolve(repositoryRoot, ".artifacts/synapp-sdk");
@@ -122,9 +125,10 @@ function runDeclarationBuild() {
 }
 async function bundle({ entry, packageDirectory, themeNames }) {
   const escapedPackageName = synWarePackageName.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  const browserDependencies = sdkBrowserDependencies();
   const publicAliases = [
     ...Object.entries(synWareSdkEntries).map(([name, source]) => ({
-      find: new RegExp(`^${escapedPackageName}/${name}$`, "u"),
+      find: new RegExp(`^${escapedPackageName}${name === "index" ? "" : "/" + name}$`, "u"),
       replacement: resolve(repositoryRoot, source),
     })),
     ...Object.entries(synWareSdkStyles).map(([name, source]) => ({
@@ -147,6 +151,7 @@ async function bundle({ entry, packageDirectory, themeNames }) {
       define: { "process.env.NODE_ENV": JSON.stringify("production") },
       resolve: { alias: publicAliases },
       esbuild: { jsxDev: false },
+      css: { postcss: { plugins: [builtInThemeCSS()] } },
       plugins: [react(), bundledDependencyNotices(), sdkPackageStyles({
         themeNames,
         publicStyleEntries: synWareSdkGeneratedStyles,
@@ -161,7 +166,7 @@ async function bundle({ entry, packageDirectory, themeNames }) {
       // shared NSE styles/chunks into multi-megabyte base64 blobs.
       assetsInlineLimit: 0,
       outDir: packageDirectory,
-      sourcemap: false,
+      sourcemap: true,
       cssCodeSplit: true,
       lib: {
         entry,
@@ -169,8 +174,9 @@ async function bundle({ entry, packageDirectory, themeNames }) {
         fileName: (_format, entryName) => `${entryName}.js`,
       },
       rollupOptions: {
-        external: [/^harfbuzzjs(?:\/|$)/u, "oauth4webapi", "woff2-encoder/decompress", "react", "react-dom", "react-dom/client", "react/jsx-runtime", "react/jsx-dev-runtime"],
+        external: browserDependencies.external,
         output: {
+          sourcemapExcludeSources: false,
           banner: "/*! SynCloudOS: AGPL-3.0-or-later; SynWare SDK source: Apache-2.0. See LICENSE, NOTICE and licenses/. */",
           // Keep the runtime entry itself in a stable chunk without pulling its
           // entire transitive dependency graph (including AppSDK/AJV) into
@@ -251,14 +257,24 @@ function assertNoLeakage(directory) {
     if (!/\.(?:js|mjs|ts|mts|css|json|md|map)$/u.test(file)) continue;
     const text = readFileSync(resolve(directory, file), "utf8");
     // PDF.js's Emscripten codec uses this fixed virtual filesystem home; it is not a build-machine path.
-    const pathScanText = /^assets\/(?:pdf\.worker\.min|pdf-document\.worker)-[A-Za-z0-9_-]+\.js$/u.test(file)
+    let pathScanText = /^assets\/(?:pdf\.worker\.min|pdf-document\.worker)-[A-Za-z0-9_-]+\.js$/u.test(file)
       ? text.replaceAll('HOME:"/home/web_user"', 'HOME:"<wasm-virtual-home>"')
       : text;
-    if (text.includes(repositoryRoot) || /(?:^|[^A-Za-z])(?:[A-Za-z]:\\|\/Users\/|\/home\/)/u.test(pathScanText)) {
-      throw new TypeError(`SDK package leaked an absolute local path in ${file}.`);
+    if (file.endsWith(".map")) {
+      const map = JSON.parse(text);
+      if (map.version !== 3 || !Array.isArray(map.sources) || !Array.isArray(map.sourcesContent)
+        || map.sources.length !== map.sourcesContent.length || map.sourcesContent.some(source => typeof source !== "string")) {
+        throw new TypeError(`SDK source map must embed its original sources: ${file}.`);
+      }
+      if ([map.sourceRoot ?? "", ...map.sources].some(path => typeof path !== "string" || /^(?:[A-Za-z]:[\\/]|[\\/])/u.test(path))) {
+        throw new TypeError(`SDK source map leaked an absolute local path in ${file}.`);
+      }
+      // Original source text can contain path examples. Only map metadata
+      // describes build inputs and must not expose a build-machine path.
+      pathScanText = JSON.stringify({ sourceRoot: map.sourceRoot, sources: map.sources });
     }
-    if (file.endsWith(".map") || text.includes("sourceMappingURL")) {
-      throw new TypeError(`SDK package leaked a source map in ${file}.`);
+    if (pathScanText.includes(repositoryRoot) || /(?:^|[^A-Za-z])(?:[A-Za-z]:\\|\/Users\/|\/home\/)/u.test(pathScanText)) {
+      throw new TypeError(`SDK package leaked an absolute local path in ${file}.`);
     }
   }
 }
@@ -274,12 +290,14 @@ function writePackage({ directory, name, exports, dependencies = undefined }) {
     ["node_modules/woff2-encoder/LICENSE-THIRD-PARTY", "woff2-third-party.txt"],
   ]) cpSync(resolve(repositoryRoot, source), resolve(licenseDirectory, target));
   for (const file of ["LICENSE", "NOTICE", "THIRD_PARTY.md", "ARTWORK.md"]) cpSync(resolve(repositoryRoot, file), resolve(directory, file));
+  // Coding agents read AGENTS.md first; it is the shipped authoring contract, from one source.
+  cpSync(resolve(repositoryRoot, "docs/framework/authoring-contract.md"), resolve(directory, "AGENTS.md"));
   cpSync(resolve(repositoryRoot, "licenses"), resolve(directory, "licenses"), { recursive: true });
   mkdirSync(resolve(directory, "sdk"), { recursive: true });
   for (const file of ["LICENSE", "NOTICE", "package.json"]) {
     cpSync(resolve(repositoryRoot, "src/SynCloudOS/AppSDK", file), resolve(directory, "sdk", file));
   }
-  writeFileSync(resolve(directory, "README.md"), `# SynCloudOS\n\nSynCloudOS 1.0 Public Beta, the web application framework for TypeScript and React 19.\n\nInstall ${name}; import app capabilities from ${name}/sdk and NSE from ${name}/nse or its documented framework entry points. Import ${name}/nse/styles.css once for portable NSE controls. Browser hosts that call mountSynCloudOS must also import ${name}/browser/styles.css for application-stage layout/chrome. Webspring hosts additionally import ${name}/webspring/styles.css for the Board launcher and shell views. All entry points share one module graph, including React contexts.\n\nFramework-owned resources referenced by public package entries are emitted with the package and remain module-relative when a consumer bundles them. Concrete NSE themes remain explicit imports, so consumers ship only the theme resources they select.\n`, "utf8");
+  writeFileSync(resolve(directory, "README.md"), `# SynCloudOS\n\nSynCloudOS 1.0 Public Beta, the web application framework for TypeScript and React 19.\n\nInstall ${name}; import SCOS, useSCOS, reactive hooks and folder declarations from ${name}, and NSE from ${name}/nse or its focused entries. An application folder default-exports an NSEApplication subclass (class authoring is the default; a function component is an explicit opt-in). AGENTS.md is the authoring contract: NSE controls, neutral appearance values with Atmo as default or a custom theme in light and dark, documents for primary state, managed tasks and display links. Info.ts is required and declares bundleIdentifier, displayName and version; schemaVersion defaults to 1, and icon and locale files are discovered. The synCloudOS() Vite plugin discovers applications, preference panes, widgets, integrations and the optional Webspring shell, then supplies the project to mountSynCloudOS automatically. See docs/framework/project-structure.md and docs/framework/getting-started.md.\n\nImport ${name}/nse/styles.css once for portable NSE controls, and ${name}/browser/styles.css for browser hosting. Use mountSynCloudOS({ element, application: { bundleIdentifier, frame } }) with synCloudOS({ webspringEntry: false }) for an application-only host; omit application to use the discovered shell. An explicit composition supports hosts without the discovery plugin; importing browser does not require a virtual module. Application and shell modes are mutually exclusive. The primary fills the page (frame \"fullscreen\", the default) or keeps its manifest presentation (frame \"declared\"); secondary apps present in windows. Authenticated fullscreen primaries declare applicationMenu.trigger: \"content\" and render a useApplicationMenuTrigger() button so users can reach Preferences and Account. Private applications stay private unless their manifest explicitly requests public access. Webspring hosts additionally import ${name}/webspring/styles.css. All entries share one module graph, including React contexts.\n\nFramework-owned resources remain module-relative when a consumer bundles them. Concrete NSE themes are explicit imports. SDK testing helpers, including createSynWare, live at ${name}/sdk/testing, not the production authoring entry.\n`, "utf8");
   const files = packageFiles(directory);
   assertReviewedPackageFiles(files);
   const repositoryManifest = JSON.parse(readFileSync(resolve(repositoryRoot, "package.json"), "utf8"));
@@ -347,7 +365,7 @@ async function main() {
     .map(([name, source]) => [name, resolve(repositoryRoot, source)]));
   // One graph preserves React context identity. CSS is attached only to the
   // chunks that own it; importing NSE alone does not select any theme.
-  await bundle({ entry: { ...frameworkEntries, "nse/styles": neutralStyleEntry }, packageDirectory: directory, themeNames: [...themeEntryNames] });
+  await bundle({ entry: { ...frameworkEntries, "nse/styles": neutralStyleEntry, "fx-attribution-runtime": resolve(repositoryRoot, "src/SynCloudOS/AppSDK/fx/runtime.ts") }, packageDirectory: directory, themeNames: [...themeEntryNames] });
   const typesDirectory = resolve(directory, "types");
   cpSync(declarationRoot, typesDirectory, {
     recursive: true,
@@ -364,14 +382,42 @@ async function main() {
     const depth = name.split("/").length - 1;
     const prefix = depth ? "../".repeat(depth) : "./";
     writeFileSync(resolve(directory, declaration), `export * from "${prefix}types/${source.replace(/^src\//u, "").replace(/\.tsx?$/u, ".js")}";\n`, "utf8");
-    exports[`./${name}`] = { types: `./${declaration}`, import: `./${name}.js` };
+    exports[name === "index" ? "." : `./${name}`] = { types: `./${declaration}`, import: `./${name}.js` };
   }
   exports["./nse/styles.css"] = "./nse/styles.css";
   for (const name of Object.keys(synWareSdkStyles)) exports[`./${name}`] = `./${name}`;
   for (const name of Object.keys(synWareSdkGeneratedStyles)) exports[`./${name}`] = `./${name}`;
   mkdirSync(resolve(typesDirectory, "NSE/Typography"), { recursive: true });
   for (const extension of ["mjs", "d.mts"]) cpSync(resolve(repositoryRoot, `src/NSE/Typography/fontDeclaration.${extension}`), resolve(typesDirectory, `NSE/Typography/fontDeclaration.${extension}`));
-  writeFileSync(resolve(directory, "vite.mjs"), readFileSync(resolve(repositoryRoot, "scripts/synware/vite-plugin.mjs"), "utf8").replace("../../src/NSE/Typography/fontDeclaration.mjs", "./types/NSE/Typography/fontDeclaration.mjs"));
+  writeFileSync(resolve(directory, "vite.mjs"), readFileSync(resolve(repositoryRoot, "scripts/synware/vite-plugin.mjs"), "utf8")
+    .replace("../../src/NSE/Typography/fontDeclaration.mjs", "./types/NSE/Typography/fontDeclaration.mjs")
+    .replace("../../src/SynCloudOS/AppSDK/scos/appModuleSource.mjs", "./app-module-source.mjs")
+    .replace("../../src/SynCloudOS/AppSDK/fx/fxAppModuleSource.mjs", "./fx-app-module-source.mjs")
+    .replace("../../src/SynCloudOS/AppSDK/fx/runtime.ts", "./fx-attribution-runtime.js")
+    .replace("../../src/SynCloudOS/AppSDK/manifest/synappManifestValidator.generated.mjs", "./manifest-validator.mjs")
+    .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs"));
+  for (const file of ["theme-bundles.mjs","theme-loading.mjs","built-in-theme-css.mjs","bundle-paths.mjs","project-derivation.mjs","manifest-source.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs","pwa-plugin.mjs"]) {
+    writeFileSync(resolve(directory, file), readFileSync(resolve(repositoryRoot, "scripts/synware", file), "utf8")
+      .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs")
+      .replace("../../src/SynCloudOS/InstalledApplications/webAppManifest.mjs", "./web-app-manifest.mjs")
+      .replace("../../src/SynCloudOS/InstalledApplications/serviceWorker.mjs", "./service-worker.mjs")
+      .replace('new URL("../../tooling/nse-theme-contract.json", import.meta.url)', 'new URL("./tooling/nse-theme-contract.json", import.meta.url)'));
+  }
+  cpSync(resolve(repositoryRoot, "src/SynCloudOS/InstalledApplications/webAppManifest.mjs"), resolve(directory, "web-app-manifest.mjs"));
+  cpSync(resolve(repositoryRoot, "src/SynCloudOS/InstalledApplications/serviceWorker.mjs"), resolve(directory, "service-worker.mjs"));
+  cpSync(resolve(repositoryRoot, "src/SynCloudOS/Identity/bundleIdentifier.mjs"), resolve(directory, "bundleIdentifier.mjs"));
+  mkdirSync(resolve(typesDirectory, "SynCloudOS/Identity"), { recursive: true });
+  for (const extension of ["mjs", "d.mts"]) cpSync(resolve(repositoryRoot, `src/SynCloudOS/Identity/bundleIdentifier.${extension}`), resolve(typesDirectory, `SynCloudOS/Identity/bundleIdentifier.${extension}`));
+  cpSync(resolve(repositoryRoot, "src/SynCloudOS/AppSDK/scos/appModuleSource.mjs"), resolve(directory, "app-module-source.mjs"));
+  writeFileSync(resolve(directory, "fx-app-module-source.mjs"), readFileSync(resolve(repositoryRoot, "src/SynCloudOS/AppSDK/fx/fxAppModuleSource.mjs"), "utf8")
+    .replace('new URL("../../../FX/", import.meta.url)', 'new URL("./types/FX/", import.meta.url)')
+    .replace('const entryName = "public.ts"', 'const entryName = "public.d.ts"'));
+  cpSync(resolve(repositoryRoot, "src/SynCloudOS/AppSDK/manifest/synappManifestValidator.generated.mjs"), resolve(directory, "manifest-validator.mjs"));
+  cpSync(resolve(repositoryRoot, "scripts/synware/virtual-themes.d.ts"), resolve(typesDirectory, "virtual-themes.d.ts"));
+  // Atmo.scostheme as source: the reference theme the developer MCP scaffolds new themes from and validates against.
+  cpSync(resolve(repositoryRoot, "src/Themes/Atmo.scostheme"), resolve(directory, "themes/Atmo.scostheme"), { recursive: true });
+  // Atmo.scostheme as source: the reference theme the developer MCP scaffolds new themes from and validates against.
+  cpSync(resolve(repositoryRoot, "src/Themes/Atmo.scostheme"), resolve(directory, "themes/Atmo.scostheme"), { recursive: true });
   cpSync(resolve(repositoryRoot, "scripts/synware/vite-plugin.d.mts"), resolve(typesDirectory, "vite.d.mts"));
   exports["./vite"] = { types: "./types/vite.d.mts", import: "./vite.mjs" };
   if (!existsSync(resolve(directory, "nse/styles.css"))) throw new Error("SynWare SDK did not emit its required NSE stylesheet.");
@@ -381,17 +427,26 @@ async function main() {
   const repositoryManifest = JSON.parse(readFileSync(resolve(repositoryRoot, "package.json"), "utf8"));
   // These libraries occur in emitted public declarations even when runtime code is bundled.
   const dependencies = Object.fromEntries(["@floating-ui/dom", "@tiptap/pm", "framer-motion", "harfbuzzjs", "oauth4webapi", "pdf-lib", "woff2-encoder"].map((name) => [name, repositoryManifest.dependencies[name]]));
-  assertTwelveFxPackageExports(exports);
+  dependencies.typescript = repositoryManifest.devDependencies.typescript;
+  dependencies["css-tree"] = repositoryManifest.devDependencies["css-tree"];
+  dependencies.saxes = repositoryManifest.devDependencies.saxes;
+  assertFxPackageExports(exports);
+  await writeDeveloperSdkData({ repositoryRoot, directory, commit, source });
   writePackage({ directory, name: synWarePackageName, exports, dependencies });
   const resources = fingerprintSdkFiles(directory, sdkDirectoryFiles(directory));
   const artifact = packPackage(directory);
+  const mcpDirectory = resolve(packageRoot, "syncloudos-developer-mcp");
+  const sdkVersion = JSON.parse(readFileSync(resolve(directory, "package.json"), "utf8")).version;
+  const mcpPackage = writeDeveloperMcpPackage({ repositoryRoot, directory: mcpDirectory, sdkVersion });
+  assertNoLeakage(mcpDirectory);
+  const developerMcp = { package: mcpPackage.name, version: sdkVersion, ...packPackage(mcpDirectory) };
   const entries = Object.fromEntries(Object.keys(synWareSdkEntries).map((name) => [
-    `${synWarePackageName}/${name}`,
+    name === "index" ? synWarePackageName : `${synWarePackageName}/${name}`,
     { archive: artifact.archive, index: hashFile(resolve(directory, `${name}.js`)), types: hashFile(resolve(directory, `${name}.d.ts`)) },
   ]));
   assertSdkSourceUnchanged(source, captureSdkSourceFingerprint(repositoryRoot));
   if (commitHash() !== commit) throw new Error("SDK HEAD changed during build; no manifest published.");
-  const manifest = { schemaVersion: 2, commit, package: synWarePackageName, ...artifact, source, resources, entries };
+  const manifest = { schemaVersion: 2, commit, package: synWarePackageName, ...artifact, source, resources, entries, developerMcp };
   const pendingManifest = resolve(outputRoot, `build-manifest.${process.pid}.tmp`);
   writeFileSync(pendingManifest, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
   renameSync(pendingManifest, resolve(outputRoot, "build-manifest.json"));

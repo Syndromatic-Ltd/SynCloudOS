@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
+
+
 export type MIFXAuthorizationState =
   | "unknown"
   | "granted"
@@ -60,7 +63,7 @@ export interface MIFXEndpointSnapshot {
 
 export interface MIFXInputPacket {
   readonly endpoint: MIFXEndpointSnapshot;
-  readonly data: Uint8Array;
+  readonly data: NSEData;
   readonly receivedAtMilliseconds: number | null;
 }
 
@@ -77,10 +80,11 @@ export interface MIFXInputSubscription extends MIFXSubscription {
 
 export interface MIFXOutputLease extends MIFXSubscription {
   readonly endpoint: MIFXEndpointSnapshot;
-  send(data: Uint8Array, timestampMilliseconds?: number): void;
+  send(data: NSEDataConvertible, timestampMilliseconds?: number): void;
 }
 
 export interface MIFXAccess extends MIFXSubscription {
+  readonly authorizationStatus: MIFXAuthorizationState;
   getCapabilities(): MIFXCapabilities;
   getEndpoints(): readonly MIFXEndpointSnapshot[];
   requestAuthorization(request?: MIFXAuthorizationRequest): Promise<MIFXAuthorizationResult>;

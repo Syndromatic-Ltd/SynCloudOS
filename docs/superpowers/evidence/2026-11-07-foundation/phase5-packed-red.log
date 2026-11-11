@@ -1,0 +1,84 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/phase5-packed.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/phase5-packed.test.ts (1 test | 1 failed) 16ms
+   × loads all six new FX roots and hooks from an independently installed SDK archive 16ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/phase5-packed.test.ts > loads all six new FX roots and hooks from an independently installed SDK archive
+AssertionError: SDK manifest must contain all thirteen FX entries.
++ actual - expected
+... Skipped lines
+
+  [
+    '@syndromatic/syncloudos/fx/animation',
+    '@syndromatic/syncloudos/fx/audio',
+-   '@syndromatic/syncloudos/fx/bluetooth',
+    '@syndromatic/syncloudos/fx/compression',
+-   '@syndromatic/syncloudos/fx/contacts',
+-   '@syndromatic/syncloudos/fx/crypto',
+    '@syndromatic/syncloudos/fx/graphics',
+    '@syndromatic/syncloudos/fx/haptics',
+    '@syndromatic/syncloudos/fx/image',
+    '@syndromatic/syncloudos/fx/location',
+    '@syndromatic/syncloudos/fx/lumina',
+...
+    '@syndromatic/syncloudos/fx/motion',
+-   '@syndromatic/syncloudos/fx/network',
+-   '@syndromatic/syncloudos/fx/nfc',
+-   '@syndromatic/syncloudos/fx/pass',
+-   '@syndromatic/syncloudos/fx/speech',
+    '@syndromatic/syncloudos/fx/text',
+    '@syndromatic/syncloudos/fx/video',
+-   '@syndromatic/syncloudos/fx/xr'
+  ]
+
+
+- Expected
++ Received
+
+  [
+    "@syndromatic/syncloudos/fx/animation",
+    "@syndromatic/syncloudos/fx/audio",
+-   "@syndromatic/syncloudos/fx/bluetooth",
+    "@syndromatic/syncloudos/fx/compression",
+-   "@syndromatic/syncloudos/fx/contacts",
+-   "@syndromatic/syncloudos/fx/crypto",
+    "@syndromatic/syncloudos/fx/graphics",
+    "@syndromatic/syncloudos/fx/haptics",
+    "@syndromatic/syncloudos/fx/image",
+    "@syndromatic/syncloudos/fx/location",
+    "@syndromatic/syncloudos/fx/lumina",
+    "@syndromatic/syncloudos/fx/media",
+    "@syndromatic/syncloudos/fx/midi",
+    "@syndromatic/syncloudos/fx/motion",
+-   "@syndromatic/syncloudos/fx/network",
+-   "@syndromatic/syncloudos/fx/nfc",
+-   "@syndromatic/syncloudos/fx/pass",
+-   "@syndromatic/syncloudos/fx/speech",
+    "@syndromatic/syncloudos/fx/text",
+    "@syndromatic/syncloudos/fx/video",
+-   "@syndromatic/syncloudos/fx/xr",
+  ]
+
+ ❯ readVerifiedSdkArchive scripts/synware/installed-consumer.mjs:77:10
+     75|   const entries = manifest.entries;
+     76|   assert(entries && typeof entries === "object", "Missing SDK entry fi…
+     77|   assert.deepEqual(Object.keys(entries).filter(key => /^fx\/[^/]+$/u.t…
+       |          ^
+     78|     requiredFxFamilies.map(family => `${manifest.package}/fx/${family}…
+     79|   assert.deepEqual(Object.keys(entries).filter(key => /^fx\/[^/]+\//u.…
+ ❯ createInstalledConsumer scripts/synware/installed-consumer.mjs:119:20
+ ❯ tests/runtime/fx/phase5-packed.test.ts:27:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  19:42:52
+   Duration  187ms (transform 35ms, setup 26ms, import 26ms, tests 16ms, environment 0ms)
+

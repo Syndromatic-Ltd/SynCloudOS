@@ -7,6 +7,30 @@
   "exclusions": [],
   "aliases": [
     {
+      "find": "@syndromatic/syncloudos/authentication-services",
+      "replacement": "src/SynCloudOS/AuthenticationServices/index.ts"
+    },
+    {
+      "find": "@syndromatic/syncloudos/auth/passkey",
+      "replacement": "src/SynCloudOS/Authentication/providers/passkey/index.ts"
+    },
+    {
+      "find": "@syndromatic/syncloudos/fx/network",
+      "replacement": "src/FX/NetworkFX/public.ts"
+    },
+    {
+      "find": "@syndromatic/syncloudos/fx/dispatch",
+      "replacement": "src/FX/DispatchFX/public.ts"
+    },
+    {
+      "find": "@syndromatic/syncloudos/fx/crypto",
+      "replacement": "src/FX/CryptoFX/public.ts"
+    },
+    {
+      "find": "@syndromatic/syncloudos",
+      "replacement": "src/SynCloudOS/AppSDK/rootPackageEntry.ts"
+    },
+    {
       "find": "@syndromatic/syncloudos/sdk",
       "replacement": "src/SynCloudOS/AppSDK/sdkPackageEntry.ts"
     },
@@ -35,16 +59,20 @@
       "replacement": "src/NSE/public/content.ts"
     },
     {
+      "find": "@syndromatic/syncloudos/nse/theme",
+      "replacement": "src/NSE/public/theme.ts"
+    },
+    {
       "find": "@syndromatic/syncloudos/nse/appearance",
       "replacement": "src/NSE/public/appearance.ts"
     },
     {
       "find": "@syndromatic/syncloudos/nse/themes/atmo",
-      "replacement": "src/NSE/Themes/Atmo/index.ts"
+      "replacement": "src/NSE/Appearance/atmo.ts"
     },
     {
       "find": "@syndromatic/syncloudos/nse/themes/atmo/styles.css",
-      "replacement": "src/NSE/Themes/Atmo/Resources/atmo.css"
+      "replacement": "src/NSE/Appearance/atmo-theme.css"
     },
     {
       "find": "@syndromatic/syncloudos/nse/text",
@@ -65,10 +93,6 @@
     {
       "find": "@syndromatic/syncloudos/nse/layout",
       "replacement": "src/NSE/public/layout.ts"
-    },
-    {
-      "find": "@syndromatic/syncloudos/nse/cover-flow",
-      "replacement": "src/NSE/public/cover-flow.ts"
     },
     {
       "find": "@syndromatic/syncloudos/nse/system-ui",
@@ -119,8 +143,40 @@
       "replacement": "src/FX/LocationFX/public.ts"
     },
     {
+      "find": "@syndromatic/syncloudos/fx/bluetooth",
+      "replacement": "src/FX/BluetoothFX/public.ts"
+    },
+    {
+      "find": "@syndromatic/syncloudos/fx/nfc",
+      "replacement": "src/FX/NFCFX/public.ts"
+    },
+    {
+      "find": "@syndromatic/syncloudos/fx/speech",
+      "replacement": "src/FX/SpeechFX/public.ts"
+    },
+    {
+      "find": "@syndromatic/syncloudos/fx/contacts",
+      "replacement": "src/FX/ContactsFX/public.ts"
+    },
+    {
+      "find": "@syndromatic/syncloudos/fx/pass",
+      "replacement": "src/FX/PassFX/public.ts"
+    },
+    {
+      "find": "@syndromatic/syncloudos/fx/xr",
+      "replacement": "src/FX/XRFX/public.ts"
+    },
+    {
       "find": "@syndromatic/syncloudos/fx/lumina",
       "replacement": "src/FX/LuminaFX/public.ts"
+    },
+    {
+      "find": "@syndromatic/syncloudos/foundation",
+      "replacement": "src/Foundation/public.ts"
+    },
+    {
+      "find": "@syndromatic/syncloudos/fx/compression",
+      "replacement": "src/FX/CompressionFX/public.ts"
     }
   ],
   "runtimeGlobalBoundary": {
@@ -132,6 +188,7 @@
       "src/SynCloudOS/PlatformAdapters/BrowserPointerAdapter.ts",
       "src/SynCloudOS/PlatformAdapters/browserPointerAdapterTypes.ts",
       "src/SynCloudOS/PlatformAdapters/BrowserAuthenticationEnvironment.ts",
+      "src/SynCloudOS/PlatformAdapters/BrowserPasskeyAuthorization.ts",
       "src/SynCloudOS/PlatformAdapters/AUFXAudioWorkletTransport.ts",
       "src/SynCloudOS/PlatformAdapters/BrowserHapticsAdapter.ts",
       "src/SynCloudOS/PlatformAdapters/BrowserTestingClock.ts",
@@ -182,6 +239,27 @@
   },
   "layers": [
     {
+      "id": "foundation",
+      "include": [
+        "src/Foundation/**"
+      ],
+      "mayImportLayers": [
+        "foundation"
+      ],
+      "mayImportEntrypoints": {}
+    },
+    {
+      "id": "bundle-identity",
+      "include": [
+        "src/SynCloudOS/Identity/bundleIdentifier.mjs",
+        "src/SynCloudOS/Identity/bundleIdentifier.d.mts"
+      ],
+      "mayImportLayers": [
+        "bundle-identity"
+      ],
+      "mayImportEntrypoints": {}
+    },
+    {
       "id": "sdk-build-config",
       "include": [
         "scripts/synware/sdk-entries.mjs",
@@ -197,9 +275,24 @@
         "src/SynCloudOS/AppSDK/manifest/**"
       ],
       "mayImportLayers": [
-        "synapp-contract"
+        "synapp-contract",
+        "bundle-identity"
       ],
-      "mayImportEntrypoints": {}
+      "mayImportEntrypoints": {
+        "bundle-identity": [
+          "src/SynCloudOS/Identity/bundleIdentifier.mjs",
+          "src/SynCloudOS/Identity/bundleIdentifier.d.mts"
+        ]
+      }
+    },
+    {
+      "id": "contacts-ui",
+      "include": ["src/FX/ContactsFX/CNFXContactPickerViewController.ts"],
+      "mayImportLayers": ["fx", "runtime", "nse"],
+      "mayImportEntrypoints": {
+        "runtime": ["src/SynCloudOS/fxRuntimeContracts.ts"],
+        "nse": ["src/NSE/Application/NSEViewController.ts", "src/NSE/Application/nativePresentation.ts"]
+      }
     },
     {
       "id": "fx",
@@ -207,9 +300,16 @@
         "src/FX/**"
       ],
       "mayImportLayers": [
-        "fx"
+        "fx",
+        "contacts-ui",
+        "runtime",
+        "foundation"
       ],
-      "mayImportEntrypoints": {}
+      "mayImportEntrypoints": {
+        "runtime": [
+          "src/SynCloudOS/fxRuntimeContracts.ts"
+        ]
+      }
     },
     {
       "id": "runtime-inspector",
@@ -220,11 +320,17 @@
       ],
       "mayImportLayers": [
         "runtime-inspector",
-        "runtime"
+        "runtime",
+        "bundle-identity",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "runtime": [
           "src/SynCloudOS/SynCloudOS.ts"
+        ],
+        "bundle-identity": [
+          "src/SynCloudOS/Identity/bundleIdentifier.mjs",
+          "src/SynCloudOS/Identity/bundleIdentifier.d.mts"
         ]
       }
     },
@@ -236,7 +342,8 @@
       "mayImportLayers": [
         "runtime-host-seams",
         "runtime",
-        "fx"
+        "fx",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "runtime": [
@@ -261,7 +368,8 @@
           "src/SynCloudOS/AnimationFX/renderedCanvasCapture.ts",
           "src/SynCloudOS/Documents/documentAssetErrors.ts",
           "src/SynCloudOS/Documents/documentEditAdmission.ts",
-          "src/SynCloudOS/Documents/DocumentAssetDocumentBinding.ts"
+          "src/SynCloudOS/Documents/DocumentAssetDocumentBinding.ts",
+          "src/SynCloudOS/Privacy/index.ts"
         ],
         "fx": [
           "src/FX/AnimationFX/AFXRenderer.ts"
@@ -278,6 +386,9 @@
         "src/SynCloudOS/AppSDK/mountedAudioGraphs.ts",
         "src/SynCloudOS/AppSDK/mountedAudioFiles.ts",
         "src/SynCloudOS/AppSDK/mountedLocationClient.ts",
+        "src/SynCloudOS/AppSDK/mountedNetworkPort.ts",
+        "src/SynCloudOS/AppSDK/mountedAudioSpeechClient.ts",
+        "src/SynCloudOS/AppSDK/mountedVideoPresentationClient.ts",
         "src/SynCloudOS/AppSDK/mountedLuminaClient.ts",
         "src/SynCloudOS/AppSDK/mountedMIDIClient.ts",
         "src/SynCloudOS/AppSDK/mountedMediaClient.ts",
@@ -287,7 +398,14 @@
         "src/SynCloudOS/AppSDK/appRuntimeFacade.ts",
         "src/SynCloudOS/AppSDK/createSynWareContextValue.ts",
         "src/SynCloudOS/AppSDK/SynWareRuntimeMount.tsx",
-        "src/SynCloudOS/AppSDK/manifest/projectRuntimeManifest.ts"
+        "src/SynCloudOS/AppSDK/manifest/projectRuntimeManifest.ts",
+        "src/SynCloudOS/AppHosting/**",
+        "src/SynCloudOS/AppSDK/mountedBluetoothPort.ts",
+        "src/SynCloudOS/AppSDK/mountedNFCPort.ts",
+        "src/SynCloudOS/AppSDK/mountedSpeechPort.ts",
+        "src/SynCloudOS/AppSDK/mountedContactsPort.ts",
+        "src/SynCloudOS/AppSDK/mountedPaymentPort.ts",
+        "src/SynCloudOS/AppSDK/mountedXRPort.ts"
       ],
       "mayImportLayers": [
         "app-sdk-host",
@@ -298,7 +416,9 @@
         "react",
         "nse",
         "synapp-contract",
-        "devtools"
+        "devtools",
+        "bundle-identity",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "runtime-host-seams": [
@@ -316,7 +436,13 @@
           "src/SynCloudOS/Runtime/runtimeInstanceTypes.ts",
           "src/SynCloudOS/Documents/index.ts",
           "src/SynCloudOS/FilePanels/index.ts",
-          "src/SynCloudOS/AnimationFX/scopedAnimationFrames.ts"
+          "src/SynCloudOS/AnimationFX/scopedAnimationFrames.ts",
+          "src/SynCloudOS/ErrorManager/lifecycleError.ts",
+          "src/SynCloudOS/nseRuntimeContracts.ts",
+          "src/SynCloudOS/Lifecycle/applicationLifecycleHooks.ts",
+          "src/SynCloudOS/Lifecycle/lifecycleTypes.ts",
+          "src/SynCloudOS/Persistence/Persistence.ts",
+          "src/SynCloudOS/Testing/hostDiagnosticsProvision.ts"
         ],
         "react": [
           "src/SynCloudOSReact/index.ts",
@@ -327,10 +453,15 @@
         ],
         "nse": [
           "src/NSE/NSE.ts",
-          "src/NSE/Animation/index.ts"
+          "src/NSE/Animation/index.ts",
+          "src/NSE/applicationHostInterop.ts"
         ],
         "synapp-contract": [
           "src/SynCloudOS/AppSDK/manifest/manifestTypes.ts"
+        ],
+        "bundle-identity": [
+          "src/SynCloudOS/Identity/bundleIdentifier.mjs",
+          "src/SynCloudOS/Identity/bundleIdentifier.d.mts"
         ]
       }
     },
@@ -355,7 +486,10 @@
         "synapps",
         "webspring",
         "app-sdk-host",
-        "runtime-host-seams"
+        "runtime-host-seams",
+        "bundle-identity",
+        "browser-host",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "runtime": [
@@ -369,7 +503,7 @@
           "src/SynCloudOS/Documents/index.ts",
           "src/SynCloudOS/DocumentStore/index.ts",
           "src/SynCloudOS/Documents/DocumentErrors.ts",
-          "src/SynCloudOS/PolicyKit/policyTypes.ts",
+          "src/SynCloudOS/ConfigurationProfiles/policyTypes.ts",
           "src/SynCloudOS/PermissionManager/permissionTypes.ts",
           "src/SynCloudOS/LocaleServices/LocaleServices.ts",
           "src/SynCloudOS/Appearance/useAppearance.ts",
@@ -380,7 +514,10 @@
           "src/SynCloudOS/Windows/index.ts",
           "src/SynCloudOS/Windows/windowTypes.ts",
           "src/SynCloudOS/FilePanels/index.ts",
-          "src/SynCloudOS/Resources/frameworkAssets.ts"
+          "src/SynCloudOS/Resources/frameworkAssets.ts",
+          "src/SynCloudOS/ErrorManager/lifecycleError.ts",
+          "src/SynCloudOS/Preferences/index.ts",
+          "src/SynCloudOS/SystemUI/alertCenter.ts"
         ],
         "react": [
           "src/SynCloudOSReact/index.ts",
@@ -400,7 +537,9 @@
           "src/NSE/Menus/index.ts",
           "src/NSE/Typography/index.ts",
           "src/NSE/Chronosphere/hostComposition.ts",
-          "src/NSE/public/text.ts"
+          "src/NSE/public/text.ts",
+          "src/NSE/applicationHostInterop.ts",
+          "src/NSE/sdkPackageEntry.ts"
         ],
         "appearance": [
           "src/NSE/Appearance/index.ts"
@@ -411,14 +550,24 @@
         ],
         "webspring": [
           "src/Webspring/ApplicationStageView.tsx",
-          "src/Webspring/WindowLayer/index.ts"
+          "src/Webspring/WindowLayer/index.ts",
+          "src/Webspring/public.ts"
         ],
         "app-sdk-host": [
           "src/SynCloudOS/AppSDK/manifest/projectRuntimeManifest.ts",
-          "src/SynCloudOS/AppSDK/mountedSettlementPort.ts"
+          "src/SynCloudOS/AppSDK/mountedSettlementPort.ts",
+          "src/SynCloudOS/AppHosting/authoring.ts"
         ],
         "runtime-host-seams": [
           "src/SynCloudOS/HostServices/AppSDKHostServiceTypes.ts"
+        ],
+        "bundle-identity": [
+          "src/SynCloudOS/Identity/bundleIdentifier.mjs",
+          "src/SynCloudOS/Identity/bundleIdentifier.d.mts"
+        ],
+        "browser-host": [
+          "src/SynCloudOS/AppSDK/testing/createSynWareTestHost.tsx",
+          "src/SynCloudOS/AppSDK/testing/fakeAdapters.ts"
         ]
       }
     },
@@ -438,7 +587,9 @@
         "app-sdk",
         "react",
         "nse",
-        "appearance"
+        "appearance",
+        "bundle-identity",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "runtime": [
@@ -453,7 +604,7 @@
         "app-sdk": [
           "src/SynCloudOS/AppSDK/index.ts",
           "src/SynCloudOS/AppAuthoring/index.ts",
-          "src/SynCloudOS/AppSDK/useSynWareLocalisedStrings.ts"
+          "src/SynCloudOS/AppSDK/useStrings.ts"
         ],
         "react": [
           "src/SynCloudOSReact/index.ts"
@@ -464,6 +615,10 @@
         ],
         "appearance": [
           "src/NSE/Appearance/index.ts"
+        ],
+        "bundle-identity": [
+          "src/SynCloudOS/Identity/bundleIdentifier.mjs",
+          "src/SynCloudOS/Identity/bundleIdentifier.d.mts"
         ]
       }
     },
@@ -479,7 +634,10 @@
         "adapters",
         "fx",
         "runtime",
-        "runtime-host-seams"
+        "runtime-host-seams",
+        "bundle-identity",
+        "foundation",
+        "authentication-services"
       ],
       "mayImportEntrypoints": {
         "runtime": [
@@ -500,11 +658,19 @@
           "src/SynCloudOS/Pointer/pointerTypes.ts",
           "src/SynCloudOS/Runtime/platformAdapterContracts.ts",
           "src/SynCloudOS/LuminaFX/platformAdapterIndexBackend.ts",
-          "src/SynCloudOS/VideoFX/platformAdapterVideoWorker.ts"
+          "src/SynCloudOS/VideoFX/platformAdapterVideoWorker.ts",
+          "src/SynCloudOS/AuthenticationServices/index.ts"
         ],
         "runtime-host-seams": [
           "src/SynCloudOS/HostServices/PlatformAdapterRuntimePorts.ts",
           "src/SynCloudOS/HostServices/PlatformAdapterRuntimeServices.ts"
+        ],
+        "bundle-identity": [
+          "src/SynCloudOS/Identity/bundleIdentifier.mjs",
+          "src/SynCloudOS/Identity/bundleIdentifier.d.mts"
+        ],
+        "authentication-services": [
+          "src/SynCloudOS/AuthenticationServices/index.ts"
         ]
       }
     },
@@ -514,7 +680,14 @@
         "src/App.tsx",
         "src/SynCloudOSReact/browser.tsx",
         "src/SynCloudOSReact/browserRuntime.tsx",
-        "src/SynCloudOSReact/browserHostContributions.ts"
+        "src/SynCloudOSReact/browserHostContributions.ts",
+        "src/SynCloudOSReact/ApplicationHost.tsx",
+        "src/SynCloudOSReact/applicationHome.ts",
+        "src/SynCloudOSReact/projectComposition.ts",
+        "src/SynCloudOSReact/virtualProject.d.ts",
+        "src/SynCloudOS/AppSDK/testing/createSynWareTestHost.tsx",
+        "src/SynCloudOS/AppSDK/testing/hostDocumentProvision.ts",
+        "src/SynCloudOS/AppSDK/testing/fakeAdapters.ts"
       ],
       "mayImportLayers": [
         "browser-host",
@@ -528,9 +701,20 @@
         "app-sdk-host",
         "synapp-contract",
         "devtools",
-        "fx"
+        "fx",
+        "bundle-identity",
+        "runtime-host-seams",
+        "foundation"
       ],
-      "mayImportEntrypoints": {}
+      "mayImportEntrypoints": {
+        "bundle-identity": [
+          "src/SynCloudOS/Identity/bundleIdentifier.mjs",
+          "src/SynCloudOS/Identity/bundleIdentifier.d.mts"
+        ],
+        "runtime-host-seams": [
+          "src/SynCloudOS/HostServices/AppSDKHostServiceTypes.ts"
+        ]
+      }
     },
     {
       "id": "react",
@@ -544,7 +728,10 @@
         "nse",
         "app-sdk",
         "devtools",
-        "runtime-host-seams"
+        "runtime-host-seams",
+        "bundle-identity",
+        "app-sdk-host",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "runtime": [
@@ -553,7 +740,8 @@
           "src/SynCloudOS/Runtime/runtimeInstanceTypes.ts",
           "src/SynCloudOS/Testing/settlementTypes.ts",
           "src/SynCloudOS/AnimationFX/scopedAnimationFrames.ts",
-          "src/SynCloudOS/Resources/frameworkAssets.ts"
+          "src/SynCloudOS/Resources/frameworkAssets.ts",
+          "src/SynCloudOS/SystemUI/alertCenter.ts"
         ],
         "app-sdk": [
           "src/SynCloudOS/AppSDK/runtimeContracts.ts",
@@ -567,10 +755,18 @@
           "src/NSE/hostComposition.ts",
           "src/NSE/Animation/index.ts",
           "src/NSE/public/controls.ts",
-          "src/NSE/Typography/index.ts"
+          "src/NSE/Typography/index.ts",
+          "src/NSE/applicationHostInterop.ts"
         ],
         "runtime-host-seams": [
           "src/SynCloudOS/HostServices/mountedAnimationLayers.ts"
+        ],
+        "bundle-identity": [
+          "src/SynCloudOS/Identity/bundleIdentifier.mjs",
+          "src/SynCloudOS/Identity/bundleIdentifier.d.mts"
+        ],
+        "app-sdk-host": [
+          "src/SynCloudOS/AppHosting/runtimeEntry.ts"
         ]
       }
     },
@@ -584,7 +780,9 @@
         "runtime",
         "app-sdk",
         "synapps",
-        "synapp-contract"
+        "synapp-contract",
+        "bundle-identity",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "runtime": [
@@ -599,6 +797,26 @@
         ],
         "synapp-contract": [
           "src/SynCloudOS/AppSDK/manifest/index.ts"
+        ],
+        "bundle-identity": [
+          "src/SynCloudOS/Identity/bundleIdentifier.mjs",
+          "src/SynCloudOS/Identity/bundleIdentifier.d.mts"
+        ]
+      }
+    },
+    {
+      "id": "authentication-services",
+      "include": [
+        "src/SynCloudOS/AuthenticationServices/**"
+      ],
+      "mayImportLayers": [
+        "authentication-services",
+        "foundation",
+        "adapters"
+      ],
+      "mayImportEntrypoints": {
+        "adapters": [
+          "src/SynCloudOS/PlatformAdapters/BrowserPasskeyAuthorization.ts"
         ]
       }
     },
@@ -614,12 +832,26 @@
         "synapp-contract",
         "runtime-inspector",
         "adapters",
-        "app-sdk"
+        "app-sdk",
+        "bundle-identity",
+        "app-sdk-host",
+        "foundation",
+        "authentication-services"
       ],
       "mayImportEntrypoints": {
         "app-sdk": [
           "src/SynCloudOS/AppSDK/createSynWare.ts",
           "src/SynCloudOS/AppSDK/runtimeContracts.ts"
+        ],
+        "bundle-identity": [
+          "src/SynCloudOS/Identity/bundleIdentifier.mjs",
+          "src/SynCloudOS/Identity/bundleIdentifier.d.mts"
+        ],
+        "app-sdk-host": [
+          "src/SynCloudOS/AppHosting/runtimeEntry.ts"
+        ],
+        "authentication-services": [
+          "src/SynCloudOS/AuthenticationServices/index.ts"
         ]
       }
     },
@@ -630,17 +862,20 @@
         "scripts/cappuccino/appearance/**",
         "src/NSE/Themes/**",
         "src/NSE/Themes/Atmo/**",
+        "src/Themes/**",
         "src/Appearance/**"
       ],
       "mayImportLayers": [
         "appearance",
         "fx",
-        "nse"
+        "nse",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "nse": [
           "src/NSE/NSE.ts",
           "src/NSE/Appearance/index.ts",
+          "src/NSE/Theme/NSETheme.ts", "src/NSE/Theme/contract/hooks.ts", "src/NSE/Theme/themeColourStyle.ts",
           "src/NSE/Material/index.ts",
           "src/NSE/Material/tokens.ts"
         ]
@@ -655,7 +890,9 @@
         "nse",
         "fx",
         "appearance",
-        "runtime"
+        "runtime",
+        "bundle-identity",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "runtime": [
@@ -663,6 +900,10 @@
           "src/SynCloudOS/Animation/index.ts",
           "src/SynCloudOS/Models/index.ts",
           "src/SynCloudOS/nseRuntimeContracts.ts"
+        ],
+        "bundle-identity": [
+          "src/SynCloudOS/Identity/bundleIdentifier.mjs",
+          "src/SynCloudOS/Identity/bundleIdentifier.d.mts"
         ]
       }
     },
@@ -679,7 +920,10 @@
         "nse",
         "appearance",
         "app-sdk",
-        "app-sdk-host"
+        "app-sdk-host",
+        "bundle-identity",
+        "synapp-contract",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "runtime": [
@@ -688,10 +932,12 @@
           "src/SynCloudOS/DocumentStore/index.ts",
           "src/SynCloudOS/Lifecycle/index.ts",
           "src/SynCloudOS/LocaleServices/index.ts",
-          "src/SynCloudOS/Preferences/systemPreferencePaneIssuer.ts",
+          "src/SynCloudOS/Preferences/index.ts",
           "src/SynCloudOS/PluginRegistry/index.ts",
-          "src/SynCloudOS/PolicyKit/index.ts",
-          "src/SynCloudOS/Resources/frameworkAssets.ts"
+          "src/SynCloudOS/ConfigurationProfiles/index.ts",
+          "src/SynCloudOS/Resources/frameworkAssets.ts",
+          "src/SynCloudOS/HostContributions/hostContribution.ts",
+          "src/SynCloudOS/Runtime/runtimeInstanceTypes.ts"
         ],
         "react": [
           "src/SynCloudOSReact/index.ts"
@@ -703,22 +949,22 @@
           "src/NSE/public/controls.ts",
           "src/NSE/AuroreEngine/index.ts",
           "src/NSE/Containers/index.ts",
-          "src/NSE/CoverFlow/index.ts",
           "src/NSE/Content/index.ts",
           "src/NSE/Editor/index.ts",
           "src/NSE/Haptics/index.ts",
           "src/NSE/Layout/index.ts",
-          "src/NSE/List/index.ts",
           "src/NSE/Material/index.ts",
           "src/NSE/Page/index.ts",
           "src/NSE/registry/index.ts",
           "src/NSE/Scroll/index.ts",
           "src/NSE/SmoothSurface/index.ts",
-          "src/NSE/SystemUI/index.ts"
+          "src/NSE/SystemUI/index.ts",
+          "src/NSE/sdkPackageEntry.ts",
+          "src/NSE/Controls/Selection/NSEListItem.tsx"
         ],
         "appearance": [
           "src/NSE/Appearance/index.ts",
-          "src/NSE/Themes/Atmo/index.ts"
+          "src/NSE/Appearance/atmo.ts"
         ],
         "app-sdk": [
           "src/SynCloudOS/AppSDK/index.ts",
@@ -727,6 +973,13 @@
         ],
         "app-sdk-host": [
           "src/SynCloudOS/AppSDK/SynWareRuntimeMount.tsx"
+        ],
+        "bundle-identity": [
+          "src/SynCloudOS/Identity/bundleIdentifier.mjs",
+          "src/SynCloudOS/Identity/bundleIdentifier.d.mts"
+        ],
+        "synapp-contract": [
+          "src/SynCloudOS/AppSDK/manifest/synappManifestValidator.generated.d.mts"
         ]
       }
     },
@@ -736,7 +989,8 @@
         "src/SynWare/Libraries/**"
       ],
       "mayImportLayers": [
-        "synware-libraries"
+        "synware-libraries",
+        "foundation"
       ],
       "mayImportEntrypoints": {}
     },
@@ -748,7 +1002,8 @@
       "mayImportLayers": [
         "synware-contracts",
         "synware-libraries",
-        "app-sdk"
+        "app-sdk",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "synware-libraries": [
@@ -772,7 +1027,8 @@
         "app-sdk",
         "fx",
         "browser-host",
-        "webspring"
+        "webspring",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "synware-libraries": [
@@ -815,7 +1071,8 @@
         "app-sdk",
         "browser-host",
         "runtime",
-        "adapters"
+        "adapters",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "app-sdk": [
@@ -838,7 +1095,9 @@
         "app-sdk",
         "nse",
         "appearance",
-        "fx"
+        "fx",
+        "foundation",
+        "authentication-services"
       ],
       "mayImportEntrypoints": {
         "app-sdk": [
@@ -866,7 +1125,6 @@
           "src/NSE/public/page.ts",
           "src/NSE/public/aurore.ts",
           "src/NSE/public/layout.ts",
-          "src/NSE/public/cover-flow.ts",
           "src/NSE/public/system-ui.ts",
           "src/NSE/public/styles.css"
         ],
@@ -880,7 +1138,10 @@
           "src/FX/TextFX/public.ts"
         ],
         "appearance": [
-          "src/NSE/Themes/Atmo/index.ts"
+          "src/NSE/Appearance/atmo.ts"
+        ],
+        "authentication-services": [
+          "src/SynCloudOS/AuthenticationServices/index.ts"
         ]
       }
     },
@@ -907,7 +1168,9 @@
         "app-sdk",
         "devtools",
         "first-party-bundles",
-        "sdk-build-config"
+        "sdk-build-config",
+        "bundle-identity",
+        "foundation"
       ],
       "mayImportEntrypoints": {
         "first-party-bundles": [
@@ -923,9 +1186,43 @@
         ],
         "synware-project": [
           "src/SynWare/projectComposition.ts"
+        ],
+        "bundle-identity": [
+          "src/SynCloudOS/Identity/bundleIdentifier.mjs",
+          "src/SynCloudOS/Identity/bundleIdentifier.d.mts"
         ]
       }
     }
   ],
-  "temporaryAllowlist": []
+  "temporaryAllowlist": [],
+  "internalEntrypoints": [
+    {
+      "path": "src/NSE/applicationHostInterop.ts",
+      "consumers": [
+        "nse",
+        "app-sdk-host",
+        "app-sdk",
+        "react"
+      ],
+      "reason": "Private NSE lifecycle, ownership and action protocols used only by framework host adapters. Not a package consumer entry."
+    },
+    {
+      "path": "src/SynCloudOS/AppHosting/runtimeEntry.ts",
+      "consumers": [
+        "app-sdk-host",
+        "runtime",
+        "react",
+        "browser-host"
+      ],
+      "reason": "Kernel and React host bootstrap for application classes and sessions. Not an SDK package export."
+    },
+    {
+      "path": "src/NSE/Controls/Selection/NSEListItem.tsx",
+      "consumers": [
+        "nse",
+        "webspring"
+      ],
+      "reason": "The row part that NSE menus, tab bars and the system preference panes draw their choice rows with. Not a public control: lists are NSETableView."
+    }
+  ]
 }

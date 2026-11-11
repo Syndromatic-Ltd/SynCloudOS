@@ -1,0 +1,9 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 typecheck
+npm notice run tsc -b --pretty false
+src/SynCloudOS/AppSDK/hooks/useNetwork.ts(25,28): error TS2339: Property 'network' does not exist on type 'SCOSFacade'.
+src/SynCloudOS/AppSDK/hooks/useSpeechSynthesizer.ts(26,28): error TS2339: Property 'speechSynthesis' does not exist on type 'SCOSFacade'.
+src/SynCloudOS/AppSDK/hooks/useVideoPresentation.ts(25,28): error TS2551: Property 'videoPresentation' does not exist on type 'SCOSFacade'. Did you mean 'presentation'?
+src/SynCloudOS/PlatformAdapters/BrowserRuntimeEnvironment.ts(721,51): error TS2322: Type 'Navigator | null' is not assignable to type '{ readonly onLine?: boolean | undefined; readonly connection?: NetworkInformation | undefined; } | undefined'.
+  Type 'null' is not assignable to type '{ readonly onLine?: boolean | undefined; readonly connection?: NetworkInformation | undefined; } | undefined'.
+src/SynCloudOS/PlatformAdapters/BrowserRuntimeEnvironment.ts(721,80): error TS2322: Type '(Window & typeof globalThis) | null' is not assignable to type 'Pick<EventTarget, "addEventListener" | "removeEventListener"> | undefined'.
+  Type 'null' is not assignable to type 'Pick<EventTarget, "addEventListener" | "removeEventListener"> | undefined'.

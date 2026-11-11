@@ -1,0 +1,35 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/compression-fx.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/compression-fx.test.ts (18 tests | 1 failed) 133ms
+     × awaits asynchronous upstream cancellation before resolving cancel 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/compression-fx.test.ts > CompressionFX > awaits asynchronous upstream cancellation before resolving cancel
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/runtime/compression-fx.test.ts:148:23
+    146|     await started;
+    147|     await new Promise((resolve) => setTimeout(resolve, 0));
+    148|     expect(completed).toBe(false);
+       |                       ^
+    149|     release();
+    150|     await cancelling;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 17 passed (18)
+   Start at  08:21:36
+   Duration  326ms (transform 49ms, setup 27ms, import 38ms, tests 133ms, environment 0ms)
+

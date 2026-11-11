@@ -33,7 +33,13 @@ export interface FocusScopeRegistration {
 }
 export type FocusRequestResult = { readonly status: "focused"; readonly responderId: string } | { readonly status: "missing" | "disabled" | "blocked"; readonly responderId: string; readonly reason: string };
 export type FocusCloseResult = { readonly status: "closed"; readonly scopeId: string; readonly restoredResponderId: string | null } | { readonly status: "missing"; readonly scopeId: string; readonly restoredResponderId: null };
-export interface FocusScopeHandle { readonly id: string; close(options?: { readonly restore?: boolean }): FocusCloseResult; dispose(): FocusCloseResult }
+export interface FocusScopeHandle {
+  readonly id: string;
+  /** Updates presentation only, preserving ancestry, children and return focus. */
+  updatePresentation(presentation: Pick<FocusScopeRegistration, "kind" | "modal" | "trapFocus">): void;
+  close(options?: { readonly restore?: boolean }): FocusCloseResult;
+  dispose(): FocusCloseResult;
+}
 export interface FocusManager {
   readonly runtimeId: SynCloudOSRuntimeId;
   openScope(registration: FocusScopeRegistration): FocusScopeHandle;
@@ -44,6 +50,8 @@ export interface FocusManager {
   getActiveAnchors(): ActiveResponderAnchors;
   getFocusedResponderId(): string | null;
   getGeneration(): number;
+  /** Observes focus, scope and anchor changes after the current mutation completes. */
+  subscribe(listener: () => void): () => void;
   inspect(): { readonly generation: number; readonly focusedResponderId: string | null; readonly scopes: readonly FocusScopeRegistration[]; readonly restorations: readonly { readonly scopeId: string; readonly responderId: string | null }[] };
   handleRespondersRemoved(ids: readonly string[]): void;
   dispose(): void;

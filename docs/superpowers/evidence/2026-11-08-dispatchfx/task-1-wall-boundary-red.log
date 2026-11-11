@@ -1,0 +1,36 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run src/FX/DispatchFX
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ src/FX/DispatchFX/__tests__/values.test.ts (9 tests | 1 failed) 10ms
+     × reserves wall sentinels at clock range boundaries 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/values.test.ts > Dispatch value types > reserves wall sentinels at clock range boundaries
+AssertionError: expected { Object (rawValue) } to be { Object (rawValue) } // Object.is equality
+
+- Expected
++ Received
+
+  DFXWallTime {
+-   "rawValue": 18446744073709551615n,
++   "rawValue": -8621553255926290448384n,
+  }
+
+ ❯ src/FX/DispatchFX/__tests__/values.test.ts:62:33
+     60|   it("reserves wall sentinels at clock range boundaries", () => {
+     61|     const clock = vi.spyOn(Date, "now").mockReturnValue(8_640_000_000_…
+     62|     expect(D.DFXWallTime.now()).toBe(D.DFXWallTime.distantFuture);
+       |                                 ^
+     63|     clock.mockReturnValue(0);
+     64|     const start = D.DFXWallTime.now();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 8 passed (9)
+   Start at  08:43:42
+   Duration  234ms (transform 71ms, setup 26ms, import 68ms, tests 10ms, environment 0ms)

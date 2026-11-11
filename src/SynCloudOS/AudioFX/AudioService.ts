@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import { normaliseAudioLevel } from "../Settings/settingsService";
 import type { RuntimeAudioMixerSnapshot } from "./audioTypes";
 import type { SynCloudOSRuntimeId } from "../Runtime/runtimeInstanceTypes";
@@ -166,7 +167,7 @@ function raceSignal<T>(promise: PromiseLike<T>, signal?: AbortSignal): Promise<T
 }
 
 function ownerKey(appId: string, ownerId: string, windowControllerId?: string) {
-  return `${appId}\0${windowControllerId ?? ""}\0${ownerId}`;
+  return `${normalizeBundleIdentifier(appId)}\0${windowControllerId ?? ""}\0${ownerId}`;
 }
 
 export function createRuntimeAudioService(input: {
@@ -205,14 +206,25 @@ export function createRuntimeAudioService(input: {
   let reducedSensory = input.reducedSensory === true;
   let disposed = false;
   let masterVolume = normaliseAudioLevel(input.masterVolume);
-  let appVolumes = Object.freeze(Object.fromEntries(Object.entries(input.appVolumes ?? {}).map(([id, level]) => [id, normaliseAudioLevel(level)])));
+  let appVolumes = Object.freeze(Object.fromEntries(Object.entries(input.appVolumes ?? {}).map(([id, level]) => [normalizeBundleIdentifier(id), normaliseAudioLevel(level)])));
   const mixerListeners = new Set<() => void>();
+  const playbackListeners = new Set<(handleId: string) => void>();
+  const notifyPlayback = (record: HandleRecord) => {
+    for (const listener of [...playbackListeners]) { try { listener(record.id); } catch { /* observation cannot change playback outcomes */ } }
+  };
   let mixerSnapshot: RuntimeAudioMixerSnapshot;
-  const appVolume = (appId: string) => Object.hasOwn(appVolumes, appId) ? appVolumes[appId] : 1;
+  const appVolume = (appId: string) => {
+    const key = normalizeBundleIdentifier(appId);
+    return Object.hasOwn(appVolumes, key) ? appVolumes[key] : 1;
+  };
   const publishMixer = () => {
-    const counts = new Map<string, number>();
-    for (const record of handles.values()) counts.set(record.owner.appId, (counts.get(record.owner.appId) ?? 0) + 1);
-    mixerSnapshot = Object.freeze({ masterVolume, enabled, applications: Object.freeze([...counts].map(([appId, sessionCount]) => Object.freeze({ appId, sessionCount, volume: appVolume(appId) }))) });
+    const counts = new Map<string, { appId: string; sessionCount: number }>();
+    for (const record of handles.values()) {
+      const key = normalizeBundleIdentifier(record.owner.appId);
+      const current = counts.get(key);
+      counts.set(key, { appId: current?.appId ?? record.owner.appId, sessionCount: (current?.sessionCount ?? 0) + 1 });
+    }
+    mixerSnapshot = Object.freeze({ masterVolume, enabled, applications: Object.freeze([...counts.values()].map(({ appId, sessionCount }) => Object.freeze({ appId, sessionCount, volume: appVolume(appId) }))) });
     for (const listener of mixerListeners) listener();
   };
   const effectiveVolume = (record: HandleRecord, requested = record.volume) => requested * appVolume(record.owner.appId) * masterVolume;
@@ -281,6 +293,7 @@ export function createRuntimeAudioService(input: {
       invalidateActivation(activation);
     }
     handles.delete(record.id);
+    notifyPlayback(record);
     publishMixer();
     try { record.playback.dispose(); } catch { /* owner release is terminal */ }
     record.cache.references = Math.max(0, record.cache.references - 1);
@@ -370,17 +383,20 @@ export function createRuntimeAudioService(input: {
     } catch (error) {
       record.state = "error";
       record.playingIntent = false;
+      notifyPlayback(record);
       if (!internal && (error as { name?: unknown })?.name === "NotAllowedError") {
         return Promise.reject(new AudioActivationRequiredError());
       }
       return Promise.reject(error);
     }
     record.state = "playing";
+    notifyPlayback(record);
     return Promise.resolve(result).then(() => {
       if (!current(record) || record.playEpoch !== epoch) return;
       record.state = "playing";
+      notifyPlayback(record);
     }, (error) => {
-      if (current(record) && record.playEpoch === epoch) { record.state = "error"; record.playingIntent = false; }
+      if (current(record) && record.playEpoch === epoch) { record.state = "error"; record.playingIntent = false; notifyPlayback(record); }
       if (!internal && (error as { name?: unknown })?.name === "NotAllowedError") {
         throw new AudioActivationRequiredError();
       }
@@ -399,6 +415,7 @@ export function createRuntimeAudioService(input: {
     record.playEpoch += 1;
     try { record.playback.pause(); record.state = "paused"; }
     catch { record.state = "error"; record.playingIntent = false; }
+    notifyPlayback(record);
   };
 
   const removeBlocker = (record: HandleRecord, blocker: "lifecycle" | "settings" | "sensory") => {
@@ -411,7 +428,11 @@ export function createRuntimeAudioService(input: {
   service = {
     runtimeId: input.runtimeId,
     getMixerSnapshot: () => mixerSnapshot,
-    getOwnerPolicy: (appId) => Object.freeze({ volume: appVolume(appId), muted: !enabled || disposed, paused: disposed || !enabled || reducedSensory || suspendedApps.has(appId) || closedApps.has(appId) }),
+    getOwnerPolicy: (appId) => Object.freeze({ volume: appVolume(appId), muted: !enabled || disposed, paused: disposed || !enabled || reducedSensory || suspendedApps.has(normalizeBundleIdentifier(appId)) || closedApps.has(normalizeBundleIdentifier(appId)) }),
+    subscribePlayback(listener) {
+      if (disposed) return () => undefined;
+      playbackListeners.add(listener); return () => { playbackListeners.delete(listener); };
+    },
     subscribeMixer(listener) {
       if (disposed) return () => undefined;
       mixerListeners.add(listener);
@@ -425,13 +446,13 @@ export function createRuntimeAudioService(input: {
     setAppVolume(appId, volume) {
       if (disposed) return;
       boundedText(appId, "mixer appId");
-      service.setMixerLevels(masterVolume, { ...appVolumes, [appId]: volume });
+      service.setMixerLevels(masterVolume, { ...appVolumes, [normalizeBundleIdentifier(appId)]: volume });
       input.persistMixer?.(masterVolume, appVolumes);
     },
     setMixerLevels(master, levels) {
       if (disposed) return;
       const nextMaster = normaliseAudioLevel(master);
-      const nextLevels = Object.freeze(Object.fromEntries(Object.entries(levels).map(([id, level]) => [id, normaliseAudioLevel(level)])));
+      const nextLevels = Object.freeze(Object.fromEntries(Object.entries(levels).map(([id, level]) => [normalizeBundleIdentifier(id), normaliseAudioLevel(level)])));
       if (nextMaster === masterVolume && JSON.stringify(nextLevels) === JSON.stringify(appVolumes)) return;
       masterVolume = nextMaster;
       appVolumes = nextLevels;
@@ -442,14 +463,14 @@ export function createRuntimeAudioService(input: {
       if (disposed || input.signal.aborted) throw input.signal.reason ?? abortError("Sound runtime disposed.");
       signal?.throwIfAborted();
       const request = normaliseRequest(value);
-      if (closedApps.has(request.appId) || (request.windowControllerId && closedWindows.has(request.windowControllerId))) {
+      if (closedApps.has(normalizeBundleIdentifier(request.appId)) || (request.windowControllerId && closedWindows.has(request.windowControllerId))) {
         throw abortError("Sound owner authority is closed.");
       }
        const key = ownerKey(request.appId, request.ownerId, request.windowControllerId);
       let owner = owners.get(key);
       if (!owner) {
         owner = { key, appId: request.appId, ownerId: request.ownerId, windowControllerId: request.windowControllerId,
-          generation: request.generation, epoch: 1, suspended: suspendedApps.has(request.appId), closed: false };
+          generation: request.generation, epoch: 1, suspended: suspendedApps.has(normalizeBundleIdentifier(request.appId)), closed: false };
         owners.set(key, owner);
       } else {
         if (owner.windowControllerId !== request.windowControllerId) throw new TypeError("A sound owner cannot change window authority.");
@@ -483,11 +504,11 @@ export function createRuntimeAudioService(input: {
         playback = adapter!.createPlayback(resource, Object.freeze({
           onEnded(playEpoch: number) {
             if (!record || !current(record) || record.playEpoch !== playEpoch || record.state !== "playing") return;
-            if (!record.loop) { record.playEpoch += 1; record.state = "stopped"; record.playingIntent = false; }
+            if (!record.loop) { record.playEpoch += 1; record.state = "stopped"; record.playingIntent = false; notifyPlayback(record); }
           },
           onError(playEpoch: number) {
             if (!record || !current(record) || record.playEpoch !== playEpoch) return;
-            record.playEpoch += 1; record.state = "error"; record.playingIntent = false;
+            record.playEpoch += 1; record.state = "error"; record.playingIntent = false; notifyPlayback(record);
           },
         }));
         record = {
@@ -544,8 +565,9 @@ export function createRuntimeAudioService(input: {
       if (!record || !current(record)) return false;
       record.playingIntent = false;
       record.playEpoch += 1;
-      try { record.playback.pause(); } catch { record.state = "error"; return false; }
+      try { record.playback.pause(); } catch { record.state = "error"; notifyPlayback(record); return false; }
       record.state = "paused";
+      notifyPlayback(record);
       return true;
     },
     stop(handleId) {
@@ -553,8 +575,9 @@ export function createRuntimeAudioService(input: {
       if (!record || !current(record)) return false;
       record.playingIntent = false;
       record.playEpoch += 1;
-      try { record.playback.stop(); } catch { record.state = "error"; return false; }
+      try { record.playback.stop(); } catch { record.state = "error"; notifyPlayback(record); return false; }
       record.state = "stopped";
+      notifyPlayback(record);
       return true;
     },
     setLoop(handleId, loop) {
@@ -573,7 +596,7 @@ export function createRuntimeAudioService(input: {
       if (typeof rate !== "number" || !Number.isFinite(rate) || rate < 0.25 || rate > 4) throw new RangeError("Sound playback rate is invalid.");
       const record = handles.get(handleId);
       if (!record || !current(record)) throw abortError("Sound handle is no longer active.");
-      record.playback.setRate(rate); record.rate = rate;
+      record.playback.setRate(rate); record.rate = rate; notifyPlayback(record);
     },
     setCurrentTime(handleId, time) {
       if (typeof time !== "number" || !Number.isFinite(time) || time < 0 || time > 86_400) throw new RangeError("Sound playback time is invalid.");
@@ -581,34 +604,34 @@ export function createRuntimeAudioService(input: {
       if (!record || !current(record)) throw abortError("Sound handle is no longer active.");
       const duration = record.playback.duration();
       if (duration !== null && time > duration) throw new RangeError("Sound playback time exceeds its duration.");
-      record.playback.setCurrentTime(time);
+      record.playback.setCurrentTime(time); notifyPlayback(record);
     },
     release(handleId) {
       const record = handles.get(handleId);
       return record ? releaseRecord(record) : false;
     },
     suspendOwner(appId) {
-      suspendedApps.add(appId);
+      suspendedApps.add(normalizeBundleIdentifier(appId));
       publishMixer();
-      for (const owner of owners.values()) if (owner.appId === appId && !owner.closed) {
+      for (const owner of owners.values()) if (normalizeBundleIdentifier(owner.appId) === normalizeBundleIdentifier(appId) && !owner.closed) {
         owner.suspended = true;
         for (const record of handles.values()) if (record.owner === owner) addBlocker(record, "lifecycle");
       }
     },
     resumeOwner(appId) {
-      suspendedApps.delete(appId);
-      closedApps.delete(appId);
+      suspendedApps.delete(normalizeBundleIdentifier(appId));
+      closedApps.delete(normalizeBundleIdentifier(appId));
       publishMixer();
-      for (const owner of owners.values()) if (owner.appId === appId && !owner.closed) {
+      for (const owner of owners.values()) if (normalizeBundleIdentifier(owner.appId) === normalizeBundleIdentifier(appId) && !owner.closed) {
         owner.suspended = false;
         for (const record of handles.values()) if (record.owner === owner) removeBlocker(record, "lifecycle");
       }
     },
     closeOwner(appId) {
-      suspendedApps.delete(appId);
-      closedApps.add(appId);
+      suspendedApps.delete(normalizeBundleIdentifier(appId));
+      closedApps.add(normalizeBundleIdentifier(appId));
       publishMixer();
-      for (const owner of [...owners.values()]) if (owner.appId === appId) closeOwnerRecord(owner);
+      for (const owner of [...owners.values()]) if (normalizeBundleIdentifier(owner.appId) === normalizeBundleIdentifier(appId)) closeOwnerRecord(owner);
     },
     closeWindowController(windowControllerId) {
       closedWindows.add(windowControllerId);
@@ -653,7 +676,7 @@ export function createRuntimeAudioService(input: {
       for (const record of [...handles.values()]) releaseRecord(record);
       for (const entry of [...cache.values()]) releaseCacheEntry(entry);
       input.caches.remove("runtime.sounds.decoded");
-      mixerListeners.clear();
+      mixerListeners.clear(); playbackListeners.clear();
       owners.clear();
       suspendedApps.clear(); closedApps.clear(); closedWindows.clear();
       activationCount = 0;

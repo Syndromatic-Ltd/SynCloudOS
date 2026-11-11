@@ -1,0 +1,22 @@
+{
+  "deliveredCommit": "c9529d1182f16d3a620ab68f3f7ff24c528f7cc4",
+  "peerCommit": "fc20cc605b1f8dfcc16798a8fbf4b82eb2d274b6",
+  "peerArchiveSha256": "c04dcf56a2df49701559ecb87f83c5a5f31028da3d86e4c33037ff319f4cedc5",
+  "sameSource": true,
+  "resourcesVerified": 2336,
+  "changedNonSourceMaps": [
+    "browser.js",
+    "chunks/AFXLayer--AjEJavj.js",
+    "chunks/AFXTiledLayer-BSTD7oYq.js",
+    "chunks/App-DY28tcDY.js",
+    "chunks/ApplicationStageView-DTQdbPYI.js",
+    "chunks/BrowserAnimationLayerHost-CMim3VBu.js",
+    "chunks/browser-D6ujrULa.js",
+    "chunks/syncloudos-runtime-DhtVSFXV.js",
+    "fx/animation.js",
+    "package.json",
+    "sdk/animation-host.js",
+    "sdk/testing.js",
+    "tooling/build-receipt.json"
+  ]
+}

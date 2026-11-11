@@ -18,13 +18,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../Foundation/NSEData";
 import { DocumentAssetError } from "../HostServices/PlatformAdapterRuntimeServices";
 
 /** Explicit default platform seam; non-browser hosts may inject all dependencies. */
 export function createBrowserDocumentAssetEnvironment(): {
   readonly indexedDB: IDBFactory | undefined;
   readonly randomUUID: () => string;
-  readonly hash: (bytes: Uint8Array) => Promise<string>;
+  readonly hash: (bytes: NSEData) => Promise<string>;
 } {
   return {
     indexedDB: globalThis.indexedDB,
@@ -34,7 +35,7 @@ export function createBrowserDocumentAssetEnvironment(): {
     },
     async hash(bytes) {
       if (!globalThis.crypto?.subtle) throw new DocumentAssetError("asset-unsupported", "Asset SHA-256 support is unavailable.");
-      const result = await globalThis.crypto.subtle.digest("SHA-256", bytes.slice().buffer);
+      const result = await globalThis.crypto.subtle.digest("SHA-256", bytes.bytes.buffer);
       return "sha256:" + [...new Uint8Array(result)].map(byte => byte.toString(16).padStart(2, "0")).join("");
     },
   };

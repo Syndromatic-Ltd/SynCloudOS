@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/sc-authorization.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  19:19:32
+   Duration  6.32s (transform 4.68s, setup 27ms, import 6.13s, tests 30ms, environment 0ms)

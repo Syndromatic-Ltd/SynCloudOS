@@ -79,10 +79,10 @@ describe("ImageFX deep barcode descriptors and symbol backends", () => {
 
     for (const descriptor of descriptors) {
       expect(descriptor.payloadKind).toBe("message");
-      expect(descriptor.message).toEqual(new Uint8Array([83, 121, 110]));
-      const leaked = descriptor.message;
+      expect(descriptor.message.bytes).toEqual(new Uint8Array([83, 121, 110]));
+      const leaked = descriptor.message.bytes;
       leaked.fill(0);
-      expect(descriptor.message).toEqual(new Uint8Array([83, 121, 110]));
+      expect(descriptor.message.bytes).toEqual(new Uint8Array([83, 121, 110]));
       expect(IFXBarcodeDescriptor.fromData(JSON.parse(JSON.stringify(descriptor.toData())))).toEqual(descriptor);
       expect(descriptor.toData()).toMatchObject({ schemaVersion: 1 });
     }
@@ -133,7 +133,7 @@ describe("ImageFX deep barcode descriptors and symbol backends", () => {
     const bytes = [0, 65, 127, 128, 200, 255];
     const descriptor = new IFXDataMatrixCodeDescriptor(bytes, { rows: 18, columns: 18, quietSpace: 2 });
     bytes.fill(32);
-    expect([...descriptor.message]).toEqual([0, 65, 127, 128, 200, 255]);
+    expect([...descriptor.message.bytes]).toEqual([0, 65, 127, 128, 200, 255]);
     const data = descriptor.toData();
     expect(data).toMatchObject({ kind: "dataMatrix", schemaVersion: 1, encoding: "binary-bytes" });
     expect(data.message).toEqual([0, 65, 127, 128, 200, 255]);

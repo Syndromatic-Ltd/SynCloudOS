@@ -24,7 +24,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testi
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEStandaloneControlHost, NSEPopup, NSEListboxPopup, createStandaloneNSEControlRuntime } from "../../../src/NSE/Overlays";
 import { NSEOverlayProvider, useNSEOverlayProvider, type NSEOverlayProviderContextValue } from "../../../src/NSE/Overlays/NSEOverlayProvider";
-import { NSEMenu, NSEPicker } from "../../../src/NSE/Menus";
+import { NSEMenuView, NSEPopUpButton } from "../../../src/NSE/Menus";
 import { NSEFeedbackProvider } from "../../../src/NSE/Feedback";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 import { installNSEScrollIntoViewFixture } from "../fixtures/browser";
@@ -44,6 +44,32 @@ function Probe({ publish }: { publish(context: NSEOverlayProviderContextValue): 
 }
 
 describe("standalone NSE host lifetime", () => {
+  it("honors retained presentation geometry and rejects invalid live visual samples", () => {
+    const previous = Object.getOwnPropertyDescriptor(window, "visualViewport");
+    const viewport = Object.assign(new EventTarget(), { width: 600, height: 400, offsetLeft: 10, offsetTop: 20 });
+    Object.defineProperty(window, "visualViewport", { configurable: true, value: viewport });
+    const base = presentation.getSnapshot();
+    let state: "current" | "retained" = "retained";
+    const local = createStandaloneNSEControlRuntime({ document, window, presentation: { getSnapshot: () => ({ ...base, geometryState: state }), subscribe: () => () => {} } });
+    try {
+      local.start();
+      expect(local.runtime.environment.visualViewport.getSnapshot()).toMatchObject({ width: 1024, height: 768 });
+      state = "current";
+      viewport.width = 0;
+      viewport.height = Number.NaN;
+      window.dispatchEvent(new Event("resize"));
+      expect(local.runtime.environment.visualViewport.getSnapshot()).toMatchObject({ width: 1024, height: 768 });
+      viewport.width = 600;
+      viewport.height = 400;
+      window.dispatchEvent(new Event("resize"));
+      expect(local.runtime.environment.visualViewport.getSnapshot()).toMatchObject({ width: 600, height: 400, offsetLeft: 10, offsetTop: 20 });
+    } finally {
+      local.dispose();
+      if (previous) Object.defineProperty(window, "visualViewport", previous);
+      else Reflect.deleteProperty(window, "visualViewport");
+    }
+  });
+
   it("keeps nested overlays and their authority across parent rerenders and Strict Mode replay", async () => {
     let authority: NSEOverlayProviderContextValue | undefined;
     const publish = (value: NSEOverlayProviderContextValue) => { authority = value; };
@@ -137,7 +163,7 @@ describe("standalone NSE host lifetime", () => {
 describe("standalone picker and menu keyboard contracts", () => {
   it("retains an open menu branch and focus across an unrelated parent render", async () => {
     const items = [{ value: "file", label: "File", children: [{ value: "save", label: "Save document" }] }];
-    const fixture = (revision: number) => <Host><output>{revision}</output><NSEMenu label="Document actions" items={items} /></Host>;
+    const fixture = (revision: number) => <Host><output>{revision}</output><NSEMenuView label="Document actions" items={items} /></Host>;
     const view = render(fixture(1));
     fireEvent.click(screen.getByRole("button", { name: "Document actions" }));
     fireEvent.click(await screen.findByRole("menuitem", { name: "File" }));
@@ -149,13 +175,21 @@ describe("standalone picker and menu keyboard contracts", () => {
     expect(document.activeElement).toBe(save);
   });
 
+  it("draws a tool menu's text label as the trigger's title, not as an image", () => {
+    render(<Host><NSEMenuView label="Presets" trigger="tool" controlSize="small" triggerLabel="Coil presets" items={[{ value: "all", label: "All" }]} /></Host>);
+    const trigger = screen.getByRole("button", { name: "Coil presets" });
+    expect(trigger.querySelector("img")).toBeNull();
+    expect(trigger.textContent).toContain("Presets");
+    expect(trigger.getAttribute("data-size")).toBe("small");
+  });
+
   it("keeps a menu open when its parent re-renders with inline items and glyph, and lights its trigger while it shows", async () => {
     const Glyph = () => <svg aria-hidden="true" />;
     // Items and label written inline: a new array and element every render.
     const fixture = (revision: number) => (
       <Host>
         <output>{revision}</output>
-        <NSEMenu label={<Glyph />} trigger="tool" triggerLabel="Font actions" items={[
+        <NSEMenuView label={<Glyph />} trigger="tool" triggerLabel="Font actions" items={[
           { value: "favourite", label: "Add to Favourites" },
           { value: "divider", label: "", separator: true },
           { value: "ruler", label: "Show Ruler" },
@@ -193,7 +227,7 @@ describe("standalone picker and menu keyboard contracts", () => {
         </>
       );
     }
-    render(<Host><ClippedSurface><NSEMenu label="Actions" items={[{ value: "one", label: "One" }]} /></ClippedSurface></Host>);
+    render(<Host><ClippedSurface><NSEMenuView label="Actions" items={[{ value: "one", label: "One" }]} /></ClippedSurface></Host>);
     const trigger = screen.getByRole("button", { name: "Actions" });
     fireEvent.click(trigger);
     const menu = await screen.findByRole("menu");
@@ -211,8 +245,8 @@ describe("standalone picker and menu keyboard contracts", () => {
     const trigger = vi.fn(async () => {});
     const engine = { trigger } as NonNullable<React.ComponentProps<typeof NSEFeedbackProvider>["value"]>;
     render(<NSEFeedbackProvider value={engine}><Host>
-      <NSEMenu label="Feedback actions" items={[{ value: "save", label: "Save document" }]} />
-      <NSEPicker label="Feedback format" options={[{ value: "plain", label: "Plain" }, { value: "rich", label: "Rich" }]} />
+      <NSEMenuView label="Feedback actions" items={[{ value: "save", label: "Save document" }]} />
+      <NSEPopUpButton label="Feedback format" items={[{ value: "plain", title: "Plain" }, { value: "rich", title: "Rich" }]} />
     </Host></NSEFeedbackProvider>);
     fireEvent.click(screen.getByRole("button", { name: "Feedback actions" }));
     expect(trigger).toHaveBeenLastCalledWith("soft");
@@ -245,32 +279,15 @@ describe("standalone picker and menu keyboard contracts", () => {
   });
 
   it("names the picker with its label and selection and opens it with ArrowDown", async () => {
-    render(<Host><NSEPicker label="Density" value="balanced" options={[{ value: "balanced", label: "Balanced" }, { value: "compact", label: "Compact" }]} /></Host>);
+    render(<Host><NSEPopUpButton label="Density" value="balanced" items={[{ value: "balanced", title: "Balanced" }, { value: "compact", title: "Compact" }]} /></Host>);
     const trigger = screen.getByRole("button", { name: "Density Balanced" });
     fireEvent.keyDown(trigger, { key: "ArrowDown" });
     const selected = await screen.findByRole("option", { name: "Balanced" });
     await waitFor(() => expect(document.activeElement).toBe(selected));
   });
 
-  it("lists a picker's actions after a rule and runs them without changing the value", async () => {
-    const onValueChange = vi.fn();
-    const showFonts = vi.fn();
-    render(<Host><NSEPicker label="Font" value="serif" onValueChange={onValueChange}
-      options={[{ value: "serif", label: "Serif" }, { value: "sans", label: "Sans" }]}
-      actions={[{ id: "show-fonts", label: "Show Fonts…", onSelect: showFonts }]} /></Host>);
-    fireEvent.click(screen.getByRole("button", { name: "Font Serif" }));
-    const action = await screen.findByRole("option", { name: "Show Fonts…" });
-    expect(action.getAttribute("data-kind")).toBe("action");
-    expect(action.getAttribute("aria-selected")).toBe("false");
-    expect(action.previousElementSibling?.getAttribute("role")).toBe("separator");
-    fireEvent.click(action);
-    expect(showFonts).toHaveBeenCalledTimes(1);
-    expect(onValueChange).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "Font Serif" })).toBeTruthy();
-  });
-
   it("opens an item menu with ArrowDown and skips disabled entries", async () => {
-    render(<Host><NSEMenu label="Actions" items={[{ value: "first", label: "First" }, { value: "off", label: "Disabled", disabled: true }, { value: "last", label: "Last" }]} /></Host>);
+    render(<Host><NSEMenuView label="Actions" items={[{ value: "first", label: "First" }, { value: "off", label: "Disabled", disabled: true }, { value: "last", label: "Last" }]} /></Host>);
     fireEvent.keyDown(screen.getByRole("button", { name: "Actions" }), { key: "ArrowDown" });
     const first = await screen.findByRole("menuitem", { name: "First" });
     await waitFor(() => expect(document.activeElement).toBe(first));

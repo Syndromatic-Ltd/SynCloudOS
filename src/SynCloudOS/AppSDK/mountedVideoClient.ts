@@ -1,6 +1,6 @@
 /*
  * SynWare SDK
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ * Copyright Â© 2026 Syndromatic Ltd. All rights reserved.
  *
  * Designed by Kavish Krishnakumar in Manchester.
  *
@@ -26,18 +26,21 @@ import type {
   VFXVideoClient,
 } from "../../FX/VideoFX/VFXCaptureSession";
 import type { VFXPresentationCoordinator } from "../../FX/VideoFX/VFXPresentation";
-import type { AudioGraphHostService, VideoCaptureService } from "../HostServices/AppSDKHostServiceTypes";
+import type { AppVideoClient, AppVideoPlaybackPresentationRequest } from "./appClientTypes";
+import type { AppPlaybackPresentationLease } from "./playbackPresentationTypes";
+import type { MountedPlaybackSource } from "./mountedPlaybackPresentation";
+import type { AudioGraphHostService, VideoCaptureService, PrivacyApplicationPort } from "../HostServices/AppSDKHostServiceTypes";
 import { AVPresentationCoordinator } from "../HostServices/AppSDKHostVideoPresentation";
 import { createMountedResourceScope, type MountedResourceAccounting } from "../HostServices/mountedResourceScope";
 import { normalizeVFXDecoderConfig } from "../../FX/VideoFX/VFXCodecCapabilities";
 
 export interface MountedVideoResourceLimits {
   readonly maximumDecoderSessions?: number;
-  /** Sum of configured width × height × four, not a claim about native heap use. */
+  /** Sum of configured width Ã— height Ã— four, not a claim about native heap use. */
   readonly maximumConfiguredFrameBytes?: number;
 }
 
-export type MountedVideoCapability = "video.capture.camera" | "video.capture.display";
+export type MountedVideoCapability = "video.capture.camera" | "video.capture.display" | "video.capture.element";
 
 function capabilityFor(kind: VFXCaptureKind): MountedVideoCapability {
   return kind === "camera" ? "video.capture.camera" : "video.capture.display";
@@ -58,7 +61,23 @@ export function createMountedVideoClient(
   audioCapability?: object,
   limits: MountedVideoResourceLimits = {},
   accounting?: MountedResourceAccounting,
-): VFXVideoClient {
+  presentPlayback?: (source: MountedPlaybackSource, request: AppVideoPlaybackPresentationRequest, signal?: AbortSignal) => AppPlaybackPresentationLease,
+  privacyForKind?: (kind: VFXCaptureKind) => PrivacyApplicationPort,
+): AppVideoClient {
+  const presentationSources = new WeakMap<VFXPresentationCoordinator, MountedPlaybackSource>();
+  const registerPresentation = (coordinator: AVPresentationCoordinator) => {
+    presentationSources.set(coordinator, Object.freeze({
+      get state() {
+        try { return coordinator.playbackState; }
+        catch { return "released" as const; } // an ended timebase cannot own native presentation
+      },
+      // A looping coordinator does not establish a finite OS track position.
+      duration: null, currentTime: 0, rate: 1,
+      allowedActions: Object.freeze(["play", "pause"] as const),
+      subscribe: (listener: () => void) => coordinator.subscribePlayback(listener),
+    }));
+    return coordinator;
+  };
   // Host admission accounts for configured pixel workload independently of
   // stream count. Many small previews must not cost the same as as many 4K
   // streams. Consumers still own and bound their retained output windows.
@@ -95,6 +114,7 @@ export function createMountedVideoClient(
   });
   const allowed = (kind: VFXCaptureKind): boolean => {
     const required = capabilityFor(kind);
+    try { privacyForKind?.(kind).assertRequestAllowed(); } catch { return false; }
     return permissions().includes(required) && authorise(required);
   };
   const requireCapability = (kind: VFXCaptureKind) => {
@@ -102,10 +122,17 @@ export function createMountedVideoClient(
     if (!permissions().includes(required))
       throw securityError(`SynWare capability ${required} must be declared.`);
     if (!authorise(required))
-      throw securityError(`PolicyKit denied SynWare capability ${required}.`);
+      throw securityError(`Privacy authorisation denied SynWare capability ${required}.`);
   };
 
   return Object.freeze({
+    present(coordinator: VFXPresentationCoordinator, request: AppVideoPlaybackPresentationRequest, signal?: AbortSignal) {
+      mountSignal.throwIfAborted(); signal?.throwIfAborted();
+      const source = presentationSources.get(coordinator);
+      if (!source || source.state === "released") throw securityError("Playback presentation requires this mount's live video coordinator.");
+      if (!presentPlayback) throw new DOMException("Video playback presentation is unavailable.", "NotSupportedError");
+      return presentPlayback(source, request, signal);
+    },
     queryDecoder(
       input: Parameters<VFXVideoClient["queryDecoder"]>[0],
       signal: Parameters<VFXVideoClient["queryDecoder"]>[1],
@@ -240,7 +267,7 @@ export function createMountedVideoClient(
           };
           Object.defineProperty(coordinator, "dispose", { configurable: true, value: dispose });
           lease.addEventListener("abort", dispose, { once: true });
-          return coordinator;
+          return registerPresentation(coordinator);
         }, coordinator => coordinator.dispose(), { sessions: 1 });
       }
       if (!audioGraphs) throw new DOMException("A/V synchronization host is unavailable.", "NotSupportedError");
@@ -269,7 +296,7 @@ export function createMountedVideoClient(
         };
         Object.defineProperty(coordinator, "dispose", { configurable: true, value: dispose });
         lease.addEventListener("abort", dispose, { once: true });
-        return coordinator;
+        return registerPresentation(coordinator);
       }, coordinator => coordinator.dispose(), { sessions: 1 });
     },
 
@@ -282,11 +309,29 @@ export function createMountedVideoClient(
           appId,
           capability,
           reauthorise: allowed,
+          reauthoriseElement: () => !lease.aborted && allowed("display") && permissions().includes("video.capture.element") && authorise("video.capture.element"),
         });
         let disposed = false;
+        const privacyBindings = new Map<VFXCaptureKind, () => void>();
+        let requestedKind: VFXCaptureKind | null = null;
+        const unsubscribePrivacy = session.subscribe(() => {
+          const kind = session.kind ?? requestedKind;
+          if (disposed || !kind) return;
+          if (session.state === "denied") privacyForKind?.(kind).observe("denied");
+          else if (session.state === "active") privacyForKind?.(kind).observe("granted");
+        });
+        const bindPrivacy = (kind: VFXCaptureKind) => {
+          const privacy = privacyForKind?.(kind);
+          privacy?.assertRequestAllowed();
+          if (privacy && !privacyBindings.has(kind)) privacyBindings.set(kind, privacy.bindResource(dispose));
+          return privacy;
+        };
         const dispose = () => {
           if (disposed) return;
           disposed = true;
+          unsubscribePrivacy();
+          for (const unbind of privacyBindings.values()) unbind();
+          privacyBindings.clear();
           try { session.dispose(); } finally { release(); }
         };
         lease.addEventListener("abort", dispose, { once: true });
@@ -295,14 +340,39 @@ export function createMountedVideoClient(
           get kind() { return session.kind; },
           get settings() { return session.settings; },
           get capabilities() { return session.capabilities; },
+          async getAuthorizationStatus(kind = "camera") {
+            if (disposed || lease.aborted) return "unavailable";
+            if (!permissions().includes(capabilityFor(kind))) return "denied";
+            const privacy = privacyForKind?.(kind);
+            return privacy ? privacy.getAuthorizationStatus(() => session.getAuthorizationStatus(kind)) : session.getAuthorizationStatus(kind);
+          },
           enumerateDevices: () => session.enumerateDevices(),
           async requestCamera(request) {
             requireCapability("camera");
-            return session.requestCamera(request);
+            requestedKind = "camera";
+            const privacy = bindPrivacy("camera");
+            return privacy ? privacy.request(signal => session.requestCamera({ ...request, signal }), { signal: request?.signal, dispose }) : session.requestCamera(request);
           },
           async requestDisplay(request) {
             requireCapability("display");
-            return session.requestDisplay(request);
+            requestedKind = "display";
+            const privacy = bindPrivacy("display");
+            return privacy ? privacy.request(signal => session.requestDisplay({ ...request, signal }), { signal: request?.signal, dispose }) : session.requestDisplay(request);
+          },
+          async setContentFilter(filter, signal) {
+            lease.throwIfAborted();
+            signal?.throwIfAborted();
+            requireCapability("display");
+            if (!permissions().includes("video.capture.element") || !authorise("video.capture.element"))
+              throw securityError("SynWare capability video.capture.element must be declared and authorised.");
+            if (!session.setContentFilter) throw new DOMException("Element capture is unavailable.", "NotSupportedError");
+            await session.setContentFilter(filter, signal);
+            lease.throwIfAborted();
+            requireCapability("display");
+            if (!permissions().includes("video.capture.element") || !authorise("video.capture.element")) {
+              dispose();
+              throw securityError("SynWare capability video.capture.element was revoked.");
+            }
           },
           suspend: () => session.suspend(),
           resume: async () => {

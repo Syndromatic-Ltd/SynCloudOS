@@ -38,8 +38,8 @@ function fixture() {
   cleanups.push(async () => { await runtime.dispose("test complete"); });
   const mount = (id: string) => {
     registerTestSynWare(runtime, {
-      schemaVersion: 1, id, version: "1.0.0", title: id,
-      routes: [{ path: `/${id}`, primary: true }],
+      schemaVersion: 1, bundleIdentifier: id, version: "1.0.0", displayName: id,
+      routes: [{ path: `/${id.split(".").at(-1)}`, primary: true }],
       documentTypes: [{ id: noteType.id, displayName: noteType.displayName }],
     });
     const mounted = mountTestSynWareRuntime(runtime, id);
@@ -47,7 +47,7 @@ function fixture() {
     const context = createSynWareContextValue(mounted.runtime);
     return { mounted, client: context.documents.workspaceDocuments, context };
   };
-  return { runtime, adapter, owner: mount("workflow-owner"), foreign: mount("workflow-foreign"), mount };
+  return { runtime, adapter, owner: mount("com.example.workflow-owner"), foreign: mount("com.example.workflow-foreign"), mount };
 }
 
 describe("mounted SDK document workflow contracts", () => {
@@ -88,7 +88,7 @@ describe("mounted SDK document workflow contracts", () => {
     expect(saved).toMatchObject({ documentId: document.id, previousLocation: null, location: first, version: { sequence: 1 } });
     const copyLocation = { ...first, key: "copy" };
     const duplicate = await owner.client.duplicateDocument<{ title: string; body: string }>(document.id, copyLocation);
-    expect(duplicate).toMatchObject({ applicationId: "workflow-owner", model: { body: "Saved" }, location: copyLocation });
+    expect(duplicate).toMatchObject({ applicationId: "com.example.workflow-owner", model: { body: "Saved" }, location: copyLocation });
     expect(duplicate.id).not.toBe(document.id);
     expect(Object.isFrozen(duplicate.model)).toBe(true);
     owner.client.updateDocument(document.id, (model) => ({ ...model, body: "Discard me" }), { actionName: "Type" });
@@ -116,7 +116,7 @@ describe("mounted SDK document workflow contracts", () => {
   it("rejects foreign and observer workflows before storage I/O", async () => {
     const { owner, foreign, adapter, mount } = fixture();
     const document = await owner.client.newDocument({ typeId: noteType.id });
-    const sibling = mount("workflow-owner");
+    const sibling = mount("com.example.workflow-owner");
     sibling.client.getDocument(document.id);
     const read = vi.spyOn(adapter, "read");
     const destination = { kind: "memory", namespace: "workflows", key: "unauthorized" } as const;

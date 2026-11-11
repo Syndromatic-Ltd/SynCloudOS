@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../Foundation/NSEData";
+
+
 import { VFXEncodedChunk } from "./VFXEncodedChunk";
 import { VFXFrame } from "./VFXFrame";
 
@@ -54,7 +57,7 @@ export interface VFXEncoderDecoderConfig {
   readonly codec: string;
   readonly codedWidth: number;
   readonly codedHeight: number;
-  readonly description?: Uint8Array;
+  readonly description?: NSEData;
 }
 
 export interface VFXEncoderOutputMetadata {

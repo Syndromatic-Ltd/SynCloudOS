@@ -21,7 +21,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { LoadingSpinner } from "../Components/LoadingSpinner";
-import { NSEPushButton } from "../Controls/Buttons/NSEButtons";
+import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { NSEFocusScope } from "../Focus/NSEFocusPort";
 import { useNSEOverlayProvider } from "../Overlays/NSEOverlayProvider";
 import { useChronosphereEnvironment } from "./chronosphereEnvironment";
@@ -176,7 +176,7 @@ export function Chronosphere<TPrepared = unknown, TDetail = unknown>({ subject, 
     const bezel = <div className="chronosphere-preparation" role={state.error ? "alert" : "status"} data-state={state.error ? "error" : "loading"}>
       <div className="chronosphere-preparation-bezel">
         {state.error ? <><p className="chronosphere-preparation-title">{labels.couldNotOpen}</p><p className="chronosphere-preparation-error">{state.error.message}</p>
-          <div className="chronosphere-preparation-actions"><NSEPushButton onClick={finishReturn}>{labels.cancel}</NSEPushButton><NSEPushButton onClick={retry}>{labels.retry}</NSEPushButton></div></>
+          <div className="chronosphere-preparation-actions"><NSEButton title={labels.cancel} onClick={finishReturn} /><NSEButton title={labels.retry} onClick={retry} /></div></>
           : <><LoadingSpinner variant="dark" label="" ariaLabel={labels.opening} className="chronosphere-preparation-spinner" /><p className="chronosphere-preparation-title">{labels.opening}</p></>}
       </div>
     </div>;

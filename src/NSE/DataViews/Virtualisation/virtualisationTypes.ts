@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { IndexRange } from "../../../SynCloudOS/Models";
+export interface NSEVirtualIndexRange { readonly start: number; readonly length: number }
 
 export type NSEVirtualAxis = "block" | "inline";
 export type NSEVirtualSizeEstimate = number | ((index: number) => number);
@@ -32,8 +32,8 @@ export interface NSEVirtualItem {
 }
 
 export interface NSEVirtualRange {
-  readonly visible: IndexRange;
-  readonly rendered: readonly IndexRange[];
+  readonly visible: NSEVirtualIndexRange;
+  readonly rendered: readonly NSEVirtualIndexRange[];
   readonly totalSize: number;
 }
 

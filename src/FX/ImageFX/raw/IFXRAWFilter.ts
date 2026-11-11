@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../../Foundation/NSEData";
 import {
   IFXPortableDNGRAWBackend,
   type IFXRAWBackend,
@@ -41,7 +42,8 @@ export class IFXRAWFilter {
   readonly #encoded: Uint8Array;
   readonly #backend: IFXRAWBackend;
 
-  constructor(encoded: Uint8Array, backend: IFXRAWBackend = new IFXPortableDNGRAWBackend()) {
+  constructor(input: NSEDataConvertible, backend: IFXRAWBackend = new IFXPortableDNGRAWBackend()) {
+    const encoded = NSEData.from(input).bytes;
     if (!(encoded instanceof Uint8Array)) throw new TypeError("IFXRAWFilter requires owned encoded RAW bytes.");
     this.#encoded = encoded.slice();
     this.#backend = backend;

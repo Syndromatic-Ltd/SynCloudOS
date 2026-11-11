@@ -119,6 +119,7 @@ export function createFakeVideoCapture(now: () => number): FakeVideoCaptureBundl
         get kind() { return kind; },
         get settings() { return settings; },
         capabilities: Object.freeze({ camera: true, display: true, deviceEnumeration: true }),
+        getAuthorizationStatus: async () => state === "disposed" ? "unavailable" : state === "active" ? "granted" : state === "denied" ? "denied" : "prompt",
         enumerateDevices: () => run("video.enumerate", signal, () => Object.freeze([Object.freeze({
           id: cameraSettings.deviceId ?? "fake-camera",
           groupId: cameraSettings.groupId,

@@ -34,16 +34,17 @@ export function NSEPanelView(props: NSEWindowViewProps) {
       dispatchCommand={props.dispatchCommand}
       moveHandleProps={props.presentation.movable ? props.moveHandleProps : undefined}
       controls={["close"]}
-      appearanceRecipe="window.standard.head.solid"
+
       variant="panel"
     />
   ) : null;
   return (
     <NSEWindowView
       {...props}
+      hasShadow
       className="nse-window-view--panel"
-      appearanceRecipe="window.standard.frame"
-      shadowRecipe="window.standard.shadow"
+
+
       titleBar={titleBar}
       onKeyDown={windowEscapeCloseHandler(props, props.record.style.includes("closable"))}
     />

@@ -1,0 +1,78 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-value-drawing-parts.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-value-drawing-parts.test.tsx (3 tests | 3 failed) 26ms
+   × distinguishes the switch's two fill caps and state captions through neutral hooks 22ms
+   × publishes the existing level classification independently of control selection 2ms
+   × publishes progress indeterminacy as an AppKit property 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-value-drawing-parts.test.tsx > distinguishes the switch's two fill caps and state captions through neutral hooks
+AssertionError: expected [ null, null ] to deeply equal [ 'leading', 'trailing' ]
+
+- Expected
++ Received
+
+  [
+-   "leading",
+-   "trailing",
++   null,
++   null,
+  ]
+
+ ❯ tests/runtime/nse-value-drawing-parts.test.tsx:12:118
+     10| it("distinguishes the switch's two fill caps and state captions throug…
+     11|   const { container } = render(<NSESwitch state="on" />);
+     12|   expect(Array.from(container.querySelectorAll('[data-nse-part="fill"]…
+       |                                                                                                                      ^
+     13|   expect(Array.from(container.querySelectorAll('[data-nse-part="title"…
+     14|   expect(container.querySelectorAll('[data-nse-part="label"]')).toHave…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/runtime/nse-value-drawing-parts.test.tsx > publishes the existing level classification independently of control selection
+AssertionError: expected null to be 'warning' // Object.is equality
+
+- Expected:
+"warning"
+
++ Received:
+null
+
+ ❯ tests/runtime/nse-value-drawing-parts.test.tsx:18:71
+     16| it("publishes the existing level classification independently of contr…
+     17|   const { container, rerender } = render(<NSELevelIndicator value={6} …
+     18|   expect(container.firstElementChild?.getAttribute("data-nse-level")).…
+       |                                                                       ^
+     19|   rerender(<NSELevelIndicator value={9} minimum={0} maximum={10} warni…
+     20|   expect(container.firstElementChild?.getAttribute("data-nse-level")).…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/runtime/nse-value-drawing-parts.test.tsx > publishes progress indeterminacy as an AppKit property
+AssertionError: expected null to be 'true' // Object.is equality
+
+- Expected:
+"true"
+
++ Received:
+null
+
+ ❯ tests/runtime/nse-value-drawing-parts.test.tsx:24:79
+     22| it("publishes progress indeterminacy as an AppKit property", () => {
+     23|   const { container, rerender } = render(<NSEProgressIndicator aria-la…
+     24|   expect(container.firstElementChild?.getAttribute("data-nse-indetermi…
+       |                                                                               ^
+     25|   rerender(<NSEProgressIndicator aria-label="Loading" value={50} />);
+     26|   expect(container.firstElementChild?.getAttribute("data-nse-indetermi…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed (3)
+   Start at  01:33:43
+   Duration  1.84s (transform 598ms, setup 27ms, import 845ms, tests 26ms, environment 809ms)

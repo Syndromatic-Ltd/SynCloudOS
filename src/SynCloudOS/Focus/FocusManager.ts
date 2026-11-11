@@ -28,10 +28,24 @@ export function createFocusManager(options: { readonly runtimeId: SynCloudOSRunt
   const scopes = new Map<string, Omit<FocusScopeRegistration, "restoreResponderId"> & { restoreResponderId: string | null }>();
   const stack: string[] = [];
   const restorations: Array<{ scopeId: string; responderId: string | null }> = [];
+  const listeners = new Set<() => void>();
   let anchors = {};
   let focusedResponderId: string | null = null;
   let generation = 0;
   let disposed = false;
+  let notificationQueued = false;
+
+  // Focus scopes can change during React commits. Keep authority synchronous,
+  // but defer presentation observers until the mutation has completed.
+  const publish = () => {
+    if (notificationQueued || disposed) return;
+    notificationQueued = true;
+    queueMicrotask(() => {
+      notificationQueued = false;
+      if (disposed) return;
+      for (const listener of listeners) listener();
+    });
+  };
 
   const isScopeWithin = (scopeId: string, ancestorScopeId: string) => {
     let current = scopes.get(scopeId);
@@ -67,17 +81,26 @@ export function createFocusManager(options: { readonly runtimeId: SynCloudOSRunt
       if (scopes.has(registration.id)) throw new FocusScopeError(`Focus scope ${registration.id} is already open.`);
       if (!options.responders.has(registration.parentResponderId)) throw new FocusScopeError(`Parent responder ${registration.parentResponderId} is not registered.`);
       if (registration.parentScopeId && !scopes.has(registration.parentScopeId)) throw new FocusScopeError(`Parent focus scope ${registration.parentScopeId} is not open.`);
-      scopes.set(registration.id, { ...registration, restoreResponderId: registration.restoreResponderId ?? focusedResponderId });
+      let ownedScope = { ...registration, restoreResponderId: registration.restoreResponderId ?? focusedResponderId };
+      scopes.set(registration.id, ownedScope);
       stack.push(registration.id);
       generation += 1;
+      publish();
       let live = true;
       const close = (closeOptions?: { restore?: boolean }) => {
-        if (!live) return { status: "missing", scopeId: registration.id, restoredResponderId: null } as const;
+        if (!live || scopes.get(registration.id) !== ownedScope) return { status: "missing", scopeId: registration.id, restoredResponderId: null } as const;
         const result = manager.closeScope(registration.id, closeOptions);
         if (result.status === "closed") live = false;
         return result;
       };
-      return { id: registration.id, close, dispose: () => close() };
+      return { id: registration.id, close, dispose: () => close(), updatePresentation(presentation) {
+        if (disposed || !live || scopes.get(registration.id) !== ownedScope) throw new FocusScopeError("Focus scope presentation requires its live handle.");
+        if (ownedScope.kind === presentation.kind && ownedScope.modal === presentation.modal && ownedScope.trapFocus === presentation.trapFocus) return;
+        ownedScope = { ...ownedScope, kind: presentation.kind, modal: presentation.modal, trapFocus: presentation.trapFocus };
+        scopes.set(registration.id, ownedScope);
+        generation += 1;
+        publish();
+      } };
     },
     requestFocus(responderId) {
       if (!options.responders.has(responderId)) return { status: "missing", responderId, reason: "The responder is no longer registered." };
@@ -85,6 +108,7 @@ export function createFocusManager(options: { readonly runtimeId: SynCloudOSRunt
       if (!allowedByModal(responderId)) return { status: "blocked", responderId, reason: "The active modal scope contains focus." };
       focusedResponderId = responderId;
       generation += 1;
+      publish();
       return { status: "focused", responderId };
     },
     closeScope(scopeId, closeOptions = {}): FocusCloseResult {
@@ -102,19 +126,26 @@ export function createFocusManager(options: { readonly runtimeId: SynCloudOSRunt
       restorations.push({ scopeId, responderId: restoredResponderId });
       restorations.splice(0, Math.max(0, restorations.length - 80));
       generation += 1;
+      publish();
       return { status: "closed", scopeId, restoredResponderId };
     },
     isScopeWithin,
-    setActiveAnchors(next) { anchors = { ...next }; generation += 1; },
+    setActiveAnchors(next) { anchors = { ...next }; generation += 1; publish(); },
     getActiveAnchors: () => ({ ...anchors }),
     getFocusedResponderId: () => focusedResponderId,
     getGeneration: () => generation,
+    subscribe(listener) {
+      if (disposed) return () => {};
+      listeners.add(listener);
+      return () => { listeners.delete(listener); };
+    },
     inspect: () => ({ generation, focusedResponderId, scopes: stack.map((id) => scopes.get(id)!).map(({ restoreResponderId: _, ...scope }) => scope), restorations: [...restorations] }),
     handleRespondersRemoved(ids) {
       if (ids.includes(focusedResponderId ?? "")) focusedResponderId = nearestLive((anchors as { runtimeResponderId?: string }).runtimeResponderId ?? "runtime");
       generation += 1;
+      publish();
     },
-    dispose() { disposed = true; scopes.clear(); stack.length = 0; focusedResponderId = null; generation += 1; },
+    dispose() { disposed = true; scopes.clear(); stack.length = 0; focusedResponderId = null; generation += 1; listeners.clear(); },
   };
   return manager;
 }

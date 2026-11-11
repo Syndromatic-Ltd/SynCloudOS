@@ -22,7 +22,7 @@
 import React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEToolbar, type NSEToolbarProps } from "../../../src/NSE/Toolbars";
+import { NSEToolbarView as NSEToolbar, type NSEToolbarViewProps as NSEToolbarProps } from "../../../src/NSE/Toolbars/NSEToolbarView";
 import { normalizeNSEProgress, progressStyle } from "../../../src/NSE/Progress/progressCore";
 
 afterEach(() => {

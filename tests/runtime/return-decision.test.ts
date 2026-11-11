@@ -33,12 +33,12 @@ function stubRuntime(options: {
   readonly returnTransitionIds?: ReadonlyArray<string | null>;
   readonly clockStep?: number;
 }) {
-  const lease = Object.freeze({ applicationId: "window-owner", epoch: 1, token: "application-close:test" });
+  const lease = Object.freeze({ applicationId: "com.example.window-owner", epoch: 1, token: "application-close:test" });
   const preparationToken = Object.freeze({
     tokenId: "application-close-preparation:test",
     runtimeId: "runtime:test",
-    applicationId: "window-owner",
-    resultWindowControllerId: "application:window-owner",
+    applicationId: "com.example.window-owner",
+    resultWindowControllerId: "application:com.example.window-owner",
   });
   const preparedResult = options.windowsResult ?? { status: "ready", token: preparationToken };
   const close = vi.fn(() => ({ result: Promise.resolve(options.closeResult) }));
@@ -97,10 +97,10 @@ describe("return-to-Webspring decision flows", () => {
     openRoute.mockImplementationOnce(() => { order.push("route"); return { result: Promise.resolve({ status: "completed", committed: true }) }; });
     close.mockImplementationOnce(() => { order.push("close"); return { result: Promise.resolve({ status: "completed", committed: true }) }; });
 
-    await expect(confirmReturnDecisionQuit(runtime, "window-owner")).resolves.toBe("closed");
+    await expect(confirmReturnDecisionQuit(runtime, "com.example.window-owner")).resolves.toBe("closed");
     expect(order).toEqual(["lease", "prepare", "route", "close"]);
-    expect(prepareCloseApplication).toHaveBeenCalledWith("window-owner", { reason: "application-quit" }, lease);
-    expect(close).toHaveBeenCalledWith("window-owner", {
+    expect(prepareCloseApplication).toHaveBeenCalledWith("com.example.window-owner", { reason: "application-quit" }, lease);
+    expect(close).toHaveBeenCalledWith("com.example.window-owner", {
       reason: "return-decision-quit",
       closeTransaction: { authority: lease, preparation: preparationToken },
     });
@@ -115,8 +115,8 @@ describe("return-to-Webspring decision flows", () => {
       returnTransitionIds: ["return-1", "return-1", null],
     });
 
-    await expect(confirmReturnDecisionQuit(runtime, "window-owner")).resolves.toBe("closed");
-    expect(close).toHaveBeenCalledWith("window-owner", {
+    await expect(confirmReturnDecisionQuit(runtime, "com.example.window-owner")).resolves.toBe("closed");
+    expect(close).toHaveBeenCalledWith("com.example.window-owner", {
       reason: "return-decision-quit",
       closeTransaction: { authority: expect.anything(), preparation: expect.anything() },
     });
@@ -128,7 +128,7 @@ describe("return-to-Webspring decision flows", () => {
       windowsResult: { status: "cancelled", windowControllerId: "window-1" },
     });
 
-    await expect(confirmReturnDecisionQuit(runtime, "window-owner")).resolves.toBe("refused");
+    await expect(confirmReturnDecisionQuit(runtime, "com.example.window-owner")).resolves.toBe("refused");
     expect(close).not.toHaveBeenCalled();
     expect(openRoute).not.toHaveBeenCalled();
     expect(endApplicationClose).toHaveBeenCalledWith(lease);
@@ -140,7 +140,7 @@ describe("return-to-Webspring decision flows", () => {
       appRoute: "/window-owner",
     });
 
-    await expect(confirmReturnDecisionQuit(runtime, "window-owner")).resolves.toBe("refused");
+    await expect(confirmReturnDecisionQuit(runtime, "com.example.window-owner")).resolves.toBe("refused");
     expect(openRoute).toHaveBeenNthCalledWith(1, "/", { source: "system-ui:return-decision" });
     expect(openRoute).toHaveBeenNthCalledWith(2, "/window-owner", { source: "system-ui:return-decision" });
     expect(rollbackCloseApplication).toHaveBeenCalledWith(preparationToken, lease);
@@ -153,7 +153,7 @@ describe("return-to-Webspring decision flows", () => {
       routeResult: { status: "cancelled", committed: false, reason: "superseded" },
     });
 
-    await expect(confirmReturnDecisionQuit(runtime, "window-owner")).rejects.toThrow(/did not complete/);
+    await expect(confirmReturnDecisionQuit(runtime, "com.example.window-owner")).rejects.toThrow(/did not complete/);
     expect(close).not.toHaveBeenCalled();
     expect(rollbackCloseApplication).toHaveBeenCalledWith(preparationToken, lease);
     expect(endApplicationClose).toHaveBeenCalledWith(lease);
@@ -166,7 +166,7 @@ describe("return-to-Webspring decision flows", () => {
       clockStep: 3_000,
     });
 
-    await expect(confirmReturnDecisionQuit(runtime, "window-owner")).rejects.toThrow(/did not settle/);
+    await expect(confirmReturnDecisionQuit(runtime, "com.example.window-owner")).rejects.toThrow(/did not settle/);
     expect(close).not.toHaveBeenCalled();
     expect(rollbackCloseApplication).toHaveBeenCalledWith(preparationToken, lease);
   });

@@ -1,0 +1,43 @@
+{
+  "commit": "4d354379c4f865e7e3d013f585d88e7efb7e8c09",
+  "frozenFilesChecked": 57,
+  "deletionsChecked": 1,
+  "allCommittedBytesAndDeletionsMatch": true,
+  "archiveHashMatches": true,
+  "installedProof": {
+    "archiveSha256": "5d4d57e0566f91f7c5a78d3a1159d503cee3181ef4e8d5b794648d3b31400fd4",
+    "sourceSha256": "ced5ae1aec20711ecc072e297ac43ca3cc71ca0d75652859213109e8d50a01cd",
+    "resourcesSha256": "9b1bc3d4dee2e1cc48e543d33ff380576320df09341c5cb537a6bd51f7f712a5",
+    "integrity": "sha512-v7lVDGClF6oc7UWrG1EQvmW36hL4g/f1/CN+L+BW7UQR9g+7O/aF2vWmypCOaeuHASvqOqRQrlwrjfCiXk/s6Q==",
+    "xr": {
+      "archive": "archives/syndromatic-syncloudos-1.0.0-beta.2-5d4d57e0566f91f7c5a78d3a1159d503cee3181ef4e8d5b794648d3b31400fd4.tgz",
+      "index": "df527bffe90aa92cffa4008b7f05b83ec6cfe6bf1057c92f271c7b4bb18561d8",
+      "types": "f7fe51395650c0292a3882a54f77e537e055153af6a2e68fc3c1eb16a0d48a4b"
+    },
+    "installedOutsideRepository": true,
+    "linked": false,
+    "compiledAppTests": 3,
+    "productionBuild": true,
+    "productionImports": true,
+    "strictInstalledTypes": true,
+    "sharedSDKGraph": true,
+    "declarationGraph": {
+      "index": {
+        "xrInternalModules": 0
+      },
+      "sdk": {
+        "xrInternalModules": 0
+      },
+      "sdk/testing": {
+        "xrInternalModules": 0
+      },
+      "browser": {
+        "xrInternalModules": 0
+      },
+      "fx/xr": {
+        "xrInternalModules": 0
+      }
+    },
+    "resourceIntegrityAfterProof": true
+  }
+}

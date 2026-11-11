@@ -39,4 +39,9 @@ export { AUFXAudioRecorder, type AUFXAudioRecorderOptions, type AUFXAudioRecorde
 export { AUFXAudioSession, type AUFXAudioSessionState, type AUFXAudioRoute, type AUFXAudioDevice } from "./AUFXAudioSession";
 export { AUFXAudioInputNode, type AUFXAudioInputNodeState, type AUFXAudioInputSourceFormat } from "./AUFXAudioInputNode";
 export { AUFXAudioProcessor } from "./AUFXAudioProcessor";
+export { AUFXSpeechSynthesizer, AUFXSpeechUtterance } from "./AUFXSpeechSynthesizer";
+export type { AUFXSpeechAuthorizationStatus, AUFXSpeechVoice, AUFXSpeechUtteranceOptions, AUFXSpeechClient } from "./AUFXSpeechSynthesizer";
+export type { AUFXAudioSessionCategory, AUFXAudioSessionType, AUFXAudioSessionAuthorizationStatus } from "./AUFXAudioSession";
 export type { AUFXAudioTap } from "./AUFXAudioEngine";
+
+export type { AUFXRecordPermission } from "./AUFXAudioSession";

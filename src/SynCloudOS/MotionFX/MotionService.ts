@@ -70,6 +70,7 @@ export class MotionService {
     else options.signal?.addEventListener("abort", abort, { once: true });
     const facade = Object.create(null) as MFXMotionManager;
     for (const key of [
+      "authorizationStatus",
       "capabilities",
       "deviceMotion",
       "accelerometerData",

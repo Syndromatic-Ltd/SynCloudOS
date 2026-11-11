@@ -29,11 +29,11 @@ import { LFXCoordinate, LFXLocation } from "../../../src/FX/LocationFX/public";
 const LocationProbe = createSynWare({
   manifest: {
     schemaVersion: 1,
-    id: "com.syndromatic.location-probe",
+    bundleIdentifier: "com.syndromatic.location-probe",
     version: "1.0.0",
-    title: "Location Probe",
+    displayName: "Location Probe",
     routes: [{ path: "/location-probe", primary: true }],
-    permissions: ["location.read", "location.request"],
+    entitlements: ["location.read", "location.request"],
   },
   root() {
     return <div>Location probe</div>;
@@ -53,7 +53,7 @@ function mountedFix(sequence: number, receivedAtMonotonicSeconds: number): LFXLo
   });
 }
 
-it("keeps PolicyKit authoritative before a mounted LocationFX client reaches its host adapter", async () => {
+it("keeps mounted privacy authority before a mounted LocationFX client reaches its host adapter", async () => {
   const host = createSynWareTestHost({ app: LocationProbe, document });
   await host.render();
   host.adapters.location.allow();
@@ -76,7 +76,7 @@ it("keeps PolicyKit authoritative before a mounted LocationFX client reaches its
   host.adapters.policy.allow();
   const manager = host.appContext.location.createManager();
   expect(host.adapters.location.calls()).toEqual([]);
-  expect(await manager.getAuthorizationStatus()).toBe("granted");
+  expect(await manager.getAuthorizationStatus()).toBe("prompt");
   expect((await manager.current()).coordinate.longitude).toBe(-2.2426);
   expect(host.adapters.location.calls().map((call) => call.operation)).toEqual(["location.status", "location.current"]);
   manager.dispose();
@@ -106,7 +106,7 @@ it("routes a mounted watch through lifecycle suspension, reauthorization and mou
   expect(host.settlement.getState().excluded).toContainEqual(expect.objectContaining({
     owner: "location",
     kind: "watch",
-    label: LocationProbe.manifest.id,
+    label: LocationProbe.manifest.bundleIdentifier,
   }));
   await expect(host.settlement.settled({ timeoutMs: 250 })).resolves.toMatchObject({
     status: "settled",
@@ -114,7 +114,7 @@ it("routes a mounted watch through lifecycle suspension, reauthorization and mou
       expect.objectContaining({
         owner: "location",
         kind: "watch",
-        label: LocationProbe.manifest.id,
+        label: LocationProbe.manifest.bundleIdentifier,
       }),
     ]),
   });
@@ -141,7 +141,7 @@ it("routes a mounted watch through lifecycle suspension, reauthorization and mou
   expect(host.settlement.getState().excluded).not.toContainEqual(expect.objectContaining({
     owner: "location",
     kind: "watch",
-    label: LocationProbe.manifest.id,
+    label: LocationProbe.manifest.bundleIdentifier,
   }));
   manager.dispose();
   const report = await host.dispose();

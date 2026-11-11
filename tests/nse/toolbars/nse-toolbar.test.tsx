@@ -22,19 +22,16 @@
 import React, { useMemo, useRef, useState } from "react";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEPreferencesController, type PreferencesAdapter } from "../../../src/NSE/Controllers";
+import { NSEUserDefaultsController } from "../../../src/NSE/Controllers";
 import { NSEOverlayProvider, type NSEWindowSurfaceDismissResult, type NSEWindowSurfaceRequest } from "../../../src/NSE/Overlays";
-import {
-  allocateNSEToolbarItems,
-  NSEToolbar,
-  NSEToolbarConfigurationSheet,
-  NSEToolbarController,
-  type NSEToolbarConfiguration,
-  type NSEToolbarItem,
-  type NSEToolbarPreferences,
-  type NSEToolbarRuntimePort,
-} from "../../../src/NSE/Toolbars";
+import { allocateNSEToolbarItems } from "../../../src/NSE/Toolbars/toolbarLayout";
+import { NSEToolbarView as NSEToolbar } from "../../../src/NSE/Toolbars/NSEToolbarView";
+import { NSEToolbarConfigurationSheet } from "../../../src/NSE/Toolbars/NSEToolbarConfigurationSheet";
+import { NSEToolbarController } from "../../../src/NSE/Toolbars/NSEToolbarController";
+import type { NSEToolbarConfiguration, NSEToolbarItem, NSEToolbarPreferences, NSEToolbarRuntimePort } from "../../../src/NSE/Toolbars/toolbarTypes";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
+import { declareSynCloudOSLifecycleSignal, SynCloudOSLifecycleError } from "../../../src/SynCloudOS/nseRuntimeContracts";
+import { defaultsFrom, type TestDefaultsStore } from "../../fixtures/userDefaults";
 
 afterEach(() => {
   document.body.replaceChildren();
@@ -127,15 +124,15 @@ const items = [
 function preferenceController(
   namespace: string,
   itemIds: readonly string[] = configuration.defaultItemIds,
-  adapter?: PreferencesAdapter,
+  adapter?: TestDefaultsStore,
 ) {
   const values = new Map<string, unknown>();
   const resolvedAdapter = adapter ?? {
     read: (key: string) => values.get(key) ?? null,
     write: (key: string, value: unknown) => void values.set(key, value),
     remove: (key: string) => void values.delete(key),
-  } satisfies PreferencesAdapter;
-  return new NSEPreferencesController<NSEToolbarPreferences>({
+  } satisfies TestDefaultsStore;
+  return new NSEUserDefaultsController<NSEToolbarPreferences>({
     namespace,
     schema: {
       version: 1,
@@ -151,12 +148,12 @@ function preferenceController(
       },
       migrations: [],
     },
-    adapter: resolvedAdapter,
+    defaults: defaultsFrom(resolvedAdapter),
   });
 }
 
 function createController(options: Partial<{
-  readonly preferences: NSEPreferencesController<NSEToolbarPreferences>;
+  readonly preferences: NSEUserDefaultsController<NSEToolbarPreferences>;
   readonly runtime: NSEToolbarRuntimePort;
 }> = {}) {
   return new NSEToolbarController({
@@ -231,6 +228,23 @@ function hostedConfiguration(outcome: NSEWindowSurfaceDismissResult["outcome"] =
 }
 
 describe("NSEToolbarController", () => {
+  it.each(["explicit", "application-closed"] as const)("records %s disposal with toolbar identity and public operation", reason => {
+    const signal = new AbortController();
+    declareSynCloudOSLifecycleSignal(signal.signal, "application-closed");
+    const controller = createController({ runtime: runtime(vi.fn(), { signal: signal.signal }) });
+    if (reason === "explicit") controller.dispose(); else signal.abort();
+    controller.dispose(); signal.abort();
+    const actions: Record<string, () => unknown> = {
+      setItemOrder: () => controller.setItemOrder([]), move: () => controller.move("save", 1), moveAt: () => controller.moveAt(0, 1),
+      insert: () => controller.insert("save"), remove: () => controller.remove("save"), removeAt: () => controller.removeAt(0),
+      setDisplayMode: () => controller.setDisplayMode("icon-only"), setSizeMode: () => controller.setSizeMode("small"),
+      reset: () => controller.reset(), beginConfiguration: () => controller.beginConfiguration({ id: "late", actionName: "Configure Toolbar" }),
+    };
+    for (const [operation, action] of Object.entries(actions)) {
+      expect(action).toThrow(SynCloudOSLifecycleError);
+      expect(action).toThrow(expect.objectContaining({ code: "NSE_TOOLBAR_CONTROLLER_DISPOSED", operation, resource: { kind: "NSEToolbarController", id: configuration.identifier }, disposal: expect.objectContaining({ reason }) }));
+    }
+  });
   it("cancels a toolbar dispatch when the displayed command authority tuple is stale", async () => {
     let registryGeneration = 1;
     const validateMany = vi.fn(async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
@@ -276,7 +290,7 @@ describe("NSEToolbarController", () => {
     const values = new Map<string, unknown>();
     let writes = 0;
     let failAt = Number.POSITIVE_INFINITY;
-    const adapter: PreferencesAdapter = {
+    const adapter: TestDefaultsStore = {
       read: (key) => values.get(key) ?? null,
       write: (key, value) => {
         writes += 1;
@@ -604,15 +618,34 @@ describe("NSEToolbar presentation", () => {
 
     const toolbar = await screen.findByRole("toolbar", { name: "Appearance actions" });
     const save = await screen.findByRole("button", { name: "Save" });
-    expect(toolbar.getAttribute("data-nse-appearance-slot")).toBe("toolbar.surface.normal.1x");
-    expect(save.getAttribute("data-nse-appearance-slot")).toBe("toolbar.item.normal.1x");
+
+
     expect(controller.snapshot.itemIds).toEqual(configuration.defaultItemIds);
+    const pointerDown = new MouseEvent("pointerdown", { bubbles: true, cancelable: true, button: 0 });
+    fireEvent(save, pointerDown);
+    expect(pointerDown.defaultPrevented).toBe(true);
     fireEvent.click(save);
     await waitFor(() => expect(controller.runtime.commands.dispatch).toHaveBeenCalledWith(
       "document.save",
       undefined,
       expect.objectContaining({ source: "toolbar" }),
     ));
+  });
+
+  it("revalidates a toolbar activation after keyboard focus changes command authority", async () => {
+    let responderGeneration = 0;
+    const port = runtime(vi.fn(async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
+      requests.map(request => [request.key, commandPresentation(request.commandId)]),
+    )));
+    port.commands.getPresentationGeneration = () => ({ registryGeneration: 0, responderGeneration });
+    const controller = createController({ runtime: port });
+    render(<OverlayHarness><NSEToolbar composition="configured" controller={controller} width={300}
+      interaction={{ overflowOverlayId: "toolbar-keyboard-activation", parentResponderId: "window:editor" }} /></OverlayHarness>);
+    const save = await screen.findByRole("button", { name: "Save" });
+    await waitFor(() => expect(save.disabled).toBe(false));
+    responderGeneration += 1;
+    fireEvent.click(save);
+    await waitFor(() => expect(port.commands.dispatch).toHaveBeenCalledWith("document.save", undefined, expect.objectContaining({ source: "toolbar" })));
   });
 
   it("uses Atmo chrome as inert paint layers while command and focus ownership stay with the toolbar", async () => {
@@ -640,6 +673,102 @@ describe("NSEToolbar presentation", () => {
       undefined,
       expect.objectContaining({ source: "toolbar" }),
     ));
+  });
+
+  it("revalidates once when command presentation authority changes, and stops when disposed", async () => {
+    let notify: (() => void) | undefined;
+    const unsubscribe = vi.fn();
+    const validateMany = vi.fn(async () => new Map([
+      ["editor-toolbar:save:0", commandPresentation("document.save")],
+      ["editor-toolbar:print:0", commandPresentation("document.print")],
+    ]));
+    const port = runtime(validateMany);
+    const controller = createController({
+      runtime: { ...port, commands: { ...port.commands, subscribePresentation: (listener: () => void) => { notify = listener; return unsubscribe; } } },
+    });
+    await controller.refresh();
+    expect(validateMany).toHaveBeenCalledTimes(1);
+
+    notify!();
+    notify!();
+    notify!();
+    await vi.waitFor(() => expect(validateMany).toHaveBeenCalledTimes(2));
+    await Promise.resolve();
+    expect(validateMany).toHaveBeenCalledTimes(2);
+
+    controller.dispose();
+    expect(unsubscribe).toHaveBeenCalledTimes(1);
+  });
+
+  it("revalidates when an action that one of its commands performs announces a change", async () => {
+    const { publishNSEActionChange } = await import("../../../src/NSE/Controls/Core/actionChanges");
+    const validateMany = vi.fn(async () => new Map([
+      ["editor-toolbar:save:0", commandPresentation("document.save")],
+      ["editor-toolbar:print:0", commandPresentation("document.print")],
+    ]));
+    const controller = createController({ runtime: runtime(validateMany) });
+    await controller.refresh();
+    publishNSEActionChange("document.unrelated");
+    await Promise.resolve();
+    expect(validateMany).toHaveBeenCalledTimes(1);
+    publishNSEActionChange("document.save");
+    await vi.waitFor(() => expect(validateMany).toHaveBeenCalledTimes(2));
+    controller.dispose();
+    publishNSEActionChange("document.save");
+    await Promise.resolve();
+    expect(validateMany).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps its shown items while authority keeps moving, as when switching menus by hover", async () => {
+    // Hovering across a menu bar moves focus on every title. Each move bumps
+    // the responder generation while the toolbar is still validating.
+    let responderGeneration = 0;
+    let moving = false;
+    const validateMany = vi.fn(async () => {
+      if (moving) responderGeneration += 1;
+      return new Map([
+        ["editor-toolbar:save:0", commandPresentation("document.save")],
+        ["editor-toolbar:print:0", commandPresentation("document.print")],
+      ]);
+    });
+    const port = runtime(validateMany);
+    const controller = createController({
+      runtime: { ...port, commands: { ...port.commands, getPresentationGeneration: () => ({ registryGeneration: 0, responderGeneration }) } },
+    });
+    await expect(controller.refresh()).resolves.toMatchObject({ status: "published" });
+    const shown = controller.snapshot.items;
+    const snapshots: (typeof controller.snapshot)[] = [];
+    const unsubscribe = controller.subscribe(() => snapshots.push(controller.snapshot));
+    moving = true;
+    await controller.refresh();
+    expect(snapshots.every((snapshot) => snapshot.diagnostic === null && snapshot.items.length === shown.length)).toBe(true);
+    expect(controller.snapshot.items.find((item) => item.id === "save")).toMatchObject({ enabled: true });
+    moving = false;
+    await expect(controller.refresh()).resolves.toMatchObject({ status: "published" });
+    expect(controller.snapshot.diagnostic).toBeNull();
+    unsubscribe();
+  });
+
+  it("retries a validation whose command authority moved underneath it instead of reporting the toolbar unavailable", async () => {
+    // A file panel or comparison window returning focus bumps the responder
+    // generation while the toolbar is validating.
+    let responderGeneration = 0;
+    const validateMany = vi.fn(async () => {
+      if (validateMany.mock.calls.length === 1) responderGeneration += 1;
+      return new Map([
+        ["editor-toolbar:save:0", commandPresentation("document.save")],
+        ["editor-toolbar:print:0", commandPresentation("document.print")],
+      ]);
+    });
+    const port = runtime(validateMany);
+    const controller = createController({
+      runtime: { ...port, commands: { ...port.commands, getPresentationGeneration: () => ({ registryGeneration: 0, responderGeneration }) } },
+    });
+    const result = await controller.refresh();
+    expect(result.status).toBe("published");
+    expect(validateMany).toHaveBeenCalledTimes(2);
+    expect(controller.snapshot.diagnostic).toBeNull();
+    expect(controller.snapshot.items.find((item) => item.id === "save")).toMatchObject({ enabled: true });
   });
 
   it("removes command controls and announces a validation failure instead of dispatching stale state", async () => {
@@ -719,6 +848,43 @@ describe("NSEToolbar presentation", () => {
       undefined,
       expect.objectContaining({ source: "menu" }),
     ));
+  });
+
+  it("parents its overflow to the nearest responder when the toolbar does not name one", async () => {
+    const { NSEActionResponderContext } = await import("../../../src/NSE/Controls/Core/useNSEControlAction");
+    const validateMany = vi.fn(async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
+      requests.map((request) => [request.key, commandPresentation(request.commandId)]),
+    ));
+    const toolbarRuntime = runtime(validateMany);
+    const controller = createController({
+      runtime: toolbarRuntime,
+      preferences: preferenceController("toolbar:nearest", ["save", "custom", "print"]),
+    });
+    render(
+      <OverlayHarness>
+        <NSEActionResponderContext.Provider value="view:editor">
+          <NSEToolbar composition="configured" controller={controller} width={150} aria-label="Document actions" />
+        </NSEActionResponderContext.Provider>
+      </OverlayHarness>,
+    );
+    fireEvent.click(await screen.findByRole("button", { name: "More toolbar items" }));
+    await screen.findByRole("menu");
+    fireEvent.click(screen.getByRole("menuitem", { name: "Print" }));
+    await waitFor(() => expect(toolbarRuntime.commands.dispatch).toHaveBeenCalledWith(
+      "document.print",
+      undefined,
+      expect.objectContaining({ source: "menu" }),
+    ));
+  });
+
+  it("explains how to give a toolbar a responder when none is in scope", () => {
+    const controller = createController();
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    expect(() => render(
+      <OverlayHarness>
+        <NSEToolbar composition="configured" controller={controller} width={150} aria-label="Document actions" />
+      </OverlayHarness>,
+    )).toThrow(/inside a view controller or responder scope/);
   });
 
   it("carries the canonical scheduler into an overflow branch so scope setup cannot stale its validation", async () => {

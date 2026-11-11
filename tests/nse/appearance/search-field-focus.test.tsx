@@ -24,36 +24,46 @@ import { readFileSync } from "node:fs";
 import { act, cleanup, render, screen } from "@testing-library/react";
 import * as cssTree from "css-tree";
 import { afterEach, describe, expect, it } from "vitest";
+import { atmoPaintCSS, atmoStructureFile } from "../../fixtures/atmoStylesheets";
 import { NSESearchField, type NSESearchFieldProps } from "../../../src/NSE/Controls/Fields/NSESearchField";
 
-const atmoCss = readFileSync("src/NSE/Themes/Atmo/Resources/atmo.css", "utf8");
+const atmoCss = atmoPaintCSS();
 const appearanceCss = readFileSync("src/NSE/Appearance/nse-appearance.css", "utf8");
 const fieldCss = readFileSync("src/NSE/Controls/Fields/nse-field-extensions.css", "utf8");
-const structureCss = readFileSync("src/NSE/Themes/Atmo/Resources/atmo-structure.css", "utf8");
+const structureCss = readFileSync(atmoStructureFile, "utf8");
 
-// Keep the real search selectors, declaration order and media conditions,
-// without mounting unrelated controls or the theme's large SVG data URLs.
-function searchPaint(css: string) {
+// JSDOM has no @scope. Unwrap the layer and scope blocks in source order, and stand the
+// theme boundary in for :scope, as a browser resolves it inside @scope ([data-nse-theme]).
+const scopeRoot = (selector: string) => selector.replaceAll(":scope", "[data-nse-theme]");
+function unscoped(css: string, keep: (rule: cssTree.Rule) => boolean = () => true) {
   const ast = cssTree.parse(css);
+  cssTree.walk(ast, {
+    visit: "Atrule",
+    leave(node, item, list) {
+      if ((node.name === "layer" || node.name === "scope") && node.block) list.replace(item, node.block.children);
+    },
+  });
   cssTree.walk(ast, {
     visit: "Rule",
     enter(node, item, list) {
-      if (!cssTree.generate(node.prelude).includes(".nse-control-search") &&
-        !node.block.children.some(child => child.type === "Declaration" && child.property === "--nse-atmo-focus-ring")) {
-        list.remove(item);
-      }
+      if (!keep(node)) list.remove(item);
+      else node.prelude = cssTree.parse(scopeRoot(cssTree.generate(node.prelude)), { context: "selectorList" }) as cssTree.SelectorList;
     },
   });
   return cssTree.generate(ast);
 }
-const paint = appearanceCss + fieldCss + searchPaint(structureCss) + searchPaint(atmoCss);
+// Keep the real search selectors, declaration order and media conditions,
+// without mounting unrelated controls or the theme's large SVG data URLs.
+const isSearchPaint = (rule: cssTree.Rule) => cssTree.generate(rule.prelude).includes("search-field") ||
+  rule.block.children.some(child => child.type === "Declaration" && child.property === "--nse-atmo-focus-ring");
+const paint = unscoped(appearanceCss) + fieldCss + unscoped(structureCss, isSearchPaint) + unscoped(atmoCss, isSearchPaint);
 
 afterEach(cleanup);
 
 function mount(props: NSESearchFieldProps = {}, contrast = "normal") {
   const { container } = render(<>
     <style>{paint}</style>
-    <div data-nse-appearance="atmo" data-nse-contrast={contrast}>
+    <div data-nse-theme="com.syndromatic.atmo" data-nse-contrast={contrast}>
       <NSESearchField aria-label="Find" {...props} />
     </div>
     <button>Outside</button>
@@ -93,7 +103,7 @@ describe("Atmo search-field focus paint", () => {
   });
 
   it("does not paint a disabled field even if another descendant receives focus", () => {
-    const { input, frame } = mount({ disabled: true });
+    const { input, frame } = mount({ isEnabled: false });
     focus(input, frame);
     expect(document.activeElement).not.toBe(input);
     frame.tabIndex = 0;
@@ -123,12 +133,12 @@ describe("Atmo search-field focus paint", () => {
     cssTree.walk(ast, {
       enter(node) {
         if (node.type === "Atrule" && node.name === "media" && node.prelude && cssTree.generate(node.prelude) === "(forced-colors:active)") forcedDepth++;
-        if (node.type !== "Rule" || !forcedDepth || !cssTree.generate(node.prelude).includes(".nse-control-search-frame")) return;
+        if (node.type !== "Rule" || !forcedDepth || !cssTree.generate(node.prelude).includes("search-field")) return;
         const declarations: Record<string, string> = {};
         node.block.children.forEach(child => {
           if (child.type === "Declaration") declarations[child.property] = cssTree.generate(child.value);
         });
-        forcedRules.push({ selector: cssTree.generate(node.prelude), declarations });
+        forcedRules.push({ selector: scopeRoot(cssTree.generate(node.prelude)), declarations });
       },
       leave(node) {
         if (node.type === "Atrule" && node.name === "media" && node.prelude && cssTree.generate(node.prelude) === "(forced-colors:active)") forcedDepth--;

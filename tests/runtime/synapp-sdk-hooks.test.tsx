@@ -28,20 +28,20 @@ import {
   createSynWare,
   defineSynWareRoutes,
   defineSynWareServiceToken,
-  useSynWare,
-  useSynWareRouteState,
-  useSynWareAppearance,
-  useSynWareColourPanel,
-  useSynWareCommands,
-  useSynWareDocument,
-  useSynWareDrag,
-  useSynWareLifecycle,
-  useSynWarePersistence,
-  useSynWarePasteboard,
-  useSynWareService,
-  useSynWareAudio,
-  useSynWareTrustedClient,
-  useSynWareWindow,
+  useSCOS,
+  useRouteState,
+  useAppearance,
+  useColourPanel,
+  useCommands,
+  useDocument,
+  useDrag,
+  useLifecycle,
+  usePersistence,
+  usePasteboard,
+  useService,
+  useAudio,
+  useTrustedClient,
+  useWindow,
 } from "../../src/SynCloudOS/AppSDK";
 import { createSynWareContextValue } from "../../src/SynCloudOS/AppSDK/createSynWareContextValue";
 import { SynWareRuntimeMount } from "../../src/SynCloudOS/AppSDK/SynWareRuntimeMount";
@@ -57,10 +57,11 @@ import {
   registerTestSynWare,
   unlockRuntime,
 } from "./helpers";
+import type { AppCloseResult, RuntimeOperationHandle } from "../../src/SynCloudOS/Runtime/runtimeInstanceTypes";
 
 const missingToken = defineSynWareServiceToken<{ readonly name: string }>({ id: "example.missing" });
 const queryGraph = defineSynWareRoutes({ id: "hooks.example", routes: [{
-  name: "example", path: "",
+  name: "com.example.example", path: "",
   query: { view: routeQuery.enum(["folders", "notes"] as const, { defaultValue: "folders" }) },
 }] } as const);
 
@@ -78,23 +79,23 @@ async function renderNamedRoute() {
   RuntimeController.markBooted();
   Statechart.gotoState("active.webspring", { source: "test" });
   const app = registerTestSynWare(runtime, createSynWare({
-    manifest: { schemaVersion: 1, id: "example", version: "1.0.0", title: "Example",
-      routes: [{ path: "/example", primary: true }], permissions: ["app.open.public"] },
+    manifest: { runtime: { policy: { public: true } }, schemaVersion: 1, bundleIdentifier: "com.example.example", version: "1.0.0", displayName: "Example",
+      routes: [{ path: "/example", primary: true }], entitlements: ["app.open.public"] },
     root: () => null, routes: queryGraph,
   }));
   expect(await runtime.routes.openRoute("/example?view=folders").result).toMatchObject({ status: "completed" });
-  let context!: ReturnType<typeof useSynWare>;
-  let query!: ReturnType<typeof useSynWareRouteState<typeof queryGraph.routes, "example">>;
+  let context!: ReturnType<typeof useSCOS>;
+  let query!: ReturnType<typeof useRouteState<typeof queryGraph.routes, "com.example.example">>;
   function Probe() {
-    context = useSynWare();
-    query = useSynWareRouteState(queryGraph, "example");
+    context = useSCOS();
+    query = useRouteState(queryGraph, "com.example.example");
     const state = React.useSyncExternalStore(query.subscribe, query.getQuery, query.getQuery);
     return <output data-testid="query-view">{state.view}</output>;
   }
   const view = render(<SynCloudOSProvider runtime={runtime}>
     <HostSiteBrandingProvider value={{ name: "Hooks", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null, logoAlt: "Hooks" }}>
-      <ResponderScope responderId="application:example" kind="application" parentResponderId="runtime" scopeId="application:example">
-        <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:example"><Probe /></SynWareRuntimeMount>
+      <ResponderScope responderId="application:com.example.example" kind="application" parentResponderId="runtime" scopeId="application:com.example.example">
+        <SynWareRuntimeMount runtime={runtime} app={app} responderId="application:com.example.example"><Probe /></SynWareRuntimeMount>
       </ResponderScope>
     </HostSiteBrandingProvider>
   </SynCloudOSProvider>);
@@ -116,13 +117,40 @@ async function renderNamedRoute() {
   } };
 }
 
+it("closes a route-hosted app through the SDK without reissuing transfer scopes or retaining its URL", async () => {
+  const fixture = await renderNamedRoute();
+  try {
+    await act(async () => {
+      const close = fixture.context.lifecycle.closeSelf() as RuntimeOperationHandle<AppCloseResult>;
+      expect(await close.result).toMatchObject({ status: "completed", committed: true });
+    });
+    expect(fixture.runtime.lifecycle.getState("com.example.example")).toBe("closed");
+    expect(fixture.view.queryByTestId("query-view")).toBeNull();
+    expect(window.location.pathname).toBe("/");
+    expect(fixture.runtime.store.getSnapshot()).toMatchObject({
+      application: { activeAppId: null, currentAppId: null, routePath: "/" },
+      statechart: { currentState: "active.webspring" },
+    });
+    fixture.view.rerender(<SynCloudOSProvider runtime={fixture.runtime}>
+      <HostSiteBrandingProvider value={{ name: "Hooks", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null, logoAlt: "Hooks" }}>
+        <SynWareRuntimeMount runtime={fixture.runtime} app={fixture.runtime.apps.getApp("com.example.example")!} responderId="application:com.example.example">
+          <span data-testid="closed-app-content">Closed app must not remount</span>
+        </SynWareRuntimeMount>
+      </HostSiteBrandingProvider>
+    </SynCloudOSProvider>);
+    expect(fixture.view.queryByTestId("closed-app-content")).toBeNull();
+  } finally {
+    await fixture.dispose();
+  }
+});
+
 function renderWithSynWare(
   runtime: ReturnType<typeof createTestRuntime>,
   renderHook: () => React.ReactNode,
 ) {
-  const app = registerTestSynWare(runtime, { schemaVersion: 1, id: "example", version: "1.0.0", title: "Example" });
-  const mounted = mountTestSynWareRuntime(runtime, app.id);
-  runtime.focus.requestFocus(`application:${app.id}`);
+  const app = registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.example", version: "1.0.0", displayName: "Example" });
+  const mounted = mountTestSynWareRuntime(runtime, app.bundleIdentifier);
+  runtime.focus.requestFocus(`application:${app.bundleIdentifier}`);
   const context = createSynWareContextValue(mounted.runtime);
 
   function Probe() {
@@ -147,16 +175,16 @@ function renderWithSynWare(
 it("removes app commands when the declaring component unmounts", async () => {
   const runtime = createTestRuntime();
   const view = renderWithSynWare(runtime, () => {
-    useSynWareCommands([{ id: "example.refresh", title: "Refresh", execute: () => undefined }]);
+    useCommands([{ id: "com.example.example.refresh", title: "Refresh", execute: () => undefined }]);
     return null;
   });
 
-  await expect(runtime.commands.dispatch("example.refresh", undefined))
+  await expect(runtime.commands.dispatch("com.example.example.refresh", undefined))
     .resolves.toMatchObject({ status: "executed" });
 
   view.unmount();
 
-  await expect(runtime.commands.dispatch("example.refresh", undefined))
+  await expect(runtime.commands.dispatch("com.example.example.refresh", undefined))
     .resolves.toMatchObject({ status: "unhandled" });
   view.dispose();
 });
@@ -166,12 +194,12 @@ it("keeps an inline declaration structurally stable while using its current hand
   const first = vi.fn();
   const second = vi.fn();
   function Probe({ handler }: { readonly handler: () => void }) {
-    useSynWareCommands([{ id: "example.refresh", title: "Refresh", execute: () => handler() }]);
+    useCommands([{ id: "com.example.example.refresh", title: "Refresh", execute: () => handler() }]);
     return null;
   }
-  const app = registerTestSynWare(runtime, { schemaVersion: 1, id: "example", version: "1.0.0", title: "Example" });
-  const mounted = mountTestSynWareRuntime(runtime, app.id);
-  runtime.focus.requestFocus(`application:${app.id}`);
+  const app = registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.example", version: "1.0.0", displayName: "Example" });
+  const mounted = mountTestSynWareRuntime(runtime, app.bundleIdentifier);
+  runtime.focus.requestFocus(`application:${app.bundleIdentifier}`);
   const context = createSynWareContextValue(mounted.runtime);
   const view = render(
     <SynWareProvider value={context}>
@@ -179,9 +207,9 @@ it("keeps an inline declaration structurally stable while using its current hand
     </SynWareProvider>,
   );
 
-  await runtime.commands.dispatch("example.refresh", undefined);
+  await runtime.commands.dispatch("com.example.example.refresh", undefined);
   expect(first).toHaveBeenCalledTimes(1);
-  const registration = runtime.commands.inspect().registrations.find(({ commandId }) => commandId === "example.refresh");
+  const registration = runtime.commands.inspect().registrations.find(({ commandId }) => commandId === "com.example.example.refresh");
   expect(registration).toBeTruthy();
 
   view.rerender(
@@ -190,21 +218,21 @@ it("keeps an inline declaration structurally stable while using its current hand
     </SynWareProvider>,
   );
 
-  await runtime.commands.dispatch("example.refresh", undefined);
+  await runtime.commands.dispatch("com.example.example.refresh", undefined);
   expect(first).toHaveBeenCalledTimes(1);
   expect(second).toHaveBeenCalledTimes(1);
-  expect(runtime.commands.inspect().registrations.find(({ commandId }) => commandId === "example.refresh")).toEqual(registration);
+  expect(runtime.commands.inspect().registrations.find(({ commandId }) => commandId === "com.example.example.refresh")).toEqual(registration);
   view.unmount();
   mounted.dispose();
 });
 
 it("keeps one command registration through the StrictMode effect probe", () => {
   const runtime = createTestRuntime();
-  const app = registerTestSynWare(runtime, { schemaVersion: 1, id: "example", version: "1.0.0", title: "Example" });
-  const mounted = mountTestSynWareRuntime(runtime, app.id);
+  const app = registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.example", version: "1.0.0", displayName: "Example" });
+  const mounted = mountTestSynWareRuntime(runtime, app.bundleIdentifier);
   const context = createSynWareContextValue(mounted.runtime);
   function Probe() {
-    useSynWareCommands([{ id: "example.refresh", title: "Refresh", execute: () => undefined }]);
+    useCommands([{ id: "com.example.example.refresh", title: "Refresh", execute: () => undefined }]);
     return null;
   }
 
@@ -216,34 +244,34 @@ it("keeps one command registration through the StrictMode effect probe", () => {
     </React.StrictMode>,
   );
 
-  expect(runtime.commands.inspect().registrations.filter(({ commandId }) => commandId === "example.refresh")).toHaveLength(1);
+  expect(runtime.commands.inspect().registrations.filter(({ commandId }) => commandId === "com.example.example.refresh")).toHaveLength(1);
   view.unmount();
-  expect(runtime.commands.inspect().registrations.filter(({ commandId }) => commandId === "example.refresh")).toHaveLength(0);
+  expect(runtime.commands.inspect().registrations.filter(({ commandId }) => commandId === "com.example.example.refresh")).toHaveLength(0);
   mounted.dispose();
 });
 
 it("returns only app-scoped clients and immutable presentation snapshots", () => {
   const runtime = createTestRuntime();
   let observed!: {
-    context: ReturnType<typeof useSynWare>;
-    commands: ReturnType<typeof useSynWareCommands>;
-    documents: ReturnType<typeof useSynWareDocument>;
-    lifecycle: ReturnType<typeof useSynWareLifecycle>;
-    window: ReturnType<typeof useSynWareWindow>;
-    service: ReturnType<typeof useSynWareService>;
+    context: ReturnType<typeof useSCOS>;
+    commands: ReturnType<typeof useCommands>;
+    documents: ReturnType<typeof useDocument>;
+    lifecycle: ReturnType<typeof useLifecycle>;
+    window: ReturnType<typeof useWindow>;
+    service: ReturnType<typeof useService>;
   };
   const view = renderWithSynWare(runtime, () => {
-    const context = useSynWare();
-    const commands = useSynWareCommands([]);
-    const lifecycle = useSynWareLifecycle();
-    const documents = useSynWareDocument();
-    const window = useSynWareWindow();
-    const service = useSynWareService(missingToken);
-    const pasteboards = useSynWarePasteboard();
-    const drag = useSynWareDrag();
-    const colourPanel = useSynWareColourPanel();
-    const audio = useSynWareAudio();
-    const appearance = useSynWareAppearance();
+    const context = useSCOS();
+    const commands = useCommands([]);
+    const lifecycle = useLifecycle();
+    const documents = useDocument();
+    const window = useWindow();
+    const service = useService(missingToken);
+    const pasteboards = usePasteboard();
+    const drag = useDrag();
+    const colourPanel = useColourPanel();
+    const audio = useAudio();
+    const appearance = useAppearance();
     observed = { context, commands, documents, lifecycle, window, service };
     return <output>{[
       typeof lifecycle.closeSelf,
@@ -261,8 +289,8 @@ it("returns only app-scoped clients and immutable presentation snapshots", () =>
     ].join(":")}</output>;
   });
 
-  expect(view.getByText("function:function:open:false:example:function:false:function:function:function:function:light")).toBeTruthy();
-  expect(observed.context).toBe(view.context);
+  expect(view.getByText("function:function:open:false:com.example.example:function:false:function:function:function:function:light")).toBeTruthy();
+  expect(observed.context.app).toEqual(view.context.appInfo);
   expect(observed.context).not.toHaveProperty("runtime");
   expect(observed.commands).toBe(view.context.commands);
   expect(observed.documents).toBe(view.context.documents);
@@ -275,7 +303,7 @@ it("returns only app-scoped clients and immutable presentation snapshots", () =>
 it("persists an app preference through the focused persistence hook", () => {
   const runtime = createTestRuntime();
   const view = renderWithSynWare(runtime, () => {
-    const persistence = useSynWarePersistence();
+    const persistence = usePersistence();
     return <button onClick={() => persistence.setPreference("hook-value", "present")}>Save preference</button>;
   });
 
@@ -345,8 +373,8 @@ it("isolates a retained named query from foreign state and revokes mutation on u
   const fixture = await renderNamedRoute();
   const retained = fixture.query;
   try {
-    registerTestSynWare(fixture.runtime, { schemaVersion: 1, id: "foreign-route-app", version: "1.0.0",
-      title: "Foreign Route App", routes: [{ path: "/foreign-route-app", primary: true }], permissions: ["app.open.public"] });
+    registerTestSynWare(fixture.runtime, { runtime: { policy: { public: true } }, schemaVersion: 1, bundleIdentifier: "com.example.foreign-route-app", version: "1.0.0",
+      displayName: "Foreign Route App", routes: [{ path: "/foreign-route-app", primary: true }], entitlements: ["app.open.public"] });
     const listener = vi.fn();
     const unsubscribe = retained.subscribe(listener);
     await act(async () => {
@@ -357,7 +385,7 @@ it("isolates a retained named query from foreign state and revokes mutation on u
     expect(listener).not.toHaveBeenCalled();
     expect(new URL(retained.createUrl({ view: "notes" })).pathname).toBe("/example");
     expect(() => retained.replaceQuery({ document: "foreign-document" } as never)).toThrow(/unknown query key/i);
-    expect(fixture.runtime.store.getSnapshot().application.activeAppId).toBe("foreign-route-app");
+    expect(fixture.runtime.store.getSnapshot().application.activeAppId).toBe("com.example.foreign-route-app");
     fixture.view.unmount();
     expect(fixture.context.signal.aborted).toBe(true);
     expect(() => retained.replaceQuery({ view: "notes" })).toThrow(/revoked/i);
@@ -367,9 +395,9 @@ it("isolates a retained named query from foreign state and revokes mutation on u
 
 it("exposes the stable trusted-client collection while ordinary apps remain fail-closed", () => {
   const runtime = createTestRuntime();
-  let trusted: ReturnType<typeof useSynWareTrustedClient> | null = null;
+  let trusted: ReturnType<typeof useTrustedClient> | null = null;
   const view = renderWithSynWare(runtime, () => {
-    trusted = useSynWareTrustedClient();
+    trusted = useTrustedClient();
     return <output>{typeof trusted.diagnostics}</output>;
   });
 

@@ -1,0 +1,208 @@
+# Developer MCP
+
+The SynCloudOS Developer MCP server gives AI coding agents local project inspection, SDK lookup, validation, scaffolding and error explanations over stdio. It reads the SDK installed in your project, not a checkout or a remote documentation service. It does not inspect a running application, expose AgentKit/WebMCP, or audit resource lifetimes.
+
+## Install the matching companion
+
+Use a patched Node.js release: 22.23.4+, 24.22.1+, or 26.12.1+ on its respective release line. Build the framework with `npm ci --ignore-scripts && npm run build`. The build writes two packages to `.artifacts/synapp-sdk/packages/` and two content-addressed `.tgz` archives to `.artifacts/synapp-sdk/archives/`:
+
+- `syncloudos`: `@syndromatic/syncloudos`, the application SDK.
+- `syncloudos-developer-mcp`: `@syndromatic/syncloudos-developer-mcp`, the developer server.
+
+The exact archive paths are in `.artifacts/synapp-sdk/build-manifest.json`: `archive` is the SDK archive and `developerMcp.archive` is the companion archive. Install both archives from the same build in your consumer project:
+
+```bash
+npm install /absolute/path/to/the-sdk-archive.tgz
+npm install --save-dev /absolute/path/to/the-mcp-archive.tgz
+```
+
+These paths stand for the actual filenames from that build manifest; the beta packages are not assumed to be published to npm. The companion has an **exact-version** peer dependency on the SDK. Its server also checks the installed version and refuses a mismatch. Update both together.
+
+Only the companion depends on the official `@modelcontextprotocol/sdk`, TypeScript, Zod and the validator's Ajv runtime. Adding MCP does not add an MCP runtime dependency to the browser SDK. The SDK contains `docs/framework/`, `tooling/manifest.schema.json`, a generated `tooling/error-catalogue.json` and `tooling/build-receipt.json`. The receipt records the source commit and source fingerprint; the external build manifest additionally records archive integrity. No network access is needed for the tools once dependencies are installed.
+
+The companion package also ships its own `README.md` with the install, `--project` and client-configuration steps on this page. If `npm install` reports blocked install scripts for `esbuild`, see [Install in Getting started](getting-started.md#install).
+
+## Configure a TOML-configured client
+
+For a coding agent that reads MCP servers from a TOML file, add this to its configuration file, replacing the two project paths with your absolute consumer-project path:
+
+```toml
+[mcp_servers.syncloudos]
+command = "node"
+args = ["/absolute/project/node_modules/@syndromatic/syncloudos-developer-mcp/scripts/developer-mcp/server.mjs", "--project", "/absolute/project"]
+```
+
+On Windows, forward slashes work in these paths (`C:/Projects/my-site/...`). Using `node` with the installed entrypoint avoids shell-specific `.cmd` wrappers and accidental `npx` downloads. The package also installs a `syncloudos-mcp` bin for terminal use:
+
+```bash
+npx --no-install syncloudos-mcp --project /absolute/project
+```
+
+## Configure a `.mcp.json` client
+
+For a coding agent that reads project-scoped `.mcp.json`, create it in your consumer project:
+
+```json
+{
+  "mcpServers": {
+    "syncloudos": {
+      "command": "node",
+      "args": [
+        "/absolute/project/node_modules/@syndromatic/syncloudos-developer-mcp/scripts/developer-mcp/server.mjs",
+        "--project",
+        "/absolute/project"
+      ]
+    }
+  }
+}
+```
+
+The server writes MCP protocol messages only to stdout. Configuration and startup diagnostics go to stderr. Without `--project`, it starts from the process working directory. Each tool accepts an optional `projectRoot` override; project detection walks upward to the nearest `package.json` and resolves the SDK as that consumer would.
+
+## Tool reference
+
+Every successful call includes both JSON text content and the same object in MCP `structuredContent`. Tool failures return `isError: true` and an explanatory text message. Paths in findings and created-file lists are relative to the detected project. SDK locations and the detected project root are absolute.
+
+### `inspect_project`
+
+Input: `{ projectRoot?: string, appsDirectory?: string, webspringEntry?: string | false }`.
+
+Output: `{ projectRoot, sdk: { version, path, buildReceipt }, vite: { config, pluginPresent, options, unresolved }, bundles: [{ directory, id, manifest, entry, error }], shell: { enabled, path, exists }, dependencies, devDependencies }`.
+
+Discovers direct `*.app` bundles using the Vite plugin's shared discovery rules: default `src/SynWare`, case-insensitive bundle suffixes, no case-colliding names or symbolic links, and `Contents/Info.ts` plus `Contents/index.tsx`. It reports incomplete bundles so they can be repaired. The default shell is `src/Webspring/Contents/index.tsx`.
+
+Vite configuration is parsed **without executing it**. Literal `synCloudOS({ appsDirectory, webspringEntry })` options, including an aliased named import, are understood. Computed options require explicit tool overrides rather than guessing a directory. This is inspection of configuration hints, not execution of Vite's configuration pipeline.
+
+### `lookup_sdk`
+
+Input: `{ projectRoot?: string, entry?: string, query?: string, limit?: number, full?: boolean }` (`limit` defaults to 8, range 1–100).
+
+With neither `entry` nor `query`, output is `{ version, entries: string[] }`. Otherwise output is `{ version, symbols: [{ entry, entries, name, signature, outlined, jsDoc, file, line, score, appkitCounterpart? }], docs: [{ file, heading, text, truncated, score }] }`.
+
+Use entry names such as `sdk`, `nse` or `fx/animation`. An entry without a query lists its exports. Queries fuzzy-match exported names, follow declaration re-exports and return declaration signatures, attached JSDoc and relevant sections of the installed framework docs. A low-confidence query can return no symbols; it does not invent an API. Each symbol appears once: `entries` lists every package entry that exports it and `entry` is the one to import from. A class or interface longer than about 1,200 characters comes back as an outline, its header and public member signatures without bodies, with `outlined: true`; pass `full: true` for complete declarations. At most three documentation sections are returned, each capped at 1,500 characters with `truncated: true` when cut; read the named `file` for the rest.
+
+Every NSE symbol carries `appkitCounterpart`, from the installed `docs/framework/appkit-counterparts.json`: the AppKit, Foundation or Core framework name it follows (`"NSPopUpButton"`, `"NSAppearance.Name"`), or `{ none, replacement? }` saying why it has none and what replaces it. A type such as `NSEButtonProps` takes its class's counterpart. Write NSE code the way the counterpart is written in AppKit, and prefer the replacement of an entry with none.
+
+Broad `application menu`, `settings`, `preferences` and `account` queries prioritise the public `useApplicationMenuTrigger` hook and `SynWareApplicationMenuManifest` before lower-level menu props or availability APIs. Documentation ranking favours the corresponding application-menu/Preferences sections and worked examples. Exact exported names still take precedence; equally relevant symbols from the main `sdk` entry rank before other entries.
+
+### `validate`
+
+Input: `{ projectRoot?: string, appsDirectory?: string, webspringEntry?: string | false, typescript?: boolean, idioms?: boolean, launch?: boolean }` (`typescript`, `idioms` and `launch` default to `true`).
+
+Output: `{ ok: boolean, findings: [{ file, line, column?, rule, severity?, message }], bundles: [{ directory, id, ok, error }], typescript: { ran, exitCode, projects }, launch: { ran, entry?, reason?, limits? }, host: { status: "checked" | "unresolved" | "not-found", reason?, file?, line?, application?: { id, frame } | null, authentication? }, idiomatic: boolean | null, idiomAudit: { applications: [...], stylesheets: {...}, errors, warnings, idiomatic, optOuts, rendererExemptions } | null }`. `ok` is false for any error, including `severity: "error"` idiom findings; warnings alone do not fail validation. `idiomatic` is false for either idiom severity and null when the audit is skipped.
+
+Uses the **same static manifest parser, import checks and directory validator as the repository's `validate-synware.mjs`**, compiled against the installed SDK's manifest schema and exports. It does not evaluate `Info.ts`. It then invokes the consumer's installed TypeScript compiler with `--noEmit --pretty false`; missing TypeScript or compiler failure is a finding, never a passing check. Set `typescript: false` only when intentionally requesting manifest/bundle checks without project type checking. Schema/import findings currently identify the containing file at line 1; TypeScript findings preserve the compiler's line and column.
+
+For a directly imported `mountSynCloudOS` call with inline, literal host options, validation also reports `synware.application-menu` on a primary manifest missing `applicationMenu: { trigger: "content" }` when the app fills the page under `"optional"` or `"required"` authentication. This includes the default fullscreen frame and `frame: "declared"` with an `appView` presentation. A declared windowed primary or disabled authentication does not require this trigger.
+
+With `authentication: "disabled"` (the default), nobody can sign in, so the host opens the primary application publicly whatever its manifest says. A primary that declares `runtime: { policy: { requiresLogin: true } }` contradicts that and fails to mount; validation reports it as `synware.public-policy` on its `Info.ts`.
+
+`host.status` makes the limits explicit: `"checked"` means a single direct top-level mount's relevant options were read safely; `"unresolved"` supplies a reason when computed options, spreads, duplicate properties, nested/ambiguous calls or an unavailable primary prevent that check. `"not-found"` means no directly imported mount was found. The scanner reads project TypeScript/JavaScript source, excluding dependency, hidden, generated (`dist`, `build`, `coverage`), test, script and `.app` directories. It recognises named imports (including aliases) and namespace imports from `@syndromatic/syncloudos/browser`, but does not execute code, follow re-exports or evaluate wrappers/control flow. No missing-trigger finding is guessed for unresolved hosts. This checks the manifest declaration, not whether a handwritten component actually renders its trigger button; verify that interaction in the running app.
+
+#### Launch check
+
+A project that builds can still fail to start. A capability can be denied, a document might not exist yet, a launch hook can throw, or a view can throw on first render. Type checking cannot see any of these, so `validate` also launches the application.
+
+It reads the module script that `index.html` loads (the host entry, usually `src/main.tsx`). It loads that script in a jsdom page through the project's own Vite configuration and plugins, so the production browser host launches the primary application as a browser would. The check runs in a child process with a 60-second limit and reports:
+
+| Rule | Severity | Meaning |
+| --- | --- | --- |
+| `launch.failed` | error | The host entry threw, or the launch did not commit. The message carries the cause, for example `APP_LAUNCH_FAILED: The workspace could not be opened`. |
+| `launch.stopped` | error | The launch finished, but the page ended on a system alert. The message gives the alert text, its technical details (error code, message, where it was caught) and any errors logged. |
+| `launch.error` | warning | Something was logged through `console.error` or thrown after launch, and the page did not end on an alert. |
+
+The check needs `vite` and `jsdom` installed in the project. If either is missing, or `index.html` has no module script, `launch.ran` is `false` and `launch.reason` says why. The check then reports nothing as passing. Pass `launch: false` to skip it.
+
+`launch.limits` lists what the page cannot show:
+
+- There is no layout, canvas drawing or WebGL, so visual problems are not detected.
+- Workers start but never reply, so work done in a worker is not checked.
+
+A passing launch check means the application starts and renders without an error. It does not mean the application looks or behaves right; check that in a browser.
+
+#### Idiom audit
+
+The audit follows application, host and Webspring entry graphs, including relative imports outside bundles, and checks project CSS. It emits two levels: **error** for definite misuse with an existing public replacement, and **warning** for heuristics. Every error names its replacement and exact import path. `ok: false` means at least one validation error; `idiomatic: false` also includes unresolved idiom warnings.
+
+The complete reconciliation of the Opus friction log, rule identifiers and limits is [Idiom rules](developer-mcp/idiom-rules.md). Definite checks cover raw controls, system images/artwork and glyph titles, UI colour overrides, raw preferences/device APIs, forced system appearances, private NSE class selectors and all-caps eyebrows directly above titles. Overflow in CSS or inline styles is a warning; legitimate code samples and document-view content do not fail validation. Static content tables are accepted; tables with interactive descendants, row selection or click handlers require `NSETableView`. Other heuristics cover animation curves, reduced motion, layer ownership, visibility callbacks, pixel sprites, near-complete circles, resource references and Foundation migration imports.
+
+Appearance checks enforce NSE's neutral contract. Atmo is the default theme; a developer's own theme is legitimate. Theme-owned semantic values may contain colour literals. Neither `NSEColor` nor `NSEColour` exists in this SDK: UI content uses semantic appearance values and graphics use `GFXColour` from `@syndromatic/syncloudos/fx/graphics`. A raw `<video>` is a warning because the public VideoFX clients do not replace a complete player view with controls.
+
+Only renderer-owned canvas/Canvas/Stage subtrees and renderer calls are exempt. `idiomAudit.rendererExemptions` lists their file, UTF-16 start/end offsets, line/endLine and kind (`surface` or `call`). Ordinary UI, including a raw HUD button in the same file as a Three.js `WebGLRenderer`, remains checked. APIs with no framework equivalent, including `fetch`, maths and utility libraries, remain legitimate.
+
+Use a reasoned inline opt-out for deliberate exceptions:
+
+```tsx
+// syncloudos-allow idiom.nse-controls: native bridge requires this element
+const bridge = <button>Open native panel</button>;
+```
+
+The comment suppresses only the named rule on its own line or the immediately following line. CSS uses `/* // syncloudos-allow idiom.rule-id: reason */`. The reason is required. `idiomAudit.optOuts` lists every directive, its location, validity and suppressed-finding count, including unused directives; missing reasons are errors. Strings and unrelated comments cannot opt out. Pass `idioms: false` to explicitly skip the audit.
+
+Validation does not run package scripts or builds. TypeScript checks may write the compiler's incremental cache if the consumer enables it. The source repository's additional governed-source boundary audit is not applied to independent consumers.
+
+### `scaffold`
+
+Input: `{ projectRoot?, appsDirectory?, preferencesDirectory?, widgetsDirectory?, integrationsDirectory?, webspringEntry?, kind?: "application" | "preferencePane" | "widget" | "integration", organisation?, bundleIdentifier?, id?, name, route?, owners?, policy?, presentation?, contentApplicationMenu?, authoring?: "separate" | "inline" | "function" }`. `kind` defaults to `"application"`; `id` is only for non-application contributions. Integrations require nonempty owner bundle identifiers.
+
+Output: `{ createdPaths: string[], nextSteps: string[] }`.
+
+Creates a conventional project folder. By default (`authoring: "separate"`), `Name.app/Contents/index.tsx` default-exports an `NSEApplication` subclass whose `NSEViewController` holds `@observable` state, a binding and an `@action`, and `Contents/Views/` holds the view, built from NSE controls. `"inline"` keeps the view in `index.tsx`; `"function"` is an explicit opt-in for a function component. The CLI's `create-synware` uses the same templates. The required `Info.ts` contains explicit `bundleIdentifier`, `displayName` and `version: "1.0.0"`, typed as `SynWareInfo`. `organisation` defaults to `com.example`; the lowercased folder name is appended to form the identifier, unless an explicit `bundleIdentifier` is supplied. The display name splits folder-name words. Identity and version are never inferred during validation or taken from the project's package version. Other kinds create `Name.prefPane/index.tsx`, `Name.widget/index.tsx` or `Name.integration.ts` with the corresponding `define*` declaration; their unrelated IDs retain their names.
+
+`policy` maps directly to `runtime.configurationProfiles`, and `presentation` to `runtime.presentation`. Both are checked against the installed manifest schema before any files are written. Omitting `policy` preserves the normal private/default access behaviour; scaffolding never silently grants public access. With host authentication `"disabled"` or `"optional"`, the **primary** application must explicitly declare `policy: { public: true }`. The returned `nextSteps` flags this requirement whenever public access has not been requested. Do not apply it to private applications indiscriminately.
+
+For example, scaffold a deliberate public primary with `{ bundleIdentifier: "org.example.notes", name: "Notes", route: "/notes", policy: { public: true }, contentApplicationMenu: true }`. `contentApplicationMenu: true` adds `applicationMenu: { trigger: "content" }` and an `ApplicationMenuButton` component that renders the `useApplicationMenuTrigger()` trigger as an `NSEButton`, with its anchor, open state, accessible menu semantics and toggle connected, placed in the view. This is required for a fullscreen primary under `"optional"` or `"required"` authentication, so people can reach Preferences, Account, Sign In and Log Out.
+
+For a secondary windowed inspector, choose `presentation: "windowedView"` and declare only the access policy it actually needs. Omitting presentation also returns that windowed-secondary reminder; it is distinct from the desktop/tablet/mobile device presentations.
+
+Names cannot contain path separators or Windows reserved device names. Targets must stay inside the project, cannot traverse symbolic links, and the entire target bundle must be absent. Existing bundles are never merged or overwritten. Review generated files and call `validate` before registering the app.
+
+### `scaffold_theme`
+
+Input: `{ projectRoot?: string, bundleIdentifier: string, displayName: string, directory?: string }`.
+
+Creates `<directory>/<displayName>.scostheme` (default directory `src/Themes`), a complete theme bundle:
+
+- `Contents/Info.ts`: the bundle identifier, display name, version and theme contract version. It is read statically; a theme contains no code.
+- `Contents/Theme.json`: every contract colour in light and dark, starting from Atmo's values and marked for replacement, with Atmo's navigation and presentation choices.
+- `Contents/Resources/theme.css`: an empty rule for every control and every part in the installed contract, grouped by control, with each control's states noted.
+
+Existing bundles, paths outside the project and symbolic-link traversal are refused, and nothing is ever overwritten. The new bundle validates with zero errors; every part is listed as undrawn until the theme draws it.
+
+### `validate_theme`
+
+Input: `{ projectRoot?: string, path: string }`, naming a `.scostheme` bundle.
+
+Returns `{ ok, errors, warnings, coverage }`:
+
+- `errors`: bundle rule violations (unknown hooks, classes or tags, typography or motion, code or fonts in the bundle, invalid colours or images) and hard-limit violations (`idiom.theme-limit`, `idiom.theme-private-class`). Any error makes `ok` false.
+- `warnings`: contract parts the theme does not draw, as `control.part`. Atmo draws them instead, so they never make `ok` false.
+- `coverage`: drawn and total parts.
+
+Both tools read the installed `tooling/nse-theme-contract.json`, generated from the rendered controls, and read CSS, JSON and `Info.ts` without running theme code. The SDK's own `themes/Atmo.scostheme` validates with zero errors and zero undrawn parts.
+
+### `explain_error`
+
+Input: `{ projectRoot?: string, query: string, limit?: number }` (`limit` defaults to 5, range 1–20).
+
+Output: `{ version, classification: { kind, catalogue, message, codes? }, matches: [{ code, title, cause, fix, docs, appliesTo?, score }], sdkErrors: [{ entry, name, signature, jsDoc, file, score, docs }], related: [{ code, title, cause, fix, docs, appliesTo?, score }], relatedThreshold, nextSteps: string[], suggestedLookups: string[] }`.
+
+`matches` contains **only whole error-code tokens** found in the installed global catalogue, at score `2`. Both `[NSE_CONTROLLER_DISPOSED]` and bare `AFX_LAYER_DISPOSED` work inside a pasted message; a code embedded in a longer identifier is not an exact match. A message without its canonical code is not treated as a confirmed diagnosis.
+
+`classification.kind` is `catalogue`, `sdk-error`, `typescript`, `npm-warning` or `unclassified`. Exported SDK error classes such as `GFXColourParseError` are resolved through the installed public declarations and their re-exports; `sdkErrors` points to their signatures, typed fields and domain documentation. They need not have a global runtime code. `TS` diagnostics such as `TS2345` and npm warnings are explicitly outside that catalogue and receive tool-specific next steps. `suggestedLookups` lists symbol names from the input to try with `lookup_sdk`; it does not assert that those names are SDK exports.
+
+Only an `unclassified` query receives fuzzy `related` suggestions. Their documented minimum score is `relatedThreshold: 0.3`; this is a retrieval threshold, **not diagnostic confidence**. Even a high similarity is never promoted into `matches`. Empty results and unrelated symptoms must not be interpreted as a login-session or other runtime failure. Documentation links are relative to the installed SDK package, with optional heading anchors.
+
+## Maintaining the error catalogue
+
+The framework source is `src/SynCloudOS/ErrorManager/errorCatalogue.ts`. Add a plain record with `code`, `title`, `cause` and `fix`, and optionally `docs` and `appliesTo`. The exported array and its records are frozen. Keep messages and fixes specific to the error, and point `docs` at a shipped framework guide. The build generates JSON from this data module, so there is no second hand-maintained MCP catalogue. A regression test requires all ErrorManager code literals, including conditional branches, to have entries.
+
+## Check the packaged server
+
+After a stable build, run:
+
+```bash
+node scripts/synware/check-developer-mcp-consumer.mjs
+```
+
+The acceptance script installs both actual archives into a temporary independent project, starts the installed server over stdio, lists all seven tools, inspects the installed build receipt, looks up `SynWareInfo` from installed declarations and docs, scaffolds an app and validates it with the consumer's `tsc --noEmit`, and explains the canonical controller-disposal code. It also checks custom-theme scaffolding/validation, an authoring error and a reasoned opt-out. It removes the temporary consumer afterward.

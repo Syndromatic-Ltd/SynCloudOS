@@ -31,7 +31,8 @@ function sameSiteBranding(left: ResolvedSiteBranding | null, right: ResolvedSite
     && left.logoAlt === right.logoAlt
     && left.lightLogoUrl === right.lightLogoUrl
     && left.darkLogoUrl === right.darkLogoUrl
-    && left.compactLogoUrl === right.compactLogoUrl;
+    && left.compactLogoUrl === right.compactLogoUrl
+    && left.homeIconUrl === right.homeIconUrl;
 }
 
 export function HostSiteBrandingProvider({ value, children }: PropsWithChildren<{ readonly value: ResolvedSiteBranding | null }>) {

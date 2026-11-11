@@ -7,6 +7,7 @@
 "apps.loading" = "Đang tải {app}";
 "apps.loadingPackage" = "Đang tải {packageName}";
 "apps.missingComponent" = "SynCloudOS không thể tìm thấy thành phần cho {packageName}.";
+"apps.reopen" = "Mở lại";
 "apps.reorderable" = "{app}, có thể sắp xếp lại";
 "notifications.actions" = "Hành động thông báo";
 "notifications.centreTitle" = "Trung tâm thông báo";
@@ -40,7 +41,6 @@
 "quickswitch.open" = "Mở QuickSwitch";
 "quickswitch.openedShortcut" = "{app}, đã mở, phím tắt {shortcut}";
 "quickswitch.visibleApps" = "Ứng dụng Webspring hiển thị";
-"shelf.ariaLabel" = "Webspring tin tức và trạng thái";
 "webspring.additionalApps.ariaLabel" = "Ứng dụng Webspring bổ sung";
 "webspring.apps.ariaLabel" = "Webspring ứng dụng";
 "webspring.ariaLabel" = "SynCloudOS Webspring";

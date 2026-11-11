@@ -1,0 +1,387 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run src/FX/DispatchFX/__tests__/sync.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts (26 tests | 26 failed) 18ms
+   × sync drains earlier pending items in order, then runs inline and returns the value 4ms
+   × sync preserves submission target snapshots while draining 1ms
+   × sync drains serial target predecessors before its block 0ms
+   × sync drains earlier concurrent-target barriers and their predecessors 0ms
+   × sync barrier drains earlier descendants and owns its concurrent queue as a barrier 0ms
+   × sync global barriers remain ignored 0ms
+   × sync onto a queue on the current stack throws with the direct label chain 0ms
+   × sync onto a queue on the current stack throws through the full target chain 0ms
+   × sync through a held serial target throws with both full label chains 0ms
+   × sync onto main from a main item throws with the main label chain 1ms
+   × sync detects queues held by an outer frame and includes every frame's labels 0ms
+   × independent queues sharing a concurrent global target are not deadlocked 0ms
+   × sync onto a queue with a worker item in flight throws 1ms
+   × sync rejects an in-flight worker on the target chain 0ms
+   × higher-QoS sync boosts the lower-QoS items ahead of it 0ms
+   × sync boosts serial-target predecessors without changing their assigned QoS 0ms
+   × sync fails boundedly for an inactive predecessor and never queues the failed block 0ms
+   × sync fails boundedly for an suspended predecessor and never queues the failed block 0ms
+   × sync fails on an inactive target without executing its block later 0ms
+   × sync fails on an suspended target without executing its block later 0ms
+   × sync does not execute independent pending queues while draining its predecessors 0ms
+   × sync propagates the original exception and clears frames and temporary QoS overrides 2ms
+   × a throwing predecessor reports once and releases its frame before sync 0ms
+   × failed draining clears temporary overrides before the queue becomes runnable 0ms
+   × sync rejects PromiseLike work in both overloads and reports thenables once at runtime 0ms
+   × sync validates flags and work without scheduling a failed call 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 26 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > sync drains earlier pending items in order, then runs inline and returns the value
+TypeError: queue.sync is not a function
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:28:31
+     26|   const queue = new DFXQueue("sync-order"); const events: number[] = […
+     27|   queue.async(() => { events.push(1); }); queue.async(() => { events.p…
+     28|   const value: number = queue.sync(() => { events.push(3); return 42; …
+       |                               ^
+     29|   expect(value).toBe(42); expect(events).toEqual([1, 2, 3]);
+     30| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/27]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > sync preserves submission target snapshots while draining
+TypeError: leaf.sync is not a function
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:36:8
+     34|   oldTarget.setSpecific(key, "old"); newTarget.setSpecific(key, "new")…
+     35|   leaf.async(() => { values.push(DFXQueue.getSpecific(key)); }); leaf.…
+     36|   leaf.sync(() => { values.push(DFXQueue.getSpecific(key)); });
+       |        ^
+     37|   expect(values).toEqual(["old", "new"]);
+     38| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/27]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > sync drains serial target predecessors before its block
+TypeError: leaf.sync is not a function
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:43:8
+     41|   const leaf = new DFXQueue("sync-child", { target }); const events: s…
+     42|   sibling.async(() => { events.push("sibling"); }); target.async(() =>…
+     43|   leaf.sync(() => { events.push("sync"); }); expect(events).toEqual(["…
+       |        ^
+     44| });
+     45| it("sync drains earlier concurrent-target barriers and their predecess…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/27]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > sync drains earlier concurrent-target barriers and their predecessors
+TypeError: after.sync is not a function
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:50:9
+     48|   const events: string[] = [];
+     49|   before.async(() => { events.push("before"); }); target.async({ flags…
+     50|   after.sync(() => { events.push("sync"); }); expect(events).toEqual([…
+       |         ^
+     51| });
+     52| it("sync barrier drains earlier descendants and owns its concurrent qu…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/27]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > sync barrier drains earlier descendants and owns its concurrent queue as a barrier
+TypeError: target.sync is not a function
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:56:10
+     54|   const child = new DFXQueue("sync-barrier-child", { target }); const …
+     55|   child.async(() => { events.push("child"); });
+     56|   target.sync([F.barrier], () => { dispatchPrecondition(DFXPredicate.o…
+       |          ^
+     57|   expect(events).toEqual(["child", "barrier"]);
+     58| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/27]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > sync global barriers remain ignored
+TypeError: global.sync is not a function
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:61:10
+     59| it("sync global barriers remain ignored", () => {
+     60|   const global = DFXQueue.global();
+     61|   global.sync([F.barrier], () => { expect(() => dispatchPrecondition(D…
+       |          ^
+     62| });
+     63| it("sync onto a queue on the current stack throws with the direct labe…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/27]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > sync onto a queue on the current stack throws with the direct label chain
+TypeError: queue.sync is not a function
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:65:9
+     63| it("sync onto a queue on the current stack throws with the direct labe…
+     64|   const queue = new DFXQueue("sync-direct"); const work = vi.fn();
+     65|   queue.sync(() => { expect(() => queue.sync(work)).toThrow(/^BUG IN C…
+       |         ^
+     66|   expect(work).not.toHaveBeenCalled();
+     67| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/27]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > sync onto a queue on the current stack throws through the full target chain
+TypeError: leaf.sync is not a function
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:71:8
+     69|   const target = new DFXQueue("sync-ancestor"); const middle = new DFX…
+     70|   const leaf = new DFXQueue("sync-descendant", { target: middle });
+     71|   leaf.sync(() => { expect(() => target.sync(() => {})).toThrow(/sync-…
+       |        ^
+     72| });
+     73| it("sync through a held serial target throws with both full label chai…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/27]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > sync through a held serial target throws with both full label chains
+TypeError: first.sync is not a function
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:76:9
+     74|   const target = new DFXQueue("sync-shared-serial");
+     75|   const first = new DFXQueue("sync-owner", { target }); const second =…
+     76|   first.sync(() => { expect(() => second.sync(() => {})).toThrow(/sync…
+       |         ^
+     77| });
+     78| it("sync onto main from a main item throws with the main label chain",…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/27]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > sync onto main from a main item throws with the main label chain
+AssertionError: expected "vi.fn()" to be called +0 times, but got 1 times
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:18:25
+     16|     for (let n = 0; tasks.length && n < 100; n++) tasks.shift()!();
+     17|     expect(tasks).toHaveLength(0);
+     18|     expect(reportError).toHaveBeenCalledTimes(expectedReports);
+       |                         ^
+     19|     expect(currentExecution()).toBeUndefined();
+     20|   } finally { vi.unstubAllGlobals(); vi.restoreAllMocks(); }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/27]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > sync detects queues held by an outer frame and includes every frame's labels
+TypeError: outer.sync is not a function
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:84:9
+     82| it("sync detects queues held by an outer frame and includes every fram…
+     83|   const outer = new DFXQueue("sync-outer"); const inner = new DFXQueue…
+     84|   outer.sync(() => inner.sync(() => { expect(() => outer.sync(() => {}…
+       |         ^
+     85| });
+     86| it("independent queues sharing a concurrent global target are not dead…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/27]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > independent queues sharing a concurrent global target are not deadlocked
+TypeError: first.sync is not a function
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:89:16
+     87|   const target = DFXQueue.global(); const first = new DFXQueue("sync-i…
+     88|   const second = new DFXQueue("sync-independent-b", { target });
+     89|   expect(first.sync(() => second.sync(() => 7))).toBe(7);
+       |                ^
+     90| });
+     91| it("sync onto a queue with a worker item in flight throws", () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/27]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > sync onto a queue with a worker item in flight throws
+AssertionError: expected [Function] to throw error matching /^BUG IN CLIENT OF LIBDISPATCH: .*work…/ but got 'queue.sync is not a function'
+
+- Expected:
+/^BUG IN CLIENT OF LIBDISPATCH: .*worker.*sync-worker-stub/
+
++ Received:
+"queue.sync is not a function"
+
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:96:40
+     94|   const state = objectState(queue) as ReturnType<typeof objectState> &…
+     95|   state.workerInFlight = true;
+     96|   try { expect(() => queue.sync(work)).toThrow(/^BUG IN CLIENT OF LIBD…
+       |                                        ^
+     97|   finally { state.workerInFlight = false; }
+     98|   expect(work).not.toHaveBeenCalled(); expect(queue.sync(() => 1)).toB…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/27]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > sync rejects an in-flight worker on the target chain
+AssertionError: expected [Function] to throw error matching /worker.*sync-worker-child -> sync-wor…/ but got 'child.sync is not a function'
+
+- Expected:
+/worker.*sync-worker-child -> sync-worker-target/
+
++ Received:
+"child.sync is not a function"
+
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:104:44
+    102|   const state = objectState(target) as ReturnType<typeof objectState> …
+    103|   state.workerInFlight = true;
+    104|   try { expect(() => child.sync(() => {})).toThrow(/worker.*sync-worke…
+       |                                            ^
+    105|   finally { state.workerInFlight = false; }
+    106| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/27]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > higher-QoS sync boosts the lower-QoS items ahead of it
+TypeError: higher.sync is not a function
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:111:10
+    109|   const higher = new DFXQueue("sync-higher", { qos: DFXQoS.userInterac…
+    110|   lower.async(() => { values.push(currentExecution()?.qos); });
+    111|   higher.sync(() => lower.sync(() => { values.push(currentExecution()?…
+       |          ^
+    112|   expect(values).toEqual([DFXQoS.userInteractive, DFXQoS.userInteracti…
+    113|   lower.sync(() => { expect(currentExecution()?.qos).toBe(DFXQoS.backg…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/27]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > sync boosts serial-target predecessors without changing their assigned QoS
+TypeError: caller.sync is not a function
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:120:10
+    118|   const caller = new DFXQueue("sync-boost-caller", { qos: DFXQoS.userI…
+    119|   sibling.async(() => { values.push(currentExecution()?.qos); });
+    120|   caller.sync(() => child.sync(() => { values.push(currentExecution()?…
+       |          ^
+    121|   expect(values).toEqual([DFXQoS.userInitiated, DFXQoS.userInitiated])…
+    122| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/27]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > sync fails boundedly for an inactive predecessor and never queues the failed block
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > sync fails boundedly for an suspended predecessor and never queues the failed block
+AssertionError: expected [Function] to throw error matching /^BUG IN CLIENT OF LIBDISPATCH: .*cann…/ but got 'leaf.sync is not a function'
+
+- Expected:
+/^BUG IN CLIENT OF LIBDISPATCH: .*cannot.*drain/
+
++ Received:
+"leaf.sync is not a function"
+
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:128:33
+    126|   const leaf = new DFXQueue(`sync-blocked-leaf-${state}`, { target: ol…
+    127|   leaf.async(old); leaf.setTarget(new DFXQueue(`sync-runnable-${state}…
+    128|   expect(() => leaf.sync(sync)).toThrow(/^BUG IN CLIENT OF LIBDISPATCH…
+       |                                 ^
+    129|   expect(old).not.toHaveBeenCalled(); expect(sync).not.toHaveBeenCalle…
+    130|   if (state === "inactive") oldTarget.activate(); else oldTarget.resum…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/27]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > sync fails on an inactive target without executing its block later
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > sync fails on an suspended target without executing its block later
+AssertionError: expected [Function] to throw error matching /^BUG IN CLIENT OF LIBDISPATCH: .*cann…/ but got 'queue.sync is not a function'
+
+- Expected:
+/^BUG IN CLIENT OF LIBDISPATCH: .*cannot.*drain/
+
++ Received:
+"queue.sync is not a function"
+
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:137:34
+    135|   const queue = new DFXQueue(`sync-unavailable-${state}`, { attributes…
+    136|   if (state === "suspended") queue.suspend(); const work = vi.fn();
+    137|   expect(() => queue.sync(work)).toThrow(/^BUG IN CLIENT OF LIBDISPATC…
+       |                                  ^
+    138|   if (state === "inactive") queue.activate(); else queue.resume();
+    139|   for (let n = 0; tasks.length && n < 100; n++) tasks.shift()!();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/27]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > sync does not execute independent pending queues while draining its predecessors
+TypeError: queue.sync is not a function
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:145:9
+    143|   const unrelated = vi.fn(); new DFXQueue("sync-unrelated", { qos: DFX…
+    144|   const queue = new DFXQueue("sync-local", { qos: DFXQoS.background })…
+    145|   queue.sync(() => { expect(before).toHaveBeenCalledTimes(1); expect(u…
+       |         ^
+    146| });
+    147| it("sync propagates the original exception and clears frames and tempo…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/27]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > sync propagates the original exception and clears frames and temporary QoS overrides
+AssertionError: expected a thrown error to be Error: sync original
+
+- Expected
++ Received
+
+- Error {
+-   "message": "sync original",
++ TypeError {
++   "message": "higher.sync is not a function",
+  }
+
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:150:71
+    148|   const lower = new DFXQueue("sync-throw-lower", { qos: DFXQoS.backgro…
+    149|   const higher = new DFXQueue("sync-throw-higher", { qos: DFXQoS.userI…
+    150|   expect(() => higher.sync(() => lower.sync(() => { throw error; }))).…
+       |                                                                       ^
+    151|   expect(currentExecution()).toBeUndefined(); expect(reportError).not.…
+    152|   lower.sync(() => { expect(currentExecution()?.qos).toBe(DFXQoS.backg…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/27]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > a throwing predecessor reports once and releases its frame before sync
+TypeError: queue.sync is not a function
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:157:16
+    155|   expectedReports = 1; const queue = new DFXQueue("sync-predecessor-th…
+    156|   queue.async(() => { throw new Error("earlier"); });
+    157|   expect(queue.sync(() => 9)).toBe(9); expect(currentExecution()).toBe…
+       |                ^
+    158| });
+    159| it("failed draining clears temporary overrides before the queue become…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/27]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > failed draining clears temporary overrides before the queue becomes runnable
+TypeError: higher.sync is not a function
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:162:10
+    160|   const lower = new DFXQueue("sync-failed-boost", { qos: DFXQoS.backgr…
+    161|   const higher = new DFXQueue("sync-failed-caller", { qos: DFXQoS.user…
+    162|   higher.sync(() => { expect(() => lower.sync(() => {})).toThrow(/^BUG…
+       |          ^
+    163|   lower.sync(() => { expect(currentExecution()?.qos).toBe(DFXQoS.backg…
+    164| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/27]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > sync rejects PromiseLike work in both overloads and reports thenables once at runtime
+TypeError: queue.sync is not a function
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:168:9
+    166|   expectedReports = 2; const queue = new DFXQueue("sync-thenable"); co…
+    167|   // @ts-expect-error Native Promise return values are forbidden in sy…
+    168|   queue.sync(async () => 1);
+       |         ^
+    169|   // @ts-expect-error Custom PromiseLike returns are forbidden in the …
+    170|   queue.sync([], () => ({ then } as PromiseLike<void>));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/27]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > sync rejects PromiseLike work in both overloads and reports thenables once at runtime
+AssertionError: expected "vi.fn()" to be called 2 times, but got 0 times
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:18:25
+     16|     for (let n = 0; tasks.length && n < 100; n++) tasks.shift()!();
+     17|     expect(tasks).toHaveLength(0);
+     18|     expect(reportError).toHaveBeenCalledTimes(expectedReports);
+       |                         ^
+     19|     expect(currentExecution()).toBeUndefined();
+     20|   } finally { vi.unstubAllGlobals(); vi.restoreAllMocks(); }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/27]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > sync validates flags and work without scheduling a failed call
+AssertionError: expected [Function] to throw error matching /^BUG IN CLIENT/ but got 'queue.sync is not a function'
+
+- Expected:
+/^BUG IN CLIENT/
+
++ Received:
+"queue.sync is not a function"
+
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:176:60
+    174| it("sync validates flags and work without scheduling a failed call", (…
+    175|   const queue = new DFXQueue("sync-validation"); const work = vi.fn();
+    176|   expect(() => queue.sync([{} as DFXWorkItemFlags], work)).toThrow(/^B…
+       |                                                            ^
+    177|   expect(() => queue.sync(null as unknown as DFXWorkItemFlags[], work)…
+    178|   expect(() => queue.sync(undefined as unknown as () => void)).toThrow…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/27]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  26 failed (26)
+   Start at  09:31:10
+   Duration  306ms (transform 110ms, setup 27ms, import 118ms, tests 18ms, environment 0ms)

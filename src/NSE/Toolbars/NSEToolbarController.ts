@@ -19,11 +19,15 @@
  */
 
 import type { CommandDispatchResult, CommandPresentation } from "../../SynCloudOS/SynCloudOS";
-import { commandValidationRequestKey } from "../../SynCloudOS/nseRuntimeContracts";
+import { commandValidationRequestKey, SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "../../SynCloudOS/nseRuntimeContracts";
+import { NSEControllerLifetime } from "../Controllers/controllerLifetime";
+import { nseActionReferenceName, type NSEActionPayloadCheck } from "../Controls/Core/actionReference";
+import { subscribeNSEActionChanges } from "../Controls/Core/actionChanges";
 import type {
   NSEToolbarConfiguration,
   NSEToolbarControllerOptions,
   NSEToolbarItem,
+  NSEToolbarItemInput,
   NSEToolbarPreferences,
   NSEToolbarPresentedItem,
   NSEToolbarRefreshResult,
@@ -58,6 +62,11 @@ function createAbortLease(parent: AbortSignal): AbortLease {
     },
   };
 }
+
+/** A validation can lose its authority to an unrelated focus or registry change
+ * (a file panel returning focus, a window opening). It is repeated this many
+ * times before the toolbar reports itself unavailable. */
+const STALE_VALIDATION_ATTEMPTS = 3;
 
 function cancelled(commandId: string, reason: string): CommandDispatchResult<unknown> {
   return { status: "cancelled", commandId, operationId: "", reason };
@@ -171,12 +180,14 @@ function presentationFor(
  * lease. Commands, preference persistence, responder hierarchy, undo, and
  * focus remain owned by the command, preference, and window authorities respectively.
  */
-export class NSEToolbarController {
+export class NSEToolbarController<const Items extends readonly NSEToolbarItemInput[] = readonly NSEToolbarItemInput[]> {
   readonly configuration: NSEToolbarConfiguration;
   readonly items: readonly NSEToolbarItem[];
   readonly preferences;
   readonly runtime;
   readonly #catalogue: ReadonlyMap<string, NSEToolbarItem>;
+  readonly #lifecycle: SynCloudOSLifecycleRecord;
+  readonly #ownership: NSEControllerLifetime;
   readonly #listeners = new Set<() => void>();
   #snapshot: NSEToolbarSnapshot = initialSnapshot;
   #validation: AbortLease | null = null;
@@ -185,10 +196,29 @@ export class NSEToolbarController {
   #presentationGeneration: PresentationGeneration | null = null;
   #disposed = false;
   #preferenceUnsubscribe: (() => boolean) | null = null;
-  #runtimeAbort = () => this.dispose();
+  #authorityUnsubscribers: Array<() => void> = [];
+  #refreshScheduled = false;
+  #unsettledCycles = 0;
+  #latestRefresh: Promise<NSEToolbarRefreshResult> | null = null;
+  #runtimeAbort = () => {
+    this.#lifecycle.markDisposed(synCloudOSLifecycleSignalReason(this.runtime.signal));
+    this.dispose();
+  };
 
-  constructor({ configuration, items, preferences, runtime }: NSEToolbarControllerOptions) {
+  constructor(options: Omit<NSEToolbarControllerOptions, "items"> & {
+    readonly items: Items & { readonly [K in keyof NoInfer<Items>]: Items[K] & NSEActionPayloadCheck<Items[K], "payload"> };
+  }) {
+    const { configuration, preferences, runtime } = options;
+    const items = options.items.map((item): NSEToolbarItem => {
+      if (item.kind !== "command" || !("action" in item)) return item;
+      if (Reflect.get(item, "commandId") !== undefined) throw new TypeError(`NSE toolbar item "${item.id}" cannot declare both action and commandId.`);
+      if (!runtime.resolveAction) throw new TypeError(`NSE toolbar item "${item.id}" requires an application to resolve its action.`);
+      const { action, ...rest } = item;
+      return { ...rest, commandId: runtime.resolveAction(typeof action === "string" ? action : nseActionReferenceName(action)) };
+    });
     if (!configuration.identifier.trim()) throw new TypeError("NSE toolbar identifiers must not be empty.");
+    this.#ownership = new NSEControllerLifetime(options, { kind: "NSEToolbarController", id: configuration.identifier }, runtime.signal);
+    this.#lifecycle = this.#ownership.record;
     assertOwner(configuration.owner);
     if (!validDisplayMode(configuration.displayMode) || !validSizeMode(configuration.sizeMode)) {
       throw new TypeError(`NSE toolbar "${configuration.identifier}" has an invalid display or size mode.`);
@@ -231,11 +261,32 @@ export class NSEToolbarController {
       this.#publishProjection(false);
       void this.refresh();
     });
-    if (runtime.signal.aborted) this.dispose();
+    // Command availability changes outside the toolbar: focus moves, windows
+    // and panels return, validators read new model state. Follow the same
+    // invalidations command-bound controls and menus follow.
+    const invalidate = () => this.#scheduleRefresh();
+    const presentationUnsubscribe = runtime.commands.subscribePresentation?.(invalidate);
+    if (presentationUnsubscribe) this.#authorityUnsubscribers.push(presentationUnsubscribe);
+    for (const commandId of new Set(items.flatMap((item) => item.kind === "command" ? [item.commandId] : []))) {
+      this.#authorityUnsubscribers.push(subscribeNSEActionChanges(commandId, invalidate));
+    }
+    if (runtime.signal.aborted) this.#runtimeAbort();
     else runtime.signal.addEventListener("abort", this.#runtimeAbort, { once: true });
+    this.#ownership.bind(() => this.dispose());
+  }
+
+  /** Coalesces a burst of invalidations into one revalidation. */
+  #scheduleRefresh(): void {
+    if (this.#disposed || this.#refreshScheduled) return;
+    this.#refreshScheduled = true;
+    queueMicrotask(() => {
+      this.#refreshScheduled = false;
+      if (!this.#disposed && !this.runtime.signal.aborted) void this.refresh();
+    });
   }
 
   get snapshot(): NSEToolbarSnapshot { return this.#snapshot; }
+  get isDisposed(): boolean { return this.#disposed; }
 
   subscribe(listener: () => void): () => void {
     if (this.#disposed) return () => undefined;
@@ -244,7 +295,7 @@ export class NSEToolbarController {
   }
 
   setItemOrder(itemIds: readonly string[]): boolean {
-    this.#assertActive();
+    this.#assertActive("setItemOrder");
     this.#assertItemOrder(itemIds);
     const current = this.preferences.getSnapshot().value.itemIds;
     if (current.length === itemIds.length && current.every((item, index) => item === itemIds[index])) return false;
@@ -253,14 +304,14 @@ export class NSEToolbarController {
   }
 
   move(itemId: string, delta: -1 | 1): boolean {
-    this.#assertActive();
+    this.#assertActive("move");
     const ids = [...this.preferences.getSnapshot().value.itemIds];
     const from = ids.indexOf(itemId);
     return this.moveAt(from, delta);
   }
 
   moveAt(from: number, delta: -1 | 1): boolean {
-    this.#assertActive();
+    this.#assertActive("moveAt");
     const ids = [...this.preferences.getSnapshot().value.itemIds];
     if (!Number.isSafeInteger(from) || from < 0 || from >= ids.length) return false;
     const to = from + delta;
@@ -270,7 +321,7 @@ export class NSEToolbarController {
   }
 
   insert(itemId: string, index = this.preferences.getSnapshot().value.itemIds.length): boolean {
-    this.#assertActive();
+    this.#assertActive("insert");
     const ids = [...this.preferences.getSnapshot().value.itemIds];
     const boundedIndex = Math.max(0, Math.min(ids.length, Math.trunc(index)));
     ids.splice(boundedIndex, 0, itemId);
@@ -278,14 +329,14 @@ export class NSEToolbarController {
   }
 
   remove(itemId: string): boolean {
-    this.#assertActive();
+    this.#assertActive("remove");
     const ids = [...this.preferences.getSnapshot().value.itemIds];
     const index = ids.lastIndexOf(itemId);
     return this.removeAt(index);
   }
 
   removeAt(index: number): boolean {
-    this.#assertActive();
+    this.#assertActive("removeAt");
     const ids = [...this.preferences.getSnapshot().value.itemIds];
     if (!Number.isSafeInteger(index) || index < 0 || index >= ids.length) return false;
     ids.splice(index, 1);
@@ -293,24 +344,24 @@ export class NSEToolbarController {
   }
 
   setDisplayMode(displayMode: NSEToolbarPreferences["displayMode"]): boolean {
-    this.#assertActive();
+    this.#assertActive("setDisplayMode");
     if (!validDisplayMode(displayMode)) throw new TypeError("NSE toolbar display mode is invalid.");
     return this.preferences.set("displayMode", displayMode);
   }
 
   setSizeMode(sizeMode: NSEToolbarPreferences["sizeMode"]): boolean {
-    this.#assertActive();
+    this.#assertActive("setSizeMode");
     if (!validSizeMode(sizeMode)) throw new TypeError("NSE toolbar size mode is invalid.");
     return this.preferences.set("sizeMode", sizeMode);
   }
 
   reset(): boolean {
-    this.#assertActive();
+    this.#assertActive("reset");
     return this.preferences.reset(["itemIds", "displayMode", "sizeMode"]);
   }
 
   beginConfiguration(transaction: Parameters<typeof this.preferences.beginEditing>[0]): void {
-    this.#assertActive();
+    this.#assertActive("beginConfiguration");
     this.preferences.beginEditing(transaction);
   }
 
@@ -318,7 +369,25 @@ export class NSEToolbarController {
 
   discardConfiguration(): void { this.preferences.discardEditing(); }
 
-  async refresh(): Promise<NSEToolbarRefreshResult> {
+  refresh(): Promise<NSEToolbarRefreshResult> {
+    const pending = this.#refresh(1);
+    this.#latestRefresh = pending;
+    return this.#settled(pending);
+  }
+
+  /** A refresh superseded by a newer one (an authority change arrived while it
+   * validated) resolves with the newer refresh's outcome, so awaiting refresh()
+   * always observes a settled toolbar. */
+  async #settled(pending: Promise<NSEToolbarRefreshResult>): Promise<NSEToolbarRefreshResult> {
+    const result = await pending;
+    const latest = this.#latestRefresh;
+    if (result.status === "cancelled" && latest && latest !== pending && !this.#disposed && !this.runtime.signal.aborted) {
+      return this.#settled(latest);
+    }
+    return result;
+  }
+
+  async #refresh(attempt: number): Promise<NSEToolbarRefreshResult> {
     if (this.#disposed || this.runtime.signal.aborted) return { status: "cancelled", generation: this.#generation };
     const generation = ++this.#generation;
     this.#dispatch?.dispose();
@@ -341,16 +410,17 @@ export class NSEToolbarController {
         return { status: "cancelled", generation };
       }
       if (!samePresentationGeneration(presentationGeneration, this.runtime.commands.getPresentationGeneration())) {
-        return this.#publishValidationFailure(generation);
+        return attempt < STALE_VALIDATION_ATTEMPTS ? this.#refresh(attempt + 1) : this.#authorityUnsettled(generation);
       }
       const presented = instances.flatMap(({ item, instanceId }) => {
         const result = presentationFor(item, instanceId, presentations, this.configuration.identifier);
         return result ? [result] : [];
       });
       if (presented.some((item) => item.kind === "command" && item.presentation?.stale)) {
-        return this.#publishValidationFailure(generation);
+        return attempt < STALE_VALIDATION_ATTEMPTS ? this.#refresh(attempt + 1) : this.#authorityUnsettled(generation);
       }
       this.#presentationGeneration = presentationGeneration;
+      this.#unsettledCycles = 0;
       this.#publish({
         generation,
         validating: false,
@@ -408,7 +478,9 @@ export class NSEToolbarController {
 
   dispose(): void {
     if (this.#disposed) return;
+    this.#lifecycle.markDisposed("explicit");
     this.#disposed = true;
+    this.#ownership.dispose();
     this.#generation += 1;
     this.#validation?.dispose();
     this.#validation = null;
@@ -416,6 +488,7 @@ export class NSEToolbarController {
     this.#dispatch = null;
     this.#preferenceUnsubscribe?.();
     this.#preferenceUnsubscribe = null;
+    for (const unsubscribe of this.#authorityUnsubscribers.splice(0)) unsubscribe();
     this.runtime.signal.removeEventListener("abort", this.#runtimeAbort);
     this.#listeners.clear();
   }
@@ -440,6 +513,23 @@ export class NSEToolbarController {
       items: freezePresentedItems(projected),
       diagnostic: null,
     });
+  }
+
+  /**
+   * Command authority kept moving through every attempt: focus crossing a menu
+   * bar by hover, a sheet settling. That is not a failure. Keep the last
+   * validated items on screen (a dispatch from them still revalidates first)
+   * and validate again once authority goes quiet. Only a toolbar that has never
+   * validated reports itself unavailable.
+   */
+  #authorityUnsettled(generation: number): NSEToolbarRefreshResult {
+    if (this.#presentationGeneration === null) return this.#publishValidationFailure(generation);
+    this.#publish({ generation, validating: false, diagnostic: null });
+    if (this.#unsettledCycles < STALE_VALIDATION_ATTEMPTS) {
+      this.#unsettledCycles += 1;
+      this.#scheduleRefresh();
+    }
+    return { status: "cancelled", generation };
   }
 
   #publishValidationFailure(generation: number): NSEToolbarRefreshResult {
@@ -482,8 +572,8 @@ export class NSEToolbarController {
     }
   }
 
-  #assertActive(): void {
-    if (this.#disposed) throw new Error(`NSE toolbar "${this.configuration.identifier}" is disposed.`);
+  #assertActive(operation: string): void {
+    if (this.#disposed) throw this.#lifecycle.error({ code: "NSE_TOOLBAR_CONTROLLER_DISPOSED", operation });
   }
 }
 

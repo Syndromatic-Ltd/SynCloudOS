@@ -1,5 +1,7 @@
 # MIDIFX
 
+Encoded byte inputs accept `NSEDataConvertible` from `@syndromatic/syncloudos/foundation`; delivered encoded bytes are immutable `NSEData`. Use `.bytes` at a native typed-buffer boundary and `.blob(mimeType)` for a browser Blob. Numeric pixel, index and PCM planes retain their typed arrays; writable copy destinations remain mutable.
+
 MIDIFX (`MIFX`) is the web-native analogue of Core MIDI. It connects an application to MIDI hardware and software instruments, turns raw bytes into typed messages and back, speaks the Universal MIDI Packet (UMP) format of MIDI 2.0, converts MIDI 2.0 messages down to MIDI 1.0 without hiding what that costs, and sends events at precise times against a shared clock.
 
 The framework separates three concerns.
@@ -20,7 +22,7 @@ import { MIFXEncoder, MIFXParser } from "@syndromatic/syncloudos/fx/midi";
 | --- | --- |
 | Prefix | `MIFX` |
 | Entry | `@syndromatic/syncloudos/fx/midi` |
-| Hook | `useSynWareMIDI`, from `@syndromatic/syncloudos/sdk` |
+| Hook | `useMIDI`, from `@syndromatic/syncloudos/sdk` |
 | Permissions | `midi.access` for devices, and `midi.sysex` in addition for system exclusive access |
 | Analogue | Core MIDI (`MIDIClientRef`, `MIDIEndpointRef`, `MIDIEventList`, UMP conversion) |
 
@@ -53,7 +55,7 @@ A discriminated union on `kind`. Every value is immutable data.
 | `"song-position"` | `position` | 0 to 16383 |
 | `"song-select"` | `song` | 0 to 127 |
 | `"tune-request"`, `"timing-clock"`, `"start"`, `"continue"`, `"stop"`, `"active-sensing"`, `"reset"` | none | |
-| `"sysex"` | `data: Uint8Array` | 7-bit bytes, without the `F0` and `F7` framing |
+| `"sysex"` | `data: NSEData` | 7-bit bytes, without the `F0` and `F7` framing |
 
 Channels are numbered from 0, so the value 0 is what a musician calls channel 1.
 
@@ -63,7 +65,7 @@ A stateless encoder.
 
 | Member | Description |
 | --- | --- |
-| `static encode(message)` | Returns the wire bytes for a message. A channel message gives two or three bytes, and a `sysex` message gives `F0`, the data and `F7`. Throws `TypeError` for a value that is not a known message and `RangeError` for a field outside its range or a system exclusive byte above 127. |
+| `static encode(message)` | Returns the wire bytes for a `MIFXMessageInput` as `NSEData`. Supplied SysEx data accepts `NSEDataConvertible`. A channel message gives two or three bytes, and a `sysex` message gives `F0`, the data and `F7`. Throws `TypeError` for a value that is not a known message and `RangeError` for a field outside its range or a system exclusive byte above 127. |
 
 ### `MIFXParser`
 
@@ -75,7 +77,7 @@ new MIFXParser(options?: MIFXParserOptions)
 
 | Member | Type or signature | Description |
 | --- | --- | --- |
-| `push(bytes)` | `(bytes: Uint8Array) => readonly MIFXParserEvent[]` | Feeds bytes and returns the events they completed, in order. |
+| `push(bytes)` | `(bytes: NSEDataConvertible) => readonly MIFXParserEvent[]` | Feeds bytes and returns the events they completed, in order. |
 | `finish()` | `() => readonly MIFXParserEvent[]` | Signals the end of input. An incomplete message becomes a `"truncated-message"` error, and the parser resets. |
 | `bufferedByteCount` | `number` | Data bytes held for an incomplete message. |
 
@@ -100,8 +102,8 @@ const parser = new MIFXParser();
 
 // A message split across two reads, then a second note that uses running status.
 const events = [
-  ...parser.push(bytes.slice(0, 2)),
-  ...parser.push(new Uint8Array([bytes[2]!, 62, 100])),
+  ...parser.push(bytes.subdata({ location: 0, length: 2 })),
+  ...parser.push(new Uint8Array([bytes.bytes[2]!, 62, 100])),
   ...parser.finish(),
 ];
 
@@ -130,10 +132,10 @@ The constructor checks that each word is an unsigned 32-bit integer and that the
 | `messageType` | `number` | The message type nibble. |
 | `group` | `number` | The group, 0 to 15. |
 | `kind` | `MIFXUniversalPacketKind` | `"utility"`, `"system"`, `"midi1-channel-voice"` or `"midi2-channel-voice"`. |
-| `toBytes()` | `Uint8Array` | The words as big-endian bytes. |
+| `toBytes()` | `NSEData` | The words as big-endian bytes. |
 | `toMIDI1Message()` | `MIFXMessage` | Decodes a system or MIDI 1.0 channel voice packet. Throws `TypeError` for other kinds. |
 | `midi2ChannelVoice()` | `MIFXMIDI2ChannelVoice` | Decodes a MIDI 2.0 channel voice packet. Throws `RangeError` when reserved bits are set. |
-| static `fromBytes(bytes)` | `MIFXUniversalPacket` | Reads big-endian bytes. The length must be a multiple of four, at most 16. |
+| static `fromBytes(bytes)` | `MIFXUniversalPacket` | Reads big-endian `NSEDataConvertible` input. The length must be a multiple of four, at most 16. |
 | static `fromMIDI1Message(group, message)` | `MIFXUniversalPacket` | Wraps a MIDI 1.0 message in a one-word packet. System exclusive messages are not supported and throw `TypeError`. |
 
 `MIFXMIDI2ChannelVoice` is a union with the higher-resolution fields of MIDI 2.0:
@@ -191,7 +193,7 @@ console.log(message, losses);
 
 ### `MIFXClient` and `MIFXAccess`
 
-`useSynWareMIDI()` returns an `MIFXAccess` for your component. Mounting it creates a passive owner and requests nothing from the browser. Only `requestAuthorization()` prompts the user. The underlying `MIFXClient` (`createAccess(signal?)`) belongs to the session.
+`useMIDI()` returns an `MIFXAccess` for your component. Mounting it creates a passive owner and requests nothing from the browser. Only `requestAuthorization()` prompts the user. The underlying `MIFXClient` (`createAccess(signal?)`) belongs to the session.
 
 | Method | Type or signature | Description |
 | --- | --- | --- |
@@ -230,19 +232,19 @@ Before the component mounts, the hook's `getCapabilities()` reports `apiAvailabl
 | `connection` | `"open"`, `"closed"` or `"pending"` (`MIFXEndpointConnection`). |
 | `generation` | Increases when the port changes, so you can tell a snapshot has gone stale. |
 
-**Input.** The listener receives an `MIFXInputPacket` with the `endpoint`, the raw `data` bytes and `receivedAtMilliseconds` (a host timestamp, or `null`). Feed `data` to an `MIFXParser` per input. The returned `MIFXInputSubscription` has the `endpoint` and `dispose()`.
+**Input.** The listener receives an `MIFXInputPacket` with the `endpoint`, `data: NSEData` and `receivedAtMilliseconds` (a host timestamp, or `null`). Feed `data` to an `MIFXParser` per input. The returned `MIFXInputSubscription` has the `endpoint` and `dispose()`.
 
-**Output.** `MIFXOutputLease` has the `endpoint`, `send(data, timestampMilliseconds?)` and `dispose()`. `send` takes wire bytes, for example from `MIFXEncoder.encode`. A timestamp in the host's millisecond clock asks the device to play at that time, and omitting it sends now. Hold the lease while you need the port and dispose it afterwards.
+**Output.** `MIFXOutputLease` has the `endpoint`, `send(data, timestampMilliseconds?)` and `dispose()`. `send` accepts wire bytes as `NSEDataConvertible`, for example from `MIFXEncoder.encode`. A timestamp in the host's millisecond clock asks the device to play at that time, and omitting it sends now. Hold the lease while you need the port and dispose it afterwards.
 
 `MIFXSubscription` (`dispose()`), `MIFXEndpointListener` and `MIFXInputListener` are the callback and handle types.
 
 ```tsx
 import { useEffect, useState } from "react";
 import { MIFXEncoder, MIFXParser, type MIFXEndpointSnapshot } from "@syndromatic/syncloudos/fx/midi";
-import { useSynWareMIDI } from "@syndromatic/syncloudos/sdk";
+import { useMIDI } from "@syndromatic/syncloudos/sdk";
 
 export function Keyboard() {
-  const midi = useSynWareMIDI();
+  const midi = useMIDI();
   const [state, setState] = useState("Not authorised");
   const [endpoints, setEndpoints] = useState<readonly MIFXEndpointSnapshot[]>([]);
   const [lastNote, setLastNote] = useState<number | null>(null);
@@ -301,9 +303,9 @@ The manifest for this component declares the permission:
 ```ts
 export default {
   schemaVersion: 1,
-  id: "com.example.keys",
+  bundleIdentifier: "com.example.keys",
   version: "1.0.0",
-  title: "Keys",
+  displayName: "Keys",
   routes: [{ path: "/keys", primary: true }],
   permissions: ["midi.access"],
 } as const;
@@ -321,7 +323,7 @@ new MIFXScheduler(options: MIFXSchedulerOptions)
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
-| `clock` | `MEFXClock` | required | The clock that target times refer to, usually a timebase from `useSynWareMedia().createTimebase()`. |
+| `clock` | `MEFXClock` | required | The clock that target times refer to, usually a timebase from `useMedia().createTimebase()`. |
 | `output` | `MIFXOutputLease` | required | Where events are sent. |
 | `ownerSignal` | `AbortSignal` | none | When it aborts, queued events are cancelled and the scheduler is disposed. |
 | `maximumQueuedEvents` | `number` | 256 | The most pending events, an integer from 1 to 65,536. |
@@ -330,7 +332,7 @@ new MIFXScheduler(options: MIFXSchedulerOptions)
 
 | Member | Description |
 | --- | --- |
-| `schedule(data, target)` | Queues raw MIDI bytes to send when the clock reaches the target time. `data` is copied and cannot be empty. The target must be a finite `MEFXTime` in the clock's epoch. Returns an `MIFXScheduledSend`. Throws `QuotaExceededError` when the queue is full. |
+| `schedule(data, target)` | Accepts `NSEDataConvertible` MIDI wire bytes to send when the clock reaches the target time. `data` is copied and cannot be empty. The target must be a finite `MEFXTime` in the clock's epoch. Returns an `MIFXScheduledSend`. Throws `QuotaExceededError` when the queue is full. |
 | `queuedCount` | The number of events still waiting. |
 | `dispose()` | Cancels every queued event and unsubscribes from the clock. |
 
@@ -340,11 +342,11 @@ new MIFXScheduler(options: MIFXSchedulerOptions)
 import { useEffect } from "react";
 import { MEFXTime } from "@syndromatic/syncloudos/fx/media";
 import { MIFXEncoder, MIFXScheduler } from "@syndromatic/syncloudos/fx/midi";
-import { useSynWareMedia, useSynWareMIDI } from "@syndromatic/syncloudos/sdk";
+import { useMedia, useMIDI } from "@syndromatic/syncloudos/sdk";
 
 export function Arpeggio() {
-  const midi = useSynWareMIDI();
-  const media = useSynWareMedia();
+  const midi = useMIDI();
+  const media = useMedia();
 
   useEffect(() => {
     const controller = new AbortController();

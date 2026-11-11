@@ -21,43 +21,41 @@
 import { describe, expect, it, vi } from "vitest";
 import { createTestRuntime, createRuntimeHarness, createTestRuntimeEnvironment } from "./helpers";
 
-function getResizeHandler(environment: ReturnType<typeof createTestRuntimeEnvironment>) {
-  const call = environment.addWindowListener.mock.calls.find(([type]) => type === "resize");
-  return call?.[1] as EventListener | undefined;
-}
-
 describe("ResponsiveModeManager throttling", () => {
   it("observes resize idempotently and removes listeners", async () => {
     const environment = createTestRuntimeEnvironment();
-    const { ResponsiveModeManager } = createRuntimeHarness(createTestRuntime({ environment }));
+    const remove = vi.fn();
+    const runtime = createTestRuntime({ environment });
+    const subscribe = vi.spyOn(runtime.screen, "subscribe").mockReturnValue(remove);
+    const { ResponsiveModeManager } = createRuntimeHarness(runtime);
+    const subscriptions = subscribe.mock.calls.length;
 
     ResponsiveModeManager.observe();
     ResponsiveModeManager.observe();
 
-    expect(environment.addWindowListener.mock.calls.filter(([type]) => type === "resize")).toHaveLength(1);
+    expect(subscribe.mock.calls).toHaveLength(subscriptions + 1);
 
     ResponsiveModeManager.unobserve();
 
-    const removeResizeListener = environment.addWindowListener.mock.results
-      .find((result, index) => environment.addWindowListener.mock.calls[index]?.[0] === "resize")
-      ?.value;
-    expect(removeResizeListener).toHaveBeenCalledTimes(1);
+    expect(remove).toHaveBeenCalledTimes(1);
   });
 
   it("coalesces resize events into one runtime commit", async () => {
     vi.useFakeTimers();
     const environment = createTestRuntimeEnvironment();
-    const { ResponsiveModeManager, RuntimeStore } = createRuntimeHarness(createTestRuntime({ environment }));
+    const runtime = createTestRuntime({ environment });
+    const subscribe = vi.spyOn(runtime.screen, "subscribe");
+    const { ResponsiveModeManager, RuntimeStore } = createRuntimeHarness(runtime);
     const listener = vi.fn();
     RuntimeStore.subscribe(listener);
 
     ResponsiveModeManager.observe();
     listener.mockClear();
-    vi.spyOn(environment.visualViewport, "getSnapshot").mockReturnValue({ width: 900, height: 700, offsetLeft: 0, offsetTop: 0, scale: 1 });
+    vi.spyOn(environment.layoutViewport, "getSnapshot").mockReturnValue({ width: 900, height: 700 });
 
-    const resize = getResizeHandler(environment);
-    resize?.(new Event("resize"));
-    resize?.(new Event("resize"));
+    const resize = subscribe.mock.calls.at(-1)?.[0];
+    resize?.();
+    resize?.();
 
     await vi.advanceTimersByTimeAsync(16);
 
@@ -67,6 +65,51 @@ describe("ResponsiveModeManager throttling", () => {
       width: 900,
       height: 700
     });
+  });
+
+  it("classifies layout bounds independently from zoom, keyboard occlusion and physical screen size", async () => {
+    const environment = createTestRuntimeEnvironment();
+    vi.spyOn(environment.layoutViewport, "getSnapshot").mockReturnValue({ width: 1100, height: 700 });
+    const visual = vi.spyOn(environment.visualViewport, "getSnapshot").mockReturnValue({
+      width: 390, height: 300, offsetLeft: 20, offsetTop: 30, scale: 2,
+    });
+    const runtime = createTestRuntime({ environment });
+    const { ResponsiveModeManager, RuntimeStore } = createRuntimeHarness(runtime);
+    ResponsiveModeManager.sync();
+    expect(RuntimeStore.getSnapshot().responsive).toMatchObject({ mode: "desktop", width: 1100, height: 700 });
+    const previous = RuntimeStore.getSnapshot().responsive;
+    visual.mockReturnValue({ width: 320, height: 200, offsetLeft: 50, offsetTop: 60, scale: 3 });
+    ResponsiveModeManager.sync();
+    expect(RuntimeStore.getSnapshot().responsive).toBe(previous);
+    await runtime.dispose("test");
+  });
+
+  it("does not publish invalid transient layout measurements", async () => {
+    const environment = createTestRuntimeEnvironment();
+    const runtime = createTestRuntime({ environment });
+    const { ResponsiveModeManager, RuntimeStore } = createRuntimeHarness(runtime);
+    ResponsiveModeManager.sync();
+    const previous = RuntimeStore.getSnapshot().responsive;
+    vi.spyOn(environment.layoutViewport, "getSnapshot").mockReturnValue({ width: Number.NaN, height: 0 });
+    ResponsiveModeManager.sync();
+    expect(RuntimeStore.getSnapshot().responsive).toBe(previous);
+    await runtime.dispose("test");
+  });
+
+  it("holds shell layout classification until the complete host sample is valid", async () => {
+    const environment = createTestRuntimeEnvironment();
+    const runtime = createTestRuntime({ environment });
+    const manager = runtime.responsiveModeManager;
+    manager.sync();
+    const previous = manager.getSnapshot();
+    vi.spyOn(environment.layoutViewport, "getSnapshot").mockReturnValue({ width: 900, height: 700 });
+    const visual = vi.spyOn(environment.visualViewport, "getSnapshot").mockReturnValue({ width: 0, height: 0, offsetLeft: 0, offsetTop: 0, scale: 1 });
+    manager.sync();
+    expect(manager.getSnapshot()).toBe(previous);
+    visual.mockReturnValue({ width: 900, height: 700, offsetLeft: 0, offsetTop: 0, scale: 1 });
+    manager.sync();
+    expect(manager.getSnapshot()).toMatchObject({ mode: "tablet", width: 900, height: 700 });
+    await runtime.dispose("test");
   });
 
   it("does not commit when responsive values are unchanged", async () => {

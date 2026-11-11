@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -18,7 +21,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-.nse-table-view {
+.nse-table-view,
+:where(:scope):is(.nse-table-view) {
   position: relative;
   overflow: auto;
   color: var(--nse-table-color, inherit);
@@ -29,30 +33,38 @@
    narrower, so a selected row's highlight reaches the far edge (NSTableView
    fills past its last column). */
 .nse-table-view [data-nse-part="header"],
+:where(:scope):is(.nse-table-view) [data-nse-part="header"],
 .nse-table-view [data-nse-part="body"],
-.nse-table-view [data-nse-part="row"] {
+:where(:scope):is(.nse-table-view) [data-nse-part="body"],
+.nse-table-view [data-nse-part="row"],
+:where(:scope):is(.nse-table-view) [data-nse-part="row"] {
   min-inline-size: 100%;
 }
 
-.nse-table-view [data-nse-part="header"] {
+.nse-table-view [data-nse-part="header"],
+:where(:scope):is(.nse-table-view) [data-nse-part="header"] {
   z-index: 2;
   background: var(--nse-table-header-background, transparent);
 }
 
 .nse-table-view [role="columnheader"],
-.nse-table-view [role="gridcell"] {
+:where(:scope):is(.nse-table-view) [role="columnheader"],
+.nse-table-view [role="gridcell"],
+:where(:scope):is(.nse-table-view) [role="gridcell"] {
   box-sizing: border-box;
   overflow: hidden;
   min-inline-size: 0;
 }
 
-.nse-table-view [data-nse-part="column-resize-handle"] {
+.nse-table-view [data-nse-part="column-resize-handle"],
+:where(:scope):is(.nse-table-view) [data-nse-part="column-resize-handle"] {
   min-inline-size: 16px;
   min-block-size: 44px;
   touch-action: none;
 }
 
-.nse-table-view-status {
+.nse-table-view-status,
+:where(:scope):is(.nse-table-view-status) {
   position: absolute;
   inline-size: 1px;
   block-size: 1px;
@@ -61,11 +73,73 @@
 }
 
 @media (forced-colors: active) {
-  .nse-table-view [data-nse-part="header"] {
+  .nse-table-view [data-nse-part="header"],
+:where(:scope):is(.nse-table-view) [data-nse-part="header"] {
     background: Canvas;
   }
 
-  .nse-table-view [data-selected="true"] {
+  .nse-table-view [data-selected="true"],
+:where(:scope):is(.nse-table-view) [data-selected="true"] {
     outline: 1px solid Highlight;
   }
+}
+
+/* viewportBlockSize="fill": the table takes its container's height, in a flex column or a sized block. */
+.nse-table-view-container[data-fill],
+:where(:scope):is(.nse-table-view-container[data-fill]) {
+  flex: 1 1 0;
+  block-size: 100%;
+  min-block-size: 0;
+}
+
+/* NSTableCellView: an optional image, then the title over its detail, then a badge or accessory. */
+.nse-table-view [data-nse-part="cell-content"],
+:where(:scope):is(.nse-table-view) [data-nse-part="cell-content"] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-inline-size: 0;
+  inline-size: 100%;
+}
+
+.nse-table-view [data-nse-part="cell-content"]>[data-nse-part="image"],
+:where(:scope):is(.nse-table-view) [data-nse-part="cell-content"]>[data-nse-part="image"] {
+  flex: 0 0 auto;
+  inline-size: 24px;
+  block-size: 24px;
+  object-fit: contain;
+}
+
+.nse-table-view [data-nse-part="cell-content"] [data-nse-part="text-content"],
+:where(:scope):is(.nse-table-view) [data-nse-part="cell-content"] [data-nse-part="text-content"] {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.nse-table-view [data-nse-part="cell-content"] [data-nse-part="primary-text"],
+:where(:scope):is(.nse-table-view) [data-nse-part="cell-content"] [data-nse-part="primary-text"],
+.nse-table-view [data-nse-part="cell-content"] [data-nse-part="secondary-text"],
+:where(:scope):is(.nse-table-view) [data-nse-part="cell-content"] [data-nse-part="secondary-text"] {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nse-table-view [data-nse-part="cell-content"] [data-nse-part="secondary-text"],
+:where(:scope):is(.nse-table-view) [data-nse-part="cell-content"] [data-nse-part="secondary-text"] {
+  font-size: 0.85em;
+  opacity: 0.72;
+}
+
+.nse-table-view [data-nse-part="cell-content"]>[data-nse-part="badge"],
+:where(:scope):is(.nse-table-view) [data-nse-part="cell-content"]>[data-nse-part="badge"],
+.nse-table-view [data-nse-part="cell-content"]>[data-nse-part="accessory"],
+:where(:scope):is(.nse-table-view) [data-nse-part="cell-content"]>[data-nse-part="accessory"] {
+  flex: 0 0 auto;
+  margin-inline-start: auto;
+}
+
+}
+
 }

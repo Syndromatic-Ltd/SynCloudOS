@@ -18,20 +18,25 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export type NSEScrollerPolicy = "automatic" | "always" | "hidden";
+import { NSEControllerLifetime } from "../Controllers/controllerLifetime";
+import type { NSEControllerOwnershipOptions } from "../Controllers/ownership";
+import { NSEEdgeInsetsZero, type NSEEdgeInsets } from "../Layout/NSEEdgeInsets";
 
-export interface NSEScrollInsets {
-  readonly top: number;
-  readonly right: number;
-  readonly bottom: number;
-  readonly left: number;
-}
+export type NSEScrollerPolicy = "automatic" | "always" | "hidden";
 
 export interface NSEScrollRect {
   readonly x: number;
   readonly y: number;
   readonly width: number;
   readonly height: number;
+}
+
+/** NSClipView: the scrolling viewport, with bounds in document coordinates. */
+export interface NSEClipViewHandle {
+  readonly element: HTMLElement;
+  readonly bounds: NSEScrollRect;
+  postsBoundsChangedNotifications: boolean;
+  observeBoundsChanges(observer: (bounds: NSEScrollRect) => void): () => void;
 }
 
 export type NSERTLScrollModel = "negative" | "reverse" | "default";
@@ -41,10 +46,8 @@ export interface NSEScrollGeometry {
   readonly viewport: { readonly width: number; readonly height: number };
   readonly content: { readonly width: number; readonly height: number };
   readonly rect: NSEScrollRect;
-  readonly insets?: NSEScrollInsets;
+  readonly insets?: NSEEdgeInsets;
 }
-
-const ZERO_INSETS: NSEScrollInsets = Object.freeze({ top: 0, right: 0, bottom: 0, left: 0 });
 
 const finite = (value: number) => Number.isFinite(value) ? value : 0;
 const clamp = (value: number, minimum: number, maximum: number) => Math.min(maximum, Math.max(minimum, value));
@@ -53,7 +56,7 @@ export const normalizeRTLScrollLeft = (value: number, maximum: number, model: NS
   model === "negative" ? -value : model === "reverse" ? maximum - value : value;
 
 export function computeScrollRectTarget(geometry: NSEScrollGeometry) {
-  const insets = geometry.insets ?? ZERO_INSETS;
+  const insets = geometry.insets ?? NSEEdgeInsetsZero;
   const viewportWidth = Math.max(0, finite(geometry.viewport.width));
   const viewportHeight = Math.max(0, finite(geometry.viewport.height));
   const contentWidth = Math.max(0, finite(geometry.content.width));
@@ -101,7 +104,55 @@ function cancel(frame: number) {
 }
 
 export class NSEScrollViewController {
-  constructor(readonly host: HTMLElement, readonly insets: NSEScrollInsets = ZERO_INSETS) {}
+  readonly #lifetime: NSEControllerLifetime;
+  readonly #connections = new Set<() => void>();
+  readonly contentView: NSEClipViewHandle;
+
+  constructor(readonly host: HTMLElement, readonly insets: NSEEdgeInsets = NSEEdgeInsetsZero, options: NSEControllerOwnershipOptions = {}) {
+    this.#lifetime = new NSEControllerLifetime(options, { kind: "NSEScrollViewController", id: host.id || "scroll-view" });
+    this.#lifetime.bind(() => this.dispose());
+    const controller = this;
+    this.contentView = {
+      element: host,
+      get bounds() { return controller.documentVisibleRect; },
+      postsBoundsChangedNotifications: false,
+      observeBoundsChanges(observer) {
+        controller.#lifetime.assertLive("observeBoundsChanges");
+        let previous = controller.documentVisibleRect;
+        const publish = () => {
+          const next = controller.documentVisibleRect;
+          if (next.x === previous.x && next.y === previous.y && next.width === previous.width && next.height === previous.height) return;
+          previous = next;
+          if (controller.contentView.postsBoundsChangedNotifications) observer(next);
+        };
+        // Bounds notifications follow the native event, so a client's next-frame
+        // drawing does not acquire an extra frame of scroll latency.
+        host.addEventListener("scroll", publish, { passive: true });
+        const Resize = host.ownerDocument.defaultView?.ResizeObserver;
+        const resize = Resize ? new Resize(publish) : null;
+        resize?.observe(host);
+        const disconnect = () => {
+          controller.#connections.delete(disconnect);
+          host.removeEventListener("scroll", publish);
+          resize?.disconnect();
+        };
+        controller.#connections.add(disconnect);
+        return disconnect;
+      },
+    };
+  }
+
+  /** NSScrollView.documentVisibleRect, in the document's coordinate system. */
+  get documentVisibleRect(): NSEScrollRect {
+    return { x: this.host.scrollLeft, y: this.host.scrollTop, width: this.host.clientWidth, height: this.host.clientHeight };
+  }
+
+  get isDisposed(): boolean { return this.#lifetime.isDisposed; }
+  dispose(): void {
+    if (!this.#lifetime.dispose()) return;
+    for (const disconnect of [...this.#connections]) disconnect();
+    this.#connections.clear();
+  }
 
   static claim(host: HTMLElement, owner: unknown): boolean {
     const current = claims.get(host);
@@ -115,6 +166,7 @@ export class NSEScrollViewController {
   }
 
   connect(observer: ScrollObserver): () => void {
+    this.#lifetime.assertLive("connect");
     let observation = observations.get(this.host);
     if (!observation) {
       const observers = new Set<ScrollObserver>();
@@ -138,9 +190,10 @@ export class NSEScrollViewController {
     observation.observers.add(observer);
 
     let active = true;
-    return () => {
+    const disconnect = () => {
       if (!active) return;
       active = false;
+      this.#connections.delete(disconnect);
       const current = observations.get(this.host);
       if (!current) return;
       current.observers.delete(observer);
@@ -149,9 +202,12 @@ export class NSEScrollViewController {
       if (current.frame !== 0) cancel(current.frame);
       observations.delete(this.host);
     };
+    this.#connections.add(disconnect);
+    return disconnect;
   }
 
   scrollRectToVisible(rect: NSEScrollRect, behavior: ScrollBehavior = "auto") {
+    this.#lifetime.assertLive("scrollRectToVisible");
     const target = computeScrollRectTarget({
       position: { left: this.host.scrollLeft, top: this.host.scrollTop },
       viewport: { width: this.host.clientWidth, height: this.host.clientHeight },

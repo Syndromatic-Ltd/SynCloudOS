@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-window-toolbar-style.test.tsx tests/runtime/nse-preferences-pane.test.tsx tests/runtime/nse-tab-view-controller.test.tsx tests/runtime/application-host-titlebar.test.tsx tests/runtime/application-stage-app-menu.test.tsx tests/runtime/appkit-counterparts.test.ts tests/runtime/update-readiness-pane.test.tsx tests/runtime/preference-panes.test.tsx tests/runtime/preferences-notifications-pane.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  9 passed (9)
+      Tests  100 passed (100)
+   Start at  11:12:16
+   Duration  18.12s (transform 9.93s, setup 116ms, import 23.14s, tests 3.20s, environment 6.98s)

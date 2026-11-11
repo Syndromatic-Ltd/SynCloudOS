@@ -91,7 +91,7 @@ describe("asset-aware native save", () => {
     await expect(coordinator.save(request([staged], "conflicting"), capture)).rejects.toMatchObject({ code: "document-version-conflict" });
     expect(await base.read(location)).toEqual(previous.record);
     expect(await store.collectGarbage(scope)).toEqual({ removedAssets: 1, removedBytes: 1 });
-    expect(await store.read(scope, ref)).toEqual(input.bytes);
+    expect((await store.read(scope, ref)).bytes).toEqual(input.bytes);
   });
 
   it("captures content and reference enumeration before an upload settles", async () => {
@@ -160,7 +160,7 @@ describe("asset-aware native save", () => {
     await transaction.seal(); await transaction.rollback();
     expect(await wrapped.read(location)).toEqual(first);
     expect(await base.listVersions(location)).toHaveLength(1);
-    expect(await store.read(scope, ref)).toEqual(input.bytes);
+    expect((await store.read(scope, ref)).bytes).toEqual(input.bytes);
   });
 
   it.each([false, true])("recovers one unknown write at a full one-root quota (provider recovery: %s)", async statusRecovery => {

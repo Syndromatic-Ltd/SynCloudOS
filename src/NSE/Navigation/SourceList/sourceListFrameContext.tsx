@@ -23,7 +23,7 @@ import type { NSEChromeScheme } from "../../Windows/Chrome/nseTopBarTypes";
 
 /**
  * Carries the system-owned source-list rail state from `ApplicationStageView` (which renders the seam'd top
- * bar and owns the width) down to `NSESourceListScene` (which renders the sidebar + main + status in
+ * bar and owns the width) down to `the source-list split view` (which renders the sidebar + main + status in
  * the app subtree). The width lives in the system, so the bar seam and the sidebar can never disagree.
  */
 export interface SourceListFrameContextValue {
@@ -37,9 +37,9 @@ export interface SourceListFrameContextValue {
   /** Rail wordmark, already resolved from the app's override or its short name. */
   railLabel: string;
   scheme: NSEChromeScheme;
-  /** Sets the dynamic centre title shown in the system bar (e.g. the active section); `null` reverts
-   *  to the window title. Lets a source-list app drive its bar title without owning the bar. */
-  setBarTitle: (title: string | null) => void;
+  /** Presentation request from the retained body; null restores the host default.
+   * Keeps stage header seams aligned with a short-window rail or compact stack. */
+  setCompactNavigation?: (compact: boolean | null) => void;
 }
 
 const SourceListFrameContext = createContext<SourceListFrameContextValue | null>(null);

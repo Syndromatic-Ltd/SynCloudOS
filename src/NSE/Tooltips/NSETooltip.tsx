@@ -25,15 +25,15 @@ import type { NSETooltipProps } from "./tooltipTypes";
 import { useNSEAppearanceProjection } from "../Appearance";
 
 /** A noninteractive overlay; focus stays on its anchor. */
-export function NSETooltip({ id, content, open, anchor, placement = "block-end-inline-start", onOpenChange }: NSETooltipProps) {
+export function NSETooltip({ id, content, open, anchor, placement = "block-end-inline-start", onOpenChange, onPointerEnter, onPointerLeave }: NSETooltipProps) {
   const appearanceProjection = useNSEAppearanceProjection();
   if (!id.trim()) throw new TypeError("NSE tooltip IDs must not be empty.");
-  const { runtime } = useNSEOverlayProvider();
+  const { runtime, defaultParentResponderId } = useNSEOverlayProvider();
   const [arrow, setArrow] = useState<HTMLSpanElement | null>(null);
   const overlay = useNSEOverlay({
     id,
     kind: "tooltip",
-    parentResponderId: runtime.runtimeId,
+    parentResponderId: defaultParentResponderId ?? runtime.runtimeId,
     anchor,
     open,
     placement,
@@ -51,13 +51,15 @@ export function NSETooltip({ id, content, open, anchor, placement = "block-end-i
       {...appearanceProjection}
       id={id}
       role="tooltip"
+      onPointerEnter={onPointerEnter}
+      onPointerLeave={onPointerLeave}
       className="nse-tooltip"
       data-nse-control="tooltip"
       data-nse-part="surface"
       data-state="open"
-      data-appearance-recipe="tooltip.background"
+
     >
-      <span ref={setArrow} className="nse-tooltip-arrow" aria-hidden="true" data-nse-part="arrow" data-appearance-recipe="tooltip.arrow" />
+      <span ref={setArrow} className="nse-tooltip-arrow" aria-hidden="true" data-nse-part="arrow"  />
       <span className="nse-tooltip-content" data-nse-part="content">{content}</span>
     </div>
   );

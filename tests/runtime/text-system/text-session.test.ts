@@ -21,11 +21,35 @@
 import { describe, expect, it } from "vitest";
 import { createInMemoryNSETextOwner, attributedContent, paragraph, textRun } from "../../../src/NSE/Text";
 import { TextEditingSession } from "../../../src/NSE/TextEditing/TextEditingSession";
+import { declareSynCloudOSLifecycleSignal, SynCloudOSLifecycleError } from "../../../src/SynCloudOS/nseRuntimeContracts";
 const content = (text: string) => attributedContent([paragraph([textRun(text)])]);
 describe("semantic editing sessions", () => {
+  it.each(["explicit", "application-closed"] as const)("keeps the first %s disposal cause and public operation", async reason => {
+    const owner = createInMemoryNSETextOwner({ content: content("abc") });
+    const signal = new AbortController();
+    declareSynCloudOSLifecycleSignal(signal.signal, "application-closed");
+    const session = new TextEditingSession({ id: "lifecycle", textOwner: owner, signal: signal.signal });
+    session.select(0, 1);
+    if (reason === "explicit") session.dispose(); else signal.abort();
+    session.dispose(); signal.abort();
+    const actions: Record<string, () => unknown> = {
+      select: () => session.select(0), setEditable: () => session.setEditable(true),
+      setTypingAttributes: () => session.setTypingAttributes({}), commit: () => session.commit([]),
+      insertText: () => session.insertText("x"), delete: () => session.delete("forward"),
+      splitParagraph: () => session.splitParagraph(), changeListLevel: () => session.changeListLevel(1),
+      setMarkedText: () => session.setMarkedText("x"), unmarkText: () => session.unmarkText(), cancelMarkedText: () => session.cancelMarkedText(),
+    };
+    for (const [operation, action] of Object.entries(actions)) {
+      expect(action).toThrow(SynCloudOSLifecycleError);
+      expect(action).toThrow(expect.objectContaining({ code: "NSE_TEXT_EDITING_SESSION_DISPOSED", operation, resource: { kind: "TextEditingSession", id: "lifecycle" }, disposal: expect.objectContaining({ reason }) }));
+    }
+    await expect(session.requestHistory("undo")).rejects.toBeInstanceOf(SynCloudOSLifecycleError);
+    await expect(session.requestHistory("undo")).rejects.toMatchObject({ code: "NSE_TEXT_EDITING_SESSION_DISPOSED", operation: "requestHistory" });
+    owner.dispose();
+  });
   it("inherits initial typing attributes but preserves an explicit collapsed removal", () => {
     const owner = createInMemoryNSETextOwner({ content: attributedContent([paragraph([textRun("ab", { bold: true })])]) });
-    const session = new TextEditingSession({ id: "inherit", owner });
+    const session = new TextEditingSession({ id: "inherit", textOwner: owner });
     expect(session.getSnapshot().typingAttributes).toEqual({ bold: true });
     session.select(1); session.removeAttributes(["bold"]); session.insertText("x");
     const inserted = owner.getSnapshot().characterSpans.find(span => span.range.location === 1);
@@ -35,7 +59,7 @@ describe("semantic editing sessions", () => {
   });
   it("revokes attached sessions with their owner and isolates observer failures", () => {
     const owner = createInMemoryNSETextOwner();
-    const session = new TextEditingSession({ id: "scope", owner });
+    const session = new TextEditingSession({ id: "scope", textOwner: owner });
     let calls = 0;
     session.subscribe(() => { throw new Error("observer"); }); session.subscribe(() => calls++);
     session.select(0); session.setTypingAttributes({ bold: true });
@@ -43,12 +67,13 @@ describe("semantic editing sessions", () => {
     owner.dispose();
     expect(session.getSnapshot().disposed).toBe(true);
     expect(session.signal.aborted).toBe(true);
-    expect(() => session.insertText("late")).toThrow(/revoked/);
+    expect(() => session.insertText("late")).toThrow(SynCloudOSLifecycleError);
+    expect(() => session.insertText("late")).toThrow(expect.objectContaining({ code: "NSE_TEXT_EDITING_SESSION_DISPOSED", operation: "insertText", disposal: expect.objectContaining({ reason: "owner-signal-aborted" }) }));
   });
   it("keeps selection independent while two views share canonical content", () => {
     const owner = createInMemoryNSETextOwner({ content: content("hello"), flowId: "main" });
-    const one = new TextEditingSession({ id: "one", owner });
-    const two = new TextEditingSession({ id: "two", owner });
+    const one = new TextEditingSession({ id: "one", textOwner: owner });
+    const two = new TextEditingSession({ id: "two", textOwner: owner });
     one.select(1, 4); two.select(0, 0); one.insertText("i");
     expect(owner.getSnapshot().text).toBe("hio");
     expect(one.getSnapshot().selection.range).toEqual({ location: 2, length: 0 });
@@ -58,7 +83,7 @@ describe("semantic editing sessions", () => {
   });
   it("keeps marked input private and commits exactly once", () => {
     const owner = createInMemoryNSETextOwner({ content: content("ab") });
-    const session = new TextEditingSession({ id: "ime", owner });
+    const session = new TextEditingSession({ id: "ime", textOwner: owner });
     session.select(1, 1); session.setMarkedText("に"); session.setMarkedText("日本");
     expect(owner.getSnapshot().text).toBe("ab");
     expect(session.settleEditing().status).toBe("refused");
@@ -68,7 +93,7 @@ describe("semantic editing sessions", () => {
   });
   it("preserves marked input and refuses stale composition after external mutation", () => {
     const owner = createInMemoryNSETextOwner({ content: content("ab") });
-    const session = new TextEditingSession({ id: "ime", owner });
+    const session = new TextEditingSession({ id: "ime", textOwner: owner });
     session.setMarkedText("x");
     owner.commit({ expectedRevision: 0, operations: [{ kind: "replace", range: { location: 0, length: 2 }, content: content("changed") }] });
     expect(() => session.unmarkText()).toThrow(/composition/i);
@@ -77,7 +102,7 @@ describe("semantic editing sessions", () => {
   });
   it("stores collapsed formatting as typing attributes without canonical history", () => {
     const owner = createInMemoryNSETextOwner({ content: content("ab") });
-    const session = new TextEditingSession({ id: "format", owner });
+    const session = new TextEditingSession({ id: "format", textOwner: owner });
     session.applyAttributes({ bold: true });
     expect(owner.getSnapshot().revision).toBe(0);
     session.insertText("x");
@@ -85,7 +110,7 @@ describe("semantic editing sessions", () => {
   });
   it("inherits effective typing attributes at a moved caret and rejects surrogate interiors", () => {
     const owner = createInMemoryNSETextOwner({ content: attributedContent([paragraph([textRun("a😀b", { bold: true })])]) });
-    const session = new TextEditingSession({ id: "typing", owner });
+    const session = new TextEditingSession({ id: "typing", textOwner: owner });
     session.select(1); expect(session.getSnapshot().typingAttributes.bold).toBe(true);
     expect(() => session.select(2)).toThrow(RangeError);
   });

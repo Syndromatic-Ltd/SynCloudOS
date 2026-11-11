@@ -39,7 +39,7 @@ it("revokes only the owning mount and hides global policy", async () => {
   expect(Object.isFrozen(first)).toBe(true);
   expect("setButtonSoundEnabled" in first).toBe(false);
   a.abort();
-  await expect(first.trigger("medium")).rejects.toThrow(/disposed/);
+  await expect(first.trigger("medium")).rejects.toThrow(expect.objectContaining({ code: "HFX_HAPTIC_ENGINE_DISPOSED" }));
   await expect(other.trigger("medium")).resolves.toBeUndefined();
   expect(() => client.createEngine()).toThrow();
   host.dispose();

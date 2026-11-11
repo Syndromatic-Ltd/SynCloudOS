@@ -1,0 +1,36 @@
+{
+  "boards": [
+    {
+      "name": "Main",
+      "originalPath": "C:/Users/KAVISH~1/AppData/Local/Temp/claude/C--Users-Kavish-Krishnakumar/cf6d67a8-095b-4276-8632-0a5bf1e8dd9d/scratchpad/headermock/project/Main.dc.html",
+      "originalSha256": "de29e4403b1adfa98d947db917a8eb449153c362f794a302b7cf7428110cfa84",
+      "deliveredSha256": "c4b201253facba49e9b61f0f381a0f4d66b36356ac7fc1cb5094dee669cb746c",
+      "width": 960,
+      "height": 600,
+      "dpr": 1,
+      "contentEquivalentIgnoringLineEndings": true
+    },
+    {
+      "name": "Phone",
+      "originalPath": "C:/Users/KAVISH~1/AppData/Local/Temp/claude/C--Users-Kavish-Krishnakumar/cf6d67a8-095b-4276-8632-0a5bf1e8dd9d/scratchpad/headermock/project/Phone.dc.html",
+      "originalSha256": "36e44a2846d00cffebce48aaec9ef9df3de296594014e390825a0212cc3525d9",
+      "deliveredSha256": "8ac3487aefef87c5eb0ba7003c6678c9ce5c584747ab2f22400e0560a5f2f8fd",
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "contentEquivalentIgnoringLineEndings": true
+    },
+    {
+      "name": "Prefs",
+      "originalPath": "C:/Users/KAVISH~1/AppData/Local/Temp/claude/C--Users-Kavish-Krishnakumar/cf6d67a8-095b-4276-8632-0a5bf1e8dd9d/scratchpad/headermock/project/Prefs.dc.html",
+      "originalSha256": "ce2f90315b38501ab1e6e3639eb0c44f4c838cf4eb538b5ac9089aeaeed38f48",
+      "deliveredSha256": "ce2f90315b38501ab1e6e3639eb0c44f4c838cf4eb538b5ac9089aeaeed38f48",
+      "width": 520,
+      "height": 560,
+      "dpr": 1,
+      "contentEquivalentIgnoringLineEndings": true
+    }
+  ],
+  "rejected": "ContentPlate.dc.html was excluded",
+  "rendering": "Chromium; static exported markup with the absent support.js script removed in memory"
+}

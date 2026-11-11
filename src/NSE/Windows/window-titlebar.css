@@ -1,0 +1,33 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
+.nse-window-titlebar-content,
+:where(:scope):is(.nse-window-titlebar-content) { box-sizing: border-box; flex: none; position: relative; z-index: 2; min-width: 0; }
+.nse-window-titlebar-copy,
+:where(:scope):is(.nse-window-titlebar-copy) { min-width: 0; }
+.nse-window-titlebar-heading,
+:where(:scope):is(.nse-window-titlebar-heading) { overflow-wrap: anywhere; }
+.nse-window-titlebar-content[data-toolbar-style="expanded"]>.nse-window-titlebar-leading:empty,
+:where(:scope):is(.nse-window-titlebar-content[data-toolbar-style="expanded"])>.nse-window-titlebar-leading:empty,
+.nse-window-titlebar-content[data-toolbar-style="expanded"]>.nse-window-titlebar-trailing:empty,
+:where(:scope):is(.nse-window-titlebar-content[data-toolbar-style="expanded"])>.nse-window-titlebar-trailing:empty { display: none; }
+.nse-window-titlebar-content[data-toolbar-style="preference"],
+:where(:scope):is(.nse-window-titlebar-content[data-toolbar-style="preference"]) { display: grid; grid-template-columns: minmax(50px, 1fr) minmax(0, auto) minmax(50px, 1fr); align-items: center; }
+.nse-window-titlebar-content[data-toolbar-style="preference"] .nse-window-titlebar-copy,
+:where(:scope):is(.nse-window-titlebar-content[data-toolbar-style="preference"]) .nse-window-titlebar-copy { text-align: center; }
+.nse-window-titlebar-leading,
+:where(:scope):is(.nse-window-titlebar-leading) { display: flex; align-items: center; justify-content: start; }
+.nse-window-titlebar-trailing,
+:where(:scope):is(.nse-window-titlebar-trailing) { display: flex; align-items: center; justify-content: end; }
+.nse-window-title-slot,
+:where(:scope):is(.nse-window-title-slot) { flex: none; }
+.nse-window-title-slot:empty,
+:where(:scope):is(.nse-window-title-slot:empty) { display: none; }
+[data-nse-part="split-pane"]:has(>.nse-window-title-slot:not(:empty)),
+:where(:scope):is([data-nse-part="split-pane"]:has(>.nse-window-title-slot:not(:empty))) { display: flex; flex-direction: column; }
+[data-nse-part="split-pane"]:has(>.nse-window-title-slot:not(:empty))>.nse-split-view-pane-host>*,
+:where(:scope):is([data-nse-part="split-pane"]:has(>.nse-window-title-slot:not(:empty)))>.nse-split-view-pane-host>* { position: relative; flex: 1 1 auto; min-height: 0; }
+
+}
+
+}

@@ -1,0 +1,186 @@
+{
+  "arrowTitlesOrLabels": [
+    {
+      "file": "..\\site\\src\\SynWare\\About.app\\Contents\\Resources\\Localised\\ru-RU.locale\\MainMenu.strings",
+      "line": 10,
+      "key": "sections.toolbarAriaLabel",
+      "value": "Разделы «О программе»"
+    },
+    {
+      "file": "..\\site\\src\\SynWare\\JournalPublisher.app\\Contents\\Resources\\Localised\\ru-RU.locale\\Localisable.strings",
+      "line": 181,
+      "key": "advanced.useNone",
+      "value": "Использовать «Нет»"
+    },
+    {
+      "file": "..\\site\\src\\SynWare\\NSEControlGallery.app\\Contents\\Resources\\Localised\\ru-RU.locale\\Localisable.strings",
+      "line": 419,
+      "key": "sl.toggleFrameworks",
+      "value": "Показать/скрыть «Фреймворки»"
+    },
+    {
+      "file": "..\\site\\src\\SynWare\\NSEControlGallery.app\\Contents\\Resources\\Localised\\ru-RU.locale\\Localisable.strings",
+      "line": 420,
+      "key": "sl.toggleServices",
+      "value": "Показать/скрыть «Службы»"
+    }
+  ],
+  "inlineSVGInventory": [
+    {
+      "file": "src\\NSE\\Colour\\ColourPanel\\colourPanelIcons.tsx",
+      "line": 43
+    },
+    {
+      "file": "src\\NSE\\Colour\\ColourPanel\\colourPanelIcons.tsx",
+      "line": 60
+    },
+    {
+      "file": "src\\NSE\\Colour\\ColourPanel\\colourPanelIcons.tsx",
+      "line": 76
+    },
+    {
+      "file": "src\\NSE\\Colour\\ColourPanel\\colourPanelIcons.tsx",
+      "line": 85
+    },
+    {
+      "file": "src\\NSE\\Colour\\ColourPanel\\colourPanelIcons.tsx",
+      "line": 100
+    },
+    {
+      "file": "src\\NSE\\Colour\\ColourPanel\\colourPanelIcons.tsx",
+      "line": 117
+    },
+    {
+      "file": "src\\NSE\\Colour\\ColourPanel\\NSEColourPanelModes.tsx",
+      "line": 246
+    },
+    {
+      "file": "src\\NSE\\Colour\\ColourPanel\\NSEColourPanelModes.tsx",
+      "line": 290
+    },
+    {
+      "file": "src\\NSE\\Navigation\\NSETabBar.tsx",
+      "line": 159
+    },
+    {
+      "file": "src\\NSE\\Overlays\\NSEPopoverFrame.tsx",
+      "line": 26
+    },
+    {
+      "file": "src\\NSE\\Page\\NSEPageCurlLeaf.tsx",
+      "line": 374
+    },
+    {
+      "file": "src\\NSE\\Typography\\fontPanelIcons.tsx",
+      "line": 28
+    },
+    {
+      "file": "src\\NSE\\Typography\\NSEFontPanel.tsx",
+      "line": 90
+    },
+    {
+      "file": "src\\NSE\\Views\\NSEViewDisplayList.tsx",
+      "line": 148
+    },
+    {
+      "file": "src\\Webspring\\WebspringFolderTile.tsx",
+      "line": 99
+    },
+    {
+      "file": "src\\Webspring\\WebspringFolderTile.tsx",
+      "line": 101
+    },
+    {
+      "file": "src\\Webspring\\WebspringFolderTile.tsx",
+      "line": 102
+    },
+    {
+      "file": "src\\Webspring\\WebspringFolderTile.tsx",
+      "line": 107
+    },
+    {
+      "file": "src\\Webspring\\WebspringFolderTile.tsx",
+      "line": 108
+    },
+    {
+      "file": "..\\site\\src\\SynWare\\JournalPublisher.app\\Contents\\publisherIcons.tsx",
+      "line": 20
+    },
+    {
+      "file": "..\\site\\src\\SynWare\\JournalPublisher.app\\Contents\\publisherIcons.tsx",
+      "line": 35
+    },
+    {
+      "file": "..\\site\\src\\SynWare\\JournalPublisher.app\\Contents\\publisherIcons.tsx",
+      "line": 58
+    },
+    {
+      "file": "..\\site\\src\\SynWare\\JournalPublisher.app\\Contents\\publisherIcons.tsx",
+      "line": 72
+    },
+    {
+      "file": "..\\site\\src\\SynWare\\JournalPublisher.app\\Contents\\publisherIcons.tsx",
+      "line": 88
+    },
+    {
+      "file": "..\\site\\src\\SynWare\\JournalPublisher.app\\Contents\\publisherIcons.tsx",
+      "line": 102
+    },
+    {
+      "file": "..\\site\\src\\SynWare\\JournalPublisher.app\\Contents\\publisherIcons.tsx",
+      "line": 118
+    },
+    {
+      "file": "..\\site\\src\\SynWare\\JournalPublisher.app\\Contents\\publisherIcons.tsx",
+      "line": 134
+    },
+    {
+      "file": "..\\site\\src\\SynWare\\JournalPublisher.app\\Contents\\publisherIcons.tsx",
+      "line": 150
+    },
+    {
+      "file": "..\\site\\src\\SynWare\\JournalPublisher.app\\Contents\\publisherIcons.tsx",
+      "line": 167
+    },
+    {
+      "file": "..\\site\\src\\SynWare\\JournalPublisher.app\\Contents\\publisherIcons.tsx",
+      "line": 181
+    },
+    {
+      "file": "..\\site\\src\\SynWare\\JournalPublisher.app\\Contents\\PublisherImagePane.tsx",
+      "line": 383
+    },
+    {
+      "file": "..\\site\\src\\SynWare\\JournalPublisher.app\\Contents\\PublisherImagePane.tsx",
+      "line": 394
+    },
+    {
+      "file": "..\\site\\src\\SynWare\\JournalPublisher.app\\Contents\\PublisherImagePane.tsx",
+      "line": 401
+    },
+    {
+      "file": "..\\site\\src\\SynWare\\JournalPublisher.app\\Contents\\PublisherImagePopover.tsx",
+      "line": 41
+    },
+    {
+      "file": "..\\site\\src\\SynWare\\JournalPublisher.app\\Contents\\PublisherInspector.tsx",
+      "line": 272
+    },
+    {
+      "file": "..\\site\\src\\SynWare\\JournalPublisher.app\\Contents\\PublisherInspector.tsx",
+      "line": 277
+    },
+    {
+      "file": "..\\site\\src\\SynWare\\Portfolio.app\\Contents\\FoilArtwork.tsx",
+      "line": 10
+    },
+    {
+      "file": "..\\site\\src\\SynWare\\Portfolio.app\\Contents\\Library.tsx",
+      "line": 349
+    },
+    {
+      "file": "..\\site\\src\\SynWare\\Portfolio.app\\Contents\\Library.tsx",
+      "line": 514
+    }
+  ]
+}

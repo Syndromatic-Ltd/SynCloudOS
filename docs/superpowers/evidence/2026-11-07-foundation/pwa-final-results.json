@@ -1,0 +1,9 @@
+{
+  "typecheck": 0,
+  "boundaries": 1,
+  "sdkBuild": 0,
+  "frameworkTests": 1,
+  "siteAdoption": 0,
+  "siteTypecheck": 0,
+  "siteTests": -1
+}

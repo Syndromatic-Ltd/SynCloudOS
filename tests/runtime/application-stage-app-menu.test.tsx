@@ -26,13 +26,19 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { SynCloudOSAppInfo } from "../../src/SynCloudOS/AppInfo/appInfoTypes";
 import { useResolvedMode as useScopedResolvedMode } from "../../src/SynCloudOS/Appearance/useAppearance";
 import { clearOwnedResponderAnchor, SynCloudOSProvider } from "../../src/SynCloudOSReact";
-import { useSynWare, useSynWareQuickSwitchTrigger } from "../../src/SynCloudOS/AppSDK";
+import { useSCOS, useQuickSwitchTrigger } from "../../src/SynCloudOS/AppSDK";
 import { createInMemoryNSETextOwner, plainNSETextContent, NSETextCommands, NSETextView, TextEditingSession } from "@syndromatic/syncloudos/nse/text";
 import { NSEHierarchyStack, NSENavigationStackController, NSETabBarController } from "../../src/NSE/Navigation";
 import { useNSEDeferredDisposal, type NSEDisposalScheduler } from "../../src/NSE/NSE";
-import { createSynWare, ResponderScope, useSynWareLocalisedStrings } from "@syndromatic/syncloudos/sdk";
+import { ResponderScope, useStrings } from "@syndromatic/syncloudos/sdk";
+import { SynWareProvider } from "../../src/SynCloudOS/AppSDK/SynWareContext";
+import { createSynWareContextValue } from "../../src/SynCloudOS/AppSDK/createSynWareContextValue";
+import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
 import { ApplicationStageView } from "../../src/Webspring/ApplicationStageView";
-import { NSESidebar, NSESourceListScene } from "../../src/NSE/Navigation/SourceList";
+import { tabViewController } from "../fixtures/tabViewController";
+import { nseUpdateTraits } from "../../src/NSE/Application/NSEViewController";
+import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
+import { NSEWindowTitlebarHostContext } from "../../src/SynCloudOS/AppHosting/windowChrome";
 import { authoriseTestRuntime, createTestBundle, createTestRuntime, createTestRuntimeEnvironment, mountTestSynWareRuntime } from "./helpers";
 import { HostSiteBrandingProvider } from "../../src/SynCloudOSReact";
 
@@ -62,19 +68,21 @@ vi.mock("../../src/Webspring/webspringLocale", () => ({
 
 function createAppInfo(topBar: "standard" | "custom" | "none" = "standard"): SynCloudOSAppInfo {
   return {
-    id: "test-app",
+    bundleIdentifier: "com.example.test-app",
     displayName: "Test App",
     shortName: "Test",
     packageName: "com.test.app",
     frame: {
-      layout: "defacto",
       material: "standard",
       rightSlot: "userInfo",
+      background: "system",
       smoothSurface: "off",
       sourceList: undefined,
       topBar
     },
     icon: { src: "/test.png" },
+    version: "1.0.0",
+    about: { copyright: "© Test", trademark: "", tagline: "A test app" },
     isDisabled: false,
     notifications: { badgeCount: 0, showsNotifications: false },
     presentation: "appView",
@@ -96,18 +104,18 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function renderFrame(beforeRender?: (runtime: ReturnType<typeof createTestRuntime>) => void) {
+function renderFrame(beforeRender?: (runtime: ReturnType<typeof createTestRuntime>) => void, appInfo = createAppInfo()) {
   const runtime = authoriseTestRuntime(createTestRuntime());
-  runtime.apps.registerBundle(createTestBundle({ id: "test-app", displayName: "Test App", route: "/test" }));
+  runtime.apps.registerBundle(createTestBundle({ version: "1.0.0", bundleIdentifier: "com.example.test-app", displayName: "Test App", route: "/test" }));
   runtime.statechart.gotoState("active.application.active");
   beforeRender?.(runtime);
   render(
     <SynCloudOSProvider runtime={runtime}>
       <HostSiteBrandingProvider value={stageSiteBranding}>
       <ApplicationStageView
-        app={createAppInfo()}
+        app={appInfo}
         lifecycle="ready"
-        stage={{ appId: "test-app", id: "application-stage:test-app", title: "Test App", isFocused: true, zIndex: 10 }}
+        stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
       />
       </HostSiteBrandingProvider>
     </SynCloudOSProvider>
@@ -151,7 +159,7 @@ function ApplicationStageHierarchyFixture() {
 }
 
 function CustomQuickSwitchTitleFixture() {
-  const quickSwitch = useSynWareQuickSwitchTrigger();
+  const quickSwitch = useQuickSwitchTrigger();
   if (!quickSwitch) return <p>QuickSwitch unavailable</p>;
   return (
     <button
@@ -165,31 +173,58 @@ function CustomQuickSwitchTitleFixture() {
 }
 
 describe("ApplicationStageView app menu", () => {
-  it("owns source-list identity, destination title and a single footer, and drops the top rail on compact displays", async () => {
+  it("keeps a class window's responder as the parent of its application menu", async () => {
+    const execute = vi.fn();
+    const runtime = renderFrame(runtime => {
+      runtime.responders.register({ id: "controller:menu-test", kind: "controller", parentId: "application:com.example.test-app", scopeId: "application:com.example.test-app" });
+      runtime.commands.register({
+        id: "com.example.test-app.settings", responderId: "controller:menu-test",
+        title: { key: "settings", fallback: "App Settings" }, payload: { description: "No payload", parse: () => ({ ok: true, value: undefined }) },
+        scope: "focused", defaultKeyBindings: [], undo: { kind: "none" }, validate: () => ({ enabled: true }), execute,
+      });
+    }, { ...createAppInfo(), applicationMenu: { preferences: { commandId: "com.example.test-app.settings", label: "App Settings" } } });
+    runtime.focus.requestFocus("controller:menu-test");
+    expect(runtime.focus.getFocusedResponderId()).toBe("controller:menu-test");
+    fireEvent.click(screen.getByRole("button", { name: "User Info" }));
+    const settings = await screen.findByRole("menuitem", { name: "App Settings" });
+    await waitFor(() => expect(settings.hasAttribute("disabled"), JSON.stringify(runtime.focus.inspect())).toBe(false));
+    fireEvent.click(settings);
+    await waitFor(() => expect(execute).toHaveBeenCalledOnce());
+  });
+  it("owns source-list identity and destination title, and drops the top rail without remounting compact content", async () => {
     let viewport = { width: 1440, height: 900 };
     const listeners = new Set<(snapshot: typeof viewport) => void>();
     const runtime = createTestRuntime({ environment: { ...createTestRuntimeEnvironment(), layoutViewport: { getSnapshot: () => viewport, subscribe: listener => { listeners.add(listener); return () => { listeners.delete(listener); }; } } } });
     function SourceListFixture() {
       const traits = React.useSyncExternalStore(runtime.presentationTraits.subscribe, runtime.presentationTraits.getSnapshot, runtime.presentationTraits.getSnapshot);
-      return <NSESourceListScene title="Buttons" compact={traits.horizontalSizeClass === "compact"} sidebar={<NSESidebar sections={[]} />} status={{ rail: "25 sections" }}><input aria-label="Live draft" defaultValue="Draft" /></NSESourceListScene>;
+      const [controller] = React.useState(() => tabViewController({ ids: ["Buttons"], content: () => <input aria-label="Live draft" defaultValue="Draft" /> }));
+      useNSEDeferredDisposal(controller, fixtureDisposalScheduler);
+      React.useLayoutEffect(() => { controller[nseUpdateTraits]({ presentation: traits, reducedMotion: traits.reducedMotion }); }, [controller, traits]);
+      // Stands in for a window titled "Buttons" (NSWindow.title), as the window controller's mount does.
+      const titlebar = React.useContext(NSEWindowTitlebarHostContext);
+      React.useLayoutEffect(() => {
+        titlebar?.setDocument({ title: "Buttons", subtitle: "", documentEdited: false });
+        return () => titlebar?.setDocument(null);
+      }, [titlebar]);
+      return <NSEViewControllerView controller={controller} />;
     }
-    runtime.apps.registerBundle(createTestBundle({ id: "test-app", route: "/test" }, {
+    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.test-app", route: "/test" }, {
       loadModule: async () => ({ default: SourceListFixture }),
     }));
-    await runtime.bundles.loadBundle("test-app");
+    await runtime.bundles.loadBundle("com.example.test-app");
     const app = { ...createAppInfo(), frame: { ...createAppInfo().frame, material: "metal" as const, sourceList: { minWidth: 220, maxWidth: 320, defaultWidth: 254, railLabel: "NSE Gallery" } } };
-    const fixture = () => <SynCloudOSProvider runtime={runtime}><HostSiteBrandingProvider value={stageSiteBranding}><ApplicationStageView app={app} lifecycle="active" stage={{ appId: "test-app", id: "application-stage:test-app", title: "Test App", isFocused: true, zIndex: 10 }} /></HostSiteBrandingProvider></SynCloudOSProvider>;
+    const fixture = () => <SynCloudOSProvider runtime={runtime}><HostSiteBrandingProvider value={stageSiteBranding}><ApplicationStageView app={app} lifecycle="active" stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }} /></HostSiteBrandingProvider></SynCloudOSProvider>;
     const view = render(fixture());
     await waitFor(() => expect(screen.getByRole("heading", { name: "Buttons" })).toBeTruthy());
     expect(view.container.querySelector('.nse-app-topbar-metal-rail-content')?.textContent).toContain("NSE Gallery");
     expect(view.container.querySelectorAll(".nse-app-topbar")).toHaveLength(1);
-    expect(view.container.querySelectorAll("footer")).toHaveLength(1);
+    // A real window owns its footer; the retained accessory path is covered by nse-source-list-chrome.test.tsx.
     const draft = screen.getByRole("textbox", { name: "Live draft" });
     fireEvent.change(draft, { target: { value: "Retained" } });
     viewport = { width: 390, height: 844 };
     listeners.forEach(listener => listener(viewport));
     await waitFor(() => expect(view.container.querySelector('.nse-app-topbar')?.getAttribute('data-has-rail')).toBe("false"));
-    expect(view.container.querySelector("footer")).toBeNull();
+
     expect(screen.getByRole("textbox", { name: "Live draft" })).toBe(draft);
     viewport = { width: 1440, height: 900 };
     listeners.forEach(listener => listener(viewport));
@@ -199,10 +234,10 @@ describe("ApplicationStageView app menu", () => {
   it("projects the shell-owned QuickSwitch action and subscribed open state into custom app chrome", async () => {
     const runtime = createTestRuntime();
     runtime.apps.registerBundle(createTestBundle(
-      { id: "test-app", displayName: "Test App", route: "/test" },
+      { version: "1.0.0", bundleIdentifier: "com.example.test-app", displayName: "Test App", route: "/test" },
       { loadModule: async () => ({ default: CustomQuickSwitchTitleFixture }) },
     ));
-    await runtime.bundles.loadBundle("test-app");
+    await runtime.bundles.loadBundle("com.example.test-app");
     runtime.statechart.gotoState("active.application.active");
     const onQuickSwitchRequest = vi.fn();
     const frame = (open: boolean) => (
@@ -213,7 +248,7 @@ describe("ApplicationStageView app menu", () => {
           lifecycle="active"
           quickSwitchOpen={open}
           onQuickSwitchRequest={onQuickSwitchRequest}
-          stage={{ appId: "test-app", id: "application-stage:test-app", title: "Test App", isFocused: true, zIndex: 10 }}
+          stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
         />
       </SynCloudOSProvider>
       </HostSiteBrandingProvider>
@@ -233,10 +268,10 @@ describe("ApplicationStageView app menu", () => {
   it("projects a pushed hierarchy into the one shared top bar and restores its source focus through Back", async () => {
     const runtime = createTestRuntime();
     runtime.apps.registerBundle(createTestBundle(
-      { id: "test-app", displayName: "Test App", route: "/test" },
+      { version: "1.0.0", bundleIdentifier: "com.example.test-app", displayName: "Test App", route: "/test" },
       { loadModule: async () => ({ default: ApplicationStageHierarchyFixture }) },
     ));
-    await runtime.bundles.loadBundle("test-app");
+    await runtime.bundles.loadBundle("com.example.test-app");
     runtime.statechart.gotoState("active.application.active");
 
     render(
@@ -245,7 +280,7 @@ describe("ApplicationStageView app menu", () => {
         <ApplicationStageView
           app={createAppInfo()}
           lifecycle="active"
-          stage={{ appId: "test-app", id: "application-stage:test-app", title: "Test App", isFocused: true, zIndex: 10 }}
+          stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
         />
         </HostSiteBrandingProvider>
       </SynCloudOSProvider>,
@@ -272,10 +307,10 @@ describe("ApplicationStageView app menu", () => {
   it("keeps the shared hierarchy chrome controller live through StrictMode effect replay", async () => {
     const runtime = createTestRuntime();
     runtime.apps.registerBundle(createTestBundle(
-      { id: "test-app", displayName: "Test App", route: "/test" },
+      { version: "1.0.0", bundleIdentifier: "com.example.test-app", displayName: "Test App", route: "/test" },
       { loadModule: async () => ({ default: ApplicationStageHierarchyFixture }) },
     ));
-    await runtime.bundles.loadBundle("test-app");
+    await runtime.bundles.loadBundle("com.example.test-app");
     runtime.statechart.gotoState("active.application.active");
 
     render(
@@ -285,7 +320,7 @@ describe("ApplicationStageView app menu", () => {
           <ApplicationStageView
             app={createAppInfo()}
             lifecycle="active"
-            stage={{ appId: "test-app", id: "application-stage:test-app", title: "Test App", isFocused: true, zIndex: 10 }}
+            stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
           />
           </HostSiteBrandingProvider>
         </SynCloudOSProvider>
@@ -300,10 +335,10 @@ describe("ApplicationStageView app menu", () => {
   it.each(["custom", "none"] as const)("does not synthesise stage chrome for a %s-frame application claim", async (topBar) => {
     const runtime = createTestRuntime();
     runtime.apps.registerBundle(createTestBundle(
-      { id: "test-app", displayName: "Test App", route: "/test" },
+      { version: "1.0.0", bundleIdentifier: "com.example.test-app", displayName: "Test App", route: "/test" },
       { loadModule: async () => ({ default: ApplicationStageHierarchyFixture }) },
     ));
-    await runtime.bundles.loadBundle("test-app");
+    await runtime.bundles.loadBundle("com.example.test-app");
     runtime.statechart.gotoState("active.application.active");
 
     render(
@@ -312,7 +347,7 @@ describe("ApplicationStageView app menu", () => {
         <ApplicationStageView
           app={createAppInfo(topBar)}
           lifecycle="active"
-          stage={{ appId: "test-app", id: `application-stage:test-app:${topBar}`, title: "Test App", isFocused: true, zIndex: 10 }}
+          stage={{ appId: "com.example.test-app", id: `application-stage:test-app:${topBar}`, title: "Test App", isFocused: true, zIndex: 10 }}
         />
         </HostSiteBrandingProvider>
       </SynCloudOSProvider>,
@@ -326,7 +361,7 @@ describe("ApplicationStageView app menu", () => {
   it("does not prepaint an outgoing 3D pose when reduced motion is active", () => {
     const runtime = createTestRuntime();
     runtime.settings.set("motion", "reduced");
-    runtime.apps.registerBundle(createTestBundle({ id: "test-app", displayName: "Test App", route: "/test" }));
+    runtime.apps.registerBundle(createTestBundle({ version: "1.0.0", bundleIdentifier: "com.example.test-app", displayName: "Test App", route: "/test" }));
     runtime.statechart.gotoState("active.application.active");
 
     render(
@@ -337,7 +372,7 @@ describe("ApplicationStageView app menu", () => {
           lifecycle="active"
           multiSwitchId="switch:reduced-motion"
           multiSwitchRole="outgoing"
-          stage={{ appId: "test-app", id: "application-stage:test-app", title: "Test App", isFocused: true, zIndex: 10 }}
+          stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
         />
         </HostSiteBrandingProvider>
       </SynCloudOSProvider>,
@@ -369,16 +404,16 @@ describe("ApplicationStageView app menu", () => {
     const runtime = createTestRuntime();
     let liveSession: TextEditingSession | undefined;
     function LiveTextConsumer() {
-      const app = useSynWare();
+      const app = useSCOS();
       const [text] = React.useState(() => {
         const owner = createInMemoryNSETextOwner({ content: plainNSETextContent("Live") });
-        const session = new TextEditingSession({ id: "session:live", documentId: "document:live", owner });
+        const session = new TextEditingSession({ id: "session:live", documentId: "document:live", textOwner: owner });
         return { owner, session, commands: new NSETextCommands({ session }) };
       });
       liveSession = text.session;
       React.useEffect(() => {
         const registration = app.commands.register({
-          id: "test-app.select-all", responderId: "editor:live", scope: "focused",
+          id: "com.example.test-app.select-all", responderId: "editor:live", scope: "focused",
           title: { key: "test.select-all", fallback: "Select All" },
           payload: { parse: (value: unknown) => value === undefined ? { ok: true, value } : { ok: false, issues: ["No payload is accepted."] } },
           defaultKeyBindings: [], undo: { kind: "none" },
@@ -395,12 +430,12 @@ describe("ApplicationStageView app menu", () => {
         </ResponderScope>
       </ResponderScope>;
     }
-    const bundle = createTestBundle({ id: "test-app", route: "/test" });
+    const bundle = createTestBundle({ bundleIdentifier: "com.example.test-app", route: "/test" });
     runtime.apps.registerBundle({
       ...bundle,
       loadModule: async () => ({ default: createSynWare({ manifest: bundle.synWareManifest!, root: LiveTextConsumer }) }),
     });
-    await runtime.bundles.loadBundle("test-app");
+    await runtime.bundles.loadBundle("com.example.test-app");
     const frame = (stageId: string) => (
       <SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={stageSiteBranding}>
@@ -408,7 +443,7 @@ describe("ApplicationStageView app menu", () => {
           key={stageId}
           app={createAppInfo()}
           lifecycle="active"
-          stage={{ appId: "test-app", id: stageId, title: "Test App", isFocused: true, zIndex: 10 }}
+          stage={{ appId: "com.example.test-app", id: stageId, title: "Test App", isFocused: true, zIndex: 10 }}
         />
         </HostSiteBrandingProvider>
       </SynCloudOSProvider>
@@ -417,25 +452,25 @@ describe("ApplicationStageView app menu", () => {
     const editor = await screen.findByRole("textbox");
     fireEvent.focus(editor);
     expect(runtime.responders.resolveChain().map(({ id }) => id)).toEqual([
-      "editor:live", "document:live", "application:test-app", "workspace", "webspring", "runtime",
+      "editor:live", "document:live", "application:com.example.test-app", "workspace", "webspring", "runtime",
     ]);
     expect(new Set(runtime.responders.resolveChain().map(({ id }) => id)).size).toBe(6);
-    expect(await runtime.commands.validate("test-app.select-all", undefined, { source: "menu" })).toMatchObject({ enabled: true, responderId: "editor:live" });
-    expect(await runtime.commands.dispatch("test-app.select-all", undefined, { source: "menu" })).toMatchObject({ status: "executed", responderId: "editor:live" });
+    expect(await runtime.commands.validate("com.example.test-app.select-all", undefined, { source: "menu" })).toMatchObject({ enabled: true, responderId: "editor:live" });
+    expect(await runtime.commands.dispatch("com.example.test-app.select-all", undefined, { source: "menu" })).toMatchObject({ status: "executed", responderId: "editor:live" });
     expect(liveSession!.getSnapshot().selection.range).toEqual({ location: 0, length: 4 });
 
     view.rerender(frame("window-two"));
     fireEvent.focus(await screen.findByRole("textbox"));
     expect(runtime.responders.resolveChain().map(({ id }) => id)).toEqual([
-      "editor:live", "document:live", "application:test-app", "workspace", "webspring", "runtime",
+      "editor:live", "document:live", "application:com.example.test-app", "workspace", "webspring", "runtime",
     ]);
-    expect(runtime.responders.has("application:test-app")).toBe(true);
-    expect(await runtime.commands.dispatch("test-app.select-all", undefined, { source: "menu" })).toMatchObject({ status: "executed", responderId: "editor:live" });
+    expect(runtime.responders.has("application:com.example.test-app")).toBe(true);
+    expect(await runtime.commands.dispatch("com.example.test-app.select-all", undefined, { source: "menu" })).toMatchObject({ status: "executed", responderId: "editor:live" });
     expect(liveSession!.getSnapshot().selection.range).toEqual({ location: 0, length: 4 });
 
     view.unmount();
     expect(liveSession!.getSnapshot().disposed).toBe(true);
-    expect(await runtime.commands.dispatch("test-app.select-all", undefined, { source: "menu" })).toMatchObject({ status: "unhandled" });
+    expect(await runtime.commands.dispatch("com.example.test-app.select-all", undefined, { source: "menu" })).toMatchObject({ status: "unhandled" });
     expect(runtime.focus.getActiveAnchors()).toEqual({
       workspaceResponderId: "workspace",
       webspringResponderId: "webspring",
@@ -445,12 +480,12 @@ describe("ApplicationStageView app menu", () => {
   it("keeps the loaded app mounted when staging hands off to the launch animation", async () => {
     const runtime = createTestRuntime();
     runtime.apps.registerBundle(createTestBundle(
-      { id: "test-app", route: "/test" },
+      { bundleIdentifier: "com.example.test-app", route: "/test" },
       { loadModule: async () => ({ default: () => <p>Loaded application</p> }) }
     ));
-    await runtime.bundles.loadBundle("test-app");
+    await runtime.bundles.loadBundle("com.example.test-app");
     runtime.store.mutate((draft) => {
-      draft.webspring.launchingAppId = "test-app";
+      draft.webspring.launchingAppId = "com.example.test-app";
       draft.webspring.launchTransitionId = "launch-test";
       draft.webspring.launchPhase = "launching";
     });
@@ -461,7 +496,7 @@ describe("ApplicationStageView app menu", () => {
         <ApplicationStageView
           app={createAppInfo()}
           lifecycle="active"
-          stage={{ appId: "test-app", id: "application-stage:test-app", title: "Test App", isFocused: true, zIndex: 10 }}
+          stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
         />
         </HostSiteBrandingProvider>
       </SynCloudOSProvider>
@@ -476,7 +511,7 @@ describe("ApplicationStageView app menu", () => {
     fireEvent.click(screen.getByRole("button", { name: "User Info" }));
 
     expect(await screen.findByRole("menuitem", { name: "About Test App" })).toBeTruthy();
-    expect(screen.getByRole("menuitem", { name: "Preferences" })).toBeTruthy();
+    expect(screen.getByRole("menuitem", { name: "System Preferences…" })).toBeTruthy();
     expect(screen.getByRole("menuitem", { name: "Log Out" })).toBeTruthy();
     expect(document.querySelector('[data-nse-overlay-kind="menu"]')?.getAttribute("data-placement")).toBe("viewport-block-start-inline-end");
     expect(document.querySelector('[data-nse-application-menu="true"]')).toBeTruthy();
@@ -500,14 +535,14 @@ describe("ApplicationStageView app menu", () => {
 
     fireEvent.keyDown(firstMenu, { key: "Escape" });
     await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
-    expect(runtime.apps.getApp("test-app")).not.toBeNull();
+    expect(runtime.apps.getApp("com.example.test-app")).not.toBeNull();
 
     fireEvent.click(trigger);
     const reopenedAbout = await screen.findByRole("menuitem", { name: "About Test App" });
     await waitFor(() => expect(reopenedAbout.getAttribute("aria-disabled")).not.toBe("true"));
     expect(validations).toEqual([
-      expect.arrayContaining([expect.objectContaining({ commandId: "application.showAbout", payload: { appId: "test-app" } })]),
-      expect.arrayContaining([expect.objectContaining({ commandId: "application.showAbout", payload: { appId: "test-app" } })]),
+      expect.arrayContaining([expect.objectContaining({ commandId: "application.showAbout", payload: { appId: "com.example.test-app" } })]),
+      expect.arrayContaining([expect.objectContaining({ commandId: "application.showAbout", payload: { appId: "com.example.test-app" } })]),
     ]);
     expect((reopenedAbout as HTMLButtonElement).disabled).toBe(false);
   });
@@ -516,22 +551,22 @@ describe("ApplicationStageView app menu", () => {
     renderFrame();
 
     const frame = document.querySelector<HTMLElement>(".webspring-app-view-frame");
-    expect(frame?.dataset.syncloudosResponderId).toBe("application:test-app");
+    expect(frame?.dataset.syncloudosResponderId).toBe("application:com.example.test-app");
     expect(frame?.dataset.syncloudosRuntimeOwner).toBeTruthy();
     expect(frame?.parentElement?.dataset.syncloudosResponderId).toBeUndefined();
   });
 
-  it("mounts the registered-owner clients only through useSynWare, without a runtime render prop", async () => {
+  it("mounts the registered-owner clients only through useSCOS, without a runtime render prop", async () => {
     const runtime = authoriseTestRuntime(createTestRuntime());
     let receivedProps: Record<string, unknown> | null = null;
     let contextRuntime: Record<string, unknown> | null = null;
     runtime.apps.registerBundle(createTestBundle(
-      { id: "test-app", route: "/test" },
+      { bundleIdentifier: "com.example.test-app", route: "/test" },
       {
         loadModule: async () => ({
           default: (props: Record<string, unknown>) => {
             receivedProps = props;
-            const app = useSynWare();
+            const app = useSCOS();
             contextRuntime = app as unknown as Record<string, unknown>;
             return <button type="button" onClick={() => {
               void app.pasteboards.find
@@ -541,7 +576,7 @@ describe("ApplicationStageView app menu", () => {
         }),
       },
     ));
-    await runtime.bundles.loadBundle("test-app");
+    await runtime.bundles.loadBundle("com.example.test-app");
 
     render(
       <SynCloudOSProvider runtime={runtime}>
@@ -549,7 +584,7 @@ describe("ApplicationStageView app menu", () => {
         <ApplicationStageView
           app={createAppInfo()}
           lifecycle="active"
-          stage={{ appId: "test-app", id: "application-stage:test-app", title: "Test App", isFocused: true, zIndex: 10 }}
+          stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
         />
         </HostSiteBrandingProvider>
       </SynCloudOSProvider>,
@@ -597,13 +632,13 @@ describe("ApplicationStageView app menu", () => {
     };
     let current: ScopedFacade | null = null;
     runtime.apps.registerBundle(createTestBundle(
-      { id: "test-app", route: "/test" },
+      { bundleIdentifier: "com.example.test-app", route: "/test" },
       { loadModule: async () => ({ default: () => {
-        current = useSynWare() as unknown as ScopedFacade;
+        current = useSCOS() as unknown as ScopedFacade;
         return <p>Mounted generation</p>;
       } }) },
     ));
-    await runtime.bundles.loadBundle("test-app");
+    await runtime.bundles.loadBundle("com.example.test-app");
     const frame = (stageId: string) => (
       <React.StrictMode>
         <SynCloudOSProvider runtime={runtime}>
@@ -612,7 +647,7 @@ describe("ApplicationStageView app menu", () => {
             key={stageId}
             app={createAppInfo()}
             lifecycle="active"
-            stage={{ appId: "test-app", id: stageId, title: "Test App", isFocused: true, zIndex: 10 }}
+            stage={{ appId: "com.example.test-app", id: stageId, title: "Test App", isFocused: true, zIndex: 10 }}
           />
           </HostSiteBrandingProvider>
         </SynCloudOSProvider>
@@ -628,7 +663,7 @@ describe("ApplicationStageView app menu", () => {
     const fresh = current;
     if (!fresh || fresh === stale) throw new Error("The replacement mounted facade was not captured.");
     expect(() => stale.drag.endpoint()).toThrow(/Runtime transfer authority is no longer live/);
-    expect(fresh.drag.endpoint()).toEqual(expect.objectContaining({ appId: "test-app" }));
+    expect(fresh.drag.endpoint()).toEqual(expect.objectContaining({ appId: "com.example.test-app" }));
 
     view.unmount();
     expect(() => fresh.drag.endpoint()).toThrow(/Runtime transfer authority is no longer live/);
@@ -651,27 +686,27 @@ describe("ApplicationStageView app menu", () => {
     };
     let captured: ScopedFacade | null = null;
     runtime.apps.registerBundle(createTestBundle(
-      { id: "test-app", route: "/test" },
+      { bundleIdentifier: "com.example.test-app", route: "/test" },
       {
         loadModule: async () => ({
           default: () => {
-            const app = useSynWare();
+            const app = useSCOS();
             captured = app as unknown as ScopedFacade;
-            const locale = useSynWareLocalisedStrings("test-app", app.locale);
+            const locale = useStrings();
             const mode = app.appearance.resolved();
             return <p>{locale.t("title", "Mounted title")} {mode}</p>;
           },
         }),
       },
     ));
-    await runtime.bundles.loadBundle("test-app");
+    await runtime.bundles.loadBundle("com.example.test-app");
     const view = render(
       <SynCloudOSProvider runtime={runtime}>
         <HostSiteBrandingProvider value={stageSiteBranding}>
         <ApplicationStageView
           app={createAppInfo()}
           lifecycle="active"
-          stage={{ appId: "test-app", id: "application-stage:test-app", title: "Test App", isFocused: true, zIndex: 10 }}
+          stage={{ appId: "com.example.test-app", id: "application-stage:com.example.test-app", title: "Test App", isFocused: true, zIndex: 10 }}
         />
         </HostSiteBrandingProvider>
       </SynCloudOSProvider>,
@@ -686,19 +721,20 @@ describe("ApplicationStageView app menu", () => {
 
   it("keeps cached presentation reads available to an outgoing render after its mount capability is revoked", () => {
     const runtime = authoriseTestRuntime(createTestRuntime());
-    runtime.apps.registerBundle(createTestBundle({ id: "test-app", route: "/test" }));
-    const mount = mountTestSynWareRuntime(runtime, "test-app");
+    runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: "com.example.test-app", route: "/test" }));
+    const mount = mountTestSynWareRuntime(runtime, "com.example.test-app");
+    const context = createSynWareContextValue(mount.runtime);
 
     function OutgoingPresentation() {
       const [revision, setRevision] = React.useState(0);
-      const locale = useSynWareLocalisedStrings("test-app", mount.runtime.locale);
+      const locale = useStrings();
       const mode = useScopedResolvedMode(mount.runtime);
       return <button type="button" onClick={() => setRevision((value) => value + 1)}>
         {locale.t("title", "Mounted title")} {mode} {revision}
       </button>;
     }
 
-    render(<OutgoingPresentation />);
+    render(<SynWareProvider value={context}><OutgoingPresentation /></SynWareProvider>);
     const refresh = screen.getByRole("button", { name: /Mounted title light 0/ });
     const snapshotAtRevocation = mount.runtime.state.getSnapshot();
     mount.dispose(new DOMException("Application stage entered its visual exit.", "AbortError"));
@@ -733,7 +769,7 @@ describe("ApplicationStageView app menu", () => {
     const about = await screen.findByRole("menuitem", { name: "About Test App" });
     await waitFor(() => expect(about.getAttribute("aria-disabled")).not.toBe("true"));
     fireEvent.click(about);
-    await waitFor(() => expect(runtime.systemUI.getSnapshot().aboutAppId).toBe("test-app"));
+    await waitFor(() => expect(runtime.systemUI.getSnapshot().aboutAppId).toBe("com.example.test-app"));
 
     fireEvent.click(screen.getByRole("button", { name: "User Info" }));
     const preferences = await screen.findByRole("menuitem", { name: /Preferences/ });

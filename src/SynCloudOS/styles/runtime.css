@@ -1,3 +1,4 @@
+@layer nse.atmo {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -37,13 +38,22 @@ body,
   min-width: 320px;
   min-height: 100%;
   margin: 0;
+}
+
+html {
   overflow-x: hidden;
 }
 
-button,
-input,
-textarea {
-  font: inherit;
+/* Flow wrappers must not become nested one-pixel scroll views when content
+   rounds to a fractional CSS height. The document owns vertical scrolling;
+   clipping horizontal ink does not create another scroll container. */
+body,
+#root {
+  overflow-x: clip;
+}
+
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
+button, input, textarea { font: inherit; }
 }
 
 button {
@@ -51,9 +61,7 @@ button {
 }
 
 @media (max-width: 880px) {
-  html,
-  body,
-  #root {
+  html {
     overflow: auto;
   }
 }
@@ -93,4 +101,32 @@ button {
   .syncloudos-login-gate {
     padding-top: 4px;
   }
+}
+
+/* An application-only host after its primary application quits. */
+.syncloudos-application-quit {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 0;
+  padding: 24px;
+  text-align: center;
+}
+
+.syncloudos-application-quit-icon {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+}
+
+.syncloudos-application-quit-name {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
 }

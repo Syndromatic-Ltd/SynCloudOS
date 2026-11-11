@@ -1,0 +1,32 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/phase5-bluetooth.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/phase5-bluetooth.test.ts (5 tests | 1 failed) 10ms
+     × checks declarations and policy again for retained peripheral and characteristic handles 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/phase5-bluetooth.test.ts > BluetoothFX browser and mounted ownership > checks declarations and policy again for retained peripheral and characteristic handles
+SecurityError: The bluetooth.access capability is required.
+ ❯ guard src/SynCloudOS/AppSDK/mountedBluetoothClient.ts:29:13
+     27|     mountSignal.throwIfAborted();
+     28|     if (!permissions().includes("bluetooth.access") || !authorise("blu…
+     29|       throw new DOMException("The bluetooth.access capability is requi…
+       |             ^
+     30|   };
+     31|   const unavailable = Object.freeze({ apiAvailable: false, retrievesGr…
+ ❯ check src/SynCloudOS/AppSDK/mountedBluetoothClient.ts:45:55
+ ❯ call src/SynCloudOS/AppSDK/mountedBluetoothClient.ts:46:78
+ ❯ Object.setNotifyValue src/SynCloudOS/AppSDK/mountedBluetoothClient.ts:50:50
+ ❯ tests/runtime/fx/phase5-bluetooth.test.ts:77:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  19:32:13
+   Duration  305ms (transform 125ms, setup 28ms, import 136ms, tests 10ms, environment 0ms)
+

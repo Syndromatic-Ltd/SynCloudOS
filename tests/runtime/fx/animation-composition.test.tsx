@@ -31,6 +31,7 @@ import {
   type AFXFrameScheduler,
 } from "../../../src/FX/AnimationFX/public";
 import { BrowserAnimationLayerSurface } from "../../../src/SynCloudOS/PlatformAdapters/BrowserAnimationAdapter";
+import { createAFXLayer } from "../../../src/FX/AnimationFX/host";
 import { layerContentSVG } from "../../../src/SynCloudOS/PlatformAdapters/BrowserAnimationLayerContent";
 import { GFXColour } from "../../../src/FX/GraphicsFX/GFXColour";
 import { GFXGradient } from "../../../src/FX/GraphicsFX/GFXGradient";
@@ -60,13 +61,13 @@ function clock() {
 }
 
 function boundLayer<T extends AFXLayer>(
-  Type: new (surface: BrowserAnimationLayerSurface, scheduler: AFXFrameScheduler) => T,
+  Type: new () => T,
   scheduler: AFXFrameScheduler,
   width: number,
   height: number,
 ) {
   const element = document.createElement("div");
-  const value = new Type(new BrowserAnimationLayerSurface(element), scheduler);
+  const value = createAFXLayer(Type, new BrowserAnimationLayerSurface(element), scheduler);
   value.frame = { x: 0, y: 0, width, height };
   return { element, value };
 }
@@ -143,7 +144,7 @@ describe("AnimationFX layer composition depth", () => {
   it("applies explicit autoresizing policy to child geometry without direction-sensitive behavior", () => {
     const c = clock();
     const parent = boundLayer(AFXLayer, c.scheduler, 100, 80).value;
-    const child = boundLayer(AFXLayer, c.scheduler, 40, 20).value;
+    const child = new AFXLayer();
     child.frame = { x: 10, y: 15, width: 40, height: 20 };
     child.autoresizingMask = ["width", "max-y-margin"];
     parent.addSublayer(child);

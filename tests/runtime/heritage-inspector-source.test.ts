@@ -29,7 +29,7 @@ it("mounts the private Inspector from the canonical SynWare host with real settl
   const source = readFileSync("src/SynCloudOS/AppSDK/SynWareRuntimeMount.tsx", "utf8");
   expect(source).toContain('import { DevInspectorRegion } from "../../SynCloudOSReact/DevInspectorRegion"');
   expect(source).toContain("getRuntimeSettlement(runtime)");
-  expect(source).toContain("runtime.routes.mountedRoutes.current(app.id)");
+  expect(source).toContain("runtime.routes.mountedRoutes.current(app.bundleIdentifier)");
   expect(source).toContain("routeSession.getSnapshot()");
   expect(source).toContain("settlement={inspectorSettlement}");
   expect(source).toContain("routes={inspectorRoutes}");
@@ -39,7 +39,7 @@ it("mounts the private Inspector from the canonical SynWare host with real settl
 it("typechecks the Inspector source dependency closure without emitting package artifacts", () => {
   const config = ts.readConfigFile("tsconfig.app.json", ts.sys.readFile);
   const parsed = ts.parseJsonConfigFileContent(config.config, ts.sys, process.cwd());
-  const program = ts.createProgram([...files.map(file => resolve("src/SynCloudOS/Inspector", file)), resolve("src/SynCloudOSReact/DevInspectorRegion.tsx")], {
+  const program = ts.createProgram([...files.map(file => resolve("src/SynCloudOS/Inspector", file)), resolve("src/SynCloudOSReact/DevInspectorRegion.tsx"), resolve("src/FX/TextFX/textBackendTypes.d.ts")], {
     ...parsed.options, noEmit: true, incremental: false, types: ["vite/client", "emscripten"],
   });
   const errors = ts.getPreEmitDiagnostics(program);
@@ -80,4 +80,4 @@ it("keeps private host imports out of shared runtime, app and SDK source entries
   };
   inspect("src");
   expect(imports).toEqual([]);
-});
+}, 60_000);

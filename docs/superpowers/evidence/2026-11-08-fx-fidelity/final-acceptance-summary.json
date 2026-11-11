@@ -1,0 +1,100 @@
+{
+  "frameworkImplementation": "5286513ee77b3e384c1b8347c3546d0d605b977e",
+  "siteCommit": "c74d8c24167357a09118a8c16b6254983bb47a10",
+  "archiveSha256": "eb4fe13bac3036d077e0b8558b7e7f2ccbf2545c6e4993f1ddedea2750170d9e",
+  "sourceSha256": "a99970151f276d4bdd65e9fd2450aac9b1e3b82520f09a497b01eb998a9959f0",
+  "resourceCount": 2630,
+  "fullFramework": {
+    "files": 991,
+    "passingFiles": 988,
+    "failedFiles": 3,
+    "tests": 8213,
+    "passed": 8205,
+    "failed": 8,
+    "originalFailedRunPreserved": true,
+    "affectedChecksSubsequentlyPassed": true
+  },
+  "finalSite": {
+    "typecheckExit": 0,
+    "vitest": {
+      "files": 62,
+      "passed": 413,
+      "failed": 0,
+      "seconds": 35.95
+    },
+    "node": {
+      "passed": 24,
+      "failed": 0
+    }
+  },
+  "finalFrameworkDelta": {
+    "focused": 75,
+    "installedChromiumHMR": 1,
+    "packedGates": 3,
+    "architectureFiles": 1795,
+    "architectureEdges": 8169,
+    "typecheckExit": 0
+  },
+  "browser": {
+    "viewports": 4,
+    "primaryScreenshots": 4,
+    "totalScreenshots": 10,
+    "recordedActions": 14,
+    "pageErrors": 0,
+    "consoleErrors": 0,
+    "gpuWarnings": 4,
+    "failedRequests": 0,
+    "optimisedSDKRequests": 0
+  },
+  "temporaryCheckoutRemoved": true,
+  "originalVitestPresent": true,
+  "protectedConfigUnchanged": true,
+  "logs": [
+    {
+      "file": "framework-final-full.json",
+      "bytes": 3082131,
+      "sha256": "dda8690b3384f7576c0b5d3ae3bc6d394d1e6656773acba7bb9495a045f2a403"
+    },
+    {
+      "file": "framework-final-full.log",
+      "bytes": 128858,
+      "sha256": "047e0867d0f14b0ab66205427e943a71a74aaa64dd8eb51d32b84cb0f254be30"
+    },
+    {
+      "file": "final-fix-covering.log",
+      "bytes": 308,
+      "sha256": "4d7b830442e5e0ec73701136467429e04429edbcd99137f9902aa9c2c96f55ca"
+    },
+    {
+      "file": "gallery-clearance-typecheck.log",
+      "bytes": 70,
+      "sha256": "4b5ff009eb18b610a38d6735ff4fbeaba7fb50dcd2764abb3a48780ff0e06552"
+    },
+    {
+      "file": "gallery-clearance-full.log",
+      "bytes": 2198,
+      "sha256": "980157c9548cd4b749b7ef1e05e6aac5e32c9074b4e5bfaa3795b52ea20c0f10"
+    },
+    {
+      "file": "gallery-clearance-node.log",
+      "bytes": 2361,
+      "sha256": "4e50c231ff4d7f8f81d44df5fe5e396e9d163b95260046181366402bae30fee0"
+    },
+    {
+      "file": "dev-sdk-peers-packed.log",
+      "bytes": 295,
+      "sha256": "8e16e4ef6bfd099bcc7472a223d05f2be4b06e2f24194cf95697152e1484d0a4"
+    },
+    {
+      "file": "dev-sdk-peers-dev-green.log",
+      "bytes": 294,
+      "sha256": "e70a6405fe6d4d975248a086260af177ae497017978f0b7bf1fdbf6af30d0569"
+    },
+    {
+      "file": "dev-sdk-peers-focused.log",
+      "bytes": 300,
+      "sha256": "87580a3cc0e825f1b8ab43a3289190c0185b7a49459859893cbdee1119e51b65"
+    }
+  ],
+  "localRawLogsPreservedByteForByte": true
+}

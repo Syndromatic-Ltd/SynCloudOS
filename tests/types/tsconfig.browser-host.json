@@ -1,0 +1,5 @@
+{
+  "extends": "../../tsconfig.app.json",
+  "compilerOptions": { "noEmit": true, "strict": true },
+  "include": ["browser-host-options.test-d.ts", "../../src/vite-env.d.ts"]
+}

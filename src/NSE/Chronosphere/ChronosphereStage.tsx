@@ -45,7 +45,8 @@ import { useChronosphereTravel } from "./useChronosphereTravel";
 import { projectChronosphereDepth, significantChronosphereIndex } from "./chronosphereTravel";
 import { ChronosphereTimeline } from "./ChronosphereTimeline";
 import { ChronosphereReflection } from "./ChronosphereReflection";
-import { ChronosphereArrow } from "./ChronosphereArrow";
+import { NSEButton } from "../Controls/Buttons/NSEButton";
+import { NSEImage } from "../Controls/Images/NSEImageResource";
 import type { VortexImages } from "./Vortex/loadVortexImages";
 import { defaultChronosphereLabels, type ChronosphereDetailRenderer, type ChronosphereFaceContext, type ChronosphereFaceRenderer, type ChronosphereLabels } from "./chronosphereViewTypes";
 import "./chronosphere.css";
@@ -138,13 +139,14 @@ export interface ChronosphereTravelImpulse {
   durationMs?: number;
 }
 
-export interface ChronospherePushButtonProps extends PropsWithChildren<{
-  tone?: "dark";
-  disabled?: boolean;
+export interface ChronospherePushButtonProps {
+  title?: ReactNode;
+  appearance?: "darkAqua";
+  isEnabled?: boolean;
   className?: string;
   onClick?: (event: ReactMouseEvent<HTMLButtonElement>) => void;
   "aria-label"?: string;
-}> {}
+}
 
 /**
  * The archive view needs only timing and reduced-motion capabilities. Keeping
@@ -596,16 +598,14 @@ export function ChronosphereStage<TDetail = unknown>({
         style={{ opacity: stage === "open" ? 1 : 0, ...(twoPane && geometry ? {
           left: `max(${geometry.stackX + geometry.width / 2 + 12}px, calc(100% - clamp(110px, 12vw, 240px) - 122px))`, right: "auto",
         } : {}) }} role="group" aria-label={labels.timeline}>
-        <button type="button" className="chronosphere-time-arrow chronosphere-time-arrow-past" aria-label="Previous significant change"
-          title="Previous significant change" disabled={travel.target >= browsed.length - 1}
-          onClick={() => goTo(significantChronosphereIndex(browsed, travel.target, 1))}>
-          <ChronosphereArrow direction="past" />
-        </button>
-        <button type="button" className="chronosphere-time-arrow chronosphere-time-arrow-present" aria-label="Next significant change"
-          title="Next significant change" disabled={travel.target <= 0}
-          onClick={() => goTo(significantChronosphereIndex(browsed, travel.target, -1))}>
-          <ChronosphereArrow direction="present" />
-        </button>
+        <NSEButton bezelStyle="texturedRounded" className="chronosphere-time-arrow chronosphere-time-arrow-past"
+          title="Previous significant change" image={NSEImage.named(NSEImage.goBackTemplateName)} imagePosition="imageOnly"
+          isEnabled={travel.target < browsed.length - 1}
+          onClick={() => goTo(significantChronosphereIndex(browsed, travel.target, 1))} />
+        <NSEButton bezelStyle="texturedRounded" className="chronosphere-time-arrow chronosphere-time-arrow-present"
+          title="Next significant change" image={NSEImage.named(NSEImage.goForwardTemplateName)} imagePosition="imageOnly"
+          isEnabled={travel.target > 0}
+          onClick={() => goTo(significantChronosphereIndex(browsed, travel.target, -1))} />
       </div>
       <div className="chronosphere-controls chronosphere-floor" inert={stage !== "open"} style={{ opacity: stage === "open" ? 1 : 0 }} role="group" aria-label={labels.controls}>
         <div className="chronosphere-floor-glass" aria-hidden="true">
@@ -613,20 +613,20 @@ export function ChronosphereStage<TDetail = unknown>({
             active={stage === "open"} settledKey={reflectionReady && !travel.travelling ? `${activeEntry?.id}:${viewport?.width}:${viewport?.height}` : null}
             style={{ position: "absolute", inset: 0, height: "100%" }} />
         </div>
-        <PushButtonComponent tone="dark" className="chronosphere-floor-action chronosphere-floor-exit" onClick={requestExit}>{twoPane ? labels.done : labels.exit}</PushButtonComponent>
+        <PushButtonComponent appearance="darkAqua" title={twoPane ? labels.done : labels.exit} className="chronosphere-floor-action chronosphere-floor-exit" onClick={requestExit} />
         <button className="chronosphere-floor-date" type="button" onClick={() => goTo(0)} aria-label={labels.jumpToPresent}>
           <strong>{activeEntry?.dateLabel ?? labels.now}</strong>
           <span>{travel.travelling ? `${shownIndex + 1} / ${browsed.length}` : activeEntry?.displayLabel ?? activeEntry?.title ?? ""}</span>
         </button>
-        {onRestore ? <PushButtonComponent tone="dark" className="chronosphere-floor-action chronosphere-floor-restore"
-          disabled={!activeEntry || activeEntry.isCurrent || travel.travelling}
+        {onRestore ? <PushButtonComponent appearance="darkAqua" title={labels.restore} className="chronosphere-floor-action chronosphere-floor-restore"
+          isEnabled={!(!activeEntry || activeEntry.isCurrent || travel.travelling)}
           onClick={() => {
             if (!activeEntry || activeEntry.isCurrent || travel.travelling || stage !== "open") return;
             onRestore(activeEntry);
             setRestoredId(activeEntry.id);
             requestExit();
-          }}>{labels.restore}</PushButtonComponent>
-          : <PushButtonComponent tone="dark" className="chronosphere-floor-action chronosphere-floor-restore" onClick={() => setDetailOpen(open => !open)}>{labels.details}</PushButtonComponent>}
+          }} />
+          : <PushButtonComponent appearance="darkAqua" title={labels.details} className="chronosphere-floor-action chronosphere-floor-restore" onClick={() => setDetailOpen(open => !open)} />}
       </div>
 
       {/* The complete launching foreground recedes down and into the galaxy,

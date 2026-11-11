@@ -29,7 +29,7 @@ describe("SynCal reminder notification actions", () => {
 
     const notification = SynCloudOS.NotificationCenter.post({
       kind: "app",
-      appId: "syncal",
+      appId: "com.example.syncal",
       title: "Calendar alarm",
       message: "Product review starts soon.",
       actions: [

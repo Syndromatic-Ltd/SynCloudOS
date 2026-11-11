@@ -1,0 +1,107 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/theme-loading.test.tsx tests/runtime/theme-bundle-loading.test.ts tests/runtime/theme-navigation.test.tsx tests/runtime/nse-theme-contract-drift.test.tsx tests/runtime/nse-menu*.test* tests/runtime/nse-popup*.test* tests/runtime/nse-tooltip*.test* tests/runtime/nse-appearance*.test*
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: Window's getComputedStyle() method: with pseudo-elements
+Not implemented: Window's getComputedStyle() method: with pseudo-elements
+ ❯ tests/runtime/nse-theme-contract-drift.test.tsx (691 tests) 5694ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-theme-contract-drift.test.tsx [ tests/runtime/nse-theme-contract-drift.test.tsx ]
+AssertionError: Rendered hooks differ from the published contract; review the API change before regenerating.: expected { themeContractVersion: 1, …(7) } to deeply equal { themeContractVersion: 1, …(7) }
+
+- Expected
++ Received
+
+@@ -520,13 +520,10 @@
+          "surface",
+          "viewport",
+        ],
+        "states": [],
+        "variants": {
+-         "chrome": [
+-           "standard",
+-         ],
+          "role": [
+            "overlay",
+          ],
+        },
+      },
+@@ -684,13 +681,10 @@
+          "popover-outline",
+          "surface",
+        ],
+        "states": [],
+        "variants": {
+-         "chrome": [
+-           "standard",
+-         ],
+          "role": [
+            "overlay",
+          ],
+        },
+      },
+@@ -792,13 +786,10 @@
+          "surface",
+          "title",
+        ],
+        "states": [],
+        "variants": {
+-         "chrome": [
+-           "standard",
+-         ],
+          "role": [
+            "overlay",
+          ],
+        },
+      },
+@@ -903,13 +894,10 @@
+          "surface",
+          "title",
+        ],
+        "states": [],
+        "variants": {
+-         "chrome": [
+-           "standard",
+-         ],
+          "role": [
+            "overlay",
+          ],
+        },
+      },
+@@ -1201,13 +1189,10 @@
+          "surface",
+          "title",
+        ],
+        "states": [],
+        "variants": {
+-         "chrome": [
+-           "standard",
+-         ],
+          "role": [
+            "overlay",
+          ],
+        },
+      },
+
+ ❯ tests/runtime/nse-theme-contract-drift.test.tsx:84:117
+     82|   if (process.env.THEME_CONTRACT_WRITE === "1" && !renderingFailed) { …
+     83|   expect(existsSync(path), "Generate the rendered contract with node s…
+     84|   expect(contract, "Rendered hooks differ from the published contract;…
+       |                                                                                                                     ^
+     85| });
+     86|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  706 passed (706)
+   Start at  23:54:40
+   Duration  16.86s (transform 10.33s, setup 69ms, import 16.05s, tests 6.57s, environment 4.16s)

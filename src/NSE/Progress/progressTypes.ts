@@ -18,18 +18,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export type NSEProgressState =
-  | { readonly kind: "determinate"; readonly value: number; readonly minimum: number; readonly maximum: number }
-  | { readonly kind: "indeterminate" }
-  | { readonly kind: "suspended"; readonly value?: number }
-  | { readonly kind: "completed" }
-  | { readonly kind: "error"; readonly message: string }
-  | { readonly kind: "hidden" };
-
+/** NSProgressIndicator: a bar, or a spinning indicator. */
 export interface NSEProgressIndicatorProps {
   readonly "aria-label": string;
-  readonly state: NSEProgressState;
-  readonly variant?: "bar" | "circular" | "spinner";
-  readonly size?: 16 | 32 | 64;
-  readonly reducedMotion?: boolean;
+  /** NSProgressIndicator.Style: a horizontal bar or a spinning indicator. Default bar. */
+  readonly style?: "bar" | "spinning";
+  /** NSProgressIndicator.isIndeterminate. Default: indeterminate when there is no value. */
+  readonly isIndeterminate?: boolean;
+  /** NSProgressIndicator.doubleValue, between `minimum` and `maximum`. */
+  readonly value?: number;
+  /** NSProgressIndicator.minValue. Default 0. */
+  readonly minimum?: number;
+  /** NSProgressIndicator.maxValue. Default 100. */
+  readonly maximum?: number;
+  /** NSControl.ControlSize. A spinning indicator is 16 (small), 32 (regular) or 64 (large) pixels across. Default regular. */
+  readonly controlSize?: "small" | "regular" | "large";
 }

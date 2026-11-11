@@ -1,0 +1,21 @@
+{
+  "recordedAt": "2026-11-07T11:14:45.7791985Z",
+  "removedScratch391": true,
+  "removedScratch772": true,
+  "originalVitestExists": true,
+  "order": "Verified named scratch and Junction; deleted junction itself; checked original Vitest; removed detached checkout",
+  "listeners": [
+    {
+      "LocalPort": 5387,
+      "OwningProcess": 69072
+    },
+    {
+      "LocalPort": 5199,
+      "OwningProcess": 83408
+    },
+    {
+      "LocalPort": 5173,
+      "OwningProcess": 72912
+    }
+  ]
+}

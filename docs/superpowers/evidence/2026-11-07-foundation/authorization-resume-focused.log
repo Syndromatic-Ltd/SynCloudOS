@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/authentication-services.test.ts tests/runtime/authentication-services-provider.test.ts tests/runtime/configuration-profiles-hardening.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  3 passed (3)
+      Tests  41 passed (41)
+   Start at  20:24:49
+   Duration  668ms (transform 147ms, setup 43ms, import 166ms, tests 46ms, environment 0ms)

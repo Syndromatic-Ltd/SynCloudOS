@@ -29,9 +29,9 @@ describe("existing ErrorManager recovery classifications", () => {
   it("keeps app deadlines on the app's identity and offers a real retry", () => {
     const host = runtime();
     const retry = vi.fn();
-    const app = { id: "notes", displayName: "Notes", packageName: "Notes.app" };
+    const app = { bundleIdentifier: "com.example.notes", displayName: "Notes", packageName: "Notes.app" };
     const error = host.errors.createNotRespondingError(app, { reason: "request-timeout", durationMs: 15000 }, retry);
-    expect(error).toMatchObject({ code: "APP_NOT_RESPONDING", title: "Notes has stopped responding.", appId: "notes", category: "app", recoverable: true, retry });
+    expect(error).toMatchObject({ code: "APP_NOT_RESPONDING", title: "Notes has stopped responding.", appId: "com.example.notes", category: "app", recoverable: true, retry });
     expect(error.context).toMatchObject({ scope: "app", reason: "request-timeout", durationMs: 15000 });
     error.retry?.();
     expect(retry).toHaveBeenCalledOnce();
@@ -56,7 +56,7 @@ describe("existing ErrorManager recovery classifications", () => {
 
   it("classifies an existing app launch timeout but leaves ordinary failures and cancellation alone", () => {
     const host = runtime();
-    const app = { id: "notes", displayName: "Notes", packageName: "Notes.app" };
+    const app = { bundleIdentifier: "com.example.notes", displayName: "Notes", packageName: "Notes.app" };
     expect(host.errors.createAppLaunchFailedError(app, new DOMException("Route preparation timed out.", "TimeoutError")).code).toBe("APP_NOT_RESPONDING");
     expect(host.errors.createAppLaunchFailedError(app, new Error("Invalid module")).code).toBe("APP_LAUNCH_FAILED");
     expect(host.errors.createAppLaunchFailedError(app, new DOMException("Cancelled", "AbortError")).code).toBe("APP_LAUNCH_FAILED");

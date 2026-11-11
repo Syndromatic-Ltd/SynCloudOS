@@ -26,7 +26,7 @@ import { pathToFileURL } from "node:url";
 export const retiredFxSymbols = Object.freeze([
   "NSEBezierPath", "NSEGraphicsContext", "NSEGradient", "NSEColour",
   "NSEAnimation", "NSEAnimationContext", "NSEViewAnimation",
-  "NSEHaptics", "AppSoundClient", "AppSoundHandle", "useSynWareSound",
+  "NSEHaptics", "AppSoundClient", "AppSoundHandle", "useSound",
   "NSEImageResource", "AppImageResource", "NSETextContainer", "NSETypesetter",
 ]);
 const retired = new Set(retiredFxSymbols);

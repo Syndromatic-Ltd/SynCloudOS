@@ -1,0 +1,127 @@
+/* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
+/* Atmo owns NSWindow.ToolbarStyle appearance. The expanded geometry follows Main/Phone.dc.html. */
+:scope { --nse-atmo-window-titlebar-radius: 14px; }
+:scope [data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="expanded"],
+:scope:is([data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="expanded"]),
+:scope[data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="expanded"] {
+  padding: 2px 28px 18px;
+  background: linear-gradient(#e6e8eb, #c9ccd1);
+  border-bottom: 1px solid #9ea2a9;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 18%);
+  color: #2b3546;
+  text-shadow: 0 1px 0 rgb(255 255 255 / 70%);
+}
+:scope [data-nse-part="title"]:where([data-nse-control="window"] *):where(:not([data-nse-control="window"] [data-nse-control] *)):where(:not([data-nse-part="header"]>*)):where(:not([data-nse-part="content"]>*)):where(:not([data-nse-part="document"] *)):where(:not([data-nse-part="leading"]>*)),
+:scope:is([data-nse-part="title"]:where([data-nse-control="window"] *):where(:not([data-nse-control="window"] [data-nse-control] *)):where(:not([data-nse-part="header"]>*)):where(:not([data-nse-part="content"]>*)):where(:not([data-nse-part="document"] *)):where(:not([data-nse-part="leading"]>*))),
+:scope[data-nse-part="title"]:where([data-nse-control="window"] *):where(:not([data-nse-control="window"] [data-nse-control] *)):where(:not([data-nse-part="header"]>*)):where(:not([data-nse-part="content"]>*)):where(:not([data-nse-part="document"] *)):where(:not([data-nse-part="leading"]>*)) { margin: 0; }
+:scope [data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="preference"],
+:scope:is([data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="preference"]),
+:scope[data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="preference"],
+:scope [data-nse-part="header"]:where([data-nse-control="window"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-chrome="hud"] *))[data-nse-toolbar-style="preference"],
+:scope:is([data-nse-part="header"]:where([data-nse-control="window"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-chrome="hud"] *))[data-nse-toolbar-style="preference"]),
+:scope[data-nse-part="header"]:where([data-nse-control="window"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-chrome="hud"] *))[data-nse-toolbar-style="preference"] {
+  min-height: 66px; padding: 8px; gap: 10px;
+  border: 0; border-radius: 14px 14px 0 0;
+  color: var(--nse-prefs-header-title-colour, #f7f8f9);
+  text-shadow: var(--nse-prefs-header-title-shadow, 0 -1px 0 rgb(0 0 0 / 55%));
+}
+:scope [data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="preference"] [data-nse-part="leading"]:where([data-nse-control="window"] *):where([data-nse-control="window"]>*),
+:scope:is([data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="preference"]) [data-nse-part="leading"]:where([data-nse-control="window"] *):where([data-nse-control="window"]>*),
+:scope[data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="preference"] [data-nse-part="leading"]:where([data-nse-control="window"] *):where([data-nse-control="window"]>*) { min-height: 50px; }
+:scope [data-nse-toolbar-style="expanded"]>[data-nse-part="title"]:where([data-nse-control="window"] *):where([data-nse-part="header"]>*):where(:not([data-nse-chrome="hud"] *)):where([data-nse-part="bezel"] *),
+:scope:is([data-nse-toolbar-style="expanded"])>[data-nse-part="title"]:where([data-nse-control="window"] *):where([data-nse-part="header"]>*):where(:not([data-nse-chrome="hud"] *)):where([data-nse-part="bezel"] *),
+:scope[data-nse-toolbar-style="expanded"]>[data-nse-part="title"]:where([data-nse-control="window"] *):where([data-nse-part="header"]>*):where(:not([data-nse-chrome="hud"] *)):where([data-nse-part="bezel"] *) { width: 1px; height: 1px; clip-path: inset(50%); }
+:scope [data-nse-part="header"]:where([data-nse-control="window"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-chrome="hud"] *))[data-nse-toolbar-style="preference"],
+:scope:is([data-nse-part="header"]:where([data-nse-control="window"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-chrome="hud"] *))[data-nse-toolbar-style="preference"]),
+:scope[data-nse-part="header"]:where([data-nse-control="window"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-chrome="hud"] *))[data-nse-toolbar-style="preference"] { height: 66px; min-height: 66px; }
+:scope [data-nse-part="header"]:where([data-nse-control="window"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-chrome="hud"] *))[data-nse-toolbar-style="preference"] [data-nse-part="title"]:where([data-nse-control="window"] *):where([data-nse-part="header"]>*):where(:not([data-nse-chrome="hud"] *)):where([data-nse-part="bezel"] *),
+:scope:is([data-nse-part="header"]:where([data-nse-control="window"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-chrome="hud"] *))[data-nse-toolbar-style="preference"]) [data-nse-part="title"]:where([data-nse-control="window"] *):where([data-nse-part="header"]>*):where(:not([data-nse-chrome="hud"] *)):where([data-nse-part="bezel"] *),
+:scope[data-nse-part="header"]:where([data-nse-control="window"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-chrome="hud"] *))[data-nse-toolbar-style="preference"] [data-nse-part="title"]:where([data-nse-control="window"] *):where([data-nse-part="header"]>*):where(:not([data-nse-chrome="hud"] *)):where([data-nse-part="bezel"] *) { color: #f7f8f9; text-shadow: 0 -1px 0 rgb(0 0 0 / 55%); }
+:scope[data-nse-colour-scheme-resolved="dark"] [data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="expanded"],
+:scope[data-nse-colour-scheme-resolved="dark"]:is([data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="expanded"]),
+:scope [data-nse-colour-scheme-resolved="dark"] [data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="expanded"],
+:scope:is([data-nse-colour-scheme-resolved="dark"]) [data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="expanded"],
+:scope:is([data-nse-colour-scheme-resolved="dark"]):is([data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="expanded"]) {
+  background: linear-gradient(#434a55, #303741); border-bottom-color: #14181e; color: #edf1f6;
+  text-shadow: 0 -1px 0 rgb(0 0 0 / 55%);
+}
+@media (max-width: 767px) {
+  :scope [data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="expanded"],
+:scope:is([data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="expanded"]),
+:scope[data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="expanded"] { padding: 0 20px 14px; }
+}
+
+:scope [data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="preference"],
+:scope:is([data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="preference"]),
+:scope[data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="preference"],
+:scope [data-nse-part="header"]:where([data-nse-control="window"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-chrome="hud"] *))[data-nse-toolbar-style="preference"],
+:scope:is([data-nse-part="header"]:where([data-nse-control="window"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-chrome="hud"] *))[data-nse-toolbar-style="preference"]),
+:scope[data-nse-part="header"]:where([data-nse-control="window"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-chrome="hud"] *))[data-nse-toolbar-style="preference"] {
+
+  border-image: none;
+  border-radius: var(--nse-atmo-window-titlebar-radius) var(--nse-atmo-window-titlebar-radius) 0 0;
+  background: var(--nse-atmo-window-titlebar-surface,
+    linear-gradient(90deg, rgba(0, 0, 0, 0.066) 0.5px, rgba(0, 0, 0, 0.031) 3.5px, rgba(0, 0, 0, 0.015) 5.5px, rgba(0, 0, 0, 0) 9px)
+      left top / 9px calc(100% - 3px) no-repeat,
+    linear-gradient(270deg, rgba(0, 0, 0, 0.066) 0.5px, rgba(0, 0, 0, 0.031) 3.5px, rgba(0, 0, 0, 0.015) 5.5px, rgba(0, 0, 0, 0) 9px)
+      right top / 9px calc(100% - 3px) no-repeat,
+    linear-gradient(
+      #d8d8d8 0.5px,
+      #9c9b9b 1.5px,
+      #a8a7a7 5.5px,
+      #b8b7b7 10.5px,
+      #bebdbd 15.5px,
+      #c1c0c0 20.5px,
+      #c4c3c3 25.5px,
+      #c6c5c5 30.5px,
+      #c8c7c7 35px,
+      #c8c7c6 calc(100% - 10.5px),
+      #c5c4c4 calc(100% - 6.5px),
+      #c3c2c2 calc(100% - 4px),
+      #c6c5c5 calc(100% - 4px),
+      #c6c5c5 calc(100% - 3px),
+      #d8d8d7 calc(100% - 3px),
+      #d8d8d7 calc(100% - 2px),
+      #a9a9a9 calc(100% - 2px),
+      #a9a9a9 calc(100% - 1px),
+      #f2f2f1 calc(100% - 1px)
+    ));
+
+  background-origin: border-box;
+}
+
+
+:scope[data-nse-colour-scheme-resolved="dark"] [data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="preference"],
+:scope[data-nse-colour-scheme-resolved="dark"]:is([data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="preference"]),
+:scope [data-nse-colour-scheme-resolved="dark"] [data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="preference"],
+:scope:is([data-nse-colour-scheme-resolved="dark"]) [data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="preference"],
+:scope:is([data-nse-colour-scheme-resolved="dark"]):is([data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="preference"]) {
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.28) 0.5px, rgba(0, 0, 0, 0.14) 3.5px, rgba(0, 0, 0, 0.06) 5.5px, rgba(0, 0, 0, 0) 9px)
+      left top / 9px calc(100% - 3px) no-repeat,
+    linear-gradient(270deg, rgba(0, 0, 0, 0.28) 0.5px, rgba(0, 0, 0, 0.14) 3.5px, rgba(0, 0, 0, 0.06) 5.5px, rgba(0, 0, 0, 0) 9px)
+      right top / 9px calc(100% - 3px) no-repeat,
+    linear-gradient(
+      #6a727d 0.5px,
+      #363d47 1.5px,
+      #3c434d 5.5px,
+      #434a55 10.5px,
+      #464e59 15.5px,
+      #48505b 20.5px,
+      #4a525d 25.5px,
+      #4b535e 30.5px,
+      #4c545f 35px,
+      #414954 calc(100% - 10.5px),
+      #3b424c calc(100% - 6.5px),
+      #373e48 calc(100% - 4px),
+      #3a414b calc(100% - 4px),
+      #3a414b calc(100% - 3px),
+      #545c67 calc(100% - 3px),
+      #545c67 calc(100% - 2px),
+      #14181e calc(100% - 2px),
+      #14181e calc(100% - 1px),
+      #6d7681 calc(100% - 1px)
+    );
+  /* After the shorthand, which resets it — same trap as the light plate. */
+  background-origin: border-box;
+}

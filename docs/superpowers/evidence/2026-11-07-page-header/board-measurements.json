@@ -1,0 +1,44 @@
+{
+  "Main": {
+    "bounds": {
+      "x": 229,
+      "y": 54,
+      "width": 703,
+      "height": 40,
+      "top": 54,
+      "right": 932,
+      "bottom": 94,
+      "left": 229
+    },
+    "font": "600 30px \"Segoe UI\", \"Helvetica Neue\", Arial, sans-serif",
+    "colour": "rgb(43, 53, 70)"
+  },
+  "Phone": {
+    "bounds": {
+      "x": 20,
+      "y": 52,
+      "width": 350,
+      "height": 37,
+      "top": 52,
+      "right": 370,
+      "bottom": 89,
+      "left": 20
+    },
+    "font": "600 28px \"Segoe UI\", \"Helvetica Neue\", Arial, sans-serif",
+    "colour": "rgb(43, 53, 70)"
+  },
+  "Prefs": {
+    "bounds": {
+      "x": 112,
+      "y": 54.5,
+      "width": 296,
+      "height": 27,
+      "top": 54.5,
+      "right": 408,
+      "bottom": 81.5,
+      "left": 112
+    },
+    "font": "600 20px \"Segoe UI\", \"Helvetica Neue\", Arial, sans-serif",
+    "colour": "rgb(247, 248, 249)"
+  }
+}

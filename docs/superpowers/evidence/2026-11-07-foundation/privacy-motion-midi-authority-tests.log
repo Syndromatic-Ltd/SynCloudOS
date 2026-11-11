@@ -1,0 +1,41 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/privacy-motion-midi.test.ts tests/runtime/fx/motion-authority.test.ts tests/runtime/fx/motion-hook.test.tsx tests/runtime/fx/midi-mounted.test.ts tests/runtime/fx/midi-service.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/midi-mounted.test.ts (3 tests | 1 failed) 98ms
+   × routes app.midi through mounted manifest and ConfigurationProfiles authority before the deterministic host adapter 92ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/midi-mounted.test.ts > routes app.midi through mounted manifest and ConfigurationProfiles authority before the deterministic host adapter
+AssertionError: expected { apiAvailable: true, …(4) } to deeply equal { apiAvailable: true, …(4) }
+
+- Expected
++ Received
+
+  {
+    "apiAvailable": true,
+-   "authorization": "unknown",
++   "authorization": "policy-denied",
+    "connectedEndpointCount": 0,
+-   "sysexAuthorization": "unknown",
++   "sysexAuthorization": "policy-denied",
+    "transportProtocol": "midi1",
+  }
+
+ ❯ tests/runtime/fx/midi-mounted.test.ts:146:36
+    144|
+    145|   const access = host.appContext.midi.createAccess();
+    146|   expect(access.getCapabilities()).toEqual({
+       |                                    ^
+    147|     apiAvailable: true,
+    148|     transportProtocol: "midi1",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 28 passed (29)
+   Start at  20:25:05
+   Duration  10.18s (transform 5.63s, setup 58ms, import 7.53s, tests 201ms, environment 1.85s)

@@ -7,6 +7,7 @@
 "apps.loading" = "ஏற்றுகிறது {app}";
 "apps.loadingPackage" = "ஏற்றுகிறது {packageName}";
 "apps.missingComponent" = "{packageName}க்கான கூறுகளை SynCloudOS கண்டுபிடிக்க முடியவில்லை.";
+"apps.reopen" = "மீண்டும் திற";
 "apps.reorderable" = "{app}, மறுவரிசைப்படுத்தக்கூடியது";
 "notifications.actions" = "அறிவிப்பு நடவடிக்கைகள்";
 "notifications.centreTitle" = "அறிவிப்பு மையம்";
@@ -40,7 +41,6 @@
 "quickswitch.open" = "QuickSwitch ஐத் திறக்கவும்";
 "quickswitch.openedShortcut" = "{app}, திறக்கப்பட்டது, {shortcut} குறுக்குவழி";
 "quickswitch.visibleApps" = "Webspring பயன்பாடுகள் தெரியும்";
-"shelf.ariaLabel" = "Webspring செய்தி மற்றும் நிலை";
 "webspring.additionalApps.ariaLabel" = "கூடுதல் Webspring பயன்பாடுகள்";
 "webspring.apps.ariaLabel" = "Webspring பயன்பாடுகள்";
 "webspring.ariaLabel" = "SynCloudOS Webspring";

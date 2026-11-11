@@ -19,9 +19,10 @@
  */
 
 import type { CSSProperties } from "react";
-import type { SynCloudOSStagePoint } from "../SynCloudOS/SynCloudOS";
+import { WEBSPRING_STAGE, type SynCloudOSStagePoint } from "../SynCloudOS/SynCloudOS";
 
-interface DialAppLike { readonly selectorAngle: number; readonly dialPlacement?: { readonly labelPosition: SynCloudOSStagePoint } }
+// The stage geometry lives with layout reconciliation, which places entries on the dial.
+export { WEBSPRING_STAGE };
 
 export interface ApplicationStagePresentation {
   readonly id: string;
@@ -30,24 +31,6 @@ export interface ApplicationStagePresentation {
   readonly isFocused: boolean;
   readonly zIndex: number;
 }
-
-export const WEBSPRING_STAGE = {
-  width: 980,
-  height: 820,
-  shelfY: 399,
-  orbCenter: { x: 490, y: 423 },
-  orbSize: 304,
-  cutoutGap: 13,
-  // The supplied dial has transparent padding; its visible circle is not canvas-centred.
-  dialArtwork: { canvasSize: 557, diameter: 484, center: { x: 278, y: 253 } },
-  selectorRadius: -105,
-  iconSize: 140,
-  indicatorSize: 17,
-  activeIndicatorSize: 38,
-  iconRadius: 270,
-  indicatorRadius: 207,
-  labelRadius: 226
-} as const;
 
 const TARGET_DESKTOP = {
   width: 1536,
@@ -97,27 +80,5 @@ export function stagePointStyle(point: SynCloudOSStagePoint, size = 0): CSSPrope
     top: `${point.y}px`,
     width: size ? `${size}px` : undefined,
     height: size ? `${size}px` : undefined
-  };
-}
-
-export function getDialPoint(angle: number, radius: number): SynCloudOSStagePoint {
-  const radians = (angle * Math.PI) / 180;
-  return {
-    x: WEBSPRING_STAGE.orbCenter.x + Math.sin(radians) * radius,
-    y: WEBSPRING_STAGE.orbCenter.y - Math.cos(radians) * radius
-  };
-}
-
-export function getDialAngleForApp(app: DialAppLike) {
-  return app.selectorAngle;
-}
-
-export function getDialLayoutForApp(app: DialAppLike) {
-  const angle = getDialAngleForApp(app);
-  return {
-    angle,
-    iconPosition: getDialPoint(angle, WEBSPRING_STAGE.iconRadius),
-    indicatorPosition: getDialPoint(angle, WEBSPRING_STAGE.indicatorRadius),
-    labelPosition: app.dialPlacement?.labelPosition ?? getDialPoint(angle, WEBSPRING_STAGE.labelRadius)
   };
 }

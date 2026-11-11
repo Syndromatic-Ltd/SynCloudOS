@@ -21,6 +21,7 @@
 // @vitest-environment jsdom
 
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { withoutScopeTwins } from "../fixtures/atmoStylesheets";
 import React from "react";
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -28,7 +29,7 @@ import type { WindowPresentation, WindowRecord } from "../../src/SynCloudOS/Wind
 import { NSEStandardWindowView } from "../../src/NSE/Windows";
 import { standardWindow } from "../fixtures/windowTestDependencies";
 
-const windowCSS = readFileSync("src/NSE/Windows/nse-windows.css", "utf8");
+const windowCSS = withoutScopeTwins(readFileSync("src/NSE/Windows/nse-windows.css", "utf8"));
 afterEach(cleanup);
 
 function standardWindowViewProps(overrides: Partial<WindowRecord> = {}) {
@@ -100,7 +101,7 @@ describe("NSEStandardWindowView", () => {
     expect(dialog.getAttribute("data-window-presentation")).toBe("desktop-window");
     expect(dialog.getAttribute("data-window-level")).toBe("floating");
     expect(dialog.getAttribute("data-window-blocked")).toBe("true");
-    expect(dialog.getAttribute("data-window-appearance-recipe")).toBe("window.standard.frame");
+
     expect(dialog.getAttribute("aria-labelledby")).toBe("window-1-title");
     expect(dialog.hasAttribute("inert")).toBe(true);
     expect(dialog.style.left).toBe("0px");
@@ -116,10 +117,10 @@ describe("NSEStandardWindowView", () => {
 
     expect(close.getAttribute("data-window-control")).toBe("close");
     expect(close.getAttribute("data-window-control-state")).toBe("unsaved-inactive");
-    expect(close.getAttribute("data-window-appearance-recipe")).toBe("window.standard.close.unsaved-inactive");
+
     fireEvent.pointerEnter(close);
     expect(close.getAttribute("data-window-control-state")).toBe("unsaved-highlighted");
-    expect(close.getAttribute("data-window-appearance-recipe")).toBe("window.standard.close.unsaved-highlighted");
+
     fireEvent.pointerLeave(close);
     expect(close.getAttribute("data-window-control-state")).toBe("unsaved-inactive");
   });

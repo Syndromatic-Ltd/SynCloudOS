@@ -35,7 +35,7 @@ describe("GraphicsFX PDF recording and parsing", () => {
         writer.endPage();
         writer.beginPage({ width: 60, height: 90, rotation: 90 });
         writer.endPage();
-        const bytes = await writer.finish();
+        const bytes = (await writer.finish()).bytes;
         expect(new TextDecoder().decode(bytes.slice(0, 5))).toBe("%PDF-");
         const document = await GFXPDFDocument.open(bytes);
         expect(document.pageCount).toBe(2);
@@ -57,7 +57,7 @@ describe("GraphicsFX PDF recording and parsing", () => {
         expect(() => writer.endPage()).toThrow();
         writer.restore();
         writer.endPage();
-        const bytes = await writer.finish();
+        const bytes = (await writer.finish()).bytes;
         const backend = await PDFDocument.load(bytes);
         expect(backend.getPageCount()).toBe(1);
         await expect(writer.finish()).rejects.toThrow();
@@ -96,7 +96,7 @@ describe("GraphicsFX independent PDF rendering and stream boundaries", () => {
         writer.fill(GFXPath.rect({ x: 40, y: 10, width: 40, height: 20 }), new GFXGradient([{ offset: 0, colour: GFXColour.rgba(0, 0, 0) }, { offset: 1, colour: GFXColour.rgba(1, 1, 1) }]));
         writer.drawImage(new GFXImage({ width: 1, height: 1, alpha: "straight", colourSpace: "srgb", data: new Uint8Array([0, 255, 0, 255]) }), { x: 10, y: 40, width: 10, height: 10 });
         writer.endPage();
-        const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs"), task = getDocument({ data: await writer.finish(), useSystemFonts: false, disableFontFace: true });
+        const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs"), task = getDocument({ data: (await writer.finish()).bytes, useSystemFonts: false, disableFontFace: true });
         const pdf = await task.promise;
         try {
             const page = await pdf.getPage(1), canvas = createCanvas(100, 80), ctx = canvas.getContext("2d");
@@ -121,7 +121,7 @@ describe("GraphicsFX independent PDF rendering and stream boundaries", () => {
             expect(() => writer.drawGlyphOutlines([{ ...outlines[0]!, embedding: "unknown" }])).toThrow();
             writer.drawGlyphOutlines(outlines);
             writer.endPage();
-            const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs"), pdf = await getDocument({ data: await writer.finish(), useSystemFonts: false, disableFontFace: true }).promise;
+            const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs"), pdf = await getDocument({ data: (await writer.finish()).bytes, useSystemFonts: false, disableFontFace: true }).promise;
             try {
                 const page = await pdf.getPage(1), canvas = createCanvas(80, 35), ctx = canvas.getContext("2d");
                 await page.render({ canvas: canvas as never, canvasContext: ctx as never, viewport: page.getViewport({ scale: 1 }) }).promise;
@@ -158,7 +158,7 @@ describe("GraphicsFX PDF numeric projection details", () => {
         writer.setAlpha(.5);
         writer.fill(GFXPath.rect({ x: 0, y: 0, width: 20, height: 20 }), GFXColour.rgba(1, 0, 0));
         writer.endPage();
-        const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs"), task = getDocument({ data: await writer.finish(), disableFontFace: true }), pdf = await task.promise;
+        const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs"), task = getDocument({ data: (await writer.finish()).bytes, disableFontFace: true }), pdf = await task.promise;
         try {
             const page = await pdf.getPage(1), canvas = createCanvas(20, 20), ctx = canvas.getContext("2d");
             await page.render({ canvas: canvas as never, canvasContext: ctx as never, viewport: page.getViewport({ scale: 1 }) }).promise;
@@ -186,11 +186,11 @@ it("embeds a parsed source page with rotation into a new destination without ras
     sourceWriter.beginPage({ width: 20, height: 10, rotation: 90 });
     sourceWriter.fill(GFXPath.rect({ x: 0, y: 0, width: 10, height: 10 }), GFXColour.rgba(1, 0, 0));
     sourceWriter.endPage();
-    const source = await GFXPDFDocument.open(await sourceWriter.finish()), writer = new GFXPDFContext();
+    const source = await GFXPDFDocument.open((await sourceWriter.finish()).bytes), writer = new GFXPDFContext();
     writer.beginPage({ width: 10, height: 20 });
     writer.drawPDFPage(source, 0, { x: 0, y: 0, width: 10, height: 20 });
     writer.endPage();
-    const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs"), task = getDocument({ data: await writer.finish(), disableFontFace: true }), pdf = await task.promise;
+    const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs"), task = getDocument({ data: (await writer.finish()).bytes, disableFontFace: true }), pdf = await task.promise;
     try {
         const page = await pdf.getPage(1), canvas = createCanvas(10, 20), ctx = canvas.getContext("2d");
         await page.render({ canvas: canvas as never, canvasContext: ctx as never, viewport: page.getViewport({ scale: 1 }) }).promise;

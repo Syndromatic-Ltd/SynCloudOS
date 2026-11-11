@@ -1,0 +1,403 @@
+{
+  "framework": "41a47defaadd162b4804047ae34a25e638386008",
+  "origin": "http://127.0.0.1:5199",
+  "browser": "Chromium",
+  "serviceWorkers": "blocked in isolated QA context to load the installed development package",
+  "checks": [
+    {
+      "check": "local denial blocks mounted LocationFX despite emulated native grant",
+      "passed": true
+    },
+    {
+      "check": "Tab reaches the real NSESwitch; Space enables consent",
+      "passed": true
+    },
+    {
+      "check": "Ask again resets consent and disables redundant reset",
+      "passed": true
+    },
+    {
+      "check": "successful re-request grants consent; consent survives full page reload",
+      "passed": true
+    },
+    {
+      "check": "phone touch switch revokes consent; dark controls and text fit at 390x844 DPR2",
+      "passed": true
+    }
+  ],
+  "desktop": {
+    "viewport": {
+      "width": 1365,
+      "height": 900,
+      "dpr": 1
+    },
+    "dialog": {
+      "x": 482.5,
+      "y": 170,
+      "width": 400,
+      "height": 560,
+      "top": 170,
+      "right": 882.5,
+      "bottom": 730,
+      "left": 482.5
+    },
+    "controls": [
+      {
+        "name": "Back",
+        "bounds": {
+          "x": 490.5,
+          "y": 178,
+          "width": 50,
+          "height": 50,
+          "top": 178,
+          "right": 540.5,
+          "bottom": 228,
+          "left": 490.5
+        },
+        "colour": "rgb(255, 255, 255)",
+        "textTransform": "none"
+      },
+      {
+        "name": "Appearance",
+        "bounds": {
+          "x": 492.5,
+          "y": 246,
+          "width": 88.5,
+          "height": 20,
+          "top": 246,
+          "right": 581,
+          "bottom": 266,
+          "left": 492.5
+        },
+        "colour": "rgb(51, 51, 51)",
+        "textTransform": "none"
+      },
+      {
+        "name": "Audio & Haptics",
+        "bounds": {
+          "x": 492.5,
+          "y": 306,
+          "width": 117.5,
+          "height": 20,
+          "top": 306,
+          "right": 610,
+          "bottom": 326,
+          "left": 492.5
+        },
+        "colour": "rgb(51, 51, 51)",
+        "textTransform": "none"
+      },
+      {
+        "name": "Audio enabled",
+        "bounds": {
+          "x": 786.5,
+          "y": 307.5,
+          "width": 64,
+          "height": 32,
+          "top": 307.5,
+          "right": 850.5,
+          "bottom": 339.5,
+          "left": 786.5
+        },
+        "colour": "rgba(255, 255, 255, 0.94)",
+        "textTransform": "uppercase"
+      },
+      {
+        "name": "Motion",
+        "bounds": {
+          "x": 492.5,
+          "y": 366,
+          "width": 52,
+          "height": 20,
+          "top": 366,
+          "right": 544.5,
+          "bottom": 386,
+          "left": 492.5
+        },
+        "colour": "rgb(51, 51, 51)",
+        "textTransform": "none"
+      },
+      {
+        "name": "Notifications",
+        "bounds": {
+          "x": 492.5,
+          "y": 426,
+          "width": 90,
+          "height": 20,
+          "top": 426,
+          "right": 582.5,
+          "bottom": 446,
+          "left": 492.5
+        },
+        "colour": "rgb(51, 51, 51)",
+        "textTransform": "none"
+      },
+      {
+        "name": "All notifications",
+        "bounds": {
+          "x": 786.5,
+          "y": 427.5,
+          "width": 64,
+          "height": 32,
+          "top": 427.5,
+          "right": 850.5,
+          "bottom": 459.5,
+          "left": 786.5
+        },
+        "colour": "rgba(255, 255, 255, 0.94)",
+        "textTransform": "uppercase"
+      },
+      {
+        "name": "Privacy & Security",
+        "bounds": {
+          "x": 492.5,
+          "y": 489,
+          "width": 128.5,
+          "height": 20,
+          "top": 489,
+          "right": 621,
+          "bottom": 509,
+          "left": 492.5
+        },
+        "colour": "rgb(51, 51, 51)",
+        "textTransform": "none"
+      },
+      {
+        "name": "Language",
+        "bounds": {
+          "x": 492.5,
+          "y": 534,
+          "width": 73,
+          "height": 20,
+          "top": 534,
+          "right": 565.5,
+          "bottom": 554,
+          "left": 492.5
+        },
+        "colour": "rgb(51, 51, 51)",
+        "textTransform": "none"
+      },
+      {
+        "name": "Updates",
+        "bounds": {
+          "x": 492.5,
+          "y": 594,
+          "width": 61.5,
+          "height": 20,
+          "top": 594,
+          "right": 554,
+          "bottom": 614,
+          "left": 492.5
+        },
+        "colour": "rgb(51, 51, 51)",
+        "textTransform": "none"
+      },
+      {
+        "name": "Storage",
+        "bounds": {
+          "x": 492.5,
+          "y": 654,
+          "width": 57.5,
+          "height": 20,
+          "top": 654,
+          "right": 550,
+          "bottom": 674,
+          "left": 492.5
+        },
+        "colour": "rgb(51, 51, 51)",
+        "textTransform": "none"
+      },
+      {
+        "name": "Capabilities",
+        "bounds": {
+          "x": 492.5,
+          "y": 717.5,
+          "width": 83.5,
+          "height": 20,
+          "top": 717.5,
+          "right": 576,
+          "bottom": 737.5,
+          "left": 492.5
+        },
+        "colour": "rgb(51, 51, 51)",
+        "textTransform": "none"
+      },
+      {
+        "name": "NSE Control Gallery",
+        "bounds": {
+          "x": 509.5,
+          "y": 322.78125,
+          "width": 346,
+          "height": 21.75,
+          "top": 322.78125,
+          "right": 855.5,
+          "bottom": 344.53125,
+          "left": 509.5
+        },
+        "colour": "rgb(38, 55, 70)",
+        "textTransform": "none"
+      },
+      {
+        "name": "Allow NSE Control Gallery to use Location",
+        "bounds": {
+          "x": 791.5,
+          "y": 361.53125,
+          "width": 64,
+          "height": 32,
+          "top": 361.53125,
+          "right": 855.5,
+          "bottom": 393.53125,
+          "left": 791.5
+        },
+        "colour": "rgba(255, 255, 255, 0.94)",
+        "textTransform": "uppercase"
+      },
+      {
+        "name": "App access: AllowedBrowser permission: Not checked",
+        "bounds": {
+          "x": 509.5,
+          "y": 402.53125,
+          "width": 346,
+          "height": 37.6875,
+          "top": 402.53125,
+          "right": 855.5,
+          "bottom": 440.21875,
+          "left": 509.5
+        },
+        "colour": "rgb(38, 55, 70)",
+        "textTransform": "none"
+      },
+      {
+        "name": "Ask again for NSE Control Gallery: Location",
+        "bounds": {
+          "x": 509.5,
+          "y": 448.21875,
+          "width": 346,
+          "height": 52,
+          "top": 448.21875,
+          "right": 855.5,
+          "bottom": 500.21875,
+          "left": 509.5
+        },
+        "colour": "rgb(255, 255, 255)",
+        "textTransform": "none"
+      }
+    ]
+  },
+  "phone": {
+    "viewport": {
+      "width": 390,
+      "height": 844,
+      "dpr": 2
+    },
+    "mode": "dark",
+    "dialog": {
+      "x": 12,
+      "y": 177.5,
+      "width": 366,
+      "height": 489,
+      "top": 177.5,
+      "right": 378,
+      "bottom": 666.5,
+      "left": 12
+    },
+    "controls": [
+      {
+        "name": "Back",
+        "bounds": {
+          "x": 20,
+          "y": 185.5,
+          "width": 50,
+          "height": 50,
+          "top": 185.5,
+          "right": 70,
+          "bottom": 235.5,
+          "left": 20
+        },
+        "colour": "rgb(255, 255, 255)",
+        "textTransform": "none"
+      },
+      {
+        "name": "NSE Control Gallery",
+        "bounds": {
+          "x": 39,
+          "y": 347.671875,
+          "width": 312,
+          "height": 21.75,
+          "top": 347.671875,
+          "right": 351,
+          "bottom": 369.421875,
+          "left": 39
+        },
+        "colour": "rgb(231, 236, 242)",
+        "textTransform": "none"
+      },
+      {
+        "name": "Allow NSE Control Gallery to use Location",
+        "bounds": {
+          "x": 287,
+          "y": 386.421875,
+          "width": 64,
+          "height": 32,
+          "top": 386.421875,
+          "right": 351,
+          "bottom": 418.421875,
+          "left": 287
+        },
+        "colour": "rgba(255, 255, 255, 0.94)",
+        "textTransform": "uppercase"
+      },
+      {
+        "name": "App access: AllowedBrowser permission: Not checked",
+        "bounds": {
+          "x": 39,
+          "y": 427.421875,
+          "width": 312,
+          "height": 37.6875,
+          "top": 427.421875,
+          "right": 351,
+          "bottom": 465.109375,
+          "left": 39
+        },
+        "colour": "rgb(231, 236, 242)",
+        "textTransform": "none"
+      },
+      {
+        "name": "Ask again for NSE Control Gallery: Location",
+        "bounds": {
+          "x": 39,
+          "y": 473.109375,
+          "width": 312,
+          "height": 52,
+          "top": 473.109375,
+          "right": 351,
+          "bottom": 525.109375,
+          "left": 39
+        },
+        "colour": "rgb(255, 255, 255)",
+        "textTransform": "none"
+      }
+    ]
+  },
+  "errors": [],
+  "nativeLocationStatus": "granted",
+  "visualReview": {
+    "desktop": "Light, 1365x900 DPR1; empty, allowed, denied, keyboard and prompt states inspected",
+    "phone": "Dark, 390x844 DPR2; allowed and denied states inspected; all controls inside viewport",
+    "inventedControls": []
+  },
+  "deliveryRecheck": {
+    "framework": "b0bfc6a7715844bd6a50f6194a40df1f556a9e64",
+    "archiveSha256": "6b2d2400abfaac1bdf983ac13cee1c0cc4b9565b23647a89ddbcf10181f41ece",
+    "paneVisible": true,
+    "errors": [],
+    "screenshot": "authorization-privacy-final-desktop.png",
+    "bounds": {
+      "x": 482.5,
+      "y": 214.5,
+      "width": 400,
+      "height": 471
+    },
+    "realLocationRequest": true
+  }
+}

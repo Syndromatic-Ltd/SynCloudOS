@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 2,
+  "commit": "e853a720aaa3a4d616223ab26c4bdaab0b29ebb0",
+  "archive": "archives/syndromatic-syncloudos-1.0.0-beta.2-2698225eba79401c0e94657ea4e475f8f52d3a7490b3f6707f8ac58bae5faf7e.tgz",
+  "archiveSha256": "2698225eba79401c0e94657ea4e475f8f52d3a7490b3f6707f8ac58bae5faf7e",
+  "integrity": "sha512-KoevXTJo06WAzWGgVoTL+UIJQbrQWV4MX4q3O5YZu8EkVl+Okq8py35WOlEq/A6M+zMMDZkAMPT2qQ+tE0vKng==",
+  "builtAt": null,
+  "sourceSHA256": "a5da28a9e24777e4f6cd05c42e7bf2275b69cd39080313de45935675f4168f8b",
+  "resourcesSHA256": "040ae21cb08d4560487520218f1572ed766b6c4183f8641d49059321271056f7"
+}

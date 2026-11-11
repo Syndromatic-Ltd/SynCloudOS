@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import { createPersistence } from "../Persistence/Persistence";
 import { canonicalDocumentJson } from "../Documents/documentTypes";
 import type { SynCloudOSPersistence, SynCloudOSRuntimeId } from "../Runtime/runtimeInstanceTypes";
@@ -48,11 +49,14 @@ import type {
 } from "./documentStoreTypes";
 import {
   SynCloudOSDocumentStoreAtomicityUnavailableError,
+  SynCloudOSDocumentStoreIdempotencyConflictError,
   SynCloudOSDocumentStoreMutationLockedError,
   SynCloudOSDocumentStorePayloadError,
   SynCloudOSDocumentStoreUnsupportedSchemaError,
+  SynCloudOSDocumentStoreVersionConflictError,
 } from "./documentStoreErrors";
 import { throwIfDocumentStoreAborted } from "./InMemoryDocumentStore";
+import { documentStoreSnapshotText, readDocumentStoreSnapshotValue } from "../PlatformAdapters/documentStoreSnapshotText";
 
 const defaultPreferenceKey = "documentStore:v1";
 const terminalMutationAuthority = Symbol("SynCloudOS.DocumentStore.terminalMutationAuthority");
@@ -88,6 +92,11 @@ interface ActiveTerminalMutationLock {
   readonly lease: SynCloudOSDocumentStoreTerminalMutationLease;
   readonly documentId: string;
   readonly identity: string;
+}
+
+interface RecoveryResolution {
+  readonly documentId: string;
+  readonly etag: string | null;
 }
 
 function createDetachedPersistence(options: SynCloudOSPersistenceDocumentStoreOptions): SynCloudOSPersistence {
@@ -139,7 +148,7 @@ function isOwnership(value: unknown): value is SynCloudOSDocumentOwnership {
 
 function ownershipKey(value: SynCloudOSDocument | SynCloudOSDocumentRevision): string {
   return value.ownership.kind === "application"
-    ? `application:${value.ownership.applicationId}`
+    ? `application:${normalizeBundleIdentifier(value.ownership.applicationId)}`
     : "system";
 }
 
@@ -166,7 +175,7 @@ function isDocument(value: unknown): value is SynCloudOSDocument {
     return false;
   }
   if (value.ownership.kind === "application") {
-    return value.applicationId === value.ownership.applicationId;
+    return typeof value.applicationId === "string" && normalizeBundleIdentifier(value.applicationId) === normalizeBundleIdentifier(value.ownership.applicationId);
   }
   return !Object.prototype.hasOwnProperty.call(value, "applicationId");
 }
@@ -356,11 +365,19 @@ function normaliseSnapshot(value: unknown): SynCloudOSDocumentStoreSnapshot {
  * or unparseable text reads as no snapshot. */
 function parseStoredSnapshot(text: string | null): unknown {
   if (!text) return null;
+  let value: unknown;
   try {
-    return JSON.parse(text) as unknown;
+    value = JSON.parse(text) as unknown;
   } catch {
     return null;
   }
+  return readDocumentStoreSnapshotValue(value);
+}
+
+function persistenceUnavailable(): SynCloudOSDocumentStoreAtomicityUnavailableError {
+  const error = new SynCloudOSDocumentStoreAtomicityUnavailableError();
+  error.message = "DocumentStore could not persist this write because storage is full or unavailable. The previous saved document has not been replaced.";
+  return error;
 }
 
 function mergeById<T extends { id: string }>(seed: T[] = [], persisted: T[] = []) {
@@ -377,6 +394,79 @@ function mergeKinds(seed: SynCloudOSDocumentKindMetadata[] = [], persisted: SynC
   return Array.from(items.values());
 }
 
+/** Compare the persisted representation, including ETags, regardless of key order
+ * or optional undefined fields present only in the in-memory record. */
+function recoveryValue(value: unknown): string | undefined {
+  if (value === undefined) return undefined;
+  return canonicalDocumentJson(JSON.parse(JSON.stringify(value)), "document-store.recovery", {
+    maxDepth: 80, maxNodes: 250_000, maxBytes: 16 * 1024 * 1024,
+  });
+}
+
+/** Apply only changes since the rejected write's base. A concurrent change to
+ * the same entry is an explicit conflict, never a last-writer-wins overwrite. */
+function reconcileEntries<T>(
+  base: readonly T[], local: readonly T[], stored: readonly T[],
+  key: (entry: T) => string, conflict: (key: string) => void,
+): T[] {
+  const before = new Map(base.map(entry => [key(entry), entry]));
+  const retained = new Map(local.map(entry => [key(entry), entry]));
+  const result = new Map(stored.map(entry => [key(entry), entry]));
+  for (const id of new Set([...before.keys(), ...retained.keys()])) {
+    const original = recoveryValue(before.get(id));
+    const changed = recoveryValue(retained.get(id));
+    if (original === changed) continue;
+    const current = recoveryValue(result.get(id));
+    if (current !== original && current !== changed) {
+      // A non-throwing callback explicitly selects the stored entry as the
+      // basis of a conditional resolution; the caller's mutation follows.
+      conflict(id);
+      continue;
+    }
+    const entry = retained.get(id);
+    if (entry === undefined) result.delete(id);
+    else result.set(id, entry);
+  }
+  return [...result.values()];
+}
+
+/** @internal Coarse observations of this canonical store's actual mutation tail.
+ * Queued and running stages remain counted until their real promise settles.
+ * This is neither a durability assertion nor a census of other persistence owners.
+ */
+export interface DocumentStorePersistenceObservation {
+  getSnapshot(): Readonly<{ revision: number; pending: number; ended: boolean }>;
+  subscribe(listener: () => void): () => void;
+}
+const persistenceObservations = new WeakMap<object, DocumentStorePersistenceObservation>();
+export function observeDocumentStorePersistence(store: SynCloudOSDocumentStoreAdapter): DocumentStorePersistenceObservation | null {
+  return persistenceObservations.get(store) ?? null;
+}
+function createMutationObservation(owner: object) {
+  let snapshot: ReturnType<DocumentStorePersistenceObservation["getSnapshot"]> = Object.freeze({ revision: 0, pending: 0, ended: false });
+  const listeners = new Set<() => void>();
+  const publish = (pending: number, ended = snapshot.ended) => {
+    snapshot = Object.freeze({ revision: snapshot.revision + 1, pending, ended });
+    for (const listener of [...listeners]) { try { listener(); } catch { /* Inspection cannot affect mutations. */ } }
+    if (ended && pending === 0) listeners.clear();
+  };
+  persistenceObservations.set(owner, Object.freeze({
+    getSnapshot: () => snapshot,
+    subscribe(listener: () => void) {
+      if (snapshot.ended && snapshot.pending === 0) return () => undefined;
+      listeners.add(listener); return () => { listeners.delete(listener); };
+    },
+  }));
+  return {
+    begin() {
+      publish(snapshot.pending + 1);
+      let released = false;
+      return () => { if (!released) { released = true; publish(snapshot.pending - 1); } };
+    },
+    end() { if (!snapshot.ended) publish(snapshot.pending, true); },
+  };
+}
+
 export class SynCloudOSPersistenceDocumentStore implements SynCloudOSDocumentStoreAdapter {
   readonly runtimeId?: SynCloudOSRuntimeId;
   private readonly preferenceKey: string;
@@ -390,8 +480,11 @@ export class SynCloudOSPersistenceDocumentStore implements SynCloudOSDocumentSto
   private readonly terminalMutationLocks = new Map<string, ActiveTerminalMutationLock>();
   private readonly ordinaryMutationsByDocumentId = new Map<string, number>();
   private mutationTail: Promise<void> = Promise.resolve();
+  private readonly mutationObservation = createMutationObservation(this);
   private readonly importedSnapshotSavedAt?: string;
   private snapshotDirty = false;
+  /** Storage state against which accepted, memory-only changes were made. */
+  private unpersistedBase: SynCloudOSInMemoryDocumentStore | null = null;
   private disposed = false;
   /**
    * The exact stored text `store` was last loaded from or written as, when
@@ -401,6 +494,8 @@ export class SynCloudOSPersistenceDocumentStore implements SynCloudOSDocumentSto
    * rebuilding every record. Any other outcome clears it.
    */
   private persistedText: string | null = null;
+  /** A format check is separate from the mutation/rebase cache. */
+  private compatibleStoredText: string | null = null;
 
   get supportsAtomicConditionalWrites(): boolean { return this.conditionalWriteLock !== undefined; }
 
@@ -450,12 +545,13 @@ export class SynCloudOSPersistenceDocumentStore implements SynCloudOSDocumentSto
     this.conditionalWriteLock = options.conditionalWriteLock;
     for (const kind of options.kinds ?? []) this.runtimeKinds.set(kind.kind, kind);
     const text = this.readSnapshotText();
-    const persisted = text === undefined ? this.persistence.getPreference<unknown>(this.preferenceKey, null) : parseStoredSnapshot(text);
+    const persisted = text === undefined ? readDocumentStoreSnapshotValue(this.persistence.getPreference<unknown>(this.preferenceKey, null)) : parseStoredSnapshot(text);
     const hasPersistedSnapshot = persisted !== null && persisted !== undefined;
     const snapshot = normaliseSnapshot(persisted);
     if (hasPersistedSnapshot) this.importedSnapshotSavedAt = snapshot.savedAt;
     this.store = this.createStore(snapshot);
     this.persistedText = text ?? null;
+    this.compatibleStoredText = text ?? null;
   }
 
   registerKind<TDocument extends SynCloudOSDocument>(
@@ -463,17 +559,19 @@ export class SynCloudOSPersistenceDocumentStore implements SynCloudOSDocumentSto
     options: SynCloudOSDocumentKindRegistrationOptions = {},
   ) {
     this.assertActive();
+    this.assertStoredCompatibility();
     const registered = this.store.registerKind(metadata, options);
     this.runtimeKinds.set(registered.kind, registered);
     // The store now differs from what was stored.
     this.persistedText = null;
     if (this.conditionalWriteLock) {
       void this.enqueueMutation(() => this.withMutationLock(undefined, async () => {
-        const store = this.createStore(normaliseSnapshot(this.readStoredSnapshot()));
+        const { store, canPersist } = this.lockedMutationStore();
         if (!store.getKind(registered.kind)) store.registerKind(registered, { emitEvent: false });
-        if (!this.persistStore(store)) throw new SynCloudOSDocumentStoreAtomicityUnavailableError();
+        if (!canPersist || !this.persistStore(store)) throw persistenceUnavailable();
         this.snapshotDirty = true;
         this.store = store;
+        this.unpersistedBase = null;
       })).catch(() => undefined);
     } else {
       this.persist();
@@ -532,7 +630,7 @@ export class SynCloudOSPersistenceDocumentStore implements SynCloudOSDocumentSto
     const mutation = () => this.mutateStore(options.signal ?? context?.signal, options.ifMatch !== undefined, async (store) => {
       const saved = await store.saveDraft(this.withRuntimeId(draft), context, options);
       return saved;
-    });
+    }, draft.id && options.ifMatch !== undefined ? { documentId: draft.id, etag: options.ifMatch } : undefined);
     return (draft.id ? this.trackDocumentMutation(draft.id, context, mutation) : mutation()).then(({ value: saved, persisted }) => {
       if (persisted) this.resolveUndo()?.get({ kind: "document", id: saved.id })?.markClean();
       return saved;
@@ -592,6 +690,7 @@ export class SynCloudOSPersistenceDocumentStore implements SynCloudOSDocumentSto
 
   dispose() {
     this.disposed = true;
+    this.mutationObservation.end();
     this.terminalMutationLocks.clear();
     this.ordinaryMutationsByDocumentId.clear();
   }
@@ -645,6 +744,10 @@ export class SynCloudOSPersistenceDocumentStore implements SynCloudOSDocumentSto
   private enqueueMutation<T>(mutation: () => Promise<T>): Promise<T> {
     const result = this.mutationTail.then(mutation, mutation);
     this.mutationTail = result.then(() => undefined, () => undefined);
+    // Establish queue ordering before notifying observers: reentrant work must
+    // join this tail. Logical cancellation/disposal never releases real work.
+    const release = this.mutationObservation.begin();
+    void result.then(release, release);
     return result;
   }
 
@@ -663,6 +766,7 @@ export class SynCloudOSPersistenceDocumentStore implements SynCloudOSDocumentSto
     signal: AbortSignal | undefined,
     requireAtomic: boolean,
     mutation: (store: SynCloudOSInMemoryDocumentStore) => Promise<T>,
+    resolution?: RecoveryResolution,
   ): Promise<{ readonly value: T; readonly persisted: boolean }> {
     if (requireAtomic && !this.conditionalWriteLock) {
       return Promise.reject(new SynCloudOSDocumentStoreAtomicityUnavailableError());
@@ -671,14 +775,18 @@ export class SynCloudOSPersistenceDocumentStore implements SynCloudOSDocumentSto
       throwIfDocumentStoreAborted(signal);
       const execute = async () => {
         throwIfDocumentStoreAborted(signal);
-        const store = this.conditionalWriteLock ? this.lockedMutationStore() : this.store;
+        if (!this.conditionalWriteLock) this.assertStoredCompatibility();
+        const { store, base, canPersist } = this.conditionalWriteLock
+          ? this.lockedMutationStore(resolution)
+          : { store: this.store.fork(), base: this.store, canPersist: true };
         this.persistedText = null;
         const value = await mutation(store);
         throwIfDocumentStoreAborted(signal);
-        const persisted = this.persistStore(store);
-        if (requireAtomic && !persisted) throw new SynCloudOSDocumentStoreAtomicityUnavailableError();
+        const persisted = canPersist && this.persistStore(store);
+        if (requireAtomic && !persisted) throw persistenceUnavailable();
         this.snapshotDirty = true;
         this.store = store;
+        this.unpersistedBase = persisted || !this.conditionalWriteLock ? null : base;
         return { value, persisted } as const;
       };
       return this.conditionalWriteLock ? this.withMutationLock(signal, execute) : execute();
@@ -698,35 +806,100 @@ export class SynCloudOSPersistenceDocumentStore implements SynCloudOSDocumentSto
 
   private readStoredSnapshot(): unknown {
     const text = this.readSnapshotText();
-    return text === undefined ? this.persistence.getPreference<unknown>(this.preferenceKey, null) : parseStoredSnapshot(text);
+    return text === undefined ? readDocumentStoreSnapshotValue(this.persistence.getPreference<unknown>(this.preferenceKey, null)) : parseStoredSnapshot(text);
   }
 
-  /** The store a locked mutation runs on: a fork of the current store while
-   * storage still holds exactly what it was loaded from or written as,
-   * otherwise a rebuild from storage (another context wrote). */
-  private lockedMutationStore(): SynCloudOSInMemoryDocumentStore {
+  /** Acquire storage under the write lock, then rebase any accepted memory-only
+   * changes. Return the observed base separately so another rejected write can
+   * retain those changes without claiming adopted remote records as local. */
+  private lockedMutationStore(resolution?: RecoveryResolution): { store: SynCloudOSInMemoryDocumentStore; base: SynCloudOSInMemoryDocumentStore; canPersist: boolean } {
     const text = this.readSnapshotText();
-    if (text !== undefined && text !== null && text === this.persistedText) return this.store.fork();
-    return this.createStore(normaliseSnapshot(text === undefined ? this.readStoredSnapshot() : parseStoredSnapshot(text)));
+    if (!this.unpersistedBase && text !== undefined && text !== null && text === this.persistedText) {
+      return { store: this.store.fork(), base: this.store, canPersist: true };
+    }
+    const snapshot = text === undefined ? this.readStoredSnapshot() : parseStoredSnapshot(text);
+    const before = this.unpersistedBase?.serialisableSnapshot();
+    // Persistence readers map denied reads and malformed text to null, just as
+    // they do a missing key. Once a populated base disappears, it is unsafe to
+    // interpret that ambiguity as remote deletions or overwrite unseen writes.
+    // Best-effort operations remain live in memory until storage is readable.
+    if (snapshot == null && before && (before.documents.length || before.revisions.length
+      || before.draftVersions.length || before.idempotentDraftWrites.length)) {
+      return { store: this.store.fork(), base: this.unpersistedBase!, canPersist: false };
+    }
+    const base = this.createStore(normaliseSnapshot(snapshot));
+    if (!before) return { store: base.fork(), base, canPersist: true };
+
+    // Preserve accepted memory-only writes, but also observe changes made by
+    // another context under this same lock. Rebase even if persistence fails
+    // again, so adopted remote changes are not mistaken for local edits later.
+    const local = this.store.serialisableSnapshot();
+    const stored = base.serialisableSnapshot();
+    const documentConflict = (id: string): never => {
+      throw new SynCloudOSDocumentStoreVersionConflictError(id,
+        resolution?.documentId === id ? resolution.etag : before.documents.find(document => document.id === id)?.storageVersion?.etag ?? null,
+        clonePlain(stored.documents.find(document => document.id === id) ?? null));
+    };
+    const resolveDocument = (id: string): void => {
+      const current = stored.documents.find(document => document.id === id);
+      // Only an explicit conditional replacement of this document may resolve
+      // its divergent draft/history. Retain the committed history and append
+      // the caller's chosen replacement through the normal saveDraft path.
+      if (resolution?.documentId === id && (current ? current.storageVersion?.etag === resolution.etag : resolution.etag === null)) return;
+      documentConflict(id);
+    };
+    const merged: SynCloudOSDocumentStoreSnapshot = {
+      schemaVersion: 2, savedAt: stored.savedAt,
+      kinds: reconcileEntries(before.kinds, local.kinds, stored.kinds, entry => entry.kind, id => {
+        throw new SynCloudOSDocumentStorePayloadError(`DocumentStore kind ${id} changed during persistence recovery.`);
+      }),
+      documents: reconcileEntries(before.documents, local.documents, stored.documents, entry => entry.id, resolveDocument),
+      revisions: reconcileEntries(before.revisions, local.revisions, stored.revisions, entry => entry.id, id => {
+        const revision = local.revisions.find(entry => entry.id === id) ?? stored.revisions.find(entry => entry.id === id)!;
+        return documentConflict(revision.documentId);
+      }),
+      draftVersions: reconcileEntries(before.draftVersions, local.draftVersions, stored.draftVersions, entry => entry.documentId, resolveDocument),
+      idempotentDraftWrites: reconcileEntries(before.idempotentDraftWrites, local.idempotentDraftWrites, stored.idempotentDraftWrites, entry => entry.key, id => {
+        throw new SynCloudOSDocumentStoreIdempotencyConflictError(id);
+      }),
+    };
+    validateSnapshotIntegrity(merged);
+    return { store: this.createStore(merged), base, canPersist: true };
+  }
+
+  /** Refuse a format introduced after this reader started. A lock is still
+   * required for atomic cross-context writes; this check is not a lock. */
+  private assertStoredCompatibility(): void {
+    const text = this.readSnapshotText();
+    if (text === undefined) {
+      normaliseSnapshot(this.readStoredSnapshot());
+    } else if (text !== null && text !== this.compatibleStoredText) {
+      normaliseSnapshot(parseStoredSnapshot(text));
+      this.compatibleStoredText = text;
+    }
   }
 
   private persistStore(store: SynCloudOSInMemoryDocumentStore) {
+    // A mutation may await authorization/work after its first format check.
+    // Preserve newly observed unsupported bytes instead of overwriting them.
+    this.assertStoredCompatibility();
     this.persistedText = null;
     const { writePreferenceText } = this.persistence;
     if (typeof writePreferenceText === "function" && typeof this.persistence.readPreferenceText === "function") {
       // Serialised straight from the stored records: identical text to
       // setPreference(exportSnapshot()), without cloning every record first.
       const snapshot = store.serialisableSnapshot();
-      const text = JSON.stringify({ ...snapshot, kinds: snapshot.kinds.map(toSerializableKind) });
+      const text = documentStoreSnapshotText({ ...snapshot, kinds: snapshot.kinds.map(toSerializableKind) });
       const persisted = writePreferenceText.call(this.persistence, this.preferenceKey, text);
-      if (persisted) this.persistedText = text;
+      if (persisted) { this.persistedText = text; this.compatibleStoredText = text; }
       return persisted;
     }
     const snapshot = store.exportSnapshot();
-    return this.persistence.setPreference<SynCloudOSDocumentStoreSnapshot>(this.preferenceKey, {
+    const text = documentStoreSnapshotText({
       ...snapshot,
       kinds: snapshot.kinds.map(toSerializableKind),
     });
+    return this.persistence.setPreference<unknown>(this.preferenceKey, JSON.parse(text));
   }
 }
 

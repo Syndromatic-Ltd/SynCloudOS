@@ -1,0 +1,52 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run vitest run tests/runtime/about-app.test.tsx -t leaves from --reporter=verbose
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site
+
+stdout | tests/runtime/about-app.test.tsx > About > leaves from the visible presentation when another tab interrupts its settle
+before-rapid true null 1
+transition-called true false 0
+
+stdout | tests/runtime/about-app.test.tsx > About > leaves from the visible presentation when another tab interrupts its settle
+transition-complete Error: 
+    at completionHandler (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/about-app.test.tsx:51:80)
+    at Object.finish (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEViewController.ts:373:7)
+    at C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/viewControllerTransition.tsx:104:107
+
+stdout | tests/runtime/about-app.test.tsx > About > leaves from the visible presentation when another tab interrupts its settle
+rapid [ 'team:appear', 'framework:disappear' ] [
+  [ 'company', false, undefined ],
+  [ 'framework', false, undefined ],
+  [ 'team', true, true ]
+] team null [{"operation":"animation.animate","at":1767225602400},{"operation":"animation.animate","at":1767225603020}]
+
+ × tests/runtime/about-app.test.tsx > About > leaves from the visible presentation when another tab interrupts its settle 457ms
+   → Cannot read NSEViewController.outlet while it is inactive.
+ ↓ tests/runtime/about-app.test.tsx > About > animates the incoming pane and keeps its presentation through the tab handoff
+ ↓ tests/runtime/about-app.test.tsx > About > retitles in place without a restoration write or a new directional transition
+ ↓ tests/runtime/about-app.test.tsx > About > opens on the company page with its tab bar
+ ↓ tests/runtime/about-app.test.tsx > About > restores the section last read and remembers a new choice
+ ↓ tests/runtime/about-app.test.tsx > About > travels right when a later section is chosen and shows its page
+ ↓ tests/runtime/about-app.test.tsx > About > goes still when the animation environment asks for reduced motion
+ ↓ tests/runtime/about-app.test.tsx > About > disposes its navigation and pages with the window
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/about-app.test.tsx > About > leaves from the visible presentation when another tab interrupts its settle
+SynCloudOSLifecycleError: Cannot read NSEViewController.outlet while it is inactive.
+ ❯ u.error ../src/SynCloudOS/ErrorManager/lifecycleError.ts:185:12
+ ❯ Ze.#require ../src/NSE/Application/viewOutlet.ts:55:127
+ ❯ Ze.get layer [as layer] ../src/NSE/Application/viewOutlet.ts:69:27
+ ❯ tests/runtime/about-app.test.tsx:62:51
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'NSE_VIEW_NOT_LOADED', resource: { kind: 'NSEViewController', id: 'AboutPaneViewController#5' }, operation: 'outlet', access: 'get', problem: undefined, disposal: undefined, ownerStack: undefined, creationStack: undefined }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 skipped (8)
+   Start at  10:59:50
+   Duration  5.12s (transform 3.05s, setup 17ms, import 3.61s, tests 458ms, environment 908ms)
+

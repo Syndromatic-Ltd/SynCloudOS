@@ -22,7 +22,7 @@ export { MIFXEncoder } from "./MIFXEncoder";
 export { MIFXParser } from "./MIFXParser";
 export type { MIFXParserOptions } from "./MIFXParser";
 export type {
-  MIFXMessage,
+  MIFXMessage, MIFXMessageInput,
   MIFXParseError,
   MIFXParserErrorCode,
   MIFXParserEvent,

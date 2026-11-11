@@ -1,0 +1,36 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run src/FX/DispatchFX/__tests__/sync.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts (30 tests | 2 failed) 19ms
+   × main ignores target changes including a null reset 3ms
+   × global ignores target changes including a null reset 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > main ignores target changes including a null reset
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > global ignores target changes including a null reset
+AssertionError: expected [Function] to not throw an error but 'Error: BUG IN CLIENT OF LIBDISPATCH: …' was thrown
+
+- Expected:
+undefined
+
++ Received:
+"Error: BUG IN CLIENT OF LIBDISPATCH: cannot change the target of a global or main queue"
+
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:64:45
+     62|   const target = new DFXQueue(`sync-${kind}-ignored-target`, { qos: DF…
+     63|   const key = new DFXSpecificKey<string>(); target.setSpecific(key, "i…
+     64|   expect(() => queue.setTarget(target)).not.toThrow(); expect(() => qu…
+       |                                             ^
+     65|   queue.sync(() => { expect(DFXQueue.getSpecific(key)).toBeUndefined()…
+     66|   expect(queue.qos).toBe(kind === "main" ? DFXQoS.userInteractive : DF…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 28 passed (30)
+   Start at  09:36:11
+   Duration  312ms (transform 123ms, setup 26ms, import 132ms, tests 19ms, environment 0ms)

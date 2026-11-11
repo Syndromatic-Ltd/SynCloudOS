@@ -19,6 +19,7 @@
  */
 
 import type { DocumentKind, DocumentWindowAssociation } from "../Documents";
+import { selectViewportFoldRegion, screenViewportRegionGeometry } from "./viewportFeatures";
 import type { ScreenSnapshot } from "./ScreenService";
 import {
   assertFiniteWindowBounds,
@@ -33,6 +34,7 @@ import {
   type WindowBounds,
   type WindowChromeMode,
   type WindowContentDescriptor,
+  type WindowGeometryState,
   type WindowIdPort,
   type WindowRecord,
   type WindowRepresentedDocument,
@@ -260,10 +262,10 @@ export function freezeWindowRestorationSnapshot(snapshot: WindowRestorationSnaps
   }
 }
 
-export function resolveWindowPresentation(record: WindowRecord, screen: ScreenSnapshot): WindowPresentation {
+export function resolveWindowPresentation(record: WindowRecord, screen: ScreenSnapshot, geometry?: Pick<WindowGeometryState, "zoomed">): WindowPresentation {
   const safeAreaInsets = screen.safeAreaInsets;
   const titleBarVisible = record.role !== "borderless" && record.style.includes("titled");
-  if (record.mobilePolicy === "hidden") {
+  if (record.mobilePolicy === "hidden" || screen.geometryState === "unavailable") {
     return Object.freeze({
       kind: "hidden",
       visible: false,
@@ -274,8 +276,33 @@ export function resolveWindowPresentation(record: WindowRecord, screen: ScreenSn
       titleBarVisible,
     });
   }
+  const region = ["modal", "sheet", "popover"].includes(record.role)
+    ? selectViewportFoldRegion(screenViewportRegionGeometry(screen), screen.layoutViewport, record.bounds) : null;
+  if (region) {
+    // Projection only: normal bounds, minimum-size/restoration contracts and
+    // controller/document identity remain with WindowManager unchanged.
+    const gap = 8;
+    const width = Math.min(record.bounds.width, region.width - 2 * gap);
+    const height = Math.min(record.bounds.height, region.height - 2 * gap);
+    const compact = screen.breakpoint === "compact";
+    const x = Math.max(region.x + gap, Math.min(record.bounds.x, region.x + region.width - gap - width));
+    const y = compact ? region.y + region.height - gap - height
+      : Math.max(region.y + gap, Math.min(record.bounds.y, region.y + region.height - gap - height));
+    return Object.freeze({ kind: compact ? "mobile-sheet" : "desktop-window", visible: true,
+      bounds: Object.freeze({ x, y, width, height }), safeAreaInsets, movable: false, resizable: false, titleBarVisible });
+  }
   if (screen.breakpoint !== "compact") {
-    const bounds = constrainDesktopPresentation(record, screen.workArea);
+    // Work and visible rectangles share page CSS coordinates. A keyboard or
+    // shallow viewport can reduce the visible work area without changing the
+    // window's stored normal bounds or its minimum-size contract.
+    const x = Math.max(screen.workArea.x, screen.visualViewport.x);
+    const y = Math.max(screen.workArea.y, screen.visualViewport.y);
+    const workArea = {
+      x, y,
+      width: Math.min(screen.workArea.x + screen.workArea.width, screen.visualViewport.x + screen.visualViewport.width) - x,
+      height: Math.min(screen.workArea.y + screen.workArea.height, screen.visualViewport.y + screen.visualViewport.height) - y,
+    };
+    const bounds = geometry?.zoomed ? Object.freeze(workArea) : constrainDesktopPresentation(record, workArea);
     return Object.freeze({
       kind: "desktop-window",
       visible: true,
@@ -300,7 +327,9 @@ export function resolveWindowPresentation(record: WindowRecord, screen: ScreenSn
   }
   const viewport = screen.visualViewport;
   const width = Math.min(record.bounds.width, viewport.width);
-  const height = Math.min(record.bounds.height, viewport.height - 24);
+  // Preserve the top clearance where it fits; a shallow valid viewport must
+  // still produce a positive presentation without rewriting normal bounds.
+  const height = Math.min(record.bounds.height, viewport.height - Math.min(24, viewport.height / 2));
   const bounds = Object.freeze({
     x: viewport.x + Math.max(0, (viewport.width - width) / 2),
     y: viewport.y + viewport.height - height,
@@ -324,12 +353,14 @@ function constrainDesktopPresentation(record: WindowRecord, workArea: WindowBoun
     record.maximumSize?.width ?? Number.POSITIVE_INFINITY,
     Math.max(record.minimumSize.width, requested.width),
   );
-  const height = Math.min(
+  const normalHeight = Math.min(
     record.maximumSize?.height ?? Number.POSITIVE_INFINITY,
     Math.max(record.minimumSize.height, requested.height),
   );
+  const height = Math.min(normalHeight, workArea.height);
   const x = Math.min(workArea.x + workArea.width - 96, Math.max(workArea.x - width + 96, requested.x));
-  const y = Math.min(workArea.y + workArea.height - 31, Math.max(workArea.y, requested.y));
+  const y = normalHeight > workArea.height ? workArea.y
+    : Math.min(workArea.y + workArea.height - 31, Math.max(workArea.y, requested.y));
   if (requested.x === x && requested.y === y && requested.width === width && requested.height === height) return requested;
   return Object.freeze({ x, y, width, height });
 }

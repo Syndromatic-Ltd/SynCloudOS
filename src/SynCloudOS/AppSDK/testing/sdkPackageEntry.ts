@@ -18,6 +18,7 @@
  */
 
 /** Reviewed testing-only public package graph. */
+export { createSynWare } from "../createSynWare";
 export {
   createDeterministicRuntimeEnvironment,
   createDeterministicScheduler,
@@ -49,6 +50,7 @@ export type {
   SynWareFakeDocumentOperation,
   SynWareFakeDragOperation,
   SynWareFakeFileOperation,
+  SynWareFakeFiles,
   SynWareFakeImageOperation,
   SynWareFakeLocation,
   SynWareFakeLocationOperation,
@@ -74,11 +76,13 @@ export type {
   SynWareFakeWindowOperation,
   SynWareFakeWorkspaceOperation,
   SynWareTestAdapters,
+  SynWareTestApplicationDocumentsConfiguration,
   SynWareTestClock,
   SynWareTestMediaClock,
   SynWareTestCommandInspection,
   SynWareTestDisposalReport,
   SynWareTestDocumentInspection,
+  SynWareTestDocumentInstallContext,
   SynWareTestHost,
   SynWareTestLifecycle,
   SynWareTestPersistence,

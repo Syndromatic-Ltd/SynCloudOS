@@ -24,6 +24,7 @@ import { TFXGlyphDrawing } from "@syndromatic/syncloudos/fx/text";
 import { GFXColour, type GFXImage } from "@syndromatic/syncloudos/fx/graphics";
 import { createExampleModel, textSystemDocumentType, type ExampleFlowId, type ExampleViewId, type TextSystemExampleModel } from "./model";
 import { ExampleResources, examplePolicy, layoutExampleFlow } from "./layout";
+import type { NSEData } from "@syndromatic/syncloudos/foundation";
 import { decodeExamplePNG } from "./image";
 export type ExampleAssetLease = Awaited<ReturnType<AppDocumentResourcesClient["acquire"]>>;
 
@@ -84,7 +85,7 @@ export async function createTextSystemExample(options: {
   readonly openLocation?: AppDocumentLocation;
   readonly nativeDestination?: AppDocumentLocation;
   /** Focused Node tests inject only the pixel decoder; admission/storage/history remain real. */
-  readonly decodePNG?: (bytes: Uint8Array, signal: AbortSignal) => Promise<GFXImage>;
+  readonly decodePNG?: (bytes: NSEData, signal: AbortSignal) => Promise<GFXImage>;
   readonly signal?: AbortSignal;
 }): Promise<TextSystemExample> {
   options.signal?.throwIfAborted();
@@ -115,9 +116,9 @@ export async function createTextSystemExample(options: {
   };
   const history = documents.getUndoManager(document.id);
   const sessions = Object.freeze({
-    body: new TextEditingSession({ id: "example-body", documentId: document.id, owner: owners.body, history, signal }),
-    bodyMirror: new TextEditingSession({ id: "example-body-mirror", documentId: document.id, owner: owners.body, history, signal }),
-    caption: new TextEditingSession({ id: "example-caption", documentId: document.id, owner: owners.caption, history, signal }),
+    body: new TextEditingSession({ id: "example-body", documentId: document.id, textOwner: owners.body, history, ownerSignal: signal }),
+    bodyMirror: new TextEditingSession({ id: "example-body-mirror", documentId: document.id, textOwner: owners.body, history, ownerSignal: signal }),
+    caption: new TextEditingSession({ id: "example-caption", documentId: document.id, textOwner: owners.caption, history, ownerSignal: signal }),
   });
   const participants = Object.values(sessions).map(session => bindSynWareNSETextEditingSession({ documents, documentId: document.id, session, lifetime: { signal } }));
   const listeners = new Set<() => void>(), presentations = new Map<ExampleViewId, ExamplePresentationResolver>();
@@ -248,7 +249,7 @@ export async function createTextSystemExample(options: {
       const before = documents.getDocument<TextSystemExampleModel>(document.id)!;
       if (before.model.assets.length) throw new Error("The private example already has its single image asset.");
       const bytes = resources.image!.toPNG();
-      const lease = await resourceClient.acquire(document.id, { type: "image/png", size: bytes.length, arrayBuffer: async () => bytes.slice().buffer }, signal);
+      const lease = await resourceClient.acquire(document.id, { type: "image/png", size: bytes.count, data: async () => bytes }, signal);
       let admitted = false;
       try {
         const reference = await resourceClient.persist(document.id, lease, signal);
@@ -276,7 +277,7 @@ export async function createTextSystemExample(options: {
     assetReceipt() {
       if (!assetLease || !resourceClient?.assetCapabilities) return null;
       const bytes = resourceClient.resolve(document.id, assetLease);
-      return { descriptor: assetLease, bytes: bytes ? Array.from(bytes) : [], active: resourceClient.isActive(document.id, assetLease), width: resources.image?.width ?? 0, height: resources.image?.height ?? 0, assetDurability: resourceClient.assetCapabilities.durability };
+      return { descriptor: assetLease, bytes: bytes ? Array.from(bytes.bytes) : [], active: resourceClient.isActive(document.id, assetLease), width: resources.image?.width ?? 0, height: resources.image?.height ?? 0, assetDurability: resourceClient.assetCapabilities.durability };
     },
     isAssetLeaseActive(lease) { try { return resourceClient?.isActive(document.id, lease) ?? false; } catch { return false; } },
     setZoom(value) { assertLive(); if (!Number.isFinite(value) || value < .5 || value > 2) throw new RangeError("Zoom must be 0.5..2."); zoom = value; transformRevision++; publish(); },

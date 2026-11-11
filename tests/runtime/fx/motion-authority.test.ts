@@ -128,7 +128,7 @@ describe("MotionFX ownership and authorization", () => {
     expect(await pending).toBe("disposed");
     expect(f.listeners.size).toBe(0);
     expect(manager.capabilities.deviceMotion.state).toBe("disposed");
-    expect(() => manager.startGyroUpdates(() => {})).toThrow(/disposed/);
+    expect(() => manager.startGyroUpdates(() => {})).toThrow(expect.objectContaining({ code: "MFX_MOTION_MANAGER_DISPOSED" }));
   });
   it("aborts a single subscription and clears recorder data on revocation", () => {
     const f = motionFixture(),

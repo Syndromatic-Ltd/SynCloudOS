@@ -1,3 +1,4 @@
+import { createTestTheme } from "../fixtures/themes";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -19,7 +20,7 @@
  */
 
 // @vitest-environment jsdom
-import { defineNSEAppearance } from "@syndromatic/syncloudos/nse/appearance";
+
 
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import * as cssTree from "css-tree";
@@ -27,26 +28,19 @@ import { readFileSync } from "node:fs";
 import React, { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import {
-  NSEAppearanceProvider,
-  useNSEAppearance,
-  useNSEAppearanceSlot,
-  type NSEAppearanceServicePort,
-} from "../../src/NSE/Appearance";
+import { NSEAppearanceProvider, useNSEAppearance, type NSEAppearanceServicePort } from "../../src/NSE/Appearance";
 import { NSEAboutDialog } from "../../src/NSE/Components/NSESystemDialogs";
 import { NSEPreferencesToast } from "../../src/NSE/Components/NSEPreferencesToast";
-import { NSECheckbox, NSERadioGroup, NSETextField } from "../../src/NSE/Controls/Fields/NSEFields";
-import { NSEPicker } from "../../src/NSE/Menus";
+import { NSERadioGroup, NSETextField } from "../../src/NSE/Controls/Fields/NSEFields";
+import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
+import { NSEPopUpButton } from "../../src/NSE/Menus";
 import { NSEOverlayProvider, NSEPopup as NSECanonicalPopup } from "../../src/NSE/Overlays";
 import type { NSEOverlayRuntimePort } from "../../src/NSE/Overlays/overlayTypes";
-import { atmoAppearance } from "../../src/NSE/Themes/Atmo";
+import { atmoTheme } from "../../src/NSE/Appearance/atmo";
 import { NSETooltip } from "../../src/NSE/Tooltips";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 
-const customAppearance = defineNSEAppearance({ id: "custom-test", displayName: "Custom test", recipes: [
-  { slot: "toolbar.item.normal.1x", recipeId: "custom-test.toolbar.normal" },
-  { slot: "toolbar.item.selected.1x", recipeId: "custom-test.toolbar.selected" },
-] });
+const customAppearance = createTestTheme("com.example.custom-test", "Custom test");
 
 afterEach(() => {
   cleanup();
@@ -71,10 +65,6 @@ function Probe({ id }: { readonly id: string }) {
   return <output data-testid={id}>{JSON.stringify(appearance)}</output>;
 }
 
-function SlotProbe({ slot }: { readonly slot: string }) {
-  const projection = useNSEAppearanceSlot(slot);
-  return <output data-testid="slot-probe" {...projection.attributes}>{projection.recipeId ?? "unresolved"}</output>;
-}
 
 function overlayRuntime(runtimeId = "runtime:p11"): NSEOverlayRuntimePort {
   const controller = new AbortController();
@@ -105,7 +95,7 @@ function overlayRuntime(runtimeId = "runtime:p11"): NSEOverlayRuntimePort {
 }
 
 const completeProjection = {
-  "data-nse-appearance": "atmo",
+  "data-nse-theme": "com.syndromatic.atmo",
   "data-nse-chrome": "hud",
   "data-nse-colour-scheme-requested": "auto",
   "data-nse-colour-scheme-resolved": "dark",
@@ -116,7 +106,7 @@ const completeProjection = {
 
 function expectCompleteProjection(element: Element) {
   for (const [name, value] of Object.entries(completeProjection)) {
-    expect(element.getAttribute(name)).toBe(value);
+    expect((name === "data-nse-theme" ? element.closest("[data-nse-theme]") : element)?.getAttribute(name)).toBe(value);
   }
 }
 
@@ -135,10 +125,10 @@ function CanonicalPortalSpecimens() {
         Canonical portal
       </NSECanonicalPopup>
       <NSETooltip id="p11-tooltip" open anchor={anchor} content="Projected tooltip" />
-      <NSEPicker
+      <NSEPopUpButton
         label="Canonical picker"
-        options={[{ value: "one", label: "One" }]}
-        listboxOverlay={{ id: "p11-listbox", parentResponderId: "workspace" }}
+        items={[{ value: "one", title: "One" }]}
+        overlay={{ id: "p11-listbox", parentResponderId: "workspace" }}
       />
     </>
   );
@@ -147,17 +137,17 @@ function CanonicalPortalSpecimens() {
 describe("NSE appearance composition", () => {
 
   it("selects explicit canonical appearance definitions without legacy aliases", () => {
-    expect(atmoAppearance.id).toBe("atmo");
+    expect(atmoTheme.bundleIdentifier).toBe("com.syndromatic.atmo");
 
     render(
-      <NSEAppearanceProvider appearance={customAppearance}>
+      <NSEAppearanceProvider theme={customAppearance}>
         <Probe id="explicit-appearance" />
       </NSEAppearanceProvider>,
     );
 
     const probe = screen.getByTestId("explicit-appearance");
-    expect(JSON.parse(probe.textContent ?? "{}").appearance.id).toBe("custom-test");
-    expect(probe.closest("[data-nse-appearance]")?.getAttribute("data-nse-appearance")).toBe("custom-test");
+    expect(JSON.parse(probe.textContent ?? "{}").theme.bundleIdentifier).toBe("com.example.custom-test");
+    expect(probe.closest("[data-nse-theme]")?.getAttribute("data-nse-theme")).toBe("com.example.custom-test");
   });
 
   it("defines materially distinct high contrast and raster-free forced-colour paint contracts", () => {
@@ -174,15 +164,15 @@ describe("NSE appearance composition", () => {
 
   it("keeps semantic disabled and invalid state when controls change", async () => {
     const { rerender } = render(
-      <NSEAppearanceProvider appearance={atmoAppearance}>
-        <NSETextField label="Name" disabled invalid />
+      <NSEAppearanceProvider theme={atmoTheme}>
+        <NSETextField label="Name" isEnabled={false} invalid />
       </NSEAppearanceProvider>,
     );
     expect(screen.getByLabelText("Name").getAttribute("aria-invalid")).toBe("true");
 
     rerender(
-      <NSEAppearanceProvider appearance={atmoAppearance}>
-        <NSETextField label="Name" disabled invalid />
+      <NSEAppearanceProvider theme={atmoTheme}>
+        <NSETextField label="Name" isEnabled={false} invalid />
       </NSEAppearanceProvider>,
     );
     expect((screen.getByLabelText("Name") as HTMLInputElement).disabled).toBe(true);
@@ -194,7 +184,7 @@ describe("NSE appearance composition", () => {
 
     render(
       <NSEAppearanceProvider
-        appearance={atmoAppearance}
+        theme={atmoTheme}
         chrome="hud"
         colourScheme="auto"
         appearanceService={service("auto", "dark", "runtime:dark")}
@@ -205,59 +195,46 @@ describe("NSE appearance composition", () => {
       </NSEAppearanceProvider>,
     );
 
-    const boundary = screen.getByTestId("child").closest("[data-nse-appearance]");
+    const boundary = screen.getByTestId("child").closest("[data-nse-theme]");
     expect(boundary).not.toBeNull();
     expectCompleteProjection(boundary!);
     expect(document.documentElement.getAttribute("data-user-sentinel")).toBe("preserved");
   });
 
-  it("projects a source-bound slot result without assigning control state ownership", () => {
-    render(
-      <NSEAppearanceProvider appearance={atmoAppearance}>
-        <SlotProbe slot="colour-picker.wheel.normal.1x" />
-      </NSEAppearanceProvider>,
-    );
-
-    const probe = screen.getByTestId("slot-probe");
-    expect(probe.getAttribute("data-nse-appearance-slot")).toBe("colour-picker.wheel.normal.1x");
-    expect(probe.getAttribute("data-nse-appearance-authority")).toBeNull();
-    expect(probe.getAttribute("data-nse-appearance-recipe-id")).toBeNull();
-    expect(probe.getAttribute("data-nse-appearance-state")).toBe("normal");
-  });
 
   it("composes nested providers and independent runtime appearance services", () => {
     render(
       <div>
         <NSEAppearanceProvider
-          appearance={customAppearance}
+          theme={customAppearance}
           chrome="metal"
           appearanceService={service("auto", "dark", "runtime:a")}
         >
           <Probe id="outer" />
-          <NSEAppearanceProvider appearance={atmoAppearance} chrome="hud">
+          <NSEAppearanceProvider theme={atmoTheme} chrome="hud">
             <Probe id="nested" />
           </NSEAppearanceProvider>
         </NSEAppearanceProvider>
-        <NSEAppearanceProvider appearance={atmoAppearance} appearanceService={service("light", "light", "runtime:b")}>
+        <NSEAppearanceProvider theme={atmoTheme} appearanceService={service("light", "light", "runtime:b")}>
           <Probe id="runtime-b" />
         </NSEAppearanceProvider>
       </div>,
     );
 
     expect(JSON.parse(screen.getByTestId("outer").textContent ?? "{}")).toMatchObject({
-      appearance: { id: "custom-test" },
+      theme: { bundleIdentifier: "com.example.custom-test" },
       chrome: "metal",
       requestedColourScheme: "auto",
       resolvedColourScheme: "dark",
     });
     expect(JSON.parse(screen.getByTestId("nested").textContent ?? "{}")).toMatchObject({
-      appearance: { id: "atmo" },
+      theme: { bundleIdentifier: "com.syndromatic.atmo" },
       chrome: "hud",
       requestedColourScheme: "auto",
       resolvedColourScheme: "dark",
     });
     expect(JSON.parse(screen.getByTestId("runtime-b").textContent ?? "{}")).toMatchObject({
-      appearance: { id: "atmo" },
+      theme: { bundleIdentifier: "com.syndromatic.atmo" },
       requestedColourScheme: "light",
       resolvedColourScheme: "light",
     });
@@ -266,7 +243,7 @@ describe("NSE appearance composition", () => {
   it("projects the complete payload through canonical portals", async () => {
     render(
       <NSEAppearanceProvider
-        appearance={atmoAppearance}
+        theme={atmoTheme}
         chrome="hud"
         appearanceService={service("auto", "dark", "runtime:portals")}
         contrast="high"
@@ -285,13 +262,13 @@ describe("NSE appearance composition", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /canonical picker one/i }));
     const listbox = await screen.findByRole("listbox");
-    expectCompleteProjection(listbox.closest("[data-nse-appearance]")!);
+    expectCompleteProjection(listbox.closest("[data-nse-theme]")!);
   });
 
   it("projects the complete payload on direct system dialog and Preferences portals", async () => {
     render(
       <NSEAppearanceProvider
-        appearance={atmoAppearance}
+        theme={atmoTheme}
         chrome="hud"
         appearanceService={service("auto", "dark", "runtime:system")}
         contrast="high"
@@ -315,15 +292,15 @@ describe("NSE appearance composition", () => {
     );
 
     const about = await screen.findByRole("dialog", { name: "Notes" });
-    expectCompleteProjection(about.closest("[data-nse-appearance]")!);
+    expectCompleteProjection(about.closest("[data-nse-theme]")!);
     // The About alert correctly inerts its body siblings while both direct
     // portal specimens are mounted, so inspect the second portal as hidden.
     const preferences = screen.getByRole("dialog", { name: "Preferences", hidden: true });
-    expectCompleteProjection(preferences.closest("[data-nse-appearance]")!);
+    expectCompleteProjection(preferences.closest("[data-nse-theme]")!);
   });
 
   it("retains native mixed checkbox state and exposes stable paint state", () => {
-    render(<NSECheckbox label="Shared" state="mixed" disabled />);
+    render(<NSEButton buttonType="switch" title="Shared" state="mixed" isEnabled={false} />);
     const input = screen.getByRole("checkbox", { name: "Shared" }) as HTMLInputElement;
     expect(input.indeterminate).toBe(true);
     expect(input.getAttribute("aria-checked")).toBe("mixed");
@@ -338,7 +315,7 @@ describe("NSE appearance composition", () => {
         value="standard"
         options={[
           { value: "standard", label: "Standard" },
-          { value: "locked", label: "Locked", disabled: true },
+          { value: "locked", label: "Locked", isEnabled: false },
         ]}
       />,
     );

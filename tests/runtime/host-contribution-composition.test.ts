@@ -32,7 +32,7 @@ import type { DocumentType } from "../../src/SynCloudOS/Documents/documentTypes"
 import type { SynCloudOSDocumentKindMetadata } from "../../src/SynCloudOS/DocumentStore";
 
 const environment = {} as SynCloudOSRuntimeEnvironment;
-const bundle = (id: string) => ({ synWareManifest: { id } } as unknown as TrustedSynWareBundle);
+const bundle = (bundleIdentifier: string) => ({ synWareManifest: { schemaVersion: 1, bundleIdentifier, displayName: bundleIdentifier, version: "1.0.0" } } as unknown as TrustedSynWareBundle);
 const kind = (kindId: string) => ({ kind: kindId, version: 1, displayName: kindId } as SynCloudOSDocumentKindMetadata);
 const type = (id: string) => ({ id } as unknown as DocumentType<unknown, unknown>);
 const adapter = (id: string) => ({ id } as unknown as DocumentStorageAdapter);
@@ -48,26 +48,26 @@ describe("host contribution composition", () => {
     const [first, second] = await prepare(
       ["journal", "tests/journal", () => ({
         runtimeConfig: { persistenceNamespace: "journal" },
-        initialBundles: [bundle("journal")],
+        initialBundles: [bundle("com.example.journal")],
         trustedDocumentKinds: [kind("journal.document")],
         applicationDocuments: { initialTypes: [type("journal")], initialAdapters: [adapter("journal")] },
       })],
       ["calendar", "tests/calendar", () => ({
         runtimeConfig: { presentationTimeoutMs: 500 },
-        initialBundles: [bundle("calendar")],
+        initialBundles: [bundle("com.example.calendar")],
         trustedDocumentKinds: [kind("calendar.event")],
         applicationDocuments: { initialTypes: [type("calendar")], initialAdapters: [adapter("calendar")] },
       })],
     );
 
     const composition = composeSynCloudOSHostContributions([first!, second!], {
-      initialBundles: [bundle("host")],
+      initialBundles: [bundle("com.example.host")],
       trustedDocumentKinds: [kind("host.document")],
       applicationDocuments: { initialTypes: [type("host")], initialAdapters: [adapter("host")] },
     });
 
     expect(Object.keys(composition.runtimeConfig)).toEqual(["persistenceNamespace", "presentationTimeoutMs"]);
-    expect(composition.initialBundles.map((entry) => entry.synWareManifest?.id)).toEqual(["journal", "calendar", "host"]);
+    expect(composition.initialBundles.map((entry) => entry.synWareManifest?.bundleIdentifier)).toEqual(["com.example.journal", "com.example.calendar", "com.example.host"]);
     expect(composition.trustedDocumentKinds.map((entry) => entry.kind)).toEqual(["journal.document", "calendar.event", "host.document"]);
     expect(composition.applicationDocuments?.initialTypes?.map((entry) => entry.id)).toEqual(["journal", "calendar", "host"]);
     expect(composition.applicationDocuments?.initialAdapters?.map((entry) => entry.id)).toEqual(["journal", "calendar", "host"]);
@@ -91,15 +91,15 @@ describe("host contribution composition", () => {
 
   it("rejects duplicate additive IDs across contributions and the host base", async () => {
     const [first, second] = await prepare(
-      ["first", "tests/first", () => ({ initialBundles: [bundle("same")], trustedDocumentKinds: [kind("same")], applicationDocuments: { initialTypes: [type("same")], initialAdapters: [adapter("same")] } })],
-      ["second", "tests/second", () => ({ initialBundles: [bundle("same")], trustedDocumentKinds: [kind("second")], applicationDocuments: { initialTypes: [type("second")], initialAdapters: [adapter("second")] } })],
+      ["first", "tests/first", () => ({ initialBundles: [bundle("com.example.same")], trustedDocumentKinds: [kind("same")], applicationDocuments: { initialTypes: [type("same")], initialAdapters: [adapter("same")] } })],
+      ["second", "tests/second", () => ({ initialBundles: [bundle("com.example.same")], trustedDocumentKinds: [kind("second")], applicationDocuments: { initialTypes: [type("second")], initialAdapters: [adapter("second")] } })],
     );
 
-    expect(() => composeSynCloudOSHostContributions([first!, second!])).toThrow(/Duplicate SynWare bundle ID same/iu);
-    const [single] = await prepare(["single", "tests/single", () => ({ initialBundles: [bundle("bundle")], trustedDocumentKinds: [kind("kind")], applicationDocuments: { initialTypes: [type("type")], initialAdapters: [adapter("adapter")] } })]);
+    expect(() => composeSynCloudOSHostContributions([first!, second!])).toThrow(/Duplicate SynWare bundle ID com\.example\.same/iu);
+    const [single] = await prepare(["single", "tests/single", () => ({ initialBundles: [bundle("com.example.bundle")], trustedDocumentKinds: [kind("kind")], applicationDocuments: { initialTypes: [type("type")], initialAdapters: [adapter("adapter")] } })]);
     expect(() => composeSynCloudOSHostContributions([single!], {
-      initialBundles: [bundle("bundle")],
-    })).toThrow(/Duplicate SynWare bundle ID bundle/iu);
+      initialBundles: [bundle("com.example.bundle")],
+    })).toThrow(/Duplicate SynWare bundle ID com\.example\.bundle/iu);
     expect(() => composeSynCloudOSHostContributions([single!], {
       trustedDocumentKinds: [kind("kind")],
     })).toThrow(/Duplicate trusted document kind ID kind/iu);

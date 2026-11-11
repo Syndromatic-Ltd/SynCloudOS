@@ -1,0 +1,12 @@
+{
+  "mapPins": {
+    "count": 1100,
+    "maximumDisplacement": 0.012085354797624395,
+    "meanDisplacement": 0.004164179220208167
+  },
+  "busts": {
+    "count": 1100,
+    "maximumDisplacement": 0.015185312253620964,
+    "meanDisplacement": 0.005329232802608096
+  }
+}

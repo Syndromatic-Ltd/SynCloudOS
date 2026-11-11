@@ -1,0 +1,2 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run tsc -p docs/superpowers/evidence/2026-11-07-foundation/faithful-values-worker-tsconfig.json --pretty false

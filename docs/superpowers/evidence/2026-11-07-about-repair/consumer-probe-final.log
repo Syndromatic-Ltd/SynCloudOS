@@ -1,0 +1,103 @@
+[
+  {
+    "route": "/journal",
+    "errors": [],
+    "owners": 5,
+    "buttons": [
+      "Reorder applications",
+      "About",
+      "Portfolio Hub",
+      "Experiments",
+      "2Journal",
+      "Software",
+      "",
+      ""
+    ],
+    "native": 33
+  },
+  {
+    "route": "/journal-old",
+    "errors": [],
+    "owners": 3,
+    "buttons": [
+      "Reorder applications",
+      "About",
+      "Portfolio Hub",
+      "Experiments",
+      "2Journal",
+      "Software",
+      ""
+    ],
+    "native": 33
+  },
+  {
+    "route": "/memo-journal",
+    "errors": [],
+    "owners": 21,
+    "buttons": [
+      "About",
+      "Portfolio Hub",
+      "Experiments",
+      "2Journal",
+      "Software",
+      "Return to Webspring",
+      "EditDone",
+      "",
+      "AppView becomes a simple SynCloudOS app mode controller: grid on launch, editor on memo selection, and a return path that saves before showing all memos.",
+      "GridAgent lessons: live search, source counts, a first-slot new memo pad, color cycling from the first memo, and a delete mode that changes commands before touching data.",
+      "EditAgent lessons: trim rich text before save, discard empty new memos, delete emptied existing memos, and keep email as an action rather than a storage concern.",
+      "DbApi and ServiceWrapper map to local SynCloudOS Persistence for this pass. db8, Luna, PalmServiceBridge, app-services, and sync stay documented follow-ups."
+    ],
+    "native": 39
+  },
+  {
+    "route": "/portfolio",
+    "errors": [],
+    "owners": 17,
+    "buttons": [
+      "About",
+      "Portfolio Hub",
+      "Experiments",
+      "2Journal",
+      "Software",
+      "",
+      "Collections",
+      "All Work",
+      "",
+      "",
+      "",
+      "Portfolio Hub\nStageA theatre for designSyndromatIc",
+      "ATMO\nUI 2026Interface studiesSyndromatIc",
+      "SkyPhoneWebspring RenderSyndromatIc",
+      "ATMO\nApp DrawerThe launcher studySyndromatIc",
+      "Icon SquareBLUEPRINTSyndromatIc",
+      "Cirrus\nIconsSeven platesSyndromatIc",
+      "MediaSonicLaunch poster · 2025SyndromatIc",
+      "Portfolio\nEnvironmentVirtual spacesSyndromatIc",
+      "SynCloudOS\nFile DropFrom the archiveSyndromatIc",
+      "All Work",
+      "Design Portfolio",
+      "User Interfaces",
+      "Icon Design",
+      "Videos",
+      "Product Design",
+      "Webspring Archive",
+      "New",
+      "Edit"
+    ],
+    "native": 29
+  },
+  {
+    "route": "/",
+    "errors": [],
+    "owners": 16,
+    "buttons": [
+      "About",
+      "Portfolio Hub",
+      "Experiments",
+      "2Journal",
+      "Software"
+    ],
+    "native": 10
+  }
+]

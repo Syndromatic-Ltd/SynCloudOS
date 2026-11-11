@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/animation-reduced-crossfade.test.ts tests/runtime/fx/animation.test.tsx tests/runtime/fx/animation-layers.test.tsx tests/runtime/nse-tab-transition-lifetime.test.tsx tests/runtime/nse-custom-presentation.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  5 passed (5)
+      Tests  46 passed (46)
+   Start at  09:12:10
+   Duration  8.33s (transform 7.63s, setup 86ms, import 10.99s, tests 541ms, environment 3.70s)
+

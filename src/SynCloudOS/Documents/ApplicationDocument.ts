@@ -18,7 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import type { DocumentActivityObservations } from "./DocumentActivityObservations";
+
 import { type UndoManager, type UndoReservation } from "../Undo";
+import { refuseUnchangedUndoReplay } from "../Undo/undoReplayRefusal";
 import { stageDocumentEdit } from "./DocumentEditTransaction";
 import { createDocumentEditHistoryAction } from "./documentEditHistory";
 import type { DocumentEditOptions, DocumentEditReceipt, DocumentEditResourceRetention, DocumentEditResult } from "./documentEditTypes";
@@ -88,6 +91,8 @@ interface BaseApplicationDocumentOptions<TModel, TSerialized> {
   readonly type: DocumentType<TModel, TSerialized>;
   readonly undoManager: UndoManager;
   readonly recovery: DocumentRecoveryStore;
+  /** Kernel owner instrumentation; does not grant document/update authority. */
+  readonly activity?: DocumentActivityObservations;
   readonly persistenceNamespace: string;
   readonly environment: DocumentRuntimeEnvironment;
   readonly observeError?: (error: unknown, context: string) => void;
@@ -191,6 +196,15 @@ function immutableClone<T>(value: T): T {
   return immutableDocumentValue(value);
 }
 
+class AsynchronousDocumentHistoryError extends DocumentSchemaError {}
+function synchronousHistoryValue<T>(value: T, typeId: string): T {
+  if (value && typeof (value as { then?: unknown }).then === "function") {
+    void Promise.resolve(value).catch(() => undefined);
+    throw new AsynchronousDocumentHistoryError(typeId, "Document history projections must be synchronous and pure.");
+  }
+  return value;
+}
+
 function asDocumentError(error: unknown): DocumentError {
   if (error instanceof DocumentError) return error;
   return new DocumentUnavailableError(
@@ -259,6 +273,8 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
   readonly type: DocumentType<TModel, TSerialized>;
   readonly undoManager: UndoManager;
   readonly #recovery: DocumentRecoveryStore;
+  readonly #activity?: DocumentActivityObservations;
+  #observingClose = false;
   readonly #environment: DocumentRuntimeEnvironment;
   readonly #observeError?: (error: unknown, context: string) => void;
   readonly #recoveryId: string;
@@ -325,11 +341,13 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
       throw new TypeError("Document application IDs must not be empty.");
     }
     if (!options.persistenceNamespace.trim()) throw new TypeError("Document persistence namespaces must not be empty.");
+    const initial = stageDocumentEdit(options.model, options.type, () => options.model);
     this.id = options.id;
     this.applicationId = options.applicationId?.trim() || null;
     this.type = options.type;
     this.undoManager = options.undoManager;
     this.#recovery = options.recovery;
+    this.#activity = options.activity;
     this.#environment = options.environment;
     this.#observeError = options.observeError;
     this.#recoveryId = JSON.stringify([options.persistenceNamespace, options.id]);
@@ -338,8 +356,8 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
       : undefined;
     this.#location = options.location ? immutableClone(options.location) : null;
     this.#adapter = options.adapter;
-    this.#model = immutableClone(options.model);
-    this.#contentIdentity = this.#modelContentIdentity(this.#model);
+    this.#model = initial.model;
+    this.#contentIdentity = initial.contentIdentity;
     this.#savedContentIdentity = this.#contentIdentity;
     this.#documentKind = options.documentKind;
     this.#state = "clean";
@@ -371,8 +389,10 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
         this.#emit();
       },
       options.environment,
+      options.activity ? () => options.activity!.begin("recovery") : undefined,
     );
     this.#editing = new DocumentEditingParticipants({
+      activity: options.activity,
       documentId: this.id, lifecycleSignal: () => this.#mutationAbortController.signal,
       assertAvailable: () => { this.#assertNotClosed(); this.#assertNoTerminalReconciliation(); this.#assertCloseGateAllowsMutation(); },
       transact: (transform, editOptions, admission) => this.transact(transform, editOptions, admission),
@@ -574,6 +594,8 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
       const staged = stageDocumentEdit(previous, this.type, transform, options.validateModel);
       const next = staged.model;
       const identity = staged.contentIdentity;
+      const beforeContent = this.#historyContentIdentity(previous);
+      const afterContent = this.#historyContentIdentity(next);
       const selection = options.selection ? immutableClone(options.selection) : undefined;
       revalidate();
       resourceChange = this.#resourceLifecycle?.stageChange(previous as Readonly<unknown>, next as Readonly<unknown>, { recordHistory: options.recordUndo !== false });
@@ -606,14 +628,15 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
       if (reservation) {
         historyEntryId = reservation.commit(createDocumentEditHistoryAction({
           documentId: this.id, before: previous, after: next, options: { ...options, selection }, retention,
-          apply: (model) => this.#applyUndoModel(model), revision: () => this.#dirtyRevision,
+          apply: (model) => this.#applyUndoModel(model, model === previous ? beforeContent : afterContent), revision: () => this.#dirtyRevision,
           observeError: (error, context) => this.#reportCleanupError(error, context),
         }), options.coalescingKey ? {
           automaticGroup: { kind: "typing", key: options.coalescingKey, boundaryId: `document:${this.id}:${this.#editBoundary}` },
         } : undefined);
       } else {
-        // A non-history model adoption must not leave replay closures for an obsolete base.
-        this.undoManager.clear();
+        // Only a declared, unchanged authored projection can keep old entries.
+        // Replay merges their content with the live non-undoable metadata.
+        if (beforeContent === undefined || beforeContent !== afterContent) this.undoManager.clear();
         this.#editBoundary += 1;
       }
       admitted = true;
@@ -796,10 +819,10 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
         if (!pending.adapter.recoverWriteByIdempotencyKey) {
           throw new DocumentWriteOutcomeUnknownError(pending.request.location, pending.request.idempotencyKey);
         }
-        record = await pending.adapter.recoverWriteByIdempotencyKey<TSerialized>({
+        record = await this.#observeStorageCallback(() => pending.adapter.recoverWriteByIdempotencyKey!<TSerialized>({
           ...pending.request,
           signal: operationSignal,
-        });
+        }), () => throwIfDocumentAborted(operationSignal));
       }
       throwIfDocumentAborted(operationSignal);
       this.#assertTerminalReconciliation(token, authority);
@@ -1247,6 +1270,15 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
   }
 
   markClosed(authority?: DocumentAdoptionAuthority): Promise<void> {
+    if (!this.#activity || this.#observingClose || this.#state === "closed") return this.#markClosedCore(authority);
+    // An observation can synchronously trigger owner disposal; reentrant close
+    // joins the existing structural-close path rather than recursively observing.
+    this.#observingClose = true;
+    try { return this.#activity.track("cleanup", () => this.#markClosedCore(authority)); }
+    finally { this.#observingClose = false; }
+  }
+
+  #markClosedCore(authority?: DocumentAdoptionAuthority): Promise<void> {
     if (authority !== undefined && authority !== documentAdoptionAuthority) {
       throw new TypeError("Document structural close requires controller authority.");
     }
@@ -1604,10 +1636,51 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
     if (this.#closeGateToken && this.#closeGateToken !== closeToken) this.#assertCloseGateAllowsMutation();
   }
 
-  #applyUndoModel(model: TModel): void {
+  #historyContentIdentity(model: TModel): string | undefined {
+    const history = this.type.history;
+    if (!history) return undefined;
+    const content = synchronousHistoryValue(history.captureContent(model), this.type.id);
+    return canonicalDocumentJson(content, this.type.id);
+  }
+
+  #applyUndoModel(model: TModel, expectedContent?: string): void {
     this.#assertEditable();
-    const staged = stageDocumentEdit(this.#model, this.type, () => model);
-    this.#withResourceChange(staged.model, () => this.#applyChangedModel(staged.model, staged.contentIdentity));
+    const revision = this.#dirtyRevision, generation = this.#mutationGeneration;
+    const currentModel = this.#model, state = this.#state;
+    const revalidate = () => {
+      this.#assertWritable(this.#publicationProtected);
+      if (revision !== this.#dirtyRevision || generation !== this.#mutationGeneration) {
+        throw new DocumentUnavailableError("The document changed during history projection.", { retryable: false });
+      }
+    };
+    this.#editInProgress = true;
+    try {
+      let candidate = model;
+      try {
+        if (this.type.history) {
+          candidate = immutableDocumentValue(synchronousHistoryValue(this.type.history.restoreContent(model, currentModel), this.type.id), this.type.id);
+          if (this.#historyContentIdentity(candidate) !== expectedContent) {
+            throw new DocumentSchemaError(this.type.id, "Document history replay must restore the historical authored content.");
+          }
+        }
+        revalidate();
+      } catch (error) {
+        // This narrow proof ends before resource staging and publication.
+        // Unknown asynchronous effects and changed/revoked authority retain
+        // ordinary undo poisoning; only an unchanged synchronous preflight is retryable.
+        let unchanged = Boolean(this.type.history) && !(error instanceof AsynchronousDocumentHistoryError)
+          && this.#model === currentModel && this.#dirtyRevision === revision && this.#mutationGeneration === generation
+          && this.#state === state && !this.#publicationProtected && !this.#deferredClose
+          && !this.#closeGateToken && !this.#activeCloseTransaction && !this.#mutationAbortController.signal.aborted;
+        if (unchanged) { try { this.#assertWritable(); } catch { unchanged = false; } }
+        throw unchanged ? refuseUnchangedUndoReplay(error) : error;
+      }
+      // Writer/schema callbacks are outside the trusted projection proof. A
+      // misbehaving callback may have unknown effects even if the model stayed put.
+      const staged = stageDocumentEdit(currentModel, this.type, () => candidate);
+      revalidate();
+      this.#withResourceChange(staged.model, () => this.#applyChangedModel(staged.model, staged.contentIdentity), revalidate);
+    } finally { this.#finishPublication(); }
   }
 
   #withResourceChange(model: TModel, publish: () => void, beforePublication?: () => void): void {
@@ -1734,7 +1807,7 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
       if ((fenceCallerAbortAfterCommit && operationSignal.aborted) || lifecycleSignal.aborted ||
           (generation !== this.#mutationGeneration && closeToken !== this.#closeGateToken) ||
           this.state === "closed" || this.state === "closing") {
-        await this.#reconcileFencedSave(adapter, location, record, expectedVersion, capturedBase, operationId);
+        await this.#observeStorageCallback(() => this.#reconcileFencedSave(adapter, location, record, expectedVersion, capturedBase, operationId));
       }
       throwIfDocumentAborted(fenceCallerAbortAfterCommit ? operationSignal : lifecycleSignal);
       if (generation !== this.#mutationGeneration && closeToken !== this.#closeGateToken) {
@@ -1790,6 +1863,16 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
     }
   }
 
+  #observeStorageCallback<T>(invoke: () => T, beforeInvoke?: () => void): T {
+    if (!this.#activity) return invoke();
+    return this.#activity.track("storageCallbacks", () => {
+      // A readonly observer can synchronously revoke a caller. Mandatory
+      // already-owned reconciliation passes no new-invocation guard.
+      beforeInvoke?.();
+      return invoke();
+    });
+  }
+
   #awaitTerminalAwareWrite(
     adapter: DocumentStorageAdapter,
     request: DocumentWriteRequest<TSerialized>,
@@ -1798,7 +1881,7 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
   ): Promise<DocumentRecord<TSerialized>> {
     let provider: Promise<DocumentRecord<TSerialized>>;
     try {
-      provider = Promise.resolve(adapter.write<TSerialized>(request));
+      provider = Promise.resolve(this.#observeStorageCallback(() => adapter.write<TSerialized>(request), () => throwIfDocumentAborted(signal)));
     } catch (error) {
       return Promise.reject(error);
     }
@@ -1939,6 +2022,7 @@ export class ApplicationDocument<TModel, TSerialized = TModel> {
       if (this.#recoveryRecord === record) this.#recoveryRecord = null;
       throwIfDocumentAborted(signal);
     });
+    this.#activity?.track("recovery", () => operation);
     // Deletion and writing share the same queue and recovery-version owner.
     this.#recoveryTail = operation.catch(() => undefined);
     try { await operation; }

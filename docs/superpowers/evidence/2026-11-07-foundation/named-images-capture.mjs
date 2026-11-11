@@ -1,0 +1,30 @@
+/* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
+import assert from 'node:assert/strict';
+import {chromium} from 'playwright';
+import {mkdir,writeFile,readFile} from 'node:fs/promises';
+import path from 'node:path';
+const phase=process.argv[2]??'before';const dpr=Number(process.argv[3]??1);
+const output='docs/superpowers/evidence/2026-11-07-named-images';await mkdir(output,{recursive:true});
+const receipt=JSON.parse(await readFile('../site/vendor/framework-receipt.json','utf8'));
+const b=await chromium.launch();const results=[];
+const settle=async p=>{await p.evaluate(()=>document.fonts.ready);await p.waitForTimeout(450)};
+const gallery=async p=>{await p.goto('http://127.0.0.1:5199/__dev/login?to=%2F__syncloudos%2Fnse-gallery');await p.getByRole('searchbox',{name:'Search NSE controls'}).waitFor();await settle(p)};
+const navigate=async(p,name)=>{await p.getByRole('searchbox',{name:'Search NSE controls'}).fill(name);await settle(p);const compact=p.getByRole('tree',{name:'Search results',exact:true});const tree=await compact.isVisible()?compact:p.getByRole('tree',{name:'NSE control sections',exact:true});await tree.focus();await tree.press('Home');await tree.press('ArrowRight');await tree.press('End');await tree.press('Enter');await settle(p)};
+const details=async loc=>loc.evaluate(e=>{const r=e.getBoundingClientRect();const img=e.querySelector('svg,img,[data-nse-image-template]');const s=img?getComputedStyle(img):null;return{bounds:r.toJSON(),label:e.getAttribute('aria-label'),bezel:e.getAttribute('data-bezel-style'),image:img?{tag:img.tagName,bounds:img.getBoundingClientRect().toJSON(),colour:s.color,background:s.backgroundColor,mask:s.maskImage,transform:s.transform}:null}});
+const capture=async(p,key,control)=>{await settle(p);const name=`${phase}-${key}-dpr${dpr}`;await p.screenshot({path:path.join(output,name+'.png'),scale:'css'});if(control){await control.screenshot({path:path.join(output,name+'-control.png'),scale:'css'});return details(control)}};
+try{
+for(const colourScheme of ['light','dark']){
+const ctx=await b.newContext({viewport:{width:390,height:844},colorScheme:colourScheme,reducedMotion:'reduce',deviceScaleFactor:dpr});const p=await ctx.newPage();p.setDefaultTimeout(20000);const errors=[];p.on('pageerror',e=>errors.push(String(e)));const row={colourScheme,dpr,receipt:receipt.commit,errors};
+try{
+await gallery(p);await navigate(p,'Buttons');const back=p.locator('[data-nse-application-navigation-back]');await back.waitFor();row.stage=await capture(p,`stage-${colourScheme}`,back);
+if(phase==='after'){await back.click();await p.getByRole('tree',{name:/Controls sections/}).waitFor();assert.equal(await p.locator('[data-nse-application-navigation-back]').count(),0);row.galleryBackReturnsToSections=true}
+// Preferences is invoked by the system keyboard equivalent, including when navigation hides the app menu.
+await p.keyboard.press('Control+,');await p.locator('.nse-prefs-list').waitFor();await p.locator('.nse-prefs-list').getByText('Appearance',{exact:true}).click();const prefsBack=p.locator('.nse-prefs-back');await prefsBack.waitFor();row.preferences=await capture(p,`preferences-${colourScheme}`,prefsBack);await p.keyboard.press('Escape');await p.locator('.nse-prefs-back').waitFor({state:'hidden'});await p.keyboard.press('Escape');await p.locator('.nse-prefs-backdrop').waitFor({state:'hidden'});
+// A fresh, isolated browser profile supplies real directory handles for the history journey.
+await p.evaluate(async()=>{const root=await navigator.storage.getDirectory();const dir=await root.getDirectoryHandle('NamedImagesEvidence',{create:true});await dir.getDirectoryHandle('Child',{create:true});const db=await new Promise((resolve,reject)=>{const r=indexedDB.open('SynCloudOS.OpenPanel',1);r.onupgradeneeded=()=>r.result.createObjectStore('bookmarks');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});await new Promise((resolve,reject)=>{const tx=db.transaction('bookmarks','readwrite');tx.objectStore('bookmarks').put([{id:'documents',name:'Documents',handle:dir}],'com.syndromatic.nse-control-gallery');tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close()});
+await navigate(p,'Open Panel Media Sources');await p.setViewportSize({width:1440,height:900});await settle(p);await p.getByRole('button',{name:'Choose a picture',exact:true}).click();await p.locator('.nse-open-sources').getByText('Documents',{exact:true}).click();await p.locator('.nse-open-collection').getByText('Child',{exact:true}).dblclick();const history=p.locator('.nse-open-history');await history.waitFor();row.history=await capture(p,`open-history-${colourScheme}`,history);await history.getByRole('button',{name:'Back',exact:true}).click();assert.equal(await history.getByRole('button',{name:'Forward',exact:true}).isEnabled(),true);await capture(p,`open-history-forward-enabled-${colourScheme}`,history);await history.getByRole('button',{name:'Forward',exact:true}).click();
+await p.keyboard.press('Escape');await p.locator('.nse-open-panel').waitFor({state:'hidden'});await p.setViewportSize({width:390,height:844});await settle(p);await p.getByRole('button',{name:'Choose a picture',exact:true}).click();await p.locator('.nse-open-sources').getByText('Documents',{exact:true}).click();const phoneBack=p.locator('.nse-open-phone-header').getByRole('button',{name:'Sources',exact:true});row.phone=await capture(p,`open-phone-${colourScheme}`,phoneBack);await phoneBack.click();assert.equal(await p.locator('.nse-open-panel').getAttribute('data-page'),'sources');await p.keyboard.press('Escape');
+results.push(row);console.log(`${phase} ${colourScheme} DPR${dpr} captured`);
+}catch(e){row.failure=String(e);row.body=(await p.locator('body').innerText()).slice(-3500);await p.screenshot({path:path.join(output,`${phase}-${colourScheme}-dpr${dpr}-failure.png`)});results.push(row);throw e}finally{await writeFile(path.join(output,`${phase}-results-dpr${dpr}.json`),JSON.stringify(results,null,2));await ctx.close()}
+}
+}finally{await b.close()}

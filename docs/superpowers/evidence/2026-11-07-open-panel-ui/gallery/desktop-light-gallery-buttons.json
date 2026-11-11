@@ -1,0 +1,28 @@
+{
+  "receipt": {
+    "commit": "c4f9adfbfdf0afb3ae9643a71bb4f6ee306bb497",
+    "archiveSha256": "1efd58d8cf08ba3c2ea09f7aad078a0f98a6a0dd1124229fc06e67ae2d72b22f"
+  },
+  "buttons": [
+    {
+      "title": "New draft",
+      "bezel": "rounded",
+      "tone": "medium",
+      "size": null,
+      "height": 52,
+      "fill": "linear-gradient(rgba(167, 167, 167, 0.82) 0px, rgba(167, 167, 167, 0.82) 2px, color(srgb 0.57905 0.57905 0.57905 / 0.846667) 10px, color(srgb 0.488784 0.488784 0.488784 / 0.909804) 17px, color(srgb 0.538196 0.538196 0.538196 / 0.909804) calc(100% - 12px), rgba(149, 149, 149, 0.91) calc(100% - 3px), rgba(97, 97, 97, 0.82) calc(100% - 2px), rgba(97, 97, 97, 0.82) 100%)",
+      "colour": "rgb(255, 255, 255)"
+    },
+    {
+      "title": "Save",
+      "bezel": "rounded",
+      "tone": "affirmative",
+      "size": null,
+      "height": 52,
+      "fill": "linear-gradient(rgb(106, 208, 86) 0px, rgb(106, 208, 86) 2px, color(srgb 0.333333 0.73451 0.257255) 10px, color(srgb 0.205412 0.609333 0.134824) 17px, color(srgb 0.251294 0.655216 0.180706) calc(100% - 12px), rgb(75, 178, 57) calc(100% - 3px), rgb(34, 113, 22) calc(100% - 2px), rgb(34, 113, 22) 100%)",
+      "colour": "rgb(255, 255, 255)"
+    }
+  ],
+  "errors": [],
+  "consoleErrors": []
+}

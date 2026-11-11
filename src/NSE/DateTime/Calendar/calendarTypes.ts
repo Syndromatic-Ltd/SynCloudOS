@@ -29,7 +29,7 @@ export type NSECalendarSelection =
 export type NSECalendarNavigationUnit = "month" | "year" | "decade";
 export interface NSECalendarNavigationRequest { readonly unit: NSECalendarNavigationUnit; readonly direction: -1 | 1; readonly reason: "button" | "keyboard" | "swipe" }
 export interface NSECalendarEventIndicator { readonly id: string; readonly label: string; readonly tone?: "neutral" | "accent" | "warning" | "critical"; readonly count?: number }
-export interface NSECalendarViewProps {
+export interface NSEGraphicalCalendarProps {
   readonly "aria-label": string;
   readonly locale: string;
   readonly timeZone: string;
@@ -48,7 +48,7 @@ export interface NSECalendarViewProps {
   onVisibleMonthChange?(month: NSECalendarMonth, request: NSECalendarNavigationRequest): void;
   onSelectionChange?(selection: NSECalendarSelection & { readonly reason?: string }): void;
 }
-export interface NSEClockViewProps {
+export interface NSEGraphicalClockProps {
   readonly "aria-label": string;
   readonly locale: string;
   readonly timeZone: string;
@@ -56,7 +56,7 @@ export interface NSEClockViewProps {
   readonly value: NSEPlainTime;
   readonly showSeconds?: boolean;
   readonly disambiguation?: "earlier" | "later" | "reject";
-  readonly disabled?: boolean;
+  readonly isEnabled?: boolean;
   readonly reducedMotion?: boolean;
   readonly showValidationMessage?: boolean;
   readonly minuteStep?: number;

@@ -18,7 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AUFXAudioRecorder, type AUFXAudioRecorderEvent, type AUFXAudioRecorderOptions } from "../../FX/AudioFX/AUFXAudioRecorder";
+import { NSEData } from "../../Foundation/NSEData";
+
+
+import { AUFXAudioRecorder, createHostAUFXAudioRecorder, type AUFXAudioRecorderEvent, type AUFXAudioRecorderOptions } from "../../FX/AudioFX/AUFXAudioRecorder";
 import {
   AUFXAudioSession,
   type AUFXAudioDevice,
@@ -29,6 +32,8 @@ import {
   type AUFXAudioRouteRecoveryStatus,
   type AUFXAudioSessionPort,
   type AUFXAudioSessionState,
+  type AUFXAudioSessionCategory,
+  type AUFXAudioSessionType,
 } from "../../FX/AudioFX/AUFXAudioSession";
 import { AUFXAudioInputNode, type AUFXAudioInputNodeState } from "../../FX/AudioFX/AUFXAudioInputNode";
 import type { AUFXAudioFormat } from "../../FX/AudioFX/AUFXAudioFormat";
@@ -40,6 +45,10 @@ export interface BrowserAudioCapturePlatform {
   now(): number;
   subscribeDeviceChange(listener: () => void): () => void;
   setOutputDevice?(deviceId: string, signal?: AbortSignal): Promise<string>;
+  readonly captureAvailable?: boolean;
+  readonly sessionTypeOwner?: object;
+  getSessionType?(): AUFXAudioSessionType;
+  setSessionType?(type: AUFXAudioSessionType): void;
   decodeRecording?(data: Blob, signal: AbortSignal): Promise<{ duration: number; frameCount: number; sampleRate: number; channelCount: number }>;
 }
 const MIME_TYPES = ["audio/webm;codecs=opus", "audio/ogg;codecs=opus", "audio/mp4", "audio/webm"];
@@ -61,7 +70,43 @@ export function connectBrowserAUFXInput(token: object, capability: object, conte
   catch (error) { dispose(); throw error; }
   return Object.freeze({ setPaused, dispose });
 }
+interface SessionTypeOwners {
+  readonly owners: Map<object, AUFXAudioSessionType>;
+  baseline: AUFXAudioSessionType;
+  applied: AUFXAudioSessionType;
+}
+const sessionTypeOwners = new WeakMap<object, SessionTypeOwners>();
+function acquireSessionType(platform: BrowserAudioCapturePlatform, owner: object, type: AUFXAudioSessionType) {
+  const key = platform.sessionTypeOwner ?? platform;
+  let state = sessionTypeOwners.get(key);
+  if (!state) { const baseline = platform.getSessionType?.() ?? "auto"; state = { owners: new Map(), baseline, applied: baseline }; }
+  // Do not publish ownership if the browser rejects this type.
+  platform.setSessionType!(type);
+  state.owners.delete(owner); state.owners.set(owner, type); state.applied = type;
+  sessionTypeOwners.set(key, state);
+}
+function releaseSessionType(platform: BrowserAudioCapturePlatform, owner: object) {
+  const key = platform.sessionTypeOwner ?? platform, state = sessionTypeOwners.get(key);
+  if (!state || !state.owners.has(owner)) return;
+  const wasCurrent = [...state.owners.keys()].at(-1) === owner;
+  state.owners.delete(owner);
+  if (!state.owners.size) sessionTypeOwners.delete(key);
+  if (!wasCurrent) return;
+  // A native/external owner may have changed the shared type: never overwrite it.
+  if (platform.getSessionType && platform.getSessionType() !== state.applied) return;
+  const next = [...state.owners.values()].at(-1) ?? state.baseline;
+  platform.setSessionType!(next); state.applied = next;
+}
 class BrowserAudioSession implements AUFXAudioSessionPort {
+  #category: AUFXAudioSessionCategory | null = null;
+  get category() { return this.#category; }
+  async setCategory(category: AUFXAudioSessionCategory) {
+    if (this.#state === "disposed") throw new DOMException("Audio session ended.", "AbortError");
+    if (!this.#platform?.setSessionType) throw new DOMException("Audio session types are unavailable.", "NotSupportedError");
+    const types: Record<AUFXAudioSessionCategory, AUFXAudioSessionType> = { ambient: "ambient", soloAmbient: "transient-solo", playback: "playback", record: "play-and-record", playAndRecord: "play-and-record" };
+    if (!Object.hasOwn(types, category)) throw new TypeError("Unknown audio session category.");
+    acquireSessionType(this.#platform, this, types[category]); this.#category = category; this.notify();
+  }
   readonly #platform: BrowserAudioCapturePlatform | null;
   readonly #listeners = new Set<() => void>();
   readonly #pending = new Set<AbortController>();
@@ -104,7 +149,7 @@ class BrowserAudioSession implements AUFXAudioSessionPort {
   get state() { if (this.#state === "disposed" || this.#state === "interrupted") return this.#state; if (this.#recorder?.state === "recording") return "recording"; if (this.#recorder?.state === "paused") return "paused"; return this.#state; }
   get route() { return this.#route; }
   get interruptionReason() { return this.#interruptionReason; }
-  get capabilities() { return Object.freeze({ capture: !!this.#platform && this.#state !== "disposed", inputSelection: !!this.#platform && this.#state !== "disposed", outputSelection: !!this.#platform?.setOutputDevice && this.#state !== "disposed", mimeTypes: Object.freeze(this.#platform ? MIME_TYPES.filter(type => this.#platform!.isTypeSupported(type)) : []) }); }
+  get capabilities() { return Object.freeze({ capture: !!this.#platform && this.#platform.captureAvailable !== false && this.#state !== "disposed", inputSelection: !!this.#platform && this.#platform.captureAvailable !== false && this.#state !== "disposed", outputSelection: !!this.#platform?.setOutputDevice && this.#state !== "disposed", sessionType: !!this.#platform?.setSessionType && this.#state !== "disposed", mimeTypes: Object.freeze(this.#platform ? MIME_TYPES.filter(type => this.#platform!.isTypeSupported(type)) : []) }); }
   private assertActive() { if (this.#state === "disposed") throw new Error("Audio session is disposed."); if (!this.#platform) throw new Error("Audio capture is unavailable."); }
   private notify() { for (const listener of this.#listeners) { try { listener(); } catch { /* Observer failures cannot retain microphone authority. */ } } }
   subscribe(listener: () => void) { this.assertActive(); this.#listeners.add(listener); return () => { this.#listeners.delete(listener); }; }
@@ -222,7 +267,7 @@ class BrowserAudioSession implements AUFXAudioSessionPort {
     if (!mimeType || !this.#platform!.isTypeSupported(mimeType)) throw new Error("Requested recording format is unavailable.");
     const native = this.#platform!.createRecorder(this.#stream, { mimeType });
     let unsubscribe: (() => void) | null = null;
-    const recorder = new AUFXAudioRecorder({
+    const recorder = createHostAUFXAudioRecorder({
       mimeType: native.mimeType || mimeType,
       now: () => this.#platform!.now(),
       subscribe: handler => {
@@ -263,6 +308,7 @@ class BrowserAudioSession implements AUFXAudioSessionPort {
   }
   dispose() {
     if (this.#state === "disposed") return; this.#state = "disposed"; this.#generation++; this.#outputGeneration++; this.#deviceObservationGeneration++;
+    if (this.#category !== null) { try { if (this.#platform) releaseSessionType(this.#platform, this); } catch { /* Teardown still releases microphone resources. */ } this.#category = null; }
     for (const controller of this.#pending) { try { controller.abort(); } catch { /* Continue aborting every pending acquisition. */ } } this.#pending.clear();
     for (const controller of this.#pendingOutputs) { try { controller.abort(); } catch { /* Continue aborting every pending route selection. */ } } this.#pendingOutputs.clear();
     try { this.#recorder?.cancel(); } catch { /* Capture release continues below. */ } this.#recorder = null; const input = this.#input; this.#input = null; if (input && !input.disposed) { input.disposed = true; input.state = "disposed"; browserInputs.delete(input.token); for (const listener of [...input.listeners]) { try { listener(); } catch {} } input.listeners.clear(); } this.releaseInput(); try { this.#removeOwnerAbort?.(); } catch { /* Continue host listener teardown. */ } this.#removeOwnerAbort = null; try { this.#removeDeviceChange?.(); } catch { /* Continue host listener teardown. */ } this.#removeDeviceChange = null; this.notify(); this.#listeners.clear();
@@ -278,15 +324,21 @@ export function createBrowserAudioCapturePlatform(browserNavigator: Navigator, b
   const mediaDevices = browserNavigator.mediaDevices;
   const native = browserWindow as unknown as { MediaRecorder?: typeof MediaRecorder; OfflineAudioContext?: typeof OfflineAudioContext };
   const Recorder = native.MediaRecorder;
-  if (!mediaDevices?.getUserMedia || !Recorder) return null;
+  const session = (browserNavigator as Navigator & { audioSession?: { type: AUFXAudioSessionType } }).audioSession;
+  const captureAvailable = !!mediaDevices?.getUserMedia && !!Recorder;
+  if (!captureAvailable && !session && !setOutputDevice) return null;
   return {
-    getUserMedia: constraints => mediaDevices.getUserMedia(constraints),
-    enumerateDevices: () => mediaDevices.enumerateDevices(),
-    createRecorder: (stream, options) => new Recorder(stream, options),
-    isTypeSupported: mimeType => Recorder.isTypeSupported(mimeType),
+    captureAvailable,
+    getUserMedia: constraints => captureAvailable ? mediaDevices.getUserMedia(constraints) : Promise.reject(new DOMException("Audio capture is unavailable.", "NotSupportedError")),
+    enumerateDevices: () => mediaDevices?.enumerateDevices?.() ?? Promise.resolve([]),
+    createRecorder: (stream, options) => new Recorder!(stream, options),
+    isTypeSupported: mimeType => Recorder?.isTypeSupported(mimeType) ?? false,
     now: () => browserWindow.performance.now() / 1000,
-    subscribeDeviceChange: listener => { mediaDevices.addEventListener("devicechange", listener); return () => mediaDevices.removeEventListener("devicechange", listener); },
+    subscribeDeviceChange: listener => { mediaDevices?.addEventListener("devicechange", listener); return () => mediaDevices?.removeEventListener("devicechange", listener); },
     setOutputDevice,
+    ...(session ? { sessionTypeOwner: session, getSessionType: () => session.type,
+      setSessionType(type: AUFXAudioSessionType) { session.type = type; },
+    } : {}),
     decodeRecording: native.OfflineAudioContext ? async (data, signal) => {
       signal.throwIfAborted(); const bytes = await data.arrayBuffer(); signal.throwIfAborted();
       const context = new native.OfflineAudioContext!(1, 1, 48000);

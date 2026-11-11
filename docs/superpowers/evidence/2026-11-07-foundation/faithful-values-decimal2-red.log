@@ -1,0 +1,26 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/foundation-faithful-decimal.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/foundation-faithful-decimal.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/foundation-faithful-decimal.test.ts [ tests/runtime/foundation-faithful-decimal.test.ts ]
+TSConfckParseError: parsing C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tsconfig.app.json failed: SyntaxError: Expected ',' or ']' after array element in JSON at position 3285 (line 103 column 45)
+  Plugin: vite:esbuild
+  File: C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/setup/runtimeEnvironment.ts
+ ❯ ../../../../../../Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/vite/dist/node/chunks/config.js:5719:9
+
+Caused by: SyntaxError: Expected ',' or ']' after array element in JSON at position 3285 (line 103 column 45)
+ ❯ ../../../../../../Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/vite/dist/node/chunks/config.js:5712:23
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  19:08:02
+   Duration  140ms (transform 0ms, setup 0ms, import 0ms, tests 0ms, environment 0ms)
+

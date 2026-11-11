@@ -22,8 +22,8 @@ import React, { useSyncExternalStore } from "react";
 import { createRoot } from "react-dom/client";
 import { NSETextView, TextEditingSession, createUndoableNSETextOwner, attributedContent, paragraph, textRun } from "@syndromatic/syncloudos/nse/text";
 const owner = createUndoableNSETextOwner({ flowId: "body", content: attributedContent([paragraph([textRun("Hello 👩‍💻 café")]), paragraph([textRun("Second paragraph")])]) });
-const first = new TextEditingSession({ id: "first", owner, history: owner.history });
-const second = new TextEditingSession({ id: "second", owner, history: owner.history });
+const first = new TextEditingSession({ id: "first", textOwner: owner, history: owner.history });
+const second = new TextEditingSession({ id: "second", textOwner: owner, history: owner.history });
 function App() {
   const snapshot = useSyncExternalStore(first.subscribe, first.getSnapshot);
   return <main><h1>Framework text editing</h1><NSETextView session={first} label="First text view" onInputError={error => { document.querySelector("#error")!.textContent = String(error); }} /><NSETextView session={second} label="Second text view" /><button onClick={() => { first.select(0, 5); first.applyAttributes({ bold: true }); }}>Format first word</button><button onClick={() => void first.requestHistory("undo")}>Undo</button><button onClick={() => void first.requestHistory("redo")}>Redo</button><button onClick={() => first.setEditable(!snapshot.editable)}>Toggle read only</button><output id="canonical">{snapshot.model.text}</output><output id="revision">{snapshot.model.revision}</output><output id="error" role="status" /></main>;

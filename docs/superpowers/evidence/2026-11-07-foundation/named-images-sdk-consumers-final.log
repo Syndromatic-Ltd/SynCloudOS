@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/synapp-sdk-package.test.ts tests/runtime/nse-file-browser-packed.test.ts tests/runtime/foundation-packed-consumer.test.ts tests/runtime/text-system-packed-consumer.test.ts tests/runtime/synapp-manifest-validator-generated.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  5 passed (5)
+      Tests  29 passed (29)
+   Start at  13:01:10
+   Duration  153.77s (transform 10.07s, setup 61ms, import 6.39s, tests 195.31s, environment 899ms)
+

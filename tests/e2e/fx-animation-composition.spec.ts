@@ -23,10 +23,11 @@ import { expect, test } from "playwright/test";
 test("real Chromium projects FX-04 image geometry and implicit action presentation at DPR1/2", async ({ page }) => {
   await page.goto("/");
   const result = await page.evaluate(async () => {
-    const [animation, browser, graphics] = await Promise.all([
+    const [animation, browser, graphics, host] = await Promise.all([
       import("/src/FX/AnimationFX/public.ts"),
       import("/src/SynCloudOS/PlatformAdapters/BrowserAnimationAdapter.ts"),
       import("/src/FX/GraphicsFX/public.ts"),
+      import("/src/FX/AnimationFX/host.ts"),
     ]);
     const scheduler = {
       now: () => 0,
@@ -36,7 +37,7 @@ test("real Chromium projects FX-04 image geometry and implicit action presentati
     };
     const element = document.createElement("div");
     document.body.append(element);
-    const layer = new animation.AFXLayer(
+    const layer = host.createAFXLayer(
       new browser.BrowserAnimationLayerSurface(element),
       scheduler,
     );

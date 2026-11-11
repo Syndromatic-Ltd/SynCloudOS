@@ -25,25 +25,32 @@ test("real Chromium executes FX-05 portable composition at DPR1/2", async ({ pag
   const result = await page.evaluate(async () => {
     const animation = await import("/src/FX/AnimationFX/public.ts");
     const graphics = await import("/src/FX/GraphicsFX/public.ts");
+    const host = await import("/src/FX/AnimationFX/host.ts");
     const scheduler = { now: () => 1, reducedMotion: false, suspended: false, requestFrame: () => () => {} };
+    const makeSurface = () => ({
+      supportedProperties: ["frame", "opacity", "transform", "backgroundColour", "boxShadow"],
+      supportedContentKinds: ["image", "shape", "gradient", "text", "emitter", "tiled"],
+      supportsReplication: true,
+      apply() {}, attach() {}, detach() {}, setMask() {}, dispose() {},
+      createSublayerSurface: makeSurface,
+    });
     const makeLayer = (width: number, height: number) => {
-      const surface = {
-        supportedProperties: ["frame", "opacity", "transform", "backgroundColour", "boxShadow"],
-        supportedContentKinds: ["image", "shape", "gradient", "text", "emitter", "tiled"],
-        supportsReplication: true,
-        apply() {}, attach() {}, detach() {}, setMask() {}, dispose() {},
-      };
-      const layer = new animation.AFXLayer(surface, scheduler);
+      const layer = host.createAFXLayer(makeSurface(), scheduler);
+      layer.frame = { x: 0, y: 0, width, height };
+      return layer;
+    };
+    const makeSublayer = (width: number, height: number) => {
+      const layer = new animation.AFXLayer();
       layer.frame = { x: 0, y: 0, width, height };
       return layer;
     };
     const root = makeLayer(8, 6);
-    const card = makeLayer(4, 4);
+    const card = makeSublayer(4, 4);
     card.position = { x: 4, y: 3 };
     card.backgroundColour = graphics.GFXColour.rgba(1, 0, 0, 1);
     card.opacity = 0.6;
     root.addSublayer(card);
-    const mask = makeLayer(4, 4);
+    const mask = makeSublayer(4, 4);
     mask.position = { x: 2, y: 2 };
     mask.backgroundColour = graphics.GFXColour.rgba(1, 1, 1, 1);
     mask.transform = animation.AFXTransform3D.perspective(70).multiply(animation.AFXTransform3D.rotation(Math.PI / 8, 0, 1, 0));

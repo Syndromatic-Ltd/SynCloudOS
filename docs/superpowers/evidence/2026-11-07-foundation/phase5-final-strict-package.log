@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "kind": "package-foundation",
+  "commit": "dd1a6ddcef5d94028af931f8f3175b632a2af115",
+  "archiveSha256": "a97ca257683d731116e7be17d0ffdb1164ec99146ca7cbc8e770fabe2ccf336e",
+  "integrity": "sha512-AVYT0GStJ0OH83UbPR/Y1YI56IEYXEDbERCtRDGWNtYdF6PAdllsL1aGvmugGcc8uck656c8UkUKpXdpVlHa8w==",
+  "sourceSha256": "0e256e225ee78a9323cdf8dc8f25b914657969ad3b9deab611b48cd1857e9d33",
+  "resourcesSha256": "741d4992dad679405cda2879ed34dd21c23237917ad1c9733e6416de625e4158",
+  "resourceFiles": 2336,
+  "installedOutsideRepository": true,
+  "types": {
+    "NodeNext": {
+      "passed": true,
+      "modules": 1230,
+      "skipLibCheck": false,
+      "independent": true
+    },
+    "Bundler": {
+      "passed": true,
+      "modules": 1230,
+      "skipLibCheck": false,
+      "independent": true
+    }
+  },
+  "families": [
+    {
+      "entry": "fx/animation",
+      "import": "passed",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/graphics",
+      "import": "passed",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/image",
+      "import": "passed",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/text",
+      "import": "passed",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/audio",
+      "import": "passed",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/haptics",
+      "import": "passed",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/motion",
+      "import": "passed",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/media",
+      "import": "passed",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/video",
+      "import": "passed",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/midi",
+      "import": "passed",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/location",
+      "import": "passed",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/lumina",
+      "import": "passed",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/compression",
+      "import": "passed",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/network",
+      "import": "passed",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/crypto",
+      "import": "passed",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/bluetooth",
+      "import": "passed",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/nfc",
+      "import": "passed",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/speech",
+      "import": "passed",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/contacts",
+      "import": "passed",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/pass",
+      "import": "passed",
+      "types": "passed"
+    },
+    {
+      "entry": "fx/xr",
+      "import": "passed",
+      "types": "passed"
+    }
+  ],
+  "behavior": "not-run",
+  "browser": "not-run",
+  "nativeDevice": "not-run",
+  "passed": true,
+  "receiptPath": "C:\\Users\\Kavish Krishnakumar\\AppData\\Local\\Temp\\synware-package-foundation-6VURgG\\package-foundation.json",
+  "consumerRoot": "C:\\Users\\Kavish Krishnakumar\\AppData\\Local\\Temp\\synware-package-foundation-6VURgG"
+}

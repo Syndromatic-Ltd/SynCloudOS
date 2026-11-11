@@ -1,0 +1,57 @@
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+ ❯ tests/runtime/nse-theme-contract-drift.test.tsx (681 tests | 4 failed) 2956ms
+   × renders supplemental configured-toolbar-50-false 5ms
+   × renders supplemental configured-toolbar-50-true 2ms
+   × renders supplemental configured-toolbar-500-false 1ms
+   × renders supplemental configured-toolbar-500-true 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-theme-contract-drift.test.tsx > renders supplemental configured-toolbar-50-false
+ FAIL  tests/runtime/nse-theme-contract-drift.test.tsx > renders supplemental configured-toolbar-50-true
+ FAIL  tests/runtime/nse-theme-contract-drift.test.tsx > renders supplemental configured-toolbar-500-false
+ FAIL  tests/runtime/nse-theme-contract-drift.test.tsx > renders supplemental configured-toolbar-500-true
+TypeError: NSE toolbar composition must be 'children' or 'configured'.
+ ❯ NSEToolbarView src/NSE/Toolbars/NSEToolbarView.tsx:450:11
+    448|   const rawProps = props as Record<string, unknown>;
+    449|   if (rawProps.composition !== "children" && rawProps.composition !== …
+    450|     throw new TypeError("NSE toolbar composition must be 'children' or…
+       |           ^
+    451|   }
+    452|   if (props.composition === "children") {
+ ❯ Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25904:20
+ ❯ renderWithHooks node_modules/react-dom/cjs/react-dom-client.development.js:7662:22
+ ❯ updateFunctionComponent node_modules/react-dom/cjs/react-dom-client.development.js:10166:19
+ ❯ beginWork node_modules/react-dom/cjs/react-dom-client.development.js:11778:18
+ ❯ runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:874:13
+ ❯ performUnitOfWork node_modules/react-dom/cjs/react-dom-client.development.js:17641:22
+ ❯ workLoopSync node_modules/react-dom/cjs/react-dom-client.development.js:17469:41
+ ❯ renderRootSync node_modules/react-dom/cjs/react-dom-client.development.js:17450:11
+ ❯ performWorkOnRoot node_modules/react-dom/cjs/react-dom-client.development.js:16583:35
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 677 passed (681)
+   Start at  22:13:15
+   Duration  11.31s (transform 5.53s, setup 25ms, import 7.31s, tests 2.96s, environment 799ms)
+
+file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/scripts/synware/build-theme-contract.mjs:32
+  if (result.status !== 0) throw new Error("Theme contract generation failed.");
+                                 ^
+
+Error: Theme contract generation failed.
+    at generateNSEThemeContract (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/scripts/synware/build-theme-contract.mjs:32:34)
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/scripts/synware/build-theme-contract.mjs:35:90
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.22.1

@@ -18,7 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
+import { nseControlHooks, nseStateHooks } from "../../Theme/contract/hooks";
+import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
+
 import type { NSELevelIndicatorProps } from "./valueControlTypes";
 
 function levelState(props: NSELevelIndicatorProps): "normal" | "warning" | "critical" {
@@ -32,24 +34,19 @@ function levelState(props: NSELevelIndicatorProps): "normal" | "warning" | "crit
  * independent track and segment presentation slots it consumes.
  */
 export function NSELevelIndicator(props: NSELevelIndicatorProps) {
+  const theme = useNSEThemeInteraction<HTMLElement>(props.isEnabled !== false);
+  const hooks = nseControlHooks({ control: "level-indicator", enabled: props.isEnabled !== false, hovered: theme.hovered, focused: theme.focused, variants: { type: props.mode ?? "continuous" } });
   const state = levelState(props);
-  const trackState = props.disabled ? "disabled" : "normal";
-  const segmentState = props.disabled ? "disabled" : state;
-  const trackAppearance = useNSEAppearanceSlot(
-    nseAppearanceSlot("level-indicator", "track", trackState),
-  );
-  const segmentAppearance = useNSEAppearanceSlot(
-    nseAppearanceSlot("level-indicator", "segment", segmentState),
-  );
+
 
   if (props.mode === "rating") {
     return (
       <div
         role="radiogroup"
         aria-label={props["aria-label"]}
-        data-nse-control="level-indicator"
-        data-state={state}
-        {...trackAppearance.attributes}
+        data-nse-part="track" {...hooks} {...theme.events}
+        data-state={state} data-nse-level={state}
+
       >
         {Array.from({ length: Math.max(0, Math.floor(props.maximum - props.minimum)) }, (_, index) => {
           const value = props.minimum + index + 1;
@@ -60,9 +57,10 @@ export function NSELevelIndicator(props: NSELevelIndicatorProps) {
               role="radio"
               aria-label={String(value)}
               aria-checked={value === props.value}
-              disabled={props.disabled}
+              disabled={(props.isEnabled === false)}
               data-nse-part="segment"
-              {...segmentAppearance.attributes}
+              {...nseStateHooks({ selected: value === props.value, enabled: props.isEnabled !== false })}
+
               onClick={() => props.onValueChange?.(value, "commit")}
             >
               ★
@@ -79,11 +77,11 @@ export function NSELevelIndicator(props: NSELevelIndicatorProps) {
       min={props.minimum}
       max={props.maximum}
       value={props.value}
-      data-nse-control="level-indicator"
-      data-state={state}
-      {...trackAppearance.attributes}
+      data-nse-part="track" {...hooks} {...theme.events}
+      data-state={state} data-nse-level={state}
+
     >
-      <span data-nse-part="segment" {...segmentAppearance.attributes}>{props.value}</span>
+      <span data-nse-part="segment" >{props.value}</span>
     </meter>
   );
 }

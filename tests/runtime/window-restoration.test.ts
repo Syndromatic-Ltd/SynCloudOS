@@ -23,7 +23,8 @@ import type {
   WindowRestorationPersistencePort,
   WindowRestorationSnapshot,
 } from "../../src/SynCloudOS/Windows";
-import { resolveWindowPersistenceNamespace } from "../../src/SynCloudOS/Windows";
+import { resolveWindowPersistenceNamespace, resolveWindowPresentation } from "../../src/SynCloudOS/Windows";
+import { createTestRuntimeEnvironment } from "./helpers";
 import {
   createWindowTestDependencies,
   standardWindow,
@@ -39,6 +40,59 @@ function memoryPersistence(): WindowRestorationPersistencePort & { readonly valu
 }
 
 describe("window workspace restoration", () => {
+  it.each(["modal", "sheet", "popover"] as const)("projects a %s inside one reported region without changing its normal bounds", async role => {
+    const f = createWindowTestDependencies();
+    const controller = f.manager.create(standardWindow("book-" + role, { role, anchor: role === "popover" ? { id: "generated-book-origin", rect: { x: 780, y: 40, width: 40, height: 32 }, edge: "block-end", alignment: "center", offset: 0 } : null, bounds: { x: 500, y: 100, width: 500, height: 500 }, restorationKey: null }));
+    const normal = controller.geometryState.normalBounds, original = controller.record.bounds;
+    const screen = { ...f.screen.getCurrentSnapshot(), geometryState: "current" as const, breakpoint: "regular" as const,
+      layoutViewport: { x: 0, y: 0, width: 900, height: 700 }, visualViewport: { x: 0, y: 0, width: 900, height: 700 }, workArea: { x: 0, y: 0, width: 900, height: 700 },
+      viewportFeatures: { posture: "folded" as const, segments: [{ x: 0, y: 0, width: 440, height: 700 }, { x: 460, y: 0, width: 440, height: 700 }] } };
+    const projected = resolveWindowPresentation(controller.record, screen, controller.geometryState);
+    expect(projected.bounds).toEqual({ x: 468, y: 100, width: 424, height: 500 });
+    expect(projected.movable).toBe(false); expect(projected.resizable).toBe(false);
+    expect(controller.record.bounds).toBe(original); expect(controller.geometryState.normalBounds).toBe(normal);
+    expect(resolveWindowPresentation(controller.record, { ...screen, viewportFeatures: { posture: "continuous", segments: null } }, controller.geometryState).bounds).toBe(original);
+    await f.cleanup();
+  });
+  it.each(["standard", "panel"] as const)("does not force an ordinary %s into a region", async role => {
+    const f = createWindowTestDependencies(); const controller = f.manager.create(standardWindow("free-" + role, { role, level: role === "panel" ? "floating" : "normal" }));
+    const screen = { ...f.screen.getCurrentSnapshot(), viewportFeatures: { posture: "folded" as const, segments: [{ x: 0, y: 0, width: 710, height: 900 }, { x: 730, y: 0, width: 710, height: 900 }] } };
+    const before = resolveWindowPresentation(controller.record, { ...screen, viewportFeatures: { posture: "continuous" as const, segments: null } });
+    expect(resolveWindowPresentation(controller.record, screen).bounds).toEqual(before.bounds); await f.cleanup();
+  });
+
+  it.each([{ zoomed: false, minimised: false }, { zoomed: true, minimised: false }, { zoomed: true, minimised: true }])("restores controller and window state %j while initial geometry is unavailable", async ({ zoomed, minimised }) => {
+    const source = createWindowTestDependencies();
+    const original = source.manager.create(standardWindow("pending-geometry"));
+    await source.manager.open(original.id);
+    if (zoomed) source.manager.zoom(original.id);
+    if (minimised) source.manager.minimise(original.id);
+    const saved = source.manager.createRestorationSnapshot();
+    await source.cleanup();
+    const environment = createTestRuntimeEnvironment();
+    const layout = vi.spyOn(environment.layoutViewport, "getSnapshot").mockReturnValue({ width: 0, height: 0 });
+    const target = createWindowTestDependencies({ environment });
+    expect(target.screen.getSnapshot().geometryState).toBe("unavailable");
+    const restored = await target.manager.restoreWorkspace(saved);
+    expect(restored.failures).toEqual([]);
+    const controller = target.manager.select("pending-geometry");
+    const normal = controller.geometryState.normalBounds;
+    expect(controller.record.state).toBe(minimised ? "minimised" : "open");
+    expect(controller.geometryState.zoomed).toBe(zoomed);
+    expect(resolveWindowPresentation(controller.record, target.screen.getCurrentSnapshot(), controller.geometryState).visible).toBe(false);
+    layout.mockReturnValue({ width: 1000, height: 760 });
+    expect(resolveWindowPresentation(controller.record, target.screen.getCurrentSnapshot(), controller.geometryState).visible).toBe(true);
+    if (minimised) target.manager.restore(controller.id);
+    if (zoomed) {
+      expect(resolveWindowPresentation(controller.record, target.screen.getCurrentSnapshot(), controller.geometryState).bounds).toEqual(target.screen.getCurrentSnapshot().workArea);
+      target.manager.zoom(controller.id);
+      expect(controller.record.bounds).toEqual(normal);
+    }
+    expect(target.manager.select(controller.id)).toBe(controller);
+    expect(controller.geometryState.normalBounds).toBe(normal);
+    await target.cleanup();
+  });
+
   it("uses the exact durable default namespace and preserves supplied whitespace", () => {
     expect(resolveWindowPersistenceNamespace()).toBe("syncloudos");
     expect(resolveWindowPersistenceNamespace("  tenant windows  ")).toBe("  tenant windows  ");

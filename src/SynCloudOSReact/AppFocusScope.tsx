@@ -1,6 +1,6 @@
 /*
  * SynCloudOS
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ * Copyright Â© 2026 Syndromatic Ltd. All rights reserved.
  *
  * Designed by Kavish Krishnakumar in Manchester.
  *
@@ -18,11 +18,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { cloneElement, isValidElement, useCallback, useContext, useLayoutEffect, useRef, type ReactElement, type ReactNode, type Ref } from "react";
+import { revealKeyboardTarget } from "./focusVisibility";
+import { cloneElement, isValidElement, useCallback, useContext, useInsertionEffect, useLayoutEffect, useMemo, useRef, type ReactElement, type ReactNode, type Ref } from "react";
 import type { FocusScopeKind } from "../SynCloudOS/SynCloudOS";
 import { SynWareRuntimeContext } from "./runtimeContext";
 import type { SynWareRuntime } from "./appRuntimeTypes";
 import { isWithinNSEFocusOrigin } from "../NSE/hostComposition";
+import { useResponderHierarchy } from "./responderHierarchy";
+import { FocusScopeIdContext } from "./focusScopeContext";
 
 export interface AppFocusScopeOptions {
   readonly scopeId: string;
@@ -51,9 +54,21 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
   }, [childRef]);
   const modal = options.modal ?? options.kind === "modal";
   const trapFocus = options.trapFocus ?? modal;
+  const hierarchy = useResponderHierarchy();
+  const parentResponderId = options.parentResponderId
+    ?? (hierarchy.runtimeId === `app:${runtime.app.bundleIdentifier}` ? hierarchy.responderId : null)
+    ?? `application:${runtime.app.bundleIdentifier}`;
+  const scopeLease = useRef<ReturnType<typeof runtime.focus.openScope> | null>(null);
+  const configuration = useMemo(() => ({ runtime, scopeId: options.scopeId, parentScopeId: options.parentScopeId, parentResponderId }), [modal, options.kind, options.parentScopeId, options.restoreFocus, options.scopeId, parentResponderId, runtime, runtimeId, trapFocus]);
+  const latestConfiguration = useRef(configuration);
+  useInsertionEffect(() => { latestConfiguration.current = configuration; }, [configuration]);
   useLayoutEffect(() => {
-    const parentResponderId = options.parentResponderId ?? `application:${runtime.app.id}`;
-    const handle = runtime.focus.openScope({
+    if (runtime.signal.aborted) return;
+    let live = true;
+    // Resolve the declared parent through the same mounted focus authority;
+    // inheriting a child controller never grants authority to another app.
+    const newlyOpened = scopeLease.current === null;
+    const handle = scopeLease.current ?? runtime.focus.openScope({
       id: options.scopeId,
       kind: options.kind,
       parentScopeId: options.parentScopeId,
@@ -61,14 +76,16 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
       modal,
       trapFocus,
     });
-    runtime.focus.requestFocus(parentResponderId);
+    scopeLease.current = handle;
+    handle.updatePresentation({ kind: options.kind, modal, trapFocus });
+    if (newlyOpened) runtime.focus.requestFocus(parentResponderId);
     const root = rootRef.current;
     const doc = root?.ownerDocument ?? (typeof document === "undefined" ? null : document);
     const focusables = () => Array.from(root?.querySelectorAll<HTMLElement>(focusableSelector) ?? [])
-      .filter((element) => !element.hasAttribute("disabled") && element.getAttribute("aria-hidden") !== "true");
+      .filter((element) => !element.hasAttribute("disabled") && !element.closest("[inert], [aria-hidden='true']"));
     let redirectingFocus = false;
     const onFocus = (event: FocusEvent) => {
-      if (redirectingFocus || !trapFocus || !root || !(event.target instanceof Node) || isWithinNSEFocusOrigin(root, event.target)) return;
+      if (runtime.signal.aborted || redirectingFocus || !trapFocus || !root || !(event.target instanceof Node) || isWithinNSEFocusOrigin(root, event.target)) return;
       // A surface opened from inside this one (a listbox or popover portalled
       // out of the sheet) nests its scope here; focus entering it stays in.
       const targetScope = event.target instanceof Element
@@ -84,7 +101,7 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
       // app-owned trap cannot recurse through its own redirect.
       redirectingFocus = true;
       try {
-        target.focus({ preventScroll: true });
+        target.focus({ preventScroll: true, focusVisible: true } as FocusOptions);
       } finally {
         queueMicrotask(() => {
           redirectingFocus = false;
@@ -92,39 +109,56 @@ export function AppFocusScope({ runtime, runtimeId, options, children }: { reado
       }
     };
     const onKeyDown = (event: KeyboardEvent) => {
-      if (!trapFocus || event.key !== "Tab" || event.altKey || event.ctrlKey || event.metaKey || !root) return;
+      if (runtime.signal.aborted || !trapFocus || event.key !== "Tab" || event.altKey || event.ctrlKey || event.metaKey || !root) return;
       const targets = focusables();
       if (targets.length === 0) return;
       const current = doc?.activeElement instanceof HTMLElement ? targets.indexOf(doc.activeElement) : -1;
       if (current < 0 || (!event.shiftKey && current === targets.length - 1) || (event.shiftKey && current === 0)) {
         event.preventDefault();
-        targets[event.shiftKey ? targets.length - 1 : 0]?.focus({ preventScroll: true });
+        const target = targets[event.shiftKey ? targets.length - 1 : 0];
+        if (target) {
+          target.focus({ preventScroll: true, focusVisible: true } as FocusOptions);
+          revealKeyboardTarget(root, target);
+        }
       }
     };
     if (trapFocus) doc?.addEventListener("focusin", onFocus, true);
     root?.addEventListener("keydown", onKeyDown, true);
-    queueMicrotask(() => {
-      if (root && doc?.activeElement && !isWithinNSEFocusOrigin(root, doc.activeElement)) focusables()[0]?.focus({ preventScroll: true });
-    });
-    return () => {
-      redirectingFocus = false;
+    const releaseDOMListeners = () => {
       doc?.removeEventListener("focusin", onFocus, true);
       root?.removeEventListener("keydown", onKeyDown, true);
+    };
+    runtime.signal.addEventListener("abort", releaseDOMListeners, { once: true });
+    queueMicrotask(() => {
+      if (!live || runtime.signal.aborted) return;
+      if (root && doc?.activeElement && !isWithinNSEFocusOrigin(root, doc.activeElement)) focusables()[0]?.focus({ preventScroll: true, focusVisible: true } as FocusOptions);
+    });
+    return () => {
+      live = false;
+      redirectingFocus = false;
+      runtime.signal.removeEventListener("abort", releaseDOMListeners);
+      releaseDOMListeners();
       // The mount owner aborts before React removes descendant scopes. The
       // app focus facade is intentionally revoked at that point, so its
       // logical close must not call back into a dead capability.
-      if (!runtime.signal.aborted) handle.close({ restore: options.restoreFocus });
+      const next = latestConfiguration.current;
+      const reconfiguring = next !== configuration && next.runtime === runtime && next.scopeId === options.scopeId &&
+        next.parentScopeId === options.parentScopeId && next.parentResponderId === parentResponderId;
+      if (!reconfiguring) {
+        scopeLease.current = null;
+        if (!runtime.signal.aborted) handle.close({ restore: options.restoreFocus });
+      }
     };
-  }, [modal, options.kind, options.parentResponderId, options.parentScopeId, options.restoreFocus, options.scopeId, runtime, runtimeId, trapFocus]);
+  }, [modal, options.kind, options.parentScopeId, options.restoreFocus, options.scopeId, parentResponderId, runtime, runtimeId, trapFocus]);
 
   const host = <div ref={rootRef} data-syncloudos-runtime-owner={runtimeId} data-syncloudos-focus-scope={options.scopeId}>{children}</div>;
-  if (!options.asChild) return host;
+  if (!options.asChild) return <FocusScopeIdContext value={options.scopeId}>{host}</FocusScopeIdContext>;
   if (!child) throw new Error("App focus scope asChild requires one React element.");
-  return cloneElement(child, {
+  return <FocusScopeIdContext value={options.scopeId}>{cloneElement(child, {
     ref: composedRootRef,
     "data-syncloudos-runtime-owner": runtimeId,
     "data-syncloudos-focus-scope": options.scopeId,
-  } as never);
+  } as never)}</FocusScopeIdContext>;
 }
 
 /** Kept as a tiny hook-level assertion for callers that accidentally render

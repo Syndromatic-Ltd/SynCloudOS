@@ -1,0 +1,35 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/foundation-faithful-date.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/foundation-faithful-date.test.ts (5 tests | 1 failed) 27ms
+   × rejects unsupported calendars when parsing rather than treating them as Gregorian 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/foundation-faithful-date.test.ts > rejects unsupported calendars when parsing rather than treating them as Gregorian
+AssertionError: expected [Function] to throw error matching /Gregorian/i but got 'Unsupported date parsing field: era'
+
+- Expected:
+/Gregorian/i
+
++ Received:
+"Unsupported date parsing field: era"
+
+ ❯ tests/runtime/foundation-faithful-date.test.ts:31:68
+     29| it("rejects unsupported calendars when parsing rather than treating th…
+     30|   const f = new NSEDateFormatter({locale:"en-US-u-ca-buddhist", timeZo…
+     31|   expect(() => f.date(f.string(new Date("2026-08-09T00:00:00Z")))).toT…
+       |                                                                    ^
+     32| });
+     33|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  19:14:16
+   Duration  273ms (transform 46ms, setup 33ms, import 31ms, tests 27ms, environment 0ms)
+

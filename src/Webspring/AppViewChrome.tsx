@@ -18,9 +18,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useCallback, useEffect, useRef, type CSSProperties, type FocusEventHandler, type ReactNode, type Ref } from "react";
+import { NSEWindowLayoutContext, NSEWindowLayoutModel, useNSEContentLayoutProperties } from "../NSE/hostComposition";
+import { useNSEDeferredDisposal } from "../NSE/hostComposition";
+
+import { useCallback, useLayoutEffect, useMemo, useEffect, useRef, type CSSProperties, type FocusEventHandler, type ReactNode, type Ref } from "react";
 import { useNSEPresenceExiting, useNSEPresentation } from "../NSE/Animation";
-import type { SynCloudOSAppFrameManifest } from "../SynCloudOS/SynCloudOS";
+import { nseTopBarHeightCssValue } from "../NSE/hostComposition";
+import { isWithinNSEFocusOrigin } from "../NSE/hostComposition";
+import type { SynCloudOSAppFrameManifest, SynCloudOSPresentationTraits } from "../SynCloudOS/SynCloudOS";
 import type { ApplicationStagePartMotion } from "./ApplicationStage.transitions";
 
 /** A stage element's AnimationFX presentation, and who hears it finish. */
@@ -44,6 +49,7 @@ function isStandardFrame(frame: SynCloudOSAppFrameManifest) {
 }
 
 type RootProps = {
+  safeAreaInsets?: SynCloudOSPresentationTraits["safeAreaInsets"];
   zIndex: number;
   multiSwitchRole?: "incoming" | "outgoing" | null;
   staged?: boolean;
@@ -62,6 +68,7 @@ type RootProps = {
 
 function Root({
   zIndex,
+  safeAreaInsets,
   multiSwitchRole,
   staged = false,
   keyWindow = false,
@@ -73,6 +80,10 @@ function Root({
   ...hostProps
 }: RootProps) {
   const frameRef = useRef<HTMLDivElement | null>(null);
+  const layout = useMemo(() => new NSEWindowLayoutModel(), []);
+  useNSEDeferredDisposal(layout);
+  useLayoutEffect(() => frameRef.current ? layout.connectRoot(frameRef.current) : undefined, [layout]);
+  useLayoutEffect(() => { if (safeAreaInsets) layout.setLogicalScreenInsets(safeAreaInsets); }, [layout, safeAreaInsets]);
   const setFrame = useCallback((element: HTMLDivElement | null) => {
     frameRef.current = element;
     if (typeof rootRef === "function") rootRef(element);
@@ -82,20 +93,32 @@ function Root({
   const exiting = useNSEPresenceExiting();
   const inactive = staged || multiSwitchRole === "outgoing" || exiting;
   useEffect(() => {
-    // A key window receives keyboard input. When the focused stage is
-    // presented (a staged frame is inert) and nothing in the document holds
-    // focus, focus the frame so the runtime routes keys to its application.
-    // Existing focus is never taken, and no keyboard focus ring is painted.
+    // Hand keyboard ownership from this runtime's launcher or previous stage
+    // to the presented key stage, without taking focus from its own editor,
+    // its portalled controls, or another runtime.
     if (inactive || !keyWindow) return;
     const frame = frameRef.current, document = frame?.ownerDocument, active = document?.activeElement;
-    if (!frame || (active && active !== document.body)) return;
-    frame.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
+    if (!frame) return;
+    if (active && active !== document.body) {
+      if (isWithinNSEFocusOrigin(frame, active)) return;
+      const owner = frame.dataset.syncloudosRuntimeOwner;
+      if (!owner || active.closest<HTMLElement>("[data-syncloudos-runtime-owner]")?.dataset.syncloudosRuntimeOwner !== owner) return;
+    }
+    // The window's content takes focus, not a view controller drawn in its title bar (an accessory).
+    const inTitlebar = (element: Element) => element.closest(".nse-window-titlebar-accessory-slot, .nse-window-titlebar-accessories, .nse-document-titlebar");
+    const firstOutsideTitlebar = (selector: string) => [...frame.querySelectorAll<HTMLElement>(selector)].find((element) => !inTitlebar(element));
+    const target = firstOutsideTitlebar("[data-nse-initial-focus]")
+      ?? firstOutsideTitlebar("[data-nse-view-controller]")
+      ?? frame;
+    target.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
   }, [inactive, keyWindow]);
   return (
+    <NSEWindowLayoutContext.Provider value={layout}>
     <div
       {...hostProps}
       ref={setFrame}
       tabIndex={-1}
+      data-nse-control="app-view-chrome" data-nse-part="background" data-nse-key-window={keyWindow ? undefined : "false"}
       className={`webspring-app-view-frame ${multiSwitchRole ? `is-multiswitch-${multiSwitchRole}` : ""} ${className ?? ""}`}
       data-multiswitch-role={multiSwitchRole ?? undefined}
       // A staged frame is mounted and painted but not yet presented: it must not take pointer
@@ -107,6 +130,7 @@ function Root({
     >
       {children}
     </div>
+    </NSEWindowLayoutContext.Provider>
   );
 }
 
@@ -122,23 +146,29 @@ function Surface({
   presentation?: AppViewPresentation;
 }) {
   const surfaceRef = useRef<HTMLDivElement>(null);
+  const contentLayoutProperties = useNSEContentLayoutProperties();
   // A role change starts its presentation during layout, so the outgoing
   // plane shows its first 3D pose in the same frame its role changes.
   useStagePresentation(surfaceRef, presentation);
   const surfaceClass = isStandardFrame(frame)
     ? "webspring-app-view-surface-generic"
     : "webspring-app-view-surface-custom";
+  // The floating bar and the neutral initial-content inset share the bar's
+  // own height token. The viewport/background remain full size beneath the
+  // glass; a custom or absent bar contributes no system overlay inset.
+  const topBarHeight = frame.topBar === "standard"
+    ? nseTopBarHeightCssValue(frame.material === "metal" ? "atmoMetal" : "atmoCumulus")
+    : "0px";
 
   return (
     <div
       ref={surfaceRef}
-      className={`webspring-app-view-surface ${surfaceClass}`}
-      data-frame-layout={frame.layout}
+      data-nse-part="content" className={`webspring-app-view-surface ${surfaceClass}`}
       data-frame-material={frame.material}
       data-frame-top-bar={frame.topBar}
       data-nse-material={frame.material}
       data-multiswitch-role={multiSwitchRole ?? undefined}
-      style={presentation?.motion.style}
+      style={{ ...contentLayoutProperties, ...presentation?.motion.style, "--webspring-app-top-bar-height": topBarHeight } as CSSProperties}
     >
       {children}
     </div>

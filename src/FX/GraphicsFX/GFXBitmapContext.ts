@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SynCloudOSLifecycleRecord } from "../../SynCloudOS/fxRuntimeContracts";
 import { GFXShadow } from "./GFXShadow";
 import { filterShadowAlpha, sampleShadowAlpha } from "./bitmapShadow";
 import type { GFXBlendMode, GFXShadowValue, GFXFillRule } from "./graphicsTypes";
@@ -62,6 +63,7 @@ const bitmapBlendModes: readonly GFXBlendMode[] = ["normal", "multiply", "screen
 const inside = (p: GFXPoint, r: GFXRect) => p.x >= r.x && p.y >= r.y && p.x < r.x + r.width && p.y < r.y + r.height;
 /** Portable RGBA8 raster surface. Coverage antialiasing is opt-in; it owns no DOM or runtime authority. */
 export class GFXBitmapContext {
+    readonly #lifecycle = new SynCloudOSLifecycleRecord({ kind: "GFXBitmapContext" });
     readonly width: number;
     readonly height: number;
     readonly scale: number;
@@ -90,23 +92,23 @@ export class GFXBitmapContext {
         this.#bytes = new Uint8Array(this.pixelWidth * this.pixelHeight * 4);
         Object.freeze(this);
     }
-    #assert(): Uint8Array {
+    #assert(operation: string): Uint8Array {
         if (!this.#bytes)
-            throw new Error("Bitmap context is disposed.");
+            throw this.#lifecycle.error({ code: "GFX_BITMAP_CONTEXT_DISPOSED", operation: operation });
         return this.#bytes;
     }
-    #target(): Uint8Array {
-        this.#assert();
+    #target(operation: string): Uint8Array {
+        this.#assert(operation);
         return this.#groups.at(-1)?.bytes ?? this.#bytes!;
     }
     save(): void {
-        this.#assert();
+        this.#assert("save");
         if (this.#stack.length >= 64)
             throw new RangeError("Bitmap state depth exceeded.");
         this.#stack.push(this.#state);
     }
     restore(): void {
-        this.#assert();
+        this.#assert("restore");
         const activeGroup = this.#groups.at(-1);
         if (activeGroup && this.#stack.length <= activeGroup.stackDepth)
             throw new Error("Bitmap restore has no matching save inside the transparency group.");
@@ -116,55 +118,55 @@ export class GFXBitmapContext {
         this.#state = state;
     }
     setTransform(transform: GFXAffineTransform): void {
-        this.#assert();
+        this.#assert("setTransform");
         const t = normaliseAffineTransform(transform);
         invertTransform(t);
         this.#state = { ...this.#state, transform: t };
     }
     convertPointToDeviceSpace(point: GFXPoint): GFXPoint {
-        this.#assert();
+        this.#assert("convertPointToDeviceSpace");
         const transformed = transformPoint(point, this.#state.transform);
         return Object.freeze({ x: transformed.x * this.scale, y: transformed.y * this.scale });
     }
     convertPointFromDeviceSpace(point: GFXPoint): GFXPoint {
-        this.#assert();
+        this.#assert("convertPointFromDeviceSpace");
         if (!Number.isFinite(point.x) || !Number.isFinite(point.y))
             throw new RangeError("Device point must be finite.");
         return transformPoint({ x: point.x / this.scale, y: point.y / this.scale }, invertTransform(this.#state.transform));
     }
     setAlpha(alpha: number): void {
-        this.#assert();
+        this.#assert("setAlpha");
         if (!Number.isFinite(alpha) || alpha < 0 || alpha > 1)
             throw new RangeError("Alpha must be in [0,1].");
         this.#state = { ...this.#state, alpha };
     }
     /** Use sixteen premultiplied coverage samples per output pixel. */
     setInterpolation(mode: GFXInterpolation): void {
-        this.#assert();
+        this.#assert("setInterpolation");
         if (mode !== "nearest" && mode !== "linear")
             throw new TypeError("Unsupported image interpolation.");
         this.#state = { ...this.#state, interpolation: mode };
     }
     setAntialiasing(enabled: boolean): void {
-        this.#assert();
+        this.#assert("setAntialiasing");
         if (typeof enabled !== "boolean")
             throw new TypeError("Antialiasing requires a boolean.");
         this.#state = { ...this.#state, antialiasing: enabled };
     }
     setBlendMode(blendMode: GFXBlendMode): void {
-        this.#assert();
+        this.#assert("setBlendMode");
         if (!bitmapBlendModes.includes(blendMode))
             throw new TypeError("Unsupported bitmap blend mode.");
         this.#state = { ...this.#state, blendMode };
     }
     setPatternPhase(phase: GFXPoint): void {
-        this.#assert();
+        this.#assert("setPatternPhase");
         if (!Number.isFinite(phase.x) || !Number.isFinite(phase.y))
             throw new RangeError("Pattern phase must be finite.");
         this.#state = { ...this.#state, patternPhase: Object.freeze({ x: phase.x, y: phase.y }) };
     }
     beginTransparencyGroup(options: GFXTransparencyGroupOptions = {}): GFXTransparencyGroup {
-        this.#assert();
+        this.#assert("beginTransparencyGroup");
         if (this.#groups.length >= 16)
             throw new RangeError("Transparency group depth exceeded.");
         const alpha = options.alpha ?? this.#state.alpha, blendMode = options.blendMode ?? this.#state.blendMode;
@@ -172,19 +174,19 @@ export class GFXBitmapContext {
             throw new RangeError("Invalid bitmap transparency group.");
         const token = new GFXTransparencyGroup(`bitmap:${++this.#groupSequence}`, alpha, blendMode);
         const stateBefore = this.#state;
-        this.#groups.push({ token, bytes: new Uint8Array(this.#assert().length), stateBefore, stackDepth: this.#stack.length });
+        this.#groups.push({ token, bytes: new Uint8Array(this.#assert("beginTransparencyGroup").length), stateBefore, stackDepth: this.#stack.length });
         this.#state = { ...stateBefore, alpha: 1, blendMode: "normal" };
         return token;
     }
     endTransparencyGroup(group: GFXTransparencyGroup): void {
-        this.#assert();
+        this.#assert("endTransparencyGroup");
         const entry = this.#groups.at(-1);
         if (!entry || entry.token !== group)
             throw new Error("Transparency group has no matching active scope.");
         if (this.#stack.length !== entry.stackDepth)
             throw new Error("Bitmap transparency group has unbalanced save/restore state.");
         this.#groups.pop();
-        const target = this.#target();
+        const target = this.#target("endTransparencyGroup");
         this.#state = { ...entry.stateBefore, alpha: 1, blendMode: group.blendMode };
         for (let index = 0; index < entry.bytes.length; index += 4) {
             const alpha = entry.bytes[index + 3]! / 255;
@@ -196,7 +198,7 @@ export class GFXBitmapContext {
     }
     /** Offset, blur and spread are surface logical units. Blur's Gaussian sigma is blur / 2. */
     setShadow(value: GFXShadowValue | null): void {
-        this.#assert();
+        this.#assert("setShadow");
         const shadow = value === null ? null : value instanceof GFXShadow ? value : new GFXShadow(value);
         if (shadow && shadow.spread < 0)
             throw new RangeError("Bitmap shadow spread must be non-negative.");
@@ -205,7 +207,7 @@ export class GFXBitmapContext {
     clip(path: GFXPath, rule: GFXFillRule = "nonzero"): void {
         if (rule !== "nonzero" && rule !== "evenodd")
             throw new TypeError("Unsupported clip rule.");
-        this.#assert();
+        this.#assert("clip");
         if (!(path instanceof GFXPath))
             throw new TypeError("Clip requires GFXPath.");
         if (this.#state.clips.length >= 64)
@@ -213,7 +215,7 @@ export class GFXBitmapContext {
         this.#state = { ...this.#state, clips: [...this.#state.clips, { path, rule, inverse: invertTransform(this.#state.transform) }] };
     }
     clipToMask(image: GFXImage, rect: GFXRect): void {
-        this.#assert();
+        this.#assert("clipToMask");
         if (!(image instanceof GFXImage))
             throw new TypeError("Mask requires GFXImage.");
         if (this.#state.masks.length >= 64)
@@ -312,8 +314,8 @@ export class GFXBitmapContext {
                 coverage += this.#coverage({ x: (x + (sx + 0.5) / grid) / this.scale, y: (y + (sy + 0.5) / grid) / this.scale }, false);
         return coverage / (grid * grid);
     }
-    #draw(sample: (point: GFXPoint) => GFXColour | null, complexity = 1): void {
-        const bytes = this.#target(), inverse = invertTransform(this.#state.transform);
+    #draw(operation: string, sample: (point: GFXPoint) => GFXColour | null, complexity = 1): void {
+        const bytes = this.#target(operation), inverse = invertTransform(this.#state.transform);
         const samples = this.#state.antialiasing ? 16 : 1;
         const clipWork = this.#state.clips.reduce((n, clip) => n + clip.path.commands.length, 0) + this.#state.masks.length;
         const baseWork = this.pixelWidth * this.pixelHeight * samples * (complexity + clipWork);
@@ -356,7 +358,7 @@ export class GFXBitmapContext {
     fillPath(path: GFXPath, paint: GFXBitmapPaint, rule: GFXFillRule = "nonzero"): void {
         if (rule !== "nonzero" && rule !== "evenodd")
             throw new TypeError("Unsupported fill rule.");
-        this.#assert();
+        this.#assert("fillPath");
         if (!(path instanceof GFXPath) || !(paint instanceof GFXColour || paint instanceof GFXGradient || paint instanceof GFXPattern || paint instanceof GFXShading))
             throw new TypeError("Typed path and bitmap paint required.");
         const work = path.commands.length + this.#state.clips.reduce((n, c) => n + c.path.commands.length, 0);
@@ -364,20 +366,20 @@ export class GFXBitmapContext {
             throw new RangeError("Raster path exceeds the portable work budget.");
         const paintBounds = path.bounds;
         const phase = this.#state.patternPhase;
-        this.#draw(point => path.contains(point, rule) ? paint instanceof GFXColour ? paint : paint instanceof GFXGradient ? paint.sampleAt(point, paintBounds) : paint instanceof GFXPattern ? paint.sample({ x: point.x - phase.x, y: point.y - phase.y }) : paint.sample(point) : null, path.commands.length);
+        this.#draw("fillPath", point => path.contains(point, rule) ? paint instanceof GFXColour ? paint : paint instanceof GFXGradient ? paint.sampleAt(point, paintBounds) : paint instanceof GFXPattern ? paint.sample({ x: point.x - phase.x, y: point.y - phase.y }) : paint.sample(point) : null, path.commands.length);
     }
     strokePath(path: GFXPath, paint: GFXBitmapPaint, options: GFXStrokeOptions): void {
-        this.#assert();
+        this.#assert("strokePath");
         if (!(path instanceof GFXPath))
             throw new TypeError("Stroke requires GFXPath.");
         this.fillPath(path.stroked(options), paint);
     }
     drawImage(image: GFXImage, rect: GFXRect): void {
-        this.#assert();
+        this.#assert("drawImage");
         if (!(image instanceof GFXImage))
             throw new TypeError("Drawing requires GFXImage.");
         const bounds = normaliseRect(rect);
-        this.#draw(point => {
+        this.#draw("drawImage", point => {
             if (!inside(point, bounds))
                 return null;
             const c = image.sample({ x: (point.x - bounds.x) / bounds.width * image.width, y: (point.y - bounds.y) / bounds.height * image.height }, { interpolation: this.#state.interpolation });
@@ -385,14 +387,15 @@ export class GFXBitmapContext {
         });
     }
     clear(): void {
-        this.#target().fill(0);
+        this.#target("clear").fill(0);
     }
     makeImage(): GFXImage {
         if (this.#groups.length)
             throw new Error("Cannot snapshot a bitmap while a transparency group is open.");
-        return new GFXImage({ width: this.pixelWidth, height: this.pixelHeight, alpha: "straight", colourSpace: "srgb", data: this.#assert() });
+        return new GFXImage({ width: this.pixelWidth, height: this.pixelHeight, alpha: "straight", colourSpace: "srgb", data: this.#assert("makeImage") });
     }
     dispose(): void {
+        this.#lifecycle.markDisposed("explicit");
         this.#bytes = null;
         this.#stack = [];
         this.#groups = [];

@@ -32,17 +32,18 @@ export function NSESheetView(props: NSEWindowViewProps) {
       dirty={props.dirty}
       dispatchCommand={props.dispatchCommand}
       controls={["close"]}
-      appearanceRecipe="window.standard.head.sheet-solid"
+
     />
   ) : null;
   return (
     <NSEWindowView
       {...props}
+      hasShadow
       className="nse-window-view--sheet"
-      appearanceRecipe="window.standard.frame"
+
       titleBar={titleBar}
       focusScope="modal"
-      shadowRecipe="window.sheet.shadow"
+
       onKeyDown={windowEscapeCloseHandler(props, props.record.style.includes("closable"))}
     />
   );

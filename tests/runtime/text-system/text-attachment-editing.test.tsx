@@ -37,7 +37,7 @@ const picture = (extra: Partial<Parameters<typeof attachmentRun>[0]> = {}) => at
 const resolver = () => ({ src: source, naturalWidth: 800, naturalHeight: 600 });
 const mount = (run: NSEAttributedAttachmentRun, onDropFiles?: (files: readonly File[], location: number) => boolean | void) => {
   const owner = createInMemoryNSETextOwner({ content: attributedContent([paragraph([textRun("Before "), run, textRun(" after")], { alignment: "centre" })]) });
-  const session = new TextEditingSession({ id: "view", owner });
+  const session = new TextEditingSession({ id: "view", textOwner: owner });
   const { container } = render(<NSETextView session={session} label="Document" attachmentResolver={resolver} onDropFiles={onDropFiles} />);
   const textbox = container.querySelector<HTMLElement>("[role=textbox]")!;
   return { owner, session, textbox, cell: () => textbox.querySelector<HTMLElement>(".nse-text-attachment")! };

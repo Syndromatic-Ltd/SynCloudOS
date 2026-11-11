@@ -52,6 +52,7 @@ export const NSEClipView = forwardRef<HTMLDivElement, NSEClipViewProps>(function
 
   return (
     <div
+      data-nse-control="clip-view" data-nse-part="viewport"
       {...props}
       ref={setRef}
       data-scroll-host={scrollHost ? "true" : "false"}

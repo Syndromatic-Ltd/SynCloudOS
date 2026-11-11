@@ -28,8 +28,8 @@ const bodyOwner = createSynWareNSETextOwner<MyModel>({
   writeContent: (model, body) => ({ ...model, flows: { ...model.flows, body } }),
 });
 const history = documents.getUndoManager(documentId);
-const body = new TextEditingSession({ id: "body", owner: bodyOwner, documentId, history, signal });
-const mirror = new TextEditingSession({ id: "mirror", owner: bodyOwner, documentId, history, signal });
+const body = new TextEditingSession({ id: "body", textOwner: bodyOwner, documentId, history, ownerSignal: signal });
+const mirror = new TextEditingSession({ id: "mirror", textOwner: bodyOwner, documentId, history, ownerSignal: signal });
 const binding = bindSynWareNSETextEditingSession({ documents, documentId, session: body, lifetime: { signal } });
 ```
 

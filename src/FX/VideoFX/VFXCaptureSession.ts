@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import type { VFXContentFilter } from "./VFXContentFilter";
+
+export type VFXCaptureAuthorizationStatus = "unknown" | "prompt" | "granted" | "denied" | "unavailable";
 export type VFXCaptureKind = "camera" | "display";
 export type VFXCaptureState =
   | "idle"
@@ -34,6 +37,9 @@ export interface VFXCaptureCapabilities {
   readonly camera: boolean;
   readonly display: boolean;
   readonly deviceEnumeration: boolean;
+  /** Before grant: factory availability; after grant: private display-track support. */
+  readonly elementRestriction?: boolean;
+  readonly elementCrop?: boolean;
 }
 
 export interface VFXCaptureDevice {
@@ -75,9 +81,12 @@ export interface VFXCaptureSession {
   readonly kind: VFXCaptureKind | null;
   readonly settings: VFXCaptureSettings | null;
   readonly capabilities: VFXCaptureCapabilities;
+  getAuthorizationStatus(kind?: VFXCaptureKind): Promise<VFXCaptureAuthorizationStatus>;
   enumerateDevices(): Promise<readonly VFXCaptureDevice[]>;
   requestCamera(request?: VFXCameraCaptureRequest): Promise<VFXCaptureSettings>;
   requestDisplay(request?: VFXDisplayCaptureRequest): Promise<VFXCaptureSettings>;
+  /** Applies only to this session's already granted display stream. */
+  setContentFilter?(filter: VFXContentFilter | null, signal?: AbortSignal): Promise<void>;
   suspend(): void;
   resume(): Promise<void>;
   subscribe(listener: () => void): () => void;

@@ -21,6 +21,7 @@
 import {
   createElement,
   useCallback,
+  useContext,
   useEffect,
   useId,
   useMemo,
@@ -29,9 +30,15 @@ import {
   type HTMLAttributes,
   type ReactNode,
 } from "react";
+import { useNSEAnimationEnvironment } from "../Animation/NSEAnimationEnvironment";
+import { nsePopoverSpringEasing, useNSEPopoverSurface } from "./useNSEPopoverSurface";
+import { NSEPopoverFrame } from "./NSEPopoverFrame";
+import { nseMenuChosenAttribute, nseMenuChosenFadeMs } from "../Menus/menuSelectionFlash";
 import { createPortal } from "react-dom";
+import type { NSEOverlayAnchorPoint } from "./computeNSEOverlayPosition";
 import { useNSEOverlay } from "./useNSEOverlay";
 import { useNSEOverlayProvider } from "./NSEOverlayProvider";
+import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
 import { useNSEAppearanceProjection } from "../Appearance";
 import type {
   NSELogicalPlacement,
@@ -56,7 +63,11 @@ export interface NSEPopupProps extends Omit<HTMLAttributes<HTMLDivElement>, "tit
   readonly open?: boolean;
   readonly defaultOpen?: boolean;
   readonly anchor?: HTMLElement | null;
-  /** Standalone hosts supply a local parent responder when omitted. */
+  /** @internal Place against this viewport point instead of the anchor's box (a context menu at the pointer). */
+  readonly anchorPoint?: NSEOverlayAnchorPoint | null;
+  /** @internal NSEPopover's positioning rectangle in the anchor view. */
+  readonly relativeTo?: Pick<DOMRectReadOnly, "x" | "y" | "width" | "height">;
+  /** Defaults to the nearest class controller, then the branch's host responder. */
   readonly parentResponderId?: string;
   readonly parentId?: string | null;
   readonly parentScopeId?: string;
@@ -69,15 +80,19 @@ export interface NSEPopupProps extends Omit<HTMLAttributes<HTMLDivElement>, "tit
   readonly dismissOnEscape?: boolean;
   readonly restoreFocus?: boolean;
   readonly exitDuration?: number;
-  /** Content supplies its own surface, padding and scrolling (for example a
-   * paper card). Placement, dismissal and focus remain owned by NSEPopup. */
-  readonly chrome?: "standard" | "content";
+  /** Surface family stays independent of adaptive placement and modality.
+   * Content supplies its own paint (for example a paper card); menus and
+   * listboxes retain their family recipe when presented as a modal sheet.
+   * Placement, dismissal and focus remain owned by NSEPopup. */
+  readonly chrome?: "standard" | "content" | "menu" | "context-menu" | "submenu" | "listbox";
   /** Keep the portal container mounted while a menu is closed to preserve its event boundary. */
   readonly keepPortalMounted?: boolean;
   /** The content is still arriving; the surface is not painted until it has. */
   readonly contentPending?: boolean;
   /** Internal family specialisation; callers should prefer family entry points. */
   readonly overlayKind?: NSEOverlayKind;
+  /** @internal NSEPopover owns the continuous plate and arrow frame. */
+  readonly drawsBackground?: boolean;
   onOpenChange?(open: boolean, reason: NSEOverlayDismissReason): void;
 }
 
@@ -123,6 +138,8 @@ export function NSEPopup({
   open,
   defaultOpen,
   anchor,
+  anchorPoint,
+  relativeTo,
   parentResponderId,
   parentId,
   parentScopeId,
@@ -139,6 +156,7 @@ export function NSEPopup({
   keepPortalMounted = false,
   contentPending = false,
   overlayKind,
+  drawsBackground,
   onOpenChange,
   className,
   children,
@@ -148,14 +166,20 @@ export function NSEPopup({
   const appearanceProjection = useNSEAppearanceProjection();
   const generatedId = useId().replace(/:/g, "");
   const resolvedId = id ?? `nse-popup:${generatedId}`;
+  const titleId = `nse-popup-title:${generatedId}`;
   const state = useNSEPopupState({ open, defaultOpen, onOpenChange });
   const { runtime, defaultParentResponderId } = useNSEOverlayProvider();
-  const resolvedParentResponderId = parentResponderId ?? defaultParentResponderId;
+  const nearestResponderId = useContext(NSEActionResponderContext);
+  const resolvedParentResponderId = parentResponderId ?? nearestResponderId ?? defaultParentResponderId;
   if (!resolvedParentResponderId) {
     throw new Error("NSEPopup requires parentResponderId or an NSEStandaloneControlHost.");
   }
   const [mounted, setMounted] = useState(state.open);
   const [closing, setClosing] = useState(false);
+  const { reducedMotion } = useNSEAnimationEnvironment();
+  const hasPopoverFrame = drawsBackground !== undefined;
+  const [surfaceElement, setSurfaceElement] = useState<HTMLElement | null>(null);
+  const [arrow, setArrow] = useState<HTMLElement | null>(null);
   const kind: NSEOverlayKind = overlayKind ?? (modal ? "action-sheet" : "popover");
   const resolvedPresentation = presentation ?? { mode: kind === "action-sheet" ? "sheet" as const : "anchored" as const };
   const isModal = kind === "action-sheet" || modal;
@@ -167,6 +191,10 @@ export function NSEPopup({
     parentScopeId,
     parentResponderId: resolvedParentResponderId,
     anchor: anchor ?? null,
+    anchorPoint: anchorPoint ?? null,
+    anchorRect: relativeTo,
+    arrow: hasPopoverFrame && kind === "popover" ? arrow : null,
+    offset: hasPopoverFrame ? 12 : undefined,
     open: state.open,
     placement: resolvedPresentation.placement,
     collisionPadding: resolvedPresentation.collisionPadding,
@@ -180,31 +208,46 @@ export function NSEPopup({
     contentPending,
     onDismiss: (reason) => state.requestOpen(false, reason),
   });
+  const surfaceRef = useCallback((element: HTMLElement | null) => {
+    overlay.surfaceProps.ref(element);
+    setSurfaceElement(element);
+  }, [overlay.surfaceProps.ref]);
+  useNSEPopoverSurface(surfaceElement, kind === "popover" ? arrow : null, state.open, hasPopoverFrame);
   const surfaceClassName = useMemo(() => classNames(
     "nse-overlay-popup",
-    `nse-overlay-popup--${chrome === "content" ? "content" : kind}`,
+    `nse-overlay-popup--${chrome === "standard" ? kind : chrome}`,
     isModal && "nse-overlay-popup--modal",
+    hasPopoverFrame && "nse-popover",
     className,
-  ), [chrome, className, isModal, kind]);
+  ), [chrome, className, hasPopoverFrame, isModal, kind]);
   const surfaceRole: AriaRole = role ?? (kind === "listbox" ? "listbox" : "dialog");
 
+  // A menu whose row was just chosen fades out (the row flashed and marked its popup), so it stays
+  // mounted for the fade even when this popup has no exit of its own.
+  const chosen = !state.open && mounted
+    && overlay.portalHost?.ownerDocument.getElementById(resolvedId)?.hasAttribute(nseMenuChosenAttribute) === true;
+  const exit = Math.max(exitDuration, hasPopoverFrame ? (reducedMotion ? 100 : 150) : 0, chosen ? nseMenuChosenFadeMs : 0);
+
   useEffect(() => {
-    if (exitDuration <= 0) return;
     if (state.open) {
       setMounted(true);
       setClosing(false);
       return;
     }
     if (!mounted) return;
+    if (exit <= 0) {
+      setMounted(false);
+      return;
+    }
     setClosing(true);
     const handle = runtime.environment.setTimeout(() => {
       setMounted(false);
       setClosing(false);
-    }, exitDuration);
+    }, exit);
     return () => runtime.environment.clearTimeout(handle);
-  }, [exitDuration, mounted, runtime, state.open]);
+  }, [exit, mounted, runtime, state.open]);
 
-  const rendered = exitDuration > 0 ? state.open || mounted : state.open;
+  const rendered = exit > 0 ? state.open || mounted : state.open;
   if (!overlay.portalHost || (!rendered && !keepPortalMounted)) return null;
   if (!rendered) {
     return createPortal(
@@ -216,39 +259,51 @@ export function NSEPopup({
   const surface = createElement(
     "div",
     {
-      ...htmlAttributes,
       ...overlay.surfaceProps,
+      "data-nse-style": chrome === "standard" ? kind : chrome,
+      ...htmlAttributes,
       ...appearanceProjection,
+      "data-nse-theme": undefined,
+      style: { ...appearanceProjection.style, ...htmlAttributes.style },
+      ref: surfaceRef,
       id: resolvedId,
-      "data-state": closing ? "closing" : "open",
+      "data-state": closing || !state.open ? "closing" : "open",
+      inert: !state.open || contentPending ? true : undefined,
+      ...(hasPopoverFrame ? {
+        "data-nse-popover-draws-background": String(drawsBackground),
+        "data-nse-reduced-motion": String(reducedMotion),
+        style: { ...appearanceProjection.style, ...htmlAttributes.style, "--nse-popover-spring": nsePopoverSpringEasing },
+      } : {}),
       className: surfaceClassName,
       role: surfaceRole,
       "aria-modal": isModal ? true : undefined,
-      "aria-labelledby": labelledBy,
+      "aria-labelledby": labelledBy ?? (title && !htmlAttributes["aria-label"] ? titleId : undefined),
       "aria-describedby": describedBy,
       "data-nse-overlay-kind": kind,
       "data-nse-presentation": resolvedPresentation.mode,
       tabIndex: htmlAttributes.tabIndex ?? -1,
     },
-    title ? createElement("div", { className: "nse-overlay-popup-title" }, title) : null,
-    createElement("div", { className: "nse-overlay-popup-content" }, children),
+    hasPopoverFrame ? createElement(NSEPopoverFrame, { arrowRef: setArrow, anchored: kind === "popover" }) : null,
+    title ? createElement("div", { id: titleId, "data-nse-part": "title", className: "nse-overlay-popup-title" }, title) : null,
+    createElement("div", { "data-nse-part": "content", className: "nse-overlay-popup-content" }, children),
   );
 
   // A compact action sheet owns a physical outside target. It remains outside
   // the registered surface, so the provider's one capture listener performs
   // the same branch-aware outside-pointer dismissal as an anchored popup.
-  const portalContents = isModal
-    ? createElement(
+  // Keep the same parent and child positions when adaptive presentation
+  // changes modality. Reparenting the surface would remount an unsaved editor.
+  const portalContents = createElement(
       "div",
-      { className: "nse-overlay-popup-modal-host", ...appearanceProjection },
+      { className: isModal ? "nse-overlay-popup-modal-host" : "nse-overlay-popup-host", ...appearanceProjection, "data-nse-role": isModal ? "modal" : undefined },
       createElement("div", {
         className: "nse-overlay-popup-backdrop",
+        hidden: !isModal,
         "data-nse-part": "backdrop",
         "aria-hidden": true,
       }),
       surface,
-    )
-    : surface;
+    );
 
   return createPortal(overlay.withFocusScope(portalContents), overlay.portalHost);
 }

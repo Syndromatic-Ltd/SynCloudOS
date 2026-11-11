@@ -20,7 +20,7 @@
 
 import { useMemo, type PropsWithChildren } from "react";
 import { useNSEAnimationEnvironment } from "../Animation/NSEAnimationEnvironment";
-import { NSEPushButton } from "../Controls/Buttons/NSEButtons";
+import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { NSEFocusScope } from "../Focus/NSEFocusPort";
 import type { ChronosphereDisposable } from "./chronosphereEnvironment";
 import { useChronosphereEnvironment } from "./chronosphereEnvironment";
@@ -68,7 +68,7 @@ function VortexView<TDetail>({ model, actions, renderFace, renderDetail }: Chron
   }), [app.mediaQueries, app.scheduler, reducedMotion]);
   return <ChronosphereStage subject={model.subject} entries={[...model.entries]} originImage={model.presentImage ?? undefined}
     curtainImage={model.foregroundImage ?? undefined} preparedImages={model.prepared} environment={environment}
-    DetailFocusScopeComponent={DetailScope} PushButtonComponent={NSEPushButton} onExit={actions.exit} onRestore={actions.restore}
+    DetailFocusScopeComponent={DetailScope} PushButtonComponent={NSEButton} onExit={actions.exit} onRestore={actions.restore}
     renderFace={renderFace} renderDetail={renderDetail} labels={model.labels} originRect={model.presentRect ?? undefined} />;
 }
 

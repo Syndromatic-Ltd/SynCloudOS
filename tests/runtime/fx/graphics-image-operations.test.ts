@@ -56,7 +56,7 @@ describe("GraphicsFX image operations", () => {
         expect([...mask.copyData()]).toEqual([128]);
         expect(image.extractMask("luminance").copyData()[0]).toBe(27);
         expect(image.withAlphaMask(mask).pixel(0, 0).a).toBe(64 / 255);
-        expect(image.toPNG().slice(0, 4)).toEqual(new Uint8Array([137, 80, 78, 71]));
+        expect(image.toPNG().bytes.slice(0, 4)).toEqual(new Uint8Array([137, 80, 78, 71]));
     });
     it("saves and restores bitmap interpolation", () => {
         const image = new GFXImage({ width: 2, height: 1, alpha: "straight", colourSpace: "srgb", data: new Uint8Array([255, 0, 0, 255, 0, 0, 255, 255]) }), bitmap = new GFXBitmapContext({ width: 1, height: 1 });

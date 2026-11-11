@@ -1,0 +1,122 @@
+{
+  "events": [
+    {
+      "stage": "navigated"
+    },
+    {
+      "stage": "bluetooth enabled"
+    },
+    {
+      "stage": "peripheral configured"
+    },
+    {
+      "stage": "enabling DeviceAccess browser"
+    },
+    {
+      "target": "browser",
+      "event": "DeviceAccess.unavailable",
+      "error": "cdpSession.send: Protocol error (DeviceAccess.enable): 'DeviceAccess.enable' wasn't found"
+    },
+    {
+      "stage": "enabling DeviceAccess page"
+    },
+    {
+      "target": "page",
+      "event": "DeviceAccess.enabled"
+    },
+    {
+      "stage": "gesture listener installed"
+    },
+    {
+      "target": "page",
+      "event": "prompt",
+      "id": "95B38ECF1BC092F2DEE4DC31E6E549B7",
+      "devices": [
+        {
+          "id": "09:09:09:09:09:09",
+          "name": ""
+        }
+      ]
+    },
+    {
+      "target": "page",
+      "event": "prompt",
+      "id": "95B38ECF1BC092F2DEE4DC31E6E549B7",
+      "devices": [
+        {
+          "id": "09:09:09:09:09:09",
+          "name": ""
+        }
+      ]
+    },
+    {
+      "stage": "clicked"
+    },
+    {
+      "target": "page",
+      "event": "selected"
+    },
+    {
+      "target": "browser",
+      "event": "gatt",
+      "address": "09:09:09:09:09:09",
+      "type": "connection"
+    },
+    {
+      "target": "browser",
+      "event": "gatt",
+      "address": "09:09:09:09:09:09",
+      "type": "discovery"
+    },
+    {
+      "target": "browser",
+      "event": "characteristic",
+      "characteristicId": "09:09:09:09:09:09_1_1",
+      "type": "read"
+    },
+    {
+      "target": "browser",
+      "event": "characteristic",
+      "characteristicId": "09:09:09:09:09:09_1_1",
+      "type": "write",
+      "data": "EQ==",
+      "writeType": "write-with-response"
+    },
+    {
+      "target": "browser",
+      "event": "characteristic",
+      "characteristicId": "09:09:09:09:09:09_1_1",
+      "type": "subscribe-to-notifications"
+    },
+    {
+      "target": "browser",
+      "event": "characteristic",
+      "characteristicId": "09:09:09:09:09:09_1_1",
+      "type": "unsubscribe-from-notifications"
+    }
+  ],
+  "errors": [],
+  "version": "149.0.7827.55",
+  "serviceId": "09:09:09:09:09:09_1",
+  "characteristicId": "09:09:09:09:09:09_1_1",
+  "native": {
+    "steps": [
+      "request",
+      "selected",
+      "connected",
+      "services:1",
+      "characteristics:1",
+      "read",
+      "wrote",
+      "notifications-started"
+    ],
+    "outcome": {
+      "ok": true,
+      "name": "Isolated research battery",
+      "read": [
+        42
+      ],
+      "disconnected": true
+    }
+  }
+}

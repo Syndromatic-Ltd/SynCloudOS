@@ -1,0 +1,8 @@
+22:37:49 [vite] (client) Forced re-optimization of dependencies
+
+  VITE v7.3.7  ready in 2933 ms
+
+  ➜  Local:   http://127.0.0.1:5199/
+  ➜  press h + enter to show help
+22:40:48 [vite] (client) ✨ new dependencies optimized: @syndromatic/syncloudos/fx/audio, @syndromatic/syncloudos/fx/crypto, @syndromatic/syncloudos/foundation
+22:40:48 [vite] (client) ✨ optimized dependencies changed. reloading

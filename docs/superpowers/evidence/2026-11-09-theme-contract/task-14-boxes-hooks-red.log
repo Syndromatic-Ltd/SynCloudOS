@@ -1,0 +1,74 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-container-drawing-state.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-container-drawing-state.test.tsx (3 tests | 3 failed) 66ms
+   × publishes NSBox transparency and custom drawing properties 13ms
+   × uses British grey in the separator's drawing contract 2ms
+   × projects disclosure drawing state while leaving activation with its existing handler 51ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-container-drawing-state.test.tsx > publishes NSBox transparency and custom drawing properties
+AssertionError: expected null to be 'true' // Object.is equality
+
+- Expected:
+"true"
+
++ Received:
+null
+
+ ❯ tests/runtime/nse-container-drawing-state.test.tsx:11:52
+      9|   const { container } = render(<NSEBox boxType="custom" isTransparent …
+     10|   const box = container.firstElementChild!;
+     11|   expect(box.getAttribute("data-nse-transparent")).toBe("true");
+       |                                                    ^
+     12|   expect(box.getAttribute("data-nse-custom-fill")).toBe("true");
+     13|   expect(box.getAttribute("data-nse-custom-border")).toBe("true");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/runtime/nse-container-drawing-state.test.tsx > uses British grey in the separator's drawing contract
+AssertionError: expected null to be 'grey' // Object.is equality
+
+- Expected:
+"grey"
+
++ Received:
+null
+
+ ❯ tests/runtime/nse-container-drawing-state.test.tsx:17:71
+     15| it("uses British grey in the separator's drawing contract", () => {
+     16|   const { container } = render(<NSEDivider variant="grey" label="Secti…
+     17|   expect(container.firstElementChild?.getAttribute("data-nse-style")).…
+       |                                                                       ^
+     18| });
+     19| it("projects disclosure drawing state while leaving activation with it…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/runtime/nse-container-drawing-state.test.tsx > projects disclosure drawing state while leaving activation with its existing handler
+AssertionError: expected null to be 'disclosure' // Object.is equality
+
+- Expected:
+"disclosure"
+
++ Received:
+null
+
+ ❯ tests/runtime/nse-container-drawing-state.test.tsx:23:48
+     21|   render(<NSEDivider label="Group" variant="arrow" expanded onToggle={…
+     22|   const button = screen.getByRole("button", { name: "Group" });
+     23|   expect(button.getAttribute("data-nse-role")).toBe("disclosure");
+       |                                                ^
+     24|   expect(button.getAttribute("data-nse-expanded")).toBe("true");
+     25|   fireEvent.click(button);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed (3)
+   Start at  02:09:45
+   Duration  1.88s (transform 589ms, setup 26ms, import 844ms, tests 66ms, environment 812ms)

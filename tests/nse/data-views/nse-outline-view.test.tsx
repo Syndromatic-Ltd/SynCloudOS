@@ -25,11 +25,12 @@ import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { NSETreeController } from "../../../src/NSE/Controllers";
-import { IndexPath, TreeNode } from "../../../src/SynCloudOS/Models";
+import { TreeControllerNodeSnapshot } from "../../../src/NSE/Controllers/treeControllerSnapshot";
+import { NSEIndexPath } from "../../../src/Foundation/public";
 import {
-  NSEOutline,
+  NSEOutlineView,
   flattenVisibleTree,
-  type NSEOutlineSelectionEvent,
+  type NSEOutlineViewSelectionEvent,
 } from "../../../src/NSE/DataViews/Outline";
 
 interface FileNode {
@@ -57,12 +58,12 @@ function createController(content: readonly FileNode[] = [documents, pictures], 
 
 afterEach(cleanup);
 
-describe("NSEOutline", () => {
+describe("NSEOutlineView", () => {
   it("maps rows, levels and items while expanding and collapsing selection to the parent", () => {
     const controller = createController();
     const changes = vi.fn();
     render(
-      <NSEOutline
+      <NSEOutlineView
         aria-label="Files"
         controller={controller}
         idForItem={(node) => node.id}
@@ -77,7 +78,7 @@ describe("NSEOutline", () => {
     fireEvent.click(screen.getByRole("treeitem", { name: /Report/ }));
     fireEvent.click(screen.getByRole("button", { name: "Collapse Documents" }));
 
-    const event = changes.mock.calls.at(-1)?.[0] as NSEOutlineSelectionEvent<string>;
+    const event = changes.mock.calls.at(-1)?.[0] as NSEOutlineViewSelectionEvent<string>;
     expect(event.reason).toBe("collapse-parent");
     expect(event.snapshot.selectedIds).toEqual(new Set(["documents"]));
     expect(screen.queryByRole("treeitem", { name: /Report/ })).toBeNull();
@@ -88,7 +89,7 @@ describe("NSEOutline", () => {
     const controller = createController();
     const didExpand = vi.fn();
     const view = render(
-      <NSEOutline
+      <NSEOutlineView
         aria-label="Files"
         controller={controller}
         idForItem={(node) => node.id}
@@ -101,7 +102,7 @@ describe("NSEOutline", () => {
     expect(controller.getSnapshot().expandedIds.size).toBe(0);
 
     view.rerender(
-      <NSEOutline
+      <NSEOutlineView
         aria-label="Files"
         controller={controller}
         idForItem={(node) => node.id}
@@ -118,7 +119,7 @@ describe("NSEOutline", () => {
   it.each(["disabled", "denied", "invalid"] as const)("blocks selection, disclosure and activation while %s", (kind) => {
     const controller = createController();
     const activate = vi.fn();
-    render(<NSEOutline aria-label="Files" controller={controller} idForItem={(node) => node.id} childrenForItem={(node) => node.children} labelForItem={(node) => node.name} state={{ kind, message: kind }} delegate={{ didActivate: activate }} />);
+    render(<NSEOutlineView aria-label="Files" controller={controller} idForItem={(node) => node.id} childrenForItem={(node) => node.children} labelForItem={(node) => node.name} state={{ kind, message: kind }} delegate={{ didActivate: activate }} />);
     fireEvent.click(screen.getByRole("treeitem", { name: /Documents/ }));
     fireEvent.click(screen.getByRole("button", { name: "Expand Documents" }));
     fireEvent.keyDown(screen.getByRole("tree"), { key: "Enter" });
@@ -136,7 +137,7 @@ describe("NSEOutline", () => {
       return new Promise((resolve) => { resolveChildren = resolve; });
     });
     render(
-      <NSEOutline
+      <NSEOutlineView
         aria-label="Files"
         controller={controller}
         idForItem={(node) => node.id}
@@ -162,7 +163,7 @@ describe("NSEOutline", () => {
       expect(signal).toBeInstanceOf(AbortSignal);
       return [{ id: "late", name: "Late", children: [] }];
     });
-    render(<NSEOutline aria-label="Files" controller={controller} idForItem={(node) => node.id} childrenForItem={childrenForItem} labelForItem={(node) => node.name} isExpandable={(node) => node.canLoad === true} />);
+    render(<NSEOutlineView aria-label="Files" controller={controller} idForItem={(node) => node.id} childrenForItem={childrenForItem} labelForItem={(node) => node.name} isExpandable={(node) => node.canLoad === true} />);
     fireEvent.click(screen.getByRole("button", { name: "Expand Remote" }));
     expect(await screen.findByRole("treeitem", { name: /Late/ })).not.toBeNull();
     expect(childrenForItem).toHaveBeenCalledTimes(1);
@@ -174,7 +175,7 @@ describe("NSEOutline", () => {
       expect(signal).toBeInstanceOf(AbortSignal);
       return Promise.resolve([{ id: "child", name: "Loaded child", children: [] }]);
     });
-    render(<NSEOutline aria-label="Files" controller={createController([lazy])} idForItem={(node) => node.id} childrenForItem={childrenForItem} labelForItem={(node) => node.name} />);
+    render(<NSEOutlineView aria-label="Files" controller={createController([lazy])} idForItem={(node) => node.id} childrenForItem={childrenForItem} labelForItem={(node) => node.name} />);
 
     expect(childrenForItem).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Expand Remote" }));
@@ -188,7 +189,7 @@ describe("NSEOutline", () => {
       expect(signal).toBeInstanceOf(AbortSignal);
       return [{ id: "child", name: "Local child", children: [] }];
     });
-    render(<NSEOutline aria-label="Files" controller={createController([lazy])} idForItem={(node) => node.id} childrenForItem={childrenForItem} labelForItem={(node) => node.name} />);
+    render(<NSEOutlineView aria-label="Files" controller={createController([lazy])} idForItem={(node) => node.id} childrenForItem={childrenForItem} labelForItem={(node) => node.name} />);
 
     expect(childrenForItem).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Expand Local" }));
@@ -201,7 +202,7 @@ describe("NSEOutline", () => {
       expect(signal).toBeInstanceOf(AbortSignal);
       return Promise.resolve([{ id: "controlled-child", name: "Controlled child", children: [] }]);
     });
-    render(<NSEOutline aria-label="Files" controller={createController([lazy])} idForItem={(node) => node.id} childrenForItem={childrenForItem} labelForItem={(node) => node.name} expandedIds={new Set(["lazy"])} />);
+    render(<NSEOutlineView aria-label="Files" controller={createController([lazy])} idForItem={(node) => node.id} childrenForItem={childrenForItem} labelForItem={(node) => node.name} expandedIds={new Set(["lazy"])} />);
     expect(await screen.findByRole("treeitem", { name: /Controlled child/ })).not.toBeNull();
     expect(childrenForItem).toHaveBeenCalledTimes(1);
   });
@@ -210,7 +211,7 @@ describe("NSEOutline", () => {
     const lazy: FileNode = { id: "lazy", name: "Remote", children: [], canLoad: true };
     const controller = createController([lazy], async () => { throw new Error("Network unavailable"); });
     render(
-      <NSEOutline
+      <NSEOutlineView
         aria-label="Files"
         controller={controller}
         idForItem={(node) => node.id}
@@ -228,7 +229,7 @@ describe("NSEOutline", () => {
   it("uses logical RTL indentation and disclosure keyboard semantics", () => {
     const controller = createController();
     render(
-      <NSEOutline
+      <NSEOutlineView
         aria-label="Files"
         dir="rtl"
         controller={controller}
@@ -250,7 +251,7 @@ describe("NSEOutline", () => {
 
   it("does not navigate or type ahead during IME composition", () => {
     const controller = createController();
-    render(<NSEOutline aria-label="Files" controller={controller} idForItem={(node) => node.id} childrenForItem={(node) => node.children} labelForItem={(node) => node.name} />);
+    render(<NSEOutlineView aria-label="Files" controller={controller} idForItem={(node) => node.id} childrenForItem={(node) => node.children} labelForItem={(node) => node.name} />);
     const tree = screen.getByRole("tree");
     const before = tree.getAttribute("aria-activedescendant");
     fireEvent.keyDown(tree, { key: "ArrowDown", isComposing: true });
@@ -262,7 +263,7 @@ describe("NSEOutline", () => {
     const roots = Array.from({ length: 50_000 }, (_, index) => ({ id: `node-${index}`, name: `Node ${index}`, children: [] }));
     const controller = createController(roots);
     render(
-      <NSEOutline
+      <NSEOutlineView
         aria-label="Large tree"
         controller={controller}
         idForItem={(node) => node.id}
@@ -279,15 +280,73 @@ describe("NSEOutline", () => {
   });
 
   it("flattens iteratively with stable sibling metadata and cycle protection", () => {
-    const leaf = new TreeNode({ id: "leaf", value: report, indexPath: IndexPath.from(0, 0), parentId: "root", children: [] });
-    const root = new TreeNode({ id: "root", value: documents, indexPath: IndexPath.from(0), parentId: null, children: [leaf] });
+    const leaf = new TreeControllerNodeSnapshot({ id: "leaf", value: report, indexPath: NSEIndexPath.from(0, 0), parentId: "root", children: [] });
+    const root = new TreeControllerNodeSnapshot({ id: "root", value: documents, indexPath: NSEIndexPath.from(0), parentId: null, children: [leaf] });
     expect(flattenVisibleTree([root], new Set(["root"]))).toEqual([
       expect.objectContaining({ id: "root", row: 0, level: 1, positionInSet: 1, setSize: 1 }),
       expect.objectContaining({ id: "leaf", row: 1, level: 2, parentId: "root", positionInSet: 1, setSize: 1 }),
     ]);
 
-    const cyclic = { id: "cycle", value: documents, indexPath: IndexPath.from(0), parentId: null, children: [] as unknown[] };
+    const cyclic = { id: "cycle", value: documents, indexPath: NSEIndexPath.from(0), parentId: null, children: [] as unknown[] };
     cyclic.children.push(cyclic);
     expect(flattenVisibleTree([cyclic as never], new Set(["cycle"]))).toHaveLength(1);
+  });
+});
+
+describe("NSEOutlineView source list", () => {
+  const library: FileNode = { id: "library", name: "Library", children: [documents, pictures] };
+  const devices: FileNode = { id: "devices", name: "Devices", children: [{ id: "disk", name: "Disk", children: [] }] };
+
+  function renderSourceList(delegate: Record<string, unknown> = {}) {
+    const controller = createController([library, devices]);
+    controller.expand("library");
+    controller.expand("devices");
+    const view = render(
+      <NSEOutlineView
+        aria-label="Sidebar"
+        controller={controller}
+        selectionHighlightStyle="sourceList"
+        idForItem={(node) => node.id}
+        childrenForItem={(node) => node.children}
+        labelForItem={(node) => node.name}
+        isExpandable={(node) => node.children.length > 0}
+        delegate={{ isGroupItem: (id: string) => id === "library" || id === "devices", ...delegate }}
+      />,
+    );
+    return { controller, view };
+  }
+
+  it("draws group items as section rows with the disclosure arrow", () => {
+    const { view } = renderSourceList();
+    const groups = view.container.querySelectorAll('[data-nse-part="group-row"]');
+    expect([...groups].map((row) => row.textContent)).toEqual(["Library", "Devices"]);
+    expect(groups[0]!.querySelector(".nse-outline-group-line")).not.toBeNull();
+    expect(screen.getByRole("button", { name: "Collapse Library" })).toBeTruthy();
+    expect(view.container.querySelector('[data-style="source-list"]')).not.toBeNull();
+  });
+
+  it("does not select group items, and selects their rows", () => {
+    const { controller } = renderSourceList();
+    fireEvent.click(screen.getByRole("treeitem", { name: /^Library/ }));
+    expect(controller.getSnapshot().selection.selectedIds.size).toBe(0);
+    fireEvent.click(screen.getByRole("treeitem", { name: /Pictures/ }));
+    expect(controller.getSnapshot().selection.selectedIds).toEqual(new Set(["pictures"]));
+  });
+
+  it("collapses a section through its arrow, keeping its rows mounted but inert", () => {
+    const { controller, view } = renderSourceList();
+    fireEvent.click(screen.getByRole("treeitem", { name: /Pictures/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Collapse Library" }));
+    expect(controller.getSnapshot().expandedIds.has("library")).toBe(false);
+    const region = view.container.querySelector('.nse-outline-children[data-collapsed="true"]')!;
+    expect(region.hasAttribute("inert")).toBe(true);
+    expect(region.textContent).toContain("Pictures");
+    expect(controller.getSnapshot().selection.selectedIds).toEqual(new Set(["pictures"]));
+  });
+
+  it("hides the arrow when the delegate does not show the outline cell", () => {
+    renderSourceList({ shouldShowOutlineCell: (id: string) => id !== "devices" });
+    expect(screen.queryByRole("button", { name: "Collapse Devices" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Collapse Library" })).toBeTruthy();
   });
 });

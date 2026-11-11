@@ -62,6 +62,9 @@ export function createFakeWindowClient(appId = "test-app", sessionId = "test-ses
     },
     openDocumentWindow: () => Promise.reject(new DOMException("The fake window host exposes no document windows.", "SecurityError")),
     focus: () => { throw new DOMException("The fake window host exposes no owned windows.", "SecurityError"); },
+    minimise: () => { throw new DOMException("The fake window host exposes no owned windows.", "SecurityError"); },
+    zoom: () => { throw new DOMException("The fake window host exposes no owned windows.", "SecurityError"); },
+    setTitle: () => { throw new DOMException("The fake window host exposes no owned windows.", "SecurityError"); },
     close: () => Promise.reject(new DOMException("The fake window host exposes no owned windows.", "SecurityError")),
   } satisfies AppWindowClient);
   return Object.freeze({

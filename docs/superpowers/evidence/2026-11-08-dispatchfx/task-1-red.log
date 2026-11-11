@@ -1,0 +1,38 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run src/FX/DispatchFX
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ src/FX/DispatchFX/__tests__/values.test.ts (0 test)
+ ❯ src/FX/DispatchFX/__tests__/counterparts.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/counterparts.test.ts [ src/FX/DispatchFX/__tests__/counterparts.test.ts ]
+Error: Cannot find module '../public' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/src/FX/DispatchFX/__tests__/counterparts.test.ts
+ ❯ src/FX/DispatchFX/__tests__/counterparts.test.ts:4:1
+      2| import ts from "typescript";
+      3| import { expect, it } from "vitest";
+      4| import * as D from "../public";
+       | ^
+      5| import { appkitCounterpartFor } from "../../../../scripts/developer-mc…
+      6| import { synWareSdkEntries } from "../../../../scripts/synware/sdk-ent…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/values.test.ts [ src/FX/DispatchFX/__tests__/values.test.ts ]
+Error: Cannot find module '../public' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/src/FX/DispatchFX/__tests__/values.test.ts
+ ❯ src/FX/DispatchFX/__tests__/values.test.ts:2:1
+      1| import { afterEach, describe, expect, it, vi } from "vitest";
+      2| import * as D from "../public";
+       | ^
+      3| import { nanoseconds } from "../internal/time";
+      4|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  no tests
+   Start at  08:38:21
+   Duration  374ms (transform 125ms, setup 51ms, import 0ms, tests 0ms, environment 0ms)

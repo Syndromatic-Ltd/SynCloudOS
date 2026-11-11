@@ -7,6 +7,7 @@
 "apps.loading" = "Memuat {app}";
 "apps.loadingPackage" = "Memuat {packageName}";
 "apps.missingComponent" = "SynCloudOS tidak dapat menemukan komponen untuk {packageName}.";
+"apps.reopen" = "Buka Lagi";
 "apps.reorderable" = "{app}, dapat dipesan ulang";
 "notifications.actions" = "Tindakan pemberitahuan";
 "notifications.centreTitle" = "Pusat Pemberitahuan";
@@ -40,7 +41,6 @@
 "quickswitch.open" = "Buka QuickSwitch";
 "quickswitch.openedShortcut" = "{app}, dibuka, {shortcut} pintasan";
 "quickswitch.visibleApps" = "Aplikasi Webspring yang terlihat";
-"shelf.ariaLabel" = "Webspring berita dan status";
 "webspring.additionalApps.ariaLabel" = "Aplikasi Webspring tambahan";
 "webspring.apps.ariaLabel" = "Webspring aplikasi";
 "webspring.ariaLabel" = "SynCloudOS Webspring";

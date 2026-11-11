@@ -1,0 +1,85 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/fx/phase5-nfc.test.ts tests/runtime/fx/phase5-payment.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/phase5-nfc.test.ts (8 tests | 2 failed) 14ms
+     × copies NDEF payload bytes at the value and browser event boundaries 4ms
+     × parses nested NDEF only for container types and preserves opaque external bytes 1ms
+ ❯ tests/runtime/fx/phase5-payment.test.ts (10 tests | 2 failed) 15ms
+     × bridges recursive SPC byte input to fresh ArrayBuffers without losing view offsets 3ms
+     × snapshots real WebAuthn credential getters and returned byte fields as NSEData 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/phase5-nfc.test.ts > phase 5 NFC > copies NDEF payload bytes at the value and browser event boundaries
+TypeError: Cannot read properties of undefined (reading 'records')
+ ❯ tests/runtime/fx/phase5-nfc.test.ts:52:25
+     50|     Reader.instances.at(-1)!.reading(bytes.subarray(1));
+     51|     bytes.fill(8);
+     52|     expect((readings[0].records[0].data as NSEData).bytes).toEqual(new…
+       |                         ^
+     53|     session.dispose();
+     54|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/runtime/fx/phase5-nfc.test.ts > phase 5 NFC > parses nested NDEF only for container types and preserves opaque external bytes
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array []
+
+
+Number of calls: 1
+
+ ❯ tests/runtime/fx/phase5-nfc.test.ts:146:27
+    144|       { recordType: "example.com:opaque", data: opaque, toRecords: () …
+    145|     ] } }));
+    146|     expect(notNested).not.toHaveBeenCalled();
+       |                           ^
+    147|     expect(listener).toHaveBeenCalledOnce();
+    148|     const message = listener.mock.calls[0][0].message as NFXNDEFMessag…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/runtime/fx/phase5-payment.test.ts > phase 5 payment > bridges recursive SPC byte input to fresh ArrayBuffers without losing view offsets
+TypeError: Payment method data must contain finite JSON values.
+ ❯ copyPaymentJSON src/FX/PassFX/internal/paymentJSON.ts:37:9
+     35|     } finally { ancestors.delete(value); }
+     36|   }
+     37|   throw new TypeError("Payment method data must contain finite JSON va…
+       |         ^
+     38| }
+     39|
+ ❯ src/FX/PassFX/internal/paymentJSON.ts:33:99
+ ❯ copyPaymentJSON src/FX/PassFX/internal/paymentJSON.ts:33:71
+ ❯ src/FX/PassFX/public.ts:61:118
+ ❯ new PKFXPaymentRequest src/FX/PassFX/public.ts:59:73
+ ❯ tests/runtime/fx/phase5-payment.test.ts:145:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/runtime/fx/phase5-payment.test.ts > phase 5 payment > snapshots real WebAuthn credential getters and returned byte fields as NSEData
+TypeError: Payment method data must contain finite JSON values.
+ ❯ copyPaymentJSON src/FX/PassFX/internal/paymentJSON.ts:37:9
+     35|     } finally { ancestors.delete(value); }
+     36|   }
+     37|   throw new TypeError("Payment method data must contain finite JSON va…
+       |         ^
+     38| }
+     39|
+ ❯ Object.present src/SynCloudOS/PlatformAdapters/BrowserPaymentAdapter.ts:111:27
+ ❯ tests/runtime/fx/phase5-payment.test.ts:184:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  4 failed | 14 passed (18)
+   Start at  19:17:37
+   Duration  267ms (transform 117ms, setup 40ms, import 130ms, tests 28ms, environment 0ms)
+

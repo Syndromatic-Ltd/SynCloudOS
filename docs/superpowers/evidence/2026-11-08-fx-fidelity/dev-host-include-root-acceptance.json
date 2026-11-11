@@ -1,0 +1,11 @@
+{
+  "source": "59ea253b4b3dbe26ede99ac05ba7fa73736e1a2a073ac7e66ad146ee35848ae7",
+  "sourceMatchesInstalled": true,
+  "frozenFiles": 5,
+  "badFiles": 0,
+  "archive": "9b8f666d409b95ce174977f341f58cbb156a26350c7bd0da72909b85cdd052a5",
+  "actualHostIncludesSanitised": true,
+  "review": "Approved; actual installed host-conflict Chromium/HMR GREEN and remaining3 packed gates GREEN inspected",
+  "commit": "4be4c68c41763ed44ca1009a8f5295ebc2057e8f",
+  "packedResult": "3/3, 129.95 s"
+}

@@ -72,6 +72,7 @@ export type {
   VFXContainerCapability,
   VFXAudioContainerTrack,
   VFXContainerTrack,
+  VFXContainerTrackInput,
   VFXVideoContainerTrack,
   VFXContainerWriterDiagnostics,
   VFXContainerWriterOptions,
@@ -108,6 +109,7 @@ export type {
   VFXCaptureKind,
   VFXCaptureSession,
   VFXCaptureSettings,
+  VFXCaptureAuthorizationStatus,
   VFXCaptureState,
   VFXDecoderSession,
   VFXDisplayCaptureRequest,
@@ -123,3 +125,6 @@ export type {
   VFXPresentationEnqueueResult,
   VFXPresentationTickResult,
 } from "./VFXPresentation";
+export { VFXContentFilter } from "./VFXContentFilter";
+export type { VFXPictureInPictureController, VFXVideoPresentationClient, VFXVideoPresentationCapabilities, VFXPresentationAuthorizationStatus } from "./VFXPictureInPictureController";
+export type { VFXRouteDetector, VFXRouteConnectionState } from "./VFXRouteDetector";

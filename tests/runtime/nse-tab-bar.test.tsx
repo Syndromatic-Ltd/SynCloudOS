@@ -1,3 +1,5 @@
+import { createTestTheme } from "../fixtures/themes";
+import { withoutScopeTwins } from "../fixtures/atmoStylesheets";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -19,7 +21,7 @@
  */
 
 // @vitest-environment jsdom
-import { defineNSEAppearance } from "@syndromatic/syncloudos/nse/appearance";
+
 
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { readFileSync } from "node:fs";
@@ -27,20 +29,16 @@ import { resolve } from "node:path";
 import React, { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance";
-import { atmoAppearance } from "../../src/NSE/Themes/Atmo";
+import { atmoTheme } from "../../src/NSE/Appearance/atmo";
 import {
   NSEApplicationNavigationChromeController,
   NSEApplicationNavigationChromeProvider,
   NSETabBar,
   NSETabBarController,
   NSETabBarOverflowList,
-  NSETabGroup,
 } from "../../src/NSE/Navigation";
 
-const customAppearance = defineNSEAppearance({ id: "custom-test", displayName: "Custom test", recipes: [
-  { slot: "toolbar.item.normal.1x", recipeId: "custom-test.toolbar.normal" },
-  { slot: "toolbar.item.selected.1x", recipeId: "custom-test.toolbar.selected" },
-] });
+const customAppearance = createTestTheme("com.example.custom-test", "Custom test");
 
 afterEach(cleanup);
 
@@ -66,21 +64,16 @@ function SharedChromeBack({ controller }: { readonly controller: NSEApplicationN
 }
 
 describe("NSETabBar", () => {
-  it("keeps NSETabGroup as a selected-value strip without panel ownership", () => {
-    const change = vi.fn();
-    render(
-      <NSETabGroup
-        label="View choices"
-        defaultValue="home"
-        selectionHaptic={false}
-        options={[{ value: "home", label: "Home" }, { value: "library", label: "Library" }]}
-        onValueChange={change}
-      />,
-    );
-    const tabList = screen.getByRole("tablist", { name: "View choices" });
-    expect(within(tabList).queryByRole("tabpanel")).toBeNull();
-    fireEvent.keyDown(within(tabList).getByRole("tab", { name: "Home" }), { key: "ArrowRight" });
-    expect(change).toHaveBeenCalledWith("library");
+  it("requests visible focus for keyboard roving independently of selection paint", () => {
+    const controller = new NSETabBarController<React.ReactNode>({ id: "keyboard-visible-tabs", destinations: destinations(3) });
+    const { unmount } = render(<NSETabBar controller={controller} aria-label="Keyboard visible tabs" />);
+    const home = screen.getByRole("tab", { name: "Home destination" });
+    const library = screen.getByRole("tab", { name: "Library destination" });
+    const focus = vi.spyOn(library, "focus");
+    fireEvent.keyDown(home, { key: "ArrowRight" });
+    expect(document.activeElement).toBe(library);
+    expect(focus).toHaveBeenCalledWith({ focusVisible: true });
+    unmount(); controller.dispose();
   });
   it.each([
     [1, 1, 0],
@@ -140,7 +133,7 @@ describe("NSETabBar", () => {
     expect(tabList.getAttribute("data-nse-tab-overflow-open")).toBe("true");
     const overflowGroup = within(overflowPage).getByRole("group", { name: "More destinations" });
     expect(overflowGroup.tagName).toBe("FIELDSET");
-    expect(overflowGroup.getAttribute("data-appearance-recipe")).toBe("box.primary.bezel.none");
+
     const overflowRows = within(overflowPage).getAllByRole("button");
     expect(overflowRows.map((row) => row.getAttribute("aria-label"))).toEqual([
       "Sharing destination",
@@ -355,7 +348,7 @@ describe("NSETabBar", () => {
       destinations: destinations(7),
     });
     const { unmount } = render(
-      <NSEAppearanceProvider appearance={atmoAppearance} colourScheme={mode}>
+      <NSEAppearanceProvider theme={atmoTheme} colourScheme={mode}>
         <NSETabBar controller={controller} aria-label="Metal More destinations" idScope={`metal-overflow-${mode}`} />
         <NSETabBarOverflowList controller={controller} aria-label="Metal More destinations" idScope={`metal-overflow-${mode}`} />
       </NSEAppearanceProvider>,
@@ -368,14 +361,14 @@ describe("NSETabBar", () => {
     expect(surface).not.toBeNull();
     expect(surface?.getAttribute("data-nse-material")).toBe("metal");
     expect(surface?.getAttribute("data-mode")).toBe(mode);
-    expect(surface?.getAttribute("data-nse-metal-surface-recipe")).toBe("nse.sidebar.metal.surface");
+
     expect(surface?.getAttribute("data-nse-metal-surface-lineage")).toBeNull();
     expect(surface?.getAttribute("data-nse-metal-surface-noise")).toBe("nse-metal-grain");
     expect(surface?.getAttribute("data-nse-metal-surface-source-path")).toBeNull();
 
     const group = within(overflow).getByRole("group", { name: "More destinations" });
     expect(group.getAttribute("data-nse-grouped-list")).toBe("true");
-    expect(group.getAttribute("data-nse-grouped-list-seam-recipe")).toBe("nse.list-item.paired-bevel");
+
     expect(group.getAttribute("data-nse-grouped-list-seam-source-path")).toBeNull();
     expect(group.getAttribute("data-nse-grouped-list-inner-radius")).toBe("frame-minus-row-inset");
     const inner = group.querySelector<HTMLElement>(":scope > .nse-control-group-inner");
@@ -442,12 +435,12 @@ describe("NSETabBar", () => {
     controller.dispose();
   });
 
-  it("projects the selected tall Atmo recipe while retaining unresolved icon state and controller ownership", () => {
+  it("publishes selected tab parts while retaining icon readiness and controller ownership", () => {
     const controller = new NSETabBarController<React.ReactNode>({
       id: "atmo-tab-skin",
       destinations: destinations(6, { disabled: "settings", badge: "library" }),
     });
-    const { unmount } = render(<NSEAppearanceProvider appearance={atmoAppearance}><NSETabBar controller={controller} aria-label="Atmo tab skin" /></NSEAppearanceProvider>);
+    const { unmount } = render(<NSEAppearanceProvider theme={atmoTheme}><NSETabBar controller={controller} aria-label="Atmo tab skin" /></NSEAppearanceProvider>);
     const home = screen.getByRole("tab", { name: "Home destination" });
     const library = screen.getByRole("tab", { name: "Library destination" });
     const settings = screen.getByRole("tab", { name: "Settings destination" });
@@ -461,14 +454,14 @@ describe("NSETabBar", () => {
     expect(tabList.getAttribute("data-nse-tab-chrome-variant")).toBe("tall");
     expect(tabList.getAttribute("data-nse-tab-chrome-size")).toBe("tall");
     expect(tabList.hasAttribute("data-nse-tab-vector-generator")).toBe(false);
-    expect(home.getAttribute("data-nse-appearance-slot")).toBe("tab-bar.tab.selected.1x");
-    expect(home.getAttribute("data-nse-appearance-authority")).toBeNull();
+
+    expect(home.getAttribute("data-nse-theme-authority")).toBeNull();
     expect(home.getAttribute("data-nse-tab-chrome-source-path")).toBeNull();
-    expect(home.getAttribute("data-nse-appearance-recipe-id")).toBe("atmo.tab-bar.tab.grouped-toolbutton.selected.1x");
+
     expect(home.getAttribute("data-nse-tab-chrome-segment")).toBe("first");
     expect(home.getAttribute("data-nse-tab-chrome-state")).toBe("sel");
-    expect(home.querySelector(".nse-tab-bar-icon")?.getAttribute("data-nse-appearance-slot")).toBe("tab-bar.icon.selected.1x");
-    expect(home.querySelector(".nse-tab-bar-icon")?.getAttribute("data-nse-appearance-recipe-id")).toBeNull();
+
+
     expect(home.querySelector(".nse-tab-bar-icon")?.getAttribute("data-nse-tab-icon-source")).toBe("template:home");
     expect(home.querySelector(".nse-tab-bar-icon")?.getAttribute("data-nse-tab-icon-ready")).toBe("false");
     expect(home.querySelectorAll(".nse-control-chrome-primitive")).toHaveLength(0);
@@ -485,24 +478,22 @@ describe("NSETabBar", () => {
     expect(home.querySelector(":scope > .nse-tab-bar-icon")).toBeNull();
     expect(library.querySelector(":scope > .nse-tab-bar-badge")).toBeNull();
     expect(library.querySelector(".nse-tab-bar-content > .nse-tab-bar-badge")).not.toBeNull();
-    const navigationCss = readFileSync(resolve(process.cwd(), "src/NSE/Navigation/nse-navigation.css"), "utf8");
+    const navigationCss = withoutScopeTwins(readFileSync(resolve(process.cwd(), "src/NSE/Navigation/nse-navigation.css"), "utf8"));
     expect(navigationCss).toContain(".nse-tab-bar-content");
     expect(navigationCss).toContain("pointer-events: none");
-    expect(navigationCss).toMatch(/\[data-nse-tab-chrome-segment="first"\] > \.nse-tab-bar-content \{\s*inset-inline-start: 6px;/u);
-    expect(navigationCss).toMatch(/\[data-nse-tab-chrome-segment="last"\] > \.nse-tab-bar-content \{\s*inset-inline-start: -6px;/u);
+    expect(navigationCss).toMatch(/\[data-nse-tab-chrome-segment="first"\]\s*>\s*\.nse-tab-bar-content \{\s*inset-inline-start: 6px;/u);
+    expect(navigationCss).toMatch(/\[data-nse-tab-chrome-segment="last"\]\s*>\s*\.nse-tab-bar-content \{\s*inset-inline-start: -6px;/u);
 
     fireEvent.pointerEnter(library);
-    expect(library.getAttribute("data-nse-appearance-slot")).toBe("tab-bar.tab.hover.1x");
-    expect(library.getAttribute("data-nse-appearance-recipe-id")).toBe("atmo.tab-bar.tab.grouped-toolbutton.hover.1x");
+
+
     fireEvent.pointerDown(library);
-    expect(library.getAttribute("data-nse-appearance-slot")).toBe("tab-bar.tab.pressed.1x");
-    expect(library.getAttribute("data-nse-appearance-recipe-id")).toBe("atmo.tab-bar.tab.grouped-toolbutton.pressed.1x");
+
+
     fireEvent.pointerUp(library);
     fireEvent.pointerLeave(library);
     fireEvent.focus(library);
-    expect(library.getAttribute("data-nse-appearance-slot")).toBe("tab-bar.tab.focused.1x");
-    expect(library.getAttribute("data-nse-appearance-recipe-id")).toBe("atmo.tab-bar.tab.grouped-toolbutton.focused.1x");
-    expect(settings.getAttribute("data-nse-appearance-recipe-id")).toBe("atmo.tab-bar.tab.grouped-toolbutton.disabled.1x");
+
 
     fireEvent.pointerDown(home);
     expect(home.getAttribute("data-nse-tab-presentation-state")).toBe("pressed");
@@ -526,7 +517,7 @@ describe("NSETabBar", () => {
 
     const homeIcon = screen.getByRole("tab", { name: "Home destination" }).querySelector<HTMLElement>(".nse-tab-bar-icon");
     const templateIcon = screen.getByRole("tab", { name: "Template destination" }).querySelector<HTMLElement>(".nse-tab-bar-icon");
-    const navigationCss = readFileSync(resolve(process.cwd(), "src/NSE/Navigation/nse-navigation.css"), "utf8");
+    const navigationCss = withoutScopeTwins(readFileSync(resolve(process.cwd(), "src/NSE/Navigation/nse-navigation.css"), "utf8"));
 
     expect(homeIcon?.getAttribute("data-nse-tab-icon-source")).toBe("vector:/fixture/home.svg");
     expect(homeIcon?.getAttribute("data-nse-tab-icon-ready")).toBe("true");
@@ -536,7 +527,7 @@ describe("NSETabBar", () => {
     expect(navigationCss).toContain('mask: var(--nse-tab-icon-source) center / contain no-repeat;');
     expect(templateIcon?.getAttribute("data-nse-tab-icon-ready")).toBe("false");
     expect(navigationCss).toContain('.nse-tab-bar-icon[data-nse-tab-icon-ready="true"]');
-    expect(navigationCss).not.toContain('.nse-tab-bar-icon[data-nse-appearance-authority="unresolved"] { display: none; }');
+    expect(navigationCss).not.toContain('.nse-tab-bar-icon[data-nse-theme-authority="unresolved"] { display: none; }');
 
     unmount();
     controller.dispose();
@@ -544,8 +535,8 @@ describe("NSETabBar", () => {
 
   it("switches explicit themes without replacing the controller, selected tab or focus", async () => {
     const controller = new NSETabBarController<React.ReactNode>({ id: "theme-switch-tabs", destinations: destinations(2) });
-    const fixture = (appearance: typeof atmoAppearance) => <NSEAppearanceProvider appearance={appearance}><NSETabBar controller={controller} aria-label="Theme tabs" /></NSEAppearanceProvider>;
-    const view = render(fixture(atmoAppearance));
+    const fixture = (appearance: typeof atmoTheme) => <NSEAppearanceProvider theme={appearance}><NSETabBar controller={controller} aria-label="Theme tabs" /></NSEAppearanceProvider>;
+    const view = render(fixture(atmoTheme));
     const library = screen.getByRole("tab", { name: "Library destination" });
     fireEvent.click(library);
     await waitFor(() => expect(controller.getSnapshot().selectedDestinationId).toBe("library"));
@@ -554,11 +545,11 @@ describe("NSETabBar", () => {
     expect(screen.getByRole("tab", { name: "Library destination" })).toBe(library);
     expect(document.activeElement).toBe(library);
     expect(library.getAttribute("aria-selected")).toBe("true");
-    expect(library.closest("[data-nse-appearance]")?.getAttribute("data-nse-appearance")).toBe("custom-test");
-    expect(library.getAttribute("data-nse-appearance-recipe-id")).toBeNull();
-    view.rerender(fixture(atmoAppearance));
+    expect(library.closest("[data-nse-theme]")?.getAttribute("data-nse-theme")).toBe("com.example.custom-test");
+
+    view.rerender(fixture(atmoTheme));
     expect(document.activeElement).toBe(library);
-    expect(library.getAttribute("data-nse-appearance-recipe-id")).toBe("atmo.tab-bar.tab.grouped-toolbutton.selected.1x");
+
     view.unmount(); controller.dispose();
   });
 
@@ -570,12 +561,12 @@ describe("NSETabBar", () => {
       destinations: destinations(2),
     });
     try {
-      const { unmount } = render(<NSEAppearanceProvider appearance={atmoAppearance}><NSETabBar controller={controller} aria-label="High density source gap" /></NSEAppearanceProvider>);
+      const { unmount } = render(<NSEAppearanceProvider theme={atmoTheme}><NSETabBar controller={controller} aria-label="High density source gap" /></NSEAppearanceProvider>);
       const tabBar = screen.getByRole("tablist", { name: "High density source gap" })
         .closest<HTMLElement>("[data-nse-tab-bar='true']");
       expect(tabBar).not.toBeNull();
-      expect(tabBar?.getAttribute("data-nse-tab-chrome-status")).toBe("resolved");
-      expect(tabBar?.getAttribute("data-nse-tab-unresolved-chrome-slots")).toBeNull();
+      expect(tabBar?.querySelectorAll('[role="tab"] [data-nse-part="bezel"]').length).toBeGreaterThan(0);
+
       expect(tabBar?.querySelector("[data-nse-tab-authority-diagnostic]")).toBeNull();
       expect(tabBar?.querySelector(".nse-tab-bar-authority-status")).toBeNull();
       unmount();
@@ -586,14 +577,14 @@ describe("NSETabBar", () => {
     }
   });
 
-  it("retains custom appearance selection and reachable interaction states without borrowing Atmo recipes", () => {
+  it("retains custom theme selection and reachable interaction states with Atmo fallback", () => {
     const controller = new NSETabBarController<React.ReactNode>({ id: "custom-tabs", destinations: destinations(2) });
-    const view = render(<NSEAppearanceProvider appearance={customAppearance}><NSETabBar controller={controller} aria-label="custom appearance tabs" /></NSEAppearanceProvider>);
+    const view = render(<NSEAppearanceProvider theme={customAppearance}><NSETabBar controller={controller} aria-label="custom appearance tabs" /></NSEAppearanceProvider>);
     const library = screen.getByRole("tab", { name: "Library destination" });
     fireEvent.pointerEnter(library);
-    expect(library.getAttribute("data-nse-appearance-slot")).toBe("tab-bar.tab.hover.1x");
-    expect(library.getAttribute("data-nse-appearance-recipe-id")).toBeNull();
-    expect(library.closest("[data-nse-appearance]")?.getAttribute("data-nse-appearance")).toBe("custom-test");
+
+
+    expect(library.closest("[data-nse-theme]")?.getAttribute("data-nse-theme")).toBe("com.example.custom-test");
     expect(library.querySelector(".nse-tab-bar-label")?.textContent).toBe("Library");
     fireEvent.pointerDown(library);
     expect(library.getAttribute("data-nse-tab-presentation-state")).toBe("pressed");
@@ -602,7 +593,7 @@ describe("NSETabBar", () => {
   });
 
   it("keeps labels and badges present under theme-neutral navigation structure", () => {
-    const css = readFileSync("src/NSE/Navigation/nse-navigation.css", "utf8");
+    const css = withoutScopeTwins(readFileSync("src/NSE/Navigation/nse-navigation.css", "utf8"));
     expect(css).toContain(".nse-tab-bar-label {");
     expect(css).toContain(".nse-tab-bar-badge {");
     const controller = new NSETabBarController<React.ReactNode>({ id: "neutral-tabs", destinations: destinations(2, { badge: "library" }) });

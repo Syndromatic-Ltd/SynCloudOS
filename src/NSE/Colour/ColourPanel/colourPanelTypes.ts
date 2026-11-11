@@ -24,6 +24,7 @@ import type { UndoManager } from "../../../SynCloudOS/SynCloudOS";
 import type { NSEColourPanelPreferencesController } from "./colourPanelPreferences";
 import type { NSEColourTransferAdapter } from "../Transfer";
 import type { GFXColour } from "../../../FX/GraphicsFX/public";
+import type { NSEControllerOwnershipOptions } from "../../Controllers/ownership";
 
 export interface NSEColourChange {
   readonly previous: GFXColour;
@@ -73,7 +74,7 @@ export interface NSEColourPanelSnapshot {
   readonly revision: number;
 }
 
-export interface NSEColourPanelControllerOptions {
+export interface NSEColourPanelControllerOptions extends NSEControllerOwnershipOptions {
   readonly undoManager?: Pick<UndoManager, "isExecuting" | "register" | "reserve">;
   readonly preferences?: NSEColourPanelPreferencesController;
   readonly transferAdapter?: NSEColourTransferAdapter;

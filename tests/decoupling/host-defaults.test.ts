@@ -19,16 +19,16 @@
  */
 
 import { expect, it } from "vitest";
-import { defaultPolicyProfile } from "../../src/SynCloudOS/PolicyKit/defaultPolicyProfile";
+import { defaultConfigurationProfile } from "../../src/SynCloudOS/ConfigurationProfiles/defaultConfigurationProfile";
 import { projectRuntimeManifest } from "../../src/SynCloudOS/AppSDK/projectRuntimeManifest";
 
 it("does not grant a site's founder identity authority in a generic host", () => {
-  expect(defaultPolicyProfile.resolveRole({ isAuthorised: true, synId: "user@example.test", accessClass: "team" }, "founder")).toBe("authenticated");
-  expect(defaultPolicyProfile.roles.authenticated).not.toContain("runtime.configure");
+  expect(defaultConfigurationProfile.resolveRole({ isAuthorised: true, synId: "user@example.test", accessClass: "team" }, "founder")).toBe("authenticated");
+  expect(defaultConfigurationProfile.roles.authenticated).not.toContain("runtime.mutate");
 });
 
 it("leaves application legal ownership to the host", () => {
-  const manifest = { schemaVersion: 1 as const, id: "org.example.app", version: "1.0.0", title: "Example" };
+  const manifest = { schemaVersion: 1 as const, bundleIdentifier: "org.example.app", version: "1.0.0", displayName: "Example" };
   const context = { appRoot: "./Example.app", packageName: "Example.app", path: "./Example.app/", componentKey: "Example" };
   expect(projectRuntimeManifest(manifest, context).about.copyright).toBe("");
   expect(projectRuntimeManifest(manifest, { ...context, about: { copyright: "Example Ltd", trademark: "Example" } }).about.copyright).toBe("Example Ltd");

@@ -1,0 +1,26 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-safe-area-model.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-safe-area-model.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-safe-area-model.test.ts [ tests/runtime/nse-safe-area-model.test.ts ]
+Error: Cannot find module '../../src/NSE/Layout/NSEEdgeInsets' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/nse-safe-area-model.test.ts
+ ❯ tests/runtime/nse-safe-area-model.test.ts:2:1
+      1| import { describe, expect, it } from "vitest";
+      2| import { NSEEdgeInsetsMake, NSEEdgeInsetsZero } from "../../src/NSE/La…
+       | ^
+      3| import { physicalSafeAreaInsets, resolveSafeAreaInsets } from "../../s…
+      4|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  18:19:24
+   Duration  407ms (transform 26ms, setup 34ms, import 0ms, tests 0ms, environment 0ms)
+

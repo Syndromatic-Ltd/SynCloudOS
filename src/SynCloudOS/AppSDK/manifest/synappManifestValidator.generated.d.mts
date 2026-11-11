@@ -8,5 +8,12 @@ export interface SynAppManifestSchemaValidator {
   errors?: ErrorObject[] | null;
 }
 
+/** The canonical bundleIdentifier field schema, with no manifest allocation. */
+export interface BundleIdentifierSchemaValidator {
+  (data: unknown): data is string;
+  errors?: ErrorObject[] | null;
+}
+
 export declare const validate: SynAppManifestSchemaValidator;
+export declare const validateBundleIdentifier: BundleIdentifierSchemaValidator;
 export default validate;

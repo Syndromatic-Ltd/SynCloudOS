@@ -19,12 +19,12 @@
  */
 
 import type { SynCloudOSIdentityUser } from "./identityTypes";
-import type { SynCloudOSPolicyProfile } from "../PolicyKit/policyTypes";
-import { defaultPolicyProfile } from "../PolicyKit/defaultPolicyProfile";
+import type { SynCloudOSConfigurationProfile } from "../ConfigurationProfiles/policyTypes";
+import { defaultConfigurationProfile } from "../ConfigurationProfiles/defaultConfigurationProfile";
 
-export function createIdentity(dependencies: { loginServices: any; runtimeId?: string; profile?: SynCloudOSPolicyProfile }) {
+export function createIdentity(dependencies: { loginServices: any; runtimeId?: string; profile?: SynCloudOSConfigurationProfile }) {
 const LoginServices = dependencies.loginServices;
-const profile = dependencies.profile ?? defaultPolicyProfile;
+const profile = dependencies.profile ?? defaultConfigurationProfile;
 
 const anonymousUser: SynCloudOSIdentityUser = {
   id: "public.anonymous",

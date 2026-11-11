@@ -1,5 +1,7 @@
 # VideoFX
 
+Encoded byte inputs accept `NSEDataConvertible` from `@syndromatic/syncloudos/foundation`; delivered encoded bytes are immutable `NSEData`. Use `.bytes` at a native typed-buffer boundary and `.blob(mimeType)` for a browser Blob. Numeric pixel, index and PCM planes retain their typed arrays; writable copy destinations remain mutable.
+
 VideoFX (`VFX`) is the web-native analogue of Video Toolbox and the video half of AVFoundation. It decodes and encodes video, holds decoded frames with exact MediaFX timing, processes frames with graphics and image filters, reads and writes container files, captures from cameras and displays, and presents frames on a shared clock.
 
 The framework is built around three ideas.
@@ -20,7 +22,7 @@ import { VFXVideoFormat, VFXPixelBuffer } from "@syndromatic/syncloudos/fx/video
 | --- | --- |
 | Prefix | `VFX` |
 | Entries | `@syndromatic/syncloudos/fx/video` and `@syndromatic/syncloudos/fx/video/webm` |
-| Hooks | `useSynWareVideo` for capture, and `useSynWare().video` for decoding, encoding, processing and presentation |
+| Hooks | `useVideo` for capture, and `useSCOS().video` for decoding, encoding, processing and presentation |
 | Permissions | `video.capture.camera` and `video.capture.display` for capture. Decoding, encoding and processing need none. |
 | Analogue | Video Toolbox (`VTDecompressionSession`, `VTCompressionSession`), AVFoundation capture and asset writing, Core Video (`CVPixelBuffer`, `CVPixelBufferPool`) |
 
@@ -159,7 +161,7 @@ A decoder hands you frames that you must close. Closing a frame twice is safe.
 One compressed unit: a keyframe or a delta frame, with its bytes and timing. It is immutable, and the constructor copies the data.
 
 ```text
-new VFXEncodedChunk({ type: "key" | "delta", data: Uint8Array, timing: MEFXSampleTimingInfo, discardPaddingNanoseconds? })
+new VFXEncodedChunk({ type: "key" | "delta", data: NSEDataConvertible, timing: MEFXSampleTimingInfo, discardPaddingNanoseconds? })
 ```
 
 | Member | Description |
@@ -167,7 +169,7 @@ new VFXEncodedChunk({ type: "key" | "delta", data: Uint8Array, timing: MEFXSampl
 | `type` | `"key"` (decodable on its own) or `"delta"` (depends on earlier chunks). |
 | `timing` | The chunk's `MEFXSampleTimingInfo`. |
 | `byteLength` | The size of the data. |
-| `copyData()` | A copy of the bytes. |
+| `copyData()` | An immutable `NSEData` copy of the encoded bytes. |
 | `copyWithNewTiming(timing)` | A chunk with the same data and new timing. The bytes are shared, since they are immutable, so retiming costs nothing. |
 | `webCodecsTiming()` | `{ timestampMicroseconds, durationMicroseconds, rounded }`, the timing converted to the microsecond integers WebCodecs uses. `rounded` is true when the conversion was inexact. Throws for times with a non-zero epoch. |
 | `discardPaddingNanoseconds` | Trailing padding to discard, from 0 to one second. Meaningful for audio packets in WebM. |
@@ -224,11 +226,11 @@ A failure in the backend, in `output` or a pending-output overflow moves the dec
 
 ```tsx
 import { useEffect, useRef } from "react";
-import { useSynWare } from "@syndromatic/syncloudos/sdk";
+import { useSCOS } from "@syndromatic/syncloudos/sdk";
 import { VFXEncodedChunk, type VFXFrame } from "@syndromatic/syncloudos/fx/video";
 
 export function useVP8Decoder(onFrame: (frame: VFXFrame) => void) {
-  const app = useSynWare();
+  const app = useSCOS();
   const decoder = useRef<ReturnType<typeof app.video.createDecoder> | null>(null);
 
   useEffect(() => {
@@ -280,7 +282,7 @@ export function useVP8Decoder(onFrame: (frame: VFXFrame) => void) {
 new VFXEncoder({ backend, output, error?, maximumPendingOutputs?, maximumEncodeQueueSize? })
 ```
 
-The options mirror the decoder's. `output` receives each `VFXEncodedChunk` and a `VFXEncoderOutputMetadata` with a `decoderConfig` (the codec, size and optional description bytes a decoder needs, or a container track needs) and an optional `colourSpace`.
+The options mirror the decoder's. `output` receives each `VFXEncodedChunk` and a `VFXEncoderOutputMetadata` with a `decoderConfig` (the codec, size and optional `description: NSEData` a decoder or container track needs) and an optional `colourSpace`.
 
 | Member | Description |
 | --- | --- |
@@ -295,11 +297,11 @@ The options mirror the decoder's. `output` receives each `VFXEncodedChunk` and a
 `VFXEncoderSession` and `VFXMountedEncoderOptions` are the session forms. `VFXEncoderBackend`, `VFXEncoderBackendCallbacks`, `VFXEncoderCapabilityProbe`, `VFXEncoderState`, `VFXEncoderLatencyMode`, `VFXEncoderAlphaMode`, `VFXEncoderHardwareAcceleration`, `VFXEncoderFrameOptions`, `VFXEncoderDecoderConfig`, `VFXEncoderOutputMetadata` and `VFXEncoderOptions` describe the plug points.
 
 ```tsx
-import { useSynWare } from "@syndromatic/syncloudos/sdk";
+import { useSCOS } from "@syndromatic/syncloudos/sdk";
 import type { VFXEncodedChunk, VFXFrame } from "@syndromatic/syncloudos/fx/video";
 
 export function useRecorder() {
-  const app = useSynWare();
+  const app = useSCOS();
 
   return async function record(frames: AsyncIterable<VFXFrame>, onChunk: (chunk: VFXEncodedChunk) => void) {
     const capability = await app.video.queryEncoder({
@@ -396,8 +398,8 @@ new VFXContainerWriter({ backend, sink, track, maximumBufferedBytes?, signal? })
 | Option | Description |
 | --- | --- |
 | `backend` | The format, for example `new VFXWebMContainerBackend()`. |
-| `sink` | Where bytes go: `write(bytes)`, and optional `close()` and `abort(reason)`. Wrap a `WritableStream` or a file handle. |
-| `track` | A `VFXContainerTrack`. See below. |
+| `sink` | Receives encoded chunks through `write(bytes: NSEData): void \| Promise<void>`, and optional `close()` and `abort(reason)`. Wrap a `WritableStream` or a file handle. |
+| `track` | A `VFXContainerTrackInput`; supplied video codec descriptions accept `NSEDataConvertible`. See below. |
 | `maximumBufferedBytes` | The most input the writer will hold, default 8 MiB, from 256 bytes to 512 MiB. |
 | `signal` | An `AbortSignal` that aborts the export. |
 
@@ -413,7 +415,7 @@ The constructor throws `NotSupportedError` when the backend cannot write the tra
 
 A failure in the sink or the backend aborts the writer, calls the sink's `abort`, and rejects the operation that failed.
 
-**Tracks.** A `VFXVideoContainerTrack` has `kind: "video"`, `id` (1 to 126), `codec`, `codedWidth`, `codedHeight`, `timescale` (units per second, up to a billion) and an optional codec `description`. A `VFXAudioContainerTrack` has `kind: "audio"`, `id`, `codec`, `sampleRate` (48,000), `channelCount` (1 or 2), `preSkip` (0 to 65,535) and `timescale`. `VFXContainerTrack` is their union.
+**Tracks.** A `VFXVideoContainerTrack` has `kind: "video"`, `id` (1 to 126), `codec`, `codedWidth`, `codedHeight`, `timescale` (units per second, up to a billion) and an optional codec `description: NSEData`. A `VFXAudioContainerTrack` has `kind: "audio"`, `id`, `codec`, `sampleRate` (48,000), `channelCount` (1 or 2), `preSkip` (0 to 65,535) and `timescale`. `VFXContainerTrack` is their delivered union. `VFXContainerTrackInput` accepts the same metadata with a video `description?: NSEDataConvertible`; the writer copies it into immutable data.
 
 ### `VFXContainerReader`
 
@@ -421,7 +423,7 @@ Reads a whole container into chunks.
 
 ```text
 new VFXContainerReader({ backend, maximumBufferedBytes?, maximumElementBytes?, maximumChunks?, signal? })
-reader.read(input: Uint8Array | AsyncIterable<Uint8Array>): Promise<VFXContainerReadResult>
+reader.read(input: NSEDataConvertible | AsyncIterable<NSEDataConvertible>): Promise<VFXContainerReadResult>
 ```
 
 | Option | Default | Range |
@@ -432,7 +434,7 @@ reader.read(input: Uint8Array | AsyncIterable<Uint8Array>): Promise<VFXContainer
 
 `read` accepts bytes in memory or an async iterable (a `ReadableStream` is one), so a large file streams through. The result holds the `container` name, the `track`, the `chunks` (`VFXEncodedChunk`s with timing) and a `seekIndex` of `{ timestampMicroseconds, byteOffset }` points. Malformed or oversized input fails and never allocates without bound.
 
-`VFXContainerBackend` (`container`, `capabilities`, `supports(track, operation)`, `createWriter(track)`) and `VFXContainerReadableBackend` (adds `createReader(limits)`) are the backend interfaces. `VFXContainerCapability` reports what a backend can do for a codec: `read`, `write`, `streaming`, `seekIndex` and `provenance`. The remaining types are `VFXContainerBackendWriter`, `VFXContainerBackendReadSession`, `VFXContainerByteSink`, `VFXContainerReadLimits`, `VFXContainerReadResult`, `VFXContainerSeekPoint`, `VFXContainerReaderOptions`, `VFXContainerWriterOptions`, `VFXContainerWriterState` and `VFXContainerWriterDiagnostics`.
+`VFXContainerBackendWriter.start()`, `write(chunk)` and `close()` return `readonly NSEData[]`; `VFXContainerBackendReadSession.push(bytes)` accepts `NSEDataConvertible`. `VFXContainerBackend` (`container`, `capabilities`, `supports(track, operation)`, `createWriter(track)`) and `VFXContainerReadableBackend` (adds `createReader(limits)`) are the backend interfaces. `VFXContainerCapability` reports what a backend can do for a codec: `read`, `write`, `streaming`, `seekIndex` and `provenance`. The remaining types are `VFXContainerBackendWriter`, `VFXContainerBackendReadSession`, `VFXContainerByteSink`, `VFXContainerReadLimits`, `VFXContainerReadResult`, `VFXContainerSeekPoint`, `VFXContainerReaderOptions`, `VFXContainerWriterOptions`, `VFXContainerWriterState` and `VFXContainerWriterDiagnostics`.
 
 ### WebM
 
@@ -448,15 +450,15 @@ import { VFXContainerWriter, type VFXEncodedChunk } from "@syndromatic/syncloudo
 import { VFXWebMContainerBackend } from "@syndromatic/syncloudos/fx/video/webm";
 
 export async function writeWebM(chunks: AsyncIterable<VFXEncodedChunk>, width: number, height: number) {
-  const parts: Uint8Array[] = [];
+  const parts: Blob[] = [];
   const writer = new VFXContainerWriter({
     backend: new VFXWebMContainerBackend(),
-    sink: { write: (bytes) => { parts.push(bytes.slice()); } },
+    sink: { write: (bytes) => { parts.push(bytes.blob()); } },
     track: { id: 1, kind: "video", codec: "vp8", codedWidth: width, codedHeight: height, timescale: 1_000_000 },
   });
   for await (const chunk of chunks) await writer.write(chunk);
   await writer.close();
-  return new Blob(parts as BlobPart[], { type: "video/webm" });
+  return new Blob(parts, { type: "video/webm" });
 }
 ```
 
@@ -497,11 +499,11 @@ Media-only coordinators have their own session scope, so several independently c
 
 ```tsx
 import { useEffect, useRef } from "react";
-import { useSynWare } from "@syndromatic/syncloudos/sdk";
+import { useSCOS } from "@syndromatic/syncloudos/sdk";
 import type { VFXFrame } from "@syndromatic/syncloudos/fx/video";
 
 export function VideoView({ frames }: { frames: AsyncIterable<VFXFrame> }) {
-  const app = useSynWare();
+  const app = useSCOS();
   const canvas = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -552,7 +554,7 @@ export function VideoView({ frames }: { frames: AsyncIterable<VFXFrame> }) {
 
 ## Capture
 
-`useSynWareVideo()` returns a `VFXCaptureSession` bound to your component. Mounting it requests nothing. The camera and display prompts appear only from `requestCamera()` and `requestDisplay()`.
+`useVideo()` returns a `VFXCaptureSession` bound to your component. Mounting it requests nothing. The camera and display prompts appear only from `requestCamera()` and `requestDisplay()`.
 
 | Member | Description |
 | --- | --- |
@@ -571,10 +573,10 @@ A refusal by the user or by policy moves the session to `"denied"` and rejects t
 
 ```tsx
 import { useEffect, useState } from "react";
-import { useSynWareVideo } from "@syndromatic/syncloudos/sdk";
+import { useVideo } from "@syndromatic/syncloudos/sdk";
 
 export function CameraButton() {
-  const video = useSynWareVideo();
+  const video = useVideo();
   const [status, setStatus] = useState("Idle");
 
   useEffect(() => video.subscribe(() => setStatus(video.state)), [video]);
@@ -598,21 +600,21 @@ The manifest for a component that captures declares the permission:
 ```ts
 export default {
   schemaVersion: 1,
-  id: "com.example.camera",
+  bundleIdentifier: "com.example.camera",
   version: "1.0.0",
-  title: "Camera",
+  displayName: "Camera",
   routes: [{ path: "/camera", primary: true }],
-  permissions: ["video.capture.camera"],
+  entitlements: ["video.capture.camera"],
 } as const;
 ```
 
 ## The session client
 
-`useSynWare().video` is the full `VFXVideoClient`. All of its resources are owned by your application and released when it closes.
+`useSCOS().video` is the full `VFXVideoClient`. All of its resources are owned by your application and released when it closes.
 
 | Method | Returns | Description |
 | --- | --- | --- |
-| `createCaptureSession(signal?)` | `VFXCaptureSession` | A capture session. `useSynWareVideo()` wraps one for a component. |
+| `createCaptureSession(signal?)` | `VFXCaptureSession` | A capture session. `useVideo()` wraps one for a component. |
 | `queryDecoder(input, signal?)` | `Promise<VFXDecoderCapability>` | Asks the host whether it can decode a configuration. |
 | `createDecoder(options, signal?)` | `VFXDecoderSession` | A decoder with WebCodecs behind it. |
 | `queryEncoder(input, signal?)` | `Promise<VFXEncoderCapability>` | Asks whether the host can encode a configuration. |
@@ -647,3 +649,18 @@ Camera and display capture show the browser's consent prompt and indicator. Stop
 - [GraphicsFX](graphics.md) and [ImageFX](image.md), for drawing on and filtering frames
 - [TextFX](text.md), for text overlays
 - [Manifest reference](../synware-manifest.md), for the capture permissions
+
+## Native browser presentation and display-element capture
+
+`useVideoPresentation()` exposes component-scoped VideoFX presentation authority. Declare `video.pictureInPicture` for PiP or `video.route` for remote playback in the app manifest. The client creates a `VFXPictureInPictureController` or `VFXRouteDetector` for an app-provided `HTMLVideoElement`. Construction is passive. Each controller exposes capabilities plus `authorizationStatus()` and `requestAuthorization()`; these check host authority and API support without fabricating a browser permission prompt.
+
+Call `startPictureInPicture()` or the route detector's `prompt()` directly from a genuine user gesture. Browser activation and media requirements still apply. PiP controllers expose `isPictureInPictureActive`, `stopPictureInPicture()`, `subscribe()`, and `dispose()`. Only the controller owning a PiP target may close it; late completion after abort cleans up that target without exiting another controller's presentation.
+
+Route detectors expose `startDiscovery()`, `stopDiscovery()`, `areRoutesAvailable`, `connectionState`, `subscribe()`, and `dispose()`. Availability is `null` until the browser invokes its discovery callback. Remote Playback support is not a promise of AirPlay: Chromium may expose a different transport or no routes. Browser availability watching can itself reject for browser policy. Cancellation also cancels watch IDs that arrive after disposal. Mount abort, caller abort and hook cleanup end all ownership.
+
+`VFXContentFilter(element, "restrict" | "crop")` follows ScreenCaptureKit's content-filter concept. After the user grants a display capture, call the optional capture-session `setContentFilter(filter)` method; pass `null` to clear. This additionally requires `video.capture.element` and existing `video.capture.display` authority. The browser must support RestrictionTarget/restrictTo or CropTarget/cropTo. Camera sessions, inactive captures, and arbitrary external tracks are rejected; the host applies filters only to its private stream. Cancellation or revoked authority during a filter update interrupts capture rather than retaining an uncertain filtering result. Capture tracks are never returned to the app.
+
+The host injects its document and element-target constructors into `BrowserVideoPresentationAdapter`, and passes that adapter into `BrowserVideoCaptureAdapter`. Unsupported hosts report capabilities explicitly. These APIs do not create document Picture-in-Picture windows or infer screen-cast devices.
+
+
+Element-capture support is reported by `session.capabilities.elementRestriction` and `elementCrop`. Before a display stream is granted these flags report target-factory availability only. After capture starts they additionally require the corresponding methods on that session's private live display track; browser surface restrictions can still reject an operation. A camera session or disposed/unavailable host reports false. The display chooser is the browser authorization step; applying a filter does not invent a second native permission prompt. The host-only `elementCaptureCapabilities(track?)` query uses injected factories and never exposes the track to apps.

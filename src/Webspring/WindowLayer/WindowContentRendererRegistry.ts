@@ -20,6 +20,13 @@
 
 import type { ReactNode } from "react";
 import type { WindowPresentation, WindowRecord } from "../../SynCloudOS/SynCloudOS";
+import type { NSEWindowSurfaceRequest } from "../../NSE/hostComposition";
+import type { NSEPopoverPosition } from "../../NSE/hostComposition";
+
+export interface WindowSurfacePresentation {
+  readonly request: NSEWindowSurfaceRequest;
+  readonly popoverPosition: NSEPopoverPosition | null;
+}
 
 export interface WindowContentRenderContext {
   readonly window: WindowRecord;
@@ -45,6 +52,7 @@ export class WindowContentRendererUnavailableError extends Error {
 
 export class WindowContentRendererRegistry {
   readonly #renderers = new Map<string, WindowContentRenderer>();
+  readonly #surfaces = new Map<string, () => WindowSurfacePresentation>();
   readonly #listeners = new Set<() => void>();
   #revision = 0;
   #disposed = false;
@@ -57,11 +65,12 @@ export class WindowContentRendererRegistry {
     return () => this.#listeners.delete(listener);
   };
 
-  register(mountKey: string, renderer: WindowContentRenderer): { dispose(): void; update(renderer: WindowContentRenderer): void } {
+  register(mountKey: string, renderer: WindowContentRenderer, surface?: () => WindowSurfacePresentation): { dispose(): void; update(renderer: WindowContentRenderer): void } {
     this.#assertLive();
     if (!mountKey.trim()) throw new TypeError("Window content renderer keys must not be empty.");
     if (this.#renderers.has(mountKey)) throw new DuplicateWindowContentRendererError(mountKey);
     this.#renderers.set(mountKey, renderer);
+    if (surface) this.#surfaces.set(mountKey, surface);
     this.#publish();
     let live = true;
     return {
@@ -76,6 +85,7 @@ export class WindowContentRendererRegistry {
         live = false;
         if (this.#renderers.get(mountKey) === renderer) {
           this.#renderers.delete(mountKey);
+          this.#surfaces.delete(mountKey);
           // A renderer registration is usually released from a fixture or
           // application effect cleanup. Its sibling WindowLayer may still be
           // completing that same React commit, so do not re-enter it with a
@@ -87,6 +97,7 @@ export class WindowContentRendererRegistry {
   }
 
   has(mountKey: string): boolean { return this.#renderers.has(mountKey); }
+  surface(mountKey: string): WindowSurfacePresentation | null { return this.#surfaces.get(mountKey)?.() ?? null; }
 
   render(mountKey: string, context: WindowContentRenderContext): ReactNode {
     this.#assertLive();
@@ -99,6 +110,7 @@ export class WindowContentRendererRegistry {
     if (this.#disposed) return;
     this.#disposed = true;
     this.#renderers.clear();
+    this.#surfaces.clear();
     this.#publish();
     this.#listeners.clear();
   }

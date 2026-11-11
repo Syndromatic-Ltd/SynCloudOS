@@ -1,0 +1,260 @@
+{
+  "method": "Real Chromium app and native effects with controlled RAF/native seeking, same as capture-controlled.mjs",
+  "errors": [],
+  "before": [
+    {
+      "section": "company",
+      "opacity": 0,
+      "x": -118.80000305175781,
+      "transform": "matrix(0.965, 0, 0, 0.965, -118.8, 15.75)",
+      "sameLeavingElement": null,
+      "native": [
+        {
+          "frames": [
+            {
+              "offset": null,
+              "easing": "linear",
+              "composite": "auto",
+              "opacity": "1",
+              "computedOffset": 0
+            },
+            {
+              "offset": null,
+              "easing": "linear",
+              "composite": "auto",
+              "opacity": "0",
+              "computedOffset": 1
+            }
+          ],
+          "state": "finished",
+          "time": 550
+        },
+        {
+          "frames": [
+            {
+              "offset": null,
+              "easing": "linear",
+              "composite": "auto",
+              "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+              "computedOffset": 0
+            },
+            {
+              "offset": null,
+              "easing": "linear",
+              "composite": "auto",
+              "transform": "matrix3d(0.965, 0, 0, 0, 0, 0.965, 0, 0, 0, 0, 1, 0, -118.8, 15.75, 0, 1)",
+              "computedOffset": 1
+            }
+          ],
+          "state": "finished",
+          "time": 550
+        }
+      ]
+    },
+    {
+      "section": "framework",
+      "opacity": 1,
+      "x": 6.502690315246582,
+      "transform": "matrix(0.99926, 0, 0, 0.99926, 6.50269, 0.33313)",
+      "sameLeavingElement": true,
+      "native": [
+        {
+          "frames": [
+            {
+              "offset": null,
+              "easing": "linear",
+              "composite": "auto",
+              "transform": "matrix3d(0.975, 0, 0, 0, 0, 0.975, 0, 0, 0, 0, 1, 0, 219.6, 11.25, 0, 1)",
+              "computedOffset": 0
+            },
+            {
+              "offset": null,
+              "easing": "linear",
+              "composite": "auto",
+              "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+              "computedOffset": 1
+            }
+          ],
+          "state": "paused",
+          "time": 620
+        }
+      ]
+    }
+  ],
+  "after": [
+    {
+      "section": "framework",
+      "opacity": 1,
+      "x": 6.502690315246582,
+      "transform": "matrix(0.99926, 0, 0, 0.99926, 6.50269, 0.33313)",
+      "sameLeavingElement": true,
+      "native": [
+        {
+          "frames": [
+            {
+              "offset": null,
+              "easing": "linear",
+              "composite": "auto",
+              "opacity": "1",
+              "computedOffset": 0
+            },
+            {
+              "offset": null,
+              "easing": "linear",
+              "composite": "auto",
+              "opacity": "0",
+              "computedOffset": 1
+            }
+          ],
+          "state": "paused",
+          "time": 0
+        },
+        {
+          "frames": [
+            {
+              "offset": null,
+              "easing": "linear",
+              "composite": "auto",
+              "transform": "matrix3d(0.99926, 0, 0, 0, 0, 0.99926, 0, 0, 0, 0, 1, 0, 6.50269, 0.33313, 0, 1)",
+              "computedOffset": 0
+            },
+            {
+              "offset": null,
+              "easing": "linear",
+              "composite": "auto",
+              "transform": "matrix3d(0.965, 0, 0, 0, 0, 0.965, 0, 0, 0, 0, 1, 0, -118.8, 15.75, 0, 1)",
+              "computedOffset": 1
+            }
+          ],
+          "state": "paused",
+          "time": 0
+        }
+      ]
+    },
+    {
+      "section": "team",
+      "opacity": 0,
+      "x": 219.60000610351562,
+      "transform": "matrix(0.975, 0, 0, 0.975, 219.6, 11.25)",
+      "sameLeavingElement": null,
+      "native": [
+        {
+          "frames": [
+            {
+              "offset": null,
+              "easing": "linear",
+              "composite": "auto",
+              "transform": "matrix3d(0.975, 0, 0, 0, 0, 0.975, 0, 0, 0, 0, 1, 0, 219.6, 11.25, 0, 1)",
+              "computedOffset": 0
+            },
+            {
+              "offset": null,
+              "easing": "linear",
+              "composite": "auto",
+              "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+              "computedOffset": 1
+            }
+          ],
+          "state": "paused",
+          "time": 0
+        }
+      ]
+    }
+  ],
+  "travelling": [
+    {
+      "section": "framework",
+      "opacity": 0.964345,
+      "x": 2.0350112915039062,
+      "transform": "matrix(0.998038, 0, 0, 0.998038, 2.03501, 0.88282)",
+      "sameLeavingElement": true,
+      "native": [
+        {
+          "frames": [
+            {
+              "offset": null,
+              "easing": "linear",
+              "composite": "auto",
+              "opacity": "1",
+              "computedOffset": 0
+            },
+            {
+              "offset": null,
+              "easing": "linear",
+              "composite": "auto",
+              "opacity": "0",
+              "computedOffset": 1
+            }
+          ],
+          "state": "paused",
+          "time": 160
+        },
+        {
+          "frames": [
+            {
+              "offset": null,
+              "easing": "linear",
+              "composite": "auto",
+              "transform": "matrix3d(0.99926, 0, 0, 0, 0, 0.99926, 0, 0, 0, 0, 1, 0, 6.50269, 0.33313, 0, 1)",
+              "computedOffset": 0
+            },
+            {
+              "offset": null,
+              "easing": "linear",
+              "composite": "auto",
+              "transform": "matrix3d(0.965, 0, 0, 0, 0, 0.965, 0, 0, 0, 0, 1, 0, -118.8, 15.75, 0, 1)",
+              "computedOffset": 1
+            }
+          ],
+          "state": "paused",
+          "time": 160
+        }
+      ]
+    },
+    {
+      "section": "team",
+      "opacity": 0.306108,
+      "x": 177.6619415283203,
+      "transform": "matrix(0.979774, 0, 0, 0.979774, 177.662, 9.10153)",
+      "sameLeavingElement": null,
+      "native": [
+        {
+          "frames": [
+            {
+              "offset": null,
+              "easing": "linear",
+              "composite": "auto",
+              "transform": "matrix3d(0.975, 0, 0, 0, 0, 0.975, 0, 0, 0, 0, 1, 0, 219.6, 11.25, 0, 1)",
+              "computedOffset": 0
+            },
+            {
+              "offset": null,
+              "easing": "linear",
+              "composite": "auto",
+              "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+              "computedOffset": 1
+            }
+          ],
+          "state": "paused",
+          "time": 160
+        }
+      ]
+    }
+  ],
+  "settled": [
+    {
+      "section": "team",
+      "opacity": 1,
+      "x": 0,
+      "transform": "matrix(1, 0, 0, 1, 0, 0)",
+      "sameLeavingElement": null,
+      "native": []
+    }
+  ],
+  "holds": [
+    {
+      "html": "<div style=\"grid-area: 1 / 1; min-width: 0px; min-height: 0px;\"><div tabindex=\"-1\" data-nse-view-controller=\"\"><article class=\"about-pane\" data-section=\"team\" a",
+      "native": []
+    }
+  ]
+}

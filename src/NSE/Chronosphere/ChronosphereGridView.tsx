@@ -20,7 +20,7 @@
 
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useNSEAnimationEnvironment } from "../Animation/NSEAnimationEnvironment";
-import { NSEPushButton } from "../Controls/Buttons/NSEButtons";
+import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { useChronosphereEnvironment } from "./chronosphereEnvironment";
 import type { ChronosphereDisposable } from "./chronosphereEnvironment";
 import type { ChronosphereVersion } from "./chronosphereTypes";
@@ -137,7 +137,7 @@ function GridView<TDetail>({ model, actions, renderFace }: ChronosphereViewProps
       <span className="chronosphere-grid-bar-side" />
       <h2 className="chronosphere-grid-title" id={titleId}>{subject.label}</h2>
       <span className="chronosphere-grid-bar-side chronosphere-grid-bar-end">
-        <NSEPushButton onClick={leave}>{labels.done}</NSEPushButton>
+        <NSEButton title={labels.done} onClick={leave} />
       </span>
     </header>
     <div ref={grid} className="chronosphere-grid-scroll" tabIndex={0} role="listbox" aria-label={labels.timeline}
@@ -161,7 +161,7 @@ function GridView<TDetail>({ model, actions, renderFace }: ChronosphereViewProps
     </div>
     <footer className="chronosphere-grid-footer">
       <span className="chronosphere-grid-detail">{entry ? <><strong>{entry.title}</strong>{entry.dateLabel ? ` · ${entry.dateLabel}` : ""}</> : null}</span>
-      {actions.restore ? <NSEPushButton tone="affirmative" disabled={!canRestore} onClick={() => entry && restore(entry)}>{labels.restore}</NSEPushButton> : null}
+      {actions.restore ? <NSEButton keyEquivalent={"\r"} title={labels.restore} isEnabled={canRestore} onClick={() => entry && restore(entry)} /> : null}
     </footer>
   </div>;
 }

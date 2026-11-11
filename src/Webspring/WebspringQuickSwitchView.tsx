@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { nseControlHooks } from "../NSE/NSE";
+import { useNSEThemeInteraction } from "../NSE/hostComposition";
+import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ComponentProps, type KeyboardEvent as ReactKeyboardEvent, type RefObject } from "react";
 import {
   NSEPresence,
@@ -79,7 +82,7 @@ export interface WebspringQuickSwitchViewProps {
 }
 
 function appKey(apps: readonly SynCloudOSAppInfo[]) {
-  return apps.map((app) => app.id).join("\u0001");
+  return apps.map((app) => app.bundleIdentifier).join("\u0001");
 }
 
 function isLoadingState(state: SynCloudOSAppLifecycleState | undefined) {
@@ -108,7 +111,7 @@ export function WebspringQuickSwitchView({
   const locale = useWebspringLocale();
   const appsSignature = useMemo(() => appKey(apps), [apps]);
   const isSelectable = useCallback(
-    (app: { id: string; isDisabled?: boolean }) => !app.isDisabled && lifecycle[app.id] !== "disabled",
+    (app: { bundleIdentifier: string; isDisabled?: boolean }) => !app.isDisabled && lifecycle[normalizeBundleIdentifier(app.bundleIdentifier)] !== "disabled",
     [lifecycle]
   );
   const selectableIndices = useMemo(
@@ -118,7 +121,7 @@ export function WebspringQuickSwitchView({
     [apps, isSelectable]
   );
   const activeOptionId = selectedIndex >= 0 && apps[selectedIndex]
-    ? `${quickSwitchId}-${apps[selectedIndex].id}`
+    ? `${quickSwitchId}-${apps[selectedIndex].bundleIdentifier}`
     : undefined;
 
   useLayoutEffect(() => {
@@ -174,10 +177,10 @@ export function WebspringQuickSwitchView({
 
   const commit = useCallback((index: number) => {
     const app = apps[index];
-    if (!app || app.isDisabled || lifecycle[app.id] === "disabled") return;
+    if (!app || app.isDisabled || lifecycle[normalizeBundleIdentifier(app.bundleIdentifier)] === "disabled") return;
     feedback?.trigger("medium");
     onClose();
-    void runtime.commands.dispatch("workspace.openApp", { appId: app.id }, { source: "keyboard" });
+    void runtime.commands.dispatch("workspace.openApp", { appId: app.bundleIdentifier }, { source: "keyboard" });
   }, [apps, lifecycle, onClose, runtime]);
 
   const handleKeyDown = useCallback((event: ReactKeyboardEvent<HTMLDivElement>) => {
@@ -239,10 +242,10 @@ export function WebspringQuickSwitchView({
 
   function openApp(index: number) {
     const app = apps[index];
-    if (!app || app.isDisabled || lifecycle[app.id] === "disabled") return;
+    if (!app || app.isDisabled || lifecycle[normalizeBundleIdentifier(app.bundleIdentifier)] === "disabled") return;
     feedback?.trigger("medium");
     onClose();
-    void runtime.commands.dispatch("workspace.openApp", { appId: app.id }, { source: "menu" });
+    void runtime.commands.dispatch("workspace.openApp", { appId: app.bundleIdentifier }, { source: "menu" });
   }
 
   return (
@@ -252,7 +255,7 @@ export function WebspringQuickSwitchView({
         <QuickSwitchSurface
           surfaceRef={rootRef}
           motion={reducedMotion ? quickSwitchMotion.reduced : quickSwitchMotion.standard}
-          className="webspring-quickswitch"
+          data-nse-control="quick-switch" data-nse-part="background" className="webspring-quickswitch"
           role="dialog"
           aria-label={locale.t("quickswitch.ariaLabel", "QuickSwitch")}
           aria-modal="false"
@@ -261,13 +264,13 @@ export function WebspringQuickSwitchView({
           style={{ ["--webspring-quickswitch-items" as string]: apps.length, ["--webspring-quickswitch-fit" as string]: fit }}
           data-overflow={overflow}
         >
-          <div className="webspring-quickswitch-strip" aria-hidden="true">
-            <span className="webspring-quickswitch-cap webspring-quickswitch-cap-left" />
-            <span className="webspring-quickswitch-middle" />
-            <span className="webspring-quickswitch-cap webspring-quickswitch-cap-right" />
+          <div data-nse-part="bezel" className="webspring-quickswitch-strip" aria-hidden="true">
+            <span data-nse-part="leading" className="webspring-quickswitch-cap webspring-quickswitch-cap-left" />
+            <span data-nse-part="background" className="webspring-quickswitch-middle" />
+            <span data-nse-part="trailing" className="webspring-quickswitch-cap webspring-quickswitch-cap-right" />
           </div>
           <div
-            className="webspring-quickswitch-items"
+            data-nse-part="content" className="webspring-quickswitch-items"
             role="listbox"
             aria-label={locale.t("quickswitch.visibleApps", "Visible Webspring apps")}
             aria-activedescendant={activeOptionId}
@@ -276,19 +279,19 @@ export function WebspringQuickSwitchView({
             data-overflowing={overflowing ? "true" : undefined}
           >
             {apps.map((app, index) => {
-              const state = lifecycle[app.id];
+              const state = lifecycle[normalizeBundleIdentifier(app.bundleIdentifier)];
               const selected = index === selectedIndex;
-              const opened = isQuickSwitchOpenedApp(app.id, { activeAppId, lifecycle, openAppIds });
-              const active = activeAppId === app.id;
+              const opened = isQuickSwitchOpenedApp(app.bundleIdentifier, { activeAppId, lifecycle, openAppIds });
+              const active = normalizeBundleIdentifier(activeAppId) === normalizeBundleIdentifier(app.bundleIdentifier);
               const mnemonic = getQuickSwitchMnemonic(app);
               const loading = isLoadingState(state);
               const appName = locale.appName(app);
 
               return (
-                <button
+                <QuickSwitchItem selected={selected}
                   type="button"
-                  key={app.id}
-                  id={`${quickSwitchId}-${app.id}`}
+                  key={app.bundleIdentifier}
+                  id={`${quickSwitchId}-${app.bundleIdentifier}`}
                   ref={(element) => {
                     itemRefs.current[index] = element;
                   }}
@@ -326,7 +329,7 @@ export function WebspringQuickSwitchView({
                     ) : null}
                     <Badge count={app.notifications.badgeCount} />
                   </IconWell>
-                </button>
+                </QuickSwitchItem>
               );
             })}
           </div>
@@ -335,6 +338,11 @@ export function WebspringQuickSwitchView({
       ) : null}
     </NSEPresence>
   );
+}
+
+function QuickSwitchItem({ selected, ...attributes }: ComponentProps<"button"> & { selected: boolean }) {
+  const drawing = useNSEThemeInteraction<HTMLButtonElement>(!attributes.disabled, true, attributes);
+  return <button {...attributes} {...drawing.events} {...nseControlHooks({ control: "app-icon", selected, enabled: !attributes.disabled, highlighted: drawing.highlighted, focused: drawing.focused, hovered: drawing.hovered })} data-nse-part="cell" />;
 }
 
 function QuickSwitchSurface({ surfaceRef, motion, ...props }: ComponentProps<"div"> & {

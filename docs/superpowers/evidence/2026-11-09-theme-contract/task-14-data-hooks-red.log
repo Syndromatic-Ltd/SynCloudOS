@@ -1,0 +1,62 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-data-view-drawing-parts.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-data-view-drawing-parts.test.tsx (3 tests | 3 failed) 93ms
+   × publishes browser columns and native disclosure state through drawing hooks 78ms
+   × gives the existing list cell neutral text and accessory slots 2ms
+   × publishes outline branch classification and expanded state without changing native activation 13ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-data-view-drawing-parts.test.tsx > publishes browser columns and native disclosure state through drawing hooks
+AssertionError: expected null not to be null
+ ❯ tests/runtime/nse-data-view-drawing-parts.test.tsx:16:68
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/runtime/nse-data-view-drawing-parts.test.tsx > gives the existing list cell neutral text and accessory slots
+AssertionError: expected null to be 'table-cell-view' // Object.is equality
+
+- Expected:
+"table-cell-view"
+
++ Received:
+null
+
+ ❯ tests/runtime/nse-data-view-drawing-parts.test.tsx:27:49
+     25|   const { container } = render(<NSEListItem selected leading="Icon" tr…
+     26|   const cell = container.firstElementChild!;
+     27|   expect(cell.getAttribute("data-nse-control")).toBe("table-cell-view"…
+       |                                                 ^
+     28|   expect(cell.hasAttribute("data-nse-selected")).toBe(true);
+     29|   for (const part of ["leading", "trailing", "text-content", "primary-…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/runtime/nse-data-view-drawing-parts.test.tsx > publishes outline branch classification and expanded state without changing native activation
+AssertionError: expected null to be 'false' // Object.is equality
+
+- Expected:
+"false"
+
++ Received:
+null
+
+ ❯ tests/runtime/nse-data-view-drawing-parts.test.tsx:39:58
+     37|     const { container } = render(<NSEOutlineView aria-label="Outline" …
+     38|     const disclosure = screen.getByRole("button", { name: "Expand Fold…
+     39|     expect(disclosure.getAttribute("data-nse-expanded")).toBe("false");
+       |                                                          ^
+     40|     expect(container.querySelector('[data-nse-part="row"]')?.getAttrib…
+     41|     fireEvent.click(disclosure);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed (3)
+   Start at  02:32:39
+   Duration  1.97s (transform 533ms, setup 28ms, import 788ms, tests 93ms, environment 919ms)

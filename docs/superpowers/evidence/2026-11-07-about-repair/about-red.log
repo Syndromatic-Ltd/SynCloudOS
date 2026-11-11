@@ -1,0 +1,28 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run vitest run tests/runtime/about-app.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site
+
+ ❯ tests/runtime/about-app.test.tsx (7 tests | 1 failed) 4601ms
+     × animates the incoming pane and keeps its presentation through the tab handoff 1867ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/about-app.test.tsx > About > animates the incoming pane and keeps its presentation through the tab handoff
+AssertionError: expected null not to be null
+ ❯ tests/runtime/about-app.test.tsx:44:66
+     42|     await act(async () => { controller.tabs.selectTabViewItem("framewo…
+     43|     expect(entering.isViewVisible).toBe(true);
+     44|     expect(entering.pane.layer.animationForKey("transform")).not.toBeN…
+       |                                                                  ^
+     45|     expect(entering.heading.layer.animationForKey("transform")).not.to…
+     46|     await act(async () => { host.clock.advance(640); });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  08:46:17
+   Duration  24.28s (transform 15.16s, setup 85ms, import 17.45s, tests 4.60s, environment 1.95s)
+

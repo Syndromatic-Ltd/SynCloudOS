@@ -17,9 +17,17 @@
  * limitations under the License.
  */
 
+import type { NSEData } from "../../../Foundation/NSEData";
 import type { SynWareContextValue } from "../appContextTypes";
 import type { SynWareDefinition } from "../appDefinitionTypes";
-import type { PasteboardRepresentation } from "../../SynCloudOS";
+import type { AppTrustedDiagnosticsClient } from "../appTrustedClientTypes";
+import type { NSEApplication, NSEApplicationClass } from "../../../NSE/sdkPackageEntry";
+import type { SynWareManifestV1 } from "../manifest/manifestTypes";
+import type { SynWareServiceToken } from "../runtimeContracts";
+import type { ApplicationDocumentRuntimeConfiguration } from "../../Runtime/runtimeInstanceTypes";
+import type { SynCloudOSDocumentKindMetadata } from "../../DocumentStore";
+import type { SynCloudOSHostContributionCleanup, SynCloudOSHostInstallContext } from "../../Testing/appSdkTestingPort";
+import type { LazyPasteboardRepresentation, PasteboardRepresentation, PasteboardRepresentationInput } from "../../SynCloudOS";
 import type { LFXAuthorizationStatus, LFXLocation } from "../../../FX/LocationFX/public";
 import type { MIFXAuthorizationState } from "../../../FX/MIDIFX/public";
 import type { VFXCaptureSettings } from "../../../FX/VideoFX/public";
@@ -67,6 +75,10 @@ export type SynWareFakeDragOperation = "drag.authorise" | "drag.begin" | "drag.d
  * browser credential authority, which belongs to the Identity boundary. */
 export type SynWareFakeCredentialOperation = "credentials.read" | "credentials.write" | "credentials.remove";
 export type SynWareFakeFileOperation = "file.read" | "file.write" | "file.remove";
+export interface SynWareFakeFiles extends SynWareFakePort<SynWareFakeFileOperation> {
+  /** Host-only captured exports; never dispatches a native download. */
+  exported(): readonly { readonly fileName: string; readonly mediaType: string; readonly data: NSEData }[];
+}
 export type SynWareFakeDocumentOperation = "document.read" | "document.write" | "document.remove";
 export type SynWareFakeRecoveryOperation = "recovery.read" | "recovery.write" | "recovery.remove";
 export type SynWareFakeWindowOperation = "window.open" | "window.close";
@@ -103,7 +115,7 @@ export interface SynWareFakeVideo extends SynWareFakeControl<SynWareFakeVideoOpe
 
 export interface SynWareFakeClipboard extends SynWareFakeControl<SynWareFakeClipboardOperation> {
   read(types: readonly string[], signal?: AbortSignal): Promise<readonly PasteboardRepresentation[]>;
-  write(values: readonly PasteboardRepresentation[], signal?: AbortSignal): Promise<void>;
+  write(values: readonly Exclude<PasteboardRepresentationInput, LazyPasteboardRepresentation>[], signal?: AbortSignal): Promise<void>;
   readonly values: () => readonly { readonly type: string }[];
 }
 
@@ -175,6 +187,35 @@ export interface SynWareTestDisposalReport {
 }
 
 export interface SynWareTestAdapters {
+  readonly xr: SynWareFakeControl<"xr.start" | "xr.add" | "xr.remove" | "xr.raycast" | "xr.pause"> & Readonly<{
+    emitFrame(): void;
+    endSessions(): void;
+    activeSessionCount(): number;
+  }>;
+  readonly bluetooth: SynWareFakeControl<"bluetooth.scan" | "bluetooth.connect" | "bluetooth.services" | "bluetooth.characteristics" | "bluetooth.descriptors" | "bluetooth.read" | "bluetooth.write" | "bluetooth.notify" | "bluetooth.disconnect"> & Readonly<{
+    emitValue(value: number): void;
+    activeConnectionCount(): number;
+  }>;
+  readonly nfc: SynWareFakeControl<"nfc.open" | "nfc.connect" | "nfc.status" | "nfc.read" | "nfc.write" | "nfc.lock"> & Readonly<{
+    emitText(value: string): void;
+    activeSessionCount(): number;
+  }>;
+  readonly payment: SynWareFakeControl<"payment.present"> & Readonly<{
+    authorize(): void;
+    cancel(): void;
+    activePresentationCount(): number;
+    completedStatuses(): readonly import("../../../FX/PassFX/PKFXPaymentAuthorizationStatus").PKFXPaymentAuthorizationStatus[];
+  }>;
+  readonly contacts: SynWareFakeControl<"contacts.select"> & Readonly<{ setSelectedName(value: string): void }>;
+  readonly speech: SynWareFakeControl<"speech.authorize" | "speech.recognize"> & Readonly<{
+    emitResult(formattedString: string, isFinal: boolean): void;
+    activeTaskCount(): number;
+    appendedBufferCount(): number;
+  }>;
+  readonly network: SynWareFakeControl<"network.read" | "network.subscribe"> & Readonly<{
+    setStatus(status: import("../../../FX/NetworkFX/NWFXPathStatus").NWFXPathStatus): void;
+    activeMonitorCount(): number;
+  }>;
   readonly browser: SynWareFakePort<SynWareFakeBrowserOperation>;
   readonly media: SynWareFakePort<SynWareFakeMediaOperation>;
   readonly viewport: SynWareFakePort<SynWareFakeViewportOperation>;
@@ -186,7 +227,7 @@ export interface SynWareTestAdapters {
   readonly clipboard: SynWareFakeClipboard;
   readonly drag: SynWareFakePort<SynWareFakeDragOperation>;
   readonly credentials: SynWareFakePort<SynWareFakeCredentialOperation>;
-  readonly files: SynWareFakePort<SynWareFakeFileOperation>;
+  readonly files: SynWareFakeFiles;
   readonly documents: SynWareFakePort<SynWareFakeDocumentOperation>;
   readonly recovery: SynWareFakePort<SynWareFakeRecoveryOperation>;
   readonly windows: SynWareFakePort<SynWareFakeWindowOperation>;
@@ -218,13 +259,33 @@ export interface SynWareTestNavigation {
   openRoute(pathname: string, options?: { readonly signal?: AbortSignal }): unknown;
 }
 
-export interface CreateSynWareTestHostOptions {
-  readonly app: Readonly<SynWareDefinition>;
-  /** Trusted test-host codec provision. The manifest still admits application use. */
-  readonly documentTypes?: readonly import("../../Documents/documentTypes").DocumentType<any, any>[];
+/** Trusted host provision only; mounted applications never receive this port. */
+export type SynWareTestDocumentInstallContext = Pick<
+  SynCloudOSHostInstallContext,
+  "documents" | "seed" | "environment" | "signal"
+>;
+
+export interface SynWareTestApplicationDocumentsConfiguration extends ApplicationDocumentRuntimeConfiguration {
+  readonly trustedDocumentKinds?: readonly SynCloudOSDocumentKindMetadata[];
+  /** Runs before application launch, using the ordinary contribution-bound ports. */
+  readonly install?: (
+    context: SynWareTestDocumentInstallContext,
+  ) => void | SynCloudOSHostContributionCleanup | Promise<void | SynCloudOSHostContributionCleanup>;
+}
+
+export type CreateSynWareTestHostOptions = (
+  | { readonly app: Readonly<SynWareDefinition>; readonly application?: never; readonly manifest?: never }
+  | { readonly application: NSEApplicationClass; readonly manifest: SynWareManifestV1; readonly app?: never }
+) & {
+  /** Real app-scoped providers; manifest declarations and token contracts still apply. */
+  readonly services?: readonly (readonly [SynWareServiceToken<unknown>, object])[];
+  /** Host-owned codecs, adapters and scoped shared-store seeding; manifest admission still applies. */
+  readonly applicationDocuments?: SynWareTestApplicationDocumentsConfiguration;
+  /** Host-owned diagnostics only; the app must still declare diagnostics.view. */
+  readonly diagnostics?: AppTrustedDiagnosticsClient;
   readonly branding?: import("../appContextTypes").SynWareSiteBranding;
   readonly now?: string | number | Date;
-  readonly permissions?: readonly string[];
+  readonly entitlements?: readonly string[];
   readonly locale?: string;
   readonly timeZone?: string;
   /** Explicit host document; the testing kit never reads an ambient DOM. */
@@ -242,12 +303,22 @@ export interface CreateSynWareTestHostOptions {
 /** A deterministic, host-owned test seam. The runtime itself remains private;
  * only narrowly redacted diagnostics and controls are made observable. */
 export interface SynWareTestHost {
+  /** The launched class application, or null before launch and for function apps. */
+  readonly application: NSEApplication | null;
   readonly clock: SynWareTestClock;
   readonly mediaClock: SynWareTestMediaClock;
   readonly persistence: SynWareTestPersistence;
   readonly lifecycle: SynWareTestLifecycle;
   readonly documents: SynWareTestDocumentInspection;
   readonly commands: SynWareTestCommandInspection;
+  /** Never exposed to the application. Replacement expires previously issued clients. */
+  readonly diagnostics: Readonly<{
+    replace(provider: AppTrustedDiagnosticsClient): void;
+    revoke(): void;
+  }>;
+  readonly mediaQueries: Readonly<{
+    setMatches(query: string, matches: boolean): void;
+  }>;
   readonly adapters: SynWareTestAdapters;
   readonly resources: SynWareTestResources;
   readonly settlement: SynWareTestSettlement;

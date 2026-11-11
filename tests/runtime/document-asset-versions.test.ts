@@ -38,14 +38,14 @@ describe("saved version asset reachability", () => {
     const entered = new Promise<void>(resolve => { enter = resolve; }), gate = new Promise<void>(resolve => { finish = resolve; });
     const mutable = { ...location };
     const result = reconcileDocumentAssetVersions({ adapter: base, store, scopeForLocation: () => scope, hash: async bytes => {
-      const hash = "sha256:" + Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes.slice().buffer)), byte => byte.toString(16).padStart(2, "0")).join("");
+      const hash = "sha256:" + Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes.bytes.buffer)), byte => byte.toString(16).padStart(2, "0")).join("");
       enter(); await gate; return hash;
     } }, mutable);
     await entered; mutable.key = "a-different-provider-location"; finish();
     expect(await result).toBe(0);
     expect(await base.readVersion(location, first.version)).toEqual(first);
     expect(await store.collectGarbage(scope)).toEqual({ removedAssets: 0, removedBytes: 0 });
-    expect(await store.read(scope, ref)).toEqual(new Uint8Array([1]));
+    expect((await store.read(scope, ref)).bytes).toEqual(new Uint8Array([1]));
   });
   it("reconciles actual native rollback eviction after the provider confirms its version is gone", async () => {
     const store = createInMemoryDocumentAssetStore();

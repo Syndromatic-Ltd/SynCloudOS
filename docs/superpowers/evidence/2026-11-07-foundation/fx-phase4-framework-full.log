@@ -1,0 +1,2065 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run --maxWorkers=1 --no-file-parallelism --reporter=default --reporter=json --outputFile.json=C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\docs\superpowers\evidence\2026-11-07-foundation\fx-phase4-framework-full.json
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451
+
+ ✓ tests/runtime/fx/phase5-packed.test.ts (1 test) 41342ms
+   ✓ loads all six new FX roots and hooks from an independently installed SDK archive  41341ms
+ ❯ tests/runtime/synapp-sdk-package.test.ts (9 tests | 1 failed) 197207ms
+     ✓ keeps the public page entry limited to the controller contract 7ms
+     ✓ pins the removal of the old navigation, source-list and sliding-pane exports 15ms
+     ✓ captures shell view components without invoking author-owned values 11ms
+     ✓ rejects inconsistent shell view bindings during capture 2ms
+     × compiles, bundles and mounts a genuinely external consumer against packed public exports 105206ms
+     ✓ keeps the reviewed runtime entry graph free of privileged exports 6ms
+     ✓ uses exact portable package aliases and keeps public client contracts host-free 7ms
+     ✓ keeps mounted runtime hooks out of public barrels 2ms
+     ✓ derives archive declarations from the reviewed public entries instead of open handwritten mirrors  91950ms
+ ✓ tests/runtime/command-focus-undo-accessibility.test.tsx (4 tests) 563ms
+     ✓ navigates a menu, skips disabled items, enters a submenu, dispatches, and restores its trigger  351ms
+ ✓ tests/runtime/synapp-context.test.tsx (14 tests) 263ms
+ ❯ tests/runtime/framework-doc-links.test.ts (4 tests | 2 failed) 207ms
+     × links only to files and headings that exist 93ms
+     × links every guide from the framework index 44ms
+     ✓ names only package entries that exist 32ms
+     ✓ describes the framework without internal project language 37ms
+ ✓ tests/runtime/browser-host-contributions.test.ts (5 tests) 95ms
+ ✓ tests/runtime/nse-text-command-undo.test.tsx (6 tests) 282ms
+ ✓ tests/runtime/pwa-installation.test.ts (3 tests) 16ms
+ ✓ tests/runtime/project-conventions-packed.test.ts (2 tests) 135057ms
+   ✓ bundles an installed browser host with discovery plugin=false  101322ms
+   ✓ bundles an installed browser host with discovery plugin=true  33734ms
+ ✓ tests/runtime/foundation-packed-consumer.test.ts (1 test) 28102ms
+   ✓ uses Foundation and CPFX from an independent SDK installation in a worker and strict worker-lib consumer  28102ms
+ ✓ tests/runtime/managed-typography-packed-consumer.test.ts (1 test) 48001ms
+   ✓ uses managed typography from an independently installed package in Node and app code  48000ms
+ ✓ tests/runtime/fx/packed-video-capture.test.ts (1 test) 34816ms
+   ✓ executes scoped VideoFX capture from an independently installed SDK archive  34815ms
+ ✓ tests/runtime/fx/packed-fx.test.ts (1 test) 28763ms
+   ✓ executes substantive FX operations from the built npm archive outside the repository  28762ms
+stdout | tests/runtime/document-asset-browser.test.ts
+Port 5197 is in use, trying another one...
+
+stdout | tests/runtime/document-asset-browser.test.ts
+Port 5198 is in use, trying another one...
+
+stdout | tests/runtime/document-asset-browser.test.ts
+Port 5199 is in use, trying another one...
+
+ ✓ tests/runtime/document-asset-browser.test.ts (6 tests) 45884ms
+     ✓ chromium: creates and disposes the real runtime, then reloads and reopens native asset bytes in a fresh runtime  19196ms
+     ✓ chromium: survives page reload with new store/service instances, renders bytes, enforces concurrent quota, detects corruption  2605ms
+     ✓ firefox: creates and disposes the real runtime, then reloads and reopens native asset bytes in a fresh runtime  9373ms
+     ✓ firefox: survives page reload with new store/service instances, renders bytes, enforces concurrent quota, detects corruption  9038ms
+     ✓ webkit: creates and disposes the real runtime, then reloads and reopens native asset bytes in a fresh runtime  2864ms
+     ✓ webkit: survives page reload with new store/service instances, renders bytes, enforces concurrent quota, detects corruption  2486ms
+ ✓ tests/runtime/error-catalogue.test.ts (3 tests) 2071ms
+   ✓ catalogues every stable diagnostic code literal throughout src, including conditional branches  2062ms
+ ❯ tests/runtime/fx/packed-value-foundations.test.ts (0 test)
+ ❯ tests/runtime/fx/packed-lumina.test.ts (0 test)
+ ❯ tests/runtime/fx/packed-video.test.ts (0 test)
+ ❯ tests/runtime/fx/packed-media.test.ts (0 test)
+ ❯ tests/runtime/synware-public-api-repairs-packed.test.ts (0 test)
+ ❯ tests/runtime/nse-page-tear.test.ts (0 test)
+ ❯ tests/performance/text-primitives-performance.test.ts (0 test)
+ ❯ tests/runtime/chronosphere/chronosphere-packed-consumer.test.ts (1 test | 1 failed) 1885ms
+   × preserves typed neutral versions and prepared custom views in an installed SDK 1884ms
+ ❯ tests/runtime/browser-global-boundary.test.ts (8 tests | 1 failed) 29147ms
+     × keeps browser globals behind explicit platform adapters 7964ms
+     ✓ keeps the Webspring surfaces behind the injected runtime environment  20095ms
+     ✓ rejects executable globals without matching strings, comments, property names, or local records 250ms
+     ✓ does not permit the removed ambient BrowserGlobals bridge through imports or aliases  760ms
+     ✓ keeps runtime settlement infrastructure independent of Webspring owner modules and role literals 47ms
+     ✓ does not expose removed presentation-report diagnostics or methods 28ms
+     ✓ removes the obsolete NSE animation facade and stylesheet boundary 2ms
+     ✓ normalizes same-origin absolute routes against an injected origin 1ms
+ ❯ tests/runtime/architecture-boundaries.test.ts (0 test)
+ ❯ tests/runtime/nse-file-browser-packed.test.ts (0 test)
+ ❯ tests/runtime/developer-mcp.test.ts (0 test)
+ ❯ tests/runtime/heritage-inspector-source.test.ts (0 test)
+ ❯ tests/runtime/fx/text-font-host.test.ts (0 test)
+ ❯ tests/runtime/fx/text-font-resource.test.ts (0 test)
+ ❯ tests/integration/text-system-example.test.ts (0 test)
+ ❯ tests/runtime/runtime-keyboard-listener-guard.test.ts (0 test)
+ ❯ tests/runtime/system-ui-boundaries.test.ts (0 test)
+ ❯ tests/runtime/runtime-singleton-boundary.test.ts (0 test)
+ ❯ tests/runtime/browser-application-host.test.tsx (0 test)
+ ❯ tests/runtime/synware-public-api-boundary-guard.test.ts (0 test)
+ ✓ tests/runtime/fx/twelve-fx-public-types.test.ts (2 tests) 5115ms
+   ✓ accepts twelve public roots and token inference while rejecting host authority and private imports  2611ms
+   ✓ fails the same public probe if a raw runtime property leaks into the app context  2503ms
+ ✓ tests/runtime/nse-animation-webspring-integration.test.tsx (13 tests) 3070ms
+     ✓ opens a Board folder over the stage and closes it with Escape  779ms
+     ✓ merges only over an entry's artwork and reorders only after a rest  642ms
+     ✓ springs a folder open under a resting app and drops it inside the panel  1200ms
+ ✓ tests/runtime/fx/package-resources.test.ts (9 tests) 3173ms
+     ✓ keeps the resource fingerprint through a real offline pack/install of an isolated fixture  1782ms
+     ✓ rejects tampered fingerprints and missing or modified installed resources  343ms
+ ✓ tests/runtime/text-system-packed-consumer.test.ts (16 tests) 3389ms
+     ✓ prepares the actual example and verified licensed font as a standalone consumer graph  3273ms
+ ✓ tests/runtime/foundation-boundary.test.ts (11 tests) 2429ms
+   ✓ rejects Foundation importing NSE  518ms
+   ✓ rejects Foundation importing FX  356ms
+   ✓ rejects Foundation importing SynCloudOS  366ms
+   ✓ rejects Foundation importing SynCloudOSReact  346ms
+   ✓ rejects Foundation importing Webspring  357ms
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+ ✓ tests/nse/colour/nse-colour-controls.test.tsx (29 tests) 1797ms
+ ✓ tests/runtime/fx/image-canny-edge-detector.test.ts (7 tests) 1370ms
+     ✓ renders a 512-square input with an existing configured context sample budget  1270ms
+ ✓ tests/runtime/fx/media-samples.test.ts (7 tests) 1324ms
+     ✓ preflights segment bounds/aggregate size, snapshots caller bytes, and retains slices independently  1315ms
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+ ✓ tests/performance/nse-colour-calendar-performance.test.tsx (5 tests) 1525ms
+   ✓ drives 120 real wheel previews into one undo group  1202ms
+ ✓ tests/performance/nse-overlay-performance.test.tsx (1 test) 1451ms
+   ✓ opens and paints 100 menu generations without retained portals, listener sets, or auto-update observers  1450ms
+ ✓ tests/runtime/product-name-hygiene.test.ts (6 tests) 3568ms
+     ✓ reports no delivery-only identifiers in product source and tooling  1567ms
+     ✓ reports no retired product names in shipped source, public docs or the built package  1981ms
+ ✓ tests/runtime/nse-primitives.test.ts (14 tests) 1288ms
+     ✓ keeps control haptics prevented when activation is cancelled  1067ms
+ ✓ tests/runtime/transient-window-surface-bridge.test.tsx (37 tests) 1344ms
+ ✓ tests/runtime/nse-web-content.test.tsx (42 tests) 1258ms
+stderr | tests/runtime/chronosphere/chronosphere-presentation.test.tsx > gives Restore its own document return choreography
+React does not recognize the `bezelStyle` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `bezelstyle` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
+React does not recognize the `imagePosition` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `imageposition` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
+
+stderr | tests/runtime/chronosphere/chronosphere-presentation.test.tsx > lays every version out in the grid view, chooses with the keyboard, restores and leaves
+React does not recognize the `keyEquivalent` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `keyequivalent` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
+
+ ✓ tests/runtime/chronosphere/chronosphere-presentation.test.tsx (25 tests) 1379ms
+   ✓ gives Restore its own document return choreography  679ms
+   ✓ gives Done its own document return choreography  455ms
+ ✓ tests/runtime/browser-route-coordinator.test.ts (52 tests) 1157ms
+ ✓ tests/nse/date-time/nse-date-picker.test.tsx (39 tests) 1578ms
+▲ [WARNING] "import.meta" is not available with the "iife" output format and will be empty [empty-import-meta]
+
+    src/NSE/Themes/Atmo/namedImages.ts:28:61:
+      28 │ ...ces/navigation-back.svg", import.meta.url).href, size: navigati...
+         ╵                              ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work correctly.
+
+▲ [WARNING] "import.meta" is not available with the "iife" output format and will be empty [empty-import-meta]
+
+    src/NSE/Themes/Atmo/namedImages.ts:31:64:
+      31 │ .../navigation-forward.svg", import.meta.url).href, size: navigati...
+         ╵                              ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work correctly.
+
+ ✓ tests/runtime/nse-view-draw-browser.test.ts (2 tests) 1444ms
+     ✓ keeps subviews above drawing, class positioning, resizing and accessible images at DPR 1  352ms
+     ✓ keeps subviews above drawing, class positioning, resizing and accessible images at DPR 2  364ms
+ ✓ tests/runtime/document-durable-synchronisation-regressions.test.ts (15 tests) 1081ms
+     ✓ does not let a non-cooperative child disposer hang synchronising disposal  1001ms
+ ✓ tests/nse/nse-view-snapshot.browser.test.ts (7 tests) 1153ms
+ ✓ tests/runtime/nse-box-shadow.test.tsx (7 tests) 1259ms
+     ✓ lets Atmo CSS select the well, frame and floating recipes from real box properties  1217ms
+ ✓ tests/runtime/document-readiness-activity.test.ts (16 tests) 1047ms
+     ✓ observes delayed recovery removal during save and preserves the new dirty generation  309ms
+ ✓ tests/runtime/focus-scope.test.tsx (25 tests) 825ms
+ ✓ tests/runtime/synware-fx-authoring.test.ts (6 tests) 777ms
+   ✓ executes all twelve actual recipe modules and declares exactly their scoped authority  315ms
+ ✓ tests/runtime/managed-font-vite.test.ts (8 tests) 236ms
+ ✓ tests/runtime/application-stage-app-menu.test.tsx (20 tests) 924ms
+ ✓ tests/runtime/nse-tab-view-controller.test.tsx (18 tests) 1215ms
+ ✓ tests/runtime/application-actions.test.tsx (43 tests) 852ms
+ ✓ tests/nse/menus/nse-menu-controller.test.tsx (39 tests) 812ms
+ ✓ tests/runtime/fx/image-worker.test.ts (38 tests) 811ms
+     ✓ sizes the CPU sample budget to the job, so a VGA two-node graph renders  757ms
+ ✓ tests/runtime/nse-window-controller-class.test.tsx (22 tests) 959ms
+ ✓ tests/runtime/webspring-host-switcher-auth.test.tsx (8 tests) 1072ms
+     ✓ opens QuickSwitch and switches public apps with disabled authentication and startup complete  484ms
+ ✓ tests/nse/toolbars/nse-toolbar.test.tsx (36 tests) 726ms
+ ✓ tests/runtime/return-decision.test.ts (8 tests) 643ms
+     ✓ prepares the complete close, routes live, then commits through lifecycle behind the shell  327ms
+     ✓ routes back to the app when the trailing close is refused  308ms
+ ✓ tests/runtime/storage-observation.test.ts (7 tests) 627ms
+ ✓ tests/runtime/synapp-capability-usage-audit.test.ts (5 tests) 713ms
+ ✓ tests/integration/nse-open-panel.test.tsx (9 tests) 661ms
+ ✓ tests/nse/controls/nse-control-contract.test.tsx (19 tests) 629ms
+ ✓ tests/runtime/webspring-folder-presentation.test.tsx (12 tests) 609ms
+ ✓ tests/nse/menus/menu-selection-flash.test.tsx (4 tests) 602ms
+   ✓ flashes the chosen row, then chooses it and fades the list out (desktop)  541ms
+ ✓ tests/nse/data-views/nse-outline-view.test.tsx (19 tests) 664ms
+     ✓ bounds 50,000 sparse rows and retains the final active descendant  380ms
+ ✓ tests/runtime/nse-tab-bar.test.tsx (24 tests) 663ms
+ ✓ tests/runtime/application-stage-right-slot.test.tsx (18 tests) 635ms
+ ✓ tests/runtime/document-output-print.test.ts (5 tests) 671ms
+     ✓ uses actual Chromium user activation and requests nothing before a user click  655ms
+ ✓ tests/performance/nse-data-views-performance.test.tsx (2 tests) 628ms
+   ✓ keeps the 10,000-row table and sparse 50,000-node outline structurally bounded  565ms
+ ✓ tests/runtime/managed-observation.test.ts (12 tests) 568ms
+ ✓ tests/runtime/nse-typography.test.tsx (15 tests) 659ms
+ ✓ tests/performance/window-manager-performance.test.ts (1 test) 611ms
+     ✓ orders and queries 500 windows through indexes  610ms
+ ✓ tests/runtime/fx/text-tabs-truncation.test.ts (16 tests) 601ms
+     ✓ handles the full attributed-string bound with linear cancellation checkpoints  497ms
+ ✓ tests/runtime/synapp-cli.test.ts (8 tests) 545ms
+ ✓ tests/runtime/project-conventions.test.ts (24 tests) 564ms
+ ✓ tests/runtime/fx/lumina-query.test.ts (11 tests) 550ms
+     ✓ uses stable title/domain/id tie breaks and bounds returned result bytes  495ms
+ ✓ tests/runtime/mixed-case-board-native-stage.test.tsx (4 tests) 670ms
+     ✓ mounts the authored class main view from a Board icon  417ms
+ ✓ tests/runtime/fx/audio-opus-codec.test.ts (7 tests) 566ms
+   ✓ streams beyond the owned PCM and 16 MiB Blob budgets while honoring sink backpressure  402ms
+ ✓ tests/runtime/nse-font-panel-supplied.test.tsx (4 tests) 796ms
+   ✓ emits canonical shadow coordinates at a cardinal angle without negative zero  380ms
+ ✓ tests/nse/controls/nse-public-control-adapters.test.tsx (22 tests) 558ms
+ ✓ tests/runtime/document-terminal-reconciliation.test.ts (14 tests) 509ms
+ ❯ tests/runtime/host-update-readiness.test.ts (28 tests | 3 failed) 1575ms
+     ✓ folds current readiness into the single public notification of an outer batch 45ms
+     ✓ defers an alternate store and never writes a second projection through its public subscriber 5ms
+     ✓ does not take over or clear another live readiness publisher 4ms
+     ✓ captures readonly host options without getters or update-control capabilities 8ms
+     ✓ observes an empty host conservatively and keeps every missing owner domain explicit 6ms
+     ✓ observes real hidden documents and repeated edits without saving, settlement, titles or models 15ms
+     ✓ shows a real saving document until its adapter write settles 59ms
+     ✓ observes active/queued jobs and holds admitted cancellation until actual lease release 5ms
+     ✓ keeps a cancelled operation busy while its actual commit is still running 4ms
+     ✓ invalidates participant evidence for real runtime-owned window creation and closure 19ms
+     ✓ does not equate an abort-raced callback leaving the operation ledger with idle coverage 55ms
+     × wires the actual mounted share boundary to the runtime-owned underlying promise 20ms
+     × creates runtime-specific picker instrumentation for a shared environment and retains late native work 1012ms
+     ✓ keeps participant readiness historical and preserves local incomplete coverage 56ms
+     ✓ invalidates a completed observation on native work or canonical account replacement without erasing that work 5ms
+     ✓ rejects late evidence after an intervening edit or superseding inspection 10ms
+     ✓ bounds an unresponsive inspector and releases its signal 26ms
+     ✓ rejects malformed or private participant facts without projecting their contents 5ms
+     ✓ never restores readiness authority from a historical RuntimeStore checkpoint 5ms
+     ✓ ends pending inspection and subscriptions with runtime disposal, ignoring late completion 5ms
+     ✓ observes explicit editing-controller disposal without a separately supplied owner signal 5ms
+     ✓ publishes pending admission before a document exists, invalidates evidence and retains real work across account change 9ms
+     ✓ projects recovery work and stops publication on observer disposal while actual work finishes 11ms
+   ✓ observes canonical persistence admissions without declaring all persistence covered 55ms
+   ✓ observes editing work beyond logical cancellation while inspection never settles participants 108ms
+   ✓ retains underlying operation callbacks after a cancellation receipt 4ms
+   ✓ retains unknown operation coverage for a foreign coordinator facade 3ms
+   × retains real mounted file-write work across mount retirement without charging a sibling runtime 11ms
+ ✓ tests/runtime/fx/text-caret.test.ts (5 tests) 543ms
+     ✓ keeps mixed-bidi truncation carets ordered and bounds repeated logical queries  501ms
+ ✓ tests/runtime/nse-page-controller.test.tsx (11 tests) 495ms
+ ✓ tests/runtime/configuration-profiles-audit-diagnostics.test.ts (3 tests) 523ms
+     ✓ bounds the audit by entries and estimated bytes, projecting oversized traces  493ms
+ ✓ tests/runtime/nse-image-resource.test.ts (27 tests) 475ms
+ ✓ tests/runtime/owned-work-observation.test.ts (11 tests) 459ms
+ ✓ tests/nse/overlays/nse-standalone-controls.test.tsx (15 tests) 477ms
+ ✓ tests/runtime/nse-alert-panel.test.tsx (10 tests) 486ms
+     ✓ animate only through leases the mounted app's own AnimationFX client issued  335ms
+ ✓ tests/runtime/nse-adaptive-rail.test.tsx (14 tests) 465ms
+ ✓ tests/nse/overlays/nse-popover.test.tsx (11 tests) 481ms
+ ✓ tests/runtime/nse-page-curl-cylinder.test.ts (9 tests) 507ms
+ ✓ tests/runtime/webspring-window-layer.test.tsx (18 tests) 617ms
+ ✓ tests/runtime/routing-ii-runtime-integration.test.ts (15 tests) 446ms
+ ✓ tests/runtime/fx/graphics-pdf-structure-text.test.ts (5 tests) 439ms
+     ✓ preserves logical Unicode extraction while rendering the existing shaped outlines  380ms
+ ✓ tests/runtime/mounted-app-interaction-authority.test.tsx (14 tests) 535ms
+ ✓ tests/runtime/class-test-host.test.tsx (9 tests) 603ms
+ ✓ tests/runtime/runtime-input-boundary.test.tsx (7 tests) 476ms
+ ✓ tests/runtime/update-readiness-pane.test.tsx (8 tests) 538ms
+ ✓ tests/runtime/application-action-registration-order.test.tsx (7 tests) 470ms
+stderr | tests/nse/data-views/nse-table-view.test.tsx > NSETableView > fills its container when viewportBlockSize is "fill", following the container as it resizes
+The current testing environment is not configured to support act(...)
+
+ ✓ tests/nse/data-views/nse-table-view.test.tsx (21 tests) 465ms
+ ✓ tests/runtime/atmo-structure.test.ts (5 tests) 442ms
+     ✓ owns the popup panel, tooltip and popover-window families  371ms
+ ✓ tests/nse/appearance/search-field-focus.test.tsx (8 tests) 460ms
+ ✓ tests/runtime/webspring-app-menu.test.tsx (3 tests) 502ms
+     ✓ opens one immutable command generation, dispatches through the runtime, and restores trigger focus  380ms
+ ✓ tests/runtime/class-test-host-document-store.test.tsx (16 tests) 517ms
+ ✓ tests/nse/controls/nse-value-controls.test.tsx (25 tests) 487ms
+ ✓ tests/runtime/fx/text-font-browser-package.test.ts (1 test) 441ms
+   ✓ packages TextFX without a Node HarfBuzz import or browser compatibility warning  440ms
+ ✓ tests/runtime/browser-neutral-launcher.test.tsx (4 tests) 700ms
+   ✓ mounts the real neutral Board without a declared shell or composition and omits an empty shelf  329ms
+ ✓ tests/runtime/application-toolchain.test.ts (14 tests) 436ms
+     ✓ compiles a decorated class in a .tsx file with Fast Refresh and registers it for hot reload  406ms
+stderr | tests/runtime/nse-stack-view.test.tsx > NSEStackView > sizes an item without a preferred size to its content's fitting size, and follows the content
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ ✓ tests/runtime/nse-stack-view.test.tsx (18 tests) 422ms
+ ✓ tests/runtime/document-acknowledgement-rebase-regressions.test.ts (11 tests) 368ms
+     ✓ does not let a retired runtime-disposal gate cancel recovery for a newly admitted edit  305ms
+ ✓ tests/runtime/nse-text-commands.test.tsx (19 tests) 527ms
+ ✓ tests/runtime/runtime-route-commit.test.ts (10 tests) 377ms
+ ❯ tests/runtime/preference-panes.test.tsx (21 tests | 5 failed) 603ms
+     × lists the built-ins in their default order, without Account when sign-in is not offered 98ms
+     × lists Account first when the host offers sign-in 24ms
+     ✓ signs in from the Account pane and closes Preferences 104ms
+     ✓ shows the signed-in name and offers Log Out 54ms
+     × hides built-ins by id 31ms
+     ✓ hides Account even when sign-in is offered 22ms
+     × adds developer panes and orders every pane by order 32ms
+     × replaces a built-in with a developer pane of the same id, in the list and when opened 37ms
+     ✓ renders a developer pane with settings, appearance and locale 26ms
+     ✓ shows a developer pane summary and accessory on its list row 55ms
+     ✓ translates a localisable title from the system dictionary 37ms
+     ✓ uses the fallback of a localisable title no dictionary knows 26ms
+     ✓ contains a failing pane behind the unavailable message while System Preferences stays up 21ms
+     ✓ shows Unavailable for a failing summary and drops a failing accessory 29ms
+     ✓ defaults to no panes and nothing hidden 4ms
+     ✓ captures panes and hidden ids immutably 1ms
+     ✓ rejects a pane not made with definePreferencePane 1ms
+     ✓ rejects duplicate pane ids 0ms
+     ✓ rejects a blank hidden id 0ms
+     ✓ rejects unknown fields 0ms
+     ✓ rejects panes that are not an array 0ms
+ ✓ tests/runtime/document-output-pdf.test.ts (1 test) 398ms
+   ✓ records a private fixed-page engine with searchable Unicode, links, images and exact raster geometry  397ms
+stderr | tests/runtime/webspring-window-host.test.tsx > Webspring window host > keeps one mounted application instance through a throwing view and fallback view switch
+Error: fixture view failed
+    at ThrowingView (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/webspring-window-host.test.tsx:90:44)
+    at Object.react_stack_bottom_frame (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:25904:20)
+    at renderWithHooks (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:7662:22)
+    at updateFunctionComponent (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:10166:19)
+    at beginWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:11778:18)
+    at runWithFiberInDEV (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+    at performUnitOfWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17641:22)
+    at workLoopSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17469:41)
+    at renderRootSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17450:11)
+    at performWorkOnRoot (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35) {
+  [stack]: [Getter/Setter],
+  [message]: 'fixture view failed'
+}
+
+The above error occurred in the <ThrowingView> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, WebspringViewBoundary.
+
+
+ ✓ tests/runtime/webspring-window-host.test.tsx (2 tests) 552ms
+     ✓ keeps one mounted application instance through a throwing view and fallback view switch  516ms
+ ✓ tests/runtime/pasteboard.test.ts (22 tests) 391ms
+ ✓ tests/nse/date-time/nse-calendar-view.test.tsx (16 tests) 409ms
+ ✓ tests/runtime/nse-controls-extended-wrappers.test.tsx (9 tests) 448ms
+ ✓ tests/integration/nse-data-view-colour-drag.test.tsx (21 tests) 659ms
+ ✓ tests/runtime/portable-action-payload.test.tsx (5 tests) 650ms
+ ✓ tests/nse/data-views/nse-data-view-core.test.tsx (19 tests) 398ms
+ ✓ tests/runtime/nse-controls-interactions.test.tsx (4 tests) 377ms
+ ✓ tests/runtime/application-action-references.test.tsx (8 tests) 461ms
+ ✓ tests/runtime/heritage-inspector-ui.test.ts (4 tests) 696ms
+     ✓ links injected faults, paginates, pauses, resumes and exports sanitized live state  329ms
+ ✓ tests/runtime/preferences-notifications-pane.test.tsx (8 tests) 722ms
+     ✓ uses canonical app metadata, percentage values, and supported haptics  346ms
+ ✓ tests/runtime/storage-diagnostics-pane.test.tsx (9 tests) 511ms
+ ✓ tests/nse/overlays/nse-overlay-manager.test.tsx (17 tests) 357ms
+ ✓ tests/runtime/nse-interfacefx-contracts.test.tsx (12 tests) 464ms
+ ✓ tests/runtime/nse-view-controller.test.tsx (13 tests) 448ms
+ ✓ tests/runtime/runtime-asset-observation.test.ts (2 tests) 323ms
+ ✓ tests/nse/data-views/nse-browser.test.tsx (23 tests) 387ms
+ ✓ tests/runtime/mounted-runtime-dom-ownership.test.tsx (6 tests) 566ms
+ ✓ tests/runtime/synapp-sdk-boundaries.test.ts (5 tests) 371ms
+ ✓ tests/runtime/heritage-inspector-region.test.ts (7 tests) 325ms
+ ✓ tests/runtime/chronosphere/chronosphere-timeline.test.tsx (6 tests) 320ms
+stderr | tests/nse/controls/nse-completion-fields.test.tsx > completion and field families > conceals secure text on capture loss, blur, Escape, visibility and disable
+React does not recognize the `isEnabled` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `isenabled` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
+
+ ✓ tests/nse/controls/nse-completion-fields.test.tsx (23 tests) 350ms
+ ✓ tests/runtime/managed-font-bytes.test.ts (6 tests) 320ms
+ ❯ tests/runtime/synapp-sdk-testing.test.tsx (10 tests | 1 failed) 291ms
+   ✓ tracks pointer and keyboard entry through the test host's supplied DOM and releases the bindings 6ms
+   ✓ boots an app against deterministic adapters and exposes only harness controls 107ms
+   ✓ renders through the real physical-window host when requested 26ms
+   ✓ fences an already-ready production render when disposal begins before the React root mounts 5ms
+   ✓ does not mount a late React root after a delayed real loader is disposed 55ms
+   × gates mounted public SDK operations through real deterministic adapters 22ms
+   ✓ reports deliberate resource leaks after the disposal graph and cleans them idempotently 4ms
+   ✓ runs two hosts without shared commands, preferences or clocks 27ms
+   ✓ supports StrictMode and HMR-style remount without retaining registrations 36ms
+   ✓ requires explicit fake capability admission and records interrupted calls 1ms
+ ✓ tests/runtime/nse-popover-window-context.test.tsx (2 tests) 359ms
+ ✓ tests/integration/synware-nse-drag.test.tsx (16 tests) 602ms
+stderr | tests/runtime/fx/graphics-pdf-render.test.ts > GraphicsFX canonical PDF page rendering > has independent known vector, text and image pixel evidence
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+ ✓ tests/runtime/fx/graphics-pdf-render.test.ts (9 tests) 227ms
+ ✓ tests/runtime/webspring-view-return-contract.test.tsx (7 tests) 421ms
+ ✓ tests/runtime/window-sheet-attachment.test.tsx (3 tests) 346ms
+ ✓ tests/nse/data-views/nse-rule-editor.test.tsx (25 tests) 347ms
+ ✓ tests/runtime/document-store-snapshot-text.test.ts (13 tests) 373ms
+ ✓ tests/nse/tooltips/nse-tooltip.test.tsx (14 tests) 372ms
+ ✓ tests/runtime/command-menu-validation.test.tsx (6 tests) 422ms
+ ✓ tests/runtime/document-resource-lifecycle.test.ts (30 tests) 288ms
+ ✓ tests/runtime/class-modal-responder.test.tsx (5 tests) 659ms
+   ✓ routes native modal controls through the enclosing child controller while blocking foreign focus and restoring on close  411ms
+ ✓ tests/runtime/synware-sdk-boundary.test.ts (1 test) 408ms
+   ✓ rejects framework barrels and host imports even when they resolve  407ms
+ ✓ tests/nse/overlays/nse-window-surface-lifecycle.test.tsx (9 tests) 302ms
+ ✓ tests/runtime/synapp-sdk-hooks.test.tsx (11 tests) 357ms
+ ✓ tests/runtime/nse-button-press.test.tsx (6 tests) 310ms
+ ✓ tests/runtime/browser-bootstrap-recovery.test.tsx (12 tests) 428ms
+stderr | tests/runtime/host-diagnostics-provision.test.tsx > revalidates useAction availability on host replacement and revocation without an app hook bridge
+useInsertionEffect must not schedule updates.
+useInsertionEffect must not schedule updates.
+useInsertionEffect must not schedule updates.
+useInsertionEffect must not schedule updates.
+
+ ✓ tests/runtime/host-diagnostics-provision.test.tsx (7 tests) 387ms
+ ✓ tests/nse/overlays/nse-popup-family.test.tsx (13 tests) 314ms
+ ✓ tests/nse/controls/nse-scroll-progress-navigation.test.tsx (25 tests) 289ms
+ ✓ tests/runtime/webspring-folders-host.test.tsx (2 tests) 401ms
+ ✓ tests/runtime/window-transaction-authority-regressions.test.ts (35 tests) 276ms
+ ✓ tests/runtime/fx/video-capture-mounted.test.tsx (4 tests) 159ms
+ ✓ tests/runtime/fx/graphics.test.tsx (19 tests) 307ms
+ ✓ tests/runtime/document-editing-observation.test.ts (7 tests) 264ms
+stderr | tests/runtime/routing-ii-outlets.test.tsx > Routing II React outlets > inherits the nearest error view for a lazy-render failure and routes retry through the host
+Error: child-lazy-render-failed
+    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/routing-ii-outlets.test.tsx:277:24
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2027:60
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20
+    at new Promise (<anonymous>)
+    at runWithCancel (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10) {
+  [stack]: [Getter/Setter],
+  [message]: 'child-lazy-render-failed'
+}
+
+The above error occurred in the <component> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, RouteRenderBoundary.
+
+
+stderr | tests/runtime/routing-ii-outlets.test.tsx > Routing II React outlets > bubbles a failing inherited error presentation past its declaring route
+RoutePresentationFailure [Error]: Route boundary presentation failed.
+    at RouteFallbackGuard.render (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/src/SynCloudOS/AppSDK/RouteOutlet.tsx:151:35)
+    at Object.react_stack_bottom_frame (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:25917:29)
+    at updateClassComponent (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:10719:25)
+    at beginWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:11792:13)
+    at runWithFiberInDEV (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+    ... 3 lines matching cause stack trace ...
+    at performWorkOnRoot (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35)
+    at performWorkOnRootViaSchedulerTask (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:18957:7) {
+  [stack]: [Getter/Setter],
+  [message]: 'Route boundary presentation failed.',
+  [cause]: Error: artist-boundary-render-failed
+      at ArtistError (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/routing-ii-outlets.test.tsx:118:42)
+      at Object.react_stack_bottom_frame (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:25904:20)
+      at renderWithHooks (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:10166:19)
+      at beginWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+      at performUnitOfWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17641:22)
+      at workLoopSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17469:41)
+      at renderRootSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35) {
+    [stack]: [Getter/Setter],
+    [message]: 'artist-boundary-render-failed'
+  },
+  error: Error: artist-boundary-render-failed
+      at ArtistError (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/routing-ii-outlets.test.tsx:118:42)
+      at Object.react_stack_bottom_frame (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:25904:20)
+      at renderWithHooks (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:10166:19)
+      at beginWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+      at performUnitOfWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17641:22)
+      at workLoopSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17469:41)
+      at renderRootSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35) {
+    [stack]: [Getter/Setter],
+    [message]: 'artist-boundary-render-failed'
+  },
+  boundaryDepth: 1
+}
+
+The above error occurred in the <RouteFallbackGuard> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, RouteRenderBoundary.
+
+
+stderr | tests/runtime/routing-ii-outlets.test.tsx > Routing II React outlets > bubbles a render exception to the nearest ancestor error boundary
+Error: album-render-failed
+    at Album (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/routing-ii-outlets.test.tsx:102:42)
+    at Object.react_stack_bottom_frame (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:25904:20)
+    at renderWithHooks (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:7662:22)
+    at updateFunctionComponent (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:10166:19)
+    at beginWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:11778:18)
+    at runWithFiberInDEV (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+    at performUnitOfWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17641:22)
+    at workLoopSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17469:41)
+    at renderRootSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17450:11)
+    at performWorkOnRoot (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35) {
+  [stack]: [Getter/Setter],
+  [message]: 'album-render-failed'
+}
+
+The above error occurred in the <Album> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, RouteRenderBoundary.
+
+
+ ✓ tests/runtime/routing-ii-outlets.test.tsx (21 tests) 287ms
+ ✓ tests/runtime/test-host-stage-popover.test.tsx (1 test) 316ms
+   ✓ renders a stage app's presented popover in the test host's real window layer  315ms
+ ✓ tests/nse/data-views/nse-collection-view.test.tsx (21 tests) 261ms
+ ✓ tests/runtime/mounted-document-admission.test.ts (26 tests) 279ms
+ ✓ tests/runtime/nse-window-toolbar-style.test.tsx (14 tests) 264ms
+ ✓ tests/runtime/app-document-editing-client.test.ts (19 tests) 264ms
+ ✓ tests/runtime/application-stage-presentation.test.tsx (12 tests) 244ms
+ ✓ tests/nse/data-views/nse-split-view-controller.test.tsx (22 tests) 266ms
+ ✓ tests/runtime/nse-text-layout.test.ts (35 tests) 264ms
+ ✓ tests/runtime/nse-ownership.test.tsx (10 tests) 263ms
+ ✓ tests/runtime/fx/image-resource.test.ts (18 tests) 242ms
+ ✓ tests/runtime/lifecycle-cancellation.test.ts (6 tests) 235ms
+ ✓ tests/runtime/class-native-window-responder-identity.test.tsx (1 test) 418ms
+   ✓ keeps implicit application responders independent across native windows, close and reopen  418ms
+stderr | tests/runtime/window-chrome-integration.test.tsx > custom chrome host integration > restores the complete system titlebar when custom chrome crashes without taking content down
+Error: chrome renderer exploded
+    at windowChrome (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/window-chrome-integration.test.tsx:105:46)
+    at Object.react_stack_bottom_frame (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:25904:20)
+    at renderWithHooks (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:7662:22)
+    at updateFunctionComponent (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:10166:19)
+    at beginWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:11778:18)
+    at runWithFiberInDEV (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+    at performUnitOfWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17641:22)
+    at workLoopSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17469:41)
+    at renderRootSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17450:11)
+    at performWorkOnRoot (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35) {
+  [stack]: [Getter/Setter],
+  [message]: 'chrome renderer exploded'
+}
+
+The above error occurred in the <windowChrome> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, WindowChromeFailureBoundary.
+
+
+ ✓ tests/runtime/window-chrome-integration.test.tsx (21 tests) 443ms
+ ✓ tests/runtime/privacy-system-notifications.test.ts (13 tests) 253ms
+ ✓ tests/runtime/synapp-manifest-validator-generated.test.ts (2 tests) 285ms
+ ✓ tests/runtime/text-system/text-composition-lifecycle.test.ts (25 tests) 276ms
+ ✓ tests/runtime/fx/animation-text-replicator.test.tsx (5 tests) 238ms
+ ✓ tests/runtime/fx/graphics-pdf.test.ts (10 tests) 253ms
+ ✓ tests/runtime/fx/lumina-authority.test.ts (13 tests) 226ms
+ ✓ tests/runtime/app-route-restore.test.tsx (2 tests) 247ms
+ ✓ tests/runtime/webspring-status-layer.test.tsx (5 tests) 251ms
+ ✓ tests/runtime/nse-runtime-controller-ownership.test.tsx (16 tests) 255ms
+ ✓ tests/runtime/application-inline-view.test.tsx (7 tests) 240ms
+stderr | tests/runtime/app-quit-detached-windows.test.tsx > application quit with detached windows > surfaces registry corruption when the app is removed while its lifecycle is active
+<ref *1> DOMException {
+  [stack]: [Getter/Setter],
+  [Symbol(impl)]: DOMExceptionImpl {
+    name: 'SecurityError',
+    message: 'Application com.example.window-owner is no longer registered.',
+    Symbol(wrapper): [Circular *1],
+    [code]: [Getter]
+  },
+  name: [Getter],
+  message: [Getter],
+  code: [Getter],
+  INDEX_SIZE_ERR: 1,
+  DOMSTRING_SIZE_ERR: 2,
+  HIERARCHY_REQUEST_ERR: 3,
+  WRONG_DOCUMENT_ERR: 4,
+  INVALID_CHARACTER_ERR: 5,
+  NO_DATA_ALLOWED_ERR: 6,
+  NO_MODIFICATION_ALLOWED_ERR: 7,
+  NOT_FOUND_ERR: 8,
+  NOT_SUPPORTED_ERR: 9,
+  INUSE_ATTRIBUTE_ERR: 10,
+  INVALID_STATE_ERR: 11,
+  SYNTAX_ERR: 12,
+  INVALID_MODIFICATION_ERR: 13,
+  NAMESPACE_ERR: 14,
+  INVALID_ACCESS_ERR: 15,
+  VALIDATION_ERR: 16,
+  TYPE_MISMATCH_ERR: 17,
+  SECURITY_ERR: 18,
+  NETWORK_ERR: 19,
+  ABORT_ERR: 20,
+  URL_MISMATCH_ERR: 21,
+  QUOTA_EXCEEDED_ERR: 22,
+  TIMEOUT_ERR: 23,
+  INVALID_NODE_TYPE_ERR: 24,
+  DATA_CLONE_ERR: 25,
+  [Symbol(Symbol.toStringTag)]: 'DOMException'
+}
+
+The above error occurred in the <SynWareRuntimeMount> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, SynCloudOSWatchdog.
+
+
+ ✓ tests/runtime/app-quit-detached-windows.test.tsx (8 tests) 241ms
+ ✓ tests/runtime/mounted-workspace-document-versions.test.ts (11 tests) 235ms
+ ✓ tests/runtime/application-undo-ownership.test.ts (9 tests) 219ms
+ ✓ tests/runtime/runtime-document-assets.test.ts (13 tests) 228ms
+ ✓ tests/runtime/nse-application.test.tsx (10 tests) 226ms
+ ✓ tests/runtime/app-document-command-provider.test.ts (8 tests) 226ms
+ ✓ tests/runtime/navigation-controller-back.test.tsx (8 tests) 235ms
+ ✓ tests/runtime/webspring-widgets.test.tsx (21 tests) 226ms
+ ✓ tests/runtime/synapp-production-entry-host.test.tsx (9 tests) 210ms
+ ✓ tests/runtime/open-panel-sheet-attachment.test.tsx (7 tests) 252ms
+ ✓ tests/runtime/application-authoring-6e-host.test.tsx (1 test) 329ms
+   ✓ mounts the public class, action, binding, observer, task and outlet contracts  327ms
+ ✓ tests/nse/appearance/menu-variant-paint.test.tsx (6 tests) 296ms
+ ✓ tests/runtime/fx/animation-tiled.test.tsx (10 tests) 424ms
+ ✓ tests/nse/date-time/nse-date-picker-public.test.tsx (5 tests) 258ms
+ ✓ tests/runtime/synware-package-styles.test.ts (5 tests) 251ms
+ ✓ tests/runtime/nse-source-list-chrome.test.tsx (4 tests) 367ms
+ ✓ tests/runtime/system-ui-log-out-command.test.tsx (2 tests) 363ms
+ ✓ tests/runtime/privacy-session-integration.test.ts (8 tests) 112ms
+ ✓ tests/runtime/routes-launchservices.test.ts (30 tests) 233ms
+ ✓ tests/runtime/nse-preferences-pane.test.tsx (5 tests) 240ms
+ ✓ tests/runtime/nse-view-draw.test.tsx (9 tests) 259ms
+ ✓ tests/runtime/nse-preference-session.test.tsx (2 tests) 275ms
+ ✓ tests/runtime/chronosphere/chronosphere-reflection.test.tsx (14 tests) 225ms
+ ✓ tests/runtime/sound-service.test.ts (38 tests) 223ms
+ ✓ tests/runtime/app-window-client.test.ts (9 tests) 222ms
+ ✓ tests/runtime/mounted-app-document-authority.test.ts (14 tests) 217ms
+ ✓ tests/runtime/runtime-multiple-roots.test.tsx (4 tests) 197ms
+ ✓ tests/runtime/fx/animation-emitter.test.tsx (9 tests) 211ms
+ ✓ tests/runtime/mounted-command-localisation.test.ts (22 tests) 209ms
+ ✓ tests/runtime/scos.test.tsx (7 tests) 209ms
+ ✓ tests/runtime/pwa-production-build.test.ts (1 test) 186ms
+ ✓ tests/runtime/fx/audio-file-host.test.ts (12 tests) 174ms
+ ✓ tests/runtime/login-gate-presentation.test.tsx (4 tests) 280ms
+ ✓ tests/runtime/standard-commands.test.ts (7 tests) 181ms
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > holds settlement until an actual React layout effect acknowledges the exact operation and revision
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > holds settlement until an actual React layout effect acknowledges the exact operation and revision
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > observes the real overlay focus-restoration receipt after close
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > observes the real overlay focus-restoration receipt after close
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > observes the real overlay focus-restoration receipt after close
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > observes the real overlay focus-restoration receipt after close
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > observes the real overlay focus-restoration receipt after close
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > settles one real cross-owner action chain only after every finite owner completes
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > settles one real cross-owner action chain only after every finite owner completes
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > settles one real cross-owner action chain only after every finite owner completes
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > settles one real cross-owner action chain only after every finite owner completes
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > settles one real cross-owner action chain only after every finite owner completes
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > settles one real cross-owner action chain only after every finite owner completes
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+ ✓ tests/runtime/framework-settlement.test.ts (15 tests) 204ms
+ ✓ tests/runtime/system-alert-branding.test.tsx (15 tests) 197ms
+ ✓ tests/runtime/fx/animation-layers.test.tsx (15 tests) 213ms
+ ✓ tests/runtime/mounted-document-ownership-fences.test.ts (11 tests) 206ms
+ ✓ tests/runtime/nse-appearance-contract.test.tsx (10 tests) 194ms
+ ✓ tests/runtime/window-final-closure-regressions.test.ts (20 tests) 185ms
+ ✓ tests/runtime/lifecycle-launch-authority.test.ts (11 tests) 171ms
+ ✓ tests/runtime/synapp-mount-remint.test.tsx (6 tests) 184ms
+ ✓ tests/runtime/book-regions.test.tsx (20 tests) 194ms
+ ✓ tests/runtime/framework-test-host-settlement.test.tsx (5 tests) 185ms
+ ✓ tests/runtime/app-document-asset-preparation.test.ts (11 tests) 205ms
+ ✓ tests/runtime/nse-view-activity.test.tsx (5 tests) 204ms
+ ✓ tests/runtime/document-save-as.test.ts (5 tests) 163ms
+ ✓ tests/nse/date-time/nse-picker-host-contract.test.tsx (5 tests) 188ms
+ ✓ tests/runtime/fx/webgpu-image-backend-lifecycle.test.ts (4 tests) 159ms
+ ✓ tests/runtime/fx/browser-animation-video-wall.test.ts (2 tests) 184ms
+ ✓ tests/runtime/app-text-owner-adapters.test.ts (8 tests) 166ms
+ ✓ tests/nse/file-panels/nse-file-panels.test.tsx (4 tests) 214ms
+ ✓ tests/runtime/recovery-route-deadline.test.ts (2 tests) 161ms
+ ✓ tests/runtime/text-layout-readiness.test.ts (14 tests) 180ms
+ ✓ tests/runtime/fx/animation.test.tsx (23 tests) 190ms
+ ✓ tests/runtime/fx/image-procedural-depth.test.ts (6 tests) 182ms
+ ✓ tests/runtime/fx/animation-spatial.test.tsx (7 tests) 176ms
+ ✓ tests/runtime/model-controller-performance.test.ts (1 test) 177ms
+ ✓ tests/runtime/quickswitch.test.ts (7 tests) 192ms
+ ✓ tests/runtime/runtime-disposal.test.ts (5 tests) 188ms
+ ✓ tests/runtime/app-manager-lifecycle-options.test.ts (3 tests) 179ms
+ ✓ tests/runtime/runtime-login-service.test.ts (7 tests) 201ms
+ ✓ tests/runtime/webspring-disabled-app.test.tsx (1 test) 234ms
+ ✓ tests/integration/nse-structured-data-view-fixtures.test.tsx (6 tests) 178ms
+ ✓ tests/runtime/document-close-review.test.ts (17 tests) 183ms
+ ✓ tests/runtime/privacy-security-pane.test.tsx (6 tests) 177ms
+ ✓ tests/runtime/browser-alert-branding.test.tsx (2 tests) 210ms
+ ✓ tests/runtime/text-system/dom-text-structure.test.tsx (7 tests) 160ms
+ ✓ tests/runtime/transient-window-surface-naming.test.ts (1 test) 602ms
+     ✓ contains no rollout identity in production filenames or source contracts  602ms
+ ✓ tests/runtime/nse-cursor-tracking.test.tsx (19 tests) 183ms
+ ✓ tests/runtime/fx/media-mounted.test.tsx (5 tests) 172ms
+ ✓ tests/runtime/fx/phase5-mounted.test.tsx (1 test) 140ms
+ ✓ tests/runtime/nse-box-contract.test.tsx (6 tests) 167ms
+ ✓ tests/runtime/watchdog-component.test.ts (8 tests) 148ms
+ ✓ tests/runtime/nse-standard-window.test.tsx (9 tests) 163ms
+ ✓ tests/nse/data-views/nse-virtualisation.test.tsx (14 tests) 188ms
+ ✓ tests/runtime/app-document-workflow-contract.test.ts (9 tests) 161ms
+ ✓ tests/runtime/synware-fx-capabilities.test.ts (7 tests) 153ms
+ ✓ tests/runtime/mounted-playback-power.test.ts (10 tests) 176ms
+ ✓ tests/nse/data-views/nse-controller-lifetime.test.tsx (6 tests) 152ms
+ ✓ tests/runtime/update-readiness.test.ts (23 tests) 139ms
+ ✓ tests/runtime/fx/media-queue.test.ts (15 tests) 150ms
+ ✓ tests/runtime/notification-centre-presentation.test.tsx (6 tests) 147ms
+ ✓ tests/runtime/document-controller.test.ts (12 tests) 150ms
+ ✓ tests/nse/file-panels/nse-open-panel-thumbnails.test.tsx (4 tests) 136ms
+ ✓ tests/runtime/managed-font-host.test.tsx (2 tests) 168ms
+ ✓ tests/runtime/nse-control-corrections.test.tsx (5 tests) 155ms
+ ✓ tests/runtime/heritage-inspector-dev.test.ts (7 tests) 245ms
+ ✓ tests/runtime/host-media-queries.test.tsx (2 tests) 192ms
+ ✓ tests/runtime/window-restoration.test.ts (21 tests) 190ms
+ ✓ tests/runtime/runtime-instance-contract.test.ts (14 tests) 160ms
+ ✓ tests/runtime/nse-scoped-animation-frames.test.tsx (12 tests) 154ms
+ ✓ tests/runtime/nse-controller-ownership-hardening.test.tsx (23 tests) 156ms
+ ✓ tests/runtime/webspring-quickswitch-presentation.test.tsx (4 tests) 145ms
+ ✓ tests/runtime/fx/video-container.test.ts (11 tests) 150ms
+ ✓ tests/runtime/document-projection.test.ts (13 tests) 134ms
+ ✓ tests/runtime/fx/location-mounted.test.tsx (2 tests) 132ms
+ ✓ tests/runtime/fx/audio-worklet-output.test.ts (17 tests) 127ms
+ ✓ tests/runtime/window-transition-authority.test.ts (21 tests) 163ms
+ ✓ tests/runtime/presentation-settlement-coordinator.test.ts (5 tests) 128ms
+ ✓ tests/runtime/fx/mounted-audio-files.test.ts (13 tests) 126ms
+ ✓ tests/runtime/class-session-operation-lifetime.test.tsx (9 tests) 145ms
+ ✓ tests/runtime/application-document-autosave.test.ts (5 tests) 120ms
+ ❯ tests/runtime/runtime.test.ts (14 tests | 1 failed) 150ms
+     ✓ returns cloned inspection snapshots 28ms
+     ✓ commits transactions, records history, and flushes post-commit effects 4ms
+     ✓ keeps login aliases on the effective runtime-owned service 8ms
+     ✓ keeps lifecycle state and app manager identity aligned after an app route opens 31ms
+     ✓ keeps Webspring edit, keyboard reorder, and drag rollback state on the runtime instance 8ms
+     ✓ keeps legacy and durable notifications on the same runtime-owned centre 6ms
+     × keeps replacement managers runtime-owned and uninstalls their host resources on disposal 6ms
+     ✓ settles a runtime MultiSwitch through its fallback 20ms
+     ✓ cancels a pending MultiSwitch fallback when the runtime is disposed 20ms
+     ✓ exposes real Inspector runtime reports 5ms
+     ✓ boots to LoginWindow by default when no session is authorised 6ms
+     ✓ rolls back failed transactions and reports runtime errors 3ms
+     ✓ keeps legacy run transactions usable for sync commands 2ms
+     ✓ asserts cross-runtime invariants for active apps 2ms
+ ✓ tests/runtime/text-system/text-attachment-editing.test.tsx (7 tests) 138ms
+ ✓ tests/nse/controls/nse-bound-values.test.tsx (10 tests) 157ms
+ ✓ tests/runtime/nse-adaptive-bottom-tabs.test.tsx (2 tests) 136ms
+ ✓ tests/runtime/initial-route-boot.test.ts (10 tests) 147ms
+ ✓ tests/runtime/lifecycle-authority.test.ts (6 tests) 118ms
+ ✓ tests/runtime/fx/image-colour-analysis.test.ts (6 tests) 140ms
+ ✓ tests/runtime/configuration-profiles-host-profiles.test.ts (9 tests) 70ms
+ ✓ tests/runtime/login-window-parity.test.tsx (4 tests) 127ms
+ ✓ tests/runtime/mounted-command-result-projection.test.ts (11 tests) 138ms
+ ✓ tests/runtime/bundle-loader-runtime.test.ts (16 tests) 122ms
+ ✓ tests/runtime/text-system/text-session-policies.test.tsx (8 tests) 136ms
+ ✓ tests/runtime/compression-fx.test.ts (21 tests) 128ms
+ ✓ tests/nse/colour/nse-colour-panel.test.tsx (16 tests) 130ms
+ ✓ tests/runtime/notification-screen-slice-capture.test.ts (12 tests) 247ms
+ ✓ tests/runtime/synware-menu-revision.test.tsx (9 tests) 147ms
+ ✓ tests/runtime/authorization-efficacy.test.ts (15 tests) 58ms
+ ✓ tests/runtime/runtime-selector.test.tsx (3 tests) 129ms
+ ✓ tests/runtime/routing-ii-mounted-settlement.test.ts (2 tests) 109ms
+ ✓ tests/runtime/class-logout-session.test.tsx (3 tests) 138ms
+ ✓ tests/runtime/fx/audio-resource-loader.test.ts (4 tests) 107ms
+ ✓ tests/runtime/nse-presentation-state.test.tsx (20 tests) 127ms
+ ✓ tests/runtime/synware-loading-fallback.test.tsx (5 tests) 124ms
+ ✓ tests/runtime/nse-window-roles.test.tsx (6 tests) 139ms
+ ✓ tests/runtime/nse-topbar-glyphs.test.tsx (8 tests) 119ms
+ ✓ tests/runtime/nse-window-accessibility.test.tsx (8 tests) 126ms
+stdout | tests/runtime/document-asset-integrated-regressions.test.ts > integrated asset ownership regressions > keeps a second independent preparation alive when the first shared candidate caller aborts
+REVIEW-PROBE independent-cancel {"first":"asset-aborted","second":"prepared","revision":1,"roots":0}
+
+stdout | tests/runtime/document-asset-integrated-regressions.test.ts > integrated asset ownership regressions > enforces the full captured candidate identity with automatic resource admission
+REVIEW-PROBE candidate-automatic {"status":"rejected","title":"New","revision":1}
+
+stdout | tests/runtime/document-asset-integrated-regressions.test.ts > integrated asset ownership regressions > enforces the full captured candidate identity with explicit resource admission
+REVIEW-PROBE candidate-explicit {"status":"rejected","title":"New","revision":1}
+
+stdout | tests/runtime/document-asset-integrated-regressions.test.ts > integrated asset ownership regressions > restores the old current owner and collects only the new candidate after synchronous retention refusal
+REVIEW-PROBE reversible-refusal {"status":"rejected","revision":2,"gc":{"removedAssets":1,"removedBytes":1}}
+
+stdout | tests/runtime/document-asset-integrated-regressions.test.ts > integrated asset ownership regressions > refuses an unprepared canonical reference and a mount revoked inside model validation
+REVIEW-PROBE prepublication-revocation {"unprepared":"rejected","revoked":"rejected","revision":1}
+
+stdout | tests/runtime/document-asset-integrated-regressions.test.ts > integrated asset ownership regressions > fences reconcile eviction against a newer retention generation at the same native version root
+REVIEW-PROBE eviction-generation {"count":0,"suppliedToken":"a58ce90b-08aa-44cb-bfd8-ef3b6995dd69","generationChanged":true,"nativeVersionPresent":true,"currentVersionPresent":true,"gc":{"removedAssets":0,"removedBytes":0}}
+
+stdout | tests/runtime/document-asset-integrated-regressions.test.ts > integrated asset ownership regressions > fences explicit eviction against a newer retention generation at the same native version root
+REVIEW-PROBE eviction-generation {"count":0,"suppliedToken":"f4a5519d-731b-4abf-b934-5434614a34fb","generationChanged":true,"nativeVersionPresent":true,"currentVersionPresent":true,"gc":{"removedAssets":0,"removedBytes":0}}
+
+stdout | tests/runtime/document-asset-integrated-regressions.test.ts > integrated asset ownership regressions > converges a recovered unknown sent write to its one acknowledged native version root
+REVIEW-PROBE unknown-write-recovery {"sameVersion":true,"roots":["native-version:eb1add02041437e666c13d5d924d9ea13e4c02ee6be2934519ac2ee218621f61:%7B%22etag%22%3A%22%5C%22b2767f3f%5C%22%22%2C%22id%22%3A%2296fdab51-fc0d-4097-a790-4ed5957b54d9%22%2C%22savedAt%22%3A%221970-01-01T00%3A00%3A01.000Z%22%2C%22sequence%22%3A1%7D"]}
+
+stdout | tests/runtime/document-asset-integrated-regressions.test.ts > integrated asset ownership regressions > does not exhaust root quota on repeated acknowledgement of one formerly unknown write
+REVIEW-PROBE unknown-write-quota {"acknowledgedVersion":"6d174bb7-e9ca-4aec-a04e-5e1111cc67a2","sameVersion":true,"retry":"acknowledged","roots":["native-version:eb1add02041437e666c13d5d924d9ea13e4c02ee6be2934519ac2ee218621f61:%7B%22etag%22%3A%22%5C%22111a8ed9%5C%22%22%2C%22id%22%3A%226d174bb7-e9ca-4aec-a04e-5e1111cc67a2%22%2C%22savedAt%22%3A%221970-01-01T00%3A00%3A01.000Z%22%2C%22sequence%22%3A1%7D"]}
+
+stdout | tests/runtime/document-asset-integrated-regressions.test.ts > integrated asset ownership regressions > returns the actual committed receipt after cancellation and rejected postcommit pin promotion
+REVIEW-PROBE committed-receipt-truth {"nativePresent":true,"abortedAfterCommit":true,"pin":"version","durability":"memory"}
+
+ ✓ tests/runtime/document-asset-integrated-regressions.test.ts (10 tests) 125ms
+ ✓ tests/runtime/document-runtime-integration.test.ts (8 tests) 120ms
+ ✓ tests/nse/data-views/nse-collection-view-cover-flow.test.tsx (5 tests) 124ms
+ ✓ tests/runtime/chronosphere/vortex-effect.test.tsx (7 tests) 115ms
+ ✓ tests/runtime/browser-host-fonts.test.tsx (4 tests) 188ms
+ ✓ tests/runtime/nse-tab-transition-lifetime.test.tsx (1 test) 174ms
+ ✓ tests/runtime/application-stage-top-bar-inset.test.tsx (5 tests) 131ms
+ ✓ tests/runtime/fx/image-feature-analysis.test.ts (7 tests) 97ms
+ ✓ tests/runtime/nse-control-controller-ownership.test.ts (31 tests) 123ms
+ ✓ tests/runtime/document-history-projection.test.ts (26 tests) 125ms
+ ✓ tests/runtime/fx/midi-mounted.test.ts (3 tests) 151ms
+ ✓ tests/runtime/app-document-asset-client.test.ts (6 tests) 125ms
+Not implemented: navigation to another Document
+ ✓ tests/runtime/text-system/nse-text-view.test.tsx (5 tests) 109ms
+ ✓ tests/runtime/drag-session.test.ts (15 tests) 123ms
+ ✓ tests/runtime/lifecycle-operation-order.test.ts (10 tests) 114ms
+ ✓ tests/runtime/routes-services-windows-launch.test.ts (9 tests) 106ms
+ ✓ tests/runtime/fx/graphics-display-list-replay.test.tsx (4 tests) 110ms
+ ✓ tests/runtime/text-system/text-document-owner.test.ts (11 tests) 106ms
+ ✓ tests/runtime/nse-animation.test.tsx (34 tests) 129ms
+ ✓ tests/runtime/fx/audio-worklet-processor.test.ts (8 tests) 117ms
+ ✓ tests/runtime/webspring-board-background.test.tsx (10 tests) 95ms
+ ✓ tests/nse/overlays/nse-alert-panel.test.tsx (3 tests) 102ms
+ ✓ tests/runtime/command-observation.test.ts (5 tests) 101ms
+ ✓ tests/runtime/nse-application-navigation-chrome.test.tsx (6 tests) 105ms
+ ✓ tests/runtime/application-stage-reconciliation.test.tsx (1 test) 109ms
+ ✓ tests/runtime/document-output-snapshot.test.ts (20 tests) 104ms
+ ✓ tests/runtime/nse-layout-defaults.test.tsx (10 tests) 97ms
+ ✓ tests/nse/controls/nse-foundational-form-controls.test.tsx (2 tests) 103ms
+ ✓ tests/runtime/host-document-asset-backing.test.ts (35 tests) 108ms
+stdout | tests/runtime/synware-text-adapter-targets.test.ts > SDK adapter construction targets > keeps a text owner on its originally supplied document port when the caller reuses its options object
+TEXT_TARGET_PROBE {"first":"!Original","second":"Other runtime","projected":"!Original"}
+
+stdout | tests/runtime/synware-text-adapter-targets.test.ts > SDK adapter construction targets > captures the same document it settled when selection options change during an async barrier
+OUTPUT_TARGET_PROBE {"documentId":"review-document","body":"Original","otherMarked":"未確定","engineCalls":1}
+
+ ✓ tests/runtime/synware-text-adapter-targets.test.ts (3 tests) 105ms
+ ✓ tests/runtime/fx/animation-composition.test.tsx (7 tests) 101ms
+ ✓ tests/runtime/synapp-trusted-provenance.test.ts (12 tests) 87ms
+ ✓ tests/runtime/identity-session-service.test.ts (18 tests) 101ms
+ ✓ tests/nse/overlays/nse-confirm-dialog-actions.test.tsx (3 tests) 96ms
+ ✓ tests/runtime/declared-disabled-app.test.ts (7 tests) 93ms
+ ✓ tests/runtime/fx/foundation-byte-contracts.test.ts (13 tests) 91ms
+ ✓ tests/runtime/fx/image-reduction-factories.test.ts (7 tests) 92ms
+ ✓ tests/runtime/nse-appearance-definition-contract.test.tsx (6 tests) 91ms
+ ❯ tests/runtime/app-share-client.test.ts (35 tests | 5 failed) 95ms
+     ✓ shares the same frozen prepared payload accepted by both receiver-bound probes before yielding 4ms
+     ✓ does not let a title mask an unsupported files member or fall back to text 1ms
+     ✓ requires the exact combined payload to be supported even after the files-only probe succeeds 1ms
+     ✓ reports prepared files unsupported without canShare while preserving ordinary text sharing 1ms
+     ✓ rejects empty, sparse, lazy and forged prepared files without evaluating accessors 1ms
+     ✓ fences owner or caller revocation during the native capability probe 1ms
+     ✓ never substitutes a fallback after prepared-file AbortError 1ms
+     ✓ never substitutes a fallback after prepared-file NotAllowedError 0ms
+     ✓ omits undefined optional fields like a native share dictionary 1ms
+     ✓ returns a typed policy denial when the host admission gate rejects before native access 1ms
+     ✓ resolves a relative HTTP share URL against the owned browser location 0ms
+     ✓ does not turn an unrecognized policy token into a native-share denial 0ms
+     ✓ respects an actual recognized Permissions Policy denial 0ms
+     ✓ preserves the native share and canShare receivers and invokes before yielding 0ms
+     ✓ reports inactive activation separately from API availability 0ms
+     ✓ lets the browser decide when activation is not observable 0ms
+     ✓ does not audit or prompt during status inspection 0ms
+     ✓ rejects malformed share data without invoking accessors or native methods 0ms
+     ✓ reports request-specific unsupported data without a share call 0ms
+     ✓ classifies native AbortError as cancelled 0ms
+     ✓ classifies native NotAllowedError as denied 0ms
+     ✓ classifies native TypeError as invalid 0ms
+     ✓ classifies native NotSupportedError as unsupported 0ms
+     ✓ classifies native OperationError as failed 0ms
+     ✓ distinguishes owner abort from user cancellation and ignores late completion 0ms
+     ✓ distinguishes caller abort from user cancellation and ignores late completion 0ms
+     ✓ does not start overlapping native share operations 0ms
+     ✓ keeps the native busy lease after caller abort until the native sheet settles 0ms
+     ✓ rejects sharing without its manifest capability before accessing the native API 45ms
+     × reports a completed native share as shared 7ms
+     × reports only a genuine AbortError cancellation as cancelled 5ms
+     × reports unavailable native sharing without attempting a native call 5ms
+     × rejects an unexpected native share failure for the mounted app to present 7ms
+     × distinguishes unsupported sharing from cancellation in the explicit API 5ms
+     ✓ does not treat missing declaration as native permission or unsupported hardware 4ms
+ ✓ tests/runtime/runtime-transfer-authority.test.ts (7 tests) 96ms
+ ✓ tests/runtime/document-editing-settlement.test.ts (19 tests) 93ms
+ ✓ tests/runtime/nse-drag.test.tsx (11 tests) 93ms
+ ✓ tests/runtime/chronosphere/chronosphere-motion.test.tsx (8 tests) 98ms
+ ✓ tests/runtime/auth-backend.test.ts (26 tests) 119ms
+ ✓ tests/nse/file-panels/nse-path-control.test.tsx (4 tests) 103ms
+ ✓ tests/runtime/nse-named-images.test.tsx (4 tests) 91ms
+ ✓ tests/runtime/fx/lumina-maintenance.test.ts (7 tests) 92ms
+ ✓ tests/runtime/audio-haptics-slider.test.tsx (2 tests) 94ms
+ ✓ tests/runtime/webspring-layout.test.ts (29 tests) 102ms
+ ✓ tests/runtime/locale-services.test.ts (21 tests) 133ms
+ ✓ tests/runtime/service-token-revocation.test.tsx (3 tests) 158ms
+ ✓ tests/runtime/fx/text-ruby.test.ts (7 tests) 94ms
+ ✓ tests/runtime/fx/metal-controls.test.tsx (5 tests) 100ms
+ ✓ tests/runtime/webspring-prefetch.test.ts (8 tests) 93ms
+ ✓ tests/runtime/nse-route-picker.test.tsx (3 tests) 85ms
+ ✓ tests/runtime/application-host-titlebar.test.tsx (2 tests) 97ms
+ ✓ tests/nse/appearance/metal-thumb-appearance.test.tsx (7 tests) 89ms
+ ✓ tests/nse/nse-topbar-document.test.tsx (3 tests) 97ms
+ ✓ tests/runtime/document-structural-close-regressions.test.ts (20 tests) 99ms
+ ✓ tests/runtime/document-edit-transaction.test.ts (16 tests) 97ms
+ ✓ tests/runtime/nse-page-curl-engine.test.ts (27 tests) 94ms
+ ✓ tests/runtime/mounted-command-payload-authority.test.ts (9 tests) 116ms
+ ✓ tests/runtime/document-saved-content-identity.test.ts (12 tests) 104ms
+ ✓ tests/nse/controls/nse-clean-boundaries.test.tsx (10 tests) 91ms
+ ✓ tests/runtime/atmo-vector-coverage.test.ts (6 tests) 95ms
+ ✓ tests/runtime/overlay-region.test.tsx (19 tests) 84ms
+ ✓ tests/runtime/conformance-inspector.test.ts (10 tests) 96ms
+ ✓ tests/runtime/fx/image-barcode-depth.test.ts (5 tests) 83ms
+ ✓ tests/runtime/content-presentation-policy.test.ts (7 tests) 97ms
+ ✓ tests/runtime/browser-host-lifetime.test.tsx (3 tests) 166ms
+ ✓ tests/runtime/framework-runtime-settlement.test.ts (6 tests) 115ms
+ ✓ tests/runtime/nse-window-chrome-mode.test.ts (11 tests) 111ms
+ ✓ tests/runtime/image-binary-metadata.test.ts (24 tests) 148ms
+ ✓ tests/runtime/document-restoration.test.ts (6 tests) 98ms
+ ✓ tests/runtime/privacy-motion-midi.test.ts (18 tests) 80ms
+ ✓ tests/runtime/window-mobile-presentation.test.ts (14 tests) 92ms
+ ✓ tests/nse/scroll/nse-appkit-view-access.test.tsx (4 tests) 80ms
+ ✓ tests/runtime/window-close-lifecycle.test.ts (6 tests) 98ms
+ ✓ tests/runtime/application-window-app-runtime-facade.test.tsx (1 test) 131ms
+ ✓ tests/runtime/registry-appinfo.test.ts (16 tests) 81ms
+ ✓ tests/runtime/http-authentication-recovery.test.ts (85 tests) 98ms
+ ✓ tests/runtime/fx/text-vertical-frame.test.ts (4 tests) 88ms
+ ✓ tests/runtime/nse-view-animator.test.ts (2 tests) 82ms
+ ✓ tests/runtime/service-token.test.ts (3 tests) 88ms
+ ✓ tests/runtime/colour-panel-service.test.ts (23 tests) 102ms
+ ✓ tests/runtime/mounted-storage-diagnostics.test.ts (5 tests) 126ms
+ ✓ tests/runtime/nse-animation-layer-ownership.test.tsx (1 test) 117ms
+ ✓ tests/performance/document-controller-performance.test.ts (1 test) 86ms
+ ✓ tests/runtime/projection-facade.test.tsx (4 tests) 89ms
+ ✓ tests/runtime/fx/browser-animation-layer-adoption.test.ts (3 tests) 81ms
+ ✓ tests/runtime/mounted-app-policy-authority.test.ts (4 tests) 103ms
+ ✓ tests/runtime/runtime-lifecycle-fuzz.test.ts (3 tests) 87ms
+ ✓ tests/runtime/document-editing-close-order.test.ts (7 tests) 74ms
+ ✓ tests/runtime/app-error-recovery.test.ts (6 tests) 92ms
+ ✓ tests/runtime/window-controller-responder-hierarchy.test.tsx (1 test) 74ms
+ ✓ tests/runtime/fx/text-path-frame.test.ts (4 tests) 68ms
+ ✓ tests/runtime/fx/animation-renderer-css-layout.test.ts (3 tests) 75ms
+ ✓ tests/nse/scroll/nse-clip-view.test.tsx (1 test) 75ms
+ ✓ tests/runtime/fx/fx-entry-contract.test.ts (5 tests) 122ms
+ ✓ tests/runtime/fx/mounted-animation-layers.test.ts (6 tests) 76ms
+ ✓ tests/runtime/document-close-gate-persistence-regressions.test.ts (10 tests) 90ms
+ ✓ tests/runtime/nse-font-manager-supplied.test.ts (19 tests) 76ms
+ ✓ tests/runtime/fx/image-barcode.test.ts (7 tests) 72ms
+ ✓ tests/runtime/nse-loading-spinner-public.test.tsx (1 test) 73ms
+ ✓ tests/runtime/application-action-results.test.ts (4 tests) 82ms
+ ✓ tests/runtime/fx/audio-route-recovery.test.ts (9 tests) 64ms
+ ✓ tests/runtime/controller-route-observation.test.ts (3 tests) 69ms
+ ✓ tests/runtime/app-facade-departing-tree.test.tsx (4 tests) 78ms
+ ✓ tests/runtime/document-synchronised-close-regressions.test.ts (9 tests) 75ms
+ ✓ tests/runtime/semantic-presentation-separation.test.ts (3 tests) 73ms
+ ✓ tests/runtime/window-relationships.test.ts (5 tests) 66ms
+ ✓ tests/runtime/fx/image-tiled-execution.test.ts (7 tests) 64ms
+ ✓ tests/runtime/fx/video-capture.test.ts (6 tests) 61ms
+ ✓ tests/runtime/transfer-mount-lifetime.test.ts (5 tests) 73ms
+ ✓ tests/runtime/runtime-instance-isolation.test.ts (3 tests) 73ms
+ ✓ tests/runtime/command-system.test.ts (15 tests) 73ms
+ ✓ tests/runtime/runtime-browser-host-contributions.test.tsx (5 tests) 61ms
+ ✓ tests/runtime/browser-text-layout-adapter.test.ts (7 tests) 60ms
+ ✓ tests/runtime/save-as-unknown-remote-outcomes.test.ts (9 tests) 78ms
+ ✓ tests/runtime/runtime-cache-lifecycle.test.ts (2 tests) 69ms
+ ✓ tests/runtime/public-api-compatibility.test.ts (7 tests) 75ms
+ ✓ tests/runtime/system-panel-error-reporting.test.tsx (1 test) 101ms
+ ✓ tests/runtime/window-keyboard-geometry.test.ts (7 tests) 94ms
+ ✓ tests/runtime/app-text-layout-capabilities.test.ts (5 tests) 82ms
+ ✓ tests/runtime/application-stage-modal-domain.test.tsx (2 tests) 69ms
+ ✓ tests/runtime/document-output-document-state.test.ts (5 tests) 70ms
+ ❯ tests/runtime/fx/phase5-real-authority.test.ts (2 tests | 1 failed) 66ms
+   × uses real lifecycle policy and captured entitlements for retained device clients 59ms
+   ✓ denies missing captured entitlements before calling a native picker 6ms
+ ✓ tests/runtime/document-store.test.ts (29 tests) 74ms
+ ✓ tests/runtime/diagnostics-inspector.test.ts (3 tests) 69ms
+ ✓ tests/runtime/undo-observation.test.ts (6 tests) 75ms
+ ✓ tests/nse/nse-view-snapshot.test.ts (3 tests) 78ms
+ ✓ tests/runtime/document-commands.test.ts (4 tests) 72ms
+ ✓ tests/runtime/fx/animation-offscreen-composition.test.tsx (4 tests) 71ms
+ ✓ tests/runtime/nse-overlay-destination.test.tsx (2 tests) 61ms
+ ✓ tests/integration/text-system-keyboard.test.tsx (4 tests) 79ms
+ ✓ tests/runtime/bundle-identity-normalisation.test.ts (14 tests) 62ms
+ ✓ tests/runtime/nse-custom-presentation.test.tsx (4 tests) 135ms
+ ✓ tests/runtime/document-store-quota.test.ts (4 tests) 110ms
+ ✓ tests/runtime/nse-animation-environment.test.tsx (7 tests) 114ms
+ ✓ tests/runtime/window-move-resize.test.tsx (11 tests) 104ms
+ ✓ tests/runtime/window-manager.test.ts (4 tests) 69ms
+ ✓ tests/runtime/pwa-system-services.test.ts (7 tests) 65ms
+ ✓ tests/runtime/window-modality.test.ts (4 tests) 77ms
+ ✓ tests/runtime/key-binding-manager.test.ts (14 tests) 84ms
+ ✓ tests/runtime/routing-graph-retention.test.ts (2 tests) 75ms
+ ✓ tests/runtime/app-presentation-client.test.tsx (2 tests) 76ms
+ ✓ tests/runtime/window-bounds.test.ts (5 tests) 80ms
+ ✓ tests/runtime/document-initial-admission.test.ts (5 tests) 78ms
+ ✓ tests/runtime/window-focus-ordering.test.ts (3 tests) 59ms
+ ✓ tests/runtime/fx/audio-dsp-depth.test.ts (5 tests) 69ms
+ ✓ tests/runtime/nse-attributed-content.test.ts (7 tests) 58ms
+ ✓ tests/runtime/notification-center.test.ts (6 tests) 58ms
+ ✓ tests/runtime/runtime-react-provider.test.tsx (3 tests) 89ms
+ ✓ tests/runtime/registry-policy-lifecycle.test.ts (6 tests) 60ms
+ ✓ tests/runtime/fx/text-review-frames.test.ts (6 tests) 61ms
+ ✓ tests/runtime/foundation-faithful-date.test.ts (10 tests) 66ms
+ ✓ tests/runtime/fx/text-attachments.test.ts (4 tests) 57ms
+ ✓ tests/runtime/browser-recovery-watchdog.test.ts (7 tests) 118ms
+ ✓ tests/runtime/operation-coordinator.test.ts (8 tests) 134ms
+ ✓ tests/runtime/fx/video-processing.test.ts (10 tests) 107ms
+ ✓ tests/runtime/app-undo-client.test.ts (1 test) 107ms
+ ✓ tests/runtime/application-authoring-6e-toolchain.test.ts (14 tests) 93ms
+ ✓ tests/runtime/runtime-route-client.test.ts (1 test) 94ms
+ ✓ tests/runtime/service-registry-depth.test.ts (7 tests) 63ms
+ ✓ tests/runtime/host-integration-environment.test.ts (2 tests) 63ms
+ ✓ tests/runtime/responsive-mode-performance.test.ts (6 tests) 63ms
+ ✓ tests/runtime/fx/nse-view-draw-fitting.test.tsx (14 tests) 62ms
+ ✓ tests/runtime/document-edit-history.test.ts (5 tests) 58ms
+ ✓ tests/runtime/user-notification-persistence.test.ts (2 tests) 55ms
+ ✓ tests/runtime/document-default-adapters.test.ts (3 tests) 62ms
+ ✓ tests/runtime/routing-ii-ownership.test.ts (5 tests) 54ms
+ ✓ tests/runtime/runtime-store-performance.test.ts (11 tests) 67ms
+ ✓ tests/runtime/text-system/dom-composition-adapter.test.ts (7 tests) 79ms
+ ✓ tests/runtime/create-synapp.test.tsx (7 tests) 66ms
+ ✓ tests/runtime/document-recovery-save-race.test.ts (3 tests) 88ms
+ ✓ tests/runtime/runtime-performance-policy.test.ts (7 tests) 62ms
+ ✓ tests/runtime/system-font-weights.test.ts (1 test) 164ms
+ ✓ tests/runtime/preference-pane-registry.test.ts (17 tests) 54ms
+ ✓ tests/runtime/synware-nse-public-surface.test.ts (6 tests) 73ms
+ ✓ tests/runtime/managed-font-access.test.tsx (4 tests) 92ms
+ ✓ tests/runtime/runtime-disposal-participants.test.ts (4 tests) 49ms
+ ✓ tests/runtime/fx/animation-shader.test.ts (9 tests) 56ms
+ ✓ tests/runtime/clipboard-work-observation.test.ts (8 tests) 47ms
+ ✓ tests/runtime/pwa-worker.test.ts (4 tests) 24ms
+ ✓ tests/runtime/preferences-notifications.test.ts (3 tests) 47ms
+ ✓ tests/runtime/application-view-dependencies.test.tsx (4 tests) 47ms
+ ✓ tests/runtime/fx/graphics-pdf-isolation.test.ts (6 tests) 49ms
+ ✓ tests/runtime/window-controller.test.ts (3 tests) 52ms
+ ✓ tests/runtime/fx/graphics-context-depth.test.tsx (14 tests) 47ms
+ ✓ tests/runtime/recovery-error-classification.test.ts (4 tests) 48ms
+ ✓ tests/runtime/project-trust.test.ts (2 tests) 50ms
+ ✓ tests/runtime/drag-board-teardown-authority.test.ts (2 tests) 48ms
+ ✓ tests/runtime/fx/system-feedback.test.ts (4 tests) 48ms
+ ✓ tests/runtime/text-container-sequence.test.ts (5 tests) 46ms
+ ✓ tests/runtime/user-notification-actions.test.ts (4 tests) 50ms
+stderr | tests/runtime/webspring-folder-tile.test.tsx > WebspringFolderTile > draws the default inset squircle from NSESmoothSurface geometry sized to the tile
+Each child in a list should have a unique "key" prop.
+
+Check the render method of `span`. It was passed a child from WebspringFolderTile. See https://react.dev/link/warning-keys for more information.
+
+ ✓ tests/runtime/webspring-folder-tile.test.tsx (6 tests) 44ms
+ ✓ tests/runtime/framework-waiters.test.ts (19 tests) 44ms
+ ✓ tests/runtime/text-system/text-structure-commands.test.ts (8 tests) 50ms
+ ✓ tests/runtime/error-manager-watchdog.test.ts (6 tests) 49ms
+ ✓ tests/runtime/configuration-profiles-subject-grants.test.ts (6 tests) 45ms
+ ✓ tests/runtime/error-manager-expansion.test.ts (6 tests) 44ms
+ ✓ tests/runtime/text-system/framework-retirement.test.ts (4 tests) 61ms
+ ✓ tests/runtime/runtime-transaction-write-set.test.ts (7 tests) 48ms
+ ✓ tests/runtime/fx/graphics-recorder-state.test.tsx (4 tests) 42ms
+ ✓ tests/runtime/fx/scoped-animation-frames.test.ts (4 tests) 46ms
+ ✓ tests/runtime/fx/graphics-recorder-paints.test.tsx (4 tests) 50ms
+ ✓ tests/runtime/configuration-profiles-plugin.test.ts (5 tests) 45ms
+ ✓ tests/runtime/presentation-traits-contract.test.ts (7 tests) 42ms
+ ✓ tests/runtime/document-version-conflict.test.ts (1 test) 41ms
+ ✓ tests/runtime/undo-manager-registry.test.ts (2 tests) 39ms
+ ✓ tests/runtime/generic-runtime-omission.test.ts (1 test) 38ms
+ ✓ tests/runtime/document-asset-save.test.ts (13 tests) 43ms
+ ✓ tests/runtime/text-attachment-metrics.test.ts (3 tests) 34ms
+ ✓ tests/runtime/webspring-key-window-focus.test.tsx (6 tests) 38ms
+ ✓ tests/runtime/chronosphere/chronosphere-camera.test.tsx (4 tests) 41ms
+ ✓ tests/runtime/document-restore-version-cancellation.test.ts (1 test) 43ms
+ ✓ tests/runtime/synware-fx-import-boundary.test.ts (1 test) 48ms
+ ✓ tests/runtime/fx/av-synchronization.test.ts (26 tests) 46ms
+ ✓ tests/runtime/text-system/text-input-client.test.ts (13 tests) 41ms
+ ✓ tests/runtime/isolated-document-store-lock.test.ts (5 tests) 41ms
+ ✓ tests/runtime/global-watchdog.test.ts (4 tests) 36ms
+ ✓ tests/runtime/command-responder-fuzz.test.ts (3 tests) 41ms
+ ✓ tests/runtime/fx/text-review-typesetter.test.ts (4 tests) 36ms
+ ✓ tests/runtime/update-readiness-evidence.test.ts (29 tests) 35ms
+ ✓ tests/runtime/fx/audio-timeline-transport.test.ts (15 tests) 38ms
+ ✓ tests/runtime/system-ui-runtime-isolation.test.ts (2 tests) 34ms
+ ✓ tests/runtime/text-geometry-capabilities.test.ts (3 tests) 35ms
+ ✓ tests/runtime/text-exclusion-geometry.test.ts (2 tests) 36ms
+ ✓ tests/runtime/responder-graph.test.ts (5 tests) 42ms
+ ✓ tests/runtime/nse-navigation-controllers.test.ts (10 tests) 30ms
+ ✓ tests/runtime/fx/text-multilingual-geometry.test.ts (5 tests) 41ms
+ ✓ tests/runtime/text-shaped-projection.test.ts (6 tests) 36ms
+ ✓ tests/runtime/atmo-asset-coverage.test.ts (2 tests) 28ms
+ ✓ tests/runtime/eventbus-hardening.test.ts (3 tests) 37ms
+ ✓ tests/runtime/fx/graphics-recorder-images.test.tsx (4 tests) 37ms
+ ✓ tests/runtime/browser-global-watchdog.test.ts (1 test) 30ms
+ ✓ tests/runtime/sc-authorization.test.ts (3 tests) 35ms
+ ✓ tests/runtime/foundation-data.test.ts (16 tests) 38ms
+ ✓ tests/runtime/error-manager-operations.test.ts (1 test) 28ms
+ ✓ tests/runtime/bundle-entitlements.test.ts (3 tests) 38ms
+ ✓ tests/runtime/fx/text-layout.test.ts (3 tests) 32ms
+ ✓ tests/runtime/nse-presentation-retained-fill.test.tsx (3 tests) 32ms
+ ✓ tests/runtime/text-layout-lifetime.test.ts (2 tests) 32ms
+ ✓ tests/runtime/fx/ifx-image-view.test.tsx (4 tests) 35ms
+ ✓ tests/runtime/nse-presentation-presence.test.tsx (4 tests) 32ms
+ ✓ tests/runtime/privacy-runtime.test.ts (1 test) 36ms
+ ✓ tests/runtime/fx/audio-worklet-graph-runtime.test.ts (13 tests) 53ms
+ ✓ tests/runtime/text-system/text-storage.test.ts (5 tests) 51ms
+ ✓ tests/runtime/error-manager-feature-ownership.test.ts (2 tests) 33ms
+ ✓ tests/runtime/fx/animation-loops.test.ts (4 tests) 28ms
+ ✓ tests/runtime/storage-diagnostics.test.ts (29 tests) 31ms
+stderr | tests/nse/chronosphere/chronosphere-environment.test.tsx > browses and restores through an injected NSE environment without an app mount
+The current testing environment is not configured to support act(...)
+
+stderr | tests/nse/chronosphere/chronosphere-environment.test.tsx > browses and restores through an injected NSE environment without an app mount
+The current testing environment is not configured to support act(...)
+
+stderr | tests/nse/chronosphere/chronosphere-environment.test.tsx > browses and restores through an injected NSE environment without an app mount
+The current testing environment is not configured to support act(...)
+
+stderr | tests/nse/chronosphere/chronosphere-environment.test.tsx > browses and restores through an injected NSE environment without an app mount
+The current testing environment is not configured to support act(...)
+
+ ✓ tests/nse/chronosphere/chronosphere-environment.test.tsx (1 test) 37ms
+ ✓ tests/runtime/fx/text-cascade.test.ts (2 tests) 47ms
+ ✓ tests/runtime/fx/lifecycle-diagnostics.test.ts (11 tests) 40ms
+ ✓ tests/runtime/fx/text-paragraph.test.ts (3 tests) 38ms
+ ✓ tests/runtime/fx/text-frame.test.ts (1 test) 35ms
+ ✓ tests/runtime/fx/text-font.test.ts (3 tests) 37ms
+ ✓ tests/runtime/developer-exposure-runtime.test.ts (3 tests) 50ms
+ ✓ tests/runtime/runtime-resource-accounting.test.ts (2 tests) 28ms
+ ✓ tests/runtime/inspector-memory-report.test.ts (2 tests) 32ms
+ ✓ tests/runtime/document-store-persistence-reuse.test.ts (10 tests) 29ms
+ ✓ tests/runtime/fx/text-inline-depth.test.ts (4 tests) 31ms
+ ✓ tests/runtime/nse-observes.test.tsx (4 tests) 33ms
+ ✓ tests/runtime/text-geometry-provider.test.ts (3 tests) 31ms
+ ✓ tests/runtime/text-system/text-commands.test.ts (7 tests) 33ms
+ ✓ tests/runtime/window-content-border.test.tsx (3 tests) 30ms
+ ✓ tests/runtime/document-asset-resource.test.ts (5 tests) 29ms
+ ✓ tests/runtime/nse-owned-factory.test.ts (15 tests) 27ms
+ ✓ tests/runtime/fx/media-ranges.test.ts (5 tests) 27ms
+ ✓ tests/runtime/fx/text-drawing.test.ts (1 test) 29ms
+ ✓ tests/runtime/nse-user-defaults-controller.test.ts (15 tests) 25ms
+ ✓ tests/runtime/nse-controller-react.test.tsx (3 tests) 29ms
+ ✓ tests/runtime/runtime-transfer-services.test.ts (1 test) 28ms
+ ✓ tests/runtime/syncal-reminders.test.ts (1 test) 30ms
+ ✓ tests/runtime/authentication-services-provider.test.ts (7 tests) 26ms
+ ✓ tests/runtime/fx/image-colour-transform-reuse.test.ts (2 tests) 25ms
+ ✓ tests/runtime/nse-tree-controller.test.ts (13 tests) 30ms
+ ✓ tests/runtime/model-formatters-transformers.test.ts (6 tests) 26ms
+ ✓ tests/runtime/fx/browser-pdf-renderer-lifecycle.test.ts (2 tests) 32ms
+ ✓ tests/runtime/fx/animation-renderer-api.test.ts (11 tests) 27ms
+ ✓ tests/runtime/synware-vite-packed-assets.test.ts (4 tests) 29ms
+ ✓ tests/runtime/routing-ii-lifecycle.test.ts (27 tests) 26ms
+ ✓ tests/runtime/text-system/text-content.test.ts (5 tests) 26ms
+ ✓ tests/runtime/fx/image-sample-conversion-parity.test.ts (3 tests) 27ms
+ ✓ tests/runtime/file-panel-service.test.ts (27 tests) 27ms
+ ✓ tests/runtime/text-system/text-session.test.ts (9 tests) 26ms
+ ✓ tests/runtime/nse-object-controller.test.ts (7 tests) 24ms
+ ✓ tests/nse/scroll/nse-always-bounce.test.tsx (1 test) 29ms
+ ✓ tests/runtime/nse-renderer-lifetime-hardening.test.tsx (8 tests) 24ms
+ ✓ tests/runtime/atmo-chrome-primitives.test.tsx (2 tests) 27ms
+ ✓ tests/runtime/fx/afx-renderer-residency.test.ts (3 tests) 23ms
+ ✓ tests/runtime/text-system/text-standalone-history.test.ts (4 tests) 26ms
+ ✓ tests/runtime/text-system/text-owner-lifecycle.test.ts (9 tests) 24ms
+ ✓ tests/runtime/nse-button-key-equivalents.test.tsx (2 tests) 23ms
+ ✓ tests/nse/date-time/calendar-arithmetic.test.ts (8 tests) 23ms
+ ✓ tests/runtime/fx/graphics-profiles.test.ts (6 tests) 23ms
+ ✓ tests/runtime/nse-preference-accessor.test.ts (12 tests) 22ms
+ ✓ tests/runtime/webspring-icon-effect.test.tsx (3 tests) 26ms
+ ✓ tests/runtime/nse-binding-lifetime-hardening.test.tsx (10 tests) 24ms
+ ✓ tests/runtime/fx/animation-video-wall-picking.test.ts (4 tests) 22ms
+ ✓ tests/runtime/document-asset-versions.test.ts (5 tests) 34ms
+ ✓ tests/nse/overlays/nse-alert-object.test.ts (9 tests) 23ms
+ ✓ tests/runtime/foundation-models.test.ts (6 tests) 30ms
+ ✓ tests/runtime/text-system/text-typography-target.test.ts (5 tests) 20ms
+ ✓ tests/runtime/nse-array-controller.test.ts (11 tests) 24ms
+ ✓ tests/runtime/fx/motion-hook.test.tsx (2 tests) 22ms
+ ✓ tests/runtime/fx/audio-live.test.ts (3 tests) 20ms
+ ✓ tests/runtime/fx/haptics-hook.test.tsx (2 tests) 22ms
+ ✓ tests/runtime/fx/haptics-lifecycle.test.ts (12 tests) 21ms
+ ✓ tests/runtime/fx/mounted-audio-graphs.test.ts (6 tests) 21ms
+ ✓ tests/runtime/privacy-new-fx.test.ts (32 tests) 22ms
+ ✓ tests/runtime/fx/audio-analysis.test.ts (2 tests) 18ms
+ ✓ tests/runtime/fx/image-filters.test.ts (15 tests) 19ms
+ ✓ tests/runtime/nse-managed-animation-renderer.test.tsx (5 tests) 22ms
+ ✓ tests/nse/objects/observable.test.tsx (7 tests) 21ms
+ ✓ tests/runtime/text-system/text-find-replace.test.ts (2 tests) 22ms
+ ✓ tests/runtime/synapp-manifest-schema.test.ts (53 tests) 21ms
+ ✓ tests/runtime/fx/graphics-bitmap-effects.test.ts (11 tests) 21ms
+ ✓ tests/runtime/text-system/text-inspector-binding.test.ts (5 tests) 20ms
+ ✓ tests/runtime/browser-host-yield.test.ts (4 tests) 18ms
+ ✓ tests/runtime/fx/graphics-png.test.ts (2 tests) 19ms
+ ✓ tests/runtime/document-adapter-conformance.test.ts (12 tests) 19ms
+ ✓ tests/runtime/nse-dictionary-controller.test.ts (8 tests) 20ms
+ ✓ tests/runtime/fx/audio-chunks-clock.test.ts (5 tests) 19ms
+ ✓ tests/runtime/model-change-selection.test.ts (9 tests) 19ms
+ ✓ tests/runtime/nse-managed-display-link.test.tsx (6 tests) 17ms
+ ✓ tests/runtime/cryptofx.test.ts (11 tests) 22ms
+ ✓ tests/runtime/heritage-inspector-projection.test.ts (8 tests) 22ms
+ ✓ tests/runtime/fx/animation-video-wall-viewport.test.ts (4 tests) 19ms
+ ✓ tests/runtime/document-asset-adapter-conformance.test.ts (8 tests) 20ms
+ ✓ tests/runtime/fx/haptics-overlap-arbitration.test.ts (5 tests) 20ms
+ ✓ tests/runtime/browser-file-picker-port.test.ts (2 tests) 19ms
+ ✓ tests/runtime/webspring-return-presentation.test.tsx (5 tests) 18ms
+ ✓ tests/runtime/pwa-view-transition.test.ts (2 tests) 16ms
+ ✓ tests/runtime/webspring-entrance.test.tsx (5 tests) 18ms
+ ✓ tests/runtime/fx/afx-layer-adoption.test.ts (10 tests) 20ms
+ ✓ tests/runtime/media-panel-service.test.ts (20 tests) 17ms
+ ✓ tests/runtime/routing-ii-query.test.ts (7 tests) 17ms
+ ✓ tests/runtime/text-system/dom-backend-adapter.test.ts (7 tests) 18ms
+ ✓ tests/runtime/webspring-definition.test.ts (32 tests) 17ms
+ ✓ tests/runtime/fx/phase5-speech-contacts-hooks.test.tsx (2 tests) 16ms
+ ✓ tests/runtime/fx/animation-renderer-retained-scene.test.ts (3 tests) 17ms
+ ✓ tests/runtime/fx/animation-renderer-initial-viewport.test.ts (4 tests) 18ms
+ ✓ tests/runtime/application-document.test.ts (6 tests) 19ms
+ ✓ tests/runtime/nse-managed-task.test.ts (9 tests) 21ms
+ ✓ tests/runtime/text-system/text-attributes.test.ts (5 tests) 18ms
+ ✓ tests/runtime/nse-controller-lifecycle.test.ts (6 tests) 19ms
+ ✓ tests/runtime/fx/graphics-pixels.test.ts (11 tests) 17ms
+ ✓ tests/runtime/routing-ii-lazy.test.ts (7 tests) 20ms
+ ✓ tests/runtime/fx/haptics-host.test.ts (4 tests) 17ms
+ ✓ tests/runtime/text-system/publisher-migration-rehearsal.test.ts (14 tests) 16ms
+ ✓ tests/nse/appearance/neutral-material-contract.test.tsx (1 test) 19ms
+ ✓ tests/runtime/synware-vite-sdk-build.test.ts (2 tests) 15ms
+ ✓ tests/runtime/fx/image-distortion-factories.test.ts (5 tests) 16ms
+ ✓ tests/runtime/nse-navigation-restoration.test.ts (6 tests) 17ms
+ ✓ tests/runtime/text-system/text-position-mapping.test.ts (4 tests) 17ms
+ ✓ tests/runtime/text-system/text-operations-custom.test.ts (5 tests) 15ms
+ ✓ tests/runtime/fx/phase5-payment-hook.test.tsx (1 test) 13ms
+ ✓ tests/runtime/fx/audio-bus-connections.test.ts (3 tests) 16ms
+ ✓ tests/runtime/fx/animation-particle-batch.test.ts (3 tests) 19ms
+ ✓ tests/runtime/fx/haptics-synthesis.test.ts (4 tests) 17ms
+ ✓ tests/runtime/fx/audio-scheduling.test.ts (3 tests) 20ms
+ ✓ tests/runtime/synware-product-contract-boundary.test.ts (3 tests) 26ms
+ ✓ tests/runtime/fx/phase5-nfc-hook.test.tsx (1 test) 13ms
+ ✓ tests/runtime/fx/mounted-feedback.test.ts (3 tests) 16ms
+ ✓ tests/runtime/fx/animation-video-wall.test.ts (2 tests) 14ms
+ ✓ tests/runtime/document-asset-retention.test.ts (5 tests) 14ms
+ ✓ tests/runtime/fx/location-requests.test.ts (9 tests) 14ms
+ ✓ tests/runtime/fx/audio-graph.test.ts (2 tests) 17ms
+ ✓ tests/runtime/mounted-file-panel-client.test.ts (14 tests) 16ms
+ ✓ tests/runtime/nse-managed-task-reentrancy.test.ts (7 tests) 17ms
+ ✓ tests/runtime/nse-page-surface-key.test.ts (1 test) 15ms
+ ✓ tests/runtime/fx/animation-layer-transaction.test.ts (5 tests) 14ms
+ ✓ tests/runtime/fx/image-geometry-depth.test.ts (6 tests) 13ms
+ ✓ tests/runtime/text-measurement-lease.test.ts (5 tests) 16ms
+ ✓ tests/runtime/document-asset-store.test.ts (7 tests) 18ms
+ ✓ tests/runtime/fx/animation-browser-clock.test.ts (6 tests) 16ms
+ ✓ tests/runtime/fx/motion-authority.test.ts (8 tests) 14ms
+ ✓ tests/runtime/routing-ii-loaders.test.ts (8 tests) 14ms
+ ✓ tests/runtime/fx/audio-media-time.test.ts (10 tests) 13ms
+ ✓ tests/runtime/fx/image-cube-perspective.test.ts (7 tests) 14ms
+ ✓ tests/runtime/runtime-asset-recovery.test.ts (2 tests) 14ms
+ ✓ tests/runtime/model-predicates-sort.test.ts (9 tests) 14ms
+ ✓ tests/runtime/fx/image-spatial-factories.test.ts (8 tests) 14ms
+ ✓ tests/runtime/fx/image-tile-filters.test.ts (6 tests) 15ms
+ ✓ tests/runtime/root-runtime-manager.test.ts (4 tests) 13ms
+ ✓ tests/runtime/fx/audio-teardown-regressions.test.ts (3 tests) 13ms
+ ✓ tests/runtime/fx/image.test.ts (9 tests) 14ms
+ ✓ tests/runtime/fx/lumina-eligible-restriction.test.ts (5 tests) 15ms
+ ✓ tests/runtime/configuration-profiles-hardening.test.ts (25 tests) 12ms
+ ✓ tests/runtime/text-system/content-entry.test.ts (9 tests) 12ms
+ ✓ tests/runtime/fx/image-geometry-factories.test.ts (4 tests) 13ms
+ ✓ tests/runtime/undo-manager.test.ts (16 tests) 13ms
+ ✓ tests/runtime/fx/phase5-payment.test.ts (10 tests) 13ms
+ ✓ tests/runtime/fx/image-raw.test.ts (8 tests) 13ms
+ ✓ tests/runtime/fx/image-processor-schema.test.ts (7 tests) 14ms
+ ✓ tests/runtime/routing-ii-graph.test.ts (12 tests) 13ms
+ ✓ tests/runtime/routing-ii-query-client.test.ts (3 tests) 13ms
+ ✓ tests/runtime/fx/lumina-backend-suggestions.test.ts (7 tests) 11ms
+ ✓ tests/runtime/open-panel-file-system.test.ts (5 tests) 14ms
+ ✓ tests/runtime/fx/motion-client.test.ts (4 tests) 13ms
+ ✓ tests/runtime/browser-file-panel-ports.test.ts (5 tests) 15ms
+ ✓ tests/runtime/chronosphere/vortex-recipe.test.ts (5 tests) 14ms
+ ✓ tests/runtime/browser-route-platform-deployment-base.test.ts (2 tests) 26ms
+ ✓ tests/runtime/synchronising-document-adapter.test.ts (4 tests) 12ms
+ ✓ tests/runtime/routing-ii-sdk.test.ts (12 tests) 12ms
+ ✓ tests/runtime/fx/animation-layer-frame-coalescing.test.ts (3 tests) 17ms
+ ✓ tests/runtime/nse-controller-responder.test.ts (3 tests) 14ms
+ ✓ tests/runtime/fx/image-transition-depth.test.ts (5 tests) 15ms
+ ✓ tests/runtime/document-update-compatibility.test.ts (6 tests) 14ms
+ ✓ tests/runtime/fx/image-colour-depth.test.ts (6 tests) 13ms
+ ✓ tests/runtime/app-content-colours.test.ts (4 tests) 12ms
+ ✓ tests/runtime/fx/audio-capture.test.ts (9 tests) 13ms
+ ✓ tests/runtime/fx/motion.test.ts (8 tests) 12ms
+ ✓ tests/runtime/routing-ii-transitions.test.ts (6 tests) 12ms
+ ✓ tests/runtime/fx/haptics-audio-controls.test.ts (4 tests) 16ms
+ ✓ tests/runtime/native-file-work-observation.test.ts (10 tests) 15ms
+ ✓ tests/runtime/fx/midi-access.test.ts (9 tests) 11ms
+ ✓ tests/runtime/fx/animation-frame-batch.test.ts (1 test) 12ms
+ ✓ tests/runtime/fx/animation-reduced-crossfade.test.ts (3 tests) 14ms
+ ✓ tests/runtime/text-system/text-target-lifetime.test.ts (2 tests) 11ms
+ ✓ tests/runtime/nse-outlet-lifetime-hardening.test.tsx (3 tests) 9ms
+ ✓ tests/runtime/video-playback-presentation.test.ts (11 tests) 13ms
+ ✓ tests/runtime/fx/haptics-transport.test.ts (2 tests) 13ms
+ ✓ tests/runtime/fx/haptics-depth.test.ts (3 tests) 13ms
+ ✓ tests/runtime/fx/browser-animation-layer-capture.test.ts (4 tests) 12ms
+ ✓ tests/runtime/fx/phase5-nfc.test.ts (8 tests) 11ms
+ ✓ tests/runtime/window-screen-service.test.ts (13 tests) 11ms
+ ✓ tests/runtime/browser-image-adapter.test.ts (14 tests) 13ms
+ ✓ tests/runtime/document-asset-duplicate.test.ts (3 tests) 13ms
+ ✓ tests/runtime/screen-wake-lock.test.ts (22 tests) 15ms
+ ✓ tests/runtime/fx/motion-conformance.test.ts (5 tests) 13ms
+ ✓ tests/runtime/fx/midi-messages.test.ts (6 tests) 12ms
+ ✓ tests/runtime/fx/animation-constructor-lifecycle.test.ts (3 tests) 14ms
+ ✓ tests/runtime/text-system/text-content-extensions.test.ts (19 tests) 12ms
+ ✓ tests/runtime/playback-presentation.test.ts (14 tests) 12ms
+ ✓ tests/runtime/fx/boundary-audit.test.ts (3 tests) 11ms
+ ✓ tests/runtime/authentication-services.test.ts (9 tests) 11ms
+ ✓ tests/runtime/nse-animation-environment-fx.test.tsx (1 test) 11ms
+ ✓ tests/runtime/framework-waiters-fake-timer-import.test.ts (1 test) 11ms
+ ✓ tests/runtime/document-store-versioning.test.ts (4 tests) 11ms
+ ✓ tests/runtime/privacy-store.test.ts (15 tests) 10ms
+ ✓ tests/runtime/fx/image-colour-adjustment-factories.test.ts (5 tests) 14ms
+ ✓ tests/runtime/fx/video-presentation.test.ts (9 tests) 10ms
+ ✓ tests/runtime/fx/image-composites.test.ts (8 tests) 11ms
+ ✓ tests/runtime/remote-document-adapter.test.ts (16 tests) 11ms
+ ✓ tests/runtime/nse-managed-task-activity.test.tsx (3 tests) 11ms
+ ✓ tests/runtime/fx/speech-synthesis.test.ts (12 tests) 11ms
+ ✓ tests/runtime/fx/graphics-path-operations.test.ts (4 tests) 10ms
+ ✓ tests/runtime/text-system/text-ruler-target.test.ts (1 test) 11ms
+ ✓ tests/runtime/fx/graphics-image-operations.test.ts (7 tests) 12ms
+ ✓ tests/runtime/appkit-counterparts.test.ts (5 tests) 21ms
+ ✓ tests/runtime/document-asset-recovery.test.ts (2 tests) 12ms
+ ✓ tests/runtime/fx/video-element-capture.test.ts (6 tests) 12ms
+ ✓ tests/nse/colour/nse-colour.test.ts (18 tests) 10ms
+ ✓ tests/nse/text/nse-text-url-contract.test.tsx (11 tests) 11ms
+ ✓ tests/runtime/nse-view-outlet.test.tsx (4 tests) 10ms
+ ✓ tests/runtime/routing-ii-history.test.ts (4 tests) 11ms
+ ✓ tests/runtime/webspring-drag-arbiter.test.ts (15 tests) 11ms
+ ✓ tests/runtime/text-long-flow-windows.test.ts (2 tests) 10ms
+ ✓ tests/runtime/view-controller-fx-remount.test.ts (3 tests) 10ms
+ ✓ tests/runtime/fx/haptics.test.ts (2 tests) 9ms
+ ✓ tests/runtime/pwa-launch.test.ts (6 tests) 8ms
+ ✓ tests/runtime/fx/audio-dsp.test.ts (3 tests) 11ms
+ ✓ tests/runtime/fx/midi-scheduling.test.ts (11 tests) 9ms
+ ✓ tests/runtime/fx/haptics-envelope.test.ts (4 tests) 10ms
+ ✓ tests/runtime/foundation-public-bytes.test.ts (3 tests) 11ms
+ ✓ tests/runtime/fx/text-font-backend-provenance.test.ts (1 test) 12ms
+ ✓ tests/runtime/fx/phase5-bluetooth.test.ts (5 tests) 11ms
+ ✓ tests/runtime/fx/haptics-conformance.test.ts (2 tests) 10ms
+ ✓ tests/runtime/fx/audio-session-category.test.ts (6 tests) 9ms
+ ✓ tests/runtime/document-store-persistence-observation.test.ts (5 tests) 9ms
+ ✓ tests/runtime/runtime-diagnostic-log.test.ts (6 tests) 11ms
+ ✓ tests/runtime/fx/phase5-package-gate.test.ts (3 tests) 9ms
+ ✓ tests/runtime/fx/phase5-contacts.test.ts (10 tests) 9ms
+ ✓ tests/nse/toolbars/nse-toolbar-model.test.ts (5 tests) 10ms
+ ✓ tests/runtime/fx/lumina-storage.test.ts (8 tests) 9ms
+ ✓ tests/runtime/fx/lumina-values.test.ts (7 tests) 9ms
+ ✓ tests/runtime/fx/phase5-xr.test.ts (5 tests) 8ms
+ ✓ tests/runtime/fx/graphics-extended-colour.test.ts (6 tests) 9ms
+ ✓ tests/runtime/fx/phase5-speech.test.ts (10 tests) 8ms
+ ✓ tests/runtime/fx/video-decoder.test.ts (5 tests) 9ms
+ ✓ tests/runtime/fx/graphics-public-boundary.test.ts (2 tests) 9ms
+ ✓ tests/runtime/fx/video-silent-presentation.test.ts (4 tests) 9ms
+ ✓ tests/runtime/fx/video-frames.test.ts (6 tests) 7ms
+ ❯ tests/runtime/fx/mounted-recording.test.ts (4 tests | 2 failed) 15ms
+   ✓ does not acquire a recording session without the current declaration 4ms
+   × keeps unavailable sessions truthful, isolated and revoked 5ms
+   × passes only the mount-issued opaque input capability to its capture host 1ms
+   ✓ excludes continuous recording and tracks its real asynchronous stop finalization 4ms
+ ✓ tests/runtime/fx/image-kernels.test.ts (5 tests) 9ms
+ ✓ tests/runtime/fx/animation-renderer-near-plane.test.ts (4 tests) 9ms
+ ✓ tests/runtime/heavy-job-admission.test.ts (7 tests) 11ms
+ ✓ tests/runtime/fx/media-clock.test.ts (7 tests) 8ms
+ ✓ tests/runtime/heritage-inspector-security.test.ts (5 tests) 8ms
+ ✓ tests/runtime/asset-build-contracts.test.ts (2 tests) 12ms
+ ✓ tests/runtime/fx/video-mounted-decoder.test.ts (3 tests) 9ms
+ ✓ tests/runtime/fx/animation-native-completion.test.ts (4 tests) 9ms
+ ✓ tests/runtime/fx/audio-file.test.ts (2 tests) 8ms
+ ✓ tests/runtime/file-panel-document-bridge.test.ts (6 tests) 8ms
+ ✓ tests/nse/file-panels/nse-open-panel-object.test.ts (5 tests) 8ms
+ ✓ tests/runtime/open-panel-storage.test.ts (5 tests) 8ms
+ ✓ tests/runtime/fx/lumina-mounted.test.ts (3 tests) 8ms
+ ✓ tests/runtime/model-indexes.test.ts (5 tests) 8ms
+ ✓ tests/runtime/browser-runtime-environment.test.ts (2 tests) 9ms
+ ✓ tests/runtime/fx/webgpu-image-executor.test.ts (5 tests) 7ms
+ ✓ tests/runtime/pwa-manifest.test.ts (7 tests) 7ms
+ ✓ tests/runtime/application-hot-reload.test.tsx (8 tests) 8ms
+ ✓ tests/runtime/chronosphere/vortex-images.test.ts (5 tests) 10ms
+ ✓ tests/runtime/privacy-location-mounted.test.ts (3 tests) 7ms
+ ✓ tests/runtime/fx/networkPaths.test.ts (7 tests) 7ms
+ ✓ tests/runtime/fx/location-watches.test.ts (3 tests) 7ms
+ ✓ tests/runtime/browser-clipboard-adapter.test.ts (5 tests) 6ms
+ ✓ tests/runtime/managed-font-declaration.test.ts (11 tests) 7ms
+ ✓ tests/runtime/text-system/text-content-migration.test.ts (4 tests) 6ms
+ ✓ tests/runtime/fx/video-encoder.test.ts (6 tests) 8ms
+ ✓ tests/runtime/privacy-capture.test.ts (2 tests) 8ms
+ ✓ tests/runtime/fx/midi-ump.test.ts (5 tests) 7ms
+ ✓ tests/runtime/chronosphere/chronosphere-stack.test.ts (17 tests) 8ms
+ ✓ tests/runtime/nse-bindings.test.ts (8 tests) 7ms
+ ✓ tests/runtime/fx/text-incremental.test.ts (4 tests) 7ms
+ ✓ tests/runtime/model-native-boundaries.test.ts (4 tests) 6ms
+ ✓ tests/runtime/fx/media-time.test.ts (7 tests) 6ms
+ ✓ tests/runtime/info-entitlements.test.ts (2 tests) 6ms
+ ✓ tests/runtime/fx/text-font-codec.test.ts (3 tests) 8ms
+ ✓ tests/runtime/webspring-icon-presentation.test.ts (6 tests) 7ms
+ ✓ tests/runtime/fx/expanded-authority.test.ts (5 tests) 6ms
+ ✓ tests/runtime/host-contribution-composition.test.ts (3 tests) 6ms
+ ✓ tests/runtime/foundation-undo.test.ts (8 tests) 8ms
+ ✓ tests/runtime/chronosphere/chronosphere-ownership.test.ts (2 tests) 14ms
+ ✓ tests/runtime/fx/browser-afx-image-pixels.test.ts (6 tests) 6ms
+ ✓ tests/runtime/fx/browser-motion.test.ts (5 tests) 6ms
+ ✓ tests/runtime/fx/package-boundary.test.ts (5 tests) 9ms
+ ✓ tests/runtime/window-content-registry.test.ts (3 tests) 6ms
+ ✓ tests/runtime/browser-viewport-features.test.ts (5 tests) 6ms
+ ✓ tests/runtime/info-entitlement-policy.test.ts (1 test) 7ms
+ ✓ tests/runtime/document-types.test.ts (4 tests) 6ms
+ ✓ tests/runtime/fx/animation-browser-frame-dispatcher.test.ts (4 tests) 5ms
+ ✓ tests/runtime/foundation-faithful-decimal.test.ts (8 tests) 6ms
+ ✓ tests/runtime/nse-typography-shadow.test.ts (10 tests) 7ms
+ ✓ tests/runtime/runtime-resource-ledger.test.ts (5 tests) 6ms
+ ✓ tests/runtime/fx/graphics-path-trim.test.ts (3 tests) 5ms
+ ✓ tests/runtime/fx/location-values.test.ts (5 tests) 5ms
+ ✓ tests/runtime/application-module-definition.test.ts (5 tests) 6ms
+ ✓ tests/runtime/fx/animation-scoped-transaction.test.ts (4 tests) 5ms
+ ✓ tests/runtime/error-report-diagnoses.test.ts (3 tests) 5ms
+ ✓ tests/runtime/appearance-slot-resolver.test.ts (6 tests) 5ms
+ ✓ tests/runtime/fx/video-mounted-encoder.test.ts (1 test) 5ms
+ ✓ tests/runtime/webspring-app-menu.test.ts (11 tests) 5ms
+ ✓ tests/nse/appearance/definition-validation.test.ts (28 tests) 6ms
+ ✓ tests/runtime/fx/graphics-path-dashing.test.ts (1 test) 5ms
+ ✓ tests/runtime/managed-font-root-style.test.ts (1 test) 5ms
+ ✓ tests/runtime/notification-presenter.test.ts (3 tests) 5ms
+ ✓ tests/nse/controls/nse-value-control-transaction.test.ts (5 tests) 5ms
+ ✓ tests/runtime/fx/shared-pixel-ownership.test.ts (3 tests) 5ms
+ ✓ tests/runtime/runtime-cache.test.ts (2 tests) 5ms
+ ✓ tests/runtime/nse-animation-context.test.ts (4 tests) 4ms
+ ✓ tests/runtime/lifecycle-transition-subscription.test.ts (5 tests) 5ms
+ ✓ tests/runtime/fx/text-font-backend-readiness.test.ts (1 test) 5ms
+ ✓ tests/runtime/text-geometry-transforms.test.ts (2 tests) 5ms
+ ✓ tests/runtime/identity-cookie-boundary.test.ts (2 tests) 4ms
+ ✓ tests/runtime/fx/value-snapshot-regressions.test.ts (3 tests) 5ms
+ ✓ tests/runtime/nse-tree-node.test.ts (2 tests) 4ms
+ ✓ tests/nse/collection/cover-flow-layout.test.ts (3 tests) 5ms
+ ✓ tests/runtime/fx/owner-revocation-matrix.test.ts (3 tests) 5ms
+ ✓ tests/runtime/chronosphere/chronosphere-travel.test.ts (4 tests) 4ms
+ ✓ tests/runtime/browser-matrix-inventory.test.ts (4 tests) 4ms
+ ✓ tests/runtime/fx/audio.test.ts (2 tests) 4ms
+ ✓ tests/runtime/fx/video-encoded-retiming.test.ts (1 test) 4ms
+ ✓ tests/runtime/nse-haptic-feedback-manager.test.ts (2 tests) 4ms
+ ✓ tests/runtime/fx/animation-transform3d-multiply.test.ts (3 tests) 4ms
+ ✓ tests/nse/focus-origin.test.ts (1 test) 4ms
+ ✓ tests/runtime/fx/phase5-counterparts.test.ts (1 test) 3ms
+ ✓ tests/runtime/appearance-service.test.ts (3 tests) 4ms
+ ✓ tests/runtime/recovery-connection-generation.test.ts (2 tests) 4ms
+ ✓ tests/runtime/text-system/backend-position-map.test.ts (3 tests) 4ms
+ ✓ tests/nse/date-time/nse-picker-transaction.test.ts (2 tests) 4ms
+ ✓ tests/runtime/fx/browser-animation-image-orientation.test.ts (2 tests) 4ms
+ ✓ tests/runtime/document-recovery-store.test.ts (1 test) 4ms
+ ✓ tests/runtime/responsiveness-probe.test.ts (3 tests) 4ms
+ ✓ tests/runtime/foundation-faithful-values.test.ts (4 tests) 4ms
+ ✓ tests/runtime/nse-window-appearance-contract.test.ts (2 tests) 3ms
+ ✓ tests/runtime/configuration-profiles-change-notification.test.ts (1 test) 26ms
+ ✓ tests/decoupling/host-defaults.test.ts (2 tests) 4ms
+ ✓ tests/runtime/fx/location-speed.test.ts (3 tests) 3ms
+ ✓ tests/runtime/routing-ii-host.test.ts (2 tests) 4ms
+ ✓ tests/runtime/browser-user-notification-adapter.test.ts (1 test) 3ms
+ ✓ tests/runtime/fx/browser-video-surface.test.ts (1 test) 3ms
+ ✓ tests/runtime/host-public-documents.test.ts (1 test) 5ms
+ ✓ tests/nse/controls/nse-canonical-import-routes.test.ts (2 tests) 3ms
+ ✓ tests/runtime/fx/rendered-canvas-capture.test.ts (2 tests) 3ms
+ ✓ tests/runtime/nse-system-ui-public.test.tsx (3 tests) 3ms
+ ✓ tests/runtime/service-version.test.ts (1 test) 3ms
+ ✓ tests/runtime/fx/text-font-backend-environment.test.ts (2 tests) 3ms
+ ✓ tests/runtime/command-registry-subscription.test.ts (1 test) 3ms
+ ✓ tests/nse/file-panels/nse-workspace.test.ts (1 test) 3ms
+ ✓ tests/runtime/application-stage-return-settlement.test.ts (2 tests) 3ms
+ ✓ tests/runtime/auth-public-provider.test.ts (1 test) 3ms
+ ✓ tests/runtime/authentication-services-entries.test.ts (1 test) 2ms
+ ✓ tests/runtime/vitest-concurrency.test.ts (1 test) 3ms
+ ✓ tests/runtime/nse-layout-list-containers.test.tsx (1 test) 2ms
+ ✓ tests/nse/scroll/nse-scroll-view-frame.test.ts (1 test) 2ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 19 ⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/text-system-example.test.ts [ tests/integration/text-system-example.test.ts ]
+ FAIL  tests/performance/text-primitives-performance.test.ts [ tests/performance/text-primitives-performance.test.ts ]
+ FAIL  tests/runtime/architecture-boundaries.test.ts [ tests/runtime/architecture-boundaries.test.ts ]
+ FAIL  tests/runtime/browser-application-host.test.tsx [ tests/runtime/browser-application-host.test.tsx ]
+ FAIL  tests/runtime/developer-mcp.test.ts [ tests/runtime/developer-mcp.test.ts ]
+ FAIL  tests/runtime/heritage-inspector-source.test.ts [ tests/runtime/heritage-inspector-source.test.ts ]
+ FAIL  tests/runtime/nse-file-browser-packed.test.ts [ tests/runtime/nse-file-browser-packed.test.ts ]
+ FAIL  tests/runtime/nse-page-tear.test.ts [ tests/runtime/nse-page-tear.test.ts ]
+ FAIL  tests/runtime/runtime-keyboard-listener-guard.test.ts [ tests/runtime/runtime-keyboard-listener-guard.test.ts ]
+ FAIL  tests/runtime/runtime-singleton-boundary.test.ts [ tests/runtime/runtime-singleton-boundary.test.ts ]
+ FAIL  tests/runtime/synware-public-api-boundary-guard.test.ts [ tests/runtime/synware-public-api-boundary-guard.test.ts ]
+ FAIL  tests/runtime/synware-public-api-repairs-packed.test.ts [ tests/runtime/synware-public-api-repairs-packed.test.ts ]
+ FAIL  tests/runtime/system-ui-boundaries.test.ts [ tests/runtime/system-ui-boundaries.test.ts ]
+ FAIL  tests/runtime/fx/packed-lumina.test.ts [ tests/runtime/fx/packed-lumina.test.ts ]
+ FAIL  tests/runtime/fx/packed-media.test.ts [ tests/runtime/fx/packed-media.test.ts ]
+ FAIL  tests/runtime/fx/packed-value-foundations.test.ts [ tests/runtime/fx/packed-value-foundations.test.ts ]
+ FAIL  tests/runtime/fx/packed-video.test.ts [ tests/runtime/fx/packed-video.test.ts ]
+ FAIL  tests/runtime/fx/text-font-host.test.ts [ tests/runtime/fx/text-font-host.test.ts ]
+ FAIL  tests/runtime/fx/text-font-resource.test.ts [ tests/runtime/fx/text-font-resource.test.ts ]
+Error: ENOSPC: no space left on device, write
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/42]⎯
+
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 23 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/app-share-client.test.ts > mounted AppSDK share client > reports a completed native share as shared
+AssertionError: promise rejected "DOMException{ stack: 'SecurityError:…' }" instead of resolving
+ ❯ tests/runtime/app-share-client.test.ts:222:38
+    220|     const share = createFixture(nativeShare);
+    221|
+    222|     await expect(share.share(request)).resolves.toBe("shared");
+       |                                      ^
+    223|     expect(nativeShare).toHaveBeenCalledWith(request);
+    224|   });
+
+Caused by: SecurityError: Sharing was not admitted.
+ ❯ Object.share src/SynCloudOS/AppSDK/mountedShareClient.ts:165:39
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 18, INDEX_SIZE_ERR: 1, DOMSTRING_SIZE_ERR: 2, HIERARCHY_REQUEST_ERR: 3, WRONG_DOCUMENT_ERR: 4, INVALID_CHARACTER_ERR: 5, NO_DATA_ALLOWED_ERR: 6, NO_MODIFICATION_ALLOWED_ERR: 7, NOT_FOUND_ERR: 8, NOT_SUPPORTED_ERR: 9, INUSE_ATTRIBUTE_ERR: 10, INVALID_STATE_ERR: 11, SYNTAX_ERR: 12, INVALID_MODIFICATION_ERR: 13, NAMESPACE_ERR: 14, INVALID_ACCESS_ERR: 15, VALIDATION_ERR: 16, TYPE_MISMATCH_ERR: 17, SECURITY_ERR: 18, NETWORK_ERR: 19, ABORT_ERR: 20, URL_MISMATCH_ERR: 21, QUOTA_EXCEEDED_ERR: 22, TIMEOUT_ERR: 23, INVALID_NODE_TYPE_ERR: 24, DATA_CLONE_ERR: 25 }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/42]⎯
+
+ FAIL  tests/runtime/app-share-client.test.ts > mounted AppSDK share client > reports only a genuine AbortError cancellation as cancelled
+AssertionError: promise rejected "DOMException{ stack: 'SecurityError:…' }" instead of resolving
+ ❯ tests/runtime/app-share-client.test.ts:231:38
+    229|     }));
+    230|
+    231|     await expect(share.share(request)).resolves.toBe("cancelled");
+       |                                      ^
+    232|   });
+    233|
+
+Caused by: SecurityError: Sharing was not admitted.
+ ❯ Object.share src/SynCloudOS/AppSDK/mountedShareClient.ts:165:39
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 18, INDEX_SIZE_ERR: 1, DOMSTRING_SIZE_ERR: 2, HIERARCHY_REQUEST_ERR: 3, WRONG_DOCUMENT_ERR: 4, INVALID_CHARACTER_ERR: 5, NO_DATA_ALLOWED_ERR: 6, NO_MODIFICATION_ALLOWED_ERR: 7, NOT_FOUND_ERR: 8, NOT_SUPPORTED_ERR: 9, INUSE_ATTRIBUTE_ERR: 10, INVALID_STATE_ERR: 11, SYNTAX_ERR: 12, INVALID_MODIFICATION_ERR: 13, NAMESPACE_ERR: 14, INVALID_ACCESS_ERR: 15, VALIDATION_ERR: 16, TYPE_MISMATCH_ERR: 17, SECURITY_ERR: 18, NETWORK_ERR: 19, ABORT_ERR: 20, URL_MISMATCH_ERR: 21, QUOTA_EXCEEDED_ERR: 22, TIMEOUT_ERR: 23, INVALID_NODE_TYPE_ERR: 24, DATA_CLONE_ERR: 25 }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/42]⎯
+
+ FAIL  tests/runtime/app-share-client.test.ts > mounted AppSDK share client > reports unavailable native sharing without attempting a native call
+AssertionError: promise rejected "DOMException{ stack: 'SecurityError:…' }" instead of resolving
+ ❯ tests/runtime/app-share-client.test.ts:238:38
+    236|
+    237|     expect(share.available()).toBe(false);
+    238|     await expect(share.share(request)).resolves.toBe("cancelled");
+       |                                      ^
+    239|   });
+    240|
+
+Caused by: SecurityError: Sharing was not admitted.
+ ❯ Object.share src/SynCloudOS/AppSDK/mountedShareClient.ts:165:39
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 18, INDEX_SIZE_ERR: 1, DOMSTRING_SIZE_ERR: 2, HIERARCHY_REQUEST_ERR: 3, WRONG_DOCUMENT_ERR: 4, INVALID_CHARACTER_ERR: 5, NO_DATA_ALLOWED_ERR: 6, NO_MODIFICATION_ALLOWED_ERR: 7, NOT_FOUND_ERR: 8, NOT_SUPPORTED_ERR: 9, INUSE_ATTRIBUTE_ERR: 10, INVALID_STATE_ERR: 11, SYNTAX_ERR: 12, INVALID_MODIFICATION_ERR: 13, NAMESPACE_ERR: 14, INVALID_ACCESS_ERR: 15, VALIDATION_ERR: 16, TYPE_MISMATCH_ERR: 17, SECURITY_ERR: 18, NETWORK_ERR: 19, ABORT_ERR: 20, URL_MISMATCH_ERR: 21, QUOTA_EXCEEDED_ERR: 22, TIMEOUT_ERR: 23, INVALID_NODE_TYPE_ERR: 24, DATA_CLONE_ERR: 25 }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/42]⎯
+
+ FAIL  tests/runtime/app-share-client.test.ts > mounted AppSDK share client > rejects an unexpected native share failure for the mounted app to present
+AssertionError: expected DOMException{ stack: 'SecurityError:…' } to match object { name: 'NotAllowedError' }
+
+- Expected
++ Received
+
+- {
+-   "name": "NotAllowedError",
++ SecurityError {
++   "message": "Sharing was not admitted.",
+  }
+
+ ❯ tests/runtime/app-share-client.test.ts:247:38
+    245|     }));
+    246|
+    247|     await expect(share.share(request)).rejects.toMatchObject({ name: "…
+       |                                      ^
+    248|   });
+    249|   it("distinguishes unsupported sharing from cancellation in the expli…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/42]⎯
+
+ FAIL  tests/runtime/app-share-client.test.ts > mounted AppSDK share client > distinguishes unsupported sharing from cancellation in the explicit API
+AssertionError: expected { provider: 'none', …(5) } to match object { availability: 'unsupported', …(1) }
+(4 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "availability": "unsupported",
++   "availability": "blocked",
+    "permission": "unknown",
+  }
+
+ ❯ tests/runtime/app-share-client.test.ts:251:31
+    249|   it("distinguishes unsupported sharing from cancellation in the expli…
+    250|     const share=createFixture();
+    251|     expect(share.getStatus()).toMatchObject({availability:'unsupported…
+       |                               ^
+    252|     await expect(share.perform(request)).resolves.toEqual({kind:'unsup…
+    253|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/42]⎯
+
+ FAIL  tests/runtime/browser-global-boundary.test.ts > browser-global runtime boundary > keeps browser globals behind explicit platform adapters
+AssertionError: expected [ …(9) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "src/SynCloudOS/PlatformAdapters/BrowserPasskeyAuthorization.ts:25:globalThis",
++   "src/SynCloudOS/PlatformAdapters/BrowserPasskeyAuthorization.ts:27:navigator",
++   "src/SynCloudOS/PlatformAdapters/BrowserPasskeyAuthorization.ts:27:navigator",
++   "src/SynCloudOS/PlatformAdapters/BrowserPasskeyAuthorization.ts:29:navigator",
++   "src/SynCloudOS/PlatformAdapters/BrowserPasskeyAuthorization.ts:32:navigator",
++   "src/SynCloudOS/PlatformAdapters/BrowserPasskeyAuthorization.ts:32:navigator",
++   "src/SynCloudOS/PlatformAdapters/BrowserPasskeyAuthorization.ts:34:navigator",
++   "src/SynCloudOS/PlatformAdapters/BrowserPasskeyAuthorization.ts:38:location",
++   "src/SynCloudOS/PlatformAdapters/BrowserPasskeyAuthorization.ts:38:location",
++ ]
+
+ ❯ tests/runtime/browser-global-boundary.test.ts:166:22
+    164|         : [];
+    165|     });
+    166|     expect(findings).toEqual([]);
+       |                      ^
+    167|   }, 90_000);
+    168|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/42]⎯
+
+ FAIL  tests/runtime/framework-doc-links.test.ts > framework documentation > links only to files and headings that exist
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "docs\\framework\\documents.md links to missing heading synware-manifest.md#permissions",
++ ]
+
+ ❯ tests/runtime/framework-doc-links.test.ts:85:20
+     83|       }
+     84|     }
+     85|     expect(errors).toEqual([]);
+       |                    ^
+     86|   });
+     87|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/42]⎯
+
+ FAIL  tests/runtime/framework-doc-links.test.ts > framework documentation > links every guide from the framework index
+AssertionError: expected [ …(2) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "docs\\framework\\installed-applications.md",
++   "docs\\framework\\privacy.md",
++ ]
+
+ ❯ tests/runtime/framework-doc-links.test.ts:104:22
+    102|       .filter((file) => !linked.has(file))
+    103|       .map((file) => relative(repositoryRoot, file));
+    104|     expect(unlinked).toEqual([]);
+       |                      ^
+    105|   });
+    106|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/42]⎯
+
+ FAIL  tests/runtime/host-update-readiness.test.ts > host readiness owner integration > wires the actual mounted share boundary to the runtime-owned underlying promise
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ tests/runtime/host-update-readiness.test.ts:147:75
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/42]⎯
+
+ FAIL  tests/runtime/host-update-readiness.test.ts > host readiness owner integration > creates runtime-specific picker instrumentation for a shared environment and retains late native work
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ tests/runtime/host-update-readiness.test.ts:159:92
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/42]⎯
+
+ FAIL  tests/runtime/host-update-readiness.test.ts > retains real mounted file-write work across mount retirement without charging a sibling runtime
+AssertionError: expected 'denied' to be 'accepted' // Object.is equality
+
+Expected: "accepted"
+Received: "denied"
+
+ ❯ tests/runtime/host-update-readiness.test.ts:317:25
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/42]⎯
+
+ FAIL  tests/runtime/preference-panes.test.tsx > System Preferences panes > lists the built-ins in their default order, without Account when sign-in is not offered
+AssertionError: expected [ 'Appearance', …(8) ] to deeply equal [ 'Appearance', …(6) ]
+
+- Expected
++ Received
+
+  [
+    "Appearance",
+    "Audio & Haptics",
+    "Motion",
+    "Notifications",
++   "Privacy & Security",
+    "Language",
+    "Updates",
+    "Storage",
++   "Capabilities",
+  ]
+
+ ❯ tests/runtime/preference-panes.test.tsx:67:41
+     65|   it("lists the built-ins in their default order, without Account when…
+     66|     renderPreferences();
+     67|     expect(listedTitles(builtInTitles)).toEqual(builtInTitles);
+       |                                         ^
+     68|     expect(screen.queryByText("Account")).toBeNull();
+     69|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/42]⎯
+
+ FAIL  tests/runtime/preference-panes.test.tsx > System Preferences panes > lists Account first when the host offers sign-in
+AssertionError: expected [ 'Account', 'Appearance', …(8) ] to deeply equal [ 'Account', 'Appearance', …(6) ]
+
+- Expected
++ Received
+
+@@ -2,9 +2,11 @@
+    "Account",
+    "Appearance",
+    "Audio & Haptics",
+    "Motion",
+    "Notifications",
++   "Privacy & Security",
+    "Language",
+    "Updates",
+    "Storage",
++   "Capabilities",
+  ]
+
+ ❯ tests/runtime/preference-panes.test.tsx:73:57
+     71|   it("lists Account first when the host offers sign-in", () => {
+     72|     renderPreferences({ account: { signedIn: false, name: null, onSign…
+     73|     expect(listedTitles(["Account", ...builtInTitles])).toEqual(["Acco…
+       |                                                         ^
+     74|     expect(screen.getByText("Not Signed In")).toBeTruthy();
+     75|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/42]⎯
+
+ FAIL  tests/runtime/preference-panes.test.tsx > System Preferences panes > hides built-ins by id
+AssertionError: expected [ 'Appearance', 'Notifications', …(5) ] to deeply equal [ 'Appearance', 'Notifications', …(3) ]
+
+- Expected
++ Received
+
+  [
+    "Appearance",
+    "Notifications",
++   "Privacy & Security",
+    "Language",
+    "Updates",
+    "Storage",
++   "Capabilities",
+  ]
+
+ ❯ tests/runtime/preference-panes.test.tsx:94:41
+     92|   it("hides built-ins by id", () => {
+     93|     renderPreferences({ preferences: { hide: ["sounds", "motion"] } });
+     94|     expect(listedTitles(builtInTitles)).toEqual(["Appearance", "Notifi…
+       |                                         ^
+     95|   });
+     96|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/42]⎯
+
+ FAIL  tests/runtime/preference-panes.test.tsx > System Preferences panes > adds developer panes and orders every pane by order
+AssertionError: expected [ 'First', 'Appearance', …(10) ] to deeply equal [ 'First', 'Appearance', …(8) ]
+
+- Expected
++ Received
+
+@@ -3,10 +3,12 @@
+    "Appearance",
+    "Audio & Haptics",
+    "Between",
+    "Motion",
+    "Notifications",
++   "Privacy & Security",
+    "Language",
+    "Billing",
+    "Updates",
+    "Storage",
++   "Capabilities",
+  ]
+
+ ❯ tests/runtime/preference-panes.test.tsx:106:8
+    104|     renderPreferences({ preferences: { panes: [pane("billing", "Billin…
+    105|     expect(listedTitles(titles))
+    106|       .toEqual(["First", "Appearance", "Audio & Haptics", "Between", "…
+       |        ^
+    107|   });
+    108|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/42]⎯
+
+ FAIL  tests/runtime/preference-panes.test.tsx > System Preferences panes > replaces a built-in with a developer pane of the same id, in the list and when opened
+AssertionError: expected [ 'Appearance', 'My Sounds', …(7) ] to deeply equal [ 'Appearance', 'My Sounds', …(5) ]
+
+- Expected
++ Received
+
+  [
+    "Appearance",
+    "My Sounds",
+    "Motion",
+    "Notifications",
++   "Privacy & Security",
+    "Language",
+    "Updates",
+    "Storage",
++   "Capabilities",
+  ]
+
+ ❯ tests/runtime/preference-panes.test.tsx:111:59
+    109|   it("replaces a built-in with a developer pane of the same id, in the…
+    110|     const { runtime } = renderPreferences({ preferences: { panes: [pan…
+    111|     expect(listedTitles([...builtInTitles, "My Sounds"])).toEqual(["Ap…
+       |                                                           ^
+    112|     act(() => { runtime.systemUI.preferences.open("sounds"); });
+    113|     expect(screen.getByText("custom sounds pane")).toBeTruthy();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/42]⎯
+
+ FAIL  tests/runtime/runtime.test.ts > runtime controller, inspector, and transaction contracts > keeps replacement managers runtime-owned and uninstalls their host resources on disposal
+AssertionError: promise rejected "Error: SynCloudOS.PluginRegistry.register…" instead of resolving
+ ❯ tests/runtime/runtime.test.ts:324:51
+    322|       expect(watchdog.install()).toMatchObject({ installed: true });
+    323|       const plugin = { id: "runtime-contract-plugin", name: "Runtime C…
+    324|       await expect(PluginRegistry.register(plugin)).resolves.toMatchOb…
+       |                                                   ^
+    325|         status: "enabled",
+    326|         plugin,
+
+Caused by: Error: SynCloudOS.PluginRegistry.register denied for runtime-contract-plugin: This action requires additional capabilities: plugin.register. The role "public" does not hold it; the host grants role capabilities in its policy profile (configurationProfile.roles).
+ ❯ Object.register src/SynCloudOS/PluginRegistry/PluginRegistry.ts:68:13
+ ❯ tests/runtime/runtime.test.ts:324:35
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/42]⎯
+
+ FAIL  tests/runtime/synapp-sdk-package.test.ts > portable SynWare SDK packages > compiles, bundles and mounts a genuinely external consumer against packed public exports
+Error: Command failed: C:\Program Files\nodejs\node.exe shared-identity.mjs
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
++ actual - expected
+
+  [
+    'BrowserImageProcessingWorker',
+    'BrowserWebGPUImageProcessingBackend',
+    'InMemoryDocumentAdapter',
+    'IndexedDBDocumentRecoveryStore',
++   'SCAuthorization',
++   'SCAuthorizationRights',
+    'createBrowserAcceleratedImageProcessingPipeline',
+    'createBrowserImageProcessingPipeline',
+    'createBrowserImageProcessingWorkerBackend',
+    'createBrowserWebGPUImageProcessingBackend',
+    'createDocumentAssetSaveCoordinator',
+
+    at file:///C:/Users/Kavish%20Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/.artifacts/synware-external-ol7mjJ/shared-identity.mjs:77:8
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: [
+    'BrowserImageProcessingWorker',
+    'BrowserWebGPUImageProcessingBackend',
+    'InMemoryDocumentAdapter',
+    'IndexedDBDocumentRecoveryStore',
+    'SCAuthorization',
+    'SCAuthorizationRights',
+    'createBrowserAcceleratedImageProcessingPipeline',
+    'createBrowserImageProcessingPipeline',
+    'createBrowserImageProcessingWorkerBackend',
+    'createBrowserWebGPUImageProcessingBackend',
+    'createDocumentAssetSaveCoordinator',
+    'createDocumentAssetStorageAdapter',
+    'createInMemoryDocumentAssetStore',
+    'createIndexedDBDocumentAssetStore',
+    'createRegisteredFontResourceLoader',
+    'createSynCloudOSHostContribution',
+    'fontResourceMimeTypeForPath',
+    'mountSynCloudOS',
+    'trustSynWareBundleForCanonicalHost'
+  ],
+  expected: [
+    'BrowserImageProcessingWorker',
+    'BrowserWebGPUImageProcessingBackend',
+    'InMemoryDocumentAdapter',
+    'IndexedDBDocumentRecoveryStore',
+    'createBrowserAcceleratedImageProcessingPipeline',
+    'createBrowserImageProcessingPipeline',
+    'createBrowserImageProcessingWorkerBackend',
+    'createBrowserWebGPUImageProcessingBackend',
+    'createDocumentAssetSaveCoordinator',
+    'createDocumentAssetStorageAdapter',
+    'createInMemoryDocumentAssetStore',
+    'createIndexedDBDocumentAssetStore',
+    'createRegisteredFontResourceLoader',
+    'createSynCloudOSHostContribution',
+    'fontResourceMimeTypeForPath',
+    'mountSynCloudOS',
+    'trustSynWareBundleForCanonicalHost'
+  ],
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.22.1
+
+ ❯ ../../../../../Kavish%20Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/.artifacts/synware-external-ol7mjJ/shared-identity.mjs:77:8
+ ❯ tests/runtime/synapp-sdk-package.test.ts:416:5
+    414| }
+    415| `, "utf8");
+    416|     execFileSync(process.execPath, ["shared-identity.mjs"], { cwd: fix…
+       |     ^
+    417|     writeFileSync(join(fixture, "tsconfig.json"), `${JSON.stringify({
+    418|       compilerOptions: {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/42]⎯
+
+ FAIL  tests/runtime/synapp-sdk-testing.test.tsx > gates mounted public SDK operations through real deterministic adapters
+AssertionError: expected 'clipboard:SecurityError' to be 'clipboard:ok' // Object.is equality
+
+Expected: "clipboard:ok"
+Received: "clipboard:SecurityError"
+
+ ❯ tests/runtime/synapp-sdk-testing.test.tsx:231:48
+    229|   view.getByRole("button", { name: "Copy" }).click();
+    230|   await flushControlResult();
+    231|   expect(view.getByRole("status").textContent).toBe("clipboard:ok");
+       |                                                ^
+    232|   expect(host.adapters.clipboard.values()).toEqual([{ type: "text/plai…
+    233|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/42]⎯
+
+ FAIL  tests/runtime/chronosphere/chronosphere-packed-consumer.test.ts > preserves typed neutral versions and prepared custom views in an installed SDK
+Error: ENOSPC: no space left on device, copyfile 'C:\Users\Kavish Krishnakumar\AppData\Local\Temp\syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451\.artifacts\synapp-sdk\archives\syndromatic-syncloudos-1.0.0-beta.2-3a916a2abf8b56f610e9bd4360a3aafbf5ee881b272f673515828adb92a35c77.tgz' -> 'C:\Users\Kavish Krishnakumar\AppData\Local\Temp\chronosphere-versions-lGNjBT\syndromatic-syncloudos-1.0.0-beta.2-3a916a2abf8b56f610e9bd4360a3aafbf5ee881b272f673515828adb92a35c77.tgz'
+ ❯ copyVerifiedSdkArchive scripts/synware/installed-consumer.mjs:102:15
+    100|   const archive = join(destination, basename(verified.archive));
+    101|   assert(resolve(archive) !== resolve(verified.archive), "Copy destina…
+    102|   copyFileSync(verified.archive, archive);
+       |               ^
+    103|   // Verify the actual private copy as well: a concurrent replacement …
+    104|   assertArchiveBytes(readFileSync(archive), verified.manifest);
+ ❯ createInstalledConsumer scripts/synware/installed-consumer.mjs:124:18
+ ❯ tests/runtime/chronosphere/chronosphere-packed-consumer.test.ts:28:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/42]⎯
+
+ FAIL  tests/runtime/fx/mounted-recording.test.ts > keeps unavailable sessions truthful, isolated and revoked
+Error: Audio capture is unavailable.
+ ❯ BrowserAudioSession.assertActive src/SynCloudOS/PlatformAdapters/BrowserAudioCaptureAdapter.ts:153:134
+
+ ❯ BrowserAudioSession.subscribe src/SynCloudOS/PlatformAdapters/BrowserAudioCaptureAdapter.ts:155:42
+ ❯ AUFXAudioSession.subscribe src/FX/AudioFX/AUFXAudioSession.ts:118:55
+ ❯ createAudioSessionFacade src/SynCloudOS/AppSDK/audioSessionFacade.ts:95:38
+ ❯ src/SynCloudOS/AppSDK/mountedAudioSessions.ts:49:24
+ ❯ Object.acquire src/SynCloudOS/HostServices/mountedResourceScope.ts:147:23
+ ❯ Object.createSession src/SynCloudOS/AppSDK/mountedAudioSessions.ts:46:20
+ ❯ tests/runtime/fx/mounted-recording.test.ts:41:84
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/42]⎯
+
+ FAIL  tests/runtime/fx/mounted-recording.test.ts > passes only the mount-issued opaque input capability to its capture host
+Error: Audio capture is unavailable.
+ ❯ BrowserAudioSession.assertActive src/SynCloudOS/PlatformAdapters/BrowserAudioCaptureAdapter.ts:153:134
+
+ ❯ BrowserAudioSession.subscribe src/SynCloudOS/PlatformAdapters/BrowserAudioCaptureAdapter.ts:155:42
+ ❯ AUFXAudioSession.subscribe src/FX/AudioFX/AUFXAudioSession.ts:118:55
+ ❯ createAudioSessionFacade src/SynCloudOS/AppSDK/audioSessionFacade.ts:95:38
+ ❯ src/SynCloudOS/AppSDK/mountedAudioSessions.ts:49:24
+ ❯ Object.acquire src/SynCloudOS/HostServices/mountedResourceScope.ts:147:23
+ ❯ Object.createSession src/SynCloudOS/AppSDK/mountedAudioSessions.ts:46:20
+ ❯ tests/runtime/fx/mounted-recording.test.ts:55:131
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/42]⎯
+
+ FAIL  tests/runtime/fx/phase5-real-authority.test.ts > uses real lifecycle policy and captured entitlements for retained device clients
+AssertionError: expected DOMException{ stack: 'AbortError: Mo…' } to match object { name: 'SecurityError' }
+
+- Expected
++ Received
+
+- {
+-   "name": "SecurityError",
++ AbortError {
++   "message": "Mounted resource was released.",
+  }
+
+ ❯ tests/runtime/fx/phase5-real-authority.test.ts:41:39
+     39|     runtime.configurationProfiles.registerPolicy("phase5-deny", (reque…
+     40|       ? { ...decision, allowed: false, decision: "deny", reason: "Test…
+     41|     await expect(store.requestAccess()).rejects.toMatchObject({ name: …
+       |                                       ^
+     42|     expect(select).toHaveBeenCalledOnce();
+     43|   } finally { store.dispose(); mounted.dispose(); await runtime.dispos…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/42]⎯
+
+
+ Test Files  30 failed | 896 passed (926)
+      Tests  23 failed | 7348 passed (7371)
+   Start at  21:32:05
+   Duration  1967.03s (transform 49.68s, setup 7.72s, import 739.98s, tests 752.00s, environment 329.64s)
+
+JSON report written to C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/docs/superpowers/evidence/2026-11-07-foundation/fx-phase4-framework-full.json

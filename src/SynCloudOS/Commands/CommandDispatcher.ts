@@ -33,6 +33,8 @@ import type {
 } from "./commandTypes";
 import { CommandUnknownOutcomeError, isCommandOperationResult } from "./commandTypes";
 import { CommandRegistry } from "./CommandRegistry";
+import { trackOwnedWork } from "../Operations/OwnedWorkObservations";
+import { markHiddenCommandAcceptance } from "./acceptancePresentation";
 import type { ResponderResolution } from "../Responders/responderTypes";
 
 function isPromiseLike(value: unknown): value is PromiseLike<unknown> {
@@ -139,18 +141,19 @@ export class CommandDispatcher {
       scopeId: resolved.responder.scopeId,
       payload: parsed.value,
     };
-    const finish = (validation: { enabled: boolean; denied?: boolean; disabledReason?: string }) => {
+    const finish = (validation: { enabled: boolean; denied?: boolean; hidden?: boolean; disabledReason?: string }) => {
       if (options.signal?.aborted
         || !this.isResolutionLive(id, resolved, options.responderId, responderGeneration)) {
         return { status: "cancelled", reason: "Command validation became stale." } as const;
       }
-      if (validation.denied || !validation.enabled) {
+      if (validation.denied || !validation.enabled || (validation.hidden && (options.source === "menu" || options.source === "toolbar"))) {
         return {
           status: validation.denied ? "denied" : "disabled",
           reason: validation.disabledReason ?? (validation.denied ? "This command is not permitted." : "This command is not currently available."),
         } as const;
       }
       const acceptance = { commandId: id, responderId: resolved.responder.id } as CommandDispatchAcceptance;
+      if (validation.hidden) markHiddenCommandAcceptance(acceptance);
       this.acceptances.set(acceptance, {
         id,
         payload,
@@ -164,7 +167,7 @@ export class CommandDispatcher {
     };
     const validation = resolved.declaration.validate?.(context) ?? { enabled: true };
     return validation instanceof Promise || (validation && typeof (validation as unknown as { then?: unknown }).then === "function")
-      ? Promise.resolve(validation).then(finish)
+      ? trackOwnedWork(this, () => Promise.resolve(validation)).then(finish)
       : finish(validation);
   }
 

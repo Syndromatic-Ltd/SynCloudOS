@@ -28,7 +28,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   NSEFontManager,
   NSEFontPanel,
-  NSERuler,
+  NSERulerView,
   normaliseFontDescriptor,
   normaliseParagraphStyle,
   type NSEFontPanelCommandPort,
@@ -125,11 +125,11 @@ describe("NSE typography values and manager", () => {
   });
 });
 
-describe("NSERuler", () => {
+describe("NSERulerView", () => {
   it("provides keyboard-operable logical indents and tab-stop mutation", () => {
     function Fixture() {
       const [style, setStyle] = useState<NSEParagraphStyle>(() => normaliseParagraphStyle({ alignment: "start", firstLineIndent: 0, headIndent: 0, tailIndent: 0, lineHeight: "normal" }));
-      return <NSERuler value={style} maximum={120} step={4} onChange={setStyle} />;
+      return <NSERulerView value={style} maximum={120} step={4} onChange={setStyle} />;
     }
     render(<Fixture />);
 
@@ -144,7 +144,7 @@ describe("NSERuler", () => {
   it("maps head and tail keyboard movement from logical edges in RTL", () => {
     function Fixture() {
       const [style, setStyle] = useState<NSEParagraphStyle>(() => normaliseParagraphStyle({ alignment: "start", headIndent: 8, tailIndent: 8 }));
-      return <NSERuler value={style} direction="rtl" maximum={120} step={4} onChange={setStyle} />;
+      return <NSERulerView value={style} direction="rtl" maximum={120} step={4} onChange={setStyle} />;
     }
     render(<Fixture />);
 
@@ -157,7 +157,7 @@ describe("NSERuler", () => {
 
   it("disables every mutation path when paragraph formatting is read only", () => {
     const onChange = vi.fn();
-    render(<NSERuler value={normaliseParagraphStyle({ alignment: "start" })} onChange={onChange} readOnly />);
+    render(<NSERulerView value={normaliseParagraphStyle({ alignment: "start" })} onChange={onChange} readOnly />);
     expect((screen.getByRole("slider", { name: "First line indent" }) as HTMLInputElement).disabled).toBe(true);
     fireEvent.keyDown(screen.getByRole("slider", { name: "First line indent" }), { key: "ArrowRight" });
     expect(onChange).not.toHaveBeenCalled();

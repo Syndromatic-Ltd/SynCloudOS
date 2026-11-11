@@ -31,28 +31,26 @@ export interface WebspringDragReorderRect {
 }
 
 export interface WebspringDragReorderCandidate {
-  appId: string;
+  itemId: string;
   index: number;
   rect: WebspringDragReorderRect;
 }
 
 export interface WebspringDragReorderTarget {
-  appId: string;
+  itemId: string;
   targetIndex: number;
 }
 
-export function getWebspringDragReorderTarget(
+/** The candidate whose centre is nearest the point, measured in units of its own size. The dragged entry counts. */
+export function getWebspringDragNearestCandidate(
   candidates: readonly WebspringDragReorderCandidate[],
-  point: WebspringDragReorderPoint,
-  draggingAppId: string | null | undefined
-): WebspringDragReorderTarget | null {
-  if (!draggingAppId) return null;
-
+  point: WebspringDragReorderPoint
+): WebspringDragReorderCandidate | null {
   let nearest: WebspringDragReorderCandidate | null = null;
   let nearestDistance = Number.POSITIVE_INFINITY;
 
   for (const candidate of candidates) {
-    if (!candidate.appId || !Number.isFinite(candidate.index)) continue;
+    if (!candidate.itemId || !Number.isFinite(candidate.index)) continue;
     if (candidate.rect.width <= 0 || candidate.rect.height <= 0) continue;
 
     const centerX = candidate.rect.left + candidate.rect.width / 2;
@@ -67,10 +65,21 @@ export function getWebspringDragReorderTarget(
     }
   }
 
-  if (!nearest || nearest.appId === draggingAppId) return null;
+  return nearest;
+}
+
+export function getWebspringDragReorderTarget(
+  candidates: readonly WebspringDragReorderCandidate[],
+  point: WebspringDragReorderPoint,
+  draggingItemId: string | null | undefined
+): WebspringDragReorderTarget | null {
+  if (!draggingItemId) return null;
+
+  const nearest = getWebspringDragNearestCandidate(candidates, point);
+  if (!nearest || nearest.itemId === draggingItemId) return null;
 
   return {
-    appId: nearest.appId,
+    itemId: nearest.itemId,
     targetIndex: nearest.index
   };
 }
@@ -85,10 +94,23 @@ export function captureWebspringDragReorderSlots(selector: string, root: ParentN
   ] as const));
 }
 
+/** Each entry's artwork alone (its icon well or tile, without the label), indexed
+ *  by slot: the zone a dragged app's centre rests on to reorder or merge. */
+export function captureWebspringDragArtworkRects(
+  selector: string,
+  artworkSelector: string,
+  root: ParentNode
+): WebspringDragReorderSlots {
+  return new Map(Array.from(root.querySelectorAll<HTMLElement>(selector), (element) => {
+    const artwork = element.querySelector<HTMLElement>(artworkSelector) ?? element;
+    return [Number(element.dataset.orderIndex), artwork.getBoundingClientRect()] as const;
+  }));
+}
+
 export function getWebspringDragReorderTargetFromPoint(
   selector: string,
   point: WebspringDragReorderPoint,
-  draggingAppId: string | null | undefined,
+  draggingItemId: string | null | undefined,
   root?: ParentNode,
   slots?: WebspringDragReorderSlots,
 ) {
@@ -98,7 +120,7 @@ export function getWebspringDragReorderTargetFromPoint(
   const candidates = Array.from(searchRoot.querySelectorAll<HTMLElement>(selector)).map((element) => {
     const rect = slots?.get(Number(element.dataset.orderIndex)) ?? element.getBoundingClientRect();
     return {
-      appId: element.dataset.webspringAppId ?? "",
+      itemId: element.dataset.webspringItemId ?? "",
       index: Number(element.dataset.orderIndex),
       rect: {
         left: rect.left,
@@ -109,5 +131,5 @@ export function getWebspringDragReorderTargetFromPoint(
     };
   });
 
-  return getWebspringDragReorderTarget(candidates, point, draggingAppId);
+  return getWebspringDragReorderTarget(candidates, point, draggingItemId);
 }

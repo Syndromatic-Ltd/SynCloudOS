@@ -114,7 +114,7 @@ export function NSEColourCrayonsModeIcon() {
 
 export function NSEColourMagnifierIcon() {
   const glass = useGradientId("magnifier-glass");
-  return <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden focusable={false}>
+  return <svg data-nse-part="image" viewBox="0 0 20 20" width="18" height="18" aria-hidden focusable={false}>
     <defs>
       <radialGradient id={glass} cx="7.4" cy="6.2" r="7" gradientUnits="userSpaceOnUse"><stop offset="0" stopColor="#fff" /><stop offset="1" stopColor="#c9d3de" /></radialGradient>
     </defs>

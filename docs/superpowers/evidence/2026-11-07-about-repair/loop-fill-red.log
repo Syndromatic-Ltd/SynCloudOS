@@ -1,0 +1,43 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/animation-loops.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/animation-loops.test.ts (3 tests | 2 failed) 32ms
+   × runs an endless native layer effect, suspends and resumes with visibility, and settles on reduced motion 26ms
+   × keeps frame-sampled endless presentation time frozen while suspended 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/animation-loops.test.ts > runs an endless native layer effect, suspends and resumes with visibility, and settles on reduced motion
+AssertionError: expected undefined to match object { iterations: Infinity, …(3) }
+
+- Expected:
+{
+  "delay": 200,
+  "duration": 2000,
+  "fill": "both",
+  "iterations": Infinity,
+}
+
++ Received:
+undefined
+
+ ❯ tests/runtime/fx/animation-loops.test.ts:27:38
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/runtime/fx/animation-loops.test.ts > keeps frame-sampled endless presentation time frozen while suspended
+AssertionError: expected 0.15 to be close to 0.25, received difference is 0.1, but expected 0.005
+ ❯ tests/runtime/fx/animation-loops.test.ts:53:48
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed (3)
+   Start at  08:48:35
+   Duration  2.57s (transform 770ms, setup 34ms, import 946ms, tests 32ms, environment 1.28s)
+

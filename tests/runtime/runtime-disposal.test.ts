@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createTestRuntime, createTestRuntimeEnvironment } from "./helpers";
 
 const pendingDisposals: Array<{ dispose: () => Promise<unknown> }> = [];
@@ -30,11 +30,17 @@ afterEach(async () => {
 describe("runtime disposal", () => {
   it("rolls back a cancelled preparation and resumes the unchanged runtime", async () => {
     const environment = createTestRuntimeEnvironment();
+    const layoutListeners = new Set<Parameters<typeof environment.layoutViewport.subscribe>[0]>();
+    vi.spyOn(environment.layoutViewport, "subscribe").mockImplementation(listener => {
+      layoutListeners.add(listener);
+      return () => { layoutListeners.delete(listener); };
+    });
     const runtime = createTestRuntime({ id: "runtime:dispose-cancel", environment });
     pendingDisposals.push({ dispose: () => runtime.dispose({ reason: "cleanup", inFlight: "cancel", timeoutMs: 100 }) });
     await runtime.boot({ initialPathname: "/" });
     const installedListeners = environment.activeListenerCount();
-    expect(installedListeners).toBeGreaterThan(0);
+    const installedLayoutListeners = layoutListeners.size;
+    expect(installedLayoutListeners).toBeGreaterThan(0);
     const runtimeSignal = runtime.signal;
     const trace: string[] = [];
     const firstRegistration = runtime.registerDisposalParticipant({
@@ -61,6 +67,7 @@ describe("runtime disposal", () => {
     expect(runtimeSignal.aborted).toBe(false);
     expect(runtime.disposalState).toBe("running");
     expect(environment.activeListenerCount()).toBe(installedListeners);
+    expect(layoutListeners.size).toBe(installedLayoutListeners);
     expect(trace).toEqual(["rollback"]);
     expect(firstRegistration.unregister()).toBe(true);
     expect(firstRegistration.unregister()).toBe(false);

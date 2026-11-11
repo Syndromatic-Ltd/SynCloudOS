@@ -1,0 +1,2 @@
+# Console transcripts retain diagnostic diff whitespace and final blank lines.
+logs/** -whitespace

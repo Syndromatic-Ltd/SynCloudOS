@@ -1,0 +1,1613 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run playwright test tests/e2e/theme-baseline.spec.ts --project=chromium --project=chromium-high-dpr --workers=2
+[WebServer] (node:90348) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 82 tests using 2 workers
+
+(node:85776) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:86640) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   2 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 (24.8s)
+  x   1 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2 (25.0s)
+(node:83660) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:3004) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   3 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3 (1.8s)
+  x   4 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 4 (1.8s)
+(node:61408) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:71704) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   5 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 5 (1.7s)
+  x   6 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 6 (1.6s)
+(node:89880) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:87508) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  8 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 8 (1.2s)
+  ok  7 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 7 (1.7s)
+  ok  9 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 9 (1.1s)
+  ok 10 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 10 (1.1s)
+  ok 11 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 11 (1.1s)
+  ok 12 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 12 (1.1s)
+  ok 13 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 13 (1.1s)
+  ok 14 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 14 (1.1s)
+  ok 15 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 15 (1.1s)
+  ok 16 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 16 (1.1s)
+  ok 17 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 17 (1.1s)
+  ok 18 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 18 (1.1s)
+  ok 19 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 19 (1.1s)
+  ok 20 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 20 (1.1s)
+  x  21 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (1.5s)
+(node:92196) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  22 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 2 (1.6s)
+(node:43872) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  23 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 3 (1.8s)
+(node:18132) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  24 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 4 (1.7s)
+(node:75504) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  25 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 5 (1.7s)
+(node:81252) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  26 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 6 (1.6s)
+(node:58624) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 27 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 7 (1.8s)
+  ok 28 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 8 (1.3s)
+  ok 29 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 9 (1.1s)
+  ok 30 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 10 (1.1s)
+  ok 31 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 11 (1.2s)
+  ok 32 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 12 (1.2s)
+  ok 33 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 13 (1.2s)
+  ok 34 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 14 (1.2s)
+  ok 35 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 15 (1.2s)
+  ok 36 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 16 (1.2s)
+  ok 37 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 17 (1.2s)
+  ok 38 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 18 (1.2s)
+  ok 39 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 19 (1.2s)
+  ok 40 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 20 (1.2s)
+(node:33244) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 41 [chromium] › tests\e2e\theme-baseline.spec.ts:97:1 › stepper hit targets preserve the painted bezel (1.2s)
+(node:18216) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  42 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 (1.7s)
+(node:90968) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  43 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2 (1.9s)
+(node:42652) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  44 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3 (2.0s)
+(node:73964) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  45 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 4 (2.0s)
+(node:83096) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  46 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 5 (1.7s)
+(node:90728) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  47 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 6 (1.7s)
+(node:67936) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 48 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 7 (1.8s)
+  ok 49 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 8 (1.3s)
+  ok 50 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 9 (1.1s)
+  ok 51 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 10 (1.1s)
+  ok 52 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 11 (1.1s)
+  ok 53 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 12 (1.1s)
+  ok 54 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 13 (1.1s)
+  ok 55 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 14 (1.1s)
+  ok 56 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 15 (1.1s)
+  ok 57 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 16 (1.1s)
+  ok 58 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 17 (1.1s)
+  ok 59 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 18 (1.1s)
+  ok 60 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 19 (1.1s)
+  ok 61 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 20 (1.1s)
+  x  62 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (1.5s)
+(node:58276) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  63 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 2 (1.6s)
+(node:92668) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  64 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 3 (1.8s)
+(node:85084) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  65 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 4 (1.8s)
+(node:28716) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  66 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 5 (1.7s)
+(node:84608) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  67 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 6 (1.6s)
+(node:23880) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 68 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 7 (1.7s)
+  ok 69 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 8 (1.2s)
+  ok 70 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 9 (1.1s)
+  ok 71 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 10 (1.1s)
+  ok 72 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 11 (1.1s)
+  ok 73 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 12 (1.2s)
+  ok 74 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 13 (1.1s)
+  ok 75 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 14 (1.1s)
+  ok 76 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 15 (1.1s)
+  ok 77 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 16 (1.1s)
+  ok 78 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 17 (1.1s)
+  ok 79 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 18 (1.1s)
+  ok 80 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 19 (1.1s)
+  ok 81 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 20 (1.2s)
+  ok 82 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:97:1 › stepper hit targets preserve the painted bezel (1.1s)
+
+
+  1) [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 › button-rounded-regular-momentaryPushIn-normal
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('#theme-baseline-surface')
+      1343 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: light-button-rounded-regular-momentaryPushIn-normal.png
+
+    Call log:
+      - Expect "toHaveScreenshot(light-button-rounded-regular-momentaryPushIn-normal.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('#theme-baseline-surface')
+        - locator resolved to <main id="theme-baseline-surface" data-baseline-surface="button-rounded-regular-momentaryPushIn-normal">…</main>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 1343 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('#theme-baseline-surface')
+        - locator resolved to <main id="theme-baseline-surface" data-baseline-surface="button-rounded-regular-momentaryPushIn-normal">…</main>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 1343 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      87 |       }
+      88 |       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
+    > 89 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      90 |       if (surface.interaction === "press") await page.mouse.up();
+      91 |       expect(errors).toEqual([]);
+      92 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:89:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: light-button-rounded-regular-momentaryPushIn-normal (image/png) ─────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\light-button-rounded-regular-momentaryPushIn-normal-chromium-win32.png
+    Received: test-results\chromium\theme-baseline-light-catalogue-partition-1-chromium\light-button-rounded-regular-momentaryPushIn-normal-actual.png
+    Diff:     test-results\chromium\theme-baseline-light-catalogue-partition-1-chromium\light-button-rounded-regular-momentaryPushIn-normal-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\chromium\theme-baseline-light-catalogue-partition-1-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\chromium\theme-baseline-light-catalogue-partition-1-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\chromium\theme-baseline-light-catalogue-partition-1-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2 › login-window-normal
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('body')
+      1635 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: light-login-window-normal.png
+
+    Call log:
+      - Expect "toHaveScreenshot(light-login-window-normal.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 1635 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 1635 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      87 |       }
+      88 |       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
+    > 89 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      90 |       if (surface.interaction === "press") await page.mouse.up();
+      91 |       expect(errors).toEqual([]);
+      92 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:89:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: light-login-window-normal (image/png) ───────────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\light-login-window-normal-chromium-win32.png
+    Received: test-results\chromium\theme-baseline-light-catalogue-partition-2-chromium\light-login-window-normal-actual.png
+    Diff:     test-results\chromium\theme-baseline-light-catalogue-partition-2-chromium\light-login-window-normal-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\chromium\theme-baseline-light-catalogue-partition-2-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\chromium\theme-baseline-light-catalogue-partition-2-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\chromium\theme-baseline-light-catalogue-partition-2-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3 › login-window-error
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('body')
+      1635 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: light-login-window-error.png
+
+    Call log:
+      - Expect "toHaveScreenshot(light-login-window-error.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 1635 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 1635 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      87 |       }
+      88 |       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
+    > 89 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      90 |       if (surface.interaction === "press") await page.mouse.up();
+      91 |       expect(errors).toEqual([]);
+      92 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:89:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: light-login-window-error (image/png) ────────────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\light-login-window-error-chromium-win32.png
+    Received: test-results\chromium\theme-baseline-light-catalogue-partition-3-chromium\light-login-window-error-actual.png
+    Diff:     test-results\chromium\theme-baseline-light-catalogue-partition-3-chromium\light-login-window-error-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\chromium\theme-baseline-light-catalogue-partition-3-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\chromium\theme-baseline-light-catalogue-partition-3-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\chromium\theme-baseline-light-catalogue-partition-3-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 4 › login-window-loading
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('body')
+      600 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: light-login-window-loading.png
+
+    Call log:
+      - Expect "toHaveScreenshot(light-login-window-loading.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 600 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 600 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      87 |       }
+      88 |       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
+    > 89 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      90 |       if (surface.interaction === "press") await page.mouse.up();
+      91 |       expect(errors).toEqual([]);
+      92 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:89:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: light-login-window-loading (image/png) ──────────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\light-login-window-loading-chromium-win32.png
+    Received: test-results\chromium\theme-baseline-light-catalogue-partition-4-chromium\light-login-window-loading-actual.png
+    Diff:     test-results\chromium\theme-baseline-light-catalogue-partition-4-chromium\light-login-window-loading-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\chromium\theme-baseline-light-catalogue-partition-4-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\chromium\theme-baseline-light-catalogue-partition-4-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\chromium\theme-baseline-light-catalogue-partition-4-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 5 › settings ────
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('body')
+      966 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: light-settings.png
+
+    Call log:
+      - Expect "toHaveScreenshot(light-settings.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 966 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 966 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      87 |       }
+      88 |       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
+    > 89 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      90 |       if (surface.interaction === "press") await page.mouse.up();
+      91 |       expect(errors).toEqual([]);
+      92 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:89:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: light-settings (image/png) ──────────────────────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\light-settings-chromium-win32.png
+    Received: test-results\chromium\theme-baseline-light-catalogue-partition-5-chromium\light-settings-actual.png
+    Diff:     test-results\chromium\theme-baseline-light-catalogue-partition-5-chromium\light-settings-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\chromium\theme-baseline-light-catalogue-partition-5-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\chromium\theme-baseline-light-catalogue-partition-5-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\chromium\theme-baseline-light-catalogue-partition-5-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 6 › window-metal-key-automatic
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('#theme-baseline-surface')
+      5158 pixels (ratio 0.02 of all image pixels) are different.
+
+      Snapshot: light-window-metal-key-automatic.png
+
+    Call log:
+      - Expect "toHaveScreenshot(light-window-metal-key-automatic.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('#theme-baseline-surface')
+        - locator resolved to <main id="theme-baseline-surface" data-baseline-surface="window-metal-key-automatic">…</main>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 5158 pixels (ratio 0.02 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('#theme-baseline-surface')
+        - locator resolved to <main id="theme-baseline-surface" data-baseline-surface="window-metal-key-automatic">…</main>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 5158 pixels (ratio 0.02 of all image pixels) are different.
+
+
+      87 |       }
+      88 |       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
+    > 89 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      90 |       if (surface.interaction === "press") await page.mouse.up();
+      91 |       expect(errors).toEqual([]);
+      92 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:89:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: light-window-metal-key-automatic (image/png) ────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\light-window-metal-key-automatic-chromium-win32.png
+    Received: test-results\chromium\theme-baseline-light-catalogue-partition-6-chromium\light-window-metal-key-automatic-actual.png
+    Diff:     test-results\chromium\theme-baseline-light-catalogue-partition-6-chromium\light-window-metal-key-automatic-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\chromium\theme-baseline-light-catalogue-partition-6-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\chromium\theme-baseline-light-catalogue-partition-6-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\chromium\theme-baseline-light-catalogue-partition-6-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 › button-rounded-regular-momentaryPushIn-normal
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('#theme-baseline-surface')
+      1240 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: dark-button-rounded-regular-momentaryPushIn-normal.png
+
+    Call log:
+      - Expect "toHaveScreenshot(dark-button-rounded-regular-momentaryPushIn-normal.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('#theme-baseline-surface')
+        - locator resolved to <main id="theme-baseline-surface" data-baseline-surface="button-rounded-regular-momentaryPushIn-normal">…</main>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 1240 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('#theme-baseline-surface')
+        - locator resolved to <main id="theme-baseline-surface" data-baseline-surface="button-rounded-regular-momentaryPushIn-normal">…</main>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 1240 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      87 |       }
+      88 |       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
+    > 89 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      90 |       if (surface.interaction === "press") await page.mouse.up();
+      91 |       expect(errors).toEqual([]);
+      92 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:89:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: dark-button-rounded-regular-momentaryPushIn-normal (image/png) ──────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\dark-button-rounded-regular-momentaryPushIn-normal-chromium-win32.png
+    Received: test-results\chromium\theme-baseline-dark-catalogue-partition-1-chromium\dark-button-rounded-regular-momentaryPushIn-normal-actual.png
+    Diff:     test-results\chromium\theme-baseline-dark-catalogue-partition-1-chromium\dark-button-rounded-regular-momentaryPushIn-normal-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\chromium\theme-baseline-dark-catalogue-partition-1-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\chromium\theme-baseline-dark-catalogue-partition-1-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\chromium\theme-baseline-dark-catalogue-partition-1-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8) [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 2 › login-window-normal
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('body')
+      1635 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: dark-login-window-normal.png
+
+    Call log:
+      - Expect "toHaveScreenshot(dark-login-window-normal.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 1635 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 1635 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      87 |       }
+      88 |       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
+    > 89 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      90 |       if (surface.interaction === "press") await page.mouse.up();
+      91 |       expect(errors).toEqual([]);
+      92 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:89:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: dark-login-window-normal (image/png) ────────────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\dark-login-window-normal-chromium-win32.png
+    Received: test-results\chromium\theme-baseline-dark-catalogue-partition-2-chromium\dark-login-window-normal-actual.png
+    Diff:     test-results\chromium\theme-baseline-dark-catalogue-partition-2-chromium\dark-login-window-normal-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\chromium\theme-baseline-dark-catalogue-partition-2-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\chromium\theme-baseline-dark-catalogue-partition-2-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\chromium\theme-baseline-dark-catalogue-partition-2-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  9) [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 3 › login-window-error
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('body')
+      1635 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: dark-login-window-error.png
+
+    Call log:
+      - Expect "toHaveScreenshot(dark-login-window-error.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 1635 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 1635 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      87 |       }
+      88 |       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
+    > 89 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      90 |       if (surface.interaction === "press") await page.mouse.up();
+      91 |       expect(errors).toEqual([]);
+      92 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:89:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: dark-login-window-error (image/png) ─────────────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\dark-login-window-error-chromium-win32.png
+    Received: test-results\chromium\theme-baseline-dark-catalogue-partition-3-chromium\dark-login-window-error-actual.png
+    Diff:     test-results\chromium\theme-baseline-dark-catalogue-partition-3-chromium\dark-login-window-error-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\chromium\theme-baseline-dark-catalogue-partition-3-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\chromium\theme-baseline-dark-catalogue-partition-3-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\chromium\theme-baseline-dark-catalogue-partition-3-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  10) [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 4 › login-window-loading
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('body')
+      600 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: dark-login-window-loading.png
+
+    Call log:
+      - Expect "toHaveScreenshot(dark-login-window-loading.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 600 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 600 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      87 |       }
+      88 |       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
+    > 89 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      90 |       if (surface.interaction === "press") await page.mouse.up();
+      91 |       expect(errors).toEqual([]);
+      92 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:89:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: dark-login-window-loading (image/png) ───────────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\dark-login-window-loading-chromium-win32.png
+    Received: test-results\chromium\theme-baseline-dark-catalogue-partition-4-chromium\dark-login-window-loading-actual.png
+    Diff:     test-results\chromium\theme-baseline-dark-catalogue-partition-4-chromium\dark-login-window-loading-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\chromium\theme-baseline-dark-catalogue-partition-4-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\chromium\theme-baseline-dark-catalogue-partition-4-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\chromium\theme-baseline-dark-catalogue-partition-4-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  11) [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 5 › settings ────
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('body')
+      558 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: dark-settings.png
+
+    Call log:
+      - Expect "toHaveScreenshot(dark-settings.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 558 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 558 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      87 |       }
+      88 |       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
+    > 89 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      90 |       if (surface.interaction === "press") await page.mouse.up();
+      91 |       expect(errors).toEqual([]);
+      92 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:89:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: dark-settings (image/png) ───────────────────────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\dark-settings-chromium-win32.png
+    Received: test-results\chromium\theme-baseline-dark-catalogue-partition-5-chromium\dark-settings-actual.png
+    Diff:     test-results\chromium\theme-baseline-dark-catalogue-partition-5-chromium\dark-settings-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\chromium\theme-baseline-dark-catalogue-partition-5-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\chromium\theme-baseline-dark-catalogue-partition-5-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\chromium\theme-baseline-dark-catalogue-partition-5-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  12) [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 6 › window-metal-key-automatic
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('#theme-baseline-surface')
+      2720 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: dark-window-metal-key-automatic.png
+
+    Call log:
+      - Expect "toHaveScreenshot(dark-window-metal-key-automatic.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('#theme-baseline-surface')
+        - locator resolved to <main id="theme-baseline-surface" data-baseline-surface="window-metal-key-automatic">…</main>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 2720 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('#theme-baseline-surface')
+        - locator resolved to <main id="theme-baseline-surface" data-baseline-surface="window-metal-key-automatic">…</main>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 2720 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      87 |       }
+      88 |       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
+    > 89 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      90 |       if (surface.interaction === "press") await page.mouse.up();
+      91 |       expect(errors).toEqual([]);
+      92 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:89:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: dark-window-metal-key-automatic (image/png) ─────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\dark-window-metal-key-automatic-chromium-win32.png
+    Received: test-results\chromium\theme-baseline-dark-catalogue-partition-6-chromium\dark-window-metal-key-automatic-actual.png
+    Diff:     test-results\chromium\theme-baseline-dark-catalogue-partition-6-chromium\dark-window-metal-key-automatic-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\chromium\theme-baseline-dark-catalogue-partition-6-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\chromium\theme-baseline-dark-catalogue-partition-6-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\chromium\theme-baseline-dark-catalogue-partition-6-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  13) [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 › button-rounded-regular-momentaryPushIn-normal
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('#theme-baseline-surface')
+      1343 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: light-button-rounded-regular-momentaryPushIn-normal.png
+
+    Call log:
+      - Expect "toHaveScreenshot(light-button-rounded-regular-momentaryPushIn-normal.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('#theme-baseline-surface')
+        - locator resolved to <main id="theme-baseline-surface" data-baseline-surface="button-rounded-regular-momentaryPushIn-normal">…</main>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 1343 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('#theme-baseline-surface')
+        - locator resolved to <main id="theme-baseline-surface" data-baseline-surface="button-rounded-regular-momentaryPushIn-normal">…</main>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 1343 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      87 |       }
+      88 |       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
+    > 89 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      90 |       if (surface.interaction === "press") await page.mouse.up();
+      91 |       expect(errors).toEqual([]);
+      92 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:89:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: light-button-rounded-regular-momentaryPushIn-normal (image/png) ─────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\light-button-rounded-regular-momentaryPushIn-normal-chromium-high-dpr-win32.png
+    Received: test-results\theme-baseline-light-catalogue-partition-1-chromium-high-dpr\light-button-rounded-regular-momentaryPushIn-normal-actual.png
+    Diff:     test-results\theme-baseline-light-catalogue-partition-1-chromium-high-dpr\light-button-rounded-regular-momentaryPushIn-normal-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\theme-baseline-light-catalogue-partition-1-chromium-high-dpr\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\theme-baseline-light-catalogue-partition-1-chromium-high-dpr\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\theme-baseline-light-catalogue-partition-1-chromium-high-dpr\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  14) [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2 › login-window-normal
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('body')
+      1635 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: light-login-window-normal.png
+
+    Call log:
+      - Expect "toHaveScreenshot(light-login-window-normal.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 1635 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 1635 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      87 |       }
+      88 |       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
+    > 89 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      90 |       if (surface.interaction === "press") await page.mouse.up();
+      91 |       expect(errors).toEqual([]);
+      92 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:89:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: light-login-window-normal (image/png) ───────────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\light-login-window-normal-chromium-high-dpr-win32.png
+    Received: test-results\theme-baseline-light-catalogue-partition-2-chromium-high-dpr\light-login-window-normal-actual.png
+    Diff:     test-results\theme-baseline-light-catalogue-partition-2-chromium-high-dpr\light-login-window-normal-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\theme-baseline-light-catalogue-partition-2-chromium-high-dpr\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\theme-baseline-light-catalogue-partition-2-chromium-high-dpr\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\theme-baseline-light-catalogue-partition-2-chromium-high-dpr\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  15) [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3 › login-window-error
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('body')
+      1635 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: light-login-window-error.png
+
+    Call log:
+      - Expect "toHaveScreenshot(light-login-window-error.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 1635 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 1635 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      87 |       }
+      88 |       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
+    > 89 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      90 |       if (surface.interaction === "press") await page.mouse.up();
+      91 |       expect(errors).toEqual([]);
+      92 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:89:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: light-login-window-error (image/png) ────────────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\light-login-window-error-chromium-high-dpr-win32.png
+    Received: test-results\theme-baseline-light-catalogue-partition-3-chromium-high-dpr\light-login-window-error-actual.png
+    Diff:     test-results\theme-baseline-light-catalogue-partition-3-chromium-high-dpr\light-login-window-error-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\theme-baseline-light-catalogue-partition-3-chromium-high-dpr\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\theme-baseline-light-catalogue-partition-3-chromium-high-dpr\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\theme-baseline-light-catalogue-partition-3-chromium-high-dpr\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  16) [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 4 › login-window-loading
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('body')
+      600 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: light-login-window-loading.png
+
+    Call log:
+      - Expect "toHaveScreenshot(light-login-window-loading.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 600 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 600 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      87 |       }
+      88 |       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
+    > 89 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      90 |       if (surface.interaction === "press") await page.mouse.up();
+      91 |       expect(errors).toEqual([]);
+      92 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:89:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: light-login-window-loading (image/png) ──────────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\light-login-window-loading-chromium-high-dpr-win32.png
+    Received: test-results\theme-baseline-light-catalogue-partition-4-chromium-high-dpr\light-login-window-loading-actual.png
+    Diff:     test-results\theme-baseline-light-catalogue-partition-4-chromium-high-dpr\light-login-window-loading-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\theme-baseline-light-catalogue-partition-4-chromium-high-dpr\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\theme-baseline-light-catalogue-partition-4-chromium-high-dpr\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\theme-baseline-light-catalogue-partition-4-chromium-high-dpr\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  17) [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 5 › settings
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('body')
+      966 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: light-settings.png
+
+    Call log:
+      - Expect "toHaveScreenshot(light-settings.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 966 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 966 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      87 |       }
+      88 |       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
+    > 89 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      90 |       if (surface.interaction === "press") await page.mouse.up();
+      91 |       expect(errors).toEqual([]);
+      92 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:89:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: light-settings (image/png) ──────────────────────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\light-settings-chromium-high-dpr-win32.png
+    Received: test-results\theme-baseline-light-catalogue-partition-5-chromium-high-dpr\light-settings-actual.png
+    Diff:     test-results\theme-baseline-light-catalogue-partition-5-chromium-high-dpr\light-settings-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\theme-baseline-light-catalogue-partition-5-chromium-high-dpr\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\theme-baseline-light-catalogue-partition-5-chromium-high-dpr\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\theme-baseline-light-catalogue-partition-5-chromium-high-dpr\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  18) [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 6 › window-metal-key-automatic
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('#theme-baseline-surface')
+      5170 pixels (ratio 0.02 of all image pixels) are different.
+
+      Snapshot: light-window-metal-key-automatic.png
+
+    Call log:
+      - Expect "toHaveScreenshot(light-window-metal-key-automatic.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('#theme-baseline-surface')
+        - locator resolved to <main id="theme-baseline-surface" data-baseline-surface="window-metal-key-automatic">…</main>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 5170 pixels (ratio 0.02 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('#theme-baseline-surface')
+        - locator resolved to <main id="theme-baseline-surface" data-baseline-surface="window-metal-key-automatic">…</main>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 5170 pixels (ratio 0.02 of all image pixels) are different.
+
+
+      87 |       }
+      88 |       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
+    > 89 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      90 |       if (surface.interaction === "press") await page.mouse.up();
+      91 |       expect(errors).toEqual([]);
+      92 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:89:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: light-window-metal-key-automatic (image/png) ────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\light-window-metal-key-automatic-chromium-high-dpr-win32.png
+    Received: test-results\theme-baseline-light-catalogue-partition-6-chromium-high-dpr\light-window-metal-key-automatic-actual.png
+    Diff:     test-results\theme-baseline-light-catalogue-partition-6-chromium-high-dpr\light-window-metal-key-automatic-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\theme-baseline-light-catalogue-partition-6-chromium-high-dpr\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\theme-baseline-light-catalogue-partition-6-chromium-high-dpr\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\theme-baseline-light-catalogue-partition-6-chromium-high-dpr\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  19) [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 › button-rounded-regular-momentaryPushIn-normal
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('#theme-baseline-surface')
+      1240 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: dark-button-rounded-regular-momentaryPushIn-normal.png
+
+    Call log:
+      - Expect "toHaveScreenshot(dark-button-rounded-regular-momentaryPushIn-normal.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('#theme-baseline-surface')
+        - locator resolved to <main id="theme-baseline-surface" data-baseline-surface="button-rounded-regular-momentaryPushIn-normal">…</main>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 1240 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('#theme-baseline-surface')
+        - locator resolved to <main id="theme-baseline-surface" data-baseline-surface="button-rounded-regular-momentaryPushIn-normal">…</main>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 1240 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      87 |       }
+      88 |       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
+    > 89 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      90 |       if (surface.interaction === "press") await page.mouse.up();
+      91 |       expect(errors).toEqual([]);
+      92 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:89:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: dark-button-rounded-regular-momentaryPushIn-normal (image/png) ──────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\dark-button-rounded-regular-momentaryPushIn-normal-chromium-high-dpr-win32.png
+    Received: test-results\theme-baseline-dark-catalogue-partition-1-chromium-high-dpr\dark-button-rounded-regular-momentaryPushIn-normal-actual.png
+    Diff:     test-results\theme-baseline-dark-catalogue-partition-1-chromium-high-dpr\dark-button-rounded-regular-momentaryPushIn-normal-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\theme-baseline-dark-catalogue-partition-1-chromium-high-dpr\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\theme-baseline-dark-catalogue-partition-1-chromium-high-dpr\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\theme-baseline-dark-catalogue-partition-1-chromium-high-dpr\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  20) [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 2 › login-window-normal
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('body')
+      1635 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: dark-login-window-normal.png
+
+    Call log:
+      - Expect "toHaveScreenshot(dark-login-window-normal.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 1635 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 1635 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      87 |       }
+      88 |       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
+    > 89 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      90 |       if (surface.interaction === "press") await page.mouse.up();
+      91 |       expect(errors).toEqual([]);
+      92 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:89:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: dark-login-window-normal (image/png) ────────────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\dark-login-window-normal-chromium-high-dpr-win32.png
+    Received: test-results\theme-baseline-dark-catalogue-partition-2-chromium-high-dpr\dark-login-window-normal-actual.png
+    Diff:     test-results\theme-baseline-dark-catalogue-partition-2-chromium-high-dpr\dark-login-window-normal-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\theme-baseline-dark-catalogue-partition-2-chromium-high-dpr\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\theme-baseline-dark-catalogue-partition-2-chromium-high-dpr\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\theme-baseline-dark-catalogue-partition-2-chromium-high-dpr\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  21) [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 3 › login-window-error
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('body')
+      1635 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: dark-login-window-error.png
+
+    Call log:
+      - Expect "toHaveScreenshot(dark-login-window-error.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 1635 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 1635 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      87 |       }
+      88 |       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
+    > 89 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      90 |       if (surface.interaction === "press") await page.mouse.up();
+      91 |       expect(errors).toEqual([]);
+      92 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:89:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: dark-login-window-error (image/png) ─────────────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\dark-login-window-error-chromium-high-dpr-win32.png
+    Received: test-results\theme-baseline-dark-catalogue-partition-3-chromium-high-dpr\dark-login-window-error-actual.png
+    Diff:     test-results\theme-baseline-dark-catalogue-partition-3-chromium-high-dpr\dark-login-window-error-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\theme-baseline-dark-catalogue-partition-3-chromium-high-dpr\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\theme-baseline-dark-catalogue-partition-3-chromium-high-dpr\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\theme-baseline-dark-catalogue-partition-3-chromium-high-dpr\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  22) [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 4 › login-window-loading
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('body')
+      600 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: dark-login-window-loading.png
+
+    Call log:
+      - Expect "toHaveScreenshot(dark-login-window-loading.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 600 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 600 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      87 |       }
+      88 |       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
+    > 89 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      90 |       if (surface.interaction === "press") await page.mouse.up();
+      91 |       expect(errors).toEqual([]);
+      92 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:89:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: dark-login-window-loading (image/png) ───────────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\dark-login-window-loading-chromium-high-dpr-win32.png
+    Received: test-results\theme-baseline-dark-catalogue-partition-4-chromium-high-dpr\dark-login-window-loading-actual.png
+    Diff:     test-results\theme-baseline-dark-catalogue-partition-4-chromium-high-dpr\dark-login-window-loading-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\theme-baseline-dark-catalogue-partition-4-chromium-high-dpr\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\theme-baseline-dark-catalogue-partition-4-chromium-high-dpr\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\theme-baseline-dark-catalogue-partition-4-chromium-high-dpr\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  23) [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 5 › settings
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('body')
+      558 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: dark-settings.png
+
+    Call log:
+      - Expect "toHaveScreenshot(dark-settings.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 558 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 558 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      87 |       }
+      88 |       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
+    > 89 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      90 |       if (surface.interaction === "press") await page.mouse.up();
+      91 |       expect(errors).toEqual([]);
+      92 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:89:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: dark-settings (image/png) ───────────────────────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\dark-settings-chromium-high-dpr-win32.png
+    Received: test-results\theme-baseline-dark-catalogue-partition-5-chromium-high-dpr\dark-settings-actual.png
+    Diff:     test-results\theme-baseline-dark-catalogue-partition-5-chromium-high-dpr\dark-settings-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\theme-baseline-dark-catalogue-partition-5-chromium-high-dpr\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\theme-baseline-dark-catalogue-partition-5-chromium-high-dpr\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\theme-baseline-dark-catalogue-partition-5-chromium-high-dpr\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  24) [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 6 › window-metal-key-automatic
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('#theme-baseline-surface')
+      2720 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: dark-window-metal-key-automatic.png
+
+    Call log:
+      - Expect "toHaveScreenshot(dark-window-metal-key-automatic.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('#theme-baseline-surface')
+        - locator resolved to <main id="theme-baseline-surface" data-baseline-surface="window-metal-key-automatic">…</main>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 2720 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('#theme-baseline-surface')
+        - locator resolved to <main id="theme-baseline-surface" data-baseline-surface="window-metal-key-automatic">…</main>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 2720 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      87 |       }
+      88 |       if (surface.id === "folder-presentation") await expect(page.locator('[data-nse-control="folder-presentation"]')).toBeVisible();
+    > 89 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      90 |       if (surface.interaction === "press") await page.mouse.up();
+      91 |       expect(errors).toEqual([]);
+      92 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:89:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: dark-window-metal-key-automatic (image/png) ─────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\dark-window-metal-key-automatic-chromium-high-dpr-win32.png
+    Received: test-results\theme-baseline-dark-catalogue-partition-6-chromium-high-dpr\dark-window-metal-key-automatic-actual.png
+    Diff:     test-results\theme-baseline-dark-catalogue-partition-6-chromium-high-dpr\dark-window-metal-key-automatic-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\theme-baseline-dark-catalogue-partition-6-chromium-high-dpr\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\theme-baseline-dark-catalogue-partition-6-chromium-high-dpr\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\theme-baseline-dark-catalogue-partition-6-chromium-high-dpr\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  24 failed
+    [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 ────────────────
+    [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2 ────────────────
+    [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3 ────────────────
+    [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 4 ────────────────
+    [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 5 ────────────────
+    [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 6 ────────────────
+    [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 ─────────────────
+    [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 2 ─────────────────
+    [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 3 ─────────────────
+    [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 4 ─────────────────
+    [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 5 ─────────────────
+    [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 6 ─────────────────
+    [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 ───────
+    [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2 ───────
+    [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3 ───────
+    [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 4 ───────
+    [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 5 ───────
+    [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 6 ───────
+    [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 ────────
+    [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 2 ────────
+    [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 3 ────────
+    [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 4 ────────
+    [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 5 ────────
+    [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 6 ────────
+  58 passed (1.5m)

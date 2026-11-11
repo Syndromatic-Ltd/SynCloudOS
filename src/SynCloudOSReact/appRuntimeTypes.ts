@@ -121,7 +121,7 @@ export interface SynWareNavigationPort {
 }
 
 export interface SynWareCatalogPort {
-  getApp(appId: string): Readonly<Pick<SynCloudOSAppInfo, "id" | "name" | "shortName" | "packageName" | "route" | "displayName">> | null;
+  getApp(appId: string): Readonly<Pick<SynCloudOSAppInfo, "bundleIdentifier" | "version" | "name" | "shortName" | "packageName" | "route" | "displayName">> | null;
 }
 
 export interface SynWareLifecyclePort {
@@ -164,6 +164,23 @@ export interface SynWareOpenDocumentWindowRequest {
   readonly mobilePolicy?: SynWareOwnedWindowSnapshot["mobilePolicy"];
 }
 
+export interface SynWareOpenWindowRequest {
+  readonly title: string;
+  /** Identifies the window across reloads; unique within the application. */
+  readonly restorationKey: string;
+  readonly preferredBounds?: SynWareWindowBounds;
+  readonly mobilePolicy?: SynWareOwnedWindowSnapshot["mobilePolicy"];
+}
+
+export type SynWareWindowCloseReason = "control" | "command" | "parent-close" | "application-quit" | "runtime-dispose";
+
+export interface SynWareWindowCloseGuard {
+  /** Asked before the window closes. Return `false` to keep it open. */
+  shouldClose(reason: SynWareWindowCloseReason): boolean | Promise<boolean>;
+  /** The close was allowed and is being committed. */
+  willClose?(reason: SynWareWindowCloseReason): void;
+}
+
 export type SynWareWindowCloseResult =
   | Readonly<{ outcome: "closed"; windowId: string }>
   | Readonly<{ outcome: "cancelled"; windowId: string }>
@@ -176,7 +193,14 @@ export interface SynWareWindowPort {
   getSnapshot(): SynWareWindowSnapshot;
   subscribe(listener: () => void): () => void;
   openDocumentWindow(request: SynWareOpenDocumentWindowRequest): Promise<SynWareOwnedWindowSnapshot>;
+  /** Opens another window of the application that is not tied to a document. */
+  openWindow(request: SynWareOpenWindowRequest): Promise<SynWareOwnedWindowSnapshot>;
+  /** Lets the window's content veto its close and learn it is closing. Returns the function that removes the guard. */
+  registerCloseGuard(windowId: string, guard: SynWareWindowCloseGuard): () => void;
   focus(windowId: string): SynWareOwnedWindowSnapshot;
+  minimise(windowId: string): void;
+  zoom(windowId: string): void;
+  setTitle(windowId: string, title: string): void;
   close(windowId: string): Promise<SynWareWindowCloseResult>;
 }
 
@@ -372,6 +396,8 @@ export interface SynWareWorkspaceDocumentPort {
   closeDocument(documentId: string, options?: AppDocumentCloseOptions | Parameters<DocumentController["closeDocument"]>[1], signal?: AbortSignal): ReturnType<DocumentController["closeDocument"]>;
 }
 export interface SynWareCommandPort {
+  getPresentationGeneration(): Readonly<{ registryGeneration: number; responderGeneration: number }>;
+  subscribePresentation(listener: () => void): () => void;
   register(declaration: object): { readonly commandId: string; readonly responderId: string; dispose(): boolean };
   /** Creates an immutable object payload without reflecting on app-owned data.
    * Provide alternating bounded string keys and primitive, mounted-capability,
@@ -450,7 +476,9 @@ export type SynWareAnimationPort = Pick<RuntimeAnimationService, "acquireOwner" 
 export type SynWareImagePort = Pick<RuntimeImageService, "createGraphicsIdentifierIssuer"> & { diagnostics(): SynWareImageDiagnostics } & {
   load(request: SynWareImageLoadRequest): RuntimeImageResource;
 };
-export type SynWareAudioPort = Pick<RuntimeAudioService, "activation" | "play" | "pause" | "stop" | "setLoop" | "setVolume" | "setRate" | "setCurrentTime" | "release"> & { diagnostics(): SynWareAudioDiagnostics } & {
+import type { AppPlaybackPresentationLease, AppPlaybackPresentationRequest } from "../SynCloudOS/AppSDK/runtimeContracts";
+
+export type SynWareAudioPort = { present(handleId: string, request: AppPlaybackPresentationRequest, signal?: AbortSignal): AppPlaybackPresentationLease } & Pick<RuntimeAudioService, "activation" | "play" | "pause" | "stop" | "setLoop" | "setVolume" | "setRate" | "setCurrentTime" | "release"> & { diagnostics(): SynWareAudioDiagnostics } & {
   load(request: SynWareAudioLoadRequest, signal?: AbortSignal): Promise<RuntimeAudioHandle>;
   suspend(): void;
   resume(): void;
@@ -485,7 +513,7 @@ export interface SynWareRuntime {
   /** Immutable identity of the mounted kernel runtime. This is separate from
    * redacted Diagnostics report identities. */
   readonly id: string;
-  readonly app: Readonly<Pick<SynCloudOSAppInfo, "id" | "name" | "shortName" | "packageName" | "route">>;
+  readonly app: Readonly<Pick<SynCloudOSAppInfo, "bundleIdentifier" | "version" | "name" | "shortName" | "packageName" | "route" | "displayName">>;
   /** The mounted responder root for this presentation generation. It is an
    * owned identity, not a kernel responder graph capability. */
   readonly responderId: string;

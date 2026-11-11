@@ -1,0 +1,20 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run vitest run tests/runtime/about-app.test.tsx tests/runtime/layer-artwork.test.tsx --reporter=verbose
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site
+
+ ✓ tests/runtime/layer-artwork.test.tsx > preserves authored tracks and disables actions while writing their model values 4ms
+ ✓ tests/runtime/about-app.test.tsx > About > leaves from the visible presentation when another tab interrupts its settle 424ms
+ ✓ tests/runtime/about-app.test.tsx > About > animates the incoming pane and keeps its presentation through the tab handoff 174ms
+ ✓ tests/runtime/about-app.test.tsx > About > retitles in place without a restoration write or a new directional transition 87ms
+ ✓ tests/runtime/about-app.test.tsx > About > opens on the company page with its tab bar 84ms
+ ✓ tests/runtime/about-app.test.tsx > About > restores the section last read and remembers a new choice 154ms
+ ✓ tests/runtime/about-app.test.tsx > About > travels right when a later section is chosen and shows its page 153ms
+ ✓ tests/runtime/about-app.test.tsx > About > goes still when the animation environment asks for reduced motion 97ms
+ ✓ tests/runtime/about-app.test.tsx > About > disposes its navigation and pages with the window 78ms
+
+ Test Files  2 passed (2)
+      Tests  9 passed (9)
+   Start at  11:01:47
+   Duration  5.60s (transform 4.44s, setup 34ms, import 5.95s, tests 1.26s, environment 1.74s)
+

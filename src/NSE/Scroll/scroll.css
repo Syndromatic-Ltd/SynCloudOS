@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -18,7 +21,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-.nse-scroll-view {
+.nse-scroll-view,
+:where(:scope):is(.nse-scroll-view) {
   box-sizing: border-box;
   overflow-y: auto;
   overflow-x: hidden;
@@ -26,47 +30,67 @@
   min-height: 0;
 }
 
-.nse-scroll-view-frame {
+.nse-scroll-view-frame,
+:where(:scope):is(.nse-scroll-view-frame) {
   display: grid;
   grid-template: minmax(0, 1fr) auto / minmax(0, 1fr) auto;
   min-width: 0;
   min-height: 0;
 }
 
-.nse-scroll-view-frame > .nse-scroll-view {
+/* As NSViewController.view, a scroll view that is a view controller's view
+   fills the frame the controller is given. Sized to its own content it would
+   have no scroll range, its overflow clipped by the container instead. */
+[data-nse-view-controller]>.nse-scroll-view-frame:only-child,
+:where(:scope):is([data-nse-view-controller])>.nse-scroll-view-frame:only-child {
+  block-size: 100%;
+}
+
+.nse-scroll-view-frame>.nse-scroll-view,
+:where(:scope):is(.nse-scroll-view-frame)>.nse-scroll-view {
   grid-area: 1 / 1;
   /* The frame draws its own NSEScrollers beside the clip; the browser's
      scrollbars would be a second pair inside them. Scrolling still works. */
   scrollbar-width: none;
 }
 
-.nse-scroll-view-frame > .nse-scroll-view::-webkit-scrollbar {
+.nse-scroll-view-frame>.nse-scroll-view::-webkit-scrollbar,
+:where(:scope):is(.nse-scroll-view-frame)>.nse-scroll-view::-webkit-scrollbar {
   display: none;
 }
 
-.nse-scroll-view-frame > [data-orientation="horizontal"] {
+.nse-scroll-view-frame>[data-orientation="horizontal"],
+:where(:scope):is(.nse-scroll-view-frame)>[data-orientation="horizontal"] {
   grid-area: 2 / 1;
   width: 100%;
 }
 
-.nse-scroll-view-frame > [data-orientation="vertical"] {
+.nse-scroll-view-frame>[data-orientation="vertical"],
+:where(:scope):is(.nse-scroll-view-frame)>[data-orientation="vertical"] {
   grid-area: 1 / 2;
   height: 100%;
   writing-mode: vertical-lr;
 }
 
-.nse-scroll-view-frame > [data-nse-part="scroller-corner"] {
+.nse-scroll-view-frame>[data-nse-part="scroller-corner"],
+:where(:scope):is(.nse-scroll-view-frame)>[data-nse-part="scroller-corner"] {
   grid-area: 2 / 2;
   min-width: 1rem;
   min-height: 1rem;
 }
 
-.nse-scroll-view[data-axis="x"] {
+.nse-scroll-view[data-axis="x"],
+:where(:scope):is(.nse-scroll-view[data-axis="x"]) {
   overflow-x: auto;
   overflow-y: hidden;
 }
 
-.nse-scroll-view-content {
+.nse-scroll-view-content,
+:where(:scope):is(.nse-scroll-view-content) {
   min-height: 100%;
   will-change: transform;
+}
+
+}
+
 }

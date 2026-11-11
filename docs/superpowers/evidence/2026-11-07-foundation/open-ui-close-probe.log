@@ -1,0 +1,17 @@
+[
+  {
+    "name": "desktop-light",
+    "bounds": {
+      "x": 310,
+      "y": 117,
+      "width": 820,
+      "height": 560,
+      "top": 117,
+      "right": 1130,
+      "bottom": 677,
+      "left": 310
+    },
+    "thumbnails": 3,
+    "errors": []
+  }
+]

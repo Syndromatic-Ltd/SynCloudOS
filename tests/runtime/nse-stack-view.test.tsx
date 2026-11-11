@@ -36,12 +36,36 @@ afterEach(() => {
 });
 
 describe("NSEStackView", () => {
+  it("sizes an item without a preferred size to its content's fitting size, and follows the content", () => {
+    const heights = new Map<string, number>([["Header", 36], ["Body", 140]]);
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
+      const height = this.classList.contains("nse-stack-view-item-content") ? heights.get(this.textContent ?? "") ?? 0 : 0;
+      return { x: 0, y: 0, top: 0, left: 0, right: 200, bottom: height, width: 200, height, toJSON() {} } as DOMRect;
+    });
+    let notify = () => {};
+    vi.stubGlobal("ResizeObserver", class { constructor(listener: () => void) { notify = listener; } observe() {} disconnect() {} });
+    render(
+      <NSEStackView aria-label="Sections" orientation="vertical" overflowPolicy="preserve">
+        <NSEStackItem id="header">Header</NSEStackItem>
+        <NSEStackItem id="body">Body</NSEStackItem>
+        <NSEStackItem id="fixed" preferredSize={48}>Fixed</NSEStackItem>
+      </NSEStackView>,
+    );
+    const size = (text: string) => screen.getByText(text).closest("[data-stack-size]")?.getAttribute("data-stack-size");
+    expect([size("Header"), size("Body"), size("Fixed")]).toEqual(["36", "140", "48"]);
+    heights.set("Body", 210);
+    React.act(() => notify());
+    expect(size("Body")).toBe("210");
+    vi.unstubAllGlobals();
+  });
+
   it("allocates fill proportionally and hides the lowest priority items first", () => {
     const { rerender } = render(
       <NSEStackView
         aria-label="Inspector actions"
         orientation="horizontal"
         distribution="fill-proportionally"
+        spacing={0}
         availableSize={240}
       >
         <NSEStackItem id="save" weight={2} visibilityPriority={100}>Save</NSEStackItem>
@@ -57,6 +81,7 @@ describe("NSEStackView", () => {
         aria-label="Inspector actions"
         orientation="horizontal"
         distribution="fill-proportionally"
+        spacing={0}
         availableSize={150}
       >
         <NSEStackItem id="save" weight={2} visibilityPriority={100}>Save</NSEStackItem>

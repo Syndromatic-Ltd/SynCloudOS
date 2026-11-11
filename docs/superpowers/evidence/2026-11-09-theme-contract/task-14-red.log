@@ -1,0 +1,39 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/atmo-theme-bundle.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/atmo-theme-bundle.test.ts (2 tests | 2 failed) 6ms
+     × is a valid static bundle with Atmo's existing navigation and presentation 5ms
+     × draws through public hooks and contains no fonts, motion or executable resources 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/atmo-theme-bundle.test.ts > Atmo's public theme bundle > is a valid static bundle with Atmo's existing navigation and presentation
+Error: ENOENT: no such file or directory, lstat 'C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\src\Themes\Atmo.scostheme'
+ ❯ visit scripts/synware/theme-bundles.mjs:16:25
+     14|   function visit(path, depth=0) {
+     15|     if(depth>20) throw new TypeError(`${path}: directory-depth: Theme …
+     16|     const stat=lstatSync(path);
+       |                         ^
+     17|     if(stat.isSymbolicLink()) throw new TypeError(`Theme packages reje…
+     18|     if(!inside(root,realpathSync(path))) throw new TypeError(`Theme pa…
+ ❯ walk scripts/synware/theme-bundles.mjs:32:3
+ ❯ readThemeBundle scripts/synware/theme-bundles.mjs:249:45
+ ❯ tests/runtime/atmo-theme-bundle.test.ts:8:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/runtime/atmo-theme-bundle.test.ts > Atmo's public theme bundle > draws through public hooks and contains no fonts, motion or executable resources
+Error: ENOENT: no such file or directory, scandir 'C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\src\Themes\Atmo.scostheme'
+ ❯ files tests/runtime/atmo-theme-bundle.test.ts:14:52
+
+ ❯ tests/runtime/atmo-theme-bundle.test.ts:15:24
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  00:10:36
+   Duration  460ms (transform 88ms, setup 26ms, import 298ms, tests 6ms, environment 0ms)

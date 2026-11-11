@@ -20,12 +20,13 @@
 
 import {
   NSEObjectController, NSEDictionaryController, NSEArrayController, NSETreeController,
-  NSEDataViewCellContent, IndexPath, IndexSet, Predicate, SortDescriptor, NumberFormatter,
+  NSETableCellView,
+  NSEPopover, type NSEPopoverProps,
   type ObjectControllerOptions, type DictionaryControllerOptions, type ControllerEditTransaction,
-  type ChangeSet, type NSEDictionaryEntry, type Formatter, type FormatterContext,
-  type FormatterResult, type NSEControlValidation,
+  type NSEControlValidation,
 } from "@syndromatic/syncloudos/nse";
-import type { NSEControlValidation as ControlValidation, Formatter as ControlFormatter } from "@syndromatic/syncloudos/nse/controls";
+import type { NSEControlValidation as ControlValidation } from "@syndromatic/syncloudos/nse/controls";
+import { NSEIndexPath, NSEIndexSet, NSEPredicate, NSESortDescriptor, NSENumberFormatter, type NSEFormatter, type NSEFormatterContext, type NSEFormatterResult } from "@syndromatic/syncloudos/foundation";
 import * as graphics from "@syndromatic/syncloudos/fx/graphics";
 import { VFXEncoder, VFXEncoderCapabilities, type VFXEncoderConfig } from "@syndromatic/syncloudos/fx/video";
 import type { SynWareContextValue } from "@syndromatic/syncloudos/sdk";
@@ -40,9 +41,12 @@ function check(value: unknown, message: string): asserts value {
   if (!value) throw new Error(message);
 }
 
-const context: FormatterContext = { locale: "en-GB" };
-const formatter: Formatter<number> & ControlFormatter<number> = new NumberFormatter();
-const parsed: FormatterResult<number> = formatter.parse("12", context);
+const popoverContentSize: NSEPopoverProps["contentSize"] = { width: 300, height: 200 };
+check(typeof NSEPopover === "function" && popoverContentSize.width === 300, "Public NSPopover surface and content size");
+
+const context: NSEFormatterContext = { locale: "en-GB" };
+const formatter: NSEFormatter<number> = new NSENumberFormatter();
+const parsed: NSEFormatterResult<number> = formatter.getObjectValue("12", context);
 check(parsed.ok && parsed.value === 12, "Public formatter contract");
 const validation: NSEControlValidation & ControlValidation = { kind: "valid" };
 check(validation.kind === "valid", "Public validation contract");
@@ -72,21 +76,21 @@ const dictionary = new NSEDictionaryController(dictionaryOptions);
 dictionary.beginEditing({ id: "rename", actionName: "Rename" });
 check(dictionary.setValue("name", "New").status === "updated", "Dictionary editing");
 check(dictionary.commitEditing().status === "committed", "Dictionary commit");
-const changes: ChangeSet<string, NSEDictionaryEntry<string>> = dictionary.getSnapshot().changeSet;
+const changes = dictionary.getSnapshot().changeSet;
 check(changes !== undefined && dictionary.getSnapshot().content.name === "New", "Dictionary snapshot");
 dictionary.dispose();
 
-const predicate = Predicate.compile<{ id: string }>({ id: "ids", fields: { id: { type: "string", read: value => value.id } } }, { kind: "constant", value: true });
+const predicate = NSEPredicate.compile<{ id: string }>({ id: "ids", fields: { id: { type: "string", read: value => value.id } } }, { kind: "constant", value: true });
 const array = new NSEArrayController({ id: "list", content: [{ id: "one" }], getId: value => value.id });
 array.setPredicate(predicate);
-const sort = new SortDescriptor<{ id: string }, string>({ id: "id", select: value => value.id });
+const sort = new NSESortDescriptor<{ id: string }, string>({ id: "id", select: value => value.id });
 check(sort.compare({ id: "a" }, { id: "b" }) < 0, "Sort descriptor");
 array.dispose();
 const tree = new NSETreeController({ id: "tree", content: [{ id: "one" }], getId: value => value.id, getChildren: () => [], withChildren: value => value });
-check(tree.nodeAt(IndexPath.from(0))?.id === "one", "Public index paths work with public tree controllers");
+check(tree.nodeAt(NSEIndexPath.from(0))?.id === "one", "Public index paths work with public tree controllers");
 tree.dispose();
-check(IndexSet.fromIndexes([1, 2, 2]).count === 2, "Index set construction");
-check(NSEDataViewCellContent({ primary: "Name", secondary: "Detail" }).props["data-nse-part"] === "cell-content", "Public cell rendering");
+check(NSEIndexSet.fromIndexes([1, 2, 2]).count === 2, "Index set construction");
+check(NSETableCellView({ primary: "Name", secondary: "Detail" }).props["data-nse-part"] === "cell-content", "Public cell rendering");
 
 // @ts-expect-error Mutable image storage is not a public graphics capability.
 void graphics.borrowGFXImageBytes;

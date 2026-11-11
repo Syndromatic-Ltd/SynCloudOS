@@ -19,6 +19,7 @@
  */
 
 import type { SynCloudOSPersistence, SynCloudOSRuntimeId } from "../Runtime/runtimeInstanceTypes";
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 
 export type SynCloudOSMotionPreference = "standard" | "reduced";
 
@@ -61,7 +62,7 @@ export const normaliseAudioLevel = (value: unknown): number =>
 function normaliseSettings(input: Partial<SynCloudOSSettings> | null | undefined): SynCloudOSSettings {
   return {
     masterVolume: normaliseAudioLevel(input?.masterVolume),
-    appVolumes: Object.freeze(Object.fromEntries(Object.entries(input?.appVolumes && typeof input.appVolumes === "object" && !Array.isArray(input.appVolumes) ? input.appVolumes : {}).map(([appId, volume]) => [appId, normaliseAudioLevel(volume)]))),
+    appVolumes: Object.freeze(Object.fromEntries(Object.entries(input?.appVolumes && typeof input.appVolumes === "object" && !Array.isArray(input.appVolumes) ? input.appVolumes : {}).map(([appId, volume]) => [normalizeBundleIdentifier(appId), normaliseAudioLevel(volume)]))),
     soundEnabled: typeof input?.soundEnabled === "boolean" ? input.soundEnabled : DEFAULTS.soundEnabled,
     vibrationEnabled: typeof input?.vibrationEnabled === "boolean" ? input.vibrationEnabled : DEFAULTS.vibrationEnabled,
     motion: input?.motion === "standard" || input?.motion === "reduced" ? input.motion : DEFAULTS.motion,

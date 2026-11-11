@@ -19,6 +19,7 @@
  */
 
 import { describe, expect, it, vi } from "vitest";
+import { SynCloudOSLifecycleError } from "../../../src/SynCloudOS/fxRuntimeContracts";
 import { MEFXBlockBuffer } from "../../../src/FX/MediaFX/MEFXBlockBuffer";
 import { MEFXFormatDescription } from "../../../src/FX/MediaFX/MEFXFormatDescription";
 import { MEFXSampleBuffer } from "../../../src/FX/MediaFX/MEFXSampleBuffer";
@@ -71,7 +72,7 @@ describe("MEFXBlockBuffer", () => {
         retained.close();
         retained.close();
         expect(released).toHaveBeenCalledTimes(1);
-        expect(() => bytesOf(retained)).toThrow(/closed/i);
+        expect(() => bytesOf(retained)).toThrow(SynCloudOSLifecycleError);
     });
 
     it("commits transfer only after synchronous admission succeeds", () => {

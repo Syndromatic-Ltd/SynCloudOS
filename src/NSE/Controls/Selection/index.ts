@@ -19,9 +19,8 @@
  */
 
 export { NSEDivider } from "./NSEDivider";
-export type { NSEDividerProps } from "./NSEDivider";
+
 export { NSEGroupedList } from "./NSEGroupedList";
 export type { NSEGroupedListEdge, NSEGroupedListProps } from "./NSEGroupedList";
 export { NSEListItem } from "./NSEListItem";
 export type { NSEListItemProps } from "./NSEListItem";
-export * from "./NSESelectors";

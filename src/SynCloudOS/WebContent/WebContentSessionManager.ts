@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import { canonicalDocumentJson, immutableDocumentValue } from "../Documents/documentTypes";
 import { normaliseWebContentSource, sandboxForWebContentCapabilities, sanitiseWebContentHTML } from "./webContentPolicy";
 import type {
@@ -501,7 +502,7 @@ export function createRuntimeWebContentSessionManager(input: {
       if (!hasLiveOwnerLease(request)) {
         throw new DOMException("Web content owner lease was denied.", "SecurityError");
       }
-      if (closedApps.has(request.appId) || (request.windowControllerId && closedWindows.has(request.windowControllerId))) {
+      if (closedApps.has(normalizeBundleIdentifier(request.appId)) || (request.windowControllerId && closedWindows.has(request.windowControllerId))) {
         throw abortError("Web content owner authority is closed.");
       }
       const id = `web-content:${input.randomUUID()}:${++sequence}`;
@@ -511,25 +512,25 @@ export function createRuntimeWebContentSessionManager(input: {
       record = { id, request, facade: null as unknown as RuntimeWebContentSession, listeners: new Set(), controller: new AbortController(),
         correlations: new Set(), outgoingCorrelations: new Set(), pendingCorrelations: new Set(), pendingOutgoingCorrelations: new Set(), navigationController: new AbortController(),
         snapshot: placeholder, source: request.source, sandbox: "", token: "", epoch: 0,
-        operation: null, prepared: null, frame: null, suspended: suspendedApps.has(request.appId), loaded: false, closed: false };
+        operation: null, prepared: null, frame: null, suspended: suspendedApps.has(normalizeBundleIdentifier(request.appId)), loaded: false, closed: false };
       record.facade = makeFacade(record); sessions.set(id, record);
       try { await navigate(record, request.source, "load", signal); return record.facade; }
       catch (error) { close(record, "Web content session creation failed."); throw error; }
     },
     get(sessionId) { return sessions.get(primitiveText(sessionId, "Web content sessionId", 1_024))?.facade ?? null; },
     suspendOwner(appId) {
-      const id = primitiveText(appId, "Web content appId");
+      const id = normalizeBundleIdentifier(primitiveText(appId, "Web content appId"));
       suspendedApps.add(id);
-      for (const record of sessions.values()) if (record.request.appId === id && !record.suspended) {
+      for (const record of sessions.values()) if (normalizeBundleIdentifier(record.request.appId) === normalizeBundleIdentifier(id) && !record.suspended) {
         record.suspended = true; record.operation?.abort(abortError("Web content owner suspended."));
         record.navigationController.abort(abortError("Web content owner suspended."));
         setSnapshot(record, { state: "suspended" });
       }
     },
     resumeOwner(appId) {
-      const id = primitiveText(appId, "Web content appId");
+      const id = normalizeBundleIdentifier(primitiveText(appId, "Web content appId"));
       suspendedApps.delete(id); closedApps.delete(id);
-      for (const record of sessions.values()) if (record.request.appId === id && record.suspended) {
+      for (const record of sessions.values()) if (normalizeBundleIdentifier(record.request.appId) === normalizeBundleIdentifier(id) && record.suspended) {
         record.suspended = false; record.navigationController = new AbortController();
         setSnapshot(record, { state: record.loaded ? "ready" : "loading" });
         if (record.loaded && record.frame && record.prepared && record.prepared.expectedOrigin !== "null") {
@@ -538,7 +539,7 @@ export function createRuntimeWebContentSessionManager(input: {
         }
       }
     },
-    closeOwner(appId, reason) { const id = primitiveText(appId, "Web content appId"); suspendedApps.delete(id); closedApps.add(id); for (const record of [...sessions.values()]) if (record.request.appId === id) close(record, reason); },
+    closeOwner(appId, reason) { const id = normalizeBundleIdentifier(primitiveText(appId, "Web content appId")); suspendedApps.delete(id); closedApps.add(id); for (const record of [...sessions.values()]) if (normalizeBundleIdentifier(record.request.appId) === normalizeBundleIdentifier(id)) close(record, reason); },
     closeWindowController(windowControllerId, reason) { const id = primitiveText(windowControllerId, "Web content windowControllerId"); closedWindows.add(id); for (const record of [...sessions.values()]) if (record.request.windowControllerId === id) close(record, reason); },
     diagnostics() { const diagnostics = adapter?.diagnostics() ?? { listenerCount: 0, objectURLCount: 0, frameCount: 0 };
       return Object.freeze({ sessionCount: sessions.size, ...diagnostics, pendingOperationCount }); },

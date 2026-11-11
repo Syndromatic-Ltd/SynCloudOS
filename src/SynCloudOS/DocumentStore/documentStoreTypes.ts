@@ -19,7 +19,7 @@
  */
 
 import type { SynCloudOSRole } from "../PermissionManager/permissionTypes";
-import type { SynCloudOSPolicyDecision, SynCloudOSPolicySubject, SynCloudOSPolicySubjectGrant } from "../PolicyKit/policyTypes";
+import type { SynCloudOSPolicyDecision, SynCloudOSPolicySubject, SynCloudOSPolicySubjectGrant } from "../ConfigurationProfiles/policyTypes";
 
 export type SynCloudOSDocumentPublishState = "draft" | "scheduled" | "published" | "unlisted" | "archived" | "deleted";
 
@@ -180,7 +180,7 @@ export interface SynCloudOSDocumentStoreContext {
   /** Descriptive; authorisation uses the runtime-derived subject unless the
    * context carries a host-issued `subjectGrant`. */
   subject?: SynCloudOSPolicySubject;
-  /** Host authority from PolicyKit.issueSubject. AppSDK callers cannot supply it. */
+  /** Host authority from ConfigurationProfiles.issueSubject. AppSDK callers cannot supply it. */
   subjectGrant?: SynCloudOSPolicySubjectGrant;
   /** Runtime-owned cancellation and namespace signal; AppSDK callers cannot supply it. */
   signal?: AbortSignal;

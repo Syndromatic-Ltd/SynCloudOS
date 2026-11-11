@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import { encodeAztecMessage, encodeDataMatrixMessage, encodePDF417Message, encodeQRDescriptor, type BarcodeMatrix } from "./barcodeEncoding";
 import {
     isSupportedDataMatrixSize,
@@ -80,12 +81,15 @@ const maximumDescriptorBytes = 4096;
 const matrices = new WeakMap<IFXBarcodeDescriptor, BarcodeMatrix>();
 
 function ownBytes(value: unknown, maximum = maximumDescriptorBytes): Uint8Array {
-    if (value instanceof Uint8Array && Object.getPrototypeOf(value) === Uint8Array.prototype) {
-        if (value.length < 1 || value.length > maximum)
+    if (!Array.isArray(value)) {
+        let data: NSEData;
+        try { data = NSEData.from(value as NSEDataConvertible); }
+        catch { throw new TypeError("Barcode payload must be a nonempty plain byte array."); }
+        if (data.count < 1 || data.count > maximum)
             throw new RangeError("Barcode payload exceeds its byte limit.");
-        return new Uint8Array(value);
+        return new Uint8Array(data.bytes);
     }
-    if (!Array.isArray(value) || Object.getPrototypeOf(value) !== Array.prototype)
+    if (Object.getPrototypeOf(value) !== Array.prototype)
         throw new TypeError("Barcode payload must be a nonempty plain byte array.");
     if (value.length < 1 || value.length > maximum)
         throw new RangeError("Barcode payload exceeds its byte limit.");
@@ -181,7 +185,7 @@ export class IFXQRCodeDescriptor extends IFXBarcodeDescriptor {
     readonly symbolVersion: number;
     readonly maskPattern: number;
     readonly errorCorrectionLevel: IFXQRCodeErrorCorrectionLevel;
-    constructor(errorCorrectedPayload: Uint8Array | readonly number[], symbolVersion: number, maskPattern: number, errorCorrectionLevel: IFXQRCodeErrorCorrectionLevel) {
+    constructor(errorCorrectedPayload: NSEDataConvertible | readonly number[], symbolVersion: number, maskPattern: number, errorCorrectionLevel: IFXQRCodeErrorCorrectionLevel) {
         super();
         const payload = ownBytes(errorCorrectedPayload);
         this.symbolVersion = integer(symbolVersion, 1, 40, "QR symbol version");
@@ -193,8 +197,8 @@ export class IFXQRCodeDescriptor extends IFXBarcodeDescriptor {
         matrices.set(this, encodeQRDescriptor(Array.from(payload), this.symbolVersion, this.maskPattern, this.errorCorrectionLevel));
         Object.freeze(this);
     }
-    get errorCorrectedPayload(): Uint8Array {
-        return new Uint8Array(this.#payload);
+    get errorCorrectedPayload(): NSEData {
+        return NSEData.from(this.#payload);
     }
     toData(): IFXQRCodeDescriptorData {
         return Object.freeze({ kind: "qr", errorCorrectedPayload: Object.freeze(Array.from(this.#payload)), symbolVersion: this.symbolVersion, maskPattern: this.maskPattern, errorCorrectionLevel: this.errorCorrectionLevel });
@@ -206,12 +210,12 @@ abstract class IFXMessageBarcodeDescriptor extends IFXBarcodeDescriptor {
     readonly schemaVersion = 1 as const;
     readonly encoding = "binary-bytes" as const;
     readonly #message: Uint8Array;
-    protected constructor(message: Uint8Array | readonly number[]) {
+    protected constructor(message: NSEDataConvertible | readonly number[]) {
         super();
         this.#message = ownBytes(message, maximumDescriptorBytes);
     }
-    get message(): Uint8Array {
-        return new Uint8Array(this.#message);
+    get message(): NSEData {
+        return NSEData.from(this.#message);
     }
     protected dataMessage(): readonly number[] {
         return Object.freeze(Array.from(this.#message));
@@ -223,7 +227,7 @@ export class IFXAztecCodeDescriptor extends IFXMessageBarcodeDescriptor {
     readonly layers: number;
     readonly compactStyle: boolean;
     readonly quietSpace: number;
-    constructor(message: Uint8Array | readonly number[], options: IFXAztecCodeDescriptorOptions) {
+    constructor(message: NSEDataConvertible | readonly number[], options: IFXAztecCodeDescriptorOptions) {
         super(message);
         if (!options || typeof options !== "object")
             throw new TypeError("Aztec descriptor options are required.");
@@ -231,7 +235,7 @@ export class IFXAztecCodeDescriptor extends IFXMessageBarcodeDescriptor {
         this.compactStyle = boolean(options.compactStyle, "Aztec compact style");
         this.layers = integer(options.layers, 1, this.compactStyle ? 4 : 32, "Aztec layers");
         this.quietSpace = integer(options.quietSpace, 0, 64, "Aztec quiet space");
-        matrices.set(this, encodeAztecMessage(Array.from(this.message), this.correctionLevel, this.layers, this.compactStyle, this.quietSpace));
+        matrices.set(this, encodeAztecMessage(Array.from(this.message.bytes), this.correctionLevel, this.layers, this.compactStyle, this.quietSpace));
         Object.freeze(this);
     }
     toData(): IFXAztecCodeDescriptorData {
@@ -248,7 +252,7 @@ export class IFXPDF417CodeDescriptor extends IFXMessageBarcodeDescriptor {
     readonly rows: number;
     readonly compactStyle: boolean;
     readonly quietSpace: number;
-    constructor(message: Uint8Array | readonly number[], options: IFXPDF417CodeDescriptorOptions) {
+    constructor(message: NSEDataConvertible | readonly number[], options: IFXPDF417CodeDescriptorOptions) {
         super(message);
         if (!options || typeof options !== "object")
             throw new TypeError("PDF417 descriptor options are required.");
@@ -257,7 +261,7 @@ export class IFXPDF417CodeDescriptor extends IFXMessageBarcodeDescriptor {
         this.rows = integer(options.rows, 3, 90, "PDF417 rows");
         this.compactStyle = boolean(options.compactStyle, "PDF417 compact style");
         this.quietSpace = integer(options.quietSpace, 0, 64, "PDF417 quiet space");
-        matrices.set(this, encodePDF417Message(Array.from(this.message), this.correctionLevel, this.dataColumns, this.rows, this.compactStyle, this.quietSpace));
+        matrices.set(this, encodePDF417Message(Array.from(this.message.bytes), this.correctionLevel, this.dataColumns, this.rows, this.compactStyle, this.quietSpace));
         Object.freeze(this);
     }
     toData(): IFXPDF417CodeDescriptorData {
@@ -273,7 +277,7 @@ export class IFXDataMatrixCodeDescriptor extends IFXMessageBarcodeDescriptor {
     readonly rows: number;
     readonly columns: number;
     readonly quietSpace: number;
-    constructor(message: Uint8Array | readonly number[], options: IFXDataMatrixCodeDescriptorOptions) {
+    constructor(message: NSEDataConvertible | readonly number[], options: IFXDataMatrixCodeDescriptorOptions) {
         super(message);
         if (!options || typeof options !== "object")
             throw new TypeError("Data Matrix descriptor options are required.");
@@ -282,7 +286,7 @@ export class IFXDataMatrixCodeDescriptor extends IFXMessageBarcodeDescriptor {
         if (!isSupportedDataMatrixSize(this.rows, this.columns))
             throw new RangeError("Data Matrix dimensions are not a supported ECC200 symbol size.");
         this.quietSpace = integer(options.quietSpace, 0, 64, "Data Matrix quiet space");
-        matrices.set(this, encodeDataMatrixMessage(Array.from(this.message), this.rows, this.columns, this.quietSpace));
+        matrices.set(this, encodeDataMatrixMessage(Array.from(this.message.bytes), this.rows, this.columns, this.quietSpace));
         Object.freeze(this);
     }
     toData(): IFXDataMatrixCodeDescriptorData {

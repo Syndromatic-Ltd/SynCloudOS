@@ -36,8 +36,10 @@ export interface AnimationRendererResidency {
   releaseIdle(targetBytes: number): number;
 }
 export interface AnimationLayerHost {
-  bind<K extends keyof AnimationLayerKinds>(kind: K, target: object, signal: AbortSignal): AnimationLayerKinds[K];
-  /** `residency`, when given, receives the renderer's GPU residency once it exists. */
-  createRenderer(target: object, options: Pick<AFXRendererOptions, "maximumQuads" | "onRenderError">, signal: AbortSignal,
+  /** CSS-owned roots keep their element's layout and measure its bounds instead. */
+  bind<K extends keyof AnimationLayerKinds>(kind: K, target: object, signal: AbortSignal,
+    options?: Readonly<{ layout: "css" }>): AnimationLayerKinds[K];
+  /** CSS layout preserves authored canvas sizing; `residency` reports GPU storage once acquired. */
+  createRenderer(target: object, options: Pick<AFXRendererOptions, "maximumQuads" | "onRenderError"> & Readonly<{ layout?: "css" }>, signal: AbortSignal,
     residency?: (report: AnimationRendererResidency) => void): AFXRenderer;
 }

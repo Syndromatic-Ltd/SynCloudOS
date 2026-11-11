@@ -1,0 +1,5 @@
+{
+  "extends": "../../tsconfig.app.json",
+  "compilerOptions": { "noEmit": true, "strict": true },
+  "include": ["authoring-6e.test-d.ts", "action-reference-contract.tsx", "../fixtures/synware-authoring/6e/src", "../../src/**/*.d.ts"]
+}

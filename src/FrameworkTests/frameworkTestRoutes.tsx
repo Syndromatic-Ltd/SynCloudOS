@@ -21,10 +21,12 @@
 import { IndexedDBDocumentFixture } from "./Documents/IndexedDBDocumentFixture";
 import { DocumentWorkspaceFixture } from "./Documents/DocumentWorkspaceFixture";
 import { WindowManagementFixture } from "./Windows/WindowManagementFixture";
+import { AdaptiveNavigationFixture } from "./Navigation/AdaptiveNavigationFixture";
 import type { FrameworkTestFixture } from "./frameworkTestTypes";
 
 export const frameworkTestRoutes: Readonly<Record<string, FrameworkTestFixture>> = Object.freeze({
   "documents/indexeddb": IndexedDBDocumentFixture,
   "documents/workspace": DocumentWorkspaceFixture,
   "windows/management": WindowManagementFixture,
+  "navigation/adaptive": AdaptiveNavigationFixture,
 });

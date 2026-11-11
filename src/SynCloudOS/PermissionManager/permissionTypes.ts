@@ -20,7 +20,7 @@
 
 /**
  * A policy role. Which roles exist is host policy, declared by the runtime's
- * policy profile; the named members are the default Syndromatic profile's
+ * configuration profile; the named members are the default Syndromatic profile's
  * roles plus the framework's reserved `system` role.
  */
 export type SynCloudOSRole = "public" | "betaTester" | "employee" | "admin" | "founder" | "system" | (string & {});

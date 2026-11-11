@@ -1,0 +1,23 @@
+[
+  {
+    "capabilities": "no-folders",
+    "sourcesHiddenCorrectly": true,
+    "mediaAvailable": true,
+    "nativeFallback": false,
+    "errors": []
+  },
+  {
+    "capabilities": "no-storage",
+    "sourcesHiddenCorrectly": true,
+    "mediaAvailable": true,
+    "nativeFallback": false,
+    "errors": []
+  },
+  {
+    "capabilities": "media-only",
+    "sourcesHiddenCorrectly": true,
+    "mediaAvailable": true,
+    "nativeFallback": true,
+    "errors": []
+  }
+]

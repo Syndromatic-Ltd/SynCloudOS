@@ -1,0 +1,7 @@
+{
+  "error": "TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByText('Menus & Popups', { exact: true }).filter({ visible: true }).first()\u001b[22m\n",
+  "errors": [],
+  "consoleErrors": [],
+  "url": "http://127.0.0.1:5199/__syncloudos/nse-gallery",
+  "body": "Reorder applications\n\nHold an application to reorder. Rest it on another application or a folder to group them. Use arrow keys to move it. Press Escape when finished.\n\nAbout\nPortfolio Hub\nExperiments\n2\nJournal\nSoftware\nLate-Breaking News\nWebspring 4.0 enters first implementation\n14 May 2026\nNSE and Atmo define the interface layer\n6 May 2026"
+}

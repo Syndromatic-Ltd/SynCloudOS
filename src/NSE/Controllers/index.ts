@@ -22,6 +22,11 @@ export * from "./NSEController";
 export * from "./NSEArrayController";
 export * from "./NSEDictionaryController";
 export * from "./NSEObjectController";
-export * from "./NSEPreferencesController";
+export * from "./NSEUserDefaultsController";
 export * from "./NSETreeController";
 export * from "./useNSEController";
+export * from "./useNSEOwnedController";
+export { nseUnowned, type NSEOwner, type NSEControllerOwnershipOptions } from "./ownership";
+
+export * from "./NSEUpdateReadinessController";
+export { NSETreeNode } from "./NSETreeNode";

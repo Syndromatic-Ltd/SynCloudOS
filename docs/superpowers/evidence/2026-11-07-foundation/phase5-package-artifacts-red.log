@@ -1,0 +1,35 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/phase5-package-gate.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/phase5-package-gate.test.ts (3 tests | 1 failed) 11ms
+   × admits the registered shared FX artifacts without allowing extra format or style entries 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/phase5-package-gate.test.ts > admits the registered shared FX artifacts without allowing extra format or style entries
+AssertionError: expected [Function] to not throw an error but 'TypeError: SDK package contains an un…' was thrown
+
+- Expected:
+undefined
+
++ Received:
+"TypeError: SDK package contains an unreviewed public file: fx/network.js"
+
+ ❯ tests/runtime/fx/phase5-package-gate.test.ts:43:92
+     41| it("admits the registered shared FX artifacts without allowing extra f…
+     42|   for (const family of ["bluetooth", "nfc", "speech", "contacts", "pas…
+     43|     expect(() => assertReviewedPackageFiles([`fx/${family}.js`, `fx/${…
+       |                                                                                            ^
+     44|     expect(() => assertReviewedPackageFiles([`fx/${family}.css`])).toT…
+     45|     expect(() => assertReviewedPackageFiles([`fx/${family}/private.js`…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  20:36:53
+   Duration  197ms (transform 37ms, setup 26ms, import 29ms, tests 11ms, environment 0ms)
+

@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-file-browser-packed.test.ts --testTimeout 120000
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-open-panel-457982c1
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  10:29:15
+   Duration  26.01s (transform 92ms, setup 39ms, import 78ms, tests 25.70s, environment 0ms)
+

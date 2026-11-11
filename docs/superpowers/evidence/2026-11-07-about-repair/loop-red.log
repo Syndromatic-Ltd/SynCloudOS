@@ -1,0 +1,45 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/animation-loops.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/animation-loops.test.ts (2 tests | 2 failed) 132ms
+   × accepts unbounded CoreAnimation timing while rejecting invalid infinity and zero cycles 18ms
+   × runs an endless native layer effect, suspends and resumes with visibility, and settles on reduced motion 112ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/animation-loops.test.ts > accepts unbounded CoreAnimation timing while rejecting invalid infinity and zero cycles
+RangeError: animation iterations is outside its supported bounds.
+ ❯ afxAnimationNumber src/FX/AnimationFX/animationValues.ts:61:11
+     59|     value > maximum
+     60|   ) {
+     61|     throw new RangeError(`${label} is outside its supported bounds.`);
+       |           ^
+     62|   }
+     63|   return value;
+ ❯ new AFXAnimation src/FX/AnimationFX/AFXAnimation.ts:83:23
+ ❯ tests/runtime/fx/animation-loops.test.ts:8:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/runtime/fx/animation-loops.test.ts > runs an endless native layer effect, suspends and resumes with visibility, and settles on reduced motion
+RangeError: animation iterations is outside its supported bounds.
+ ❯ afxAnimationNumber src/FX/AnimationFX/animationValues.ts:61:11
+     59|     value > maximum
+     60|   ) {
+     61|     throw new RangeError(`${label} is outside its supported bounds.`);
+       |           ^
+     62|   }
+     63|   return value;
+ ❯ new AFXAnimation src/FX/AnimationFX/AFXAnimation.ts:83:23
+ ❯ tests/runtime/fx/animation-loops.test.ts:26:126
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  08:45:07
+   Duration  5.45s (transform 2.73s, setup 29ms, import 3.18s, tests 132ms, environment 1.90s)
+

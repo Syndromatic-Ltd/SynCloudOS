@@ -1,0 +1,44 @@
+{
+  "typechecks": {
+    "framework": {
+      "passed": true,
+      "log": "framework-shared-typecheck-final.log"
+    },
+    "site": {
+      "passed": true,
+      "log": "site-typecheck-final.log"
+    }
+  },
+  "tests": {
+    "frameworkAnimationAndTransitions": {
+      "files": 41,
+      "passed": 243,
+      "failed": 0,
+      "total": 243,
+      "log": "framework-animation-suites-final.log",
+      "revision": "772d20b"
+    },
+    "siteAboutAndArtworkConsumers": {
+      "files": 19,
+      "passed": 129,
+      "failed": 0,
+      "total": 129,
+      "log": "site-consumers-final.log"
+    },
+    "sharedSiteSuite": {
+      "files": 61,
+      "passed": 398,
+      "failed": 3,
+      "total": 401,
+      "log": "site-suite-final.log",
+      "failures": [
+        "tests/runtime/gallery-atmo-surfaces.test.tsx > Gallery Atmo surface coverage in its class application > uses real owned window and document states for focus, minimisation, zoom and dirty/clean history",
+        "tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > moves imagePopover to a replacement button without closing it",
+        "tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > moves publishMenu to a replacement button without closing it"
+      ],
+      "note": "Remaining Gallery and Publisher failures in the concurrent shared source. These files were not edited by this task."
+    }
+  },
+  "browserErrors": 0,
+  "currentSdk": "b21cf2975212cf91ed0cb19f93165b586468b4c2"
+}

@@ -19,7 +19,7 @@
  */
 
 import type { GFXPoint, GFXRect, GFXSize } from "../../FX/GraphicsFX/GFXGeometry";
-import type { RangeValue } from "../Models/GeometryValues";
+import type { NSERange } from "../../Foundation/NSERange";
 import type { SynCloudOSRuntimeId } from "../Runtime/runtimeInstanceTypes";
 import type { RuntimeCacheRegistry } from "../Cache";
 import { createTFXFontHost } from "./TFXFontHost";
@@ -135,7 +135,7 @@ function normaliseSafeRect(value: unknown): GFXRect {
   });
 }
 
-function normaliseSafeRange(value: unknown, textLength: number): RangeValue {
+function normaliseSafeRange(value: unknown, textLength: number): NSERange {
   const record = dataRecord(value, "Text range", ["location", "length"]);
   if (!Number.isSafeInteger(record.location) || (record.location as number) < 0 || !Number.isSafeInteger(record.length) || (record.length as number) < 0) throw new RangeError("Text range is invalid.");
   const location = record.location as number;

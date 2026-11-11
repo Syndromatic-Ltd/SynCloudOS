@@ -1,0 +1,118 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/browser-application-host.test.tsx (36 tests | 1 failed) 3837ms
+     × grants a no-sign-in single application the document-store capabilities it declares 47ms
+ ❯ tests/runtime/synapp-context.test.tsx (14 tests | 2 failed) 178ms
+   × resolves only declared, host-provided app-scoped services and fails closed otherwise 9ms
+   × delivers declared notification actions only while their mounted client remains live 7ms
+ ❯ tests/runtime/registry-policy-lifecycle.test.ts (6 tests | 2 failed) 52ms
+     × keeps ConfigurationProfiles decisions explicit for public, system, and elevated subjects 5ms
+     × registers trusted bundles, plugins, and invokes lifecycle hooks 3ms
+ ❯ tests/runtime/synapp-sdk-package.test.ts (9 tests | 2 failed) 34115ms
+     × compiles, bundles and mounts a genuinely external consumer against packed public exports 16803ms
+     × derives archive declarations from the reviewed public entries instead of open handwritten mirrors 17281ms
+ ❯ tests/runtime/project-conventions-packed.test.ts (2 tests | 2 failed) 27ms
+   × bundles an installed browser host with discovery plugin=false 17ms
+   × bundles an installed browser host with discovery plugin=true 10ms
+ ❯ tests/runtime/foundation-packed-consumer.test.ts (1 test | 1 failed) 17ms
+   × uses Foundation and CPFX from an independent SDK installation in a worker and strict worker-lib consumer 16ms
+ ❯ tests/runtime/managed-typography-packed-consumer.test.ts (1 test | 1 failed) 16ms
+   × uses managed typography from an independently installed package in Node and app code 15ms
+ ❯ tests/runtime/fx/packed-video-capture.test.ts (1 test | 1 failed) 16ms
+   × executes scoped VideoFX capture from an independently installed SDK archive 15ms
+ ❯ tests/runtime/fx/packed-fx.test.ts (1 test | 1 failed) 18ms
+   × executes substantive FX operations from the built npm archive outside the repository 17ms
+ ❯ tests/runtime/fx/packed-value-foundations.test.ts (1 test | 1 failed) 18ms
+   × executes and typechecks LocationFX and MIDIFX from an independently installed SDK archive 17ms
+ ❯ tests/runtime/fx/packed-lumina.test.ts (1 test | 1 failed) 19ms
+   × executes and typechecks named-route LuminaFX values from an independently installed SDK archive 19ms
+ ❯ tests/runtime/fx/packed-video.test.ts (1 test | 1 failed) 19ms
+   × executes and typechecks VideoFX frame ownership from an independently installed SDK archive 18ms
+ ❯ tests/runtime/fx/packed-media.test.ts (1 test | 1 failed) 18ms
+   × executes and typechecks MediaFX from an independently installed SDK archive 17ms
+ ❯ tests/runtime/synware-public-api-repairs-packed.test.ts (1 test | 1 failed) 17ms
+   × typechecks and executes repaired APIs through an independently installed SDK 16ms
+ ❯ tests/runtime/chronosphere/chronosphere-packed-consumer.test.ts (1 test | 1 failed) 17ms
+   × preserves typed neutral versions and prepared custom views in an installed SDK 16ms
+ ❯ tests/runtime/browser-global-boundary.test.ts (8 tests | 1 failed) 16454ms
+     × keeps browser globals behind explicit platform adapters 4233ms
+ ❯ tests/runtime/nse-file-browser-packed.test.ts (1 test | 1 failed) 16ms
+   × exports usable path items and workspace artwork from an independently installed SDK 15ms
+ ❯ tests/runtime/heritage-inspector-source.test.ts (3 tests | 1 failed) 9503ms
+   × typechecks the Inspector source dependency closure without emitting package artifacts 8112ms
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+▲ [WARNING] "import.meta" is not available with the "iife" output format and will be empty [empty-import-meta]
+
+    src/NSE/Themes/Atmo/namedImages.ts:28:61:
+      28 │ ...ces/navigation-back.svg", import.meta.url).href, size: navigati...
+         ╵                              ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work correctly.
+
+▲ [WARNING] "import.meta" is not available with the "iife" output format and will be empty [empty-import-meta]
+
+    src/NSE/Themes/Atmo/namedImages.ts:31:64:
+      31 │ .../navigation-forward.svg", import.meta.url).href, size: navigati...
+         ╵                              ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work correctly.
+
+ ❯ tests/runtime/host-update-readiness.test.ts (28 tests | 3 failed) 1495ms
+     × wires the actual mounted share boundary to the runtime-owned underlying promise 15ms
+     × creates runtime-specific picker instrumentation for a shared environment and retains late native work 1009ms
+   × retains real mounted file-write work across mount retirement without charging a sibling runtime 5ms
+ ❯ tests/runtime/owned-work-observation.test.ts (11 tests | 1 failed) 5378ms
+     × tracks the actual application hook beyond its cancelled operation and account generation 5006ms
+ ❯ tests/runtime/class-test-host-document-store.test.tsx (16 tests | 8 failed) 299ms
+   × opens a seeded real DocumentStore envelope during class launch and saves a transaction to the same store 66ms
+   × commits exactly one concurrent conditional write and reports the other stale version 10ms
+   × denies retained host seed writes outside the declared owner and kind without altering the admitted record 10ms
+   × isolates two deterministic class hosts using identical document and adapter identifiers 11ms
+   × revokes retained provisioning ports and runs returned installation cleanup exactly once on disposal 8ms
+   × creates a missing document from initialModel when opening it, and writes it on the first save 20ms
+   × opens what is stored over initialModel 17ms
+   × still rejects a missing document when no initialModel is given 18ms
+ ❯ tests/runtime/preference-panes.test.tsx (21 tests | 5 failed) 370ms
+     × lists the built-ins in their default order, without Account when sign-in is not offered 83ms
+     × lists Account first when the host offers sign-in 21ms
+     × hides built-ins by id 14ms
+     × adds developer panes and orders every pane by order 16ms
+     × replaces a built-in with a developer pane of the same id, in the list and when opened 13ms
+ ❯ tests/runtime/synapp-sdk-testing.test.tsx (10 tests | 2 failed) 230ms
+   × boots an app against deterministic adapters and exposes only harness controls 3ms
+   × gates mounted public SDK operations through real deterministic adapters 1ms
+ ❯ tests/runtime/fx/lumina-authority.test.ts (13 tests | 1 failed) 163ms
+   × integrates mounted app ownership, trusted donation, ConfigurationProfiles, RouteManager and presentation settlement in one runtime 41ms
+ ❯ tests/runtime/fx/video-capture-mounted.test.tsx (4 tests | 2 failed) 139ms
+   × routes mounted video capture through manifest, privacy, lifecycle and deterministic test authority 95ms
+   × makes useVideo component-scoped and tears it down on unmount without prompting on mount 18ms
+ ❯ tests/runtime/framework-doc-links.test.ts (4 tests | 1 failed) 71ms
+     × links every guide from the framework index 16ms
+ ❯ tests/runtime/runtime.test.ts (14 tests | 1 failed) 119ms
+     × keeps replacement managers runtime-owned and uninstalls their host resources on disposal 4ms
+ ❯ tests/runtime/fx/location-mounted.test.tsx (2 tests | 2 failed) 99ms
+   × keeps mounted privacy authority before a mounted LocationFX client reaches its host adapter 81ms
+   × routes a mounted watch through lifecycle suspension, reauthorization and mount revocation 17ms
+ ❯ tests/runtime/fx/phase5-mounted.test.tsx (1 test | 1 failed) 97ms
+   × projects all six real mounted clients and revokes component owners on unmount 97ms
+Not implemented: navigation to another Document

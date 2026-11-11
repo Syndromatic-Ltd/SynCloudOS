@@ -1,0 +1,54 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/theme-css-selectors.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/theme-css-selectors.test.ts (5 tests | 2 failed) 9ms
+     × accepts a control's nested state predicates 6ms
+     × rejects a negative predicate as the only anchor 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/theme-css-selectors.test.ts > contract selector anchoring > accepts a control's nested state predicates
+AssertionError: expected [Function] to not throw an error but 'TypeError: C:\Users\Kavish Krishnakum…' was thrown
+
+- Expected:
+undefined
+
++ Received:
+"TypeError: C:\\Users\\Kavish Krishnakumar\\Developer\\SynCloudOS-Workspace\\.worktrees\\webspring-folders\\framework\\theme.css: css-selector: A selector needs a control, part or :scope hook: [data-nse-highlighted]"
+
+ ❯ tests/runtime/theme-css-selectors.test.ts:8:147
+      6| const validate = (selector: string) => validateThemeCSS(selector + " {…
+      7| describe("contract selector anchoring", () => {
+      8|   it("accepts a control's nested state predicates", () => { expect(() …
+       |                                                                                                                                                   ^
+      9|   it("accepts part alternatives within a control", () => { expect(() =…
+     10|   it("accepts alternative anchored controls", () => { expect(() => val…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/runtime/theme-css-selectors.test.ts > contract selector anchoring > rejects a negative predicate as the only anchor
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ tests/runtime/theme-css-selectors.test.ts:11:125
+      9|   it("accepts part alternatives within a control", () => { expect(() =…
+     10|   it("accepts alternative anchored controls", () => { expect(() => val…
+     11|   it("rejects a negative predicate as the only anchor", () => { expect…
+       |                                                                                                                             ^
+     12|   it("rejects an unanchored universal alternative", () => { expect(() …
+     13| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 3 passed (5)
+   Start at  00:23:37
+   Duration  470ms (transform 88ms, setup 27ms, import 306ms, tests 9ms, environment 0ms)

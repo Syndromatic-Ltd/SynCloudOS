@@ -18,9 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { SynCloudOSNotificationCenter, SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
 import type { RuntimeSnapshot } from "../Runtime/runtimeTypes";
-import type { SynCloudOSPolicyDecision, SynCloudOSPolicyRequest, SynCloudOSPolicySubject } from "../PolicyKit/policyTypes";
+import type { SynCloudOSPolicyDecision, SynCloudOSPolicyRequest, SynCloudOSPolicySubject } from "../ConfigurationProfiles/policyTypes";
 import {
   createNotificationPolicySnapshot,
   type SynCloudOSNotification,
@@ -184,7 +185,7 @@ function createGroup(input: SynCloudOSNotificationPostInput, createdAt: number):
   const kind = input.group?.kind ?? input.kind;
   const threadKey = input.group?.threadKey ?? input.threadKey;
   const appId = input.group?.appId ?? input.appId;
-  const key = input.groupKey ?? input.group?.key ?? [appId ?? "system", kind, threadKey ?? "general", dateKey].join(":");
+  const key = input.groupKey ?? input.group?.key ?? [appId ? normalizeBundleIdentifier(appId) : "system", kind, threadKey ?? "general", dateKey].join(":");
 
   return {
     key,
@@ -309,19 +310,19 @@ function trimHistory(notifications: SynCloudOSNotification[]) {
   notifications.splice(MAX_NOTIFICATION_HISTORY, Math.max(0, notifications.length - MAX_NOTIFICATION_HISTORY));
 }
 
-function createBadgeSnapshot(notifications: SynCloudOSNotification[], now: number): SynCloudOSNotificationBadgeSnapshot {
+export function createBadgeSnapshot(notifications: SynCloudOSNotification[], now: number): SynCloudOSNotificationBadgeSnapshot {
   const records: Record<string, SynCloudOSNotificationAppBadgeSnapshot & { explicitCount?: number }> = {};
 
   for (const notification of notifications) {
     if (!notification.appId || !isActive(notification, now)) continue;
 
-    const current = records[notification.appId];
+    const current = records[normalizeBundleIdentifier(notification.appId)];
     const explicitCount = current?.explicitCount ?? (
       typeof notification.badgeCount === "number" ? notification.badgeCount : undefined
     );
     const notificationIds = [...(current?.notificationIds ?? []), notification.id];
 
-    records[notification.appId] = {
+    records[normalizeBundleIdentifier(notification.appId)] = {
       appId: notification.appId,
       count: explicitCount ?? notificationIds.length,
       explicitCount,
@@ -350,13 +351,13 @@ function syncAppBadges(draft: RuntimeSnapshot, now: number) {
   );
 
   for (const appId of notificationAppIds) {
-    const app = draft.appInfo[appId];
+    const app = draft.appInfo[normalizeBundleIdentifier(appId)];
     if (!app) continue;
-    draft.appInfo[appId] = {
+    draft.appInfo[normalizeBundleIdentifier(appId)] = {
       ...app,
       notifications: {
         ...app.notifications,
-        badgeCount: badgeSnapshot.byAppId[appId]?.count ?? 0
+        badgeCount: badgeSnapshot.byAppId[normalizeBundleIdentifier(appId)]?.count ?? 0
       }
     };
   }
@@ -435,12 +436,12 @@ type NotificationCenterPostInput = SynCloudOSNotificationPostInput | UserNotific
 export function createNotificationCenter(
   runtime: SynCloudOSRuntime,
   dependencies: {
-    policyKit?: { authorise(request: SynCloudOSPolicyRequest): SynCloudOSPolicyDecision };
+    configurationProfiles?: { authorise(request: SynCloudOSPolicyRequest): SynCloudOSPolicyDecision };
     userNotifications?: UserNotificationCenter;
   } = {}
 ): SynCloudOSNotificationCenter {
 const EventBus = runtime.events;
-const PolicyKit = dependencies.policyKit ?? runtime.policy;
+const ConfigurationProfiles = dependencies.configurationProfiles ?? runtime.configurationProfiles;
 const RuntimeStore = runtime.store;
 const SettingsService = runtime.settings;
 
@@ -469,8 +470,8 @@ function evaluatePolicy(
   const mode = options.policy ?? "system";
   if (mode === "skip") return { mode, decision: null, snapshot: undefined };
 
-  const app = input.appId ? RuntimeStore.getSnapshot().appInfo[input.appId] ?? null : null;
-  const decision = PolicyKit.authorise({
+  const app = input.appId ? RuntimeStore.getSnapshot().appInfo[normalizeBundleIdentifier(input.appId)] ?? null : null;
+  const decision = ConfigurationProfiles.authorise({
     action: "notification.post",
     source: options.source ?? input.source ?? "SynCloudOS.NotificationCenter.post",
     origin: options.origin ?? "runtime",

@@ -246,7 +246,7 @@ describe("FilePanelService", () => {
     if (reference.kind !== "file-handle") throw new Error("expected file handle");
     expect(await reference.queryPermission()).toBe("prompt");
     expect(await reference.requestPermission()).toBe("granted");
-    expect(await reference.read()).toMatchObject({ name: "editable.txt" });
+    expect(new TextDecoder().decode((await reference.read()).bytes)).toBe("file");
     selected.revoke();
     expect(await reference.queryPermission()).toBe("revoked");
     await expect(reference.read()).rejects.toMatchObject({ code: "permission-revoked" });
@@ -344,7 +344,7 @@ describe("FilePanelService", () => {
     if (save.kind !== "accepted") throw new Error("expected download destination");
     const target = save.values[0]!;
     expect(target).toMatchObject({ kind: "download-export", exists: false, suggestedName: "copy.txt" });
-    await expect(target.sink.write({ fileName: "copy.txt", mediaType: "text/plain", blob: new Blob(["copy"]) })).resolves.toEqual({ kind: "exported", fileName: "copy.txt" });
+    await expect(target.sink.write({ fileName: "copy.txt", mediaType: "text/plain", data: new TextEncoder().encode("copy") })).resolves.toEqual({ kind: "exported", fileName: "copy.txt" });
   });
 
   it("rejects content by the supplied validator rather than selected name or MIME metadata", async () => {
@@ -734,7 +734,7 @@ describe("FilePanelService", () => {
     });
     if (selectedTarget.kind !== "accepted") throw new Error("expected selected target");
 
-    await expect(selectedTarget.values[0]!.sink.write({ fileName: "close-race.txt", mediaType: "text/plain", blob: new Blob(["copy"]) }, controller.signal)).resolves.toEqual({ kind: "exported", fileName: "close-race.txt" });
+    await expect(selectedTarget.values[0]!.sink.write({ fileName: "close-race.txt", mediaType: "text/plain", data: new TextEncoder().encode("copy") }, controller.signal)).resolves.toEqual({ kind: "exported", fileName: "close-race.txt" });
     expect(abort).not.toHaveBeenCalled();
   });
 
@@ -850,4 +850,16 @@ describe("FilePanelService", () => {
       document.body.replaceChildren();
     }
   });
+});
+
+it.each(["read", "readwrite"] as const)("keeps native MIME metadata live after %s byte reads", async access => {
+  const selected = fileHandle("sample.txt");
+  const adapter = createFileSystemAccessPanelAdapter({ isSecureContext: () => true, hasTransientUserActivation: () => true,
+    openFiles: async () => [selected.handle], openDirectory: async () => null, saveFile: async () => null });
+  const result = await adapter.open({ ...readOpenRequest("mime-read"), access }, new AbortController().signal);
+  if (result.kind !== "accepted" || result.values[0]!.kind !== "file-handle") throw new Error("Expected file reference");
+  const reference = result.values[0]!;
+  await reference.requestPermission();
+  await reference.read();
+  expect(reference.mediaType).toBe("text/plain");
 });

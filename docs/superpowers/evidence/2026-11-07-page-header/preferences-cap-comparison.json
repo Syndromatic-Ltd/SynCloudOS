@@ -1,0 +1,25 @@
+{
+  "geometryUnchanged": false,
+  "maximumGeometryDifference": 0.015625,
+  "bounds": {
+    "x": 520,
+    "y": 296.484375,
+    "width": 400,
+    "height": 66,
+    "top": 296.484375,
+    "right": 920,
+    "bottom": 362.484375,
+    "left": 520
+  },
+  "region": {
+    "left": 534,
+    "top": 300,
+    "width": 372,
+    "height": 60
+  },
+  "changedChannels": 0,
+  "totalChannels": 66960,
+  "meanAbsoluteChannelDifference": 0,
+  "maximumChannelDifference": 0,
+  "note": "Opaque cap interior, excluding antialiased corners; original screenshot is Software, replacement screenshot is the gallery. Geometry allows 1/32 CSS pixel of subpixel centring."
+}

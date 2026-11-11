@@ -18,7 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useContext, useLayoutEffect, useRef, type ReactNode } from "react";
+import { createContext, useContext, useLayoutEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
+import { NSEControllerLifetime } from "../Controllers/controllerLifetime";
+import type { NSEControllerOwnershipOptions } from "../Controllers/ownership";
 
 export interface NSEApplicationNavigationChromeState {
   readonly ownerId: string;
@@ -76,6 +78,14 @@ export class NSEApplicationNavigationChromeController {
   #revision = 0;
   #snapshot = freezeSnapshot(0, null);
   #disposed = false;
+  readonly #lifetime: NSEControllerLifetime;
+
+  constructor(options: NSEControllerOwnershipOptions = {}) {
+    this.#lifetime = new NSEControllerLifetime(options, { kind: "NSEApplicationNavigationChromeController", id: "navigation-chrome" });
+    this.#lifetime.bind(() => this.dispose());
+  }
+
+  get isDisposed(): boolean { return this.#disposed; }
 
   getSnapshot = (): NSEApplicationNavigationChromeSnapshot => this.#snapshot;
 
@@ -122,6 +132,7 @@ export class NSEApplicationNavigationChromeController {
   dispose(): void {
     if (this.#disposed) return;
     this.#disposed = true;
+    this.#lifetime.dispose();
     this.#claim = null;
     this.#listeners.clear();
     this.#snapshot = freezeSnapshot(this.#revision, null);
@@ -135,17 +146,22 @@ export class NSEApplicationNavigationChromeController {
 }
 
 const NSEApplicationNavigationChromeContext = createContext<NSEApplicationNavigationChromeController | null>(null);
+const NSEStandardNavigationChromeAvailableContext = createContext(true);
+const NSEControllerNavigationChromeBoundaryContext = createContext(false);
 
 export function NSEApplicationNavigationChromeProvider({
   controller,
   children,
+  standardChromeAvailable = true,
 }: {
   readonly controller: NSEApplicationNavigationChromeController;
   readonly children?: ReactNode;
+  /** @internal Whether this host actually renders standard application chrome. */
+  readonly standardChromeAvailable?: boolean;
 }): ReactNode {
   return (
     <NSEApplicationNavigationChromeContext.Provider value={controller}>
-      {children}
+      <NSEStandardNavigationChromeAvailableContext.Provider value={standardChromeAvailable}>{children}</NSEStandardNavigationChromeAvailableContext.Provider>
     </NSEApplicationNavigationChromeContext.Provider>
   );
 }
@@ -153,17 +169,54 @@ export function NSEApplicationNavigationChromeProvider({
 /** Registers one hierarchy owner against the nearest application-stage chrome. */
 export function useNSEApplicationNavigationChrome(state: NSEApplicationNavigationChromeState | null): void {
   const controller = useContext(NSEApplicationNavigationChromeContext);
+  useNavigationChromeClaim(controller, state);
+}
+
+/** @internal A default container owns the application boundary; embedded containers keep local chrome. */
+export function NSEControllerNavigationChromeBoundary({ children }: { readonly children: ReactNode }): ReactNode {
+  return <NSEControllerNavigationChromeBoundaryContext.Provider value={true}>{children}</NSEControllerNavigationChromeBoundaryContext.Provider>;
+}
+
+/** @internal The default controller renderers need to know whether the stage accepted their claim. */
+export function useNSEControllerNavigationChrome(state: NSEApplicationNavigationChromeState | null): boolean {
+  const controller = useContext(NSEApplicationNavigationChromeContext);
+  const available = useContext(NSEStandardNavigationChromeAvailableContext);
+  const embedded = useContext(NSEControllerNavigationChromeBoundaryContext);
+  const effectiveState = available && !embedded ? state : null;
+  useNavigationChromeClaim(controller, effectiveState);
+  const snapshot = useSyncExternalStore(controller?.subscribe ?? noNavigationChromeSubscription,
+    controller?.getSnapshot ?? noNavigationChromeSnapshot, controller?.getSnapshot ?? noNavigationChromeSnapshot);
+  return effectiveState !== null && snapshot?.active?.ownerId === effectiveState.ownerId;
+}
+
+const noNavigationChromeSubscription = () => () => {};
+const noNavigationChromeSnapshot = () => null;
+
+function useNavigationChromeClaim(controller: NSEApplicationNavigationChromeController | null, state: NSEApplicationNavigationChromeState | null): void {
   const claim = useRef<NSEApplicationNavigationChromeClaim | null>(null);
   const ownerId = state?.ownerId ?? null;
 
+  const latestState = useRef(state);
+  latestState.current = state;
   useLayoutEffect(() => {
     if (!controller || !ownerId) return undefined;
-    const nextClaim = controller.claim(ownerId);
-    claim.current = nextClaim;
-    if (nextClaim && state) nextClaim.update({ title: state.title, back: state.back });
+    // A default container can release chrome after its initial compact layout.
+    // Retain the pending owner and retry the claim when that slot becomes free.
+    const acquire = () => {
+      const current = latestState.current;
+      if (claim.current || !current || current.ownerId !== ownerId) return;
+      const nextClaim = controller.claim(ownerId);
+      if (!nextClaim) return;
+      claim.current = nextClaim;
+      nextClaim.update({ title: current.title, back: current.back });
+    };
+    const unsubscribe = controller.subscribe(acquire);
+    acquire();
     return () => {
-      nextClaim?.release();
-      if (claim.current === nextClaim) claim.current = null;
+      unsubscribe();
+      const previousClaim = claim.current;
+      claim.current = null;
+      previousClaim?.release();
     };
   }, [controller, ownerId]);
 
@@ -171,5 +224,4 @@ export function useNSEApplicationNavigationChrome(state: NSEApplicationNavigatio
     if (!state) return;
     claim.current?.update({ title: state.title, back: state.back });
   }, [state]);
-
 }

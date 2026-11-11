@@ -1,0 +1,69 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-theme-system-surface-coverage.test.tsx tests/runtime/webspring-quickswitch-presentation.test.tsx tests/runtime/webspring-folder-presentation.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/webspring-folder-presentation.test.tsx (12 tests | 1 failed) 602ms
+     × copies the stage into both halves as it mounts, with no capture to wait for 40ms
+ ❯ tests/runtime/webspring-quickswitch-presentation.test.tsx (4 tests | 1 failed) 132ms
+   × selects on hover without scrolling the row; keyboard selection only scrolls as far as needed 16ms
+ ❯ tests/runtime/nse-theme-system-surface-coverage.test.tsx (11 tests | 1 failed) 305ms
+     × publishes the stage's key state and its status-bar slot 68ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-theme-system-surface-coverage.test.tsx > system surface theme hooks > publishes the stage's key state and its status-bar slot
+TypeError: Cannot read properties of null (reading 'dataset')
+ ❯ tests/runtime/nse-theme-system-surface-coverage.test.tsx:24:17
+     22|     const view = render(surface(false));
+     23|     const root = view.container.querySelector<HTMLElement>('[data-nse-…
+     24|     expect(root.dataset.nseKeyWindow).toBe("false");
+       |                 ^
+     25|     expect(root.querySelector('[data-nse-control="status-bar"]')).not.…
+     26|     view.rerender(surface(true));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/runtime/webspring-folder-presentation.test.tsx > Webspring folder split presentation > copies the stage into both halves as it mounts, with no capture to wait for
+AssertionError: expected undefined to be 'folder-presentation' // Object.is equality
+
+- Expected:
+"folder-presentation"
+
++ Received:
+undefined
+
+ ❯ tests/runtime/webspring-folder-presentation.test.tsx:105:37
+    103|   it("copies the stage into both halves as it mounts, with no capture …
+    104|     const { root } = renderSplit();
+    105|     expect(root.dataset.nseControl).toBe("folder-presentation");
+       |                                     ^
+    106|     expect(root.dataset.nsePart).toBe("background");
+    107|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/runtime/webspring-quickswitch-presentation.test.tsx > selects on hover without scrolling the row; keyboard selection only scrolls as far as needed
+AssertionError: expected null to be 'quick-switch' // Object.is equality
+
+- Expected:
+"quick-switch"
+
++ Received:
+null
+
+ ❯ tests/runtime/webspring-quickswitch-presentation.test.tsx:102:98
+    100|       </SynCloudOSProvider>
+    101|     );
+    102|     expect(screen.getByRole("dialog", { name: "QuickSwitch" }).getAttr…
+       |                                                                                                  ^
+    103|     const options = screen.getAllByRole("option");
+    104|     expect(options[0]!.getAttribute("data-nse-control")).toBe("app-ico…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  3 failed (3)
+      Tests  3 failed | 24 passed (27)
+   Start at  21:31:17
+   Duration  7.94s (transform 6.74s, setup 56ms, import 11.40s, tests 1.04s, environment 2.55s)

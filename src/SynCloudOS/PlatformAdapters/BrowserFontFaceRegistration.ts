@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../Foundation/NSEData";
+
 import type { TFXFontFaceRegistrationRequest } from "../../FX/TextFX/textLayoutTypes";
 import type { BrowserTextLayoutPlatform } from "./browserTextLayoutAdapterTypes";
 
@@ -66,7 +68,7 @@ export function createBrowserFontFaceRegistrationPort(
       const variationSettings = Object.entries(request.descriptor.variations)
         .map(([tag, value]) => `"${tag}" ${value}`)
         .join(", ");
-      const face = new FontFaceConstructor(request.familyName, request.bytes.slice().buffer, variationSettings ? { variationSettings } : undefined);
+      const face = new FontFaceConstructor(request.familyName, NSEData.from(request.bytes).bytes.buffer, variationSettings ? { variationSettings } : undefined);
       let added = false;
       try {
         await waitForFontReadiness(face.load(), request.signal);

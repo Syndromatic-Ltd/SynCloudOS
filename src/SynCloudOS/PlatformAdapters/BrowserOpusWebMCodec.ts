@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../Foundation/NSEData";
+
+
 import { MEFXSampleTimingInfo } from "../../FX/MediaFX/MEFXSampleTimingInfo";
 import { MEFXTime } from "../../FX/MediaFX/MEFXTime";
 import type { AUFXAudioFile } from "../../FX/AudioFX/AUFXAudioFile";
@@ -118,9 +121,9 @@ export async function encodeOpusWebM(file: AUFXAudioFile, signal: AbortSignal, b
         writer = new VFXContainerWriter({ backend: new VFXWebMContainerBackend(), track, signal,
           maximumBufferedBytes: 2 * 1024 * 1024,
           sink: { write(fragment) {
-            if (writtenBytes + fragment.byteLength > MAX_ENCODED_BYTES)
+            if (writtenBytes + fragment.count > MAX_ENCODED_BYTES)
               throw new DOMException("Opus WebM export exceeds the 16 MiB byte budget.", "QuotaExceededError");
-            parts.push(fragment.slice().buffer as ArrayBuffer); writtenBytes += fragment.byteLength;
+            parts.push(fragment.bytes.buffer); writtenBytes += fragment.count;
           }, abort() { parts.length = 0; writtenBytes = 0; } },
         });
       }
@@ -191,7 +194,7 @@ export async function encodeOpusWebM(file: AUFXAudioFile, signal: AbortSignal, b
 }
 
 /** Duration-independent Opus/WebM export. Source and sink each have one owner for the entire operation. */
-export async function encodeOpusWebMStream(source: AUFXAudioChunkStream, sink: WritableStream<Uint8Array>, signal: AbortSignal, bitrate?: number): Promise<AUFXAudioStreamExport> {
+export async function encodeOpusWebMStream(source: AUFXAudioChunkStream, sink: WritableStream<NSEData>, signal: AbortSignal, bitrate?: number): Promise<AUFXAudioStreamExport> {
   signal.throwIfAborted();
   if (bitrate !== undefined && (!Number.isSafeInteger(bitrate) || bitrate < 6_000 || bitrate > 256_000))
     throw new RangeError("Opus bitrate must be between 6000 and 256000 bits per second.");
@@ -284,10 +287,10 @@ export async function encodeOpusWebMStream(source: AUFXAudioChunkStream, sink: W
             maximumBufferedBytes: 2 * 1024 * 1024,
             sink: {
               async write(fragment) {
-                if (!Number.isSafeInteger(writtenBytes + fragment.byteLength))
+                if (!Number.isSafeInteger(writtenBytes + fragment.count))
                   throw new RangeError("Opus WebM output exceeds the safe byte range.");
                 await awaitOpusAbort(sinkWriter.write(fragment), signal);
-                writtenBytes += fragment.byteLength;
+                writtenBytes += fragment.count;
               },
               async close() {
                 await awaitOpusAbort(sinkWriter.close(), signal);
@@ -432,7 +435,7 @@ export async function decodeOpusWebM(bytes: Uint8Array, signal: AbortSignal): Pr
       if (signal.aborted) throw abortError(signal);
       const timing = packet.webCodecsTiming();
       decoder.decode(new EncodedAudioChunk({ type: "key", timestamp: timing.timestampMicroseconds,
-        ...(timing.durationMicroseconds === null ? {} : { duration: timing.durationMicroseconds }), data: packet.copyData() }));
+        ...(timing.durationMicroseconds === null ? {} : { duration: timing.durationMicroseconds }), data: packet.copyData().bytes }));
       await decoder.flush();
       if (signal.aborted) throw abortError(signal);
       if (error) throw error;

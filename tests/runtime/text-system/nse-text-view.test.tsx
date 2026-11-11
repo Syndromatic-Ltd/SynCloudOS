@@ -29,7 +29,7 @@ afterEach(cleanup);
 describe("bounded text view", () => {
   it("leaves links followable in a read-only view", () => {
     const owner = createInMemoryNSETextOwner({ content: attributedContent([paragraph([textRun("Read on", { link: "https://syndromatic.example/journal" })])]) });
-    const session = new TextEditingSession({ id: "reader", owner, editable: false });
+    const session = new TextEditingSession({ id: "reader", textOwner: owner, editable: false });
     render(<NSETextView session={session} label="Post" />);
     const link = screen.getByRole("textbox").querySelector("a")!;
     expect(link.getAttribute("href")).toBe("https://syndromatic.example/journal");
@@ -38,7 +38,7 @@ describe("bounded text view", () => {
     expect(click.defaultPrevented).toBe(false);
   });
   it("updates accessible presentation options without replacing the native editing host", () => {
-    const owner = createInMemoryNSETextOwner(); const session = new TextEditingSession({ id: "stable", owner });
+    const owner = createInMemoryNSETextOwner(); const session = new TextEditingSession({ id: "stable", textOwner: owner });
     const mounted = render(<NSETextView session={session} label="Initial" spellCheck />);
     const native = screen.getByRole("textbox", { name: "Initial" });
     mounted.rerender(<NSETextView session={session} label="Revised" spellCheck={false} />);
@@ -47,8 +47,8 @@ describe("bounded text view", () => {
   });
   it("projects canonical multiline text and updates two views from one owner", () => {
     const owner = createInMemoryNSETextOwner({ content: attributedContent([paragraph([textRun("one")]), paragraph([textRun("two")])]) });
-    const first = new TextEditingSession({ id: "first", owner });
-    const second = new TextEditingSession({ id: "second", owner });
+    const first = new TextEditingSession({ id: "first", textOwner: owner });
+    const second = new TextEditingSession({ id: "second", textOwner: owner });
     render(<><NSETextView session={first} label="First" /><NSETextView session={second} label="Second" /></>);
     expect(screen.getAllByRole("textbox").map(el => el.textContent)).toEqual(["onetwo", "onetwo"]);
     act(() => { first.select(0, 3); first.insertText("new"); });
@@ -56,7 +56,7 @@ describe("bounded text view", () => {
   });
   it("projects formatting and transitions to read-only without exposing a backend", () => {
     const owner = createInMemoryNSETextOwner({ content: attributedContent([paragraph([textRun("hello")])]) });
-    const session = new TextEditingSession({ id: "first", owner });
+    const session = new TextEditingSession({ id: "first", textOwner: owner });
     render(<NSETextView session={session} label="Document" />);
     act(() => { session.select(0, 5); session.applyAttributes({ bold: true }); });
     expect(screen.getByRole("textbox").querySelector("span")?.style.fontWeight).toBe("700");
@@ -65,7 +65,7 @@ describe("bounded text view", () => {
     expect(screen.getByRole("textbox").getAttribute("aria-readonly")).toBe("true");
   });
   it("unmounts presentation without disposing the shared content owner", () => {
-    const owner = createInMemoryNSETextOwner(); const session = new TextEditingSession({ id: "one", owner });
+    const owner = createInMemoryNSETextOwner(); const session = new TextEditingSession({ id: "one", textOwner: owner });
     const view = render(<NSETextView session={session} label="Document" />);
     view.unmount(); session.insertText("still alive");
     expect(owner.getSnapshot().text).toBe("still alive");

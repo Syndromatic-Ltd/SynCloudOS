@@ -53,18 +53,26 @@ test("framework source does not fetch assets from the consumer origin root", () 
 test("all authored CSS asset URLs rewrite to existing framework-owned resources", () => {
   const plugin = sdkPackageStyles({ themeNames: [], frameworkPublicDirectory: resolve(root, "public") });
   plugin.configResolved({ publicDir: false });
-  const stripUrls = (source) => source.replace(/url\([^)]*\)/g, "url()");
+  const stripUrls = (source) => source.replace(/url\(\s*(?:"[^"]*"|'[^']*'|[^)]*)\s*\)/g, "url()");
   const stylesheets = areas.flatMap((area) => sources(resolve(root, "src", area), /\.css$/));
   let count = 0;
   for (const path of stylesheets) {
     const source = readFileSync(path, "utf8");
-    const rewritten = plugin.transform(source, path)?.code ?? source;
+    const rewritten = plugin.transform.call({ emitFile: (asset) => {
+      assert.equal(asset.type, "asset");
+      assert.match(asset.source, /^<svg\b/u);
+      return "vector-resource";
+    } }, source, path)?.code ?? source;
     assert.equal(stripUrls(rewritten), stripUrls(source), `CSS declarations changed: ${path}`);
     for (const match of source.matchAll(/url\(\s*["']?(\/assets\/[^"'()]+)["']?\s*\)/g)) {
       count++;
       assert.ok(!/url\(\s*["']?\/assets\//.test(rewritten), `unrewritten asset: ${path}: ${match[1]}`);
     }
     for (const match of rewritten.matchAll(/url\(\s*["']?([^"'()]+\?no-inline)["']?\s*\)/g)) {
+      if (match[1].startsWith("__VITE_ASSET__")) {
+        assert.equal(match[1], "__VITE_ASSET__vector-resource__?no-inline");
+        continue;
+      }
       const asset = fileURLToPath(new URL(match[1], pathToFileURL(path)));
       assert.ok(readFileSync(asset).length > 0, `missing or empty package resource: ${asset}`);
     }
@@ -120,6 +128,8 @@ test("CSS-only package emits browser runtime rules and relocatable artwork", asy
     assert.match(browser, /\.syncloudos-login-gate/);
     assert.match(browser, /\.syncloudos-login-backdrop/);
     assert.match(browser, /prefers-reduced-motion/);
+    // Node imports the browser entry; its runtime CSS reaches browsers only through browser/styles.css.
+    assert.doesNotMatch(output.get("browser.js").code, /import\s*["'][^"']+\.css["']/);
     cssAt("nse/styles.css");
   } finally {
     rmSync(directory, { recursive: true, force: true });
@@ -135,12 +145,14 @@ test("framework artwork survives an isolated Vite library build and relocation w
   const modules = [
     "src/SynCloudOS/Resources/frameworkAssets.ts",
     "src/NSE/SystemUI/LoginWindow/loginWindowAssets.ts",
+    "src/Webspring/webspringSurface.ts",
   ];
   const directory = mkdtempSync(resolve(tmpdir(), "syncloudos-asset-portability-"));
   const entry = resolve(directory, "framework-assets-probe.ts");
   try {
     writeFileSync(entry, modules.map((path, index) =>
-      `export * as module${index} from ${JSON.stringify(resolve(root, path).replaceAll("\\", "/"))};`).join("\n"));
+      `export * as module${index} from ${JSON.stringify(resolve(root, path).replaceAll("\\", "/"))};`).join("\n") +
+      `\nimport { WebspringSurface } from ${JSON.stringify(resolve(root, "src/Webspring/webspringSurface.ts").replaceAll("\\", "/"))};\nexport const cotton = WebspringSurface.cotton();\n`);
     // Only resource leaf modules: this does not run or overwrite the SDK build.
     const result = await build({
       root, configFile: false, publicDir: false, base: "./", logLevel: "silent",
@@ -158,6 +170,7 @@ test("framework artwork survives an isolated Vite library build and relocation w
       writeFileSync(target, item.type === "chunk" ? item.code : item.source);
     }
     const built = await import(pathToFileURL(resolve(directory, "resources.mjs")).href);
+    assert.match(built.cotton.texture.image, /^file:/, "the default Board texture must relocate with its package");
     const urls = new Set();
     function visit(value) {
       if (typeof value === "string" && value.startsWith("file:")) urls.add(value);

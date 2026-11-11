@@ -1,0 +1,66 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/animation-reduced-crossfade.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/animation-reduced-crossfade.test.ts (3 tests | 3 failed) 12ms
+   × preserves a single system opacity crossfade under reduced motion 8ms
+   × preserves opacity on a runtime preference change and still honours explicit pause 1ms
+   × settles system repeats and always effects, while never opts out of spatial reduction 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/animation-reduced-crossfade.test.ts > preserves a single system opacity crossfade under reduced motion
+AssertionError: expected 'completed' to be 'running' // Object.is equality
+
+Expected: "running"
+Received: "completed"
+
+ ❯ tests/runtime/fx/animation-reduced-crossfade.test.ts:22:24
+     20|   const handle = f.layer.addAnimation(new AFXBasicAnimation({ targetId…
+     21|     animation: new AFXAnimation({ duration: 0.24, timing: "linear", re…
+     22|   expect(handle.state).toBe("running");
+       |                        ^
+     23|   f.tick(0.12); expect(f.layer.presentation.opacity).toBeCloseTo(0.5);
+     24|   f.tick(0.24); expect(handle.state).toBe("completed");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/runtime/fx/animation-reduced-crossfade.test.ts > preserves opacity on a runtime preference change and still honours explicit pause
+AssertionError: expected 'completed' to be 'paused' // Object.is equality
+
+Expected: "paused"
+Received: "completed"
+
+ ❯ tests/runtime/fx/animation-reduced-crossfade.test.ts:33:24
+     31|     animation: new AFXAnimation({ duration: 1, timing: "linear" }) }));
+     32|   f.tick(0.2); handle.pause(); f.reduce();
+     33|   expect(handle.state).toBe("paused");
+       |                        ^
+     34|   expect(f.layer.presentation.opacity).toBeCloseTo(0.2);
+     35|   handle.resume(); f.tick(0.4); expect(f.layer.presentation.opacity).t…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/runtime/fx/animation-reduced-crossfade.test.ts > settles system repeats and always effects, while never opts out of spatial reduction
+AssertionError: expected 'running' to be 'completed' // Object.is equality
+
+Expected: "completed"
+Received: "running"
+
+ ❯ tests/runtime/fx/animation-reduced-crossfade.test.ts:50:26
+     48|     const handle = f.layer.addAnimation(new AFXBasicAnimation({ target…
+     49|       animation: new AFXAnimation({ duration: 1, reducedMotion: policy…
+     50|     expect(handle.state).toBe(expected); f.layer.dispose();
+       |                          ^
+     51|   }
+     52| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed (3)
+   Start at  09:09:35
+   Duration  796ms (transform 501ms, setup 28ms, import 621ms, tests 12ms, environment 0ms)
+

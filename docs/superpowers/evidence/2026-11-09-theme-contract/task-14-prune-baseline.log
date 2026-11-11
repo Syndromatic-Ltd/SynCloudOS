@@ -1,0 +1,104 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run playwright test tests/e2e/theme-baseline.spec.ts --project=chromium --project=chromium-high-dpr --workers=2 --reporter=line
+
+Running 82 tests using 2 workers
+
+
+(node:31912) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+(node:39404) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[1/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1
+[2/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2
+[3/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3
+[4/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 4
+[5/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 5
+[6/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 6
+[7/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 7
+[8/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 8
+[9/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 9
+[10/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 10
+[11/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 11
+[12/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 12
+[13/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 13
+[14/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 14
+[15/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 15
+[16/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 16
+[17/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 17
+[18/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 18
+[19/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 19
+[20/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 20
+[21/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1
+[22/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 2
+[23/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 3
+[24/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 4
+[25/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 5
+[26/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 6
+[27/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 7
+[28/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 8
+[29/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 9
+[30/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 10
+[31/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 11
+[32/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 12
+[33/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 13
+[34/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 14
+[35/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 15
+[36/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 16
+[37/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 17
+[38/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 18
+[39/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 19
+[40/82] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 20
+[41/82] [chromium] › tests\e2e\theme-baseline.spec.ts:113:1 › stepper hit targets preserve the painted bezel
+
+(node:15416) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[42/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1
+
+(node:89972) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[43/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2
+[44/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3
+[45/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 4
+[46/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 5
+[47/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 6
+[48/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 7
+[49/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 8
+[50/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 9
+[51/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 10
+[52/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 11
+[53/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 12
+[54/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 13
+[55/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 14
+[56/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 15
+[57/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 16
+[58/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 17
+[59/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 18
+[60/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 19
+[61/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 20
+[62/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1
+[63/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 2
+[64/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 3
+[65/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 4
+[66/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 5
+[67/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 6
+[68/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 7
+[69/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 8
+[70/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 9
+[71/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 10
+[72/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 11
+[73/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 12
+[74/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 13
+[75/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 14
+[76/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 15
+[77/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 16
+[78/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 17
+[79/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 18
+[80/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 19
+[81/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 20
+[82/82] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:113:1 › stepper hit targets preserve the painted bezel
+  82 passed (5.1m)

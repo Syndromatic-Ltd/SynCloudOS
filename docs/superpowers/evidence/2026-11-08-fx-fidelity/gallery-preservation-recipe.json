@@ -1,0 +1,10 @@
+{
+  "siteCommit": "35d43ac",
+  "path": "src/SynWare/NSEControlGallery.app/Contents/Gallery/FXCapabilitiesSection.tsx",
+  "extraction": "TypeScript FunctionDeclaration named VideoExample; text.slice(node.getStart(sourceFile),node.end), excludes surrounding blank lines",
+  "lfSha256": "fdc780cbe1b25b27d976b1ea8ed1896344b849f81736c69a54c6d4bbf0f065b9",
+  "crlfSha256": "e0e5fc0feeeeb2f93b02b648a0924022329aa8d57b2e8dc607121e25413faad0",
+  "rawVideoLineSha256": "182fbf8f67ae6f7b9528e227f94f66a12a51605cc84cde551c3431e9e8cb9f43",
+  "initialRecordedFunctionSha256": "88E2E3FEABC6EC84048EB1FAEE5FC09D9F50D58CACF261AF4FD505E8644B91D1",
+  "initialRecordedFunctionHashReproduced": false
+}

@@ -1,0 +1,29 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-theme-system-control-coverage.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-theme-system-control-coverage.test.tsx (2 tests | 2 failed) 119ms
+     × badge 106ms
+     × loading-spinner 12ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-theme-system-control-coverage.test.tsx > public system controls > badge
+ FAIL  tests/runtime/nse-theme-system-control-coverage.test.tsx > public system controls > loading-spinner
+AssertionError: expected null not to be null
+ ❯ tests/runtime/nse-theme-system-control-coverage.test.tsx:22:22
+     20|     const identity = id === "badge" ? "badge" : "progress-indicator";
+     21|     const root = view.container.querySelector<HTMLElement>(`[data-nse-…
+     22|     expect(root).not.toBeNull();
+       |                      ^
+     23|     expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     24|     if (id === "loading-spinner") {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  21:14:40
+   Duration  9.52s (transform 6.28s, setup 26ms, import 8.30s, tests 119ms, environment 923ms)

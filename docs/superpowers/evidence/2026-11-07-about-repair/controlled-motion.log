@@ -1,0 +1,433 @@
+{
+  "errors": [],
+  "standard": [
+    {
+      "time": 0,
+      "name": "tab-controlled/00.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 1,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)"
+        },
+        {
+          "section": "framework",
+          "opacity": 0,
+          "x": 219.60000610351562,
+          "transform": "matrix(0.975, 0, 0, 0.975, 219.6, 11.25)"
+        }
+      ]
+    },
+    {
+      "time": 80,
+      "name": "tab-controlled/01.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 0.99175,
+          "x": -0.9801533222198486,
+          "transform": "matrix(0.999711, 0, 0, 0.999711, -0.980153, 0.129945)"
+        },
+        {
+          "section": "framework",
+          "opacity": 0,
+          "x": 219.60000610351562,
+          "transform": "matrix(0.975, 0, 0, 0.975, 219.6, 11.25)"
+        }
+      ]
+    },
+    {
+      "time": 160,
+      "name": "tab-controlled/02.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 0.964345,
+          "x": -4.235825061798096,
+          "transform": "matrix(0.998752, 0, 0, 0.998752, -4.23583, 0.561568)"
+        },
+        {
+          "section": "framework",
+          "opacity": 0.366762,
+          "x": 177.6619415283203,
+          "transform": "matrix(0.979774, 0, 0, 0.979774, 177.662, 9.10153)"
+        }
+      ]
+    },
+    {
+      "time": 240,
+      "name": "tab-controlled/03.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 0.912263,
+          "x": -10.42313003540039,
+          "transform": "matrix(0.996929, 0, 0, 0.996929, -10.4231, 1.38185)"
+        },
+        {
+          "section": "framework",
+          "opacity": 0.83918,
+          "x": 101.14370727539062,
+          "transform": "matrix(0.988485, 0, 0, 0.988485, 101.144, 5.18154)"
+        }
+      ]
+    },
+    {
+      "time": 320,
+      "name": "tab-controlled/04.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 0.826375,
+          "x": -20.626611709594727,
+          "transform": "matrix(0.993923, 0, 0, 0.993923, -20.6266, 2.73459)"
+        },
+        {
+          "section": "framework",
+          "opacity": 0.952877,
+          "x": 53.54331970214844,
+          "transform": "matrix(0.993904, 0, 0, 0.993904, 53.5433, 2.743)"
+        }
+      ]
+    },
+    {
+      "time": 400,
+      "name": "tab-controlled/05.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 0.689264,
+          "x": -36.91545104980469,
+          "transform": "matrix(0.989124, 0, 0, 0.989124, -36.9155, 4.89409)"
+        },
+        {
+          "section": "framework",
+          "opacity": 0.98729,
+          "x": 29.63520050048828,
+          "transform": "matrix(0.996626, 0, 0, 0.996626, 29.6352, 1.5182)"
+        }
+      ]
+    },
+    {
+      "time": 480,
+      "name": "tab-controlled/06.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 0.457304,
+          "x": -64.4722671508789,
+          "transform": "matrix(0.981006, 0, 0, 0.981006, -64.4723, 8.54746)"
+        },
+        {
+          "section": "framework",
+          "opacity": 0.998049,
+          "x": 17.04027557373047,
+          "transform": "matrix(0.99806, 0, 0, 0.99806, 17.0403, 0.872965)"
+        }
+      ]
+    },
+    {
+      "time": 560,
+      "name": "tab-controlled/07.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 9.885899543762207,
+          "transform": "matrix(0.998875, 0, 0, 0.998875, 9.8859, 0.50645)"
+        }
+      ]
+    },
+    {
+      "time": 640,
+      "name": "tab-controlled/08.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 5.630928039550781,
+          "transform": "matrix(0.999359, 0, 0, 0.999359, 5.63093, 0.28847)"
+        }
+      ]
+    },
+    {
+      "time": 720,
+      "name": "tab-controlled/09.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 3.056472063064575,
+          "transform": "matrix(0.999652, 0, 0, 0.999652, 3.05647, 0.156582)"
+        }
+      ]
+    },
+    {
+      "time": 800,
+      "name": "tab-controlled/10.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 1.5146944522857666,
+          "transform": "matrix(0.999828, 0, 0, 0.999828, 1.51469, 0.0775971)"
+        }
+      ]
+    },
+    {
+      "time": 880,
+      "name": "tab-controlled/11.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 0.6322720050811768,
+          "transform": "matrix(0.999928, 0, 0, 0.999928, 0.632272, 0.032391)"
+        }
+      ]
+    },
+    {
+      "time": 960,
+      "name": "tab-controlled/12.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 0.18029291927814484,
+          "transform": "matrix(0.999979, 0, 0, 0.999979, 0.180293, 0.00923632)"
+        }
+      ]
+    },
+    {
+      "time": 1040,
+      "name": "tab-controlled/13.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 0.011488271877169609,
+          "transform": "matrix(0.999999, 0, 0, 0.999999, 0.0114883, 0.000588539)"
+        }
+      ]
+    },
+    {
+      "time": 1120,
+      "name": "tab-controlled/14.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)"
+        }
+      ]
+    },
+    {
+      "time": 1200,
+      "name": "tab-controlled/15.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)"
+        }
+      ]
+    },
+    {
+      "time": 1280,
+      "name": "tab-controlled/16.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)"
+        }
+      ]
+    },
+    {
+      "time": 1360,
+      "name": "tab-controlled/17.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)"
+        }
+      ]
+    },
+    {
+      "time": 1440,
+      "name": "tab-controlled/18.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)"
+        }
+      ]
+    },
+    {
+      "time": 1520,
+      "name": "tab-controlled/19.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)"
+        }
+      ]
+    }
+  ],
+  "reduced": [
+    {
+      "time": 0,
+      "name": "reduced-controlled/00.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 1,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)"
+        },
+        {
+          "section": "framework",
+          "opacity": 0,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)"
+        }
+      ]
+    },
+    {
+      "time": 40,
+      "name": "reduced-controlled/01.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 0.276437,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)"
+        },
+        {
+          "section": "framework",
+          "opacity": 0.605439,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)"
+        }
+      ]
+    },
+    {
+      "time": 80,
+      "name": "reduced-controlled/02.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 0.0747845,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)"
+        },
+        {
+          "section": "framework",
+          "opacity": 0.858149,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)"
+        }
+      ]
+    },
+    {
+      "time": 120,
+      "name": "reduced-controlled/03.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 0.0178848,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)"
+        },
+        {
+          "section": "framework",
+          "opacity": 0.946079,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)"
+        }
+      ]
+    },
+    {
+      "time": 160,
+      "name": "reduced-controlled/04.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 0.0014638,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)"
+        },
+        {
+          "section": "framework",
+          "opacity": 0.982115,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)"
+        }
+      ]
+    },
+    {
+      "time": 200,
+      "name": "reduced-controlled/05.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 0,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)"
+        },
+        {
+          "section": "framework",
+          "opacity": 0.996468,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)"
+        }
+      ]
+    },
+    {
+      "time": 240,
+      "name": "reduced-controlled/06.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)"
+        }
+      ]
+    },
+    {
+      "time": 280,
+      "name": "reduced-controlled/07.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)"
+        }
+      ]
+    },
+    {
+      "time": 320,
+      "name": "reduced-controlled/08.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)"
+        }
+      ]
+    }
+  ]
+}

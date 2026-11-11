@@ -24,13 +24,420 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest";
 import type { AFXAnimationSettlement } from "../../src/FX/AnimationFX/animationTypes";
 import { NSEAnimationEnvironmentProvider, type NSEAnimator } from "../../src/NSE/Animation";
-import { NSEPicker } from "../../src/NSE/Menus";
+import { NSEPopUpButton } from "../../src/NSE/Menus";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { createTransientWindowSurfaceBridge, WindowContentRendererRegistry } from "../../src/Webspring/WindowLayer";
 import { WindowLayer } from "../../src/Webspring/WindowLayer/WindowLayer";
-import { createTestRuntime } from "./helpers";
+import { createTestRuntime, createTestRuntimeEnvironment } from "./helpers";
+
+function geometrySource<T>(initial: T) {
+  let value = initial;
+  const listeners = new Set<(snapshot: T) => void>();
+  return {
+    source: { getSnapshot: () => value, subscribe: (listener: (snapshot: T) => void) => {
+      listeners.add(listener);
+      return () => { listeners.delete(listener); };
+    } },
+    set(next: T) { value = next; for (const listener of listeners) listener(next); },
+  };
+}
+
+function geometryEnvironment() {
+  const base = createTestRuntimeEnvironment();
+  const layout = geometrySource({ width: 1024, height: 768 });
+  const visual = geometrySource({ width: 1024, height: 768, offsetLeft: 0, offsetTop: 0, scale: 1 });
+  const work = geometrySource({ x: 0, y: 0, width: 1024, height: 768, devicePixelRatio: 1, safeArea: { top: 0, right: 0, bottom: 0, left: 0 } });
+  return { layout, visual, work, environment: { ...base, layoutViewport: layout.source, visualViewport: visual.source, workArea: work.source } };
+}
 
 describe("window-hosted transient surface bridge", () => {
+  it("retries opening focus when the browser rejects it before the popover is positioned", async () => {
+    const runtime = createTestRuntime();
+    const renderers = new WindowContentRendererRegistry();
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "positioned-focus", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const anchor = document.createElement("button"); document.body.append(anchor); anchor.focus();
+    let visible = false;
+    const focus = HTMLElement.prototype.focus;
+    const rejectHiddenFocus = vi.spyOn(HTMLElement.prototype, "focus").mockImplementation(function(this: HTMLElement, options?: FocusOptions) {
+      if (this.textContent === "Ready action" && !visible) return;
+      focus.call(this, options);
+    });
+    await bridge.present({ id: "positioned", role: "popover", title: "Positioned", parentWindowControllerId: null, anchor, drawsBackground: true, bounds: { x: 20, y: 20, width: 240, height: 140 } }, <button>Ready action</button>);
+    const view = render(<SynCloudOSProvider runtime={runtime}><WindowLayer contentRegistry={renderers} /></SynCloudOSProvider>);
+    try {
+      const surface = await screen.findByRole("dialog", { name: "Positioned" });
+      const action = screen.getByRole("button", { name: "Ready action" });
+      expect(document.activeElement).not.toBe(action);
+      await act(async () => { visible = true; surface.setAttribute("data-nse-positioned", "true"); });
+      await waitFor(() => expect(document.activeElement).toBe(action));
+    } finally { rejectHiddenFocus.mockRestore(); view.unmount(); bridge.dispose(); anchor.remove(); await runtime.dispose("test"); }
+  });
+
+  it("retains one popover window and its edited input while adapting to a sheet and back", async () => {
+    const runtime = createTestRuntime();
+    const renderers = new WindowContentRendererRegistry();
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "adaptive-popover", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const anchor = document.createElement("button"); document.body.append(anchor);
+    const request = { id: "adaptive", role: "popover" as const, title: "Adaptive", parentWindowControllerId: null, anchor, drawsBackground: true, bounds: { x: 20, y: 20, width: 240, height: 140 } };
+    const content = <input aria-label="Adaptive draft" defaultValue="Initial" />;
+    const id = await bridge.present({ ...request, presentation: { mode: "anchored" } }, content);
+    const view = render(<SynCloudOSProvider runtime={runtime}><WindowLayer contentRegistry={renderers} /></SynCloudOSProvider>);
+    try {
+      const draft = await screen.findByRole("textbox", { name: "Adaptive draft" });
+      fireEvent.change(draft, { target: { value: "Retained draft" } });
+      for (const mode of ["sheet", "anchored", "sheet", "anchored"] as const) {
+        await act(async () => { await bridge.present({ ...request, presentation: { mode } }, content); });
+        expect(screen.getByRole("textbox", { name: "Adaptive draft" })).toBe(draft);
+        expect((draft as HTMLInputElement).value).toBe("Retained draft");
+        expect(runtime.windows.list({ role: "popover" }).map(window => window.id)).toEqual([id]);
+        expect(screen.getByRole("dialog", { name: "Adaptive" }).getAttribute("data-nse-presentation")).toBe(mode);
+      }
+    } finally { view.unmount(); bridge.dispose(); anchor.remove(); await runtime.dispose("test"); }
+  });
+
+  it("finishes the initial focus handoff when a popover's command controls become available", async () => {
+    const runtime = createTestRuntime();
+    const renderers = new WindowContentRendererRegistry();
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "deferred-focus", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const anchor = document.createElement("button"); document.body.append(anchor);
+    const request = { id: "deferred", role: "popover" as const, title: "Deferred actions", parentWindowControllerId: null, anchor, drawsBackground: true, bounds: { x: 20, y: 20, width: 240, height: 140 } };
+    await bridge.present(request, <button disabled>Validated action</button>);
+    const view = render(<SynCloudOSProvider runtime={runtime}><WindowLayer contentRegistry={renderers} /></SynCloudOSProvider>);
+    try {
+      await screen.findByRole("dialog", { name: "Deferred actions" });
+      anchor.focus();
+      await act(async () => { await bridge.present(request, <button>Validated action</button>); });
+      await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("button", { name: "Validated action" })));
+    } finally { view.unmount(); bridge.dispose(); anchor.remove(); await runtime.dispose("test"); }
+  });
+
+  it("keeps closing paint inert and replaces it when the same popover reopens before its exit finishes", async () => {
+    const runtime = createTestRuntime();
+    const renderers = new WindowContentRendererRegistry();
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "popover-reopen", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const animator: NSEAnimator = { ownerAppId: "syncloudos.system", animations: {
+      acquireOwner: owner => ({ ...owner, epoch: 1, release() {} }),
+      animate() {
+        let resolve!: (settlement: AFXAnimationSettlement) => void;
+        const finished = new Promise<AFXAnimationSettlement>(done => { resolve = done; });
+        return { id: "held-exit", finished, progress: 0, cancel: () => resolve({ state: "cancelled", reduced: false }), seek() {}, pause() {}, resume() {} };
+      },
+    } as NSEAnimator["animations"] };
+    const anchor = document.createElement("button"); document.body.append(anchor);
+    const request = { id: "reopen", role: "popover" as const, title: "Reopened", parentWindowControllerId: null, anchor, drawsBackground: true, bounds: { x: 20, y: 20, width: 240, height: 140 } };
+    await bridge.present(request, <button>First generation</button>);
+    const view = render(<SynCloudOSProvider runtime={runtime}><NSEAnimationEnvironmentProvider animator={animator}><WindowLayer contentRegistry={renderers} /></NSEAnimationEnvironmentProvider></SynCloudOSProvider>);
+    try {
+      await screen.findByRole("button", { name: "First generation" });
+      await act(async () => { await bridge.dismiss(request.id); });
+      const closing = document.querySelector("[data-window-exiting]");
+      expect(closing?.hasAttribute("inert")).toBe(true);
+      expect(closing?.textContent).toContain("First generation");
+      await act(async () => { await bridge.present(request, <button>Second generation</button>); });
+      expect(await screen.findByRole("button", { name: "Second generation" })).toBeTruthy();
+      expect(screen.queryByRole("button", { name: "First generation" })).toBeNull();
+      expect(document.querySelectorAll("[data-nse-window-popover]")).toHaveLength(1);
+      await act(async () => {
+        await bridge.dismiss(request.id);
+        await bridge.present(request, <button>Third generation</button>);
+      });
+      await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("button", { name: "Third generation" })));
+      expect(screen.queryByRole("button", { name: "Second generation" })).toBeNull();
+    } finally { view.unmount(); bridge.dispose(); anchor.remove(); await runtime.dispose("test"); }
+  });
+
+  it.each(["transient", "semitransient", "applicationDefined"] as const)("draws a real content-painted %s popover with the shared frame and dismissal policy", async behavior => {
+    const runtime = createTestRuntime();
+    const renderers = new WindowContentRendererRegistry();
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: `shared-${behavior}`, owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" }, restoreFocus: anchor => anchor.focus() });
+    const anchor = document.createElement("button"); anchor.textContent = "Positioning view";
+    const root = document.createElement("div"); root.dataset.syncloudosRuntimeOwner = runtime.runtimeId;
+    document.body.append(root); root.append(anchor);
+    vi.spyOn(anchor, "getBoundingClientRect").mockReturnValue(DOMRect.fromRect({ x: 500, y: 300, width: 100, height: 40 }));
+    const id = await bridge.present({ id: "paper", role: "popover", title: "Paper", parentWindowControllerId: null, anchor,
+      relativeTo: { x: 20, y: 8, width: 20, height: 20 }, preferredEdge: "minX", behavior, drawsBackground: false,
+      bounds: { x: 0, y: 0, width: 240, height: 140 } }, <div style={{ "--nse-popover-content-fill": "#efe2c6" } as React.CSSProperties}><input aria-label="Hosted draft" defaultValue="Keep this" /></div>);
+    const view = render(<SynCloudOSProvider runtime={runtime}><WindowLayer contentRegistry={renderers} /></SynCloudOSProvider>, { container: root.appendChild(document.createElement("div")) });
+    try {
+      const surface = await screen.findByRole("dialog", { name: "Paper" });
+      expect(surface.closest("[data-window-host]")?.getAttribute("data-window-host")).toBe(id);
+      expect(surface.querySelector('[data-nse-part="popover-frame"]')).not.toBeNull();
+      expect(surface.dataset.nsePopoverDrawsBackground).toBe("false");
+      await waitFor(() => expect(surface.dataset.placement).toBe("left"));
+      expect(surface.style.getPropertyValue("--nse-popover-arrow-fill")).toBe("#efe2c6");
+      expect(runtime.windows.select(id).record.bounds).toMatchObject({ x: 268, y: 248 });
+      expect(runtime.windows.select(id).record.anchor?.rect).toEqual({ x: 520, y: 308, width: 20, height: 20 });
+      fireEvent.pointerDown(anchor);
+      if (behavior === "transient") await waitFor(() => expect(runtime.windows.list({ role: "popover" })).toHaveLength(0));
+      else {
+        await act(async () => { await new Promise(resolve => setTimeout(resolve, 10)); });
+        expect(runtime.windows.list({ role: "popover" })).toHaveLength(1);
+        fireEvent.keyDown(surface, { key: "Escape" });
+        if (behavior === "semitransient") await waitFor(() => expect(runtime.windows.list({ role: "popover" })).toHaveLength(0));
+        else expect(runtime.windows.list({ role: "popover" })).toHaveLength(1);
+      }
+    } finally { view.unmount(); bridge.dispose(); root.remove(); await runtime.dispose("test"); }
+  });
+
+  it.each(["modal", "sheet"] as const)("restores a user-positioned normal %s after book changes and removes geometry work", async role => {
+    const geometry = geometryEnvironment();
+    geometry.layout.set({ width: 900, height: 700 }); geometry.visual.set({ width: 900, height: 700, offsetLeft: 0, offsetTop: 0, scale: 1 });
+    geometry.work.set({ ...geometry.work.source.getSnapshot(), width: 900, height: 700 });
+    const features = geometrySource<{ posture: "continuous" | "folded"; segments: readonly { x: number; y: number; width: number; height: number }[] | null }>({ posture: "continuous", segments: null });
+    const frames = new Map<number, (time: number) => void>(); let nextFrame = 0;
+    const flush = () => { for (let pass = 0; pass < 20 && frames.size; pass++) { const batch = [...frames.values()]; frames.clear(); for (const callback of batch) callback(0); } expect(frames.size).toBe(0); };
+    const runtime = createTestRuntime({ environment: { ...geometry.environment, viewportFeatures: features.source,
+      requestAnimationFrame(callback) { const id = ++nextFrame; frames.set(id, callback); return id; }, cancelAnimationFrame(handle) { frames.delete(handle as number); } } });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers: new WindowContentRendererRegistry(), physicalHostId: "book-" + role, owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const request = { id: "book-owned", role, title: "Generated modal", parentWindowControllerId: null, anchor: null, bounds: { x: 180, y: 120, width: 520, height: 420 } };
+    const id = await bridge.present(request, <input defaultValue="Retained generated work" />); const controller = runtime.windows.select(id), content = controller.record.content;
+    runtime.windows.setBounds(id, { x: 500, y: 80, width: 520, height: 420 }, "programmatic"); flush();
+    const normal = controller.record.bounds; expect(normal.x).toBe(500);
+    const folded = { posture: "folded" as const, segments: [{ x: 0, y: 0, width: 440, height: 700 }, { x: 460, y: 0, width: 440, height: 700 }] };
+    for (let repeat = 0; repeat < 3; repeat++) {
+      features.set(folded); flush(); expect(controller.record.bounds.x).toBe(468); expect(controller.record.bounds.width).toBe(424);
+      const held = controller.record.bounds; geometry.layout.set({ width: 0, height: 0 }); flush(); expect(controller.record.bounds).toBe(held);
+      geometry.layout.set({ width: 900, height: 700 }); flush(); features.set({ posture: "continuous", segments: null }); flush(); expect(controller.record.bounds).toEqual(normal);
+      expect(runtime.windows.select(id)).toBe(controller); expect(controller.record.content).toBe(content);
+    }
+    const setBounds = vi.spyOn(runtime.windows, "setBounds"); features.set(folded); await bridge.dismiss(request.id); flush(); const settledCalls = setBounds.mock.calls.length;
+    bridge.dispose(); features.set({ posture: "continuous", segments: null }); flush(); expect(setBounds.mock.calls.length).toBe(settledCalls); expect(runtime.windows.snapshot().windowControllerIds).toEqual([]);
+    await runtime.dispose("test");
+  });
+
+  it("retains the fitted frame while host geometry is invalid even if the anchor moves", async () => {
+    const geometry = geometryEnvironment();
+    const runtime = createTestRuntime({ environment: geometry.environment });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers: new WindowContentRendererRegistry(), physicalHostId: "invalid-anchor", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const anchor = document.createElement("button");
+    document.body.append(anchor);
+    const rect = vi.spyOn(anchor, "getBoundingClientRect").mockReturnValue(DOMRect.fromRect({ x: 300, y: 100, width: 100, height: 30 }));
+    const id = await bridge.present({ id: "retained", role: "popover", title: "Retained", parentWindowControllerId: null, anchor, bounds: { x: 0, y: 0, width: 360, height: 280 } }, <input defaultValue="Retained" />);
+    const controller = runtime.windows.select(id);
+    const bounds = controller.record.bounds;
+    const content = controller.record.content;
+    rect.mockReturnValue(DOMRect.fromRect({ x: 800, y: 100, width: 100, height: 30 }));
+    geometry.visual.set({ width: 0, height: 0, offsetLeft: 0, offsetTop: 0, scale: 1 });
+    await waitFor(() => expect(runtime.screen.getSnapshot().geometryState).toBe("retained"));
+    await new Promise(resolve => setTimeout(resolve, 50));
+    expect(controller.record.bounds).toBe(bounds);
+    geometry.visual.set({ width: 1024, height: 768, offsetLeft: 0, offsetTop: 0, scale: 1 });
+    await waitFor(() => expect(controller.record.anchor?.rect.x).toBe(800));
+    expect(controller.record.content).toBe(content);
+    expect(runtime.windows.select(id)).toBe(controller);
+    await bridge.dismiss("retained");
+    bridge.dispose(); anchor.remove(); await runtime.dispose("test");
+  });
+
+  it("remeasures an open popover from canonical visual bounds without reopening or losing its preferred size", async () => {
+    const geometry = geometryEnvironment();
+    const runtime = createTestRuntime({ environment: geometry.environment });
+    const renderers = new WindowContentRendererRegistry();
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "geometry", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const anchor = document.createElement("button");
+    document.body.append(anchor);
+    const rect = vi.spyOn(anchor, "getBoundingClientRect").mockReturnValue(DOMRect.fromRect({ x: 300, y: 400, width: 100, height: 30 }));
+    const id = await bridge.present({ id: "live", role: "popover", title: "Live", parentWindowControllerId: null, anchor, bounds: { x: 0, y: 0, width: 360, height: 280 } }, <input defaultValue="Retained draft" />);
+    const controller = runtime.windows.select(id);
+    const content = controller.record.content;
+    rect.mockReturnValue(DOMRect.fromRect({ x: 400, y: 160, width: 100, height: 30 }));
+    geometry.visual.set({ width: 800, height: 400, offsetLeft: 100, offsetTop: 80, scale: 1 });
+    await waitFor(() => expect(controller.record.bounds).toEqual({ x: 270, y: 202, width: 360, height: 270 }));
+    expect(runtime.windows.select(id)).toBe(controller);
+    expect(controller.record.content).toBe(content);
+    expect(renderers.size).toBe(1);
+    geometry.visual.set({ width: 1024, height: 768, offsetLeft: 0, offsetTop: 0, scale: 1 });
+    await waitFor(() => expect(controller.record.bounds.height).toBe(280));
+    await bridge.dismiss("live");
+    bridge.dispose(); anchor.remove(); await runtime.dispose("test");
+  });
+
+  it("remeasures an anchor after a captured scroll without another present request", async () => {
+    const geometry = geometryEnvironment();
+    const runtime = createTestRuntime({ environment: geometry.environment });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers: new WindowContentRendererRegistry(), physicalHostId: "scroll", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const anchor = document.createElement("button");
+    document.body.append(anchor);
+    const rect = vi.spyOn(anchor, "getBoundingClientRect").mockReturnValue(DOMRect.fromRect({ x: 300, y: 100, width: 100, height: 30 }));
+    const id = await bridge.present({ id: "scrolling", role: "popover", title: "Scrolling", parentWindowControllerId: null, anchor, bounds: { x: 0, y: 0, width: 360, height: 280 } }, <p>Retained</p>);
+    rect.mockReturnValue(DOMRect.fromRect({ x: 800, y: 100, width: 100, height: 30 }));
+    const listener = geometry.environment.addWindowListener.mock.calls.find(([type]) => type === "scroll")?.[1] as (() => void) | undefined;
+    expect(listener).toBeTypeOf("function");
+    listener?.();
+    await waitFor(() => expect(runtime.windows.select(id).record.anchor?.rect.x).toBe(800));
+    expect(runtime.windows.select(id).record.bounds.x).toBe(656);
+    await bridge.dismiss("scrolling");
+    bridge.dispose(); anchor.remove(); await runtime.dispose("test");
+  });
+
+  it("fits narrow shallow viewports and recovers from invalid visual measurements without persisting an invalid frame", async () => {
+    const geometry = geometryEnvironment();
+    const runtime = createTestRuntime({ environment: geometry.environment });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers: new WindowContentRendererRegistry(), physicalHostId: "shallow", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const anchor = document.createElement("button");
+    document.body.append(anchor);
+    vi.spyOn(anchor, "getBoundingClientRect").mockReturnValue(DOMRect.fromRect({ x: 100, y: 70, width: 30, height: 20 }));
+    const id = await bridge.present({ id: "shallow", role: "popover", title: "Shallow", parentWindowControllerId: null, anchor, bounds: { x: 0, y: 0, width: 360, height: 280 } }, <p>Retained</p>);
+    geometry.visual.set({ width: 260, height: 100, offsetLeft: 50, offsetTop: 50, scale: 1 });
+    await waitFor(() => expect(runtime.windows.select(id).record.bounds.width).toBeLessThanOrEqual(244));
+    const fitted = runtime.windows.select(id).record.bounds;
+    expect(fitted.x).toBeGreaterThanOrEqual(50);
+    expect(fitted.y).toBeGreaterThanOrEqual(50);
+    expect(fitted.x + fitted.width).toBeLessThanOrEqual(310);
+    expect(fitted.y + fitted.height).toBeLessThanOrEqual(150);
+    geometry.visual.set({ width: Number.NaN, height: 0, offsetLeft: 0, offsetTop: 0, scale: 1 });
+    await new Promise(resolve => setTimeout(resolve, 50));
+    expect(runtime.windows.select(id).record.bounds).toBe(fitted);
+    geometry.visual.set({ width: 1024, height: 768, offsetLeft: 0, offsetTop: 0, scale: 1 });
+    await waitFor(() => expect(runtime.windows.select(id).record.bounds.width).toBe(360));
+    await bridge.dismiss("shallow");
+    bridge.dispose(); anchor.remove(); await runtime.dispose("test");
+  });
+
+  it("remeasures resized anchors and releases the observer after the final popover closes", async () => {
+    let resized = () => {};
+    const observe = vi.fn();
+    const disconnect = vi.fn();
+    class ResizeFixture {
+      constructor(callback: () => void) { resized = callback; }
+      observe = observe;
+      disconnect = disconnect;
+    }
+    vi.stubGlobal("ResizeObserver", ResizeFixture);
+    const geometry = geometryEnvironment();
+    const runtime = createTestRuntime({ environment: geometry.environment });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers: new WindowContentRendererRegistry(), physicalHostId: "anchor-resize", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const anchor = document.createElement("button");
+    document.body.append(anchor);
+    const rect = vi.spyOn(anchor, "getBoundingClientRect").mockReturnValue(DOMRect.fromRect({ x: 300, y: 100, width: 100, height: 30 }));
+    const id = await bridge.present({ id: "resize", role: "popover", title: "Resize", parentWindowControllerId: null, anchor, bounds: { x: 0, y: 0, width: 360, height: 280 } }, <p>Retained</p>);
+    expect(observe).toHaveBeenCalledWith(anchor);
+    rect.mockReturnValue(DOMRect.fromRect({ x: 300, y: 100, width: 220, height: 30 }));
+    resized();
+    await waitFor(() => expect(runtime.windows.select(id).record.anchor?.rect.width).toBe(220));
+    await bridge.dismiss("resize");
+    expect(disconnect).toHaveBeenCalled();
+    const scrollIndex = geometry.environment.addWindowListener.mock.calls.findIndex(([type]) => type === "scroll");
+    expect(geometry.environment.addWindowListener.mock.results[scrollIndex].value).toHaveBeenCalledTimes(1);
+    bridge.dispose(); anchor.remove(); await runtime.dispose("test");
+    vi.unstubAllGlobals();
+  });
+
+  it("uses the host work area once rather than adding its safe-area insets again", async () => {
+    const geometry = geometryEnvironment();
+    geometry.work.set({ x: 100, y: 80, width: 400, height: 200, devicePixelRatio: 1, safeArea: { top: 80, right: 20, bottom: 30, left: 100 } });
+    const runtime = createTestRuntime({ environment: geometry.environment });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers: new WindowContentRendererRegistry(), physicalHostId: "work-area", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const anchor = document.createElement("button");
+    document.body.append(anchor);
+    vi.spyOn(anchor, "getBoundingClientRect").mockReturnValue(DOMRect.fromRect({ x: 100, y: 30, width: 30, height: 20 }));
+    const id = await bridge.present({ id: "insets", role: "popover", title: "Insets", parentWindowControllerId: null, anchor, bounds: { x: 0, y: 0, width: 360, height: 220 } }, <p>Retained</p>);
+    expect(runtime.windows.select(id).record.bounds.y).toBe(88);
+    await bridge.dismiss("insets");
+    bridge.dispose(); anchor.remove(); await runtime.dispose("test");
+  });
+
+  it("cancels scheduled placement when disposed", async () => {
+    const geometry = geometryEnvironment();
+    const runtime = createTestRuntime({ environment: geometry.environment });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers: new WindowContentRendererRegistry(), physicalHostId: "dispose-geometry", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const anchor = document.createElement("button");
+    document.body.append(anchor);
+    vi.spyOn(anchor, "getBoundingClientRect").mockReturnValue(DOMRect.fromRect({ x: 300, y: 100, width: 100, height: 30 }));
+    await bridge.present({ id: "dispose", role: "popover", title: "Dispose", parentWindowControllerId: null, anchor, bounds: { x: 0, y: 0, width: 360, height: 280 } }, <p>Retained</p>);
+    const setBounds = vi.spyOn(runtime.windows, "setBounds");
+    geometry.visual.set({ width: 800, height: 400, offsetLeft: 0, offsetTop: 0, scale: 1 });
+    bridge.dispose();
+    await new Promise(resolve => setTimeout(resolve, 50));
+    expect(setBounds).not.toHaveBeenCalled();
+    expect(runtime.windows.snapshot().windowControllerIds).toHaveLength(0);
+    anchor.remove(); await runtime.dispose("test");
+  });
+  it("keeps a popover anchored to an ordinary idless element until that element is removed", async () => {
+    const runtime = createTestRuntime({ id: "runtime:idless-popover" });
+    const renderers = new WindowContentRendererRegistry();
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:idless", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const view = render(<SynCloudOSProvider runtime={runtime}>
+      <div data-syncloudos-runtime-owner={runtime.runtimeId}>
+        <button>Ordinary anchor</button><WindowLayer contentRegistry={renderers} />
+      </div>
+    </SynCloudOSProvider>);
+    const anchor = screen.getByRole("button", { name: "Ordinary anchor" });
+    const onDidClose = vi.fn();
+    let id = "";
+    await act(async () => {
+      id = await bridge.present({ id: "details", role: "popover", title: "Details", parentWindowControllerId: null, anchor, bounds: { x: 0, y: 0, width: 240, height: 150 }, onDidClose }, <p>Popover details</p>);
+    });
+    await act(async () => { anchor.after(document.createElement("span")); });
+    expect(runtime.windows.snapshot().windowControllerIds).toContain(id);
+    expect(onDidClose).not.toHaveBeenCalled();
+    await act(async () => { anchor.remove(); });
+    await waitFor(() => expect(runtime.windows.snapshot().windowControllerIds).not.toContain(id));
+    expect(onDidClose).toHaveBeenCalledTimes(1);
+    expect(anchor.hasAttribute("id")).toBe(false);
+    view.unmount(); bridge.dispose(); await runtime.dispose("test");
+  });
+
+  it("retains a shared anchor until its final surface closes and preserves a caller's replacement ID", async () => {
+    const runtime = createTestRuntime({ id: "runtime:shared-idless-anchor" });
+    const renderers = new WindowContentRendererRegistry();
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:shared-anchor", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const anchor = document.createElement("button");
+    document.body.append(anchor);
+    const request = { role: "popover" as const, title: "Details", parentWindowControllerId: null, anchor, bounds: { x: 0, y: 0, width: 240, height: 150 } };
+    const first = await bridge.present({ ...request, id: "first" }, <p>First</p>);
+    const second = await bridge.present({ ...request, id: "second" }, <p>Second</p>);
+    expect(anchor.id).toBeTruthy();
+    expect(runtime.windows.select(first).record.anchor?.id).toBe(anchor.id);
+    expect(runtime.windows.select(second).record.anchor?.id).toBe(anchor.id);
+    await bridge.dismiss("first");
+    expect(anchor.id).toBe(runtime.windows.select(second).record.anchor?.id);
+    anchor.id = "caller-replacement";
+    await bridge.dismiss("second");
+    expect(anchor.id).toBe("caller-replacement");
+    anchor.remove(); bridge.dispose(); await runtime.dispose("test");
+  });
+
+  it("switches idless anchors without a stale removal observer closing the current popover", async () => {
+    const runtime = createTestRuntime({ id: "runtime:replacement-idless-anchor" });
+    const renderers = new WindowContentRendererRegistry();
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:replacement-anchor", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const view = render(<SynCloudOSProvider runtime={runtime}>
+      <div data-syncloudos-runtime-owner={runtime.runtimeId}>
+        <button>First anchor</button><button>Second anchor</button><WindowLayer contentRegistry={renderers} />
+      </div>
+    </SynCloudOSProvider>);
+    const first = screen.getByRole("button", { name: "First anchor" });
+    const second = screen.getByRole("button", { name: "Second anchor" });
+    const request = { id: "details", role: "popover" as const, title: "Details", parentWindowControllerId: null, bounds: { x: 0, y: 0, width: 240, height: 150 } };
+    let id = "";
+    await act(async () => { id = await bridge.present({ ...request, anchor: first }, <p>Details</p>); });
+    await act(async () => { await bridge.present({ ...request, anchor: second }, <p>Updated details</p>); });
+    expect(runtime.windows.snapshot().windowControllerIds).toContain(id);
+    expect(runtime.windows.select(id).record.anchor?.id).toBe(second.id);
+    expect(first.hasAttribute("id")).toBe(false);
+    await act(async () => { await bridge.dismiss(request.id); });
+    expect(second.hasAttribute("id")).toBe(false);
+    view.unmount(); bridge.dispose(); await runtime.dispose("test");
+  });
+
+  it("retains a replacement anchor lease when a render clears the same element's generated ID", async () => {
+    const runtime = createTestRuntime({ id: "runtime:renewed-idless-anchor" });
+    const renderers = new WindowContentRendererRegistry();
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:renewed-anchor", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const anchor = document.createElement("button");
+    document.body.append(anchor);
+    const request = { id: "details", role: "popover" as const, title: "Details", parentWindowControllerId: null, anchor, bounds: { x: 0, y: 0, width: 240, height: 150 } };
+    const id = await bridge.present(request, <p>Details</p>);
+    anchor.removeAttribute("id");
+    await bridge.present(request, <p>Updated details</p>);
+    expect(anchor.id).toBeTruthy();
+    expect(runtime.windows.select(id).record.anchor?.id).toBe(anchor.id);
+    await bridge.dismiss(request.id);
+    expect(anchor.hasAttribute("id")).toBe(false);
+    anchor.remove(); bridge.dispose(); await runtime.dispose("test");
+  });
+
   it("creates one real window sheet for an application stage and cleans both renderer registries", async () => {
     const runtime = createTestRuntime({ id: "runtime:p07-surface" });
     const renderers = new WindowContentRendererRegistry();
@@ -38,7 +445,7 @@ describe("window-hosted transient surface bridge", () => {
       runtime,
       renderers,
       physicalHostId: "test:first-sheet",
-      owner: { workspaceId: "workspace:default", applicationId: "gallery", applicationSessionId: "gallery" },
+      owner: { workspaceId: "workspace:default", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" },
     });
     const request = {
       id: "gallery:toolbar-configuration",
@@ -58,8 +465,8 @@ describe("window-hosted transient surface bridge", () => {
     expect(runtime.windows.snapshot().windowControllerIds).toEqual([first]);
     expect(runtime.windows.select(first).record).toMatchObject({
       role: "sheet",
-      applicationId: "gallery",
-      applicationSessionId: "gallery",
+      applicationId: "com.example.gallery",
+      applicationSessionId: "com.example.gallery",
       parentWindowControllerId: null,
       state: "open",
     });
@@ -136,7 +543,7 @@ describe("window-hosted transient surface bridge", () => {
   it("hangs an untitled popover off its anchor, flipping above when only that fits", async () => {
     const runtime = createTestRuntime({ id: "runtime:p07-popover-placement" });
     const renderers = new WindowContentRendererRegistry();
-    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:popover-placement", owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" } });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:popover-placement", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
     const anchor = document.createElement("button");
     anchor.id = "popover-anchor";
     document.body.append(anchor);
@@ -146,17 +553,17 @@ describe("window-hosted transient surface bridge", () => {
     const windowControllerId = await bridge.present(request, <p>Placed</p>);
     const record = () => runtime.windows.select(windowControllerId).record;
 
-    // Centred on the anchor, 10px below it (jsdom's viewport is 1024 x 768).
+    // Shared joined frame: centred on the anchor, 12px below it.
     expect(record()).toMatchObject({
       style: ["closable"],
-      bounds: { x: 170, y: 440, width: 360, height: 280 },
+      bounds: { x: 170, y: 442, width: 360, height: 280 },
       anchor: { id: "popover-anchor", edge: "block-end", alignment: "center" },
     });
 
     place(700);
     await bridge.present({ ...request }, <p>Placed</p>);
     expect(record()).toMatchObject({
-      bounds: { x: 170, y: 410 },
+      bounds: { x: 170, y: 408 },
       anchor: { edge: "block-start", alignment: "center" },
     });
     anchor.remove();
@@ -170,8 +577,8 @@ describe("window-hosted transient surface bridge", () => {
     const secondRuntime = createTestRuntime({ id: "runtime:p07:second" });
     const firstRenderers = new WindowContentRendererRegistry();
     const secondRenderers = new WindowContentRendererRegistry();
-    const first = createTransientWindowSurfaceBridge({ runtime: firstRuntime, renderers: firstRenderers, physicalHostId: "stage:first", owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" } });
-    const second = createTransientWindowSurfaceBridge({ runtime: secondRuntime, renderers: secondRenderers, physicalHostId: "stage:second", owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" } });
+    const first = createTransientWindowSurfaceBridge({ runtime: firstRuntime, renderers: firstRenderers, physicalHostId: "stage:first", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+    const second = createTransientWindowSurfaceBridge({ runtime: secondRuntime, renderers: secondRenderers, physicalHostId: "stage:second", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
     const request = { id: "shared", role: "panel" as const, title: "Media", parentWindowControllerId: null, anchor: null, bounds: { x: 0, y: 0, width: 400, height: 320 } };
 
     await first.present(request, <p>First</p>);
@@ -194,7 +601,7 @@ describe("window-hosted transient surface bridge", () => {
       runtime,
       renderers,
       physicalHostId: "test:native-close",
-      owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" },
+      owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" },
     });
     const request = {
       id: "toolbar-configuration",
@@ -223,7 +630,7 @@ describe("window-hosted transient surface bridge", () => {
       runtime,
       renderers,
       physicalHostId: "test:refused-close",
-      owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" },
+      owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" },
     });
     const request = { id: "media", role: "panel" as const, title: "Media", parentWindowControllerId: null, anchor: null, bounds: { x: 0, y: 0, width: 500, height: 400 } };
     const windowControllerId = await bridge.present(request, <p>Media</p>);
@@ -253,7 +660,7 @@ describe("window-hosted transient surface bridge", () => {
       runtime,
       renderers,
       physicalHostId: "test:pending-dispose",
-      owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" },
+      owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" },
     });
     const pending = bridge.present({ id: "pending", role: "panel", title: "Pending", parentWindowControllerId: null, anchor: null, bounds: { x: 0, y: 0, width: 400, height: 320 } }, <p>Pending</p>);
     await Promise.resolve();
@@ -271,7 +678,7 @@ describe("window-hosted transient surface bridge", () => {
     const runtime = createTestRuntime({ id: "runtime:surface-hosts" });
     const renderers = new WindowContentRendererRegistry();
     const createForHost = createTransientWindowSurfaceBridge;
-    const owner = { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" };
+    const owner = { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" };
     const first = createForHost({ runtime, renderers, owner, physicalHostId: "stage:gallery" });
     const second = createForHost({ runtime, renderers, owner, physicalHostId: "window:gallery-main" });
     const request = { id: "shared", role: "panel" as const, title: "Media", parentWindowControllerId: null, anchor: null, bounds: { x: 0, y: 0, width: 400, height: 320 } };
@@ -297,7 +704,7 @@ describe("window-hosted transient surface bridge", () => {
       runtime,
       renderers,
       physicalHostId: "test:update",
-      owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" },
+      owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" },
     });
     const first = { id: "mutable", role: "panel" as const, title: "Media", parentWindowControllerId: null, anchor: null, bounds: { x: 0, y: 0, width: 400, height: 320 } };
     const windowControllerId = await bridge.present(first, <p>First content</p>);
@@ -321,7 +728,7 @@ describe("window-hosted transient surface bridge", () => {
       runtime,
       renderers,
       physicalHostId: "test:publication",
-      owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" },
+      owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" },
     });
     const firstAnchor = document.createElement("button");
     const secondAnchor = document.createElement("button");
@@ -350,7 +757,7 @@ describe("window-hosted transient surface bridge", () => {
     const runtime = createTestRuntime({ id: "runtime:surface-refused-reconfigure" });
     const renderers = new WindowContentRendererRegistry();
     const onDidClose = vi.fn();
-    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:refused-reconfigure", owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" } });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:refused-reconfigure", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
     const request = { id: "adaptive", role: "panel" as const, title: "Panel", parentWindowControllerId: null, anchor: null, bounds: { x: 0, y: 0, width: 400, height: 320 }, onDidClose };
     const windowControllerId = await bridge.present(request, <p>Panel</p>);
     const originalClose = runtime.windows.requestClose.bind(runtime.windows);
@@ -368,7 +775,7 @@ describe("window-hosted transient surface bridge", () => {
   it("replays only the latest presentation requested while close is pending", async () => {
     const runtime = createTestRuntime({ id: "runtime:surface-latest-intent" });
     const renderers = new WindowContentRendererRegistry();
-    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:latest-intent", owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" } });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:latest-intent", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
     const request = { id: "latest", role: "panel" as const, title: "Initial", parentWindowControllerId: null, anchor: null, bounds: { x: 0, y: 0, width: 400, height: 320 } };
     await bridge.present(request, <p>Initial</p>);
     let continueClose!: () => void;
@@ -402,7 +809,7 @@ describe("window-hosted transient surface bridge", () => {
     const restored = vi.fn();
     const firstClosed = vi.fn();
     const secondClosed = vi.fn();
-    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:generation-fence", owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" }, restoreFocus: restored });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:generation-fence", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" }, restoreFocus: restored });
     const firstAnchor = document.createElement("button");
     const secondAnchor = document.createElement("button");
     document.body.append(firstAnchor, secondAnchor);
@@ -423,7 +830,7 @@ describe("window-hosted transient surface bridge", () => {
   it("recovers from a rejected manager close so a fresh dismissal can close the same owned window", async () => {
     const runtime = createTestRuntime({ id: "runtime:surface-close-retry" });
     const renderers = new WindowContentRendererRegistry();
-    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:close-retry", owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" } });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:close-retry", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
     const request = { id: "retry-close", role: "panel" as const, title: "Retry close", parentWindowControllerId: null, anchor: null, bounds: { x: 0, y: 0, width: 400, height: 320 } };
     const windowControllerId = await bridge.present(request, <p>Retry close</p>);
     const originalClose = runtime.windows.requestClose.bind(runtime.windows);
@@ -454,7 +861,7 @@ describe("window-hosted transient surface bridge", () => {
     });
     const renderers = new WindowContentRendererRegistry();
     const restored = vi.fn();
-    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:latest-focus", owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" }, restoreFocus: restored });
+    const bridge = createTransientWindowSurfaceBridge({ runtime, renderers, physicalHostId: "test:latest-focus", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" }, restoreFocus: restored });
     const firstAnchor = document.createElement("button");
     const secondAnchor = document.createElement("button");
     document.body.append(firstAnchor, secondAnchor);
@@ -480,15 +887,15 @@ describe("window-hosted transient surface bridge", () => {
       runtime,
       renderers,
       physicalHostId: "test:hosted-providers",
-      owner: { workspaceId: "workspace", applicationId: "gallery", applicationSessionId: "gallery" },
+      owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" },
     });
     const request = { id: "hosted", role: "panel" as const, title: "Hosted controls", parentWindowControllerId: null, anchor: null, bounds: { x: 0, y: 0, width: 500, height: 400 } };
     const windowControllerId = await bridge.present(request, <p>Loading</p>);
     await bridge.present(request, (
-      <NSEPicker
+      <NSEPopUpButton
         label="Hosted density"
-        options={[{ value: "regular", label: "Regular" }, { value: "compact", label: "Compact" }]}
-        listboxOverlay={{ id: "hosted-density", parentResponderId: `window:${windowControllerId}` }}
+        items={[{ value: "regular", title: "Regular" }, { value: "compact", title: "Compact" }]}
+        overlay={{ id: "hosted-density", parentResponderId: `window:${windowControllerId}` }}
       />
     ));
 

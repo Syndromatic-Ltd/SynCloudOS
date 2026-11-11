@@ -18,9 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import { canonicalDocumentJson, immutableDocumentValue } from "../Documents/documentTypes";
 import { PasteboardUnavailableError } from "../Pasteboard/pasteboardErrors";
 import type { PasteboardAdapter, PasteboardCanonicalValue, PasteboardRepresentation, PasteboardWriteResult } from "../Pasteboard/pasteboardTypes";
+
+import type { NativeOperationActivity } from "../SynCloudOS";
 
 const MAX_TEXT_BYTES = 4 * 1024 * 1024;
 const MAX_BINARY_BYTES = 16 * 1024 * 1024;
@@ -33,6 +36,8 @@ export interface BrowserClipboardPort {
 }
 
 export interface BrowserClipboardAdapterOptions {
+  /** Coarse lifetime observation only; no permission or cancellation authority. */
+  readonly nativeActivity?: NativeOperationActivity;
   readonly clipboard: BrowserClipboardPort | null;
   readonly isSecureContext: () => boolean;
   readonly isUserActive: () => boolean;
@@ -49,7 +54,7 @@ async function decodeBlob(type: string, blob: Blob): Promise<PasteboardRepresent
   if (blob.type && blob.type !== type) throw unavailable(`The browser returned mismatched MIME data for ${type}.`);
   if (type.startsWith("image/") || type === "application/octet-stream") {
     if (blob.size > MAX_BINARY_BYTES) throw unavailable("Browser pasteboard binary data exceeds the byte limit.");
-    return { type: type as `image/${string}` | "application/octet-stream", value: blob.slice(0, blob.size, type) };
+    return { type: type as `image/${string}` | "application/octet-stream", value: await NSEData.read(blob) };
   }
   if (blob.size > MAX_TEXT_BYTES) throw unavailable("Browser pasteboard text data exceeds the byte limit.");
   const text = await blob.text();
@@ -73,9 +78,9 @@ function encodeRepresentation(representation: PasteboardRepresentation): Blob {
     if (blob.size > MAX_TEXT_BYTES) throw unavailable("Browser pasteboard text data exceeds the byte limit.");
     return blob;
   }
-  if (representation.value instanceof Blob) {
-    if (representation.value.size > MAX_BINARY_BYTES) throw unavailable("Browser pasteboard binary data exceeds the byte limit.");
-    return representation.value.slice(0, representation.value.size, representation.type);
+  if (representation.value instanceof NSEData) {
+    if (representation.value.count > MAX_BINARY_BYTES) throw unavailable("Browser pasteboard binary data exceeds the byte limit.");
+    return representation.value.blob(representation.type);
   }
   const json = canonicalDocumentJson(representation.value, `pasteboard.browser.${representation.type}`, {
     maxDepth: 32,
@@ -87,6 +92,12 @@ function encodeRepresentation(representation: PasteboardRepresentation): Blob {
 
 export class BrowserClipboardAdapter implements PasteboardAdapter {
   constructor(private readonly options: BrowserClipboardAdapterOptions) {}
+
+  private observe<T>(invoke: () => Promise<T>, signal: AbortSignal): Promise<T> {
+    signal.throwIfAborted();
+    const run = () => { signal.throwIfAborted(); return invoke(); };
+    return this.options.nativeActivity ? this.options.nativeActivity.track(run) : run();
+  }
 
   private requireClipboard(signal: AbortSignal) {
     signal.throwIfAborted();
@@ -101,6 +112,10 @@ export class BrowserClipboardAdapter implements PasteboardAdapter {
 
   async read(types: readonly string[], signal: AbortSignal = new AbortController().signal): Promise<readonly PasteboardRepresentation[]> {
     const clipboard = this.requireClipboard(signal);
+    return this.observe(() => this.readClipboard(clipboard, types, signal), signal);
+  }
+
+  private async readClipboard(clipboard: BrowserClipboardPort, types: readonly string[], signal: AbortSignal): Promise<readonly PasteboardRepresentation[]> {
     try {
       if (clipboard.read) {
         const items = await clipboard.read();
@@ -137,6 +152,10 @@ export class BrowserClipboardAdapter implements PasteboardAdapter {
     if (!this.options.isUserActive()) {
       throw unavailable("System pasteboard writes require current user activation.");
     }
+    return this.observe(() => this.writeClipboard(clipboard, values, signal), signal);
+  }
+
+  private async writeClipboard(clipboard: BrowserClipboardPort, values: readonly PasteboardRepresentation[], signal: AbortSignal): Promise<void | PasteboardWriteResult> {
     try {
       const hostSafe = values.filter((value) =>
         value.type === "text/plain" ||

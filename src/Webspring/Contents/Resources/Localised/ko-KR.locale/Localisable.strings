@@ -7,6 +7,7 @@
 "apps.loading" = "{app} 로드 중";
 "apps.loadingPackage" = "{packageName} 로드 중";
 "apps.missingComponent" = "SynCloudOS이 {packageName}에 대한 구성 요소를 찾을 수 없습니다.";
+"apps.reopen" = "다시 열기";
 "apps.reorderable" = "{app}, 재정렬 가능";
 "notifications.actions" = "알림 작업";
 "notifications.centreTitle" = "알림 센터";
@@ -40,7 +41,6 @@
 "quickswitch.open" = "퀵스위치 열기";
 "quickswitch.openedShortcut" = "{app}, 열림, {shortcut} 바로가기";
 "quickswitch.visibleApps" = "Webspring 앱 표시";
-"shelf.ariaLabel" = "Webspring 뉴스 및 상태";
 "webspring.additionalApps.ariaLabel" = "추가 Webspring 앱";
 "webspring.apps.ariaLabel" = "Webspring 앱";
 "webspring.ariaLabel" = "SynCloudOS Webspring";

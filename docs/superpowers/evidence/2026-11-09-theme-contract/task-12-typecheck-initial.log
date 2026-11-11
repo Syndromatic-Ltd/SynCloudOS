@@ -1,0 +1,16 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 typecheck
+npm notice run tsc -b --pretty false
+src/NSE/Appearance/appearanceSlotResolver.ts(21,31): error TS2307: Cannot find module './NSETheme' or its corresponding type declarations.
+src/NSE/Appearance/appearanceSlotResolver.ts(36,43): error TS7006: Parameter 'candidate' implicitly has an 'any' type.
+src/NSE/DataViews/Table/NSETableView.tsx(439,43): error TS2304: Cannot find name 'tableHeaderHoverAppearance'.
+src/NSE/DataViews/Table/NSETableView.tsx(441,45): error TS2304: Cannot find name 'tableHeaderPressedAppearance'.
+src/NSE/DataViews/Table/NSETableView.tsx(443,51): error TS2304: Cannot find name 'tableHeaderHoverPressedAppearance'.
+src/NSE/DataViews/Table/NSETableView.tsx(445,45): error TS2304: Cannot find name 'tableSortAscendingAppearance'.
+src/NSE/DataViews/Table/NSETableView.tsx(447,46): error TS2304: Cannot find name 'tableSortDescendingAppearance'.
+src/NSE/public/appearance.ts(38,3): error TS2724: '"../Appearance"' has no exported member named 'NSEAppearanceSlotResolution'. Did you mean 'NSEAppearanceSelection'?
+src/NSE/Views/NSEView.tsx(136,7): error TS2322: Type '{ children: ReactNode; transparency?: NSETransparency | undefined; contrast?: NSEContrast | undefined; chrome?: NSEChromeAppearance | undefined; appearance: any; colourScheme: "light" | "dark"; resolvedColourScheme: "light" | "dark"; }' is not assignable to type 'IntrinsicAttributes & NSEAppearanceProviderProps'.
+  Property 'appearance' does not exist on type 'IntrinsicAttributes & NSEAppearanceProviderProps'.
+src/NSE/Views/NSEView.tsx(136,49): error TS2339: Property 'appearance' does not exist on type 'NSEAppearanceSelection'.
+src/NSE/Windows/NSEWindowTitleBar.tsx(99,3): error TS2339: Property 'appearanceRecipe' does not exist on type 'NSEWindowTitleBarProps'.
+src/NSE/Windows/NSEWindowView.tsx(146,8): error TS2304: Cannot find name 'shadowRecipe'.
+src/NSE/Windows/NSEWindowView.tsx(150,37): error TS2304: Cannot find name 'shadowRecipe'.

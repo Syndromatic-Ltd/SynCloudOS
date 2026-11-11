@@ -1,0 +1,62 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/nse/file-panels/nse-open-panel-thumbnails.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/nse/file-panels/nse-open-panel-thumbnails.test.tsx (4 tests | 2 failed) 2090ms
+   × decodes an image provider's url when it has no separate thumbnail 1007ms
+   × decodes an image provider's file-reference when it has no separate thumbnail 1003ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/nse/file-panels/nse-open-panel-thumbnails.test.tsx > decodes an image provider's url when it has no separate thumbnail
+ FAIL  tests/nse/file-panels/nse-open-panel-thumbnails.test.tsx > decodes an image provider's file-reference when it has no separate thumbnail
+AssertionError: expected "vi.fn()" to be called once, but got 0 times
+
+Ignored nodes: comments, script, style
+<html>
+  <head />
+  <body>
+    <div>
+      <div
+        class="nse-control-image-view nse-open-workspace-icon"
+        data-image-scaling="proportionallyUpOrDown"
+      >
+        <div
+          class="nse-control-sizeable-image"
+          data-pannable="false"
+          data-zoomed="false"
+        >
+          <img
+            alt=""
+            class="nse-control-sizeable-image-media"
+            data-nse-image-rendering="original"
+            data-nse-image-resizing="stretch"
+            draggable="false"
+            src="http://localhost:3000/src/NSE/Themes/Atmo/Resources/workspace/document-generic-96@2x.png"
+            style="transform: translate(-50%, -50%) translate(0px, 0px);"
+          />
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+ ❯ tests/nse/file-panels/nse-open-panel-thumbnails.test.tsx:44:36
+     42|   } } as any;
+     43|   const view = render(<NSEOpenPanelItemImage item={item} images={{ loa…
+     44|   await waitFor(() => expect(load).toHaveBeenCalledOnce());
+       |                                    ^
+     45|   expect(load.mock.calls[0]?.[0]).toMatchObject({ source: kind === "ur…
+     46|   view.unmount(); expect(resource.release).toHaveBeenCalledOnce();
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 2 passed (4)
+   Start at  10:50:51
+   Duration  3.46s (transform 126ms, setup 29ms, import 285ms, tests 2.09s, environment 918ms)
+

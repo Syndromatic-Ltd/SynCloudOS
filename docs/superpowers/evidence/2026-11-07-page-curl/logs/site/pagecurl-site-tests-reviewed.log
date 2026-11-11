@@ -1,0 +1,1791 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run vitest run
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site
+
+ ❯ tests/runtime/gallery-renderers.test.ts (0 test)
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+ ❯ tests/runtime/gallery-class.test.tsx (0 test)
+ ❯ tests/runtime/gallery-specimen-ownership.test.tsx (0 test)
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+stderr | tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > moves imagePopover to a replacement button without closing it
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > keeps the opened editor visible in compact layout without changing the desktop posts preference
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-file-image-ui.test.tsx > Publisher visible File commands and image description > exposes all File commands and delegates no-post disabled states to command validation
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > moves publishMenu to a replacement button without closing it
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > forgets imagePopover when its popover closes
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-file-image-ui.test.tsx > Publisher visible File commands and image description > exports the current unsaved post and prints through the rendered popup
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-file-image-ui.test.tsx > Publisher visible File commands and image description > routes Rename, Move and New from the popup into the actual existing controls
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > moves a draft through the canonical document history and rejects unknown folders
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > inserts separate image and caption paragraphs without swallowing adjacent text, in one undo
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > forgets publishMenu when its popover closes
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > does not admit a toolbar refresh after its window lifetime retires
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > rejects an invalid stored canonical document before opening it
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-file-image-ui.test.tsx > Publisher visible File commands and image description > uses the current post for Duplicate and Delete and reaches Versions rather than the context-menu target
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-file-image-ui.test.tsx > Publisher visible File commands and image description > keeps File reachable in compact chrome, uses the locale client and disposes its class-owned menu
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > refuses publication with a blank image alternative before calling the provider
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > rejects an invalid initial model through the actual workspace document admission
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > rejects an invalid replacement provider without replacing local edits, media or history
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-file-image-ui.test.tsx > Publisher visible File commands and image description > commits description input before a real Document pane switch (compact=false), saves it and preserves one canonical undo
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-file-image-ui.test.tsx > Publisher visible File commands and image description > commits description input before a real Document pane switch (compact=true), saves it and preserves one canonical undo
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+ ❯ tests/runtime/publisher/publisher-file-image-ui.test.tsx (8 tests | 8 failed) 879ms
+     × validates all File rows and exports the current unsaved post from the real stage in phone chrome 309ms
+     × exposes all File commands and delegates no-post disabled states to command validation 135ms
+     × exports the current unsaved post and prints through the rendered popup 92ms
+     × routes Rename, Move and New from the popup into the actual existing controls 87ms
+     × uses the current post for Duplicate and Delete and reaches Versions rather than the context-menu target 53ms
+     × keeps File reachable in compact chrome, uses the locale client and disposes its class-owned menu 52ms
+     × commits description input before a real Document pane switch (compact=false), saves it and preserves one canonical undo 41ms
+     × commits description input before a real Document pane switch (compact=true), saves it and preserves one canonical undo 108ms
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > rejects a late invalid settings field without persisting earlier fields
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > readmits the same post route on provider replacement and rejects an older pending open
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > does not download after its post changes while an image fetch is pending
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > shows an export error when the post's image cannot be resolved
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+stderr | tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > downloads self-contained image bytes and strips authoring comments
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > exports generated plain text through the scoped provider without marking the document clean
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+ ❯ tests/runtime/publisher/product-controller.test.tsx (12 tests | 12 failed) 1009ms
+     × moves imagePopover to a replacement button without closing it 329ms
+     × moves publishMenu to a replacement button without closing it 87ms
+     × forgets imagePopover when its popover closes 71ms
+     × forgets publishMenu when its popover closes 89ms
+     × does not admit a toolbar refresh after its window lifetime retires 43ms
+     × rejects an invalid stored canonical document before opening it 37ms
+     × rejects an invalid initial model through the actual workspace document admission 35ms
+     × rejects an invalid replacement provider without replacing local edits, media or history 54ms
+     × does not download after its post changes while an image fetch is pending 66ms
+     × shows an export error when the post's image cannot be resolved 67ms
+     × downloads self-contained image bytes and strips authoring comments 61ms
+     × exports generated plain text through the scoped provider without marking the document clean 69ms
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > preserves its unsaved canonical session and history when a replacement provider has different content
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > does not publish an obsolete provider save acknowledgement or replay it to the replacement
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > revokes a pending provider open without discarding an existing local session
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > revokes conditional page outlets when closing a post and binds fresh outlets on reopen
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > binds settings to grouped preferences without changing the post and rejects invalid or stale edits
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > keeps a later library provider authoritative and stops library publication after close
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > selects a created title at view commit without later stealing focus
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > returns from the compact Posts list to the already-open post without reopening its session
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > does not overwrite a divergent Journal copy when a local workspace save completes
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > does not delete a post or navigate away when closing it is cancelled
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > does not restore into a later post when a Versions request completes late
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > waits for the latest Journal save and vetoes close if that queued save fails
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > does not apply an old post's asynchronous media response to the next post
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > keeps its window and application open when the document cannot be saved
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > cancels a pending post open when its owner closes the post
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > defers resize-driven layout and cancels pending work when its view detaches
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > retains the author gate and refuses actions through the real command runtime
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > owns settings, persists changes and keeps menu check states live
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > formats the real document selection, finds and replaces text and validates editing
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > keeps smart punctuation in the editor controller and leaves composing input alone
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > owns the read-only preview session and releases it when dismissed
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > owns a version card's read-only session within a real application window
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > binds the native New Post controls and resets overlay drafts when reopened
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher transient anchor ownership at DOM admission > hands the open image surface to its committed replacement before parent layout notification
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+stderr | tests/runtime/publisher/publisher-class.test.tsx > Publisher transient anchor ownership at DOM admission > hands the open publish surface to its committed replacement before parent layout notification
+TypeError: __vite_ssr_import_1__.NSEUserDefaults is not a constructor
+    at createPublisherPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31)
+    at factory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48)
+    at construct (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:19:20)
+    at constructNSEOwnedResource (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Controllers/ownership.ts:247:16)
+    at ownNSEFactory (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/ownedFactory.ts:18:10)
+    at PublisherApplication.own (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEApplication.ts:143:12)
+    at PublisherApplication.loadPreferences (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38)
+    at PublisherWindowController.windowDidLoad (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28)
+    at PublisherWindowController.#attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:476:12)
+    at Object.attach (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/src/NSE/Application/NSEWindowController.ts:357:37) {
+  [stack]: [Getter/Setter],
+  [message]: '__vite_ssr_import_1__.NSEUserDefaults is not a constructor'
+}
+
+The above error occurred in the <_h> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Zy.
+
+
+ ❯ tests/runtime/publisher/publisher-class.test.tsx (31 tests | 31 failed) 2035ms
+     × keeps the opened editor visible in compact layout without changing the desktop posts preference 440ms
+     × moves a draft through the canonical document history and rejects unknown folders 103ms
+     × inserts separate image and caption paragraphs without swallowing adjacent text, in one undo 59ms
+     × refuses publication with a blank image alternative before calling the provider 99ms
+     × rejects a late invalid settings field without persisting earlier fields 93ms
+     × readmits the same post route on provider replacement and rejects an older pending open 54ms
+     × preserves its unsaved canonical session and history when a replacement provider has different content 50ms
+     × does not publish an obsolete provider save acknowledgement or replay it to the replacement 43ms
+     × revokes a pending provider open without discarding an existing local session 46ms
+     × revokes conditional page outlets when closing a post and binds fresh outlets on reopen 42ms
+     × binds settings to grouped preferences without changing the post and rejects invalid or stale edits 53ms
+     × keeps a later library provider authoritative and stops library publication after close 54ms
+     × selects a created title at view commit without later stealing focus 42ms
+     × returns from the compact Posts list to the already-open post without reopening its session 34ms
+     × does not overwrite a divergent Journal copy when a local workspace save completes 37ms
+     × does not delete a post or navigate away when closing it is cancelled 63ms
+     × does not restore into a later post when a Versions request completes late 45ms
+     × waits for the latest Journal save and vetoes close if that queued save fails 48ms
+     × does not apply an old post's asynchronous media response to the next post 41ms
+     × keeps its window and application open when the document cannot be saved 38ms
+     × cancels a pending post open when its owner closes the post 33ms
+     × defers resize-driven layout and cancels pending work when its view detaches 45ms
+     × retains the author gate and refuses actions through the real command runtime 48ms
+     × owns settings, persists changes and keeps menu check states live 42ms
+     × formats the real document selection, finds and replaces text and validates editing 34ms
+     × keeps smart punctuation in the editor controller and leaves composing input alone 32ms
+     × owns the read-only preview session and releases it when dismissed 33ms
+     × owns a version card's read-only session within a real application window 56ms
+     × binds the native New Post controls and resets overlay drafts when reopened 72ms
+     × hands the open image surface to its committed replacement before parent layout notification 56ms
+     × hands the open publish surface to its committed replacement before parent layout notification 96ms
+ ❯ tests/runtime/gallery-atmo-surfaces.test.tsx (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/gallery-atmo-surfaces.test.tsx [ tests/runtime/gallery-atmo-surfaces.test.tsx ]
+ FAIL  tests/runtime/gallery-class.test.tsx [ tests/runtime/gallery-class.test.tsx ]
+ FAIL  tests/runtime/gallery-specimen-ownership.test.tsx [ tests/runtime/gallery-specimen-ownership.test.tsx ]
+TypeError: NumberFormatter is not a constructor
+ ❯ src/SynWare/NSEControlGallery.app/Contents/Gallery/InputSections.tsx:7:27
+      5|
+      6| const formatterContext = { locale: "en-GB" };
+      7| const currencyFormatter = new NumberFormatter({ style: "currency", cur…
+       |                           ^
+      8| const percentageFormatter = new NumberFormatter({ minimum: 0, maximum:…
+      9| const byteFormatter = new ByteCountFormatter({ unitSystem: "binary", m…
+ ❯ src/SynWare/NSEControlGallery.app/Contents/Gallery/sections.ts:4:1
+ ❯ src/SynWare/NSEControlGallery.app/Contents/GalleryViews.tsx:19:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/55]⎯
+
+ FAIL  tests/runtime/gallery-renderers.test.ts [ tests/runtime/gallery-renderers.test.ts ]
+TypeError: NumberFormatter is not a constructor
+ ❯ src/SynWare/NSEControlGallery.app/Contents/Gallery/InputSections.tsx:7:27
+      5|
+      6| const formatterContext = { locale: "en-GB" };
+      7| const currencyFormatter = new NumberFormatter({ style: "currency", cur…
+       |                           ^
+      8| const percentageFormatter = new NumberFormatter({ minimum: 0, maximum:…
+      9| const byteFormatter = new ByteCountFormatter({ unitSystem: "binary", m…
+ ❯ src/SynWare/NSEControlGallery.app/Contents/Gallery/sections.ts:4:1
+ ❯ tests/runtime/gallery-renderers.test.ts:3:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/55]⎯
+
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 51 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > moves imagePopover to a replacement button without closing it
+ FAIL  tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > moves publishMenu to a replacement button without closing it
+Error: Missing Publisher window
+ ❯ fixture tests/runtime/publisher/product-controller.test.tsx:56:61
+     54|   const id = host.appContext.windows.getSnapshot().current?.id;
+     55|   const window = host.application?.windows.find(controller => controll…
+     56|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     57|   await act(async () => { await window.openPost("post"); });
+     58|   if (!window.session || !window.posts.opened) throw new Error("Missin…
+ ❯ tests/runtime/publisher/product-controller.test.tsx:66:24
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/55]⎯
+
+ FAIL  tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > forgets imagePopover when its popover closes
+ FAIL  tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > forgets publishMenu when its popover closes
+Error: Missing Publisher window
+ ❯ fixture tests/runtime/publisher/product-controller.test.tsx:56:61
+     54|   const id = host.appContext.windows.getSnapshot().current?.id;
+     55|   const window = host.application?.windows.find(controller => controll…
+     56|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     57|   await act(async () => { await window.openPost("post"); });
+     58|   if (!window.session || !window.posts.opened) throw new Error("Missin…
+ ❯ tests/runtime/publisher/product-controller.test.tsx:83:24
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/55]⎯
+
+ FAIL  tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > does not admit a toolbar refresh after its window lifetime retires
+Error: Missing Publisher window
+ ❯ fixture tests/runtime/publisher/product-controller.test.tsx:56:61
+     54|   const id = host.appContext.windows.getSnapshot().current?.id;
+     55|   const window = host.application?.windows.find(controller => controll…
+     56|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     57|   await act(async () => { await window.openPost("post"); });
+     58|   if (!window.session || !window.posts.opened) throw new Error("Missin…
+ ❯ tests/runtime/publisher/product-controller.test.tsx:91:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/55]⎯
+
+ FAIL  tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > rejects an invalid stored canonical document before opening it
+Error: Missing Publisher window
+ ❯ fixture tests/runtime/publisher/product-controller.test.tsx:56:61
+     54|   const id = host.appContext.windows.getSnapshot().current?.id;
+     55|   const window = host.application?.windows.find(controller => controll…
+     56|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     57|   await act(async () => { await window.openPost("post"); });
+     58|   if (!window.session || !window.posts.opened) throw new Error("Missin…
+ ❯ tests/runtime/publisher/product-controller.test.tsx:98:24
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/55]⎯
+
+ FAIL  tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > rejects an invalid initial model through the actual workspace document admission
+Error: Missing Publisher window
+ ❯ fixture tests/runtime/publisher/product-controller.test.tsx:56:61
+     54|   const id = host.appContext.windows.getSnapshot().current?.id;
+     55|   const window = host.application?.windows.find(controller => controll…
+     56|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     57|   await act(async () => { await window.openPost("post"); });
+     58|   if (!window.session || !window.posts.opened) throw new Error("Missin…
+ ❯ tests/runtime/publisher/product-controller.test.tsx:110:24
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/55]⎯
+
+ FAIL  tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > rejects an invalid replacement provider without replacing local edits, media or history
+Error: Missing Publisher window
+ ❯ fixture tests/runtime/publisher/product-controller.test.tsx:56:61
+     54|   const id = host.appContext.windows.getSnapshot().current?.id;
+     55|   const window = host.application?.windows.find(controller => controll…
+     56|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     57|   await act(async () => { await window.openPost("post"); });
+     58|   if (!window.session || !window.posts.opened) throw new Error("Missin…
+ ❯ tests/runtime/publisher/product-controller.test.tsx:123:38
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/55]⎯
+
+ FAIL  tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > does not download after its post changes while an image fetch is pending
+Error: Missing Publisher window
+ ❯ fixture tests/runtime/publisher/product-controller.test.tsx:56:61
+     54|   const id = host.appContext.windows.getSnapshot().current?.id;
+     55|   const window = host.application?.windows.find(controller => controll…
+     56|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     57|   await act(async () => { await window.openPost("post"); });
+     58|   if (!window.session || !window.posts.opened) throw new Error("Missin…
+ ❯ tests/runtime/publisher/product-controller.test.tsx:148:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/55]⎯
+
+ FAIL  tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > shows an export error when the post's image cannot be resolved
+Error: Missing Publisher window
+ ❯ fixture tests/runtime/publisher/product-controller.test.tsx:56:61
+     54|   const id = host.appContext.windows.getSnapshot().current?.id;
+     55|   const window = host.application?.windows.find(controller => controll…
+     56|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     57|   await act(async () => { await window.openPost("post"); });
+     58|   if (!window.session || !window.posts.opened) throw new Error("Missin…
+ ❯ tests/runtime/publisher/product-controller.test.tsx:164:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/55]⎯
+
+ FAIL  tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > downloads self-contained image bytes and strips authoring comments
+Error: Missing Publisher window
+ ❯ fixture tests/runtime/publisher/product-controller.test.tsx:56:61
+     54|   const id = host.appContext.windows.getSnapshot().current?.id;
+     55|   const window = host.application?.windows.find(controller => controll…
+     56|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     57|   await act(async () => { await window.openPost("post"); });
+     58|   if (!window.session || !window.posts.opened) throw new Error("Missin…
+ ❯ tests/runtime/publisher/product-controller.test.tsx:172:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/55]⎯
+
+ FAIL  tests/runtime/publisher/product-controller.test.tsx > Publisher admission and export command > exports generated plain text through the scoped provider without marking the document clean
+Error: Missing Publisher window
+ ❯ fixture tests/runtime/publisher/product-controller.test.tsx:56:61
+     54|   const id = host.appContext.windows.getSnapshot().current?.id;
+     55|   const window = host.application?.windows.find(controller => controll…
+     56|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     57|   await act(async () => { await window.openPost("post"); });
+     58|   if (!window.session || !window.posts.opened) throw new Error("Missin…
+ ❯ tests/runtime/publisher/product-controller.test.tsx:193:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > keeps the opened editor visible in compact layout without changing the desktop posts preference
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:82:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > moves a draft through the canonical document history and rejects unknown folders
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:102:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > inserts separate image and caption paragraphs without swallowing adjacent text, in one undo
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:120:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > refuses publication with a blank image alternative before calling the provider
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:140:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > rejects a late invalid settings field without persisting earlier fields
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:151:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > readmits the same post route on provider replacement and rejects an older pending open
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:165:38
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > preserves its unsaved canonical session and history when a replacement provider has different content
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:187:38
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > does not publish an obsolete provider save acknowledgement or replay it to the replacement
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:206:38
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > revokes a pending provider open without discarding an existing local session
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:229:38
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > revokes conditional page outlets when closing a post and binds fresh outlets on reopen
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:244:36
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > binds settings to grouped preferences without changing the post and rejects invalid or stale edits
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:260:36
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > keeps a later library provider authoritative and stops library publication after close
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:282:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > selects a created title at view commit without later stealing focus
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:307:55
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > returns from the compact Posts list to the already-open post without reopening its session
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:333:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > does not overwrite a divergent Journal copy when a local workspace save completes
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:347:38
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > does not delete a post or navigate away when closing it is cancelled
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:361:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > does not restore into a later post when a Versions request completes late
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:373:38
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > waits for the latest Journal save and vetoes close if that queued save fails
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:389:38
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[30/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > does not apply an old post's asynchronous media response to the next post
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:413:38
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[31/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > keeps its window and application open when the document cannot be saved
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:426:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[32/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > cancels a pending post open when its owner closes the post
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:438:41
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[33/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > defers resize-driven layout and cancels pending work when its view detaches
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:449:35
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[34/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > retains the author gate and refuses actions through the real command runtime
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:480:36
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[35/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > owns settings, persists changes and keeps menu check states live
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:492:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[36/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > formats the real document selection, finds and replaces text and validates editing
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:511:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[37/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > keeps smart punctuation in the editor controller and leaves composing input alone
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:542:36
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[38/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > owns the read-only preview session and releases it when dismissed
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:566:36
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > owns a version card's read-only session within a real application window
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:581:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[40/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher class application > binds the native New Post controls and resets overlay drafts when reopened
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:600:36
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[41/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher transient anchor ownership at DOM admission > hands the open image surface to its committed replacement before parent layout notification
+ FAIL  tests/runtime/publisher/publisher-class.test.tsx > Publisher transient anchor ownership at DOM admission > hands the open publish surface to its committed replacement before parent layout notification
+Error: Publisher did not open its main window.
+ ❯ fixture tests/runtime/publisher/publisher-class.test.tsx:65:61
+     63|   const currentWindowId=host.appContext.windows.getSnapshot().current?…
+     64|   const window = host.application?.windows.find(controller=>controller…
+     65|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     66|   return { view, window, host, service, record };
+     67| }
+ ❯ tests/runtime/publisher/publisher-class.test.tsx:628:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[42/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-file-image-ui.test.tsx > Publisher visible File commands and image description > validates all File rows and exports the current unsaved post from the real stage in phone chrome
+TypeError: NSEUserDefaults is not a constructor
+ ❯ createPublisherPreferences src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:43:31
+
+ ❯ factory src/SynWare/JournalPublisher.app/Contents/index.tsx:17:48
+ ❯ construct ../src/NSE/Application/ownedFactory.ts:19:20
+ ❯ constructNSEOwnedResource ../src/NSE/Controllers/ownership.ts:247:16
+ ❯ ownNSEFactory ../src/NSE/Application/ownedFactory.ts:18:10
+ ❯ PublisherApplication.own ../src/NSE/Application/NSEApplication.ts:143:12
+ ❯ PublisherApplication.loadPreferences src/SynWare/JournalPublisher.app/Contents/index.tsx:17:38
+ ❯ PublisherWindowController.windowDidLoad src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx:1010:28
+ ❯ PublisherWindowController.#attach ../src/NSE/Application/NSEWindowController.ts:476:12
+ ❯ Object.attach ../src/NSE/Application/NSEWindowController.ts:357:37
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[43/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-file-image-ui.test.tsx > Publisher visible File commands and image description > exposes all File commands and delegates no-post disabled states to command validation
+Error: Missing actual Publisher window
+ ❯ fixture tests/runtime/publisher/publisher-file-image-ui.test.tsx:50:61
+     48|   const current = host.appContext.windows.getSnapshot().current?.id;
+     49|   const window = surface === "stage" ? host.application?.windows[0] : …
+     50|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     51|   await act(async () => { if (open) await window.openPost("post"); });
+     52|   await act(async () => { host.clock.advance(0); });
+ ❯ tests/runtime/publisher/publisher-file-image-ui.test.tsx:113:40
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[44/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-file-image-ui.test.tsx > Publisher visible File commands and image description > exports the current unsaved post and prints through the rendered popup
+Error: Missing actual Publisher window
+ ❯ fixture tests/runtime/publisher/publisher-file-image-ui.test.tsx:50:61
+     48|   const current = host.appContext.windows.getSnapshot().current?.id;
+     49|   const window = surface === "stage" ? host.application?.windows[0] : …
+     50|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     51|   await act(async () => { if (open) await window.openPost("post"); });
+     52|   await act(async () => { host.clock.advance(0); });
+ ❯ tests/runtime/publisher/publisher-file-image-ui.test.tsx:123:38
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[45/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-file-image-ui.test.tsx > Publisher visible File commands and image description > routes Rename, Move and New from the popup into the actual existing controls
+Error: Missing actual Publisher window
+ ❯ fixture tests/runtime/publisher/publisher-file-image-ui.test.tsx:50:61
+     48|   const current = host.appContext.windows.getSnapshot().current?.id;
+     49|   const window = surface === "stage" ? host.application?.windows[0] : …
+     50|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     51|   await act(async () => { if (open) await window.openPost("post"); });
+     52|   await act(async () => { host.clock.advance(0); });
+ ❯ tests/runtime/publisher/publisher-file-image-ui.test.tsx:142:38
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[46/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-file-image-ui.test.tsx > Publisher visible File commands and image description > uses the current post for Duplicate and Delete and reaches Versions rather than the context-menu target
+Error: Missing actual Publisher window
+ ❯ fixture tests/runtime/publisher/publisher-file-image-ui.test.tsx:50:61
+     48|   const current = host.appContext.windows.getSnapshot().current?.id;
+     49|   const window = surface === "stage" ? host.application?.windows[0] : …
+     50|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     51|   await act(async () => { if (open) await window.openPost("post"); });
+     52|   await act(async () => { host.clock.advance(0); });
+ ❯ tests/runtime/publisher/publisher-file-image-ui.test.tsx:157:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[47/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-file-image-ui.test.tsx > Publisher visible File commands and image description > keeps File reachable in compact chrome, uses the locale client and disposes its class-owned menu
+Error: Missing actual Publisher window
+ ❯ fixture tests/runtime/publisher/publisher-file-image-ui.test.tsx:50:61
+     48|   const current = host.appContext.windows.getSnapshot().current?.id;
+     49|   const window = surface === "stage" ? host.application?.windows[0] : …
+     50|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     51|   await act(async () => { if (open) await window.openPost("post"); });
+     52|   await act(async () => { host.clock.advance(0); });
+ ❯ tests/runtime/publisher/publisher-file-image-ui.test.tsx:171:52
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[48/55]⎯
+
+ FAIL  tests/runtime/publisher/publisher-file-image-ui.test.tsx > Publisher visible File commands and image description > commits description input before a real Document pane switch (compact=false), saves it and preserves one canonical undo
+ FAIL  tests/runtime/publisher/publisher-file-image-ui.test.tsx > Publisher visible File commands and image description > commits description input before a real Document pane switch (compact=true), saves it and preserves one canonical undo
+Error: Missing actual Publisher window
+ ❯ fixture tests/runtime/publisher/publisher-file-image-ui.test.tsx:50:61
+     48|   const current = host.appContext.windows.getSnapshot().current?.id;
+     49|   const window = surface === "stage" ? host.application?.windows[0] : …
+     50|   if (!(window instanceof PublisherWindowController)) throw new Error(…
+       |                                                             ^
+     51|   await act(async () => { if (open) await window.openPost("post"); });
+     52|   await act(async () => { host.clock.advance(0); });
+ ❯ tests/runtime/publisher/publisher-file-image-ui.test.tsx:184:43
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[49/55]⎯
+
+
+ Test Files  7 failed | 52 passed (59)
+      Tests  51 failed | 321 passed (372)
+   Start at  08:41:38
+   Duration  22.89s (transform 123.93s, setup 1.61s, import 194.89s, tests 54.24s, environment 205.27s)
+

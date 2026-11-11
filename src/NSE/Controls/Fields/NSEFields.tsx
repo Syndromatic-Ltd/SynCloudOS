@@ -1,3 +1,5 @@
+import { useNSEValueBinding } from "../Core/useNSEValueBinding";
+import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -18,8 +20,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { nseControlHooks, nseStateHooks } from "../../Theme/contract/hooks";
+import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import { NSEMetalThumb, type NSEThumbMaterial } from "../../Appearance/NSEMetalThumb";
+import { NSEDivider } from "../Selection/NSEDivider";
+import { nseCSSValue } from "../../Graphics/NSEShadow";
+import { nseNonNegative, useNSEViewLayerProperties, type NSEViewLayerProperties } from "../../Views/viewLayerProperties";
 import {
+  Children,
+  Fragment,
+  cloneElement,
+  isValidElement,
   useCallback,
   useEffect,
   useId,
@@ -34,7 +45,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode
 } from "react";
-import type { Formatter, FormatterContext } from "../../../SynCloudOS/Models";
+import type { NSEFormatter, NSEFormatterContext } from "../../../Foundation/public";
 import {
   useNSEControlCommand,
   useNSEControlFormReset,
@@ -95,8 +106,8 @@ export interface NSEFormattedTextFieldProps<T> extends NSETextFieldChromeProps, 
   value?: T;
   defaultValue?: T;
   invalid?: boolean;
-  formatter: Formatter<T>;
-  formatterContext: FormatterContext;
+  formatter: NSEFormatter<T>;
+  formatterContext: NSEFormatterContext;
   command?: NSEControlCommandBinding<T>;
   onValueChange?(value: T, phase: NSEControlInteractionPhase): void;
 }
@@ -108,23 +119,84 @@ export interface NSEFormattedTextFieldProps<T> extends NSETextFieldChromeProps, 
  */
 export interface NSETextFieldProps<T = string> extends NSETextFieldChromeProps, Omit<
   InputHTMLAttributes<HTMLInputElement>,
-  "prefix" | "value" | "defaultValue" | "height"
+  "prefix" | "value" | "defaultValue" | "height" | "disabled"
 > {
+  /** NSTextField.isEditable (default true); false makes the field a label (see NSELabelTextFieldProps). */
+  isEditable?: true;
+  /** NSControl.isEnabled (default true). */
+  isEnabled?: boolean;
   value?: T;
   defaultValue?: T;
   invalid?: boolean;
-  formatter?: Formatter<T>;
-  formatterContext?: FormatterContext;
+  formatter?: NSEFormatter<T>;
+  formatterContext?: NSEFormatterContext;
   command?: NSEControlCommandBinding<T>;
   onValueChange?(value: T, phase: NSEControlInteractionPhase): void;
 }
 
-function toTextValue<T>(value: T | undefined, formatter: Formatter<T> | undefined, context: FormatterContext | undefined) {
-  if (formatter && value !== undefined && context) return formatter.editingText(value, context);
+function toTextValue<T>(value: T | undefined, formatter: NSEFormatter<T> | undefined, context: NSEFormatterContext | undefined) {
+  if (formatter && value !== undefined && context) return formatter.editingString(value, context);
   return value === undefined ? "" : String(value);
 }
 
-export function NSETextField<T = string>(props: NSETextFieldProps<T>) {
+/** NSFont.TextStyle: the SDK's text styles, sized by its text tokens so every theme agrees. */
+export type NSEFontTextStyle = "body" | "callout" | "footnote" | "caption" | "headline" | "label";
+
+/**
+ * A text field that is not editable: AppKit's `NSTextField(labelWithString:)`, drawn without a bezel or
+ * background. Its children are its string value. Use it for readouts, captions and notes beside controls.
+ */
+export interface NSELabelTextFieldProps extends Omit<HTMLAttributes<HTMLSpanElement>, "color"> {
+  /** NSTextField.isEditable. */
+  readonly isEditable: false;
+  /** NSTextField.font, as a text style (default body). */
+  readonly font?: NSEFontTextStyle;
+  /** NSTextField's text colour: `labelColour` (default), or the quieter `secondaryLabelColour` for hints and metadata. */
+  readonly textColour?: "labelColour" | "secondaryLabelColour";
+  /** The monospaced-digit system font: tabular figures, so changing numbers do not jitter. */
+  readonly monospacedDigits?: boolean;
+  /** NSTextField.lineBreakMode: wrap at words (default), or anywhere for paths, URLs and hex values. */
+  readonly lineBreakMode?: "byWordWrapping" | "byCharWrapping";
+  /**
+   * NSCell.backgroundStyle: what the label is drawn on. `raised` is a label on a raised surface, such
+   * as status text on a window's bottom content border, which the theme draws embossed.
+   */
+  readonly backgroundStyle?: NSELabelBackgroundStyle;
+}
+
+/** NSView.BackgroundStyle. */
+export type NSELabelBackgroundStyle = "normal" | "emphasised" | "raised" | "lowered";
+
+function NSELabelTextField({ isEditable: _isEditable, font = "body", textColour = "labelColour", monospacedDigits = false, lineBreakMode = "byWordWrapping", backgroundStyle = "normal", className = "", children, ...props }: NSELabelTextFieldProps) {
+  return (
+    <span
+      {...props}
+      {...nseControlHooks({ control: "text-field", variants: { editable: "false", "text-colour": textColour, "background-style": backgroundStyle } })}
+      data-nse-part="title"
+      className={classes("nse-control-label-field", className)}
+      data-font={font}
+      data-text-colour={textColour === "secondaryLabelColour" ? "secondary" : undefined}
+      data-monospaced-digits={monospacedDigits ? "true" : undefined}
+      data-line-break-mode={lineBreakMode === "byCharWrapping" ? "char" : undefined}
+      data-background-style={backgroundStyle === "normal" ? undefined : backgroundStyle}
+    >
+      {children}
+    </span>
+  );
+}
+
+type NSEEditableTextFieldProps<T> = NSEBoundValueProps<T, NSETextFieldProps<T>, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>;
+
+export function NSETextField<T = string>(props: NSELabelTextFieldProps | NSEEditableTextFieldProps<T>) {
+  if ((props as { readonly isEditable?: boolean }).isEditable === false) return <NSELabelTextField {...props as NSELabelTextFieldProps} />;
+  return <NSEEditableTextField<T> {...props as NSEEditableTextFieldProps<T>} />;
+}
+
+function NSEEditableTextField<T>(props: NSEEditableTextFieldProps<T>) {
+  return <NSETextFieldControl {...useNSEValueBinding<T, NSETextFieldProps<T>, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback: '' as T})} />;
+}
+
+function NSETextFieldControl<T = string>(props: NSETextFieldProps<T>) {
   const {
     label,
     controlSize = "regular",
@@ -135,7 +207,7 @@ export function NSETextField<T = string>(props: NSETextFieldProps<T>) {
     groupPosition = "single",
     className = "",
     id,
-    disabled,
+    isEnabled = true,
     readOnly,
     required,
     name,
@@ -155,6 +227,8 @@ export function NSETextField<T = string>(props: NSETextFieldProps<T>) {
     "aria-describedby": ariaDescribedBy,
     ...inputProps
   } = props;
+  const disabled = !isEnabled;
+  const theme = useNSEThemeInteraction<HTMLLabelElement>(isEnabled);
   const generatedId = useId();
   const inputId = id ?? generatedId;
   const inputRef = useRef<HTMLInputElement>(null);
@@ -165,7 +239,7 @@ export function NSETextField<T = string>(props: NSETextFieldProps<T>) {
     value: value as T | string | undefined,
     defaultValue: defaultValue as T | string | undefined,
     fallback: "",
-    disabled,
+    isEnabled: !disabled,
     readOnly,
     required,
     validation,
@@ -199,7 +273,7 @@ export function NSETextField<T = string>(props: NSETextFieldProps<T>) {
 
   const validatePartial = useCallback((text: string) => {
     if (!formatter || !formatterContext) return true;
-    const partial = formatter.validatePartial(text, formatterContext);
+    const partial = formatter.isPartialStringValid(text, formatterContext);
     if (partial.valid) {
       setEditingValidation(undefined);
       if (partial.replacement !== undefined && partial.replacement !== text) setDraft(partial.replacement);
@@ -223,7 +297,7 @@ export function NSETextField<T = string>(props: NSETextFieldProps<T>) {
       currentValue.change(draft, "commit");
       return true;
     }
-    const parsed = formatter.parse(draft, formatterContext);
+    const parsed = formatter.getObjectValue(draft, formatterContext);
     if (!parsed.ok) {
       setEditingValidation({ kind: "invalid", code: parsed.error.code, message: parsed.error.message });
       return false;
@@ -234,25 +308,30 @@ export function NSETextField<T = string>(props: NSETextFieldProps<T>) {
       if (result?.status !== "executed") return false;
     }
     currentValue.change(parsed.value, "commit");
-    setDraft(formatter.editingText(parsed.value, formatterContext));
+    setDraft(formatter.editingString(parsed.value, formatterContext));
     return true;
   }, [command, commandBinding, currentValue, disabled, draft, formatter, formatterContext, readOnly]);
 
   return (
     <>
       <label
+        {...theme.events}
+        {...nseControlHooks({ control: "text-field", enabled: isEnabled, hovered: theme.hovered, focused: theme.focused, variants: { "control-size": controlSize, position: groupPosition, validation: invalidState ? "invalid" : "valid", editable: String(!readOnly) } })}
+        data-nse-part="content"
         className={classes("nse-control-text-field", disabled && "is-disabled", className)}
         data-invalid={invalidState ? "true" : "false"}
         data-position={groupPosition}
+        data-nse-height={height === undefined ? undefined : String(height)}
         data-size={height !== undefined ? "custom" : controlSize}
         style={sizedControlStyle(undefined, height, undefined)}
         htmlFor={inputId}
       >
-        {label ? <span className="nse-control-field-label">{label}</span> : null}
-        <span className="nse-control-field-frame">
-          {prefix ? <span className="nse-control-field-affix">{prefix}</span> : null}
+        {label ? <span data-nse-part="label" className="nse-control-field-label">{label}</span> : null}
+        <span data-nse-part="bezel" className="nse-control-field-frame">
+          {prefix ? <span data-nse-part="prefix" className="nse-control-field-affix">{prefix}</span> : null}
           <input
           {...inputProps}
+          data-nse-part="field"
           ref={inputRef}
           id={inputId}
           name={name}
@@ -276,7 +355,7 @@ export function NSETextField<T = string>(props: NSETextFieldProps<T>) {
             if (composing.current) return;
             if (isFormatted) {
               if (validatePartial(nextText) && formatter && formatterContext) {
-                const parsed = formatter.parse(nextText, formatterContext);
+                const parsed = formatter.getObjectValue(nextText, formatterContext);
                 if (parsed.ok) currentValue.change(parsed.value, "preview");
               }
             } else currentValue.change(nextText, "preview");
@@ -291,7 +370,7 @@ export function NSETextField<T = string>(props: NSETextFieldProps<T>) {
             setDraft(nextText);
             if (isFormatted) {
               if (validatePartial(nextText) && formatter && formatterContext) {
-                const parsed = formatter.parse(nextText, formatterContext);
+                const parsed = formatter.getObjectValue(nextText, formatterContext);
                 if (parsed.ok) currentValue.change(parsed.value, "preview");
               }
             } else currentValue.change(nextText, "preview");
@@ -323,10 +402,10 @@ export function NSETextField<T = string>(props: NSETextFieldProps<T>) {
             onKeyDown?.(event);
           }}
           />
-          {suffix ? <span className="nse-control-field-affix">{suffix}</span> : null}
+          {suffix ? <span data-nse-part="suffix" className="nse-control-field-affix">{suffix}</span> : null}
         </span>
       </label>
-      {invalidState ? <span id={errorId} className="nse-control-field-error" role="alert">{effectiveValidation.message}</span> : null}
+      {invalidState ? <span id={errorId} data-nse-part="error" className="nse-control-field-error" role="alert">{effectiveValidation.message}</span> : null}
     </>
   );
 }
@@ -334,12 +413,29 @@ export function NSETextField<T = string>(props: NSETextFieldProps<T>) {
 export interface NSEInputBoxProps extends HTMLAttributes<HTMLDivElement> {
   label?: ReactNode;
   invalid?: boolean;
-  disabled?: boolean;
+  /** NSControl.isEnabled (default true). */
+  isEnabled?: boolean;
   /** Render with the focused appearance even when nothing inside has focus. */
   alwaysLooksFocused?: boolean;
 }
 
+/** Native editing slots in this composite belong to the input group. Nested
+ * NSE controls and custom components publish their own drawing contract. */
+function inputBoxFieldParts(children: ReactNode): ReactNode {
+  return Children.map(children, child => {
+    if (!isValidElement<{ children?: ReactNode; type?: string; "data-nse-control"?: string; "data-nse-part"?: string }>(child)) return child;
+    if (child.props["data-nse-control"] || (typeof child.type !== "string" && child.type !== Fragment)) return child;
+    if ((child.type === "input" && child.props.type !== "hidden") || child.type === "textarea") {
+      return child.props["data-nse-part"] ? child : cloneElement(child, { "data-nse-part": "field" });
+    }
+    return child.props.children === undefined ? child : cloneElement(child, { children: inputBoxFieldParts(child.props.children) });
+  });
+}
+
 /**
+@internal The developer Inspector's export box. Apps compose a field's affixes with NSETextField's
+`prefix` and `suffix`.
+
 A box styled like a single input that wraps a set of controls — an icon, the text input, a button —
 so they appear to live inside one field. It takes on the focused look whenever any
 child is focused, or always when `alwaysLooksFocused` is set.
@@ -347,7 +443,7 @@ child is focused, or always when `alwaysLooksFocused` is set.
 export function NSEInputBox({
   label,
   invalid = false,
-  disabled = false,
+  isEnabled = true,
   alwaysLooksFocused = false,
   className = "",
   children,
@@ -356,157 +452,63 @@ export function NSEInputBox({
   return (
     <div
       {...props}
-      className={classes("nse-control-input-box", disabled && "is-disabled", className)}
+      {...nseControlHooks({ control: "text-field", enabled: isEnabled, highlighted: alwaysLooksFocused, variants: { role: "group", validation: invalid ? "invalid" : "valid" } })} data-nse-part="content"
+      className={classes("nse-control-input-box", !isEnabled && "is-disabled", className)}
       data-invalid={invalid ? "true" : "false"}
       data-always-focused={alwaysLooksFocused ? "true" : "false"}
-      aria-disabled={disabled || undefined}
+      aria-disabled={!isEnabled || undefined}
     >
-      {label ? <span className="nse-control-field-label">{label}</span> : null}
-      <div className="nse-control-field-frame nse-control-input-box-frame">{children}</div>
+      {label ? <span data-nse-part="label" className="nse-control-field-label">{label}</span> : null}
+      <div data-nse-part="bezel" className="nse-control-field-frame nse-control-input-box-frame">{inputBoxFieldParts(children)}</div>
     </div>
   );
 }
 
-interface NSECheckboxPropsBase extends Omit<
-  InputHTMLAttributes<HTMLInputElement>,
-  "type" | "checked" | "defaultChecked" | "onChange"
-> {
-  label: ReactNode;
-  /** Native form submission value; defaults to the browser's normal "on" value. */
-  submissionValue?: string;
-  state?: NSECheckboxState;
-  defaultState?: NSECheckboxState;
-  mixed?: boolean;
-  command?: NSEControlCommandBinding<void>;
-  validation?: NSEControlValidation;
-  onStateChange?(state: NSECheckboxState, phase: "commit"): void;
-  /** Existing native callback kept as a narrow compatibility entry point. */
-  onCheckedChange?(checked: boolean): void;
-  selectionHaptic?: HFXFeedbackRequest;
-}
-
-/**
- * `state`/`defaultState` model the complete native checkbox state machine. The
- * legacy checked props remain deliberately narrow compatibility aliases.
- */
-export interface NSECheckboxProps extends NSECheckboxPropsBase {
-  checked?: boolean;
-  defaultChecked?: boolean;
-  onChange?: InputHTMLAttributes<HTMLInputElement>["onChange"];
-}
-
-export function NSECheckbox({
-  label,
-  state,
-  defaultState,
-  checked,
-  defaultChecked,
-  mixed,
-  submissionValue,
-  command: commandBinding,
-  validation,
-  onStateChange,
-  onCheckedChange,
-  selectionHaptic = "selection",
-  className = "",
-  id,
-  disabled,
-  readOnly,
-  onChange,
-  ...props
-}: NSECheckboxProps) {
-  const { triggerNSEControlHaptic, triggerNSEControlHapticForEvent } = useNSEControlFeedback();
-
-  const generatedId = useId();
-  const inputId = id ?? generatedId;
-  const inputRef = useRef<HTMLInputElement>(null);
-  const defaultCheckboxState = defaultState ?? (defaultChecked ?? false);
-  const currentState = useNSEControlValue<NSECheckboxState>({
-    value: state ?? (mixed ? "mixed" : checked),
-    defaultValue: defaultCheckboxState,
-    fallback: false,
-    disabled,
-    readOnly,
-    required: props.required,
-    validation,
-    onValueChange(nextState, phase) {
-      if (phase !== "commit") return;
-      onStateChange?.(nextState, "commit");
-      if (typeof nextState === "boolean") onCheckedChange?.(nextState);
-    },
-  });
-  const command = useNSEControlCommand(commandBinding);
-  const restoreMixedAfterReset = useCallback(() => {
-    if (inputRef.current) inputRef.current.indeterminate = defaultCheckboxState === "mixed";
-  }, [defaultCheckboxState]);
-  useNSEControlFormReset(inputRef, currentState.reset, restoreMixedAfterReset);
-
-  useLayoutEffect(() => {
-    if (inputRef.current) inputRef.current.indeterminate = currentState.value === "mixed";
-  }, [currentState.value]);
-
-  const invalid = validation?.kind === "invalid";
-  const errorId = `${inputId}-error`;
-  const describedBy = [props["aria-describedby"], invalid ? errorId : undefined].filter(Boolean).join(" ") || undefined;
-
-  return (
-    <>
-      <label
-        className={classes("nse-control-checkbox", disabled && "is-disabled", className)}
-        htmlFor={inputId}
-        data-state={currentState.value === "mixed" ? "mixed" : currentState.value ? "checked" : "unchecked"}
-        data-disabled={disabled ? "true" : "false"}
-      >
-        <span className="nse-control-checkbox-control">
-          <input
-          {...props}
-          ref={inputRef}
-          id={inputId}
-          type="checkbox"
-          disabled={disabled}
-          readOnly={readOnly}
-          checked={currentState.value === true}
-          value={submissionValue}
-          aria-checked={currentState.value === "mixed" ? "mixed" : currentState.value}
-          aria-invalid={invalid || undefined}
-          aria-describedby={describedBy}
-          onClick={(event) => {
-            if (readOnly) event.preventDefault();
-          }}
-          onChange={(event) => {
-            onChange?.(event);
-            if (readOnly || disabled) return;
-            const nextState = event.currentTarget.checked;
-            triggerNSEControlHapticForEvent(selectionHaptic, event, !disabled);
-            void (async () => {
-              if (commandBinding) {
-                const result = await command.dispatch();
-                if (result?.status !== "executed") return;
-              }
-              currentState.change(nextState, "commit");
-            })();
-          }}
-          />
-          <span className="nse-control-checkbox-art" aria-hidden="true" />
-        </span>
-        <span className="nse-control-checkbox-label">{label}</span>
-      </label>
-      {invalid ? <span id={errorId} className="nse-control-field-error" role="alert">{validation.message}</span> : null}
-    </>
-  );
-}
-
-export interface NSEToggleButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onChange" | "defaultChecked"> {
+export interface NSESwitchProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onChange" | "defaultChecked" | "disabled" | "title"> {
+  /** The theme's thumb: the standard glass thumb or brushed metal. */
   thumbMaterial?: NSEThumbMaterial;
-  checked?: boolean;
-  defaultChecked?: boolean;
-  onCheckedChange?: (checked: boolean) => void;
+  /** NSSwitch.state. */
+  state?: "on" | "off";
+  defaultState?: "on" | "off";
+  /** Called with the new state after the user flips the switch. */
+  onStateChange?: (state: "on" | "off") => void;
+  /** NSControl.isEnabled. Defaults to true. */
+  isEnabled?: boolean;
+  /** NSView.toolTip. */
+  toolTip?: string;
+  /** The words the track shows on each side. */
   onLabel?: string;
   offLabel?: string;
   selectionHaptic?: HFXFeedbackRequest;
 }
 
-export function NSEToggleButton({
+type NSESwitchControlProps = Omit<NSESwitchProps, "state" | "defaultState" | "onStateChange"> & {
+  checked?: boolean;
+  defaultChecked?: boolean;
+  onCheckedChange?: (checked: boolean) => void;
+};
+
+/** NSSwitch: an on/off switch. Bound through Cocoa Bindings' `value`, it reads and writes a Boolean. */
+export function NSESwitch(props: NSEBoundValueProps<boolean, NSESwitchProps, 'state' | 'defaultState' | 'onStateChange'>) {
+  const bound = useNSEValueBinding<boolean, NSESwitchControlProps & { binding?: unknown }, 'checked' | 'onCheckedChange'>(
+    toSwitchControlProps(props) as never,
+    { value: 'checked', change: 'onCheckedChange', excludes: ['defaultChecked'], fallback: false },
+  ) as NSESwitchControlProps & { disabled?: boolean };
+  const { disabled, ...rest } = bound;
+  return <NSESwitchControl {...rest} isEnabled={(rest.isEnabled ?? true) && !disabled} />;
+}
+
+function toSwitchControlProps(props: NSESwitchProps & { binding?: unknown }): NSESwitchControlProps & { binding?: unknown } {
+  const { state, defaultState, onStateChange, ...rest } = props;
+  return {
+    ...rest,
+    ...(state !== undefined ? { checked: state === "on" } : {}),
+    ...(defaultState !== undefined ? { defaultChecked: defaultState === "on" } : {}),
+    ...(onStateChange ? { onCheckedChange: (checked: boolean) => onStateChange(checked ? "on" : "off") } : {}),
+  };
+}
+
+function NSESwitchControl({
   thumbMaterial = "standard",
   checked,
   defaultChecked,
@@ -515,16 +517,32 @@ export function NSEToggleButton({
   offLabel = "Off",
   selectionHaptic = "selection",
   className = "",
-  disabled,
+  isEnabled = true,
+  toolTip,
   onClick,
   onKeyDown,
   style,
   type = "button",
   ...props
-}: NSEToggleButtonProps) {
+}: NSESwitchControlProps) {
+  const disabled = !isEnabled;
+  const theme = useNSEThemeInteraction<HTMLButtonElement>(isEnabled, true, props);
   const { triggerNSEControlHaptic, triggerNSEControlHapticForEvent } = useNSEControlFeedback();
 
   const toggleRef = useRef<HTMLButtonElement>(null);
+  const thumbRef = useRef<HTMLSpanElement>(null);
+  const onTextRef = useRef<HTMLSpanElement>(null);
+  const offTextRef = useRef<HTMLSpanElement>(null);
+  const [labelWidth, setLabelWidth] = useState(0);
+  useLayoutEffect(() => {
+    const labels = [onTextRef.current, offTextRef.current].filter((node): node is HTMLSpanElement => !!node);
+    const measure = () => setLabelWidth(Math.max(0, ...labels.map(node => node.offsetWidth)));
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(measure);
+    labels.forEach(node => observer.observe(node));
+    return () => observer.disconnect();
+  }, [onLabel, offLabel]);
   const dragState = useRef({ pointerId: -1, startX: 0, moved: false });
   const [dragPercent, setDragPercent] = useState<number | null>(null);
   const [isDragging, setDragging] = useState(false);
@@ -537,6 +555,7 @@ export function NSEToggleButton({
   const displayPercent = dragPercent ?? (isChecked ? 1 : 0);
   const toggleStyle = {
     ...style,
+    "--nse-control-toggle-label-width": `${labelWidth}px`,
     "--nse-control-toggle-ratio": displayPercent,
     "--nse-control-toggle-thumb-x": `${displayPercent * TOGGLE_TRAVEL_PX}px`
   } as CSSVarStyle;
@@ -544,8 +563,9 @@ export function NSEToggleButton({
   function getPercentFromPointer(clientX: number) {
     const rect = toggleRef.current?.getBoundingClientRect();
     if (!rect) return isChecked ? 1 : 0;
-    const start = TOGGLE_INSET_PX + TOGGLE_THUMB_PX / 2;
-    const end = rect.width - TOGGLE_INSET_PX - TOGGLE_THUMB_PX / 2;
+    const thumbWidth = thumbRef.current?.getBoundingClientRect().width || TOGGLE_THUMB_PX;
+    const start = TOGGLE_INSET_PX + thumbWidth / 2;
+    const end = rect.width - TOGGLE_INSET_PX - thumbWidth / 2;
     return clamp((clientX - rect.left - start) / Math.max(1, end - start), 0, 1);
   }
 
@@ -603,8 +623,12 @@ export function NSEToggleButton({
       ref={toggleRef}
       className={classes("nse-control-toggle", className)}
       {...props}
+      {...theme.events}
+      {...nseControlHooks({ control: "switch", tracking: isDragging, state: isChecked ? "on" : "off", highlighted: theme.highlighted || isDragging, enabled: isEnabled, hovered: theme.hovered, focused: theme.focused })}
+      data-nse-part="background"
       type={type}
       role="switch"
+      title={toolTip}
       aria-checked={isChecked}
       data-thumb-material={thumbMaterial}
       data-state={isChecked ? "on" : "off"}
@@ -637,13 +661,14 @@ export function NSEToggleButton({
       onPointerUp={finishPointer}
       onPointerCancel={cancelPointer}
     >
+      <span data-nse-part="bezel" aria-hidden="true" style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />
       <span className="nse-control-visually-hidden">{isChecked ? onLabel : offLabel}</span>
-      <span className="nse-control-toggle-track" aria-hidden="true">
-        <span className="nse-control-toggle-rail nse-control-toggle-rail-start" />
-        <span className="nse-control-toggle-rail nse-control-toggle-rail-end" />
-        <span className="nse-control-toggle-text nse-control-toggle-text-on">{onLabel}</span>
-        <span className="nse-control-toggle-text nse-control-toggle-text-off">{offLabel}</span>
-        <span className="nse-control-toggle-thumb">{thumbMaterial === "metal" ? <NSEMetalThumb disabled={disabled} /> : null}</span>
+      <span data-nse-part="track" className="nse-control-toggle-track" aria-hidden="true">
+        <span data-nse-part="fill" data-nse-position="leading" className="nse-control-toggle-rail nse-control-toggle-rail-start" />
+        <span data-nse-part="fill" data-nse-position="trailing" className="nse-control-toggle-rail nse-control-toggle-rail-end" />
+        <span data-nse-part="title" data-nse-state="on" className="nse-control-toggle-text nse-control-toggle-text-on"><span data-nse-part="label" className="nse-control-toggle-state-label" ref={onTextRef}>{onLabel}</span></span>
+        <span data-nse-part="title" data-nse-state="off" className="nse-control-toggle-text nse-control-toggle-text-off"><span data-nse-part="label" className="nse-control-toggle-state-label" ref={offTextRef}>{offLabel}</span></span>
+        <span data-nse-part="knob" className="nse-control-toggle-thumb" ref={thumbRef}>{thumbMaterial === "metal" ? <NSEMetalThumb disabled={disabled} /> : null}</span>
       </span>
     </button>
   );
@@ -652,7 +677,7 @@ export function NSEToggleButton({
 export interface NSERadioOption {
   value: string;
   label: ReactNode;
-  disabled?: boolean;
+  isEnabled?: boolean;
   command?: NSEControlCommandBinding<{ readonly value: string }>;
 }
 
@@ -665,7 +690,7 @@ export interface NSERadioGroupProps extends Omit<HTMLAttributes<HTMLDivElement>,
   /** New callers should supply a native group name. An ID-backed compatibility name protects existing callers. */
   name?: string;
   required?: boolean;
-  disabled?: boolean;
+  isEnabled?: boolean;
   validation?: NSEControlValidation;
   selectionHaptic?: HFXFeedbackRequest;
 }
@@ -677,23 +702,38 @@ interface NSERadioOptionControlProps {
   readonly name: string;
   readonly required?: boolean;
   readonly disabled: boolean;
+  readonly tabStop: boolean;
+  readonly onAvailabilityChange: (value: string, available: boolean | null) => void;
   readonly inputRef: (node: HTMLInputElement | null) => void;
   readonly onCommit: () => void;
   readonly onKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void;
 }
 
-function NSERadioOptionControl({ option, selected, position, name, required, disabled, inputRef, onCommit, onKeyDown }: NSERadioOptionControlProps) {
+function NSERadioOptionControl({ option, selected, position, name, required, disabled, tabStop, onAvailabilityChange, inputRef, onCommit, onKeyDown }: NSERadioOptionControlProps) {
   const command = useNSEControlCommand(option.command);
-  const optionDisabled = disabled || Boolean(option.disabled);
+  const presentation = command.presentation;
+  const theme = useNSEThemeInteraction<HTMLLabelElement>(!disabled && option.isEnabled !== false, true);
+  const optionDisabled = disabled || option.isEnabled === false || Boolean(option.command && (!presentation?.enabled || presentation.denied || presentation.hidden || presentation.stale));
+  useEffect(() => {
+    onAvailabilityChange(option.value, !optionDisabled);
+    return () => onAvailabilityChange(option.value, null);
+  }, [onAvailabilityChange, option.value, optionDisabled]);
   return (
     <label
+      data-nse-part="cell"
+      data-nse-button-type="radio"
+      data-nse-position={position}
+      {...theme.events}
+      {...nseStateHooks({ state: selected ? "on" : "off", selected, enabled: !optionDisabled, highlighted: theme.highlighted, hovered: theme.hovered, focused: theme.focused })}
       className="nse-control-radio"
       data-position={position}
       data-selected={selected ? "true" : "false"}
       data-disabled={optionDisabled ? "true" : "false"}
+      hidden={presentation?.hidden}
     >
       <input
         ref={inputRef}
+        data-nse-part="field"
         className="nse-control-visually-hidden"
         type="radio"
         name={name}
@@ -702,9 +742,9 @@ function NSERadioOptionControl({ option, selected, position, name, required, dis
         disabled={optionDisabled}
         checked={selected}
         aria-checked={selected}
-        tabIndex={selected ? 0 : -1}
+        tabIndex={tabStop && !optionDisabled ? 0 : -1}
         onChange={() => {
-          if (disabled || option.disabled) return;
+          if (optionDisabled) return;
           void (async () => {
             if (option.command) {
               const result = await command.dispatch();
@@ -715,12 +755,16 @@ function NSERadioOptionControl({ option, selected, position, name, required, dis
         }}
         onKeyDown={onKeyDown}
       />
-      {option.label}
+      <span data-nse-part="title">{option.label}</span>
     </label>
   );
 }
 
-export function NSERadioGroup({
+export function NSERadioGroup(props: NSEBoundValueProps<string, NSERadioGroupProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
+  return <NSERadioGroupControl {...useNSEValueBinding<string, NSERadioGroupProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:''})} />;
+}
+
+function NSERadioGroupControl({
   options,
   value,
   defaultValue,
@@ -728,7 +772,7 @@ export function NSERadioGroup({
   label,
   name,
   required,
-  disabled = false,
+  isEnabled = true,
   validation,
   selectionHaptic = "selection",
   className = "",
@@ -736,25 +780,38 @@ export function NSERadioGroup({
   dir,
   ...props
 }: NSERadioGroupProps) {
+  const disabled = !isEnabled;
   const { triggerNSEControlHaptic, triggerNSEControlHapticForEvent } = useNSEControlFeedback();
 
+  const theme = useNSEThemeInteraction<HTMLDivElement>(isEnabled, false, props);
   const generatedName = useId();
   const groupName = name ?? generatedName;
   const firstInputRef = useRef<HTMLInputElement>(null);
   const inputRefs = useRef(new Map<string, HTMLInputElement>());
-  const fallbackValue = defaultValue ?? options.find((option) => !option.disabled)?.value ?? "";
+  const [availability, setAvailability] = useState<ReadonlyMap<string, boolean>>(() => new Map());
+  const reportAvailability = useCallback((value: string, available: boolean | null) => {
+    setAvailability(previous => {
+      if (available === null ? !previous.has(value) : previous.get(value) === available) return previous;
+      const next = new Map(previous);
+      if (available === null) next.delete(value); else next.set(value, available);
+      return next;
+    });
+  }, []);
+  const fallbackValue = defaultValue ?? options.find((option) => option.isEnabled !== false)?.value ?? "";
   const currentValue = useNSEControlValue<string>({
     value,
     defaultValue,
     fallback: fallbackValue,
     required,
-    disabled,
+    isEnabled,
     validation,
     onValueChange(value, phase) {
       if (phase === "commit") onValueChange?.(value, "commit");
     },
   });
   useNSEControlFormReset(firstInputRef, currentValue.reset);
+  const enabledOptions = disabled ? [] : options.filter(option => option.isEnabled !== false && (!option.command || availability.get(option.value) === true));
+  const tabStopValue = enabledOptions.find(option => option.value === currentValue.value)?.value ?? enabledOptions[0]?.value;
   const invalid = validation?.kind === "invalid";
   const errorId = `${groupName}-error`;
   const describedBy = [props["aria-describedby"], invalid ? errorId : undefined].filter(Boolean).join(" ") || undefined;
@@ -766,9 +823,8 @@ export function NSERadioGroup({
     currentValue.change(nextValue, "commit");
   }
 
-  function moveSelection(direction: 1 | -1) {
-    const enabledOptions = options.filter((option) => !option.disabled);
-    const currentIndex = enabledOptions.findIndex((option) => option.value === currentValue.value);
+  function moveSelection(direction: 1 | -1, focusedValue: string) {
+    const currentIndex = enabledOptions.findIndex((option) => option.value === focusedValue);
     const nextIndex = currentIndex < 0
       ? 0
       : (currentIndex + direction + enabledOptions.length) % enabledOptions.length;
@@ -782,6 +838,8 @@ export function NSERadioGroup({
 
   return (
     <div
+      data-nse-part="content"
+      {...nseControlHooks({ control: "matrix", enabled: isEnabled, hovered: theme.hovered, focused: theme.focused })}
       className={classes("nse-control-radio-group", className)}
       role="radiogroup"
       aria-label={label}
@@ -789,6 +847,7 @@ export function NSERadioGroup({
       aria-describedby={describedBy}
       dir={dir}
       {...props}
+      {...theme.events}
     >
       {options.map((option, index) => {
         const selected = option.value === currentValue.value;
@@ -808,6 +867,8 @@ export function NSERadioGroup({
             name={groupName}
             required={required}
             disabled={disabled}
+            tabStop={option.value === tabStopValue}
+            onAvailabilityChange={reportAvailability}
             inputRef={(node) => {
                 if (node) inputRefs.current.set(option.value, node);
                 else inputRefs.current.delete(option.value);
@@ -820,46 +881,41 @@ export function NSERadioGroup({
                 const rtl = dir === "rtl";
                 if (event.key === "ArrowDown" || event.key === (rtl ? "ArrowLeft" : "ArrowRight")) {
                   event.preventDefault();
-                  moveSelection(1);
+                  moveSelection(1, event.currentTarget.value);
                 } else if (event.key === "ArrowUp" || event.key === (rtl ? "ArrowRight" : "ArrowLeft")) {
                   event.preventDefault();
-                  moveSelection(-1);
+                  moveSelection(-1, event.currentTarget.value);
                 }
                 onKeyDown?.(event as unknown as KeyboardEvent<HTMLDivElement>);
               }}
           />
         );
       })}
-      {invalid ? <span id={errorId} className="nse-control-field-error" role="alert">{validation.message}</span> : null}
+      {invalid ? <span id={errorId} data-nse-part="error" className="nse-control-field-error" role="alert">{validation.message}</span> : null}
     </div>
   );
 }
 
+/** NSBox.TitlePosition. */
 export type NSEBoxTitlePosition =
-  | "none"
-  | "above-top"
-  | "at-top"
-  | "below-top"
-  | "above-bottom"
-  | "at-bottom"
-  | "below-bottom";
+  | "noTitle"
+  | "aboveTop"
+  | "atTop"
+  | "belowTop"
+  | "aboveBottom"
+  | "atBottom"
+  | "belowBottom";
 
-export type NSEBoxKind = "primary" | "secondary" | "separator" | "custom";
-export type NSEBoxBorder = "none" | "line" | "bezel" | "groove";
+/** NSBox.BoxType. */
+export type NSEBoxType = "primary" | "secondary" | "separator" | "custom";
+/** NSBorderType. */
+export type NSEBorderType = "noBorder" | "lineBorder" | "bezelBorder" | "grooveBorder";
 
-export interface NSEBoxContentInsets {
-  readonly top: number;
-  readonly right: number;
-  readonly bottom: number;
-  readonly left: number;
+/** NSBox.contentViewMargins: the horizontal (width) and vertical (height) distance from the border to the content. */
+export interface NSEBoxContentViewMargins {
+  readonly width: number;
+  readonly height: number;
 }
-
-/**
- * A container's layout margins (UIKit's layoutMargins): `standard` insets
- * content by the SDK's content margin, except that rows (list items) run edge
- * to edge like a grouped table section; `none` removes the margins.
- */
-export type NSELayoutMargins = "standard" | "none";
 
 /**
  * How a container lays out its children. `stack` (the default) is a
@@ -869,99 +925,131 @@ export type NSELayoutMargins = "standard" | "none";
  */
 export type NSEContentLayout = "stack" | "flow";
 
-export interface NSEBoxProps extends Omit<HTMLAttributes<HTMLFieldSetElement>, "title"> {
+export interface NSEBoxProps extends Omit<HTMLAttributes<HTMLFieldSetElement>, "title">, NSEViewLayerProperties {
+  /** NSBox.title. A titled separator draws its title as the theme's captioned separator. */
   title?: ReactNode;
+  /** NSBox.titlePosition (default atTop with a title, otherwise noTitle). */
   titlePosition?: NSEBoxTitlePosition;
-  kind?: NSEBoxKind;
-  border?: NSEBoxBorder;
-  /** Explicit content insets in pixels. When given, they replace `layoutMargins`. */
-  contentInsets?: NSEBoxContentInsets;
-  layoutMargins?: NSELayoutMargins;
+  /** NSBox.boxType (default primary). */
+  boxType?: NSEBoxType;
+  /** NSBox.borderType (default bezelBorder). */
+  borderType?: NSEBorderType;
+  /** NSBox.contentViewMargins. Without them the content sits at the standard content margin, and rows run edge to edge. */
+  contentViewMargins?: NSEBoxContentViewMargins;
   contentLayout?: NSEContentLayout;
-  fill?: string;
-  smoothSurface?: NSESmoothSurfaceRequest;
+  /** NSBox.fillColour, as one CSS background value. */
+  fillColour?: string;
+  /** NSBox.borderColour, as one CSS colour value. */
+  borderColour?: string;
+  /** NSBox.borderWidth. Explicit widths override the theme's frame thickness. */
+  borderWidth?: number;
+  /** NSBox.isTransparent: leave the interior unpainted. */
+  isTransparent?: boolean;
 }
 
 function validateNSEBoxFill(fill: string | undefined): string | undefined {
   if (fill === undefined) return undefined;
-  if (typeof fill !== "string") throw new TypeError("NSEBox fill must be a CSS background string.");
+  if (typeof fill !== "string") throw new TypeError("NSEBox fillColour must be a CSS background string.");
   const value = fill.trim();
   if (!value || value.length > 512 || /[;{}]/u.test(value)) {
-    throw new TypeError("NSEBox fill must be one safe CSS background value.");
+    throw new TypeError("NSEBox fillColour must be one safe CSS background value.");
   }
   const css = globalThis.CSS;
   if (css && typeof css.supports === "function" && !css.supports("background", value)) {
-    throw new TypeError(`NSEBox fill is not a supported CSS background: ${value}`);
+    throw new TypeError(`NSEBox fillColour is not a supported CSS background: ${value}`);
   }
   return value;
 }
 
-function validateNSEBoxInsets(insets: NSEBoxContentInsets | undefined): NSEBoxContentInsets | undefined {
-  if (insets === undefined) return undefined;
-  const descriptors = Object.getOwnPropertyDescriptors(insets);
-  const result = {} as Record<keyof NSEBoxContentInsets, number>;
-  for (const edge of ["top", "right", "bottom", "left"] as const) {
-    const descriptor = descriptors[edge];
+function validateNSEBoxMargins(margins: NSEBoxContentViewMargins | undefined): NSEBoxContentViewMargins | undefined {
+  if (margins === undefined) return undefined;
+  const descriptors = Object.getOwnPropertyDescriptors(margins);
+  const result = {} as Record<keyof NSEBoxContentViewMargins, number>;
+  for (const axis of ["width", "height"] as const) {
+    const descriptor = descriptors[axis];
     if (!descriptor || "get" in descriptor || "set" in descriptor) {
-      throw new TypeError(`NSEBox ${edge} inset must be a data property.`);
+      throw new TypeError(`NSEBox contentViewMargins ${axis} must be a data property.`);
     }
     const value = descriptor.value;
     if (typeof value !== "number" || !Number.isFinite(value) || value < 0 || value > 4096) {
-      throw new RangeError(`NSEBox ${edge} inset must be a finite number from 0 to 4096.`);
+      throw new RangeError(`NSEBox contentViewMargins ${axis} must be a finite number from 0 to 4096.`);
     }
-    result[edge] = value;
+    result[axis] = value;
   }
   return result;
 }
 
+// The theme's recipes and attributes keep their own spellings.
+const titlePositionAttribute: Record<NSEBoxTitlePosition, string> = {
+  noTitle: "none", aboveTop: "above-top", atTop: "at-top", belowTop: "below-top",
+  aboveBottom: "above-bottom", atBottom: "at-bottom", belowBottom: "below-bottom",
+};
+const borderAttribute: Record<NSEBorderType, string> = { noBorder: "none", lineBorder: "line", bezelBorder: "bezel", grooveBorder: "groove" };
+
 export function NSEBox({
   title,
-  titlePosition = title ? "at-top" : "none",
-  kind = "primary",
-  border = "bezel",
-  contentInsets,
-  layoutMargins = "standard",
+  titlePosition = title ? "atTop" : "noTitle",
+  boxType = "primary",
+  borderType = "bezelBorder",
+  contentViewMargins,
   contentLayout = "stack",
-  fill,
-  smoothSurface = false,
+  fillColour,
+  borderColour,
+  borderWidth,
+  isTransparent = false,
+  shadow,
+  cornerRadius,
+  cornerCurve,
   className = "",
   style,
   children,
   ...props
 }: NSEBoxProps) {
-  if (kind === "separator") {
+  const layer = useNSEViewLayerProperties({ shadow, cornerRadius, cornerCurve });
+  const resolvedBorder = borderColour === undefined ? undefined : nseCSSValue(borderColour, "color", "NSEBox borderColour");
+  const resolvedWidth = nseNonNegative(borderWidth, "borderWidth");
+  const position = titlePositionAttribute[titlePosition];
+  const border = borderAttribute[borderType];
+  if (boxType === "separator") {
     if (children !== undefined && children !== null && import.meta.env.DEV) {
       throw new TypeError("NSEBox separators cannot contain children.");
     }
     const separatorLabel = props["aria-label"] ?? (typeof title === "string" ? title : undefined);
+    if (title && titlePosition !== "noTitle") {
+      return <NSEDivider data-nse-control="box" data-nse-box-type={boxType} data-nse-title-position={titlePosition} data-nse-border-type={borderType} className={classes("nse-box", "nse-box-separator-titled", className)} variant="alpha" caption={title} label={separatorLabel} style={style} />;
+    }
     return (
       <div
         {...props as HTMLAttributes<HTMLDivElement>}
+        data-nse-control="box" data-nse-part="separator" data-nse-box-type={boxType} data-nse-title-position={titlePosition} data-nse-border-type={borderType}
         role="separator"
         aria-label={separatorLabel}
         className={classes("nse-box", "nse-box-separator", className)}
-        data-title-position={titlePosition}
+        data-title-position={position}
         data-box-kind="separator"
         data-border-style={border}
-        data-appearance-recipe={`box.separator.${border}.${titlePosition}`}
+
         style={style}
       />
     );
   }
 
-  const resolvedFill = validateNSEBoxFill(fill);
-  const resolvedInsets = validateNSEBoxInsets(contentInsets);
+  const resolvedFill = validateNSEBoxFill(fillColour);
+  const resolvedMargins = validateNSEBoxMargins(contentViewMargins);
   const customStyle: CSSVarStyle = {
     ...style,
+    ...layer.style,
+    ...(resolvedBorder !== undefined ? { "--nse-box-border-colour": resolvedBorder } : {}),
+    ...(resolvedWidth !== undefined ? { "--nse-box-border-width": `${resolvedWidth}px` } : {}),
     ...(resolvedFill ? { "--nse-box-fill": resolvedFill } : null),
-    // Explicit insets win; otherwise the layout margins resolve through
+    // Explicit margins win; otherwise the standard margins resolve through
     // --nse-box-margin-* (nse-layout-defaults.css), which also drops them to
     // zero when the box holds rows.
-    ...(resolvedInsets ? {
-      "--nse-box-inset-top": `${resolvedInsets.top}px`,
-      "--nse-box-inset-right": `${resolvedInsets.right}px`,
-      "--nse-box-inset-bottom": `${resolvedInsets.bottom}px`,
-      "--nse-box-inset-left": `${resolvedInsets.left}px`,
+    ...(resolvedMargins ? {
+      "--nse-box-inset-top": `${resolvedMargins.height}px`,
+      "--nse-box-inset-right": `${resolvedMargins.width}px`,
+      "--nse-box-inset-bottom": `${resolvedMargins.height}px`,
+      "--nse-box-inset-left": `${resolvedMargins.width}px`,
     } : {
       "--nse-box-inset-top": "var(--nse-box-margin-top, 0px)",
       "--nse-box-inset-right": "var(--nse-box-margin-right, 0px)",
@@ -969,65 +1057,46 @@ export function NSEBox({
       "--nse-box-inset-left": "var(--nse-box-margin-left, 0px)",
     }),
   };
-  const surfaceProps = getControlSmoothSurfaceProps(smoothSurface, className, customStyle);
-  const visuallyIntegratedTitle = Boolean(title) && titlePosition === "at-top";
+  const visuallyIntegratedTitle = Boolean(title) && titlePosition === "atTop";
 
   return (
     <fieldset
       {...props}
+      data-nse-control="box" data-nse-part="bezel" data-nse-box-type={boxType} data-nse-title-position={titlePosition} data-nse-border-type={borderType}
+      {...layer.attributes}
       className={classes(
         "nse-box",
         "nse-control-group-box",
         visuallyIntegratedTitle && "is-labeled",
-        surfaceProps.className,
+        className,
       )}
-      data-title-position={titlePosition}
-      data-box-kind={kind}
+      data-title-position={position}
+      data-box-kind={boxType}
       data-border-style={border}
-      data-appearance-recipe={`box.${kind}.${border}.${titlePosition}`}
-      data-nse-layout-margins={resolvedInsets ? undefined : layoutMargins}
-      style={surfaceProps.style}
+      data-transparent={String(isTransparent)}
+      data-nse-transparent={String(isTransparent)}
+      data-custom-fill={resolvedFill === undefined ? undefined : "true"}
+      data-nse-custom-fill={resolvedFill === undefined ? undefined : "true"}
+      data-custom-border={resolvedBorder !== undefined || resolvedWidth !== undefined || cornerRadius !== undefined || cornerCurve !== undefined ? "true" : undefined}
+      data-nse-custom-border={resolvedBorder !== undefined || resolvedWidth !== undefined || cornerRadius !== undefined || cornerCurve !== undefined ? "true" : undefined}
+
+      data-nse-layout-margins={resolvedMargins ? undefined : "standard"}
+      style={customStyle}
     >
       {title ? (
         <legend
+          data-nse-part="title"
           className={classes(
             "nse-control-group-label",
             "nse-box-title",
-            titlePosition === "none" && "nse-control-visually-hidden",
+            titlePosition === "noTitle" && "nse-control-visually-hidden",
           )}
         >
           {title}
         </legend>
       ) : null}
-      <div className="nse-control-group-inner nse-box-content" data-nse-content-layout={contentLayout === "stack" ? "stack" : undefined}>{children}</div>
+      <div data-nse-part="content" className="nse-control-group-inner nse-box-content" data-nse-content-layout={contentLayout === "stack" ? "stack" : undefined}>{children}</div>
     </fieldset>
-  );
-}
-
-export interface NSEGroupBoxProps extends Omit<
-  NSEBoxProps,
-  "title" | "titlePosition" | "kind" | "border"
-> {
-  label?: ReactNode;
-}
-
-export function NSEGroupBox({
-  label,
-  children,
-  smoothSurface = false,
-  ...props
-}: NSEGroupBoxProps) {
-  return (
-    <NSEBox
-      {...props}
-      title={label}
-      titlePosition={label ? "at-top" : "none"}
-      kind="primary"
-      border="bezel"
-      smoothSurface={smoothSurface}
-    >
-      {children}
-    </NSEBox>
   );
 }
 

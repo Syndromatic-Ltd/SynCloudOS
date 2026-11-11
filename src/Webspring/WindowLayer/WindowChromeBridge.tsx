@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../../SynCloudOS/Identity/bundleIdentifier.mjs";
 import React, { useEffect, useMemo, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { createWindowPointerGesture, resolveWindowPresentation, type SynCloudOSRuntime } from "../../SynCloudOS/SynCloudOS";
@@ -97,9 +98,9 @@ export function SynWareWindowChromeBridge({
     }).catch((error: unknown) => {
       runtime.errors.capture({
         code: "APP_CONTENT_FAILED",
-        title: "Window command failed.",
-        message: `The custom titlebar could not ${commandId === "window.minimise" ? "minimise" : "zoom"} this window.`,
-        technicalMessage: error instanceof Error ? error.message : String(error),
+        title: `This window could not be ${commandId === "window.minimise" ? "minimised" : "zoomed"}.`,
+        message: "The application's window controls did not respond.",
+        error,
         severity: "error",
         recoverable: true,
         suggestedActions: [],
@@ -136,7 +137,7 @@ export function SynWareWindowChromeBridge({
   });
   const Chrome = windowChrome;
   return createPortal(
-    <WindowChromeFailureBoundary runtime={runtime} onFallback={slot.reportChromeFailure}>
+    <WindowChromeFailureBoundary runtime={runtime} applicationId={record.applicationId} onFallback={slot.reportChromeFailure}>
       <HostAppWindowChromePropsProvider value={chromeProps}>
         <Chrome {...chromeProps} />
       </HostAppWindowChromePropsProvider>
@@ -151,19 +152,24 @@ export function SynWareWindowChromeBridge({
  * It renders nothing on failure — the host's system fallback owns the bar. */
 class WindowChromeFailureBoundary extends React.Component<{
   readonly runtime: SynCloudOSRuntime;
+  readonly applicationId: string | null;
   readonly onFallback: () => void;
   readonly children: React.ReactNode;
 }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  componentDidCatch(error: unknown, errorInfo: React.ErrorInfo) {
     try {
-      this.props.runtime.errors.capture({
+      const { applicationId, runtime } = this.props;
+      const appName = applicationId ? runtime.store.getSnapshot().appInfo[normalizeBundleIdentifier(applicationId)]?.displayName : undefined;
+      runtime.errors.capture({
         code: "APP_CONTENT_FAILED",
-        title: "Window chrome failed.",
-        message: "The application's custom window chrome failed and the system titlebar was restored.",
-        technicalMessage: error.message,
-        technicalDetails: error.stack ?? errorInfo.componentStack ?? undefined,
+        title: "Window controls were reset.",
+        message: `${appName ? `${appName}'s` : "The application's"} custom window controls stopped working, so the standard title bar has been restored.`,
+        error,
+        ...(applicationId ? { appId: applicationId } : {}),
+        source: "Webspring.WindowChromeFailureBoundary",
+        context: { componentStack: errorInfo.componentStack },
         severity: "error",
         recoverable: true,
         suggestedActions: [],

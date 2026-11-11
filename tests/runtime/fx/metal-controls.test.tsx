@@ -25,7 +25,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEMaterialLighting } from "../../../src/NSE/Appearance/NSEMaterialLighting";
 import { NSEMaterialLightingProvider } from "../../../src/NSE/Appearance/NSEMetalThumb";
 import { NSESlider } from "../../../src/NSE/Controls/Values/NSESlider";
-import { NSEToggleButton } from "../../../src/NSE/Controls/Fields/NSEFields";
+import { NSESwitch } from "../../../src/NSE/Controls/Fields/NSEFields";
 import { MFXAttitude } from "../../../src/FX/MotionFX/MFXAttitude";
 import type { MFXMotionManager } from "../../../src/FX/MotionFX/MFXMotionManager";
 import type { MFXDeviceMotion } from "../../../src/FX/MotionFX/MFXDeviceMotion";
@@ -122,13 +122,13 @@ describe("metal material controls", () => {
             thumbMaterial="metal"
             aria-label="Disabled slider"
             value={30}
-            disabled
+            isEnabled={false}
           />
-          <NSEToggleButton
+          <NSESwitch
+            state="on"
+            isEnabled={false}
             thumbMaterial="metal"
             aria-label="Disabled switch"
-            checked
-            disabled
           />
         </NSEMaterialLightingProvider>,
       );
@@ -192,7 +192,7 @@ describe("metal material controls", () => {
           thumbMaterial="metal"
           aria-label="Disabled"
           value={20}
-          disabled
+          isEnabled={false}
         />
         <NSESlider
           thumbMaterial="metal"
@@ -200,11 +200,11 @@ describe("metal material controls", () => {
           value={50}
           onValueChange={volume}
         />
-        <NSEToggleButton
+        <NSESwitch
+          state="off"
+          onStateChange={(state) => toggle(state === "on")}
           thumbMaterial="metal"
           aria-label="Sound"
-          checked={false}
-          onCheckedChange={toggle}
         />
       </NSEMaterialLightingProvider>,
     );
@@ -232,7 +232,7 @@ describe("metal material controls", () => {
         <StrictMode>
           <NSEMaterialLightingProvider value={h.store}>
             <NSESlider thumbMaterial="metal" aria-label="Volume" value={40} />
-            <NSEToggleButton thumbMaterial="metal" aria-label="Sound" checked />
+            <NSESwitch state="on" thumbMaterial="metal" aria-label="Sound" />
           </NSEMaterialLightingProvider>
         </StrictMode>,
       );

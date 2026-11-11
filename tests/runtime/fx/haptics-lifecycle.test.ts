@@ -102,7 +102,7 @@ it("completes engine disposal even when cancellation backend throws", () => {
   const engine = new HFXHapticEngine({ supported: true, trigger() {}, cancel() { throw new Error("cancel failure"); }, dispose: release });
   expect(() => engine.dispose()).not.toThrow();
   expect(release).toHaveBeenCalledOnce();
-  expect(() => engine.emit({ type: "transient", relativeTime: 0 })).toThrow("disposed");
+  expect(() => engine.emit({ type: "transient", relativeTime: 0 })).toThrow(expect.objectContaining({ code: "HFX_HAPTIC_ENGINE_DISPOSED" }));
 });
 
 it("disposes the backend once when player completion reenters engine disposal", () => {

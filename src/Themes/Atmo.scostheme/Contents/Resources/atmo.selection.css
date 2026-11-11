@@ -1,0 +1,217 @@
+:scope [data-nse-button-type="radio"],
+:scope:is([data-nse-button-type="radio"]),
+:scope[data-nse-button-type="radio"] {
+  border:0;
+  border-image:none;
+  background:transparent;
+}
+
+:scope [data-nse-button-type="radio"]::before,
+:scope:is([data-nse-button-type="radio"]::before),
+:scope[data-nse-button-type="radio"]::before {
+  border-style:solid;
+  border-color:rgba(0,0,0,0.34) rgba(0,0,0,0.3) rgba(0,0,0,0.49) rgba(0,0,0,0.3);
+  box-shadow:0 1px 0 rgba(255,255,255,0.5);
+}
+
+:scope [data-nse-button-type="radio"]::after,
+:scope:is([data-nse-button-type="radio"]::after),
+:scope[data-nse-button-type="radio"]::after {
+  border:2px solid;
+  border-color:var(--nse-atmo-rg-ring-t) var(--nse-atmo-rg-ring-seam) var(--nse-atmo-rg-ring-b);
+  background:var(--nse-atmo-rg-up) padding-box;
+}
+
+:scope [data-nse-button-type="radio"][data-nse-position="first"],
+:scope:is([data-nse-button-type="radio"][data-nse-position="first"]),
+:scope[data-nse-button-type="radio"][data-nse-position="first"] {
+  padding:0 15px;
+}
+
+:scope [data-nse-button-type="radio"][data-nse-position="first"]::before,
+:scope:is([data-nse-button-type="radio"][data-nse-position="first"]::before),
+:scope[data-nse-button-type="radio"][data-nse-position="first"]::before {
+  border-radius:13px 0 0 13px;
+  border-width:2px 1px 2px 2px;
+  border-right-color:#a2a2a2;
+}
+
+:scope [data-nse-button-type="radio"][data-nse-position="first"]::after,
+:scope:is([data-nse-button-type="radio"][data-nse-position="first"]::after),
+:scope[data-nse-button-type="radio"][data-nse-position="first"]::after {
+  border-radius:11px 0 0 11px;
+  border-left-color:var(--nse-atmo-rg-ring-s);
+}
+
+:scope [data-nse-button-type="radio"][data-nse-position="middle"],
+:scope:is([data-nse-button-type="radio"][data-nse-position="middle"]),
+:scope[data-nse-button-type="radio"][data-nse-position="middle"] {
+  padding:0 15px 0 14px;
+}
+
+:scope [data-nse-button-type="radio"][data-nse-position="middle"]::before,
+:scope:is([data-nse-button-type="radio"][data-nse-position="middle"]::before),
+:scope[data-nse-button-type="radio"][data-nse-position="middle"]::before {
+  border-width:2px 1px;
+  border-left-color:#efefef;
+  border-right-color:#a2a2a2;
+}
+
+:scope [data-nse-button-type="radio"][data-nse-position="last"],
+:scope:is([data-nse-button-type="radio"][data-nse-position="last"]),
+:scope[data-nse-button-type="radio"][data-nse-position="last"] {
+  padding:0 15px 0 14px;
+}
+
+:scope [data-nse-button-type="radio"][data-nse-position="last"]::before,
+:scope:is([data-nse-button-type="radio"][data-nse-position="last"]::before),
+:scope[data-nse-button-type="radio"][data-nse-position="last"]::before {
+  border-radius:0 13px 13px 0;
+  border-width:2px 2px 2px 1px;
+  border-left-color:#efefef;
+}
+
+:scope [data-nse-button-type="radio"][data-nse-position="last"]::after,
+:scope:is([data-nse-button-type="radio"][data-nse-position="last"]::after),
+:scope[data-nse-button-type="radio"][data-nse-position="last"]::after {
+  border-radius:0 11px 11px 0;
+  border-right-color:var(--nse-atmo-rg-ring-s);
+}
+
+:scope [data-nse-button-type="radio"][data-nse-position="single"],
+:scope:is([data-nse-button-type="radio"][data-nse-position="single"]),
+:scope[data-nse-button-type="radio"][data-nse-position="single"] {
+  padding:0 28px;
+}
+
+:scope [data-nse-button-type="radio"][data-nse-position="single"]::before,
+:scope:is([data-nse-button-type="radio"][data-nse-position="single"]::before),
+:scope[data-nse-button-type="radio"][data-nse-position="single"]::before {
+  border-radius:13px;
+  border-width:2px;
+}
+
+:scope [data-nse-button-type="radio"][data-nse-position="single"]::after,
+:scope:is([data-nse-button-type="radio"][data-nse-position="single"]::after),
+:scope[data-nse-button-type="radio"][data-nse-position="single"]::after {
+  border-radius:11px;
+  border-left-color:var(--nse-atmo-rg-ring-s);
+  border-right-color:var(--nse-atmo-rg-ring-s);
+}
+
+:scope [data-nse-button-type="radio"][data-nse-selected]::before,
+:scope:is([data-nse-button-type="radio"][data-nse-selected]::before),
+:scope[data-nse-button-type="radio"][data-nse-selected]::before {
+  border-top-color:rgba(0,0,0,0.68);
+  border-bottom-color:rgba(58,58,58,0.42);
+}
+
+:scope [data-nse-button-type="radio"][data-nse-selected]::after,
+:scope:is([data-nse-button-type="radio"][data-nse-selected]::after),
+:scope[data-nse-button-type="radio"][data-nse-selected]::after {
+  border-color:var(--nse-atmo-rg-ring-sel-t) var(--nse-atmo-rg-ring-sel-s) var(--nse-atmo-rg-ring-sel-b);
+  background:var(--nse-atmo-rg-sel) padding-box;
+}
+
+:scope [data-nse-button-type="radio"][data-nse-position="middle"][data-nse-selected]::before,
+:scope:is([data-nse-button-type="radio"][data-nse-position="middle"][data-nse-selected]::before),
+:scope[data-nse-button-type="radio"][data-nse-position="middle"][data-nse-selected]::before {
+  border-left-color:transparent;
+  border-right-color:transparent;
+}
+
+:scope [data-nse-button-type="radio"][data-nse-position="middle"][data-nse-selected]::after,
+:scope:is([data-nse-button-type="radio"][data-nse-position="middle"][data-nse-selected]::after),
+:scope[data-nse-button-type="radio"][data-nse-position="middle"][data-nse-selected]::after {
+  border-width:2px 0;
+  background:var(--nse-atmo-rg-edge-l) padding-box,var(--nse-atmo-rg-edge-r) padding-box,var(--nse-atmo-rg-sel) padding-box;
+}
+
+:scope [data-nse-button-type="radio"][data-nse-position="first"][data-nse-selected]::before,
+:scope:is([data-nse-button-type="radio"][data-nse-position="first"][data-nse-selected]::before),
+:scope[data-nse-button-type="radio"][data-nse-position="first"][data-nse-selected]::before {
+  border-right-color:transparent;
+}
+
+:scope [data-nse-button-type="radio"][data-nse-position="first"][data-nse-selected]::after,
+:scope:is([data-nse-button-type="radio"][data-nse-position="first"][data-nse-selected]::after),
+:scope[data-nse-button-type="radio"][data-nse-position="first"][data-nse-selected]::after {
+  border-width:2px 0;
+  background:var(--nse-atmo-rg-cap-l) padding-box,var(--nse-atmo-rg-edge-r) padding-box,var(--nse-atmo-rg-sel) padding-box;
+}
+
+:scope [data-nse-button-type="radio"][data-nse-position="last"][data-nse-selected]::before,
+:scope:is([data-nse-button-type="radio"][data-nse-position="last"][data-nse-selected]::before),
+:scope[data-nse-button-type="radio"][data-nse-position="last"][data-nse-selected]::before {
+  border-left-color:transparent;
+}
+
+:scope [data-nse-button-type="radio"][data-nse-position="last"][data-nse-selected]::after,
+:scope:is([data-nse-button-type="radio"][data-nse-position="last"][data-nse-selected]::after),
+:scope[data-nse-button-type="radio"][data-nse-position="last"][data-nse-selected]::after {
+  border-width:2px 0;
+  background:var(--nse-atmo-rg-edge-l) padding-box,var(--nse-atmo-rg-cap-r) padding-box,var(--nse-atmo-rg-sel) padding-box;
+}
+
+:scope [data-nse-button-type="radio"][data-nse-position="single"][data-nse-selected]::after,
+:scope:is([data-nse-button-type="radio"][data-nse-position="single"][data-nse-selected]::after),
+:scope[data-nse-button-type="radio"][data-nse-position="single"][data-nse-selected]::after {
+  border-width:2px 0;
+  background:var(--nse-atmo-rg-cap-l) padding-box,var(--nse-atmo-rg-cap-r) padding-box,var(--nse-atmo-rg-sel) padding-box;
+}
+
+:scope [data-nse-button-type="radio"]:disabled::before,
+:scope:is([data-nse-button-type="radio"]:disabled::before),
+:scope[data-nse-button-type="radio"]:disabled::before,
+:scope [data-nse-button-type="radio"]:disabled::after,
+:scope:is([data-nse-button-type="radio"]:disabled::after),
+:scope[data-nse-button-type="radio"]:disabled::after,
+:scope [data-nse-button-type="radio"][data-nse-enabled="false"]::before,
+:scope:is([data-nse-button-type="radio"][data-nse-enabled="false"]::before),
+:scope[data-nse-button-type="radio"][data-nse-enabled="false"]::before,
+:scope [data-nse-button-type="radio"][data-nse-enabled="false"]::after,
+:scope:is([data-nse-button-type="radio"][data-nse-enabled="false"]::after),
+:scope[data-nse-button-type="radio"][data-nse-enabled="false"]::after {
+  opacity:0.5;
+}
+
+:scope [data-nse-part="indicator"]:where([data-nse-button-type="switch"] *),
+:scope:is([data-nse-part="indicator"]:where([data-nse-button-type="switch"] *)),
+:scope[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *) {
+  background:var(--nse-atmo-check-well)0 0/100% 100%no-repeat;
+}
+
+:scope [data-nse-button-type="switch"] [data-nse-part="field"]:checked+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *),
+:scope:is([data-nse-button-type="switch"]) [data-nse-part="field"]:checked+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *),
+:scope[data-nse-button-type="switch"] [data-nse-part="field"]:checked+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *) {
+  background:var(--nse-atmo-check-mark)0 0/100% 100%no-repeat,var(--nse-atmo-check-well)0 0/100% 100%no-repeat;
+}
+
+:scope [data-nse-button-type="switch"] [data-nse-part="field"]:disabled+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *),
+:scope:is([data-nse-button-type="switch"]) [data-nse-part="field"]:disabled+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *),
+:scope[data-nse-button-type="switch"] [data-nse-part="field"]:disabled+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *) {
+  background:var(--nse-atmo-check-well)0 0/100% 100%no-repeat;
+  opacity:0.4;
+}
+
+:scope [data-nse-button-type="switch"] [data-nse-part="field"]:disabled:checked+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *),
+:scope:is([data-nse-button-type="switch"]) [data-nse-part="field"]:disabled:checked+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *),
+:scope[data-nse-button-type="switch"] [data-nse-part="field"]:disabled:checked+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *) {
+  background:var(--nse-atmo-check-mark)0 0/100% 100%no-repeat,var(--nse-atmo-check-well)0 0/100% 100%no-repeat;
+  opacity:0.4;
+}
+
+:scope [data-nse-button-type="radio"]:has([data-nse-part="field"]:focus-visible)::after,
+:scope:is([data-nse-button-type="radio"]:has([data-nse-part="field"]:focus-visible)::after),
+:scope[data-nse-button-type="radio"]:has([data-nse-part="field"]:focus-visible)::after {
+  box-shadow:inset 0 0 0 2px rgba(76,164,255,0.95),inset 0 0 6px 2px rgba(62,151,247,0.5);
+}
+
+:scope [data-nse-button-type="switch"] [data-nse-part="field"]:focus-visible+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *)::after,
+:scope:is([data-nse-button-type="switch"]) [data-nse-part="field"]:focus-visible+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *)::after,
+:scope[data-nse-button-type="switch"] [data-nse-part="field"]:focus-visible+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *)::after {
+  width:25px;
+  height:25.5px;
+  border-radius:4px;
+  box-shadow:var(--nse-atmo-focus-ring);
+}

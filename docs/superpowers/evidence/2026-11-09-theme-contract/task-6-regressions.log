@@ -1,0 +1,61 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/focus-scope.test.tsx tests/runtime/screen-service.test.ts tests/runtime/runtime-input-boundary.test.tsx tests/runtime/nse-view-safe-area.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+stderr | tests/runtime/runtime-input-boundary.test.tsx > RuntimeInputBoundary > stops local bubbling after synchronous shortcut acceptance
+The result of getSnapshot should be cached to avoid an infinite loop
+
+ ❯ tests/runtime/runtime-input-boundary.test.tsx (7 tests | 7 failed) 188ms
+     × stops local bubbling after synchronous shortcut acceptance 86ms
+     × does not suppress browser fallback while asynchronous keyboard validation is unresolved 10ms
+     × assigns a nested runtime its own keyboard event without outer interception 18ms
+     × routes mounted application-owned keyboard events through the host runtime 8ms
+     × retains a portalled FocusScope's logical command authority 13ms
+     × injects logical scope ownership into a generic NSE menu portal without coupling NSE to the runtime 30ms
+     × replaces an inherited outer-runtime NSE port inside a nested runtime 23ms
+stderr | tests/runtime/focus-scope.test.tsx > focus scopes > can compose responder ownership into a single host without adding a layout box
+The result of getSnapshot should be cached to avoid an infinite loop
+
+ ❯ tests/runtime/focus-scope.test.tsx (26 tests | 6 failed) 651ms
+     × can compose responder ownership into a single host without adding a layout box 13ms
+     × maps DOM focus to logical responders through a portal and restores on close 8ms
+     × moves DOM focus into a trapped modal and restores it after a rejected outside focus move 8ms
+     × returns focus from a modal opened by a menu command to the control that opened the menu 10ms
+     × does not pull focus back when something outside the closing scope already holds it 8ms
+     × does not recursively redirect a re-entrant outside focus event while trapping a modal 7ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 13 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/focus-scope.test.tsx > focus scopes > can compose responder ownership into a single host without adding a layout box
+ FAIL  tests/runtime/focus-scope.test.tsx > focus scopes > maps DOM focus to logical responders through a portal and restores on close
+ FAIL  tests/runtime/focus-scope.test.tsx > focus scopes > moves DOM focus into a trapped modal and restores it after a rejected outside focus move
+ FAIL  tests/runtime/focus-scope.test.tsx > focus scopes > returns focus from a modal opened by a menu command to the control that opened the menu
+ FAIL  tests/runtime/focus-scope.test.tsx > focus scopes > does not pull focus back when something outside the closing scope already holds it
+ FAIL  tests/runtime/focus-scope.test.tsx > focus scopes > does not recursively redirect a re-entrant outside focus event while trapping a modal
+ FAIL  tests/runtime/runtime-input-boundary.test.tsx > RuntimeInputBoundary > stops local bubbling after synchronous shortcut acceptance
+ FAIL  tests/runtime/runtime-input-boundary.test.tsx > RuntimeInputBoundary > does not suppress browser fallback while asynchronous keyboard validation is unresolved
+ FAIL  tests/runtime/runtime-input-boundary.test.tsx > RuntimeInputBoundary > assigns a nested runtime its own keyboard event without outer interception
+ FAIL  tests/runtime/runtime-input-boundary.test.tsx > RuntimeInputBoundary > routes mounted application-owned keyboard events through the host runtime
+ FAIL  tests/runtime/runtime-input-boundary.test.tsx > RuntimeInputBoundary > retains a portalled FocusScope's logical command authority
+ FAIL  tests/runtime/runtime-input-boundary.test.tsx > RuntimeInputBoundary > injects logical scope ownership into a generic NSE menu portal without coupling NSE to the runtime
+ FAIL  tests/runtime/runtime-input-boundary.test.tsx > RuntimeInputBoundary > replaces an inherited outer-runtime NSE port inside a nested runtime
+Error: Maximum update depth exceeded. This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate. React limits the number of nested updates to prevent infinite loops.
+ ❯ getRootForUpdatedFiber node_modules/react-dom/cjs/react-dom-client.development.js:4624:11
+ ❯ enqueueConcurrentRenderForLane node_modules/react-dom/cjs/react-dom-client.development.js:4588:14
+ ❯ forceStoreRerender node_modules/react-dom/cjs/react-dom-client.development.js:8261:18
+ ❯ updateStoreInstance node_modules/react-dom/cjs/react-dom-client.development.js:8241:39
+ ❯ Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25989:20
+ ❯ runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:874:13
+ ❯ commitHookEffectListMount node_modules/react-dom/cjs/react-dom-client.development.js:13249:29
+ ❯ commitHookPassiveMountEffects node_modules/react-dom/cjs/react-dom-client.development.js:13336:11
+ ❯ commitPassiveMountOnFiber node_modules/react-dom/cjs/react-dom-client.development.js:15484:13
+ ❯ recursivelyTraversePassiveMountEffects node_modules/react-dom/cjs/react-dom-client.development.js:15439:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/13]⎯
+
+
+ Test Files  2 failed | 1 passed (3)
+      Tests  13 failed | 25 passed (38)
+   Start at  18:59:16
+   Duration  8.97s (transform 8.48s, setup 71ms, import 12.29s, tests 869ms, environment 2.89s)

@@ -1,0 +1,60 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run src/FX/DispatchFX/__tests__/queue.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts (49 tests | 2 failed) 27ms
+   × a suspended child does not stall independent work on its serial target 4ms
+   × a concurrent target's barrier orders preceding and later descendant work 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > a suspended child does not stall independent work on its serial target
+AssertionError: expected [] to deeply equal [ 'target' ]
+
+- Expected
++ Received
+
+- [
+-   "target",
+- ]
++ []
+
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:286:38
+    284|   const target = new (Q())("runnable-target"); const child = new (Q())…
+    285|   child.suspend(); child.async(() => { events.push("child"); }); targe…
+    286|   await host.flush(); expect(events).toEqual(["target"]);
+       |                                      ^
+    287|   child.resume(); await host.flush(); expect(events).toEqual(["target"…
+    288| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/queue.test.ts > a concurrent target's barrier orders preceding and later descendant work
+AssertionError: expected [ 'barrier', 'after', 'before' ] to deeply equal [ 'before', 'barrier', 'after' ]
+
+- Expected
++ Received
+
+  [
+-   "before",
+    "barrier",
+    "after",
++   "before",
+  ]
+
+ ❯ src/FX/DispatchFX/__tests__/queue.test.ts:296:38
+    294|   target.async({ qos: D.DFXQoS.userInteractive, flags: [F.barrier, F.e…
+    295|   after.async(() => { events.push("after"); });
+    296|   await host.flush(); expect(events).toEqual(["before", "barrier", "af…
+       |                                      ^
+    297| });
+    298|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 47 passed (49)
+   Start at  09:08:34
+   Duration  343ms (transform 117ms, setup 26ms, import 125ms, tests 27ms, environment 0ms)

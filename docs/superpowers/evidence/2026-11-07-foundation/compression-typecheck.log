@@ -1,0 +1,59 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 typecheck
+npm notice run tsc -b --pretty false
+src/Foundation/internal/compression.ts(20,5): error TS2322: Type 'CompressionStream' is not assignable to type 'ReadableWritablePair<Uint8Array<ArrayBufferLike>, Uint8Array<ArrayBufferLike>>'.
+  Types of property 'writable' are incompatible.
+    Type 'WritableStream<BufferSource>' is not assignable to type 'WritableStream<Uint8Array<ArrayBufferLike>>'.
+      Type 'BufferSource' is not assignable to type 'Uint8Array<ArrayBufferLike>'.
+        Type 'ArrayBuffer' is missing the following properties from type 'Uint8Array<ArrayBufferLike>': BYTES_PER_ELEMENT, buffer, byteOffset, copyWithin, and 24 more.
+src/Foundation/NSENumberFormatter.ts(288,8): error TS2339: Property 'string' does not exist on type 'NumberFormat'.
+src/NSE/Colour/ColourPanel/colourPanelPreferences.ts(21,10): error TS2305: Module '"../../Controllers"' has no exported member 'NSEUserDefaults'.
+src/NSE/Colour/ColourPanel/colourPanelPreferences.ts(64,13): error TS7006: Parameter 'key' implicitly has an 'any' type.
+src/NSE/Colour/ColourPanel/colourPanelPreferences.ts(65,13): error TS7006: Parameter 'key' implicitly has an 'any' type.
+src/NSE/Colour/ColourPanel/colourPanelPreferences.ts(65,18): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/NSE/Colour/ColourPanel/colourPanelPreferences.ts(68,16): error TS7006: Parameter 'key' implicitly has an 'any' type.
+src/NSE/Controllers/NSEArrayController.ts(21,58): error TS2305: Module '"../../SynCloudOS/Models"' has no exported member 'sortWithDescriptors'.
+src/NSE/Controllers/NSEArrayController.ts(442,69): error TS2339: Property 'test' does not exist on type 'NSEPredicate<T>'.
+src/NSE/Controllers/NSEObjectController.ts(163,36): error TS2339: Property 'parse' does not exist on type 'NSEFormatter<any>'.
+src/NSE/Controllers/NSETreeController.ts(21,58): error TS2305: Module '"../../SynCloudOS/Models"' has no exported member 'sortWithDescriptors'.
+src/NSE/Controllers/NSETreeController.ts(660,35): error TS2339: Property 'test' does not exist on type 'NSEPredicate<T>'.
+src/NSE/Controls/Fields/NSEFields.tsx(132,69): error TS2339: Property 'editingText' does not exist on type 'NSEFormatter<T>'.
+src/NSE/Controls/Fields/NSEFields.tsx(267,31): error TS2339: Property 'validatePartial' does not exist on type 'NSEFormatter<T>'.
+src/NSE/Controls/Fields/NSEFields.tsx(291,30): error TS2339: Property 'parse' does not exist on type 'NSEFormatter<T>'.
+src/NSE/Controls/Fields/NSEFields.tsx(302,24): error TS2339: Property 'editingText' does not exist on type 'NSEFormatter<T>'.
+src/NSE/Controls/Fields/NSEFields.tsx(344,42): error TS2339: Property 'parse' does not exist on type 'NSEFormatter<T>'.
+src/NSE/Controls/Fields/NSEFields.tsx(359,42): error TS2339: Property 'parse' does not exist on type 'NSEFormatter<T>'.
+src/NSE/DataViews/RuleEditor/NSEPredicateEditor.tsx(46,62): error TS2339: Property 'editingText' does not exist on type 'NSEFormatter<unknown>'.
+src/NSE/DataViews/RuleEditor/NSEPredicateEditor.tsx(47,148): error TS2339: Property 'editingText' does not exist on type 'NSEFormatter<unknown>'.
+src/NSE/DataViews/RuleEditor/NSEPredicateEditor.tsx(50,33): error TS2339: Property 'editingText' does not exist on type 'NSEFormatter<unknown>'.
+src/NSE/DataViews/RuleEditor/NSEPredicateEditor.tsx(51,99): error TS2339: Property 'editingText' does not exist on type 'NSEFormatter<unknown>'.
+src/NSE/DataViews/RuleEditor/NSEPredicateEditor.tsx(57,40): error TS2339: Property 'parse' does not exist on type 'NSEFormatter<unknown>'.
+src/NSE/DataViews/RuleEditor/NSEPredicateEditor.tsx(92,44): error TS2339: Property 'parse' does not exist on type 'NSEFormatter<unknown>'.
+src/NSE/DataViews/RuleEditor/NSERuleEditor.tsx(76,59): error TS2339: Property 'editingText' does not exist on type 'NSEFormatter<unknown>'.
+src/NSE/DataViews/RuleEditor/NSERuleEditor.tsx(83,41): error TS2339: Property 'parse' does not exist on type 'NSEFormatter<unknown>'.
+src/NSE/DataViews/RuleEditor/predicateTemplates.ts(81,3): error TS2739: Type 'Readonly<{ format: (value: unknown) => string; editingText: (value: unknown) => string; parse: (text: string) => { ok: true; value: number; readonly error?: undefined; } | { ok: false; error: { code: string; message: string; input: string; }; value?: undefined; } | { ...; } | { ...; }; validatePartial: (text: string...' is missing the following properties from type 'NSEFormatter<unknown>': string, editingString, getObjectValue, isPartialStringValid
+src/NSE/DataViews/Table/NSETableView.tsx(228,18): error TS2339: Property 'reversed' does not exist on type 'NSESortDescriptor<T, unknown>'.
+src/NSE/DataViews/Table/NSETableView.tsx(249,61): error TS2339: Property 'editingText' does not exist on type 'NSEFormatter<unknown>'.
+src/NSE/DataViews/Table/NSETableView.tsx(259,24): error TS2339: Property 'parse' does not exist on type 'NSEFormatter<unknown>'.
+src/NSE/DataViews/Table/NSETableView.tsx(519,54): error TS2339: Property 'validatePartial' does not exist on type 'NSEFormatter<unknown>'.
+src/NSE/DataViews/Table/NSETableView.tsx(531,36): error TS2339: Property 'format' does not exist on type 'NSEFormatter<unknown>'.
+src/NSE/DataViews/Virtualisation/computeVirtualRange.ts(128,68): error TS2339: Property 'start' does not exist on type 'NSERange'.
+src/NSE/DataViews/Virtualisation/computeVirtualRange.ts(132,45): error TS2339: Property 'start' does not exist on type 'NSERange'.
+src/NSE/DataViews/Virtualisation/computeVirtualRange.ts(132,87): error TS2345: Argument of type '{ start: any; length: number; }' is not assignable to parameter of type 'NSERange'.
+  Property 'location' is missing in type '{ start: any; length: number; }' but required in type 'NSERange'.
+src/NSE/DataViews/Virtualisation/computeVirtualRange.ts(133,35): error TS2339: Property 'start' does not exist on type 'NSERange'.
+src/NSE/DataViews/Virtualisation/computeVirtualRange.ts(134,41): error TS2353: Object literal may only specify known properties, and 'start' does not exist in type 'NSERange'.
+src/NSE/DataViews/Virtualisation/computeVirtualRange.ts(134,57): error TS2339: Property 'start' does not exist on type 'NSERange'.
+src/NSE/DataViews/Virtualisation/computeVirtualRange.ts(134,87): error TS2339: Property 'start' does not exist on type 'NSERange'.
+src/NSE/DataViews/Virtualisation/computeVirtualRange.ts(144,46): error TS2353: Object literal may only specify known properties, and 'start' does not exist in type 'NSERange'.
+src/NSE/DataViews/Virtualisation/computeVirtualRange.ts(151,33): error TS2353: Object literal may only specify known properties, and 'start' does not exist in type 'NSERange'.
+src/NSE/DataViews/Virtualisation/computeVirtualRange.ts(152,150): error TS2353: Object literal may only specify known properties, and 'start' does not exist in type 'NSERange'.
+src/NSE/DataViews/Virtualisation/computeVirtualRange.ts(153,23): error TS2353: Object literal may only specify known properties, and 'start' does not exist in type 'NSERange'.
+src/NSE/DataViews/Virtualisation/useNSEVirtualiser.ts(65,74): error TS2339: Property 'start' does not exist on type 'NSERange'.
+src/NSE/DataViews/Virtualisation/useNSEVirtualiser.ts(65,102): error TS2339: Property 'start' does not exist on type 'NSERange'.
+src/NSE/sdkPackageEntry.ts(62,10): error TS2305: Module '"../SynCloudOS/Models"' has no exported member 'sortWithDescriptors'.
+src/NSE/TextLayout/NSELayoutManager.ts(21,15): error TS2305: Module '"../../SynCloudOS/SynCloudOS"' has no exported member 'NSERange'.
+src/NSE/TextLayout/stringDrawing.ts(25,15): error TS2305: Module '"../../SynCloudOS/SynCloudOS"' has no exported member 'NSERange'.
+src/SynCloudOS/Models/DateFormatter.ts(26,8): error TS2307: Cannot find module './NSEFormatter' or its corresponding type declarations.
+src/SynCloudOS/Models/TreeNode.ts(22,30): error TS2307: Cannot find module './NSEIndexPath' or its corresponding type declarations.
+src/SynCloudOS/SynCloudOS.ts(136,15): error TS2307: Cannot find module './Models/GeometryValues' or its corresponding type declarations.
+src/SynCloudOS/TextFX/TextLayoutService.ts(22,31): error TS2307: Cannot find module '../Models/GeometryValues' or its corresponding type declarations.

@@ -56,9 +56,10 @@ Inside a group, drawing starts with alpha 1 and the normal blend mode. The optio
 `GFXTransparencyGroup` is the token that `beginTransparencyGroup` returns. It has `id`, `alpha` and `blendMode`, and it is only useful as the argument to `endTransparencyGroup`. `GFXTransparencyGroupOptions` is the options type.
 
 ```ts
+import type { NSEData } from "@syndromatic/syncloudos/foundation";
 import { GFXBitmapContext, GFXColour, GFXPath } from "@syndromatic/syncloudos/fx/graphics";
 
-export function overlappingDiscs(): Uint8Array {
+export function overlappingDiscs(): NSEData {
   const context = new GFXBitmapContext({ width: 120, height: 80 });
   context.setAntialiasing(true);
   try {
@@ -121,7 +122,7 @@ GFXContext.recording({ size, identifiers, scale? })
 | Option | Description |
 | --- | --- |
 | `size` | The logical `GFXSize` of the drawing. |
-| `identifiers` | An identifier issuer that gives every gradient, pattern, clip and shadow definition in the output a unique ID. Applications get one from `useSynWareImages().createGraphicsIdentifierIssuer()`, which keeps the IDs unique and stops working when your application closes. |
+| `identifiers` | An identifier issuer that gives every gradient, pattern, clip and shadow definition in the output a unique ID. Applications get one from `useImages().createGraphicsIdentifierIssuer()`, which keeps the IDs unique and stops working when your application closes. |
 | `scale` | The device scale, above 0 and at most 8. Used by the point conversion methods. |
 
 Unlike the bitmap context, the recording context keeps a full graphics state with fill and stroke paints (defaults are opaque black), so you set paint once and draw several times.
@@ -144,6 +145,7 @@ Unlike the bitmap context, the recording context keeps a full graphics state wit
 | `fill(path, rule?)`, `stroke(path)` | `void` | Records a fill or stroke with the current paint and state. |
 | `drawImage(image, rect)` | `void` | Records an image. Each image is limited to one megapixel. An empty rectangle records nothing. |
 | `drawLayer(layer, rect)` | `void` | Draws a `GFXLayer`. |
+| `drawDisplayList(list, rect)` | `void` | Draws another recorded display list scaled into `rect`, as `CGContext` draws a PDF page. The list keeps its own coordinate space under the current transform, clip and alpha, and its gradients, patterns and masks never collide with this context's. Only lists a `GFXContext` recorded are accepted, their commands count against the 10,000-command limit, and lists nest at most eight deep. An empty `rect` draws nothing. |
 | `drawText(text, origin, font)` | `void` | Records text as an SVG `text` element with the current fill. `font` is `{ family, size, weight?, style? }` (`GFXTextFont`): a family up to 256 characters, a size up to 512, a weight from 1 to 1000 (default 400) and a style `"normal"` (default) or `"italic"`. Text is limited to 64 KiB. The text is set by the viewer's fonts. For exact glyph shapes, draw [TextFX](../text.md) outlines as paths. |
 | `beginTransparencyGroup(options?)`, `endTransparencyGroup(group)` | | Groups, to a depth of 16. |
 | `displayList` | `GFXDisplayList` | The recording so far as an immutable value. Throws while a group is open. |
@@ -168,10 +170,10 @@ Every command carries a `GFXCommandState`, an immutable snapshot of the whole gr
 ```tsx
 import { useEffect, useState } from "react";
 import { GFXColour, GFXContext, GFXGradient, GFXPath } from "@syndromatic/syncloudos/fx/graphics";
-import { useSynWareImages } from "@syndromatic/syncloudos/sdk";
+import { useImages } from "@syndromatic/syncloudos/sdk";
 
 export function Badge() {
-  const images = useSynWareImages();
+  const images = useImages();
   const [svg, setSvg] = useState<string>("");
 
   useEffect(() => {
@@ -203,9 +205,10 @@ new GFXLayer(surface: GFXBitmapContext)
 `image` is the snapshot (a `GFXImage`), and `draw(context, rect)` draws it into any `GFXImageDrawingDestination`, that is, any context with `drawImage`. Build a complicated shape once on a bitmap, wrap it in a layer, and stamp it where you need it.
 
 ```ts
+import type { NSEData } from "@syndromatic/syncloudos/foundation";
 import { GFXBitmapContext, GFXColour, GFXLayer, GFXPath } from "@syndromatic/syncloudos/fx/graphics";
 
-export function stampedStars(): Uint8Array {
+export function stampedStars(): NSEData {
   const star = new GFXBitmapContext({ width: 16, height: 16 });
   star.setAntialiasing(true);
   const points = new GFXPath().move({ x: 8, y: 1 }).line({ x: 10, y: 6 }).line({ x: 15, y: 6 }).line({ x: 11, y: 10 }).line({ x: 13, y: 15 }).line({ x: 8, y: 12 }).line({ x: 3, y: 15 }).line({ x: 5, y: 10 }).line({ x: 1, y: 6 }).line({ x: 6, y: 6 }).close();
@@ -238,4 +241,4 @@ export function stampedStars(): Uint8Array {
 - [GraphicsFX](../graphics.md)
 - [Paint and images](paint-and-images.md)
 - [PDF](pdf.md)
-- [NSE controls](../../nse-controls.md), where `NSEGraphicsView` hosts drawing code
+- [NSE controls](../../nse-controls.md), where `NSEView.draw(dirtyRect, context)` hosts drawing code

@@ -21,12 +21,12 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { copyFileSync, existsSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import {
-  assertSdkFingerprint, assertSdkRelativePath, assertSdkSourceUnchanged, assertTwelveFxPackageExports,
+  assertSdkFingerprint, assertSdkRelativePath, assertSdkSourceUnchanged, assertFxPackageExports,
   captureSdkSourceFingerprint, fingerprintSdkFiles, requiredFxFamilies, sdkDirectoryFiles,
 } from "./sdk-package-manifest.mjs";
 
@@ -75,12 +75,12 @@ export function readVerifiedSdkArchive(repositoryRoot, {
   const entries = manifest.entries;
   assert(entries && typeof entries === "object", "Missing SDK entry fingerprints.");
   assert.deepEqual(Object.keys(entries).filter(key => /^fx\/[^/]+$/u.test(key.slice(manifest.package.length + 1))).sort(),
-    requiredFxFamilies.map(family => `${manifest.package}/fx/${family}`).sort(), "SDK manifest must contain all twelve FX entries.");
+    requiredFxFamilies.map(family => `${manifest.package}/fx/${family}`).sort(), "SDK manifest must contain every required FX entry.");
   assert.deepEqual(Object.keys(entries).filter(key => /^fx\/[^/]+\//u.test(key.slice(manifest.package.length + 1))),
     [`${manifest.package}/fx/video/webm`], "Only reviewed FX format extensions may be installed.");
   for (const [specifier, entry] of Object.entries(entries)) {
-    assert(specifier.startsWith(`${manifest.package}/`), "Invalid SDK entry identity.");
-    const name = specifier.slice(manifest.package.length + 1);
+    assert(specifier === manifest.package || specifier.startsWith(`${manifest.package}/`), "Invalid SDK entry identity.");
+    const name = specifier === manifest.package ? "index" : specifier.slice(manifest.package.length + 1);
     assertSdkRelativePath(name);
     assert.equal(entry.archive, manifest.archive, `SDK entry ${name} does not reference the frozen archive.`);
     assert.equal(entry.index, inventory.get(`${name}.js`)?.sha256, `SDK entry ${name} JS fingerprint mismatch.`);
@@ -111,14 +111,32 @@ export function verifyInstalledSdkResources(installed, manifest) {
   assert.equal(actual.sha256, manifest.resources.sha256, "Installed SDK resource fingerprint mismatch (missing, changed or extra file).");
   const pkg = JSON.parse(readFileSync(join(installed, "package.json"), "utf8"));
   assert.equal(pkg.name, manifest.package, "Installed SDK identity mismatch.");
-  assertTwelveFxPackageExports(pkg.exports);
+  assertFxPackageExports(pkg.exports);
   return actual;
+}
+
+// Only loaded inside Vitest workers; standalone scripts never import Vitest.
+const vitest = process.env.VITEST ? await import("vitest") : undefined;
+
+function removeWhenFinished(root) {
+  const remove = () => rmSync(root, { recursive: true, force: true, maxRetries: 3 });
+  try {
+    if (vitest) return vitest.onTestFinished(remove);
+  } catch {
+    // Created outside a running test (for example in a hook); fall back to process exit.
+  }
+  process.once("exit", remove);
 }
 
 export function createInstalledConsumer(repositoryRoot, label = "synware-installed-", options = {}) {
   const verified = readVerifiedSdkArchive(repositoryRoot, options);
   assertSdkSourceUnchanged(verified.manifest.source, captureSdkSourceFingerprint(repositoryRoot));
   const root = realpathSync.native(mkdtempSync(join(tmpdir(), label)));
+  // Each consumer is a full npm installation (about 180 MB). Remove it when the test
+  // finishes (or, for scripts, when the process exits), so callers cannot fill the disk.
+  // Vitest stops workers without an exit event, hence onTestFinished. rmSync removes
+  // links without following them. Set SYNWARE_KEEP_CONSUMERS=1 to inspect one.
+  if (!process.env.SYNWARE_KEEP_CONSUMERS) removeWhenFinished(root);
   const repository = realpathSync.native(repositoryRoot);
   assert(!isWithin(repository, root), "Installed consumer must be outside the repository.");
   const frozen = copyVerifiedSdkArchive(repositoryRoot, root, { manifestPath: verified.manifestPath });
@@ -145,6 +163,16 @@ export function assertIndependentModules(root, ids) {
   }
 }
 
+/** Device families expose runtime classes; privileged instances obtain their mounted session internally. */
+export function assertFxRuntimeEntry(family, module) {
+  assert(requiredFxFamilies.includes(family), `Unknown FX family: ${family}`);
+  assert(Object.keys(module).length > 0, `Empty FX runtime entry: ${family}`);
+  if (family === "xr") {
+    for (const name of ["XRFXSession", "XRFXConfiguration", "XRFXWorldTrackingConfiguration", "XRFXOrientationTrackingConfiguration", "XRFXFrame", "XRFXCamera", "XRFXAnchor", "XRFXRaycastQuery", "XRFXRaycastResult", "XRFXError"]) assert(typeof module[name] === "function", `Missing XR runtime class: ${name}`);
+    for (const name of ["XRFXClient", "XRFXCapabilities", "XRFXAuthorizationStatus", "XRFXSessionMode", "XRFXReferenceSpace", "XRFXConfigurationOptions"]) assert(!(name in module), `Removed XR export: ${name}`);
+  }
+}
+
 /** Shared by source-side regression tests and the strict installed declaration gate. */
 export function createSdkPublicTypeProbe() {
   return [
@@ -153,12 +181,21 @@ export function createSdkPublicTypeProbe() {
     `import type { SynWareContextValue } from "@syndromatic/syncloudos/sdk";`,
     `void [${requiredFxFamilies.join(", ")}];`,
     `declare const app: SynWareContextValue;`,
+    `import { BTFXCentralManager } from "@syndromatic/syncloudos/fx/bluetooth";`,
+    `import { XRFXSession, XRFXWorldTrackingConfiguration } from "@syndromatic/syncloudos/fx/xr";`,
+    `const xrSession: XRFXSession = new XRFXSession(); const xrConfiguration = new XRFXWorldTrackingConfiguration(); xrConfiguration.isLightEstimationEnabled = false; xrSession.delegate = { sessionDidUpdateFrame(sender, frame) { const timestamp: number = frame.timestamp; void [sender, timestamp]; } }; xrSession.run(xrConfiguration); xrSession.pause();`,
+    `import { SPFXSpeechRecognizer } from "@syndromatic/syncloudos/fx/speech";`,
+    `const bluetoothManager: BTFXCentralManager = new BTFXCentralManager(); void bluetoothManager;`,
+    `const speechRecognizer: SPFXSpeechRecognizer = new SPFXSpeechRecognizer(); void speechRecognizer;`,
+    `import { NWFXPathMonitor } from "@syndromatic/syncloudos/fx/network";`,
+    `import { DFXQueue } from "@syndromatic/syncloudos/fx/dispatch";`,
+    `const networkMonitor = new NWFXPathMonitor(); networkMonitor.pathUpdateHandler = path => { const status: string = path.status; void status; }; networkMonitor.start(DFXQueue.main); networkMonitor.cancel();`,
     `const token = sdk.defineSynWareServiceToken<{ read(): string }>({ id: "org.example.package-proof", contractVersion: "proof.v1" });`,
     `const serviceText: string = app.services.require(token).read(); void serviceText;`,
     `// @ts-expect-error Tokens must infer the declared client, not an arbitrary caller type.`,
     `app.services.require(token).missingMethod();`,
     ...[
-      "app.runtime", "app.services.registerClient", "app.services.resolveAppClient",
+      "app.runtime", "app.bluetooth", "app.speech", "app.xr", "app.services.registerClient", "app.services.resolveAppClient",
       "app.lumina.createIndex().backend", "app.video.backend", "app.midi.backend", "app.location.backend",
       "sdk.createSynCloudOS", "sdk.ServiceRegistry", "sdk.createSynWareTestHost", "sdk.createMountedLuminaClient",
       "sdk.createMountedSynWareRouter", "sdk.SynWareRouteSessionProvider",
@@ -212,13 +249,15 @@ import { relative, isAbsolute } from "node:path";
 import { fileURLToPath } from "node:url";
 const root = realpathSync(".");
 const rows = [];
-for (const family of ${JSON.stringify(requiredFxFamilies)}) {
+const requiredFxFamilies = ${JSON.stringify(requiredFxFamilies)};
+${assertFxRuntimeEntry.toString()}
+for (const family of requiredFxFamilies) {
   const entry = "@syndromatic/syncloudos/fx/" + family;
   const path = realpathSync(fileURLToPath(import.meta.resolve(entry)));
   const local = relative(root, path);
   assert(!isAbsolute(local) && local !== ".." && !local.startsWith("../") && !local.startsWith("..\\\\"), "Package resolved outside installation");
   const module = await import(entry);
-  assert(Object.keys(module).length > 0, "Empty FX runtime entry: " + family);
+  assertFxRuntimeEntry(family, module);
   rows.push({ entry: "fx/" + family, import: "passed", types: "passed" });
 }
 const sdk = await import("@syndromatic/syncloudos/sdk");

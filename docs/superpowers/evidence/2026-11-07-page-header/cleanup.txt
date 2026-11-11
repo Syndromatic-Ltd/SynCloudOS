@@ -1,0 +1,6 @@
+Final adoption checkout: 7bdaa0d3fdc6d42529b96f9fabf14d27e9f36ba6
+Deleted node_modules junction with Get-Item.Delete() before checkout removal.
+Framework node_modules/.bin/vitest exists after junction deletion.
+Removed only the verified temporary adoption checkout with git worktree remove --force.
+Framework node_modules/.bin/vitest still exists:
+True

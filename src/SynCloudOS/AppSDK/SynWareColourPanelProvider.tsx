@@ -64,6 +64,10 @@ export function SynWareColourPanelProvider({
   children,
 }: SynWareColourPanelProviderProps) {
   const nseService = useMemo(() => nseServiceFor(service), [service]);
+  const nseDrag = useMemo(
+    () => drag ? createSynWareNSEColourPanelDragPort(drag, service.authorityToken) : undefined,
+    [drag, service.authorityToken],
+  );
   const options = undoManager
     ? { undoManager: undoManager as unknown as NonNullable<NSEColourPanelControllerOptions["undoManager"]> }
     : undefined;
@@ -73,7 +77,7 @@ export function SynWareColourPanelProvider({
       commands={commands as unknown as NSEColourPanelProviderProps["commands"]}
       options={options}
       responderId={responderId}
-      drag={drag ? createSynWareNSEColourPanelDragPort(drag, service.authorityToken) : undefined}
+      drag={nseDrag}
     >
       {children}
     </NSEColourPanelProvider>

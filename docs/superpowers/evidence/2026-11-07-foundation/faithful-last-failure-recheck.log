@@ -1,0 +1,17 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/host-update-readiness.test.ts tests/runtime/fx/packed-lumina.test.ts tests/runtime/fx/packed-media.test.ts --maxWorkers=1 --no-file-parallelism --reporter=default --reporter=json --outputFile.json=C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\docs\superpowers\evidence\2026-11-07-foundation/faithful-last-failure-recheck.json
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-faithful-last-20261107
+
+ ✓ tests/runtime/fx/packed-media.test.ts (1 test) 28232ms
+   ✓ executes and typechecks MediaFX from an independently installed SDK archive  28232ms
+ ✓ tests/runtime/fx/packed-lumina.test.ts (1 test) 26378ms
+   ✓ executes and typechecks named-route LuminaFX values from an independently installed SDK archive  26378ms
+ ✓ tests/runtime/host-update-readiness.test.ts (28 tests) 535ms
+
+ Test Files  3 passed (3)
+      Tests  30 passed (30)
+   Start at  22:54:15
+   Duration  67.67s (transform 9.91s, setup 44ms, import 12.05s, tests 55.15s, environment 0ms)
+
+JSON report written to C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/docs/superpowers/evidence/2026-11-07-foundation/faithful-last-failure-recheck.json

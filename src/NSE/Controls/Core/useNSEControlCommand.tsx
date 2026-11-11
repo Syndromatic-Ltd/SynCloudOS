@@ -30,6 +30,8 @@ import {
 } from "react";
 import type { CommandDispatchResult, CommandPresentation } from "../../../SynCloudOS/SynCloudOS";
 import type { NSEControlCommandBinding, NSEControlRuntimePort } from "./controlTypes";
+import { subscribeNSEActionChanges } from "./actionChanges";
+import { isHiddenCommandAcceptance } from "../../../SynCloudOS/nseRuntimeContracts";
 
 const NSEControlRuntimeContext = createContext<NSEControlRuntimePort | null>(null);
 
@@ -52,6 +54,7 @@ export interface NSEControlCommandState<P> {
   readonly validating: boolean;
   readonly failure: NSEControlCommandFailure | null;
   refresh(): void;
+  /** No argument uses the bound payload; a supplied argument, including undefined, is freshly prepared. */
   dispatch(payload?: P): Promise<CommandDispatchResult<unknown> | null>;
 }
 
@@ -96,16 +99,15 @@ export function useNSEControlCommand<P>(
   const [validating, setValidating] = useState(false);
   const [failure, setFailure] = useState<NSEControlCommandFailure | null>(null);
   const generation = useRef(0);
+  const bindingGeneration = useRef(0);
   const validationLease = useRef<AbortLease | null>(null);
   const dispatchLease = useRef<AbortLease | null>(null);
   const presentationGeneration = useRef<{ readonly registryGeneration: number; readonly responderGeneration: number } | null>(null);
 
-  const refresh = useCallback(() => {
+  const refresh = useCallback((): void => {
     validationLease.current?.dispose();
     validationLease.current = null;
     generation.current += 1;
-    dispatchLease.current?.dispose();
-    dispatchLease.current = null;
     const currentGeneration = generation.current;
     if (!binding || !port || port.signal.aborted) {
       setPresentation(null);
@@ -128,6 +130,7 @@ export function useNSEControlCommand<P>(
         || currentAuthority.responderGeneration !== authorityGeneration.responderGeneration) {
         setPresentation(null);
         presentationGeneration.current = null;
+        refresh();
         return;
       }
       presentationGeneration.current = authorityGeneration;
@@ -139,15 +142,17 @@ export function useNSEControlCommand<P>(
       setPresentation(null);
       setFailure({ commandId: binding.id, stage: "validate" });
     }).finally(() => {
-      if (lease.signal.aborted || currentGeneration !== generation.current) return;
+      const current = !lease.signal.aborted && currentGeneration === generation.current;
       if (validationLease.current === lease) validationLease.current = null;
-      setValidating(false);
+      lease.dispose();
+      if (current) setValidating(false);
     });
   }, [binding, port]);
 
   useEffect(() => {
     refresh();
     return () => {
+      bindingGeneration.current += 1;
       generation.current += 1;
       validationLease.current?.dispose();
       validationLease.current = null;
@@ -156,37 +161,51 @@ export function useNSEControlCommand<P>(
     };
   }, [refresh]);
 
-  const dispatch = useCallback(async (payload?: P): Promise<CommandDispatchResult<unknown> | null> => {
-    if (!binding || !port || port.signal.aborted || !presentation?.enabled || presentation.denied || presentation.hidden || presentation.stale) {
-      return null;
-    }
+  useEffect(() => binding ? subscribeNSEActionChanges(binding.id, refresh) : undefined, [binding, refresh]);
+  useEffect(() => binding && port && !port.signal.aborted ? port.commands.subscribePresentation?.(refresh) : undefined, [binding, port, refresh]);
+  const dispatch = useCallback(async function dispatch(payload?: P): Promise<CommandDispatchResult<unknown> | null> {
+    if (!binding || !port || port.signal.aborted) return null;
+    const hasPayload = arguments.length > 0;
     const currentAuthority = port.commands.getPresentationGeneration();
-    if (presentationGeneration.current?.registryGeneration !== currentAuthority.registryGeneration
-      || presentationGeneration.current.responderGeneration !== currentAuthority.responderGeneration) return null;
+    // Cached presentation draws availability; it cannot decide a new intent.
+    // A custom sender can fire between a model/focus change and React's next
+    // validation paint. Prepare both bound and event payloads canonically.
     dispatchLease.current?.dispose();
     const lease = createAbortLease(port.signal);
     dispatchLease.current = lease;
-    const dispatchGeneration = generation.current;
+    const dispatchGeneration = bindingGeneration.current;
     const acceptedAuthority = currentAuthority;
     setFailure(null);
     try {
-      const dispatchedPayload = payload === undefined ? binding.payload : payload;
+      const dispatchedPayload = hasPayload ? payload : binding.payload;
+      const availability = await port.commands.validate(binding.id, dispatchedPayload, { signal: lease.signal, source: "api" });
+      if (!availability?.enabled || availability.denied || availability.hidden || availability.stale) return null;
+      if (lease.signal.aborted || dispatchLease.current !== lease || dispatchGeneration !== bindingGeneration.current) return null;
       const preparation = await port.commands.prepareDispatch(binding.id, dispatchedPayload, {
         signal: lease.signal,
         source: "api",
       });
-      if (preparation.status !== "accepted") return null;
+      if (preparation.status !== "accepted" || isHiddenCommandAcceptance(preparation.acceptance)) return null;
       const latestAuthority = port.commands.getPresentationGeneration();
-      if (lease.signal.aborted || dispatchLease.current !== lease || dispatchGeneration !== generation.current
+      // A popup can restore focus while its choice is being prepared. The
+      // one-shot canonical acceptance owns exact responder/registration checks;
+      // a coarse focus generation change alone must not cancel the same target.
+      if (lease.signal.aborted || dispatchLease.current !== lease || dispatchGeneration !== bindingGeneration.current
         || latestAuthority.registryGeneration !== acceptedAuthority.registryGeneration
-        || latestAuthority.responderGeneration !== acceptedAuthority.responderGeneration) return null;
-      return await port.commands.dispatch(binding.id, payload === undefined ? binding.payload : payload, {
+        || preparation.acceptance.responderId !== availability.responderId) return null;
+      const result = await port.commands.dispatch(binding.id, dispatchedPayload, {
         signal: lease.signal,
         source: "api",
         acceptance: preparation.acceptance,
       });
+      // Execution can settle after this sender has unmounted, rebound or lost
+      // its runtime. The command owns its work; the obsolete control must not
+      // apply a late selection/value commit through its old callbacks.
+      if (lease.signal.aborted || dispatchLease.current !== lease || dispatchGeneration !== bindingGeneration.current) return null;
+      refresh();
+      return result;
     } catch {
-      if (!lease.signal.aborted && dispatchLease.current === lease && dispatchGeneration === generation.current) {
+      if (!lease.signal.aborted && dispatchLease.current === lease && dispatchGeneration === bindingGeneration.current) {
         setFailure({ commandId: binding.id, stage: "dispatch" });
       }
       return null;
@@ -194,7 +213,7 @@ export function useNSEControlCommand<P>(
       if (dispatchLease.current === lease) dispatchLease.current = null;
       lease.dispose();
     }
-  }, [binding, port, presentation]);
+  }, [binding, port, refresh]);
 
   return useMemo(() => ({ presentation, validating, failure, refresh, dispatch }), [dispatch, failure, presentation, refresh, validating]);
 }

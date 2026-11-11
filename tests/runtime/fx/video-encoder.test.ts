@@ -103,7 +103,7 @@ describe("VFXEncoder", () => {
   it("serializes reconfiguration after drain and fences stale output generations", async () => {
     const backend = new FixtureEncoderBackend();
     const outputs: number[] = [];
-    const encoder = new VFXEncoder({ backend, output(chunk) { outputs.push(chunk.copyData()[0]!); } });
+    const encoder = new VFXEncoder({ backend, output(chunk) { outputs.push(chunk.copyData().bytes[0]!); } });
     await encoder.configure({ codec: "vp8", codedWidth: 2, codedHeight: 2, bitrate: 100_000, framerate: 24 });
     const firstCallbacks = backend.callbacks!;
     await encoder.configure({ codec: "vp8", codedWidth: 2, codedHeight: 2, bitrate: 200_000, framerate: 60 });

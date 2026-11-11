@@ -34,7 +34,7 @@ describe("HFX host scoped authority", () => {
     const vibrate = vi.fn(() => true), host = createRuntimeHapticsHostService(new AUFXSystemFeedbackBus(() => null), { navigator: { vibrate }, audio: "off" });
     const controller = new AbortController(), a = host.createSession(controller.signal), b = host.createSession();
     await a.trigger("medium"); await b.trigger("rigid"); vibrate.mockClear(); a.stop(); expect(vibrate).not.toHaveBeenCalled();
-    controller.abort(); await expect(a.trigger("medium")).rejects.toThrow("disposed"); b.stop(); expect(vibrate).toHaveBeenCalledWith(0); host.dispose();
+    controller.abort(); await expect(a.trigger("medium")).rejects.toThrow(expect.objectContaining({ code: "HFX_HAPTIC_ENGINE_DISPOSED" })); b.stop(); expect(vibrate).toHaveBeenCalledWith(0); host.dispose();
   });
   it("applies vibration policy to every engine before surfacing the first backend error", () => {
     const vibrate = vi.fn((pattern: VibratePattern) => { if (pattern === 0) throw new Error("native policy failure"); return true; });

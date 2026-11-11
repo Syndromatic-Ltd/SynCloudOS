@@ -1,0 +1,7 @@
+{
+  "error": "Error: page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:5199/__dev/login?to=%2F__syncloudos%2Fnse-gallery\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5199/__dev/login?to=%2F__syncloudos%2Fnse-gallery\", waiting until \"load\"\u001b[22m\n",
+  "errors": [],
+  "consoleErrors": [],
+  "url": "chrome-error://chromewebdata/",
+  "body": ""
+}

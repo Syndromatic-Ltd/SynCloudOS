@@ -19,6 +19,7 @@
  */
 
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
+import { sameViewportFeatures } from "../Windows/viewportFeatures";
 import type { WindowBounds } from "../Windows/windowTypes";
 import type { SynCloudOSResponsiveMode } from "./responsiveTypes";
 import {
@@ -37,7 +38,9 @@ function sameBounds(left: WindowBounds, right: WindowBounds): boolean {
 }
 
 function samePresentationTraits(left: SynCloudOSPresentationTraits, right: SynCloudOSPresentationTraits): boolean {
-  return sameBounds(left.contentBounds, right.contentBounds) &&
+  return sameViewportFeatures(left.viewportFeatures, right.viewportFeatures) && left.geometryState === right.geometryState &&
+    left.safeAreaAvailability === right.safeAreaAvailability &&
+    sameBounds(left.contentBounds, right.contentBounds) &&
     sameBounds(left.hostViewportBounds, right.hostViewportBounds) &&
     left.horizontalSizeClass === right.horizontalSizeClass &&
     left.orientation === right.orientation &&
@@ -86,16 +89,27 @@ export function createContentBoundPresentationTraitsService(
   const disposers: Array<() => void> = [];
   let disposed = false;
   let frame: unknown = null;
+  let lastContentBounds: WindowBounds | null = null;
 
   const project = (revision: number): SynCloudOSPresentationTraits => {
-    const contentBounds = sources.contentBounds.getSnapshot();
+    const measuredContent = sources.contentBounds.getSnapshot();
     // Read the geometry authority atomically at publication time. A content
     // resize can share a frame with a host resize, so the last published
     // ScreenService snapshot alone is intentionally not enough here.
     const screen = sources.screen.getCurrentSnapshot();
+    const validContent = [measuredContent.x, measuredContent.y, measuredContent.width, measuredContent.height,
+      measuredContent.x + measuredContent.width, measuredContent.y + measuredContent.height].every(Number.isFinite)
+      && measuredContent.width > 0 && measuredContent.height > 0;
+    if (validContent && screen.geometryState === "current") lastContentBounds = freezeBounds(measuredContent);
+    const contentBounds = lastContentBounds ?? freezeBounds({ x: 0, y: 0, width: 1, height: 1 });
+    const geometryState = screen.geometryState === "unavailable" || !lastContentBounds ? "unavailable"
+      : screen.geometryState === "retained" || !validContent ? "retained" : "current";
     const primaryPointer = finePointer.matches ? "fine" as const : coarsePointer.matches ? "coarse" as const : "none" as const;
     return Object.freeze({
       revision,
+      geometryState,
+      safeAreaAvailability: screen.safeAreaAvailability,
+      viewportFeatures: screen.viewportFeatures,
       contentBounds: freezeBounds(contentBounds),
       hostViewportBounds: freezeBounds(screen.layoutViewport),
       horizontalSizeClass: getSynCloudOSHorizontalSizeClass(contentBounds.width),
@@ -181,10 +195,11 @@ let removeReducedMotionListener: (() => void) | null = null;
 let reducedMotionQuery: ReturnType<typeof runtime.environment.matchMedia> | null = null;
 
 function readResponsiveState() {
-  const viewport = runtime.environment.visualViewport.getSnapshot();
-  const screen = runtime.environment.screen.getSnapshot();
-  const width = viewport?.width ?? screen.width;
-  const height = viewport?.height ?? screen.height;
+  // Shell composition follows page layout, like ScreenService. The visual
+  // viewport describes zoom/occlusion and must not impersonate a device mode.
+  const screen = runtime.screen.getCurrentSnapshot();
+  if (screen.geometryState === "unavailable") return null;
+  const { width, height } = screen.layoutViewport;
   const temporaryReducedMotionQuery = reducedMotionQuery ?? runtime.environment.matchMedia("(prefers-reduced-motion: reduce)");
   const prefersReducedMotion = temporaryReducedMotionQuery.matches;
   if (!reducedMotionQuery) temporaryReducedMotionQuery.dispose();
@@ -198,6 +213,7 @@ function readResponsiveState() {
 
 function commitResponsiveState() {
   const next = readResponsiveState();
+  if (!next) return;
   const current = RuntimeStore.getSnapshot().responsive;
   if (
     current.mode === next.mode &&
@@ -242,7 +258,9 @@ const responsiveModeManager = {
     observing = true;
     reducedMotionQuery = runtime.environment.matchMedia("(prefers-reduced-motion: reduce)");
     this.sync();
-    removeResizeListener = runtime.environment.addWindowListener("resize", scheduleSync, { passive: true });
+    // ScreenService has already coalesced its geometry publication. Consume
+    // it in that frame rather than putting shell composition one frame behind.
+    removeResizeListener = runtime.screen.subscribe(() => this.sync());
     removeReducedMotionListener = reducedMotionQuery.subscribe(scheduleSync);
   },
   unobserve() {

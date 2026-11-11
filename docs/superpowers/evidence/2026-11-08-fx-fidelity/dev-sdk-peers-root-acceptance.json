@@ -1,0 +1,16 @@
+{
+  "source": "a99970151f276d4bdd65e9fd2450aac9b1e3b82520f09a497b01eb998a9959f0",
+  "sourceMatchesInstalled": true,
+  "frozenFiles": 5,
+  "badFiles": 0,
+  "archive": "b0d6a6a298c6347834463bc84d6fb1f9a04dd4538b9005fdecd101ac190410bc",
+  "peerEntries": [
+    "react",
+    "react-dom",
+    "react-dom/client",
+    "react/jsx-runtime"
+  ],
+  "review": "Approved; exact-host installed Chromium/HMR GREEN and final three packed gates GREEN inspected",
+  "packedResult": "3/3, 117.55 s",
+  "commit": "5286513ee77b3e384c1b8347c3546d0d605b977e"
+}

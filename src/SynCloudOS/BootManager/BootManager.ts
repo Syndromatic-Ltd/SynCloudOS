@@ -35,13 +35,13 @@ type SynCloudOSBootManagerHotData = {
 };
 
 export function createBootManager(runtime: SynCloudOSRuntime, dependencies: {
-  appRegistry: any; policyKit: any; responsiveModeManager: any;
+  appRegistry: any; configurationProfiles: any; responsiveModeManager: any;
   routeManager: any; runtimeController: any; serviceRegistry: any; statechart: any;
   loginServices: any; localeServices: any;
 }) {
 const AppRegistry = dependencies.appRegistry;
 const EventBus = runtime.events;
-const PolicyKit = dependencies.policyKit;
+const ConfigurationProfiles = dependencies.configurationProfiles;
 const ResponsiveModeManager = dependencies.responsiveModeManager;
 const RouteManager = dependencies.routeManager;
 const RuntimeController = dependencies.runtimeController;
@@ -116,16 +116,16 @@ function registerBundleLocaleResources(appBundles: TrustedSynWareBundle[]) {
     try {
       bundleCount += 1;
       if (bundle.localeResources) {
-        const result = LocaleServices.registerBundleLocaleResources(bundle.manifest.id, bundle.localeResources);
+        const result = LocaleServices.registerBundleLocaleResources(bundle.manifest.bundleIdentifier, bundle.localeResources);
         registered += result.registered;
       }
       if (bundle.localeResourceLoader) {
-        LocaleServices.registerBundleLocaleResourceLoader(bundle.manifest.id, bundle.localeResourceLoader);
+        LocaleServices.registerBundleLocaleResourceLoader(bundle.manifest.bundleIdentifier, bundle.localeResourceLoader);
         lazyLoaders += 1;
       }
     } catch (error) {
       failures.push({
-        appId: bundle.manifest.id,
+        appId: bundle.manifest.bundleIdentifier,
         error: error instanceof Error ? error.message : String(error)
       });
     }
@@ -227,7 +227,7 @@ const bootManager = {
       });
       runStage(stages, "runtime.markBooted", "Mark runtime booted", () => RuntimeController.markBooted());
       runStage(stages, "statechart.initial", "Enter initial workspace route", () => {
-        const webspringPolicy = PolicyKit.authorise({
+        const webspringPolicy = ConfigurationProfiles.authorise({
           action: "webspring.enter",
           source: "SynCloudOS.BootManager.boot",
           origin: "runtime"

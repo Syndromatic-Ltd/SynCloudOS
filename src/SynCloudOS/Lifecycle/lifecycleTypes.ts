@@ -206,3 +206,15 @@ export interface SynCloudOSLifecycleNamespace {
   ): SynCloudOSLifecycleTransitionResult;
   onTransition(listener: SynCloudOSLifecycleTransitionListener, options?: SynCloudOSLifecycleSubscribeOptions): () => void;
 }
+
+/**
+ * Thrown by a `will` hook to refuse its stage (an application declining to
+ * terminate). The operation reports `cancelled`, the hook is recorded as
+ * cancelled and no `bundle.lifecycle.failed` event is published.
+ */
+export class SynCloudOSLifecycleVeto extends Error {
+  constructor(readonly stage: SynCloudOSLifecycleStage, message: string) {
+    super(message);
+    this.name = "SynCloudOSLifecycleVeto";
+  }
+}

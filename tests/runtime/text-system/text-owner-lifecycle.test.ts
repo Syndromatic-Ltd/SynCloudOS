@@ -19,6 +19,7 @@
  */
 
 import { expect,it } from "vitest";
+import { SynCloudOSLifecycleError } from "../../../src/SynCloudOS/nseRuntimeContracts";
 const text=await import("../../../src/NSE/Text/index").catch(()=>null);
 const setup=()=>{expect(text?.NSETextStorage).toBeTypeOf("function");return text!;};
 
@@ -28,9 +29,13 @@ it("reads one canonical owner through two facades without losing ownership on vi
   let calls=0; b.subscribe(()=>calls++);
   a.replaceCharacters({location:0,length:0},"shared");
   expect(a.getSnapshot()).toBe(owner.getSnapshot()); expect(b.getSnapshot()).toBe(owner.getSnapshot()); expect(calls).toBe(1);
-  a.dispose(); a.dispose(); expect(()=>a.replaceCharacters({location:0,length:0},"bad")).toThrow(/disposed/i);
+  a.dispose(); a.dispose();
+  expect(()=>a.replaceCharacters({location:0,length:0},"bad")).toThrow(SynCloudOSLifecycleError);
+  expect(()=>a.replaceCharacters({location:0,length:0},"bad")).toThrow(expect.objectContaining({code:"NSE_TEXT_STORAGE_DISPOSED",operation:"replaceCharacters",disposal:expect.objectContaining({reason:"explicit"})}));
   b.replaceCharacters({location:6,length:0},"!"); expect(owner.getSnapshot().text).toBe("shared!");
-  owner.dispose(); expect(()=>b.replaceCharacters({location:0,length:0},"late")).toThrow(/disposed/i);
+  owner.dispose();
+  expect(()=>b.replaceCharacters({location:0,length:0},"late")).toThrow(SynCloudOSLifecycleError);
+  expect(()=>b.replaceCharacters({location:0,length:0},"late")).toThrow(expect.objectContaining({code:"NSE_TEXT_OWNER_DISPOSED",operation:"getSnapshot"}));
 });
 
 it("batches only notifications, rejects reentrant commits, and isolates subscriber failures",()=>{
@@ -106,6 +111,29 @@ it("admits bounded semantic action metadata without acquiring a history authorit
 it("exposes an owner lifetime signal and aborts it exactly once on disposal",()=>{
   const t=setup(),owner=t.createInMemoryNSETextOwner();
   expect(owner.signal).toBeInstanceOf(AbortSignal);let aborted=0;
-  owner.signal!.addEventListener("abort",()=>{aborted++;expect(()=>owner.getSnapshot()).toThrow(/disposed/);});
+  owner.signal!.addEventListener("abort",()=>{aborted++;expect(()=>owner.getSnapshot()).toThrow(SynCloudOSLifecycleError);});
   expect(owner.signal!.aborted).toBe(false);owner.dispose();owner.dispose();expect(owner.signal!.aborted).toBe(true);expect(aborted).toBe(1);
+});
+
+it("identifies each disposed storage and owner operation",()=>{
+  const t=setup(),storage=new t.NSETextStorage({flowId:"body"}),owner=t.createInMemoryNSETextOwner({flowId:"owner"});
+  storage.dispose();owner.dispose();
+  const storageActions:Record<string,()=>unknown>={
+    getSnapshot:()=>storage.getSnapshot(),subscribe:()=>storage.subscribe(()=>{}),commit:()=>storage.commit([]),
+    replaceCharacters:()=>storage.replaceCharacters({location:0,length:0},"x"),
+    applyAttributes:()=>storage.applyAttributes({location:0,length:0},{}),
+    removeAttributes:()=>storage.removeAttributes({location:0,length:0},[]),
+    setParagraphAttributes:()=>storage.setParagraphAttributes({location:0,length:0},{}),
+    read:()=>storage.read({location:0,length:0}),beginEditing:()=>storage.beginEditing(),endEditing:()=>storage.endEditing(),
+  };
+  for(const [operation,action] of Object.entries(storageActions)){
+    expect(action).toThrow(SynCloudOSLifecycleError);
+    expect(action).toThrow(expect.objectContaining({code:"NSE_TEXT_STORAGE_DISPOSED",operation}));
+  }
+  for(const [operation,action] of Object.entries({getSnapshot:()=>owner.getSnapshot(),subscribe:()=>owner.subscribe(()=>{}),commit:()=>owner.commit({expectedRevision:0,operations:[]})})){
+    expect(action).toThrow(SynCloudOSLifecycleError);
+    expect(action).toThrow(expect.objectContaining({code:"NSE_TEXT_OWNER_DISPOSED",operation}));
+  }
+  expect(owner.signal!.reason).toBeInstanceOf(SynCloudOSLifecycleError);
+  expect(owner.signal!.reason).toMatchObject({code:"NSE_TEXT_OWNER_DISPOSED",operation:"dispose",disposal:{reason:"explicit"}});
 });

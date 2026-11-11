@@ -1,0 +1,26 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/privacy-store.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/privacy-store.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/privacy-store.test.ts [ tests/runtime/privacy-store.test.ts ]
+Error: Cannot find module '../../src/SynCloudOS/Privacy/PrivacyStore' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/privacy-store.test.ts
+ ❯ tests/runtime/privacy-store.test.ts:22:1
+     20|
+     21| import { describe, expect, it, vi } from "vitest";
+     22| import { createPrivacyStore, type PrivacyPersistence } from "../../src…
+       | ^
+     23|
+     24| function deferred<T>() {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  19:07:14
+   Duration  194ms (transform 31ms, setup 29ms, import 0ms, tests 0ms, environment 0ms)

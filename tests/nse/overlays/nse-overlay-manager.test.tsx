@@ -36,8 +36,16 @@ import { belongsToNearestNSEOverlayProvider, isWithinNSEOverlay, nseOverlayEvent
 import { SynCloudOSProvider, useRuntimeNSEOverlayPort } from "../../../src/SynCloudOSReact";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 import { createTestRuntime } from "../../runtime/helpers";
+import { SynCloudOSLifecycleError } from "../../../src/SynCloudOS/nseRuntimeContracts";
 
 afterEach(cleanup);
+
+it("diagnoses registration after overlay manager disposal", () => {
+  const manager = createNSEOverlayManager(); manager.dispose(); manager.dispose();
+  const registration = { id: "late", kind: "menu" as const, parentId: null, anchor: null, surface: document.createElement("div"), restoreFocus: false, dismissOn: new Set<NSEOverlayDismissReason>(), onDismiss: vi.fn() };
+  expect(() => manager.register(registration)).toThrow(SynCloudOSLifecycleError);
+  expect(() => manager.register(registration)).toThrow(expect.objectContaining({ code: "NSE_OVERLAY_MANAGER_DISPOSED", operation: "register", disposal: expect.objectContaining({ reason: "explicit" }) }));
+});
 
 function RuntimeOverlayProvider({ manager, children }: PropsWithChildren<{ readonly manager: ReturnType<typeof createNSEOverlayManager> }>) {
   const runtimePort = useRuntimeNSEOverlayPort();

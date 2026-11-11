@@ -1,0 +1,16 @@
+{
+  "changed": [
+    "src/SynWare/About.app/Contents/Info.ts",
+    "src/SynWare/AnimationFX.app/Contents/Info.ts",
+    "src/SynWare/Chronosphere.app/Contents/Info.ts",
+    "src/SynWare/Diagnostics.app/Contents/Info.ts",
+    "src/SynWare/Journal.app/Contents/Info.ts",
+    "src/SynWare/JournalOld.app/Contents/Info.ts",
+    "src/SynWare/JournalPublisher.app/Contents/Info.ts",
+    "src/SynWare/MemoJournal.app/Contents/Info.ts",
+    "src/SynWare/Portfolio.app/Contents/Info.ts",
+    "src/SynWare/Software.app/Contents/Info.ts",
+    "src/SynWare/SynCal.app/Contents/Info.ts"
+  ],
+  "skipped": []
+}

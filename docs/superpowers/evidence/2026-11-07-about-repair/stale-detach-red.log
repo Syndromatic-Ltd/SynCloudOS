@@ -1,0 +1,37 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-tab-transition-lifetime.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-tab-transition-lifetime.test.tsx (1 test | 1 failed) 99ms
+   × keeps the incoming tab mounted through transition settlement 98ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-tab-transition-lifetime.test.tsx > keeps the incoming tab mounted through transition settlement
+AssertionError: expected <p></p> to be <p></p> // Object.is equality
+
+- Expected
++ Received
+
+  <p>
+-   Third
++   Second
+  </p>
+
+ ❯ tests/runtime/nse-tab-transition-lifetime.test.tsx:49:39
+     47|   expect(tabs.second.isViewVisible).toBe(true);
+     48|   expect(tabs.second.content.element.isConnected).toBe(true);
+     49|   expect(tabs.second.content.element).toBe(secondElement);
+       |                                       ^
+     50|   await act(async () => { for (const done of finish.splice(0)) done();…
+     51|   expect(tabs.third.viewDidAppear).toHaveBeenCalledTimes(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  10:49:42
+   Duration  8.15s (transform 5.42s, setup 29ms, import 6.92s, tests 99ms, environment 966ms)
+

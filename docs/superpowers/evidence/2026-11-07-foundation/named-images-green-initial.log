@@ -1,0 +1,60 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-named-images.test.tsx tests/runtime/text-system-packed-consumer.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-named-images.test.tsx (4 tests | 4 failed) 8ms
+   × looks up cached, distinct NSImage navigation templates and returns null for unknown names 6ms
+   × draws an image-only button as a currentColor template with its accessible title 0ms
+   × draws named images in texturedRounded history segments and preserves disabled state 0ms
+   × draws named images in rounded history segments and preserves disabled state 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-named-images.test.tsx > looks up cached, distinct NSImage navigation templates and returns null for unknown names
+AssertionError: expected 'data:image/svg+xml,%3c!--%20SynCloudO…' to contain 'navigation-back.svg'
+
+Expected: "navigation-back.svg"
+Received: "data:image/svg+xml,%3c!--%20SynCloudOS%20%E2%80%94%20Copyright%20%C2%A9%202026%20Syndromatic%20Ltd.%20AGPL-3.0-or-later.%20NSImage.goBackTemplateName.%20Original%20NSEPreferencesToast%20geometry,%20unchanged.%20--%3e%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20width='17'%20height='17'%3e%3cpath%20d='M15%204%20L7%2012%20L15%2020'%20fill='none'%20stroke='white'%20stroke-width='3'%20stroke-linecap='round'%20stroke-linejoin='round'/%3e%3c/svg%3e"
+
+ ❯ tests/runtime/nse-named-images.test.tsx:37:20
+     35|   expect(NSEImage.named(NSEImage.goBackTemplateName)).toBe(back);
+     36|   expect(back.src).not.toBe(forward.src);
+     37|   expect(back.src).toContain("navigation-back.svg");
+       |                    ^
+     38|   expect(forward.src).toContain("navigation-forward.svg");
+     39|   expect(NSEImage.named("missing-image")).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/runtime/nse-named-images.test.tsx > draws an image-only button as a currentColor template with its accessible title
+ReferenceError: React is not defined
+ ❯ tests/runtime/nse-named-images.test.tsx:42:10
+     40| });
+     41| it("draws an image-only button as a currentColor template with its acc…
+     42|   render(<NSEButton title="Sections" bezelStyle="texturedRounded" imag…
+       |          ^
+     43|   const button = screen.getByRole("button", { name: "Sections" });
+     44|   const image = button.querySelector<HTMLElement>("[data-nse-image-tem…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/runtime/nse-named-images.test.tsx > draws named images in texturedRounded history segments and preserves disabled state
+ FAIL  tests/runtime/nse-named-images.test.tsx > draws named images in rounded history segments and preserves disabled state
+ReferenceError: React is not defined
+ ❯ tests/runtime/nse-named-images.test.tsx:51:10
+     49| });
+     50| it.each(["texturedRounded", "rounded"] as const)("draws named images i…
+     51|   render(<NSESegmentedControl aria-label="History" segmentStyle={segme…
+       |          ^
+     52|     { id: "back", label: "Back", image: NSEImage.named(NSEImage.goBack…
+     53|     { id: "forward", label: "Forward", image: NSEImage.named(NSEImage.…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 16 passed (20)
+   Start at  12:35:43
+   Duration  3.27s (transform 714ms, setup 42ms, import 1.16s, tests 2.88s, environment 899ms)
+

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import { MIFXEncoder } from "./MIFXEncoder";
 import { decodeMIFXFixedMessage, mifxFixedDataLength, type MIFXMessage } from "./MIFXMessage";
 
@@ -99,7 +100,8 @@ export class MIFXUniversalPacket {
     Object.freeze(this);
   }
 
-  static fromBytes(bytes: Uint8Array): MIFXUniversalPacket {
+  static fromBytes(data: NSEDataConvertible): MIFXUniversalPacket {
+    const bytes = NSEData.from(data).bytes;
     if (!(bytes instanceof Uint8Array)) throw new TypeError("UMP bytes must be a Uint8Array.");
     if (bytes.byteLength === 0 || bytes.byteLength % 4 !== 0)
       throw new RangeError("UMP byte length must be a nonzero multiple of four.");
@@ -113,7 +115,7 @@ export class MIFXUniversalPacket {
 
   static fromMIDI1Message(groupValue: number, message: MIFXMessage): MIFXUniversalPacket {
     const packetGroup = group(groupValue);
-    const encoded = MIFXEncoder.encode(message);
+    const encoded = MIFXEncoder.encode(message).bytes;
     if (encoded[0] === 0xf0) throw new TypeError("SysEx requires a data-message UMP packet outside the declared initial subset.");
     if (encoded.length > 3) throw new RangeError("MIDI 1 message does not fit the declared 32-bit UMP subset.");
     const status = encoded[0]!;
@@ -122,7 +124,7 @@ export class MIFXUniversalPacket {
     return new MIFXUniversalPacket([word]);
   }
 
-  toBytes(): Uint8Array {
+  toBytes(): NSEData {
     const bytes = new Uint8Array(this.words.length * 4);
     for (let index = 0; index < this.words.length; index += 1) {
       const word = this.words[index]!;
@@ -132,7 +134,7 @@ export class MIFXUniversalPacket {
       bytes[offset + 2] = word >>> 8;
       bytes[offset + 3] = word;
     }
-    return bytes;
+    return NSEData.from(bytes);
   }
 
   toMIDI1Message(): MIFXMessage {

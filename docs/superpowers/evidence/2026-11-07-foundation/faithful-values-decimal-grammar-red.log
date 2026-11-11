@@ -1,0 +1,29 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/foundation-faithful-decimal.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/foundation-faithful-decimal.test.ts (8 tests | 1 failed) 7ms
+   × accepts decimal strings with an omitted leading or trailing zero 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/foundation-faithful-decimal.test.ts > accepts decimal strings with an omitted leading or trailing zero
+TypeError: Invalid decimal string.
+ ❯ NSEDecimalNumber.fromString src/Foundation/NSEDecimalNumber.ts:115:19
+    113|   static fromString(value: string): NSEDecimalNumber {
+    114|     const m = /^([+-]?)(\d+)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/.exec(val…
+    115|     if (!m) throw new TypeError("Invalid decimal string.");
+       |                   ^
+    116|     const exponent = Number(m[4] ?? 0) - (m[3]?.length ?? 0);
+    117|     return NSEDecimalNumber.#make(BigInt(`${m[1]}${m[2]}${m[3] ?? ""}`…
+ ❯ tests/runtime/foundation-faithful-decimal.test.ts:73:27
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  19:19:21
+   Duration  173ms (transform 32ms, setup 27ms, import 17ms, tests 7ms, environment 0ms)
+

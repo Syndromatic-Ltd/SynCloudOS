@@ -33,7 +33,7 @@ import {
   type VortexLayerProps,
   type VortexImages,
 } from "../../../NSE/Chronosphere/hostComposition";
-import { useSynWare } from "../SynWareContext";
+import { useSCOS } from "../scos/useSCOS"
 import type { AppImageClient } from "../appEnvironmentClientTypes";
 
 /** App-facing preparation retains the full scoped image client. */
@@ -51,7 +51,7 @@ export interface ChronosphereProps<TPrepared = unknown, TDetail = unknown> exten
 
 /** The app mount remains the authority for every service supplied to NSE. */
 function useAppPresentationEnvironment(): ChronosphereEnvironment {
-  const app = useSynWare();
+  const app = useSCOS();
   return useMemo(() => Object.freeze({
     signal: app.signal,
     images: app.images,
@@ -63,7 +63,7 @@ function useAppPresentationEnvironment(): ChronosphereEnvironment {
 
 export function Chronosphere<TPrepared = unknown, TDetail = unknown>({ view = ChronosphereVortexView as unknown as ChronosphereViewComponent<TPrepared, TDetail>, ...props }: ChronosphereProps<TPrepared, TDetail>) {
   const environment = useAppPresentationEnvironment();
-  const { images } = useSynWare();
+  const { images } = useSCOS();
   const presentation = useMemo<NSEViewComponent<TPrepared, TDetail>>(() => {
     const View = view;
     return Object.assign(

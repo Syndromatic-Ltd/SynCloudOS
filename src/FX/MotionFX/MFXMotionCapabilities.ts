@@ -48,6 +48,7 @@ export type MFXSensor =
   | "historical";
 export type MFXMotionCapabilities = Readonly<Record<MFXSensor, MFXCapability>>;
 export interface MFXMotionAuthorization {
+  readonly authorizationStatus: MFXAvailability;
   requestAuthorization(): Promise<MFXAvailability>;
 }
 export const MFXSensors: readonly MFXSensor[] = Object.freeze([

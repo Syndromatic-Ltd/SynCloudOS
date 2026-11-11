@@ -35,7 +35,7 @@ export function NSEPopoverWindowView(props: NSEWindowViewProps) {
       dirty={props.dirty}
       dispatchCommand={props.dispatchCommand}
       controls={["close"]}
-      appearanceRecipe="window.standard.head.solid"
+
     />
   ) : null;
   const outsideDismiss = !props.record.pinned;
@@ -43,7 +43,7 @@ export function NSEPopoverWindowView(props: NSEWindowViewProps) {
     <NSEWindowView
       {...props}
       className="nse-window-view--popover"
-      appearanceRecipe="window.popover.frame"
+
       accessibleName={titled ? undefined : props.record.title}
       titleBar={titleBar}
       outsideDismiss={outsideDismiss}

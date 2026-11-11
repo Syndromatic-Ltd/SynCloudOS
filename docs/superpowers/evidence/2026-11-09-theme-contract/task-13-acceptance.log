@@ -1,0 +1,41 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/theme-bundles.test.ts tests/runtime/theme-bundle-loading.test.ts tests/runtime/theme-loading.test.tsx tests/runtime/theme-navigation.test.tsx tests/runtime/nse-theme-contract-drift.test.tsx tests/nse/appearance/metal-thumb-appearance.test.tsx tests/runtime/nse-theme-menu-hook-coverage.test.tsx tests/runtime/application-stage-app-menu.test.tsx tests/runtime/nse-appearance-contract.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: Window's getComputedStyle() method: with pseudo-elements
+Not implemented: Window's getComputedStyle() method: with pseudo-elements
+ ❯ tests/runtime/nse-appearance-contract.test.tsx (9 tests | 1 failed) 248ms
+     × projects the complete payload through canonical portals 138ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-appearance-contract.test.tsx > NSE appearance composition > projects the complete payload through canonical portals
+AssertionError: expected null to be 'com.syndromatic.atmo' // Object.is equality
+
+- Expected:
+"com.syndromatic.atmo"
+
++ Received:
+null
+
+ ❯ expectCompleteProjection tests/runtime/nse-appearance-contract.test.tsx:109:40
+    107| function expectCompleteProjection(element: Element) {
+    108|   for (const [name, value] of Object.entries(completeProjection)) {
+    109|     expect(element.getAttribute(name)).toBe(value);
+       |                                        ^
+    110|   }
+    111| }
+ ❯ tests/runtime/nse-appearance-contract.test.tsx:260:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 8 passed (9)
+      Tests  1 failed | 806 passed (807)
+   Start at  00:00:22
+   Duration  21.30s (transform 9.95s, setup 116ms, import 20.75s, tests 11.10s, environment 7.48s)

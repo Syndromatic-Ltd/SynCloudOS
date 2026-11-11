@@ -41,5 +41,4 @@ export type {
   SynCloudOSHostSeedPort,
   SynCloudOSHostServiceInstallPort,
   SynCloudOSHostTerminalSeedReservation,
-  SynCloudOSHostWebspringInstallPort,
 } from "../SynCloudOS/HostContributions/hostContribution";

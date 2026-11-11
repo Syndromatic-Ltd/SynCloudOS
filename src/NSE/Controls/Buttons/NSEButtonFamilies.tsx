@@ -18,141 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { forwardRef, type ReactNode } from "react";
+
+import type { ReactNode } from "react";
 import { classes, sizedControlStyle } from "../Core/nseControlsShared";
-import { NSEPushButton, type NSEButtonTone, type NSEPushButtonProps } from "./NSEButtons";
-import { NSEToolbar, type NSEToolbarProps } from "../../Toolbars";
-import { NSERadioGroup, type NSERadioGroupProps, type NSERadioOption } from "../Fields/NSEFields";
-import { NSESpinner } from "../../Progress/NSEProgress";
-import type { NSESelectableOption } from "../Selection/NSESelectors";
-
-function resolveCaption(children: ReactNode, caption?: ReactNode, label?: ReactNode, fallback?: ReactNode) {
-  return children ?? caption ?? label ?? fallback;
-}
-
-function renderControlIcon(icon?: ReactNode, src?: string) {
-  const iconSrc = src ?? (typeof icon === "string" ? icon : undefined);
-  if (iconSrc) return <img src={iconSrc} alt="" draggable={false} />;
-  return icon ?? null;
-}
-
-function renderSelectableOption(option: NSESelectableOption) {
-  const icon = renderControlIcon(option.icon, option.src);
-  const label = option.label ?? option.caption ?? option.value;
-  if (!icon) return label;
-
-  return (
-    <span className="nse-extended-option">
-      <span className="nse-extended-option-icon">{icon}</span>
-      <span className="nse-extended-option-label">{label}</span>
-    </span>
-  );
-}
-
-export interface NSEActivityButtonProps extends Omit<NSEPushButtonProps, "active" | "children" | "loading" | "loadingLabel"> {
-  active?: boolean;
-  caption?: ReactNode;
-  children?: ReactNode;
-  spinnerLabel?: string;
-}
-
-export const NSEActivityButton = forwardRef<HTMLButtonElement, NSEActivityButtonProps>(function NSEActivityButton(
-  {
-    active = false,
-    caption,
-    children,
-    spinnerLabel = "Working",
-    className = "",
-    icon,
-    iconPosition = "right",
-    "aria-busy": ariaBusy,
-    ...props
-  },
-  ref
-) {
-  return (
-    <NSEPushButton
-      ref={ref}
-      className={classes("nse-extended-activity-button", className)}
-      data-active={active ? "true" : "false"}
-      icon={active ? <NSESpinner size="small" tone="light" label={spinnerLabel} /> : icon}
-      iconPosition={active ? "right" : iconPosition}
-      aria-busy={ariaBusy ?? (active || undefined)}
-      {...props}
-    >
-      {resolveCaption(children, caption)}
-    </NSEPushButton>
-  );
-});
-
-export interface NSENotificationButtonProps extends Omit<NSEPushButtonProps, "children"> {
-  caption?: ReactNode;
-  label?: ReactNode;
-  children?: ReactNode;
-  variant?: "default" | "affirmative" | "negative" | "alternate";
-}
-
-// Notification button tones:
-// default = medium, alternate = dark,
-// affirmative = green, negative = red. NSE has no gold tone, so Onyx's alternate-gold
-// collapses onto `dark` (its Heritage-faithful mapping).
-const NOTIFICATION_VARIANT_TONES = {
-  default: "medium",
-  affirmative: "affirmative",
-  negative: "negative",
-  alternate: "dark"
-} as const satisfies Record<NonNullable<NSENotificationButtonProps["variant"]>, NSEButtonTone>;
-
-export const NSENotificationButton = forwardRef<HTMLButtonElement, NSENotificationButtonProps>(
-  function NSENotificationButton(
-    {
-      caption,
-      label,
-      children,
-      variant = "default",
-      tone,
-      className = "",
-      ...props
-    },
-    ref
-  ) {
-    return (
-      <NSEPushButton
-        ref={ref}
-        className={classes("nse-extended-notification-button", className)}
-        tone={tone ?? NOTIFICATION_VARIANT_TONES[variant]}
-        data-variant={variant}
-        {...props}
-      >
-        {resolveCaption(children, caption, label)}
-      </NSEPushButton>
-    );
-  }
-);
-
-export interface NSEButtonHeaderProps extends Omit<NSEPushButtonProps, "children" | "content"> {
-  caption?: ReactNode;
-  content?: ReactNode;
-  children?: ReactNode;
-}
-
-export const NSEButtonHeader = forwardRef<HTMLButtonElement, NSEButtonHeaderProps>(function NSEButtonHeader(
-  {
-    caption,
-    content,
-    children,
-    tone = "dark",
-    className = "",
-    ...props
-  },
-  ref
-) {
-  return (
-    <NSEPushButton ref={ref} className={classes("nse-extended-button-header", className)} tone={tone} {...props}>
-      {resolveCaption(children, caption, content)}
-    </NSEPushButton>
-  );
-});
+import { NSEToolbarView, type NSEToolbarViewProps } from "../../Toolbars/NSEToolbarView";
 
 /** A capsule control's size: NSControl's regular or small, or custom when a
  * height is given. The skin draws every part from the one band height, so
@@ -168,65 +37,11 @@ function capsuleSizeAttribute({ controlSize = "regular", height }: NSECapsuleSiz
   return height !== undefined ? "custom" : controlSize === "small" ? "small" : undefined;
 }
 
-export interface NSEToolButtonProps extends Omit<NSEPushButtonProps, "children" | "icon">, NSECapsuleSizing {
-  caption?: ReactNode;
-  children?: ReactNode;
-  icon?: ReactNode;
-  src?: string;
-  label?: string;
-  showLabel?: boolean;
-  /** An explicit width (CSS pixels, or any CSS length). */
-  width?: number | string;
-}
-
-export const NSEToolButton = forwardRef<HTMLButtonElement, NSEToolButtonProps>(function NSEToolButton(
-  {
-    caption,
-    children,
-    icon,
-    src,
-    label,
-    showLabel,
-    className = "",
-    tone = "dark",
-    "aria-label": ariaLabel,
-    title,
-    controlSize,
-    height,
-    width,
-    style,
-    ...props
-  },
-  ref
-) {
-  const visibleLabel = resolveCaption(children, caption);
-  const accessibleLabel = ariaLabel ?? label ?? (typeof visibleLabel === "string" ? visibleLabel : "Tool button");
-  const renderedIcon = renderControlIcon(icon, src);
-  // A tool button with no icon shows its caption; otherwise it would draw an
-  // empty capsule. With an icon, the caption shows only when asked for.
-  const showsLabel = showLabel ?? !renderedIcon;
-
-  return (
-    <NSEPushButton
-      ref={ref}
-      className={classes("nse-extended-tool-button", className)}
-      tone={tone}
-      icon={renderedIcon}
-      aria-label={accessibleLabel}
-      title={title ?? accessibleLabel}
-      data-size={capsuleSizeAttribute({ controlSize, height })}
-      style={sizedControlStyle(style, height, width)}
-      {...props}
-    >
-      {showsLabel && visibleLabel ? visibleLabel : <span className="nse-control-visually-hidden">{accessibleLabel}</span>}
-    </NSEPushButton>
-  );
-});
-
-export type NSEToolButtonGroupProps = Omit<Extract<NSEToolbarProps, { readonly composition: "children" }>, "composition"> & NSECapsuleSizing & {
+export type NSEToolButtonGroupProps = Omit<Extract<NSEToolbarViewProps, { readonly composition: "children" }>, "composition"> & NSECapsuleSizing & {
   label?: string;
 };
 
+/** @internal The joined tool-button band: the font panel's tool groups and NSESegmentedControl's textured segments. */
 export function NSEToolButtonGroup({
   label,
   position = "inline",
@@ -239,46 +54,20 @@ export function NSEToolButtonGroup({
   ...props
 }: NSEToolButtonGroupProps) {
   return (
-    <NSEToolbar
+    <NSEToolbarView
       composition="children"
       className={classes("nse-extended-tool-button-group", className)}
       position={position}
       grouped={grouped}
       aria-label={label}
       data-size={capsuleSizeAttribute({ controlSize, height })}
+      data-nse-type="tool-button-group"
+      data-nse-control-size={controlSize ?? "regular"}
+      data-nse-height={height === undefined ? undefined : String(height)}
       style={sizedControlStyle(style, height, undefined)}
       {...props}
     >
       {children}
-    </NSEToolbar>
-  );
-}
-
-export interface NSERadioToolButtonGroupProps extends Omit<NSERadioGroupProps, "options">, NSECapsuleSizing {
-  options: NSESelectableOption[];
-}
-
-export function NSERadioToolButtonGroup({
-  options,
-  controlSize,
-  height,
-  className = "",
-  style,
-  ...props
-}: NSERadioToolButtonGroupProps) {
-  const radioOptions: NSERadioOption[] = options.map((option) => ({
-    value: option.value,
-    label: renderSelectableOption(option),
-    disabled: option.disabled
-  }));
-
-  return (
-    <NSERadioGroup
-      className={classes("nse-extended-radio-tool-button-group", className)}
-      options={radioOptions}
-      data-size={capsuleSizeAttribute({ controlSize, height })}
-      style={sizedControlStyle(style, height, undefined)}
-      {...props}
-    />
+    </NSEToolbarView>
   );
 }

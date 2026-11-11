@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SynCloudOSLifecycleRecord } from "../../SynCloudOS/fxRuntimeContracts";
 import { AUFXAudioNode } from "./AUFXAudioNode";
 import { AUFXAudioPCMBuffer } from "./AUFXAudioPCMBuffer";
 import { createAUFXRealtimeNotifier, registerAUFXRealtimeNode, type AUFXRenderEvent } from "./AUFXAudioRenderPlan";
@@ -25,13 +26,14 @@ export type AUFXAudioScheduleResult = Readonly<{ status: "rendered"; endSampleTi
 export interface AUFXAudioSchedule { readonly completed: Promise<AUFXAudioScheduleResult>; cancel(): void; }
 type ScheduledBuffer = { id: number; buffer: AUFXAudioPCMBuffer | null; planar: readonly Float32Array[] | null; time: number; loop: boolean; completed: boolean; finish(result: AUFXAudioScheduleResult): void };
 export class AUFXAudioPlayerNode extends AUFXAudioNode {
+  readonly #lifecycle = new SynCloudOSLifecycleRecord({ kind: "AUFXAudioPlayerNode" });
   #schedule: ScheduledBuffer[] = [];
   #disposed = false;
   #nextScheduleId = 1;
   #positionRevision = 0;
   #retainForTimeline = false;
   retainTimelineSchedules(): () => void {
-    this.assertActive();
+    this.assertActive("retainTimelineSchedules");
     if (this.#retainForTimeline) throw new DOMException("Audio timeline schedules already have an owner.", "InvalidStateError");
     this.#retainForTimeline = true; this.#touch();
     let released = false;
@@ -43,7 +45,7 @@ export class AUFXAudioPlayerNode extends AUFXAudioNode {
   }
   readonly #realtime = createAUFXRealtimeNotifier();
   get currentTime() { return this.#position; }
-  private assertActive() { if (this.#disposed) throw new Error("Audio player is disposed."); }
+  private assertActive(operation: string) { if (this.#disposed) throw this.#lifecycle.error({ code: "AUFX_AUDIO_PLAYER_NODE_DISPOSED", operation: operation }); }
   #playing = false;
   #position = 0;
   #rate = 1;
@@ -61,10 +63,11 @@ export class AUFXAudioPlayerNode extends AUFXAudioNode {
     else if (event.type === "complete") this.#schedule.find(item => item.id === event.scheduleId)?.finish({ status: "rendered", endSampleTime: event.endSampleTime });
   }
   scheduleBuffer(buffer: AUFXAudioPCMBuffer, atTime = this.#position, loop = false, completion?: (result: AUFXAudioScheduleResult) => void): AUFXAudioSchedule {
+    this.assertActive("scheduleBuffer");
     return this.scheduleSegment(buffer, 0, buffer.frameLength, atTime, loop, completion);
   }
   scheduleSegment(buffer: AUFXAudioPCMBuffer, startFrame: number, frameCount: number, atTime = this.#position, loop = false, completion?: (result: AUFXAudioScheduleResult) => void): AUFXAudioSchedule {
-    this.assertActive();
+    this.assertActive("scheduleSegment");
     const retained = this.#schedule.reduce((sum, item) => sum + (item.buffer?.frameLength ?? 0) * this.format.channelCount, 0);
     if (!this.format.isEqual(buffer.format) || !Number.isSafeInteger(startFrame) || !Number.isSafeInteger(frameCount) || startFrame < 0 || frameCount <= 0 || startFrame + frameCount > buffer.frameLength || !Number.isFinite(atTime) || atTime < 0 || (atTime + frameCount / this.format.sampleRate) * this.format.sampleRate > Number.MAX_SAFE_INTEGER || (!loop && atTime + frameCount / this.format.sampleRate <= this.#position) || typeof loop !== "boolean" || this.#schedule.length >= 256 || retained + frameCount * this.format.channelCount > 16777216) throw new RangeError("Invalid scheduled segment or scheduling budget exceeded.");
     const owned = new AUFXAudioPCMBuffer(this.format, frameCount); owned.frameLength = frameCount;
@@ -82,14 +85,14 @@ export class AUFXAudioPlayerNode extends AUFXAudioNode {
     } };
     this.#schedule.push(item); this.#touch(); return Object.freeze({ completed, cancel: () => item.finish({ status: "cancelled" }) });
   }
-  play() { this.assertActive(); this.#playing = true; this.#touch(); }
-  pause() { this.assertActive(); this.#playing = false; this.#touch(); }
+  play() { this.assertActive("play"); this.#playing = true; this.#touch(); }
+  pause() { this.assertActive("pause"); this.#playing = false; this.#touch(); }
   stop() { this.#playing = false; this.#position = 0; for (const item of [...this.#schedule]) item.finish({ status: "cancelled" }); this.#touch(true); }
-  seek(seconds: number) { this.assertActive(); if (!Number.isFinite(seconds) || seconds < 0 || seconds * this.format.sampleRate > Number.MAX_SAFE_INTEGER) throw new RangeError("Invalid playback position."); this.#position = seconds; if (!this.#retainForTimeline) for (const item of [...this.#schedule]) if (!item.loop && item.time + item.buffer!.frameLength / this.format.sampleRate <= seconds) item.finish({ status: "cancelled" }); this.#touch(true); }
+  seek(seconds: number) { this.assertActive("seek"); if (!Number.isFinite(seconds) || seconds < 0 || seconds * this.format.sampleRate > Number.MAX_SAFE_INTEGER) throw new RangeError("Invalid playback position."); this.#position = seconds; if (!this.#retainForTimeline) for (const item of [...this.#schedule]) if (!item.loop && item.time + item.buffer!.frameLength / this.format.sampleRate <= seconds) item.finish({ status: "cancelled" }); this.#touch(true); }
   override reset() { this.stop(); }
-  override dispose() { if (this.#disposed) return; this.#disposed = true; this.stop(); }
+  override dispose() { if (this.#disposed) return; this.#lifecycle.markDisposed("explicit"); this.#disposed = true; this.stop(); }
   render(_inputs: readonly AUFXAudioPCMBuffer[], frames: number, _startTime: number, signal?: AbortSignal) {
-    this.assertActive(); const output = this.buffer(frames); if (!this.#playing) return output;
+    this.assertActive("render"); const output = this.buffer(frames); if (!this.#playing) return output;
     for (let frame = 0; frame < frames; frame++) {
       if (frame % 1024 === 0) signal?.throwIfAborted();
       const time = this.#position + frame * this.#rate / this.format.sampleRate;

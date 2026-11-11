@@ -18,11 +18,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../Foundation/NSEData";
+import type { OpenDocumentContentsRequest } from "./documentTypes";
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { CommandSystem } from "../Commands/commandTypes";
 import type { OperationCoordinator } from "../Operations";
 import type { SynCloudOSRuntimeId } from "../Runtime/runtimeInstanceTypes";
 import type { RuntimeDisposalPreparation, RuntimeDisposalPrepareContext } from "../Runtime/disposalTypes";
 import type { UndoManagerRegistry } from "../Undo";
+import { DocumentActivityObservations, type DocumentActivitySource } from "./DocumentActivityObservations";
 import {
   ApplicationDocument,
   type ApplicationDocumentCloseTransaction,
@@ -122,6 +126,11 @@ export interface DocumentControllerDependencies {
   readonly observeError?: (error: unknown, context: string) => void;
   readonly resourceLifecycle?: (document: ApplicationDocument<unknown, unknown>, signal?: AbortSignal) => Promise<DocumentResourceLifecycle>;
   readonly transformAdapter?: (adapter: DocumentStorageAdapter) => DocumentStorageAdapter;
+  /**
+   * A built-in adapter for a location no registered adapter supports, or null. It is registered on
+   * first use and gives way to any adapter registered later that supports the same location.
+   */
+  readonly defaultAdapterFor?: (location: DocumentLocation) => DocumentStorageAdapter | null;
 }
 
 
@@ -438,9 +447,13 @@ function awaitDocumentSignal<T>(value: Promise<T>, signal?: AbortSignal): Promis
 }
 
 export class DocumentController {
+  readonly #activity = new DocumentActivityObservations();
+  /** Read-only stages, including unpublished and retired document work. */
+  get activity(): DocumentActivitySource { return this.#activity.source; }
   readonly #types = new DocumentTypeRegistry();
   readonly #adapters = new Map<string, DocumentStorageAdapter>();
   readonly #adapterGenerations = new Map<string, number>();
+  readonly #defaultAdapterIds = new Set<string>();
   #nextAdapterGeneration = 0;
   readonly #documents = new Map<string, ApplicationDocument<unknown, unknown>>();
   readonly #documentIdsByLocation = new Map<string, string>();
@@ -509,7 +522,8 @@ export class DocumentController {
     const creating = type.creatingApplicationId;
     const opening = type.openingApplicationIds;
     if (!creating && !opening) return true;
-    return creating === applicationId || Boolean(opening?.includes(applicationId));
+    return normalizeBundleIdentifier(creating) === normalizeBundleIdentifier(applicationId) ||
+      Boolean(opening?.some((owner) => normalizeBundleIdentifier(owner) === normalizeBundleIdentifier(applicationId)));
   }
   hasAdapter(adapterId: string): boolean { return this.#adapters.has(adapterId); }
   registerType<TModel, TSerialized = TModel>(type: DocumentType<TModel, TSerialized>): DocumentTypeRegistration {
@@ -539,7 +553,7 @@ export class DocumentController {
     kind: DocumentReferenceLease["kind"],
   ): DocumentReferenceLease {
     const document = this.#requireOpenDocument(documentId);
-    if (document.applicationId !== applicationId) {
+    if (normalizeBundleIdentifier(document.applicationId) !== normalizeBundleIdentifier(applicationId)) {
       throw new DocumentUnavailableError("A document reference lease may only be issued to its owning application.", { retryable: false });
     }
     const lease = Object.freeze({
@@ -562,12 +576,12 @@ export class DocumentController {
     const record = this.#documentReferenceLeases.get(lease);
     return Boolean(record && !record.released && (!kind || record.lease.kind === kind) &&
       this.#documents.get(record.document.id) === record.document &&
-      record.document.applicationId === record.lease.applicationId);
+      normalizeBundleIdentifier(record.document.applicationId) === normalizeBundleIdentifier(record.lease.applicationId));
   }
 
   hasActiveDocumentOwnerLease(documentId: string, applicationId: string): boolean {
     return [...this.#documentReferenceLeases.values()].some((record) => !record.released && record.owner &&
-      record.lease.documentId === documentId && record.lease.applicationId === applicationId &&
+      record.lease.documentId === documentId && normalizeBundleIdentifier(record.lease.applicationId) === normalizeBundleIdentifier(applicationId) &&
       this.#documents.get(record.document.id) === record.document);
   }
 
@@ -615,7 +629,7 @@ export class DocumentController {
     applicationId: string,
   ): readonly TerminalProviderOperationSnapshot<TState, TResult>[] {
     return Object.freeze([...this.#terminalProviderOperations.values()]
-      .filter((record) => record.applicationId === applicationId)
+      .filter((record) => normalizeBundleIdentifier(record.applicationId) === normalizeBundleIdentifier(applicationId))
       .sort((left, right) => left.reservationSequence - right.reservationSequence)
       .map((record) => this.#terminalProviderOperationSnapshot(record) as TerminalProviderOperationSnapshot<TState, TResult>));
   }
@@ -633,8 +647,8 @@ export class DocumentController {
     }
     const preferredDocumentId = request.preferredDocumentId?.trim() || null;
     const candidates = [...this.#terminalProviderOperations.values()]
-      .filter((record) => record.applicationId === claimedApplicationId && record.serviceId === serviceId && record.claim === null &&
-        this.#documents.get(record.documentId) === record.document && record.document.applicationId === claimedApplicationId)
+      .filter((record) => normalizeBundleIdentifier(record.applicationId) === normalizeBundleIdentifier(claimedApplicationId) && record.serviceId === serviceId && record.claim === null &&
+        this.#documents.get(record.documentId) === record.document && normalizeBundleIdentifier(record.document.applicationId) === normalizeBundleIdentifier(claimedApplicationId))
       .sort((left, right) => {
         const leftPreferred = left.documentId === preferredDocumentId ? 0 : 1;
         const rightPreferred = right.documentId === preferredDocumentId ? 0 : 1;
@@ -659,7 +673,7 @@ export class DocumentController {
       throw new TypeError("Terminal provider operation identities must not be empty.");
     }
     const document = this.#requireOpenDocument(documentId);
-    if (document.applicationId !== applicationId) {
+    if (normalizeBundleIdentifier(document.applicationId) !== normalizeBundleIdentifier(applicationId)) {
       throw new DocumentUnavailableError("A terminal provider operation may only reserve its owning application document.", { retryable: false });
     }
     const key = this.#terminalProviderOperationKey(applicationId, documentId);
@@ -772,7 +786,7 @@ export class DocumentController {
 
   applicationDocumentIds(applicationId: string): readonly string[] {
     return Object.freeze([...this.#documents.values()]
-      .filter((document) => document.applicationId === applicationId)
+      .filter((document) => normalizeBundleIdentifier(document.applicationId) === normalizeBundleIdentifier(applicationId))
       .map(({ id }) => id));
   }
 
@@ -783,7 +797,7 @@ export class DocumentController {
     this.assertApplicationAdmissionAllowed(applicationId);
     return Object.freeze({
       applicationId,
-      epoch: this.#applicationEpochs.get(applicationId) ?? 0,
+      epoch: this.#applicationEpochs.get(normalizeBundleIdentifier(applicationId)) ?? 0,
       token: `application-mutation:${this.dependencies.environment.randomUUID()}`,
     });
   }
@@ -792,15 +806,15 @@ export class DocumentController {
     if (applicationId === null || applicationId === undefined) return;
     applicationId = applicationId.trim();
     if (!applicationId) throw new TypeError("Application IDs must not be empty.");
-    if (this.#applicationCloseLeases.has(applicationId)) {
+    if (this.#applicationCloseLeases.has(normalizeBundleIdentifier(applicationId))) {
       throw new DocumentUnavailableError(`Application "${applicationId}" membership is reserved by close.`, { retryable: true });
     }
   }
 
   validateApplicationMutation(ticket: ApplicationSessionMutationTicket | null): void {
     if (!ticket) return;
-    if (this.#applicationCloseLeases.has(ticket.applicationId) ||
-        (this.#applicationEpochs.get(ticket.applicationId) ?? 0) !== ticket.epoch) {
+    if (this.#applicationCloseLeases.has(normalizeBundleIdentifier(ticket.applicationId)) ||
+        (this.#applicationEpochs.get(normalizeBundleIdentifier(ticket.applicationId)) ?? 0) !== ticket.epoch) {
       throw new DocumentUnavailableError(
         `Application "${ticket.applicationId}" membership changed while the operation was pending.`,
         { retryable: true },
@@ -812,29 +826,29 @@ export class DocumentController {
     applicationId = applicationId.trim();
     if (!applicationId) throw new TypeError("Application IDs must not be empty.");
     this.assertApplicationAdmissionAllowed(applicationId);
-    this.#applicationEpochs.set(applicationId, (this.#applicationEpochs.get(applicationId) ?? 0) + 1);
+    this.#applicationEpochs.set(normalizeBundleIdentifier(applicationId), (this.#applicationEpochs.get(normalizeBundleIdentifier(applicationId)) ?? 0) + 1);
   }
 
   acquireApplicationCloseLease(applicationId: string): ApplicationSessionCloseLease {
     applicationId = applicationId.trim();
     if (!applicationId) throw new TypeError("Application IDs must not be empty.");
-    if (this.#applicationCloseLeases.has(applicationId)) {
+    if (this.#applicationCloseLeases.has(normalizeBundleIdentifier(applicationId))) {
       throw new DocumentUnavailableError(`Application "${applicationId}" already has a close in progress.`, { retryable: true });
     }
-    const epoch = (this.#applicationEpochs.get(applicationId) ?? 0) + 1;
-    this.#applicationEpochs.set(applicationId, epoch);
+    const epoch = (this.#applicationEpochs.get(normalizeBundleIdentifier(applicationId)) ?? 0) + 1;
+    this.#applicationEpochs.set(normalizeBundleIdentifier(applicationId), epoch);
     const lease = Object.freeze({
       applicationId,
       epoch,
       token: `application-close:${this.dependencies.environment.randomUUID()}`,
     });
-    this.#applicationCloseLeases.set(applicationId, lease);
+    this.#applicationCloseLeases.set(normalizeBundleIdentifier(applicationId), lease);
     return lease;
   }
 
   async settleApplicationAdmissions(lease: ApplicationSessionCloseLease): Promise<void> {
     this.#requireApplicationCloseLease(lease);
-    const pending = [...(this.#applicationAdmissions.get(lease.applicationId) ?? [])];
+    const pending = [...(this.#applicationAdmissions.get(normalizeBundleIdentifier(lease.applicationId)) ?? [])];
     if (pending.length > 0) await Promise.allSettled(pending);
     this.#requireApplicationCloseLease(lease);
   }
@@ -850,8 +864,8 @@ export class DocumentController {
   }
 
   releaseApplicationCloseLease(lease: ApplicationSessionCloseLease): void {
-    if (this.#applicationCloseLeases.get(lease.applicationId) === lease) {
-      this.#applicationCloseLeases.delete(lease.applicationId);
+    if (this.#applicationCloseLeases.get(normalizeBundleIdentifier(lease.applicationId)) === lease) {
+      this.#applicationCloseLeases.delete(normalizeBundleIdentifier(lease.applicationId));
     }
   }
 
@@ -911,13 +925,30 @@ export class DocumentController {
     ));
   }
 
+  openDocument<TModel, TSerialized = TModel>(request: OpenDocumentContentsRequest): Promise<ApplicationDocument<TModel, TSerialized>>;
+  openDocument<TModel, TSerialized = TModel>(request: OpenDocumentRequest): Promise<ApplicationDocument<TModel, TSerialized>>;
   async openDocument<TModel, TSerialized = TModel>(
-    request: OpenDocumentRequest,
+    request: OpenDocumentRequest | OpenDocumentContentsRequest,
   ): Promise<ApplicationDocument<TModel, TSerialized>> {
+    if ("withContentsOf" in request) {
+      const ticket = this.captureApplicationMutation(request.applicationId);
+      return this.#trackApplicationAdmission(ticket, this.#operate("documents.open", request, request.signal, async () => {
+        throwIfDocumentAborted(request.signal);
+        const admission = this.#types.admission(request.typeId);
+        const type = admission.type as DocumentType<TModel, TSerialized>;
+        if (!this.isTypeAvailableToApplication(type.id, request.applicationId)) throw new DocumentUnavailableError("The application cannot open this document type.", { retryable: false });
+        if (!type.readFromData) throw new DocumentSchemaError(type.id, "The document type must implement readFromData to open incoming file contents.");
+        const data = await NSEData.read(request.withContentsOf);
+        const model = await type.readFromData(data, { typeId: type.id, schemaVersion: type.schemaVersion });
+        throwIfDocumentAborted(request.signal);
+        if (!this.#types.isCurrent(admission)) throw new DocumentAbortError("The incoming document type changed while reading.");
+        return this.#newDocumentCore<TModel, TSerialized>({ typeId: type.id, applicationId: request.applicationId, initialModel: model, activate: request.activate, signal: request.signal }, ticket);
+      }));
+    }
     const locationKey = canonicalDocumentLocation(request.location);
     const liveOwner = this.#documents.get(this.#documentIdsByLocation.get(locationKey) ?? "")?.applicationId;
     const closedOwner = this.#closedLocationOwners.get(locationKey);
-    if (this.#closedLocationOwners.has(locationKey) && request.applicationId && closedOwner !== request.applicationId) {
+    if (this.#closedLocationOwners.has(locationKey) && request.applicationId && normalizeBundleIdentifier(closedOwner) !== normalizeBundleIdentifier(request.applicationId)) {
       throw new DocumentUnavailableError("A closed document location is owned by another application.", { retryable: false });
     }
     const ticket = this.captureApplicationMutation(
@@ -1289,7 +1320,7 @@ export class DocumentController {
    * not an AppSDK capability. */
   discardRestorationProjection(documentId: string, applicationId: string): boolean {
     const document = this.#documents.get(documentId);
-    if (!document || document.applicationId !== applicationId || document.documentKind !== "projection" ||
+    if (!document || normalizeBundleIdentifier(document.applicationId) !== normalizeBundleIdentifier(applicationId) || document.documentKind !== "projection" ||
         document.state !== "clean" || document.hasUnsavedChanges || document.location !== null ||
         document.windowControllerIds.length > 0 || document.hasTerminalReconciliationLease ||
         this.hasActiveDocumentOwnerLease(documentId, applicationId)) return false;
@@ -1588,7 +1619,7 @@ export class DocumentController {
         if (this.dependencies.recovery.dispose) {
           const error = await settleBoundedDocumentCleanup(
             "document recovery disposal",
-            () => this.dependencies.recovery.dispose!(),
+            () => this.#activity.track("cleanup", () => this.dependencies.recovery.dispose!()),
             cleanupTimeoutMs(),
             cleanupTimers,
           );
@@ -1733,7 +1764,7 @@ export class DocumentController {
     this.validateApplicationMutation(admissionTicket);
     const existing = this.#documents.get(entry.documentId);
     if (existing) {
-      if (existing.applicationId !== (entry.applicationId ?? null) ||
+      if (normalizeBundleIdentifier(existing.applicationId) !== normalizeBundleIdentifier(entry.applicationId ?? null) ||
           existing.type.id !== entry.typeId ||
           !this.#sameOptionalLocation(existing.location, entry.location)) {
         throw new DocumentRequestedIdConflictError(entry.documentId);
@@ -1837,7 +1868,8 @@ export class DocumentController {
 
   async #loadRecoveryRecord(entry: RestorableDocument): Promise<DocumentRecoveryRecord> {
     if (entry.recovery.kind !== "record") throw new DocumentRecoveryCorruptError(entry.documentId);
-    const record = await this.dependencies.recovery.read(entry.recovery.recoveryId);
+    const recoveryId = entry.recovery.recoveryId;
+    const record = await this.#activity.track("recovery", () => this.dependencies.recovery.read(recoveryId));
     if (!record) throw new DocumentRecoveryMissingError(entry.recovery.recoveryId);
     const matches = record.schemaVersion === 1 && record.recoveryVersion === entry.recovery.recoveryVersion &&
       record.documentId === entry.documentId && record.typeId === entry.typeId &&
@@ -1871,6 +1903,7 @@ export class DocumentController {
       type,
       undoManager,
       recovery: this.dependencies.recovery,
+      activity: this.#activity,
       persistenceNamespace: this.dependencies.persistenceNamespace,
       environment: this.dependencies.environment,
       observeError: this.dependencies.observeError,
@@ -1893,9 +1926,9 @@ export class DocumentController {
     const revision = document.dirtyRevision;
     let abandoned = false;
     const pending = this.dependencies.resourceLifecycle(document, signal);
-    void pending.then(lifecycle => {
-      if (abandoned) void Promise.resolve().then(() => lifecycle.dispose()).catch(error => this.#reportError(error, "document-resource-late-factory-dispose"));
-    }, () => undefined);
+    void this.#activity.track("admissions", () => pending.then(async lifecycle => {
+      if (abandoned) await this.#activity.track("cleanup", () => Promise.resolve().then(() => lifecycle.dispose()).catch(error => this.#reportError(error, "document-resource-late-factory-dispose")));
+    }, () => undefined));
     let lifecycle: DocumentResourceLifecycle;
     try { lifecycle = await awaitDocumentSignal(pending, signal); }
     catch (error) { abandoned = true; throw error; }
@@ -1944,7 +1977,7 @@ export class DocumentController {
         throw new DocumentDestinationConflictError(request.location);
       }
       const closedOwner = this.#closedLocationOwners.get(locationKey);
-      if (this.#closedLocationOwners.has(locationKey) && request.applicationId && closedOwner !== request.applicationId) {
+      if (this.#closedLocationOwners.has(locationKey) && request.applicationId && normalizeBundleIdentifier(closedOwner) !== normalizeBundleIdentifier(request.applicationId)) {
         throw new DocumentUnavailableError("A closed document location is owned by another application.", { retryable: false });
       }
       this.#reservedLocations.set(locationKey, documentId);
@@ -1982,10 +2015,16 @@ export class DocumentController {
         adapter,
         undoManager,
         recovery: this.dependencies.recovery,
+      activity: this.#activity,
         persistenceNamespace: this.dependencies.persistenceNamespace,
         environment: this.dependencies.environment,
         observeError: this.dependencies.observeError,
       });
+      throwIfDocumentAborted(request.signal);
+      this.validateApplicationMutation(admissionTicket);
+      if (!this.#types.isCurrent(typeAdmission) || (adapterAdmission !== null && !this.#isCurrentAdapter(adapterAdmission))) {
+        throw new DocumentAbortError("The document creation admission became stale during model validation.");
+      }
       await this.#installResourceLifecycle(document, request.signal);
       throwIfDocumentAborted(request.signal);
       document.markUnsaved(documentAdoptionAuthority);
@@ -2037,10 +2076,16 @@ export class DocumentController {
           model: request.initialModel,
           undoManager,
           recovery: this.dependencies.recovery,
+      activity: this.#activity,
           persistenceNamespace: this.dependencies.persistenceNamespace,
           environment: this.dependencies.environment,
           observeError: this.dependencies.observeError,
         }, documentProjectionAuthority);
+        throwIfDocumentAborted(request.signal);
+        this.validateApplicationMutation(admissionTicket);
+        if (!this.#types.isCurrent(typeAdmission)) {
+          throw new DocumentAbortError("The projection creation admission became stale during model validation.");
+        }
         await this.#installResourceLifecycle(document, request.signal);
         throwIfDocumentAborted(request.signal);
         // No markUnsaved: a projection is born clean (dirtyRevision 0) and
@@ -2074,7 +2119,7 @@ export class DocumentController {
     if (liveId) {
       if (request.documentId && request.documentId !== liveId) throw new DocumentRequestedIdConflictError(request.documentId);
       const live = this.#requireOpenDocument(liveId);
-      if (admissionTicket && live.applicationId !== admissionTicket.applicationId) {
+      if (admissionTicket && normalizeBundleIdentifier(live.applicationId) !== normalizeBundleIdentifier(admissionTicket.applicationId)) {
         throw new DocumentUnavailableError("A canonical document cannot change application ownership.", { retryable: false });
       }
       if (live.type.id !== request.typeId) {
@@ -2091,12 +2136,12 @@ export class DocumentController {
       if (opening.typeId !== request.typeId) {
         throw new DocumentSchemaError(request.typeId, `Open location is already being opened as document type "${opening.typeId}".`);
       }
-      if (admissionTicket && opening.applicationId !== admissionTicket.applicationId) {
+      if (admissionTicket && normalizeBundleIdentifier(opening.applicationId) !== normalizeBundleIdentifier(admissionTicket.applicationId)) {
         throw new DocumentUnavailableError("An opening canonical document cannot change application ownership.", { retryable: false });
       }
       const document = await this.#awaitOpening(opening.promise, request.signal);
       this.validateApplicationMutation(admissionTicket);
-      if (admissionTicket && document.applicationId !== admissionTicket.applicationId) {
+      if (admissionTicket && normalizeBundleIdentifier(document.applicationId) !== normalizeBundleIdentifier(admissionTicket.applicationId)) {
         throw new DocumentUnavailableError("An opening canonical document changed application ownership.", { retryable: false });
       }
       if (request.activate !== false) this.activateDocument(document.id);
@@ -2153,6 +2198,7 @@ export class DocumentController {
         adapter,
         undoManager,
         recovery: this.dependencies.recovery,
+      activity: this.#activity,
         persistenceNamespace: this.dependencies.persistenceNamespace,
         environment: this.dependencies.environment,
         observeError: this.dependencies.observeError,
@@ -2329,7 +2375,7 @@ export class DocumentController {
         if (!this.#types.isCurrent(typeAdmission) || !this.#isCurrentAdapter(adapterAdmission)) {
           throw new DocumentAbortError("The Save As admission became stale.");
         }
-        if (this.#documents.get(document.id) !== document || (ticket && document.applicationId !== ticket.applicationId)) {
+        if (this.#documents.get(document.id) !== document || (ticket && normalizeBundleIdentifier(document.applicationId) !== normalizeBundleIdentifier(ticket.applicationId))) {
           throw new DocumentAbortError("The Save As document admission became stale.");
         }
       };
@@ -2470,7 +2516,7 @@ export class DocumentController {
         // authority boundary; treating a concurrent edit as stale would make
         // a successful Save As fail even though its captured bytes are safely
         // isolated from that newer in-memory model.
-        if (this.#documents.get(document.id) !== document || (ticket && document.applicationId !== ticket.applicationId)) {
+        if (this.#documents.get(document.id) !== document || (ticket && normalizeBundleIdentifier(document.applicationId) !== normalizeBundleIdentifier(ticket.applicationId))) {
           throw new DocumentAbortError("The Save As admission became stale after the destination write.");
         }
         assertSaveAsAdmission();
@@ -3201,7 +3247,7 @@ export class DocumentController {
   }
 
   #terminalProviderOperationKey(applicationId: string, documentId: string): string {
-    return `${applicationId.trim()}\u0000${documentId.trim()}`;
+    return `${normalizeBundleIdentifier(applicationId.trim())}\u0000${documentId.trim()}`;
   }
 
   #terminalProviderOperationSnapshot<TState, TResult>(
@@ -3236,7 +3282,7 @@ export class DocumentController {
     request: TerminalProviderOperationClaimRequest,
   ): TerminalProviderOperationClaim<TState, TResult> {
     if (record.claim !== null || this.#documents.get(record.documentId) !== record.document ||
-        record.document.applicationId !== record.applicationId) {
+        normalizeBundleIdentifier(record.document.applicationId) !== normalizeBundleIdentifier(record.applicationId)) {
       throw new DocumentUnavailableError("The terminal provider operation receipt is no longer available to claim.", { retryable: false });
     }
     let claim!: ActiveTerminalProviderOperationClaim<TState, TResult>;
@@ -3270,7 +3316,7 @@ export class DocumentController {
       const claim = claimForReceipt();
       if (this.#terminalProviderOperations.get(key) !== record || record.claim !== claim ||
           this.#documents.get(record.documentId) !== record.document ||
-          record.document.applicationId !== record.applicationId) {
+          normalizeBundleIdentifier(record.document.applicationId) !== normalizeBundleIdentifier(record.applicationId)) {
         throw new DocumentUnavailableError("The terminal provider operation receipt claim is no longer authoritative.", { retryable: false });
       }
       return record;
@@ -3369,14 +3415,14 @@ export class DocumentController {
     applicationId: string,
   ): ActiveTerminalProviderOperation | null {
     return [...this.#terminalProviderOperations.values()].find((record) =>
-      record.document === document && record.applicationId === applicationId) ?? null;
+      record.document === document && normalizeBundleIdentifier(record.applicationId) === normalizeBundleIdentifier(applicationId)) ?? null;
   }
 
   async #requestFinalOwnerCleanup(
     document: ApplicationDocument<unknown, unknown>,
     applicationId: string,
   ): Promise<void> {
-    if (this.#documents.get(document.id) !== document || document.applicationId !== applicationId) {
+    if (this.#documents.get(document.id) !== document || normalizeBundleIdentifier(document.applicationId) !== normalizeBundleIdentifier(applicationId)) {
       this.#deferredFinalOwnerCleanups.delete(document);
       return;
     }
@@ -3411,19 +3457,19 @@ export class DocumentController {
     if (document.hasTerminalReconciliationLease) return;
     if (deferred.promise) return deferred.promise;
     const dirtyRevision = document.dirtyRevision;
-    const cleanup = (async () => {
+    const cleanup = this.#activity.track("cleanup", async () => {
       try {
-        if (this.#documents.get(document.id) !== document || document.applicationId !== applicationId ||
+        if (this.#documents.get(document.id) !== document || normalizeBundleIdentifier(document.applicationId) !== normalizeBundleIdentifier(applicationId) ||
             document.hasTerminalReconciliationLease || this.hasActiveDocumentOwnerLease(document.id, applicationId) ||
             document.windowControllerIds.length > 0) return;
         if (document.state === "dirty") await this.saveDocument(document.id, { reason: "explicit" });
-        if (this.#documents.get(document.id) !== document || document.applicationId !== applicationId ||
+        if (this.#documents.get(document.id) !== document || normalizeBundleIdentifier(document.applicationId) !== normalizeBundleIdentifier(applicationId) ||
             document.hasTerminalReconciliationLease || document.dirtyRevision !== dirtyRevision ||
             this.hasActiveDocumentOwnerLease(document.id, applicationId) ||
             document.windowControllerIds.length > 0) return;
         await this.#closeDocumentCore(document.id, "parent-close", undefined, () => (
           this.#documents.get(document.id) === document &&
-          document.applicationId === applicationId &&
+          normalizeBundleIdentifier(document.applicationId) === normalizeBundleIdentifier(applicationId) &&
           !document.hasTerminalReconciliationLease &&
           !this.hasActiveDocumentOwnerLease(document.id, applicationId) &&
           document.windowControllerIds.length === 0
@@ -3433,7 +3479,7 @@ export class DocumentController {
         // close leaves this exact document open rather than closing a newer
         // same-ID generation.
       }
-    })();
+    });
     deferred.promise = cleanup;
     void cleanup.finally(() => {
       if (this.#deferredFinalOwnerCleanups.get(document) !== deferred) return;
@@ -3449,7 +3495,7 @@ export class DocumentController {
 
   #resumeDeferredFinalOwnerCleanup(record: ActiveTerminalProviderOperation): void {
     const deferred = this.#deferredFinalOwnerCleanups.get(record.document);
-    if (!deferred || deferred.applicationId !== record.applicationId || deferred.terminalToken !== record.terminalToken) return;
+    if (!deferred || normalizeBundleIdentifier(deferred.applicationId) !== normalizeBundleIdentifier(record.applicationId) || deferred.terminalToken !== record.terminalToken) return;
     void this.#requestFinalOwnerCleanup(record.document, record.applicationId).catch((error) => {
       this.#reportError(error, "terminal-provider-final-owner-cleanup");
     });
@@ -3493,21 +3539,21 @@ export class DocumentController {
     operation: Promise<T>,
   ): Promise<T> {
     if (!ticket) return operation;
-    const admissions = this.#applicationAdmissions.get(ticket.applicationId) ?? new Set<Promise<unknown>>();
-    this.#applicationAdmissions.set(ticket.applicationId, admissions);
+    const admissions = this.#applicationAdmissions.get(normalizeBundleIdentifier(ticket.applicationId)) ?? new Set<Promise<unknown>>();
+    this.#applicationAdmissions.set(normalizeBundleIdentifier(ticket.applicationId), admissions);
     admissions.add(operation);
     void operation.finally(() => {
       admissions.delete(operation);
-      if (admissions.size === 0 && this.#applicationAdmissions.get(ticket.applicationId) === admissions) {
-        this.#applicationAdmissions.delete(ticket.applicationId);
+      if (admissions.size === 0 && this.#applicationAdmissions.get(normalizeBundleIdentifier(ticket.applicationId)) === admissions) {
+        this.#applicationAdmissions.delete(normalizeBundleIdentifier(ticket.applicationId));
       }
     }).catch(() => undefined);
     return operation;
   }
 
   #requireApplicationCloseLease(lease: ApplicationSessionCloseLease): void {
-    if (this.#applicationCloseLeases.get(lease.applicationId) !== lease ||
-        (this.#applicationEpochs.get(lease.applicationId) ?? 0) !== lease.epoch) {
+    if (this.#applicationCloseLeases.get(normalizeBundleIdentifier(lease.applicationId)) !== lease ||
+        (this.#applicationEpochs.get(normalizeBundleIdentifier(lease.applicationId)) ?? 0) !== lease.epoch) {
       throw new DocumentUnavailableError("Application close authority is stale.", { retryable: true });
     }
   }
@@ -3535,8 +3581,19 @@ export class DocumentController {
   }
 
   #resolveAdapter(location: DocumentLocation): DocumentStorageAdapter {
-    const candidates = [...this.#adapters.values()].filter((adapter) => adapter.supports(location));
-    if (candidates.length === 0) throw new DocumentAdapterUnavailableError(location);
+    const supporting = [...this.#adapters.values()].filter((adapter) => adapter.supports(location));
+    // A registered adapter always wins over a built-in default for the same location.
+    const registered = supporting.filter(({ id }) => !this.#defaultAdapterIds.has(id));
+    let candidates = registered.length > 0 ? registered : supporting;
+    if (candidates.length === 0) {
+      const fallback = this.dependencies.defaultAdapterFor?.(location) ?? null;
+      if (!fallback || !fallback.supports(location)) throw new DocumentAdapterUnavailableError(location);
+      if (!this.#adapters.has(fallback.id)) {
+        this.#defaultAdapterIds.add(fallback.id);
+        this.registerAdapter(fallback);
+      }
+      candidates = [this.#adapters.get(fallback.id)!];
+    }
     if (candidates.length > 1) throw new DocumentAdapterAmbiguousError(location, candidates.map(({ id }) => id));
     return candidates[0]!;
   }
@@ -3598,21 +3655,25 @@ export class DocumentController {
   }
 
   async #operate<I, T>(kind: string, input: I, signal: AbortSignal | undefined, run: () => Promise<T>): Promise<T> {
-    throwIfDocumentAborted(signal);
-    const handle = this.dependencies.operations.run({ kind, input, commit: run });
-    const cancel = () => handle.cancel("Document operation aborted.");
-    signal?.addEventListener("abort", cancel, { once: true });
-    if (signal?.aborted) cancel();
+    const admission = ["documents.new", "documents.open", "documents.new-projection", "documents.import", "documents.duplicate", "documents.reopen", "documents.restore-session", "documents.save-as", "documents.move"].includes(kind);
+    const release = admission ? this.#activity.begin("admissions") : () => {};
     try {
-      const result = await handle.result;
-      if (result.status === "completed") return result.value;
-      if (result.status === "cancelled") throw new DocumentAbortError(result.reason);
-      const cause = result.error.cause;
-      if (cause) throw cause;
-      throw new DocumentUnavailableError(result.error.message, { retryable: false });
-    } finally {
-      signal?.removeEventListener("abort", cancel);
-    }
+      throwIfDocumentAborted(signal);
+      const handle = this.dependencies.operations.run({ kind, input, commit: () => admission ? this.#activity.track("admissions", run) : run() });
+      const cancel = () => handle.cancel("Document operation aborted.");
+      signal?.addEventListener("abort", cancel, { once: true });
+      if (signal?.aborted) cancel();
+      try {
+        const result = await handle.result;
+        if (result.status === "completed") return result.value;
+        if (result.status === "cancelled") throw new DocumentAbortError(result.reason);
+        const cause = result.error.cause;
+        if (cause) throw cause;
+        throw new DocumentUnavailableError(result.error.message, { retryable: false });
+      } finally {
+        signal?.removeEventListener("abort", cancel);
+      }
+    } finally { release(); }
   }
 
   #emit(): void {

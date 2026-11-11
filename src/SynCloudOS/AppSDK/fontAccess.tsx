@@ -17,11 +17,13 @@
  * limitations under the License.
  */
 
+import { NSEData } from "../../Foundation/NSEData";
 import { createContext, useContext, useEffect, useMemo, useSyncExternalStore, type PropsWithChildren } from "react";
 import { NSEFontManager, type FontDeclaration } from "../../NSE/Typography";
 import type { TFXFontClient, TFXFontRegistration, TFXPackagedFontResourceLoader } from "../../FX/TextFX/textLayoutTypes";
 import type { TFXFontDescriptor } from "../../FX/TextFX/TFXFontDescriptor";
-import { useSynWare } from "./SynWareContext";
+import { useSCOS } from "./scos/useSCOS"
+import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
 
 /** Host composition input, kept private to framework composition. */
 export interface SynWareFontCatalogue {
@@ -29,15 +31,25 @@ export interface SynWareFontCatalogue {
   readonly declaration?: FontDeclaration;
   readonly loadResource?: TFXPackagedFontResourceLoader;
 }
+const runtimeCatalogues = new WeakMap<SynCloudOSRuntime, SynWareFontCatalogue>();
+
+/** Internal host composition: establishes the catalogue before application launch. */
+export function runtimeFontCatalogue(runtime: SynCloudOSRuntime, supplied?: SynWareFontCatalogue): SynWareFontCatalogue {
+  const existing = runtimeCatalogues.get(runtime);
+  const catalogue = supplied ?? existing ?? Object.freeze({ manager: new NSEFontManager() });
+  if (catalogue !== existing) runtimeCatalogues.set(runtime, catalogue);
+  return catalogue;
+}
+
 const FontCatalogueContext = createContext<SynWareFontCatalogue | null>(null);
 const noSubscription = () => () => {};
 const emptySnapshot = () => null;
 export function FontCatalogueProvider({ catalogue, children }: PropsWithChildren<{ readonly catalogue: SynWareFontCatalogue }>) {
   return <FontCatalogueContext.Provider value={catalogue}>{children}</FontCatalogueContext.Provider>;
 }
-export function useFontCatalogue(): SynWareFontCatalogue {
+export function useFontCatalogue(runtime?: SynCloudOSRuntime): SynWareFontCatalogue {
   const supplied = useContext(FontCatalogueContext);
-  return useMemo(() => supplied ?? Object.freeze({ manager:new NSEFontManager() }), [supplied]);
+  return useMemo(() => runtime ? runtimeFontCatalogue(runtime, supplied ?? undefined) : supplied ?? Object.freeze({ manager:new NSEFontManager() }), [runtime, supplied]);
 }
 
 /** Private host namespace; application bundle resources retain their own loader. */
@@ -76,14 +88,14 @@ function waitFor<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
   });
 }
 
-/** Internal composition: app code receives useSynWareFonts(), never the host loader. */
+/** Internal composition: app code receives useFonts(), never the host loader. */
 export function createSynWareFontAccess(catalogue: SynWareFontCatalogue, client: Pick<TFXFontClient, "registerFont" | "registerFontResource">, owner: AbortSignal): SynWareFontAccess {
   return Object.freeze({ manager: catalogue.manager,
     async loadFace(id: string, descriptor: TFXFontDescriptor, caller?: AbortSignal) {
       const signal = caller ? AbortSignal.any([owner, caller]) : owner;
       signal.throwIfAborted();
       const face = catalogue.declaration?.faces.find(face => face.id === id);
-      let bytes: Uint8Array | null = null;
+      let bytes: NSEData | null = null;
       if (face) {
         if (!catalogue.loadResource) throw new DOMException("The host font resource is unavailable.", "NotFoundError");
         return client.registerFontResource(hostResourcePath(catalogue.declaration!, face.resource), descriptor, signal);
@@ -99,8 +111,8 @@ export function createSynWareFontAccess(catalogue: SynWareFontCatalogue, client:
 }
 
 /** Font metadata and byte-backed registration for the active SynWare mount. */
-export function useSynWareFonts(): SynWareFontAccess {
-  const mount = useSynWare();
+export function useFonts(): SynWareFontAccess {
+  const mount = useSCOS();
   const catalogue = useFontCatalogue();
   const library = catalogue.manager.library;
   useSyncExternalStore(library?.subscribe ?? noSubscription, library?.getSnapshot ?? emptySnapshot, library?.getSnapshot ?? emptySnapshot);

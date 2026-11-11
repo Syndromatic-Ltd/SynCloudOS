@@ -19,7 +19,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
-import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
+
 import { GFXColour } from "../../../FX/GraphicsFX/public";
 import { NSESlider } from "../../Controls/Values/NSESlider";
 import { NSETextField } from "../../Controls/Fields/NSEFields";
@@ -112,9 +112,9 @@ export function NSEColourWheelPicker({ colour, disabled, fields = true, brightne
     // still runs "to right": black at the bottom, the full colour at the top.
     "--nse-colour-channel-track": `linear-gradient(to right, #000, ${GFXColour.hsva({ h: draft.hsva.h, s: draft.hsva.s, v: 1, a: 1 }).toCSS()})`,
   };
-  const appearance = useNSEAppearanceSlot(nseAppearanceSlot("colour-wheel", "wheel", disabled ? "disabled" : "normal"));
-  return <div data-nse-control="colour-wheel" data-state={disabled ? "disabled" : "ready"} data-brightness={brightnessPlacement} {...appearance.attributes} style={wheelStyle}>
-    <div role="slider" aria-label="Colour hue and saturation" aria-disabled={disabled || undefined} aria-valuemin={0} aria-valuemax={360} aria-valuenow={Math.round(draft.hsva.h)} tabIndex={disabled ? -1 : 0} {...appearance.attributes}
+
+  return <div data-nse-control="colour-wheel" data-nse-part="bezel" data-nse-enabled={disabled ? "false" : undefined} data-state={disabled ? "disabled" : "ready"} data-nse-brightness-placement={brightnessPlacement} data-brightness={brightnessPlacement}  style={wheelStyle}>
+    <div role="slider" data-nse-part="wheel" aria-label="Colour hue and saturation" aria-disabled={disabled || undefined} aria-valuemin={0} aria-valuemax={360} aria-valuenow={Math.round(draft.hsva.h)} tabIndex={disabled ? -1 : 0}
       onPointerDown={(event) => { if (disabled) return; activePointer.current = event.pointerId; pointerOpening.current = colour; pointerElement.current = event.currentTarget; event.currentTarget.setPointerCapture?.(event.pointerId); updateFromPointer(event.currentTarget, event.clientX, event.clientY); }}
       onPointerMove={(event) => { if (!disabled && activePointer.current === event.pointerId) updateFromPointer(event.currentTarget, event.clientX, event.clientY); }}
       onPointerUp={(event) => { if (disabled || activePointer.current !== event.pointerId) return; updateFromPointer(event.currentTarget, event.clientX, event.clientY); activePointer.current = null; pointerOpening.current = null; pointerElement.current = null; releasePointerCaptureSafely(event.currentTarget, event.pointerId); onCommit(latest.current); }}
@@ -127,12 +127,12 @@ export function NSEColourWheelPicker({ colour, disabled, fields = true, brightne
       else if (event.key === "ArrowUp") adjust(0, 0.01);
       else if (event.key === "ArrowDown") adjust(0, -0.01);
     }} onKeyUp={(event) => { if (!disabled && event.key.startsWith("Arrow")) onCommit(latest.current); }}><span data-nse-part="wheel-surface" /></div>
-    <NSESlider controlSize={controlHeight === undefined ? "small" : "mini"} orientation={brightnessPlacement === "beside" ? "vertical" : "horizontal"} data-nse-part="brightness" aria-label="Brightness" minimum={0} maximum={100} value={Math.round(draft.hsva.v * 100)} disabled={disabled} onValueChange={(value, phase) => { if (disabled) return; if (value !== Math.round(latest.current.hsva.v * 100)) { const next = GFXColour.hsva({ ...latest.current.hsva, v: value / 100 }); latest.current = next; setDraft(next); onPreview(next); } if (phase === "commit") onCommit(latest.current); }} />
+    <NSESlider controlSize={controlHeight === undefined ? "small" : "mini"} orientation={brightnessPlacement === "beside" ? "vertical" : "horizontal"} data-nse-part="brightness" aria-label="Brightness" minimum={0} maximum={100} value={Math.round(draft.hsva.v * 100)} isEnabled={!disabled} onValueChange={(value, phase) => { if (disabled) return; if (value !== Math.round(latest.current.hsva.v * 100)) { const next = GFXColour.hsva({ ...latest.current.hsva, v: value / 100 }); latest.current = next; setDraft(next); onPreview(next); } if (phase === "commit") onCommit(latest.current); }} />
     {fields ? <div data-nse-part="numeric">
-      <NSETextField controlSize="small" height={controlHeight} label="Hue" aria-label="Hue" type="number" inputMode="numeric" min={0} max={360} value={String(Math.round(draft.hsva.h))} disabled={disabled} onValueChange={(text, phase) => { if (phase === "commit") { if (!disabled) onCommit(latest.current); } else if (text.trim() !== "" && Number.isFinite(Number(text))) updateNumeric("h", Number(text)); }} />
-      <NSETextField controlSize="small" height={controlHeight} label="Saturation" aria-label="Saturation" type="number" inputMode="numeric" min={0} max={100} value={String(Math.round(draft.hsva.s * 100))} disabled={disabled} onValueChange={(text, phase) => { if (phase === "commit") { if (!disabled) onCommit(latest.current); } else if (text.trim() !== "" && Number.isFinite(Number(text))) updateNumeric("s", Number(text)); }} />
-      <NSETextField controlSize="small" height={controlHeight} label="Brightness" aria-label="Brightness value" type="number" inputMode="numeric" min={0} max={100} value={String(Math.round(draft.hsva.v * 100))} disabled={disabled} onValueChange={(text, phase) => { if (phase === "commit") { if (!disabled) onCommit(latest.current); } else if (text.trim() !== "" && Number.isFinite(Number(text))) updateNumeric("v", Number(text)); }} />
-      <NSETextField controlSize="small" height={controlHeight} label="Opacity" aria-label="Opacity" type="number" inputMode="numeric" min={0} max={100} value={String(Math.round(draft.hsva.a * 100))} disabled={disabled} onValueChange={(text, phase) => { if (phase === "commit") { if (!disabled) onCommit(latest.current); } else if (text.trim() !== "" && Number.isFinite(Number(text))) updateNumeric("a", Number(text)); }} />
+      <NSETextField controlSize="small" height={controlHeight} label="Hue" aria-label="Hue" type="number" inputMode="numeric" min={0} max={360} value={String(Math.round(draft.hsva.h))} isEnabled={!disabled} onValueChange={(text, phase) => { if (phase === "commit") { if (!disabled) onCommit(latest.current); } else if (text.trim() !== "" && Number.isFinite(Number(text))) updateNumeric("h", Number(text)); }} />
+      <NSETextField controlSize="small" height={controlHeight} label="Saturation" aria-label="Saturation" type="number" inputMode="numeric" min={0} max={100} value={String(Math.round(draft.hsva.s * 100))} isEnabled={!disabled} onValueChange={(text, phase) => { if (phase === "commit") { if (!disabled) onCommit(latest.current); } else if (text.trim() !== "" && Number.isFinite(Number(text))) updateNumeric("s", Number(text)); }} />
+      <NSETextField controlSize="small" height={controlHeight} label="Brightness" aria-label="Brightness value" type="number" inputMode="numeric" min={0} max={100} value={String(Math.round(draft.hsva.v * 100))} isEnabled={!disabled} onValueChange={(text, phase) => { if (phase === "commit") { if (!disabled) onCommit(latest.current); } else if (text.trim() !== "" && Number.isFinite(Number(text))) updateNumeric("v", Number(text)); }} />
+      <NSETextField controlSize="small" height={controlHeight} label="Opacity" aria-label="Opacity" type="number" inputMode="numeric" min={0} max={100} value={String(Math.round(draft.hsva.a * 100))} isEnabled={!disabled} onValueChange={(text, phase) => { if (phase === "commit") { if (!disabled) onCommit(latest.current); } else if (text.trim() !== "" && Number.isFinite(Number(text))) updateNumeric("a", Number(text)); }} />
     </div> : null}
   </div>;
 }

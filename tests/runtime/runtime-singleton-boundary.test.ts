@@ -51,7 +51,7 @@ const forbiddenRuntimeValues = new Set([
   "PermissionManager",
   "Persistence",
   "PluginRegistry",
-  "PolicyKit",
+  "ConfigurationProfiles",
   "ResponsiveModeManager",
   "RouteManager",
   "ServiceRegistry",
@@ -63,7 +63,7 @@ const forbiddenRuntimeValues = new Set([
   "WebspringChoreography",
 ]);
 
-const forbiddenRuntimeModules = /\/(?:SynCloudOS|Runtime\/(?:RuntimeStore|RuntimeController|transactions|run)|Appearance\/appearanceService|ApplicationState\/ApplicationState|AppsController\/AppsController|AppManager\/(?:AppManagerController|AppLifecycle)|AppRegistry\/AppRegistry|BootManager\/BootManager|BundleLoader\/BundleLoader|Choreography\/WebspringChoreography|DocumentStore\/DocumentStore|ErrorManager\/(?:ErrorManager|SynCloudOSGlobalWatchdog)|EventBus\/EventBus|Identity\/Identity|Inspector\/Inspector|LaunchServices\/LaunchServices|Lifecycle\/Lifecycle|LocaleServices\/LocaleServices|LoginServices\/LoginServices|NotificationCenter\/NotificationCenter|PermissionManager\/PermissionManager|Persistence\/Persistence|PluginRegistry\/PluginRegistry|PolicyKit\/PolicyKit|ResponsiveModeManager\/ResponsiveModeManager|RouteManager\/RouteManager|ServiceRegistry\/ServiceRegistry|Settings\/settingsService|Statechart\/Statechart|WebspringState\/WebspringState|WindowManager\/WindowManager|WorkspaceController\/WorkspaceController)$/;
+const forbiddenRuntimeModules = /\/(?:SynCloudOS|Runtime\/(?:RuntimeStore|RuntimeController|transactions|run)|Appearance\/appearanceService|ApplicationState\/ApplicationState|AppsController\/AppsController|AppManager\/(?:AppManagerController|AppLifecycle)|AppRegistry\/AppRegistry|BootManager\/BootManager|BundleLoader\/BundleLoader|Choreography\/WebspringChoreography|DocumentStore\/DocumentStore|ErrorManager\/(?:ErrorManager|SynCloudOSGlobalWatchdog)|EventBus\/EventBus|Identity\/Identity|Inspector\/Inspector|LaunchServices\/LaunchServices|Lifecycle\/Lifecycle|LocaleServices\/LocaleServices|LoginServices\/LoginServices|NotificationCenter\/NotificationCenter|PermissionManager\/PermissionManager|Persistence\/Persistence|PluginRegistry\/PluginRegistry|ConfigurationProfiles\/ConfigurationProfiles|ResponsiveModeManager\/ResponsiveModeManager|RouteManager\/RouteManager|ServiceRegistry\/ServiceRegistry|Settings\/settingsService|Statechart\/Statechart|WebspringState\/WebspringState|WindowManager\/WindowManager|WorkspaceController\/WorkspaceController)$/;
 
 function sourceFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -221,7 +221,7 @@ describe("runtime singleton boundary", () => {
   it("rejects adversarial value imports while allowing types, classes, and factories", () => {
     expect(inspectRuntimeSingletonSource("fixture/value.ts", [
       'import { RuntimeStore as store } from "./SynCloudOS/Runtime/RuntimeStore";',
-      'import * as policy from "./SynCloudOS/PolicyKit/PolicyKit";',
+      'import * as policy from "./SynCloudOS/ConfigurationProfiles/ConfigurationProfiles";',
       'export { EventBus as Events } from "./SynCloudOS/EventBus/EventBus";',
       'export const AppearanceService = {};',
       'void import("./SynCloudOS/Runtime/transactions");',
@@ -236,7 +236,7 @@ describe("runtime singleton boundary", () => {
     expect(inspectRuntimeSingletonSource("fixture/legitimate.ts", [
       'import type { RuntimeStore } from "./SynCloudOS/Runtime/RuntimeStore";',
       'import { SynCloudOSRuntimeStore, createRuntimeStore } from "./SynCloudOS/Runtime/RuntimeStore";',
-      'import { createPolicyKit } from "./SynCloudOS/PolicyKit/PolicyKit";',
+      'import { createConfigurationProfiles } from "./SynCloudOS/ConfigurationProfiles/ConfigurationProfiles";',
       'export type { EventBus } from "./SynCloudOS/EventBus/EventBus";',
     ].join("\n"))).toEqual([]);
   });

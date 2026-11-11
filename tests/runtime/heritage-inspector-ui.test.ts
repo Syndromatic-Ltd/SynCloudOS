@@ -35,7 +35,7 @@ describe("live development Inspector", () => {
     const runtime = createTestRuntime();
     registerTrustedTestSynWare(runtime, diagnosticsManifest, ["diagnostics"]);
     const mount = new AbortController();
-    const mounted = render(createElement(DevInspectorRegion, { runtime, appId: "diagnostics", mountSignal: mount.signal, enabled: true }));
+    const mounted = render(createElement(DevInspectorRegion, { runtime, appId: "com.example.diagnostics", mountSignal: mount.signal, enabled: true }));
     try {
       await screen.findByRole("region", { name: "Development Inspector" });
       await act(async () => { runtime.locale.registerTranslations("synapps.diagnostics", "en-GB", { "inspector.title": "Live translated Inspector" }); });
@@ -43,7 +43,7 @@ describe("live development Inspector", () => {
       const presentation = await act(async () => runtime.presentationSettlements.begin({ operationId: "test", roles: ["route-outlet"], timeoutMs: 10000 }));
       fireEvent.click(within(screen.getByRole("navigation", { name: "Inspector views" })).getByRole("button", { name: "NSE", exact: true }));
       expect(screen.getByText("Awaiting: route-outlet")).toBeTruthy();
-      await act(async () => { await runtime.apps.unregister("diagnostics"); });
+      await act(async () => { await runtime.apps.unregister("com.example.diagnostics"); });
       expect(screen.queryByRole("region", { name: "Live translated Inspector" })).toBeNull();
       presentation.cancel();
     } finally { mounted.unmount(); mount.abort(); await runtime.dispose(); }

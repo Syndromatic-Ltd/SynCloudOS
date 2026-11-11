@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import type { MEFXClock } from "./MEFXClock";
 import type { MEFXBlockBuffer } from "./MEFXBlockBuffer";
 import type { MEFXBufferQueue, MEFXBufferQueueOptions } from "./MEFXBufferQueue";
@@ -28,7 +29,7 @@ export interface MEFXClockLease extends MEFXClock {
 }
 
 export interface MEFXMediaClient {
-    copyBlock(bytes: Uint8Array, signal?: AbortSignal): MEFXBlockBuffer;
+    copyBlock(bytes: NSEDataConvertible, signal?: AbortSignal): MEFXBlockBuffer;
     createQueue<T>(options: MEFXBufferQueueOptions<T>, signal?: AbortSignal): MEFXBufferQueue<T>;
     observeClock(signal?: AbortSignal): MEFXClockLease;
     createTimebase(options?: MEFXTimebaseOptions, signal?: AbortSignal): MEFXTimebase;

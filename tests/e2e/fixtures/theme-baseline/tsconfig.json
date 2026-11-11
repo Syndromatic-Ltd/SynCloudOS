@@ -1,0 +1,5 @@
+{
+  "extends": "../../../../tsconfig.app.json",
+  "compilerOptions": { "types": ["vite/client", "emscripten", "node"] },
+  "include": ["./*.tsx", "../../theme-baseline.spec.ts", "../../../fixtures/presentationTraits.ts", "../../../../src/**/*.d.ts"]
+}

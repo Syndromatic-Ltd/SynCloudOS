@@ -1,0 +1,89 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/bundle-entitlements.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/bundle-entitlements.test.ts (3 tests | 3 failed) 35ms
+   × captures a frozen copy of explicit legacy bundle entitlements and adds no implicit access grant 26ms
+   × takes canonical Info entitlements rather than additional host bundle declarations 7ms
+   × projects site access and app type only from explicit runtime declarations 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/bundle-entitlements.test.ts > captures a frozen copy of explicit legacy bundle entitlements and adds no implicit access grant
+AssertionError: expected [ 'location.read', 'camera' ] to deeply equal [ 'location.read' ]
+
+- Expected
++ Received
+
+  [
+    "location.read",
++   "camera",
+  ]
+
+ ❯ tests/runtime/bundle-entitlements.test.ts:31:33
+     29|   const captured = runtime.bundles.createBundle({ manifest: createTest…
+     30|   entitlements.push("camera");
+     31|   expect(captured.entitlements).toEqual(["location.read"]);
+       |                                 ^
+     32|   expect(Object.isFrozen(captured.entitlements)).toBe(true);
+     33|   expect(runtime.bundles.createBundle(createTestManifest()).entitlemen…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/runtime/bundle-entitlements.test.ts > takes canonical Info entitlements rather than additional host bundle declarations
+AssertionError: expected [ 'video.capture.camera' ] to deeply equal [ 'location.read' ]
+
+- Expected
++ Received
+
+  [
+-   "location.read",
++   "video.capture.camera",
+  ]
+
+ ❯ tests/runtime/bundle-entitlements.test.ts:39:33
+     37|   const definition = createSynWare({ manifest: { bundleIdentifier: "co…
+     38|   const captured = runtime.bundles.createBundle({ ...createSynWareBund…
+     39|   expect(captured.entitlements).toEqual(["location.read"]);
+       |                                 ^
+     40|   expect(Object.isFrozen(captured.entitlements)).toBe(true);
+     41| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/runtime/bundle-entitlements.test.ts > projects site access and app type only from explicit runtime declarations
+AssertionError: expected { …(26) } to match object { type: 'system', policy: { …(3) } }
+(61 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "policy": {
+      "public": true,
+-     "requiredEntitlements": [
+-       "diagnostics.view",
+-     ],
+-     "requiredRoles": [
+-       "operator",
+-     ],
+    },
+    "type": "system",
+  }
+
+ ❯ tests/runtime/bundle-entitlements.test.ts:48:53
+     46|   expect(projectRuntimeManifest(manifest, context).policy).toBeUndefin…
+     47|   const explicit = { ...manifest, runtime: { type: "system" as const, …
+     48|   expect(projectRuntimeManifest(explicit, context)).toMatchObject({ ty…
+       |                                                     ^
+     49| });
+     50|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed (3)
+   Start at  19:22:46
+   Duration  6.37s (transform 4.71s, setup 26ms, import 6.17s, tests 35ms, environment 0ms)

@@ -23,6 +23,7 @@ import type { NSEMenuEntry, NSEMenuModel, NSEMenuSection } from "./menuTypes";
 export interface NSEApplicationMenuLabels {
   readonly label: string;
   readonly about: string;
+  /** The system Preferences entry, which is always present. */
   readonly preferences: string;
   readonly logOut: string;
 }
@@ -32,16 +33,19 @@ export interface NSEApplicationMenuModelOptions {
   readonly labels: NSEApplicationMenuLabels;
   readonly appPreferences?: Readonly<{ commandId: string; label: string }>;
   readonly extensions?: readonly NSEMenuSection[];
+  /** Whether the menu opens with About {App}. Defaults to `true`. */
+  readonly includeAbout?: boolean;
+  /** Whether the menu ends with a separator and Log Out. Defaults to `true`. */
   readonly includeLogOut?: boolean;
   /** Mounted apps must create cross-boundary payloads through their runtime. */
   readonly createPayload?: (key: string, value: unknown) => Readonly<Record<string, unknown>>;
 }
 
-export function createNSEApplicationMenuModel({ appId, labels, appPreferences, extensions = [], includeLogOut = true, createPayload }: NSEApplicationMenuModelOptions): NSEMenuModel {
+export function createNSEApplicationMenuModel({ appId, labels, appPreferences, extensions = [], includeAbout = true, includeLogOut = true, createPayload }: NSEApplicationMenuModelOptions): NSEMenuModel {
   if (!appId.trim()) throw new TypeError("NSE application menus require a stable app ID.");
   const aboutPayload = createPayload?.("appId", appId) ?? Object.freeze({ appId });
   const entries: readonly NSEMenuEntry[] = Object.freeze([
-    Object.freeze({ kind: "command" as const, id: "about", commandId: "application.showAbout", payload: aboutPayload, labelOverride: labels.about }),
+    ...(includeAbout ? [Object.freeze({ kind: "command" as const, id: "about", commandId: "application.showAbout", payload: aboutPayload, labelOverride: labels.about })] : []),
     ...(appPreferences ? [Object.freeze({ kind: "command" as const, id: "app-preferences", commandId: appPreferences.commandId, labelOverride: appPreferences.label })] : []),
     Object.freeze({ kind: "command" as const, id: "preferences", commandId: "system.showPreferences", labelOverride: labels.preferences }),
     ...(includeLogOut ? [

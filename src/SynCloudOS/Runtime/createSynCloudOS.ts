@@ -1,3 +1,4 @@
+import { createStorageDiagnosticsClient } from "../Persistence/storageDiagnostics";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -18,6 +19,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NativeOperationActivity, HostUpdateReadinessService, captureHostUpdateReadinessOptions } from '../Updates';
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import { createAudioGraphHostService } from "../AudioFX/AudioGraphHostService";
 import { MotionService } from "../MotionFX/MotionService";
 import { LocationService } from "../LocationFX/LocationService";
@@ -39,6 +42,7 @@ import { createBootManager } from "../BootManager/BootManager";
 import { createWebspringChoreography } from "../Choreography/WebspringChoreography";
 import { createSynCloudOSGlobalWatchdog } from "../ErrorManager/SynCloudOSGlobalWatchdog";
 import { createErrorManager } from "../ErrorManager/ErrorManager";
+import { createSynCloudOSAlertCenter } from "../SystemUI/alertCenter";
 import { createInspector } from "../Inspector/Inspector";
 import { createLaunchServices } from "../LaunchServices/LaunchServices";
 import { createLifecycle } from "../Lifecycle/Lifecycle";
@@ -69,6 +73,9 @@ import { createUndoManagerRegistry } from "../Undo";
 import { createPersistenceDocumentStore } from "../DocumentStore";
 import type { SynCloudOSDocumentStoreLock } from "../DocumentStore";
 import { DocumentController, InMemoryDocumentRecoveryStore, createDocumentResourceService } from "../Documents";
+import { InMemoryDocumentAdapter } from "../Documents/Adapters/InMemoryDocumentAdapter";
+import { IndexedDBDocumentAdapter } from "../Documents/Adapters/IndexedDBDocumentAdapter";
+import type { DocumentLocation } from "../Documents/documentTypes";
 import { createDocumentAssetRuntimeIntegration } from "./DocumentAssetRuntimeIntegration";
 import {
   ScreenService,
@@ -82,10 +89,12 @@ import {
   type WindowSerializableValue,
 } from "../Windows";
 import type { SynWareOwnedDocumentRematerialiseContext } from "../AppSDK/runtimeContracts";
-import { createPolicyKit } from "../PolicyKit/PolicyKit";
+import { createConfigurationProfiles } from "../ConfigurationProfiles/ConfigurationProfiles";
 import { createRuntimePerformancePolicy } from "../Performance/RuntimePerformancePolicy";
-import { defaultPolicyProfile } from "../PolicyKit/defaultPolicyProfile";
-import type { SynCloudOSAccessMode } from "../PolicyKit/policyTypes";
+import { defaultConfigurationProfile } from "../ConfigurationProfiles/defaultConfigurationProfile";
+import { createPrivacyStore } from "../Privacy";
+import { SCAuthorization } from "../Authorization/SCAuthorization";
+import type { SynCloudOSAccessMode } from "../ConfigurationProfiles/policyTypes";
 import { createRuntimeUserNotificationCenter } from "../NotificationCenter/runtimeNotificationCenter";
 import { createPersistenceBackedUserNotificationPersistence } from "../NotificationCenter/NotificationPersistence";
 import {
@@ -151,10 +160,12 @@ function accessModeForAuthenticationPolicy(
 
 
 export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRuntime {
+  const readinessOptions = captureHostUpdateReadinessOptions(config.updateReadiness);
   const runtimeId = asRuntimeId(config.id ?? `runtime:${config.environment.randomUUID()}`);
   const ownerToken = createRuntimeOwnerToken();
-  const policyProfile = config.policyProfile ?? defaultPolicyProfile;
+  const configurationProfile = config.configurationProfile ?? defaultConfigurationProfile;
   const controller = new AbortController();
+  const nativeActivity = new NativeOperationActivity(controller.signal);
   const store = createRuntimeStore(runtimeId);
   const diagnostics = createRuntimeDiagnostics({ eventHistoryLimit: config.operationHistoryLimit ?? 240 });
   const resources = createRuntimeResourceLedger({ softBudgetBytes: config.resourceSoftBudgetBytes ?? null });
@@ -232,7 +243,9 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     storage: config.environment.localStorage,
     namespace: persistenceNamespace,
   });
-  let policy!: SynCloudOSRuntime["policy"];
+  const privacy = createPrivacyStore({ runtimeId, persistence, now: config.environment.now });
+  let policy!: SynCloudOSRuntime["configurationProfiles"];
+  let authorization!: SCAuthorization;
   let runtime!: SynCloudOSRuntime;
   let runtimeController!: SynCloudOSRuntimeController;
   let bundles!: SynCloudOSBundleLoader;
@@ -242,6 +255,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
   let identity!: SynCloudOSIdentityService;
   let login!: SynCloudOSRuntime["login"];
   let errors!: SynCloudOSRuntime["errors"];
+  let alerts!: SynCloudOSRuntime["alerts"];
   let appManager!: SynCloudOSRuntime["appManager"];
   let lifecycle!: SynCloudOSRuntime["lifecycle"];
   let statechart!: SynCloudOSRuntime["statechart"];
@@ -271,6 +285,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
   let commands!: SynCloudOSRuntime["commands"];
   let keyBindings!: SynCloudOSRuntime["keyBindings"];
   let documents!: DocumentController;
+  let updateReadiness!: HostUpdateReadinessService;
   let documentStore!: SynCloudOSRuntime["documentStore"];
   let documentResources!: SynCloudOSRuntime["documentResources"];
   let documentAssetIntegration: ReturnType<typeof createDocumentAssetRuntimeIntegration> | undefined;
@@ -349,7 +364,9 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     get apps() { return apps; },
     get bundles() { return bundles; },
     get services() { return services; },
-    get policy() { return policy; },
+    get configurationProfiles() { return policy; },
+    get authorization() { return authorization; },
+    get privacy() { return privacy; },
     get permissions() { return permissions; },
     get identity() { return identity; },
     get login() { return login; },
@@ -361,6 +378,9 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     get presentationTraits() { return presentationTraits; },
     get windows() { return windows; },
     get documents() { return documents; },
+    get updateReadiness() { return updateReadiness; },
+    storageDiagnostics: createStorageDiagnosticsClient({ signal: controller.signal, assertLive: () => controller.signal.throwIfAborted(), getNavigator: () => config.environment.browser.getNavigator() }),
+    nativeActivity,
     get documentStore() { return documentStore; },
     get documentResources() { return documentResources; },
     get documentAssets() { return documentAssetIntegration?.cooperation; },
@@ -368,6 +388,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     get locale() { return locale; },
     get inspector() { return inspector; },
     get errors() { return errors; },
+    get alerts() { return alerts; },
     get webspring() { return webspring; },
     get systemUI() { return systemUI; },
     get preferencePanes() { return preferencePanes; },
@@ -411,7 +432,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     endIdentitySession: (reason) => identitySession.end({ reason }),
   });
   login = loginService;
-  const identityCore = createIdentity({ loginServices: loginService, runtimeId, profile: policyProfile });
+  const identityCore = createIdentity({ loginServices: loginService, runtimeId, profile: configurationProfile });
   identity = {
     runtimeId,
     getCurrentUser: identityCore.getCurrentUser,
@@ -424,13 +445,14 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
   services = createServiceRegistry(runtime);
   bundles = createBundleLoader(runtime);
   runtimeController = createRuntimeController(runtime);
-  policy = createPolicyKit(runtime, {
+  policy = createConfigurationProfiles(runtime, {
     bundleLoader: bundles,
     loginServices: loginService,
     identity,
     accessMode: accessModeForAuthenticationPolicy(config.authenticationPolicy),
-    profile: policyProfile,
+    profile: configurationProfile,
   });
+  authorization = new SCAuthorization(policy);
   errors = createErrorManager(runtime, { loginServices: loginService });
   const appManagerBridge: SynCloudOSRuntime["appManager"] = {
     runtimeId,
@@ -471,8 +493,8 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
       : app.window.role;
     return {
       workspaceId: "workspace-main",
-      applicationId: app.id,
-      applicationSessionId: app.id,
+      applicationId: app.bundleIdentifier,
+      applicationSessionId: app.bundleIdentifier,
       documentId: null,
       documentAssociationRole: null,
       representedDocument: null,
@@ -482,7 +504,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
       chromeMode: app.presentation === "systemSheet" ? "system" : app.window.chrome,
       smoothSurface: app.window.smoothSurface,
       title: app.window.title,
-      content: { rendererId: "application", parameters: { appId: app.id } },
+      content: { rendererId: "application", parameters: { appId: app.bundleIdentifier } },
       bounds: app.window.defaultBounds,
       minimumSize: app.window.minimumSize,
       maximumSize: null,
@@ -507,7 +529,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
       draft.loginServices.synId = active ? (typeof identitySnapshot.claims.email === "string" ? identitySnapshot.claims.email : identitySnapshot.subjectId) : null;
       draft.loginServices.displayName = active ? (typeof identitySnapshot.claims.displayName === "string" ? identitySnapshot.claims.displayName : identitySnapshot.subjectId) : null;
       const roles = active && typeof identitySnapshot.claims.roles === "string" ? identitySnapshot.claims.roles.split(",") : [];
-      draft.loginServices.accessClass = active ? policyProfile.sessionAccessClass?.(roles.map((role) => role.trim())) ?? "external" : null;
+      draft.loginServices.accessClass = active ? configurationProfile.sessionAccessClass?.(roles.map((role) => role.trim())) ?? "external" : null;
       draft.loginServices.expiresAt = active ? identitySnapshot.expiresAt ?? null : null;
       draft.loginServices.lastCheckedAt = config.environment.now();
       draft.loginServices.lastFailureReason = active ? null : "missingSession";
@@ -559,8 +581,8 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
   const initialBundlesRegistered = Boolean(config.initialBundles?.length);
 
 
-  const browserLocks = config.environment.browser.getNavigator()?.locks;
-  const documentStoreLock: SynCloudOSDocumentStoreLock | undefined = browserLocks
+  const browserLocks = config.documentStoreLock ? undefined : config.environment.browser.getNavigator()?.locks;
+  const documentStoreLock: SynCloudOSDocumentStoreLock | undefined = config.documentStoreLock ?? (browserLocks
     ? {
         async request<T>(
           name: string,
@@ -574,7 +596,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
           );
         },
       }
-    : undefined;
+    : undefined);
   documentStore = createPersistenceDocumentStore({
     runtimeId,
     persistence,
@@ -582,6 +604,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     resolveUndo: () => undo,
     authorise: (request) => policy.authorise(request),
     conditionalWriteLock: documentStoreLock,
+    clock: () => new Date(config.environment.now()),
   });
   // Schema registration is a host bootstrap concern.  Mounted AppSDK
   // projections deliberately do not receive registerKind, so migrations and
@@ -603,7 +626,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
       if (request.appId && !settings.notificationsAllowed(request.appId)) {
         return { allowed: false, id: `${runtimeId}:settings:${config.environment.randomUUID()}`, reason: "notification-settings-muted" };
       }
-      const decision = policy.evaluate({
+      const decision = policy.authorise({
         action: "notification.post",
         app: request.appId ? apps.getApp(request.appId) : null,
         context: { appId: request.appId },
@@ -649,7 +672,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     },
   });
   notifications = createNotificationCenter(runtime, {
-    policyKit: policy,
+    configurationProfiles: policy,
     userNotifications,
   });
   locale = createRuntimeLocaleServices({
@@ -688,6 +711,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     responsiveModeManager.unobserve();
   };
   systemUI = createSystemUIService(runtimeId);
+  alerts = createSynCloudOSAlertCenter({ createId: () => `alert-${runtimeId}-${config.environment.randomUUID()}` });
   preferencePanes = createPreferencePaneRegistry(runtimeId);
   const linkExternalSignal = <T,>(handle: RuntimeOperationHandle<T>, signal?: AbortSignal) => {
     if (!signal) return handle;
@@ -705,16 +729,20 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     sessionLogoutPending = true;
     routes?.cancelActiveOperations("session-logout");
     lifecycle.cancelActiveOperations("session-logout");
-    let activeAppId: string | null = null;
     let identityEnd: Promise<void> = Promise.resolve();
     const handle = operations.run<undefined, { runtimeId: SynCloudOSRuntimeId; reason: string }>({
       kind: "session.logout",
       input: undefined,
       supersedeKey: "session.logout",
       will: [async (context) => {
-        activeAppId = store.getSnapshot().application.activeAppId;
-        if (activeAppId && lifecycle.getState(activeAppId) === "active") {
-          await lifecycle.suspend(activeAppId, { reason, signal: context.signal }).result;
+        // Logout ends application lifetimes, including suspended applications.
+        // Retaining their controllers would reuse subscriptions/service handles
+        // whose mounted authority was revoked when the login gate took over.
+        const appIds = [...store.getSnapshot().application.openAppIds].reverse();
+        for (const appId of appIds) {
+          const closing = await lifecycle.close(appId, { reason, signal: context.signal }).result;
+          if (closing.status === "cancelled") context.cancel(closing.reason);
+          if (closing.status === "failed") throw new Error(closing.error.message);
         }
       }],
       commit: (context) => {
@@ -777,7 +805,20 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
   commands = createCommandSystem({
     getRuntime: () => runtime,
     responderResolver: {
-      resolveResponderChain: (startId) => responders.resolveChain(startId),
+      resolveResponderChain: (startId) => {
+        const chain = responders.resolveChain(startId);
+        if (startId === undefined) return chain;
+        // A mounted action names its concrete responder. Active document/window
+        // anchors are fallback routes for untargeted commands, not dependencies
+        // of that explicit action (which may itself open or close a document).
+        const ancestors = new Set<string>();
+        let current: string | null = startId;
+        while (current && !ancestors.has(current)) {
+          ancestors.add(current);
+          current = responders.get(current)?.parentId ?? null;
+        }
+        return chain.filter(responder => ancestors.has(responder.id));
+      },
       getGeneration: () => responders.getGeneration() + focus.getGeneration(),
       getRegistrationToken: (responderId) => responders.getRegistrationToken(responderId),
     },
@@ -793,9 +834,10 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     observeListenerError: (error) => {
       errors.capture({
         code: "RUNTIME_TRANSACTION_FAILED",
-        title: "An undo-history observer failed.",
-        message: "A diagnostic undo-history observer failed; the history transaction remained active.",
-        technicalMessage: error instanceof Error ? error.message : String(error),
+        title: "Undo ran into a problem.",
+        message: "Your changes were kept, but Undo may not work for this action.",
+        error,
+        technicalMessage: "An undo-history observer failed; the history transaction remained active.",
         source: "UndoManager.notify",
         category: "runtime",
         suggestedActions: ["dismiss"],
@@ -819,6 +861,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     environment: config.environment,
     ...(documentAssetIntegration?.resourceLifecycle ? { resourceLifecycle: documentAssetIntegration.resourceLifecycle } : {}),
     ...(documentAssetIntegration ? { transformAdapter: documentAssetIntegration.wrapAdapter } : {}),
+    ...(config.applicationDocuments?.defaultAdapters ? { defaultAdapterFor: (location: DocumentLocation) => defaultDocumentAdapterFor(location, config.environment, config.applicationDocuments!.defaultAdapters!.indexedDB) } : {}),
     observeError: (error, context) => {
       // Structural cleanup diagnostics deliberately exclude provider text:
       // error messages may contain document content, URLs, or credentials.
@@ -865,7 +908,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
         ? parameterRecord.appId
         : "unknown";
       return {
-        mountKey: `application:${appId}`,
+        mountKey: `application:${normalizeBundleIdentifier(appId)}`,
         responderId: `window-content:${windowControllerId}`,
         async load({ signal }) { signal.throwIfAborted(); },
         async prepareClose() {
@@ -993,8 +1036,9 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     bundles,
     apps,
     appManagerController: appManagerBridge,
-    policyKit: policy,
+    configurationProfiles: policy,
     windows,
+    revokeApplicationMounts: (appId) => transfers.revokeApplicationMounts(appId),
     operations,
     caches,
     resources,
@@ -1019,7 +1063,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     windowManager: windows,
     serviceRegistry: services,
     loginServices: login,
-    policyKit: policy,
+    configurationProfiles: policy,
   });
   statechart = createStatechart(runtime, {
     appRegistry: apps,
@@ -1048,7 +1092,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     bundleLoader: bundles,
     lifecycle,
     launchServices,
-    policyKit: policy,
+    configurationProfiles: policy,
     errorManager: errors,
     serviceRegistry: services,
     statechart,
@@ -1057,10 +1101,10 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     presentationTimeoutMs: config.presentationTimeoutMs,
     presentationRolesForRoute: config.presentationRolesForRoute,
   });
-  pluginRegistry = createPluginRegistry(runtime, { policyKit: policy, lifecycle });
+  pluginRegistry = createPluginRegistry(runtime, { configurationProfiles: policy, lifecycle });
   bootManager = createBootManager(runtime, {
     appRegistry: apps,
-    policyKit: policy,
+    configurationProfiles: policy,
     responsiveModeManager,
     routeManager: routes,
     runtimeController,
@@ -1086,7 +1130,9 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
   const policyApp = (appId: string) => apps.getApp(appId);
   const clipboardAdapter = config.adapters?.clipboard !== undefined
     ? config.adapters.clipboard
-    : config.environment.clipboard;
+    : config.environment.createClipboardAdapter
+      ? config.environment.createClipboardAdapter(nativeActivity)
+      : config.environment.clipboard;
   pasteboards = createPasteboardRegistry({
     runtimeId,
     signal: controller.signal,
@@ -1133,7 +1179,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     resolveEndpoint: transfers.resolveDragEndpoint,
     authorise: (request, signal) => {
       signal.throwIfAborted();
-      const crossApplication = request.source.appId !== request.destination.appId;
+      const crossApplication = normalizeBundleIdentifier(request.source.appId) !== normalizeBundleIdentifier(request.destination.appId);
       const supported = request.representationTypes.length > 0 && request.representationTypes.every((type) =>
         type === "text/plain" || type === "text/html" || type === "text/uri-list" ||
         type === "text/rtf" || type === "application/x-syncloudos-colour" ||
@@ -1239,7 +1285,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
         });
       },
     },
-    // The policy subject derives from store state (login) and from PolicyKit
+    // The policy subject derives from store state (login) and from ConfigurationProfiles
     // state (role capabilities, policies, access mode); observe both sources.
     subscribeState: (listener) => {
       const unsubscribeStore = store.subscribe(listener);
@@ -1363,7 +1409,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     else if (state === "closed") video.closeOwner(appId);
     else if (state === undefined && previous !== undefined) video.closeOwner(appId);
   });
-  // Location resume reauthorizes through PolicyKit, which can synchronously
+  // Location resume reauthorizes through ConfigurationProfiles, which can synchronously
   // publish back into the runtime store; the transition helper commits the
   // observed lifecycle before invoking this handler, so a re-entrant
   // publication never replays suspended -> active.
@@ -1411,8 +1457,11 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     webContentWindowIds = nextWindowIds;
   });
 
+  updateReadiness = new HostUpdateReadinessService(runtime, readinessOptions);
+
   const coreParticipants: RuntimeDisposalParticipant[] = [
     alwaysReady("runtime:store", () => store.dispose()),
+    alwaysReady("runtime:update-readiness", () => updateReadiness.dispose()),
     alwaysReady("runtime:diagnostics", () => diagnostics.dispose()),
     alwaysReady("runtime:jobs", () => jobs.dispose(new DOMException("Runtime disposed.", "AbortError"))),
     alwaysReady("runtime:resources", () => resources.dispose()),
@@ -1427,10 +1476,12 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     alwaysReady("runtime:system-ui", () => systemUI.dispose()),
     alwaysReady("runtime:preference-panes", () => preferencePanes.dispose()),
     alwaysReady("runtime:settings", () => settings.dispose()),
+    alwaysReady("runtime:privacy", () => privacy.dispose()),
     alwaysReady("runtime:appearance", () => appearance.dispose()),
     alwaysReady("runtime:webspring", () => webspring.dispose()),
     alwaysReady("runtime:webspring-choreography", () => webspringChoreography.dispose()),
     alwaysReady("runtime:errors", () => errors.dispose()),
+    alwaysReady("runtime:alerts", () => alerts.dispose()),
     alwaysReady("runtime:inspector", () => inspector.dispose()),
     alwaysReady("runtime:locale", () => locale.dispose()),
     alwaysReady("runtime:notifications", () => notifications.dispose()),
@@ -1501,7 +1552,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     setTimeout: config.environment.setTimeout,
     clearTimeout: config.environment.clearTimeout,
     coreParticipants,
-    onStateChange(state) { disposalState = state; },
+    onStateChange(state) { disposalState = state; updateReadiness.inspect(); },
   });
 
   bootImplementation = (options: SynCloudOSBootOptions = {}) => {
@@ -1547,10 +1598,10 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
         locale.hydrate();
         const localeLoaderAppIds: string[] = [];
         for (const bundle of bundles.getBundles()) {
-          if (bundle.localeResources) locale.registerBundleLocaleResources(bundle.manifest.id, bundle.localeResources);
+          if (bundle.localeResources) locale.registerBundleLocaleResources(bundle.manifest.bundleIdentifier, bundle.localeResources);
           if (bundle.localeResourceLoader) {
-            locale.registerBundleLocaleResourceLoader(bundle.manifest.id, bundle.localeResourceLoader);
-            localeLoaderAppIds.push(bundle.manifest.id);
+            locale.registerBundleLocaleResourceLoader(bundle.manifest.bundleIdentifier, bundle.localeResourceLoader);
+            localeLoaderAppIds.push(bundle.manifest.bundleIdentifier);
           }
         }
         if (localeLoaderAppIds.length > 0) await locale.loadBundleLocaleResources(localeLoaderAppIds);
@@ -1635,4 +1686,13 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     },
   });
   return runtime;
+}
+
+/** The built-in adapter for a memory or IndexedDB location, or null when the environment cannot provide one. */
+function defaultDocumentAdapterFor(location: DocumentLocation, environment: SynCloudOSRuntimeConfig["environment"], indexedDB: IDBFactory | undefined) {
+  if (location.kind === "memory") return new InMemoryDocumentAdapter(environment, { id: "syncloudos.default.memory" });
+  if (location.kind === "indexed-db" && indexedDB) {
+    return new IndexedDBDocumentAdapter({ indexedDB, databaseName: location.database, environment, id: `syncloudos.default.indexed-db:${location.database}` });
+  }
+  return null;
 }

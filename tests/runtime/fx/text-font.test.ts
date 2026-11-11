@@ -21,6 +21,7 @@
 import { readFileSync } from "node:fs";
 import { expect, it } from "vitest";
 import { TFXFont, TFXFontDescriptor } from "../../../src/FX/TextFX/public";
+import { SynCloudOSLifecycleError } from "../../../src/SynCloudOS/fxRuntimeContracts";
 
 const fontBytes = (family: string, name: string) => new Uint8Array(readFileSync(`tests/fixtures/fx/fonts/${family}-${name}[wdth,wght].ttf`));
 
@@ -34,7 +35,20 @@ it("shapes true ligature glyphs with UTF-16 clusters and immutable positions", a
   expect(run.advance.width).toBeGreaterThan(20);
   expect(font.glyphPath(run.glyphs[0].id)).toMatch(/[MLQC]/);
   font.dispose();
-  expect(() => font.shape("x")).toThrow(/disposed/);
+  expect(() => font.shape("x")).toThrow(SynCloudOSLifecycleError);
+  try { font.shape("x"); } catch (error) {
+    expect(error).toMatchObject({ code: "TFX_FONT_DISPOSED", operation: "shape", disposal: { reason: "explicit" } });
+  }
+  for (const [operation, action] of [
+    ["supportsCodePoint", () => font.supportsCodePoint(65)],
+    ["glyphPath", () => font.glyphPath(1)],
+    ["createPathForGlyph", () => font.createPathForGlyph(1)],
+    ["supportsText", () => font.supportsText("x")],
+    ["pdfFontSubset", () => font.pdfFontSubset()],
+  ] as const) {
+    expect(action).toThrow(SynCloudOSLifecycleError);
+    try { action(); } catch (error) { expect(error).toMatchObject({ code: "TFX_FONT_DISPOSED", operation }); }
+  }
 });
 
 it("preserves Arabic and Indic clusters rather than returning codepoint IDs", async () => {

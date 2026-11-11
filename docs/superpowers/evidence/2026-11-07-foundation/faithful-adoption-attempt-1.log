@@ -1,0 +1,62 @@
+
+> @syndromatic/syncloudos-source@1.0.0-beta.2 build
+> npm run typecheck && npm run sdk:build
+
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 typecheck
+npm notice run tsc -b --pretty false
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(3728,47): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(3755,36): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4197,25): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4208,86): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4211,46): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4438,82): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4442,82): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4446,82): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4450,82): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4454,82): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4462,84): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4475,53): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4498,84): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4510,51): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4524,84): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4537,53): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4553,84): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4565,51): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/hooks/useBluetooth.ts(26,28): error TS2339: Property 'bluetooth' does not exist on type 'SCOSFacade'.
+src/SynCloudOS/AppSDK/hooks/useContacts.ts(26,28): error TS2339: Property 'contacts' does not exist on type 'SCOSFacade'.
+src/SynCloudOS/AppSDK/hooks/useNetwork.ts(25,28): error TS2339: Property 'network' does not exist on type 'SCOSFacade'.
+src/SynCloudOS/AppSDK/hooks/useNFC.ts(26,28): error TS2339: Property 'nfc' does not exist on type 'SCOSFacade'.
+src/SynCloudOS/AppSDK/hooks/usePayment.ts(26,28): error TS2339: Property 'payment' does not exist on type 'SCOSFacade'.
+src/SynCloudOS/AppSDK/hooks/useSpeech.ts(26,28): error TS2339: Property 'speech' does not exist on type 'SCOSFacade'.
+src/SynCloudOS/AppSDK/hooks/useVideoPresentation.ts(25,28): error TS2551: Property 'videoPresentation' does not exist on type 'SCOSFacade'. Did you mean 'presentation'?
+src/SynCloudOS/AppSDK/hooks/useXR.ts(26,28): error TS2339: Property 'xr' does not exist on type 'SCOSFacade'.
+src/SynCloudOS/AppSDK/projectRuntimeManifest.ts(58,7): error TS2353: Object literal may only specify known properties, and 'requiredEntitlements' does not exist in type 'SynCloudOSAppAccessPolicy'.
+src/SynCloudOS/AppSDK/SynWareRuntimeMount.tsx(393,75): error TS2339: Property 'permissions' does not exist on type 'TrustedSynWareBundle'.
+src/SynCloudOS/AppSDK/testing/createSynWareTestHost.tsx(152,66): error TS2339: Property 'permissions' does not exist on type 'SynWareManifestV1'.
+src/SynCloudOS/AppSDK/testing/createSynWareTestHost.tsx(153,70): error TS2339: Property 'permissions' does not exist on type 'SynWareManifestV1'.
+src/SynCloudOS/ConfigurationProfiles/ConfigurationProfiles.ts(531,129): error TS2339: Property 'permissions' does not exist on type 'TrustedSynWareBundle'.
+src/SynCloudOS/Routing/RouteServiceScope.ts(60,40): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/Routing/RouteServiceScope.ts(64,111): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOSReact/browserRuntime.tsx(310,32): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: npm run build failed
+
+2 !== 0
+
+    at run (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/scripts/use-framework.mjs:19:10)
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/scripts/use-framework.mjs:32:37
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 2,
+  expected: 0,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.22.1

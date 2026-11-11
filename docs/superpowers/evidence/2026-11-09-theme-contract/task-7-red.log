@@ -1,0 +1,25 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-theme-hooks.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-theme-hooks.test.tsx (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-theme-hooks.test.tsx [ tests/runtime/nse-theme-hooks.test.tsx ]
+Error: Cannot find module '../../src/NSE/Theme/contract/hooks' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/nse-theme-hooks.test.tsx
+ ❯ tests/runtime/nse-theme-hooks.test.tsx:2:1
+      1| import { describe, expect, it } from "vitest";
+      2| import { nseControlHooks, nsePartHooks } from "../../src/NSE/Theme/con…
+       | ^
+      3| import { nseThemeControls, nseThemeParts, nseThemeStates, nseThemeVari…
+      4|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  19:06:55
+   Duration  170ms (transform 24ms, setup 27ms, import 0ms, tests 0ms, environment 0ms)

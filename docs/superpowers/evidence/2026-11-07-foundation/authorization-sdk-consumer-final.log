@@ -1,0 +1,14 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/synapp-sdk-package.test.ts -t compiles, bundles and mounts a genuinely external consumer against packed public exports --maxWorkers=1 --no-file-parallelism --reporter=default --reporter=json --outputFile.json=C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\docs\superpowers\evidence\2026-11-07-foundation/authorization-sdk-consumer-final.json
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-authorization-final-8c78a917def1-28840fd8
+
+ ✓ tests/runtime/synapp-sdk-package.test.ts (9 tests | 8 skipped) 127308ms
+     ✓ compiles, bundles and mounts a genuinely external consumer against packed public exports  127307ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 8 skipped (9)
+   Start at  22:33:45
+   Duration  139.46s (transform 13.81s, setup 37ms, import 10.99s, tests 127.31s, environment 961ms)
+
+JSON report written to C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/docs/superpowers/evidence/2026-11-07-foundation/authorization-sdk-consumer-final.json

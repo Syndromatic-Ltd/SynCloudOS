@@ -429,15 +429,20 @@ export function useNSEPresentation(ref: RefObject<HTMLElement | null>, motion: N
   const running = useRef<AFXAnimationHandle | null>(null);
   /** The state the element last presented, or null while unmounted. */
   const presentedState = useRef<string | null>(null);
+  /** The state this element finished presenting. It outlives an effect
+   * replay (StrictMode replays a view's effects when a keyed list moves it),
+   * but not a remount. */
+  const settledState = useRef<string | null>(null);
   const run = (spec: NSEPresentationSpec | null | undefined, phase: "enter" | "exit"): AFXAnimationHandle | null => {
     const element = ref.current, active = view.current;
-    if (!spec || !element || !active) return null;
     const previous = running.current;
     running.current = null;
     // A presentation still in flight hands over from what it shows now.
-    const origin = previous && (previous.state === "running" || previous.state === "paused")
+    const origin = spec && element && previous && (previous.state === "running" || previous.state === "paused")
       ? presentedOrigin(element, spec) : {};
     previous?.cancel("superseded by the next presentation");
+    // A model-only state also supersedes a held exit presentation.
+    if (!spec || !element || !active) return null;
     active.generation += 1;
     // Presentation is cosmetic: an animation the service refuses leaves the
     // element in its final state rather than failing the view.
@@ -454,12 +459,15 @@ export function useNSEPresentation(ref: RefObject<HTMLElement | null>, motion: N
   const present = (previousState: string | null) => {
     const { enter, state = defaultState } = latest.current;
     presentedState.current = state;
+    settledState.current = null;
     const spec = typeof enter === "function" ? enter(previousState) : enter;
     const handle = run(spec, "enter");
-    if (!handle) { latest.current.onPresented?.(state); return; }
+    if (!handle) { settledState.current = state; latest.current.onPresented?.(state); return; }
     void handle.finished.then((settlement) => {
-      if ((settlement.state === "completed" || settlement.state === "failed") && presentedState.current === state)
+      if (running.current === handle && (settlement.state === "completed" || settlement.state === "failed") && presentedState.current === state) {
+        settledState.current = state;
         latest.current.onPresented?.(state);
+      }
     });
   };
   useLayoutEffect(() => {
@@ -472,7 +480,11 @@ export function useNSEPresentation(ref: RefObject<HTMLElement | null>, motion: N
       }
     }
     view.current = animator && lease ? { animator, lease, generation: 0 } : null;
-    if (presence?.skipEnter) {
+    const state = latest.current.state ?? defaultState;
+    // A replay over an element that already shows its state is not a new
+    // appearance; an entrance the replay interrupted starts again.
+    if (settledState.current === state) presentedState.current = state;
+    else if (presence?.skipEnter) {
       presentedState.current = latest.current.state ?? defaultState;
       latest.current.onPresented?.(presentedState.current);
     } else present(null);
@@ -502,6 +514,7 @@ export function useNSEPresentation(ref: RefObject<HTMLElement | null>, motion: N
     if (!presence) return;
     if (!exiting) return;
     exited.current = true;
+    settledState.current = null;
     const handle = run(latest.current.exit, "exit");
     if (!handle) { presence.exited(participant); return; }
     let current = true;

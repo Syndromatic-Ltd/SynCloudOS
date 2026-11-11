@@ -25,7 +25,7 @@ import { createWebspringBoardView, defineWebspring, WebspringBoardView, type Web
 function defineView(component: WebspringViewComponent, id = "custom") {
   return defineWebspring({
     manifest: {
-      schemaVersion: 1, id: "test.return-definition", version: "1.0.0", title: "Return definition",
+      schemaVersion: 1, bundleIdentifier: "com.example.test.return-definition", version: "1.0.0", displayName: "Return definition",
       webspringShell: {
         views: [{ id, presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
         defaults: { desktop: id, tablet: id, mobile: id }, homeRoute: "/",
@@ -77,5 +77,86 @@ describe("Webspring return requirement capture", () => {
     });
     expect(() => defineView(View)).toThrow(/returnTracks.*accessor/);
     expect(reads).toBe(0);
+  });
+});
+
+describe("Webspring folder definition", () => {
+  type Folder = { id: `folder.${string}`; title: { key: string }; order: number; apps: string[] };
+  function defineFolders(initial: Folder[], extra: Record<string, unknown> = {}) {
+    return defineWebspring({
+      manifest: {
+        schemaVersion: 1, bundleIdentifier: "com.example.test.folders", version: "1.0.0", displayName: "Folders",
+        webspringShell: {
+          views: [{ id: "board", presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
+          defaults: { desktop: "board", tablet: "board", mobile: "board" }, homeRoute: "/",
+          branding: { name: { key: "site.name", fallback: "Fixture" } },
+          folders: { editable: true, initial },
+        },
+      },
+      components: { board: WebspringBoardView },
+      ...extra,
+    });
+  }
+
+  it("defaults to the split presentation and keeps a supplied one", () => {
+    const Presentation = () => null;
+    const defaults = defineFolders([{ id: "folder.tools", title: { key: "tools" }, order: 1, apps: ["one"] }]);
+    expect(typeof defaults.folderPresentation).toBe("function");
+    expect(defineFolders([], { folderPresentation: Presentation }).folderPresentation).toBe(Presentation);
+    expect(() => defineFolders([], { folderPresentation: "split" })).toThrow(/folderPresentation.*React component/);
+  });
+
+  it("fills in the folder appearance's defaults and keeps a configured one", () => {
+    expect(defineFolders([]).folderAppearance).toEqual({
+      shape: { kind: "roundedRect", smoothSurface: { radius: "36%", curve: "squircle", smoothing: 0.6 } },
+      fill: "inset",
+    });
+    expect(defineFolders([], { folderAppearance: { shape: { kind: "roundedRect", smoothSurface: { radius: 14, curve: "arc" } } } }).folderAppearance).toEqual({
+      shape: { kind: "roundedRect", smoothSurface: { radius: 14, curve: "arc", smoothing: 0.6 } },
+      fill: "inset",
+    });
+    const textured = defineFolders([], { folderAppearance: { shape: { kind: "circle" }, fill: { kind: "texture", image: "/cotton.jpg" } } });
+    expect(textured.folderAppearance).toEqual({
+      shape: { kind: "circle" },
+      fill: { kind: "texture", image: "/cotton.jpg", size: "cover", colour: "transparent" },
+    });
+    expect(Object.isFrozen(textured.folderAppearance.fill)).toBe(true);
+    expect(defineFolders([], { folderAppearance: { shape: { kind: "roundedRect", smoothSurface: { radius: "xl" } } } })
+      .folderAppearance.shape).toMatchObject({ smoothSurface: { radius: "xl" } });
+  });
+
+  it.each([
+    [{ shape: { kind: "hexagon" } }, /shape\.kind must be roundedRect or circle/],
+    [{ shape: "circle" }, /shape must be a plain object/],
+    [{ shape: { kind: "circle", smoothSurface: {} } }, /shape has unknown fields: smoothSurface/],
+    [{ shape: { kind: "roundedRect", smoothSurface: { radius: "60%" } } }, /radius must be a percentage up to 50%/],
+    [{ shape: { kind: "roundedRect", smoothSurface: { radius: -2 } } }, /radius must be/],
+    [{ shape: { kind: "roundedRect", smoothSurface: { radius: "huge" } } }, /radius must be/],
+    [{ shape: { kind: "roundedRect", smoothSurface: { curve: "bezier" } } }, /curve must be arc, squircle, superellipse or clothoid/],
+    [{ shape: { kind: "roundedRect", smoothSurface: { smoothing: 2 } } }, /smoothing must be a number from 0 to 1/],
+    [{ shape: { kind: "roundedRect", smoothSurface: { radius: null } } }, /radius must be/],
+    [{ fill: "cotton" }, /fill must be inset or a texture/],
+    [{ fill: { kind: "texture" } }, /fill\.image must be a nonempty string/],
+    [{ fill: { kind: "texture", image: "/cotton.jpg", colour: "" } }, /fill\.colour must be a nonempty string/],
+    [{ fill: { kind: "texture", image: "/cotton.jpg", repeat: true } }, /fill has unknown fields: repeat/],
+    [{ outline: "none" }, /folderAppearance has unknown fields: outline/],
+    ["inset", /folderAppearance must be a plain object/],
+  ])("rejects the folder appearance %j", (folderAppearance, message) => {
+    expect(() => defineFolders([], { folderAppearance })).toThrow(TypeError);
+    expect(() => defineFolders([], { folderAppearance })).toThrow(message);
+  });
+
+  it("rejects duplicate folder IDs", () => {
+    expect(() => defineFolders([
+      { id: "folder.tools", title: { key: "a" }, order: 1, apps: ["one"] },
+      { id: "folder.tools", title: { key: "b" }, order: 2, apps: ["two"] },
+    ])).toThrow("Webspring manifest contains duplicate folder ID folder.tools.");
+  });
+
+  it("rejects an app listed in two folders", () => {
+    expect(() => defineFolders([
+      { id: "folder.tools", title: { key: "a" }, order: 1, apps: ["one", "two"] },
+      { id: "folder.games", title: { key: "b" }, order: 2, apps: ["two"] },
+    ])).toThrow("Webspring app two is listed in folders folder.tools and folder.games.");
   });
 });

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import type {
   DocumentController,
   DocumentLocation,
@@ -47,7 +48,7 @@ export type FilePanelPermissionState =
   | "revoked";
 
 export interface FilePanelWritable {
-  write(data: Blob | Uint8Array | string): Promise<void>;
+  write(data: NSEDataConvertible | string): Promise<void>;
   close(): Promise<void>;
   abort(reason?: unknown): Promise<void>;
 }
@@ -88,27 +89,27 @@ export type FilePanelReference =
       readonly lastModified: number;
       readonly lifetime: "runtime-memory";
       readonly permission: "granted";
-      read(signal?: AbortSignal): Promise<File>;
+      read(signal?: AbortSignal): Promise<NSEData>;
     })
   | (FilePanelReferenceBase & {
       readonly kind: "file-handle";
-      readonly handle: FilePanelFileHandle;
+      readonly mediaType: string;
       readonly lifetime: "browser-permission";
       readonly access: "read";
       readonly permission: Exclude<FilePanelPermissionState, "not-applicable">;
       queryPermission(): Promise<FilePanelPermissionState>;
       requestPermission(): Promise<FilePanelPermissionState>;
-      read(signal?: AbortSignal): Promise<File>;
+      read(signal?: AbortSignal): Promise<NSEData>;
     })
   | (FilePanelReferenceBase & {
       readonly kind: "file-handle";
-      readonly handle: FilePanelFileHandle;
+      readonly mediaType: string;
       readonly lifetime: "browser-permission";
       readonly access: "readwrite";
       readonly permission: Exclude<FilePanelPermissionState, "not-applicable">;
       queryPermission(): Promise<FilePanelPermissionState>;
       requestPermission(): Promise<FilePanelPermissionState>;
-      read(signal?: AbortSignal): Promise<File>;
+      read(signal?: AbortSignal): Promise<NSEData>;
       createWritable(signal?: AbortSignal): Promise<FilePanelWritable>;
     })
   | (FilePanelReferenceBase & {
@@ -146,7 +147,7 @@ export type FilePanelConflictDecision = "replace" | "choose-another" | "cancel";
 export interface FilePanelExportPayload {
   readonly fileName: string;
   readonly mediaType: string;
-  readonly blob: Blob;
+  readonly data: NSEDataConvertible;
 }
 
 export interface FilePanelExportSink {
@@ -257,7 +258,7 @@ export interface FileSystemAccessSaveSelection {
 export interface FileSystemAccessPanelPort {
   isSecureContext(): boolean;
   /** False means the browser does not expose this capability at all. */
-  isAvailable?(): boolean;
+  isAvailable?(operation?: "open" | "save" | "directory"): boolean;
   hasTransientUserActivation(): boolean;
   openFiles(options: FileSystemAccessOpenOptions, signal: AbortSignal): Promise<readonly FilePanelFileHandle[]>;
   openDirectory(signal: AbortSignal): Promise<FilePanelDirectoryHandle | null>;

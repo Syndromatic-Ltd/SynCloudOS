@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-page-controller.test.tsx tests/runtime/nse-page-surface-key.test.ts tests/runtime/nse-page-curl-engine.test.ts tests/runtime/nse-page-curl-cylinder.test.ts tests/runtime/nse-page-tear.test.ts tests/runtime/navigation-controller-back.test.tsx tests/runtime/synware-nse-public-surface.test.ts tests/runtime/appkit-counterparts.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  8 passed (8)
+      Tests  79 passed (79)
+   Start at  09:31:20
+   Duration  33.70s (transform 11.60s, setup 138ms, import 20.90s, tests 35.59s, environment 5.90s)
+

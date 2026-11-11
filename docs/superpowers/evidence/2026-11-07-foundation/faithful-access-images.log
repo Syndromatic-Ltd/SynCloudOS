@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-control-corrections.test.tsx tests/runtime/nse-controls-extended-wrappers.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  2 passed (2)
+      Tests  14 passed (14)
+   Start at  19:06:21
+   Duration  2.58s (transform 1.62s, setup 53ms, import 2.38s, tests 462ms, environment 1.78s)
+

@@ -1,0 +1,30 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/foundation-faithful-decimal.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/foundation-faithful-decimal.test.ts (6 tests | 1 failed) 6ms
+   × uses replaceable default behavior and custom exception handling 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/foundation-faithful-decimal.test.ts > uses replaceable default behavior and custom exception handling
+RangeError: Decimal divide by zero.
+ ❯ NSEDecimalNumber.#operate src/Foundation/NSEDecimalNumber.ts:120:40
+    118|     if (this.#isNaN || other.#isNaN) return NSEDecimalNumber.notANumbe…
+    119|     if (op === "divide" && other.#coefficient === 0n) {
+    120|       if (h.raiseOnDivideByZero) throw new RangeError("Decimal divide …
+       |                                        ^
+    121|       return NSEDecimalNumber.notANumber;
+    122|     }
+ ❯ NSEDecimalNumber.dividing src/Foundation/NSEDecimalNumber.ts:149:97
+ ❯ tests/runtime/foundation-faithful-decimal.test.ts:45:33
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  19:16:27
+   Duration  193ms (transform 34ms, setup 28ms, import 19ms, tests 6ms, environment 0ms)
+

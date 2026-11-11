@@ -19,7 +19,7 @@
  */
 
 import type { WindowBounds, WindowRecord, WindowRole, WindowStyle } from "../Windows";
-import type { SynCloudOSAppAccessPolicy } from "../PolicyKit/policyTypes";
+import type { SynCloudOSAppAccessPolicy } from "../ConfigurationProfiles/policyTypes";
 import type {
   SynCloudOSAppInfoExplanation,
   SynCloudOSAppInfoIssue,
@@ -27,6 +27,8 @@ import type {
   SynCloudOSAppInfoValidationReport
 } from "../AppInfo/appInfoTypes";
 import type {
+  SynWareFrameBackgroundManifest,
+  SynWareLocalisedText,
   SynCloudOSAppFrameSmoothSurfaceCurve,
   SynCloudOSAppFrameSmoothSurfaceManifest,
   SynCloudOSAppFrameSmoothSurfacePhysicality,
@@ -40,7 +42,12 @@ export type {
 
 export type SynCloudOSAppType = "internal" | "external" | "system";
 export type SynCloudOSAppPresentation = "appView" | "windowedView" | "systemSheet" | "backgroundService";
-export type SynCloudOSAppFrameLayout = "defacto" | "simple";
+/** The right-slot control with its icon resolved to a URL. `"auto"` is a gear, `"userInfo"` a person, `"none"` nothing. */
+export type SynCloudOSAppFrameRightSlot = "auto" | "userInfo" | "none" | {
+  readonly icon: string;
+  readonly label: SynWareLocalisedText;
+};
+export type SynCloudOSAppFrameBackground = SynWareFrameBackgroundManifest;
 export type SynCloudOSAppFrameMaterial = "standard" | "metal";
 export type SynCloudOSAppFrameTopBar = "standard" | "custom" | "none";
 export type SynCloudOSWindowChrome = "system" | "custom" | "frameless";
@@ -112,9 +119,8 @@ export interface SynCloudOSAppWindowManifest {
 /**
  * Optional source-list window primitive. When present (and `topBar:"standard"`), the system frame
  * draws a sidebar-aligned rail seam in the top bar/status bar and owns a resizable sidebar width.
- * The app supplies only sidebar + main content via `NSESourceListScene`; it never re-implements the
- * bar, the seam, the resizer, or QuickSwitch. A source-list window is a `defacto` app with a
- * system-owned rail — NOT a third `layout` value.
+ * The app supplies only sidebar + main content via `the source-list split view`; it never re-implements the
+ * bar, the seam, the resizer, or QuickSwitch.
  */
 export interface SynCloudOSAppFrameSourceList {
   /** Rail wordmark. Defaults to the app's short name (resolved through the locale layer) so an app
@@ -130,16 +136,16 @@ export interface SynCloudOSAppFrameSourceList {
 }
 
 export interface SynCloudOSAppFrameManifest {
-  /** Body presentation: `defacto` = full-bleed (app paints its own surface), `simple` = inset card. */
-  layout: SynCloudOSAppFrameLayout;
   /** Chrome skin. Drives the standard top bar's look. `metal` is light/dark-aware. */
   material: SynCloudOSAppFrameMaterial;
   /** Top-bar behaviour. `standard` ⟹ system chrome, `custom` ⟹ app-owned chrome (may draw no bar), `none` ⟹ no bar + runtime return. */
   topBar: SynCloudOSAppFrameTopBar;
   /** Host launch/return motion, or motion completed by the application's content. */
   presentationMotion?: "host" | "content";
-  /** RightSlotRegistry key for the standard bar's right affordance. `"none"` = empty. Honoured only when `topBar:"standard"`. */
-  rightSlot: string;
+  /** The standard bar's right-hand control. Honoured only when `topBar:"standard"`. */
+  rightSlot: SynCloudOSAppFrameRightSlot;
+  /** What fills the body behind the content. */
+  background: SynCloudOSAppFrameBackground;
   smoothSurface: SynCloudOSAppFrameSmoothSurfaceManifest;
   /** System-owned source-list rail. Honoured only when `topBar:"standard"`; otherwise dropped. */
   sourceList?: SynCloudOSAppFrameSourceList;
@@ -152,6 +158,8 @@ export interface SynCloudOSAppLifecycleManifest {
 }
 
 export interface SynCloudOSAppNotificationManifest {
+  /** NSDockTile.badgeLabel; omitted leaves NotificationCenter counts visible. */
+  badgeLabel?: string;
   showsNotifications?: boolean;
   badgeCount?: number;
 }
@@ -173,10 +181,10 @@ export interface SynCloudOSAppSeoManifest {
 }
 
 /**
- * What the About box shows. Mirrors the Info.plist keys macOS's standard About
- * panel reads, so the mapping stays obvious to anyone coming from a .app bundle:
+ * Legal attribution and build details for the standard About panel. The
+ * user-facing version is the manifest's required top-level `version`
+ * (CFBundleShortVersionString), never a separate About override.
  *
- *   version   → CFBundleShortVersionString  (the user-facing "Version 1.0")
  *   build     → CFBundleVersion             (shown in parentheses after it)
  *   copyright → NSHumanReadableCopyright
  *   name/icon → CFBundleName / CFBundleIconFile, already on the manifest
@@ -186,7 +194,6 @@ export interface SynCloudOSAppSeoManifest {
  * carries the same trademark line and a one-line statement of what it is.
  */
 export interface SynCloudOSAppAboutManifest {
-  version: string;
   build?: string;
   copyright: string;
   trademark: string;
@@ -199,10 +206,10 @@ export interface SynCloudOSAppRouteClaim {
 }
 
 export interface SynCloudOSAppManifest {
-  id: string;
+  bundleIdentifier: string;
+  version: string;
   name: string;
   packageName: string;
-  bundleId: string;
   displayName: string;
   shortName: string;
   description: string;
@@ -237,7 +244,7 @@ export type SynCloudOSAppRegistryMap = Record<string, SynCloudOSAppManifest>;
 export type SynCloudOSAppRegistrationAction = "register" | "update" | "unregister" | "failed";
 export type SynCloudOSAppRegistrationIssueSeverity = "fatal" | "warning";
 export type SynCloudOSAppRegistrationRouteMatchMode = "path" | "href" | "none";
-export type SynCloudOSAppRegistrationCollisionField = "bundleId" | "packageName" | "route" | "componentKey";
+export type SynCloudOSAppRegistrationCollisionField = "bundleIdentifier" | "packageName" | "route" | "componentKey";
 
 export interface SynCloudOSAppRegistrationCollision {
   field: SynCloudOSAppRegistrationCollisionField;
@@ -265,7 +272,7 @@ export interface SynCloudOSAppRegistrationPreflightReport {
   ok: boolean;
   appId: string | null;
   packageName: string | null;
-  bundleId: string | null;
+  bundleIdentifier: string | null;
   route: string | null;
   normalizedRoute: string | null;
   routeKey: string | null;
@@ -275,7 +282,7 @@ export interface SynCloudOSAppRegistrationPreflightReport {
   previousApp: {
     appId: string;
     packageName: string;
-    bundleId: string;
+    bundleIdentifier: string;
     route: string;
     componentKey: string;
   } | null;
@@ -297,7 +304,7 @@ export interface SynCloudOSAppRegistrationHistoryRecord {
   result: "accepted" | "rejected" | "removed";
   at: number;
   reason?: string;
-  bundleId?: string;
+  bundleIdentifier?: string;
   route?: string;
   normalizedRoute?: string | null;
   routeKey?: string | null;

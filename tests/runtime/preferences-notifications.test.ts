@@ -36,8 +36,8 @@ describe("Notifications preference", () => {
     const { SynCloudOS } = createRuntimeHarness(createTestRuntime());
     const settings = SynCloudOS.Settings;
 
-    settings.setNotificationsAllowed("muted-app", false);
-    expect(settings.appNotificationsAllowed("muted-app")).toBe(false);
+    settings.setNotificationsAllowed("com.example.muted-app", false);
+    expect(settings.appNotificationsAllowed("com.example.muted-app")).toBe(false);
     expect(settings.appNotificationsAllowed("allowed-app")).toBe(true);
 
     settings.set("notificationsEnabled", false);
@@ -45,46 +45,46 @@ describe("Notifications preference", () => {
     // back on restores exactly what was there before.
     expect(settings.notificationsAllowed("allowed-app")).toBe(false);
     expect(settings.appNotificationsAllowed("allowed-app")).toBe(true);
-    expect(settings.notificationsAllowed("muted-app")).toBe(false);
-    expect(settings.appNotificationsAllowed("muted-app")).toBe(false);
+    expect(settings.notificationsAllowed("com.example.muted-app")).toBe(false);
+    expect(settings.appNotificationsAllowed("com.example.muted-app")).toBe(false);
 
     settings.set("notificationsEnabled", true);
     expect(settings.notificationsAllowed("allowed-app")).toBe(true);
-    expect(settings.notificationsAllowed("muted-app")).toBe(false);
+    expect(settings.notificationsAllowed("com.example.muted-app")).toBe(false);
 
-    settings.setNotificationsAllowed("muted-app", true);
-    expect(settings.notificationsAllowed("muted-app")).toBe(true);
+    settings.setNotificationsAllowed("com.example.muted-app", true);
+    expect(settings.notificationsAllowed("com.example.muted-app")).toBe(true);
   });
 
   it("drops a muted app's notification at post rather than hiding it later", async () => {
     const { AppRegistry, ServiceRegistry, SynCloudOS } = createRuntimeHarness(createTestRuntime());
     ServiceRegistry.ensureDefaults();
     AppRegistry.register(createTestManifest({
-      id: "muted-app",
+      bundleIdentifier: "com.example.muted-app",
       route: "/muted-app",
       requiredServices: ["webspring", "notifications"],
       notifications: { showsNotifications: true, badgeCount: 0 }
     }));
 
-    SynCloudOS.Settings.setNotificationsAllowed("muted-app", false);
+    SynCloudOS.Settings.setNotificationsAllowed("com.example.muted-app", false);
     const suppressed = SynCloudOS.NotificationCenter.post({
       kind: "publishing",
       title: "Should never arrive",
       message: "Muted by the application preference.",
-      appId: "muted-app"
+      appId: "com.example.muted-app"
     });
     expect(suppressed).toBeNull();
     // Not merely unseen: it must not be in the history either.
     expect(
-      SynCloudOS.NotificationCenter.getSnapshot().history.some((entry) => entry.appId === "muted-app")
+      SynCloudOS.NotificationCenter.getSnapshot().history.some((entry) => entry.appId === "com.example.muted-app")
     ).toBe(false);
 
-    SynCloudOS.Settings.setNotificationsAllowed("muted-app", true);
+    SynCloudOS.Settings.setNotificationsAllowed("com.example.muted-app", true);
     expect(SynCloudOS.NotificationCenter.post({
       kind: "publishing",
       title: "Arrives once allowed",
       message: "Allowed by the application preference.",
-      appId: "muted-app"
+      appId: "com.example.muted-app"
     })).not.toBeNull();
   });
 

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../src/Foundation/NSEData";
 import { describe, expect, it } from "vitest";
 import { createInMemoryDocumentAssetStore } from "../../src/SynCloudOS/Documents/DocumentAssetStore";
 
@@ -33,9 +34,11 @@ describe("document asset store", () => {
     expect(ref.hash).toBe("sha256:039058c6f2c0cb492c533b0a4d14ef77cc0f78abccced5287d84a1a2011cfb81");
     expect(ref).not.toHaveProperty("leaseId");
     expect(ref).not.toHaveProperty("url");
-    const bytes = await store.read(scope, ref);
+    const stored = await store.read(scope, ref);
+    expect(stored).toBeInstanceOf(NSEData);
+    const bytes = stored.bytes;
     bytes[0] = 88;
-    expect(await store.read(scope, ref)).toEqual(new Uint8Array([1, 2, 3]));
+    expect((await store.read(scope, ref)).bytes).toEqual(new Uint8Array([1, 2, 3]));
     expect(store.capabilities.durability).toBe("memory");
   });
 
@@ -77,9 +80,9 @@ describe("document asset store", () => {
 
   it("detects corrupted persisted bytes through digest verification", async () => {
     let badHash = false;
-    const hash = async (bytes: Uint8Array) => badHash
+    const hash = async (bytes: NSEData) => badHash
       ? "sha256:" + "0".repeat(64)
-      : "sha256:" + Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes.slice().buffer)), b => b.toString(16).padStart(2, "0")).join("");
+      : "sha256:" + Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes.bytes.buffer)), b => b.toString(16).padStart(2, "0")).join("");
     const store = createInMemoryDocumentAssetStore({ hash });
     const ref = await store.put(scope, input());
     badHash = true;
@@ -96,7 +99,7 @@ describe("document asset store", () => {
     expect(await store.listRetentionRoots(scope)).toEqual([{ root: target, references: [ref], token }]);
     expect(await store.release(source, undefined, oldToken)).toBe(false);
     expect(await store.collectGarbage(scope)).toEqual({ removedAssets: 0, removedBytes: 0 });
-    expect(await store.read(scope, ref)).toEqual(input().bytes);
+    expect((await store.read(scope, ref)).bytes).toEqual(input().bytes);
   });
 
   it("refuses a stale promotion and leaves a newer source pin untouched", async () => {
@@ -109,6 +112,6 @@ describe("document asset store", () => {
     const token = await store.promoteRetentionRoot!(source, source, [ref], freshToken);
     expect(token).not.toBe(freshToken);
     expect(await store.release(source, undefined, freshToken)).toBe(false);
-    expect(await store.read(scope, ref)).toEqual(input().bytes);
+    expect((await store.read(scope, ref)).bytes).toEqual(input().bytes);
   });
 });

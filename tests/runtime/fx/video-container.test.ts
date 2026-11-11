@@ -46,7 +46,7 @@ describe("VFX bounded WebM container I/O", () => {
   it("shares the reader-owned segment allocation without exposing mutable input or packet aliases", async () => {
     const fragments: Uint8Array[] = [];
     const writer = new VFXContainerWriter({ backend: new VFXWebMContainerBackend(), track,
-      sink: { write(bytes) { fragments.push(bytes.slice()); } } });
+      sink: { write(bytes) { fragments.push(new Uint8Array(bytes.bytes)); } } });
     for (let index = 0; index < 4; index++) await writer.write(chunk(index, 16384));
     await writer.close();
     const input = new Uint8Array(fragments.reduce((sum, bytes) => sum + bytes.length, 0));
@@ -57,9 +57,9 @@ describe("VFX bounded WebM container I/O", () => {
     expect(buffers.size, 'Demux must not allocate another compressed payload for every packet.').toBe(1);
     expect(buffers.has(input.buffer)).toBe(false);
     input.fill(255);
-    result.chunks[2]!.copyData().fill(254);
+    result.chunks[2]!.copyData().bytes.fill(254);
     for (let index = 0; index < 4; index++)
-      expect(result.chunks[index]!.copyData()).toEqual(new Uint8Array(16384).fill(index));
+      expect(result.chunks[index]!.copyData().bytes).toEqual(new Uint8Array(16384).fill(index));
     expect(result.chunks.map(packet => packet.webCodecsTiming().timestampMicroseconds))
       .toEqual([0, 33333, 66666, 99999]);
   });
@@ -68,14 +68,14 @@ describe("VFX bounded WebM container I/O", () => {
     const vp9: VFXContainerTrack = { ...track, codec: 'vp09.00.40.08', codedWidth: 2080, codedHeight: 296 };
     const fragments: Uint8Array[] = [];
     const writer = new VFXContainerWriter({ backend, track: vp9,
-      sink: { write(bytes) { fragments.push(bytes.slice()); } } });
+      sink: { write(bytes) { fragments.push(new Uint8Array(bytes.bytes)); } } });
     for (let frame = 0; frame < 3; frame++) await writer.write(chunk(frame));
     await writer.close();
     const bytes = Uint8Array.from(fragments.flatMap(fragment => [...fragment]));
     const reader = new VFXContainerReader({ backend });
     const parsed = await reader.read(fragment(bytes, 3));
     expect(parsed.track).toEqual(vp9);
-    expect(parsed.chunks.map(packet => [...packet.copyData()])).toEqual([
+    expect(parsed.chunks.map(packet => [...packet.copyData().bytes])).toEqual([
       [0, 0, 0, 0], [1, 1, 1, 1], [2, 2, 2, 2],
     ]);
     expect(parsed.chunks.map(packet => packet.type)).toEqual(['key', 'delta', 'delta']);
@@ -100,7 +100,7 @@ describe("VFX bounded WebM container I/O", () => {
   it("demuxes many packets with linear copied bytes while retaining owned packet data", async () => {
     const parts: Uint8Array[] = [];
     const backend = new VFXWebMContainerBackend();
-    const writer = new VFXContainerWriter({ backend, track, sink: { write(bytes) { parts.push(bytes.slice()); } } });
+    const writer = new VFXContainerWriter({ backend, track, sink: { write(bytes) { parts.push(new Uint8Array(bytes.bytes)); } } });
     for (let index = 0; index < 48; index++) await writer.write(chunk(index, 8192));
     await writer.close();
     const bytes = new Uint8Array(parts.reduce((sum, part) => sum + part.length, 0));
@@ -119,14 +119,14 @@ describe("VFX bounded WebM container I/O", () => {
     finally { slicing.mockRestore(); }
     bytes.fill(255);
     expect(result.chunks.length).toBe(48);
-    expect(result.chunks[23]!.copyData()).toEqual(new Uint8Array(8192).fill(23));
+    expect(result.chunks[23]!.copyData().bytes).toEqual(new Uint8Array(8192).fill(23));
     expect(copied).toBeLessThan(bytes.byteLength * 6);
   });
   it("writes and reimports bounded Opus audio-only WebM with explicit decoder metadata", async () => {
     const fragments: Uint8Array[] = [];
     const writer = new VFXContainerWriter({
       backend: new VFXWebMContainerBackend(),
-      sink: { write(bytes) { fragments.push(bytes.slice()); } },
+      sink: { write(bytes) { fragments.push(new Uint8Array(bytes.bytes)); } },
       track: audioTrack,
       maximumBufferedBytes: 4096,
     });
@@ -145,7 +145,7 @@ describe("VFX bounded WebM container I/O", () => {
     const reader = new VFXContainerReader({ backend: new VFXWebMContainerBackend(), maximumBufferedBytes: 4096, maximumElementBytes: 2048 });
     const imported = await reader.read(fragment(bytes, 3));
     expect(imported.track).toEqual(audioTrack);
-    expect(imported.chunks.map(item => Array.from(item.copyData()))).toEqual([[0xf8, 0], [0xf8, 1], [0xf8, 2]]);
+    expect(imported.chunks.map(item => Array.from(item.copyData().bytes))).toEqual([[0xf8, 0], [0xf8, 1], [0xf8, 2]]);
     expect(imported.chunks.map(item => item.webCodecsTiming().timestampMicroseconds)).toEqual([0, 20_000, 40_000]);
     expect(imported.chunks.map(item => item.discardPaddingNanoseconds)).toEqual([0, 0, 3_500_000]);
     expect(writer.diagnostics.reservedInputBytes).toBe(0);
@@ -160,7 +160,7 @@ describe("VFX bounded WebM container I/O", () => {
   });
   it("caps retained demuxed packet count independently of the parser byte window", async () => {
     const parts: Uint8Array[] = [];
-    const writer = new VFXContainerWriter({ backend: new VFXWebMContainerBackend(), track: audioTrack, sink: { write(bytes) { parts.push(bytes.slice()); } } });
+    const writer = new VFXContainerWriter({ backend: new VFXWebMContainerBackend(), track: audioTrack, sink: { write(bytes) { parts.push(new Uint8Array(bytes.bytes)); } } });
     for (let index = 0; index < 3; index++) await writer.write(new VFXEncodedChunk({ type: "key", data: Uint8Array.of(0xf8, index), timing: new MEFXSampleTimingInfo({ presentationTime: MEFXTime.finite(BigInt(index * 20_000), 1_000_000), duration: MEFXTime.finite(20_000n, 1_000_000) }) }));
     await writer.close();
     const bytes = new Uint8Array(parts.reduce((sum, part) => sum + part.length, 0));
@@ -172,7 +172,7 @@ describe("VFX bounded WebM container I/O", () => {
     const fragments: Uint8Array[] = [];
     const writer = new VFXContainerWriter({
       backend: new VFXWebMContainerBackend(),
-      sink: { async write(bytes) { fragments.push(bytes.slice()); } },
+      sink: { async write(bytes) { fragments.push(new Uint8Array(bytes.bytes)); } },
       track,
       maximumBufferedBytes: 4096,
     });
@@ -237,7 +237,7 @@ describe("VFX bounded WebM container I/O", () => {
       sink: {
         async write(bytes) {
           writes += 1;
-          bytesWritten += bytes.byteLength;
+          bytesWritten += bytes.count;
           await Promise.resolve();
         },
       },

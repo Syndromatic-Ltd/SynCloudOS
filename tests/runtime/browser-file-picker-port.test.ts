@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -18,7 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// @vitest-environment jsdom
+import { NSEData } from "../../src/Foundation/NSEData";
 import { describe, expect, it } from "vitest";
 import { createBrowserFilePickerPort } from "../../src/SynCloudOS/PlatformAdapters/BrowserFilePickerPort";
 import { createBrowserFilePanelAdapter } from "../../src/SynCloudOS/FilePanels/BrowserFilePanelAdapter";
@@ -42,7 +43,13 @@ describe("the browser file chooser behind the Open panel", () => {
     input.dispatchEvent(new Event("change"));
     const result = await opened;
     expect(result.kind).toBe("accepted");
-    if (result.kind === "accepted") await expect(result.values[0]!.kind === "ephemeral-file" && result.values[0]!.read()).resolves.toBe(file);
+    if (result.kind === "accepted" && result.values[0]!.kind === "ephemeral-file") {
+      const reference = result.values[0]!;
+      expect(reference.file).toBe(file);
+      const data = await reference.read();
+      expect(data).toBeInstanceOf(NSEData);
+      expect(Array.from(data.bytes)).toEqual([137, 80, 78, 71]);
+    }
     expect(chooser()).toBeNull();
   });
 

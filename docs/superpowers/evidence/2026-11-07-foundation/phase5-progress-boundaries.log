@@ -1,0 +1,6 @@
+policy aliases are missing configured alias @syndromatic/syncloudos/fx/bluetooth -> src/FX/BluetoothFX/public.ts
+policy aliases are missing configured alias @syndromatic/syncloudos/fx/nfc -> src/FX/NFCFX/public.ts
+policy aliases are missing configured alias @syndromatic/syncloudos/fx/speech -> src/FX/SpeechFX/public.ts
+policy aliases are missing configured alias @syndromatic/syncloudos/fx/contacts -> src/FX/ContactsFX/public.ts
+policy aliases are missing configured alias @syndromatic/syncloudos/fx/pass -> src/FX/PassFX/public.ts
+policy aliases are missing configured alias @syndromatic/syncloudos/fx/xr -> src/FX/XRFX/public.ts

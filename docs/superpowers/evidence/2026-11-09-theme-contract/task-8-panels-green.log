@@ -1,0 +1,413 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-theme-panel-hook-coverage.test.tsx tests/nse/date-time
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+ ❯ tests/runtime/nse-theme-panel-hook-coverage.test.tsx (72 tests | 3 failed) 3911ms
+     × popover 1021ms
+     × sheet 1009ms
+     × route-picker 1003ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-theme-panel-hook-coverage.test.tsx > date, panel and window theme hooks > popover
+AssertionError: popover publishes popover: expected null not to be null
+
+Ignored nodes: comments, script, style
+<html>
+  <head />
+  <body>
+    <div>
+      <div
+        class="nse-appearance-provider"
+        data-mode="light"
+        data-nse-appearance="atmo"
+        data-nse-chrome="standard"
+        data-nse-colour-scheme-requested="light"
+        data-nse-colour-scheme-resolved="light"
+        data-nse-contrast="normal"
+        data-nse-transparency="normal"
+      >
+        <div
+          data-nse-overlay-provider="nse-overlay-provider:nse-standalone:20:_r_22_"
+          data-syncloudos-runtime-owner="nse-standalone:20"
+          style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px; display: contents;"
+        >
+          <button>
+            Anchor
+          </button>
+          <div
+            data-mode="light"
+            data-nse-appearance="atmo"
+            data-nse-chrome="standard"
+            data-nse-colour-scheme-requested="light"
+            data-nse-colour-scheme-resolved="light"
+            data-nse-contrast="normal"
+            data-nse-overlay-portal-host="true"
+            data-nse-transparency="normal"
+            data-syncloudos-runtime-owner="nse-standalone:20"
+            style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px;"
+          >
+            <div
+              data-nse-focus-scope="nse-overlay:baseline-popover"
+              data-nse-focus-scope-kind="popover"
+              data-nse-focus-scope-runtime="nse-standalone:20"
+              style="display: contents;"
+            >
+              <div
+                class="nse-overlay-popup-host"
+                data-mode="light"
+                data-nse-appearance="atmo"
+                data-nse-chrome="standard"
+                data-nse-colour-scheme-requested="light"
+                data-nse-colour-scheme-resolved="light"
+                data-nse-contrast="normal"
+                data-nse-transparency="normal"
+              >
+                <div
+                  aria-hidden="true"
+                  class="nse-overlay-popup-backdrop"
+                  data-nse-part="backdrop"
+                  hidden=""
+                />
+                <div
+                  aria-label="Details"
+                  class="nse-overlay-popup nse-overlay-popup--popover nse-popover"
+                  data-mode="light"
+                  data-nse-appearance="atmo"
+                  data-nse-chrome="standard"
+                  data-nse-colour-scheme-requested="light"
+                  data-nse-colour-scheme-resolved="light"
+                  data-nse-contrast="normal"
+                  data-nse-control="overlay"
+                  data-nse-overlay-kind="popover"
+                  data-nse-part="surface"
+                  data-nse-popover-draws-background="true"
+                  data-nse-positioned="true"
+                  data-nse-presentation="anchored"
+                  data-nse-reduced-motion="false"
+                  data-nse-transparency="normal"
+                  data-nse-viewport-limited="false"
+                  data-placement="bottom-start"
+                  data-state="open"
+                  id="baseline-popover"
+                  role="dialog"
+                  style="width: 300px; height: 200px; min-width: 0px; --nse-popover-spring: linear(0, 0.00732, 0.02763, 0.0586, 0.09813, 0.14433, 0.19548, 0.25009, 0.30683, 0.36457, 0.42233, 0.47929, 0.53475, 0.58817, 0.63909, 0.6872, 0.73223, 0.77404, 0.81253, 0.84767, 0.87948, 0.90804, 0.93344, 0.95582, 0.97533, 0.99214, 1.00643, 1.0184, 1.02823, 1.03613, 1.04227, 1.04686, 1.05006, 1.05205, 1.05298, 1.05302, 1.05229, 1.05094, 1.04907, 1.04679, 1.0442, 1.04139, 1.03843, 1.03539, 1.03232, 1.02926, 1.02627, 1.02337, 1.0206, 1.01796, 1.01548, 1.01317, 1.01103, 1.00907, 1.00728, 1.00567, 1.00424, 1.00296, 1.00185, 1.00088, 1.00005, 0.99935, 0.99877, 0.99829, 1); position: fixed; --nse-overlay-available-inline-size: 1px; --nse-overlay-available-block-size: 1px; left: 8px; top: 12px; transform-origin: -0.5px -10px;"
+                  tabindex="-1"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="nse-popover-frame"
+                    data-nse-part="popover-frame"
+                    viewBox="-12 -12 24 24"
+                  >
+                    <path
+                      d="M -10.5 0 L -0.5 -10 L 9.5 0 Z"
+                      data-nse-part="popover-arrow-fill"
+                    />
+                    <path
+                      d="M 0 0 L -10.5 0 L -0.5 -10 L 9.5 0 L 0 0 Q 0 0 0 0  L 0 0 Q 0 0 0 0  L 0 0 Q 0 0 0 0  L 0 0 Q 0 0 0 0 Z"
+                      data-nse-part="popover-outline"
+                    />
+                  </svg>
+                  <span
+                    aria-hidden="true"
+                    class="nse-popover-arrow"
+                    data-nse-part="arrow"
+                    style="left: -10.5px; top: -10px;"
+                  />
+                  <div
+                    class="nse-overlay-popup-content"
+                    data-nse-part="content"
+                  >
+                    <p>
+                      Popover content
+                    </p>
+                    <button
+                      class="nse-control-button"
+                      data-bezel-style="rounded"
+                      data-nse-bezel-style="rounded"
+                      data-nse-button-type="momentaryPushIn"
+                      data-nse-control="button"
+                      data-nse-control-size="regular"
+                      data-nse-part="background"
+                      data-nse-state="off"
+                      data-press-active="false"
+                      data-pressed="false"
+                      data-tone="medium"
+                      type="button"
+                    >
+                      <span
+                        aria-hidden="true"
+                        data-nse-part="bezel"
+                        style="position: absolute; inset: 0px; pointer-events: none;"
+                      />
+                      <span
+                        class="nse-control-button-label"
+                        data-nse-part="title"
+                      >
+                        Done
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+ ❯ tests/runtime/nse-theme-panel-hook-coverage.test.tsx:24:68
+     22|       const root = await waitFor(() => {
+     23|         const element = view.baseElement.querySelector<HTMLElement>(`[…
+     24|         expect(element, `${surface.id} publishes ${identity}`).not.toB…
+       |                                                                    ^
+     25|         return element!;
+     26|       });
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/runtime/nse-theme-panel-hook-coverage.test.tsx > date, panel and window theme hooks > sheet
+AssertionError: sheet publishes sheet: expected null not to be null
+
+Ignored nodes: comments, script, style
+<html>
+  <head />
+  <body>
+    <div>
+      <div
+        class="nse-appearance-provider"
+        data-mode="light"
+        data-nse-appearance="atmo"
+        data-nse-chrome="standard"
+        data-nse-colour-scheme-requested="light"
+        data-nse-colour-scheme-resolved="light"
+        data-nse-contrast="normal"
+        data-nse-transparency="normal"
+      >
+        <div
+          data-nse-overlay-provider="nse-overlay-provider:nse-standalone:21:_r_24_"
+          data-syncloudos-runtime-owner="nse-standalone:21"
+          style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px; display: contents;"
+        >
+          <button>
+            Anchor
+          </button>
+          <div
+            data-mode="light"
+            data-nse-appearance="atmo"
+            data-nse-chrome="standard"
+            data-nse-colour-scheme-requested="light"
+            data-nse-colour-scheme-resolved="light"
+            data-nse-contrast="normal"
+            data-nse-overlay-portal-host="true"
+            data-nse-transparency="normal"
+            data-syncloudos-runtime-owner="nse-standalone:21"
+            style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px;"
+          >
+            <div
+              data-nse-focus-scope="nse-overlay:baseline-sheet"
+              data-nse-focus-scope-kind="modal"
+              data-nse-focus-scope-runtime="nse-standalone:21"
+              style="display: contents;"
+            >
+              <div
+                class="nse-overlay-popup-modal-host"
+                data-mode="light"
+                data-nse-appearance="atmo"
+                data-nse-chrome="standard"
+                data-nse-colour-scheme-requested="light"
+                data-nse-colour-scheme-resolved="light"
+                data-nse-contrast="normal"
+                data-nse-transparency="normal"
+              >
+                <div
+                  aria-hidden="true"
+                  class="nse-overlay-popup-backdrop"
+                  data-nse-part="backdrop"
+                />
+                <div
+                  aria-labelledby="nse-popup-title:_r_25_"
+                  aria-modal="true"
+                  class="nse-overlay-popup nse-overlay-popup--action-sheet nse-overlay-popup--modal"
+                  data-mode="light"
+                  data-nse-appearance="atmo"
+                  data-nse-chrome="standard"
+                  data-nse-colour-scheme-requested="light"
+                  data-nse-colour-scheme-resolved="light"
+                  data-nse-contrast="normal"
+                  data-nse-control="overlay"
+                  data-nse-overlay-kind="action-sheet"
+                  data-nse-part="surface"
+                  data-nse-presentation="sheet"
+                  data-nse-transparency="normal"
+                  data-nse-viewport-limited="false"
+                  data-placement="block-end-inline-start"
+                  data-state="open"
+                  id="baseline-sheet"
+                  role="dialog"
+                  style="--nse-overlay-available-inline-size: 1000px; --nse-overlay-available-block-size: 792px;"
+                  tabindex="-1"
+                >
+                  <div
+                    class="nse-overlay-popup-title"
+                    data-nse-part="title"
+                    id="nse-popup-title:_r_25_"
+                  >
+                    Save changes
+                  </div>
+                  <div
+                    class="nse-overlay-popup-content"
+                    data-nse-part="content"
+                  >
+                    <p>
+                      Do you want to save this document?
+                    </p>
+                    <button
+                      class="nse-control-button"
+                      data-bezel-style="rounded"
+                      data-nse-bezel-style="rounded"
+                      data-nse-button-type="momentaryPushIn"
+                      data-nse-control="button"
+                      data-nse-control-size="regular"
+                      data-nse-focused=""
+                      data-nse-part="background"
+                      data-nse-state="off"
+                      data-press-active="false"
+                      data-pressed="false"
+                      data-tone="medium"
+                      type="button"
+                    >
+                      <span
+                        aria-hidden="true"
+                        data-nse-part="bezel"
+                        style="position: absolute; inset: 0px; pointer-events: none;"
+                      />
+                      <span
+                        class="nse-control-button-label"
+                        data-nse-part="title"
+                      >
+                        Save
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+ ❯ tests/runtime/nse-theme-panel-hook-coverage.test.tsx:24:68
+     22|       const root = await waitFor(() => {
+     23|         const element = view.baseElement.querySelector<HTMLElement>(`[…
+     24|         expect(element, `${surface.id} publishes ${identity}`).not.toB…
+       |                                                                    ^
+     25|         return element!;
+     26|       });
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/runtime/nse-theme-panel-hook-coverage.test.tsx > date, panel and window theme hooks > route-picker
+AssertionError: route-picker publishes route-picker-view: expected null not to be null
+
+Ignored nodes: comments, script, style
+<html>
+  <head />
+  <body>
+    <div>
+      <div
+        class="nse-appearance-provider"
+        data-mode="light"
+        data-nse-appearance="atmo"
+        data-nse-chrome="standard"
+        data-nse-colour-scheme-requested="light"
+        data-nse-colour-scheme-resolved="light"
+        data-nse-contrast="normal"
+        data-nse-transparency="normal"
+      >
+        <div
+          data-nse-overlay-provider="nse-overlay-provider:nse-standalone:71:_r_86_"
+          data-syncloudos-runtime-owner="nse-standalone:71"
+          style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px; display: contents;"
+        >
+          <button
+            aria-label="Choose playback device"
+            aria-pressed="false"
+            class="nse-control-button"
+            data-bezel-style="rounded"
+            data-nse-bezel-style="rounded"
+            data-nse-button-type="momentaryPushIn"
+            data-nse-control="button"
+            data-nse-control-size="regular"
+            data-nse-enabled="false"
+            data-nse-part="background"
+            data-nse-state="off"
+            data-press-active="false"
+            data-pressed="false"
+            data-route-state="disconnected"
+            data-tone="medium"
+            disabled=""
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              data-nse-part="bezel"
+              style="position: absolute; inset: 0px; pointer-events: none;"
+            />
+            <span
+              class="nse-control-button-label"
+              data-nse-part="title"
+            >
+              Choose playback device
+            </span>
+          </button>
+          <div
+            data-mode="light"
+            data-nse-appearance="atmo"
+            data-nse-chrome="standard"
+            data-nse-colour-scheme-requested="light"
+            data-nse-colour-scheme-resolved="light"
+            data-nse-contrast="normal"
+            data-nse-overlay-portal-host="true"
+            data-nse-transparency="normal"
+            data-syncloudos-runtime-owner="nse-standalone:71"
+            style="--nse-screen-safe-area-inset-top: 0px; --nse-screen-safe-area-inset-left: 0px; --nse-screen-safe-area-inset-bottom: 0px; --nse-screen-safe-area-inset-right: 0px;"
+          />
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+ ❯ tests/runtime/nse-theme-panel-hook-coverage.test.tsx:24:68
+     22|       const root = await waitFor(() => {
+     23|         const element = view.baseElement.querySelector<HTMLElement>(`[…
+     24|         expect(element, `${surface.id} publishes ${identity}`).not.toB…
+       |                                                                    ^
+     25|         return element!;
+     26|       });
+ ❯ runWithExpensiveErrorDiagnosticsDisabled node_modules/@testing-library/dom/dist/config.js:47:12
+ ❯ checkCallback node_modules/@testing-library/dom/dist/wait-for.js:124:77
+ ❯ Timeout.checkRealTimersCallback node_modules/@testing-library/dom/dist/wait-for.js:118:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed | 6 passed (7)
+      Tests  3 failed | 144 passed (147)
+   Start at  21:00:32
+   Duration  12.05s (transform 8.53s, setup 97ms, import 13.13s, tests 5.80s, environment 4.12s)

@@ -34,7 +34,7 @@ afterEach(async () => {
 });
 
 function registerApp(runtime: ReturnType<typeof createTestRuntime>, id: string) {
-  runtime.apps.registerBundle(createTestBundle({ id, route: `/${id}` }));
+  runtime.apps.registerBundle(createTestBundle({ bundleIdentifier: id, route: `/${id.split(".").at(-1)}` }));
   const app = runtime.apps.getApp(id)!;
   runtime.responders.register({ id: `application:${id}`, kind: "application", parentId: "workspace", scopeId: `application:${id}` });
   return app;
@@ -43,14 +43,14 @@ function registerApp(runtime: ReturnType<typeof createTestRuntime>, id: string) 
 function mountPair() {
   const runtime = createTestRuntime();
   runtimes.push(runtime);
-  const app = registerApp(runtime, "authority-app");
-  const victim = registerApp(runtime, "authority-victim");
+  const app = registerApp(runtime, "com.example.authority-app");
+  const victim = registerApp(runtime, "com.example.authority-victim");
   return {
     runtime,
     app,
     victim,
-    mount: createMountedSynWareRuntime({ runtime, app, responderId: `application:${app.id}` }),
-    victimMount: createMountedSynWareRuntime({ runtime, app: victim, responderId: `application:${victim.id}` }),
+    mount: createMountedSynWareRuntime({ runtime, app, responderId: `application:${app.bundleIdentifier}` }),
+    victimMount: createMountedSynWareRuntime({ runtime, app: victim, responderId: `application:${victim.bundleIdentifier}` }),
   };
 }
 
@@ -79,8 +79,8 @@ describe("mounted application document authority", () => {
   it("keeps mounted kind registration host-provisioned and collision-safe", async () => {
     const metadata = { kind: "tests.mounted-authority", version: 1, displayName: "Mounted authority" };
     const runtime = createTestRuntime({ trustedDocumentKinds: [metadata] });
-    const app = registerApp(runtime, "syncal");
-    const syncalMount = createMountedSynWareRuntime({ runtime, app, responderId: "application:syncal" });
+    const app = registerApp(runtime, "com.example.syncal");
+    const syncalMount = createMountedSynWareRuntime({ runtime, app, responderId: "application:com.example.syncal" });
     const documentStore = syncalMount.runtime.documentStore as unknown as { registerKind?: (value: unknown) => unknown };
     const migration = vi.fn();
 
@@ -106,7 +106,7 @@ describe("mounted application document authority", () => {
     });
     await runtime.documentStore.saveDraft(
       { kind: "p10.idempotent", id: "victim-draft", title: "victim" },
-      { appId: "authority-victim" },
+      { appId: "com.example.authority-victim" },
       { idempotencyKey: "victim-key" },
     );
     await expect(mount.runtime.documentStore.saveDraft(
@@ -118,10 +118,10 @@ describe("mounted application document authority", () => {
 
   it("freezes command authority before a pending declaration can be mutated", async () => {
     const { runtime, mount } = mountPair();
-    const responderId = "application:authority-app";
+    const responderId = "application:com.example.authority-app";
     const execute = vi.fn(() => "original");
     const declaration = {
-      id: "authority-app.command",
+      id: "com.example.authority-app.command",
       responderId,
       title: { key: "authority.command", fallback: "Original" },
       payload: { description: "No payload.", parse: (value: unknown) => value === undefined ? { ok: true as const, value: undefined } : { ok: false as const, issues: ["payload"] } },
@@ -131,9 +131,9 @@ describe("mounted application document authority", () => {
       execute,
     };
     const registration = mount.runtime.commands.register(declaration);
-    (declaration as { responderId: string; execute: () => string }).responderId = "application:authority-victim";
+    (declaration as { responderId: string; execute: () => string }).responderId = "application:com.example.authority-victim";
     (declaration as { responderId: string; execute: () => string }).execute = () => "forged";
-    const result = await mount.runtime.commands.dispatch("authority-app.command");
+    const result = await mount.runtime.commands.dispatch("com.example.authority-app.command");
     expect(result).toMatchObject({ status: "executed", responderId });
     expect(execute).toHaveBeenCalledTimes(1);
     registration.dispose();
@@ -141,7 +141,7 @@ describe("mounted application document authority", () => {
 
   it("does not project or accept foreign focus scopes and responders", () => {
     const { runtime, mount } = mountPair();
-    runtime.responders.register({ id: "authority-victim:control", kind: "control", parentId: "application:authority-victim", scopeId: "authority-victim:control" });
+    runtime.responders.register({ id: "authority-victim:control", kind: "control", parentId: "application:com.example.authority-victim", scopeId: "authority-victim:control" });
     const foreignScope = runtime.focus.openScope({ id: "authority-victim:scope", kind: "modal", parentResponderId: "authority-victim:control", modal: true, trapFocus: true });
     runtime.focus.requestFocus("authority-victim:control");
     expect(mount.runtime.focus.getFocusedResponderId()).toBeNull();
@@ -150,7 +150,7 @@ describe("mounted application document authority", () => {
       id: "authority-app:scope",
       kind: "popover",
       parentScopeId: foreignScope.id,
-      parentResponderId: "application:authority-app",
+      parentResponderId: "application:com.example.authority-app",
       restoreResponderId: "authority-victim:control",
       modal: false,
       trapFocus: false,
@@ -185,12 +185,12 @@ describe("mounted application document authority", () => {
       write: (value: { value: string }) => value,
       validate: (value: unknown): value is { value: string } => Boolean(value && typeof value === "object" && typeof (value as { value?: unknown }).value === "string"),
     });
-    const location = { kind: "memory" as const, namespace: "p10", key: "owned" };
+    const location = { kind: "memory" as const, namespace: "com.example.p10", key: "owned" };
     const document = await mount.runtime.workspaceDocuments.newDocument({ typeId: "authority.document", location, initialModel: { value: "owned" } });
     await mount.runtime.workspaceDocuments.saveDocument(document.id);
     await mount.runtime.workspaceDocuments.closeDocument(document.id, "parent-close");
     await expect(victimMount.runtime.workspaceDocuments.openDocument({ typeId: "authority.document", location })).rejects.toThrow(/owned|application|location/i);
-    await expect(mount.runtime.workspaceDocuments.openDocument({ typeId: "authority.document", location })).resolves.toMatchObject({ applicationId: "authority-app" });
+    await expect(mount.runtime.workspaceDocuments.openDocument({ typeId: "authority.document", location })).resolves.toMatchObject({ applicationId: "com.example.authority-app" });
   });
 
   it("exposes a revocable document undo lease rather than the kernel manager", async () => {
@@ -210,7 +210,7 @@ describe("mounted application document authority", () => {
     });
     const document = await mount.runtime.workspaceDocuments.newDocument({
       typeId: "authority.undo",
-      location: { kind: "memory", namespace: "p10", key: "undo" },
+      location: { kind: "memory", namespace: "com.example.p10", key: "undo" },
       initialModel: { value: "undo" },
     });
     const lease = mount.runtime.workspaceDocuments.getUndoManager(document.id) as unknown as Record<string, unknown>;
@@ -310,9 +310,9 @@ describe("mounted application document authority", () => {
       ownerToken: {} as never,
       signal: new AbortController().signal,
       pasteboard: board as never,
-      randomUUID: () => "p10",
+      randomUUID: () => "com.example.p10",
     });
-    drag.begin({ source: { appId: "p10", windowId: "p10", responderId: "p10" }, operations: ["copy"], representations: [{ type: "text/plain", value: "p10" }] });
+    drag.begin({ source: { appId: "com.example.p10", windowId: "com.example.p10", responderId: "com.example.p10" }, operations: ["copy"], representations: [{ type: "text/plain", value: "com.example.p10" }] });
     drag.dispose();
     await Promise.resolve();
     expect(board.clear).toHaveBeenCalledTimes(1);

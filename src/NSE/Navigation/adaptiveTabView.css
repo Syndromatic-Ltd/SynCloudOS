@@ -1,0 +1,80 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
+/* NSETabViewController.sidebarAdaptable: the same content tree in every allocation. */
+.nse-adaptive-tab-controller,
+:where(:scope):is(.nse-adaptive-tab-controller) {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  block-size: 100%;
+  min-block-size: 0;
+  min-inline-size: 0;
+}
+.nse-adaptive-tab-split,
+:where(:scope):is(.nse-adaptive-tab-split) { flex: 1 1 auto; min-block-size: 0; }
+.nse-adaptive-tab-sidebar,
+:where(:scope):is(.nse-adaptive-tab-sidebar),
+.nse-adaptive-tab-content,
+:where(:scope):is(.nse-adaptive-tab-content),
+.nse-adaptive-tab-panel,
+:where(:scope):is(.nse-adaptive-tab-panel) {
+  display: flex;
+  flex-direction: column;
+  block-size: 100%;
+  min-block-size: 0;
+  min-inline-size: 0;
+  overflow: hidden;
+}
+.nse-adaptive-tab-panel,
+:where(:scope):is(.nse-adaptive-tab-panel) { flex: 1 1 auto; }
+.nse-adaptive-tab-panel>[data-nse-view-controller],
+:where(:scope):is(.nse-adaptive-tab-panel)>[data-nse-view-controller] { flex: 1 1 auto; min-block-size: 0; }
+.nse-adaptive-tab-controller [hidden],
+:where(:scope):is(.nse-adaptive-tab-controller) [hidden] { display: none; }
+.nse-adaptive-tab-controller:is([data-navigation-renderer="tabs"],[data-navigation-renderer="rail"],[data-navigation-renderer="none"])>.nse-adaptive-tab-split,
+:where(:scope):is(.nse-adaptive-tab-controller:is([data-navigation-renderer="tabs"],[data-navigation-renderer="rail"],[data-navigation-renderer="none"]))>.nse-adaptive-tab-split {
+  grid-template-columns: minmax(0, 1fr);
+}
+.nse-adaptive-tab-controller:is([data-navigation-renderer="tabs"],[data-navigation-renderer="rail"],[data-navigation-renderer="none"])>.nse-adaptive-tab-split>:is(.nse-split-view-sidebar,.nse-split-view-resizer),
+:where(:scope):is(.nse-adaptive-tab-controller:is([data-navigation-renderer="tabs"],[data-navigation-renderer="rail"],[data-navigation-renderer="none"]))>.nse-adaptive-tab-split>:is(.nse-split-view-sidebar,.nse-split-view-resizer) { display: none; }
+.nse-adaptive-tab-controller:is([data-navigation-renderer="tabs"],[data-navigation-renderer="rail"],[data-navigation-renderer="none"])>.nse-adaptive-tab-split>.nse-split-view-main,
+:where(:scope):is(.nse-adaptive-tab-controller:is([data-navigation-renderer="tabs"],[data-navigation-renderer="rail"],[data-navigation-renderer="none"]))>.nse-adaptive-tab-split>.nse-split-view-main { grid-column: 1; grid-row: 1; }
+.nse-adaptive-tab-chrome,
+:where(:scope):is(.nse-adaptive-tab-chrome) { flex: 0 0 auto; }
+.nse-adaptive-tab-controller[data-navigation-renderer="rail"],
+:where(:scope):is(.nse-adaptive-tab-controller[data-navigation-renderer="rail"]) { flex-direction: row; }
+.nse-adaptive-tab-controller[data-navigation-renderer="rail"]>.nse-adaptive-tab-split,
+:where(:scope):is(.nse-adaptive-tab-controller[data-navigation-renderer="rail"])>.nse-adaptive-tab-split { order: 1; }
+.nse-adaptive-tab-controller[data-navigation-renderer="rail"]>.nse-adaptive-tab-chrome,
+:where(:scope):is(.nse-adaptive-tab-controller[data-navigation-renderer="rail"])>.nse-adaptive-tab-chrome {
+  order: 0;
+  inline-size: var(--nse-navigation-rail-width);
+  min-block-size: 0;
+  overflow: hidden;
+}
+
+}
+
+@layer nse.structure {
+.nse-adaptive-tab-controller[data-nse-navigation-placement="block-start"]>.nse-adaptive-tab-split,
+:where(:scope):is(.nse-adaptive-tab-controller[data-nse-navigation-placement="block-start"])>.nse-adaptive-tab-split { order: 1; }
+.nse-adaptive-tab-controller[data-nse-navigation-placement="block-start"]>.nse-adaptive-tab-chrome,
+:where(:scope):is(.nse-adaptive-tab-controller[data-nse-navigation-placement="block-start"])>.nse-adaptive-tab-chrome { order: 0; }
+.nse-adaptive-tab-controller[data-navigation-renderer="tabs"][data-nse-navigation-flow="overlay"]>.nse-adaptive-tab-chrome,
+:where(:scope):is(.nse-adaptive-tab-controller[data-navigation-renderer="tabs"][data-nse-navigation-flow="overlay"])>.nse-adaptive-tab-chrome {
+  position: absolute; inset-inline: 0; z-index: 4; pointer-events: none; overflow: visible;
+}
+.nse-adaptive-tab-controller[data-nse-navigation-placement="block-start"][data-nse-navigation-flow="overlay"]>.nse-adaptive-tab-chrome,
+:where(:scope):is(.nse-adaptive-tab-controller[data-nse-navigation-placement="block-start"][data-nse-navigation-flow="overlay"])>.nse-adaptive-tab-chrome { inset-block-start: 0; inset-block-end: auto; }
+.nse-adaptive-tab-controller[data-navigation-renderer="source-list-content"][data-nse-navigation-flow="overlay"]>.nse-adaptive-tab-split,
+:where(:scope):is(.nse-adaptive-tab-controller[data-navigation-renderer="source-list-content"][data-nse-navigation-flow="overlay"])>.nse-adaptive-tab-split { position: relative; grid-template-columns: minmax(0, 1fr); }
+.nse-adaptive-tab-controller[data-navigation-renderer="source-list-content"][data-nse-navigation-flow="overlay"]>.nse-adaptive-tab-split>.nse-split-view-sidebar,
+:where(:scope):is(.nse-adaptive-tab-controller[data-navigation-renderer="source-list-content"][data-nse-navigation-flow="overlay"])>.nse-adaptive-tab-split>.nse-split-view-sidebar { position: absolute; inset-block: 0; inset-inline-start: 0; inline-size: var(--nse-split-sidebar); z-index: 2; }
+.nse-adaptive-tab-controller[data-navigation-renderer="source-list-content"][data-nse-navigation-flow="overlay"]>.nse-adaptive-tab-split>.nse-split-view-main,
+:where(:scope):is(.nse-adaptive-tab-controller[data-navigation-renderer="source-list-content"][data-nse-navigation-flow="overlay"])>.nse-adaptive-tab-split>.nse-split-view-main { grid-column: 1; grid-row: 1; }
+.nse-adaptive-tab-controller[data-navigation-renderer="source-list-content"][data-nse-navigation-flow="overlay"]>.nse-adaptive-tab-split>.nse-split-view-resizer,
+:where(:scope):is(.nse-adaptive-tab-controller[data-navigation-renderer="source-list-content"][data-nse-navigation-flow="overlay"])>.nse-adaptive-tab-split>.nse-split-view-resizer { position: absolute; inset-block: 0; inset-inline-start: calc(var(--nse-split-sidebar) - 4px); inline-size: 8px; z-index: 3; }
+}
+
+}

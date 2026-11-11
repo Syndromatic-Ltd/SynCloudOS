@@ -61,6 +61,12 @@ export function assertDisplayListImagePaintBudget(list: GFXDisplayList): void {
     const visit = (commands: readonly GFXCommand[]) => {
         for (const command of commands) {
             if (command.kind === "transparency-group") { visit(command.commands); continue; }
+            if (command.kind === "display-list") {
+                for (const mask of command.state.masks)
+                    definitions.set(`mask:${mask.id}`, mask.image);
+                visit(command.commands);
+                continue;
+            }
             if (command.kind === "image")
                 definitions.set(`image:${imageIndex++}`, command.image);
             for (const paint of [command.state.fill, command.state.stroke])

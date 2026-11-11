@@ -32,7 +32,7 @@ import type { RuntimeSnapshot, RuntimeTransactionRecord } from "../Runtime/runti
 import type { RuntimeCacheStats } from "../Cache/cacheTypes";
 import type { SynCloudOSRuntimeEvent } from "../EventBus/eventTypes";
 import type { FocusScopeRegistration } from "../Focus/focusTypes";
-import type { SynCloudOSPolicyAuditReport, SynCloudOSCapabilityMatrix, SynCloudOSPolicyDecision, SynCloudOSRoleCapabilityReportItem } from "../PolicyKit/policyTypes";
+import type { SynCloudOSPolicyAuditReport, SynCloudOSCapabilityMatrix, SynCloudOSPolicyDecision, SynCloudOSRoleCapabilityReportItem } from "../ConfigurationProfiles/policyTypes";
 import type { KeyBindingCandidateInspection, KeyBindingDeclaration } from "../KeyBindings/keyBindingTypes";
 import type { SynCloudOSLaunchHistoryRecord, SynCloudOSLaunchQueueSnapshot } from "../LaunchServices/launchTypes";
 import type { ResponderGraphInspection } from "../Responders/responderTypes";
@@ -177,7 +177,7 @@ export interface InspectorRuntimeReport {
       readonly historyCount: number;
     };
   };
-  readonly policyKit: {
+  readonly configurationProfiles: {
     readonly accessMode: string | null;
     readonly accessReport: SynCloudOSPolicyAuditReport;
     readonly auditLog: SynCloudOSPolicyDecision[];
@@ -328,8 +328,8 @@ export function createInspector(getRuntime: () => SynCloudOSRuntime): SynCloudOS
     const missingRequiredServices = Array.from(new Set(affectedApps.flatMap((app) => app.missing)));
     const launchInspection = runtime.launchServices.inspect();
     const launchHistory = runtime.launchServices.getHistory(80);
-    const auditLog = runtime.policy.getAuditLog(80);
-    const auditReport = runtime.policy.getAuditReport(80);
+    const auditLog = runtime.configurationProfiles.getAuditLog(80);
+    const auditReport = runtime.configurationProfiles.getAuditReport(80);
     const statechartInspection = runtime.statechart.inspect();
     const errorHistory = runtime.errors.getHistory();
     const latestError = runtime.errors.getLatest();
@@ -399,14 +399,14 @@ export function createInspector(getRuntime: () => SynCloudOSRuntime): SynCloudOS
           historyCount: launchHistory.length,
         },
       },
-      policyKit: {
-        accessMode: runtime.policy.getAccessMode(),
+      configurationProfiles: {
+        accessMode: runtime.configurationProfiles.getAccessMode(),
         accessReport: auditReport,
         auditLog,
         report: {
           audit: auditReport,
-          roleCapabilities: runtime.policy.getRoleCapabilityReport(),
-          capabilityMatrix: runtime.policy.getCapabilityMatrix(),
+          roleCapabilities: runtime.configurationProfiles.getRoleCapabilityReport(),
+          capabilityMatrix: runtime.configurationProfiles.getCapabilityMatrix(),
         },
         summary: {
           auditCount: auditLog.length,

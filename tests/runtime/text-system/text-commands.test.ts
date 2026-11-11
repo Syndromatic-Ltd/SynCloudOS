@@ -22,7 +22,7 @@ import { expect,it } from "vitest";
 import { createInMemoryNSETextOwner,plainNSETextContent,textRun,paragraph,attributedContent } from "../../../src/NSE/Text";
 import { TextEditingSession } from "../../../src/NSE/TextEditing/TextEditingSession";
 const api=await import("../../../src/NSE/TextEditing/textCommands").catch(()=>null);
-const setup=()=>{expect(api?.NSETextCommands).toBeTypeOf("function");const owner=createInMemoryNSETextOwner({content:attributedContent([paragraph([textRun("ab",{bold:true}),textRun("cd")])])});const session=new TextEditingSession({id:"commands",owner});return {owner,session,api:api!};};
+const setup=()=>{expect(api?.NSETextCommands).toBeTypeOf("function");const owner=createInMemoryNSETextOwner({content:attributedContent([paragraph([textRun("ab",{bold:true}),textRun("cd")])])});const session=new TextEditingSession({id:"commands",textOwner:owner});return {owner,session,api:api!};};
 
 it("aggregates mixed toggle state and formats a collapsed typing target without canonical mutation",async()=>{
   const {session,owner,api}=setup(),commands=new api.NSETextCommands({session});session.select(0,4);
@@ -49,7 +49,7 @@ it("rejects malicious attributed paste and revoked or cancelled asynchronous tar
   const abort=new AbortController();abort.abort();await expect(commands.execute("text.insert","x",{signal:abort.signal})).rejects.toThrow();
 });
 it("registers scoped payload validation and routes history without a second undo registration",async()=>{
-  const {session,api}=setup();let undo=0;const historySession=new TextEditingSession({id:"history",owner:createInMemoryNSETextOwner(),history:{undo(){undo++;},redo(){}}});
+  const {session,api}=setup();let undo=0;const historySession=new TextEditingSession({id:"history",textOwner:createInMemoryNSETextOwner(),history:{undo(){undo++;},redo(){}}});
   const controller=new api.NSETextCommands({session:historySession,historyPresentation:()=>({canUndo:true,canRedo:false,undoTitle:"Undo Typing"})});
   expect(controller.validate("text.undo").title).toBe("Undo Typing");await controller.execute("text.undo");expect(undo).toBe(1);
   const registrations:any[]=[];let disposed=0;const handle=api.registerNSETextCommands({controller,responderId:"responder:text",commands:{register(declaration){registrations.push(declaration);return {dispose(){disposed++;}};}}});
@@ -74,7 +74,7 @@ it("remaps captured paste targets after an unrelated same-owner insertion",async
 
 it("admits cut/paste as one named action through the existing standalone document history route",async()=>{
   const {api}=setup();const {createUndoableNSETextOwner}=await import("../../../src/NSE/TextEditing/standaloneTextHistory");
-  const owner=createUndoableNSETextOwner({content:plainNSETextContent("word")}),session=new TextEditingSession({id:"named",owner,history:owner.history});session.select(0,4);
+  const owner=createUndoableNSETextOwner({content:plainNSETextContent("word")}),session=new TextEditingSession({id:"named",textOwner:owner,history:owner.history});session.select(0,4);
   const commands=new api.NSETextCommands({session,historyPresentation:()=>owner.history.getSnapshot(),clipboard:{read:async()=>({"text/plain":"new"}),write:async()=>{}}});
   await commands.execute("text.cut");expect(owner.history.getSnapshot().undoTitle).toMatch(/Cut/);await commands.execute("text.undo");expect(owner.getSnapshot().text).toBe("word");
   session.select(0,4);await commands.execute("text.paste");expect(owner.getSnapshot().text).toBe("new");expect(owner.history.getSnapshot().undoTitle).toMatch(/Paste/);await commands.execute("text.undo");expect(owner.getSnapshot().text).toBe("word");

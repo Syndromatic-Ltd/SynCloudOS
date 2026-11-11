@@ -31,10 +31,10 @@ export interface NSEDisposalScheduler {
 
 interface NSEMicrotaskDisposalHandle { cancelled: boolean }
 
-/** Internal scheduler for shell-owned resources. It preserves the deferred
- * StrictMode replay contract without creating runtime-owned timers while the
- * shell is being unmounted. */
-export const nseDeferredDisposalMicrotaskScheduler: NSEDisposalScheduler = Object.freeze({
+/** The default scheduler: it defers a release by one microtask, which is
+ * enough for React's synchronous StrictMode cleanup/setup replay to cancel
+ * it, and creates no runtime-owned timers while a shell is being unmounted. */
+const microtaskDisposalScheduler: NSEDisposalScheduler = Object.freeze({
   setTimeout(callback: () => void, _delayMs: number) {
     const handle: NSEMicrotaskDisposalHandle = { cancelled: false };
     queueMicrotask(() => { if (!handle.cancelled) callback(); });
@@ -48,20 +48,21 @@ export const nseDeferredDisposalMicrotaskScheduler: NSEDisposalScheduler = Objec
 });
 
 /**
- * Releases a host-owned interaction resource after React has had an
- * opportunity to replay an effect. Development StrictMode deliberately runs
- * cleanup/setup as a pair while preserving the component instance; disposing
- * a memoized controller in that synthetic cleanup leaves its second setup
- * holding a dead controller. The injected runtime scheduler defers the
- * release one lifecycle turn; it is not an interaction timer.
+ * Releases an interaction resource after React has had an opportunity to
+ * replay an effect. Development StrictMode deliberately runs cleanup/setup as
+ * a pair while preserving the component instance; disposing a memoized
+ * resource in that synthetic cleanup leaves its second setup holding a dead
+ * resource. The scheduler defers the release one lifecycle turn; it is not an
+ * interaction timer. It defaults to a microtask; pass an app scheduler to
+ * defer through runtime-owned timers instead.
  *
  * Replacement resources retain independent leases, so replacing a model still
- * disposes the old controller, while a real unmount deterministically releases
+ * disposes the old resource, while a real unmount deterministically releases
  * the final one.
  */
 export function useNSEDeferredDisposal(
   resource: NSEDisposable | null | undefined,
-  scheduler: NSEDisposalScheduler,
+  scheduler: NSEDisposalScheduler = microtaskDisposalScheduler,
 ): void {
   const pending = useRef(new Map<NSEDisposable, { readonly lease: object; handle: unknown | null }>());
 

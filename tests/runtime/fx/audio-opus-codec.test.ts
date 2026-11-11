@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../../src/Foundation/NSEData";
+
 import { afterEach, expect, it, vi } from "vitest";
 import { AUFXAudioChunkStream, AUFXAudioFile, AUFXAudioFormat, AUFXAudioPCMBuffer, AUFXClockObservation } from "../../../src/FX/AudioFX/public";
 import { RuntimeAudioFileService } from "../../../src/SynCloudOS/AudioFX/AudioFileService";
@@ -110,8 +112,8 @@ it("streams beyond the owned PCM and 16 MiB Blob budgets while honoring sink bac
   let releaseFirstWrite!: () => void;
   const firstWrite = new Promise<void>(resolve => { releaseFirstWrite = resolve; });
   let writes = 0, byteLength = 0, closed = 0, aborted = 0;
-  const sink = new WritableStream<Uint8Array>({
-    async write(bytes) { writes++; if (writes === 1) await firstWrite; byteLength += bytes.byteLength; },
+  const sink = new WritableStream<NSEData>({
+    async write(bytes) { writes++; if (writes === 1) await firstWrite; byteLength += bytes.count; },
     close() { closed++; }, abort() { aborted++; },
   });
   const result = encodeOpusWebMStream(streamingSource(totalChunks, observed), sink, new AbortController().signal);
@@ -135,7 +137,7 @@ it("cancels a backpressured stream, releases its source and encoder, and aborts 
   let writes = 0, closed = 0, aborted = 0;
   let releaseWrite!: () => void;
   const blockedWrite = new Promise<void>(resolve => { releaseWrite = resolve; });
-  const sink = new WritableStream<Uint8Array>({
+  const sink = new WritableStream<NSEData>({
     write() { writes++; return blockedWrite; },
     close() { closed++; }, abort() { aborted++; },
   });
@@ -156,7 +158,7 @@ it("exposes the separate streaming contract through the runtime service and repo
   const service = new RuntimeAudioFileService(adapter);
   expect(service.capabilities().encode).not.toContainEqual(expect.objectContaining({ mimeType: "audio/webm" }));
   const fragments: Uint8Array[] = [];
-  const sink = new WritableStream<Uint8Array>({ write(bytes) { fragments.push(bytes.slice()); } });
+  const sink = new WritableStream<NSEData>({ write(bytes) { fragments.push(new Uint8Array(bytes.bytes)); } });
   const result = await service.exportStream({ source: streamingSource(1, observed), sink, format: "opus-webm" }, new AbortController().signal);
   expect(result).toEqual({ mimeType: "audio/webm", fileType: "webm", byteLength: fragments.reduce((sum, part) => sum + part.byteLength, 0) });
   expect(sink.locked).toBe(false);
@@ -170,7 +172,7 @@ it("keeps the export receipt pending until the writable sink finishes closing", 
   let finishClose!: () => void;
   const closeGate = new Promise<void>(resolve => { finishClose = resolve; });
   let closeEntered = false, settled = false;
-  const sink = new WritableStream<Uint8Array>({ close() { closeEntered = true; return closeGate; } });
+  const sink = new WritableStream<NSEData>({ close() { closeEntered = true; return closeGate; } });
   const pending = encodeOpusWebMStream(streamingSource(1, observed), sink, new AbortController().signal)
     .finally(() => { settled = true; });
   await vi.waitFor(() => expect(closeEntered).toBe(true));
@@ -192,7 +194,7 @@ it("rejects an over-budget source chunk and releases source and sink without enc
     } finally { observed.cancelled++; }
   });
   let closed = 0, aborted = 0;
-  const sink = new WritableStream<Uint8Array>({ close() { closed++; }, abort() { aborted++; } });
+  const sink = new WritableStream<NSEData>({ close() { closed++; }, abort() { aborted++; } });
   await expect(encodeOpusWebMStream(source, sink, new AbortController().signal)).rejects.toMatchObject({ name: "NotSupportedError" });
   await vi.waitFor(() => expect(aborted).toBe(1));
   expect(observed).toMatchObject({ cancelled: 1, encoderClosed: 1, dataClosed: 0 });

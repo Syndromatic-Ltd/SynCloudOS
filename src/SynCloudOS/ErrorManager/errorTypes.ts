@@ -18,10 +18,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/** Codes for conditions the framework reports itself. A captured thrown
+ * value that carries a catalogue code keeps that code instead. */
 export type SynCloudOSErrorCode =
   | "APP_NOT_FOUND"
   | "APP_LAUNCH_FAILED"
   | "APP_CONTENT_FAILED"
+  | "LIFECYCLE_HOOK_FAILED"
   | "APP_DISABLED"
   | "APP_NOT_RESPONDING"
   | "SITE_NOT_RESPONDING"
@@ -39,13 +42,24 @@ export type SynCloudOSErrorCode =
 export type SynCloudOSErrorCategory = "runtime" | "app" | "resource" | "event" | "watchdog";
 
 export interface SynCloudOSErrorPayload {
+  /** The condition's code. When `error` carries a catalogue code, that code
+   * replaces this one: one error has exactly one authoritative code. */
   code: SynCloudOSErrorCode;
+  /** The plain, user-facing title the alert shows. */
   title: string;
+  /** The plain, user-facing sentence the alert shows under the title. Never
+   * the thrown value's message: that belongs in the technical details. */
   message: string;
+  /** The thrown value this capture reports. Its class name, catalogue code,
+   * message, stack, cause and lifecycle fields go into the technical details. */
+  error?: unknown;
   appId?: string;
   packageName?: string;
+  /** A one-line technical statement of the condition, for captures without a thrown value. */
   technicalMessage?: string;
+  /** Extra condition-specific detail lines. */
   technicalDetails?: string;
+  /** The component that caught or reported the condition. */
   source?: string;
   severity?: "info" | "warning" | "error" | "fatal";
   recoverable?: boolean;
@@ -59,7 +73,17 @@ export interface SynCloudOSErrorPayload {
   category?: SynCloudOSErrorCategory;
 }
 
-export interface CapturedSynCloudOSError extends SynCloudOSErrorPayload {
+export interface CapturedSynCloudOSError extends Omit<SynCloudOSErrorPayload, "code" | "message" | "error" | "technicalMessage"> {
+  /** The one authoritative code: the thrown value's catalogue code when it has one, otherwise the condition's code. */
+  code: string;
+  /** The user-facing sentence, as supplied by the capture. */
+  message: string;
+  /** The thrown value's class name (such as `SynCloudOSLifecycleError` or
+   * `TypeError`); absent when no value was thrown. */
+  exception?: string;
+  /** Everything developer-facing: exception, code, the thrown message, who
+   * caught it, then context, hint, stacks. Shown only when disclosed. */
+  technicalDetails?: string;
   runtimeId?: string;
   id: string;
   at: number;

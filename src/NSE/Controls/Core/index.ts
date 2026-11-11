@@ -21,8 +21,8 @@
 export * from "./controlTypes";
 export * from "./useNSEControlValue";
 export * from "./useNSEControlCommand";
-export { NSEHashBadge } from "./NSEHashBadge";
-export type { NSEHashBadgeProps } from "./NSEHashBadge";
+export * from "./useNSEControlAction";
+export { nseActionCommandId } from "./actionCommandId";
 export {
   useNSEControlFeedback,
 } from "./nseControlsShared";

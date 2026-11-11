@@ -19,29 +19,12 @@
  */
 
 export {
-  NSEAnimationDefaults,
-  NSEAnimationEnvironmentProvider,
-  NSELayoutView,
-  NSEPresence,
-  nseTransformStyle,
-  useNSEAnimationEnvironment,
-  useNSEPresentation,
-} from "./Animation";
-export type {
-  NSEAnimationEnvironment,
-  NSEAnimationEnvironmentProviderProps,
-  NSELayoutTransitionTiming,
-  NSELayoutViewProps,
-  NSEPresentationEnter,
-  NSEPresentationMotion,
-  NSEPresentationSpec,
-  NSEPresentationTrack,
-  NSETransformComponents,
-  NSETranslationUnit,
+  NSEAnimationContext,
+  useNSETraitCollection,
 } from "./Animation";
 /** Supported SynWare SDK NSE framework surface. Concrete themes are explicit subpaths. */
-export { LoadingSpinner } from "./Components/LoadingSpinner";
-export type { LoadingSpinnerVariant } from "./Components/LoadingSpinner";
+export { NSEEdgeInsetsMake, NSEEdgeInsetsZero } from "./Layout/NSEEdgeInsets";
+export type { NSEEdgeInsets } from "./Layout/NSEEdgeInsets";
 export { NSEObjectController } from "./Controllers/NSEObjectController";
 export type {
   ObjectControllerField, ObjectControllerFields, ObjectControllerSnapshot,
@@ -53,52 +36,42 @@ export type {
   DictionaryMutationResult, DictionaryControllerChange,
 } from "./Controllers/NSEDictionaryController";
 export { ControllerReadOnlyError, ControllerEditingStateError, UnknownControllerFieldError } from "./Controllers/NSEController";
-export type { ControllerValidationIssue, ControllerEditTransaction, ControllerCommitResult, ControllerUndoRegistration } from "./Controllers/NSEController";
+export type {
+  ControllerValidationIssue, ControllerEditTransaction, ControllerCommitResult, ControllerUndoRegistration,
+  NSEControllerDisposalReason, NSEControllerOwnership,
+} from "./Controllers/NSEController";
+export { nseUnowned } from "./Controllers/ownership";
+export { bind, createNSEBinding, useNSEBinding } from "./Bindings";
+export type { NSEBinding, NSEBindingValue, NSEBindingSnapshot, NSEBindingCommitResult, NSEBindingEdit, NSEBindingOwner, NSEBindingAdapter, NSEBoundValueProps, NSEBindingView, NSEWritableBindingKey } from "./Bindings";
+export { managedTask, NSETaskQueueFullError } from "./Tasks";
+export type { NSETaskLifetime, NSETaskSettlement, NSETaskContext, NSETaskRun, NSETaskSnapshot, NSEManagedTask, NSETaskOptions } from "./Tasks";
+export { outlet } from "./Application/viewOutlet";
+export type { NSEViewOutlet, NSEOutletElement, NSEOutletOptions } from "./Application/viewOutlet";
+export type { NSEManagedAFXDisplayLink, NSEManagedAFXDisplayLinkOptions, NSEManagedAFXFrame, NSEManagedAFXRenderer, NSEManagedAFXRendererOptions, NSEManagedAFXRendererSnapshot } from "./Application/managedAnimationRenderer";
+export type { NSEOwner, NSEControllerOwnershipOptions } from "./Controllers/ownership";
+export { useNSEArrayController, useNSETreeController } from "./Controllers/useNSEOwnedController";
+export { SynCloudOSLifecycleError } from "../SynCloudOS/nseRuntimeContracts";
+export type {
+  SynCloudOSLifecycleDisposal, SynCloudOSLifecycleDisposalReason, SynCloudOSLifecycleErrorOptions, SynCloudOSLifecycleResource,
+} from "../SynCloudOS/nseRuntimeContracts";
 export type { ArrayControllerSnapshot, ArrayControllerChange, ArrayControllerInsertion } from "./Controllers/NSEArrayController";
 export type { TreeControllerSnapshot, TreeControllerChange, TreeDestination } from "./Controllers/NSETreeController";
 
-// Value models required to author and consume the public controller contracts.
-export { IndexPath, compareIndexPaths } from "../SynCloudOS/Models";
-export { IndexSet } from "../SynCloudOS/Models";
-export type { IndexRange } from "../SynCloudOS/Models";
-export { Predicate, PredicateValidationError } from "../SynCloudOS/Models";
-export type {
-  PredicateScalar, PredicateLiteral, PredicateComparisonOperator, PredicateTextOptions,
-  PredicateExpression, PredicateField, PredicateSchema,
-} from "../SynCloudOS/Models";
-export type { ItemIdentity, CollectionChange, ChangeSet } from "../SynCloudOS/Models";
-export { SelectionModel } from "../SynCloudOS/Models";
-export type { SelectionSnapshot, SelectionChange, SelectionModelOptions } from "../SynCloudOS/Models";
-export { SortDescriptor, sortWithDescriptors } from "../SynCloudOS/Models";
-export type { SortDirection, SortNulls, SortDescriptorOptions, SortComparator } from "../SynCloudOS/Models";
-export { TreeNode } from "../SynCloudOS/Models";
-export type { TreeNodeInit } from "../SynCloudOS/Models";
-export type { Formatter, FormatterContext, FormatterError, FormatterResult } from "../SynCloudOS/Models";
-export { NumberFormatter } from "../SynCloudOS/Models";
-export type { NumberFormatterOptions } from "../SynCloudOS/Models";
-export { DateFormatter } from "../SynCloudOS/Models";
-export type { DateFormatterValueType, DateFormatterValue, DateFormatterOptions } from "../SynCloudOS/Models";
-export { ByteCountFormatter } from "../SynCloudOS/Models";
-export type { ByteUnitSystem, DecimalByteUnit, BinaryByteUnit, ByteUnit, ByteCountFormatterOptions } from "../SynCloudOS/Models";
-export { createValueTransformer, composeTransformers, negateBooleanTransformer, isNullTransformer, isNotNullTransformer } from "../SynCloudOS/Models";
-export type { ValueTransformer } from "../SynCloudOS/Models";
+// AppKit tree nodes belong to NSE; Cocoa value models are imported from Foundation.
+export { NSETreeNode } from "./Controllers/NSETreeNode";
 export type { NSEControlValidation, NSEControlInteractionPhase, NSEControlValueProps } from "./Controls/Core/controlTypes";
-export { NSEDataViewCellContent } from "./DataViews/Core/NSEDataViewCellContent";
+export { NSETableCellView } from "./DataViews/Table/NSETableCellView";
 
 export {
-  NSEAppearanceProvider,
-  defineNSEAppearance,
   useNSEAppearanceProjection,
   useNSEAppearance,
-  useNSEAppearanceSlot,
-  resolveNSEAppearanceSlot,
 } from "./Appearance";
 export type {
-  NSEAppearanceProviderProps,
   NSEAppearanceDataAttributes,
-  NSEAppearanceDefinition,
-  NSEAppearanceDefinitionInput,
-  NSEAppearanceRecipeDefinition,
+  NSETheme,
+  NSEThemeNavigation,
+  NSEThemePresentation,
+  NSEThemeImage,
   NSEAppearanceSelection,
   NSEAppearanceServicePort,
   NSEChromeAppearance,
@@ -124,30 +97,6 @@ export type {
   NSEColourWellProps,
 } from "./Colour/Controls/NSEColourWell";
 export {
-  NSEColourSliderPicker,
-} from "./Colour/Pickers/NSEColourSliderPicker";
-export type {
-  NSEColourSliderPickerProps,
-} from "./Colour/Pickers/NSEColourSliderPicker";
-export {
-  NSEColourSwatches,
-} from "./Colour/Pickers/NSEColourSwatches";
-export type {
-  NSEColourSwatchesProps,
-} from "./Colour/Pickers/NSEColourSwatches";
-export {
-  NSEColourWheelPicker,
-} from "./Colour/Pickers/NSEColourWheelPicker";
-export type {
-  NSEColourWheelPickerProps,
-} from "./Colour/Pickers/NSEColourWheelPicker";
-export {
-  NSEAlertBackdrop,
-} from "./Components/NSEAlertBackdrop";
-export {
-  NSEAlert,
-} from "./Components/NSEAlert";
-export {
   NSEArrayController,
 } from "./Controllers/NSEArrayController";
 export type {
@@ -155,12 +104,11 @@ export type {
   ArrayControllerSelectionOptions,
 } from "./Controllers/NSEArrayController";
 export {
-  NSEPreferencesController,
-} from "./Controllers/NSEPreferencesController";
-export type {
-  PreferencesAdapter,
-  PreferencesControllerOptions,
-} from "./Controllers/NSEPreferencesController";
+  NSEUserDefaultsController,
+  PreferenceValidationError,
+  PreferencePersistenceError,
+} from "./Controllers/NSEUserDefaultsController";
+export type { NSEUserDefaultsControllerOptions } from "./Controllers/NSEUserDefaultsController";
 export {
   NSETreeController,
 } from "./Controllers/NSETreeController";
@@ -177,13 +125,6 @@ export type {
   NSETokenValue,
 } from "./Controls/Completion/completionTypes";
 export {
-  NSESearchFieldController,
-  createNSESearchFieldPreferences,
-} from "./Controls/Fields/NSESearchFieldController";
-export type {
-  NSESearchFieldControllerOptions,
-} from "./Controls/Fields/NSESearchFieldController";
-export {
   NSESearchField,
 } from "./Controls/Fields/NSESearchField";
 export type {
@@ -196,109 +137,42 @@ export type {
   NSESecureTextFieldProps,
 } from "./Controls/Fields/NSESecureTextField";
 export {
-  NSEIconButton,
-  NSEPushButton,
-} from "./Controls/Buttons/NSEButtons";
+  NSEButton,
+} from "./Controls/Buttons/NSEButton";
 export type {
-  NSEButtonTone,
-  NSEIconButtonProps,
-  NSEPushButtonProps,
-} from "./Controls/Buttons/NSEButtons";
-export {
-  NSEActivityButton,
-  NSEButtonHeader,
-  NSENotificationButton,
-  NSERadioToolButtonGroup,
-  NSEToolButton,
-  NSEToolButtonGroup,
-} from "./Controls/Buttons/NSEButtonFamilies";
-export type {
-  NSEActivityButtonProps,
-  NSEButtonHeaderProps,
-  NSENotificationButtonProps,
-  NSERadioToolButtonGroupProps,
-  NSEToolButtonGroupProps,
-  NSEToolButtonProps,
-} from "./Controls/Buttons/NSEButtonFamilies";
-export type { NSEExtendedControlLevel, NSESelectableOption, NSESelectorItem, NSESelectorItemInput } from "./Controls/Selection/NSESelectors";
-export { NSEGrabHandle } from "./Controls/Buttons/NSEGrabHandle";
-export type { NSEGrabHandleProps } from "./Controls/Buttons/NSEGrabHandle";
+  NSEBezelStyle,
+  NSEButtonControlSize,
+  NSEButtonProps,
+  NSEButtonType,
+  NSEControlStateValue,
+  NSEImagePosition,
+} from "./Controls/Buttons/NSEButton";
+export type { NSEKeyEquivalentModifierMask } from "./Controls/Buttons/useNSEKeyEquivalent";
 export {
   NSEBox,
-  NSECheckbox,
-  NSEGroupBox,
-  NSEInputBox,
-  NSERadioGroup,
   NSETextField,
-  NSEToggleButton,
+  NSESwitch,
 } from "./Controls/Fields/NSEFields";
 export type {
-  NSEBoxBorder,
-  NSEBoxContentInsets,
-  NSEBoxKind,
   NSEBoxProps,
   NSEBoxTitlePosition,
-  NSECheckboxProps,
+  NSEBoxType,
+  NSEBorderType,
+  NSEBoxContentViewMargins,
   NSEFormattedTextFieldProps,
-  NSEGroupBoxProps,
-  NSEInputBoxProps,
   NSEPlainTextFieldProps,
-  NSERadioGroupProps,
-  NSERadioOption,
   NSETextFieldChromeProps,
   NSETextFieldProps,
-  NSEToggleButtonProps,
+  NSELabelBackgroundStyle,
+  NSELabelTextFieldProps,
+  NSEFontTextStyle,
+  NSESwitchProps,
 } from "./Controls/Fields/NSEFields";
-export { NSEPasswordField } from "./Controls/Fields/NSEPasswordField";
-export type { NSEPasswordFieldProps } from "./Controls/Fields/NSEPasswordField";
-export { NSERoundedInput, NSEToolInput } from "./Controls/Fields/NSEFieldVariants";
-export type { NSERoundedInputProps, NSEToolInputProps } from "./Controls/Fields/NSEFieldVariants";
-export { NSEDivider, NSEGroupedList, NSEListItem } from "./Controls/Selection";
-export type { NSEDividerProps, NSEGroupedListEdge, NSEGroupedListProps, NSEListItemProps } from "./Controls/Selection";
-export { NSEListSelector, NSEPopupList, NSEPickerGroup, NSEIntegerPicker } from "./Controls/Selection/NSESelectors";
-export type { NSEIntegerPickerProps, NSEListSelectorProps, NSEPickerGroupProps, NSEPopupListProps } from "./Controls/Selection/NSESelectors";
-export { NSEPageHeader, NSEHeader, NSEPrevNextBanner } from "./Windows/Chrome";
-export type { NSEHeaderProps, NSEPageHeaderProps, NSEPrevNextBannerProps } from "./Windows/Chrome";
-export { NSETopBar, NSETopBarButton, NSEStatusBar } from "./Windows/Chrome";
-export type {
-  NSEChromeScheme,
-  NSEStatusBarProps,
-  NSEStatusBarVariant,
-  NSETopBarItem,
-  NSETopBarItemKind,
-  NSETopBarItemPosition,
-  NSETopBarProps,
-  NSETopBarRail,
-  NSETopBarTitleAction,
-  NSETopBarVariant,
-} from "./Windows/Chrome";
-export { NSESidebar, NSESourceListScene } from "./Navigation/SourceList";
-export type {
-  NSESidebarItem,
-  NSESidebarProps,
-  NSESidebarSection,
-  NSESidebarSurface,
-  NSESidebarVariant,
-  NSESourceListCompactHandoff,
-  NSESourceListNavigationProjection,
-  NSESourceListSceneProps,
-  NSESourceListSceneStatus,
-} from "./Navigation/SourceList";
+export type { NSEChromeScheme } from "./Windows/Chrome";
+export { resolveNSEBookRegions, NSEBookRegionMetrics } from "./Navigation/bookRegions";
+export type { NSEBookRegions } from "./Navigation/bookRegions";
 export { NSESplitView } from "./DataViews/Split/NSESplitView";
 export type { NSESplitViewProps } from "./DataViews/Split/NSESplitView";
-export { NSEMetalSurface, NSERoundedBox } from "./Material";
-export type { NSEMetalSurfaceProps, NSERoundedBoxProps } from "./Material";
-export { NSEAppMenuSurface, NSEAppMenu, NSEEditMenu, NSEHelpMenu } from "./Menus";
-export type { NSEAppMenuItemDefinition, NSEAppMenuProps, NSEAppMenuSurfaceProps, NSEEditMenuProps, NSEHelpMenuProps } from "./Menus";
-export { NSEDialogSurface } from "./Overlays/NSEDialogSurface";
-export type { NSEDialogSurfaceProps } from "./Overlays/NSEDialogSurface";
-export { NSEFilePickerButton } from "./FilePanels/NSEFilePickerButton";
-export type { NSEFilePickerButtonProps, NSEFilePickerPanelBinding } from "./FilePanels/NSEFilePickerButton";
-export { NSEProgressBar, NSEProgressButton, NSEProgressItem, NSEProgressSlider, NSESpinner } from "./Progress";
-export type { NSEProgressBarProps, NSEProgressButtonProps, NSEProgressItemProps, NSEProgressSliderProps, NSESpinnerProps } from "./Progress";
-export {
-  NSECircularSlider,
-} from "./Controls/Values/NSECircularSlider";
 export {
   NSELevelIndicator,
 } from "./Controls/Values/NSELevelIndicator";
@@ -330,6 +204,18 @@ export {
   createAdaptiveCollectionLayout,
   createListCollectionLayout,
 } from "./DataViews/Collection/collectionLayout";
+export {
+  coverFlowItemAttributes,
+  coverFlowLayoutAttributes,
+  createCoverFlowCollectionLayout,
+  type NSECollectionViewCoverFlowLayout,
+  type NSECollectionViewCoverFlowLayoutOptions,
+  coverFlowReflectionBrightness,
+  coverFlowReflectionFadeMask,
+  coverFlowReflectionFrameY,
+  coverFlowReflectionOpacity,
+  type NSECoverFlowLayoutAttributes,
+} from "./DataViews/Collection/coverFlowLayout";
 export type {
   NSECollectionLayout,
   NSECollectionLayoutInput,
@@ -342,8 +228,8 @@ export type {
   NSEDataViewDragBinding,
 } from "./DataViews/Drag/useNSEDataViewDrag";
 export {
-  NSEOutline,
-} from "./DataViews/Outline/NSEOutline";
+  NSEOutlineView,
+} from "./DataViews/Outline/NSEOutlineView";
 export {
   NSEPredicateEditor,
 } from "./DataViews/RuleEditor/NSEPredicateEditor";
@@ -351,41 +237,42 @@ export {
   NSERuleEditor,
 } from "./DataViews/RuleEditor/NSERuleEditor";
 export {
-  NSESplitViewAdapter,
-} from "./DataViews/Split/NSESplitViewAdapter";
-export type {
-  NSESplitViewAdapterProps,
-} from "./DataViews/Split/NSESplitViewAdapter";
-export {
   NSESplitViewController,
 } from "./DataViews/Split/NSESplitViewController";
 export {
-  NSETable,
-} from "./DataViews/Table/NSETable";
+  NSESplitViewItem,
+} from "./DataViews/Split/NSESplitViewItem";
+export type {
+  NSESplitViewItemBehavior,
+  NSESplitViewItemOptions,
+} from "./DataViews/Split/NSESplitViewItem";
+export type {
+  NSESplitViewControllerOptions,
+  NSESplitViewItemSnapshot,
+  NSESplitViewPreferences,
+  NSESplitViewSnapshot,
+} from "./DataViews/Split/splitViewTypes";
+export {
+  NSETableView,
+} from "./DataViews/Table/NSETableView";
 export type {
   NSETableColumn,
 } from "./DataViews/Table/tableTypes";
 export {
-  NSECalendarView,
-} from "./DateTime/Calendar/NSECalendarView";
-export {
-  NSEClockView,
-} from "./DateTime/Calendar/NSEClockView";
-export {
   NSEDatePicker,
 } from "./DateTime/Pickers/NSEDatePicker";
-export {
-  NSEDateRangePicker,
-} from "./DateTime/Pickers/NSEDateRangePicker";
-export {
-  NSEDateTimePicker,
-} from "./DateTime/Pickers/NSEDateTimePicker";
-export {
-  NSETimePicker,
-} from "./DateTime/Pickers/NSETimePicker";
 export type {
-  NSEDateTimePickerValue,
+  NSEDatePickerDateProps,
+  NSEDatePickerDateTimeProps,
+  NSEDatePickerProps,
+  NSEDatePickerRangeProps,
+  NSEDatePickerStyle,
+  NSEDatePickerTimeProps,
+  NSEDateTimeValue,
 } from "./DateTime/Pickers/datePickerTypes";
+export type {
+  NSECalendarEventIndicator,
+} from "./DateTime/Calendar/calendarTypes";
 export {
   resolveZonedDateTime,
 } from "./DateTime/calendarArithmetic";
@@ -593,7 +480,7 @@ export {
   NSEOpenPanel,
 } from "./FilePanels/NSEOpenPanel";
 export type {
-  NSEOpenPanelProps,
+  NSEOpenPanelURL,
 } from "./FilePanels/NSEOpenPanel";
 export {
   NSESavePanel,
@@ -601,45 +488,17 @@ export {
 export type {
   NSESavePanelProps,
 } from "./FilePanels/NSESavePanel";
-export {
-  NSEFocusScope,
-} from "./Focus/NSEFocusPort";
-export type {
-  NSEFocusScopeOptions,
-} from "./Focus/NSEFocusPort";
-export {
-  NSEGraphicsView,
-} from "./Graphics/NSEGraphicsView";
+export type { NSEMetalSurfaceProps } from "./Material";
 export { snapshotNSEView } from "./Graphics/snapshotNSEView";
 export type { NSEViewSnapshotOptions } from "./Graphics/snapshotNSEView";
-export type {
-  NSEGraphicsViewProps,
-} from "./Graphics/NSEGraphicsView";
+export { NSEShadow } from "./Graphics/NSEShadow";
+export type { NSEShadowOptions } from "./Graphics/NSEShadow";
 export {
-  NSEShadowView,
-} from "./Graphics/NSEShadowView";
-export {
-  NSECroppableImage,
   NSEImageView,
-  NSERotatingImage,
-  NSEScrollingImage,
-  NSESizeableImage,
-  NSEViewImage,
 } from "./Controls/Images/NSEImage";
 export type {
-  NSECropParams,
-  NSECroppableImageProps,
-  NSEImageDimensions,
-  NSEImageGeometryPort,
-  NSEImageStringSourceLease,
-  NSEImageStringSourcePort,
+  NSEImageScaling,
   NSEImageViewProps,
-  NSERotatingImageHandle,
-  NSERotatingImageProps,
-  NSEScrollingImageProps,
-  NSESizeableImageHandle,
-  NSESizeableImageProps,
-  NSEViewImageProps,
 } from "./Controls/Images/NSEImage";
 export {
   NSEStackItem,
@@ -648,35 +507,33 @@ export {
   NSEStackView,
 } from "./Layout/NSEStackView";
 export {
+  NSEStackVisibilityPriority,
+} from "./Layout/stackViewTypes";
+export {
+  NSEGridRow,
+  NSEGridView,
+} from "./Layout/NSEGridView";
+export type {
+  NSEGridColumn,
+  NSEGridRowProps,
+  NSEGridViewProps,
+  NSEGridXPlacement,
+  NSEGridYPlacement,
+} from "./Layout/NSEGridView";
+export type {
+  NSELayoutGap,
+  NSESpacing,
+} from "./Layout/layoutSpacing";
+export {
   resolveStackLayout,
 } from "./Layout/resolveStackLayout";
 export {
-  NSEVirtualList,
-  computeNSEVirtualWindow,
-} from "./List/NSEVirtualList";
+  NSEView,
+} from "./Views/NSEView";
 export type {
-  NSEVirtualListHandle,
-  NSEVirtualListProps,
-  NSEVirtualWindowOptions,
-} from "./List/NSEVirtualList";
-export {
-  NSEMediaPanel,
-} from "./MediaPanels/NSEMediaPanel";
-export type {
-  NSEMediaPanelProps,
-} from "./MediaPanels/NSEMediaPanel";
-export {
-  NSEApplicationMenu,
-} from "./Menus/NSEApplicationMenu";
-export type {
-  NSEApplicationMenuProps,
-} from "./Menus/NSEApplicationMenu";
-export {
-  NSEContextMenu,
-} from "./Menus/NSEContextMenu";
-export type {
-  NSEContextMenuProps,
-} from "./Menus/NSEContextMenu";
+  NSEViewProps,
+  NSEViewLayerContentsPlacement,
+} from "./Views/NSEView";
 export {
   NSEMenuBar,
 } from "./Menus/NSEMenuBar";
@@ -685,89 +542,34 @@ export type {
   NSEMenuBarProps,
 } from "./Menus/NSEMenuBar";
 export {
-  NSEMenuController,
-} from "./Menus/NSEMenuController";
-export {
-  NSEMenuOverlay,
-} from "./Menus/NSEMenuOverlay";
-export type {
-  NSEMenuOverlayProps,
-} from "./Menus/NSEMenuOverlay";
-export {
   NSEMenu,
 } from "./Menus/NSEMenu";
-export type {
-  NSEMenuProps,
-} from "./Menus/NSEMenu";
 export {
-  NSEPopupButton,
-} from "./Menus/NSEPopupButton";
+  NSEPopUpButton,
+} from "./Menus/NSEPopUpButton";
 export type {
-  NSEPopupButtonProps,
-} from "./Menus/NSEPopupButton";
-export {
-  createNSEApplicationMenuModel,
-} from "./Menus/createApplicationMenuModel";
+  NSEPopUpButtonItem,
+  NSEPopUpButtonProps,
+} from "./Menus/NSEPopUpButton";
 export type {
-  NSEApplicationMenuModelOptions,
-} from "./Menus/createApplicationMenuModel";
-export type {
-  NSEMenuModel,
+  NSEMenuItem,
+  NSEMenuOptions,
   NSEMenuRuntimePort,
 } from "./Menus/menuTypes";
-export {
-  NSEAccordionView,
-} from "./Navigation/NSEAccordionView";
-export {
-  NSEAdaptiveNavigationController,
-} from "./Navigation/NSEAdaptiveNavigationController";
-export type {
-  NSEAdaptiveNavigationControllerOptions,
-} from "./Navigation/NSEAdaptiveNavigationController";
-export {
-  NSEHierarchyStack,
-} from "./Navigation/NSEHierarchyStack";
-export type {
-  NSEHierarchyStackProps,
-} from "./Navigation/NSEHierarchyStack";
-export {
-  NSENavigationStackController,
-} from "./Navigation/NSENavigationStackController";
-export type {
-  NSENavigationStackControllerOptions,
-} from "./Navigation/NSENavigationStackController";
-export {
-  NSETabBarController,
-} from "./Navigation/NSETabBarController";
-export type {
-  NSETabBarControllerOptions,
-} from "./Navigation/NSETabBarController";
-export {
-  NSETabBar,
-  NSETabBarOverflowList,
-} from "./Navigation/NSETabBar";
-export type {
-  NSETabBarOverflowListProps,
-  NSETabBarProps,
-} from "./Navigation/NSETabBar";
+export { NSETabViewController, NSETabViewItem } from "./Navigation/NSETabViewController";
+export { useNSEApplicationNavigationChrome } from "./Navigation/NSEApplicationNavigationChrome";
+export type { NSEApplicationNavigationChromeState } from "./Navigation/NSEApplicationNavigationChrome";
+export type { NSETabViewControllerOptions, NSETabViewControllerSnapshot, NSETabViewControllerTabStyle, NSETabViewItemOptions } from "./Navigation/NSETabViewController";
 export {
   NSETabView,
 } from "./Navigation/NSETabView";
 export {
-  NSEListboxPopup,
-} from "./Overlays/NSEListboxPopup";
-export type {
-  NSEListboxPopupProps,
-} from "./Overlays/NSEListboxPopup";
-export {
-  NSEPopover,
-} from "./Overlays/NSEPopover";
-export type {
-  NSEPopoverProps,
-} from "./Overlays/NSEPopover";
-export {
   NSEPopup,
 } from "./Overlays/NSEPopup";
+/** NSPopover's anchored surface, positioning rectangle, behaviour and content size.
+ * Use presentAsPopover for the view-controller presentation's adaptive policy. */
+export { NSEPopover } from "./Overlays/NSEPopover";
+export type { NSEPopoverProps } from "./Overlays/NSEPopover";
 export { useNSEOverlayProvider } from "./Overlays/NSEOverlayProvider";
 export type {
   NSEPopupProps,
@@ -784,15 +586,13 @@ export {
 export {
   NSEProgressIndicator,
 } from "./Progress/NSEProgressIndicator";
+export type { NSEProgressIndicatorProps } from "./Progress/progressTypes";
 export {
   NSEClipView,
 } from "./Scroll/NSEClipView";
 export type {
   NSEClipViewProps,
 } from "./Scroll/NSEClipView";
-export {
-  NSESmoothSurface,
-} from "./SmoothSurface/NSESmoothSurface";
 export {
   NSELayoutManager,
 } from "./TextLayout/NSELayoutManager";
@@ -812,31 +612,18 @@ export type {
   NSEProjectedAttachmentSource,
 } from "./TextLayout/attachmentProjection";
 export {
-  NSEToolbarConfigurationSheet,
-} from "./Toolbars/NSEToolbarConfigurationSheet";
-export type {
-  NSEToolbarConfigurationSheetProps,
-} from "./Toolbars/NSEToolbarConfigurationSheet";
-export {
-  NSEToolbarController,
-} from "./Toolbars/NSEToolbarController";
-export {
   NSEToolbar,
 } from "./Toolbars/NSEToolbar";
 export type {
-  NSEToolbarProps,
+  NSEToolbarDisplayMode,
+  NSEToolbarOptions,
+  NSEToolbarSizeMode,
 } from "./Toolbars/NSEToolbar";
 export type {
-  NSEToolbarConfiguration,
   NSEToolbarItem,
-  NSEToolbarPreferences,
+  NSEToolbarActionItem,
+  NSEToolbarItemInput,
 } from "./Toolbars/toolbarTypes";
-export {
-  NSETooltipProvider,
-} from "./Tooltips/NSETooltipProvider";
-export type {
-  NSETooltipProviderProps,
-} from "./Tooltips/NSETooltipProvider";
 export {
   useNSETooltip,
 } from "./Tooltips/useNSETooltip";
@@ -850,21 +637,21 @@ export type {
   NSEFontPanelProps,
 } from "./Typography/NSEFontPanel";
 export {
-  NSERuler,
-} from "./Typography/NSERuler";
+  NSERulerView,
+} from "./Typography/NSERulerView";
 export type {
-  NSERulerProps,
-} from "./Typography/NSERuler";
+  NSERulerViewProps,
+} from "./Typography/NSERulerView";
 export type {
   NSEParagraphStyle,
 } from "./Typography/typographyTypes";
 export {
-  NSEWebContentView,
-} from "./WebContent/NSEWebContentView";
+  NSEWebView,
+} from "./WebContent/NSEWebView";
 export type {
   NSEWebContentSourceViewProps,
-  NSEWebContentViewProps,
-} from "./WebContent/NSEWebContentView";
+  NSEWebViewProps,
+} from "./WebContent/NSEWebView";
 export {
   useNSEDeferredDisposal,
 } from "./interactionLifecycle";
@@ -890,40 +677,26 @@ export type {
 } from "./Layout/stackViewTypes";
 export type {
   NSENavigationIcon,
-  NSENavigationSidebarItemDescriptor,
   NSENavigationPresentationState,
   NSENavigationIconPresentation,
-  NSENavigationDestination,
-  NSENavigationSection,
-  NSENavigationSelectionOptions,
-  NSETabBarControllerSnapshot,
-  NSETabBarRestorationSnapshot,
-  NSENavigationStackSnapshot,
-  NSENavigationStackRestorationSnapshot,
-  NSEAdaptiveNavigationModel,
-  NSEAdaptiveNavigationPresentation,
-  NSEAdaptiveNavigationRenderer,
-  NSEAdaptiveNavigationSnapshot,
   NSETabItem,
   NSETabViewProps,
-  NSEAccordionItem,
-  NSEAccordionViewProps,
 } from "./Navigation/navigationTypes";
 export type {
-  NSETableEditContext,
-  NSETableDropProposal,
+  NSETableViewEditContext,
+  NSETableViewDropProposal,
   NSETableColumnConfiguration,
   NSETableColumnMenu,
-  NSETableProps,
-  NSETableSelectionSnapshot,
+  NSETableViewProps,
+  NSETableViewSelectionSnapshot,
 } from "./DataViews/Table/tableTypes";
 export type {
-  NSEOutlineDataSource,
-  NSEOutlineDelegate,
-  NSEOutlineRow,
-  NSEOutlineSelectionEvent,
-  NSEOutlineDropProposal,
-  NSEOutlineProps,
+  NSEOutlineViewDataSource,
+  NSEOutlineViewDelegate,
+  NSEOutlineViewRow,
+  NSEOutlineViewSelectionEvent,
+  NSEOutlineViewDropProposal,
+  NSEOutlineViewProps,
 } from "./DataViews/Outline/outlineTypes";
 export type {
   NSEDataViewKey,
@@ -934,7 +707,7 @@ export type {
   NSEDataViewSelectionMode,
   NSEDataViewCoordinatorOptions,
   NSEDataViewCellImage,
-  NSEDataViewCellContentProps,
+  NSETableCellViewProps,
 } from "./DataViews/Core/dataViewTypes";
 export type {
   NSECompletionDataSource,
@@ -947,11 +720,56 @@ export type {
   NSEUndoManagerPort,
   NSESegmentedItem,
   NSESegmentedControlProps,
+  NSESegmentStyle,
   NSESliderProps,
-  NSECircularSliderProps,
   NSELevelIndicatorProps,
 } from "./Controls/Values/valueControlTypes";
+
+export { NSEObject, observable, observe, useObserve } from "./Objects";
+export type { NSEObservable } from "./Objects";
+export { NSEApplication, NSEWindowController, NSEViewController, NSETitlebarAccessoryViewController, NSEAlert, NSEAlertButton, NSEModalResponse } from "./Application";
+export type { NSEAlertStyle, NSEPopoverPositioning } from "./Application";
+export type { NSEViewControllerPresentationAnimator } from "./Application";
+export { NSEViewControllerTransitionOptions } from "./Application";
+export type { NSEViewAnimator } from "./Animation/NSEViewAnimator";
 export type {
-  NSEVirtualRowState,
-  NSEVirtualWindow,
-} from "./List/NSEVirtualList";
+  NSEAnyWindowController, NSEApplicationClass, NSEApplicationContext, NSEApplicationDelegate, NSEControllerView, NSEOpenWindowOptions,
+  NSETraitCollection,
+  NSEViewComponent, NSEViewControllerClass, NSEViewControllerOptions, NSEWindow, NSEWindowCloseOutcome, NSEWindowContentBorderEdge, NSEWindowToolbarStyle,
+  NSEWindowControllerClass, NSEWindowControllerContext, NSEWindowControllerOptions, NSEWindowDocument,
+} from "./Application";
+export { preference } from "./Objects/preference";
+export type { NSEPreferenceDescriptor } from "./Objects/preference";
+export { observes } from "./Objects/observes";
+export type { NSEObservationOptions } from "./Objects/observes";
+
+export type { NSENavigationRestorationDescriptor } from "./Navigation/navigationRestoration";
+
+export { actionRef } from "./Controls/Core/actionReference";
+export type { NSEActionReference, NSEActionPayloadCheck } from "./Controls/Core/actionReference";
+export type { NSEViewControllerFX, NSEViewControllerFXClients } from "./Application";
+export { NSEHapticFeedbackManager } from "./Feedback/NSEHapticFeedbackManager";
+export type { NSEHapticFeedbackPattern, NSEHapticFeedbackPerformanceTime, NSEHapticFeedbackPerformer } from "./Feedback/NSEHapticFeedbackManager";
+export { NSEAppearance } from "./Appearance/NSEAppearance";
+export type { NSEAppearanceOptions } from "./Appearance/NSEAppearance";
+export { NSEWorkspace } from "./Application/NSEWorkspace";
+export { NSEPathControl, NSEPathControlItem } from "./Controls/Values/NSEPathControl";
+export type { NSEPathControlProps, NSEPathControlHandle } from "./Controls/Values/NSEPathControl";
+
+export { NSEImage } from "./Controls/Images/NSEImageResource";
+
+export type { NSEAppearanceName } from "./Appearance/nseAppearanceTypes";
+
+export { NSEDockTile } from "./Application/NSEDockTile";
+
+export type { BGTaskScheduler, BGTaskRequest, BGDownloadTaskRequest, UNUserNotificationCenter, UNNotificationSettings, UNNotificationCategory, UNNotificationAction, UNPushConfiguration } from "../SynCloudOS/nseRuntimeContracts";
+
+
+export type { NSELayoutGuide } from "./Layout/NSELayoutGuide";
+export { useNSEWindowChromeObstruction } from "./Layout/windowChromeObstructions";
+
+export { useNSESafeArea } from "./Layout/useNSESafeArea";
+export type { NSESafeArea } from "./Layout/useNSESafeArea";
+
+export { nseControlHooks, nsePartHooks } from "./Theme/contract/hooks";
+export type { NSEThemeControlName, NSEThemePartName } from "./Theme/contract/vocabulary";

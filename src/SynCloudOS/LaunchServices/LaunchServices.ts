@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import { getCanonicalExternalHref } from "../Routing/routeNormalization";
 import { WEBSPRING_PRESENTATION_ROLES } from "../WebspringState/webspringPresentation";
 import { createBrowserRoutePlatform } from "../PlatformAdapters/BrowserRoutePlatform";
@@ -50,13 +51,13 @@ import type {
   SynCloudOSOpenAppOptions,
   SynCloudOSPolicyAuthorisationExplanation,
   SynCloudOSPolicyAuthorisationResult,
-  SynCloudOSPolicyKit as LaunchPolicyKit
+  SynCloudOSConfigurationProfiles as LaunchConfigurationProfiles
 } from "./launchTypes";
 
 type LaunchAppRegistryPort = Pick<SynCloudOSAppRegistry, "getApp" | "getAppForRoute">;
 type LaunchAppManagerPort = Pick<SynCloudOSAppManagerController, "getManagerForApp" | "createManagerForApp">;
 type LaunchApplicationDescriptor = {
-  readonly id: string;
+  readonly bundleIdentifier: string;
   readonly packageName: string;
   readonly displayName: string;
 };
@@ -109,7 +110,7 @@ export interface LaunchServicesDependencies {
   readonly windowManager: LaunchWindowManagerPort;
   readonly serviceRegistry: LaunchServiceRegistryPort;
   readonly loginServices: LaunchLoginServicesPort;
-  readonly policyKit: LaunchPolicyKit;
+  readonly configurationProfiles: LaunchConfigurationProfiles;
 }
 
 export function createLaunchServices(runtime: SynCloudOSRuntime, dependencies: LaunchServicesDependencies) {
@@ -122,7 +123,7 @@ const WebspringState = dependencies.webspringState;
 const WindowManager = dependencies.windowManager;
 const ServiceRegistry = dependencies.serviceRegistry;
 const LoginServices = dependencies.loginServices;
-const RuntimePolicyKit = dependencies.policyKit;
+const RuntimeConfigurationProfiles = dependencies.configurationProfiles;
 const RuntimeStore = runtime.store;
 const browserRoutes = createBrowserRoutePlatform(runtime.environment);
 
@@ -373,8 +374,8 @@ function createLaunchRequestId(appId: string) {
 }
 
 function getNextLaunchAttempt(appId: string) {
-  const nextAttempt = (launchAttempts.get(appId) ?? 0) + 1;
-  launchAttempts.set(appId, nextAttempt);
+  const nextAttempt = (launchAttempts.get(normalizeBundleIdentifier(appId)) ?? 0) + 1;
+  launchAttempts.set(normalizeBundleIdentifier(appId), nextAttempt);
   return nextAttempt;
 }
 
@@ -402,9 +403,9 @@ function getLaunchOrigin(options: SynCloudOSOpenAppOptions) {
   return getLaunchSource(options) === "developer" ? "developerConsole" : "runtime";
 }
 
-function getPolicyKit() {
-  const localPolicyKit = RuntimePolicyKit;
-  return typeof localPolicyKit.authorise === "function" ? localPolicyKit : null;
+function getConfigurationProfiles() {
+  const localConfigurationProfiles = RuntimeConfigurationProfiles;
+  return typeof localConfigurationProfiles.authorise === "function" ? localConfigurationProfiles : null;
 }
 
 function policyCapabilityForApp(app: SynCloudOSAppInfo) {
@@ -440,7 +441,7 @@ function normalizePolicyResult(
       available: true,
       checked: true,
       allowed: result,
-      reason: result ? "PolicyKit authorised launch." : "PolicyKit denied launch.",
+      reason: result ? "ConfigurationProfiles authorised launch." : "ConfigurationProfiles denied launch.",
       result
     };
   }
@@ -450,27 +451,27 @@ function normalizePolicyResult(
     available: true,
     checked: true,
     allowed,
-    reason: result.reason ?? result.message ?? (allowed ? "PolicyKit authorised launch." : "PolicyKit denied launch."),
+    reason: result.reason ?? result.message ?? (allowed ? "ConfigurationProfiles authorised launch." : "ConfigurationProfiles denied launch."),
     code: result.code,
     result
   };
 }
 
-async function authoriseWithPolicyKit(
+async function authoriseWithConfigurationProfiles(
   request: SynCloudOSLaunchRequestDetails
 ): Promise<SynCloudOSPolicyAuthorisationExplanation> {
-  const policyKit = getPolicyKit();
-  if (!policyKit?.authorise) {
+  const configurationProfiles = getConfigurationProfiles();
+  if (!configurationProfiles?.authorise) {
     return {
       available: false,
       checked: false,
       allowed: true,
-      reason: "PolicyKit.authorise is not registered."
+      reason: "ConfigurationProfiles.authorise is not registered."
     };
   }
 
   try {
-    const result = await policyKit.authorise(createPolicyRequest(request.app, request.options, request.requestId));
+    const result = await configurationProfiles.authorise(createPolicyRequest(request.app, request.options, request.requestId));
     return normalizePolicyResult(result);
   } catch (error) {
     return {
@@ -478,34 +479,34 @@ async function authoriseWithPolicyKit(
       checked: true,
       allowed: false,
       reason: error instanceof Error ? error.message : String(error),
-      code: "POLICYKIT_AUTHORISE_THROWN"
+      code: "CONFIGURATION_AUTHORISE_THROWN"
     };
   }
 }
 
-function explainWithPolicyKit(
+function explainWithConfigurationProfiles(
   app: SynCloudOSAppInfo,
   options: SynCloudOSOpenAppOptions,
-  requestId = `explain-${app.id}-${runtime.environment.now()}`
+  requestId = `explain-${app.bundleIdentifier}-${runtime.environment.now()}`
 ): SynCloudOSPolicyAuthorisationExplanation {
-  const policyKit = getPolicyKit();
-  if (!policyKit?.authorise) {
+  const configurationProfiles = getConfigurationProfiles();
+  if (!configurationProfiles?.authorise) {
     return {
       available: false,
       checked: false,
       allowed: true,
-      reason: "PolicyKit.authorise is not registered."
+      reason: "ConfigurationProfiles.authorise is not registered."
     };
   }
 
   try {
-    const result = policyKit.authorise(createPolicyRequest(app, options, requestId));
+    const result = configurationProfiles.authorise(createPolicyRequest(app, options, requestId));
     if (isPromiseLike(result)) {
       return {
         available: true,
         checked: false,
         allowed: true,
-        reason: "PolicyKit.authorise is asynchronous; LaunchServices will check it when the launch request starts."
+        reason: "ConfigurationProfiles.authorise is asynchronous; LaunchServices will check it when the launch request starts."
       };
     }
     return normalizePolicyResult(result);
@@ -515,7 +516,7 @@ function explainWithPolicyKit(
       checked: true,
       allowed: false,
       reason: error instanceof Error ? error.message : String(error),
-      code: "POLICYKIT_AUTHORISE_THROWN"
+      code: "CONFIGURATION_AUTHORISE_THROWN"
     };
   }
 }
@@ -604,14 +605,14 @@ function recordRequestHistory(action: SynCloudOSLaunchHistoryAction, request: Sy
 }
 
 function findPendingRequest(appId: string) {
-  if (activeLaunchRequest?.appId === appId) {
+  if (activeLaunchRequest && normalizeBundleIdentifier(activeLaunchRequest.appId) === normalizeBundleIdentifier(appId)) {
     if (requestAuthorityIsCurrent(activeLaunchRequest)) return activeLaunchRequest;
     const stale = activeLaunchRequest;
     cancelStaleLaunch(stale, "A replacement registration invalidated the active launch request.");
     if (activeLaunchRequest === stale) activeLaunchRequest = null;
   }
   for (const queue of [queuedLaunches, deferredLaunches]) {
-    const index = queue.findIndex((request) => request.appId === appId);
+    const index = queue.findIndex((request) => normalizeBundleIdentifier(request.appId) === normalizeBundleIdentifier(appId));
     if (index < 0) continue;
     const request = queue[index]!;
     if (requestAuthorityIsCurrent(request)) return request;
@@ -625,16 +626,16 @@ function createLaunchRequest(
   app: SynCloudOSAppInfo,
   manager: AppManager,
   options: SynCloudOSOpenAppOptions,
-  applicationMutation = WindowManager.captureApplicationMutation(app.id),
+  applicationMutation = WindowManager.captureApplicationMutation(app.bundleIdentifier),
 ): SynCloudOSLaunchRequestDetails {
   return {
-    requestId: createLaunchRequestId(app.id),
-    appId: app.id,
+    requestId: createLaunchRequestId(app.bundleIdentifier),
+    appId: app.bundleIdentifier,
     app,
     manager,
     options,
     requestedAt: runtime.environment.now(),
-    attempt: getNextLaunchAttempt(app.id),
+    attempt: getNextLaunchAttempt(app.bundleIdentifier),
     applicationMutation,
   };
 }
@@ -643,15 +644,15 @@ function createRouteAwareMultiSwitch(app: SynCloudOSAppInfo, options: SynCloudOS
   const snapshot = RuntimeStore.getSnapshot();
   const fromAppId = snapshot.application.activeAppId;
   const fromRoute = snapshot.application.routePath;
-  if (!fromAppId || fromAppId === app.id || fromRoute === "/" || app.presentation !== "appView") return null;
+  if (!fromAppId || normalizeBundleIdentifier(fromAppId) === normalizeBundleIdentifier(app.bundleIdentifier) || fromRoute === "/" || app.presentation !== "appView") return null;
 
   const fromApp = AppRegistry.getApp(fromAppId);
   const routedFromApp = AppRegistry.getAppForRoute(fromRoute);
-  if (!fromApp || fromApp.presentation !== "appView" || routedFromApp?.id !== fromAppId) return null;
+  if (!fromApp || fromApp.presentation !== "appView" || normalizeBundleIdentifier(routedFromApp?.bundleIdentifier) !== normalizeBundleIdentifier(fromAppId)) return null;
 
   return {
     fromAppId,
-    toAppId: app.id,
+    toAppId: app.bundleIdentifier,
     fromRoute,
     toRoute: options.lifecycle?.routePath ?? app.route,
     source: getLaunchSource(options)
@@ -665,7 +666,7 @@ function isInitialRouteLaunch(options: SynCloudOSOpenAppOptions) {
 function captureDisabledLaunch(request: SynCloudOSLaunchRequestDetails, explanation: SynCloudOSLaunchExplanation) {
   return ErrorManager.capture({
     code: "APP_DISABLED",
-    title: `${request.app.packageName} is disabled.`,
+    title: `${request.app.displayName} is disabled.`,
     message: "SynCloudOS could not start the app because a required service is unavailable.",
     appId: request.appId,
     source: "SynCloudOS.LaunchServices.openApp",
@@ -680,7 +681,7 @@ function captureDisabledLaunch(request: SynCloudOSLaunchRequestDetails, explanat
 function captureLaunchInProgress(request: SynCloudOSLaunchRequestDetails, explanation: SynCloudOSLaunchExplanation) {
   return ErrorManager.capture({
     code: "APP_LAUNCH_FAILED",
-    title: `${request.app.packageName} could not launch.`,
+    title: `${request.app.displayName} could not launch.`,
     message: explanation.reason,
     appId: request.appId,
     source: "SynCloudOS.LaunchServices.openApp",
@@ -785,19 +786,19 @@ function requestAuthorityIsCurrent(request: SynCloudOSLaunchRequestDetails): boo
 
 function cancelPendingLaunchesForApplication(appId: string) {
   const removed = [
-    ...queuedLaunches.filter((request) => request.appId === appId),
-    ...deferredLaunches.filter((request) => request.appId === appId),
+    ...queuedLaunches.filter((request) => normalizeBundleIdentifier(request.appId) === normalizeBundleIdentifier(appId)),
+    ...deferredLaunches.filter((request) => normalizeBundleIdentifier(request.appId) === normalizeBundleIdentifier(appId)),
   ];
-  const active = activeLaunchRequest?.appId === appId ? activeLaunchRequest : null;
+  const active = normalizeBundleIdentifier(activeLaunchRequest?.appId) === normalizeBundleIdentifier(appId) ? activeLaunchRequest : null;
   if (active) {
     cancelStaleLaunch(active, "Application close cancelled active launch work.");
     if (activeLaunchRequest === active) activeLaunchRequest = null;
   }
   for (let index = queuedLaunches.length - 1; index >= 0; index -= 1) {
-    if (queuedLaunches[index]!.appId === appId) queuedLaunches.splice(index, 1);
+    if (normalizeBundleIdentifier(queuedLaunches[index]!.appId) === normalizeBundleIdentifier(appId)) queuedLaunches.splice(index, 1);
   }
   for (let index = deferredLaunches.length - 1; index >= 0; index -= 1) {
-    if (deferredLaunches[index]!.appId === appId) deferredLaunches.splice(index, 1);
+    if (normalizeBundleIdentifier(deferredLaunches[index]!.appId) === normalizeBundleIdentifier(appId)) deferredLaunches.splice(index, 1);
   }
   for (const request of removed) cancelStaleLaunch(request, "Application close cancelled pending launch work.");
 }
@@ -859,9 +860,9 @@ function reconcileAbandonedHotLaunch(request: SynCloudOSLaunchRequestDetails | n
   if (!request) return;
 
   RuntimeStore.mutate((draft) => {
-    if (draft.application.pendingAppId === request.appId) draft.application.pendingAppId = null;
-    if (draft.application.launchingAppId === request.appId) draft.application.launchingAppId = null;
-    if (draft.webspring.launchingAppId === request.appId) {
+    if (normalizeBundleIdentifier(draft.application.pendingAppId) === normalizeBundleIdentifier(request.appId)) draft.application.pendingAppId = null;
+    if (normalizeBundleIdentifier(draft.application.launchingAppId) === normalizeBundleIdentifier(request.appId)) draft.application.launchingAppId = null;
+    if (normalizeBundleIdentifier(draft.webspring.launchingAppId) === normalizeBundleIdentifier(request.appId)) {
       draft.webspring.launchingAppId = null;
       draft.webspring.launchPhase = "idle";
       draft.webspring.isAnimating = false;
@@ -909,24 +910,24 @@ async function runLaunch(request: SynCloudOSLaunchRequestDetails) {
   let multiSwitch: RouteAwareMultiSwitch | null = null;
 
   if (!launchAuthorityIsCurrent(request)) return;
-  const policy = await authoriseWithPolicyKit(request);
+  const policy = await authoriseWithConfigurationProfiles(request);
   if (!launchAuthorityIsCurrent(request)) return;
   if (shouldAbortDisposedLaunch(request)) return;
   if (!policy.allowed) {
     const captured = ErrorManager.capture({
       code: "APP_LAUNCH_FAILED",
-      title: `${app.packageName} was not authorised.`,
+      title: `${app.displayName} was not authorised.`,
       message: "SynCloudOS policy refused this launch request.",
       appId: request.appId,
       source: "SynCloudOS.LaunchServices.openApp",
       context: { policy, request: toQueueItem(request) }
     });
-    failRunningLaunch(request, new Error(policy.reason ?? "PolicyKit denied app launch."), "POLICY_DENIED", captured);
+    failRunningLaunch(request, new Error(policy.reason ?? "ConfigurationProfiles denied app launch."), "POLICY_DENIED", captured);
     return;
   }
 
   EventBus.publish("app.launch.authorised", { appId: request.appId, requestId: request.requestId, policy }, app.packageName);
-  recordRequestHistory("authorised", request, [policy.reason ?? "PolicyKit authorised launch."]);
+  recordRequestHistory("authorised", request, [policy.reason ?? "ConfigurationProfiles authorised launch."]);
   multiSwitch = createRouteAwareMultiSwitch(app, request.options);
   ApplicationState.setPendingApp(request.appId);
   if (opensAppView && !multiSwitch && !isInitialRouteLaunch(request.options)) {
@@ -1022,28 +1023,28 @@ function startLaunch(request: SynCloudOSLaunchRequestDetails) {
 }
 
 function removePendingLaunch(requestIdOrAppId: string) {
-  const queuedIndex = queuedLaunches.findIndex((request) => request.requestId === requestIdOrAppId || request.appId === requestIdOrAppId);
+  const queuedIndex = queuedLaunches.findIndex((request) => request.requestId === requestIdOrAppId || normalizeBundleIdentifier(request.appId) === normalizeBundleIdentifier(requestIdOrAppId));
   if (queuedIndex >= 0) return queuedLaunches.splice(queuedIndex, 1)[0];
 
-  const deferredIndex = deferredLaunches.findIndex((request) => request.requestId === requestIdOrAppId || request.appId === requestIdOrAppId);
+  const deferredIndex = deferredLaunches.findIndex((request) => request.requestId === requestIdOrAppId || normalizeBundleIdentifier(request.appId) === normalizeBundleIdentifier(requestIdOrAppId));
   if (deferredIndex >= 0) return deferredLaunches.splice(deferredIndex, 1)[0];
 
   return null;
 }
 
 function explainExternalOpen(app: SynCloudOSAppInfo, options: SynCloudOSOpenAppOptions): SynCloudOSPolicyAuthorisationExplanation {
-  const policyKit = getPolicyKit();
-  if (!policyKit?.authorise) {
+  const configurationProfiles = getConfigurationProfiles();
+  if (!configurationProfiles?.authorise) {
     return {
       available: false,
       checked: false,
       allowed: true,
-      reason: "PolicyKit.authorise is not registered."
+      reason: "ConfigurationProfiles.authorise is not registered."
     };
   }
 
   try {
-    const result = policyKit.authorise({
+    const result = configurationProfiles.authorise({
       action: "external.open",
       app,
       href: app.route,
@@ -1071,19 +1072,20 @@ function explainExternalOpen(app: SynCloudOSAppInfo, options: SynCloudOSOpenAppO
       checked: true,
       allowed: false,
       reason: error instanceof Error ? error.message : String(error),
-      code: "POLICYKIT_AUTHORISE_THROWN"
+      code: "CONFIGURATION_AUTHORISE_THROWN"
     };
   }
 }
 
 function explainExternalApp(appId: string, options: SynCloudOSOpenAppOptions = {}): SynCloudOSExternalAppExplanation {
+  appId = AppRegistry.getApp(appId)?.bundleIdentifier ?? appId;
   const app = AppRegistry.getApp(appId);
-  const policyKit = getPolicyKit();
+  const configurationProfiles = getConfigurationProfiles();
   const uncheckedPolicy: SynCloudOSPolicyAuthorisationExplanation = {
-    available: Boolean(policyKit?.authorise),
+    available: Boolean(configurationProfiles?.authorise),
     checked: false,
     allowed: true,
-    reason: "PolicyKit is checked after an external app is resolved."
+    reason: "ConfigurationProfiles is checked after an external app is resolved."
   };
 
   if (!app) {
@@ -1121,7 +1123,7 @@ function explainExternalApp(appId: string, options: SynCloudOSOpenAppOptions = {
     blockers.push(`Required services unavailable: ${serviceReport.missing.join(", ") || "unknown"}.`);
   } else if (!policy.allowed) {
     code = "POLICY_DENIED";
-    blockers.push(policy.reason ?? "PolicyKit denied this external route.");
+    blockers.push(policy.reason ?? "ConfigurationProfiles denied this external route.");
   }
 
   return {
@@ -1132,7 +1134,7 @@ function explainExternalApp(appId: string, options: SynCloudOSOpenAppOptions = {
     reason: blockers.length > 0 ? blockers.join(" ") : `${app.packageName} can open in an external browser context.`,
     blockers,
     app: {
-      id: app.id,
+      bundleIdentifier: app.bundleIdentifier,
       packageName: app.packageName,
       displayName: app.displayName,
       type: app.type,
@@ -1144,16 +1146,17 @@ function explainExternalApp(appId: string, options: SynCloudOSOpenAppOptions = {
     serviceReport,
     policy: {
       ...policy,
-      available: Boolean(policyKit?.authorise) || policy.available
+      available: Boolean(configurationProfiles?.authorise) || policy.available
     }
   };
 }
 
 function explainLaunch(appId: string, options: SynCloudOSOpenAppOptions = {}): SynCloudOSLaunchExplanation {
+  appId = AppRegistry.getApp(appId)?.bundleIdentifier ?? appId;
   const app = AppRegistry.getApp(appId);
   const queue = getLaunchQueueSnapshot();
   const loginServices = LoginServices.getSnapshot();
-  const policyKit = getPolicyKit();
+  const configurationProfiles = getConfigurationProfiles();
 
   if (!app) {
     return {
@@ -1174,10 +1177,10 @@ function explainLaunch(appId: string, options: SynCloudOSOpenAppOptions = {}): S
         lastFailureReason: loginServices.lastFailureReason
       },
       policy: {
-        available: Boolean(policyKit?.authorise),
+        available: Boolean(configurationProfiles?.authorise),
         checked: false,
         allowed: true,
-        reason: "PolicyKit is checked after an app is resolved."
+        reason: "ConfigurationProfiles is checked after an app is resolved."
       },
       queue
     };
@@ -1185,10 +1188,10 @@ function explainLaunch(appId: string, options: SynCloudOSOpenAppOptions = {}): S
 
   const snapshot = RuntimeStore.getSnapshot();
   const manager = AppManagerController.getManagerForApp(appId);
-  const lifecycleState: SynCloudOSAppLifecycleState = manager?.getState() ?? snapshot.lifecycle[appId] ?? "registered";
+  const lifecycleState: SynCloudOSAppLifecycleState = manager?.getState() ?? snapshot.lifecycle[normalizeBundleIdentifier(appId)] ?? "registered";
   const managerExplanation = manager?.explainLaunch();
   const serviceReport = managerExplanation?.serviceReport ?? ServiceRegistry.getServiceReport(app.requiredServices);
-  const policy = explainWithPolicyKit(app, options);
+  const policy = explainWithConfigurationProfiles(app, options);
   const blockers: string[] = [];
   let code: SynCloudOSLaunchExplanation["code"] = "READY";
   const launchBusy = Boolean(activeLaunchRequest) || Boolean(snapshot.application.pendingAppId);
@@ -1200,7 +1203,7 @@ function explainLaunch(appId: string, options: SynCloudOSOpenAppOptions = {}): S
       code = policy.result && typeof policy.result !== "boolean" && policy.result.reason?.toLowerCase().includes("authorised session")
         ? "LOGIN_SESSION_REQUIRED"
         : "POLICY_DENIED";
-      blockers.push(policy.reason ?? "PolicyKit denied this launch request.");
+      blockers.push(policy.reason ?? "ConfigurationProfiles denied this launch request.");
     }
   } else if (app.isDisabled) {
     code = "APP_DISABLED";
@@ -1242,7 +1245,7 @@ function explainLaunch(appId: string, options: SynCloudOSOpenAppOptions = {}): S
             : `${app.packageName} can launch.`,
     blockers,
     app: {
-      id: app.id,
+      bundleIdentifier: app.bundleIdentifier,
       packageName: app.packageName,
       displayName: app.displayName,
       type: app.type,
@@ -1258,7 +1261,7 @@ function explainLaunch(appId: string, options: SynCloudOSOpenAppOptions = {}): S
     },
     policy: {
       ...policy,
-      available: Boolean(policyKit?.authorise) || policy.available
+      available: Boolean(configurationProfiles?.authorise) || policy.available
     },
     queue
   };
@@ -1267,6 +1270,7 @@ function explainLaunch(appId: string, options: SynCloudOSOpenAppOptions = {}): S
 const launchServices = {
   runtimeId: runtime.runtimeId,
   openApp(appId: string, options: SynCloudOSOpenAppOptions = {}) {
+    appId = AppRegistry.getApp(appId)?.bundleIdentifier ?? appId;
     const applicationMutation = WindowManager.captureApplicationMutation(appId);
     EventBus.publish("app.launch.requested", { appId, options }, appId);
     const app = AppRegistry.getApp(appId);
@@ -1343,6 +1347,7 @@ const launchServices = {
   },
 
   async preloadApp(appId: string, options: SynCloudOSOpenAppOptions = {}) {
+    appId = AppRegistry.getApp(appId)?.bundleIdentifier ?? appId;
     const applicationMutation = WindowManager.captureApplicationMutation(appId);
     const app = AppRegistry.getApp(appId);
     if (!app) {
@@ -1422,8 +1427,8 @@ const launchServices = {
   retryLaunch(requestIdOrAppId: string, options: SynCloudOSOpenAppOptions = {}) {
     const previous = [...launchHistory]
       .reverse()
-      .find((record) => record.requestId === requestIdOrAppId || record.appId === requestIdOrAppId);
-    const appId = AppRegistry.getApp(requestIdOrAppId)?.id ?? previous?.appId ?? requestIdOrAppId;
+      .find((record) => record.requestId === requestIdOrAppId || normalizeBundleIdentifier(record.appId) === normalizeBundleIdentifier(requestIdOrAppId));
+    const appId = AppRegistry.getApp(requestIdOrAppId)?.bundleIdentifier ?? previous?.appId ?? requestIdOrAppId;
     const app = AppRegistry.getApp(appId);
     const previousOptions = previous?.options ?? {};
     const retryOptions: SynCloudOSOpenAppOptions = {
@@ -1453,6 +1458,7 @@ const launchServices = {
   },
 
   async closeApp(appId: string) {
+    appId = AppRegistry.getApp(appId)?.bundleIdentifier ?? appId;
     const authority = WindowManager.beginApplicationClose(appId);
     try {
       const manager = AppManagerController.getManagerForApp(appId);
@@ -1480,6 +1486,7 @@ const launchServices = {
   },
 
   queueLaunch(appId: string, options: SynCloudOSOpenAppOptions = {}) {
+    appId = AppRegistry.getApp(appId)?.bundleIdentifier ?? appId;
     const applicationMutation = WindowManager.captureApplicationMutation(appId);
     const app = AppRegistry.getApp(appId);
     if (!app) {
@@ -1526,6 +1533,7 @@ const launchServices = {
   },
 
   openExternalApp(appId: string, options: SynCloudOSOpenAppOptions = {}) {
+    appId = AppRegistry.getApp(appId)?.bundleIdentifier ?? appId;
     const explanation = explainExternalApp(appId, options);
     const app = AppRegistry.getApp(appId);
     if (!app) {
@@ -1557,7 +1565,7 @@ const launchServices = {
       });
       ErrorManager.capture({
         code: "APP_LAUNCH_FAILED",
-        title: `${app.packageName} was not authorised.`,
+        title: `${app.displayName} was not authorised.`,
         message: explanation.reason,
         appId,
         source: "SynCloudOS.LaunchServices.openExternalApp",

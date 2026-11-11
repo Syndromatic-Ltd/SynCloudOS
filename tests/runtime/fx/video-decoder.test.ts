@@ -106,7 +106,7 @@ it("copies encoded bytes and reports bounded integral-microsecond rounding", () 
   const bytes = new Uint8Array([1, 2, 3]);
   const chunk = new VFXEncodedChunk({ type: "key", data: bytes, timing: timing(1n, 3) });
   bytes[0] = 9;
-  expect([...chunk.copyData()]).toEqual([1, 2, 3]);
+  expect([...chunk.copyData().bytes]).toEqual([1, 2, 3]);
   expect(chunk.webCodecsTiming()).toEqual({ timestampMicroseconds: 333333, durationMicroseconds: 333333, rounded: true });
 
   const exact = new VFXEncodedChunk({ type: "delta", data: new Uint8Array([4]), timing: timing(1n, 4) });

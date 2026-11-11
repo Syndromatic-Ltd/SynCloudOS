@@ -67,6 +67,36 @@ function paneProps(open = true) {
 }
 
 describe("NSE Preferences choreography", () => {
+  it("removes outgoing pane actions from interaction while an interrupted push/pop is still animating", () => {
+    const {animator}=recordingAnimator();const props=paneProps();
+    render(<NSEAnimationEnvironmentProvider animator={animator} reducedMotion={false}><NSEPreferencesToast {...props} panes={[{id:"display",label:"Display",render:()=> <button>Live pane action</button>},{id:"sound",label:"Sound",render:()=>null}]} /></NSEAnimationEnvironmentProvider>);
+    fireEvent.click(screen.getByRole("button",{name:"Display",exact:true}));
+    expect(screen.queryByRole("button",{name:"Display",exact:true})).toBeNull();
+    const live=screen.getByRole("button",{name:"Live pane action"});live.focus();fireEvent.keyDown(live,{key:"Escape"});
+    expect(screen.queryByRole("button",{name:"Live pane action"})).toBeNull();
+    expect(screen.queryByRole("button",{name:"Back",exact:true})).toBeNull();
+    expect(screen.getByRole("button",{name:"Display",exact:true})).toBeTruthy();
+    fireEvent.keyDown(screen.getByRole("dialog"),{key:"Escape"});expect(props.onClose).toHaveBeenCalledOnce();
+  });
+  it("exposes pane navigation as a native button separate from row accessories", () => {
+    const { animator } = recordingAnimator();
+    render(<NSEAnimationEnvironmentProvider animator={animator} reducedMotion>
+      <NSEPreferencesToast {...paneProps()} panes={[
+        { id: "display", label: "Display", accessory: <button>Independent accessory</button>, render: () => <p>Display pane</p> },
+      ]} />
+    </NSEAnimationEnvironmentProvider>);
+    const pane = screen.getByRole("button", { name: "Display", exact: true });
+    expect(pane.getAttribute("type")).toBe("button");
+    expect(pane.tabIndex).toBe(0);
+    expect(pane.contains(screen.getByRole("button", { name: "Independent accessory" }))).toBe(false);
+    fireEvent.click(screen.getByRole("button", { name: "Independent accessory" }));
+    expect(screen.queryByText("Display pane")).toBeNull();
+    pane.focus();
+    expect(document.activeElement).toBe(pane);
+    fireEvent.click(pane);
+    expect(screen.getByText("Display pane")).toBeTruthy();
+  });
+
   it("pushes and pops panes and titles in the direction the stack moves", async () => {
     const { animator, played, on, endpoints } = recordingAnimator();
     render(

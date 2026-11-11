@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../../Foundation/NSEData";
 import { PDFDocument, EncryptedPDFError, PDFName, PDFNumber, type PDFPage } from "pdf-lib";
 import { normaliseRect, type GFXRect } from "../GFXGeometry";
 import { hasBoundedPDFEnvelope, normalisePDFOpenOptions, type GFXPDFDocumentDescriptor, type GFXPDFDocumentPageDescriptor, type GFXPDFNormalizedOpenOptions, type GFXPDFObjectSnapshotEntry } from "./pdfDocumentProtocol";
@@ -207,9 +208,10 @@ export class GFXPDFDocument {
         this.permissions = Object.freeze({ raw: descriptor.permissions.raw ? Object.freeze([...descriptor.permissions.raw]) : null });
         Object.freeze(this);
     }
-    static open(bytes: Uint8Array, signal?: AbortSignal): Promise<GFXPDFDocument>;
-    static open(bytes: Uint8Array, options?: GFXPDFOpenOptions, signal?: AbortSignal): Promise<GFXPDFDocument>;
-    static async open(bytes: Uint8Array, optionsOrSignal: GFXPDFOpenOptions | AbortSignal = {}, maybeSignal?: AbortSignal): Promise<GFXPDFDocument> {
+    static open(bytes: NSEDataConvertible, signal?: AbortSignal): Promise<GFXPDFDocument>;
+    static open(bytes: NSEDataConvertible, options?: GFXPDFOpenOptions, signal?: AbortSignal): Promise<GFXPDFDocument>;
+    static async open(input: NSEDataConvertible, optionsOrSignal: GFXPDFOpenOptions | AbortSignal = {}, maybeSignal?: AbortSignal): Promise<GFXPDFDocument> {
+        const bytes = NSEData.from(input).bytes;
         const signal = typeof AbortSignal === "function" && optionsOrSignal instanceof AbortSignal ? optionsOrSignal : maybeSignal;
         const options = typeof AbortSignal === "function" && optionsOrSignal instanceof AbortSignal ? {} : optionsOrSignal;
         signal?.throwIfAborted();

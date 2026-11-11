@@ -24,10 +24,35 @@ import { afterEach, expect, it, vi } from "vitest";
 import { createSynWareContextValue } from "../../src/SynCloudOS/AppSDK/createSynWareContextValue";
 import { createMountedSynWareRuntime } from "../../src/SynCloudOS/AppSDK/appRuntimeFacade";
 import { standardWindow } from "../fixtures/windowTestDependencies";
-import { createTestRuntime, registerTestSynWare } from "./helpers";
+import { createTestRuntime, createTestRuntimeEnvironment, registerTestSynWare } from "./helpers";
 
 const runtimes: ReturnType<typeof createTestRuntime>[] = [];
 const mounts: ReturnType<typeof createMountedSynWareRuntime>[] = [];
+
+it("projects the displayed compact window without rewriting its desktop bounds", () => {
+  const environment = createTestRuntimeEnvironment();
+  const viewport = { width: 390, height: 844 };
+  environment.layoutViewport = { getSnapshot: () => viewport, subscribe: () => () => undefined };
+  environment.visualViewport = { getSnapshot: () => ({ ...viewport, offsetLeft: 0, offsetTop: 0, scale: 1 }), subscribe: () => () => undefined };
+  environment.workArea = { getSnapshot: () => ({ ...viewport, x: 0, y: 0, devicePixelRatio: 1, safeArea: { top: 0, right: 0, bottom: 0, left: 0 } }), subscribe: () => () => undefined };
+  const runtime = createTestRuntime({ environment });
+  runtimes.push(runtime);
+  const bundleIdentifier = "com.example.compact-presentation-client";
+  registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier, version: "1.0.0", displayName: "Compact presentation client" });
+  const app = runtime.apps.getApp(bundleIdentifier)!;
+  const responderId = `application:${bundleIdentifier}`;
+  runtime.responders.register({ id: responderId, kind: "application", parentId: "workspace", scopeId: responderId });
+  const bounds = { x: 80, y: 60, width: 720, height: 520 };
+  const window = runtime.windows.create(standardWindow("compact-presentation-client-window", {
+    applicationId: bundleIdentifier, applicationSessionId: bundleIdentifier, bounds,
+  }));
+  const mount = createMountedSynWareRuntime({ runtime, app, responderId, windowControllerId: window.id });
+  mounts.push(mount);
+  expect(mount.runtime.presentation.getSnapshot()).toMatchObject({
+    contentBounds: { x: 0, y: 0, ...viewport }, horizontalSizeClass: "compact",
+  });
+  expect(window.record.bounds).toEqual(bounds);
+});
 
 afterEach(async () => {
   vi.useRealTimers();
@@ -39,24 +64,24 @@ it("projects only a mounted window's content-bound, read-only presentation trait
   vi.useFakeTimers();
   const runtime = createTestRuntime({ id: "runtime:app-presentation-client" });
   runtimes.push(runtime);
-  registerTestSynWare(runtime, { schemaVersion: 1, id: "presentation-client", version: "1.0.0", title: "Presentation client" });
-  const app = runtime.apps.getApp("presentation-client");
+  registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.presentation-client", version: "1.0.0", displayName: "Presentation client" });
+  const app = runtime.apps.getApp("com.example.presentation-client");
   if (!app) throw new Error("The presentation fixture app did not register.");
   runtime.responders.register({
-    id: `application:${app.id}`,
+    id: `application:${app.bundleIdentifier}`,
     kind: "application",
     parentId: "workspace",
-    scopeId: `application:${app.id}`,
+    scopeId: `application:${app.bundleIdentifier}`,
   });
   const window = runtime.windows.create(standardWindow("presentation-client-window", {
-    applicationId: app.id,
-    applicationSessionId: `${app.id}:window`,
+    applicationId: app.bundleIdentifier,
+    applicationSessionId: `${app.bundleIdentifier}:window`,
     bounds: { x: 80, y: 60, width: 640, height: 520 },
   }));
   const mount = createMountedSynWareRuntime({
     runtime,
     app,
-    responderId: `application:${app.id}`,
+    responderId: `application:${app.bundleIdentifier}`,
     windowControllerId: window.id,
   });
   mounts.push(mount);

@@ -1,0 +1,8 @@
+{
+  "cancelledBeforeAdoption": true,
+  "cleanedAt": "2026-11-07T22:47:11.8856037+00:00",
+  "reason": "Superseded by the b0bfc6a build including overlay work-area reservation",
+  "checkoutRemoved": true,
+  "junctionRemoved": true,
+  "frameworkVitestPreserved": true
+}

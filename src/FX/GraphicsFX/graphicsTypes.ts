@@ -187,6 +187,14 @@ export type GFXCommand = Readonly<{
     kind: "transparency-group";
     group: GFXTransparencyGroup;
     commands: readonly GFXCommand[];
+}> | Readonly<{
+    /** Another recorded display list, drawn by `GFXContext.drawDisplayList`. Its commands keep their own
+     * coordinate space; `transform` places that space in this list's, and `state` carries the clips,
+     * alpha and blend mode in force where it was drawn. */
+    kind: "display-list";
+    commands: readonly GFXCommand[];
+    transform: GFXAffineTransform;
+    state: GFXCommandState;
 }>;
 export interface GFXDisplayList {
     readonly size: GFXSize;

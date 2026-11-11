@@ -1,0 +1,38 @@
+{
+  "artifactRoot": "C:\\Users\\Kavish Krishnakumar\\Developer\\SynCloudOS-Workspace\\.worktrees\\webspring-folders\\site\\node_modules\\@syndromatic\\syncloudos",
+  "frameworkCommit": "b0bfc6a7715844bd6a50f6194a40df1f556a9e64",
+  "archiveSha256": "6b2d2400abfaac1bdf983ac13cee1c0cc4b9565b23647a89ddbcf10181f41ece",
+  "checks": [
+    {
+      "entry": ".",
+      "modules": 116,
+      "containsPasskeys": false
+    },
+    {
+      "entry": "./browser",
+      "modules": 152,
+      "containsPasskeys": false
+    },
+    {
+      "entry": "./sdk",
+      "modules": 66,
+      "containsPasskeys": false
+    },
+    {
+      "entry": "./auth",
+      "modules": 1,
+      "containsPasskeys": false
+    },
+    {
+      "entry": "./authentication-services",
+      "modules": 3,
+      "containsPasskeys": true
+    },
+    {
+      "entry": "./auth/passkey",
+      "modules": 3,
+      "containsPasskeys": true
+    }
+  ],
+  "scope": "Real emitted ESM dependency graphs; no relying-party/authenticator acceptance claim"
+}

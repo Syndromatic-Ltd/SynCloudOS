@@ -31,7 +31,7 @@ afterEach(() => { disposers.splice(0).forEach(dispose => dispose()); vi.restoreA
 function fixture(text: string | NSEAttributedContent = "before selected after") {
   vi.useFakeTimers();
   const owner = createInMemoryNSETextOwner({ content: typeof text === "string" ? plainNSETextContent(text) : text });
-  const session = new TextEditingSession({ id: "composition", owner });
+  const session = new TextEditingSession({ id: "composition", textOwner: owner });
   let view!: EditorView;
   const update = EditorView.prototype.updateState;
   vi.spyOn(EditorView.prototype, "updateState").mockImplementation(function (state) { view = this; return update.call(this, state); });

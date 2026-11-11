@@ -43,6 +43,7 @@ it("rejects a fabricated null root only in a first-party SynWare entry", async (
   try {
     const contents = join(root, "src", "SynWare", "Placeholder.app", "Contents");
     mkdirSync(contents, { recursive: true });
+    writeFileSync(join(contents, "Info.ts"), 'export default { bundleIdentifier: "com.example.placeholder", displayName: "Placeholder", version: "1.0.0" };\n');
     writeFileSync(join(root, "tsconfig.json"), JSON.stringify({
       compilerOptions: { baseUrl: ".", paths: { "@syndromatic/syncloudos/sdk": ["src/SynCloudOS/AppSDK/sdkPackageEntry.ts"] } },
     }));
@@ -50,8 +51,7 @@ it("rejects a fabricated null root only in a first-party SynWare entry", async (
     mkdirSync(sdk, { recursive: true });
     writeFileSync(join(sdk, "sdkPackageEntry.ts"), "export const createSynWare = (definition) => definition;\n");
     writeFileSync(join(contents, "index.tsx"), [
-      'import { createSynWare } from "@syndromatic/syncloudos/sdk";',
-      'export default createSynWare({ manifest: { schemaVersion: 1, id: "placeholder", version: "1.0.0", title: "Placeholder" }, root: () => null });',
+      'export default function App() { return null; }',
     ].join("\n"));
 
     const audit = auditSynWareImports(root);
@@ -87,6 +87,8 @@ it("fails closed for aliases, side-effect and dynamic imports into a private Syn
     const privateContents = join(root, "src", "SynWare", "Private.app", "Contents");
     mkdirSync(contents, { recursive: true });
     mkdirSync(privateContents, { recursive: true });
+    writeFileSync(join(contents, "Info.ts"), 'export default { bundleIdentifier: "com.example.example", displayName: "Example", version: "1.0.0" };\n');
+    writeFileSync(join(privateContents, "Info.ts"), 'export default { bundleIdentifier: "com.example.private", displayName: "Private", version: "1.0.0" };\n');
     writeFileSync(join(root, "tsconfig.json"), JSON.stringify({
       compilerOptions: { baseUrl: ".", paths: { "@private/*": ["src/SynWare/Private.app/Contents/*"] } },
     }));
@@ -123,6 +125,7 @@ it("reports every non-literal dynamic import and rejects unresolved or wrong-cas
     const contents = join(root, "src", "SynWare", "Example.app", "Contents");
     const sdk = join(root, "src", "SynCloudOS", "AppSDK");
     mkdirSync(contents, { recursive: true });
+    writeFileSync(join(contents, "Info.ts"), 'export default { bundleIdentifier: "com.example.example", displayName: "Example", version: "1.0.0" };\n');
     mkdirSync(sdk, { recursive: true });
     writeFileSync(join(root, "tsconfig.json"), JSON.stringify({
       compilerOptions: {

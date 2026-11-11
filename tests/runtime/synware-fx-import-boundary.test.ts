@@ -45,6 +45,7 @@ it("rejects new-family private paths, computed loaders and production testing im
     ].join("\n");
     const path = join(root, "src/SynWare/Example.app/Contents/index.ts");
     mkdirSync(dirname(path), { recursive: true }); writeFileSync(path, source);
+    writeFileSync(join(root, "src/SynWare/Example.app/Contents/Info.ts"), 'export default { bundleIdentifier: "com.example.example", displayName: "Example", version: "1.0.0" };\n');
     expect(auditSynWareImports(root).internalImports.map((record: any) => record.line)).toEqual([2,3,4,5,6,7,8,9,12,13,14]);
   } finally { expect(root.startsWith(join(tmpdir(), "synware-fx-imports-"))).toBe(true); rmSync(root, { recursive: true, force: true }); }
 });

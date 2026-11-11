@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import type { RuntimeOwnerToken } from "../Runtime/runtimeOwner";
 import type { DocumentAssetReference, DocumentAssetScope, DocumentAssetStore, DocumentAssetStoreCapabilities } from "./documentAssetTypes";
 import { DocumentAssetError } from "./documentAssetErrors";
@@ -36,7 +37,7 @@ export interface DocumentResourceDescriptor {
 export interface DocumentResourceInput {
   readonly type: string;
   readonly size: number;
-  arrayBuffer(): Promise<ArrayBuffer>;
+  data(): Promise<NSEData>;
 }
 
 export interface DocumentResourceInvalidation {
@@ -52,7 +53,7 @@ export interface DocumentResourceService {
   acquireAsset(documentId: string, reference: DocumentAssetReference, signal: AbortSignal): Promise<DocumentResourceDescriptor>;
   persist(documentId: string, descriptor: DocumentResourceDescriptor, signal: AbortSignal): Promise<DocumentAssetReference>;
   isActive(documentId: string, descriptor: unknown): descriptor is DocumentResourceDescriptor;
-  resolve(documentId: string, descriptor: DocumentResourceDescriptor, signal?: AbortSignal): Uint8Array | null;
+  resolve(documentId: string, descriptor: DocumentResourceDescriptor, signal?: AbortSignal): NSEData | null;
   subscribeInvalidation(listener: (invalidation: DocumentResourceInvalidation) => void): () => void;
   release(documentId: string, descriptor: DocumentResourceDescriptor): boolean;
   releaseDocument(documentId: string): number;
@@ -63,7 +64,7 @@ const maximumResourceBytes = 8 * 1024 * 1024;
 const allowedMimeTypes = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);
 const descriptorKeys = new Set(["kind", "documentId", "resourceId", "leaseId", "generation", "mimeType", "byteLength"]);
 
-function awaitResourceBytes(value: Promise<ArrayBuffer>, callerSignal: AbortSignal, runtimeSignal: AbortSignal): Promise<ArrayBuffer> {
+function awaitResourceBytes(value: Promise<NSEData>, callerSignal: AbortSignal, runtimeSignal: AbortSignal): Promise<NSEData> {
   return new Promise((resolve, reject) => {
     let settled = false;
     const finish = (next: () => void) => {
@@ -113,7 +114,7 @@ export function createDocumentResourceService(options: {
     readonly scopeForDocument: (documentId: string) => DocumentAssetScope;
   };
 }): DocumentResourceService {
-  const resources = new Map<string, { readonly descriptor: DocumentResourceDescriptor; readonly bytes: Uint8Array }>();
+  const resources = new Map<string, { readonly descriptor: DocumentResourceDescriptor; readonly bytes: NSEData }>();
   const invalidationListeners = new Set<(invalidation: DocumentResourceInvalidation) => void>();
   let generation = 0;
   let disposed = false;
@@ -148,7 +149,7 @@ export function createDocumentResourceService(options: {
       const merged = AbortSignal.any([signal, options.signal, lifetime.signal]);
       const bytes = await backing.store.read(scope, captured, merged);
       assertLive(signal);
-      return service.acquire(documentId, { type: captured.mimeType, size: bytes.byteLength, arrayBuffer: async () => bytes.slice().buffer }, merged);
+      return service.acquire(documentId, { type: captured.mimeType, size: bytes.count, data: async () => bytes }, merged);
     },
     async persist(documentId, descriptor, signal) {
       assertLive(signal);
@@ -170,9 +171,9 @@ export function createDocumentResourceService(options: {
       const mimeType = resource.type;
       if (!Number.isSafeInteger(expectedSize) || expectedSize < 0 || expectedSize > maximumResourceBytes) throw new RangeError("Document resource exceeds the byte limit.");
       if (!allowedMimeTypes.has(mimeType)) throw new TypeError("Document resource MIME type is unsupported.");
-      const buffer = await awaitResourceBytes(resource.arrayBuffer(), signal, AbortSignal.any([options.signal, lifetime.signal]));
+      const buffer = await awaitResourceBytes(resource.data(), signal, AbortSignal.any([options.signal, lifetime.signal]));
       assertLive(signal);
-      if (buffer.byteLength !== expectedSize || buffer.byteLength > maximumResourceBytes) throw new RangeError("Document resource size changed during acquisition.");
+      if (buffer.count !== expectedSize || buffer.count > maximumResourceBytes) throw new RangeError("Document resource size changed during acquisition.");
       generation += 1;
       const descriptor = Object.freeze({
         kind: "document-resource" as const,
@@ -181,9 +182,9 @@ export function createDocumentResourceService(options: {
         leaseId: `lease:${options.randomUUID()}`,
         generation,
         mimeType,
-        byteLength: buffer.byteLength,
+        byteLength: buffer.count,
       });
-      resources.set(descriptor.leaseId, { descriptor, bytes: new Uint8Array(buffer.slice(0)) });
+      resources.set(descriptor.leaseId, { descriptor, bytes: NSEData.from(buffer) });
       return descriptor;
     },
     isActive(documentId, descriptor): descriptor is DocumentResourceDescriptor {
@@ -200,7 +201,7 @@ export function createDocumentResourceService(options: {
       assertLive(signal);
       if (!service.isActive(documentId, descriptor)) return null;
       const bytes = resources.get(descriptor.leaseId)?.bytes;
-      return bytes ? bytes.slice() : null;
+      return bytes ?? null;
     },
     subscribeInvalidation(listener) {
       assertLive();

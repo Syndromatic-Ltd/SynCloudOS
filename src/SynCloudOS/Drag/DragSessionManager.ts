@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import { normalisePasteboardRepresentations } from "../Pasteboard";
 import type {
   CreateDragSessionManagerOptions,
@@ -160,7 +161,7 @@ function leaseId(value: unknown): string {
 }
 
 function endpointEquals(left: DragEndpoint, right: DragEndpoint): boolean {
-  return left.appId === right.appId && left.windowId === right.windowId && left.responderId === right.responderId;
+  return normalizeBundleIdentifier(left.appId) === normalizeBundleIdentifier(right.appId) && left.windowId === right.windowId && left.responderId === right.responderId;
 }
 
 function authorityError() { return new DOMException("Drag endpoint authority was denied.", "SecurityError"); }
@@ -197,7 +198,7 @@ export function createDragSessionManager(options: CreateDragSessionManagerOption
     operation,
     representationTypes: session.representationTypes,
     origin: "drag" as const,
-    capability: session.source.appId === target.appId
+    capability: normalizeBundleIdentifier(session.source.appId) === normalizeBundleIdentifier(target.appId)
       ? "transfer.same-application" as const
       : "transfer.cross-application" as const,
     phase,

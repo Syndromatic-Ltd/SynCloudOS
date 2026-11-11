@@ -191,7 +191,7 @@ export function NSEToolbarConfigurationSheet({
         className="nse-toolbar-configuration-content"
         aria-label="Toolbar items"
         data-nse-part="content"
-        data-nse-control="toolbar-configuration-sheet"
+        data-nse-control="toolbar-customisation-palette"
         onKeyDown={(event) => {
           if (event.nativeEvent.isComposing || event.key !== "Escape") return;
           event.preventDefault();
@@ -210,7 +210,7 @@ export function NSEToolbarConfigurationSheet({
                 draggable
                 data-nse-part="configured-item"
                 data-state={draggedIndex === index ? "dragging" : "normal"}
-                data-nse-appearance-recipe="toolbar.configuration.item"
+
                 data-nse-toolbar-drop-position={index}
                 onDragStart={() => setDraggedIndex(index)}
                 onDragEnd={() => setDraggedIndex(null)}
@@ -221,7 +221,7 @@ export function NSEToolbarConfigurationSheet({
                   setDraggedIndex(null);
                 }}
               >
-                <button className="nse-toolbar-configuration-handle" type="button" draggable aria-label={`Drag ${label} to reorder`} data-nse-part="drag-handle" data-appearance-recipe="toolbar.configuration.drag-handle" />
+                <button className="nse-toolbar-configuration-handle" type="button" draggable aria-label={`Drag ${label} to reorder`} data-nse-part="drag-handle"  />
                 <span>{label}</span>
                 <span className="nse-toolbar-configuration-move-controls">
                   <button type="button" disabled={index === 0} aria-label={`Move ${label} left`} onClick={() => controller.moveAt(index, -1)}>Move left</button>
@@ -278,10 +278,10 @@ export function NSEToolbarConfigurationSheet({
       title={name}
       aria-label={name}
       className="nse-toolbar-configuration-sheet"
-      data-nse-control="toolbar-configuration-sheet"
+      data-nse-control="toolbar-customisation-palette"
       data-nse-part="surface"
       data-state={open ? "open" : "closed"}
-      data-appearance-recipe="toolbar.configuration.sheet"
+
       onOpenChange={(nextOpen, reason) => {
         if (!nextOpen) dismiss(reason, false);
       }}

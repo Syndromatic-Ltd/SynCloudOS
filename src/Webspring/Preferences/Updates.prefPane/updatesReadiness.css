@@ -1,0 +1,13 @@
+.nse-update-readiness { display: grid; gap: 14px; min-width: 0; color: var(--nse-prefs-row-colour, #263746); }
+.nse-update-readiness .nse-prefs-note { color: var(--nse-prefs-note-lead-colour, rgba(42, 55, 70, 0.78)); }
+[data-mode="dark"] .nse-update-readiness { color: var(--nse-prefs-row-colour, #e7ecf2); }
+[data-mode="dark"] .nse-update-readiness .nse-prefs-note { color: var(--nse-prefs-note-lead-colour, rgba(206, 214, 224, 0.82)); }
+.nse-update-readiness-section { padding: 12px; min-width: 0; overflow-wrap: anywhere; }
+.nse-update-readiness h2, .nse-update-readiness h3 { font: inherit; font-weight: 600; margin: 0 0 10px; }
+.nse-update-readiness p { margin: 8px 0; }
+.nse-update-readiness-counts { margin: 14px 0 0; }
+.nse-update-readiness-counts > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; margin-block: 8px; }
+.nse-update-readiness-counts dd { margin: 0; text-align: end; font-variant-numeric: tabular-nums; }
+.nse-update-readiness summary { min-height: 44px; display: list-item; align-content: center; cursor: pointer; }
+.nse-update-readiness li { margin-block: 8px; }
+.nse-update-readiness-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-block-start: 16px; }

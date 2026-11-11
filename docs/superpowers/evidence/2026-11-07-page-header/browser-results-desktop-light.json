@@ -1,0 +1,83 @@
+[
+  {
+    "name": "desktop-light",
+    "width": 1440,
+    "height": 900,
+    "dpr": 1,
+    "frameworkCommit": "c4f9adfbfdf0afb3ae9643a71bb4f6ee306bb497",
+    "archiveSha256": "1efd58d8cf08ba3c2ea09f7aad078a0f98a6a0dd1124229fc06e67ae2d72b22f",
+    "colourScheme": "light",
+    "gallery": {
+      "text": "Buttons",
+      "bounds": {
+        "x": 254,
+        "y": 56,
+        "width": 1186,
+        "height": 61,
+        "top": 56,
+        "right": 1440,
+        "bottom": 117,
+        "left": 254
+      },
+      "title": {
+        "x": 282,
+        "y": 58,
+        "width": 1130,
+        "height": 40,
+        "top": 58,
+        "right": 1412,
+        "bottom": 98,
+        "left": 282
+      },
+      "font": "600 30px / 40px \"Syndromatic UI\", \"Segoe UI\", sans-serif",
+      "colour": "rgb(43, 53, 70)"
+    },
+    "scrollBefore": {
+      "top": 0,
+      "range": 88
+    },
+    "scrollAfter": {
+      "top": 88,
+      "range": 88
+    },
+    "prefsMetrics": {
+      "bounds": {
+        "x": 520,
+        "y": 296.484375,
+        "width": 400,
+        "height": 66,
+        "top": 296.484375,
+        "right": 920,
+        "bottom": 362.484375,
+        "left": 520
+      },
+      "title": {
+        "x": 666.5625,
+        "y": 316.65625,
+        "width": 106.875,
+        "height": 25.640625,
+        "top": 316.65625,
+        "right": 773.4375,
+        "bottom": 342.296875,
+        "left": 666.5625
+      },
+      "font": "700 19px / 25.65px \"Syndromatic UI\", \"Segoe UI\", sans-serif"
+    },
+    "more": null,
+    "errors": [],
+    "capturedAt": "2026-11-07T11:26:38.554Z",
+    "receiptStable": true,
+    "siteCommit": "890305c919b5831c8a774050403b4657c5d1857e",
+    "gallerySourceSha256": {
+      "src/SynWare/NSEControlGallery.app/Contents/GalleryViews.tsx": "2033a01e495435ffefe250fa07e6387a284233f8aaf5bbeb7e2256b1b13ee760",
+      "src/SynWare/NSEControlGallery.app/Contents/Resources/styles.css": "0589bead42fdfd0c652bd370f0c76fd58e732293b9cf8b4270a04237ce68725a"
+    },
+    "captureSha256": {
+      "gallery-buttons-desktop-light.png": "c8b77175420d0c9aeea639bfbdf0ef3874c7e85456311a9797671d6afbc0bc1b",
+      "gallery-scrolled-desktop-light.png": "58ce4d898f6d5af21403cf47716fec204611ea74eb801dec1bd6dbb1ff975302",
+      "preferences-appearance-desktop-light.png": "14fc519c136fa172d60684f0b102cfebf1da49d5308b3db6d0fdef9fbd59e975",
+      "preferences-root-desktop-light.png": "814c11b28d003046bc83d78293d8efcd26e1d70e485dad5a834c4ea21ceb5460",
+      "preferences-transition-desktop-light.png": "2840d7dcc41ceedd825e73bd5166ce66124740db523d5a807a485df7aa9f1e8d"
+    }
+  }
+]

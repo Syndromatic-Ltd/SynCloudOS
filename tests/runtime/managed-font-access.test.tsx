@@ -37,11 +37,11 @@ import { defineFontDeclaration } from "../../src/NSE/Typography";
 afterEach(cleanup);
 const faces = defineFontDeclaration({ resources:{regular:"Resources/Regular.ttf"}, families:[{ id:"example", label:"Example", defaultFaceId:"example.regular", faces:[{id:"example.regular",label:"Regular",browserFamily:"Example",resource:"regular",weight:400,style:"normal"}] }] });
 describe("managed font access", () => {
-  it("provides a supported SDK hook", () => { expect((sdk as any).useSynWareFonts).toBeTypeOf("function"); });
+  it("provides a supported SDK hook", () => { expect((sdk as any).useFonts).toBeTypeOf("function"); });
   it("supplies separate host managers to mounted applications", () => {
     const signal = new AbortController().signal;
     const context = { signal, textLayout:{} } as any;
-    function Probe({ id }: {id:string}) { const fonts = (sdk as any).useSynWareFonts(); return <output data-testid={id}>{fonts.manager.availableFamilies.map((family:any)=>family.id).join(",")}</output>; }
+    function Probe({ id }: {id:string}) { const fonts = (sdk as any).useFonts(); return <output data-testid={id}>{fonts.manager.availableFamilies.map((family:any)=>family.id).join(",")}</output>; }
     render(<><HostFontsProvider families={faces.families}><SynWareProvider value={context}><Probe id="first" /></SynWareProvider></HostFontsProvider><HostFontsProvider><SynWareProvider value={context}><Probe id="second" /></SynWareProvider></HostFontsProvider></>);
     expect(screen.getByTestId("first").textContent).toBe("example"); expect(screen.getByTestId("second").textContent).toBe("");
   });
@@ -51,15 +51,15 @@ describe("managed font access", () => {
     const result = await library.addFonts([{ name:"Noto.ttf", size:source.length, arrayBuffer:async()=>source.slice().buffer as ArrayBuffer }]);
     const id = result.added[0]!.id;
     expect((library as any).fontBytes).toBeTypeOf("function");
-    const first = (library as any).fontBytes(id); first[0] = 255;
-    expect((library as any).fontBytes(id)[0]).toBe(source[0]);
+    const first = library.fontBytes(id)!.bytes; first[0] = 255;
+    expect(library.fontBytes(id)!.bytes[0]).toBe(source[0]);
     await library.removeFont(id); expect((library as any).fontBytes(id)).toBeNull();
   });
   it("updates mounted catalogue consumers when a person imports or removes a face",async()=>{
     const library=new NSEFontLibrary({storage:null,preferences:null,faceHost:{register:async()=>()=>{}}});
     const manager=new NSEFontManager({library});
     const context={signal:new AbortController().signal,textLayout:{}} as any;
-    function Probe(){const fonts=(sdk as any).useSynWareFonts();return <output data-testid="catalogue">{fonts.manager.allFamilies().flatMap((family:any)=>family.presets.map((preset:any)=>preset.id)).join(",")}</output>;}
+    function Probe(){const fonts=(sdk as any).useFonts();return <output data-testid="catalogue">{fonts.manager.allFamilies().flatMap((family:any)=>family.presets.map((preset:any)=>preset.id)).join(",")}</output>;}
     render(<HostFontsProvider catalogue={{manager}}><SynWareProvider value={context}><Probe/></SynWareProvider></HostFontsProvider>);
     const source=new Uint8Array(readFileSync(resolve("tests/fixtures/fx/fonts/notosans-NotoSans[wdth,wght].ttf")));
     let id="";await act(async()=>{const imported=await library.addFonts([{name:"Imported.ttf",size:source.length,arrayBuffer:async()=>source.slice().buffer as ArrayBuffer}]);id=imported.added[0]!.id;});

@@ -389,8 +389,16 @@ export type WindowContentState =
 
 export interface WindowControllerDelegate {
   shouldClose?(request: WindowCloseRequest): boolean | Promise<boolean>;
+  /** The close was allowed and is being committed; nothing can stop it now. */
+  willClose?(request: WindowCloseRequest): void;
   didOpen?(record: WindowRecord): void;
   didClose?(record: WindowRecord): void;
+}
+
+/** What the owner of a window's content registers to veto its close and to learn it is closing. */
+export interface WindowCloseGuard {
+  shouldClose(request: WindowCloseRequest): boolean | Promise<boolean>;
+  willClose?(request: WindowCloseRequest): void;
 }
 
 export interface WindowIdPort {

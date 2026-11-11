@@ -1,0 +1,35 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/authentication-services.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/authentication-services.test.ts (9 tests | 1 failed) 12ms
+     × ends controller ownership before invoking an error delegate that retries 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/authentication-services.test.ts > optional AuthenticationServices passkeys > ends controller ownership before invoking an error delegate that retries
+AssertionError: promise rejected "ASAuthorizationError: A passkey request i… { code: '…' }" instead of resolving
+ ❯ tests/runtime/authentication-services.test.ts:131:23
+    129|     controller.delegate = { authorizationControllerDidCompleteWithErro…
+    130|     await expect(controller.performRequests()).rejects.toMatchObject({…
+    131|     await expect(retry).resolves.toHaveProperty("credential.kind", "as…
+       |                       ^
+    132|   });
+    133|   it("reports user cancellation once without exposing native error det…
+
+Caused by: ASAuthorizationError: A passkey request is already running.
+ ❯ ASAuthorizationController.performRequests src/SynCloudOS/AuthenticationServices/ASAuthorizationController.ts:145:29
+ ❯ Object.authorizationControllerDidCompleteWithError tests/runtime/authentication-services.test.ts:129:96
+ ❯ ASAuthorizationController.performRequests src/SynCloudOS/AuthenticationServices/ASAuthorizationController.ts:175:17
+ ❯ tests/runtime/authentication-services.test.ts:130:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'failed' }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 8 passed (9)
+   Start at  19:15:39
+   Duration  221ms (transform 58ms, setup 27ms, import 50ms, tests 12ms, environment 0ms)

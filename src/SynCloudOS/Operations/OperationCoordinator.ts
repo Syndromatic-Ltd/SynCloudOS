@@ -32,6 +32,8 @@ import type {
   OperationSkippedWork,
 } from "./operationTypes";
 
+import { OwnedWorkObservations } from "./OwnedWorkObservations";
+
 class OperationCancelled extends Error {
   readonly reason: string;
   readonly timeout: boolean;
@@ -81,6 +83,7 @@ function withAbort<T>(value: T | Promise<T>, signal: AbortSignal): Promise<T> {
 }
 
 export function createOperationCoordinator(options: OperationCoordinatorOptions): OperationCoordinator {
+  const work = new OwnedWorkObservations();
   const historyLimit = Math.max(1, options.historyLimit ?? 160);
   const pending = new Map<string, { handle: OperationHandle<unknown>; record: OperationRecord }>();
   const keyed = new Map<string, OperationHandle<unknown>>();
@@ -181,7 +184,17 @@ export function createOperationCoordinator(options: OperationCoordinatorOptions)
           ? controller.signal.reason
           : new OperationCancelled(cancelReason, timedOut);
       },
+      cancel(reason = "cancelled") {
+        cancel(reason);
+        throw new OperationCancelled(reason);
+      },
     };
+
+    const invoke = <R,>(callback: () => R): R => work.track(() => {
+      // Publishing a coarse stage can synchronously revoke this operation.
+      context.throwIfCancelled();
+      return callback();
+    });
 
     const cancel = (reason = "cancelled") => {
       cancelReason = reason;
@@ -201,7 +214,7 @@ export function createOperationCoordinator(options: OperationCoordinatorOptions)
       try {
         if (definition.validate) {
           update({ phase: "validating" });
-          const validation = await withAbort(definition.validate(context), controller.signal);
+          const validation = await withAbort(invoke(() => definition.validate!(context)), controller.signal);
           if (!validation.ok) {
             const error: OperationError = {
               code: validation.code ?? "validation-denied",
@@ -216,14 +229,14 @@ export function createOperationCoordinator(options: OperationCoordinatorOptions)
         context.throwIfCancelled();
         update({ phase: "will" });
         for (const hook of definition.will ?? []) {
-          await withAbort(hook(context), controller.signal);
+          await withAbort(invoke(() => hook(context)), controller.signal);
           context.throwIfCancelled();
         }
         context.throwIfCancelled();
         update({ phase: "committing" });
         let value: T;
         try {
-          value = await definition.commit(context);
+          value = await invoke(() => definition.commit(context));
           if (!commitEstablished) context.markCommitted(value);
           else value = committedValue as T;
         } catch (error) {
@@ -296,7 +309,7 @@ export function createOperationCoordinator(options: OperationCoordinatorOptions)
             break;
           }
           try {
-            await withAbort(effect.run(context, value), controller.signal);
+            await withAbort(invoke(() => effect.run(context, value)), controller.signal);
           } catch (error) {
             if (error instanceof OperationCancelled || controller.signal.aborted) {
               postCommit = "cancelled";
@@ -326,7 +339,7 @@ export function createOperationCoordinator(options: OperationCoordinatorOptions)
               break;
             }
             try {
-              await withAbort(hook.run(context, value), controller.signal);
+              await withAbort(invoke(() => hook.run(context, value)), controller.signal);
             } catch (error) {
               if (error instanceof OperationCancelled || controller.signal.aborted) {
                 postCommit = "cancelled";
@@ -402,6 +415,7 @@ export function createOperationCoordinator(options: OperationCoordinatorOptions)
       for (const { handle } of pending.values()) handle.cancel("runtime-disposed");
       pending.clear();
       keyed.clear();
+      work.end();
       notify();
       listeners.clear();
     },
@@ -454,7 +468,10 @@ export function createOperationCoordinator(options: OperationCoordinatorOptions)
           run<T>(request: { readonly id: string; execute(signal: AbortSignal): Promise<T> }) {
             if (closed) return Promise.reject(new Error("preparation lane is closed"));
             if (signal.aborted) return Promise.reject(signal.reason instanceof Error ? signal.reason : new Error("preparation lane is cancelled"));
-            const promise = withAbort(request.execute(signal), signal);
+            const promise = withAbort(work.track(() => {
+              if (signal.aborted) return Promise.reject(signal.reason);
+              return request.execute(signal);
+            }), signal);
             active.add(promise);
             lanePromises.add(promise);
             const cleanup = () => {
@@ -485,5 +502,6 @@ export function createOperationCoordinator(options: OperationCoordinatorOptions)
     };
   }
 
+  work.bind(coordinator);
   return coordinator;
 }

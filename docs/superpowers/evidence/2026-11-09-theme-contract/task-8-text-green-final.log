@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-theme-hook-coverage.test.tsx tests/nse/controls/nse-completion-fields.test.tsx tests/runtime/text-system/nse-text-view.test.tsx tests/runtime/text-system/text-input-client.test.ts tests/runtime/text-system/text-ruler-target.test.ts tests/nse/appearance/search-field-focus.test.tsx tests/runtime/nse-layout-defaults.test.tsx tests/runtime/idiom-errors.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+Not implemented: navigation to another Document
+
+ Test Files  8 passed (8)
+      Tests  568 passed (568)
+   Start at  20:23:58
+   Duration  9.74s (transform 6.10s, setup 86ms, import 9.40s, tests 4.00s, environment 4.27s)

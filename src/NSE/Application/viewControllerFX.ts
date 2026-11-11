@@ -1,0 +1,123 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import type { HFXHapticClient } from "../../FX/HapticsFX/HFXHapticClient";
+import type { HFXHapticSession } from "../../FX/HapticsFX/HFXHapticSession";
+import type { LFXLocationClient, LFXLocationManager } from "../../FX/LocationFX/public";
+import type { LUFXIndexClient } from "../../FX/LuminaFX/public";
+import type { MEFXMediaClient } from "../../FX/MediaFX/MEFXMediaClient";
+import type { MIFXAccess, MIFXClient } from "../../FX/MIDIFX/public";
+import type { MFXMotionClient, MFXMotionManager } from "../../FX/MotionFX/public";
+import type { VFXCaptureSession, VFXVideoClient } from "../../FX/VideoFX/public";
+import { manageNSEAnimationDisplayLink, manageNSEAnimationRenderer, type NSEManagedAnimationHost, type NSEManagedAFXDisplayLink, type NSEManagedAFXDisplayLinkOptions, type NSEManagedAFXRenderer, type NSEManagedAFXRendererOptions } from "./managedAnimationRenderer";
+import type { NSEViewController } from "./NSEViewController";
+import type { NSEViewOutlet } from "./viewOutlet";
+
+/** The FX clients of the mounted application, as the host hands them to a view controller. */
+export interface NSEViewControllerFXClients {
+  readonly animation?: NSEManagedAnimationHost;
+  readonly motion: MFXMotionClient;
+  readonly location: LFXLocationClient;
+  readonly haptics: HFXHapticClient;
+  readonly midi: MIFXClient;
+  readonly media: MEFXMediaClient;
+  readonly video: VFXVideoClient;
+  readonly lumina: LUFXIndexClient;
+}
+
+/**
+ * The FX services a view controller can use without a hook. Each is created
+ * the first time it is read, belongs to the controller, and is released when
+ * the controller is disposed; nothing is requested from the device (a
+ * location fix, a MIDI port, the camera) until the controller asks.
+ */
+export interface NSEViewControllerFX {
+  readonly animation: {
+    /** An AFXRenderer that owns the canvas's drawing context (CARenderer). */
+    manageRenderer(outlet: NSEViewOutlet<HTMLCanvasElement>, options?: NSEManagedAFXRendererOptions): NSEManagedAFXRenderer;
+    /**
+     * Frame pacing and drawable-size tracking for a canvas whose context you
+     * own, such as Three.js, raw WebGL2 or WebGPU (CADisplayLink / MTKView).
+     * A canvas outlet takes either a renderer or a display link, never both.
+     */
+    manageDisplayLink(outlet: NSEViewOutlet<HTMLCanvasElement>, options?: NSEManagedAFXDisplayLinkOptions): NSEManagedAFXDisplayLink;
+  };
+  /** Device motion and attitude (MotionFX). */
+  readonly motion: MFXMotionManager;
+  /** Foreground location (LocationFX). */
+  readonly location: LFXLocationManager;
+  /** Haptic patterns (HapticsFX). */
+  readonly haptics: HFXHapticSession;
+  /** MIDI ports (MIDIFX). */
+  readonly midi: MIFXAccess;
+  /** Media buffers, clocks and timebases (MediaFX); every call is bound to the controller's lifetime. */
+  readonly media: MEFXMediaClient;
+  /** Camera capture (VideoFX). */
+  readonly video: VFXCaptureSession;
+  /** The on-device search index (LuminaFX); an index is acquired by `createIndex()`. */
+  readonly lumina: LUFXIndexClient;
+}
+
+function boundTo(owner: AbortSignal, signal: AbortSignal | undefined): AbortSignal {
+  return signal ? AbortSignal.any([owner, signal]) : owner;
+}
+
+/** The FX services of one view controller, owned by `owner`. */
+export function createViewControllerFX(clients: Partial<NSEViewControllerFXClients>, owner: AbortSignal, controller?: NSEViewController<unknown>): NSEViewControllerFX {
+  const requireClient = <K extends keyof NSEViewControllerFXClients>(key: K): NonNullable<NSEViewControllerFXClients[K]> => {
+    const client = clients[key];
+    if (!client) throw new DOMException(`${key} is unavailable in this view's host.`, "NotSupportedError");
+    return client;
+  };
+  let motion: MFXMotionManager | undefined;
+  let location: LFXLocationManager | undefined;
+  let haptics: HFXHapticSession | undefined;
+  let midi: MIFXAccess | undefined;
+  let video: VFXCaptureSession | undefined;
+  const media: MEFXMediaClient = Object.freeze({
+    copyBlock: (bytes: Uint8Array, signal?: AbortSignal) => requireClient("media").copyBlock(bytes, boundTo(owner, signal)),
+    createQueue: <T>(options: Parameters<MEFXMediaClient["createQueue"]>[0], signal?: AbortSignal) =>
+      requireClient("media").createQueue<T>(options as never, boundTo(owner, signal)),
+    observeClock: (signal?: AbortSignal) => requireClient("media").observeClock(boundTo(owner, signal)),
+    createTimebase: (options?: Parameters<MEFXMediaClient["createTimebase"]>[0], signal?: AbortSignal) =>
+      requireClient("media").createTimebase(options, boundTo(owner, signal)),
+  }) as MEFXMediaClient;
+  return Object.freeze({
+    animation: Object.freeze({
+      manageRenderer(outlet: NSEViewOutlet<HTMLCanvasElement>, options?: NSEManagedAFXRendererOptions) {
+        owner.throwIfAborted();
+        if (!controller) throw new TypeError("Managed animation renderers require a view controller.");
+        return manageNSEAnimationRenderer(controller, outlet, options);
+      },
+      manageDisplayLink(outlet: NSEViewOutlet<HTMLCanvasElement>, options?: NSEManagedAFXDisplayLinkOptions) {
+        owner.throwIfAborted();
+        if (!controller) throw new TypeError("Managed display links require a view controller.");
+        return manageNSEAnimationDisplayLink(controller, outlet, options);
+      },
+    }),
+    get motion() { return (motion ??= requireClient("motion").createManager(owner)); },
+    get location() { return (location ??= requireClient("location").createManager(owner)); },
+    get haptics() { return (haptics ??= requireClient("haptics").createEngine(owner)); },
+    get midi() { return (midi ??= requireClient("midi").createAccess(owner)); },
+    get video() { return (video ??= requireClient("video").createCaptureSession(owner)); },
+    media,
+    get lumina() { return requireClient("lumina"); },
+  });
+}

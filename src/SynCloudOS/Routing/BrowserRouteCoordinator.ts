@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type {
   SynCloudOSOpenRouteOptions,
   SynCloudOSOpenRouteResult,
@@ -39,7 +40,7 @@ export type CoordinatedRouteResolution =
   | {
       kind: "app";
       pathname: string;
-      app: { id: string; policy?: Readonly<{ public?: boolean; requiresLogin?: boolean }> };
+      app: { bundleIdentifier: string; policy?: Readonly<{ public?: boolean; requiresLogin?: boolean }> };
     }
   | { kind: "external" | "notFound"; pathname: string };
 
@@ -47,6 +48,7 @@ interface BrowserRouteRuntimeSnapshot {
   booted: boolean;
   statechart: { currentState: string };
   loginServices: { isAuthorised: boolean };
+  lifecycle: Readonly<Record<string, string>>;
   application: {
     activeAppId: string | null;
     routePath: string;
@@ -139,7 +141,7 @@ function isRuntimeAtRoute(
   if (resolution.kind === "app") {
     return (
       snapshot.application.routePath === resolution.pathname &&
-      snapshot.application.activeAppId === resolution.app.id
+      normalizeBundleIdentifier(snapshot.application.activeAppId) === normalizeBundleIdentifier(resolution.app.bundleIdentifier)
     );
   }
   return false;
@@ -244,7 +246,7 @@ export function createBrowserRouteCoordinator(
     );
     if (
       resolution.kind === "app" &&
-      resolution.app.id === snapshot.application.activeAppId
+      normalizeBundleIdentifier(resolution.app.bundleIdentifier) === normalizeBundleIdentifier(snapshot.application.activeAppId)
     ) {
       dependencies.platform.setSessionItem(lastActiveAppRouteKey, resolution.pathname);
     } else if (snapshot.application.routePath === "/") {
@@ -307,6 +309,21 @@ export function createBrowserRouteCoordinator(
   const handleRuntimeChange = () => {
     persistActiveRoute();
     const snapshot = dependencies.getRuntimeSnapshot();
+    // A direct SDK/lifecycle close reconciles runtime presentation atomically,
+    // without a route.open operation. Retire the closed app's browser entry
+    // here too. Hosts whose "/" resolves to an application own their quit
+    // surface instead; sending them home would relaunch the closed primary.
+    const browserPath = dependencies.platform.getLocation().pathname;
+    const browserRoute = dependencies.resolveRoute(browserPath);
+    if (snapshot.application.activeAppId === null && snapshot.application.routePath === "/"
+      && snapshot.statechart.currentState === "active.webspring"
+      && browserRoute.kind === "app" && snapshot.lifecycle[normalizeBundleIdentifier(browserRoute.app.bundleIdentifier)] === "closed"
+      && dependencies.resolveRoute("/").kind === "webspring") {
+      initialHref = null;
+      initialHrefDeferredForAuthorization = false;
+      handleRuntimeRouteOpen({ browserHref: "/", syncRoute: true, historyMode: "replace" });
+      return;
+    }
     if (!initialHref || !snapshot.booted) return;
     let initialUrl: URL;
     try {

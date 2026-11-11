@@ -36,6 +36,6 @@ describe("FX production cutover audit", () => {
   });
   it("detects an old public declaration and respects actual NSE control names", () => {
     expect(inspectFxBoundary("src/bridge.ts", "export const NSEBezierPath = GFXPath;")).toHaveLength(1);
-    expect(inspectFxBoundary("src/control.ts", "export class NSEPushButton {}" )).toEqual([]);
+    expect(inspectFxBoundary("src/control.ts", "export class NSEButton {}" )).toEqual([]);
   });
 });

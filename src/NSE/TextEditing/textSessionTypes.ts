@@ -19,6 +19,7 @@
  */
 
 import type { NSEAttributedTextAttributes, NSEParagraphAttributes, NSETextRange, NSETextOwner, NSETextSnapshot } from "../Text";
+import type { NSEControllerOwnershipOptions } from "../Controllers/ownership";
 
 export interface NSETextSelectionTarget {
   readonly sessionId: string;
@@ -53,9 +54,10 @@ export interface NSETextCustomAttributePolicy {
   /** A paragraph key is copied to the new paragraph when Enter splits one (default true). */
   readonly carriesAcrossParagraphSplit?: boolean;
 }
-export interface NSETextEditingSessionOptions {
+export interface NSETextEditingSessionOptions extends NSEControllerOwnershipOptions {
   readonly id: string;
-  readonly owner: NSETextOwner;
+  /** The canonical content authority; `owner` separately bounds this controller's lifetime. */
+  readonly textOwner: NSETextOwner;
   readonly documentId?: string;
   readonly editable?: boolean;
   readonly signal?: AbortSignal;

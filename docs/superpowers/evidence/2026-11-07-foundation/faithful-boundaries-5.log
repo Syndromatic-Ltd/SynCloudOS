@@ -1,0 +1,2 @@
+policy aliases are missing configured alias @syndromatic/syncloudos/fx/network -> src/FX/NetworkFX/public.ts
+policy aliases are missing configured alias @syndromatic/syncloudos/fx/crypto -> src/FX/CryptoFX/public.ts

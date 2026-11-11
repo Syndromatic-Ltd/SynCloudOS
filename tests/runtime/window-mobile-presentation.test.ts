@@ -33,6 +33,9 @@ import {
 } from "../fixtures/windowTestDependencies";
 
 const desktopScreen: ScreenSnapshot = {
+  geometryState: "current",
+  invalidGeometrySources: [],
+  safeAreaAvailability: "available",
   layoutViewport: { x: 0, y: 0, width: 1_440, height: 900 },
   visualViewport: { x: 0, y: 0, width: 1_440, height: 900 },
   workArea: { x: 0, y: 0, width: 1_440, height: 860 },
@@ -44,6 +47,9 @@ const desktopScreen: ScreenSnapshot = {
 };
 
 const compactScreen: ScreenSnapshot = {
+  geometryState: "current",
+  invalidGeometrySources: [],
+  safeAreaAvailability: "available",
   layoutViewport: { x: 0, y: 0, width: 390, height: 844 },
   visualViewport: { x: 0, y: 0, width: 390, height: 544 },
   workArea: { x: 0, y: 47, width: 390, height: 763 },
@@ -55,6 +61,57 @@ const compactScreen: ScreenSnapshot = {
 };
 
 describe("non-destructive mobile window presentation", () => {
+  it("projects owned zoom state into the current visible work area without replacing normal bounds", async () => {
+    const harness = createWindowTestDependencies();
+    const controller = harness.manager.create(standardWindow("zoomed-projection"));
+    const normal = controller.record.bounds;
+    const screen = { ...desktopScreen, visualViewport: { x: 40, y: 90, width: 900, height: 200 } };
+    expect(resolveWindowPresentation(controller.record, screen, { zoomed: true }).bounds).toEqual(screen.visualViewport);
+    expect(controller.record.bounds).toBe(normal);
+    await harness.cleanup();
+  });
+
+  it.each([48, 120, 280])("fits a regular-width window into a %spx visible work area and restores its normal bounds", async height => {
+    const harness = createWindowTestDependencies();
+    const controller = harness.manager.create(standardWindow("shallow-regular"));
+    const normal = controller.record.bounds;
+    const minimum = controller.record.minimumSize;
+    const presentation = resolveWindowPresentation(controller.record, {
+      ...desktopScreen,
+      visualViewport: { x: 0, y: 20, width: 1000, height },
+      workArea: { x: 0, y: 40, width: 1000, height: 800 },
+    });
+    expect(presentation.kind).toBe("desktop-window");
+    expect(presentation.bounds.y).toBe(40);
+    expect(presentation.bounds.height).toBe(height - 20);
+    expect(presentation.bounds.y + presentation.bounds.height).toBeLessThanOrEqual(height + 20);
+    expect(controller.record.bounds).toBe(normal);
+    expect(controller.record.minimumSize).toBe(minimum);
+    expect(resolveWindowPresentation(controller.record, desktopScreen).bounds).toBe(normal);
+    await harness.cleanup();
+  });
+
+  it("does not render an initial unavailable host placeholder as a window", async () => {
+    const harness = createWindowTestDependencies();
+    const controller = harness.manager.create(standardWindow("unavailable"));
+    expect(resolveWindowPresentation(controller.record, { ...desktopScreen, geometryState: "unavailable" }).visible).toBe(false);
+    await harness.cleanup();
+  });
+
+  it.each([0.5, 1, 12, 24, 25, 48])("fits a sheet inside a shallow %spx visual viewport without changing its normal bounds", async (height) => {
+    const harness = createWindowTestDependencies();
+    const panel = harness.manager.create(panelWindow("shallow-panel"));
+    const normal = panel.record.bounds;
+    const visualViewport = { x: 20, y: 40, width: 320, height };
+    const presentation = resolveWindowPresentation(panel.record, { ...compactScreen, visualViewport });
+    expect(presentation.bounds.width).toBeGreaterThan(0);
+    expect(presentation.bounds.height).toBeGreaterThan(0);
+    expect(presentation.bounds.height).toBeLessThanOrEqual(height);
+    expect(presentation.bounds.y).toBeGreaterThanOrEqual(visualViewport.y);
+    expect(presentation.bounds.y + presentation.bounds.height).toBeLessThanOrEqual(visualViewport.y + height);
+    expect(panel.record.bounds).toBe(normal);
+    await harness.cleanup();
+  });
   it("returns the desktop bounds by reference at regular and wide breakpoints", async () => {
     const harness = createWindowTestDependencies();
     const controller = harness.manager.create(standardWindow("desktop"));

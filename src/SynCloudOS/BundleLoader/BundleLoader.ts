@@ -19,6 +19,7 @@
  */
 
 import type { SynCloudOSAppManifest } from "../AppRegistry/appRegistryTypes";
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import { captureSynWareManifest } from "../AppSDK/manifest/canonicalManifest";
 import type { SynWareManifestV1 } from "../AppSDK/manifest/manifestTypes";
 import type { SynCloudOSRuntime, SynCloudOSEventBus, SynCloudOSBundleLoader, SynCloudOSRuntimeId } from "../Runtime/runtimeInstanceTypes";
@@ -131,7 +132,7 @@ function createDefaultBundle(manifest: SynCloudOSAppManifest): TrustedSynWareBun
     modulePath: manifest.path,
     services: [...manifest.requiredServices, ...(manifest.optionalServices ?? [])],
     optionalServices: manifest.optionalServices,
-    permissions: manifest.type === "system" ? ["diagnostics.view"] : ["app.open.public"],
+    entitlements: Object.freeze([]),
     lifecycleHooks: {}
   };
 }
@@ -142,6 +143,11 @@ function isTrustedBundle(value: SynCloudOSAppManifest | TrustedSynWareBundle): v
 
 function prepareBundle(bundle: TrustedSynWareBundle): TrustedSynWareBundle {
   const synWareManifest = canonicalManifestForBundle(bundle);
+  const declaredEntitlements = synWareManifest === undefined ? bundle.entitlements ?? [] : synWareManifest.entitlements ?? [];
+  if (!Array.isArray(declaredEntitlements) || declaredEntitlements.some((value) => typeof value !== "string" || !/^[a-z][A-Za-z0-9]*(?:[.-][A-Za-z0-9]+)*$/u.test(value)) || new Set(declaredEntitlements).size !== declaredEntitlements.length) {
+    throw new TypeError("Bundle entitlements must be unique named capabilities.");
+  }
+  const entitlements = Object.freeze([...declaredEntitlements]);
   const requiredServices = declaredServices(synWareManifest, true) ?? bundle.manifest.requiredServices;
   const optionalServices = declaredServices(synWareManifest, false) ?? bundle.manifest.optionalServices;
   return preserveTrustedSynWareBundleProvenance(bundle, {
@@ -151,36 +157,36 @@ function prepareBundle(bundle: TrustedSynWareBundle): TrustedSynWareBundle {
     modulePath: bundle.modulePath ?? bundle.manifest.path,
     services: bundle.services ?? [...requiredServices, ...(optionalServices ?? [])],
     optionalServices: bundle.optionalServices ?? optionalServices,
-    permissions: bundle.permissions ?? (synWareManifest?.permissions ? [...synWareManifest.permissions] : bundle.manifest.type === "system" ? ["diagnostics.view"] : ["app.open.public"]),
+    entitlements,
     lifecycleHooks: bundle.lifecycleHooks ?? {}
   });
 }
 
 function setLoadFailed(appId: string, error: SynCloudOSBundleLoadError) {
-  loadStates.set(appId, "failed");
-  loadErrors.set(appId, error);
+  loadStates.set(normalizeBundleIdentifier(appId), "failed");
+  loadErrors.set(normalizeBundleIdentifier(appId), error);
 }
 
 function clearLoadedState(appId: string) {
-  const controller = loadControllers.get(appId);
+  const controller = loadControllers.get(normalizeBundleIdentifier(appId));
   if (controller && !controller.signal.aborted) {
     controller.abort(new DOMException(`Bundle ${appId} load generation was replaced.`, "AbortError"));
   }
-  loadControllers.delete(appId);
-  loadedBundles.delete(appId);
-  loadingPromises.delete(appId);
-  loadStates.delete(appId);
-  loadErrors.delete(appId);
+  loadControllers.delete(normalizeBundleIdentifier(appId));
+  loadedBundles.delete(normalizeBundleIdentifier(appId));
+  loadingPromises.delete(normalizeBundleIdentifier(appId));
+  loadStates.delete(normalizeBundleIdentifier(appId));
+  loadErrors.delete(normalizeBundleIdentifier(appId));
 }
 
 function publishBundleRegistration(bundle: TrustedSynWareBundle, hadExistingBundle: boolean) {
   EventBus.publish(hadExistingBundle ? "bundle.update" : "bundle.register", {
-    appId: bundle.manifest.id,
+    appId: bundle.manifest.bundleIdentifier,
     packageName: bundle.manifest.packageName,
     componentKey: bundle.componentKey,
     modulePath: bundle.modulePath,
     services: bundle.services,
-    permissions: bundle.permissions
+    entitlements: bundle.entitlements
   }, bundle.manifest.packageName);
 }
 
@@ -193,13 +199,13 @@ async function invokeLifecycleHookForBundle(
   if (!hook) return;
   try {
     await hook({
-      appId: bundle.manifest.id,
+      appId: bundle.manifest.bundleIdentifier,
       packageName: bundle.manifest.packageName,
       ...context
     });
   } catch (error) {
     EventBus.publish("bundle.lifecycle.failed", {
-      appId: bundle.manifest.id,
+      appId: bundle.manifest.bundleIdentifier,
       packageName: bundle.manifest.packageName,
       hookName,
       error: error instanceof Error ? error.message : String(error)
@@ -216,9 +222,13 @@ const bundleLoader = {
 
   registerBundle(bundle: TrustedSynWareBundle, options: { publish?: boolean } = {}) {
     const prepared = prepareBundle(bundle);
-    const hadExistingBundle = bundles.has(prepared.manifest.id);
-    bundles.set(prepared.manifest.id, prepared);
-    if (hadExistingBundle) clearLoadedState(prepared.manifest.id);
+    const existing = bundles.get(normalizeBundleIdentifier(prepared.manifest.bundleIdentifier));
+    if (existing && existing.manifest.bundleIdentifier !== prepared.manifest.bundleIdentifier) {
+      throw new TypeError(`Duplicate SynWare bundle identifier ${prepared.manifest.bundleIdentifier}.`);
+    }
+    const hadExistingBundle = bundles.has(normalizeBundleIdentifier(prepared.manifest.bundleIdentifier));
+    bundles.set(normalizeBundleIdentifier(prepared.manifest.bundleIdentifier), prepared);
+    if (hadExistingBundle) clearLoadedState(prepared.manifest.bundleIdentifier);
     if (options.publish !== false) publishBundleRegistration(prepared, hadExistingBundle);
     return prepared;
   },
@@ -226,11 +236,11 @@ const bundleLoader = {
   captureBundleRegistrationState(appId: string) {
     return {
       appId,
-      bundle: bundles.get(appId) ?? null,
-      loaded: loadedBundles.get(appId) ?? null,
-      loading: loadingPromises.get(appId) ?? null,
-      loadState: loadStates.get(appId) ?? null,
-      loadError: loadErrors.get(appId) ?? null,
+      bundle: bundles.get(normalizeBundleIdentifier(appId)) ?? null,
+      loaded: loadedBundles.get(normalizeBundleIdentifier(appId)) ?? null,
+      loading: loadingPromises.get(normalizeBundleIdentifier(appId)) ?? null,
+      loadState: loadStates.get(normalizeBundleIdentifier(appId)) ?? null,
+      loadError: loadErrors.get(normalizeBundleIdentifier(appId)) ?? null,
     };
   },
   restoreBundleRegistrationState(state: {
@@ -242,11 +252,11 @@ const bundleLoader = {
     loadError: SynCloudOSBundleLoadError | null;
   }) {
     const { appId } = state;
-    if (state.bundle) bundles.set(appId, state.bundle); else bundles.delete(appId);
-    if (state.loaded) loadedBundles.set(appId, state.loaded); else loadedBundles.delete(appId);
-    if (state.loading) loadingPromises.set(appId, state.loading); else loadingPromises.delete(appId);
-    if (state.loadState) loadStates.set(appId, state.loadState); else loadStates.delete(appId);
-    if (state.loadError) loadErrors.set(appId, state.loadError); else loadErrors.delete(appId);
+    if (state.bundle) bundles.set(normalizeBundleIdentifier(appId), state.bundle); else bundles.delete(normalizeBundleIdentifier(appId));
+    if (state.loaded) loadedBundles.set(normalizeBundleIdentifier(appId), state.loaded); else loadedBundles.delete(normalizeBundleIdentifier(appId));
+    if (state.loading) loadingPromises.set(normalizeBundleIdentifier(appId), state.loading); else loadingPromises.delete(normalizeBundleIdentifier(appId));
+    if (state.loadState) loadStates.set(normalizeBundleIdentifier(appId), state.loadState); else loadStates.delete(normalizeBundleIdentifier(appId));
+    if (state.loadError) loadErrors.set(normalizeBundleIdentifier(appId), state.loadError); else loadErrors.delete(normalizeBundleIdentifier(appId));
   },
 
   registerManifest(manifest: SynCloudOSAppManifest) {
@@ -258,9 +268,9 @@ const bundleLoader = {
   },
 
   unregisterBundle(appId: string) {
-    const bundle = bundles.get(appId);
+    const bundle = bundles.get(normalizeBundleIdentifier(appId));
     if (!bundle) return null;
-    bundles.delete(appId);
+    bundles.delete(normalizeBundleIdentifier(appId));
     clearLoadedState(appId);
     EventBus.publish("bundle.unregister", { appId, packageName: bundle.manifest.packageName }, bundle.manifest.packageName);
     return bundle;
@@ -268,13 +278,13 @@ const bundleLoader = {
 
   async loadBundle(appId: string, options: { readonly signal?: AbortSignal } = {}) {
     if (disposed) throw new Error(`Bundle loader ${runtimeId} is disposed.`);
-    const loaded = loadedBundles.get(appId);
+    const loaded = loadedBundles.get(normalizeBundleIdentifier(appId));
     if (loaded) return loaded;
 
-    const inFlight = loadingPromises.get(appId);
+    const inFlight = loadingPromises.get(normalizeBundleIdentifier(appId));
     if (inFlight) return awaitCallerSignal(inFlight, options.signal);
 
-    const bundle = bundles.get(appId);
+    const bundle = bundles.get(normalizeBundleIdentifier(appId));
     if (!bundle) {
       const error = new SynCloudOSBundleLoadError("BUNDLE_NOT_REGISTERED", `No bundle is registered for ${appId}.`, { appId });
       setLoadFailed(appId, error);
@@ -298,8 +308,8 @@ const bundleLoader = {
       throw error;
     }
 
-    loadStates.set(appId, "loading");
-    loadErrors.delete(appId);
+    loadStates.set(normalizeBundleIdentifier(appId), "loading");
+    loadErrors.delete(normalizeBundleIdentifier(appId));
     EventBus.publish("bundle.load.begin", {
       appId,
       packageName: bundle.manifest.packageName,
@@ -307,12 +317,12 @@ const bundleLoader = {
     }, bundle.manifest.packageName);
 
     const controller = new AbortController();
-    loadControllers.set(appId, controller);
+    loadControllers.set(normalizeBundleIdentifier(appId), controller);
     const signal = AbortSignal.any([runtime.signal, controller.signal]);
     const assertCurrent = () => {
       // Keep the historical stale-success classification stable while still
       // aborting declaration work immediately on replacement.
-      if (bundles.get(appId) !== bundle) {
+      if (bundles.get(normalizeBundleIdentifier(appId)) !== bundle) {
         throw new Error(`Bundle ${appId} changed while its module was loading.`);
       }
       if (signal.aborted) throw signal.reason instanceof Error
@@ -348,7 +358,7 @@ const bundleLoader = {
           definition = captureLazySynWareDefinition(module, bundle);
           await runDefinitionLifecycle(definition, { signal, assertCurrent });
         } catch (error) {
-          if (isAbortError(error) || bundles.get(appId) !== bundle) throw error;
+          if (isAbortError(error) || bundles.get(normalizeBundleIdentifier(appId)) !== bundle) throw error;
           throw new SynCloudOSBundleLoadError(
             "BUNDLE_INVALID_MODULE",
             `${bundle.manifest.packageName} did not complete a valid SynWare definition lifecycle: ${error instanceof Error ? error.message : String(error)}`,
@@ -363,8 +373,8 @@ const bundleLoader = {
           definition,
           loadedAt: Date.now()
         };
-        loadedBundles.set(appId, loadedBundle);
-        loadStates.set(appId, "ready");
+        loadedBundles.set(normalizeBundleIdentifier(appId), loadedBundle);
+        loadStates.set(normalizeBundleIdentifier(appId), "ready");
         EventBus.publish("bundle.load.complete", {
           appId,
           packageName: bundle.manifest.packageName,
@@ -376,10 +386,10 @@ const bundleLoader = {
       .catch((error) => {
         // A stale completion belongs to the prior registration and must not
         // turn the replacement bundle into a failed load state.
-        if (bundles.get(appId) !== bundle) throw error;
+        if (bundles.get(normalizeBundleIdentifier(appId)) !== bundle) throw error;
         if (signal.aborted || isAbortError(error)) {
-          loadStates.delete(appId);
-          loadErrors.delete(appId);
+          loadStates.delete(normalizeBundleIdentifier(appId));
+          loadErrors.delete(normalizeBundleIdentifier(appId));
           throw error;
         }
         const loadError = error instanceof SynCloudOSBundleLoadError
@@ -400,33 +410,33 @@ const bundleLoader = {
         throw loadError;
       })
       .finally(() => {
-        if (loadingPromises.get(appId) === promise) loadingPromises.delete(appId);
-        if (loadControllers.get(appId) === controller) loadControllers.delete(appId);
+        if (loadingPromises.get(normalizeBundleIdentifier(appId)) === promise) loadingPromises.delete(normalizeBundleIdentifier(appId));
+        if (loadControllers.get(normalizeBundleIdentifier(appId)) === controller) loadControllers.delete(normalizeBundleIdentifier(appId));
       });
 
-    loadingPromises.set(appId, promise);
+    loadingPromises.set(normalizeBundleIdentifier(appId), promise);
     return awaitCallerSignal(promise, options.signal);
   },
 
   getBundle(appId: string) {
-    return bundles.get(appId) ?? null;
+    return bundles.get(normalizeBundleIdentifier(appId)) ?? null;
   },
   getTrustedBundleProvenance(appId: string) {
-    return getTrustedSynWareBundleProvenance(bundles.get(appId));
+    return getTrustedSynWareBundleProvenance(bundles.get(normalizeBundleIdentifier(appId)));
   },
 
   getLoadedBundle(appId: string) {
-    return loadedBundles.get(appId) ?? null;
+    return loadedBundles.get(normalizeBundleIdentifier(appId)) ?? null;
   },
 
   getBundleLoadState(appId: string): SynCloudOSBundleLoadState {
-    if (loadedBundles.has(appId)) return "ready";
-    if (loadingPromises.has(appId)) return "loading";
-    return loadStates.get(appId) ?? "unloaded";
+    if (loadedBundles.has(normalizeBundleIdentifier(appId))) return "ready";
+    if (loadingPromises.has(normalizeBundleIdentifier(appId))) return "loading";
+    return loadStates.get(normalizeBundleIdentifier(appId)) ?? "unloaded";
   },
 
   getBundleLoadError(appId: string) {
-    return loadErrors.get(appId) ?? null;
+    return loadErrors.get(normalizeBundleIdentifier(appId)) ?? null;
   },
 
   invalidateBundle(appId: string) {
@@ -438,13 +448,13 @@ const bundleLoader = {
   },
 
   getLifecycleHook(appId: string, hookName: SynCloudOSBundleLifecycleHookName) {
-    return bundles.get(appId)?.lifecycleHooks?.[hookName] ?? null;
+    return bundles.get(normalizeBundleIdentifier(appId))?.lifecycleHooks?.[hookName] ?? null;
   },
 
   invokeLifecycleHookForBundle,
 
   async invokeLifecycleHook(appId: string, hookName: SynCloudOSBundleLifecycleHookName, context: { reason?: string; error?: unknown } = {}) {
-    const bundle = bundles.get(appId);
+    const bundle = bundles.get(normalizeBundleIdentifier(appId));
     if (!bundle) return;
     await invokeLifecycleHookForBundle(bundle, hookName, context);
   },
@@ -468,4 +478,3 @@ const bundleLoader = {
 
 return bundleLoader;
 }
-

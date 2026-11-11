@@ -36,6 +36,7 @@ import { GFXColour } from "../../../src/FX/GraphicsFX/GFXColour";
 import { GFXImage } from "../../../src/FX/GraphicsFX/GFXImage";
 import { GFXPath } from "../../../src/FX/GraphicsFX/GFXPath";
 import { BrowserAnimationLayerSurface } from "../../../src/SynCloudOS/PlatformAdapters/BrowserAnimationAdapter";
+import { createAFXLayer } from "../../../src/FX/AnimationFX/host";
 import * as publicAnimationFX from "../../../src/FX/AnimationFX/public";
 
 class FrameClock implements AFXFrameScheduler {
@@ -77,18 +78,17 @@ const pixel = (value: number) => new GFXImage({
 const white = pixel(255);
 const grey = pixel(127);
 
-function shape(clock: FrameClock) {
-  const element = document.createElement("div");
-  const layer = new AFXShapeLayer(new BrowserAnimationLayerSurface(element), clock);
+function shape() {
+  const layer = new AFXShapeLayer();
   layer.frame = { x: 0, y: 0, width: 10, height: 10 };
   layer.path = GFXPath.rect({ x: 0, y: 0, width: 10, height: 10 });
   layer.fillColour = GFXColour.parse("white");
-  return { element, layer };
+  return { layer };
 }
 
 function emitter(clock = new FrameClock()) {
   const element = document.createElement("div");
-  const layer = new AFXEmitterLayer(new BrowserAnimationLayerSurface(element), clock);
+  const layer = createAFXLayer(AFXEmitterLayer, new BrowserAnimationLayerSurface(element), clock);
   layer.frame = { x: 0, y: 0, width: 100, height: 100 };
   return { clock, element, layer };
 }
@@ -101,7 +101,8 @@ describe("AnimationFX spatial replication and emitter depth", () => {
   it("replicates independently animated child history at each instance delay", () => {
     const clock = new FrameClock();
     const element = document.createElement("div");
-    const replica = new AFXReplicatorLayer(
+    const replica = createAFXLayer(
+      AFXReplicatorLayer,
       new BrowserAnimationLayerSurface(element),
       clock,
     );
@@ -109,7 +110,7 @@ describe("AnimationFX spatial replication and emitter depth", () => {
     replica.instanceCount = 2;
     replica.instanceDelay = 0.5;
     replica.instanceTransform = AFXTransform3D.translation(15, 0);
-    const child = shape(clock);
+    const child = shape();
     replica.addSublayer(child.layer);
     child.layer.addAnimation(
       new AFXBasicAnimation({
@@ -135,7 +136,8 @@ describe("AnimationFX spatial replication and emitter depth", () => {
   it("samples independently delayed child presentation in projective replicas", () => {
     const clock = new FrameClock();
     const element = document.createElement("div");
-    const replica = new AFXReplicatorLayer(
+    const replica = createAFXLayer(
+      AFXReplicatorLayer,
       new BrowserAnimationLayerSurface(element),
       clock,
     );
@@ -146,7 +148,7 @@ describe("AnimationFX spatial replication and emitter depth", () => {
     replica.instanceTransform = AFXTransform3D.perspective(400).multiply(
       AFXTransform3D.rotation(0.2, 1, 0, 0),
     );
-    const child = shape(clock);
+    const child = shape();
     replica.addSublayer(child.layer);
     child.layer.addAnimation(
       new AFXBasicAnimation({
@@ -171,12 +173,13 @@ describe("AnimationFX spatial replication and emitter depth", () => {
   it("keeps planar replication affine but enables projective depth only on a capable backend", () => {
     const clock = new FrameClock();
     const element = document.createElement("div");
-    const replica = new AFXReplicatorLayer(
+    const replica = createAFXLayer(
+      AFXReplicatorLayer,
       new BrowserAnimationLayerSurface(element),
       clock,
     );
     replica.instanceCount = 2;
-    replica.addSublayer(shape(clock).layer);
+    replica.addSublayer(shape().layer);
     expect(replica.projectionMode).toBe("planar");
     expect(replica.preservesDepth).toBe(false);
     expect(() => {
@@ -204,7 +207,7 @@ describe("AnimationFX spatial replication and emitter depth", () => {
       setMask() {},
       dispose() {},
     };
-    const incapable = new AFXReplicatorLayer(incapableSurface, clock);
+    const incapable = createAFXLayer(AFXReplicatorLayer, incapableSurface, clock);
     expect(() => { incapable.projectionMode = "projective"; }).toThrow(/projective depth/i);
     expect(incapable.preservesDepth).toBe(false);
     incapable.dispose();

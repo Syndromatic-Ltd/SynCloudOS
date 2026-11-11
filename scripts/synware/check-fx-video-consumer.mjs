@@ -55,7 +55,8 @@ function staticServer(directory) {
 
 const probeSource = `import { useEffect } from "react";
 import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
-import { createSynWare, useSynWare } from "@syndromatic/syncloudos/sdk";
+import { useSCOS } from "@syndromatic/syncloudos/sdk";
+import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
 import { MEFXSampleTimingInfo, MEFXTime } from "@syndromatic/syncloudos/fx/media";
 import { VFXEncodedChunk } from "@syndromatic/syncloudos/fx/video";
 import { defineWebspring, type WebspringViewProps } from "@syndromatic/syncloudos/webspring";
@@ -98,7 +99,7 @@ async function encodeFixture(): Promise<EncodedFixture> {
 }
 
 function Probe() {
-  const app = useSynWare();
+  const app = useSCOS();
   useEffect(() => {
     void (async () => {
       const decoderConfig = { codec: "vp8", codedWidth: 16, codedHeight: 16 } as const;
@@ -164,9 +165,9 @@ function Website({ actions, applicationOutlet }: WebspringViewProps) {
 const shell = defineWebspring({
   manifest: {
     schemaVersion: 1,
-    id: "org.example.vfx02-shell",
+    bundleIdentifier: "org.example.vfx02-shell",
     version: "1.0.0",
-    title: "VFX-02 shell",
+    displayName: "VFX-02 shell",
     webspringShell: {
       views: [{ id: "website", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
       defaults: { desktop: "website", tablet: "website", mobile: "website" },
@@ -180,9 +181,9 @@ const shell = defineWebspring({
 const app = createSynWare({
   manifest: {
     schemaVersion: 1,
-    id: "org.example.vfx02",
+    bundleIdentifier: "org.example.vfx02",
     version: "1.0.0",
-    title: "VFX-02 Probe",
+    displayName: "VFX-02 Probe",
     runtime: { policy: { public: true } },
     presentations: ["desktop", "tablet", "mobile"],
     routes: [{ path: "/vfx02", primary: true }],

@@ -22,7 +22,7 @@ import type { HTMLAttributes, ReactNode } from "react";
 import { classes } from "../Core/nseControlsShared";
 
 export interface NSEDividerProps extends HTMLAttributes<HTMLHRElement> {
-  variant?: "plain" | "soft" | "gray" | "alpha" | "arrow";
+  variant?: "plain" | "soft" | "grey" | "alpha" | "arrow";
   label?: string;
   /** Visible inline caption — renders the divider grammar: [caption][line-to-edge]. */
   caption?: ReactNode;
@@ -38,6 +38,7 @@ export interface NSEDividerProps extends HTMLAttributes<HTMLHRElement> {
   onToggle?: () => void;
 }
 
+/** @internal The theme's separator art: captioned separators, and the disclosure arrow of source-list group rows. Apps draw separators with NSEBox boxType="separator". */
 export function NSEDivider({
   variant = "plain",
   label,
@@ -49,10 +50,13 @@ export function NSEDivider({
   style,
   ...props
 }: NSEDividerProps) {
+  const drawing = { "data-nse-control": "box", "data-nse-box-type": "separator", "data-nse-style": variant, "data-nse-role": onToggle ? "disclosure" : undefined, "data-nse-expanded": expanded === undefined ? undefined : String(expanded), ...Object.fromEntries(Object.entries(props).filter(([name]) => name.startsWith("data-nse-"))) };
   if (onToggle) {
     return (
       <button
         type="button"
+        data-nse-part="separator"
+        {...drawing}
         className={classes("nse-control-divider", "nse-control-divider-toggle", className)}
         data-variant={variant}
         data-expanded={expanded ? "true" : "false"}
@@ -67,19 +71,23 @@ export function NSEDivider({
     // Alphabetical divider: a single-letter index caption in a left gutter, then line-to-edge.
     return (
       <div
+        data-nse-part="separator"
+        {...drawing}
         className={classes("nse-control-divider", "nse-control-divider-alpha-captioned", className)}
         data-variant="alpha"
         role="separator"
         aria-label={label ?? (typeof caption === "string" ? caption : undefined)}
         style={style}
       >
-        <span className="nse-control-divider-alpha-caption">{caption}</span>
+        <span data-nse-part="title" className="nse-control-divider-alpha-caption">{caption}</span>
       </div>
     );
   }
   if (caption !== undefined) {
     return (
       <div
+        data-nse-part="separator"
+        {...drawing}
         className={classes("nse-control-divider", "nse-control-divider-captioned", className)}
         data-variant={variant}
         role="separator"
@@ -88,19 +96,21 @@ export function NSEDivider({
       >
         {icon ? (
           <span
-            className="nse-control-divider-icon"
+            data-nse-part="image" className="nse-control-divider-icon"
             style={{ backgroundImage: `url("${icon}")` }}
             aria-hidden="true"
           />
         ) : null}
-        <span className="nse-control-divider-caption">{caption}</span>
-        <span className="nse-control-divider-cap" aria-hidden="true" />
+        <span data-nse-part="title" className="nse-control-divider-caption">{caption}</span>
+        <span data-nse-part="border" className="nse-control-divider-cap" aria-hidden="true" />
       </div>
     );
   }
   return (
     <hr
-      className={classes("nse-control-divider", className)}
+      data-nse-part="separator"
+        {...drawing}
+        className={classes("nse-control-divider", className)}
       data-variant={variant}
       data-expanded={expanded ? "true" : undefined}
       aria-label={label}

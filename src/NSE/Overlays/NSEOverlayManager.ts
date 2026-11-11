@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SynCloudOSLifecycleRecord } from "../../SynCloudOS/nseRuntimeContracts";
 import type {
   NSEOverlayDismissReason,
   NSEOverlayId,
@@ -54,6 +55,7 @@ function registrationsEqual(left: NSEOverlayRegistration, right: NSEOverlayRegis
 }
 
 export function createNSEOverlayManager(): NSEOverlayManager {
+  const lifecycle = new SynCloudOSLifecycleRecord({ kind: "NSEOverlayManager" });
   const registrations = new Map<NSEOverlayId, NSEOverlayRegistration>();
   const orderedIds: NSEOverlayId[] = [];
   const listeners = new Set<() => void>();
@@ -114,7 +116,7 @@ export function createNSEOverlayManager(): NSEOverlayManager {
       };
     },
     register(registration) {
-      if (disposed) throw new Error("NSE overlay manager is disposed.");
+      if (disposed) throw lifecycle.error({ code: "NSE_OVERLAY_MANAGER_DISPOSED", operation: "register" });
       if (registrations.has(registration.id)) {
         throw new Error(`NSE overlay id \"${registration.id}\" is already registered.`);
       }
@@ -161,6 +163,7 @@ export function createNSEOverlayManager(): NSEOverlayManager {
     },
     dispose() {
       if (disposed) return;
+      lifecycle.markDisposed("explicit");
       disposed = true;
       const dismissed = orderedIds.slice().reverse()
         .map((id) => ({ id, registration: remove(id) }))

@@ -1,5 +1,7 @@
 # TextFX
 
+Encoded byte inputs accept `NSEDataConvertible` from `@syndromatic/syncloudos/foundation`; delivered encoded bytes are immutable `NSEData`. Use `.bytes` at a native typed-buffer boundary and `.blob(mimeType)` for a browser Blob. Numeric pixel, index and PCM planes retain their typed arrays; writable copy destinations remain mutable.
+
 TextFX (`TFX`) is the web-native analogue of Core Text. It turns text and font data into shaped glyphs, breaks them into lines, fits lines into frames of any shape, and gives you the geometry to draw, measure and hit-test the result. Layout, measurement and drawing reuse shaped glyph data. Caret and selection queries must use the current model, font and container revisions.
 
 The pipeline has five stages, and each has a class.
@@ -32,7 +34,7 @@ import { TFXAttributedString, TFXFont, TFXFontDescriptor } from "@syndromatic/sy
 | --- | --- |
 | Prefix | `TFX` |
 | Entry | `@syndromatic/syncloudos/fx/text` |
-| Hook | `useSynWareTextLayout`, from `@syndromatic/syncloudos/sdk` |
+| Hook | `useTextLayout`, from `@syndromatic/syncloudos/sdk` |
 | Permissions | None |
 | Analogue | Core Text (`CTFont`, `CTFontDescriptor`, `CTFontCollection`, `CTTypesetter`, `CTFramesetter`, `CTFrame`, `CTLine`, `CTRunDelegate`, `CTRubyAnnotation`) |
 
@@ -75,7 +77,7 @@ The constructor throws `RangeError` for a bad size or index and `TypeError` for 
 A loaded, sized font that can shape text and produce glyph outlines. Create one with the asynchronous factory. The constructor is private.
 
 ```text
-TFXFont.create(bytes: Uint8Array, descriptor: TFXFontDescriptor, signal?: AbortSignal): Promise<TFXFont>
+TFXFont.create(bytes: NSEDataConvertible, descriptor: TFXFontDescriptor, signal?: AbortSignal): Promise<TFXFont>
 ```
 
 `bytes` holds a TrueType, OpenType, WOFF or WOFF2 file of 12 bytes to 32 MiB. The font copies it. The first call loads the HarfBuzz engine, and later calls reuse it. The factory rejects with `RangeError` for a bad size, `TypeError` for an unreadable or unsupported face, and the signal's reason when aborted.
@@ -116,9 +118,10 @@ Each `TFXGlyphInfo` has:
 | `ligatureCaretOffsets` | Caret positions inside a ligature, from the font's caret table, when present. |
 
 ```ts
+import type { NSEDataConvertible } from "@syndromatic/syncloudos/foundation";
 import { TFXFont, TFXFontDescriptor } from "@syndromatic/syncloudos/fx/text";
 
-export async function measureWord(fontBytes: Uint8Array, word: string) {
+export async function measureWord(fontBytes: NSEDataConvertible, word: string) {
   const font = await TFXFont.create(fontBytes, new TFXFontDescriptor({ size: 24 }));
   try {
     const run = font.shape(word, { language: "en", features: { kern: 1 } });
@@ -261,6 +264,7 @@ One shaped line. The typesetter creates lines and you read them.
 The remaining types: `TFXLineStringRange` (`location`, `length`), `TFXLineCaretOffsets` (`primary`, `secondary`), `TFXLineCaretOffset`, `TFXLineCaretVisitor`, `TFXLineTextPosition`, `TFXLineTruncationType` and `TFXPositionedGlyphRunKind`.
 
 ```ts
+import type { NSEDataConvertible } from "@syndromatic/syncloudos/foundation";
 import {
   TFXAttributedString,
   TFXFont,
@@ -268,7 +272,7 @@ import {
   TFXTypesetter,
 } from "@syndromatic/syncloudos/fx/text";
 
-export async function wrapAndTruncate(fontBytes: Uint8Array, message: string, width: number) {
+export async function wrapAndTruncate(fontBytes: NSEDataConvertible, message: string, width: number) {
   const font = await TFXFont.create(fontBytes, new TFXFontDescriptor({ size: 16 }));
   const text = new TFXAttributedString(message, [{ start: 0, end: message.length, font }]);
   const typesetter = new TFXTypesetter(text);
@@ -369,6 +373,7 @@ The framesetter honours paragraph styles for indents, spacing, alignment and jus
 To flow text across several frames, create the first, then start the next at `frame.visibleRange.end`.
 
 ```ts
+import type { NSEDataConvertible } from "@syndromatic/syncloudos/foundation";
 import {
   TFXAttributedString,
   TFXFont,
@@ -377,7 +382,7 @@ import {
   TFXParagraphStyle,
 } from "@syndromatic/syncloudos/fx/text";
 
-export async function twoColumns(fontBytes: Uint8Array, story: string) {
+export async function twoColumns(fontBytes: NSEDataConvertible, story: string) {
   const font = await TFXFont.create(fontBytes, new TFXFontDescriptor({ size: 14 }));
   const paragraph = new TFXParagraphStyle({ alignment: "justified", paragraphSpacing: 8 });
   const text = new TFXAttributedString(story, [{ start: 0, end: story.length, font, paragraphStyle: paragraph }]);
@@ -405,7 +410,7 @@ new TFXRunDelegate({ width, ascent, descent, attachment: { image: GFXImage, acce
 
 The metrics are each from 0 to 32,768. The image must be an owned [GraphicsFX](graphics.md) `GFXImage` of at most 8 MiB. The accessibility label is required, non-blank and at most 4,096 units, because the object stands in for text that a screen reader would otherwise miss. Layout never runs application code. The delegate is a snapshot of these values, and the properties `width`, `ascent`, `descent` and `attachment` read them back.
 
-In an application, `useSynWareTextLayout().resolveRunDelegate(request)` builds a delegate from an image that belongs to one of your documents, and the client reports when the image becomes ready.
+In an application, `useTextLayout().resolveRunDelegate(request)` builds a delegate from an image that belongs to one of your documents, and the client reports when the image becomes ready.
 
 ### Ruby annotations
 
@@ -432,6 +437,7 @@ A ruby base is atomic: a line never breaks inside it, and ruby text cannot cross
 `layoutTFXRuby(input)` is the geometry the typesetter uses, exposed for renderers that place ruby themselves. It takes the position, widths, alignment, overhang, collision policy, direction, orientation and font metrics of the base and the ruby, and returns the offsets and extents (`baseInlineOffset`, `cellWidth`, `inlineOffset`, `crossOffset`, `crossMin`, `crossMax`, `width`). `tfxRubyGlyphOffsets(count, naturalWidth, targetWidth, alignment)` returns the per-glyph spacing that distributes ruby over a wider base.
 
 ```ts
+import type { NSEDataConvertible } from "@syndromatic/syncloudos/foundation";
 import {
   TFXAttributedString,
   TFXFont,
@@ -440,7 +446,7 @@ import {
   TFXTypesetter,
 } from "@syndromatic/syncloudos/fx/text";
 
-export async function furigana(fontBytes: Uint8Array) {
+export async function furigana(fontBytes: NSEDataConvertible) {
   const font = await TFXFont.create(fontBytes, new TFXFontDescriptor({ size: 24 }));
   const text = "漢字を読む";
   const annotated = new TFXAttributedString(text, [
@@ -541,11 +547,11 @@ planner.plan(input, containers): Promise<TFXTextLayoutResult>
 
 ## In a SynWare
 
-`useSynWareTextLayout()` returns a client that owns fonts for your application and reports when they are ready. It is a `TFXFontClient` with a few extras.
+`useTextLayout()` returns a client that owns fonts for your application and reports when they are ready. It is a `TFXFontClient` with a few extras.
 
 | Member | Description |
 | --- | --- |
-| `registerFont(bytes, descriptor, signal?)` | Registers font bytes and resolves with a `TFXFontRegistration`: `id`, `familyName`, `format` (`"truetype"`, `"opentype"`, `"woff"` or `"woff2"`), an independent `font` instance and `dispose()`. Disposing one registration never revokes another. |
+| `registerFont(bytes, descriptor, signal?)` | Accepts `NSEDataConvertible` font bytes and resolves with a `TFXFontRegistration`: `id`, `familyName`, `format` (`"truetype"`, `"opentype"`, `"woff"` or `"woff2"`), an independent `font` instance and `dispose()`. Disposing one registration never revokes another. |
 | `registerFontResource(relativeBundlePath, descriptor, signal?)` | Loads a font that ships inside your SynWare's `Resources` folder. The host resolves the path within your bundle only. |
 | `fontReadinessGeneration` | A counter that increases when a font becomes ready or is released. |
 | `subscribeFontReadiness(listener)` | Calls the listener with `{ registrationId, familyName, generation, state }` where `state` is `"ready"` or `"released"`. Returns an unsubscribe function. Redraw text when it fires. |
@@ -553,15 +559,15 @@ planner.plan(input, containers): Promise<TFXTextLayoutResult>
 | `attachmentReadinessGeneration`, `subscribeAttachmentReadiness(listener)` | The same readiness protocol for attachments. |
 | `segment(input)`, `layout(input, containers?)`, `measure(input)` | Text segmentation, layout into containers and measurement. Used by NSE's `NSELayoutManager`. |
 
-`TFXFontRegistration`, `TFXFontReadinessChange`, `TFXFontFaceRegistration`, `TFXFontFaceRegistrationRequest`, `TFXFontResourceMimeType`, `TFXPackagedFontResource`, `TFXPackagedFontResourceLoader`, `TFXRunDelegateRequest` and `TFXRunDelegateReadinessChange` are the types of these requests and events. The host implements the loader and face-registration types.
+`TFXFontRegistration`, `TFXFontReadinessChange`, `TFXFontFaceRegistration`, `TFXFontFaceRegistrationRequest`, `TFXFontResourceMimeType`, `TFXPackagedFontResource`, `TFXPackagedFontResourceLoader`, `TFXRunDelegateRequest` and `TFXRunDelegateReadinessChange` are the types of these requests and events. The host implements the loader and face-registration types. `TFXFontFaceRegistrationRequest.bytes` accepts `NSEDataConvertible`; a `TFXPackagedFontResourceLoader` resolves with `{ bytes: NSEData, mimeType: TFXFontResourceMimeType }`. MIME metadata stays beside the immutable data.
 
 ```tsx
 import { useEffect, useState } from "react";
 import { TFXFontDescriptor, type TFXFontRegistration } from "@syndromatic/syncloudos/fx/text";
-import { useSynWareTextLayout } from "@syndromatic/syncloudos/sdk";
+import { useTextLayout } from "@syndromatic/syncloudos/sdk";
 
 export function useBundledFont(path: string, size: number) {
-  const textLayout = useSynWareTextLayout();
+  const textLayout = useTextLayout();
   const [registration, setRegistration] = useState<TFXFontRegistration | null>(null);
 
   useEffect(() => {
