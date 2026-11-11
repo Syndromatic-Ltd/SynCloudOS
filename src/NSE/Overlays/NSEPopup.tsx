@@ -295,7 +295,7 @@ export function NSEPopup({
   // changes modality. Reparenting the surface would remount an unsaved editor.
   const portalContents = createElement(
       "div",
-      { className: isModal ? "nse-overlay-popup-modal-host" : "nse-overlay-popup-host", ...appearanceProjection },
+      { className: isModal ? "nse-overlay-popup-modal-host" : "nse-overlay-popup-host", ...appearanceProjection, "data-nse-role": isModal ? "modal" : undefined },
       createElement("div", {
         className: "nse-overlay-popup-backdrop",
         hidden: !isModal,

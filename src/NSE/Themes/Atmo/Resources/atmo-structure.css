@@ -1051,23 +1051,23 @@
   gap: 8px;
 }
 
-:where(:scope) [data-nse-part="image"]:where([data-nse-part="cell-content"] > *),
-:where(:scope):is([data-nse-part="image"]:where([data-nse-part="cell-content"] > *)),
+:where(:scope) [data-nse-part="image"]:where([data-nse-part="cell-content"]>*),
+:where(:scope):is([data-nse-part="image"]:where([data-nse-part="cell-content"]>*)),
 :where(:scope) .nse-extended-option-icon img,
 :where(:scope):is(.nse-extended-option-icon) img {
   width: 20px;
   height: 20px;
 }
 
-:where(:scope) [data-nse-part="image"]:where([data-nse-part="cell-content"] > *),
-:where(:scope):is([data-nse-part="image"]:where([data-nse-part="cell-content"] > *)) {
+:where(:scope) [data-nse-part="image"]:where([data-nse-part="cell-content"]>*),
+:where(:scope):is([data-nse-part="image"]:where([data-nse-part="cell-content"]>*)) {
   display: inline-grid;
   flex: 0 0 auto;
   place-items: center;
 }
 
-:where(:scope) [data-nse-part="label"]:where([data-nse-part="cell-content"] > *),
-:where(:scope):is([data-nse-part="label"]:where([data-nse-part="cell-content"] > *)) {
+:where(:scope) [data-nse-part="label"]:where([data-nse-part="cell-content"]>*),
+:where(:scope):is([data-nse-part="label"]:where([data-nse-part="cell-content"]>*)) {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1286,14 +1286,6 @@
 :where(:scope) [data-nse-part="cancel"]:where([data-nse-control="search-field"] *),
 :where(:scope):is([data-nse-part="cancel"]:where([data-nse-control="search-field"] *)) {
   display:block;
-}
-
-:where(:scope) .nse-control-search-affordance[data-state="search"],
-:where(:scope):is(.nse-control-search-affordance[data-state="search"]) {
-  background-image: var(--nse-atmo-search-affordance-icon);
-  transform: rotate(90deg) scale(0.8);
-  opacity: 0.62;
-  cursor: text;
 }
 
 :where(:scope) [data-nse-part="cancel"]:where([data-nse-control="search-field"] *)[data-nse-part="cancel"],
@@ -1619,8 +1611,8 @@
   background-size: 128px 1536px;
 }
 
-:where(:scope) [data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]:is([data-nse-control-size="small"], [data-nse-control-size="large"]):not([data-nse-indeterminate]))[data-nse-appearance-name="aqua"],
-:where(:scope):is([data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]:is([data-nse-control-size="small"], [data-nse-control-size="large"]):not([data-nse-indeterminate]))[data-nse-appearance-name="aqua"]) {
+:where(:scope) [data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]:is([data-nse-control-size="small"],[data-nse-control-size="large"]):not([data-nse-indeterminate]))[data-nse-appearance-name="aqua"],
+:where(:scope):is([data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]:is([data-nse-control-size="small"],[data-nse-control-size="large"]):not([data-nse-indeterminate]))[data-nse-appearance-name="aqua"]) {
   filter: invert(1) saturate(0.2) brightness(0.72);
 }
 
@@ -2210,8 +2202,8 @@
   overflow: auto;
 }
 
-:where(:scope) .nse-overlay-popup-modal-host>.nse-overlay-popup-backdrop,
-:where(:scope):is(.nse-overlay-popup-modal-host)>.nse-overlay-popup-backdrop {
+:where(:scope) :scope:where([data-nse-role="modal"])>[data-nse-part="backdrop"]:where([data-nse-chrome="standard"] *):where(:not([data-nse-control="system-alert"])):where(:not([data-nse-control="folder-presentation"] > *)),
+:where(:scope):is(:scope:where([data-nse-role="modal"]))>[data-nse-part="backdrop"]:where([data-nse-chrome="standard"] *):where(:not([data-nse-control="system-alert"])):where(:not([data-nse-control="folder-presentation"] > *)) {
   background: rgba(0, 0, 0, 0.26);
 }
 
@@ -3552,7 +3544,7 @@
 
 
 
-:where(:scope) [data-nse-control="stepper"][data-state]>[data-nse-part="bezel"]>:where(:is([data-nse-part="increment"],[data-nse-part="decrement"])),
+:where(:scope) [data-nse-control="stepper"][data-nse-part="content"]>[data-nse-part="bezel"]>:where(:is([data-nse-part="increment"],[data-nse-part="decrement"])),
 :where(:scope):is([data-nse-control="stepper"][data-state])>[data-nse-part="bezel"]>button {
   position: relative;
   inline-size: auto;
@@ -4025,7 +4017,7 @@
    family's paint. Equal physical edge gaps follow the viewport safe area;
    desktop anchored menus and the existing wide modal policy stay unchanged. */
 @media (max-width: 639px), (max-height: 419px) {
-  .nse-overlay-popup:where([data-nse-part="surface"]):is(.nse-overlay-popup--menu,.nse-overlay-popup--context-menu,.nse-overlay-popup--submenu,.nse-overlay-popup--listbox)[data-nse-presentation="sheet"] {
+  [data-nse-part="surface"]:where(:not([data-nse-control="tooltip"])):where([data-nse-part="surface"]):is([data-nse-style]:where(:is([data-nse-style="menu"],[data-nse-style="application-menu"])):where([data-nse-part="surface"]),[data-nse-style="context-menu"]:where([data-nse-part="surface"]),[data-nse-style="submenu"]:where([data-nse-part="surface"]),[data-nse-style="listbox"]:where([data-nse-part="surface"]))[data-nse-presentation="sheet"] {
     inset-block-start: auto;
     inset-block-end: max(8px, var(--nse-screen-safe-area-inset-bottom, 0px));
     inset-inline: max(8px, var(--nse-screen-safe-area-inset-left, 0px)) max(8px, var(--nse-screen-safe-area-inset-right, 0px));

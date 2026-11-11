@@ -107,7 +107,7 @@
 }
 
 /* An appearance boundary supplies readable body ink as well as control paint. */
-:where(.nse-appearance-provider:scope) {
+:where(:scope:where([data-nse-role="appearance-provider"]):scope) {
   color: var(--nse-atmo-content-ink);
 }
 
@@ -1042,11 +1042,6 @@
 
 /* Search/clear affordance glyphs → inline SVG (menuitem-arrow chevron and
    the glassy clear circle), traced from the sprites. */
-:scope .nse-control-search-affordance[data-state="search"],
-:scope:is(.nse-control-search-affordance[data-state="search"]),
-:scope.nse-control-search-affordance[data-state="search"] {
-  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="%23e4e4e4"/><stop offset="1" stop-color="%23a3a3a3"/></linearGradient></defs><path d="M9 5.5 L16 12 L9 18.5" fill="none" stroke="url(%23g)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>');
-}
 
 
 
@@ -4715,9 +4710,9 @@
 }
 
 /* A window blocked by its sheet or modal child cannot be closed or zoomed. */
-:scope [data-nse-control="window"]:where([data-nse-part="background"])[data-nse-enabled="false"] [data-nse-part="bezel"]:where([data-nse-control="button"] *):where([data-nse-part="cell"] > *),
-:scope:is([data-nse-control="window"]:where([data-nse-part="background"])[data-nse-enabled="false"]) [data-nse-part="bezel"]:where([data-nse-control="button"] *):where([data-nse-part="cell"] > *),
-:scope[data-nse-control="window"]:where([data-nse-part="background"])[data-nse-enabled="false"] [data-nse-part="bezel"]:where([data-nse-control="button"] *):where([data-nse-part="cell"] > *) {
+:scope [data-nse-control="window"]:where([data-nse-part="background"])[data-nse-enabled="false"] [data-nse-part="bezel"]:where([data-nse-control="button"] *):where([data-nse-part="cell"]>*),
+:scope:is([data-nse-control="window"]:where([data-nse-part="background"])[data-nse-enabled="false"]) [data-nse-part="bezel"]:where([data-nse-control="button"] *):where([data-nse-part="cell"]>*),
+:scope[data-nse-control="window"]:where([data-nse-part="background"])[data-nse-enabled="false"] [data-nse-part="bezel"]:where([data-nse-control="button"] *):where([data-nse-part="cell"]>*) {
   opacity: 0.45;
 }
 
@@ -4859,15 +4854,15 @@
 
 
 
-:scope .nse-media-grid-item[data-selected="true"],
-:scope:is(.nse-media-grid-item[data-selected="true"]),
-:scope.nse-media-grid-item[data-selected="true"] {
+:scope [data-nse-part="media-item"][data-nse-selected],
+:scope:is([data-nse-part="media-item"][data-nse-selected]),
+:scope[data-nse-part="media-item"][data-nse-selected] {
   outline: none;
 }
 
-:scope .nse-media-grid-thumbnail,
-:scope:is(.nse-media-grid-thumbnail),
-:scope.nse-media-grid-thumbnail {
+:scope [data-nse-part="image"]:where([data-nse-part="media-item"] > *),
+:scope:is([data-nse-part="image"]:where([data-nse-part="media-item"] > *)),
+:scope[data-nse-part="image"]:where([data-nse-part="media-item"] > *) {
   border-radius: 4px;
 }
 
@@ -5883,14 +5878,6 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
   font-size:max(11px,calc(var(--nse-control-height,26px)*0.5));
 }
 
-
-
-:scope .nse-control-search-field[data-size] .nse-control-search-affordance[data-state="search"],
-:scope:is(.nse-control-search-field[data-size]) .nse-control-search-affordance[data-state="search"],
-:scope.nse-control-search-field[data-size] .nse-control-search-affordance[data-state="search"] {
-  transform: rotate(90deg);
-}
-
 /* The push button, sized. controlSize="small" or an explicit height sets
    --nse-control-height (24px when small); every measure of the vector face is
    that band's fraction of the regular 52px one (insets 3/52 and 5/52, rings
@@ -6375,9 +6362,9 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
 
 
 /* Over the compact strip (a short content border), which stays light in both modes. */
-:scope .nse-window-chrome-content[data-content-border="small"] .nse-control-label-field[data-background-style="raised"],
-:scope:is(.nse-window-chrome-content[data-content-border="small"]) .nse-control-label-field[data-background-style="raised"],
-:scope.nse-window-chrome-content[data-content-border="small"] .nse-control-label-field[data-background-style="raised"] {
+:scope [data-nse-part="content-view"][data-nse-content-border="small"] [data-nse-control="text-field"]:where([data-nse-part="title"])[data-nse-background-style="raised"],
+:scope:is([data-nse-part="content-view"][data-nse-content-border="small"]) [data-nse-control="text-field"]:where([data-nse-part="title"])[data-nse-background-style="raised"],
+:scope[data-nse-part="content-view"][data-nse-content-border="small"] [data-nse-control="text-field"]:where([data-nse-part="title"])[data-nse-background-style="raised"] {
   color: #2b333c;
   font-weight: 700;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.62);
@@ -6414,9 +6401,9 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
   );
 }
 
-:scope .nse-toolbar[data-nse-toolbar-size-mode="small"],
-:scope:is(.nse-toolbar[data-nse-toolbar-size-mode="small"]),
-:scope.nse-toolbar[data-nse-toolbar-size-mode="small"] {
+:scope [data-nse-control="toolbar"]:where([data-nse-part="background"]):where(:not([data-nse-position]))[data-nse-toolbar-size-mode="small"],
+:scope:is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where(:not([data-nse-position]))[data-nse-toolbar-size-mode="small"]),
+:scope[data-nse-control="toolbar"]:where([data-nse-part="background"]):where(:not([data-nse-position]))[data-nse-toolbar-size-mode="small"] {
   --nse-atmo-bar-h: 36px;
 }
 
@@ -6734,7 +6721,7 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
    size, so all of them are already loaded before any control needs one. It
    paints nothing, takes no space and is not interactive. Add any new
    --nse-atmo-svg-* state here; atmo-vector-coverage enforces the list. */
-:scope.nse-appearance-provider::before {
+:scope:where([data-nse-role="appearance-provider"])::before {
   content: "";
   position: absolute;
   inline-size: 0;
