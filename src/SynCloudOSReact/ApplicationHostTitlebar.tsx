@@ -51,9 +51,9 @@ export function ApplicationHostTitlebar({ title, iconSrc, material, scheme, menu
     <div className="syncloudos-application-host-frame" style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column" }}>
       <HostTopBar title={title} iconSrc={iconSrc} material={material} scheme={scheme} menuStore={menuStore} menuLabel={menuLabel}
         center={(
-          <span className="nse-window-titlebar-document">
+          <span data-nse-part="document" className="nse-window-titlebar-document">
             <span ref={setLeadingAccessories} className="nse-window-titlebar-accessory-slot" data-layout-attribute="leading" />
-            <span className="nse-window-titlebar-title" data-document-edited={document?.documentEdited || undefined}>
+            <span data-nse-part="title" className="nse-window-titlebar-title" data-document-edited={document?.documentEdited || undefined}>
               {document?.title && document.toolbarStyle !== "expanded" ? <span className="nse-window-titlebar-title-text">{document.title}</span> : null}
               {document?.subtitle && document.toolbarStyle !== "expanded" ? <span className="nse-window-titlebar-subtitle">{document.subtitle}</span> : null}
               <span ref={setTrailingAccessories} className="nse-window-titlebar-accessory-slot" data-layout-attribute="trailing" />
@@ -75,6 +75,7 @@ function HostTopBar({ title, iconSrc, material, scheme, menuStore, menuLabel, ce
       title={title}
       titlePlacement="leading"
       className="nse-document-titlebar"
+      documentTitlebar
       variant={material === "metal" ? "atmoMetal" : "atmoCumulus"}
       scheme={scheme}
       leading={iconSrc ? <img src={iconSrc} width="20" height="20" alt="" className="syncloudos-application-host-icon" /> : undefined}

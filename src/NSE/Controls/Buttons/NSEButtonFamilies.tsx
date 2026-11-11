@@ -61,6 +61,9 @@ export function NSEToolButtonGroup({
       grouped={grouped}
       aria-label={label}
       data-size={capsuleSizeAttribute({ controlSize, height })}
+      data-nse-type="tool-button-group"
+      data-nse-control-size={controlSize ?? "regular"}
+      data-nse-height={height === undefined ? undefined : String(height)}
       style={sizedControlStyle(style, height, undefined)}
       {...props}
     >

@@ -96,6 +96,8 @@ export interface NSETopBarProps {
   titlePlacement?: "centre" | "leading";
   center?: ReactNode;
   className?: string;
+  /** @internal The bar is a document window's titlebar: the window's represented document title sits in it. */
+  documentTitlebar?: boolean;
   smoothSurface?: NSESmoothSurfaceRequest;
   style?: CSSProperties;
 }

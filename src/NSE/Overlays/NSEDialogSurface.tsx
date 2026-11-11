@@ -34,9 +34,9 @@ export function NSEDialogSurface({
   ...props
 }: NSEDialogSurfaceProps) {
   return (
-    <section className={classes("nse-control-dialog-surface", className)} data-variant={variant} {...props}>
-      {title ? <div className="nse-control-dialog-title">{title}</div> : null}
-      <div className="nse-control-dialog-inner">{children}</div>
+    <section className={classes("nse-control-dialog-surface", className)} data-nse-control="system-alert" data-nse-part="bezel" data-nse-style={variant} data-variant={variant} {...props}>
+      {title ? <div data-nse-part="title" className="nse-control-dialog-title">{title}</div> : null}
+      <div data-nse-part="content" className="nse-control-dialog-inner">{children}</div>
     </section>
   );
 }

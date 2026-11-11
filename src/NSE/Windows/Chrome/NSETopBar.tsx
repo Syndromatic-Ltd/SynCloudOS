@@ -120,7 +120,8 @@ function NSETopBarMetal({
   titleAction = null,
   titlePlacement = "centre",
   center,
-  className = ""
+  className = "",
+  documentTitlebar = false
 }: NSETopBarProps) {
   const header = useRef<HTMLElement>(null);
   useNSEWindowChromeElement(header, "top", true);
@@ -166,7 +167,7 @@ function NSETopBarMetal({
 
   return (
     <header
-      data-nse-control="window" data-nse-part="header" data-nse-chrome="metal"
+      data-nse-control="window" data-nse-part="header" data-nse-chrome="metal" data-nse-role={documentTitlebar ? "document" : undefined}
       ref={header}
       className={`nse-app-topbar nse-app-topbar-metal ${className}`.trim()}
       data-variant="atmoMetal"
@@ -226,7 +227,7 @@ function NSETopBarCumulus(props: NSETopBarProps) {
   );
 
   return (
-    <header data-nse-control="window" data-nse-part="header" data-nse-chrome="standard" ref={header} className={`nse-app-topbar ${surfaceProps.className ?? ""}`.trim()} data-variant="atmoCumulus" style={surfaceProps.style as CSSProperties | undefined}>
+    <header data-nse-control="window" data-nse-part="header" data-nse-chrome="standard" data-nse-role={props.documentTitlebar ? "document" : undefined} ref={header} className={`nse-app-topbar ${surfaceProps.className ?? ""}`.trim()} data-variant="atmoCumulus" style={surfaceProps.style as CSSProperties | undefined}>
       <div className="nse-app-topbar-base" aria-hidden="true">
         <span className="nse-app-topbar-base-glass" />
       </div>

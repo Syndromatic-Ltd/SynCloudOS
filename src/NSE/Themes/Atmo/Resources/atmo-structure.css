@@ -1543,8 +1543,8 @@
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
-:where(:scope) .nse-control-dialog-surface,
-:where(:scope):is(.nse-control-dialog-surface) {
+:where(:scope) [data-nse-style]:where([data-nse-control="system-alert"][data-nse-part="bezel"]),
+:where(:scope):is([data-nse-style]:where([data-nse-control="system-alert"][data-nse-part="bezel"])) {
   min-width: min(340px, 100%);
   border: 24px solid transparent;
   border-image: var(--nse-atmo-popup) 24 fill stretch;
@@ -1552,8 +1552,8 @@
   filter: drop-shadow(0 16px 28px rgba(0, 0, 0, 0.32));
 }
 
-:where(:scope) .nse-control-dialog-title,
-:where(:scope):is(.nse-control-dialog-title) {
+:where(:scope) [data-nse-part="title"]:where([data-nse-control="system-alert"][data-nse-style] > *),
+:where(:scope):is([data-nse-part="title"]:where([data-nse-control="system-alert"][data-nse-style] > *)) {
   /* The plate starts 7-8px inside the border box; title and body sit 12px
      in from it (24px border less 4px), not on its edge. */
   margin: -8px -4px 8px;
@@ -1561,8 +1561,8 @@
   font-weight: 700;
 }
 
-:where(:scope) .nse-control-dialog-inner,
-:where(:scope):is(.nse-control-dialog-inner) {
+:where(:scope) [data-nse-part="content"]:where([data-nse-control="system-alert"][data-nse-style] > *),
+:where(:scope):is([data-nse-part="content"]:where([data-nse-control="system-alert"][data-nse-style] > *)) {
   display: grid;
   gap: 8px;
   margin: -7px -4px;
@@ -3883,14 +3883,14 @@
 }
 
 :where(:scope) [data-nse-control="font-panel"]>:where([data-nse-part="notice"]):is([data-nse-part="error"],[data-nse-part="notice"]),
-:where(:scope):is([data-nse-control="font-panel"])>:where(:is([data-nse-part="notice"], [data-nse-part="error"], [data-nse-part="preview-description"])):is([data-nse-part="error"],[data-nse-part="notice"]) {
+:where(:scope):is([data-nse-control="font-panel"])>:where(:is([data-nse-part="notice"],[data-nse-part="error"],[data-nse-part="preview-description"])):is([data-nse-part="error"],[data-nse-part="notice"]) {
   margin: 0 var(--nse-font-panel-inset) var(--nse-font-panel-inset);
   font-size: 11px;
   font-weight: 600;
 }
 
 :where(:scope) [data-nse-control="font-panel"]>:where([data-nse-part="notice"])[data-nse-part="notice"]:empty,
-:where(:scope):is([data-nse-control="font-panel"])>:where(:is([data-nse-part="notice"], [data-nse-part="error"], [data-nse-part="preview-description"]))[data-nse-part="notice"]:empty {
+:where(:scope):is([data-nse-control="font-panel"])>:where(:is([data-nse-part="notice"],[data-nse-part="error"],[data-nse-part="preview-description"]))[data-nse-part="notice"]:empty {
   display: none;
 }
 
@@ -4051,10 +4051,10 @@
 /* ---- Window chrome: the document title bar and the window toolbar ---- */
 
 /* The document in a metal title bar: accessories 12px from the title; title, subtitle and trailing accessories 8px apart. */
-:where(:scope) .nse-window-titlebar-document,
-:where(:scope):is(.nse-window-titlebar-document) { gap: 12px; }
-:where(:scope) .nse-window-titlebar-title,
-:where(:scope):is(.nse-window-titlebar-title) { gap: 8px; }
+:where(:scope) [data-nse-part="document"],
+:where(:scope):is([data-nse-part="document"]) { gap: 12px; }
+:where(:scope) [data-nse-part="title"]:where([data-nse-part="document"] *),
+:where(:scope):is([data-nse-part="title"]:where([data-nse-part="document"] *)) { gap: 8px; }
 /* The subtitle is a status capsule. */
 :where(:scope) [data-nse-part="subtitle"]:where([data-nse-control="window"] *),
 :where(:scope):is([data-nse-part="subtitle"]:where([data-nse-control="window"] *)) {
@@ -4088,13 +4088,13 @@
 :where(:scope):is(.nse-document-titlebar) .nse-app-topbar-title-arrow { flex: none; }
   :where(:scope) .nse-document-titlebar .nse-app-topbar-metal-centre,
 :where(:scope):is(.nse-document-titlebar) .nse-app-topbar-metal-centre { max-width: none; overflow: visible; }
-  :where(:scope) .nse-document-titlebar .nse-window-titlebar-title,
-:where(:scope):is(.nse-document-titlebar) .nse-window-titlebar-title { display: none; }
+  :where(:scope) [data-nse-role="document"]:where([data-nse-control="window"][data-nse-part="header"]) [data-nse-part="title"]:where([data-nse-part="document"] *),
+:where(:scope):is([data-nse-role="document"]:where([data-nse-control="window"][data-nse-part="header"])) [data-nse-part="title"]:where([data-nse-part="document"] *) { display: none; }
 }
 
 /* The window toolbar is a lit metal strip, edge to edge, with a soft fade at its foot. */
-:where(:scope) .nse-window-toolbar,
-:where(:scope):is(.nse-window-toolbar) {
+:where(:scope) [data-nse-part="toolbar"],
+:where(:scope):is([data-nse-part="toolbar"]) {
   min-height: 58px;
   padding: 3px 10px 2px;
   color: #1d1d1f;
@@ -4103,35 +4103,35 @@
   border-bottom: 1px solid rgba(0, 0, 0, 0.26);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
-:where(:scope) .nse-window-toolbar[data-mode="dark"],
-:where(:scope):is(.nse-window-toolbar[data-mode="dark"]) {
+:where(:scope) [data-nse-part="toolbar"][data-nse-colour-scheme-resolved="dark"],
+:where(:scope):is([data-nse-part="toolbar"][data-nse-colour-scheme-resolved="dark"]) {
   color: #ececee;
   background: linear-gradient(180deg, #3a3b3f 0%, #2d2e31 100%);
   border-bottom-color: #000;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 /* The strip is the toolbar's material, so the toolbar's own surface (which stops short of the strip's padding) is not drawn. */
-:where(:scope) .nse-window-toolbar::after,
-:where(:scope):is(.nse-window-toolbar::after) { content: ""; position: absolute; inset: auto 0 0; height: 27px; pointer-events: none; background: linear-gradient(to top, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0)); }
-:where(:scope) .nse-window-toolbar[data-mode="dark"]::after,
-:where(:scope):is(.nse-window-toolbar[data-mode="dark"]::after) { background: linear-gradient(to top, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0)); }
+:where(:scope) [data-nse-part="toolbar"]::after,
+:where(:scope):is([data-nse-part="toolbar"]::after) { content: ""; position: absolute; inset: auto 0 0; height: 27px; pointer-events: none; background: linear-gradient(to top, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0)); }
+:where(:scope) [data-nse-part="toolbar"][data-nse-colour-scheme-resolved="dark"]::after,
+:where(:scope):is([data-nse-part="toolbar"][data-nse-colour-scheme-resolved="dark"]::after) { background: linear-gradient(to top, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0)); }
 /* Bottom titlebar accessories continue the strip under the toolbar, which hands them its foot rule. */
-:where(:scope) .nse-window-titlebar-accessories,
-:where(:scope):is(.nse-window-titlebar-accessories) {
+:where(:scope) [data-nse-part="titlebar-accessories"],
+:where(:scope):is([data-nse-part="titlebar-accessories"]) {
   min-height: 30px;
   padding: 0 6px;
   color: #1d1d1f;
   background: #d9dbde;
   border-bottom: 1px solid rgba(0, 0, 0, 0.26);
 }
-:where(:scope) .nse-window-titlebar-accessories[data-mode="dark"],
-:where(:scope):is(.nse-window-titlebar-accessories[data-mode="dark"]) {
+:where(:scope) [data-nse-part="titlebar-accessories"][data-nse-colour-scheme-resolved="dark"],
+:where(:scope):is([data-nse-part="titlebar-accessories"][data-nse-colour-scheme-resolved="dark"]) {
   color: #ececee;
   background: #2d2e31;
   border-bottom-color: #000;
 }
-:where(:scope) .nse-window-toolbar:has(+.nse-window-titlebar-accessories),
-:where(:scope):is(.nse-window-toolbar:has(+.nse-window-titlebar-accessories)) { border-bottom-color: transparent; }
+:where(:scope) [data-nse-part="toolbar"]:has(+[data-nse-part="titlebar-accessories"]),
+:where(:scope):is([data-nse-part="toolbar"]:has(+[data-nse-part="titlebar-accessories"])) { border-bottom-color: transparent; }
 
 /* A chosen command fades the application menu out (nse-overlays.css) instead of retracting it. */
 :where(:scope) .nse-overlay-popup--application-menu[data-state="closing"][data-nse-menu-chosen] .nse-control-app-menu-surface,

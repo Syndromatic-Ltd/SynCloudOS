@@ -41,12 +41,12 @@ function Tooltip() {
   const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
   return <><button ref={setAnchor}>Anchor</button><NSETooltip id="contract-tooltip" open anchor={anchor} content="Help" /></>;
 }
-function Toolbar({ width, customising, borderless = false }: { width: number; customising: boolean; borderless?: boolean }) {
+function Toolbar({ width, customising, borderless = false, labelled = false }: { width: number; customising: boolean; borderless?: boolean; labelled?: boolean }) {
   const [controller] = useState(() => {
     const values = new Map<string, unknown>();
     const preferences = new NSEUserDefaultsController<NSEToolbarPreferences>({ namespace: "contract-toolbar", schema: { version: 1, defaults: { itemIds: ["save", "custom", "space", "flex", "separator"], displayMode: "icon-and-label", sizeMode: "regular" }, fields: { itemIds: { validate: (v: unknown): v is readonly string[] => Array.isArray(v) }, displayMode: { validate: (v: unknown): v is NSEToolbarPreferences["displayMode"] => typeof v === "string" }, sizeMode: { validate: (v: unknown): v is NSEToolbarPreferences["sizeMode"] => typeof v === "string" } }, migrations: [] }, defaults: defaultsFrom({ read: key => values.get(key) ?? null, write: (key, value) => { values.set(key, value); }, remove: key => { values.delete(key); } }) });
     const runtime: NSEToolbarRuntimePort = { signal: new AbortController().signal, commands: { getPresentationGeneration: () => ({ registryGeneration: 0, responderGeneration: 0 }), validateMany: async requests => new Map(requests.map(request => [request.key, { commandId: request.commandId, responderId: "contract", title: "Save", enabled: true, denied: false, hidden: false, state: "off" as const, stale: false }])), prepareDispatch: async () => ({ status: "cancelled", reason: "specimen" }), dispatch: async commandId => ({ status: "cancelled", commandId, operationId: "contract", reason: "specimen" }) } };
-    return new NSEToolbarController({ configuration: { identifier: "contract-toolbar", owner: { kind: "window", windowControllerId: "contract" }, allowedItemIds: ["save", "custom", "space", "flex", "separator"], defaultItemIds: ["save", "custom", "space", "flex", "separator"], displayMode: "icon-and-label", sizeMode: "regular" }, items: [{ kind: "command", id: "save", label: "Save", paletteLabel: "Save document", commandId: "save", icon: <span>S</span>, minimumWidth: 40, idealWidth: 54, ...(borderless ? { bordered: false } : {}) }, { kind: "custom", id: "custom", label: "Custom", minimumWidth: 40, idealWidth: 62, render: () => <span>Custom</span> }, { kind: "space", id: "space", width: 8 }, { kind: "flexible-space", id: "flex", minimumWidth: 12 }, { kind: "separator", id: "separator" }], preferences, runtime });
+    return new NSEToolbarController({ configuration: { identifier: "contract-toolbar", owner: { kind: "window", windowControllerId: "contract" }, allowedItemIds: ["save", "custom", "space", "flex", "separator"], defaultItemIds: ["save", "custom", "space", "flex", "separator"], displayMode: "icon-and-label", sizeMode: "regular" }, items: [{ kind: "command", id: "save", label: "Save", paletteLabel: "Save document", commandId: "save", icon: <span>S</span>, minimumWidth: 40, idealWidth: 54, ...(borderless ? { bordered: false } : {}) }, { kind: "custom", id: "custom", label: "Custom", minimumWidth: 40, idealWidth: 62, render: () => <span>Custom</span>, ...(labelled ? { showsLabel: true } : {}) }, { kind: "space", id: "space", width: 8 }, { kind: "flexible-space", id: "flex", minimumWidth: 12 }, { kind: "separator", id: "separator" }], preferences, runtime });
   });
   useEffect(() => () => controller.dispose(), [controller]);
   return <><NSEToolbarView composition="configured" controller={controller} width={width} interaction={{ parentResponderId: "contract" }} />{customising ? <NSEToolbarConfigurationSheet id="contract-toolbar-palette" open anchor={null} parentResponderId="contract" parentWindowControllerId={null} controller={controller} onOpenChange={noop} /> : null}</>;
@@ -63,6 +63,8 @@ import { createStaticPresentationTraits } from "../../../fixtures/presentationTr
 import { windowSpecimens } from "./windowSpecimens";
 import { MaterialProvider } from "../../../../src/NSE/Material/MaterialProvider";
 import { NSEView } from "../../../../src/NSE/Views/NSEView";
+import { ApplicationHostTitlebar } from "../../../../src/SynCloudOSReact/ApplicationHostTitlebar";
+import { createApplicationMenuStore } from "../../../../src/SynCloudOSReact/ApplicationMenuTrigger";
 import { NSEPopUpButton } from "../../../../src/NSE/Menus/NSEPopUpButton";
 import { NSEListItem } from "../../../../src/NSE/Controls/Selection/NSEListItem";
 import { NSEDatePicker } from "../../../../src/NSE/DateTime/Pickers/NSEDatePicker";
@@ -90,10 +92,12 @@ export const supplementalThemeCatalogue: readonly { id: string; ready?: string; 
   { id: "tooltip", render: () => <Tooltip /> },
   ...[50, 500].flatMap(width => [false, true].map(customising => ({ id: `configured-toolbar-${width}-${customising}`, render: () => <Toolbar width={width} customising={customising} /> }))),
   { id: "configured-toolbar-borderless", render: () => <Toolbar width={500} customising={false} borderless /> },
+{ id: "configured-toolbar-labelled", render: () => <Toolbar width={500} customising={false} labelled /> },
   { id: "menu-bar-open", activate: '[role="menubar"] [role="menuitem"]', render: () => <SpecimenMenuBar /> },
   { id: "application-menu-open", ready: '[data-nse-application-menu]', render: () => <SpecimenApplicationMenu open /> },
   { id: "application-menu-submenu", ready: '[data-nse-application-menu]', hover: '[data-nse-application-menu] [aria-haspopup]', render: () => <SpecimenApplicationMenu open id="specimen-app-submenu" /> },
   { id: "context-menu", context: '[data-specimen-context]', render: () => <SpecimenContextMenu /> },
+  ...(["metal", "cumulus"] as const).map(material => ({ id: `host-titlebar-${material}`, render: () => <ApplicationHostTitlebar title="Documents" iconSrc={null} material={material} scheme="light" menuStore={createApplicationMenuStore()} menuLabel="Documents"><p>Body</p></ApplicationHostTitlebar> })),
   { id: "view-layer-continuous", render: () => <NSEView cornerRadius={8} cornerCurve="continuous">Layer</NSEView> },
   { id: "view-layer-circular", render: () => <NSEView cornerRadius={8} cornerCurve="circular">Layer</NSEView> },
   { id: "surface-ink-light", render: () => <NSEView><section data-nse-surface-ink="light">Paper</section></NSEView> },  { id: "pop-up-native", bare: true, render: () => <NSEPopUpButton label="Zone" value="a" items={[{ value: "a", title: "A" }, { value: "b", title: "B" }]} onValueChange={noop} /> },
