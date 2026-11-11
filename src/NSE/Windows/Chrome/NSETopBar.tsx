@@ -52,6 +52,7 @@ function NSETopBarTitle({
   return (
     <NSELabelHelp label={typeof title === "string" && title !== titleAction.label ? `${title} — ${titleAction.label}` : titleAction.label}><button
       type="button"
+      data-nse-part="button"
       className="nse-app-topbar-title-button"
       data-selected={titleAction.selected ? "true" : "false"}
       aria-label={titleAction.label}
@@ -66,7 +67,7 @@ function NSETopBarTitle({
       }}
     >
       <span className="nse-app-topbar-title-text">{title}</span>
-      <span className="nse-app-topbar-title-arrow" aria-hidden="true">
+      <span data-nse-part="arrow" className="nse-app-topbar-title-arrow" aria-hidden="true">
         <span className="nse-app-topbar-title-arrow-glyph nse-app-topbar-title-arrow-right" />
         <span className="nse-app-topbar-title-arrow-glyph nse-app-topbar-title-arrow-down" />
       </span>
@@ -132,30 +133,30 @@ function NSETopBarMetal({
     : undefined;
 
   const main = (
-    <div className="nse-app-topbar-metal-main">
+    <div data-nse-part="body" className="nse-app-topbar-metal-main">
       <span className="nse-app-topbar-metal-grain" aria-hidden="true" />
       {leading !== undefined || leadingItems.length || leadingAccessory || leadingTitle ? (
-        <div className="nse-app-topbar-metal-cluster nse-app-topbar-metal-leading">
+        <div data-nse-part="leading" className="nse-app-topbar-metal-cluster nse-app-topbar-metal-leading">
           {leading !== undefined ? leadingLabelHelp(leading) : leadingItems.map((item) => (
             <NSETopBarMetalPill key={`${item.kind}-${item.label}`} item={item} position="left" />
           ))}
           {leadingAccessory}
           {leadingTitle ? (
-            <h1 className="nse-app-topbar-metal-title nse-app-topbar-metal-leading-title">
+            <h1 data-nse-part="title" className="nse-app-topbar-metal-title nse-app-topbar-metal-leading-title">
               <NSETopBarTitle title={title} titleAction={titleAction} />
             </h1>
           ) : null}
         </div>
       ) : null}
       {leadingTitle ? (
-        center !== undefined ? <div className="nse-app-topbar-metal-title nse-app-topbar-metal-centre">{center}</div> : null
+        center !== undefined ? <div data-nse-part="centre" className="nse-app-topbar-metal-title nse-app-topbar-metal-centre">{center}</div> : null
       ) : (
         <h1 className="nse-app-topbar-metal-title">
           <NSETopBarTitle title={title} center={center} titleAction={titleAction} />
         </h1>
       )}
       {trailing !== undefined || trailingItems.length || trailingAccessory ? (
-        <div className="nse-app-topbar-metal-cluster nse-app-topbar-metal-trailing">
+        <div data-nse-part="trailing" className="nse-app-topbar-metal-cluster nse-app-topbar-metal-trailing">
           {trailing !== undefined ? trailing : trailingItems.map(item => (
             <NSETopBarMetalPill key={`${item.kind}-${item.label}`} item={item} position="right" />
           ))}

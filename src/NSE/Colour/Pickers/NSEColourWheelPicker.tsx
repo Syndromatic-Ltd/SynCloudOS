@@ -113,7 +113,7 @@ export function NSEColourWheelPicker({ colour, disabled, fields = true, brightne
     "--nse-colour-channel-track": `linear-gradient(to right, #000, ${GFXColour.hsva({ h: draft.hsva.h, s: draft.hsva.s, v: 1, a: 1 }).toCSS()})`,
   };
 
-  return <div data-nse-control="colour-wheel" data-nse-part="bezel" data-nse-enabled={disabled ? "false" : undefined} data-state={disabled ? "disabled" : "ready"} data-brightness={brightnessPlacement}  style={wheelStyle}>
+  return <div data-nse-control="colour-wheel" data-nse-part="bezel" data-nse-enabled={disabled ? "false" : undefined} data-state={disabled ? "disabled" : "ready"} data-nse-brightness-placement={brightnessPlacement} data-brightness={brightnessPlacement}  style={wheelStyle}>
     <div role="slider" data-nse-part="wheel" aria-label="Colour hue and saturation" aria-disabled={disabled || undefined} aria-valuemin={0} aria-valuemax={360} aria-valuenow={Math.round(draft.hsva.h)} tabIndex={disabled ? -1 : 0}
       onPointerDown={(event) => { if (disabled) return; activePointer.current = event.pointerId; pointerOpening.current = colour; pointerElement.current = event.currentTarget; event.currentTarget.setPointerCapture?.(event.pointerId); updateFromPointer(event.currentTarget, event.clientX, event.clientY); }}
       onPointerMove={(event) => { if (!disabled && activePointer.current === event.pointerId) updateFromPointer(event.currentTarget, event.clientX, event.clientY); }}

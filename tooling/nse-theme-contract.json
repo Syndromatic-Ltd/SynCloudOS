@@ -320,7 +320,11 @@
         "wheel-surface"
       ],
       "states": [],
-      "variants": {}
+      "variants": {
+        "brightness-placement": [
+          "beside"
+        ]
+      }
     },
     "combo-box": {
       "parts": [
@@ -1562,6 +1566,8 @@
         "accessory",
         "background",
         "bezel",
+        "body",
+        "centre",
         "content",
         "document",
         "header",
