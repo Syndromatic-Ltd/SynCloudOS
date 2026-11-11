@@ -28,7 +28,7 @@ import { resolve } from "node:path";
 import React, { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance";
-import { atmoTheme } from "../../src/NSE/Themes/Atmo";
+import { atmoTheme } from "../../src/NSE/Appearance/atmo";
 import {
   NSEApplicationNavigationChromeController,
   NSEApplicationNavigationChromeProvider,

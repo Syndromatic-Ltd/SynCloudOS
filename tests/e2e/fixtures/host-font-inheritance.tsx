@@ -23,7 +23,7 @@ import { createRoot } from "react-dom/client";
 import { NSEButton } from "../../../src/NSE/Controls/Buttons/NSEButton";
 import { NSETopBar } from "../../../src/NSE/Windows/Chrome/NSETopBar";
 import "../../../src/NSE/public/styles.css";
-import "../../../src/NSE/Themes/Atmo/Resources/atmo.css";
+import "../../../src/NSE/Appearance/atmo-theme.css";
 import "../../../src/SynCloudOS/styles/runtime.css";
 
 function HostTypography() {

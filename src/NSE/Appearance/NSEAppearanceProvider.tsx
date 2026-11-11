@@ -27,7 +27,7 @@ import {
   type PropsWithChildren,
 } from "react";
 import { freezeNSETheme, type NSETheme } from "../Theme/NSETheme";
-import { atmoTheme } from "../Themes/Atmo/appearance";
+import { atmoTheme } from "./atmoTheme";
 import { projectNSEAppearance } from "./appearanceProjection";
 import type {
   NSEAppearanceServicePort,
@@ -40,11 +40,7 @@ import type {
 } from "./nseAppearanceTypes";
 import "../Structure/layers.css";
 import "../Structure/defaults.css";
-import "../Structure/controls.css";
-import "../Themes/Atmo/Resources/atmo-structure.css";
-import "../Themes/Atmo/Resources/atmo.css";
-import "../Themes/Atmo/Resources/chrome.css";
-import "../Themes/Atmo/Resources/window-titlebar.css";
+import "./atmo-theme.css";
 import "./nse-appearance.css";
 
 

@@ -26,7 +26,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance";
-import { atmoTheme } from "../../src/NSE/Themes/Atmo";
+import { atmoTheme } from "../../src/NSE/Appearance/atmo";
 import { NSEButton, NSEImageView, NSESearchField, NSESegmentedControl } from "../../src/NSE/public/controls";
 import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
 import { HFXHapticEngine } from "../../src/FX/HapticsFX/HFXHapticEngine";

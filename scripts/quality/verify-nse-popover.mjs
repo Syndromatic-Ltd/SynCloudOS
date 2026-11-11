@@ -10,7 +10,10 @@ const output = new URL("../../artifacts/nse-popover/", import.meta.url);
 const screenshotPath = name => fileURLToPath(new URL(name, output));
 await mkdir(output, { recursive: true });
 const bundle = await build({ entryPoints: ["tests/e2e/fixtures/nse-popover.tsx"], bundle: true, write: false, outdir: "artifacts/nse-popover", format: "iife", platform: "browser", jsx: "automatic", loader: { ".css": "empty" }, define: { "process.env.NODE_ENV": '"development"', "import.meta.env.DEV": "true" } });
-const css = (await Promise.all(["src/NSE/Overlays/nse-overlays.css", "src/NSE/Themes/Atmo/Resources/atmo-structure.css", "src/NSE/Themes/Atmo/Resources/atmo.css"].map(path => readFile(path, "utf8")))).join("\n");
+// Atmo as it loads: control structure, then every Atmo.scostheme stylesheet in theme.css order.
+const bundle = "src/Themes/Atmo.scostheme/Contents/Resources/";
+const atmoFiles = [...(await readFile(bundle + "theme.css", "utf8")).matchAll(/@import "\.\/([^"]+)";/gu)].map(match => bundle + match[1]);
+const css = (await Promise.all(["src/NSE/Overlays/nse-overlays.css", "src/NSE/Structure/controls.css", ...atmoFiles].map(path => readFile(path, "utf8")))).join("\n");
 const fixtureCSS = `body{margin:0;background:#9ba8b5;font:14px system-ui}h2{font-size:17px;margin:0 0 8px}p{margin:0 0 16px}label{display:grid;gap:6px}input{font:inherit;padding:7px;border-radius:5px;border:1px solid #999;background:#fff;color:#222}.done{margin-top:16px;float:right;padding:5px 22px;border:1px solid #5b6571;border-radius:5px;background:linear-gradient(#fcfcfc,#c9c9c9);color:#222}#anchor{border-radius:6px;border:1px solid #5b6571;background:linear-gradient(#fcfcfc,#c9c9c9)}.paper{padding:22px;background:#efe2c6;color:#55462d;font-family:Georgia,serif}.paper h2{font-size:20px}.nse-appearance-provider{min-height:100vh}`;
 const report = [];
 for (const [engine, launcher] of Object.entries({ chromium, firefox, webkit })) {

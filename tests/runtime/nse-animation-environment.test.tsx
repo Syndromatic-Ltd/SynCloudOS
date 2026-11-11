@@ -28,7 +28,7 @@ import {
   NSEAnimationEnvironmentProvider,
   useNSEAnimationEnvironment,
 } from "../../src/NSE/Animation/NSEAnimationEnvironment";
-// Atmo's curves and durations: internal, published as atmoMotion and NSEAnimationContext.current.
+// The framework's curves and durations, published as NSEAnimationContext.current.
 import { NSEAnimationDefaults } from "../../src/NSE/Appearance/NSEAnimationDefaults";
 import { useNSETraitCollection } from "../../src/NSE/Animation/useNSETraitCollection";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";

@@ -118,7 +118,7 @@ export const nseRegistry = [
     title: "Atmo",
     type: "appearance",
     description: "Canonical first-party Atmo appearance for NSE controls.",
-    files: ["src/NSE/Themes/Atmo/index.ts", "src/NSE/Themes/Atmo/Resources/atmo.css"]
+    files: ["src/NSE/Appearance/atmo.ts", "src/NSE/Appearance/atmo-theme.css"]
   }
 ] satisfies NSERegistryItem[];
 

@@ -19,10 +19,6 @@
  */
 
 import "../../Structure/layers.css";
-import "../../Structure/controls.css";
-import "./Resources/atmo-structure.css";
-import "./Resources/atmo.css";
-import "./Resources/chrome.css";
-import "./Resources/window-titlebar.css";
+import "../../Appearance/atmo-theme.css";
 export { atmoTheme } from "./appearance";
 export { atmoMotion } from "./motion";

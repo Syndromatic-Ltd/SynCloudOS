@@ -8,7 +8,7 @@ import { NSEView } from "../../src/NSE/Views/NSEView";
 import { NSEControlImage } from "../../src/NSE/Controls/Images/NSEControlImage";
 import { NSEImage } from "../../src/NSE/Controls/Images/NSEImageResource";
 import { LoginWindow } from "../../src/NSE/SystemUI/LoginWindow";
-import { atmoTheme } from "../../src/NSE/Themes/Atmo/appearance";
+import { atmoTheme } from "../../src/NSE/Appearance/atmoTheme";
 import { freezeNSETheme } from "../../src/NSE/Theme/NSETheme";
 import { nseThemeColourNames, nseThemeColourProperties } from "../../src/NSE/Theme/contract/colours";
 afterEach(cleanup);

@@ -59,16 +59,20 @@
       "replacement": "src/NSE/public/content.ts"
     },
     {
+      "find": "@syndromatic/syncloudos/nse/theme",
+      "replacement": "src/NSE/public/theme.ts"
+    },
+    {
       "find": "@syndromatic/syncloudos/nse/appearance",
       "replacement": "src/NSE/public/appearance.ts"
     },
     {
       "find": "@syndromatic/syncloudos/nse/themes/atmo",
-      "replacement": "src/NSE/Themes/Atmo/index.ts"
+      "replacement": "src/NSE/Appearance/atmo.ts"
     },
     {
       "find": "@syndromatic/syncloudos/nse/themes/atmo/styles.css",
-      "replacement": "src/NSE/Themes/Atmo/Resources/atmo.css"
+      "replacement": "src/NSE/Appearance/atmo-theme.css"
     },
     {
       "find": "@syndromatic/syncloudos/nse/text",
@@ -858,6 +862,7 @@
         "scripts/cappuccino/appearance/**",
         "src/NSE/Themes/**",
         "src/NSE/Themes/Atmo/**",
+        "src/Themes/**",
         "src/Appearance/**"
       ],
       "mayImportLayers": [
@@ -870,6 +875,7 @@
         "nse": [
           "src/NSE/NSE.ts",
           "src/NSE/Appearance/index.ts",
+          "src/NSE/Theme/NSETheme.ts",
           "src/NSE/Material/index.ts",
           "src/NSE/Material/tokens.ts"
         ]
@@ -958,7 +964,7 @@
         ],
         "appearance": [
           "src/NSE/Appearance/index.ts",
-          "src/NSE/Themes/Atmo/index.ts"
+          "src/NSE/Appearance/atmo.ts"
         ],
         "app-sdk": [
           "src/SynCloudOS/AppSDK/index.ts",
@@ -1132,7 +1138,7 @@
           "src/FX/TextFX/public.ts"
         ],
         "appearance": [
-          "src/NSE/Themes/Atmo/index.ts"
+          "src/NSE/Appearance/atmo.ts"
         ],
         "authentication-services": [
           "src/SynCloudOS/AuthenticationServices/index.ts"

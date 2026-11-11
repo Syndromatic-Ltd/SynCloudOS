@@ -31,7 +31,7 @@ import type { App as ShellApp } from "../App";
 import { ApplicationHost, applicationRecoveryError } from "./ApplicationHost";
 import { createApplicationHostHome, type ApplicationHostHome } from "./applicationHome";
 import { NSEAppearanceProvider, type NSETheme } from "../NSE/Appearance";
-import { atmoTheme } from "../NSE/Themes/Atmo";
+import { atmoTheme } from "../NSE/Appearance/atmo";
 import { NSERubberBandProvider } from "../NSE/Scroll";
 import { NSEAlertBackdrop } from "../NSE/SystemUI";
 import { SystemAlert } from "./SystemAlert";

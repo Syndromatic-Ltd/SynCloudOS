@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { nseThemeColourNames, nseThemeColourProperties } from "../../src/NSE/Theme/contract/colours";
-import atmoColours from "../../src/NSE/Themes/Atmo/colours.json";
+import definition from "../../src/Themes/Atmo.scostheme/Contents/Theme.json";
+const atmoColours = definition.colours;
 const expected = [
   "labelColour", "secondaryLabelColour", "tertiaryLabelColour", "quaternaryLabelColour",
   "textColour", "placeholderTextColour", "selectedTextColour", "textBackgroundColour", "selectedTextBackgroundColour", "unemphasisedSelectedTextColour", "unemphasisedSelectedTextBackgroundColour",

@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import { NSEAppearanceProvider } from "../../../../src/NSE/Appearance/NSEAppearanceProvider";
-import { atmoTheme } from "../../../../src/NSE/Themes/Atmo";
+import { atmoTheme } from "../../../../src/NSE/Appearance/atmo";
 import { NSEStandaloneControlHost } from "../../../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../../../fixtures/presentationTraits";
 import { themeBaselineCatalogue } from "./catalogue";

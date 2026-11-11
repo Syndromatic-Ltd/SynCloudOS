@@ -10,7 +10,7 @@ import { NotificationCentrePresenter } from "../../../../src/Webspring/Notificat
 import { NSEStandardWindowView } from "../../../../src/NSE/Windows/NSEStandardWindowView";
 import { NSEHUDWindowView } from "../../../../src/NSE/Windows/NSEHUDWindowView";
 import { NSEAppearanceProvider } from "../../../../src/NSE/Appearance/NSEAppearanceProvider";
-import { atmoTheme } from "../../../../src/NSE/Themes/Atmo";
+import { atmoTheme } from "../../../../src/NSE/Appearance/atmo";
 import { NSEWindowTitlebarHostContext } from "../../../../src/NSE/Windows/windowTitlebarContext";
 import type { WindowRecord } from "../../../../src/SynCloudOS/Windows";
 import type { NSEWindowToolbarStyle } from "../../../../src/NSE/Application/NSEWindowController";

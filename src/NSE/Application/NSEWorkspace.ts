@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { atmoWorkspaceArtwork } from "../Themes/Atmo/workspaceArtwork";
+import { atmoTheme } from "../Appearance/atmoTheme";
 
 /** NSWorkspace: shared file artwork lookup. Sources are directly usable by NSEImageView. */
 export class NSEWorkspace {
@@ -40,6 +40,6 @@ export class NSEWorkspace {
   }
 
   #art(slot: string, size: number, scale: number): string {
-    return atmoWorkspaceArtwork[`${slot}:${size}:${scale}`]!;
+    return atmoTheme.images[`${slot}:${size}`]!.files[scale === 2 ? "2x" : "1x"]!;
   }
 }

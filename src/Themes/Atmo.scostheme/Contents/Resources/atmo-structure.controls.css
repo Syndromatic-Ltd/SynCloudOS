@@ -1,32 +1,4 @@
-@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.core.css";
-@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.data.css";
-@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.boxes.css";
-@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.text.css";
-@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.values.css";
-@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.selection.css";
-@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo-structure.buttons.css";
-@layer nse.atmo {
-@scope ([data-nse-theme]) to ([data-nse-theme]) {
-/*
- * SynCloudOS
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
- *
- * Designed by Kavish Krishnakumar in Manchester.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
+/* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 /* Atmo control geometry, layout, native-control resets and paint slots.
  * The vector paint layer loads after this zero-specificity structure. */
 
@@ -655,12 +627,12 @@
   color: rgba(255, 255, 255, 0.78);
 }
 
-/* The dropdown menu is a non-scrolling frame; its inner .nse-control-menu-scroll scrolls and
+/* The dropdown menu is a non-scrolling frame; its inner the menu scroll element scrolls and
    bleeds into the frame so rows reach (and fade at) the absolute top/bottom edges. */
 
 /* Inner content strip the rubber-band hook translates; the scroll box clips the bounce. */
 
-/* The picker popup is a non-scrolling sprite frame; its inner .nse-control-picker-scroll scrolls,
+/* The picker popup is a non-scrolling sprite frame; its inner the picker scroll element scrolls,
    bleeds over the frame's top/bottom border, hides its scrollbar and fades at the edges, and
    rubber-bands — the same grammar as the dropdown menu. */
 
@@ -817,7 +789,7 @@
 
 /* AppMenu: a dark system menu fixed at the top-left of the screen that slides
    down (Heritage top:-2px left:4px). It supplies its own dark frame via
-   .nse-control-app-menu-surface, so the generic light popup frame + centering is stripped. */
+   the app menu surface element, so the generic light popup frame + centering is stripped. */
 
 /* Optional top-right placement (e.g. wired under the rightSlot / User Info button). */
 
@@ -1120,13 +1092,13 @@
 /* ============================================================================
    Generic menu engine: NSEMenu inside an NSEPopup (menu, submenu and context
    menu kinds) and NSEListboxPopup (picker lists) wear the Atmo system-menu and
-   picker-list boxes. The metrics are the .nse-control-menu / picker-list
+   picker-list boxes. The metrics are the the menu element / picker-list
    grammar above: a transparent 30/28/35 (menu) or 19px (list) layout border
    that the frame art owns, rows that bleed back over the side frame, 42px
    rows with a centre-weighted divider, trailing check and chevron. Only the
-   popup SURFACE is framed; the inner .nse-menu is transparent and scrolls, so
+   popup SURFACE is framed; the inner the menu element is transparent and scrolls, so
    the frame and its shadow never scroll away or clip.
-   The application menu keeps its own surface (.nse-overlay-popup--application-menu).
+   The application menu keeps its own surface (the overlay popup  application menu element).
    ========================================================================= */
 [data-nse-part="surface"]:where(:not([data-nse-control="tooltip"])):where([data-nse-part="surface"]):is([data-nse-style]:where(:is([data-nse-style="menu"],[data-nse-style="application-menu"])):where([data-nse-part="surface"]),[data-nse-style="submenu"]:where([data-nse-part="surface"]),[data-nse-style="context-menu"]:where([data-nse-part="surface"])):not([data-nse-style="application-menu"]:where([data-nse-part="surface"])) {
   /* Border-box: 180px of rows plus the 56px of side frame. */
@@ -1300,7 +1272,7 @@
 
 /* ============================================================================
    Popup panels: NSEPopup's popover and action-sheet surfaces take the popup
-   panel's geometry (24px frame, title and inner insets), as .nse-control-popup
+   panel's geometry (24px frame, title and inner insets), as the popup element
    did. The surface keeps overflow visible so the painted frame is not clipped;
    the content scrolls instead. At desktop sizes a modal sheet presents as a
    centred panel over a dimmed backdrop; compact viewports keep the bottom
@@ -2608,8 +2580,4 @@
 :where(:scope) [data-nse-part="title-measurement"]:where([data-nse-control="button"] *),
 :where(:scope):is([data-nse-part="title-measurement"]:where([data-nse-control="button"] *)) {
   padding-inline-end: 13px;
-}
-
-}
-
 }

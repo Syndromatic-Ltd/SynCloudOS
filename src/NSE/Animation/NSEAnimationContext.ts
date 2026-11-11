@@ -29,8 +29,7 @@ type NSEAnimationTimingFunction = Extract<AFXAnimationTiming, { readonly kind: "
 /**
  * NSAnimationContext: the duration and timing function NSE animates with, and whether views
  * animate changes implicitly. Use `NSEAnimationContext.current` when you start your own AnimationFX
- * animation so it moves as the system's do; the curves themselves come from the theme (Atmo's are
- * `atmoMotion`).
+ * animation so it moves as the system's do. Motion is framework-owned: themes do not change it.
  */
 export class NSEAnimationContext {
   static readonly #default = new NSEAnimationContext(NSEAnimationDefaults.durationSeconds.standard, NSEAnimationDefaults.easing.standard, false);
