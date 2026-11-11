@@ -192,7 +192,7 @@ describe("framework finite-work settlement", () => {
     const workArea = Object.freeze({ width: 1024, height: 768, safeArea: Object.freeze({ top: 0, right: 0, bottom: 0, left: 0 }) });
     const presentation = Object.freeze({
       contentBounds: Object.freeze({ x: 0, y: 0, width: 1024, height: 768 }),
-      safeAreaInsets: Object.freeze({ top: 0, right: 0, bottom: 0, left: 0 }),
+      safeAreaInsets: Object.freeze({ blockStart: 0, inlineEnd: 0, blockEnd: 0, inlineStart: 0 }),
       virtualKeyboardInset: 0,
       horizontalSizeClass: "regular" as const,
       verticalSizeClass: "regular" as const,
