@@ -65,6 +65,7 @@ export function NSEApplicationMenu({ model, controller, overlay, open, anchor, t
       kind="menu"
       presentationMode="viewport-block-start-inline-end"
       viewportCornerBleed={applicationMenuFrameBleed}
+      appearance="application-menu"
       className="nse-overlay-popup--application-menu"
       exitDuration={160}
       restoreFocus={false}

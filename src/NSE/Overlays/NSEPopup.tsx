@@ -260,6 +260,7 @@ export function NSEPopup({
     "div",
     {
       ...overlay.surfaceProps,
+      "data-nse-style": chrome === "standard" ? kind : chrome,
       ...htmlAttributes,
       ...appearanceProjection,
       "data-nse-theme": undefined,
@@ -274,7 +275,6 @@ export function NSEPopup({
         style: { ...appearanceProjection.style, ...htmlAttributes.style, "--nse-popover-spring": nsePopoverSpringEasing },
       } : {}),
       className: surfaceClassName,
-      "data-nse-style": chrome === "standard" ? kind : chrome,
       role: surfaceRole,
       "aria-modal": isModal ? true : undefined,
       "aria-labelledby": labelledBy ?? (title && !htmlAttributes["aria-label"] ? titleId : undefined),
