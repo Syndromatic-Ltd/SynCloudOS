@@ -1,0 +1,12 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/chronosphere/chronosphere-packed-consumer.test.ts tests/runtime/foundation-packed-consumer.test.ts tests/runtime/fx/app-attribution-dev.test.ts tests/runtime/fx/app-attribution-packed.test.ts tests/runtime/fx/bluetooth-packed.test.ts tests/runtime/fx/contacts-packed.test.ts tests/runtime/fx/dispatch-packed.test.ts tests/runtime/fx/hooks-packed.test.ts tests/runtime/fx/network-packed.test.ts tests/runtime/fx/nfc-packed.test.ts tests/runtime/fx/pass-packed.test.ts tests/runtime/fx/speech-packed.test.ts tests/runtime/fx/xr-packed.test.ts tests/runtime/managed-typography-packed-consumer.test.ts tests/runtime/nse-file-browser-packed.test.ts tests/runtime/project-conventions-packed.test.ts tests/runtime/synware-public-api-repairs-packed.test.ts --reporter=dot
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+···················
+
+ Test Files  17 passed (17)
+      Tests  19 passed (19)
+   Start at  20:18:31
+   Duration  275.22s (transform 159ms, setup 158ms, import 448ms, tests 520.14s, environment 1ms)
+
