@@ -35,7 +35,7 @@ export const nseThemeVariants = Object.freeze([
   "bezel-style", "control-size", "segment-style", "box-type", "toolbar-style", "chrome", "button-type", "slider-type",
   "login-presentation", "notification-presentation", "appearance-name", "key-equivalent", "has-destructive-action", "image-position",
   "sort-direction", "selection-highlight-style", "highlight-style", "material", "transparent", "custom-fill", "custom-border", "shadow", "shadow-suppressed", "validation", "value-state", "revealed", "indeterminate", "height", "expanded", "orientation", "alignment", "position", "placement", "flow", "style", "role", "type", "edge", "level",
-  "pulls-down", "title-position", "border-type", "image-scaling", "text-role", "text-colour", "background-style", "editable", "date-picker-style", "date-picker-mode", "date-picker-elements", "navigation-placement", "navigation-flow", "distribution", "view-layer", "corner-curve", "surface-ink",
+  "pulls-down", "title-position", "border-type", "image-scaling", "text-role", "text-colour", "background-style", "editable", "date-picker-style", "date-picker-mode", "date-picker-elements", "navigation-placement", "navigation-flow", "distribution", "menu-flash", "menu-chosen", "view-layer", "corner-curve", "surface-ink",
 ] as const);
 
 export type NSEThemeControlName = typeof nseThemeControls[number];

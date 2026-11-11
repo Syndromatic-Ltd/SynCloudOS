@@ -20,6 +20,7 @@ import { NSEWindowController } from "../../src/NSE/Application/NSEWindowControll
 import { NSETitlebarAccessoryViewController } from "../../src/NSE/Application/NSETitlebarAccessoryViewController";
 import { NSEToolbar } from "../../src/NSE/Toolbars/NSEToolbar";
 import { createClassApplicationHost } from "./fixtures/classApplicationHost";
+import { nseFlashMenuSelection } from "../../src/NSE/Menus/menuSelectionFlash";
 
 const repository = resolve(import.meta.dirname, "../..");
 const presentation = createStaticPresentationPort({ width: 1000, height: 800, reducedMotion: true });
@@ -104,6 +105,7 @@ for (const surface of supplementalThemeCatalogue) it(`renders supplemental ${sur
     await act(async () => { await Promise.resolve(); });
     collect();
   }
+  await flashOpenMenus();
 });
 // A hosted application window draws its toolbar and titlebar accessories in the window chrome.
 it("renders a hosted application window", async () => {
@@ -144,6 +146,21 @@ it("renders a hosted application window", async () => {
     await host.dispose();
   }
 });
+// A chosen menu row flashes before its menu acts and fades: drive the real flash on each open menu's first row.
+async function flashOpenMenus() {
+  const rows = [...document.querySelectorAll<HTMLElement>('[data-nse-control="menu-item"][data-nse-part="cell"]:not([data-nse-enabled="false"])')];
+  if (!rows.length) return;
+  const matchMedia = window.matchMedia;
+  window.matchMedia = ((query: string) => ({ matches: true, media: query, addEventListener() {}, removeEventListener() {} })) as unknown as typeof window.matchMedia;
+  try {
+    const flashes = [nseFlashMenuSelection(rows[0])];
+    collect();
+    await act(async () => { await Promise.all(flashes); });
+    collect();
+  } finally {
+    window.matchMedia = matchMedia;
+  }
+}
 afterAll(() => {
   const contract = createNSEThemeContract(controls, { controls: nseThemeControls, parts: nseThemeParts, states: nseThemeStates, variants: nseThemeVariants }, nseThemeColourNames);
   const path = resolve(repository, "tooling/nse-theme-contract.json");

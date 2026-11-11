@@ -486,7 +486,7 @@ function NSECommandMenuSurface({
               <>
                 {(entry.kind === "command" && entry.checked !== "off") || entry.icon ? (
                   <span className="nse-control-list-leading" data-nse-part="leading" aria-hidden="true">
-                    {entry.kind === "command" && entry.checked !== "off" ? <span className="nse-menu-state-column" data-state={entry.checked} /> : entry.icon}
+                    {entry.kind === "command" && entry.checked !== "off" ? <span className="nse-menu-state-column" data-nse-part="state-column" data-nse-state={entry.checked} data-state={entry.checked} /> : entry.icon}
                   </span>
                 ) : null}
                 <span className="nse-control-list-body">
@@ -502,7 +502,7 @@ function NSECommandMenuSurface({
             ) : (
               <>
                 {entry.kind === "command" ? (
-                  <span className="nse-menu-state-column" data-nse-part="state-column" data-state={entry.checked} aria-hidden="true" />
+                  <span className="nse-menu-state-column" data-nse-part="state-column" data-nse-state={entry.checked} data-state={entry.checked} aria-hidden="true" />
                 ) : <span className="nse-menu-state-column" data-nse-part="state-column" aria-hidden="true" />}
                 <span className="nse-menu-item-icon" data-nse-part="icon-column" aria-hidden="true">{entry.icon}</span>
                 <span data-nse-part="title" className="nse-menu-item-label">{entry.label}</span>
