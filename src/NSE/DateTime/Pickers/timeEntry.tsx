@@ -139,7 +139,7 @@ function NSETimeSegmentEditor({
   const fieldOrder: readonly NSETimeSegment[] = hourCycle === "h12" ? [...parts, "ampm"] : parts;
 
   return (
-    <span role="group" aria-label={label} data-value={serializePlainTime(active)} data-locale-order={parts.join("-")} data-hour-mode={hourCycle === "h12" ? "12" : "24"} data-field-editor="segments">
+    <span role="group" aria-label={label} data-value={serializePlainTime(active)} data-locale-order={parts.join("-")} data-hour-mode={hourCycle === "h12" ? "12" : "24"} data-nse-part="segments" data-field-editor="segments">
       {fieldOrder.map((part) => editors[part])}
     </span>
   );
@@ -266,7 +266,7 @@ function NSETimeFieldEditor({ value, minimum, maximum, locale, timeZone, date, h
   const stepSize = segment === "hour" ? 60 : segment === "ampm" ? 720 : minuteStep;
   const titleId = `time-field-clock-${instanceId}`;
   return (
-    <span role="group" aria-label={label} data-field-editor="field" data-value={serializePlainTime(value)}>
+    <span role="group" aria-label={label} data-nse-part="field" data-field-editor="field" data-value={serializePlainTime(value)}>
       <span data-nse-part="segments">
         {order.flatMap((part, index) => {
           const nodes: ReactNode[] = [];
@@ -354,7 +354,7 @@ export function NSETimeEntry({
 
 
   return (
-    <span {...hostProps} {...drawing.attributes} {...drawing.events} data-state={disabled ? "disabled" : current ? "ready" : "empty"} data-hour-mode={hourCycle === "h12" ? "12" : "24"} data-editor={editorMode}  onFocusCapture={(event) => { drawing.events.onFocusCapture?.(event); setFocused(true); onFocusCapture?.(event); }} onBlurCapture={(event) => { drawing.events.onBlurCapture?.(event); if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false); onBlurCapture?.(event); }}>
+    <span {...hostProps} {...drawing.attributes} {...drawing.events} data-state={disabled ? "disabled" : current ? "ready" : "empty"} data-hour-mode={hourCycle === "h12" ? "12" : "24"} data-editor={editorMode} data-nse-type={editorMode}  onFocusCapture={(event) => { drawing.events.onFocusCapture?.(event); setFocused(true); onFocusCapture?.(event); }} onBlurCapture={(event) => { drawing.events.onBlurCapture?.(event); if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false); onBlurCapture?.(event); }}>
       {editor}
       <input ref={hiddenRef} type="hidden" {...(name ? { name: name } : {})} value={serializePlainTime(current ?? null)} />
     </span>
