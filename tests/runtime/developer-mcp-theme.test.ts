@@ -1,142 +1,88 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { deriveNSEAppearanceContract, writeDeveloperSdkData } from "../../scripts/developer-mcp/build-package.mjs";
 import { scaffoldTheme, validateTheme } from "../../scripts/developer-mcp/themes.mjs";
 import { assertReviewedPackageFiles } from "../../scripts/synware/sdk-package-manifest.mjs";
 
 const repository = resolve(import.meta.dirname, "../..");
+const contract = JSON.parse(readFileSync(resolve(repository, "tooling/nse-theme-contract.json"), "utf8"));
+const atmo = JSON.parse(readFileSync(resolve(repository, "src/Themes/Atmo.scostheme/Contents/Theme.json"), "utf8"));
+const partCount = Object.values(contract.controls as Record<string, { parts: string[] }>).reduce((total, control) => total + control.parts.length, 0);
 let project: string;
-let contract: ReturnType<typeof deriveNSEAppearanceContract>;
 beforeEach(() => {
   project = mkdtempSync(join(tmpdir(), "syncloudos-theme-test-"));
   writeFileSync(join(project, "package.json"), JSON.stringify({ name: "theme-consumer" }));
   const installed = join(project, "node_modules/@syndromatic/syncloudos");
   mkdirSync(join(installed, "tooling"), { recursive: true });
   writeFileSync(join(installed, "package.json"), JSON.stringify({ name: "@syndromatic/syncloudos", version: "1.0.0-beta.2" }));
-  contract = deriveNSEAppearanceContract(repository);
-  writeFileSync(join(installed, "tooling/nse-appearance-contract.json"), JSON.stringify(contract));
+  cpSync(resolve(repository, "tooling/nse-theme-contract.json"), join(installed, "tooling/nse-theme-contract.json"));
+  mkdirSync(join(installed, "themes/Atmo.scostheme/Contents"), { recursive: true });
+  cpSync(resolve(repository, "src/Themes/Atmo.scostheme/Contents/Theme.json"), join(installed, "themes/Atmo.scostheme/Contents/Theme.json"));
 });
 afterEach(() => rmSync(project, { recursive: true, force: true }));
+const scaffold = (displayName = "Dusk", extra = {}) => scaffoldTheme({ projectRoot: project, bundleIdentifier: `com.example.${displayName.toLowerCase()}`, displayName, ...extra });
+const css = (name = "Dusk") => join(project, `src/Themes/${name}.scostheme/Contents/Resources/theme.css`);
 
-describe("developer MCP neutral theme provisioning", () => {
-  it("admits only the reviewed neutral contract as a public tooling resource", () => {
-    expect(() => assertReviewedPackageFiles(["tooling/nse-appearance-contract.json"])).not.toThrow();
+describe("developer MCP .scostheme bundles", () => {
+  it("ships the theme contract as a reviewed tooling resource", () => {
+    expect(() => assertReviewedPackageFiles(["tooling/nse-theme-contract.json"])).not.toThrow();
     expect(() => assertReviewedPackageFiles(["tooling/arbitrary-theme.json"])).toThrow(/unreviewed/u);
   });
-  it("requires positive appearance and scheme attributes on the same provider", async () => {
-    await scaffoldTheme({ projectRoot: project, name: "Scoped" });
-    const path = join(project, "src/Themes/scoped/styles.css");
-    const original = readFileSync(path, "utf8");
-    for (const selector of ['[data-nse-theme="scoped"] [data-nse-colour-scheme-resolved=', ':not([data-nse-theme="scoped"])[data-nse-colour-scheme-resolved=', '[data-nse-theme="scoped"], [data-nse-colour-scheme-resolved=']) {
-      writeFileSync(path, original.replaceAll('[data-nse-theme="scoped"][data-nse-colour-scheme-resolved=', selector));
-      expect((await validateTheme({ projectRoot: project, path: "src/Themes/scoped" })).ok).toBe(false);
+  it("scaffolds a complete bundle that validates, with every part listed as undrawn", async () => {
+    const result = await scaffold();
+    expect(result.createdPaths).toEqual(["src/Themes/Dusk.scostheme/Contents/Info.ts", "src/Themes/Dusk.scostheme/Contents/Theme.json", "src/Themes/Dusk.scostheme/Contents/Resources/theme.css"]);
+    const definition = JSON.parse(readFileSync(join(project, "src/Themes/Dusk.scostheme/Contents/Theme.json"), "utf8"));
+    expect(definition.colours.light).toEqual(atmo.colours.light);
+    expect(definition.colours.dark).toEqual(atmo.colours.dark);
+    expect(definition.navigation).toEqual(atmo.navigation);
+    expect(definition.presentation).toEqual(atmo.presentation);
+    expect(readFileSync(join(project, "src/Themes/Dusk.scostheme/Contents/Info.ts"), "utf8")).toMatch(/Replace every colour/u);
+    const stylesheet = readFileSync(css(), "utf8");
+    for (const [control, entry] of Object.entries(contract.controls as Record<string, { parts: string[] }>)) {
+      expect(stylesheet).toContain(`/* ${control}`);
+      for (const part of entry.parts) expect(stylesheet).toContain(`[data-nse-control="${control}"] [data-nse-part="${part}"] {}`);
     }
-    writeFileSync(path, original);
-    expect((await validateTheme({ projectRoot: project, path: "src/Themes/scoped" })).ok).toBe(true);
+    const validation = await validateTheme({ projectRoot: project, path: "src/Themes/Dusk.scostheme" });
+    expect(validation.errors).toEqual([]);
+    expect(validation.ok).toBe(true);
+    expect(validation.coverage).toEqual({ drawn: 0, total: partCount });
+    expect(validation.warnings).toHaveLength(partCount);
+    expect(validation.warnings).toContainEqual(expect.objectContaining({ rule: "theme.undrawn-part", part: "button.bezel" }));
   });
-  it("validates theme-local colour variables, fallbacks, unresolved variables and cycles", async () => {
-    await scaffoldTheme({ projectRoot: project, name: "Variables" });
-    const path = join(project, "src/Themes/variables/styles.css");
-    const original = readFileSync(path, "utf8");
-    writeFileSync(path, original.replace(/(--nse-colour-window-background:)\s*[^;]+;/u, '$1 var(--paper); --paper: white;'));
-    expect((await validateTheme({ projectRoot: project, path: "src/Themes/variables" })).ok).toBe(true);
-    writeFileSync(path, original.replace(/(--nse-colour-window-background:)\s*[^;]+;/u, '$1 var(--absent, Canvas);'));
-    expect((await validateTheme({ projectRoot: project, path: "src/Themes/variables" })).ok).toBe(true);
-    for (const value of ['var(--absent)', 'var(--nse-colour-window-background)']) {
-      writeFileSync(path, original.replace(/(--nse-colour-window-background:)\s*[^;]+;/u, `$1 ${value};`));
-      expect((await validateTheme({ projectRoot: project, path: "src/Themes/variables" })).ok).toBe(false);
+  it("counts a part as drawn once a rule with declarations names it", async () => {
+    await scaffold();
+    writeFileSync(css(), readFileSync(css(), "utf8").replace('[data-nse-control="button"] [data-nse-part="bezel"] {}', '[data-nse-control="button"] [data-nse-part="bezel"] { background: #20242c; }'));
+    const validation = await validateTheme({ projectRoot: project, path: "src/Themes/Dusk.scostheme" });
+    expect(validation.ok).toBe(true);
+    expect(validation.coverage.drawn).toBe(1);
+    expect(validation.warnings.map(warning => warning.part)).not.toContain("button.bezel");
+  });
+  it("reports private classes, hard limits and unknown hooks as errors", async () => {
+    await scaffold();
+    const original = readFileSync(css(), "utf8");
+    const cases: Array<[string, string]> = [
+      [".nse-button { color: #fff; }", "idiom.theme-private-class"],
+      ['[data-nse-control="button"][data-nse-focused] { outline: none; }', "idiom.theme-limit"],
+      ['[data-nse-control="button"] [data-nse-part="title"] { font-size: 30px; }', "theme.typography"],
+      ['[data-nse-control="button"][data-nse-made-up] { color: #fff; }', "theme.css-selector"],
+    ];
+    for (const [rule, expected] of cases) {
+      writeFileSync(css(), `${original}\n${rule}\n`);
+      const validation = await validateTheme({ projectRoot: project, path: "src/Themes/Dusk.scostheme" });
+      expect(validation.ok, rule).toBe(false);
+      expect(validation.errors.map(error => error.rule), rule).toContain(expected);
     }
   });
-  it("rejects recoverable CSS syntax errors and unclosed blocks", async () => {
-    await scaffoldTheme({ projectRoot: project, name: "Syntax" });
-    const path = join(project, "src/Themes/syntax/styles.css");
-    const original = readFileSync(path, "utf8");
-    for (const css of [original + '\n.x { ??? }', original.replace(/\}\s*$/u, '')]) {
-      writeFileSync(path, css);
-      expect((await validateTheme({ projectRoot: project, path: "src/Themes/syntax" })).findings).toContainEqual(expect.objectContaining({ rule: "theme.stylesheet" }));
-    }
-    writeFileSync(path, original);
-    expect((await validateTheme({ projectRoot: project, path: "src/Themes/syntax" })).ok).toBe(true);
-  });
-  it("matches runtime trimming when checking duplicate recipes", async () => {
-    await scaffoldTheme({ projectRoot: project, name: "Recipes" });
-    const path = join(project, "src/Themes/recipes/theme.json");
-    const definition = JSON.parse(readFileSync(path, "utf8"));
-    definition.recipes = [{ slot: "button", recipeId: "one" }, { slot: " button ", recipeId: "two" }];
-    writeFileSync(path, JSON.stringify(definition));
-    expect((await validateTheme({ projectRoot: project, path })).findings).toContainEqual(expect.objectContaining({ rule: "theme.duplicate-recipe" }));
-  });
-  it("derives both schemes from neutral source and packages the same contract", async () => {
-    const neutral = readFileSync(join(repository, "src/NSE/Appearance/nse-appearance.css"), "utf8");
-    expect(contract.values.length).toBeGreaterThan(0);
-    expect(contract.values.map((value: { name: string }) => value.name)).toContain("--nse-colour-window-background");
-    expect(contract.values.every((value: { name: string }) => !value.name.includes("atmo"))).toBe(true);
-    for (const value of contract.values) {
-      expect(neutral).toContain(value.name);
-      expect(value.defaults.light).toBeTypeOf("string");
-      expect(value.defaults.dark).toBeTypeOf("string");
-    }
-    const sdk = join(project, "packed-sdk");
-    await writeDeveloperSdkData({ repositoryRoot: repository, directory: sdk, commit: "test", source: { sha256: "test" } });
-    expect(JSON.parse(readFileSync(join(sdk, "tooling/nse-appearance-contract.json"), "utf8"))).toEqual(contract);
-  });
-
-  it("scaffolds every light and dark value for a custom theme that validates without Atmo", async () => {
-    const result = await scaffoldTheme({ projectRoot: project, name: "Paper Studio" });
-    expect(result.createdPaths).toEqual(["src/Themes/paper-studio/theme.json", "src/Themes/paper-studio/appearance.ts", "src/Themes/paper-studio/styles.css"]);
-    const css = readFileSync(join(project, "src/Themes/paper-studio/styles.css"), "utf8");
-    expect(css).not.toContain("atmo");
-    expect(css).toContain('[data-nse-theme="paper-studio"]');
-    for (const value of contract.values) expect(css.split(value.name + ":")).toHaveLength(3);
-    const checked = await validateTheme({ projectRoot: project, path: "src/Themes/paper-studio" });
-    expect(checked.ok).toBe(true);
-    expect(checked.findings).toEqual([]);
-    expect(checked.checkedValues).toBe(contract.values.length * 2);
-    expect(readFileSync(join(project, "src/Themes/paper-studio/appearance.ts"), "utf8")).toContain('@syndromatic/syncloudos/nse/appearance');
-  });
-
-  it("reports every missing scheme value", async () => {
-    await scaffoldTheme({ projectRoot: project, name: "Incomplete" });
-    writeFileSync(join(project, "src/Themes/incomplete/styles.css"), '[data-nse-theme="incomplete"][data-nse-colour-scheme-resolved="light"] { --nse-colour-window-background: white; }');
-    const result = await validateTheme({ projectRoot: project, path: "src/Themes/incomplete/theme.json" });
-    expect(result.ok).toBe(false);
-    expect(result.findings.filter((finding: { rule: string }) => finding.rule === "theme.missing-value")).toHaveLength(contract.values.length * 2 - 1);
-    expect(result.findings).toContainEqual(expect.objectContaining({ value: "--nse-colour-window-background", scheme: "dark", severity: "error" }));
-  });
-
-  it("reports malformed colours and accepts a different legitimate colour palette", async () => {
-    await scaffoldTheme({ projectRoot: project, name: "Ink" });
-    const path = join(project, "src/Themes/ink/styles.css");
-    let css = readFileSync(path, "utf8");
-    css = css.replace(/(--nse-colour-window-background:\s*)[^;]+;/u, "$1definitely-not-a-colour;");
-    writeFileSync(path, css);
-    expect((await validateTheme({ projectRoot: project, path: "src/Themes/ink" })).findings).toContainEqual(expect.objectContaining({ rule: "theme.malformed-value", value: "--nse-colour-window-background", scheme: "light" }));
-    writeFileSync(path, css.replace("definitely-not-a-colour", "Canvas"));
-    expect((await validateTheme({ projectRoot: project, path: "src/Themes/ink" })).ok).toBe(true);
-  });
-
-  it("validates runtime definition fields and duplicate recipes without executing modules", async () => {
-    await scaffoldTheme({ projectRoot: project, name: "Broken" });
-    const path = join(project, "src/Themes/broken/theme.json");
-    writeFileSync(path, JSON.stringify({ id: "Bad ID", displayName: "", recipes: [{ slot: "x", recipeId: "x" }, { slot: "x", recipeId: "x" }], stylesheet: "styles.css" }));
-    const result = await validateTheme({ projectRoot: project, path });
-    expect(result.ok).toBe(false);
-    expect(result.findings.map((finding: { rule: string }) => finding.rule)).toEqual(expect.arrayContaining(["theme.definition", "theme.duplicate-recipe"]));
-    writeFileSync(path, JSON.stringify({ id: 12, displayName: "Numeric", stylesheet: "styles.css" }));
-    const numeric = await validateTheme({ projectRoot: project, path });
-    expect(numeric.findings).toContainEqual(expect.objectContaining({ rule: "theme.definition" }));
-    expect(numeric.findings.some((finding: { rule: string }) => finding.rule === "theme.stylesheet")).toBe(false);
-  });
-
-  it("refuses overwrite, escape and symlink targets", async () => {
-    await scaffoldTheme({ projectRoot: project, name: "Safe" });
-    await expect(scaffoldTheme({ projectRoot: project, name: "Safe" })).rejects.toThrow(/exists/u);
-    await expect(scaffoldTheme({ projectRoot: project, name: "Escape", directory: "../outside" })).rejects.toThrow(/inside/u);
+  it("refuses overwrite, escape, symlink and non-bundle targets", async () => {
+    await scaffold("Safe");
+    await expect(scaffold("Safe")).rejects.toThrow(/exists/u);
+    await expect(scaffold("Escape", { directory: "../outside" })).rejects.toThrow(/inside/u);
+    await expect(scaffoldTheme({ projectRoot: project, bundleIdentifier: "Not An Identifier", displayName: "Bad" })).rejects.toThrow(/reverse-DNS/u);
     mkdirSync(join(project, "actual"));
     symlinkSync(join(project, "actual"), join(project, "linked"), "junction");
-    await expect(scaffoldTheme({ projectRoot: project, name: "Link", directory: "linked/theme" })).rejects.toThrow(/symbolic/u);
-    await expect(validateTheme({ projectRoot: project, path: "linked" })).rejects.toThrow(/symbolic/u);
+    await expect(scaffold("Link", { directory: "linked" })).rejects.toThrow(/symbolic/u);
+    await expect(validateTheme({ projectRoot: project, path: "linked/Link.scostheme" })).rejects.toThrow(/symbolic/u);
+    await expect(validateTheme({ projectRoot: project, path: "src/Themes" })).rejects.toThrow(/\.scostheme/u);
   });
 });
