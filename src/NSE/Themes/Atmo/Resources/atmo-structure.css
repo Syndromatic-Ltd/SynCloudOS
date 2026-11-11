@@ -603,8 +603,8 @@
 
 
 
-:where(:scope) .nse-control-input-box.is-disabled,
-:where(:scope):is(.nse-control-input-box.is-disabled) {
+:where(:scope) [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-role="group"])[data-nse-enabled="false"]:where(:not([data-nse-control="search-field"])),
+:where(:scope):is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-role="group"])[data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))) {
   pointer-events:none;
 }
 
@@ -923,8 +923,8 @@
   overflow:visible;
 }
 
-:where(:scope) .nse-control-list-item,
-:where(:scope):is(.nse-control-list-item) {
+:where(:scope) :is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)),
+:where(:scope):is(:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *))) {
   display:flex;
   align-items:center;
 }
@@ -1308,13 +1308,13 @@
   font-size:16px;
 }
 
-:where(:scope) .nse-control-search-field.is-disabled,
-:where(:scope):is(.nse-control-search-field.is-disabled) {
+:where(:scope) [data-nse-control="search-field"]:where([data-nse-part="content"])[data-nse-enabled="false"]:where(:not([data-nse-control="search-field"])),
+:where(:scope):is([data-nse-control="search-field"]:where([data-nse-part="content"])[data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))) {
   opacity: 0.58;
 }
 
-:where(:scope) .nse-control-app-menu-surface,
-:where(:scope):is(.nse-control-app-menu-surface) {
+:where(:scope) [data-nse-role="application-menu"]:where([data-nse-part="bezel"]),
+:where(:scope):is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])) {
   min-width: 220px;
   width: max-content;
   max-width: calc(var(--nse-overlay-available-inline-size, 100vw) + 6px);
@@ -1388,8 +1388,8 @@
   }
 }
 
-:where(:scope) .nse-control-app-menu-title,
-:where(:scope):is(.nse-control-app-menu-title) {
+:where(:scope) [data-nse-part="title"]:where([data-nse-role="application-menu"] > *),
+:where(:scope):is([data-nse-part="title"]:where([data-nse-role="application-menu"] > *)) {
   display: grid;
   grid-template-columns: 22px minmax(0, 1fr);
   gap: 7px;
@@ -1399,16 +1399,16 @@
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.55);
 }
 
-:where(:scope) .nse-control-app-menu-title::before,
-:where(:scope):is(.nse-control-app-menu-title::before) {
+:where(:scope) [data-nse-part="title"]:where([data-nse-role="application-menu"] > *)::before,
+:where(:scope):is([data-nse-part="title"]:where([data-nse-role="application-menu"] > *)::before) {
   content: "";
   width: 22px;
   height: 22px;
   background: var(--nse-atmo-app-menu-icon-meta) center / contain no-repeat;
 }
 
-:where(:scope) .nse-control-app-menu-inner,
-:where(:scope):is(.nse-control-app-menu-inner) {
+:where(:scope) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *),
+:where(:scope):is([data-nse-part="body"]:where([data-nse-role="application-menu"] > *)) {
   display: grid;
   gap: 0;
   /* -22px, not -12px: the frame stops painting 8px in from the border box, and
@@ -1425,22 +1425,22 @@
    first row sat 28px under the frame's top stroke (2px in) but the last row
    only 12px above its bottom one (10px in, minus the -8px above). Pull the
    rows up 16px so the menu is inset evenly top and bottom. */
-:where(:scope) .nse-control-app-menu-surface:not(:has(>.nse-control-app-menu-title))>.nse-control-app-menu-inner,
-:where(:scope):is(.nse-control-app-menu-surface:not(:has(>.nse-control-app-menu-title)))>.nse-control-app-menu-inner {
+:where(:scope) [data-nse-role="application-menu"]:where([data-nse-part="bezel"]):not(:has(>[data-nse-part="title"]:where([data-nse-role="application-menu"] > *)))>[data-nse-part="body"]:where([data-nse-role="application-menu"] > *),
+:where(:scope):is([data-nse-role="application-menu"]:where([data-nse-part="bezel"]):not(:has(>[data-nse-part="title"]:where([data-nse-role="application-menu"] > *))))>[data-nse-part="body"]:where([data-nse-role="application-menu"] > *) {
   margin-top: -16px;
 }
 
 /* The 10px the rows just gave up on each side, handed back as padding so the
    labels do not move — only the plate behind them widens. Carries the surface
    class so it outranks the row's own padding rather than tying it. */
-:where(:scope) .nse-control-app-menu-surface .nse-control-app-menu-inner>*,
-:where(:scope):is(.nse-control-app-menu-surface) .nse-control-app-menu-inner>* {
+:where(:scope) [data-nse-role="application-menu"]:where([data-nse-part="bezel"]) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>*,
+:where(:scope):is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>* {
   padding-right: 20px;
   padding-left: 20px;
 }
 
-:where(:scope) .nse-control-app-menu-surface.nse-application-menu .nse-control-app-menu-inner>.nse-menu,
-:where(:scope):is(.nse-control-app-menu-surface.nse-application-menu) .nse-control-app-menu-inner>.nse-menu {
+:where(:scope) [data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>[data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]),
+:where(:scope):is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"])) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>[data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]) {
   width: 100%;
   min-width: 0;
   padding: 0;
@@ -1449,8 +1449,8 @@
   background: transparent;
 }
 
-:where(:scope) .nse-control-app-menu-surface.nse-application-menu .nse-application-menu-list>.nse-control-list-item,
-:where(:scope):is(.nse-control-app-menu-surface.nse-application-menu) .nse-application-menu-list>.nse-control-list-item {
+:where(:scope) [data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))>:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)),
+:where(:scope):is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"])) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))>:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)) {
   display: flex;
   align-items: center;
   width: 100%;
@@ -1466,36 +1466,36 @@
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.55);
 }
 
-:where(:scope) .nse-control-app-menu-surface.nse-application-menu .nse-menu-shortcut,
-:where(:scope):is(.nse-control-app-menu-surface.nse-application-menu) .nse-menu-shortcut,
-:where(:scope) .nse-control-app-menu-surface.nse-application-menu .nse-menu-submenu-arrow,
-:where(:scope):is(.nse-control-app-menu-surface.nse-application-menu) .nse-menu-submenu-arrow {
+:where(:scope) [data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-part="shortcut-column"]:where([data-nse-control="menu-item"] *),
+:where(:scope):is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"])) [data-nse-part="shortcut-column"]:where([data-nse-control="menu-item"] *),
+:where(:scope) [data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-part="submenu-arrow"]:where([data-nse-control="menu-item"] *),
+:where(:scope):is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"])) [data-nse-part="submenu-arrow"]:where([data-nse-control="menu-item"] *) {
   margin-inline-start: auto;
 }
 
-:where(:scope) .nse-control-app-menu-surface.nse-application-menu .nse-application-menu-list>.nse-menu-separator,
-:where(:scope):is(.nse-control-app-menu-surface.nse-application-menu) .nse-application-menu-list>.nse-menu-separator {
+:where(:scope) [data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))>[data-nse-part="separator"]:where([data-nse-role="overlay"] *):where([data-nse-control="menu"] > *),
+:where(:scope):is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"])) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))>[data-nse-part="separator"]:where([data-nse-role="overlay"] *):where([data-nse-control="menu"] > *) {
   height: 0;
   margin: 0;
   background: transparent;
   box-shadow: none;
 }
 
-:where(:scope) .nse-control-app-menu-surface.nse-application-menu .nse-application-menu-list>.nse-control-list-item:first-of-type,
-:where(:scope):is(.nse-control-app-menu-surface.nse-application-menu) .nse-application-menu-list>.nse-control-list-item:first-of-type {
+:where(:scope) [data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))>:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):first-of-type,
+:where(:scope):is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"])) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))>:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):first-of-type {
   border-top-width: 0;
 }
 
-:where(:scope) .nse-control-app-menu-surface.nse-application-menu .nse-application-menu-list>.nse-control-list-item:last-of-type,
-:where(:scope):is(.nse-control-app-menu-surface.nse-application-menu) .nse-application-menu-list>.nse-control-list-item:last-of-type {
+:where(:scope) [data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))>:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):last-of-type,
+:where(:scope):is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"])) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))>:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):last-of-type {
   border-bottom-width: 0;
 }
 
 /* AppMenuItem rows: transparent (the dark system menu shows through), white text,
    a thin divider between rows (system-menu-item-divider), and a held/hover highlight.
    `> *` keeps specificity equal to the Onyx override so that override still wins by order. */
-:where(:scope) .nse-control-app-menu-inner>*,
-:where(:scope):is(.nse-control-app-menu-inner)>* {
+:where(:scope) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>*,
+:where(:scope):is([data-nse-part="body"]:where([data-nse-role="application-menu"] > *))>* {
   border: 0 solid transparent;
   border-top-width: 1px;
   border-image: var(--nse-atmo-system-menu-divider) 1 0 1 0 stretch;
@@ -1506,21 +1506,21 @@
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.55);
 }
 
-:where(:scope) .nse-control-app-menu-inner>*:first-child,
-:where(:scope):is(.nse-control-app-menu-inner)>*:first-child {
+:where(:scope) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>*:first-child,
+:where(:scope):is([data-nse-part="body"]:where([data-nse-role="application-menu"] > *))>*:first-child {
   border-top-width: 0;
 }
 
 /* Hover is a soft wash. Held state comes from the NSEListItem recipe below. */
-:where(:scope) .nse-control-app-menu-inner>*:not(.is-disabled):hover,
-:where(:scope):is(.nse-control-app-menu-inner)>*:not(.is-disabled):hover {
+:where(:scope) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>*:not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):hover,
+:where(:scope):is([data-nse-part="body"]:where([data-nse-role="application-menu"] > *))>*:not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):hover {
   background-color: rgba(255, 255, 255, 0.16);
 }
 
-:where(:scope) .nse-control-app-menu-surface.nse-application-menu .nse-control-app-menu-inner>.nse-menu:hover,
-:where(:scope):is(.nse-control-app-menu-surface.nse-application-menu) .nse-control-app-menu-inner>.nse-menu:hover,
-:where(:scope) .nse-control-app-menu-surface.nse-application-menu .nse-control-app-menu-inner>.nse-menu:active,
-:where(:scope):is(.nse-control-app-menu-surface.nse-application-menu) .nse-control-app-menu-inner>.nse-menu:active {
+:where(:scope) [data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>[data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):hover,
+:where(:scope):is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"])) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>[data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):hover,
+:where(:scope) [data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>[data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):active,
+:where(:scope):is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"])) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>[data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):active {
   background: transparent;
 }
 
@@ -1530,15 +1530,15 @@
   color: #fff;
 }
 
-:where(:scope) .nse-control-app-menu-surface.nse-application-menu .nse-application-menu-list>.nse-control-list-item:not(.is-disabled):active,
-:where(:scope):is(.nse-control-app-menu-surface.nse-application-menu) .nse-application-menu-list>.nse-control-list-item:not(.is-disabled):active {
+:where(:scope) [data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))>:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):active,
+:where(:scope):is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"])) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))>:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):active {
   background: linear-gradient(#555, #888);
   color: #fff;
 }
 
 /* Disabled rows read as engraved grey text with a crisp (undimmed) white bottom emboss. */
-:where(:scope) .nse-control-app-menu-inner>*.is-disabled,
-:where(:scope):is(.nse-control-app-menu-inner)>*.is-disabled {
+:where(:scope) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>*[data-nse-enabled="false"]:where(:not([data-nse-control="search-field"])),
+:where(:scope):is([data-nse-part="body"]:where([data-nse-role="application-menu"] > *))>*[data-nse-enabled="false"]:where(:not([data-nse-control="search-field"])) {
   color: #8c8c8c;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
 }
@@ -1948,7 +1948,7 @@
    the frame and its shadow never scroll away or clip.
    The application menu keeps its own surface (.nse-overlay-popup--application-menu).
    ========================================================================= */
-.nse-overlay-popup:where([data-nse-part="surface"]):is(.nse-overlay-popup--menu,.nse-overlay-popup--submenu,.nse-overlay-popup--context-menu):not(.nse-overlay-popup--application-menu) {
+[data-nse-part="surface"]:where(:not([data-nse-control="tooltip"])):where([data-nse-part="surface"]):is([data-nse-style="menu"]:where([data-nse-part="surface"]),[data-nse-style="submenu"]:where([data-nse-part="surface"]),[data-nse-style="context-menu"]:where([data-nse-part="surface"])):not([data-nse-part="surface"]:where(:has([data-nse-style="application-menu"][data-nse-part="bezel"]))) {
   /* Border-box: 180px of rows plus the 56px of side frame. */
   min-inline-size: 236px;
   max-inline-size: min(376px, calc(100vw - 36px));
@@ -1963,11 +1963,11 @@
   overflow: visible;
 }
 
-.nse-overlay-popup:where([data-nse-part="surface"]):is(.nse-overlay-popup--menu,.nse-overlay-popup--submenu,.nse-overlay-popup--context-menu):not(.nse-overlay-popup--application-menu)>.nse-overlay-popup-content {
+[data-nse-part="surface"]:where(:not([data-nse-control="tooltip"])):where([data-nse-part="surface"]):is([data-nse-style="menu"]:where([data-nse-part="surface"]),[data-nse-style="submenu"]:where([data-nse-part="surface"]),[data-nse-style="context-menu"]:where([data-nse-part="surface"])):not([data-nse-part="surface"]:where(:has([data-nse-style="application-menu"][data-nse-part="bezel"])))>[data-nse-part="content"]:where([data-nse-role="overlay"] *):where([data-nse-part="surface"] > *):where(:not([data-nse-control="tooltip"] > *)) {
   display: block;
 }
 
-.nse-overlay-popup:where([data-nse-part="surface"]):is(.nse-overlay-popup--menu,.nse-overlay-popup--submenu,.nse-overlay-popup--context-menu):not(.nse-overlay-popup--application-menu) .nse-menu:not(.nse-application-menu-list) {
+[data-nse-part="surface"]:where(:not([data-nse-control="tooltip"])):where([data-nse-part="surface"]):is([data-nse-style="menu"]:where([data-nse-part="surface"]),[data-nse-style="submenu"]:where([data-nse-part="surface"]),[data-nse-style="context-menu"]:where([data-nse-part="surface"])):not([data-nse-part="surface"]:where(:has([data-nse-style="application-menu"][data-nse-part="bezel"]))) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):not([data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))) {
   display: block;
   min-inline-size: 0;
   /* 65px of frame border minus the 32px the rows bleed back over it. */
@@ -2057,8 +2057,8 @@
 }
 
 [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where([data-nse-part="background"]):not([data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"]>*))) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-control="menu"]>*)+[data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-control="menu"]>*)::before,
-:where(:scope) .nse-overlay-popup--listbox .nse-overlay-listbox-option+.nse-overlay-listbox-option::before,
-:where(:scope):is(.nse-overlay-popup--listbox) .nse-overlay-listbox-option+.nse-overlay-listbox-option::before {
+:where(:scope) [data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *)+[data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *)::before,
+:where(:scope):is([data-nse-style="listbox"]:where([data-nse-part="surface"])) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *)+[data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *)::before {
   content: "";
   position: absolute;
   inset: 0 0 auto;
@@ -2090,7 +2090,7 @@
 }
 
 /* Picker list: the light popup-picker box. */
-.nse-overlay-popup:where([data-nse-part="surface"]).nse-overlay-popup--listbox {
+[data-nse-part="surface"]:where(:not([data-nse-control="tooltip"])):where([data-nse-part="surface"])[data-nse-style="listbox"]:where([data-nse-part="surface"]) {
   min-inline-size: 140px;
   padding: 0;
   border: 19px solid transparent;
@@ -2102,8 +2102,8 @@
   overflow: visible;
 }
 
-:where(:scope) .nse-overlay-popup--listbox .nse-overlay-listbox-scroll,
-:where(:scope):is(.nse-overlay-popup--listbox) .nse-overlay-listbox-scroll {
+:where(:scope) [data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-part="viewport"]:where([data-nse-role="overlay"] *),
+:where(:scope):is([data-nse-style="listbox"]:where([data-nse-part="surface"])) [data-nse-part="viewport"]:where([data-nse-role="overlay"] *) {
   max-block-size: min(60vh, 420px, calc(var(--nse-overlay-available-block-size, 100vh) - 16px));
   /* The frame's 19px border-image is mostly shadow; its face starts 3px in. The list
      reaches that face on every side, so a highlighted row runs edge to edge as a Mac
@@ -2112,8 +2112,8 @@
   border-radius: 5px;
 }
 
-:where(:scope) .nse-overlay-popup--listbox .nse-overlay-listbox-option,
-:where(:scope):is(.nse-overlay-popup--listbox) .nse-overlay-listbox-option {
+:where(:scope) [data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *),
+:where(:scope):is([data-nse-style="listbox"]:where([data-nse-part="surface"])) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *) {
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 34px;
@@ -2133,8 +2133,8 @@
 
 /* The chosen row carries the trailing check; the empty column keeps every
    label on the same measure. */
-:where(:scope) .nse-overlay-popup--listbox .nse-overlay-listbox-option::after,
-:where(:scope):is(.nse-overlay-popup--listbox) .nse-overlay-listbox-option::after {
+:where(:scope) [data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *)::after,
+:where(:scope):is([data-nse-style="listbox"]:where([data-nse-part="surface"])) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *)::after {
   content: "";
   grid-column: 2;
   inline-size: 34px;
@@ -2155,8 +2155,8 @@
     rgba(255, 255, 255, 0.78);
 }
 
-:where(:scope) .nse-overlay-popup--listbox .nse-overlay-listbox-option:disabled,
-:where(:scope):is(.nse-overlay-popup--listbox) .nse-overlay-listbox-option:disabled {
+:where(:scope) [data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *):disabled,
+:where(:scope):is([data-nse-style="listbox"]:where([data-nse-part="surface"])) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *):disabled {
   color: rgba(35, 45, 55, 0.42);
   cursor: default;
 }
@@ -2184,7 +2184,7 @@
    sheet.
    ========================================================================= */
 
-.nse-overlay-popup:where([data-nse-part="surface"]):is(.nse-overlay-popup--popover,.nse-overlay-popup--action-sheet)[data-nse-part="surface"] {
+[data-nse-part="surface"]:where(:not([data-nse-control="tooltip"])):where([data-nse-part="surface"]):is([data-nse-style="popover"]:where([data-nse-part="surface"]),[data-nse-style="action-sheet"]:where([data-nse-part="surface"]))[data-nse-part="surface"] {
   /* [data-nse-part] outranks the engine's bare available-size cap, which
      is folded into min() below instead. The block cap stays the engine's
      (border-box, so it includes the 24px frame): a column whose content
@@ -2204,7 +2204,7 @@
   overflow: visible;
 }
 
-.nse-overlay-popup:where([data-nse-part="surface"]):is(.nse-overlay-popup--popover,.nse-overlay-popup--action-sheet)>.nse-overlay-popup-title {
+[data-nse-part="surface"]:where(:not([data-nse-control="tooltip"])):where([data-nse-part="surface"]):is([data-nse-style="popover"]:where([data-nse-part="surface"]),[data-nse-style="action-sheet"]:where([data-nse-part="surface"]))>[data-nse-part="title"]:where([data-nse-role="overlay"] *):where([data-nse-part="surface"] > *) {
   /* The plate starts 8px inside the border box; title and body sit 12px in
      from it, as on the dialog surface, not on its edge. */
   margin: -8px -4px 8px;
@@ -2213,7 +2213,7 @@
   font-weight: 700;
 }
 
-.nse-overlay-popup:where([data-nse-part="surface"]):is(.nse-overlay-popup--popover,.nse-overlay-popup--action-sheet)>.nse-overlay-popup-content {
+[data-nse-part="surface"]:where(:not([data-nse-control="tooltip"])):where([data-nse-part="surface"]):is([data-nse-style="popover"]:where([data-nse-part="surface"]),[data-nse-style="action-sheet"]:where([data-nse-part="surface"]))>[data-nse-part="content"]:where([data-nse-role="overlay"] *):where([data-nse-part="surface"] > *):where(:not([data-nse-control="tooltip"] > *)) {
   flex: 0 1 auto;
   gap: 12px;
   min-block-size: 0;
@@ -4021,15 +4021,15 @@
 }
 
 /* A group rule in a picker's list: the menu separator, bled to the list's edges. */
-:where(:scope) .nse-overlay-popup--listbox .nse-overlay-listbox-separator,
-:where(:scope):is(.nse-overlay-popup--listbox) .nse-overlay-listbox-separator {
+:where(:scope) [data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-part="separator"]:where([data-nse-role="overlay"] *):where([data-nse-part="content"] > *),
+:where(:scope):is([data-nse-style="listbox"]:where([data-nse-part="surface"])) [data-nse-part="separator"]:where([data-nse-role="overlay"] *):where([data-nse-part="content"] > *) {
   block-size: 1px;
   margin: 4px 0;
   background: var(--nse-atmo-system-menu-divider) center top / 236px 1px repeat-x;
   opacity: 1;
 }
-:where(:scope) .nse-overlay-popup--listbox .nse-overlay-listbox-separator+.nse-overlay-listbox-option::before,
-:where(:scope):is(.nse-overlay-popup--listbox) .nse-overlay-listbox-separator+.nse-overlay-listbox-option::before {
+:where(:scope) [data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-part="separator"]:where([data-nse-role="overlay"] *):where([data-nse-part="content"] > *)+[data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *)::before,
+:where(:scope):is([data-nse-style="listbox"]:where([data-nse-part="surface"])) [data-nse-part="separator"]:where([data-nse-role="overlay"] *):where([data-nse-part="content"] > *)+[data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *)::before {
   content: none;
 }
 
@@ -4142,7 +4142,7 @@
 /* The pop-up list's face is as wide as its button's (the list's face is 6px narrower than its box, the
    button's 2px), and the button is sized to its widest item with room for the list's check column, so
    the list never outgrows its button. */
-.nse-overlay-popup:where([data-nse-part="surface"]).nse-overlay-popup--listbox {
+[data-nse-part="surface"]:where(:not([data-nse-control="tooltip"])):where([data-nse-part="surface"])[data-nse-style="listbox"]:where([data-nse-part="surface"]) {
   min-inline-size: max(140px, calc(var(--nse-overlay-anchor-inline-size, 0px) + 4px));
 }
 
