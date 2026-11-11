@@ -94,7 +94,7 @@ export function NSEGraphicalCalendar(props: NSEGraphicalCalendarProps) {
     <header data-nse-part="header">
       {props.variant !== "month" ? <button type="button" aria-label="Previous year" data-nse-part="previous-year" onClick={() => navigate("year", -1, "button")}>−y</button> : null}
       <button type="button" aria-label="Previous month" data-nse-part="previous-month" onClick={() => navigate("month", -1, "button")}>−m</button>
-      <h2 aria-live="polite">{formatters.month.format(civilToEpochDay({ ...props.visibleMonth, day: 1 }) * 86_400_000)}</h2>
+      <h2 data-nse-part="title" aria-live="polite">{formatters.month.format(civilToEpochDay({ ...props.visibleMonth, day: 1 }) * 86_400_000)}</h2>
       <button type="button" aria-label="Today" data-nse-part="today" onClick={showToday}>•</button>
       <button type="button" aria-label="Next month" data-nse-part="next-month" onClick={() => navigate("month", 1, "button")}>+m</button>
       {props.variant !== "month" ? <button type="button" aria-label="Next year" data-nse-part="next-year" onClick={() => navigate("year", 1, "button")}>+y</button> : null}

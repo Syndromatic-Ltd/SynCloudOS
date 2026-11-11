@@ -197,7 +197,7 @@ export function NSEDateTimeEntry({ value, defaultValue = null, mode = "combined"
   const showClock = editorMode === "clock" || editorMode === "calendar-clock" || editorMode === "combined";
   const showZone = editorMode === "calendar-clock" || editorMode === "combined";
   const editor = <section data-testid="date-time-editor" data-nse-part="date-time-editor" data-editor-mode={editorMode}>
-    {showText ? <input aria-label={`${props["aria-label"]} date and time`} type="text" value={textDraft} disabled={disabled} readOnly={props.readOnly} required={props.required} aria-invalid={Boolean(error) || undefined} onChange={(event) => { if (!props.readOnly) { setTextDraft(event.currentTarget.value); setError(""); } }} onKeyDown={(event) => {
+    {showText ? <input data-nse-part="field" data-nse-validation={error ? "invalid" : undefined} aria-label={`${props["aria-label"]} date and time`} type="text" value={textDraft} disabled={disabled} readOnly={props.readOnly} required={props.required} aria-invalid={Boolean(error) || undefined} onChange={(event) => { if (!props.readOnly) { setTextDraft(event.currentTarget.value); setError(""); } }} onKeyDown={(event) => {
       if (event.key === "Escape") { event.preventDefault(); cancel(); return; }
       if (event.key !== "Enter") return;
       event.preventDefault();
@@ -244,7 +244,7 @@ export function NSEDateTimeEntry({ value, defaultValue = null, mode = "combined"
         onClick={cancel}
       />
     </div>
-    {error ? <span role="alert">{error}</span> : null}
+    {error ? <span role="alert" data-nse-part="error">{error}</span> : null}
   </section>;
 
   const titleId = `date-time-picker-title-${instanceId}`;
@@ -252,7 +252,7 @@ export function NSEDateTimeEntry({ value, defaultValue = null, mode = "combined"
 
 
   return <span {...drawing.attributes} {...drawing.events} data-state={error ? "invalid" : disabled ? "disabled" : props.readOnly ? "read-only" : current ? "ready" : "empty"} data-nse-validation={error ? "invalid" : undefined}  onFocusCapture={(event) => { drawing.events.onFocusCapture?.(event); setFocused(true); }} onBlurCapture={(event) => { drawing.events.onBlurCapture?.(event); if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false); }}>
-    {mode === "automatic" ? <><button ref={triggerRef} type="button" aria-label={props["aria-label"]} aria-describedby={current ? valueId : undefined} aria-expanded={open} disabled={disabled || props.readOnly} onClick={begin}><span id={valueId} data-nse-part="value">{current ? displayForValue(current, props.locale, hourCycle) : props["aria-label"]}</span></button><NSEPopover id={`date-time-picker-${instanceId}`} open={open} anchor={triggerRef.current} parentWindowControllerId="date-time-picker-window" presentation={{ mode: "automatic" }} surface="overlay" labelledBy={titleId} onOpenChange={(next) => { if (!next && open) cancel(); }}><section data-nse-part="calendar-sheet"><h2 id={titleId}>{props["aria-label"]}</h2>{editor}</section></NSEPopover></> : editor}
+    {mode === "automatic" ? <><button ref={triggerRef} type="button" data-nse-part="button" aria-label={props["aria-label"]} aria-describedby={current ? valueId : undefined} aria-expanded={open} disabled={disabled || props.readOnly} onClick={begin}><span id={valueId} data-nse-part="value">{current ? displayForValue(current, props.locale, hourCycle) : props["aria-label"]}</span></button><NSEPopover id={`date-time-picker-${instanceId}`} open={open} anchor={triggerRef.current} parentWindowControllerId="date-time-picker-window" presentation={{ mode: "automatic" }} surface="overlay" labelledBy={titleId} onOpenChange={(next) => { if (!next && open) cancel(); }}><section data-nse-part="calendar-sheet"><h2 id={titleId}>{props["aria-label"]}</h2>{editor}</section></NSEPopover></> : editor}
     {props.name ? <><input type="hidden" name={props.name} value={`${serializePlainDate(current?.date ?? null)}${current ? `T${serializePlainTime(current.time)}` : ""}`} /><input type="hidden" name={`${props.name}.timeZone`} value={current?.timeZone ?? ""} /><input type="hidden" name={`${props.name}.disambiguation`} value={current?.disambiguation ?? ""} /></> : null}
   </span>;
 }

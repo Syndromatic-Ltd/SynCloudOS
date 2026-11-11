@@ -321,6 +321,7 @@
         "actions",
         "bezel",
         "body",
+        "button",
         "cell",
         "centre",
         "clock",
@@ -344,6 +345,7 @@
         "row",
         "segments",
         "separator",
+        "title",
         "today",
         "value"
       ],
