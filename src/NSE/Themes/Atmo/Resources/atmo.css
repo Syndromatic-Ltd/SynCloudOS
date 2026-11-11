@@ -2922,9 +2922,9 @@
     rgba(40, 65, 82, 0.74);
 }
 
-:scope [data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *):is([data-nse-highlighted],[data-nse-menu-flash="on"]):not(:disabled):not([data-nse-menu-flash="off"]),
-:scope:is([data-nse-style="listbox"]:where([data-nse-part="surface"])) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *):is([data-nse-highlighted],[data-nse-menu-flash="on"]):not(:disabled):not([data-nse-menu-flash="off"]),
-:scope[data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *):is([data-nse-highlighted],[data-nse-menu-flash="on"]):not(:disabled):not([data-nse-menu-flash="off"]) {
+:scope [data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"]>*):is([data-nse-highlighted],[data-nse-menu-flash="on"]):not(:disabled):not([data-nse-menu-flash="off"]),
+:scope:is([data-nse-style="listbox"]:where([data-nse-part="surface"])) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"]>*):is([data-nse-highlighted],[data-nse-menu-flash="on"]):not(:disabled):not([data-nse-menu-flash="off"]),
+:scope[data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"]>*):is([data-nse-highlighted],[data-nse-menu-flash="on"]):not(:disabled):not([data-nse-menu-flash="off"]) {
   background:
     linear-gradient(
       rgba(91, 141, 184, 0.75) 0, rgba(91, 141, 184, 0.75) 1px,
@@ -2935,10 +2935,10 @@
     rgba(255, 255, 255, 0.78);
 }
 
-[data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"])[data-nse-part="background"]:not([data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))) [data-nse-part="state-column"]:where([data-nse-control="menu-item"] *)[data-nse-state="on"]::before,
-:scope [data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *)[data-nse-selected]::after,
-:scope:is([data-nse-style="listbox"]:where([data-nse-part="surface"])) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *)[data-nse-selected]::after,
-:scope[data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *)[data-nse-selected]::after {
+[data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"])[data-nse-part="background"]:not([data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"]>*))) [data-nse-part="state-column"]:where([data-nse-control="menu-item"] *)[data-nse-state="on"]::before,
+:scope [data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"]>*)[data-nse-selected]::after,
+:scope:is([data-nse-style="listbox"]:where([data-nse-part="surface"])) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"]>*)[data-nse-selected]::after,
+:scope[data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"]>*)[data-nse-selected]::after {
   background: var(--nse-atmo-check-glyph) center / contain no-repeat;
 }
 
@@ -5114,7 +5114,7 @@
 
 
 :scope [data-nse-control="secure-text-field"]>:where([data-nse-part="reveal"][data-nse-revealed="false"]):focus-visible,
-:scope:is([data-nse-control="secure-text-field"])>:where([data-nse-part="button"]):focus-visible,
+:scope:is([data-nse-control="secure-text-field"])>:where([data-nse-part="reveal"]):focus-visible,
 :scope[data-nse-control="secure-text-field"]>:where([data-nse-part="reveal"][data-nse-revealed="false"]):focus-visible {
   outline:none;
 }
@@ -5774,15 +5774,15 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
   color: #dfe5ec;
 }
 
-:scope .nse-icon-tab:hover:not(:disabled,[aria-selected="true"]),
-:scope:is(.nse-icon-tab:hover:not(:disabled,[aria-selected="true"])),
-:scope.nse-icon-tab:hover:not(:disabled,[aria-selected="true"]) {
+:scope [data-nse-control="button"]:where([data-nse-part="cell"]):where([data-nse-style="icons"] *):hover:not(:disabled,[data-nse-selected]),
+:scope:is([data-nse-control="button"]:where([data-nse-part="cell"]):where([data-nse-style="icons"] *):hover:not(:disabled,[data-nse-selected])),
+:scope[data-nse-control="button"]:where([data-nse-part="cell"]):where([data-nse-style="icons"] *):hover:not(:disabled,[data-nse-selected]) {
   background-color: var(--nse-atmo-icon-tab-hover);
 }
 
-:scope .nse-icon-tab[aria-selected="true"],
-:scope:is(.nse-icon-tab[aria-selected="true"]),
-:scope.nse-icon-tab[aria-selected="true"] {
+:scope [data-nse-control="button"]:where([data-nse-part="cell"]):where([data-nse-style="icons"] *)[data-nse-selected],
+:scope:is([data-nse-control="button"]:where([data-nse-part="cell"]):where([data-nse-style="icons"] *)[data-nse-selected]),
+:scope[data-nse-control="button"]:where([data-nse-part="cell"]):where([data-nse-style="icons"] *)[data-nse-selected] {
   background-image: var(--nse-atmo-icon-tab-well);
   box-shadow: var(--nse-atmo-icon-tab-well-shadow);
 }
@@ -5794,9 +5794,9 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
   box-shadow: var(--nse-atmo-focus-ring);
 }
 
-:scope .nse-icon-tab[aria-selected="true"]:focus-visible,
-:scope:is(.nse-icon-tab[aria-selected="true"]:focus-visible),
-:scope.nse-icon-tab[aria-selected="true"]:focus-visible {
+:scope [data-nse-control="button"]:where([data-nse-part="cell"]):where([data-nse-style="icons"] *)[data-nse-selected]:focus-visible,
+:scope:is([data-nse-control="button"]:where([data-nse-part="cell"]):where([data-nse-style="icons"] *)[data-nse-selected]:focus-visible),
+:scope[data-nse-control="button"]:where([data-nse-part="cell"]):where([data-nse-style="icons"] *)[data-nse-selected]:focus-visible {
   box-shadow: var(--nse-atmo-icon-tab-well-shadow), var(--nse-atmo-focus-ring);
 }
 
@@ -6024,9 +6024,9 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
 }
 
 /* NSControl.ControlSize.large: the 28px band. Small is the 24px default band. */
-:scope :is(.nse-control-button,.nse-extended-tool-button-group,.nse-extended-radio-tool-button-group)[data-size="large"],
-:scope:is(:is(.nse-control-button,.nse-extended-tool-button-group,.nse-extended-radio-tool-button-group)[data-size="large"]),
-:scope:is(.nse-control-button,.nse-extended-tool-button-group,.nse-extended-radio-tool-button-group)[data-size="large"] {
+:scope :is(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"])),[data-nse-type="tool-button-group"]:where([data-nse-control="toolbar"]),[data-nse-segment-style="texturedRounded"]:where([data-nse-control="segmented-control"]))[data-nse-control-size="large"]:where([data-nse-control="button"]),
+:scope:is(:is(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"])),[data-nse-type="tool-button-group"]:where([data-nse-control="toolbar"]),[data-nse-segment-style="texturedRounded"]:where([data-nse-control="segmented-control"]))[data-nse-control-size="large"]:where([data-nse-control="button"])),
+:scope:is(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"])),[data-nse-type="tool-button-group"]:where([data-nse-control="toolbar"]),[data-nse-segment-style="texturedRounded"]:where([data-nse-control="segmented-control"]))[data-nse-control-size="large"]:where([data-nse-control="button"]) {
   --nse-control-height: 28px;
 }
 
@@ -6094,9 +6094,9 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
    not, as NSOutlineView and NSBrowser do. The disclosure is the disclosure button's
    triangle, turned a quarter when open. Rows keep the Mac's 23px.
    ========================================================================= */
-:scope .nse-outline-view:not([data-style="source-list"]),
-:scope:is(.nse-outline-view:not([data-style="source-list"])),
-:scope.nse-outline-view:not([data-style="source-list"]),
+:scope [data-nse-control="outline-view"]:where([data-nse-part="background"]):not([data-nse-selection-highlight-style="sourceList"]),
+:scope:is([data-nse-control="outline-view"]:where([data-nse-part="background"]):not([data-nse-selection-highlight-style="sourceList"])),
+:scope[data-nse-control="outline-view"]:where([data-nse-part="background"]):not([data-nse-selection-highlight-style="sourceList"]),
 :scope [data-nse-part="columns"]:where([data-nse-control="browser"] *),
 :scope:is([data-nse-part="columns"]:where([data-nse-control="browser"] *)),
 :scope[data-nse-part="columns"]:where([data-nse-control="browser"] *) {
@@ -6104,18 +6104,18 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
   font-size:13px;
 }
 
-:scope .nse-outline-view:not([data-style="source-list"]):focus-visible,
-:scope:is(.nse-outline-view:not([data-style="source-list"]):focus-visible),
-:scope.nse-outline-view:not([data-style="source-list"]):focus-visible,
+:scope [data-nse-control="outline-view"]:where([data-nse-part="background"]):not([data-nse-selection-highlight-style="sourceList"]):focus-visible,
+:scope:is([data-nse-control="outline-view"]:where([data-nse-part="background"]):not([data-nse-selection-highlight-style="sourceList"]):focus-visible),
+:scope[data-nse-control="outline-view"]:where([data-nse-part="background"]):not([data-nse-selection-highlight-style="sourceList"]):focus-visible,
 :scope [data-nse-part="column"]:where([data-nse-control="browser"] *) [data-nse-part="viewport"]:focus-visible,
 :scope:is([data-nse-part="column"]:where([data-nse-control="browser"] *)) [data-nse-part="viewport"]:focus-visible,
 :scope[data-nse-part="column"]:where([data-nse-control="browser"] *) [data-nse-part="viewport"]:focus-visible {
   outline:none;
 }
 
-:scope .nse-outline-view:not([data-style="source-list"]) [data-nse-part="row"],
-:scope:is(.nse-outline-view:not([data-style="source-list"])) [data-nse-part="row"],
-:scope.nse-outline-view:not([data-style="source-list"]) [data-nse-part="row"] {
+:scope [data-nse-control="outline-view"]:where([data-nse-part="background"]):not([data-nse-selection-highlight-style="sourceList"]) [data-nse-part="row"],
+:scope:is([data-nse-control="outline-view"]:where([data-nse-part="background"]):not([data-nse-selection-highlight-style="sourceList"])) [data-nse-part="row"],
+:scope[data-nse-control="outline-view"]:where([data-nse-part="background"]):not([data-nse-selection-highlight-style="sourceList"]) [data-nse-part="row"] {
   display:flex;
   align-items:center;
   white-space:nowrap;
@@ -6126,9 +6126,9 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
    disclosure column a branch spends on its triangle. */
 
 
-:scope .nse-outline-view:not([data-style="source-list"]) [data-nse-part="label"],
-:scope:is(.nse-outline-view:not([data-style="source-list"])) [data-nse-part="label"],
-:scope.nse-outline-view:not([data-style="source-list"]) [data-nse-part="label"] {
+:scope [data-nse-control="outline-view"]:where([data-nse-part="background"]):not([data-nse-selection-highlight-style="sourceList"]) [data-nse-part="label"],
+:scope:is([data-nse-control="outline-view"]:where([data-nse-part="background"]):not([data-nse-selection-highlight-style="sourceList"])) [data-nse-part="label"],
+:scope[data-nse-control="outline-view"]:where([data-nse-part="background"]):not([data-nse-selection-highlight-style="sourceList"]) [data-nse-part="label"] {
   overflow:hidden;
 }
 

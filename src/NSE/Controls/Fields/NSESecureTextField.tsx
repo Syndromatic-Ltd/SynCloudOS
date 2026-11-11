@@ -131,7 +131,6 @@ function NSESecureTextFieldControl(props: NSESecureTextFieldProps) {
       {policy !== "never" ? (
         <button
           type="button"
-          data-nse-part="button"
           aria-label={revealed ? "Conceal password" : "Reveal password"}
           disabled={(props.isEnabled === false) || props.readOnly}
           onClick={() => { if (policy === "toggle") setRevealed((value) => !value); }}

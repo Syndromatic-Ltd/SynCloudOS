@@ -319,6 +319,8 @@ export function NSEColourCrayonsMode({ colour, commit }: NSEColourPickerContext)
         title={entry.name}
         tabIndex={entry.name === focusable ? 0 : -1}
         data-nse-part="crayon"
+        data-nse-selected={selected?.name === entry.name ? "" : undefined}
+        data-nse-position={index === 0 ? "first" : undefined}
         data-row={index}
         style={{ "--nse-crayon": entry.hex, "--nse-crayon-row": index, "--nse-crayon-column": column } as CSSProperties}
         onClick={() => choose(entry)}
