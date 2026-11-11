@@ -215,6 +215,8 @@
         "role": [
           "close",
           "default",
+          "ground",
+          "ink",
           "minimise",
           "zoom"
         ],
@@ -469,7 +471,11 @@
         "size-list"
       ],
       "states": [],
-      "variants": {}
+      "variants": {
+        "flow": [
+          "ltr"
+        ]
+      }
     },
     "grid-view": {
       "parts": [

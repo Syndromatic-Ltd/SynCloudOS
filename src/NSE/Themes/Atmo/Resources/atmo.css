@@ -3217,9 +3217,9 @@
 
 /* The appearance accessibility rules otherwise outline the inner input box.
    Keep one focus indicator on the frame, including in contrast modes. */
-:scope .nse-control-search-frame :where([data-nse-part="field"])[type="search"]:focus-visible,
-:scope:is(.nse-control-search-frame) input[type="search"]:focus-visible,
-:scope.nse-control-search-frame :where([data-nse-part="field"])[type="search"]:focus-visible {
+:scope [data-nse-part="bezel"]:where([data-nse-control="search-field"] *) :where([data-nse-part="field"])[data-nse-part="field"]:focus-visible,
+:scope:is([data-nse-part="bezel"]:where([data-nse-control="search-field"] *)) :where([data-nse-part="field"])[data-nse-part="field"]:focus-visible,
+:scope[data-nse-part="bezel"]:where([data-nse-control="search-field"] *) :where([data-nse-part="field"])[data-nse-part="field"]:focus-visible {
   outline: none !important;
   box-shadow: none !important;
 }
@@ -4349,15 +4349,15 @@
 }
 
 /* An automatic colour's chip shows the document's own ink or ground. */
-:scope [data-nse-control="font-panel"] [data-nse-part="colour-chip"][data-automatic="ink"],
-:scope:is([data-nse-control="font-panel"]) [data-nse-part="colour-chip"][data-automatic="ink"],
-:scope[data-nse-control="font-panel"] [data-nse-part="colour-chip"][data-automatic="ink"] {
+:scope [data-nse-control="font-panel"] [data-nse-part="colour-chip"][data-nse-role="ink"],
+:scope:is([data-nse-control="font-panel"]) [data-nse-part="colour-chip"][data-nse-role="ink"],
+:scope[data-nse-control="font-panel"] [data-nse-part="colour-chip"][data-nse-role="ink"] {
   --nse-font-panel-chip: var(--nse-atmo-well-ink);
 }
 
-:scope [data-nse-control="font-panel"] [data-nse-part="colour-chip"][data-automatic="ground"],
-:scope:is([data-nse-control="font-panel"]) [data-nse-part="colour-chip"][data-automatic="ground"],
-:scope[data-nse-control="font-panel"] [data-nse-part="colour-chip"][data-automatic="ground"] {
+:scope [data-nse-control="font-panel"] [data-nse-part="colour-chip"][data-nse-role="ground"],
+:scope:is([data-nse-control="font-panel"]) [data-nse-part="colour-chip"][data-nse-role="ground"],
+:scope[data-nse-control="font-panel"] [data-nse-part="colour-chip"][data-nse-role="ground"] {
   --nse-font-panel-chip: var(--nse-atmo-well-fill);
 }
 
@@ -4397,15 +4397,15 @@
   border-color: var(--nse-atmo-panel-rule);
 }
 
-:scope [data-nse-control="font-panel"]>p[role="alert"],
-:scope:is([data-nse-control="font-panel"])>p[role="alert"],
-:scope[data-nse-control="font-panel"]>p[role="alert"] {
+:scope [data-nse-control="font-panel"]>:where(:is([data-nse-part="notice"], [data-nse-part="error"], [data-nse-part="preview-description"]))[data-nse-part="error"],
+:scope:is([data-nse-control="font-panel"])>:where(:is([data-nse-part="notice"], [data-nse-part="error"], [data-nse-part="preview-description"]))[data-nse-part="error"],
+:scope[data-nse-control="font-panel"]>:where(:is([data-nse-part="notice"], [data-nse-part="error"], [data-nse-part="preview-description"]))[data-nse-part="error"] {
   color: var(--nse-atmo-alert-ink);
 }
 
-:scope [data-nse-control="font-panel"]>:where([data-nse-part="notice"])[role="status"],
-:scope:is([data-nse-control="font-panel"])>p[role="status"],
-:scope[data-nse-control="font-panel"]>:where([data-nse-part="notice"])[role="status"] {
+:scope [data-nse-control="font-panel"]>:where([data-nse-part="notice"])[data-nse-part="notice"],
+:scope:is([data-nse-control="font-panel"])>:where(:is([data-nse-part="notice"], [data-nse-part="error"], [data-nse-part="preview-description"]))[data-nse-part="notice"],
+:scope[data-nse-control="font-panel"]>:where([data-nse-part="notice"])[data-nse-part="notice"] {
   color: var(--nse-atmo-well-muted);
 }
 
@@ -5877,9 +5877,9 @@ input:scope[data-nse-control="scroller"]:focus-visible {
   grid-template-columns:minmax(0,1fr) calc(var(--nse-control-height,26px)*0.56);
 }
 
-:scope .nse-control-search-field[data-size] .nse-control-search-frame :where([data-nse-part="field"])[type="search"],
-:scope:is(.nse-control-search-field[data-size]) .nse-control-search-frame input[type="search"],
-:scope.nse-control-search-field[data-size] .nse-control-search-frame :where([data-nse-part="field"])[type="search"] {
+:scope [data-nse-control="search-field"]:where([data-nse-part="content"]):is([data-nse-height], [data-nse-control-size="small"]) [data-nse-part="bezel"]:where([data-nse-control="search-field"] *) :where([data-nse-part="field"])[data-nse-part="field"],
+:scope:is([data-nse-control="search-field"]:where([data-nse-part="content"]):is([data-nse-height], [data-nse-control-size="small"])) [data-nse-part="bezel"]:where([data-nse-control="search-field"] *) [data-nse-part="field"],
+:scope[data-nse-control="search-field"]:where([data-nse-part="content"]):is([data-nse-height], [data-nse-control-size="small"]) [data-nse-part="bezel"]:where([data-nse-control="search-field"] *) :where([data-nse-part="field"])[data-nse-part="field"] {
   font-size:max(11px,calc(var(--nse-control-height,26px)*0.5));
 }
 
@@ -6259,16 +6259,16 @@ input:scope[data-nse-control="scroller"]:focus-visible {
   align-items:center;
 }
 
-:scope .nse-control-search-frame :where([data-nse-part="field"])[type="search"],
-:scope:is(.nse-control-search-frame) input[type="search"],
-:scope.nse-control-search-frame :where([data-nse-part="field"])[type="search"] {
+:scope [data-nse-part="bezel"]:where([data-nse-control="search-field"] *) :where([data-nse-part="field"])[data-nse-part="field"],
+:scope:is([data-nse-part="bezel"]:where([data-nse-control="search-field"] *)) :where([data-nse-part="field"])[data-nse-part="field"],
+:scope[data-nse-part="bezel"]:where([data-nse-control="search-field"] *) :where([data-nse-part="field"])[data-nse-part="field"] {
   flex:1 1 auto;
   transition:color 0.18s ease,text-shadow 0.18s ease;
 }
 
-:scope .nse-control-search-frame :where([data-nse-part="field"])[type="search"]::placeholder,
-:scope:is(.nse-control-search-frame) input[type="search"]::placeholder,
-:scope.nse-control-search-frame :where([data-nse-part="field"])[type="search"]::placeholder {
+:scope [data-nse-part="bezel"]:where([data-nse-control="search-field"] *) :where([data-nse-part="field"])[data-nse-part="field"]::placeholder,
+:scope:is([data-nse-part="bezel"]:where([data-nse-control="search-field"] *)) :where([data-nse-part="field"])[data-nse-part="field"]::placeholder,
+:scope[data-nse-part="bezel"]:where([data-nse-control="search-field"] *) :where([data-nse-part="field"])[data-nse-part="field"]::placeholder {
   font-style:italic;
   transition:color 0.18s ease,text-shadow 0.18s ease;
 }
@@ -6276,12 +6276,12 @@ input:scope[data-nse-control="scroller"]:focus-visible {
 
 
 /* The native search input's own cancel and decoration would double the clear button. */
-:scope .nse-control-search-frame :where([data-nse-part="field"])[type="search"]::-webkit-search-cancel-button,
-:scope:is(.nse-control-search-frame) input[type="search"]::-webkit-search-cancel-button,
-:scope.nse-control-search-frame :where([data-nse-part="field"])[type="search"]::-webkit-search-cancel-button,
-:scope .nse-control-search-frame :where([data-nse-part="field"])[type="search"]::-webkit-search-decoration,
-:scope:is(.nse-control-search-frame) input[type="search"]::-webkit-search-decoration,
-:scope.nse-control-search-frame :where([data-nse-part="field"])[type="search"]::-webkit-search-decoration {
+:scope [data-nse-part="bezel"]:where([data-nse-control="search-field"] *) :where([data-nse-part="field"])[data-nse-part="field"]::-webkit-search-cancel-button,
+:scope:is([data-nse-part="bezel"]:where([data-nse-control="search-field"] *)) :where([data-nse-part="field"])[data-nse-part="field"]::-webkit-search-cancel-button,
+:scope[data-nse-part="bezel"]:where([data-nse-control="search-field"] *) :where([data-nse-part="field"])[data-nse-part="field"]::-webkit-search-cancel-button,
+:scope [data-nse-part="bezel"]:where([data-nse-control="search-field"] *) :where([data-nse-part="field"])[data-nse-part="field"]::-webkit-search-decoration,
+:scope:is([data-nse-part="bezel"]:where([data-nse-control="search-field"] *)) :where([data-nse-part="field"])[data-nse-part="field"]::-webkit-search-decoration,
+:scope[data-nse-part="bezel"]:where([data-nse-control="search-field"] *) :where([data-nse-part="field"])[data-nse-part="field"]::-webkit-search-decoration {
   -webkit-appearance: none;
   appearance: none;
 }
@@ -6302,12 +6302,12 @@ input:scope[data-nse-control="scroller"]:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :scope .nse-control-search-frame :where([data-nse-part="field"])[type="search"],
-:scope:is(.nse-control-search-frame) input[type="search"],
-:scope.nse-control-search-frame :where([data-nse-part="field"])[type="search"],
-:scope .nse-control-search-frame :where([data-nse-part="field"])[type="search"]::placeholder,
-:scope:is(.nse-control-search-frame) input[type="search"]::placeholder,
-:scope.nse-control-search-frame :where([data-nse-part="field"])[type="search"]::placeholder,
+  :scope [data-nse-part="bezel"]:where([data-nse-control="search-field"] *) :where([data-nse-part="field"])[data-nse-part="field"],
+:scope:is([data-nse-part="bezel"]:where([data-nse-control="search-field"] *)) :where([data-nse-part="field"])[data-nse-part="field"],
+:scope[data-nse-part="bezel"]:where([data-nse-control="search-field"] *) :where([data-nse-part="field"])[data-nse-part="field"],
+:scope [data-nse-part="bezel"]:where([data-nse-control="search-field"] *) :where([data-nse-part="field"])[data-nse-part="field"]::placeholder,
+:scope:is([data-nse-part="bezel"]:where([data-nse-control="search-field"] *)) :where([data-nse-part="field"])[data-nse-part="field"]::placeholder,
+:scope[data-nse-part="bezel"]:where([data-nse-control="search-field"] *) :where([data-nse-part="field"])[data-nse-part="field"]::placeholder,
 :scope [data-nse-part="image"]:where([data-nse-control="search-field"] *),
 :scope:is([data-nse-part="image"]:where([data-nse-control="search-field"] *)),
 :scope[data-nse-part="image"]:where([data-nse-control="search-field"] *) {

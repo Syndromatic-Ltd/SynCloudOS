@@ -3679,8 +3679,8 @@
 /* The panel fills its window edge to edge: the preview and the bars run
    under the title bar and out to the frame (the utility panel lays it out
    with no content inset). */
-:where(:scope) [data-nse-control="font-panel"][data-state],
-:where(:scope):is([data-nse-control="font-panel"][data-state]) {
+:where(:scope) [data-nse-control="font-panel"][data-nse-part="background"],
+:where(:scope):is([data-nse-control="font-panel"][data-nse-part="background"]) {
   --nse-font-panel-inset: 8px;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -3803,8 +3803,8 @@
 }
 
 
-:where(:scope) [data-nse-control="font-panel"] [data-nse-part="size-column"]>.nse-control-text-field :is(.nse-control-field-frame,input),
-:where(:scope):is([data-nse-control="font-panel"]) [data-nse-part="size-column"]>.nse-control-text-field :is(.nse-control-field-frame,input) {
+:where(:scope) [data-nse-control="font-panel"] [data-nse-part="size-column"]>[data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"]) :is([data-nse-part="bezel"]:where([data-nse-control="text-field"] *),:where([data-nse-part="field"])),
+:where(:scope):is([data-nse-control="font-panel"]) [data-nse-part="size-column"]>[data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"]) :is([data-nse-part="bezel"]:where([data-nse-control="text-field"] *),:where([data-nse-part="field"])) {
   inline-size:100%;
   min-inline-size:0;
 }
@@ -3838,8 +3838,8 @@
 
 /* The search field keeps to the column grid: it spans the Typeface and Size
    columns (118 + 5 + 67) and ends at the panel's inset. */
-:where(:scope) [data-nse-control="font-panel"]>[data-nse-part="footer"]>:is(.nse-search-field,[data-nse-control="search-field"]),
-:where(:scope):is([data-nse-control="font-panel"])>[data-nse-part="footer"]>:is(.nse-search-field,[data-nse-control="search-field"]) {
+:where(:scope) [data-nse-control="font-panel"]>[data-nse-part="footer"]>[data-nse-control="search-field"],
+:where(:scope):is([data-nse-control="font-panel"])>[data-nse-part="footer"]>[data-nse-control="search-field"] {
   flex: 0 1 190px;
   margin-inline-start: auto;
 }
@@ -3875,22 +3875,22 @@
   transform: translateY(-1px);
 }
 
-:where(:scope) [data-nse-control="font-panel"] [dir="rtl"] [data-nse-part="alignment-glyph"],
-:where(:scope):is([data-nse-control="font-panel"]) [dir="rtl"] [data-nse-part="alignment-glyph"],
-:where(:scope) [data-nse-control="font-panel"][dir="rtl"] [data-nse-part="alignment-glyph"],
-:where(:scope):is([data-nse-control="font-panel"][dir="rtl"]) [data-nse-part="alignment-glyph"] {
+:where(:scope) [data-nse-control="font-panel"] [data-nse-flow="rtl"] [data-nse-part="alignment-glyph"],
+:where(:scope):is([data-nse-control="font-panel"]) [data-nse-flow="rtl"] [data-nse-part="alignment-glyph"],
+:where(:scope) [data-nse-control="font-panel"][data-nse-flow="rtl"] [data-nse-part="alignment-glyph"],
+:where(:scope):is([data-nse-control="font-panel"][data-nse-flow="rtl"]) [data-nse-part="alignment-glyph"] {
   transform: scaleX(-1);
 }
 
-:where(:scope) [data-nse-control="font-panel"]>:where([data-nse-part="notice"]):is([role="alert"],[role="status"]),
-:where(:scope):is([data-nse-control="font-panel"])>p:is([role="alert"],[role="status"]) {
+:where(:scope) [data-nse-control="font-panel"]>:where([data-nse-part="notice"]):is([data-nse-part="error"],[data-nse-part="notice"]),
+:where(:scope):is([data-nse-control="font-panel"])>:where(:is([data-nse-part="notice"], [data-nse-part="error"], [data-nse-part="preview-description"])):is([data-nse-part="error"],[data-nse-part="notice"]) {
   margin: 0 var(--nse-font-panel-inset) var(--nse-font-panel-inset);
   font-size: 11px;
   font-weight: 600;
 }
 
-:where(:scope) [data-nse-control="font-panel"]>:where([data-nse-part="notice"])[role="status"]:empty,
-:where(:scope):is([data-nse-control="font-panel"])>p[role="status"]:empty {
+:where(:scope) [data-nse-control="font-panel"]>:where([data-nse-part="notice"])[data-nse-part="notice"]:empty,
+:where(:scope):is([data-nse-control="font-panel"])>:where(:is([data-nse-part="notice"], [data-nse-part="error"], [data-nse-part="preview-description"]))[data-nse-part="notice"]:empty {
   display: none;
 }
 
