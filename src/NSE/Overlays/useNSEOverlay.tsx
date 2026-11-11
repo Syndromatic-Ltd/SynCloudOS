@@ -73,6 +73,7 @@ export interface UseNSEOverlayResult {
     readonly "data-nse-role": "overlay";
     readonly "data-state": "open";
     readonly "data-placement": NSELogicalPlacement;
+    readonly "data-nse-placement": NSELogicalPlacement;
     readonly "data-nse-viewport-limited": "true" | "false";
     readonly "data-nse-content-pending"?: "true";
     readonly inert?: boolean;
@@ -424,6 +425,7 @@ export function useNSEOverlay({
       "data-nse-role": "overlay",
       "data-state": "open",
       "data-placement": placement,
+      "data-nse-placement": placement,
       "data-nse-viewport-limited": viewportLimited ? "true" : "false",
       ...(contentPending ? { "data-nse-content-pending": "true" as const, inert: true } : {}),
     },
