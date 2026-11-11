@@ -19,8 +19,7 @@
  */
 
 import type { NSETheme } from "../../Theme/NSETheme";
-import { atmoTheme } from "../../Themes/Atmo/appearance";
-import { atmoNamedImages } from "../../Themes/Atmo/namedImages";
+import { atmoTheme } from "../../Appearance/atmoTheme";
 
 /** NSImage: a named system image. Atmo supplies its artwork; controls supply its content colour. */
 export class NSEImage {
@@ -38,13 +37,12 @@ export class NSEImage {
   /** NSImage(named:): returns the shared system image, or null when the name is unknown. */
   static named(name: string, theme: NSETheme = atmoTheme): NSEImage | null {
     const artwork = theme.images[name] ?? atmoTheme.images[name];
-    const fallback = Object.hasOwn(atmoNamedImages, name) ? atmoNamedImages[name as keyof typeof atmoNamedImages] : null;
-    if (!artwork && !fallback) return null;
+    if (!artwork) return null;
     let cache = this.#named.get(theme);
     if (!cache) this.#named.set(theme, cache = new Map());
     let image = cache.get(name);
     if (!image) {
-      image = artwork ? new NSEImage(name, artwork.files["1x"], artwork.pointSize, artwork.template ?? false, artwork.files) : new NSEImage(name, fallback!.src, fallback!.size);
+      image = new NSEImage(name, artwork.files["1x"]!, artwork.pointSize, artwork.template ?? false, artwork.files);
       cache.set(name, image);
     }
     return image;

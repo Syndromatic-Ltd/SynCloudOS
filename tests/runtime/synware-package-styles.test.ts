@@ -76,7 +76,7 @@ describe("installed SDK stylesheet ownership", () => {
     expect(chrome).toContain("var(--nse-topbar-title-arrow-image, none)");
 
     for (const stylesheet of [
-      "src/NSE/Themes/Atmo/Resources/atmo.css",
+      "src/Themes/Atmo.scostheme/Contents/Resources/atmo.controls.css",
     ]) {
       expect(readFileSync(join(process.cwd(), stylesheet), "utf8"), stylesheet)
         .toContain("--nse-topbar-title-arrow-image");

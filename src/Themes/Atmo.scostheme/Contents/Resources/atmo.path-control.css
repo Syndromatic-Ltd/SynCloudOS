@@ -1,26 +1,4 @@
-
-@layer nse.atmo {
-@scope ([data-nse-theme]) to ([data-nse-theme]) {
-/*
- * SynCloudOS
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
- *
- * Designed by Kavish Krishnakumar in Manchester.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
+/* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 /* NSPathControl.standard: Atmo's inset path bezel; these are path cells, not push-button bezels. */
 :where(:scope) [data-nse-control="path-control"]:where([data-nse-part="background"]),
 :where(:scope):is([data-nse-control="path-control"]:where([data-nse-part="background"])),
@@ -73,6 +51,3 @@
 :where(:scope):is([data-nse-colour-scheme-resolved="dark"]):is([data-nse-control="button"]:where([data-nse-part="path-item"])),
 :where(:scope)[data-nse-colour-scheme-resolved="dark"] [data-nse-control="button"]:where([data-nse-part="path-item"]),
 :where(:scope)[data-nse-colour-scheme-resolved="dark"]:is([data-nse-control="button"]:where([data-nse-part="path-item"])) { text-shadow: 0 -1px #0008; }
-
-}
-}

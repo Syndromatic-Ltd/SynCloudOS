@@ -1,14 +1,21 @@
-@import "./atmo-structure.buttons.css";
-@import "./atmo.buttons.css";
-@import "./atmo-structure.selection.css";
-@import "./atmo.selection.css";
-@import "./atmo-structure.values.css";
-@import "./atmo.values.css";
-@import "./atmo-structure.text.css";
-@import "./atmo.text.css";
-@import "./atmo-structure.boxes.css";
-@import "./atmo.boxes.css";
-@import "./atmo-structure.data.css";
-@import "./atmo.data.css";
+/* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
+/* Atmo: the built-in theme. Every stylesheet of the bundle, in drawing order. */
 @import "./atmo-structure.core.css";
+@import "./atmo-structure.data.css";
+@import "./atmo-structure.boxes.css";
+@import "./atmo-structure.text.css";
+@import "./atmo-structure.values.css";
+@import "./atmo-structure.selection.css";
+@import "./atmo-structure.buttons.css";
+@import "./atmo-structure.controls.css";
 @import "./atmo.core.css";
+@import "./atmo.data.css";
+@import "./atmo.boxes.css";
+@import "./atmo.text.css";
+@import "./atmo.values.css";
+@import "./atmo.selection.css";
+@import "./atmo.buttons.css";
+@import "./atmo.path-control.css";
+@import "./atmo.controls.css";
+@import "./atmo.chrome.css";
+@import "./atmo.window-titlebar.css";

@@ -28,7 +28,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance";
-import { atmoTheme } from "../../src/NSE/Themes/Atmo";
+import { atmoTheme } from "../../src/NSE/Appearance/atmo";
 import { NSEMenuView, NSEPopUpButton } from "../../src/NSE/Menus";
 import { NSELevelIndicator, NSEStepper } from "../../src/NSE/Controls/Values";
 import { NSEComboBox } from "../../src/NSE/Controls/Completion";

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import * as appearance from "../../src/NSE/public/appearance";
 import * as publicNSE from "../../src/NSE/sdkPackageEntry";
 import { freezeNSETheme } from "../../src/NSE/Theme/NSETheme";
-import { atmoTheme } from "../../src/NSE/Themes/Atmo";
+import { atmoTheme } from "../../src/NSE/Appearance/atmo";
 describe("NSETheme replaces appearance definitions", () => {
   it("removes the definition factory and slot API from both public entries", () => {
     for (const entry of [appearance, publicNSE]) for (const name of ["defineNSEAppearance", "useNSEAppearanceSlot", "resolveNSEAppearanceSlot"]) expect(entry).not.toHaveProperty(name);

@@ -24,12 +24,13 @@ import { readFileSync } from "node:fs";
 import { act, cleanup, render, screen } from "@testing-library/react";
 import * as cssTree from "css-tree";
 import { afterEach, describe, expect, it } from "vitest";
+import { atmoPaintCSS, atmoStructureFile } from "../../fixtures/atmoStylesheets";
 import { NSESearchField, type NSESearchFieldProps } from "../../../src/NSE/Controls/Fields/NSESearchField";
 
-const atmoCss = readFileSync("src/NSE/Themes/Atmo/Resources/atmo.css", "utf8");
+const atmoCss = atmoPaintCSS();
 const appearanceCss = readFileSync("src/NSE/Appearance/nse-appearance.css", "utf8");
 const fieldCss = readFileSync("src/NSE/Controls/Fields/nse-field-extensions.css", "utf8");
-const structureCss = readFileSync("src/NSE/Themes/Atmo/Resources/atmo-structure.css", "utf8");
+const structureCss = readFileSync(atmoStructureFile, "utf8");
 
 // Keep the real search selectors, declaration order and media conditions,
 // without mounting unrelated controls or the theme's large SVG data URLs.

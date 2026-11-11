@@ -1,35 +1,4 @@
-@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo.core.css";
-@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo.data.css";
-@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo.boxes.css";
-@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo.text.css";
-@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo.values.css";
-@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo.selection.css";
-@import "../../../../Themes/Atmo.scostheme/Contents/Resources/atmo.buttons.css";
-@import "./path-control.css";
-@layer nse.atmo {
-@scope ([data-nse-theme]) to ([data-nse-theme]) {
-/*
- * SynCloudOS
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
- *
- * Designed by Kavish Krishnakumar in Manchester.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
-
-
+/* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 /* Atmo vector control material, with light and dark appearance tokens.
  * Load after atmo-structure.css. Third-party artwork origins are recorded
  * in the repository notices; no raster theme is required at runtime. */
@@ -976,7 +945,7 @@
 
 
 /* Same shadowing problem, same fix: the row sets `color`, which outranks
-   atmo-controls.css's `.nse-control-list-item.is-disabled { color: gray }` and made
+   atmo-controls.css's `the list item element.is-disabled { color: gray }` and made
    disabled rows render at full strength. */
 
 
@@ -1121,7 +1090,7 @@
   );
 }
 
-/* App menu — the same 30/28/35-sliced system-menu frame as .nse-control-menu, but
+/* App menu — the same 30/28/35-sliced system-menu frame as the menu element, but
    the element declares a UNIFORM 30px border rather than 30/28/35. The vector
    frame is drawn by pseudo-elements positioned against the padding box, so the
    insets must subtract THIS element's border to land on the same border-box
@@ -1193,7 +1162,7 @@
 
 /* App menu rows use system-menu-item-divider.png as a 1px border-image; the
    menu's own separators already resolve to a native hairline pair, so this is
-   the same treatment reached through .nse-control-app-menu-inner's child selector.
+   the same treatment reached through the app menu inner element's child selector.
    Border-image is cleared and the rule restates the 1px top border it was
    carrying, so row rhythm is unchanged. */
 :scope [data-nse-part="body"]:where([data-nse-role="application-menu"]>*)>*,
@@ -1256,13 +1225,13 @@
 /* Row colour, held one notch above the geometry rule above and away from the
    disabled rule below.
 
-   atmo-controls.css writes these rows as `.nse-control-app-menu-inner > *` —
-   (0,1,0), a TIE with `.nse-control-list-item` — so the later app-menu rule wins on
+   atmo-controls.css writes these rows as `the app menu inner element > *` —
+   (0,1,0), a TIE with `the list item element` — so the later app-menu rule wins on
    order and the rows read white on the dark system menu. This file's
-   `[data-nse-theme="com.syndromatic.atmo"] .nse-control-list-item` is (0,2,0) and broke that tie,
+   `[data-nse-theme="com.syndromatic.atmo"] the list item element` is (0,2,0) and broke that tie,
    so the colour was restated at (0,2,0) and won back on order. Then the metal
    fix split row colour out into
-   `[data-nse-theme="com.syndromatic.atmo"] .nse-control-list-item:not([data-nse-material="metal"] *)`.
+   `[data-nse-theme="com.syndromatic.atmo"] the list item element:not([data-nse-material="metal"] *)`.
    `:not()` carries the weight of its argument, so that rule is (0,3,0) — it
    outranks the restatement outright and took the app menu with it. Enabled rows
    went #333 on a #4a4b4c panel; the DISABLED row, at (0,3,0) and later, kept
@@ -1341,7 +1310,7 @@
   background: transparent;
 }
 
-/* Dialog — identical geometry to .nse-control-popup (24px border, popup-panel.png
+/* Dialog — identical geometry to the popup element (24px border, popup-panel.png
    sliced 24 fill), so the popup recipe transfers with its insets unchanged. */
 :scope [data-nse-style]:where([data-nse-control="system-alert"][data-nse-part="bezel"]),
 :scope:is([data-nse-style]:where([data-nse-control="system-alert"][data-nse-part="bezel"])),
@@ -2507,7 +2476,7 @@
    The NSEMenu / NSEListboxPopup surfaces wear the same measured recipes as
    the system menu and picker list above (system-menu-background.png,
    popup-picker.png). Box geometry is the shared Atmo control structure's, so
-   the pseudo-element insets are the .nse-control-menu / picker-list ones. */
+   the pseudo-element insets are the the menu element / picker-list ones. */
 [data-nse-part="surface"]:where(:not([data-nse-control="tooltip"]))[data-nse-part="surface"]:is([data-nse-style]:where(:is([data-nse-style="menu"],[data-nse-style="application-menu"])):where([data-nse-part="surface"]),[data-nse-style="submenu"]:where([data-nse-part="surface"]),[data-nse-style="context-menu"]:where([data-nse-part="surface"])):not([data-nse-style="application-menu"]:where([data-nse-part="surface"])),
 [data-nse-part="surface"]:where(:not([data-nse-control="tooltip"]))[data-nse-part="surface"][data-nse-style="listbox"]:where([data-nse-part="surface"]) {
   border-image: none;
@@ -2625,7 +2594,7 @@
 /* Popup panels (NSEPopup popover / action sheet): the popup-panel recipe.
    The surface is already positioned (fixed or anchored), so the frame hangs
    off it without changing its position. Insets subtract the 24px frame to
-   land at border-box 8px 7px, as on .nse-control-popup. */
+   land at border-box 8px 7px, as on the popup element. */
 [data-nse-part="surface"]:where(:not([data-nse-control="tooltip"]))[data-nse-part="surface"]:is([data-nse-style="popover"]:where([data-nse-part="surface"]),[data-nse-style="action-sheet"]:where([data-nse-part="surface"])) {
   border-image: none;
 }
@@ -5648,7 +5617,4 @@
     var(--nse-atmo-svg-nse-tab-atmo-only-dis-end);
   background-repeat: no-repeat;
   background-size: 0 0;
-}
-
-}
 }

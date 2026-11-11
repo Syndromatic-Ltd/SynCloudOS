@@ -4,7 +4,7 @@ import { act, cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance/NSEAppearanceProvider";
 import { freezeNSETheme } from "../../src/NSE/Theme/NSETheme";
-import { atmoTheme } from "../../src/NSE/Themes/Atmo/appearance";
+import { atmoTheme } from "../../src/NSE/Appearance/atmoTheme";
 import { NSEViewController, nseUpdateTraits } from "../../src/NSE/Application/NSEViewController";
 import { NSEViewControllerView } from "../../src/SynCloudOS/AppHosting/applicationHosting";
 import { NSETabViewController, NSETabViewItem } from "../../src/NSE/Navigation/NSETabViewController";

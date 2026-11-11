@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { themeBaselineCatalogue } from "../e2e/fixtures/theme-baseline/catalogue";
 import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance/NSEAppearanceProvider";
-import { atmoTheme } from "../../src/NSE/Themes/Atmo";
+import { atmoTheme } from "../../src/NSE/Appearance/atmo";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 import { nseThemeParts } from "../../src/NSE/Theme/contract/vocabulary";
 

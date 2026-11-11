@@ -9,7 +9,7 @@ import { supplementalThemeCatalogue } from "../e2e/fixtures/theme-additional/sup
 import { additionalThemeCatalogue } from "../e2e/fixtures/theme-additional/catalogue";
 import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance/NSEAppearanceProvider";
-import { atmoTheme } from "../../src/NSE/Themes/Atmo";
+import { atmoTheme } from "../../src/NSE/Appearance/atmo";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 import { nseThemeControls, nseThemeParts, nseThemeStates, nseThemeVariants } from "../../src/NSE/Theme/contract/vocabulary";
 import { nseThemeColourNames } from "../../src/NSE/Theme/contract/colours";

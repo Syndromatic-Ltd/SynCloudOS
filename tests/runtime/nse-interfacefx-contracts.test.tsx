@@ -171,7 +171,7 @@ describe("NSE semantic contracts", () => {
     expect(registrySource).not.toMatch(/Atmo-Onyx|\bOnyx\b|atmo-onyx|AtmoRefresh\.app/u);
     expect(getNSERegistryItem("atmo")).toMatchObject({
       title: "Atmo",
-      files: ["src/NSE/Themes/Atmo/index.ts", "src/NSE/Themes/Atmo/Resources/atmo.css"],
+      files: ["src/NSE/Appearance/atmo.ts", "src/NSE/Appearance/atmo-theme.css"],
     });
   });
 

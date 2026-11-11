@@ -62,14 +62,14 @@ export const synWareSdkEntries = Object.freeze({
   "nse/content": "src/NSE/public/content.ts",
   "nse/theme": "src/NSE/public/theme.ts",
   "nse/appearance": "src/NSE/public/appearance.ts",
-  "nse/themes/atmo": "src/NSE/Themes/Atmo/index.ts",
+  "nse/themes/atmo": "src/NSE/Appearance/atmo.ts",
   "nse/scroll": "src/NSE/public/scroll.ts",
   "nse/page": "src/NSE/public/page.ts",
   "nse/layout": "src/NSE/public/layout.ts",
   "nse/system-ui": "src/NSE/public/system-ui.ts",
 });
 export const synWareSdkStyles = Object.freeze({
-  "nse/themes/atmo/styles.css": "src/NSE/Themes/Atmo/Resources/atmo.css",
+  "nse/themes/atmo/styles.css": "src/NSE/Appearance/atmo-theme.css",
 });
 export const synWareSdkGeneratedStyles = Object.freeze({
   "browser/styles.css": "browser",

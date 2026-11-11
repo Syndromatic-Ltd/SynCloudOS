@@ -414,6 +414,10 @@ async function main() {
     .replace('const entryName = "public.ts"', 'const entryName = "public.d.ts"'));
   cpSync(resolve(repositoryRoot, "src/SynCloudOS/AppSDK/manifest/synappManifestValidator.generated.mjs"), resolve(directory, "manifest-validator.mjs"));
   cpSync(resolve(repositoryRoot, "scripts/synware/virtual-themes.d.ts"), resolve(typesDirectory, "virtual-themes.d.ts"));
+  // Atmo.scostheme as source: the reference theme the developer MCP scaffolds new themes from and validates against.
+  cpSync(resolve(repositoryRoot, "src/Themes/Atmo.scostheme"), resolve(directory, "themes/Atmo.scostheme"), { recursive: true });
+  // Atmo.scostheme as source: the reference theme the developer MCP scaffolds new themes from and validates against.
+  cpSync(resolve(repositoryRoot, "src/Themes/Atmo.scostheme"), resolve(directory, "themes/Atmo.scostheme"), { recursive: true });
   cpSync(resolve(repositoryRoot, "scripts/synware/vite-plugin.d.mts"), resolve(typesDirectory, "vite.d.mts"));
   exports["./vite"] = { types: "./types/vite.d.mts", import: "./vite.mjs" };
   if (!existsSync(resolve(directory, "nse/styles.css"))) throw new Error("SynWare SDK did not emit its required NSE stylesheet.");

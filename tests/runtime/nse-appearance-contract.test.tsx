@@ -36,7 +36,7 @@ import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEPopUpButton } from "../../src/NSE/Menus";
 import { NSEOverlayProvider, NSEPopup as NSECanonicalPopup } from "../../src/NSE/Overlays";
 import type { NSEOverlayRuntimePort } from "../../src/NSE/Overlays/overlayTypes";
-import { atmoTheme } from "../../src/NSE/Themes/Atmo";
+import { atmoTheme } from "../../src/NSE/Appearance/atmo";
 import { NSETooltip } from "../../src/NSE/Tooltips";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 

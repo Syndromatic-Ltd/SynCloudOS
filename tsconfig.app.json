@@ -55,10 +55,10 @@
         "./src/NSE/public/appearance.ts"
       ],
       "@syndromatic/syncloudos/nse/themes/atmo": [
-        "./src/NSE/Themes/Atmo/index.ts"
+        "./src/NSE/Appearance/atmo.ts"
       ],
       "@syndromatic/syncloudos/nse/themes/atmo/styles.css": [
-        "./src/NSE/Themes/Atmo/Resources/atmo.css"
+        "./src/NSE/Appearance/atmo-theme.css"
       ],
       "@syndromatic/syncloudos/nse/scroll": [
         "./src/NSE/public/scroll.ts"

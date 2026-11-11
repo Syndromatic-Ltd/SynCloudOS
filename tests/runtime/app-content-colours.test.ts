@@ -5,6 +5,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { atmoPaintCSS } from "../fixtures/atmoStylesheets";
 
 const root = resolve(import.meta.dirname, "../..");
 const read = (path: string) => readFileSync(resolve(root, path), "utf8");
@@ -50,9 +51,10 @@ describe("application content colours", () => {
   });
 
   it("lets Atmo define every token it draws differently, in light and dark", () => {
-    const css = read("src/NSE/Themes/Atmo/Resources/atmo.css");
-    const light = block(css, '[data-nse-theme="com.syndromatic.atmo"]');
-    const dark = block(css, '[data-nse-theme="com.syndromatic.atmo"][data-mode="dark"],\n[data-nse-theme="com.syndromatic.atmo"] [data-mode="dark"]');
+    const css = atmoPaintCSS();
+    // Bundle rules are scoped to the theme root: :scope is Atmo's root, in light unless the resolved scheme is dark.
+    const light = block(css, ":scope");
+    const dark = block(css, ':scope:is([data-nse-colour-scheme-resolved="dark"])');
     const themed = documented.filter(token => token !== "--nse-colour-window-background" && token !== "--nse-colour-label");
     for (const token of themed) {
       expect(light.has(token), `Atmo light ${token}`).toBe(true);

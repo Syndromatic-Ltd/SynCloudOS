@@ -52,7 +52,7 @@ function Toolbar({ width, customising, borderless = false, labelled = false, siz
   return <><NSEToolbarView composition="configured" controller={controller} width={width} interaction={{ parentResponderId: "contract" }} />{customising ? <NSEToolbarConfigurationSheet id="contract-toolbar-palette" open anchor={null} parentResponderId="contract" parentWindowControllerId={null} controller={controller} onOpenChange={noop} /> : null}</>;
 }
 import { NSEAppearanceProvider } from "../../../../src/NSE/Appearance/NSEAppearanceProvider";
-import { atmoTheme } from "../../../../src/NSE/Themes/Atmo";
+import { atmoTheme } from "../../../../src/NSE/Appearance/atmo";
 import { freezeNSETheme } from "../../../../src/NSE/Theme/NSETheme";
 import { LoginWindow } from "../../../../src/NSE/SystemUI/LoginWindow";
 import { SystemSurface } from "../theme-baseline/system";

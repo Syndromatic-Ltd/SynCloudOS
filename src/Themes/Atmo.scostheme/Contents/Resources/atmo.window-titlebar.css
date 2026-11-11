@@ -1,6 +1,4 @@
-
-@layer nse.atmo {
-@scope ([data-nse-theme]) to ([data-nse-theme]) {
+/* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 /* Atmo owns NSWindow.ToolbarStyle appearance. The expanded geometry follows Main/Phone.dc.html. */
 :scope { --nse-atmo-window-titlebar-radius: 14px; }
 :scope [data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-toolbar-style])[data-nse-toolbar-style="expanded"],
@@ -126,7 +124,4 @@
     );
   /* After the shorthand, which resets it — same trap as the light plate. */
   background-origin: border-box;
-}
-
-}
 }
