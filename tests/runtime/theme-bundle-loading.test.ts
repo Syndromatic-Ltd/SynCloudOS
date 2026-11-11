@@ -31,7 +31,7 @@ describe("theme loading", () => {
   });
   it("emits only statically referenced themes' CSS in a real Vite build", async () => {
     const root = project(); writeFileSync(join(root, "src/main.ts"), 'import { themes } from "virtual:syncloudos/themes"; console.log(themes["com.example.paper"]);');
-    const result = await build({ configFile: false, root, logLevel: "silent", plugins: [synCloudOS({ webspringEntry: false })], resolve: { alias: { "@syndromatic/syncloudos/nse/themes/atmo": resolve(import.meta.dirname, "../../src/NSE/Themes/Atmo/index.ts") } }, build: { write: false, minify: false } });
+    const result = await build({ configFile: false, root, logLevel: "silent", plugins: [synCloudOS({ webspringEntry: false })], resolve: { alias: { "@syndromatic/syncloudos/nse/themes/atmo": resolve(import.meta.dirname, "../../src/NSE/Appearance/atmo.ts") } }, build: { write: false, minify: false } });
     const outputs = (Array.isArray(result) ? result : [result]).flatMap(result => "output" in result ? result.output : []);
     const css = outputs.filter(output => output.type === "asset" && output.fileName.endsWith(".css")).map(output => String(output.source)).join("\n");
     expect(css).toContain("--paper-marker"); expect(css).not.toContain("--unused-marker"); expect(css).toContain("nse.atmo");
