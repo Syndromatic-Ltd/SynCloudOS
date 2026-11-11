@@ -85,6 +85,7 @@ export function RuntimeInputBoundary({ children }: PropsWithChildren) {
         data-syncloudos-runtime-root="true"
         data-appearance={appearance}
         data-mode={resolvedMode}
+        data-nse-colour-scheme-resolved={resolvedMode}
         onFocusCapture={handleFocusCapture}
         onKeyDownCapture={handleKeyDownCapture}
       >

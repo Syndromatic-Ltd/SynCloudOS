@@ -268,6 +268,7 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
             {...appearanceProjection}
             data-appearance={requestedAppearance}
             data-mode={projectedMode}
+            data-nse-colour-scheme-resolved={projectedMode}
             data-syncloudos-runtime-owner={runtimeOwner}
             onMouseDown={(event) => {
               if (event.target === event.currentTarget) onClose();

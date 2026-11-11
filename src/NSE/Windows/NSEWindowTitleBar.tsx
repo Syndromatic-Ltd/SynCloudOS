@@ -66,7 +66,7 @@ function NSEWindowControl({
       type="button"
       className={`nse-window__control nse-window__control--${kind}`}
       aria-label={label}
-      data-nse-control="button" data-nse-part="cell" data-nse-highlighted={highlighted ? "" : undefined} data-nse-role={kind}
+      data-nse-control="button" data-nse-part="cell" data-nse-highlighted={highlighted ? "" : undefined} data-nse-role={kind} data-nse-style={kind === "close" && dirty ? "edited" : undefined}
       data-window-control={kind}
       data-window-control-state={state}
 
@@ -108,7 +108,7 @@ function NSEManagedWindowTitleBar({
       ref={header}
       className={["nse-window__titlebar", `nse-window__titlebar--${variant}`, moveClassName].filter(Boolean).join(" ")}
       data-toolbar-style={document?.toolbarStyle ?? "automatic"}
-      data-nse-part="header" data-nse-key-window={record.isKey ? undefined : "false"}
+      data-nse-part="header" data-nse-style={variant} data-nse-toolbar-style={document?.toolbarStyle ?? "automatic"} data-nse-key-window={record.isKey ? undefined : "false"}
       data-window-titlebar=""
       data-window-panel-titlebar={variant === "panel" ? "" : undefined}
       data-window-active={record.isKey ? "true" : "false"}

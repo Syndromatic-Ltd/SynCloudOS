@@ -105,7 +105,7 @@ function AccessoryRow({ children }: { readonly children: ReactNode }) {
   const element = useRef<HTMLDivElement>(null);
   useNSEWindowChromeElement(element, "top", false);
   const mode = useWindowChromeMode();
-  return <div ref={element} className="nse-window-titlebar-accessories" data-nse-part="titlebar-accessories" data-mode={mode}>{children}</div>;
+  return <div ref={element} className="nse-window-titlebar-accessories" data-nse-part="titlebar-accessories" data-mode={mode} data-nse-colour-scheme-resolved={mode}>{children}</div>;
 }
 
 /** @internal Atmo draws a tall content border as its metal footer and a short one as its compact strip. */
@@ -124,10 +124,10 @@ export function NSEWindowContentBorder({ thickness }: { readonly thickness: numb
   const style = { "--nse-window-content-border-thickness": `${thickness}px` } as CSSProperties;
   const size = nseContentBorderSize(thickness);
   return <>
-    <div className="nse-window-content-border" data-nse-part="content-border" data-edge="minY" data-size={size} data-mode={mode} style={style} aria-hidden="true">
+    <div className="nse-window-content-border" data-nse-part="content-border" data-edge="minY" data-size={size} data-mode={mode} data-nse-colour-scheme-resolved={mode} style={style} aria-hidden="true">
       <span className="nse-window-content-border-grain" />
     </div>
-    <div className="nse-window-content-border-edge" data-edge="minY" data-size={size} data-mode={mode} style={style} aria-hidden="true" />
+    <div className="nse-window-content-border-edge" data-edge="minY" data-size={size} data-mode={mode} data-nse-colour-scheme-resolved={mode} style={style} aria-hidden="true" />
   </>;
 }
 
@@ -219,7 +219,7 @@ export function NSEWindowToolbar({ controller, toolbar }: { readonly controller:
   if (!toolbar.isVisible || !responderId) return null;
   return (
     <>
-      <div ref={element} className="nse-window-toolbar" data-nse-part="toolbar" data-mode={mode} data-toolbar-identifier={toolbar.identifier} data-has-tab-items={tabViews.length ? "true" : undefined}>
+      <div ref={element} className="nse-window-toolbar" data-nse-part="toolbar" data-mode={mode} data-nse-colour-scheme-resolved={mode} data-toolbar-identifier={toolbar.identifier} data-has-tab-items={tabViews.length ? "true" : undefined}>
         {engine && width > 0 && (!tabViews.length || toolbar.items.length > 0) ? (
           <NSEToolbarView
             composition="configured"
