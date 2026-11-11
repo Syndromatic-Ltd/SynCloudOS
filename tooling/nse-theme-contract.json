@@ -564,6 +564,10 @@
         "chrome": [
           "standard"
         ],
+        "control-size": [
+          "regular",
+          "small"
+        ],
         "role": [
           "application-menu",
           "overlay"
@@ -729,6 +733,9 @@
         "control-size": [
           "regular",
           "small"
+        ],
+        "height": [
+          "24"
         ],
         "pulls-down": [
           "false",
@@ -1295,7 +1302,8 @@
       ],
       "variants": {
         "background-style": [
-          "normal"
+          "normal",
+          "raised"
         ],
         "control-size": [
           "mini",

@@ -486,30 +486,30 @@
    border+padding so labels sit identically. */
 
 
-:scope .nse-control-radio[data-position="first"]::after,
-:scope:is(.nse-control-radio[data-position="first"]::after),
-:scope.nse-control-radio[data-position="first"]::after {
+:scope [data-nse-part="cell"]:where([data-nse-button-type="radio"])[data-nse-position="first"]::after,
+:scope:is([data-nse-part="cell"]:where([data-nse-button-type="radio"])[data-nse-position="first"]::after),
+:scope[data-nse-part="cell"]:where([data-nse-button-type="radio"])[data-nse-position="first"]::after {
   inset:4px 1px 4px 2px;
 }
 
 
-:scope .nse-control-radio[data-position="middle"]::after,
-:scope:is(.nse-control-radio[data-position="middle"]::after),
-:scope.nse-control-radio[data-position="middle"]::after {
+:scope [data-nse-part="cell"]:where([data-nse-button-type="radio"])[data-nse-position="middle"]::after,
+:scope:is([data-nse-part="cell"]:where([data-nse-button-type="radio"])[data-nse-position="middle"]::after),
+:scope[data-nse-part="cell"]:where([data-nse-button-type="radio"])[data-nse-position="middle"]::after {
   inset: 4px 1px;
 }
 
 
-:scope .nse-control-radio[data-position="last"]::after,
-:scope:is(.nse-control-radio[data-position="last"]::after),
-:scope.nse-control-radio[data-position="last"]::after {
+:scope [data-nse-part="cell"]:where([data-nse-button-type="radio"])[data-nse-position="last"]::after,
+:scope:is([data-nse-part="cell"]:where([data-nse-button-type="radio"])[data-nse-position="last"]::after),
+:scope[data-nse-part="cell"]:where([data-nse-button-type="radio"])[data-nse-position="last"]::after {
   inset:4px 2px 4px 1px;
 }
 
 
-:scope .nse-control-radio[data-position="single"]::after,
-:scope:is(.nse-control-radio[data-position="single"]::after),
-:scope.nse-control-radio[data-position="single"]::after {
+:scope [data-nse-part="cell"]:where([data-nse-button-type="radio"])[data-nse-position="single"]::after,
+:scope:is([data-nse-part="cell"]:where([data-nse-button-type="radio"])[data-nse-position="single"]::after),
+:scope[data-nse-part="cell"]:where([data-nse-button-type="radio"])[data-nse-position="single"]::after {
   inset:4px 2px;
 }
 
@@ -521,21 +521,21 @@
    overlays; ::before's seam borders go transparent so nothing brightens
    beneath the translucent ink. */
 
-:scope .nse-control-radio[data-position="middle"][data-selected="true"]::after,
-:scope:is(.nse-control-radio[data-position="middle"][data-selected="true"]::after),
-:scope.nse-control-radio[data-position="middle"][data-selected="true"]::after {
+:scope [data-nse-part="cell"]:where([data-nse-button-type="radio"])[data-nse-position="middle"][data-nse-selected]::after,
+:scope:is([data-nse-part="cell"]:where([data-nse-button-type="radio"])[data-nse-position="middle"][data-nse-selected]::after),
+:scope[data-nse-part="cell"]:where([data-nse-button-type="radio"])[data-nse-position="middle"][data-nse-selected]::after {
   inset:4px 0;
 }
 
-:scope .nse-control-radio[data-position="first"][data-selected="true"]::after,
-:scope:is(.nse-control-radio[data-position="first"][data-selected="true"]::after),
-:scope.nse-control-radio[data-position="first"][data-selected="true"]::after {
+:scope [data-nse-part="cell"]:where([data-nse-button-type="radio"])[data-nse-position="first"][data-nse-selected]::after,
+:scope:is([data-nse-part="cell"]:where([data-nse-button-type="radio"])[data-nse-position="first"][data-nse-selected]::after),
+:scope[data-nse-part="cell"]:where([data-nse-button-type="radio"])[data-nse-position="first"][data-nse-selected]::after {
   inset:4px 0 4px 2px;
 }
 
-:scope .nse-control-radio[data-position="last"][data-selected="true"]::after,
-:scope:is(.nse-control-radio[data-position="last"][data-selected="true"]::after),
-:scope.nse-control-radio[data-position="last"][data-selected="true"]::after {
+:scope [data-nse-part="cell"]:where([data-nse-button-type="radio"])[data-nse-position="last"][data-nse-selected]::after,
+:scope:is([data-nse-part="cell"]:where([data-nse-button-type="radio"])[data-nse-position="last"][data-nse-selected]::after),
+:scope[data-nse-part="cell"]:where([data-nse-button-type="radio"])[data-nse-position="last"][data-nse-selected]::after {
   inset:4px 2px 4px 0;
 }
 
@@ -832,15 +832,15 @@
 
 /* A field of a custom height keeps the pill in proportion: its inset and
    radius are the 36px small field's (4px, 2px, 10px) as fractions. */
-:scope .nse-control-text-field[data-size="custom"] .nse-control-field-frame::before,
-:scope:is(.nse-control-text-field[data-size="custom"]) .nse-control-field-frame::before,
-:scope.nse-control-text-field[data-size="custom"] .nse-control-field-frame::before {
+:scope [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-height] [data-nse-part="bezel"]:where([data-nse-control="text-field"] *)::before,
+:scope:is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-height]) [data-nse-part="bezel"]:where([data-nse-control="text-field"] *)::before,
+:scope[data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-height] [data-nse-part="bezel"]:where([data-nse-control="text-field"] *)::before {
   inset:calc(var(--nse-control-height)*0.11) calc(var(--nse-control-height)*0.055);
 }
 
-:scope .nse-control-text-field[data-size="custom"][data-position="single"]:focus-within .nse-control-field-frame::before,
-:scope:is(.nse-control-text-field[data-size="custom"][data-position="single"]:focus-within) .nse-control-field-frame::before,
-:scope.nse-control-text-field[data-size="custom"][data-position="single"]:focus-within .nse-control-field-frame::before {
+:scope [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-height][data-nse-position="single"]:focus-within [data-nse-part="bezel"]:where([data-nse-control="text-field"] *)::before,
+:scope:is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-height][data-nse-position="single"]:focus-within) [data-nse-part="bezel"]:where([data-nse-control="text-field"] *)::before,
+:scope[data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-height][data-nse-position="single"]:focus-within [data-nse-part="bezel"]:where([data-nse-control="text-field"] *)::before {
   inset: calc(var(--nse-control-height) * 0.083) calc(var(--nse-control-height) * 0.028);
 }
 
@@ -856,9 +856,9 @@
 
 
 /* Focus (single fields + input boxes): grey pill, dark strokes, drop shadow. */
-:scope .nse-control-text-field[data-position="single"]:focus-within .nse-control-field-frame::before,
-:scope:is(.nse-control-text-field[data-position="single"]:focus-within) .nse-control-field-frame::before,
-:scope.nse-control-text-field[data-position="single"]:focus-within .nse-control-field-frame::before,
+:scope [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-position="single"]:focus-within [data-nse-part="bezel"]:where([data-nse-control="text-field"] *)::before,
+:scope:is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-position="single"]:focus-within) [data-nse-part="bezel"]:where([data-nse-control="text-field"] *)::before,
+:scope[data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-position="single"]:focus-within [data-nse-part="bezel"]:where([data-nse-control="text-field"] *)::before,
 :scope [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-role="group"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="text-field"] *):where([data-nse-role="group"] *)::before,
 :scope:is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-role="group"]):focus-within) [data-nse-part="bezel"]:where([data-nse-control="text-field"] *):where([data-nse-role="group"] *)::before,
 :scope[data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-role="group"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="text-field"] *):where([data-nse-role="group"] *)::before,
@@ -870,21 +870,21 @@
 
 /* Grouped stacks: full-bleed cells; first is top-rounded, last bottom-rounded,
    middles carry the #969696 divider at their bottom edge. */
-:scope .nse-control-text-field[data-position="first"] .nse-control-field-frame::before,
-:scope:is(.nse-control-text-field[data-position="first"]) .nse-control-field-frame::before,
-:scope.nse-control-text-field[data-position="first"] .nse-control-field-frame::before {
+:scope [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-position="first"] [data-nse-part="bezel"]:where([data-nse-control="text-field"] *)::before,
+:scope:is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-position="first"]) [data-nse-part="bezel"]:where([data-nse-control="text-field"] *)::before,
+:scope[data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-position="first"] [data-nse-part="bezel"]:where([data-nse-control="text-field"] *)::before {
   inset:0;
 }
 
-:scope .nse-control-text-field[data-position="middle"] .nse-control-field-frame::before,
-:scope:is(.nse-control-text-field[data-position="middle"]) .nse-control-field-frame::before,
-:scope.nse-control-text-field[data-position="middle"] .nse-control-field-frame::before {
+:scope [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-position="middle"] [data-nse-part="bezel"]:where([data-nse-control="text-field"] *)::before,
+:scope:is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-position="middle"]) [data-nse-part="bezel"]:where([data-nse-control="text-field"] *)::before,
+:scope[data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-position="middle"] [data-nse-part="bezel"]:where([data-nse-control="text-field"] *)::before {
   inset:0;
 }
 
-:scope .nse-control-text-field[data-position="last"] .nse-control-field-frame::before,
-:scope:is(.nse-control-text-field[data-position="last"]) .nse-control-field-frame::before,
-:scope.nse-control-text-field[data-position="last"] .nse-control-field-frame::before {
+:scope [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-position="last"] [data-nse-part="bezel"]:where([data-nse-control="text-field"] *)::before,
+:scope:is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-position="last"]) [data-nse-part="bezel"]:where([data-nse-control="text-field"] *)::before,
+:scope[data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-position="last"] [data-nse-part="bezel"]:where([data-nse-control="text-field"] *)::before {
   inset:0;
 }
 
@@ -929,9 +929,9 @@
   pointer-events:none;
 }
 
-:scope .nse-control-toggle[data-dragging="true"] .nse-control-toggle-track::after,
-:scope:is(.nse-control-toggle[data-dragging="true"]) .nse-control-toggle-track::after,
-:scope.nse-control-toggle[data-dragging="true"] .nse-control-toggle-track::after {
+:scope [data-nse-control="switch"]:where([data-nse-part="background"])[data-nse-tracking="true"] [data-nse-part="track"]:where([data-nse-control="switch"] *)::after,
+:scope:is([data-nse-control="switch"]:where([data-nse-part="background"])[data-nse-tracking="true"]) [data-nse-part="track"]:where([data-nse-control="switch"] *)::after,
+:scope[data-nse-control="switch"]:where([data-nse-part="background"])[data-nse-tracking="true"] [data-nse-part="track"]:where([data-nse-control="switch"] *)::after {
   transition: none;
 }
 
@@ -1154,18 +1154,18 @@
    the primary line readable (the sidebar restates it at (0,4,0)) while the
    TRAILING badge, which has no restatement, went near-black on steel. Geometry
    stays universal above; only the colour is handed back. */
-:scope :is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):not([data-nse-material="metal"] *),
-:scope:is(:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):not([data-nse-material="metal"] *)),
-:scope:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):not([data-nse-material="metal"] *) {
+:scope :is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]),[data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):not([data-nse-material="metal"] *),
+:scope:is(:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]),[data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):not([data-nse-material="metal"] *)),
+:scope:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]),[data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):not([data-nse-material="metal"] *) {
   color: #333;
 }
 
-:scope :is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *))[data-nse-selected]:where([data-nse-control="table-cell-view"]):not([data-nse-material="metal"] *):not([data-nse-part="body"]:where([data-nse-role="application-menu"] > *) *),
-:scope:is(:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *))[data-nse-selected]:where([data-nse-control="table-cell-view"]):not([data-nse-material="metal"] *):not([data-nse-part="body"]:where([data-nse-role="application-menu"] > *) *)),
-:scope:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *))[data-nse-selected]:where([data-nse-control="table-cell-view"]):not([data-nse-material="metal"] *):not([data-nse-part="body"]:where([data-nse-role="application-menu"] > *) *),
-:scope :is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):not([data-nse-highlight-style="none"]):not([data-nse-material="metal"] *):not([data-nse-part="body"]:where([data-nse-role="application-menu"] > *) *):active,
-:scope:is(:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):not([data-nse-highlight-style="none"]):not([data-nse-material="metal"] *):not([data-nse-part="body"]:where([data-nse-role="application-menu"] > *) *):active),
-:scope:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):not([data-nse-highlight-style="none"]):not([data-nse-material="metal"] *):not([data-nse-part="body"]:where([data-nse-role="application-menu"] > *) *):active {
+:scope :is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]),[data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *))[data-nse-selected]:where([data-nse-control="table-cell-view"]):not([data-nse-material="metal"] *):not([data-nse-part="body"]:where([data-nse-role="application-menu"]>*) *),
+:scope:is(:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]),[data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *))[data-nse-selected]:where([data-nse-control="table-cell-view"]):not([data-nse-material="metal"] *):not([data-nse-part="body"]:where([data-nse-role="application-menu"]>*) *)),
+:scope:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]),[data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *))[data-nse-selected]:where([data-nse-control="table-cell-view"]):not([data-nse-material="metal"] *):not([data-nse-part="body"]:where([data-nse-role="application-menu"]>*) *),
+:scope :is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]),[data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):not([data-nse-highlight-style="none"]):not([data-nse-material="metal"] *):not([data-nse-part="body"]:where([data-nse-role="application-menu"]>*) *):active,
+:scope:is(:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]),[data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):not([data-nse-highlight-style="none"]):not([data-nse-material="metal"] *):not([data-nse-part="body"]:where([data-nse-role="application-menu"]>*) *):active),
+:scope:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]),[data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):not([data-nse-highlight-style="none"]):not([data-nse-material="metal"] *):not([data-nse-part="body"]:where([data-nse-role="application-menu"]>*) *):active {
   color: #1d3548;
   background:
     var(--nse-atmo-onyx-item-gloss) left top / 100% 90px no-repeat,
@@ -1173,12 +1173,12 @@
   text-shadow: none;
 }
 
-:scope :is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *))[data-nse-selected]:where([data-nse-control="table-cell-view"]):not([data-nse-material="metal"] *) [data-nse-part="secondary-text"]:where([data-nse-control="table-cell-view"] *):where([data-nse-style="list"] *),
-:scope:is(:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *))[data-nse-selected]:where([data-nse-control="table-cell-view"]):not([data-nse-material="metal"] *)) [data-nse-part="secondary-text"]:where([data-nse-control="table-cell-view"] *):where([data-nse-style="list"] *),
-:scope:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *))[data-nse-selected]:where([data-nse-control="table-cell-view"]):not([data-nse-material="metal"] *) [data-nse-part="secondary-text"]:where([data-nse-control="table-cell-view"] *):where([data-nse-style="list"] *),
-:scope :is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):not([data-nse-highlight-style="none"]):not([data-nse-material="metal"] *):active [data-nse-part="secondary-text"]:where([data-nse-control="table-cell-view"] *):where([data-nse-style="list"] *),
-:scope:is(:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):not([data-nse-highlight-style="none"]):not([data-nse-material="metal"] *):active) [data-nse-part="secondary-text"]:where([data-nse-control="table-cell-view"] *):where([data-nse-style="list"] *),
-:scope:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):not([data-nse-highlight-style="none"]):not([data-nse-material="metal"] *):active [data-nse-part="secondary-text"]:where([data-nse-control="table-cell-view"] *):where([data-nse-style="list"] *) {
+:scope :is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]),[data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *))[data-nse-selected]:where([data-nse-control="table-cell-view"]):not([data-nse-material="metal"] *) [data-nse-part="secondary-text"]:where([data-nse-control="table-cell-view"] *):where([data-nse-style="list"] *),
+:scope:is(:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]),[data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *))[data-nse-selected]:where([data-nse-control="table-cell-view"]):not([data-nse-material="metal"] *)) [data-nse-part="secondary-text"]:where([data-nse-control="table-cell-view"] *):where([data-nse-style="list"] *),
+:scope:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]),[data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *))[data-nse-selected]:where([data-nse-control="table-cell-view"]):not([data-nse-material="metal"] *) [data-nse-part="secondary-text"]:where([data-nse-control="table-cell-view"] *):where([data-nse-style="list"] *),
+:scope :is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]),[data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):not([data-nse-highlight-style="none"]):not([data-nse-material="metal"] *):active [data-nse-part="secondary-text"]:where([data-nse-control="table-cell-view"] *):where([data-nse-style="list"] *),
+:scope:is(:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]),[data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):not([data-nse-highlight-style="none"]):not([data-nse-material="metal"] *):active) [data-nse-part="secondary-text"]:where([data-nse-control="table-cell-view"] *):where([data-nse-style="list"] *),
+:scope:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]),[data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):not([data-nse-highlight-style="none"]):not([data-nse-material="metal"] *):active [data-nse-part="secondary-text"]:where([data-nse-control="table-cell-view"] *):where([data-nse-style="list"] *) {
   color: #5a6b7d;
 }
 
@@ -3227,26 +3227,26 @@
   box-shadow: none !important;
 }
 
-:scope .nse-control-search-field:not([data-state="disabled"]):focus-within .nse-control-search-frame:where([data-nse-contrast="high"] *),
-:scope:is(.nse-control-search-field:not([data-state="disabled"]):focus-within) .nse-control-search-frame:where([data-nse-contrast="high"] *),
-:scope.nse-control-search-field:not([data-state="disabled"]):focus-within .nse-control-search-frame:where([data-nse-contrast="high"] *) {
+:scope [data-nse-control="search-field"]:where([data-nse-part="content"]):not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"] *):where([data-nse-contrast="high"] *),
+:scope:is([data-nse-control="search-field"]:where([data-nse-part="content"]):not([data-nse-enabled="false"]):focus-within) [data-nse-part="bezel"]:where([data-nse-control="search-field"] *):where([data-nse-contrast="high"] *),
+:scope[data-nse-control="search-field"]:where([data-nse-part="content"]):not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"] *):where([data-nse-contrast="high"] *) {
   outline: 3px solid var(--nse-contrast-accent);
   outline-offset: 2px;
   box-shadow: none;
 }
 
-:scope .nse-control-search-field:not([data-state="disabled"]):focus-within .nse-control-search-frame:where([data-nse-contrast="forced"] *),
-:scope:is(.nse-control-search-field:not([data-state="disabled"]):focus-within) .nse-control-search-frame:where([data-nse-contrast="forced"] *),
-:scope.nse-control-search-field:not([data-state="disabled"]):focus-within .nse-control-search-frame:where([data-nse-contrast="forced"] *) {
+:scope [data-nse-control="search-field"]:where([data-nse-part="content"]):not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"] *):where([data-nse-contrast="forced"] *),
+:scope:is([data-nse-control="search-field"]:where([data-nse-part="content"]):not([data-nse-enabled="false"]):focus-within) [data-nse-part="bezel"]:where([data-nse-control="search-field"] *):where([data-nse-contrast="forced"] *),
+:scope[data-nse-control="search-field"]:where([data-nse-part="content"]):not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"] *):where([data-nse-contrast="forced"] *) {
   outline: 2px solid Highlight;
   outline-offset: 2px;
   box-shadow: none;
 }
 
 @media (forced-colors: active) {
-  :scope .nse-control-search-field:not([data-state="disabled"]):focus-within .nse-control-search-frame,
-:scope:is(.nse-control-search-field:not([data-state="disabled"]):focus-within) .nse-control-search-frame,
-:scope.nse-control-search-field:not([data-state="disabled"]):focus-within .nse-control-search-frame {
+  :scope [data-nse-control="search-field"]:where([data-nse-part="content"]):not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"] *),
+:scope:is([data-nse-control="search-field"]:where([data-nse-part="content"]):not([data-nse-enabled="false"]):focus-within) [data-nse-part="bezel"]:where([data-nse-control="search-field"] *),
+:scope[data-nse-control="search-field"]:where([data-nse-part="content"]):not([data-nse-enabled="false"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"] *) {
     outline: 2px solid Highlight;
     outline-offset: 2px;
     box-shadow: none;
@@ -3715,9 +3715,9 @@
   --nse-atmo-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1h10L6 7z' fill='%23d4dae2'/%3E%3C/svg%3E");
 }
 
-:scope [data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]):not(:has([data-nse-part="segments"]:where([data-nse-control="date-picker"] *):where(:not([data-nse-part="field"] > *))))::before,
-:scope:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]):not(:has([data-nse-part="segments"]:where([data-nse-control="date-picker"] *):where(:not([data-nse-part="field"] > *))))::before),
-:scope[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]):not(:has([data-nse-part="segments"]:where([data-nse-control="date-picker"] *):where(:not([data-nse-part="field"] > *))))::before,
+:scope [data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]):not(:has([data-nse-part="segments"]:where([data-nse-control="date-picker"] *):where(:not([data-nse-part="field"]>*))))::before,
+:scope:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]):not(:has([data-nse-part="segments"]:where([data-nse-control="date-picker"] *):where(:not([data-nse-part="field"]>*))))::before),
+:scope[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]):not(:has([data-nse-part="segments"]:where([data-nse-control="date-picker"] *):where(:not([data-nse-part="field"]>*))))::before,
 :scope :is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"]))>button,
 :scope:is(:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"])))>button,
 :scope:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"]))>button,
@@ -5815,9 +5815,9 @@ input:scope[data-nse-control="scroller"]:focus-visible {
    height sets --nse-control-height; everything else follows from it, so the
    art keeps its proportions: the pill's ring and the search capsule's end caps
    are half the height wide, and the type scales with them. */
-:scope .nse-control-picker[data-size] .nse-control-picker-button,
-:scope:is(.nse-control-picker[data-size]) .nse-control-picker-button,
-:scope.nse-control-picker[data-size] .nse-control-picker-button {
+:scope [data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):is([data-nse-height], [data-nse-control-size="small"]) [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *),
+:scope:is([data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):is([data-nse-height], [data-nse-control-size="small"])) [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *),
+:scope[data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):is([data-nse-height], [data-nse-control-size="small"]) [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *) {
   min-width: 0;
   --nse-control-minimum-inline-size: 0;
   height: var(--nse-control-height, 24px);
@@ -5829,31 +5829,31 @@ input:scope[data-nse-control="scroller"]:focus-visible {
   font-size: max(11px, calc(var(--nse-control-height, 24px) * 0.5));
 }
 
-:scope .nse-control-picker[data-size] .nse-control-picker-button::before,
-:scope:is(.nse-control-picker[data-size]) .nse-control-picker-button::before,
-:scope.nse-control-picker[data-size] .nse-control-picker-button::before {
+:scope [data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):is([data-nse-height], [data-nse-control-size="small"]) [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *)::before,
+:scope:is([data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):is([data-nse-height], [data-nse-control-size="small"])) [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *)::before,
+:scope[data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):is([data-nse-height], [data-nse-control-size="small"]) [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *)::before {
   inset: 0;
   border-radius: calc(var(--nse-control-height, 24px) * 0.25);
 }
 
-:scope .nse-control-picker[data-size] .nse-control-picker-button::after,
-:scope:is(.nse-control-picker[data-size]) .nse-control-picker-button::after,
-:scope.nse-control-picker[data-size] .nse-control-picker-button::after {
+:scope [data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):is([data-nse-height], [data-nse-control-size="small"]) [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *)::after,
+:scope:is([data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):is([data-nse-height], [data-nse-control-size="small"])) [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *)::after,
+:scope[data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):is([data-nse-height], [data-nse-control-size="small"]) [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *)::after {
   inset: 1px;
   border-radius: calc(var(--nse-control-height, 24px) * 0.25 - 1px);
 }
 
-:scope .nse-control-picker[data-size] .nse-control-picker-caption,
-:scope:is(.nse-control-picker[data-size]) .nse-control-picker-caption,
-:scope.nse-control-picker[data-size] .nse-control-picker-caption {
+:scope [data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):is([data-nse-height], [data-nse-control-size="small"]) [data-nse-part="content"]:where([data-nse-control="button"] *):where([data-nse-button-type="momentaryPushIn"] *):where(:not([data-nse-control])),
+:scope:is([data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):is([data-nse-height], [data-nse-control-size="small"])) [data-nse-part="content"]:where([data-nse-control="button"] *):where([data-nse-button-type="momentaryPushIn"] *):where(:not([data-nse-control])),
+:scope[data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):is([data-nse-height], [data-nse-control-size="small"]) [data-nse-part="content"]:where([data-nse-control="button"] *):where([data-nse-button-type="momentaryPushIn"] *):where(:not([data-nse-control])) {
   margin: 0;
   padding: 0;
   line-height: var(--nse-control-height, 24px);
 }
 
-:scope .nse-control-picker[data-size] .nse-control-picker-arrow,
-:scope:is(.nse-control-picker[data-size]) .nse-control-picker-arrow,
-:scope.nse-control-picker[data-size] .nse-control-picker-arrow {
+:scope [data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):is([data-nse-height], [data-nse-control-size="small"]) [data-nse-part="arrow"]:where([data-nse-control="button"] *),
+:scope:is([data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):is([data-nse-height], [data-nse-control-size="small"])) [data-nse-part="arrow"]:where([data-nse-control="button"] *),
+:scope[data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):is([data-nse-height], [data-nse-control-size="small"]) [data-nse-part="arrow"]:where([data-nse-control="button"] *) {
   width: calc(var(--nse-control-height, 24px) * 0.38);
   min-height: var(--nse-control-height, 24px);
   margin: 0;
@@ -5861,9 +5861,9 @@ input:scope[data-nse-control="scroller"]:focus-visible {
   background-size: 100% auto;
 }
 
-:scope .nse-control-picker[data-size] .nse-control-picker-label,
-:scope:is(.nse-control-picker[data-size]) .nse-control-picker-label,
-:scope.nse-control-picker[data-size] .nse-control-picker-label {
+:scope [data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):is([data-nse-height], [data-nse-control-size="small"]) [data-nse-part="label"]:where([data-nse-control="pop-up-button"] *):where([data-nse-part="background"] > *):where(:not([data-nse-date-picker-style="textField"] *)):where(:not([data-nse-part="sliders-mode"] *)):where(:not([data-nse-control="rule-editor"] *)):where(:not([data-nse-control="predicate-editor"] *)),
+:scope:is([data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):is([data-nse-height], [data-nse-control-size="small"])) [data-nse-part="label"]:where([data-nse-control="pop-up-button"] *):where([data-nse-part="background"] > *):where(:not([data-nse-date-picker-style="textField"] *)):where(:not([data-nse-part="sliders-mode"] *)):where(:not([data-nse-control="rule-editor"] *)):where(:not([data-nse-control="predicate-editor"] *)),
+:scope[data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):is([data-nse-height], [data-nse-control-size="small"]) [data-nse-part="label"]:where([data-nse-control="pop-up-button"] *):where([data-nse-part="background"] > *):where(:not([data-nse-date-picker-style="textField"] *)):where(:not([data-nse-part="sliders-mode"] *)):where(:not([data-nse-control="rule-editor"] *)):where(:not([data-nse-control="predicate-editor"] *)) {
   font-size: max(11px, calc(var(--nse-control-height, 24px) * 0.5));
   font-weight: 700;
 }
@@ -5871,12 +5871,12 @@ input:scope[data-nse-control="scroller"]:focus-visible {
 /* The search capsule, scaled: the same art with its end caps at half the
    height (the 50px art's caps are 25px). Small is 26px, a touch taller than
    the small pill, as the field holds typed text. */
-:scope .nse-control-search-field[data-size] .nse-control-search-frame,
-:scope:is(.nse-control-search-field[data-size]) .nse-control-search-frame,
-:scope.nse-control-search-field[data-size] .nse-control-search-frame,
-:scope .nse-control-search-field[data-size]:focus-within .nse-control-search-frame,
-:scope:is(.nse-control-search-field[data-size]:focus-within) .nse-control-search-frame,
-:scope.nse-control-search-field[data-size]:focus-within .nse-control-search-frame {
+:scope [data-nse-control="search-field"]:where([data-nse-part="content"]):is([data-nse-height], [data-nse-control-size="small"]) [data-nse-part="bezel"]:where([data-nse-control="search-field"] *),
+:scope:is([data-nse-control="search-field"]:where([data-nse-part="content"]):is([data-nse-height], [data-nse-control-size="small"])) [data-nse-part="bezel"]:where([data-nse-control="search-field"] *),
+:scope[data-nse-control="search-field"]:where([data-nse-part="content"]):is([data-nse-height], [data-nse-control-size="small"]) [data-nse-part="bezel"]:where([data-nse-control="search-field"] *),
+:scope [data-nse-control="search-field"]:where([data-nse-part="content"]):is([data-nse-height], [data-nse-control-size="small"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"] *),
+:scope:is([data-nse-control="search-field"]:where([data-nse-part="content"]):is([data-nse-height], [data-nse-control-size="small"]):focus-within) [data-nse-part="bezel"]:where([data-nse-control="search-field"] *),
+:scope[data-nse-control="search-field"]:where([data-nse-part="content"]):is([data-nse-height], [data-nse-control-size="small"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"] *) {
   grid-template-columns:minmax(0,1fr) calc(var(--nse-control-height,26px)*0.56);
 }
 
@@ -6073,9 +6073,9 @@ input:scope[data-nse-control="scroller"]:focus-visible {
 }
 
 /* A small picker's menu: the same list at popup-menu scale. */
-:scope .nse-overlay-popup--listbox .nse-overlay-listbox[data-size="small"] .nse-overlay-listbox-option,
-:scope:is(.nse-overlay-popup--listbox) .nse-overlay-listbox[data-size="small"] .nse-overlay-listbox-option,
-:scope.nse-overlay-popup--listbox .nse-overlay-listbox[data-size="small"] .nse-overlay-listbox-option {
+:scope [data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-control="menu"]:where([data-nse-part="background"]):where(:not([data-nse-chrome="standard"]))[data-nse-control-size="small"] [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *),
+:scope:is([data-nse-style="listbox"]:where([data-nse-part="surface"])) [data-nse-control="menu"]:where([data-nse-part="background"]):where(:not([data-nse-chrome="standard"]))[data-nse-control-size="small"] [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *),
+:scope[data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-control="menu"]:where([data-nse-part="background"]):where(:not([data-nse-chrome="standard"]))[data-nse-control-size="small"] [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *) {
   grid-template-columns: minmax(0, 1fr) 22px;
   min-block-size: 26px;
   padding: 0 8px 0 18px;
@@ -6083,9 +6083,9 @@ input:scope[data-nse-control="scroller"]:focus-visible {
   line-height: 16px;
 }
 
-:scope .nse-overlay-popup--listbox .nse-overlay-listbox[data-size="small"] .nse-overlay-listbox-option::after,
-:scope:is(.nse-overlay-popup--listbox) .nse-overlay-listbox[data-size="small"] .nse-overlay-listbox-option::after,
-:scope.nse-overlay-popup--listbox .nse-overlay-listbox[data-size="small"] .nse-overlay-listbox-option::after {
+:scope [data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-control="menu"]:where([data-nse-part="background"]):where(:not([data-nse-chrome="standard"]))[data-nse-control-size="small"] [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *)::after,
+:scope:is([data-nse-style="listbox"]:where([data-nse-part="surface"])) [data-nse-control="menu"]:where([data-nse-part="background"]):where(:not([data-nse-chrome="standard"]))[data-nse-control-size="small"] [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *)::after,
+:scope[data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-control="menu"]:where([data-nse-part="background"]):where(:not([data-nse-chrome="standard"]))[data-nse-control-size="small"] [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *)::after {
   inline-size: 20px;
   block-size: 16px;
 }
@@ -6252,12 +6252,12 @@ input:scope[data-nse-control="scroller"]:focus-visible {
 :scope [data-nse-part="bezel"]:where([data-nse-control="search-field"] *),
 :scope:is([data-nse-part="bezel"]:where([data-nse-control="search-field"] *)),
 :scope[data-nse-part="bezel"]:where([data-nse-control="search-field"] *),
-:scope .nse-control-search-field[data-size] .nse-control-search-frame,
-:scope:is(.nse-control-search-field[data-size]) .nse-control-search-frame,
-:scope.nse-control-search-field[data-size] .nse-control-search-frame,
-:scope .nse-control-search-field[data-size]:focus-within .nse-control-search-frame,
-:scope:is(.nse-control-search-field[data-size]:focus-within) .nse-control-search-frame,
-:scope.nse-control-search-field[data-size]:focus-within .nse-control-search-frame {
+:scope [data-nse-control="search-field"]:where([data-nse-part="content"]):is([data-nse-height], [data-nse-control-size="small"]) [data-nse-part="bezel"]:where([data-nse-control="search-field"] *),
+:scope:is([data-nse-control="search-field"]:where([data-nse-part="content"]):is([data-nse-height], [data-nse-control-size="small"])) [data-nse-part="bezel"]:where([data-nse-control="search-field"] *),
+:scope[data-nse-control="search-field"]:where([data-nse-part="content"]):is([data-nse-height], [data-nse-control-size="small"]) [data-nse-part="bezel"]:where([data-nse-control="search-field"] *),
+:scope [data-nse-control="search-field"]:where([data-nse-part="content"]):is([data-nse-height], [data-nse-control-size="small"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"] *),
+:scope:is([data-nse-control="search-field"]:where([data-nse-part="content"]):is([data-nse-height], [data-nse-control-size="small"]):focus-within) [data-nse-part="bezel"]:where([data-nse-control="search-field"] *),
+:scope[data-nse-control="search-field"]:where([data-nse-part="content"]):is([data-nse-height], [data-nse-control-size="small"]):focus-within [data-nse-part="bezel"]:where([data-nse-control="search-field"] *) {
   display:flex;
   align-items:center;
 }
@@ -6369,9 +6369,9 @@ input:scope[data-nse-control="scroller"]:focus-visible {
 
 /* A label on a raised surface (NSCell backgroundStyle .raised), such as status text on a window's
    bottom content border: the metal footer's embossed ink. */
-:scope .nse-control-label-field[data-background-style="raised"],
-:scope:is(.nse-control-label-field[data-background-style="raised"]),
-:scope.nse-control-label-field[data-background-style="raised"] {
+:scope [data-nse-control="text-field"]:where([data-nse-part="title"])[data-nse-background-style="raised"],
+:scope:is([data-nse-control="text-field"]:where([data-nse-part="title"])[data-nse-background-style="raised"]),
+:scope[data-nse-control="text-field"]:where([data-nse-part="title"])[data-nse-background-style="raised"] {
   font-weight:600;
 }
 

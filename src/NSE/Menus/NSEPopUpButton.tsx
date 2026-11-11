@@ -287,6 +287,7 @@ function NSEPopUpButtonControl(props: NSEPopUpButtonProps) {
       data-nse-choice="picker"
       data-pulls-down={pullsDown ? "true" : undefined}
       data-size={height !== undefined ? "custom" : controlSize === "small" ? "small" : undefined}
+      data-nse-height={height === undefined ? undefined : String(height)}
       style={sizedControlStyle(style, height, width)}
       {...htmlAttributes}
       {...theme.events}

@@ -92,6 +92,7 @@ export const supplementalThemeCatalogue: readonly { id: string; ready?: string; 
   { id: "application-menu-open", ready: '[data-nse-application-menu]', render: () => <SpecimenApplicationMenu open /> },
   { id: "application-menu-submenu", ready: '[data-nse-application-menu]', hover: '[data-nse-application-menu] [aria-haspopup]', render: () => <SpecimenApplicationMenu open id="specimen-app-submenu" /> },
   { id: "context-menu", context: '[data-specimen-context]', render: () => <SpecimenContextMenu /> },
+  { id: "label-raised", render: () => <NSETextField isEditable={false} backgroundStyle="raised">Raised</NSETextField> },
   { id: "list-item-no-highlight", render: () => <NSEListItem tapHighlight={false}>Static row</NSEListItem> },
   { id: "segment-fill-equally", render: () => <NSESegmentedControl selection={{ mode: "select-one", selectedIds: new Set(["a"]), allowsEmpty: false }} aria-label="Fill" distribution="fill-equally" name="fill" items={[{ id: "a", label: "A" }, { id: "b", label: "Longer" }]} onSelectionChange={noop} /> },
   { id: "calendar-rtl", render: () => <NSEDatePicker aria-label="Date" locale="he-IL" timeZone="Asia/Jerusalem" datePickerStyle="clockAndCalendar" datePickerElements={["yearMonthDay"]} defaultValue={{ year: 2026, month: 11, day: 9 }} /> },  { id: "material-metal", render: () => <MaterialProvider appearance="metal"><p>Metal</p></MaterialProvider> },
