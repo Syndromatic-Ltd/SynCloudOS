@@ -40,6 +40,7 @@ import type {
 } from "./nseAppearanceTypes";
 import "../Structure/layers.css";
 import "../Structure/defaults.css";
+import "../Structure/controls.css";
 import "../Themes/Atmo/Resources/atmo-structure.css";
 import "../Themes/Atmo/Resources/atmo.css";
 import "../Themes/Atmo/Resources/chrome.css";

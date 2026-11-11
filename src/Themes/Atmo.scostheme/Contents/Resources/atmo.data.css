@@ -71,13 +71,6 @@
 :scope:is([data-nse-control="table-view"]) [data-nse-part="cell"],
 :scope[data-nse-control="table-view"] [data-nse-part="cell"] {
   padding-inline:6px;
-  text-overflow:ellipsis;
-}
-
-:scope [data-nse-control="table-view"] [data-nse-part="cell"]>*,
-:scope:is([data-nse-control="table-view"]) [data-nse-part="cell"]>*,
-:scope[data-nse-control="table-view"] [data-nse-part="cell"]>* {
-  text-overflow:ellipsis;
 }
 
 :scope [data-nse-control="table-view"] [data-nse-part="row"][data-nse-selected],
@@ -151,7 +144,6 @@
 :scope:is([data-nse-control="outline-view"]:not([data-nse-selection-highlight-style="sourceList"])) [data-nse-part="label"],
 :scope[data-nse-control="outline-view"]:not([data-nse-selection-highlight-style="sourceList"]) [data-nse-part="label"] {
   min-inline-size:0;
-  text-overflow:ellipsis;
 }
 
 :scope [data-nse-control="outline-view"] [data-nse-part="disclosure"],

@@ -77,7 +77,6 @@
 :where(:scope) [data-nse-part="title"]:where([data-nse-control="button"]:not([data-nse-button-type="switch"],[data-nse-button-type="radio"])>*,[data-nse-control="route-picker-view"]>*),
 :where(:scope):is([data-nse-part="title"]:where([data-nse-control="button"]:not([data-nse-button-type="switch"],[data-nse-button-type="radio"])>*,[data-nse-control="route-picker-view"]>*)) {
   min-width:0;
-  text-overflow:ellipsis;
   transform:translateY(-1px);
 }
 

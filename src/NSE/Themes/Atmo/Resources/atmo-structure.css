@@ -117,34 +117,12 @@
 
 :where(:scope) :is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *))),
 :where(:scope):is(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *)))) {
-  position:relative;
-  display:inline-grid;
-  grid-auto-flow:column;
-  grid-auto-columns:max-content;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-  font:inherit;
-  font-size:18px;
-  font-weight:700;
-  line-height:52px;
   text-align:center;
-  cursor:pointer;
-  user-select:none;
 }
 
 /* Ordinary action labels may wrap when text zoom or localization exhausts
    their available width. Keep the 52px minimum target; explicit tool/tab
    chrome retains its own sizing and single-line presentation. */
-:where(:scope) :is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="button"]:where([data-nse-bezel-style="texturedRounded"]):where([data-nse-image-position]),[data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-part="actions"]>*):where([data-nse-part="backdrop"] *),[data-nse-control-size]:where([data-nse-button-type]):where(:not([data-nse-control-size="regular"])))):where(:not([data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-chrome]) *)),
-:where(:scope):is(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="button"]:where([data-nse-bezel-style="texturedRounded"]):where([data-nse-image-position]),[data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-part="actions"]>*):where([data-nse-part="backdrop"] *),[data-nse-control-size]:where([data-nse-button-type]):where(:not([data-nse-control-size="regular"])))):where(:not([data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-chrome]) *))) {
-  grid-auto-columns: minmax(0, max-content);
-}
-:where(:scope) :is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-bezel-style="texturedRounded"]:where([data-nse-control="button"]:not([data-nse-button-type="switch"])),[data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-part="actions"]>*):where([data-nse-part="backdrop"] *),[data-nse-control-size]:where([data-nse-button-type]):where(:not([data-nse-control-size="regular"])))):where(:not([data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-chrome]) *))>[data-nse-part="title"]:where(:is([data-nse-control="button"]:not([data-nse-button-type="switch"]),[data-nse-image-position])>*),
-:where(:scope):is(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-bezel-style="texturedRounded"]:where([data-nse-control="button"]:not([data-nse-button-type="switch"])),[data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-part="actions"]>*):where([data-nse-part="backdrop"] *),[data-nse-control-size]:where([data-nse-button-type]):where(:not([data-nse-control-size="regular"])))):where(:not([data-nse-control="window"]:where([data-nse-part="header"]):where([data-nse-chrome]) *)))>[data-nse-part="title"]:where(:is([data-nse-control="button"]:not([data-nse-button-type="switch"]),[data-nse-image-position])>*) {
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
 
 
 
@@ -161,11 +139,6 @@
 :where(:scope):is(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *)))[data-nse-selected]:where(:not([data-nse-button-type]))) {
   border-image-slice:52 17 52 17 fill;
   transform:translateY(1px);
-}
-
-:where(:scope) :is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *))):disabled,
-:where(:scope):is(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *))):disabled) {
-  cursor:default;
 }
 
 
@@ -189,12 +162,6 @@
 /* line-height 1: the button's own line-height is its whole band (50–52px),
    so a text glyph used as an icon (★, ↻) inherited a line box twice the
    icon's height and sat on the icon's bottom edge. */
-:where(:scope) [data-nse-part="image"]:where([data-nse-control="button"] *):where(:not([data-nse-control="button"] [data-nse-control] *)),
-:where(:scope):is([data-nse-part="image"]:where([data-nse-control="button"] *):where(:not([data-nse-control="button"] [data-nse-control] *))) {
-  display:inline-grid;
-  place-items:center;
-  line-height:1;
-}
 
 :where(:scope) .nse-control-button-icon img,
 :where(:scope):is(.nse-control-button-icon) img {
@@ -203,23 +170,13 @@
   object-fit: contain;
 }
 
-:where(:scope) [data-nse-part="title"]:where(:is([data-nse-control="button"]:not([data-nse-button-type="switch"]),[data-nse-image-position])>*),
-:where(:scope):is([data-nse-part="title"]:where(:is([data-nse-control="button"]:not([data-nse-button-type="switch"]),[data-nse-image-position])>*)) {
-  overflow:hidden;
-  white-space:nowrap;
-}
-
 
 
 :where(:scope) :is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-style="navigation"] *),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"])),
 :where(:scope):is(:is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-style="navigation"] *),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"]))) {
-  position: relative;
-  display: flex;
-  align-items: center;
   gap: 8px;
   min-height: 58px;
   padding: 6px 8px 8px;
-  overflow: visible;
   color: #fff;
   background: var(--nse-atmo-toolbar-fade) 0 bottom repeat-x;
 }
@@ -253,7 +210,6 @@
   --nse-control-minimum-block-size: 50px;
   border-width: 0 25px;
   border-image: var(--nse-atmo-menu-button) 0 25 200 25 fill stretch;
-  line-height: 50px;
 }
 
 :where(:scope) :is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-style="navigation"] *),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"])):not(:is([data-nse-part="header"],[data-nse-style="grouped"]))>:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):active:not([data-nse-tracking]):not(:disabled),
@@ -289,10 +245,6 @@
 /* ButtonHeader + standalone ToolButton wear the menu-button sprite directly,
    not only when nested in a toolbar. Same 5-state ladder as the non-grouped toolbar
    button above (atmo-menu-button.png, 250px tall / 5×50px state bands). */
-:where(:scope) [data-nse-control="button"]:where([data-nse-bezel-style="texturedRounded"]):where([data-nse-image-position]):is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])),
-:where(:scope):is([data-nse-control="button"]:where([data-nse-bezel-style="texturedRounded"]):where([data-nse-image-position]):is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"]))) {
-  line-height:50px;
-}
 
 
 
@@ -317,8 +269,6 @@
   border-style: solid;
   border-width: 0 1px;
   border-image: var(--nse-atmo-grouped-toolbutton) 250 1 700 1 fill stretch;
-  font-size: max(11px, calc(var(--nse-atmo-bar-h, 50px) * 0.4));
-  line-height: var(--nse-atmo-bar-h, 50px);
   transform: none;
 }
 
@@ -490,11 +440,6 @@
    from the radio family comes from Tabs + RadioGroup using the radiobutton sprite instead.
    Map the radio's data-position onto the grouped-toolbutton ladder (grouped-toolbutton.png,
    1000px / 50px cells — same slices the grouped toolbar uses above). */
-:where(:scope) [data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-segment-style="texturedRounded"]):where(:not([data-nse-position="inline"])) [data-nse-part="cell"]:where([data-nse-button-type="radio"]),
-:where(:scope):is([data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-segment-style="texturedRounded"]):where(:not([data-nse-position="inline"]))) [data-nse-part="cell"]:where([data-nse-button-type="radio"]) {
-  font-size:max(11px,calc(var(--nse-atmo-bar-h,50px)*0.4));
-  line-height:var(--nse-atmo-bar-h,50px);
-}
 
 
 
@@ -514,26 +459,6 @@
 
 /* selected + press */
 
-
-
-
-
-:where(:scope) [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"]),
-:where(:scope):is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])) {
-  display:grid;
-}
-
-:where(:scope) [data-nse-part="label"]:where([data-nse-control="text-field"] *),
-:where(:scope):is([data-nse-part="label"]:where([data-nse-control="text-field"] *)),
-:where(:scope) [data-nse-part="label"]:where([data-nse-control="pop-up-button"] *):where([data-nse-part="background"]>*):where(:not([data-nse-date-picker-style="textField"] *)):where(:not([data-nse-part="sliders-mode"] *)):where(:not([data-nse-control="rule-editor"] *)):where(:not([data-nse-control="predicate-editor"] *)),
-:where(:scope):is([data-nse-part="label"]:where([data-nse-control="pop-up-button"] *):where([data-nse-part="background"]>*):where(:not([data-nse-date-picker-style="textField"] *)):where(:not([data-nse-part="sliders-mode"] *)):where(:not([data-nse-control="rule-editor"] *)):where(:not([data-nse-control="predicate-editor"] *))),
-:where(:scope) [data-nse-part="title"]:where([data-nse-control="slider"] *),
-:where(:scope):is([data-nse-part="title"]:where([data-nse-control="slider"] *)) {
-  font-size:13px;
-  font-weight:700;
-  line-height:1.2;
-}
-
 :where(:scope) [data-nse-part="label"]:where([data-nse-control="pop-up-button"] *):where([data-nse-part="background"]>*):where(:not([data-nse-date-picker-style="textField"] *)):where(:not([data-nse-part="sliders-mode"] *)):where(:not([data-nse-control="rule-editor"] *)):where(:not([data-nse-control="predicate-editor"] *)),
 :where(:scope):is([data-nse-part="label"]:where([data-nse-control="pop-up-button"] *):where([data-nse-part="background"]>*):where(:not([data-nse-date-picker-style="textField"] *)):where(:not([data-nse-part="sliders-mode"] *)):where(:not([data-nse-control="rule-editor"] *)):where(:not([data-nse-control="predicate-editor"] *))) {
   color:var(--nse-atmo-label-ink,#314255);
@@ -542,14 +467,6 @@
 /* Geometry only: the pill (Heritage's border-image fill, Atmo's vector
    ::before) is the field's one surface. A frame tint here showed as a pale
    rectangle around every rounded Atmo pill. */
-:where(:scope) [data-nse-part="bezel"]:where([data-nse-control="text-field"] *),
-:where(:scope):is([data-nse-part="bezel"]:where([data-nse-control="text-field"] *)) {
-  position:relative;
-  display:flex;
-  align-items:center;
-  box-sizing:border-box;
-  transition:background 140ms ease,box-shadow 140ms ease,filter 140ms ease;
-}
 
 
 
@@ -561,22 +478,7 @@
 
 :where(:scope) [data-nse-part="bezel"]:where([data-nse-control="text-field"] *) :where([data-nse-part="field"]),
 :where(:scope):is([data-nse-part="bezel"]:where([data-nse-control="text-field"] *)) :where([data-nse-part="field"]) {
-  flex:1 1 auto;
   outline:0;
-  font:inherit;
-  font-size:17px;
-  line-height:34px;
-}
-
-
-
-:where(:scope) [data-nse-part]:where([data-nse-control="text-field"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-part="field"])),
-:where(:scope):is([data-nse-part]:where([data-nse-control="text-field"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-part="field"]))) {
-  display:inline-grid;
-  place-items:center;
-  flex:0 0 auto;
-  font-weight:700;
-  line-height:34px;
 }
 
 
@@ -584,34 +486,12 @@
 
 
 /* NSEInputBox — a frame that wraps several controls to look like one input. */
-:where(:scope) [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-role="group"]),
-:where(:scope):is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-role="group"])) {
-  display:grid;
-}
 
 
 
 /* Controls set into an input box keep their natural width; only the text
    input yields space. Without this a push button shrinks to its minimum and
    ellipsises a two-letter label ("Go" -> "G..."). */
-:where(:scope) [data-nse-part="bezel"]:where([data-nse-control="text-field"] *):where([data-nse-role="group"] *)>:not(:where([data-nse-part="field"])),
-:where(:scope):is([data-nse-part="bezel"]:where([data-nse-control="text-field"] *):where([data-nse-role="group"] *))>:not(:where([data-nse-part="field"])) {
-  flex: none;
-}
-
-
-
-
-
-:where(:scope) [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-role="group"])[data-nse-enabled="false"]:where(:not([data-nse-control="search-field"])),
-:where(:scope):is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-role="group"])[data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))) {
-  pointer-events:none;
-}
-
-:where(:scope) [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-button-type="switch"]),
-:where(:scope):is([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-button-type="switch"])) {
-  font-weight:700;
-}
 
 
 
@@ -625,61 +505,7 @@
 
 :where(:scope) [data-nse-control="switch"]:where([data-nse-part="background"]),
 :where(:scope):is([data-nse-control="switch"]:where([data-nse-part="background"])) {
-  position:relative;
-  display:inline-block;
-  overflow:visible;
-  font:inherit;
-  font-size:10px;
-  font-weight:700;
-  line-height:1;
   text-align:left;
-  text-transform:uppercase;
-  cursor:pointer;
-  touch-action:pan-y;
-  user-select:none;
-}
-
-:where(:scope) [data-nse-part="track"]:where([data-nse-control="switch"] *),
-:where(:scope):is([data-nse-part="track"]:where([data-nse-control="switch"] *)) {
-  position:absolute;
-  inset:0;
-  overflow:hidden;
-}
-
-:where(:scope) [data-nse-part="fill"]:where([data-nse-control="switch"] *),
-:where(:scope):is([data-nse-part="fill"]:where([data-nse-control="switch"] *)),
-:where(:scope) [data-nse-part="knob"]:where([data-nse-control="switch"] *),
-:where(:scope):is([data-nse-part="knob"]:where([data-nse-control="switch"] *)),
-:where(:scope) [data-nse-part="knob"]:where([data-nse-control="switch"] *)::before,
-:where(:scope):is([data-nse-part="knob"]:where([data-nse-control="switch"] *)::before),
-:where(:scope) [data-nse-part="knob"]:where([data-nse-control="switch"] *)::after,
-:where(:scope):is([data-nse-part="knob"]:where([data-nse-control="switch"] *)::after) {
-  position:absolute;
-}
-
-:where(:scope) [data-nse-part="fill"]:where([data-nse-control="switch"] *),
-:where(:scope):is([data-nse-part="fill"]:where([data-nse-control="switch"] *)) {
-  top:0;
-  z-index:0;
-}
-
-:where(:scope) [data-nse-part="fill"]:where([data-nse-control="switch"] *):where([data-nse-position="leading"]),
-:where(:scope):is([data-nse-part="fill"]:where([data-nse-control="switch"] *):where([data-nse-position="leading"])) {
-  left:0;
-}
-
-:where(:scope) [data-nse-part="fill"]:where([data-nse-control="switch"] *):where([data-nse-position="trailing"]),
-:where(:scope):is([data-nse-part="fill"]:where([data-nse-control="switch"] *):where([data-nse-position="trailing"])) {
-  right:0;
-}
-
-:where(:scope) [data-nse-part="knob"]:where([data-nse-control="switch"] *),
-:where(:scope):is([data-nse-part="knob"]:where([data-nse-control="switch"] *)) {
-  top:0;
-  left:0;
-  z-index:3;
-  left:calc(100%*var(--nse-control-toggle-ratio,0));
-  transition:left 180ms cubic-bezier(0.22,0.75,0.28,1),transform 180ms cubic-bezier(0.22,0.75,0.28,1),filter 140ms ease;
 }
 
 :where(:scope) [data-nse-part="knob"]:where([data-nse-control="switch"] *)::before,
@@ -687,104 +513,16 @@
 :where(:scope) [data-nse-part="knob"]:where([data-nse-control="switch"] *)::after,
 :where(:scope):is([data-nse-part="knob"]:where([data-nse-control="switch"] *)::after) {
   content: "";
-  inset: 0;
-  transition: opacity 180ms cubic-bezier(0.22, 0.75, 0.28, 1);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-:where(:scope) [data-nse-part="label"]:where([data-nse-control="switch"] *),
-:where(:scope):is([data-nse-part="label"]:where([data-nse-control="switch"] *)) { display: inline-block; white-space: nowrap; }
-
-:where(:scope) [data-nse-part="title"]:where([data-nse-control="switch"] *),
-:where(:scope):is([data-nse-part="title"]:where([data-nse-control="switch"] *)) {
-  position:absolute;
-  top:50%;
-  z-index:2;
-  line-height:1;
-  pointer-events:none;
-  transition:opacity 160ms ease,text-shadow 160ms ease,color 160ms ease;
-}
-
-:where(:scope) [data-nse-part="title"]:where([data-nse-state="on"]):where([data-nse-control="switch"] *),
-:where(:scope):is([data-nse-part="title"]:where([data-nse-state="on"]):where([data-nse-control="switch"] *)) {
-  left:calc(var(--nse-control-toggle-unit)*.28125);
 }
 
 :where(:scope) [data-nse-part="title"]:where([data-nse-state="off"]):where([data-nse-control="switch"] *),
 :where(:scope):is([data-nse-part="title"]:where([data-nse-state="off"]):where([data-nse-control="switch"] *)) {
   text-align:right;
-  right:calc(var(--nse-control-toggle-unit)/4);
-}
-
-
-
-:where(:scope) [data-nse-control="switch"]:where([data-nse-part="background"])[data-nse-tracking="true"] [data-nse-part="knob"]:where([data-nse-control="switch"] *),
-:where(:scope):is([data-nse-control="switch"]:where([data-nse-part="background"])[data-nse-tracking="true"]) [data-nse-part="knob"]:where([data-nse-control="switch"] *),
-:where(:scope) [data-nse-control="switch"]:where([data-nse-part="background"])[data-nse-tracking="true"] [data-nse-part="knob"]:where([data-nse-control="switch"] *)::before,
-:where(:scope):is([data-nse-control="switch"]:where([data-nse-part="background"])[data-nse-tracking="true"]) [data-nse-part="knob"]:where([data-nse-control="switch"] *)::before,
-:where(:scope) [data-nse-control="switch"]:where([data-nse-part="background"])[data-nse-tracking="true"] [data-nse-part="knob"]:where([data-nse-control="switch"] *)::after,
-:where(:scope):is([data-nse-control="switch"]:where([data-nse-part="background"])[data-nse-tracking="true"]) [data-nse-part="knob"]:where([data-nse-control="switch"] *)::after {
-  transition: none;
-}
-
-:where(:scope) [data-nse-control="switch"]:where([data-nse-part="background"]):disabled,
-:where(:scope):is([data-nse-control="switch"]:where([data-nse-part="background"]):disabled) {
-  cursor:default;
-}
-
-
-
-:where(:scope) [data-nse-part="content"]:where([data-nse-control]):where(:not([data-nse-control="slider"])):where(:not([data-nse-control="text-field"])):where(:not([data-nse-control="search-field"])):where(:not([data-nse-control="progress-indicator"])):where(:not([data-nse-segment-style="rounded"])):where(:not([data-nse-part="content"] *)):where(:not([data-nse-segment-style="capsule"])):where(:not([data-nse-control="stepper"])):where(:not([data-nse-control="tab-view"])):where(:not([data-nse-control="text-view"])):where(:not([data-nse-control="page-controller"])):where(:not([data-nse-orientation="horizontal"])):where(:not([data-nse-control="view"])):where(:not([data-nse-control="web-view"])):where(:not([data-nse-control="colour-swatches"])),
-:where(:scope):is([data-nse-part="content"]:where([data-nse-control]):where(:not([data-nse-control="slider"])):where(:not([data-nse-control="text-field"])):where(:not([data-nse-control="search-field"])):where(:not([data-nse-control="progress-indicator"])):where(:not([data-nse-segment-style="rounded"])):where(:not([data-nse-part="content"] *)):where(:not([data-nse-segment-style="capsule"])):where(:not([data-nse-control="stepper"])):where(:not([data-nse-control="tab-view"])):where(:not([data-nse-control="text-view"])):where(:not([data-nse-control="page-controller"])):where(:not([data-nse-orientation="horizontal"])):where(:not([data-nse-control="view"])):where(:not([data-nse-control="web-view"])):where(:not([data-nse-control="colour-swatches"]))) {
-  display:inline-flex;
-  overflow:hidden;
-  white-space:nowrap;
 }
 
 :where(:scope) [data-nse-part="cell"]:where([data-nse-button-type="radio"]),
 :where(:scope):is([data-nse-part="cell"]:where([data-nse-button-type="radio"])) {
-  overflow:hidden;
-  font:inherit;
-  font-size:13px;
-  font-weight:700;
-  line-height:50px;
   text-align:center;
-  text-transform:uppercase;
-  cursor:pointer;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-:where(:scope) [data-nse-part="cell"]:where([data-nse-button-type="radio"]):disabled,
-:where(:scope):is([data-nse-part="cell"]:where([data-nse-button-type="radio"]):disabled) {
-  cursor:default;
 }
 
 
@@ -810,10 +548,6 @@
   border-color: transparent;
   border-style: solid;
   color: #555;
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 50px;
-  text-transform: uppercase;
 }
 :where(:scope) [data-nse-control="tab-view"]>:is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-style="navigation"] *),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"])):is([data-nse-part="header"],[data-nse-style="grouped"])>[data-nse-part="tab-item"]>:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"]))[data-nse-selected]:where(:not([data-nse-button-type])),
 :where(:scope):is([data-nse-control="tab-view"])>:is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-style="navigation"] *),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"])):is([data-nse-part="header"],[data-nse-style="grouped"])>[data-nse-part="tab-item"]>:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"]))[data-nse-selected]:where(:not([data-nse-button-type])) {
@@ -910,29 +644,6 @@
 
 
 
-:where(:scope) [data-nse-part="title"]:where([data-nse-control="box"] *):where([data-nse-part="bezel"]>*),
-:where(:scope):is([data-nse-part="title"]:where([data-nse-control="box"] *):where([data-nse-part="bezel"]>*)) {
-  font-size:13px;
-  font-weight:700;
-  line-height:1.2;
-  text-transform:uppercase;
-}
-
-:where(:scope) [data-nse-part="content"]:where([data-nse-control="box"] *):where([data-nse-part="bezel"]>*),
-:where(:scope):is([data-nse-part="content"]:where([data-nse-control="box"] *):where([data-nse-part="bezel"]>*)) {
-  overflow:visible;
-}
-
-:where(:scope) :is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]),[data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)),
-:where(:scope):is(:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]),[data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *))) {
-  display:flex;
-  align-items:center;
-}
-
-
-
-
-
 
 
 
@@ -949,19 +660,6 @@
 :where(:scope) :is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]),[data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):not([data-nse-highlight-style="none"]):not([data-nse-material="metal"] *):active [data-nse-part="secondary-text"]:where([data-nse-control="table-cell-view"] *):where([data-nse-style="list"] *),
 :where(:scope):is(:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]),[data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):not([data-nse-highlight-style="none"]):not([data-nse-material="metal"] *):active) [data-nse-part="secondary-text"]:where([data-nse-control="table-cell-view"] *):where([data-nse-style="list"] *) {
   color: rgba(255, 255, 255, 0.78);
-}
-
-:where(:scope) [data-nse-part="secondary-text"]:where([data-nse-control="table-cell-view"] *):where([data-nse-style="list"] *),
-:where(:scope):is([data-nse-part="secondary-text"]:where([data-nse-control="table-cell-view"] *):where([data-nse-style="list"] *)) {
-  font-size:13px;
-  font-weight:700;
-}
-
-:where(:scope) [data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]),
-:where(:scope):is([data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"])) {
-  position:relative;
-  display:inline-flex;
-  align-items:center;
 }
 
 /* The dropdown menu is a non-scrolling frame; its inner .nse-control-menu-scroll scrolls and
@@ -983,37 +681,9 @@
 
 /* Collapsible sub-items: the parent's chevron rotates down when expanded. */
 
-:where(:scope) [data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]),
-:where(:scope):is([data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"])) {
-  display: inline-grid;
-  grid-template-columns: auto minmax(0, 1fr);
-}
-
 /* A picker without a visible label is the pop-up button alone: it fills the width it is
    given, as an NSPopUpButton fills its frame. Two columns would leave the button in the
    label's content-sized one, so a width never reached the pill. */
-:where(:scope) [data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):not(:has(>[data-nse-part="label"]:where([data-nse-control="pop-up-button"] *):where([data-nse-part="background"]>*):where(:not([data-nse-date-picker-style="textField"] *)):where(:not([data-nse-part="sliders-mode"] *)):where(:not([data-nse-control="rule-editor"] *)):where(:not([data-nse-control="predicate-editor"] *)))),
-:where(:scope):is([data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):not(:has(>[data-nse-part="label"]:where([data-nse-control="pop-up-button"] *):where([data-nse-part="background"]>*):where(:not([data-nse-date-picker-style="textField"] *)):where(:not([data-nse-part="sliders-mode"] *)):where(:not([data-nse-control="rule-editor"] *)):where(:not([data-nse-control="predicate-editor"] *))))) {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-:where(:scope) [data-nse-part="label"]:where([data-nse-control="pop-up-button"] *):where([data-nse-part="background"]>*):where(:not([data-nse-date-picker-style="textField"] *)):where(:not([data-nse-part="sliders-mode"] *)):where(:not([data-nse-control="rule-editor"] *)):where(:not([data-nse-control="predicate-editor"] *)),
-:where(:scope):is([data-nse-part="label"]:where([data-nse-control="pop-up-button"] *):where([data-nse-part="background"]>*):where(:not([data-nse-date-picker-style="textField"] *)):where(:not([data-nse-part="sliders-mode"] *)):where(:not([data-nse-control="rule-editor"] *)):where(:not([data-nse-control="predicate-editor"] *))) {
-  align-self: center;
-  white-space: nowrap;
-}
-
-:where(:scope) [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *),
-:where(:scope):is([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *)) {
-  display:inline-grid;
-  grid-template-columns:minmax(0,1fr) 14px;
-  align-items:center;
-  box-sizing:border-box;
-  font:inherit;
-  font-size:16px;
-  line-height:normal;
-  cursor:pointer;
-}
 
 
 
@@ -1024,15 +694,10 @@
 
 :where(:scope) [data-nse-part="content"]:where([data-nse-control="button"] *):where([data-nse-button-type="momentaryPushIn"] *):where(:not([data-nse-control])),
 :where(:scope):is([data-nse-part="content"]:where([data-nse-control="button"] *):where([data-nse-button-type="momentaryPushIn"] *):where(:not([data-nse-control]))) {
-  display: block;
   min-width: 24px;
   margin: -15px -8px -17px -11px;
-  overflow: hidden;
   padding: 0 11px;
-  line-height: 48px;
   text-align: left;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 :where(:scope) [data-nse-part="arrow"]:where([data-nse-control="button"] *),
@@ -1045,8 +710,6 @@
 
 :where(:scope) [data-nse-part="cell-content"]:where([data-nse-control="menu-item"] *),
 :where(:scope):is([data-nse-part="cell-content"]:where([data-nse-control="menu-item"] *)) {
-  display: inline-flex;
-  align-items: center;
   min-width: 0;
   gap: 8px;
 }
@@ -1059,111 +722,15 @@
   height: 20px;
 }
 
-:where(:scope) [data-nse-part="image"]:where([data-nse-part="cell-content"]>*),
-:where(:scope):is([data-nse-part="image"]:where([data-nse-part="cell-content"]>*)) {
-  display: inline-grid;
-  flex: 0 0 auto;
-  place-items: center;
-}
-
 :where(:scope) [data-nse-part="label"]:where([data-nse-part="cell-content"]>*),
 :where(:scope):is([data-nse-part="label"]:where([data-nse-part="cell-content"]>*)) {
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 /* Selected picker item: the chosen row is bold. */
 
-:where(:scope) [data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"]),
-:where(:scope):is([data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"])) {
-  display:grid;
-}
-
-:where(:scope) [data-nse-part="bezel"]:where([data-nse-slider-type="linear"] *),
-:where(:scope):is([data-nse-part="bezel"]:where([data-nse-slider-type="linear"] *)) {
-  position:relative;
-  display:block;
-  overflow:visible;
-  cursor:pointer;
-}
-
-:where(:scope) [data-nse-part="track"]:where([data-nse-slider-type="linear"] *),
-:where(:scope):is([data-nse-part="track"]:where([data-nse-slider-type="linear"] *)) {
-  position:absolute;
-  top:50%;
-  left:calc(var(--nse-atmo-slider-thumb-size)/2);
-  right:calc(var(--nse-atmo-slider-thumb-size)/2);
-}
-
-:where(:scope) [data-nse-part="fill"]:where([data-nse-slider-type="linear"] *),
-:where(:scope):is([data-nse-part="fill"]:where([data-nse-slider-type="linear"] *)) {
-  display: none;
-}
-
-:where(:scope) [data-nse-part="accessory"]:where([data-nse-slider-type="linear"] *),
-:where(:scope):is([data-nse-part="accessory"]:where([data-nse-slider-type="linear"] *)) {
-  position:absolute;
-  top:50%;
-  left:calc(var(--nse-atmo-slider-thumb-size)/2);
-  right:calc(var(--nse-atmo-slider-thumb-size)/2);
-  z-index:1;
-  overflow:visible;
-}
-
-:where(:scope) [data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"]) :where([data-nse-part="field"]),
-:where(:scope):is([data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"])) :where([data-nse-part="field"]) {
-  position:absolute;
-  inset:0;
-  appearance:none;
-  cursor:pointer;
-}
-
-
-
-:where(:scope) [data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"]) :where([data-nse-part="field"])::-webkit-slider-thumb,
-:where(:scope):is([data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"])) :where([data-nse-part="field"])::-webkit-slider-thumb {
-  appearance:none;
-  cursor:pointer;
-}
-
-
-
-
-
-:where(:scope) [data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"]) :where([data-nse-part="field"])::-moz-range-thumb,
-:where(:scope):is([data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"])) :where([data-nse-part="field"])::-moz-range-thumb {
-  cursor:pointer;
-}
-
-:where(:scope) [data-nse-part="knob"]:where([data-nse-slider-type="linear"] *),
-:where(:scope):is([data-nse-part="knob"]:where([data-nse-slider-type="linear"] *)) {
-  position:absolute;
-  top:0;
-  left:var(--nse-control-slider-progress,0%);
-  z-index:1;
-  pointer-events:none;
-  transition:filter 120ms ease;
-}
-
-:where(:scope) [data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"]) :where([data-nse-part="field"]),
-:where(:scope):is([data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"])) :where([data-nse-part="field"]) {
-  z-index: 2;
-}
-
 /* Vertical slider: the control is turned -90°; the thumb turns back so its
    artwork stays top-lit. */
-
-
-
-
-
-
-:where(:scope) [data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"]):has(:where([data-nse-part="field"]):disabled) [data-nse-part="bezel"]:where([data-nse-slider-type="linear"] *),
-:where(:scope):is([data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"]):has(:where([data-nse-part="field"]):disabled)) [data-nse-part="bezel"]:where([data-nse-slider-type="linear"] *) {
-  cursor: default;
-}
 
 
 
@@ -1173,31 +740,14 @@
    `*-border` family as a BORDER-IMAGE (heritage divider: `border-image: divider-border.png
    0 6 0 6 repeat`): 6px end caps + a repeating 1px middle. Tiling it as a repeat-x background (the
    old approach) repeats the whole 13px sprite — caps and all — into broken dashes. */
-:where(:scope) [data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style])[data-nse-style="grey"]:where([data-nse-box-type="separator"]),
-:where(:scope):is([data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style])[data-nse-style="grey"]:where([data-nse-box-type="separator"])) {
-  box-sizing:border-box;
-}
 
 
 
 /* AlphaDivider: a single-letter index caption sitting in a
    left gutter, then the divider line runs to the edge. Blue bold letter (#4299ea, per Onyx). */
-:where(:scope) [data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style])[data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style="alpha"]):where(:not([data-nse-role="disclosure"])),
-:where(:scope):is([data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style])[data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style="alpha"]):where(:not([data-nse-role="disclosure"]))) {
-  display:flex;
-  align-items:center;
-}
-:where(:scope) [data-nse-part="title"]:where([data-nse-control="box"] *):where([data-nse-style="alpha"] *),
-:where(:scope):is([data-nse-part="title"]:where([data-nse-control="box"] *):where([data-nse-style="alpha"] *)) {
-  flex:0 0 auto;
-  font-size:16px;
-  font-weight:700;
-  line-height:30px;
-}
 :where(:scope) [data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style="alpha"]):where(:not([data-nse-role="disclosure"]))::after,
 :where(:scope):is([data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style="alpha"]):where(:not([data-nse-role="disclosure"]))::after) {
   content:"";
-  flex:1 1 auto;
 }
 
 /* Arrow disclosure — the divider-arrow sprite (56×132): a 4-cell vertical sprite (row 0
@@ -1216,18 +766,12 @@
    sprite width (56/33 of the box) so the segments stop exactly at the knob's edges, and every segment
    + the baked line is the same 7/33-of-box thickness. Lower the token and the whole thing shrinks
    together. (The button/disclosure form drops the segments — its header supplies the line.) */
-:where(:scope) [data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style])[data-nse-style="arrow"]:where([data-nse-box-type="separator"]),
-:where(:scope):is([data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style])[data-nse-style="arrow"]:where([data-nse-box-type="separator"])) {
-  display:flex;
-  align-items:center;
-}
 
 :where(:scope) [data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style])[data-nse-style="arrow"]:where([data-nse-box-type="separator"])::before,
 :where(:scope):is([data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style])[data-nse-style="arrow"]:where([data-nse-box-type="separator"])::before),
 :where(:scope) [data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style])[data-nse-style="arrow"]:where([data-nse-box-type="separator"])::after,
 :where(:scope):is([data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style])[data-nse-style="arrow"]:where([data-nse-box-type="separator"])::after) {
   content:"";
-  flex:1 1 0;
 }
 
 /* The disclosure-button form (NSEDivider with onToggle: sidebar section toggles, gallery disclosure,
@@ -1255,49 +799,18 @@
 }
 
 /* Interactive disclosure renders as a real <button>; reset its native chrome. */
-:where(:scope) [data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style])[data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-role="disclosure"]),
-:where(:scope):is([data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-style])[data-nse-control="box"]:where([data-nse-part="separator"]):where([data-nse-role="disclosure"])) {
-  -webkit-appearance:none;
-  appearance:none;
-  cursor:pointer;
-}
 
 /* Atmo search fields span their row. The neutral control sheet makes
    [data-nse-control="search-field"] inline-flex at (0,1,0); the attribute here
    outranks it instead of tying on import order. */
-:where(:scope) [data-nse-control="search-field"]:where([data-nse-part="content"]),
-:where(:scope):is([data-nse-control="search-field"]:where([data-nse-part="content"])),
-:where(:scope) [data-nse-control="search-field"]:where([data-nse-part="content"])[data-nse-control="search-field"],
-:where(:scope):is([data-nse-control="search-field"]:where([data-nse-part="content"])[data-nse-control="search-field"]) {
-  display:grid;
-}
-
-:where(:scope) [data-nse-part="bezel"]:where([data-nse-control="search-field"] *),
-:where(:scope):is([data-nse-part="bezel"]:where([data-nse-control="search-field"] *)) {
-  display:grid;
-  grid-template-columns:minmax(0,1fr) 28px;
-  align-items:center;
-  box-sizing:border-box;
-}
 
 
 
 /* One affordance that morphs from the search glyph (empty) to a clear ✕ (has text). */
-:where(:scope) [data-nse-part="cancel"]:where([data-nse-control="search-field"] *),
-:where(:scope):is([data-nse-part="cancel"]:where([data-nse-control="search-field"] *)) {
-  display:block;
-}
-
-:where(:scope) [data-nse-part="cancel"]:where([data-nse-control="search-field"] *)[data-nse-part="cancel"],
-:where(:scope):is([data-nse-part="cancel"]:where([data-nse-control="search-field"] *)[data-nse-part="cancel"]) {
-  cursor:pointer;
-}
 
 :where(:scope) [data-nse-part="bezel"]:where([data-nse-control="search-field"] *) :where([data-nse-part="field"]),
 :where(:scope):is([data-nse-part="bezel"]:where([data-nse-control="search-field"] *)) :where([data-nse-part="field"]) {
   outline:0;
-  font:inherit;
-  font-size:16px;
 }
 
 :where(:scope) [data-nse-control="search-field"]:where([data-nse-part="content"])[data-nse-enabled="false"]:where(:not([data-nse-control="search-field"])),
@@ -1317,21 +830,6 @@
   filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.36));
 }
 
-:where(:scope) .nse-overlay-popup--application-menu[data-state="open"] .nse-control-app-menu-surface,
-:where(:scope):is(.nse-overlay-popup--application-menu[data-state="open"]) .nse-control-app-menu-surface {
-  animation: nse-control-app-menu-drop 0.18s ease-out;
-}
-
-:where(:scope) .nse-overlay-popup--application-menu[data-state="closing"],
-:where(:scope):is(.nse-overlay-popup--application-menu[data-state="closing"]) {
-  pointer-events: none;
-}
-
-:where(:scope) .nse-overlay-popup--application-menu[data-state="closing"] .nse-control-app-menu-surface,
-:where(:scope):is(.nse-overlay-popup--application-menu[data-state="closing"]) .nse-control-app-menu-surface {
-  animation: nse-control-app-menu-retract 0.16s ease-in forwards;
-}
-
 /* AppMenu: a dark system menu fixed at the top-left of the screen that slides
    down (Heritage top:-2px left:4px). It supplies its own dark frame via
    .nse-control-app-menu-surface, so the generic light popup frame + centering is stripped. */
@@ -1342,37 +840,7 @@
    this has something to play on; without that the menu unmounted on the same
    frame the flag flipped and simply ceased to exist. */
 
-@keyframes nse-control-app-menu-retract {
-  from {
-    transform: translateY(0);
-    opacity: 1;
-  }
-
-  to {
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-}
-
-@keyframes nse-control-app-menu-drop {
-  from {
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  :where(:scope) .nse-overlay-popup--application-menu[data-state] .nse-control-app-menu-surface,
-:where(:scope):is(.nse-overlay-popup--application-menu[data-state]) .nse-control-app-menu-surface {
-    /* Match the open/closing recipe's specificity so reduced motion removes
-       the keyframe, rather than shortening an off-screen first pose. */
-    animation: none;
-  }
 
   :where(:scope) .nse-overlay-popup--application-menu[data-state="closing"] .nse-control-app-menu-surface,
 :where(:scope):is(.nse-overlay-popup--application-menu[data-state="closing"]) .nse-control-app-menu-surface {
@@ -1382,12 +850,8 @@
 
 :where(:scope) [data-nse-part="title"]:where([data-nse-role="application-menu"]>*),
 :where(:scope):is([data-nse-part="title"]:where([data-nse-role="application-menu"]>*)) {
-  display: grid;
-  grid-template-columns: 22px minmax(0, 1fr);
   gap: 7px;
-  align-items: center;
   margin: -12px -10px 8px;
-  font-weight: 700;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.55);
 }
 
@@ -1401,7 +865,6 @@
 
 :where(:scope) [data-nse-part="body"]:where([data-nse-role="application-menu"]>*),
 :where(:scope):is([data-nse-part="body"]:where([data-nse-role="application-menu"]>*)) {
-  display: grid;
   gap: 0;
   /* -22px, not -12px: the frame stops painting 8px in from the border box, and
      a row that stops at 18px leaves the selected ramp and the dividers floating
@@ -1409,8 +872,6 @@
      an inner margin of -9px -20px against its 28px side border. */
   margin: 0 -22px -8px;
   max-height: calc(var(--nse-overlay-available-block-size, 100vh) - 70px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
 }
 
 /* Without a title the 30px top border is a title band with nothing in it: the
@@ -1443,8 +904,6 @@
 
 :where(:scope) [data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"]>*))>:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]),[data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)),
 :where(:scope):is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"])) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"]>*))>:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]),[data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)) {
-  display: flex;
-  align-items: center;
   width: 100%;
   min-height: 48px;
   padding-right: 20px;
@@ -1549,13 +1008,10 @@
   /* The plate starts 7-8px inside the border box; title and body sit 12px
      in from it (24px border less 4px), not on its edge. */
   margin: -8px -4px 8px;
-  font-size: 18px;
-  font-weight: 700;
 }
 
 :where(:scope) [data-nse-part="content"]:where([data-nse-control="system-alert"][data-nse-style]>*),
 :where(:scope):is([data-nse-part="content"]:where([data-nse-control="system-alert"][data-nse-style]>*)) {
-  display: grid;
   gap: 8px;
   margin: -7px -4px;
 }
@@ -1573,19 +1029,11 @@
 
    The frame and shadow variants keep 18: their sprites are 64×64 and 44×44, so
    18 is within bounds and is the slice they were authored for. */
-:where(:scope) .nse-box[data-box-kind="custom"],
-:where(:scope):is(.nse-box[data-box-kind="custom"]) {
-  position:relative;
-}
 
 :where(:scope) [data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]:is([data-nse-control-size="small"],[data-nse-control-size="large"]):not([data-nse-indeterminate])),
 :where(:scope):is([data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]:is([data-nse-control-size="small"],[data-nse-control-size="large"]):not([data-nse-indeterminate]))) {
-  display: inline-grid;
   width: 32px;
   height: 32px;
-  flex: 0 0 auto;
-  place-items: center;
-  vertical-align: middle;
 }
 
 :where(:scope) [data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]:is([data-nse-control-size="small"],[data-nse-control-size="large"]):not([data-nse-indeterminate]))[data-nse-control-size="large"],
@@ -1596,11 +1044,9 @@
 
 :where(:scope) [data-nse-part="image"]:where([data-nse-control="progress-indicator"][data-nse-style="spinning"]:is([data-nse-control-size="small"],[data-nse-control-size="large"]):not([data-nse-indeterminate])>*),
 :where(:scope):is([data-nse-part="image"]:where([data-nse-control="progress-indicator"][data-nse-style="spinning"]:is([data-nse-control-size="small"],[data-nse-control-size="large"]):not([data-nse-indeterminate])>*)) {
-  display: block;
   width: 32px;
   height: 32px;
   background: var(--nse-atmo-spinner) 0 0 / 32px 384px no-repeat;
-  animation: nse-control-spinner 0.9s steps(12) infinite;
 }
 
 :where(:scope) [data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]:is([data-nse-control-size="small"],[data-nse-control-size="large"]):not([data-nse-indeterminate]))[data-nse-control-size="large"] [data-nse-part="image"]:where([data-nse-control="progress-indicator"][data-nse-style="spinning"]:is([data-nse-control-size="small"],[data-nse-control-size="large"]):not([data-nse-indeterminate])>*),
@@ -1618,114 +1064,18 @@
 
 :where(:scope) :is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *)))>[data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]:is([data-nse-control-size="small"],[data-nse-control-size="large"]):not([data-nse-indeterminate])),
 :where(:scope):is(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])),[data-nse-part="cell"]:where([data-nse-role="tab"]),[data-nse-control="route-picker-view"]:where([data-nse-part="background"])):where(:not([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *))))>[data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]:is([data-nse-control-size="small"],[data-nse-control-size="large"]):not([data-nse-indeterminate])) {
-  position: absolute;
-  left: 12px;
   transform: scale(0.62);
-}
-
-@keyframes nse-control-spinner {
-  to {
-    background-position: 0 -384px;
-  }
 }
 
 /* Off-screen spinners keep compositing their filmstrip for nothing —
    NSESpinner flags visibility via IntersectionObserver. */
-:where(:scope) .nse-control-spinner[data-suspended="true"] .nse-control-spinner-sprite,
-:where(:scope):is(.nse-control-spinner[data-suspended="true"]) .nse-control-spinner-sprite {
-  animation-play-state: paused;
-}
 
 /* A frozen spinner reads as a hang, so slow the cadence right down
    instead of stopping it. */
-@media (prefers-reduced-motion: reduce) {
-  :where(:scope) [data-nse-part="image"]:where([data-nse-control="progress-indicator"][data-nse-style="spinning"]:is([data-nse-control-size="small"],[data-nse-control-size="large"]):not([data-nse-indeterminate])>*),
-:where(:scope):is([data-nse-part="image"]:where([data-nse-control="progress-indicator"][data-nse-style="spinning"]:is([data-nse-control-size="small"],[data-nse-control-size="large"]):not([data-nse-indeterminate])>*)) {
-    animation-duration: 3.6s;
-  }
-}
-
-:where(:scope) [data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]:is([data-nse-control-size="small"],[data-nse-control-size="large"]):not([data-nse-indeterminate]))[data-nse-control-size="large"] [data-nse-part="image"]:where([data-nse-control="progress-indicator"][data-nse-style="spinning"]:is([data-nse-control-size="small"],[data-nse-control-size="large"]):not([data-nse-indeterminate])>*),
-:where(:scope):is([data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]:is([data-nse-control-size="small"],[data-nse-control-size="large"]):not([data-nse-indeterminate]))[data-nse-control-size="large"]) [data-nse-part="image"]:where([data-nse-control="progress-indicator"][data-nse-style="spinning"]:is([data-nse-control-size="small"],[data-nse-control-size="large"]):not([data-nse-indeterminate])>*) {
-  animation-name: nse-control-spinner-large;
-}
-
-@keyframes nse-control-spinner-large {
-  to {
-    background-position: 0 -1536px;
-  }
-}
-
-@media (max-width: 760px) {
-  :where(:scope) :is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-style="navigation"] *),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"])),
-:where(:scope):is(:is([data-nse-control="toolbar"]:where([data-nse-part="background"]):where([data-nse-position]),[data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="capsule"]),[data-nse-part="header"]:where([data-nse-style="navigation"] *),[data-nse-control="segmented-control"]:where([data-nse-part="content"]):where([data-nse-position="inline"]))) {
-    flex-wrap: wrap;
-  }
-
-  :where(:scope) [data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]),
-:where(:scope):is([data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"])) {
-  grid-template-columns:1fr;
-}
-}
 
 /* --- NSESizeableImage / NSEImageView ------------------- */
-:where(:scope) [data-nse-part="image"]:where([data-nse-control="image-view"] *):where([data-nse-control="image-view"]>*),
-:where(:scope):is([data-nse-part="image"]:where([data-nse-control="image-view"] *):where([data-nse-control="image-view"]>*)) {
-  position:relative;
-  overflow:hidden;
-  touch-action:none;
-  user-select:none;
-}
-
-:where(:scope) .nse-control-sizeable-image[data-pannable="true"],
-:where(:scope):is(.nse-control-sizeable-image[data-pannable="true"]) {
-  cursor: grab;
-}
-
-:where(:scope) .nse-control-sizeable-image[data-pannable="true"]:active,
-:where(:scope):is(.nse-control-sizeable-image[data-pannable="true"]:active) {
-  cursor: grabbing;
-}
-
-:where(:scope) [data-nse-part="image"]:where([data-nse-control="image-view"] *):where([data-nse-part="image"]>*),
-:where(:scope):is([data-nse-part="image"]:where([data-nse-control="image-view"] *):where([data-nse-part="image"]>*)) {
-  position:absolute;
-  top:50%;
-  left:50%;
-  pointer-events:none;
-}
-
-:where(:scope) [data-nse-control="image-view"]:where([data-nse-part="background"]),
-:where(:scope):is([data-nse-control="image-view"]:where([data-nse-part="background"])) {
-  position:relative;
-  display:block;
-  overflow:hidden;
-}
 
 /* An image view at natural size (imageScaling none) pans within the box. */
-:where(:scope) .nse-control-image-view[data-image-scaling="none"] .nse-control-sizeable-image,
-:where(:scope):is(.nse-control-image-view[data-image-scaling="none"]) .nse-control-sizeable-image {
-  cursor: grab;
-}
-
-:where(:scope) [data-nse-part="accessory"]:where([data-nse-control="image-view"] *),
-:where(:scope):is([data-nse-part="accessory"]:where([data-nse-control="image-view"] *)) {
-  position:absolute;
-  right:12px;
-  bottom:12px;
-  z-index:2;
-  display:inline-flex;
-}
-
-:where(:scope) [data-nse-part="button"]:where([data-nse-control="image-view"] *),
-:where(:scope):is([data-nse-part="button"]:where([data-nse-control="image-view"] *)) {
-  display:grid;
-  place-items:center;
-  font-size:24px;
-  line-height:1;
-  cursor:pointer;
-  transition:background 0.15s ease;
-}
 
 
 
@@ -1734,42 +1084,20 @@
 /* --- IFXImageView ------------------------------------- */
 :where(:scope) .ifx-image-view,
 :where(:scope):is(.ifx-image-view) {
-  position: relative;
-  overflow: hidden;
   width: 100%;
   height: 100%;
   border-radius: 8px;
   background: #0d0f12;
-  touch-action: none;
-  user-select: none;
-}
-
-:where(:scope) .ifx-image-view[data-pannable="true"],
-:where(:scope):is(.ifx-image-view[data-pannable="true"]) {
-  cursor: grab;
-}
-
-:where(:scope) .ifx-image-view[data-pannable="true"]:active,
-:where(:scope):is(.ifx-image-view[data-pannable="true"]:active) {
-  cursor: grabbing;
 }
 
 :where(:scope) .ifx-image-view-image,
 :where(:scope):is(.ifx-image-view-image) {
-  position: absolute;
-  top: 50%;
-  left: 50%;
   max-width: none;
-  pointer-events: none;
 }
 
 /* IFXImageView's crop tool: the visible region is the crop, with a rule-of-thirds guide. */
 :where(:scope) .ifx-image-view-crop-frame,
 :where(:scope):is(.ifx-image-view-crop-frame) {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.82);
   background:
     linear-gradient(to right, transparent calc(33.333% - 1px), rgba(255, 255, 255, 0.34) calc(33.333% - 1px), rgba(255, 255, 255, 0.34) calc(33.333% + 1px), transparent calc(33.333% + 1px)),
@@ -1786,95 +1114,19 @@
   outline-offset: 2px;
 }
 
-:where(:scope) [data-nse-part="cell"]:where([data-nse-button-type="radio"])[data-nse-enabled="false"],
-:where(:scope):is([data-nse-part="cell"]:where([data-nse-button-type="radio"])[data-nse-enabled="false"]) {
-  cursor:default;
-}
-
-
-
-
-
-
-
-
-
-:where(:scope) [data-nse-part="indicator"]:where([data-nse-control="button"] *):where([data-nse-button-type="switch"] *),
-:where(:scope):is([data-nse-part="indicator"]:where([data-nse-control="button"] *):where([data-nse-button-type="switch"] *)) {
-  position: relative;
-}
-
 :where(:scope) [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-button-type="switch"]) :where([data-nse-part="field"]):indeterminate+[data-nse-part="indicator"]:where([data-nse-control="button"] *):where([data-nse-button-type="switch"] *)::after,
 :where(:scope):is([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-button-type="switch"])) :where([data-nse-part="field"]):indeterminate+[data-nse-part="indicator"]:where([data-nse-control="button"] *):where([data-nse-button-type="switch"] *)::after {
   content:"";
-  position:absolute;
-  top:12px;
-  left:9px;
 }
 
 
 
 /* Native fieldset/legend defaults are fully neutralised before the existing
    14px/36px measured group slices are applied. */
-:where(:scope) [data-nse-control="box"]:where([data-nse-part="bezel"])[data-nse-control="box"]:where([data-nse-border-type]),
-:where(:scope):is([data-nse-control="box"]:where([data-nse-part="bezel"])[data-nse-control="box"]:where([data-nse-border-type])) {
-  position:relative;
-  appearance:none;
-}
-
-:where(:scope) .nse-control-group-box.nse-box>.nse-box-title:where(legend.nse-control-group-label),
-:where(:scope):is(.nse-control-group-box.nse-box)>.nse-box-title:where(legend.nse-control-group-label) {
-  position:absolute;
-  z-index:1;
-  display:block;
-  float:none;
-  overflow:hidden;
-  line-height:20px;
-  white-space:nowrap;
-}
 
 /* The legend is out of flow, but the label it replaced was not: its 42px band
    under a -34px margin pushed the content 8px below the 36px frame. Hand
    those 8px back so content clears the band as it did before the fieldset. */
-
-
-:where(:scope) .nse-box[data-title-position="above-top"]>.nse-box-title,
-:where(:scope):is(.nse-box[data-title-position="above-top"])>.nse-box-title {
-  bottom: calc(100% + 4px);
-  left: -12px;
-}
-
-:where(:scope) .nse-box[data-title-position="at-top"]>.nse-box-title,
-:where(:scope):is(.nse-box[data-title-position="at-top"])>.nse-box-title {
-  top: -32px;
-  right: -12px;
-  left: -12px;
-}
-
-:where(:scope) .nse-box[data-title-position="below-top"]>.nse-box-title,
-:where(:scope):is(.nse-box[data-title-position="below-top"])>.nse-box-title {
-  top: -8px;
-  left: -8px;
-}
-
-:where(:scope) .nse-box[data-title-position="above-bottom"]>.nse-box-title,
-:where(:scope):is(.nse-box[data-title-position="above-bottom"])>.nse-box-title {
-  bottom: -8px;
-  left: -8px;
-}
-
-:where(:scope) .nse-box[data-title-position="at-bottom"]>.nse-box-title,
-:where(:scope):is(.nse-box[data-title-position="at-bottom"])>.nse-box-title {
-  right: -12px;
-  bottom: -12px;
-  left: -12px;
-}
-
-:where(:scope) .nse-box[data-title-position="below-bottom"]>.nse-box-title,
-:where(:scope):is(.nse-box[data-title-position="below-bottom"])>.nse-box-title {
-  top: calc(100% + 4px);
-  left: -12px;
-}
 
 
 
@@ -1898,14 +1150,6 @@
   :where(:scope) [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-button-type="switch"]) :where([data-nse-part="field"]):checked+[data-nse-part="indicator"]:where([data-nse-control="button"] *):where([data-nse-button-type="switch"] *)::before,
 :where(:scope):is([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-button-type="switch"])) :where([data-nse-part="field"]):checked+[data-nse-part="indicator"]:where([data-nse-control="button"] *):where([data-nse-button-type="switch"] *)::before {
   content:"✓";
-  display:grid;
-  font-size:22px;
-  place-items:center;
-}
-
-  :where(:scope) [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-button-type="switch"]) :where([data-nse-part="field"]):indeterminate+[data-nse-part="indicator"]:where([data-nse-control="button"] *):where([data-nse-button-type="switch"] *)::after,
-:where(:scope):is([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-button-type="switch"])) :where([data-nse-part="field"]):indeterminate+[data-nse-part="indicator"]:where([data-nse-control="button"] *):where([data-nse-button-type="switch"] *)::after {
-  top:12px;
 }
 
 
@@ -1940,23 +1184,14 @@
   background: transparent;
   color: #fff;
   filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.42));
-  overflow: visible;
-}
-
-[data-nse-part="surface"]:where(:not([data-nse-control="tooltip"])):where([data-nse-part="surface"]):is([data-nse-style]:where(:is([data-nse-style="menu"],[data-nse-style="application-menu"])):where([data-nse-part="surface"]),[data-nse-style="submenu"]:where([data-nse-part="surface"]),[data-nse-style="context-menu"]:where([data-nse-part="surface"])):not([data-nse-style="application-menu"]:where([data-nse-part="surface"]))>[data-nse-part="content"]:where([data-nse-role="overlay"] *):where([data-nse-part="surface"] > *):where(:not([data-nse-control="tooltip"] > *)) {
-  display: block;
 }
 
 [data-nse-part="surface"]:where(:not([data-nse-control="tooltip"])):where([data-nse-part="surface"]):is([data-nse-style]:where(:is([data-nse-style="menu"],[data-nse-style="application-menu"])):where([data-nse-part="surface"]),[data-nse-style="submenu"]:where([data-nse-part="surface"]),[data-nse-style="context-menu"]:where([data-nse-part="surface"])):not([data-nse-style="application-menu"]:where([data-nse-part="surface"])) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):not([data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))) {
-  display: block;
   min-inline-size: 0;
   /* 65px of frame border minus the 32px the rows bleed back over it. */
   max-block-size: calc(var(--nse-overlay-available-block-size, 100vh) - 33px);
   margin: -16px -20px;
   padding: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
   scrollbar-width: none;
   border-radius: 0;
   background: transparent;
@@ -1964,13 +1199,7 @@
 }
 
 [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where([data-nse-part="background"]):not([data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-control="menu"] > *) {
-  position: relative;
-  box-sizing: border-box;
-  display: grid;
-  grid-template-columns: auto auto auto auto minmax(0, 1fr) auto;
-  grid-template-areas: "icon label state arrow . shortcut";
   column-gap: 0;
-  align-items: center;
   inline-size: 100%;
   min-block-size: 42px;
   padding: 0 16px 0 24px;
@@ -1978,45 +1207,27 @@
   border-radius: 0;
   background: transparent;
   color: inherit;
-  font: inherit;
-  font-size: 16px;
-  line-height: 20px;
   text-align: start;
-  cursor: pointer;
 }
-
-[data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where([data-nse-part="background"]):not([data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))) [data-nse-part="icon-column"]:where([data-nse-control="menu-item"] *) { grid-area: icon; }
-[data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where([data-nse-part="background"]):not([data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))) [data-nse-part="icon-column"]:where([data-nse-control="menu-item"] *):empty { display: none; }
 [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where([data-nse-part="background"]):not([data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))) [data-nse-part="icon-column"]:where([data-nse-control="menu-item"] *):not(:empty) { margin-inline-end: 8px; }
 
 [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where([data-nse-part="background"]):not([data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))) [data-nse-part="title"]:where([data-nse-control="menu-item"] *) {
-  grid-area: label;
   min-inline-size: 0;
   padding: 2px 0;
-  overflow: hidden;
-  line-height: 22px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 /* The check trails the label in a 34x25 slot, as the Atmo menu always drew it. */
 [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where([data-nse-part="background"]):not([data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))) [data-nse-part="state-column"]:where([data-nse-control="menu-item"] *) {
-  grid-area: state;
   inline-size: 0;
-  overflow: hidden;
 }
 
 [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where([data-nse-part="background"]):not([data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))) [data-nse-part="state-column"]:where([data-nse-control="menu-item"] *):is([data-nse-state="on"],[data-nse-state="mixed"]) {
-  display: grid;
-  place-items: center;
   inline-size: 34px;
   block-size: 25px;
   margin-inline-start: 6px;
 }
 
 [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where([data-nse-part="background"]):not([data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))) [data-nse-part="submenu-arrow"]:where([data-nse-control="menu-item"] *) {
-  grid-area: arrow;
-  justify-self: start;
   inline-size: 16px;
   block-size: 16px;
   margin-inline-start: 6px;
@@ -2029,23 +1240,17 @@
 }
 
 [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where([data-nse-part="background"]):not([data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))) [data-nse-part="shortcut-column"]:where([data-nse-control="menu-item"] *) {
-  grid-area: shortcut;
   padding-inline-start: 12px;
-  font-size: 12px;
   opacity: 0.74;
-  white-space: nowrap;
 }
 
 [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where([data-nse-part="background"]):not([data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"]>*))) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-control="menu"]>*)+[data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-control="menu"]>*)::before,
 :where(:scope) [data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"]>*)+[data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"]>*)::before,
 :where(:scope):is([data-nse-style="listbox"]:where([data-nse-part="surface"])) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"]>*)+[data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"]>*)::before {
   content: "";
-  position: absolute;
-  inset: 0 0 auto;
   block-size: 1px;
   background: var(--nse-atmo-system-menu-divider) center top / 236px 1px repeat-x;
   opacity: 0.78;
-  pointer-events: none;
 }
 
 [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where([data-nse-part="background"]):not([data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))) [data-nse-part="separator"]:where([data-nse-role="overlay"] *):where([data-nse-control="menu"] > *) {
@@ -2065,7 +1270,6 @@
 
 [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where([data-nse-part="background"]):not([data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-control="menu"] > *)[data-nse-enabled="false"] {
   color: rgba(255, 255, 255, 0.48);
-  cursor: default;
   opacity: 1;
 }
 
@@ -2079,7 +1283,6 @@
   background: transparent;
   color: #1b2734;
   filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.34));
-  overflow: visible;
 }
 
 :where(:scope) [data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-part="viewport"]:where([data-nse-role="overlay"] *),
@@ -2094,21 +1297,12 @@
 
 :where(:scope) [data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"]>*),
 :where(:scope):is([data-nse-style="listbox"]:where([data-nse-part="surface"])) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"]>*) {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 34px;
-  align-items: center;
-  box-sizing: border-box;
   inline-size: 100%;
   min-block-size: 40px;
   margin: 0;
   padding: 0 10px 0 18px;
-  font: inherit;
-  font-size: 16px;
-  line-height: 20px;
   text-align: start;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.58);
-  cursor: pointer;
 }
 
 /* The chosen row carries the trailing check; the empty column keeps every
@@ -2116,14 +1310,8 @@
 :where(:scope) [data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"]>*)::after,
 :where(:scope):is([data-nse-style="listbox"]:where([data-nse-part="surface"])) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"]>*)::after {
   content: "";
-  grid-column: 2;
   inline-size: 34px;
   block-size: 25px;
-}
-
-:where(:scope) [data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"]>*)[data-nse-selected],
-:where(:scope):is([data-nse-style="listbox"]:where([data-nse-part="surface"])) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"]>*)[data-nse-selected] {
-  font-weight: 700;
 }
 
 :where(:scope) [data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"]>*):is([data-nse-highlighted],[data-nse-menu-flash="on"]):not(:disabled):not([data-nse-menu-flash="off"]),
@@ -2138,7 +1326,6 @@
 :where(:scope) [data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"]>*):disabled,
 :where(:scope):is([data-nse-style="listbox"]:where([data-nse-part="surface"])) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"]>*):disabled {
   color: rgba(35, 45, 55, 0.42);
-  cursor: default;
 }
 
 /* The art replaces the neutral glyphs. */
@@ -2169,8 +1356,6 @@
      is folded into min() below instead. The block cap stays the engine's
      (border-box, so it includes the 24px frame): a column whose content
      shrinks into whatever the frame and title leave. */
-  display: flex;
-  flex-direction: column;
   gap: 0;
   min-inline-size: min(340px, calc(100vw - 34px));
   max-inline-size: min(560px, calc(100vw - 34px), var(--nse-overlay-available-inline-size, 100vw));
@@ -2181,7 +1366,6 @@
   background: transparent;
   color: #182334;
   filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.42));
-  overflow: visible;
 }
 
 [data-nse-part="surface"]:where(:not([data-nse-control="tooltip"])):where([data-nse-part="surface"]):is([data-nse-style="popover"]:where([data-nse-part="surface"]),[data-nse-style="action-sheet"]:where([data-nse-part="surface"]))>[data-nse-part="title"]:where([data-nse-role="overlay"] *):where([data-nse-part="surface"] > *) {
@@ -2189,17 +1373,13 @@
      from it, as on the dialog surface, not on its edge. */
   margin: -8px -4px 8px;
   color: var(--nse-atmo-title-ink, #1d2a37);
-  font-size: 18px;
-  font-weight: 700;
 }
 
 [data-nse-part="surface"]:where(:not([data-nse-control="tooltip"])):where([data-nse-part="surface"]):is([data-nse-style="popover"]:where([data-nse-part="surface"]),[data-nse-style="action-sheet"]:where([data-nse-part="surface"]))>[data-nse-part="content"]:where([data-nse-role="overlay"] *):where([data-nse-part="surface"] > *):where(:not([data-nse-control="tooltip"] > *)) {
-  flex: 0 1 auto;
   gap: 12px;
   min-block-size: 0;
   margin: -7px -12px;
   padding: 4px 8px;
-  overflow: auto;
 }
 
 :where(:scope) :scope:where([data-nse-role="modal"])>[data-nse-part="backdrop"]:where([data-nse-chrome="standard"] *):where(:not([data-nse-control="system-alert"])):where(:not([data-nse-control="folder-presentation"] > *)),
@@ -2209,7 +1389,6 @@
 
 @media (min-width: 640px) and (min-height: 420px) {
   .nse-overlay-popup:where([data-nse-part="surface"])[data-nse-overlay-kind="action-sheet"][data-nse-presentation="sheet"] {
-    inset: 0;
     inline-size: fit-content;
     block-size: fit-content;
     margin: auto;
@@ -2226,23 +1405,14 @@
    Atmo scope; it carries its appearance itself, so it matches either way. */
 [data-nse-control="tooltip"]:where([data-nse-part="surface"])[data-nse-control="tooltip"],
 :where(:scope):is([data-nse-control="tooltip"]:where([data-nse-part="surface"])[data-nse-control="tooltip"]) {
-  position: fixed;
-  isolation: isolate;
-  box-sizing: border-box;
   max-inline-size: min(320px, var(--nse-overlay-available-inline-size, 100vw));
   padding: 5px 10px 6px;
   color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 17px;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.45);
 }
 
 [data-nse-control="tooltip"]:where([data-nse-part="surface"])>[data-nse-part="arrow"]:where([data-nse-control="tooltip"] *),
 :where(:scope):is([data-nse-control="tooltip"]:where([data-nse-part="surface"]))>[data-nse-part="arrow"]:where([data-nse-control="tooltip"] *) {
-  position: absolute;
-  z-index: -2;
-  box-sizing: border-box;
   inline-size: 9px;
   block-size: 9px;
   transform: rotate(45deg);
@@ -2258,14 +1428,9 @@
 
 :where(:scope) [data-nse-role="popover"]:where([data-nse-control="window"][data-nse-part="background"]) [data-nse-part="content"]:where([data-nse-control="window"] *):where([data-nse-part="bezel"]>*):where([data-nse-control="window"] *):where(:not([data-nse-control="window"] [data-nse-control] *)),
 :where(:scope):is([data-nse-role="popover"]:where([data-nse-control="window"][data-nse-part="background"])) [data-nse-part="content"]:where([data-nse-control="window"] *):where([data-nse-part="bezel"]>*):where([data-nse-control="window"] *):where(:not([data-nse-control="window"] [data-nse-control] *)) {
-  box-sizing: border-box;
   min-block-size: 0;
-  flex: 1 1 auto;
   padding: 12px 16px;
-  overflow: auto;
   color: #182334;
-  font-size: 15px;
-  line-height: 20px;
 }
 
 :where(:scope) [data-nse-role="popover"]:where([data-nse-control="window"][data-nse-part="background"]) [data-nse-part="content"]:where([data-nse-control="window"] *):where([data-nse-part="bezel"]>*):where([data-nse-control="window"] *):where(:not([data-nse-control="window"] [data-nse-control] *))>:first-child,
@@ -2275,21 +1440,9 @@
 
 :where(:scope) [data-nse-role="popover"]:where([data-nse-control="window"][data-nse-part="background"])::before,
 :where(:scope):is([data-nse-role="popover"]:where([data-nse-control="window"][data-nse-part="background"])::before) {
-  box-sizing: border-box;
   width: 13px;
   height: 13px;
 }
-
-:where(:scope) [data-nse-role="popover"]:where([data-nse-control="window"][data-nse-part="background"])[data-nse-edge="block-end"]::before,
-:where(:scope):is([data-nse-role="popover"]:where([data-nse-control="window"][data-nse-part="background"])[data-nse-edge="block-end"]::before) { top: -6px; }
-:where(:scope) [data-nse-role="popover"]:where([data-nse-control="window"][data-nse-part="background"])[data-nse-edge="block-start"]::before,
-:where(:scope):is([data-nse-role="popover"]:where([data-nse-control="window"][data-nse-part="background"])[data-nse-edge="block-start"]::before) { bottom: -6px; }
-:where(:scope) [data-nse-role="popover"]:where([data-nse-control="window"][data-nse-part="background"])[data-nse-alignment="center"]::before,
-:where(:scope):is([data-nse-role="popover"]:where([data-nse-control="window"][data-nse-part="background"])[data-nse-alignment="center"]::before) { inset-inline-start: calc(50% - 6.5px); }
-:where(:scope) [data-nse-role="popover"]:where([data-nse-control="window"][data-nse-part="background"])[data-nse-alignment="start"]::before,
-:where(:scope):is([data-nse-role="popover"]:where([data-nse-control="window"][data-nse-part="background"])[data-nse-alignment="start"]::before) { inset-inline-start: 21.5px; }
-:where(:scope) [data-nse-role="popover"]:where([data-nse-control="window"][data-nse-part="background"])[data-nse-alignment="end"]::before,
-:where(:scope):is([data-nse-role="popover"]:where([data-nse-control="window"][data-nse-part="background"])[data-nse-alignment="end"]::before) { inset-inline-end: 21.5px; }
 
 /* ============================================================================
    Calendar (Atmo-designed; its AppearanceAuthority slots stay unresolved
@@ -2301,114 +1454,74 @@
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])[data-nse-role="calendar"],
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"])[data-nse-role="calendar"]) {
-  box-sizing: border-box;
-  display: grid;
   gap: 6px;
   inline-size: 280px;
   max-inline-size: 100%;
   min-block-size: 0;
   padding: 10px 10px 8px;
   border-radius: 12px;
-  font-variant-numeric: tabular-nums;
 }
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="header"],
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"] {
-  display: flex;
-  align-items: center;
   gap: 2px;
   min-block-size: 30px;
 }
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="header"]>:where([data-nse-part="title"]),
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>:where([data-nse-part="title"]) {
-  flex: 1 1 auto;
   min-inline-size: 0;
   margin: 0;
-  overflow: hidden;
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 20px;
   text-align: center;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="header"]>:where(:is([data-nse-part="previous-month"],[data-nse-part="today"],[data-nse-part="next-month"],[data-nse-part="previous-year"],[data-nse-part="next-year"])),
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>:where(:is([data-nse-part="previous-year"],[data-nse-part="previous-month"],[data-nse-part="today"],[data-nse-part="next-month"],[data-nse-part="next-year"])) {
-  position: relative;
-  flex: none;
   inline-size: 26px;
   block-size: 24px;
   margin: 0;
   padding: 0;
   border-radius: 7px;
-  font-size: 0;
-  cursor: pointer;
-}
-
-:where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="header"]>:where(:is([data-nse-part="previous-month"],[data-nse-part="today"],[data-nse-part="next-month"],[data-nse-part="previous-year"],[data-nse-part="next-year"]))::before,
-:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>:where(:is([data-nse-part="previous-year"],[data-nse-part="previous-month"],[data-nse-part="today"],[data-nse-part="next-month"],[data-nse-part="next-year"]))::before {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1;
 }
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="header"]>:where([data-nse-part="previous-year"])[data-nse-part="previous-year"]::before,
-:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>[data-nse-part="previous-year"]::before { content: "\00AB"; font-size: 17px; }
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>[data-nse-part="previous-year"]::before { content: "\00AB"; }
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="header"]>:where([data-nse-part="previous-month"])[data-nse-part="previous-month"]::before,
-:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>[data-nse-part="previous-month"]::before { content: "\2039"; font-size: 19px; }
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>[data-nse-part="previous-month"]::before { content: "\2039"; }
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="header"]>:where([data-nse-part="next-month"])[data-nse-part="next-month"]::before,
-:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>[data-nse-part="next-month"]::before { content: "\203A"; font-size: 19px; }
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>[data-nse-part="next-month"]::before { content: "\203A"; }
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="header"]>:where([data-nse-part="next-year"])[data-nse-part="next-year"]::before,
-:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>[data-nse-part="next-year"]::before { content: "\00BB"; font-size: 17px; }
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>[data-nse-part="next-year"]::before { content: "\00BB"; }
 /* Today: a dot, drawn rather than typed so it sits on the button's optical centre. */
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="header"]>:where([data-nse-part="today"])[data-nse-part="today"]::before,
-:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>[data-nse-part="today"]::before { content: ""; inset: calc(50% - 3.5px); border-radius: 50%; background: currentColor; }
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>[data-nse-part="today"]::before { content: ""; border-radius: 50%; background: currentColor; }
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])[data-nse-flow="rtl"]>[data-nse-part="header"]>:where(:is([data-nse-part="previous-year"],[data-nse-part="previous-month"],[data-nse-part="today"],[data-nse-part="next-month"],[data-nse-part="next-year"]))::before,
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"])[data-nse-flow="rtl"])>[data-nse-part="header"]>:where(:is([data-nse-part="previous-year"],[data-nse-part="previous-month"],[data-nse-part="today"],[data-nse-part="next-month"],[data-nse-part="next-year"]))::before { transform: scaleX(-1); }
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="body"],
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="body"] {
-  display: grid;
   gap: 1px;
 }
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"]) [data-nse-part="row"],
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"])) [data-nse-part="row"] {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 1px;
 }
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"]) [data-nse-part="column-caption"],
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"])) [data-nse-part="column-caption"] {
   padding-block: 2px 5px;
-  overflow: hidden;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  line-height: 13px;
   text-align: center;
-  text-overflow: clip;
-  text-transform: uppercase;
-  white-space: nowrap;
 }
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"]) [data-nse-part="row"]>:where(:is([data-nse-part="cell"],[data-nse-part="column-caption"])),
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"])) [data-nse-part="row"]>:where(:is([data-nse-part="cell"],[data-nse-part="column-caption"])) {
-  display: grid;
   min-inline-size: 0;
 }
 
 /* [data-calendar-variant] outranks the base sheet's 20×18 cell. */
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"])[data-nse-role="calendar"] [data-nse-part="day"],
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"])[data-nse-role="calendar"]) [data-nse-part="day"] {
-  position: relative;
   inline-size: auto;
   block-size: 30px;
   min-inline-size: 0;
@@ -2417,25 +1530,16 @@
   border: 1px solid transparent;
   border-radius: 7px;
   background: transparent;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 28px;
   text-align: center;
-  cursor: pointer;
 }
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"]) [data-nse-part="day"]:disabled,
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"])) [data-nse-part="day"]:disabled {
-  cursor: default;
   opacity: 0.35;
 }
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-role="calendar"]) [data-nse-part="event-indicator"],
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"])) [data-nse-part="event-indicator"] {
-  position: absolute;
-  inset-block-end: 3px;
-  inset-inline-start: calc(50% - 2px);
   inline-size: 4px;
   block-size: 4px;
   border-radius: 50%;
@@ -2449,66 +1553,38 @@
 
 :where(:scope) [data-nse-part="clock"],
 :where(:scope):is([data-nse-part="clock"]) {
-  display: grid;
-  justify-items: start;
   gap: 10px;
-}
-
-:where(:scope) [data-nse-part="clock"]>[data-nse-part="face"],
-:where(:scope):is([data-nse-part="clock"])>[data-nse-part="face"] {
-  isolation: isolate;
-  touch-action: none;
-  cursor: grab;
 }
 
 :where(:scope) [data-nse-part="clock"]>[data-nse-part="face"]::before,
 :where(:scope):is([data-nse-part="clock"])>[data-nse-part="face"]::before {
   content: "";
-  position: absolute;
-  inset: 5px;
-  z-index: -1;
   border-radius: 50%;
-  pointer-events: none;
 }
 
 :where(:scope) [data-nse-part="clock"][data-nse-enabled="false"]>[data-nse-part="face"],
 :where(:scope):is([data-nse-part="clock"][data-nse-enabled="false"])>[data-nse-part="face"] {
-  cursor: default;
   opacity: 0.5;
 }
 
 :where(:scope) [data-nse-part="clock"]>[data-nse-part="numeric"],
 :where(:scope):is([data-nse-part="clock"])>[data-nse-part="numeric"] {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
   gap: 6px 12px;
 }
 
 :where(:scope) [data-nse-part="clock"]>[data-nse-part="numeric"]>:where([data-nse-control-size="small"][data-nse-control="text-field"][data-nse-editable="true"][data-nse-part="content"][data-nse-position="single"][data-nse-validation="valid"]),
 :where(:scope):is([data-nse-part="clock"])>[data-nse-part="numeric"]>:where([data-nse-control-size="small"][data-nse-control="text-field"][data-nse-editable="true"][data-nse-part="content"][data-nse-position="single"][data-nse-validation="valid"]) {
-  display: inline-flex;
-  align-items: center;
   gap: 6px;
-  font-size: 12px;
-  font-weight: 700;
 }
 
 :where(:scope) [data-nse-part="clock"]>[data-nse-part="numeric"] :where([data-nse-part="field"]),
 :where(:scope):is([data-nse-part="clock"])>[data-nse-part="numeric"] :where([data-nse-part="field"]) {
-  box-sizing: border-box;
   inline-size: 48px;
   block-size: 28px;
   margin: 0;
   padding: 0 6px;
   border-radius: 7px;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
   text-align: center;
-  appearance: textfield;
-  -moz-appearance: textfield;
 }
 
 :where(:scope) [data-nse-part="clock"]>[data-nse-part="numeric"] :where([data-nse-part="field"])::-webkit-inner-spin-button,
@@ -2516,7 +1592,6 @@
 :where(:scope) [data-nse-part="clock"]>[data-nse-part="numeric"] :where([data-nse-part="field"])::-webkit-outer-spin-button,
 :where(:scope):is([data-nse-part="clock"])>[data-nse-part="numeric"] :where([data-nse-part="field"])::-webkit-outer-spin-button {
   margin: 0;
-  -webkit-appearance: none;
 }
 
 /* ============================================================================
@@ -2529,47 +1604,25 @@
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]):not(:has([data-nse-part="segments"]:where([data-nse-control="date-picker"] *):where(:not([data-nse-part="field"]>*)))),
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]):not(:has([data-nse-part="segments"]:where([data-nse-control="date-picker"] *):where(:not([data-nse-part="field"]>*))))) {
-  position: relative;
-  isolation: isolate;
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
   column-gap: 2px;
   min-inline-size: 180px;
   min-block-size: 36px;
   padding-inline: 4px 10px;
-  box-sizing: border-box;
-  vertical-align: middle;
 }
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]):not(:has([data-nse-part="segments"]:where([data-nse-control="date-picker"] *):where(:not([data-nse-part="field"]>*))))::before,
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]):not(:has([data-nse-part="segments"]:where([data-nse-control="date-picker"] *):where(:not([data-nse-part="field"]>*))))::before) {
   content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  z-index: -1;
   block-size: 36px;
   border-radius: 10px;
-  pointer-events: none;
 }
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])>[data-nse-part="date-entry"],
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]))>[data-nse-part="date-entry"] {
-  flex: 1 1 96px;
   min-inline-size: 0;
   block-size: 36px;
   padding: 0 4px;
-  font-size: 15px;
   outline: none;
-}
-
-:where(:scope) [data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])>:where([data-nse-part="button"]),
-:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]))>:where([data-nse-part="button"]),
-:where(:scope) :is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"]))>:where([data-nse-part="button"]),
-:where(:scope):is(:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"])))>:where([data-nse-part="button"]) {
-  position: relative;
-  flex: none;
-  cursor: pointer;
 }
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])>:where([data-nse-part="button"]),
@@ -2579,15 +1632,11 @@
   margin: 0;
   padding: 0;
   border-radius: 7px;
-  font-size: 0;
 }
 
 :where(:scope) :is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])>:where([data-nse-part="button"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"])>:where([data-nse-part="button"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"])>:where([data-nse-part="button"]))::before,
 :where(:scope):is(:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])>:where([data-nse-part="button"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"])>:where([data-nse-part="button"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"])>:where([data-nse-part="button"]))::before) {
   content: "";
-  position: absolute;
-  inset-block: 0;
-  inset-inline-start: calc(50% - 8px);
   inline-size: 16px;
   -webkit-mask: var(--nse-atmo-calendar-glyph) center / 16px 16px no-repeat;
   mask: var(--nse-atmo-calendar-glyph) center / 16px 16px no-repeat;
@@ -2599,11 +1648,7 @@
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"]))>[data-nse-part="error"],
 :where(:scope) [data-nse-part="date-time-editor"]>[data-nse-part="error"],
 :where(:scope):is([data-nse-part="date-time-editor"])>[data-nse-part="error"] {
-  flex-basis: 100%;
-  grid-column: 1 / -1;
   padding: 4px 4px 0;
-  font-size: 12px;
-  font-weight: 700;
 }
 
 /* Date-time picker trigger: the value in a field pill with a trailing
@@ -2616,120 +1661,73 @@
   margin: 0;
   padding: 0 38px 0 12px;
   border-radius: 10px;
-  font-size: 15px;
-  font-variant-numeric: tabular-nums;
   text-align: start;
-}
-
-:where(:scope) :is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"]))>:where([data-nse-part="button"])::before,
-:where(:scope):is(:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"])))>:where([data-nse-part="button"])::before {
-  inset-inline-start: auto;
-  inset-inline-end: 12px;
 }
 
 /* Range picker: one trigger pill at rest; start and end fields side by side
    at the top of its calendar sheet (or inline, without an overlay host). */
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"]),
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"])) {
-  display: inline-grid;
   gap: 8px;
   min-inline-size: 0;
 }
 
 :where(:scope) [data-nse-part="range-fields"],
 :where(:scope):is([data-nse-part="range-fields"]) {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"])>[data-nse-part="actions"],
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-mode="range"][data-nse-role="field"]))>[data-nse-part="actions"] {
-  display: flex;
-  flex-wrap: wrap;
   gap: 4px 8px;
 }
 
 /* Popover calendar sheets and the date-time editor. */
 :where(:scope) [data-nse-part="calendar-sheet"],
 :where(:scope):is([data-nse-part="calendar-sheet"]) {
-  display: grid;
   gap: 8px;
 }
 
 :where(:scope) :is([data-nse-part="calendar-sheet"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]) :where(:is([data-nse-control="date-picker"],[data-nse-part="clock"],[data-nse-part="date-time-editor"],[data-nse-part="clock-sheet"])))>:where([data-nse-part="title"]),
 :where(:scope):is(:is([data-nse-part="calendar-sheet"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]) :where(:is([data-nse-control="date-picker"],[data-nse-part="clock"],[data-nse-part="date-time-editor"],[data-nse-part="clock-sheet"]))))>:where([data-nse-part="title"]) {
   margin: 0;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  line-height: 16px;
-  text-transform: uppercase;
 }
 
 :where(:scope) :is([data-nse-part="calendar-sheet"],[data-nse-part="date-time-editor"])>[data-nse-part="actions"],
 :where(:scope):is(:is([data-nse-part="calendar-sheet"],[data-nse-part="date-time-editor"]))>[data-nse-part="actions"] {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
   gap: 4px 8px;
 }
 
 :where(:scope) [data-nse-part="date-time-editor"],
 :where(:scope):is([data-nse-part="date-time-editor"]) {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
   gap: 12px 16px;
 }
 
 :where(:scope) [data-nse-part="date-time-editor"]>[data-nse-part="field"],
 :where(:scope):is([data-nse-part="date-time-editor"])>[data-nse-part="field"] {
-  box-sizing: border-box;
-  flex: 1 1 100%;
   block-size: 36px;
   padding: 0 12px;
   border-radius: 10px;
-  font-size: 15px;
 }
 
 :where(:scope) [data-nse-part="date-time-editor"]>:where([data-nse-control="pop-up-button"][data-nse-type="native"]),
 :where(:scope):is([data-nse-part="date-time-editor"])>:where([data-nse-control="pop-up-button"][data-nse-type="native"]) {
-  display: inline-flex;
-  align-items: center;
   gap: 8px;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-:where(:scope) [data-nse-part="date-time-editor"]>[data-nse-part="actions"],
-:where(:scope):is([data-nse-part="date-time-editor"])>[data-nse-part="actions"] {
-  flex-basis: 100%;
 }
 
 /* Native selects in the date/time family keep their semantics and OS list;
    their closed state is a light Atmo pill with the picker's triangle. */
 :where(:scope) :is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-part="date-time-editor"],[data-nse-part="clock"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])) :where([data-nse-control="pop-up-button"]>[data-nse-part="bezel"]),
 :where(:scope):is(:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-part="date-time-editor"],[data-nse-part="clock"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]))) :where([data-nse-control="pop-up-button"]>[data-nse-part="bezel"]) {
-  box-sizing: border-box;
   block-size: 32px;
   min-inline-size: 64px;
   margin: 0;
   padding: 0 30px 0 12px;
   border-radius: 9px;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  appearance: none;
-  -webkit-appearance: none;
-  cursor: pointer;
 }
 
 :where(:scope) :is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"])) [data-nse-part="segments"]:where([data-nse-control="date-picker"] *):where(:not([data-nse-part="field"]>*)),
 :where(:scope):is(:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]))) [data-nse-part="segments"]:where([data-nse-control="date-picker"] *):where(:not([data-nse-part="field"]>*)) {
-  display: inline-flex;
-  flex-wrap: nowrap;
-  align-items: center;
   gap: 6px;
 }
 
@@ -2737,7 +1735,6 @@
    regular picker's 136px minimum, so the date reads as one row. */
 :where(:scope) [data-nse-control="pop-up-button"]:where([data-nse-part="background"]):where([data-nse-date-picker-style="textField"] *) [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *),
 :where(:scope):is([data-nse-control="pop-up-button"]:where([data-nse-part="background"]):where([data-nse-date-picker-style="textField"] *)) [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *) {
-  grid-template-columns: max-content 14px;
   gap: 6px;
   min-width: 0;
   --nse-control-minimum-inline-size: 0;
@@ -2752,68 +1749,9 @@
    cropped) and its ball centre on the native thumb path.
    ========================================================================= */
 
-
-
-
-:where(:scope) [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-control-size="small"]:where(:not([data-nse-height])) [data-nse-part="bezel"]:where([data-nse-control="text-field"] *) :where([data-nse-part="field"]),
-:where(:scope):is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-control-size="small"]:where(:not([data-nse-height]))) [data-nse-part="bezel"]:where([data-nse-control="text-field"] *) :where([data-nse-part="field"]) {
-  font-size:14px;
-  line-height:26px;
-}
-
-:where(:scope) [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-control-size="small"]:where(:not([data-nse-height])) [data-nse-part]:where([data-nse-control="text-field"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-part="field"])),
-:where(:scope):is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-control-size="small"]:where(:not([data-nse-height]))) [data-nse-part]:where([data-nse-control="text-field"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-part="field"])) {
-  line-height:26px;
-}
-
-:where(:scope) [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-control-size="small"]:where(:not([data-nse-height])) [data-nse-part="label"]:where([data-nse-control="text-field"] *),
-:where(:scope):is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-control-size="small"]:where(:not([data-nse-height]))) [data-nse-part="label"]:where([data-nse-control="text-field"] *) {
-  font-size: 12px;
-}
-
-
-
-
-
-:where(:scope) [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-control-size="mini"]:where(:not([data-nse-height])) [data-nse-part="bezel"]:where([data-nse-control="text-field"] *) :where([data-nse-part="field"]),
-:where(:scope):is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-control-size="mini"]:where(:not([data-nse-height]))) [data-nse-part="bezel"]:where([data-nse-control="text-field"] *) :where([data-nse-part="field"]) {
-  font-size:12px;
-  line-height:20px;
-}
-
-:where(:scope) [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-control-size="mini"]:where(:not([data-nse-height])) [data-nse-part]:where([data-nse-control="text-field"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-part="field"])),
-:where(:scope):is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-control-size="mini"]:where(:not([data-nse-height]))) [data-nse-part]:where([data-nse-control="text-field"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-part="field"])) {
-  line-height:20px;
-}
-
-:where(:scope) [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-control-size="mini"]:where(:not([data-nse-height])) [data-nse-part="label"]:where([data-nse-control="text-field"] *),
-:where(:scope):is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-control-size="mini"]:where(:not([data-nse-height]))) [data-nse-part="label"]:where([data-nse-control="text-field"] *) {
-  font-size: 11px;
-}
-
 /* A custom height draws the same field in proportion, by the ratios small
    (36px) and mini (28px) share: a border of 0.28 of the height, an input
    line of 0.72 set over the frame's content box, type at half the height. */
-
-
-
-
-:where(:scope) [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-height] [data-nse-part="bezel"]:where([data-nse-control="text-field"] *) :where([data-nse-part="field"]),
-:where(:scope):is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-height]) [data-nse-part="bezel"]:where([data-nse-control="text-field"] *) :where([data-nse-part="field"]) {
-  font-size:max(11px,calc(var(--nse-control-height)*0.46));
-  line-height:calc(var(--nse-control-height)*0.72);
-}
-
-:where(:scope) [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-height] [data-nse-part]:where([data-nse-control="text-field"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-part="field"])),
-:where(:scope):is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-height]) [data-nse-part]:where([data-nse-control="text-field"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-part="field"])) {
-  font-size:max(11px,calc(var(--nse-control-height)*0.46));
-  line-height:calc(var(--nse-control-height)*0.72);
-}
-
-:where(:scope) [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-height] [data-nse-part="label"]:where([data-nse-control="text-field"] *),
-:where(:scope):is([data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"])[data-nse-height]) [data-nse-part="label"]:where([data-nse-control="text-field"] *) {
-  font-size: max(11px, calc(var(--nse-control-height) * 0.4));
-}
 
 /* Slider: row height, ball size (sprite cell = ball / 0.54), ball inset. */
 
@@ -2847,43 +1785,23 @@
 
 :where(:scope) [data-nse-control="colour-well"]>:where([data-nse-part="button"]),
 :where(:scope):is([data-nse-control="colour-well"])>:where([data-nse-part="button"]) {
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
   gap: 8px;
   min-inline-size: 112px;
   block-size: 34px;
   padding: 0 12px 0 5px;
   border-radius: 10px;
-  font: inherit;
-  cursor: pointer;
 }
 
 :where(:scope) [data-nse-control="colour-well"] [data-nse-part="colour-sample"],
 :where(:scope):is([data-nse-control="colour-well"]) [data-nse-part="colour-sample"] {
-  box-sizing: border-box;
-  flex: none;
   inline-size: 36px;
   block-size: 24px;
   border-radius: 6px;
 }
 
-:where(:scope) [data-nse-control="colour-well"] [data-nse-part="colour-value"],
-:where(:scope):is([data-nse-control="colour-well"]) [data-nse-part="colour-value"] {
-  font: 600 12px/1 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  letter-spacing: 0.02em;
-}
-
-:where(:scope) [data-nse-control="colour-well"]>[data-nse-part="status"]:empty,
-:where(:scope):is([data-nse-control="colour-well"])>[data-nse-part="status"]:empty {
-  display: none;
-}
-
 /* --- Wheel ---------------------------------------------------------------- */
 :where(:scope) [data-nse-control="colour-wheel"],
 :where(:scope):is([data-nse-control="colour-wheel"]) {
-  display: grid;
-  justify-items: stretch;
   gap: 6px;
   inline-size: 200px;
   max-inline-size: 100%;
@@ -2896,46 +1814,30 @@
 
 :where(:scope) [data-nse-control="colour-wheel"][data-nse-part="bezel"]>[data-nse-part="wheel"],
 :where(:scope):is([data-nse-control="colour-wheel"][data-nse-part="bezel"])>[data-nse-part="wheel"] {
-  box-sizing: border-box;
-  justify-self: center;
   inline-size: 100%;
   max-inline-size: 240px;
   block-size: auto;
   aspect-ratio: 1;
-  isolation: isolate;
-  cursor: crosshair;
 }
 
 :where(:scope) [data-nse-control="colour-wheel"]>[data-nse-part="wheel"]::before,
 :where(:scope):is([data-nse-control="colour-wheel"])>[data-nse-part="wheel"]::before {
   content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
   border-radius: 50%;
   background: #000;
   opacity: var(--nse-colour-wheel-darkness, 0);
-  pointer-events: none;
 }
 
 :where(:scope) [data-nse-control="colour-wheel"]>[data-nse-part="wheel"]::after,
 :where(:scope):is([data-nse-control="colour-wheel"])>[data-nse-part="wheel"]::after {
   content: "";
-  position: absolute;
-  z-index: 2;
-  inset-inline-start: calc(var(--nse-colour-wheel-x, 50%) - 8px);
-  inset-block-start: calc(var(--nse-colour-wheel-y, 50%) - 8px);
   inline-size: 16px;
   block-size: 16px;
-  box-sizing: border-box;
   border-radius: 50%;
-  pointer-events: none;
 }
 
 :where(:scope) [data-nse-control="colour-wheel"][data-nse-part="bezel"] [data-nse-part="numeric"],
 :where(:scope):is([data-nse-control="colour-wheel"][data-nse-part="bezel"]) [data-nse-part="numeric"] {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px 10px;
   margin-block-start: 4px;
 }
@@ -2949,18 +1851,13 @@
   height: 10px;
   border: 0;
   border-radius: 5px;
-  box-sizing: border-box;
 }
 
 /* Numerals centre in their small fields; the native spin arrows go (the
    slider beside each field is the stepping affordance). */
 :where(:scope) :is([data-nse-control="colour-sliders"],[data-nse-control="colour-wheel"]) [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"]) [data-nse-part="bezel"]:where([data-nse-control="text-field"] *) :where([data-nse-part="field"]),
 :where(:scope):is(:is([data-nse-control="colour-sliders"],[data-nse-control="colour-wheel"])) [data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"]) [data-nse-part="bezel"]:where([data-nse-control="text-field"] *) :where([data-nse-part="field"]) {
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
   text-align: center;
-  appearance: textfield;
-  -moz-appearance: textfield;
 }
 
 :where(:scope) :is([data-nse-control="colour-sliders"],[data-nse-control="colour-wheel"]) :where([data-nse-part="field"])::-webkit-inner-spin-button,
@@ -2968,13 +1865,11 @@
 :where(:scope) :is([data-nse-control="colour-sliders"],[data-nse-control="colour-wheel"]) :where([data-nse-part="field"])::-webkit-outer-spin-button,
 :where(:scope):is(:is([data-nse-control="colour-sliders"],[data-nse-control="colour-wheel"])) :where([data-nse-part="field"])::-webkit-outer-spin-button {
   margin: 0;
-  -webkit-appearance: none;
 }
 
 /* --- Channel rows ---------------------------------------------------------- */
 :where(:scope) [data-nse-control="colour-sliders"][data-nse-part="content"],
 :where(:scope):is([data-nse-control="colour-sliders"][data-nse-part="content"]) {
-  display: grid;
   gap: 2px;
   min-inline-size: 0;
   margin: 0;
@@ -2984,46 +1879,34 @@
 
 :where(:scope) [data-nse-control="colour-sliders"]>:where([data-nse-part="title"]),
 :where(:scope):is([data-nse-control="colour-sliders"])>:where([data-nse-part="title"]) {
-  float: left;
   inline-size: 100%;
   margin-block-end: 2px;
   padding: 0;
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 18px;
 }
 
 :where(:scope) [data-nse-control="colour-sliders"] [data-nse-part="channel"],
 :where(:scope):is([data-nse-control="colour-sliders"]) [data-nse-part="channel"] {
-  display: grid;
-  grid-template-columns: 14px minmax(0, 1fr) 62px;
-  align-items: center;
   gap: 8px;
 }
 
 :where(:scope) [data-nse-control="colour-sliders"] [data-nse-part="channel-key"],
 :where(:scope):is([data-nse-control="colour-sliders"]) [data-nse-part="channel-key"] {
-  font-size: 13px;
-  font-weight: 700;
   text-align: center;
 }
 
 /* --- Swatches -------------------------------------------------------------- */
 :where(:scope) [data-nse-control="colour-swatches"][data-nse-part="content"],
 :where(:scope):is([data-nse-control="colour-swatches"][data-nse-part="content"]) {
-  grid-template-columns: repeat(auto-fill, 26px);
   gap: 6px;
 }
 
 :where(:scope) [data-nse-control="colour-swatches"][data-nse-part="content"] [data-nse-part="swatch"],
 :where(:scope):is([data-nse-control="colour-swatches"][data-nse-part="content"]) [data-nse-part="swatch"] {
-  box-sizing: border-box;
   inline-size: 26px;
   block-size: 26px;
   margin: 0;
   padding: 0;
   border-radius: 6px;
-  cursor: pointer;
 }
 
 /* --- Panel -----------------------------------------------------------------
@@ -3042,13 +1925,11 @@
   --nse-colour-panel-rhythm: 6px;
   --nse-colour-panel-control: 24px;
   --nse-colour-panel-label: 48px;
-  display: grid;
   gap: var(--nse-colour-panel-rhythm);
   inline-size: 236px;
   max-inline-size: 100%;
   min-inline-size: 0;
   padding-block-end: var(--nse-colour-panel-inset);
-  box-sizing: border-box;
 }
 
 :where(:scope) [data-nse-control="colour-panel"] :is([data-nse-part="sample-row"],[data-nse-part="eyedropper-status"],[data-nse-role="tabpanel"],[data-nse-part="opacity-row"],[data-nse-part="hex-row"],[data-nse-part="swatch-strip"],[data-nse-part="content-message"]),
@@ -3059,45 +1940,19 @@
 /* Every label of the panel (a row's, or a popup's) in one column. */
 :where(:scope) [data-nse-control="colour-panel"] :is([data-nse-part="row-label"],[data-nse-part="label"]:where([data-nse-control="pop-up-button"] *):where([data-nse-part="background"]>*):where(:not([data-nse-date-picker-style="textField"] *)):where(:not([data-nse-part="sliders-mode"] *)):where(:not([data-nse-control="rule-editor"] *)):where(:not([data-nse-control="predicate-editor"] *))),
 :where(:scope):is([data-nse-control="colour-panel"]) :is([data-nse-part="row-label"],[data-nse-part="label"]:where([data-nse-control="pop-up-button"] *):where([data-nse-part="background"]>*):where(:not([data-nse-date-picker-style="textField"] *)):where(:not([data-nse-part="sliders-mode"] *)):where(:not([data-nse-control="rule-editor"] *)):where(:not([data-nse-control="predicate-editor"] *))) {
-  font-size: 11px;
-  font-weight: 700;
-  line-height: var(--nse-colour-panel-control);
   text-align: start;
 }
 
 /* The panel's popups span their rows, a label (when shown) in the column. */
-:where(:scope) [data-nse-control="colour-panel"] [data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]),
-:where(:scope):is([data-nse-control="colour-panel"]) [data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]) {
-  display:grid;
-  grid-template-columns:minmax(0,1fr);
-  align-items:center;
-}
-
-:where(:scope) [data-nse-control="colour-panel"] [data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):has(>[data-nse-part="label"]:where([data-nse-control="pop-up-button"] *):where([data-nse-part="background"]>*):where(:not([data-nse-date-picker-style="textField"] *)):where(:not([data-nse-part="sliders-mode"] *)):where(:not([data-nse-control="rule-editor"] *)):where(:not([data-nse-control="predicate-editor"] *))),
-:where(:scope):is([data-nse-control="colour-panel"]) [data-nse-control="pop-up-button"]:where([data-nse-pulls-down="false"]):has(>[data-nse-part="label"]:where([data-nse-control="pop-up-button"] *):where([data-nse-part="background"]>*):where(:not([data-nse-date-picker-style="textField"] *)):where(:not([data-nse-part="sliders-mode"] *)):where(:not([data-nse-control="rule-editor"] *)):where(:not([data-nse-control="predicate-editor"] *))) {
-  grid-template-columns: var(--nse-colour-panel-label) minmax(0, 1fr);
-}
-
-
-
-:where(:scope) [data-nse-control="colour-panel"]>fieldset,
-:where(:scope):is([data-nse-control="colour-panel"])>fieldset,
-:where(:scope) [data-nse-control="colour-panel"] [data-nse-control="tab-view"],
-:where(:scope):is([data-nse-control="colour-panel"]) [data-nse-control="tab-view"] {
-  display: contents;
-}
 
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="content-message"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="content-message"] {
   margin: 0;
-  font-size: 12px;
 }
 
 /* The mode bar runs edge to edge under the title bar, like a toolbar. */
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="icons"]),
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-control="tab-view"]:where([data-nse-part="header"]):where([data-nse-style="icons"]) {
-  order: 0;
-  justify-content: center;
   margin: 0;
   padding: 4px var(--nse-colour-panel-inset) 5px;
 }
@@ -3105,24 +1960,16 @@
 /* The magnifier beside the colour it picked, both a row control high. */
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="sample-row"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="sample-row"] {
-  order: 1;
-  display: grid;
-  grid-template-columns: var(--nse-colour-panel-control) minmax(0, 1fr);
-  align-items: center;
   gap: var(--nse-colour-panel-rhythm);
 }
 
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="eyedropper"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="eyedropper"] {
-  display: grid;
-  place-items: center;
-  box-sizing: border-box;
   inline-size: var(--nse-colour-panel-control);
   block-size: var(--nse-colour-panel-control);
   margin: 0;
   padding: 0;
   border-radius: 5px;
-  cursor: default;
 }
 
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="eyedropper"]>:where([data-nse-part="image"]),
@@ -3133,101 +1980,56 @@
 
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="current-colour"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="current-colour"] {
-  box-sizing: border-box;
   block-size: var(--nse-colour-panel-control);
   border-radius: 4px;
   /* The colour over a chequer, so opacity reads. */
   background:
     linear-gradient(var(--nse-colour-sample, transparent), var(--nse-colour-sample, transparent)),
     repeating-conic-gradient(#c8c8c8 0 25%, #fff 0 50%) 0 0 / 10px 10px;
-  cursor: grab;
 }
 
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="eyedropper-status"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="eyedropper-status"] {
-  order: 1;
   margin: 0;
-  font-size: 11px;
 }
 
 /* The mode area is square to the column (220px), so the wheel and the crayon
    box fill it and changing mode never resizes the window. */
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-role="tabpanel"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-role="tabpanel"] {
-  order: 2;
   /* This inspector owns its mode geometry. Generic leading-aligned tab
      content stacks shrink palettes and offset the wheel inside the slot. */
-  display: block;
   padding: 0;
-  box-sizing: border-box;
   block-size: 220px;
   min-inline-size: 0;
-}
-
-:where(:scope) [data-nse-control="colour-panel"] [role="tabpanel"][hidden],
-:where(:scope):is([data-nse-control="colour-panel"]) [role="tabpanel"][hidden] {
-  display: none;
 }
 
 /* Opacity and hex: a label in the label column, then the control. The
    opacity readout takes the numeric column the channel fields use. */
 :where(:scope) [data-nse-control="colour-panel"] :is([data-nse-part="opacity-row"],[data-nse-part="hex-row"]),
 :where(:scope):is([data-nse-control="colour-panel"]) :is([data-nse-part="opacity-row"],[data-nse-part="hex-row"]) {
-  display: grid;
-  align-items: center;
   gap: 0;
   min-block-size: var(--nse-colour-panel-control);
 }
 
-:where(:scope) [data-nse-control="colour-panel"] [data-nse-part="opacity-row"],
-:where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="opacity-row"] {
-  order: 3;
-  grid-template-columns: var(--nse-colour-panel-label) minmax(0, 1fr) 36px;
-}
-
-:where(:scope) [data-nse-control="colour-panel"] [data-nse-part="hex-row"],
-:where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="hex-row"] {
-  order: 4;
-  grid-template-columns: var(--nse-colour-panel-label) minmax(0, 1fr);
-}
-
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="opacity-value"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="opacity-value"] {
-  font-size: 11px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
   text-align: end;
-}
-
-:where(:scope) [data-nse-control="colour-panel"] [data-nse-part="hex-row"] [data-nse-part="bezel"]:where([data-nse-control="text-field"] *) :where([data-nse-part="field"]),
-:where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="hex-row"] [data-nse-part="bezel"]:where([data-nse-control="text-field"] *) :where([data-nse-part="field"]) {
-  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 /* Each mode fills the fixed area. */
 :where(:scope) [data-nse-control="colour-panel"] :is([data-nse-part="wheel-mode"],[data-nse-part="sliders-mode"],[data-nse-part="palettes-mode"],[data-nse-part="image-mode"],[data-nse-part="crayons-mode"]),
 :where(:scope):is([data-nse-control="colour-panel"]) :is([data-nse-part="wheel-mode"],[data-nse-part="sliders-mode"],[data-nse-part="palettes-mode"],[data-nse-part="image-mode"],[data-nse-part="crayons-mode"]) {
-  box-sizing: border-box;
   block-size: 100%;
   min-inline-size: 0;
 }
 
 /* Wheel: the wheel with its brightness upright beside it. */
-:where(:scope) [data-nse-control="colour-panel"] [data-nse-part="wheel-mode"],
-:where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="wheel-mode"] {
-  display: grid;
-  align-items: center;
-}
 
 /* The wheel fills the column beside its brightness bar, the bar as tall as
    the wheel. */
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-control="colour-wheel"][data-nse-brightness-placement="beside"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-control="colour-wheel"][data-nse-brightness-placement="beside"] {
-  grid-template-columns: minmax(0, 1fr) var(--nse-colour-panel-control);
-  align-items: center;
   gap: var(--nse-colour-panel-inset);
   inline-size: 100%;
 }
@@ -3240,23 +2042,18 @@
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-control="colour-wheel"][data-nse-brightness-placement="beside"]>[data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"]),
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-control="colour-wheel"][data-nse-brightness-placement="beside"]>[data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"]) {
   --nse-control-slider-length: 188px;
-  justify-self: center;
 }
 
 /* Sliders: the model menu, then each channel named above its bar. */
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="sliders-mode"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="sliders-mode"] {
-  display: grid;
-  align-content: start;
   gap: var(--nse-colour-panel-rhythm);
 }
 
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-control="colour-sliders"]>:where([data-nse-part="title"]),
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-control="colour-sliders"]>:where([data-nse-part="title"]) {
-  position: absolute;
   inline-size: 1px;
   block-size: 1px;
-  overflow: hidden;
   clip-path: inset(50%);
 }
 
@@ -3268,60 +2065,27 @@
 
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-control="colour-sliders"] [data-nse-part="channel"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-control="colour-sliders"] [data-nse-part="channel"] {
-  grid-template-columns: minmax(0, 1fr) 36px;
-  grid-template-areas: "name name" "slider field";
-  align-items: center;
   gap: 0 var(--nse-colour-panel-rhythm);
-}
-
-:where(:scope) [data-nse-control="colour-panel"] [data-nse-control="colour-sliders"] [data-nse-part="channel-key"],
-:where(:scope):is([data-nse-control="colour-panel"]) [data-nse-control="colour-sliders"] [data-nse-part="channel-key"] {
-  display: none;
-}
-
-:where(:scope) [data-nse-control="colour-panel"] [data-nse-control="colour-sliders"] [data-nse-part="channel-name"],
-:where(:scope):is([data-nse-control="colour-panel"]) [data-nse-control="colour-sliders"] [data-nse-part="channel-name"] {
-  display: block;
-  grid-area: name;
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 14px;
-}
-
-:where(:scope) [data-nse-control="colour-panel"] [data-nse-control="colour-sliders"] [data-nse-part="channel"]>[data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"]),
-:where(:scope):is([data-nse-control="colour-panel"]) [data-nse-control="colour-sliders"] [data-nse-part="channel"]>[data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"]) {
-  grid-area: slider;
-}
-
-:where(:scope) [data-nse-control="colour-panel"] [data-nse-control="colour-sliders"] [data-nse-part="channel"]>[data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"]),
-:where(:scope):is([data-nse-control="colour-panel"]) [data-nse-control="colour-sliders"] [data-nse-part="channel"]>[data-nse-control="text-field"]:where([data-nse-part="content"]):where([data-nse-position="single"]) {
-  grid-area: field;
 }
 
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="grey-presets"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="grey-presets"] {
-  display: flex;
-  justify-content: space-between;
   padding-inline: 2px;
 }
 
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="grey-presets"]>:where([data-nse-part="swatch"]),
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="grey-presets"]>:where([data-nse-part="swatch"]) {
-  box-sizing: border-box;
   inline-size: 18px;
   block-size: 18px;
   margin: 0;
   padding: 0;
   border-radius: 3px;
   background: var(--nse-colour-sample);
-  cursor: default;
 }
 
 /* Palettes: the list menu, the named colours, and a search field. */
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="palettes-mode"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="palettes-mode"] {
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
   gap: var(--nse-colour-panel-rhythm);
 }
 
@@ -3338,19 +2102,12 @@
 
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="colour-list-row"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="colour-list-row"] {
-  display: grid;
-  grid-template-columns: 20px minmax(0, 1fr);
-  align-items: center;
   gap: var(--nse-colour-panel-rhythm);
   padding: 1px var(--nse-colour-panel-rhythm);
-  font-size: 12px;
-  line-height: 16px;
-  cursor: default;
 }
 
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="colour-list-chip"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="colour-list-chip"] {
-  box-sizing: border-box;
   block-size: 12px;
 }
 
@@ -3358,82 +2115,57 @@
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="colour-list-empty"] {
   margin: 0;
   padding: 10px 8px;
-  font-size: 12px;
 }
 
 /* Image palettes: the image menu over the picture itself. */
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="image-mode"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="image-mode"] {
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
   gap: var(--nse-colour-panel-rhythm);
 }
 
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="image-palette"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="image-palette"] {
-  position: relative;
   min-block-size: 0;
 }
 
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="image-palette"]>:where([data-nse-part="image"]),
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="image-palette"]>:where([data-nse-part="image"]) {
-  display: block;
-  box-sizing: border-box;
   inline-size: 100%;
   block-size: 100%;
   border-radius: 3px;
-  cursor: crosshair;
-  touch-action: none;
 }
 
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="image-marker"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="image-marker"] {
-  position: absolute;
-  box-sizing: border-box;
   inline-size: 7px;
   block-size: 7px;
   margin: -3px 0 0 -3px;
   border: 1px solid #fff;
   outline: 1px solid rgba(0, 0, 0, 0.75);
-  pointer-events: none;
 }
 
 /* Crayons, measured from the Mac OS X 10.3 box: eight to a row on a pitch
    of 22 units (the stick is 20), the rows stepping down 20 and set alternately
    half a crayon left and right, the back row left. Everything scales with the
    pitch, which the box's width sets. The chosen crayon rises from its row. */
-:where(:scope) [data-nse-control="colour-panel"] [data-nse-part="crayons-mode"],
-:where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="crayons-mode"] {
-  display: grid;
-}
 
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="crayon-box"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="crayon-box"] {
   --nse-crayon-pitch: calc((100cqw - 12px) / 8.5);
-  position: relative;
-  container-type: inline-size;
   /* Clipped, never scrolled: focusing a front crayon, which runs past the
      box, must not scroll the box to reveal it. */
-  overflow: clip;
   border-radius: 6px;
 }
 
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="crayon"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="crayon"] {
   --nse-crayon-shift: calc((1 - mod(var(--nse-crayon-row), 2)) * var(--nse-crayon-pitch) / 2);
-  position: absolute;
-  z-index: calc(10 - var(--nse-crayon-row));
-  inset-inline-start: calc(6px + var(--nse-crayon-column) * var(--nse-crayon-pitch) + var(--nse-crayon-shift) + var(--nse-crayon-pitch) * 0.05);
-  inset-block-start: calc(var(--nse-crayon-pitch) + (5 - var(--nse-crayon-row)) * var(--nse-crayon-pitch) * 20 / 22);
   inline-size: calc(var(--nse-crayon-pitch) * 0.9);
   block-size: calc(var(--nse-crayon-pitch) * 20 / 22);
   margin: 0;
   padding: 0;
   border: 0;
   background: none;
-  overflow: visible;
-  cursor: default;
-  transition: transform 140ms ease-out;
 }
 
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="crayon"][data-nse-position="first"],
@@ -3453,75 +2185,50 @@
 
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="crayon-art"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="crayon-art"] {
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline-start: 0;
   inline-size: 100%;
   block-size: calc(var(--nse-crayon-pitch) * 130 / 22);
-  pointer-events: none;
 }
 
 /* The box's frosted front, over its lower third. */
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="crayon-box-front"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="crayon-box-front"] {
-  position: absolute;
-  z-index: 20;
-  inset: auto 0 0;
   block-size: 20%;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="crayon"],
-:where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="crayon"] {
-    transition: none;
-  }
 }
 
 /* Saved colours: rows of ten wells and a grip that opens two more rows. */
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="swatch-strip"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="swatch-strip"] {
-  order: 5;
-  display: grid;
-  justify-items: center;
   gap: 3px;
 }
 
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="swatch-strip"]>[data-nse-part="body"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="swatch-strip"]>[data-nse-part="body"] {
-  display: grid;
   gap: 2px;
   inline-size: 100%;
 }
 
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="swatch-strip"] [data-nse-part="row"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="swatch-strip"] [data-nse-part="row"] {
-  display: grid;
-  grid-template-columns: repeat(10, minmax(0, 1fr));
   gap: 2px;
 }
 
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="swatch-strip"] [data-nse-part="swatch"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="swatch-strip"] [data-nse-part="swatch"] {
-  box-sizing: border-box;
   block-size: 16px;
   min-inline-size: 0;
   margin: 0;
   padding: 0;
   border-radius: 3px;
-  cursor: default;
 }
 
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="swatch-grip"],
 :where(:scope):is([data-nse-control="colour-panel"]) [data-nse-part="swatch-grip"] {
-  box-sizing: border-box;
   inline-size: 34px;
   block-size: 9px;
   margin: 0;
   padding: 0;
   border: 0;
   border-radius: 4.5px;
-  cursor: default;
 }
 /* ============================================================================
    Stepper (Atmo-designed): a slim capsule split into an up and a down half,
@@ -3531,41 +2238,19 @@
 
 
 
-:where(:scope) [data-nse-control="stepper"]>[data-nse-part="bezel"],
-:where(:scope):is([data-nse-control="stepper"])>[data-nse-part="bezel"] {
-  display:inline-grid;
-  grid-template-rows:1fr 1fr;
-  flex:none;
-  box-sizing:border-box;
-  overflow:hidden;
-}
-
-
-
 
 
 :where(:scope) [data-nse-control="stepper"][data-nse-part="content"]>[data-nse-part="bezel"]>:where(:is([data-nse-part="increment"],[data-nse-part="decrement"])),
 :where(:scope):is([data-nse-control="stepper"][data-state])>[data-nse-part="bezel"]>button {
-  position: relative;
   inline-size: auto;
   min-block-size: 0;
   margin: 0;
   padding: 0;
-  cursor: pointer;
 }
 
 :where(:scope) [data-nse-control="stepper"]>[data-nse-part="bezel"]>:where(:is([data-nse-part="increment"],[data-nse-part="decrement"]))::before,
 :where(:scope):is([data-nse-control="stepper"])>[data-nse-part="bezel"]>:where(:is([data-nse-part="increment"],[data-nse-part="decrement"]))::before {
   content:"";
-  position:absolute;
-  inset:0;
-}
-
-
-
-:where(:scope) [data-nse-control="stepper"]>[data-nse-part="bezel"]>:where([data-nse-enabled="false"]):disabled,
-:where(:scope):is([data-nse-control="stepper"])>[data-nse-part="bezel"]>:where([data-nse-enabled="false"]):disabled {
-  cursor: default;
 }
 
 /* ============================================================================
@@ -3575,36 +2260,20 @@
    ========================================================================= */
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"])[data-nse-type="field"]>[data-nse-part="field"]:where([data-nse-control="date-picker"] *),
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"])[data-nse-type="field"])>[data-nse-part="field"]:where([data-nse-control="date-picker"] *) {
-  position: relative;
-  isolation: isolate;
-  display: inline-flex;
-  align-items: center;
   gap: 4px;
   block-size: 36px;
   padding-inline: 10px 4px;
-  box-sizing: border-box;
-  vertical-align: middle;
 }
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"])[data-nse-type="field"]>[data-nse-part="field"]:where([data-nse-control="date-picker"] *)::before,
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"])[data-nse-type="field"])>[data-nse-part="field"]:where([data-nse-control="date-picker"] *)::before {
   content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
   border-radius: 10px;
-  pointer-events: none;
 }
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]) [data-nse-part="segments"],
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"])) [data-nse-part="segments"] {
-  display: inline-flex;
-  align-items: center;
   min-inline-size: 64px;
-  font-size: 15px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
 }
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]) [data-nse-part$="-segment"],
@@ -3612,7 +2281,6 @@
   padding: 2px 2px;
   border-radius: 4px;
   outline: none;
-  cursor: default;
 }
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]) [data-nse-part="period-gap"],
@@ -3622,8 +2290,6 @@
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]) [data-nse-part="clock-affix"],
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"])) [data-nse-part="clock-affix"] {
-  position: relative;
-  flex: none;
   inline-size: 28px;
   block-size: 28px;
   margin: 0;
@@ -3631,22 +2297,17 @@
   border: 0;
   border-radius: 7px;
   background: transparent;
-  cursor: pointer;
 }
 
 :where(:scope) [data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]) [data-nse-part="clock-affix"]::before,
 :where(:scope):is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"])) [data-nse-part="clock-affix"]::before {
   content: "";
-  position: absolute;
-  inset: calc(50% - 8px);
   -webkit-mask: var(--nse-atmo-clock-glyph) center / 16px 16px no-repeat;
   mask: var(--nse-atmo-clock-glyph) center / 16px 16px no-repeat;
 }
 
 :where(:scope) [data-nse-part="clock-sheet"],
 :where(:scope):is([data-nse-part="clock-sheet"]) {
-  display: grid;
-  justify-items: center;
   gap: 8px;
 }
 
@@ -3662,8 +2323,6 @@
 :where(:scope) [data-nse-control="font-panel"][data-nse-part="background"],
 :where(:scope):is([data-nse-control="font-panel"][data-nse-part="background"]) {
   --nse-font-panel-inset: 8px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
   inline-size: 452px;
   max-inline-size: 100%;
   min-inline-size: 0;
@@ -3671,115 +2330,69 @@
 
 :where(:scope) [data-nse-control="font-panel"]>[data-nse-part="preview"],
 :where(:scope):is([data-nse-control="font-panel"])>[data-nse-part="preview"] {
-  display: grid;
-  place-content: center;
-  justify-items: center;
   gap: 8px;
   block-size: 78px;
   padding: 0 12px;
-  overflow: hidden;
-  box-sizing: border-box;
   border-block-end: 1px solid;
 }
 
 :where(:scope) [data-nse-control="font-panel"] [data-nse-part="preview-sample"],
 :where(:scope):is([data-nse-control="font-panel"]) [data-nse-part="preview-sample"] {
-  display: block;
   max-inline-size: 420px;
-  overflow: hidden;
-  line-height: 1.15;
-  white-space: nowrap;
-  text-overflow: ellipsis;
 }
 
 :where(:scope) [data-nse-control="font-panel"] [data-nse-part="preview-description"],
 :where(:scope):is([data-nse-control="font-panel"]) [data-nse-part="preview-description"] {
   margin: 0;
-  font-size: 12px;
-  line-height: 1;
 }
 
 /* The effects bar: underline and strikethrough pull-downs, the text and
    document colour buttons, a rule, then the shadow and its controls. */
 :where(:scope) [data-nse-control="font-panel"]>[data-nse-part="effects"],
 :where(:scope):is([data-nse-control="font-panel"])>[data-nse-part="effects"] {
-  display: flex;
-  align-items: center;
   gap: 5px;
   min-block-size: 34px;
   padding: 5px var(--nse-font-panel-inset);
-  box-sizing: border-box;
   border-block-end: 1px solid;
-}
-
-:where(:scope) [data-nse-control="font-panel"] [data-nse-part="effect-glyph"],
-:where(:scope):is([data-nse-control="font-panel"]) [data-nse-part="effect-glyph"] {
-  display: block;
-  flex: none;
 }
 
 /* A colour button's face: the glyph, then a chip of the colour it sets. */
 :where(:scope) [data-nse-control="font-panel"] [data-nse-part="effect-colour-face"],
 :where(:scope):is([data-nse-control="font-panel"]) [data-nse-part="effect-colour-face"] {
-  display: inline-flex;
-  align-items: center;
   gap: 2px;
 }
 
 :where(:scope) [data-nse-control="font-panel"] [data-nse-part="colour-chip"],
 :where(:scope):is([data-nse-control="font-panel"]) [data-nse-part="colour-chip"] {
-  display: block;
   inline-size: 11px;
   block-size: 9px;
   border-radius: 2px;
   background: var(--nse-font-panel-chip);
 }
 
-:where(:scope) [data-nse-control="font-panel"]>[data-nse-part="effects"]>[data-nse-control="slider"][data-nse-slider-type="linear"],
-:where(:scope):is([data-nse-control="font-panel"])>[data-nse-part="effects"]>[data-nse-control="slider"][data-nse-slider-type="linear"] {
-  flex: none;
-}
-
 :where(:scope) [data-nse-control="font-panel"] [data-nse-part="shadow-angle"],
 :where(:scope):is([data-nse-control="font-panel"]) [data-nse-part="shadow-angle"] {
   min-inline-size: 30px;
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
 }
 
 /* The columns: three lists and the size column, each headed alike. */
 :where(:scope) [data-nse-control="font-panel"]>[data-nse-part="columns"],
 :where(:scope):is([data-nse-control="font-panel"])>[data-nse-part="columns"] {
-  display: flex;
-  align-items: start;
   gap: 5px;
   padding: var(--nse-font-panel-inset) var(--nse-font-panel-inset) 6px;
   min-inline-size: 0;
 }
 
-:where(:scope) [data-nse-control="font-panel"] [data-nse-part="font-list"],
-:where(:scope):is([data-nse-control="font-panel"]) [data-nse-part="font-list"] {
-  box-sizing: border-box;
-  overscroll-behavior: contain;
-}
-
 :where(:scope) [data-nse-control="font-panel"] [data-nse-part="size-column"],
 :where(:scope):is([data-nse-control="font-panel"]) [data-nse-part="size-column"] {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
   gap: 3px;
-  flex: 1 1 0;
   min-inline-size: 0;
 }
 
 :where(:scope) [data-nse-control="font-panel"] [data-nse-part="column-caption"],
 :where(:scope):is([data-nse-control="font-panel"]) [data-nse-part="column-caption"] {
-  display: flex;
-  align-items: center;
   block-size: 19px;
   padding-inline: 6px;
-  box-sizing: border-box;
-  font-size: 11px;
 }
 
 
@@ -3797,21 +2410,12 @@
 
 :where(:scope) [data-nse-control="font-panel"] [data-nse-part="size-list"],
 :where(:scope):is([data-nse-control="font-panel"]) [data-nse-part="size-list"] {
-  display: flex;
-  align-items: stretch;
   gap: 2px;
-}
-
-:where(:scope) [data-nse-control="font-panel"] [data-nse-part="size-list"]>[data-nse-control="slider"][data-nse-slider-type="linear"],
-:where(:scope):is([data-nse-control="font-panel"]) [data-nse-part="size-list"]>[data-nse-control="slider"][data-nse-slider-type="linear"] {
-  flex: none;
 }
 
 /* The footer: + and -, the action menu, and the search field. */
 :where(:scope) [data-nse-control="font-panel"]>[data-nse-part="footer"],
 :where(:scope):is([data-nse-control="font-panel"])>[data-nse-part="footer"] {
-  display: flex;
-  align-items: center;
   gap: 8px;
   padding: 2px var(--nse-font-panel-inset) var(--nse-font-panel-inset);
 }
@@ -3820,13 +2424,11 @@
    columns (118 + 5 + 67) and ends at the panel's inset. */
 :where(:scope) [data-nse-control="font-panel"]>[data-nse-part="footer"]>[data-nse-control="search-field"],
 :where(:scope):is([data-nse-control="font-panel"])>[data-nse-part="footer"]>[data-nse-control="search-field"] {
-  flex: 0 1 190px;
   margin-inline-start: auto;
 }
 
 :where(:scope) [data-nse-control="font-panel"]>:where([data-nse-part="paragraph"])[data-nse-part="paragraph"],
 :where(:scope):is([data-nse-control="font-panel"])>:where([data-nse-part="paragraph"])[data-nse-part="paragraph"] {
-  display: grid;
   gap: 8px;
   min-inline-size: 0;
   margin: 0;
@@ -3837,7 +2439,6 @@
 
 :where(:scope) [data-nse-control="font-panel"] [data-nse-part="alignment-glyph"],
 :where(:scope):is([data-nse-control="font-panel"]) [data-nse-part="alignment-glyph"] {
-  display: block;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.7;
@@ -3865,26 +2466,13 @@
 :where(:scope) [data-nse-control="font-panel"]>:where([data-nse-part="notice"]):is([data-nse-part="error"],[data-nse-part="notice"]),
 :where(:scope):is([data-nse-control="font-panel"])>:where(:is([data-nse-part="notice"],[data-nse-part="error"],[data-nse-part="preview-description"])):is([data-nse-part="error"],[data-nse-part="notice"]) {
   margin: 0 var(--nse-font-panel-inset) var(--nse-font-panel-inset);
-  font-size: 11px;
-  font-weight: 600;
-}
-
-:where(:scope) [data-nse-control="font-panel"]>:where([data-nse-part="notice"])[data-nse-part="notice"]:empty,
-:where(:scope):is([data-nse-control="font-panel"])>:where(:is([data-nse-part="notice"],[data-nse-part="error"],[data-nse-part="preview-description"]))[data-nse-part="notice"]:empty {
-  display: none;
 }
 
 /* Ruler: indents and tab stops as small NSE sliders, each labelled at the
    start of its row; the tail indent's slider runs from the end edge. */
-:where(:scope) [data-nse-control="ruler-view"],
-:where(:scope):is([data-nse-control="ruler-view"]) {
-  display:grid;
-}
 
 :where(:scope) [data-nse-control="ruler-view"] [data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"]),
 :where(:scope):is([data-nse-control="ruler-view"]) [data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"]) {
-  grid-template-columns: 100px minmax(0, 1fr);
-  align-items: center;
   gap: 10px;
   min-inline-size: 0;
   --nse-control-minimum-inline-size: 0;
@@ -3892,27 +2480,7 @@
 
 :where(:scope) [data-nse-control="ruler-view"] [data-nse-part="title"]:where([data-nse-control="slider"] *),
 :where(:scope):is([data-nse-control="ruler-view"]) [data-nse-part="title"]:where([data-nse-control="slider"] *) {
-  font-size: 12px;
-  font-weight: 700;
   text-align: end;
-}
-
-:where(:scope) [data-nse-control="ruler-view"] [data-nse-part="tab-stop"],
-:where(:scope):is([data-nse-control="ruler-view"]) [data-nse-part="tab-stop"] {
-  display:grid;
-  grid-template-columns:minmax(0,1fr) auto;
-  align-items:center;
-}
-
-:where(:scope) [data-nse-control="ruler-view"] [data-nse-part="tab-stops"],
-:where(:scope):is([data-nse-control="ruler-view"]) [data-nse-part="tab-stops"] {
-  display:flex;
-  align-items:center;
-}
-
-:where(:scope) [data-nse-control="ruler-view"] [data-nse-part="tab-stops"]>:where([data-nse-part="status"]),
-:where(:scope):is([data-nse-control="ruler-view"]) [data-nse-part="tab-stops"]>:where([data-nse-part="status"]) {
-  font-size:12px;
 }
 
 /* ============================================================================
@@ -3934,8 +2502,6 @@
 
 :where(:scope) [data-nse-control="window"]:where([data-nse-part="background"]) [data-nse-part="accessory"]:where([data-nse-control="window"] *):where(:not([data-nse-control="window"] [data-nse-control] *)),
 :where(:scope):is([data-nse-control="window"]:where([data-nse-part="background"])) [data-nse-part="accessory"]:where([data-nse-control="window"] *):where(:not([data-nse-control="window"] [data-nse-control] *)) {
-  inset-block: 0;
-  align-items: center;
   padding-inline-start: 5px;
 }
 
@@ -3945,17 +2511,9 @@
   height: var(--nse-window-titlebar-height);
 }
 
-:where(:scope) [data-nse-control="window"]:where([data-nse-part="background"]) :is([data-nse-part="header"]:where([data-nse-control="window"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-chrome="hud"] *)),[data-nse-part="header"]:where([data-nse-control="window"] *):where([data-nse-chrome="hud"] *)) [data-nse-part="bezel"]:where([data-nse-control="button"] *):where([data-nse-part="cell"]>*),
-:where(:scope):is([data-nse-control="window"]:where([data-nse-part="background"])) :is([data-nse-part="header"]:where([data-nse-control="window"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-chrome="hud"] *)),[data-nse-part="header"]:where([data-nse-control="window"] *):where([data-nse-chrome="hud"] *)) [data-nse-part="bezel"]:where([data-nse-control="button"] *):where([data-nse-part="cell"]>*) {
-  inset-block-start: calc(50% - var(--nse-window-control-paint-size) / 2);
-  inset-inline-start: calc(50% - var(--nse-window-control-paint-size) / 2);
-}
-
 :where(:scope) [data-nse-part="bezel"]:where([data-nse-control="button"] *):where([data-nse-part="cell"]>*)::before,
 :where(:scope):is([data-nse-part="bezel"]:where([data-nse-control="button"] *):where([data-nse-part="cell"]>*)::before) {
   content: "";
-  position: absolute;
-  inset: 0;
   -webkit-mask: var(--nse-window-control-glyph) center / 8px 8px no-repeat;
   mask: var(--nse-window-control-glyph) center / 8px 8px no-repeat;
 }
@@ -3965,32 +2523,22 @@
 :where(:scope) [data-nse-part="header"]:where([data-nse-control="window"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-chrome="hud"] *))[data-nse-part="header"]:where(:not([data-nse-toolbar-style])) [data-nse-part="title"]:where([data-nse-control="window"] *):where([data-nse-part="header"]>*):where(:not([data-nse-chrome="hud"] *)):where([data-nse-part="bezel"] *),
 :where(:scope):is([data-nse-part="header"]:where([data-nse-control="window"] *):where([data-nse-part="bezel"]>*):where(:not([data-nse-chrome="hud"] *))[data-nse-part="header"]:where(:not([data-nse-toolbar-style]))) [data-nse-part="title"]:where([data-nse-control="window"] *):where([data-nse-part="header"]>*):where(:not([data-nse-chrome="hud"] *)):where([data-nse-part="bezel"] *) {
   padding: 0 80px;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  line-height: var(--nse-window-titlebar-height);
 }
 
 :where(:scope) [data-nse-control="window"]:where([data-nse-part="background"]) [data-nse-style="panel"]:where([data-nse-part="header"]) [data-nse-part="title"]:where([data-nse-control="window"] *):where([data-nse-part="header"]>*):where(:not([data-nse-chrome="hud"] *)):where([data-nse-part="bezel"] *),
 :where(:scope):is([data-nse-control="window"]:where([data-nse-part="background"])) [data-nse-style="panel"]:where([data-nse-part="header"]) [data-nse-part="title"]:where([data-nse-control="window"] *):where([data-nse-part="header"]>*):where(:not([data-nse-chrome="hud"] *)):where([data-nse-part="bezel"] *) {
   padding: 0 36px;
-  font-size: 12px;
 }
 
 :where(:scope) [data-nse-control="window"]:where([data-nse-part="background"]) [data-nse-part="header"]:where([data-nse-control="window"] *):where([data-nse-chrome="hud"] *) [data-nse-control="button"]:where([data-nse-part="cell"]):where([data-nse-chrome="hud"] *),
 :where(:scope):is([data-nse-control="window"]:where([data-nse-part="background"])) [data-nse-part="header"]:where([data-nse-control="window"] *):where([data-nse-chrome="hud"] *) [data-nse-control="button"]:where([data-nse-part="cell"]):where([data-nse-chrome="hud"] *) {
   width: 26px;
   height: 26px;
-  inset-inline-start: 3px;
 }
 
 :where(:scope) [data-nse-control="window"]:where([data-nse-part="background"]) [data-nse-part="title"]:where([data-nse-control="window"] *):where([data-nse-chrome="hud"] *),
 :where(:scope):is([data-nse-control="window"]:where([data-nse-part="background"])) [data-nse-part="title"]:where([data-nse-control="window"] *):where([data-nse-chrome="hud"] *) {
   padding: 0 36px;
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 26px;
 }
 
 @media (pointer: coarse) {
@@ -4018,9 +2566,6 @@
    desktop anchored menus and the existing wide modal policy stay unchanged. */
 @media (max-width: 639px), (max-height: 419px) {
   [data-nse-part="surface"]:where(:not([data-nse-control="tooltip"])):where([data-nse-part="surface"]):is([data-nse-style]:where(:is([data-nse-style="menu"],[data-nse-style="application-menu"])):where([data-nse-part="surface"]),[data-nse-style="context-menu"]:where([data-nse-part="surface"]),[data-nse-style="submenu"]:where([data-nse-part="surface"]),[data-nse-style="listbox"]:where([data-nse-part="surface"]))[data-nse-presentation="sheet"] {
-    inset-block-start: auto;
-    inset-block-end: max(8px, var(--nse-screen-safe-area-inset-bottom, 0px));
-    inset-inline: max(8px, var(--nse-screen-safe-area-inset-left, 0px)) max(8px, var(--nse-screen-safe-area-inset-right, 0px));
     inline-size: auto;
     max-inline-size: none;
     block-size: auto;
@@ -4038,11 +2583,8 @@
 /* The subtitle is a status capsule. */
 :where(:scope) [data-nse-part="subtitle"]:where([data-nse-control="window"] *),
 :where(:scope):is([data-nse-part="subtitle"]:where([data-nse-control="window"] *)) {
-  flex: none;
   padding: 1px 7px 2px;
   border-radius: 999px;
-  font: 700 10px/1.4 "Syndromatic UI", system-ui, sans-serif;
-  letter-spacing: 0.04em;
   color: rgba(255, 255, 255, 0.92);
   background: rgba(0, 0, 0, 0.32);
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.35), 0 1px 0 rgba(255, 255, 255, 0.22);
@@ -4053,23 +2595,17 @@
 @media (max-width: 767px) {
   :where(:scope) [data-nse-role="document"]:where([data-nse-control="window"][data-nse-part="header"]) [data-nse-part="body"]:where([data-nse-role="document"][data-nse-part="header"] *),
 :where(:scope):is([data-nse-role="document"]:where([data-nse-control="window"][data-nse-part="header"])) [data-nse-part="body"]:where([data-nse-role="document"][data-nse-part="header"] *) {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) max-content max-content;
     gap: 8px;
     padding-inline: 14px;
   }
   :where(:scope) [data-nse-role="document"]:where([data-nse-control="window"][data-nse-part="header"]) :is([data-nse-part="leading"],[data-nse-part="trailing"]):where([data-nse-role="document"][data-nse-part="header"] [data-nse-part="body"]>*),
-:where(:scope):is([data-nse-role="document"]:where([data-nse-control="window"][data-nse-part="header"])) :is([data-nse-part="leading"],[data-nse-part="trailing"]):where([data-nse-role="document"][data-nse-part="header"] [data-nse-part="body"]>*) { position: relative; inset: auto; min-width: 0; transform: none; }
+:where(:scope):is([data-nse-role="document"]:where([data-nse-control="window"][data-nse-part="header"])) :is([data-nse-part="leading"],[data-nse-part="trailing"]):where([data-nse-role="document"][data-nse-part="header"] [data-nse-part="body"]>*) { min-width: 0; transform: none; }
   :where(:scope) [data-nse-role="document"]:where([data-nse-control="window"][data-nse-part="header"]) [data-nse-part="title"]:where([data-nse-role="document"][data-nse-part="header"] [data-nse-part="leading"]>*),
-:where(:scope):is([data-nse-role="document"]:where([data-nse-control="window"][data-nse-part="header"])) [data-nse-part="title"]:where([data-nse-role="document"][data-nse-part="header"] [data-nse-part="leading"]>*) { flex: 1; min-width: 0; }
+:where(:scope):is([data-nse-role="document"]:where([data-nse-control="window"][data-nse-part="header"])) [data-nse-part="title"]:where([data-nse-role="document"][data-nse-part="header"] [data-nse-part="leading"]>*) { min-width: 0; }
   :where(:scope) [data-nse-role="document"]:where([data-nse-control="window"][data-nse-part="header"]) [data-nse-part="button"]:where([data-nse-role="document"][data-nse-part="header"] [data-nse-part="title"] *),
-:where(:scope):is([data-nse-role="document"]:where([data-nse-control="window"][data-nse-part="header"])) [data-nse-part="button"]:where([data-nse-role="document"][data-nse-part="header"] [data-nse-part="title"] *) { display: flex; min-width: 0; }
-  :where(:scope) [data-nse-role="document"]:where([data-nse-control="window"][data-nse-part="header"]) [data-nse-part="arrow"]:where([data-nse-role="document"][data-nse-part="header"] [data-nse-part="button"]>*),
-:where(:scope):is([data-nse-role="document"]:where([data-nse-control="window"][data-nse-part="header"])) [data-nse-part="arrow"]:where([data-nse-role="document"][data-nse-part="header"] [data-nse-part="button"]>*) { flex: none; }
+:where(:scope):is([data-nse-role="document"]:where([data-nse-control="window"][data-nse-part="header"])) [data-nse-part="button"]:where([data-nse-role="document"][data-nse-part="header"] [data-nse-part="title"] *) { min-width: 0; }
   :where(:scope) [data-nse-role="document"]:where([data-nse-control="window"][data-nse-part="header"]) [data-nse-part="centre"]:where([data-nse-role="document"][data-nse-part="header"] *),
-:where(:scope):is([data-nse-role="document"]:where([data-nse-control="window"][data-nse-part="header"])) [data-nse-part="centre"]:where([data-nse-role="document"][data-nse-part="header"] *) { max-width: none; overflow: visible; }
-  :where(:scope) [data-nse-role="document"]:where([data-nse-control="window"][data-nse-part="header"]) [data-nse-part="title"]:where([data-nse-part="document"] *),
-:where(:scope):is([data-nse-role="document"]:where([data-nse-control="window"][data-nse-part="header"])) [data-nse-part="title"]:where([data-nse-part="document"] *) { display: none; }
+:where(:scope):is([data-nse-role="document"]:where([data-nse-control="window"][data-nse-part="header"])) [data-nse-part="centre"]:where([data-nse-role="document"][data-nse-part="header"] *) { max-width: none; }
 }
 
 /* The window toolbar is a lit metal strip, edge to edge, with a soft fade at its foot. */
@@ -4078,7 +2614,6 @@
   min-height: 58px;
   padding: 3px 10px 2px;
   color: #1d1d1f;
-  font: 13px/1.38 "Syndromatic UI", system-ui, sans-serif;
   background: linear-gradient(180deg, #ebecee 0%, #d9dbde 100%);
   border-bottom: 1px solid rgba(0, 0, 0, 0.26);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
@@ -4092,7 +2627,7 @@
 }
 /* The strip is the toolbar's material, so the toolbar's own surface (which stops short of the strip's padding) is not drawn. */
 :where(:scope) [data-nse-part="toolbar"]::after,
-:where(:scope):is([data-nse-part="toolbar"]::after) { content: ""; position: absolute; inset: auto 0 0; height: 27px; pointer-events: none; background: linear-gradient(to top, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0)); }
+:where(:scope):is([data-nse-part="toolbar"]::after) { content: ""; height: 27px; background: linear-gradient(to top, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0)); }
 :where(:scope) [data-nse-part="toolbar"][data-nse-colour-scheme-resolved="dark"]::after,
 :where(:scope):is([data-nse-part="toolbar"][data-nse-colour-scheme-resolved="dark"]::after) { background: linear-gradient(to top, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0)); }
 /* Bottom titlebar accessories continue the strip under the toolbar, which hands them its foot rule. */
@@ -4114,10 +2649,6 @@
 :where(:scope):is([data-nse-part="toolbar"]:has(+[data-nse-part="titlebar-accessories"])) { border-bottom-color: transparent; }
 
 /* A chosen command fades the application menu out (nse-overlays.css) instead of retracting it. */
-:where(:scope) .nse-overlay-popup--application-menu[data-state="closing"][data-nse-menu-chosen] .nse-control-app-menu-surface,
-:where(:scope):is(.nse-overlay-popup--application-menu[data-state="closing"][data-nse-menu-chosen]) .nse-control-app-menu-surface {
-  animation: none;
-}
 
 /* The pop-up list's face is as wide as its button's (the list's face is 6px narrower than its box, the
    button's 2px), and the button is sized to its widest item with room for the list's check column, so
