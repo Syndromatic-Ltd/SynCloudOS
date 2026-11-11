@@ -7,7 +7,7 @@
 import { existsSync, lstatSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { relative, resolve, sep } from "node:path";
 import { parse, generate, walk } from "css-tree";
-import { readThemeBundle } from "../synware/theme-bundles.mjs";
+import { readThemeBundle, themeRuleSummaries } from "../synware/theme-bundles.mjs";
 import { inspectStyleErrors } from "../synware/idiom-errors.mjs";
 import { inside, projectContext, slash } from "./project.mjs";
 
@@ -60,10 +60,13 @@ export function themeCoverage(stylesheets, contract) {
             if (name === "data-nse-control") controls.add(value);
             if (name === "data-nse-part") parts.add(value);
           });
-          for (const [control, entry] of Object.entries(contract.controls)) {
-            if (controls.has(control)) drawn.add(control);
-            if (controls.size && !controls.has(control)) continue;
-            for (const part of parts) if (entry.parts.includes(part)) drawn.add(`${control}.${part}`);
+          for (const control of controls) drawn.add(control);
+          for (const part of parts) {
+            // A part belongs to its nearest control. Named under one of its own controls, it is drawn there;
+            // named with no control, or under an outer control that does not own it (a nested control's part), it is drawn wherever it appears.
+            const owners = Object.entries(contract.controls).filter(([, entry]) => entry.parts.includes(part)).map(([control]) => control);
+            const named = owners.filter(control => controls.has(control));
+            for (const control of named.length ? named : owners) drawn.add(`${control}.${part}`);
           }
         }
       },
@@ -139,7 +142,8 @@ export async function validateTheme({ projectRoot, path } = {}) {
   // The idiom rules see every stylesheet, so one violation does not hide the others.
   const stylesheets = bundle?.stylesheets ?? [];
   const cssFiles = bundle ? stylesheets : (() => { const css = resolve(target, "Contents/Resources/theme.css"); return existsSync(css) ? [css] : []; })();
-  for (const file of cssFiles) for (const finding of inspectStyleErrors({ file, text: readFileSync(file, "utf8") }))
+  const themeSiblings = cssFiles.flatMap(file => themeRuleSummaries(readFileSync(file, "utf8")));
+  for (const file of cssFiles) for (const finding of inspectStyleErrors({ file, text: readFileSync(file, "utf8"), themeSiblings }))
     if (finding.severity === "error") error(file, finding.rule, finding.message, finding.line);
   let coverage = { drawn: 0, total: 0, undrawn: [] };
   try { coverage = themeCoverage(cssFiles.map(file => readFileSync(file, "utf8")), contract); } catch { /* Syntax errors are already reported. */ }

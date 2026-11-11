@@ -157,6 +157,13 @@ describe("theme-aware stylesheet rules", () => {
     expect(rules(theme, "[data-nse-control=\"button\"] [data-nse-part=\"title\"] { display: none; }")).toEqual(["idiom.theme-limit"]);
     expect(rules(theme, "[data-nse-control=\"button\"] [data-nse-part=\"bezel\"] { display: none; }")).toEqual([]);
   });
+  it("accepts a focus removal whose replacement another focused rule for the same control draws", () => {
+    const field = '[data-nse-control="search-field"] [data-nse-part="field"]:focus-visible { outline: none; box-shadow: none; }';
+    expect(rules(theme, field)).toEqual(["idiom.theme-limit"]);
+    expect(rules(theme, field + '\n[data-nse-control="search-field"]:focus-within [data-nse-part="bezel"] { outline: 3px solid #3478f6; }')).toEqual([]);
+    expect(rules(theme, '[data-nse-control="toolbar-item"]:focus-visible { outline: none; filter: drop-shadow(0 0 2px #3478f6); }')).toEqual([]);
+    expect(rules(theme, field + '\n[data-nse-control="text-field"]:focus-within [data-nse-part="bezel"] { outline: 3px solid #3478f6; }')).toEqual(["idiom.theme-limit"]);
+  });
   it("rejects contract hooks in app CSS but lets it follow the appearance", () => {
     expect(rules("app.css", "[data-nse-control=\"button\"] { border-radius: 4px; }")).toEqual(["idiom.control-internals"]);
     expect(rules("app.css", "[data-nse-colour-scheme-resolved=\"dark\"] .hero { background: var(--nse-colour-window-background); }")).toEqual([]);
