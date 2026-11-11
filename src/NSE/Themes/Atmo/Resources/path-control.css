@@ -56,7 +56,7 @@
 :where(:scope):is([data-nse-control="button"]:where([data-nse-part="path-item"])) [data-nse-part="image"]:where([data-nse-control="image-view"] *):where([data-nse-control="image-view"]>*),
 :where(:scope)[data-nse-control="button"]:where([data-nse-part="path-item"]) [data-nse-part="image"]:where([data-nse-control="image-view"] *):where([data-nse-control="image-view"]>*) { width: 100%; height: 100%; background: none; border: 0; box-shadow: none; }
 :where(:scope) [data-nse-control="button"]:where([data-nse-part="path-item"]) :where([data-nse-part="image"]:not(:has(*))),
-:where(:scope):is(.nse-path-item) img,
+:where(:scope):is([data-nse-control="button"]:where([data-nse-part="path-item"])) :where([data-nse-part="image"]:not(:has(*))),
 :where(:scope)[data-nse-control="button"]:where([data-nse-part="path-item"]) :where([data-nse-part="image"]:not(:has(*))) { width: 100%; height: 100%; object-fit: contain; }
 :where(:scope) .nse-path-item[aria-current],
 :where(:scope):is(.nse-path-item[aria-current]),

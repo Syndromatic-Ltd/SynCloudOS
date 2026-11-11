@@ -3263,10 +3263,10 @@
 :scope:is(.nse-control-radio:has(input:focus-visible)),
 :scope.nse-control-radio:has(input:focus-visible),
 :scope [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-button-type="switch"]) :where([data-nse-part="field"]):focus-visible+[data-nse-part="indicator"]:where([data-nse-control="button"] *):where([data-nse-button-type="switch"] *),
-:scope:is(.nse-control-checkbox) input:focus-visible+.nse-control-checkbox-art,
+:scope:is([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-button-type="switch"])) :where([data-nse-part="field"]):focus-visible+[data-nse-part="indicator"]:where([data-nse-control="button"] *):where([data-nse-button-type="switch"] *),
 :scope[data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-button-type="switch"]) :where([data-nse-part="field"]):focus-visible+[data-nse-part="indicator"]:where([data-nse-control="button"] *):where([data-nse-button-type="switch"] *),
 :scope [data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"]) :where([data-nse-part="field"]):focus-visible,
-:scope:is(.nse-control-slider) input:focus-visible,
+:scope:is([data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"])) :where([data-nse-part="field"]):focus-visible,
 :scope[data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"]) :where([data-nse-part="field"]):focus-visible {
   outline: none;
 }
@@ -3284,13 +3284,13 @@
 /* Checkbox: around the well (x0 y2, 25×25.5, r=4 in the 33×28 cell), not the
    cell the check overflows into. */
 :scope [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-button-type="switch"]) :where([data-nse-part="field"]):focus-visible+[data-nse-part="indicator"]:where([data-nse-control="button"] *):where([data-nse-button-type="switch"] *),
-:scope:is(.nse-control-checkbox) input:focus-visible+.nse-control-checkbox-art,
+:scope:is([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-button-type="switch"])) :where([data-nse-part="field"]):focus-visible+[data-nse-part="indicator"]:where([data-nse-control="button"] *):where([data-nse-button-type="switch"] *),
 :scope[data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-button-type="switch"]) :where([data-nse-part="field"]):focus-visible+[data-nse-part="indicator"]:where([data-nse-control="button"] *):where([data-nse-button-type="switch"] *) {
   position: relative;
 }
 
 :scope [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-button-type="switch"]) :where([data-nse-part="field"]):focus-visible+[data-nse-part="indicator"]:where([data-nse-control="button"] *):where([data-nse-button-type="switch"] *)::after,
-:scope:is(.nse-control-checkbox) input:focus-visible+.nse-control-checkbox-art::after,
+:scope:is([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-button-type="switch"])) :where([data-nse-part="field"]):focus-visible+[data-nse-part="indicator"]:where([data-nse-control="button"] *):where([data-nse-button-type="switch"] *)::after,
 :scope[data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-button-type="switch"]) :where([data-nse-part="field"]):focus-visible+[data-nse-part="indicator"]:where([data-nse-control="button"] *):where([data-nse-button-type="switch"] *)::after {
   content:"";
   position:absolute;
@@ -3637,7 +3637,7 @@
 }
 
 :scope [data-nse-part="clock"]>[data-nse-part="numeric"]>:where([data-nse-control-size="small"][data-nse-control="text-field"][data-nse-editable="true"][data-nse-part="content"][data-nse-position="single"][data-nse-validation="valid"]),
-:scope:is([data-nse-part="clock"])>[data-nse-part="numeric"]>label,
+:scope:is([data-nse-part="clock"])>[data-nse-part="numeric"]>:where([data-nse-control-size="small"][data-nse-control="text-field"][data-nse-editable="true"][data-nse-part="content"][data-nse-position="single"][data-nse-validation="valid"]),
 :scope[data-nse-part="clock"]>[data-nse-part="numeric"]>:where([data-nse-control-size="small"][data-nse-control="text-field"][data-nse-editable="true"][data-nse-part="content"][data-nse-position="single"][data-nse-validation="valid"]) {
   color: var(--nse-atmo-clock-label);
 }
@@ -3960,9 +3960,9 @@
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.38), inset 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
-:scope :is([data-nse-control="colour-sliders"],[data-nse-control="colour-panel"],[data-nse-control="colour-wheel"]) :is(:where([data-nse-part="title"]:where([data-nse-control="colour-sliders"] > *)),[data-nse-part="channel-key"],[data-nse-part="opacity-value"],[data-nse-part="label"]:where([data-nse-control="text-field"] *)),
-:scope:is(:is([data-nse-control="colour-sliders"],[data-nse-control="colour-panel"],[data-nse-control="colour-wheel"])) :is(:where([data-nse-part="title"]:where([data-nse-control="colour-sliders"] > *)),[data-nse-part="channel-key"],[data-nse-part="opacity-value"],[data-nse-part="label"]:where([data-nse-control="text-field"] *)),
-:scope:is([data-nse-control="colour-sliders"],[data-nse-control="colour-panel"],[data-nse-control="colour-wheel"]) :is(:where([data-nse-part="title"]:where([data-nse-control="colour-sliders"] > *)),[data-nse-part="channel-key"],[data-nse-part="opacity-value"],[data-nse-part="label"]:where([data-nse-control="text-field"] *)) {
+:scope :is([data-nse-control="colour-sliders"],[data-nse-control="colour-panel"],[data-nse-control="colour-wheel"]) :is(:where([data-nse-part="title"]:where([data-nse-control="colour-sliders"]>*)),[data-nse-part="channel-key"],[data-nse-part="opacity-value"],[data-nse-part="label"]:where([data-nse-control="text-field"] *)),
+:scope:is(:is([data-nse-control="colour-sliders"],[data-nse-control="colour-panel"],[data-nse-control="colour-wheel"])) :is(:where([data-nse-part="title"]:where([data-nse-control="colour-sliders"]>*)),[data-nse-part="channel-key"],[data-nse-part="opacity-value"],[data-nse-part="label"]:where([data-nse-control="text-field"] *)),
+:scope:is([data-nse-control="colour-sliders"],[data-nse-control="colour-panel"],[data-nse-control="colour-wheel"]) :is(:where([data-nse-part="title"]:where([data-nse-control="colour-sliders"]>*)),[data-nse-part="channel-key"],[data-nse-part="opacity-value"],[data-nse-part="label"]:where([data-nse-control="text-field"] *)) {
   color: var(--nse-atmo-well-muted);
 }
 
@@ -4395,7 +4395,7 @@
 }
 
 :scope [data-nse-control="font-panel"]>:where([data-nse-part="paragraph"])[data-nse-part="paragraph"],
-:scope:is([data-nse-control="font-panel"])>fieldset[data-nse-part="paragraph"],
+:scope:is([data-nse-control="font-panel"])>:where([data-nse-part="paragraph"])[data-nse-part="paragraph"],
 :scope[data-nse-control="font-panel"]>:where([data-nse-part="paragraph"])[data-nse-part="paragraph"] {
   border-color: var(--nse-atmo-panel-rule);
 }
@@ -5081,7 +5081,7 @@
 }
 
 :scope [data-nse-control="token-field"] [data-nse-part="token"]>:where(:is([data-nse-part="token-label"],[data-nse-part="token-disclosure"])),
-:scope:is([data-nse-control="token-field"]) [data-nse-part="token"]>button,
+:scope:is([data-nse-control="token-field"]) [data-nse-part="token"]>:where(:is([data-nse-part="token-label"],[data-nse-part="token-disclosure"])),
 :scope[data-nse-control="token-field"] [data-nse-part="token"]>:where(:is([data-nse-part="token-label"],[data-nse-part="token-disclosure"])) {
   font:inherit;
   font-size:14px;
@@ -5104,7 +5104,7 @@
 }
 
 :scope [data-nse-control="secure-text-field"]>:where([data-nse-part="reveal"][data-nse-revealed="false"]),
-:scope:is([data-nse-control="secure-text-field"])>button,
+:scope:is([data-nse-control="secure-text-field"])>:where([data-nse-part="reveal"][data-nse-revealed="false"]),
 :scope[data-nse-control="secure-text-field"]>:where([data-nse-part="reveal"][data-nse-revealed="false"]) {
   flex:0 0 auto;
   display:inline-grid;
@@ -5152,15 +5152,15 @@
   display: flex;
   inline-size: 100%;
 }
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-distribution="fill-equally"] button,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-distribution="fill-equally"]) button,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-distribution="fill-equally"] button {
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-distribution="fill-equally"] :where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])),
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-distribution="fill-equally"]) :where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])),
+:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-distribution="fill-equally"] :where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])) {
   flex: 1 1 0;
   min-inline-size: 0;
 }
 
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"])),
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"])),
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"])) {
   position:relative;
   isolation:isolate;
@@ -5172,17 +5172,17 @@
   cursor:default;
 }
 
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :where([data-nse-expanded="false"])[aria-expanded],
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button[aria-expanded],
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :where([data-nse-expanded="false"])[aria-expanded] {
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :where([data-nse-expanded="false"])[data-nse-expanded],
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) :where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"]))[data-nse-expanded],
+:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :where([data-nse-expanded="false"])[data-nse-expanded] {
   font-size:11px;
 }
 
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"]))::before,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button::before,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"]))::before,
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"]))::before,
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"]))::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"]))::after,
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"]))::after {
   content: "";
   position: absolute;
@@ -5192,13 +5192,13 @@
 
 /* Middle cell (the default): seams both sides. */
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"]))::before,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button::before,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"]))::before,
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"]))::before {
   inset:2px 0;
 }
 
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"]))::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"]))::after,
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"]))::after {
   inset:4px 1px;
 }
@@ -5207,11 +5207,11 @@
 
 
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>:first-child>:where([data-nse-part="bezel"]):first-child::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>:first-child>button:first-child::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>:first-child>:where([data-nse-part="bezel"]):first-child::after,
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>:first-child>:where([data-nse-part="bezel"]):first-child::after,
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>button:first-child::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>button:first-child::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>button:first-child::after {
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>:where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])):first-child::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>:where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])):first-child::after,
+:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>:where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])):first-child::after {
   inset-inline-start:2px;
 }
 
@@ -5235,7 +5235,7 @@
 
 
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"])):focus-visible,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button:focus-visible,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) :where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])):focus-visible,
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"])):focus-visible {
   outline: none;
   z-index: 1;
@@ -5247,10 +5247,10 @@
 @media (forced-colors: active) {
 
   :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"]))::before,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button::before,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"]))::before,
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"]))::before,
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"]))::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) button::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"]))::after,
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"],[data-nse-part="overflow"]))::after {
     content: none;
   }
@@ -5370,7 +5370,7 @@
 }
 
 :scope :where([data-nse-control="level-indicator"]:not([data-nse-type="rating"]))[data-nse-control="level-indicator"],
-:scope:is(meter[data-nse-control="level-indicator"]),
+:scope:is(:where([data-nse-control="level-indicator"]:not([data-nse-type="rating"]))[data-nse-control="level-indicator"]),
 meter:scope[data-nse-control="level-indicator"] {
   display:block;
   box-sizing:border-box;
@@ -5382,19 +5382,19 @@ meter:scope[data-nse-control="level-indicator"] {
 
 
 :scope :where([data-nse-control="level-indicator"]:not([data-nse-type="rating"]))[data-nse-control="level-indicator"]::-webkit-meter-optimum-value,
-:scope:is(meter[data-nse-control="level-indicator"]::-webkit-meter-optimum-value),
+:scope:is(:where([data-nse-control="level-indicator"]:not([data-nse-type="rating"]))[data-nse-control="level-indicator"]::-webkit-meter-optimum-value),
 meter:scope[data-nse-control="level-indicator"]::-webkit-meter-optimum-value,
 :scope :where([data-nse-control="level-indicator"]:not([data-nse-type="rating"]))[data-nse-control="level-indicator"]::-webkit-meter-suboptimum-value,
-:scope:is(meter[data-nse-control="level-indicator"]::-webkit-meter-suboptimum-value),
+:scope:is(:where([data-nse-control="level-indicator"]:not([data-nse-type="rating"]))[data-nse-control="level-indicator"]::-webkit-meter-suboptimum-value),
 meter:scope[data-nse-control="level-indicator"]::-webkit-meter-suboptimum-value,
 :scope :where([data-nse-control="level-indicator"]:not([data-nse-type="rating"]))[data-nse-control="level-indicator"]::-webkit-meter-even-less-good-value,
-:scope:is(meter[data-nse-control="level-indicator"]::-webkit-meter-even-less-good-value),
+:scope:is(:where([data-nse-control="level-indicator"]:not([data-nse-type="rating"]))[data-nse-control="level-indicator"]::-webkit-meter-even-less-good-value),
 meter:scope[data-nse-control="level-indicator"]::-webkit-meter-even-less-good-value {
   box-sizing:border-box;
 }
 
 :scope :where([data-nse-control="level-indicator"]:not([data-nse-type="rating"]))[data-nse-control="level-indicator"]::-moz-meter-bar,
-:scope:is(meter[data-nse-control="level-indicator"]::-moz-meter-bar),
+:scope:is(:where([data-nse-control="level-indicator"]:not([data-nse-type="rating"]))[data-nse-control="level-indicator"]::-moz-meter-bar),
 meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
   box-sizing:border-box;
 }
@@ -5427,9 +5427,9 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
   padding-inline-end: 34px;
 }
 
-:scope [data-nse-control="tab-view"]>.nse-control-toolbar>[data-nse-part="tab-item"]>button:not(.nse-control-button),
-:scope:is([data-nse-control="tab-view"])>.nse-control-toolbar>[data-nse-part="tab-item"]>button:not(.nse-control-button),
-:scope[data-nse-control="tab-view"]>.nse-control-toolbar>[data-nse-part="tab-item"]>button:not(.nse-control-button) {
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>[data-nse-part="tab-item"]>:where(:is([data-nse-control="button"], [data-nse-part="button"])):not(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"]))),
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>[data-nse-part="tab-item"]>:where(:is([data-nse-control="button"], [data-nse-part="button"])):not(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"]))),
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>[data-nse-part="tab-item"]>:where(:is([data-nse-control="button"], [data-nse-part="button"])):not(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"]))) {
   position: absolute;
   z-index: 2;
   inset-block-start: 50%;
@@ -5454,17 +5454,17 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
   background: rgba(255, 255, 255, 0.18);
 }
 
-:scope [data-nse-control="tab-view"]>.nse-control-toolbar>[data-nse-part="tab-item"]>button:not(.nse-control-button):focus-visible,
-:scope:is([data-nse-control="tab-view"])>.nse-control-toolbar>[data-nse-part="tab-item"]>button:not(.nse-control-button):focus-visible,
-:scope[data-nse-control="tab-view"]>.nse-control-toolbar>[data-nse-part="tab-item"]>button:not(.nse-control-button):focus-visible {
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>[data-nse-part="tab-item"]>:where(:is([data-nse-control="button"], [data-nse-part="button"])):not(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"]))):focus-visible,
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>[data-nse-part="tab-item"]>:where(:is([data-nse-control="button"], [data-nse-part="button"])):not(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"]))):focus-visible,
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>[data-nse-part="tab-item"]>:where(:is([data-nse-control="button"], [data-nse-part="button"])):not(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"]))):focus-visible {
   outline: none;
   box-shadow: var(--nse-atmo-focus-ring);
 }
 
 /* The overflow cell: the capsule's end cap on the silver material. */
-:scope [data-nse-control="tab-view"]>.nse-control-toolbar>button,
-:scope:is([data-nse-control="tab-view"])>.nse-control-toolbar>button,
-:scope[data-nse-control="tab-view"]>.nse-control-toolbar>button {
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"])),
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"])),
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"])) {
   position: relative;
   isolation: isolate;
   min-inline-size: 44px;
@@ -5482,21 +5482,21 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
   cursor: default;
 }
 
-:scope [data-nse-control="tab-view"]>.nse-control-toolbar>button::before,
-:scope:is([data-nse-control="tab-view"])>.nse-control-toolbar>button::before,
-:scope[data-nse-control="tab-view"]>.nse-control-toolbar>button::before,
-:scope [data-nse-control="tab-view"]>.nse-control-toolbar>button::after,
-:scope:is([data-nse-control="tab-view"])>.nse-control-toolbar>button::after,
-:scope[data-nse-control="tab-view"]>.nse-control-toolbar>button::after {
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::before,
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::before,
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::before,
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::after,
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::after,
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::after {
   content: "";
   position: absolute;
   z-index: -1;
   pointer-events: none;
 }
 
-:scope [data-nse-control="tab-view"]>.nse-control-toolbar>button::before,
-:scope:is([data-nse-control="tab-view"])>.nse-control-toolbar>button::before,
-:scope[data-nse-control="tab-view"]>.nse-control-toolbar>button::before {
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::before,
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::before,
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::before {
   inset: 2px 0;
   border: solid;
   border-width: 2px 2px 2px 1px;
@@ -5506,9 +5506,9 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
-:scope [data-nse-control="tab-view"]>.nse-control-toolbar>button::after,
-:scope:is([data-nse-control="tab-view"])>.nse-control-toolbar>button::after,
-:scope[data-nse-control="tab-view"]>.nse-control-toolbar>button::after {
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::after,
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::after,
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::after {
   inset: 4px 2px 4px 1px;
   border: 2px solid;
   border-color: var(--nse-atmo-rg-ring-t) var(--nse-atmo-rg-ring-s) var(--nse-atmo-rg-ring-b) var(--nse-atmo-rg-ring-seam);
@@ -5517,29 +5517,29 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
   background: var(--nse-atmo-rg-up) padding-box;
 }
 
-:scope [data-nse-control="tab-view"]>.nse-control-toolbar>button[aria-expanded="true"],
-:scope:is([data-nse-control="tab-view"])>.nse-control-toolbar>button[aria-expanded="true"],
-:scope[data-nse-control="tab-view"]>.nse-control-toolbar>button[aria-expanded="true"] {
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))[data-nse-expanded="true"],
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))[data-nse-expanded="true"],
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))[data-nse-expanded="true"] {
   color: #fff;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.58);
 }
 
-:scope [data-nse-control="tab-view"]>.nse-control-toolbar>button[aria-expanded="true"]::after,
-:scope:is([data-nse-control="tab-view"])>.nse-control-toolbar>button[aria-expanded="true"]::after,
-:scope[data-nse-control="tab-view"]>.nse-control-toolbar>button[aria-expanded="true"]::after {
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))[data-nse-expanded="true"]::after,
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))[data-nse-expanded="true"]::after,
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))[data-nse-expanded="true"]::after {
   border-color: var(--nse-atmo-rg-ring-sel-t) var(--nse-atmo-rg-ring-sel-s) var(--nse-atmo-rg-ring-sel-b);
   background: var(--nse-atmo-rg-edge-l) padding-box, var(--nse-atmo-rg-sel) padding-box;
 }
 
-:scope [data-nse-control="tab-view"]>.nse-control-toolbar>button:focus-visible,
-:scope:is([data-nse-control="tab-view"])>.nse-control-toolbar>button:focus-visible,
-:scope[data-nse-control="tab-view"]>.nse-control-toolbar>button:focus-visible {
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"])):focus-visible,
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"])):focus-visible,
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"])):focus-visible {
   outline: none;
 }
 
-:scope [data-nse-control="tab-view"]>.nse-control-toolbar>button:focus-visible::before,
-:scope:is([data-nse-control="tab-view"])>.nse-control-toolbar>button:focus-visible::before,
-:scope[data-nse-control="tab-view"]>.nse-control-toolbar>button:focus-visible::before {
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"])):focus-visible::before,
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"])):focus-visible::before,
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"])):focus-visible::before {
   box-shadow: var(--nse-atmo-focus-ring);
 }
 
@@ -5560,20 +5560,20 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
 }
 
 @media (forced-colors: active) {
-  :scope [data-nse-control="tab-view"]>.nse-control-toolbar>button,
-:scope:is([data-nse-control="tab-view"])>.nse-control-toolbar>button,
-:scope[data-nse-control="tab-view"]>.nse-control-toolbar>button {
+  :scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"])),
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"])),
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"])) {
     border: 1px solid ButtonText;
     forced-color-adjust: none;
     color: ButtonText;
     background: ButtonFace;
   }
-  :scope [data-nse-control="tab-view"]>.nse-control-toolbar>button::before,
-:scope:is([data-nse-control="tab-view"])>.nse-control-toolbar>button::before,
-:scope[data-nse-control="tab-view"]>.nse-control-toolbar>button::before,
-:scope [data-nse-control="tab-view"]>.nse-control-toolbar>button::after,
-:scope:is([data-nse-control="tab-view"])>.nse-control-toolbar>button::after,
-:scope[data-nse-control="tab-view"]>.nse-control-toolbar>button::after {
+  :scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::before,
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::before,
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::before,
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::after,
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::after,
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>:where(:is([data-nse-control="button"], [data-nse-part="overflow"]))::after {
     content: none;
   }
 }
@@ -5609,7 +5609,7 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
    translucent blue arc and a dark pointer.
    ========================================================================= */
 :scope :where([data-nse-control="scroller"][data-nse-orientation="vertical"][data-nse-part="track"])[data-nse-control="scroller"],
-:scope:is(input[data-nse-control="scroller"]),
+:scope:is(:where([data-nse-control="scroller"][data-nse-orientation="vertical"][data-nse-part="track"])[data-nse-control="scroller"]),
 input:scope[data-nse-control="scroller"] {
   appearance:none;
   -webkit-appearance:none;
@@ -5623,7 +5623,7 @@ input:scope[data-nse-control="scroller"] {
 
 
 :scope :where([data-nse-control="scroller"][data-nse-orientation="vertical"][data-nse-part="track"])[data-nse-control="scroller"]::-webkit-slider-thumb,
-:scope:is(input[data-nse-control="scroller"]::-webkit-slider-thumb),
+:scope:is(:where([data-nse-control="scroller"][data-nse-orientation="vertical"][data-nse-part="track"])[data-nse-control="scroller"]::-webkit-slider-thumb),
 input:scope[data-nse-control="scroller"]::-webkit-slider-thumb {
   -webkit-appearance:none;
   appearance:none;
@@ -5636,7 +5636,7 @@ input:scope[data-nse-control="scroller"]::-webkit-slider-thumb {
 
 
 :scope :where([data-nse-control="scroller"][data-nse-orientation="vertical"][data-nse-part="track"])[data-nse-control="scroller"]:focus-visible,
-:scope:is(input[data-nse-control="scroller"]:focus-visible),
+:scope:is(:where([data-nse-control="scroller"][data-nse-orientation="vertical"][data-nse-part="track"])[data-nse-control="scroller"]:focus-visible),
 input:scope[data-nse-control="scroller"]:focus-visible {
   outline:none;
 }
@@ -5924,7 +5924,7 @@ input:scope[data-nse-control="scroller"]:focus-visible {
    no emboss under unselected labels. A sized capsule keeps the band's own
    fractional insets below. */
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"] :where([data-nse-part="bezel"]),
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]) button,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]) :where([data-nse-part="bezel"]),
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"] :where([data-nse-part="bezel"]) {
   text-transform:uppercase;
 }
@@ -5937,15 +5937,15 @@ input:scope[data-nse-control="scroller"]:focus-visible {
    rim or seam columns, the ink running to the seams (or the stroke at a cap)
    under the edge and cap cast overlays. */
 
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"] :where([data-nse-part="bezel"][data-nse-selected])[aria-pressed="true"]::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]) button[aria-pressed="true"]::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"] :where([data-nse-part="bezel"][data-nse-selected])[aria-pressed="true"]::after {
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"] :where([data-nse-part="bezel"][data-nse-selected])[data-nse-selected]::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]) :where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"]))[data-nse-selected]::after,
+:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"] :where([data-nse-part="bezel"][data-nse-selected])[data-nse-selected]::after {
   inset-inline:0;
 }
 
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]>:first-child>:where([data-nse-part="bezel"][data-nse-selected]):first-child[aria-pressed="true"]::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"])>:first-child>button:first-child[aria-pressed="true"]::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]>:first-child>:where([data-nse-part="bezel"][data-nse-selected]):first-child[aria-pressed="true"]::after {
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]>:first-child>:where([data-nse-part="bezel"][data-nse-selected]):first-child[data-nse-selected]::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"])>:first-child>:where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])):first-child[data-nse-selected]::after,
+:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]>:first-child>:where([data-nse-part="bezel"][data-nse-selected]):first-child[data-nse-selected]::after {
   inset-inline-start:2px;
 }
 
@@ -5962,9 +5962,9 @@ input:scope[data-nse-control="scroller"]:focus-visible {
    the regular 50px one: cell insets 2/50 and 4/50, rings 2/50, cap radii 13/50
    and 11/50, cell padding 14/50 (caps 18/50), type 13px at 50 and never under
    11px. The seams stay a single pixel, as they are at every size. */
-:scope :is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])),[data-nse-control="tab-group"])[data-size],
-:scope:is(:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])),[data-nse-control="tab-group"])[data-size]),
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])),[data-nse-control="tab-group"])[data-size] {
+:scope :is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))):is([data-nse-height], [data-nse-control-size="small"]),
+:scope:is(:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))):is([data-nse-height], [data-nse-control-size="small"])),
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))):is([data-nse-height], [data-nse-control-size="small"]) {
   --nse-atmo-rg-band: var(--nse-control-height, 24px);
   --nse-atmo-rg-line: max(1px, calc(var(--nse-atmo-rg-band) * 0.04));
   --nse-atmo-bar-h: var(--nse-atmo-rg-band);
@@ -5973,27 +5973,27 @@ input:scope[data-nse-control="scroller"]:focus-visible {
 
 
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])):is([data-nse-height],[data-nse-control-size="small"]) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"])),
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]) button,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])):is([data-nse-height],[data-nse-control-size="small"])) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"])),
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])):is([data-nse-height],[data-nse-control-size="small"]) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"])) {
   font-size:max(11px,calc(var(--nse-atmo-rg-band)*0.16 + 5px));
   line-height:var(--nse-atmo-rg-band);
 }
 
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])):is([data-nse-height],[data-nse-control-size="small"]) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"]))::before,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]) button::before,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])):is([data-nse-height],[data-nse-control-size="small"])) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"]))::before,
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])):is([data-nse-height],[data-nse-control-size="small"]) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"]))::before {
   inset-block:calc(var(--nse-atmo-rg-band)*0.04);
 }
 
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])):is([data-nse-height],[data-nse-control-size="small"]) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"]))::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]) button::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])):is([data-nse-height],[data-nse-control-size="small"])) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"]))::after,
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])):is([data-nse-height],[data-nse-control-size="small"]) :where(:is([data-nse-part="bezel"],[data-nse-part="disclosure"]))::after {
   inset-block:calc(var(--nse-atmo-rg-band)*0.08);
 }
 
 /* The start cap. */
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])):is([data-nse-height],[data-nse-control-size="small"])>:first-child>:where([data-nse-part="bezel"]):first-child::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size])>:first-child>button:first-child::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])):is([data-nse-height],[data-nse-control-size="small"]))>:first-child>:where([data-nse-part="bezel"]):first-child::after,
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])):is([data-nse-height],[data-nse-control-size="small"])>:first-child>:where([data-nse-part="bezel"]):first-child::after {
   inset-inline-start:calc(var(--nse-atmo-rg-band)*0.04);
 }
@@ -6010,14 +6010,14 @@ input:scope[data-nse-control="scroller"]:focus-visible {
 
 /* A sized capsule's selected cell keeps the inset ink: no ring columns at its
    seams, the cap ring's start inside the stroke. */
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size] :where([data-nse-part="bezel"][data-nse-selected])[aria-pressed="true"]::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size]) button[aria-pressed="true"]::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size] :where([data-nse-part="bezel"][data-nse-selected])[aria-pressed="true"]::after {
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]:is([data-nse-height], [data-nse-control-size="small"]) :where([data-nse-part="bezel"][data-nse-selected])[data-nse-selected]::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]:is([data-nse-height], [data-nse-control-size="small"])) :where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"]))[data-nse-selected]::after,
+:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]:is([data-nse-height], [data-nse-control-size="small"]) :where([data-nse-part="bezel"][data-nse-selected])[data-nse-selected]::after {
   inset-inline:0;
 }
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size]>:first-child>:where([data-nse-part="bezel"][data-nse-selected]):first-child[aria-pressed="true"]::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size])>:first-child>button:first-child[aria-pressed="true"]::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size]>:first-child>:where([data-nse-part="bezel"][data-nse-selected]):first-child[aria-pressed="true"]::after {
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]:is([data-nse-height], [data-nse-control-size="small"])>:first-child>:where([data-nse-part="bezel"][data-nse-selected]):first-child[data-nse-selected]::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]:is([data-nse-height], [data-nse-control-size="small"]))>:first-child>:where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])):first-child[data-nse-selected]::after,
+:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]:is([data-nse-height], [data-nse-control-size="small"])>:first-child>:where([data-nse-part="bezel"][data-nse-selected]):first-child[data-nse-selected]::after {
   inset-inline-start:calc(var(--nse-atmo-rg-band)*0.04);
 }
 :scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child[aria-pressed="true"]::after,
@@ -6199,7 +6199,7 @@ input:scope[data-nse-control="scroller"]:focus-visible {
 }
 
 :scope [data-nse-part="row"]:where([data-nse-control="browser"] *)>:where([data-nse-part="title"]):first-of-type,
-:scope:is(.nse-browser-option)>span:first-of-type,
+:scope:is([data-nse-part="row"]:where([data-nse-control="browser"] *))>:where([data-nse-part="title"]):first-of-type,
 :scope[data-nse-part="row"]:where([data-nse-control="browser"] *)>:where([data-nse-part="title"]):first-of-type {
   flex: 1 1 auto;
   min-inline-size: 0;
@@ -6328,7 +6328,7 @@ input:scope[data-nse-control="scroller"]:focus-visible {
    title does while its menu shows.
    ========================================================================= */
 :scope [data-nse-part="item"]:where([data-nse-control="menu-bar"] *)>:where([data-nse-control="menu-item"][data-nse-part="title"]),
-:scope:is(.nse-menu-bar-item)>button,
+:scope:is([data-nse-part="item"]:where([data-nse-control="menu-bar"] *))>:where([data-nse-control="menu-item"][data-nse-part="title"]),
 :scope[data-nse-part="item"]:where([data-nse-control="menu-bar"] *)>:where([data-nse-control="menu-item"][data-nse-part="title"]) {
   padding: 5px 12px;
   border-radius: 6px;
@@ -6339,7 +6339,7 @@ input:scope[data-nse-control="scroller"]:focus-visible {
 }
 
 :scope [data-nse-part="item"]:where([data-nse-control="menu-bar"] *)>:where([data-nse-control="menu-item"][data-nse-part="title"]):hover,
-:scope:is(.nse-menu-bar-item)>button:hover,
+:scope:is([data-nse-part="item"]:where([data-nse-control="menu-bar"] *))>:where([data-nse-control="menu-item"][data-nse-part="title"]):hover,
 :scope[data-nse-part="item"]:where([data-nse-control="menu-bar"] *)>:where([data-nse-control="menu-item"][data-nse-part="title"]):hover {
   background: rgba(0, 0, 0, 0.06);
 }
@@ -6353,7 +6353,7 @@ input:scope[data-nse-control="scroller"]:focus-visible {
 }
 
 :scope [data-nse-part="item"]:where([data-nse-control="menu-bar"] *)>:where([data-nse-control="menu-item"][data-nse-part="title"]):focus-visible,
-:scope:is(.nse-menu-bar-item)>button:focus-visible,
+:scope:is([data-nse-part="item"]:where([data-nse-control="menu-bar"] *))>:where([data-nse-control="menu-item"][data-nse-part="title"]):focus-visible,
 :scope[data-nse-part="item"]:where([data-nse-control="menu-bar"] *)>:where([data-nse-control="menu-item"][data-nse-part="title"]):focus-visible {
   outline: none;
   box-shadow: var(--nse-atmo-focus-ring);
