@@ -267,6 +267,6 @@ export function NSEColourWell(props: NSEColourWellProps) {
       } else dragSource.onKeyDown(event);
     }}><span data-nse-part="colour-sample" aria-hidden="true" style={{ backgroundColor: current.toCSS() }} /><span data-nse-part="colour-value">{current.toHex({ includeAlpha: props.showAlpha })}</span></button>
     {props.name ? <input ref={hiddenRef} type="hidden" name={props.name} value={current.toCSS()} /> : null}
-    <span role="status" aria-live="polite">{transferAnnouncement}</span>
+    <span data-nse-part="status" role="status" aria-live="polite">{transferAnnouncement}</span>
   </span>;
 }

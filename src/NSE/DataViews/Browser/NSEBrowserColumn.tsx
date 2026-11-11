@@ -124,7 +124,7 @@ export function NSEBrowserColumn<T, TId extends NSEDataViewKey>({ label, index, 
         </div>
       </div>
       {state.status !== "ready" && state.status !== "empty" && <div data-nse-part="status" role="status">{state.message ?? "Loading"}</div>}
-      {state.status === "empty" && <div role="status">{state.message ?? "No items"}</div>}
+      {state.status === "empty" && <div data-nse-part="status" role="status">{state.message ?? "No items"}</div>}
       {state.retry && <button data-nse-part="recovery" type="button" onClick={state.retry}>Retry</button>}
     </div>
   );

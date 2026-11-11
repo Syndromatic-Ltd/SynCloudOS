@@ -594,8 +594,8 @@
 /* Controls set into an input box keep their natural width; only the text
    input yields space. Without this a push button shrinks to its minimum and
    ellipsises a two-letter label ("Go" -> "G..."). */
-:where(:scope) .nse-control-input-box-frame>:not(input),
-:where(:scope):is(.nse-control-input-box-frame)>:not(input) {
+:where(:scope) [data-nse-part="bezel"]:where([data-nse-control="text-field"] *):where([data-nse-role="group"] *)>:not(:where([data-nse-part="field"])),
+:where(:scope):is([data-nse-part="bezel"]:where([data-nse-control="text-field"] *):where([data-nse-role="group"] *))>:not(:where([data-nse-part="field"])) {
   flex: none;
 }
 
@@ -1160,8 +1160,8 @@
 
 
 
-:where(:scope) .nse-control-slider:has(input:disabled) .nse-control-slider-control,
-:where(:scope):is(.nse-control-slider:has(input:disabled)) .nse-control-slider-control {
+:where(:scope) [data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"]):has(:where([data-nse-part="field"]):disabled) [data-nse-part="bezel"]:where([data-nse-slider-type="linear"] *),
+:where(:scope):is([data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"]):has(:where([data-nse-part="field"]):disabled)) [data-nse-part="bezel"]:where([data-nse-slider-type="linear"] *) {
   cursor: default;
 }
 
@@ -1552,8 +1552,8 @@
   filter: drop-shadow(0 16px 28px rgba(0, 0, 0, 0.32));
 }
 
-:where(:scope) [data-nse-part="title"]:where([data-nse-control="system-alert"][data-nse-style] > *),
-:where(:scope):is([data-nse-part="title"]:where([data-nse-control="system-alert"][data-nse-style] > *)) {
+:where(:scope) [data-nse-part="title"]:where([data-nse-control="system-alert"][data-nse-style]>*),
+:where(:scope):is([data-nse-part="title"]:where([data-nse-control="system-alert"][data-nse-style]>*)) {
   /* The plate starts 7-8px inside the border box; title and body sit 12px
      in from it (24px border less 4px), not on its edge. */
   margin: -8px -4px 8px;
@@ -1561,8 +1561,8 @@
   font-weight: 700;
 }
 
-:where(:scope) [data-nse-part="content"]:where([data-nse-control="system-alert"][data-nse-style] > *),
-:where(:scope):is([data-nse-part="content"]:where([data-nse-control="system-alert"][data-nse-style] > *)) {
+:where(:scope) [data-nse-part="content"]:where([data-nse-control="system-alert"][data-nse-style]>*),
+:where(:scope):is([data-nse-part="content"]:where([data-nse-control="system-alert"][data-nse-style]>*)) {
   display: grid;
   gap: 8px;
   margin: -7px -4px;
@@ -1800,8 +1800,8 @@
 
 /* Semantic state repair. The native input remains authoritative; these
    stable state hooks only make that state reachable to the appearance layer. */
-:where(:scope) .nse-control-radio:has(input:focus-visible),
-:where(:scope):is(.nse-control-radio:has(input:focus-visible)) {
+:where(:scope) [data-nse-part="cell"]:where([data-nse-button-type="radio"]):has(:where([data-nse-part="field"]):focus-visible),
+:where(:scope):is([data-nse-part="cell"]:where([data-nse-button-type="radio"]):has(:where([data-nse-part="field"]):focus-visible)) {
   outline: 2px solid rgba(141, 211, 255, 0.95);
   outline-offset: 2px;
 }
@@ -2894,8 +2894,8 @@
   letter-spacing: 0.02em;
 }
 
-:where(:scope) [data-nse-control="colour-well"]>[role="status"]:empty,
-:where(:scope):is([data-nse-control="colour-well"])>[role="status"]:empty {
+:where(:scope) [data-nse-control="colour-well"]>[data-nse-part="status"]:empty,
+:where(:scope):is([data-nse-control="colour-well"])>[data-nse-part="status"]:empty {
   display: none;
 }
 
