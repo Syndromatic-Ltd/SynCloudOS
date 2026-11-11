@@ -182,15 +182,21 @@ function validateDefinition(input, contract, file, root) {
 const semanticParts = new Set(["title", "label", "content", "field", "cell", "row", "item", "segment", "value", "text-content", "primary-text", "secondary-text"]);
 /** The hard limits every theme rule keeps: semantic parts stay present, focus stays visible, hit targets stay usable.
  * Shared by bundle validation and the idiom audit (idiom.theme-limit). Declarations are { property, value }. */
-export function themeRuleLimitViolations(selector, declarations) {
+export function themeRuleLimitViolations(selector, declarations, siblings = []) {
   const out = [], none = /^(?:none|0(?:px)?|transparent)$/u;
   const pseudo = /::(?:before|after)/u.test(selector);
   const semantic = !pseudo && (/(?:data-nse-control)/u.test(selector) && !/data-nse-part/u.test(selector) || [...semanticParts].some(part => selector.includes(`data-nse-part="${part}"`) || selector.includes(`data-nse-part=${part}]`)));
   if (semantic && declarations.some(({ property }) => ["display", "visibility", "content"].includes(property))) out.push({ rule: "semantic-limit", message: "Themes cannot set semantic display, visibility or content." });
   if (/data-nse-focused|:focus/u.test(selector)) {
     const removes = declarations.some(({ property, value }) => /^(?:outline|outline-width|outline-style|box-shadow)$/u.test(property) && none.test(value));
-    const replaces = declarations.some(({ property, value }) => /^(?:outline|box-shadow|border|border-color|background|background-color)$/u.test(property) && !none.test(value));
-    if (removes && !replaces) out.push({ rule: "focus-limit", message: "A focused control must retain a visible focus indicator." });
+    const replaces = declarations.some(({ property, value }) => /^(?:outline|box-shadow|border|border-color|background|background-color|filter)$/u.test(property) && !none.test(value));
+    // The replacement may be drawn by another focused-state rule for the same control in the same stylesheet:
+    // for example a field drops its own ring while the bezel around it draws one.
+    const controls = new Set([...selector.matchAll(/data-nse-control=["']?([\w-]+)/gu)].map(match => match[1]));
+    const elsewhere = siblings.some(other => /data-nse-focused|:focus/u.test(other.selector)
+      && [...other.selector.matchAll(/data-nse-control=["']?([\w-]+)/gu)].some(match => controls.has(match[1]))
+      && other.declarations.some(({ property, value }) => /^(?:outline|box-shadow|border|border-color|background|background-color|filter)$/u.test(property) && !none.test(value)));
+    if (removes && !replaces && !elsewhere) out.push({ rule: "focus-limit", message: "A focused control must retain a visible focus indicator." });
   }
   if (semantic && /data-nse-control-size=(?:"|')?(?:regular|large)/u.test(selector) && declarations.some(({ property, value }) => /^min-(?:width|height|inline-size|block-size)$/u.test(property) && /^\d+(?:\.\d+)?px$/u.test(value) && parseFloat(value) < 24)) out.push({ rule: "hit-target-limit", message: "Regular and large hit targets must be at least 24 points." });
   return out;
@@ -207,10 +213,19 @@ function selectorHasAnchor(selector) {
   });
 }
 /** Shared by bundle validation and the idiom audit. Throws a file-specific rule violation. */
-export function validateThemeCSS(source, { file, root, contract, onImport = () => undefined } = {}) {
+/** Every rule of a stylesheet as { selector, declarations }, for limits that look across a theme's rules. */
+export function themeRuleSummaries(source) {
+  const out = [];
+  try {
+    cssTree.walk(cssTree.parse(source, { parseCustomProperty: true }), { visit: "Rule", enter(rule) { out.push({ selector: cssTree.generate(rule.prelude), declarations: rule.block.children.toArray().filter(child => child.type === "Declaration").map(declaration => ({ property: cssTree.ident.decode(declaration.property).toLowerCase(), value: cssTree.generate(declaration.value).trim() })) }); } });
+  } catch { /* Syntax errors are reported by validation. */ }
+  return out;
+}
+export function validateThemeCSS(source, { file, root, contract, onImport = () => undefined, siblings: bundleSiblings } = {}) {
   const ast = cssTree.parse(source, { parseCustomProperty: true, positions: true, onParseError(error) { fail(file, "css-syntax", error.message); } });
   const attributes = new Set(["control", "part", "state", "highlighted", "enabled", "selected", "hovered", "focused", "key-window", "tracking", "colour-scheme-resolved", "contrast", "transparency", ...Object.values(contract.controls).flatMap(control => Object.keys(control.variants))].map(name => `data-nse-${name}`));
   const valueText = node => cssTree.generate(node.value);
+  const siblings = bundleSiblings ?? themeRuleSummaries(source);
   const checkSlice = (declarations, label) => {
     const find = name => declarations.find(node => cssTree.ident.decode(node.property).toLowerCase() === name);
     const shorthand = find("border-image"), source = find("border-image-source"), slice = find("border-image-slice");
@@ -250,7 +265,7 @@ export function validateThemeCSS(source, { file, root, contract, onImport = () =
       }
       if (node.type === "Rule") {
         const declarations = node.block.children.toArray().filter(child => child.type === "Declaration"); checkSlice(declarations, "border-image");
-        const violation = themeRuleLimitViolations(cssTree.generate(node.prelude), declarations.map(declaration => ({ property: cssTree.ident.decode(declaration.property).toLowerCase(), value: valueText(declaration).trim() })))[0];
+        const violation = themeRuleLimitViolations(cssTree.generate(node.prelude), declarations.map(declaration => ({ property: cssTree.ident.decode(declaration.property).toLowerCase(), value: valueText(declaration).trim() })), siblings)[0];
         if (violation) fail(file, violation.rule, violation.message);
       }
       if (node.type === "Declaration") {
@@ -283,9 +298,10 @@ export function readThemeBundle(bundlePath, options = {}) {
   validateDefinition(input, contract, definitionPath, root);
   for (const file of files.filter(file => extname(file).toLowerCase() === ".svg")) validateSvg(readFileSync(file, "utf8"), file);
   const imports = new Map(), stylesheets = new Map();
+  const siblings = files.filter(file => extname(file).toLowerCase() === ".css").flatMap(file => themeRuleSummaries(readFileSync(file, "utf8")));
   for (const file of files.filter(file => extname(file).toLowerCase() === ".css")) {
     const dependencies = []; imports.set(file, dependencies);
-    stylesheets.set(file, validateThemeCSS(readFileSync(file, "utf8"), { file, root, contract, onImport: path => dependencies.push(path) }));
+    stylesheets.set(file, validateThemeCSS(readFileSync(file, "utf8"), { file, root, contract, siblings, onImport: path => dependencies.push(path) }));
   }
   const stylesheetPath = resolve(contents, "Resources/theme.css"), visited = new Set(), visiting = new Set();
   const visit = file => { if (visiting.has(file)) fail(file, "cyclic-import", "Cyclic theme CSS imports."); if (visited.has(file)) return; if (!stylesheets.has(file)) fail(file, "stylesheet", "Missing theme stylesheet."); visiting.add(file); for (const child of imports.get(file)) visit(child); visiting.delete(file); visited.add(file); };
