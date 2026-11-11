@@ -186,7 +186,7 @@
   opacity: 0.42;
 }
 
-.webspring-quickswitch-item .nse-icon-well {
+.webspring-quickswitch-item [data-nse-control="icon-well"] {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -200,7 +200,7 @@
     transform 260ms var(--webspring-material-ease);
 }
 
-.webspring-quickswitch-item .nse-icon-well::before {
+.webspring-quickswitch-item [data-nse-control="icon-well"]::before {
   opacity: 0;
 }
 
@@ -211,12 +211,12 @@
   height: 68px;
 }
 
-.webspring-quickswitch-item .nse-loading-spinner,
-.webspring-quickswitch-item .nse-badge {
+.webspring-quickswitch-item [data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]),
+.webspring-quickswitch-item [data-nse-control="badge"] {
   z-index: 5;
 }
 
-.webspring-quickswitch-item.is-selected .nse-icon-well {
+.webspring-quickswitch-item.is-selected [data-nse-control="icon-well"] {
   filter:
     drop-shadow(0 11px 12px rgba(0, 0, 0, 0.42))
     drop-shadow(0 0 8px rgba(142, 224, 255, 0.24));
@@ -235,7 +235,7 @@
   transform: scale(1.018);
 }
 
-.webspring-quickswitch-item:focus-visible .nse-icon-well {
+.webspring-quickswitch-item:focus-visible [data-nse-control="icon-well"] {
   outline: 2px solid rgba(174, 236, 255, 0.82);
   outline-offset: 4px;
 }
@@ -253,11 +253,11 @@
     --webspring-quickswitch-min-width: 210px;
   }
 
-  .webspring-quickswitch-item .nse-icon-well {
+  .webspring-quickswitch-item [data-nse-control="icon-well"] {
     transform: translate(-50%, calc(-50% - 3px)) scale(calc(0.83 * var(--webspring-quickswitch-fit)));
   }
 
-  .webspring-quickswitch-item.is-selected .nse-icon-well {
+  .webspring-quickswitch-item.is-selected [data-nse-control="icon-well"] {
     transform: translate(-50%, calc(-50% - 3px)) scale(calc(0.88 * var(--webspring-quickswitch-fit)));
   }
 }
@@ -1311,7 +1311,7 @@
   flex-direction: column;
 }
 
-.webspring-app-view-body-surface-sourcelist > .nse-app-topbar {
+.webspring-app-view-body-surface-sourcelist > [data-nse-control="window"]:where([data-nse-part="header"]) {
   flex: 0 0 auto;
   position: relative;
   z-index: 2;
@@ -1367,7 +1367,7 @@
 
 .webspring-loading-state-content p { margin: 0; }
 
-.webspring-loading-state-content .nse-loading-spinner {
+.webspring-loading-state-content [data-nse-control="progress-indicator"]:where([data-nse-style="spinning"]) {
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .8));
 }
 

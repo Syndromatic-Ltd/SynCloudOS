@@ -90,7 +90,3 @@
   line-height: 1.45;
   text-shadow: 0 2px 3px rgba(0, 0, 0, .75);
 }
-
-.webspring-widget > .nse-push-button {
-  justify-self: start;
-}

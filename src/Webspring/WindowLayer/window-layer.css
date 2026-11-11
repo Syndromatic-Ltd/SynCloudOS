@@ -42,7 +42,7 @@
   background: rgb(0 0 0 / 18%);
 }
 
-.webspring-window-host > .nse-window-view {
+.webspring-window-host > [data-nse-control="window"]:where([data-nse-part="background"]) {
   position: relative;
   inset: 0;
 }

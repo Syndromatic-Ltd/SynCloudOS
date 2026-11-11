@@ -22,5 +22,5 @@ import type { ReactNode } from "react";
 import "./components.css";
 
 export function IconWell({ children, active = false }: { children: ReactNode; active?: boolean }) {
-  return <span className={`nse-icon-well ${active ? "is-active" : ""}`}>{children}</span>;
+  return <span data-nse-control="icon-well" data-nse-part="background" className={`nse-icon-well ${active ? "is-active" : ""}`}>{children}</span>;
 }
