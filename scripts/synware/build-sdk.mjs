@@ -37,6 +37,7 @@ import { build } from "vite";
 import { synWareSdkEntries, synWareSdkGeneratedStyles, synWareSdkStyles, synWarePackageName } from "./sdk-entries.mjs";
 import react from "@vitejs/plugin-react";
 import { builtInThemeCSS } from "./built-in-theme-css.mjs";
+import { selectorPerformance } from "./selector-performance.mjs";
 import {
   assertReviewedPackageFiles, assertSdkSourceUnchanged, assertFxPackageExports,
   captureSdkSourceFingerprint, createSdkPackageManifest, fingerprintSdkFiles, sdkDirectoryFiles,
@@ -151,7 +152,7 @@ async function bundle({ entry, packageDirectory, themeNames }) {
       define: { "process.env.NODE_ENV": JSON.stringify("production") },
       resolve: { alias: publicAliases },
       esbuild: { jsxDev: false },
-      css: { postcss: { plugins: [builtInThemeCSS()] } },
+      css: { postcss: { plugins: [builtInThemeCSS(), selectorPerformance()] } },
       plugins: [react(), bundledDependencyNotices(), sdkPackageStyles({
         themeNames,
         publicStyleEntries: synWareSdkGeneratedStyles,
