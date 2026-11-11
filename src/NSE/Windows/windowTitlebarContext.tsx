@@ -39,7 +39,7 @@ export function NSEWindowTitlebarContent({ toolbarStyle, title, subtitle, leadin
   readonly mode?: "light" | "dark";
   readonly className?: string;
 }) {
-  return <header data-nse-control="window" data-nse-part="header" data-nse-toolbar-style={toolbarStyle} className={`nse-window-titlebar-content ${className}`} data-window-titlebar="" data-toolbar-style={toolbarStyle} data-mode={mode}>
+  return <header data-nse-control="window" data-nse-part="header" data-nse-toolbar-style={toolbarStyle} className={`nse-window-titlebar-content ${className}`} data-window-titlebar="" data-toolbar-style={toolbarStyle} data-mode={mode} data-nse-colour-scheme-resolved={mode}>
     <span data-nse-part="leading" className="nse-window-titlebar-leading" data-layout-attribute="leading">{leading}</span>
     <div className="nse-window-titlebar-copy">
       <h1 data-nse-part="title" className="nse-window-titlebar-heading" data-window-title="">{title}</h1>

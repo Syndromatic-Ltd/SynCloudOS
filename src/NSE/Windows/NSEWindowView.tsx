@@ -107,7 +107,7 @@ export function NSEWindowView({
   return (
     <NSEWindowTitlebarHostContext.Provider value={titlebarHost}>
     <section
-      data-nse-control="window" data-nse-part="background" data-nse-chrome={record.role === "hud" ? "hud" : appearance.chrome} data-nse-key-window={record.isKey ? undefined : "false"} data-nse-toolbar-style={titlebarDocument?.toolbarStyle ?? "automatic"}
+      data-nse-control="window" data-nse-part="background" data-nse-role={record.role} data-nse-type={record.chromeMode} data-nse-style={customChromeActive ? "custom" : undefined} data-nse-edge={arrowEdge} data-nse-alignment={arrowAlignment} data-nse-chrome={record.role === "hud" ? "hud" : appearance.chrome} data-nse-key-window={record.isKey ? undefined : "false"} data-nse-toolbar-style={titlebarDocument?.toolbarStyle ?? "automatic"}
       className={["nse-window-view", className].filter(Boolean).join(" ")}
       role={resolvedSemanticRole}
       aria-label={fallbackAccessibleName}

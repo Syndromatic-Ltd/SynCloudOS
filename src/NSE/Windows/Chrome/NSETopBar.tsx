@@ -171,6 +171,7 @@ function NSETopBarMetal({
       className={`nse-app-topbar nse-app-topbar-metal ${className}`.trim()}
       data-variant="atmoMetal"
       data-mode={scheme}
+      data-nse-colour-scheme-resolved={scheme}
       data-has-rail={rail ? "true" : "false"}
       data-title-placement={titlePlacement}
       style={headerStyle}

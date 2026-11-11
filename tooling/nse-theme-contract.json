@@ -1422,12 +1422,24 @@
           "metal",
           "standard"
         ],
+        "role": [
+          "hud",
+          "panel",
+          "standard"
+        ],
+        "style": [
+          "panel",
+          "standard"
+        ],
         "toolbar-style": [
           "automatic",
           "expanded",
           "preference",
           "unified",
           "unifiedCompact"
+        ],
+        "type": [
+          "system"
         ]
       }
     }

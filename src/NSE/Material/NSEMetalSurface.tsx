@@ -45,6 +45,7 @@ export function NSEMetalSurface({
       className={classes("nse-metal-surface", className)}
       data-nse-material="metal"
       data-mode={mode}
+      data-nse-colour-scheme-resolved={mode}
 
       data-nse-metal-surface-noise="nse-metal-grain"
     >
