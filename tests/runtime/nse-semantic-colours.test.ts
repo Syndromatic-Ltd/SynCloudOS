@@ -26,7 +26,7 @@ describe("AppKit semantic colours", () => {
     expect(Object.keys(atmoColours[scheme])).toEqual(expected);
     for (const value of Object.values(atmoColours[scheme])) expect(value).toMatch(/^(#|rgb)/);
     const css = readFileSync(new URL("../../src/NSE/Appearance/nse-appearance.css", import.meta.url), "utf8");
-    const block = css.split(`:where([data-nse-colour-scheme-resolved="${scheme}"]) {`)[2];
+    const block = css.split(`:where(:scope):is(:where([data-nse-colour-scheme-resolved="${scheme}"])) {`)[2];
     expect(block).toBeDefined();
     for (const property of Object.values(nseThemeColourProperties)) expect(block!.split("}")[0]).toContain(`${property}:`);
   });
