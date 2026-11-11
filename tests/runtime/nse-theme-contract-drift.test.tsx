@@ -82,6 +82,16 @@ for (const surface of supplementalThemeCatalogue) it(`renders supplemental ${sur
     await act(async () => { await Promise.resolve(); });
     collect();
   }
+  if (surface.hover) {
+    fireEvent.pointerOver(document.querySelector<HTMLElement>(surface.hover)!);
+    await act(async () => { await new Promise(resolve => setTimeout(resolve, 400)); });
+    collect();
+  }
+  if (surface.context) {
+    fireEvent.contextMenu(document.querySelector<HTMLElement>(surface.context)!);
+    await act(async () => { await Promise.resolve(); });
+    collect();
+  }
   if (surface.id === "segment-menu" || surface.id === "segment-overflow") {
     fireEvent.click(document.querySelector<HTMLElement>('[data-nse-expanded="false"]')!);
     await act(async () => { await Promise.resolve(); });
