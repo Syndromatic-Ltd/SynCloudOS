@@ -169,7 +169,34 @@ A widget owns its feed and React view; the generic shelf supplies loading, empty
 
 Integrations declare their actual application owners. Owner matching is case-insensitive; selected applications constrain installation and seed authority. Use `applicationDocuments(environment)` when construction needs the host clock, timers or recovery-store environment. Do not replace persistent recovery with an in-memory workaround. See [Webspring](webspring.md).
 
-## 7. Verify the installed consumer, not only the source tree
+## 7. Move to themes and the theme contract
+
+Appearance definitions, slots and recipes are replaced by `.scostheme` theme bundles drawn through a public contract ([Themes](themes.md), [contract reference](theme-contract.md)). None of the removed names has an alias.
+
+**Theme selection**
+
+| Removed | Use instead |
+| --- | --- |
+| `atmoAppearance` | `atmoTheme` from `@syndromatic/syncloudos/nse/themes/atmo` |
+| `NSEAppearanceProvider` `appearance` prop, selection `appearance` | `theme` |
+| `mountSynCloudOS` `appearance` option | `theme`, an `NSETheme`; omit it for Atmo |
+| `data-nse-appearance` | `data-nse-theme`, holding the bundle identifier |
+| `defineNSEAppearance`, `NSEAppearanceDefinition`, `NSEAppearanceDefinitionInput`, `NSEAppearanceRecipeDefinition` | a `.scostheme` bundle: `Info.ts`, `Theme.json` and stylesheets |
+| `useNSEAppearanceSlot`, `resolveNSEAppearanceSlot`, `nseAppearanceSlot`, `projectNSEAppearanceSlot`, `NSEAppearanceSlotDescriptor`, `NSEAppearanceSlotProjection`, `NSEAppearanceSlotResolution`, `NSEChromeSlot`, `NSEChromePrimitiveProps.slot` | contract hooks: `[data-nse-control]`, `[data-nse-part]` and their state and variant attributes |
+| `NSEWindowAppearanceRecipeId`, `NSE_WINDOW_APPEARANCE_RECIPE_IDS`, `NSEWindowFrameProps.appearanceRecipe` and `shadowRecipe`, `NSEWindowTitleBarProps.appearanceRecipe` | `NSEWindowFrameProps.hasShadow` (`NSWindow.hasShadow`) |
+| `atmoMotion` | `NSEAnimationContext.current`; motion is framework-owned |
+
+The `@syndromatic/syncloudos/nse/themes/atmo` entry now exports only `atmoTheme`, and its `styles.css` loads control structure and the whole Atmo bundle.
+
+**Colours.** The `--nse-app-*` properties become semantic colours: `--nse-app-background` → `--nse-colour-window-background`, `--nse-app-foreground` → `--nse-colour-label`, `--nse-app-foreground-secondary` → `--nse-colour-secondary-label`, `--nse-app-surface` → `--nse-colour-control-background`, `--nse-app-surface-border` → `--nse-colour-grid`, `--nse-app-separator` → `--nse-colour-separator`, `--nse-app-accent` → `--nse-colour-control-accent`, `--nse-app-accent-foreground` → `--nse-colour-selected-control-text`, `--nse-app-selection` → `--nse-colour-selected-content-background` and `--nse-app-critical` → `--nse-colour-system-red`. The British spellings replace `textColor`, `labelColor`, `secondaryLabelColor` and `emphasized`: use `textColour`, `labelColour`, `secondaryLabelColour` and `emphasised`. The separator's `gray` variant is `grey`.
+
+**Layout.** `NSEScrollInsets` becomes `NSEEdgeInsets` (with `NSEEdgeInsetsZero` and `NSEEdgeInsetsMake`), and `NSEScrollView`'s `scrollInsets` prop becomes `contentInsets` and `scrollerInsets`, with `automaticallyAdjustsContentInsets` on by default. See [layout guides and safe areas](windows.md#layout-guides-and-safe-areas).
+
+**Control identities.** Theme and application CSS that selected the old identities uses their replacements: `calendar`, `time-picker`, `date-time-picker` and `date-range-picker` are `date-picker` with its `date-picker-elements` and `date-picker-mode` variants; `circular-slider` and `slider-field` are `slider` with `slider-type`; `ruler` is `ruler-view`; `route-picker` is `route-picker-view`; `file-panel` is `save-panel`; `scroll-view-frame` is `scroll-view`; `toolbar-configuration-sheet` is `toolbar-customisation-palette`; and the toolbar's `root` part is `background`.
+
+**Drawing controls.** Only a theme draws NSE controls. Application CSS that selects private `.nse-*` classes, or contract hooks such as `[data-nse-control]` and `[data-nse-part]`, is reported by the Developer MCP as `idiom.control-internals`. Draw your own content with the semantic colours, and leave NSE controls to the theme.
+
+## 8. Verify the installed consumer, not only the source tree
 
 Use `createSynWareTestHost({ application: AppClass, manifest })` from `/sdk/testing` for actual class instances, windows, routes, commands and preferences. `host.application` is the live instance after rendering. Supply trusted host fixtures through the documented test-host configuration, not app-constructor clients. Native keyboard events use the production input boundary.
 

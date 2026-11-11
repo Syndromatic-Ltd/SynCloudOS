@@ -46,6 +46,8 @@ SynCloudOS is an application framework for the web, in the tradition of Cocoa. T
 | [Text and editing](text-and-editing.md) | Use text owners, sessions, views, typography and web content |
 | [Text geometry](text-geometry.md) | Query revisioned logical or shaped geometry and explicit transforms |
 | [Appearance and Atmo](appearance.md) | Load the theme, and work with light and dark |
+| [Themes](themes.md) | Write, load, nest and validate a .scostheme theme bundle |
+| [Theme contract reference](theme-contract.md) | Every control part, state, variant and colour a theme can draw |
 
 ## FX frameworks
 

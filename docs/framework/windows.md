@@ -115,6 +115,31 @@ On a phone or a narrow tablet the host presents each window according to its `mo
 | `popover-to-sheet` | An anchored popover becomes a sheet. |
 | `hidden` | The window does not appear. |
 
+## Layout guides and safe areas
+
+A window's bars (title bar, toolbar, bottom bar, the screen's own edges) change with the theme, the window's style and the screen. Lay content out against the guides the framework measures, never against a bar height you know today.
+
+| API | AppKit | What it gives you |
+| --- | --- | --- |
+| `NSEWindow.contentLayoutRect`, `NSEWindow.contentLayoutGuide` | `NSWindow.contentLayoutRect`, `contentLayoutGuide` | The part of the window not covered by its title bar and toolbar. The guide's `frame` is current, and `observe(listener)` reports changes. |
+| `useNSESafeArea()` | `NSView.safeAreaInsets`, `safeAreaRect` | The current view's insets and the rectangle inside them, including every bar that overlaps it. |
+| `NSEView` `additionalSafeAreaInsets` and `onSafeAreaInsetsChange` | `NSView.additionalSafeAreaInsets` | Adds insets for your own overlays, and reports when the view's insets change. |
+| `NSEViewController.safeAreaInsets` and `viewSafeAreaInsetsDidChange()` | `NSView.safeAreaInsets` | The controller-side view of the same values, and a callback when they change. |
+| `NSEScrollView` `automaticallyAdjustsContentInsets` (on by default), `contentInsets` and `scrollerInsets` | `NSScrollView` | Scrolls content under translucent bars while keeping the first and last rows reachable. |
+| `useNSEWindowChromeObstruction(edge, thickness, translucent)` | none | Registers chrome you draw yourself, such as a custom title bar, so every safe area accounts for it. |
+
+In CSS, each view publishes its insets as `--nse-safe-area-inset-top`, `--nse-safe-area-inset-left`, `--nse-safe-area-inset-bottom` and `--nse-safe-area-inset-right`:
+
+```css
+.floating-controls {
+  position: absolute;
+  inset-block-end: calc(var(--nse-safe-area-inset-bottom) + 12px);
+  inset-inline: var(--nse-safe-area-inset-left) var(--nse-safe-area-inset-right);
+}
+```
+
+The Developer MCP reports `idiom.layout-guide` for a raw `env(safe-area-inset-*)` in application CSS, or for a fixed or sticky element offset by a known system bar height.
+
 ## Custom title bars
 
 Set `windowDefaults.chrome` to `"custom"` and export a named `windowChrome` component from the application entry to draw the title bar yourself. The component receives the window's state and actions.

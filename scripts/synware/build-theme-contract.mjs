@@ -1,5 +1,5 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
@@ -38,4 +38,48 @@ export function generateNSEThemeContract(repositoryRoot) {
   if (result.status !== 0) throw new Error("Theme contract generation failed.");
   return deriveNSEThemeContract(repositoryRoot);
 }
-if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) generateNSEThemeContract(resolve(fileURLToPath(new URL("../..", import.meta.url))));
+/** docs/framework/theme-contract.md: every control's parts, states and variants, every colour, and the hard limits. */
+export function renderNSEThemeContractMarkdown(contract) {
+  const tick = value => "`" + value + "`";
+  const list = values => values.length ? values.map(tick).join(", ") : "none";
+  const lines = [
+    "# Theme contract reference",
+    "",
+    "Generated from " + tick("tooling/nse-theme-contract.json") + " by " + tick("scripts/synware/build-theme-contract.mjs") + ". Do not edit by hand.",
+    "",
+    "A theme draws controls through these hooks only: " + tick("[data-nse-control]") + ", " + tick("[data-nse-part]") + ", the state and variant attributes listed here, and the appearance attributes on the theme boundary. [Themes](themes.md) explains how to use them.",
+    "",
+    "Contract version " + contract.themeContractVersion + ": " + Object.keys(contract.controls).length + " controls, " + contract.colours.length + " colours.",
+    "",
+    "## Controls",
+    "",
+  ];
+  for (const [name, entry] of Object.entries(contract.controls)) {
+    lines.push("### " + tick(name), "", "- Parts: " + list(entry.parts), "- States: " + list(entry.states));
+    const variants = Object.entries(entry.variants);
+    if (variants.length) {
+      lines.push("- Variants:");
+      for (const [variant, values] of variants) lines.push("  - " + tick("data-nse-" + variant) + ": " + list(values));
+    }
+    lines.push("");
+  }
+  lines.push("## Colours", "", "Each name is a key of " + tick("colours.light") + " and " + tick("colours.dark") + " in " + tick("Theme.json") + ".", "", list(contract.colours), "");
+  lines.push("## Appearance attributes", "");
+  for (const [name, values] of Object.entries(contract.appearance)) lines.push("- " + tick("data-nse-" + name) + ": " + list(values));
+  lines.push("", "## Navigation and presentation", "");
+  for (const [size, entry] of Object.entries(contract.navigation)) lines.push("- " + tick("navigation." + size) + ": placement " + list(entry.placement) + "; flow " + list(entry.flow));
+  for (const [name, values] of Object.entries(contract.presentation)) lines.push("- " + tick("presentation." + name) + ": " + list(values));
+  lines.push("", "## Limits", "");
+  for (const [name, value] of Object.entries(contract.limits)) {
+    const text = Array.isArray(value) ? list(value) : value && typeof value === "object" ? Object.entries(value).map(([key, item]) => key + " " + item).join(", ") : String(value);
+    lines.push("- " + tick(name) + ": " + text);
+  }
+  lines.push("", "## Renamed identities", "", "Earlier names and the hooks that replaced them. None is accepted as an alias.", "");
+  for (const [from, to] of Object.entries(contract.renamedFrom)) lines.push("- " + tick(from) + " → " + tick(to));
+  lines.push("");
+  return lines.join("\n");
+}
+if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {
+  const root = resolve(fileURLToPath(new URL("../..", import.meta.url)));
+  writeFileSync(resolve(root, "docs/framework/theme-contract.md"), renderNSEThemeContractMarkdown(generateNSEThemeContract(root)));
+}
