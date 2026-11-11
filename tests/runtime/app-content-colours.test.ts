@@ -45,7 +45,7 @@ describe("application content colours", () => {
   it("gives every documented token a theme-neutral light and dark default", () => {
     const css = read("src/NSE/Appearance/nse-appearance.css");
     for (const scheme of ["light", "dark"]) {
-      const values = block(css, `:where([data-nse-colour-scheme-resolved="${scheme}"])`);
+      const values = block(css, `:where(:scope):is(:where([data-nse-colour-scheme-resolved="${scheme}"]))`);
       for (const token of documented) expect(values.has(token), `${token} (${scheme})`).toBe(true);
     }
   });
@@ -65,7 +65,7 @@ describe("application content colours", () => {
   it("keeps the neutral text colours readable on the app background", () => {
     const css = read("src/NSE/Appearance/nse-appearance.css");
     for (const scheme of ["light", "dark"]) {
-      const values = block(css, `:where([data-nse-colour-scheme-resolved="${scheme}"])`);
+      const values = block(css, `:where(:scope):is(:where([data-nse-colour-scheme-resolved="${scheme}"]))`);
       const background = values.get("--nse-colour-window-background")!;
       for (const token of ["--nse-colour-label", "--nse-colour-secondary-label", "--nse-colour-system-red"]) {
         expect(contrast(values.get(token)!, background), `${token} (${scheme})`).toBeGreaterThanOrEqual(4.5);
