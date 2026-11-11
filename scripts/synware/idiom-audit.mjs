@@ -9,7 +9,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, extname, relative, resolve, sep } from "node:path";
 import ts from "typescript";
 import { inspectIdiomErrors, inspectStyleErrors, rendererOwnedRegions, withinRendererRegion, interactiveTable } from "./idiom-errors.mjs";
-import { inspectIdiomWarnings, inspectUnusedResources } from "./idiom-warnings.mjs";
+import { inspectIdiomWarnings, inspectStyleWarnings, inspectUnusedResources } from "./idiom-warnings.mjs";
 
 const SOURCE = [".tsx", ".ts", ".jsx", ".js", ".mts", ".mjs"];
 const STYLE = [".css"];
@@ -329,7 +329,7 @@ export function auditSynWareIdioms({ root, applications, sdkRoot, entries = [] }
   for (const file of stylesheets) {
     const text = read(file);
     stylesheetReport.colourLiterals += colourLiterals(text).length;
-    for (const finding of inspectStyleErrors({ file, text, sdkRoot })) at(file, finding.line, finding.rule, finding.message, finding.severity);
+    for (const finding of [...inspectStyleErrors({ file, text, sdkRoot }), ...inspectStyleWarnings({ file, text })]) at(file, finding.line, finding.rule, finding.message, finding.severity);
   }
   for (const finding of inspectUnusedResources({ root, applications, files: [...scanned, ...stylesheets] })) {
     const file = resolve(root, finding.file);

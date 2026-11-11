@@ -5,6 +5,7 @@
 import ts from "typescript";
 import { parse as parseCss, walk as walkCss } from "css-tree";
 import { IDIOM_REPLACEMENTS, replacementMessage } from "./idiom-replacements.mjs";
+import { themeRuleLimitViolations } from "./theme-bundles.mjs";
 
 function parse(file, text) {
   return ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, /\.[jt]sx$/u.test(file) ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
@@ -275,29 +276,40 @@ export function inspectIdiomErrors({ file, text, regions = rendererOwnedRegions(
   return findings;
 }
 
-/** CSS rules concern consumer UI declarations, not theme-owned semantic values.
- * The stylesheet control-internals and UI-colour policies are intentionally unchanged:
- * theme authoring is being redesigned around a public control-recipe contract and .scostheme bundles.
+/** Appearance attributes any stylesheet may read: the theme root and the resolved scheme, contrast and transparency. */
+const APPEARANCE_ATTRIBUTES = new Set(["data-nse-theme", "data-nse-colour-scheme-resolved", "data-nse-contrast", "data-nse-transparency"]);
+
+/** Stylesheets are either theme data (inside a .scostheme bundle) or app and host CSS.
+ * A theme draws controls through the public contract hooks: private .nse-* classes are an error, colour literals are its job,
+ * and the hard limits (semantic parts present, focus visible, hit targets usable) are errors.
+ * App and host CSS styles its own content: reaching into a control, by private class or by contract hook, is an error,
+ * and colours come from the selected appearance.
  */
-export function inspectStyleErrors({ text }) {
+export function inspectStyleErrors({ file = "", text }) {
+  const theme = /\.scostheme[\\/]/iu.test(file);
   const css = text.replace(/\/\*[\s\S]*?\*\//gu, value => value.replace(/[^\n]/gu, " "));
   const findings = [];
-  const at = (index, rule, key, message, severity = "error") => findings.push({ line: css.slice(0, index).split("\n").length, rule, severity, message: `${message} ${replacementMessage(key)}` });
+  const at = (index, rule, key, message, severity = "error") => findings.push({ line: css.slice(0, index).split("\n").length, rule, severity, message: key ? `${message} ${replacementMessage(key)}` : message });
   for (const block of css.matchAll(/([^{}]+)\{([^{}]*)\}/gu)) {
     const selector = block[1].trim(), declarations = block[2];
     if (selector.startsWith("@")) continue;
-    // Themes implement semantic recipe selectors; consumer overrides of private class internals do not.
-    let privateClass = false;
+    const selectorIndex = block.index + block[1].search(/\S/u);
+    let privateClass = false, hook = false;
     try {
-      walkCss(parseCss(selector, { context: "selectorList" }), node => { if (node.type === "ClassSelector" && /^nse-/u.test(node.name)) privateClass = true; });
+      walkCss(parseCss(selector, { context: "selectorList" }), node => {
+        if (node.type === "ClassSelector" && /^nse-/u.test(node.name)) privateClass = true;
+        if (node.type === "AttributeSelector" && /^data-nse-/u.test(node.name.name) && !APPEARANCE_ATTRIBUTES.has(node.name.name)) hook = true;
+      });
     } catch { /* Incomplete CSS is left to stylesheet validation. */ }
-    if (privateClass) at(block.index + block[1].search(/\S/u), "idiom.control-internals", "uiColour", "A class selector styles private NSE control internals. Supply semantic appearance values or a control recipe.");
-    for (const declaration of declarations.matchAll(/([\w-]+)\s*:\s*([^;{}]+)/gu)) {
-      const property = declaration[1], value = declaration[2].trim();
+    if (theme && privateClass) at(selectorIndex, "idiom.theme-private-class", null, "A theme selector uses a private NSE class. Draw the control through its public contract hooks: [data-nse-control], [data-nse-part] and its state attributes.");
+    if (!theme && privateClass) at(selectorIndex, "idiom.control-internals", "uiColour", "A class selector styles private NSE control internals. Supply semantic appearance values or a control recipe.");
+    if (!theme && !privateClass && hook) at(selectorIndex, "idiom.control-internals", "uiColour", "A contract hook selector draws a control from app CSS. Only a .scostheme theme draws controls; apps supply semantic appearance values.");
+    const parsed = [...declarations.matchAll(/([\w-]+)\s*:\s*([^;{}]+)/gu)].map(declaration => ({ property: declaration[1].toLowerCase(), value: declaration[2].trim(), index: block.index + block[0].indexOf("{") + 1 + declaration.index }));
+    if (theme) for (const violation of themeRuleLimitViolations(selector, parsed)) at(selectorIndex, "idiom.theme-limit", null, `${violation.message} Themes change appearance, never what a control presents or whether it can be used.`);
+    for (const { property, value, index } of parsed) {
       if (property.startsWith("--")) continue;
-      const index = block.index + block[0].indexOf("{") + 1 + declaration.index;
       if (/^overflow(?:-[xy])?$/iu.test(property) && /^(?:auto|scroll)$/u.test(value)) at(index, "idiom.scroll-view", "scroll", "Explicit CSS overflow may be appropriate for a code sample or document-view content. Review whether this region needs framework-owned scrolling.", "warning");
-      if (/^(?:color|background(?:-color)?|border(?:-(?:top|bottom|left|right))?(?:-color)?|outline(?:-color)?|text-decoration-color|box-shadow|text-shadow|caret-color|accent-color)$/iu.test(property) && COLOUR.test(value)) at(index, "idiom.ui-colour", "uiColour", "A UI colour is hard-coded instead of supplied by the selected NSE appearance.");
+      if (!theme && /^(?:color|background(?:-color)?|border(?:-(?:top|bottom|left|right))?(?:-color)?|outline(?:-color)?|text-decoration-color|box-shadow|text-shadow|caret-color|accent-color)$/iu.test(property) && COLOUR.test(value)) at(index, "idiom.ui-colour", "uiColour", "A UI colour is hard-coded instead of supplied by the selected NSE appearance.");
     }
   }
   return findings;
