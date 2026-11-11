@@ -111,6 +111,9 @@
         "transparent": [
           "false",
           "true"
+        ],
+        "view-layer": [
+          ""
         ]
       }
     },
@@ -734,6 +737,7 @@
       "parts": [
         "action-menu",
         "background",
+        "bezel",
         "field",
         "label"
       ],
@@ -757,6 +761,9 @@
         "pulls-down": [
           "false",
           "true"
+        ],
+        "type": [
+          "native"
         ]
       }
     },
@@ -1481,7 +1488,18 @@
         "content"
       ],
       "states": [],
-      "variants": {}
+      "variants": {
+        "corner-curve": [
+          "circular",
+          "continuous"
+        ],
+        "surface-ink": [
+          "light"
+        ],
+        "view-layer": [
+          ""
+        ]
+      }
     },
     "virtual-viewport": {
       "parts": [
