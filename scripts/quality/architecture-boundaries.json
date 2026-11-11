@@ -875,7 +875,7 @@
         "nse": [
           "src/NSE/NSE.ts",
           "src/NSE/Appearance/index.ts",
-          "src/NSE/Theme/NSETheme.ts",
+          "src/NSE/Theme/NSETheme.ts", "src/NSE/Theme/contract/hooks.ts", "src/NSE/Theme/themeColourStyle.ts",
           "src/NSE/Material/index.ts",
           "src/NSE/Material/tokens.ts"
         ]

@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { nseControlHooks } from "../../../../NSE/Theme/contract/hooks";
-import { useNSEThemeInteraction } from "../../../../NSE/Theme/contract/useThemeInteraction";
+import { nseControlHooks } from "../../../../NSE/NSE";
+import { useNSEThemeInteraction } from "../../../../NSE/hostComposition";
 import { normalizeBundleIdentifier } from "../../../../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { WebspringLaunchDim } from "../../../WebspringLaunchDim";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent, type ReactNode, type TransitionEvent } from "react";

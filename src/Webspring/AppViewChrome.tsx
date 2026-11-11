@@ -18,15 +18,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEWindowLayoutContext, NSEWindowLayoutModel, useNSEContentLayoutProperties } from "../NSE/Layout/windowChromeObstructions";
-import { useNSEDeferredDisposal } from "../NSE/interactionLifecycle";
-import type { ScreenSnapshot } from "../SynCloudOS/Windows/ScreenService";
+import { NSEWindowLayoutContext, NSEWindowLayoutModel, useNSEContentLayoutProperties } from "../NSE/hostComposition";
+import { useNSEDeferredDisposal } from "../NSE/hostComposition";
 
 import { useCallback, useLayoutEffect, useMemo, useEffect, useRef, type CSSProperties, type FocusEventHandler, type ReactNode, type Ref } from "react";
 import { useNSEPresenceExiting, useNSEPresentation } from "../NSE/Animation";
 import { nseTopBarHeightCssValue } from "../NSE/hostComposition";
 import { isWithinNSEFocusOrigin } from "../NSE/hostComposition";
-import type { SynCloudOSAppFrameManifest } from "../SynCloudOS/SynCloudOS";
+import type { SynCloudOSAppFrameManifest, SynCloudOSPresentationTraits } from "../SynCloudOS/SynCloudOS";
 import type { ApplicationStagePartMotion } from "./ApplicationStage.transitions";
 
 /** A stage element's AnimationFX presentation, and who hears it finish. */
@@ -50,7 +49,7 @@ function isStandardFrame(frame: SynCloudOSAppFrameManifest) {
 }
 
 type RootProps = {
-  safeAreaInsets?: ScreenSnapshot["safeAreaInsets"];
+  safeAreaInsets?: SynCloudOSPresentationTraits["safeAreaInsets"];
   zIndex: number;
   multiSwitchRole?: "incoming" | "outgoing" | null;
   staged?: boolean;

@@ -57,6 +57,13 @@ export type { NSEWindowSurfaceRequest } from "./Overlays/NSEWindowSurfaceBridge"
 export { logicalPlacementToFloatingPlacement } from "./Overlays/computeNSEOverlayPosition";
 export { registerNSEHapticFeedbackEngine } from "./Feedback/NSEHapticFeedbackManager";
 export { NSEViewDrawingEnvironmentContext } from "./Views/NSEViewDrawingEnvironment";
+// Window layout and safe areas for framework chrome, and the theme hooks system surfaces publish.
+export { NSEWindowLayoutContext, NSEWindowLayoutModel, useNSEContentLayoutProperties } from "./Layout/windowChromeObstructions";
+export { useNSEViewSafeArea } from "./Layout/useNSESafeArea";
+export { useNSEDeferredDisposal } from "./interactionLifecycle";
+export { nseStateHooks } from "./Theme/contract/hooks";
+export { useNSEThemeInteraction } from "./Theme/contract/useThemeInteraction";
+export type { NSETheme } from "./Theme/NSETheme";
 export type { NSEViewDrawingEnvironment } from "./Views/NSEViewDrawingEnvironment";
 
 export { NSEWindowTitleBar } from "./Windows/NSEWindowTitleBar";
