@@ -261,7 +261,7 @@ export function NSETabStrip({
       }}
     />
   );
-  const overflowButton = overflow.length ? <button ref={overflowRef} type="button" aria-label={`More ${ariaLabel}`} aria-expanded={overflowOpen} onClick={() => setOverflowOpen((open) => !open)}>…</button> : null;
+  const overflowButton = overflow.length ? <button ref={overflowRef} type="button" data-nse-part="overflow" data-nse-expanded={String(overflowOpen)} aria-expanded={overflowOpen} aria-label={`More ${ariaLabel}`} onClick={() => setOverflowOpen((open) => !open)}>…</button> : null;
   const directTabButtons = presentation?.directTabButtons === true;
   // The icons style is not a toolbar capsule and takes none of its skin.
   const tabListClassName = [tabStyle === "icons" ? "nse-icon-tabs" : "nse-control-toolbar", presentation?.tabListClassName].filter(Boolean).join(" ");
@@ -271,13 +271,13 @@ export function NSETabStrip({
       {directTabButtons ? visible.map(tabButton) : visible.map((item) => (
         <span key={item.id} role="presentation" data-nse-part="tab-item">
           {tabButton(item)}
-          {item.closable ? <button type="button" aria-label={`Close ${item.accessibleLabel ?? (typeof item.label === "string" ? item.label : item.id)}`} disabled={item.disabled} onClick={() => close(item.id)}>×</button> : null}
+          {item.closable ? <button type="button" data-nse-part="button" data-nse-role="close" aria-label={`Close ${item.accessibleLabel ?? (typeof item.label === "string" ? item.label : item.id)}`} disabled={item.disabled} onClick={() => close(item.id)}>×</button> : null}
         </span>
       ))}
       {directTabButtons ? null : overflowButton}
     </div>
     {directTabButtons && (visible.some((item) => item.closable) || overflowButton) ? <div role="presentation" data-nse-part="tab-accessories">
-      {visible.filter((item) => item.closable).map((item) => <button key={item.id} type="button" aria-label={`Close ${item.accessibleLabel ?? (typeof item.label === "string" ? item.label : item.id)}`} disabled={item.disabled} onClick={() => close(item.id)}>×</button>)}
+      {visible.filter((item) => item.closable).map((item) => <button key={item.id} type="button" data-nse-part="button" data-nse-role="close" aria-label={`Close ${item.accessibleLabel ?? (typeof item.label === "string" ? item.label : item.id)}`} disabled={item.disabled} onClick={() => close(item.id)}>×</button>)}
       {overflowButton}
     </div> : null}
     {overflow.length ? <NSEListboxPopup id={`tab-overflow-${instanceId}`} open={overflowOpen} anchor={overflowRef.current} parentResponderId={parentResponderId} options={overflow.map((item) => ({ id: item.id, label: item.label, value: item.id, disabled: item.disabled }))} selectedId={selected?.id} onOpenChange={setOverflowOpen} onSelect={(option) => { if (option.value) publishSelection(option.value, "pointer"); }} /> : null}
