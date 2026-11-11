@@ -197,3 +197,25 @@ export function inspectUnusedResources({ root, applications, files }) {
   }
   return resources.filter(file => !retained.has(file)).sort().map(file => ({ file, line: 1, rule: "idiom.unused-resource", severity: "warning", message: `No static reference to bundle resource ${basename(file)} was found in scanned source, manifest or reachable artwork. Dynamic lookup and external consumers are not resolved; verify its use before removing it.` }));
 }
+
+/** Bar heights an app might hard-code instead of reading the layout guides: window title bars, toolbars, top bars and tab bars. */
+const KNOWN_BAR_HEIGHTS = new Set([24, 26, 31, 43, 44, 46, 49, 52, 56, 59, 68, 72]);
+const LAYOUT_GUIDE = "Use the --nse-safe-area-inset-* properties, useNSESafeArea, or NSEScrollView's automatic content insets so content follows the bars the framework actually shows.";
+
+/** App and host stylesheets (never a .scostheme theme): layout that guesses at the system bars instead of following the layout guides. */
+export function inspectStyleWarnings({ file = "", text }) {
+  if (!file.endsWith(".css") || /\.scostheme[\/]/iu.test(file)) return [];
+  const css = text.replace(/\/\*[\s\S]*?\*\//gu, value => value.replace(/[^\n]/gu, " "));
+  const findings = [], line = index => css.slice(0, index).split("\n").length;
+  const warn = (index, message) => findings.push({ line: line(index), rule: "idiom.layout-guide", severity: "warning", message: `${message} ${LAYOUT_GUIDE}` });
+  for (const match of css.matchAll(/env\(\s*safe-area-inset-(?:top|bottom|left|right)/gu)) warn(match.index, "A raw env(safe-area-inset-*) reads the screen edge, not the window's safe area.");
+  for (const block of css.matchAll(/([^{}]+)\{([^{}]*)\}/gu)) {
+    const body = block[2];
+    if (!/(?:^|;)\s*position\s*:\s*(?:fixed|sticky)\b/iu.test(body)) continue;
+    for (const declaration of body.matchAll(/([\w-]+)\s*:\s*(-?\d+(?:\.\d+)?)px\s*(?:;|$)/gu)) {
+      if (!/^(?:top|bottom|inset-block-start|inset-block-end|padding-top|padding-bottom|padding-block-start|padding-block-end)$/iu.test(declaration[1])) continue;
+      if (KNOWN_BAR_HEIGHTS.has(Math.abs(Number(declaration[2])))) warn(block.index + block[0].indexOf("{") + 1 + declaration.index, `A pinned element is offset by ${declaration[2]}px, the height of a system bar.`);
+    }
+  }
+  return findings;
+}

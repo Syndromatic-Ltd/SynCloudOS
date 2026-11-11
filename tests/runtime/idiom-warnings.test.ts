@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, resolve } from "node:path";
-import { inspectIdiomWarnings, inspectUnusedResources } from "../../scripts/synware/idiom-warnings.mjs";
+import { inspectIdiomWarnings, inspectStyleWarnings, inspectUnusedResources } from "../../scripts/synware/idiom-warnings.mjs";
 
 const inspect = (text: string) => inspectIdiomWarnings({ file: "View.tsx", text });
 const fixtures = [
@@ -90,5 +90,22 @@ describe("unused bundle resource warnings", () => {
   });
   it("does not call dynamic resource families unused or inspect framework-managed localisations", () => {
     expect(inspectUnusedResources(resourceProject('const art = resource(`Images/icon-${mode}.png`);', { "Images/icon-dark.png": "image", "Images/icon-light.png": "image", "Localised/Base.locale/Localisable.strings": "text" }))).toEqual([]);
+  });
+});
+
+describe("idiom.layout-guide", () => {
+  const style = (text: string, file = "App.css") => inspectStyleWarnings({ file, text });
+  it("warns when app CSS reads the raw screen safe area", () => {
+    expect(style(".footer { padding-bottom: env(safe-area-inset-bottom); }")).toEqual([expect.objectContaining({ rule: "idiom.layout-guide", severity: "warning" })]);
+    expect(style(".footer { padding-bottom: var(--nse-safe-area-inset-bottom); }")).toEqual([]);
+  });
+  it("warns when a pinned element is offset by a system bar height", () => {
+    expect(style(".banner { position: sticky; top: 52px; }")).toEqual([expect.objectContaining({ rule: "idiom.layout-guide", line: 1 })]);
+    expect(style(".banner { position: sticky; top: 0; }")).toEqual([]);
+    expect(style(".card { position: relative; top: 52px; }")).toEqual([]);
+  });
+  it("leaves themes and source files alone", () => {
+    expect(style("[data-nse-part=\"content\"] { padding-bottom: env(safe-area-inset-bottom); }", "Themes/Mine.scostheme/Contents/Resources/theme.css")).toEqual([]);
+    expect(style("position: fixed; top: 52px;", "View.tsx")).toEqual([]);
   });
 });

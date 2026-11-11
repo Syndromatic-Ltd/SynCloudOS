@@ -180,6 +180,21 @@ function validateDefinition(input, contract, file, root) {
   }
 }
 const semanticParts = new Set(["title", "label", "content", "field", "cell", "row", "item", "segment", "value", "text-content", "primary-text", "secondary-text"]);
+/** The hard limits every theme rule keeps: semantic parts stay present, focus stays visible, hit targets stay usable.
+ * Shared by bundle validation and the idiom audit (idiom.theme-limit). Declarations are { property, value }. */
+export function themeRuleLimitViolations(selector, declarations) {
+  const out = [], none = /^(?:none|0(?:px)?|transparent)$/u;
+  const pseudo = /::(?:before|after)/u.test(selector);
+  const semantic = !pseudo && (/(?:data-nse-control)/u.test(selector) && !/data-nse-part/u.test(selector) || [...semanticParts].some(part => selector.includes(`data-nse-part="${part}"`) || selector.includes(`data-nse-part=${part}]`)));
+  if (semantic && declarations.some(({ property }) => ["display", "visibility", "content"].includes(property))) out.push({ rule: "semantic-limit", message: "Themes cannot set semantic display, visibility or content." });
+  if (/data-nse-focused|:focus/u.test(selector)) {
+    const removes = declarations.some(({ property, value }) => /^(?:outline|outline-width|outline-style|box-shadow)$/u.test(property) && none.test(value));
+    const replaces = declarations.some(({ property, value }) => /^(?:outline|box-shadow|border|border-color|background|background-color)$/u.test(property) && !none.test(value));
+    if (removes && !replaces) out.push({ rule: "focus-limit", message: "A focused control must retain a visible focus indicator." });
+  }
+  if (semantic && /data-nse-control-size=(?:"|')?(?:regular|large)/u.test(selector) && declarations.some(({ property, value }) => /^min-(?:width|height|inline-size|block-size)$/u.test(property) && /^\d+(?:\.\d+)?px$/u.test(value) && parseFloat(value) < 24)) out.push({ rule: "hit-target-limit", message: "Regular and large hit targets must be at least 24 points." });
+  return out;
+}
 /** Negative predicates cannot anchor a drawing; every positive alternative must. */
 function selectorHasAnchor(selector) {
   return selector.children.toArray().some(node => {
@@ -235,16 +250,8 @@ export function validateThemeCSS(source, { file, root, contract, onImport = () =
       }
       if (node.type === "Rule") {
         const declarations = node.block.children.toArray().filter(child => child.type === "Declaration"); checkSlice(declarations, "border-image");
-        const selector = cssTree.generate(node.prelude), pseudo = /::(?:before|after)/u.test(selector);
-        const semantic = !pseudo && (/(?:data-nse-control)/u.test(selector) && !/data-nse-part/u.test(selector) || [...semanticParts].some(part => selector.includes(`data-nse-part="${part}"`) || selector.includes(`data-nse-part=${part}]`)));
-        const focused = /data-nse-focused|:focus/u.test(selector);
-        if (semantic) for (const declaration of declarations) if (["display", "visibility", "content"].includes(cssTree.ident.decode(declaration.property))) fail(file, "semantic-limit", "Themes cannot set semantic display, visibility or content.");
-        if (focused) {
-          const removals = declarations.filter(declaration => /^(?:outline|outline-width|outline-style|box-shadow)$/u.test(declaration.property) && /^(?:none|0(?:px)?|transparent)$/u.test(valueText(declaration)));
-          const replacement = declarations.some(declaration => /^(?:outline|box-shadow|border|border-color|background|background-color)$/u.test(declaration.property) && !/^(?:none|0(?:px)?|transparent)$/u.test(valueText(declaration)));
-          if (removals.length && !replacement) fail(file, "focus-limit", "A focused control must retain a visible focus indicator.");
-        }
-        if (semantic && /data-nse-control-size=(?:"|')?(?:regular|large)/u.test(selector)) for (const declaration of declarations) if (/^min-(?:width|height|inline-size|block-size)$/u.test(declaration.property) && /^\d+(?:\.\d+)?px$/u.test(valueText(declaration)) && parseFloat(valueText(declaration)) < 24) fail(file, "hit-target-limit", "Regular and large hit targets must be at least 24 points.");
+        const violation = themeRuleLimitViolations(cssTree.generate(node.prelude), declarations.map(declaration => ({ property: cssTree.ident.decode(declaration.property).toLowerCase(), value: valueText(declaration).trim() })))[0];
+        if (violation) fail(file, violation.rule, violation.message);
       }
       if (node.type === "Declaration") {
         const property = cssTree.ident.decode(node.property).toLowerCase();

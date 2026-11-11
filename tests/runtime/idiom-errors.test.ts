@@ -143,3 +143,22 @@ describe("definite authoring errors", () => {
     }
   });
 });
+
+describe("theme-aware stylesheet rules", () => {
+  const theme = "Themes/Mine.scostheme/Contents/Resources/theme.css";
+  const rules = (file: string, text: string) => inspectStyleErrors({ file, text }).filter(finding => finding.severity === "error").map(finding => finding.rule);
+  it("rejects private classes in a theme and accepts contract hooks and colour literals", () => {
+    expect(rules(theme, ".nse-button__label { color: #222; }")).toEqual(["idiom.theme-private-class"]);
+    expect(rules(theme, "[data-nse-control=\"button\"] [data-nse-part=\"title\"] { color: #222; }")).toEqual([]);
+  });
+  it("rejects hard-limit violations in a theme", () => {
+    expect(rules(theme, "[data-nse-control=\"button\"][data-nse-focused] { outline: none; }")).toEqual(["idiom.theme-limit"]);
+    expect(rules(theme, "[data-nse-control=\"button\"][data-nse-focused] { outline: none; box-shadow: 0 0 0 3px #3478f6; }")).toEqual([]);
+    expect(rules(theme, "[data-nse-control=\"button\"] [data-nse-part=\"title\"] { display: none; }")).toEqual(["idiom.theme-limit"]);
+    expect(rules(theme, "[data-nse-control=\"button\"] [data-nse-part=\"bezel\"] { display: none; }")).toEqual([]);
+  });
+  it("rejects contract hooks in app CSS but lets it follow the appearance", () => {
+    expect(rules("app.css", "[data-nse-control=\"button\"] { border-radius: 4px; }")).toEqual(["idiom.control-internals"]);
+    expect(rules("app.css", "[data-nse-colour-scheme-resolved=\"dark\"] .hero { background: var(--nse-colour-window-background); }")).toEqual([]);
+  });
+});
