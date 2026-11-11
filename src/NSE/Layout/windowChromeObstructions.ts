@@ -89,7 +89,9 @@ export class NSEWindowLayoutModel extends NSELayoutGuideStore {
         for (const token of this.#leadingChrome) { const obstruction = this.#chrome.get(token); if (obstruction) this.#chrome.set(token, Object.freeze({ ...obstruction, edge: direction === "rtl" ? "right" : "left" })); }
         if (this.#logicalScreen) this.setScreenInsets(physicalSafeAreaInsets(this.#logicalScreen, direction)); this.#schedule(); }
     };
-    const stop = this.observeElement(element, rect => { if (rect.width > 0 && rect.height > 0) this.setBounds(rect); readDirection(); });
+    // The root's size comes from layout; its origin stays the logical one its
+    // host gave, as a window's frame does while its presentation animates.
+    const stop = this.observeElement(element, rect => { if (rect.width > 0 && rect.height > 0) this.setBounds({ x: this.#bounds.x, y: this.#bounds.y, width: rect.width, height: rect.height }); readDirection(); });
     const Mutation = element.ownerDocument.defaultView?.MutationObserver;
     const directionObserver = Mutation ? new Mutation(readDirection) : null;
     directionObserver?.observe(element.ownerDocument.documentElement, { attributes: true, subtree: true, attributeFilter: ["dir"] });

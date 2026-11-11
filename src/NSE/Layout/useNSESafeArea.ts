@@ -23,6 +23,26 @@ export function useNSESafeArea(): NSESafeArea {
   }, [inherited, bounds, insets]);
 }
 
+/**
+ * @internal A view's layout origin in document coordinates, before any CSS
+ * transform. AppKit reads a view's frame from the model layer while a
+ * presentation animation runs; offsets play that part here, so a window
+ * zooming open never moves the frame its safe area is computed from.
+ * Returns null where nothing has been laid out (no layout engine, or a view
+ * not rendered), and the caller falls back to the client rectangle.
+ */
+export function nseLayoutOrigin(element: HTMLElement): { readonly x: number; readonly y: number } | null {
+  if (!element.offsetWidth && !element.offsetHeight) return null;
+  let x = 0, y = 0;
+  for (let node: HTMLElement | null = element; node; node = node.offsetParent as HTMLElement | null) {
+    x += node.offsetLeft; y += node.offsetTop;
+    const parent = node.offsetParent as HTMLElement | null;
+    if (parent) { x += parent.clientLeft; y += parent.clientTop; }
+  }
+  for (let node = element.parentElement; node; node = node.parentElement) { x -= node.scrollLeft; y -= node.scrollTop; }
+  return { x, y };
+}
+
 /** @internal Measures an existing view element; never inserts a layout wrapper. */
 export function useNSEViewSafeArea(ref: RefObject<HTMLElement | null>, additional: NSEEdgeInsets = NSEEdgeInsetsZero, onChange?: (insets: NSEEdgeInsets) => void, onResize?: () => void, contentRef?: RefObject<HTMLElement | null>) {
   const model = useContext(NSEWindowLayoutContext);
@@ -35,6 +55,13 @@ export function useNSEViewSafeArea(ref: RefObject<HTMLElement | null>, additiona
   const measure = () => {
     const element = ref.current;
     if (!element) return;
+    const origin = nseLayoutOrigin(element);
+    const rootOrigin = model?.root ? nseLayoutOrigin(model.root) : { x: window.bounds.x, y: window.bounds.y };
+    if (origin && rootOrigin) {
+      const laidOut = Object.freeze({ x: origin.x - rootOrigin.x, y: origin.y - rootOrigin.y, width: element.offsetWidth, height: element.offsetHeight });
+      setRect(previous => previous && nseEqualRects(previous, laidOut) ? previous : laidOut);
+      return;
+    }
     const measured = element.getBoundingClientRect();
     const root = model?.root?.getBoundingClientRect();
     const scaleX = root?.width ? window.bounds.width / root.width : 1;
