@@ -595,6 +595,9 @@
           "regular",
           "small"
         ],
+        "menu-chosen": [
+          ""
+        ],
         "role": [
           "application-menu",
           "overlay"
@@ -630,7 +633,12 @@
         "highlighted",
         "selected"
       ],
-      "variants": {}
+      "variants": {
+        "menu-flash": [
+          "off",
+          "on"
+        ]
+      }
     },
     "notification-banner": {
       "parts": [
