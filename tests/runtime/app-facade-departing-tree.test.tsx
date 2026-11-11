@@ -66,14 +66,14 @@ describe("AppSDK facade departing-tree read safety", () => {
     const runtime = createTestRuntime({ id: "runtime:facade-departing-tree", environment });
     activeRuntimes.push(runtime);
     registerTestSynWare(runtime, {
-      schemaVersion: 1,
-      id: "window-owner",
-      version: "1.0.0",
-      title: "Window Owner",
-      routes: [{ path: "/window-owner", primary: true }],
-      windowDefaults: { title: "Window Owner", width: 480, height: 360 },
-    });
-    const mounted = mountTestSynWareRuntime(runtime, "window-owner");
+          schemaVersion: 1,
+          bundleIdentifier: "com.example.window-owner",
+          version: "1.0.0",
+          displayName: "Window Owner",
+          routes: [{ path: "/window-owner", primary: true }],
+          windowDefaults: { title: "Window Owner", width: 480, height: 360 },
+        });
+    const mounted = mountTestSynWareRuntime(runtime, "com.example.window-owner");
     activeMounts.push(mounted);
 
     const facade = mounted.runtime as unknown as DepartingFacade;
@@ -107,14 +107,14 @@ describe("AppSDK facade departing-tree read safety", () => {
     const runtime = createTestRuntime({ id: "runtime:facade-ambient-revoked", environment });
     activeRuntimes.push(runtime);
     registerTestSynWare(runtime, {
-      schemaVersion: 1,
-      id: "window-owner",
-      version: "1.0.0",
-      title: "Window Owner",
-      routes: [{ path: "/window-owner", primary: true }],
-      windowDefaults: { title: "Window Owner", width: 480, height: 360 },
-    });
-    const mounted = mountTestSynWareRuntime(runtime, "window-owner");
+          schemaVersion: 1,
+          bundleIdentifier: "com.example.window-owner",
+          version: "1.0.0",
+          displayName: "Window Owner",
+          routes: [{ path: "/window-owner", primary: true }],
+          windowDefaults: { title: "Window Owner", width: 480, height: 360 },
+        });
+    const mounted = mountTestSynWareRuntime(runtime, "com.example.window-owner");
     activeMounts.push(mounted);
 
     const clients = getMountedAppEnvironmentClients(mounted.runtime);
@@ -131,14 +131,14 @@ describe("AppSDK facade departing-tree read safety", () => {
     const runtime = createTestRuntime({ id: "runtime:facade-revoked-disposal", environment });
     activeRuntimes.push(runtime);
     registerTestSynWare(runtime, {
-      schemaVersion: 1,
-      id: "window-owner",
-      version: "1.0.0",
-      title: "Window Owner",
-      routes: [{ path: "/window-owner", primary: true }],
-      windowDefaults: { title: "Window Owner", width: 480, height: 360 },
-    });
-    const mounted = mountTestSynWareRuntime(runtime, "window-owner");
+          schemaVersion: 1,
+          bundleIdentifier: "com.example.window-owner",
+          version: "1.0.0",
+          displayName: "Window Owner",
+          routes: [{ path: "/window-owner", primary: true }],
+          windowDefaults: { title: "Window Owner", width: 480, height: 360 },
+        });
+    const mounted = mountTestSynWareRuntime(runtime, "com.example.window-owner");
     activeMounts.push(mounted);
     const scheduler = getMountedAppEnvironmentClients(mounted.runtime).scheduler;
     let disposals = 0;
@@ -163,14 +163,14 @@ describe("AppSDK facade departing-tree read safety", () => {
     const runtime = createTestRuntime({ id: "runtime:facade-live-tree", environment });
     activeRuntimes.push(runtime);
     registerTestSynWare(runtime, {
-      schemaVersion: 1,
-      id: "window-owner",
-      version: "1.0.0",
-      title: "Window Owner",
-      routes: [{ path: "/window-owner", primary: true }],
-      windowDefaults: { title: "Window Owner", width: 480, height: 360 },
-    });
-    const mounted = mountTestSynWareRuntime(runtime, "window-owner");
+          schemaVersion: 1,
+          bundleIdentifier: "com.example.window-owner",
+          version: "1.0.0",
+          displayName: "Window Owner",
+          routes: [{ path: "/window-owner", primary: true }],
+          windowDefaults: { title: "Window Owner", width: 480, height: 360 },
+        });
+    const mounted = mountTestSynWareRuntime(runtime, "com.example.window-owner");
     activeMounts.push(mounted);
 
     const facade = mounted.runtime as unknown as DepartingFacade;

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import type { NSEFontFamily, NSEFontPreset } from "../Text/fontDescriptors";
 
 /**
@@ -46,19 +47,19 @@ export interface NSEUserFontFace {
 export interface NSEStoredUserFont {
   readonly id: string;
   readonly fileName: string;
-  readonly bytes: ArrayBuffer;
+  readonly bytes: NSEData;
 }
 
 /** Where added fonts are kept between sessions. */
 export interface NSEUserFontStorage {
   load(): Promise<readonly NSEStoredUserFont[]>;
-  save(font: NSEStoredUserFont): Promise<void>;
+  save(font: Omit<NSEStoredUserFont, "bytes"> & { readonly bytes: NSEDataConvertible }): Promise<void>;
   delete(id: string): Promise<void>;
 }
 
 /** Makes a font's bytes renderable under a CSS family; returns its release. */
 export interface NSEUserFontFaceHost {
-  register(cssFamily: string, bytes: ArrayBuffer): Promise<() => void>;
+  register(cssFamily: string, bytes: NSEDataConvertible): Promise<() => void>;
 }
 
 /** Small persisted lists (favourites, recents). */
@@ -211,8 +212,9 @@ export class NSEFontLibrary {
   }
 
   /** An owned copy of a successfully installed imported face, for byte-backed layout. */
-  fontBytes(id: string): Uint8Array | null {
-    return this.#faces.get(id)?.bytes.slice() ?? null;
+  fontBytes(id: string): NSEData | null {
+    const bytes = this.#faces.get(id)?.bytes;
+    return bytes ? NSEData.from(bytes) : null;
   }
 
 
@@ -300,7 +302,8 @@ export class NSEFontLibrary {
     this.#publish();
   }
 
-  async #install(id: string, fileName: string, bytes: ArrayBuffer): Promise<NSEUserFontFace> {
+  async #install(id: string, fileName: string, data: NSEDataConvertible): Promise<NSEUserFontFace> {
+    const bytes = NSEData.from(data).bytes.buffer;
     const names = await readNames(bytes, fileName);
     const cssFamily = cssFamilyForNSEUserFont(id);
     let release: () => void;
@@ -364,9 +367,9 @@ export function createNSEBrowserFontFaceHost(): NSEUserFontFaceHost | null {
   // `in` asks without reading: document.fonts is only touched to register.
   if (!FontFaceConstructor || typeof document === "undefined" || !("fonts" in document)) return null;
   return Object.freeze({
-    async register(cssFamily: string, bytes: ArrayBuffer) {
+    async register(cssFamily: string, bytes: NSEDataConvertible) {
       const fonts = (document as Document & { fonts: FontFaceSet }).fonts;
-      const face = new FontFaceConstructor(cssFamily, bytes.slice(0));
+      const face = new FontFaceConstructor(cssFamily, NSEData.from(bytes).bytes.buffer);
       await face.load();
       fonts.add(face);
       return () => { fonts.delete(face); };
@@ -399,13 +402,13 @@ export function createNSEIndexedDBUserFontStorage(): NSEUserFontStorage | null {
   return Object.freeze({
     async load() {
       const records = await run<unknown[]>("readonly", (store) => store.getAll());
-      return records.filter((record): record is NSEStoredUserFont => {
+      return records.filter((record): record is { id: string; fileName: string; bytes: ArrayBuffer } => {
         const candidate = record as Partial<NSEStoredUserFont> | null;
         return !!candidate && isNSEUserFontId(candidate.id) && typeof candidate.fileName === "string" && candidate.bytes instanceof ArrayBuffer;
-      });
+      }).map(record => ({ ...record, bytes: NSEData.from(record.bytes) }));
     },
-    async save(font: NSEStoredUserFont) {
-      await run("readwrite", (store) => store.put({ id: font.id, fileName: font.fileName, bytes: font.bytes }));
+    async save(font: Omit<NSEStoredUserFont, "bytes"> & { readonly bytes: NSEDataConvertible }) {
+      await run("readwrite", (store) => store.put({ id: font.id, fileName: font.fileName, bytes: NSEData.from(font.bytes).bytes.buffer }));
     },
     async delete(id: string) {
       await run("readwrite", (store) => store.delete(id));

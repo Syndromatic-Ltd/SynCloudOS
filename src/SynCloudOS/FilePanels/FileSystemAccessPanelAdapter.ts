@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../Foundation/NSEData";
 import { FilePanelReferenceError, isFilePanelAbort, mapFilePanelBrowserException, throwIfFilePanelAborted } from "./FilePanelService";
 import type {
   FilePanelAdapter,
@@ -33,6 +34,10 @@ import type {
   OpenPanelRequest,
   SavePanelRequest,
 } from "./filePanelTypes";
+
+import type { NativeOperationActivity } from "../Updates/updateReadiness";
+type ObserveHandleWork = <T>(invoke: () => Promise<T>, rollback?: boolean) => Promise<T>;
+const observeDirect: ObserveHandleWork = invoke => invoke();
 
 type BrowserPermission = "prompt" | "granted" | "denied";
 
@@ -72,12 +77,12 @@ async function throwMappedHandleFailure(
   throw permissionError(state === "granted" ? (wasGranted ? "revoked" : "denied") : state);
 }
 
-async function initialFilePermission(handle: FilePanelFileHandle, mode: "read" | "readwrite"): Promise<BrowserPermission> {
-  return handle.queryPermission({ mode });
+async function initialFilePermission(handle: FilePanelFileHandle, mode: "read" | "readwrite", observe: ObserveHandleWork, signal: AbortSignal): Promise<BrowserPermission> {
+  return observe(() => { signal.throwIfAborted(); return handle.queryPermission({ mode }); });
 }
 
-async function initialDirectoryPermission(handle: FilePanelDirectoryHandle, mode: "read" | "readwrite"): Promise<BrowserPermission> {
-  return handle.queryPermission({ mode });
+async function initialDirectoryPermission(handle: FilePanelDirectoryHandle, mode: "read" | "readwrite", observe: ObserveHandleWork, signal: AbortSignal): Promise<BrowserPermission> {
+  return observe(() => { signal.throwIfAborted(); return handle.queryPermission({ mode }); });
 }
 
 function fileReference(
@@ -87,6 +92,7 @@ function fileReference(
   initial: BrowserPermission,
   hasTransientUserActivation: () => boolean,
   access: "read",
+  observe?: ObserveHandleWork,
 ): Extract<FilePanelReference, { readonly kind: "file-handle"; readonly access: "read" }>;
 function fileReference(
   handle: FilePanelFileHandle,
@@ -95,6 +101,7 @@ function fileReference(
   initial: BrowserPermission,
   hasTransientUserActivation: () => boolean,
   access: "readwrite",
+  observe?: ObserveHandleWork,
 ): Extract<FilePanelReference, { readonly kind: "file-handle"; readonly access: "readwrite" }>;
 function fileReference(
   handle: FilePanelFileHandle,
@@ -103,6 +110,7 @@ function fileReference(
   initial: BrowserPermission,
   hasTransientUserActivation: () => boolean,
   access: "read" | "readwrite",
+  observe: ObserveHandleWork = observeDirect,
 ): Extract<FilePanelReference, { readonly kind: "file-handle" }> {
   let released = false;
   let wasGranted = initial === "granted";
@@ -111,10 +119,11 @@ function fileReference(
     throwIfFilePanelAborted(signal);
     if (released) throw new FilePanelReferenceError("reference-released", "This file-handle wrapper has been released.");
   };
-  const query = async (mode: "read" | "readwrite") => {
+  const invoke = <T,>(run: () => Promise<T>, signal?: AbortSignal) => observe(() => { assertLive(signal); return run(); });
+  const query = async (mode: "read" | "readwrite", signal?: AbortSignal) => {
     assertLive();
     try {
-      const raw = await handle.queryPermission({ mode });
+      const raw = await invoke(() => handle.queryPermission({ mode }), signal);
       if (raw === "granted") wasGranted = true;
       lastPermission = permissionState(raw, wasGranted);
       return lastPermission;
@@ -129,7 +138,7 @@ function fileReference(
       throw new FilePanelReferenceError("permission-required", "File permission must be requested from an active user action.");
     }
     try {
-      const raw = await handle.requestPermission({ mode });
+      const raw = await invoke(() => handle.requestPermission({ mode }));
       if (raw === "granted") wasGranted = true;
       lastPermission = permissionState(raw, wasGranted);
       return lastPermission;
@@ -140,19 +149,20 @@ function fileReference(
   };
   const requirePermission = async (mode: "read" | "readwrite", signal?: AbortSignal) => {
     assertLive(signal);
-    const state = await query(mode);
+    const state = await query(mode, signal);
     assertLive(signal);
     if (state !== "granted") throw permissionError(state);
   };
+  let mediaType = "application/octet-stream";
   const base = {
     kind: "file-handle",
     id: `${requestId}:handle:${index}`,
     name: handle.name,
+    get mediaType() { return mediaType; },
     issuedByRequestId: requestId,
     capabilities: Object.freeze<FilePanelCapability[]>(access === "read" ? ["read", "persistent-handle"] : ["read", "write", "persistent-handle"]),
     get released() { return released; },
     release: (_reason: FilePanelReleaseReason) => { released = true; },
-    handle,
     lifetime: "browser-permission",
     get permission() { return lastPermission; },
     queryPermission: async () => query(access),
@@ -160,25 +170,33 @@ function fileReference(
     read: async (signal?: AbortSignal) => {
       await requirePermission("read", signal);
       try {
-        const file = await handle.getFile();
+        const { file, data } = await invoke(async () => {
+          const file = await handle.getFile();
+          assertLive(signal);
+          return { file, data: await NSEData.read(file) };
+        }, signal);
         assertLive(signal);
-        return file;
+        mediaType = file.type || "application/octet-stream";
+        return data;
       } catch (error) {
         return throwMappedHandleFailure(error, () => query("read"), wasGranted);
       }
     },
   } as const;
   if (access === "read") {
-    return Object.freeze({ ...base, access: "read" as const });
+    return Object.freeze({ ...base, access: "read" as const, get mediaType() { return mediaType; }, get released() { return released; }, get permission() { return lastPermission; } });
   }
   const reference: Extract<FilePanelReference, { readonly kind: "file-handle"; readonly access: "readwrite" }> = {
     ...base,
     access: "readwrite",
+    get mediaType() { return mediaType; },
+    get released() { return released; },
+    get permission() { return lastPermission; },
     createWritable: async (signal?: AbortSignal): Promise<FilePanelWritable> => {
       await requirePermission("readwrite", signal);
       let writable: FilePanelWritable;
       try {
-        writable = await handle.createWritable();
+        writable = await invoke(() => handle.createWritable(), signal);
       } catch (error) {
         return throwMappedHandleFailure(error, () => query("readwrite"), wasGranted);
       }
@@ -186,7 +204,7 @@ function fileReference(
         assertLive(signal);
       } catch (error) {
         try {
-          await writable.abort(error);
+          await observe(() => writable.abort(error), true);
         } catch {
           // Preserve the original abort/lifetime outcome if browser rollback fails.
         }
@@ -196,7 +214,7 @@ function fileReference(
         write: async (data) => {
           await requirePermission("readwrite", signal);
           try {
-            await writable.write(data);
+            await invoke(() => writable.write(typeof data === "string" ? data : NSEData.from(data).bytes), signal);
             assertLive(signal);
           } catch (error) {
             return throwMappedHandleFailure(error, () => query("readwrite"), wasGranted);
@@ -205,12 +223,12 @@ function fileReference(
         close: async () => {
           await requirePermission("readwrite", signal);
           try {
-            await writable.close();
+            await invoke(() => writable.close(), signal);
           } catch (error) {
             return throwMappedHandleFailure(error, () => query("readwrite"), wasGranted);
           }
         },
-        abort: async (reason?: unknown) => writable.abort(reason),
+        abort: async (reason?: unknown) => observe(() => writable.abort(reason), true),
       };
     },
   };
@@ -223,6 +241,7 @@ function directoryReference(
   initial: BrowserPermission,
   hasTransientUserActivation: () => boolean,
   access: "read" | "readwrite",
+  observe: ObserveHandleWork = observeDirect,
 ): Extract<FilePanelReference, { readonly kind: "directory-handle" }> {
   let released = false;
   let wasGranted = initial === "granted";
@@ -230,10 +249,11 @@ function directoryReference(
   const assertLive = () => {
     if (released) throw new FilePanelReferenceError("reference-released", "This directory-handle wrapper has been released.");
   };
+  const invoke = <T,>(run: () => Promise<T>) => observe(() => { assertLive(); return run(); });
   const query = async () => {
     assertLive();
     try {
-      const raw = await handle.queryPermission({ mode: access });
+      const raw = await invoke(() => handle.queryPermission({ mode: access }));
       if (raw === "granted") wasGranted = true;
       lastPermission = permissionState(raw, wasGranted);
       return lastPermission;
@@ -248,7 +268,7 @@ function directoryReference(
       throw new FilePanelReferenceError("permission-required", "Directory permission must be requested from an active user action.");
     }
     try {
-      const raw = await handle.requestPermission({ mode: access });
+      const raw = await invoke(() => handle.requestPermission({ mode: access }));
       if (raw === "granted") wasGranted = true;
       lastPermission = permissionState(raw, wasGranted);
       return lastPermission;
@@ -276,11 +296,11 @@ function directoryReference(
   });
 }
 
-function preflight(port: FileSystemAccessPanelPort): FilePanelResult<never> | null {
+function preflight(port: FileSystemAccessPanelPort, operation: "open" | "save" | "directory"): FilePanelResult<never> | null {
   if (!port.isSecureContext()) {
     return { kind: "unavailable", missingCapabilities: Object.freeze(["persistent-handle"]), message: "File System Access requires a secure browser context." };
   }
-  if (port.isAvailable && !port.isAvailable()) {
+  if (port.isAvailable && !port.isAvailable(operation)) {
     return { kind: "unavailable", missingCapabilities: Object.freeze(["persistent-handle"]), message: "File System Access is unavailable in this browser." };
   }
   if (!port.hasTransientUserActivation()) {
@@ -289,8 +309,29 @@ function preflight(port: FileSystemAccessPanelPort): FilePanelResult<never> | nu
   return null;
 }
 
+function pickerFailure(error:unknown,signal:AbortSignal):FilePanelResult<never>{
+  const name=typeof error==='object'&&error!==null&&'name'in error?error.name:null;
+  if(!signal.aborted&&name==='AbortError')return {kind:'cancelled'};
+  // Availability/secure-context checks have already passed. A native security
+  // refusal is a denial, not a reason to try a different export transport.
+  if(!signal.aborted&&name==='SecurityError')return {kind:'denied',reason:'policy',message:'Browser policy did not admit this file selection.'};
+  return mapFilePanelBrowserException(error);
+}
+
 /** File System Access adapter with wrapper-only lifetime; browser handles are never persisted or logged. */
-export function createFileSystemAccessPanelAdapter(port: FileSystemAccessPanelPort): FilePanelAdapter {
+export function createFileSystemAccessPanelAdapter(port: FileSystemAccessPanelPort, nativeActivity?: NativeOperationActivity): FilePanelAdapter {
+  const observe: ObserveHandleWork = async (action, rollback = false) => {
+    if (!nativeActivity) return action();
+    let invoked = false;
+    try {
+      return await nativeActivity.track(() => { invoked = true; return action(); });
+    } catch (error) {
+      // Instrumentation retirement must not prevent already-owned rollback.
+      // This fallback never starts a new read/write or permission request.
+      if (rollback && !invoked && nativeActivity.signal.aborted) return action();
+      throw error;
+    }
+  };
   return {
     id: "file-system-access",
     capabilities: new Set(["read", "write", "multiple-selection", "directory", "persistent-handle"]),
@@ -298,15 +339,15 @@ export function createFileSystemAccessPanelAdapter(port: FileSystemAccessPanelPo
     async open(request: OpenPanelRequest, signal: AbortSignal): Promise<FilePanelResult<FilePanelReference>> {
       try {
         throwIfFilePanelAborted(signal);
-        const blocked = preflight(port);
+        const blocked = preflight(port, request.selection === "single-directory" ? "directory" : "open");
         if (blocked) return blocked;
         if (request.selection === "single-directory") {
           const handle = await port.openDirectory(signal);
           throwIfFilePanelAborted(signal);
           if (!handle) return { kind: "cancelled" };
-          const initial = await initialDirectoryPermission(handle, request.access);
+          const initial = await initialDirectoryPermission(handle, request.access, observe, signal);
           if (initial === "denied") return { kind: "denied", reason: "permission", message: "Directory access was denied." };
-          return { kind: "accepted", values: Object.freeze([directoryReference(handle, request.id, initial, port.hasTransientUserActivation, request.access)]) };
+          return { kind: "accepted", values: Object.freeze([directoryReference(handle, request.id, initial, port.hasTransientUserActivation, request.access, observe)]) };
         }
         const handles = await port.openFiles({ accepts: request.accepts, multiple: request.selection === "multiple-files" }, signal);
         throwIfFilePanelAborted(signal);
@@ -315,7 +356,7 @@ export function createFileSystemAccessPanelAdapter(port: FileSystemAccessPanelPo
           return { kind: "error", message: "The browser returned more than one file for a single-file request." };
         }
         const mode = request.access;
-        const initialPermissions = await Promise.all(handles.map((handle) => initialFilePermission(handle, mode)));
+        const initialPermissions = await Promise.all(handles.map((handle) => initialFilePermission(handle, mode, observe, signal)));
         throwIfFilePanelAborted(signal);
         if (initialPermissions.some((permission) => permission === "denied")) {
           return { kind: "denied", reason: "permission", message: "File access was denied." };
@@ -323,24 +364,24 @@ export function createFileSystemAccessPanelAdapter(port: FileSystemAccessPanelPo
         return {
           kind: "accepted",
           values: Object.freeze(handles.map((handle, index) => request.access === "read"
-            ? fileReference(handle, request.id, index, initialPermissions[index]!, port.hasTransientUserActivation, "read")
-            : fileReference(handle, request.id, index, initialPermissions[index]!, port.hasTransientUserActivation, "readwrite"))),
+            ? fileReference(handle, request.id, index, initialPermissions[index]!, port.hasTransientUserActivation, "read", observe)
+            : fileReference(handle, request.id, index, initialPermissions[index]!, port.hasTransientUserActivation, "readwrite", observe))),
         };
       } catch (error) {
-        return mapFilePanelBrowserException(error);
+        return pickerFailure(error,signal);
       }
     },
     async save(request: SavePanelRequest, signal: AbortSignal): Promise<FilePanelResult<import("./filePanelTypes").FilePanelSaveTarget>> {
       try {
         throwIfFilePanelAborted(signal);
-        const blocked = preflight(port);
+        const blocked = preflight(port, "save");
         if (blocked) return blocked;
         const selected = await port.saveFile({ accepts: request.accepts, suggestedName: request.suggestedName }, signal);
         throwIfFilePanelAborted(signal);
         if (!selected) return { kind: "cancelled" };
-        const initial = await initialFilePermission(selected.handle, "readwrite");
+        const initial = await initialFilePermission(selected.handle, "readwrite", observe, signal);
         if (initial === "denied") return { kind: "denied", reason: "permission", message: "Write access was denied." };
-        const reference = fileReference(selected.handle, request.id, 0, initial, port.hasTransientUserActivation, "readwrite");
+        const reference = fileReference(selected.handle, request.id, 0, initial, port.hasTransientUserActivation, "readwrite", observe);
         const sink = {
           kind: "file-handle-export" as const,
           async write(payload: import("./filePanelTypes").FilePanelExportPayload, writeSignal?: AbortSignal) {
@@ -349,7 +390,7 @@ export function createFileSystemAccessPanelAdapter(port: FileSystemAccessPanelPo
             try {
               const created = await reference.createWritable(writeSignal);
               writable = created;
-              await created.write(payload.blob);
+              await created.write(payload.data);
               throwIfFilePanelAborted(writeSignal);
               await created.close();
               writable = null;
@@ -369,8 +410,25 @@ export function createFileSystemAccessPanelAdapter(port: FileSystemAccessPanelPo
         };
         return { kind: "accepted", values: Object.freeze([{ kind: "file-handle", reference, sink, exists: selected.exists }]) };
       } catch (error) {
-        return mapFilePanelBrowserException(error);
+        return pickerFailure(error,signal);
       }
     },
   };
+}
+
+/** @internal Wraps a browsed handle with the existing reference lifetime and permission rules. */
+export async function referenceForOpenPanelHandle(handle: FilePanelFileHandle | FilePanelDirectoryHandle, requestId: string, index: number, activation: () => boolean, ownerSignal?: AbortSignal): Promise<FilePanelReference> {
+  throwIfFilePanelAborted(ownerSignal);
+  const permission = typeof handle.queryPermission === "function" ? await handle.queryPermission({ mode: "read" }) : "granted";
+  throwIfFilePanelAborted(ownerSignal);
+  if (permission !== "granted") throw new Error("The selected item needs permission. Choose its folder to unlock it.");
+  const reference = handle.kind === "directory" ? directoryReference(handle, requestId, permission, activation, "read") : fileReference(handle, requestId, index, permission, activation, "read");
+  if (!ownerSignal) return reference;
+  const abort = () => owned.release("runtime-disposed");
+  const descriptors = Object.getOwnPropertyDescriptors(reference);
+  const owned = Object.freeze(Object.defineProperties({}, { ...descriptors,
+    release: { enumerable: true, value(reason: FilePanelReleaseReason) { ownerSignal.removeEventListener("abort", abort); reference.release(reason); } },
+  })) as FilePanelReference;
+  ownerSignal.addEventListener("abort", abort, { once: true });
+  return owned;
 }

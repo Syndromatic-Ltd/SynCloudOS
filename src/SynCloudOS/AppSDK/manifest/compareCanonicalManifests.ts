@@ -18,6 +18,7 @@
  */
 
 import type { SynWareManifestV1 } from "./manifestTypes";
+import { normalizeBundleIdentifier } from "../../Identity/bundleIdentifier.mjs";
 
 export interface SynWareManifestDifference {
   /** RFC 6901 JSON Pointer identifying the first semantic difference. */
@@ -36,6 +37,8 @@ function difference(
   pointer: string,
 ): SynWareManifestDifference | null {
   if (Object.is(expected, actual)) return null;
+  if (pointer === "/bundleIdentifier" && typeof expected === "string" && typeof actual === "string"
+    && normalizeBundleIdentifier(expected) === normalizeBundleIdentifier(actual)) return null;
   if (Array.isArray(expected) && Array.isArray(actual)) {
     if (expected.length !== actual.length) return { pointer: `${pointer}/length`, expected: expected.length, actual: actual.length };
     for (let index = 0; index < expected.length; index += 1) {

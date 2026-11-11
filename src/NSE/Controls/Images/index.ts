@@ -19,3 +19,5 @@
  */
 
 export * from "./NSEImage";
+
+export { NSEImage } from "./NSEImageResource";

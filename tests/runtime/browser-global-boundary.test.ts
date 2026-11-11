@@ -137,6 +137,7 @@ describe("browser-global runtime boundary", () => {
     const ambientAuthorityRoots = new Set([
       resolve(root, "PlatformAdapters", "BrowserRuntimeEnvironment.ts"),
       resolve(root, "PlatformAdapters", "BrowserAuthenticationEnvironment.ts"),
+      resolve(root, "PlatformAdapters", "BrowserPasskeyAuthorization.ts"),
       resolve(root, "PlatformAdapters", "BrowserPointerAdapter.ts"),
       resolve(root, "PlatformAdapters", "browserPointerAdapterTypes.ts"),
       resolve(root, "PlatformAdapters", "AUFXAudioWorkletTransport.ts"),

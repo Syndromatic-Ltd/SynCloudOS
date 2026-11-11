@@ -85,18 +85,18 @@ describe("runtime-owned system UI", () => {
   it("keeps a muted app out of the visible notification store without leaking the choice to another root", async () => {
     const first = createTestRuntime({ id: "runtime:settings:first" });
     const second = createTestRuntime({ id: "runtime:settings:second" });
-    first.settings.setNotificationsAllowed("mail", false);
+    first.settings.setNotificationsAllowed("com.example.mail", false);
 
     const muted = await first.notifications.post({
       idempotencyKey: "settings:muted",
-      appId: "mail",
+      appId: "com.example.mail",
       title: "Muted mail",
       body: "Do not present",
       delivery: "in-app",
     });
     const allowed = await second.notifications.post({
       idempotencyKey: "settings:allowed",
-      appId: "mail",
+      appId: "com.example.mail",
       title: "Allowed mail",
       body: "Present here",
       delivery: "in-app",

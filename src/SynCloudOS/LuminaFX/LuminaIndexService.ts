@@ -23,6 +23,7 @@ import type { LUFXIndexBackend } from "../../FX/LuminaFX/LUFXIndexBackend";
 import { LUFXQuery, type LUFXQueryDescriptor } from "../../FX/LuminaFX/LUFXQuery";
 import { LUFXQueryPlanner, type LUFXQueryExecutionOptions, type LUFXQueryResultPage } from "../../FX/LuminaFX/LUFXQueryPlanner";
 import { luminaRestrictionMatcher, type LuminaEligibilityRestriction } from "./luminaEligibilityRestriction";
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import {
   LuminaIndexMaintenance,
   type LuminaIndexMaintenanceBackend,
@@ -66,7 +67,7 @@ export class LuminaIndexService {
     if (this.#disposed) throw new DOMException("Lumina index service is disposed.", "AbortError");
     signal.throwIfAborted();
     if (!this.#factory) throw new DOMException("Durable Lumina indexing is unavailable on this host.", "NotSupportedError");
-    const backend = this.#factory.create(ownerKey, signal);
+    const backend = this.#factory.create(normalizeBundleIdentifier(ownerKey), signal);
     const index = new LUFXIndex(backend);
     this.#indexes.add(index);
     const rawDispose = index.dispose.bind(index);
@@ -116,7 +117,7 @@ export class LuminaIndexService {
     if (this.#disposed) throw new DOMException("Lumina index service is disposed.", "AbortError");
     signal.throwIfAborted();
     if (!this.#factory) throw new DOMException("Durable Lumina indexing is unavailable on this host.", "NotSupportedError");
-    const backend = this.#factory.create(ownerKey, signal);
+    const backend = this.#factory.create(normalizeBundleIdentifier(ownerKey), signal);
     if (!isMaintenanceBackend(backend)) {
       backend.dispose();
       throw new DOMException("Lumina index maintenance is unavailable on this host backend.", "NotSupportedError");

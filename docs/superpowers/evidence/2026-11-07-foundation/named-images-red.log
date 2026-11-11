@@ -1,0 +1,143 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-named-images.test.tsx tests/runtime/text-system-packed-consumer.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/text-system-packed-consumer.test.ts (16 tests | 4 failed) 86ms
+     × loads the required public browser stylesheet only in the trusted host bootstrap 46ms
+     × confines public browser host provisioning to the separate private bootstrap 15ms
+     × accepts the public Foundation base layer, while rejecting private Foundation paths 1ms
+     × prepares the actual example and verified licensed font as a standalone consumer graph 14ms
+ ❯ tests/runtime/nse-named-images.test.tsx (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-named-images.test.tsx [ tests/runtime/nse-named-images.test.tsx ]
+Error: Failed to resolve import "../../src/NSE/Controls/Images/NSEImageResource" from "tests/runtime/nse-named-images.test.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/nse-named-images.test.tsx:25:25
+  1  |  import { afterEach, expect, it } from "vitest";
+  2  |  import { cleanup, render, screen } from "@testing-library/react";
+  3  |  import { NSEImage } from "../../src/NSE/Controls/Images/NSEImageResource";
+     |                            ^
+  4  |  import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
+  5  |  import { NSESegmentedControl } from "../../src/NSE/Controls/Values/NSESegmentedControl";
+ ❯ TransformPluginContext._formatLog ../../../../../../Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/vite/dist/node/chunks/config.js:29250:43
+ ❯ TransformPluginContext.error ../../../../../../Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/vite/dist/node/chunks/config.js:29247:14
+ ❯ normalizeUrl ../../../../../../Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/vite/dist/node/chunks/config.js:27370:18
+ ❯ ../../../../../../Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/vite/dist/node/chunks/config.js:27428:32
+ ❯ TransformPluginContext.transform ../../../../../../Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/vite/dist/node/chunks/config.js:27396:4
+ ❯ EnvironmentPluginContainer.transform ../../../../../../Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/vite/dist/node/chunks/config.js:29048:14
+ ❯ loadAndTransform ../../../../../../Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/vite/dist/node/chunks/config.js:22914:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/text-system-packed-consumer.test.ts > independent custom text consumer preparation > loads the required public browser stylesheet only in the trusted host bootstrap
+AssertionError: Nonpublic consumer import: @syndromatic/syncloudos/foundation
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ checkSpecifier scripts/synware/check-custom-text-system-consumer.mjs:60:11
+     58|     if (externalImports.has(specifier)) return;
+     59|     if (isHost && hostImports.has(specifier)) return;
+     60|     assert(specifier.startsWith("./") || specifier.startsWith("../"), …
+       |           ^
+     61|     assert(!specifier.includes("\\") && !specifier.includes("\0"), `In…
+     62|     const [path, query] = specifier.split("?");
+ ❯ visit scripts/synware/check-custom-text-system-consumer.mjs:73:33
+ ❯ visitNodes node_modules/typescript/lib/typescript.js:32559:22
+ ❯ forEachChildInSourceFile node_modules/typescript/lib/typescript.js:32772:12
+ ❯ Object.forEachChild node_modules/typescript/lib/typescript.js:33072:35
+ ❯ visit scripts/synware/check-custom-text-system-consumer.mjs:82:8
+ ❯ assertCustomTextSystemSourceBoundary scripts/synware/check-custom-text-system-consumer.mjs:84:3
+ ❯ createCustomTextSystemConsumerSources scripts/synware/check-custom-text-system-consumer.mjs:176:65
+ ❯ tests/runtime/text-system-packed-consumer.test.ts:37:24
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/runtime/text-system-packed-consumer.test.ts > independent custom text consumer preparation > confines public browser host provisioning to the separate private bootstrap
+AssertionError: Nonpublic consumer import: @syndromatic/syncloudos/foundation
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ checkSpecifier scripts/synware/check-custom-text-system-consumer.mjs:60:11
+     58|     if (externalImports.has(specifier)) return;
+     59|     if (isHost && hostImports.has(specifier)) return;
+     60|     assert(specifier.startsWith("./") || specifier.startsWith("../"), …
+       |           ^
+     61|     assert(!specifier.includes("\\") && !specifier.includes("\0"), `In…
+     62|     const [path, query] = specifier.split("?");
+ ❯ visit scripts/synware/check-custom-text-system-consumer.mjs:73:33
+ ❯ visitNodes node_modules/typescript/lib/typescript.js:32559:22
+ ❯ forEachChildInSourceFile node_modules/typescript/lib/typescript.js:32772:12
+ ❯ Object.forEachChild node_modules/typescript/lib/typescript.js:33072:35
+ ❯ visit scripts/synware/check-custom-text-system-consumer.mjs:82:8
+ ❯ assertCustomTextSystemSourceBoundary scripts/synware/check-custom-text-system-consumer.mjs:84:3
+ ❯ createCustomTextSystemConsumerSources scripts/synware/check-custom-text-system-consumer.mjs:176:65
+ ❯ tests/runtime/text-system-packed-consumer.test.ts:46:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/runtime/text-system-packed-consumer.test.ts > independent custom text consumer preparation > accepts the public Foundation base layer, while rejecting private Foundation paths
+AssertionError: expected [Function] to not throw an error but 'AssertionError [ERR_ASSERTION]: Nonpu…' was thrown
+
+- Expected:
+undefined
+
++ Received:
+"AssertionError [ERR_ASSERTION]: Nonpublic consumer import: @syndromatic/syncloudos/foundation"
+
+ ❯ tests/runtime/text-system-packed-consumer.test.ts:52:165
+     50|   });
+     51|   it("accepts the public Foundation base layer, while rejecting privat…
+     52|     expect(() => assertCustomTextSystemSourceBoundary('import { NSEDat…
+       |                                                                                                                                                                     ^
+     53|     expect(() => assertCustomTextSystemSourceBoundary('import { NSEDat…
+     54|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/runtime/text-system-packed-consumer.test.ts > independent custom text consumer preparation > prepares the actual example and verified licensed font as a standalone consumer graph
+AssertionError: Nonpublic consumer import: @syndromatic/syncloudos/foundation
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ checkSpecifier scripts/synware/check-custom-text-system-consumer.mjs:60:11
+     58|     if (externalImports.has(specifier)) return;
+     59|     if (isHost && hostImports.has(specifier)) return;
+     60|     assert(specifier.startsWith("./") || specifier.startsWith("../"), …
+       |           ^
+     61|     assert(!specifier.includes("\\") && !specifier.includes("\0"), `In…
+     62|     const [path, query] = specifier.split("?");
+ ❯ visit scripts/synware/check-custom-text-system-consumer.mjs:73:33
+ ❯ visitNodes node_modules/typescript/lib/typescript.js:32559:22
+ ❯ forEachChildInSourceFile node_modules/typescript/lib/typescript.js:32772:12
+ ❯ Object.forEachChild node_modules/typescript/lib/typescript.js:33072:35
+ ❯ visit scripts/synware/check-custom-text-system-consumer.mjs:82:8
+ ❯ assertCustomTextSystemSourceBoundary scripts/synware/check-custom-text-system-consumer.mjs:84:3
+ ❯ createCustomTextSystemConsumerSources scripts/synware/check-custom-text-system-consumer.mjs:176:65
+ ❯ tests/runtime/text-system-packed-consumer.test.ts:91:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  4 failed | 12 passed (16)
+   Start at  12:34:12
+   Duration  1.05s (transform 119ms, setup 42ms, import 240ms, tests 86ms, environment 889ms)
+

@@ -44,14 +44,14 @@ it("keeps shell rendering live when an app mount revokes its own renderer", asyn
   });
   const runtime = createTestRuntime({ environment: { ...createTestRuntimeEnvironment(), animationLayers: host } });
   runtimes.push(runtime);
-  registerTestSynWare(runtime, { schemaVersion: 1, id: "layer-probe", version: "1.0.0", title: "Layer Probe", routes: [{ path: "/layer-probe", primary: true }] });
-  const app = runtime.apps.getApp("layer-probe")!;
+  registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.layer-probe", version: "1.0.0", displayName: "Layer Probe", routes: [{ path: "/layer-probe", primary: true }] });
+  const app = runtime.apps.getApp("com.example.layer-probe")!;
   const seen = new Map<string, ReturnType<typeof useNSEAnimationEnvironment>>();
   function Probe({ owner }: { owner: string }) { seen.set(owner, useNSEAnimationEnvironment()); return null; }
   const branding = { name: "Layer tests", logoAlt: "", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null };
   const tree = (mounted: boolean) => <SynCloudOSProvider runtime={runtime}><HostSiteBrandingProvider value={branding}>
     <Probe owner="shell" />
-    {mounted && <SynWareRuntimeMount runtime={runtime} app={app} responderId={`application:${app.id}`}><Probe owner="app" /></SynWareRuntimeMount>}
+    {mounted && <SynWareRuntimeMount runtime={runtime} app={app} responderId={`application:${app.bundleIdentifier}`}><Probe owner="app" /></SynWareRuntimeMount>}
   </HostSiteBrandingProvider></SynCloudOSProvider>;
   const view = render(tree(true));
   const renderer = (owner: string) => {

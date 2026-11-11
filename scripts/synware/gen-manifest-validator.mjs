@@ -31,7 +31,7 @@
 //   node scripts/synware/gen-manifest-validator.mjs --check  fail if stale
 //
 // tests/runtime/synapp-manifest-validator-generated.test.ts runs the check.
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -69,7 +69,7 @@ function inlineCommonJS(specifiers) {
     // literals (their own code-generation references).
     for (const [, nested] of source.matchAll(/(?<!['"])\brequire\("([^"]+)"\)/g)) requires.set(nested, visit(nested, path));
     const name = `__cjs${modules.size}`;
-    const label = relative(resolve(root, "node_modules"), path).replaceAll("\\", "/");
+    const label = relative(realpathSync(resolve(root, "node_modules")), path).replaceAll("\\", "/");
     const requireMap = [...requires].map(([nested, nestedName]) => `${JSON.stringify(nested)}: ${nestedName}`).join(", ");
     modules.set(path, {
       name,
@@ -93,7 +93,11 @@ function inlineCommonJS(specifiers) {
 export function generateManifestValidatorSource(schema) {
   const ajv = new Ajv2020({ ...validatorOptions, code: { source: true, esm: true, lines: true } });
   addFormats(ajv);
-  const code = standaloneCode(ajv, ajv.compile(schema));
+  ajv.addSchema(schema);
+  const code = standaloneCode(ajv, {
+    validate: schema.$id,
+    validateBundleIdentifier: `${schema.$id}#/properties/bundleIdentifier`,
+  });
   // Ajv's ESM output still require()s its runtime helpers
   // (https://github.com/ajv-validator/ajv/issues/2209).
   const helpers = [];
@@ -114,6 +118,7 @@ export function generateManifestValidatorSource(schema) {
     inlined.code,
     ...helpers.map((helper, index) => `const ${helper.name} = ${inlined.names[index]}.default;`),
     body.trim(),
+    "export default validate;",
     "",
   ].join("\n");
 }

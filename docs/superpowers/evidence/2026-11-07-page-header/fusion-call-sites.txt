@@ -1,0 +1,5 @@
+Read-only Fusion NSEPageHeader search
+Repository: C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Fusion
+HEAD: 6b2cf0c29f2ae9390c7eb6f42d847b7ca31b6583
+Command: rg -n --hidden --glob !.git/** --glob !**/node_modules/** --glob !**/dist/** NSEPageHeader <repository>
+rg exit: 1

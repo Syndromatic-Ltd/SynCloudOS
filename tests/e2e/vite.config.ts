@@ -20,6 +20,11 @@
 
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { synCloudOS } from "../../scripts/synware/vite-plugin.mjs";
+const themeFixtureRoot = resolve(import.meta.dirname, "fixtures/theme-nesting");
+const themeFixturePlugin = synCloudOS({ webspringEntry: false, themesDirectory: "Themes" });
+const configureThemes = themeFixturePlugin.configResolved;
+themeFixturePlugin.configResolved = function(config) { return configureThemes.call(this, { ...config, root: themeFixtureRoot }); };
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { synWareSdkEntries, synWareSdkGeneratedStyles, synWarePackageName } from "../../scripts/synware/sdk-entries.mjs";
@@ -29,7 +34,7 @@ export default defineConfig({
   root: resolve(import.meta.dirname, "../.."),
   resolve: { alias: [
     ...Object.entries(synWareSdkEntries).map(([entry, source]) => ({
-      find: new RegExp("^" + synWarePackageName + "/" + entry + "$"), replacement: resolve(import.meta.dirname, "../..", source),
+      find: new RegExp("^" + synWarePackageName + (entry === "index" ? "" : "/" + entry) + "$"), replacement: resolve(import.meta.dirname, "../..", source),
     })),
     // sdk:build assembles these public host styles with their module-relative assets.
     ...Object.keys(synWareSdkGeneratedStyles).map(entry => ({
@@ -37,7 +42,7 @@ export default defineConfig({
       replacement: resolve(import.meta.dirname, "../../.artifacts/synapp-sdk/packages/syncloudos", entry),
     })),
   ] },
-  plugins: [react(), {
+  plugins: [react(), themeFixturePlugin, {
     name: "framework-fixture-pages",
     configureServer(server) {
       const pdfReaderWorker = readFileSync(resolve(import.meta.dirname, "../../node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"));

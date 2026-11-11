@@ -1,0 +1,769 @@
+{
+  "errors": [],
+  "standard": [
+    {
+      "time": 0,
+      "name": "faithful-current-raw-tab-controlled/00.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 1,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "art": {
+            "x": 595,
+            "y": 173.859375,
+            "width": 250,
+            "height": 250,
+            "opacity": 1,
+            "transform": "none"
+          }
+        },
+        {
+          "section": "framework",
+          "opacity": 0,
+          "x": 219.60000610351562,
+          "transform": "matrix(0.975, 0, 0, 0.975, 219.6, 11.25)",
+          "art": {
+            "x": 814.2325439453125,
+            "y": 212.8203887939453,
+            "width": 214.7349853515625,
+            "height": 214.73497009277344,
+            "opacity": 0,
+            "transform": "matrix(0.772409, -0.108555, 0.108555, 0.772409, 14.8795, 60.0182)"
+          }
+        }
+      ]
+    },
+    {
+      "time": 80,
+      "name": "faithful-current-raw-tab-controlled/01.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 0.99175,
+          "x": -0.9801533222198486,
+          "transform": "matrix(0.999711, 0, 0, 0.999711, -0.980153, 0.129945)",
+          "art": {
+            "x": 593.8480224609375,
+            "y": 173.93911743164062,
+            "width": 249.92779541015625,
+            "height": 249.92779541015625,
+            "opacity": 1,
+            "transform": "none"
+          }
+        },
+        {
+          "section": "framework",
+          "opacity": 0,
+          "x": 219.60000610351562,
+          "transform": "matrix(0.975, 0, 0, 0.975, 219.6, 11.25)",
+          "art": {
+            "x": 814.2325439453125,
+            "y": 212.8203887939453,
+            "width": 214.7349853515625,
+            "height": 214.73497009277344,
+            "opacity": 0,
+            "transform": "matrix(0.772409, -0.108555, 0.108555, 0.772409, 14.8795, 60.0182)"
+          }
+        }
+      ]
+    },
+    {
+      "time": 160,
+      "name": "faithful-current-raw-tab-controlled/02.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 0.964345,
+          "x": -4.235825061798096,
+          "transform": "matrix(0.998752, 0, 0, 0.998752, -4.23583, 0.561568)",
+          "art": {
+            "x": 590.0216674804688,
+            "y": 174.2039794921875,
+            "width": 249.68798828125,
+            "height": 249.68801879882812,
+            "opacity": 1,
+            "transform": "none"
+          }
+        },
+        {
+          "section": "framework",
+          "opacity": 0.366762,
+          "x": 177.6619415283203,
+          "transform": "matrix(0.979774, 0, 0, 0.979774, 177.662, 9.10153)",
+          "art": {
+            "x": 775.2062377929688,
+            "y": 211.65896606445312,
+            "width": 215.78643798828125,
+            "height": 215.78646850585938,
+            "opacity": 0,
+            "transform": "matrix(0.772409, -0.108555, 0.108555, 0.772409, 14.8795, 60.0182)"
+          }
+        }
+      ]
+    },
+    {
+      "time": 240,
+      "name": "faithful-current-raw-tab-controlled/03.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 0.912263,
+          "x": -10.42313003540039,
+          "transform": "matrix(0.996929, 0, 0, 0.996929, -10.4231, 1.38185)",
+          "art": {
+            "x": 582.749755859375,
+            "y": 174.7073516845703,
+            "width": 249.2322998046875,
+            "height": 249.23231506347656,
+            "opacity": 1,
+            "transform": "none"
+          }
+        },
+        {
+          "section": "framework",
+          "opacity": 0.83918,
+          "x": 101.14370727539062,
+          "transform": "matrix(0.988485, 0, 0, 0.988485, 101.144, 5.18154)",
+          "art": {
+            "x": 702.7008056640625,
+            "y": 207.01979064941406,
+            "width": 220.3048095703125,
+            "height": 220.3047637939453,
+            "opacity": 0.0685821,
+            "transform": "matrix(0.788374, -0.10311, 0.10311, 0.788374, 13.5645, 56.1076)"
+          }
+        }
+      ]
+    },
+    {
+      "time": 320,
+      "name": "faithful-current-raw-tab-controlled/04.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 0.826375,
+          "x": -20.626611709594727,
+          "transform": "matrix(0.993923, 0, 0, 0.993923, -20.6266, 2.73459)",
+          "art": {
+            "x": 570.7576293945312,
+            "y": 175.53744506835938,
+            "width": 248.48077392578125,
+            "height": 248.48077392578125,
+            "opacity": 1,
+            "transform": "none"
+          }
+        },
+        {
+          "section": "framework",
+          "opacity": 0.952877,
+          "x": 53.54331970214844,
+          "transform": "matrix(0.993904, 0, 0, 0.993904, 53.5433, 2.743)",
+          "art": {
+            "x": 652.0233764648438,
+            "y": 192.6409912109375,
+            "width": 234.2623291015625,
+            "height": 234.26239013671875,
+            "opacity": 0.441512,
+            "transform": "matrix(0.874467, -0.0683291, 0.0683291, 0.874467, 7.15045, 34.2855)"
+          }
+        }
+      ]
+    },
+    {
+      "time": 400,
+      "name": "faithful-current-raw-tab-controlled/05.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 0.689264,
+          "x": -36.91545104980469,
+          "transform": "matrix(0.989124, 0, 0, 0.989124, -36.9155, 4.89409)",
+          "art": {
+            "x": 551.6134643554688,
+            "y": 176.86260986328125,
+            "width": 247.28106689453125,
+            "height": 247.28106689453125,
+            "opacity": 1,
+            "transform": "none"
+          }
+        },
+        {
+          "section": "framework",
+          "opacity": 0.98729,
+          "x": 29.63520050048828,
+          "transform": "matrix(0.996626, 0, 0, 0.996626, 29.6352, 1.5182)",
+          "art": {
+            "x": 625.2896118164062,
+            "y": 181.71664428710938,
+            "width": 243.83294677734375,
+            "height": 243.8330078125,
+            "opacity": 0.762319,
+            "transform": "matrix(0.947188, -0.0314454, 0.0314454, 0.947188, 2.67078, 14.8104)"
+          }
+        }
+      ]
+    },
+    {
+      "time": 480,
+      "name": "faithful-current-raw-tab-controlled/06.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 0.457304,
+          "x": -64.4722671508789,
+          "transform": "matrix(0.981006, 0, 0, 0.981006, -64.4723, 8.54746)",
+          "art": {
+            "x": 519.2261352539062,
+            "y": 179.1044921875,
+            "width": 245.25140380859375,
+            "height": 245.25140380859375,
+            "opacity": 1,
+            "transform": "none"
+          }
+        },
+        {
+          "section": "framework",
+          "opacity": 0.998049,
+          "x": 17.04027557373047,
+          "transform": "matrix(0.99806, 0, 0, 0.99806, 17.0403, 0.872965)",
+          "art": {
+            "x": 611.5665283203125,
+            "y": 176.2559051513672,
+            "width": 248.15399169921875,
+            "height": 248.1539764404297,
+            "opacity": 0.934299,
+            "transform": "matrix(0.985504, -0.0090408, 0.0090408, 0.985504, 0.681848, 4.12466)"
+          }
+        }
+      ]
+    },
+    {
+      "time": 560,
+      "name": "faithful-current-raw-tab-controlled/07.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 9.885899543762207,
+          "transform": "matrix(0.998875, 0, 0, 0.998875, 9.8859, 0.50645)",
+          "art": {
+            "x": 604.213623046875,
+            "y": 174.16648864746094,
+            "width": 249.72381591796875,
+            "height": 249.7238311767578,
+            "opacity": 1,
+            "transform": "matrix(1.00001, 8.1e-06, -8.1e-06, 1.00001, -0.0005844, -0.003662)"
+          }
+        }
+      ]
+    },
+    {
+      "time": 640,
+      "name": "faithful-current-raw-tab-controlled/08.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 5.630928039550781,
+          "transform": "matrix(0.999359, 0, 0, 0.999359, 5.63093, 0.28847)",
+          "art": {
+            "x": 599.6013793945312,
+            "y": 173.12892150878906,
+            "width": 251.135986328125,
+            "height": 251.13600158691406,
+            "opacity": 1,
+            "transform": "matrix(1.00317, 0.0020191, -0.0020191, 1.00317, -0.143776, -0.908045)"
+          }
+        }
+      ]
+    },
+    {
+      "time": 720,
+      "name": "faithful-current-raw-tab-controlled/09.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 3.056472063064575,
+          "transform": "matrix(0.999652, 0, 0, 0.999652, 3.05647, 0.156582)",
+          "art": {
+            "x": 597.3377075195312,
+            "y": 173.2389373779297,
+            "width": 250.93646240234375,
+            "height": 250.9364776611328,
+            "opacity": 1,
+            "transform": "matrix(1.0025, 0.0015929, -0.0015929, 1.0025, -0.11368, -0.71677)"
+          }
+        }
+      ]
+    },
+    {
+      "time": 800,
+      "name": "faithful-current-raw-tab-controlled/10.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 1.5146944522857666,
+          "transform": "matrix(0.999828, 0, 0, 0.999828, 1.51469, 0.0775971)",
+          "art": {
+            "x": 596.1494750976562,
+            "y": 173.5392303466797,
+            "width": 250.482177734375,
+            "height": 250.4821319580078,
+            "opacity": 1,
+            "transform": "matrix(1.00128, 0.0008166, -0.0008166, 1.00128, -0.058515, -0.36783)"
+          }
+        }
+      ]
+    },
+    {
+      "time": 880,
+      "name": "faithful-current-raw-tab-controlled/11.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 0.6322720050811768,
+          "transform": "matrix(0.999928, 0, 0, 0.999928, 0.632272, 0.032391)",
+          "art": {
+            "x": 595.4937744140625,
+            "y": 173.74530029296875,
+            "width": 250.17327880859375,
+            "height": 250.17327880859375,
+            "opacity": 1,
+            "transform": "matrix(1.00047, 0.0002972, -0.0002972, 1.00047, -0.0213537, -0.133959)"
+          }
+        }
+      ]
+    },
+    {
+      "time": 960,
+      "name": "faithful-current-raw-tab-controlled/12.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 0.18029291927814484,
+          "transform": "matrix(0.999979, 0, 0, 0.999979, 0.180293, 0.00923632)",
+          "art": {
+            "x": 595.14990234375,
+            "y": 173.83961486816406,
+            "width": 250.03118896484375,
+            "height": 250.0311737060547,
+            "opacity": 1,
+            "transform": "matrix(1.00009, 5.64e-05, -5.64e-05, 1.00009, -0.0040582, -0.0254345)"
+          }
+        }
+      ]
+    },
+    {
+      "time": 1040,
+      "name": "faithful-current-raw-tab-controlled/13.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 0.011488271877169609,
+          "transform": "matrix(0.999999, 0, 0, 0.999999, 0.0114883, 0.000588539)",
+          "art": {
+            "x": 595.0121459960938,
+            "y": 173.86386108398438,
+            "width": 249.9967041015625,
+            "height": 249.9967041015625,
+            "opacity": 0.999854,
+            "transform": "matrix(0.999968, -2.03e-05, 2.03e-05, 0.999968, 0.0014674, 0.0091942)"
+          }
+        }
+      ]
+    },
+    {
+      "time": 1120,
+      "name": "faithful-current-raw-tab-controlled/14.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "art": {
+            "x": 595.0020751953125,
+            "y": 173.86509704589844,
+            "width": 249.995849609375,
+            "height": 249.99586486816406,
+            "opacity": 0.999796,
+            "transform": "matrix(0.999955, -2.84e-05, 2.84e-05, 0.999955, 0.0020476, 0.0128292)"
+          }
+        }
+      ]
+    },
+    {
+      "time": 1200,
+      "name": "faithful-current-raw-tab-controlled/15.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "art": {
+            "x": 595.0012817382812,
+            "y": 173.86300659179688,
+            "width": 249.99737548828125,
+            "height": 249.99737548828125,
+            "opacity": 0.999871,
+            "transform": "matrix(0.999972, -1.8e-05, 1.8e-05, 0.999972, 0.0012973, 0.0081285)"
+          }
+        }
+      ]
+    },
+    {
+      "time": 1280,
+      "name": "faithful-current-raw-tab-controlled/16.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "art": {
+            "x": 595.0005493164062,
+            "y": 173.86099243164062,
+            "width": 249.99884033203125,
+            "height": 249.99880981445312,
+            "opacity": 0.999943,
+            "transform": "matrix(0.999987, -8e-06, 8e-06, 0.999987, 0.0005774, 0.0036183)"
+          }
+        }
+      ]
+    },
+    {
+      "time": 1360,
+      "name": "faithful-current-raw-tab-controlled/17.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "art": {
+            "x": 595.0001831054688,
+            "y": 173.85987854003906,
+            "width": 249.9996337890625,
+            "height": 249.99961853027344,
+            "opacity": 0.999983,
+            "transform": "matrix(0.999996, -2.3e-06, 2.3e-06, 0.999996, 0.0001726, 0.0010819)"
+          }
+        }
+      ]
+    },
+    {
+      "time": 1440,
+      "name": "faithful-current-raw-tab-controlled/18.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "art": {
+            "x": 595,
+            "y": 173.859375,
+            "width": 250,
+            "height": 250,
+            "opacity": 1,
+            "transform": "matrix(1, 0, 0, 1, 0, 0)"
+          }
+        }
+      ]
+    },
+    {
+      "time": 1520,
+      "name": "faithful-current-raw-tab-controlled/19.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "art": {
+            "x": 595,
+            "y": 173.859375,
+            "width": 250,
+            "height": 250,
+            "opacity": 1,
+            "transform": "matrix(1, 0, 0, 1, 0, 0)"
+          }
+        }
+      ]
+    }
+  ],
+  "reduced": [
+    {
+      "time": 0,
+      "name": "faithful-current-raw-reduced-controlled/00.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 1,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "art": {
+            "x": 595,
+            "y": 173.859375,
+            "width": 250,
+            "height": 250,
+            "opacity": 1,
+            "transform": "none"
+          }
+        },
+        {
+          "section": "framework",
+          "opacity": 0,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "art": {
+            "x": 595,
+            "y": 173.859375,
+            "width": 250,
+            "height": 250,
+            "opacity": 1,
+            "transform": "none"
+          }
+        }
+      ]
+    },
+    {
+      "time": 40,
+      "name": "faithful-current-raw-reduced-controlled/01.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 0.276437,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "art": {
+            "x": 595,
+            "y": 173.859375,
+            "width": 250,
+            "height": 250,
+            "opacity": 1,
+            "transform": "none"
+          }
+        },
+        {
+          "section": "framework",
+          "opacity": 0.605439,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "art": {
+            "x": 595,
+            "y": 173.859375,
+            "width": 250,
+            "height": 250,
+            "opacity": 1,
+            "transform": "none"
+          }
+        }
+      ]
+    },
+    {
+      "time": 80,
+      "name": "faithful-current-raw-reduced-controlled/02.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 0.0747845,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "art": {
+            "x": 595,
+            "y": 173.859375,
+            "width": 250,
+            "height": 250,
+            "opacity": 1,
+            "transform": "none"
+          }
+        },
+        {
+          "section": "framework",
+          "opacity": 0.858149,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "art": {
+            "x": 595,
+            "y": 173.859375,
+            "width": 250,
+            "height": 250,
+            "opacity": 1,
+            "transform": "none"
+          }
+        }
+      ]
+    },
+    {
+      "time": 120,
+      "name": "faithful-current-raw-reduced-controlled/03.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 0.0178848,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "art": {
+            "x": 595,
+            "y": 173.859375,
+            "width": 250,
+            "height": 250,
+            "opacity": 1,
+            "transform": "none"
+          }
+        },
+        {
+          "section": "framework",
+          "opacity": 0.946079,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "art": {
+            "x": 595,
+            "y": 173.859375,
+            "width": 250,
+            "height": 250,
+            "opacity": 1,
+            "transform": "none"
+          }
+        }
+      ]
+    },
+    {
+      "time": 160,
+      "name": "faithful-current-raw-reduced-controlled/04.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 0.0014638,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "art": {
+            "x": 595,
+            "y": 173.859375,
+            "width": 250,
+            "height": 250,
+            "opacity": 1,
+            "transform": "none"
+          }
+        },
+        {
+          "section": "framework",
+          "opacity": 0.982115,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "art": {
+            "x": 595,
+            "y": 173.859375,
+            "width": 250,
+            "height": 250,
+            "opacity": 1,
+            "transform": "none"
+          }
+        }
+      ]
+    },
+    {
+      "time": 200,
+      "name": "faithful-current-raw-reduced-controlled/05.png",
+      "panes": [
+        {
+          "section": "company",
+          "opacity": 0,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "art": {
+            "x": 595,
+            "y": 173.859375,
+            "width": 250,
+            "height": 250,
+            "opacity": 1,
+            "transform": "none"
+          }
+        },
+        {
+          "section": "framework",
+          "opacity": 0.996468,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "art": {
+            "x": 595,
+            "y": 173.859375,
+            "width": 250,
+            "height": 250,
+            "opacity": 1,
+            "transform": "none"
+          }
+        }
+      ]
+    },
+    {
+      "time": 240,
+      "name": "faithful-current-raw-reduced-controlled/06.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "art": {
+            "x": 595,
+            "y": 173.859375,
+            "width": 250,
+            "height": 250,
+            "opacity": 1,
+            "transform": "none"
+          }
+        }
+      ]
+    },
+    {
+      "time": 280,
+      "name": "faithful-current-raw-reduced-controlled/07.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "art": {
+            "x": 595,
+            "y": 173.859375,
+            "width": 250,
+            "height": 250,
+            "opacity": 1,
+            "transform": "none"
+          }
+        }
+      ]
+    },
+    {
+      "time": 320,
+      "name": "faithful-current-raw-reduced-controlled/08.png",
+      "panes": [
+        {
+          "section": "framework",
+          "opacity": 1,
+          "x": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "art": {
+            "x": 595,
+            "y": 173.859375,
+            "width": 250,
+            "height": 250,
+            "opacity": 1,
+            "transform": "none"
+          }
+        }
+      ]
+    }
+  ]
+}

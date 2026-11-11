@@ -164,8 +164,8 @@ describe("ServiceRegistry dependency depth and impact reports", () => {
         dependencies: ["impact.middle"]
       }
     ]);
-    AppRegistry.register(createTestManifest({ id: "impact-root-app", requiredServices: ["impact.root"] }));
-    AppRegistry.register(createTestManifest({ id: "impact-leaf-app", requiredServices: ["impact.leaf"] }));
+    AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.impact-root-app", requiredServices: ["impact.root"] }));
+    AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.impact-leaf-app", requiredServices: ["impact.leaf"] }));
 
     ServiceRegistry.stopService("impact.leaf");
 
@@ -173,11 +173,11 @@ describe("ServiceRegistry dependency depth and impact reports", () => {
     const snapshot = RuntimeController.getSnapshot();
 
     expect(impact.affectedServices).toEqual(["impact.middle", "impact.root"]);
-    expect(impact.affectedApps.map((app) => app.appId)).toEqual(["impact-root-app", "impact-leaf-app"]);
-    expect(impact.disabledApps.map((app) => app.appId)).toEqual(["impact-root-app", "impact-leaf-app"]);
+    expect(impact.affectedApps.map((app) => app.appId)).toEqual(["com.example.impact-root-app", "com.example.impact-leaf-app"]);
+    expect(impact.disabledApps.map((app) => app.appId)).toEqual(["com.example.impact-root-app", "com.example.impact-leaf-app"]);
     expect(impact.blockers).toContain("impact.leaf");
-    expect(snapshot.appInfo["impact-root-app"].isDisabled).toBe(true);
-    expect(snapshot.lifecycle["impact-root-app"]).toBe("disabled");
+    expect(snapshot.appInfo["com.example.impact-root-app"].isDisabled).toBe(true);
+    expect(snapshot.lifecycle["com.example.impact-root-app"]).toBe("disabled");
   });
 
   it("restores disabled app service state when an unavailable service comes back", async () => {
@@ -189,29 +189,29 @@ describe("ServiceRegistry dependency depth and impact reports", () => {
       description: "Restoration fixture.",
       availability: "available"
     });
-    AppRegistry.register(createTestManifest({ id: "restore-app", requiredServices: ["restore.service"] }));
+    AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.restore-app", requiredServices: ["restore.service"] }));
 
     ServiceRegistry.stopService("restore.service");
 
-    expect(RuntimeController.getSnapshot().appInfo["restore-app"]).toMatchObject({
+    expect(RuntimeController.getSnapshot().appInfo["com.example.restore-app"]).toMatchObject({
       hasAccessToRequiredServices: false,
       isDisabled: true,
       serviceStatus: { "restore.service": false }
     });
-    expect(RuntimeController.getSnapshot().managers["restore-app"]).toMatchObject({
+    expect(RuntimeController.getSnapshot().managers["com.example.restore-app"]).toMatchObject({
       disabled: true,
       lastError: "Required services unavailable: restore.service."
     });
 
     ServiceRegistry.startService("restore.service");
 
-    expect(RuntimeController.getSnapshot().appInfo["restore-app"]).toMatchObject({
+    expect(RuntimeController.getSnapshot().appInfo["com.example.restore-app"]).toMatchObject({
       hasAccessToRequiredServices: true,
       isDisabled: false,
       serviceStatus: { "restore.service": true }
     });
-    expect(RuntimeController.getSnapshot().lifecycle["restore-app"]).toBe("registered");
-    expect(RuntimeController.getSnapshot().managers["restore-app"]).toMatchObject({
+    expect(RuntimeController.getSnapshot().lifecycle["com.example.restore-app"]).toBe("registered");
+    expect(RuntimeController.getSnapshot().managers["com.example.restore-app"]).toMatchObject({
       disabled: false,
       lastError: null
     });
@@ -227,18 +227,18 @@ describe("ServiceRegistry dependency depth and impact reports", () => {
       availability: "available"
     });
     AppRegistry.register(createTestManifest({
-      id: "optional-refresh-app",
+      bundleIdentifier: "com.example.optional-refresh-app",
       optionalServices: ["optional.fixture"]
     }));
 
     ServiceRegistry.stopService("optional.fixture");
 
-    expect(RuntimeController.getSnapshot().appInfo["optional-refresh-app"]).toMatchObject({
+    expect(RuntimeController.getSnapshot().appInfo["com.example.optional-refresh-app"]).toMatchObject({
       hasAccessToRequiredServices: true,
       isDisabled: false,
       optionalServiceStatus: { "optional.fixture": false },
       unavailableOptionalServices: ["optional.fixture"]
     });
-    expect(RuntimeController.getSnapshot().lifecycle["optional-refresh-app"]).toBe("registered");
+    expect(RuntimeController.getSnapshot().lifecycle["com.example.optional-refresh-app"]).toBe("registered");
   });
 });

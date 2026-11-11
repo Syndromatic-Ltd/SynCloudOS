@@ -18,12 +18,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { NSEWindowLayoutContext, NSEWindowLayoutModel } from "../../NSE/hostComposition";
+
+import React, { useCallback, useLayoutEffect, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useNSEPresenceExiting, useNSEPresentation, type NSEPresentationSpec } from "../../NSE/Animation";
 import {
   NSEControlRuntimeProvider,
   NSEFocusPortProvider,
   NSEOverlayProvider,
+  NSETooltipProvider,
   NSEWindowSurfaceBridgeProvider,
   NSEBorderlessWindowView,
   NSEHUDWindowView,
@@ -35,7 +38,6 @@ import {
   type NSEWindowHost,
   useNSEDeferredDisposal,
 } from "../../NSE/NSE";
-import { nseDeferredDisposalMicrotaskScheduler } from "../../NSE/hostComposition";
 import {
   resolveWindowPresentation,
   type ScreenSnapshot,
@@ -50,6 +52,9 @@ import { createTransientWindowSurfaceBridge } from "./TransientWindowSurfaceBrid
 import { WindowChromeSlotContext } from "./windowChromeSlotContext";
 import { useWindowMoveResize } from "./useWindowMoveResize";
 import type { WindowContentRendererRegistry } from "./WindowContentRendererRegistry";
+import { PopoverWindowSurface } from "./PopoverWindowSurface";
+import { ResponderHierarchyContext } from "../../SynCloudOSReact";
+import { FocusScopeIdContext } from "../../SynCloudOSReact";
 
 export interface WindowLayerDiagnostic {
   readonly code: "WINDOW_PRESENTATION_GEOMETRY_INVALID";
@@ -87,6 +92,7 @@ const windowHostMotion = Object.freeze({
     tracks: Object.freeze([Object.freeze({ keyPath: "opacity", values: Object.freeze([1, 0]) })]),
   }) satisfies NSEPresentationSpec,
 });
+const popoverWindowMotion = { exit: { duration: 0.15, timing: "linear", tracks: [{ keyPath: "opacity", values: [1, 1] }] } } satisfies Parameters<typeof useNSEPresentation>[1];
 
 function validGeometry(bounds: Readonly<{ x: number; y: number; width: number; height: number }>): boolean {
   return Number.isFinite(bounds.x) && Number.isFinite(bounds.y) &&
@@ -108,6 +114,10 @@ export function WindowHost({
   const contentState = useSyncExternalStore(controller.subscribe, () => controller.contentState, () => controller.contentState);
   useSyncExternalStore(renderers.subscribe, () => renderers.revision, () => renderers.revision);
   const contentRendererAvailable = contentState.status === "loaded" && renderers.has(contentState.mountKey);
+  const surface = contentState.status === "loaded" ? renderers.surface(contentState.mountKey) : null;
+  const popoverSurface = surface && (record.role === "popover" || record.role === "sheet" && surface.request.drawsBackground !== undefined) ? surface : null;
+  const wasPopoverSurface = useRef(false);
+  if (popoverSurface) wasPopoverSurface.current = true;
   // The custom-titlebar slot div is rendered declaratively by the view; the
   // host learns the node through a ref callback (raw `document` access is
   // forbidden in Webspring surfaces). The mounted application's chrome
@@ -144,7 +154,9 @@ export function WindowHost({
       ? { key: chromeHandshakeKey, ready: false, failed: true }
       : state),
   }), [chromeHandshakeKey, chromeSlotNode]);
-  const presentation = resolveWindowPresentation(record, screen);
+  const presentation = resolveWindowPresentation(record, screen, controller.geometryState);
+  const compactPopover = Boolean(popoverSurface && (presentation.kind === "mobile-sheet" || popoverSurface.request.presentation?.mode === "sheet"));
+  const ownsPopoverFocus = record.role === "popover" && popoverSurface !== null;
   const focusPort = useRuntimeNSEFocusPort(controller.windowResponderId);
   const overlayPort = useRuntimeNSEOverlayPort(controller.windowResponderId);
   const controlPort = useRuntimeNSEControlPort();
@@ -167,7 +179,7 @@ export function WindowHost({
     ),
     dismiss: transientBridge.dismiss,
   } : null, [controller.id, transientBridge]);
-  useNSEDeferredDisposal(transientBridge, nseDeferredDisposalMicrotaskScheduler);
+  useNSEDeferredDisposal(transientBridge);
   const moveHandleProps = useWindowMoveResize({
     manager,
     windowControllerId: controller.id,
@@ -204,18 +216,27 @@ export function WindowHost({
     });
   }, [controller.id, geometryIsValid, invalidBounds, onDiagnostic]);
   const hostRef = useRef<HTMLDivElement>(null);
+  const layout = useMemo(() => new NSEWindowLayoutModel(), [controller.id]);
+  useNSEDeferredDisposal(layout);
+  // A host with invalid geometry is omitted and reported, so it has no bounds to lay out against.
+  useLayoutEffect(() => { layout.setLogicalScreenInsets(screen.safeAreaInsets, screen.layoutViewport); if (geometryIsValid) layout.setBounds(presentation.bounds); }, [layout, screen.safeAreaInsets, screen.layoutViewport, presentation.bounds, geometryIsValid]);
+  useLayoutEffect(() => hostRef.current ? layout.connectRoot(hostRef.current) : undefined, [layout, record.state, contentRendererAvailable]);
   // The window surface clips to its rounded outline, and a fixed-position
   // popup does not escape a clip-path. Menus and popovers opened from the
   // window's content mount here, beside the surface, so they can hang past
   // the window's edge as a menu does.
   const [overlayLayerNode, setOverlayLayerNode] = useState<HTMLDivElement | null>(null);
-  useNSEPresentation(hostRef, windowHostMotion);
+  useNSEPresentation(hostRef, wasPopoverSurface.current ? popoverWindowMotion : windowHostMotion);
   // Closing commits the record as closed and removes the controller in one
   // batch, so by the time NSEPresence holds this host for its exit there is
   // no open window left to draw. The host keeps its last open frame for the
   // exit fade, inert, rather than cutting.
   const exiting = useNSEPresenceExiting();
-  const lastFrameRef = useRef<{ readonly style: React.CSSProperties; readonly contents: React.ReactNode } | null>(null);
+  const lastFrameRef = useRef<{
+    readonly style: React.CSSProperties;
+    readonly contents: React.ReactNode;
+    readonly popoverScope?: { readonly parentResponderId: string; readonly parentScopeId?: string };
+  } | null>(null);
   const hostRendered = record.state === "open" &&
     contentState.status === "loaded" &&
     contentRendererAvailable &&
@@ -228,17 +249,41 @@ export function WindowHost({
   // control, then the title-bar controls. Only on opening: later key changes
   // come from a click or a command that already placed focus.
   const openedKey = hostRendered && record.isKey;
+  const contentGeneration = contentState.status === "loaded" ? contentState.mountKey : null;
   useEffect(() => {
-    if (!openedKey || (record.role !== "panel" && record.role !== "popover")) return;
+    if (!openedKey || (record.role !== "panel" && record.role !== "popover" && !popoverSurface)) return;
     const host = hostRef.current;
-    const active = host?.ownerDocument.activeElement;
-    if (!host || (active && host.contains(active))) return;
-    const target = host.querySelector<HTMLElement>(`.nse-window__content [data-nse-initial-focus]:not([disabled])`) ??
-      host.querySelector<HTMLElement>(`.nse-window__content :is(${windowFocusableSelector})`) ??
-      host.querySelector<HTMLElement>(windowFocusableSelector);
-    target?.focus({ preventScroll: true });
+    if (!host) return;
+    const surface = host.querySelector<HTMLElement>("[data-nse-window-popover]");
+    let observer: MutationObserver | null = null;
+    const focusInitialControl = () => {
+      const active = host.ownerDocument.activeElement;
+      const initialResponder = host.querySelector<HTMLElement>("[data-nse-view-controller][tabindex]") ?? surface;
+      const target = host.querySelector<HTMLElement>(`.nse-window__content [data-nse-initial-focus]:not([disabled])`) ??
+        host.querySelector<HTMLElement>(`.nse-window__content :is(${windowFocusableSelector})`) ??
+        host.querySelector<HTMLElement>(windowFocusableSelector);
+      if (active && host.contains(active) && active !== surface && active !== initialResponder) { observer?.disconnect(); return true; }
+      if (target) {
+        target.focus({ preventScroll: true });
+        const focused = host.ownerDocument.activeElement === target || target.contains(host.ownerDocument.activeElement);
+        if (focused) observer?.disconnect();
+        return focused;
+      }
+      // A presented controller is a valid first responder even while every
+      // command button is validating, including inside a modal compact sheet.
+      initialResponder?.focus({ preventScroll: true });
+      return false;
+    };
+    if (!focusInitialControl()) {
+      // Command controls arrive disabled until asynchronous validation has
+      // settled. Complete the opening handoff when the first one is ready.
+      const Observer = host.ownerDocument.defaultView?.MutationObserver;
+      observer = Observer ? new Observer(focusInitialControl) : null;
+      observer?.observe(host, { childList: true, subtree: true, attributes: true, attributeFilter: ["disabled", "data-nse-positioned", "hidden", "inert", "style"] });
+    }
+    return () => observer?.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per opening
-  }, [controller.id, openedKey]);
+  }, [contentGeneration, controller.id, openedKey]);
 
   if (
     record.state !== "open" ||
@@ -249,7 +294,10 @@ export function WindowHost({
   ) {
     const lastFrame = lastFrameRef.current;
     if (!exiting || !lastFrame) return null;
+    // The same provider as the open frame keeps the tree's shape, so the exit
+    // keeps the mounted contents rather than remounting them empty.
     return (
+      <NSEWindowLayoutContext.Provider value={layout}>
       <div
         ref={hostRef}
         className="webspring-window-host"
@@ -259,8 +307,15 @@ export function WindowHost({
         inert
         style={{ ...lastFrame.style, pointerEvents: "none" }}
       >
-        {lastFrame.contents}
+        {lastFrame.popoverScope ? <FocusScope
+          scopeId={`window:${record.id}`} kind="popover"
+          parentScopeId={lastFrame.popoverScope.parentScopeId}
+          parentResponderId={lastFrame.popoverScope.parentResponderId}
+          modal={false} trapFocus={false} restoreFocus={false}
+          externallyManagedScope externallyManagedInert
+        >{lastFrame.contents}</FocusScope> : lastFrame.contents}
       </div>
+      </NSEWindowLayoutContext.Provider>
     );
   }
 
@@ -280,6 +335,18 @@ export function WindowHost({
     window: record,
     presentation,
   });
+  const surfaceContent = popoverSurface
+    ? <PopoverWindowSurface key={contentState.mountKey} surface={popoverSurface} windowControllerId={controller.id} anchored={record.role === "popover" && !compactPopover}>
+        <FocusScopeIdContext.Provider value={`window:${record.id}`}>
+          <ResponderHierarchyContext.Provider value={{
+            runtimeId: runtime.runtimeId,
+            responderId: popoverSurface.request.parentResponderId ?? controller.windowResponderId,
+            windowResponderId: controller.windowResponderId,
+            applicationResponderId: record.applicationSessionId ? `application:${record.applicationSessionId}` : undefined,
+          }}>{hostedContent}</ResponderHierarchyContext.Provider>
+        </FocusScopeIdContext.Provider>
+      </PopoverWindowSurface>
+    : hostedContent;
   const customChromeActive = chromeReady && !chromeFailed;
   // The slot node must exist BEFORE the handshake can complete: the bridge
   // needs a portal target to mount and report ready. Render it for every
@@ -293,17 +360,19 @@ export function WindowHost({
         defaultParentResponderId={controller.windowResponderId}
         portalContainer={overlayLayerNode}
       >
+        <NSETooltipProvider>
         <NSEControlRuntimeProvider port={controlPort}>
           <NSEFocusPortProvider port={focusPort}>
             {childTransientBridge ? (
-              <NSEWindowSurfaceBridgeProvider bridge={childTransientBridge}>{hostedContent}</NSEWindowSurfaceBridgeProvider>
-            ) : hostedContent}
+              <NSEWindowSurfaceBridgeProvider bridge={childTransientBridge}>{surfaceContent}</NSEWindowSurfaceBridgeProvider>
+            ) : surfaceContent}
           </NSEFocusPortProvider>
         </NSEControlRuntimeProvider>
+      </NSETooltipProvider>
       </NSEOverlayProvider>
     </WindowChromeSlotContext.Provider>
   );
-  const view = (
+  const view = popoverSurface ? runtimeHostedContent : (
     <View
       record={record}
       presentation={presentation}
@@ -325,20 +394,30 @@ export function WindowHost({
       <div ref={setOverlayLayerNode} data-window-overlay-layer="" style={{ display: "contents" }} />
     </>
   );
+  const sheetInset = Math.max(8, presentation.safeAreaInsets.blockEnd);
+  const sheetBounds = compactPopover ? {
+    x: screen.visualViewport.x + Math.max(8, presentation.safeAreaInsets.inlineStart),
+    y: screen.visualViewport.y + screen.visualViewport.height - sheetInset - presentation.bounds.height,
+    width: Math.min(presentation.bounds.width, screen.visualViewport.width - Math.max(8, presentation.safeAreaInsets.inlineStart) - Math.max(8, presentation.safeAreaInsets.inlineEnd)),
+    height: presentation.bounds.height,
+  } : presentation.bounds;
   const hostStyle: React.CSSProperties = {
     position: "absolute",
-    left: presentation.bounds.x,
-    top: presentation.bounds.y,
-    width: presentation.bounds.width,
-    height: presentation.bounds.height,
+    left: sheetBounds.x,
+    top: sheetBounds.y,
+    width: sheetBounds.width,
+    height: sheetBounds.height,
     zIndex: record.zIndex,
   };
   // A modal's focus scope is not kept: an exiting sheet traps nothing.
-  lastFrameRef.current = { style: hostStyle, contents: windowContents };
+  lastFrameRef.current = { style: hostStyle, contents: windowContents,
+    ...(ownsPopoverFocus ? { popoverScope: { parentScopeId, parentResponderId: popoverSurface?.request.parentResponderId ?? parentResponderId } } : {}),
+  };
   return (
-    // Exit fade only (no enter animation): a closing window dissolves instead
-    // of cutting, so Quit-with-windows reads as one continuous exit rather
-    // than a flash. NSEPresence in WindowLayer owns the unmount.
+    <NSEWindowLayoutContext.Provider value={layout}>
+    {/* Exit fade only (no enter animation): a closing window dissolves instead
+     * of cutting, so Quit-with-windows reads as one continuous exit rather
+     * than a flash. NSEPresence in WindowLayer owns the unmount. */}
     <div
       ref={hostRef}
       className="webspring-window-host"
@@ -352,20 +431,22 @@ export function WindowHost({
       }}
       style={hostStyle}
     >
-      {record.role === "modal" || record.role === "sheet" ? (
+      {record.role === "modal" || record.role === "sheet" || ownsPopoverFocus ? (
         <FocusScope
           scopeId={`window:${record.id}`}
-          kind="modal"
+          kind={ownsPopoverFocus ? "popover" : "modal"}
           parentScopeId={parentScopeId}
-          parentResponderId={parentResponderId}
-          modal
-          trapFocus
-          externallyManagedScope
+          parentResponderId={ownsPopoverFocus ? popoverSurface?.request.parentResponderId ?? parentResponderId : parentResponderId}
+          modal={!ownsPopoverFocus || compactPopover}
+          trapFocus={!ownsPopoverFocus || compactPopover}
+          restoreFocus={!ownsPopoverFocus}
+          externallyManagedScope={!ownsPopoverFocus}
           externallyManagedInert
         >
           {windowContents}
         </FocusScope>
       ) : windowContents}
     </div>
+    </NSEWindowLayoutContext.Provider>
   );
 }

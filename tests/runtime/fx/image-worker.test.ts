@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../../src/Foundation/NSEData";
+
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { GFXFloatImage, GFXImage } from "../../../src/FX/GraphicsFX/public";
 import { IFXContext, IFXFilterGraph, IFXFilterRegistry, IFXGraphCodec, IFXImage, IFXProcessorDefinition, IFXRenderDestination, IFXRenderPipeline } from "../../../src/FX/ImageFX/public";
@@ -632,7 +634,7 @@ describe("ImageFX worker backend", () => {
     expect(request.operation).toBe("render-encoded");
     const blob = new Blob([new Uint8Array([1,2,3])], { type: "image/png" });
     worker.respond({ id: request.id, ok: true, kind: "encoded", value: { blob, metadata: { width: 1, height: 1, mimeType: "image/png", colourSpace: "srgb", orientation: "up" } } } as IFXImageWorkerResponse);
-    await expect(pending).resolves.toMatchObject({ blob, metadata: { mimeType: "image/png", colourSpace: "srgb", orientation: "up" } });
+    await expect(pending).resolves.toMatchObject({ data: await NSEData.read(blob), metadata: { mimeType: "image/png", colourSpace: "srgb", orientation: "up" } });
 
     const failed = backend.renderEncoded(image(), { format: "image/webp", colourSpace: "srgb", orientation: "up" });
     const failedId = worker.posts.at(-1)!.message.id;
@@ -640,6 +642,21 @@ describe("ImageFX worker backend", () => {
     await expect(failed).rejects.toThrow("encoder failed");
     backend.dispose();
   });
+
+  it.each(["abort", "dispose"])("revokes an encoded result during Foundation bridging on %s", async action => {
+    const worker = new FakeWorker();
+    const backend = new BrowserImageProcessingWorker(worker as unknown as Worker, { encoded: true });
+    const controller = new AbortController();
+    const pending = backend.renderEncoded(image(), { format: "image/png", signal: controller.signal });
+    const request = worker.posts[0]!.message;
+    let finish!: (value: ArrayBuffer) => void;
+    const blob = new Blob([new Uint8Array([1, 2, 3])], { type: "image/png" });
+    vi.spyOn(blob, "arrayBuffer").mockImplementation(() => new Promise(resolve => { finish = resolve; }));
+    worker.respond({ id: request.id, ok: true, kind: "encoded", value: { blob, metadata: { width: 1, height: 1, mimeType: "image/png", colourSpace: "srgb", orientation: "up" } } } as IFXImageWorkerResponse);
+    if (action === "abort") controller.abort(); else backend.dispose();
+    try { await expect(pending).rejects.toMatchObject({ name: "AbortError" }); }
+    finally { finish(new Uint8Array([1, 2, 3]).buffer); backend.dispose(); }
+  }, 1000);
 
   it("advertises only encoded formats that are actually enabled", async () => {
     const worker = new FakeWorker();

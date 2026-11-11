@@ -28,7 +28,9 @@ import {
 } from "react";
 import { useNSEAnimationEnvironment } from "../Animation";
 import { useNSEFeedback } from "../Feedback";
-import { NSEPageController } from "./NSEPageController";
+import { nseUnowned } from "../Controllers/ownership";
+import { useNSEDeferredDisposal } from "../interactionLifecycle";
+import { PageTurnController } from "./pageTurnController";
 import {
   clampNSEPageProgress,
   easeInOutNSEPageProgress,
@@ -48,7 +50,7 @@ import {
 import { getNSEPagePreset } from "./nsePagePresets";
 import type {
   NSEPageCompletionReason,
-  NSEPageControllerSnapshot,
+  NSEPageTurnSnapshot,
   NSEPageDogEarHandlers,
   NSEPageEdge,
   NSEPageEvent,
@@ -147,7 +149,7 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
   const { reducedMotion: environmentReducedMotion } = useNSEAnimationEnvironment();
   const reducedMotion = options.reducedMotion ?? environmentReducedMotion;
   const preset = useMemo(() => getNSEPagePreset(options.preset, options.presetOverrides), [options.preset, options.presetOverrides]);
-  const controllerRef = useRef<NSEPageController | null>(null);
+  const controllerRef = useRef<PageTurnController | null>(null);
   const rootElementRef = useRef<HTMLElement | null>(null);
   const frameRef = useRef<number | null>(null);
   const activeTurnRef = useRef<object | null>(null);
@@ -186,7 +188,8 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
           ? initialOpenProgress
           : options.defaultProgress ?? restProgress
     );
-    controllerRef.current = new NSEPageController({
+    controllerRef.current = new PageTurnController({
+      owner: nseUnowned,
       progress: initialProgress,
       mode: options.mode ?? preset.mode,
       edge: options.edge ?? preset.edge,
@@ -196,7 +199,8 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
   }
 
   const controller = controllerRef.current;
-  const [snapshot, setSnapshot] = useState<NSEPageControllerSnapshot>(() => controller.getSnapshot());
+  useNSEDeferredDisposal(controller);
+  const [snapshot, setSnapshot] = useState<NSEPageTurnSnapshot>(() => controller.getSnapshot());
   const snapshotRef = useRef(snapshot);
   const lastPhaseRef = useRef<NSEPagePhase>(snapshot.phase);
   const lastOpenRef = useRef(snapshot.progress >= (preset.interaction.openProgress ?? 1));
@@ -661,6 +665,13 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
       cancelToRest();
     },
     reset: () => {
+      // A new selection also ends the old pointer's ownership. It must not
+      // resume that gesture against the replacement print on move/release.
+      if (moveFrameRef.current != null) cancelFrame(moveFrameRef.current);
+      moveFrameRef.current = null;
+      pendingMoveRef.current = null;
+      if (draggingRef.current) dragMovedRef.current = true;
+      draggingRef.current = null;
       cancelActiveTurn();
       dragPointerRef.current = null;
       tearSeedRef.current = newTearSeed();
@@ -739,7 +750,7 @@ export function useNSEPage(options: UseNSEPageOptions = {}): UseNSEPageResult {
     return () => { frameListenersRef.current.delete(listener); };
   }, []);
 
-  const applyDragFrame = useCallback((nextSnapshot: NSEPageControllerSnapshot) => {
+  const applyDragFrame = useCallback((nextSnapshot: NSEPageTurnSnapshot) => {
     const root = rootElementRef.current;
     if (!root) return;
     const frameGeometry = resolveNSEPageGeometry({

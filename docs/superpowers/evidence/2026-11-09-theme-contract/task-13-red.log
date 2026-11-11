@@ -1,0 +1,81 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/theme-loading.test.tsx tests/runtime/theme-bundle-loading.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/theme-bundle-loading.test.ts (0 test)
+ ❯ tests/runtime/theme-loading.test.tsx (3 tests | 3 failed) 83ms
+     × resets every semantic colour inside nested appearances without inheriting the outer palette 19ms
+     × resolves a named image against the view's theme and falls back part by part 10ms
+     × turns off only the existing login ornament effect for plain presentation 53ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/theme-bundle-loading.test.ts [ tests/runtime/theme-bundle-loading.test.ts ]
+Error: Cannot find module '../../scripts/synware/theme-loading.mjs' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/theme-bundle-loading.test.ts
+ ❯ tests/runtime/theme-bundle-loading.test.ts:7:1
+      5| import { build } from "vite";
+      6| import { synCloudOS } from "../../scripts/synware/vite-plugin.mjs";
+      7| import { scopeThemeCSS } from "../../scripts/synware/theme-loading.mjs…
+       | ^
+      8| const roots: string[] = [];
+      9| afterEach(() => { for (const root of roots.splice(0)) rmSync(root, { r…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/theme-loading.test.tsx > theme boundaries > resets every semantic colour inside nested appearances without inheriting the outer palette
+AssertionError: expected '' to be '#112233' // Object.is equality
+
+- Expected
++ Received
+
+- #112233
+
+ ❯ tests/runtime/theme-loading.test.tsx:23:124
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/runtime/theme-loading.test.tsx > theme boundaries > resolves a named image against the view's theme and falls back part by part
+AssertionError: expected 'url("data:image/svg+xml,%3c!--%20SynC…' to contain '/inner.svg'
+
+Expected: "/inner.svg"
+Received: "url("data:image/svg+xml,%3c!--%20SynCloudOS%20%E2%80%94%20Copyright%20%C2%A9%202026%20Syndromatic%20Ltd.%20AGPL-3.0-or-later.%20NSImage.goBackTemplateName.%20Original%20NSEPreferencesToast%20geometry,%20unchanged.%20--%3e%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20width='17'%20height='17'%3e%3cpath%20d='M15%204%20L7%2012%20L15%2020'%20fill='none'%20stroke='white'%20stroke-width='3'%20stroke-linecap='round'%20stroke-linejoin='round'/%3e%3c/svg%3e")"
+
+ ❯ tests/runtime/theme-loading.test.tsx:29:37
+     27|     render(<NSEAppearanceProvider theme={inner}><NSEControlImage image…
+     28|     const element = document.querySelector<HTMLElement>('[data-nse-ima…
+     29|     expect(element.style.maskImage).toContain("/inner.svg"); expect(el…
+       |                                     ^
+     30|     expect(element.style.width).toBe("17px"); expect(element.style.hei…
+     31|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/runtime/theme-loading.test.tsx > theme boundaries > turns off only the existing login ornament effect for plain presentation
+AssertionError: expected null to be 'plain' // Object.is equality
+
+- Expected:
+"plain"
+
++ Received:
+null
+
+ ❯ tests/runtime/theme-loading.test.tsx:34:103
+     32|   it("turns off only the existing login ornament effect for plain pres…
+     33|     render(<NSEAppearanceProvider theme={inner}><LoginWindow title="Si…
+     34|     const root = screen.getByRole("dialog"); expect(root.getAttribute(…
+       |                                                                                                       ^
+     35|     expect(root.querySelector('[data-nse-part="attachment"]')).toBeNul…
+     36|     expect(screen.getByRole("button", { name: "Continue" })).not.toBeN…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  3 failed (3)
+   Start at  22:47:48
+   Duration  2.19s (transform 915ms, setup 39ms, import 1.08s, tests 83ms, environment 864ms)

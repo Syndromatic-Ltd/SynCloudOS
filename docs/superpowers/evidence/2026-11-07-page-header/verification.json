@@ -1,0 +1,122 @@
+{
+  "implementationCommit": "7bdaa0d3fdc6d42529b96f9fabf14d27e9f36ba6",
+  "generatedAt": "2026-11-07T11:33:04.177Z",
+  "frameworkHeadAtFinalisation": "805bae210aafc28ddaf92285432bcba99c9430e6",
+  "siteHeadAtFinalisation": "890305c919b5831c8a774050403b4657c5d1857e",
+  "installedFramework": {
+    "commit": "c4f9adfbfdf0afb3ae9643a71bb4f6ee306bb497",
+    "archiveSha256": "1efd58d8cf08ba3c2ea09f7aad078a0f98a6a0dd1124229fc06e67ae2d72b22f"
+  },
+  "checks": {
+    "frameworkTypecheck": {
+      "exitCode": 0,
+      "log": "framework-typecheck-current-final.log"
+    },
+    "frameworkFocused": {
+      "passed": 100,
+      "failed": 0,
+      "files": 9,
+      "log": "feature-focused-current-final.log"
+    },
+    "sdkExportRemoval": {
+      "passed": 2,
+      "failed": 0,
+      "skipped": 7,
+      "log": "sdk-export-tests.log"
+    },
+    "frameworkFull": {
+      "commit": "7bdaa0d3fdc6d42529b96f9fabf14d27e9f36ba6",
+      "passed": 7252,
+      "failed": 28,
+      "filesPassed": 863,
+      "filesFailed": 10,
+      "log": "framework-frozen-full.log"
+    },
+    "siteTypecheck": {
+      "exitCode": 0,
+      "log": "site-current-typecheck-final.log"
+    },
+    "siteFull": {
+      "frameworkCommit": "c4f9adfbfdf0afb3ae9643a71bb4f6ee306bb497",
+      "archiveSha256": "1efd58d8cf08ba3c2ea09f7aad078a0f98a6a0dd1124229fc06e67ae2d72b22f",
+      "passed": 398,
+      "failed": 3,
+      "filesPassed": 59,
+      "filesFailed": 2,
+      "log": "site-current-full.log"
+    },
+    "browser": [
+      {
+        "name": "desktop-light",
+        "frameworkCommit": "c4f9adfbfdf0afb3ae9643a71bb4f6ee306bb497",
+        "siteCommit": "890305c919b5831c8a774050403b4657c5d1857e",
+        "archiveSha256": "1efd58d8cf08ba3c2ea09f7aad078a0f98a6a0dd1124229fc06e67ae2d72b22f",
+        "capturedAt": "2026-11-07T11:26:38.554Z",
+        "receiptStable": true
+      },
+      {
+        "name": "desktop-dark",
+        "frameworkCommit": "c4f9adfbfdf0afb3ae9643a71bb4f6ee306bb497",
+        "siteCommit": "890305c919b5831c8a774050403b4657c5d1857e",
+        "archiveSha256": "1efd58d8cf08ba3c2ea09f7aad078a0f98a6a0dd1124229fc06e67ae2d72b22f",
+        "capturedAt": "2026-11-07T11:28:01.521Z",
+        "receiptStable": true
+      },
+      {
+        "name": "phone-light",
+        "frameworkCommit": "c4f9adfbfdf0afb3ae9643a71bb4f6ee306bb497",
+        "siteCommit": "890305c919b5831c8a774050403b4657c5d1857e",
+        "archiveSha256": "1efd58d8cf08ba3c2ea09f7aad078a0f98a6a0dd1124229fc06e67ae2d72b22f",
+        "capturedAt": "2026-11-07T11:29:12.978Z",
+        "receiptStable": true
+      },
+      {
+        "name": "phone-dark",
+        "frameworkCommit": "c4f9adfbfdf0afb3ae9643a71bb4f6ee306bb497",
+        "siteCommit": "890305c919b5831c8a774050403b4657c5d1857e",
+        "archiveSha256": "1efd58d8cf08ba3c2ea09f7aad078a0f98a6a0dd1124229fc06e67ae2d72b22f",
+        "capturedAt": "2026-11-07T11:30:37.895Z",
+        "receiptStable": true
+      },
+      {
+        "name": "desktop-light-dpr2",
+        "frameworkCommit": "c4f9adfbfdf0afb3ae9643a71bb4f6ee306bb497",
+        "siteCommit": "890305c919b5831c8a774050403b4657c5d1857e",
+        "archiveSha256": "1efd58d8cf08ba3c2ea09f7aad078a0f98a6a0dd1124229fc06e67ae2d72b22f",
+        "capturedAt": "2026-11-07T11:31:41.941Z",
+        "receiptStable": true
+      },
+      {
+        "name": "phone-dark-dpr2",
+        "frameworkCommit": "c4f9adfbfdf0afb3ae9643a71bb4f6ee306bb497",
+        "siteCommit": "890305c919b5831c8a774050403b4657c5d1857e",
+        "archiveSha256": "1efd58d8cf08ba3c2ea09f7aad078a0f98a6a0dd1124229fc06e67ae2d72b22f",
+        "capturedAt": "2026-11-07T11:32:28.453Z",
+        "receiptStable": true
+      }
+    ],
+    "installedSDK": {
+      "passed": true,
+      "frameworkCommit": "c4f9adfbfdf0afb3ae9643a71bb4f6ee306bb497",
+      "archiveSha256": "1efd58d8cf08ba3c2ea09f7aad078a0f98a6a0dd1124229fc06e67ae2d72b22f",
+      "removed": [
+        "NSEPageHeader",
+        "NSEPageHeaderProps"
+      ],
+      "styles": [
+        "automatic",
+        "expanded",
+        "preference",
+        "unified",
+        "unifiedCompact"
+      ],
+      "subtitle": true,
+      "leadingAccessory": true
+    }
+  },
+  "limitations": [
+    "Full suites remain red; see full-suite-failures.md",
+    "Host toolbar is 56px versus the 52px board sketch",
+    "Human visual review and physical-device acceptance are not claimed"
+  ]
+}

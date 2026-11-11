@@ -1,0 +1,677 @@
+{
+  "fullRun": {
+    "commit": "41a47defaadd162b4804047ae34a25e638386008",
+    "files": 926,
+    "failedFiles": 60,
+    "enospcFiles": 51,
+    "passedTests": 6231,
+    "failedTests": 19
+  },
+  "deliveryCommit": "bcb829700b5fe9e931bce3ee45a48e4d61a9a560",
+  "scope": "Maps every failure from the single full run to subsequent focused results. This is not a second full-suite pass claim.",
+  "coveredFailureFiles": 60,
+  "unrecoveredFailureFiles": [],
+  "coverage": [
+    {
+      "file": "tests/integration/nse-data-view-colour-drag.test.tsx",
+      "covered": true,
+      "knownCases": 21,
+      "passedCases": 21,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/performance/text-primitives-performance.test.ts",
+      "covered": true,
+      "knownCases": 1,
+      "passedCases": 1,
+      "evidence": [
+        "authorization-last-failures-recheck.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/nse/colour/nse-colour-controls.test.tsx",
+      "covered": true,
+      "knownCases": 29,
+      "passedCases": 29,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/nse/date-time/nse-date-picker.test.tsx",
+      "covered": true,
+      "knownCases": 39,
+      "passedCases": 39,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/nse/menus/nse-menu-controller.test.tsx",
+      "covered": true,
+      "knownCases": 39,
+      "passedCases": 39,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/nse/overlays/nse-overlay-manager.test.tsx",
+      "covered": true,
+      "knownCases": 17,
+      "passedCases": 17,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/nse/toolbars/nse-toolbar.test.tsx",
+      "covered": true,
+      "knownCases": 36,
+      "passedCases": 36,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/app-share-client.test.ts",
+      "covered": true,
+      "knownCases": 36,
+      "passedCases": 36,
+      "evidence": [
+        "authorization-fixture-migration-final.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/application-actions.test.tsx",
+      "covered": true,
+      "knownCases": 43,
+      "passedCases": 43,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/application-stage-app-menu.test.tsx",
+      "covered": true,
+      "knownCases": 20,
+      "passedCases": 20,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/architecture-boundaries.test.ts",
+      "covered": true,
+      "knownCases": 36,
+      "passedCases": 36,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/browser-application-host.test.tsx",
+      "covered": true,
+      "knownCases": 36,
+      "passedCases": 36,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/browser-global-boundary.test.ts",
+      "covered": true,
+      "knownCases": 8,
+      "passedCases": 8,
+      "evidence": [
+        "authorization-browser-boundary-final.log"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/browser-route-coordinator.test.ts",
+      "covered": true,
+      "knownCases": 52,
+      "passedCases": 52,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/bundle-loader-runtime.test.ts",
+      "covered": true,
+      "knownCases": 16,
+      "passedCases": 16,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/developer-mcp.test.ts",
+      "covered": true,
+      "knownCases": 62,
+      "passedCases": 62,
+      "evidence": [
+        "authorization-package-recheck.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/document-durable-synchronisation-regressions.test.ts",
+      "covered": true,
+      "knownCases": 15,
+      "passedCases": 15,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/document-resource-lifecycle.test.ts",
+      "covered": true,
+      "knownCases": 30,
+      "passedCases": 30,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/document-store.test.ts",
+      "covered": true,
+      "knownCases": 29,
+      "passedCases": 29,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/document-terminal-reconciliation.test.ts",
+      "covered": true,
+      "knownCases": 14,
+      "passedCases": 14,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/file-panel-service.test.ts",
+      "covered": true,
+      "knownCases": 27,
+      "passedCases": 27,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/focus-scope.test.tsx",
+      "covered": true,
+      "knownCases": 25,
+      "passedCases": 25,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/framework-doc-links.test.ts",
+      "covered": true,
+      "knownCases": 4,
+      "passedCases": 4,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/framework-settlement.test.ts",
+      "covered": true,
+      "knownCases": 15,
+      "passedCases": 15,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/host-update-readiness.test.ts",
+      "covered": true,
+      "knownCases": 28,
+      "passedCases": 28,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/http-authentication-recovery.test.ts",
+      "covered": true,
+      "knownCases": 82,
+      "passedCases": 82,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/mounted-app-interaction-authority.test.tsx",
+      "covered": true,
+      "knownCases": 14,
+      "passedCases": 14,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/mounted-workspace-document-versions.test.ts",
+      "covered": true,
+      "knownCases": 11,
+      "passedCases": 11,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/nse-animation-webspring-integration.test.tsx",
+      "covered": true,
+      "knownCases": 13,
+      "passedCases": 13,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/nse-animation.test.tsx",
+      "covered": true,
+      "knownCases": 34,
+      "passedCases": 34,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/nse-cursor-tracking.test.tsx",
+      "covered": true,
+      "knownCases": 19,
+      "passedCases": 19,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/nse-image-resource.test.ts",
+      "covered": true,
+      "knownCases": 27,
+      "passedCases": 27,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/nse-stack-view.test.tsx",
+      "covered": true,
+      "knownCases": 18,
+      "passedCases": 18,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/nse-tab-bar.test.tsx",
+      "covered": true,
+      "knownCases": 24,
+      "passedCases": 24,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/nse-text-layout.test.ts",
+      "covered": true,
+      "knownCases": 35,
+      "passedCases": 35,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/nse-web-content.test.tsx",
+      "covered": true,
+      "knownCases": 42,
+      "passedCases": 42,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/nse-window-controller-class.test.tsx",
+      "covered": true,
+      "knownCases": 22,
+      "passedCases": 22,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/preference-panes.test.tsx",
+      "covered": true,
+      "knownCases": 21,
+      "passedCases": 21,
+      "evidence": [
+        "authorization-fixture-migration-final.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/routes-launchservices.test.ts",
+      "covered": true,
+      "knownCases": 30,
+      "passedCases": 30,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/routing-ii-lifecycle.test.ts",
+      "covered": true,
+      "knownCases": 27,
+      "passedCases": 27,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/routing-ii-outlets.test.tsx",
+      "covered": true,
+      "knownCases": 21,
+      "passedCases": 21,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/runtime-instance-contract.test.ts",
+      "covered": true,
+      "knownCases": 14,
+      "passedCases": 14,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/runtime.test.ts",
+      "covered": true,
+      "knownCases": 14,
+      "passedCases": 14,
+      "evidence": [
+        "authorization-fixture-migration-final.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/sound-service.test.ts",
+      "covered": true,
+      "knownCases": 38,
+      "passedCases": 38,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/synapp-sdk-package.test.ts",
+      "covered": true,
+      "knownCases": 9,
+      "passedCases": 9,
+      "evidence": [
+        "authorization-package-recheck.json",
+        "authorization-sdk-consumer-final.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/synapp-sdk-testing.test.tsx",
+      "covered": true,
+      "knownCases": 10,
+      "passedCases": 10,
+      "evidence": [
+        "authorization-fixture-migration-final.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/transient-window-surface-bridge.test.tsx",
+      "covered": true,
+      "knownCases": 37,
+      "passedCases": 37,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/webspring-layout.test.ts",
+      "covered": true,
+      "knownCases": 29,
+      "passedCases": 29,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/window-final-closure-regressions.test.ts",
+      "covered": true,
+      "knownCases": 20,
+      "passedCases": 20,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/window-transaction-authority-regressions.test.ts",
+      "covered": true,
+      "knownCases": 35,
+      "passedCases": 35,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/chronosphere/chronosphere-presentation.test.tsx",
+      "covered": true,
+      "knownCases": 25,
+      "passedCases": 25,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/fx/animation.test.tsx",
+      "covered": true,
+      "knownCases": 23,
+      "passedCases": 23,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/fx/graphics.test.tsx",
+      "covered": true,
+      "knownCases": 19,
+      "passedCases": 19,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/fx/image-resource.test.ts",
+      "covered": true,
+      "knownCases": 18,
+      "passedCases": 18,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/fx/image-worker.test.ts",
+      "covered": true,
+      "knownCases": 38,
+      "passedCases": 38,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/fx/lumina-authority.test.ts",
+      "covered": true,
+      "knownCases": 13,
+      "passedCases": 13,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/fx/media-queue.test.ts",
+      "covered": true,
+      "knownCases": 15,
+      "passedCases": 15,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/fx/mounted-recording.test.ts",
+      "covered": true,
+      "knownCases": 5,
+      "passedCases": 5,
+      "evidence": [
+        "authorization-recovered-suites.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/fx/packed-fx.test.ts",
+      "covered": true,
+      "knownCases": 1,
+      "passedCases": 1,
+      "evidence": [
+        "authorization-package-recheck.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    },
+    {
+      "file": "tests/runtime/fx/phase5-real-authority.test.ts",
+      "covered": true,
+      "knownCases": 2,
+      "passedCases": 2,
+      "evidence": [
+        "authorization-last-failures-recheck.json"
+      ],
+      "missingKnown": [],
+      "missingFailures": []
+    }
+  ]
+}

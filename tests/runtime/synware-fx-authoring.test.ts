@@ -36,6 +36,7 @@ import * as media from "../../src/FX/MediaFX/public";
 import * as video from "../../src/FX/VideoFX/public";
 import * as midi from "../../src/FX/MIDIFX/public";
 import * as location from "../../src/FX/LocationFX/public";
+import * as compression from "../../src/FX/CompressionFX/public";
 import * as lumina from "../../src/FX/LuminaFX/public";
 import { exerciseRecipes, families } from "../fixtures/synware-authoring/exercise-recipes.mjs";
 import { auditSynWareCapabilityUsage } from "../../scripts/synware/audit-capability-usage.mjs";
@@ -43,11 +44,11 @@ import { auditSynWareImports } from "../../scripts/synware/audit-sdk-imports.mjs
 
 const roots: string[] = [];
 const generator = resolve("scripts/synware/create-synware.mjs");
-const fx: Record<string, unknown> = { animation, graphics, image, text, audio, haptics, motion, media, video, midi, location, lumina };
+const fx: Record<string, unknown> = { animation, graphics, image, text, audio, haptics, motion, media, video, midi, location, lumina, compression };
 function temporary() { const root = mkdtempSync(join(tmpdir(), "synware-fx-authoring-")); roots.push(root); return root; }
 function generate(options: string[] = []) {
   const root = temporary(), app = join(root, "src/SynWare/Example.app");
-  execFileSync(process.execPath, [generator, app, "com.example.fx", ...options]);
+  execFileSync(process.execPath, [generator, app, ...options]);
   return { root, app };
 }
 function load(path: string, overrides: Record<string, unknown> = {}): any {
@@ -69,18 +70,18 @@ afterEach(() => { for (const root of roots.splice(0)) { expect(root.startsWith(j
 
 it("keeps the default permission-free and rejects unknown recipes/options before writing", () => {
   const { app } = generate();
-  expect(load(join(app, "Contents/Info.ts")).default.permissions).toBeUndefined();
+  expect(load(join(app, "Contents/Info.ts")).default.entitlements).toBeUndefined();
   expect(existsSync(join(app, "Contents/recipes"))).toBe(false);
   for (const options of [["--fx", "unknown"], ["--fx"], ["--fxx", "media"], ["--fx", "video", "unexpected"]]) {
-    const target = join(temporary(), "invalid");
-    expect(spawnSync(process.execPath, [generator, target, "com.example.fx", ...options]).status).toBe(1);
+    const target = join(temporary(), "Invalid.app");
+    expect(spawnSync(process.execPath, [generator, target, ...options]).status).toBe(1);
     expect(existsSync(target)).toBe(false);
   }
 });
 
 it("executes all twelve actual recipe modules and declares exactly their scoped authority", async () => {
   const { root, app } = generate(["--fx", families.join(",")]);
-  expect(load(join(app, "Contents/Info.ts")).default.permissions).toEqual([
+  expect(load(join(app, "Contents/Info.ts")).default.entitlements).toEqual([
     "video.capture.camera", "midi.access", "location.read", "location.request", "lumina.query",
   ]);
   const result = await exerciseRecipes((family: string) => load(join(app, `Contents/recipes/${family}.ts`)));
@@ -95,7 +96,7 @@ it("executes all twelve actual recipe modules and declares exactly their scoped 
 
 it("selects only requested recipes and deduplicates repeated options without granting unrelated authority", () => {
   const { app } = generate(["--fx", "media", "--fx", "location,media"]);
-  expect(load(join(app, "Contents/Info.ts")).default.permissions).toEqual(["location.read", "location.request"]);
+  expect(load(join(app, "Contents/Info.ts")).default.entitlements).toEqual(["location.read", "location.request"]);
   expect(existsSync(join(app, "Contents/recipes/video.ts"))).toBe(false);
   expect((readFileSync(join(app, "Contents/index.tsx"), "utf8").match(/id="media"/g) ?? [])).toHaveLength(1);
 });
@@ -118,10 +119,10 @@ it("does no device work on render and shows explicit action failures rather than
   const states: unknown[] = [];
   const definition = load(join(app, "Contents/index.tsx"), {
     "react": { useState: () => ["Ready", (value: unknown) => states.push(value)] }, "react/jsx-runtime": jsx,
-    "@syndromatic/syncloudos/sdk": { createSynWare: (value: unknown) => value, useSynWare: () => ({appId:"com.example.fx"}), useSynWareVideo: () => ({capabilities:{camera:true},requestCamera}) },
-    "@syndromatic/syncloudos/nse": { NSEStackView: "div", NSEStackItem: "div" }, "@syndromatic/syncloudos/nse/styles.css": {},
+    "@syndromatic/syncloudos": { SCOS: { app: { id: "example", title: "Example" } }, useVideo: () => ({capabilities:{camera:true},requestCamera}) },
+    "@syndromatic/syncloudos/nse": { NSEStackView: "div", NSEStackItem: "div" }, "@syndromatic/syncloudos/nse/controls": { NSEButton: "button" }, "@syndromatic/syncloudos/nse/styles.css": {},
   }).default;
-  const tree = definition.root();
+  const tree = definition();
   expect(requestCamera).not.toHaveBeenCalled();
   const buttons: any[] = [];
   function visit(node: any) { if (!node || typeof node !== "object") return; if (node.type === "button") buttons.push(node); for (const child of [node.props?.children].flat()) visit(child); }
@@ -129,4 +130,13 @@ it("does no device work on render and shows explicit action failures rather than
   await buttons[0].props.onClick();
   expect(requestCamera).toHaveBeenCalledOnce();
   expect(states.at(-1)).toBe("Camera denied");
+});
+
+it("scaffolds Compression's exact algorithm enum without entitlements or a mounted hook", () => {
+  const { app } = generate(["--fx", "compression"]);
+  expect(load(join(app, "Contents/Info.ts")).default.entitlements).toBeUndefined();
+  const recipe = join(app, "Contents/recipes/compression.ts");
+  expect(readFileSync(recipe, "utf8")).toContain('import { CPFXAlgorithm } from "@syndromatic/syncloudos/fx/compression";');
+  expect(load(recipe).runRecipe()).toBe("Compression algorithms: lzfse, lz4, lzma, zlib, brotli, lzbitmap");
+  expect(readFileSync(join(app, "Contents/index.tsx"), "utf8")).not.toContain("useCompression");
 });

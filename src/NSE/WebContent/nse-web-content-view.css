@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -18,7 +21,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-.nse-web-content-view {
+.nse-web-content-view,
+:where(:scope):is(.nse-web-content-view) {
   display: block;
   inline-size: 100%;
   max-inline-size: 100%;
@@ -26,4 +30,9 @@
   block-size: 20rem;
   border: 0;
 }
-.nse-web-content-view[hidden] { display: none; }
+.nse-web-content-view[hidden],
+:where(:scope):is(.nse-web-content-view[hidden]) { display: none; }
+
+}
+
+}

@@ -1,0 +1,5 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run tsc -b --pretty false
+src/SynWare/NSEControlGallery.app/Contents/GalleryViews.tsx(115,69): error TS2322: Type 'GalleryViewController' is not assignable to type 'NSEViewController<number>'.
+  The types returned by 'getSnapshot()' are incompatible between these types.
+    Type 'NSESplitViewSnapshot' is not assignable to type 'number'.

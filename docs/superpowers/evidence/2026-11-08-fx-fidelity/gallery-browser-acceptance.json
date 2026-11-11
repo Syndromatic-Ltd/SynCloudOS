@@ -1,0 +1,557 @@
+{
+  "framework": "5286513ee77b3e384c1b8347c3546d0d605b977e",
+  "sdkSource": "a99970151f276d4bdd65e9fd2450aac9b1e3b82520f09a497b01eb998a9959f0",
+  "archive": "eb4fe13bac3036d077e0b8558b7e7f2ccbf2545c6e4993f1ddedea2750170d9e",
+  "browser": "149.0.7827.55",
+  "dpr": 1,
+  "actions": [
+    {
+      "action": "Monitor network",
+      "status": [
+        "Monitoring network changes.",
+        "satisfied; Expensive: NWFXError: isExpensive is unavailable: the host cannot observe this network property.; Constrained: false; Interfaces: NWFXError: availableInterfaces is unavailable: the host cannot observe this network property."
+      ]
+    },
+    {
+      "action": "Stop monitoring",
+      "status": [
+        "Monitoring is stopped."
+      ]
+    },
+    {
+      "action": "Check speech authorisation",
+      "status": [
+        "Recognition unavailable; on-device recognition unavailable.",
+        "Speech authorisation: restricted."
+      ]
+    },
+    {
+      "action": "Recognise supplied audio",
+      "status": [
+        "Recognition unavailable; on-device recognition unavailable.",
+        "SPFXError: The speech.recognize entitlement or speech authorization was denied or revoked."
+      ]
+    },
+    {
+      "action": "Choose contact",
+      "status": [
+        "CNFXError: Contact Picker is unavailable in this browser context."
+      ]
+    },
+    {
+      "action": "Check contact database access",
+      "status": [
+        "CNFXError: This browser cannot authorize a persistent Contacts database; present CNFXContactPickerViewController to select contacts."
+      ]
+    },
+    {
+      "action": "Try payment authorisation",
+      "status": [
+        "Payments unavailable.",
+        "PKFXError: Apple Pay merchant validation is unavailable through this browser PassKit transport."
+      ]
+    },
+    {
+      "action": "Read NFC tag",
+      "status": [
+        "NFC reading unavailable.",
+        "NFXReaderError: NFC reading is unavailable."
+      ]
+    },
+    {
+      "action": "Stop NFC reading",
+      "status": [
+        "NFC reading unavailable.",
+        "NFC reading is stopped."
+      ]
+    },
+    {
+      "action": "Start world tracking",
+      "status": [
+        "World tracking unavailable.",
+        "XRFXError: The privacy owner or authorisation was revoked."
+      ]
+    },
+    {
+      "action": "Pause world tracking",
+      "status": [
+        "World tracking unavailable.",
+        "World tracking is paused."
+      ]
+    },
+    {
+      "action": "Encrypt and verify",
+      "status": [
+        "AES.GCM round trip verified. SHA-256: SHA256 digest: 1575164a430539b0eb9787a6a123ecea0bc8db5c0aba45a2895a97b6b2ca4e23"
+      ]
+    },
+    {
+      "action": "Compress and restore",
+      "status": [
+        "Raw DEFLATE round trip verified: 140 bytes compressed to 40 bytes."
+      ]
+    },
+    {
+      "action": "Navigate away while monitor active and reopen",
+      "status": [
+        "Monitoring is stopped."
+      ]
+    }
+  ],
+  "viewports": [
+    {
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "scheme": "light",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "groups": [
+        {
+          "title": "Speech",
+          "left": 19,
+          "right": 354
+        },
+        {
+          "title": "Audio session",
+          "left": 19,
+          "right": 354
+        },
+        {
+          "title": "Video presentation",
+          "left": 19,
+          "right": 354
+        },
+        {
+          "title": "Network path",
+          "left": 19,
+          "right": 354
+        },
+        {
+          "title": "Location speed",
+          "left": 19,
+          "right": 354
+        },
+        {
+          "title": "Speech recognition",
+          "left": 19,
+          "right": 354
+        },
+        {
+          "title": "Contacts",
+          "left": 19,
+          "right": 354
+        },
+        {
+          "title": "Payment authorisation",
+          "left": 19,
+          "right": 354
+        },
+        {
+          "title": "NFC reading",
+          "left": 19,
+          "right": 354
+        },
+        {
+          "title": "Bluetooth peripheral",
+          "left": 19,
+          "right": 354
+        },
+        {
+          "title": "Augmented reality",
+          "left": 19,
+          "right": 354
+        },
+        {
+          "title": "Cryptography",
+          "left": 19,
+          "right": 354
+        },
+        {
+          "title": "Compression",
+          "left": 19,
+          "right": 354
+        }
+      ],
+      "overflowingButtons": []
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "scheme": "dark",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "groups": [
+        {
+          "title": "Speech",
+          "left": 19,
+          "right": 354
+        },
+        {
+          "title": "Audio session",
+          "left": 19,
+          "right": 354
+        },
+        {
+          "title": "Video presentation",
+          "left": 19,
+          "right": 354
+        },
+        {
+          "title": "Network path",
+          "left": 19,
+          "right": 354
+        },
+        {
+          "title": "Location speed",
+          "left": 19,
+          "right": 354
+        },
+        {
+          "title": "Speech recognition",
+          "left": 19,
+          "right": 354
+        },
+        {
+          "title": "Contacts",
+          "left": 19,
+          "right": 354
+        },
+        {
+          "title": "Payment authorisation",
+          "left": 19,
+          "right": 354
+        },
+        {
+          "title": "NFC reading",
+          "left": 19,
+          "right": 354
+        },
+        {
+          "title": "Bluetooth peripheral",
+          "left": 19,
+          "right": 354
+        },
+        {
+          "title": "Augmented reality",
+          "left": 19,
+          "right": 354
+        },
+        {
+          "title": "Cryptography",
+          "left": 19,
+          "right": 354
+        },
+        {
+          "title": "Compression",
+          "left": 19,
+          "right": 354
+        }
+      ],
+      "overflowingButtons": []
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "dpr": 1,
+      "scheme": "dark",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "groups": [
+        {
+          "title": "Speech",
+          "left": 277,
+          "right": 825.5
+        },
+        {
+          "title": "Audio session",
+          "left": 851.5,
+          "right": 1400
+        },
+        {
+          "title": "Video presentation",
+          "left": 277,
+          "right": 825.5
+        },
+        {
+          "title": "Network path",
+          "left": 851.5,
+          "right": 1400
+        },
+        {
+          "title": "Location speed",
+          "left": 277,
+          "right": 825.5
+        },
+        {
+          "title": "Speech recognition",
+          "left": 851.5,
+          "right": 1400
+        },
+        {
+          "title": "Contacts",
+          "left": 277,
+          "right": 825.5
+        },
+        {
+          "title": "Payment authorisation",
+          "left": 851.5,
+          "right": 1400
+        },
+        {
+          "title": "NFC reading",
+          "left": 277,
+          "right": 825.5
+        },
+        {
+          "title": "Bluetooth peripheral",
+          "left": 851.5,
+          "right": 1400
+        },
+        {
+          "title": "Augmented reality",
+          "left": 277,
+          "right": 825.5
+        },
+        {
+          "title": "Cryptography",
+          "left": 851.5,
+          "right": 1400
+        },
+        {
+          "title": "Compression",
+          "left": 277,
+          "right": 825.5
+        }
+      ],
+      "overflowingButtons": []
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "dpr": 1,
+      "scheme": "light",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "groups": [
+        {
+          "title": "Speech",
+          "left": 277,
+          "right": 825.5
+        },
+        {
+          "title": "Audio session",
+          "left": 851.5,
+          "right": 1400
+        },
+        {
+          "title": "Video presentation",
+          "left": 277,
+          "right": 825.5
+        },
+        {
+          "title": "Network path",
+          "left": 851.5,
+          "right": 1400
+        },
+        {
+          "title": "Location speed",
+          "left": 277,
+          "right": 825.5
+        },
+        {
+          "title": "Speech recognition",
+          "left": 851.5,
+          "right": 1400
+        },
+        {
+          "title": "Contacts",
+          "left": 277,
+          "right": 825.5
+        },
+        {
+          "title": "Payment authorisation",
+          "left": 851.5,
+          "right": 1400
+        },
+        {
+          "title": "NFC reading",
+          "left": 277,
+          "right": 825.5
+        },
+        {
+          "title": "Bluetooth peripheral",
+          "left": 851.5,
+          "right": 1400
+        },
+        {
+          "title": "Augmented reality",
+          "left": 277,
+          "right": 825.5
+        },
+        {
+          "title": "Cryptography",
+          "left": 851.5,
+          "right": 1400
+        },
+        {
+          "title": "Compression",
+          "left": 277,
+          "right": 825.5
+        }
+      ],
+      "overflowingButtons": []
+    }
+  ],
+  "limits": [
+    "Physical pairing, native contact chooser, payment transport, supplied-audio native backend and AR hardware are not verified.",
+    "Desktop-session Bluetooth chooser invoked without selecting a peripheral; leaving and reopening reset the session."
+  ],
+  "site": "c74d8c24167357a09118a8c16b6254983bb47a10",
+  "phoneDarkClearance": {
+    "statusBottom": 709.515625,
+    "barTop": 762
+  },
+  "controls": {
+    "renderedButtons": 34,
+    "allUseNSEButtonClass": true,
+    "videoElements": 1,
+    "groups": [
+      "Speech",
+      "Audio session",
+      "Video presentation",
+      "Network path",
+      "Location speed",
+      "Speech recognition",
+      "Contacts",
+      "Payment authorisation",
+      "NFC reading",
+      "Bluetooth peripheral",
+      "Augmented reality",
+      "Cryptography",
+      "Compression"
+    ]
+  },
+  "console": {
+    "pageErrors": [],
+    "errors": [],
+    "warnings": [
+      "[.WebGL-0x449403885200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+      "[.WebGL-0x449403885200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+      "[.WebGL-0x449403885200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+      "[.WebGL-0x449403885200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+    ],
+    "failedRequests": [],
+    "optimisedSDKRequests": []
+  },
+  "screenshots": [
+    {
+      "file": "gallery-desktop-light.png",
+      "primary": true,
+      "bytes": 258038,
+      "sha256": "ac03de3e110d80060339ec744da8685973eb7c147518ed1a6cb3aeef19c51113",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "gallery-desktop-dark.png",
+      "primary": true,
+      "bytes": 260240,
+      "sha256": "9ba6d6660da4eb3b4ab091277b8b06b87016bb4046b0574a5eab31d04ab5820b",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "gallery-phone-light.png",
+      "primary": true,
+      "bytes": 97942,
+      "sha256": "9acdc9d9dce26ddf0c6d45587ba522b3544d3d8d3639c7cf140337d0a8b67c75",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "gallery-phone-dark.png",
+      "primary": true,
+      "bytes": 98677,
+      "sha256": "871956e53a3a4d86ff30b33f5e876080c1801bc419c7866838562b820ef236f1",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "gallery-desktop-light-middle.png",
+      "primary": false,
+      "bytes": 272390,
+      "sha256": "4b9a8ba040e0e51746d10e35faaa8c3a72fff20823d426be15cdeb45303b0db9",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "gallery-desktop-light-devices.png",
+      "primary": false,
+      "bytes": 287787,
+      "sha256": "f3566a2f2971853491bf8c5c5f06cad2b6662886693df599eb7827553d27c4bd",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "gallery-desktop-light-results.png",
+      "primary": false,
+      "bytes": 272641,
+      "sha256": "3d5f16e02e2957adaedce1d5ac7fa826842261735cb461e5ef30712d26616369",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "file": "gallery-phone-light-errors.png",
+      "primary": false,
+      "bytes": 97993,
+      "sha256": "24712e7b74516b58d798d400e0b68adc5afdb0d64f6e1f9ec89f23bb96051834",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "gallery-phone-light-results.png",
+      "primary": false,
+      "bytes": 82456,
+      "sha256": "331cd6e01251316feb233020248884b237e5bd25c7259976cd4d7660ffb6b106",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "gallery-phone-dark-results.png",
+      "primary": false,
+      "bytes": 85311,
+      "sha256": "c3517baa13e1d22146f507dd1d7acb5e1823827131c239baafe3916a975e025c",
+      "width": 390,
+      "height": 844
+    }
+  ],
+  "phoneClearance": {
+    "before": {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "maximumScrollTop": 4502,
+      "scrollHeight": 5164,
+      "clientHeight": 662,
+      "statusBottom": 802.140625,
+      "obscured": true,
+      "approximateBarTopFromScreenshot": 766
+    },
+    "after": {
+      "status": {
+        "top": 671.921875,
+        "bottom": 709.609375
+      },
+      "bar": {
+        "top": 762,
+        "bottom": 834
+      }
+    },
+    "canonicalMarker": true,
+    "noAppearanceOverride": true
+  },
+  "result": "Passed desktop and phone viewport/appearance checks with documented physical-backend limitations"
+}

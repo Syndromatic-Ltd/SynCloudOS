@@ -1,0 +1,81 @@
+[
+  {
+    "name": "phone-dark-dpr2",
+    "width": 390,
+    "height": 844,
+    "dpr": 2,
+    "frameworkCommit": "c4f9adfbfdf0afb3ae9643a71bb4f6ee306bb497",
+    "archiveSha256": "1efd58d8cf08ba3c2ea09f7aad078a0f98a6a0dd1124229fc06e67ae2d72b22f",
+    "colourScheme": "dark",
+    "gallery": {
+      "text": "Buttons",
+      "bounds": {
+        "x": 0,
+        "y": 56,
+        "width": 390,
+        "height": 52,
+        "top": 56,
+        "right": 390,
+        "bottom": 108,
+        "left": 0
+      },
+      "title": {
+        "x": 20,
+        "y": 56,
+        "width": 350,
+        "height": 37,
+        "top": 56,
+        "right": 370,
+        "bottom": 93,
+        "left": 20
+      },
+      "font": "600 28px / 37px \"Syndromatic UI\", \"Segoe UI\", sans-serif",
+      "colour": "rgb(237, 241, 246)"
+    },
+    "scrollBefore": {
+      "top": 0,
+      "range": 683
+    },
+    "scrollAfter": {
+      "top": 450,
+      "range": 683
+    },
+    "prefsMetrics": {
+      "bounds": {
+        "x": 12,
+        "y": 268.484375,
+        "width": 366,
+        "height": 66,
+        "top": 268.484375,
+        "right": 378,
+        "bottom": 334.484375,
+        "left": 12
+      },
+      "title": {
+        "x": 141.5625,
+        "y": 288.65625,
+        "width": 106.875,
+        "height": 25.640625,
+        "top": 288.65625,
+        "right": 248.4375,
+        "bottom": 314.296875,
+        "left": 141.5625
+      },
+      "font": "700 19px / 25.65px \"Syndromatic UI\", \"Segoe UI\", sans-serif"
+    },
+    "errors": [],
+    "scope": "rendering spot check",
+    "capturedAt": "2026-11-07T11:32:28.453Z",
+    "receiptStable": true,
+    "siteCommit": "890305c919b5831c8a774050403b4657c5d1857e",
+    "gallerySourceSha256": {
+      "src/SynWare/NSEControlGallery.app/Contents/GalleryViews.tsx": "2033a01e495435ffefe250fa07e6387a284233f8aaf5bbeb7e2256b1b13ee760",
+      "src/SynWare/NSEControlGallery.app/Contents/Resources/styles.css": "0589bead42fdfd0c652bd370f0c76fd58e732293b9cf8b4270a04237ce68725a"
+    },
+    "captureSha256": {
+      "gallery-buttons-phone-dark-dpr2.png": "60a390ddc6570893827b66b2c600cff0504a1d649a1178708df46645c747b7b2",
+      "gallery-scrolled-phone-dark-dpr2.png": "adf1075680ba01d1214457a6867cc9c4658cb6ac1289a939554934cfa7ceb4c9",
+      "preferences-appearance-phone-dark-dpr2.png": "de02da8c7275fd64e1568051e561175be04a178811349849206ae3a6cb61799f"
+    }
+  }
+]

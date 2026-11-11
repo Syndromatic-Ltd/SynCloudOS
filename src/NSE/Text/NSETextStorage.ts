@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SynCloudOSLifecycleRecord } from "../../SynCloudOS/nseRuntimeContracts";
 import { composeNSETextChangeMaps } from "./textChanges";
 import { createInMemoryNSETextOwner, type NSETextOwner, type NSETextChangeReceipt } from "./textOwner";
 import { inheritedNSETextAttributes, plainNSETextContent, readNSETextContent } from "./textOperations";
@@ -32,6 +33,7 @@ export class NSETextStorage {
   readonly #ownsOwner:boolean;
   readonly #unsubscribe:()=>void;
   readonly #listeners=new Set<(receipt:NSETextChangeReceipt)=>void>();
+  readonly #lifecycle=new SynCloudOSLifecycleRecord({kind:"NSETextStorage"});
   #disposed=false;
   #publishing=false;
   #editingDepth=0;
@@ -48,7 +50,7 @@ export class NSETextStorage {
       else this.#lastPublished=this.#publish(receipt);
     });
   }
-  #assertLive():void { if(this.#disposed) throw new Error("Text storage is disposed."); }
+  #assertLive(operation:string):void { if(this.#disposed) throw this.#lifecycle.error({code:"NSE_TEXT_STORAGE_DISPOSED",operation}); }
   #merge(a:NSETextChangeReceipt,b:NSETextChangeReceipt):NSETextChangeReceipt {
     return Object.freeze({before:a.before,snapshot:b.snapshot,changeMap:composeNSETextChangeMaps(a.changeMap,b.changeMap),operations:Object.freeze([...a.operations,...b.operations]),observerErrors:Object.freeze([...a.observerErrors,...b.observerErrors])});
   }
@@ -62,32 +64,34 @@ export class NSETextStorage {
     } finally { this.#publishing=false; }
     return errors.length ? Object.freeze({...receipt,observerErrors:Object.freeze(errors)}) : receipt;
   }
-  getSnapshot=()=>{this.#assertLive();return this.#owner.getSnapshot();};
-  subscribe=(listener:(receipt:NSETextChangeReceipt)=>void):(()=>void)=>{this.#assertLive();this.#listeners.add(listener);return()=>{this.#listeners.delete(listener);};};
+  getSnapshot=()=>{this.#assertLive("getSnapshot");return this.#owner.getSnapshot();};
+  subscribe=(listener:(receipt:NSETextChangeReceipt)=>void):(()=>void)=>{this.#assertLive("subscribe");this.#listeners.add(listener);return()=>{this.#listeners.delete(listener);};};
   commit(operations:readonly NSETextEditOperation[]):NSETextChangeReceipt {
-    this.#assertLive(); if(this.#publishing) throw new Error("Reentrant text commit during publishing is forbidden.");
+    this.#assertLive("commit"); if(this.#publishing) throw new Error("Reentrant text commit during publishing is forbidden.");
     const before=this.#owner.getSnapshot(); this.#lastPublished=null;
     const receipt=this.#owner.commit({expectedRevision:before.revision,expectedGeneration:before.ownerGeneration,operations});
     const published=this.#lastPublished as NSETextChangeReceipt|null;
     return published ? Object.freeze({...published,observerErrors:Object.freeze([...published.observerErrors,...receipt.observerErrors])}) : receipt;
   }
   replaceCharacters(range:NSETextRange,value:string|NSEAttributedContent,attributes?:NSEAttributedTextAttributes):NSETextChangeReceipt {
+    this.#assertLive("replaceCharacters");
     const content=typeof value==="string" ? plainNSETextContent(value,attributes ?? inheritedNSETextAttributes(this.getSnapshot(),range.location)) : value;
     return this.commit([{kind:"replace",range,content}]);
   }
-  applyAttributes(range:NSETextRange,attributes:NSEAttributedTextAttributes):NSETextChangeReceipt {return this.commit([{kind:"apply-attributes",range,attributes}]);}
-  removeAttributes(range:NSETextRange,keys:readonly (keyof NSEAttributedTextAttributes)[]):NSETextChangeReceipt {return this.commit([{kind:"remove-attributes",range,keys}]);}
-  setParagraphAttributes(range:NSETextRange,attributes:NSEParagraphAttributes,remove?:readonly (keyof NSEParagraphAttributes)[]):NSETextChangeReceipt {return this.commit([{kind:"paragraph-attributes",range,attributes,...(remove ? {remove} : {})}]);}
-  read(range:NSETextRange):NSEAttributedContent {return readNSETextContent(this.getSnapshot(),range);}
-  beginEditing():void {this.#assertLive();this.#editingDepth++;}
+  applyAttributes(range:NSETextRange,attributes:NSEAttributedTextAttributes):NSETextChangeReceipt {this.#assertLive("applyAttributes");return this.commit([{kind:"apply-attributes",range,attributes}]);}
+  removeAttributes(range:NSETextRange,keys:readonly (keyof NSEAttributedTextAttributes)[]):NSETextChangeReceipt {this.#assertLive("removeAttributes");return this.commit([{kind:"remove-attributes",range,keys}]);}
+  setParagraphAttributes(range:NSETextRange,attributes:NSEParagraphAttributes,remove?:readonly (keyof NSEParagraphAttributes)[]):NSETextChangeReceipt {this.#assertLive("setParagraphAttributes");return this.commit([{kind:"paragraph-attributes",range,attributes,...(remove ? {remove} : {})}]);}
+  read(range:NSETextRange):NSEAttributedContent {this.#assertLive("read");return readNSETextContent(this.getSnapshot(),range);}
+  beginEditing():void {this.#assertLive("beginEditing");this.#editingDepth++;}
   endEditing():NSETextChangeReceipt|null {
-    this.#assertLive(); if(!this.#editingDepth) throw new Error("Unbalanced endEditing: call beginEditing first.");
+    this.#assertLive("endEditing"); if(!this.#editingDepth) throw new Error("Unbalanced endEditing: call beginEditing first.");
     if(--this.#editingDepth) return null;
     const receipt=this.#pending;this.#pending=null;
     return receipt ? this.#publish(receipt) : null;
   }
   dispose():void {
     if(this.#disposed) return;
+    this.#lifecycle.markDisposed("explicit");
     this.#disposed=true;this.#unsubscribe();this.#listeners.clear();this.#pending=null;
     if(this.#ownsOwner) (this.#owner as ReturnType<typeof createInMemoryNSETextOwner>).dispose();
   }

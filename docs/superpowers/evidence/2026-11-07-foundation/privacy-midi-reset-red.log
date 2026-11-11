@@ -1,0 +1,31 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/privacy-motion-midi.test.ts -t normal consent is reset --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/privacy-motion-midi.test.ts (18 tests | 1 failed | 17 skipped) 7ms
+     × does not report an effective SysEx grant after normal consent is reset 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/privacy-motion-midi.test.ts > MIDIFX shared privacy authorisation > does not report an effective SysEx grant after normal consent is reset
+AssertionError: expected 'granted' to be 'unknown' // Object.is equality
+
+Expected: "unknown"
+Received: "granted"
+
+ ❯ tests/runtime/privacy-motion-midi.test.ts:164:57
+    162|     f.store.setAuthorization(midiScope, "prompt");
+    163|     expect(access.authorizationStatus).toBe("unknown");
+    164|     expect(access.getCapabilities().sysexAuthorization).toBe("unknown"…
+       |                                                         ^
+    165|   });
+    166|   it.each(["denied", "unavailable"] as const)("records no MIDI grant f…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 17 skipped (18)
+   Start at  20:27:36
+   Duration  269ms (transform 104ms, setup 25ms, import 110ms, tests 7ms, environment 0ms)

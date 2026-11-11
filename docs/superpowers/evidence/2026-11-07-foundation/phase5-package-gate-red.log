@@ -1,0 +1,130 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/phase5-package-gate.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/phase5-package-gate.test.ts (2 tests | 2 failed) 10ms
+   × accepts the reviewed type-only runtime entries while rejecting omitted implementations 4ms
+   × requires useful declarations for the two type-only families in the strict installed probe 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/phase5-package-gate.test.ts > accepts the reviewed type-only runtime entries while rejecting omitted implementations
+AssertionError: expected [Function] to not throw an error but 'TypeError: (0 , __vite_ssr_import_1__…' was thrown
+
+- Expected:
+undefined
+
++ Received:
+"TypeError: (0 , __vite_ssr_import_1__.assertFxRuntimeEntry) is not a function"
+
+ ❯ tests/runtime/fx/phase5-package-gate.test.ts:25:59
+     23|
+     24| it("accepts the reviewed type-only runtime entries while rejecting omi…
+     25|   expect(() => assertFxRuntimeEntry("bluetooth", {})).not.toThrow();
+       |                                                           ^
+     26|   expect(() => assertFxRuntimeEntry("speech", {})).not.toThrow();
+     27|   expect(() => assertFxRuntimeEntry("audio", {})).toThrow(/Empty FX ru…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/runtime/fx/phase5-package-gate.test.ts > requires useful declarations for the two type-only families in the strict installed probe
+AssertionError: expected 'import * as animation from "@syndroma…' to contain 'import type { BTFXCentralManager } fr…'
+
+- Expected
++ Received
+
+- import type { BTFXCentralManager } from "@syndromatic/syncloudos/fx/bluetooth";
++ import * as animation from "@syndromatic/syncloudos/fx/animation";
++ import * as graphics from "@syndromatic/syncloudos/fx/graphics";
++ import * as image from "@syndromatic/syncloudos/fx/image";
++ import * as text from "@syndromatic/syncloudos/fx/text";
++ import * as audio from "@syndromatic/syncloudos/fx/audio";
++ import * as haptics from "@syndromatic/syncloudos/fx/haptics";
++ import * as motion from "@syndromatic/syncloudos/fx/motion";
++ import * as media from "@syndromatic/syncloudos/fx/media";
++ import * as video from "@syndromatic/syncloudos/fx/video";
++ import * as midi from "@syndromatic/syncloudos/fx/midi";
++ import * as location from "@syndromatic/syncloudos/fx/location";
++ import * as lumina from "@syndromatic/syncloudos/fx/lumina";
++ import * as compression from "@syndromatic/syncloudos/fx/compression";
++ import * as network from "@syndromatic/syncloudos/fx/network";
++ import * as crypto from "@syndromatic/syncloudos/fx/crypto";
++ import * as bluetooth from "@syndromatic/syncloudos/fx/bluetooth";
++ import * as nfc from "@syndromatic/syncloudos/fx/nfc";
++ import * as speech from "@syndromatic/syncloudos/fx/speech";
++ import * as contacts from "@syndromatic/syncloudos/fx/contacts";
++ import * as pass from "@syndromatic/syncloudos/fx/pass";
++ import * as xr from "@syndromatic/syncloudos/fx/xr";
++ import * as sdk from "@syndromatic/syncloudos/sdk";
++ import type { SynWareContextValue } from "@syndromatic/syncloudos/sdk";
++ void [animation, graphics, image, text, audio, haptics, motion, media, video, midi, location, lumina, compression, network, crypto, bluetooth, nfc, speech, contacts, pass, xr];
++ declare const app: SynWareContextValue;
++ const token = sdk.defineSynWareServiceToken<{ read(): string }>({ id: "org.example.package-proof", contractVersion: "proof.v1" });
++ const serviceText: string = app.services.require(token).read(); void serviceText;
++ // @ts-expect-error Tokens must infer the declared client, not an arbitrary caller type.
++ app.services.require(token).missingMethod();
++ // @ts-expect-error Ordinary app APIs cannot acquire host or test authority.
++ app.runtime;
++ // @ts-expect-error Ordinary app APIs cannot acquire host or test authority.
++ app.services.registerClient;
++ // @ts-expect-error Ordinary app APIs cannot acquire host or test authority.
++ app.services.resolveAppClient;
++ // @ts-expect-error Ordinary app APIs cannot acquire host or test authority.
++ app.lumina.createIndex().backend;
++ // @ts-expect-error Ordinary app APIs cannot acquire host or test authority.
++ app.video.backend;
++ // @ts-expect-error Ordinary app APIs cannot acquire host or test authority.
++ app.midi.backend;
++ // @ts-expect-error Ordinary app APIs cannot acquire host or test authority.
++ app.location.backend;
++ // @ts-expect-error Ordinary app APIs cannot acquire host or test authority.
++ sdk.createSynCloudOS;
++ // @ts-expect-error Ordinary app APIs cannot acquire host or test authority.
++ sdk.ServiceRegistry;
++ // @ts-expect-error Ordinary app APIs cannot acquire host or test authority.
++ sdk.createSynWareTestHost;
++ // @ts-expect-error Ordinary app APIs cannot acquire host or test authority.
++ sdk.createMountedLuminaClient;
++ // @ts-expect-error Ordinary app APIs cannot acquire host or test authority.
++ sdk.createMountedSynWareRouter;
++ // @ts-expect-error Ordinary app APIs cannot acquire host or test authority.
++ sdk.SynWareRouteSessionProvider;
++ // @ts-expect-error Host implementation types are not ordinary SDK authoring exports.
++ import type { SynCloudOSRuntime } from "@syndromatic/syncloudos/sdk";
++ // @ts-expect-error Host implementation types are not ordinary SDK authoring exports.
++ import type { ServiceRegistry } from "@syndromatic/syncloudos/sdk";
++ // @ts-expect-error Host implementation types are not ordinary SDK authoring exports.
++ import type { AppRouteSession } from "@syndromatic/syncloudos/sdk";
++ // @ts-expect-error Host implementation types are not ordinary SDK authoring exports.
++ import type { MountedSynWareRouterOptions } from "@syndromatic/syncloudos/sdk";
++ // @ts-expect-error Host implementation types are not ordinary SDK authoring exports.
++ import type { LuminaIndexService } from "@syndromatic/syncloudos/sdk";
++ // @ts-expect-error Host implementation types are not ordinary SDK authoring exports.
++ import type { VideoCaptureService } from "@syndromatic/syncloudos/sdk";
++ // @ts-expect-error Physical declaration/source/backend paths are not package exports.
++ import * as forbidden0 from "@syndromatic/syncloudos/types/SynCloudOS/Runtime/runtimeInstanceTypes.js";
++ // @ts-expect-error Physical declaration/source/backend paths are not package exports.
++ import * as forbidden1 from "@syndromatic/syncloudos/src/SynCloudOS/Runtime/createSynCloudOS";
++ // @ts-expect-error Physical declaration/source/backend paths are not package exports.
++ import * as forbidden2 from "@syndromatic/syncloudos/sdk/internal/runtime";
++ // @ts-expect-error Physical declaration/source/backend paths are not package exports.
++ import * as forbidden3 from "@syndromatic/syncloudos/fx/private";
++
+
+ ❯ tests/runtime/fx/phase5-package-gate.test.ts:34:17
+     32| it("requires useful declarations for the two type-only families in the…
+     33|   const probe = createSdkPublicTypeProbe();
+     34|   expect(probe).toContain('import type { BTFXCentralManager } from "@s…
+       |                 ^
+     35|   expect(probe).toContain('import type { SPFXSpeechRecognizer } from "…
+     36|   expect(probe).toContain("app.bluetooth.createCentralManager()");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  20:29:59
+   Duration  215ms (transform 38ms, setup 29ms, import 28ms, tests 10ms, environment 0ms)
+

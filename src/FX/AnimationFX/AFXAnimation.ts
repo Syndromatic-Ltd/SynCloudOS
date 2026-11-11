@@ -80,7 +80,10 @@ export class AFXAnimation {
       throw new TypeError(
         "repeatDuration requires a nonzero cycle and cannot also specify iterations.",
       );
-    this.iterations = afxAnimationNumber(
+    const endless = input.iterations === Infinity || input.repeatDuration === Infinity;
+    if (endless && this.duration === 0)
+      throw new RangeError("An endless animation requires a nonzero cycle.");
+    this.iterations = endless ? Infinity : afxAnimationNumber(
       input.repeatDuration === undefined
         ? (input.iterations ?? 1)
         : afxAnimationNumber(
@@ -145,7 +148,15 @@ export class AFXAnimation {
       return this.fill === "backwards" || this.fill === "both" ? 0 : null;
     const active = (seconds - this.delay) * this.speed,
       cycles = this.iterations * (this.autoreverses ? 2 : 1);
-    if (this.duration === 0 || active >= this.duration * cycles) {
+    const total = this.totalDuration;
+    // Delay subtraction and speed multiplication can round the exact endpoint
+    // below the active duration. Bound the tolerance to a billionth of a cycle
+    // so genuinely earlier samples (and unbounded loops) keep their phase.
+    const tolerance = Number.isFinite(total)
+      ? Math.min(this.cycleDuration * 1e-9, Number.EPSILON * Math.max(1, total) * 4)
+      : 0;
+    if (this.duration === 0 || active >= this.duration * cycles ||
+        (Number.isFinite(total) && seconds >= total - tolerance)) {
       if (this.fill === "none" || this.fill === "backwards") return null;
       const fractional = cycles % 1;
       const final = fractional === 0 ? 1 : fractional;

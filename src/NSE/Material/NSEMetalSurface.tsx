@@ -24,7 +24,7 @@ import { classes } from "../Controls/Core/nseControlsShared";
 
 /**
  * A layout-neutral projection of the Metal source-list material owned by
- * NSESidebar. It deliberately owns only the appearance surface: callers keep
+ * source-list outlines. It deliberately owns only the appearance surface: callers keep
  * their own navigation/layout semantics instead of importing desktop sidebar
  * geometry into a contained hierarchy page.
  */
@@ -43,9 +43,10 @@ export function NSEMetalSurface({
     <div
       {...props}
       className={classes("nse-metal-surface", className)}
-      data-nse-material="metal"
+      data-nse-control="visual-effect-view" data-nse-part="background" data-nse-material="metal"
       data-mode={mode}
-      data-nse-metal-surface-recipe="nse.sidebar.metal.surface"
+      data-nse-colour-scheme-resolved={mode}
+
       data-nse-metal-surface-noise="nse-metal-grain"
     >
       {children}

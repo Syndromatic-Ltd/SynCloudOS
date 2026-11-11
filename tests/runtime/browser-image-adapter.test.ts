@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../src/Foundation/NSEData";
 import { describe, expect, it, vi } from "vitest";
 
 import { BrowserImageAdapter, BrowserImageAdapterFactory } from "../../src/SynCloudOS/PlatformAdapters/BrowserImageAdapter";
@@ -31,7 +32,7 @@ function png(width = 1, height = 1) {
   return bytes;
 }
 
-const source = Object.freeze({ kind: "bytes" as const, mimeType: "image/png" as const, bytes: png() });
+const source = Object.freeze({ kind: "bytes" as const, mimeType: "image/png" as const, bytes: NSEData.from(png()) });
 
 function platform(): BrowserImagePlatform & { revokeObjectURL: ReturnType<typeof vi.fn> } {
   return {
@@ -60,7 +61,7 @@ describe("BrowserImageAdapter", () => {
     const secondLease = await second.adapter.decode({ cacheKey: "second", source, signal: new AbortController().signal });
     first.release();
     expect(browser.revokeObjectURL).toHaveBeenCalledTimes(1);
-    await expect(second.adapter.export(secondLease, "image/png", new AbortController().signal)).resolves.toEqual(new Uint8Array([4]));
+    await expect(second.adapter.export(secondLease, "image/png", new AbortController().signal)).resolves.toHaveProperty("bytes", new Uint8Array([4]));
     second.release(); firstLease.release(); secondLease.release();
     expect(browser.revokeObjectURL).toHaveBeenCalledTimes(2);
   });
@@ -104,7 +105,7 @@ describe("BrowserImageAdapter", () => {
     browser.decode = vi.fn(async () => ({ src: "blob:compressed-profile", intrinsicSize: { width: 1, height: 1 }, density: 1, byteLength: 260, corsClean: true, revoke: true, sourceICCProfile: profile }));
     const adapter = new BrowserImageAdapter(browser);
     const lease = await adapter.decode({ cacheKey: "compressed-profile", source, signal: new AbortController().signal });
-    expect(lease.sourceICCProfile).toEqual(profile);
+    expect(lease.sourceICCProfile?.bytes).toEqual(profile);
     lease.release();
     expect(browser.revokeObjectURL).toHaveBeenCalledExactlyOnceWith("blob:compressed-profile");
   });
@@ -129,7 +130,7 @@ describe("BrowserImageAdapter", () => {
     let sliceReads = 0; let expandoReads = 0;
     Object.defineProperty(bytes, "slice", { get() { sliceReads += 1; throw new Error("poisoned slice"); } });
     Object.defineProperty(bytes, "metadata", { get() { expandoReads += 1; throw new Error("poisoned expando"); } });
-    const lease = await adapter.decode({ cacheKey: "intrinsic-copy", source: { kind: "bytes", mimeType: "image/png", bytes }, signal: new AbortController().signal });
+    const lease = await adapter.decode({ cacheKey: "intrinsic-copy", source: { kind: "bytes", mimeType: "image/png", bytes: NSEData.from(bytes) }, signal: new AbortController().signal });
     expect(sliceReads).toBe(0);
     expect(expandoReads).toBe(0);
     lease.release();
@@ -142,7 +143,7 @@ describe("BrowserImageAdapter", () => {
     const mimeType = { [Symbol.toPrimitive]() { coercions += 1; return "image/png"; } };
     await expect(adapter.decode({
       cacheKey: "hostile-mime",
-      source: { kind: "bytes", mimeType, bytes: png() },
+      source: { kind: "bytes", mimeType, bytes: NSEData.from(png()) },
       signal: new AbortController().signal,
     } as never)).rejects.toThrow(TypeError);
     expect(coercions).toBe(0);
@@ -176,7 +177,7 @@ describe("BrowserImageAdapter", () => {
     const adapter = new BrowserImageAdapter(browser);
     const controller = new AbortController();
     const decoding = adapter.decode({ cacheKey: "aborted-candidate", source, signal: controller.signal });
-    resolve({ src: "blob:aborted-candidate", intrinsicSize: { width: 1, height: 1 }, density: 1, byteLength: source.bytes.byteLength, corsClean: true, revoke: true });
+    resolve({ src: "blob:aborted-candidate", intrinsicSize: { width: 1, height: 1 }, density: 1, byteLength: source.bytes.count, corsClean: true, revoke: true });
     controller.abort(new DOMException("caller stopped", "AbortError"));
     await expect(decoding).rejects.toMatchObject({ name: "AbortError" });
     expect(browser.revokeObjectURL).toHaveBeenCalledExactlyOnceWith("blob:aborted-candidate");
@@ -187,7 +188,7 @@ describe("BrowserImageAdapter", () => {
     const adapter = new BrowserImageAdapter(browser);
     await expect(adapter.decode({
       cacheKey: "png-bomb",
-      source: { kind: "bytes", mimeType: "image/png", bytes: png(65_536, 65_536) },
+      source: { kind: "bytes", mimeType: "image/png", bytes: NSEData.from(png(65_536, 65_536)) },
       signal: new AbortController().signal,
     })).rejects.toThrow(RangeError);
     expect(browser.decode).not.toHaveBeenCalled();
@@ -197,7 +198,7 @@ describe("BrowserImageAdapter", () => {
     const browser = platform();
     const adapter = new BrowserImageAdapter(browser);
     const bytes = new Uint8Array([71, 73, 70, 56, 57, 97, 1, 0, 1, 0, 0, 0, 0, 44, 0, 0, 0, 0, 255, 255, 255, 255, 0, 2, 1, 0, 0, 59]);
-    await expect(adapter.decode({ cacheKey: "gif-frame-bomb", source: { kind: "bytes", mimeType: "image/gif", bytes }, signal: new AbortController().signal })).rejects.toThrow(RangeError);
+    await expect(adapter.decode({ cacheKey: "gif-frame-bomb", source: { kind: "bytes", mimeType: "image/gif", bytes: NSEData.from(bytes) }, signal: new AbortController().signal })).rejects.toThrow(RangeError);
     expect(browser.decode).not.toHaveBeenCalled();
   });
 });

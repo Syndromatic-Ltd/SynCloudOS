@@ -21,5 +21,4 @@
 export {
   useNSEAppearance,
   useNSEAppearanceProjection,
-  useNSEAppearanceSlot,
 } from "./NSEAppearanceProvider";

@@ -1,0 +1,115 @@
+{
+  "checkedAt": "2026-11-07T20:30:54.210Z",
+  "sourceCommit": "bfcfb32bdc4930bcb2e129656f052e4512bb5139",
+  "browserMode": "Full headless Chromium; SwiftShader WebGL; virtual Bluetooth/SPC",
+  "families": {
+    "bluetooth": {
+      "status": "verified-emulated",
+      "read": [
+        42
+      ],
+      "authorization": "granted",
+      "disconnected": true,
+      "nativeDisconnected": true,
+      "services": 1,
+      "characteristics": 1,
+      "operations": [
+        "connection",
+        "discovery",
+        "read",
+        "write",
+        "subscribe-to-notifications",
+        "unsubscribe-from-notifications"
+      ],
+      "writes": [
+        "EQ=="
+      ],
+      "characteristicId": "09:09:09:09:09:09_1_1"
+    },
+    "nfc": {
+      "status": "verified-availability-only",
+      "authorization": "unavailable",
+      "error": "NotSupportedError"
+    },
+    "contacts": {
+      "status": "verified-availability-only",
+      "authorization": "unavailable",
+      "error": "NotSupportedError"
+    },
+    "speech": {
+      "status": "verified-browser-start-only",
+      "error": "OperationError",
+      "message": "Speech recognition failed: audio-capture."
+    },
+    "xr": {
+      "status": "verified-live-inline",
+      "supported": true,
+      "frames": 31,
+      "first": {
+        "timestamp": 8.6671,
+        "viewerTransform": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "anchors": []
+      }
+    },
+    "payment": {
+      "status": "verified-SPC-emulation",
+      "statusBefore": "unknown",
+      "methodName": "secure-payment-confirmation",
+      "signatureBytes": 72,
+      "rawIdBytes": 32,
+      "registration": {
+        "id": "JE1URZZcldgifig5r4pxlc0s3QBrnUVQe3tIcGaKIJI"
+      },
+      "virtualAuthenticator": "e9846a57-0e6a-4878-b2ba-4964600a9aea"
+    }
+  },
+  "errors": [],
+  "port": 53979,
+  "chromium": "149.0.7827.55",
+  "capabilities": {
+    "bt": {
+      "apiAvailable": true,
+      "retrievesGrantedPeripherals": true,
+      "backgroundScanning": false,
+      "peripheralRole": false
+    },
+    "nfc": {
+      "reading": false,
+      "writing": false,
+      "makingReadOnly": false
+    },
+    "speech": {
+      "recognition": true,
+      "onDeviceRecognition": false
+    },
+    "contacts": {
+      "contactPicker": false,
+      "persistentAccess": false
+    },
+    "payment": {
+      "paymentRequest": true
+    },
+    "xr": {
+      "apiAvailable": true,
+      "worldTracking": false,
+      "nativeARKit": false
+    }
+  }
+}

@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
+import { SynCloudOSLifecycleRecord } from "../../SynCloudOS/fxRuntimeContracts";
 import { AUFXAudioFormat } from "./AUFXAudioFormat";
 import { AUFXAudioPCMBuffer } from "./AUFXAudioPCMBuffer";
 import { AUFXClockObservation } from "./AUFXClockObservation";
@@ -41,16 +43,17 @@ export interface AUFXAudioFileExportOptions { readonly format: "wav" | "opus-web
 /** A distinct streaming export: neither input nor output is an owned whole-file allocation. */
 export interface AUFXAudioStreamExportOptions {
   readonly source: AUFXAudioChunkStream;
-  readonly sink: WritableStream<Uint8Array>;
+  readonly sink: WritableStream<NSEData>;
   readonly format: "opus-webm";
   readonly bitrate?: number;
 }
 export type AUFXAudioStreamExport = Readonly<{ mimeType: "audio/webm"; fileType: "webm"; byteLength: number }>;
 export type AUFXAudioFileExport =
-  | Readonly<{ data: Blob; mimeType: "audio/wav"; byteLength: number; fileType: "wav" }>
-  | Readonly<{ data: Blob; mimeType: "audio/webm"; byteLength: number; fileType: "webm" }>;
+  | Readonly<{ data: NSEData; mimeType: "audio/wav"; byteLength: number; fileType: "wav" }>
+  | Readonly<{ data: NSEData; mimeType: "audio/webm"; byteLength: number; fileType: "webm" }>;
 /** PCM WAV interchange. Compressed codec decoding is owned by the host. */
 export class AUFXAudioFile {
+  readonly #lifecycle = new SynCloudOSLifecycleRecord({ kind: "AUFXAudioFile" });
   readonly fileFormat: AUFXAudioFormat;
   readonly processingFormat: AUFXAudioFormat;
   readonly url: string | null;
@@ -66,14 +69,14 @@ export class AUFXAudioFile {
     for (let channel = 0; channel < buffer.format.channelCount; channel++) for (let frame = 0; frame < buffer.frameLength; frame++) data.setSample(channel, frame, buffer.getSample(channel, frame));
     this.#data = data;
   }
-  private data() { if (!this.#data) throw new Error("Audio file is disposed."); return this.#data; }
-  get length() { return this.data().frameLength; }
+  private data(operation: string) { if (!this.#data) throw this.#lifecycle.error({ code: "AUFX_AUDIO_FILE_DISPOSED", operation: operation }); return this.#data; }
+  get length() { return this.data("length").frameLength; }
   get isOpen() { return this.#data !== null; }
-  get framePosition() { this.data(); return this.#position; }
-  set framePosition(value: number) { if (!Number.isSafeInteger(value) || value < 0 || value > this.data().frameLength) throw new RangeError("Invalid audio file frame position."); if (value !== this.#position) this.#discontinuityGeneration++; this.#position = value; }
-  observeClock() { this.data(); return new AUFXClockObservation({ samplePosition: this.#position, sampleRate: this.processingFormat.sampleRate, domain: "source", hostAnchorSeconds: null, uncertaintySeconds: 0, discontinuityGeneration: this.#discontinuityGeneration }); }
+  get framePosition() { this.data("framePosition"); return this.#position; }
+  set framePosition(value: number) { if (!Number.isSafeInteger(value) || value < 0 || value > this.data("framePosition").frameLength) throw new RangeError("Invalid audio file frame position."); if (value !== this.#position) this.#discontinuityGeneration++; this.#position = value; }
+  observeClock() { this.data("observeClock"); return new AUFXClockObservation({ samplePosition: this.#position, sampleRate: this.processingFormat.sampleRate, domain: "source", hostAnchorSeconds: null, uncertaintySeconds: 0, discontinuityGeneration: this.#discontinuityGeneration }); }
   read(into: AUFXAudioPCMBuffer, frameCount = into.frameCapacity): number {
-    const data = this.data();
+    const data = this.data("read");
     if (!into.format.isEqual(this.processingFormat) || !Number.isSafeInteger(frameCount) || frameCount < 0 || frameCount > into.frameCapacity) throw new RangeError("Invalid audio file read format/capacity.");
     const count = Math.min(frameCount, data.frameLength - this.#position); into.frameLength = count;
     for (let channel = 0; channel < data.format.channelCount; channel++) for (let frame = 0; frame < count; frame++) into.setSample(channel, frame, data.getSample(channel, this.#position + frame));
@@ -81,23 +84,23 @@ export class AUFXAudioFile {
   }
   readFrames(frameCount: number): AUFXAudioPCMBuffer {
     if (!Number.isSafeInteger(frameCount) || frameCount < 0 || frameCount > 16_777_216) throw new RangeError("Invalid audio file frame count.");
-    const output = new AUFXAudioPCMBuffer(this.processingFormat, Math.min(frameCount, this.length - this.#position)); this.read(output, output.frameCapacity); return output;
+    const output = new AUFXAudioPCMBuffer(this.processingFormat, Math.min(frameCount, this.data("readFrames").frameLength - this.#position)); this.read(output, output.frameCapacity); return output;
   }
   write(buffer: AUFXAudioPCMBuffer): void {
-    const data = this.data(); if (!this.#writable) throw new Error("Audio file is read-only.");
+    const data = this.data("write"); if (!this.#writable) throw new Error("Audio file is read-only.");
     if (!buffer.format.isEqual(this.processingFormat) || this.#position + buffer.frameLength > data.frameCapacity) throw new RangeError("Invalid audio file write format/capacity.");
     data.frameLength = Math.max(data.frameLength, this.#position + buffer.frameLength);
     for (let channel = 0; channel < data.format.channelCount; channel++) for (let frame = 0; frame < buffer.frameLength; frame++) data.setSample(channel, this.#position + frame, buffer.getSample(channel, frame));
     this.#position += buffer.frameLength;
   }
-  toWAV() { return AUFXAudioFile.encodeWAV(this.data()); }
-  close() { this.#data = null; this.#position = 0; this.#discontinuityGeneration++; }
+  toWAV() { return AUFXAudioFile.encodeWAV(this.data("toWAV")); }
+  close() { this.#lifecycle.markDisposed("explicit"); this.#data = null; this.#position = 0; this.#discontinuityGeneration++; }
   dispose() { this.close(); }
-  static encodeWAV(buffer: AUFXAudioPCMBuffer): ArrayBuffer {
-    const header = AUFXAudioFile.encodeWAVHeader(buffer.format, buffer.frameLength), pcm = AUFXAudioFile.encodePCM16Chunk(buffer);
-    const output = new Uint8Array(header.byteLength + pcm.byteLength); output.set(header, 0); output.set(pcm, header.byteLength); return output.buffer;
+  static encodeWAV(buffer: AUFXAudioPCMBuffer): NSEData {
+    const header = AUFXAudioFile.encodeWAVHeader(buffer.format, buffer.frameLength).bytes, pcm = AUFXAudioFile.encodePCM16Chunk(buffer).bytes;
+    const output = new Uint8Array(header.byteLength + pcm.byteLength); output.set(header, 0); output.set(pcm, header.byteLength); return NSEData.from(output);
   }
-  static encodeWAVHeader(format: AUFXAudioFormat, frameLength: number): Uint8Array {
+  static encodeWAVHeader(format: AUFXAudioFormat, frameLength: number): NSEData {
     if (!Number.isSafeInteger(frameLength) || frameLength < 0) throw new RangeError("Invalid WAV frame length.");
     const channels = format.channelCount, size = frameLength * channels * 2;
     if (!Number.isSafeInteger(size) || size > 0xffff_ffff - 36) throw new RangeError("WAV output exceeds the RIFF size limit.");
@@ -107,17 +110,18 @@ export class AUFXAudioFile {
     view.setUint16(20, 1, true); view.setUint16(22, channels, true); view.setUint32(24, format.sampleRate, true);
     view.setUint32(28, format.sampleRate * channels * 2, true); view.setUint16(32, channels * 2, true); view.setUint16(34, 16, true);
     text(36, "data"); view.setUint32(40, size, true);
-    return output;
+    return NSEData.from(output);
   }
-  static encodePCM16Chunk(buffer: AUFXAudioPCMBuffer): Uint8Array {
+  static encodePCM16Chunk(buffer: AUFXAudioPCMBuffer): NSEData {
     const channels = buffer.format.channelCount, output = new Uint8Array(buffer.frameLength * channels * 2), view = new DataView(output.buffer);
     for (let f = 0; f < buffer.frameLength; f++) for (let c = 0; c < channels; c++) {
       const value = Math.max(-1, Math.min(1, buffer.getSample(c, f)));
       view.setInt16((f * channels + c) * 2, Math.round(value * (value < 0 ? 32768 : 32767)), true);
     }
-    return output;
+    return NSEData.from(output);
   }
-  static decodeWAV(bytes: ArrayBuffer): AUFXAudioPCMBuffer {
+  static decodeWAV(data: NSEDataConvertible): AUFXAudioPCMBuffer {
+    const bytes = NSEData.from(data).bytes.buffer;
     if (bytes.byteLength < 44 || bytes.byteLength > 67108864) throw new RangeError("Invalid WAV size.");
     const view = new DataView(bytes), text = (offset: number) => String.fromCharCode(...new Uint8Array(bytes, offset, 4));
     if (text(0) !== "RIFF" || text(8) !== "WAVE" || view.getUint32(4, true) + 8 > bytes.byteLength) throw new TypeError("Invalid WAV header.");

@@ -101,7 +101,7 @@ function runtimeWithAnimations(factory = new RecordingAnimationFactory(), reduce
 describe("runtime-owned NSE animations", () => {
   it("commits immutable context writes as one adapter group and reports progress", async () => {
     const { runtime, factory } = runtimeWithAnimations();
-    const lease = runtime.animations.acquireOwner({ appId: "notes", viewId: "editor" });
+    const lease = runtime.animations.acquireOwner({ appId: "com.example.notes", viewId: "editor" });
     const context = new AFXTransaction((target, definition) => runtime.animations.runGroup(target, definition, lease), () => lease.release());
     const target = Object.freeze({ node: "editor" });
     const view = Object.freeze({ id: "editor", target, frame: { x: 0, y: 0, width: 200, height: 120 }, opacity: 1 });
@@ -124,7 +124,7 @@ describe("runtime-owned NSE animations", () => {
 
   it("inherits nested context timing while committing each context as one group", () => {
     const { runtime, factory } = runtimeWithAnimations();
-    const lease = runtime.animations.acquireOwner({ appId: "notes", viewId: "nested" });
+    const lease = runtime.animations.acquireOwner({ appId: "com.example.notes", viewId: "nested" });
     const context = new AFXTransaction((target, definition) => runtime.animations.runGroup(target, definition, lease), () => lease.release());
     const target = {};
     const view = { id: "nested", target, frame: { x: 0, y: 0, width: 10, height: 10 }, opacity: 1, transform: "none" };
@@ -150,7 +150,7 @@ describe("runtime-owned NSE animations", () => {
       animation: new AFXAnimation({ duration: 0.3, timing: "linear" }),
     });
 
-    const owner = runtime.animations.acquireOwner({ appId: "about", viewId: "card" });
+    const owner = runtime.animations.acquireOwner({ appId: "com.example.about", viewId: "card" });
     const first = runtime.animations.animate(target, definition.toRuntime(), owner, 1);
     const second = runtime.animations.animate(target, definition.toRuntime(), owner, 2);
     await expect(first.finished).resolves.toMatchObject({ state: "interrupted" });
@@ -167,7 +167,7 @@ describe("runtime-owned NSE animations", () => {
       animations: [{ targetId: "generation", keyPath: "opacity" as const, from: 0, to: 1 }],
       duration: 0.1,
     };
-    const owner = runtime.animations.acquireOwner({ appId: "gallery", viewId: "generation" });
+    const owner = runtime.animations.acquireOwner({ appId: "com.example.gallery", viewId: "generation" });
     const current = runtime.animations.animate({}, definition, owner, 4);
     const stale = runtime.animations.animate({}, definition, owner, 3);
     await expect(stale.finished).resolves.toMatchObject({ state: "interrupted", reason: "stale animation generation" });
@@ -179,7 +179,7 @@ describe("runtime-owned NSE animations", () => {
 
   it("animates a CSS filter as a view key path and rejects a non-string filter", async () => {
     const { runtime, factory } = runtimeWithAnimations();
-    const owner = runtime.animations.acquireOwner({ appId: "gallery", viewId: "filter" });
+    const owner = runtime.animations.acquireOwner({ appId: "com.example.gallery", viewId: "filter" });
     const handle = runtime.animations.animate({}, {
       animations: [{ targetId: "view", keyPath: "filter", from: "brightness(1)", to: "brightness(0.4)" }],
       duration: 0.1,
@@ -195,7 +195,7 @@ describe("runtime-owned NSE animations", () => {
 
   it("animates a view's height as a bounded CSS length", async () => {
     const { runtime, factory } = runtimeWithAnimations();
-    const owner = runtime.animations.acquireOwner({ appId: "gallery", viewId: "height" });
+    const owner = runtime.animations.acquireOwner({ appId: "com.example.gallery", viewId: "height" });
     runtime.animations.animate({}, {
       animations: [{ targetId: "view", keyPath: "height", from: "0px", to: "120px" }],
       duration: 0.1,
@@ -269,7 +269,7 @@ describe("runtime-owned NSE animations", () => {
         to: 1,
         animation: new AFXAnimation({ duration: 0.5, reducedMotion: "system" }),
       }).toRuntime(),
-      runtime.animations.acquireOwner({ appId: "notifications", viewId: "banner" }),
+      runtime.animations.acquireOwner({ appId: "com.example.notifications", viewId: "banner" }),
       1,
     );
 
@@ -280,28 +280,28 @@ describe("runtime-owned NSE animations", () => {
 
   it("pauses on owner suspension, resumes on activation and cancels on close", async () => {
     const { runtime, factory } = runtimeWithAnimations();
-    const owner = runtime.animations.acquireOwner({ appId: "calendar", windowControllerId: "window:calendar", viewId: "root" });
+    const owner = runtime.animations.acquireOwner({ appId: "com.example.calendar", windowControllerId: "window:calendar", viewId: "root" });
     const handle = runtime.animations.animate(Object.freeze({ node: "window" }), {
       animations: [{ targetId: "window", keyPath: "transform", from: "translateX(0px)", to: "translateX(40px)" }],
       duration: 0.24,
       timing: "ease-out",
     }, owner, 1);
 
-    runtime.animations.suspendOwner("calendar");
+    runtime.animations.suspendOwner("com.example.calendar");
     expect(factory.playbacks[0]?.pause).toHaveBeenCalledTimes(1);
     factory.playbacks[0]?.advance(1);
     await Promise.resolve();
     expect(runtime.animations.diagnostics()).toMatchObject({ activeCount: 1, pausedCount: 1, settlementCount: 0 });
-    runtime.animations.resumeOwner("calendar");
+    runtime.animations.resumeOwner("com.example.calendar");
     await expect(handle.finished).resolves.toMatchObject({ state: "completed" });
     expect(factory.playbacks[0]?.play).not.toHaveBeenCalled();
     expect(factory.playbacks[0]?.dispose).toHaveBeenCalledTimes(1);
-    const closingOwner = runtime.animations.acquireOwner({ appId: "calendar", windowControllerId: "window:calendar", viewId: "closing-window" });
+    const closingOwner = runtime.animations.acquireOwner({ appId: "com.example.calendar", windowControllerId: "window:calendar", viewId: "closing-window" });
     const closing = runtime.animations.animate(Object.freeze({ node: "closing-window" }), {
       animations: [{ targetId: "closing-window", keyPath: "opacity", from: 1, to: 0 }],
       duration: 0.24,
     }, closingOwner, 1);
-    runtime.animations.closeOwner("calendar", "application closed");
+    runtime.animations.closeOwner("com.example.calendar", "application closed");
     await expect(closing.finished).resolves.toMatchObject({ state: "cancelled", reason: "application closed" });
   });
 
@@ -315,8 +315,8 @@ describe("runtime-owned NSE animations", () => {
       duration: 0.1,
       timing: "linear" as const,
     };
-    const firstHandle = first.animations.animate({}, definition, first.animations.acquireOwner({ appId: "a", viewId: "shared" }), 1);
-    const secondHandle = second.animations.animate({}, definition, second.animations.acquireOwner({ appId: "a", viewId: "shared" }), 1);
+    const firstHandle = first.animations.animate({}, definition, first.animations.acquireOwner({ appId: "com.example.a", viewId: "shared" }), 1);
+    const secondHandle = second.animations.animate({}, definition, second.animations.acquireOwner({ appId: "com.example.a", viewId: "shared" }), 1);
 
     await first.dispose("first runtime closed");
     await expect(firstHandle.finished).resolves.toMatchObject({ state: "cancelled" });
@@ -332,8 +332,8 @@ describe("runtime-owned NSE animations", () => {
       animations: [{ targetId: "shared", keyPath: "opacity" as const, from: 0, to: 1 }],
       duration: 0.1,
     };
-    const first = runtime.animations.animate({}, definition, runtime.animations.acquireOwner({ appId: "app", viewId: "shared", windowControllerId: "window:one" }), 1);
-    const second = runtime.animations.animate({}, definition, runtime.animations.acquireOwner({ appId: "app", viewId: "shared", windowControllerId: "window:two" }), 1);
+    const first = runtime.animations.animate({}, definition, runtime.animations.acquireOwner({ appId: "com.example.app", viewId: "shared", windowControllerId: "window:one" }), 1);
+    const second = runtime.animations.animate({}, definition, runtime.animations.acquireOwner({ appId: "com.example.app", viewId: "shared", windowControllerId: "window:two" }), 1);
     expect(runtime.animations.diagnostics().activeCount).toBe(2);
     runtime.animations.closeWindowController("window:one", "window one closed");
     await expect(first.finished).resolves.toMatchObject({ state: "cancelled" });
@@ -344,29 +344,29 @@ describe("runtime-owned NSE animations", () => {
 
   it("binds canonical application lifecycle state to pause, resume and cancellation", async () => {
     const { runtime, factory } = runtimeWithAnimations();
-    const owner = runtime.animations.acquireOwner({ appId: "lifecycle-app", viewId: "lifecycle" });
+    const owner = runtime.animations.acquireOwner({ appId: "com.example.lifecycle-app", viewId: "lifecycle" });
     const handle = runtime.animations.animate({}, {
       animations: [{ targetId: "lifecycle", keyPath: "opacity", from: 0, to: 1 }],
       duration: 0.2,
     }, owner, 1);
-    runtime.store.mutate((draft) => { draft.lifecycle["lifecycle-app"] = "suspended"; });
+    runtime.store.mutate((draft) => { draft.lifecycle["com.example.lifecycle-app"] = "suspended"; });
     expect(factory.playbacks[0]?.pause).toHaveBeenCalledTimes(1);
-    runtime.store.mutate((draft) => { draft.lifecycle["lifecycle-app"] = "active"; });
+    runtime.store.mutate((draft) => { draft.lifecycle["com.example.lifecycle-app"] = "active"; });
     expect(factory.playbacks[0]?.play).toHaveBeenCalledTimes(1);
-    runtime.store.mutate((draft) => { draft.lifecycle["lifecycle-app"] = "closed"; });
+    runtime.store.mutate((draft) => { draft.lifecycle["com.example.lifecycle-app"] = "closed"; });
     await expect(handle.finished).resolves.toMatchObject({ state: "cancelled", reason: "application closed" });
     expect(runtime.animations.diagnostics().activeCount).toBe(0);
   });
 
   it("closes windowless animations when the app leaves the lifecycle table", async () => {
     const { runtime, factory } = runtimeWithAnimations();
-    const owner = runtime.animations.acquireOwner({ appId: "windowless-app", viewId: "orphan" });
+    const owner = runtime.animations.acquireOwner({ appId: "com.example.windowless-app", viewId: "orphan" });
     runtime.animations.animate({}, {
       animations: [{ targetId: "orphan", keyPath: "opacity", from: 0, to: 1 }],
       duration: 0.2,
     }, owner, 1);
-    runtime.store.mutate((draft) => { draft.lifecycle["windowless-app"] = "active"; });
-    runtime.store.mutate((draft) => { delete draft.lifecycle["windowless-app"]; });
+    runtime.store.mutate((draft) => { draft.lifecycle["com.example.windowless-app"] = "active"; });
+    runtime.store.mutate((draft) => { delete draft.lifecycle["com.example.windowless-app"]; });
     expect(runtime.animations.diagnostics().activeCount).toBe(0);
     expect(factory.playbacks[0]?.dispose).toHaveBeenCalled();
   });
@@ -379,18 +379,18 @@ describe("runtime-owned NSE animations", () => {
       animations: [{ targetId: "lease-target", keyPath: "opacity" as const, from: 0, to: 1 }],
       duration: 0.1,
     };
-    const viewLease = runtime.animations.acquireOwner({ appId: "lease-app", viewId: "lease-view" });
-    runtime.animations.cancelView("lease-app", "lease-view", "view unmounted");
+    const viewLease = runtime.animations.acquireOwner({ appId: "com.example.lease-app", viewId: "lease-view" });
+    runtime.animations.cancelView("com.example.lease-app", "lease-view", "view unmounted");
     const viewLate = runtime.animations.animate({}, definition, viewLease, 1);
     await expect(viewLate.finished).resolves.toMatchObject({ state: "cancelled", reason: "view unmounted" });
 
-    const windowLease = runtime.animations.acquireOwner({ appId: "lease-app", viewId: "window-view", windowControllerId: "window:lease" });
+    const windowLease = runtime.animations.acquireOwner({ appId: "com.example.lease-app", viewId: "window-view", windowControllerId: "window:lease" });
     runtime.animations.closeWindowController("window:lease", "window closed");
     const windowLate = runtime.animations.animate({}, definition, windowLease, 1);
     await expect(windowLate.finished).resolves.toMatchObject({ state: "cancelled", reason: "window closed" });
 
-    const appLease = runtime.animations.acquireOwner({ appId: "lease-app", viewId: "app-view" });
-    runtime.animations.closeOwner("lease-app", "application closed");
+    const appLease = runtime.animations.acquireOwner({ appId: "com.example.lease-app", viewId: "app-view" });
+    runtime.animations.closeOwner("com.example.lease-app", "application closed");
     const appLate = runtime.animations.animate({}, definition, appLease, 1);
     await expect(appLate.finished).resolves.toMatchObject({ state: "cancelled", reason: "application closed" });
     expect(() => runtime.animations.animate({}, definition, { ...appLease } as never, 1)).toThrow(/runtime-issued owner lease/i);
@@ -410,7 +410,7 @@ describe("runtime-owned NSE animations", () => {
       now: () => 0,
     });
     const runtime = createTestRuntime({ environment: { ...createTestRuntimeEnvironment(), animation: adapterFactory } });
-    const owner = runtime.animations.acquireOwner({ appId: "startup", viewId: "failure" });
+    const owner = runtime.animations.acquireOwner({ appId: "com.example.startup", viewId: "failure" });
     const handle = runtime.animations.animate({}, {
       animations: [{ targetId: "failure", keyPath: "opacity", from: 0, to: 1 }],
       duration: 0.1,
@@ -423,7 +423,7 @@ describe("runtime-owned NSE animations", () => {
 
   it("rejects hostile descriptors and sparse groups before adapter ownership", () => {
     const { runtime, factory } = runtimeWithAnimations();
-    const owner = runtime.animations.acquireOwner({ appId: "gallery", viewId: "hostile" });
+    const owner = runtime.animations.acquireOwner({ appId: "com.example.gallery", viewId: "hostile" });
     const poison = vi.fn(() => { throw new Error("getter executed"); });
     const entries: unknown[] = [];
     Object.defineProperty(entries, "0", { get: poison, enumerable: true });
@@ -445,7 +445,7 @@ describe("runtime-owned NSE animations", () => {
 
   it("rejects invalid key-path values and a non-boolean autoreverse before adapter work", () => {
     const { runtime, factory } = runtimeWithAnimations();
-    const owner = runtime.animations.acquireOwner({ appId: "gallery", viewId: "invalid-values" });
+    const owner = runtime.animations.acquireOwner({ appId: "com.example.gallery", viewId: "invalid-values" });
     expect(() => runtime.animations.animate({}, {
       animations: [{ targetId: "view", keyPath: "scrollPosition", from: { x: 0, y: 0 }, to: { x: 1, y: Number.NaN } }],
       duration: 0.1,
@@ -520,7 +520,7 @@ describe("runtime-owned NSE animations", () => {
     const target = Object.freeze({ node: "hook-view" });
     const { result, unmount } = renderHook(() => useNSEViewAnimator({
       animations: runtime.animations,
-      owner: { appId: "gallery", viewId: "hook-view" },
+      owner: { appId: "com.example.gallery", viewId: "hook-view" },
       target,
       targetId: "hook-view",
     }));
@@ -542,7 +542,7 @@ describe("runtime-owned NSE animations", () => {
     const acquireOwner = vi.spyOn(runtime.animations, "acquireOwner");
     const committed = renderHook(() => useNSEViewAnimator({
       animations: runtime.animations,
-      owner: { appId: "gallery", viewId: "abandoned" },
+      owner: { appId: "com.example.gallery", viewId: "abandoned" },
       target: {},
       targetId: "committed",
     }));
@@ -551,7 +551,7 @@ describe("runtime-owned NSE animations", () => {
     function AbandonedAnimator() {
       useNSEViewAnimator({
         animations: runtime.animations,
-        owner: { appId: "gallery", viewId: "abandoned" },
+        owner: { appId: "com.example.gallery", viewId: "abandoned" },
         target: {},
         targetId: "abandoned",
       });
@@ -569,7 +569,7 @@ describe("runtime-owned NSE animations", () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => <StrictMode>{children}</StrictMode>;
     const { result, unmount } = renderHook(() => useNSEViewAnimator({
       animations: runtime.animations,
-      owner: { appId: "gallery", viewId: "strict" },
+      owner: { appId: "com.example.gallery", viewId: "strict" },
       target: {},
       targetId: "strict",
     }), { wrapper });
@@ -589,7 +589,7 @@ describe("runtime-owned NSE animations", () => {
     const secondTarget = { node: "second" };
     const { result, rerender } = renderHook(({ viewId, target }: { viewId: string; target: object }) => useNSEViewAnimator({
       animations: runtime.animations,
-      owner: { appId: "gallery", viewId },
+      owner: { appId: "com.example.gallery", viewId },
       target,
       targetId: viewId,
     }), { initialProps: { viewId: "first", target: firstTarget } });
@@ -613,7 +613,7 @@ describe("runtime-owned NSE animations", () => {
     const secondTarget = { node: "second-runtime" };
     const { result, rerender } = renderHook(({ runtime, target }: { runtime: typeof first.runtime; target: object }) => useNSEViewAnimator({
       animations: runtime.animations,
-      owner: { appId: "gallery", viewId: "runtime-view" },
+      owner: { appId: "com.example.gallery", viewId: "runtime-view" },
       target,
       targetId: "runtime-view",
     }), { initialProps: { runtime: first.runtime, target: firstTarget } });

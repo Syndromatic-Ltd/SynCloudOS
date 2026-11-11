@@ -18,12 +18,27 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { nseControlHooks } from "../../Theme/contract/hooks";
+import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import { useEffect, useId, useRef, useState } from "react";
-import { nseAppearanceSlot, useNSEAppearanceSlot } from "../../Appearance";
+
 import { NSEListboxPopup, useNSEOverlayProvider } from "../../Overlays";
 import type { NSEComboBoxProps } from "./completionTypes";
+import { useNSEValueBinding } from "../Core/useNSEValueBinding";
+import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 
-export function NSEComboBox<T>(props: NSEComboBoxProps<T>) {
+/** A combo binding owns editable text; selected domain objects retain their own typed channel. */
+export function NSEComboBox<T>(props: NSEBoundValueProps<string,NSEComboBoxProps<T>,"inputValue"|"onInputValueChange"|"undoManager">) {
+  const resolved=useNSEValueBinding<string,NSEComboBoxProps<T>,"inputValue"|"onInputValueChange"|"undoManager">(props,{value:"inputValue",change:"onInputValueChange",fallback:""});
+  return <NSEComboBoxControl {...resolved} onValueChange={(value,reason)=>{
+    if(props.binding) resolved.onInputValueChange(reason==="completion" ? resolved.dataSource.labelForItem(value as T) : typeof value==="string"?value:"");
+    resolved.onValueChange(value,reason);
+  }} />;
+}
+
+function NSEComboBoxControl<T>(props: NSEComboBoxProps<T>) {
+  const theme = useNSEThemeInteraction<HTMLSpanElement>(props.isEnabled !== false);
+  const disabled = props.isEnabled === false;
   useNSEOverlayProvider();
   const generatedId = useId().replace(/:/g, "");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -51,7 +66,7 @@ export function NSEComboBox<T>(props: NSEComboBoxProps<T>) {
     setItems([]);
     setActive(-1);
     setLoading(false);
-  }, [props.dataSource, props.disabled, props.readOnly]);
+  }, [props.dataSource, disabled, props.readOnly]);
 
   const query = (text: string) => {
     controller.current?.abort();
@@ -85,7 +100,7 @@ export function NSEComboBox<T>(props: NSEComboBoxProps<T>) {
     });
   };
   const commit = (item: T) => {
-    if (composing.current || props.disabled || props.readOnly) return;
+    if (composing.current || disabled || props.readOnly) return;
     props.onValueChange(item, "completion");
     setDraft(props.dataSource.labelForItem(item));
     setItems([]);
@@ -94,11 +109,12 @@ export function NSEComboBox<T>(props: NSEComboBoxProps<T>) {
   const activeItem = active >= 0 ? items[active] : undefined;
   const activeOptionId = activeItem ? `${popupId}-option-${props.dataSource.idForItem(activeItem)}` : undefined;
   const options = items.map((item) => ({ id: props.dataSource.idForItem(item), label: props.dataSource.labelForItem(item), value: item }));
-  const appearanceState = props.disabled ? "disabled" : focused ? "focused" : "normal";
-  const appearance = useNSEAppearanceSlot(nseAppearanceSlot("combo-box", "well", appearanceState));
+
+
   return (
-    <span data-nse-control="combo-box" data-state={loading ? "loading" : items.length ? "ready" : "empty"} {...appearance.attributes}>
+    <span data-nse-part="bezel" {...theme.events} {...nseControlHooks({ control: "combo-box", enabled: !disabled, hovered: theme.hovered, focused: theme.focused, variants: { editable: String(!props.readOnly) } })} data-state={loading ? "loading" : items.length ? "ready" : "empty"} >
       <input
+        data-nse-part="field"
         ref={inputRef}
         id={inputId}
         role="combobox"
@@ -107,19 +123,19 @@ export function NSEComboBox<T>(props: NSEComboBoxProps<T>) {
         aria-controls={items.length > 0 ? popupId : undefined}
         aria-activedescendant={activeOptionId}
         value={draft}
-        disabled={props.disabled}
+        disabled={disabled}
         readOnly={props.readOnly}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         onCompositionStart={() => { composing.current = true; }}
         onCompositionEnd={(event) => {
-          if (props.disabled || props.readOnly) return;
+          if (disabled || props.readOnly) return;
           composing.current = false;
           props.onInputValueChange(event.currentTarget.value);
           query(event.currentTarget.value);
         }}
         onChange={(event) => {
-          if (props.disabled || props.readOnly) return;
+          if (disabled || props.readOnly) return;
           setDraft(event.currentTarget.value);
           if (!composing.current) {
             props.onInputValueChange(event.currentTarget.value);
@@ -127,7 +143,7 @@ export function NSEComboBox<T>(props: NSEComboBoxProps<T>) {
           }
         }}
         onKeyDown={(event) => {
-          if (props.disabled || props.readOnly || composing.current || event.nativeEvent.isComposing) return;
+          if (disabled || props.readOnly || composing.current || event.nativeEvent.isComposing) return;
           if (event.key === "ArrowDown" && items.length) {
             event.preventDefault();
             setActive((value) => Math.min(items.length - 1, value + 1));

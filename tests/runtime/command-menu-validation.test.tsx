@@ -22,7 +22,7 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import React from "react";
-import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
+import { NSEMenuView } from "../../src/NSE/Menus/NSEMenuView";
 import { NSEOverlayProvider } from "../../src/NSE/Overlays";
 import type { CommandDeclaration } from "../../src/SynCloudOS/Commands";
 import { SynCloudOSProvider, useCommandMenuItems, useRuntimeNSEOverlayPort } from "../../src/SynCloudOSReact";
@@ -40,7 +40,7 @@ function TestMenu({ open }: { open: boolean }) {
     { key: "separator", separator: true },
     { key: "parent", label: "Parent", children: [{ key: "custom", label: "Custom" }] },
   ], open);
-  return <NSEMenu label="Actions" open={open} items={[...menu.items]} onSelect={(value) => { void menu.dispatch(value); }} />;
+  return <NSEMenuView label="Actions" open={open} items={[...menu.items]} onSelect={(value) => { void menu.dispatch(value); }} />;
 }
 
 function RuntimeOverlayHost({ children }: { children: React.ReactNode }) {
@@ -147,7 +147,7 @@ describe("command menu validation", () => {
         { key: "hidden", commandId: "menu.payload", payload: { variant: "hidden" } },
         { key: "disabled", commandId: "menu.payload", payload: { variant: "disabled" } },
       ], true);
-      return <NSEMenu label="Payloads" open items={[...menu.items]} onSelect={(value) => { void menu.dispatch(value); }} />;
+      return <NSEMenuView label="Payloads" open items={[...menu.items]} onSelect={(value) => { void menu.dispatch(value); }} />;
     }
     render(<SynCloudOSProvider runtime={runtime}><RuntimeOverlayHost><PayloadMenu /></RuntimeOverlayHost></SynCloudOSProvider>);
     expect(await screen.findByRole("menuitem", { name: "First" })).toBeTruthy();

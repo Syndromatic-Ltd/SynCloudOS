@@ -33,36 +33,12 @@ export interface NSERegistryItem {
 
 export const nseRegistry = [
   {
-    name: "nse-app-frame",
-    title: "NSEAppFrame",
-    type: "composition",
-    description: "Standard SynCloudOS app-view frame with optional top bar, split content, and status bar slots.",
-    files: ["src/NSE/Windows/NSEAppFrame.tsx", "src/NSE/Windows/Chrome/nse-chrome.css"],
-    dependencies: ["nse-top-bar", "nse-split-view", "nse-status-bar"],
-    variants: ["standard", "sourceList", "document", "canvas"],
-    examples: ["src/SynWare/NSEControlGallery.app/Contents/index.tsx"]
-  },
-  {
-    name: "nse-top-bar",
-    title: "NSETopBar",
+    name: "nse-animation-context",
+    title: "NSEAnimationContext",
     type: "primitive",
-    description: "Apple-inspired app chrome bar: the Cumulus slice variant and the reusable atmoMetal source-list chrome (rail+main seam, grain, light/dark, metal pills).",
-    files: [
-      "src/NSE/Windows/Chrome/NSETopBar.tsx",
-      "src/NSE/Windows/Chrome/NSETopBarButton.tsx",
-      "src/NSE/Windows/Chrome/nseTopBarTypes.ts",
-      "src/NSE/Windows/Chrome/nseTopBarStyles.ts",
-      "src/NSE/Windows/Chrome/nse-chrome.css"
-    ],
-    variants: ["atmoCumulus", "atmoMetal"]
-  },
-  {
-    name: "nse-sidebar",
-    title: "NSESidebar",
-    type: "primitive",
-    description: "Source-list and inspector sidebar model with sections, badges, nested items, metadata, and custom row rendering.",
-    files: ["src/NSE/Navigation/SourceList/NSESidebar.tsx", "src/NSE/Navigation/SourceList/nse-sourcelist.css", "src/NSE/Windows/Chrome/nse-chrome.css"],
-    variants: ["sourceList", "inspector", "plain"]
+    description: "NSAnimationContext groups, NSView animator proxies and NSViewController presentations and child transitions. Reduced motion is a read-only system trait.",
+    files: ["src/NSE/Animation/NSEAnimationContext.ts", "src/NSE/Animation/NSEViewAnimator.ts", "src/NSE/Application/NSEViewController.ts"],
+    variants: ["NSEAnimationContext", "NSEViewControllerPresentationAnimator", "NSEViewControllerTransitionOptions"]
   },
   {
     name: "nse-split-view",
@@ -70,13 +46,6 @@ export const nseRegistry = [
     type: "primitive",
     description: "Resizable app split view with keyboard and pointer resizing contracts.",
     files: ["src/NSE/DataViews/Split/NSESplitView.tsx", "src/NSE/Windows/Chrome/nse-chrome.css"]
-  },
-  {
-    name: "nse-status-bar",
-    title: "NSEStatusBar",
-    type: "primitive",
-    description: "Compact bottom app status strip with leading, centre, and trailing regions.",
-    files: ["src/NSE/Windows/Chrome/NSEStatusBar.tsx", "src/NSE/Windows/Chrome/nse-chrome.css"]
   },
   {
     name: "nse-controls",
@@ -87,61 +56,25 @@ export const nseRegistry = [
       "src/NSE/Controls/Buttons/NSEButtons.tsx",
       "src/NSE/Controls/Buttons/NSEButtonFamilies.tsx",
       "src/NSE/Controls/Fields/NSEFields.tsx",
-      "src/NSE/Controls/Selection/NSESelectors.tsx",
       "src/NSE/Menus/index.ts",
-      "src/NSE/Progress/NSEProgress.tsx",
+      "src/NSE/Progress/NSEProgressIndicator.tsx",
       "src/NSE/Material/index.ts",
       "src/NSE/Appearance/index.ts"
     ],
     variants: [
-      "NSEPushButton",
-      "NSEIconButton",
+      "NSEButton",
       "NSETextField",
       "NSESearchField",
-      "NSECheckbox",
-      "NSEToggleButton",
-      "NSERadioGroup",
+      "NSESwitch",
       "NSEToolbar",
-      "NSEGroupBox",
-      "NSEListItem",
       "NSEPopup",
       "NSEMenu",
-      "NSEPicker",
-      "NSEProgressBar",
-      "NSEProgressButton",
-      "NSEProgressItem",
+      "NSEPopUpButton",
+      "NSEProgressIndicator",
       "NSESlider",
-      "NSESpinner",
-      "NSEDivider",
-      "NSEPageHeader",
-      "NSEAppMenuSurface",
-      "NSEDialogSurface",
-      "NSEFilePickerButton",
-      "NSEGrabHandle",
-      "NSERoundedBox",
-      "NSEHashBadge",
-      "NSEActivityButton",
-      "NSENotificationButton",
-      "NSEButtonHeader",
-      "NSEToolButton",
-      "NSEToolButtonGroup",
-      "NSERadioToolButtonGroup",
-      "NSETabGroup",
-      "NSEPasswordField",
-      "NSERoundedInput",
-      "NSEToolInput",
-      "NSEHeader",
-      "NSEPrevNextBanner",
-      "NSEListSelector",
-      "NSEPopupList",
-      "NSEPickerGroup",
-      "NSEIntegerPicker",
-      "NSEDatePicker",
-      "NSETimePicker",
-      "NSEProgressSlider",
-      "NSEAppMenu",
-      "NSEEditMenu",
-      "NSEHelpMenu"
+      "NSEBox",
+      "NSEShadow",
+      "NSEDatePicker"
     ],
     examples: ["src/SynWare/NSEControlGallery.app/Contents/index.tsx"]
   },
@@ -149,39 +82,19 @@ export const nseRegistry = [
     name: "nse-layout",
     title: "NSE Layout",
     type: "composition",
-    description: "Modern NSE layout layer for flex, stack, inline, fit, spacer, and ordered visible-child composition.",
+    description: "NSStackView and NSGridView: views in a row or column, and in rows and columns.",
     files: [
-      "src/NSE/Layout/NSELayout.tsx",
+      "src/NSE/Layout/NSEStackView.tsx",
+      "src/NSE/Layout/flowStackView.tsx",
+      "src/NSE/Layout/NSEGridView.tsx",
       "src/NSE/Layout/nse-layout.css",
       "src/NSE/Layout/index.ts"
     ],
     variants: [
-      "NSEFlex",
-      "NSEStack",
-      "NSEInline",
-      "NSEFit",
-      "NSEOrdered",
-      "NSESpacer",
-      "useNSEOrderedChildren"
-    ],
-    examples: ["src/SynWare/NSEControlGallery.app/Contents/index.tsx"]
-  },
-  {
-    name: "nse-list",
-    title: "NSE List",
-    type: "composition",
-    description: "Selectable, page-windowed, and swipeable list primitives that keep list behaviour separate from app-specific sidebars.",
-    files: [
-      "src/NSE/List/NSEList.tsx",
-      "src/NSE/List/nse-list.css",
-      "src/NSE/List/index.ts"
-    ],
-    variants: [
-      "NSEList",
-      "NSEListRow",
-      "NSESwipeableItem",
-      "useNSEListSelection",
-      "useNSEPageWindow"
+      "NSEStackView",
+      "NSEStackItem",
+      "NSEGridView",
+      "NSEGridRow"
     ],
     examples: ["src/SynWare/NSEControlGallery.app/Contents/index.tsx"]
   },
@@ -189,23 +102,14 @@ export const nseRegistry = [
     name: "nse-containers",
     title: "NSE Containers",
     type: "composition",
-    description: "Row groups, drawers, panes, sliding views, modal dialogs, confirm prompts, and toasters for app composition in NSE vocabulary.",
+    description: "Drawers and collapsing split items. Alerts are NSEAlert objects and custom dialogs are view controllers presented as sheets.",
     files: [
       "src/NSE/Containers/NSEContainers.tsx",
       "src/NSE/Containers/nse-containers.css",
       "src/NSE/Containers/index.ts"
     ],
     variants: [
-      "NSERowGroup",
-      "NSEDrawer",
-      "NSEDividerDrawer",
-      "NSEPane",
-      "NSESlidingPane",
-      "NSESlidingView",
-      "NSEDialog",
-      "NSEModalDialog",
-      "NSEConfirmPrompt",
-      "NSEToaster"
+      "NSEDrawer"
     ],
     examples: ["src/SynWare/NSEControlGallery.app/Contents/index.tsx"]
   },
@@ -214,7 +118,7 @@ export const nseRegistry = [
     title: "Atmo",
     type: "appearance",
     description: "Canonical first-party Atmo appearance for NSE controls.",
-    files: ["src/NSE/Themes/Atmo/index.ts", "src/NSE/Themes/Atmo/Resources/atmo.css"]
+    files: ["src/NSE/Appearance/atmo.ts", "src/NSE/Appearance/atmo-theme.css"]
   }
 ] satisfies NSERegistryItem[];
 

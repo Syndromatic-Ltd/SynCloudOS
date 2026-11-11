@@ -30,7 +30,7 @@ describe("runtime lifecycle cancellation", () => {
     let entered!: () => void;
     const did = vi.fn();
     const runtime = createTestRuntime({
-      initialBundles: [createTestBundle({ id: "cancelled-app" }, {
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.cancelled-app" }, {
         lifecycleHooks: {
           launch: {
             will: ({ signal }: { signal: AbortSignal }) => new Promise<void>((resolve) => {
@@ -45,14 +45,14 @@ describe("runtime lifecycle cancellation", () => {
     });
 
     authoriseRuntime(runtime);
-    const handle = runtime.lifecycle.launch("cancelled-app", { reason: "user" });
+    const handle = runtime.lifecycle.launch("com.example.cancelled-app", { reason: "user" });
     await vi.waitFor(() => expect(entered).toBeTypeOf("function"));
     handle.cancel("user-cancelled");
     entered();
 
     await expect(handle.result).resolves.toMatchObject({ status: "cancelled", committed: false });
     expect(did).not.toHaveBeenCalled();
-    expect(runtime.store.getSnapshot().lifecycle["cancelled-app"]).toBe("registered");
+    expect(runtime.store.getSnapshot().lifecycle["com.example.cancelled-app"]).toBe("registered");
     expect(runtime.windows.list()).toEqual([]);
     expect(runtime.operations.inspectPending()).toEqual([]);
   });
@@ -60,7 +60,7 @@ describe("runtime lifecycle cancellation", () => {
   it("times out a lifecycle hook with a typed operation failure", async () => {
     const runtime = createTestRuntime({
       lifecycleHookTimeoutMs: 5,
-      initialBundles: [createTestBundle({ id: "timeout-app" }, {
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.timeout-app" }, {
         lifecycleHooks: {
           launch: { will: () => new Promise<void>(() => undefined) },
         } as never,
@@ -68,10 +68,10 @@ describe("runtime lifecycle cancellation", () => {
     });
 
     authoriseRuntime(runtime);
-    const result = await runtime.lifecycle.launch("timeout-app", { reason: "timeout" }).result;
+    const result = await runtime.lifecycle.launch("com.example.timeout-app", { reason: "timeout" }).result;
 
     expect(result).toMatchObject({ status: "failed", committed: false, error: { code: "operation-timeout" } });
-    expect(runtime.store.getSnapshot().lifecycle["timeout-app"]).toBe("registered");
+    expect(runtime.store.getSnapshot().lifecycle["com.example.timeout-app"]).toBe("registered");
     expect(runtime.operations.inspectPending()).toEqual([]);
   });
 
@@ -79,7 +79,7 @@ describe("runtime lifecycle cancellation", () => {
     let entered!: () => void;
     const did = vi.fn();
     const runtime = createTestRuntime({
-      initialBundles: [createTestBundle({ id: "route-app", route: "/route-app" }, {
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.route-app", route: "/route-app" }, {
         lifecycleHooks: {
           suspend: {
             will: ({ signal }: { signal: AbortSignal }) => new Promise<void>((resolve) => {
@@ -103,10 +103,10 @@ describe("runtime lifecycle cancellation", () => {
     await expect(handle.result).resolves.toMatchObject({ status: "cancelled", committed: false });
     expect(did).not.toHaveBeenCalled();
     expect(runtime.store.getSnapshot()).toMatchObject({
-      lifecycle: { "route-app": "active" },
+      lifecycle: { "com.example.route-app": "active" },
       application: {
-        activeAppId: "route-app",
-        currentAppId: "route-app",
+        activeAppId: "com.example.route-app",
+        currentAppId: "com.example.route-app",
         routePath: "/route-app",
       },
       statechart: { currentState: before.statechart.currentState },
@@ -119,7 +119,7 @@ describe("runtime lifecycle cancellation", () => {
     let loadEntered = false;
     const heldLoad = new Promise<void>((resolve) => { releaseLoad = resolve; });
     const runtime = createTestRuntime({
-      initialBundles: [createTestBundle({ id: "load-cancel-app" }, {
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.load-cancel-app" }, {
         loadModule: async () => {
           loadEntered = true;
           await heldLoad;
@@ -129,7 +129,7 @@ describe("runtime lifecycle cancellation", () => {
     });
 
     authoriseRuntime(runtime);
-    const handle = runtime.lifecycle.launch("load-cancel-app", { reason: "cancel-load" });
+    const handle = runtime.lifecycle.launch("com.example.load-cancel-app", { reason: "cancel-load" });
     await vi.waitFor(() => expect(loadEntered).toBe(true));
     handle.cancel("expected-user-cancellation");
     releaseLoad();
@@ -140,11 +140,11 @@ describe("runtime lifecycle cancellation", () => {
 
   it("establishes the irreversible checkpoint before lifecycle state becomes observable", async () => {
     const runtime = createTestRuntime({
-      initialBundles: [createTestBundle({ id: "checkpoint-app" })],
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.checkpoint-app" })],
     });
     const observedCommitStates: boolean[] = [];
     const unsubscribe = runtime.store.subscribe(() => {
-      if (runtime.store.getSnapshot().lifecycle["checkpoint-app"] !== "active") return;
+      if (runtime.store.getSnapshot().lifecycle["com.example.checkpoint-app"] !== "active") return;
       const operation = runtime.operations.inspectPending().find((record) => (
         record.kind === "lifecycle.launch" && record.phase === "committing"
       ));
@@ -152,7 +152,7 @@ describe("runtime lifecycle cancellation", () => {
     });
 
     authoriseRuntime(runtime);
-    await runtime.lifecycle.launch("checkpoint-app", { reason: "checkpoint-order" }).result;
+    await runtime.lifecycle.launch("com.example.checkpoint-app", { reason: "checkpoint-order" }).result;
     unsubscribe();
 
     expect(observedCommitStates.length).toBeGreaterThan(0);
@@ -161,7 +161,7 @@ describe("runtime lifecycle cancellation", () => {
 
   it("establishes the irreversible checkpoint before route state becomes observable", async () => {
     const runtime = createTestRuntime({
-      initialBundles: [createTestBundle({ id: "route-checkpoint-app", route: "/route-checkpoint" })],
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.route-checkpoint-app", route: "/route-checkpoint" })],
     });
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
     const observedCommitStates: boolean[] = [];

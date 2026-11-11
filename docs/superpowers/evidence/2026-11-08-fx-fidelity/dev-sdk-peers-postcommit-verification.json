@@ -1,0 +1,20 @@
+{
+  "commit": "5286513ee77b3e384c1b8347c3546d0d605b977e",
+  "parent": "4be4c68c41763ed44ca1009a8f5295ebc2057e8f",
+  "paths": [
+    "scripts/synware/vite-plugin.mjs",
+    "docs/framework/synware-sdk.md",
+    "tests/runtime/synware-vite-sdk-build.test.ts",
+    "tests/runtime/fx/app-attribution-dev.test.ts",
+    "tests/fixtures/fx-dev-attribution/serve.mjs",
+    "docs/superpowers/evidence/2026-11-08-fx-fidelity/dev-binding-fix-evidence.md"
+  ],
+  "commitWorkingIndexIdentical": true,
+  "frozenFilesMatch": true,
+  "sourceSha256": "a99970151f276d4bdd65e9fd2450aac9b1e3b82520f09a497b01eb998a9959f0",
+  "archiveSha256": "b0d6a6a298c6347834463bc84d6fb1f9a04dd4538b9005fdecd101ac190410bc",
+  "resourcesSha256": "0fdec76cb7d313aebdd5b3b93edfd2bb81bceac3a7a3c9134026e4d8d8b678fe",
+  "restoredTrackedHistoricalReceipts": [
+    "docs/superpowers/evidence/2026-11-08-dispatchfx/task-6-installed.json"
+  ]
+}

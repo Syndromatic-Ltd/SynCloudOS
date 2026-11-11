@@ -19,8 +19,8 @@
  */
 
 // @vitest-environment jsdom
-import React, { useRef, type PropsWithChildren } from "react";
-import { act, cleanup, render } from "@testing-library/react";
+import React, { useRef, useSyncExternalStore, type PropsWithChildren } from "react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import {
   NSEAnimationEnvironmentProvider,
@@ -32,6 +32,9 @@ import { LoginWindow } from "../../src/NSE/SystemUI/LoginWindow";
 import { LoginGatePresenter, type LoginGatePresenterProps } from "../../src/SynCloudOS/RootRuntime";
 import { resolveWebspringMotion } from "../../src/Webspring/Webspring.transitions";
 import type { AFXAnimationDefinition, AFXAnimationSettlement } from "../../src/FX/AnimationFX/animationTypes";
+import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
+import { HostLoginGate } from "../../src/Webspring/HostLoginGate";
+import { createTestRuntime } from "./helpers";
 
 afterEach(cleanup);
 
@@ -98,4 +101,77 @@ it("keeps the gate until the backdrop, window and placard exits settle, then rep
   await exits.at(-1)!.settle();
   expect(rendered.container.querySelector(".syncloudos-login-gate")).toBeNull();
   expect(onExitComplete).toHaveBeenCalledTimes(1);
+});
+
+it.each(["optional", "required"] as const)("preserves Board-origin %s authentication cancellation policy without creating a session", async (authentication) => {
+  const runtime = createTestRuntime({ authenticationPolicy: authentication });
+  await runtime.boot({ initialPathname: "/" });
+  if (authentication === "optional") runtime.statechart.gotoState("locked.loginWindow", { source: "webspring-account", closeWindows: false, syncRoute: false });
+  function Gate() {
+    const snapshot = useSyncExternalStore(runtime.store.subscribe, runtime.store.getSnapshot, runtime.store.getSnapshot);
+    return <HostLoginGate runtime={runtime} snapshot={snapshot} authentication={authentication} />;
+  }
+  const view = render(<SynCloudOSProvider runtime={runtime}><button>Board action</button><Gate /></SynCloudOSProvider>);
+  try {
+    expect(await screen.findByText("Authentication is not configured.")).not.toBeNull();
+    if (authentication === "required") {
+      expect(screen.queryByRole("button", { name: "Cancel" })).toBeNull();
+      expect(runtime.statechart.getCurrentState()).toBe("locked.loginWindow");
+    } else {
+      await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Cancel" })); });
+      await waitFor(() => expect(view.container.querySelector(".syncloudos-login-gate")).toBeNull());
+      expect(runtime.statechart.getCurrentState()).toBe("active.webspring");
+      const board = screen.getByRole("button", { name: "Board action" });
+      board.focus();
+      expect(document.activeElement).toBe(board);
+    }
+    expect(runtime.store.getSnapshot().loginServices.isAuthorised).toBe(false);
+    expect(runtime.store.getSnapshot().application.activeAppId).toBeNull();
+    expect(runtime.store.getSnapshot().application.routePath).toBe("/");
+  } finally {
+    view.unmount();
+    await runtime.dispose("login-gate-test");
+  }
+});
+
+it("keeps optional authentication locked until the login modal finishes its cancellation exit", async () => {
+  const runtime = createTestRuntime({ authenticationPolicy: "optional" });
+  await runtime.boot({ initialPathname: "/" });
+  runtime.statechart.gotoState("locked.loginWindow", { source: "webspring-account", closeWindows: false, syncRoute: false });
+  const { animator, played } = controlledAnimator();
+  const completions: Array<{ state: string; modal: boolean }> = [];
+  function Gate() {
+    const snapshot = useSyncExternalStore(runtime.store.subscribe, runtime.store.getSnapshot, runtime.store.getSnapshot);
+    return <HostLoginGate runtime={runtime} snapshot={snapshot} authentication="optional" onExitComplete={() => {
+      completions.push({ state: snapshot.statechart.currentState, modal: runtime.focus.inspect().scopes.some(({ id }) => id === "system-ui:login") });
+    }} />;
+  }
+  const view = render(<SynCloudOSProvider runtime={runtime}><NSEAnimationEnvironmentProvider animator={animator}><Gate /></NSEAnimationEnvironmentProvider></SynCloudOSProvider>);
+  try {
+    const cancel = await screen.findByRole("button", { name: "Cancel" }) as HTMLButtonElement;
+    expect(cancel.disabled).toBe(false);
+    // Finish real entrance/error-feedback animations before testing dismissal.
+    // Only animations created by the native Cancel click count as exits.
+    for (const entrance of [...played]) await entrance.settle();
+    const beforeCancel = played.length;
+    await act(async () => { fireEvent.click(cancel); });
+    const exits = played.slice(beforeCancel);
+    expect(exits.map(({ target }) => target.className.split(" ")[0]).sort())
+      .toEqual(["nse-login-window", "nse-login-window-swing-stage", "syncloudos-login-backdrop"]);
+    expect(exits.every(({ definition }) => definition.fill === "forwards")).toBe(true);
+    expect(runtime.statechart.getCurrentState()).toBe("locked.loginWindow");
+    expect(completions).toHaveLength(0);
+    for (const exit of exits.slice(0, -1)) await exit.settle();
+    expect(runtime.statechart.getCurrentState()).toBe("locked.loginWindow");
+    expect(runtime.focus.inspect().scopes.some(({ id }) => id === "system-ui:login")).toBe(true);
+    await exits.at(-1)!.settle();
+    await waitFor(() => expect(view.container.querySelector(".syncloudos-login-gate")).toBeNull());
+    expect(runtime.focus.inspect().scopes.some(({ id }) => id === "system-ui:login")).toBe(false);
+    expect(runtime.statechart.getCurrentState()).toBe("active.webspring");
+    expect(runtime.store.getSnapshot().loginServices.isAuthorised).toBe(false);
+    expect(completions).toEqual([{ state: "active.webspring", modal: false }]);
+  } finally {
+    view.unmount();
+    await runtime.dispose("login-gate-test");
+  }
 });

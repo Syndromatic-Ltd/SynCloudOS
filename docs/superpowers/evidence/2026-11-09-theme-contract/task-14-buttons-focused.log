@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/theme-css-selectors.test.ts tests/runtime/theme-bundles.test.ts tests/runtime/atmo-theme-bundle.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  3 passed (3)
+      Tests  40 passed (40)
+   Start at  00:24:05
+   Duration  3.58s (transform 183ms, setup 55ms, import 874ms, tests 2.81s, environment 0ms)

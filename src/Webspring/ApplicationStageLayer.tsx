@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import { NSEPresence, useNSEPresentation, type NSEPresentationSpec } from "../NSE/Animation";
 import { ApplicationStageHost } from "./ApplicationStageHost";
@@ -54,8 +55,8 @@ function getMultiSwitchRole(
   appId: string,
 ): WebspringMultiSwitchRole | null {
   if (!multiSwitch || multiSwitch.status !== "switching") return null;
-  if (multiSwitch.fromAppId === appId) return WEBSPRING_MULTI_SWITCH_ROLES[1];
-  if (multiSwitch.toAppId === appId) return WEBSPRING_MULTI_SWITCH_ROLES[0];
+  if (normalizeBundleIdentifier(multiSwitch.fromAppId) === normalizeBundleIdentifier(appId)) return WEBSPRING_MULTI_SWITCH_ROLES[1];
+  if (normalizeBundleIdentifier(multiSwitch.toAppId) === normalizeBundleIdentifier(appId)) return WEBSPRING_MULTI_SWITCH_ROLES[0];
   return null;
 }
 
@@ -73,7 +74,12 @@ export function selectApplicationStageAppIds({
   readonly returnTransitionId: string | null;
 }): readonly string[] {
   if (multiSwitch?.status === "switching") {
-    return [...new Set([multiSwitch.fromAppId, multiSwitch.toAppId].filter((id): id is string => Boolean(id)))];
+    const appIds: string[] = [];
+    if (multiSwitch.fromAppId) appIds.push(multiSwitch.fromAppId);
+    if (multiSwitch.toAppId && normalizeBundleIdentifier(multiSwitch.toAppId) !== normalizeBundleIdentifier(multiSwitch.fromAppId)) {
+      appIds.push(multiSwitch.toAppId);
+    }
+    return appIds;
   }
   // Removing the live child starts NSEPresence's owned exit. Keeping a
   // returning app mounted would make applicationExit depend on the return that
@@ -111,6 +117,11 @@ export function ApplicationStageLayer({
 }) {
   const hasMultiSwitch = multiSwitch?.status === "switching";
   const runtime = useKernelSynCloudOS();
+  const workArea = useSyncExternalStore(
+    runtime.environment.workArea.subscribe,
+    runtime.environment.workArea.getSnapshot,
+    runtime.environment.workArea.getSnapshot,
+  );
   const windowSnapshot = useSyncExternalStore(
     runtime.windows.subscribe,
     runtime.windows.snapshot,
@@ -121,13 +132,13 @@ export function ApplicationStageLayer({
     const appIds = selectApplicationStageAppIds({ activeAppId, multiSwitch, returnTransitionId });
     return appIds
       .map((appId, index) => {
-        const app = apps[appId];
+        const app = apps[normalizeBundleIdentifier(appId)];
         if (!app || app.presentation !== "appView") return null;
         return {
-          id: `application-stage:${appId}`,
-          appId,
+          id: `application-stage:${app.bundleIdentifier}`,
+          appId: app.bundleIdentifier,
           title: app.window.title,
-          isFocused: appId === activeAppId,
+          isFocused: normalizeBundleIdentifier(appId) === normalizeBundleIdentifier(activeAppId),
           zIndex: index + 1,
         } satisfies ApplicationStagePresentation;
       })
@@ -149,7 +160,9 @@ export function ApplicationStageLayer({
     );
   }, [hasMultiSwitch, multiSwitch, presentations]);
   const applicationStageBlocked = windowSnapshot.applicationStageBlocked ||
-    presentations.some(({ appId }) => windowSnapshot.blockedApplicationIds.includes(appId));
+    presentations.some(({ appId }) => windowSnapshot.blockedApplicationIds.some(
+      blockedAppId => normalizeBundleIdentifier(blockedAppId) === normalizeBundleIdentifier(appId),
+    ));
 
   useEffect(() => {
     completedReturnTransitionRef.current = null;
@@ -209,7 +222,8 @@ export function ApplicationStageLayer({
       data-multiswitching={hasMultiSwitch ? "true" : undefined}
       inert={applicationStageBlocked ? true : undefined}
       aria-hidden={applicationStageBlocked ? true : undefined}
-      style={applicationStageBlocked ? { pointerEvents: "none" } : undefined}
+      style={{ left: workArea.x, top: workArea.y, right: "auto", bottom: "auto", width: workArea.width, height: workArea.height,
+        pointerEvents: applicationStageBlocked ? "none" : undefined }}
       // Clicking the application behind the windows makes it the active
       // surface: every window, floating panels included, goes inactive.
       onPointerDownCapture={() => runtime.windows.resignKey()}
@@ -217,7 +231,7 @@ export function ApplicationStageLayer({
       <NSEPresence>{hasMultiSwitch ? <MultiSwitchBackdrop /> : null}</NSEPresence>
       <NSEPresence onExitComplete={handleWindowExitComplete}>
         {presentations.map((presentation) => {
-          const app = apps[presentation.appId];
+          const app = apps[normalizeBundleIdentifier(presentation.appId)];
           if (!app) return null;
           return (
             <ApplicationStageHost
@@ -225,10 +239,10 @@ export function ApplicationStageLayer({
               key={presentation.id}
               stage={presentation}
               app={app}
-              lifecycle={lifecycle[app.id] ?? "registered"}
+              lifecycle={lifecycle[normalizeBundleIdentifier(app.bundleIdentifier)] ?? "registered"}
               multiSwitchId={multiSwitchId}
-              multiSwitchRole={getMultiSwitchRole(multiSwitch, app.id)}
-              staged={stagingAppId === app.id}
+              multiSwitchRole={getMultiSwitchRole(multiSwitch, app.bundleIdentifier)}
+              staged={normalizeBundleIdentifier(stagingAppId) === normalizeBundleIdentifier(app.bundleIdentifier)}
               launchTransitionId={launchTransitionId}
               presentationSettlementId={presentationSettlementId}
               quickSwitchOpen={quickSwitchOpen}

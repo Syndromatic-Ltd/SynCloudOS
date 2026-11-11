@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import {
   createRuntimeOwnedMEFXBlockBuffer,
   type MEFXBlockRuntimeHandle,
@@ -103,18 +104,17 @@ export function createMountedMediaClient(
     );
 
   return Object.freeze({
-    copyBlock(bytes: Uint8Array, signal?: AbortSignal) {
+    copyBlock(bytes: NSEDataConvertible, signal?: AbortSignal) {
       mountSignal.throwIfAborted();
       signal?.throwIfAborted();
-      if (!(bytes instanceof Uint8Array))
-        throw new TypeError("Mounted media block input must be Uint8Array.");
-      const backing = scope.reserve({ bytes: bytes.byteLength });
+      const data = NSEData.from(bytes);
+      const backing = scope.reserve({ bytes: data.count });
       const owner: MEFXBlockRuntimeOwner = Object.freeze({
         acquireHandle: () => acquireHandle(signal),
         onBackingRelease: () => backing.release(),
       });
       try {
-        return createRuntimeOwnedMEFXBlockBuffer(bytes, owner);
+        return createRuntimeOwnedMEFXBlockBuffer(data, owner);
       }
       catch (error) {
         backing.release();

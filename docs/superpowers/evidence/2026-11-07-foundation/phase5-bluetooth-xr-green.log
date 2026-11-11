@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/phase5-bluetooth.test.ts tests/runtime/fx/phase5-xr.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  2 passed (2)
+      Tests  10 passed (10)
+   Start at  19:14:17
+   Duration  355ms (transform 198ms, setup 42ms, import 215ms, tests 19ms, environment 0ms)
+

@@ -1,0 +1,27 @@
+[
+  {
+    "commandLine": "\"C:\\Program Files\\nodejs\\node.exe\" node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5173 --strictPort --force",
+    "processId": 72912,
+    "port": 5173,
+    "executable": "C:\\Program Files\\nodejs\\node.exe",
+    "listening": true
+  },
+  {
+    "commandLine": "\"C:\\Program Files\\nodejs\\node.exe\" ../framework/docs/superpowers/evidence/2026-11-07-foundation/open-ui-preview.mjs",
+    "processId": 83408,
+    "port": 5199,
+    "executable": "C:\\Program Files\\nodejs\\node.exe",
+    "listening": true
+  },
+  {
+    "listening": false,
+    "port": 5210
+  },
+  {
+    "commandLine": "\"C:\\Program Files\\nodejs\\node.exe\" node_modules/vite/bin/vite.js --config vite.local-auth.config.mts --host 127.0.0.1 --port 5387 --strictPort --force",
+    "processId": 69072,
+    "port": 5387,
+    "executable": "C:\\Program Files\\nodejs\\node.exe",
+    "listening": true
+  }
+]

@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/focus-scope.test.tsx tests/runtime/runtime-input-boundary.test.tsx tests/runtime/nse-view-safe-area.test.tsx tests/runtime/nse-layout-guide-adoption.test.tsx tests/runtime/nse-tab-view-controller.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  5 passed (5)
+      Tests  59 passed (59)
+   Start at  19:02:10
+   Duration  11.18s (transform 8.25s, setup 72ms, import 14.66s, tests 2.09s, environment 4.12s)

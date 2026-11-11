@@ -1,0 +1,10 @@
+{
+  "resourceSha256": "c8ff8f43de2ae0132cf8f6f12731c40363bade8636b19c9a5abada6b9d306df9",
+  "commit": "b21cf2975212cf91ed0cb19f93165b586468b4c2",
+  "archiveSha256": "1aa562bc384ea5218e25c846a1e4435bb9eae7224b1d21cf399185f9e3c6cdd1",
+  "integrity": "sha512-SxfZgyOD5t15F2aE4ekWItg8XcFHYsxqFsMiPOM4vSpLkIVzk/w/vSbV8jU1g+37owd7d1CAF1jxX66DQsQsIg==",
+  "siteReceipt": "site/vendor/framework-receipt.json",
+  "cleanCheckout": true,
+  "resourceFileCount": 2167,
+  "sourceSha256": "ed8f99a23be7e870669aab112e0068763ec4aee42b4e0756ce3a83d54895a8ad"
+}

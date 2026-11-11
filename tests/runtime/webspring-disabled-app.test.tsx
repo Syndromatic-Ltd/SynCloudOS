@@ -39,14 +39,14 @@ it.each([
   const reason = "This application is being prepared.";
   const loadModule = vi.fn(() => Promise.resolve({ default: () => null }));
   const runtime = createTestRuntime({ initialBundles: [createTestBundle({
-    ...createTestManifest({ id: "preparing", displayName: "Preparing", policy: { public: true } }),
+    ...createTestManifest({ bundleIdentifier: "com.example.preparing", displayName: "Preparing", policy: { public: true } }),
     disabled: true, disabledReason: reason,
   }, { loadModule })] });
   runtimes.push(runtime);
   await runtime.boot({ initialPathname: "/" });
   const shell = defineWebspring({
     manifest: {
-      schemaVersion: 1, id: "fixture.disabled-shell", version: "1.0.0", title: "Fixture",
+      schemaVersion: 1, bundleIdentifier: "com.example.fixture.disabled-shell", version: "1.0.0", displayName: "Fixture",
       webspringShell: {
         views: [{ id, presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
         defaults: { desktop: id, tablet: id, mobile: id }, homeRoute: "/",
@@ -69,7 +69,7 @@ it.each([
 
   await act(async () => {
     runtime.apps.registerBundle(createTestBundle({
-      ...createTestManifest({ id: "preparing", displayName: "Preparing", policy: { public: true } }),
+      ...createTestManifest({ bundleIdentifier: "com.example.preparing", displayName: "Preparing", policy: { public: true } }),
       disabled: true, disabledReason: "A newer availability explanation.",
     }, { loadModule }));
   });

@@ -1,0 +1,28 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/foundation-faithful-values.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/foundation-faithful-values.test.ts (4 tests | 1 failed) 5ms
+   × provides Foundation boolean and nil transformers by their standard names 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/foundation-faithful-values.test.ts > provides Foundation boolean and nil transformers by their standard names
+TypeError: Cannot read properties of null (reading 'transformedValue')
+ ❯ tests/runtime/foundation-faithful-values.test.ts:33:17
+     31| it("provides Foundation boolean and nil transformers by their standard…
+     32|   const negate = NSEValueTransformer.valueTransformerForName("NSNegate…
+     33|   expect(negate.transformedValue(true)).toBe(false);
+       |                 ^
+     34|   expect(negate.reverseTransformedValue(false)).toBe(true);
+     35|   expect(NSEValueTransformer.valueTransformerForName("NSIsNilTransform…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 passed (4)
+   Start at  19:06:01
+   Duration  197ms (transform 33ms, setup 29ms, import 17ms, tests 5ms, environment 0ms)
+

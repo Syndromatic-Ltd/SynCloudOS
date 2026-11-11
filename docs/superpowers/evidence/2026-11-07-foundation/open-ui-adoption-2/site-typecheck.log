@@ -1,0 +1,17 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run tsc -b --pretty false
+src/SynWare/JournalPublisher.app/Contents/PublisherWindowController.tsx(1227,59): error TS2353: Object literal may only specify known properties, and 'blob' does not exist in type 'FilePanelExportPayload'.
+src/SynWare/NSEControlGallery.app/Contents/Gallery/WindowSections.tsx(331,28): error TS2345: Argument of type '{ fileName: string; mediaType: string; blob: Blob; }' is not assignable to parameter of type 'FilePanelExportPayload'.
+  Property 'data' is missing in type '{ fileName: string; mediaType: string; blob: Blob; }' but required in type 'FilePanelExportPayload'.
+src/SynWare/NSEControlGallery.app/Contents/GalleryTextImport.tsx(44,19): error TS2339: Property 'name' does not exist on type 'NSEData'.
+src/SynWare/NSEControlGallery.app/Contents/GalleryTextImport.tsx(44,63): error TS2339: Property 'type' does not exist on type 'NSEData'.
+src/SynWare/NSEControlGallery.app/Contents/GalleryTextImport.tsx(44,76): error TS2339: Property 'type' does not exist on type 'NSEData'.
+src/SynWare/NSEControlGallery.app/Contents/GalleryTextImport.tsx(45,18): error TS2339: Property 'size' does not exist on type 'NSEData'.
+src/SynWare/NSEControlGallery.app/Contents/GalleryTextImport.tsx(46,34): error TS2339: Property 'arrayBuffer' does not exist on type 'NSEData'.
+src/SynWare/NSEControlGallery.app/Contents/GalleryTextImport.tsx(68,102): error TS2339: Property 'name' does not exist on type 'NSEData'.
+src/SynWare/NSEControlGallery.app/Contents/TextTransferMedia.tsx(657,85): error TS2345: Argument of type 'Blob' is not assignable to parameter of type 'DocumentResourceInput'.
+  Property 'data' is missing in type 'Blob' but required in type 'DocumentResourceInput'.
+tests/runtime/gallery-class.test.tsx(223,28): error TS2339: Property 'getByText' does not exist on type 'SynWareTestRenderResult'.
+tests/runtime/publisher/product-controller.test.tsx(181,53): error TS2339: Property 'blob' does not exist on type 'FilePanelExportPayload'.
+tests/runtime/publisher/publisher-file-image-ui.test.tsx(95,67): error TS2339: Property 'blob' does not exist on type 'FilePanelExportPayload'.
+tests/runtime/publisher/publisher-file-image-ui.test.tsx(126,67): error TS2339: Property 'blob' does not exist on type 'FilePanelExportPayload'.

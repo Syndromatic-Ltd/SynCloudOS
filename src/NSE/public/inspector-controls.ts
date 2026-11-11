@@ -19,6 +19,8 @@
  */
 
 /** Narrow NSE projection for the development Inspector's three controls. */
-export { NSEPane } from "../Containers/NSEContainers";
-export { NSEPushButton } from "../Controls/Buttons/NSEButtons";
+export { NSEButton } from "../Controls/Buttons/NSEButton";
+
+// Development Inspector chrome; this projection is not an SDK package entry.
+export { ContainerPane } from "../Containers/NSEContainers";
 export { NSEInputBox } from "../Controls/Fields/NSEFields";

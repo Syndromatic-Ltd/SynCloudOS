@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/browser-file-picker-port.test.ts tests/runtime/chronosphere/chronosphere-reflection.test.tsx tests/runtime/framework-doc-links.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  3 passed (3)
+      Tests  20 passed (20)
+   Start at  10:39:04
+   Duration  8.76s (transform 5.87s, setup 56ms, import 7.44s, tests 294ms, environment 2.07s)

@@ -1,0 +1,37 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 sdk:build
+npm notice run node scripts/synware/build-sdk.mjs
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(3737,47): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(3764,36): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4206,25): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4217,86): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4220,46): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4471,82): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4475,82): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4479,82): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4483,82): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4487,82): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4495,84): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4508,53): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4531,84): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4543,51): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4557,84): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4570,53): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4586,84): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4598,51): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/mountedMotionClient.ts(82,21): error TS2540: Cannot assign to 'authorizationStatus' because it is a read-only property.
+src/SynCloudOS/AppSDK/mountedMotionClient.ts(83,21): error TS2540: Cannot assign to 'capabilities' because it is a read-only property.
+src/SynCloudOS/AppSDK/mountedMotionClient.ts(91,21): error TS2540: Cannot assign to 'deviceMotion' because it is a read-only property.
+src/SynCloudOS/AppSDK/mountedMotionClient.ts(92,21): error TS2540: Cannot assign to 'accelerometerData' because it is a read-only property.
+src/SynCloudOS/AppSDK/mountedMotionClient.ts(93,21): error TS2540: Cannot assign to 'gyroData' because it is a read-only property.
+src/SynCloudOSReact/browserRuntime.tsx(315,32): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+Error: Command failed: C:\Program Files\nodejs\node.exe C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\typescript\bin\tsc -p tsconfig.sdk.json
+    at genericNodeError (node:internal/errors:986:15)
+    at wrappedFn (node:internal/errors:540:14)
+    at checkExecSyncError (node:child_process:943:11)
+    at execFileSync (node:child_process:979:15)
+    at runDeclarationBuild (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/scripts/synware/build-sdk.mjs:120:3)
+    at main (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/scripts/synware/build-sdk.mjs:351:3)
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/scripts/synware/build-sdk.mjs:441:1
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async node:internal/modules/esm/loader:647:26

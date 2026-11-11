@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/privacy-security-pane.test.tsx tests/runtime/privacy-runtime.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  2 passed (2)
+      Tests  7 passed (7)
+   Start at  21:33:42
+   Duration  16.21s (transform 10.83s, setup 45ms, import 14.16s, tests 280ms, environment 1.40s)

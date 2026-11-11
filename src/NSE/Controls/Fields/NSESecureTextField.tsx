@@ -1,3 +1,5 @@
+import { useNSEValueBinding } from "../Core/useNSEValueBinding";
+import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -18,6 +20,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { nseControlHooks } from "../../Theme/contract/hooks";
+import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import { useEffect, useRef, useState, type InputHTMLAttributes, type ReactNode } from "react";
 import type { NSEControlValidation } from "../Core";
 
@@ -46,7 +50,8 @@ export interface NSESecureTextFieldProps extends Omit<InputHTMLAttributes<HTMLIn
   readonly name?: string;
   readonly value?: string;
   readonly defaultValue?: string;
-  readonly disabled?: boolean;
+  /** NSControl.isEnabled (default true). */
+  readonly isEnabled?: boolean;
   readonly readOnly?: boolean;
   readonly autoComplete?: string;
   readonly required?: boolean;
@@ -63,7 +68,12 @@ export interface NSESecureTextFieldProps extends Omit<InputHTMLAttributes<HTMLIn
   onValueChange?(value: string): void;
 }
 
-export function NSESecureTextField(props: NSESecureTextFieldProps) {
+export function NSESecureTextField(props: NSEBoundValueProps<string, NSESecureTextFieldProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
+  return <NSESecureTextFieldControl {...useNSEValueBinding<string, NSESecureTextFieldProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:''})} />;
+}
+
+function NSESecureTextFieldControl(props: NSESecureTextFieldProps) {
+  const theme = useNSEThemeInteraction<HTMLLabelElement>(props.isEnabled !== false);
   const controlled = props.value !== undefined;
   const [stored, setStored] = useState(props.defaultValue ?? "");
   const [revealed, setRevealed] = useState(false);
@@ -90,21 +100,22 @@ export function NSESecureTextField(props: NSESecureTextFieldProps) {
     form.addEventListener("reset", reset);
     return () => form.removeEventListener("reset", reset);
   }, [controlled, props.defaultValue]);
-  useEffect(() => { if (props.disabled || props.readOnly || policy === "never") conceal(); }, [policy, props.disabled, props.readOnly]);
+  useEffect(() => { if ((props.isEnabled === false) || props.readOnly || policy === "never") conceal(); }, [policy, (props.isEnabled === false), props.readOnly]);
 
   const { revealPolicy: _revealPolicy, invalid: _invalid, validationMessage: _validationMessage, validation: _validation, label, prefix, suffix, onValueChange: _onValueChange, value: _value, defaultValue: _defaultValue, onBlur, onKeyDown, onInvalid, onChange, ...inputProps } = props;
   return (
-    <label data-nse-control="secure-text-field" data-state={props.invalid || validationInvalid || nativeInvalid ? "invalid" : revealed ? "revealed" : "concealed"}>
+    <label data-nse-part="bezel" {...theme.events} {...nseControlHooks({ control: "secure-text-field", enabled: props.isEnabled !== false, hovered: theme.hovered, focused: theme.focused, variants: { editable: String(!props.readOnly), validation: props.invalid || validationInvalid || nativeInvalid ? "invalid" : "valid" } })} data-state={props.invalid || validationInvalid || nativeInvalid ? "invalid" : revealed ? "revealed" : "concealed"}>
       {label ? <span data-nse-part="label">{label}</span> : null}
       {prefix ? <span data-nse-part="prefix">{prefix}</span> : null}
       <input
         {...inputProps}
+        data-nse-part="field"
         ref={inputRef}
         aria-label={props["aria-label"]}
         type={revealed ? "text" : "password"}
         name={props.name}
         value={current}
-        disabled={props.disabled}
+        disabled={(props.isEnabled === false)}
         readOnly={props.readOnly}
         autoComplete={props.autoComplete}
         required={props.required}
@@ -121,7 +132,7 @@ export function NSESecureTextField(props: NSESecureTextFieldProps) {
         <button
           type="button"
           aria-label={revealed ? "Conceal password" : "Reveal password"}
-          disabled={props.disabled || props.readOnly}
+          disabled={(props.isEnabled === false) || props.readOnly}
           onClick={() => { if (policy === "toggle") setRevealed((value) => !value); }}
           onPointerDown={(event) => {
             if (policy !== "hold") return;
@@ -134,14 +145,14 @@ export function NSESecureTextField(props: NSESecureTextFieldProps) {
           onBlur={conceal}
           onKeyDown={(event) => { if (event.key === "Escape") conceal(); }}
           data-nse-part="reveal"
-          data-revealed={revealed ? "true" : "false"}
+          data-nse-revealed={String(revealed)} data-revealed={revealed ? "true" : "false"}
         >
           <span data-nse-part="reveal-glyph" aria-hidden="true" />
         </button>
       ) : null}
       {suffix ? <span data-nse-part="suffix">{suffix}</span> : null}
-      {capsLock ? <span role="status">Caps Lock is on.</span> : null}
-      {props.invalid || validationInvalid || nativeInvalid ? <span role="alert">{props.validationMessage ?? (validationInvalid ? props.validation?.message : undefined) ?? "Enter a valid password."}</span> : null}
+      {capsLock ? <span data-nse-part="status" role="status">Caps Lock is on.</span> : null}
+      {props.invalid || validationInvalid || nativeInvalid ? <span data-nse-part="error" role="alert">{props.validationMessage ?? (validationInvalid ? props.validation?.message : undefined) ?? "Enter a valid password."}</span> : null}
     </label>
   );
 }

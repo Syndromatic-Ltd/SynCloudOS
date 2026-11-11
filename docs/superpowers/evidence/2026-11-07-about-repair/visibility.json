@@ -1,0 +1,48 @@
+{
+  "method": "Synthetic visibility notification; await native.ready before checking the suspended interval",
+  "errors": [],
+  "before": {
+    "transform": "matrix(1, 0, 0, 1, 0, 62.9989)",
+    "native": [
+      {
+        "state": "running",
+        "time": 2699.951999974437,
+        "iterations": "Infinity"
+      }
+    ]
+  },
+  "hidden": {
+    "transform": "matrix(1, 0, 0, 1, 0, 64.9425)",
+    "native": [
+      {
+        "state": "paused",
+        "time": 2783.2519999744372,
+        "iterations": "Infinity"
+      }
+    ]
+  },
+  "hiddenLater": {
+    "transform": "matrix(1, 0, 0, 1, 0, 64.9425)",
+    "native": [
+      {
+        "state": "paused",
+        "time": 2783.2519999744372,
+        "iterations": "Infinity"
+      }
+    ]
+  },
+  "resumed": {
+    "transform": "matrix(1, 0, 0, 1, 0, 74.277)",
+    "native": [
+      {
+        "state": "running",
+        "time": 3183.2999999014664,
+        "iterations": "Infinity"
+      }
+    ]
+  },
+  "reduced": {
+    "transform": "matrix(1, 0, 0, 1, 0, 84)",
+    "native": []
+  }
+}

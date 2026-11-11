@@ -1,0 +1,2 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run tsc --ignoreConfig --noEmit --target es2022 --module esnext --lib es2022,webworker --skipLibCheck --types node src/Foundation/NSEDateFormatter.ts src/Foundation/NSEDecimalNumber.ts src/Foundation/NSEValueTransformer.ts

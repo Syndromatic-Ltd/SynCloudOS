@@ -26,6 +26,7 @@ import { GFXColour } from "../../../src/FX/GraphicsFX/GFXColour";
 import { GFXImage } from "../../../src/FX/GraphicsFX/GFXImage";
 import type { AFXFrameScheduler, AFXLayerSurface } from "../../../src/FX/AnimationFX/AFXLayer";
 import { AFXCompositionSnapshot } from "../../../src/FX/AnimationFX/AFXCompositionSnapshot";
+import { createAFXLayer } from "../../../src/FX/AnimationFX/host";
 
 const scheduler: AFXFrameScheduler = {
   now: () => 2.5,
@@ -36,22 +37,29 @@ const scheduler: AFXFrameScheduler = {
 
 function layer(width: number, height: number) {
   const element = document.createElement("div");
-  const value = new animation.AFXLayer(
-    new BrowserAnimationLayerSurface(element),
-    scheduler,
-  );
+  const value = createAFXLayer(animation.AFXLayer, new BrowserAnimationLayerSurface(element), scheduler);
   value.frame = { x: 0, y: 0, width, height };
   return { element, value };
 }
 
-function portableLayer(width: number, height: number) {
-  const surface: AFXLayerSurface = {
+function sublayer(width: number, height: number) {
+  const value = new animation.AFXLayer();
+  value.frame = { x: 0, y: 0, width, height };
+  return value;
+}
+
+function portableSurface(): AFXLayerSurface {
+  return {
     supportedProperties: ["frame", "opacity", "transform", "backgroundColour", "boxShadow"],
     supportedContentKinds: ["image", "shape", "gradient", "text", "emitter", "tiled"],
     supportsReplication: true,
     apply() {}, attach() {}, detach() {}, setMask() {}, dispose() {},
+    createSublayerSurface: portableSurface,
   };
-  const value = new animation.AFXLayer(surface, scheduler);
+}
+
+function portableLayer(width: number, height: number) {
+  const value = createAFXLayer(animation.AFXLayer, portableSurface(), scheduler);
   value.frame = { x: 0, y: 0, width, height };
   return value;
 }
@@ -71,13 +79,13 @@ describe("AnimationFX owned offscreen composition", () => {
     expect(AFXCompositionSnapshot).toBeTypeOf("function");
 
     const root = layer(8, 8);
-    const child = layer(4, 4);
-    child.value.position = { x: 3.25, y: 3.5 };
-    child.value.backgroundColour = GFXColour.rgba(1, 0, 0, 1);
-    root.value.addSublayer(child.value);
-    const mask = layer(4, 4);
-    mask.value.backgroundColour = GFXColour.rgba(1, 1, 1, 1);
-    child.value.setMask(mask.value);
+    const child = sublayer(4, 4);
+    child.position = { x: 3.25, y: 3.5 };
+    child.backgroundColour = GFXColour.rgba(1, 0, 0, 1);
+    root.value.addSublayer(child);
+    const mask = sublayer(4, 4);
+    mask.backgroundColour = GFXColour.rgba(1, 1, 1, 1);
+    child.setMask(mask);
 
     const snapshot = AFXCompositionSnapshot.capture(root.value, {
       bounds: { x: 0, y: 0, width: 8, height: 8 },
@@ -102,7 +110,7 @@ describe("AnimationFX owned offscreen composition", () => {
     expect(unsupported.capability.state).toBe("unsupported");
     expect(unsupported.capability.reason).toMatch(/unmanaged-dom/i);
 
-    mask.value.dispose();
+    mask.dispose();
     root.value.dispose();
   });
 
@@ -111,7 +119,7 @@ describe("AnimationFX owned offscreen composition", () => {
 
     const root = portableLayer(12, 10);
     root.backgroundColour = GFXColour.rgba(0, 0, 0, 0);
-    const shadowSource = portableLayer(2, 2);
+    const shadowSource = sublayer(2, 2);
     shadowSource.position = { x: 1, y: 1 };
     shadowSource.backgroundColour = GFXColour.rgba(0, 0, 1, 1);
     shadowSource.shadowColour = GFXColour.rgba(0, 0, 0, 1);
@@ -119,7 +127,7 @@ describe("AnimationFX owned offscreen composition", () => {
     shadowSource.shadowRadius = 0;
     shadowSource.shadowOffset = { x: 2, y: 0 };
     root.addSublayer(shadowSource);
-    const card = portableLayer(6, 6);
+    const card = sublayer(6, 6);
     card.position = { x: 6, y: 5 };
     card.backgroundColour = GFXColour.rgba(1, 0, 0, 1);
     card.opacity = 0.6;
@@ -130,13 +138,13 @@ describe("AnimationFX owned offscreen composition", () => {
     card.clipsToBounds = true;
     root.addSublayer(card);
 
-    const mask = portableLayer(6, 6);
+    const mask = sublayer(6, 6);
     mask.position = { x: 3, y: 3 };
     mask.backgroundColour = GFXColour.rgba(1, 1, 1, 1);
     mask.transform = animation.AFXTransform3D.perspective(80).multiply(
       animation.AFXTransform3D.rotation(Math.PI / 7, 0, 1, 0),
     );
-    const innerMask = portableLayer(3, 6);
+    const innerMask = sublayer(3, 6);
     innerMask.position = { x: 1.5, y: 3 };
     innerMask.backgroundColour = GFXColour.rgba(1, 1, 1, 1);
     mask.setMask(innerMask);
@@ -174,9 +182,9 @@ describe("AnimationFX owned offscreen composition", () => {
 
     const root = layer(8, 4);
     root.value.backgroundColour = GFXColour.rgba(0.1, 0.2, 0.3, 1);
-    const child = layer(4, 4);
-    child.value.position = { x: 4, y: 2 };
-    child.value.contents = new GFXImage({
+    const child = sublayer(4, 4);
+    child.position = { x: 4, y: 2 };
+    child.contents = new GFXImage({
       width: 2,
       height: 2,
       alpha: "straight",
@@ -186,7 +194,7 @@ describe("AnimationFX owned offscreen composition", () => {
         0, 0, 255, 255, 255, 255, 255, 255,
       ]),
     });
-    root.value.addSublayer(child.value);
+    root.value.addSublayer(child);
     const snapshot = AFXCompositionSnapshot.capture(root.value, {
       bounds: { x: 0, y: 0, width: 8, height: 4 },
       scale: 2,

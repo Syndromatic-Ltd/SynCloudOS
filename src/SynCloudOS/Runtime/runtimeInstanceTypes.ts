@@ -18,7 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { BrowserFilePanelPort } from "../FilePanels/filePanelTypes";
+import type { NativeOperationActivity, HostUpdateReadinessService, HostUpdateReadinessOptions } from '../Updates';
+import type { BrowserFilePanelPort, FileSystemAccessPanelPort, DownloadFilePanelPort } from "../FilePanels/filePanelTypes";
 import type { RuntimeResourceLedger } from "../Resources/RuntimeResourceLedger";
 import type { HeavyJobAdmission, HeavyJobCapacity } from "../Operations/HeavyJobAdmission";
 import type { SynCloudOSRuntimeDiagnostics } from "../Diagnostics/runtimeDiagnostics";
@@ -47,7 +48,7 @@ import type { SynCloudOSLoadedBundle, TrustedSynWareBundle, SynCloudOSBundleLife
 import type { SynWareTrustedBundleProvenance } from "../BundleLoader/trustedBundleProvenance";
 import type { SynCloudOSServiceDefinition, SynCloudOSServiceReport, SynCloudOSServiceHealthReport, SynCloudOSServiceExplanation, SynCloudOSServiceProvider } from "../ServiceRegistry/serviceTypes";
 import type { SynCloudOSBootReport } from "../BootManager/bootTypes";
-import type { SynCloudOSAccessMode, SynCloudOSPolicyAuditReport, SynCloudOSRoleCapabilityReportItem, SynCloudOSCapabilityMatrix, SynCloudOSPolicy, SynCloudOSPolicyEvaluationOptions } from "../PolicyKit/policyTypes";
+import type { SynCloudOSAccessMode, SynCloudOSPolicyAuditReport, SynCloudOSRoleCapabilityReportItem, SynCloudOSCapabilityMatrix, SynCloudOSPolicy, SynCloudOSPolicyEvaluationOptions } from "../ConfigurationProfiles/policyTypes";
 import type { SynCloudOSRuntimeEvent } from "../EventBus/eventTypes";
 import type {
   RuntimeSnapshot,
@@ -108,6 +109,7 @@ import type { SynCloudOSInspectorService } from "../Inspector/Inspector";
 import type { RuntimeCacheRegistry } from "../Cache/cacheTypes";
 import type { IdentitySessionAdapter, IdentitySessionService } from "../Identity/identitySessionTypes";
 import type { SystemUIService } from "../SystemUI/systemUIService";
+import type { SynCloudOSAlertCenter } from "../SystemUI/alertCenter";
 import type { SynCloudOSSettingsService } from "../Settings/settingsService";
 import type { SynCloudOSAppearanceService } from "../Appearance/appearanceService";
 import type { UndoManagerRegistry } from "../Undo";
@@ -163,17 +165,22 @@ import type { CommandSystem } from "../Commands/commandTypes";
 import type { ResponderGraph } from "../Responders/responderTypes";
 import type { FocusManager } from "../Focus/focusTypes";
 import type { KeyBindingManager } from "../KeyBindings/keyBindingTypes";
-import type { SynCloudOSDocumentKindMetadata, SynCloudOSDocumentStoreAdapter, SynCloudOSDocumentStoreTerminalMutationLease } from "../DocumentStore";
+import type {
+  SynCloudOSDocumentKindMetadata,
+  SynCloudOSDocumentStoreAdapter,
+  SynCloudOSDocumentStoreLock,
+  SynCloudOSDocumentStoreTerminalMutationLease,
+} from "../DocumentStore";
 import type { RuntimeNetworkHints, RuntimePerformancePolicy } from "../Performance/RuntimePerformancePolicy";
 import type {
   SynCloudOSPolicyDecision,
-  SynCloudOSPolicyProfile,
+  SynCloudOSConfigurationProfile,
   SynCloudOSPolicyRequest,
   SynCloudOSPolicySubject,
   SynCloudOSPolicySubjectGrant,
   SynCloudOSRoleCapabilityRegistration,
   SynCloudOSRoleCapabilityRegistrationInput,
-} from "../PolicyKit/policyTypes";
+} from "../ConfigurationProfiles/policyTypes";
 import type { ScreenService, WindowManager } from "../Windows";
 import type { SynCloudOSPresentationTraitsService } from "../ResponsiveModeManager/presentationTypes";
 import type { ColourPanelService } from "../ColourPanel";
@@ -193,6 +200,7 @@ import type { DocumentRecoveryStore } from "../Documents/DocumentRecoveryStore";
 import type { DocumentStorageAdapter } from "../Documents/Adapters/documentAdapterTypes";
 import type { DocumentType } from "../Documents/documentTypes";
 import type { DocumentAssetRuntimeBacking, DocumentAssetRuntimeCooperation } from "./DocumentAssetRuntimeIntegration";
+import type { SynCloudOSWebspringFolderConfiguration } from "../WebspringState/webspringStateTypes";
 
 declare const runtimeIdBrand: unique symbol;
 export type SynCloudOSRuntimeId = string & { readonly [runtimeIdBrand]: true };
@@ -231,6 +239,9 @@ export interface RuntimeWorkAreaSnapshot {
   readonly height: number;
   readonly devicePixelRatio: number;
   readonly safeArea: { readonly top: number; readonly right: number; readonly bottom: number; readonly left: number };
+  /** Existing external adapters may omit this; their availability is unknown.
+   * Browser adapters explicitly report unavailable rather than measured zero. */
+  readonly safeAreaAvailability?: "available" | "unavailable";
 }
 
 export interface RuntimeSnapshotSource<T> {
@@ -298,6 +309,8 @@ export interface RuntimeImageGeometryPort {
  * methods call it around their real action, while tests receive only their
  * narrow fake-control projection. */
 export interface RuntimeTestCapabilityControl {
+  /** Observe injected test access changes, including deny then allow before a callback. */
+  subscribe?(listener: () => void): () => void;
   run<T>(operation: string, signal: AbortSignal | undefined, action: () => T | Promise<T>): Promise<T>;
   runSync<T>(operation: string, action: () => T): T;
 }
@@ -355,9 +368,13 @@ export interface SynCloudOSRuntimeEnvironment {
   readonly visualViewport: RuntimeSnapshotSource<RuntimeVisualViewportSnapshot | null>;
   readonly screen: RuntimeSnapshotSource<RuntimeScreenSnapshot>;
   readonly workArea: RuntimeSnapshotSource<RuntimeWorkAreaSnapshot>;
+  /** Optional for existing hosts. Actual posture/segment facts, never inferred from size. */
+  readonly viewportFeatures?: RuntimeSnapshotSource<import("../Windows/viewportFeatures").RuntimeViewportFeaturesSnapshot>;
   /** Environment-owned system clipboard authority. Tests inject a recording
    * adapter; the browser environment is the only production constructor. */
   readonly clipboard?: PasteboardAdapter | null;
+  /** Creates a runtime-owned clipboard observation boundary without charging a shared environment. */
+  readonly createClipboardAdapter?: (activity: NativeOperationActivity) => PasteboardAdapter | null;
   /** Environment-owned pointer geometry, observer and cursor authority. */
   readonly pointer?: RuntimePointerAdapter | null;
   /** Environment-owned segmentation and browser measurement authority. */
@@ -369,6 +386,14 @@ export interface SynCloudOSRuntimeEnvironment {
   /** Environment-owned file chooser behind every application's Open panel. Mounted apps
    * receive a scoped panel client, never this port. */
   readonly filePicker?: BrowserFilePanelPort | null;
+  /** Native chooser and write-only export ports; apps receive only scoped panel clients. */
+  readonly fileSystemAccess?: FileSystemAccessPanelPort | null;
+  /** Host-owned structured-clone directory bookmarks and bundle-scoped OPFS. */
+  readonly openPanelStorage?: import("../FilePanels/OpenPanelFileSystem").OpenPanelStoragePort | null;
+  readonly createOpenPanelStoragePort?: (activity: NativeOperationActivity) => import("../FilePanels/OpenPanelFileSystem").OpenPanelStoragePort | null;
+  /** Creates an instrumented port for this runtime without mutating a shared environment. */
+  readonly createFileSystemAccessPanelPort?: (activity: NativeOperationActivity) => FileSystemAccessPanelPort | null;
+  readonly downloadExport?: DownloadFilePanelPort | null;
   /** Environment-owned Web Animations and fallback-scheduler authority. */
   readonly animation?: RuntimeAnimationAdapterFactory | null;
   readonly animationFrames?: AFXFrameScheduler;
@@ -387,6 +412,8 @@ export interface SynCloudOSRuntimeEnvironment {
    * a worker-backed IndexedDB implementation; deterministic hosts may inject a fake. */
   readonly luminaIndex?: LuminaIndexBackendFactory | null;
   readonly audioCapture?: { createSession(signal?: AbortSignal, capability?: object): AUFXAudioSession };
+  readonly speechSynthesis?: import("../../FX/AudioFX/AUFXSpeechSynthesizer").AUFXSpeechSynthesisHost;
+  readonly videoPresentation?: import("../../FX/VideoFX/VFXPictureInPictureController").VFXVideoPresentationAdapter;
   readonly audioFiles?: RuntimeAudioFileService;
   readonly hapticFeedback?: HFXFeedbackOptions;
   readonly systemFeedbackAudioContext?: (options?: AudioContextOptions) => AudioContext | null;
@@ -533,7 +560,7 @@ export interface SynCloudOSServiceRegistry extends RuntimeOwnedService {
   }): SynCloudOSAppServiceResolution<TClient>;
 }
 
-export interface SynCloudOSPolicyKit extends RuntimeOwnedService {
+export interface SynCloudOSConfigurationProfiles extends RuntimeOwnedService {
   registerPolicy(policyId: string, policy: SynCloudOSPolicy): SynCloudOSPolicy;
   removePolicy(policyId: string): boolean;
   getRoleCapabilities(role: string): readonly string[];
@@ -705,33 +732,38 @@ export interface SynCloudOSLocaleServices extends RuntimeOwnedService {
 export interface SynCloudOSInspector extends SynCloudOSInspectorService {}
 export interface SynCloudOSErrorManager extends RuntimeOwnedService {
   capture(payload: SynCloudOSErrorPayload): CapturedSynCloudOSError;
+  /**
+   * Records a failed application lifecycle method. It shows no alert of its own: a later fatal
+   * report for the same application lists it in its technical details as LIFECYCLE_HOOK_FAILED.
+   */
+  recordLifecycleFailure(failure: Readonly<{ appId: string; stage: string; phase: string; hookName: string; message: string }>): void;
   getLatest(): CapturedSynCloudOSError | null;
   getHistory(): CapturedSynCloudOSError[];
   dismiss(errorId: string): boolean;
   createAppNotFoundError(appId: string, context?: Record<string, unknown>): CapturedSynCloudOSError;
   createRouteNotFoundError(pathname: string, context?: Record<string, unknown>): CapturedSynCloudOSError;
   createAppLaunchFailedError(
-    app: { readonly id: string; readonly packageName: string; readonly displayName: string } | null,
+    app: { readonly bundleIdentifier: string; readonly packageName: string; readonly displayName: string } | null,
     error: unknown,
     context?: Record<string, unknown>,
   ): CapturedSynCloudOSError;
   createNotRespondingError(
-    app: { readonly id: string; readonly packageName: string; readonly displayName: string } | null,
+    app: { readonly bundleIdentifier: string; readonly packageName: string; readonly displayName: string } | null,
     context?: Record<string, unknown>,
     retry?: () => void,
   ): CapturedSynCloudOSError;
   createConnectionError(
-    app: { readonly id: string; readonly packageName: string; readonly displayName: string } | null,
+    app: { readonly bundleIdentifier: string; readonly packageName: string; readonly displayName: string } | null,
     error: unknown,
     context?: Record<string, unknown>,
     retry?: () => void,
   ): CapturedSynCloudOSError;
   createLoginSessionMismatchError(
-    app: { readonly id: string; readonly packageName: string; readonly displayName: string } | null,
+    app: { readonly bundleIdentifier: string; readonly packageName: string; readonly displayName: string } | null,
     context?: Record<string, unknown>,
   ): CapturedSynCloudOSError;
   createAppContentFailedError(
-    app: { readonly id: string; readonly packageName: string; readonly displayName: string } | null,
+    app: { readonly bundleIdentifier: string; readonly packageName: string; readonly displayName: string } | null,
     error: unknown,
     context?: Record<string, unknown>,
   ): CapturedSynCloudOSError;
@@ -742,19 +774,30 @@ export interface SynCloudOSErrorManager extends RuntimeOwnedService {
   toTechnicalReport(error: CapturedSynCloudOSError | null): string;
 }
 export interface SynCloudOSWebspringStateController extends RuntimeOwnedService {
+  /** Threads the shell's folder declaration into layout reconciliation. */
+  configureFolders(configuration: SynCloudOSWebspringFolderConfiguration): void;
   hydrateLayoutPreference(): unknown;
-  hydrateLayoutOrder(appIds: string[]): void;
+  /** Seeds the top-level order without persisting it. */
+  hydrateLayoutOrder(order: string[]): void;
   hoverApp(appId: string | null): void;
   selectApp(appId: string | null): void;
-  enterEditMode(appId?: string | null): void;
+  enterEditMode(itemId?: string | null): void;
   exitEditMode(commit?: boolean): void;
-  beginDrag(appId: string): void;
-  startDraggingApp(appId: string): void;
-  endDrag(commit?: boolean): void;
-  finishDraggingApp(commit?: boolean): void;
-  reorderApp(appId: string, targetIndex: number, commit?: boolean): boolean;
-  reorderDraggedAppBefore(targetAppId: string, commit?: boolean): boolean;
-  moveEditingAppByKeyboard(appId: string, key: string, columns?: number): boolean;
+  /** Starts dragging an app or a folder. */
+  beginDrag(itemId: string): void;
+  finishDrag(commit?: boolean): void;
+  /** Reorders within the container holding the item: the top level, or its folder. */
+  moveItem(itemId: string, targetIndex: number, commit?: boolean): boolean;
+  moveItemByKeyboard(itemId: string, key: string, columns?: number): boolean;
+  /** Replaces the top-level order; it must list every top-level entry exactly once. */
+  reorder(order: readonly string[]): boolean;
+  setDropTarget(itemId: string | null): void;
+  /** Merges an app into a folder, or with another app into a new folder. Editable folders only. */
+  dropOnItem(appId: string, targetItemId: string): boolean;
+  moveAppOutOfFolder(appId: string, targetIndex: number): boolean;
+  /** Opens a folder. A drag may open one only when it sprang it open itself. */
+  openFolder(folderId: string, options?: { readonly duringDrag?: boolean }): boolean;
+  closeFolder(): void;
   commitLayoutOrder(): void;
   resetLayoutOrder(): void;
   setLoadingApp(appId: string | null, launchTransitionId?: string | null): void;
@@ -854,9 +897,17 @@ export interface ApplicationDocumentRuntimeConfiguration {
   readonly initialTypes?: readonly DocumentType<unknown, unknown>[];
   /** Supplied stores are host owned; createStore results are runtime owned. */
   readonly assetBacking?: DocumentAssetRuntimeBacking;
+  /**
+   * Built-in adapters for `memory` locations, and for `indexed-db` locations when `indexedDB` is
+   * given, used only when no registered adapter supports the location. The browser host turns this
+   * on; it is off for runtimes that leave it out.
+   */
+  readonly defaultAdapters?: { readonly indexedDB?: IDBFactory };
 }
 
 export interface SynCloudOSRuntimeConfig {
+  /** Readonly host diagnostics; no worker discovery, activation or cache policy. */
+  readonly updateReadiness?: HostUpdateReadinessOptions;
   readonly id?: string;
   readonly environment: SynCloudOSRuntimeEnvironment;
   /** Runtime-owned browser adapters may be supplied independently of the environment bundle. */
@@ -865,6 +916,9 @@ export interface SynCloudOSRuntimeConfig {
   /** Host-provisioned immutable document schemas. Mounted AppSDK code cannot
    * register or migrate kinds. */
   readonly trustedDocumentKinds?: readonly SynCloudOSDocumentKindMetadata[];
+  /** Host-owned lock shared by every writer to this backing persistence.
+   * Defaults to browser Web Locks; absent locks leave conditional writes unavailable. */
+  readonly documentStoreLock?: SynCloudOSDocumentStoreLock;
   readonly initialPathname?: string;
   readonly persistenceNamespace?: string;
   readonly windowPersistenceNamespace?: string;
@@ -895,9 +949,9 @@ export interface SynCloudOSRuntimeConfig {
     readonly sessionAdapter: IdentitySessionAdapter;
   };
   readonly authenticationPolicy?: "disabled" | "optional" | "required";
-  /** The host's role taxonomy for PolicyKit and Identity. Defaults to
-   * Syndromatic's (`defaultPolicyProfile`). */
-  readonly policyProfile?: SynCloudOSPolicyProfile;
+  /** The host's role taxonomy for ConfigurationProfiles and Identity. Defaults to
+   * Syndromatic's (`defaultConfigurationProfile`). */
+  readonly configurationProfile?: SynCloudOSConfigurationProfile;
   readonly userNotifications?: {
     readonly persistence: UserNotificationPersistenceAdapter;
     readonly delivery?: UserNotificationDeliveryAdapter;
@@ -951,6 +1005,10 @@ export interface SynCloudOSRuntimeController {
 }
 
 export interface SynCloudOSRuntime {
+  readonly storageDiagnostics: import("../Persistence/storageDiagnostics").StorageDiagnosticsClient;
+  readonly updateReadiness: HostUpdateReadinessService;
+  /** Host-owned underlying native promise instrumentation. Not an AppSDK authority. */
+  readonly nativeActivity: NativeOperationActivity;
   readonly runtimeId: SynCloudOSRuntimeId;
   readonly environment: SynCloudOSRuntimeEnvironment;
   readonly signal: AbortSignal;
@@ -1002,7 +1060,9 @@ export interface SynCloudOSRuntime {
   readonly apps: SynCloudOSAppRegistry;
   readonly bundles: SynCloudOSBundleLoader;
   readonly services: SynCloudOSServiceRegistry;
-  readonly policy: SynCloudOSPolicyKit;
+  readonly configurationProfiles: SynCloudOSConfigurationProfiles;
+  readonly authorization: import("../Authorization/SCAuthorization").SCAuthorization;
+  readonly privacy: import("../Privacy").PrivacyStore;
   readonly permissions: SynCloudOSPermissionManager;
   readonly identity: SynCloudOSIdentityService;
   readonly login: SynCloudOSLoginService;
@@ -1023,6 +1083,7 @@ export interface SynCloudOSRuntime {
   readonly locale: SynCloudOSLocaleServices;
   readonly inspector: SynCloudOSInspector;
   readonly errors: SynCloudOSErrorManager;
+  readonly alerts: SynCloudOSAlertCenter;
   readonly webspring: SynCloudOSWebspringStateController;
   readonly systemUI: SystemUIService;
   readonly preferencePanes: PreferencePaneRegistry;

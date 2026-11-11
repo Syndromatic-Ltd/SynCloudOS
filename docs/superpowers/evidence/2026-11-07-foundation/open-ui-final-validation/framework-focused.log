@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/nse/file-panels tests/integration/nse-open-panel.test.tsx tests/runtime/open-panel-file-system.test.ts tests/runtime/open-panel-storage.test.ts tests/runtime/open-panel-sheet-attachment.test.tsx tests/runtime/mounted-file-panel-client.test.ts tests/runtime/media-panel-service.test.ts tests/runtime/appkit-counterparts.test.ts tests/runtime/browser-global-boundary.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-open-panel-118f7ba8
+
+
+ Test Files  13 passed (13)
+      Tests  82 passed (82)
+   Start at  10:08:25
+   Duration  39.38s (transform 18.85s, setup 187ms, import 30.51s, tests 27.63s, environment 7.08s)
+

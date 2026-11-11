@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useNSEThemeInteraction } from "../Theme/contract/useThemeInteraction";
+import { nseControlHooks } from "../Theme/contract/hooks";
 import { useId, useMemo, useRef, useState, type MutableRefObject, type ReactNode } from "react";
 
 import type { HFXFeedbackRequest } from "../Feedback";
@@ -122,9 +124,12 @@ function TabButton({ item, selected, instanceId, tone, panelIdentity, tabStyle, 
   const commandEnabled = !item.commandId || Boolean(command.presentation?.enabled && !command.presentation.denied && !command.presentation.hidden && !command.presentation.stale);
   const panelId = item.panelId ?? (panelIdentity ? `tab-panel-${instanceId}-${item.id}` : undefined);
 
+  const theme = useNSEThemeInteraction<HTMLButtonElement>(!item.disabled && commandEnabled, true, anchorProps);
   const icons = tabStyle === "icons";
   return <button
     {...anchorProps}
+    {...theme.events}
+    {...nseControlHooks({ control: "button", enabled: !item.disabled && commandEnabled, selected, hovered: theme.hovered, focused: theme.focused, highlighted: theme.highlighted, variants: { ...(icons ? {} : { "bezel-style": "rounded" }), ...(tone === "light" ? { "appearance-name": "aqua" } : tone === "dark" ? { "appearance-name": "darkAqua" } : {}), ...(tone === "affirmative" ? { role: "default" } : {}), ...(tone === "negative" ? { "has-destructive-action": "true" } : {}) } })} data-nse-part="cell"
     className={icons ? "nse-icon-tab" : "nse-control-button"}
     title={title}
     type="button"
@@ -155,7 +160,7 @@ function TabButton({ item, selected, instanceId, tone, panelIdentity, tabStyle, 
         <span data-nse-part="tab-icon" aria-hidden="true">{item.icon}</span>
         {showsCaptions ? <span data-nse-part="tab-caption">{item.label}</span> : null}
       </>
-      : <span className="nse-control-button-label">{item.label}</span>}
+      : <span data-nse-part="title" className="nse-control-button-label">{item.label}</span>}
   </button>;
 }
 
@@ -256,27 +261,26 @@ export function NSETabStrip({
       }}
     />
   );
-  const overflowButton = overflow.length ? <button ref={overflowRef} type="button" aria-label={`More ${ariaLabel}`} aria-expanded={overflowOpen} onClick={() => setOverflowOpen((open) => !open)}>…</button> : null;
+  const overflowButton = overflow.length ? <button ref={overflowRef} type="button" data-nse-part="overflow" data-nse-expanded={String(overflowOpen)} aria-expanded={overflowOpen} aria-label={`More ${ariaLabel}`} onClick={() => setOverflowOpen((open) => !open)}>…</button> : null;
   const directTabButtons = presentation?.directTabButtons === true;
   // The icons style is not a toolbar capsule and takes none of its skin.
   const tabListClassName = [tabStyle === "icons" ? "nse-icon-tabs" : "nse-control-toolbar", presentation?.tabListClassName].filter(Boolean).join(" ");
   const renderState: NSETabStripRenderState = { instanceId, enabled, selected };
   return <>
-    <div className={tabListClassName} role="tablist" aria-label={ariaLabel} data-position="inline" data-grouped={tabStyle === "icons" ? undefined : "true"} data-tab-style={tabStyle} data-captions={tabStyle === "icons" && presentation?.showsCaptions ? "true" : undefined}>
+    <div data-nse-control="tab-view" data-nse-part="header" data-nse-style={tabStyle} className={tabListClassName} role="tablist" aria-label={ariaLabel} data-position="inline" data-grouped={tabStyle === "icons" ? undefined : "true"} data-tab-style={tabStyle} data-captions={tabStyle === "icons" && presentation?.showsCaptions ? "true" : undefined}>
       {directTabButtons ? visible.map(tabButton) : visible.map((item) => (
         <span key={item.id} role="presentation" data-nse-part="tab-item">
           {tabButton(item)}
-          {item.closable ? <button type="button" aria-label={`Close ${item.accessibleLabel ?? (typeof item.label === "string" ? item.label : item.id)}`} disabled={item.disabled} onClick={() => close(item.id)}>×</button> : null}
+          {item.closable ? <button type="button" data-nse-part="button" data-nse-role="close" aria-label={`Close ${item.accessibleLabel ?? (typeof item.label === "string" ? item.label : item.id)}`} disabled={item.disabled} onClick={() => close(item.id)}>×</button> : null}
         </span>
       ))}
       {directTabButtons ? null : overflowButton}
     </div>
     {directTabButtons && (visible.some((item) => item.closable) || overflowButton) ? <div role="presentation" data-nse-part="tab-accessories">
-      {visible.filter((item) => item.closable).map((item) => <button key={item.id} type="button" aria-label={`Close ${item.accessibleLabel ?? (typeof item.label === "string" ? item.label : item.id)}`} disabled={item.disabled} onClick={() => close(item.id)}>×</button>)}
+      {visible.filter((item) => item.closable).map((item) => <button key={item.id} type="button" data-nse-part="button" data-nse-role="close" aria-label={`Close ${item.accessibleLabel ?? (typeof item.label === "string" ? item.label : item.id)}`} disabled={item.disabled} onClick={() => close(item.id)}>×</button>)}
       {overflowButton}
     </div> : null}
     {overflow.length ? <NSEListboxPopup id={`tab-overflow-${instanceId}`} open={overflowOpen} anchor={overflowRef.current} parentResponderId={parentResponderId} options={overflow.map((item) => ({ id: item.id, label: item.label, value: item.id, disabled: item.disabled }))} selectedId={selected?.id} onOpenChange={setOverflowOpen} onSelect={(option) => { if (option.value) publishSelection(option.value, "pointer"); }} /> : null}
     {children?.(renderState)}
   </>;
 }
-

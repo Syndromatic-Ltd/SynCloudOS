@@ -22,7 +22,7 @@ import type { AppManager } from "../AppManager/AppManager";
 import type { SynCloudOSAppLifecycleState } from "../AppManager/appManagerTypes";
 import type { SynCloudOSAppInfo } from "../AppInfo/appInfoTypes";
 import type { SynCloudOSLoginSessionSnapshot } from "../LoginServices/loginServicesTypes";
-import type { SynCloudOSPolicyDecision, SynCloudOSPolicyRequest } from "../PolicyKit/policyTypes";
+import type { SynCloudOSPolicyDecision, SynCloudOSPolicyRequest } from "../ConfigurationProfiles/policyTypes";
 import type { SynCloudOSServiceReport } from "../ServiceRegistry/serviceTypes";
 import type { ApplicationSessionMutationTicket } from "../Documents";
 import type { LifecycleRequestOptions } from "../Lifecycle/lifecycleTypes";
@@ -135,7 +135,7 @@ export interface SynCloudOSPolicyAuthorisationExplanation {
   result?: boolean | SynCloudOSPolicyAuthorisationResult;
 }
 
-export interface SynCloudOSPolicyKit {
+export interface SynCloudOSConfigurationProfiles {
   authorise?: (
     request: SynCloudOSPolicyAuthorisationRequest
   ) =>
@@ -191,7 +191,7 @@ export interface SynCloudOSLaunchExplanation {
   code: SynCloudOSLaunchDecisionCode;
   reason: string;
   blockers: string[];
-  app: Pick<SynCloudOSAppInfo, "id" | "packageName" | "displayName" | "type" | "presentation" | "route"> | null;
+  app: Pick<SynCloudOSAppInfo, "bundleIdentifier" | "packageName" | "displayName" | "type" | "presentation" | "route"> | null;
   lifecycleState: SynCloudOSAppLifecycleState | null;
   serviceReport: SynCloudOSServiceReport | null;
   loginServices: Pick<SynCloudOSLoginSessionSnapshot, "isAuthorised" | "status" | "lastFailureReason">;
@@ -214,7 +214,7 @@ export interface SynCloudOSExternalAppExplanation {
   code: SynCloudOSExternalAppDecisionCode;
   reason: string;
   blockers: string[];
-  app: Pick<SynCloudOSAppInfo, "id" | "packageName" | "displayName" | "type" | "route"> | null;
+  app: Pick<SynCloudOSAppInfo, "bundleIdentifier" | "packageName" | "displayName" | "type" | "route"> | null;
   href: string | null;
   canonicalHref: string | null;
   isSafeProtocol: boolean;

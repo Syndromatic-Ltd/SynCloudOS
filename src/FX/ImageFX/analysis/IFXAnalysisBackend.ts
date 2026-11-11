@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../../Foundation/NSEData";
+
+
 import {
   BarcodeFormat,
   BinaryBitmap,
@@ -161,7 +164,7 @@ function qrFeature(raster: IFXAnalysisRaster, signal: AbortSignal): IFXQRCodeFea
       backend: "portable-analysis",
       backendVersion: 1,
       payload: result.getText(),
-      rawBytes: new Uint8Array(result.getRawBytes() ?? []),
+      rawBytes: NSEData.from(new Uint8Array(result.getRawBytes() ?? [])),
     });
   } catch (error) {
     if (error instanceof NotFoundException || (error instanceof Error && error.name === "NotFoundException")) return null;

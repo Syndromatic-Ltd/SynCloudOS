@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../../src/Foundation/NSEData";
+
 // @vitest-environment jsdom
 import { IFXImageResource } from "../../../src/FX/ImageFX/IFXImageResource";
 function loadImageResource(service: import("../../../src/SynCloudOS/Images/imageTypes").RuntimeImageService, request: import("../../../src/SynCloudOS/Images/imageTypes").RuntimeImageLoadRequest) {
@@ -26,14 +28,17 @@ function loadImageResource(service: import("../../../src/SynCloudOS/Images/image
 }
 
 import React from "react";
-import { act, render, screen } from "@testing-library/react";
+import { act, screen } from "@testing-library/react";
+import { renderGraphics as render, drawFigure } from "./graphicsViewFixture";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { GFXColour } from "../../../src/FX/GraphicsFX/public";
 import { GFXStateUnderflowError, GFXPath, GFXGradient, GFXContext } from "../../../src/FX/GraphicsFX/public";
-import { NSEGraphicsView, NSEShadowView, type NSEShadowPreferenceSource } from "../../../src/NSE/Graphics";
+import { NSEShadow } from "../../../src/NSE/Graphics";
+import { NSEAppearance } from "../../../src/NSE/Appearance/NSEAppearance";
+import { NSEView } from "../../../src/NSE/Views/NSEView";
 import { NSEImageView, NSESizeableImage } from "../../../src/NSE/Controls/Images";
-import type { NSEImageGeometryPort, NSEImageStringSourcePort } from "../../../src/NSE/Controls/Images";
+import type { IFXImageGeometryPort, IFXImageStringSourcePort } from "../../../src/FX/ImageFX/IFXImageViewport";
 import type { RuntimeImageAdapter, RuntimeImageAdapterFactory } from "../../../src/SynCloudOS/Images";
 import { createTestRuntime, createTestRuntimeEnvironment } from "../helpers";
 
@@ -279,7 +284,7 @@ describe("closed NSE graphics", () => {
     expect(stringClipRefs).toHaveLength(3);
     expect(stringClipRefs.every((id) => stringClipIds.includes(id))).toBe(true);
 
-    const { container } = render(<NSEGraphicsView displayList={context.displayList} label="Clip intersection" />);
+    const { container } = render(<NSEView draw={drawFigure(context.displayList)} aria-label="Clip intersection" />);
     const reactClipIds = Array.from(container.querySelectorAll("clipPath"), (node) => node.id);
     const reactClipRefs = Array.from(container.querySelectorAll("g[clip-path]"), (node) => /url\(#([^)]+)\)/.exec(node.getAttribute("clip-path") ?? "")?.[1] ?? "");
     expect(reactClipIds).toHaveLength(2);
@@ -314,16 +319,16 @@ describe("closed NSE graphics", () => {
     context.setFill(GFXColour.parse("#123456"));
     context.fill(GFXPath.rect({ x: 0, y: 0, width: 40, height: 24 }));
     const { container } = render(
-      <NSEShadowView shadow={{ offset: { x: 1, y: 2 }, blur: 4, spread: 0, colour: GFXColour.parse("#0008") }}>
-        <NSEGraphicsView displayList={context.displayList} label="Chart" description="A bounded chart" />
-      </NSEShadowView>,
+      <NSEView shadow={new NSEShadow({ shadowOffset: { width: 1, height: -2 }, shadowBlurRadius: 4, shadowColour: GFXColour.parse("#0008") })}>
+        <NSEView draw={drawFigure(context.displayList)} aria-label="Chart" aria-description="A bounded chart" />
+      </NSEView>,
     );
-    expect(container.querySelector("svg")?.getAttribute("aria-label")).toBe("Chart");
+    expect(container.querySelector("[aria-label]")?.getAttribute("aria-label")).toBe("Chart");
     expect(container.querySelector("path")?.getAttribute("d")).toBe("M 0 0 L 40 0 L 40 24 L 0 24 Z");
-    expect(container.querySelector("[data-nse-shadow-recipe]")).not.toBeNull();
-    expect((container.querySelector("[data-nse-shadow-recipe]") as HTMLElement | null)?.style.boxShadow).toContain("1px");
+    expect(container.querySelector("[data-nse-shadow]")).not.toBeNull();
+    expect((container.querySelector("[data-nse-shadow]") as HTMLElement | null)?.style.getPropertyValue("--nse-shadow-offset-x")).toBe("1px");
     expect(container.querySelector("script")).toBeNull();
-    expect(() => render(<NSEGraphicsView displayList={{ size: { width: 1, height: 1 }, commands: [{ kind: "fill-path", path: [], pathData: "M0 0", paint: { kind: "colour", css: "url(javascript:alert(1))" }, opacity: 1 }] }} label="Forged" />)).toThrow(TypeError);
+    expect(() => render(<NSEView draw={drawFigure({ size: { width: 1, height: 1 }, commands: [{ kind: "fill-path", path: [], pathData: "M0 0", paint: { kind: "colour", css: "url(javascript:alert(1))" }, opacity: 1 }] })} aria-label="Forged" />)).toThrow(TypeError);
   });
 
   it("issues unique definition ids for same-named runtimes and each mounted view", () => {
@@ -343,8 +348,8 @@ describe("closed NSE graphics", () => {
     expect(firstExportId).not.toBe(secondExportId);
 
     const { container } = render(<>
-      <NSEGraphicsView displayList={first.displayList} label="First view" />
-      <NSEGraphicsView displayList={first.displayList} label="Second view" />
+      <NSEView draw={drawFigure(first.displayList)} aria-label="First view" />
+      <NSEView draw={drawFigure(first.displayList)} aria-label="Second view" />
     </>);
     const ids = Array.from(container.querySelectorAll("linearGradient"), (node) => node.id);
     expect(ids).toHaveLength(2);
@@ -438,7 +443,7 @@ describe("closed NSE graphics", () => {
     const runtime = createTestRuntime({ id: "runtime:graphics-document-image", environment, imageAuthorisation: { authorise: () => true } });
     runtimes.push(runtime);
     const descriptor = await runtime.documentResources.acquire("document:a", {
-      type: "image/png", size: 1, arrayBuffer: async () => new Uint8Array([1]).buffer,
+      type: "image/png", size: 1, data: async () => NSEData.from(new Uint8Array([1])),
     }, new AbortController().signal);
     const resource = loadImageResource(runtime.images, {
       subject: { appId: "app:gallery", documentId: "document:a", capability: "image.decode" },
@@ -534,7 +539,7 @@ describe("closed NSE graphics", () => {
     const originalObserver = globalThis.ResizeObserver;
     // @ts-expect-error — the control must not fall back to the ambient observer
     delete (globalThis as { ResizeObserver?: unknown }).ResizeObserver;
-    const geometry: NSEImageGeometryPort = {
+    const geometry: IFXImageGeometryPort = {
       measure: vi.fn(() => ({ width: 120, height: 80 })),
       observe: vi.fn(() => () => undefined),
     };
@@ -567,11 +572,11 @@ describe("closed NSE graphics", () => {
     const originalImage = globalThis.Image;
     const originalObserver = globalThis.ResizeObserver;
     const release = vi.fn();
-    const geometry: NSEImageGeometryPort = {
+    const geometry: IFXImageGeometryPort = {
       measure: vi.fn(() => ({ width: 120, height: 80 })),
       observe: vi.fn(() => () => undefined),
     };
-    const sourcePort: NSEImageStringSourcePort = {
+    const sourcePort: IFXImageStringSourcePort = {
       geometry,
       load: vi.fn(async (_source: string, _signal: AbortSignal) => ({
         src: "blob:runtime-owned-string-source",
@@ -597,54 +602,20 @@ describe("closed NSE graphics", () => {
     }
   });
 
-  it("applies a real shadow recipe and flattens it under reduced transparency and forced colours", () => {
-    const shadow = { offset: { x: 2, y: 3 }, blur: 6, spread: 1, colour: GFXColour.parse("#112233") };
-    const { container, rerender } = render(
-      <NSEShadowView shadow={shadow}>
-        <button type="button">Focusable chart</button>
-      </NSEShadowView>,
-    );
-    const host = container.querySelector("[data-nse-shadow-recipe]") as HTMLElement;
-    expect(host.style.boxShadow).toMatch(/2px 3px 6px 1px rgb\(17[, ]+34[, ]+51\)/);
-    expect(host.getAttribute("data-nse-shadow-recipe")).toBe("semantic");
-
-    rerender(
-      <NSEShadowView shadow={shadow} reducedTransparency>
-        <button type="button">Focusable chart</button>
-      </NSEShadowView>,
-    );
-    expect((container.querySelector("[data-nse-shadow-recipe]") as HTMLElement).style.boxShadow).toBe("none");
-    expect(container.querySelector("[data-nse-shadow-recipe]")?.getAttribute("data-nse-shadow-recipe")).toBe("suppressed");
-
-    rerender(
-      <NSEShadowView shadow={shadow} forcedColours>
-        <button type="button">Focusable chart</button>
-      </NSEShadowView>,
-    );
-    const forced = container.querySelector("[data-nse-shadow-recipe]") as HTMLElement;
-    expect(forced.style.boxShadow).toBe("none");
-    const focusable = container.querySelector("button") as HTMLButtonElement;
-    focusable.focus();
-    expect(getComputedStyle(focusable).outlineStyle === "none" ? forced.getAttribute("data-nse-shadow-protect-focus") : "visible").toBeTruthy();
-    expect(forced.getAttribute("data-nse-shadow-protect-focus")).toBe("true");
-  });
-
-  it("updates shadow presentation from a disposable injected preference source", () => {
-    let snapshot = { reducedTransparency: false, forcedColours: false };
-    const listeners = new Set<() => void>();
-    const source: NSEShadowPreferenceSource = {
-      getSnapshot: () => snapshot,
-      subscribe: (listener) => { listeners.add(listener); return () => listeners.delete(listener); },
-    };
-    const shadow = { offset: { x: 1, y: 1 }, blur: 2, spread: 0, colour: GFXColour.parse("#000") };
-    const { container, unmount } = render(<NSEShadowView shadow={shadow} preferenceSource={source}><button>Focus</button></NSEShadowView>);
-    const host = () => container.querySelector("[data-nse-shadow-recipe]") as HTMLElement;
-    expect(host().style.boxShadow).not.toBe("none");
-    act(() => { snapshot = { reducedTransparency: true, forcedColours: false }; listeners.forEach((listener) => listener()); });
-    expect(host().style.boxShadow).toBe("none");
-    act(() => { snapshot = { reducedTransparency: false, forcedColours: false }; listeners.forEach((listener) => listener()); });
-    expect(host().style.boxShadow).not.toBe("none");
-    unmount();
-    expect(listeners).toHaveLength(0);
+  it("projects shadow properties and follows inherited appearance preferences", () => {
+    const shadow = new NSEShadow({ shadowOffset: { width: 2, height: -3 }, shadowBlurRadius: 6, shadowColour: GFXColour.parse("#112233") });
+    const { container, rerender } = render(<NSEView shadow={shadow}><button>Focus</button></NSEView>);
+    const host = () => container.querySelector("[data-nse-shadow]") as HTMLElement;
+    expect(host().style.getPropertyValue("--nse-shadow-offset-x")).toBe("2px");
+    expect(host().style.getPropertyValue("--nse-shadow-blur")).toBe("6px");
+    expect(host().dataset.nseShadowSuppressed).toBeUndefined();
+    rerender(<NSEView shadow={shadow} appearance={new NSEAppearance("aqua", { transparency: "reduced" })}><button>Focus</button></NSEView>);
+    expect(host().dataset.nseShadowSuppressed).toBe("true");
+    rerender(<NSEView shadow={shadow} appearance={new NSEAppearance("aqua", { contrast: "forced" })}><button>Focus</button></NSEView>);
+    expect(host().dataset.nseShadowSuppressed).toBe("true");
+    const button = container.querySelector("button")!;
+    button.focus();
+    expect(document.activeElement).toBe(button);
+    expect(host().style.clipPath).toBe("");
   });
 });

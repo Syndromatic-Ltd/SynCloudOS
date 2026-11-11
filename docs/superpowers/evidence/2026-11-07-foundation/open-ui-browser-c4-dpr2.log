@@ -1,0 +1,68 @@
+desktop-light: panel, sources, collection and three decoded thumbnails captured
+desktop-dark: panel, sources, collection and three decoded thumbnails captured
+phone-light: panel, sources, collection and three decoded thumbnails captured
+phone-dark: panel, sources, collection and three decoded thumbnails captured
+[
+  {
+    "name": "desktop-light",
+    "bounds": {
+      "x": 310,
+      "y": 56,
+      "width": 820,
+      "height": 560,
+      "top": 56,
+      "right": 1130,
+      "bottom": 616,
+      "left": 310
+    },
+    "thumbnails": 3,
+    "errors": []
+  },
+  {
+    "name": "desktop-dark",
+    "bounds": {
+      "x": 310,
+      "y": 56,
+      "width": 820,
+      "height": 560,
+      "top": 56,
+      "right": 1130,
+      "bottom": 616,
+      "left": 310
+    },
+    "thumbnails": 3,
+    "errors": []
+  },
+  {
+    "name": "phone-light",
+    "bounds": {
+      "x": 8,
+      "y": 204,
+      "width": 374,
+      "height": 640,
+      "top": 204,
+      "right": 382,
+      "bottom": 844,
+      "left": 8
+    },
+    "thumbnails": 3,
+    "errors": []
+  },
+  {
+    "name": "phone-dark",
+    "bounds": {
+      "x": 8,
+      "y": 204,
+      "width": 374,
+      "height": 640,
+      "top": 204,
+      "right": 382,
+      "bottom": 844,
+      "left": 8
+    },
+    "thumbnails": 3,
+    "errors": []
+  }
+]
+
+exit: 0

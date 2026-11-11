@@ -133,7 +133,7 @@ describe("GraphicsFX bounded RGB ICC profiles", () => {
         expect(red.b).toBeLessThan(.08);
         expect(red.a).toBe(.5);
         expect(bytes).toEqual(snapshot);
-        expect(value.copyData()).toEqual(snapshot);
+        expect(value.copyData().bytes).toEqual(snapshot);
         const missingPair = lutProfile(), pairEntry = 132 + 7 * 12;
         missingPair.set([88, 88, 88, 88], pairEntry);
         expect(() => new GFXColourProfile(missingPair)).toThrow(/paired A2B0\/B2A0/i);

@@ -1,0 +1,60 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Window chrome structure: the toolbar and accessory row a window draws above its content.
+ * Themes give them their appearance; this file only lays them out.
+ */
+
+.nse-window-chrome-frame { position: absolute; inset: 0; display: flex; flex-direction: column; }
+.nse-window-chrome-frame > .nse-window-toolbar { flex: none; position: relative; z-index: 2; }
+.nse-window-chrome-frame > .nse-window-titlebar-accessories { flex: none; display: flex; align-items: center; }
+.nse-window-chrome-frame > .nse-window-chrome-content { position: relative; flex: 1 1 auto; min-height: 0; isolation: isolate; }
+
+/* The stage title bar's document: leading accessories, then the title, subtitle and trailing accessories. */
+.nse-window-titlebar-document { display: flex; align-items: center; justify-content: center; min-width: 0; max-width: 100%; }
+.nse-window-titlebar-title { display: inline-flex; align-items: center; min-width: 0; max-width: 100%; }
+.nse-window-titlebar-title-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nse-window-titlebar-accessory-slot { display: contents; }
+/* A view controller frame fills its container; an accessory sizes to its view. */
+.nse-window-titlebar-accessory-slot > .nse-window-titlebar-accessory { display: inline-flex !important; flex: none; width: auto !important; height: auto !important; }
+.nse-window-titlebar-accessory-slot:empty { display: none; }
+
+/* The bottom content border lies behind the content; its edge (which a theme may shade) lies above it. */
+.nse-window-content-border,
+.nse-window-content-border-edge { position: absolute; inset: auto 0 0; height: var(--nse-window-content-border-thickness); pointer-events: none; }
+.nse-window-content-border { z-index: -1; overflow: hidden; }
+.nse-window-content-border-edge { z-index: 1; }
+.nse-window-content-above-bottom-bar { position: absolute; inset: 0; }
+.nse-window-bottom-bar-accessory { position: absolute; inset: auto 0 0; z-index: 2; min-width: 0; }
+.nse-window-bottom-bar-accessory > * { height: 100%; }
+
+/*
+ * A window's sheets attach at the top of its content, under the title bar, toolbar and accessory row,
+ * and slide down from that edge. The layer clips them so they come out from under the toolbar.
+ */
+/* View-owned floating tab bars use layers 2 and 4. A window-modal sheet must
+   cover them as well as the ordinary content and bottom-bar accessory. */
+.nse-window-sheet-layer { position: absolute; inset: 0; z-index: 5; overflow: hidden; pointer-events: none; }
+.nse-window-sheet-layer:empty { display: none; }
+.nse-window-sheet-layer > .nse-window-sheet { position: absolute; inset: 0; }
+.nse-window-sheet-layer > .nse-window-sheet[data-sheet-exiting] { pointer-events: none; }
+.nse-window-sheet > .nse-window-sheet-backdrop,
+.nse-window-sheet > .nse-window-sheet-backdrop[data-nse-overlay-region="true"] {
+  position: absolute;
+  inset: 0;
+  z-index: auto;
+  place-items: start center;
+  padding: 0 16px 16px;
+  pointer-events: auto;
+  /* A sheet is a physical panel: the window behind it is not dimmed or blurred. */
+  background: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.nse-window-sheet-backdrop > .nse-sheet {
+  max-block-size: 100%;
+  overflow: auto;
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
+}

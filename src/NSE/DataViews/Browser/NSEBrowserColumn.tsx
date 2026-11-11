@@ -80,10 +80,10 @@ export function NSEBrowserColumn<T, TId extends NSEDataViewKey>({ label, index, 
   };
 
   return (
-    <div className="nse-browser-column" data-appearance-recipe="browser-column">
+    <div data-nse-part="column" className="nse-browser-column" >
       <div
         ref={viewportRef}
-        role="listbox"
+        data-nse-part="viewport" role="listbox"
         aria-label={label}
         aria-busy={state.status === "loading"}
         aria-disabled={disabled || undefined}
@@ -92,7 +92,7 @@ export function NSEBrowserColumn<T, TId extends NSEDataViewKey>({ label, index, 
         tabIndex={disabled ? -1 : 0}
         onKeyDown={handleKey}
       >
-        <div className="nse-browser-options" style={{ blockSize: virtualiser.snapshot.range.totalSize }}>
+        <div data-nse-part="content" className="nse-browser-options" style={{ blockSize: virtualiser.snapshot.range.totalSize }}>
         {virtualiser.snapshot.items.map((virtualItem) => {
           const item = state.presentation[virtualItem.index]!;
           const { id, leaf } = item;
@@ -106,24 +106,26 @@ export function NSEBrowserColumn<T, TId extends NSEDataViewKey>({ label, index, 
               aria-expanded={leaf ? undefined : Object.is(expandedId, id)}
               aria-posinset={virtualItem.index + 1}
               aria-setsize={state.items.length}
-              className="nse-browser-option"
+              data-nse-part="row" data-nse-selected={active ? "" : undefined} data-nse-enabled={disabled ? "false" : undefined} className="nse-browser-option"
+              data-nse-expanded={leaf ? undefined : String(Object.is(expandedId, id))}
+              data-nse-type={leaf ? "leaf" : "branch"}
               data-focused={active || undefined}
               data-leaf={leaf || undefined}
-              data-appearance-recipe={leaf ? "browser-leaf" : "browser-branch"}
+
               style={{ insetBlockStart: virtualItem.start, blockSize: virtualItem.size }}
               onClick={() => { if (!disabled) { onActiveChange(id); onChoose(item); } }}
             >
               {item.icon}
-              <span>{item.label}</span>
-              {!leaf && <span aria-hidden="true" data-appearance-recipe="browser-leaf-glyph" />}
+              <span data-nse-part="title">{item.label}</span>
+              {!leaf && <span data-nse-part="disclosure" aria-hidden="true"  />}
             </div>
           );
         })}
         </div>
       </div>
-      {state.status !== "ready" && state.status !== "empty" && <div role="status">{state.message ?? "Loading"}</div>}
-      {state.status === "empty" && <div role="status">{state.message ?? "No items"}</div>}
-      {state.retry && <button type="button" onClick={state.retry}>Retry</button>}
+      {state.status !== "ready" && state.status !== "empty" && <div data-nse-part="status" role="status">{state.message ?? "Loading"}</div>}
+      {state.status === "empty" && <div data-nse-part="status" role="status">{state.message ?? "No items"}</div>}
+      {state.retry && <button data-nse-part="recovery" type="button" onClick={state.retry}>Retry</button>}
     </div>
   );
 }

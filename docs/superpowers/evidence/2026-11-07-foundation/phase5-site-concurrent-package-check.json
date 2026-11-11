@@ -1,0 +1,40 @@
+{
+  "checkedAt": "2026-11-07T22:03:57.1333232+00:00",
+  "commit": "3274bfa40e72e55561b88c3b5278b083d72d4a07",
+  "archiveSha256": "dae7390373ed5c3ee95ef609056f2c12789811fe3480745d4d19a617bce09256",
+  "preview": "http://127.0.0.1:5199",
+  "exports": [
+    {
+      "types": "./fx/bluetooth.d.ts",
+      "entry": "./fx/bluetooth",
+      "typesExist": true
+    },
+    {
+      "types": "./fx/nfc.d.ts",
+      "entry": "./fx/nfc",
+      "typesExist": true
+    },
+    {
+      "types": "./fx/speech.d.ts",
+      "entry": "./fx/speech",
+      "typesExist": true
+    },
+    {
+      "types": "./fx/contacts.d.ts",
+      "entry": "./fx/contacts",
+      "typesExist": true
+    },
+    {
+      "types": "./fx/pass.d.ts",
+      "entry": "./fx/pass",
+      "typesExist": true
+    },
+    {
+      "types": "./fx/xr.d.ts",
+      "entry": "./fx/xr",
+      "typesExist": true
+    }
+  ],
+  "note": "Read-only checkpoint of a concurrent uncommitted adoption, not the final phase5 adoption receipt",
+  "archive": "syndromatic-syncloudos-1.0.0-beta.2-dae7390373ed5c3ee95ef609056f2c12789811fe3480745d4d19a617bce09256.tgz"
+}

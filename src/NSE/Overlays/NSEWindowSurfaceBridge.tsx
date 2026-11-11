@@ -19,18 +19,34 @@
  */
 
 import { createContext, useContext, type PropsWithChildren, type ReactNode } from "react";
+import type { NSELogicalPlacement } from "./overlayTypes";
+import type { NSEPopupPresentation } from "./NSEPopup";
+
+export type NSEPopoverPreferredEdge = "minX" | "maxX" | "minY" | "maxY";
+export type NSEPopoverBehavior = "transient" | "semitransient" | "applicationDefined";
 
 export interface NSEWindowSurfaceRequest {
   readonly id: string;
   readonly role: "sheet" | "panel" | "modal" | "popover";
   readonly title: string;
   readonly parentWindowControllerId: string | null;
+  readonly parentResponderId?: string;
   readonly anchor: HTMLElement | null;
   readonly bounds: { readonly x: number; readonly y: number; readonly width: number; readonly height: number };
   /** "content": the size in `bounds` is the fitted content's, so the host
    *  resizes the window even when its style is not user-resizable. Popovers
    *  always size this way. */
   readonly sizing?: "content";
+  readonly relativeTo?: Readonly<{ x: number; y: number; width: number; height: number }>;
+  readonly preferredEdge?: NSEPopoverPreferredEdge;
+  readonly drawsBackground?: boolean;
+  readonly behavior?: NSEPopoverBehavior;
+  readonly presentation?: NSEPopupPresentation;
+  /** Internal logical placement preserves aligned NSEPopup presentations. */
+  readonly placement?: NSELogicalPlacement;
+  readonly collisionPadding?: number;
+  readonly labelledBy?: string;
+  readonly describedBy?: string;
   readonly onDidClose?: () => void;
 }
 

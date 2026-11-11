@@ -18,10 +18,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useNSEWindowChromeElement } from "../Layout/windowChromeObstructions";
+
 import React, { useState, type HTMLAttributes } from "react";
 import type { WindowRecord } from "../../SynCloudOS/SynCloudOS";
+import { NSEWindowTitlebarDocumentContext } from "./windowTitlebarContext";
 import type { NSEWindowViewProps } from "./windowViewTypes";
-import type { NSEWindowAppearanceRecipeId } from "./windowAppearanceContract";
+
+import "./nse-windows.css";
 
 export interface NSEWindowTitleBarProps {
   readonly record: WindowRecord;
@@ -29,7 +33,7 @@ export interface NSEWindowTitleBarProps {
   readonly dispatchCommand: NSEWindowViewProps["dispatchCommand"];
   readonly moveHandleProps?: HTMLAttributes<HTMLElement>;
   readonly controls?: readonly WindowControlKind[];
-  readonly appearanceRecipe?: NSEWindowAppearanceRecipeId;
+
   readonly variant?: "standard" | "panel";
 }
 
@@ -62,9 +66,10 @@ function NSEWindowControl({
       type="button"
       className={`nse-window__control nse-window__control--${kind}`}
       aria-label={label}
+      data-nse-control="button" data-nse-part="cell" data-nse-highlighted={highlighted ? "" : undefined} data-nse-role={kind} data-nse-style={kind === "close" && dirty ? "edited" : undefined}
       data-window-control={kind}
       data-window-control-state={state}
-      data-window-appearance-recipe={`window.standard.${kind}.${state}`}
+
       data-window-no-drag=""
       onPointerEnter={() => setHighlighted(true)}
       onPointerLeave={() => setHighlighted(false)}
@@ -72,33 +77,46 @@ function NSEWindowControl({
       onPointerUp={() => setHighlighted(false)}
       onClick={() => void dispatchCommand(commandId, { windowControllerId: record.id })}
     >
-      <span className="nse-window__control-paint" aria-hidden="true" />
+      <span data-nse-part="bezel" className="nse-window__control-paint" aria-hidden="true" />
     </button>
   );
 }
 
-export function NSEWindowTitleBar({
+export function NSEWindowTitleBar(props: NSEWindowTitleBarProps | { readonly title: string; readonly isKeyWindow: boolean }) {
+  const header = React.useRef<HTMLElement>(null);
+  useNSEWindowChromeElement(header, "top", false, "title" in props);
+  if ("title" in props) return <header data-nse-part="header" data-nse-key-window={props.isKeyWindow ? undefined : "false"} ref={header} className="nse-window__titlebar nse-window__titlebar--standard" data-window-titlebar="" data-window-host-titlebar="" style={{ height: "100%", minHeight: "100%" }} data-window-active={props.isKeyWindow ? "true" : "false"} >
+    <h2 data-nse-part="title" className="nse-window__title">{props.title}</h2>
+  </header>;
+  return <NSEManagedWindowTitleBar {...props} />;
+}
+function NSEManagedWindowTitleBar({
   record,
   dirty,
   dispatchCommand,
   moveHandleProps,
   controls = ["close", "minimise", "zoom"],
-  appearanceRecipe,
   variant = "standard",
 }: NSEWindowTitleBarProps) {
+  const header = React.useRef<HTMLElement>(null);
+  useNSEWindowChromeElement(header, "top", false);
+  const document = React.useContext(NSEWindowTitlebarDocumentContext);
   const { className: moveClassName, ...handleProps } = moveHandleProps ?? {};
   return (
     <header
       {...handleProps}
+      ref={header}
       className={["nse-window__titlebar", `nse-window__titlebar--${variant}`, moveClassName].filter(Boolean).join(" ")}
+      data-toolbar-style={document?.toolbarStyle ?? "automatic"}
+      data-nse-part="header" data-nse-style={variant} data-nse-toolbar-style={document?.toolbarStyle ?? "automatic"} data-nse-key-window={record.isKey ? undefined : "false"}
       data-window-titlebar=""
       data-window-panel-titlebar={variant === "panel" ? "" : undefined}
       data-window-active={record.isKey ? "true" : "false"}
-      data-window-appearance-recipe={appearanceRecipe ?? (record.isKey ? "window.standard.head.active" : "window.standard.head.inactive")}
+
     >
       {/* Window controls stay in the tab order but are never a window's
           first responder, as in AppKit. */}
-      <div className="nse-window__controls" data-syncloudos-focus-chrome="">
+      <div data-nse-part="accessory" className="nse-window__controls" data-syncloudos-focus-chrome="">
         {controls.includes("close") && record.style.includes("closable") ? (
           <NSEWindowControl kind="close" record={record} dirty={dirty} dispatchCommand={dispatchCommand} />
         ) : null}
@@ -109,8 +127,9 @@ export function NSEWindowTitleBar({
           <NSEWindowControl kind="zoom" record={record} dirty={dirty} dispatchCommand={dispatchCommand} />
         ) : null}
       </div>
-      <h2 id={`${record.id}-title`} data-window-title="" className="nse-window__title">
-        {record.title}
+      <h2 id={`${record.id}-title`} data-window-title="" data-nse-part="title" className="nse-window__title">
+        {document?.title ?? record.title}
+        {document?.subtitle ? <span data-nse-part="subtitle" className="nse-window-titlebar-subtitle">{document.subtitle}</span> : null}
       </h2>
     </header>
   );

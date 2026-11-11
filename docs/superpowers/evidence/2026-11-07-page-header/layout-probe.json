@@ -1,0 +1,1002 @@
+{
+  "before": {
+    "ancestors": [
+      {
+        "attrs": {
+          "class": "gallery-main"
+        },
+        "class": "gallery-main",
+        "height": 1418.65625,
+        "display": "flex",
+        "cssHeight": "1418.66px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "1418.66px"
+      },
+      {
+        "attrs": {
+          "tabindex": "-1",
+          "data-nse-view-controller": ""
+        },
+        "class": "",
+        "height": 1418.65625,
+        "display": "flex",
+        "cssHeight": "1418.66px",
+        "flex": "1 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "1418.66px"
+      },
+      {
+        "attrs": {
+          "class": "nse-split-view-pane-host",
+          "data-pane-host": "content",
+          "style": "display: contents;"
+        },
+        "class": "nse-split-view-pane-host",
+        "height": 0,
+        "display": "contents",
+        "cssHeight": "auto",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": "display: contents;",
+        "blockSize": "auto"
+      },
+      {
+        "attrs": {
+          "data-nse-part": "split-pane-slot",
+          "style": "display: contents;"
+        },
+        "class": "",
+        "height": 0,
+        "display": "contents",
+        "cssHeight": "auto",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": "display: contents;",
+        "blockSize": "auto"
+      },
+      {
+        "attrs": {
+          "role": "region",
+          "aria-label": "content",
+          "tabindex": "-1",
+          "data-nse-part": "split-pane",
+          "data-pane-id": "content"
+        },
+        "class": "",
+        "height": 1418.65625,
+        "display": "flex",
+        "cssHeight": "1418.66px",
+        "flex": "1 1 auto",
+        "overflow": "hidden",
+        "style": null,
+        "blockSize": "1418.66px"
+      },
+      {
+        "attrs": {
+          "class": "nse-split-view-controller-view",
+          "aria-label": "Split view",
+          "data-nse-control": "split-view",
+          "data-state": "ready",
+          "data-presentation": "single-pane"
+        },
+        "class": "nse-split-view-controller-view",
+        "height": 1470.65625,
+        "display": "flex",
+        "cssHeight": "1470.66px",
+        "flex": "0 1 auto",
+        "overflow": "hidden",
+        "style": null,
+        "blockSize": "1470.66px"
+      },
+      {
+        "attrs": {
+          "class": "nse-gallery",
+          "data-mode": "light",
+          "data-gallery-layout": "phone",
+          "data-gallery-navigation": "tabs",
+          "data-gallery-active-section": "buttons"
+        },
+        "class": "nse-gallery",
+        "height": 1470.65625,
+        "display": "block",
+        "cssHeight": "1470.66px",
+        "flex": "0 1 auto",
+        "overflow": "hidden",
+        "style": null,
+        "blockSize": "1470.66px"
+      },
+      {
+        "attrs": {
+          "class": "gallery-appearance-host"
+        },
+        "class": "gallery-appearance-host",
+        "height": 1470.65625,
+        "display": "block",
+        "cssHeight": "1470.66px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "1470.66px"
+      },
+      {
+        "attrs": {
+          "class": "nse-appearance-provider",
+          "data-nse-appearance": "atmo",
+          "data-nse-chrome": "standard",
+          "data-nse-colour-scheme-requested": "light",
+          "data-nse-colour-scheme-resolved": "light",
+          "data-nse-contrast": "normal",
+          "data-nse-transparency": "normal",
+          "data-mode": "light"
+        },
+        "class": "nse-appearance-provider",
+        "height": 1470.65625,
+        "display": "block",
+        "cssHeight": "1470.66px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "1470.66px"
+      },
+      {
+        "attrs": {
+          "tabindex": "-1",
+          "data-nse-view-controller": "",
+          "data-syncloudos-runtime-owner": "runtime:38ce398e-f8d5-4e48-884d-22195d01e43c",
+          "data-syncloudos-responder-id": "view:com.syndromatic.nse-control-gallery:1:_r_v_",
+          "data-syncloudos-focus-scope": "application:com.syndromatic.nse-control-gallery",
+          "style": "display: block; width: 100%; height: 100%; min-width: 0px; min-height: 0px;"
+        },
+        "class": "",
+        "height": 788,
+        "display": "block",
+        "cssHeight": "788px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": "display: block; width: 100%; height: 100%; min-width: 0px; min-height: 0px;",
+        "blockSize": "788px"
+      },
+      {
+        "attrs": {
+          "class": "nse-window-content-above-bottom-bar",
+          "style": "bottom: 0px;"
+        },
+        "class": "nse-window-content-above-bottom-bar",
+        "height": 788,
+        "display": "block",
+        "cssHeight": "788px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": "bottom: 0px;",
+        "blockSize": "788px"
+      },
+      {
+        "attrs": {
+          "class": "nse-window-chrome-content"
+        },
+        "class": "nse-window-chrome-content",
+        "height": 788,
+        "display": "block",
+        "cssHeight": "788px",
+        "flex": "1 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "788px"
+      },
+      {
+        "attrs": {
+          "class": "nse-window-chrome-frame"
+        },
+        "class": "nse-window-chrome-frame",
+        "height": 788,
+        "display": "flex",
+        "cssHeight": "788px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "788px"
+      },
+      {
+        "attrs": {
+          "data-nse-overlay-provider": "nse-overlay-provider:runtime:38ce398e-f8d5-4e48-884d-22195d01e43c:_r_u_",
+          "data-syncloudos-runtime-owner": "runtime:38ce398e-f8d5-4e48-884d-22195d01e43c",
+          "style": "display: contents;"
+        },
+        "class": "",
+        "height": 0,
+        "display": "contents",
+        "cssHeight": "auto",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": "display: contents;",
+        "blockSize": "auto"
+      },
+      {
+        "attrs": {
+          "class": "webspring-app-view-fullbleed-content",
+          "aria-label": "NSE Control Gallery"
+        },
+        "class": "webspring-app-view-fullbleed-content",
+        "height": 788,
+        "display": "block",
+        "cssHeight": "788px",
+        "flex": "1 1 auto",
+        "overflow": "hidden",
+        "style": null,
+        "blockSize": "788px"
+      },
+      {
+        "attrs": {
+          "data-frame-background": "system",
+          "class": "nse-smooth-surface nse-smooth-surface-radius-custom nse-smooth-surface-focus-ring nse-smooth-surface-overflow-hidden nse-smooth-surface-scroll-none nse-smooth-surface-shadow-soft nse-smooth-surface-physicality-custom nse-smooth-surface-performance-paint webspring-app-view-body-surface webspring-app-view-body-surface-sourcelist",
+          "data-slot": "nse-smooth-surface",
+          "data-state": "ready",
+          "data-nse-smooth-surface-state": "ready",
+          "style": "--nse-smooth-surface-radius: 31px; --nse-smooth-surface-mobile-radius: 28px; --nse-smooth-surface-radius-number: 31; --nse-smooth-surface-shadow: 0 10px 28px rgba(6, 10, 18, 0.24), inset 0px 2px 0px 0px rgba(255,255,255,0.65), inset 0px -2px 0px 0px rgba(0,0,0,0.45); --nse-smooth-surface-curve: squircle; --nse-smooth-surface-smoothing: 0.6; border-radius: var(--nse-smooth-surface-active-radius, var(--nse-smooth-surface-radius)); box-shadow: var(--nse-smooth-surface-shadow); --nse-smooth-surface-focus-ring: 0 0 0 2px rgba(142, 212, 255, 0.76); --nse-smooth-surface-focus-offset: 2px; overflow: hidden; contain: paint; --nse-app-content-inset-top: 0px; clip-path: path(\"M 28 0 L 362 0 L 375.718 0.1331 L 379.824 0.5352 L 382.666 1.2156 L 384.824 2.1918 L 386.506 3.4943 L 387.808 5.1758 L 388.784 7.3342 L 389.465 10.1763 L 389.867 14.2822 L 390 28 L 390 816 L 389.867 829.718 L 389.465 833.824 L 388.784 836.666 L 387.808 838.824 L 386.506 840.506 L 384.824 841.808 L 382.666 842.784 L 379.824 843.465 L 375.718 843.867 L 362 844 L 28 844 L 14.2822 843.867 L 10.1763 843.465 L 7.3342 842.784 L 5.1758 841.808 L 3.4943 840.506 L 2.1918 838.824 L 1.2156 836.666 L 0.5352 833.824 L 0.1331 829.718 L 0 816 L 0 28 L 0.1331 14.2822 L 0.5352 10.1763 L 1.2156 7.3342 L 2.1918 5.1758 L 3.4943 3.4943 L 5.1758 2.1918 L 7.3342 1.2156 L 10.1763 0.5352 L 14.2822 0.1331 L 28 0 Z\");"
+        },
+        "class": "nse-smooth-surface nse-smooth-surface-radius-custom nse-smooth-surface-focus-ring nse-smooth-surface-overflow-hidden nse-smooth-surface-scroll-none nse-smooth-surface-shadow-soft nse-smooth-surface-physicality-custom nse-smooth-surface-performance-paint webspring-app-view-body-surface webspring-app-view-body-surface-sourcelist",
+        "height": 844,
+        "display": "flex",
+        "cssHeight": "844px",
+        "flex": "0 1 auto",
+        "overflow": "hidden",
+        "style": "--nse-smooth-surface-radius: 31px; --nse-smooth-surface-mobile-radius: 28px; --nse-smooth-surface-radius-number: 31; --nse-smooth-surface-shadow: 0 10px 28px rgba(6, 10, 18, 0.24), inset 0px 2px 0px 0px rgba(255,255,255,0.65), inset 0px -2px 0px 0px rgba(0,0,0,0.45); --nse-smooth-surface-curve: squircle; --nse-smooth-surface-smoothing: 0.6; border-radius: var(--nse-smooth-surface-active-radius, var(--nse-smooth-surface-radius)); box-shadow: var(--nse-smooth-surface-shadow); --nse-smooth-surface-focus-ring: 0 0 0 2px rgba(142, 212, 255, 0.76); --nse-smooth-surface-focus-offset: 2px; overflow: hidden; contain: paint; --nse-app-content-inset-top: 0px; clip-path: path(\"M 28 0 L 362 0 L 375.718 0.1331 L 379.824 0.5352 L 382.666 1.2156 L 384.824 2.1918 L 386.506 3.4943 L 387.808 5.1758 L 388.784 7.3342 L 389.465 10.1763 L 389.867 14.2822 L 390 28 L 390 816 L 389.867 829.718 L 389.465 833.824 L 388.784 836.666 L 387.808 838.824 L 386.506 840.506 L 384.824 841.808 L 382.666 842.784 L 379.824 843.465 L 375.718 843.867 L 362 844 L 28 844 L 14.2822 843.867 L 10.1763 843.465 L 7.3342 842.784 L 5.1758 841.808 L 3.4943 840.506 L 2.1918 838.824 L 1.2156 836.666 L 0.5352 833.824 L 0.1331 829.718 L 0 816 L 0 28 L 0.1331 14.2822 L 0.5352 10.1763 L 1.2156 7.3342 L 2.1918 5.1758 L 3.4943 3.4943 L 5.1758 2.1918 L 7.3342 1.2156 L 10.1763 0.5352 L 14.2822 0.1331 L 28 0 Z\");",
+        "blockSize": "844px"
+      },
+      {
+        "attrs": {
+          "class": "webspring-app-view-surface webspring-app-view-surface-generic",
+          "data-frame-material": "metal",
+          "data-frame-top-bar": "standard",
+          "data-nse-material": "metal",
+          "style": "--webspring-app-top-bar-height: var(--nse-app-topbar-height, var(--nse-topbar-height-metal));"
+        },
+        "class": "webspring-app-view-surface webspring-app-view-surface-generic",
+        "height": 844,
+        "display": "block",
+        "cssHeight": "844px",
+        "flex": "0 1 auto",
+        "overflow": "hidden",
+        "style": "--webspring-app-top-bar-height: var(--nse-app-topbar-height, var(--nse-topbar-height-metal));",
+        "blockSize": "844px"
+      },
+      {
+        "attrs": {
+          "data-syncloudos-runtime-owner": "runtime:38ce398e-f8d5-4e48-884d-22195d01e43c",
+          "data-syncloudos-responder-id": "application:com.syndromatic.nse-control-gallery",
+          "data-syncloudos-focus-scope": "application:com.syndromatic.nse-control-gallery",
+          "tabindex": "-1",
+          "class": "webspring-app-view-frame  ",
+          "style": "z-index: 71;"
+        },
+        "class": "webspring-app-view-frame  ",
+        "height": 844,
+        "display": "block",
+        "cssHeight": "844px",
+        "flex": "0 1 auto",
+        "overflow": "hidden",
+        "style": "z-index: 71;",
+        "blockSize": "844px"
+      },
+      {
+        "attrs": {
+          "data-nse-overlay-provider": "nse-overlay-provider:runtime:38ce398e-f8d5-4e48-884d-22195d01e43c:_r_q_",
+          "data-syncloudos-runtime-owner": "runtime:38ce398e-f8d5-4e48-884d-22195d01e43c",
+          "style": "display: contents;"
+        },
+        "class": "",
+        "height": 0,
+        "display": "contents",
+        "cssHeight": "auto",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": "display: contents;",
+        "blockSize": "auto"
+      },
+      {
+        "attrs": {
+          "class": "webspring-apps-container"
+        },
+        "class": "webspring-apps-container",
+        "height": 844,
+        "display": "block",
+        "cssHeight": "844px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "844px"
+      },
+      {
+        "attrs": {
+          "class": "webspring-application-outlet-host"
+        },
+        "class": "webspring-application-outlet-host",
+        "height": 0,
+        "display": "block",
+        "cssHeight": "0px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "0px"
+      },
+      {
+        "attrs": {
+          "class": "webspring-application-outlet"
+        },
+        "class": "webspring-application-outlet",
+        "height": 0,
+        "display": "block",
+        "cssHeight": "0px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "0px"
+      },
+      {
+        "attrs": {
+          "class": "webspring-board",
+          "data-launch-phase": "covered",
+          "data-entrance-phase": "ready",
+          "data-layout-editing": "false",
+          "data-reduced-motion": "false",
+          "style": "--webspring-launcher-colour: #929eae; --webspring-launcher-image: url(\"/src/Webspring/Contents/Resources/Dial/brushed-metal-launcher.webp\"); --webspring-launcher-size: 100% 100%; --webspring-launcher-repeat: repeat; --webspring-launcher-position: 0 0; --webspring-launcher-overlay-image: none; --webspring-launcher-overlay-size: 100% auto; --webspring-launcher-overlay-opacity: 1; --webspring-launcher-overlay-blend: normal;"
+        },
+        "class": "webspring-board",
+        "height": 1166.28125,
+        "display": "block",
+        "cssHeight": "1166.28px",
+        "flex": "0 1 auto",
+        "overflow": "clip visible",
+        "style": "--webspring-launcher-colour: #929eae; --webspring-launcher-image: url(\"/src/Webspring/Contents/Resources/Dial/brushed-metal-launcher.webp\"); --webspring-launcher-size: 100% 100%; --webspring-launcher-repeat: repeat; --webspring-launcher-position: 0 0; --webspring-launcher-overlay-image: none; --webspring-launcher-overlay-size: 100% auto; --webspring-launcher-overlay-opacity: 1; --webspring-launcher-overlay-blend: normal;",
+        "blockSize": "1166.28px"
+      },
+      {
+        "attrs": {
+          "class": "nse-material-provider",
+          "data-nse-material": "atmo"
+        },
+        "class": "nse-material-provider",
+        "height": 1166.28125,
+        "display": "block",
+        "cssHeight": "1166.28px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "1166.28px"
+      },
+      {
+        "attrs": {
+          "class": "webspring-entrance-surface"
+        },
+        "class": "webspring-entrance-surface",
+        "height": 0,
+        "display": "contents",
+        "cssHeight": "auto",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "auto"
+      },
+      {
+        "attrs": {
+          "class": "webspring-view-host"
+        },
+        "class": "webspring-view-host",
+        "height": 0,
+        "display": "contents",
+        "cssHeight": "auto",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "auto"
+      },
+      {
+        "attrs": {
+          "class": "nse-material-provider",
+          "data-nse-material": "atmo"
+        },
+        "class": "nse-material-provider",
+        "height": 1166.28125,
+        "display": "block",
+        "cssHeight": "1166.28px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "1166.28px"
+      },
+      {
+        "attrs": {
+          "data-syncloudos-runtime-id": "runtime:38ce398e-f8d5-4e48-884d-22195d01e43c",
+          "data-syncloudos-runtime-owner": "runtime:38ce398e-f8d5-4e48-884d-22195d01e43c",
+          "data-syncloudos-runtime-root": "true",
+          "data-appearance": "auto",
+          "data-mode": "light"
+        },
+        "class": "",
+        "height": 1166.28125,
+        "display": "block",
+        "cssHeight": "1166.28px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "1166.28px"
+      },
+      {
+        "attrs": {
+          "class": "nse-appearance-provider",
+          "data-nse-appearance": "atmo",
+          "data-nse-chrome": "standard",
+          "data-nse-colour-scheme-requested": "auto",
+          "data-nse-colour-scheme-resolved": "light",
+          "data-nse-contrast": "normal",
+          "data-nse-transparency": "normal",
+          "data-mode": "light"
+        },
+        "class": "nse-appearance-provider",
+        "height": 1166.28125,
+        "display": "block",
+        "cssHeight": "1166.28px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "1166.28px"
+      },
+      {
+        "attrs": {
+          "id": "root"
+        },
+        "class": "",
+        "height": 1166.28125,
+        "display": "block",
+        "cssHeight": "1166.28px",
+        "flex": "0 1 auto",
+        "overflow": "clip visible",
+        "style": null,
+        "blockSize": "1166.28px"
+      },
+      {
+        "attrs": {},
+        "class": "",
+        "height": 1166.28125,
+        "display": "block",
+        "cssHeight": "1166.28px",
+        "flex": "0 1 auto",
+        "overflow": "clip visible",
+        "style": null,
+        "blockSize": "1166.28px"
+      },
+      {
+        "attrs": {
+          "lang": "en-GB",
+          "dir": "ltr"
+        },
+        "class": "",
+        "height": 1166.28125,
+        "display": "block",
+        "cssHeight": "1166.28px",
+        "flex": "0 1 auto",
+        "overflow": "hidden",
+        "style": null,
+        "blockSize": "1166.28px"
+      }
+    ],
+    "tabs": [
+      {
+        "rect": {
+          "x": 20,
+          "y": 1444.65625,
+          "width": 350,
+          "height": 72,
+          "top": 1444.65625,
+          "right": 370,
+          "bottom": 1516.65625,
+          "left": 20
+        },
+        "text": "ControlsPickersDataLayoutMore"
+      }
+    ]
+  },
+  "after": {
+    "ancestors": [
+      {
+        "attrs": {
+          "class": "gallery-main"
+        },
+        "class": "gallery-main",
+        "height": 736,
+        "display": "flex",
+        "cssHeight": "736px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "736px"
+      },
+      {
+        "attrs": {
+          "tabindex": "-1",
+          "data-nse-view-controller": ""
+        },
+        "class": "",
+        "height": 736,
+        "display": "flex",
+        "cssHeight": "736px",
+        "flex": "1 1 0%",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "736px"
+      },
+      {
+        "attrs": {
+          "class": "nse-split-view-pane-host",
+          "data-pane-host": "content",
+          "style": "display: contents;"
+        },
+        "class": "nse-split-view-pane-host",
+        "height": 0,
+        "display": "contents",
+        "cssHeight": "auto",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": "display: contents;",
+        "blockSize": "auto"
+      },
+      {
+        "attrs": {
+          "data-nse-part": "split-pane-slot",
+          "style": "display: contents;"
+        },
+        "class": "",
+        "height": 0,
+        "display": "contents",
+        "cssHeight": "auto",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": "display: contents;",
+        "blockSize": "auto"
+      },
+      {
+        "attrs": {
+          "role": "region",
+          "aria-label": "content",
+          "tabindex": "-1",
+          "data-nse-part": "split-pane",
+          "data-pane-id": "content"
+        },
+        "class": "",
+        "height": 736,
+        "display": "flex",
+        "cssHeight": "736px",
+        "flex": "1 1 auto",
+        "overflow": "hidden",
+        "style": null,
+        "blockSize": "736px"
+      },
+      {
+        "attrs": {
+          "class": "nse-split-view-controller-view",
+          "aria-label": "Split view",
+          "data-nse-control": "split-view",
+          "data-state": "ready",
+          "data-presentation": "single-pane"
+        },
+        "class": "nse-split-view-controller-view",
+        "height": 788,
+        "display": "flex",
+        "cssHeight": "788px",
+        "flex": "0 1 auto",
+        "overflow": "hidden",
+        "style": null,
+        "blockSize": "788px"
+      },
+      {
+        "attrs": {
+          "class": "nse-gallery",
+          "data-mode": "light",
+          "data-gallery-layout": "phone",
+          "data-gallery-navigation": "tabs",
+          "data-gallery-active-section": "buttons"
+        },
+        "class": "nse-gallery",
+        "height": 788,
+        "display": "block",
+        "cssHeight": "788px",
+        "flex": "0 1 auto",
+        "overflow": "hidden",
+        "style": null,
+        "blockSize": "788px"
+      },
+      {
+        "attrs": {
+          "class": "gallery-appearance-host"
+        },
+        "class": "gallery-appearance-host",
+        "height": 788,
+        "display": "block",
+        "cssHeight": "788px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "788px"
+      },
+      {
+        "attrs": {
+          "class": "nse-appearance-provider",
+          "data-nse-appearance": "atmo",
+          "data-nse-chrome": "standard",
+          "data-nse-colour-scheme-requested": "light",
+          "data-nse-colour-scheme-resolved": "light",
+          "data-nse-contrast": "normal",
+          "data-nse-transparency": "normal",
+          "data-mode": "light"
+        },
+        "class": "nse-appearance-provider",
+        "height": 788,
+        "display": "block",
+        "cssHeight": "788px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "788px"
+      },
+      {
+        "attrs": {
+          "tabindex": "-1",
+          "data-nse-view-controller": "",
+          "data-syncloudos-runtime-owner": "runtime:38ce398e-f8d5-4e48-884d-22195d01e43c",
+          "data-syncloudos-responder-id": "view:com.syndromatic.nse-control-gallery:1:_r_v_",
+          "data-syncloudos-focus-scope": "application:com.syndromatic.nse-control-gallery",
+          "style": "display: block; width: 100%; height: 100%; min-width: 0px; min-height: 0px;"
+        },
+        "class": "",
+        "height": 788,
+        "display": "block",
+        "cssHeight": "788px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": "display: block; width: 100%; height: 100%; min-width: 0px; min-height: 0px;",
+        "blockSize": "788px"
+      },
+      {
+        "attrs": {
+          "class": "nse-window-content-above-bottom-bar",
+          "style": "bottom: 0px;"
+        },
+        "class": "nse-window-content-above-bottom-bar",
+        "height": 788,
+        "display": "block",
+        "cssHeight": "788px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": "bottom: 0px;",
+        "blockSize": "788px"
+      },
+      {
+        "attrs": {
+          "class": "nse-window-chrome-content"
+        },
+        "class": "nse-window-chrome-content",
+        "height": 788,
+        "display": "block",
+        "cssHeight": "788px",
+        "flex": "1 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "788px"
+      },
+      {
+        "attrs": {
+          "class": "nse-window-chrome-frame"
+        },
+        "class": "nse-window-chrome-frame",
+        "height": 788,
+        "display": "flex",
+        "cssHeight": "788px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "788px"
+      },
+      {
+        "attrs": {
+          "data-nse-overlay-provider": "nse-overlay-provider:runtime:38ce398e-f8d5-4e48-884d-22195d01e43c:_r_u_",
+          "data-syncloudos-runtime-owner": "runtime:38ce398e-f8d5-4e48-884d-22195d01e43c",
+          "style": "display: contents;"
+        },
+        "class": "",
+        "height": 0,
+        "display": "contents",
+        "cssHeight": "auto",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": "display: contents;",
+        "blockSize": "auto"
+      },
+      {
+        "attrs": {
+          "class": "webspring-app-view-fullbleed-content",
+          "aria-label": "NSE Control Gallery"
+        },
+        "class": "webspring-app-view-fullbleed-content",
+        "height": 788,
+        "display": "block",
+        "cssHeight": "788px",
+        "flex": "1 1 auto",
+        "overflow": "hidden",
+        "style": null,
+        "blockSize": "788px"
+      },
+      {
+        "attrs": {
+          "data-frame-background": "system",
+          "class": "nse-smooth-surface nse-smooth-surface-radius-custom nse-smooth-surface-focus-ring nse-smooth-surface-overflow-hidden nse-smooth-surface-scroll-none nse-smooth-surface-shadow-soft nse-smooth-surface-physicality-custom nse-smooth-surface-performance-paint webspring-app-view-body-surface webspring-app-view-body-surface-sourcelist",
+          "data-slot": "nse-smooth-surface",
+          "data-state": "ready",
+          "data-nse-smooth-surface-state": "ready",
+          "style": "--nse-smooth-surface-radius: 31px; --nse-smooth-surface-mobile-radius: 28px; --nse-smooth-surface-radius-number: 31; --nse-smooth-surface-shadow: 0 10px 28px rgba(6, 10, 18, 0.24), inset 0px 2px 0px 0px rgba(255,255,255,0.65), inset 0px -2px 0px 0px rgba(0,0,0,0.45); --nse-smooth-surface-curve: squircle; --nse-smooth-surface-smoothing: 0.6; border-radius: var(--nse-smooth-surface-active-radius, var(--nse-smooth-surface-radius)); box-shadow: var(--nse-smooth-surface-shadow); --nse-smooth-surface-focus-ring: 0 0 0 2px rgba(142, 212, 255, 0.76); --nse-smooth-surface-focus-offset: 2px; overflow: hidden; contain: paint; --nse-app-content-inset-top: 0px; clip-path: path(\"M 28 0 L 362 0 L 375.718 0.1331 L 379.824 0.5352 L 382.666 1.2156 L 384.824 2.1918 L 386.506 3.4943 L 387.808 5.1758 L 388.784 7.3342 L 389.465 10.1763 L 389.867 14.2822 L 390 28 L 390 816 L 389.867 829.718 L 389.465 833.824 L 388.784 836.666 L 387.808 838.824 L 386.506 840.506 L 384.824 841.808 L 382.666 842.784 L 379.824 843.465 L 375.718 843.867 L 362 844 L 28 844 L 14.2822 843.867 L 10.1763 843.465 L 7.3342 842.784 L 5.1758 841.808 L 3.4943 840.506 L 2.1918 838.824 L 1.2156 836.666 L 0.5352 833.824 L 0.1331 829.718 L 0 816 L 0 28 L 0.1331 14.2822 L 0.5352 10.1763 L 1.2156 7.3342 L 2.1918 5.1758 L 3.4943 3.4943 L 5.1758 2.1918 L 7.3342 1.2156 L 10.1763 0.5352 L 14.2822 0.1331 L 28 0 Z\");"
+        },
+        "class": "nse-smooth-surface nse-smooth-surface-radius-custom nse-smooth-surface-focus-ring nse-smooth-surface-overflow-hidden nse-smooth-surface-scroll-none nse-smooth-surface-shadow-soft nse-smooth-surface-physicality-custom nse-smooth-surface-performance-paint webspring-app-view-body-surface webspring-app-view-body-surface-sourcelist",
+        "height": 844,
+        "display": "flex",
+        "cssHeight": "844px",
+        "flex": "0 1 auto",
+        "overflow": "hidden",
+        "style": "--nse-smooth-surface-radius: 31px; --nse-smooth-surface-mobile-radius: 28px; --nse-smooth-surface-radius-number: 31; --nse-smooth-surface-shadow: 0 10px 28px rgba(6, 10, 18, 0.24), inset 0px 2px 0px 0px rgba(255,255,255,0.65), inset 0px -2px 0px 0px rgba(0,0,0,0.45); --nse-smooth-surface-curve: squircle; --nse-smooth-surface-smoothing: 0.6; border-radius: var(--nse-smooth-surface-active-radius, var(--nse-smooth-surface-radius)); box-shadow: var(--nse-smooth-surface-shadow); --nse-smooth-surface-focus-ring: 0 0 0 2px rgba(142, 212, 255, 0.76); --nse-smooth-surface-focus-offset: 2px; overflow: hidden; contain: paint; --nse-app-content-inset-top: 0px; clip-path: path(\"M 28 0 L 362 0 L 375.718 0.1331 L 379.824 0.5352 L 382.666 1.2156 L 384.824 2.1918 L 386.506 3.4943 L 387.808 5.1758 L 388.784 7.3342 L 389.465 10.1763 L 389.867 14.2822 L 390 28 L 390 816 L 389.867 829.718 L 389.465 833.824 L 388.784 836.666 L 387.808 838.824 L 386.506 840.506 L 384.824 841.808 L 382.666 842.784 L 379.824 843.465 L 375.718 843.867 L 362 844 L 28 844 L 14.2822 843.867 L 10.1763 843.465 L 7.3342 842.784 L 5.1758 841.808 L 3.4943 840.506 L 2.1918 838.824 L 1.2156 836.666 L 0.5352 833.824 L 0.1331 829.718 L 0 816 L 0 28 L 0.1331 14.2822 L 0.5352 10.1763 L 1.2156 7.3342 L 2.1918 5.1758 L 3.4943 3.4943 L 5.1758 2.1918 L 7.3342 1.2156 L 10.1763 0.5352 L 14.2822 0.1331 L 28 0 Z\");",
+        "blockSize": "844px"
+      },
+      {
+        "attrs": {
+          "class": "webspring-app-view-surface webspring-app-view-surface-generic",
+          "data-frame-material": "metal",
+          "data-frame-top-bar": "standard",
+          "data-nse-material": "metal",
+          "style": "--webspring-app-top-bar-height: var(--nse-app-topbar-height, var(--nse-topbar-height-metal));"
+        },
+        "class": "webspring-app-view-surface webspring-app-view-surface-generic",
+        "height": 844,
+        "display": "block",
+        "cssHeight": "844px",
+        "flex": "0 1 auto",
+        "overflow": "hidden",
+        "style": "--webspring-app-top-bar-height: var(--nse-app-topbar-height, var(--nse-topbar-height-metal));",
+        "blockSize": "844px"
+      },
+      {
+        "attrs": {
+          "data-syncloudos-runtime-owner": "runtime:38ce398e-f8d5-4e48-884d-22195d01e43c",
+          "data-syncloudos-responder-id": "application:com.syndromatic.nse-control-gallery",
+          "data-syncloudos-focus-scope": "application:com.syndromatic.nse-control-gallery",
+          "tabindex": "-1",
+          "class": "webspring-app-view-frame  ",
+          "style": "z-index: 71;"
+        },
+        "class": "webspring-app-view-frame  ",
+        "height": 844,
+        "display": "block",
+        "cssHeight": "844px",
+        "flex": "0 1 auto",
+        "overflow": "hidden",
+        "style": "z-index: 71;",
+        "blockSize": "844px"
+      },
+      {
+        "attrs": {
+          "data-nse-overlay-provider": "nse-overlay-provider:runtime:38ce398e-f8d5-4e48-884d-22195d01e43c:_r_q_",
+          "data-syncloudos-runtime-owner": "runtime:38ce398e-f8d5-4e48-884d-22195d01e43c",
+          "style": "display: contents;"
+        },
+        "class": "",
+        "height": 0,
+        "display": "contents",
+        "cssHeight": "auto",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": "display: contents;",
+        "blockSize": "auto"
+      },
+      {
+        "attrs": {
+          "class": "webspring-apps-container"
+        },
+        "class": "webspring-apps-container",
+        "height": 844,
+        "display": "block",
+        "cssHeight": "844px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "844px"
+      },
+      {
+        "attrs": {
+          "class": "webspring-application-outlet-host"
+        },
+        "class": "webspring-application-outlet-host",
+        "height": 0,
+        "display": "block",
+        "cssHeight": "0px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "0px"
+      },
+      {
+        "attrs": {
+          "class": "webspring-application-outlet"
+        },
+        "class": "webspring-application-outlet",
+        "height": 0,
+        "display": "block",
+        "cssHeight": "0px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "0px"
+      },
+      {
+        "attrs": {
+          "class": "webspring-board",
+          "data-launch-phase": "covered",
+          "data-entrance-phase": "ready",
+          "data-layout-editing": "false",
+          "data-reduced-motion": "false",
+          "style": "--webspring-launcher-colour: #929eae; --webspring-launcher-image: url(\"/src/Webspring/Contents/Resources/Dial/brushed-metal-launcher.webp\"); --webspring-launcher-size: 100% 100%; --webspring-launcher-repeat: repeat; --webspring-launcher-position: 0 0; --webspring-launcher-overlay-image: none; --webspring-launcher-overlay-size: 100% auto; --webspring-launcher-overlay-opacity: 1; --webspring-launcher-overlay-blend: normal;"
+        },
+        "class": "webspring-board",
+        "height": 1166.28125,
+        "display": "block",
+        "cssHeight": "1166.28px",
+        "flex": "0 1 auto",
+        "overflow": "clip visible",
+        "style": "--webspring-launcher-colour: #929eae; --webspring-launcher-image: url(\"/src/Webspring/Contents/Resources/Dial/brushed-metal-launcher.webp\"); --webspring-launcher-size: 100% 100%; --webspring-launcher-repeat: repeat; --webspring-launcher-position: 0 0; --webspring-launcher-overlay-image: none; --webspring-launcher-overlay-size: 100% auto; --webspring-launcher-overlay-opacity: 1; --webspring-launcher-overlay-blend: normal;",
+        "blockSize": "1166.28px"
+      },
+      {
+        "attrs": {
+          "class": "nse-material-provider",
+          "data-nse-material": "atmo"
+        },
+        "class": "nse-material-provider",
+        "height": 1166.28125,
+        "display": "block",
+        "cssHeight": "1166.28px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "1166.28px"
+      },
+      {
+        "attrs": {
+          "class": "webspring-entrance-surface"
+        },
+        "class": "webspring-entrance-surface",
+        "height": 0,
+        "display": "contents",
+        "cssHeight": "auto",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "auto"
+      },
+      {
+        "attrs": {
+          "class": "webspring-view-host"
+        },
+        "class": "webspring-view-host",
+        "height": 0,
+        "display": "contents",
+        "cssHeight": "auto",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "auto"
+      },
+      {
+        "attrs": {
+          "class": "nse-material-provider",
+          "data-nse-material": "atmo"
+        },
+        "class": "nse-material-provider",
+        "height": 1166.28125,
+        "display": "block",
+        "cssHeight": "1166.28px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "1166.28px"
+      },
+      {
+        "attrs": {
+          "data-syncloudos-runtime-id": "runtime:38ce398e-f8d5-4e48-884d-22195d01e43c",
+          "data-syncloudos-runtime-owner": "runtime:38ce398e-f8d5-4e48-884d-22195d01e43c",
+          "data-syncloudos-runtime-root": "true",
+          "data-appearance": "auto",
+          "data-mode": "light"
+        },
+        "class": "",
+        "height": 1166.28125,
+        "display": "block",
+        "cssHeight": "1166.28px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "1166.28px"
+      },
+      {
+        "attrs": {
+          "class": "nse-appearance-provider",
+          "data-nse-appearance": "atmo",
+          "data-nse-chrome": "standard",
+          "data-nse-colour-scheme-requested": "auto",
+          "data-nse-colour-scheme-resolved": "light",
+          "data-nse-contrast": "normal",
+          "data-nse-transparency": "normal",
+          "data-mode": "light"
+        },
+        "class": "nse-appearance-provider",
+        "height": 1166.28125,
+        "display": "block",
+        "cssHeight": "1166.28px",
+        "flex": "0 1 auto",
+        "overflow": "visible",
+        "style": null,
+        "blockSize": "1166.28px"
+      },
+      {
+        "attrs": {
+          "id": "root"
+        },
+        "class": "",
+        "height": 1166.28125,
+        "display": "block",
+        "cssHeight": "1166.28px",
+        "flex": "0 1 auto",
+        "overflow": "clip visible",
+        "style": null,
+        "blockSize": "1166.28px"
+      },
+      {
+        "attrs": {},
+        "class": "",
+        "height": 1166.28125,
+        "display": "block",
+        "cssHeight": "1166.28px",
+        "flex": "0 1 auto",
+        "overflow": "clip visible",
+        "style": null,
+        "blockSize": "1166.28px"
+      },
+      {
+        "attrs": {
+          "lang": "en-GB",
+          "dir": "ltr"
+        },
+        "class": "",
+        "height": 1166.28125,
+        "display": "block",
+        "cssHeight": "1166.28px",
+        "flex": "0 1 auto",
+        "overflow": "hidden",
+        "style": null,
+        "blockSize": "1166.28px"
+      }
+    ],
+    "tabs": [
+      {
+        "rect": {
+          "x": 20,
+          "y": 1444.65625,
+          "width": 350,
+          "height": 72,
+          "top": 1444.65625,
+          "right": 370,
+          "bottom": 1516.65625,
+          "left": 20
+        },
+        "text": "ControlsPickersDataLayoutMore"
+      }
+    ]
+  }
+}

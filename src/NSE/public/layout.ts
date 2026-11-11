@@ -19,6 +19,8 @@
  */
 
 /** Supported SynWare SDK NSE layout surface. Host machinery stays private. */
+export { NSEEdgeInsetsMake, NSEEdgeInsetsZero } from "../Layout/NSEEdgeInsets";
+export type { NSEEdgeInsets } from "../Layout/NSEEdgeInsets";
 export {
   NSEStackItem,
 } from "../Layout/NSEStackItem";
@@ -42,3 +44,9 @@ export type {
   NSEStackItemProps,
   NSEStackViewProps,
 } from "../Layout/stackViewTypes";
+
+export type { NSELayoutGuide } from "../Layout/NSELayoutGuide";
+export { useNSEWindowChromeObstruction } from "../Layout/windowChromeObstructions";
+
+export { useNSESafeArea } from "../Layout/useNSESafeArea";
+export type { NSESafeArea } from "../Layout/useNSESafeArea";

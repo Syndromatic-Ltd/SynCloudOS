@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/privacy-new-fx.test.ts -t shared.privacy.for.[nscpx] --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  1 passed (1)
+      Tests  20 passed | 4 skipped (24)
+   Start at  19:42:35
+   Duration  253ms (transform 90ms, setup 26ms, import 91ms, tests 14ms, environment 0ms)

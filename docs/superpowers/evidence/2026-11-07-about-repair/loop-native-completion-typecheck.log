@@ -1,0 +1,44 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run tsc -b --pretty false
+src/FX/GraphicsFX/pdf/GFXPDFContext.ts(535,58): error TS2345: Argument of type 'NSEData' is not assignable to parameter of type 'string | ArrayBuffer | Uint8Array<ArrayBufferLike>'.
+src/FX/GraphicsFX/pdf/GFXPDFContext.ts(754,45): error TS2345: Argument of type 'NSEData' is not assignable to parameter of type 'string | ArrayBuffer | Uint8Array<ArrayBufferLike>'.
+src/FX/MIDIFX/MIFXParser.ts(185,85): error TS2740: Type 'Uint8Array<ArrayBuffer>' is missing the following properties from type 'NSEData': #storage, count, bytes, subdata, and 5 more.
+src/FX/VideoFX/backends/VFXWebMContainerBackend.ts(260,48): error TS2345: Argument of type 'NSEData' is not assignable to parameter of type 'Uint8Array<ArrayBufferLike>'.
+  Type 'NSEData' is missing the following properties from type 'Uint8Array<ArrayBufferLike>': BYTES_PER_ELEMENT, buffer, byteLength, byteOffset, and 27 more.
+src/FX/VideoFX/VFXContainerWriter.ts(117,3): error TS2322: Type 'Readonly<{ description?: NSEData | undefined; codec: string; id: number; kind: "audio"; sampleRate: number; channelCount: number; preSkip: number; timescale: number; } | { description?: NSEDataConvertible | undefined; ... 5 more ...; codedHeight: number; }>' is not assignable to type 'VFXContainerTrack'.
+  Type 'Readonly<{ description?: NSEDataConvertible | undefined; codec: string; kind: "video"; timescale: number; id: number; codedWidth: number; codedHeight: number; }>' is not assignable to type 'VFXContainerTrack'.
+    Type 'Readonly<{ description?: NSEDataConvertible | undefined; codec: string; kind: "video"; timescale: number; id: number; codedWidth: number; codedHeight: number; }>' is not assignable to type 'VFXVideoContainerTrack'.
+      Types of property 'description' are incompatible.
+        Type 'NSEDataConvertible | undefined' is not assignable to type 'NSEData | undefined'.
+          Type 'ArrayBuffer' is missing the following properties from type 'NSEData': #storage, count, bytes, subdata, and 5 more.
+src/SynCloudOS/AppSDK/fontAccess.tsx(103,9): error TS2322: Type 'NSEData | null' is not assignable to type 'Uint8Array<ArrayBufferLike> | null'.
+  Type 'NSEData' is missing the following properties from type 'Uint8Array<ArrayBufferLike>': BYTES_PER_ELEMENT, buffer, byteLength, byteOffset, and 27 more.
+src/SynCloudOS/BundleLoader/fontResourceLoader.ts(65,3): error TS2322: Type 'Readonly<{ bytes: Uint8Array<ArrayBuffer>; mimeType: TFXFontResourceMimeType; }>' is not assignable to type 'TFXPackagedFontResource'.
+  Types of property 'bytes' are incompatible.
+    Type 'Uint8Array<ArrayBuffer>' is missing the following properties from type 'NSEData': #storage, count, bytes, subdata, and 5 more.
+src/SynCloudOS/BundleLoader/fontResourceLoader.ts(115,38): error TS2740: Type 'Uint8Array<ArrayBufferLike>' is missing the following properties from type 'NSEData': #storage, count, bytes, subdata, and 5 more.
+src/SynCloudOS/PlatformAdapters/BrowserDownloadFilePanelPort.ts(13,78): error TS2339: Property 'mimeType' does not exist on type 'FilePanelExportPayload'.
+src/SynCloudOS/PlatformAdapters/BrowserFontFaceRegistration.ts(69,78): error TS2339: Property 'slice' does not exist on type 'NSEDataConvertible'.
+  Property 'slice' does not exist on type 'NSEData'.
+src/SynCloudOS/PlatformAdapters/BrowserImageProcessingWorker.ts(295,38): error TS2322: Type '(value: Readonly<{ data: NSEData; metadata: IFXEncodedImageMetadata; }> | PromiseLike<Readonly<{ data: NSEData; metadata: IFXEncodedImageMetadata; }>>) => void' is not assignable to type '(value: Readonly<{ blob: Blob; metadata: IFXEncodedImageMetadata; }>) => void'.
+  Types of parameters 'value' and 'value' are incompatible.
+    Type 'Readonly<{ blob: Blob; metadata: IFXEncodedImageMetadata; }>' is not assignable to type 'Readonly<{ data: NSEData; metadata: IFXEncodedImageMetadata; }> | PromiseLike<Readonly<{ data: NSEData; metadata: IFXEncodedImageMetadata; }>>'.
+      Property 'data' is missing in type 'Readonly<{ blob: Blob; metadata: IFXEncodedImageMetadata; }>' but required in type 'Readonly<{ data: NSEData; metadata: IFXEncodedImageMetadata; }>'.
+src/SynCloudOS/PlatformAdapters/BrowserImageProcessingWorker.ts(375,84): error TS2345: Argument of type 'Readonly<{ data: NSEData; metadata: Readonly<IFXEncodedImageMetadata>; }>' is not assignable to parameter of type 'Readonly<{ blob: Blob; metadata: IFXEncodedImageMetadata; }>'.
+  Property 'blob' is missing in type 'Readonly<{ data: NSEData; metadata: Readonly<IFXEncodedImageMetadata>; }>' but required in type 'Readonly<{ blob: Blob; metadata: IFXEncodedImageMetadata; }>'.
+src/SynCloudOS/PlatformAdapters/BrowserOpusWebMCodec.ts(124,41): error TS2339: Property 'byteLength' does not exist on type 'NSEData'.
+src/SynCloudOS/PlatformAdapters/BrowserOpusWebMCodec.ts(126,33): error TS2339: Property 'slice' does not exist on type 'NSEData'.
+src/SynCloudOS/PlatformAdapters/BrowserOpusWebMCodec.ts(126,90): error TS2339: Property 'byteLength' does not exist on type 'NSEData'.
+src/SynCloudOS/PlatformAdapters/BrowserOpusWebMCodec.ts(290,67): error TS2339: Property 'byteLength' does not exist on type 'NSEData'.
+src/SynCloudOS/PlatformAdapters/BrowserOpusWebMCodec.ts(293,42): error TS2339: Property 'byteLength' does not exist on type 'NSEData'.
+src/SynCloudOS/PlatformAdapters/BrowserOpusWebMCodec.ts(438,101): error TS2322: Type 'NSEData' is not assignable to type 'AllowSharedBufferSource'.
+src/SynCloudOS/PlatformAdapters/BrowserVideoEncoder.ts(96,3): error TS2322: Type 'Readonly<{ decoderConfig: Readonly<{ description?: Uint8Array<ArrayBuffer> | undefined; codec: string; codedWidth: number; codedHeight: number; }>; colourSpace: string | undefined; }>' is not assignable to type 'VFXEncoderOutputMetadata'.
+  The types of 'decoderConfig.description' are incompatible between these types.
+    Type 'Uint8Array<ArrayBuffer> | undefined' is not assignable to type 'NSEData | undefined'.
+      Type 'Uint8Array<ArrayBuffer>' is missing the following properties from type 'NSEData': #storage, count, bytes, subdata, and 5 more.
+src/SynCloudOS/PlatformAdapters/imageProcessingWorkerRuntime.ts(138,26): error TS2339: Property 'buffer' does not exist on type 'NSEData'.
+src/SynCloudOS/PlatformAdapters/imageProcessingWorkerRuntime.ts(138,45): error TS2339: Property 'byteOffset' does not exist on type 'NSEData'.
+src/SynCloudOS/PlatformAdapters/imageProcessingWorkerRuntime.ts(138,63): error TS2339: Property 'byteOffset' does not exist on type 'NSEData'.
+src/SynCloudOS/PlatformAdapters/imageProcessingWorkerRuntime.ts(138,82): error TS2339: Property 'byteLength' does not exist on type 'NSEData'.
+src/SynCloudOS/TextFX/TFXFontHost.ts(150,38): error TS2339: Property 'slice' does not exist on type 'NSEDataConvertible'.
+  Property 'slice' does not exist on type 'NSEData'.

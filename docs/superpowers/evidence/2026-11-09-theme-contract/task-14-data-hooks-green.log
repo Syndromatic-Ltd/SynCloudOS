@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-data-view-drawing-parts.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  02:34:40
+   Duration  1.98s (transform 534ms, setup 28ms, import 782ms, tests 111ms, environment 896ms)

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { nseControlHooks } from "../../Theme/contract/hooks";
 import { forwardRef, type HTMLAttributes, type ReactNode } from "react";
 import "./nse-list-item.css";
 import "../../Navigation/SourceList/nse-sourcelist.css";
@@ -27,7 +28,7 @@ import { classes, getControlSmoothSurfaceProps, useNSEControlFeedback } from "..
 
 export interface NSEListItemProps extends HTMLAttributes<HTMLDivElement> {
   selected?: boolean;
-  disabled?: boolean;
+  isEnabled?: boolean;
   /** Show the held (#555→#888) press highlight on tap. Default true. */
   tapHighlight?: boolean;
   leading?: ReactNode;
@@ -39,7 +40,7 @@ export interface NSEListItemProps extends HTMLAttributes<HTMLDivElement> {
 
 export const NSEListItem = forwardRef<HTMLDivElement, NSEListItemProps>(function NSEListItem({
   selected = false,
-  disabled = false,
+  isEnabled = true,
   tapHighlight = true,
   leading,
   trailing,
@@ -52,6 +53,7 @@ export const NSEListItem = forwardRef<HTMLDivElement, NSEListItemProps>(function
   style,
   ...props
 }: NSEListItemProps, ref) {
+  const disabled = !isEnabled;
   const { triggerNSEControlHaptic, triggerNSEControlHapticForEvent } = useNSEControlFeedback();
 
   const surfaceProps = getControlSmoothSurfaceProps(smoothSurface, className, style);
@@ -59,6 +61,8 @@ export const NSEListItem = forwardRef<HTMLDivElement, NSEListItemProps>(function
   return (
     <div
       ref={ref}
+      {...nseControlHooks({ control: "table-cell-view", selected, enabled: isEnabled, highlighted: (props as Record<string, unknown>)["data-pressed"] === "true", variants: { style: "list", "highlight-style": tapHighlight ? "regular" : "none" } })}
+      data-nse-part="cell-content"
       className={classes("nse-control-list-item", disabled && "is-disabled", surfaceProps.className)}
       data-selected={selected ? "true" : "false"}
       data-tap-highlight={tapHighlight ? undefined : "false"}
@@ -70,12 +74,12 @@ export const NSEListItem = forwardRef<HTMLDivElement, NSEListItemProps>(function
       }}
       {...props}
     >
-      {leading ? <span className="nse-control-list-leading">{leading}</span> : null}
-      <span className="nse-control-list-body">
-        <span className="nse-control-list-primary">{children}</span>
-        {meta ? <span className="nse-control-list-meta">{meta}</span> : null}
+      {leading ? <span data-nse-part="leading" className="nse-control-list-leading">{leading}</span> : null}
+      <span data-nse-part="text-content" className="nse-control-list-body">
+        <span data-nse-part="primary-text" className="nse-control-list-primary">{children}</span>
+        {meta ? <span data-nse-part="secondary-text" className="nse-control-list-meta">{meta}</span> : null}
       </span>
-      {trailing ? <span className="nse-control-list-trailing">{trailing}</span> : null}
+      {trailing ? <span data-nse-part="trailing" className="nse-control-list-trailing">{trailing}</span> : null}
     </div>
   );
 });

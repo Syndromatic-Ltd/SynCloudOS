@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import type { SynCloudOSRuntimeEnvironment } from "../Runtime/runtimeInstanceTypes";
 import { DocumentSchemaError } from "./DocumentErrors";
 
@@ -86,8 +87,20 @@ export interface DocumentType<TModel, TSerialized = TModel> {
     | { readonly mode: "debounced"; readonly delayMs: number };
   create(context: DocumentCreationContext): TModel;
   read(serialized: TSerialized, context: DocumentReadContext): TModel;
+  /** NSDocument.read(from:ofType:): decodes an incoming file without assuming an encoding. */
+  readFromData?(data: NSEData, context: DocumentReadContext): TModel | Promise<TModel>;
   write(model: TModel, context: DocumentWriteContext): TSerialized;
   validate(serialized: unknown): serialized is TSerialized;
+  /** Optional authored-content policy for models containing synchronization metadata.
+   * Callbacks are synchronous and pure; inputs are immutable. captureContent must
+   * return a JSON value (or fingerprint) which compares by canonical JSON identity.
+   * restoreContent merges historical authored content with current non-undoable
+   * metadata, returning a valid model with the historical content identity.
+   */
+  readonly history?: {
+    captureContent(model: Readonly<TModel>): unknown;
+    restoreContent(historical: Readonly<TModel>, current: Readonly<TModel>): TModel;
+  };
   readonly migrations?: Readonly<Record<number, DocumentMigration>>;
 }
 
@@ -242,6 +255,14 @@ export interface NewProjectionDocumentRequest<TModel> {
   readonly signal?: AbortSignal;
 }
 
+export interface OpenDocumentContentsRequest {
+  readonly typeId: string;
+  readonly withContentsOf: Blob;
+  readonly applicationId: string;
+  readonly activate?: boolean;
+  readonly signal?: AbortSignal;
+}
+
 export interface OpenDocumentRequest {
   readonly documentId?: string;
   readonly typeId: string;
@@ -253,7 +274,7 @@ export interface OpenDocumentRequest {
 
 export type DocumentImportSource =
   | { readonly kind: "text"; readonly text: string; readonly mediaType: string }
-  | { readonly kind: "bytes"; readonly bytes: Uint8Array; readonly mediaType: string };
+  | { readonly kind: "bytes"; readonly bytes: NSEDataConvertible; readonly mediaType: string };
 
 export interface ImportDocumentRequest<TSerialized> {
   readonly typeId: string;

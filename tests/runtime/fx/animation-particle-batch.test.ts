@@ -49,7 +49,7 @@ it('submits independent particles through one AFX layer with inherited transform
   expect(q.bounds).toEqual({ x: -2, y: -1, width: 4, height: 2 });
   expect(q.colourModulation?.scale.r).toBeCloseTo(.2);
   layer.setParticles([]); renderer.render(); expect(scenes.at(-1)!.quads).toHaveLength(0);
-  renderer.dispose(); expect(() => layer.setParticles([])).toThrow(/disposed/);
+  renderer.dispose(); expect(() => layer.setParticles([])).toThrow(expect.objectContaining({ code: "AFX_LAYER_DISPOSED" }));
 });
 
 it('preserves interleaved layer order, transforms, masks and the shared budget in compact submissions', () => {

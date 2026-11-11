@@ -39,7 +39,7 @@ let resize: () => void, disconnect: ReturnType<typeof vi.fn>, load: ReturnType<t
 let releases: ReturnType<typeof vi.fn>[], leaseReleases: ReturnType<typeof vi.fn>[];
 let floorWidth: number;
 let floorLeft: number, floorProjectedWidth: number, edgeLeft: number, edgeWidth: number;
-let selectedBounds: DOMRect;
+let currentBounds: DOMRect, selectedBounds: DOMRect;
 let failRender: boolean;
 let time: number;
 const image = new GFXImage({ width: 2, height: 2, alpha: "straight", colourSpace: "srgb", data: new Uint8Array(16).fill(255) });
@@ -51,14 +51,14 @@ beforeEach(() => {
   container = document.createElement("div"); current = document.createElement("article"); selected = document.createElement("article");
   document.body.append(container, current, selected); root = createRoot(container);
   floorWidth = 800; floorLeft = 0; floorProjectedWidth = 800; edgeLeft = 0; edgeWidth = 800;
-  selectedBounds = rect(450, 250, 1000);
+  currentBounds = rect(100, 200, 800); selectedBounds = rect(450, 250, 1000);
   time = 0; failRender = false; scenes = []; pending = new Set(); releases = []; leaseReleases = [];
   vi.spyOn(Element.prototype, "clientWidth", "get").mockImplementation(() => floorWidth);
   vi.spyOn(Element.prototype, "clientHeight", "get").mockReturnValue(54);
   vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(function (this: Element) {
     if (this.getAttribute("data-reflection-edge") === "start") return rect(edgeLeft, 0, 0);
     if (this.getAttribute("data-reflection-edge") === "end") return rect(edgeLeft + edgeWidth, 0, 0);
-    return this === current ? rect(100, 200, 800) : this === selected ? selectedBounds : rect(floorLeft, floorProjectedWidth, 44);
+    return this === current ? currentBounds : this === selected ? selectedBounds : rect(floorLeft, floorProjectedWidth, 44);
   });
   disconnect = vi.fn();
   vi.stubGlobal("ResizeObserver", class {
@@ -81,14 +81,17 @@ beforeEach(() => {
     return { release, pixelLease: async () => ({ transferImage: () => image, release: releaseLease }) };
   });
   host.app = { images: { load } };
-  host.capture.mockReset().mockResolvedValue(`data:image/png;base64,${Buffer.from(image.toPNG()).toString("base64")}`);
+  host.capture.mockReset().mockResolvedValue(`data:image/png;base64,${image.toPNG().base64EncodedString()}`);
 });
 afterEach(async () => {
   await act(async () => root.unmount()); container.remove(); current.remove(); selected.remove(); vi.restoreAllMocks(); vi.unstubAllGlobals(); vi.useRealTimers();
 });
 async function flush() {
   await act(async () => { await vi.runAllTimersAsync(); });
-  await act(async () => { time += 16; const callbacks = [...pending]; pending.clear(); callbacks.forEach(callback => callback(time)); });
+  await frame();
+}
+async function frame(milliseconds = 16) {
+  await act(async () => { time += milliseconds / 1000; const callbacks = [...pending]; pending.clear(); callbacks.forEach(callback => callback(time)); });
 }
 async function show(key: string | null, active = true) {
   await act(async () => root.render(<ChronosphereReflection currentElement={current} selectedElement={selected} settledKey={key} active={active} />));
@@ -115,6 +118,52 @@ it("replaces documents immediately when the environment has no animation clock",
   } finally { previous.remove(); }
 });
 
+it("mirrors the visible foot of an asymmetric page without squeezing its full height into the shelf", async () => {
+  const pixels = new Uint8Array(200 * 800 * 4);
+  for (let y = 0; y < 800; y++) for (let x = 0; x < 200; x++) {
+    const colour = y >= 790 ? [255, 0, 0] : y >= 780 ? [0, 255, 0] : y >= 770 ? [0, 0, 255] : [255, 0, 255];
+    pixels.set([...colour, 255], (y * 200 + x) * 4);
+  }
+  const page = new GFXImage({ width: 200, height: 800, alpha: "straight", colourSpace: "srgb", data: pixels });
+  load.mockImplementation(() => ({ release() {}, pixelLease: async () => ({ transferImage: () => page, release() {} }) }));
+  selectedBounds = rect(450, 200, 800);
+  await show("bands");
+  const reflected = scenes.at(-1)!.quads.filter(quad => quad.transform.values[5] < 0)[0]!;
+  const sample = (floorY: number) => page.pixel(100, Math.floor((reflected.uv.y + (1 - floorY / reflected.bounds.height) * reflected.uv.height) * page.height));
+  expect(sample(5)).toMatchObject({ r: 1, g: 0, b: 0 });
+  expect(sample(15)).toMatchObject({ r: 0, g: 1, b: 0 });
+  expect(sample(25)).toMatchObject({ r: 0, g: 0, b: 1 });
+  expect(reflected.uv.height).toBeCloseTo(54 / 800);
+  expect(reflected.transform.transformPoint({ x: 0, y: reflected.bounds.height, z: 0 }).y).toBe(0);
+});
+
+it("keeps a page shorter than the shelf at its natural height", async () => {
+  currentBounds = rect(100, 200, 24); selectedBounds = rect(450, 200, 24);
+  await show("short");
+  for (const reflected of scenes.at(-1)!.quads.filter(quad => quad.transform.values[5] < 0)) {
+    expect(reflected.bounds.height).toBe(24);
+    expect(reflected.uv).toEqual({ x: 0, y: 0, width: 1, height: 1 });
+    expect(reflected.transform.transformPoint({ x: 0, y: 0, z: 0 }).y).toBe(24);
+  }
+});
+
+it("finishes selection replacement in 180 milliseconds on the canonical seconds clock", async () => {
+  await show("first");
+  const previous = selected;
+  selected = document.createElement("article"); document.body.append(selected);
+  try {
+    await act(async () => root.render(<ChronosphereReflection currentElement={current} selectedElement={selected} settledKey="second" />));
+    await act(async () => { await vi.runAllTimersAsync(); });
+    await frame(90);
+    const midway = scenes.at(-1)!.quads.filter(quad => quad.transform.values[5] < 0);
+    expect(midway[1]!.opacity).toBeCloseTo(0.5);
+    expect(midway[2]!.opacity).toBeCloseTo(0.5);
+    await frame(91);
+    expect(scenes.at(-1)!.quads).toHaveLength(4);
+    expect(pending.size).toBe(0);
+  } finally { previous.remove(); }
+});
+
 it("captures settled documents once and submits mirrored image quads with a real ImageFX fade mask", async () => {
   await show("first");
   expect(host.capture).toHaveBeenCalledTimes(2);
@@ -125,11 +174,12 @@ it("captures settled documents once and submits mirrored image quads with a real
   const mirrored = quads.filter(quad => quad.transform.values[5] < 0);
   expect(mirrored).toHaveLength(2);
   expect(mirrored.map(quad => quad.transform.transformPoint({ x: 0, y: 0, z: 0 }).x)).toEqual([100, 450]);
-  for (const quad of mirrored) {
+  for (const [index, quad] of mirrored.entries()) {
     expect(quad.content).toBe(image);
     expect(quad.transform.transformPoint({ x: 0, y: quad.bounds.height, z: 0 }).y).toBe(0);
     expect(quad.transform.transformPoint({ x: 0, y: 0, z: 0 }).y).toBe(54);
-    expect(quad.uv).toEqual({ x: 0, y: 0, width: 1, height: 1 });
+    const fraction = 54 / [800, 1000][index]!;
+    expect(quad.uv).toEqual({ x: 0, y: 1 - fraction, width: 1, height: fraction });
     const mask = quad.mask!.content;
     expect(mask.pixel(0, 0).a).toBeLessThan(mask.pixel(0, mask.height - 1).a);
   }
@@ -198,7 +248,8 @@ it("preserves a 530px document's projected width and x origin on a tilted floor"
   const planeScale = edgeWidth / floorWidth;
   expect(edgeLeft + topLeft.x * planeScale).toBeCloseTo(200);
   expect((topRight.x - topLeft.x) * planeScale).toBeCloseTo(530);
-  expect(mirrored.uv).toEqual({ x: 0, y: 0, width: 1, height: 1 });
+  const fraction = 54 / (700 / planeScale);
+  expect(mirrored.uv).toEqual({ x: 0, y: 1 - fraction, width: 1, height: fraction });
   expect(container.querySelector<HTMLElement>(".chronosphere-reflection")!.style.height).toBe("54px");
 });
 
@@ -213,7 +264,7 @@ it("serializes replacement captures and rejects the stale selection before decod
   await act(async () => finish("data:image/png;base64,OLD")); await flush();
   expect(host.capture).toHaveBeenCalledTimes(3);
   expect(load).toHaveBeenCalledTimes(2);
-  for (const [request] of load.mock.calls) expect(request.source).toEqual({ kind: "bytes", mimeType: "image/png", bytes: image.toPNG() });
+  for (const [request] of load.mock.calls) expect(request.source).toEqual({ kind: "bytes", mimeType: "image/png", bytes: image.toPNG().bytes });
   expect(scenes.at(-1)!.quads).toHaveLength(4);
 });
 
@@ -258,20 +309,21 @@ it("cancels capture when the renderer fails and hides an unavailable surface", a
 it("loads captured PNG bytes through the mounted app image client and real resource policy", async () => {
   const environment = createTestRuntimeEnvironment();
   const png = image.toPNG();
-  host.capture.mockResolvedValue(`data:image/png;base64,${Buffer.from(png).toString("base64")}`);
+  host.capture.mockResolvedValue(`data:image/png;base64,${png.base64EncodedString()}`);
   const decode = vi.fn(async () => ({ src: "blob:reflection", intrinsicSize: { width: 2, height: 2 }, density: 1,
-    byteLength: png.length, corsClean: true, release: vi.fn() }));
+    byteLength: png.count, corsClean: true, release: vi.fn() }));
   const adapter = { decode, readPixels: vi.fn(async () => image), export: vi.fn(async () => png), dispose: vi.fn() };
   Object.defineProperty(environment, "images", { value: { acquire: () => ({ adapter, release: () => adapter.dispose() }) } });
   const runtime = createTestRuntime({ id: "runtime:reflection", environment });
-  const app = registerTestSynWare(runtime, { schemaVersion: 1, id: "reflection-consumer", version: "1.0.0", title: "Reflection" });
-  const mount = mountTestSynWareRuntime(runtime, app.id);
+  const app = registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.reflection-consumer", version: "1.0.0", displayName: "Reflection" });
+  const mount = mountTestSynWareRuntime(runtime, app.bundleIdentifier);
   host.app = { images: createSynWareContextValue(mount.runtime).images };
   try {
     await show("mounted");
     expect(container.querySelector("[data-reflection='ready']"), container.innerHTML).not.toBeNull();
     expect(decode).toHaveBeenCalled();
     expect(decode.mock.calls[0][0].source).toEqual({ kind: "bytes", mimeType: "image/png", bytes: png });
+    expect(decode.mock.calls[0][0].source.bytes.isEqual(png)).toBe(true);
     expect(scenes.at(-1)!.quads.filter(quad => quad.transform.values[5] < 0)).toHaveLength(2);
     expect(runtime.images.diagnostics().activeReferenceCount).toBe(0);
   } finally {

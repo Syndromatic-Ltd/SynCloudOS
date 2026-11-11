@@ -24,7 +24,7 @@ import type {
   NSEPageBookStripGeometry,
   NSEPageBookStripGeometryInput,
   NSEPageCompletionReason,
-  NSEPageControllerSnapshot,
+  NSEPageTurnSnapshot,
   NSEPageCorner,
   NSEPageCurlCylinder,
   NSEPageDirection,
@@ -1077,7 +1077,7 @@ export function createNSEPageSnapshot(options: {
   torn?: boolean;
   reason?: NSEPageCompletionReason;
   turnId?: string | number;
-}): NSEPageControllerSnapshot {
+}): NSEPageTurnSnapshot {
   const progress = clampNSEPageProgress(options.progress ?? 0);
   return {
     progress,

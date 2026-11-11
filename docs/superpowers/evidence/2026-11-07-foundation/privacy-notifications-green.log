@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/privacy-system-notifications.test.ts tests/runtime/pwa-system-services.test.ts tests/runtime/privacy-session-integration.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  3 passed (3)
+      Tests  28 passed (28)
+   Start at  21:04:28
+   Duration  41.82s (transform 33.94s, setup 55ms, import 39.77s, tests 458ms, environment 1.07s)

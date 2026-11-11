@@ -1,0 +1,40 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run vitest run tests/runtime/about-app.test.tsx --reporter=verbose
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site
+
+ × tests/runtime/about-app.test.tsx > About > leaves from the visible presentation when another tab interrupts its settle 532ms
+   → Cannot read NSEViewController.outlet while it is inactive.
+ ✓ tests/runtime/about-app.test.tsx > About > animates the incoming pane and keeps its presentation through the tab handoff 188ms
+ ✓ tests/runtime/about-app.test.tsx > About > retitles in place without a restoration write or a new directional transition 98ms
+ ✓ tests/runtime/about-app.test.tsx > About > opens on the company page with its tab bar 95ms
+ ✓ tests/runtime/about-app.test.tsx > About > restores the section last read and remembers a new choice 190ms
+ ✓ tests/runtime/about-app.test.tsx > About > travels right when a later section is chosen and shows its page 181ms
+ ✓ tests/runtime/about-app.test.tsx > About > goes still when the animation environment asks for reduced motion 121ms
+ ✓ tests/runtime/about-app.test.tsx > About > disposes its navigation and pages with the window 101ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/about-app.test.tsx > About > leaves from the visible presentation when another tab interrupts its settle
+SynCloudOSLifecycleError: Cannot read NSEViewController.outlet while it is inactive.
+ ❯ u.error ../src/SynCloudOS/ErrorManager/lifecycleError.ts:185:12
+ ❯ Ze.#require ../src/NSE/Application/viewOutlet.ts:55:127
+ ❯ Ze.get layer [as layer] ../src/NSE/Application/viewOutlet.ts:69:27
+ ❯ tests/runtime/about-app.test.tsx:49:51
+     47|     expect(before.tx).toBeGreaterThan(0);
+     48|     await act(async () => { controller.tabs.selectTabViewItem("team");…
+     49|     const after = controller.panes.framework.pane.layer.presentation.t…
+       |                                                   ^
+     50|     expect(after.tx).toBeCloseTo(before.tx, 5);
+     51|     expect(after.a).toBeCloseTo(before.a, 5);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'NSE_VIEW_NOT_LOADED', resource: { kind: 'NSEViewController', id: 'AboutPaneViewController#5' }, operation: 'outlet', access: 'get', problem: undefined, disposal: undefined, ownerStack: undefined, creationStack: undefined }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  10:56:23
+   Duration  11.78s (transform 5.56s, setup 42ms, import 6.36s, tests 1.51s, environment 3.59s)
+

@@ -18,13 +18,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { type RangeValue, type TFXLogicalTextInput, type TFXTextFragment, type TFXTextLayoutResult, type TFXTextLayoutService } from "../../SynCloudOS/SynCloudOS";
+import { type TFXLogicalTextInput, type TFXTextFragment, type TFXTextLayoutResult, type TFXTextLayoutService } from "../../SynCloudOS/SynCloudOS";
+import type { NSERange } from "../../Foundation/NSERange";
 import { attributedContent, attributedContentLayoutText, parseAttributedContent, textRun, type NSEAttributedContent } from "../Text/attributedContent";
 import { TFXLayoutCache } from "../../FX/TextFX/TFXLayoutCache";
 import { normaliseTFXTextLayoutRecord, snapshotTFXTextContainers, type TFXTextContainer } from "../../FX/TextFX/TFXTextContainer";
 
 export type NSETextLayoutInvalidation =
-  | { readonly kind: "graphemes"; readonly range: RangeValue }
+  | { readonly kind: "graphemes"; readonly range: NSERange }
   | { readonly kind: "layout"; readonly fromCharacter: number };
 
 type NSETextLayoutService = Pick<TFXTextLayoutService, "layout" | "segment"> &
@@ -32,7 +33,7 @@ type NSETextLayoutService = Pick<TFXTextLayoutService, "layout" | "segment"> &
     subscribeAttachmentReadiness?(listener: (change: { readonly state?: "ready" | "released" }) => void): () => void;
   };
 
-function normaliseInvalidationRange(value: unknown): RangeValue {
+function normaliseInvalidationRange(value: unknown): NSERange {
   if (!value || typeof value !== "object" || Array.isArray(value) || (Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null)) throw new TypeError("Invalidation range must be a plain data-only object.");
   const descriptors = Object.getOwnPropertyDescriptors(value);
   if (Object.getOwnPropertySymbols(value).length > 0) throw new TypeError("Invalidation range must not contain symbols.");
@@ -75,7 +76,7 @@ function paragraphDependencyStart(text: string, location: number, fragmentStart:
 function replaceInCanonicalTextRun(
   value: unknown,
   ownedText: string,
-  range: RangeValue,
+  range: NSERange,
   replacement: string,
 ): NSEAttributedContent {
   if (replacement.includes("\r") || replacement.includes("\n")) {
@@ -119,7 +120,7 @@ export class NSELayoutManager {
   readonly #service: NSETextLayoutService;
   readonly #unsubscribeFontReadiness: () => void;
   readonly #unsubscribeAttachmentReadiness: () => void;
-  #invalidatedRange: RangeValue | null = null;
+  #invalidatedRange: NSERange | null = null;
   #layoutFrom: number | null = null;
   #dirtyFrom: number | null = null;
   #ownedInput: TFXLogicalTextInput | null = null;
@@ -228,7 +229,7 @@ export class NSELayoutManager {
     });
   }
 
-  replaceCharacters(range: RangeValue, replacement: string): void {
+  replaceCharacters(range: NSERange, replacement: string): void {
     const canonical = normaliseInvalidationRange(range);
     if (typeof replacement !== "string") throw new TypeError("Replacement must be text.");
     if (new TextEncoder().encode(replacement).byteLength > 1_048_576) throw new RangeError("Replacement exceeds the text-layout byte limit.");

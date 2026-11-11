@@ -18,18 +18,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type {
-  Formatter,
-  FormatterContext,
-  FormatterResult,
-  ValueTransformer,
-} from "../../SynCloudOS/Models";
+import type { NSEValueTransformer } from "../../Foundation/NSEValueTransformer";
+import type { NSEFormatter, NSEFormatterContext, NSEFormatterResult } from "../../Foundation/public";
 import { defineSyncUndoAction } from "../../SynCloudOS/nseRuntimeContracts";
 import {
   ControllerEditingStateError,
   ControllerReadOnlyError,
   UnknownControllerFieldError,
   NSEController,
+  type NSEControllerOwnership,
   type ControllerCommitResult,
   type ControllerEditTransaction,
   type ControllerValidationIssue,
@@ -39,8 +36,8 @@ import { mutableClone, ownImmutable } from "./immutableValue";
 export interface ObjectControllerField<T extends object, V> {
   read(content: T): V;
   write(content: T, value: V): T;
-  readonly formatter?: Formatter<any>;
-  readonly transformer?: ValueTransformer<any, V>;
+  readonly formatter?: NSEFormatter<any>;
+  readonly transformer?: NSEValueTransformer<any, V>;
   readonly validate?: (
     value: V,
     content: T,
@@ -59,7 +56,7 @@ export interface ObjectControllerSnapshot<T extends object> {
   readonly issues: readonly ControllerValidationIssue[];
 }
 
-export interface ObjectControllerOptions<T extends object> {
+export interface ObjectControllerOptions<T extends object> extends NSEControllerOwnership {
   readonly id: string;
   readonly responderId?: string;
   readonly content: T;
@@ -102,7 +99,7 @@ export class NSEObjectController<T extends object> extends NSEController<
   #changedDuringEdit = false;
 
   constructor(options: ObjectControllerOptions<T>) {
-    super({ id: options.id, responderId: options.responderId });
+    super({ kind: "NSEObjectController", id: options.id, responderId: options.responderId, ownerSignal: options.ownerSignal, owner: options.owner });
     this.#fields = Object.freeze(
       Object.assign(Object.create(null), options.fields),
     ) as ObjectControllerFields<T>;
@@ -130,7 +127,7 @@ export class NSEObjectController<T extends object> extends NSEController<
   }
 
   setField<V>(fieldName: string, value: V): boolean {
-    this.assertActive();
+    this.assertActive("setField");
     const field = this.#requireField<V>(fieldName);
     const draft = this.#requireDraft();
     const issues = field.validate?.(value, draft) ?? [];
@@ -150,8 +147,8 @@ export class NSEObjectController<T extends object> extends NSEController<
   setFieldText(
     fieldName: string,
     text: string,
-    context: FormatterContext,
-  ): FormatterResult<unknown> {
+    context: NSEFormatterContext,
+  ): NSEFormatterResult<unknown> {
     const field = this.#requireField<unknown>(fieldName);
     if (!field.formatter) {
       return {
@@ -163,10 +160,10 @@ export class NSEObjectController<T extends object> extends NSEController<
         },
       };
     }
-    const parsed = field.formatter.parse(text, context);
+    const parsed = field.formatter.getObjectValue(text, context);
     if (!parsed.ok) return parsed;
     const value = field.transformer
-      ? field.transformer.transform(parsed.value)
+      ? field.transformer.transformedValue(parsed.value)
       : parsed.value;
     return this.setField(fieldName, value)
       ? { ok: true, value }
@@ -181,7 +178,7 @@ export class NSEObjectController<T extends object> extends NSEController<
   }
 
   commitEditing(): ControllerCommitResult {
-    this.assertActive();
+    this.assertActive("commitEditing");
     const transaction = this.editTransaction;
     const draft = this.#snapshot.draft;
     if (!transaction || draft === null) return { status: "not-editing" };

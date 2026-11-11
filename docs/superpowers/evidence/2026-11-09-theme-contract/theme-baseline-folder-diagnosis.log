@@ -1,0 +1,202 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run playwright test tests/e2e/theme-baseline.spec.ts --project=chromium-high-dpr --grep dark catalogue partition 1$ --repeat-each=3 --workers=1
+[WebServer] (node:78024) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 3 tests using 1 worker
+
+(node:48004) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (21.9s)
+(node:90348) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  2 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (2.3s)
+(node:43972) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  3 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (2.3s)
+
+
+  1) [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 › folder-presentation 
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('body')
+      75 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: dark-folder-presentation.png
+
+    Call log:
+      - Expect "toHaveScreenshot(dark-folder-presentation.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 75 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 75 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      65 |         await testInfo.attach("folder-geometry", { body: JSON.stringify({ dpr: await page.evaluate(() => devicePixelRatio), before, after: await geometry() }, null, 2), contentType: "application/json" });
+      66 |       }
+    > 67 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      68 |       if (surface.interaction === "press") await page.mouse.up();
+      69 |       expect(errors).toEqual([]);
+      70 |     }, { timeout: 30_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:67:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #2: dark-folder-presentation (image/png) ────────────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\dark-folder-presentation-chromium-high-dpr-win32.png
+    Received: test-results\theme-baseline-dark-catalogue-partition-1-chromium-high-dpr\dark-folder-presentation-actual.png
+    Diff:     test-results\theme-baseline-dark-catalogue-partition-1-chromium-high-dpr\dark-folder-presentation-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\theme-baseline-dark-catalogue-partition-1-chromium-high-dpr\error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\theme-baseline-dark-catalogue-partition-1-chromium-high-dpr\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\theme-baseline-dark-catalogue-partition-1-chromium-high-dpr\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 › folder-presentation 
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('body')
+      75 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: dark-folder-presentation.png
+
+    Call log:
+      - Expect "toHaveScreenshot(dark-folder-presentation.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 75 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 75 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      65 |         await testInfo.attach("folder-geometry", { body: JSON.stringify({ dpr: await page.evaluate(() => devicePixelRatio), before, after: await geometry() }, null, 2), contentType: "application/json" });
+      66 |       }
+    > 67 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      68 |       if (surface.interaction === "press") await page.mouse.up();
+      69 |       expect(errors).toEqual([]);
+      70 |     }, { timeout: 30_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:67:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #2: dark-folder-presentation (image/png) ────────────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\dark-folder-presentation-chromium-high-dpr-win32.png
+    Received: test-results\theme-baseline-dark-catalogue-partition-1-chromium-high-dpr-repeat1\dark-folder-presentation-actual.png
+    Diff:     test-results\theme-baseline-dark-catalogue-partition-1-chromium-high-dpr-repeat1\dark-folder-presentation-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\theme-baseline-dark-catalogue-partition-1-chromium-high-dpr-repeat1\error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\theme-baseline-dark-catalogue-partition-1-chromium-high-dpr-repeat1\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\theme-baseline-dark-catalogue-partition-1-chromium-high-dpr-repeat1\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 › folder-presentation 
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('body')
+      75 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: dark-folder-presentation.png
+
+    Call log:
+      - Expect "toHaveScreenshot(dark-folder-presentation.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 75 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('body')
+        - locator resolved to <body>…</body>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 75 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      65 |         await testInfo.attach("folder-geometry", { body: JSON.stringify({ dpr: await page.evaluate(() => devicePixelRatio), before, after: await geometry() }, null, 2), contentType: "application/json" });
+      66 |       }
+    > 67 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+         |                                                                     ^
+      68 |       if (surface.interaction === "press") await page.mouse.up();
+      69 |       expect(errors).toEqual([]);
+      70 |     }, { timeout: 30_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:67:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #2: dark-folder-presentation (image/png) ────────────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\dark-folder-presentation-chromium-high-dpr-win32.png
+    Received: test-results\theme-baseline-dark-catalogue-partition-1-chromium-high-dpr-repeat2\dark-folder-presentation-actual.png
+    Diff:     test-results\theme-baseline-dark-catalogue-partition-1-chromium-high-dpr-repeat2\dark-folder-presentation-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\theme-baseline-dark-catalogue-partition-1-chromium-high-dpr-repeat2\error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\theme-baseline-dark-catalogue-partition-1-chromium-high-dpr-repeat2\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\theme-baseline-dark-catalogue-partition-1-chromium-high-dpr-repeat2\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 ────────
+    [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 ────────
+    [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 ────────

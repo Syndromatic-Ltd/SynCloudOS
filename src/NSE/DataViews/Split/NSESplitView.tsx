@@ -20,14 +20,18 @@
 
 import {
   useCallback,
+  useLayoutEffect,
   useRef,
   useState,
   type CSSProperties,
   type HTMLAttributes,
   type KeyboardEvent,
   type PointerEvent as ReactPointerEvent,
-  type ReactNode
+  type ReactNode,
+  type Ref
 } from "react";
+
+import type { NSEBookRegions } from "../../Navigation/bookRegions";
 
 function classes(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(" ");
@@ -36,6 +40,7 @@ function classes(...values: Array<string | false | null | undefined>) {
 type CSSVarStyle = CSSProperties & Record<`--${string}`, string | number>;
 
 export interface NSESplitViewProps extends HTMLAttributes<HTMLDivElement> {
+  readonly bookRegions?: NSEBookRegions | null;
   sidebar: ReactNode;
   children: ReactNode;
   sidebarWidth?: number | null;
@@ -47,11 +52,14 @@ export interface NSESplitViewProps extends HTMLAttributes<HTMLDivElement> {
   sidebarPosition?: "leading" | "trailing";
   label?: string;
   valueText?: (width: number) => string;
+  /** The split view's root element. */
+  ref?: Ref<HTMLDivElement>;
 }
 
 export function NSESplitView({
   sidebar,
   children,
+  bookRegions,
   sidebarWidth,
   defaultSidebarWidth = 280,
   minSidebarWidth = 208,
@@ -61,11 +69,26 @@ export function NSESplitView({
   sidebarPosition = "leading",
   label = "Resize sidebar",
   valueText,
-  dir = "ltr",
+  dir,
   className = "",
   style,
+  ref,
   ...props
 }: NSESplitViewProps) {
+  const root = useRef<HTMLDivElement>(null);
+  const setRoot = useCallback((node: HTMLDivElement | null) => {
+    root.current = node;
+    if (typeof ref === "function") ref(node);
+    else if (ref) ref.current = node;
+  }, [ref]);
+  const [inheritedDirection, setInheritedDirection] = useState("ltr");
+  useLayoutEffect(() => {
+    const element = root.current;
+    if (element) setInheritedDirection(element.ownerDocument.defaultView?.getComputedStyle(element).direction ?? "ltr");
+  }, [dir, bookRegions]);
+  const direction = dir ?? inheritedDirection;
+  const canResize = resizable && !bookRegions;
+  useLayoutEffect(() => { if (!canResize) { dragRef.current = null; setResizing(false); } }, [canResize]);
   const [internalWidth, setInternalWidth] = useState<number | null>(null);
   const resolvedWidth = sidebarWidth !== undefined ? sidebarWidth : internalWidth;
   const activeWidth = resolvedWidth ?? defaultSidebarWidth;
@@ -82,7 +105,7 @@ export function NSESplitView({
   }, [onSidebarWidthChange, sidebarWidth]);
 
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!resizable || event.button !== 0) return;
+    if (!canResize || event.button !== 0) return;
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
     dragRef.current = { startX: event.clientX, startWidth: activeWidth };
@@ -91,8 +114,8 @@ export function NSESplitView({
 
   const onPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
     const drag = dragRef.current;
-    if (!drag) return;
-    const physicalDirection = (sidebarPosition === "leading" ? 1 : -1) * (dir === "rtl" ? -1 : 1);
+    if (!drag || !canResize) return;
+    const physicalDirection = (sidebarPosition === "leading" ? 1 : -1) * (direction === "rtl" ? -1 : 1);
     const delta = (event.clientX - drag.startX) * physicalDirection;
     commitWidth(clampWidth(drag.startWidth + delta));
   };
@@ -114,10 +137,10 @@ export function NSESplitView({
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (!resizable) return;
-    const direction = (sidebarPosition === "leading" ? 1 : -1) * (dir === "rtl" ? -1 : 1);
-    if (event.key === "ArrowLeft") commitWidth(clampWidth(activeWidth - 16 * direction));
-    else if (event.key === "ArrowRight") commitWidth(clampWidth(activeWidth + 16 * direction));
+    if (!canResize) return;
+    const keyDirection = (sidebarPosition === "leading" ? 1 : -1) * (direction === "rtl" ? -1 : 1);
+    if (event.key === "ArrowLeft") commitWidth(clampWidth(activeWidth - 16 * keyDirection));
+    else if (event.key === "ArrowRight") commitWidth(clampWidth(activeWidth + 16 * keyDirection));
     else if (event.key === "Home") commitWidth(minSidebarWidth);
     else if (event.key === "End") commitWidth(maxSidebarWidth);
     else return;
@@ -126,23 +149,33 @@ export function NSESplitView({
 
   const splitStyle: CSSVarStyle = {
     "--nse-split-sidebar": `${activeWidth}px`,
-    ...(style as CSSVarStyle | undefined)
+    ...(style as CSSVarStyle | undefined),
+    ...(bookRegions ? {
+      "--nse-book-left": `${bookRegions.left.x}px`, "--nse-book-left-width": `${bookRegions.left.width}px`,
+      "--nse-book-gap": `${bookRegions.right.x - bookRegions.left.x - bookRegions.left.width}px`,
+      "--nse-book-right-width": `${bookRegions.right.width}px`, "--nse-book-top": `${bookRegions.left.y}px`,
+      "--nse-book-height": `${bookRegions.left.height}px`,
+    } : {})
   };
 
   return (
     <div
+      ref={setRoot}
+      data-nse-control="split-view" data-nse-part="background" data-nse-position={sidebarPosition}
       className={classes("nse-split-view", className)}
+      data-book-regions={bookRegions ? "true" : undefined}
+      data-book-sidebar-side={((sidebarPosition === "leading") !== (direction === "rtl")) ? "left" : "right"}
       data-sidebar-position={sidebarPosition}
-      data-resizable={resizable ? "true" : "false"}
+      data-resizable={canResize ? "true" : "false"}
       data-resizing={resizing ? "true" : undefined}
       dir={dir}
       style={splitStyle}
       {...props}
     >
-      <div className="nse-split-view-sidebar">{sidebar}</div>
-      {resizable ? (
+      <div data-nse-part="sidebar" className="nse-split-view-sidebar">{sidebar}</div>
+      {canResize ? (
         <div
-          className="nse-split-view-resizer"
+          data-nse-part="divider" data-nse-highlighted={resizing ? "" : undefined} className="nse-split-view-resizer"
           role="separator"
           aria-orientation="vertical"
           aria-label={label}
@@ -159,10 +192,10 @@ export function NSESplitView({
           onDoubleClick={() => commitWidth(null)}
           onKeyDown={onKeyDown}
         >
-          <span className="nse-split-view-resizer-grip" aria-hidden="true" />
+          <span data-nse-part="handle" className="nse-split-view-resizer-grip" aria-hidden="true" />
         </div>
       ) : null}
-      <div className="nse-split-view-main">{children}</div>
+      <div data-nse-part="content" className="nse-split-view-main">{children}</div>
     </div>
   );
 }

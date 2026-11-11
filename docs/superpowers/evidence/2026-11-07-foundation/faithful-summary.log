@@ -1,0 +1,277 @@
+{
+  "geometry": [
+    {
+      "device": "desktop",
+      "section": "company",
+      "maximumRectangleDelta": 0,
+      "scrollHeightDelta": 0
+    },
+    {
+      "device": "desktop",
+      "section": "framework",
+      "maximumRectangleDelta": 0,
+      "scrollHeightDelta": 0
+    },
+    {
+      "device": "desktop",
+      "section": "team",
+      "maximumRectangleDelta": 0,
+      "scrollHeightDelta": 0
+    },
+    {
+      "device": "phone",
+      "section": "company",
+      "maximumRectangleDelta": 0,
+      "scrollHeightDelta": 0
+    },
+    {
+      "device": "phone",
+      "section": "framework",
+      "maximumRectangleDelta": 0,
+      "scrollHeightDelta": 0
+    },
+    {
+      "device": "phone",
+      "section": "team",
+      "maximumRectangleDelta": 0,
+      "scrollHeightDelta": 0
+    },
+    {
+      "device": "desktop-dpr2",
+      "section": "company",
+      "maximumRectangleDelta": 0,
+      "scrollHeightDelta": 0
+    }
+  ],
+  "motion": {
+    "standard": {
+      "frames": 20,
+      "minimumVisiblePaneOpacity": 0.912263,
+      "maximumReferenceOpacityDelta": 0.05145700000000003,
+      "maximumReferencePositionDelta": 0
+    },
+    "reduced": {
+      "frames": 9,
+      "minimumVisiblePaneOpacity": 0.605439,
+      "maximumReferenceOpacityDelta": 0,
+      "maximumReferencePositionDelta": 0
+    }
+  },
+  "currentSDKComparison": {
+    "standard": {
+      "frames": 20,
+      "maximumAbsoluteDelta": {
+        "paneX": 0,
+        "paneOpacity": 0.010379000000000027,
+        "artX": 0.0777587890625,
+        "artY": 0.1658477783203125,
+        "artWidth": 0.15545654296875,
+        "artHeight": 0.1554718017578125,
+        "artOpacity": 0.004924999999999957
+      }
+    },
+    "reduced": {
+      "frames": 9,
+      "maximumAbsoluteDelta": {
+        "paneX": 0,
+        "paneOpacity": 0,
+        "artX": 0,
+        "artY": 0,
+        "artWidth": 0,
+        "artHeight": 0,
+        "artOpacity": 0
+      }
+    }
+  },
+  "errors": {
+    "live": [],
+    "controlled": [],
+    "raw": []
+  },
+  "liveAnimationSamples": [
+    {
+      "reduced": false,
+      "frames": 20,
+      "artworkFramesWithNativeEffects": 0
+    },
+    {
+      "reduced": true,
+      "frames": 9,
+      "artworkFramesWithNativeEffects": 0
+    }
+  ],
+  "tests": {
+    "faithful-site-full.json": {
+      "success": false,
+      "total": 398,
+      "passed": 395,
+      "failed": 3,
+      "pending": 0,
+      "failures": [
+        {
+          "file": "C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/gallery-atmo-surfaces.test.tsx",
+          "name": "Gallery Atmo surface coverage in its class application uses real owned window and document states for focus, minimisation, zoom and dirty/clean history",
+          "message": "Error: expected undefined to be defined\n    at Proxy.__VITEST_POLL_CHAIN__ (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/node_modules/vitest/dist/chunks/test.DNmyFkvJ.js:3748:47)\n    at C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/gallery-atmo-surfaces.test.tsx:58:119\n    at fi"
+        },
+        {
+          "file": "C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/publisher/product-controller.test.tsx",
+          "name": "Publisher admission and export command moves imagePopover to a replacement button without closing it",
+          "message": "AssertionError: expected <button type=\"button\" …(16)>…(8)</button> to be <button></button> // Object.is equality\n    at C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/publisher/product-controller.test.tsx:73:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/node_modules/@vit"
+        },
+        {
+          "file": "C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/publisher/product-controller.test.tsx",
+          "name": "Publisher admission and export command moves publishMenu to a replacement button without closing it",
+          "message": "AssertionError: expected <button type=\"button\" …(16)>…(8)</button> to be <button></button> // Object.is equality\n    at C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/publisher/product-controller.test.tsx:73:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/node_modules/@vit"
+        }
+      ]
+    },
+    "faithful-site-final-full.json": {
+      "success": false,
+      "total": 401,
+      "passed": 398,
+      "failed": 3,
+      "pending": 0,
+      "failures": [
+        {
+          "file": "C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/gallery-atmo-surfaces.test.tsx",
+          "name": "Gallery Atmo surface coverage in its class application uses real owned window and document states for focus, minimisation, zoom and dirty/clean history",
+          "message": "Error: expected undefined to be defined\n    at Proxy.__VITEST_POLL_CHAIN__ (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/node_modules/vitest/dist/chunks/test.DNmyFkvJ.js:3748:47)\n    at C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/gallery-atmo-surfaces.test.tsx:58:119\n    at fi"
+        },
+        {
+          "file": "C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/publisher/product-controller.test.tsx",
+          "name": "Publisher admission and export command moves imagePopover to a replacement button without closing it",
+          "message": "AssertionError: expected <button type=\"button\" …(16)>…(8)</button> to be <button></button> // Object.is equality\n    at C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/publisher/product-controller.test.tsx:73:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/node_modules/@vit"
+        },
+        {
+          "file": "C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/publisher/product-controller.test.tsx",
+          "name": "Publisher admission and export command moves publishMenu to a replacement button without closing it",
+          "message": "AssertionError: expected <button type=\"button\" …(16)>…(8)</button> to be <button></button> // Object.is equality\n    at C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/publisher/product-controller.test.tsx:73:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/node_modules/@vit"
+        }
+      ]
+    },
+    "faithful-site-last-full.json": {
+      "success": false,
+      "total": 401,
+      "passed": 397,
+      "failed": 4,
+      "pending": 0,
+      "failures": [
+        {
+          "file": "C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/gallery-atmo-surfaces.test.tsx",
+          "name": "Gallery Atmo surface coverage in its class application uses real owned window and document states for focus, minimisation, zoom and dirty/clean history",
+          "message": "Error: expected undefined to be defined\n    at Proxy.__VITEST_POLL_CHAIN__ (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/node_modules/vitest/dist/chunks/test.DNmyFkvJ.js:3748:47)\n    at C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/gallery-atmo-surfaces.test.tsx:58:119\n    at fi"
+        },
+        {
+          "file": "C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/gallery-text-document.test.tsx",
+          "name": "gallery document-bound text editing renders the owned specimen without privileged conformance and executes replace through its app-scoped commands",
+          "message": "Error: expected undefined to be 'Attributed editor specimen' // Object.is equality\n    at Proxy.__VITEST_POLL_CHAIN__ (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/node_modules/vitest/dist/chunks/test.DNmyFkvJ.js:3748:47)\n    at C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/gall"
+        },
+        {
+          "file": "C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/publisher/product-controller.test.tsx",
+          "name": "Publisher admission and export command moves imagePopover to a replacement button without closing it",
+          "message": "AssertionError: expected <button type=\"button\" …(16)>…(8)</button> to be <button></button> // Object.is equality\n    at C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/publisher/product-controller.test.tsx:73:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/node_modules/@vit"
+        },
+        {
+          "file": "C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/publisher/product-controller.test.tsx",
+          "name": "Publisher admission and export command moves publishMenu to a replacement button without closing it",
+          "message": "AssertionError: expected <button type=\"button\" …(16)>…(8)</button> to be <button></button> // Object.is equality\n    at C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/publisher/product-controller.test.tsx:73:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/node_modules/@vit"
+        }
+      ]
+    },
+    "faithful-site-tip-full.json": {
+      "success": false,
+      "total": 401,
+      "passed": 398,
+      "failed": 3,
+      "pending": 0,
+      "failures": [
+        {
+          "file": "C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/gallery-atmo-surfaces.test.tsx",
+          "name": "Gallery Atmo surface coverage in its class application uses real owned window and document states for focus, minimisation, zoom and dirty/clean history",
+          "message": "Error: expected undefined to be defined\n    at Proxy.__VITEST_POLL_CHAIN__ (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/node_modules/vitest/dist/chunks/test.DNmyFkvJ.js:3748:47)\n    at C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/gallery-atmo-surfaces.test.tsx:58:119\n    at fi"
+        },
+        {
+          "file": "C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/publisher/product-controller.test.tsx",
+          "name": "Publisher admission and export command moves imagePopover to a replacement button without closing it",
+          "message": "AssertionError: expected <button type=\"button\" …(16)>…(8)</button> to be <button></button> // Object.is equality\n    at C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/publisher/product-controller.test.tsx:73:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/node_modules/@vit"
+        },
+        {
+          "file": "C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/publisher/product-controller.test.tsx",
+          "name": "Publisher admission and export command moves publishMenu to a replacement button without closing it",
+          "message": "AssertionError: expected <button type=\"button\" …(16)>…(8)</button> to be <button></button> // Object.is equality\n    at C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/publisher/product-controller.test.tsx:73:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/node_modules/@vit"
+        }
+      ]
+    },
+    "faithful-site-handoff-full.json": {
+      "success": false,
+      "total": 401,
+      "passed": 398,
+      "failed": 3,
+      "pending": 0,
+      "failures": [
+        {
+          "file": "C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/gallery-atmo-surfaces.test.tsx",
+          "name": "Gallery Atmo surface coverage in its class application uses real owned window and document states for focus, minimisation, zoom and dirty/clean history",
+          "message": "Error: expected undefined to be defined\n    at Proxy.__VITEST_POLL_CHAIN__ (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/node_modules/vitest/dist/chunks/test.DNmyFkvJ.js:3748:47)\n    at C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/gallery-atmo-surfaces.test.tsx:58:119\n    at fi"
+        },
+        {
+          "file": "C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/publisher/product-controller.test.tsx",
+          "name": "Publisher admission and export command moves imagePopover to a replacement button without closing it",
+          "message": "AssertionError: expected <button type=\"button\" …(16)>…(8)</button> to be <button></button> // Object.is equality\n    at C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/publisher/product-controller.test.tsx:73:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/node_modules/@vit"
+        },
+        {
+          "file": "C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/publisher/product-controller.test.tsx",
+          "name": "Publisher admission and export command moves publishMenu to a replacement button without closing it",
+          "message": "AssertionError: expected <button type=\"button\" …(16)>…(8)</button> to be <button></button> // Object.is equality\n    at C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/tests/runtime/publisher/product-controller.test.tsx:73:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/node_modules/@vit"
+        }
+      ]
+    },
+    "faithful-full-framework-final-result.json": {
+      "success": false,
+      "total": 7643,
+      "passed": 7637,
+      "failed": 6,
+      "pending": 0,
+      "failures": [
+        {
+          "file": "C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-faithful-adopt-1794089186913/tests/runtime/host-update-readiness.test.ts",
+          "name": "host readiness owner integration wires the actual mounted share boundary to the runtime-owned underlying promise",
+          "message": "AssertionError: expected +0 to be 1 // Object.is equality\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-faithful-adopt-1794089186913/tests/runtime/host-update-readiness.test.ts:147:75\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/User"
+        },
+        {
+          "file": "C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-faithful-adopt-1794089186913/tests/runtime/host-update-readiness.test.ts",
+          "name": "host readiness owner integration creates runtime-specific picker instrumentation for a shared environment and retains late native work",
+          "message": "AssertionError: expected +0 to be 1 // Object.is equality\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-faithful-adopt-1794089186913/tests/runtime/host-update-readiness.test.ts:159:92\n    at Timeout.checkCallback (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/vitest/dist/chunks/test.DNmyFkvJ.js:3383:20)"
+        },
+        {
+          "file": "C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-faithful-adopt-1794089186913/tests/runtime/host-update-readiness.test.ts",
+          "name": "retains real mounted file-write work across mount retirement without charging a sibling runtime",
+          "message": "AssertionError: expected 'denied' to be 'accepted' // Object.is equality\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-faithful-adopt-1794089186913/tests/runtime/host-update-readiness.test.ts:317:25"
+        },
+        {
+          "file": "C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-faithful-adopt-1794089186913/tests/runtime/synapp-sdk-package.test.ts",
+          "name": "portable SynWare SDK packages compiles, bundles and mounts a genuinely external consumer against packed public exports",
+          "message": "Error: Command failed: C:\\Program Files\\nodejs\\node.exe shared-identity.mjs\nnode:internal/modules/run_main:107\r\n    triggerUncaughtException(\r\n    ^\r\n\r\nAssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\r\n+ actual - expected\r\n\r\n  [\r\n    'BrowserImageProcessingWorker',\r\n    'BrowserWebGPUImageProcessingBackend',\r\n    'InMemoryDocumentAdapter',\r\n    'IndexedDBDocumentRecoveryS"
+        },
+        {
+          "file": "C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-faithful-adopt-1794089186913/tests/runtime/fx/packed-lumina.test.ts",
+          "name": "executes and typechecks named-route LuminaFX values from an independently installed SDK archive",
+          "message": "Error: STACK_TRACE_ERROR\n    at task (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1784:27)\n    at Object.<anonymous> (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1817:1"
+        },
+        {
+          "file": "C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-faithful-adopt-1794089186913/tests/runtime/fx/packed-media.test.ts",
+          "name": "executes and typechecks MediaFX from an independently installed SDK archive",
+          "message": "Error: STACK_TRACE_ERROR\n    at task (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1784:27)\n    at Object.<anonymous> (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1817:1"
+        }
+      ]
+    },
+    "faithful-last-failure-recheck.json": {
+      "success": true,
+      "total": 30,
+      "passed": 30,
+      "failed": 0,
+      "pending": 0,
+      "failures": []
+    }
+  }
+}

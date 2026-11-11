@@ -1,0 +1,29 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/privacy-capture.test.ts tests/runtime/fx/video-capture-mounted.test.tsx tests/runtime/fx/audio-live.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/video-capture-mounted.test.tsx (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/video-capture-mounted.test.tsx [ tests/runtime/fx/video-capture-mounted.test.tsx ]
+SynWareManifestValidationError: SynWare manifest validation failed: /permissions must NOT have additional properties
+ ❯ captureDefinition src/SynCloudOS/AppSDK/createSynWare.ts:126:29
+    124|   if (typeof root !== "function") throw new TypeError("A SynWare defin…
+    125|   const validation = captureSynWareManifest(dataProperty(value, "manif…
+    126|   if (!validation.ok) throw new SynWareManifestValidationError(validat…
+       |                             ^
+    127|   const declaredRoutes = dataProperty(value, "routes");
+    128|   if (declaredRoutes !== undefined && !isSynWareRouteGraph(declaredRou…
+ ❯ captureSynWareDefinition src/SynCloudOS/AppSDK/createSynWare.ts:173:10
+ ❯ createSynWare src/SynCloudOS/AppSDK/createSynWare.ts:184:10
+ ❯ tests/runtime/fx/video-capture-mounted.test.tsx:32:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  5 passed (5)
+   Start at  19:37:35
+   Duration  8.30s (transform 5.38s, setup 44ms, import 550ms, tests 25ms, environment 851ms)

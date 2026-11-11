@@ -1,0 +1,666 @@
+{
+  "referenceCommit": "a1c3617015906b4c802bd7ef7f2183062581f3b8",
+  "currentHead": "47893020ac676145525629e41ee16827b5a3c40a",
+  "sourcePatchSha256": "b3772885cf53ae641606a549059826f01225f3d06f26384742cc1ea0e51a64b9",
+  "referenceSourceUnchanged": true,
+  "fixtures": {
+    "index.html": {
+      "reference": "f6978f62622f40486c437ee4a8de4cb686977e436bdaeae411e96958baedba3d",
+      "current": "f6978f62622f40486c437ee4a8de4cb686977e436bdaeae411e96958baedba3d"
+    },
+    "catalogue.tsx": {
+      "reference": "9045d101217e0481e3bd4b887fbe0305126c63a9092a8a08ccb2668898a938c6",
+      "current": "9045d101217e0481e3bd4b887fbe0305126c63a9092a8a08ccb2668898a938c6"
+    },
+    "host.tsx": {
+      "reference": "7dcf823b950b2154dda83cb7d92028efa06bebb1a09230d491e5debc8539e13c",
+      "current": "7dcf823b950b2154dda83cb7d92028efa06bebb1a09230d491e5debc8539e13c"
+    },
+    "host.css": {
+      "reference": "a8addddfe24df801d20de65bfd730b6bd50f38908c7c9477bbd1f62faeb79d39",
+      "current": "a8addddfe24df801d20de65bfd730b6bd50f38908c7c9477bbd1f62faeb79d39"
+    }
+  },
+  "results": [
+    {
+      "surface": "quick-switch-normal",
+      "scheme": "light",
+      "dpr": 1,
+      "identical": true,
+      "captures": [
+        {
+          "name": "light-dpr1-quick-switch-normal-reference.png",
+          "sha256": "88f701a4e66d4fbb1d72ff13d080be974082f97dd5a59d526756cb90d2ec5b85"
+        },
+        {
+          "name": "light-dpr1-quick-switch-normal-current.png",
+          "sha256": "88f701a4e66d4fbb1d72ff13d080be974082f97dd5a59d526756cb90d2ec5b85"
+        }
+      ]
+    },
+    {
+      "surface": "quick-switch-selected",
+      "scheme": "light",
+      "dpr": 1,
+      "identical": true,
+      "captures": [
+        {
+          "name": "light-dpr1-quick-switch-selected-reference.png",
+          "sha256": "963e652d5709cb5845b9bc169634a28c259f21a4ffdfc08d8f29e459975217ab"
+        },
+        {
+          "name": "light-dpr1-quick-switch-selected-current.png",
+          "sha256": "963e652d5709cb5845b9bc169634a28c259f21a4ffdfc08d8f29e459975217ab"
+        }
+      ]
+    },
+    {
+      "surface": "system-alert-normal",
+      "scheme": "light",
+      "dpr": 1,
+      "identical": true,
+      "captures": [
+        {
+          "name": "light-dpr1-system-alert-normal-reference.png",
+          "sha256": "93167956575e515fcdd8ae7900980bee0ce2f0b49c974456770f969343be1e63"
+        },
+        {
+          "name": "light-dpr1-system-alert-normal-current.png",
+          "sha256": "93167956575e515fcdd8ae7900980bee0ce2f0b49c974456770f969343be1e63"
+        }
+      ]
+    },
+    {
+      "surface": "system-alert-details",
+      "scheme": "light",
+      "dpr": 1,
+      "identical": true,
+      "captures": [
+        {
+          "name": "light-dpr1-system-alert-details-reference.png",
+          "sha256": "ce94514022ce6d4f224663059d81b518ef0c5a09fdeb9292914a413cfc7a7595"
+        },
+        {
+          "name": "light-dpr1-system-alert-details-current.png",
+          "sha256": "ce94514022ce6d4f224663059d81b518ef0c5a09fdeb9292914a413cfc7a7595"
+        }
+      ]
+    },
+    {
+      "surface": "stage-status-inactive",
+      "scheme": "light",
+      "dpr": 1,
+      "identical": true,
+      "captures": [
+        {
+          "name": "light-dpr1-stage-status-inactive-reference.png",
+          "sha256": "162d90e40d1be42f3f2f62988d03460ade77de9f3efa6564c3aaf29d89b3f4f8"
+        },
+        {
+          "name": "light-dpr1-stage-status-inactive-current.png",
+          "sha256": "162d90e40d1be42f3f2f62988d03460ade77de9f3efa6564c3aaf29d89b3f4f8"
+        }
+      ]
+    },
+    {
+      "surface": "stage-status-key",
+      "scheme": "light",
+      "dpr": 1,
+      "identical": true,
+      "captures": [
+        {
+          "name": "light-dpr1-stage-status-key-reference.png",
+          "sha256": "162d90e40d1be42f3f2f62988d03460ade77de9f3efa6564c3aaf29d89b3f4f8"
+        },
+        {
+          "name": "light-dpr1-stage-status-key-current.png",
+          "sha256": "162d90e40d1be42f3f2f62988d03460ade77de9f3efa6564c3aaf29d89b3f4f8"
+        }
+      ]
+    },
+    {
+      "surface": "date-picker-combined-textFieldAndStepper",
+      "scheme": "light",
+      "dpr": 1,
+      "identical": true,
+      "captures": [
+        {
+          "name": "light-dpr1-date-picker-combined-textFieldAndStepper-reference.png",
+          "sha256": "7f2368007707e2c45ca33727ffac30d7be762eeb949a49fa829e2df5e26a0c1c"
+        },
+        {
+          "name": "light-dpr1-date-picker-combined-textFieldAndStepper-current.png",
+          "sha256": "7f2368007707e2c45ca33727ffac30d7be762eeb949a49fa829e2df5e26a0c1c"
+        }
+      ]
+    },
+    {
+      "surface": "date-picker-combined-clockAndCalendar",
+      "scheme": "light",
+      "dpr": 1,
+      "identical": true,
+      "captures": [
+        {
+          "name": "light-dpr1-date-picker-combined-clockAndCalendar-reference.png",
+          "sha256": "45332276d470b87dad47020caa7c8fead9239bcb3f2e958e57e1252d46417482"
+        },
+        {
+          "name": "light-dpr1-date-picker-combined-clockAndCalendar-current.png",
+          "sha256": "45332276d470b87dad47020caa7c8fead9239bcb3f2e958e57e1252d46417482"
+        }
+      ]
+    },
+    {
+      "surface": "date-picker-range-textFieldAndStepper",
+      "scheme": "light",
+      "dpr": 1,
+      "identical": true,
+      "captures": [
+        {
+          "name": "light-dpr1-date-picker-range-textFieldAndStepper-reference.png",
+          "sha256": "6a12e45e692fc84897f0fa423903f4cbb4374f41bbf19f26263281148e353fbc"
+        },
+        {
+          "name": "light-dpr1-date-picker-range-textFieldAndStepper-current.png",
+          "sha256": "6a12e45e692fc84897f0fa423903f4cbb4374f41bbf19f26263281148e353fbc"
+        }
+      ]
+    },
+    {
+      "surface": "date-picker-range-clockAndCalendar",
+      "scheme": "light",
+      "dpr": 1,
+      "identical": true,
+      "captures": [
+        {
+          "name": "light-dpr1-date-picker-range-clockAndCalendar-reference.png",
+          "sha256": "5f9ae849f77b013c07b36639006c658119c4bc4eeebcaab1537b1d16a339a102"
+        },
+        {
+          "name": "light-dpr1-date-picker-range-clockAndCalendar-current.png",
+          "sha256": "5f9ae849f77b013c07b36639006c658119c4bc4eeebcaab1537b1d16a339a102"
+        }
+      ]
+    },
+    {
+      "surface": "quick-switch-normal",
+      "scheme": "dark",
+      "dpr": 1,
+      "identical": true,
+      "captures": [
+        {
+          "name": "dark-dpr1-quick-switch-normal-reference.png",
+          "sha256": "759669badbb9e899f0435796af7000c976fa040c800bfcee00cdd006e2a26e0c"
+        },
+        {
+          "name": "dark-dpr1-quick-switch-normal-current.png",
+          "sha256": "759669badbb9e899f0435796af7000c976fa040c800bfcee00cdd006e2a26e0c"
+        }
+      ]
+    },
+    {
+      "surface": "quick-switch-selected",
+      "scheme": "dark",
+      "dpr": 1,
+      "identical": true,
+      "captures": [
+        {
+          "name": "dark-dpr1-quick-switch-selected-reference.png",
+          "sha256": "7e553a8d34aefa5a77323596e20b198b648bcedcff82b6a95c747a45e851c229"
+        },
+        {
+          "name": "dark-dpr1-quick-switch-selected-current.png",
+          "sha256": "7e553a8d34aefa5a77323596e20b198b648bcedcff82b6a95c747a45e851c229"
+        }
+      ]
+    },
+    {
+      "surface": "system-alert-normal",
+      "scheme": "dark",
+      "dpr": 1,
+      "identical": true,
+      "captures": [
+        {
+          "name": "dark-dpr1-system-alert-normal-reference.png",
+          "sha256": "c87bbf252bf1eb096d3e7ea3890e42aa87a179c82ad58b644381593ce9ba5b90"
+        },
+        {
+          "name": "dark-dpr1-system-alert-normal-current.png",
+          "sha256": "c87bbf252bf1eb096d3e7ea3890e42aa87a179c82ad58b644381593ce9ba5b90"
+        }
+      ]
+    },
+    {
+      "surface": "system-alert-details",
+      "scheme": "dark",
+      "dpr": 1,
+      "identical": true,
+      "captures": [
+        {
+          "name": "dark-dpr1-system-alert-details-reference.png",
+          "sha256": "84d1020a464d65c02218f2a99a7cb5ca58d9b7caa13230914d14b6c617442e52"
+        },
+        {
+          "name": "dark-dpr1-system-alert-details-current.png",
+          "sha256": "84d1020a464d65c02218f2a99a7cb5ca58d9b7caa13230914d14b6c617442e52"
+        }
+      ]
+    },
+    {
+      "surface": "stage-status-inactive",
+      "scheme": "dark",
+      "dpr": 1,
+      "identical": true,
+      "captures": [
+        {
+          "name": "dark-dpr1-stage-status-inactive-reference.png",
+          "sha256": "8ec497f1a67994888ce389b721b5281a056f9599695bdab3485f3d97e6ab7984"
+        },
+        {
+          "name": "dark-dpr1-stage-status-inactive-current.png",
+          "sha256": "8ec497f1a67994888ce389b721b5281a056f9599695bdab3485f3d97e6ab7984"
+        }
+      ]
+    },
+    {
+      "surface": "stage-status-key",
+      "scheme": "dark",
+      "dpr": 1,
+      "identical": true,
+      "captures": [
+        {
+          "name": "dark-dpr1-stage-status-key-reference.png",
+          "sha256": "8ec497f1a67994888ce389b721b5281a056f9599695bdab3485f3d97e6ab7984"
+        },
+        {
+          "name": "dark-dpr1-stage-status-key-current.png",
+          "sha256": "8ec497f1a67994888ce389b721b5281a056f9599695bdab3485f3d97e6ab7984"
+        }
+      ]
+    },
+    {
+      "surface": "date-picker-combined-textFieldAndStepper",
+      "scheme": "dark",
+      "dpr": 1,
+      "identical": true,
+      "captures": [
+        {
+          "name": "dark-dpr1-date-picker-combined-textFieldAndStepper-reference.png",
+          "sha256": "b3a64572d23aadc67be2b0ffca4f59214581667882438c335245a73a376ad09b"
+        },
+        {
+          "name": "dark-dpr1-date-picker-combined-textFieldAndStepper-current.png",
+          "sha256": "b3a64572d23aadc67be2b0ffca4f59214581667882438c335245a73a376ad09b"
+        }
+      ]
+    },
+    {
+      "surface": "date-picker-combined-clockAndCalendar",
+      "scheme": "dark",
+      "dpr": 1,
+      "identical": true,
+      "captures": [
+        {
+          "name": "dark-dpr1-date-picker-combined-clockAndCalendar-reference.png",
+          "sha256": "bdb4b98862ef1501f275ff6f9815a99d8d621ee8c2e04e71bc029a42d508bbaa"
+        },
+        {
+          "name": "dark-dpr1-date-picker-combined-clockAndCalendar-current.png",
+          "sha256": "bdb4b98862ef1501f275ff6f9815a99d8d621ee8c2e04e71bc029a42d508bbaa"
+        }
+      ]
+    },
+    {
+      "surface": "date-picker-range-textFieldAndStepper",
+      "scheme": "dark",
+      "dpr": 1,
+      "identical": true,
+      "captures": [
+        {
+          "name": "dark-dpr1-date-picker-range-textFieldAndStepper-reference.png",
+          "sha256": "a749fd1b9c81dfee08574e2a11e060fccbdc584e72277f5e0b6f12f9370b9394"
+        },
+        {
+          "name": "dark-dpr1-date-picker-range-textFieldAndStepper-current.png",
+          "sha256": "a749fd1b9c81dfee08574e2a11e060fccbdc584e72277f5e0b6f12f9370b9394"
+        }
+      ]
+    },
+    {
+      "surface": "date-picker-range-clockAndCalendar",
+      "scheme": "dark",
+      "dpr": 1,
+      "identical": true,
+      "captures": [
+        {
+          "name": "dark-dpr1-date-picker-range-clockAndCalendar-reference.png",
+          "sha256": "696a9f18b8a8459760101b5ce00117119535b3c0c83bc092e43fafebf446dae1"
+        },
+        {
+          "name": "dark-dpr1-date-picker-range-clockAndCalendar-current.png",
+          "sha256": "696a9f18b8a8459760101b5ce00117119535b3c0c83bc092e43fafebf446dae1"
+        }
+      ]
+    },
+    {
+      "surface": "quick-switch-normal",
+      "scheme": "light",
+      "dpr": 2,
+      "identical": true,
+      "captures": [
+        {
+          "name": "light-dpr2-quick-switch-normal-reference.png",
+          "sha256": "27790302a89d943ae31a78fe4388dbbbabee2b1cb441f70c887c46e3bb6e71d9"
+        },
+        {
+          "name": "light-dpr2-quick-switch-normal-current.png",
+          "sha256": "27790302a89d943ae31a78fe4388dbbbabee2b1cb441f70c887c46e3bb6e71d9"
+        }
+      ]
+    },
+    {
+      "surface": "quick-switch-selected",
+      "scheme": "light",
+      "dpr": 2,
+      "identical": true,
+      "captures": [
+        {
+          "name": "light-dpr2-quick-switch-selected-reference.png",
+          "sha256": "7e24a06f82f19220703b2ad3b0921b0bbfd62d9f15f9d0ff4c75cfd757d98571"
+        },
+        {
+          "name": "light-dpr2-quick-switch-selected-current.png",
+          "sha256": "7e24a06f82f19220703b2ad3b0921b0bbfd62d9f15f9d0ff4c75cfd757d98571"
+        }
+      ]
+    },
+    {
+      "surface": "system-alert-normal",
+      "scheme": "light",
+      "dpr": 2,
+      "identical": true,
+      "captures": [
+        {
+          "name": "light-dpr2-system-alert-normal-reference.png",
+          "sha256": "19aa4e9a9d3079c74a78bd36fe2f8ead969173225e6fbb47e132b3ea3cc0a751"
+        },
+        {
+          "name": "light-dpr2-system-alert-normal-current.png",
+          "sha256": "19aa4e9a9d3079c74a78bd36fe2f8ead969173225e6fbb47e132b3ea3cc0a751"
+        }
+      ]
+    },
+    {
+      "surface": "system-alert-details",
+      "scheme": "light",
+      "dpr": 2,
+      "identical": true,
+      "captures": [
+        {
+          "name": "light-dpr2-system-alert-details-reference.png",
+          "sha256": "c96a46c48163460bfd2c59266ffa778b0dd0649f943fbe737ea58ccf56959832"
+        },
+        {
+          "name": "light-dpr2-system-alert-details-current.png",
+          "sha256": "c96a46c48163460bfd2c59266ffa778b0dd0649f943fbe737ea58ccf56959832"
+        }
+      ]
+    },
+    {
+      "surface": "stage-status-inactive",
+      "scheme": "light",
+      "dpr": 2,
+      "identical": true,
+      "captures": [
+        {
+          "name": "light-dpr2-stage-status-inactive-reference.png",
+          "sha256": "fc61bec12c715f4378221dfbbcb82b91ec01e2f923b14a6986437b5d1388c252"
+        },
+        {
+          "name": "light-dpr2-stage-status-inactive-current.png",
+          "sha256": "fc61bec12c715f4378221dfbbcb82b91ec01e2f923b14a6986437b5d1388c252"
+        }
+      ]
+    },
+    {
+      "surface": "stage-status-key",
+      "scheme": "light",
+      "dpr": 2,
+      "identical": true,
+      "captures": [
+        {
+          "name": "light-dpr2-stage-status-key-reference.png",
+          "sha256": "fc61bec12c715f4378221dfbbcb82b91ec01e2f923b14a6986437b5d1388c252"
+        },
+        {
+          "name": "light-dpr2-stage-status-key-current.png",
+          "sha256": "fc61bec12c715f4378221dfbbcb82b91ec01e2f923b14a6986437b5d1388c252"
+        }
+      ]
+    },
+    {
+      "surface": "date-picker-combined-textFieldAndStepper",
+      "scheme": "light",
+      "dpr": 2,
+      "identical": true,
+      "captures": [
+        {
+          "name": "light-dpr2-date-picker-combined-textFieldAndStepper-reference.png",
+          "sha256": "bfa9a7280230116d25addf351b57ee0ce6873685bdedbbebf7f738cbb3aee177"
+        },
+        {
+          "name": "light-dpr2-date-picker-combined-textFieldAndStepper-current.png",
+          "sha256": "bfa9a7280230116d25addf351b57ee0ce6873685bdedbbebf7f738cbb3aee177"
+        }
+      ]
+    },
+    {
+      "surface": "date-picker-combined-clockAndCalendar",
+      "scheme": "light",
+      "dpr": 2,
+      "identical": true,
+      "captures": [
+        {
+          "name": "light-dpr2-date-picker-combined-clockAndCalendar-reference.png",
+          "sha256": "e925687363fecefc426749748c47dc89adab3f59528e48d1348b3fa9b088e76c"
+        },
+        {
+          "name": "light-dpr2-date-picker-combined-clockAndCalendar-current.png",
+          "sha256": "e925687363fecefc426749748c47dc89adab3f59528e48d1348b3fa9b088e76c"
+        }
+      ]
+    },
+    {
+      "surface": "date-picker-range-textFieldAndStepper",
+      "scheme": "light",
+      "dpr": 2,
+      "identical": true,
+      "captures": [
+        {
+          "name": "light-dpr2-date-picker-range-textFieldAndStepper-reference.png",
+          "sha256": "f10adbe3840602980a53031e45666be9078d653d056962b35c290867a040aa4c"
+        },
+        {
+          "name": "light-dpr2-date-picker-range-textFieldAndStepper-current.png",
+          "sha256": "f10adbe3840602980a53031e45666be9078d653d056962b35c290867a040aa4c"
+        }
+      ]
+    },
+    {
+      "surface": "date-picker-range-clockAndCalendar",
+      "scheme": "light",
+      "dpr": 2,
+      "identical": true,
+      "captures": [
+        {
+          "name": "light-dpr2-date-picker-range-clockAndCalendar-reference.png",
+          "sha256": "132b721f55e040fdb058b0b6629e53986d1dbedf0ffb696708f4ef18a8162e71"
+        },
+        {
+          "name": "light-dpr2-date-picker-range-clockAndCalendar-current.png",
+          "sha256": "132b721f55e040fdb058b0b6629e53986d1dbedf0ffb696708f4ef18a8162e71"
+        }
+      ]
+    },
+    {
+      "surface": "quick-switch-normal",
+      "scheme": "dark",
+      "dpr": 2,
+      "identical": true,
+      "captures": [
+        {
+          "name": "dark-dpr2-quick-switch-normal-reference.png",
+          "sha256": "b2f397a5c43f32e26b25723911337ddd5a3a274e9be28cb0e2192275f7b1434e"
+        },
+        {
+          "name": "dark-dpr2-quick-switch-normal-current.png",
+          "sha256": "b2f397a5c43f32e26b25723911337ddd5a3a274e9be28cb0e2192275f7b1434e"
+        }
+      ]
+    },
+    {
+      "surface": "quick-switch-selected",
+      "scheme": "dark",
+      "dpr": 2,
+      "identical": true,
+      "captures": [
+        {
+          "name": "dark-dpr2-quick-switch-selected-reference.png",
+          "sha256": "7ca55d8d12b8869dfadc651a66aecd1b351f5c9025a60d877de3c9a3ca571784"
+        },
+        {
+          "name": "dark-dpr2-quick-switch-selected-current.png",
+          "sha256": "7ca55d8d12b8869dfadc651a66aecd1b351f5c9025a60d877de3c9a3ca571784"
+        }
+      ]
+    },
+    {
+      "surface": "system-alert-normal",
+      "scheme": "dark",
+      "dpr": 2,
+      "identical": true,
+      "captures": [
+        {
+          "name": "dark-dpr2-system-alert-normal-reference.png",
+          "sha256": "6a06eee924627b7a2e1b60bf53e22fc43b9b7a6f55b283767cde0888692cce29"
+        },
+        {
+          "name": "dark-dpr2-system-alert-normal-current.png",
+          "sha256": "6a06eee924627b7a2e1b60bf53e22fc43b9b7a6f55b283767cde0888692cce29"
+        }
+      ]
+    },
+    {
+      "surface": "system-alert-details",
+      "scheme": "dark",
+      "dpr": 2,
+      "identical": true,
+      "captures": [
+        {
+          "name": "dark-dpr2-system-alert-details-reference.png",
+          "sha256": "8969faca4fd6f2c7a3e6168e0f63e0979e99c9618cae7b0770c25113a6baef6b"
+        },
+        {
+          "name": "dark-dpr2-system-alert-details-current.png",
+          "sha256": "8969faca4fd6f2c7a3e6168e0f63e0979e99c9618cae7b0770c25113a6baef6b"
+        }
+      ]
+    },
+    {
+      "surface": "stage-status-inactive",
+      "scheme": "dark",
+      "dpr": 2,
+      "identical": true,
+      "captures": [
+        {
+          "name": "dark-dpr2-stage-status-inactive-reference.png",
+          "sha256": "73870b87b17b907dfde8cf48e43a6aae390c7f76ece7f12bc7d8c220fc44cd6b"
+        },
+        {
+          "name": "dark-dpr2-stage-status-inactive-current.png",
+          "sha256": "73870b87b17b907dfde8cf48e43a6aae390c7f76ece7f12bc7d8c220fc44cd6b"
+        }
+      ]
+    },
+    {
+      "surface": "stage-status-key",
+      "scheme": "dark",
+      "dpr": 2,
+      "identical": true,
+      "captures": [
+        {
+          "name": "dark-dpr2-stage-status-key-reference.png",
+          "sha256": "73870b87b17b907dfde8cf48e43a6aae390c7f76ece7f12bc7d8c220fc44cd6b"
+        },
+        {
+          "name": "dark-dpr2-stage-status-key-current.png",
+          "sha256": "73870b87b17b907dfde8cf48e43a6aae390c7f76ece7f12bc7d8c220fc44cd6b"
+        }
+      ]
+    },
+    {
+      "surface": "date-picker-combined-textFieldAndStepper",
+      "scheme": "dark",
+      "dpr": 2,
+      "identical": true,
+      "captures": [
+        {
+          "name": "dark-dpr2-date-picker-combined-textFieldAndStepper-reference.png",
+          "sha256": "a9e3ce7b536da42bb0cd94cc54b4f91566473fb9d89fe56aa2e6e18daffe5c98"
+        },
+        {
+          "name": "dark-dpr2-date-picker-combined-textFieldAndStepper-current.png",
+          "sha256": "a9e3ce7b536da42bb0cd94cc54b4f91566473fb9d89fe56aa2e6e18daffe5c98"
+        }
+      ]
+    },
+    {
+      "surface": "date-picker-combined-clockAndCalendar",
+      "scheme": "dark",
+      "dpr": 2,
+      "identical": true,
+      "captures": [
+        {
+          "name": "dark-dpr2-date-picker-combined-clockAndCalendar-reference.png",
+          "sha256": "4be79dafafeefaa60f430f21fb6f86645968f8e0db6dda697ac70d369a5689b1"
+        },
+        {
+          "name": "dark-dpr2-date-picker-combined-clockAndCalendar-current.png",
+          "sha256": "4be79dafafeefaa60f430f21fb6f86645968f8e0db6dda697ac70d369a5689b1"
+        }
+      ]
+    },
+    {
+      "surface": "date-picker-range-textFieldAndStepper",
+      "scheme": "dark",
+      "dpr": 2,
+      "identical": true,
+      "captures": [
+        {
+          "name": "dark-dpr2-date-picker-range-textFieldAndStepper-reference.png",
+          "sha256": "94fd9d28a9e397ee57630f27f41e692d8662bb4172e63ee7e3cb46c95eb234cd"
+        },
+        {
+          "name": "dark-dpr2-date-picker-range-textFieldAndStepper-current.png",
+          "sha256": "94fd9d28a9e397ee57630f27f41e692d8662bb4172e63ee7e3cb46c95eb234cd"
+        }
+      ]
+    },
+    {
+      "surface": "date-picker-range-clockAndCalendar",
+      "scheme": "dark",
+      "dpr": 2,
+      "identical": true,
+      "captures": [
+        {
+          "name": "dark-dpr2-date-picker-range-clockAndCalendar-reference.png",
+          "sha256": "aeaf965e90ebb7961050e991127e592e29229c92d5dd1b1107ae0ffcd4981335"
+        },
+        {
+          "name": "dark-dpr2-date-picker-range-clockAndCalendar-current.png",
+          "sha256": "aeaf965e90ebb7961050e991127e592e29229c92d5dd1b1107ae0ffcd4981335"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,161 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run playwright test tests/e2e/theme-baseline.spec.ts --project=chromium --project=chromium-high-dpr --update-snapshots --workers=4
+[WebServer] (node:13468) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 80 tests using 4 workers
+
+(node:85636) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:73784) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:61024) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:52048) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  2 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 4 (26.2s)
+  ok  4 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3 (26.3s)
+  ok  3 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 (26.6s)
+  ok  1 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2 (27.1s)
+  ok  5 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 5 (5.5s)
+  ok  7 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 7 (5.3s)
+  ok  6 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 6 (5.7s)
+  ok  8 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 8 (5.5s)
+  ok  9 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 9 (5.4s)
+  ok 11 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 11 (5.5s)
+  ok 10 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 10 (5.8s)
+  ok 12 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 12 (5.4s)
+  ok 13 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 13 (5.5s)
+  ok 15 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 15 (5.6s)
+  ok 14 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 14 (6.0s)
+  ok 16 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 16 (5.7s)
+  ok 17 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 17 (5.8s)
+  ok 19 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 19 (5.3s)
+  ok 18 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 18 (5.7s)
+  ok 20 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 20 (5.6s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-input-box-chromium-win32.png, writing actual.
+  ok 21 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (5.7s)
+  ok 23 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 3 (5.2s)
+  ok 24 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 4 (5.2s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-stack-item-chromium-win32.png, writing actual.
+  ok 22 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 2 (6.1s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-open-panel-regular-chromium-win32.png, writing actual.
+  ok 25 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 5 (5.9s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-save-panel-regular-chromium-win32.png, writing actual.
+  ok 26 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 6 (5.9s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-open-panel-compact-chromium-win32.png, writing actual.
+  ok 27 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 7 (5.7s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-save-panel-compact-chromium-win32.png, writing actual.
+  ok 28 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 8 (5.6s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-text-input-host-chromium-win32.png, writing actual.
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-route-picker-chromium-win32.png, writing actual.
+  ok 29 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 9 (6.1s)
+  ok 31 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 11 (5.8s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-web-view-chromium-win32.png, writing actual.
+  ok 32 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 12 (6.0s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-table-cell-view-chromium-win32.png, writing actual.
+  ok 30 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 10 (6.4s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-page-controller-stackHistory-chromium-win32.png, writing actual.
+  ok 34 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 13 (6.0s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-page-controller-pageCurl-chromium-win32.png, writing actual.
+  ok 35 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 15 (6.0s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-page-controller-horizontalStrip-chromium-win32.png, writing actual.
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-container-pane-plain-chromium-win32.png, writing actual.
+  ok 33 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 14 (6.5s)
+  ok 36 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 16 (6.1s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-container-pane-inspector-chromium-win32.png, writing actual.
+  ok 39 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 19 (5.8s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-container-pane-surface-chromium-win32.png, writing actual.
+  ok 37 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 17 (6.5s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-container-pane-sidebar-chromium-win32.png, writing actual.
+  ok 38 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 18 (6.2s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-container-pane-floating-chromium-win32.png, writing actual.
+  ok 40 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 20 (6.0s)
+(node:48996) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:77068) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:20188) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:77508) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 42 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3 (5.7s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\light-input-box-chromium-high-dpr-win32.png, writing actual.
+  ok 41 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 (6.1s)
+  ok 44 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 4 (5.8s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\light-stack-item-chromium-high-dpr-win32.png, writing actual.
+  ok 43 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2 (6.5s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\light-open-panel-regular-chromium-high-dpr-win32.png, writing actual.
+  ok 45 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 5 (5.8s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\light-open-panel-compact-chromium-high-dpr-win32.png, writing actual.
+  ok 47 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 7 (5.7s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\light-save-panel-regular-chromium-high-dpr-win32.png, writing actual.
+  ok 46 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 6 (6.0s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\light-save-panel-compact-chromium-high-dpr-win32.png, writing actual.
+  ok 48 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 8 (5.4s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\light-route-picker-chromium-high-dpr-win32.png, writing actual.
+  ok 49 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 9 (6.2s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\light-text-input-host-chromium-high-dpr-win32.png, writing actual.
+  ok 51 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 11 (5.9s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\light-web-view-chromium-high-dpr-win32.png, writing actual.
+  ok 52 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 12 (6.0s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\light-table-cell-view-chromium-high-dpr-win32.png, writing actual.
+  ok 50 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 10 (6.5s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\light-page-controller-stackHistory-chromium-high-dpr-win32.png, writing actual.
+  ok 53 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 13 (6.2s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\light-page-controller-pageCurl-chromium-high-dpr-win32.png, writing actual.
+  ok 55 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 15 (6.1s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\light-container-pane-plain-chromium-high-dpr-win32.png, writing actual.
+  ok 56 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 16 (6.1s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\light-page-controller-horizontalStrip-chromium-high-dpr-win32.png, writing actual.
+  ok 54 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 14 (6.6s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\light-container-pane-inspector-chromium-high-dpr-win32.png, writing actual.
+  ok 59 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 19 (6.0s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\light-container-pane-floating-chromium-high-dpr-win32.png, writing actual.
+  ok 60 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 20 (6.1s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\light-container-pane-sidebar-chromium-high-dpr-win32.png, writing actual.
+  ok 58 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 18 (6.5s)
+C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\light-folder-presentation-chromium-high-dpr-win32.png is re-generated, writing actual.
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\light-container-pane-surface-chromium-high-dpr-win32.png, writing actual.
+  ok 57 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 17 (7.3s)
+  ok 63 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 3 (6.0s)
+  ok 64 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 4 (5.6s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-input-box-chromium-high-dpr-win32.png, writing actual.
+  ok 61 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (6.7s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-stack-item-chromium-high-dpr-win32.png, writing actual.
+  ok 62 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 2 (6.9s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-open-panel-regular-chromium-high-dpr-win32.png, writing actual.
+  ok 65 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 5 (6.0s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-open-panel-compact-chromium-high-dpr-win32.png, writing actual.
+  ok 67 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 7 (5.8s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-save-panel-regular-chromium-high-dpr-win32.png, writing actual.
+  ok 66 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 6 (6.1s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-save-panel-compact-chromium-high-dpr-win32.png, writing actual.
+  ok 68 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 8 (5.7s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-route-picker-chromium-high-dpr-win32.png, writing actual.
+  ok 69 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 9 (6.6s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-text-input-host-chromium-high-dpr-win32.png, writing actual.
+  ok 71 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 11 (6.4s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-web-view-chromium-high-dpr-win32.png, writing actual.
+  ok 72 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 12 (6.3s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-table-cell-view-chromium-high-dpr-win32.png, writing actual.
+  ok 70 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 10 (6.7s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-page-controller-stackHistory-chromium-high-dpr-win32.png, writing actual.
+  ok 73 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 13 (6.4s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-page-controller-pageCurl-chromium-high-dpr-win32.png, writing actual.
+  ok 75 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 15 (6.4s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-container-pane-plain-chromium-high-dpr-win32.png, writing actual.
+  ok 76 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 16 (6.4s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-page-controller-horizontalStrip-chromium-high-dpr-win32.png, writing actual.
+  ok 74 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 14 (6.8s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-container-pane-inspector-chromium-high-dpr-win32.png, writing actual.
+  ok 79 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 19 (6.2s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-container-pane-sidebar-chromium-high-dpr-win32.png, writing actual.
+  ok 78 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 18 (6.6s)
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-container-pane-floating-chromium-high-dpr-win32.png, writing actual.
+  ok 80 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 20 (6.2s)
+C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-folder-presentation-chromium-high-dpr-win32.png is re-generated, writing actual.
+A snapshot doesn't exist at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts-snapshots\dark-container-pane-surface-chromium-high-dpr-win32.png, writing actual.
+  ok 77 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 17 (7.4s)
+
+  80 passed (2.4m)

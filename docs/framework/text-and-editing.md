@@ -17,7 +17,7 @@ export function NoteBody() {
   } | null>(null);
   useEffect(() => {
     const owner = createUndoableNSETextOwner({ flowId: "body" });
-    const session = new TextEditingSession({ id: "note-view", owner, history: owner.history });
+    const session = new TextEditingSession({ id: "note-view", textOwner: owner, history: owner.history });
     setBinding({ owner, session });
     return () => { session.dispose(); owner.dispose(); };
   }, []);
@@ -31,7 +31,7 @@ The bounded view supports paragraphs, inline attributes and semantic attachment 
 
 ### Sessions, commands and inspectors
 
-`TextEditingSession` (also exported as `NSETextEditingController`) keeps semantic selection, typing and composition state. Retained targets include document/flow identity, model revision, owner generation and selection lineage; asynchronous actions revalidate them after resource acquisition. Disposing an owner revokes its attached sessions.
+`TextEditingSession` (also exported as `NSETextEditingController`) keeps semantic selection, typing and composition state. Pass the content authority as `textOwner`; `owner: this` instead selects the controller's lifecycle owner, just as in other NSE controllers. Ambient construction ownership and `ownerSignal` also apply. Retained targets include document/flow identity, model revision, text-owner generation and selection lineage; asynchronous actions revalidate them after resource acquisition. Disposing either the text owner or lifecycle owner revokes the session.
 
 `NSETextCommands` supplies reusable insertion, deletion, clipboard, formatting and history intents. Clipboard interchange is bounded attributed JSON plus plain text; application-native fragments use application-private codecs. `NSETextInspectorBinding` uses the existing `NSEObjectController` for field drafts, then commits through the canonical text owner without another content undo registration. Typography adapters supply character, colour and paragraph-ruler actions; named styles and page margins remain application policy.
 
@@ -53,7 +53,7 @@ List markers are drawn by the view in the indent gutter. They are not characters
 
 ```ts
 const session = new TextEditingSession({
-  id: "post-body", owner, history,
+  id: "post-body", textOwner: owner, history,
   // A comment anchor does not grow when typing at its edge; a style id does not follow Enter.
   customAttributePolicies: { "journal.comment": { extendsWhenTyping: false }, "journal.style": { carriesAcrossParagraphSplit: false } },
   // Pages' "Following paragraph style": a heading is followed by body text.
@@ -80,7 +80,7 @@ In editable text a selected image shows eight handles, and dragging any of them 
 ```tsx
 // The application supplies its native model mapping.
 const owner = createSynWareNSETextOwner({ documents, documentId, flowId: "body", readContent: model => model.body, writeContent: (model, body) => ({ ...model, body }) });
-const session = new TextEditingSession({ id: "body-view", documentId, owner, history: documents.getUndoManager(documentId) });
+const session = new TextEditingSession({ id: "body-view", documentId, textOwner: owner, history: documents.getUndoManager(documentId) });
 const participant = bindSynWareNSETextEditingSession({ documents, documentId, session });
 // Dispose the participant/session/owner when this view's scope ends.
 ```
@@ -105,17 +105,17 @@ Ranges use UTF-16 offsets; surrogate interiors are rejected. User deletion/movem
 
 ## Typography
 
-`NSEFontManager` and `NSEFontPanel` provide font selection in the manner of `NSFontManager`, including families, sizes, weights and paragraph styles. Applications reach the shared panel through the session, and choose fonts by `TFXFontDescriptor`. `NSERuler` draws a text ruler with tab stops and indents.
+`NSEFontManager` and `NSEFontPanel` provide font selection in the manner of `NSFontManager`, including families, sizes, weights and paragraph styles. Applications reach the shared panel through the session, and choose fonts by `TFXFontDescriptor`. `NSERulerView` draws a text ruler with tab stops and indents.
 
 Font choices belong to the host. A manager has no built-in family catalogue: supply family metadata when constructing it, or offer fonts registered in its font library. The framework packages no site font files, and its chrome inherits the host's typography. Portable font descriptors retain requested intent; font acquisition and resolution use the caller's resources.
 
-[Managed fonts](managed-fonts.md) capture resources, stable named faces and semantic UI roles in one declaration. Mounted apps access that manager with `useSynWareFonts()`; ordinary resolvers receive it explicitly. Imported-library snapshot changes refresh reader callbacks, while unknown or not-yet-installed selections retain fallback behavior. Catalogue metadata alone does not provide ready glyph data.
+[Managed fonts](managed-fonts.md) capture resources, stable named faces and semantic UI roles in one declaration. Mounted apps access that manager with `useFonts()`; ordinary resolvers receive it explicitly. Imported-library snapshot changes refresh reader callbacks, while unknown or not-yet-installed selections retain fallback behavior. Catalogue metadata alone does not provide ready glyph data.
 
 `NSELayoutManager` retains browser logical measurement and scoped invalidation. Shaped geometry uses explicit TextFX projections and supplied containers/exclusions. Their capability declarations distinguish logical DOM measurement from shaped glyph/caret geometry; they do not imply DOM/PDF pixel equality.
 
 ## Web content
 
-`NSEWebContentView` hosts external web content in a sandboxed frame. `useSynWareWebContent()` returns a client whose `createSession(request)` opens a session with a declared navigation policy. Pass the session to the view as its `session` prop.
+`NSEWebView` hosts external web content in a sandboxed frame. `useWebContent()` returns a client whose `createSession(request)` opens a session with a declared navigation policy. Pass the session to the view as its `session` prop.
 
 A session reports a snapshot with its `title`, its `state` (`loading`, `ready`, `suspended`, `failed` or `closed`), the frame's source, the expected origin and the sandbox in force. It offers `navigate`, `postMessage` and `openExternal`, each of which resolves to whether the host allowed it, and `dispose` to release the frame.
 

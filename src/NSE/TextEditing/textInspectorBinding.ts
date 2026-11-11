@@ -24,6 +24,7 @@ import { canonicalNSETextData } from "../Text";
 import { withNSETextCancellation } from "./textClipboard";
 import type { TextEditingSession } from "./TextEditingSession";
 import type { NSETextSelectionTarget } from "./textSessionTypes";
+import { SynCloudOSLifecycleRecord } from "../../SynCloudOS/nseRuntimeContracts";
 
 export interface NSETextInspectorDraftSnapshot {
   readonly revision:number;readonly content:{readonly value:unknown};readonly draft:{readonly value:unknown}|null;
@@ -37,6 +38,7 @@ export class NSETextInspectorBinding {
   readonly controller:NSETextInspectorDraftController;
   readonly #draftController:NSEObjectController<{value:unknown}>;
   readonly #session:TextEditingSession;
+  readonly #lifecycle:SynCloudOSLifecycleRecord;
   #target:NSETextSelectionTarget|null=null;
   #generation=0;
   #disposed=false;
@@ -45,32 +47,33 @@ export class NSETextInspectorBinding {
   #committing=false;
   constructor(options:{readonly session:TextEditingSession;readonly id:string}) {
     this.#session=options.session;
+    this.#lifecycle=new SynCloudOSLifecycleRecord({kind:"NSETextInspectorBinding",id:options.id});
     this.#draftController=new NSEObjectController<{value:unknown}>({id:`text-inspector:${options.id}`,content:{value:null},fields:{value:{read:content=>content.value,write:(content,value)=>({...content,value}),validate:()=>this.#issues}}});
     this.controller=Object.freeze({getSnapshot:this.#draftController.getSnapshot,subscribe:(listener:()=>void)=>this.#draftController.subscribe(listener)});
   }
   get issues():readonly ControllerValidationIssue[]{return this.#issues;}
-  #assertLive():void{if(this.#disposed)throw new Error("Text inspector is revoked.");}
+  #assertLive(operation:string):void{if(this.#disposed)throw this.#lifecycle.error({code:"NSE_TEXT_INSPECTOR_BINDING_DISPOSED",operation});}
   begin(initial:unknown=null):void {
-    this.#assertLive();this.cancel();const state=this.#session.getSnapshot();if(!state.editable || state.disposed || state.marked)throw new Error("Text inspector target is unavailable.");
+    this.#assertLive("begin");this.cancel();const state=this.#session.getSnapshot();if(!state.editable || state.disposed || state.marked)throw new Error("Text inspector target is unavailable.");
     this.#target=this.#session.captureTarget();
     this.#draftController.beginEditing({id:`${this.#draftController.id}:${this.#generation}`,actionName:"Formatting"});
     this.#draftController.setField("value",canonicalNSETextData(initial,"Inspector initial value"));
   }
   setDraft(value:unknown):boolean {
-    this.#assertLive();if(!this.#target)throw new Error("Begin editing the text inspector first.");
+    this.#assertLive("setDraft");if(!this.#target)throw new Error("Begin editing the text inspector first.");
     this.#generation++;this.#pending?.abort(new Error("Text inspector draft changed."));this.#pending=null;this.#issues=Object.freeze([]);
     return this.#draftController.setField("value",canonicalNSETextData(value,"Inspector draft"));
   }
-  preview(value:unknown):boolean{return this.setDraft(value);}
+  preview(value:unknown):boolean{this.#assertLive("preview");return this.setDraft(value);}
   async commit(apply:(value:unknown,target:NSETextSelectionTarget)=>unknown,validate?:(value:unknown,signal:AbortSignal)=>Promise<readonly ControllerValidationIssue[]>|readonly ControllerValidationIssue[]):Promise<{readonly status:"invalid";readonly issues:readonly ControllerValidationIssue[]}|{readonly status:"committed";readonly controller:ControllerCommitResult;readonly result:unknown}> {
-    this.#assertLive();if(this.#committing)throw new Error("Text inspector commitment is already in progress.");
+    this.#assertLive("commit");if(this.#committing)throw new Error("Text inspector commitment is already in progress.");
     if(!this.#target)throw new Error("Text inspector has no retained target.");
     const target=this.#target,generation=this.#generation,draft=this.controller.getSnapshot().draft;if(!draft)throw new Error("Text inspector has no draft.");
     const cancellation=new AbortController();this.#pending=cancellation;this.#committing=true;
     const unsubscribe=this.#session.subscribe(()=>{if(!this.#session.resolveTarget(target))cancellation.abort(new Error("Text inspector target is stale or revoked."));});
     try {
       const issues=validate ? await withNSETextCancellation(Promise.resolve(validate(draft.value,cancellation.signal)),cancellation.signal) : [];
-      cancellation.signal.throwIfAborted();this.#assertLive();
+      cancellation.signal.throwIfAborted();this.#assertLive("commit");
       if(generation!==this.#generation || this.#target!==target)throw new Error("Text inspector operation was cancelled or revoked.");
       const resolved=this.#session.resolveTarget(target);if(!resolved)throw new Error("Text inspector target is stale or revoked.");
       if(issues.length){this.#issues=Object.freeze(issues.map(issue=>Object.freeze({...issue})));this.#draftController.setField("value",draft.value);return Object.freeze({status:"invalid",issues:this.#issues});}
@@ -84,5 +87,5 @@ export class NSETextInspectorBinding {
   cancel():void {
     this.#generation++;this.#pending?.abort(new Error("Text inspector operation cancelled."));this.#pending=null;this.#target=null;this.#issues=Object.freeze([]);this.#draftController.discardEditing();
   }
-  dispose():void {if(this.#disposed)return;this.cancel();this.#disposed=true;this.#draftController.dispose();}
+  dispose():void {if(this.#disposed)return;this.#lifecycle.markDisposed("explicit");this.cancel();this.#disposed=true;this.#draftController.dispose();}
 }

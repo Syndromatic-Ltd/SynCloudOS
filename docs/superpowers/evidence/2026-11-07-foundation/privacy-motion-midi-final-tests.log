@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/privacy-motion-midi.test.ts tests/runtime/fx/motion-authority.test.ts tests/runtime/fx/motion-client.test.ts tests/runtime/fx/motion-hook.test.tsx tests/runtime/fx/midi-access.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  5 passed (5)
+      Tests  41 passed (41)
+   Start at  20:28:12
+   Duration  2.17s (transform 196ms, setup 60ms, import 408ms, tests 124ms, environment 939ms)

@@ -71,6 +71,11 @@ export interface KeyBindingManager {
   resolve(event: KeyBindingEvent, context: KeyBindingContext): KeyBindingResolution | null;
   claimKeyboardEvent(event: KeyBindingEvent, context: KeyBindingContext): KeyBindingClaim | null;
   handleKeyboardEvent(event: KeyBindingEvent, context: KeyBindingContext, claim?: KeyBindingClaim): Promise<KeyBindingHandleResult>;
+  /**
+   * The binding a command's menu item shows as its key equivalent: the user's
+   * override, else the first default for this platform. Null when it has none.
+   */
+  bindingFor(commandId: CommandId, responderId: string): ResolvedKeyBinding | null;
   setOverride(commandId: CommandId, binding: KeyBindingDeclaration | null): void;
   clearOverride(commandId: CommandId): void;
   inspectCollisions(): readonly KeyBindingCandidateInspection[];

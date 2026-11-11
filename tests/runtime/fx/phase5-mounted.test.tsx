@@ -1,0 +1,74 @@
+/*
+ * SynCloudOS
+ * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ *
+ * Designed by Kavish Krishnakumar in Manchester.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+// @vitest-environment jsdom
+import React from "react";
+import { NSEDecimalNumber } from "../../../src/Foundation/NSEDecimalNumber";
+import { PKFXPaymentAuthorizationController, PKFXPaymentRequest, PKFXPaymentSummaryItem } from "../../../src/FX/PassFX/public";
+import { XRFXSession, XRFXOrientationTrackingConfiguration } from "../../../src/FX/XRFX/public";
+import { BTFXCentralManager } from "../../../src/FX/BluetoothFX/public";
+import { NFXNDEFReaderSession } from "../../../src/FX/NFCFX/public";
+import { CNFXContactStore } from "../../../src/FX/ContactsFX/public";
+import { expect, it } from "vitest";
+import { createSynWare, useBluetooth, useNFC, useSpeech, useContacts, usePayment, useXR, useSCOS } from "../../../src/SynCloudOS/AppSDK";
+import { createSynWareTestHost } from "../../../src/SynCloudOS/AppSDK/testing";
+
+it("projects mounted clients and the real Speech recognizer and revokes component owners on unmount", async () => {
+  let owners!: {
+    bluetooth: ReturnType<typeof useBluetooth>; nfc: ReturnType<typeof useNFC>;
+    speech: ReturnType<typeof useSpeech>; contacts: ReturnType<typeof useContacts>;
+    payment: ReturnType<typeof usePayment>; xr: ReturnType<typeof useXR>;
+    session: ReturnType<typeof useSCOS>;
+  };
+  const request = new PKFXPaymentRequest();
+  Object.assign(request, { merchantIdentifier: "merchant.test", countryCode: "GB", currencyCode: "GBP", supportedNetworks: ["visa"], merchantCapabilities: 1, paymentSummaryItems: [new PKFXPaymentSummaryItem("Merchant", NSEDecimalNumber.one)] });
+  const app = createSynWare({
+    manifest: { schemaVersion: 1, bundleIdentifier: "com.syndromatic.phase5-probe", version: "1.0.0", displayName: "Phase 5 Probe",
+      entitlements: ["bluetooth.access", "nfc.read", "nfc.write", "speech.recognize", "contacts.select", "payment.request", "xr.session"] },
+    root() {
+      owners = { bluetooth: useBluetooth(), nfc: useNFC({ readerSessionDidInvalidateWithError() {} }), speech: useSpeech(), contacts: useContacts(), payment: usePayment(request), xr: useXR(), session: useSCOS() };
+      return null;
+    },
+  });
+  const host = createSynWareTestHost({ app, document, strictMode: true });
+  host.adapters.permissions.allow(); host.adapters.policy.allow();
+  await host.render();
+  expect("xr" in owners.session).toBe(false);
+  expect(owners.xr).toBeInstanceOf(XRFXSession);
+  expect("nfc" in owners.session).toBe(false);
+  expect(owners.nfc).toBeInstanceOf(NFXNDEFReaderSession);
+  expect("speech" in owners.session).toBe(false);
+  expect("contacts" in owners.session).toBe(false);
+  expect("payment" in owners.session).toBe(false);
+  expect(owners.payment).toBeInstanceOf(PKFXPaymentAuthorizationController);
+  expect(owners.contacts).toBeInstanceOf(CNFXContactStore);
+  expect("bluetooth" in owners.session).toBe(false);
+  expect(owners.bluetooth).toBeInstanceOf(BTFXCentralManager);
+  expect(owners.bluetooth.state).toBe("unsupported");
+  expect(owners.speech.isAvailable).toBe(false);
+  expect(() => owners.contacts.unifiedContacts(null, [])).toThrow();
+  expect(owners.xr.currentFrame).toBeNull();
+  await host.dispose();
+  expect(() => owners.payment.present()).toThrow();
+  expect(() => owners.bluetooth.scanForPeripherals(null)).toThrow();
+  expect(() => owners.xr.run(new XRFXOrientationTrackingConfiguration())).toThrow();
+  expect(owners.speech.isAvailable).toBe(false);
+  expect(() => owners.contacts.unifiedContacts(null, [])).toThrow();
+});

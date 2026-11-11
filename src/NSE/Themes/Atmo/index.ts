@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import "./Resources/atmo-structure.css";
-import "./Resources/atmo.css";
-import "./Resources/chrome.css";
-export { atmoAppearance } from "./appearance";
+import "../../Structure/layers.css";
+import "../../Appearance/atmo-theme.css";
+export { atmoTheme } from "./appearance";
+export { atmoMotion } from "./motion";

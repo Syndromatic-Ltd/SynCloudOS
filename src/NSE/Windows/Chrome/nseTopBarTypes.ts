@@ -47,8 +47,12 @@ export interface NSETopBarItem {
   label: string;
   selected?: boolean;
   disabled?: boolean;
+  /**
+   * URL of a single-shape SVG, drawn as a CSS mask for any item kind so the theme colours it in
+   * its normal, pressed and selected states. When absent, each built-in kind draws its own glyph
+   * (`webspring` a house, `userInfo` a person, `settings` a gear); a `custom` item draws nothing.
+   */
   icon?: string;
-  selectedIcon?: string;
   haptic?: HFXFeedbackRequest;
   onClick?: () => void;
   /** The item opens a menu; `selected` then reports whether it is open. */
@@ -79,8 +83,12 @@ export interface NSETopBarProps {
   trailingItems?: NSETopBarItem[];
   /** Replaces mapped leading items when supplied, including when explicitly null. */
   leading?: ReactNode;
+  /** @internal Window-owned views beside the host’s leading controls. */
+  leadingAccessory?: ReactNode;
   /** Replaces mapped trailing items when supplied, including when explicitly null. */
   trailing?: ReactNode;
+  /** @internal Window-owned views beside the host’s trailing controls. */
+  trailingAccessory?: ReactNode;
   titleAction?: NSETopBarTitleAction | null;
   /** Metal variant: `"leading"` sets the app title (and its title action) straight after the
    *  leading items, as a document window does, leaving the middle for `center`. In dark chrome
@@ -88,11 +96,13 @@ export interface NSETopBarProps {
   titlePlacement?: "centre" | "leading";
   center?: ReactNode;
   className?: string;
+  /** @internal The bar is a document window's titlebar: the window's represented document title sits in it. */
+  documentTitlebar?: boolean;
   smoothSurface?: NSESmoothSurfaceRequest;
   style?: CSSProperties;
 }
 
 export interface NSETopBarStyleDefinition {
-  height: number;
-  icons: Partial<Record<NSETopBarItemKind, { normal: string; selected: string }>>;
+  /** Built-in glyph URL per item kind (single-shape SVGs used as CSS masks). */
+  icons: Partial<Record<NSETopBarItemKind, string>>;
 }

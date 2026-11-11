@@ -1,0 +1,41 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/fx/phase5-contacts.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/phase5-contacts.test.ts (10 tests | 2 failed) 12ms
+     × presents the named browser picker controller and freezes request fields 4ms
+     × promptly cancels picker controller work while the browser dialog remains pending 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/phase5-contacts.test.ts > ContactsFX per-request browser picker > presents the named browser picker controller and freezes request fields
+TypeError: CNFXContactPickerViewController is not a constructor
+ ❯ tests/runtime/fx/phase5-contacts.test.ts:31:24
+     29|     const store = new BrowserContactsAdapter({ isSecureContext: true, …
+     30|     const properties: ("name" | "email")[] = ["name"];
+     31|     const controller = new CNFXContactPickerViewController(store, { pr…
+       |                        ^
+     32|     properties.push("email");
+     33|     const selected = await controller.present();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/runtime/fx/phase5-contacts.test.ts > ContactsFX per-request browser picker > promptly cancels picker controller work while the browser dialog remains pending
+TypeError: CNFXContactPickerViewController is not a constructor
+ ❯ tests/runtime/fx/phase5-contacts.test.ts:43:24
+     41|     const select = () => new Promise<{ name: string[] }[]>(resolve => …
+     42|     const store = new BrowserContactsAdapter({ isSecureContext: true, …
+     43|     const controller = new CNFXContactPickerViewController(store);
+       |                        ^
+     44|     const selected = controller.present().catch(error => error);
+     45|     controller.dispose();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 8 passed (10)
+   Start at  19:09:40
+   Duration  241ms (transform 57ms, setup 31ms, import 45ms, tests 12ms, environment 0ms)
+

@@ -1,0 +1,6 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run tsc -b --pretty false
+src/SynWare/NSEControlGallery.app/Contents/GalleryViews.tsx(106,109): error TS2339: Property 'toolbarStyle' does not exist on type 'NSEWindow'.
+tests/runtime/gallery-class.test.tsx(219,17): error TS2339: Property 'toolbarStyle' does not exist on type 'NSEWindow'.
+tests/runtime/gallery-class.test.tsx(223,28): error TS2339: Property 'getByText' does not exist on type 'SynWareTestRenderResult'.
+tests/runtime/gallery-class.test.tsx(229,19): error TS2339: Property 'toolbarStyle' does not exist on type 'NSEWindow'.

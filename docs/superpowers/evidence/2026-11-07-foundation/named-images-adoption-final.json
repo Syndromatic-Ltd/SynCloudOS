@@ -1,0 +1,11 @@
+{
+  "framework": "C:\\Users\\Kavish Krishnakumar\\Developer\\SynCloudOS-Workspace\\.worktrees\\webspring-folders\\framework",
+  "commit": "d7e1b829156909ed478ccc3f303724d0887fb78f",
+  "scratch": "C:\\Users\\Kavish Krishnakumar\\AppData\\Local\\Temp\\syncloudos-named-images-final-9662639db0e54e108eedd0af0e22b5d1",
+  "junctionDeletedFirst": true,
+  "frameworkVitestSurvived": true,
+  "scratchRemoved": false,
+  "gitRegistrationRemoved": true,
+  "gitRemovalError": "Filename too long; registration removed but directory remains",
+  "nativeCleanupBlocked": "Automatic approval review rejected two guarded PowerShell Remove-Item -LiteralPath -Recurse attempts: blocked by policy; no further reason supplied"
+}

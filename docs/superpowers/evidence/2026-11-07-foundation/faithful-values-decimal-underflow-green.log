@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/foundation-faithful-decimal.test.ts tests/runtime/model-native-boundaries.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  2 passed (2)
+      Tests  7 passed (7)
+   Start at  19:14:06
+   Duration  272ms (transform 135ms, setup 57ms, import 125ms, tests 10ms, environment 0ms)
+

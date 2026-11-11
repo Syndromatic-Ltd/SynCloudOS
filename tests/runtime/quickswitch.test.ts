@@ -49,12 +49,12 @@ vi.mock("../../src/Webspring/WebspringIconEffect", () => ({
 }));
 
 function app(id: string, displayName: string, shortName = displayName) {
-  return {
-    id,
+  return { version: "1.0.0",
+    bundleIdentifier: id,
     displayName,
     shortName,
     packageName: `com.test.${id}`,
-    route: `/${id}`,
+    route: `/${id.split(".").at(-1)}`,
     icon: { src: `/icons/${id}.png` },
     notifications: { badgeCount: 0 },
     isDisabled: false
@@ -71,38 +71,38 @@ describe("Webspring QuickSwitch model", () => {
     expect(normalizeQuickSwitchKey("a")).toBe("A");
     expect(normalizeQuickSwitchKey("7")).toBe("7");
     expect(normalizeQuickSwitchKey("Enter")).toBeNull();
-    expect(getQuickSwitchMnemonic(app("about", "About"))).toBe("A");
-    expect(getQuickSwitchMnemonic(app("studio", "Studio", "  Studio"))).toBe("S");
+    expect(getQuickSwitchMnemonic(app("com.example.about", "About"))).toBe("A");
+    expect(getQuickSwitchMnemonic(app("com.example.studio", "Studio", "  Studio"))).toBe("S");
   });
 
   it("selects initial, arrow, and duplicate-letter indices deterministically", () => {
-    const disabledArchive = app("archive", "Archive");
+    const disabledArchive = app("com.example.archive", "Archive");
     disabledArchive.isDisabled = true;
     const apps = [
-      app("about", "About"),
+      app("com.example.about", "About"),
       disabledArchive,
-      app("studio", "Studio")
+      app("com.example.studio", "Studio")
     ];
     const selectable = (item: { isDisabled?: boolean }) => !item.isDisabled;
 
-    expect(getQuickSwitchInitialIndex(apps, null, "studio")).toBe(2);
+    expect(getQuickSwitchInitialIndex(apps, null, "com.example.studio")).toBe(2);
     expect(moveQuickSwitchSelection(0, apps.length, "ArrowLeft")).toBe(2);
     expect(moveQuickSwitchSelection(2, apps.length, "ArrowRight")).toBe(0);
     expect(selectQuickSwitchMnemonicIndex(apps, "A", -1)).toBe(0);
     expect(selectQuickSwitchMnemonicIndex(apps, "A", 0)).toBe(1);
     expect(selectQuickSwitchMnemonicIndex(apps, "A", 1)).toBe(0);
-    expect(getQuickSwitchInitialIndex(apps, "archive", null, selectable)).toBe(0);
+    expect(getQuickSwitchInitialIndex(apps, "com.example.archive", null, selectable)).toBe(0);
     expect(moveQuickSwitchSelection(0, apps.length, "ArrowRight", [0, 2])).toBe(2);
     expect(selectQuickSwitchMnemonicIndex(apps, "A", 0, selectable)).toBe(0);
   });
 
   it("derives opened indicators from runtime application and lifecycle authority", () => {
-    expect(isQuickSwitchOpenedApp("about", { activeAppId: "about" })).toBe(true);
-    expect(isQuickSwitchOpenedApp("about", { openAppIds: ["about"] })).toBe(true);
-    expect(isQuickSwitchOpenedApp("about", { lifecycle: { about: "ready" } })).toBe(false);
-    expect(isQuickSwitchOpenedApp("about", { lifecycle: { about: "loading" } })).toBe(false);
-    expect(isQuickSwitchOpenedApp("about", { lifecycle: { about: "suspended" } })).toBe(true);
-    expect(isQuickSwitchOpenedApp("about", { lifecycle: { about: "registered" } })).toBe(false);
+    expect(isQuickSwitchOpenedApp("com.example.about", { activeAppId: "com.example.about" })).toBe(true);
+    expect(isQuickSwitchOpenedApp("com.example.about", { openAppIds: ["com.example.about"] })).toBe(true);
+    expect(isQuickSwitchOpenedApp("com.example.about", { lifecycle: { "com.example.about": "ready" } })).toBe(false);
+    expect(isQuickSwitchOpenedApp("com.example.about", { lifecycle: { "com.example.about": "loading" } })).toBe(false);
+    expect(isQuickSwitchOpenedApp("com.example.about", { lifecycle: { "com.example.about": "suspended" } })).toBe(true);
+    expect(isQuickSwitchOpenedApp("com.example.about", { lifecycle: { "com.example.about": "registered" } })).toBe(false);
   });
 
   it("guards the opener shortcut around editable targets without suppressing standard dialogs", () => {
@@ -126,9 +126,9 @@ describe("Webspring QuickSwitch model", () => {
 describe("WebspringQuickSwitchView", () => {
   it("selects by mnemonic and opens only after Enter", async () => {
     const apps = [
-      app("about", "About"),
-      app("archive", "Archive"),
-      app("studio", "Studio")
+      app("com.example.about", "About"),
+      app("com.example.archive", "Archive"),
+      app("com.example.studio", "Studio")
     ];
     const onClose = vi.fn();
     const runtime = createTestRuntime();
@@ -137,10 +137,10 @@ describe("WebspringQuickSwitchView", () => {
     render(React.createElement(SynCloudOSProvider, { runtime }, React.createElement(WebspringQuickSwitchView, {
       open: true,
       apps,
-      lifecycle: { about: "registered", archive: "registered", studio: "active" },
+      lifecycle: { "com.example.about": "registered", archive: "registered", "com.example.studio": "active" },
       windows: [],
-      openAppIds: ["studio"],
-      activeAppId: "studio",
+      openAppIds: ["com.example.studio"],
+      activeAppId: "com.example.studio",
       selectedAppId: null,
       onClose
     })));
@@ -162,19 +162,19 @@ describe("WebspringQuickSwitchView", () => {
 
     expect(onClose).toHaveBeenCalled();
     await waitFor(() => {
-      expect(dispatch).toHaveBeenCalledWith("workspace.openApp", { appId: "archive" }, { source: "keyboard" });
+      expect(dispatch).toHaveBeenCalledWith("workspace.openApp", { appId: "com.example.archive" }, { source: "keyboard" });
     });
   });
 
   it("moves with arrows and closes on Escape", async () => {
-    const apps = [app("about", "About"), app("studio", "Studio")];
+    const apps = [app("com.example.about", "About"), app("com.example.studio", "Studio")];
     const onClose = vi.fn();
     const runtime = createTestRuntime();
 
     render(React.createElement(SynCloudOSProvider, { runtime }, React.createElement(WebspringQuickSwitchView, {
       open: true,
       apps,
-      lifecycle: { about: "registered", studio: "registered" },
+      lifecycle: { "com.example.about": "registered", "com.example.studio": "registered" },
       windows: [],
       openAppIds: [],
       activeAppId: null,
@@ -192,9 +192,9 @@ describe("WebspringQuickSwitchView", () => {
   });
 
   it("skips disabled options and activates the selected app with Space", async () => {
-    const disabledArchive = app("archive", "Archive");
+    const disabledArchive = app("com.example.archive", "Archive");
     disabledArchive.isDisabled = true;
-    const apps = [app("about", "About"), disabledArchive, app("studio", "Studio")];
+    const apps = [app("com.example.about", "About"), disabledArchive, app("com.example.studio", "Studio")];
     const onClose = vi.fn();
     const runtime = createTestRuntime();
     const dispatch = vi.spyOn(runtime.commands, "dispatch");
@@ -202,7 +202,7 @@ describe("WebspringQuickSwitchView", () => {
     render(React.createElement(SynCloudOSProvider, { runtime }, React.createElement(WebspringQuickSwitchView, {
       open: true,
       apps,
-      lifecycle: { about: "registered", archive: "disabled", studio: "registered" },
+      lifecycle: { "com.example.about": "registered", archive: "disabled", "com.example.studio": "registered" },
       windows: [],
       openAppIds: [],
       activeAppId: null,
@@ -219,7 +219,7 @@ describe("WebspringQuickSwitchView", () => {
 
     expect(onClose).toHaveBeenCalled();
     await waitFor(() => {
-      expect(dispatch).toHaveBeenCalledWith("workspace.openApp", { appId: "studio" }, { source: "keyboard" });
+      expect(dispatch).toHaveBeenCalledWith("workspace.openApp", { appId: "com.example.studio" }, { source: "keyboard" });
     });
   });
 });

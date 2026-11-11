@@ -18,12 +18,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useNSEAppearance } from "../../Appearance/NSEAppearanceProvider";
 import { useEffect, useRef, type KeyboardEvent } from "react";
 import "./loginPlate.css";
 import "./LoginWindow.css";
 import { useNSEAnimationEnvironment, useNSEPresentation } from "../../Animation";
 import { resolveLoginWindowTransitions } from "./LoginWindow.transitions";
-import { NSEPushButton } from "../../Controls/Buttons/NSEButtons";
+import { NSEButton } from "../../Controls/Buttons/NSEButton";
+import { NSESpinner } from "../../Progress/spinnerSprite";
 import { useNSEFeedback } from "../../Feedback";
 import { loginWindowAssets } from "./loginWindowAssets";
 
@@ -47,6 +49,7 @@ function focusable(root: HTMLElement | null) {
 }
 
 export function LoginWindow({ title = "Sign in", branding, methods = [], authenticationStatus, onMethodSignIn, onCancel, cancelLabel = "Cancel", variant = "atmoPlacard", loading = false, error = null, configurationError = null, className = "" }: LoginWindowProps) {
+  const ornamented = useNSEAppearance().theme.presentation.login === "ornamented";
   const rootRef = useRef<HTMLDivElement>(null);
   const swingRef = useRef<HTMLDivElement>(null);
   const shakeRef = useRef<HTMLDivElement>(null);
@@ -56,7 +59,7 @@ export function LoginWindow({ title = "Sign in", branding, methods = [], authent
   const { window: windowMotion, enter: enterMotion, shake: shakeMotion } = resolveLoginWindowTransitions(reducedMotion);
   const activeError = configurationError ?? error;
   useNSEPresentation(rootRef, windowMotion);
-  useNSEPresentation(swingRef, enterMotion);
+  useNSEPresentation(swingRef, ornamented ? enterMotion : resolveLoginWindowTransitions(true).enter);
   // Each newly visible error shakes the placard once.
   useNSEPresentation(shakeRef, { state: activeError ?? "", enter: () => activeError ? shakeMotion : null });
   const logoUrl = branding?.compactLogoUrl ?? branding?.logoUrl;
@@ -80,15 +83,24 @@ export function LoginWindow({ title = "Sign in", branding, methods = [], authent
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus({ preventScroll: true }); }
   }
   return (
-    <div ref={rootRef} className={`nse-login-window nse-login-window--${variant} is-login-step-synId ${activeError ? "has-login-error" : ""} ${className}`} data-sheen="enter" role="dialog" aria-modal="true" aria-labelledby="nse-login-window-title" aria-describedby={activeError ? "nse-login-window-error" : undefined} onKeyDown={trapFocus}>
-      <span className="nse-login-window-top-tack" aria-hidden="true"><img src={loginWindowAssets.tackTransparent} alt="" draggable={false} /><img src={loginWindowAssets.tackWhite} alt="" draggable={false} /></span>
-      <div ref={swingRef} className="nse-login-window-swing-stage">
-        <div className="nse-login-window-hang" aria-hidden="true"><div className="nse-login-window-hang-flipper"><img className="nse-login-window-rope-shadow" src={loginWindowAssets.ropeShadow} alt="" draggable={false} /><img className="nse-login-window-rope nse-login-window-rope-left" src={loginWindowAssets.ropeLeft} alt="" draggable={false} /><img className="nse-login-window-rope nse-login-window-rope-right" src={loginWindowAssets.ropeRight} alt="" draggable={false} /></div></div>
-        <div ref={shakeRef} className="nse-login-window-shake-stage"><div className="nse-login-window-card-stage"><div className="nse-login-window-card-flipper is-signin">
-          <img className="nse-login-window-beta-ribbon" src={loginWindowAssets.betaRibbon} alt="" aria-hidden="true" draggable={false} /><img className="nse-login-window-ring nse-login-window-ring-left" src={loginWindowAssets.ringLeft} alt="" aria-hidden="true" draggable={false} /><img className="nse-login-window-ring nse-login-window-ring-right" src={loginWindowAssets.ringRight} alt="" aria-hidden="true" draggable={false} />
-          <section className="nse-login-window-card nse-login-window-face nse-login-window-face-front" data-login-face="signin"><span className="nse-login-window-texture" aria-hidden="true" /><span className="nse-login-window-texture-turn" aria-hidden="true" /><div className="nse-login-window-content">
-            <img className="nse-login-window-logo" src={logoUrl ?? loginWindowAssets.logo} alt={logoUrl ? branding?.logoAlt : ""} aria-hidden={logoUrl ? undefined : "true"} draggable={false} /><h1 id="nse-login-window-title">{title}</h1>
-            <div className="nse-login-form" aria-live="polite"><p id="nse-login-window-error" className="nse-login-error" role="alert">{activeError ?? (authenticationStatus === "checking" ? "Checking your session…" : "\u00a0")}</p><div className="nse-login-action">{methods.map((method) => <NSEPushButton key={method.id} type="button" tone="light" icon={method.iconUrl ? <img className="nse-login-provider-icon" src={method.iconUrl} alt="" aria-hidden={true} draggable={false} /> : undefined} loading={authenticationStatus === "authenticating"} disabled={pending || Boolean(configurationError)} onClick={() => { void Promise.resolve(onMethodSignIn?.(method.id)).catch(() => undefined); }}>{method.label}</NSEPushButton>)}{onCancel ? <NSEPushButton type="button" tone="light" disabled={pending} onClick={onCancel}>{cancelLabel}</NSEPushButton> : null}</div></div>
+    <div data-nse-control="login-window" data-nse-part="background" ref={rootRef} className={`nse-login-window nse-login-window--${variant} is-login-step-synId ${activeError ? "has-login-error" : ""} ${className}`} data-sheen={ornamented ? "enter" : undefined} data-nse-login-presentation={ornamented ? "ornamented" : "plain"} role="dialog" aria-modal="true" aria-labelledby="nse-login-window-title" aria-describedby={activeError ? "nse-login-window-error" : undefined} onKeyDown={trapFocus}>
+      {ornamented ? <span data-nse-part="attachment" className="nse-login-window-top-tack" aria-hidden="true"><img src={loginWindowAssets.tackTransparent} alt="" draggable={false} /><img src={loginWindowAssets.tackWhite} alt="" draggable={false} /></span> : null}
+      <div ref={swingRef} data-nse-part="effects" className="nse-login-window-swing-stage">
+        {ornamented ? <div data-nse-part="suspension" className="nse-login-window-hang" aria-hidden="true"><div data-nse-part="content" className="nse-login-window-hang-flipper"><img data-nse-part="shadow" className="nse-login-window-rope-shadow" src={loginWindowAssets.ropeShadow} alt="" draggable={false} /><img data-nse-part="leading" className="nse-login-window-rope nse-login-window-rope-left" src={loginWindowAssets.ropeLeft} alt="" draggable={false} /><img data-nse-part="trailing" className="nse-login-window-rope nse-login-window-rope-right" src={loginWindowAssets.ropeRight} alt="" draggable={false} /></div></div> : null}
+        <div ref={shakeRef} data-nse-part="effects" className="nse-login-window-shake-stage"><div data-nse-part="content" className="nse-login-window-card-stage"><div data-nse-part="content" className="nse-login-window-card-flipper is-signin">
+          <img data-nse-part="badge" className="nse-login-window-beta-ribbon" src={loginWindowAssets.betaRibbon} alt="" aria-hidden="true" draggable={false} />{ornamented ? <img data-nse-part="leading" className="nse-login-window-ring nse-login-window-ring-left" src={loginWindowAssets.ringLeft} alt="" aria-hidden="true" draggable={false} /> : null}{ornamented ? <img data-nse-part="trailing" className="nse-login-window-ring nse-login-window-ring-right" src={loginWindowAssets.ringRight} alt="" aria-hidden="true" draggable={false} /> : null}
+          <section data-nse-part="bezel" className="nse-login-window-card nse-login-window-face nse-login-window-face-front" data-login-face="signin"><span data-nse-part="background" className="nse-login-window-texture" aria-hidden="true" /><span data-nse-part="decoration" className="nse-login-window-texture-turn" aria-hidden="true" /><div data-nse-part="content" className="nse-login-window-content">
+            <img data-nse-part="image" className="nse-login-window-logo" src={logoUrl ?? loginWindowAssets.logo} alt={logoUrl ? branding?.logoAlt : ""} aria-hidden={logoUrl ? undefined : "true"} draggable={false} /><h1 data-nse-part="title" id="nse-login-window-title">{title}</h1>
+            <div data-nse-part="content" className="nse-login-form" aria-live="polite"><p id="nse-login-window-error" data-nse-part="error" className="nse-login-error" role="alert">{activeError ?? (authenticationStatus === "checking" ? "Checking your session…" : "\u00a0")}</p><div data-nse-part="actions" className="nse-login-action">{methods.map((method) => <NSEButton
+              appearance="aqua"
+              title={method.label}
+              image={<>{authenticationStatus === "authenticating" ? <NSESpinner size="small" tone="dark" label="Loading" /> : null}{method.iconUrl ? <img data-nse-part="image" className="nse-login-provider-icon" src={method.iconUrl} alt="" aria-hidden={true} draggable={false} /> : null}</>}
+              isEnabled={!(pending || Boolean(configurationError) || authenticationStatus === "authenticating")}
+              aria-busy={authenticationStatus === "authenticating" || undefined}
+              key={method.id}
+              type="button"
+              onClick={() => { void Promise.resolve(onMethodSignIn?.(method.id)).catch(() => undefined); }}
+            />)}{onCancel ? <NSEButton appearance="aqua" title={cancelLabel} isEnabled={!pending} type="button" onClick={onCancel} /> : null}</div></div>
           </div></section>
         </div></div></div>
       </div>

@@ -17,9 +17,28 @@
  * limitations under the License.
  */
 
+import { associateXRAdapter, type XRAdapter, type XRCallbacks } from "../../../FX/XRFX/internal/xrPort";
+import { makeXRCamera, makeXRFrame, makeXRRaycastResult } from "../../../FX/XRFX/internal/xrObjects";
+import { AFXTransform3D } from "../../../FX/AnimationFX/AFXTransform3D";
+import type { XRFXAnchor } from "../../../FX/XRFX/XRFXAnchor";
+import { BTFXUUID } from "../../../FX/BluetoothFX/BTFXUUID";
+import { NSEUUID } from "../../../Foundation/NSEUUID";
+import { associateBluetoothAdapter, type BluetoothAdapter, type BTConnection, type BTCharacteristic } from "../../../FX/BluetoothFX/internal/bluetoothPort";
+import { NFXNDEFMessage, NFXNDEFPayload, NFXReaderError } from "../../../FX/NFCFX/public";
+import { associateNFCAdapter, type NFCAdapter, type NFCEvents, type NFCNativeTag } from "../../../FX/NFCFX/internal/nfcPort";
+import { associatePaymentAdapter, type PaymentAdapter, type PaymentResponse } from "../../../FX/PassFX/internal/paymentPort";
+import { PKFXPayment, PKFXPaymentMethod, PKFXPaymentToken, PKFXContact, type PKFXPaymentAuthorizationStatus } from "../../../FX/PassFX/public";
+import { paymentMethods, paymentTokens, payments } from "../../../FX/PassFX/internal/paymentValues";
+import { NSEPersonNameComponents } from "../../../Foundation/NSEPersonNameComponents";
+import { associateContactsAdapter, type ContactsAdapter } from "../../../FX/ContactsFX/internal/contactsPort";
+import { CNFXMutableContact } from "../../../FX/ContactsFX/CNFXMutableContact";
+import { NSEData } from "../../../Foundation/NSEData";
+import { normalisePasteboardRepresentations } from "../../Pasteboard/Pasteboard";
 import type {
   PasteboardAdapter,
   PasteboardRepresentation,
+  PasteboardRepresentationInput,
+  LazyPasteboardRepresentation,
   RuntimeLayoutViewportSnapshot,
   RuntimeMediaQuery,
   RuntimeScreenSnapshot,
@@ -30,6 +49,9 @@ import type {
   RuntimeTestCapabilityControls,
   SynCloudOSRuntimeEnvironment,
 } from "../../SynCloudOS";
+import { BrowserPointerAdapter } from "../../PlatformAdapters/BrowserPointerAdapter";
+import { createBrowserAnimationLayerHost } from "../../PlatformAdapters/BrowserAnimationLayerHost";
+import type { AFXFrameScheduler } from "../../../FX/AnimationFX/AFXLayer";
 import type {
   SynWareFakeAnimationOperation,
   SynWareFakeAudioOperation,
@@ -68,6 +90,8 @@ import type {
   SynWareTestClock,
   SynWareTestMediaClock,
 } from "./testHostTypes";
+import { associateSpeechAdapter, type SpeechAdapter, type SpeechEvent } from "../../../FX/SpeechFX/internal/speechPort";
+import { associateNetworkAdapter } from "../../../FX/NetworkFX/internal/networkPort";
 import { LFXCoordinate, LFXLocation } from "../../../FX/LocationFX/public";
 import type { LFXAuthorizationStatus } from "../../../FX/LocationFX/public";
 import type { LFXLocationAdapter } from "../../HostServices/AppSDKHostServiceTypes";
@@ -177,12 +201,14 @@ export function createDeterministicScheduler(initial?: string | number | Date): 
 }
 
 interface InternalFakeControl<TOperation extends string> extends SynWareFakeControl<TOperation> {
+  subscribe(listener: () => void): () => void;
   run<T>(operation: TOperation, signal: AbortSignal | undefined, action: () => T | Promise<T>): Promise<T>;
   runSync<T>(operation: TOperation, action: () => T): T;
 }
 
 function runtimeGate<TOperation extends string>(base: InternalFakeControl<TOperation>): RuntimeTestCapabilityControl {
   return Object.freeze({
+    subscribe: base.subscribe,
     run<T>(operation: string, signal: AbortSignal | undefined, action: () => T | Promise<T>) {
       return base.run(operation as TOperation, signal, action);
     },
@@ -219,6 +245,8 @@ function control<TOperation extends string>(clock: SynWareTestClock, options: Fa
   let reason = initialReason;
   let failure = new Error("The fake adapter failed this operation.");
   const history: SynWareFakeCall<TOperation>[] = [];
+  const listeners = new Set<() => void>();
+  const changed = () => { for (const listener of [...listeners]) listener(); };
   const assertAllowed = (signal: AbortSignal | undefined) => {
     if (signal?.aborted) throw abortError("The fake adapter received an aborted operation.");
     if (mode === "deny") throw new DOMException(reason, "SecurityError");
@@ -227,16 +255,18 @@ function control<TOperation extends string>(clock: SynWareTestClock, options: Fa
   };
   return Object.freeze({
     get mode() { return mode; },
-    allow() { mode = "allow"; reason = initialReason; },
-    deny(nextReason = "The fake adapter denied this operation.") { mode = "deny"; reason = nextReason; },
-    fail(error = new Error("The fake adapter failed this operation.")) { mode = "fail"; failure = error; },
-    interrupt(nextReason = "The fake adapter interrupted this operation.") { mode = "interrupt"; reason = nextReason; },
+    subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener); }; },
+    allow() { mode = "allow"; reason = initialReason; changed(); },
+    deny(nextReason = "The fake adapter denied this operation.") { mode = "deny"; reason = nextReason; changed(); },
+    fail(error = new Error("The fake adapter failed this operation.")) { mode = "fail"; failure = error; changed(); },
+    interrupt(nextReason = "The fake adapter interrupted this operation.") { mode = "interrupt"; reason = nextReason; changed(); },
     calls: () => Object.freeze(history.map((entry) => Object.freeze({ ...entry }))),
     reset() {
       mode = initialMode;
       reason = initialReason;
       failure = new Error("The fake adapter failed this operation.");
       history.splice(0);
+      changed();
     },
     async run<T>(operation: TOperation, signal: AbortSignal | undefined, action: () => T | Promise<T>): Promise<T> {
       history.push(Object.freeze({ operation, at: clock.now() }));
@@ -292,8 +322,8 @@ export function createFakeClipboardAdapter(clock: SynWareTestClock): FakeClipboa
     read(types: readonly string[], signal?: AbortSignal) {
       return adapter.read(types, signal);
     },
-    async write(next: readonly PasteboardRepresentation[], signal?: AbortSignal) {
-      await adapter.write(next, signal);
+    async write(next: readonly Exclude<PasteboardRepresentationInput, LazyPasteboardRepresentation>[], signal?: AbortSignal) {
+      await adapter.write(normalisePasteboardRepresentations(next), signal);
     },
     values: () => Object.freeze(values.map((value) => Object.freeze({ type: value.type }))),
   } satisfies SynWareFakeClipboard);
@@ -396,6 +426,9 @@ export interface DeterministicRuntimeEnvironment {
   readonly environment: SynCloudOSRuntimeEnvironment;
   readonly clock: DeterministicScheduler;
   readonly mediaClock: SynWareTestMediaClock;
+  readonly mediaQueries: Readonly<{
+    setMatches(query: string, matches: boolean): void;
+  }>;
   readonly clipboard: FakeClipboardAdapter;
   readonly adapters: SynWareTestAdapters;
   /** The production runtime reads window persistence during construction.
@@ -433,6 +466,150 @@ export function createDeterministicRuntimeEnvironment(options: {
   const sessionStorage = createFakeStorageAdapter(clock, "session");
   const denied = { initialMode: "deny" as const, denialReason: "This sensitive fake capability requires an explicit test allow()." };
   const videoCapture = createFakeVideoCapture(clock.now);
+  const networkControl = control<"network.read" | "network.subscribe">(clock, denied);
+  let networkStatus: import("../../../FX/NetworkFX/NWFXPathStatus").NWFXPathStatus = "satisfied";
+  const networkListeners = new Set<(path: import("../../../FX/NetworkFX/internal/networkPort").NetworkPathSnapshot) => void>();
+  const networkPath = () => ({ status: networkStatus, unsatisfiedReason: "notAvailable" as const, isExpensive: false, isConstrained: false,
+    supportsIPv4: true, supportsIPv6: true, supportsDNS: true, interfaceTypes: ["wifi" as const], interfaces: [{ type: "wifi" as const, name: "test0", index: 1 }] });
+  const network = Object.freeze({ ...publicPort(networkControl),
+    setStatus(status: typeof networkStatus) { networkStatus = status; for (const listener of [...networkListeners]) listener(networkPath()); },
+    activeMonitorCount: () => networkListeners.size,
+  });
+  const networkPaths = Object.freeze({ currentPath: () => networkControl.runSync("network.read", networkPath),
+    subscribe(listener: (path: import("../../../FX/NetworkFX/internal/networkPort").NetworkPathSnapshot) => void) {
+      return networkControl.runSync("network.subscribe", () => { networkListeners.add(listener); return { dispose() { networkListeners.delete(listener); } }; });
+    },
+  });
+  const paymentControl = control<"payment.present">(clock, denied);
+  const paymentPresentations = new Set<{ resolve(value: PaymentResponse): void; reject(error: unknown): void }>();
+  const paymentStatuses: PKFXPaymentAuthorizationStatus[] = [];
+  const payment = Object.freeze({ ...publicPort(paymentControl),
+    authorize() {
+      for (const presentation of [...paymentPresentations]) {
+        const method = new PKFXPaymentMethod(); paymentMethods.set(method, { displayName: "Test Visa", network: "visa", type: "credit" });
+        const token = new PKFXPaymentToken(); paymentTokens.set(token, { paymentMethod: method, transactionIdentifier: "test-transaction", paymentData: NSEData.from(new Uint8Array([1, 2, 3])) });
+        const contact = new PKFXContact(); contact.name = new NSEPersonNameComponents(); contact.name.givenName = "Test"; contact.emailAddress = "test@example.invalid";
+        const value = new PKFXPayment(); payments.set(value, { token, billingContact: contact });
+        let finished = false; presentation.resolve({ payment: value, async finish(result) {
+          if (finished) throw new Error("The fake payment was already completed."); finished = true;
+          if (paymentControl.mode === "deny") throw new DOMException("The fake payment sheet denied completion.", "SecurityError");
+          paymentStatuses.push(result.status);
+        } });
+      }
+    },
+    cancel() { for (const presentation of [...paymentPresentations]) presentation.reject(new DOMException("The fake payment was cancelled.", "AbortError")); },
+    activePresentationCount: () => paymentPresentations.size,
+    completedStatuses: () => Object.freeze([...paymentStatuses]),
+  });
+  const paymentAdapter: PaymentAdapter = {
+    assertAvailable() {}, canMakePayments: networks => paymentControl.mode === "allow" && (networks === undefined || networks.every(network => network === "visa")),
+    open(_request, signal) {
+      let resolve!: (value: PaymentResponse) => void; let reject!: (error: unknown) => void;
+      const authorized = new Promise<PaymentResponse>((a, b) => { resolve = a; reject = b; });
+      const presentation = { resolve, reject }; paymentPresentations.add(presentation);
+      const presented = paymentControl.run("payment.present", signal, () => true).catch(error => { const denial = typeof error === "object" && error !== null && "name" in error && error.name === "SecurityError" ? new DOMException("The fake payment sheet denied presentation.", "NotAllowedError") : error; reject(denial); throw denial; });
+      return { presented, authorized, async dismiss() { paymentPresentations.delete(presentation); } };
+    },
+  };
+  const bluetoothControl = control<"bluetooth.scan" | "bluetooth.connect" | "bluetooth.services" | "bluetooth.characteristics" | "bluetooth.descriptors" | "bluetooth.read" | "bluetooth.write" | "bluetooth.notify" | "bluetooth.disconnect">(clock, denied);
+  const bluetoothConnections = new Set<{ receive?: (value: NSEData) => void; stop(): void }>();
+  const bluetooth = Object.freeze({ ...publicPort(bluetoothControl), activeConnectionCount: () => bluetoothConnections.size,
+    emitValue(value: number) { for (const connection of bluetoothConnections) connection.receive?.(NSEData.from(new Uint8Array([value]))); } });
+  const bluetoothIdentifier = new NSEUUID();
+  const bluetoothAdapter: BluetoothAdapter = { get state() { return bluetoothControl.mode === "allow" ? "poweredOn" : "unsupported"; },
+    observeState: listener => bluetoothControl.subscribe(listener),
+    scan: (_services, signal) => bluetoothControl.run("bluetooth.scan", signal, () => ({ advertisementData: Object.freeze({}), rssi: 127, device: {
+      identifier: bluetoothIdentifier, name: "Sensor", connect: (owner) => bluetoothControl.run("bluetooth.connect", owner, () => {
+        let data = NSEData.from(new Uint8Array([42])); let description = "Sensor";
+        const connection: { receive?: (value: NSEData) => void; stop(): void } = { stop() { bluetoothConnections.delete(connection); owner.removeEventListener("abort", connection.stop); } };
+        bluetoothConnections.add(connection); owner.addEventListener("abort", connection.stop, { once: true });
+        const characteristic: BTCharacteristic = { uuid: new BTFXUUID("2A19"), properties: 26,
+          read: () => bluetoothControl.run("bluetooth.read", owner, () => data),
+          write: next => bluetoothControl.run("bluetooth.write", owner, () => { data = NSEData.from(next); }),
+          discoverDescriptors: () => bluetoothControl.run("bluetooth.descriptors", owner, () => [{ uuid: new BTFXUUID("2901"), read: () => bluetoothControl.run("bluetooth.read", owner, () => description), write: next => bluetoothControl.run("bluetooth.write", owner, () => { description = new TextDecoder().decode(next.bytes); }) }]),
+          setNotify: (enabled, listener) => bluetoothControl.run("bluetooth.notify", owner, () => { connection.receive = enabled ? listener : undefined; }),
+        };
+        return { discoverServices: () => bluetoothControl.run("bluetooth.services", owner, () => [{ uuid: new BTFXUUID("180F"), isPrimary: true, discoverCharacteristics: () => bluetoothControl.run("bluetooth.characteristics", owner, () => [characteristic]) }]),
+          async disconnect() { connection.stop(); await bluetoothControl.run("bluetooth.disconnect", owner, () => {}); } } satisfies BTConnection;
+      }),
+    } })),
+  };
+  const xrControl = control<"xr.start" | "xr.add" | "xr.remove" | "xr.raycast" | "xr.pause">(clock, denied);
+  const xrRuns = new Set<{ callbacks: XRCallbacks; anchors: Map<string, XRFXAnchor>; signal: AbortSignal }>();
+  const xr = Object.freeze({ ...publicPort(xrControl), activeSessionCount: () => xrRuns.size,
+    endSessions() {
+      for (const run of [...xrRuns]) { xrRuns.delete(run); run.callbacks.ended(); }
+    },
+    emitFrame() {
+      for (const run of [...xrRuns]) {
+        if (run.signal.aborted) continue;
+        run.callbacks.frame(makeXRFrame(clock.now() / 1000, makeXRCamera(AFXTransform3D.translation(1,2,3), new AFXTransform3D(), "notAvailable"), [...run.anchors.values()]));
+      }
+    },
+  });
+  const xrAdapter: XRAdapter = {
+    isSupported: async () => xrControl.mode === "allow",
+    async start(_configuration, signal, callbacks) {
+      const run = { callbacks, signal, anchors: new Map<string, XRFXAnchor>() };
+      await xrControl.run("xr.start", signal, () => { xrRuns.add(run); });
+      return {
+        add: anchor => xrControl.run("xr.add", signal, () => { run.anchors.set(anchor.identifier.uuidString, anchor); }),
+        remove: anchor => xrControl.run("xr.remove", signal, () => { run.anchors.delete(anchor.identifier.uuidString); }),
+        raycast: () => xrControl.run("xr.raycast", signal, () => [makeXRRaycastResult(AFXTransform3D.translation(0,0,-1), "estimatedPlane", "any", null)]),
+        async pause() { xrRuns.delete(run); await xrControl.run("xr.pause", signal, () => {}); },
+      };
+    },
+  };
+  const nfcControl = control<"nfc.open" | "nfc.connect" | "nfc.status" | "nfc.read" | "nfc.write" | "nfc.lock">(clock, denied);
+  const nfcReaders = new Set<{ events: NFCEvents; signal: AbortSignal }>();
+  const nfc = Object.freeze({ ...publicPort(nfcControl), activeSessionCount: () => nfcReaders.size,
+    emitText(value: string) {
+      for (const reader of [...nfcReaders]) {
+        let message = new NFXNDEFMessage([NFXNDEFPayload.wellKnownTypeTextPayload(value, new Intl.Locale("en"))!]); let locked = false;
+        const tag: NFCNativeTag = { get isAvailable() { return !reader.signal.aborted; },
+          queryNDEFStatus: () => nfcControl.run("nfc.status", reader.signal, () => ({ status: locked ? "readOnly" as const : "readWrite" as const, capacity: 4096 })),
+          readNDEF: () => nfcControl.run("nfc.read", reader.signal, () => message),
+          writeNDEF: next => nfcControl.run("nfc.write", reader.signal, () => { if (locked) throw new NFXReaderError("ndefReaderSessionErrorTagNotWritable"); if (!next.length) throw new NFXReaderError("ndefReaderSessionErrorZeroLengthMessage"); if (next.length > 4096) throw new NFXReaderError("ndefReaderSessionErrorTagSizeTooSmall"); message = new NFXNDEFMessage(next.records); }),
+          writeLock: () => nfcControl.run("nfc.lock", reader.signal, () => { locked = true; }),
+        };
+        reader.events.messages([message]); reader.events.tags([tag]);
+      }
+    },
+  });
+  const nfcAdapter: NFCAdapter = { get readingAvailable() { return nfcControl.mode === "allow"; },
+    async open(signal, events) {
+      const reader = { events, signal }; await nfcControl.run("nfc.open", signal, () => { nfcReaders.add(reader); });
+      return { connect: () => nfcControl.run("nfc.connect", signal, () => {}), restartPolling() {}, async invalidate() { nfcReaders.delete(reader); if (nfcControl.mode === "deny") throw new DOMException("Native NFC denied invalidation.", "SecurityError"); } };
+    },
+  };
+  const contactsControl = control<"contacts.select">(clock, denied);
+  let contactName = "Selected contact";
+  const contacts = Object.freeze({ ...publicPort(contactsControl), setSelectedName(value: string) { contactName = value; } });
+  const contactsAdapter: ContactsAdapter = { available: true, select: (_keys, _multiple, signal) => contactsControl.run("contacts.select", signal, () => { const contact = new CNFXMutableContact(); contact.givenName = contactName; return Object.freeze([contact.copy()]); }).catch(error => { if (typeof error === "object" && error !== null && "name" in error && error.name === "SecurityError") throw new DOMException("The fake contact picker denied selection.", "NotAllowedError"); throw error; }) };
+  const speechControl = control<"speech.authorize" | "speech.recognize">(clock, denied);
+  const speechListeners = new Set<(event: SpeechEvent) => void>();
+  let speechBufferCount = 0;
+  const speech = Object.freeze({ ...publicPort(speechControl),
+    emitResult(formattedString: string, isFinal: boolean) {
+      for (const listener of [...speechListeners]) {
+        listener({ type: "result", result: { isFinal, transcriptions: [{ formattedString, segments: [] }] } });
+        if (isFinal) listener({ type: "complete" });
+      }
+    },
+    activeTaskCount: () => speechListeners.size,
+    appendedBufferCount: () => speechBufferCount,
+  });
+  const speechAdapter: SpeechAdapter = {
+    authorizationStatus: () => speechControl.mode === "allow" ? "granted" : "denied",
+    requestAuthorization: signal => speechControl.run("speech.authorize", signal, () => "granted" as const),
+    isAvailable: () => speechControl.mode === "allow", supportsOnDeviceRecognition: () => true,
+    supportedLocales: () => new Set([new Intl.Locale("en-GB")]),
+    start: (_request, listener, signal) => speechControl.run("speech.recognize", signal, () => {
+      speechListeners.add(listener);
+      return { append() { speechBufferCount++; }, endAudio() { listener({ type: "audioEnd" }); },
+        finish() { listener({ type: "audioEnd" }); }, cancel() { speechListeners.delete(listener); } };
+    }),
+  };
   const locationControl = control<SynWareFakeLocationOperation>(clock, denied);
   let locationStatus: LFXAuthorizationStatus = "unknown";
   const defaultLocation = () => new LFXLocation({
@@ -562,6 +739,7 @@ export function createDeterministicRuntimeEnvironment(options: {
     audio: control<SynWareFakeAudioOperation>(clock, denied),
     webContent: control<SynWareFakeWebContentOperation>(clock, denied),
   });
+  const exportedFiles:{ readonly fileName: string; readonly mediaType: string; readonly data: NSEData }[]=[];
   const adapters: SynWareTestAdapters = Object.freeze({
     browser: publicPort(controls.browser),
     media: publicPort(controls.media),
@@ -571,7 +749,10 @@ export function createDeterministicRuntimeEnvironment(options: {
     clipboard: clipboard.control,
     drag: publicPort(controls.drag),
     credentials: publicPort(controls.credentials),
-    files: publicPort(controls.files),
+    files: Object.freeze({...publicPort(controls.files),
+      exported:()=>Object.freeze([...exportedFiles]),
+      reset(){controls.files.reset();exportedFiles.splice(0);},
+    }),
     documents: publicPort(controls.documents),
     recovery: publicPort(controls.recovery),
     windows: publicPort(controls.windows),
@@ -588,6 +769,13 @@ export function createDeterministicRuntimeEnvironment(options: {
     location,
     midi,
     video: videoCapture.control,
+    network,
+    speech,
+    contacts,
+    bluetooth,
+    xr,
+    nfc,
+    payment,
     webContent: publicPort(controls.webContent),
   });
   const testControls: RuntimeTestCapabilityControls = Object.freeze({
@@ -625,8 +813,21 @@ export function createDeterministicRuntimeEnvironment(options: {
   const workArea = snapshotSource<RuntimeWorkAreaSnapshot>(Object.freeze({
     x: 0, y: 0, width: 1440, height: 900, devicePixelRatio: 1,
     safeArea: Object.freeze({ top: 0, right: 0, bottom: 0, left: 0 }),
+    safeAreaAvailability: "available",
   }));
-  const mediaQueries = new Set<RuntimeMediaQuery>();
+  const mediaQueries = new Map<RuntimeMediaQuery, Set<(matches: boolean) => void>>();
+  const mediaQueryMatches = new Map<string, boolean>();
+  const mediaQueryControl = Object.freeze({
+    setMatches(query: string, matches: boolean) {
+      if (mediaDisposed) throw abortError("The deterministic media queries are disposed.");
+      if ((mediaQueryMatches.get(query) ?? false) === matches) return;
+      mediaQueryMatches.set(query, matches);
+      for (const [media, subscribers] of [...mediaQueries]) {
+        if (media.media !== query) continue;
+        for (const listener of [...subscribers]) listener(matches);
+      }
+    },
+  });
   const browser = Object.freeze({
     getLocation() {
       return controls.browser.runSync("browser.location", () => {
@@ -671,7 +872,25 @@ export function createDeterministicRuntimeEnvironment(options: {
       return Object.freeze({ requestedHref: href, browserHref, pathname: target.pathname, changed: true, replaced: replace, dispatchedPopState: dispatchPopState });
     },
   });
+  // Use the production DOM layer projection with the host's deterministic
+  // clock. Canvas/GPU capability stays truthful to the supplied document.
+  const animationOrigin=clock.now();
+  const animationFrames:AFXFrameScheduler=Object.freeze({
+    now:()=> (clock.now()-animationOrigin)/1000,
+    reducedMotion:false,
+    suspended:false,
+    requestFrame(callback:(time:number)=>void){
+      const handle=clock.requestAnimationFrame(time=>callback((time-animationOrigin)/1000));
+      return()=>clock.cancelAnimationFrame(handle);
+    },
+  });
   const environment = Object.freeze({
+    animationFrames,
+    animationLayers: options.document ? createBrowserAnimationLayerHost(options.document,animationFrames) : undefined,
+    pointer: options.document ? new BrowserPointerAdapter({
+      createResizeObserver: () => null,
+      createIntersectionObserver: () => null,
+    }) : undefined,
     navigation: null,
     testControls,
     browser,
@@ -684,6 +903,15 @@ export function createDeterministicRuntimeEnvironment(options: {
     screen: gatedSnapshotSource(screen, testControls.viewport, "viewport.screen"),
     workArea: gatedSnapshotSource(workArea, testControls.viewport, "viewport.work-area"),
     clipboard: clipboard.adapter,
+    downloadExport: Object.freeze({id:'deterministic-download',
+      export:(payload:import('../../FilePanels').FilePanelExportPayload,signal?:AbortSignal)=>{
+        const captured=Object.freeze({...payload,data:NSEData.from(payload.data)});
+        return controls.files.run('file.write',signal,()=>{
+          exportedFiles.push(captured);
+          return {kind:'exported' as const,fileName:captured.fileName};
+        });
+      },
+    }),
     location: locationAdapter,
     midi: midiAdapter,
     videoCapture: videoCapture.host,
@@ -702,7 +930,7 @@ export function createDeterministicRuntimeEnvironment(options: {
         const queryListeners = new Set<(matches: boolean) => void>();
         const match = Object.freeze({
           media: query,
-          matches: false,
+          get matches() { return mediaQueryMatches.get(query) ?? false; },
           subscribe(listener: (matches: boolean) => void) {
             return controls.media.runSync("media.subscribe", () => {
               queryListeners.add(listener);
@@ -711,7 +939,7 @@ export function createDeterministicRuntimeEnvironment(options: {
           },
           dispose() { queryListeners.clear(); mediaQueries.delete(match); },
         } satisfies RuntimeMediaQuery);
-        mediaQueries.add(match);
+        mediaQueries.set(match, queryListeners);
         return match;
       });
     },
@@ -729,10 +957,18 @@ export function createDeterministicRuntimeEnvironment(options: {
       });
     },
   } satisfies SynCloudOSRuntimeEnvironment);
+  associateNetworkAdapter(environment, networkPaths);
+  associateSpeechAdapter(environment, speechAdapter);
+  associateContactsAdapter(environment, contactsAdapter);
+  associateXRAdapter(environment, xrAdapter);
+  associateBluetoothAdapter(environment, bluetoothAdapter);
+  associateNFCAdapter(environment, nfcAdapter);
+  associatePaymentAdapter(environment, paymentAdapter);
   return Object.freeze({
     environment,
     clock,
     mediaClock,
+    mediaQueries: mediaQueryControl,
     clipboard,
     adapters,
     prepareRuntimeBootstrap() {
@@ -754,8 +990,12 @@ export function createDeterministicRuntimeEnvironment(options: {
     },
     dispose() {
       mediaDisposed = true;
+      xrRuns.clear();
+      speechListeners.clear();
+      paymentPresentations.clear();
       clock.dispose();
-      for (const media of mediaQueries) media.dispose();
+      for (const media of mediaQueries.keys()) media.dispose();
+      mediaQueryMatches.clear();
       listeners.clear();
     },
   });

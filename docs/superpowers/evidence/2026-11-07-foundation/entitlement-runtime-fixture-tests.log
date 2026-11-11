@@ -1,0 +1,111 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/browser-application-host.test.tsx tests/runtime/declared-disabled-app.test.ts tests/runtime/registry-policy-lifecycle.test.ts tests/runtime/host-diagnostics-provision.test.tsx tests/runtime/synapp-context.test.tsx tests/runtime/synapp-sdk-hooks.test.tsx --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/browser-application-host.test.tsx (36 tests | 1 failed) 3385ms
+     × grants a no-sign-in single application the document-store capabilities it declares 32ms
+ ❯ tests/runtime/synapp-context.test.tsx (14 tests | 2 failed) 150ms
+   × resolves only declared, host-provided app-scoped services and fails closed otherwise 7ms
+   × delivers declared notification actions only while their mounted client remains live 4ms
+ ❯ tests/runtime/registry-policy-lifecycle.test.ts (6 tests | 2 failed) 49ms
+     × keeps ConfigurationProfiles decisions explicit for public, system, and elevated subjects 5ms
+     × registers trusted bundles, plugins, and invokes lifecycle hooks 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/browser-application-host.test.tsx > application-only browser host > grants a no-sign-in single application the document-store capabilities it declares
+AssertionError: expected 'syncloudos.default' to be 'syncloudos.single-application' // Object.is equality
+
+Expected: "syncloudos.single-application"
+Received: "syncloudos.default"
+
+ ❯ tests/runtime/browser-application-host.test.tsx:153:24
+    151|     await mount(element(), { bundles: [documentBundle] });
+    152|     const profile = vi.mocked(createSynCloudOS).mock.calls.at(-1)![0].…
+    153|     expect(profile.id).toBe("syncloudos.single-application");
+       |                        ^
+    154|     const anonymous = profile.roles[profile.anonymousRole]!;
+    155|     expect(anonymous).toEqual(expect.arrayContaining(["app.open.public…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/runtime/registry-policy-lifecycle.test.ts > runtime registry, ConfigurationProfiles, Lifecycle, and PluginRegistry contracts > keeps ConfigurationProfiles decisions explicit for public, system, and elevated subjects
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/runtime/registry-policy-lifecycle.test.ts:85:186
+     83|       allowed: true
+     84|     });
+     85|     expect(ConfigurationProfiles.can({ action: "runtime.system", ...as…
+       |                                                                                                                                                                                          ^
+     86|     expect(ConfigurationProfiles.getAuditLog()).toHaveLength(3);
+     87|     expect(PermissionManager.getRoleCapabilities("founder")).toContain…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/runtime/registry-policy-lifecycle.test.ts > runtime registry, ConfigurationProfiles, Lifecycle, and PluginRegistry contracts > registers trusted bundles, plugins, and invokes lifecycle hooks
+Error: SynCloudOS.PluginRegistry.register denied for qa-plugin: This action requires additional capabilities: plugin.register. The role "public" does not hold it; the host grants role capabilities in its policy profile (configurationProfile.roles).
+ ❯ Object.register src/SynCloudOS/PluginRegistry/PluginRegistry.ts:68:13
+     66|     if (!policy.allowed) {
+     67|       EventBus.publish("plugin.register.denied", { pluginId: plugin.id…
+     68|       throw new Error(`SynCloudOS.PluginRegistry.register denied for $…
+       |             ^
+     69|     }
+     70|     const record: SynCloudOSPluginRecord = {
+ ❯ tests/runtime/registry-policy-lifecycle.test.ts:199:41
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/runtime/synapp-context.test.tsx > resolves only declared, host-provided app-scoped services and fails closed otherwise
+AssertionError: expected { Object (available, client, ...) } to deeply equal { available: true, …(2) }
+
+- Expected
++ Received
+
+  {
+-   "available": true,
+-   "client": ObjectContaining {
+-     "appId": "com.syndromatic.service-example",
+-     "permissions": [
+-       "clipboard.read",
+-     ],
++   "available": false,
++   "client": null,
++   "denial": {
++     "code": "denied",
++     "message": "The SynWare did not declare the required permission: clipboard.read.",
+    },
+-   "denial": null,
+  }
+
+ ❯ tests/runtime/synapp-context.test.tsx:308:210
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/runtime/synapp-context.test.tsx > delivers declared notification actions only while their mounted client remains live
+SecurityError: SynWare capability "notifications.post" must be declared before posting an application notification.
+ ❯ securityError src/SynCloudOS/AppSDK/appRuntimeFacade.ts:201:10
+    199|
+    200| function securityError(message: string): DOMException {
+    201|   return new DOMException(message, "SecurityError");
+       |          ^
+    202| }
+    203|
+ ❯ requireDeclaredCapability src/SynCloudOS/AppSDK/appRuntimeFacade.ts:4207:15
+ ❯ Object.post src/SynCloudOS/AppSDK/appRuntimeFacade.ts:4714:11
+ ❯ tests/runtime/synapp-context.test.tsx:525:54
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  3 failed | 3 passed (6)
+      Tests  5 failed | 76 passed (81)
+   Start at  19:28:47
+   Duration  28.27s (transform 10.75s, setup 68ms, import 19.61s, tests 4.21s, environment 3.60s)

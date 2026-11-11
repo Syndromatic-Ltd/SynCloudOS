@@ -1,0 +1,142 @@
+[
+  {
+    "engine": "chromium",
+    "capabilities": {
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+      "secure": true,
+      "speech": {
+        "speechSynthesis": true,
+        "nativePermissionPrompt": false
+      },
+      "voices": 3,
+      "network": {
+        "pathMonitoring": true,
+        "networkInformation": true,
+        "interfaceType": false,
+        "expensive": false,
+        "constrained": false,
+        "authorizationPrompt": false
+      },
+      "video": {
+        "pictureInPicture": true,
+        "remotePlayback": true
+      },
+      "audio": {
+        "capture": true,
+        "inputSelection": true,
+        "outputSelection": false,
+        "sessionType": false,
+        "mimeTypes": [
+          "audio/webm;codecs=opus",
+          "audio/mp4",
+          "audio/webm"
+        ]
+      },
+      "capture": {
+        "camera": true,
+        "display": true,
+        "deviceEnumeration": true,
+        "elementRestriction": true,
+        "elementCrop": true
+      },
+      "activation": true
+    },
+    "pip": {
+      "active": true,
+      "native": true
+    },
+    "pipStop": {
+      "active": false
+    },
+    "speech": {
+      "completed": true,
+      "elapsedMilliseconds": 3494.6650000810623,
+      "voices": 3
+    },
+    "routes": {
+      "availability": null,
+      "state": "unknown"
+    },
+    "category": {
+      "error": {
+        "name": "NotSupportedError",
+        "message": "Audio session types are unavailable."
+      }
+    },
+    "paths": [
+      {
+        "status": "satisfied",
+        "interfaceType": null,
+        "isExpensive": null,
+        "isConstrained": null,
+        "saveData": false,
+        "effectiveType": "4g",
+        "downlinkMegabitsPerSecond": 1.65,
+        "roundTripTimeMilliseconds": 100,
+        "source": "browserHint"
+      },
+      {
+        "status": "unsatisfied",
+        "interfaceType": null,
+        "isExpensive": null,
+        "isConstrained": null,
+        "saveData": false,
+        "effectiveType": "4g",
+        "downlinkMegabitsPerSecond": 10,
+        "roundTripTimeMilliseconds": 0,
+        "source": "browserHint"
+      },
+      {
+        "status": "unsatisfied",
+        "interfaceType": null,
+        "isExpensive": null,
+        "isConstrained": null,
+        "saveData": false,
+        "effectiveType": "4g",
+        "downlinkMegabitsPerSecond": 10,
+        "roundTripTimeMilliseconds": 0,
+        "source": "browserHint"
+      },
+      {
+        "status": "satisfied",
+        "interfaceType": null,
+        "isExpensive": null,
+        "isConstrained": null,
+        "saveData": false,
+        "effectiveType": "4g",
+        "downlinkMegabitsPerSecond": 1.65,
+        "roundTripTimeMilliseconds": 100,
+        "source": "browserHint"
+      },
+      {
+        "status": "satisfied",
+        "interfaceType": null,
+        "isExpensive": null,
+        "isConstrained": null,
+        "saveData": false,
+        "effectiveType": "4g",
+        "downlinkMegabitsPerSecond": 1.65,
+        "roundTripTimeMilliseconds": 100,
+        "source": "browserHint"
+      }
+    ],
+    "location": {
+      "emulated": true,
+      "speedMetresPerSecond": 12.5,
+      "horizontalAccuracyMetres": 5
+    },
+    "element": {
+      "restricted": true,
+      "cropped": true,
+      "cleared": true,
+      "capabilities": {
+        "camera": true,
+        "display": true,
+        "deviceEnumeration": true,
+        "elementRestriction": true,
+        "elementCrop": true
+      }
+    },
+    "errors": []
+  }
+]

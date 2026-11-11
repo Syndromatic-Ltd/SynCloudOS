@@ -30,6 +30,8 @@ describe("BrowserRuntimeEnvironment snapshot sources", () => {
     const initialLayout = environment.layoutViewport.getSnapshot();
     const initialScreen = environment.screen.getSnapshot();
     const initialWorkArea = environment.workArea.getSnapshot();
+    expect(initialWorkArea.safeAreaAvailability).toBe("unavailable");
+    expect(initialWorkArea.safeArea).toEqual({ top: 0, right: 0, bottom: 0, left: 0 });
     expect(environment.layoutViewport.getSnapshot()).toBe(initialLayout);
     expect(environment.screen.getSnapshot()).toBe(initialScreen);
     expect(environment.workArea.getSnapshot()).toBe(initialWorkArea);
@@ -51,6 +53,38 @@ describe("BrowserRuntimeEnvironment snapshot sources", () => {
     } finally {
       Object.defineProperty(window, "innerWidth", { configurable: true, value: previousWidth });
       unsubscribe();
+    }
+  });
+
+  it("places windows in the page, wherever the browser sits on the desktop", () => {
+    // A browser on a second monitor reports that monitor's desktop origin;
+    // windows are laid out in the page, so the work area must not inherit it.
+    const restore = [
+      ["availLeft", 1920], ["availTop", 40], ["availWidth", 1755], ["availHeight", 1057],
+    ].map(([key, value]) => {
+      const previous = Object.getOwnPropertyDescriptor(window.screen, key);
+      Object.defineProperty(window.screen, key, { configurable: true, value });
+      return () => previous ? Object.defineProperty(window.screen, key, previous) : delete (window.screen as unknown as Record<string, unknown>)[key as string];
+    });
+    const previousWidth = window.innerWidth;
+    const previousHeight = window.innerHeight;
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: 1755 });
+    Object.defineProperty(window, "innerHeight", { configurable: true, value: 940 });
+    try {
+      const environment = createBrowserRuntimeEnvironment();
+      expect(environment.workArea.getSnapshot()).toMatchObject({ x: 0, y: 0, width: 1755, height: 940 });
+
+      const notified = vi.fn();
+      const unsubscribe = environment.workArea.subscribe(notified);
+      Object.defineProperty(window, "innerWidth", { configurable: true, value: 1200 });
+      window.dispatchEvent(new Event("resize"));
+      expect(notified).toHaveBeenCalledTimes(1);
+      expect(environment.workArea.getSnapshot()).toMatchObject({ x: 0, y: 0, width: 1200, height: 940 });
+      unsubscribe();
+    } finally {
+      Object.defineProperty(window, "innerWidth", { configurable: true, value: previousWidth });
+      Object.defineProperty(window, "innerHeight", { configurable: true, value: previousHeight });
+      restore.forEach((undo) => undo());
     }
   });
 });

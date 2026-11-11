@@ -28,11 +28,13 @@ import {
 } from "react";
 import type { RuntimeAnimationService } from "../../SynCloudOS/SynCloudOS";
 import type { AFXFrameScheduler } from "../../FX/AnimationFX/AFXLayer";
+import type { AFXLayer } from "../../FX/AnimationFX/AFXLayer";
 import type { AFXRenderer, AFXRendererOptions } from "../../FX/AnimationFX/AFXRenderer";
 
 /** The layer capability NSE needs; host and app clients satisfy it structurally. */
 interface NSEAnimationLayers {
   createRenderer(target: object, options?: Pick<AFXRendererOptions, "maximumQuads" | "onRenderError">, signal?: AbortSignal): AFXRenderer;
+  bindLayer?(target: object, signal?: AbortSignal, options?: Readonly<{ layout?: "css" }>): AFXLayer;
 }
 
 /** Where NSE views run presentation animations: an AnimationFX service and
@@ -66,20 +68,20 @@ const defaultEnvironment: NSEAnimationEnvironment = Object.freeze({
   layers: null,
   frames: null,
 });
-const NSEAnimationEnvironmentContext = createContext(defaultEnvironment);
+const NSEAnimationEnvironmentContext = createContext<NSEAnimationEnvironment | null>(null);
 
-function getSystemReducedMotion(): boolean {
+export function getSystemReducedMotion(): boolean {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
     return false;
   }
   return window.matchMedia(REDUCED_MOTION_QUERY).matches;
 }
 
-function getServerReducedMotion(): boolean {
+export function getServerReducedMotion(): boolean {
   return false;
 }
 
-function subscribeSystemReducedMotion(listener: () => void): () => void {
+export function subscribeSystemReducedMotion(listener: () => void): () => void {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
     return () => undefined;
   }
@@ -108,7 +110,7 @@ export function NSEAnimationEnvironmentProvider({
     getSystemReducedMotion,
     getServerReducedMotion,
   );
-  const inherited = useContext(NSEAnimationEnvironmentContext);
+  const inherited = useContext(NSEAnimationEnvironmentContext) ?? defaultEnvironment;
   const environment = useMemo(
     () => Object.freeze({
       reducedMotion:
@@ -128,5 +130,8 @@ export function NSEAnimationEnvironmentProvider({
 }
 
 export function useNSEAnimationEnvironment(): NSEAnimationEnvironment {
-  return useContext(NSEAnimationEnvironmentContext);
+  return useContext(NSEAnimationEnvironmentContext) ?? defaultEnvironment;
 }
+
+/** @internal Distinguishes static React roots from an explicitly overridden host. */
+export function useProvidedNSEAnimationEnvironment(): NSEAnimationEnvironment | null { return useContext(NSEAnimationEnvironmentContext); }

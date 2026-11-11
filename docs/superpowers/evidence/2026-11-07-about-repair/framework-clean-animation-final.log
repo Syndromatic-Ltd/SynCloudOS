@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/animation tests/runtime/fx/browser-animation tests/runtime/nse-animation tests/runtime/nse-tab-transition-lifetime.test.tsx tests/runtime/nse-custom-presentation.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-about-adopt-long
+
+
+ Test Files  41 passed (41)
+      Tests  243 passed (243)
+   Start at  09:32:42
+   Duration  28.11s (transform 8.28s, setup 376ms, import 23.05s, tests 5.53s, environment 21.53s)
+

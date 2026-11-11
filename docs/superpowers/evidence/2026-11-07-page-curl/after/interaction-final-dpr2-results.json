@@ -1,0 +1,66 @@
+[
+  {
+    "phone": false,
+    "motion": "no-preference",
+    "dpr": 2,
+    "checkedAt": "2026-11-07T09:42:00.410Z",
+    "frameworkCommit": "57761ffdb78ee0621566d58f98301d31f5fccfe9",
+    "archiveSha256": "b1878b3976a98eba094cd646e6ff5dbf56c6062f17355302391ded2fc2ecaf72",
+    "keyboardRoundTrips": 3,
+    "contentSwipes": 2,
+    "focus": {
+      "inside": true,
+      "inert": false
+    },
+    "returnedToShelf": true,
+    "errors": []
+  },
+  {
+    "phone": false,
+    "motion": "reduce",
+    "dpr": 2,
+    "checkedAt": "2026-11-07T09:42:12.490Z",
+    "frameworkCommit": "57761ffdb78ee0621566d58f98301d31f5fccfe9",
+    "archiveSha256": "b1878b3976a98eba094cd646e6ff5dbf56c6062f17355302391ded2fc2ecaf72",
+    "keyboardRoundTrips": 3,
+    "contentSwipes": 2,
+    "focus": {
+      "inside": true,
+      "inert": false
+    },
+    "returnedToShelf": true,
+    "errors": []
+  },
+  {
+    "phone": true,
+    "motion": "no-preference",
+    "dpr": 2,
+    "checkedAt": "2026-11-07T09:42:31.042Z",
+    "frameworkCommit": "57761ffdb78ee0621566d58f98301d31f5fccfe9",
+    "archiveSha256": "b1878b3976a98eba094cd646e6ff5dbf56c6062f17355302391ded2fc2ecaf72",
+    "keyboardRoundTrips": 3,
+    "contentSwipes": 2,
+    "focus": {
+      "inside": true,
+      "inert": false
+    },
+    "returnedToShelf": true,
+    "errors": []
+  },
+  {
+    "phone": true,
+    "motion": "reduce",
+    "dpr": 2,
+    "checkedAt": "2026-11-07T09:42:42.525Z",
+    "frameworkCommit": "57761ffdb78ee0621566d58f98301d31f5fccfe9",
+    "archiveSha256": "b1878b3976a98eba094cd646e6ff5dbf56c6062f17355302391ded2fc2ecaf72",
+    "keyboardRoundTrips": 3,
+    "contentSwipes": 2,
+    "focus": {
+      "inside": true,
+      "inert": false
+    },
+    "returnedToShelf": true,
+    "errors": []
+  }
+]

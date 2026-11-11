@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { LUFXSearchableItem } from "../../FX/LuminaFX/LUFXSearchableItem";
 import type { LuminaIndexService } from "./LuminaIndexService";
 import type { LuminaEligibilityRegistry } from "./LuminaEligibility";
@@ -86,9 +87,9 @@ interface ActivationResolverOptions {
   readonly indexes: LuminaIndexService;
   readonly eligibility: LuminaEligibilityRegistry;
   readonly policy: LUFXHostPolicyPortLike;
-  readonly apps: { getApp(appId: string): { readonly id: string } | null };
+  readonly apps: { getApp(appId: string): { readonly bundleIdentifier: string } | null };
   readonly routes: {
-    getAppForRoute(pathname: string): { readonly id: string } | null;
+    getAppForRoute(pathname: string): { readonly bundleIdentifier: string } | null;
     openRoute(pathname: string, options?: Record<string, unknown>): RouteOperationHandle;
   };
   readonly presentationSettlements: {
@@ -106,7 +107,7 @@ interface ResolverRegistration {
 }
 
 function resolverKey(ownerAppId: string, domain: string): string {
-  return `${ownerAppId}\u0000${domain}`;
+  return `${normalizeBundleIdentifier(ownerAppId)}\u0000${domain}`;
 }
 
 function linkSignals(base: AbortSignal, external?: AbortSignal): { signal: AbortSignal; dispose(): void } {
@@ -215,7 +216,7 @@ export class LUFXActivationResolver {
       signal.throwIfAborted();
       if (!checkCurrent(item)) return stale();
       if (!resolved || typeof resolved.pathname !== "string" || resolved.pathname.length === 0) return Object.freeze({ status: "unavailable", committed: false, correlationId });
-      if (this.#options.routes.getAppForRoute(resolved.pathname)?.id !== binding.destinationAppId) {
+      if (normalizeBundleIdentifier(this.#options.routes.getAppForRoute(resolved.pathname)?.bundleIdentifier) !== normalizeBundleIdentifier(binding.destinationAppId)) {
         return Object.freeze({ status: "unavailable", committed: false, correlationId, pathname: resolved.pathname });
       }
       routeHandle = this.#options.routes.openRoute(resolved.pathname, {

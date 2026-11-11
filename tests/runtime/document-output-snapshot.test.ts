@@ -114,7 +114,7 @@ describe("DocumentOutputPreparation", () => {
     expect(order).toEqual(["settle", "capture"]);
     expect(result.receipt).toMatchObject({ revision: 7, configurationId: "fixed-private-engine", readiness: "complete", pageUnit: "pt", pages: [{ width: 200, height: 300, rotation: 90 }] });
     if (result.status !== "exported") return;
-    const pdf = await PDFDocument.load(result.bytes);
+    const pdf = await PDFDocument.load(result.bytes.bytes);
     expect(pdf.getPage(0).getSize()).toEqual({ width: 200, height: 300 });
     expect(pdf.getPage(0).getRotation().angle).toBe(90);
   });
@@ -255,7 +255,7 @@ describe("DocumentOutputPreparation", () => {
     const result = await prepared.output.exportPDF();
     expect(result.status).toBe("exported");
     if (result.status !== "exported") return;
-    const pdf = await PDFDocument.load(result.bytes);
+    const pdf = await PDFDocument.load(result.bytes.bytes);
     expect(pdf.getTitle()).toBe("captured output metadata");
     expect(pdf.getPage(0).getWidth()).toBe(100);
     expect(releases).toBe(1);

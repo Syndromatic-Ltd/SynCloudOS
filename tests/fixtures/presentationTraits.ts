@@ -43,6 +43,8 @@ export function createStaticPresentationTraits(input: StaticPresentationTraitsIn
   const bounds = Object.freeze({ x: 0, y: 0, width: input.width, height: input.height });
   return Object.freeze({
     revision: 1,
+    geometryState: "current",
+    safeAreaAvailability: "available",
     contentBounds: bounds,
     hostViewportBounds: bounds,
     horizontalSizeClass,

@@ -1,0 +1,217 @@
+:where(:scope) [data-nse-button-type="switch"],
+:where(:scope):is([data-nse-button-type="switch"]) {
+  color:var(--nse-atmo-control-ink,#243040);
+}
+
+:where(:scope) [data-nse-button-type="switch"][data-nse-enabled="false"],
+:where(:scope):is([data-nse-button-type="switch"][data-nse-enabled="false"]) {
+  opacity:0.56;
+}
+
+:where(:scope) [data-nse-part="indicator"]:where([data-nse-button-type="switch"] *),
+:where(:scope):is([data-nse-part="indicator"]:where([data-nse-button-type="switch"] *)) {
+  background:var(--nse-atmo-checkbox)0 0/33px 112px no-repeat;
+}
+
+:where(:scope) [data-nse-button-type="switch"] [data-nse-part="field"]:checked+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *),
+:where(:scope):is([data-nse-button-type="switch"]) [data-nse-part="field"]:checked+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *) {
+  background-position:0-28px;
+}
+
+:where(:scope) [data-nse-button-type="switch"] [data-nse-part="field"]:disabled+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *),
+:where(:scope):is([data-nse-button-type="switch"]) [data-nse-part="field"]:disabled+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *) {
+  background-position:0-56px;
+}
+
+:where(:scope) [data-nse-button-type="switch"] [data-nse-part="field"]:disabled:checked+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *),
+:where(:scope):is([data-nse-button-type="switch"]) [data-nse-part="field"]:disabled:checked+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *) {
+  background-position:0-84px;
+}
+
+:where(:scope) [data-nse-control="matrix"],
+:where(:scope):is([data-nse-control="matrix"]) {
+  max-width:100%;
+}
+
+:where(:scope) [data-nse-button-type="radio"],
+:where(:scope):is([data-nse-button-type="radio"]) {
+  height:50px;
+  min-width:54px;
+  max-width:220px;
+  padding:0 13px;
+  border-color:transparent;
+  border-style:solid;
+  color:#555;
+  background:transparent;
+}
+
+:where(:scope) [data-nse-button-type="radio"][data-nse-position="first"],
+:where(:scope):is([data-nse-button-type="radio"][data-nse-position="first"]) {
+  border-width:0 2px 0 15px;
+  border-image:var(--nse-atmo-radio-group)0 2 550 15 fill stretch;
+  padding-left:0;
+}
+
+:where(:scope) [data-nse-button-type="radio"][data-nse-position="middle"],
+:where(:scope):is([data-nse-button-type="radio"][data-nse-position="middle"]) {
+  border-width:0 2px 0 1px;
+  border-image:var(--nse-atmo-radio-group)150 2 400 1 fill stretch;
+}
+
+:where(:scope) [data-nse-button-type="radio"][data-nse-position="last"],
+:where(:scope):is([data-nse-button-type="radio"][data-nse-position="last"]) {
+  border-width:0 15px 0 1px;
+  border-image:var(--nse-atmo-radio-group)300 15 250 1 fill stretch;
+  padding-right:0;
+}
+
+:where(:scope) [data-nse-button-type="radio"][data-nse-position="single"],
+:where(:scope):is([data-nse-button-type="radio"][data-nse-position="single"]) {
+  border-width:0 15px;
+  border-image:var(--nse-atmo-radio-group)450 15 100 15 fill stretch;
+}
+
+:where(:scope) [data-nse-button-type="radio"][data-nse-selected],
+:where(:scope):is([data-nse-button-type="radio"][data-nse-selected]) {
+  color:#fff;
+  text-shadow:0-1px 0 rgba(0,0,0,0.58);
+}
+
+:where(:scope) [data-nse-button-type="radio"][data-nse-position="first"][data-nse-selected],
+:where(:scope):is([data-nse-button-type="radio"][data-nse-position="first"][data-nse-selected]) {
+  border-image-slice:50 2 500 15 fill;
+}
+
+:where(:scope) [data-nse-button-type="radio"][data-nse-position="middle"][data-nse-selected],
+:where(:scope):is([data-nse-button-type="radio"][data-nse-position="middle"][data-nse-selected]) {
+  border-image-slice:200 2 350 1 fill;
+}
+
+:where(:scope) [data-nse-button-type="radio"][data-nse-position="last"][data-nse-selected],
+:where(:scope):is([data-nse-button-type="radio"][data-nse-position="last"][data-nse-selected]) {
+  border-image-slice:350 15 200 1 fill;
+}
+
+:where(:scope) [data-nse-button-type="radio"][data-nse-position="single"][data-nse-selected],
+:where(:scope):is([data-nse-button-type="radio"][data-nse-position="single"][data-nse-selected]) {
+  border-image-slice:500 15 50 15 fill;
+}
+
+:where(:scope) [data-nse-button-type="radio"]:disabled,
+:where(:scope):is([data-nse-button-type="radio"]:disabled) {
+  color:silver;
+}
+
+:where(:scope) [data-nse-button-type="radio"][data-nse-position="first"]:disabled,
+:where(:scope):is([data-nse-button-type="radio"][data-nse-position="first"]:disabled) {
+  border-image-slice:100 2 450 15 fill;
+}
+
+:where(:scope) [data-nse-button-type="radio"][data-nse-position="middle"]:disabled,
+:where(:scope):is([data-nse-button-type="radio"][data-nse-position="middle"]:disabled) {
+  border-image-slice:250 2 300 1 fill;
+}
+
+:where(:scope) [data-nse-button-type="radio"][data-nse-position="last"]:disabled,
+:where(:scope):is([data-nse-button-type="radio"][data-nse-position="last"]:disabled) {
+  border-image-slice:400 15 150 1 fill;
+}
+
+:where(:scope) [data-nse-button-type="radio"][data-nse-position="single"]:disabled,
+:where(:scope):is([data-nse-button-type="radio"][data-nse-position="single"]:disabled) {
+  border-image-slice:550 15 0 15 fill;
+}
+
+:where(:scope) [data-nse-button-type="radio"][data-nse-enabled="false"],
+:where(:scope):is([data-nse-button-type="radio"][data-nse-enabled="false"]) {
+  color:silver;
+}
+
+:where(:scope) [data-nse-button-type="radio"][data-nse-position="first"][data-nse-enabled="false"],
+:where(:scope):is([data-nse-button-type="radio"][data-nse-position="first"][data-nse-enabled="false"]) {
+  border-image-slice:100 2 450 15 fill;
+}
+
+:where(:scope) [data-nse-button-type="radio"][data-nse-position="middle"][data-nse-enabled="false"],
+:where(:scope):is([data-nse-button-type="radio"][data-nse-position="middle"][data-nse-enabled="false"]) {
+  border-image-slice:250 2 300 1 fill;
+}
+
+:where(:scope) [data-nse-button-type="radio"][data-nse-position="last"][data-nse-enabled="false"],
+:where(:scope):is([data-nse-button-type="radio"][data-nse-position="last"][data-nse-enabled="false"]) {
+  border-image-slice:400 15 150 1 fill;
+}
+
+:where(:scope) [data-nse-button-type="radio"][data-nse-position="single"][data-nse-enabled="false"],
+:where(:scope):is([data-nse-button-type="radio"][data-nse-position="single"][data-nse-enabled="false"]) {
+  border-image-slice:550 15 0 15 fill;
+}
+
+:where(:scope) [data-nse-button-type="switch"] [data-nse-part="field"]:indeterminate+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *)::after,
+:where(:scope):is([data-nse-button-type="switch"]) [data-nse-part="field"]:indeterminate+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *)::after {
+  width:15px;
+  height:4px;
+  border:1px solid rgba(4,42,75,0.72);
+  border-radius:3px;
+  background:linear-gradient(#bdefff,#168fda 52%,#0068af);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.84),0 1px 1px rgba(0,0,0,0.3);
+}
+
+:where(:scope) [data-nse-button-type="switch"] [data-nse-part="field"]:disabled:indeterminate+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *),
+:where(:scope):is([data-nse-button-type="switch"]) [data-nse-part="field"]:disabled:indeterminate+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *) {
+  background-position:0-56px;
+}
+
+@media (forced-colors:active) {
+:where(:scope) [data-nse-part="indicator"]:where([data-nse-button-type="switch"] *),
+:where(:scope):is([data-nse-part="indicator"]:where([data-nse-button-type="switch"] *)) {
+  border:1px solid ButtonText;
+  border-radius:5px;
+  background:Canvas!important;
+  forced-color-adjust:none;
+}
+}
+
+@media (forced-colors:active) {
+:where(:scope) [data-nse-button-type="switch"] [data-nse-part="field"]:checked+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *)::before,
+:where(:scope):is([data-nse-button-type="switch"]) [data-nse-part="field"]:checked+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *)::before {
+  height:100%;
+  color:ButtonText;
+}
+}
+
+@media (forced-colors:active) {
+:where(:scope) [data-nse-button-type="switch"] [data-nse-part="field"]:indeterminate+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *)::after,
+:where(:scope):is([data-nse-button-type="switch"]) [data-nse-part="field"]:indeterminate+[data-nse-part="indicator"]:where([data-nse-button-type="switch"] *)::after {
+  border:0;
+  background:ButtonText;
+  box-shadow:none;
+}
+}
+
+@media (forced-colors:active) {
+:where(:scope) [data-nse-button-type="radio"],
+:where(:scope):is([data-nse-button-type="radio"]) {
+  border:1px solid ButtonText!important;
+  border-image:none!important;
+  background:Canvas;
+  color:ButtonText;
+  forced-color-adjust:none;
+}
+}
+
+@media (forced-colors:active) {
+:where(:scope) [data-nse-button-type="radio"][data-nse-selected],
+:where(:scope):is([data-nse-button-type="radio"][data-nse-selected]) {
+  color:HighlightText;
+  background:Highlight;
+}
+}
+
+@media (forced-colors:active) {
+:where(:scope) [data-nse-button-type="radio"][data-nse-enabled="false"],
+:where(:scope):is([data-nse-button-type="radio"][data-nse-enabled="false"]) {
+  color:GrayText;
+  border-color:GrayText!important;
+}
+}

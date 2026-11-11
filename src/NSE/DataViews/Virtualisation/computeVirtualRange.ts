@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { IndexRange } from "../../../SynCloudOS/Models";
+import type { NSEVirtualIndexRange } from "./virtualisationTypes";
 import type { NSEVirtualRange, NSEVirtualRangeOptions, NSEVirtualSizeEstimate } from "./virtualisationTypes";
 
 const MAX_VIRTUAL_COUNT = 10_000_000;
@@ -124,9 +124,9 @@ export class NSEVirtualSizeIndex {
   }
 }
 
-export function coalesceNSEVirtualRanges(ranges: readonly IndexRange[]): readonly IndexRange[] {
+export function coalesceNSEVirtualRanges(ranges: readonly NSEVirtualIndexRange[]): readonly NSEVirtualIndexRange[] {
   const ordered = ranges.filter(({ length }) => length > 0).map(({ start, length }) => ({ start, length })).sort((left, right) => left.start - right.start);
-  const coalesced: IndexRange[] = [];
+  const coalesced: NSEVirtualIndexRange[] = [];
   for (const range of ordered) {
     const previous = coalesced.at(-1);
     if (!previous || range.start > previous.start + previous.length) { coalesced.push(range); continue; }
@@ -148,7 +148,7 @@ export function computeNSEVirtualRangeFromIndex(options: Omit<NSEVirtualRangeOpt
   const visibleEnd = Math.min(index.count, Math.max(visibleStart + 1, index.lowerBound(viewportEnd)));
   const renderedStart = Math.max(0, visibleStart - options.overscan);
   const renderedEnd = Math.min(index.count, visibleEnd + options.overscan);
-  const ranges: IndexRange[] = [{ start: renderedStart, length: renderedEnd - renderedStart }];
+  const ranges: NSEVirtualIndexRange[] = [{ start: renderedStart, length: renderedEnd - renderedStart }];
   for (const retained of options.retainedIndices ?? []) if (Number.isSafeInteger(retained) && retained >= 0 && retained < index.count) ranges.push({ start: retained, length: 1 });
   return { visible: { start: visibleStart, length: visibleEnd - visibleStart }, rendered: coalesceNSEVirtualRanges(ranges), totalSize };
 }

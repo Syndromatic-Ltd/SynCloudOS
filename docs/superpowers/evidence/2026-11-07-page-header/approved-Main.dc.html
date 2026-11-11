@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Expanded window title</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 960px; height: 600px; display: flex; font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; background: #e9ebee; overflow: hidden;">
+  <nav aria-label="Sections" style="width: 200px; flex-shrink: 0; display: flex; flex-direction: column; background: linear-gradient(90deg, #e6e8eb, #dcdfe3); border-right: 1px solid #b4b8be;">
+    <div style="height: 52px; flex-shrink: 0; display: flex; align-items: center; padding: 0 16px; background: linear-gradient(#f4f5f7, #d3d6db); border-bottom: 1px solid #a7abb2; font-size: 15px; font-weight: 600; color: #2b2e33;">NSE Control Gallery</div>
+    <div style="display: flex; align-items: center; gap: 8px; padding: 18px 0 6px 16px;"><span style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; color: #2f6fd0;">CONTROLS</span><span style="flex-grow: 1; height: 1px; background: #2f6fd0; margin-right: 12px;"></span></div>
+    <div style="height: 40px; display: flex; align-items: center; padding: 0 16px; background: #d4e4f8; font-size: 14px; color: #1f2a38;">Buttons</div>
+    <div style="height: 40px; display: flex; align-items: center; padding: 0 16px; border-top: 1px solid #cfd2d6; font-size: 14px; color: #2b2e33;">Text Fields</div>
+    <div style="height: 40px; display: flex; align-items: center; padding: 0 16px; border-top: 1px solid #cfd2d6; font-size: 14px; color: #2b2e33;">Selection &amp; Sliders</div>
+    <div style="height: 40px; display: flex; align-items: center; padding: 0 16px; border-top: 1px solid #cfd2d6; font-size: 14px; color: #2b2e33;">Progress &amp; Feedback</div>
+  </nav>
+  <div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column;">
+    <div style="flex-shrink: 0; background: linear-gradient(#f4f5f7, #c9ccd1); border-bottom: 1px solid #9ea2a9; box-shadow: 0 2px 6px rgba(0,0,0,0.18); position: relative; z-index: 1;">
+      <div style="height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 14px;">
+        <button type="button" aria-label="Home" style="width: 52px; height: 30px; border-radius: 15px; border: 1px solid #8f939a; background: linear-gradient(#fdfdfd, #d9dbdf); display: flex; align-items: center; justify-content: center;"><svg width="16" height="15" viewBox="0 0 16 15" fill="#4a4f57" aria-hidden="true"><path d="M8 1l7 6h-2v7H9.5V10h-3v4H3V7H1z"></path></svg></button>
+        <button type="button" aria-label="Account" style="width: 52px; height: 30px; border-radius: 15px; border: 1px solid #8f939a; background: linear-gradient(#fdfdfd, #d9dbdf); display: flex; align-items: center; justify-content: center;"><svg width="14" height="15" viewBox="0 0 14 15" fill="#4a4f57" aria-hidden="true"><circle cx="7" cy="4" r="3.2"></circle><path d="M1 14.5c0-3.6 2.7-5.6 6-5.6s6 2 6 5.6z"></path></svg></button>
+      </div>
+      <div style="padding: 2px 28px 18px; display: flex; flex-direction: column; gap: 2px;">
+        <h1 style="margin: 0; font-size: 30px; font-weight: 600; color: #2b3546; text-shadow: 0 1px 0 rgba(255,255,255,0.7);">Buttons</h1>
+      </div>
+    </div>
+    <div style="flex-grow: 1; min-height: 0; overflow: hidden; padding: 16px 24px; display: flex; flex-direction: column; gap: 16px;">
+      <p style="margin: 0; font-size: 13.5px; color: #4a4f57;">Push buttons, tool buttons and grouped actions.</p>
+      <section style="border-radius: 10px; border: 1px solid #a7abb2; background: #f2f3f5; overflow: hidden;">
+        <h2 style="margin: 0; padding: 6px 12px; font-size: 12px; font-weight: 700; color: #fff; background: linear-gradient(#a9adb4, #8c9098);">PUSH BUTTONS</h2>
+        <div style="padding: 14px 16px; display: flex; gap: 12px;">
+          <button type="button" style="height: 40px; padding: 0 22px; border-radius: 8px; border: 1px solid #5f646b; background: linear-gradient(#9aa0a8, #6b7078); color: #fff; font: inherit; font-size: 16px; font-weight: 600;">New draft</button>
+          <button type="button" style="height: 40px; padding: 0 22px; border-radius: 8px; border: 1px solid #2e6e1f; background: linear-gradient(#5cc04a, #2f8a22); color: #fff; font: inherit; font-size: 16px; font-weight: 600;">Save</button>
+          <button type="button" style="height: 40px; padding: 0 22px; border-radius: 8px; border: 1px solid #8a2620; background: linear-gradient(#ec6a5e, #c3392f); color: #fff; font: inherit; font-size: 16px; font-weight: 600;">Discard</button>
+        </div>
+      </section>
+      <section style="border-radius: 10px; border: 1px solid #a7abb2; background: #f2f3f5; overflow: hidden;">
+        <h2 style="margin: 0; padding: 6px 12px; font-size: 12px; font-weight: 700; color: #fff; background: linear-gradient(#a9adb4, #8c9098);">TOOL BUTTONS</h2>
+        <div style="height: 120px;"></div>
+      </section>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":600}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

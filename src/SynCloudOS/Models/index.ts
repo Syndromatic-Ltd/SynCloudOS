@@ -18,19 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export * from "./IndexPath";
-export * from "./IndexSet";
-export * from "./ByteCountFormatter";
 export * from "./ChangeSet";
-export * from "./DateFormatter";
-export * from "./Formatter";
-export * from "./NumberFormatter";
-export * from "./Predicate";
 export * from "./SelectionModel";
-export * from "./SortDescriptor";
-export * from "./TreeNode";
-export * from "./CountedSet";
-export * from "./DecimalValue";
-export * from "./GeometryValues";
-export * from "./UnicodeCharacterSet";
-export * from "./ValueTransformer";
+export * from "./Sorting";

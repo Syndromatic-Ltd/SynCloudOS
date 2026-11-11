@@ -26,18 +26,23 @@ import { isAbsolute, relative, resolve } from "node:path";
 
 export const requiredFxFamilies = Object.freeze([
   "animation", "graphics", "image", "text", "audio", "haptics", "motion",
-  "media", "video", "midi", "location", "lumina",
+  "media", "video", "midi", "location", "lumina", "compression", "network", "crypto", "dispatch",
+  "bluetooth", "nfc", "speech", "contacts", "pass", "xr",
 ]);
 
-export function assertTwelveFxPackageExports(exports) {
-  assert(exports && typeof exports === "object", "SDK exports must describe all twelve FX families.");
+export function assertFxPackageExports(exports) {
+  assert(exports && typeof exports === "object", "SDK exports must describe all reviewed FX families.");
   assert.deepEqual(Object.keys(exports).filter(key => /^\.\/fx\/[^/]+$/u.test(key)).sort(),
-    requiredFxFamilies.map(family => `./fx/${family}`).sort(), "SDK must export exactly the twelve FX families.");
+    requiredFxFamilies.map(family => `./fx/${family}`).sort(), "SDK must export exactly the reviewed FX families.");
   assert.deepEqual(Object.keys(exports).filter(key => /^\.\/fx\/[^/]+\//u.test(key)),
     ["./fx/video/webm"], "Only reviewed FX format extensions may be exported.");
   assert.deepEqual(exports["./fx/video/webm"],
     { types: "./fx/video/webm.d.ts", import: "./fx/video/webm.js" }, "Invalid WebM extension targets.");
   for (const key of Object.keys(exports)) {
+    if (key === ".") {
+      assert.deepEqual(exports["."], { types: "./index.d.ts", import: "./index.js" }, "The root export must be the SynCloudOS package entry.");
+      continue;
+    }
     assert(key.startsWith("./") && !key.includes("*") && !/\/(?:src|types|internal|private)(?:\/|$)/u.test(key), `Private SDK export is forbidden: ${key}`);
     assertSdkRelativePath(key.slice(2));
   }
@@ -84,10 +89,10 @@ export function sdkDirectoryFiles(root, prefix = "") {
   }).sort();
 }
 
-/** Include untracked implementation and build inputs, exclude tests/docs/receipts. */
+/** Include implementation, shipped documentation and build inputs; exclude tests/receipts. */
 export function captureSdkSourceFingerprint(repositoryRoot) {
   const paths = execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard", "-z", "--",
-    "src", "public", "scripts/synware", "package.json", "package-lock.json", "LICENSE", "NOTICE", "THIRD_PARTY.md", "ARTWORK.md", "licenses", ":(glob)tsconfig*.json", ".npmrc"],
+    "src", "public", "tooling/nse-theme-contract.json", "docs/framework", "scripts/synware", "scripts/developer-mcp", "package.json", "package-lock.json", "LICENSE", "NOTICE", "THIRD_PARTY.md", "ARTWORK.md", "licenses", ":(glob)tsconfig*.json", ".npmrc"],
   { cwd: repositoryRoot, encoding: "utf8", maxBuffer: 32 * 1024 * 1024 }).split("\0").filter(Boolean);
   // Tracked deletions remain in the inventory so they cannot retain the old hash.
   const missing = paths.filter(path => {
@@ -122,7 +127,7 @@ export function assertSdkFingerprint(value, label) {
 export function createSdkPackageManifest({ name, exports, files, peerDependencies, dependencies = undefined }) {
   return {
     name,
-    version: "1.0.0-beta.1",
+    version: "1.0.0-beta.2",
     private: false,
     type: "module",
     license: "AGPL-3.0-or-later AND Apache-2.0",
@@ -143,7 +148,16 @@ export function assertReviewedPackageFiles(files) {
       throw new TypeError(`SDK package contains an unsafe file path: ${file}`);
     }
     if (file.startsWith("types/FrameworkTests/")) throw new TypeError(`SDK package contains a test fixture: ${file}`);
-    if (["LICENSE", "NOTICE", "THIRD_PARTY.md", "ARTWORK.md", "sdk/LICENSE", "sdk/NOTICE", "sdk/package.json", "licenses/dependencies.json"].includes(file)) continue;
+    if (file.endsWith(".js.map")) {
+      // Reuse the reviewed JavaScript policy, rather than admitting arbitrary
+      // maps or introducing a second list that can drift from its artifacts.
+      assertReviewedPackageFiles([file.slice(0, -4)]);
+      continue;
+    }
+    if (["LICENSE", "NOTICE", "THIRD_PARTY.md", "ARTWORK.md", "AGENTS.md", "sdk/LICENSE", "sdk/NOTICE", "sdk/package.json", "licenses/dependencies.json"].includes(file)) continue;
+    if (["fx-attribution-runtime.js", "fx-app-module-source.mjs"].includes(file)) continue;
+    if (["index.js","index.d.ts","app-module-source.mjs","theme-bundles.mjs","theme-loading.mjs","built-in-theme-css.mjs","project-derivation.mjs","manifest-source.mjs","manifest-validator.mjs","bundleIdentifier.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs","bundle-paths.mjs","pwa-plugin.mjs","web-app-manifest.mjs","service-worker.mjs"].includes(file) || /^tooling\/(?:manifest\.schema|error-catalogue|build-receipt|nse-theme-contract)\.json$/u.test(file)) continue;
+    if (/^docs\/framework\/(?:[A-Za-z0-9][A-Za-z0-9._-]*\/)*[A-Za-z0-9][A-Za-z0-9._-]*\.(?:md|json|png|webp|svg|jpg|jpeg|gif)$/u.test(file)) continue;
     if (/^licenses\/(?:dependencies\/)?[A-Za-z0-9._-]+\/(?:(?:MIT|APACHE|BSD)[.-])?(?:LICENSE|LICENCE|COPYING|NOTICE)(?:[.-][A-Za-z0-9._-]+)?$/iu.test(file)) continue;
     if (/^licenses\/[A-Za-z0-9._-]+\.(?:txt|md)$/u.test(file)) continue;
     if (/^licenses\/(?:harfbuzzjs\.txt|harfbuzzjs-provenance\.json|pdfjs-dist\.txt|woff2-encoder\.txt|woff2-third-party\.txt)$/u.test(file)) continue;
@@ -154,10 +168,13 @@ export function assertReviewedPackageFiles(files) {
     if (/^assets\/image-processing\.worker-[A-Za-z0-9_-]+\.js$/u.test(file)) continue;
     if (/^assets\/video-processing\.worker-[A-Za-z0-9_-]+\.js$/u.test(file)) continue;
     if (/^assets\/browserResponsiveness\.worker-[A-Za-z0-9_-]+\.js$/u.test(file)) continue;
+    if (/^themes\/Atmo\.scostheme\/Contents\/(?:Info\.ts|Theme\.json|Licences\/[A-Za-z0-9._-]+|Resources\/(?:[A-Za-z0-9._-]+\/)*[A-Za-z0-9._@-]+\.(?:css|png|svg))$/u.test(file)) continue;
     if (/^nse\/themes\/atmo\/(?:[A-Za-z0-9._-]+\/)*[A-Za-z0-9._@-]+\.(?:css|png|webp|svg|jpg|jpeg|gif|avif|woff2?|ttf|otf)$/u.test(file)) continue;
     if (/^assets\/[A-Za-z0-9_-]+\.css$/u.test(file)) continue;
     if (file === "webspring/styles.css" || file === "chronosphere/styles.css") continue;
-    if (/^fx\/video\/webm\.(?:js|d\.ts)$/u.test(file)) continue;
+    if (/^(?:foundation|fx\/compression|fx\/video\/webm)\.(?:js|d\.ts)$/u.test(file)) continue;
+    if (/^(?:authentication-services|auth\/passkey)\.(?:js|d\.ts)$/u.test(file)) continue;
+    if (/^fx\/(?:bluetooth|nfc|speech|contacts|pass|xr|network|crypto|dispatch)\.(?:js|d\.ts)$/u.test(file)) continue;
     if (!/^(?:(?:(?:sdk|nse)(?:\/(?:[a-z][a-z-]*\/)*[a-z][a-z-]*)?|auth|browser|typography|server\/auth|webspring|chronosphere|fx\/(?:animation|graphics|image|text|audio|haptics|motion|media|video|midi|location|lumina))\.(?:js|d\.ts|css)|browser\/styles\.css|vite\.mjs|chunks\/[A-Za-z0-9_-]+\.js|assets\/[A-Za-z0-9._-]+\.(?:png|webp|svg|jpg|jpeg|gif|woff2?|ttf|otf)|README\.md|types\/(?:[A-Za-z0-9][A-Za-z0-9._-]*\/)*[A-Za-z0-9][A-Za-z0-9._-]*\.(?:d\.ts|d\.mts|mjs|json))$/u.test(file)) {
       throw new TypeError(`SDK package contains an unreviewed public file: ${file}`);
     }

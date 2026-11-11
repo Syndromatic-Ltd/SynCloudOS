@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../src/Foundation/NSEData";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createSynWareContextValue } from "../../src/SynCloudOS/AppSDK/createSynWareContextValue";
 import { createInMemoryDocumentAssetStore } from "../../src/SynCloudOS/Documents/DocumentAssetStore";
@@ -37,14 +38,14 @@ const bytes = new Uint8Array([1, 2, 3]);
 
 async function fixture(backed = true) {
   let pauseHash: (() => Promise<void>) | undefined;
-  const hash = async (value: Uint8Array) => {
-    const digest = "sha256:" + Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", value.slice().buffer)), (byte) => byte.toString(16).padStart(2, "0")).join("");
+  const hash = async (value: NSEData) => {
+    const digest = "sha256:" + Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", value.bytes.buffer)), (byte) => byte.toString(16).padStart(2, "0")).join("");
     await pauseHash?.();
     return digest;
   };
   const store = { ...createInMemoryDocumentAssetStore({ hash }) };
   cleanups.push(() => store.dispose());
-  const scopeForDocument = (documentId: string) => ({ authorizationId: "prepared-owner", documentId });
+  const scopeForDocument = (documentId: string) => ({ authorizationId: "com.example.prepared-owner", documentId });
   const runtime = createTestRuntime({ environment: createTestRuntimeEnvironment(), applicationDocuments: {
     initialTypes: [type], ...(backed ? { assetBacking: { store, scopeForDocument, manifest: {
       scopeForLocation: () => scopeForDocument("prepared-document"), enumerateReferences: (content: unknown) => (content as Model).assets,
@@ -53,16 +54,16 @@ async function fixture(backed = true) {
   runtime.documents.registerCloseReviewer({ review: async () => "discard" });
   cleanups.push(async () => { await runtime.dispose("test"); });
   const mount = (id: string) => {
-    registerTestSynWare(runtime, { schemaVersion: 1, id, version: "1.0.0", title: id, routes: [{ path: `/${id}`, primary: true }], documentTypes: [{ id: type.id, displayName: type.displayName }] });
+    registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: id, version: "1.0.0", displayName: id, routes: [{ path: `/${id.split(".").at(-1)}`, primary: true }], documentTypes: [{ id: type.id, displayName: type.displayName }] });
     const mounted = mountTestSynWareRuntime(runtime, id);
     cleanups.push(() => mounted.dispose("test"));
     return { mounted, ...createSynWareContextValue(mounted.runtime).documents };
   };
-  const app = mount("prepared-owner"), foreign = mount("prepared-foreign");
+  const app = mount("com.example.prepared-owner"), foreign = mount("com.example.prepared-foreign");
   const document = await app.workspaceDocuments.newDocument<Model>({ documentId: "prepared-document", typeId: type.id });
   const canonical = runtime.documents.getDocument(document.id)!;
   const persist = async () => {
-    const descriptor = await app.documentResources.acquire(document.id, new Blob([bytes], { type: "image/png" }));
+    const descriptor = await app.documentResources.acquire(document.id, resourceInput(new Blob([bytes], { type: "image/png" })));
     const reference = await app.documentResources.persist(document.id, descriptor);
     app.documentResources.release(document.id, descriptor);
     return reference;
@@ -101,7 +102,7 @@ describe("scoped SDK asset model preparation", () => {
     await expect(history.undo()).resolves.toMatchObject({ status: "completed" });
     expect(app.workspaceDocuments.getDocument<Model>(document.id)!.model.assets).toEqual([reference]);
     const reacquired = await app.documentResources.acquireAsset(document.id, reference);
-    expect(app.documentResources.resolve(document.id, reacquired)).toEqual(bytes);
+    expect(app.documentResources.resolve(document.id, reacquired)?.bytes).toEqual(bytes);
     app.documentResources.release(document.id, reacquired);
     await history.redo();
     // Trusted host fixture exercises actual history eviction; no app clear/store capability is added.
@@ -118,8 +119,8 @@ describe("scoped SDK asset model preparation", () => {
     const retain = vi.spyOn(store, "retain");
     expect(() => foreign.documentResources.prepareEdit(document.id, document.model, document.model)).toThrow(/owner lease|application/i);
     const responderId = "application:prepared-owner:observer";
-    runtime.responders.register({ id: responderId, kind: "view", parentId: "application:prepared-owner", scopeId: responderId });
-    const observer = mountTestSynWareRuntime(runtime, "prepared-owner", responderId);
+    runtime.responders.register({ id: responderId, kind: "view", parentId: "application:com.example.prepared-owner", scopeId: responderId });
+    const observer = mountTestSynWareRuntime(runtime, "com.example.prepared-owner", responderId);
     cleanups.push(() => observer.dispose("test"));
     const client = createSynWareContextValue(observer.runtime).documents;
     client.workspaceDocuments.getDocument(document.id);
@@ -209,3 +210,5 @@ describe("scoped SDK asset model preparation", () => {
     expect(await store.collectGarbage(scope)).toMatchObject({ removedAssets: 1 });
   });
 });
+
+function resourceInput(blob: Blob) { return { type: blob.type, size: blob.size, data: () => NSEData.read(blob) }; }

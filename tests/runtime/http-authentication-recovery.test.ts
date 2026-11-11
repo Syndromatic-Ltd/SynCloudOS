@@ -88,6 +88,120 @@ afterEach(() => {
 });
 
 describe("HTTP authentication failure classification and recovery", () => {
+  it("retains known sign-in methods after logout so the gate can sign in again", async () => {
+    const { service } = harness();
+    await service.refresh();
+    await service.signOut();
+    expect(service.getSnapshot()).toMatchObject({ status: "anonymous", methods: methods.methods });
+  });
+  it("verifies a completed local sign-in before an intercepted return navigation", async () => {
+    let signedIn = false;
+    const { service, fetcher, navigate } = harness();
+    fetcher.mockImplementation(async input => {
+      if (String(input).endsWith("/start")) {
+        signedIn = true;
+        return Response.json({ redirectTo: "/journal" });
+      }
+      return successfulResponse(input, signedIn ? authenticated : { authenticated: false });
+    });
+    await service.refresh();
+    const identity = vi.fn();
+    service.sessionAdapter.subscribe(identity);
+    navigate.mockImplementation(() => {
+      expect(service.getSnapshot().status).toBe("authenticated");
+      expect(identity).toHaveBeenLastCalledWith(expect.objectContaining({ subjectId: "verified-person" }));
+    });
+    await service.signIn("google", "/journal");
+    expect(navigate).toHaveBeenCalledWith("/journal");
+    expect(service.getSnapshot().status).toBe("authenticated");
+  });
+
+  it("publishes verified identity before authentication UI observers can launch an app", async () => {
+    const { service, fetcher } = harness();
+    let subject: string | undefined;
+    service.sessionAdapter.subscribe(value => { subject = value?.subjectId; });
+    const observed: Array<string | undefined> = [];
+    service.subscribe(() => { if (service.getSnapshot().status === "authenticated") observed.push(subject); });
+    fetcher.mockImplementation(async input => successfulResponse(input, authenticated));
+    await service.refresh();
+    expect(observed).toEqual(["verified-person"]);
+  });
+
+  it("refuses a completed local return if the server did not establish a session", async () => {
+    const { service, fetcher, navigate } = harness();
+    fetcher.mockImplementation(async input => String(input).endsWith("/start")
+      ? Response.json({ redirectTo: "/journal" }) : successfulResponse(input));
+    await service.refresh();
+    await expect(service.signIn("google", "/journal")).rejects.toThrow(/did not establish an authorised session/);
+    expect(navigate).not.toHaveBeenCalled();
+    expect(service.getSnapshot()).toMatchObject({ status: "error", profile: null });
+  });
+
+  it("does not navigate an older completed sign-in after a newer logout", async () => {
+    const { service, fetcher, navigate } = harness();
+    await service.refresh();
+    const verification = deferred<Response>();
+    fetcher.mockImplementation(async input => String(input).endsWith("/start")
+      ? Response.json({ redirectTo: "/journal" }) : String(input).endsWith("/session")
+        ? verification.promise : successfulResponse(input));
+    const signingIn = service.signIn("google", "/journal");
+    await vi.advanceTimersByTimeAsync(0);
+    await service.signOut();
+    verification.resolve(Response.json(authenticated));
+    await signingIn;
+    expect(navigate).not.toHaveBeenCalled();
+    expect(service.getSnapshot()).toMatchObject({ status: "anonymous", profile: null });
+  });
+
+  it("does not let a passive focus check cancel an explicit pending sign-in", async () => {
+    const events = new EventTarget();
+    const { service, fetcher, navigate } = harness({ eventTarget: events });
+    await service.refresh();
+    const start = deferred<Response>();
+    fetcher.mockImplementation(async input => String(input).endsWith("/start") ? start.promise : successfulResponse(input));
+    const signingIn = service.signIn("google", "/journal");
+    events.dispatchEvent(new Event("focus"));
+    await vi.advanceTimersByTimeAsync(0);
+    start.resolve(Response.json({ redirectTo: "https://identity.example/sign-in" }));
+    await signingIn;
+    expect(navigate).toHaveBeenCalledWith("https://identity.example/sign-in");
+  });
+
+  it("keeps confirmed identity when an adapter read is superseded by a pending browser recheck", async () => {
+    const { service, fetcher } = harness();
+    fetcher.mockImplementation(async input => successfulResponse(input, authenticated));
+    await service.refresh();
+    const oldResponse = deferred<Response>();
+    fetcher.mockImplementation(async input => String(input).endsWith("/session") ? oldResponse.promise : successfulResponse(input));
+    const reading = service.sessionAdapter.read();
+    const newResponse = deferred<Response>();
+    fetcher.mockImplementation(async input => String(input).endsWith("/session") ? newResponse.promise : successfulResponse(input));
+    const rechecking = service.refresh();
+    void rechecking.catch(() => undefined);
+    oldResponse.resolve(Response.json({ authenticated: false }));
+    await expect(reading).resolves.toMatchObject({ subjectId: "verified-person", state: "active" });
+    expect(service.getSnapshot().status).toBe("checking");
+    newResponse.resolve(Response.json({ authenticated: false }));
+    await rechecking;
+    expect(service.getSnapshot().status).toBe("anonymous");
+  });
+
+  it("still expires confirmed identity while a passive recheck is pending", async () => {
+    const { service, fetcher } = harness();
+    fetcher.mockImplementation(async input => successfulResponse(input, { ...authenticated, expiresAt: 1_010 }));
+    await service.refresh();
+    const changed = vi.fn();
+    service.sessionAdapter.subscribe(changed);
+    fetcher.mockImplementation(() => new Promise<Response>(() => {}));
+    const reading = service.refresh();
+    void reading.catch(() => undefined);
+    await vi.advanceTimersByTimeAsync(10);
+    expect(service.getSnapshot().status).toBe("expired");
+    expect(changed).toHaveBeenLastCalledWith(null);
+    service.dispose();
+    await expect(reading).rejects.toBeDefined();
+  });
+
   it.each([0, -1, NaN, Infinity, -Infinity])("rejects invalid requestTimeoutMs %s before opening resources", requestTimeoutMs => {
     const createBroadcastChannel = vi.fn();
     expect(() => createHttpAuthentication({ requestTimeoutMs, createBroadcastChannel })).toThrow(/finite.*positive/i);

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { SynCloudOSRouteInfo } from "./appRouteTypes";
 import type { AppRouteSession } from "./AppRouteSession";
 
@@ -91,28 +92,28 @@ export function createMountedRouteSettlement(clock: {
   const listeners = new Set<() => void>();
   let disposed = false;
   return {
-    current(appId: string) { return requests.get(appId) ?? null; },
+    current(appId: string) { return requests.get(normalizeBundleIdentifier(appId)) ?? null; },
     attach(appId: string, participant: MountedRouteParticipant) {
       if (disposed || participant.signal.aborted) throw new DOMException("Route mount is revoked.", "AbortError");
-      participants.set(appId, participant);
+      participants.set(normalizeBundleIdentifier(appId), participant);
       for (const listener of [...listeners]) listener();
       const release = () => {
-        if (participants.get(appId) === participant) participants.delete(appId);
+        if (participants.get(normalizeBundleIdentifier(appId)) === participant) participants.delete(normalizeBundleIdentifier(appId));
         participant.signal.removeEventListener("abort", release);
       };
       participant.signal.addEventListener("abort", release, { once: true });
       return release;
     },
     async settle(appId: string, request: MountedRouteRequest, required: boolean) {
-      requests.set(appId, request);
-      if (!required && !participants.has(appId)) return;
+      requests.set(normalizeBundleIdentifier(appId), request);
+      if (!required && !participants.has(normalizeBundleIdentifier(appId))) return;
       const participant = await new Promise<MountedRouteParticipant>((resolve, reject) => {
         let timer: unknown;
         const cleanup = () => { listeners.delete(check); request.signal.removeEventListener("abort", abort); if (timer !== undefined) clock.clearTimeout(timer); };
         const abort = () => { cleanup(); reject(new DOMException("Route mount settlement cancelled.", "AbortError")); };
         const check = () => {
-          if (disposed || request.signal.aborted || requests.get(appId) !== request) { abort(); return; }
-          const mounted = participants.get(appId);
+          if (disposed || request.signal.aborted || requests.get(normalizeBundleIdentifier(appId)) !== request) { abort(); return; }
+          const mounted = participants.get(normalizeBundleIdentifier(appId));
           if (mounted && !mounted.signal.aborted) { cleanup(); resolve(mounted); }
         };
         timer = clock.setTimeout(() => { cleanup(); reject(new Error("Route mount did not attach: " + appId)); }, 15_000);

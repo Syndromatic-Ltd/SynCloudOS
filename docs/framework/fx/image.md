@@ -1,5 +1,7 @@
 # ImageFX
 
+Encoded byte inputs accept `NSEDataConvertible` from `@syndromatic/syncloudos/foundation`; delivered encoded bytes are immutable `NSEData`. Use `.bytes` at a native typed-buffer boundary and `.blob(mimeType)` for a browser Blob. Numeric pixel, index and PCM planes retain their typed arrays; writable copy destinations remain mutable.
+
 ImageFX (`IFX`) is the web-native analogue of Core Image. It describes image processing as a graph of lazy operations. Building a graph does no pixel work, and nothing runs until you render it. That delay lets the framework work out which region each output pixel needs, split the output into tiles, keep memory inside a budget, choose a backend and run the work off the main thread.
 
 An ImageFX image is a description, not a bitmap. `IFXImage.fromPixels()` wraps existing pixels, `IFXImage.constant()` describes a colour that fills all space, and every filter takes images and returns a new image that records what it does. The graph is immutable, so you can share a node between several outputs and render them separately.
@@ -10,6 +12,7 @@ The framework has these parts, and each has its own section below.
 - **Filters.** About 200 named filters in 15 categories, applied with `IFXFilter` and discovered through `IFXFilterRegistry`. See the [filter catalogue](image/filters.md).
 - **Rendering.** `IFXContext`, `IFXRenderPipeline`, destinations, tile plans and tasks turn a graph into pixels with budgets and cancellation.
 - **Resources.** `IFXImageResource` loads and exports images through the session.
+- **Image view.** `IFXImageView`, after ImageKit's `IKImageView`, shows a resource to zoom, pan and crop.
 - **Text images.** `createIFXTextImage` and `createIFXAttributedTextImage` turn [TextFX](text.md) text into graph nodes.
 - **Analysis and RAW.** Feature detection, barcode descriptors, model assets and a portable DNG decoder. See [analysis and RAW](image/analysis-and-raw.md).
 - **Kernels, processors and graph transport.** Custom per-pixel programs and the codec that moves a graph between threads. See [kernels and graph transport](image/kernels-and-graphs.md).
@@ -25,9 +28,9 @@ import { IFXImage } from "@syndromatic/syncloudos/fx/image";
 | --- | --- |
 | Prefix | `IFX` |
 | Entry | `@syndromatic/syncloudos/fx/image` |
-| Hook | `useSynWareImages`, from `@syndromatic/syncloudos/sdk` |
+| Hook | `useImages`, from `@syndromatic/syncloudos/sdk` |
 | Permissions | None declared in the manifest. The session checks decode and export policy for each image. |
-| Analogue | Core Image (`CIImage`, `CIFilter`, `CIContext`, `CIKernel`, `CIDetector`, `CIRAWFilter`) |
+| Analogue | Core Image (`CIImage`, `CIFilter`, `CIContext`, `CIKernel`, `CIDetector`, `CIRAWFilter`) and ImageKit's `IKImageView` |
 
 ## What the entry exports
 
@@ -38,6 +41,7 @@ import { IFXImage } from "@syndromatic/syncloudos/fx/image";
 | Filters | `IFXFilter`, `IFXFilterRegistry`, `IFXFilterName`, `IFXFilterParameters`, `IFXFilterCategory`, `IFXBlendMode`, `IFXColourComponents` |
 | Rendering | `IFXContext`, `IFXRenderPipeline`, `IFXRenderDestination`, `IFXTileRenderDestination`, `IFXTilePlan`, `IFXRenderTask`, `IFXRenderBackend` and the option, result and info types |
 | Resources | `IFXImageResource`, `IFXImageResourcePort`, `IFXResourceHandle` |
+| Image view | `IFXImageView`, `IFXImageViewHandle`, `IFXImageToolMode`, `IFXImageVisibleRect`, `IFXImageGeometryPort` and the string-source port types |
 | Text | `createIFXTextImage`, `createIFXAttributedTextImage`, `IFXTextImageOptions` |
 | Graphs | `IFXFilterGraph`, `IFXGraphCodec`, `IFXSerializedGraph`, `IFXSerializedGraphV2`, `IFXSerializedGraphV3`, `IFXPortableGraph` |
 | Kernels and processors | `IFXKernel`, `IFXColourKernel`, `IFXBlendKernel`, `IFXWarpKernel`, `IFXProcessorDefinition` and their program types |
@@ -256,6 +260,8 @@ The interface a backend implements:
 
 Graphs render on a browser worker by default. An explicit WebGPU backend accelerates a reviewed subset of operations, and every graph still has a portable path. Float sources keep their precision through the worker, and clipping to bytes happens at the byte render destination. `IFXBackendRenderOptions` has `signal` and `interpolation`.
 
+The browser entry's `BrowserImageProcessingWorker.renderEncoded(image, options)` returns `Promise<{ data: NSEData; metadata: IFXEncodedImageMetadata }>`. Options select `"image/png"` or `"image/webp"`, with optional `colourSpace: "srgb"`, `orientation: "up"`, `signal` and `interpolation`. The metadata carries the MIME type and dimensions; use `data.count` for the encoded size and `data.blob(metadata.mimeType)` for a native upload or download.
+
 ### `IFXSampler`
 
 The evaluator behind a render. It samples a graph at a point and memoises the results. Most code does not need it, and it is public for backends and diagnostics.
@@ -292,7 +298,7 @@ export async function paintDab(accumulator: IFXImageAccumulator, context: IFXCon
 
 ### `IFXImageResource`
 
-A decoded image that the session owns. Inside a SynWare, `useSynWareImages().load(request)` returns one. The request names a `source` and can set `accessibleLabel`, `renderingMode`, `tintColour`, `capInsets` and `resizingMode`.
+A decoded image that the session owns. Inside a SynWare, `useImages().load(request)` returns one. The request names a `source` and can set `accessibleLabel`, `renderingMode`, `tintColour`, `capInsets` and `resizingMode`.
 
 A source is one of:
 
@@ -313,7 +319,7 @@ A source is one of:
 | `src` | `string` | The resource's URL identity. |
 | `intrinsicSize`, `density` | `GFXSize \| null`, `number \| null` | The decoded size in points and the pixel density. |
 | `sourceOrientation` | `1` to `8` or `null` | The EXIF orientation of the encoded file. Decoded pixels may already be rotated by the browser, and the framework leaves that as the browser made it. |
-| `sourceICCProfile` | `Uint8Array \| null` | A fresh copy of the embedded ICC profile, when present. |
+| `sourceICCProfile` | `NSEData \| null` | A fresh copy of the embedded ICC profile, when present. |
 | `accessibleLabel` | `string` | The description for assistive technology. |
 | `renderingMode` | `"original" \| "template"` | Template images are drawn as a mask that takes `tintColour`. |
 | `tintColour` | `string \| null` | A CSS colour for template images. |
@@ -321,20 +327,44 @@ A source is one of:
 | `resizingMode` | `"stretch" \| "tile" \| "cap-insets"` | How the image fills a larger area. |
 | `image(signal?)` | `Promise<IFXImage>` | A graph node that reuses the decoded pixels. |
 | `pixelLease(signal?)` | `Promise<GFXPixelLease>` | A short-lived view of the pixels. |
-| `export(format, signal?)` | `Promise<Uint8Array>` | Encoded bytes as `"image/png"` or `"image/webp"`. Rejects if the browser answers with a different type, and never labels PNG bytes as WebP. |
+| `export(format, signal?)` | `Promise<NSEData>` | Encoded bytes as `"image/png"` or `"image/webp"`. Rejects if the browser answers with a different type, and never labels PNG bytes as WebP. |
 | `release()` | `void` | Frees the image. |
 
 The session checks export policy, CORS cleanliness and mount lifetime before it hands pixels over. When a host cannot identify colour channels reliably, numeric pixel and export access rejects with `NotSupportedError` while display decoding continues to work. Operations that read pixels wait for `ready` and reject with `AbortError` if the image changes while they run.
 
 `IFXImageResourcePort` and `IFXResourceHandle` are the interfaces a host implements to supply a resource.
 
+## Showing an image
+
+### `IFXImageView`
+
+ImageKit's `IKImageView`. It shows an `IFXImageResource` fitted to the view. The wheel, a pinch or a double-click zooms about the pointer, and a drag pans once the image overflows. The view draws no controls; put your own buttons beside it and call its handle.
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `image` | `IFXImageResource` | The image, as `IKImageView.setImage`. |
+| `geometry` | `IFXImageGeometryPort` | Measures the view. Pass `useImages().geometry`; without it the view takes the image's own size. |
+| `currentToolMode` | `"move"` or `"crop"` | `IKImageView.currentToolMode`. Default `"move"`. The crop tool frames the visible region. |
+| `maxZoomRatio`, `zoomStep` | `number` | The largest zoom as a multiple of the fitted zoom (default 2), and how far one step moves (default 0.25 of that range). |
+| `onZoomChange` | `(zoomFactor) => void` | Called after the zoom changes. |
+
+The handle (`ref`) has `zoomFactor`, `zoomIn()`, `zoomOut()`, `zoomImageToFit()` and `crop()`. In the crop tool, `crop()` returns an `IFXImageVisibleRect`: the framed region's `x`, `y`, `width` and `height` in source pixels, the image's `imageWidth` and `imageHeight`, and the `zoomFactor`. Outside the crop tool, or before the image is ready, it returns `null`.
+
+```tsx
+import { IFXImageView, type IFXImageViewHandle } from "@syndromatic/syncloudos/fx/image";
+
+const view = useRef<IFXImageViewHandle>(null);
+<IFXImageView ref={view} image={photo} geometry={images.geometry} currentToolMode="crop" />
+<NSEButton title="Crop" onClick={() => setRegion(view.current?.crop() ?? null)} />
+```
+
 ```tsx
 import { useEffect, useRef } from "react";
 import { IFXContext, IFXFilter } from "@syndromatic/syncloudos/fx/image";
-import { useSynWareImages } from "@syndromatic/syncloudos/sdk";
+import { useImages } from "@syndromatic/syncloudos/sdk";
 
 export function Vignette({ path }: { path: string }) {
-  const images = useSynWareImages();
+  const images = useImages();
   const canvas = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {

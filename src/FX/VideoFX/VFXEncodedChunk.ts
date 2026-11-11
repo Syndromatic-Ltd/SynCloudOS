@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
+
+
 import { MEFXSampleTimingInfo } from "../MediaFX/MEFXSampleTimingInfo";
 import { MEFXTime } from "../MediaFX/MEFXTime";
 
@@ -25,7 +28,7 @@ export type VFXEncodedChunkType = "key" | "delta";
 
 export interface VFXEncodedChunkInit {
   readonly type: VFXEncodedChunkType;
-  readonly data: Uint8Array;
+  readonly data: NSEDataConvertible;
   readonly timing: MEFXSampleTimingInfo;
   /** Positive WebM BlockGroup end padding; only meaningful for an audio packet. */
   readonly discardPaddingNanoseconds?: number;
@@ -42,7 +45,7 @@ const encodedBytes = new WeakMap<VFXEncodedChunk, Uint8Array<ArrayBuffer>>();
 function validateInit(init: VFXEncodedChunkInit): void {
   if (!init || typeof init !== "object") throw new TypeError("Encoded video chunk initialization is required.");
   if (init.type !== "key" && init.type !== "delta") throw new TypeError("Encoded video chunk type must be key or delta.");
-  if (!(init.data instanceof Uint8Array)) throw new TypeError("Encoded video chunk data must be Uint8Array.");
+  NSEData.from(init.data);
   if (!(init.timing instanceof MEFXSampleTimingInfo)) throw new TypeError("Encoded video chunk timing must be MEFXSampleTimingInfo.");
   if (init.discardPaddingNanoseconds !== undefined && (!Number.isSafeInteger(init.discardPaddingNanoseconds) || init.discardPaddingNanoseconds < 0 || init.discardPaddingNanoseconds > 1_000_000_000))
     throw new RangeError("Encoded chunk discard padding must be a nonnegative nanosecond duration within one second.");
@@ -61,7 +64,7 @@ function initializeChunk(chunk: VFXEncodedChunk, init: VFXEncodedChunkInit, data
 /** Internal demux ownership transfer. The backend must own this allocation and
  * never mutate it again. The public constructor/copyData still isolate callers.
  * Deliberately absent from the public SDK barrel. */
-export function ownedVFXEncodedChunk(init: VFXEncodedChunkInit): VFXEncodedChunk {
+export function ownedVFXEncodedChunk(init: Omit<VFXEncodedChunkInit, "data"> & { readonly data: Uint8Array }): VFXEncodedChunk {
   validateInit(init);
   if (!(init.data.buffer instanceof ArrayBuffer))
     throw new TypeError('Owned encoded data requires a non-shared ArrayBuffer.');
@@ -93,15 +96,15 @@ export class VFXEncodedChunk {
 
   constructor(init: VFXEncodedChunkInit) {
     validateInit(init);
-    initializeChunk(this, init, new Uint8Array(init.data));
+    initializeChunk(this, init, new Uint8Array(NSEData.from(init.data).bytes));
   }
 
   get byteLength(): number { return encodedBytes.get(this)?.byteLength ?? 0; }
 
-  copyData(): Uint8Array {
+  copyData(): NSEData {
     const data = encodedBytes.get(this);
     if (!data) throw new DOMException("Encoded video chunk is unavailable.", "InvalidStateError");
-    return data.slice();
+    return NSEData.from(data);
   }
 
   /** Core Media-style sample retiming: new timing metadata, shared immutable data. */

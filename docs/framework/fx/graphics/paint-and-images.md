@@ -131,7 +131,7 @@ An image is limited to 64 MiB. The constructor rejects a descriptor that has an 
 | --- | --- | --- |
 | `width`, `height`, `bytesPerRow`, `bytesPerPixel`, `pixelFormat`, `alpha`, `colourSpace` | | The descriptor's values. |
 | `descriptor` | `GFXBytePixelDescriptor` | The same values as a descriptor with `sampleFormat: "unorm8"`. |
-| `copyData()` | `Uint8Array` | A copy of the bytes. An image never exposes its own storage. |
+| `copyData()` | `Uint8Array` | A copy of the numeric pixel channels. An image never exposes its own storage. |
 | `pixel(x, y)` | `GFXRGBAComponents` | One pixel as straight (not premultiplied) unit components. Throws `RangeError` outside the image. |
 | `sample(position, options?)` | `GFXRGBAComponents` | Reads at a fractional position. Pixel centres sit at half-integer coordinates. `options.interpolation` is `"nearest"` (default) or `"linear"` (which blends premultiplied values), and `options.edge` is `"clamp"` (default), `"repeat"` or `"transparent"`. |
 | `cropped(rect)` | `GFXImage \| null` | The part inside an integer rectangle, or `null` when nothing overlaps. |
@@ -139,7 +139,7 @@ An image is limited to 64 MiB. The constructor rejects a descriptor that has an 
 | `resized(size, mode?)` | `GFXImage` | Resamples to an integer size with `"linear"` (default) or `"nearest"`. |
 | `extractMask(mode?)` | `GFXImage` | An `a8` image from the `"alpha"` channel (default) or from the `"luminance"` weighted by alpha. |
 | `withAlphaMask(mask)` | `GFXImage` | Multiplies alpha by a mask's alpha. The mask must have the same size. |
-| `toPNG()` | `Uint8Array` | Encodes the image as a PNG file. |
+| `toPNG()` | `NSEData` | Encodes the image as an immutable PNG file. |
 
 ```ts
 import { GFXImage } from "@syndromatic/syncloudos/fx/graphics";
@@ -158,6 +158,8 @@ export function checker(size: number): GFXImage {
 const tile = checker(16);
 export const thumbnail = tile.resized({ width: 8, height: 8 }, "nearest");
 export const png = thumbnail.toPNG();
+export const pngBlob = png.blob("image/png");
+export const encodedByteCount = png.count;
 export const centre = tile.pixel(8, 8);
 export const mask = tile.extractMask("luminance");
 ```
@@ -209,15 +211,15 @@ These move bytes across a boundary with a size limit.
 `GFXDataProvider` wraps bytes or a callback so a consumer can read bounded slices.
 
 ```text
-new GFXDataProvider(data: Uint8Array | GFXCallbackDataProvider)
+new GFXDataProvider(data: NSEDataConvertible | GFXCallbackDataProvider)
 ```
 
-Bytes are copied. A `GFXCallbackDataProvider` (`length`, `read(offset, length)`, `release()`) is read on demand and released once. Both are limited to 64 MiB.
+Supplied bytes accept `NSEDataConvertible` and are copied. A `GFXCallbackDataProvider` (`length`, `read(offset, length): NSEData`, `release()`) is read on demand and released once. Each callback read must return an `NSEData` with the requested byte count. Both forms are limited to 64 MiB.
 
 | Member | Description |
 | --- | --- |
 | `length` | The size in bytes. |
-| `read(offset, length)` | A copy of a slice. Throws `RangeError` outside the data and `Error` after release. |
+| `read(offset, length)` | An `NSEData` containing a copy of the slice. Throws `RangeError` outside the data and `Error` after release. |
 | `released` | True after `release()`. |
 | `release()` | Frees the data and calls the callback's `release`. |
 
@@ -227,7 +229,27 @@ Bytes are copied. A `GFXCallbackDataProvider` (`length`, `read(offset, length)`,
 new GFXDataConsumer(maximumBytes = 64 MiB)
 ```
 
-`write(bytes)` appends a copy and throws `RangeError` past the limit. `finish()` returns all the bytes as one array and closes the consumer. `dispose()` discards everything. `GFXPDFContext.finish` accepts a consumer, which is how a large PDF is bounded.
+`write(bytes: NSEDataConvertible)` appends a copy and throws `RangeError` past the limit. `finish(): NSEData` returns all the bytes as one immutable value and closes the consumer. `dispose()` discards everything. `GFXPDFContext.finish` accepts a consumer, which is how a large PDF is bounded.
+
+```ts
+import { NSEData } from "@syndromatic/syncloudos/foundation";
+import { GFXDataConsumer, GFXDataProvider } from "@syndromatic/syncloudos/fx/graphics";
+
+const payload = NSEData.from(new Uint8Array([1, 2, 3]));
+const provider = new GFXDataProvider({
+  length: payload.count,
+  read: (offset, length) => payload.subdata({ location: offset, length }),
+  release() {},
+});
+const consumer = new GFXDataConsumer();
+try {
+  consumer.write(provider.read(0, provider.length));
+  const data = consumer.finish(); // NSEData
+  console.log(data.count, data.blob("application/octet-stream"));
+} finally {
+  provider.release();
+}
+```
 
 `GFXImageDrawingDestination` is the one-method interface (`drawImage(image, rect)`) that `GFXLayer.draw` and text attachments draw into. Every drawing context satisfies it.
 

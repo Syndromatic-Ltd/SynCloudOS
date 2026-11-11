@@ -1,0 +1,4 @@
+/* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
+/* Atmo as the framework loads it: control structure, then Atmo's bundle. Both draw in the nse.atmo layer. */
+@import "../Structure/controls.css";
+@import "../../Themes/Atmo.scostheme/Contents/Resources/theme.css";

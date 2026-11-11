@@ -18,12 +18,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useMemo, type HTMLAttributes, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type HTMLAttributes, type ReactNode } from "react";
 import { NSEPopup, useNSEPopupOpenState, type NSEPopupPresentation, type NSEPopupProps } from "./NSEPopup";
 import type { NSEOverlayDismissReason } from "./overlayTypes";
 import { useOptionalNSEWindowSurfaceBridge, type NSEWindowSurfaceBridge } from "./NSEWindowSurfaceBridge";
 import { reportNSEWindowSurfaceError, useNSEWindowSurfaceLifecycle } from "./useNSEWindowSurfaceLifecycle";
 import { useNSEPresentedContent } from "./useNSEPresentedContent";
+import { PresentedDialogContent, PresentedDialogTitle, usePresentedDialogContent } from "./presentedDialogContent";
 
 export interface NSEActionSheetProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
   readonly id: string;
@@ -73,6 +74,9 @@ export function NSEActionSheet({
   ...props
 }: NSEActionSheetProps) {
   const state = useNSEPopupOpenState({ open, defaultOpen, onOpenChange });
+  const contentOwner = usePresentedDialogContent();
+  const [renderedTitle, setRenderedTitle] = useState("");
+  const accessibleTitle = typeof props.title === "string" ? props.title : renderedTitle || "Dialog";
   const hostedBridge = useOptionalNSEWindowSurfaceBridge();
   const canonicalBridge = windowBridge?.present && windowBridge.dismiss ? windowBridge as NSEWindowSurfaceBridge : hostedBridge;
   const handleDidClose = useNSEWindowSurfaceLifecycle({
@@ -97,13 +101,16 @@ export function NSEActionSheet({
   const canonicalRequest = useMemo(() => ({
     id: props.id,
     role: "sheet" as const,
-    title: typeof props.title === "string" ? props.title : props.id,
+    title: accessibleTitle,
     parentWindowControllerId: parentWindowControllerId ?? null,
     anchor,
     bounds: { x: 180, y: 120, width: 520, height: 420 },
     onDidClose: handleDidClose,
-  }), [anchor, handleDidClose, parentWindowControllerId, props.id, props.title]);
-  const hostedContent = <div role="dialog" aria-label={typeof props.title === "string" ? props.title : props.id}>{props.children}</div>;
+  }), [accessibleTitle, anchor, handleDidClose, parentWindowControllerId, props.id]);
+  const hostedContent = <PresentedDialogContent onTitleChange={setRenderedTitle}><div>
+    {!contentOwner.titleInContent && props.title && typeof props.title !== "string" ? <PresentedDialogTitle>{props.title}</PresentedDialogTitle> : null}
+    {props.children}
+  </div></PresentedDialogContent>;
   const presentedContent = useNSEPresentedContent(hostedContent);
   useEffect(() => {
     if (!state.open || !canonicalBridge) return;
@@ -116,12 +123,14 @@ export function NSEActionSheet({
   return (
     <NSEPopup
       {...(props as Omit<NSEPopupProps, "anchor" | "overlayKind" | "modal" | "presentation">)}
+      title={contentOwner.titleInContent ? undefined : props.title}
+      aria-label={props["aria-label"] ?? (!props.labelledBy && (contentOwner.titleInContent || !props.title) ? accessibleTitle : undefined)}
       anchor={anchor}
       open={state.open}
       overlayKind="action-sheet"
       modal
       presentation={resolvedPresentation}
       onOpenChange={state.requestOpen}
-    />
+    ><PresentedDialogContent onTitleChange={setRenderedTitle}>{props.children}</PresentedDialogContent></NSEPopup>
   );
 }

@@ -1,0 +1,27 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/cryptofx.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/cryptofx.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/cryptofx.test.ts [ tests/runtime/cryptofx.test.ts ]
+Error: Cannot find module '../../src/FX/CryptoFX/public' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/cryptofx.test.ts
+ ❯ tests/runtime/cryptofx.test.ts:3:1
+      1| import { describe, expect, it } from "vitest";
+      2| import { NSEData } from "../../src/Foundation/NSEData";
+      3| import { CRFXSHA256, CRFXSHA384, CRFXSHA512, CRFXHMAC, CRFXHKDF, CRFXS…
+       | ^
+      4| const bytes = (s: string) => new TextEncoder().encode(s);
+      5| const hex = (s: string) => Uint8Array.from(s.match(/../g) ?? [], x => …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  19:02:07
+   Duration  175ms (transform 26ms, setup 27ms, import 0ms, tests 0ms, environment 0ms)
+

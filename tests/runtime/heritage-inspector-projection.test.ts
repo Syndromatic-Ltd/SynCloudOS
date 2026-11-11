@@ -53,7 +53,7 @@ describe("heritage owner projections", () => {
     const route = {
       runtimeId: owners.runtimeId,
       read: () => ({ transitions: [{ operationId: first.operationId, correlationId: first.correlationId, outcome: "redirected", successorId: next.operationId }],
-        sessions: [{ appId: "music", operationId: next.operationId, snapshot: { revision: 2, status: "loading", route: { name: "artist", params: { artist: "PRIVATE" }, query: { token: "PRIVATE" }, branch: ["artist"] }, nodes: { artist: { routeName: "artist", state: "loading", revision: 2 } } } }],
+        sessions: [{ appId: "com.example.music", operationId: next.operationId, snapshot: { revision: 2, status: "loading", route: { name: "artist", params: { artist: "PRIVATE" }, query: { token: "PRIVATE" }, branch: ["artist"] }, nodes: { artist: { routeName: "artist", state: "loading", revision: 2 } } } }],
         modules: [{ id: "artist", status: "loading", operationId: next.operationId }], graphs: [] }),
       subscribe: (_listener: () => void) => () => {},
     };
@@ -78,7 +78,7 @@ describe("heritage owner projections", () => {
     let listener = () => {};
     const read = vi.fn(() => [{ id: "pending", status: "pending" }, ...Array.from({ length: 9 }, (_, i) => ({ id: `done-${i}`, status: "completed" }))]);
     const remove = vi.fn();
-    const inspector = projection.createInspectorProjection({ runtimeId: "one", now: () => 1, historyLimit: 8,
+    const inspector = projection.createInspectorProjection({ runtimeId: "com.example.one", now: () => 1, historyLimit: 8,
       sources: [{ panel: "Operations", read, subscribe: fn => { listener = fn; return remove; } }] });
     for (let i = 0; i < 10000; i++) listener();
     expect(read).not.toHaveBeenCalled();
@@ -134,13 +134,13 @@ describe("heritage owner projections", () => {
     const owners = inspectorOwners();
     let reject!: (error: unknown) => void;
     const loading = new Promise((_resolve, fail) => { reject = fail; });
-    const graph = defineSynWareRoutes({ id: "music", routes: [{ name: "artist", path: ":artist", component: () => null, load: () => loading }] }).bind("/music", "music");
+    const graph = defineSynWareRoutes({ id: "music", routes: [{ name: "artist", path: ":artist", component: () => null, load: () => loading }] }).bind("/music", "com.example.music");
     const session = createAppRouteSession({ graph, getBundleGeneration: () => 1, getAuthorizationGeneration: () => 1,
       getSessionId: () => "mount", createLoaderServices: () => ({ resolve: () => { throw Error("unused"); } }), routeDataTimeoutMs: 10000,
       setTimeout: owners.setTimeout, clearTimeout: owners.clearTimeout });
     const inspector = projection.createInspectorProjection({ runtimeId: owners.runtimeId, now: owners.now,
       sources: createInspectorOwnerSources({ ...owners, routes: { runtimeId: owners.runtimeId,
-        read: () => ({ sessions: [{ appId: "music", operationId: "op", snapshot: session.getSnapshot() }] }),
+        read: () => ({ sessions: [{ appId: "com.example.music", operationId: "op", snapshot: session.getSnapshot() }] }),
         subscribe: listener => session.subscribe(listener) } }) });
     const route = graph.recognize("/music/SECRET_ARTIST");
     if (route.kind !== "match") throw Error("route fixture mismatch");
@@ -170,7 +170,7 @@ describe("heritage owner projections", () => {
     const snapshot = { revision: 1, status: "ready", route: { name: "root.child", branch: ["root", "root.child"] }, nodes: {} };
     const inspector = projection.createInspectorProjection({ runtimeId: owners.runtimeId, now: owners.now,
       sources: createInspectorOwnerSources({ ...owners, routes: { runtimeId: owners.runtimeId, subscribe: () => () => {},
-        read: () => ({ sessions: [{ appId: "one", snapshot }, { appId: "two", snapshot }], graphs: [{ id: "g", appId: "one", routes: [{ name: "root", path: "PRIVATE_PATH", children: [{ name: "root.child" }] }] }] }) } }) });
+        read: () => ({ sessions: [{ appId: "com.example.one", snapshot }, { appId: "com.example.two", snapshot }], graphs: [{ id: "g", appId: "com.example.one", routes: [{ name: "root", path: "PRIVATE_PATH", children: [{ name: "root.child" }] }] }] }) } }) });
     const routes = inspector.getPage("Routes").rows.filter(row => row.kind === "route" && row.status === "ready");
     expect(routes).toHaveLength(2);
     expect(routes[0].id).not.toBe(routes[1].id);

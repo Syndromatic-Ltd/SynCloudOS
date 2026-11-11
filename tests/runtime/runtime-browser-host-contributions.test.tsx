@@ -24,12 +24,9 @@ import {
   createSynCloudOSHostInstallContext,
   prepareSynCloudOSHostContributions,
 } from "../../src/SynCloudOS/HostContributions/hostContribution";
-import type { SynCloudOSPolicySubject } from "../../src/SynCloudOS/PolicyKit/policyTypes";
-import type { WebspringContentSource } from "../../src/Webspring/webspringContent";
+import type { SynCloudOSPolicySubject } from "../../src/SynCloudOS/ConfigurationProfiles/policyTypes";
 import { createTestRuntime, unlockRuntime } from "./helpers";
 import { noteType } from "../fixtures/noteDocumentType";
-
-const source: WebspringContentSource = { read: async () => [] };
 
 describe("runtime browser host contribution context", () => {
   it("projects scoped capabilities without exposing runtime authorities", async () => {
@@ -37,17 +34,14 @@ describe("runtime browser host contribution context", () => {
     try {
       const contribution = createSynCloudOSHostContribution("host", "tests/host", () => ({}));
       const [prepared] = await prepareSynCloudOSHostContributions([contribution], runtime.environment);
-      const contentSources: Record<string, typeof source> = {};
-      const handle = createSynCloudOSHostInstallContext(prepared!, runtime, contentSources);
+      const handle = createSynCloudOSHostInstallContext(prepared!, runtime);
 
       expect(Object.keys(handle.context)).not.toEqual(expect.arrayContaining(["runtime", "documentStore", "windows", "commands", "transfer"]));
-      expect(Object.keys(handle.context)).toEqual(expect.arrayContaining(["services", "documents", "seed", "events", "webspring", "policy"]));
+      expect(Object.keys(handle.context)).toEqual(expect.arrayContaining(["services", "documents", "seed", "events", "policy"]));
+      expect(Object.keys(handle.context)).not.toContain("webspring");
       expect((handle.context as Record<string, unknown>).runtime).toBeUndefined();
 
-      handle.context.webspring.registerContentSource("host.content", source);
-      expect(contentSources["host.content"]).toBe(source);
       await handle.cleanup();
-      expect(contentSources["host.content"]).toBeUndefined();
     } finally {
       await runtime.dispose();
     }
@@ -59,7 +53,7 @@ describe("runtime browser host contribution context", () => {
     try {
       const contribution = createSynCloudOSHostContribution("host", "tests/host", () => ({}));
       const [prepared] = await prepareSynCloudOSHostContributions([contribution], runtime.environment);
-      const handle = createSynCloudOSHostInstallContext(prepared!, runtime, {}, {}, controller.signal);
+      const handle = createSynCloudOSHostInstallContext(prepared!, runtime, {}, controller.signal);
       controller.abort();
 
       expect(() => handle.context.resources.lookup("missing")).toThrow(/aborted/iu);
@@ -150,7 +144,7 @@ describe("runtime browser host contribution context", () => {
         roles: ["employee"],
         capabilities: ["tests.seed.write", "tests.seed.write"],
       });
-      expect(runtime.policy.getRoleCapabilities("employee")).toContain("tests.seed.write");
+      expect(runtime.configurationProfiles.getRoleCapabilities("employee")).toContain("tests.seed.write");
       expect(handle.context.policy.currentSubject().role).not.toBe("system");
 
       const seeded = await handle.context.seed.saveDraft({ kind: "tests.seed", title: "Seeded", body: "content" });
@@ -170,18 +164,18 @@ describe("runtime browser host contribution context", () => {
         capabilities: ["*"],
         isAuthenticated: true,
       };
-      const forged = runtime.policy.authorise({
+      const forged = runtime.configurationProfiles.authorise({
         action: "runtime.mutate",
         origin: "runtime",
         source: "tests/host-seed",
         subject: forgedSubject,
-        requiredCapabilities: ["runtime.configure"],
+        requiredCapabilities: ["runtime.mutate"],
       });
       expect(forged.allowed).toBe(false);
       expect(forged.subjectRole).toBe("public");
 
       await handle.cleanup();
-      expect(runtime.policy.getRoleCapabilities("employee")).not.toContain("tests.seed.write");
+      expect(runtime.configurationProfiles.getRoleCapabilities("employee")).not.toContain("tests.seed.write");
     } finally {
       await runtime.dispose();
     }

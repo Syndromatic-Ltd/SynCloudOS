@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../../Foundation/NSEData";
+
+
 import { MEFXSampleTimingInfo } from "../../MediaFX/MEFXSampleTimingInfo";
 import { MEFXTime } from "../../MediaFX/MEFXTime";
 import type {
@@ -254,7 +257,7 @@ function clusterElement(track: VFXContainerTrack, chunk: VFXEncodedChunk): Uint8
   if (timing.timestampMicroseconds < 0)
     throw new RangeError("Restricted WebM output requires nonnegative timestamps.");
   const group: Uint8Array[] = [
-    element(EBML.block, blockPayload(track.id, chunk.copyData())),
+    element(EBML.block, blockPayload(track.id, new Uint8Array(chunk.copyData().bytes))),
   ];
   if (timing.durationMicroseconds !== null) {
     if (timing.durationMicroseconds < 0)
@@ -272,15 +275,15 @@ function clusterElement(track: VFXContainerTrack, chunk: VFXEncodedChunk): Uint8
 class WebMWriter implements VFXContainerBackendWriter {
   constructor(readonly track: VFXContainerTrack) {}
 
-  start(): readonly Uint8Array[] {
-    return Object.freeze([...webmHeader(), trackElement(this.track)]);
+  start(): readonly NSEData[] {
+    return Object.freeze([...webmHeader(), trackElement(this.track)].map(bytes => NSEData.from(bytes)));
   }
 
-  write(chunk: VFXEncodedChunk): readonly Uint8Array[] {
-    return Object.freeze([clusterElement(this.track, chunk)]);
+  write(chunk: VFXEncodedChunk): readonly NSEData[] {
+    return Object.freeze([NSEData.from(clusterElement(this.track, chunk))]);
   }
 
-  close(): readonly Uint8Array[] {
+  close(): readonly NSEData[] {
     return Object.freeze([]);
   }
 }
@@ -392,7 +395,8 @@ class WebMReader implements VFXContainerBackendReadSession {
     this.#limits = limits;
   }
 
-  push(bytes: Uint8Array): void {
+  push(input: NSEDataConvertible): void {
+    const bytes = new Uint8Array(NSEData.from(input).bytes);
     if (!(bytes instanceof Uint8Array)) throw new TypeError("WebM reader input must be Uint8Array.");
     if (this.#buffer.byteLength + bytes.byteLength > this.#limits.maximumBufferedBytes)
       throw new DOMException("WebM buffered input exceeds the configured limit.", "QuotaExceededError");

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../Foundation/NSEData";
 import { GFXImage } from "../../FX/GraphicsFX/GFXImage";
 import type { RuntimeDecodedImageLease, RuntimeImageAdapter, RuntimeImageAdapterFactory, RuntimeImageDecodeRequest, SynCloudOSRuntimeId } from "../SynCloudOS";
 import type { BrowserImagePlatform } from "./browserImageAdapterTypes";
@@ -43,8 +44,8 @@ function inspectDecodeRequest(value: Parameters<RuntimeImageAdapter["decode"]>[0
   if (kind === "bytes") {
     if (Object.keys(sourceDescriptors).length !== 3) throw new TypeError("Binary image source has an invalid shape.");
     const mimeType = read("mimeType"); const bytes = read("bytes");
-    if (typeof mimeType !== "string" || !(bytes instanceof Uint8Array) || Object.getPrototypeOf(bytes) !== Uint8Array.prototype || !["image/png", "image/jpeg", "image/webp", "image/gif", "image/svg+xml"].includes(mimeType)) throw new TypeError("Binary image source is invalid.");
-    return Object.freeze({ cacheKey, source: Object.freeze({ kind: "bytes", mimeType: mimeType as "image/png" | "image/jpeg" | "image/webp" | "image/gif" | "image/svg+xml", bytes: intrinsicUint8ArraySlice.call(bytes) as Uint8Array }), signal });
+    if (typeof mimeType !== "string" || !(bytes instanceof NSEData) || !["image/png", "image/jpeg", "image/webp", "image/gif", "image/svg+xml"].includes(mimeType)) throw new TypeError("Binary image source is invalid.");
+    return Object.freeze({ cacheKey, source: Object.freeze({ kind: "bytes", mimeType: mimeType as "image/png" | "image/jpeg" | "image/webp" | "image/gif" | "image/svg+xml", bytes: NSEData.from(bytes) }), signal });
   }
   throw new TypeError("Image source kind is unsupported.");
 }
@@ -80,7 +81,7 @@ export class BrowserImageAdapter implements RuntimeImageAdapter {
     const input = inspectDecodeRequest(request);
     input.signal.throwIfAborted();
     if (this.#disposed) throw new DOMException("Image adapter disposed.", "AbortError");
-    if (input.source.kind === "bytes" && input.source.mimeType !== "image/svg+xml") inspectImageBinaryMetadata(input.source.mimeType, input.source.bytes);
+    if (input.source.kind === "bytes" && input.source.mimeType !== "image/svg+xml") inspectImageBinaryMetadata(input.source.mimeType, input.source.bytes.bytes);
     const candidate = await this.#platform.decode(input.source, input.signal);
     let transferred = false;
     try {
@@ -93,7 +94,7 @@ export class BrowserImageAdapter implements RuntimeImageAdapter {
         intrinsicSize: Object.freeze({ ...decoded.intrinsicSize }),
         density: decoded.density,
         ...(decoded.sourceOrientation === undefined ? {} : { sourceOrientation: decoded.sourceOrientation }),
-        ...(decoded.sourceICCProfile === undefined ? {} : { sourceICCProfile: intrinsicUint8ArraySlice.call(decoded.sourceICCProfile) as Uint8Array }),
+        ...(decoded.sourceICCProfile === undefined ? {} : { sourceICCProfile: NSEData.from(decoded.sourceICCProfile) }),
         byteLength: decoded.byteLength,
         corsClean: decoded.corsClean,
         release: () => {
@@ -133,7 +134,7 @@ export class BrowserImageAdapter implements RuntimeImageAdapter {
     const bytes = await this.#platform.export(lease.src, lease.intrinsicSize, format, signal);
     signal.throwIfAborted();
     if (this.#disposed || !this.#active.has(lease)) throw new DOMException("Image lease was released during export.", "AbortError");
-    return bytes;
+    return NSEData.from(bytes);
   }
 
   dispose() {

@@ -52,12 +52,12 @@ async function mountView(id: string, component: WebspringViewComponent, reducedM
     media: query, matches: reducedMotion && query.includes("prefers-reduced-motion"),
     subscribe: () => () => undefined, dispose: () => undefined,
   });
-  const runtime = createTestRuntime({ environment, initialBundles: [createTestBundle({ id: "alpha", policy: { public: true } })] });
+  const runtime = createTestRuntime({ environment, initialBundles: [createTestBundle({ bundleIdentifier: "com.example.alpha", policy: { public: true } })] });
   runtimes.push(runtime);
   await runtime.boot({ initialPathname: "/" });
   const shell = defineWebspring({
     manifest: {
-      schemaVersion: 1, id: "test.view-return-contract", version: "1.0.0", title: "Return fixture",
+      schemaVersion: 1, bundleIdentifier: "com.example.test.view-return-contract", version: "1.0.0", displayName: "Return fixture",
       webspringShell: {
         views: [{ id, presentations: ["desktop", "tablet", "mobile"], mode: "launcher" }],
         defaults: { desktop: id, tablet: id, mobile: id }, homeRoute: "/",
@@ -69,7 +69,7 @@ async function mountView(id: string, component: WebspringViewComponent, reducedM
   render(<SynCloudOSProvider runtime={runtime}><WebspringHost shell={shell} startupPhase="complete" /></SynCloudOSProvider>);
   let transitionId = "";
   await act(async () => {
-    transitionId = runtime.webspringChoreography.beginReturn("alpha");
+    transitionId = runtime.webspringChoreography.beginReturn("com.example.alpha");
     // No app is mounted in this launcher fixture; supply the independent app-exit role.
     runtime.webspring.completeReturnRole(transitionId, "applicationExit");
   });

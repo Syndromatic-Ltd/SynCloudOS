@@ -1,5 +1,20 @@
 # AudioFX
 
+Audio categories expose `AUFXAudioSession.authorizationStatus` and
+`requestAuthorization()` for the `audio.session` entitlement. This is separate
+from microphone access through `audio.record` and `requestRecordAuthorization()`.
+The browser has no category permission prompt; an unsupported Audio Session API
+reports `unavailable`. `useAudio().createSession()` owns the category until disposal.
+
+`useSpeechSynthesizer()` from the SDK supplies a component-owned
+`AUFXSpeechSynthesizer` under the `audio.speech` entitlement. Construction is
+passive. Call `requestAuthorization()` or inspect `authorizationStatus`, then
+`speak(new AUFXSpeechUtterance(text))` from an action. Browser speech voices can
+arrive asynchronously; subscribe for `voiceschanged` updates. Successful API
+dispatch does not guarantee audible output or an installed voice.
+
+Encoded byte inputs accept `NSEDataConvertible` from `@syndromatic/syncloudos/foundation`; delivered encoded bytes are immutable `NSEData`. Use `.bytes` at a native typed-buffer boundary and `.blob(mimeType)` for a browser Blob. Numeric pixel, index and PCM planes retain their typed arrays; writable copy destinations remain mutable.
+
 AudioFX (`AUFX`) is the web-native analogue of AVAudioEngine. It models sound as a graph of nodes joined by connections. Players and live inputs produce audio, effects and mixers process it, and an engine renders the result to the speakers or to a buffer. Everything that touches a device sits behind the mounted session, and everything else is deterministic, portable code that runs in tests and workers.
 
 Three ideas organise the framework.
@@ -20,7 +35,7 @@ import { AUFXAudioFormat, AUFXAudioPCMBuffer } from "@syndromatic/syncloudos/fx/
 | --- | --- |
 | Prefix | `AUFX` |
 | Entry | `@syndromatic/syncloudos/fx/audio` |
-| Hook | `useSynWareAudio`, from `@syndromatic/syncloudos/sdk` |
+| Hook | `useAudio`, from `@syndromatic/syncloudos/sdk` |
 | Permissions | `audio.play` to make sound, `audio.record` to capture from a microphone |
 | Analogue | AVAudioEngine (`AVAudioEngine`, `AVAudioNode`, `AVAudioPlayerNode`, `AVAudioFile`, `AVAudioSession`, `AVAudioConverter`) |
 
@@ -139,7 +154,7 @@ Owns a graph of nodes and renders it. It always contains a `mainMixerNode`, whic
 new AUFXAudioEngine(format: AUFXAudioFormat, output?: AUFXAudioGraphOutput, inputCapability?: object)
 ```
 
-Construct an engine yourself for offline rendering, which needs no permission. For live sound, use `useSynWareAudio().createEngine(format)`, which supplies the output and disposes the engine when the component unmounts.
+Construct an engine yourself for offline rendering, which needs no permission. For live sound, use `useAudio().createEngine(format)`, which supplies the output and disposes the engine when the component unmounts.
 
 | Member | Type or signature | Description |
 | --- | --- | --- |
@@ -447,7 +462,7 @@ Resamples with linear interpolation and maps channels: a stereo source downmixes
 
 ### `AUFXAudioFile`
 
-An in-memory view of PCM audio with file-like reading, writing and WAV interchange. It never touches the file system. The host opens files through `useSynWareAudio().openFile()`, which decodes compressed formats and gives you an `AUFXAudioFile`.
+An in-memory view of PCM audio with file-like reading, writing and WAV interchange. It never touches the file system. The host opens files through `useAudio().openFile()`, which decodes compressed formats and gives you an `AUFXAudioFile`.
 
 ```text
 new AUFXAudioFile(buffer, mode?: "read" | "read-write", frameCapacity?, metadata?)
@@ -467,12 +482,12 @@ The constructor copies `buffer`. Mode `"read-write"` allows writing, and `frameC
 | `readFrames(count)` | `AUFXAudioPCMBuffer` | Reads into a new buffer, up to 16,777,216 frames. |
 | `write(buffer)` | `void` | Writes at the position, growing the length. Throws on a read-only file, a format mismatch or exceeded capacity. |
 | `observeClock()` | `AUFXClockObservation` | The source-domain position. |
-| `toWAV()` | `ArrayBuffer` | Encodes 16-bit PCM WAV. |
+| `toWAV()` | `NSEData` | Encodes 16-bit PCM WAV. |
 | `close()`, `dispose()` | `void` | Releases the data. |
-| static `encodeWAV(buffer)` | `ArrayBuffer` | A complete 16-bit PCM WAV file. |
-| static `encodeWAVHeader(format, frameLength)` | `Uint8Array` | The 44-byte header alone, for streaming. |
-| static `encodePCM16Chunk(buffer)` | `Uint8Array` | Interleaved 16-bit little-endian samples, for streaming. |
-| static `decodeWAV(bytes)` | `AUFXAudioPCMBuffer` | Parses 16-bit PCM WAV of up to 64 MiB. Throws `TypeError` for other encodings and `RangeError` for truncated data. |
+| static `encodeWAV(buffer)` | `NSEData` | A complete 16-bit PCM WAV file. |
+| static `encodeWAVHeader(format, frameLength)` | `NSEData` | The 44-byte header alone, for streaming. |
+| static `encodePCM16Chunk(buffer)` | `NSEData` | Interleaved 16-bit little-endian samples, for streaming. |
+| static `decodeWAV(bytes: NSEDataConvertible)` | `AUFXAudioPCMBuffer` | Parses 16-bit PCM WAV of up to 64 MiB. Throws `TypeError` for other encodings and `RangeError` for truncated data. |
 
 ```ts
 import { AUFXAudioFile, AUFXAudioFormat, AUFXAudioPCMBuffer } from "@syndromatic/syncloudos/fx/audio";
@@ -500,8 +515,8 @@ The session client exposes host codec support and file export. These types descr
 | `AUFXAudioCodecNegotiation` | A configuration plus `decode`, `encode` and `provenance` (`"portable"`, `"webcodecs-probe"` or `"unavailable"`). |
 | `AUFXAudioFileOpenRequest` | `{ source, processingFormat? }`. Ask for a processing format to receive samples converted to it. |
 | `AUFXAudioFileExportOptions` | `{ format: "wav" \| "opus-webm", bitrate? }`. |
-| `AUFXAudioFileExport` | `{ data: Blob, mimeType, byteLength, fileType }`, for `"audio/wav"` or `"audio/webm"`. |
-| `AUFXAudioStreamExportOptions` | `{ source: AUFXAudioChunkStream, sink: WritableStream<Uint8Array>, format: "opus-webm", bitrate? }`. Neither the input nor the output is held whole in memory. |
+| `AUFXAudioFileExport` | `{ data: NSEData, mimeType, byteLength, fileType }`, for `"audio/wav"` or `"audio/webm"`. |
+| `AUFXAudioStreamExportOptions` | `{ source: AUFXAudioChunkStream, sink: WritableStream<NSEData>, format: "opus-webm", bitrate? }`. Neither the input nor the output is held whole in memory. |
 | `AUFXAudioStreamExport` | `{ mimeType: "audio/webm", fileType: "webm", byteLength }`. |
 
 `exportFile(file, signal, { format })` writes WAV by default. On hosts with WebCodecs, `format: "opus-webm"` encodes 48 kHz mono or stereo PCM into audio-only WebM. The Opus path preserves the source length exactly, using the codec's pre-skip and final padding. `exportStream` does the same from a chunk stream to a writable stream, so an hour of audio can render and encode with bounded memory.
@@ -527,11 +542,11 @@ import { AUFXAudioEngine, AUFXAudioFile, AUFXAudioFormat } from "@syndromatic/sy
 export async function renderToWavParts(engine: AUFXAudioEngine, seconds: number) {
   const format = engine.format;
   const total = Math.round(seconds * format.sampleRate);
-  const parts: Uint8Array[] = [AUFXAudioFile.encodeWAVHeader(format, total)];
+  const parts: Blob[] = [AUFXAudioFile.encodeWAVHeader(format, total).blob()];
   for await (const chunk of engine.renderOfflineChunks(total, { chunkFrames: 4096 })) {
-    parts.push(AUFXAudioFile.encodePCM16Chunk(chunk.buffer));
+    parts.push(AUFXAudioFile.encodePCM16Chunk(chunk.buffer).blob());
   }
-  return new Blob(parts as BlobPart[], { type: "audio/wav" });
+  return new Blob(parts, { type: "audio/wav" });
 }
 
 export const mono = new AUFXAudioFormat(48_000, 1);
@@ -541,7 +556,7 @@ export const mono = new AUFXAudioFormat(48_000, 1);
 
 ### `AUFXAudioSession`
 
-The application's capture and routing authority. It comes from `useSynWareAudio().createSession()`. Its constructor takes a host-private port, so applications never build one.
+The application's capture and routing authority. It comes from `useAudio().createSession()`. Its constructor takes a host-private port, so applications never build one.
 
 | Member | Type or signature | Description |
 | --- | --- | --- |
@@ -581,15 +596,15 @@ Records encoded audio with bounded memory.
 | `maximumChunks` | 4096 | 16,384 | The same for data chunks. |
 | `maximumDuration` | 300 s | 3600 s | The recorder stops itself at this length. |
 
-`AUFXAudioRecording` holds `data` (a `Blob`), `mimeType`, `byteLength`, `elapsedRecordingTime`, and, when the host can decode the result, `duration`, `frameCount`, `sampleRate` and `channelCount` (each `null` otherwise). A recording that captured no audio rejects with an error, and finalisation times out after 10 seconds.
+`AUFXAudioRecording` holds `data` (an `NSEData`), `mimeType`, `byteLength`, `elapsedRecordingTime`, and, when the host can decode the result, `duration`, `frameCount`, `sampleRate` and `channelCount` (each `null` otherwise). A recording that captured no audio rejects with an error, and finalisation times out after 10 seconds.
 
 ```tsx
 import { useEffect, useRef, useState } from "react";
 import type { AUFXAudioRecorder, AUFXAudioSession } from "@syndromatic/syncloudos/fx/audio";
-import { useSynWareAudio } from "@syndromatic/syncloudos/sdk";
+import { useAudio } from "@syndromatic/syncloudos/sdk";
 
 export function VoiceMemo() {
-  const audio = useSynWareAudio();
+  const audio = useAudio();
   const session = useRef<AUFXAudioSession | null>(null);
   const recorder = useRef<AUFXAudioRecorder | null>(null);
   const [status, setStatus] = useState("Idle");
@@ -634,11 +649,11 @@ The manifest for this component declares both permissions it may use:
 ```ts
 export default {
   schemaVersion: 1,
-  id: "com.example.memo",
+  bundleIdentifier: "com.example.memo",
   version: "1.0.0",
-  title: "Voice Memo",
+  displayName: "Voice Memo",
   routes: [{ path: "/memo", primary: true }],
-  permissions: ["audio.record"],
+  entitlements: ["audio.record"],
 } as const;
 ```
 
@@ -658,7 +673,7 @@ Applications that only need to start and stop sounds can skip transports and use
 
 ## In a SynWare
 
-`useSynWareAudio()` returns an `AUFXAudioClient` that is scoped to the calling component. Everything acquired through it is released when the component unmounts.
+`useAudio()` returns an `AUFXAudioClient` that is scoped to the calling component. Everything acquired through it is released when the component unmounts.
 
 | Member | Description |
 | --- | --- |
@@ -682,10 +697,10 @@ For simple sound effects, the client also offers **sound handles**, which play a
 ```tsx
 import { useEffect, useRef } from "react";
 import { AUFXAudioFormat, AUFXAudioPCMBuffer, AUFXAudioPlayerNode } from "@syndromatic/syncloudos/fx/audio";
-import { useSynWareAudio } from "@syndromatic/syncloudos/sdk";
+import { useAudio } from "@syndromatic/syncloudos/sdk";
 
 export function Beep() {
-  const audio = useSynWareAudio();
+  const audio = useAudio();
   const started = useRef(false);
 
   useEffect(() => {
@@ -726,7 +741,8 @@ export function Beep() {
 | Situation | Error |
 | --- | --- |
 | A value outside its documented range, a graph limit exceeded, an index out of bounds | `RangeError` |
-| A cycle, a duplicate connection, a node from another engine, an engine that is disposed, rendering or already running | `Error` |
+| A cycle, a duplicate connection, a node from another engine, an engine rendering or already running | `Error` |
+| A disposed audio engine, audio file or player node | `SynCloudOSLifecycleError`, respectively `AUFX_AUDIO_ENGINE_DISPOSED`, `AUFX_AUDIO_FILE_DISPOSED` or `AUFX_AUDIO_PLAYER_NODE_DISPOSED`; see [Errors and outcomes](../errors.md) |
 | A wrong argument type, unsupported WAV encoding | `TypeError` |
 | A missing permission or a capture handle from another application | `DOMException` named `SecurityError` |
 | The user refused the microphone | `DOMException` named `NotAllowedError` |
@@ -734,6 +750,16 @@ export function Beep() {
 | A second consumer of a chunk stream, an invalid timeline transition | `DOMException` named `InvalidStateError` |
 | Transport limits exceeded | `DOMException` named `QuotaExceededError` |
 | Live input in an offline render | `Error` named `AUFXUnsupportedOfflineInputError` |
+
+## Speech synthesis and audio session categories
+
+`AUFXSpeechUtterance` is an immutable speech value with text, rate (0.1-10), pitch (0-2), volume (0-1), optional language and voice identifier. Use the mounted `speechSynthesis` client (or `useSpeechSynthesizer()`) to create a synthesizer, list voices and call `speak(utterance)`. The application must declare `audio.speech` in its `entitlements`. This is manifest authority, not a browser permission prompt; capabilities report `nativePermissionPrompt: false`. Speech may require a user gesture and voices depend on the browser and operating system.
+
+Each synthesizer owns up to 32 pending/active utterances. The host serialises the shared browser queue across owners. Stopping a queued owner does not cancel a sibling's active native utterance; cancelling an active owner settles its work and hands the queue to the next owner. Disposal, caller cancellation and mount teardown reject outstanding speech with `AbortError`, release listeners and return mounted resource slots. Saved late callbacks cannot settle subsequent speech. Manifest authority is checked before admission, at native dispatch and at completion; a revoked active completion rejects with `SecurityError`. Manifest changes cannot be detected instantly without a subsequent operation or callback.
+
+`AUFXAudioSession.setCategory(category)` requires the separate `audio.session` capability. It does not request the microphone and remains available with `navigator.audioSession` even when capture or `MediaRecorder` is absent. `session.capabilities.sessionType` distinguishes support; unsupported operations reject with `NotSupportedError`. Capture and device operations still require `audio.record`.
+
+Categories map to browser types: ambient to ambient, soloAmbient to transient-solo, playback to playback, and record/playAndRecord to play-and-record. These are browser hints, not guarantees of native AVAudioSession mixing, interruption, background execution or route policy. Arbitration is shared by native audio-session object: the most recently configured live owner wins; removing it restores the preceding owner, and removing the final owner restores the original native type. Removing an older owner leaves the current owner untouched. Teardown respects a different type installed externally after the framework's last write.
 
 ## Related
 

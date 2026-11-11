@@ -33,7 +33,41 @@ export { encodeOpaqueIdentity } from "./MediaPanels/opaqueIdentity";
 export { normalisePasteboardRepresentations } from "./Pasteboard/Pasteboard";
 export { normaliseRuntimeCursorDescriptor } from "./Pointer/TrackingRegionManager";
 export { saveFilePanelTarget } from "./FilePanels/FilePanelDocumentBridge";
+export { declareSynCloudOSLifecycleSignal, SynCloudOSLifecycleError, SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "./ErrorManager/lifecycleError";
+export type {
+  SynCloudOSLifecycleDisposal,
+  SynCloudOSLifecycleDisposalReason,
+  SynCloudOSLifecycleErrorOptions,
+  SynCloudOSLifecycleResource,
+} from "./ErrorManager/lifecycleError";
 
 export { canonicalDocumentJson } from "./Documents/documentTypes";
 export { createUndoManager } from "./Undo/UndoManager";
 export { createCanonicalWindowRecord, freezeWindowRecord } from "./Windows/windowTypes";
+
+// Type-only authoring projections retain their existing canonical authorities.
+export type { SynWareMigration, AppBounds, AppOwnedWindowSnapshot, SynCloudOSPresentationTraits, SynWareOwnedWindowSnapshot, SynWareWindowCloseGuard } from "./AppSDK/runtimeContracts";
+export type { SynWareRouteGraph } from "./Routing/appRouteTypes";
+export { normalizeBundleIdentifier } from "./Identity/bundleIdentifier.mjs";
+export { markHiddenCommandAcceptance, isHiddenCommandAcceptance } from "./Commands/acceptancePresentation";
+
+export { UPDATE_READINESS_PROTOCOL, updateReadinessDomains, updateReadinessBlockers } from './Updates/updateReadiness';
+export { UpdateReadinessProjection } from './Updates/UpdateReadinessProjection';
+
+// Host-only authoring observation bridge, with no runtime construction.
+export { trackOwnedWork } from "./Operations/OwnedWorkObservations";
+
+export { resolveViewportBookRegions, selectViewportFoldRegion } from "./Windows/viewportFeatures";
+
+// File and media panel capabilities; no runtime construction or application SDK dependency.
+export type { FilePanelReference, FilePanelResult, FilePanelService, OpenPanelRequest, FilePanelFileHandle } from "./FilePanels/filePanelTypes";
+export type { FilePanelDirectory, OpenPanelFolder, OpenPanelFileSystem } from "./FilePanels/OpenPanelFileSystem";
+export { matchesOpenPanelContentType, openPanelAcceptTypes } from "./FilePanels/OpenPanelFileSystem";
+export { referenceForOpenPanelHandle } from "./FilePanels/FileSystemAccessPanelAdapter";
+export type { MediaPanelItem, MediaPanelProvider } from "./MediaPanels/mediaPanelTypes";
+export { createMediaPanelService, takeOpenPanelMediaSelection } from "./MediaPanels/MediaPanelService";
+
+export type { BGTaskScheduler, BGTaskRequest, BGDownloadTaskRequest } from "./BackgroundTasks/BackgroundTasks";
+export type { UNUserNotificationCenter, UNRemoteNotificationRegistration, UNNotificationSettings, UNNotificationCategory, UNNotificationAction, UNPushConfiguration } from "./UserNotifications/UserNotifications";
+
+export { startBrowserViewTransition } from "./PlatformAdapters/BrowserViewTransitionBackend";

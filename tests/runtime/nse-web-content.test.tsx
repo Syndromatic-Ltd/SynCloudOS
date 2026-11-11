@@ -31,7 +31,7 @@ import { authoriseTestRuntime, createTestBundle, createTestRuntime, createTestRu
 import { createBrowserRuntimeEnvironment } from "../../src/SynCloudOS/PlatformAdapters/BrowserRuntimeEnvironment";
 import { BrowserWebContentAdapterFactory, type BrowserWebContentPlatform } from "../../src/SynCloudOS/PlatformAdapters/BrowserWebContentAdapter";
 import { NSE } from "../../src/NSE/NSE";
-import { NSEWebContentView } from "../../src/NSE/WebContent";
+import { NSEWebView } from "../../src/NSE/WebContent";
 import { standardWindow } from "../fixtures/windowTestDependencies";
 
 function deferred<T>() {
@@ -102,7 +102,7 @@ function runtimeWithWebContent(authorisation: { authorise: (request: never, sign
 }
 
 const remoteRequest = (overrides: Record<string, unknown> = {}) => ({
-  appId: "reference", applicationSessionId: "reference:session", ownerId: "reference:view", title: "Reference",
+  appId: "com.example.reference", applicationSessionId: "reference:session", ownerId: "reference:view", title: "Reference",
   source: { kind: "url", url: "https://reference.example/start" }, capabilities: ["same-origin"],
   decodeMessage: (payload: unknown) => payload, ...overrides,
 });
@@ -123,7 +123,7 @@ describe("runtime-owned web content", () => {
   });
 
   it("exports the neutral session-bound web content view", () => {
-    expect((NSE as unknown as { NSEWebContentView?: unknown }).NSEWebContentView).toBeTypeOf("function");
+    expect((NSE as unknown as { NSEWebView?: unknown }).NSEWebView).toBeTypeOf("function");
   });
 
   it("default-denies creation before browser preparation and rechecks an explicit grant at commit", async () => {
@@ -147,12 +147,12 @@ describe("runtime-owned web content", () => {
     const runtime = authoriseTestRuntime(createTestRuntime({
       id: "runtime:web:scoped-owner",
       environment: { ...environment, webContent: factory },
-      initialBundles: [createTestBundle({ id: "scoped-owner", route: "/scoped-owner" })],
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.scoped-owner", route: "/scoped-owner" })],
       webContentAuthorisation: { authorise: () => true },
     }));
     const request = {
-      applicationSessionId: "application:scoped-owner",
-      ownerId: "application:scoped-owner",
+      applicationSessionId: "application:com.example.scoped-owner",
+      ownerId: "application:com.example.scoped-owner",
       title: "Scoped owner",
       source: { kind: "url" as const, url: "https://reference.example/start" },
       capabilities: ["same-origin" as const],
@@ -161,18 +161,18 @@ describe("runtime-owned web content", () => {
 
     await expect(runtime.webContent.createSession({
       ...request,
-      appId: "scoped-owner",
+      appId: "com.example.scoped-owner",
       ownerLease: Object.freeze({}),
     } as never)).rejects.toMatchObject({ name: "SecurityError" });
     expect(factory.adapters[0]!.prepares).toHaveLength(0);
 
-    const responderId = "application:scoped-owner";
+    const responderId = "application:com.example.scoped-owner";
     runtime.responders.register({ id: responderId, kind: "application", parentId: "workspace", scopeId: responderId });
-    const mount = runtime.transfers.mountApp(runtime.apps.getApp("scoped-owner")!, { responderId });
+    const mount = runtime.transfers.mountApp(runtime.apps.getApp("com.example.scoped-owner")!, { responderId });
     const scope = mount.scope;
     await expect(scope.webContent.createSession({
       ...request,
-      appId: "forged-owner",
+      appId: "com.example.forged-owner",
     } as never)).rejects.toThrow(/unsupported|descriptor|scope/i);
     const scopedRequest = {
       title: request.title,
@@ -484,11 +484,11 @@ describe("runtime-owned web content", () => {
   it("suspends and closes app-owned sessions through runtime lifecycle and releases every adapter resource", async () => {
     const { runtime, factory, adapter } = runtimeWithWebContent();
     const session = await runtime.webContent.createSession(remoteRequest({ source: { kind: "html", html: "<p>Safe</p>" }, capabilities: [] }) as never);
-    runtime.store.mutate((draft) => { draft.lifecycle.reference = "suspended"; });
+    runtime.store.mutate((draft) => { draft.lifecycle["com.example.reference"] = "suspended"; });
     expect(session.getSnapshot().state).toBe("suspended");
-    runtime.store.mutate((draft) => { draft.lifecycle.reference = "active"; });
+    runtime.store.mutate((draft) => { draft.lifecycle["com.example.reference"] = "active"; });
     expect(session.getSnapshot().state).toBe("loading");
-    runtime.store.mutate((draft) => { draft.lifecycle.reference = "closed"; });
+    runtime.store.mutate((draft) => { draft.lifecycle["com.example.reference"] = "closed"; });
     expect(session.getSnapshot().state).toBe("closed");
     expect(adapter.releases).toHaveLength(1);
     await runtime.dispose("test");
@@ -510,37 +510,37 @@ describe("runtime-owned web content", () => {
     const navigating = session.navigate({ kind: "url", url: "https://next.example/pending" });
     await vi.waitFor(() => expect(adapter.prepares).toHaveLength(2));
 
-    runtime.webContent.suspendOwner("reference");
+    runtime.webContent.suspendOwner("com.example.reference");
     expect(session.getSnapshot()).toMatchObject({ state: "suspended", navigationEpoch: committed.navigationEpoch, frameSource: committed.frameSource });
     await expect(navigating).rejects.toMatchObject({ name: "AbortError" });
     expect(session.getSnapshot().state).toBe("suspended");
 
-    runtime.webContent.resumeOwner("reference");
+    runtime.webContent.resumeOwner("com.example.reference");
     expect(session.getSnapshot()).toMatchObject({ state: "ready", navigationEpoch: committed.navigationEpoch, frameSource: committed.frameSource });
     gate.resolve();
     await vi.waitFor(() => expect(adapter.releases).toHaveLength(1));
     expect(session.getSnapshot().state).toBe("ready");
 
-    runtime.webContent.closeOwner("reference", "closed while suspended");
-    runtime.webContent.suspendOwner("reference");
-    runtime.webContent.resumeOwner("reference");
+    runtime.webContent.closeOwner("com.example.reference", "closed while suspended");
+    runtime.webContent.suspendOwner("com.example.reference");
+    runtime.webContent.resumeOwner("com.example.reference");
     expect(session.getSnapshot().state).toBe("closed");
   });
 
   it("remembers suspended and closed owner authority before a session is created", async () => {
     const { runtime } = runtimeWithWebContent();
-    runtime.store.mutate((draft) => { draft.lifecycle.reference = "suspended"; });
+    runtime.store.mutate((draft) => { draft.lifecycle["com.example.reference"] = "suspended"; });
     const suspended = await runtime.webContent.createSession(remoteRequest() as never);
     expect(suspended.getSnapshot().state).toBe("suspended"); suspended.dispose();
-    runtime.store.mutate((draft) => { draft.lifecycle.reference = "closed"; });
+    runtime.store.mutate((draft) => { draft.lifecycle["com.example.reference"] = "closed"; });
     await expect(runtime.webContent.createSession(remoteRequest() as never)).rejects.toMatchObject({ name: "AbortError" });
 
     const window = runtime.windows.create(standardWindow("already-closed-web-window", {
-      applicationId: "window-app", applicationSessionId: "window-app:session",
-      content: { rendererId: "application", parameters: { appId: "window-app" } },
+      applicationId: "com.example.window-app", applicationSessionId: "window-app:session",
+      content: { rendererId: "application", parameters: { appId: "com.example.window-app" } },
     }));
     await runtime.windows.open(window.id); await runtime.windows.requestClose(window.id, { reason: "command" });
-    await expect(runtime.webContent.createSession(remoteRequest({ appId: "window-app", applicationSessionId: "window-app:session",
+    await expect(runtime.webContent.createSession(remoteRequest({ appId: "com.example.window-app", applicationSessionId: "window-app:session",
       windowControllerId: window.id }) as never)).rejects.toMatchObject({ name: "AbortError" });
   });
 
@@ -720,8 +720,8 @@ describe("runtime-owned web content", () => {
   it("closes a session when its canonical window controller is removed", async () => {
     const { runtime, adapter } = runtimeWithWebContent();
     const window = runtime.windows.create(standardWindow("web-content-window", {
-      applicationId: "reference", applicationSessionId: "reference:session",
-      content: { rendererId: "application", parameters: { appId: "reference" } },
+      applicationId: "com.example.reference", applicationSessionId: "reference:session",
+      content: { rendererId: "application", parameters: { appId: "com.example.reference" } },
     }));
     await runtime.windows.open(window.id);
     const session = await runtime.webContent.createSession(remoteRequest({ windowControllerId: window.id }) as never);
@@ -732,7 +732,7 @@ describe("runtime-owned web content", () => {
   it("renders only the session snapshot and disposes the session on unmount", async () => {
     const { runtime, adapter } = runtimeWithWebContent();
     const session = await runtime.webContent.createSession(remoteRequest({ capabilities: ["forms"] }) as never);
-    const view = render(<NSEWebContentView session={session} ownership="view" className="host-recipe" />);
+    const view = render(<NSEWebView session={session} ownership="view" className="host-recipe" />);
     const frame = screen.getByTitle("Reference");
     expect(frame.classList.contains("host-recipe")).toBe(true);
     expect(frame.classList.contains("nse-web-content-view")).toBe(true);
@@ -749,12 +749,12 @@ describe("runtime-owned web content", () => {
     const runtime = authoriseTestRuntime(createTestRuntime({
       id: "runtime:web:source-bound-scope",
       environment: { ...environment, webContent: factory },
-      initialBundles: [createTestBundle({ id: "source-bound", route: "/source-bound" })],
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.source-bound", route: "/source-bound" })],
       webContentAuthorisation: { authorise: () => true },
     }));
-    const responderId = "application:source-bound";
+    const responderId = "application:com.example.source-bound";
     runtime.responders.register({ id: responderId, kind: "application", parentId: "workspace", scopeId: responderId });
-    const mount = runtime.transfers.mountApp(runtime.apps.getApp("source-bound")!, { responderId });
+    const mount = runtime.transfers.mountApp(runtime.apps.getApp("com.example.source-bound")!, { responderId });
     const scopedRuntime = { webContent: mount.scope.webContent };
     const props = {
       runtime: scopedRuntime,
@@ -763,7 +763,7 @@ describe("runtime-owned web content", () => {
       capabilities: ["forms" as const],
       decodeMessage: (payload: unknown) => payload,
     };
-    const view = render(<NSEWebContentView {...props} />);
+    const view = render(<NSEWebView {...props} />);
     await waitFor(() => expect(screen.getByTitle("Source-bound reference")).toBeTruthy());
     expect(screen.getByTitle("Source-bound reference").getAttribute("sandbox")).toBe("allow-forms");
     expect(runtime.webContent.diagnostics().sessionCount).toBe(1);
@@ -776,7 +776,7 @@ describe("runtime-owned web content", () => {
   it("ignores a superseded epoch load and does not dispose a parent-owned session on unmount", async () => {
     const { runtime, adapter } = runtimeWithWebContent();
     const session = await runtime.webContent.createSession(remoteRequest({ capabilities: ["same-origin"] }) as never);
-    const view = render(<NSEWebContentView session={session} ownership="parent" />);
+    const view = render(<NSEWebView session={session} ownership="parent" />);
     const frame = screen.getByTitle("Reference") as HTMLIFrameElement;
     Object.defineProperty(frame, "src", { configurable: true, value: "https://stale.example/one" });
     fireEvent.load(frame);
@@ -812,7 +812,7 @@ describe("runtime-owned web content", () => {
   it("publishes a browser frame load failure through the session snapshot", async () => {
     const { runtime } = runtimeWithWebContent();
     const session = await runtime.webContent.createSession(remoteRequest({ capabilities: ["forms"] }) as never);
-    const view = render(<NSEWebContentView session={session} />);
+    const view = render(<NSEWebView session={session} />);
     act(() => session.didFail(navigationAuthority(session)));
     expect(session.getSnapshot()).toMatchObject({ state: "failed", failure: "Web content failed to load." });
     expect(view.container.querySelector("iframe")?.getAttribute("data-nse-web-content-state")).toBe("failed");
@@ -822,7 +822,7 @@ describe("runtime-owned web content", () => {
   it("rebinds the mounted frame to each committed navigation epoch", async () => {
     const { runtime, adapter } = runtimeWithWebContent();
     const session = await runtime.webContent.createSession(remoteRequest({ capabilities: ["same-origin"] }) as never);
-    const view = render(<NSEWebContentView session={session} />); const firstFrame = screen.getByTitle("Reference");
+    const view = render(<NSEWebView session={session} />); const firstFrame = screen.getByTitle("Reference");
     fireEvent.load(firstFrame); expect(session.getSnapshot().state).toBe("ready");
     await act(() => session.navigate({ kind: "url", url: "https://next.example/page" }));
     const currentFrame = screen.getByTitle("Reference");
@@ -853,18 +853,18 @@ describe("runtime-owned web content", () => {
     expect(b.getSnapshot().state).toBe("loading");
   });
 
-  it("routes web load and message through PolicyKit allow/deny and cannot be bypassed", async () => {
+  it("routes web load and message through ConfigurationProfiles allow/deny and cannot be bypassed", async () => {
     const factory = new RecordingWebContentFactory();
     const environment = createTestRuntimeEnvironment();
     const runtime = authoriseTestRuntime(createTestRuntime({
-      id: "runtime:web:policykit",
+      id: "runtime:web:configuration-profiles",
       environment: { ...environment, webContent: factory },
       webContentAuthorisation: { authorise: () => true },
     }));
     const adapter = factory.adapters[0]!;
-    const authorise = vi.spyOn(runtime.policy, "authorise");
+    const authorise = vi.spyOn(runtime.configurationProfiles, "authorise");
 
-    runtime.policy.registerPolicy("deny-load", (request, decision) =>
+    runtime.configurationProfiles.registerPolicy("deny-load", (request, decision) =>
       request.action === "web-content.load" ? { ...decision, allowed: false, decision: "deny" } : decision,
     );
     await expect(runtime.webContent.createSession(remoteRequest() as never))
@@ -876,7 +876,7 @@ describe("runtime-owned web content", () => {
     )).toBe(true);
     expect(adapter.prepares).toHaveLength(0);
 
-    expect(runtime.policy.removePolicy("deny-load")).toBe(true);
+    expect(runtime.configurationProfiles.removePolicy("deny-load")).toBe(true);
     const received = vi.fn();
     const session = await runtime.webContent.createSession(remoteRequest({
       capabilities: ["same-origin"],
@@ -897,7 +897,7 @@ describe("runtime-owned web content", () => {
         direction: "to-host",
         token: prepared.token,
         navigationEpoch: 1,
-        correlationId: "policykit:receive",
+        correlationId: "configuration-profiles:receive",
         payload: { safe: true },
       },
     });
@@ -907,10 +907,10 @@ describe("runtime-owned web content", () => {
       && request.requiredCapabilities?.includes("web-content.message"),
     )).toBe(true);
 
-    runtime.policy.registerPolicy("deny-send", (request, decision) =>
+    runtime.configurationProfiles.registerPolicy("deny-send", (request, decision) =>
       request.action === "web-content.message-send" ? { ...decision, allowed: false, decision: "deny" } : decision,
     );
-    await expect(session.postMessage({ safe: true }, "policykit:send")).resolves.toBe(false);
+    await expect(session.postMessage({ safe: true }, "configuration-profiles:send")).resolves.toBe(false);
     expect(authorise.mock.calls.some(([request]) =>
       request.action === "web-content.message-send"
       && request.requiredCapabilities?.includes("web-content.message"),

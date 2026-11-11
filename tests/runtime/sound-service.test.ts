@@ -138,8 +138,8 @@ it("projects mixer and lifecycle policy even for an app with graph-only audio", 
 describe("runtime-owned sound service", () => {
   it("does not expose mixer authority or levels through the mounted app", () => {
     const { runtime } = runtimeWithSound();
-    const app = registerTestSynWare(runtime, { schemaVersion: 1, id: "example", version: "1.0.0", title: "Example" });
-    const mounted = mountTestSynWareRuntime(runtime, app.id);
+    const app = registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.example", version: "1.0.0", displayName: "Example" });
+    const mounted = mountTestSynWareRuntime(runtime, app.bundleIdentifier);
     expect(mounted.runtime.audio).not.toHaveProperty("getMixerSnapshot");
     expect(mounted.runtime.audio).not.toHaveProperty("setMasterVolume");
     expect(mounted.runtime.audio).not.toHaveProperty("setAppVolume");
@@ -161,25 +161,25 @@ describe("runtime-owned sound service", () => {
   });
   it("scales live output without rewriting requested volume and aggregates retained sessions", async () => {
     const { runtime, adapter } = runtimeWithSound();
-    const first = await runtime.audio.load({ source: "/one.wav", appId: "notes", ownerId: "one", volume: 0.8 });
-    const second = await runtime.audio.load({ source: "/two.wav", appId: "notes", ownerId: "two" });
+    const first = await runtime.audio.load({ source: "/one.wav", appId: "com.example.notes", ownerId: "one", volume: 0.8 });
+    const second = await runtime.audio.load({ source: "/two.wav", appId: "com.example.notes", ownerId: "two" });
     const changed = vi.fn();
     runtime.audio.subscribeMixer(changed);
     await runtime.audio.play(first.id, runtime.audio.activation(first.id));
     runtime.audio.pause(first.id);
     runtime.audio.setMasterVolume(0.5);
-    runtime.audio.setAppVolume("notes", 0.25);
+    runtime.audio.setAppVolume("com.example.notes", 0.25);
     expect(adapter.playbacks[0].setVolume).toHaveBeenLastCalledWith(0.1);
     expect(first.volume).toBe(0.8);
     expect(runtime.settings.get().masterVolume).toBe(0.5);
-    expect(runtime.settings.get().appVolumes.notes).toBe(0.25);
-    expect(runtime.audio.getMixerSnapshot().applications).toEqual([{ appId: "notes", volume: 0.25, sessionCount: 2 }]);
+    expect(runtime.settings.get().appVolumes["com.example.notes"]).toBe(0.25);
+    expect(runtime.audio.getMixerSnapshot().applications).toEqual([{ appId: "com.example.notes", volume: 0.25, sessionCount: 2 }]);
     runtime.settings.set("soundEnabled", false);
     runtime.settings.set("soundEnabled", true);
     expect(first.volume).toBe(0.8);
     runtime.audio.release(first.id);
     expect(runtime.audio.getMixerSnapshot().applications[0].sessionCount).toBe(1);
-    runtime.audio.closeOwner("notes");
+    runtime.audio.closeOwner("com.example.notes");
     expect(runtime.audio.getMixerSnapshot().applications).toEqual([]);
     expect(second.state).toBe("released");
     expect(changed).toHaveBeenCalled();
@@ -196,8 +196,8 @@ describe("runtime-owned sound service", () => {
   });
   it("loads once per cached source but creates independent playback handles", async () => {
     const { runtime, adapter } = runtimeWithSound();
-    const first = await runtime.audio.load({ source: "/sounds/chime.wav", appId: "notes", ownerId: "one" });
-    const second = await runtime.audio.load({ source: "/sounds/chime.wav", appId: "notes", ownerId: "two", loop: true, volume: 0.4 });
+    const first = await runtime.audio.load({ source: "/sounds/chime.wav", appId: "com.example.notes", ownerId: "one" });
+    const second = await runtime.audio.load({ source: "/sounds/chime.wav", appId: "com.example.notes", ownerId: "two", loop: true, volume: 0.4 });
     expect(adapter.loads).toEqual(["/sounds/chime.wav"]);
     expect(adapter.playbacks).toHaveLength(2);
     expect(first).not.toBe(second);
@@ -207,7 +207,7 @@ describe("runtime-owned sound service", () => {
 
   it("requires a current single-use activation and invokes play synchronously", async () => {
     const { runtime, adapter } = runtimeWithSound();
-    const handle = await runtime.audio.load({ source: "/sounds/chime.wav", appId: "notes", ownerId: "one" });
+    const handle = await runtime.audio.load({ source: "/sounds/chime.wav", appId: "com.example.notes", ownerId: "one" });
     await expect(runtime.audio.play(handle.id, {} as never)).rejects.toBeInstanceOf(AudioActivationRequiredError);
     const token = runtime.audio.activation(handle.id);
     const result = runtime.audio.play(handle.id, token);
@@ -218,7 +218,7 @@ describe("runtime-owned sound service", () => {
 
   it("maps browser activation denial and fences late play/ended after release", async () => {
     const { runtime, adapter } = runtimeWithSound();
-    const handle = await runtime.audio.load({ source: "/sounds/chime.wav", appId: "notes", ownerId: "one" });
+    const handle = await runtime.audio.load({ source: "/sounds/chime.wav", appId: "com.example.notes", ownerId: "one" });
     const denied = deferred<void>();
     adapter.playbacks[0]!.playResults.push(denied);
     const play = runtime.audio.play(handle.id, runtime.audio.activation(handle.id));
@@ -236,7 +236,7 @@ describe("runtime-owned sound service", () => {
 
   it("supports pause, resume, stop, loop, volume and ended state", async () => {
     const { runtime, adapter } = runtimeWithSound();
-    const handle = await runtime.audio.load({ source: "/sounds/chime.wav", appId: "music", ownerId: "player" });
+    const handle = await runtime.audio.load({ source: "/sounds/chime.wav", appId: "com.example.music", ownerId: "com.example.player" });
     await runtime.audio.play(handle.id, runtime.audio.activation(handle.id));
     expect(runtime.audio.pause(handle.id)).toBe(true);
     expect(handle.state).toBe("paused");
@@ -254,7 +254,7 @@ describe("runtime-owned sound service", () => {
 
   it("denies audible playback when reduced-sensory settings are active", async () => {
     const { runtime, adapter } = runtimeWithSound();
-    const handle = await runtime.audio.load({ source: "/sounds/chime.wav", appId: "notes", ownerId: "quiet" });
+    const handle = await runtime.audio.load({ source: "/sounds/chime.wav", appId: "com.example.notes", ownerId: "quiet" });
     runtime.settings.set("motion", "reduced");
     const token = runtime.audio.activation(handle.id);
     await expect(runtime.audio.play(handle.id, token)).rejects.toMatchObject({
@@ -267,35 +267,35 @@ describe("runtime-owned sound service", () => {
 
   it("pauses/resumes for application lifecycle and releases on close or uninstall", async () => {
     const { runtime, adapter } = runtimeWithSound();
-    const handle = await runtime.audio.load({ source: "/sounds/chime.wav", appId: "player", ownerId: "root" });
+    const handle = await runtime.audio.load({ source: "/sounds/chime.wav", appId: "com.example.player", ownerId: "root" });
     await runtime.audio.play(handle.id, runtime.audio.activation(handle.id));
-    runtime.store.mutate((draft) => { draft.lifecycle.player = "suspended"; });
+    runtime.store.mutate((draft) => { draft.lifecycle["com.example.player"] = "suspended"; });
     expect(adapter.playbacks[0]?.pause).toHaveBeenCalledTimes(1);
-    runtime.store.mutate((draft) => { draft.lifecycle.player = "active"; });
+    runtime.store.mutate((draft) => { draft.lifecycle["com.example.player"] = "active"; });
     await Promise.resolve();
     expect(adapter.playbacks[0]?.play).toHaveBeenCalledTimes(2);
-    runtime.store.mutate((draft) => { draft.lifecycle.player = "closed"; });
+    runtime.store.mutate((draft) => { draft.lifecycle["com.example.player"] = "closed"; });
     expect(handle.state).toBe("released");
-    await expect(runtime.audio.load({ source: "/sounds/chime.wav", appId: "player", ownerId: "late" })).rejects.toMatchObject({ name: "AbortError" });
-    const uninstalling = await runtime.audio.load({ source: "/sounds/chime.wav", appId: "uninstalling", ownerId: "root" });
-    runtime.store.mutate((draft) => { draft.lifecycle.uninstalling = "active"; });
-    runtime.store.mutate((draft) => { delete draft.lifecycle.uninstalling; });
+    await expect(runtime.audio.load({ source: "/sounds/chime.wav", appId: "com.example.player", ownerId: "late" })).rejects.toMatchObject({ name: "AbortError" });
+    const uninstalling = await runtime.audio.load({ source: "/sounds/chime.wav", appId: "com.example.uninstalling", ownerId: "root" });
+    runtime.store.mutate((draft) => { draft.lifecycle["com.example.uninstalling"] = "active"; });
+    runtime.store.mutate((draft) => { delete draft.lifecycle["com.example.uninstalling"]; });
     expect(uninstalling.state).toBe("released");
   });
 
   it("releases only sound owners attached to the removed canonical window", async () => {
     const { runtime, adapter } = runtimeWithSound();
     const firstWindow = runtime.windows.create(standardWindow("sound-one", {
-      applicationId: "sound-app", applicationSessionId: "sound-session",
-      content: { rendererId: "application", parameters: { appId: "sound-app" } },
+      applicationId: "com.example.sound-app", applicationSessionId: "sound-session",
+      content: { rendererId: "application", parameters: { appId: "com.example.sound-app" } },
     }));
     const secondWindow = runtime.windows.create(standardWindow("sound-two", {
-      applicationId: "sound-app", applicationSessionId: "sound-session",
-      content: { rendererId: "application", parameters: { appId: "sound-app" } },
+      applicationId: "com.example.sound-app", applicationSessionId: "sound-session",
+      content: { rendererId: "application", parameters: { appId: "com.example.sound-app" } },
     }));
     await runtime.windows.open(firstWindow.id); await runtime.windows.open(secondWindow.id);
-    const first = await runtime.audio.load({ source: "/sounds/one.wav", appId: "sound-app", ownerId: "view-one", windowControllerId: firstWindow.id });
-    const second = await runtime.audio.load({ source: "/sounds/two.wav", appId: "sound-app", ownerId: "view-two", windowControllerId: secondWindow.id });
+    const first = await runtime.audio.load({ source: "/sounds/one.wav", appId: "com.example.sound-app", ownerId: "view-one", windowControllerId: firstWindow.id });
+    const second = await runtime.audio.load({ source: "/sounds/two.wav", appId: "com.example.sound-app", ownerId: "view-two", windowControllerId: secondWindow.id });
     await runtime.windows.requestClose(firstWindow.id, { reason: "command" });
     expect(first.state).toBe("released"); expect(second.state).toBe("ready");
     expect(adapter.playbacks[0]?.dispose).toHaveBeenCalledTimes(1);
@@ -304,8 +304,8 @@ describe("runtime-owned sound service", () => {
 
   it("keeps same-app same-owner sounds independent across windows", async () => {
     const { runtime } = runtimeWithSound();
-    const first = await runtime.audio.load({ source: "/sounds/one.wav", appId: "sound-app", ownerId: "shared", windowControllerId: "window:one" });
-    const second = await runtime.audio.load({ source: "/sounds/two.wav", appId: "sound-app", ownerId: "shared", windowControllerId: "window:two" });
+    const first = await runtime.audio.load({ source: "/sounds/one.wav", appId: "com.example.sound-app", ownerId: "shared", windowControllerId: "window:one" });
+    const second = await runtime.audio.load({ source: "/sounds/two.wav", appId: "com.example.sound-app", ownerId: "shared", windowControllerId: "window:two" });
     expect(runtime.audio.diagnostics().handleCount).toBe(2);
     runtime.audio.closeWindowController("window:one", "window one closed");
     expect(first.state).toBe("released");
@@ -315,8 +315,8 @@ describe("runtime-owned sound service", () => {
 
   it("binds live sound settings without reviving stopped handles", async () => {
     const { runtime, adapter } = runtimeWithSound();
-    const playing = await runtime.audio.load({ source: "/sounds/a.wav", appId: "player", ownerId: "playing" });
-    const stopped = await runtime.audio.load({ source: "/sounds/b.wav", appId: "player", ownerId: "stopped" });
+    const playing = await runtime.audio.load({ source: "/sounds/a.wav", appId: "com.example.player", ownerId: "playing" });
+    const stopped = await runtime.audio.load({ source: "/sounds/b.wav", appId: "com.example.player", ownerId: "stopped" });
     await runtime.audio.play(playing.id, runtime.audio.activation(playing.id));
     runtime.audio.stop(stopped.id);
     runtime.settings.set("soundEnabled", false);
@@ -331,19 +331,19 @@ describe("runtime-owned sound service", () => {
   it.each([
     ["settings then lifecycle", (runtime: ReturnType<typeof createTestRuntime>) => {
       runtime.settings.set("soundEnabled", false);
-      runtime.store.mutate((draft) => { draft.lifecycle.player = "suspended"; });
+      runtime.store.mutate((draft) => { draft.lifecycle["com.example.player"] = "suspended"; });
       runtime.settings.set("soundEnabled", true);
-      runtime.store.mutate((draft) => { draft.lifecycle.player = "active"; });
+      runtime.store.mutate((draft) => { draft.lifecycle["com.example.player"] = "active"; });
     }],
     ["lifecycle then settings", (runtime: ReturnType<typeof createTestRuntime>) => {
-      runtime.store.mutate((draft) => { draft.lifecycle.player = "suspended"; });
+      runtime.store.mutate((draft) => { draft.lifecycle["com.example.player"] = "suspended"; });
       runtime.settings.set("soundEnabled", false);
-      runtime.store.mutate((draft) => { draft.lifecycle.player = "active"; });
+      runtime.store.mutate((draft) => { draft.lifecycle["com.example.player"] = "active"; });
       runtime.settings.set("soundEnabled", true);
     }],
   ])("resumes playing intent once all blockers lift: %s", async (_label, transition) => {
     const { runtime, adapter } = runtimeWithSound();
-    const handle = await runtime.audio.load({ source: "/sounds/blockers.wav", appId: "player", ownerId: "root" });
+    const handle = await runtime.audio.load({ source: "/sounds/blockers.wav", appId: "com.example.player", ownerId: "root" });
     await runtime.audio.play(handle.id, runtime.audio.activation(handle.id));
     transition(runtime);
     await Promise.resolve();
@@ -353,7 +353,7 @@ describe("runtime-owned sound service", () => {
 
   it("ignores ended and error events from an earlier play epoch", async () => {
     const { runtime, adapter } = runtimeWithSound();
-    const handle = await runtime.audio.load({ source: "/sounds/epochs.wav", appId: "player", ownerId: "root" });
+    const handle = await runtime.audio.load({ source: "/sounds/epochs.wav", appId: "com.example.player", ownerId: "root" });
     await runtime.audio.play(handle.id, runtime.audio.activation(handle.id));
     runtime.audio.pause(handle.id);
     await runtime.audio.play(handle.id, runtime.audio.activation(handle.id));
@@ -366,7 +366,7 @@ describe("runtime-owned sound service", () => {
     ["ended", "fulfils"], ["ended", "rejects"], ["error", "fulfils"], ["error", "rejects"],
   ] as const)("keeps a terminal %s state when the play promise later %s", async (terminal, settlement) => {
     const { runtime, adapter } = runtimeWithSound();
-    const handle = await runtime.audio.load({ source: "/sounds/terminal.wav", appId: "player", ownerId: "root" });
+    const handle = await runtime.audio.load({ source: "/sounds/terminal.wav", appId: "com.example.player", ownerId: "root" });
     const pending = deferred<void>();
     adapter.playbacks[0]!.playResults.push(pending);
     const play = runtime.audio.play(handle.id, runtime.audio.activation(handle.id));
@@ -395,7 +395,7 @@ describe("runtime-owned sound service", () => {
     const lease = new BrowserSoundAdapterFactory(platform).acquire("runtime:activation", controller.signal);
     const service = createRuntimeAudioService({ runtimeId: "runtime:activation" as never, signal: controller.signal,
       adapterLease: lease, randomUUID: () => "id", soundEnabled: true, caches: cache });
-    const handle = await service.load({ source: "/sound.wav", appId: "player", ownerId: "root" });
+    const handle = await service.load({ source: "/sound.wav", appId: "com.example.player", ownerId: "root" });
     const superseded = service.activation(handle.id); const immediate = service.activation(handle.id);
     const supersededResult = service.play(handle.id, superseded); const immediateResult = service.play(handle.id, immediate);
     await expect(supersededResult).rejects.toBeInstanceOf(AudioActivationRequiredError);
@@ -413,8 +413,8 @@ describe("runtime-owned sound service", () => {
     const controller = new AbortController(); const adapter = new RecordingAdapter(); adapter.autoLoad = false;
     const service = createRuntimeAudioService({ runtimeId: "runtime:sound" as never, signal: controller.signal,
       adapterLease: { adapter, release: vi.fn() }, randomUUID: () => "id", soundEnabled: true, caches: soundCaches() });
-    const first = service.load({ source: "/sounds/slow.wav", appId: "player", ownerId: "root", generation: 1 });
-    const replacement = service.load({ source: "/sounds/slow.wav", appId: "player", ownerId: "root", generation: 2 });
+    const first = service.load({ source: "/sounds/slow.wav", appId: "com.example.player", ownerId: "root", generation: 1 });
+    const replacement = service.load({ source: "/sounds/slow.wav", appId: "com.example.player", ownerId: "root", generation: 2 });
     const resource = Object.freeze({ id: "slow", source: "/sounds/slow.wav", byteLength: 4, mimeType: "audio/wav" });
     adapter.pendingLoads.get("/sounds/slow.wav")!.resolve(resource);
     await expect(first).rejects.toMatchObject({ name: "AbortError" });
@@ -428,7 +428,7 @@ describe("runtime-owned sound service", () => {
     const service = createRuntimeAudioService({ runtimeId: "runtime:sound:last-abort" as never, signal: runtimeController.signal,
       adapterLease: { adapter, release: vi.fn() }, randomUUID: () => "id", soundEnabled: true, caches: soundCaches() });
     const caller = new AbortController();
-    const pending = service.load({ source: "/sounds/non-cooperative.wav", appId: "player", ownerId: "first" }, caller.signal);
+    const pending = service.load({ source: "/sounds/non-cooperative.wav", appId: "com.example.player", ownerId: "first" }, caller.signal);
     await vi.waitFor(() => expect(adapter.pendingLoads.has("/sounds/non-cooperative.wav")).toBe(true));
     const firstGate = adapter.pendingLoads.get("/sounds/non-cooperative.wav")!;
     const firstLoadSignal = adapter.loadSignals.get("/sounds/non-cooperative.wav")!;
@@ -445,7 +445,7 @@ describe("runtime-owned sound service", () => {
     await vi.waitFor(() => expect(adapter.releases).toContain(late));
     expect(service.diagnostics()).toMatchObject({ pendingLoadCount: 0, cacheEntryCount: 0 });
 
-    const reacquired = service.load({ source: "/sounds/non-cooperative.wav", appId: "player", ownerId: "second" });
+    const reacquired = service.load({ source: "/sounds/non-cooperative.wav", appId: "com.example.player", ownerId: "second" });
     await vi.waitFor(() => expect(adapter.loads).toEqual(["/sounds/non-cooperative.wav", "/sounds/non-cooperative.wav"]));
     const secondGate = adapter.pendingLoads.get("/sounds/non-cooperative.wav")!;
     secondGate.resolve(Object.freeze({ id: "fresh-resource", source: "/sounds/non-cooperative.wav", byteLength: 4, mimeType: "audio/wav" }));
@@ -466,8 +466,8 @@ describe("runtime-owned sound service", () => {
       adapterLease: { adapter: firstAdapter, release: vi.fn() }, randomUUID: () => "first", soundEnabled: true, caches: soundCaches() });
     const second = createRuntimeAudioService({ runtimeId: "runtime:sound:dispose:second" as never, signal: secondController.signal,
       adapterLease: { adapter: secondAdapter, release: vi.fn() }, randomUUID: () => "second", soundEnabled: true, caches: soundCaches() });
-    const firstPending = first.load({ source: "/sounds/shared.wav", appId: "player", ownerId: "first" });
-    const secondPending = second.load({ source: "/sounds/shared.wav", appId: "player", ownerId: "second" });
+    const firstPending = first.load({ source: "/sounds/shared.wav", appId: "com.example.player", ownerId: "first" });
+    const secondPending = second.load({ source: "/sounds/shared.wav", appId: "com.example.player", ownerId: "second" });
     await vi.waitFor(() => expect(firstAdapter.pendingLoads.has("/sounds/shared.wav") && secondAdapter.pendingLoads.has("/sounds/shared.wav")).toBe(true));
     const firstGate = firstAdapter.pendingLoads.get("/sounds/shared.wav")!;
     const secondGate = secondAdapter.pendingLoads.get("/sounds/shared.wav")!;
@@ -499,8 +499,8 @@ describe("runtime-owned sound service", () => {
     const service = createRuntimeAudioService({ runtimeId: "runtime:sound" as never, signal: controller.signal,
       adapterLease: { adapter, release: vi.fn() }, randomUUID: () => Math.random().toString(), soundEnabled: true,
       caches: soundCaches(), maxCachedResources: 1 });
-    const one = await service.load({ source: "/sounds/one.wav", appId: "a", ownerId: "one" }); service.release(one.id);
-    const two = await service.load({ source: "/sounds/two.wav", appId: "a", ownerId: "two" }); service.release(two.id);
+    const one = await service.load({ source: "/sounds/one.wav", appId: "com.example.a", ownerId: "one" }); service.release(one.id);
+    const two = await service.load({ source: "/sounds/two.wav", appId: "com.example.a", ownerId: "two" }); service.release(two.id);
     expect(adapter.releases.map((value) => value.source)).toContain("/sounds/one.wav");
     expect(service.diagnostics().cacheEntryCount).toBe(1);
   });
@@ -509,8 +509,8 @@ describe("runtime-owned sound service", () => {
     const factory = new RecordingFactory();
     const one = createTestRuntime({ id: "runtime:same", environment: { ...createTestRuntimeEnvironment(), audio: factory } });
     const two = createTestRuntime({ id: "runtime:same", environment: { ...createTestRuntimeEnvironment(), audio: factory } });
-    const first = await one.audio.load({ source: "/sounds/chime.wav", appId: "a", ownerId: "one" });
-    const second = await two.audio.load({ source: "/sounds/chime.wav", appId: "a", ownerId: "two" });
+    const first = await one.audio.load({ source: "/sounds/chime.wav", appId: "com.example.a", ownerId: "one" });
+    const second = await two.audio.load({ source: "/sounds/chime.wav", appId: "com.example.a", ownerId: "two" });
     await one.dispose("one closed");
     expect(first.state).toBe("released");
     expect(second.state).toBe("ready");
@@ -521,7 +521,7 @@ describe("runtime-owned sound service", () => {
 
   it("disposes runtime resources, listener diagnostics and adapter leases exactly once", async () => {
     const { runtime, factory, adapter } = runtimeWithSound();
-    await runtime.audio.load({ source: "/sounds/chime.wav", appId: "a", ownerId: "one" });
+    await runtime.audio.load({ source: "/sounds/chime.wav", appId: "com.example.a", ownerId: "one" });
     expect(runtime.audio.diagnostics()).toMatchObject({ handleCount: 1, cacheEntryCount: 1, playbackCount: 1, listenerCount: 2 });
     await runtime.dispose("closed");
     expect(adapter.releases).toHaveLength(1);

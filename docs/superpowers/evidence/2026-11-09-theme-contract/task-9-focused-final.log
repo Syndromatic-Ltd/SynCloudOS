@@ -1,0 +1,14 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-theme-system-surface-coverage.test.tsx tests/runtime/nse-theme-hook-coverage.test.tsx tests/runtime/nse-theme-menu-hook-coverage.test.tsx tests/runtime/nse-theme-panel-hook-coverage.test.tsx tests/runtime/nse-theme-system-control-coverage.test.tsx tests/runtime/login-window-parity.test.tsx tests/runtime/login-gate-presentation.test.tsx tests/runtime/notification-presenter.test.ts tests/runtime/notification-centre-presentation.test.tsx tests/runtime/webspring-quickswitch-presentation.test.tsx tests/runtime/webspring-folders-host.test.tsx tests/runtime/webspring-folder-tile.test.tsx tests/runtime/webspring-folder-presentation.test.tsx tests/nse/date-time
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+
+ Test Files  19 passed (19)
+      Tests  787 passed (787)
+   Start at  21:52:10
+   Duration  28.28s (transform 9.63s, setup 216ms, import 30.74s, tests 6.72s, environment 15.88s)

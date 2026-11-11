@@ -1,0 +1,48 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-scroll-content-insets.test.tsx tests/runtime/nse-view-safe-area.test.tsx tests/nse/controls/nse-scroll-progress-navigation.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-scroll-content-insets.test.tsx (4 tests | 1 failed) 50ms
+     × allows explicit zero content insets when automatic adjustment is disabled 5ms
+ ❯ tests/nse/controls/nse-scroll-progress-navigation.test.tsx (25 tests | 2 failed) 261ms
+     × publishes inset-aware both-axis geometry and tears down resize observation 4ms
+     × updates rendered scroller ranges after resize even without an external geometry callback 9ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/nse/controls/nse-scroll-progress-navigation.test.tsx > scroll progress and navigation > publishes inset-aware both-axis geometry and tears down resize observation
+AssertionError: expected "vi.fn()" to be called once, but got 2 times
+ ❯ tests/nse/controls/nse-scroll-progress-navigation.test.tsx:128:1297
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/nse/controls/nse-scroll-progress-navigation.test.tsx > scroll progress and navigation > updates rendered scroller ranges after resize even without an external geometry callback
+AssertionError: expected "vi.fn()" to be called once, but got 2 times
+ ❯ tests/nse/controls/nse-scroll-progress-navigation.test.tsx:148:24
+    146|     expect((screen.getByRole("slider", { name: "horizontal scroller" }…
+    147|     view.unmount();
+    148|     expect(disconnect).toHaveBeenCalledOnce();
+       |                        ^
+    149|     vi.unstubAllGlobals();
+    150|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/runtime/nse-scroll-content-insets.test.tsx > scroll content insets > allows explicit zero content insets when automatic adjustment is disabled
+AssertionError: expected '0px' to be '0px 0px 0px 0px' // Object.is equality
+
+Expected: "0px 0px 0px 0px"
+Received: "0px"
+
+ ❯ tests/runtime/nse-scroll-content-insets.test.tsx:33:98
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  2 failed | 1 passed (3)
+      Tests  3 failed | 31 passed (34)
+   Start at  18:51:34
+   Duration  2.93s (transform 1.57s, setup 66ms, import 2.48s, tests 340ms, environment 2.51s)

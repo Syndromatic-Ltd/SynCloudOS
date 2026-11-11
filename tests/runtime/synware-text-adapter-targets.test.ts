@@ -34,8 +34,8 @@ async function fixture() {
   const runtime = createTestRuntime({ environment: createTestRuntimeEnvironment(), applicationDocuments: { initialTypes: [noteType] } });
   runtime.documents.registerCloseReviewer({ review: async () => "discard" });
   cleanups.push(async () => { await runtime.dispose("review complete"); });
-  registerTestSynWare(runtime, { schemaVersion: 1, id: "review-owner", version: "1.0.0", title: "Review", documentTypes: [{ id: noteType.id, displayName: noteType.displayName }] });
-  const mounted = mountTestSynWareRuntime(runtime, "review-owner");
+  registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: "com.example.review-owner", version: "1.0.0", displayName: "Review", documentTypes: [{ id: noteType.id, displayName: noteType.displayName }] });
+  const mounted = mountTestSynWareRuntime(runtime, "com.example.review-owner");
   cleanups.push(() => mounted.dispose("review complete"));
   const app = createSynWareContextValue(mounted.runtime);
   const documents = app.documents.workspaceDocuments;
@@ -51,7 +51,7 @@ describe("SDK adapter construction targets", () => {
         readContent: model => content(model.body), writeContent: (model, value) => ({ ...model, body: createNSETextSnapshot(value).text }),
       });
       cleanups.push(() => owner.dispose());
-      const session = new TextEditingSession({ id, documentId, owner });
+      const session = new TextEditingSession({ id, documentId, textOwner: owner });
       cleanups.push(() => session.dispose());
       return session;
     };
@@ -73,7 +73,7 @@ describe("SDK adapter construction targets", () => {
     };
     const owner = createSynWareNSETextOwner(options);
     cleanups.push(() => owner.dispose());
-    const session = new TextEditingSession({ id: "review-session", documentId: first.document.id, owner });
+    const session = new TextEditingSession({ id: "review-session", documentId: first.document.id, textOwner: owner });
     cleanups.push(() => session.dispose());
     // Valid typed caller code: factory input is readonly, the caller's own object remains mutable.
     options.documents = second.documents;
@@ -92,7 +92,7 @@ describe("SDK adapter construction targets", () => {
       readContent: model => content(model.body), writeContent: (model, value) => ({ ...model, body: createNSETextSnapshot(value).text }),
     });
     cleanups.push(() => owner.dispose());
-    const session = new TextEditingSession({ id: "other-session", documentId: other.id, owner });
+    const session = new TextEditingSession({ id: "other-session", documentId: other.id, textOwner: owner });
     cleanups.push(() => session.dispose());
     bindSynWareNSETextEditingSession({ documents, documentId: other.id, session });
     session.setMarkedText("未確定");

@@ -20,10 +20,8 @@
 
 import { afterAll, expect, it } from "vitest";
 
-import {
-  NumberFormatter,
-  createValueTransformer,
-} from "../../src/SynCloudOS/Models";
+import { NSEValueTransformer } from "../../src/Foundation/NSEValueTransformer";
+import { NSENumberFormatter } from "../../src/Foundation/public";
 import { createUndoManager } from "../../src/SynCloudOS/Undo";
 import { NSEObjectController } from "@syndromatic/syncloudos/nse";
 import { createTestRuntime } from "./helpers";
@@ -47,12 +45,10 @@ it("validates, discards and registers committed object edits with runtime undo",
           ...invoice,
           totalPennies: value,
         }),
-        formatter: new NumberFormatter({ minimum: 0 }),
-        transformer: createValueTransformer({
-          id: "pounds-to-pennies",
-          transform: (pounds: number) => Math.round(pounds * 100),
-          reverse: (pennies: number) => pennies / 100,
-        }),
+        formatter: new NSENumberFormatter({ minimum: 0 }),
+        transformer: new (class extends NSEValueTransformer<number, number> {
+          override transformedValue(pounds: number) { return Math.round(pounds * 100); }
+        })(),
       },
     },
   });
@@ -99,7 +95,7 @@ it("retains immutable content and reports validation without throwing user input
       age: {
         read: (profile) => profile.age,
         write: (profile, age: number) => ({ ...profile, age }),
-        formatter: new NumberFormatter({ minimum: 0 }),
+        formatter: new NSENumberFormatter({ minimum: 0 }),
         validate: (age) =>
           age >= 18
             ? []

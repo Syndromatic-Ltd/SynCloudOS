@@ -24,7 +24,8 @@ installNSEScrollIntoViewFixture();
 import React, { useMemo, useState } from "react";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEOverlayProvider, NSEActionSheet, NSEListboxPopup, NSEPopover, NSEPopup } from "../../../src/NSE/Overlays";
+import { NSEOverlayProvider, NSEActionSheet, NSEListboxPopup, NSEPopup } from "../../../src/NSE/Overlays";
+import { NSEPopover } from "../../../src/NSE/Overlays/NSEPopover";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 import { NSEUtilityPanel } from "../../../src/NSE/Overlays/NSEUtilityPanel";
 
@@ -73,6 +74,37 @@ function PopupFixture({ defaultOpen = false }: { readonly defaultOpen?: boolean 
 }
 
 describe("NSE popup family", () => {
+  it("keeps a child overlay registered while its parent changes modality", async () => {
+    function Fixture({ modal }: { modal: boolean }) {
+      const [childOpen, setChildOpen] = useState(true);
+      return <OverlayHarness><NSEPopup id="parent-adaptive" open modal={modal} parentResponderId="workspace" aria-label="Adaptive parent">
+        <span>Parent content</span>
+        <NSEPopup id="child-retained" open={childOpen} parentId="parent-adaptive" parentResponderId="workspace" aria-label="Retained child" onOpenChange={setChildOpen}><input aria-label="Nested draft" defaultValue="Initial child" /></NSEPopup>
+      </NSEPopup></OverlayHarness>;
+    }
+    const view = render(<Fixture modal={false} />);
+    const draft = await screen.findByRole("textbox", { name: "Nested draft" });
+    fireEvent.change(draft, { target: { value: "Keep nested work" } });
+    for (const modal of [true, false, true]) {
+      view.rerender(<Fixture modal={modal} />);
+      expect(await screen.findByRole("textbox", { name: "Nested draft" })).toBe(draft);
+      expect((draft as HTMLInputElement).value).toBe("Keep nested work");
+    }
+  });
+  it("retains an unsaved input and its DOM identity when a popover becomes a modal sheet and back", async () => {
+    const fixture = (modal: boolean) => <OverlayHarness><NSEPopup id="retained-editor" open modal={modal} parentResponderId="workspace" aria-label="Retained editor">
+      <input aria-label="Unsaved popup draft" defaultValue="Initial" />
+    </NSEPopup></OverlayHarness>;
+    const view = render(fixture(false));
+    const draft = await screen.findByRole("textbox", { name: "Unsaved popup draft" });
+    fireEvent.change(draft, { target: { value: "Retain edited content" } });
+    for (const modal of [true, false, true]) {
+      view.rerender(fixture(modal));
+      await waitFor(() => expect(screen.getByRole("dialog", { name: "Retained editor" }).getAttribute("aria-modal")).toBe(modal ? "true" : null));
+      expect(screen.getByRole("textbox", { name: "Unsaved popup draft" })).toBe(draft);
+      expect((draft as HTMLInputElement).value).toBe("Retain edited content");
+    }
+  });
   it("lets content own the paint without losing popup semantics", async () => {
     render(<OverlayHarness><NSEPopup open modal chrome="content" parentResponderId="workspace" aria-label="Paper editor">Paper</NSEPopup></OverlayHarness>);
     const popup = await screen.findByRole("dialog", { name: "Paper editor" });
@@ -138,7 +170,7 @@ describe("NSE popup family", () => {
     const popup = await screen.findByRole("dialog");
     expect(popup.getAttribute("data-nse-overlay-kind")).toBe("popover");
     expect(popup.hasAttribute("aria-modal")).toBe(false);
-    expect(document.querySelector('[data-nse-part="backdrop"]')).toBeNull();
+    expect(document.querySelector('[data-nse-part="backdrop"]')?.hasAttribute("hidden")).toBe(true);
 
     fireEvent.keyDown(document, { key: "Escape" });
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());

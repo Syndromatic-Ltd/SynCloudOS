@@ -21,8 +21,8 @@
 import { useCallback } from "react";
 import { NSEAppMenuSurface } from "./NSEAppMenuSurface";
 import type { NSEOverlayDismissReason } from "../Overlays";
-import { NSEMenu } from "./NSEMenu";
-import type { NSEMenuController } from "./NSEMenuController";
+import { NSEMenuView } from "./NSEMenuView";
+import type { NSEMenu } from "./NSEMenu";
 import { NSEMenuOverlay } from "./NSEMenuOverlay";
 import type { NSEMenuModel, NSEMenuOverlayOptions } from "./menuTypes";
 
@@ -30,7 +30,7 @@ const applicationMenuFrameBleed = Object.freeze({ blockStart: 2, inlineEnd: 6 })
 
 export interface NSEApplicationMenuProps {
   readonly model: NSEMenuModel;
-  readonly controller: NSEMenuController;
+  readonly controller: NSEMenu;
   readonly overlay: NSEMenuOverlayOptions;
   readonly open: boolean;
   readonly anchor: HTMLElement | null;
@@ -65,13 +65,14 @@ export function NSEApplicationMenu({ model, controller, overlay, open, anchor, t
       kind="menu"
       presentationMode="viewport-block-start-inline-end"
       viewportCornerBleed={applicationMenuFrameBleed}
+      appearance="application-menu"
       className="nse-overlay-popup--application-menu"
       exitDuration={160}
       restoreFocus={false}
       onOpenChange={onOpenChange}
     >
-      <NSEAppMenuSurface className="nse-application-menu" title={title} data-nse-application-menu="true">
-        <NSEMenu appearance="application-menu" model={model} controller={controller} open={open} onOpenChange={handleMenuOpenChange} />
+      <NSEAppMenuSurface className="nse-application-menu" title={title} data-nse-style="application-menu" data-nse-application-menu="true">
+        <NSEMenuView appearance="application-menu" model={model} controller={controller} open={open} onOpenChange={handleMenuOpenChange} />
       </NSEAppMenuSurface>
     </NSEMenuOverlay>
   );

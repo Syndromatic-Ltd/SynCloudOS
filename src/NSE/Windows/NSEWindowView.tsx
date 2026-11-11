@@ -18,17 +18,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useNSEAppearance } from "../Appearance/NSEAppearanceProvider";
+import { useNSEContentLayoutProperties } from "../Layout/windowChromeObstructions";
+
 import React, { type KeyboardEventHandler, type ReactNode } from "react";
 import { NSEAppearanceNineSlice } from "../Appearance/NSEAppearanceNineSlice";
 import { getOptionalNSESmoothSurfaceProps, useNSESmoothSurface } from "../SmoothSurface";
-import type { NSEWindowAppearanceRecipeId } from "./windowAppearanceContract";
+
 import type { NSESmoothSurfaceRequest } from "../SmoothSurface";
 import type { SynCloudOSAppFrameSmoothSurfaceManifest } from "../../SynCloudOS/SynCloudOS";
 import type { NSEWindowViewProps } from "./windowViewTypes";
 import "./nse-windows.css";
+import { NSEWindowTitlebarHostContext, NSEWindowTitlebarDocumentContext, type NSEWindowTitlebarDocument } from "./windowTitlebarContext";
 
 export interface NSEWindowFrameProps extends NSEWindowViewProps {
-  readonly appearanceRecipe?: NSEWindowAppearanceRecipeId | null;
+  readonly hasShadow?: boolean;
+
   readonly className?: string;
   readonly titleBar?: ReactNode;
   readonly resizeHandles?: ReactNode;
@@ -36,7 +41,7 @@ export interface NSEWindowFrameProps extends NSEWindowViewProps {
   readonly accessibleName?: string;
   readonly focusScope?: "modal";
   readonly outsideDismiss?: boolean;
-  readonly shadowRecipe?: NSEWindowAppearanceRecipeId;
+
   readonly arrowEdge?: string;
   readonly arrowAlignment?: string;
   readonly onKeyDown?: KeyboardEventHandler<HTMLElement>;
@@ -63,7 +68,7 @@ export function NSEWindowView({
   zoomed = false,
   blocked,
   dirty,
-  appearanceRecipe,
+  hasShadow = false,
   className = "",
   titleBar,
   resizeHandles,
@@ -71,7 +76,6 @@ export function NSEWindowView({
   accessibleName,
   focusScope,
   outsideDismiss,
-  shadowRecipe,
   arrowEdge,
   arrowAlignment,
   onKeyDown,
@@ -84,6 +88,10 @@ export function NSEWindowView({
   // props carry the radius paint underneath. Shadow and resize handles are
   // siblings of the surface, so clipping never touches them; content scrolls
   // inside the clipped surface exactly like mounted app views.
+  const appearance = useNSEAppearance();
+  const contentLayoutProperties = useNSEContentLayoutProperties();
+  const [titlebarDocument, setTitlebarDocument] = React.useState<NSEWindowTitlebarDocument | null>(null);
+  const titlebarHost = React.useMemo(() => ({ setDocument: setTitlebarDocument, leadingAccessories: null, trailingAccessories: null }), []);
   const [surfaceNode, setSurfaceNode] = React.useState<HTMLDivElement | null>(null);
   const smoothSurfaceRequest = windowSmoothSurfaceRequest(record.smoothSurface ?? null);
   useNSESmoothSurface(surfaceNode, smoothSurfaceRequest);
@@ -94,10 +102,12 @@ export function NSEWindowView({
   const fallbackAccessibleName = resolvedSemanticRole === "dialog" && !accessibleName && !labelledTitlePresent
     ? record.title
     : accessibleName;
-  const resolvedAppearanceRecipe = appearanceRecipe === undefined ? "window.standard.frame" : appearanceRecipe;
+
   const smoothSurfaceProps = getOptionalNSESmoothSurfaceProps(smoothSurfaceRequest);
   return (
+    <NSEWindowTitlebarHostContext.Provider value={titlebarHost}>
     <section
+      data-nse-control="window" data-nse-part="background" data-nse-role={record.role} data-nse-type={record.chromeMode} data-nse-style={customChromeActive ? "custom" : undefined} data-nse-edge={arrowEdge} data-nse-alignment={arrowAlignment} data-nse-chrome={record.role === "hud" ? "hud" : appearance.chrome} data-nse-key-window={record.isKey ? undefined : "false"} data-nse-toolbar-style={titlebarDocument?.toolbarStyle ?? "automatic"}
       className={["nse-window-view", className].filter(Boolean).join(" ")}
       role={resolvedSemanticRole}
       aria-label={fallbackAccessibleName}
@@ -105,6 +115,7 @@ export function NSEWindowView({
       aria-modal={modal ? true : undefined}
       inert={blocked ? true : undefined}
       onKeyDown={onKeyDown}
+      data-toolbar-style={titlebarDocument?.toolbarStyle ?? "automatic"}
       data-window-id={record.id}
       data-window-role={record.role}
       data-window-state={record.state}
@@ -115,16 +126,17 @@ export function NSEWindowView({
       data-window-zoomed={zoomed ? "true" : "false"}
       data-window-level={record.level}
       data-window-blocked={blocked ? "true" : "false"}
+      data-nse-enabled={blocked ? "false" : undefined}
       data-window-chrome-mode={record.chromeMode}
       data-window-custom-chrome-active={customChromeActive ? "true" : "false"}
-      data-window-appearance-recipe={resolvedAppearanceRecipe ?? undefined}
+
       data-window-parent-id={record.parentWindowControllerId ?? undefined}
       data-window-anchor-id={record.anchor?.id}
       data-window-anchor-edge={record.anchor?.edge}
       data-window-anchor-alignment={record.anchor?.alignment}
       data-window-focus-scope={focusScope}
       data-window-outside-dismiss={outsideDismiss === undefined ? undefined : outsideDismiss ? "true" : "false"}
-      data-window-shadow-recipe={shadowRecipe}
+
       data-window-arrow-edge={arrowEdge}
       data-window-arrow-alignment={arrowAlignment}
       style={{
@@ -134,31 +146,32 @@ export function NSEWindowView({
         height: "100%",
       }}
     >
-      {shadowRecipe ? (
+      {hasShadow ? (
         <NSEAppearanceNineSlice
           kind="window-shadow"
           className="nse-window__shadow-layer"
-          data-window-shadow-layer={shadowRecipe}
+          data-window-shadow-layer="" data-nse-part="shadow"
         />
       ) : null}
       <div
         ref={setSurfaceNode}
-        className={["nse-window__surface", smoothSurfaceProps.className].filter(Boolean).join(" ")}
+        data-nse-part="bezel" className={["nse-window__surface", smoothSurfaceProps.className].filter(Boolean).join(" ")}
         style={smoothSurfaceProps.style}
         data-window-surface=""
       >
-        {titleBar}
+        <NSEWindowTitlebarDocumentContext.Provider value={titlebarDocument}>{titleBar}</NSEWindowTitlebarDocumentContext.Provider>
         {customTitleBarSlotRef ? (
           <div
             ref={customTitleBarSlotRef}
-            className="nse-window__custom-titlebar"
+            data-nse-part="header" className="nse-window__custom-titlebar"
             data-window-titlebar="custom"
             role="presentation"
           />
         ) : null}
-        <div className="nse-window__content" data-window-content="">{children}</div>
+        <div data-nse-part="content" className="nse-window__content" data-window-content="" style={contentLayoutProperties}>{children}</div>
       </div>
       {resizeHandles}
     </section>
+    </NSEWindowTitlebarHostContext.Provider>
   );
 }

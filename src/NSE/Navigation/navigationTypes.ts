@@ -20,7 +20,6 @@
 
 import type { NSETabStripPresentation } from "./tabStrip";
 import type { ReactNode } from "react";
-import type { SynCloudOSPresentationTraits } from "../../SynCloudOS/SynCloudOS";
 
 /** Semantic icon data only. NavigationFoundation does not assign final visual treatment. */
 export type NSENavigationIcon =
@@ -128,22 +127,6 @@ export interface NSENavigationStackRestorationSnapshot {
   readonly path: readonly string[];
 }
 
-export type NSEAdaptiveNavigationModel = "peer" | "hierarchy";
-export type NSEAdaptiveNavigationPresentation = "adaptive" | "bottom-tabs";
-export type NSEAdaptiveNavigationRenderer = "tabs" | "source-list-content" | "list-detail" | "stack";
-
-export interface NSEAdaptiveNavigationSnapshot {
-  readonly revision: number;
-  readonly id: string;
-  readonly model: NSEAdaptiveNavigationModel;
-  readonly presentation: NSEAdaptiveNavigationPresentation;
-  readonly renderer: NSEAdaptiveNavigationRenderer;
-  readonly traits: SynCloudOSPresentationTraits;
-  readonly selectedDestinationId: string;
-  readonly stack: NSENavigationStackSnapshot | null;
-}
-
-
 export interface NSETabItem {
   readonly id: string;
   readonly label: ReactNode;
@@ -177,18 +160,3 @@ export interface NSETabViewProps {
   onRequestReorder?(id: string, toIndex: number): void;
 }
 
-export interface NSEAccordionItem {
-  readonly id: string;
-  readonly label: string;
-  readonly disabled?: boolean;
-  readonly render: () => ReactNode;
-}
-
-export interface NSEAccordionViewProps {
-  readonly "aria-label": string;
-  readonly items: readonly NSEAccordionItem[];
-  readonly expandedIds: ReadonlySet<string>;
-  readonly mode: "single" | "multiple";
-  readonly headingLevel?: number;
-  onExpandedIdsChange(ids: ReadonlySet<string>): void;
-}

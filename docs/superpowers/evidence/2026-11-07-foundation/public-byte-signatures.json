@@ -1,0 +1,381 @@
+[
+  {
+    "path": "src/Foundation/NSEData.ts",
+    "line": 25,
+    "name": "NSEDataConvertible",
+    "signature": "Uint8Array | ArrayBuffer | NSEData",
+    "entries": [
+      "browser",
+      "chronosphere",
+      "foundation",
+      "fx/animation",
+      "fx/audio",
+      "fx/compression",
+      "fx/graphics",
+      "fx/image",
+      "fx/media",
+      "fx/midi",
+      "fx/text",
+      "fx/video",
+      "fx/video/webm",
+      "index",
+      "nse",
+      "nse/controls",
+      "nse/page",
+      "nse/text",
+      "sdk",
+      "sdk/animation-host",
+      "sdk/testing",
+      "webspring"
+    ],
+    "carveOut": {
+      "category": "web-bridge",
+      "reason": "Foundation input union explicitly bridges existing web buffers to NSEData."
+    }
+  },
+  {
+    "path": "src/Foundation/NSEData.ts",
+    "line": 50,
+    "name": "NSEData.read",
+    "signature": "(blob: Blob): Promise<NSEData>",
+    "entries": [
+      "browser",
+      "chronosphere",
+      "foundation",
+      "fx/animation",
+      "fx/audio",
+      "fx/compression",
+      "fx/graphics",
+      "fx/image",
+      "fx/media",
+      "fx/midi",
+      "fx/text",
+      "fx/video",
+      "fx/video/webm",
+      "index",
+      "nse",
+      "nse/controls",
+      "nse/page",
+      "nse/text",
+      "sdk",
+      "sdk/animation-host",
+      "sdk/testing",
+      "webspring"
+    ],
+    "carveOut": {
+      "category": "web-bridge",
+      "reason": "The explicit asynchronous Blob/File read bridge constructs NSEData."
+    }
+  },
+  {
+    "path": "src/Foundation/NSEData.ts",
+    "line": 74,
+    "name": "NSEData.bytes",
+    "signature": "(): Readonly<Uint8Array<ArrayBuffer>>",
+    "entries": [
+      "browser",
+      "chronosphere",
+      "foundation",
+      "fx/animation",
+      "fx/audio",
+      "fx/compression",
+      "fx/graphics",
+      "fx/image",
+      "fx/media",
+      "fx/midi",
+      "fx/text",
+      "fx/video",
+      "fx/video/webm",
+      "index",
+      "nse",
+      "nse/controls",
+      "nse/page",
+      "nse/text",
+      "sdk",
+      "sdk/animation-host",
+      "sdk/testing",
+      "webspring"
+    ],
+    "carveOut": {
+      "category": "web-bridge",
+      "reason": "A defensive read-only typed-array copy is the explicit Foundation web byte view."
+    }
+  },
+  {
+    "path": "src/Foundation/NSEData.ts",
+    "line": 97,
+    "name": "NSEData.blob",
+    "signature": "(type?: string): Blob",
+    "entries": [
+      "browser",
+      "chronosphere",
+      "foundation",
+      "fx/animation",
+      "fx/audio",
+      "fx/compression",
+      "fx/graphics",
+      "fx/image",
+      "fx/media",
+      "fx/midi",
+      "fx/text",
+      "fx/video",
+      "fx/video/webm",
+      "index",
+      "nse",
+      "nse/controls",
+      "nse/page",
+      "nse/text",
+      "sdk",
+      "sdk/animation-host",
+      "sdk/testing",
+      "webspring"
+    ],
+    "carveOut": {
+      "category": "web-bridge",
+      "reason": "The explicit web output bridge constructs a Blob for native browser APIs."
+    }
+  },
+  {
+    "path": "src/FX/AudioFX/AUFXAudioAnalyser.ts",
+    "line": 28,
+    "name": "AUFXAudioAnalyser.spectrum",
+    "signature": "(buffer: AUFXAudioPCMBuffer, fftSize?: number, channel?: number): Readonly<{ magnitudes: Float32Array<ArrayBuffer>; binWidth: number; fftSize: number; }>",
+    "entries": [
+      "fx/audio"
+    ],
+    "carveOut": {
+      "category": "numeric-buffer",
+      "reason": "FFT magnitudes are floating-point numerical samples; ArrayBuffer describes their backing store."
+    }
+  },
+  {
+    "path": "src/FX/AudioFX/AUFXAudioAnalyser.ts",
+    "line": 46,
+    "name": "__object.magnitudes",
+    "signature": "Float32Array<ArrayBuffer>",
+    "entries": [
+      "fx/audio"
+    ],
+    "carveOut": {
+      "category": "numeric-buffer",
+      "reason": "FFT magnitudes are Float32 numerical samples, not encoded bytes; ArrayBuffer is backing-store typing."
+    }
+  },
+  {
+    "path": "src/FX/GraphicsFX/GFXFloatImage.ts",
+    "line": 38,
+    "name": "GFXIndexedImageDescriptor.indices",
+    "signature": "Uint8Array | Uint16Array",
+    "entries": [
+      "browser",
+      "chronosphere",
+      "fx/animation",
+      "fx/graphics",
+      "fx/image",
+      "fx/video",
+      "index",
+      "nse",
+      "nse/page",
+      "sdk",
+      "sdk/animation-host",
+      "sdk/testing",
+      "webspring"
+    ],
+    "carveOut": {
+      "category": "numeric-buffer",
+      "reason": "Palette index planes contain numerical pixel indexes with 8-bit or 16-bit element semantics."
+    }
+  },
+  {
+    "path": "src/FX/GraphicsFX/GFXImage.ts",
+    "line": 38,
+    "name": "GFXImageDescriptor.data",
+    "signature": "Uint8Array | Uint8ClampedArray",
+    "entries": [
+      "browser",
+      "chronosphere",
+      "fx/animation",
+      "fx/graphics",
+      "fx/image",
+      "fx/text",
+      "fx/video",
+      "index",
+      "nse",
+      "nse/page",
+      "nse/text",
+      "sdk",
+      "sdk/animation-host",
+      "sdk/testing",
+      "webspring"
+    ],
+    "carveOut": {
+      "category": "numeric-buffer",
+      "reason": "Unencoded pixel component planes retain numeric Uint8Array/Uint8ClampedArray storage."
+    }
+  },
+  {
+    "path": "src/FX/GraphicsFX/GFXImage.ts",
+    "line": 69,
+    "name": "bytePixelComponents",
+    "signature": "(bytes: Uint8Array, index: number, pixelFormat: GFXPixelFormat, alpha: GFXAlphaFormat): GFXRGBAComponents",
+    "entries": [
+      "fx/graphics"
+    ],
+    "carveOut": {
+      "category": "numeric-buffer",
+      "reason": "Numerical pixel-component access operates on an unencoded plane."
+    }
+  },
+  {
+    "path": "src/FX/GraphicsFX/GFXImage.ts",
+    "line": 149,
+    "name": "GFXImage.copyData",
+    "signature": "(): Uint8Array",
+    "entries": [
+      "browser",
+      "chronosphere",
+      "fx/animation",
+      "fx/graphics",
+      "fx/image",
+      "fx/text",
+      "fx/video",
+      "index",
+      "nse",
+      "nse/page",
+      "nse/text",
+      "sdk",
+      "sdk/animation-host",
+      "sdk/testing",
+      "webspring"
+    ],
+    "carveOut": {
+      "category": "numeric-buffer",
+      "reason": "Copies an unencoded numeric pixel component plane; encoded PNG results use NSEData."
+    }
+  },
+  {
+    "path": "src/FX/MediaFX/MEFXBlockBuffer.ts",
+    "line": 261,
+    "name": "MEFXBlockBuffer.copyTo",
+    "signature": "(target: Uint8Array, options?: MEFXBlockCopyOptions): number",
+    "entries": [
+      "browser",
+      "fx/media",
+      "index",
+      "nse",
+      "nse/page",
+      "sdk",
+      "sdk/testing",
+      "webspring"
+    ],
+    "carveOut": {
+      "category": "writable-destination",
+      "reason": "The caller supplies writable storage; immutable NSEData cannot be a copy destination."
+    }
+  },
+  {
+    "path": "src/FX/VideoFX/VFXPixelBuffer.ts",
+    "line": 66,
+    "name": "VFXPixelBuffer.constructor",
+    "signature": "(format: VFXVideoFormat, data?: Uint8Array): VFXPixelBuffer",
+    "entries": [
+      "browser",
+      "fx/animation",
+      "fx/video",
+      "index",
+      "nse",
+      "nse/page",
+      "sdk",
+      "sdk/animation-host",
+      "sdk/testing",
+      "webspring"
+    ],
+    "carveOut": {
+      "category": "numeric-buffer",
+      "reason": "Initialises an unencoded numerical video pixel plane."
+    }
+  },
+  {
+    "path": "src/FX/VideoFX/VFXPixelBuffer.ts",
+    "line": 141,
+    "name": "VFXPixelBuffer.copyData",
+    "signature": "(): Uint8Array",
+    "entries": [
+      "browser",
+      "fx/animation",
+      "fx/video",
+      "index",
+      "nse",
+      "nse/page",
+      "sdk",
+      "sdk/animation-host",
+      "sdk/testing",
+      "webspring"
+    ],
+    "carveOut": {
+      "category": "numeric-buffer",
+      "reason": "Copies unencoded numeric video pixel planes, not a container or encoded chunk."
+    }
+  },
+  {
+    "path": "src/FX/VideoFX/VFXPixelBuffer.ts",
+    "line": 145,
+    "name": "VFXPixelBuffer.copyPlane",
+    "signature": "(index: number): Uint8Array",
+    "entries": [
+      "browser",
+      "fx/animation",
+      "fx/video",
+      "index",
+      "nse",
+      "nse/page",
+      "sdk",
+      "sdk/animation-host",
+      "sdk/testing",
+      "webspring"
+    ],
+    "carveOut": {
+      "category": "numeric-buffer",
+      "reason": "Copies one unencoded numerical video pixel plane."
+    }
+  },
+  {
+    "path": "src/FX/VideoFX/VFXPixelBuffer.ts",
+    "line": 231,
+    "name": "VFXPixelBufferPool.acquire",
+    "signature": "(format: VFXVideoFormat, data?: Uint8Array): VFXPixelBuffer",
+    "entries": [
+      "fx/video"
+    ],
+    "carveOut": {
+      "category": "numeric-buffer",
+      "reason": "Pool acquisition accepts initial numerical pixel-plane storage."
+    }
+  },
+  {
+    "path": "src/SynCloudOS/PlatformAdapters/BrowserWebGPUImageProcessingBackend.ts",
+    "line": 36,
+    "name": "BrowserWebGPUImageExecutionRequest.pixels",
+    "signature": "Uint8Array",
+    "entries": [
+      "browser"
+    ],
+    "carveOut": {
+      "category": "numeric-buffer",
+      "reason": "GPU execution uploads unencoded numerical RGBA pixel components."
+    }
+  },
+  {
+    "path": "src/SynCloudOS/PlatformAdapters/BrowserWebGPUImageProcessingBackend.ts",
+    "line": 42,
+    "name": "BrowserWebGPUImageExecutor.execute",
+    "signature": "(request: BrowserWebGPUImageExecutionRequest, signal?: AbortSignal): Promise<Uint8Array>",
+    "entries": [
+      "browser"
+    ],
+    "carveOut": {
+      "category": "numeric-buffer",
+      "reason": "GPU readback returns an unencoded numerical RGBA component plane."
+    }
+  }
+]

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import { createBrowserRoutePlatform } from "../PlatformAdapters/BrowserRoutePlatform";
 import type {
   SynCloudOSAppManagerController,
@@ -390,10 +391,10 @@ const statechart = {
         if (!app) {
           throw ErrorManager.createAppNotFoundError(options.appId, { source: "SynCloudOS.Statechart.gotoState", statechartTarget: stateName });
         }
-        WebspringState.selectApp(app.id);
+        WebspringState.selectApp(app.bundleIdentifier);
         const targetOptions = {
           ...options,
-          appId: app.id,
+          appId: app.bundleIdentifier,
           pathname: options.pathname ?? app.route
         };
         const targetRecord = recordTransition("active.application", targetOptions, true);
@@ -402,7 +403,7 @@ const statechart = {
           ? options.source
           : "statechart";
         let launchFailedSynchronously = false;
-        const manager = LaunchServices.openApp(app.id, {
+        const manager = LaunchServices.openApp(app.bundleIdentifier, {
           source: launchSource,
           focus: options.focus ?? true,
           syncRoute: options.syncRoute,
@@ -413,7 +414,7 @@ const statechart = {
             onCancelled: () => {
               if (generation !== transitionGeneration || runtime.signal.aborted) return;
               const current = RuntimeStore.getSnapshot();
-              if (current.application.activeAppId === app.id) return;
+              if (normalizeBundleIdentifier(current.application.activeAppId) === normalizeBundleIdentifier(app.bundleIdentifier)) return;
               RuntimeStore.mutate((draft) => { draft.statechart = { ...previousStatechart, history: [...previousStatechart.history] }; });
             },
             onLoading: () => {
@@ -453,9 +454,9 @@ const statechart = {
         const error = options.error instanceof Error
           ? ErrorManager.capture({
               code: "UNKNOWN_RUNTIME_ERROR",
-              title: "SynCloudOS reported a runtime error.",
-              message: options.error.message,
-              technicalDetails: options.error.stack,
+              title: "SynCloudOS ran into a problem.",
+              message: "An unexpected error occurred. Some features may not work as expected.",
+              error: options.error,
               source: options.source ?? "SynCloudOS.Statechart.gotoState",
               context: options.context
             })
@@ -473,9 +474,10 @@ const statechart = {
       if (!RuntimeStore.getSnapshot().errors.length && !(error && typeof error === "object" && "code" in error)) {
         ErrorManager.capture({
           code: "UNKNOWN_RUNTIME_ERROR",
-          title: "SynCloudOS could not complete a state transition.",
-          message: `Statechart failed while moving to ${stateName}.`,
-          technicalDetails: error instanceof Error ? error.stack ?? error.message : String(error),
+          title: "SynCloudOS could not finish that.",
+          message: "Something went wrong while switching screens. Please try again.",
+          error,
+          technicalMessage: `Statechart failed while moving to ${stateName}.`,
           source: "SynCloudOS.Statechart.gotoState",
           context: { stateName, options }
         });

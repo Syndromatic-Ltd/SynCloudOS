@@ -20,4 +20,3 @@
 
 export * from "./progressTypes";
 export * from "./NSEProgressIndicator";
-export * from "./NSEProgress";

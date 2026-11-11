@@ -161,9 +161,9 @@ describe("Routing II immutable route graph", () => {
     const definition = createSynWare({
       manifest: {
         schemaVersion: 1,
-        id: "music-app",
+        bundleIdentifier: "com.example.music-app",
         version: "1.0.0",
-        title: "Music",
+        displayName: "Music",
         routes: [{ path: "/music", primary: true, match: "prefix" }],
       },
       routes,
@@ -182,9 +182,9 @@ describe("Routing II immutable route graph", () => {
     const definition = createSynWare({
       manifest: {
         schemaVersion: 1,
-        id: "graphless",
+        bundleIdentifier: "com.example.graphless",
         version: "1.0.0",
-        title: "Graphless",
+        displayName: "Graphless",
         routes: [{ path: "/graphless", primary: true }],
       },
       root: Root,
@@ -192,7 +192,7 @@ describe("Routing II immutable route graph", () => {
 
     expect(definition.routes?.recognize("/graphless")).toMatchObject({
       kind: "match",
-      branch: ["graphless"],
+      branch: ["com.example.graphless"],
       pathname: "/graphless",
     });
   });

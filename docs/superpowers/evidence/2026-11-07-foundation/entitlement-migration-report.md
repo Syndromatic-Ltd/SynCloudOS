@@ -1,0 +1,11 @@
+# Entitlement declaration migration
+
+Schema commit `e3171de` rejects the removed manifest key and adds runtime role/entitlement requirements. Bundle commit `66dfd59` captures immutable canonical entitlements, leaves legacy defaults empty and projects only explicit site access/type intent.
+
+The fixture/scaffold migration changes declarations to `entitlements`, makes former public fixture intent explicit in runtime policy, and retains explicit diagnostics fixture type. `createTestBundle` defaults to no device/service entitlements for ordinary apps and copies supplied declarations into the canonical Info manifest before loader capture. The registry fixture now supplies explicit host authority for plugin registration and explicit extension requirements for `runtime.system`.
+
+Focused verification: 52 tests pass across seven bundle, registry, provenance, scaffolding and capability-audit files. Schema/generated-validator verification: five tests pass. Full framework typecheck at capture still reports old declaration-key consumers in root-owned appRuntimeFacade, SynWareRuntimeMount, createSynWareTestHost, RouteServiceScope and browserRuntime, together with concurrent FX facade wiring. The broader runtime fixture batch captured 76/81 passing before the registry fixture repairs; its remaining failures were caused by those old root-owned key consumers. No such failures are hidden as a full-suite pass.
+
+Site declarations: eleven owned Info.ts files validate against the current framework schema. Public app intent moves to runtime policy, and Diagnostics/Chronosphere have explicit system type. The in-progress NSEControlGallery Info file belongs to the FX job and was not edited. Before framework adoption, site typecheck correctly reports that the old vendor lacks entitlements and new FX, plus two site tests reading the removed declaration key: gallery-preview-policy and journal-lumina-reader. Root owns those test migrations and adoption.
+
+Owned fixture and site path inventories are in entitlement-fixture-owned.json and entitlement-site-owned.json. Browser permission objects, document-kind operation permissions, service-client permission arguments and deterministic adapter controls retain their existing semantics; they are not Info.ts declarations.

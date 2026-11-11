@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { SynCloudOSLifecycleRecord } from "../../SynCloudOS/fxRuntimeContracts";
+
 import { MEFXTime } from "./MEFXTime";
 
 export type MEFXBufferQueueOrdering = "insertion" | "presentation";
@@ -209,9 +211,6 @@ function endedError(): Error {
     return new Error("Media queue has ended.");
 }
 
-function disposedError(): Error {
-    return new Error("Media queue is disposed.");
-}
 
 function budgetError(kind = "budget"): Error {
     return new Error(`Media queue ${kind} budget is full.`);
@@ -229,6 +228,7 @@ function freezeResult<T>(
 }
 
 export class MEFXBufferQueue<T> {
+    readonly #lifecycle = new SynCloudOSLifecycleRecord({ kind: "MEFXBufferQueue" });
     readonly configuration: MEFXBufferQueueConfiguration;
 
     readonly #byteCost: (value: T) => number;
@@ -237,6 +237,10 @@ export class MEFXBufferQueue<T> {
     readonly #transfer: <R>(value: T, accept: (owned: T) => R) => R;
     readonly #close: (value: T) => void;
     readonly #maxDuration: Rational | null;
+
+    #disposedError(operation: string): Error {
+        return this.#lifecycle.error({ code: "MEFX_BUFFER_QUEUE_DISPOSED", operation: operation });
+    }
 
     #entries: QueueEntry<T>[] = [];
     #producerWaiters: ProducerWaiter<T>[] = [];
@@ -326,7 +330,7 @@ export class MEFXBufferQueue<T> {
             return Promise.reject(error);
         }
         if (this.#disposed)
-            return Promise.reject(disposedError());
+            return Promise.reject(this.#disposedError("enqueue"));
         if (this.#ended)
             return Promise.reject(endedError());
         if (options.signal?.aborted)
@@ -393,7 +397,7 @@ export class MEFXBufferQueue<T> {
             return Promise.reject(error);
         }
         if (this.#disposed)
-            return Promise.reject(disposedError());
+            return Promise.reject(this.#disposedError("dequeue"));
         if (options.signal?.aborted)
             return Promise.reject(abortError());
         if (this.#entries.length > 0) {
@@ -463,6 +467,7 @@ export class MEFXBufferQueue<T> {
         if (this.#disposed)
             return;
         this.#generation += 1;
+        this.#lifecycle.markDisposed("explicit");
         this.#disposed = true;
         this.#ended = true;
         this.#rejectAllProducers(reason);
@@ -587,7 +592,7 @@ export class MEFXBufferQueue<T> {
         if (signal?.aborted)
             throw abortError();
         if (this.#disposed)
-            throw disposedError();
+            throw this.#disposedError("enqueue");
         if (this.#ended)
             throw endedError();
         if (generation !== this.#generation)

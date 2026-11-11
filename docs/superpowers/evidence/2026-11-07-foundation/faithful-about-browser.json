@@ -1,0 +1,4335 @@
+{
+  "errors": [],
+  "samples": [
+    {
+      "device": "desktop",
+      "section": "company",
+      "geometry": {
+        "section": "company",
+        "pane": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 900
+        },
+        "art": {
+          "x": 595,
+          "y": 173.859375,
+          "width": 250,
+          "height": 250
+        },
+        "image": {
+          "x": 595,
+          "y": 173.859375,
+          "width": 250,
+          "height": 250
+        },
+        "imageView": {
+          "x": 595,
+          "y": 173.859375,
+          "width": 250,
+          "height": 250
+        },
+        "hero": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 900
+        },
+        "scroll": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 900
+        },
+        "scrollHeight": 2556,
+        "scrollTop": 0,
+        "opacity": 1,
+        "artOpacity": 1,
+        "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+        "paneEffects": [],
+        "artEffects": []
+      }
+    },
+    {
+      "device": "desktop",
+      "section": "framework",
+      "geometry": {
+        "section": "framework",
+        "pane": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 900
+        },
+        "art": {
+          "x": 595,
+          "y": 173.859375,
+          "width": 250,
+          "height": 250
+        },
+        "image": {
+          "x": 595,
+          "y": 173.859375,
+          "width": 250,
+          "height": 250
+        },
+        "imageView": {
+          "x": 595,
+          "y": 173.859375,
+          "width": 250,
+          "height": 250
+        },
+        "hero": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 900
+        },
+        "scroll": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 900
+        },
+        "scrollHeight": 2556,
+        "scrollTop": 0,
+        "opacity": 1,
+        "artOpacity": 1,
+        "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+        "paneEffects": [],
+        "artEffects": []
+      }
+    },
+    {
+      "device": "desktop",
+      "section": "team",
+      "geometry": {
+        "section": "team",
+        "pane": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 900
+        },
+        "art": {
+          "x": 595,
+          "y": 173.859375,
+          "width": 250,
+          "height": 250
+        },
+        "image": {
+          "x": 595,
+          "y": 173.859375,
+          "width": 250,
+          "height": 250
+        },
+        "imageView": {
+          "x": 595,
+          "y": 173.859375,
+          "width": 250,
+          "height": 250
+        },
+        "hero": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 900
+        },
+        "scroll": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 900
+        },
+        "scrollHeight": 2556,
+        "scrollTop": 0,
+        "opacity": 1,
+        "artOpacity": 1,
+        "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+        "paneEffects": [],
+        "artEffects": []
+      }
+    },
+    {
+      "device": "desktop",
+      "section": "scrolled",
+      "geometry": {
+        "section": "company",
+        "pane": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 900
+        },
+        "art": {
+          "x": 595,
+          "y": -476.140625,
+          "width": 250,
+          "height": 250
+        },
+        "image": {
+          "x": 595,
+          "y": -476.140625,
+          "width": 250,
+          "height": 250
+        },
+        "imageView": {
+          "x": 595,
+          "y": -476.140625,
+          "width": 250,
+          "height": 250
+        },
+        "hero": {
+          "x": 0,
+          "y": -650,
+          "width": 1440,
+          "height": 900
+        },
+        "scroll": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 900
+        },
+        "scrollHeight": 2556,
+        "scrollTop": 650,
+        "opacity": 1,
+        "artOpacity": 1,
+        "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+        "paneEffects": [],
+        "artEffects": []
+      }
+    },
+    {
+      "device": "phone",
+      "section": "company",
+      "geometry": {
+        "section": "company",
+        "pane": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 844
+        },
+        "art": {
+          "x": 120.90625,
+          "y": 221.84375,
+          "width": 148.1875,
+          "height": 148.1875
+        },
+        "image": {
+          "x": 120.90625,
+          "y": 221.84375,
+          "width": 148.1875,
+          "height": 148.1875
+        },
+        "imageView": {
+          "x": 120.90625,
+          "y": 221.84375,
+          "width": 148.1875,
+          "height": 148.1875
+        },
+        "hero": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 844
+        },
+        "scroll": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 844
+        },
+        "scrollHeight": 2581,
+        "scrollTop": 0,
+        "opacity": 1,
+        "artOpacity": 1,
+        "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+        "paneEffects": [],
+        "artEffects": []
+      }
+    },
+    {
+      "device": "phone",
+      "section": "framework",
+      "geometry": {
+        "section": "framework",
+        "pane": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 844
+        },
+        "art": {
+          "x": 120.90625,
+          "y": 210.25,
+          "width": 148.1875,
+          "height": 148.1875
+        },
+        "image": {
+          "x": 120.90625,
+          "y": 210.25,
+          "width": 148.1875,
+          "height": 148.1875
+        },
+        "imageView": {
+          "x": 120.90625,
+          "y": 210.25,
+          "width": 148.1875,
+          "height": 148.1875
+        },
+        "hero": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 844
+        },
+        "scroll": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 844
+        },
+        "scrollHeight": 2829,
+        "scrollTop": 0,
+        "opacity": 1,
+        "artOpacity": 1,
+        "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+        "paneEffects": [],
+        "artEffects": []
+      }
+    },
+    {
+      "device": "phone",
+      "section": "team",
+      "geometry": {
+        "section": "team",
+        "pane": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 844
+        },
+        "art": {
+          "x": 120.90625,
+          "y": 190.875,
+          "width": 148.1875,
+          "height": 148.1875
+        },
+        "image": {
+          "x": 120.90625,
+          "y": 190.875,
+          "width": 148.1875,
+          "height": 148.1875
+        },
+        "imageView": {
+          "x": 120.90625,
+          "y": 190.875,
+          "width": 148.1875,
+          "height": 148.1875
+        },
+        "hero": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 844
+        },
+        "scroll": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 844
+        },
+        "scrollHeight": 2532,
+        "scrollTop": 0,
+        "opacity": 1,
+        "artOpacity": 1,
+        "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+        "paneEffects": [],
+        "artEffects": []
+      }
+    },
+    {
+      "device": "desktop-dpr2",
+      "section": "company",
+      "geometry": {
+        "section": "company",
+        "pane": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 900
+        },
+        "art": {
+          "x": 595,
+          "y": 173.859375,
+          "width": 250,
+          "height": 250
+        },
+        "image": {
+          "x": 595,
+          "y": 173.859375,
+          "width": 250,
+          "height": 250
+        },
+        "imageView": {
+          "x": 595,
+          "y": 173.859375,
+          "width": 250,
+          "height": 250
+        },
+        "hero": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 900
+        },
+        "scroll": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 900
+        },
+        "scrollHeight": 2556,
+        "scrollTop": 0,
+        "opacity": 1,
+        "artOpacity": 1,
+        "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+        "paneEffects": [],
+        "artEffects": []
+      }
+    }
+  ],
+  "motion": [
+    {
+      "reduced": false,
+      "frames": [
+        {
+          "elapsed": 0,
+          "panes": [
+            {
+              "section": "company",
+              "pane": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "art": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "image": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "imageView": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "hero": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scroll": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 1,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 0,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "1",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "0",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 550,
+                    "easing": "cubic-bezier(0.62, 0, 0.92, 0.42)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                },
+                {
+                  "state": "running",
+                  "time": 0,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(0.965, 0, 0, 0, 0, 0.965, 0, 0, 0, 0, 1, 0, -118.8, 15.75, 0, 1)",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 550,
+                    "easing": "cubic-bezier(0.62, 0, 0.92, 0.42)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            },
+            {
+              "section": "framework",
+              "pane": {
+                "x": 219.60000610351562,
+                "y": 11.25,
+                "width": 1404.0001220703125,
+                "height": 877.5
+              },
+              "art": {
+                "x": 799.7250366210938,
+                "y": 180.7628936767578,
+                "width": 243.74993896484375,
+                "height": 243.75001525878906
+              },
+              "image": {
+                "x": 814.2325439453125,
+                "y": 212.8203887939453,
+                "width": 214.7349853515625,
+                "height": 214.73497009277344
+              },
+              "imageView": {
+                "x": 814.2325439453125,
+                "y": 212.8203887939453,
+                "width": 214.7349853515625,
+                "height": 214.73497009277344
+              },
+              "hero": {
+                "x": 219.60000610351562,
+                "y": 11.25,
+                "width": 1404.0001220703125,
+                "height": 877.5
+              },
+              "scroll": {
+                "x": 219.60000610351562,
+                "y": 11.25,
+                "width": 1404.0001220703125,
+                "height": 877.5
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 0,
+              "artOpacity": 0,
+              "artTransform": "matrix(0.772409, -0.108555, 0.108555, 0.772409, 14.8795, 60.0182)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 0,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(0.975, 0, 0, 0, 0, 0.975, 0, 0, 0, 0, 1, 0, 219.6, 11.25, 0, 1)",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 120,
+                    "direction": "normal",
+                    "duration": 950,
+                    "easing": "cubic-bezier(0.2, 0.9, 0.18, 1)",
+                    "endDelay": 0,
+                    "fill": "both",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 85,
+          "panes": [
+            {
+              "section": "company",
+              "pane": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "art": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "image": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "imageView": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "hero": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scroll": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 1,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 0,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "1",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "0",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 550,
+                    "easing": "cubic-bezier(0.62, 0, 0.92, 0.42)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                },
+                {
+                  "state": "running",
+                  "time": 0,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(0.965, 0, 0, 0, 0, 0.965, 0, 0, 0, 0, 1, 0, -118.8, 15.75, 0, 1)",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 550,
+                    "easing": "cubic-bezier(0.62, 0, 0.92, 0.42)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            },
+            {
+              "section": "framework",
+              "pane": {
+                "x": 219.60000610351562,
+                "y": 11.25,
+                "width": 1404.0001220703125,
+                "height": 877.5
+              },
+              "art": {
+                "x": 799.7250366210938,
+                "y": 180.7628936767578,
+                "width": 243.74993896484375,
+                "height": 243.75001525878906
+              },
+              "image": {
+                "x": 814.2325439453125,
+                "y": 212.8203887939453,
+                "width": 214.7349853515625,
+                "height": 214.73497009277344
+              },
+              "imageView": {
+                "x": 814.2325439453125,
+                "y": 212.8203887939453,
+                "width": 214.7349853515625,
+                "height": 214.73497009277344
+              },
+              "hero": {
+                "x": 219.60000610351562,
+                "y": 11.25,
+                "width": 1404.0001220703125,
+                "height": 877.5
+              },
+              "scroll": {
+                "x": 219.60000610351562,
+                "y": 11.25,
+                "width": 1404.0001220703125,
+                "height": 877.5
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 0,
+              "artOpacity": 0,
+              "artTransform": "matrix(0.772409, -0.108555, 0.108555, 0.772409, 14.8795, 60.0182)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 0,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(0.975, 0, 0, 0, 0, 0.975, 0, 0, 0, 0, 1, 0, 219.6, 11.25, 0, 1)",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 120,
+                    "direction": "normal",
+                    "duration": 950,
+                    "easing": "cubic-bezier(0.2, 0.9, 0.18, 1)",
+                    "endDelay": 0,
+                    "fill": "both",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 167,
+          "panes": [
+            {
+              "section": "company",
+              "pane": {
+                "x": -0.040053773671388626,
+                "y": 0.005310159642249346,
+                "width": 1439.9830322265625,
+                "height": 899.9893798828125
+              },
+              "art": {
+                "x": 594.9529418945312,
+                "y": 173.86264038085938,
+                "width": 249.99700927734375,
+                "height": 249.99703979492188
+              },
+              "image": {
+                "x": 594.9529418945312,
+                "y": 173.86264038085938,
+                "width": 249.99700927734375,
+                "height": 249.99703979492188
+              },
+              "imageView": {
+                "x": 594.9529418945312,
+                "y": 173.86264038085938,
+                "width": 249.99700927734375,
+                "height": 249.99703979492188
+              },
+              "hero": {
+                "x": -0.040053773671388626,
+                "y": 0.005310159642249346,
+                "width": 1439.9830322265625,
+                "height": 899.9893798828125
+              },
+              "scroll": {
+                "x": -0.040053773671388626,
+                "y": 0.005310159642249346,
+                "width": 1439.9830322265625,
+                "height": 899.9893798828125
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 0.999663,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 16.621000017785548,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "1",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "0",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 550,
+                    "easing": "cubic-bezier(0.62, 0, 0.92, 0.42)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                },
+                {
+                  "state": "running",
+                  "time": 16.621000017785548,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(0.965, 0, 0, 0, 0, 0.965, 0, 0, 0, 0, 1, 0, -118.8, 15.75, 0, 1)",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 550,
+                    "easing": "cubic-bezier(0.62, 0, 0.92, 0.42)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            },
+            {
+              "section": "framework",
+              "pane": {
+                "x": 219.60000610351562,
+                "y": 11.25,
+                "width": 1404.0001220703125,
+                "height": 877.5
+              },
+              "art": {
+                "x": 799.7250366210938,
+                "y": 180.7628936767578,
+                "width": 243.74993896484375,
+                "height": 243.75001525878906
+              },
+              "image": {
+                "x": 814.1834716796875,
+                "y": 212.7259063720703,
+                "width": 214.8331298828125,
+                "height": 214.83314514160156
+              },
+              "imageView": {
+                "x": 814.1834716796875,
+                "y": 212.7259063720703,
+                "width": 214.8331298828125,
+                "height": 214.83314514160156
+              },
+              "hero": {
+                "x": 219.60000610351562,
+                "y": 11.25,
+                "width": 1404.0001220703125,
+                "height": 877.5
+              },
+              "scroll": {
+                "x": 219.60000610351562,
+                "y": 11.25,
+                "width": 1404.0001220703125,
+                "height": 877.5
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 0.730893,
+              "artOpacity": 0.00275313,
+              "artTransform": "matrix(0.773012, -0.108355, 0.108355, 0.773012, 14.8291, 59.8713)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 16.621000017785548,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(0.975, 0, 0, 0, 0, 0.975, 0, 0, 0, 0, 1, 0, 219.6, 11.25, 0, 1)",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 120,
+                    "direction": "normal",
+                    "duration": 950,
+                    "easing": "cubic-bezier(0.2, 0.9, 0.18, 1)",
+                    "endDelay": 0,
+                    "fill": "both",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 268,
+          "panes": [
+            {
+              "section": "company",
+              "pane": {
+                "x": -8.268102645874023,
+                "y": 1.0961499214172363,
+                "width": 1436.4923095703125,
+                "height": 897.8077392578125
+              },
+              "art": {
+                "x": 585.2825317382812,
+                "y": 174.5320281982422,
+                "width": 249.39105224609375,
+                "height": 249.3910369873047
+              },
+              "image": {
+                "x": 585.2825317382812,
+                "y": 174.5320281982422,
+                "width": 249.39105224609375,
+                "height": 249.3910369873047
+              },
+              "imageView": {
+                "x": 585.2825317382812,
+                "y": 174.5320281982422,
+                "width": 249.39105224609375,
+                "height": 249.3910369873047
+              },
+              "hero": {
+                "x": -8.268102645874023,
+                "y": 1.0961499214172363,
+                "width": 1436.4923095703125,
+                "height": 897.8077392578125
+              },
+              "scroll": {
+                "x": -8.268102645874023,
+                "y": 1.0961499214172363,
+                "width": 1436.4923095703125,
+                "height": 897.8077392578125
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 0.930403,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 216.7210000177846,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "1",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "0",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 550,
+                    "easing": "cubic-bezier(0.62, 0, 0.92, 0.42)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                },
+                {
+                  "state": "running",
+                  "time": 216.7210000177846,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(0.965, 0, 0, 0, 0, 0.965, 0, 0, 0, 0, 1, 0, -118.8, 15.75, 0, 1)",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 550,
+                    "easing": "cubic-bezier(0.62, 0, 0.92, 0.42)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            },
+            {
+              "section": "framework",
+              "pane": {
+                "x": 121.10009765625,
+                "y": 6.2038984298706055,
+                "width": 1420.1475830078125,
+                "height": 887.5921630859375
+              },
+              "art": {
+                "x": 707.8971557617188,
+                "y": 177.66636657714844,
+                "width": 246.55340576171875,
+                "height": 246.5533905029297
+              },
+              "image": {
+                "x": 714.5286254882812,
+                "y": 193.71937561035156,
+                "width": 233.2904052734375,
+                "height": 233.29039001464844
+              },
+              "imageView": {
+                "x": 714.5286254882812,
+                "y": 193.71937561035156,
+                "width": 233.2904052734375,
+                "height": 233.29039001464844
+              },
+              "hero": {
+                "x": 121.10009765625,
+                "y": 6.2038984298706055,
+                "width": 1420.1475830078125,
+                "height": 887.5921630859375
+              },
+              "scroll": {
+                "x": 121.10009765625,
+                "y": 6.2038984298706055,
+                "width": 1420.1475830078125,
+                "height": 887.5921630859375
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 0.955596,
+              "artOpacity": 0.470214,
+              "artTransform": "matrix(0.880815, -0.0653919, 0.0653919, 0.880815, 6.72418, 32.6254)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 216.7210000177846,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(0.975, 0, 0, 0, 0, 0.975, 0, 0, 0, 0, 1, 0, 219.6, 11.25, 0, 1)",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 120,
+                    "direction": "normal",
+                    "duration": 950,
+                    "easing": "cubic-bezier(0.2, 0.9, 0.18, 1)",
+                    "endDelay": 0,
+                    "fill": "both",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 380,
+          "panes": [
+            {
+              "section": "company",
+              "pane": {
+                "x": -8.268102645874023,
+                "y": 1.0961499214172363,
+                "width": 1436.4923095703125,
+                "height": 897.8077392578125
+              },
+              "art": {
+                "x": 585.2825317382812,
+                "y": 174.5320281982422,
+                "width": 249.39105224609375,
+                "height": 249.3910369873047
+              },
+              "image": {
+                "x": 585.2825317382812,
+                "y": 174.5320281982422,
+                "width": 249.39105224609375,
+                "height": 249.3910369873047
+              },
+              "imageView": {
+                "x": 585.2825317382812,
+                "y": 174.5320281982422,
+                "width": 249.39105224609375,
+                "height": 249.3910369873047
+              },
+              "hero": {
+                "x": -8.268102645874023,
+                "y": 1.0961499214172363,
+                "width": 1436.4923095703125,
+                "height": 897.8077392578125
+              },
+              "scroll": {
+                "x": -8.268102645874023,
+                "y": 1.0961499214172363,
+                "width": 1436.4923095703125,
+                "height": 897.8077392578125
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 0.930403,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 216.7210000177846,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "1",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "0",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 550,
+                    "easing": "cubic-bezier(0.62, 0, 0.92, 0.42)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                },
+                {
+                  "state": "running",
+                  "time": 216.7210000177846,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(0.965, 0, 0, 0, 0, 0.965, 0, 0, 0, 0, 1, 0, -118.8, 15.75, 0, 1)",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 550,
+                    "easing": "cubic-bezier(0.62, 0, 0.92, 0.42)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            },
+            {
+              "section": "framework",
+              "pane": {
+                "x": 121.10009765625,
+                "y": 6.2038984298706055,
+                "width": 1420.1475830078125,
+                "height": 887.5921630859375
+              },
+              "art": {
+                "x": 707.8971557617188,
+                "y": 177.66636657714844,
+                "width": 246.55340576171875,
+                "height": 246.5533905029297
+              },
+              "image": {
+                "x": 714.5286254882812,
+                "y": 193.71937561035156,
+                "width": 233.2904052734375,
+                "height": 233.29039001464844
+              },
+              "imageView": {
+                "x": 714.5286254882812,
+                "y": 193.71937561035156,
+                "width": 233.2904052734375,
+                "height": 233.29039001464844
+              },
+              "hero": {
+                "x": 121.10009765625,
+                "y": 6.2038984298706055,
+                "width": 1420.1475830078125,
+                "height": 887.5921630859375
+              },
+              "scroll": {
+                "x": 121.10009765625,
+                "y": 6.2038984298706055,
+                "width": 1420.1475830078125,
+                "height": 887.5921630859375
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 0.955596,
+              "artOpacity": 0.470214,
+              "artTransform": "matrix(0.880815, -0.0653919, 0.0653919, 0.880815, 6.72418, 32.6254)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 216.7210000177846,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(0.975, 0, 0, 0, 0, 0.975, 0, 0, 0, 0, 1, 0, 219.6, 11.25, 0, 1)",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 120,
+                    "direction": "normal",
+                    "duration": 950,
+                    "easing": "cubic-bezier(0.2, 0.9, 0.18, 1)",
+                    "endDelay": 0,
+                    "fill": "both",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 461,
+          "panes": [
+            {
+              "section": "company",
+              "pane": {
+                "x": -22.83612060546875,
+                "y": 3.0275161266326904,
+                "width": 1430.31201171875,
+                "height": 893.9449462890625
+              },
+              "art": {
+                "x": 568.1608276367188,
+                "y": 175.71719360351562,
+                "width": 248.31805419921875,
+                "height": 248.31805419921875
+              },
+              "image": {
+                "x": 568.1608276367188,
+                "y": 175.71719360351562,
+                "width": 248.31805419921875,
+                "height": 248.31805419921875
+              },
+              "imageView": {
+                "x": 568.1608276367188,
+                "y": 175.71719360351562,
+                "width": 248.31805419921875,
+                "height": 248.31805419921875
+              },
+              "hero": {
+                "x": -22.83612060546875,
+                "y": 3.0275161266326904,
+                "width": 1430.31201171875,
+                "height": 893.9449462890625
+              },
+              "scroll": {
+                "x": -22.83612060546875,
+                "y": 3.0275161266326904,
+                "width": 1430.31201171875,
+                "height": 893.9449462890625
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 0.807777,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 333.32100001778286,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "1",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "0",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 550,
+                    "easing": "cubic-bezier(0.62, 0, 0.92, 0.42)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                },
+                {
+                  "state": "running",
+                  "time": 333.32100001778286,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(0.965, 0, 0, 0, 0, 0.965, 0, 0, 0, 0, 1, 0, -118.8, 15.75, 0, 1)",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 550,
+                    "easing": "cubic-bezier(0.62, 0, 0.92, 0.42)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            },
+            {
+              "section": "framework",
+              "pane": {
+                "x": 48.33921432495117,
+                "y": 2.4763941764831543,
+                "width": 1432.075439453125,
+                "height": 895.0471801757812
+              },
+              "art": {
+                "x": 640.0648803710938,
+                "y": 175.37899780273438,
+                "width": 248.62420654296875,
+                "height": 248.62423706054688
+              },
+              "image": {
+                "x": 641.517578125,
+                "y": 179.2683868408203,
+                "width": 245.71881103515625,
+                "height": 245.7187957763672
+              },
+              "imageView": {
+                "x": 641.517578125,
+                "y": 179.2683868408203,
+                "width": 245.71881103515625,
+                "height": 245.7187957763672
+              },
+              "hero": {
+                "x": 48.33921432495117,
+                "y": 2.4763941764831543,
+                "width": 1432.075439453125,
+                "height": 895.0471801757812
+              },
+              "scroll": {
+                "x": 48.33921432495117,
+                "y": 2.4763941764831543,
+                "width": 1432.075439453125,
+                "height": 895.0471801757812
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 0.993987,
+              "artOpacity": 0.864307,
+              "artTransform": "matrix(0.969878, -0.0184356, 0.0184356, 0.969878, 1.46074, 8.51981)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 333.32100001778286,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(0.975, 0, 0, 0, 0, 0.975, 0, 0, 0, 0, 1, 0, 219.6, 11.25, 0, 1)",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 120,
+                    "direction": "normal",
+                    "duration": 950,
+                    "easing": "cubic-bezier(0.2, 0.9, 0.18, 1)",
+                    "endDelay": 0,
+                    "fill": "both",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 545,
+          "panes": [
+            {
+              "section": "company",
+              "pane": {
+                "x": -58.598876953125,
+                "y": 7.768790245056152,
+                "width": 1415.139892578125,
+                "height": 884.4624633789062
+              },
+              "art": {
+                "x": 526.1290893554688,
+                "y": 178.6266632080078,
+                "width": 245.68402099609375,
+                "height": 245.6840057373047
+              },
+              "image": {
+                "x": 526.1290893554688,
+                "y": 178.6266632080078,
+                "width": 245.68402099609375,
+                "height": 245.6840057373047
+              },
+              "imageView": {
+                "x": 526.1290893554688,
+                "y": 178.6266632080078,
+                "width": 245.68402099609375,
+                "height": 245.6840057373047
+              },
+              "hero": {
+                "x": -58.598876953125,
+                "y": 7.768790245056152,
+                "width": 1415.139892578125,
+                "height": 884.4624633789062
+              },
+              "scroll": {
+                "x": -58.598876953125,
+                "y": 7.768790245056152,
+                "width": 1415.139892578125,
+                "height": 884.4624633789062
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 0.506743,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 466.6210000177848,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "1",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "0",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 550,
+                    "easing": "cubic-bezier(0.62, 0, 0.92, 0.42)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                },
+                {
+                  "state": "running",
+                  "time": 466.6210000177848,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(0.965, 0, 0, 0, 0, 0.965, 0, 0, 0, 0, 1, 0, -118.8, 15.75, 0, 1)",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 550,
+                    "easing": "cubic-bezier(0.62, 0, 0.92, 0.42)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            },
+            {
+              "section": "framework",
+              "pane": {
+                "x": 18.666654586791992,
+                "y": 0.9562835693359375,
+                "width": 1436.93994140625,
+                "height": 898.08740234375
+              },
+              "art": {
+                "x": 612.4022216796875,
+                "y": 174.44619750976562,
+                "width": 249.46875,
+                "height": 249.46871948242188
+              },
+              "image": {
+                "x": 612.2254638671875,
+                "y": 174.19869995117188,
+                "width": 249.822265625,
+                "height": 249.82220458984375
+              },
+              "imageView": {
+                "x": 612.2254638671875,
+                "y": 174.19869995117188,
+                "width": 249.822265625,
+                "height": 249.82220458984375
+              },
+              "hero": {
+                "x": 18.666654586791992,
+                "y": 0.9562835693359375,
+                "width": 1436.93994140625,
+                "height": 898.08740234375
+              },
+              "scroll": {
+                "x": 18.666654586791992,
+                "y": 0.9562835693359375,
+                "width": 1436.93994140625,
+                "height": 898.08740234375
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 1,
+              "artOpacity": 1,
+              "artTransform": "matrix(1.00087, 0.0005504, -0.0005504, 1.00087, -0.0394963, -0.248019)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 466.6210000177848,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(0.975, 0, 0, 0, 0, 0.975, 0, 0, 0, 0, 1, 0, 219.6, 11.25, 0, 1)",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 120,
+                    "direction": "normal",
+                    "duration": 950,
+                    "easing": "cubic-bezier(0.2, 0.9, 0.18, 1)",
+                    "endDelay": 0,
+                    "fill": "both",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 629,
+          "panes": [
+            {
+              "section": "company",
+              "pane": {
+                "x": -58.598876953125,
+                "y": 7.768790245056152,
+                "width": 1415.139892578125,
+                "height": 884.4624633789062
+              },
+              "art": {
+                "x": 526.1290893554688,
+                "y": 178.6266632080078,
+                "width": 245.68402099609375,
+                "height": 245.6840057373047
+              },
+              "image": {
+                "x": 526.1290893554688,
+                "y": 178.6266632080078,
+                "width": 245.68402099609375,
+                "height": 245.6840057373047
+              },
+              "imageView": {
+                "x": 526.1290893554688,
+                "y": 178.6266632080078,
+                "width": 245.68402099609375,
+                "height": 245.6840057373047
+              },
+              "hero": {
+                "x": -58.598876953125,
+                "y": 7.768790245056152,
+                "width": 1415.139892578125,
+                "height": 884.4624633789062
+              },
+              "scroll": {
+                "x": -58.598876953125,
+                "y": 7.768790245056152,
+                "width": 1415.139892578125,
+                "height": 884.4624633789062
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 0.506743,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 466.6210000177848,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "1",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "0",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 550,
+                    "easing": "cubic-bezier(0.62, 0, 0.92, 0.42)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                },
+                {
+                  "state": "running",
+                  "time": 466.6210000177848,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(0.965, 0, 0, 0, 0, 0.965, 0, 0, 0, 0, 1, 0, -118.8, 15.75, 0, 1)",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 550,
+                    "easing": "cubic-bezier(0.62, 0, 0.92, 0.42)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            },
+            {
+              "section": "framework",
+              "pane": {
+                "x": 18.666654586791992,
+                "y": 0.9562835693359375,
+                "width": 1436.93994140625,
+                "height": 898.08740234375
+              },
+              "art": {
+                "x": 612.4022216796875,
+                "y": 174.44619750976562,
+                "width": 249.46875,
+                "height": 249.46871948242188
+              },
+              "image": {
+                "x": 612.2254638671875,
+                "y": 174.19869995117188,
+                "width": 249.822265625,
+                "height": 249.82220458984375
+              },
+              "imageView": {
+                "x": 612.2254638671875,
+                "y": 174.19869995117188,
+                "width": 249.822265625,
+                "height": 249.82220458984375
+              },
+              "hero": {
+                "x": 18.666654586791992,
+                "y": 0.9562835693359375,
+                "width": 1436.93994140625,
+                "height": 898.08740234375
+              },
+              "scroll": {
+                "x": 18.666654586791992,
+                "y": 0.9562835693359375,
+                "width": 1436.93994140625,
+                "height": 898.08740234375
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 1,
+              "artOpacity": 1,
+              "artTransform": "matrix(1.00087, 0.0005504, -0.0005504, 1.00087, -0.0394963, -0.248019)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 466.6210000177848,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(0.975, 0, 0, 0, 0, 0.975, 0, 0, 0, 0, 1, 0, 219.6, 11.25, 0, 1)",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 120,
+                    "direction": "normal",
+                    "duration": 950,
+                    "easing": "cubic-bezier(0.2, 0.9, 0.18, 1)",
+                    "endDelay": 0,
+                    "fill": "both",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 711,
+          "panes": [
+            {
+              "section": "framework",
+              "pane": {
+                "x": 8.421907424926758,
+                "y": 0.4314501881599426,
+                "width": 1438.619384765625,
+                "height": 899.1370849609375
+              },
+              "art": {
+                "x": 602.8514404296875,
+                "y": 174.12413024902344,
+                "width": 249.76025390625,
+                "height": 249.7602996826172
+              },
+              "image": {
+                "x": 602.2801513671875,
+                "y": 173.3242645263672,
+                "width": 250.90277099609375,
+                "height": 250.90284729003906
+              },
+              "imageView": {
+                "x": 602.2801513671875,
+                "y": 173.3242645263672,
+                "width": 250.90277099609375,
+                "height": 250.90284729003906
+              },
+              "hero": {
+                "x": 8.421907424926758,
+                "y": 0.4314501881599426,
+                "width": 1438.619384765625,
+                "height": 899.1370849609375
+              },
+              "scroll": {
+                "x": 8.421907424926758,
+                "y": 0.4314501881599426,
+                "width": 1438.619384765625,
+                "height": 899.1370849609375
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 1,
+              "artOpacity": 1,
+              "artTransform": "matrix(1.00279, 0.0017797, -0.0017797, 1.00279, -0.126887, -0.80063)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 583.2210000177831,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(0.975, 0, 0, 0, 0, 0.975, 0, 0, 0, 0, 1, 0, 219.6, 11.25, 0, 1)",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 120,
+                    "direction": "normal",
+                    "duration": 950,
+                    "easing": "cubic-bezier(0.2, 0.9, 0.18, 1)",
+                    "endDelay": 0,
+                    "fill": "both",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 793,
+          "panes": [
+            {
+              "section": "framework",
+              "pane": {
+                "x": 4.078125476837158,
+                "y": 0.20892037451267242,
+                "width": 1439.3314208984375,
+                "height": 899.5821533203125
+              },
+              "art": {
+                "x": 598.8018798828125,
+                "y": 173.98757934570312,
+                "width": 249.88397216796875,
+                "height": 249.88394165039062
+              },
+              "image": {
+                "x": 598.5238647460938,
+                "y": 173.59823608398438,
+                "width": 250.44000244140625,
+                "height": 250.44000244140625
+              },
+              "imageView": {
+                "x": 598.5238647460938,
+                "y": 173.59823608398438,
+                "width": 250.44000244140625,
+                "height": 250.44000244140625
+              },
+              "hero": {
+                "x": 4.078125476837158,
+                "y": 0.20892037451267242,
+                "width": 1439.3314208984375,
+                "height": 899.5821533203125
+              },
+              "scroll": {
+                "x": 4.078125476837158,
+                "y": 0.20892037451267242,
+                "width": 1439.3314208984375,
+                "height": 899.5821533203125
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 1,
+              "artOpacity": 1,
+              "artTransform": "matrix(1.00136, 0.0008648, -0.0008648, 1.00136, -0.0619547, -0.389526)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 683.3210000177843,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(0.975, 0, 0, 0, 0, 0.975, 0, 0, 0, 0, 1, 0, 219.6, 11.25, 0, 1)",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 120,
+                    "direction": "normal",
+                    "duration": 950,
+                    "easing": "cubic-bezier(0.2, 0.9, 0.18, 1)",
+                    "endDelay": 0,
+                    "fill": "both",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 875,
+          "panes": [
+            {
+              "section": "framework",
+              "pane": {
+                "x": 1.7720450162887573,
+                "y": 0.09078098833560944,
+                "width": 1439.70947265625,
+                "height": 899.8184204101562
+              },
+              "art": {
+                "x": 596.6519775390625,
+                "y": 173.9150848388672,
+                "width": 249.9495849609375,
+                "height": 249.9495391845703
+              },
+              "image": {
+                "x": 596.5753784179688,
+                "y": 173.80770874023438,
+                "width": 250.10284423828125,
+                "height": 250.10287475585938
+              },
+              "imageView": {
+                "x": 596.5753784179688,
+                "y": 173.80770874023438,
+                "width": 250.10284423828125,
+                "height": 250.10287475585938
+              },
+              "hero": {
+                "x": 1.7720450162887573,
+                "y": 0.09078098833560944,
+                "width": 1439.70947265625,
+                "height": 899.8184204101562
+              },
+              "scroll": {
+                "x": 1.7720450162887573,
+                "y": 0.09078098833560944,
+                "width": 1439.70947265625,
+                "height": 899.8184204101562
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 1,
+              "artOpacity": 1,
+              "artTransform": "matrix(1.00038, 0.0002382, -0.0002382, 1.00038, -0.0171225, -0.107391)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 783.3210000177858,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(0.975, 0, 0, 0, 0, 0.975, 0, 0, 0, 0, 1, 0, 219.6, 11.25, 0, 1)",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 120,
+                    "direction": "normal",
+                    "duration": 950,
+                    "easing": "cubic-bezier(0.2, 0.9, 0.18, 1)",
+                    "endDelay": 0,
+                    "fill": "both",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 957,
+          "panes": [
+            {
+              "section": "framework",
+              "pane": {
+                "x": 0.6069549322128296,
+                "y": 0.031094001606106758,
+                "width": 1439.9005126953125,
+                "height": 899.9378662109375
+              },
+              "art": {
+                "x": 595.5658569335938,
+                "y": 173.8784637451172,
+                "width": 249.98272705078125,
+                "height": 249.9827117919922
+              },
+              "image": {
+                "x": 595.5617065429688,
+                "y": 173.8726348876953,
+                "width": 249.99102783203125,
+                "height": 249.9910125732422
+              },
+              "imageView": {
+                "x": 595.5617065429688,
+                "y": 173.8726348876953,
+                "width": 249.99102783203125,
+                "height": 249.9910125732422
+              },
+              "hero": {
+                "x": 0.6069549322128296,
+                "y": 0.031094001606106758,
+                "width": 1439.9005126953125,
+                "height": 899.9378662109375
+              },
+              "scroll": {
+                "x": 0.6069549322128296,
+                "y": 0.031094001606106758,
+                "width": 1439.9005126953125,
+                "height": 899.9378662109375
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 1,
+              "artOpacity": 1,
+              "artTransform": "matrix(1.00002, 1.29e-05, -1.29e-05, 1.00002, -0.000929, -0.005822)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 883.2210000177838,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(0.975, 0, 0, 0, 0, 0.975, 0, 0, 0, 0, 1, 0, 219.6, 11.25, 0, 1)",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 120,
+                    "direction": "normal",
+                    "duration": 950,
+                    "easing": "cubic-bezier(0.2, 0.9, 0.18, 1)",
+                    "endDelay": 0,
+                    "fill": "both",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 1046,
+          "panes": [
+            {
+              "section": "framework",
+              "pane": {
+                "x": 0.1069454476237297,
+                "y": 0.0054787625558674335,
+                "width": 1439.9825439453125,
+                "height": 899.989013671875
+              },
+              "art": {
+                "x": 595.0997314453125,
+                "y": 173.8627471923828,
+                "width": 249.9969482421875,
+                "height": 249.99696350097656
+              },
+              "image": {
+                "x": 595.101806640625,
+                "y": 173.8686065673828,
+                "width": 249.99273681640625,
+                "height": 249.9927520751953
+              },
+              "imageView": {
+                "x": 595.101806640625,
+                "y": 173.8686065673828,
+                "width": 249.99273681640625,
+                "height": 249.9927520751953
+              },
+              "hero": {
+                "x": 0.1069454476237297,
+                "y": 0.0054787625558674335,
+                "width": 1439.9825439453125,
+                "height": 899.989013671875
+              },
+              "scroll": {
+                "x": 0.1069454476237297,
+                "y": 0.0054787625558674335,
+                "width": 1439.9825439453125,
+                "height": 899.989013671875
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 1,
+              "artOpacity": 0.999792,
+              "artTransform": "matrix(0.999954, -2.9e-05, 2.9e-05, 0.999954, 0.0020917, 0.0131055)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 983.321000017785,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(0.975, 0, 0, 0, 0, 0.975, 0, 0, 0, 0, 1, 0, 219.6, 11.25, 0, 1)",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 120,
+                    "direction": "normal",
+                    "duration": 950,
+                    "easing": "cubic-bezier(0.2, 0.9, 0.18, 1)",
+                    "endDelay": 0,
+                    "fill": "both",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 1141,
+          "panes": [
+            {
+              "section": "framework",
+              "pane": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "art": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "image": {
+                "x": 595.0015258789062,
+                "y": 173.86358642578125,
+                "width": 249.9969482421875,
+                "height": 249.99697875976562
+              },
+              "imageView": {
+                "x": 595.0015258789062,
+                "y": 173.86358642578125,
+                "width": 249.9969482421875,
+                "height": 249.99697875976562
+              },
+              "hero": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scroll": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 1,
+              "artOpacity": 0.999851,
+              "artTransform": "matrix(0.999967, -2.08e-05, 2.08e-05, 0.999967, 0.0015017, 0.0094091)",
+              "paneEffects": [],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 1238,
+          "panes": [
+            {
+              "section": "framework",
+              "pane": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "art": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "image": {
+                "x": 595.0015258789062,
+                "y": 173.86358642578125,
+                "width": 249.9969482421875,
+                "height": 249.99697875976562
+              },
+              "imageView": {
+                "x": 595.0015258789062,
+                "y": 173.86358642578125,
+                "width": 249.9969482421875,
+                "height": 249.99697875976562
+              },
+              "hero": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scroll": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 1,
+              "artOpacity": 0.999851,
+              "artTransform": "matrix(0.999967, -2.08e-05, 2.08e-05, 0.999967, 0.0015017, 0.0094091)",
+              "paneEffects": [],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 1319,
+          "panes": [
+            {
+              "section": "framework",
+              "pane": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "art": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "image": {
+                "x": 595.0004272460938,
+                "y": 173.8606719970703,
+                "width": 249.99908447265625,
+                "height": 249.99903869628906
+              },
+              "imageView": {
+                "x": 595.0004272460938,
+                "y": 173.8606719970703,
+                "width": 249.99908447265625,
+                "height": 249.99903869628906
+              },
+              "hero": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scroll": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 1,
+              "artOpacity": 0.999955,
+              "artTransform": "matrix(0.99999, -6.3e-06, 6.3e-06, 0.99999, 0.0004572, 0.0028651)",
+              "paneEffects": [],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 1401,
+          "panes": [
+            {
+              "section": "framework",
+              "pane": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "art": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "image": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "imageView": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "hero": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scroll": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 1,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 1496,
+          "panes": [
+            {
+              "section": "framework",
+              "pane": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "art": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "image": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "imageView": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "hero": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scroll": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 1,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 1607,
+          "panes": [
+            {
+              "section": "framework",
+              "pane": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "art": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "image": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "imageView": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "hero": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scroll": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 1,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 1712,
+          "panes": [
+            {
+              "section": "framework",
+              "pane": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "art": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "image": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "imageView": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "hero": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scroll": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 1,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [],
+              "artEffects": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "reduced": true,
+      "frames": [
+        {
+          "elapsed": 0,
+          "panes": [
+            {
+              "section": "company",
+              "pane": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "art": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "image": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "imageView": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "hero": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scroll": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 1,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 0,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "1",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "0",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 180,
+                    "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            },
+            {
+              "section": "framework",
+              "pane": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "art": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "image": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "imageView": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "hero": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scroll": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 0,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 0,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "0",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "1",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 240,
+                    "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 43,
+          "panes": [
+            {
+              "section": "company",
+              "pane": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "art": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "image": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "imageView": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "hero": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scroll": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 1,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 0,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "1",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "0",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 180,
+                    "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            },
+            {
+              "section": "framework",
+              "pane": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "art": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "image": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "imageView": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "hero": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scroll": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 0,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 0,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "0",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "1",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 240,
+                    "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 85,
+          "panes": [
+            {
+              "section": "company",
+              "pane": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "art": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "image": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "imageView": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "hero": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scroll": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 0.0670958,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 83.35100002728524,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "1",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "0",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 180,
+                    "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            },
+            {
+              "section": "framework",
+              "pane": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "art": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "image": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "imageView": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "hero": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scroll": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 0.86916,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 83.35100002728524,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "0",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "1",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 240,
+                    "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 128,
+          "panes": [
+            {
+              "section": "company",
+              "pane": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "art": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "image": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "imageView": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "hero": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scroll": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 0.0205041,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 116.68300002728316,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "1",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "0",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 180,
+                    "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            },
+            {
+              "section": "framework",
+              "pane": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "art": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "image": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "imageView": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "hero": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scroll": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 0.941448,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 116.68300002728316,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "0",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "1",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 240,
+                    "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 170,
+          "panes": [
+            {
+              "section": "company",
+              "pane": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "art": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "image": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "imageView": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "hero": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scroll": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 0.000620236,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 166.68700002728443,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "1",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "0",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 180,
+                    "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            },
+            {
+              "section": "framework",
+              "pane": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "art": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "image": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "imageView": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "hero": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scroll": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 0.985607,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 166.68700002728443,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "0",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "1",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 240,
+                    "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 212,
+          "panes": [
+            {
+              "section": "company",
+              "pane": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "art": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "image": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "imageView": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "hero": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scroll": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 0,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [
+                {
+                  "state": "finished",
+                  "time": 200.01900002728235,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "1",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "0",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 180,
+                    "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            },
+            {
+              "section": "framework",
+              "pane": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "art": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "image": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "imageView": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "hero": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scroll": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 0.996472,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [
+                {
+                  "state": "running",
+                  "time": 200.01900002728235,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "0",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "1",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 240,
+                    "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 255,
+          "panes": [
+            {
+              "section": "company",
+              "pane": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "art": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "image": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "imageView": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "hero": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scroll": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 0,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [],
+              "artEffects": []
+            },
+            {
+              "section": "framework",
+              "pane": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "art": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "image": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "imageView": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "hero": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scroll": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 1,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [
+                {
+                  "state": "finished",
+                  "time": 249.9870000272857,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "0",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "1",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 240,
+                    "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 299,
+          "panes": [
+            {
+              "section": "framework",
+              "pane": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "art": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "image": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "imageView": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "hero": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scroll": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 1,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [
+                {
+                  "state": "finished",
+                  "time": 283.3190000272836,
+                  "frames": [
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "0",
+                      "computedOffset": 0
+                    },
+                    {
+                      "offset": null,
+                      "easing": "linear",
+                      "composite": "auto",
+                      "opacity": "1",
+                      "computedOffset": 1
+                    }
+                  ],
+                  "timing": {
+                    "delay": 0,
+                    "direction": "normal",
+                    "duration": 240,
+                    "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+                    "endDelay": 0,
+                    "fill": "forwards",
+                    "iterationStart": 0,
+                    "iterations": "1"
+                  }
+                }
+              ],
+              "artEffects": []
+            }
+          ]
+        },
+        {
+          "elapsed": 342,
+          "panes": [
+            {
+              "section": "framework",
+              "pane": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "art": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "image": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "imageView": {
+                "x": 595,
+                "y": 173.859375,
+                "width": 250,
+                "height": 250
+              },
+              "hero": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scroll": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 900
+              },
+              "scrollHeight": 2556,
+              "scrollTop": 0,
+              "opacity": 1,
+              "artOpacity": 1,
+              "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+              "paneEffects": [],
+              "artEffects": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rapid": {
+        "before": [
+          {
+            "section": "company",
+            "pane": {
+              "x": -41.44465637207031,
+              "y": 5.494556903839111,
+              "width": 1422.41748046875,
+              "height": 889.0108642578125
+            },
+            "art": {
+              "x": 546.2903442382812,
+              "y": 177.2310791015625,
+              "width": 246.94744873046875,
+              "height": 246.94747924804688
+            },
+            "image": {
+              "x": 546.2903442382812,
+              "y": 177.2310791015625,
+              "width": 246.94744873046875,
+              "height": 246.94747924804688
+            },
+            "imageView": {
+              "x": 546.2903442382812,
+              "y": 177.2310791015625,
+              "width": 246.94744873046875,
+              "height": 246.94747924804688
+            },
+            "hero": {
+              "x": -41.44465637207031,
+              "y": 5.494556903839111,
+              "width": 1422.41748046875,
+              "height": 889.0108642578125
+            },
+            "scroll": {
+              "x": -41.44465637207031,
+              "y": 5.494556903839111,
+              "width": 1422.41748046875,
+              "height": 889.0108642578125
+            },
+            "scrollHeight": 2556,
+            "scrollTop": 0,
+            "opacity": 0.651139,
+            "artOpacity": 1,
+            "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+            "paneEffects": [
+              {
+                "state": "running",
+                "time": 416.703000026196,
+                "frames": [
+                  {
+                    "offset": null,
+                    "easing": "linear",
+                    "composite": "auto",
+                    "opacity": "1",
+                    "computedOffset": 0
+                  },
+                  {
+                    "offset": null,
+                    "easing": "linear",
+                    "composite": "auto",
+                    "opacity": "0",
+                    "computedOffset": 1
+                  }
+                ],
+                "timing": {
+                  "delay": 0,
+                  "direction": "normal",
+                  "duration": 550,
+                  "easing": "cubic-bezier(0.62, 0, 0.92, 0.42)",
+                  "endDelay": 0,
+                  "fill": "forwards",
+                  "iterationStart": 0,
+                  "iterations": "1"
+                }
+              },
+              {
+                "state": "running",
+                "time": 416.703000026196,
+                "frames": [
+                  {
+                    "offset": null,
+                    "easing": "linear",
+                    "composite": "auto",
+                    "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                    "computedOffset": 0
+                  },
+                  {
+                    "offset": null,
+                    "easing": "linear",
+                    "composite": "auto",
+                    "transform": "matrix3d(0.965, 0, 0, 0, 0, 0.965, 0, 0, 0, 0, 1, 0, -118.8, 15.75, 0, 1)",
+                    "computedOffset": 1
+                  }
+                ],
+                "timing": {
+                  "delay": 0,
+                  "direction": "normal",
+                  "duration": 550,
+                  "easing": "cubic-bezier(0.62, 0, 0.92, 0.42)",
+                  "endDelay": 0,
+                  "fill": "forwards",
+                  "iterationStart": 0,
+                  "iterations": "1"
+                }
+              }
+            ],
+            "artEffects": []
+          },
+          {
+            "section": "framework",
+            "pane": {
+              "x": 26.344493865966797,
+              "y": 1.349615454673767,
+              "width": 1435.6812744140625,
+              "height": 897.30078125
+            },
+            "art": {
+              "x": 619.5599975585938,
+              "y": 174.68756103515625,
+              "width": 249.250244140625,
+              "height": 249.25021362304688
+            },
+            "image": {
+              "x": 619.58251953125,
+              "y": 174.75039672851562,
+              "width": 249.2052001953125,
+              "height": 249.20516967773438
+            },
+            "imageView": {
+              "x": 619.58251953125,
+              "y": 174.75039672851562,
+              "width": 249.2052001953125,
+              "height": 249.20516967773438
+            },
+            "hero": {
+              "x": 26.344493865966797,
+              "y": 1.349615454673767,
+              "width": 1435.6812744140625,
+              "height": 897.30078125
+            },
+            "scroll": {
+              "x": 26.344493865966797,
+              "y": 1.349615454673767,
+              "width": 1435.6812744140625,
+              "height": 897.30078125
+            },
+            "scrollHeight": 2556,
+            "scrollTop": 0,
+            "opacity": 1,
+            "artOpacity": 0.997844,
+            "artTransform": "matrix(0.999506, -0.0003133, 0.0003133, 0.999506, 0.0225845, 0.141343)",
+            "paneEffects": [
+              {
+                "state": "running",
+                "time": 416.703000026196,
+                "frames": [
+                  {
+                    "offset": null,
+                    "easing": "linear",
+                    "composite": "auto",
+                    "transform": "matrix3d(0.975, 0, 0, 0, 0, 0.975, 0, 0, 0, 0, 1, 0, 219.6, 11.25, 0, 1)",
+                    "computedOffset": 0
+                  },
+                  {
+                    "offset": null,
+                    "easing": "linear",
+                    "composite": "auto",
+                    "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                    "computedOffset": 1
+                  }
+                ],
+                "timing": {
+                  "delay": 120,
+                  "direction": "normal",
+                  "duration": 950,
+                  "easing": "cubic-bezier(0.2, 0.9, 0.18, 1)",
+                  "endDelay": 0,
+                  "fill": "both",
+                  "iterationStart": 0,
+                  "iterations": "1"
+                }
+              }
+            ],
+            "artEffects": []
+          }
+        ],
+        "after": [
+          {
+            "section": "framework",
+            "pane": {
+              "x": 4.0786871910095215,
+              "y": 0.20894910395145416,
+              "width": 1439.331298828125,
+              "height": 899.5820922851562
+            },
+            "art": {
+              "x": 598.8023681640625,
+              "y": 173.9875946044922,
+              "width": 249.8839111328125,
+              "height": 249.88389587402344
+            },
+            "image": {
+              "x": 598.6030883789062,
+              "y": 173.7084503173828,
+              "width": 250.28253173828125,
+              "height": 250.2825469970703
+            },
+            "imageView": {
+              "x": 598.6030883789062,
+              "y": 173.7084503173828,
+              "width": 250.28253173828125,
+              "height": 250.2825469970703
+            },
+            "hero": {
+              "x": 4.0786871910095215,
+              "y": 0.20894910395145416,
+              "width": 1439.331298828125,
+              "height": 899.5820922851562
+            },
+            "scroll": {
+              "x": 4.0786871910095215,
+              "y": 0.20894910395145416,
+              "width": 1439.331298828125,
+              "height": 899.5820922851562
+            },
+            "scrollHeight": 2556,
+            "scrollTop": 0,
+            "opacity": 1,
+            "artOpacity": 1,
+            "artTransform": "matrix(1.00098, 0.0006198, -0.0006198, 1.00098, -0.0444598, -0.279263)",
+            "paneEffects": [
+              {
+                "state": "running",
+                "time": 0,
+                "frames": [
+                  {
+                    "offset": null,
+                    "easing": "linear",
+                    "composite": "auto",
+                    "opacity": "1",
+                    "computedOffset": 0
+                  },
+                  {
+                    "offset": null,
+                    "easing": "linear",
+                    "composite": "auto",
+                    "opacity": "0",
+                    "computedOffset": 1
+                  }
+                ],
+                "timing": {
+                  "delay": 0,
+                  "direction": "normal",
+                  "duration": 550,
+                  "easing": "cubic-bezier(0.62, 0, 0.92, 0.42)",
+                  "endDelay": 0,
+                  "fill": "forwards",
+                  "iterationStart": 0,
+                  "iterations": "1"
+                }
+              },
+              {
+                "state": "running",
+                "time": 0,
+                "frames": [
+                  {
+                    "offset": null,
+                    "easing": "linear",
+                    "composite": "auto",
+                    "transform": "matrix3d(0.999536, 0, 0, 0, 0, 0.999536, 0, 0, 0, 0, 1, 0, 4.07869, 0.208949, 0, 1)",
+                    "computedOffset": 0
+                  },
+                  {
+                    "offset": null,
+                    "easing": "linear",
+                    "composite": "auto",
+                    "transform": "matrix3d(0.965, 0, 0, 0, 0, 0.965, 0, 0, 0, 0, 1, 0, -118.8, 15.75, 0, 1)",
+                    "computedOffset": 1
+                  }
+                ],
+                "timing": {
+                  "delay": 0,
+                  "direction": "normal",
+                  "duration": 550,
+                  "easing": "cubic-bezier(0.62, 0, 0.92, 0.42)",
+                  "endDelay": 0,
+                  "fill": "forwards",
+                  "iterationStart": 0,
+                  "iterations": "1"
+                }
+              }
+            ],
+            "artEffects": []
+          },
+          {
+            "section": "team",
+            "pane": {
+              "x": 219.60000610351562,
+              "y": 11.25,
+              "width": 1404.0001220703125,
+              "height": 877.5
+            },
+            "art": {
+              "x": 799.7250366210938,
+              "y": 180.7628936767578,
+              "width": 243.74993896484375,
+              "height": 243.75001525878906
+            },
+            "image": {
+              "x": 814.2325439453125,
+              "y": 212.8203887939453,
+              "width": 214.7349853515625,
+              "height": 214.73497009277344
+            },
+            "imageView": {
+              "x": 814.2325439453125,
+              "y": 212.8203887939453,
+              "width": 214.7349853515625,
+              "height": 214.73497009277344
+            },
+            "hero": {
+              "x": 219.60000610351562,
+              "y": 11.25,
+              "width": 1404.0001220703125,
+              "height": 877.5
+            },
+            "scroll": {
+              "x": 219.60000610351562,
+              "y": 11.25,
+              "width": 1404.0001220703125,
+              "height": 877.5
+            },
+            "scrollHeight": 2556,
+            "scrollTop": 0,
+            "opacity": 0,
+            "artOpacity": 0,
+            "artTransform": "matrix(0.772409, -0.108555, 0.108555, 0.772409, 14.8795, 60.0182)",
+            "paneEffects": [
+              {
+                "state": "running",
+                "time": 0,
+                "frames": [
+                  {
+                    "offset": null,
+                    "easing": "linear",
+                    "composite": "auto",
+                    "transform": "matrix3d(0.975, 0, 0, 0, 0, 0.975, 0, 0, 0, 0, 1, 0, 219.6, 11.25, 0, 1)",
+                    "computedOffset": 0
+                  },
+                  {
+                    "offset": null,
+                    "easing": "linear",
+                    "composite": "auto",
+                    "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)",
+                    "computedOffset": 1
+                  }
+                ],
+                "timing": {
+                  "delay": 120,
+                  "direction": "normal",
+                  "duration": 950,
+                  "easing": "cubic-bezier(0.2, 0.9, 0.18, 1)",
+                  "endDelay": 0,
+                  "fill": "both",
+                  "iterationStart": 0,
+                  "iterations": "1"
+                }
+              }
+            ],
+            "artEffects": []
+          }
+        ],
+        "final": [
+          {
+            "section": "team",
+            "pane": {
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 900
+            },
+            "art": {
+              "x": 595,
+              "y": 173.859375,
+              "width": 250,
+              "height": 250
+            },
+            "image": {
+              "x": 595,
+              "y": 173.859375,
+              "width": 250,
+              "height": 250
+            },
+            "imageView": {
+              "x": 595,
+              "y": 173.859375,
+              "width": 250,
+              "height": 250
+            },
+            "hero": {
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 900
+            },
+            "scroll": {
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 900
+            },
+            "scrollHeight": 2556,
+            "scrollTop": 0,
+            "opacity": 1,
+            "artOpacity": 1,
+            "artTransform": "matrix(1, 0, 0, 1, 0, 0)",
+            "paneEffects": [],
+            "artEffects": []
+          }
+        ]
+      }
+    }
+  ]
+}

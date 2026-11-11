@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -19,14 +22,31 @@
  */
 
 /* AppearanceAuthority review: calendar and clock CSS dimensions remain explicitly unresolved. */
-[data-nse-control="calendar"] { inline-size: 141px; min-block-size: 148px; }
-[data-nse-control="calendar"] [data-nse-part="header"] { min-block-size: 39px; }
-[data-nse-control="calendar"] [data-nse-part="day"] { inline-size: 20px; block-size: 18px; }
-[data-nse-control="clock"] [data-nse-part="face"] { inline-size: 122px; block-size: 123px; border-radius: 50%; position: relative; }
-[data-nse-control="clock"] [data-nse-part="face"] { border: 1px solid CanvasText; background: Canvas; box-sizing: border-box; }
-[data-nse-control="clock"] [data-nse-part$="hand"] { position: absolute; inset-inline-start: calc(50% - 1px); inset-block-end: 50%; inline-size: 2px; transform-origin: bottom; background: CanvasText; border-radius: 2px; }
-[data-nse-control="clock"] [data-nse-part="hour-hand"] { block-size: 32px; inline-size: 4px; inset-inline-start: calc(50% - 2px); }
-[data-nse-control="clock"] [data-nse-part="minute-hand"] { block-size: 46px; }
-[data-nse-control="clock"] [data-nse-part="second-hand"] { block-size: 50px; background: Highlight; }
-[data-nse-control="clock"] [data-nse-part="centre"] { position: absolute; inline-size: 8px; block-size: 8px; inset-inline-start: calc(50% - 4px); inset-block-start: calc(50% - 4px); border-radius: 50%; background: CanvasText; }
-@media (forced-colors: active) { [data-nse-control="clock"] [data-nse-part$="hand"], [data-nse-control="clock"] [data-nse-part="centre"] { forced-color-adjust: none; background: ButtonText; } }
+[data-nse-control="date-picker"]:where([data-nse-role="calendar"]),
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"])) { inline-size: 141px; min-block-size: 148px; }
+[data-nse-control="date-picker"]:where([data-nse-role="calendar"]) [data-nse-part="header"],
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"])) [data-nse-part="header"] { min-block-size: 39px; }
+[data-nse-control="date-picker"]:where([data-nse-role="calendar"]) [data-nse-part="day"],
+:where(:scope):is([data-nse-control="date-picker"]:where([data-nse-role="calendar"])) [data-nse-part="day"] { inline-size: 20px; block-size: 18px; }
+[data-nse-part="clock"] [data-nse-part="face"],
+:where(:scope):is([data-nse-part="clock"]) [data-nse-part="face"] { inline-size: 122px; block-size: 123px; border-radius: 50%; position: relative; }
+[data-nse-part="clock"] [data-nse-part="face"],
+:where(:scope):is([data-nse-part="clock"]) [data-nse-part="face"] { border: 1px solid CanvasText; background: Canvas; box-sizing: border-box; }
+[data-nse-part="clock"] [data-nse-part$="hand"],
+:where(:scope):is([data-nse-part="clock"]) [data-nse-part$="hand"] { position: absolute; inset-inline-start: calc(50% - 1px); inset-block-end: 50%; inline-size: 2px; transform-origin: bottom; background: CanvasText; border-radius: 2px; }
+[data-nse-part="clock"] [data-nse-part="hour-hand"],
+:where(:scope):is([data-nse-part="clock"]) [data-nse-part="hour-hand"] { block-size: 32px; inline-size: 4px; inset-inline-start: calc(50% - 2px); }
+[data-nse-part="clock"] [data-nse-part="minute-hand"],
+:where(:scope):is([data-nse-part="clock"]) [data-nse-part="minute-hand"] { block-size: 46px; }
+[data-nse-part="clock"] [data-nse-part="second-hand"],
+:where(:scope):is([data-nse-part="clock"]) [data-nse-part="second-hand"] { block-size: 50px; background: Highlight; }
+[data-nse-part="clock"] [data-nse-part="centre"],
+:where(:scope):is([data-nse-part="clock"]) [data-nse-part="centre"] { position: absolute; inline-size: 8px; block-size: 8px; inset-inline-start: calc(50% - 4px); inset-block-start: calc(50% - 4px); border-radius: 50%; background: CanvasText; }
+@media (forced-colors: active) { [data-nse-part="clock"] [data-nse-part$="hand"],
+:where(:scope):is([data-nse-part="clock"]) [data-nse-part$="hand"],
+[data-nse-part="clock"] [data-nse-part="centre"],
+:where(:scope):is([data-nse-part="clock"]) [data-nse-part="centre"] { forced-color-adjust: none; background: ButtonText; } }
+
+}
+
+}

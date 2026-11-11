@@ -59,7 +59,9 @@ function staticServer(directory) {
 
 const probeSource = `import { useEffect } from "react";
 import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
-import { createSynWare, useSynWare } from "@syndromatic/syncloudos/sdk";
+import { useSCOS } from "@syndromatic/syncloudos/sdk";
+import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
+import type { NSEData } from "@syndromatic/syncloudos/foundation";
 import { AUFXAudioChunkStream, AUFXAudioFormat, AUFXAudioPCMBuffer, AUFXClockObservation } from "@syndromatic/syncloudos/fx/audio";
 import { VFXContainerReader } from "@syndromatic/syncloudos/fx/video";
 import { VFXWebMContainerBackend } from "@syndromatic/syncloudos/fx/video/webm";
@@ -68,14 +70,14 @@ import { defineWebspring, type WebspringViewProps } from "@syndromatic/syncloudo
 declare global { interface Window { fxAudioCodec: any; } }
 window.fxAudioCodec = { ready: false };
 function Probe() {
-  const app = useSynWare();
+  const app = useSCOS();
   useEffect(() => { void (async () => {
     const opened = await app.audio.openFile({ source: "/tone.wav", processingFormat: new AUFXAudioFormat(48_000, 1) });
     let imported;
     try {
       opened.framePosition = 21;
       const exported = await app.audio.exportFile(opened, undefined, { format: "opus-webm", bitrate: 64_000 });
-      const bytes = new Uint8Array(await exported.data.arrayBuffer());
+      const bytes = exported.data.bytes;
       const parsed = await new VFXContainerReader({ backend: new VFXWebMContainerBackend(), maximumChunks: 128 }).read(bytes);
       const streamBuffer = new AUFXAudioPCMBuffer(new AUFXAudioFormat(48_000, 1), 960);
       streamBuffer.frameLength = 960;
@@ -87,13 +89,13 @@ function Probe() {
         finally { streamReleased++; }
       });
       const fragments: Uint8Array[] = [];
-      const sink = new WritableStream<Uint8Array>({ write(fragment) { fragments.push(fragment.slice()); } });
+      const sink = new WritableStream<NSEData>({ write(fragment) { fragments.push(new Uint8Array(fragment.bytes)); } });
       const streamed = await app.audio.exportStream({ source, sink, format: "opus-webm" });
       const streamBytes = new Uint8Array(streamed.byteLength);
       let offset = 0;
       for (const fragment of fragments) { streamBytes.set(fragment, offset); offset += fragment.byteLength; }
       const parsedStream = await new VFXContainerReader({ backend: new VFXWebMContainerBackend(), maximumChunks: 128 }).read(streamBytes);
-      const stored = await fetch("/roundtrip.webm", { method: "PUT", body: exported.data });
+      const stored = await fetch("/roundtrip.webm", { method: "PUT", body: exported.data.blob(exported.mimeType) });
       if (!stored.ok) throw new Error("Installed consumer could not store its roundtrip fixture.");
       imported = await app.audio.openFile({ source: "/roundtrip.webm" });
       const pcm = imported.readFrames(imported.length);
@@ -113,12 +115,12 @@ function Probe() {
 function Website({ actions, applicationOutlet }: WebspringViewProps) {
   return <main><button id="open" onClick={() => { void actions.openApp("org.example.audio-codec"); }}>Open audio codec probe</button>{applicationOutlet}</main>;
 }
-const shell = defineWebspring({ manifest: { schemaVersion: 1, id: "org.example.audio-codec-shell", version: "1.0.0", title: "Audio codec shell",
+const shell = defineWebspring({ manifest: { schemaVersion: 1, bundleIdentifier: "org.example.audio-codec-shell", version: "1.0.0", displayName: "Audio codec shell",
   webspringShell: { views: [{ id: "website", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
     defaults: { desktop: "website", tablet: "website", mobile: "website" }, homeRoute: "/", branding: { name: { key: "brand", fallback: "Audio codec" } } } },
   components: { website: Website } });
-const app = createSynWare({ manifest: { schemaVersion: 1, id: "org.example.audio-codec", version: "1.0.0", title: "Audio codec probe",
-  permissions: ["audio.play"], runtime: { policy: { public: true } }, presentations: ["desktop", "tablet", "mobile"],
+const app = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "org.example.audio-codec", version: "1.0.0", displayName: "Audio codec probe",
+  entitlements: ["audio.play"], runtime: { policy: { public: true } }, presentations: ["desktop", "tablet", "mobile"],
   routes: [{ path: "/audio-codec", primary: true }], webspring: { visible: true, order: 1 } }, root: Probe });
 mountSynCloudOS({ element: document.getElementById("root")!, bundles: [app], shell, authentication: "disabled" })
   .then(host => { window.fxAudioCodec.dispose = () => host.dispose("installed audio codec complete"); })

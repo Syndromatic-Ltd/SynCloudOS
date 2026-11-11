@@ -1,0 +1,150 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/runtime.test.ts tests/runtime/app-share-client.test.ts tests/runtime/synapp-sdk-testing.test.tsx tests/runtime/preference-panes.test.tsx --maxWorkers=1 --no-file-parallelism --reporter=default --reporter=json --outputFile.json=docs/superpowers/evidence/2026-11-07-foundation/authorization-fixture-migration-green.json
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ✓ tests/runtime/preference-panes.test.tsx (21 tests) 749ms
+ ✓ tests/runtime/synapp-sdk-testing.test.tsx (10 tests) 551ms
+ ✓ tests/runtime/runtime.test.ts (14 tests) 212ms
+ ❯ tests/runtime/app-share-client.test.ts (35 tests | 5 failed) 110ms
+     ✓ shares the same frozen prepared payload accepted by both receiver-bound probes before yielding 5ms
+     ✓ does not let a title mask an unsupported files member or fall back to text 1ms
+     ✓ requires the exact combined payload to be supported even after the files-only probe succeeds 1ms
+     ✓ reports prepared files unsupported without canShare while preserving ordinary text sharing 1ms
+     ✓ rejects empty, sparse, lazy and forged prepared files without evaluating accessors 1ms
+     ✓ fences owner or caller revocation during the native capability probe 1ms
+     ✓ never substitutes a fallback after prepared-file AbortError 1ms
+     ✓ never substitutes a fallback after prepared-file NotAllowedError 1ms
+     ✓ omits undefined optional fields like a native share dictionary 1ms
+     ✓ returns a typed policy denial when the host admission gate rejects before native access 1ms
+     ✓ resolves a relative HTTP share URL against the owned browser location 1ms
+     ✓ does not turn an unrecognized policy token into a native-share denial 0ms
+     ✓ respects an actual recognized Permissions Policy denial 1ms
+     ✓ preserves the native share and canShare receivers and invokes before yielding 0ms
+     ✓ reports inactive activation separately from API availability 0ms
+     ✓ lets the browser decide when activation is not observable 0ms
+     ✓ does not audit or prompt during status inspection 0ms
+     ✓ rejects malformed share data without invoking accessors or native methods 0ms
+     ✓ reports request-specific unsupported data without a share call 0ms
+     ✓ classifies native AbortError as cancelled 0ms
+     ✓ classifies native NotAllowedError as denied 0ms
+     ✓ classifies native TypeError as invalid 0ms
+     ✓ classifies native NotSupportedError as unsupported 0ms
+     ✓ classifies native OperationError as failed 0ms
+     ✓ distinguishes owner abort from user cancellation and ignores late completion 0ms
+     ✓ distinguishes caller abort from user cancellation and ignores late completion 0ms
+     ✓ does not start overlapping native share operations 0ms
+     ✓ keeps the native busy lease after caller abort until the native sheet settles 1ms
+     ✓ rejects sharing without its manifest capability before accessing the native API 51ms
+     × reports a completed native share as shared 8ms
+     × reports only a genuine AbortError cancellation as cancelled 7ms
+     × reports unavailable native sharing without attempting a native call 6ms
+     × rejects an unexpected native share failure for the mounted app to present 8ms
+     × distinguishes unsupported sharing from cancellation in the explicit API 6ms
+     ✓ does not treat missing declaration as native permission or unsupported hardware 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/app-share-client.test.ts > mounted AppSDK share client > reports a completed native share as shared
+AssertionError: promise rejected "DOMException{ stack: 'SecurityError:…' }" instead of resolving
+ ❯ tests/runtime/app-share-client.test.ts:223:38
+    221|     const share = createFixture(nativeShare);
+    222|
+    223|     await expect(share.share(request)).resolves.toBe("shared");
+       |                                      ^
+    224|     expect(nativeShare).toHaveBeenCalledWith(request);
+    225|   });
+
+Caused by: SecurityError: Sharing was not admitted.
+ ❯ Object.share src/SynCloudOS/AppSDK/mountedShareClient.ts:165:39
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 18, INDEX_SIZE_ERR: 1, DOMSTRING_SIZE_ERR: 2, HIERARCHY_REQUEST_ERR: 3, WRONG_DOCUMENT_ERR: 4, INVALID_CHARACTER_ERR: 5, NO_DATA_ALLOWED_ERR: 6, NO_MODIFICATION_ALLOWED_ERR: 7, NOT_FOUND_ERR: 8, NOT_SUPPORTED_ERR: 9, INUSE_ATTRIBUTE_ERR: 10, INVALID_STATE_ERR: 11, SYNTAX_ERR: 12, INVALID_MODIFICATION_ERR: 13, NAMESPACE_ERR: 14, INVALID_ACCESS_ERR: 15, VALIDATION_ERR: 16, TYPE_MISMATCH_ERR: 17, SECURITY_ERR: 18, NETWORK_ERR: 19, ABORT_ERR: 20, URL_MISMATCH_ERR: 21, QUOTA_EXCEEDED_ERR: 22, TIMEOUT_ERR: 23, INVALID_NODE_TYPE_ERR: 24, DATA_CLONE_ERR: 25 }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/runtime/app-share-client.test.ts > mounted AppSDK share client > reports only a genuine AbortError cancellation as cancelled
+AssertionError: promise rejected "DOMException{ stack: 'SecurityError:…' }" instead of resolving
+ ❯ tests/runtime/app-share-client.test.ts:232:38
+    230|     }));
+    231|
+    232|     await expect(share.share(request)).resolves.toBe("cancelled");
+       |                                      ^
+    233|   });
+    234|
+
+Caused by: SecurityError: Sharing was not admitted.
+ ❯ Object.share src/SynCloudOS/AppSDK/mountedShareClient.ts:165:39
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 18, INDEX_SIZE_ERR: 1, DOMSTRING_SIZE_ERR: 2, HIERARCHY_REQUEST_ERR: 3, WRONG_DOCUMENT_ERR: 4, INVALID_CHARACTER_ERR: 5, NO_DATA_ALLOWED_ERR: 6, NO_MODIFICATION_ALLOWED_ERR: 7, NOT_FOUND_ERR: 8, NOT_SUPPORTED_ERR: 9, INUSE_ATTRIBUTE_ERR: 10, INVALID_STATE_ERR: 11, SYNTAX_ERR: 12, INVALID_MODIFICATION_ERR: 13, NAMESPACE_ERR: 14, INVALID_ACCESS_ERR: 15, VALIDATION_ERR: 16, TYPE_MISMATCH_ERR: 17, SECURITY_ERR: 18, NETWORK_ERR: 19, ABORT_ERR: 20, URL_MISMATCH_ERR: 21, QUOTA_EXCEEDED_ERR: 22, TIMEOUT_ERR: 23, INVALID_NODE_TYPE_ERR: 24, DATA_CLONE_ERR: 25 }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/runtime/app-share-client.test.ts > mounted AppSDK share client > reports unavailable native sharing without attempting a native call
+AssertionError: promise rejected "DOMException{ stack: 'SecurityError:…' }" instead of resolving
+ ❯ tests/runtime/app-share-client.test.ts:239:38
+    237|
+    238|     expect(share.available()).toBe(false);
+    239|     await expect(share.share(request)).resolves.toBe("cancelled");
+       |                                      ^
+    240|   });
+    241|
+
+Caused by: SecurityError: Sharing was not admitted.
+ ❯ Object.share src/SynCloudOS/AppSDK/mountedShareClient.ts:165:39
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 18, INDEX_SIZE_ERR: 1, DOMSTRING_SIZE_ERR: 2, HIERARCHY_REQUEST_ERR: 3, WRONG_DOCUMENT_ERR: 4, INVALID_CHARACTER_ERR: 5, NO_DATA_ALLOWED_ERR: 6, NO_MODIFICATION_ALLOWED_ERR: 7, NOT_FOUND_ERR: 8, NOT_SUPPORTED_ERR: 9, INUSE_ATTRIBUTE_ERR: 10, INVALID_STATE_ERR: 11, SYNTAX_ERR: 12, INVALID_MODIFICATION_ERR: 13, NAMESPACE_ERR: 14, INVALID_ACCESS_ERR: 15, VALIDATION_ERR: 16, TYPE_MISMATCH_ERR: 17, SECURITY_ERR: 18, NETWORK_ERR: 19, ABORT_ERR: 20, URL_MISMATCH_ERR: 21, QUOTA_EXCEEDED_ERR: 22, TIMEOUT_ERR: 23, INVALID_NODE_TYPE_ERR: 24, DATA_CLONE_ERR: 25 }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/runtime/app-share-client.test.ts > mounted AppSDK share client > rejects an unexpected native share failure for the mounted app to present
+AssertionError: expected DOMException{ stack: 'SecurityError:…' } to match object { name: 'NotAllowedError' }
+
+- Expected
++ Received
+
+- {
+-   "name": "NotAllowedError",
++ SecurityError {
++   "message": "Sharing was not admitted.",
+  }
+
+ ❯ tests/runtime/app-share-client.test.ts:248:38
+    246|     }));
+    247|
+    248|     await expect(share.share(request)).rejects.toMatchObject({ name: "…
+       |                                      ^
+    249|   });
+    250|   it("distinguishes unsupported sharing from cancellation in the expli…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/runtime/app-share-client.test.ts > mounted AppSDK share client > distinguishes unsupported sharing from cancellation in the explicit API
+AssertionError: expected { provider: 'none', …(5) } to match object { availability: 'unsupported', …(1) }
+(4 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "availability": "unsupported",
++   "availability": "blocked",
+    "permission": "unknown",
+  }
+
+ ❯ tests/runtime/app-share-client.test.ts:252:31
+    250|   it("distinguishes unsupported sharing from cancellation in the expli…
+    251|     const share=createFixture();
+    252|     expect(share.getStatus()).toMatchObject({availability:'unsupported…
+       |                               ^
+    253|     await expect(share.perform(request)).resolves.toEqual({kind:'unsup…
+    254|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  5 failed | 75 passed (80)
+   Start at  21:56:15
+   Duration  34.07s (transform 20.58s, setup 80ms, import 28.91s, tests 1.62s, environment 2.71s)
+
+JSON report written to C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/docs/superpowers/evidence/2026-11-07-foundation/authorization-fixture-migration-green.json

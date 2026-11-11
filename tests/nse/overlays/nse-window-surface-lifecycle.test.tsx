@@ -23,7 +23,8 @@ import React, { useMemo, useState } from "react";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEFilePanelView } from "../../../src/NSE/FilePanels/NSEFilePanelView";
-import { NSEActionSheet, NSEOverlayProvider, NSEPopover, useNSEWindowSurfaceLifecycle, type NSEWindowSurfaceBridge } from "../../../src/NSE/Overlays";
+import { NSEPopover } from "../../../src/NSE/Overlays/NSEPopover";
+import { NSEActionSheet, NSEOverlayProvider, useNSEWindowSurfaceLifecycle, type NSEWindowSurfaceBridge } from "../../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 
 afterEach(() => document.body.replaceChildren());

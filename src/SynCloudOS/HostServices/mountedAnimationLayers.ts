@@ -20,23 +20,23 @@
 
 import type { AnimationLayerHost, AnimationLayerKinds } from "./AppSDKHostServiceTypes";
 import { createMountedResourceScope, type MountedResourceAccounting } from "./mountedResourceScope";
-import type { AFXRendererOptions } from "../../FX/AnimationFX/AFXRenderer";
 export function createMountedAnimationLayers(host: AnimationLayerHost | undefined, owner: AbortSignal, assertLive: () => void,
   accounting?: MountedResourceAccounting) {
   let rendererSerial = 0;
   const scope = createMountedResourceScope(owner, 64);
-  const bind = <K extends keyof AnimationLayerKinds>(kind: K, target: object, signal?: AbortSignal): AnimationLayerKinds[K] => {
+  const bind = <K extends keyof AnimationLayerKinds>(kind: K, target: object, signal?: AbortSignal,
+    options?: Parameters<AnimationLayerHost["bind"]>[3]): AnimationLayerKinds[K] => {
     assertLive();
     if (!host) throw new DOMException("Animation layer rendering is unavailable.", "NotSupportedError");
     return scope.acquire(signal, (lease, release) => {
-      const layer = host.bind(kind, target, lease);
+      const layer = host.bind(kind, target, lease, options);
       const dispose = layer.dispose.bind(layer);
       Object.defineProperty(layer, "dispose", { configurable: true, value: () => { try { dispose(); } finally { release(); } } });
       return layer;
     }, (layer) => layer.dispose());
   };
   return Object.freeze({
-    createRenderer: (target: object, options: Pick<AFXRendererOptions, "maximumQuads" | "onRenderError"> = {}, signal?: AbortSignal) => {
+    createRenderer: (target: object, options: Parameters<AnimationLayerHost["createRenderer"]>[1] = {}, signal?: AbortSignal) => {
       assertLive();
       if (!host) throw new DOMException("Animation layer rendering is unavailable.", "NotSupportedError");
       return scope.acquire(signal, (lease, release) => {
@@ -67,7 +67,7 @@ export function createMountedAnimationLayers(host: AnimationLayerHost | undefine
         return renderer;
       }, (renderer) => renderer.dispose());
     },
-    bindLayer: (target: object, signal?: AbortSignal) => bind("layer", target, signal),
+    bindLayer: (target: object, signal?: AbortSignal, options?: Parameters<AnimationLayerHost["bind"]>[3]) => bind("layer", target, signal, options),
     bindShapeLayer: (target: object, signal?: AbortSignal) => bind("shape", target, signal),
     bindGradientLayer: (target: object, signal?: AbortSignal) => bind("gradient", target, signal),
     bindTextLayer: (target: object, signal?: AbortSignal) => bind("text", target, signal),

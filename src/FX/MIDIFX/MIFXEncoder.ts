@@ -18,7 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { MIFXMessage } from "./MIFXMessage";
+import { NSEData } from "../../Foundation/NSEData";
+import type { MIFXMessageInput } from "./MIFXMessage";
 
 function integerInRange(value: unknown, minimum: number, maximum: number, label: string): number {
   if (!Number.isInteger(value) || (value as number) < minimum || (value as number) > maximum) {
@@ -44,7 +45,11 @@ function encodeChannel(status: number, channelValue: unknown, first: unknown, se
 }
 
 export class MIFXEncoder {
-  static encode(message: MIFXMessage): Uint8Array {
+  static encode(message: MIFXMessageInput): NSEData {
+    return NSEData.from(encode(message));
+  }
+}
+function encode(message: MIFXMessageInput): Uint8Array {
     if (!message || typeof message !== "object" || typeof (message as { kind?: unknown }).kind !== "string") {
       throw new TypeError("MIDI message must be a tagged message value.");
     }
@@ -82,13 +87,13 @@ export class MIFXEncoder {
       case "active-sensing": return new Uint8Array([0xfe]);
       case "reset": return new Uint8Array([0xff]);
       case "sysex": {
-        if (!(message.data instanceof Uint8Array)) throw new TypeError("MIDI SysEx data must be a Uint8Array.");
-        for (const byte of message.data) {
+        const data = NSEData.from(message.data).bytes;
+        for (const byte of data) {
           if (byte > 0x7f) throw new RangeError("MIDI SysEx data bytes must be 7-bit values.");
         }
-        const encoded = new Uint8Array(message.data.byteLength + 2);
+        const encoded = new Uint8Array(data.byteLength + 2);
         encoded[0] = 0xf0;
-        encoded.set(message.data, 1);
+        encoded.set(data, 1);
         encoded[encoded.length - 1] = 0xf7;
         return encoded;
       }
@@ -96,4 +101,3 @@ export class MIFXEncoder {
         throw new TypeError(`Unsupported MIDI message kind: ${String((message as { kind?: unknown }).kind)}.`);
     }
   }
-}

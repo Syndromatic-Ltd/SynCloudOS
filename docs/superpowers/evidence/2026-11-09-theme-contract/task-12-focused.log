@@ -1,0 +1,34 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/theme-bundles.test.ts tests/runtime/nse-theme-definition.test.ts tests/runtime/nse-appearance-contract.test.tsx tests/runtime/nse-controls-interactions.test.tsx tests/runtime/nse-tab-bar.test.tsx tests/nse/appearance/metal-thumb-appearance.test.tsx tests/nse/data-views/nse-table-view.test.tsx tests/nse/menus/nse-menu-controller.test.tsx tests/runtime/nse-window-appearance-contract.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-tab-bar.test.tsx (24 tests | 1 failed) 708ms
+     × keeps canonical Atmo density-independent at DPR2 without adding a compact chrome diagnostic 10ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-tab-bar.test.tsx > NSETabBar > keeps canonical Atmo density-independent at DPR2 without adding a compact chrome diagnostic
+AssertionError: expected null to be 'resolved' // Object.is equality
+
+- Expected:
+"resolved"
+
++ Received:
+null
+
+ ❯ tests/runtime/nse-tab-bar.test.tsx:569:66
+    567|         .closest<HTMLElement>("[data-nse-tab-bar='true']");
+    568|       expect(tabBar).not.toBeNull();
+    569|       expect(tabBar?.getAttribute("data-nse-tab-chrome-status")).toBe(…
+       |                                                                  ^
+    570|
+    571|       expect(tabBar?.querySelector("[data-nse-tab-authority-diagnostic…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 8 passed (9)
+      Tests  1 failed | 136 passed (137)
+   Start at  22:29:17
+   Duration  10.36s (transform 5.50s, setup 124ms, import 9.45s, tests 2.96s, environment 5.92s)

@@ -1,0 +1,38 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-page-controller.test.tsx -t normal-motion button
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-page-controller.test.tsx (9 tests | 1 failed | 8 skipped) 265ms
+   × lays the new print flat after normal-motion button turns so every click navigates 264ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-page-controller.test.tsx > lays the new print flat after normal-motion button turns so every click navigates
+AssertionError: expected [ '0.000', '1.000' ] to deeply equal [ '0.000', '0.000' ]
+
+- Expected
++ Received
+
+  [
+    "0.000",
+-   "0.000",
++   "1.000",
+  ]
+
+ ❯ tests/runtime/nse-page-controller.test.tsx:208:103
+    206|       await act(async () => { vi.runAllTimers(); });
+    207|       expect(liveBook.selectedIndex).toBe(selectedIndex);
+    208|       expect([...view.querySelectorAll<HTMLElement>(".nse-page")].map(…
+       |                                                                                                       ^
+    209|     }
+    210|   } finally { vi.useRealTimers(); }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 8 skipped (9)
+   Start at  08:08:06
+   Duration  10.14s (transform 6.64s, setup 33ms, import 8.56s, tests 265ms, environment 1.13s)
+

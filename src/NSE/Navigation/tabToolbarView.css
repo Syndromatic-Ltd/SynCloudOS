@@ -1,0 +1,20 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
+/* A toolbar-style tab controller contributes selectable items to the window's existing toolbar. */
+.nse-window-toolbar[data-has-tab-items="true"],
+:where(:scope):is(.nse-window-toolbar[data-has-tab-items="true"]) { display: flex; min-width: 0; }
+.nse-window-toolbar[data-has-tab-items="true"]>.nse-toolbar,
+:where(:scope):is(.nse-window-toolbar[data-has-tab-items="true"])>.nse-toolbar { flex: 1 1 auto; min-width: 0; }
+.nse-window-toolbar-tab-items,
+:where(:scope):is(.nse-window-toolbar-tab-items) { display: flex; flex: 0 1 auto; max-width: 100%; min-width: 0; }
+.nse-tab-toolbar-items,
+:where(:scope):is(.nse-tab-toolbar-items) { flex: 1 1 auto; max-width: 100%; min-width: 0; overflow-x: auto; }
+.nse-tab-toolbar-items>.nse-toolbar-item,
+:where(:scope):is(.nse-tab-toolbar-items)>.nse-toolbar-item { flex: 0 0 auto; min-width: 64px; }
+.nse-tab-toolbar-items .nse-toolbar-item-icon>img,
+:where(:scope):is(.nse-tab-toolbar-items) .nse-toolbar-item-icon>img { width: 100%; height: 100%; object-fit: contain; }
+
+}
+
+}

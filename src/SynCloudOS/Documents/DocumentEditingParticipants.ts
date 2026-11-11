@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import type { DocumentActivityObservations } from "./DocumentActivityObservations";
 import { DocumentAbortError, DocumentUnavailableError } from "./DocumentErrors";
 import { immutableDocumentValue } from "./documentTypes";
 import type { DocumentEditOptions, DocumentEditResult } from "./documentEditTypes";
@@ -82,6 +83,7 @@ export class DocumentEditingParticipants<TModel> {
 
   constructor(private readonly owner: {
     readonly documentId: string;
+    readonly activity?: DocumentActivityObservations;
     readonly lifecycleSignal: () => AbortSignal;
     readonly assertAvailable: () => void;
     transact(transform: (current: Readonly<TModel>) => TModel, options: DocumentEditOptions<TModel>, admission?: DocumentEditAdmission): DocumentEditResult;
@@ -104,12 +106,14 @@ export class DocumentEditingParticipants<TModel> {
     if (!participantId?.trim() || typeof participant.settle !== "function") throw new TypeError("Editing participants require an ID and settle callback.");
     if (this.#members.has(participantId)) throw new TypeError(`Editing participant "${participantId}" is already registered.`);
     const controller = new AbortController();
+    let releaseMembership = () => {};
     const dispose = () => {
       if (controller.signal.aborted) return;
       controller.abort("editing-participant-revoked");
       options.signal?.removeEventListener("abort", dispose);
       this.#members.delete(participantId);
       this.#membership += 1;
+      releaseMembership();
     };
     const member: Member<TModel> = { admission, participant: Object.freeze({
       id: participantId, settle: participant.settle.bind(participant),
@@ -118,6 +122,10 @@ export class DocumentEditingParticipants<TModel> {
     this.#members.set(participantId, member);
     this.#membership += 1;
     options.signal?.addEventListener("abort", dispose, { once: true });
+    // Publish after membership and lifetime teardown are established. An
+    // observer may revoke this very registration before begin returns.
+    releaseMembership = this.owner.activity?.begin("editingParticipants") ?? (() => {});
+    if (controller.signal.aborted) releaseMembership();
     return Object.freeze({
       get isLive() { return !controller.signal.aborted && (!options.isCurrent || options.isCurrent()); }, dispose,
     });
@@ -167,6 +175,10 @@ export class DocumentEditingParticipants<TModel> {
     const flight: Flight = { mode, reason, signal, membership, promise };
     this.#flights.add(flight);
     this.#tail = execution.catch(() => undefined);
+    // Count queued execution, not the early caller-facing cancellation receipt.
+    // Establish ordering/deduplication before notifying a reentrant observer.
+    const releaseExecution = this.owner.activity?.begin("editingSettlements");
+    void execution.then(() => releaseExecution?.(), () => releaseExecution?.());
     void promise.then(() => this.#flights.delete(flight), () => this.#flights.delete(flight));
     return promise;
   }
@@ -206,7 +218,14 @@ export class DocumentEditingParticipants<TModel> {
         try {
           const callback = mode === "discard" ? member.participant.discard : member.participant.settle;
           if (!callback) return refuse(member.participant.id, "discard-unavailable");
-          const result: DocumentEditingParticipantResult = await awaitParticipant(Promise.resolve(callback.call(member.participant, context)), signal);
+          const invoke = () => {
+            // Observation can synchronously revoke admission. Never enter a
+            // callback that lost its existing document/member generation.
+            if (check(member)) throw new DocumentAbortError("Editing callback admission was revoked.");
+            return callback.call(member.participant, context);
+          };
+          const actual = this.owner.activity ? this.owner.activity.track("editingCallbacks", invoke) : invoke();
+          const result: DocumentEditingParticipantResult = await awaitParticipant(Promise.resolve(actual), signal);
           const changed = check(member); if (changed) return changed;
           if (result?.status === "refused") return refuse(member.participant.id, result.reason, result.issues);
           if (result?.status !== "settled") return refuse(member.participant.id, "invalid-participant-result");

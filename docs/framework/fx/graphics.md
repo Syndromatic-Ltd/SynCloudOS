@@ -1,5 +1,7 @@
 # GraphicsFX
 
+Encoded byte inputs accept `NSEDataConvertible` from `@syndromatic/syncloudos/foundation`; delivered encoded bytes are immutable `NSEData`. Use `.bytes` at a native typed-buffer boundary and `.blob(mimeType)` for a browser Blob. Numeric pixel, index and PCM planes retain their typed arrays; writable copy destinations remain mutable.
+
 GraphicsFX (`GFX`) is the web-native analogue of Quartz 2D. It supplies the vocabulary that all drawing code shares: points and rectangles, affine transforms, colours in named colour spaces, vector paths, gradients, shadows and images. On top of that vocabulary it provides drawing contexts that turn calls into pixels (`GFXBitmapContext`), into a replayable display list and SVG (`GFXContext`), or into a PDF document (`GFXPDFContext`), and it reads PDF files back (`GFXPDFDocument`).
 
 Every other FX framework builds on these types. An [AnimationFX](animation.md) shape layer takes a `GFXPath` and a `GFXColour`. An [ImageFX](image.md) graph starts from a `GFXImage` and renders back to one. [TextFX](text.md) turns glyphs into `GFXPath` outlines. [VideoFX](video.md) converts frames to `GFXImage`. Learning GraphicsFX first makes the rest of the FX frameworks easier to read.
@@ -22,7 +24,7 @@ import { GFXColour, GFXPath } from "@syndromatic/syncloudos/fx/graphics";
 | --- | --- |
 | Prefix | `GFX` |
 | Entry | `@syndromatic/syncloudos/fx/graphics` |
-| Hook | None. GraphicsFX is a library. The session supplies the identifier issuer that `GFXContext` needs, through `useSynWareImages().createGraphicsIdentifierIssuer()`. |
+| Hook | None. GraphicsFX is a library. The session supplies the identifier issuer that `GFXContext` needs, through `useImages().createGraphicsIdentifierIssuer()`. |
 | Permissions | None |
 | Analogue | Quartz 2D (`CGPath`, `CGColor`, `CGColorSpace`, `CGImage`, `CGGradient`, `CGShading`, `CGPattern`, `CGContext`, `CGLayer`, `CGPDFDocument`) |
 
@@ -199,7 +201,7 @@ new GFXColourTransform({ source, destination, intent?, blackPointCompensation?, 
 An ICC colour profile, for images and colours that arrive in a camera, scanner or display profile.
 
 ```text
-new GFXColourProfile(data: Uint8Array)
+new GFXColourProfile(data: NSEDataConvertible)
 ```
 
 The constructor validates the profile and copies the bytes. It supports ICC version 2 and 4 RGB profiles of the matrix and tone curve kind (and LUT profiles with paired 8-bit A2B0 and B2A0 tables), with an XYZ connection space at D50. It rejects everything else, including CMYK profiles, other transforms and profiles larger than 4 MiB, with `RangeError` or `TypeError`, rather than guess. Conversions use the relative colorimetric intent and clip at the gamut edge.
@@ -209,15 +211,16 @@ The constructor validates the profile and copies the bytes. It supports ICC vers
 | `version` | `2` or `4`. |
 | `preferredIntent` | The profile's declared rendering intent, from 0 to 3. |
 | `tags` | The tag signatures the profile contains. |
-| `copyData()` | A copy of the profile bytes. |
+| `copyData()` | An immutable `NSEData` copy of the encoded ICC profile. |
 | `toSRGB(components)` | Converts profile RGBA components (unit values) to sRGB. |
 | `fromSRGB(components)` | Converts sRGB components into the profile's space. |
 | `decodeImage(descriptor)` | Builds a `GFXImage` in sRGB from image data that is in this profile. The descriptor is a `GFXImageDescriptor` without `colourSpace`. Limited to four million pixels, RGB channels only. |
 
 ```ts
+import type { NSEDataConvertible } from "@syndromatic/syncloudos/foundation";
 import { GFXColourProfile, GFXColourTransform } from "@syndromatic/syncloudos/fx/graphics";
 
-export function toPrinterSpace(profileBytes: Uint8Array) {
+export function toPrinterSpace(profileBytes: NSEDataConvertible) {
   const printer = new GFXColourProfile(profileBytes);
   const transform = new GFXColourTransform({ source: "srgb", destination: printer, gamutMapping: "clip" });
   return transform.apply({ r: 0.9, g: 0.2, b: 0.1, a: 1 });

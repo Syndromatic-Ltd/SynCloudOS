@@ -35,11 +35,11 @@ function createTestRuntime(options: Parameters<typeof createRuntime>[0] = {}) {
 }
 
 function galleryPasteboards(runtime: ReturnType<typeof createRuntime>) {
-  const responderId = "application:gallery";
+  const responderId = "application:com.example.gallery";
   if (!runtime.responders.get(responderId)) {
     runtime.responders.register({ id: responderId, kind: "application", parentId: "workspace", scopeId: responderId });
   }
-  return runtime.transfers.mountApp(runtime.apps.getApp("gallery")!, { responderId }).scope.pasteboards;
+  return runtime.transfers.mountApp(runtime.apps.getApp("com.example.gallery")!, { responderId }).scope.pasteboards;
 }
 
 describe("runtime pasteboards", () => {
@@ -305,7 +305,7 @@ describe("runtime pasteboards", () => {
       .rejects.toMatchObject({ name: "InvalidPasteboardRepresentationError" });
     await expect(runtime.pasteboards.find.write([{
       type: "application/octet-stream",
-      value: new Blob([new Uint8Array(16 * 1024 * 1024 + 1)]),
+      value: new Uint8Array(16 * 1024 * 1024 + 1),
     }])).rejects.toMatchObject({ name: "InvalidPasteboardRepresentationError" });
     expect(getter).not.toHaveBeenCalled();
     expect(poisonedIterator).not.toHaveBeenCalled();
@@ -338,7 +338,7 @@ describe("runtime pasteboards", () => {
     const runtime = createTestRuntime({
       id: "runtime:pasteboard:partial-snapshot",
       environment: environmentWithClipboard({ read: async () => [], write }),
-      initialBundles: [createTestBundle({ id: "gallery", route: "/gallery" })],
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.gallery", route: "/gallery" })],
     });
     const system = galleryPasteboards(runtime).system;
 
@@ -364,7 +364,7 @@ describe("runtime pasteboards", () => {
     const runtime = createTestRuntime({
       id: `runtime:pasteboard:partial-atomic:${_label}`,
       environment: environmentWithClipboard({ read: async () => [], write }),
-      initialBundles: [createTestBundle({ id: "gallery", route: "/gallery" })],
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.gallery", route: "/gallery" })],
     });
     const system = galleryPasteboards(runtime).system;
     await system.write([{ type: "text/plain", value: "before" }]);
@@ -383,16 +383,16 @@ describe("runtime pasteboards", () => {
   });
 
 
-  it("routes named and system pasteboard access through PolicyKit allow/deny", async () => {
+  it("routes named and system pasteboard access through ConfigurationProfiles allow/deny", async () => {
     const write = vi.fn(async () => undefined);
     const read = vi.fn(async () => [{ type: "text/plain", value: "clipboard" }]);
     const runtime = createTestRuntime({
-      id: "runtime:pasteboard:policykit",
+      id: "runtime:pasteboard:configuration-profiles",
       environment: environmentWithClipboard({ read, write }),
-      initialBundles: [createTestBundle({ id: "gallery", route: "/gallery" })],
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.gallery", route: "/gallery" })],
     });
     const pasteboards = galleryPasteboards(runtime);
-    const authorise = vi.spyOn(runtime.policy, "authorise");
+    const authorise = vi.spyOn(runtime.configurationProfiles, "authorise");
 
     await pasteboards.find.write([{ type: "text/plain", value: "local" }]);
     await expect(pasteboards.find.readFirst(["text/plain"]))
@@ -405,20 +405,20 @@ describe("runtime pasteboards", () => {
     expect(authorise.mock.calls.some(([request]) =>
       request.action === "pasteboard.write"
       && request.requiredCapabilities?.includes("transfer.same-application")
-      && request.context?.appId === "gallery"
+      && request.context?.appId === "com.example.gallery"
       && request.context?.pasteboard === "find",
     )).toBe(true);
     expect(authorise.mock.calls.some(([request]) =>
       request.action === "pasteboard.read"
       && request.requiredCapabilities?.includes("transfer.cross-application")
-      && request.context?.appId === "gallery"
+      && request.context?.appId === "com.example.gallery"
       && request.context?.pasteboard === "system",
     )).toBe(true);
 
     write.mockClear();
     read.mockClear();
-    runtime.policy.registerPolicy("deny-gallery", (request, decision) =>
-      request.app?.id === "gallery" ? { ...decision, allowed: false, decision: "deny" } : decision,
+    runtime.configurationProfiles.registerPolicy("deny-gallery", (request, decision) =>
+      request.app?.bundleIdentifier === "com.example.gallery" ? { ...decision, allowed: false, decision: "deny" } : decision,
     );
     await expect(pasteboards.find.write([{ type: "text/plain", value: "denied" }]))
       .rejects.toMatchObject({ name: "SecurityError" });
@@ -431,7 +431,7 @@ describe("runtime pasteboards", () => {
     expect(write).not.toHaveBeenCalled();
     expect(read).not.toHaveBeenCalled();
 
-    expect(runtime.policy.removePolicy("deny-gallery")).toBe(true);
+    expect(runtime.configurationProfiles.removePolicy("deny-gallery")).toBe(true);
     await pasteboards.find.write([{ type: "text/plain", value: "restored" }]);
     await expect(pasteboards.find.readFirst(["text/plain"]))
       .resolves.toMatchObject({ value: "restored" });

@@ -1,0 +1,11 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run vitest run tests/runtime/about-particle-sprite.test.ts tests/runtime/layer-artwork.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site
+
+
+ Test Files  2 passed (2)
+      Tests  2 passed (2)
+   Start at  09:12:09
+   Duration  2.68s (transform 1.96s, setup 37ms, import 2.46s, tests 41ms, environment 1.86s)
+

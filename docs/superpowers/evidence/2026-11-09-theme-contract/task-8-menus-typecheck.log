@@ -1,0 +1,4 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 typecheck
+npm notice run tsc -b --pretty false
+src/NSE/Menus/NSEPopUpButton.tsx(218,231): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.

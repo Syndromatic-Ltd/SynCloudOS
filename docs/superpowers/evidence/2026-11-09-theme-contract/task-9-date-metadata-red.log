@@ -1,0 +1,58 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-theme-panel-hook-coverage.test.tsx -t AppKit metadata
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-theme-panel-hook-coverage.test.tsx (77 tests | 4 failed | 73 skipped) 127ms
+     × AppKit metadata: date-picker-combined-textFieldAndStepper 74ms
+     × AppKit metadata: date-picker-combined-clockAndCalendar 35ms
+     × AppKit metadata: date-picker-range-textFieldAndStepper 7ms
+     × AppKit metadata: date-picker-range-clockAndCalendar 10ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-theme-panel-hook-coverage.test.tsx > date, panel and window theme hooks > AppKit metadata: date-picker-combined-textFieldAndStepper
+ FAIL  tests/runtime/nse-theme-panel-hook-coverage.test.tsx > date, panel and window theme hooks > AppKit metadata: date-picker-combined-clockAndCalendar
+AssertionError: expected undefined to be 'single' // Object.is equality
+
+- Expected:
+"single"
+
++ Received:
+undefined
+
+ ❯ tests/runtime/nse-theme-panel-hook-coverage.test.tsx:21:44
+     19|     const view = render(<SurfaceHost>{surface.render("light")}</Surfac…
+     20|     const root = view.container.querySelector<HTMLElement>('[data-nse-…
+     21|     expect(root.dataset.nseDatePickerMode).toBe(surface.id.includes("-…
+       |                                            ^
+     22|     expect(root.dataset.nseDatePickerElements).toBe(surface.id.include…
+     23|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/runtime/nse-theme-panel-hook-coverage.test.tsx > date, panel and window theme hooks > AppKit metadata: date-picker-range-textFieldAndStepper
+ FAIL  tests/runtime/nse-theme-panel-hook-coverage.test.tsx > date, panel and window theme hooks > AppKit metadata: date-picker-range-clockAndCalendar
+AssertionError: expected undefined to be 'range' // Object.is equality
+
+- Expected:
+"range"
+
++ Received:
+undefined
+
+ ❯ tests/runtime/nse-theme-panel-hook-coverage.test.tsx:21:44
+     19|     const view = render(<SurfaceHost>{surface.render("light")}</Surfac…
+     20|     const root = view.container.querySelector<HTMLElement>('[data-nse-…
+     21|     expect(root.dataset.nseDatePickerMode).toBe(surface.id.includes("-…
+       |                                            ^
+     22|     expect(root.dataset.nseDatePickerElements).toBe(surface.id.include…
+     23|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 73 skipped (77)
+   Start at  21:46:03
+   Duration  8.42s (transform 5.54s, setup 25ms, import 7.31s, tests 127ms, environment 821ms)

@@ -60,6 +60,28 @@ async function loadLocaleRuntime() {
 }
 
 describe("LocaleServices runtime infrastructure", () => {
+  it("loads only the requested shell locale and British English fallback", async () => {
+    const { getWebspringLocaleResourceLoader } = await import("../../src/Webspring/webspringLocale");
+    const load = getWebspringLocaleResourceLoader();
+    const english = await load("en-GB");
+    expect(Object.keys(english ?? {}).sort()).toEqual(["Base.locale", "en-GB.locale"]);
+    const french = await load("fr-FR");
+    expect(Object.keys(french ?? {}).sort()).toEqual(["Base.locale", "en-GB.locale", "fr-FR.locale"]);
+  });
+
+  it("passes the active locale to bundle loaders and reloads when it changes", async () => {
+    setNavigatorLanguages(["en-GB"]);
+    const { LocaleServices } = await loadLocaleRuntime();
+    LocaleServices.hydrate();
+    const loader = vi.fn(async (_locale: string) => ({}));
+    LocaleServices.registerBundleLocaleResourceLoader("localised", loader);
+    await LocaleServices.loadBundleLocaleResources();
+    expect(loader).toHaveBeenLastCalledWith("en-GB");
+    LocaleServices.setLocale("fr-FR");
+    await LocaleServices.loadBundleLocaleResources();
+    expect(loader).toHaveBeenLastCalledWith("fr-FR");
+  });
+
   it("resolves localised site branding and registered logo variants without a product fallback", () => {
     const locale = { t: (key: string) => key === "site.name" ? "Example Site" : key };
     expect(resolveSiteBranding({
@@ -76,6 +98,7 @@ describe("LocaleServices runtime infrastructure", () => {
       lightLogoUrl: "/assets/logo.svg",
       darkLogoUrl: "/assets/logo-dark.svg",
       compactLogoUrl: "/assets/logo.svg",
+      homeIconUrl: null,
     });
     expect(() => resolveSiteBranding({
       name: { key: "site.name", fallback: "Example" },
@@ -175,7 +198,7 @@ describe("LocaleServices runtime infrastructure", () => {
 
   it("does not make locale a hard app service and survives hydrate failure during boot", async () => {
     const { AppRegistry, BootManager, LocaleServices, RuntimeController, ServiceRegistry } = await loadLocaleRuntime();
-    AppRegistry.register(createTestManifest({ id: "locale-optional-app" }));
+    AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.locale-optional-app" }));
     const originalHydrate = LocaleServices.hydrate;
     LocaleServices.hydrate = (() => {
       throw new Error("locale offline");
@@ -190,7 +213,7 @@ describe("LocaleServices runtime infrastructure", () => {
       serviceAvailable: false
     });
     expect(ServiceRegistry.getServiceReport(["webspring", "routing", "windowing"]).ok).toBe(true);
-    expect(RuntimeController.getSnapshot().appInfo["locale-optional-app"].requiredServices).not.toContain("locale");
+    expect(RuntimeController.getSnapshot().appInfo["com.example.locale-optional-app"].requiredServices).not.toContain("locale");
   });
 
   it("falls back through translations and interpolates parameters", async () => {

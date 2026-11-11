@@ -21,6 +21,7 @@
 import type { SynCloudOSRuntime } from "../Runtime/runtimeInstanceTypes";
 import { CommandDispatcher } from "./CommandDispatcher";
 import { CommandRegistry } from "./CommandRegistry";
+import { OwnedWorkObservations } from "../Operations/OwnedWorkObservations";
 import type {
   CommandDeclaration,
   CommandDiagnosticRecord,
@@ -76,10 +77,17 @@ function stalePresentation(commandId: CommandId): CommandPresentation {
   return { ...unresolvedPresentation(commandId), stale: true, disabledReason: commandValidationStaleReason };
 }
 
+function isPromiseLike<T>(value: T | PromiseLike<T>): value is PromiseLike<T> {
+  return value !== null && (typeof value === "object" || typeof value === "function")
+    && typeof (value as PromiseLike<T>).then === "function";
+}
+
 export function createCommandSystem(options: CreateCommandSystemOptions): CommandSystem {
   const getRuntime = options.getRuntime ?? (() => options.runtime!);
   const registry = new CommandRegistry();
   const dispatcher = new CommandDispatcher(getRuntime, registry, options.responderResolver);
+  const work = new OwnedWorkObservations();
+  work.bind(dispatcher);
   const history: CommandDiagnosticRecord[] = [];
   const historyLimit = Math.max(1, options.historyLimit ?? 80);
   let disposed = false;
@@ -104,12 +112,19 @@ export function createCommandSystem(options: CreateCommandSystemOptions): Comman
     const runtime = getRuntime();
     const context = { runtime, runtimeId: runtime.runtimeId, commandId: id, responderId: resolved.responder.id, scopeId: resolved.responder.scopeId, payload: parsed.value };
     const declaredTitle = typeof resolved.declaration.title === "function" ? resolved.declaration.title(context) : resolved.declaration.title;
-    const validation = await resolved.declaration.validate?.(context) ?? { enabled: true };
+    // Synchronous validators complete within the sender's event. Yielding here
+    // would misclassify the sender's own popup-close commit as stale validation.
+    // Real asynchronous validation still retains the authority fence below.
+    const pendingValidation = resolved.declaration.validate?.(context);
+    const validation = (isPromiseLike(pendingValidation)
+      ? await work.track(() => Promise.resolve(pendingValidation))
+      : pendingValidation) ?? { enabled: true };
     if (validationOptions.signal?.aborted) return cancelledPresentation(id);
     if (disposed || registry.generation !== registryGeneration || (options.responderResolver.getGeneration?.() ?? 0) !== responderGeneration) {
       return stalePresentation(id);
     }
     const title = validation.title ?? declaredTitle;
+    const keyBinding = runtime.keyBindings?.bindingFor(id, resolved.responder.id) ?? undefined;
     const presentation: CommandPresentation = {
       commandId: id,
       responderId: resolved.responder.id,
@@ -121,6 +136,7 @@ export function createCommandSystem(options: CreateCommandSystemOptions): Comman
       state: validation.state ?? "off",
       stale: false,
       disabledReason: validation.disabledReason,
+      ...(keyBinding ? { keyBinding } : {}),
     };
     record({ at: startedAt, type: "validation", commandId: id, responderId: resolved.responder.id, chain: resolved.chain.map(({ id: responderId }) => responderId), durationMs: Math.max(0, runtime.environment.now() - startedAt), outcome: validation.denied ? "denied" : validation.enabled ? "enabled" : "disabled" });
     return presentation;
@@ -195,11 +211,13 @@ export function createCommandSystem(options: CreateCommandSystemOptions): Comman
       return { registrations: registry.inspect(), history: [...history], generation: registry.generation };
     },
     getDeclarations: () => registry.declarations(),
+    subscribe: (listener) => registry.subscribe(listener),
     dispose() {
       if (disposed) return;
       disposed = true;
-      registry.dispose();
+      try { registry.dispose(); } finally { work.end(); }
     },
   };
+  work.bind(system);
   return system;
 }

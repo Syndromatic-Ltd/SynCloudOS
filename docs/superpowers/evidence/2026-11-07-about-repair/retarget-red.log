@@ -1,0 +1,31 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run vitest run tests/runtime/about-app.test.tsx -t interrupts its settle
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site
+
+ ❯ tests/runtime/about-app.test.tsx (8 tests | 1 failed | 7 skipped) 433ms
+     × leaves from the visible presentation when another tab interrupts its settle 432ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/about-app.test.tsx > About > leaves from the visible presentation when another tab interrupts its settle
+SynCloudOSLifecycleError: Cannot read NSEViewController.outlet while it is inactive.
+ ❯ u.error ../src/SynCloudOS/ErrorManager/lifecycleError.ts:185:12
+ ❯ Ge.#require ../src/NSE/Application/viewOutlet.ts:55:127
+ ❯ Ge.get layer [as layer] ../src/NSE/Application/viewOutlet.ts:69:27
+ ❯ tests/runtime/about-app.test.tsx:49:51
+     47|     expect(before.tx).toBeGreaterThan(0);
+     48|     await act(async () => { controller.tabs.selectTabViewItem("team");…
+     49|     const after = controller.panes.framework.pane.layer.presentation.t…
+       |                                                   ^
+     50|     expect(after.tx).toBeCloseTo(before.tx, 5);
+     51|     expect(after.a).toBeCloseTo(before.a, 5);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 skipped (8)
+   Start at  10:42:37
+   Duration  5.07s (transform 3.01s, setup 16ms, import 3.56s, tests 433ms, environment 921ms)
+

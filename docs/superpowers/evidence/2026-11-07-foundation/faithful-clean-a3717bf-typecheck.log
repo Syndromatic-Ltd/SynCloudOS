@@ -1,0 +1,34 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run tsc -b --pretty false
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(3737,47): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(3764,36): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4206,25): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4217,86): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4220,46): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4471,82): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4475,82): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4479,82): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4483,82): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4487,82): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4495,84): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4508,53): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4531,84): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4543,51): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4557,84): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4570,53): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4586,84): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4598,51): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/AppSDK/SynWareRuntimeMount.tsx(393,75): error TS2339: Property 'permissions' does not exist on type 'TrustedSynWareBundle'.
+src/SynCloudOS/AppSDK/testing/createSynWareTestHost.tsx(152,66): error TS2339: Property 'permissions' does not exist on type 'SynWareManifestV1'.
+src/SynCloudOS/AppSDK/testing/createSynWareTestHost.tsx(153,70): error TS2339: Property 'permissions' does not exist on type 'SynWareManifestV1'.
+src/SynCloudOS/Routing/RouteServiceScope.ts(60,40): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOS/Routing/RouteServiceScope.ts(64,111): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/SynCloudOSReact/browserRuntime.tsx(310,32): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/Webspring/Preferences/Capabilities.prefPane/index.tsx(25,10): error TS2305: Module '"../../../SynCloudOS/PlatformAdapters/BrowserInstalledApplicationAdapter"' has no exported member 'installedApplicationForDocument'.
+src/Webspring/Preferences/Capabilities.prefPane/index.tsx(44,33): error TS2339: Property 'installed' does not exist on type 'never'.
+src/Webspring/Preferences/Capabilities.prefPane/index.tsx(45,106): error TS2339: Property 'canInstall' does not exist on type 'never'.
+src/Webspring/Preferences/Capabilities.prefPane/index.tsx(48,89): error TS2339: Property 'worker' does not exist on type 'never'.
+src/Webspring/Preferences/Capabilities.prefPane/index.tsx(49,96): error TS2339: Property 'persistence' does not exist on type 'never'.
+src/Webspring/Preferences/Capabilities.prefPane/index.tsx(50,16): error TS2339: Property 'error' does not exist on type 'never'.
+src/Webspring/Preferences/Capabilities.prefPane/index.tsx(50,50): error TS2339: Property 'error' does not exist on type 'never'.
+src/Webspring/useWebspringResponder.ts(21,10): error TS2305: Module '"../SynCloudOS/PlatformAdapters/BrowserInstalledApplicationAdapter"' has no exported member 'installedApplicationForDocument'.

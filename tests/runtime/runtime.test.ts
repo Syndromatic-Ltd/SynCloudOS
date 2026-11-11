@@ -19,7 +19,7 @@
  */
 
 import { describe, expect, it, vi } from "vitest";
-import { createTestBundle, createTestRuntime, createRuntimeHarness, flushMultiSwitchLaunch } from "./helpers";
+import { asPolicySubject, createTestBundle, createTestRuntime, createRuntimeHarness, flushMultiSwitchLaunch } from "./helpers";
 
 type RuntimeLoginSurface = {
   readonly runtimeId: string;
@@ -153,7 +153,7 @@ describe("runtime controller, inspector, and transaction contracts", () => {
 
     try {
       const app = runtime.apps.registerBundle(createTestBundle({
-        id: "lifecycle-contract-app",
+        bundleIdentifier: "com.example.lifecycle-contract-app",
         route: "/lifecycle-contract-app",
         requiredServices: [],
       }));
@@ -164,19 +164,19 @@ describe("runtime controller, inspector, and transaction contracts", () => {
       });
 
       expect(Lifecycle.runtimeId).toBe(runtime.runtimeId);
-      expect(Lifecycle.getState(app.id)).toBe("registered");
+      expect(Lifecycle.getState(app.bundleIdentifier)).toBe("registered");
       const route = runtime.routes.openRoute(app.route);
       await expect(route.result).resolves.toMatchObject({
         status: "completed",
         committed: true,
         value: {
           runtimeId: runtime.runtimeId,
-          appId: app.id,
+          appId: app.bundleIdentifier,
         },
       });
-      const lifecycleManager = Lifecycle.getManager(app.id);
-      expect(lifecycleManager).toBe(AppManagerController.getManagerForApp(app.id));
-      expect(lifecycleManager).toMatchObject({ appId: app.id });
+      const lifecycleManager = Lifecycle.getManager(app.bundleIdentifier);
+      expect(lifecycleManager).toBe(AppManagerController.getManagerForApp(app.bundleIdentifier));
+      expect(lifecycleManager).toMatchObject({ bundleIdentifier: app.bundleIdentifier });
       expect(lifecycleManager.getState()).toBe("active");
       expect(AppManagerController.runtimeId).toBe(runtime.runtimeId);
     } finally {
@@ -190,13 +190,13 @@ describe("runtime controller, inspector, and transaction contracts", () => {
     try {
       runtime.apps.registerMany([
         createTestBundle({
-          id: "webspring-contract-one",
+          bundleIdentifier: "com.example.webspring-contract-one",
           route: "/webspring-contract-one",
           requiredServices: [],
           webspring: { visible: true, order: 1 },
         }),
         createTestBundle({
-          id: "webspring-contract-two",
+          bundleIdentifier: "com.example.webspring-contract-two",
           route: "/webspring-contract-two",
           requiredServices: [],
           webspring: { visible: true, order: 2 },
@@ -204,45 +204,45 @@ describe("runtime controller, inspector, and transaction contracts", () => {
       ]);
       runtime.webspring.resetLayoutOrder();
       expect(runtime.store.getSnapshot().webspring.layout.preference.order).toEqual([
-        "webspring-contract-one",
-        "webspring-contract-two",
+        "com.example.webspring-contract-one",
+        "com.example.webspring-contract-two",
       ]);
 
-      runtime.webspring.enterEditMode("webspring-contract-one");
+      runtime.webspring.enterEditMode("com.example.webspring-contract-one");
       expect(runtime.store.getSnapshot().webspring.layout.isEditing).toBe(true);
       expect(runtime.webspring.isLaunchSuppressed()).toBe(true);
-      expect(runtime.webspring.moveEditingAppByKeyboard("webspring-contract-one", "ArrowRight", 1)).toBe(true);
+      expect(runtime.webspring.moveItemByKeyboard("com.example.webspring-contract-one", "ArrowRight", 1)).toBe(true);
       expect(runtime.store.getSnapshot().webspring.layout.preference.order).toEqual([
-        "webspring-contract-two",
-        "webspring-contract-one",
+        "com.example.webspring-contract-two",
+        "com.example.webspring-contract-one",
       ]);
       runtime.webspring.exitEditMode(true);
       expect(runtime.store.getSnapshot().webspring.layout.isEditing).toBe(false);
       const committedOrder = runtime.store.getSnapshot().webspring.layout.preference.order;
 
-      runtime.webspring.enterEditMode("webspring-contract-one");
-      runtime.webspring.startDraggingApp("webspring-contract-one");
-      expect(runtime.webspring.reorderDraggedAppBefore("webspring-contract-two", false)).toBe(true);
+      runtime.webspring.enterEditMode("com.example.webspring-contract-one");
+      runtime.webspring.beginDrag("com.example.webspring-contract-one");
+      expect(runtime.webspring.moveItem("com.example.webspring-contract-one", 0, false)).toBe(true);
       expect(runtime.store.getSnapshot().webspring.layout.preference.order).toEqual([
-        "webspring-contract-one",
-        "webspring-contract-two",
+        "com.example.webspring-contract-one",
+        "com.example.webspring-contract-two",
       ]);
       runtime.webspring.exitEditMode(true);
       expect(runtime.store.getSnapshot().webspring.layout.preference.order).toEqual([
-        "webspring-contract-one",
-        "webspring-contract-two",
+        "com.example.webspring-contract-one",
+        "com.example.webspring-contract-two",
       ]);
 
-      runtime.webspring.startDraggingApp("webspring-contract-two");
-      expect(runtime.webspring.reorderDraggedAppBefore("webspring-contract-one", false)).toBe(true);
-      runtime.webspring.finishDraggingApp(false);
+      runtime.webspring.beginDrag("com.example.webspring-contract-two");
+      expect(runtime.webspring.moveItem("com.example.webspring-contract-two", 0, false)).toBe(true);
+      runtime.webspring.finishDrag(false);
       expect(runtime.store.getSnapshot().webspring.layout.preference.order).toEqual([
-        "webspring-contract-one",
-        "webspring-contract-two",
+        "com.example.webspring-contract-one",
+        "com.example.webspring-contract-two",
       ]);
       expect(committedOrder).toEqual([
-        "webspring-contract-two",
-        "webspring-contract-one",
+        "com.example.webspring-contract-two",
+        "com.example.webspring-contract-one",
       ]);
     } finally {
       await runtime.dispose("Webspring contract test");
@@ -321,7 +321,11 @@ describe("runtime controller, inspector, and transaction contracts", () => {
       expect(watchdog.getStatus()).toMatchObject({ installed: false });
       expect(watchdog.install()).toMatchObject({ installed: true });
       const plugin = { id: "runtime-contract-plugin", name: "Runtime Contract Plugin", version: "1.0.0" };
-      await expect(PluginRegistry.register(plugin)).resolves.toMatchObject({
+      const hostAuthority = asPolicySubject(runtime.configurationProfiles, {
+        user: { id: "plugin-host", displayName: "Plugin host" },
+        role: "admin", capabilities: ["plugin.register"], isAuthenticated: true,
+      });
+      await expect(PluginRegistry.register(plugin, hostAuthority)).resolves.toMatchObject({
         status: "enabled",
         plugin,
       });
@@ -352,12 +356,12 @@ describe("runtime controller, inspector, and transaction contracts", () => {
     try {
       runtime.apps.registerMany([
         createTestBundle({
-          id: "multiswitch-fallback-one",
+          bundleIdentifier: "com.example.multiswitch-fallback-one",
           route: "/multiswitch-fallback-one",
           requiredServices: [],
         }),
         createTestBundle({
-          id: "multiswitch-fallback-two",
+          bundleIdentifier: "com.example.multiswitch-fallback-two",
           route: "/multiswitch-fallback-two",
           requiredServices: [],
         }),
@@ -377,8 +381,8 @@ describe("runtime controller, inspector, and transaction contracts", () => {
       const switching = runtime.store.getSnapshot().application.multiSwitch;
       expect(switching).toMatchObject({
         status: "switching",
-        fromAppId: "multiswitch-fallback-one",
-        toAppId: "multiswitch-fallback-two",
+        fromAppId: "com.example.multiswitch-fallback-one",
+        toAppId: "com.example.multiswitch-fallback-two",
       });
 
       await flushMultiSwitchLaunch();
@@ -407,12 +411,12 @@ describe("runtime controller, inspector, and transaction contracts", () => {
     try {
       runtime.apps.registerMany([
         createTestBundle({
-          id: "multiswitch-disposal-one",
+          bundleIdentifier: "com.example.multiswitch-disposal-one",
           route: "/multiswitch-disposal-one",
           requiredServices: [],
         }),
         createTestBundle({
-          id: "multiswitch-disposal-two",
+          bundleIdentifier: "com.example.multiswitch-disposal-two",
           route: "/multiswitch-disposal-two",
           requiredServices: [],
         }),
@@ -432,8 +436,8 @@ describe("runtime controller, inspector, and transaction contracts", () => {
       const switching = runtime.store.getSnapshot().application.multiSwitch;
       expect(switching).toMatchObject({
         status: "switching",
-        fromAppId: "multiswitch-disposal-one",
-        toAppId: "multiswitch-disposal-two",
+        fromAppId: "com.example.multiswitch-disposal-one",
+        toAppId: "com.example.multiswitch-disposal-two",
       });
 
       await flushMultiSwitchLaunch();

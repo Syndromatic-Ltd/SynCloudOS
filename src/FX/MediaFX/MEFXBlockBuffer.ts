@@ -18,10 +18,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
+import { SynCloudOSLifecycleRecord, synCloudOSLifecycleSignalReason } from "../../SynCloudOS/fxRuntimeContracts";
+
 export type MEFXBlockSegmentInput =
-    | Uint8Array
+    | NSEDataConvertible
     | Readonly<{
-        bytes: Uint8Array;
+        bytes: NSEDataConvertible;
         offset?: number;
         length?: number;
     }>;
@@ -84,7 +87,7 @@ function checkedInteger(value: unknown, name: string, maximum = Number.MAX_SAFE_
     return value as number;
 }
 
-function segmentRecord(value: Exclude<MEFXBlockSegmentInput, Uint8Array>): PreparedSegment {
+function segmentRecord(value: Exclude<MEFXBlockSegmentInput, NSEDataConvertible>): PreparedSegment {
     if (!value || typeof value !== "object" || (Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null))
         throw new TypeError("Media block segment must be plain data.");
     if (Object.getOwnPropertySymbols(value).length)
@@ -97,7 +100,7 @@ function segmentRecord(value: Exclude<MEFXBlockSegmentInput, Uint8Array>): Prepa
     if ((descriptors.offset && !("value" in descriptors.offset)) || (descriptors.length && !("value" in descriptors.length)))
         throw new TypeError("Media block segment fields must be data properties.");
 
-    const bytes = descriptors.bytes.value;
+    const bytes = new Uint8Array(NSEData.from(descriptors.bytes.value!).bytes);
     if (!(bytes instanceof Uint8Array))
         throw new TypeError("Media block segment bytes must be Uint8Array.");
     const offset = descriptors.offset ? checkedInteger(descriptors.offset.value, "Media block segment offset", bytes.byteLength) : 0;
@@ -113,14 +116,17 @@ function prepareSegments(input: MEFXBlockSegmentInput | readonly MEFXBlockSegmen
     segments: readonly PreparedSegment[];
     byteLength: number;
 }> {
-    const supplied = input instanceof Uint8Array ? [input] : Array.isArray(input) ? input : [input];
+    const supplied: readonly MEFXBlockSegmentInput[] = Array.isArray(input) ? input : [input as MEFXBlockSegmentInput];
     const prepared: PreparedSegment[] = [];
     let total = 0;
 
     for (const segment of supplied) {
-        const current = segment instanceof Uint8Array
-            ? Object.freeze({ bytes: segment, offset: 0, length: segment.byteLength })
-            : segmentRecord(segment);
+        let bytes: Uint8Array | undefined;
+        try { bytes = new Uint8Array(NSEData.from(segment as NSEDataConvertible).bytes); }
+        catch { /* Non-byte input is validated as a bounded segment record below. */ }
+        const current = bytes
+            ? Object.freeze({ bytes, offset: 0, length: bytes.byteLength })
+            : segmentRecord(segment as Exclude<MEFXBlockSegmentInput, NSEDataConvertible>);
         if (current.length > maximumPortableBlockBytes - total)
             throw new RangeError("Media block exceeds the " + maximumPortableBlockBytes + " byte portable block limit.");
         total += current.length;
@@ -216,12 +222,13 @@ class BlockBacking {
 }
 
 export class MEFXBlockBuffer {
+    readonly #lifecycle = new SynCloudOSLifecycleRecord({ kind: "MEFXBlockBuffer" });
     #backing: BlockBacking | null;
     readonly #offset: number;
     readonly #length: number;
 
     constructor(
-        input: MEFXBlockSegmentInput | readonly MEFXBlockSegmentInput[] | InternalView,
+        input: MEFXBlockSegmentInput | readonly MEFXBlockSegmentInput[],
         options: MEFXBlockBufferOptions = {},
     ) {
         if (isInternalView(input)) {
@@ -254,7 +261,7 @@ export class MEFXBlockBuffer {
     copyTo(target: Uint8Array, options: MEFXBlockCopyOptions = {}): number {
         if (!(target instanceof Uint8Array))
             throw new TypeError("Media block copy target must be Uint8Array.");
-        const backing = this.#assertOpen();
+        const backing = this.#assertOpen("copyTo");
         const sourceOffset = checkedInteger(options.sourceOffset ?? 0, "Media block source offset", this.#length);
         const targetOffset = checkedInteger(options.targetOffset ?? 0, "Media block target offset", target.byteLength);
         const defaultLength = this.#length - sourceOffset;
@@ -268,7 +275,7 @@ export class MEFXBlockBuffer {
     }
 
     slice(start = 0, end = this.#length): MEFXBlockBuffer {
-        const backing = this.#assertOpen();
+        const backing = this.#assertOpen("slice");
         const checkedStart = checkedInteger(start, "Media block slice start", this.#length);
         const checkedEnd = checkedInteger(end, "Media block slice end", this.#length);
         if (checkedEnd < checkedStart)
@@ -282,7 +289,7 @@ export class MEFXBlockBuffer {
                 backing,
                 offset: this.#offset + checkedStart,
                 length: checkedEnd - checkedStart,
-            });
+            } as unknown as MEFXBlockSegmentInput);
             if (owner && handle)
                 attachRuntimeHandle(slice, owner, handle);
             return slice;
@@ -301,7 +308,7 @@ export class MEFXBlockBuffer {
     transfer<T>(accept: (transferred: MEFXBlockBuffer) => T | PromiseLike<T>): T | Promise<T> {
         if (typeof accept !== "function")
             throw new TypeError("Media block transfer requires an admission function.");
-        this.#assertOpen();
+        this.#assertOpen("transfer");
         const transferred = this.slice();
         const transferredRuntimeHandle = runtimeHandles.get(transferred)?.handle;
         const assertRuntimeTransferLive = () => {
@@ -341,8 +348,10 @@ export class MEFXBlockBuffer {
         const backing = this.#backing;
         if (!backing)
             return;
-        this.#backing = null;
         const runtimeHandle = runtimeHandles.get(this);
+        const signal = runtimeHandle?.handle.signal;
+        this.#lifecycle.markDisposed(signal?.aborted ? synCloudOSLifecycleSignalReason(signal) : "explicit");
+        this.#backing = null;
         runtimeHandles.delete(this);
         runtimeOwners.delete(this);
         if (runtimeHandle) {
@@ -352,9 +361,9 @@ export class MEFXBlockBuffer {
         backing.release();
     }
 
-    #assertOpen(): BlockBacking {
+    #assertOpen(operation: string): BlockBacking {
         if (!this.#backing)
-            throw new Error("Media block buffer is closed.");
+            throw this.#lifecycle.error({ code: "MEFX_BLOCK_BUFFER_DISPOSED", operation: operation });
         return this.#backing;
     }
 }

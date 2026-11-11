@@ -29,9 +29,11 @@ import { afterEach, expect, it, vi } from "vitest";
 import { GFXColour } from "../../src/FX/GraphicsFX/public";
 import { NSEColourPanel, NSEColourPanelProvider, NSEColourWell } from "../../src/NSE/Colour";
 import { NSEComboBox, type NSECompletionDataSource } from "../../src/NSE/Controls/Completion";
-import { NSECalendarView, type NSECalendarMonth } from "../../src/NSE/DateTime";
+import type { NSECalendarMonth } from "../../src/NSE/DateTime";
+import { NSEGraphicalCalendar } from "../../src/NSE/DateTime/Calendar/graphicalCalendar";
 import { NSEOverlayProvider } from "../../src/NSE/Overlays";
 import { NSEProgressIndicator } from "../../src/NSE/Progress";
+import { NSEAnimationEnvironmentProvider } from "../../src/NSE/Animation/NSEAnimationEnvironment";
 import { NSEScrollView } from "../../src/NSE/Scroll";
 import { createSynCloudOS } from "../../src/SynCloudOS/Runtime/createSynCloudOS";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
@@ -113,7 +115,7 @@ it("drives 120 real wheel previews into one undo group", async () => {
 it("keeps 100 calendar month changes bounded and attached", async () => {
   const budget = budgets.portableCases["calendar-controls.month-change-100"];
   let changes = 0;
-  function Harness() { const [month, setMonth] = useState<NSECalendarMonth>({ year: 2026, month: 1 }); return <NSECalendarView aria-label="Calendar performance" locale="en-GB" timeZone="Europe/London" visibleMonth={month} selection={{ kind: "none" }} isDateDisabled={() => false} onVisibleMonthChange={(next) => { changes += 1; setMonth(next); }} />; }
+  function Harness() { const [month, setMonth] = useState<NSECalendarMonth>({ year: 2026, month: 1 }); return <NSEGraphicalCalendar aria-label="Calendar performance" locale="en-GB" timeZone="Europe/London" visibleMonth={month} selection={{ kind: "none" }} isDateDisabled={() => false} onVisibleMonthChange={(next) => { changes += 1; setMonth(next); }} />; }
   await runStructuralScenario({ run: () => {
     const view = render(<Harness />); const next = view.getByRole("button", { name: "Next month" });
     for (let index = 0; index < budget.changes; index += 1) fireEvent.click(next);
@@ -162,5 +164,5 @@ it("coalesces the real scroll view observer and keeps rubber-band listeners dist
 it("schedules no animation for reduced-motion indeterminate progress", async () => {
   const budget = budgets.portableCases["progress-controls.reduced-motion"];
   const raf = vi.fn(); vi.stubGlobal("requestAnimationFrame", raf);
-  await runStructuralScenario({ run: () => render(<NSEProgressIndicator aria-label="Static progress" state={{ kind: "indeterminate" }} reducedMotion />), assertStructural: (view) => { expect(raf).toHaveBeenCalledTimes(budget.maxAnimationCallbacks); expect(view.getByRole("progressbar").getAttribute("data-motion")).toBe("static"); view.unmount(); } });
+  await runStructuralScenario({ run: () => render(<NSEAnimationEnvironmentProvider reducedMotion><NSEProgressIndicator aria-label="Static progress" /></NSEAnimationEnvironmentProvider>), assertStructural: (view) => { expect(raf).toHaveBeenCalledTimes(budget.maxAnimationCallbacks); expect(view.getByRole("progressbar").getAttribute("data-motion")).toBe("static"); view.unmount(); } });
 });

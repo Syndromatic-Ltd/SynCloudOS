@@ -77,3 +77,19 @@ Recovery stores a committed native model with its manifest and exact retention r
 Output preparation retains resources for its captured native revision independently from views/history. The application engine declares dependency retention and drawing; the framework manages the preparation's lifetime. A synchronous output/history release callback can schedule durable cleanup, but its owner must observe the resulting promise and report later failures. An already-issued immutable terminal receipt cannot report a future asynchronous cleanup error.
 
 Browser tests save through a real runtime, provider and store, reload the page, create fresh instances, reacquire a new lease and decode the retained image bytes, and also exercise concurrent quota and deliberate corruption. They establish browser persistence behaviour; they do not imply remote-provider durability or platform-native parity.
+
+## Foundation byte values
+
+Asset `put` inputs accept `NSEDataConvertible`; `read` delivers `Promise<NSEData>`. Injected hash callbacks receive `NSEData`, so bridge with `data.bytes.buffer` when invoking Web Crypto. Resource acquisition keeps metadata separate from bytes:
+
+```ts
+import { NSEData } from "@syndromatic/syncloudos/foundation";
+
+const data = await NSEData.read(file);
+const descriptor = await SCOS.documentResources.acquire(documentId, {
+  type: file.type, size: data.count, data: async () => data,
+});
+const live = SCOS.documentResources.resolve(documentId, descriptor); // NSEData | null
+```
+
+Byte values are copied at admission and are immutable. Native IndexedDB backing still stores web buffers privately; it never structured-clones an NSEData class instance.

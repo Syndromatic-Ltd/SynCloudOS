@@ -1,0 +1,42 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/pwa-installation.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/pwa-installation.test.ts (4 tests | 1 failed) 47ms
+   × reserves the visible host title bar in the canonical work area and tracks geometry changes 18ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/pwa-installation.test.ts > reserves the visible host title bar in the canonical work area and tracks geometry changes
+AssertionError: expected { x: +0, y: +0, width: 1024, …(4) } to match object { x: +0, y: 32, width: 1024, …(1) }
+(7 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "height": 736,
++   "height": 768,
+    "width": 1024,
+    "x": 0,
+-   "y": 32,
++   "y": 0,
+  }
+
+ ❯ tests/runtime/pwa-installation.test.ts:33:34
+     31|   try {
+     32|     const source = createBrowserRuntimeEnvironment().workArea;
+     33|     expect(source.getSnapshot()).toMatchObject({ x: 0, y: 32, width: w…
+       |                                  ^
+     34|     const changed = vi.fn(); unsubscribe = source.subscribe(changed);
+     35|     overlay.visible = false; overlay.dispatchEvent(new Event("geometry…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 passed (4)
+   Start at  22:37:34
+   Duration  13.52s (transform 10.14s, setup 36ms, import 12.30s, tests 47ms, environment 971ms)
+

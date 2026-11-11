@@ -20,7 +20,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import type { WebspringViewModel } from "./webspringTypes";
+import { WebspringFolderTile } from "./WebspringFolderTile";
+import type { WebspringApp, WebspringFolderItem } from "./webspringTypes";
 import "./WebspringPresentation.css";
 
 export interface WebspringDragProxyPoint {
@@ -28,12 +29,38 @@ export interface WebspringDragProxyPoint {
   y: number;
 }
 
+export interface WebspringDragProxyRect {
+  readonly left: number;
+  readonly top: number;
+  readonly width: number;
+  readonly height: number;
+}
+
+/** How far the pressed point sits from the icon's centre. Keeping it stops the
+ *  icon jumping to the pointer when the drag begins off-centre. */
+export function getWebspringDragGrabOffset(
+  pointer: WebspringDragProxyPoint,
+  artwork: WebspringDragProxyRect | null,
+): WebspringDragProxyPoint {
+  if (!artwork || artwork.width <= 0 || artwork.height <= 0) return { x: 0, y: 0 };
+  return {
+    x: artwork.left + artwork.width / 2 - pointer.x,
+    y: artwork.top + artwork.height / 2 - pointer.y
+  };
+}
+
 export function useWebspringDragProxyPosition() {
   const [point, setPoint] = useState<WebspringDragProxyPoint | null>(null);
   const proxyElementRef = useRef<HTMLDivElement | null>(null);
   const lastPointRef = useRef<WebspringDragProxyPoint | null>(null);
   const pendingPointRef = useRef<WebspringDragProxyPoint | null>(null);
+  const grabOffsetRef = useRef<WebspringDragProxyPoint>({ x: 0, y: 0 });
   const frameRef = useRef(0);
+
+  /** Records where the icon was taken from, so its centre follows the pointer. */
+  const beginGrab = useCallback((pointer: WebspringDragProxyPoint, artwork: WebspringDragProxyRect | null) => {
+    grabOffsetRef.current = getWebspringDragGrabOffset(pointer, artwork);
+  }, []);
 
   const applyPoint = useCallback((nextPoint: WebspringDragProxyPoint) => {
     const element = proxyElementRef.current;
@@ -48,11 +75,17 @@ export function useWebspringDragProxyPosition() {
     if (nextPoint) applyPoint(nextPoint);
   }, [applyPoint]);
 
-  const recordPoint = useCallback((nextPoint: WebspringDragProxyPoint, visible: boolean) => {
-    lastPointRef.current = nextPoint;
-    if (!visible || typeof window === "undefined") return;
-    pendingPointRef.current = nextPoint;
+  /** Follows the pointer from the grabbed point; returns the icon's centre. */
+  const recordPoint = useCallback((pointer: WebspringDragProxyPoint, visible: boolean) => {
+    const hitPoint = {
+      x: pointer.x + grabOffsetRef.current.x,
+      y: pointer.y + grabOffsetRef.current.y
+    };
+    lastPointRef.current = hitPoint;
+    if (!visible || typeof window === "undefined") return hitPoint;
+    pendingPointRef.current = hitPoint;
     if (!frameRef.current) frameRef.current = window.requestAnimationFrame(flushPoint);
+    return hitPoint;
   }, [flushPoint]);
 
   const showProxy = useCallback(() => {
@@ -90,6 +123,7 @@ export function useWebspringDragProxyPosition() {
 
   return {
     point,
+    beginGrab,
     setProxyElement,
     recordPoint,
     showProxy,
@@ -97,19 +131,25 @@ export function useWebspringDragProxyPosition() {
   };
 }
 
+/** The icon that follows the pointer while an app or a folder is dragged. */
 export function WebspringDragProxy({
-  app,
+  app = null,
+  folder = null,
   point,
   mobile = false,
   proxyRef
 }: {
-  app: WebspringViewModel["apps"][number] | null;
+  app?: WebspringApp | null;
+  folder?: WebspringFolderItem | null;
   point: WebspringDragProxyPoint | null;
   mobile?: boolean;
   proxyRef?: (element: HTMLDivElement | null) => void;
 }) {
-  if (!app || !point || typeof document === "undefined") return null;
-  const appName = app.title;
+  if (!point || typeof document === "undefined") return null;
+  const artwork = app
+    ? <img src={app.iconUrl ?? ""} alt="" draggable={false} />
+    : folder ? <span className="webspring-drag-proxy-folder"><WebspringFolderTile folder={folder} /></span> : null;
+  if (!artwork) return null;
 
   return createPortal((
     <div
@@ -119,8 +159,8 @@ export function WebspringDragProxy({
       aria-hidden="true"
       style={{ left: point.x, top: point.y }}
     >
-      <img src={app.iconUrl ?? ""} alt="" draggable={false} />
-      <span>{appName}</span>
+      {artwork}
+      <span>{app?.displayName ?? folder?.title}</span>
     </div>
   ), document.body);
 }

@@ -9,8 +9,8 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but with ABSOLUTELY NO WARRANTY; without even the implied warranty of
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { discoverThemeBundles } from "./theme-bundles.mjs";
+import { builtInThemeCSS } from "./built-in-theme-css.mjs";
+import { referencedThemeIdentifiers, themeModuleSource, themeStylesheet } from "./theme-loading.mjs";
 import {
   createReadStream,
   existsSync,
@@ -26,8 +29,27 @@ import {
   realpathSync,
   readFileSync,
 } from "node:fs";
+import { createHash } from "node:crypto";
+import { fileURLToPath } from "node:url";
 import { loadConfigFromFile } from "vite";
 import { captureFontDeclaration, fontDeclarationCSS } from "../../src/NSE/Typography/fontDeclaration.mjs";
+import { installedApplicationBuild } from "./pwa-plugin.mjs";
+import { bundlePaths } from "./bundle-paths.mjs";
+import { createApplicationToolchain } from "./application-toolchain.mjs";
+import { createScosAppModuleSource } from "../../src/SynCloudOS/AppSDK/scos/appModuleSource.mjs";
+import { createFXAppModuleSource, isFXFamily } from "../../src/SynCloudOS/AppSDK/fx/fxAppModuleSource.mjs";
+import { assertExpectedDefaultExport, parseManifest } from "./manifest-source.mjs";
+import validateManifest from "../../src/SynCloudOS/AppSDK/manifest/synappManifestValidator.generated.mjs";
+import { normalizeBundleIdentifier } from "../../src/SynCloudOS/Identity/bundleIdentifier.mjs";
+import {
+  assertUniqueBundleIdentifiers,
+  deriveSynWareManifest,
+  integrationIdFromFileName,
+  isIntegrationFileName,
+  isPreferencePaneFolderName,
+  isWidgetFolderName,
+  parseApplicationSelection,
+} from "./project-derivation.mjs";
 import {
   dirname,
   extname,
@@ -37,12 +59,24 @@ import {
   posix,
 } from "node:path";
 
-const virtualModuleId = "virtual:syncloudos/composition";
-const resolvedVirtualModuleId = `\0${virtualModuleId}`;
+const themesModuleId = "virtual:syncloudos/themes";
+const resolvedThemesModuleId = "\0" + themesModuleId;
+const themeStylePrefix = "virtual:syncloudos/theme-style/";
+const projectModuleId = "virtual:syncloudos/project";
+const appModulePrefix = "virtual:syncloudos/app/";
+const fxRuntimeModuleId = "virtual:syncloudos/fx-runtime";
+const fxRuntimePath = fileURLToPath(new URL("../../src/SynCloudOS/AppSDK/fx/runtime.ts", import.meta.url));
+const resolvedProjectModuleId = `\0${projectModuleId}`;
+const browserModuleId = "virtual:syncloudos/browser";
+const resolvedBrowserModuleId = `\0${browserModuleId}`;
 const typographyModuleId = "virtual:syncloudos/typography";
 const resolvedTypographyModuleId = `\0${typographyModuleId}`;
 const defaultAppsDirectory = "src/SynWare";
+const defaultPreferencesDirectory = "src/Preferences";
+const defaultWidgetsDirectory = "src/Widgets";
+const defaultIntegrationsDirectory = "src/Integrations";
 const defaultWebspringEntry = "src/Webspring/Contents/index.tsx";
+const derivationModulePath = fileURLToPath(new URL("./project-derivation.mjs", import.meta.url));
 const fontExtensions = new Set([".otf", ".ttf", ".woff", ".woff2"]);
 const sourceExtensions = new Set([
   ".cjs",
@@ -133,6 +167,12 @@ function assertUniqueCaseInsensitive(values, label) {
     }
     seen.set(key, value);
   }
+}
+
+/** Every folder kind fails the build when its entry has no default export. */
+function assertDefaultExport(path, label, expected) {
+  try { assertExpectedDefaultExport(path, expected.match(/^(define\w+)\(/u)?.[1] ?? null, expected); }
+  catch (cause) { throw new TypeError(`SynCloudOS expected ${label} to default-export ${expected}: ${cause.message}`, { cause }); }
 }
 
 function collectFiles(directory, label) {
@@ -236,7 +276,27 @@ function renderMap(entries, variableNames) {
   return `Object.freeze({\n${entries.map(({ key }, index) => `    ${quote(key)}: ${variableNames[index]},`).join("\n")}\n  })`;
 }
 
-function generateVirtualModule(discovery) {
+/** Locale files group by their `.locale` folder: `{ "Base.locale": { "Localisable.strings": source } }`, the shape LocaleServices registers. */
+function renderLocaleResourceMap(entries, variableNames) {
+  if (entries.length === 0) return "Object.freeze({})";
+  const folders = new Map();
+  entries.forEach(({ key }, index) => {
+    const separator = key.indexOf("/");
+    const folderName = separator === -1 ? key : key.slice(0, separator);
+    const fileName = separator === -1 ? "" : key.slice(separator + 1);
+    const files = folders.get(folderName) ?? [];
+    files.push(`      ${quote(fileName)}: ${variableNames[index]},`);
+    folders.set(folderName, files);
+  });
+  const rendered = [...folders].map(([folderName, files]) => `    ${quote(folderName)}: Object.freeze({\n${files.join("\n")}\n    }),`);
+  return `Object.freeze({\n${rendered.join("\n")}\n  })`;
+}
+
+function renderSourceList(entries) {
+  return `Object.freeze([${entries.map((entry) => quote(entry)).join(", ")}])`;
+}
+
+function generateProjectModule(discovery) {
   const imports = [];
   const body = [];
   const bundleExpressions = [];
@@ -247,14 +307,41 @@ function generateVirtualModule(discovery) {
     imports.push(`import ${variableName} from ${quote(`${toViteFileImport(entry.file)}?${query}`)};`);
     return variableName;
   });
+  const addModuleImport = (path, prefix) => {
+    const variableName = `${prefix}${importIndex++}`;
+    imports.push(`import * as ${variableName} from ${quote(toViteFileImport(path))};`);
+    return variableName;
+  };
 
-  discovery.bundles.forEach((bundle, bundleIndex) => {
-    const manifestVariable = `manifestModule${bundleIndex}`;
-    imports.push(`import * as ${manifestVariable} from ${quote(toViteFileImport(bundle.infoPath))};`);
+  imports.push(`import { selectProjectBundles, selectProjectIntegrations } from ${quote(toViteFileImport(derivationModulePath))};`);
+  imports.push('import { createIntegrationContribution, integrationOwners, isDefinedWebspringWidget, isPreferencePaneDefinition, withDiscoveredWebspringItems } from "@syndromatic/syncloudos/webspring";');
+
+  discovery.bundles.forEach((bundle) => {
     const resourceVariables = addUrlImports(bundle.resources.resourceUrls, "url", "resource");
     const localeVariables = addUrlImports(bundle.resources.localeResources, "raw", "locale");
     const fontVariables = addUrlImports(bundle.resources.fontResourceUrls, "url", "font");
-    bundleExpressions.push(`  Object.freeze({\n    manifest: ${manifestVariable},\n    modulePath: ${quote(bundle.modulePath)},\n    loadModule: () => import(${quote(toViteFileImport(bundle.entryPath))}),\n    resourceUrls: ${renderMap(bundle.resources.resourceUrls, resourceVariables)},\n    localeResources: ${renderMap(bundle.resources.localeResources, localeVariables)},\n    fontResourceUrls: ${renderMap(bundle.resources.fontResourceUrls, fontVariables)},\n  })`);
+    const resourceUrls = renderMap(bundle.resources.resourceUrls, resourceVariables);
+    bundleExpressions.push(`  Object.freeze({
+    manifest: Object.freeze(${quote(bundle.manifest)}),
+    modulePath: ${quote(bundle.modulePath)},
+    loadModule: () => import(${quote(toViteFileImport(bundle.entryPath))}),
+    resourceUrls: ${resourceUrls},
+    localeResources: ${renderLocaleResourceMap(bundle.resources.localeResources, localeVariables)},
+    fontResourceUrls: ${renderMap(bundle.resources.fontResourceUrls, fontVariables)},
+  })`);
+  });
+
+  const preferenceSources = discovery.preferences.map((pane) => {
+    const variableName = addModuleImport(pane.entryPath, "preference");
+    return `  { path: ${quote(pane.sourcePath)}, definition: ${variableName}.default }`;
+  });
+  const widgetSources = discovery.widgets.map((widget) => {
+    const variableName = addModuleImport(widget.entryPath, "widget");
+    return `  { path: ${quote(widget.sourcePath)}, definition: ${variableName}.default }`;
+  });
+  const integrationSources = discovery.integrations.map((integration) => {
+    const variableName = addModuleImport(integration.entryPath, "integration");
+    return `  { path: ${quote(integration.sourcePath)}, id: ${quote(integration.id)}, definition: ${variableName}.default, owners: integrationOwners(${variableName}.default, ${quote(integration.sourcePath)}) }`;
   });
 
   let shellExpression = "null";
@@ -266,12 +353,27 @@ function generateVirtualModule(discovery) {
     const localeVariables = addUrlImports(discovery.shell.resources.localeResources, "raw", "shellLocale");
     const fontVariables = addUrlImports(discovery.shell.resources.fontResourceUrls, "url", "shellFont");
     shellExpression = `${shellModuleVariable}.default ?? null`;
-    shellResourcesExpression = `Object.freeze({\n  resourceUrls: ${renderMap(discovery.shell.resources.resourceUrls, resourceVariables)},\n  localeResources: ${renderMap(discovery.shell.resources.localeResources, localeVariables)},\n  fontResourceUrls: ${renderMap(discovery.shell.resources.fontResourceUrls, fontVariables)},\n})`;
+    shellResourcesExpression = `Object.freeze({\n  resourceUrls: ${renderMap(discovery.shell.resources.resourceUrls, resourceVariables)},\n  localeResources: ${renderLocaleResourceMap(discovery.shell.resources.localeResources, localeVariables)},\n  fontResourceUrls: ${renderMap(discovery.shell.resources.fontResourceUrls, fontVariables)},\n})`;
   }
 
-  body.push(`export const bundles = Object.freeze([\n${bundleExpressions.join(",\n")}\n]);`);
-  body.push(`export const shell = ${shellExpression};`);
   body.push(`export const shellResources = ${shellResourcesExpression};`);
+  body.push(`const definedPreferences = [\n${preferenceSources.join(",\n")}\n];`);
+  body.push(`export const preferences = Object.freeze(definedPreferences.map(({ path, definition }) => {
+  if (!isPreferencePaneDefinition(definition)) throw new TypeError(\`\${path} must default-export definePreferencePane(...).\`);
+  return definition;
+}).sort((left, right) => left.order - right.order || left.id.localeCompare(right.id)));`);
+  body.push(`const definedWidgets = [\n${widgetSources.join(",\n")}\n];`);
+  body.push(`export const widgets = Object.freeze(definedWidgets.map(({ path, definition }) => {
+  if (!isDefinedWebspringWidget(definition)) throw new TypeError(\`\${path} must default-export defineWidget(...).\`);
+  return definition;
+}).sort((left, right) => left.order - right.order || left.id.localeCompare(right.id)));`);
+  body.push(`const shellDefinition = ${shellExpression};`);
+  body.push("export const shell = shellDefinition === null ? null : withDiscoveredWebspringItems(shellDefinition, { preferences, widgets });");
+  body.push(`const allBundles = Object.freeze([\n${bundleExpressions.join(",\n")}\n]);`);
+  body.push("const applications = " + (discovery.applications === null ? "null" : renderSourceList(discovery.applications)) + ";");
+  body.push("export const bundles = selectProjectBundles(allBundles, { applications, development: import.meta.env.DEV });");
+  body.push(`const definedIntegrations = [\n${integrationSources.join(",\n")}\n];`);
+  body.push("export const contributions = Object.freeze(selectProjectIntegrations(definedIntegrations, bundles.map(bundle => bundle.manifest.bundleIdentifier)).map(({ id, path, definition }) => createIntegrationContribution(definition, { id, source: path }, bundles)));");
 
   return `${imports.join("\n")}\n\n${body.join("\n")}\n`;
 }
@@ -281,88 +383,180 @@ function normaliseOptions(options) {
   if (!options || typeof options !== "object" || Array.isArray(options)) {
     throw new TypeError("synCloudOS options must be an object when provided.");
   }
-  if (options.appsDirectory !== undefined && typeof options.appsDirectory !== "string") {
-    throw new TypeError("synCloudOS options.appsDirectory must be a string when provided.");
-  }
-  if (options.webspringEntry !== undefined && options.webspringEntry !== false && typeof options.webspringEntry !== "string") {
-    throw new TypeError("synCloudOS options.webspringEntry must be a string or false when provided.");
-  }
-  if (typeof options.appsDirectory === "string" && options.appsDirectory.length === 0) {
-    throw new TypeError("synCloudOS options.appsDirectory must not be empty.");
-  }
-  if (typeof options.webspringEntry === "string" && options.webspringEntry.length === 0) {
-    throw new TypeError("synCloudOS options.webspringEntry must not be empty.");
+  for (const key of ["appsDirectory", "preferencesDirectory", "widgetsDirectory", "integrationsDirectory", "webspringEntry", "themesDirectory"]) {
+    const value = options[key];
+    if (value === undefined) continue;
+    if ((key === "webspringEntry" || key === "themesDirectory") && value === false) continue;
+    if (typeof value !== "string") throw new TypeError(`synCloudOS options.${key} must be a string when provided.`);
+    if (value.length === 0) throw new TypeError(`synCloudOS options.${key} must not be empty.`);
   }
   if (options.typography !== undefined && (typeof options.typography !== "string" || !options.typography)) throw new TypeError("synCloudOS options.typography must name a declaration module.");
+  const applications = parseApplicationSelection(options.applications, "options.applications");
   return Object.freeze({
     appsDirectory: options.appsDirectory,
+    preferencesDirectory: options.preferencesDirectory,
+    widgetsDirectory: options.widgetsDirectory,
+    integrationsDirectory: options.integrationsDirectory,
     webspringEntry: options.webspringEntry,
     typography: options.typography,
+    themesDirectory: options.themesDirectory,
+    applications,
   });
+}
+
+
+/** Direct child folders of one kind: `Billing.prefPane`, `Latest.widget`. */
+function kindFolders(directory, matches, label, entryName, expected, options) {
+  if (directory === null) return [];
+  if (!existsSync(directory)) return [];
+  assertDirectory(directory, label);
+  const folders = [];
+  for (const entry of readEntries(directory, label)) {
+    if (!matches(entry.name)) continue;
+    const path = resolve(directory, entry.name);
+    const stat = assertNoSymlink(path, `${label} entry`);
+    if (!stat.isDirectory()) throw new Error(`SynCloudOS expected ${label} entries to be directories: ${displayPath(path)}.`);
+    const entryPath = resolve(path, entryName);
+    assertFile(entryPath, `${entry.name} entry`, path);
+    assertDefaultExport(entryPath, `${label}/${entry.name}/${entryName}`, expected);
+    folders.push(Object.freeze({
+      name: entry.name,
+      entryPath,
+      sourcePath: slash(relative(options.root, entryPath)),
+    }));
+  }
+  return folders;
 }
 
 function discover(root, options) {
   const appsDirectory = resolve(root, options.appsDirectory ?? defaultAppsDirectory);
-  assertDirectory(appsDirectory, "the SynWare apps directory");
-  const appEntries = readEntries(appsDirectory, "the SynWare apps directory")
-    .filter((entry) => /\.app$/iu.test(entry.name));
-  assertUniqueCaseInsensitive(appEntries.map((entry) => entry.name), "SynWare app directories");
-
-  const bundles = appEntries.map((appEntry) => {
-    const appRoot = resolve(appsDirectory, appEntry.name);
-    assertDirectory(appRoot, `the ${appEntry.name} app bundle`);
+  if (existsSync(appsDirectory)) assertDirectory(appsDirectory, "the SynWare apps directory");
+  const bundles = bundlePaths(root, options.appsDirectory ?? defaultAppsDirectory).map((appRoot) => {
+    const name = posix.basename(slash(appRoot));
+    assertDirectory(appRoot, `the ${name} app bundle`);
     const contentsDirectory = resolve(appRoot, "Contents");
-    assertDirectory(contentsDirectory, `${appEntry.name} Contents`);
+    assertDirectory(contentsDirectory, `${name} Contents`);
     const infoPath = resolve(contentsDirectory, "Info.ts");
     const entryPath = resolve(contentsDirectory, "index.tsx");
-    assertFile(infoPath, `${appEntry.name} Info.ts`, appRoot);
-    assertFile(entryPath, `${appEntry.name} entry`, appRoot);
+    assertFile(infoPath, `${name}/Contents/Info.ts (required)`, appRoot);
+    assertFile(entryPath, `${name} entry`, appRoot);
+    assertDefaultExport(entryPath, `${name}/Contents/index.tsx`, "a React component or an NSEApplication subclass");
     const resourcesDirectory = resolve(contentsDirectory, "Resources");
-    const resources = scanResources(resourcesDirectory, `${appEntry.name} Resources`);
+    const resources = scanResources(resourcesDirectory, `${name} Resources`);
+    const appRelative = slash(relative(appsDirectory, entryPath));
+    const info = parseManifest(infoPath);
+    const manifest = deriveSynWareManifest({ folderName: name, info, resourceUrls: Object.fromEntries(resources.resourceUrls.map(({ key, file }) => [key, file])) });
+    if (!validateManifest(manifest)) throw new TypeError(`${name}/Contents/Info.ts resolves to an invalid manifest: ${validateManifest.errors.map(error => `${error.instancePath || "/"} ${error.message}`).join("; ")}`);
     return Object.freeze({
+      name,
+      bundleIdentifier: manifest.bundleIdentifier,
+      manifest,
       infoPath,
       entryPath,
-      modulePath: `./${slash(relative(appsDirectory, entryPath))}`,
+      modulePath: `./${appRelative}`,
       resources,
     });
   }).sort((left, right) => left.modulePath.localeCompare(right.modulePath, "en"));
+  assertUniqueBundleIdentifiers(bundles);
 
-  const watchRoots = [appsDirectory, ...bundles.flatMap((bundle) => [dirname(bundle.infoPath), dirname(bundle.entryPath), dirname(dirname(bundle.entryPath))])];
+  const preferences = kindFolders(
+    options.preferencesDirectory === false ? null : resolve(root, options.preferencesDirectory ?? defaultPreferencesDirectory),
+    isPreferencePaneFolderName,
+    "the SynWare preference panes directory",
+    "index.tsx",
+    "definePreferencePane(...)",
+    { root },
+  );
+  const widgets = kindFolders(
+    options.widgetsDirectory === false ? null : resolve(root, options.widgetsDirectory ?? defaultWidgetsDirectory),
+    isWidgetFolderName,
+    "the SynWare widgets directory",
+    "index.tsx",
+    "defineWidget(...)",
+    { root },
+  );
+
+  const integrationsDirectory = options.integrationsDirectory === false
+    ? null
+    : resolve(root, options.integrationsDirectory ?? defaultIntegrationsDirectory);
+  const integrations = [];
+  if (integrationsDirectory !== null && existsSync(integrationsDirectory)) {
+    assertDirectory(integrationsDirectory, "the SynWare integrations directory");
+    for (const entry of readEntries(integrationsDirectory, "the SynWare integrations directory")) {
+      if (!isIntegrationFileName(entry.name)) continue;
+      const path = resolve(integrationsDirectory, entry.name);
+      assertFile(path, `${entry.name} integration`, integrationsDirectory);
+      assertDefaultExport(path, `Integrations/${entry.name}`, "defineIntegration(...)");
+      integrations.push(Object.freeze({
+        name: entry.name,
+        entryPath: path,
+        sourcePath: slash(relative(root, path)),
+        id: integrationIdFromFileName(entry.name),
+      }));
+    }
+  }
+
+  const watchRoots = [
+    appsDirectory,
+    root,
+    ...bundles.flatMap((bundle) => [dirname(bundle.entryPath), dirname(dirname(bundle.entryPath))]),
+    ...preferences.flatMap((pane) => [dirname(pane.entryPath), dirname(dirname(pane.entryPath))]),
+    ...widgets.flatMap((widget) => [dirname(widget.entryPath), dirname(dirname(widget.entryPath))]),
+    ...(integrationsDirectory === null ? [] : [integrationsDirectory]),
+  ];
   let shell = null;
   if (options.webspringEntry !== false) {
     const shellEntry = resolve(root, options.webspringEntry ?? defaultWebspringEntry);
     const shellContents = dirname(shellEntry);
-    assertDirectory(shellContents, "the Webspring shell Contents directory");
-    assertFile(shellEntry, "the Webspring shell entry", shellContents);
-    const shellResourcesDirectory = resolve(shellContents, "Resources");
-    const resources = scanResources(shellResourcesDirectory, "Webspring shell Resources");
-    shell = Object.freeze({
-      entryPath: shellEntry,
-      resources,
-    });
-    watchRoots.push(shellContents, shellResourcesDirectory);
+    if (existsSync(shellEntry)) {
+      assertDirectory(shellContents, "the Webspring shell Contents directory");
+      assertFile(shellEntry, "the Webspring shell entry", shellContents);
+      assertDefaultExport(shellEntry, "the Webspring shell entry", "defineWebspring(...)");
+      const shellResourcesDirectory = resolve(shellContents, "Resources");
+      const resources = scanResources(shellResourcesDirectory, "Webspring shell Resources");
+      shell = Object.freeze({ entryPath: shellEntry, resources });
+      watchRoots.push(shellContents, shellResourcesDirectory);
+    }
   }
+
+  const envApplications = parseApplicationSelection(process.env.SYNCLOUDOS_APPLICATIONS, "SYNCLOUDOS_APPLICATIONS");
+  const applications = options.applications ?? envApplications ?? null;
 
   const watchPaths = [
     ...watchRoots,
-    ...bundles.flatMap((bundle) => [bundle.infoPath, bundle.entryPath, ...bundle.resources.files]),
+    ...bundles.flatMap((bundle) => [bundle.entryPath, ...(bundle.infoPath === null ? [] : [bundle.infoPath]), ...bundle.resources.files]),
+    ...preferences.flatMap((pane) => [pane.entryPath]),
+    ...widgets.flatMap((widget) => [widget.entryPath]),
+    ...integrations.map((integration) => integration.entryPath),
     ...(shell ? [shell.entryPath, ...shell.resources.files] : []),
   ];
   const uniqueWatchRoots = [...new Set(watchRoots.map(displayPath))];
   const uniqueWatchPaths = [...new Set(watchPaths.map(displayPath))];
   assertUniqueCaseInsensitive(uniqueWatchRoots, "discovery watch roots");
   assertUniqueCaseInsensitive(uniqueWatchPaths, "discovery watch paths");
-  return Object.freeze({
-    bundles: Object.freeze(bundles),
+  const discovery = {
+    applications,
+    bundles,
+    preferences,
+    widgets,
+    integrations,
     shell,
     watchRoots: Object.freeze(uniqueWatchRoots),
     watchPaths: Object.freeze(uniqueWatchPaths),
-    code: generateVirtualModule({ bundles, shell }),
-  });
+  };
+  return Object.freeze({ ...discovery, code: generateProjectModule(discovery) });
 }
 
 function isWatchedFile(file, watchRoots) {
   return watchRoots.some((root) => isPathInside(root, file));
+}
+
+/**
+ * The discovery the plugin, the static validator and the developer MCP share:
+ * folders in, complete manifest bundles and contributions out.
+ */
+export function discoverSynWareProject(root, options = {}) {
+  return discover(resolve(root), normaliseOptions(options));
 }
 
 function deploymentBasePath(base) {
@@ -408,15 +602,41 @@ function mountPackedSdkAssets(devServer, root, base, cacheDir) {
   for (const mountPath of mountPaths) devServer.middlewares.use(mountPath, serveAsset);
 }
 
+/**
+ * Vite serves pre-bundled dependencies as immutable files, keyed by a hash of the
+ * lockfile and the config. Replacing the installed SDK without a lockfile change
+ * (a local tarball unpacked in place, a linked checkout rebuilt) keeps that key,
+ * so a browser can combine cached and new SDK chunks: two copies of each React
+ * context, and crashes such as "NSEMenuBar requires an NSEOverlayProvider".
+ * Folding this SDK build into the key gives every build new URLs. In a source
+ * checkout there is no built SDK beside this file, and the key is left alone.
+ */
+let pluginSdkBuild;
+/** @internal Exported for tests. A fingerprint of the built SDK in `directory`, or null when it holds no built SDK. */
+export function sdkBuildFingerprint(directory) {
+  const chunks = resolve(directory, "chunks");
+  if (!existsSync(resolve(directory, "package.json")) || !existsSync(chunks)) return null;
+  const hash = createHash("sha256");
+  hash.update(readFileSync(resolve(directory, "package.json")));
+  // Chunk names carry their content hashes; entry files are hashed by content.
+  for (const name of readdirSync(chunks).sort()) hash.update(`chunk:${name}\n`);
+  for (const name of readdirSync(directory).filter(name => /\.(?:js|mjs)$/u.test(name)).sort()) hash.update(`entry:${name}\n`).update(readFileSync(resolve(directory, name)));
+  return hash.digest("hex").slice(0, 16);
+}
+
 export function synCloudOS(options) {
   const pluginOptions = normaliseOptions(options);
   let resolvedConfig = { root: resolve(process.cwd()) };
   let discovery = null;
+  let installationBuild = null;
   let server = null;
   let watcherCleanup = null;
+  let themeBundles = [];
+  let selectedThemes = new Set();
   let typography = null;
   let typographyAssets = new Map();
   let typographyAssetPaths = new Map();
+  const appVirtualModules = new Set();
 
   const refreshTypography = async () => {
     if (!pluginOptions.typography) return;
@@ -442,8 +662,13 @@ export function synCloudOS(options) {
 
   const refresh = () => {
     discovery = discover(resolvedConfig.root, pluginOptions);
+    themeBundles = pluginOptions.themesDirectory === false ? [] : discoverThemeBundles(resolve(resolvedConfig.root, pluginOptions.themesDirectory ?? "src/Themes"));
+    selectedThemes = referencedThemeIdentifiers(resolvedConfig.root, themeBundles);
+    installationBuild = null;
     return discovery;
   };
+
+  const installedBuild = () => installationBuild ??= installedApplicationBuild(resolvedConfig, discovery ?? refresh());
 
   const addWatchFiles = (context, paths) => {
     if (typeof context?.addWatchFile !== "function") return;
@@ -451,11 +676,11 @@ export function synCloudOS(options) {
   };
 
   const invalidateVirtualModule = () => {
-    for (const id of [resolvedVirtualModuleId, resolvedTypographyModuleId]) {
+    for (const id of [resolvedProjectModuleId, resolvedTypographyModuleId, resolvedThemesModuleId, ...themeBundles.map(bundle => "\0" + themeStylePrefix + bundle.theme.bundleIdentifier + ".css"), ...appVirtualModules]) {
       const moduleNode = server?.moduleGraph?.getModuleById(id);
       if (moduleNode) server.moduleGraph.invalidateModule(moduleNode);
     }
-    server?.ws?.send({ type: "full-reload", path: virtualModuleId });
+    server?.ws?.send({ type: "full-reload", path: projectModuleId });
   };
 
   const sendWatcherError = (error) => {
@@ -471,7 +696,8 @@ export function synCloudOS(options) {
 
   const refreshFromWatcher = (file) => {
     const current = discovery ?? refresh();
-    if (!isWatchedFile(file, current.watchRoots)) return false;
+    const themesRoot = pluginOptions.themesDirectory === false ? null : resolve(resolvedConfig.root, pluginOptions.themesDirectory ?? "src/Themes");
+    if (!isWatchedFile(file, current.watchRoots) && !(themesRoot && isPathInside(themesRoot, file)) && !(isPathInside(resolvedConfig.root, file) && /\.(?:tsx?|jsx?|mjs|mts)$/u.test(file))) return false;
     try {
       const next = refresh();
       server?.watcher.add(next.watchPaths);
@@ -482,9 +708,37 @@ export function synCloudOS(options) {
     return true;
   };
 
+  // Standard decorators and hot reload of application modules (scripts/synware/application-toolchain.mjs).
+  const toolchain = createApplicationToolchain();
+
   return {
-    name: "syncloudos:composition",
+    name: "syncloudos:project",
     enforce: "pre",
+    config(config, env) {
+      // Explicit includes override exclusions; remove only SDK entries before Vite merges arrays.
+      if (config.optimizeDeps?.include) {
+        const isSDK = id => id === "@syndromatic/syncloudos" || id.startsWith("@syndromatic/syncloudos/");
+        const removed = config.optimizeDeps.include.filter(isSDK);
+        config.optimizeDeps.include = config.optimizeDeps.include.filter(id => !isSDK(id));
+        if (removed.length) console.warn(`[syncloudos] Removed ${removed.join(", ")} from optimizeDeps.include. The SDK must stay out of dependency pre-bundling so FX classes and app sessions share one module graph.`);
+      }
+      const toolchainConfig = toolchain.config(config, env);
+      pluginSdkBuild ??= sdkBuildFingerprint(fileURLToPath(new URL(".", import.meta.url)));
+      const build = pluginSdkBuild;
+      return {
+        ...toolchainConfig,
+        css: { postcss: { plugins: [builtInThemeCSS()] } },
+        optimizeDeps: {
+          // Vite matches subpaths too: classes, private attribution and mounted sessions must share one graph.
+          exclude: ["@syndromatic/syncloudos"],
+          // These are the CommonJS React peer entries imported by the emitted SDK.
+          include: ["react", "react-dom", "react-dom/client", "react/jsx-runtime"],
+          ...(build ? { esbuildOptions: { define: { __SYNCLOUDOS_SDK_BUILD__: JSON.stringify(build) } } } : {}),
+        },
+      };
+    },
+    api: toolchain.api,
+    transform: toolchain.transform,
 
     async configResolved(config) {
       resolvedConfig = config;
@@ -495,6 +749,7 @@ export function synCloudOS(options) {
     async buildStart() {
       const current = refresh();
       addWatchFiles(this, current.watchPaths);
+      addWatchFiles(this, themeBundles.flatMap(bundle => bundle.files));
       if (typography) {
         addWatchFiles(this, typography.watchPaths);
         if (resolvedConfig.command === "build") {
@@ -504,22 +759,47 @@ export function synCloudOS(options) {
       }
     },
 
-    resolveId(id) {
-      return id === virtualModuleId ? resolvedVirtualModuleId : id === typographyModuleId ? resolvedTypographyModuleId : null;
+    resolveId(id, importer) {
+      // Use the same canonical path and dependency version query as relative SDK imports.
+      if (id === fxRuntimeModuleId) return this.resolve(displayPath(fxRuntimePath), importer, { skipSelf: true });
+      if (id === themesModuleId || id.startsWith(themeStylePrefix)) return "\0" + id;
+      if (id === browserModuleId) return resolvedBrowserModuleId;
+      if (id === "@syndromatic/syncloudos/browser" && importer !== resolvedBrowserModuleId) return resolvedBrowserModuleId;
+      if (id.startsWith(appModulePrefix)) { const resolved = `\0${id}`; appVirtualModules.add(resolved); return resolved; }
+      const fxFamily = id.startsWith("@syndromatic/syncloudos/fx/") ? id.slice("@syndromatic/syncloudos/fx/".length) : null;
+      if ((id === "@syndromatic/syncloudos" || (fxFamily && isFXFamily(fxFamily))) && importer && !importer.startsWith("\0")) {
+        const bundle = (discovery ?? refresh()).bundles.find(bundle => isPathInside(dirname(dirname(bundle.entryPath)), importer.split("?")[0]));
+        if (bundle) {
+          const resolved = `\0${appModulePrefix}${normalizeBundleIdentifier(bundle.bundleIdentifier)}${fxFamily ? `/fx/${fxFamily}` : ""}`;
+          appVirtualModules.add(resolved); return resolved;
+        }
+      }
+      return id === projectModuleId ? resolvedProjectModuleId : id === typographyModuleId ? resolvedTypographyModuleId : null;
     },
 
     load(id) {
+      if (id === resolvedThemesModuleId) return themeModuleSource(themeBundles, selectedThemes, toViteFileImport, themeStylePrefix);
+      if (id.startsWith("\0" + themeStylePrefix)) { const bundleIdentifier = id.slice(themeStylePrefix.length + 1, -4); const bundle = themeBundles.find(bundle => bundle.theme.bundleIdentifier === bundleIdentifier); if (!bundle) throw new Error("Unknown theme: " + bundleIdentifier); return themeStylesheet(bundle, toViteFileImport); }
+      if (id.startsWith(`\0${appModulePrefix}`)) {
+        const app = id.slice(appModulePrefix.length + 1);
+        const separator = app.indexOf("/fx/");
+        return separator < 0 ? createScosAppModuleSource(app) : createFXAppModuleSource(app.slice(0, separator), app.slice(separator + 4), fxRuntimeModuleId);
+      }
+      if (id === resolvedBrowserModuleId) return 'export * from "@syndromatic/syncloudos/browser";\nimport { mountSynCloudOS as mount } from "@syndromatic/syncloudos/browser";\nimport * as project from "virtual:syncloudos/project";\nexport function mountSynCloudOS(options) { return mount({ ...options, composition: options.composition ?? project }); }';
       if (id === resolvedTypographyModuleId) return typographyCode();
-      if (id !== resolvedVirtualModuleId) return null;
+      if (id !== resolvedProjectModuleId) return null;
       return (discovery ?? refresh()).code;
     },
 
     configureServer(devServer) {
       watcherCleanup?.();
       server = devServer;
+      devServer.middlewares.use((request, response, next) => installedBuild().middleware(request, response, next));
       mountPackedSdkAssets(devServer, resolvedConfig.root, resolvedConfig.base, resolvedConfig.cacheDir);
       const current = discovery ?? refresh();
       devServer.watcher.add(current.watchPaths);
+      if (pluginOptions.themesDirectory !== false) devServer.watcher.add(resolve(resolvedConfig.root, pluginOptions.themesDirectory ?? "src/Themes"));
+      devServer.watcher.add(themeBundles.flatMap(bundle => bundle.files));
       if (typography) devServer.watcher.add(typography.watchPaths);
       const watcher = devServer.watcher;
       const eventNames = ["add", "addDir", "unlink", "unlinkDir"];
@@ -542,6 +822,8 @@ export function synCloudOS(options) {
     },
 
     async handleHotUpdate(context) {
+      // An application module takes its own update; the project is unchanged.
+      if (toolchain.acceptsHotUpdate(context)) return undefined;
       if (typography?.watchPaths.some(path => caseKey(path) === caseKey(displayPath(context.file)))) {
         await refreshTypography(); invalidateVirtualModule(); return [];
       }
@@ -553,9 +835,13 @@ export function synCloudOS(options) {
       return [];
     },
 
+    renderStart() {
+      typographyAssetPaths = new Map([...typographyAssets].map(([id, reference]) => [id, this.getFileName(reference)]));
+    },
     generateBundle: {
-      order: "pre",
-      handler() {
+      order: "post",
+      handler(_options, bundle) {
+        installedBuild().emit(this, bundle);
         // Output names belong to this output's emitter, not buildStart's emitter.
         // Resolve them before Vite applies its post HTML transforms.
         typographyAssetPaths = new Map([...typographyAssets].map(([id, reference]) => [id, this.getFileName(reference)]));
@@ -565,7 +851,8 @@ export function synCloudOS(options) {
     transformIndexHtml: {
       order: "post",
       handler(_html, context = {}) {
-        if (!typography) return [];
+        const installationTags = installedBuild().tags(context.path);
+        if (!typography) return installationTags;
         const base = resolvedConfig.base ?? "/";
         const urls = Object.fromEntries(typography.resources.map(resource => {
           const path = resolvedConfig.command === "build" ? typographyAssetPaths.get(resource.id) : slash(relative(resolvedConfig.root, resource.file)).split("/").map(encodeURIComponent).join("/");
@@ -578,6 +865,7 @@ export function synCloudOS(options) {
           return [resource.id, `${base.endsWith("/") ? base : `${base}/`}${path}`];
         }));
         return [
+          ...installationTags,
           ...typography.declaration.preloadResources.map(id => ({ tag:"link", attrs:{rel:"preload", as:"font", href:urls[id], type:packedAssetMime[extname(typography.declaration.resources[id]).toLowerCase()], crossorigin:"anonymous"}, injectTo:"head-prepend" })),
           { tag:"style", attrs:{"data-syncloudos-typography":""}, children:fontDeclarationCSS(typography.declaration, urls), injectTo:"head-prepend" },
         ];

@@ -1,0 +1,18 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 sdk:build
+npm notice run node scripts/synware/build-sdk.mjs
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4460,7): error TS2353: Object literal may only specify known properties, and 'speechSynthesis' does not exist in type 'MountedAppEnvironmentClients'.
+src/SynCloudOS/PlatformAdapters/BrowserRuntimeEnvironment.ts(721,51): error TS2322: Type 'Navigator | null' is not assignable to type '{ readonly onLine?: boolean | undefined; readonly connection?: NetworkInformation | undefined; } | undefined'.
+  Type 'null' is not assignable to type '{ readonly onLine?: boolean | undefined; readonly connection?: NetworkInformation | undefined; } | undefined'.
+src/SynCloudOS/PlatformAdapters/BrowserRuntimeEnvironment.ts(721,80): error TS2322: Type '(Window & typeof globalThis) | null' is not assignable to type 'Pick<EventTarget, "addEventListener" | "removeEventListener"> | undefined'.
+  Type 'null' is not assignable to type 'Pick<EventTarget, "addEventListener" | "removeEventListener"> | undefined'.
+Error: Command failed: C:\Program Files\nodejs\node.exe C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\typescript\bin\tsc -p tsconfig.sdk.json
+    at genericNodeError (node:internal/errors:986:15)
+    at wrappedFn (node:internal/errors:540:14)
+    at checkExecSyncError (node:child_process:943:11)
+    at execFileSync (node:child_process:979:15)
+    at runDeclarationBuild (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/scripts/synware/build-sdk.mjs:120:3)
+    at main (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/scripts/synware/build-sdk.mjs:351:3)
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/scripts/synware/build-sdk.mjs:441:1
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async node:internal/modules/esm/loader:647:26

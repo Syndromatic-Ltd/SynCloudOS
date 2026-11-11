@@ -2,7 +2,7 @@
 
 A document is a live editing session for content the user owns. It keeps a stable identity while its storage location, saved version and windows change, and it tracks whether it has unsaved changes. The runtime supplies the mechanics: autosave, recovery after a crash, version history, conflict detection and undo. Your application supplies the model.
 
-SynWare reach documents through `useSynWareDocument()`, which returns a client scoped to your application. The client exposes the document mechanics under `workspaceDocuments`.
+SynWare reach documents through `useDocument()`, which returns a client scoped to your application. The client exposes the document mechanics under `workspaceDocuments`.
 
 ## Declare a document type
 
@@ -11,9 +11,9 @@ List each kind of document your application edits in the manifest.
 ```ts
 export default {
   schemaVersion: 1,
-  id: "com.example.notes",
+  bundleIdentifier: "com.example.notes",
   version: "1.0.0",
-  title: "Notes",
+  displayName: "Notes",
   documentTypes: [
     { id: "com.example.notes.note", extensions: ["note"], displayName: "Note" },
   ],
@@ -29,7 +29,7 @@ A document model is plain JSON: objects, dense arrays, strings, finite numbers, 
 ## Create, open and edit
 
 ```tsx
-import { useSynWareDocument } from "@syndromatic/syncloudos/sdk";
+import { useDocument } from "@syndromatic/syncloudos/sdk";
 
 interface Note {
   readonly title: string;
@@ -39,7 +39,7 @@ interface Note {
 const typeId = "com.example.notes.note";
 
 export function useNoteActions() {
-  const { workspaceDocuments } = useSynWareDocument();
+  const { workspaceDocuments } = useDocument();
 
   return {
     async create() {
@@ -69,12 +69,26 @@ export function useNoteActions() {
 
 | Kind | Fields | Meaning |
 | --- | --- | --- |
-| `memory` | `namespace`, `key` | Transient storage, useful for tests and scratch work. |
+| `memory` | `namespace`, `key` | Transient storage, useful for tests. |
 | `indexed-db` | `database`, `store`, `key` | Durable browser storage. |
 | `document-store` | `documentId` | The host's document store. |
 | `remote` | `url` | A remote endpoint. |
 
-Opening a location that is already open returns the existing document.
+Each location kind is stored by a document adapter. The browser host (`mountSynCloudOS`) provides `memory` and `indexed-db` out of the box: `memory` keeps documents for the life of the page, and `indexed-db` stores them in the browser under the location's `database`. `document-store` uses the host's document store, and `remote` needs an adapter the host registers, because only the host knows the endpoint and its credentials. A host registers adapters through `applicationDocuments.initialAdapters` or `registerAdapter` in a host contribution's `install`, and an adapter it registers always takes precedence over a built-in one. Without any adapter for a location, opening or saving there fails with `document-adapter-unavailable`. A scratch document that is never saved needs no location at all: call `newDocument` without one.
+
+Opening a location that is already open returns the existing document. Give `openDocument` an `initialModel` to open or create: when nothing is stored at the location yet, it creates a new document there from that model, written on its first save. A stored document always opens with its stored model. Without `initialModel`, a missing document rejects with code `document-not-found`. This makes the first launch the same as every other:
+
+```ts
+async applicationWillFinishLaunching() {
+  this.document = await SCOS.documents.openDocument({
+    typeId: "org.example.lab.simulation",
+    location: { kind: "document-store", documentId: "lab.workspace" },
+    initialModel: emptySimulation(),
+  });
+}
+```
+
+Document-store reads and writes are authorised against the signed-in person's role, not only the application's manifest; see [Entitlements](synware-manifest.md#entitlements-privacy-and-services).
 
 `updateDocument` applies a transform to the current model and records an undo step named by `actionName`. Set a `coalescingKey` so a burst of edits such as typing merges into one step, or `recordUndo: false` for changes that should not be undoable.
 
@@ -122,13 +136,26 @@ Every write names the version it expects, so a conflict always surfaces as a sta
 
 Each document has its own undo history, and `getUndoManager(documentId)` returns it. The history follows the responder that has focus, so pressing undo in one document never reverses another. See [commands, responders and undo](commands-responders-undo.md).
 
+For models containing provider metadata such as ETags, declare an optional `history` policy on the document type:
+
+```ts
+history: {
+  captureContent: model => ({ text: model.text }),
+  restoreContent: (historical, current) => ({ ...current, text: historical.text }),
+},
+```
+
+`captureContent` returns a JSON value or deterministic fingerprint of authored content. Values compare by canonical JSON identity. `restoreContent` merges historical authored content into the current model, retaining current synchronization metadata. Both callbacks are synchronous and pure and receive immutable inputs. Replay validates the resulting model and requires its authored projection to match the historical one before publishing or restoring selection.
+
+With this policy, a `recordUndo: false` adoption preserves existing Undo and Redo only when authored content is unchanged; it still closes typing coalescing. Replacing authored content clears obsolete history. Without the policy, non-history model adoption retains the existing behavior of clearing history. Keep this domain policy on the document type instead of maintaining a separate application undo stack.
+
 ## Document resources
 
 Binary content such as images and audio lives beside the model as document resources. `documentResources.acquire`, `resolve` and `release` manage each resource's lifetime, and `subscribeInvalidation` reports when a resource changes. Keep large assets here so the model stays small enough to save quickly.
 
 ## Documents and windows
 
-A document can appear in one or more windows. `useSynWareWindow().client.openDocumentWindow({ documentId, title, restorationKey })` opens one. The [windows guide](windows.md) covers presentation, restoration and close behaviour.
+A document can appear in one or more windows. `useWindow().client.openDocumentWindow({ documentId, title, restorationKey })` opens one. The [windows guide](windows.md) covers presentation, restoration and close behaviour.
 
 ## Accessibility
 
@@ -170,3 +197,5 @@ The same scoped client exposes `saveAsDocument`, `duplicateDocument`, `moveDocum
 ## Persistent assets and derived output
 
 Stable asset references are native data; live image descriptors and object URLs are temporary leases. See [document assets](document-assets.md) for storage guarantees, preflight, retention and fresh-runtime reopen, and [custom document engines](custom-document-engines.md) for immutable output preparation. PDF/print output captures a settled revision and retains its dependencies without changing document history or saved identity.
+
+Binary import sources accept `NSEDataConvertible`. Document resource inputs expose `data(): Promise<NSEData>` with `type` and `size` metadata; `resolve` returns `NSEData | null`. PDF output returns `NSEData` in its existing exported-result wrapper. Use `.count` for byte length, `.bytes` for a defensive web view and `.blob(mimeType)` only when calling a browser API. The native document model remains plain JSON; retain resource/asset references in the model.

@@ -1,6 +1,6 @@
 /*
  * SynCloudOS
- * Copyright © 2026 Syndromatic Ltd. All rights reserved.
+ * Copyright Â© 2026 Syndromatic Ltd. All rights reserved.
  *
  * Designed by Kavish Krishnakumar in Manchester.
  *
@@ -24,6 +24,7 @@ import {
 } from "./BrowserAnimationReplication";
 import { layerContentSVG, layerSVGColour } from "./BrowserAnimationLayerContent";
 import { AFXTimingFunction } from "../../FX/AnimationFX/AFXTimingFunction";
+import { continuousLayerPath } from "../../FX/AnimationFX/layerCornerGeometry";
 import { afxStringsInterpolate, interpolateAFXValue } from "../../FX/AnimationFX/interpolation";
 import { AFXTransform3D } from "../../FX/AnimationFX/AFXTransform3D";
 import { AFXPresentationHistory } from "../../FX/AnimationFX/AFXPresentationHistory";
@@ -351,6 +352,12 @@ class BrowserAnimationAdapter implements RuntimeAnimationAdapter {
                   : cssTiming(request.timing)),
             }),
           );
+    let nativeCancelled = false;
+    const cancelNative = () => {
+      if (nativeCancelled) return;
+      nativeCancelled = true;
+      native?.cancel();
+    };
     let settled = false;
     let paused = false;
     let finishListenerInstalled = false;
@@ -488,15 +495,39 @@ class BrowserAnimationAdapter implements RuntimeAnimationAdapter {
       );
       this.#timerCount += 1;
     };
-    const scheduleCompletion = () => {
+    const armCompletionTimer = (delayMs: number) => {
       if (!this.#platform.schedule || settled || paused) return;
-      scheduledAt = this.#platform.now();
       completionTimer = this.#platform.schedule(() => {
         completionTimer = undefined;
         this.#timerCount = Math.max(0, this.#timerCount - 1);
-        settle("completed");
-      }, remainingMs);
+        if (settled || paused) return;
+        if (!native) {
+          settle("completed");
+          return;
+        }
+        if (native.playState === "idle") {
+          settle("cancelled");
+          return;
+        }
+        const currentTime = native.currentTime;
+        if (native.playState === "finished" ||
+            (typeof currentTime === "number" && Number.isFinite(currentTime) && currentTime >= totalDuration)) {
+          settle("completed");
+          return;
+        }
+        // Native timelines can lag wall time while the browser is busy. This
+        // watchdog observes native completion without restarting scroll ticks
+        // or changing the wall-clock origin used by pause/resume and scrolling.
+        armCompletionTimer(typeof currentTime === "number" && Number.isFinite(currentTime)
+          ? Math.max(16, totalDuration - currentTime)
+          : 16);
+      }, delayMs);
       this.#timerCount += 1;
+    };
+    const scheduleCompletion = () => {
+      if (!this.#platform.schedule || settled || paused) return;
+      scheduledAt = this.#platform.now();
+      armCompletionTimer(remainingMs);
       scheduleScrollTick();
     };
     const playback: RuntimeAnimationPlayback = {
@@ -533,7 +564,7 @@ class BrowserAnimationAdapter implements RuntimeAnimationAdapter {
           return true;
         } catch {
           try {
-            native?.cancel();
+            cancelNative();
           } catch {
             /* settlement still owns cleanup */
           }
@@ -550,7 +581,7 @@ class BrowserAnimationAdapter implements RuntimeAnimationAdapter {
           return true;
         } catch {
           try {
-            native?.cancel();
+            cancelNative();
           } catch {
             /* settlement still owns cleanup */
           }
@@ -583,18 +614,18 @@ class BrowserAnimationAdapter implements RuntimeAnimationAdapter {
         if (!paused) scheduleCompletion();
       },
       cancel() {
-        if (!settled) {
-          try {
-            native?.cancel();
-          } finally {
-            settle("cancelled");
-          }
+        // A finished forwards fill is still a native presentation effect.
+        // Explicit cancellation removes it without changing settled facts.
+        try {
+          cancelNative();
+        } finally {
+          if (!settled) settle("cancelled");
         }
       },
       dispose() {
         if (!settled) {
           try {
-            native?.cancel();
+            cancelNative();
           } finally {
             settle("cancelled");
           }
@@ -610,7 +641,7 @@ class BrowserAnimationAdapter implements RuntimeAnimationAdapter {
           (compiled.scroll && !this.#platform.applyScrollPosition)
         ) {
           settle("cancelled");
-          native?.cancel();
+          cancelNative();
           return;
         }
         native?.pause();
@@ -625,11 +656,11 @@ class BrowserAnimationAdapter implements RuntimeAnimationAdapter {
             scrollSample(request, compiled, terminalProgress(request)),
           );
         settle("completed");
-        native?.cancel();
+        cancelNative();
       } catch {
         settle("cancelled");
         try {
-          native?.cancel();
+          cancelNative();
         } catch {
           /* Teardown remains terminal. */
         }
@@ -660,7 +691,7 @@ class BrowserAnimationAdapter implements RuntimeAnimationAdapter {
       }
     } catch (error) {
       try {
-        native?.cancel();
+        cancelNative();
       } catch {
         /* preserve the startup failure */
       }
@@ -798,10 +829,13 @@ export class BrowserAnimationLayerSurface implements AFXLayerSurface {
   #mask: BrowserAnimationLayerSurface | null = null;
   #maskRelease: (() => void) | null = null;
   #disposed = false;
-  constructor(element: HTMLElement) {
+  #ownsElement = false;
+  readonly #layout: "layer" | "css";
+  constructor(element: HTMLElement, layout: "layer" | "css" = "layer") {
     if (!element || !element.style || !element.ownerDocument)
       throw new TypeError("Layer surface requires a real DOM element.");
     this.#element = element;
+    this.#layout = layout;
     this.#originalStyle = element.getAttribute("style");
   }
   replicationCapability() {
@@ -826,6 +860,13 @@ export class BrowserAnimationLayerSurface implements AFXLayerSurface {
       return Object.freeze({ state: "unsupported" as const, reason: "unmanaged-dom-background-image" });
     return Object.freeze({ state: "portable-owned" as const });
   }
+  /** Allocates the projection for a detached layer added under this one: a new element owned by the surface and removed with it. */
+  createSublayerSurface(): AFXLayerSurface {
+    if (this.#disposed) throw new DOMException("The layer surface is disposed.", "InvalidStateError");
+    const surface = new BrowserAnimationLayerSurface(this.#element.ownerDocument.createElement("div"));
+    surface.#ownsElement = true;
+    return surface;
+  }
   startCompositorAnimation(input: AFXLayerCompositorRequest): AFXLayerCompositorPlayback | null {
     const snapshot = this.#snapshot;
     if (this.#disposed || !snapshot || !this.#element.isConnected || typeof this.#element.animate !== "function") return null;
@@ -835,7 +876,7 @@ export class BrowserAnimationLayerSurface implements AFXLayerSurface {
     try {
       native = this.#element.animate(
         [{ [input.property]: from }, { [input.property]: to }],
-        { duration: input.duration * 1000, delay: input.delay * 1000, easing: input.easing, fill: "forwards" },
+        { duration: input.duration * 1000, delay: input.delay * 1000, iterations: input.iterations ?? 1, easing: input.easing, fill: input.fill ?? "forwards" },
       );
     } catch {
       // A browser may expose Web Animations but reject this particular effect.
@@ -889,11 +930,13 @@ export class BrowserAnimationLayerSurface implements AFXLayerSurface {
     this.#snapshot = snapshot;
     const { bounds, position, anchorPoint, transform, values } = snapshot;
     const style = this.#element.style;
-    style.position = "absolute";
-    style.left = "0px";
-    style.top = "0px";
-    style.width = `${bounds.width}px`;
-    style.height = `${bounds.height}px`;
+    if (this.#layout === "layer") {
+      style.position = "absolute";
+      style.left = "0px";
+      style.top = "0px";
+      style.width = `${bounds.width}px`;
+      style.height = `${bounds.height}px`;
+    }
     style.transformOrigin = "0 0";
     style.opacity = String(snapshot.opacity);
     style.transform = snapshot.inheritedTransform
@@ -934,12 +977,13 @@ export class BrowserAnimationLayerSurface implements AFXLayerSurface {
     style.borderStyle = "solid";
     style.borderWidth = `${snapshot.style.borderWidth}px`;
     style.borderColor = snapshot.style.borderColour?.toCSS() ?? "transparent";
-    style.boxSizing = "border-box";
+    if (this.#layout === "layer") style.boxSizing = "border-box";
     const corners = snapshot.style.maskedCorners;
     style.borderTopLeftRadius = `${corners.includes("top-left") ? snapshot.style.cornerRadius : 0}px`;
     style.borderTopRightRadius = `${corners.includes("top-right") ? snapshot.style.cornerRadius : 0}px`;
     style.borderBottomLeftRadius = `${corners.includes("bottom-left") ? snapshot.style.cornerRadius : 0}px`;
     style.borderBottomRightRadius = `${corners.includes("bottom-right") ? snapshot.style.cornerRadius : 0}px`;
+    style.setProperty("corner-shape", snapshot.style.cornerCurve === "continuous" ? "squircle" : "round");
     const shadow = snapshot.style.shadowColour;
     style.boxShadow =
       shadow && snapshot.style.shadowOpacity > 0
@@ -1318,7 +1362,7 @@ export class BrowserAnimationLayerSurface implements AFXLayerSurface {
       ? `<svg aria-hidden="true" focusable="false" viewBox="${bounds.x} ${bounds.y} ${Math.max(1, bounds.width)} ${Math.max(1, bounds.height)}" style="position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none">${content}</svg>`
       : "";
     const markup =
-      `<div data-afx-projective-layer="" opacity="${snapshot.opacity}" style="position:absolute;left:0;top:0;width:${bounds.width}px;height:${bounds.height}px;box-sizing:border-box;transform-origin:0 0;transform-style:preserve-3d;transform:${transform.toCSS()};opacity:${snapshot.opacity};visibility:${style.hidden ? "hidden" : "visible"};backface-visibility:${style.doubleSided ? "visible" : "hidden"};background:${background};border:${style.borderWidth}px solid ${border};border-radius:${radii};overflow:${snapshot.clipsToBounds ? "hidden" : "visible"};pointer-events:none">` +
+      `<div data-afx-projective-layer="" opacity="${snapshot.opacity}" style="position:absolute;left:0;top:0;width:${bounds.width}px;height:${bounds.height}px;box-sizing:border-box;transform-origin:0 0;transform-style:preserve-3d;transform:${transform.toCSS()};opacity:${snapshot.opacity};visibility:${style.hidden ? "hidden" : "visible"};backface-visibility:${style.doubleSided ? "visible" : "hidden"};background:${background};border:${style.borderWidth}px solid ${border};border-radius:${radii};corner-shape:${style.cornerCurve === "continuous" ? "squircle" : "round"};overflow:${snapshot.clipsToBounds ? "hidden" : "visible"};pointer-events:none">` +
       contentSVG +
       children +
       `</div>`;
@@ -1377,7 +1421,9 @@ export class BrowserAnimationLayerSurface implements AFXLayerSurface {
         ? r
         : 0,
     );
-    const path = `M ${inset + tl} ${inset} H ${inset + w - tr} Q ${inset + w} ${inset} ${inset + w} ${inset + tr} V ${inset + h - br} Q ${inset + w} ${inset + h} ${inset + w - br} ${inset + h} H ${inset + bl} Q ${inset} ${inset + h} ${inset} ${inset + h - bl} V ${inset + tl} Q ${inset} ${inset} ${inset + tl} ${inset} Z`;
+    const path = style.cornerCurve === "continuous"
+      ? continuousLayerPath(inset, inset, w, h, r, style.maskedCorners)
+      : `M ${inset + tl} ${inset} H ${inset + w - tr} Q ${inset + w} ${inset} ${inset + w} ${inset + tr} V ${inset + h - br} Q ${inset + w} ${inset + h} ${inset + w - br} ${inset + h} H ${inset + bl} Q ${inset} ${inset + h} ${inset} ${inset + h - bl} V ${inset + tl} Q ${inset} ${inset} ${inset + tl} ${inset} Z`;
     const id = "afx-mask-node-" + budget.count;
     const content = historical?.contentMarkup ?? this.#contentMarkup;
     budget.bytes = (budget.bytes ?? 0) + content.length + path.length + 500;
@@ -1461,7 +1507,8 @@ export class BrowserAnimationLayerSurface implements AFXLayerSurface {
     this.#contentElement = null;
     this.#replicationElement?.remove();
     this.#replicationElement = null;
-    if (this.#originalStyle === null) this.#element.removeAttribute("style");
+    if (this.#ownsElement) this.#element.remove();
+    else if (this.#originalStyle === null) this.#element.removeAttribute("style");
     else this.#element.setAttribute("style", this.#originalStyle);
   }
 }

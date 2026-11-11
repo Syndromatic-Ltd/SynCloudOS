@@ -1,0 +1,322 @@
+[
+  {
+    "engine": "chromium",
+    "capabilities": {
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36",
+      "secure": true,
+      "speech": {
+        "speechSynthesis": true,
+        "nativePermissionPrompt": false
+      },
+      "voices": 3,
+      "network": {
+        "pathMonitoring": true,
+        "networkInformation": true,
+        "interfaceType": false,
+        "expensive": false,
+        "constrained": false,
+        "authorizationPrompt": false
+      },
+      "video": {
+        "pictureInPicture": true,
+        "remotePlayback": true
+      },
+      "audio": {
+        "capture": true,
+        "inputSelection": true,
+        "outputSelection": false,
+        "sessionType": false,
+        "mimeTypes": [
+          "audio/webm;codecs=opus",
+          "audio/mp4",
+          "audio/webm"
+        ]
+      },
+      "capture": {
+        "camera": true,
+        "display": true,
+        "deviceEnumeration": true,
+        "elementRestriction": true,
+        "elementCrop": true
+      },
+      "activation": true
+    },
+    "pip": {
+      "active": true,
+      "native": true
+    },
+    "pipStop": {
+      "active": false
+    },
+    "speech": {
+      "completed": true,
+      "elapsedMilliseconds": 3138.7000000476837,
+      "voices": 3
+    },
+    "routes": {
+      "availability": null,
+      "state": "unknown"
+    },
+    "category": {
+      "error": {
+        "name": "NotSupportedError",
+        "message": "Audio session types are unavailable."
+      }
+    },
+    "paths": [
+      {
+        "status": "satisfied",
+        "interfaceType": null,
+        "isExpensive": null,
+        "isConstrained": null,
+        "saveData": false,
+        "effectiveType": "4g",
+        "downlinkMegabitsPerSecond": 9.6,
+        "roundTripTimeMilliseconds": 0,
+        "source": "browserHint"
+      },
+      {
+        "status": "unsatisfied",
+        "interfaceType": null,
+        "isExpensive": null,
+        "isConstrained": null,
+        "saveData": false,
+        "effectiveType": "4g",
+        "downlinkMegabitsPerSecond": 9.6,
+        "roundTripTimeMilliseconds": 0,
+        "source": "browserHint"
+      },
+      {
+        "status": "satisfied",
+        "interfaceType": null,
+        "isExpensive": null,
+        "isConstrained": null,
+        "saveData": false,
+        "effectiveType": "4g",
+        "downlinkMegabitsPerSecond": 9.6,
+        "roundTripTimeMilliseconds": 0,
+        "source": "browserHint"
+      }
+    ],
+    "element": {
+      "error": {
+        "name": "NotSupportedError",
+        "message": "Not supported"
+      }
+    },
+    "errors": []
+  },
+  {
+    "engine": "firefox",
+    "capabilities": {
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0",
+      "secure": true,
+      "speech": {
+        "speechSynthesis": true,
+        "nativePermissionPrompt": false
+      },
+      "voices": 0,
+      "network": {
+        "pathMonitoring": true,
+        "networkInformation": false,
+        "interfaceType": false,
+        "expensive": false,
+        "constrained": false,
+        "authorizationPrompt": false
+      },
+      "video": {
+        "pictureInPicture": false,
+        "remotePlayback": false
+      },
+      "audio": {
+        "capture": true,
+        "inputSelection": true,
+        "outputSelection": false,
+        "sessionType": false,
+        "mimeTypes": [
+          "audio/webm;codecs=opus",
+          "audio/ogg;codecs=opus",
+          "audio/webm"
+        ]
+      },
+      "capture": {
+        "camera": true,
+        "display": true,
+        "deviceEnumeration": true,
+        "elementRestriction": false,
+        "elementCrop": false
+      },
+      "activation": true
+    },
+    "pip": {
+      "error": {
+        "name": "NotSupportedError",
+        "message": "Video presentation API is unavailable."
+      }
+    },
+    "pipStop": null,
+    "speech": {
+      "completed": true,
+      "elapsedMilliseconds": 3553,
+      "voices": 5
+    },
+    "routes": {
+      "error": {
+        "name": "NotSupportedError",
+        "message": "Video presentation API is unavailable."
+      }
+    },
+    "category": {
+      "error": {
+        "name": "NotSupportedError",
+        "message": "Audio session types are unavailable."
+      }
+    },
+    "paths": [
+      {
+        "status": "satisfied",
+        "interfaceType": null,
+        "isExpensive": null,
+        "isConstrained": null,
+        "saveData": null,
+        "effectiveType": null,
+        "downlinkMegabitsPerSecond": null,
+        "roundTripTimeMilliseconds": null,
+        "source": "browserHint"
+      },
+      {
+        "status": "unsatisfied",
+        "interfaceType": null,
+        "isExpensive": null,
+        "isConstrained": null,
+        "saveData": null,
+        "effectiveType": null,
+        "downlinkMegabitsPerSecond": null,
+        "roundTripTimeMilliseconds": null,
+        "source": "browserHint"
+      },
+      {
+        "status": "satisfied",
+        "interfaceType": null,
+        "isExpensive": null,
+        "isConstrained": null,
+        "saveData": null,
+        "effectiveType": null,
+        "downlinkMegabitsPerSecond": null,
+        "roundTripTimeMilliseconds": null,
+        "source": "browserHint"
+      }
+    ],
+    "element": {
+      "skipped": "No portable automatic native screen chooser for this engine."
+    },
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "capabilities": {
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.5 Safari/605.1.15",
+      "secure": true,
+      "speech": {
+        "speechSynthesis": false,
+        "nativePermissionPrompt": false
+      },
+      "voices": 0,
+      "network": {
+        "pathMonitoring": true,
+        "networkInformation": false,
+        "interfaceType": false,
+        "expensive": false,
+        "constrained": false,
+        "authorizationPrompt": false
+      },
+      "video": {
+        "pictureInPicture": false,
+        "remotePlayback": false
+      },
+      "audio": {
+        "capture": false,
+        "inputSelection": false,
+        "outputSelection": false,
+        "sessionType": false,
+        "mimeTypes": []
+      },
+      "capture": {
+        "camera": false,
+        "display": false,
+        "deviceEnumeration": false,
+        "elementRestriction": false,
+        "elementCrop": false
+      },
+      "activation": true
+    },
+    "preparation": {
+      "error": {
+        "message": "page.evaluate: TypeError: canvas.captureStream is not a function. (In 'canvas.captureStream(1)', 'canvas.captureStream' is undefined)"
+      }
+    },
+    "pip": {
+      "error": {
+        "name": "NotSupportedError",
+        "message": "Video presentation API is unavailable."
+      }
+    },
+    "pipStop": null,
+    "speech": {
+      "error": {
+        "message": "page.evaluate: NotSupportedError: Speech synthesis is unavailable."
+      }
+    },
+    "routes": {
+      "error": {
+        "name": "NotSupportedError",
+        "message": "Video presentation API is unavailable."
+      }
+    },
+    "category": {
+      "error": {
+        "name": "NotSupportedError",
+        "message": "Audio session types are unavailable."
+      }
+    },
+    "paths": [
+      {
+        "status": "satisfied",
+        "interfaceType": null,
+        "isExpensive": null,
+        "isConstrained": null,
+        "saveData": null,
+        "effectiveType": null,
+        "downlinkMegabitsPerSecond": null,
+        "roundTripTimeMilliseconds": null,
+        "source": "browserHint"
+      },
+      {
+        "status": "unsatisfied",
+        "interfaceType": null,
+        "isExpensive": null,
+        "isConstrained": null,
+        "saveData": null,
+        "effectiveType": null,
+        "downlinkMegabitsPerSecond": null,
+        "roundTripTimeMilliseconds": null,
+        "source": "browserHint"
+      },
+      {
+        "status": "satisfied",
+        "interfaceType": null,
+        "isExpensive": null,
+        "isConstrained": null,
+        "saveData": null,
+        "effectiveType": null,
+        "downlinkMegabitsPerSecond": null,
+        "roundTripTimeMilliseconds": null,
+        "source": "browserHint"
+      }
+    ],
+    "element": {
+      "skipped": "No portable automatic native screen chooser for this engine."
+    },
+    "errors": []
+  }
+]

@@ -1,0 +1,351 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run playwright test tests/e2e/theme-baseline.spec.ts --project=chromium --project=chromium-high-dpr --workers=2
+
+Running 82 tests using 2 workers
+
+(node:33488) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:87392) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  2 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2 (6.8s)
+  x   1 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 (7.0s)
+(node:24400) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  3 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3 (6.0s)
+  ok  4 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 4 (6.3s)
+  ok  5 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 5 (6.1s)
+  ok  6 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 6 (6.2s)
+  ok  7 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 7 (6.1s)
+  ok  8 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 8 (6.1s)
+  ok  9 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 9 (6.1s)
+  ok 10 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 10 (6.3s)
+  ok 11 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 11 (6.0s)
+  ok 12 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 12 (6.0s)
+  ok 13 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 13 (6.0s)
+  ok 14 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 14 (6.3s)
+  ok 15 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 15 (6.2s)
+  ok 16 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 16 (6.3s)
+  ok 17 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 17 (7.8s)
+  ok 18 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 18 (6.3s)
+  ok 19 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 19 (6.2s)
+  ok 20 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 20 (6.7s)
+  x  21 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (7.2s)
+(node:53104) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 22 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 2 (7.0s)
+  ok 24 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 4 (6.1s)
+  ok 23 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 3 (6.2s)
+  ok 25 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 5 (6.2s)
+  ok 26 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 6 (6.4s)
+  ok 27 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 7 (6.3s)
+  ok 28 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 8 (6.1s)
+  ok 29 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 9 (6.4s)
+  ok 30 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 10 (6.4s)
+  ok 31 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 11 (6.3s)
+  ok 32 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 12 (6.3s)
+  ok 33 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 13 (6.3s)
+  ok 34 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 14 (6.7s)
+  ok 35 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 15 (6.6s)
+  ok 36 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 16 (6.6s)
+  ok 38 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 18 (6.7s)
+  ok 37 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 17 (8.1s)
+  ok 39 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 19 (6.2s)
+  ok 41 [chromium] › tests\e2e\theme-baseline.spec.ts:113:1 › stepper hit targets preserve the painted bezel (1.5s)
+  ok 40 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 20 (6.9s)
+(node:74764) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:52156) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 43 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2 (7.1s)
+  x  42 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 (7.3s)
+(node:91216) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 44 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3 (6.3s)
+  ok 45 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 4 (6.7s)
+  ok 46 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 5 (6.6s)
+  ok 47 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 6 (6.6s)
+  ok 48 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 7 (6.7s)
+  ok 49 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 8 (6.3s)
+  ok 50 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 9 (6.5s)
+  ok 51 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 10 (6.5s)
+  ok 52 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 11 (6.5s)
+  ok 53 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 12 (6.4s)
+  ok 54 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 13 (6.5s)
+  ok 55 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 14 (6.5s)
+  ok 56 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 15 (6.8s)
+  ok 57 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 16 (6.4s)
+  ok 59 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 18 (6.7s)
+  ok 58 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 17 (8.4s)
+  ok 60 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 19 (6.4s)
+  ok 61 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 20 (6.9s)
+  x  62 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (7.5s)
+(node:79184) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 63 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 2 (7.4s)
+  ok 64 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 3 (6.7s)
+  ok 65 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 4 (6.1s)
+  ok 66 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 5 (6.2s)
+  ok 67 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 6 (6.3s)
+  ok 68 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 7 (6.3s)
+  ok 69 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 8 (6.1s)
+  ok 70 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 9 (6.4s)
+  ok 71 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 10 (6.3s)
+  ok 72 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 11 (6.3s)
+  ok 73 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 12 (6.3s)
+  ok 74 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 13 (6.4s)
+  ok 75 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 14 (6.8s)
+  ok 76 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 15 (6.6s)
+  ok 77 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 16 (6.5s)
+  ok 79 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 18 (6.6s)
+  ok 78 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 17 (8.4s)
+  ok 80 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 19 (6.4s)
+  ok 82 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:113:1 › stepper hit targets preserve the painted bezel (1.6s)
+  ok 81 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 20 (7.2s)
+
+
+  1) [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 › input-box ───
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('#theme-baseline-surface')
+      1810 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: light-input-box.png
+
+    Call log:
+      - Expect "toHaveScreenshot(light-input-box.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('#theme-baseline-surface')
+        - locator resolved to <main id="theme-baseline-surface" data-baseline-surface="input-box">…</main>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 1810 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('#theme-baseline-surface')
+        - locator resolved to <main id="theme-baseline-surface" data-baseline-surface="input-box">…</main>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 1810 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      103 |         await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+      104 |       });
+    > 105 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+          |                                                                     ^
+      106 |       if (surface.interaction === "press") await page.mouse.up();
+      107 |       expect(errors).toEqual([]);
+      108 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:105:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: light-input-box (image/png) ─────────────────────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\light-input-box-chromium-win32.png
+    Received: test-results\chromium\theme-baseline-light-catalogue-partition-1-chromium\light-input-box-actual.png
+    Diff:     test-results\chromium\theme-baseline-light-catalogue-partition-1-chromium\light-input-box-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\chromium\theme-baseline-light-catalogue-partition-1-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\chromium\theme-baseline-light-catalogue-partition-1-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\chromium\theme-baseline-light-catalogue-partition-1-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 › input-box ────
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('#theme-baseline-surface')
+      24093 pixels (ratio 0.11 of all image pixels) are different.
+
+      Snapshot: dark-input-box.png
+
+    Call log:
+      - Expect "toHaveScreenshot(dark-input-box.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('#theme-baseline-surface')
+        - locator resolved to <main id="theme-baseline-surface" data-baseline-surface="input-box">…</main>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 24093 pixels (ratio 0.11 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('#theme-baseline-surface')
+        - locator resolved to <main id="theme-baseline-surface" data-baseline-surface="input-box">…</main>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 24093 pixels (ratio 0.11 of all image pixels) are different.
+
+
+      103 |         await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+      104 |       });
+    > 105 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+          |                                                                     ^
+      106 |       if (surface.interaction === "press") await page.mouse.up();
+      107 |       expect(errors).toEqual([]);
+      108 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:105:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: dark-input-box (image/png) ──────────────────────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\dark-input-box-chromium-win32.png
+    Received: test-results\chromium\theme-baseline-dark-catalogue-partition-1-chromium\dark-input-box-actual.png
+    Diff:     test-results\chromium\theme-baseline-dark-catalogue-partition-1-chromium\dark-input-box-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\chromium\theme-baseline-dark-catalogue-partition-1-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\chromium\theme-baseline-dark-catalogue-partition-1-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\chromium\theme-baseline-dark-catalogue-partition-1-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 › input-box
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('#theme-baseline-surface')
+      1810 pixels (ratio 0.01 of all image pixels) are different.
+
+      Snapshot: light-input-box.png
+
+    Call log:
+      - Expect "toHaveScreenshot(light-input-box.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('#theme-baseline-surface')
+        - locator resolved to <main id="theme-baseline-surface" data-baseline-surface="input-box">…</main>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 1810 pixels (ratio 0.01 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('#theme-baseline-surface')
+        - locator resolved to <main id="theme-baseline-surface" data-baseline-surface="input-box">…</main>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 1810 pixels (ratio 0.01 of all image pixels) are different.
+
+
+      103 |         await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+      104 |       });
+    > 105 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+          |                                                                     ^
+      106 |       if (surface.interaction === "press") await page.mouse.up();
+      107 |       expect(errors).toEqual([]);
+      108 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:105:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: light-input-box (image/png) ─────────────────────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\light-input-box-chromium-high-dpr-win32.png
+    Received: test-results\theme-baseline-light-catalogue-partition-1-chromium-high-dpr\light-input-box-actual.png
+    Diff:     test-results\theme-baseline-light-catalogue-partition-1-chromium-high-dpr\light-input-box-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\theme-baseline-light-catalogue-partition-1-chromium-high-dpr\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\theme-baseline-light-catalogue-partition-1-chromium-high-dpr\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\theme-baseline-light-catalogue-partition-1-chromium-high-dpr\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 › input-box
+
+    Error: expect(locator).toHaveScreenshot(expected) failed
+
+    Locator: locator('#theme-baseline-surface')
+      24093 pixels (ratio 0.11 of all image pixels) are different.
+
+      Snapshot: dark-input-box.png
+
+    Call log:
+      - Expect "toHaveScreenshot(dark-input-box.png)" with timeout 10000ms
+        - verifying given screenshot expectation
+      - waiting for locator('#theme-baseline-surface')
+        - locator resolved to <main id="theme-baseline-surface" data-baseline-surface="input-box">…</main>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - 24093 pixels (ratio 0.11 of all image pixels) are different.
+      - waiting 100ms before taking screenshot
+      - waiting for locator('#theme-baseline-surface')
+        - locator resolved to <main id="theme-baseline-surface" data-baseline-surface="input-box">…</main>
+      - taking element screenshot
+        - disabled all CSS animations
+      - waiting for fonts to load...
+      - fonts loaded
+      - attempting scroll into view action
+        - waiting for element to be stable
+      - captured a stable screenshot
+      - 24093 pixels (ratio 0.11 of all image pixels) are different.
+
+
+      103 |         await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+      104 |       });
+    > 105 |       await expect(surface.fullPage ? page.locator("body") : frame).toHaveScreenshot(`${scheme}-${surface.id}.png`, { maxDiffPixels: 0, animations: "disabled", caret: "hide" });
+          |                                                                     ^
+      106 |       if (surface.interaction === "press") await page.mouse.up();
+      107 |       expect(errors).toEqual([]);
+      108 |     }, { timeout: 60_000 });
+        at test.step.timeout (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:105:69)
+        at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\tests\e2e\theme-baseline.spec.ts:19:84
+
+    attachment #1: dark-input-box (image/png) ──────────────────────────────────────────────────────
+    Expected: tests\e2e\theme-baseline.spec.ts-snapshots\dark-input-box-chromium-high-dpr-win32.png
+    Received: test-results\theme-baseline-dark-catalogue-partition-1-chromium-high-dpr\dark-input-box-actual.png
+    Diff:     test-results\theme-baseline-dark-catalogue-partition-1-chromium-high-dpr\dark-input-box-diff.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\theme-baseline-dark-catalogue-partition-1-chromium-high-dpr\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\theme-baseline-dark-catalogue-partition-1-chromium-high-dpr\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\theme-baseline-dark-catalogue-partition-1-chromium-high-dpr\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4 failed
+    [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 ────────────────
+    [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 ─────────────────
+    [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 ───────
+    [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 ────────
+  78 passed (4.5m)

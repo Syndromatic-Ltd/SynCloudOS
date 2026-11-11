@@ -1,0 +1,35 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/foundation-faithful-decimal.test.ts tests/runtime/foundation-faithful-date.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/foundation-faithful-date.test.ts (9 tests | 1 failed) 47ms
+   × rejects unsupported era and pattern calendars 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/foundation-faithful-date.test.ts > rejects unsupported era and pattern calendars
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ tests/runtime/foundation-faithful-date.test.ts:58:60
+     56|   const f=new NSEDateFormatter({locale:"en-GB",timeZone:"UTC",dateForm…
+     57|   expect(f.date("0000-01-01")).toBeNull();
+     58|   expect(() => f.string(new Date("0000-01-01T00:00:00Z"))).toThrow(/er…
+       |                                                            ^
+     59|   const b=new NSEDateFormatter({locale:"en-US-u-ca-buddhist",timeZone:…
+     60|   expect(() => b.string(new Date())).toThrow(/Gregorian/i);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 15 passed (16)
+   Start at  19:18:00
+   Duration  247ms (transform 80ms, setup 56ms, import 54ms, tests 52ms, environment 0ms)
+

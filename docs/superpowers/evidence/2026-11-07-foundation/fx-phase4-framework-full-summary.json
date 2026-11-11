@@ -1,0 +1,309 @@
+{
+  "passedTests": 7348,
+  "failed": [
+    {
+      "file": "tests/integration/text-system-example.test.ts",
+      "failures": [],
+      "message": "ENOSPC: no space left on device, write"
+    },
+    {
+      "file": "tests/performance/text-primitives-performance.test.ts",
+      "failures": [],
+      "message": "ENOSPC: no space left on device, write"
+    },
+    {
+      "file": "tests/runtime/app-share-client.test.ts",
+      "failures": [
+        {
+          "name": "mounted AppSDK share client reports a completed native share as shared",
+          "messages": [
+            "Error: promise rejected \"DOMException{ stack: 'SecurityError:…' }\" instead of resolving\n    at _Assertion.__VITEST_RESOLVES__ (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/expect/dist/index.js:1710:17)\n    at _Assertion.propertyGetter (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/chai/index.js:1607:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/chai/index.js:1696:22)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/app-share-client.test.ts:222:38\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)"
+          ]
+        },
+        {
+          "name": "mounted AppSDK share client reports only a genuine AbortError cancellation as cancelled",
+          "messages": [
+            "Error: promise rejected \"DOMException{ stack: 'SecurityError:…' }\" instead of resolving\n    at _Assertion.__VITEST_RESOLVES__ (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/expect/dist/index.js:1710:17)\n    at _Assertion.propertyGetter (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/chai/index.js:1607:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/chai/index.js:1696:22)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/app-share-client.test.ts:231:38\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)"
+          ]
+        },
+        {
+          "name": "mounted AppSDK share client reports unavailable native sharing without attempting a native call",
+          "messages": [
+            "Error: promise rejected \"DOMException{ stack: 'SecurityError:…' }\" instead of resolving\n    at _Assertion.__VITEST_RESOLVES__ (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/expect/dist/index.js:1710:17)\n    at _Assertion.propertyGetter (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/chai/index.js:1607:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/chai/index.js:1696:22)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/app-share-client.test.ts:238:38\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)"
+          ]
+        },
+        {
+          "name": "mounted AppSDK share client rejects an unexpected native share failure for the mounted app to present",
+          "messages": [
+            "Error: expected DOMException{ stack: 'SecurityError:…' } to match object { name: 'NotAllowedError' }\n    at _Assertion.__VITEST_REJECTS__ (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/expect/dist/index.js:1747:17)\n    at _Assertion.propertyGetter (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/chai/index.js:1607:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/chai/index.js:1696:22)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/app-share-client.test.ts:247:38\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)"
+          ]
+        },
+        {
+          "name": "mounted AppSDK share client distinguishes unsupported sharing from cancellation in the explicit API",
+          "messages": [
+            "AssertionError: expected { provider: 'none', …(5) } to match object { availability: 'unsupported', …(1) }\n(4 matching properties omitted from actual)\n    at Proxy.<anonymous> (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/expect/dist/index.js:1283:10)\n    at Proxy.<anonymous> (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/expect/dist/index.js:1156:15)\n    at Proxy.methodWrapper (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/chai/index.js:1737:25)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/app-share-client.test.ts:251:31\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20"
+          ]
+        }
+      ],
+      "message": ""
+    },
+    {
+      "file": "tests/runtime/architecture-boundaries.test.ts",
+      "failures": [],
+      "message": "ENOSPC: no space left on device, write"
+    },
+    {
+      "file": "tests/runtime/browser-application-host.test.tsx",
+      "failures": [],
+      "message": "ENOSPC: no space left on device, write"
+    },
+    {
+      "file": "tests/runtime/browser-global-boundary.test.ts",
+      "failures": [
+        {
+          "name": "browser-global runtime boundary keeps browser globals behind explicit platform adapters",
+          "messages": [
+            "AssertionError: expected [ …(9) ] to deeply equal []\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/browser-global-boundary.test.ts:166:22\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10)\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2956:64"
+          ]
+        }
+      ],
+      "message": ""
+    },
+    {
+      "file": "tests/runtime/developer-mcp.test.ts",
+      "failures": [],
+      "message": "ENOSPC: no space left on device, write"
+    },
+    {
+      "file": "tests/runtime/framework-doc-links.test.ts",
+      "failures": [
+        {
+          "name": "framework documentation links only to files and headings that exist",
+          "messages": [
+            "AssertionError: expected [ Array(1) ] to deeply equal []\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/framework-doc-links.test.ts:85:20\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10)\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2956:64"
+          ]
+        },
+        {
+          "name": "framework documentation links every guide from the framework index",
+          "messages": [
+            "AssertionError: expected [ …(2) ] to deeply equal []\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/framework-doc-links.test.ts:104:22\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10)\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2956:64"
+          ]
+        }
+      ],
+      "message": ""
+    },
+    {
+      "file": "tests/runtime/heritage-inspector-source.test.ts",
+      "failures": [],
+      "message": "ENOSPC: no space left on device, write"
+    },
+    {
+      "file": "tests/runtime/host-update-readiness.test.ts",
+      "failures": [
+        {
+          "name": "host readiness owner integration wires the actual mounted share boundary to the runtime-owned underlying promise",
+          "messages": [
+            "AssertionError: expected +0 to be 1 // Object.is equality\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/host-update-readiness.test.ts:147:75\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10)\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2956:64"
+          ]
+        },
+        {
+          "name": "host readiness owner integration creates runtime-specific picker instrumentation for a shared environment and retains late native work",
+          "messages": [
+            "AssertionError: expected +0 to be 1 // Object.is equality\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/host-update-readiness.test.ts:159:92\n    at Timeout.checkCallback (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/vitest/dist/chunks/test.DNmyFkvJ.js:3383:20)\n    at listOnTimeout (node:internal/timers:685:17)\n    at processTimers (node:internal/timers:618:7)"
+          ]
+        },
+        {
+          "name": "retains real mounted file-write work across mount retirement without charging a sibling runtime",
+          "messages": [
+            "AssertionError: expected 'denied' to be 'accepted' // Object.is equality\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/host-update-readiness.test.ts:317:25"
+          ]
+        }
+      ],
+      "message": ""
+    },
+    {
+      "file": "tests/runtime/nse-file-browser-packed.test.ts",
+      "failures": [],
+      "message": "ENOSPC: no space left on device, write"
+    },
+    {
+      "file": "tests/runtime/nse-page-tear.test.ts",
+      "failures": [],
+      "message": "ENOSPC: no space left on device, write"
+    },
+    {
+      "file": "tests/runtime/preference-panes.test.tsx",
+      "failures": [
+        {
+          "name": "System Preferences panes lists the built-ins in their default order, without Account when sign-in is not offered",
+          "messages": [
+            "AssertionError: expected [ 'Appearance', …(8) ] to deeply equal [ 'Appearance', …(6) ]\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/preference-panes.test.tsx:67:41\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10)\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2956:64"
+          ]
+        },
+        {
+          "name": "System Preferences panes lists Account first when the host offers sign-in",
+          "messages": [
+            "AssertionError: expected [ 'Account', 'Appearance', …(8) ] to deeply equal [ 'Account', 'Appearance', …(6) ]\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/preference-panes.test.tsx:73:57\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10)\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2956:64"
+          ]
+        },
+        {
+          "name": "System Preferences panes hides built-ins by id",
+          "messages": [
+            "AssertionError: expected [ 'Appearance', 'Notifications', …(5) ] to deeply equal [ 'Appearance', 'Notifications', …(3) ]\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/preference-panes.test.tsx:94:41\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10)\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2956:64"
+          ]
+        },
+        {
+          "name": "System Preferences panes adds developer panes and orders every pane by order",
+          "messages": [
+            "AssertionError: expected [ 'First', 'Appearance', …(10) ] to deeply equal [ 'First', 'Appearance', …(8) ]\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/preference-panes.test.tsx:106:8\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10)\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2956:64"
+          ]
+        },
+        {
+          "name": "System Preferences panes replaces a built-in with a developer pane of the same id, in the list and when opened",
+          "messages": [
+            "AssertionError: expected [ 'Appearance', 'My Sounds', …(7) ] to deeply equal [ 'Appearance', 'My Sounds', …(5) ]\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/preference-panes.test.tsx:111:59\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10)\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2956:64"
+          ]
+        }
+      ],
+      "message": ""
+    },
+    {
+      "file": "tests/runtime/runtime-keyboard-listener-guard.test.ts",
+      "failures": [],
+      "message": "ENOSPC: no space left on device, write"
+    },
+    {
+      "file": "tests/runtime/runtime-singleton-boundary.test.ts",
+      "failures": [],
+      "message": "ENOSPC: no space left on device, write"
+    },
+    {
+      "file": "tests/runtime/runtime.test.ts",
+      "failures": [
+        {
+          "name": "runtime controller, inspector, and transaction contracts keeps replacement managers runtime-owned and uninstalls their host resources on disposal",
+          "messages": [
+            "Error: promise rejected \"Error: SynCloudOS.PluginRegistry.register…\" instead of resolving\n    at _Assertion.__VITEST_RESOLVES__ (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/expect/dist/index.js:1710:17)\n    at _Assertion.propertyGetter (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/chai/index.js:1607:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/chai/index.js:1696:22)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/runtime.test.ts:324:51\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)"
+          ]
+        }
+      ],
+      "message": ""
+    },
+    {
+      "file": "tests/runtime/synapp-sdk-package.test.ts",
+      "failures": [
+        {
+          "name": "portable SynWare SDK packages compiles, bundles and mounts a genuinely external consumer against packed public exports",
+          "messages": [
+            "Error: Command failed: C:\\Program Files\\nodejs\\node.exe shared-identity.mjs\nnode:internal/modules/run_main:107\r\n    triggerUncaughtException(\r\n    ^\r\n\r\nAssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\r\n+ actual - expected\r\n\r\n  [\r\n    'BrowserImageProcessingWorker',\r\n    'BrowserWebGPUImageProcessingBackend',\r\n    'InMemoryDocumentAdapter',\r\n    'IndexedDBDocumentRecoveryStore',\r\n+   'SCAuthorization',\r\n+   'SCAuthorizationRights',\r\n    'createBrowserAcceleratedImageProcessingPipeline',\r\n    'createBrowserImageProcessingPipeline',\r\n    'createBrowserImageProcessingWorkerBackend',\r\n    'createBrowserWebGPUImageProcessingBackend',\r\n    'createDocumentAssetSaveCoordinator',\r\n\r\n    at file:///C:/Users/Kavish%20Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/.artifacts/synware-external-ol7mjJ/shared-identity.mjs:77:8\r\n    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)\r\n    at async node:internal/modules/esm/loader:647:26\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {\r\n  generatedMessage: true,\r\n  code: 'ERR_ASSERTION',\r\n  actual: [\r\n    'BrowserImageProcessingWorker',\r\n    'BrowserWebGPUImageProcessingBackend',\r\n    'InMemoryDocumentAdapter',\r\n    'IndexedDBDocumentRecoveryStore',\r\n    'SCAuthorization',\r\n    'SCAuthorizationRights',\r\n    'createBrowserAcceleratedImageProcessingPipeline',\r\n    'createBrowserImageProcessingPipeline',\r\n    'createBrowserImageProcessingWorkerBackend',\r\n    'createBrowserWebGPUImageProcessingBackend',\r\n    'createDocumentAssetSaveCoordinator',\r\n    'createDocumentAssetStorageAdapter',\r\n    'createInMemoryDocumentAssetStore',\r\n    'createIndexedDBDocumentAssetStore',\r\n    'createRegisteredFontResourceLoader',\r\n    'createSynCloudOSHostContribution',\r\n    'fontResourceMimeTypeForPath',\r\n    'mountSynCloudOS',\r\n    'trustSynWareBundleForCanonicalHost'\r\n  ],\r\n  expected: [\r\n    'BrowserImageProcessingWorker',\r\n    'BrowserWebGPUImageProcessingBackend',\r\n    'InMemoryDocumentAdapter',\r\n    'IndexedDBDocumentRecoveryStore',\r\n    'createBrowserAcceleratedImageProcessingPipeline',\r\n    'createBrowserImageProcessingPipeline',\r\n    'createBrowserImageProcessingWorkerBackend',\r\n    'createBrowserWebGPUImageProcessingBackend',\r\n    'createDocumentAssetSaveCoordinator',\r\n    'createDocumentAssetStorageAdapter',\r\n    'createInMemoryDocumentAssetStore',\r\n    'createIndexedDBDocumentAssetStore',\r\n    'createRegisteredFontResourceLoader',\r\n    'createSynCloudOSHostContribution',\r\n    'fontResourceMimeTypeForPath',\r\n    'mountSynCloudOS',\r\n    'trustSynWareBundleForCanonicalHost'\r\n  ],\r\n  operator: 'deepStrictEqual',\r\n  diff: 'simple'\r\n}\r\n\r\nNode.js v24.22.1\r\n\n    at genericNodeError (node:internal/errors:986:15)\n    at wrappedFn (node:internal/errors:540:14)\n    at checkExecSyncError (node:child_process:943:11)\n    at execFileSync (node:child_process:979:15)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/synapp-sdk-package.test.ts:416:5\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)"
+          ]
+        }
+      ],
+      "message": ""
+    },
+    {
+      "file": "tests/runtime/synapp-sdk-testing.test.tsx",
+      "failures": [
+        {
+          "name": "gates mounted public SDK operations through real deterministic adapters",
+          "messages": [
+            "AssertionError: expected 'clipboard:SecurityError' to be 'clipboard:ok' // Object.is equality\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/synapp-sdk-testing.test.tsx:231:48\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20"
+          ]
+        }
+      ],
+      "message": ""
+    },
+    {
+      "file": "tests/runtime/synware-public-api-boundary-guard.test.ts",
+      "failures": [],
+      "message": "ENOSPC: no space left on device, write"
+    },
+    {
+      "file": "tests/runtime/synware-public-api-repairs-packed.test.ts",
+      "failures": [],
+      "message": "ENOSPC: no space left on device, write"
+    },
+    {
+      "file": "tests/runtime/system-ui-boundaries.test.ts",
+      "failures": [],
+      "message": "ENOSPC: no space left on device, write"
+    },
+    {
+      "file": "tests/runtime/chronosphere/chronosphere-packed-consumer.test.ts",
+      "failures": [
+        {
+          "name": "preserves typed neutral versions and prepared custom views in an installed SDK",
+          "messages": [
+            "Error: ENOSPC: no space left on device, copyfile 'C:\\Users\\Kavish Krishnakumar\\AppData\\Local\\Temp\\syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451\\.artifacts\\synapp-sdk\\archives\\syndromatic-syncloudos-1.0.0-beta.2-3a916a2abf8b56f610e9bd4360a3aafbf5ee881b272f673515828adb92a35c77.tgz' -> 'C:\\Users\\Kavish Krishnakumar\\AppData\\Local\\Temp\\chronosphere-versions-lGNjBT\\syndromatic-syncloudos-1.0.0-beta.2-3a916a2abf8b56f610e9bd4360a3aafbf5ee881b272f673515828adb92a35c77.tgz'\n    at copyFileSync (node:fs:3210:11)\n    at copyVerifiedSdkArchive (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/scripts/synware/installed-consumer.mjs:102:15)\n    at createInstalledConsumer (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/scripts/synware/installed-consumer.mjs:124:18)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/chronosphere/chronosphere-packed-consumer.test.ts:28:20\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20"
+          ]
+        }
+      ],
+      "message": ""
+    },
+    {
+      "file": "tests/runtime/fx/mounted-recording.test.ts",
+      "failures": [
+        {
+          "name": "keeps unavailable sessions truthful, isolated and revoked",
+          "messages": [
+            "Error: Audio capture is unavailable.\n    at BrowserAudioSession.assertActive (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/src/SynCloudOS/PlatformAdapters/BrowserAudioCaptureAdapter.ts:153:134)\n    at BrowserAudioSession.subscribe (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/src/SynCloudOS/PlatformAdapters/BrowserAudioCaptureAdapter.ts:155:42)\n    at AUFXAudioSession.subscribe (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/src/FX/AudioFX/AUFXAudioSession.ts:118:55)\n    at createAudioSessionFacade (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/src/SynCloudOS/AppSDK/audioSessionFacade.ts:95:38)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/src/SynCloudOS/AppSDK/mountedAudioSessions.ts:49:24\n    at Object.acquire (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/src/SynCloudOS/HostServices/mountedResourceScope.ts:147:23)\n    at Object.createSession (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/src/SynCloudOS/AppSDK/mountedAudioSessions.ts:46:20)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/fx/mounted-recording.test.ts:41:84\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26"
+          ]
+        },
+        {
+          "name": "passes only the mount-issued opaque input capability to its capture host",
+          "messages": [
+            "Error: Audio capture is unavailable.\n    at BrowserAudioSession.assertActive (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/src/SynCloudOS/PlatformAdapters/BrowserAudioCaptureAdapter.ts:153:134)\n    at BrowserAudioSession.subscribe (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/src/SynCloudOS/PlatformAdapters/BrowserAudioCaptureAdapter.ts:155:42)\n    at AUFXAudioSession.subscribe (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/src/FX/AudioFX/AUFXAudioSession.ts:118:55)\n    at createAudioSessionFacade (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/src/SynCloudOS/AppSDK/audioSessionFacade.ts:95:38)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/src/SynCloudOS/AppSDK/mountedAudioSessions.ts:49:24\n    at Object.acquire (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/src/SynCloudOS/HostServices/mountedResourceScope.ts:147:23)\n    at Object.createSession (C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/src/SynCloudOS/AppSDK/mountedAudioSessions.ts:46:20)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/fx/mounted-recording.test.ts:55:131\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26"
+          ]
+        }
+      ],
+      "message": ""
+    },
+    {
+      "file": "tests/runtime/fx/packed-lumina.test.ts",
+      "failures": [],
+      "message": "ENOSPC: no space left on device, write"
+    },
+    {
+      "file": "tests/runtime/fx/packed-media.test.ts",
+      "failures": [],
+      "message": "ENOSPC: no space left on device, write"
+    },
+    {
+      "file": "tests/runtime/fx/packed-value-foundations.test.ts",
+      "failures": [],
+      "message": "ENOSPC: no space left on device, write"
+    },
+    {
+      "file": "tests/runtime/fx/packed-video.test.ts",
+      "failures": [],
+      "message": "ENOSPC: no space left on device, write"
+    },
+    {
+      "file": "tests/runtime/fx/phase5-real-authority.test.ts",
+      "failures": [
+        {
+          "name": "uses real lifecycle policy and captured entitlements for retained device clients",
+          "messages": [
+            "Error: expected DOMException{ stack: 'AbortError: Mo…' } to match object { name: 'SecurityError' }\n    at _Assertion.__VITEST_REJECTS__ (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/expect/dist/index.js:1747:17)\n    at _Assertion.propertyGetter (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/chai/index.js:1607:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/chai/index.js:1696:22)\n    at C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-fx-phase4-adoption-final-8c78a917-20261107211451/tests/runtime/fx/phase5-real-authority.test.ts:41:39\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20"
+          ]
+        }
+      ],
+      "message": ""
+    },
+    {
+      "file": "tests/runtime/fx/text-font-host.test.ts",
+      "failures": [],
+      "message": "ENOSPC: no space left on device, write"
+    },
+    {
+      "file": "tests/runtime/fx/text-font-resource.test.ts",
+      "failures": [],
+      "message": "ENOSPC: no space left on device, write"
+    }
+  ],
+  "commit": "8c78a917def1c587e852e860e416175508f8fa53",
+  "testFiles": 926,
+  "failedFiles": 30,
+  "failedTests": 23,
+  "passedFiles": 896
+}

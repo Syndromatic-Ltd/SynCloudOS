@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import type { MEFXClock, MEFXClockReading } from "../MediaFX/MEFXClock";
 import { MEFXTime } from "../MediaFX/MEFXTime";
 import type { MIFXOutputLease } from "./MIFXAccess";
@@ -128,7 +129,7 @@ export class MIFXScheduler {
 
   get queuedCount(): number { return this.#queue.length; }
 
-  schedule(data: Uint8Array, target: MEFXTime): MIFXScheduledSend {
+  schedule(input: NSEDataConvertible, target: MEFXTime): MIFXScheduledSend {
     this.#assertActive();
     if (!(target instanceof MEFXTime) || target.value.kind !== "finite") throw new TypeError("Scheduled MIDI time must be finite MEFXTime.");
     const reading = this.#clock.now();
@@ -144,7 +145,7 @@ export class MIFXScheduler {
     });
     event = {
       sequence: this.#nextSequence++,
-      data: checkedData(data),
+      data: checkedData(new Uint8Array(NSEData.from(input).bytes)),
       target,
       generation: reading.generation,
       targetHostMilliseconds: deltaMilliseconds <= 0 ? hostNow : hostNow + deltaMilliseconds,

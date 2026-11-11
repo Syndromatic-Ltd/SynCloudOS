@@ -7,6 +7,7 @@
 "apps.loading" = "Caricamento {app}";
 "apps.loadingPackage" = "Caricamento {packageName}";
 "apps.missingComponent" = "SynCloudOS non è riuscito a trovare un componente per {packageName}.";
+"apps.reopen" = "Riapri";
 "apps.reorderable" = "{app}, riordinabile";
 "notifications.actions" = "Azioni di notifica";
 "notifications.centreTitle" = "Centro notifiche";
@@ -40,7 +41,6 @@
 "quickswitch.open" = "Apri Cambio rapido";
 "quickswitch.openedShortcut" = "{app}, aperto, scorciatoia {shortcut}";
 "quickswitch.visibleApps" = "App Webspring visibili";
-"shelf.ariaLabel" = "Webspring notizie e stato";
 "webspring.additionalApps.ariaLabel" = "Ulteriori Webspring app";
 "webspring.apps.ariaLabel" = "Webspring app";
 "webspring.ariaLabel" = "SynCloudOS Webspring";

@@ -1,0 +1,22 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/authentication-services.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/authentication-services.test.ts (8 tests | 1 failed) 11ms
+     × rejects invalid relying parties, empty challenges and out-of-range user handles before prompting 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/authentication-services.test.ts > optional AuthenticationServices passkeys > rejects invalid relying parties, empty challenges and out-of-range user handles before prompting
+AssertionError: expected function to throw an error, but it didn't
+ ❯ tests/runtime/authentication-services.test.ts:121:115
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  19:13:07
+   Duration  407ms (transform 213ms, setup 30ms, import 204ms, tests 11ms, environment 0ms)

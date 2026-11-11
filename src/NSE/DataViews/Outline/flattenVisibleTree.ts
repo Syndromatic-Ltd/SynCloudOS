@@ -18,19 +18,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { TreeNode } from "../../../SynCloudOS/Models";
+import type { TreeControllerNodeSnapshot } from "../../Controllers/treeControllerSnapshot";
 import type { NSEDataViewKey } from "../Core";
-import type { NSEOutlineRow } from "./outlineTypes";
+import type { NSEOutlineViewRow } from "./outlineTypes";
 
 export function flattenVisibleTree<T, TId extends NSEDataViewKey>(
-  roots: readonly TreeNode<T, TId>[],
+  roots: readonly TreeControllerNodeSnapshot<T, TId>[],
   expandedIds: ReadonlySet<TId>,
-  isExpandable: (item: T, node: TreeNode<T, TId>) => boolean = (_item, node) => node.children.length > 0,
-): readonly NSEOutlineRow<T, TId>[] {
-  const rows: NSEOutlineRow<T, TId>[] = [];
+  isExpandable: (item: T, node: TreeControllerNodeSnapshot<T, TId>) => boolean = (_item, node) => node.children.length > 0,
+): readonly NSEOutlineViewRow<T, TId>[] {
+  const rows: NSEOutlineViewRow<T, TId>[] = [];
   const seen = new Set<TId>();
   const pending: Array<{
-    node: TreeNode<T, TId>;
+    node: TreeControllerNodeSnapshot<T, TId>;
     level: number;
     positionInSet: number;
     setSize: number;

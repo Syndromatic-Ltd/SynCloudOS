@@ -1,0 +1,27 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 typecheck
+npm notice run tsc -b --pretty false
+src/Foundation/internal/compression.ts(20,5): error TS2322: Type 'CompressionStream' is not assignable to type 'ReadableWritablePair<Uint8Array<ArrayBufferLike>, Uint8Array<ArrayBufferLike>>'.
+  Types of property 'writable' are incompatible.
+    Type 'WritableStream<BufferSource>' is not assignable to type 'WritableStream<Uint8Array<ArrayBufferLike>>'.
+      Type 'BufferSource' is not assignable to type 'Uint8Array<ArrayBufferLike>'.
+        Type 'ArrayBuffer' is missing the following properties from type 'Uint8Array<ArrayBufferLike>': BYTES_PER_ELEMENT, buffer, byteOffset, copyWithin, and 24 more.
+src/NSE/Controllers/NSEArrayController.ts(21,58): error TS2305: Module '"../../SynCloudOS/Models"' has no exported member 'sortWithDescriptors'.
+src/NSE/Controllers/NSETreeController.ts(21,58): error TS2305: Module '"../../SynCloudOS/Models"' has no exported member 'sortWithDescriptors'.
+src/NSE/Controls/Fields/NSEFields.tsx(343,19): error TS2304: Cannot find name 'isPartialStringValid'.
+src/NSE/Controls/Fields/NSEFields.tsx(358,19): error TS2304: Cannot find name 'isPartialStringValid'.
+src/NSE/DataViews/RuleEditor/NSEPredicateEditor.tsx(46,62): error TS2339: Property 'editingText' does not exist on type 'NSEFormatter<unknown>'.
+src/NSE/DataViews/RuleEditor/NSEPredicateEditor.tsx(47,148): error TS2339: Property 'editingText' does not exist on type 'NSEFormatter<unknown>'.
+src/NSE/DataViews/RuleEditor/NSEPredicateEditor.tsx(50,33): error TS2339: Property 'editingText' does not exist on type 'NSEFormatter<unknown>'.
+src/NSE/DataViews/RuleEditor/NSEPredicateEditor.tsx(51,99): error TS2339: Property 'editingText' does not exist on type 'NSEFormatter<unknown>'.
+src/NSE/DataViews/RuleEditor/NSEPredicateEditor.tsx(57,40): error TS2339: Property 'parse' does not exist on type 'NSEFormatter<unknown>'.
+src/NSE/DataViews/RuleEditor/NSEPredicateEditor.tsx(92,44): error TS2339: Property 'parse' does not exist on type 'NSEFormatter<unknown>'.
+src/NSE/DataViews/RuleEditor/NSERuleEditor.tsx(76,59): error TS2339: Property 'editingText' does not exist on type 'NSEFormatter<unknown>'.
+src/NSE/DataViews/RuleEditor/NSERuleEditor.tsx(83,41): error TS2339: Property 'parse' does not exist on type 'NSEFormatter<unknown>'.
+src/NSE/DataViews/RuleEditor/predicateTemplates.ts(81,3): error TS2739: Type 'Readonly<{ format: (value: unknown) => string; editingText: (value: unknown) => string; parse: (text: string) => { ok: true; value: number; readonly error?: undefined; } | { ok: false; error: { code: string; message: string; input: string; }; value?: undefined; } | { ...; } | { ...; }; validatePartial: (text: string...' is missing the following properties from type 'NSEFormatter<unknown>': string, editingString, getObjectValue, isPartialStringValid
+src/NSE/DataViews/Table/NSETableView.tsx(249,61): error TS2339: Property 'editingText' does not exist on type 'NSEFormatter<unknown>'.
+src/NSE/DataViews/Table/NSETableView.tsx(259,24): error TS2339: Property 'parse' does not exist on type 'NSEFormatter<unknown>'.
+src/NSE/DataViews/Table/NSETableView.tsx(519,54): error TS2339: Property 'validatePartial' does not exist on type 'NSEFormatter<unknown>'.
+src/NSE/DataViews/Table/NSETableView.tsx(531,36): error TS2339: Property 'format' does not exist on type 'NSEFormatter<unknown>'.
+src/NSE/sdkPackageEntry.ts(62,10): error TS2305: Module '"../SynCloudOS/Models"' has no exported member 'sortWithDescriptors'.
+src/SynCloudOS/Models/TreeNode.ts(22,30): error TS2307: Cannot find module './NSEIndexPath' or its corresponding type declarations.
+src/SynCloudOS/SynCloudOS.ts(136,15): error TS2307: Cannot find module './Models/GeometryValues' or its corresponding type declarations.

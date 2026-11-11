@@ -1,0 +1,8 @@
+src/SynCloudOS/PlatformAdapters/BrowserPasskeyAuthorization.ts:25 accesses browser global globalThis outside the platform adapter boundary
+src/SynCloudOS/PlatformAdapters/BrowserPasskeyAuthorization.ts:27 accesses browser global navigator outside the platform adapter boundary
+src/SynCloudOS/PlatformAdapters/BrowserPasskeyAuthorization.ts:29 accesses browser global navigator outside the platform adapter boundary
+src/SynCloudOS/PlatformAdapters/BrowserPasskeyAuthorization.ts:32 accesses browser global navigator outside the platform adapter boundary
+src/SynCloudOS/PlatformAdapters/BrowserPasskeyAuthorization.ts:34 accesses browser global navigator outside the platform adapter boundary
+src/SynCloudOS/PlatformAdapters/BrowserPasskeyAuthorization.ts:38 accesses browser global location outside the platform adapter boundary
+src/FrameworkTests/Windows/WindowManagementFixture.tsx:29 -> src/NSE/Overlays/NSEPopover.tsx: devtools must use a public nse entrypoint
+src/NSE/Controls/Values/valueControlTypes.ts:27 -> src/SynCloudOS/Undo/undoTypes.ts: nse must use a public runtime entrypoint

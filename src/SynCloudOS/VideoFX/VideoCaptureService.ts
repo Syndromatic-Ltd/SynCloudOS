@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import type { VFXContentFilter } from "../../FX/VideoFX/VFXContentFilter";
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type {
   VFXCameraCaptureRequest,
   VFXCaptureKind,
@@ -45,7 +47,7 @@ import { VFXFrameProcessor } from "../../FX/VideoFX/VFXFrameProcessor";
 import type { IFXRenderBackend } from "../../FX/ImageFX/IFXRenderBackend";
 
 export interface VideoCaptureSessionHost {
-  createSession(signal?: AbortSignal, capability?: object): VFXCaptureSession;
+  createSession(signal?: AbortSignal, capability?: object, reauthoriseElement?: () => boolean): VFXCaptureSession;
 }
 
 export interface VideoDecoderBackendHost {
@@ -72,6 +74,7 @@ const unavailableVideoCaptureHost: VideoCaptureSessionHost = Object.freeze({
       kind: null,
       settings: null,
       capabilities: Object.freeze({ camera: false, display: false, deviceEnumeration: false }),
+      getAuthorizationStatus: async () => "unavailable" as const,
       enumerateDevices: async () => Object.freeze([]),
       requestCamera: unsupported,
       requestDisplay: unsupported,
@@ -93,6 +96,7 @@ const unavailableVideoCaptureHost: VideoCaptureSessionHost = Object.freeze({
 });
 
 export interface VideoCaptureServiceSessionOptions {
+  readonly reauthoriseElement?: () => boolean;
   readonly signal?: AbortSignal;
   readonly appId?: string;
   readonly capability?: object;
@@ -183,7 +187,7 @@ export class VideoCaptureService {
   ): VFXDecoderSession {
     if (this.#disposed) throw new Error("Video capture service is disposed.");
     ownership.signal?.throwIfAborted();
-    if (ownership.appId && this.#closedOwners.has(ownership.appId))
+    if (ownership.appId && this.#closedOwners.has(normalizeBundleIdentifier(ownership.appId)))
       throw new DOMException("Video decoder owner is closed.", "AbortError");
     const backend = this.decoderHost?.createBackend({ outputStorage: options.outputStorage });
     if (!backend) throw new DOMException("Video decoding is unavailable on this host.", "NotSupportedError");
@@ -218,7 +222,7 @@ export class VideoCaptureService {
   ): VFXEncoderSession {
     if (this.#disposed) throw new Error("Video capture service is disposed.");
     ownership.signal?.throwIfAborted();
-    if (ownership.appId && this.#closedOwners.has(ownership.appId))
+    if (ownership.appId && this.#closedOwners.has(normalizeBundleIdentifier(ownership.appId)))
       throw new DOMException("Video encoder owner is closed.", "AbortError");
     const backend = this.encoderHost?.createBackend();
     if (!backend) throw new DOMException("Video encoding is unavailable on this host.", "NotSupportedError");
@@ -253,9 +257,9 @@ export class VideoCaptureService {
   ): VFXFrameProcessorSession {
     if (this.#disposed) throw new Error("Video capture service is disposed.");
     ownership.signal?.throwIfAborted();
-    if (ownership.appId && this.#closedOwners.has(ownership.appId))
+    if (ownership.appId && this.#closedOwners.has(normalizeBundleIdentifier(ownership.appId)))
       throw new DOMException("Video frame processor owner is closed.", "AbortError");
-    const backend = this.processorHost?.createBackend(ownership.appId ?? "video:anonymous") ?? null;
+    const backend = this.processorHost?.createBackend(ownership.appId ? normalizeBundleIdentifier(ownership.appId) : "video:anonymous") ?? null;
     const raw = new VFXFrameProcessor({ ...options, backend });
     let disposed = false;
     let record!: OwnedFrameProcessor;
@@ -281,13 +285,13 @@ export class VideoCaptureService {
   createSession(options: VideoCaptureServiceSessionOptions = {}): VFXCaptureSession {
     if (this.#disposed) throw new Error("Video capture service is disposed.");
     options.signal?.throwIfAborted();
-    if (options.appId && this.#closedOwners.has(options.appId))
+    if (options.appId && this.#closedOwners.has(normalizeBundleIdentifier(options.appId)))
       throw new DOMException("Video capture owner is closed.", "AbortError");
 
     const owner = new AbortController();
     const revoke = () => owner.abort(options.signal?.reason ?? new DOMException("Video capture owner was revoked.", "AbortError"));
     options.signal?.addEventListener("abort", revoke, { once: true });
-    const underlying = this.host.createSession(owner.signal, options.capability);
+    const underlying = this.host.createSession(owner.signal, options.capability, options.reauthoriseElement);
     let disposed = false;
     let record!: OwnedCapture;
     const dispose = () => {
@@ -302,9 +306,16 @@ export class VideoCaptureService {
       get kind() { return underlying.kind; },
       get settings() { return underlying.settings; },
       get capabilities() { return underlying.capabilities; },
+      getAuthorizationStatus: (kind?: VFXCaptureKind) => underlying.getAuthorizationStatus?.(kind) ?? Promise.resolve("unknown"),
       enumerateDevices: () => underlying.enumerateDevices(),
       requestCamera: (request: VFXCameraCaptureRequest) => underlying.requestCamera(request),
       requestDisplay: (request: VFXDisplayCaptureRequest) => underlying.requestDisplay(request),
+      async setContentFilter(filter: VFXContentFilter | null, signal?: AbortSignal) {
+        owner.signal.throwIfAborted();
+        if (!options.reauthoriseElement?.()) throw new DOMException("Element capture is not authorised.", "SecurityError");
+        if (!underlying.setContentFilter) throw new DOMException("Element capture is unavailable.", "NotSupportedError");
+        await underlying.setContentFilter(filter, signal);
+      },
       suspend: () => underlying.suspend(),
       resume: () => underlying.resume(),
       subscribe: (listener: () => void) => underlying.subscribe(listener),
@@ -323,14 +334,14 @@ export class VideoCaptureService {
   suspendOwner(appId: string): void {
     if (this.#disposed) return;
     for (const record of this.#sessions)
-      if (record.appId === appId) record.session.suspend();
+      if (normalizeBundleIdentifier(record.appId) === normalizeBundleIdentifier(appId)) record.session.suspend();
   }
 
   async resumeOwner(appId: string): Promise<void> {
     if (this.#disposed) return;
-    this.#closedOwners.delete(appId);
+    this.#closedOwners.delete(normalizeBundleIdentifier(appId));
     for (const record of [...this.#sessions]) {
-      if (record.appId !== appId || record.session.state !== "suspended") continue;
+      if (normalizeBundleIdentifier(record.appId) !== normalizeBundleIdentifier(appId) || record.session.state !== "suspended") continue;
       const kind = record.session.kind;
       if (kind && record.reauthorise && !(await record.reauthorise(kind))) {
         record.dispose();
@@ -342,15 +353,15 @@ export class VideoCaptureService {
 
   closeOwner(appId: string): void {
     if (this.#disposed) return;
-    this.#closedOwners.add(appId);
+    this.#closedOwners.add(normalizeBundleIdentifier(appId));
     for (const record of [...this.#sessions])
-      if (record.appId === appId) record.dispose();
+      if (normalizeBundleIdentifier(record.appId) === normalizeBundleIdentifier(appId)) record.dispose();
     for (const record of [...this.#decoders])
-      if (record.appId === appId) record.dispose();
+      if (normalizeBundleIdentifier(record.appId) === normalizeBundleIdentifier(appId)) record.dispose();
     for (const record of [...this.#encoders])
-      if (record.appId === appId) record.dispose();
+      if (normalizeBundleIdentifier(record.appId) === normalizeBundleIdentifier(appId)) record.dispose();
     for (const record of [...this.#processors])
-      if (record.appId === appId) record.dispose();
+      if (normalizeBundleIdentifier(record.appId) === normalizeBundleIdentifier(appId)) record.dispose();
   }
 
   dispose(): void {

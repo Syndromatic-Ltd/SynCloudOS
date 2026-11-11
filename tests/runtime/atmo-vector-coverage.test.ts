@@ -22,11 +22,11 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-const VECTOR = "src/NSE/Themes/Atmo/Resources/atmo.css";
+import { atmoCSS } from "../fixtures/atmoStylesheets";
 
 /** Guards the committed Atmo vector material and accessible paint fallbacks. */
 describe("Atmo vector coverage", () => {
-  const readVectorCss = () => readFileSync(path.join(process.cwd(), VECTOR), "utf8").replace(/\r\n?/gu, "\n");
+  const readVectorCss = atmoCSS;
 
   it("never lets a raster Atmo sprite into atmo-vector.css itself", () => {
     const css = readVectorCss();
@@ -44,7 +44,6 @@ describe("Atmo vector coverage", () => {
       css.indexOf("/* End tall tab material. */"),
     );
 
-    expect(css).toContain("[data-nse-appearance=\"atmo\"] .nse-tab-bar.nse-control-toolbar[data-grouped=\"true\"][data-nse-tab-chrome-active=\"true\"][data-nse-tab-chrome-size=\"tall\"]");
     for (const segment of ["first", "middle", "last", "only"]) {
       for (const state of ["up", "down", "sel", "seldown", "dis"]) {
         for (const piece of ["start", "body", "end"]) {
@@ -52,6 +51,8 @@ describe("Atmo vector coverage", () => {
         }
       }
     }
+    // Geometry metadata is shared by horizontal groups and independent rail items.
+    expect(generatedBlock).not.toMatch(/:(?:first|last|only)-child/);
     expect(generatedBlock).toContain("border-image-source: none;");
     expect(generatedBlock).not.toMatch(/border-image(?:-source)?:\s*(?:var\(|url\()/i);
     expect(generatedBlock).toContain("filter: none;");
@@ -68,10 +69,10 @@ describe("Atmo vector coverage", () => {
     expect(generatedBlock).toContain("backdrop-filter: blur(6px) saturate(1.25);");
     for (const state of ["up", "down", "sel", "seldown", "dis"]) {
       expect(generatedBlock).toMatch(new RegExp(
-        `:first-child:not\\(:last-child\\):dir\\(rtl\\)[^{]*\\{[\\s\\S]*?--nse-tab-chrome-start: var\\(--nse-atmo-svg-nse-tab-atmo-last-${state}-end\\);[\\s\\S]*?--nse-tab-chrome-body: var\\(--nse-atmo-svg-nse-tab-atmo-last-${state}-body\\);[\\s\\S]*?--nse-tab-chrome-end: var\\(--nse-atmo-svg-nse-tab-atmo-last-${state}-start\\);`,
+        `\\[data-nse-position="first"\\]:dir\\(rtl\\)[^{]*\\{[\\s\\S]*?--nse-tab-chrome-start: var\\(--nse-atmo-svg-nse-tab-atmo-last-${state}-end\\);[\\s\\S]*?--nse-tab-chrome-body: var\\(--nse-atmo-svg-nse-tab-atmo-last-${state}-body\\);[\\s\\S]*?--nse-tab-chrome-end: var\\(--nse-atmo-svg-nse-tab-atmo-last-${state}-start\\);`,
       ));
       expect(generatedBlock).toMatch(new RegExp(
-        `:last-child:not\\(:first-child\\):dir\\(rtl\\)[^{]*\\{[\\s\\S]*?--nse-tab-chrome-start: var\\(--nse-atmo-svg-nse-tab-atmo-first-${state}-end\\);[\\s\\S]*?--nse-tab-chrome-body: var\\(--nse-atmo-svg-nse-tab-atmo-first-${state}-body\\);[\\s\\S]*?--nse-tab-chrome-end: var\\(--nse-atmo-svg-nse-tab-atmo-first-${state}-start\\);`,
+        `\\[data-nse-position="last"\\]:dir\\(rtl\\)[^{]*\\{[\\s\\S]*?--nse-tab-chrome-start: var\\(--nse-atmo-svg-nse-tab-atmo-first-${state}-end\\);[\\s\\S]*?--nse-tab-chrome-body: var\\(--nse-atmo-svg-nse-tab-atmo-first-${state}-body\\);[\\s\\S]*?--nse-tab-chrome-end: var\\(--nse-atmo-svg-nse-tab-atmo-first-${state}-start\\);`,
       ));
     }
 
@@ -90,8 +91,9 @@ describe("Atmo vector coverage", () => {
     // The tab-only variant preserves the shared dark gt control's caption
     // paint rather than inheriting the unrelated light-radio tab-label token.
     expect(css).toContain(
-      "[data-nse-appearance=\"atmo\"] .nse-tab-bar.nse-control-toolbar[data-grouped=\"true\"][data-nse-tab-chrome-active=\"true\"][data-nse-tab-chrome-size=\"tall\"] > .nse-tab-bar-tab.nse-control-button > .nse-tab-bar-content > .nse-tab-bar-label {\n  color: inherit;\n}",
+      '[data-nse-control-size="large"]>[data-nse-part="cell"]:where([data-nse-role="tab"])',
     );
+    expect(css).toContain('>[data-nse-part="title"]:where([data-nse-role="tab"] *) {\n  color: inherit;\n}');
   });
 
   it("gives only NSETabBar exact 72px atomic vector caps without stretching the shared 50px gt geometry", () => {
@@ -168,6 +170,26 @@ describe("Atmo vector coverage", () => {
     }
   });
 
+  it("keeps every swappable Atmo state vector resident before a control first needs it", () => {
+    const css = readVectorCss();
+    const defined = [...new Set([...css.matchAll(/(--nse-atmo-svg-[\w-]+):\s*url\(/gu)].map((match) => match[1]))];
+    expect(defined.length).toBeGreaterThan(0);
+    const selector = ':scope:where([data-nse-role="appearance-provider"])::before {';
+    // Structure (size, position) and paint (the vectors) each declare half of the rule.
+    const starts = [...css.matchAll(new RegExp(selector.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&"), "gu"))].map((match) => match.index!);
+    expect(starts.length, "missing appearance-boundary residency rule").toBeGreaterThan(0);
+    const rule = starts.map((start) => css.slice(start, css.indexOf("}", start))).join("\n");
+    // One declared layer per state vector: a missing one would paint a blank
+    // frame on its first use in Chromium and WebKit.
+    const resident = [...rule.matchAll(/var\((--nse-atmo-svg-[\w-]+)\)/gu)].map((match) => match[1]);
+    expect([...resident].sort()).toEqual([...defined].sort());
+    expect(new Set(resident).size).toBe(resident.length);
+    // It must stay invisible, sizeless and inert.
+    for (const declaration of [
+      "content: \"\";", "position: absolute;", "inline-size: 0;", "block-size: 0;",
+      "overflow: hidden;", "pointer-events: none;", "background-repeat: no-repeat;", "background-size: 0 0;",
+    ]) expect(rule).toContain(declaration);
+  });
   it("keeps blur and deep elevation on the inert shared layer with accessibility fallbacks", () => {
     const navigationCss = readFileSync(path.join(process.cwd(), "src/NSE/Navigation/nse-navigation.css"), "utf8");
 

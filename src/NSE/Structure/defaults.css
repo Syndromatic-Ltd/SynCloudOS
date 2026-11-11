@@ -1,0 +1,60 @@
+/* Document defaults inherit into theme boundaries; themes may override metrics there. */
+@layer nse.structure {
+:root {
+  /* The scale. Semantic tokens point here; apps may use it directly. */
+  --nse-space-1: 4px;
+  --nse-space-2: 8px;
+  --nse-space-3: 12px;
+  --nse-space-4: 16px;
+  --nse-space-5: 20px;
+  --nse-space-6: 24px;
+  --nse-space-7: 32px;
+  --nse-space-8: 40px;
+
+  /* Margins (AppKit: 20pt window edge, 14pt under a title or toolbar, 16pt
+     inside a box or tab view; UIKit: 16pt root margins on compact widths). */
+  --nse-layout-margin: var(--nse-space-5);
+  --nse-layout-margin-top: 14px;
+  --nse-layout-margin-compact: var(--nse-space-4);
+  --nse-content-margin: var(--nse-space-4);
+
+  /* Spacing between things. */
+  --nse-spacing-tight: var(--nse-space-1);
+  --nse-spacing-standard: var(--nse-space-2);
+  /* Controls side by side on one line (a row of push buttons). Themes whose
+     art bleeds to its edges widen it. */
+  --nse-spacing-inline: var(--nse-space-2);
+  --nse-spacing-related: var(--nse-space-3);
+  --nse-spacing-group: var(--nse-space-5);
+  --nse-form-label-spacing: var(--nse-space-2);
+  --nse-form-row-spacing: var(--nse-space-3);
+
+  --nse-readable-width: 42rem;
+
+  /* Text roles (SwiftUI's body / callout / footnote / caption / headline). */
+  --nse-text-body-size: 14px;
+  --nse-text-body-line: 1.45;
+  --nse-text-callout-size: 13px;
+  --nse-text-footnote-size: 12px;
+  --nse-text-caption-size: 11px;
+  --nse-text-headline-size: 15px;
+  --nse-text-headline-weight: 700;
+  --nse-text-label-size: 13px;
+  --nse-text-label-weight: 700;
+  --nse-text-secondary-opacity: 66%;
+}
+:root {
+  --nse-topbar-height-cumulus: 68px;
+  --nse-topbar-height-metal: 56px;
+}
+:root {
+    --nse-topbar-height-cumulus: 56px;
+  }
+:root {
+  --nse-metal-grain-tile: 56px 56px;
+  --nse-metal-grain: url("data:image/png;base64,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");
+}
+:root {
+  --nse-loading-background-image: url('/assets/textures/NSETileCotton.jpg');
+}
+}

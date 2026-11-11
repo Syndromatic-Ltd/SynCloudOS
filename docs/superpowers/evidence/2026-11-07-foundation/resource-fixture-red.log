@@ -1,0 +1,195 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/package-resources.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/package-resources.test.ts (9 tests | 5 failed) 2106ms
+     × includes original-source maps in installed resource integrity 136ms
+     × keeps the resource fingerprint through a real offline pack/install of an isolated fixture 1023ms
+     × copies verified manifest bytes without requiring or repacking the mutable package directory 125ms
+     × fails closed for old manifests, modified archives and traversal 86ms
+     × rejects tampered fingerprints and missing or modified installed resources 135ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/package-resources.test.ts > SDK source and resource fingerprints > includes original-source maps in installed resource integrity
+AssertionError: expected [Function] to not throw an error but 'AssertionError [ERR_ASSERTION]: SDK m…' was thrown
+
+- Expected:
+undefined
+
++ Received:
+"AssertionError [ERR_ASSERTION]: SDK must export exactly the thirteen FX families.
++ actual - expected
+
+  [
+    './fx/animation',
+    './fx/audio',
+-   './fx/compression',
+    './fx/graphics',
+    './fx/haptics',
+    './fx/image',
+    './fx/location',
+    './fx/lumina',
+"
+
+ ❯ tests/runtime/fx/package-resources.test.ts:114:85
+    112|     const f = fixture();
+    113|     expect(f.manifest.resources.files.some((file: { path: string }) =>…
+    114|     expect(() => consumers.verifyInstalledSdkResources(f.packaged, f.m…
+       |                                                                                     ^
+    115|     write(f.packaged, "fx/graphics.js.map", "{}");
+    116|     expect(() => consumers.verifyInstalledSdkResources(f.packaged, f.m…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/runtime/fx/package-resources.test.ts > manifest archive consumption > keeps the resource fingerprint through a real offline pack/install of an isolated fixture
+AssertionError: SDK manifest must contain all thirteen FX entries.
++ actual - expected
+
+  [
+    '@syndromatic/syncloudos/fx/animation',
+    '@syndromatic/syncloudos/fx/audio',
+-   '@syndromatic/syncloudos/fx/compression',
+    '@syndromatic/syncloudos/fx/graphics',
+    '@syndromatic/syncloudos/fx/haptics',
+    '@syndromatic/syncloudos/fx/image',
+    '@syndromatic/syncloudos/fx/location',
+    '@syndromatic/syncloudos/fx/lumina',
+
+
+- Expected
++ Received
+
+@@ -1,9 +1,8 @@
+  [
+    "@syndromatic/syncloudos/fx/animation",
+    "@syndromatic/syncloudos/fx/audio",
+-   "@syndromatic/syncloudos/fx/compression",
+    "@syndromatic/syncloudos/fx/graphics",
+    "@syndromatic/syncloudos/fx/haptics",
+    "@syndromatic/syncloudos/fx/image",
+    "@syndromatic/syncloudos/fx/location",
+    "@syndromatic/syncloudos/fx/lumina",
+
+ ❯ readVerifiedSdkArchive scripts/synware/installed-consumer.mjs:77:10
+     75|   const entries = manifest.entries;
+     76|   assert(entries && typeof entries === "object", "Missing SDK entry fi…
+     77|   assert.deepEqual(Object.keys(entries).filter(key => /^fx\/[^/]+$/u.t…
+       |          ^
+     78|     requiredFxFamilies.map(family => `${manifest.package}/fx/${family}…
+     79|   assert.deepEqual(Object.keys(entries).filter(key => /^fx\/[^/]+\//u.…
+ ❯ Module.copyVerifiedSdkArchive scripts/synware/installed-consumer.mjs:99:20
+ ❯ tests/runtime/fx/package-resources.test.ts:144:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/runtime/fx/package-resources.test.ts > manifest archive consumption > copies verified manifest bytes without requiring or repacking the mutable package directory
+AssertionError: SDK manifest must contain all thirteen FX entries.
++ actual - expected
+
+  [
+    '@syndromatic/syncloudos/fx/animation',
+    '@syndromatic/syncloudos/fx/audio',
+-   '@syndromatic/syncloudos/fx/compression',
+    '@syndromatic/syncloudos/fx/graphics',
+    '@syndromatic/syncloudos/fx/haptics',
+    '@syndromatic/syncloudos/fx/image',
+    '@syndromatic/syncloudos/fx/location',
+    '@syndromatic/syncloudos/fx/lumina',
+
+
+- Expected
++ Received
+
+@@ -1,9 +1,8 @@
+  [
+    "@syndromatic/syncloudos/fx/animation",
+    "@syndromatic/syncloudos/fx/audio",
+-   "@syndromatic/syncloudos/fx/compression",
+    "@syndromatic/syncloudos/fx/graphics",
+    "@syndromatic/syncloudos/fx/haptics",
+    "@syndromatic/syncloudos/fx/image",
+    "@syndromatic/syncloudos/fx/location",
+    "@syndromatic/syncloudos/fx/lumina",
+
+ ❯ readVerifiedSdkArchive scripts/synware/installed-consumer.mjs:77:10
+     75|   const entries = manifest.entries;
+     76|   assert(entries && typeof entries === "object", "Missing SDK entry fi…
+     77|   assert.deepEqual(Object.keys(entries).filter(key => /^fx\/[^/]+$/u.t…
+       |          ^
+     78|     requiredFxFamilies.map(family => `${manifest.package}/fx/${family}…
+     79|   assert.deepEqual(Object.keys(entries).filter(key => /^fx\/[^/]+\//u.…
+ ❯ Module.copyVerifiedSdkArchive scripts/synware/installed-consumer.mjs:99:20
+ ❯ tests/runtime/fx/package-resources.test.ts:154:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/runtime/fx/package-resources.test.ts > manifest archive consumption > fails closed for old manifests, modified archives and traversal
+AssertionError: expected [Function] to throw error matching /SHA|integrity/i but got 'SDK manifest must contain all thirtee…'
+
+- Expected:
+/SHA|integrity/i
+
++ Received:
+"SDK manifest must contain all thirteen FX entries.
++ actual - expected
+
+  [
+    '@syndromatic/syncloudos/fx/animation',
+    '@syndromatic/syncloudos/fx/audio',
+-   '@syndromatic/syncloudos/fx/compression',
+    '@syndromatic/syncloudos/fx/graphics',
+    '@syndromatic/syncloudos/fx/haptics',
+    '@syndromatic/syncloudos/fx/image',
+    '@syndromatic/syncloudos/fx/location',
+    '@syndromatic/syncloudos/fx/lumina',
+"
+
+ ❯ tests/runtime/fx/package-resources.test.ts:168:66
+    166|     expect(() => consumers.readVerifiedSdkArchive(f.repository)).toThr…
+    167|     f.save(); write(f.output, f.manifest.archive, "different artifact"…
+    168|     expect(() => consumers.readVerifiedSdkArchive(f.repository)).toThr…
+       |                                                                  ^
+    169|     f.manifest.archive = "../escape.tgz"; f.save();
+    170|     expect(() => consumers.readVerifiedSdkArchive(f.repository)).toThr…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/runtime/fx/package-resources.test.ts > manifest archive consumption > rejects tampered fingerprints and missing or modified installed resources
+AssertionError: expected [Function] to not throw an error but 'AssertionError [ERR_ASSERTION]: SDK m…' was thrown
+
+- Expected:
+undefined
+
++ Received:
+"AssertionError [ERR_ASSERTION]: SDK must export exactly the thirteen FX families.
++ actual - expected
+
+  [
+    './fx/animation',
+    './fx/audio',
+-   './fx/compression',
+    './fx/graphics',
+    './fx/haptics',
+    './fx/image',
+    './fx/location',
+    './fx/lumina',
+"
+
+ ❯ tests/runtime/fx/package-resources.test.ts:176:85
+    174|     expect(consumers.verifyInstalledSdkResources).toBeTypeOf("function…
+    175|     const f = fixture();
+    176|     expect(() => consumers.verifyInstalledSdkResources(f.packaged, f.m…
+       |                                                                                     ^
+    177|     write(f.packaged, "assets/image-processing.worker-proof.js", "corr…
+    178|     expect(() => consumers.verifyInstalledSdkResources(f.packaged, f.m…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 4 passed (9)
+   Start at  08:56:31
+   Duration  2.37s (transform 54ms, setup 34ms, import 43ms, tests 2.11s, environment 0ms)
+

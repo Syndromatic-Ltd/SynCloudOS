@@ -1,0 +1,301 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/privacy-system-notifications.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/privacy-system-notifications.test.ts (13 tests | 10 failed) 181ms
+     × keeps passive native grants behind the canonical app/user gate ({"id":"session:alice","subjectId":"person:alice","state":"active","claims":{"email":"shared@example.test","displayName":"alice","roles":"member"}}) 49ms
+     × keeps passive native grants behind the canonical app/user gate (null) 6ms
+     × records an explicit native grant and still permits passive inspection after local withdrawal 7ms
+     × records a native refusal without granting app consent 7ms
+     × requires this app's consent before registering and preserves safe unregistration after withdrawal 9ms
+     × invalidates old authority when the authenticated principal changes with the same email 7ms
+     × invalidates a replaced session while retaining the same principal's saved consent 6ms
+     × discards an in-flight native permission result after a principal change 9ms
+     × ends issued notification authority when managed app access is withdrawn without rewriting consent 5ms
+     × cancels a pending push association when app consent is withdrawn 55ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/privacy-system-notifications.test.ts > real runtime notification privacy bridge > keeps passive native grants behind the canonical app/user gate ({"id":"session:alice","subjectId":"person:alice","state":"active","claims":{"email":"shared@example.test","displayName":"alice","roles":"member"}})
+AssertionError: expected [ { userId: 'person:alice', …(6) } ] to deep equally contain ObjectContaining{…}
+
+- Expected:
+ObjectContaining {
+  "appId": "com.example.notification-privacy",
+  "browserStatus": "granted",
+  "decision": "prompt",
+  "service": "notifications",
+  "userId": "identity:person:alice",
+}
+
++ Received:
+[
+  {
+    "appId": "com.example.notification-privacy",
+    "authorizationStatus": "prompt",
+    "browserStatus": "granted",
+    "decision": "prompt",
+    "service": "notifications",
+    "updatedAt": 1794085183128,
+    "userId": "person:alice",
+  },
+]
+
+ ❯ tests/runtime/privacy-system-notifications.test.ts:109:45
+    107|     const f = await fixture(initial); f.native.permission = "granted";
+    108|     await expect(f.mount().getNotificationSettings()).resolves.toMatch…
+    109|     expect(f.runtime.privacy.getSnapshot()).toContainEqual(expect.obje…
+       |                                             ^
+    110|     expect(f.requestPermission).not.toHaveBeenCalled();
+    111|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+ FAIL  tests/runtime/privacy-system-notifications.test.ts > real runtime notification privacy bridge > keeps passive native grants behind the canonical app/user gate (null)
+AssertionError: expected [ { userId: 'anonymous', …(6) } ] to deep equally contain ObjectContaining{…}
+
+- Expected:
+ObjectContaining {
+  "appId": "com.example.notification-privacy",
+  "browserStatus": "granted",
+  "decision": "prompt",
+  "service": "notifications",
+  "userId": "public.anonymous",
+}
+
++ Received:
+[
+  {
+    "appId": "com.example.notification-privacy",
+    "authorizationStatus": "prompt",
+    "browserStatus": "granted",
+    "decision": "prompt",
+    "service": "notifications",
+    "updatedAt": 1794085183142,
+    "userId": "anonymous",
+  },
+]
+
+ ❯ tests/runtime/privacy-system-notifications.test.ts:109:45
+    107|     const f = await fixture(initial); f.native.permission = "granted";
+    108|     await expect(f.mount().getNotificationSettings()).resolves.toMatch…
+    109|     expect(f.runtime.privacy.getSnapshot()).toContainEqual(expect.obje…
+       |                                             ^
+    110|     expect(f.requestPermission).not.toHaveBeenCalled();
+    111|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯
+
+ FAIL  tests/runtime/privacy-system-notifications.test.ts > real runtime notification privacy bridge > records an explicit native grant and still permits passive inspection after local withdrawal
+AssertionError: expected [ { userId: 'person:alice', …(6) } ] to deep equally contain ObjectContaining{…}
+
+- Expected:
+ObjectContaining {
+  "appId": "com.example.notification-privacy",
+  "decision": "granted",
+  "service": "notifications",
+  "userId": "identity:person:alice",
+}
+
++ Received:
+[
+  {
+    "appId": "com.example.notification-privacy",
+    "authorizationStatus": "granted",
+    "browserStatus": "granted",
+    "decision": "granted",
+    "service": "notifications",
+    "updatedAt": 1794085183149,
+    "userId": "person:alice",
+  },
+]
+
+ ❯ tests/runtime/privacy-system-notifications.test.ts:116:45
+    114|     const f = await fixture(), notifications = f.mount();
+    115|     await expect(notifications.requestAuthorization()).resolves.toBe(t…
+    116|     expect(f.runtime.privacy.getSnapshot()).toContainEqual(expect.obje…
+       |                                             ^
+    117|     f.runtime.privacy.revoke(f.scope());
+    118|     await expect(notifications.getNotificationSettings()).resolves.toM…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯
+
+ FAIL  tests/runtime/privacy-system-notifications.test.ts > real runtime notification privacy bridge > records a native refusal without granting app consent
+AssertionError: expected [ { userId: 'person:alice', …(6) } ] to deep equally contain ObjectContaining{…}
+
+- Expected:
+ObjectContaining {
+  "appId": "com.example.notification-privacy",
+  "browserStatus": "denied",
+  "decision": "denied",
+  "service": "notifications",
+  "userId": "identity:person:alice",
+}
+
++ Received:
+[
+  {
+    "appId": "com.example.notification-privacy",
+    "authorizationStatus": "denied",
+    "browserStatus": "denied",
+    "decision": "denied",
+    "service": "notifications",
+    "updatedAt": 1794085183156,
+    "userId": "person:alice",
+  },
+]
+
+ ❯ tests/runtime/privacy-system-notifications.test.ts:126:45
+    124|     const f = await fixture(); f.native.result = "denied";
+    125|     await expect(f.mount().requestAuthorization()).resolves.toBe(false…
+    126|     expect(f.runtime.privacy.getSnapshot()).toContainEqual(expect.obje…
+       |                                             ^
+    127|   });
+    128|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯
+
+ FAIL  tests/runtime/privacy-system-notifications.test.ts > real runtime notification privacy bridge > requires this app's consent before registering and preserves safe unregistration after withdrawal
+AssertionError: promise resolved "{ …(3) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "endpoint": "https://push.example.test/subscription",
++   "expirationTime": null,
++   "keys": {
++     "auth": "test-auth",
++     "p256dh": "test-key",
++   },
+  }
+
+ ❯ tests/runtime/privacy-system-notifications.test.ts:141:56
+    139|     await expect(other.registerForRemoteNotifications()).rejects.toMat…
+    140|     f.runtime.privacy.revoke(f.scope());
+    141|     await expect(first.registerForRemoteNotifications()).rejects.toMat…
+       |                                                        ^
+    142|     await expect(first.unregisterForRemoteNotifications()).resolves.to…
+    143|     expect(f.fetch.mock.calls.map(call => (call as unknown as [unknown…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/10]⎯
+
+ FAIL  tests/runtime/privacy-system-notifications.test.ts > real runtime notification privacy bridge > invalidates old authority when the authenticated principal changes with the same email
+AssertionError: promise resolved "{ …(2) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "authorizationStatus": "authorized",
++   "remoteNotifications": true,
+  }
+
+ ❯ tests/runtime/privacy-system-notifications.test.ts:152:28
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/10]⎯
+
+ FAIL  tests/runtime/privacy-system-notifications.test.ts > real runtime notification privacy bridge > invalidates a replaced session while retaining the same principal's saved consent
+AssertionError: promise resolved "{ …(2) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "authorizationStatus": "authorized",
++   "remoteNotifications": true,
+  }
+
+ ❯ tests/runtime/privacy-system-notifications.test.ts:163:57
+    161|     await notifications.requestAuthorization();
+    162|     f.identity.publish({ ...initial, id: "session:alice:replacement" }…
+    163|     await expect(notifications.getNotificationSettings()).rejects.toMa…
+       |                                                         ^
+    164|     await expect(f.mount().getNotificationSettings()).resolves.toMatch…
+    165|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/10]⎯
+
+ FAIL  tests/runtime/privacy-system-notifications.test.ts > real runtime notification privacy bridge > discards an in-flight native permission result after a principal change
+AssertionError: promise resolved "true" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+true
+
+ ❯ tests/runtime/privacy-system-notifications.test.ts:174:25
+    172|     f.identity.publish(session("bob"));
+    173|     finish("granted");
+    174|     await expect(pending).rejects.toMatchObject({ name: "AbortError" }…
+       |                         ^
+    175|     expect(f.runtime.privacy.getSnapshot().find(record => record.userI…
+    176|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/10]⎯
+
+ FAIL  tests/runtime/privacy-system-notifications.test.ts > real runtime notification privacy bridge > ends issued notification authority when managed app access is withdrawn without rewriting consent
+AssertionError: promise resolved "{ …(3) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "endpoint": "https://push.example.test/subscription",
++   "expirationTime": null,
++   "keys": {
++     "auth": "test-auth",
++     "p256dh": "test-key",
++   },
+  }
+
+ ❯ tests/runtime/privacy-system-notifications.test.ts:190:64
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/10]⎯
+
+ FAIL  tests/runtime/privacy-system-notifications.test.ts > real runtime notification privacy bridge > cancels a pending push association when app consent is withdrawn
+AssertionError: promise resolved "{ …(3) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "endpoint": "https://push.example.test/subscription",
++   "expirationTime": null,
++   "keys": {
++     "auth": "test-auth",
++     "p256dh": "test-key",
++   },
+  }
+
+ ❯ tests/runtime/privacy-system-notifications.test.ts:203:25
+    201|     await vi.waitFor(() => expect(f.getSubscription).toHaveBeenCalledO…
+    202|     f.runtime.privacy.revoke(f.scope()); finish(f.subscription);
+    203|     await expect(pending).rejects.toMatchObject({ name: "AbortError" }…
+       |                         ^
+    204|     expect(f.fetch).not.toHaveBeenCalled();
+    205|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/10]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  10 failed | 3 passed (13)
+   Start at  20:58:43
+   Duration  59.87s (transform 56.33s, setup 29ms, import 58.51s, tests 181ms, environment 989ms)

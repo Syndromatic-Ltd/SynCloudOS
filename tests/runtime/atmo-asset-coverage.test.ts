@@ -31,7 +31,7 @@ function cssFiles(root: string): string[] {
 
 describe("explicit theme resource ownership", () => {
   it.each(["Atmo"])("keeps every %s CSS resource local and present", (theme) => {
-    const root = path.resolve("src/NSE/Themes", theme, "Resources");
+    const root = path.resolve("src/Themes", `${theme}.scostheme`, "Contents", "Resources");
     const files = cssFiles(root);
     expect(files.length).toBeGreaterThan(0);
     let references = 0;
@@ -60,7 +60,7 @@ describe("explicit theme resource ownership", () => {
   });
 
   it("keeps canonical Atmo self-contained and raster-free", () => {
-    for (const file of ["src/NSE/Themes/Atmo/index.ts", ...cssFiles("src/NSE/Themes/Atmo/Resources")]) {
+    for (const file of ["src/NSE/Appearance/atmo.ts", "src/NSE/Appearance/atmoTheme.ts", ...cssFiles("src/Themes/Atmo.scostheme/Contents/Resources")]) {
       const source = readFileSync(file, "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
       expect(source, file).not.toMatch(/AtmoHeritage|AtmoOnyx|AppearanceAssets|\/assets\/nse\/atmo\/|--av-|data-atmo-render/);
     }

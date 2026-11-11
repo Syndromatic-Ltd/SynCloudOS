@@ -3,7 +3,7 @@
 **Cocoa for the web.** SynCloudOS is a batteries-included application framework for TypeScript and React 19. It gives the browser what a desktop platform gives a native application: a runtime with a formal lifecycle, a responder chain and typed commands, undo, documents, a windowing system, a kit of controls and controllers, twelve media frameworks and an application bundle format.
 
 > [!NOTE]
-> **SynCloudOS 1.0 Public Beta** (`v1.0.0-beta.1`). The architecture and the public entry points are in place and covered by tests, but the API may still change before 1.0. Expect rough edges, and please [open an issue](https://github.com/Syndromatic-Ltd/SynCloudOS/issues) when you find one.
+> **SynCloudOS 1.0 Public Beta** (`v1.0.0-beta.2`, unpublished development candidate). The architecture and the public entry points are in place and covered by tests, but the API may still change before 1.0. Expect rough edges, and please [open an issue](https://github.com/Syndromatic-Ltd/SynCloudOS/issues) when you find one.
 
 ## Why it exists
 
@@ -40,34 +40,38 @@ The framework's authored APIs use TypeScript and build under strict type checkin
 │                               MIDI, location, search                 │
 ├──────────────────────────────────────────────────────────────────────┤
 │  SynCloudOS runtime           statechart, commands, responders,      │
-│                               undo, documents, windows, PolicyKit    │
+│                               undo, documents, windows, privacy      │
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
-- **The runtime.** `createSynCloudOS` builds a self-contained runtime with its own store, services and adapters. It reads no globals at construction, so several runtimes can share one page. An explicit statechart tracks boot, the shell and every application's lifecycle; PolicyKit evaluates every privileged action against role capabilities; and everything a service acquires is released on disposal. See [the runtime](docs/framework/runtime.md).
-- **NSE.** NSE plays the role of AppKit: you write `NSEPushButton` where a Mac developer writes `NSButton`. Controls expose neutral behaviour and take their look from the theme. See [NSE controls](docs/framework/nse-controls.md), [controllers](docs/framework/controllers.md) and [data views](docs/framework/data-views.md).
-- **FX.** Pure computation runs anywhere JavaScript runs; anything that touches a device comes from the mounted session, so the host enforces permissions and releases resources when the application closes. See the [FX guide](docs/framework/fx/README.md).
+- **The runtime.** `createSynCloudOS` builds a self-contained runtime with its own store, services and adapters. It reads no globals at construction, so several runtimes can share one page. An explicit statechart tracks boot, the shell and every application's lifecycle. Configuration profiles govern app access, SCAuthorization checks named administrative rights, and the privacy store mediates device consent. These are cooperative page checks; protected servers enforce their own access. Everything a service acquires is released on disposal. See [the runtime](docs/framework/runtime.md) and [authorisation](docs/framework/authorization.md).
+- **NSE.** NSE plays the role of AppKit: you write `NSEButton` where a Mac developer writes `NSButton`. Controls expose neutral behaviour and take their look from the theme. See [NSE controls](docs/framework/nse-controls.md), [controllers](docs/framework/controllers.md) and [data views](docs/framework/data-views.md).
+- **FX.** Pure computation runs anywhere JavaScript runs; anything that touches a device comes from the mounted session, which mediates declared entitlements and privacy choices and releases resources when the application closes. See the [FX guide](docs/framework/fx/README.md).
 - **Webspring.** A project declares one validated shell definition and mounts it through the browser entry. See [Webspring](docs/framework/webspring.md).
-- **SynWare.** A bundle's `Contents/Info.ts` manifest declares its routes, presentations, commands, document types, menus, window defaults and permissions. The [SynWare SDK](docs/framework/synware-sdk.md), imported from `@syndromatic/syncloudos/sdk`, is everything a bundle needs from the platform.
+- **SynWare.** A bundle's `Contents/Info.ts` manifest declares its routes, presentations, commands, document types, menus, window defaults and entitlements. The [SynWare SDK](docs/framework/synware-sdk.md), imported from `@syndromatic/syncloudos/sdk`, is everything a bundle needs from the platform.
 
 ## Getting SynCloudOS
 
-You need Node.js 22.12 or later and npm.
+Use a patched Node.js release (22.23.4+, 24.22.1+, or 26.12.1+ on its respective release line) and npm. CI uses Node.js 24.22.1.
 
-The beta is not published to the npm registry. Install the package archive attached to the [v1.0.0-beta.1 release](https://github.com/Syndromatic-Ltd/SynCloudOS/releases/tag/v1.0.0-beta.1):
+The source toolchain pins TypeScript 6.0.3. It retains the JavaScript compiler API used by framework tooling; native TypeScript 7 is a separate future migration.
+
+The beta is not published to the npm registry. The latest published archive is the [v1.0.0-beta.1 release](https://github.com/Syndromatic-Ltd/SynCloudOS/releases/tag/v1.0.0-beta.1); the beta.2 candidate must be built from source:
+
+Install the published beta.1 archive:
 
 ```bash
 npm install https://github.com/Syndromatic-Ltd/SynCloudOS/releases/download/v1.0.0-beta.1/syndromatic-syncloudos-1.0.0-beta.1.tgz
 ```
 
-or build the same archive from source:
+To build the beta.2 candidate from source:
 
 ```bash
 git clone https://github.com/Syndromatic-Ltd/SynCloudOS.git
 cd SynCloudOS
 npm ci --ignore-scripts
 npm run sdk:build
-# → .artifacts/synapp-sdk/archives/syndromatic-syncloudos-1.0.0-beta.1-<sha256>.tgz
+# → .artifacts/synapp-sdk/archives/syndromatic-syncloudos-1.0.0-beta.2-<sha256>.tgz
 ```
 
 and install it into your project with `npm install /path/to/that.tgz`. React 19 is a peer dependency.
@@ -84,14 +88,14 @@ import { synCloudOS } from "@syndromatic/syncloudos/vite";
 export default defineConfig({ plugins: [react(), synCloudOS()] });
 ```
 
-A SynWare lives in `src/SynWare/Hello.app/Contents/`. Its manifest is `Info.ts`:
+A SynWare lives in `src/SynWare/Hello.app/Contents/`. Its required `Info.ts` declares the app's bundle identifier, display name and version explicitly:
 
 ```ts
 export default {
   schemaVersion: 1,
-  id: "com.example.hello",
+  bundleIdentifier: "com.example.hello",
   version: "0.1.0",
-  title: "Hello",
+  displayName: "Hello",
   routes: [{ path: "/hello", primary: true }],
   presentations: ["desktop", "tablet", "mobile"],
   runtime: { policy: { public: true } },
@@ -103,42 +107,42 @@ and its component is `index.tsx`:
 
 ```tsx
 import "@syndromatic/syncloudos/nse/styles.css";
-import { createSynWare, useSynWare } from "@syndromatic/syncloudos/sdk";
+import { SCOS } from "@syndromatic/syncloudos";
 import { NSEStackItem, NSEStackView } from "@syndromatic/syncloudos/nse";
-import manifest from "./Info";
 
-function Hello() {
-  const app = useSynWare();
+export default function Hello() {
   return (
     <NSEStackView aria-label="Hello" orientation="vertical" spacing={12}>
       <NSEStackItem id="greeting" visibilityPriority={100}>
-        <p>Hello from {app.appId}.</p>
+        <p>Hello from {SCOS.app.displayName}.</p>
       </NSEStackItem>
     </NSEStackView>
   );
 }
 
-export default createSynWare({ manifest, root: Hello });
 ```
 
 The [getting started guide](docs/framework/getting-started.md) adds the Webspring shell definition and the `main.tsx` that mounts everything, and finishes with a running Board launcher.
 
+Bundle identifiers use reverse-DNS syntax with at least two dots. Declared case is preserved; lookups and storage keys are case-insensitive. The [identity migration table](docs/framework/synware-manifest.md#migration-from-the-previous-identity-fields) replaces the old `id` / `runtime.bundleId` and `title` fields with `bundleIdentifier` and `displayName`. Saved app data and old Webspring layouts are reset, not migrated.
+
+
 ## Working with the session
 
-A mounted SynWare receives narrow clients, never the runtime or its registries. `useSynWare()` gives the application its identity, branding and presentation traits, and dedicated hooks give each capability:
+A mounted SynWare receives narrow clients, never the runtime or its registries. Inside an app folder, `SCOS` is bound to that app even after `await` or in timers. Shared React components call `useSCOS()` to select the nearest app provider; reactive hooks subscribe to changing values:
 
 | Area | Hooks |
 | --- | --- |
-| Commands, undo and focus | `useSynWareCommands`, `ResponderScope` |
-| Documents and persistence | `useSynWareDocument`, `useSynWarePersistence` |
-| Windows and chrome | `useSynWareWindow`, `useSynWareWindowChrome`, `useSynWareWorkArea` |
-| Navigation | `useSynWareRouter`, `useSynWareRouteState`, `useSynWareRouteData` |
-| Pasteboard and drag | `useSynWarePasteboard`, `useSynWareDrag`, `useSynWareShare` |
-| Notifications and lifecycle | `useSynWareNotifications`, `useSynWareLifecycle`, `useSynWareEvents`, `useSynWareErrors` |
-| Appearance and locale | `useSynWareAppearance`, `useSynWareColourPanel`, `useSynWareLocalisedStrings`, `useSynWareMediaQuery` |
-| Identity and services | `useSynWareIdentity`, `useSynWareService`, `useSynWareTrustedClient` |
-| Media and devices | `useSynWareAnimations`, `useSynWareImages`, `useSynWareTextLayout`, `useSynWareAudio`, `useSynWareHaptics`, `useSynWareMotion`, `useSynWareMedia`, `useSynWareVideo`, `useSynWareMIDI`, `useSynWareLocation`, `useSynWareLumina` |
-| Web content | `useSynWareWebContent` |
+| Commands, undo and focus | `useCommands`, `ResponderScope` |
+| Documents and persistence | `useDocument`, `usePersistence` |
+| Windows and chrome | `useWindow`, `useWindowChrome`, `useWorkArea` |
+| Navigation | `useRouter`, `useRouteState`, `useRouteData` |
+| Pasteboard and drag | `usePasteboard`, `useDrag`, `useShare` |
+| Notifications and lifecycle | `useNotifications`, `useLifecycle`, `useEvents`, `useErrors` |
+| Appearance and locale | `useAppearance`, `useColourPanel`, `useStrings`, `useMediaQuery` |
+| Identity and services | `useIdentity`, `useService`, `useTrustedClient` |
+| Media and devices | `useAnimations`, `useImages`, `useTextLayout`, `useAudio`, `useHaptics`, `useMotion`, `useMedia`, `useVideo`, `useMIDI`, `useLocation`, `useLumina` |
+| Web content | `useWebContent` |
 
 An absent or denied service returns `{ available: false, client: null, denial }` instead of throwing, so an application renders the matching state.
 
@@ -182,6 +186,7 @@ Start with the [framework guide](docs/framework/README.md).
 | [Webspring](docs/framework/webspring.md) | The shell and launcher |
 | [Authentication](docs/framework/authentication.md) | Sign-in and roles |
 | [Testing a SynWare](docs/framework/testing-synware.md) | Deterministic tests |
+| [Developer MCP](docs/framework/developer-mcp.md) | Offline installed-SDK tools for AI coding agents |
 
 ## Developing the framework
 
@@ -201,7 +206,7 @@ The retained scripts build and validate the distributable, scaffold and validate
 
 ```text
 src/
-  SynCloudOS/       runtime, SynWare SDK (AppSDK), PolicyKit, documents, windows
+  SynCloudOS/       runtime, SynWare SDK (AppSDK), authorisation, documents, windows
   SynCloudOSReact/  React bindings and the browser host
   NSE/              application kit, controllers, data views, Atmo appearance
   FX/               the twelve FX frameworks

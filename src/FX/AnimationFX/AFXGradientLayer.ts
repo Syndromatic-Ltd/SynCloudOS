@@ -28,14 +28,17 @@ import type { AFXAnimationScalar } from "./animationTypes";
 export class AFXGradientLayer extends AFXLayer {
   #gradient: GFXGradient | null = null;
   #replace(
+    operation: string,
     stops: readonly GFXGradientStop[],
     geometry: GFXGradientGeometry,
   ) {
     const current = this.gradient;
-    this.gradient = new GFXGradient(stops, geometry, {
+    const next = new GFXGradient(stops, geometry, {
       units: current?.units ?? "objectBoundingBox",
       transform: current?.transform,
     });
+    this.setLayerContent(operation, Object.freeze({ kind: "gradient", gradient: next }), "gradient");
+    this.#gradient = next;
   }
   get gradient() {
     const content = this.model.content;
@@ -44,7 +47,7 @@ export class AFXGradientLayer extends AFXLayer {
   set gradient(value: GFXGradient | null) {
     if (value !== null && !(value instanceof GFXGradient))
       throw new TypeError("Gradient layer requires GFXGradient.");
-    this.setLayerContent(Object.freeze({ kind: "gradient", gradient: value }), "gradient");
+    this.setLayerContent("gradient", Object.freeze({ kind: "gradient", gradient: value }), "gradient");
     this.#gradient = value;
   }
   get colours(): readonly GFXColour[] {
@@ -67,6 +70,7 @@ export class AFXGradientLayer extends AFXLayer {
       ? current.stops.map((stop) => stop.offset)
       : colours.map((_, index) => (colours.length === 1 ? 0 : index / (colours.length - 1)));
     this.#replace(
+      "colours",
       colours.map((colour, index) => ({ offset: offsets[index]!, colour })),
       current?.geometry ?? { kind: "linear", start: { x: 0, y: 0 }, end: { x: 1, y: 0 } },
     );
@@ -96,6 +100,7 @@ export class AFXGradientLayer extends AFXLayer {
       return location;
     });
     this.#replace(
+      "locations",
       current.stops.map((stop, index) => ({ ...stop, offset: locations[index]! })),
       current.geometry,
     );
@@ -108,7 +113,7 @@ export class AFXGradientLayer extends AFXLayer {
     const current = this.gradient;
     if (!current || current.geometry.kind !== "linear")
       throw new TypeError("startPoint requires an existing linear gradient.");
-    this.#replace(current.stops, {
+    this.#replace("startPoint", current.stops, {
       ...current.geometry,
       start: normalisePoint(value),
     });
@@ -121,7 +126,7 @@ export class AFXGradientLayer extends AFXLayer {
     const current = this.gradient;
     if (!current || current.geometry.kind !== "linear")
       throw new TypeError("endPoint requires an existing linear gradient.");
-    this.#replace(current.stops, {
+    this.#replace("endPoint", current.stops, {
       ...current.geometry,
       end: normalisePoint(value),
     });

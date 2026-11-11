@@ -26,7 +26,7 @@ import {
   useSyncExternalStore,
   type HTMLAttributes,
 } from "react";
-import { useNSEDeferredDisposal, type NSEDisposalScheduler } from "../../interactionLifecycle";
+import { useNSEDeferredDisposal } from "../../interactionLifecycle";
 
 import { dataViewAnnouncement, dataViewEventIsComposing, dataViewIsBusy, dataViewIsDisabled } from "./dataViewAccessibility";
 import { NSEDataViewCoordinator } from "./NSEDataViewCoordinator";
@@ -35,17 +35,10 @@ import type {
   NSEDataViewAdapter,
   NSEDataViewCoordinatorOptions,
   NSEDataViewKey,
+  NSEDataViewState,
 } from "./dataViewTypes";
 
-interface MicrotaskHandle { cancelled: boolean }
-const disposalScheduler: NSEDisposalScheduler = {
-  setTimeout(callback) {
-    const handle: MicrotaskHandle = { cancelled: false };
-    queueMicrotask(() => { if (!handle.cancelled) callback(); });
-    return handle;
-  },
-  clearTimeout(handle) { (handle as MicrotaskHandle).cancelled = true; },
-};
+const readyState: NSEDataViewState = Object.freeze({ kind: "ready" });
 
 type DataViewRootAttributes = HTMLAttributes<HTMLDivElement> & {
   readonly "data-state": string;
@@ -56,16 +49,28 @@ type DataViewItemAttributes = HTMLAttributes<HTMLElement> & {
   readonly "data-focused"?: boolean;
 };
 
+/**
+ * Binds a data view to its adapter. The coordinator lives as long as
+ * `adapter.controller`: a new adapter object around the same controller is
+ * adopted in place, so inline adapters do not rebuild the view. Once the
+ * controller is disposed, `state` reports a disabled view and every
+ * interaction is ignored.
+ */
 export function useNSEDataView<T, TId extends NSEDataViewKey>(
   adapter: NSEDataViewAdapter<T, TId>,
   options: NSEDataViewCoordinatorOptions<T, TId>,
 ) {
   const generatedId = useId().replace(/:/g, "");
-  const coordinator = useMemo(() => new NSEDataViewCoordinator(adapter, options), [adapter]);
+  // The memo reads the adapter of the render that creates the coordinator;
+  // later adapters for the same controller arrive through updateAdapter.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const coordinator = useMemo(() => new NSEDataViewCoordinator(adapter, options), [adapter.controller]);
+  coordinator.updateAdapter(adapter);
   coordinator.updateOptions(options);
-  useNSEDeferredDisposal(coordinator, disposalScheduler);
-  useEffect(() => coordinator.setState(options.state ?? { kind: "ready" }), [coordinator, options.state]);
+  useNSEDeferredDisposal(coordinator);
+  useEffect(() => coordinator.setState(options.state ?? readyState), [coordinator, options.state]);
   const snapshot = useSyncExternalStore(coordinator.subscribe, coordinator.getSnapshot, coordinator.getSnapshot);
+  const state = coordinator.controllerDisposed ? snapshot.state : options.state ?? readyState;
   const itemDomId = (id: TId) => `nse-data-view-${generatedId}-${encodeNSEDataViewKey(id)}`;
   const activeDescendant = snapshot.activeId === null ? undefined : itemDomId(snapshot.activeId);
   const typeaheadRef = useRef({ value: "", updatedAt: 0 });
@@ -121,6 +126,8 @@ export function useNSEDataView<T, TId extends NSEDataViewKey>(
   return {
     snapshot,
     coordinator,
+    /** The requested state, or a disabled state once the controller is disposed. */
+    state,
     announcement: dataViewAnnouncement(snapshot.state),
     rootProps,
     itemDomId,
@@ -130,7 +137,7 @@ export function useNSEDataView<T, TId extends NSEDataViewKey>(
       return {
         id: itemDomId(id),
         "aria-selected": selected,
-        "aria-disabled": entry?.disabled,
+        "aria-disabled": entry?.disabled || coordinator.controllerDisposed,
         "data-selected": selected || undefined,
         "data-focused": Object.is(snapshot.activeId, id) || undefined,
         onClick(event) {

@@ -31,7 +31,7 @@ import { assertSdkSourceUnchanged, captureSdkSourceFingerprint } from "./sdk-pac
 
 const repositoryRoot = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const productIds = ["journal", "journal-publisher", "syncal"];
-const themes = { atmo: "atmoAppearance" };
+const themes = { atmo: "atmoTheme" };
 const output = resolve(repositoryRoot, ".artifacts/synapp-sdk/omitted-products-consumer.json");
 const sha = (path) => createHash("sha256").update(readFileSync(path)).digest("hex");
 const files = (root) => readdirSync(root, { withFileTypes: true }).flatMap((entry) => entry.isDirectory() ? files(join(root, entry.name)) : [join(root, entry.name)]);
@@ -53,7 +53,8 @@ function staticServer(directory) {
 
 const probeSource = `import { useEffect } from "react";
 import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
-import { createSynWare, defineSynWareServiceToken, useSynWare, useSynWareLumina } from "@syndromatic/syncloudos/sdk";
+import { defineSynWareServiceToken, useSCOS, useLumina } from "@syndromatic/syncloudos/sdk";
+import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
 import { LUFXSearchableItem } from "@syndromatic/syncloudos/fx/lumina";
 import { defineWebspring, type WebspringViewProps } from "@syndromatic/syncloudos/webspring";
 import "@syndromatic/syncloudos/nse/styles.css";
@@ -62,8 +63,8 @@ window.consumer = { ready: false };
 const journalProbeToken = defineSynWareServiceToken<unknown>({ id: "journal.content", minimumVersion: "2.0.0", contractVersion: "journal.content.v2" });
 const synCalProbeToken = defineSynWareServiceToken<unknown>({ id: "syncal.calendar", minimumVersion: "1.0.0", contractVersion: "syncal.calendar.v1" });
 function Probe() {
-  const app = useSynWare();
-  const lumina = useSynWareLumina();
+  const app = useSCOS();
+  const lumina = useLumina();
   useEffect(() => {
     void (async () => {
       const index = lumina.createIndex();
@@ -104,11 +105,11 @@ function Website({ model, actions, applicationOutlet }: WebspringViewProps) {
   useEffect(() => { window.consumer.model = model; window.consumer.actions = actions; }, [model, actions]);
   return <main><button id="open" onClick={() => { void actions.openApp("org.example.probe"); }}>Open probe</button>{applicationOutlet}</main>;
 }
-const shell = defineWebspring({ manifest: { schemaVersion: 1, id: "org.example.shell", version: "1.0.0", title: "Independent shell", webspringShell: {
+const shell = defineWebspring({ manifest: { schemaVersion: 1, bundleIdentifier: "org.example.shell", version: "1.0.0", displayName: "Independent shell", webspringShell: {
   views: [{ id: "website", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
   defaults: { desktop: "website", tablet: "website", mobile: "website" }, homeRoute: "/", branding: { name: { key: "brand", fallback: "Independent" } }
 }}, components: { website: Website } });
-const app = createSynWare({ manifest: { schemaVersion: 1, id: "org.example.probe", version: "1.0.0", title: "Probe", runtime: { policy: { public: true } }, presentations: ["desktop", "tablet", "mobile"], routes: [{ path: "/probe", primary: true }], permissions: ["lumina.index", "lumina.query"], services: [{ id: "journal.content", required: false }, { id: "syncal.calendar", required: false }], webspring: { visible: true, order: 1 } }, root: Probe });
+const app = createSynWare({ manifest: { schemaVersion: 1, bundleIdentifier: "org.example.probe", version: "1.0.0", displayName: "Probe", runtime: { policy: { public: true } }, presentations: ["desktop", "tablet", "mobile"], routes: [{ path: "/probe", primary: true }], entitlements: ["lumina.index", "lumina.query"], services: [{ id: "journal.content", required: false }, { id: "syncal.calendar", required: false }], webspring: { visible: true, order: 1 } }, root: Probe });
 const element = document.getElementById("root")!;
 mountSynCloudOS({ element, bundles: [app], shell, authentication: "disabled" }).then(host => { window.consumer.dispose = () => host.dispose("consumer verification"); }).catch(error => { window.consumer.error = String(error); });
 `;
@@ -151,7 +152,7 @@ export default { plugins: [{ name: "record-independent-inputs", generateBundle()
         const value = window.consumer;
         const routes = [];
         for (const id of ids) routes.push({ id, result: await value.actions.openApp(id) });
-        return { apps: value.model.apps.map(app => app.id), services: value.services, documentTypes: value.documentTypes, lumina: value.lumina, sections: value.model.sections.map(section => section.id), routes };
+        return { apps: value.model.apps.map(app => app.bundleIdentifier), services: value.services, documentTypes: value.documentTypes, lumina: value.lumina, widgets: value.model.widgets.map(entry => entry.widget.id), routes };
       }, productIds);
       assert.deepEqual(result.apps, ["org.example.probe"]);
       assert(Object.values(result.services).every(available => available === false));
@@ -176,12 +177,12 @@ export default { plugins: [{ name: "record-independent-inputs", generateBundle()
     } finally { await new Promise(accept => hosted.server.close(accept)); }
 
     for (const [theme, exported] of [["neutral", null], ...Object.entries(themes)]) {
-      const themeImport = exported ? `import { ${exported} as appearance } from "@syndromatic/syncloudos/nse/themes/${theme}";` : 'const appearance = defineNSEAppearance({ id: "independent", displayName: "Independent" });';
+      const themeImport = exported ? `import { ${exported} as appearance } from "@syndromatic/syncloudos/nse/themes/${theme}";` : "const appearance = {\"bundleIdentifier\":\"com.example.independent\",\"displayName\":\"Independent\",\"version\":\"1.0.0\",\"colours\":{\"light\":{\"labelColour\":\"#2a2f36\",\"secondaryLabelColour\":\"#4f5d6d\",\"tertiaryLabelColour\":\"rgba(44, 56, 70, 0.54)\",\"quaternaryLabelColour\":\"rgba(0, 0, 0, 0.2)\",\"textColour\":\"#25303c\",\"placeholderTextColour\":\"rgba(44, 56, 70, 0.54)\",\"selectedTextColour\":\"#ffffff\",\"textBackgroundColour\":\"#ffffff\",\"selectedTextBackgroundColour\":\"rgba(99, 153, 200, 0.2)\",\"unemphasisedSelectedTextColour\":\"#1f2833\",\"unemphasisedSelectedTextBackgroundColour\":\"#d4d8de\",\"keyboardFocusIndicatorColour\":\"rgba(76, 164, 255, 0.95)\",\"linkColour\":\"rgb(28 112 185)\",\"separatorColour\":\"rgb(67 88 107 / 20%)\",\"gridColour\":\"rgb(67 88 107 / 28%)\",\"headerTextColour\":\"#2b3440\",\"findHighlightColour\":\"#ffcc00\",\"highlightColour\":\"rgba(255, 255, 255, 0.9)\",\"shadowColour\":\"rgba(0, 0, 0, 0.35)\",\"selectedContentBackgroundColour\":\"rgba(99, 153, 200, 0.2)\",\"unemphasisedSelectedContentBackgroundColour\":\"#d4d8de\",\"alternatingContentBackground1\":\"#ffffff\",\"alternatingContentBackground2\":\"rgba(0, 0, 0, 0.035)\",\"selectedMenuItemTextColour\":\"#ffffff\",\"controlAccentColour\":\"rgb(28 112 185)\",\"controlColour\":\"#d1d0d0\",\"controlBackgroundColour\":\"rgb(255 255 255 / 60%)\",\"controlTextColour\":\"#283444\",\"disabledControlTextColour\":\"rgba(44, 56, 70, 0.54)\",\"selectedControlColour\":\"rgb(28 112 185)\",\"selectedControlTextColour\":\"#ffffff\",\"alternateSelectedControlTextColour\":\"#ffffff\",\"windowBackgroundColour\":\"#d9dbde\",\"windowFrameTextColour\":\"#293645\",\"underPageBackgroundColour\":\"#d9dbde\",\"systemRed\":\"#a52d28\",\"systemOrange\":\"#ff8000\",\"systemYellow\":\"#ffcc00\",\"systemGreen\":\"#34c759\",\"systemMint\":\"#00ff80\",\"systemTeal\":\"#008080\",\"systemCyan\":\"#00ffff\",\"systemBlue\":\"#007aff\",\"systemIndigo\":\"#5856d6\",\"systemPurple\":\"#800080\",\"systemPink\":\"#ff0080\",\"systemBrown\":\"#996633\",\"systemGrey\":\"#808080\"},\"dark\":{\"labelColour\":\"#dde3ea\",\"secondaryLabelColour\":\"#c3ccd7\",\"tertiaryLabelColour\":\"rgba(200, 210, 222, 0.45)\",\"quaternaryLabelColour\":\"rgba(255, 255, 255, 0.32)\",\"textColour\":\"#e3e8ee\",\"placeholderTextColour\":\"rgba(200, 210, 222, 0.45)\",\"selectedTextColour\":\"#ffffff\",\"textBackgroundColour\":\"#1d2229\",\"selectedTextBackgroundColour\":\"rgba(99, 153, 200, 0.24)\",\"unemphasisedSelectedTextColour\":\"#dfe5ec\",\"unemphasisedSelectedTextBackgroundColour\":\"#3c434c\",\"keyboardFocusIndicatorColour\":\"rgba(76, 164, 255, 0.95)\",\"linkColour\":\"rgb(120 172 222)\",\"separatorColour\":\"rgb(255 255 255 / 9%)\",\"gridColour\":\"rgb(255 255 255 / 11%)\",\"headerTextColour\":\"#dfe5ec\",\"findHighlightColour\":\"#ffcc00\",\"highlightColour\":\"rgba(255, 255, 255, 0.14)\",\"shadowColour\":\"rgba(0, 0, 0, 0.65)\",\"selectedContentBackgroundColour\":\"rgba(99, 153, 200, 0.24)\",\"unemphasisedSelectedContentBackgroundColour\":\"#3c434c\",\"alternatingContentBackground1\":\"#1d2229\",\"alternatingContentBackground2\":\"rgba(255, 255, 255, 0.035)\",\"selectedMenuItemTextColour\":\"#ffffff\",\"controlAccentColour\":\"rgb(120 172 222)\",\"controlColour\":\"#343b44\",\"controlBackgroundColour\":\"rgb(255 255 255 / 6%)\",\"controlTextColour\":\"#e7ecf2\",\"disabledControlTextColour\":\"rgba(200, 210, 222, 0.45)\",\"selectedControlColour\":\"rgb(120 172 222)\",\"selectedControlTextColour\":\"#0d1a2a\",\"alternateSelectedControlTextColour\":\"#ffffff\",\"windowBackgroundColour\":\"#1b222c\",\"windowFrameTextColour\":\"#f1f4f8\",\"underPageBackgroundColour\":\"#1b222c\",\"systemRed\":\"#ff7b72\",\"systemOrange\":\"#ff8000\",\"systemYellow\":\"#ffcc00\",\"systemGreen\":\"#34c759\",\"systemMint\":\"#00ff80\",\"systemTeal\":\"#008080\",\"systemCyan\":\"#00ffff\",\"systemBlue\":\"#007aff\",\"systemIndigo\":\"#5856d6\",\"systemPurple\":\"#800080\",\"systemPink\":\"#ff0080\",\"systemBrown\":\"#996633\",\"systemGrey\":\"#808080\"}},\"navigation\":{\"compact\":{\"placement\":\"block-end\",\"flow\":\"overlay\"},\"regular\":{\"placement\":\"source-list\",\"flow\":\"in-flow\"}},\"presentation\":{\"login\":\"ornamented\",\"notifications\":\"sliced-3d\",\"materialLighting\":\"on\"},\"images\":{}} as const; const freeze = (value: unknown): void => { if (value && typeof value === \"object\") { Object.values(value).forEach(freeze); Object.freeze(value); } }; freeze(appearance);";
       write(root, "src/main.tsx", `import { createRoot } from "react-dom/client";
-import { NSEAppearanceProvider, defineNSEAppearance, NSEStackView } from "@syndromatic/syncloudos/nse";
+import { NSEAppearanceProvider, NSEStackView } from "@syndromatic/syncloudos/nse";
 import "@syndromatic/syncloudos/nse/styles.css";
 ${themeImport}
-createRoot(document.getElementById("root")!).render(<NSEAppearanceProvider appearance={appearance}><NSEStackView aria-label="Theme probe"><span>Theme ${theme}</span></NSEStackView></NSEAppearanceProvider>);`);
+createRoot(document.getElementById("root")!).render(<NSEAppearanceProvider theme={appearance}><NSEStackView aria-label="Theme probe"><span>Theme ${theme}</span></NSEStackView></NSEAppearanceProvider>);`);
       runNode([join(root, "node_modules/typescript/bin/tsc"), "-p", "tsconfig.json"], root);
       runNode([join(root, "node_modules/vite/bin/vite.js"), "build"], root, { log: join(root, `theme-${theme}.log`) });
       const ids = JSON.parse(readFileSync(join(root, "resolved-modules.json"), "utf8"));
@@ -190,7 +191,7 @@ createRoot(document.getElementById("root")!).render(<NSEAppearanceProvider appea
       assert.deepEqual(importedThemes, exported ? [theme] : []);
       const css = files(join(root, "dist")).filter(path => path.endsWith(".css")).map(path => readFileSync(path, "utf8")).join("\n");
       for (const other of Object.keys(themes).filter(name => name !== theme)) {
-        const selector = new RegExp(`\\[data-nse-appearance=(?:["']?)${other}(?:["']?)\\]`, "u");
+        const selector = new RegExp(`\\[data-nse-theme=(?:["']?)${other}(?:["']?)\\]`, "u");
         assert(!selector.test(css), `${theme} includes ${other} theme styles.`);
       }
       const server = await staticServer(join(root, "dist"));
@@ -199,7 +200,7 @@ createRoot(document.getElementById("root")!).render(<NSEAppearanceProvider appea
         page.on("pageerror", error => errors.push(error.message));
         page.on("response", response => { if (response.status() >= 400) failures.push(response.url()); });
         await page.goto(server.url);
-        await page.locator(`[data-nse-appearance="${exported ? theme : "independent"}"]`).first().waitFor();
+        await page.locator(`[data-nse-theme="${exported ? "com.syndromatic." + theme : "com.example.independent"}"]`).first().waitFor();
         assert.deepEqual(errors, []);
         evidence.themes.push({ theme, importedThemes, mounted: true, typecheck: true, errors, failedRequests: failures });
         await page.close();

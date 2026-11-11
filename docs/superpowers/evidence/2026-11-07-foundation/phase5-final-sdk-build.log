@@ -1,0 +1,533 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 sdk:build
+npm notice run node scripts/synware/build-sdk.mjs
+vite v7.3.7 building client environment for production...
+transforming...
+✓ 2026 modules transformed.
+Export "createSynWareDefinitionFromApplicationClass" of module "src/SynCloudOS/AppHosting/applicationClass.ts" was reexported through module "src/SynCloudOS/AppHosting/runtimeEntry.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/SynCloudOS/AppSDK/testing/createSynWareTestHost.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "applicationSessionFor" of module "src/SynCloudOS/AppHosting/applicationSession.ts" was reexported through module "src/SynCloudOS/AppHosting/runtimeEntry.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/SynCloudOS/AppSDK/testing/createSynWareTestHost.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "SynCloudOSProvider" of module "src/SynCloudOSReact/SynCloudOSProvider.tsx" was reexported through module "src/SynCloudOSReact/index.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/SynCloudOS/AppSDK/testing/createSynWareTestHost.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "RuntimeInputBoundary" of module "src/SynCloudOSReact/RuntimeInputBoundary.tsx" was reexported through module "src/SynCloudOSReact/index.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/SynCloudOS/AppSDK/testing/createSynWareTestHost.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "useResolvedMode" of module "src/SynCloudOSReact/serviceHooks.ts" was reexported through module "src/SynCloudOSReact/index.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/Webspring/ApplicationStageView.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "useRuntimeNSEFocusPort" of module "src/SynCloudOSReact/nseFocusPort.tsx" was reexported through module "src/SynCloudOSReact/index.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/Webspring/ApplicationStageView.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "useRuntimeNSEOverlayPort" of module "src/SynCloudOSReact/nseFocusPort.tsx" was reexported through module "src/SynCloudOSReact/index.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/Webspring/ApplicationStageView.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "ResponderScope" of module "src/SynCloudOSReact/ResponderScope.tsx" was reexported through module "src/SynCloudOSReact/index.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/Webspring/ApplicationStageView.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "FocusScope" of module "src/SynCloudOSReact/FocusScope.tsx" was reexported through module "src/SynCloudOSReact/index.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/Webspring/WebspringQuickSwitchView.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "FocusScope" of module "src/SynCloudOSReact/FocusScope.tsx" was reexported through module "src/SynCloudOSReact/index.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/Webspring/NotificationCentrePresenter.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "useResolvedMode" of module "src/SynCloudOSReact/serviceHooks.ts" was reexported through module "src/SynCloudOSReact/index.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/Webspring/WebspringStatusLayer.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "FocusScope" of module "src/SynCloudOSReact/FocusScope.tsx" was reexported through module "src/SynCloudOSReact/index.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/Webspring/WebspringStatusLayer.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "useRuntimeNSEFocusPort" of module "src/SynCloudOSReact/nseFocusPort.tsx" was reexported through module "src/SynCloudOSReact/index.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/Webspring/WebspringHost.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "applicationSessionFor" of module "src/SynCloudOS/AppHosting/applicationSession.ts" was reexported through module "src/SynCloudOS/AppHosting/runtimeEntry.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/SynCloudOS/InstalledApplications/installedApplicationRuntimePort.ts" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "useLocaleServicesSnapshot" of module "src/SynCloudOSReact/serviceHooks.ts" was reexported through module "src/SynCloudOSReact/index.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/Webspring/Preferences/useSystemText.ts" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "useSettings" of module "src/SynCloudOSReact/serviceHooks.ts" was reexported through module "src/SynCloudOSReact/index.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/Webspring/Preferences/useSystemPreferencePanes.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "useAppearance" of module "src/SynCloudOSReact/serviceHooks.ts" was reexported through module "src/SynCloudOSReact/index.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/Webspring/Preferences/useSystemPreferencePanes.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "useLocaleServicesSnapshot" of module "src/SynCloudOSReact/serviceHooks.ts" was reexported through module "src/SynCloudOSReact/index.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/Webspring/Preferences/useSystemPreferencePanes.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "useAppearance" of module "src/SynCloudOSReact/serviceHooks.ts" was reexported through module "src/SynCloudOSReact/index.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/Webspring/SystemUILayer.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "useResolvedMode" of module "src/SynCloudOSReact/serviceHooks.ts" was reexported through module "src/SynCloudOSReact/index.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/Webspring/SystemUILayer.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "useSettings" of module "src/SynCloudOSReact/serviceHooks.ts" was reexported through module "src/SynCloudOSReact/index.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/Webspring/SystemUILayer.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "useRuntimeNSEFocusPort" of module "src/SynCloudOSReact/nseFocusPort.tsx" was reexported through module "src/SynCloudOSReact/index.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/Webspring/SystemUILayer.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "useRuntimeNSEOverlayPort" of module "src/SynCloudOSReact/nseFocusPort.tsx" was reexported through module "src/SynCloudOSReact/index.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/Webspring/SystemPanelsLayer.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "useLocaleServicesSnapshot" of module "src/SynCloudOSReact/serviceHooks.ts" was reexported through module "src/SynCloudOSReact/index.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/Webspring/HostLoginGate.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "FocusScope" of module "src/SynCloudOSReact/FocusScope.tsx" was reexported through module "src/SynCloudOSReact/index.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/Webspring/HostLoginGate.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "SynCloudOSProvider" of module "src/SynCloudOSReact/SynCloudOSProvider.tsx" was reexported through module "src/SynCloudOSReact/index.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/SynCloudOSReact/browserRuntime.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "RuntimeInputBoundary" of module "src/SynCloudOSReact/RuntimeInputBoundary.tsx" was reexported through module "src/SynCloudOSReact/index.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/SynCloudOSReact/browserRuntime.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "FocusScope" of module "src/SynCloudOSReact/FocusScope.tsx" was reexported through module "src/SynCloudOSReact/index.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/SynCloudOSReact/browserRuntime.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "NSEViewControllerView" of module "src/SynCloudOS/AppHosting/applicationHosting.tsx" was reexported through module "src/SynCloudOS/AppHosting/runtimeEntry.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/SynCloudOSReact/SynCloudOSProvider.tsx" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "isNSEApplicationClass" of module "src/SynCloudOS/AppHosting/applicationClass.ts" was reexported through module "src/SynCloudOS/AppHosting/runtimeEntry.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/SynCloudOS/BundleLoader/definitionModule.ts" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "createSynWareDefinitionFromApplicationClass" of module "src/SynCloudOS/AppHosting/applicationClass.ts" was reexported through module "src/SynCloudOS/AppHosting/runtimeEntry.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/SynCloudOS/BundleLoader/definitionModule.ts" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Export "createSynWareDefinitionFromComponent" of module "src/SynCloudOS/AppHosting/applicationClass.ts" was reexported through module "src/SynCloudOS/AppHosting/runtimeEntry.ts" while both modules are dependencies of each other and will end up in different chunks by current Rollup settings. This scenario is not well supported at the moment as it will produce a circular dependency between chunks and will likely lead to broken execution order.
+Either change the import in "src/SynCloudOS/BundleLoader/definitionModule.ts" to point directly to the exporting module or reconfigure "output.manualChunks" to ensure these modules end up in the same chunk.
+Circular chunk: browser -> syncloudos-runtime -> browser. Consider disabling the "output.onlyExplicitManualChunks" option, as enabling it causes the static dependencies of the manual chunk "syncloudos-runtime" to be bundled into the chunk "browser".
+Generated an empty chunk: "fx/network".
+Generated an empty chunk: "fx/bluetooth".
+Generated an empty chunk: "fx/speech".
+rendering chunks...
+computing gzip size...
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-oRMg3iMw.svg                                            0.09 kB │ gzip:   0.11 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-BJGu_9FP.svg                                            0.10 kB │ gzip:   0.11 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-jkRe-HrI.svg                                            0.10 kB │ gzip:   0.11 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CeSvvCu6.svg                                            0.11 kB │ gzip:   0.12 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-DyYQ7wIe.svg                                            0.12 kB │ gzip:   0.13 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-I-bLOvbs.svg                                            0.13 kB │ gzip:   0.13 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CQPggjDx.svg                                            0.13 kB │ gzip:   0.14 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CW6IbLAP.svg                                            0.14 kB │ gzip:   0.15 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-BagmvuQ_.svg                                            0.14 kB │ gzip:   0.14 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-BtJkt8uO.svg                                            0.15 kB │ gzip:   0.15 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-C1nMtsKZ.svg                                            0.16 kB │ gzip:   0.15 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-BRlafRRu.svg                                            0.16 kB │ gzip:   0.15 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-B0N3sspq.svg                                            0.21 kB │ gzip:   0.17 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-BOFjBVRA.svg                                            0.23 kB │ gzip:   0.17 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CHJ1Mlyl.svg                                            0.23 kB │ gzip:   0.19 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-DnfGECbB.svg                                            0.29 kB │ gzip:   0.19 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-BlRg_hsL.svg                                            0.31 kB │ gzip:   0.21 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/home-BdVuCs5G.svg                                                  0.34 kB │ gzip:   0.28 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-Bh0EKP5L.svg                                            0.35 kB │ gzip:   0.24 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CG0GmLtm.svg                                            0.37 kB │ gzip:   0.25 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/pdf-lib-fontkit-1.1.1/NOTICE                        0.39 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-D3zYql_L.svg                                            0.48 kB │ gzip:   0.25 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-C9VDOmaS.svg                                            0.51 kB │ gzip:   0.27 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/header-middle-CWBOBlnr.png                                         0.52 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-DaHIcNu4.svg                                            0.54 kB │ gzip:   0.30 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/providerIconInset-WVxkeRAb.svg                                     0.55 kB │ gzip:   0.29 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/checkboxUnchecked-2x-DTB8y_eD.png                                  0.58 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-IJhUNJRN.svg                                            0.63 kB │ gzip:   0.37 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/tslib-1.14.1/LICENSE.txt                            0.66 kB │ gzip:   0.43 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/header-middle-BIQZWiHn.png                                         0.66 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/arrow-SELECTOR-FOjtKdRR.png                                        0.67 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/settings-ELby_l4U.svg                                              0.70 kB │ gzip:   0.39 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/TopBar-Middle-NonSelector-2x-x2_k4Dpg.png                          0.70 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/TopBar-Middle-SELECTOR-2x-C2cp2Rhu.png                             0.74 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/header-endcap-left-e6RGACyh.png                                    0.75 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/checkboxChecked-2x-V4RDPeHT.png                                    0.78 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/header-endcap-right-BN5URN-3.png                                   0.79 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/browserResponsiveness.worker-DBPIAVzy.js                           0.88 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/TopBar-ButtonSELECTOR-Left-Middle-2x-6sw0x9EK.png                  0.90 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/control-tab-middle-DiAP0S6U.png                                    1.02 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/unicode-trie-2.0.0/LICENSE                          1.04 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/pdf-lib-upng-1.0.1/LICENSE                          1.07 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/zumer-snapdom-2.12.9/LICENSE                        1.07 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/base64-js-0.0.8/LICENSE.MIT                         1.07 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/tiptap-pm-3.24.0/LICENSE                            1.07 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/pdf-lib-standard-fonts-1.0.0/LICENSE.md             1.07 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/pdf-lib-1.17.1/LICENSE.md                           1.07 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/bidi-js-1.1.0/LICENSE.txt                           1.07 kB │ gzip:   0.65 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/ajv-formats-3.0.1/LICENSE                           1.07 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/unicode-script-1.2.0/MIT-LICENSE.txt                1.08 kB │ gzip:   0.66 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/pdf-lib-fontkit-1.1.1/NOTICE.node                   1.08 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/linebreak-1.1.0/LICENSE                             1.08 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/tiny-inflate-1.0.3/LICENSE                          1.08 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/regenerator-runtime-0.14.1/LICENSE                  1.08 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/floating-ui-core-1.7.5/LICENSE                      1.09 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/floating-ui-dom-1.7.6/LICENSE                       1.09 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/floating-ui-utils-0.2.11/LICENSE                    1.09 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/ajv-8.20.0/LICENSE                                  1.09 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/orderedmap-2.1.1/LICENSE                            1.10 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/w3c-keyname-2.2.8/LICENSE                           1.10 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/woff2-encoder-3.0.0-beta.1/LICENSE                  1.10 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/pako-1.0.11/LICENSE                                 1.10 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/prosemirror-commands-1.7.1/LICENSE                  1.11 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/prosemirror-keymap-1.2.3/LICENSE                    1.11 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/prosemirror-model-1.25.12/LICENSE                   1.11 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/prosemirror-state-1.4.4/LICENSE                     1.11 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/prosemirror-transform-1.12.0/LICENSE                1.11 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/prosemirror-view-1.42.6/LICENSE                     1.11 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/ts-custom-error-3.3.1/LICENSE                       1.11 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/bwip-js-generic-4.11.4/LICENSE                      1.12 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CsvPRbpj.svg                                            1.13 kB │ gzip:   0.48 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/pdf-lib-fontkit-1.1.1/LICENSE                       1.17 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-kEG6YqZh.svg                                            1.35 kB │ gzip:   0.51 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-D70Tvskj.svg                                            1.39 kB │ gzip:   0.48 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/cloud-particle-BPeD8d7b.png                                        1.44 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-C8xCRquj.svg                                            1.46 kB │ gzip:   0.59 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/header-endcap-left-BsIH3QAb.png                                    1.62 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/header-endcap-right-97l4ji2A.png                                   1.65 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/left-6CAv360h.png                                                  1.93 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/right-DOWPjGUp.png                                                 1.94 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-Ddu_kdwR.svg                                            2.01 kB │ gzip:   0.57 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-DmmCnCSx.svg                                            2.09 kB │ gzip:   0.74 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CKdgsMXJ.svg                                            2.15 kB │ gzip:   0.60 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/TackWhite-BhC9NXpq.png                                             2.23 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-DBC6SFsO.svg                                            2.95 kB │ gzip:   0.74 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-D4fkys8t.svg                                            3.04 kB │ gzip:   1.12 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-BeuXs9uZ.svg                                            3.04 kB │ gzip:   0.80 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-B_da1VrI.svg                                            3.07 kB │ gzip:   1.16 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-YQ0moJme.svg                                            3.24 kB │ gzip:   0.74 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-BJn0om38.svg                                            3.30 kB │ gzip:   0.84 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/user-info-BVdMtTs0.svg                                             3.45 kB │ gzip:   1.63 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CGaHZUFJ.svg                                            3.60 kB │ gzip:   0.85 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-BidszYW4.svg                                            3.99 kB │ gzip:   0.88 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/TackTransparent-CetyGCKH.png                                       4.03 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/spinner_signin-DvxiY73e.png                                        5.39 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CQDOZvw4.svg                                            5.48 kB │ gzip:   1.08 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/woff2-encoder-3.0.0-beta.1/LICENSE-THIRD-PARTY      5.71 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies.json                                                5.76 kB │ gzip:   0.87 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-a2i0k0-W.svg                                            6.75 kB │ gzip:   1.15 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/rope-shadow-MERGED-NNRVFzDS.png                                    7.31 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/TopBar-LeftCurve-SELECTOR-2x-DIlT4KIv.png                          8.02 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/TopBar-RightCurve-SELECTOR-2x-u8U3jrZC.png                         8.99 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/TopBar-ButtonSELECTOR-Left-Curve-2x-BMdPnqaW.png                   9.71 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-BwhEvMRg.svg                                            9.77 kB │ gzip:   1.38 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/pdfjs-dist-6.3.289/LICENSE                         10.17 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/TopBar-ButtonSELECTOR-Right-Curve-2x-Dnl2B8hw.png                 11.22 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-Ccf0E1xv.svg                                           12.11 kB │ gzip:   1.91 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/control-tab-right-BW2U8mgw.png                                    12.15 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/control-tab-left-BZJO-hQE.png                                     12.48 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-C5p0r783.svg                                           12.59 kB │ gzip:   1.65 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/BETAbanner-topRight-2x-BxcG6O7N.png                               12.79 kB
+.artifacts/synapp-sdk/packages/syncloudos/licenses/dependencies/zxing-library-0.23.0/LICENSE                       13.32 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/RopeLeft-MxoFPG-t.png                                             14.02 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-7cjHEWLY.svg                                           14.57 kB │ gzip:   2.04 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-DpLr66o9.svg                                           14.73 kB │ gzip:   1.58 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-Dngsn03p.svg                                           14.89 kB │ gzip:   1.55 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-DiIOC3dT.svg                                           15.04 kB │ gzip:   1.49 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CdM2E_Xg.svg                                           15.12 kB │ gzip:   1.98 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-DNqyy9jB.svg                                           15.17 kB │ gzip:   1.73 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-DCtpci_X.svg                                           15.18 kB │ gzip:   1.74 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-DHwnXUEM.svg                                           15.18 kB │ gzip:   1.74 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-BxuEzKO7.svg                                           15.32 kB │ gzip:   1.70 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-BPknhegf.svg                                           15.33 kB │ gzip:   1.71 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-UxwfpAi5.svg                                           15.33 kB │ gzip:   1.71 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-Ce-Zc-lv.svg                                           15.48 kB │ gzip:   1.64 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-D0I74twi.svg                                           15.49 kB │ gzip:   1.65 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-DyDJnZAZ.svg                                           15.49 kB │ gzip:   1.65 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/RopeRight-D77UT-Y-.png                                            15.80 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/spinner-mB64Y0EN.png                                              15.94 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-l8-qzXfq.svg                                           19.01 kB │ gzip:   2.68 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-DMwMQJQi.svg                                           23.57 kB │ gzip:   4.01 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-wlBSpbgx.svg                                           23.64 kB │ gzip:   3.99 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-vbRu4l_y.svg                                           23.85 kB │ gzip:   4.06 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CmdC5Ic3.svg                                           24.02 kB │ gzip:   4.05 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CZ1AmqZF.svg                                           24.03 kB │ gzip:   4.17 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-BzM1qWay.svg                                           24.03 kB │ gzip:   4.18 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-D2q7fSmj.svg                                           24.03 kB │ gzip:   4.18 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-M6HRY64n.svg                                           24.10 kB │ gzip:   4.15 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CGRoH_yC.svg                                           24.10 kB │ gzip:   4.16 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CBNLsGG1.svg                                           24.10 kB │ gzip:   4.09 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-2RDqh5V0.svg                                           24.10 kB │ gzip:   4.16 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-Dc4z0UvP.svg                                           24.11 kB │ gzip:   4.05 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-B7VBeFmz.svg                                           24.13 kB │ gzip:   4.10 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-BWrLPk4A.svg                                           24.32 kB │ gzip:   4.22 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-3brF06Lt.svg                                           24.32 kB │ gzip:   4.23 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-BbfAsSkd.svg                                           24.33 kB │ gzip:   4.23 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-BRPyGDef.svg                                           24.47 kB │ gzip:   4.20 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-BF8NAUK2.svg                                           24.48 kB │ gzip:   4.21 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-C7QWblEn.svg                                           24.48 kB │ gzip:   4.21 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-B_Lyc7AY.svg                                           24.56 kB │ gzip:   4.21 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-B2YSV9qD.svg                                           24.56 kB │ gzip:   4.21 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-Czf6DvC7.svg                                           24.56 kB │ gzip:   4.22 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-rZlgU3d9.svg                                           24.57 kB │ gzip:   4.25 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-viOKCVSr.svg                                           24.57 kB │ gzip:   4.26 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-ooZYDrEx.svg                                           24.58 kB │ gzip:   4.26 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-6Jv_IceE.svg                                           24.60 kB │ gzip:   4.26 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-Dusyt_X9.svg                                           24.60 kB │ gzip:   4.27 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-aqvwZ3p9.svg                                           24.60 kB │ gzip:   4.27 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-ChWygs-9.svg                                           24.84 kB │ gzip:   4.72 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-LhADxQxs.svg                                           25.08 kB │ gzip:   4.86 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-C8CZhVMg.svg                                           25.14 kB │ gzip:   4.84 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-DsFkTlMM.svg                                           25.14 kB │ gzip:   4.82 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-DIA7JUNa.svg                                           25.21 kB │ gzip:   4.95 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CuDAqxzH.svg                                           25.25 kB │ gzip:   4.89 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-DCae-MSX.svg                                           25.33 kB │ gzip:   4.88 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-Bdcxw_MV.svg                                           25.33 kB │ gzip:   4.89 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-Tyjf3w-9.svg                                           25.46 kB │ gzip:   4.96 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-lci0-NkK.svg                                           25.46 kB │ gzip:   4.97 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-Dpabe3lq.svg                                           25.48 kB │ gzip:   4.76 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-DsmpdgY-.svg                                           25.59 kB │ gzip:   5.04 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-Dohc-VjY.svg                                           25.59 kB │ gzip:   5.04 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-B4oq56Mg.svg                                           25.59 kB │ gzip:   5.05 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-24QXRAk5.svg                                           25.65 kB │ gzip:   5.02 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CdjkrCJc.svg                                           25.65 kB │ gzip:   5.03 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CZjh3180.svg                                           25.65 kB │ gzip:   5.03 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CXosoJnL.svg                                           25.66 kB │ gzip:   2.13 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-BRm9bqJr.svg                                           25.75 kB │ gzip:   5.14 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-DZUuEKD_.svg                                           25.75 kB │ gzip:   5.15 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-uG9IvpQL.svg                                           25.76 kB │ gzip:   5.15 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CTW7vcGy.svg                                           25.87 kB │ gzip:   5.07 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-DqFCMP8E.svg                                           25.87 kB │ gzip:   5.08 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-DCvOGce7.svg                                           25.88 kB │ gzip:   5.09 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-Cqdj58HK.svg                                           25.97 kB │ gzip:   5.14 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-MpY5fHjc.svg                                           25.97 kB │ gzip:   5.15 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-DU3TGJki.svg                                           25.97 kB │ gzip:   5.15 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CntGrPQq.svg                                           26.10 kB │ gzip:   2.28 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CeqT_zsh.svg                                           26.10 kB │ gzip:   2.29 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-98clLabl.svg                                           26.11 kB │ gzip:   2.29 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CGPCTw_Y.svg                                           29.47 kB │ gzip:   4.41 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-XwII574Y.svg                                           29.93 kB │ gzip:   4.57 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CW0w_hI-.svg                                           29.93 kB │ gzip:   4.58 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CvlAymeg.svg                                           29.94 kB │ gzip:   4.58 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-zmInUwIL.svg                                           34.61 kB │ gzip:   4.73 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/EmbossedSynMarksmanLogoMetalFX-DKzEqJUE.png                       34.74 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-DK_uf5iR.svg                                           35.08 kB │ gzip:   4.90 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-B31IIhOH.svg                                           35.08 kB │ gzip:   4.91 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-DyMR1U05.svg                                           35.08 kB │ gzip:   4.91 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/lumina-index.worker-DGdI5eo8.js                                   36.06 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-BXYmvBYW.svg                                           36.39 kB │ gzip:   2.38 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CxyvYv6q.svg                                           36.82 kB │ gzip:   2.53 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-BZfhQiSH.svg                                           36.83 kB │ gzip:   2.54 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-MbdYvaQe.svg                                           36.83 kB │ gzip:   2.54 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/AUFXAudioRenderRuntime-CRTziFbi.js                                39.26 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CnrUDVno.svg                                           40.13 kB │ gzip:   5.04 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CREutypP.svg                                           40.58 kB │ gzip:   5.20 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-IErt1ia6.svg                                           40.58 kB │ gzip:   5.21 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-vector-CRnBhj6E.svg                                           40.58 kB │ gzip:   5.21 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/NSETileCotton-DkyatXus.jpg                                        46.06 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/Panel-VyJpXVYi.png                                                55.35 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/AlertCautionIcon-JZFezHJQ.png                                     73.34 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/core-glow-6KJ4u7vF.png                                            90.00 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/plate-texture-D-gC5Wb9.webp                                      108.27 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/select-circle-eiUlyVZ8.png                                       190.48 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/Webspring-BQlLRdC6.png                                           206.22 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/SynCloudOSLogo-DM7gfhvn.png                                      224.25 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/time-machine-shadow-CmBsfW9m.png                                 476.60 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/image-processing.worker-CJvMA367.js                              478.46 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/video-processing.worker-D8v7HfNk.js                              479.22 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/galaxy-supernova-LoSzA3jU.png                                    945.51 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/star-nebula-BegDShOO.png                                         961.25 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/pdf-document.worker-DEbzoKAg.js                                  969.46 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/pdf.worker.min-Bsp49Cxp.js                                     1,198.29 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/news-D0bhBJvm.png                                              1,202.32 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/linen-RK6nIh-k.webp                                            1,446.79 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/brushed-metal-CyjYuJ9u.webp                                    2,085.21 kB
+.artifacts/synapp-sdk/packages/syncloudos/nse/themes/atmo/styles.css                                                0.11 kB │ gzip:   0.10 kB
+.artifacts/synapp-sdk/packages/syncloudos/chronosphere/styles.css                                                   0.44 kB │ gzip:   0.23 kB
+.artifacts/synapp-sdk/packages/syncloudos/nse/styles.css                                                            0.48 kB │ gzip:   0.24 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/BrowserAnimationLayerHost-DmTgufqQ.css                             0.51 kB │ gzip:   0.26 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/splitViewController-DSyx5sG3.css                                   0.74 kB │ gzip:   0.31 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/WebspringIconEffect-BZzEpQHk.css                                   0.75 kB │ gzip:   0.35 kB
+.artifacts/synapp-sdk/packages/syncloudos/webspring/styles.css                                                      0.81 kB │ gzip:   0.36 kB
+.artifacts/synapp-sdk/packages/syncloudos/browser/styles.css                                                        0.85 kB │ gzip:   0.37 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/scroll-DhvhpxaX.css                                                0.87 kB │ gzip:   0.37 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/pageCurlController-BMWV04z5.css                                    1.47 kB │ gzip:   0.35 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nseSystemDialogs-CpHwEsY9.css                                      1.93 kB │ gzip:   0.63 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/NSETitlebarAccessoryViewController-ECZBrsGN.css                    2.16 kB │ gzip:   0.53 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/browser-DnYy08_c.css                                               3.43 kB │ gzip:   1.19 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/NSETooltipProvider-D9coaODn.css                                    3.84 kB │ gzip:   1.03 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/webspringLocale-DdOJvNRN.css                                       4.35 kB │ gzip:   1.01 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/textLayoutTypes-BmX6WVck.css                                       5.88 kB │ gzip:   1.39 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-overlays-hVy6-1mO.css                                          6.99 kB │ gzip:   1.74 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-chrome-primitives-Cm3Gg5sd.css                                 8.10 kB │ gzip:   1.57 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/components-CIaaTZV-.css                                           11.98 kB │ gzip:   3.12 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-table-view-9wmDC1hB.css                                       12.04 kB │ gzip:   2.85 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/WebspringBoardView-1KhdW881.css                                   12.70 kB │ gzip:   3.14 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-sourcelist-zrYOy169.css                                       17.28 kB │ gzip:   3.64 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/chronosphere-fYldAOkT.css                                         23.37 kB │ gzip:   5.45 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/useMotion-BW4Gvtz5.css                                            25.62 kB │ gzip:   5.75 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/App-CnfNy9YZ.css                                                  41.19 kB │ gzip:  13.72 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/nse-stack-view-x6nCd0n9.css                                       41.42 kB │ gzip:   7.78 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/styles-wLwCf9tn.css                                               57.94 kB │ gzip:  12.14 kB
+.artifacts/synapp-sdk/packages/syncloudos/assets/motion-BlayRTEr.css                                              405.03 kB │ gzip:  48.76 kB
+.artifacts/synapp-sdk/packages/syncloudos/fx/speech.js                                                              0.04 kB │ gzip:   0.06 kB │ map:     0.09 kB
+.artifacts/synapp-sdk/packages/syncloudos/fx/network.js                                                             0.04 kB │ gzip:   0.06 kB │ map:     0.09 kB
+.artifacts/synapp-sdk/packages/syncloudos/fx/bluetooth.js                                                           0.04 kB │ gzip:   0.06 kB │ map:     0.09 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/undoTypes-CwzVfkkX.js                                              0.10 kB │ gzip:   0.11 kB │ map:     7.83 kB
+.artifacts/synapp-sdk/packages/syncloudos/sdk/animation-host.js                                                     0.13 kB │ gzip:   0.14 kB │ map:     0.10 kB
+.artifacts/synapp-sdk/packages/syncloudos/nse/layout.js                                                             0.16 kB │ gzip:   0.15 kB │ map:     0.09 kB
+.artifacts/synapp-sdk/packages/syncloudos/nse/scroll.js                                                             0.16 kB │ gzip:   0.16 kB │ map:     0.09 kB
+.artifacts/synapp-sdk/packages/syncloudos/typography.js                                                             0.17 kB │ gzip:   0.16 kB │ map:     0.10 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/_commonjsHelpers-C6fGbg64.js                                       0.19 kB │ gzip:   0.18 kB │ map:     0.11 kB
+.artifacts/synapp-sdk/packages/syncloudos/nse/themes/atmo.js                                                        0.25 kB │ gzip:   0.19 kB │ map:     0.09 kB
+.artifacts/synapp-sdk/packages/syncloudos/nse/system-ui.js                                                          0.29 kB │ gzip:   0.20 kB │ map:     0.10 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/Badge-CJ8S8Iis.js                                                  0.35 kB │ gzip:   0.28 kB │ map:     1.50 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/namedColourTransform-DYdVIdpQ.js                                   0.36 kB │ gzip:   0.28 kB │ map:     2.58 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/MaterialProvider-CsjQDp4J.js                                       0.37 kB │ gzip:   0.27 kB │ map:     1.80 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/layoutSpacing-BSCFp7zb.js                                          0.40 kB │ gzip:   0.25 kB │ map:     2.51 kB
+.artifacts/synapp-sdk/packages/syncloudos/authentication-services.js                                                0.41 kB │ gzip:   0.23 kB │ map:     0.11 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/MainMenu-Cqz-SXVK.js                                               0.42 kB │ gzip:   0.29 kB │ map:     0.68 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/MainMenu-BMBs4Epk.js                                               0.42 kB │ gzip:   0.29 kB │ map:     0.69 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/MainMenu-DsYvwjBN.js                                               0.42 kB │ gzip:   0.29 kB │ map:     0.69 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/MainMenu-uV1LFr0M.js                                               0.42 kB │ gzip:   0.29 kB │ map:     0.69 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/MainMenu-qL8JmuBI.js                                               0.42 kB │ gzip:   0.29 kB │ map:     0.69 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/MainMenu-CGGFMgj0.js                                               0.42 kB │ gzip:   0.30 kB │ map:     0.69 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/MainMenu-DXqYS0bx.js                                               0.42 kB │ gzip:   0.29 kB │ map:     0.69 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/MainMenu-D__bK4M1.js                                               0.42 kB │ gzip:   0.29 kB │ map:     0.69 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/MainMenu-mTn3bjIu.js                                               0.42 kB │ gzip:   0.31 kB │ map:     0.69 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/MainMenu-eqj3xdt0.js                                               0.43 kB │ gzip:   0.29 kB │ map:     0.69 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/MainMenu-CGKkM8NW.js                                               0.43 kB │ gzip:   0.31 kB │ map:     0.69 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/MainMenu-7ckDnjHH.js                                               0.43 kB │ gzip:   0.31 kB │ map:     0.69 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/MainMenu-CAoRm4n-.js                                               0.43 kB │ gzip:   0.30 kB │ map:     0.69 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/MainMenu-BZufhHl_.js                                               0.43 kB │ gzip:   0.30 kB │ map:     0.69 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/useNSETraitCollection-SDKNiYld.js                                  0.43 kB │ gzip:   0.29 kB │ map:     2.49 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/MainMenu-Tsech8CJ.js                                               0.43 kB │ gzip:   0.30 kB │ map:     0.70 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/MainMenu-kl_swMJP.js                                               0.43 kB │ gzip:   0.31 kB │ map:     0.70 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/MainMenu-DwLOnkFC.js                                               0.43 kB │ gzip:   0.32 kB │ map:     0.70 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/MainMenu-BOim9DUd.js                                               0.44 kB │ gzip:   0.31 kB │ map:     0.70 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/MainMenu-BWzTtJbM.js                                               0.44 kB │ gzip:   0.32 kB │ map:     0.71 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/MainMenu-Cup-zosW.js                                               0.45 kB │ gzip:   0.33 kB │ map:     0.71 kB
+.artifacts/synapp-sdk/packages/syncloudos/nse/appearance.js                                                         0.47 kB │ gzip:   0.26 kB │ map:     0.10 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/CNFXContact-DlsX1xYL.js                                            0.48 kB │ gzip:   0.30 kB │ map:     2.36 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/WebspringIconEffect-BJ-45z21.js                                    0.50 kB │ gzip:   0.32 kB │ map:     2.37 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/NSEAppearance-Ig_OxR4T.js                                          0.52 kB │ gzip:   0.32 kB │ map:     3.16 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/LoadingSpinner-GROiyI7f.js                                         0.58 kB │ gzip:   0.36 kB │ map:     2.11 kB
+.artifacts/synapp-sdk/packages/syncloudos/nse/content.js                                                            0.59 kB │ gzip:   0.32 kB │ map:     0.09 kB
+.artifacts/synapp-sdk/packages/syncloudos/fx/nfc.js                                                                 0.71 kB │ gzip:   0.39 kB │ map:     4.11 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/WebspringIconArtwork-BVjO50Bf.js                                   0.74 kB │ gzip:   0.35 kB │ map:     2.15 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/NSEAnimationDefaults-xRlCSvPc.js                                   0.81 kB │ gzip:   0.36 kB │ map:     3.66 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/TFXFontDescriptor-Bf_bIChk.js                                      0.88 kB │ gzip:   0.49 kB │ map:     2.99 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/identifierAuthority-Bcf3IUSV.js                                    0.88 kB │ gzip:   0.40 kB │ map:     4.39 kB
+.artifacts/synapp-sdk/packages/syncloudos/fx/location.js                                                            0.89 kB │ gzip:   0.42 kB │ map:     3.58 kB
+.artifacts/synapp-sdk/packages/syncloudos/fx/xr.js                                                                  0.92 kB │ gzip:   0.43 kB │ map:     4.48 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/NSEHapticFeedbackManager-CTjPQT7j.js                               0.99 kB │ gzip:   0.53 kB │ map:     4.69 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/NSEUserDefaults-rf4ytZfa.js                                        1.08 kB │ gzip:   0.54 kB │ map:     4.01 kB
+.artifacts/synapp-sdk/packages/syncloudos/fx/video.js                                                               1.14 kB │ gzip:   0.54 kB │ map:     1.79 kB
+.artifacts/synapp-sdk/packages/syncloudos/browser.js                                                                1.18 kB │ gzip:   0.55 kB │ map:     0.10 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/TFXFrame-CUceV21L.js                                               1.35 kB │ gzip:   0.63 kB │ map:     4.88 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/IFXRenderPipeline-CUQvAs4R.js                                      1.43 kB │ gzip:   0.72 kB │ map:     4.50 kB
+.artifacts/synapp-sdk/packages/syncloudos/fx/text.js                                                                1.50 kB │ gzip:   0.69 kB │ map:     2.49 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/NSEObject-CsURAzBV.js                                              1.63 kB │ gzip:   0.79 kB │ map:     8.22 kB
+.artifacts/synapp-sdk/packages/syncloudos/fx/pass.js                                                                1.66 kB │ gzip:   0.67 kB │ map:     6.71 kB
+.artifacts/synapp-sdk/packages/syncloudos/fx/contacts.js                                                            1.66 kB │ gzip:   0.69 kB │ map:     4.68 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/AFXTimingFunction-I8CavDVC.js                                      1.69 kB │ gzip:   0.83 kB │ map:     6.22 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/attachmentProjection-B4pjleBu.js                                   1.88 kB │ gzip:   0.79 kB │ map:     6.63 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/VFXCodecCapabilities-Bkdo1MLd.js                                   1.92 kB │ gzip:   0.81 kB │ map:     5.96 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/NSESortDescriptor-CzrKPf_5.js                                      1.98 kB │ gzip:   0.75 kB │ map:     6.42 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/MEFXSampleTimingInfo-e5zNrIrG.js                                   1.99 kB │ gzip:   0.72 kB │ map:     5.31 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/paymentData-BbQS6PV7.js                                            2.04 kB │ gzip:   0.87 kB │ map:     6.03 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/UndoHistory-DrR1YwaU.js                                            2.14 kB │ gzip:   0.80 kB │ map:     6.86 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/motion-BwHqa9V2.js                                                 2.20 kB │ gzip:   0.53 kB │ map:     5.39 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/GFXPDFFontSubset-oNi5ml2P.js                                       2.36 kB │ gzip:   1.09 kB │ map:     7.59 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/NSEAlert-transitions-CcRfGGe1.js                                   2.42 kB │ gzip:   0.75 kB │ map:     7.79 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/Localisable-BsPV-4db.js                                            2.44 kB │ gzip:   1.03 kB │ map:     3.50 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/Localisable-CqlP3EkM.js                                            2.45 kB │ gzip:   1.04 kB │ map:     3.52 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/Localisable-D70d3iDA.js                                            2.51 kB │ gzip:   0.93 kB │ map:     3.58 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/Localisable-CAO4nT2Y.js                                            2.51 kB │ gzip:   0.92 kB │ map:     3.58 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/Localisable-BL5FHjgR.js                                            2.52 kB │ gzip:   0.92 kB │ map:     3.59 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/Localisable-Cs7dredb.js                                            2.55 kB │ gzip:   1.06 kB │ map:     3.62 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/Localisable-6MxRUe9q.js                                            2.56 kB │ gzip:   0.99 kB │ map:     3.63 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/Localisable-By1wAsQm.js                                            2.59 kB │ gzip:   0.95 kB │ map:     3.65 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/Localisable-DlDSlGzp.js                                            2.62 kB │ gzip:   0.92 kB │ map:     3.69 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/Localisable-DmyVjp1e.js                                            2.62 kB │ gzip:   0.95 kB │ map:     3.69 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/Localisable-Czhs6yN-.js                                            2.63 kB │ gzip:   0.89 kB │ map:     3.80 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/Localisable-B_g80Ces.js                                            2.64 kB │ gzip:   0.89 kB │ map:     3.80 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/Localisable-Bc7ncimi.js                                            2.64 kB │ gzip:   1.02 kB │ map:     3.71 kB
+.artifacts/synapp-sdk/packages/syncloudos/fx/compression.js                                                         2.64 kB │ gzip:   1.00 kB │ map:     8.85 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/Localisable-DefYUK5p.js                                            2.65 kB │ gzip:   0.97 kB │ map:     3.72 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/animationValues-DMj674Jd.js                                        2.69 kB │ gzip:   0.99 kB │ map:     7.32 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/Localisable-C_y3XjTf.js                                            2.70 kB │ gzip:   1.06 kB │ map:     3.76 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/lifecycleError-CGbvPLGg.js                                         2.72 kB │ gzip:   1.05 kB │ map:    10.90 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/Localisable-DAo69L33.js                                            2.81 kB │ gzip:   1.17 kB │ map:     3.87 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/webspringIntegration-BmQvuto4.js                                   2.88 kB │ gzip:   1.06 kB │ map:    10.84 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/IFXImage-DJ2VrQ1v.js                                               2.99 kB │ gzip:   1.19 kB │ map:    10.98 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/browserPDFRenderer-CWG9IXPD.js                                     3.00 kB │ gzip:   1.32 kB │ map:     8.95 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/Localisable-BGsMGmHv.js                                            3.26 kB │ gzip:   1.20 kB │ map:     4.33 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/VFXEncodedChunk-hW-rY3sn.js                                        3.27 kB │ gzip:   1.26 kB │ map:     8.99 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/Localisable-BtnogNkK.js                                            3.39 kB │ gzip:   1.16 kB │ map:     4.45 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/Localisable-LBxuWFbV.js                                            3.51 kB │ gzip:   1.20 kB │ map:     4.58 kB
+.artifacts/synapp-sdk/packages/syncloudos/fx/motion.js                                                              3.56 kB │ gzip:   1.22 kB │ map:    10.44 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/Localisable-B4VUKccr.js                                            3.89 kB │ gzip:   1.21 kB │ map:     4.95 kB
+.artifacts/synapp-sdk/packages/syncloudos/auth/passkey.js                                                           4.10 kB │ gzip:   1.60 kB │ map:    13.22 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/NSEAlertSurface-Mn0x2feM.js                                        4.21 kB │ gzip:   1.68 kB │ map:    14.00 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/NSEAppearanceProvider-Cm1YHzZb.js                                  4.31 kB │ gzip:   1.51 kB │ map:    18.99 kB
+.artifacts/synapp-sdk/packages/syncloudos/nse/text.js                                                               4.32 kB │ gzip:   1.62 kB │ map:     0.09 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/IFXImageResource-KXlUO6N4.js                                       4.33 kB │ gzip:   1.33 kB │ map:    14.42 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/snapshotNSEView-Dno5QmvA.js                                        4.86 kB │ gzip:   1.98 kB │ map:    15.38 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/NSESystemDialogs-DlrD6yPc.js                                       4.93 kB │ gzip:   1.48 kB │ map:    12.44 kB
+.artifacts/synapp-sdk/packages/syncloudos/webspring.js                                                              4.97 kB │ gzip:   1.90 kB │ map:     6.14 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/GFXFloatImage-NFB6jp8a.js                                          5.07 kB │ gzip:   1.85 kB │ map:    13.80 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/NSEData-6fKW2RfT.js                                                5.08 kB │ gzip:   1.96 kB │ map:    16.69 kB
+.artifacts/synapp-sdk/packages/syncloudos/nse/controls.js                                                           5.26 kB │ gzip:   1.97 kB │ map:    12.81 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/GFXColourTransform-ITbjcEQd.js                                     5.33 kB │ gzip:   2.03 kB │ map:    16.58 kB
+.artifacts/synapp-sdk/packages/syncloudos/sdk.js                                                                    5.39 kB │ gzip:   2.10 kB │ map:     0.12 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/BrowserPDFDocumentWorker-B5SXcZ_8.js                               5.45 kB │ gzip:   1.69 kB │ map:    15.20 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/LFXLocation-T8boEkSK.js                                            5.48 kB │ gzip:   1.98 kB │ map:    19.00 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/GFXGradient-Dg3Vh9nf.js                                            5.78 kB │ gzip:   1.91 kB │ map:    14.53 kB
+.artifacts/synapp-sdk/packages/syncloudos/fx/animation.js                                                           5.99 kB │ gzip:   1.97 kB │ map:    14.32 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/IFXImageViewport-DZhARvGU.js                                       6.12 kB │ gzip:   2.23 kB │ map:    22.58 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/fontDescriptors-mBp-zYUT.js                                        6.20 kB │ gzip:   2.06 kB │ map:    18.58 kB
+.artifacts/synapp-sdk/packages/syncloudos/index.js                                                                  6.45 kB │ gzip:   2.41 kB │ map:     0.14 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/controllerLifetime-DbGgV0bA.js                                     6.66 kB │ gzip:   2.26 kB │ map:    24.07 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/VFXContainerReader-DZGYhK9J.js                                     6.87 kB │ gzip:   2.09 kB │ map:    21.80 kB
+.artifacts/synapp-sdk/packages/syncloudos/fx/crypto.js                                                              7.32 kB │ gzip:   2.23 kB │ map:    20.84 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/TFXGlyphDrawing-DFkKrwmS.js                                        7.38 kB │ gzip:   2.16 kB │ map:    20.28 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/AUFXAudioConverter-qwLz0aSX.js                                     7.48 kB │ gzip:   2.48 kB │ map:    22.74 kB
+.artifacts/synapp-sdk/packages/syncloudos/fx/haptics.js                                                             7.49 kB │ gzip:   1.88 kB │ map:    15.31 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/NSEDecimalNumber-DULj8kyJ.js                                       7.84 kB │ gzip:   2.57 kB │ map:    25.58 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/TFXLayoutCache-LusUoKAc.js                                         7.89 kB │ gzip:   2.57 kB │ map:    22.69 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/public-fta4-uwS.js                                                 8.30 kB │ gzip:   2.79 kB │ map:    20.04 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/MEFXTime-DbwnOqDL.js                                               8.95 kB │ gzip:   2.33 kB │ map:    23.25 kB
+.artifacts/synapp-sdk/packages/syncloudos/fx/audio.js                                                               9.15 kB │ gzip:   2.79 kB │ map:    26.86 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/TFXFont-DXTKq6Vx.js                                                9.24 kB │ gzip:   3.63 kB │ map:    26.19 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/index-CVjiLtwr.js                                                 10.09 kB │ gzip:   3.08 kB │ map:    32.01 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/GFXColourProfile-B_AphL3Y.js                                      10.63 kB │ gzip:   3.98 kB │ map:    30.80 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/AFXTransaction-CHoJ3yvX.js                                        11.27 kB │ gzip:   3.31 kB │ map:    31.76 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/immutableValue-CWkl63sQ.js                                        11.30 kB │ gzip:   3.29 kB │ map:    34.34 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/createSynWare-BGbg_ie1.js                                         12.31 kB │ gzip:   4.28 kB │ map:    39.11 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/NSESegmentedControl-cr-_Caum.js                                   12.91 kB │ gzip:   4.06 kB │ map:    38.01 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/managedTask-B6n_34Kz.js                                           13.27 kB │ gzip:   3.93 kB │ map:    37.35 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/observes-D1aKr2ny.js                                              13.29 kB │ gzip:   4.41 kB │ map:    39.40 kB
+.artifacts/synapp-sdk/packages/syncloudos/server/auth.js                                                           13.34 kB │ gzip:   4.34 kB │ map:    39.24 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/UndoManager-CEMMGL5I.js                                           14.33 kB │ gzip:   4.22 kB │ map:    41.90 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/GFXImage-DkItuSIO.js                                              14.56 kB │ gzip:   4.78 kB │ map:    39.17 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/NSEAnimationContext-CI29T6rc.js                                   14.60 kB │ gzip:   5.04 kB │ map:    53.79 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/index-8uUw1MtP.js                                                 14.68 kB │ gzip:   4.80 kB │ map:    51.86 kB
+.artifacts/synapp-sdk/packages/syncloudos/fx/media.js                                                              15.05 kB │ gzip:   4.12 kB │ map:    42.31 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/TFXFramesetter-gwXRhoeq.js                                        15.19 kB │ gzip:   4.63 kB │ map:    47.08 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/VFXFrame-DQkOYqgd.js                                              15.95 kB │ gzip:   4.70 kB │ map:    43.95 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/AFXTransform3D-_Q918-0I.js                                        16.21 kB │ gzip:   4.69 kB │ map:    43.95 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/IFXGraphNodes-31PGqEYX.js                                         16.60 kB │ gzip:   4.33 kB │ map:    46.24 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/NSEFocusPort-Bszf1fM9.js                                          17.61 kB │ gzip:   5.75 kB │ map:    71.02 kB
+.artifacts/synapp-sdk/packages/syncloudos/fx/video/webm.js                                                         18.09 kB │ gzip:   5.44 kB │ map:    46.62 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/GFXBitmapContext-WZ6ZnZRJ.js                                      18.83 kB │ gzip:   5.52 kB │ map:    57.70 kB
+.artifacts/synapp-sdk/packages/syncloudos/auth.js                                                                  18.94 kB │ gzip:   5.87 kB │ map:    41.16 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/content--25Xy9RJ.js                                               19.20 kB │ gzip:   5.28 kB │ map:    48.49 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/documentTextOwner-BhfvIrWV.js                                     21.52 kB │ gzip:   6.55 kB │ map:    66.22 kB
+.artifacts/synapp-sdk/packages/syncloudos/fx/graphics.js                                                           21.53 kB │ gzip:   6.15 kB │ map:    51.60 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/VFXFrameProcessor-CbaXMQ7D.js                                     21.65 kB │ gzip:   5.24 kB │ map:    62.55 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/TFXLine-CJ4K1QzQ.js                                               22.10 kB │ gzip:   6.34 kB │ map:    66.80 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/HFXHapticEngine-DJD4Xdsa.js                                       22.29 kB │ gzip:   5.70 kB │ map:    57.78 kB
+.artifacts/synapp-sdk/packages/syncloudos/fx/midi.js                                                               23.40 kB │ gzip:   6.19 kB │ map:    67.61 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/ApplicationStageView-DPgFIGju.js                                  25.12 kB │ gzip:   8.04 kB │ map:    84.06 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/IFXContext-6XfvUtYL.js                                            25.68 kB │ gzip:   7.14 kB │ map:    83.50 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/MEFXBufferQueue-BMU4zDs7.js                                       26.17 kB │ gzip:   7.03 kB │ map:    86.74 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/GFXPDFContext-CDPYm0FE.js                                         27.36 kB │ gzip:   8.20 kB │ map:    79.47 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/NSEStackView-DNpJtNba.js                                          27.40 kB │ gzip:   7.99 kB │ map:    89.84 kB
+.artifacts/synapp-sdk/packages/syncloudos/fx/lumina.js                                                             28.44 kB │ gzip:   7.69 kB │ map:    88.58 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/GFXContext-BbR2TT4f.js                                            29.15 kB │ gzip:   8.19 kB │ map:    82.40 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/AUFXSpeechSynthesizer-B1EL-8u5.js                                 33.75 kB │ gzip:   9.46 kB │ map:    90.02 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/GFXPath-MTJRbP2S.js                                               38.19 kB │ gzip:  11.07 kB │ map:   123.69 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/WebspringBoardView-B4-IWGeJ.js                                    39.64 kB │ gzip:  11.86 kB │ map:   124.24 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/NSELabelHelp-WO9B5yeC.js                                          41.43 kB │ gzip:  11.07 kB │ map:   122.47 kB
+.artifacts/synapp-sdk/packages/syncloudos/foundation.js                                                            41.55 kB │ gzip:  11.35 kB │ map:   120.08 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/NSEButton-CaFKu2_0.js                                             43.65 kB │ gzip:  13.40 kB │ map:   166.17 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/useRouteData-mYZNJ8bX.js                                          45.19 kB │ gzip:  11.12 kB │ map:   167.10 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/AUFXMediaTime-YZGzOvU1.js                                         48.81 kB │ gzip:  12.51 kB │ map:   137.41 kB
+.artifacts/synapp-sdk/packages/syncloudos/sdk/testing.js                                                           49.36 kB │ gzip:  13.68 kB │ map:   142.53 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/syncloudos-runtime-CSlKZ45j.js                                    52.43 kB │ gzip:  14.10 kB │ map:   149.47 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/NSEApplicationNavigationChrome-p5SQ3lUf.js                        54.66 kB │ gzip:  15.49 kB │ map:   181.79 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/scosFacade-DJovjN91.js                                            55.58 kB │ gzip:  14.35 kB │ map:   173.63 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/NSETooltipProvider-BOWMLC2c.js                                    59.54 kB │ gzip:  17.84 kB │ map:   238.70 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/host-Sm5fSo-Q.js                                                  62.46 kB │ gzip:  16.75 kB │ map:   185.28 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/AFXTiledLayer-qsRGm2oA.js                                         66.41 kB │ gzip:  17.01 kB │ map:   188.58 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/NSEDatePicker-mvaBIVdP.js                                         70.33 kB │ gzip:  18.51 kB │ map:   209.32 kB
+.artifacts/synapp-sdk/packages/syncloudos/chronosphere.js                                                          75.00 kB │ gzip:  21.90 kB │ map:   240.85 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/harfbuzzRuntime-Cg5W9-al.js                                       77.09 kB │ gzip:  17.41 kB │ map:   185.75 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/splitViewController-BDejD2Iz.js                                   88.07 kB │ gzip:  25.27 kB │ map:   282.88 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/App-DLgHz-SD.js                                                   98.45 kB │ gzip:  27.32 kB │ map:   305.21 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/textLayoutTypes-CiAQOft0.js                                      102.59 kB │ gzip:  28.52 kB │ map:   281.46 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/progressCore-DYny_OzH.js                                         105.59 kB │ gzip:  27.39 kB │ map:   325.67 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/TFXTypesetter-BwU3TExf.js                                        114.57 kB │ gzip:  30.93 kB │ map:   371.98 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/webspringLocale-B_ZdmsOu.js                                      120.23 kB │ gzip:  31.85 kB │ map:   383.46 kB
+.artifacts/synapp-sdk/packages/syncloudos/nse/page.js                                                             121.13 kB │ gzip:  35.29 kB │ map:   368.53 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/NSETitlebarAccessoryViewController-DEoo38aM.js                   125.40 kB │ gzip:  34.46 kB │ map:   374.08 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/snapdom-odWIspiP.js                                              162.09 kB │ gzip:  45.22 kB │ map:   295.85 kB
+.artifacts/synapp-sdk/packages/syncloudos/nse.js                                                                  269.97 kB │ gzip:  71.19 kB │ map:   785.23 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/shapedTextLayoutAdapter-CoQBgVki.js                              367.49 kB │ gzip: 101.26 kB │ map: 1,102.65 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/browser-DLoP1Fgv.js                                              419.93 kB │ gzip: 107.10 kB │ map: 1,249.78 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/IFXFilterRegistry-DlBKKbDh.js                                    530.35 kB │ gzip: 147.03 kB │ map: 3,407.22 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/pdf-BS8Eyhri.js                                                  600.57 kB │ gzip: 148.52 kB │ map: 1,561.81 kB
+.artifacts/synapp-sdk/packages/syncloudos/fx/image.js                                                             707.14 kB │ gzip: 145.34 kB │ map: 2,376.64 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/NSEGridView-BshaIZ1P.js                                          766.20 kB │ gzip: 402.39 kB │ map:   571.90 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/useMotion-D27br3AZ.js                                            868.06 kB │ gzip: 178.32 kB │ map: 2,324.58 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/BrowserAnimationLayerHost-B_hFH5xK.js                          1,330.41 kB │ gzip: 323.98 kB │ map: 3,994.99 kB
+.artifacts/synapp-sdk/packages/syncloudos/chunks/GFXPDFDocument-DHZjPHDx.js                                     1,722.43 kB │ gzip: 605.59 kB │ map: 4,626.78 kB
+✓ built in 24.20s
+built SynWare SDK archives at C:\Users\Kavish Krishnakumar\AppData\Local\Temp\syncloudos-phase5-final-dd1a6ddcef-573fd54c\.artifacts\synapp-sdk\archives

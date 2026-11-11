@@ -49,7 +49,7 @@ export function NSETableCell({
       role="gridcell"
       aria-colindex={columnIndex + 1}
       aria-selected={selected}
-      data-nse-part="cell"
+      data-nse-part="cell" data-nse-selected={selected ? "" : undefined} data-nse-focused={focused ? "" : undefined} data-nse-alignment={alignment}
       data-selected={selected || undefined}
       data-focused={focused || undefined}
       data-alignment={alignment}

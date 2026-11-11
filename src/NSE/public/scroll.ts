@@ -24,7 +24,9 @@ export {
 } from "../Scroll/NSEScrollView";
 export type {
   NSEScrollViewProps,
+  NSEScrollViewHandle,
 } from "../Scroll/NSEScrollView";
+export type { NSEClipViewHandle, NSEScrollRect } from "../Scroll/scrollTypes";
 export {
   useNSERubberBandScroll,
 } from "../Scroll/index";

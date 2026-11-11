@@ -1,0 +1,1868 @@
+{
+  "themeContractVersion": 1,
+  "controls": {
+    "app-icon": {
+      "parts": [
+        "bezel",
+        "cell",
+        "content",
+        "image",
+        "shadow",
+        "title"
+      ],
+      "states": [
+        "enabled=false",
+        "selected"
+      ],
+      "variants": {
+        "type": [
+          "application",
+          "folder"
+        ]
+      }
+    },
+    "app-view-chrome": {
+      "parts": [
+        "background"
+      ],
+      "states": [
+        "key-window=false"
+      ],
+      "variants": {}
+    },
+    "badge": {
+      "parts": [
+        "badge"
+      ],
+      "states": [],
+      "variants": {}
+    },
+    "board": {
+      "parts": [
+        "background",
+        "content",
+        "group",
+        "header"
+      ],
+      "states": [],
+      "variants": {}
+    },
+    "box": {
+      "parts": [
+        "actions",
+        "background",
+        "bezel",
+        "border",
+        "content",
+        "header",
+        "separator",
+        "title"
+      ],
+      "states": [],
+      "variants": {
+        "border-type": [
+          "bezelBorder",
+          "grooveBorder"
+        ],
+        "box-type": [
+          "custom",
+          "primary",
+          "secondary",
+          "separator"
+        ],
+        "custom-border": [
+          "true"
+        ],
+        "custom-fill": [
+          "true"
+        ],
+        "expanded": [
+          "true"
+        ],
+        "role": [
+          "disclosure"
+        ],
+        "shadow": [
+          "true"
+        ],
+        "shadow-suppressed": [
+          "true"
+        ],
+        "style": [
+          "alpha",
+          "arrow",
+          "floating",
+          "grey",
+          "inspector",
+          "plain",
+          "sidebar",
+          "soft",
+          "surface"
+        ],
+        "title-position": [
+          "aboveBottom",
+          "aboveTop",
+          "atBottom",
+          "atTop",
+          "belowBottom",
+          "belowTop",
+          "noTitle"
+        ],
+        "transparent": [
+          "false",
+          "true"
+        ],
+        "view-layer": [
+          ""
+        ]
+      }
+    },
+    "browser": {
+      "parts": [
+        "background",
+        "column",
+        "columns",
+        "content",
+        "disclosure",
+        "group",
+        "handle",
+        "row",
+        "status",
+        "title",
+        "viewport"
+      ],
+      "states": [
+        "selected"
+      ],
+      "variants": {
+        "expanded": [
+          "false"
+        ],
+        "type": [
+          "branch",
+          "leaf"
+        ]
+      }
+    },
+    "button": {
+      "parts": [
+        "alignment-glyph",
+        "arrow",
+        "background",
+        "bezel",
+        "cancel",
+        "cell",
+        "choose",
+        "colour-chip",
+        "content",
+        "effect-colour",
+        "effect-colour-face",
+        "effect-glyph",
+        "field",
+        "image",
+        "indicator",
+        "label",
+        "path-item",
+        "tab-icon",
+        "title",
+        "title-measurement"
+      ],
+      "states": [
+        "enabled=false",
+        "focused",
+        "highlighted",
+        "hovered",
+        "selected",
+        "state=mixed",
+        "state=off",
+        "state=on",
+        "tracking=false",
+        "tracking=true"
+      ],
+      "variants": {
+        "appearance-name": [
+          "aqua",
+          "darkAqua"
+        ],
+        "bezel-style": [
+          "disclosure",
+          "rounded",
+          "texturedRounded"
+        ],
+        "button-type": [
+          "momentaryPushIn",
+          "pushOnPushOff",
+          "switch",
+          "toggle"
+        ],
+        "control-size": [
+          "large",
+          "regular",
+          "small"
+        ],
+        "expanded": [
+          "false",
+          "true"
+        ],
+        "has-destructive-action": [
+          "true"
+        ],
+        "image-position": [
+          "imageLeading",
+          "imageOnly",
+          "imageTrailing",
+          "noImage"
+        ],
+        "key-equivalent": [
+          "\r",
+          "\u001b"
+        ],
+        "role": [
+          "close",
+          "current",
+          "default",
+          "ground",
+          "ink",
+          "minimise",
+          "zoom"
+        ],
+        "style": [
+          "edited"
+        ]
+      }
+    },
+    "clip-view": {
+      "parts": [
+        "colour-list",
+        "colour-list-chip",
+        "colour-list-empty",
+        "colour-list-name",
+        "colour-list-row",
+        "colour-list-scroll",
+        "content",
+        "viewport"
+      ],
+      "states": [],
+      "variants": {}
+    },
+    "collection-view": {
+      "parts": [
+        "background",
+        "content",
+        "image",
+        "item",
+        "media-item",
+        "row",
+        "viewport"
+      ],
+      "states": [
+        "enabled=false",
+        "focused",
+        "selected"
+      ],
+      "variants": {}
+    },
+    "colour-panel": {
+      "parts": [
+        "background",
+        "body",
+        "content-message",
+        "current-colour",
+        "eyedropper",
+        "eyedropper-status",
+        "hex-row",
+        "image",
+        "opacity-row",
+        "opacity-value",
+        "row",
+        "row-label",
+        "sample-row",
+        "swatch",
+        "swatch-grip",
+        "swatch-strip"
+      ],
+      "states": [
+        "state=off"
+      ],
+      "variants": {
+        "value-state": [
+          "empty",
+          "populated"
+        ]
+      }
+    },
+    "colour-sliders": {
+      "parts": [
+        "channel",
+        "channel-key",
+        "channel-name",
+        "content",
+        "title"
+      ],
+      "states": [],
+      "variants": {}
+    },
+    "colour-swatches": {
+      "parts": [
+        "content",
+        "swatch"
+      ],
+      "states": [
+        "selected"
+      ],
+      "variants": {}
+    },
+    "colour-well": {
+      "parts": [
+        "bezel",
+        "button",
+        "colour-sample",
+        "colour-value",
+        "status"
+      ],
+      "states": [
+        "enabled=false",
+        "state=off"
+      ],
+      "variants": {}
+    },
+    "colour-wheel": {
+      "parts": [
+        "bezel",
+        "wheel",
+        "wheel-surface"
+      ],
+      "states": [],
+      "variants": {
+        "brightness-placement": [
+          "beside"
+        ]
+      }
+    },
+    "combo-box": {
+      "parts": [
+        "bezel",
+        "field"
+      ],
+      "states": [
+        "enabled=false",
+        "focused"
+      ],
+      "variants": {
+        "editable": [
+          "true"
+        ]
+      }
+    },
+    "date-picker": {
+      "parts": [
+        "actions",
+        "ampm-segment",
+        "bezel",
+        "body",
+        "button",
+        "cell",
+        "centre",
+        "clock",
+        "clock-affix",
+        "column-caption",
+        "date-entry",
+        "date-time-editor",
+        "day",
+        "event-indicator",
+        "face",
+        "field",
+        "header",
+        "hour-hand",
+        "hour-segment",
+        "minute-hand",
+        "minute-segment",
+        "next-month",
+        "next-year",
+        "numeric",
+        "period-gap",
+        "previous-month",
+        "previous-year",
+        "row",
+        "segments",
+        "separator",
+        "title",
+        "today",
+        "value"
+      ],
+      "states": [
+        "enabled=false",
+        "selected"
+      ],
+      "variants": {
+        "date-picker-elements": [
+          "hourMinute",
+          "yearMonthDay",
+          "yearMonthDay hourMinute"
+        ],
+        "date-picker-mode": [
+          "range",
+          "single"
+        ],
+        "date-picker-style": [
+          "clockAndCalendar",
+          "textField",
+          "textFieldAndStepper"
+        ],
+        "flow": [
+          "ltr",
+          "rtl"
+        ],
+        "position": [
+          "end",
+          "middle",
+          "start"
+        ],
+        "role": [
+          "calendar",
+          "field",
+          "today"
+        ],
+        "type": [
+          "adjacent",
+          "clock",
+          "field"
+        ]
+      }
+    },
+    "drawer": {
+      "parts": [
+        "background"
+      ],
+      "states": [],
+      "variants": {
+        "placement": [
+          "bottom",
+          "leading",
+          "top",
+          "trailing"
+        ]
+      }
+    },
+    "folder-presentation": {
+      "parts": [
+        "backdrop",
+        "background",
+        "bezel",
+        "border",
+        "cell",
+        "content",
+        "group",
+        "image",
+        "indicator",
+        "preview",
+        "title"
+      ],
+      "states": [],
+      "variants": {}
+    },
+    "folder-tile": {
+      "parts": [
+        "background",
+        "bezel",
+        "image"
+      ],
+      "states": [],
+      "variants": {
+        "style": [
+          "roundedRect"
+        ]
+      }
+    },
+    "font-panel": {
+      "parts": [
+        "background",
+        "column-caption",
+        "columns",
+        "effects",
+        "font-file-input",
+        "footer",
+        "notice",
+        "paragraph",
+        "preview",
+        "preview-description",
+        "preview-sample",
+        "shadow-angle",
+        "size-column",
+        "size-list"
+      ],
+      "states": [],
+      "variants": {
+        "flow": [
+          "ltr"
+        ]
+      }
+    },
+    "grid-view": {
+      "parts": [
+        "background",
+        "cell",
+        "content",
+        "row"
+      ],
+      "states": [],
+      "variants": {}
+    },
+    "image-view": {
+      "parts": [
+        "accessory",
+        "background",
+        "button",
+        "image"
+      ],
+      "states": [],
+      "variants": {
+        "image-scaling": [
+          "none",
+          "proportionallyUpOrDown"
+        ]
+      }
+    },
+    "level-indicator": {
+      "parts": [
+        "segment",
+        "track"
+      ],
+      "states": [
+        "enabled=false",
+        "selected"
+      ],
+      "variants": {
+        "level": [
+          "critical",
+          "normal",
+          "warning"
+        ],
+        "type": [
+          "capacity",
+          "continuous",
+          "discrete",
+          "rating"
+        ]
+      }
+    },
+    "login-window": {
+      "parts": [
+        "actions",
+        "attachment",
+        "background",
+        "badge",
+        "bezel",
+        "content",
+        "decoration",
+        "effects",
+        "error",
+        "image",
+        "leading",
+        "shadow",
+        "suspension",
+        "title",
+        "trailing"
+      ],
+      "states": [],
+      "variants": {
+        "login-presentation": [
+          "ornamented",
+          "plain"
+        ]
+      }
+    },
+    "matrix": {
+      "parts": [
+        "cell",
+        "content",
+        "field",
+        "title"
+      ],
+      "states": [
+        "enabled=false",
+        "selected",
+        "state=off",
+        "state=on"
+      ],
+      "variants": {
+        "button-type": [
+          "radio"
+        ],
+        "position": [
+          "first",
+          "last"
+        ]
+      }
+    },
+    "menu": {
+      "parts": [
+        "background",
+        "bezel",
+        "body",
+        "content",
+        "separator",
+        "surface",
+        "title",
+        "viewport"
+      ],
+      "states": [],
+      "variants": {
+        "chrome": [
+          "standard"
+        ],
+        "control-size": [
+          "regular",
+          "small"
+        ],
+        "menu-chosen": [
+          ""
+        ],
+        "placement": [
+          "block-end-inline-start",
+          "bottom-start",
+          "viewport-block-start-inline-end"
+        ],
+        "presentation": [
+          "anchored",
+          "viewport-block-start-inline-end"
+        ],
+        "role": [
+          "application-menu",
+          "overlay"
+        ],
+        "style": [
+          "application-menu",
+          "context-menu",
+          "listbox",
+          "menu"
+        ]
+      }
+    },
+    "menu-bar": {
+      "parts": [
+        "background",
+        "item"
+      ],
+      "states": [],
+      "variants": {}
+    },
+    "menu-item": {
+      "parts": [
+        "back-indicator",
+        "cell",
+        "icon-column",
+        "shortcut-column",
+        "state-column",
+        "submenu-arrow",
+        "title"
+      ],
+      "states": [
+        "enabled=false",
+        "focused",
+        "highlighted",
+        "selected",
+        "state=off"
+      ],
+      "variants": {
+        "menu-flash": [
+          "off",
+          "on"
+        ]
+      }
+    },
+    "notification-banner": {
+      "parts": [
+        "accessory",
+        "background",
+        "bezel",
+        "cancel",
+        "content",
+        "effects",
+        "image",
+        "label",
+        "shadow"
+      ],
+      "states": [],
+      "variants": {
+        "notification-presentation": [
+          "plain",
+          "sliced-3d"
+        ]
+      }
+    },
+    "notification-centre": {
+      "parts": [
+        "accessory",
+        "actions",
+        "background",
+        "cancel",
+        "cell",
+        "content",
+        "disclosure",
+        "group",
+        "header",
+        "label",
+        "row",
+        "title"
+      ],
+      "states": [
+        "selected"
+      ],
+      "variants": {}
+    },
+    "open-panel": {
+      "parts": [
+        "background"
+      ],
+      "states": [],
+      "variants": {}
+    },
+    "outline-view": {
+      "parts": [
+        "background",
+        "disclosure",
+        "label",
+        "loading",
+        "row"
+      ],
+      "states": [
+        "enabled=false",
+        "selected"
+      ],
+      "variants": {
+        "expanded": [
+          "false",
+          "true"
+        ],
+        "selection-highlight-style": [
+          "regular",
+          "sourceList"
+        ],
+        "type": [
+          "branch"
+        ]
+      }
+    },
+    "page-controller": {
+      "parts": [
+        "content"
+      ],
+      "states": [],
+      "variants": {}
+    },
+    "panel": {
+      "parts": [
+        "actions",
+        "background",
+        "content",
+        "label",
+        "title",
+        "value"
+      ],
+      "states": [],
+      "variants": {
+        "appearance-name": [
+          "aqua"
+        ],
+        "style": [
+          "about",
+          "preferences"
+        ]
+      }
+    },
+    "path-control": {
+      "parts": [
+        "background"
+      ],
+      "states": [],
+      "variants": {
+        "style": [
+          "standard"
+        ]
+      }
+    },
+    "pop-up-button": {
+      "parts": [
+        "action-menu",
+        "background",
+        "bezel",
+        "field",
+        "label"
+      ],
+      "states": [
+        "enabled=false",
+        "focused",
+        "highlighted",
+        "hovered"
+      ],
+      "variants": {
+        "bezel-style": [
+          "rounded"
+        ],
+        "control-size": [
+          "regular",
+          "small"
+        ],
+        "height": [
+          "24"
+        ],
+        "pulls-down": [
+          "false",
+          "true"
+        ],
+        "type": [
+          "native"
+        ]
+      }
+    },
+    "popover": {
+      "parts": [
+        "actions",
+        "arrow",
+        "calendar-sheet",
+        "centre",
+        "clock",
+        "clock-sheet",
+        "content",
+        "face",
+        "hour-hand",
+        "minute-hand",
+        "numeric",
+        "popover-arrow-fill",
+        "popover-frame",
+        "popover-outline",
+        "range-fields",
+        "surface",
+        "title"
+      ],
+      "states": [],
+      "variants": {
+        "chrome": [
+          "standard"
+        ],
+        "placement": [
+          "block-end-inline-start",
+          "bottom-start"
+        ],
+        "presentation": [
+          "anchored"
+        ],
+        "role": [
+          "overlay"
+        ],
+        "style": [
+          "popover"
+        ]
+      }
+    },
+    "predicate-editor": {
+      "parts": [
+        "background"
+      ],
+      "states": [],
+      "variants": {}
+    },
+    "progress-indicator": {
+      "parts": [
+        "content",
+        "fill",
+        "image",
+        "status",
+        "track"
+      ],
+      "states": [],
+      "variants": {
+        "appearance-name": [
+          "aqua"
+        ],
+        "background-style": [
+          "normal"
+        ],
+        "control-size": [
+          "large",
+          "regular",
+          "small"
+        ],
+        "indeterminate": [
+          "false",
+          "true"
+        ],
+        "role": [
+          "status"
+        ],
+        "style": [
+          "bar",
+          "spinning"
+        ]
+      }
+    },
+    "quick-switch": {
+      "parts": [
+        "background",
+        "bezel",
+        "content",
+        "leading",
+        "trailing"
+      ],
+      "states": [],
+      "variants": {}
+    },
+    "route-picker-view": {
+      "parts": [
+        "background",
+        "bezel",
+        "title"
+      ],
+      "states": [
+        "enabled=false",
+        "state=off",
+        "tracking=false"
+      ],
+      "variants": {
+        "bezel-style": [
+          "rounded"
+        ],
+        "button-type": [
+          "momentaryPushIn"
+        ],
+        "control-size": [
+          "regular"
+        ],
+        "image-position": [
+          "noImage"
+        ]
+      }
+    },
+    "rule-editor": {
+      "parts": [
+        "background"
+      ],
+      "states": [],
+      "variants": {}
+    },
+    "ruler-view": {
+      "parts": [
+        "content",
+        "status",
+        "tab-stop",
+        "tab-stops"
+      ],
+      "states": [],
+      "variants": {
+        "editable": [
+          "true"
+        ],
+        "orientation": [
+          "horizontal"
+        ]
+      }
+    },
+    "save-panel": {
+      "parts": [
+        "content",
+        "prompt",
+        "suggested-name",
+        "surface",
+        "title"
+      ],
+      "states": [],
+      "variants": {
+        "chrome": [
+          "standard"
+        ],
+        "placement": [
+          "block-end-inline-start"
+        ],
+        "presentation": [
+          "anchored",
+          "sheet"
+        ],
+        "role": [
+          "overlay"
+        ],
+        "style": [
+          "action-sheet",
+          "popover"
+        ]
+      }
+    },
+    "scroll-view": {
+      "parts": [
+        "background"
+      ],
+      "states": [],
+      "variants": {}
+    },
+    "scroller": {
+      "parts": [
+        "track"
+      ],
+      "states": [
+        "enabled=false"
+      ],
+      "variants": {
+        "orientation": [
+          "vertical"
+        ]
+      }
+    },
+    "search-field": {
+      "parts": [
+        "bezel",
+        "cancel",
+        "content",
+        "field",
+        "image"
+      ],
+      "states": [
+        "enabled=false",
+        "focused",
+        "hovered"
+      ],
+      "variants": {
+        "control-size": [
+          "regular",
+          "small"
+        ],
+        "editable": [
+          "true"
+        ],
+        "height": [
+          "24",
+          "28"
+        ],
+        "value-state": [
+          "empty",
+          "populated"
+        ]
+      }
+    },
+    "secure-text-field": {
+      "parts": [
+        "bezel",
+        "field",
+        "reveal",
+        "reveal-glyph"
+      ],
+      "states": [
+        "enabled=false",
+        "focused"
+      ],
+      "variants": {
+        "editable": [
+          "true"
+        ],
+        "revealed": [
+          "false"
+        ],
+        "validation": [
+          "valid"
+        ]
+      }
+    },
+    "segmented-control": {
+      "parts": [
+        "bezel",
+        "cell",
+        "content",
+        "disclosure",
+        "field",
+        "overflow",
+        "segment",
+        "title"
+      ],
+      "states": [
+        "enabled=false",
+        "focused",
+        "highlighted",
+        "hovered",
+        "selected",
+        "state=off",
+        "state=on"
+      ],
+      "variants": {
+        "button-type": [
+          "radio"
+        ],
+        "control-size": [
+          "regular",
+          "small"
+        ],
+        "distribution": [
+          "fill-equally"
+        ],
+        "expanded": [
+          "false",
+          "true"
+        ],
+        "height": [
+          "40"
+        ],
+        "position": [
+          "first",
+          "inline",
+          "last",
+          "middle"
+        ],
+        "segment-style": [
+          "capsule",
+          "rounded",
+          "texturedRounded"
+        ],
+        "style": [
+          "grouped"
+        ],
+        "type": [
+          "tool-button-group"
+        ]
+      }
+    },
+    "sheet": {
+      "parts": [
+        "content",
+        "surface",
+        "title"
+      ],
+      "states": [],
+      "variants": {
+        "chrome": [
+          "standard"
+        ],
+        "placement": [
+          "block-end-inline-start"
+        ],
+        "presentation": [
+          "sheet"
+        ],
+        "role": [
+          "overlay"
+        ],
+        "style": [
+          "action-sheet"
+        ]
+      }
+    },
+    "slider": {
+      "parts": [
+        "accessory",
+        "bezel",
+        "circular-body",
+        "content",
+        "field",
+        "fill",
+        "knob",
+        "linear-alternative",
+        "title",
+        "track"
+      ],
+      "states": [
+        "enabled=false",
+        "focused",
+        "tracking=false"
+      ],
+      "variants": {
+        "control-size": [
+          "mini",
+          "regular",
+          "small"
+        ],
+        "orientation": [
+          "horizontal",
+          "vertical"
+        ],
+        "slider-type": [
+          "circular",
+          "linear"
+        ]
+      }
+    },
+    "split-view": {
+      "parts": [
+        "background",
+        "content",
+        "divider",
+        "handle",
+        "sidebar"
+      ],
+      "states": [],
+      "variants": {
+        "position": [
+          "leading"
+        ],
+        "role": [
+          "tabpanel"
+        ]
+      }
+    },
+    "stack-view": {
+      "parts": [
+        "content"
+      ],
+      "states": [],
+      "variants": {
+        "alignment": [
+          "centre"
+        ],
+        "orientation": [
+          "horizontal"
+        ]
+      }
+    },
+    "status-bar": {
+      "parts": [
+        "background"
+      ],
+      "states": [],
+      "variants": {}
+    },
+    "stepper": {
+      "parts": [
+        "bezel",
+        "content",
+        "decrement",
+        "increment"
+      ],
+      "states": [
+        "enabled=false",
+        "focused"
+      ],
+      "variants": {
+        "control-size": [
+          "regular",
+          "small"
+        ]
+      }
+    },
+    "switch": {
+      "parts": [
+        "background",
+        "bezel",
+        "fill",
+        "knob",
+        "label",
+        "title",
+        "track"
+      ],
+      "states": [
+        "enabled=false",
+        "state=off",
+        "state=on",
+        "tracking=false"
+      ],
+      "variants": {
+        "position": [
+          "leading",
+          "trailing"
+        ]
+      }
+    },
+    "system-alert": {
+      "parts": [
+        "actions",
+        "backdrop",
+        "background",
+        "content",
+        "label",
+        "title"
+      ],
+      "states": [],
+      "variants": {
+        "appearance-name": [
+          "aqua"
+        ],
+        "chrome": [
+          "standard"
+        ]
+      }
+    },
+    "tab-view": {
+      "parts": [
+        "background",
+        "bezel",
+        "cell",
+        "content",
+        "crayon",
+        "crayon-art",
+        "crayon-box",
+        "crayon-box-front",
+        "crayons-mode",
+        "grey-presets",
+        "header",
+        "image",
+        "image-marker",
+        "image-mode",
+        "image-palette",
+        "indicator",
+        "palettes-mode",
+        "sliders-mode",
+        "swatch",
+        "tab-item",
+        "title",
+        "viewport",
+        "wheel-mode"
+      ],
+      "states": [
+        "selected"
+      ],
+      "variants": {
+        "control-size": [
+          "large"
+        ],
+        "navigation-flow": [
+          "in-flow",
+          "overlay"
+        ],
+        "navigation-placement": [
+          "block-end",
+          "block-start",
+          "source-list"
+        ],
+        "orientation": [
+          "horizontal",
+          "vertical"
+        ],
+        "position": [
+          "first",
+          "last",
+          "middle",
+          "only"
+        ],
+        "role": [
+          "tab",
+          "tabpanel"
+        ],
+        "style": [
+          "capsule",
+          "icons",
+          "navigation"
+        ],
+        "type": [
+          "template",
+          "vector"
+        ]
+      }
+    },
+    "table-cell-view": {
+      "parts": [
+        "accessory",
+        "badge",
+        "cell",
+        "cell-content",
+        "disclosure",
+        "leading",
+        "primary-text",
+        "row",
+        "secondary-text",
+        "text-content",
+        "trailing"
+      ],
+      "states": [
+        "selected"
+      ],
+      "variants": {
+        "expanded": [
+          "false"
+        ],
+        "highlight-style": [
+          "none",
+          "regular"
+        ],
+        "style": [
+          "list"
+        ]
+      }
+    },
+    "table-view": {
+      "parts": [
+        "background",
+        "body",
+        "cell",
+        "column",
+        "column-resize-handle",
+        "font-list-label",
+        "header",
+        "row",
+        "sort-glyph",
+        "title"
+      ],
+      "states": [
+        "enabled=false",
+        "focused",
+        "selected"
+      ],
+      "variants": {
+        "alignment": [
+          "start"
+        ],
+        "role": [
+          "sort"
+        ],
+        "sort-direction": [
+          "ascending",
+          "none"
+        ]
+      }
+    },
+    "text-field": {
+      "parts": [
+        "bezel",
+        "content",
+        "field",
+        "label",
+        "prefix",
+        "suffix",
+        "title"
+      ],
+      "states": [
+        "enabled=false",
+        "focused",
+        "highlighted",
+        "hovered"
+      ],
+      "variants": {
+        "background-style": [
+          "normal",
+          "raised"
+        ],
+        "control-size": [
+          "mini",
+          "regular",
+          "small"
+        ],
+        "editable": [
+          "false",
+          "true"
+        ],
+        "height": [
+          "24"
+        ],
+        "position": [
+          "single"
+        ],
+        "role": [
+          "group"
+        ],
+        "text-colour": [
+          "labelColour"
+        ],
+        "validation": [
+          "invalid",
+          "valid"
+        ]
+      }
+    },
+    "text-view": {
+      "parts": [
+        "content",
+        "field"
+      ],
+      "states": [],
+      "variants": {
+        "editable": [
+          "false",
+          "true"
+        ]
+      }
+    },
+    "token-field": {
+      "parts": [
+        "bezel",
+        "field",
+        "token",
+        "token-disclosure",
+        "token-label"
+      ],
+      "states": [
+        "enabled=false"
+      ],
+      "variants": {
+        "editable": [
+          "true"
+        ]
+      }
+    },
+    "toolbar": {
+      "parts": [
+        "background",
+        "border",
+        "flexible-space",
+        "highlight",
+        "separator",
+        "shadow",
+        "space"
+      ],
+      "states": [],
+      "variants": {
+        "control-size": [
+          "small"
+        ],
+        "position": [
+          "bottom",
+          "inline",
+          "top"
+        ],
+        "style": [
+          "bevel",
+          "gloss",
+          "grouped",
+          "inner-shadow",
+          "separator",
+          "surface"
+        ],
+        "toolbar-size-mode": [
+          "regular",
+          "small"
+        ],
+        "type": [
+          "tool-button-group"
+        ]
+      }
+    },
+    "toolbar-customisation-palette": {
+      "parts": [
+        "configured-item",
+        "content",
+        "drag-handle",
+        "surface",
+        "title"
+      ],
+      "states": [],
+      "variants": {
+        "chrome": [
+          "standard"
+        ],
+        "placement": [
+          "block-end-inline-start"
+        ],
+        "presentation": [
+          "sheet"
+        ],
+        "role": [
+          "overlay"
+        ],
+        "style": [
+          "action-sheet"
+        ]
+      }
+    },
+    "toolbar-item": {
+      "parts": [
+        "background",
+        "border",
+        "content",
+        "custom",
+        "highlight",
+        "image",
+        "item",
+        "overflow",
+        "overflow-glyph",
+        "separator",
+        "shadow",
+        "title"
+      ],
+      "states": [
+        "state=off"
+      ],
+      "variants": {
+        "style": [
+          "bevel",
+          "borderless",
+          "cap",
+          "gloss",
+          "inner-shadow",
+          "labelled",
+          "splice",
+          "surface"
+        ],
+        "toolbar-bordered": [
+          "false"
+        ]
+      }
+    },
+    "tooltip": {
+      "parts": [
+        "arrow",
+        "content",
+        "surface"
+      ],
+      "states": [],
+      "variants": {
+        "chrome": [
+          "standard"
+        ],
+        "placement": [
+          "bottom-start"
+        ],
+        "role": [
+          "overlay"
+        ]
+      }
+    },
+    "view": {
+      "parts": [
+        "content"
+      ],
+      "states": [],
+      "variants": {
+        "corner-curve": [
+          "circular",
+          "continuous"
+        ],
+        "surface-ink": [
+          "light"
+        ],
+        "view-layer": [
+          ""
+        ]
+      }
+    },
+    "virtual-viewport": {
+      "parts": [
+        "content",
+        "viewport"
+      ],
+      "states": [],
+      "variants": {}
+    },
+    "visual-effect-view": {
+      "parts": [
+        "background"
+      ],
+      "states": [],
+      "variants": {
+        "chrome": [
+          "standard"
+        ],
+        "material": [
+          "atmo",
+          "metal"
+        ]
+      }
+    },
+    "web-view": {
+      "parts": [
+        "content"
+      ],
+      "states": [],
+      "variants": {}
+    },
+    "window": {
+      "parts": [
+        "accessory",
+        "background",
+        "bezel",
+        "body",
+        "centre",
+        "content",
+        "content-border",
+        "content-view",
+        "document",
+        "handle",
+        "header",
+        "leading",
+        "shadow",
+        "sheet",
+        "subtitle",
+        "title",
+        "titlebar-accessories",
+        "toolbar",
+        "trailing",
+        "window-fitting-content"
+      ],
+      "states": [
+        "key-window=false"
+      ],
+      "variants": {
+        "alignment": [
+          "center",
+          "end",
+          "start"
+        ],
+        "chrome": [
+          "hud",
+          "metal",
+          "standard"
+        ],
+        "content-border": [
+          "small"
+        ],
+        "edge": [
+          "block-end",
+          "block-end-inline-end",
+          "block-end-inline-start",
+          "block-start",
+          "block-start-inline-end",
+          "block-start-inline-start",
+          "inline-end",
+          "inline-start"
+        ],
+        "role": [
+          "borderless",
+          "document",
+          "hud",
+          "modal",
+          "panel",
+          "popover",
+          "sheet",
+          "standard"
+        ],
+        "style": [
+          "custom",
+          "panel",
+          "standard"
+        ],
+        "toolbar-style": [
+          "automatic",
+          "expanded",
+          "preference",
+          "unified",
+          "unifiedCompact"
+        ],
+        "type": [
+          "custom",
+          "frameless",
+          "system"
+        ]
+      }
+    }
+  },
+  "colours": [
+    "labelColour",
+    "secondaryLabelColour",
+    "tertiaryLabelColour",
+    "quaternaryLabelColour",
+    "textColour",
+    "placeholderTextColour",
+    "selectedTextColour",
+    "textBackgroundColour",
+    "selectedTextBackgroundColour",
+    "unemphasisedSelectedTextColour",
+    "unemphasisedSelectedTextBackgroundColour",
+    "keyboardFocusIndicatorColour",
+    "linkColour",
+    "separatorColour",
+    "gridColour",
+    "headerTextColour",
+    "findHighlightColour",
+    "highlightColour",
+    "shadowColour",
+    "selectedContentBackgroundColour",
+    "unemphasisedSelectedContentBackgroundColour",
+    "alternatingContentBackground1",
+    "alternatingContentBackground2",
+    "selectedMenuItemTextColour",
+    "controlAccentColour",
+    "controlColour",
+    "controlBackgroundColour",
+    "controlTextColour",
+    "disabledControlTextColour",
+    "selectedControlColour",
+    "selectedControlTextColour",
+    "alternateSelectedControlTextColour",
+    "windowBackgroundColour",
+    "windowFrameTextColour",
+    "underPageBackgroundColour",
+    "systemRed",
+    "systemOrange",
+    "systemYellow",
+    "systemGreen",
+    "systemMint",
+    "systemTeal",
+    "systemCyan",
+    "systemBlue",
+    "systemIndigo",
+    "systemPurple",
+    "systemPink",
+    "systemBrown",
+    "systemGrey"
+  ],
+  "appearance": {
+    "colour-scheme-resolved": [
+      "light",
+      "dark"
+    ],
+    "contrast": [
+      "normal",
+      "high",
+      "forced"
+    ],
+    "transparency": [
+      "normal",
+      "reduced"
+    ]
+  },
+  "navigation": {
+    "compact": {
+      "placement": [
+        "block-start",
+        "block-end"
+      ],
+      "flow": [
+        "in-flow",
+        "overlay"
+      ]
+    },
+    "regular": {
+      "placement": [
+        "source-list",
+        "block-start"
+      ],
+      "flow": [
+        "in-flow",
+        "overlay"
+      ]
+    }
+  },
+  "presentation": {
+    "login": [
+      "plain",
+      "ornamented"
+    ],
+    "notifications": [
+      "plain",
+      "sliced-3d"
+    ],
+    "materialLighting": [
+      "off",
+      "on"
+    ]
+  },
+  "limits": {
+    "minimumHitTarget": {
+      "regular": 24,
+      "large": 24
+    },
+    "visibleFocusIndicator": true,
+    "reducedMotion": true,
+    "semanticProperties": [
+      "display",
+      "visibility",
+      "content"
+    ],
+    "forbiddenProperties": [
+      "animation",
+      "transition",
+      "font",
+      "font-family",
+      "font-size",
+      "font-weight",
+      "line-height",
+      "letter-spacing"
+    ]
+  },
+  "renamedFrom": {
+    "toolbar.root": "toolbar.background",
+    "circular-slider": "slider[slider-type=circular]",
+    "slider-field": "slider[slider-type=linear]",
+    "ruler": "ruler-view",
+    "scroll-view-frame": "scroll-view",
+    "toolbar-configuration-sheet": "toolbar-customisation-palette",
+    "calendar": "date-picker[date-picker-elements=yearMonthDay]",
+    "time-picker": "date-picker[date-picker-elements=hourMinute]",
+    "date-time-picker": "date-picker[date-picker-elements=yearMonthDay hourMinute]",
+    "date-range-picker": "date-picker[date-picker-mode=range]",
+    "route-picker": "route-picker-view",
+    "file-panel": "save-panel"
+  }
+}

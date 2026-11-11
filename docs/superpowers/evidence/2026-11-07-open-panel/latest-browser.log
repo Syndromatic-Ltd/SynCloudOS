@@ -1,0 +1,70 @@
+[
+  {
+    "name": "desktop-light",
+    "panel": {
+      "x": 310,
+      "y": 56,
+      "width": 820,
+      "height": 560,
+      "top": 56,
+      "right": 1130,
+      "bottom": 616,
+      "left": 310
+    },
+    "compact": false,
+    "mode": "light",
+    "focusRestored": true,
+    "errors": []
+  },
+  {
+    "name": "desktop-dark",
+    "panel": {
+      "x": 310,
+      "y": 56,
+      "width": 820,
+      "height": 560,
+      "top": 56,
+      "right": 1130,
+      "bottom": 616,
+      "left": 310
+    },
+    "compact": false,
+    "mode": "dark",
+    "focusRestored": true,
+    "errors": []
+  },
+  {
+    "name": "phone-light",
+    "panel": {
+      "x": 0,
+      "y": 56,
+      "width": 390,
+      "height": 788,
+      "top": 56,
+      "right": 390,
+      "bottom": 844,
+      "left": 0
+    },
+    "compact": true,
+    "mode": "light",
+    "focusRestored": true,
+    "errors": []
+  },
+  {
+    "name": "phone-dark",
+    "panel": {
+      "x": 0,
+      "y": 56,
+      "width": 390,
+      "height": 788,
+      "top": 56,
+      "right": 390,
+      "bottom": 844,
+      "left": 0
+    },
+    "compact": true,
+    "mode": "dark",
+    "focusRestored": true,
+    "errors": []
+  }
+]

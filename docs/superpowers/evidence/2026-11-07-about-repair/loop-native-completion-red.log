@@ -1,0 +1,116 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/animation-native-completion.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/animation-native-completion.test.ts (4 tests | 4 failed) 17ms
+   × waits for delayed native time rather than wall time, then handles native finish exactly once 9ms
+   × polls null pending time and completes terminal native time even without a finish event 2ms
+   × cleans the watchdog across pause, resume, seek and cancellation 1ms
+   × settles idle native cancellation and preserves wall time for effects without native playback 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/animation-native-completion.test.ts > waits for delayed native time rather than wall time, then handles native finish exactly once
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array [
+      "completed",
+    ]
+
+
+Number of calls: 1
+
+ ❯ tests/runtime/fx/animation-native-completion.test.ts:18:65
+     16| it('waits for delayed native time rather than wall time, then handles …
+     17|   const f = fixture(); f.native.currentTime = 350;
+     18|   await vi.advanceTimersByTimeAsync(550); expect(f.settled).not.toHave…
+       |                                                                 ^
+     19|   f.events.get('finish')?.(); await Promise.resolve(); expect(f.settle…
+     20| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/runtime/fx/animation-native-completion.test.ts > polls null pending time and completes terminal native time even without a finish event
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array [
+      "completed",
+    ]
+
+
+Number of calls: 1
+
+ ❯ tests/runtime/fx/animation-native-completion.test.ts:23:65
+     21| it('polls null pending time and completes terminal native time even wi…
+     22|   const f = fixture(); f.native.currentTime = null;
+     23|   await vi.advanceTimersByTimeAsync(550); expect(f.settled).not.toHave…
+       |                                                                 ^
+     24|   f.native.currentTime = 550; await vi.advanceTimersByTimeAsync(16);
+     25|   expect(f.settled).toHaveBeenCalledExactlyOnceWith('completed'); expe…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/runtime/fx/animation-native-completion.test.ts > cleans the watchdog across pause, resume, seek and cancellation
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array [
+      "completed",
+    ]
+
+
+Number of calls: 1
+
+ ❯ tests/runtime/fx/animation-native-completion.test.ts:29:122
+     27| it('cleans the watchdog across pause, resume, seek and cancellation', …
+     28|   const f = fixture(); f.native.currentTime = 350; await vi.advanceTim…
+     29|   f.playback.pause(); expect(vi.getTimerCount()).toBe(0); await vi.adv…
+       |                                                                                                                          ^
+     30|   f.playback.play(); expect(vi.getTimerCount()).toBe(1); f.playback.se…
+     31|   f.playback.cancel(); await Promise.resolve(); expect(f.settled).toHa…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/runtime/fx/animation-native-completion.test.ts > settles idle native cancellation and preserves wall time for effects without native playback
+AssertionError: expected "vi.fn()" to be called once with arguments: [ 'cancelled' ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   "cancelled",
++   "completed",
+  ]
+
+
+Number of calls: 1
+
+ ❯ tests/runtime/fx/animation-native-completion.test.ts:35:21
+     33| it('settles idle native cancellation and preserves wall time for effec…
+     34|   const f = fixture(); Object.defineProperty(f.native, 'playState', { …
+     35|   expect(f.settled).toHaveBeenCalledExactlyOnceWith('cancelled'); f.le…
+       |                     ^
+     36|   const wall = fixture(false); await vi.advanceTimersByTimeAsync(550);…
+     37| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed (4)
+   Start at  09:29:04
+   Duration  1.10s (transform 732ms, setup 30ms, import 906ms, tests 17ms, environment 0ms)
+

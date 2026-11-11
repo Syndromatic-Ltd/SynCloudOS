@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../../Foundation/NSEData";
 import { PDFArray, PDFBool, PDFDict, PDFHexString, PDFName, PDFNull, PDFNumber, PDFRawStream, PDFRef, PDFString, PDFStream, type PDFObject } from "pdf-lib";
 import { GFXPDFDocument, pdfAssertLive, pdfBackend, pdfObjectSnapshot } from "./GFXPDFDocument";
 import type { GFXPDFObjectSnapshotEntry, GFXPDFSnapshotObject, GFXPDFStreamDecoding, GFXPDFStreamParameters } from "./pdfDocumentProtocol";
@@ -44,7 +45,7 @@ export type GFXPDFObject = Readonly<{
 }> | Readonly<{
     kind: "string";
     value: string;
-    bytes: Uint8Array;
+    bytes: NSEData;
 }> | Readonly<{
     kind: "reference";
     reference: GFXPDFReference;
@@ -57,7 +58,7 @@ export type GFXPDFObject = Readonly<{
 }> | Readonly<{
     kind: "stream";
     dictionary: GFXPDFObject;
-    encodedBytes: Uint8Array;
+    encodedBytes: NSEData;
 }>;
 function reference(value: GFXPDFReference): PDFRef {
     if (!Number.isSafeInteger(value.objectNumber) || value.objectNumber < 1 || !Number.isSafeInteger(value.generationNumber) || value.generationNumber < 0 || value.generationNumber > 65535)
@@ -391,7 +392,7 @@ function cloneSnapshotObject(root: GFXPDFSnapshotObject, entries: ReadonlyMap<st
         if (value.kind === "string") {
             bytes += value.bytes.byteLength;
             if (bytes > maximumDecodedBytes) throw new GFXPDFError("limit", "PDF object byte budget exceeded.");
-            return Object.freeze({ kind: "string", value: value.value, bytes: Uint8Array.from(value.bytes) });
+            return Object.freeze({ kind: "string", value: value.value, bytes: NSEData.from(value.bytes) });
         }
         if (value.kind === "reference") {
             const referenceValue = Object.freeze({ objectNumber: value.reference.objectNumber, generationNumber: value.reference.generationNumber });
@@ -413,7 +414,7 @@ function cloneSnapshotObject(root: GFXPDFSnapshotObject, entries: ReadonlyMap<st
         }
         bytes += value.encodedBytes.byteLength;
         if (bytes > maximumDecodedBytes) throw new GFXPDFError("limit", "Encoded PDF stream budget exceeded.");
-        return Object.freeze({ kind: "stream", dictionary: visit(value.dictionary, depth + 1), encodedBytes: Uint8Array.from(value.encodedBytes) });
+        return Object.freeze({ kind: "stream", dictionary: visit(value.dictionary, depth + 1), encodedBytes: NSEData.from(value.encodedBytes) });
     };
     return visit(root, 0);
 }
@@ -499,7 +500,7 @@ export class GFXPDFScanner {
                     bytes += data.length;
                     if (bytes > this.maximumDecodedBytes)
                         throw new GFXPDFError("limit", "PDF object byte budget exceeded.");
-                    return Object.freeze({ kind: "string", value: value.decodeText(), bytes: data.slice() });
+                    return Object.freeze({ kind: "string", value: value.decodeText(), bytes: NSEData.from(data) });
                 }
                 if (value instanceof PDFRef) {
                     if (resolveReferences) {
@@ -520,7 +521,7 @@ export class GFXPDFScanner {
                     bytes += value.getContentsSize();
                     if (bytes > this.maximumDecodedBytes)
                         throw new GFXPDFError("limit", "Encoded PDF stream budget exceeded.");
-                    return Object.freeze({ kind: "stream", dictionary: visit(value.dict, depth + 1), encodedBytes: value.getContents().slice() });
+                    return Object.freeze({ kind: "stream", dictionary: visit(value.dict, depth + 1), encodedBytes: NSEData.from(value.getContents()) });
                 }
                 if (value instanceof PDFDict) {
                     const entries: Record<string, GFXPDFObject> = Object.create(null);
@@ -536,26 +537,26 @@ export class GFXPDFScanner {
         };
         return visit(root, 0);
     }
-    async decodedStream(ref: GFXPDFReference, signal?: AbortSignal): Promise<Uint8Array> {
+    async decodedStream(ref: GFXPDFReference, signal?: AbortSignal): Promise<NSEData> {
         signal?.throwIfAborted();
         const snapshot = pdfObjectSnapshot(this.document);
         if (snapshot) {
             const entry = snapshotMap(snapshot).get(snapshotKey(ref));
             if (!entry) throw new RangeError("Unknown PDF object reference.");
             if (entry.value.kind !== "stream") throw new TypeError("Reference does not identify a raw PDF stream.");
-            return decodeStream(entry.value.encodedBytes, entry.value.decoding, this.maximumDecodedBytes, signal, () => pdfAssertLive(this.document));
+            return NSEData.from(await decodeStream(entry.value.encodedBytes, entry.value.decoding, this.maximumDecodedBytes, signal, () => pdfAssertLive(this.document)));
         }
         const backend = pdfBackend(this.document), value = backend.context.lookup(reference(ref));
         if (!(value instanceof PDFRawStream))
             throw new TypeError("Reference does not identify a raw PDF stream.");
         const filters = filterNames(value.dict.lookup(PDFName.of("Filter")));
         const decoding: GFXPDFStreamDecoding = Object.freeze({ filters, parameters: filterParameters(value.dict.lookup(PDFName.of("DecodeParms")), filters.length) });
-        return decodeStream(value.getContents(), decoding, this.maximumDecodedBytes, signal, () => { pdfBackend(this.document); });
+        return NSEData.from(await decodeStream(value.getContents(), decoding, this.maximumDecodedBytes, signal, () => { pdfBackend(this.document); }));
     }
     async contentOperators(ref: GFXPDFReference, signal?: AbortSignal): Promise<readonly GFXPDFContentOperator[]> {
         const bytes = await this.decodedStream(ref, signal);
         signal?.throwIfAborted();
         pdfAssertLive(this.document);
-        return scanContentOperators(bytes, signal, () => pdfAssertLive(this.document));
+        return scanContentOperators(new Uint8Array(bytes.bytes), signal, () => pdfAssertLive(this.document));
     }
 }

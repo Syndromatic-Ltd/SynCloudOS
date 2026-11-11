@@ -67,8 +67,38 @@ const backdropReduced: NSEAlertMotion = Object.freeze({
   exit: fade(1, 0, 0.08),
 });
 
+// A sheet slides down out of the window's top content edge and back up into it.
+const sheetStandard: NSEAlertMotion = Object.freeze({
+  // An even, ease-out travel over the whole height: the bottom edge shows first, under the toolbar.
+  enter: Object.freeze({
+    duration: 0.36,
+    timing: "ease-out" as const,
+    tracks: Object.freeze([Object.freeze({ keyPath: "transform" as const, unit: "%" as const, values: Object.freeze([Object.freeze({ y: -100 }), Object.freeze({ y: 0 })]) })]),
+  }),
+  exit: Object.freeze({
+    duration: 0.3,
+    timing: "ease-in" as const,
+    tracks: Object.freeze([Object.freeze({ keyPath: "transform" as const, unit: "%" as const, values: Object.freeze([Object.freeze({ y: 0 }), Object.freeze({ y: -100 })]) })]),
+  }),
+});
+
+/** A window sheet's motion: a slide from the window's top content edge, or a fade with reduced motion. */
+export function resolveNSESheetMotion(reducedMotion: boolean): NSEAlertMotion {
+  return reducedMotion ? alertReduced : sheetStandard;
+}
+
 export function resolveNSEAlertMotion(reducedMotion: boolean): NSEAlertMotion {
   return reducedMotion ? alertReduced : alertStandard;
+}
+
+// A sheet's backdrop is not drawn and does not fade: it only holds the sheet while it slides in and out.
+const hold = (duration: number): NSEPresentationSpec =>
+  Object.freeze({ duration, timing: "linear" as const, tracks: Object.freeze([Object.freeze({ keyPath: "opacity" as const, values: Object.freeze([1, 1]) })]) });
+const sheetBackdrop: NSEAlertMotion = Object.freeze({ enter: hold(0.36), exit: hold(0.3) });
+
+/** The motion of a window sheet's (undrawn) backdrop: it holds the sheet for the length of its slide. */
+export function resolveNSESheetBackdropMotion(reducedMotion: boolean): NSEAlertMotion {
+  return reducedMotion ? backdropReduced : sheetBackdrop;
 }
 
 export function resolveNSEAlertBackdropMotion(reducedMotion: boolean): NSEAlertMotion {

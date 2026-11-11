@@ -18,13 +18,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useImperativeHandle, useRef } from "react";
+import { nseControlHooks } from "../Theme/contract/hooks";
+import { useNSEThemeInteraction } from "../Theme/contract/useThemeInteraction";
+import { useSyncExternalStore, useEffect, useImperativeHandle, useRef } from "react";
 import { mountDOMTextBackend } from "./backends/domTextBackend";
 import type { NSETextViewProps } from "./textViewTypes";
 import "./text-view.css";
 
 /** A bounded paragraph text view with a supplied canonical owner and per-view session. */
 export function NSETextView({ session, label, className, style, spellCheck, attachmentResolver, fontResolver, onDropFiles, ref, onInputError, onGeometry }: NSETextViewProps) {
+  const snapshot = useSyncExternalStore(session.subscribe, session.getSnapshot, session.getSnapshot);
+  const theme = useNSEThemeInteraction<HTMLDivElement>(!snapshot.disposed);
   const host = useRef<HTMLDivElement>(null);
   const backend = useRef<ReturnType<typeof mountDOMTextBackend> | null>(null);
   const callbacks = useRef({ onInputError, onGeometry }); callbacks.current = { onInputError, onGeometry };
@@ -37,5 +41,5 @@ export function NSETextView({ session, label, className, style, spellCheck, atta
     backend.current = mounted; callbacks.current.onGeometry?.(mounted.geometry);
     return () => { mounted.dispose(); backend.current = null; callbacks.current.onGeometry?.(null); };
   }, [session]);
-  return <div ref={host} className={["nse-text-view", className].filter(Boolean).join(" ")} style={style} />;
+  return <div data-nse-part="content" {...theme.events} {...nseControlHooks({ control: "text-view", enabled: !snapshot.disposed, hovered: theme.hovered, focused: theme.focused, variants: { editable: String(snapshot.editable) } })} ref={host} className={["nse-text-view", className].filter(Boolean).join(" ")} style={style} />;
 }

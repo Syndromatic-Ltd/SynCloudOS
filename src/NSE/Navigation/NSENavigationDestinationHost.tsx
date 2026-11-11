@@ -104,7 +104,7 @@ export function NSENavigationDestinationHost({
             className="nse-tab-bar-panel"
             key={destination.id}
             id={panelId}
-            role={tabSemantics ? "tabpanel" : undefined}
+            role={tabSemantics ? "tabpanel" : undefined} data-nse-role={tabSemantics ? "tabpanel" : undefined}
             aria-labelledby={tabSemantics ? tabId : undefined}
             aria-hidden={!visible || undefined}
             inert={!visible}
@@ -120,7 +120,7 @@ export function NSENavigationDestinationHost({
         <div
           className="nse-tab-bar-panel nse-tab-bar-more-panel"
           id={morePanelId}
-          role={tabSemantics ? "tabpanel" : undefined}
+          role={tabSemantics ? "tabpanel" : undefined} data-nse-role={tabSemantics ? "tabpanel" : undefined}
           aria-label={tabSemantics ? "More destinations" : undefined}
           aria-labelledby={tabSemantics ? getNSETabBarTabId(idScope, NSETabBarMoreDestinationId) : undefined}
           aria-hidden={!moreSelected || undefined}

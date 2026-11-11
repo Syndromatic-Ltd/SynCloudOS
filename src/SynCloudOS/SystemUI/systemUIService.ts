@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { SynCloudOSRuntimeId } from "../Runtime/runtimeInstanceTypes";
 
 export interface SystemUIState {
@@ -68,9 +69,9 @@ export function createSystemUIService(runtimeId: SynCloudOSRuntimeId): SystemUIS
     const merged = { ...state, ...next };
     if (
       merged.preferencesPane === state.preferencesPane &&
-      merged.aboutAppId === state.aboutAppId &&
+      normalizeBundleIdentifier(merged.aboutAppId) === normalizeBundleIdentifier(state.aboutAppId) &&
       merged.logOutOpen === state.logOutOpen &&
-      merged.returnDecision?.appId === state.returnDecision?.appId
+      normalizeBundleIdentifier(merged.returnDecision?.appId) === normalizeBundleIdentifier(state.returnDecision?.appId)
     ) return;
     state = merged;
     listeners.forEach((listener) => listener());

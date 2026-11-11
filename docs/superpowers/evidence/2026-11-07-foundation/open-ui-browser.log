@@ -1,0 +1,18 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+  - waiting for getByRole('dialog', { name: 'Open', exact: true }) to be hidden
+    64 × locator resolved to visible <section role="dialog" aria-modal="true" aria-label="Open" class="nse-open-sheet nse-sheet" data-nse-colour-scheme-resolved="light">…</section>
+
+    at C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\docs\superpowers\evidence\2026-11-07-foundation\open-ui-capture.mjs:92:106 {
+  log: [
+    "  - waiting for getByRole('dialog', { name: 'Open', exact: true }) to be hidden",
+    '    64 × locator resolved to visible <section role="dialog" aria-modal="true" aria-label="Open" class="nse-open-sheet nse-sheet" data-nse-colour-scheme-resolved="light">…</section>'
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v24.22.1

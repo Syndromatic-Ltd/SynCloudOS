@@ -1,0 +1,712 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-theme-hook-coverage.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx (549 tests | 87 failed) 1458ms
+     × box-primary-noTitle 4ms
+     × box-primary-aboveTop 2ms
+     × box-primary-atTop 2ms
+     × box-primary-belowTop 2ms
+     × box-primary-aboveBottom 2ms
+     × box-primary-atBottom 2ms
+     × box-primary-belowBottom 5ms
+     × box-secondary-noTitle 2ms
+     × box-secondary-aboveTop 2ms
+     × box-secondary-atTop 2ms
+     × box-secondary-belowTop 2ms
+     × box-secondary-aboveBottom 2ms
+     × box-secondary-atBottom 2ms
+     × box-secondary-belowBottom 2ms
+     × box-separator-noTitle 2ms
+     × box-separator-aboveTop 2ms
+     × box-separator-atTop 2ms
+     × box-separator-belowTop 2ms
+     × box-separator-aboveBottom 2ms
+     × box-separator-atBottom 2ms
+     × box-separator-belowBottom 2ms
+     × box-custom-noTitle 2ms
+     × box-custom-aboveTop 2ms
+     × box-custom-atTop 2ms
+     × box-custom-belowTop 2ms
+     × box-custom-aboveBottom 2ms
+     × box-custom-atBottom 2ms
+     × box-custom-belowBottom 2ms
+     × stack-view 4ms
+     × grid-view 4ms
+     × split-view 2ms
+     × drawer-leading 3ms
+     × drawer-trailing 2ms
+     × drawer-top 2ms
+     × drawer-bottom 2ms
+     × scroll-view 5ms
+     × view 2ms
+     × table-view-normal 8ms
+     × table-view-selected 4ms
+     × outline-view-normal 5ms
+     × outline-view-selected 3ms
+     × collection-view-normal 4ms
+     × collection-view-selected 3ms
+     × table-view-loading 4ms
+     × table-view-empty 8ms
+     × table-view-disabled 4ms
+     × table-view-read-only 3ms
+     × table-view-invalid 4ms
+     × table-view-denied 4ms
+     × table-view-interrupted 4ms
+     × table-view-error 3ms
+     × outline-view-loading 3ms
+     × outline-view-empty 2ms
+     × outline-view-disabled 3ms
+     × outline-view-read-only 2ms
+     × outline-view-invalid 2ms
+     × outline-view-denied 2ms
+     × outline-view-interrupted 2ms
+     × outline-view-error 3ms
+     × collection-view-loading 3ms
+     × collection-view-empty 2ms
+     × collection-view-disabled 2ms
+     × collection-view-read-only 2ms
+     × collection-view-invalid 2ms
+     × collection-view-denied 2ms
+     × collection-view-interrupted 3ms
+     × collection-view-error 2ms
+     × source-list-normal 3ms
+     × source-list-selected 3ms
+     × browser 4ms
+     × rule-editor 6ms
+     × predicate-editor 8ms
+     × image-view-proportionallyUpOrDown 4ms
+     × image-view-none 8ms
+     × clip-view-clip 2ms
+     × clip-view-scroll 2ms
+     × table-cell-view 2ms
+     × page-controller-stackHistory 8ms
+     × page-controller-horizontalStrip 4ms
+     × page-controller-pageCurl 13ms
+     × container-pane-plain 2ms
+     × container-pane-surface 2ms
+     × container-pane-sidebar 2ms
+     × container-pane-inspector 2ms
+     × container-pane-floating 2ms
+     × input-box 2ms
+     × stack-item 2ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 87 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-primary-noTitle
+AssertionError: box-primary-noTitle publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-primary-aboveTop
+AssertionError: box-primary-aboveTop publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-primary-atTop
+AssertionError: box-primary-atTop publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-primary-belowTop
+AssertionError: box-primary-belowTop publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-primary-aboveBottom
+AssertionError: box-primary-aboveBottom publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-primary-atBottom
+AssertionError: box-primary-atBottom publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-primary-belowBottom
+AssertionError: box-primary-belowBottom publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-secondary-noTitle
+AssertionError: box-secondary-noTitle publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-secondary-aboveTop
+AssertionError: box-secondary-aboveTop publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-secondary-atTop
+AssertionError: box-secondary-atTop publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-secondary-belowTop
+AssertionError: box-secondary-belowTop publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-secondary-aboveBottom
+AssertionError: box-secondary-aboveBottom publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-secondary-atBottom
+AssertionError: box-secondary-atBottom publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-secondary-belowBottom
+AssertionError: box-secondary-belowBottom publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-separator-noTitle
+AssertionError: box-separator-noTitle publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-separator-aboveTop
+AssertionError: box-separator-aboveTop publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-separator-atTop
+AssertionError: box-separator-atTop publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-separator-belowTop
+AssertionError: box-separator-belowTop publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-separator-aboveBottom
+AssertionError: box-separator-aboveBottom publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-separator-atBottom
+AssertionError: box-separator-atBottom publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-separator-belowBottom
+AssertionError: box-separator-belowBottom publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-custom-noTitle
+AssertionError: box-custom-noTitle publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-custom-aboveTop
+AssertionError: box-custom-aboveTop publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-custom-atTop
+AssertionError: box-custom-atTop publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-custom-belowTop
+AssertionError: box-custom-belowTop publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-custom-aboveBottom
+AssertionError: box-custom-aboveBottom publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-custom-atBottom
+AssertionError: box-custom-atBottom publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > box-custom-belowBottom
+AssertionError: box-custom-belowBottom publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > stack-view
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > grid-view
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > table-view-normal
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > table-view-selected
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > outline-view-normal
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > outline-view-selected
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > collection-view-normal
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > collection-view-selected
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > table-view-loading
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > table-view-empty
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > table-view-disabled
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > table-view-read-only
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > table-view-invalid
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > table-view-denied
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > table-view-interrupted
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > table-view-error
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > outline-view-loading
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > outline-view-empty
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > outline-view-disabled
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > outline-view-read-only
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > outline-view-invalid
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > outline-view-denied
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > outline-view-interrupted
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > outline-view-error
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > collection-view-loading
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > collection-view-empty
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > collection-view-disabled
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > collection-view-read-only
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > collection-view-invalid
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > collection-view-denied
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > collection-view-interrupted
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > collection-view-error
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > source-list-normal
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > source-list-selected
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > browser
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > rule-editor
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > predicate-editor
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > page-controller-stackHistory
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > page-controller-horizontalStrip
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > page-controller-pageCurl
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > stack-item
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:65:49
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+       |                                                 ^
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+     67|       for (const item of root!.querySelectorAll<HTMLElement>('[aria-se…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > split-view
+AssertionError: split-view publishes split-view: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[30/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > drawer-leading
+AssertionError: drawer-leading publishes drawer: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[31/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > drawer-trailing
+AssertionError: drawer-trailing publishes drawer: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[32/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > drawer-top
+AssertionError: drawer-top publishes drawer: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[33/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > drawer-bottom
+AssertionError: drawer-bottom publishes drawer: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[34/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > scroll-view
+AssertionError: scroll-view publishes scroll-view: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[35/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > view
+AssertionError: view publishes view: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[36/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > image-view-proportionallyUpOrDown
+AssertionError: image-view-proportionallyUpOrDown publishes image-view: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[37/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > image-view-none
+AssertionError: image-view-none publishes image-view: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[38/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > clip-view-clip
+AssertionError: clip-view-clip publishes clip-view: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > clip-view-scroll
+AssertionError: clip-view-scroll publishes clip-view: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[40/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > table-cell-view
+AssertionError: table-cell-view publishes table-cell-view: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[41/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > container-pane-plain
+AssertionError: container-pane-plain publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[42/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > container-pane-surface
+AssertionError: container-pane-surface publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+ Test Files  1 failed (1)
+      Tests  87 failed | 462 passed (549)
+   Start at  20:30:04
+   Duration  9.80s (transform 5.53s, setup 27ms, import 7.33s, tests 1.46s, environment 851ms)
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[43/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > container-pane-sidebar
+AssertionError: container-pane-sidebar publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[44/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > container-pane-inspector
+AssertionError: container-pane-inspector publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[45/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > container-pane-floating
+AssertionError: container-pane-floating publishes box: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[46/87]⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > container theme hooks > input-box
+AssertionError: input-box publishes text-field: expected null not to be null
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:64:63
+     62|       const view = render(<SurfaceHost>{surface.render()}</SurfaceHost…
+     63|       const root = view.container.querySelector<HTMLElement>(`[data-ns…
+     64|       expect(root, `${surface.id} publishes ${identity}`).not.toBeNull…
+       |                                                               ^
+     65|       expect(parts.has(root!.dataset.nsePart!)).toBe(true);
+     66|       for (const part of root!.querySelectorAll<HTMLElement>("[data-ns…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[47/87]⎯

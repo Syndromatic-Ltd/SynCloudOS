@@ -21,6 +21,7 @@
 import type {
   VFXCameraCaptureRequest,
   VFXCaptureCapabilities,
+  VFXCaptureAuthorizationStatus,
   VFXCaptureDevice,
   VFXCaptureKind,
   VFXCaptureSession,
@@ -28,6 +29,9 @@ import type {
   VFXCaptureState,
   VFXDisplayCaptureRequest,
 } from "../../FX/VideoFX/VFXCaptureSession";
+
+import type { VFXContentFilter } from "../../FX/VideoFX/VFXContentFilter";
+import type { BrowserVideoPresentationAdapter, BrowserElementCaptureTrack } from "./BrowserVideoPresentationAdapter";
 
 export interface BrowserVideoCapturePlatform {
   getUserMedia(constraints: MediaStreamConstraints): Promise<MediaStream>;
@@ -137,9 +141,10 @@ class BrowserVFXCaptureSession implements VFXCaptureSession {
   #kind: VFXCaptureKind | null = null;
   #settings: VFXCaptureSettings | null = null;
   #generation = 0;
+  #filterPending = false;
   #resumeEnabled = new Map<MediaStreamTrack, boolean>();
 
-  constructor(platform: BrowserVideoCapturePlatform | null, ownerSignal?: AbortSignal) {
+  constructor(platform: BrowserVideoCapturePlatform | null, ownerSignal?: AbortSignal, private readonly presentation?: Pick<BrowserVideoPresentationAdapter, "applyContentFilter" | "elementCaptureCapabilities">, private readonly reauthoriseElement: () => boolean = () => false) {
     this.#platform = platform;
     this.#state = platform ? "idle" : "unavailable";
     if (ownerSignal?.aborted) {
@@ -164,13 +169,29 @@ class BrowserVFXCaptureSession implements VFXCaptureSession {
   }
 
   get state(): VFXCaptureState { return this.#state; }
+  async getAuthorizationStatus(kind: VFXCaptureKind = "camera"): Promise<VFXCaptureAuthorizationStatus> {
+    if (this.#state === "disposed" || !this.#platform || !this.capabilities[kind]) return "unavailable";
+    try {
+      const status = await this.#platform.getPermissionState?.(kind);
+      if (this.state === "disposed") return "unavailable";
+      if (status === "granted" || status === "denied" || status === "prompt") return status;
+    } catch { /* A failed passive query cannot establish permission. */ }
+    return this.#kind === kind && this.#state === "active" ? "granted" : "unknown";
+  }
+
   get kind(): VFXCaptureKind | null { return this.#kind; }
   get settings(): VFXCaptureSettings | null { return this.#settings; }
   get capabilities(): VFXCaptureCapabilities {
+    const track = this.#stream?.getVideoTracks()[0];
+    const element = this.#state !== "disposed" && this.#platform && (!this.#kind || this.#kind === "display")
+      ? this.presentation?.elementCaptureCapabilities(track as unknown as BrowserElementCaptureTrack | undefined)
+      : undefined;
     return Object.freeze({
       camera: this.#platform !== null && this.#state !== "disposed",
       display: !!this.#platform?.getDisplayMedia && this.#state !== "disposed",
       deviceEnumeration: this.#platform !== null && this.#state !== "disposed",
+      elementRestriction: element?.restriction ?? false,
+      elementCrop: element?.crop ?? false,
     });
   }
 
@@ -214,6 +235,31 @@ class BrowserVFXCaptureSession implements VFXCaptureSession {
       if (!getDisplayMedia) throw unsupported("Display capture is unavailable on this host.");
       return getDisplayMedia(displayConstraints(request));
     });
+  }
+
+  async setContentFilter(filter: VFXContentFilter | null, signal?: AbortSignal): Promise<void> {
+    signal?.throwIfAborted();
+    if (!this.reauthoriseElement()) throw new DOMException("Element capture is not authorised.", "SecurityError");
+    if (this.#state !== "active" || this.#kind !== "display" || !this.#stream)
+      throw invalidState("Content filters require an active display capture owned by this session.");
+    if (this.#filterPending) throw invalidState("A content filter update is already pending.");
+    const track = this.#stream.getVideoTracks()[0];
+    if (!track || !this.presentation) throw unsupported("Element capture is unavailable.");
+    const controller = new AbortController();
+    const abort = () => controller.abort(signal?.reason ?? abortError());
+    signal?.addEventListener("abort", abort, { once: true });
+    this.#pending.add(controller);
+    this.#filterPending = true;
+    try {
+      await this.presentation.applyContentFilter(track as unknown as BrowserElementCaptureTrack, filter, controller.signal, this.reauthoriseElement);
+    } catch (error) {
+      if (controller.signal.aborted || !this.reauthoriseElement()) this.interrupt("Element capture was cancelled or revoked.");
+      throw error;
+    } finally {
+      this.#filterPending = false;
+      this.#pending.delete(controller);
+      signal?.removeEventListener("abort", abort);
+    }
   }
 
   async #acquire(kind: VFXCaptureKind, callerSignal: AbortSignal | undefined, acquire: () => Promise<MediaStream>): Promise<VFXCaptureSettings> {
@@ -382,10 +428,10 @@ class BrowserVFXCaptureSession implements VFXCaptureSession {
 }
 
 export class BrowserVideoCaptureAdapter {
-  constructor(private readonly platform: BrowserVideoCapturePlatform | null) {}
+  constructor(private readonly platform: BrowserVideoCapturePlatform | null, private readonly presentation?: Pick<BrowserVideoPresentationAdapter, "applyContentFilter" | "elementCaptureCapabilities">) {}
 
-  createSession(signal?: AbortSignal): VFXCaptureSession {
-    return new BrowserVFXCaptureSession(this.platform, signal);
+  createSession(signal?: AbortSignal, _capability?: object, reauthoriseElement?: () => boolean): VFXCaptureSession {
+    return new BrowserVFXCaptureSession(this.platform, signal, this.presentation, reauthoriseElement);
   }
 }
 

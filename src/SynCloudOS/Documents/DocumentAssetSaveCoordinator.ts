@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import type { DocumentReadOptions, DocumentStorageAdapter, DocumentWriteRequest } from "./Adapters/documentAdapterTypes";
 import { canonicalDocumentJson, canonicalDocumentLocation, immutableDocumentValue, type DocumentLocation, type DocumentRecord, type DocumentVersion } from "./documentTypes";
 import { assertDocumentAssetNotAborted, awaitDocumentAsset, DocumentAssetError } from "./documentAssetErrors";
@@ -35,7 +36,7 @@ export interface DocumentAssetSaveOptions {
   readonly scopeForLocation: (location: DocumentLocation) => DocumentAssetScope;
   readonly enumerateReferences: (content: unknown, context: { readonly typeId: string; readonly schemaVersion: number }) => readonly DocumentAssetReference[];
   readonly randomUUID?: () => string;
-  readonly hash?: (bytes: Uint8Array) => Promise<string>;
+  readonly hash?: (bytes: NSEData) => Promise<string>;
   /** Provider/native-record persistence is asserted by its owner, never inferred from asset backing. */
   readonly nativeDurability?: "memory" | "durable";
   readonly observeError?: (error: unknown) => void;
@@ -92,7 +93,7 @@ export function createDocumentAssetSaveCoordinator(options: DocumentAssetSaveOpt
       }
       // Copy all staged inputs synchronously, before the first upload can yield.
       const staged = (capture.stagedAssets ?? []).map(value => ({ reference: validateDocumentAssetReference(value.reference),
-        input: { ...value.input, bytes: value.input.bytes.slice(), intrinsic: value.input.intrinsic ? { ...value.input.intrinsic } : undefined } }));
+        input: { ...value.input, bytes: NSEData.from(value.input.bytes), intrinsic: value.input.intrinsic ? { ...value.input.intrinsic } : undefined } }));
       const required = new Map(prepared.manifest.assets.map(reference => [documentAssetKey(reference), reference]));
       for (const entry of staged) {
         const requested = required.get(documentAssetKey(entry.reference));
@@ -107,7 +108,7 @@ export function createDocumentAssetSaveCoordinator(options: DocumentAssetSaveOpt
       const operationIdentity = canonicalDocumentJson({ adapterId: options.adapter.id, location: canonicalDocumentLocation(prepared.request.location),
         typeId: prepared.request.typeId, schemaVersion: prepared.request.schemaVersion, content: prepared.request.content,
         expectedVersion: prepared.request.expectedVersion, idempotencyKey: prepared.request.idempotencyKey, metadata: prepared.request.metadata }, request.typeId);
-      const prefix = prepared.manifest.assets.length ? `save:${documentAssetHash(await awaitDocumentAsset(hash(new TextEncoder().encode(operationIdentity)), request.signal)).slice(7)}:` : "";
+      const prefix = prepared.manifest.assets.length ? `save:${documentAssetHash(await awaitDocumentAsset(hash(NSEData.from(new TextEncoder().encode(operationIdentity))), request.signal)).slice(7)}:` : "";
       const matches = prepared.manifest.assets.length ? (await options.store.listRetentionRoots(prepared.manifest.scope, request.signal)).filter(entry =>
         entry.root.kind === "version" && entry.root.id.startsWith(prefix) &&
         encodeDocumentAssetManifest(createDocumentAssetManifest(prepared.manifest.scope, entry.references)) === encodeDocumentAssetManifest(prepared.manifest)) : [];

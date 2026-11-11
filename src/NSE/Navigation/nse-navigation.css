@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -18,10 +21,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-[data-nse-control="tab-view"] [role="tablist"]{display:flex;overflow:auto}[data-nse-control="accordion-view"] [role="region"]{padding:8px}
+[data-nse-control="tab-view"]:where(:not([data-nse-style="navigation"]))>[role="tablist"],
+:where(:scope):is([data-nse-control="tab-view"]:where(:not([data-nse-style="navigation"])))>[role="tablist"]{display:flex;overflow:auto}
 
 /* NavigationFoundation owns controller geometry/retention; AppearanceAuthority projects only source-bound paint. */
-.nse-tab-bar-safe-area {
+/* A destination's vertical scroll boundary belongs to the app, not the host
+   document. Contain chaining while retaining local native/rubber-band
+   affordances; horizontal browser navigation remains unchanged. */
+[data-nse-navigation-scroll-surface="true"],
+:where(:scope):is([data-nse-navigation-scroll-surface="true"]) {
+  overscroll-behavior-y: contain;
+}
+
+.nse-tab-bar-safe-area,
+:where(:scope):is(.nse-tab-bar-safe-area) {
   --nse-tab-safe-inline-inset: clamp(
     10px,
     calc((100% - var(--nse-tab-visible-minimum-width, 64px)) / 2),
@@ -33,7 +46,7 @@
   justify-content: flex-start;
   min-width: 0;
   overflow: visible;
-  padding: 10px max(var(--nse-tab-safe-inline-inset), env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(var(--nse-tab-safe-inline-inset), env(safe-area-inset-left, 0px));
+  padding: 10px max(var(--nse-tab-safe-inline-inset), var(--nse-screen-safe-area-inset-right, 0px)) calc(10px + var(--nse-screen-safe-area-inset-bottom, 0px)) max(var(--nse-tab-safe-inline-inset), var(--nse-screen-safe-area-inset-left, 0px));
   pointer-events: none;
   position: relative;
   z-index: 2;
@@ -41,12 +54,14 @@
 
 /* Compact chrome is a shared overlay contract. Its owner keeps the retained
    destination at full height; only the capsule accepts pointer input. */
-.nse-compact-bottom-chrome-owner {
-  --nse-compact-bottom-chrome-clearance: calc(92px + env(safe-area-inset-bottom, 0px));
+.nse-compact-bottom-chrome-owner,
+:where(:scope):is(.nse-compact-bottom-chrome-owner) {
+  --nse-compact-bottom-chrome-clearance: var(--nse-safe-area-inset-bottom, 0px);
   position: relative;
 }
 
-.nse-compact-bottom-chrome-mount {
+.nse-compact-bottom-chrome-mount,
+:where(:scope):is(.nse-compact-bottom-chrome-mount) {
   inset-block-end: 0;
   inset-inline: 0;
   overflow: visible;
@@ -57,13 +72,13 @@
 
 /* The app identifies its real scroll owner; shared chrome contributes only a
    trailing spacer, preserving the app's existing surface padding and paint. */
-.nse-compact-bottom-chrome-owner:has(> .nse-compact-bottom-chrome-mount)
-  [data-nse-navigation-scroll-surface="true"] {
+.nse-compact-bottom-chrome-owner:has(>.nse-compact-bottom-chrome-mount) [data-nse-navigation-scroll-surface="true"],
+:where(:scope):is(.nse-compact-bottom-chrome-owner:has(>.nse-compact-bottom-chrome-mount)) [data-nse-navigation-scroll-surface="true"] {
   scroll-padding-block-end: var(--nse-compact-bottom-chrome-clearance);
 }
 
-.nse-compact-bottom-chrome-owner:has(> .nse-compact-bottom-chrome-mount)
-  [data-nse-navigation-scroll-surface="true"]::after {
+.nse-compact-bottom-chrome-owner:has(>.nse-compact-bottom-chrome-mount) [data-nse-navigation-scroll-surface="true"]:not(.nse-scroll-view)::after,
+:where(:scope):is(.nse-compact-bottom-chrome-owner:has(>.nse-compact-bottom-chrome-mount)) [data-nse-navigation-scroll-surface="true"]:not(.nse-scroll-view)::after {
   block-size: var(--nse-compact-bottom-chrome-clearance);
   content: "";
   display: block;
@@ -74,7 +89,8 @@
 /* The viewport belongs only to the visible chrome. Destination panels remain
    siblings under the semantic host, so a constrained proof host can scroll
    the five-item composition without clipping retained application content. */
-.nse-tab-bar-scroll-viewport {
+.nse-tab-bar-scroll-viewport,
+:where(:scope):is(.nse-tab-bar-scroll-viewport) {
   align-items: flex-end;
   display: flex;
   flex: 1 1 auto;
@@ -85,9 +101,11 @@
   scrollbar-width: none;
 }
 
-.nse-tab-bar-scroll-viewport::-webkit-scrollbar { display: none; }
+.nse-tab-bar-scroll-viewport::-webkit-scrollbar,
+:where(:scope):is(.nse-tab-bar-scroll-viewport)::-webkit-scrollbar { display: none; }
 
-.nse-tab-bar {
+.nse-tab-bar,
+:where(:scope):is(.nse-tab-bar) {
   align-items: stretch;
   --nse-tab-bar-height: 72px;
   --nse-tab-minimum-item-width: 64px;
@@ -108,7 +126,8 @@
   scrollbar-width: thin;
 }
 
-.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] {
+.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"],
+:where(:scope):is(.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"]) {
   --nse-tab-chrome-native-height: 72px;
   --nse-tab-chrome-cap-diameter: 72px;
   --nse-tab-chrome-cap-radius: 36px;
@@ -118,7 +137,8 @@
 /* NSETabBar's own chrome variant owns a 72px capsule and vertical content
    stack. This selector deliberately excludes ordinary grouped tool buttons:
    their canonical 50px `gt` output remains independent. */
-.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] > .nse-tab-bar-tab.nse-control-button {
+.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"]>.nse-tab-bar-tab.nse-control-button,
+:where(:scope):is(.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"])>.nse-tab-bar-tab.nse-control-button {
   align-items: center;
   block-size: var(--nse-tab-chrome-native-height);
   box-sizing: border-box;
@@ -142,7 +162,9 @@
 }
 
 .nse-tab-bar-tab,
-.nse-tab-bar-more-option {
+:where(:scope):is(.nse-tab-bar-tab),
+.nse-tab-bar-more-option,
+:where(:scope):is(.nse-tab-bar-more-option) {
   align-items: center;
   appearance: none;
   background: transparent;
@@ -165,7 +187,8 @@
   touch-action: manipulation;
 }
 
-.nse-tab-bar-tab {
+.nse-tab-bar-tab,
+:where(:scope):is(.nse-tab-bar-tab) {
   flex: 1 1 0;
   flex-direction: column;
   gap: 3px;
@@ -173,14 +196,18 @@
   min-inline-size: 0;
 }
 
-.nse-tab-bar-more-option {
+.nse-tab-bar-more-option,
+:where(:scope):is(.nse-tab-bar-more-option) {
   flex-direction: row;
 }
 
 .nse-tab-bar-content,
-.nse-tab-bar-more-option > * { position: relative; z-index: 1; }
+:where(:scope):is(.nse-tab-bar-content),
+.nse-tab-bar-more-option>*,
+:where(:scope):is(.nse-tab-bar-more-option)>* { position: relative; z-index: 1; }
 
-.nse-tab-bar-content {
+.nse-tab-bar-content,
+:where(:scope):is(.nse-tab-bar-content) {
   align-items: center;
   display: flex;
   flex-direction: column;
@@ -194,8 +221,8 @@
 /* Every inert content stack retains the full dimensions of its equal semantic
    hit target. Middle content centres here; the approved outer optical inset is
    applied independently below without changing button or paint geometry. */
-.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"]
-  > .nse-tab-bar-tab.nse-control-button > .nse-tab-bar-content {
+.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"]>.nse-tab-bar-tab.nse-control-button>.nse-tab-bar-content,
+:where(:scope):is(.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"])>.nse-tab-bar-tab.nse-control-button>.nse-tab-bar-content {
   block-size: 100%;
   inline-size: 100%;
   inset-block: 0;
@@ -206,24 +233,26 @@
 
 /* Pull only the two outer content stacks optically inward. Logical offsets
    mirror the adjustment in RTL without changing paint or hit geometry. */
-.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"]
-  > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="first"] > .nse-tab-bar-content {
+.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"]>.nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="first"]>.nse-tab-bar-content,
+:where(:scope):is(.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"])>.nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="first"]>.nse-tab-bar-content {
   inset-inline-start: 6px;
 }
 
-.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"]
-  > .nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="last"] > .nse-tab-bar-content {
+.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"]>.nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="last"]>.nse-tab-bar-content,
+:where(:scope):is(.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"])>.nse-tab-bar-tab.nse-control-button[data-nse-tab-chrome-segment="last"]>.nse-tab-bar-content {
   inset-inline-start: -6px;
 }
 
 /* The measured atomic vector start/body/end pieces belong to one inert,
    full-segment paint layer, independent of the content stack's optical inset. */
-.nse-tab-bar-chrome-surface {
+.nse-tab-bar-chrome-surface,
+:where(:scope):is(.nse-tab-bar-chrome-surface) {
   display: block;
   pointer-events: none;
 }
 
-.nse-tab-bar-icon {
+.nse-tab-bar-icon,
+:where(:scope):is(.nse-tab-bar-icon) {
   block-size: 1.125rem;
   box-sizing: border-box;
   flex: 0 0 1.125rem;
@@ -231,7 +260,8 @@
   transition: filter 120ms ease, opacity 120ms ease, transform 120ms ease;
 }
 
-.nse-tab-bar-icon[data-nse-tab-icon-ready="true"] {
+.nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
+:where(:scope):is(.nse-tab-bar-icon[data-nse-tab-icon-ready="true"]) {
   background: currentColor;
   block-size: 20px;
   flex-basis: 20px;
@@ -240,7 +270,8 @@
   mask: var(--nse-tab-icon-source) center / contain no-repeat;
 }
 
-.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] .nse-tab-bar-icon {
+.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] .nse-tab-bar-icon,
+:where(:scope):is(.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"]) .nse-tab-bar-icon {
   block-size: 24px;
   flex: 0 0 24px;
   inline-size: 24px;
@@ -249,12 +280,14 @@
 /* The glyph layer is inert unless an appearance paints the icon as a ringed
    glyph (Atmo tall tabs). Elsewhere the masked icon span above remains the
    whole icon. */
-.nse-tab-bar-icon-glyph {
+.nse-tab-bar-icon-glyph,
+:where(:scope):is(.nse-tab-bar-icon-glyph) {
   display: none;
 }
 
 /* Filter definitions only: takes no space and paints nothing itself. */
-.nse-tab-bar-icon-material {
+.nse-tab-bar-icon-material,
+:where(:scope):is(.nse-tab-bar-icon-material) {
   block-size: 0;
   inline-size: 0;
   overflow: hidden;
@@ -262,7 +295,8 @@
   position: absolute;
 }
 
-.nse-tab-bar-icon[data-nse-tab-icon-ready="false"] {
+.nse-tab-bar-icon[data-nse-tab-icon-ready="false"],
+:where(:scope):is(.nse-tab-bar-icon[data-nse-tab-icon-ready="false"]) {
   align-items: center;
   border: 1px dashed currentColor;
   display: grid;
@@ -271,32 +305,45 @@
 }
 
 .nse-tab-bar-tab[data-nse-tab-visual-state="hover"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
-.nse-tab-bar-more-option[data-nse-tab-visual-state="hover"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"] {
+:where(:scope):is(.nse-tab-bar-tab[data-nse-tab-visual-state="hover"]) .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
+.nse-tab-bar-more-option[data-nse-tab-visual-state="hover"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
+:where(:scope):is(.nse-tab-bar-more-option[data-nse-tab-visual-state="hover"]) .nse-tab-bar-icon[data-nse-tab-icon-ready="true"] {
   filter: brightness(1.1);
 }
 
 .nse-tab-bar-tab[data-nse-tab-visual-state="selected"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
+:where(:scope):is(.nse-tab-bar-tab[data-nse-tab-visual-state="selected"]) .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
 .nse-tab-bar-tab[data-nse-tab-visual-state="selected-pressed"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
+:where(:scope):is(.nse-tab-bar-tab[data-nse-tab-visual-state="selected-pressed"]) .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
 .nse-tab-bar-more-option[data-nse-tab-visual-state="selected"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
-.nse-tab-bar-more-option[data-nse-tab-visual-state="selected-pressed"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"] {
+:where(:scope):is(.nse-tab-bar-more-option[data-nse-tab-visual-state="selected"]) .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
+.nse-tab-bar-more-option[data-nse-tab-visual-state="selected-pressed"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
+:where(:scope):is(.nse-tab-bar-more-option[data-nse-tab-visual-state="selected-pressed"]) .nse-tab-bar-icon[data-nse-tab-icon-ready="true"] {
   filter: brightness(1.28);
 }
 
 .nse-tab-bar-tab[data-nse-tab-visual-state="pressed"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
-.nse-tab-bar-more-option[data-nse-tab-visual-state="pressed"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"] {
+:where(:scope):is(.nse-tab-bar-tab[data-nse-tab-visual-state="pressed"]) .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
+.nse-tab-bar-more-option[data-nse-tab-visual-state="pressed"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
+:where(:scope):is(.nse-tab-bar-more-option[data-nse-tab-visual-state="pressed"]) .nse-tab-bar-icon[data-nse-tab-icon-ready="true"] {
   transform: translateY(1px);
 }
 
 .nse-tab-bar-tab[data-nse-tab-visual-state="selected-pressed"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
-.nse-tab-bar-more-option[data-nse-tab-visual-state="selected-pressed"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"] {
+:where(:scope):is(.nse-tab-bar-tab[data-nse-tab-visual-state="selected-pressed"]) .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
+.nse-tab-bar-more-option[data-nse-tab-visual-state="selected-pressed"] .nse-tab-bar-icon[data-nse-tab-icon-ready="true"],
+:where(:scope):is(.nse-tab-bar-more-option[data-nse-tab-visual-state="selected-pressed"]) .nse-tab-bar-icon[data-nse-tab-icon-ready="true"] {
   transform: translateY(1px) scale(0.94);
 }
 
 .nse-tab-bar-tab[data-nse-tab-visual-state="disabled"] .nse-tab-bar-icon,
-.nse-tab-bar-more-option[data-nse-tab-visual-state="disabled"] .nse-tab-bar-icon {
+:where(:scope):is(.nse-tab-bar-tab[data-nse-tab-visual-state="disabled"]) .nse-tab-bar-icon,
+.nse-tab-bar-more-option[data-nse-tab-visual-state="disabled"] .nse-tab-bar-icon,
+:where(:scope):is(.nse-tab-bar-more-option[data-nse-tab-visual-state="disabled"]) .nse-tab-bar-icon {
   opacity: 0.42;
 }
-.nse-tab-bar-label {
+.nse-tab-bar-label,
+:where(:scope):is(.nse-tab-bar-label) {
   font-size: 0.625rem;
   line-height: 0.75rem;
   min-inline-size: 0;
@@ -305,17 +352,21 @@
   white-space: nowrap;
 }
 
-.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] .nse-tab-bar-label {
+.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"] .nse-tab-bar-label,
+:where(:scope):is(.nse-tab-bar[data-nse-tab-chrome-active="true"][data-nse-tab-chrome-size="tall"]) .nse-tab-bar-label {
   font-size: 0.75rem;
   line-height: 0.875rem;
   max-inline-size: 100%;
 }
-.nse-tab-bar-badge { flex: 0 0 auto; }
-.nse-tab-bar-more { margin-inline-start: 0; }
+.nse-tab-bar-badge,
+:where(:scope):is(.nse-tab-bar-badge) { flex: 0 0 auto; }
+.nse-tab-bar-more,
+:where(:scope):is(.nse-tab-bar-more) { margin-inline-start: 0; }
 
 /* More is a retained hierarchy page, never a wrapping popup/listbox. It stays
    in the existing shared vector stage rather than adding a local raster skin. */
-.nse-tab-bar-overflow-page {
+.nse-tab-bar-overflow-page,
+:where(:scope):is(.nse-tab-bar-overflow-page) {
   background: transparent;
   border: 0;
   display: flex;
@@ -328,16 +379,19 @@
   position: relative;
 }
 
-.nse-tab-bar-overflow-page > * { position: relative; z-index: 1; }
+.nse-tab-bar-overflow-page>*,
+:where(:scope):is(.nse-tab-bar-overflow-page)>* { position: relative; z-index: 1; }
 
-.nse-tab-bar-overflow-region {
+.nse-tab-bar-overflow-region,
+:where(:scope):is(.nse-tab-bar-overflow-region) {
   display: flex;
   flex: 1 1 auto;
   min-height: 0;
   min-width: 0;
 }
 
-.nse-tab-bar-overflow-metal-surface {
+.nse-tab-bar-overflow-metal-surface,
+:where(:scope):is(.nse-tab-bar-overflow-metal-surface) {
   display: flex;
   flex: 1 1 auto;
   min-block-size: 0;
@@ -347,7 +401,8 @@
   padding-block-end: calc(0.875rem + var(--nse-compact-bottom-chrome-clearance, 0px));
 }
 
-.nse-tab-bar-overflow-group {
+.nse-tab-bar-overflow-group,
+:where(:scope):is(.nse-tab-bar-overflow-group) {
   align-self: flex-start;
   block-size: fit-content;
   flex: 0 0 auto;
@@ -355,26 +410,31 @@
   min-inline-size: 0;
 }
 
-.nse-tab-bar-overflow-option {
+.nse-tab-bar-overflow-option,
+:where(:scope):is(.nse-tab-bar-overflow-option) {
   cursor: pointer;
   inline-size: 100%;
   min-inline-size: 0;
 }
 
-.nse-tab-bar-overflow-option:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+.nse-tab-bar-overflow-option:focus-visible,
+:where(:scope):is(.nse-tab-bar-overflow-option:focus-visible) { outline: 2px solid currentColor; outline-offset: -2px; }
 
-.nse-tab-bar-panel[hidden] {
+.nse-tab-bar-panel[hidden],
+:where(:scope):is(.nse-tab-bar-panel[hidden]) {
   display: none;
 }
 
 /* App-owned content renderers still need one stable More IDREF. The empty
    detail-state owner has no layout footprint; its root More page becomes the
    normal flex surface while open. */
-.nse-tab-bar-more-panel[data-nse-tab-overflow-owned-panel="true"] {
+.nse-tab-bar-more-panel[data-nse-tab-overflow-owned-panel="true"],
+:where(:scope):is(.nse-tab-bar-more-panel[data-nse-tab-overflow-owned-panel="true"]) {
   display: contents;
 }
 
-.nse-tab-bar-more-panel[data-nse-tab-overflow-owned-panel="true"][data-nse-tab-overflow-page-open="true"] {
+.nse-tab-bar-more-panel[data-nse-tab-overflow-owned-panel="true"][data-nse-tab-overflow-page-open="true"],
+:where(:scope):is(.nse-tab-bar-more-panel[data-nse-tab-overflow-owned-panel="true"][data-nse-tab-overflow-page-open="true"]) {
   display: flex;
   flex: 1 1 auto;
   block-size: 100%;
@@ -383,7 +443,8 @@
   overflow: hidden;
 }
 
-.nse-navigation-destination-host {
+.nse-navigation-destination-host,
+:where(:scope):is(.nse-navigation-destination-host) {
   display: flex;
   flex-direction: column;
   block-size: 100%;
@@ -392,7 +453,8 @@
   overflow: hidden;
 }
 
-.nse-navigation-destination-host > .nse-tab-bar-panel {
+.nse-navigation-destination-host>.nse-tab-bar-panel,
+:where(:scope):is(.nse-navigation-destination-host)>.nse-tab-bar-panel {
   flex: 1 1 auto;
   block-size: 100%;
   min-block-size: 0;
@@ -400,15 +462,20 @@
   overflow: hidden;
 }
 
-.nse-navigation-destination-host > .nse-tab-bar-panel:not([hidden]),
+.nse-navigation-destination-host>.nse-tab-bar-panel:not([hidden]),
+:where(:scope):is(.nse-navigation-destination-host)>.nse-tab-bar-panel:not([hidden]),
 .nse-tab-bar-more-stack:not([hidden]),
-.nse-tab-bar-more-stack > [data-nse-more-destination]:not([hidden]) {
+:where(:scope):is(.nse-tab-bar-more-stack:not([hidden])),
+.nse-tab-bar-more-stack>[data-nse-more-destination]:not([hidden]),
+:where(:scope):is(.nse-tab-bar-more-stack)>[data-nse-more-destination]:not([hidden]) {
   display: flex;
   flex-direction: column;
 }
 
 .nse-tab-bar-more-stack:not([hidden]),
-.nse-tab-bar-more-stack > [data-nse-more-destination]:not([hidden]) {
+:where(:scope):is(.nse-tab-bar-more-stack:not([hidden])),
+.nse-tab-bar-more-stack>[data-nse-more-destination]:not([hidden]),
+:where(:scope):is(.nse-tab-bar-more-stack)>[data-nse-more-destination]:not([hidden]) {
   flex: 1 1 auto;
   block-size: 100%;
   min-block-size: 0;
@@ -416,48 +483,73 @@
   overflow: hidden;
 }
 
-.nse-hierarchy-stack {
+/* A retained destination owns the child controller frame's available size.
+   An auto-sized flex item expands to its document height, leaving a nested
+   native scroller with no scroll range behind the panel's overflow clip. */
+.nse-navigation-destination-host>.nse-tab-bar-panel>[data-nse-view-controller],
+:where(:scope):is(.nse-navigation-destination-host)>.nse-tab-bar-panel>[data-nse-view-controller],
+.nse-tab-bar-more-stack>[data-nse-more-destination]>[data-nse-view-controller],
+:where(:scope):is(.nse-tab-bar-more-stack)>[data-nse-more-destination]>[data-nse-view-controller] {
+  flex: 1 1 auto;
+  block-size: 100%;
+  min-block-size: 0;
+  min-inline-size: 0;
+}
+
+.nse-hierarchy-stack,
+:where(:scope):is(.nse-hierarchy-stack) {
   min-width: 0;
 }
 
 .nse-hierarchy-stack-current,
-.nse-hierarchy-stack-destinations {
+:where(:scope):is(.nse-hierarchy-stack-current),
+.nse-hierarchy-stack-destinations,
+:where(:scope):is(.nse-hierarchy-stack-destinations) {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
 @media (forced-colors: active) {
-  .nse-tab-bar::before {
+  .nse-tab-bar::before,
+:where(:scope):is(.nse-tab-bar)::before {
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
     box-shadow: none !important;
   }
 
   .nse-tab-bar-tab:focus-visible,
-  .nse-tab-bar-more-option:focus-visible { outline: 2px solid Highlight; outline-offset: -2px; }
+:where(:scope):is(.nse-tab-bar-tab:focus-visible),
+.nse-tab-bar-more-option:focus-visible,
+:where(:scope):is(.nse-tab-bar-more-option:focus-visible) { outline: 2px solid Highlight; outline-offset: -2px; }
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  .nse-tab-bar::before {
+  .nse-tab-bar::before,
+:where(:scope):is(.nse-tab-bar)::before {
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nse-tab-bar *, .nse-tab-bar-overflow-page * { animation-duration: 0ms !important; transition-duration: 0ms !important; }
+  .nse-tab-bar *,
+:where(:scope):is(.nse-tab-bar) *,
+.nse-tab-bar-overflow-page *,
+:where(:scope):is(.nse-tab-bar-overflow-page) * { animation-duration: 0ms !important; transition-duration: 0ms !important; }
 }
 
 /* Icon tabs (NSETabView / NSETabGroup, tabStyle "icons"): a row of icons,
    the chosen one in a recessed well; the theme paints the well. */
-.nse-icon-tabs {
+.nse-icon-tabs,
+:where(:scope):is(.nse-icon-tabs) {
   display: flex;
   align-items: stretch;
   gap: 2px;
 }
 
-.nse-icon-tab {
+.nse-icon-tab,
+:where(:scope):is(.nse-icon-tab) {
   appearance: none;
   display: grid;
   justify-items: center;
@@ -474,24 +566,109 @@
   cursor: default;
 }
 
-.nse-icon-tab [data-nse-part="tab-icon"] {
+.nse-icon-tab [data-nse-part="tab-icon"],
+:where(:scope):is(.nse-icon-tab) [data-nse-part="tab-icon"] {
   display: grid;
   place-items: center;
   inline-size: 28px;
   block-size: 28px;
 }
 
-.nse-icon-tab [data-nse-part="tab-icon"] > :is(svg, img) {
+.nse-icon-tab [data-nse-part="tab-icon"]>:is(svg,img),
+:where(:scope):is(.nse-icon-tab) [data-nse-part="tab-icon"]>:is(svg,img) {
   inline-size: 100%;
   block-size: 100%;
 }
 
-.nse-icon-tab [data-nse-part="tab-caption"] {
+.nse-icon-tab [data-nse-part="tab-caption"],
+:where(:scope):is(.nse-icon-tab) [data-nse-part="tab-caption"] {
   font-size: 11px;
   line-height: 1.2;
   white-space: nowrap;
 }
 
-.nse-icon-tab:disabled {
+.nse-icon-tab:disabled,
+:where(:scope):is(.nse-icon-tab:disabled) {
   opacity: 0.45;
+}
+
+/* A rail changes only tab orientation. Targets keep the tall tab's 72px
+   height and independent end caps; content is beside it, never underneath. */
+.nse-tab-bar-safe-area[data-orientation="vertical"],
+:where(:scope):is(.nse-tab-bar-safe-area[data-orientation="vertical"]) {
+  align-items: stretch;
+  block-size: 100%;
+  box-sizing: border-box;
+  inline-size: var(--nse-navigation-rail-width, 104px);
+  padding: 10px;
+  min-block-size: 0;
+}
+.nse-tab-bar-safe-area[data-orientation="vertical"] .nse-tab-bar-scroll-viewport,
+:where(:scope):is(.nse-tab-bar-safe-area[data-orientation="vertical"]) .nse-tab-bar-scroll-viewport {
+  align-items: flex-start;
+  overflow-x: hidden;
+  overflow-y: auto;
+  pointer-events: auto;
+  min-block-size: 0;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.nse-tab-bar-safe-area[data-orientation="vertical"] .nse-tab-bar,
+:where(:scope):is(.nse-tab-bar-safe-area[data-orientation="vertical"]) .nse-tab-bar {
+  flex-direction: column;
+  block-size: auto;
+  min-block-size: 0;
+  min-inline-size: 0;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  gap: 6px;
+}
+.nse-tab-bar-safe-area[data-orientation="vertical"] .nse-tab-bar>.nse-tab-bar-tab,
+:where(:scope):is(.nse-tab-bar-safe-area[data-orientation="vertical"]) .nse-tab-bar>.nse-tab-bar-tab {
+  flex: 0 0 72px;
+  block-size: 72px;
+  min-block-size: 72px;
+  min-inline-size: 64px;
+}
+.nse-tab-bar-safe-area[data-orientation="vertical"] .nse-tab-bar-label,
+:where(:scope):is(.nse-tab-bar-safe-area[data-orientation="vertical"]) .nse-tab-bar-label {
+  max-inline-size: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Overflow destinations have room to grow vertically; keep their names readable. */
+.nse-tab-bar-overflow-option .nse-control-list-primary,
+:where(:scope):is(.nse-tab-bar-overflow-option) .nse-control-list-primary { white-space: normal; overflow: visible; overflow-wrap: anywhere; }
+
+/* NSETabViewController: the selected item's view above or below the tab control its tabStyle names. */
+.nse-tab-view-controller,
+:where(:scope):is(.nse-tab-view-controller) {
+  display: flex;
+  flex-direction: column;
+  block-size: 100%;
+  min-block-size: 0;
+  min-inline-size: 0;
+}
+
+.nse-tab-view-controller-content,
+:where(:scope):is(.nse-tab-view-controller-content) {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-block-size: 0;
+  min-inline-size: 0;
+}
+
+.nse-tab-view-controller-content>[data-nse-view-controller],
+:where(:scope):is(.nse-tab-view-controller-content)>[data-nse-view-controller] {
+  flex: 1 1 auto;
+  block-size: 100%;
+  min-block-size: 0;
+  min-inline-size: 0;
+}
+
+}
+
 }

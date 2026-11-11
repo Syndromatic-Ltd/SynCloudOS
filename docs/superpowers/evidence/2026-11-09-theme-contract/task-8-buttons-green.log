@@ -1,0 +1,46 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-theme-hook-coverage.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx (319 tests | 7 failed) 311ms
+     × button-imageOnly-focused 4ms
+     × button-imageLeading-focused 1ms
+     × button-imageTrailing-focused 1ms
+     × button-default-focused 1ms
+     × button-destructive-focused 1ms
+     × button-aqua-focused 1ms
+     × button-darkAqua-focused 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > button-imageOnly-focused
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > button-imageLeading-focused
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > button-imageTrailing-focused
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > button-default-focused
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > button-destructive-focused
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > button-aqua-focused
+ FAIL  tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > button-darkAqua-focused
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/runtime/nse-theme-hook-coverage.test.tsx:25:83
+     23|       if (surface.interaction === "focus") {
+     24|         const target = root!.matches("button") ? root! : root!.querySe…
+     25|         act(() => target.focus()); expect(root!.hasAttribute("data-nse…
+       |                                                                                   ^
+     26|         act(() => target.blur()); expect(root!.hasAttribute("data-nse-…
+     27|       }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  7 failed | 312 passed (319)
+   Start at  19:14:21
+   Duration  8.89s (transform 5.86s, setup 28ms, import 7.61s, tests 311ms, environment 809ms)

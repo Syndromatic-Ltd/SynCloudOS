@@ -21,9 +21,9 @@
 // @vitest-environment jsdom
 import React from "react";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAnimationDefaults, NSEAnimationEnvironmentProvider, type NSEAnimator } from "../../src/NSE/Animation";
-import { NSEAlert } from "../../src/NSE/Components/NSEAlert";
+import { NSEAlertSurface } from "../../src/NSE/Components/NSEAlertSurface";
 import { NSEAlertBackdrop } from "../../src/NSE/Components/NSEAlertBackdrop";
 import { SystemAlert } from "../../src/SynCloudOSReact/SystemAlert";
 import type { AFXAnimationDefinition, AFXAnimationSettlement } from "../../src/FX/AnimationFX/animationTypes";
@@ -93,11 +93,45 @@ function renderSystemAlert(animator: NSEAnimator | null, reducedMotion = false) 
 }
 
 describe("NSE alert choreography on AnimationFX", () => {
+  it.each([["Cancel", false], ["Escape", false], ["Cancel", true], ["Escape", true]] as const)("restores an interactive background before returning focus after %s (StrictMode=%s)", (reason, strict) => {
+    function Fixture() {
+      const [shown, setShown] = React.useState(false);
+      return <div>
+        <div data-testid="focus-background" aria-hidden="false"><button onClick={() => setShown(true)}>Alert origin</button></div>
+        {shown ? <NSEAlertBackdrop onSafeDismiss={() => setShown(false)}><button onClick={() => setShown(false)}>Cancel</button></NSEAlertBackdrop> : null}
+      </div>;
+    }
+    const view = render(strict ? <React.StrictMode><Fixture /></React.StrictMode> : <Fixture />);
+    const origin = screen.getByRole("button", { name: "Alert origin" });
+    origin.focus();
+    const nativeFocus = origin.focus.bind(origin);
+    const attempts: { inert: boolean; hidden: string | null }[] = [];
+    // jsdom does not enforce inert focus refusal. Match the browser constraint
+    // that exposed the real Cancel/Escape failure, while retaining native focus.
+    const focus = vi.spyOn(origin, "focus").mockImplementation(options => {
+      const background = origin.closest<HTMLElement>('[data-testid="focus-background"]');
+      const inert = Boolean(origin.closest("[inert]"));
+      attempts.push({ inert, hidden: background?.getAttribute("aria-hidden") ?? null });
+      if (!inert) nativeFocus(options);
+    });
+    try {
+      fireEvent.click(origin);
+      const cancel = screen.getByRole("button", { name: "Cancel" });
+      if (reason === "Cancel") fireEvent.click(cancel);
+      else fireEvent.keyDown(cancel, { key: "Escape" });
+      if (strict) {
+        expect(attempts.length).toBeGreaterThan(0);
+        expect(attempts.every(attempt => !attempt.inert && attempt.hidden === "false")).toBe(true);
+      } else expect(attempts).toEqual([{ inert: false, hidden: "false" }]);
+      expect(document.activeElement).toBe(origin);
+    } finally { focus.mockRestore(); view.unmount(); }
+  });
+
   it("pops the alert in with the damped elastic scale, and fades it when motion is reduced", () => {
     const { animator, played } = recordingAnimator();
     const standard = render(
       <NSEAnimationEnvironmentProvider reducedMotion={false} animator={animator}>
-        <NSEAlert labelledBy="title"><h2 id="title">Notice</h2></NSEAlert>
+        <NSEAlertSurface labelledBy="title"><h2 id="title">Notice</h2></NSEAlertSurface>
       </NSEAnimationEnvironmentProvider>,
     );
     const alert = screen.getByRole("alertdialog");
@@ -125,7 +159,7 @@ describe("NSE alert choreography on AnimationFX", () => {
     const reduced = recordingAnimator();
     render(
       <NSEAnimationEnvironmentProvider reducedMotion animator={reduced.animator}>
-        <NSEAlert labelledBy="title"><h2 id="title">Notice</h2></NSEAlert>
+        <NSEAlertSurface labelledBy="title"><h2 id="title">Notice</h2></NSEAlertSurface>
       </NSEAnimationEnvironmentProvider>,
     );
     const [fade] = reduced.played as [Played];
@@ -138,7 +172,7 @@ describe("NSE alert choreography on AnimationFX", () => {
       const { animator, played } = recordingAnimator();
       const view = render(
         <NSEAnimationEnvironmentProvider reducedMotion={reducedMotion} animator={animator}>
-          <NSEAlertBackdrop><NSEAlert labelledBy="title"><h2 id="title">Notice</h2></NSEAlert></NSEAlertBackdrop>
+          <NSEAlertBackdrop><NSEAlertSurface labelledBy="title"><h2 id="title">Notice</h2></NSEAlertSurface></NSEAlertBackdrop>
         </NSEAnimationEnvironmentProvider>,
       );
       const backdrop = document.querySelector<HTMLElement>(".nse-control-alert-backdrop")!;

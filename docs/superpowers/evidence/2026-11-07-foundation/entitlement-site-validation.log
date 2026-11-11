@@ -1,0 +1,61 @@
+{
+  "valid": 11,
+  "total": 11,
+  "results": [
+    {
+      "path": "src/SynWare/About.app/Contents/Info.ts",
+      "ok": true,
+      "errors": null
+    },
+    {
+      "path": "src/SynWare/AnimationFX.app/Contents/Info.ts",
+      "ok": true,
+      "errors": null
+    },
+    {
+      "path": "src/SynWare/Chronosphere.app/Contents/Info.ts",
+      "ok": true,
+      "errors": null
+    },
+    {
+      "path": "src/SynWare/Diagnostics.app/Contents/Info.ts",
+      "ok": true,
+      "errors": null
+    },
+    {
+      "path": "src/SynWare/Journal.app/Contents/Info.ts",
+      "ok": true,
+      "errors": null
+    },
+    {
+      "path": "src/SynWare/JournalOld.app/Contents/Info.ts",
+      "ok": true,
+      "errors": null
+    },
+    {
+      "path": "src/SynWare/JournalPublisher.app/Contents/Info.ts",
+      "ok": true,
+      "errors": null
+    },
+    {
+      "path": "src/SynWare/MemoJournal.app/Contents/Info.ts",
+      "ok": true,
+      "errors": null
+    },
+    {
+      "path": "src/SynWare/Portfolio.app/Contents/Info.ts",
+      "ok": true,
+      "errors": null
+    },
+    {
+      "path": "src/SynWare/Software.app/Contents/Info.ts",
+      "ok": true,
+      "errors": null
+    },
+    {
+      "path": "src/SynWare/SynCal.app/Contents/Info.ts",
+      "ok": true,
+      "errors": null
+    }
+  ]
+}

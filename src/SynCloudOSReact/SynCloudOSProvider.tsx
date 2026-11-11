@@ -24,7 +24,12 @@ import {
   NSEMaterialLightingProvider,
 } from "../NSE/hostComposition";
 import { NSEAnimationEnvironmentProvider, type NSEAnimator } from "../NSE/Animation";
+import { NSEViewControllerRendererProvider } from "../NSE/applicationHostInterop";
+import { NSEViewControllerView } from "../SynCloudOS/AppHosting/runtimeEntry";
+import { registerNSEHapticFeedbackEngine } from "../NSE/hostComposition";
+import { NSEViewDrawingEnvironmentContext, type NSEViewDrawingEnvironment } from "../NSE/hostComposition";
 import {
+  useLayoutEffect,
   useMemo,
   useSyncExternalStore,
   type PropsWithChildren,
@@ -75,6 +80,13 @@ export function SynCloudOSProvider({
     if (!frames) return null;
     return createScopedAnimationFrames(runtime.signal, animationState, frames);
   }, [runtime, animationState]);
+  // NSEHapticFeedbackManager.defaultPerformer performs through this runtime's engine while it is mounted.
+  useLayoutEffect(() => (runtime.haptics ? registerNSEHapticFeedbackEngine(runtime.haptics) : undefined), [runtime.haptics]);
+  const drawingEnvironment = useMemo<NSEViewDrawingEnvironment>(() => ({
+    createGraphicsIdentifierIssuer: () => runtime.images.createGraphicsIdentifierIssuer(),
+    // The kernel owns the same geometry exposed to mounted apps as images.geometry.
+    geometry: runtime.environment.imageGeometry,
+  }), [runtime]);
   const lighting = useMemo(() => {
     if (!shellFrames) return null;
     return new NSEMaterialLighting(
@@ -94,7 +106,9 @@ export function SynCloudOSProvider({
         >
           <NSEFeedbackProvider value={runtime.haptics}>
             <NSEMaterialLightingProvider value={lighting}>
-              {children}
+              <NSEViewDrawingEnvironmentContext.Provider value={drawingEnvironment}>
+                <NSEViewControllerRendererProvider value={NSEViewControllerView}>{children}</NSEViewControllerRendererProvider>
+              </NSEViewDrawingEnvironmentContext.Provider>
             </NSEMaterialLightingProvider>
           </NSEFeedbackProvider>
         </ResponderHierarchyContext.Provider>

@@ -36,8 +36,26 @@ export class CommandRegistry {
   readonly #entries = new Map<string, CommandRegistryEntry>();
   #generation = 0;
   #disposed = false;
+  readonly #listeners = new Set<() => void>();
+  #notificationQueued = false;
 
   get generation() { return this.#generation; }
+
+  subscribe(listener: () => void): () => void {
+    if (this.#disposed) return () => {};
+    this.#listeners.add(listener);
+    return () => { this.#listeners.delete(listener); };
+  }
+
+  #publish(): void {
+    if (this.#notificationQueued || this.#disposed) return;
+    this.#notificationQueued = true;
+    queueMicrotask(() => {
+      this.#notificationQueued = false;
+      if (this.#disposed) return;
+      for (const listener of this.#listeners) listener();
+    });
+  }
 
   register<P, R>(declaration: CommandDeclaration<P, R>): CommandRegistration {
     if (this.#disposed) throw new Error("Runtime commands are disposed.");
@@ -45,6 +63,7 @@ export class CommandRegistry {
     if (this.#entries.has(key)) throw new CommandRegistrationError(declaration.id, declaration.responderId);
     const generation = ++this.#generation;
     this.#entries.set(key, { declaration: declaration as CommandDeclaration<unknown, unknown>, generation });
+    this.#publish();
     let live = true;
     return {
       commandId: declaration.id,
@@ -54,6 +73,7 @@ export class CommandRegistry {
         live = false;
         if (!this.#entries.delete(key)) return false;
         this.#generation += 1;
+        this.#publish();
         return true;
       },
     };
@@ -80,6 +100,7 @@ export class CommandRegistry {
     this.#disposed = true;
     this.#entries.clear();
     this.#generation += 1;
+    this.#listeners.clear();
   }
 
   #key(commandId: CommandId, responderId: string) {

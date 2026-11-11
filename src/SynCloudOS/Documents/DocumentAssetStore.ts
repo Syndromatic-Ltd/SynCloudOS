@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import { assertDocumentAssetNotAborted, awaitDocumentAsset, DocumentAssetError } from "./documentAssetErrors";
 import { emptyDocumentAssetState, type DocumentAssetBackend, type DocumentAssetBackendState } from "./documentAssetBackend";
 import { documentAssetBlobKey, documentAssetHash, documentAssetId, documentAssetKey, documentAssetMime, documentAssetReferencesEqual,
@@ -32,7 +33,7 @@ export interface DocumentAssetStoreOptions {
   readonly maximumRetentionRoots?: number;
   readonly randomUUID?: () => string;
   /** Trusted cryptographic platform dependency; must return a SHA-256 digest. */
-  readonly hash?: (bytes: Uint8Array) => Promise<string>;
+  readonly hash?: (bytes: NSEData) => Promise<string>;
 }
 
 function storedBytes(state: DocumentAssetBackendState, reference: DocumentAssetReference): Uint8Array {
@@ -56,7 +57,7 @@ export function createDocumentAssetStore(backend: DocumentAssetBackend, options:
   const live = (signal?: AbortSignal) => { assertDocumentAssetNotAborted(signal); assertDocumentAssetNotAborted(lifetime.signal); };
   const digest = async (bytes: Uint8Array, signal?: AbortSignal) => {
     live(signal);
-    const result = await awaitDocumentAsset(awaitDocumentAsset(hash(bytes.slice()), signal), lifetime.signal);
+    const result = await awaitDocumentAsset(awaitDocumentAsset(hash(NSEData.from(bytes)), signal), lifetime.signal);
     live(signal);
     return documentAssetHash(result);
   };
@@ -69,8 +70,9 @@ export function createDocumentAssetStore(backend: DocumentAssetBackend, options:
     async put(scope, input, signal) {
       live(signal);
       const capturedScope = validateDocumentAssetScope(scope);
-      if (!(input.bytes instanceof Uint8Array)) throw new DocumentAssetError("asset-invalid", "Asset bytes must be a Uint8Array.");
-      const bytes = input.bytes.slice();
+      let bytes: Uint8Array;
+      try { bytes = NSEData.from(input.bytes).bytes; }
+      catch { throw new DocumentAssetError("asset-invalid", "Asset bytes must be NSEDataConvertible."); }
       if (bytes.byteLength > maximumAssetBytes) throw new DocumentAssetError("asset-quota", "Asset exceeds the native storage byte limit.");
       const mimeType = documentAssetMime(input.mimeType);
       const assetId = documentAssetId(input.assetId ?? `asset:${uuid()}`);
@@ -98,7 +100,7 @@ export function createDocumentAssetStore(backend: DocumentAssetBackend, options:
       if (!documentAssetScopeEqual(capturedScope, captured.scope)) throw new DocumentAssetError("asset-unauthorized", "The asset belongs to another authorization/document scope.");
       const bytes = await run(false, state => storedBytes(state, captured).slice(), signal);
       if (await digest(bytes, signal) !== captured.hash) throw new DocumentAssetError("asset-corrupt", "Stored asset bytes failed SHA-256 verification.");
-      return bytes;
+      return NSEData.from(bytes);
     },
     async copy(source, reference, destination, signal) {
       const target = validateDocumentAssetScope(destination);

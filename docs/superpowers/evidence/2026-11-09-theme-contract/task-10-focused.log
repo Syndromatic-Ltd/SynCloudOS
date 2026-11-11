@@ -1,0 +1,82 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-semantic-colours.test.ts tests/runtime/app-content-colours.test.ts tests/nse/nse-topbar-document.test.tsx tests/runtime/application-stage-right-slot.test.tsx tests/runtime/application-stage-top-bar-inset.test.tsx tests/runtime/developer-mcp-theme.test.ts tests/runtime/developer-mcp.test.ts tests/runtime/idiom-audit.test.ts tests/runtime/nse-topbar-glyphs.test.tsx tests/runtime/synware-package-styles.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/application-stage-top-bar-inset.test.tsx (5 tests | 3 failed) 166ms
+     × exposes the cumulus overlay inset without nesting content inside the bar 118ms
+     × leaves the whole frame to the content with a custom bar 13ms
+     × leaves the whole frame to the content with a none bar 9ms
+ ❯ tests/runtime/app-content-colours.test.ts (4 tests | 1 failed) 13ms
+     × documents the full shared set 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/app-content-colours.test.ts > application content colours > documents the full shared set
+AssertionError: expected [] to deeply equal [ …(10) ]
+
+- Expected
++ Received
+
+- [
+-   "--nse-colour-window-background",
+-   "--nse-colour-label",
+-   "--nse-colour-secondary-label",
+-   "--nse-colour-control-background",
+-   "--nse-colour-grid",
+-   "--nse-colour-separator",
+-   "--nse-colour-control-accent",
+-   "--nse-colour-selected-control-text",
+-   "--nse-colour-selected-content-background",
+-   "--nse-colour-system-red",
+- ]
++ []
+
+ ❯ tests/runtime/app-content-colours.test.ts:37:24
+     35| describe("application content colours", () => {
+     36|   it("documents the full shared set", () => {
+     37|     expect(documented).toEqual([
+       |                        ^
+     38|       "--nse-colour-window-background", "--nse-colour-label", "--nse-c…
+     39|       "--nse-colour-grid", "--nse-colour-separator", "--nse-colour-con…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/runtime/application-stage-top-bar-inset.test.tsx > the standard top bar's overlay and content-inset contract > exposes the cumulus overlay inset without nesting content inside the bar
+AssertionError: expected 'var(--nse-safe-area-inset-top, 0px)' to be 'var(--webspring-app-top-bar-height, 0…' // Object.is equality
+
+Expected: "var(--webspring-app-top-bar-height, 0px)"
+Received: "var(--nse-safe-area-inset-top, 0px)"
+
+ ❯ tests/runtime/application-stage-top-bar-inset.test.tsx:106:75
+    104|     expect(background).not.toBeNull();
+    105|     expect(background!.contains(content!)).toBe(true);
+    106|     expect(background!.style.getPropertyValue("--nse-content-inset-top…
+       |                                                                           ^
+    107|     expect(bar!.contains(content!)).toBe(false);
+    108|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/runtime/application-stage-top-bar-inset.test.tsx > the standard top bar's overlay and content-inset contract > leaves the whole frame to the content with a custom bar
+ FAIL  tests/runtime/application-stage-top-bar-inset.test.tsx > the standard top bar's overlay and content-inset contract > leaves the whole frame to the content with a none bar
+AssertionError: expected 'var(--nse-safe-area-inset-top, 0px)' to be 'var(--webspring-app-top-bar-height, 0…' // Object.is equality
+
+Expected: "var(--webspring-app-top-bar-height, 0px)"
+Received: "var(--nse-safe-area-inset-top, 0px)"
+
+ ❯ tests/runtime/application-stage-top-bar-inset.test.tsx:124:75
+    122|     expect(bar).toBeNull();
+    123|     expect(background!.contains(content!)).toBe(true);
+    124|     expect(background!.style.getPropertyValue("--nse-content-inset-top…
+       |                                                                           ^
+    125|   });
+    126|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+
+ Test Files  2 failed | 8 passed (10)
+      Tests  4 failed | 127 passed (131)
+   Start at  22:02:53
+   Duration  15.65s (transform 6.46s, setup 95ms, import 12.30s, tests 14.04s, environment 3.45s)

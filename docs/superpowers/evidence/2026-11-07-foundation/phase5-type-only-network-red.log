@@ -1,0 +1,35 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/phase5-package-gate.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/phase5-package-gate.test.ts (3 tests | 1 failed) 10ms
+   × accepts the reviewed type-only runtime entries while rejecting omitted implementations 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/phase5-package-gate.test.ts > accepts the reviewed type-only runtime entries while rejecting omitted implementations
+AssertionError: expected [Function] to not throw an error but 'AssertionError [ERR_ASSERTION]: Empty…' was thrown
+
+- Expected:
+undefined
+
++ Received:
+"AssertionError [ERR_ASSERTION]: Empty FX runtime entry: network"
+
+ ❯ tests/runtime/fx/phase5-package-gate.test.ts:28:57
+     26|   expect(() => assertFxRuntimeEntry("bluetooth", {})).not.toThrow();
+     27|   expect(() => assertFxRuntimeEntry("speech", {})).not.toThrow();
+     28|   expect(() => assertFxRuntimeEntry("network", {})).not.toThrow();
+       |                                                         ^
+     29|   expect(() => assertFxRuntimeEntry("audio", {})).toThrow(/Empty FX ru…
+     30|   expect(() => assertFxRuntimeEntry("private", { accidental: true })).…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  21:00:02
+   Duration  198ms (transform 39ms, setup 28ms, import 29ms, tests 10ms, environment 0ms)
+

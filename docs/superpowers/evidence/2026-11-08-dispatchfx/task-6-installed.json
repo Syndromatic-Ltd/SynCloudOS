@@ -1,0 +1,22 @@
+{
+  "archiveSha256": "b520ef53deaec913223047805cea276065a32dfa68cf109f6e5d79c63b7c4a0b",
+  "integrity": "sha512-4VpF44/KQjY045qyTw4RUTe3wXIpeVIahFtwphm6cz6t46t1akiP31BlHTuYWrwJEpp2U9na+ZI3GP7VKzinKQ==",
+  "sourceSha256": "d9d6d89a2f7806186b65f2e7a409d9c8ef8cd6585a5b782c3e31f47f714a1aed",
+  "resourcesSha256": "baadec6b3ec8093d0f8a8743ea5b280e943d40e77c2b8187ce04d7a1c38c3390",
+  "dispatch": {
+    "archive": "archives/syndromatic-syncloudos-1.0.0-beta.2-b520ef53deaec913223047805cea276065a32dfa68cf109f6e5d79c63b7c4a0b.tgz",
+    "index": "fdf446d5a60e088b7c1fb0c9fe30730af36aa4edd9ca8f81067543ce34455d74",
+    "types": "bbe87c340bfd46605ada0e57879c90596e8dbc4fb93e47ca5b1c8c9eaebaba6d"
+  },
+  "installedOutsideRepository": true,
+  "linked": false,
+  "compiledAppTests": 2,
+  "authoring6eTests": 1,
+  "productionBuild": true,
+  "productionImports": true,
+  "declarationGraph": true,
+  "strictInstalledTypes": true,
+  "sharedSDKGraph": true,
+  "separateCopyRegistryIsolation": true,
+  "resourceIntegrityAfterProof": true
+}

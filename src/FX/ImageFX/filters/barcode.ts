@@ -18,6 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../../Foundation/NSEData";
+
+
 import { encodeCode128, encodeQRMessage, type BarcodeMatrix } from "../barcodeEncoding";
 import {
     barcodeMatrixForDescriptor,
@@ -109,7 +112,7 @@ export const barcodes: Record<string, Definition> = {
                 quietSpace: integer(parameters.quietSpace, NaN, 0, 64),
             });
             const normalized = Object.freeze({
-                message: Object.freeze(Array.from(descriptor.message)),
+                message: Object.freeze(Array.from(descriptor.message.bytes)),
                 correctionLevel: descriptor.correctionLevel,
                 layers: descriptor.layers,
                 compactStyle: descriptor.compactStyle,
@@ -131,7 +134,7 @@ export const barcodes: Record<string, Definition> = {
                 quietSpace: integer(parameters.quietSpace, NaN, 0, 64),
             });
             const normalized = Object.freeze({
-                message: Object.freeze(Array.from(descriptor.message)),
+                message: Object.freeze(Array.from(descriptor.message.bytes)),
                 correctionLevel: descriptor.correctionLevel,
                 dataColumns: descriptor.dataColumns,
                 rows: descriptor.rows,
@@ -152,7 +155,7 @@ export const barcodes: Record<string, Definition> = {
                 quietSpace: integer(parameters.quietSpace, NaN, 0, 64),
             });
             const normalized = Object.freeze({
-                message: Object.freeze(Array.from(descriptor.message)),
+                message: Object.freeze(Array.from(descriptor.message.bytes)),
                 rows: descriptor.rows,
                 columns: descriptor.columns,
                 quietSpace: descriptor.quietSpace,

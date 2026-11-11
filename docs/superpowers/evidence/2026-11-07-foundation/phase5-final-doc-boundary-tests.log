@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/framework-doc-links.test.ts tests/runtime/browser-global-boundary.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  2 passed (2)
+      Tests  12 passed (12)
+   Start at  22:06:29
+   Duration  56.18s (transform 8.97s, setup 47ms, import 11.43s, tests 44.31s, environment 0ms)
+

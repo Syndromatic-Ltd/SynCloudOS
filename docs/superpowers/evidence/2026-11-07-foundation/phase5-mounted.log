@@ -1,0 +1,70 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/phase5-mounted.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 2 unhandled errors during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯⎯ Uncaught Exception ⎯⎯⎯⎯⎯
+SecurityError: The bluetooth.access capability is required.
+ ❯ guard src/SynCloudOS/AppSDK/mountedBluetoothClient.ts:29:13
+     27|     mountSignal.throwIfAborted();
+     28|     if (!permissions().includes("bluetooth.access") || !authorise("blu…
+     29|       throw new DOMException("The bluetooth.access capability is requi…
+       |             ^
+     30|   };
+     31|   const unavailable = Object.freeze({ apiAvailable: false, retrievesGr…
+ ❯ Object.createCentralManager src/SynCloudOS/AppSDK/mountedBluetoothClient.ts:35:7
+ ❯ Object.mount src/SynCloudOS/AppSDK/hooks/useBluetooth.ts:41:28
+ ❯ src/SynCloudOS/AppSDK/hooks/useBluetooth.ts:45:33
+ ❯ Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25989:20
+ ❯ runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:874:13
+ ❯ commitHookEffectListMount node_modules/react-dom/cjs/react-dom-client.development.js:13249:29
+ ❯ commitHookLayoutEffects node_modules/react-dom/cjs/react-dom-client.development.js:13213:11
+ ❯ commitLayoutEffectOnFiber node_modules/react-dom/cjs/react-dom-client.development.js:13951:13
+ ❯ recursivelyTraverseLayoutEffects node_modules/react-dom/cjs/react-dom-client.development.js:15159:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 18, INDEX_SIZE_ERR: 1, DOMSTRING_SIZE_ERR: 2, HIERARCHY_REQUEST_ERR: 3, WRONG_DOCUMENT_ERR: 4, INVALID_CHARACTER_ERR: 5, NO_DATA_ALLOWED_ERR: 6, NO_MODIFICATION_ALLOWED_ERR: 7, NOT_FOUND_ERR: 8, NOT_SUPPORTED_ERR: 9, INUSE_ATTRIBUTE_ERR: 10, INVALID_STATE_ERR: 11, SYNTAX_ERR: 12, INVALID_MODIFICATION_ERR: 13, NAMESPACE_ERR: 14, INVALID_ACCESS_ERR: 15, VALIDATION_ERR: 16, TYPE_MISMATCH_ERR: 17, SECURITY_ERR: 18, NETWORK_ERR: 19, ABORT_ERR: 20, URL_MISMATCH_ERR: 21, QUOTA_EXCEEDED_ERR: 22, TIMEOUT_ERR: 23, INVALID_NODE_TYPE_ERR: 24, DATA_CLONE_ERR: 25 }
+This error originated in "tests/runtime/fx/phase5-mounted.test.tsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "projects all six real mounted clients and revokes component owners on unmount". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯⎯ Uncaught Exception ⎯⎯⎯⎯⎯
+SecurityError: The bluetooth.access capability is required.
+ ❯ guard src/SynCloudOS/AppSDK/mountedBluetoothClient.ts:29:13
+     27|     mountSignal.throwIfAborted();
+     28|     if (!permissions().includes("bluetooth.access") || !authorise("blu…
+     29|       throw new DOMException("The bluetooth.access capability is requi…
+       |             ^
+     30|   };
+     31|   const unavailable = Object.freeze({ apiAvailable: false, retrievesGr…
+ ❯ Object.createCentralManager src/SynCloudOS/AppSDK/mountedBluetoothClient.ts:35:7
+ ❯ Object.mount src/SynCloudOS/AppSDK/hooks/useBluetooth.ts:41:28
+ ❯ src/SynCloudOS/AppSDK/hooks/useBluetooth.ts:45:33
+ ❯ Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25989:20
+ ❯ runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:874:13
+ ❯ commitHookEffectListMount node_modules/react-dom/cjs/react-dom-client.development.js:13249:29
+ ❯ commitHookLayoutEffects node_modules/react-dom/cjs/react-dom-client.development.js:13213:11
+ ❯ reappearLayoutEffects node_modules/react-dom/cjs/react-dom-client.development.js:15252:11
+ ❯ recursivelyTraverseReappearLayoutEffects node_modules/react-dom/cjs/react-dom-client.development.js:15394:9
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 18, INDEX_SIZE_ERR: 1, DOMSTRING_SIZE_ERR: 2, HIERARCHY_REQUEST_ERR: 3, WRONG_DOCUMENT_ERR: 4, INVALID_CHARACTER_ERR: 5, NO_DATA_ALLOWED_ERR: 6, NO_MODIFICATION_ALLOWED_ERR: 7, NOT_FOUND_ERR: 8, NOT_SUPPORTED_ERR: 9, INUSE_ATTRIBUTE_ERR: 10, INVALID_STATE_ERR: 11, SYNTAX_ERR: 12, INVALID_MODIFICATION_ERR: 13, NAMESPACE_ERR: 14, INVALID_ACCESS_ERR: 15, VALIDATION_ERR: 16, TYPE_MISMATCH_ERR: 17, SECURITY_ERR: 18, NETWORK_ERR: 19, ABORT_ERR: 20, URL_MISMATCH_ERR: 21, QUOTA_EXCEEDED_ERR: 22, TIMEOUT_ERR: 23, INVALID_NODE_TYPE_ERR: 24, DATA_CLONE_ERR: 25 }
+This error originated in "tests/runtime/fx/phase5-mounted.test.tsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "projects all six real mounted clients and revokes component owners on unmount". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+     Errors  2 errors
+   Start at  19:28:23
+   Duration  7.72s (transform 4.97s, setup 27ms, import 6.52s, tests 105ms, environment 928ms)
+

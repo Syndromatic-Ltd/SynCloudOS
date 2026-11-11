@@ -1,0 +1,30 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/phase5-real-authority.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/fx/phase5-real-authority.test.ts (2 tests | 1 failed) 56ms
+   × uses real lifecycle policy and captured entitlements for retained device clients 48ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/fx/phase5-real-authority.test.ts > uses real lifecycle policy and captured entitlements for retained device clients
+SecurityError: Privacy authorisation denied contacts.select.
+ ❯ requireAccess src/SynCloudOS/AppSDK/mountedContactsClient.ts:38:46
+     36|     signal.throwIfAborted();
+     37|     if (!entitlements().includes("contacts.select")) throw new DOMExce…
+     38|     if (!authorise("contacts.select")) throw new DOMException("Privacy…
+       |                                              ^
+     39|     privacy?.assertRequestAllowed();
+     40|     if (!adapter) throw new DOMException("Contact selection is unavail…
+ ❯ Object.requestAccess src/SynCloudOS/AppSDK/mountedContactsClient.ts:69:13
+ ❯ tests/runtime/fx/phase5-real-authority.test.ts:36:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  19:40:15
+   Duration  6.62s (transform 4.96s, setup 25ms, import 6.41s, tests 56ms, environment 0ms)
+

@@ -1,0 +1,3551 @@
+[
+  {
+    "before": {
+      "path": "src/Foundation/NSEData.ts",
+      "line": 25,
+      "name": "NSEDataConvertible",
+      "signature": "Uint8Array | ArrayBuffer | NSEData",
+      "entries": [
+        "foundation",
+        "fx/compression"
+      ]
+    },
+    "disposition": "carve-out",
+    "reason": "Foundation input union explicitly bridges existing web buffers to NSEData.",
+    "after": [
+      {
+        "line": 25,
+        "signature": "Uint8Array | ArrayBuffer | NSEData",
+        "entries": [
+          "browser",
+          "chronosphere",
+          "foundation",
+          "fx/animation",
+          "fx/audio",
+          "fx/compression",
+          "fx/graphics",
+          "fx/image",
+          "fx/media",
+          "fx/midi",
+          "fx/text",
+          "fx/video",
+          "fx/video/webm",
+          "index",
+          "nse",
+          "nse/controls",
+          "nse/page",
+          "nse/text",
+          "sdk",
+          "sdk/animation-host",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/Foundation/NSEData.ts",
+      "line": 45,
+      "name": "NSEData.read",
+      "signature": "(blob: Blob): Promise<NSEData>",
+      "entries": [
+        "foundation",
+        "fx/compression"
+      ]
+    },
+    "disposition": "carve-out",
+    "reason": "The explicit asynchronous Blob/File read bridge constructs NSEData.",
+    "after": [
+      {
+        "line": 50,
+        "signature": "(blob: Blob): Promise<NSEData>",
+        "entries": [
+          "browser",
+          "chronosphere",
+          "foundation",
+          "fx/animation",
+          "fx/audio",
+          "fx/compression",
+          "fx/graphics",
+          "fx/image",
+          "fx/media",
+          "fx/midi",
+          "fx/text",
+          "fx/video",
+          "fx/video/webm",
+          "index",
+          "nse",
+          "nse/controls",
+          "nse/page",
+          "nse/text",
+          "sdk",
+          "sdk/animation-host",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/Foundation/NSEData.ts",
+      "line": 69,
+      "name": "NSEData.bytes",
+      "signature": "(): Readonly<Uint8Array<ArrayBuffer>>",
+      "entries": [
+        "foundation",
+        "fx/compression"
+      ]
+    },
+    "disposition": "carve-out",
+    "reason": "A defensive read-only typed-array copy is the explicit Foundation web byte view.",
+    "after": [
+      {
+        "line": 74,
+        "signature": "(): Readonly<Uint8Array<ArrayBuffer>>",
+        "entries": [
+          "browser",
+          "chronosphere",
+          "foundation",
+          "fx/animation",
+          "fx/audio",
+          "fx/compression",
+          "fx/graphics",
+          "fx/image",
+          "fx/media",
+          "fx/midi",
+          "fx/text",
+          "fx/video",
+          "fx/video/webm",
+          "index",
+          "nse",
+          "nse/controls",
+          "nse/page",
+          "nse/text",
+          "sdk",
+          "sdk/animation-host",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/Foundation/NSEData.ts",
+      "line": 92,
+      "name": "NSEData.blob",
+      "signature": "(type?: string): Blob",
+      "entries": [
+        "foundation",
+        "fx/compression"
+      ]
+    },
+    "disposition": "carve-out",
+    "reason": "The explicit web output bridge constructs a Blob for native browser APIs.",
+    "after": [
+      {
+        "line": 97,
+        "signature": "(type?: string): Blob",
+        "entries": [
+          "browser",
+          "chronosphere",
+          "foundation",
+          "fx/animation",
+          "fx/audio",
+          "fx/compression",
+          "fx/graphics",
+          "fx/image",
+          "fx/media",
+          "fx/midi",
+          "fx/text",
+          "fx/video",
+          "fx/video/webm",
+          "index",
+          "nse",
+          "nse/controls",
+          "nse/page",
+          "nse/text",
+          "sdk",
+          "sdk/animation-host",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/AudioFX/AUFXAudioAnalyser.ts",
+      "line": 28,
+      "name": "AUFXAudioAnalyser.spectrum",
+      "signature": "(buffer: AUFXAudioPCMBuffer, fftSize?: number, channel?: number): Readonly<{ magnitudes: Float32Array<ArrayBuffer>; binWidth: number; fftSize: number; }>",
+      "entries": [
+        "fx/audio"
+      ]
+    },
+    "disposition": "carve-out",
+    "reason": "FFT magnitudes are floating-point numerical samples; ArrayBuffer describes their backing store.",
+    "after": [
+      {
+        "line": 28,
+        "signature": "(buffer: AUFXAudioPCMBuffer, fftSize?: number, channel?: number): Readonly<{ magnitudes: Float32Array<ArrayBuffer>; binWidth: number; fftSize: number; }>",
+        "entries": [
+          "fx/audio"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/AudioFX/AUFXAudioAnalyser.ts",
+      "line": 46,
+      "name": "__object.magnitudes",
+      "signature": "Float32Array<ArrayBuffer>",
+      "entries": [
+        "fx/audio"
+      ]
+    },
+    "disposition": "carve-out",
+    "reason": "FFT magnitudes are Float32 numerical samples, not encoded bytes; ArrayBuffer is backing-store typing.",
+    "after": [
+      {
+        "line": 46,
+        "signature": "Float32Array<ArrayBuffer>",
+        "entries": [
+          "fx/audio"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/AudioFX/AUFXAudioFile.ts",
+      "line": 45,
+      "name": "AUFXAudioStreamExportOptions.sink",
+      "signature": "WritableStream<Uint8Array>",
+      "entries": [
+        "browser",
+        "fx/audio",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 46,
+        "signature": "WritableStream<NSEData>",
+        "entries": [
+          "browser",
+          "fx/audio",
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/AudioFX/AUFXAudioFile.ts",
+      "line": 50,
+      "name": "AUFXAudioFileExport",
+      "signature": "| Readonly<{ data: Blob; mimeType: \"audio/wav\"; byteLength: number; fileType: \"wav\" }> | Readonly<{ data: Blob; mimeType: \"audio/webm\"; byteLength: number; fileType: \"webm\" }>",
+      "entries": [
+        "browser",
+        "fx/audio",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 51,
+        "signature": "| Readonly<{ data: NSEData; mimeType: \"audio/wav\"; byteLength: number; fileType: \"wav\" }> | Readonly<{ data: NSEData; mimeType: \"audio/webm\"; byteLength: number; fileType: \"webm\" }>",
+        "entries": [
+          "browser",
+          "fx/audio",
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/AudioFX/AUFXAudioFile.ts",
+      "line": 51,
+      "name": "__type.data",
+      "signature": "Blob",
+      "entries": [
+        "browser",
+        "fx/audio",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 52,
+        "signature": "NSEData",
+        "entries": [
+          "browser",
+          "fx/audio",
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      },
+      {
+        "line": 53,
+        "signature": "NSEData",
+        "entries": [
+          "browser",
+          "fx/audio",
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/AudioFX/AUFXAudioFile.ts",
+      "line": 52,
+      "name": "__type.data",
+      "signature": "Blob",
+      "entries": [
+        "browser",
+        "fx/audio",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 52,
+        "signature": "NSEData",
+        "entries": [
+          "browser",
+          "fx/audio",
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      },
+      {
+        "line": 53,
+        "signature": "NSEData",
+        "entries": [
+          "browser",
+          "fx/audio",
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/AudioFX/AUFXAudioFile.ts",
+      "line": 95,
+      "name": "AUFXAudioFile.toWAV",
+      "signature": "(): ArrayBuffer",
+      "entries": [
+        "browser",
+        "fx/audio",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 96,
+        "signature": "(): NSEData",
+        "entries": [
+          "browser",
+          "fx/audio",
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/AudioFX/AUFXAudioFile.ts",
+      "line": 98,
+      "name": "AUFXAudioFile.encodeWAV",
+      "signature": "(buffer: AUFXAudioPCMBuffer): ArrayBuffer",
+      "entries": [
+        "browser",
+        "fx/audio",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 99,
+        "signature": "(buffer: AUFXAudioPCMBuffer): NSEData",
+        "entries": [
+          "browser",
+          "fx/audio",
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/AudioFX/AUFXAudioFile.ts",
+      "line": 102,
+      "name": "AUFXAudioFile.encodeWAVHeader",
+      "signature": "(format: AUFXAudioFormat, frameLength: number): Uint8Array",
+      "entries": [
+        "browser",
+        "fx/audio",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 103,
+        "signature": "(format: AUFXAudioFormat, frameLength: number): NSEData",
+        "entries": [
+          "browser",
+          "fx/audio",
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/AudioFX/AUFXAudioFile.ts",
+      "line": 114,
+      "name": "AUFXAudioFile.encodePCM16Chunk",
+      "signature": "(buffer: AUFXAudioPCMBuffer): Uint8Array",
+      "entries": [
+        "browser",
+        "fx/audio",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 115,
+        "signature": "(buffer: AUFXAudioPCMBuffer): NSEData",
+        "entries": [
+          "browser",
+          "fx/audio",
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/AudioFX/AUFXAudioFile.ts",
+      "line": 122,
+      "name": "AUFXAudioFile.decodeWAV",
+      "signature": "(bytes: ArrayBuffer): AUFXAudioPCMBuffer",
+      "entries": [
+        "browser",
+        "fx/audio",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 123,
+        "signature": "(data: NSEDataConvertible): AUFXAudioPCMBuffer",
+        "entries": [
+          "browser",
+          "fx/audio",
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/AudioFX/AUFXAudioRecorder.ts",
+      "line": 22,
+      "name": "AUFXAudioRecording.data",
+      "signature": "Blob",
+      "entries": [
+        "browser",
+        "fx/audio",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 25,
+        "signature": "NSEData",
+        "entries": [
+          "browser",
+          "fx/audio",
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/AudioFX/AUFXAudioRecorder.ts",
+      "line": 38,
+      "name": "AUFXAudioRecorderEvent",
+      "signature": "{ readonly type: \"data\"; readonly data: Blob } | { readonly type: \"stop\" } | { readonly type: \"error\"; readonly error: Error }",
+      "entries": [
+        "browser",
+        "fx/audio",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "private-host-protocol",
+    "after": []
+  },
+  {
+    "before": {
+      "path": "src/FX/AudioFX/AUFXAudioRecorder.ts",
+      "line": 38,
+      "name": "__type.data",
+      "signature": "Blob",
+      "entries": [
+        "browser",
+        "fx/audio",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "private-host-protocol",
+    "after": []
+  },
+  {
+    "before": {
+      "path": "src/FX/AudioFX/AUFXAudioRecorder.ts",
+      "line": 48,
+      "name": "AUFXAudioRecorderPort.decode",
+      "signature": "(data: Blob, signal: AbortSignal): Promise<Readonly<{ duration: number; frameCount: number; sampleRate: number; channelCount: number; }>>",
+      "entries": [
+        "browser",
+        "fx/audio",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "private-host-protocol",
+    "after": []
+  },
+  {
+    "before": {
+      "path": "src/FX/GraphicsFX/GFXColourProfile.ts",
+      "line": 122,
+      "name": "GFXColourProfile.constructor",
+      "signature": "(data: Uint8Array): GFXColourProfile",
+      "entries": [
+        "fx/graphics",
+        "index",
+        "sdk"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 123,
+        "signature": "(input: NSEDataConvertible): GFXColourProfile",
+        "entries": [
+          "fx/graphics",
+          "index",
+          "sdk"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/GraphicsFX/GFXColourProfile.ts",
+      "line": 240,
+      "name": "GFXColourProfile.copyData",
+      "signature": "(): Uint8Array",
+      "entries": [
+        "fx/graphics",
+        "index",
+        "sdk"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 242,
+        "signature": "(): NSEData",
+        "entries": [
+          "fx/graphics",
+          "index",
+          "sdk"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/GraphicsFX/GFXFloatImage.ts",
+      "line": 38,
+      "name": "GFXIndexedImageDescriptor.indices",
+      "signature": "Uint8Array | Uint16Array",
+      "entries": [
+        "browser",
+        "chronosphere",
+        "fx/animation",
+        "fx/graphics",
+        "fx/image",
+        "fx/video",
+        "index",
+        "nse",
+        "nse/page",
+        "sdk",
+        "sdk/animation-host",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "carve-out",
+    "reason": "Palette index planes contain numerical pixel indexes with 8-bit or 16-bit element semantics.",
+    "after": [
+      {
+        "line": 38,
+        "signature": "Uint8Array | Uint16Array",
+        "entries": [
+          "browser",
+          "chronosphere",
+          "fx/animation",
+          "fx/graphics",
+          "fx/image",
+          "fx/video",
+          "index",
+          "nse",
+          "nse/page",
+          "sdk",
+          "sdk/animation-host",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/GraphicsFX/GFXImage.ts",
+      "line": 37,
+      "name": "GFXImageDescriptor.data",
+      "signature": "Uint8Array | Uint8ClampedArray",
+      "entries": [
+        "browser",
+        "chronosphere",
+        "fx/animation",
+        "fx/graphics",
+        "fx/image",
+        "fx/text",
+        "fx/video",
+        "index",
+        "nse",
+        "nse/page",
+        "nse/text",
+        "sdk",
+        "sdk/animation-host",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "carve-out",
+    "reason": "Unencoded pixel component planes retain numeric Uint8Array/Uint8ClampedArray storage.",
+    "after": [
+      {
+        "line": 38,
+        "signature": "Uint8Array | Uint8ClampedArray",
+        "entries": [
+          "browser",
+          "chronosphere",
+          "fx/animation",
+          "fx/graphics",
+          "fx/image",
+          "fx/text",
+          "fx/video",
+          "index",
+          "nse",
+          "nse/page",
+          "nse/text",
+          "sdk",
+          "sdk/animation-host",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/GraphicsFX/GFXImage.ts",
+      "line": 68,
+      "name": "bytePixelComponents",
+      "signature": "(bytes: Uint8Array, index: number, pixelFormat: GFXPixelFormat, alpha: GFXAlphaFormat): GFXRGBAComponents",
+      "entries": [
+        "fx/graphics"
+      ]
+    },
+    "disposition": "carve-out",
+    "reason": "Numerical pixel-component access operates on an unencoded plane.",
+    "after": [
+      {
+        "line": 69,
+        "signature": "(bytes: Uint8Array, index: number, pixelFormat: GFXPixelFormat, alpha: GFXAlphaFormat): GFXRGBAComponents",
+        "entries": [
+          "fx/graphics"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/GraphicsFX/GFXImage.ts",
+      "line": 148,
+      "name": "GFXImage.copyData",
+      "signature": "(): Uint8Array",
+      "entries": [
+        "browser",
+        "chronosphere",
+        "fx/animation",
+        "fx/graphics",
+        "fx/image",
+        "fx/text",
+        "fx/video",
+        "index",
+        "nse",
+        "nse/page",
+        "nse/text",
+        "sdk",
+        "sdk/animation-host",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "carve-out",
+    "reason": "Copies an unencoded numeric pixel component plane; encoded PNG results use NSEData.",
+    "after": [
+      {
+        "line": 149,
+        "signature": "(): Uint8Array",
+        "entries": [
+          "browser",
+          "chronosphere",
+          "fx/animation",
+          "fx/graphics",
+          "fx/image",
+          "fx/text",
+          "fx/video",
+          "index",
+          "nse",
+          "nse/page",
+          "nse/text",
+          "sdk",
+          "sdk/animation-host",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/GraphicsFX/GFXImage.ts",
+      "line": 248,
+      "name": "GFXImage.toPNG",
+      "signature": "(): Uint8Array",
+      "entries": [
+        "browser",
+        "chronosphere",
+        "fx/animation",
+        "fx/graphics",
+        "fx/image",
+        "fx/text",
+        "fx/video",
+        "index",
+        "nse",
+        "nse/page",
+        "nse/text",
+        "sdk",
+        "sdk/animation-host",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 249,
+        "signature": "(): NSEData",
+        "entries": [
+          "browser",
+          "chronosphere",
+          "fx/animation",
+          "fx/graphics",
+          "fx/image",
+          "fx/text",
+          "fx/video",
+          "index",
+          "nse",
+          "nse/page",
+          "nse/text",
+          "sdk",
+          "sdk/animation-host",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/GraphicsFX/GFXImage.ts",
+      "line": 255,
+      "name": "GFXCallbackDataProvider.read",
+      "signature": "(offset: number, length: number): Uint8Array | Uint8ClampedArray",
+      "entries": [
+        "fx/graphics"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 256,
+        "signature": "(offset: number, length: number): NSEData",
+        "entries": [
+          "fx/graphics"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/GraphicsFX/GFXImage.ts",
+      "line": 265,
+      "name": "GFXDataProvider.constructor",
+      "signature": "(data: Uint8Array | GFXCallbackDataProvider): GFXDataProvider",
+      "entries": [
+        "fx/graphics"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 266,
+        "signature": "(input: NSEDataConvertible | GFXCallbackDataProvider): GFXDataProvider",
+        "entries": [
+          "fx/graphics"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/GraphicsFX/GFXImage.ts",
+      "line": 286,
+      "name": "GFXDataProvider.read",
+      "signature": "(offset: number, length: number): Uint8Array",
+      "entries": [
+        "fx/graphics"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 292,
+        "signature": "(offset: number, length: number): NSEData",
+        "entries": [
+          "fx/graphics"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/GraphicsFX/GFXImage.ts",
+      "line": 318,
+      "name": "GFXDataConsumer.write",
+      "signature": "(bytes: Uint8Array): void",
+      "entries": [
+        "fx/graphics",
+        "index",
+        "sdk"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 324,
+        "signature": "(data: NSEDataConvertible): void",
+        "entries": [
+          "fx/graphics",
+          "index",
+          "sdk"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/GraphicsFX/GFXImage.ts",
+      "line": 326,
+      "name": "GFXDataConsumer.finish",
+      "signature": "(): Uint8Array",
+      "entries": [
+        "fx/graphics",
+        "index",
+        "sdk"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 333,
+        "signature": "(): NSEData",
+        "entries": [
+          "fx/graphics",
+          "index",
+          "sdk"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/GraphicsFX/pdf/GFXPDFContext.ts",
+      "line": 436,
+      "name": "GFXPDFContext.finish",
+      "signature": "(consumer?: GFXDataConsumer, signal?: AbortSignal): Promise<Uint8Array>",
+      "entries": [
+        "fx/graphics",
+        "index",
+        "sdk"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 437,
+        "signature": "(consumer?: GFXDataConsumer, signal?: AbortSignal): Promise<NSEData>",
+        "entries": [
+          "fx/graphics",
+          "index",
+          "sdk"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/GraphicsFX/pdf/GFXPDFDocument.ts",
+      "line": 210,
+      "name": "GFXPDFDocument.open",
+      "signature": "(bytes: Uint8Array, signal?: AbortSignal): Promise<GFXPDFDocument>",
+      "entries": [
+        "fx/graphics",
+        "index",
+        "sdk"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 211,
+        "signature": "(bytes: NSEDataConvertible, signal?: AbortSignal): Promise<GFXPDFDocument>",
+        "entries": [
+          "fx/graphics",
+          "index",
+          "sdk"
+        ]
+      },
+      {
+        "line": 212,
+        "signature": "(bytes: NSEDataConvertible, options?: GFXPDFOpenOptions, signal?: AbortSignal): Promise<GFXPDFDocument>",
+        "entries": [
+          "fx/graphics",
+          "index",
+          "sdk"
+        ]
+      },
+      {
+        "line": 213,
+        "signature": "(input: NSEDataConvertible, optionsOrSignal?: GFXPDFOpenOptions | AbortSignal, maybeSignal?: AbortSignal): Promise<GFXPDFDocument>",
+        "entries": [
+          "fx/graphics",
+          "index",
+          "sdk"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/GraphicsFX/pdf/GFXPDFDocument.ts",
+      "line": 211,
+      "name": "GFXPDFDocument.open",
+      "signature": "(bytes: Uint8Array, options?: GFXPDFOpenOptions, signal?: AbortSignal): Promise<GFXPDFDocument>",
+      "entries": [
+        "fx/graphics",
+        "index",
+        "sdk"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 211,
+        "signature": "(bytes: NSEDataConvertible, signal?: AbortSignal): Promise<GFXPDFDocument>",
+        "entries": [
+          "fx/graphics",
+          "index",
+          "sdk"
+        ]
+      },
+      {
+        "line": 212,
+        "signature": "(bytes: NSEDataConvertible, options?: GFXPDFOpenOptions, signal?: AbortSignal): Promise<GFXPDFDocument>",
+        "entries": [
+          "fx/graphics",
+          "index",
+          "sdk"
+        ]
+      },
+      {
+        "line": 213,
+        "signature": "(input: NSEDataConvertible, optionsOrSignal?: GFXPDFOpenOptions | AbortSignal, maybeSignal?: AbortSignal): Promise<GFXPDFDocument>",
+        "entries": [
+          "fx/graphics",
+          "index",
+          "sdk"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/GraphicsFX/pdf/GFXPDFDocument.ts",
+      "line": 212,
+      "name": "GFXPDFDocument.open",
+      "signature": "(bytes: Uint8Array, optionsOrSignal?: GFXPDFOpenOptions | AbortSignal, maybeSignal?: AbortSignal): Promise<GFXPDFDocument>",
+      "entries": [
+        "fx/graphics",
+        "index",
+        "sdk"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 211,
+        "signature": "(bytes: NSEDataConvertible, signal?: AbortSignal): Promise<GFXPDFDocument>",
+        "entries": [
+          "fx/graphics",
+          "index",
+          "sdk"
+        ]
+      },
+      {
+        "line": 212,
+        "signature": "(bytes: NSEDataConvertible, options?: GFXPDFOpenOptions, signal?: AbortSignal): Promise<GFXPDFDocument>",
+        "entries": [
+          "fx/graphics",
+          "index",
+          "sdk"
+        ]
+      },
+      {
+        "line": 213,
+        "signature": "(input: NSEDataConvertible, optionsOrSignal?: GFXPDFOpenOptions | AbortSignal, maybeSignal?: AbortSignal): Promise<GFXPDFDocument>",
+        "entries": [
+          "fx/graphics",
+          "index",
+          "sdk"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/GraphicsFX/pdf/GFXPDFFontSubset.ts",
+      "line": 85,
+      "name": "GFXPDFFontSubset.constructor",
+      "signature": "(source: Uint8Array, options: GFXPDFFontSubsetOptions): GFXPDFFontSubset",
+      "entries": [
+        "browser",
+        "fx/animation",
+        "fx/graphics",
+        "fx/image",
+        "fx/text",
+        "fx/video",
+        "index",
+        "nse",
+        "nse/page",
+        "nse/text",
+        "sdk",
+        "sdk/animation-host",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 86,
+        "signature": "(input: NSEDataConvertible, options: GFXPDFFontSubsetOptions): GFXPDFFontSubset",
+        "entries": [
+          "browser",
+          "fx/animation",
+          "fx/graphics",
+          "fx/image",
+          "fx/text",
+          "fx/video",
+          "index",
+          "nse",
+          "nse/page",
+          "nse/text",
+          "sdk",
+          "sdk/animation-host",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/GraphicsFX/pdf/GFXPDFScanner.ts",
+      "line": 33,
+      "name": "GFXPDFObject",
+      "signature": "Readonly<{ kind: \"null\"; }> | Readonly<{ kind: \"boolean\"; value: boolean; }> | Readonly<{ kind: \"number\"; value: number; }> | Readonly<{ kind: \"name\"; value: string; }> | Readonly<{ kind: \"string\"; value: string; bytes: Uint8Array; }> | Readonly<{ kind: \"reference\"; reference: GFXPDFReference; }> | Readonly<{ kind: \"array\"; items: readonly GFXPDFObject[]; }> | Readonly<{ kind: \"dictionary\"; entries: Readonly<Record<string, GFXPDFObject>>; }> | Readonly<{ kind: \"stream\"; dictionary: GFXPDFObject; encodedBytes: Uint8Array; }>",
+      "entries": [
+        "fx/graphics"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 34,
+        "signature": "Readonly<{ kind: \"null\"; }> | Readonly<{ kind: \"boolean\"; value: boolean; }> | Readonly<{ kind: \"number\"; value: number; }> | Readonly<{ kind: \"name\"; value: string; }> | Readonly<{ kind: \"string\"; value: string; bytes: NSEData; }> | Readonly<{ kind: \"reference\"; reference: GFXPDFReference; }> | Readonly<{ kind: \"array\"; items: readonly GFXPDFObject[]; }> | Readonly<{ kind: \"dictionary\"; entries: Readonly<Record<string, GFXPDFObject>>; }> | Readonly<{ kind: \"stream\"; dictionary: GFXPDFObject; encodedBytes: NSEData; }>",
+        "entries": [
+          "fx/graphics"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/GraphicsFX/pdf/GFXPDFScanner.ts",
+      "line": 47,
+      "name": "__type.bytes",
+      "signature": "Uint8Array",
+      "entries": [
+        "fx/graphics"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 48,
+        "signature": "NSEData",
+        "entries": [
+          "fx/graphics"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/GraphicsFX/pdf/GFXPDFScanner.ts",
+      "line": 60,
+      "name": "__type.encodedBytes",
+      "signature": "Uint8Array",
+      "entries": [
+        "fx/graphics"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 61,
+        "signature": "NSEData",
+        "entries": [
+          "fx/graphics"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/GraphicsFX/pdf/GFXPDFScanner.ts",
+      "line": 539,
+      "name": "GFXPDFScanner.decodedStream",
+      "signature": "(ref: GFXPDFReference, signal?: AbortSignal): Promise<Uint8Array>",
+      "entries": [
+        "fx/graphics"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 540,
+        "signature": "(ref: GFXPDFReference, signal?: AbortSignal): Promise<NSEData>",
+        "entries": [
+          "fx/graphics"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/GraphicsFX/pdf/pdfDocumentProtocol.ts",
+      "line": 52,
+      "name": "GFXPDFSnapshotObject",
+      "signature": "| Readonly<{ kind: \"null\" }> | Readonly<{ kind: \"boolean\"; value: boolean }> | Readonly<{ kind: \"number\"; value: number }> | Readonly<{ kind: \"name\"; value: string }> | Readonly<{ kind: \"string\"; value: string; bytes: Uint8Array }> | Readonly<{ kind: \"reference\"; reference: GFXPDFSnapshotReference }> | Readonly<{ kind: \"array\"; items: readonly GFXPDFSnapshotObject[] }> | Readonly<{ kind: \"dictionary\"; entries: Readonly<Record<string, GFXPDFSnapshotObject>> }> | Readonly<{ kind: \"stream\"; dictionary: GFXPDFSnapshotObject; encodedBytes: Uint8Array; decoding: GFXPDFStreamDecoding }>",
+      "entries": [
+        "fx/graphics",
+        "index",
+        "sdk"
+      ]
+    },
+    "disposition": "private-host-protocol",
+    "after": []
+  },
+  {
+    "before": {
+      "path": "src/FX/GraphicsFX/pdf/pdfDocumentProtocol.ts",
+      "line": 57,
+      "name": "__type.bytes",
+      "signature": "Uint8Array",
+      "entries": [
+        "fx/graphics",
+        "index",
+        "sdk"
+      ]
+    },
+    "disposition": "private-host-protocol",
+    "after": []
+  },
+  {
+    "before": {
+      "path": "src/FX/GraphicsFX/pdf/pdfDocumentProtocol.ts",
+      "line": 61,
+      "name": "__type.encodedBytes",
+      "signature": "Uint8Array",
+      "entries": [
+        "fx/graphics",
+        "index",
+        "sdk"
+      ]
+    },
+    "disposition": "private-host-protocol",
+    "after": []
+  },
+  {
+    "before": {
+      "path": "src/FX/ImageFX/analysis/IFXFeature.ts",
+      "line": 41,
+      "name": "IFXQRCodeFeature.rawBytes",
+      "signature": "Uint8Array",
+      "entries": [
+        "fx/image"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 42,
+        "signature": "NSEData",
+        "entries": [
+          "fx/image"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/ImageFX/IFXBarcodeDescriptor.ts",
+      "line": 184,
+      "name": "IFXQRCodeDescriptor.constructor",
+      "signature": "(errorCorrectedPayload: Uint8Array | readonly number[], symbolVersion: number, maskPattern: number, errorCorrectionLevel: IFXQRCodeErrorCorrectionLevel): IFXQRCodeDescriptor",
+      "entries": [
+        "fx/image"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 188,
+        "signature": "(errorCorrectedPayload: NSEDataConvertible | readonly number[], symbolVersion: number, maskPattern: number, errorCorrectionLevel: IFXQRCodeErrorCorrectionLevel): IFXQRCodeDescriptor",
+        "entries": [
+          "fx/image"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/ImageFX/IFXBarcodeDescriptor.ts",
+      "line": 196,
+      "name": "IFXQRCodeDescriptor.errorCorrectedPayload",
+      "signature": "(): Uint8Array",
+      "entries": [
+        "fx/image"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 200,
+        "signature": "(): NSEData",
+        "entries": [
+          "fx/image"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/ImageFX/IFXBarcodeDescriptor.ts",
+      "line": 213,
+      "name": "IFXMessageBarcodeDescriptor.message",
+      "signature": "(): Uint8Array",
+      "entries": [
+        "fx/image"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 217,
+        "signature": "(): NSEData",
+        "entries": [
+          "fx/image"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/ImageFX/IFXBarcodeDescriptor.ts",
+      "line": 226,
+      "name": "IFXAztecCodeDescriptor.constructor",
+      "signature": "(message: Uint8Array | readonly number[], options: IFXAztecCodeDescriptorOptions): IFXAztecCodeDescriptor",
+      "entries": [
+        "fx/image"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 230,
+        "signature": "(message: NSEDataConvertible | readonly number[], options: IFXAztecCodeDescriptorOptions): IFXAztecCodeDescriptor",
+        "entries": [
+          "fx/image"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/ImageFX/IFXBarcodeDescriptor.ts",
+      "line": 251,
+      "name": "IFXPDF417CodeDescriptor.constructor",
+      "signature": "(message: Uint8Array | readonly number[], options: IFXPDF417CodeDescriptorOptions): IFXPDF417CodeDescriptor",
+      "entries": [
+        "fx/image"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 255,
+        "signature": "(message: NSEDataConvertible | readonly number[], options: IFXPDF417CodeDescriptorOptions): IFXPDF417CodeDescriptor",
+        "entries": [
+          "fx/image"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/ImageFX/IFXBarcodeDescriptor.ts",
+      "line": 276,
+      "name": "IFXDataMatrixCodeDescriptor.constructor",
+      "signature": "(message: Uint8Array | readonly number[], options: IFXDataMatrixCodeDescriptorOptions): IFXDataMatrixCodeDescriptor",
+      "entries": [
+        "fx/image"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 280,
+        "signature": "(message: NSEDataConvertible | readonly number[], options: IFXDataMatrixCodeDescriptorOptions): IFXDataMatrixCodeDescriptor",
+        "entries": [
+          "fx/image"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/ImageFX/IFXImageResource.ts",
+      "line": 34,
+      "name": "IFXResourceHandle.sourceICCProfile",
+      "signature": "Uint8Array | null",
+      "entries": [
+        "chronosphere",
+        "fx/image",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 35,
+        "signature": "NSEData | null",
+        "entries": [
+          "chronosphere",
+          "fx/image",
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/ImageFX/IFXImageResource.ts",
+      "line": 52,
+      "name": "IFXImageResourcePort.export",
+      "signature": "(format: \"image/png\" | \"image/webp\", signal?: AbortSignal): Promise<Uint8Array>",
+      "entries": [
+        "chronosphere",
+        "fx/image",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 53,
+        "signature": "(format: \"image/png\" | \"image/webp\", signal?: AbortSignal): Promise<NSEData>",
+        "entries": [
+          "chronosphere",
+          "fx/image",
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/ImageFX/IFXImageResource.ts",
+      "line": 81,
+      "name": "IFXImageResource.sourceICCProfile",
+      "signature": "(): Uint8Array<ArrayBufferLike> | null",
+      "entries": [
+        "chronosphere",
+        "fx/image",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 82,
+        "signature": "(): NSEData | null",
+        "entries": [
+          "chronosphere",
+          "fx/image",
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/ImageFX/IFXImageResource.ts",
+      "line": 148,
+      "name": "IFXImageResource.export",
+      "signature": "(format: \"image/png\" | \"image/webp\", signal?: AbortSignal): Promise<Uint8Array>",
+      "entries": [
+        "chronosphere",
+        "fx/image",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 149,
+        "signature": "(format: \"image/png\" | \"image/webp\", signal?: AbortSignal): Promise<NSEData>",
+        "entries": [
+          "chronosphere",
+          "fx/image",
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/ImageFX/raw/IFXRAWBackend.ts",
+      "line": 173,
+      "name": "IFXRAWBackend.inspect",
+      "signature": "(source: Uint8Array): IFXRAWMetadata",
+      "entries": [
+        "fx/image"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 174,
+        "signature": "(source: NSEDataConvertible): IFXRAWMetadata",
+        "entries": [
+          "fx/image"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/ImageFX/raw/IFXRAWBackend.ts",
+      "line": 174,
+      "name": "IFXRAWBackend.develop",
+      "signature": "(source: Uint8Array, options?: IFXRAWDevelopmentOptions): Promise<IFXRAWDevelopmentResult>",
+      "entries": [
+        "fx/image"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 175,
+        "signature": "(source: NSEDataConvertible, options?: IFXRAWDevelopmentOptions): Promise<IFXRAWDevelopmentResult>",
+        "entries": [
+          "fx/image"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/ImageFX/raw/IFXRAWBackend.ts",
+      "line": 527,
+      "name": "IFXPortableDNGRAWBackend.inspect",
+      "signature": "(source: Uint8Array): IFXRAWMetadata",
+      "entries": [
+        "fx/image"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 528,
+        "signature": "(source: NSEDataConvertible): IFXRAWMetadata",
+        "entries": [
+          "fx/image"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/ImageFX/raw/IFXRAWBackend.ts",
+      "line": 531,
+      "name": "IFXPortableDNGRAWBackend.develop",
+      "signature": "(source: Uint8Array, options?: IFXRAWDevelopmentOptions): Promise<IFXRAWDevelopmentResult>",
+      "entries": [
+        "fx/image"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 532,
+        "signature": "(source: NSEDataConvertible, options?: IFXRAWDevelopmentOptions): Promise<IFXRAWDevelopmentResult>",
+        "entries": [
+          "fx/image"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/ImageFX/raw/IFXRAWFilter.ts",
+      "line": 44,
+      "name": "IFXRAWFilter.constructor",
+      "signature": "(encoded: Uint8Array, backend?: IFXRAWBackend): IFXRAWFilter",
+      "entries": [
+        "fx/image"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 45,
+        "signature": "(input: NSEDataConvertible, backend?: IFXRAWBackend): IFXRAWFilter",
+        "entries": [
+          "fx/image"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/MediaFX/MEFXBlockBuffer.ts",
+      "line": 23,
+      "name": "MEFXBlockSegmentInput",
+      "signature": "| Uint8Array | Readonly<{ bytes: Uint8Array; offset?: number; length?: number; }>",
+      "entries": [
+        "browser",
+        "fx/media",
+        "index",
+        "nse",
+        "nse/page",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 24,
+        "signature": "| NSEDataConvertible | Readonly<{ bytes: NSEDataConvertible; offset?: number; length?: number; }>",
+        "entries": [
+          "browser",
+          "fx/media",
+          "index",
+          "nse",
+          "nse/page",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/MediaFX/MEFXBlockBuffer.ts",
+      "line": 26,
+      "name": "__type.bytes",
+      "signature": "Uint8Array",
+      "entries": [
+        "browser",
+        "fx/media",
+        "index",
+        "nse",
+        "nse/page",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 27,
+        "signature": "NSEDataConvertible",
+        "entries": [
+          "browser",
+          "fx/media",
+          "index",
+          "nse",
+          "nse/page",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/MediaFX/MEFXBlockBuffer.ts",
+      "line": 163,
+      "name": "BlockBacking.constructor",
+      "signature": "(segments: readonly Uint8Array[], byteLength: number, onRelease?: () => void): BlockBacking",
+      "entries": [
+        "browser",
+        "fx/media",
+        "index",
+        "nse",
+        "nse/page",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "private-host-protocol",
+    "after": []
+  },
+  {
+    "before": {
+      "path": "src/FX/MediaFX/MEFXBlockBuffer.ts",
+      "line": 186,
+      "name": "BlockBacking.copyRange",
+      "signature": "(sourceOffset: number, length: number, target: Uint8Array, targetOffset: number): void",
+      "entries": [
+        "browser",
+        "fx/media",
+        "index",
+        "nse",
+        "nse/page",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "private-host-protocol",
+    "after": []
+  },
+  {
+    "before": {
+      "path": "src/FX/MediaFX/MEFXBlockBuffer.ts",
+      "line": 257,
+      "name": "MEFXBlockBuffer.copyTo",
+      "signature": "(target: Uint8Array, options?: MEFXBlockCopyOptions): number",
+      "entries": [
+        "browser",
+        "fx/media",
+        "index",
+        "nse",
+        "nse/page",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "carve-out",
+    "reason": "The caller supplies writable storage; immutable NSEData cannot be a copy destination.",
+    "after": [
+      {
+        "line": 261,
+        "signature": "(target: Uint8Array, options?: MEFXBlockCopyOptions): number",
+        "entries": [
+          "browser",
+          "fx/media",
+          "index",
+          "nse",
+          "nse/page",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/MediaFX/MEFXMediaClient.ts",
+      "line": 31,
+      "name": "MEFXMediaClient.copyBlock",
+      "signature": "(bytes: Uint8Array, signal?: AbortSignal): MEFXBlockBuffer",
+      "entries": [
+        "browser",
+        "index",
+        "nse",
+        "nse/page",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 32,
+        "signature": "(bytes: NSEDataConvertible, signal?: AbortSignal): MEFXBlockBuffer",
+        "entries": [
+          "browser",
+          "index",
+          "nse",
+          "nse/page",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/MIDIFX/MIFXAccess.ts",
+      "line": 63,
+      "name": "MIFXInputPacket.data",
+      "signature": "Uint8Array",
+      "entries": [
+        "browser",
+        "fx/midi",
+        "index",
+        "nse",
+        "nse/page",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 66,
+        "signature": "NSEData",
+        "entries": [
+          "browser",
+          "fx/midi",
+          "index",
+          "nse",
+          "nse/page",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/MIDIFX/MIFXAccess.ts",
+      "line": 80,
+      "name": "MIFXOutputLease.send",
+      "signature": "(data: Uint8Array, timestampMilliseconds?: number): void",
+      "entries": [
+        "browser",
+        "fx/midi",
+        "index",
+        "nse",
+        "nse/page",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 83,
+        "signature": "(data: NSEDataConvertible, timestampMilliseconds?: number): void",
+        "entries": [
+          "browser",
+          "fx/midi",
+          "index",
+          "nse",
+          "nse/page",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/MIDIFX/MIFXEncoder.ts",
+      "line": 47,
+      "name": "MIFXEncoder.encode",
+      "signature": "(message: MIFXMessage): Uint8Array",
+      "entries": [
+        "fx/midi"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 48,
+        "signature": "(message: MIFXMessageInput): NSEData",
+        "entries": [
+          "fx/midi"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/MIDIFX/MIFXMessage.ts",
+      "line": 21,
+      "name": "MIFXMessage",
+      "signature": "| { readonly kind: \"note-off\"; readonly channel: number; readonly note: number; readonly velocity: number } | { readonly kind: \"note-on\"; readonly channel: number; readonly note: number; readonly velocity: number } | { readonly kind: \"polyphonic-key-pressure\"; readonly channel: number; readonly note: number; readonly pressure: number } | { readonly kind: \"control-change\"; readonly channel: number; readonly controller: number; readonly value: number } | { readonly kind: \"program-change\"; readonly channel: number; readonly program: number } | { readonly kind: \"channel-pressure\"; readonly channel: number; readonly pressure: number } | { readonly kind: \"pitch-bend\"; readonly channel: number; readonly value: number } | { readonly kind: \"time-code-quarter-frame\"; readonly value: number } | { readonly kind: \"song-position\"; readonly position: number } | { readonly kind: \"song-select\"; readonly song: number } | { readonly kind: \"tune-request\" } | { readonly kind: \"timing-clock\" } | { readonly kind: \"start\" } | { readonly kind: \"continue\" } | { readonly kind: \"stop\" } | { readonly kind: \"active-sensing\" } | { readonly kind: \"reset\" } | { readonly kind: \"sysex\"; readonly data: Uint8Array }",
+      "entries": [
+        "fx/midi"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 23,
+        "signature": "| { readonly kind: \"note-off\"; readonly channel: number; readonly note: number; readonly velocity: number } | { readonly kind: \"note-on\"; readonly channel: number; readonly note: number; readonly velocity: number } | { readonly kind: \"polyphonic-key-pressure\"; readonly channel: number; readonly note: number; readonly pressure: number } | { readonly kind: \"control-change\"; readonly channel: number; readonly controller: number; readonly value: number } | { readonly kind: \"program-change\"; readonly channel: number; readonly program: number } | { readonly kind: \"channel-pressure\"; readonly channel: number; readonly pressure: number } | { readonly kind: \"pitch-bend\"; readonly channel: number; readonly value: number } | { readonly kind: \"time-code-quarter-frame\"; readonly value: number } | { readonly kind: \"song-position\"; readonly position: number } | { readonly kind: \"song-select\"; readonly song: number } | { readonly kind: \"tune-request\" } | { readonly kind: \"timing-clock\" } | { readonly kind: \"start\" } | { readonly kind: \"continue\" } | { readonly kind: \"stop\" } | { readonly kind: \"active-sensing\" } | { readonly kind: \"reset\" } | { readonly kind: \"sysex\"; readonly data: NSEData }",
+        "entries": [
+          "fx/midi"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/MIDIFX/MIFXMessage.ts",
+      "line": 39,
+      "name": "__type.data",
+      "signature": "Uint8Array",
+      "entries": [
+        "fx/midi"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 41,
+        "signature": "NSEData",
+        "entries": [
+          "fx/midi"
+        ]
+      },
+      {
+        "line": 44,
+        "signature": "NSEDataConvertible",
+        "entries": [
+          "fx/midi"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/MIDIFX/MIFXParser.ts",
+      "line": 63,
+      "name": "MIFXParser.push",
+      "signature": "(bytes: Uint8Array): readonly MIFXParserEvent[]",
+      "entries": [
+        "fx/midi"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 64,
+        "signature": "(data: NSEDataConvertible): readonly MIFXParserEvent[]",
+        "entries": [
+          "fx/midi"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/MIDIFX/MIFXScheduler.ts",
+      "line": 131,
+      "name": "MIFXScheduler.schedule",
+      "signature": "(data: Uint8Array, target: MEFXTime): MIFXScheduledSend",
+      "entries": [
+        "fx/midi"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 132,
+        "signature": "(input: NSEDataConvertible, target: MEFXTime): MIFXScheduledSend",
+        "entries": [
+          "fx/midi"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/MIDIFX/MIFXUniversalPacket.ts",
+      "line": 102,
+      "name": "MIFXUniversalPacket.fromBytes",
+      "signature": "(bytes: Uint8Array): MIFXUniversalPacket",
+      "entries": [
+        "fx/midi"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 103,
+        "signature": "(data: NSEDataConvertible): MIFXUniversalPacket",
+        "entries": [
+          "fx/midi"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/MIDIFX/MIFXUniversalPacket.ts",
+      "line": 125,
+      "name": "MIFXUniversalPacket.toBytes",
+      "signature": "(): Uint8Array",
+      "entries": [
+        "fx/midi"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 127,
+        "signature": "(): NSEData",
+        "entries": [
+          "fx/midi"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/TextFX/textLayoutTypes.ts",
+      "line": 184,
+      "name": "TFXFontFaceRegistrationRequest.bytes",
+      "signature": "Uint8Array",
+      "entries": [
+        "browser",
+        "fx/text",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 185,
+        "signature": "NSEDataConvertible",
+        "entries": [
+          "browser",
+          "fx/text",
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/TextFX/textLayoutTypes.ts",
+      "line": 236,
+      "name": "TFXPackagedFontResource.bytes",
+      "signature": "Uint8Array",
+      "entries": [
+        "browser",
+        "fx/text",
+        "index",
+        "nse",
+        "nse/text",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 237,
+        "signature": "NSEData",
+        "entries": [
+          "browser",
+          "fx/text",
+          "index",
+          "nse",
+          "nse/text",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/TextFX/textLayoutTypes.ts",
+      "line": 248,
+      "name": "TFXFontClient.registerFont",
+      "signature": "(bytes: Uint8Array, descriptor: TFXFontDescriptor, signal?: AbortSignal): Promise<TFXFontRegistration>",
+      "entries": [
+        "fx/text",
+        "index",
+        "nse",
+        "nse/text",
+        "sdk",
+        "sdk/testing"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 249,
+        "signature": "(bytes: NSEDataConvertible, descriptor: TFXFontDescriptor, signal?: AbortSignal): Promise<TFXFontRegistration>",
+        "entries": [
+          "fx/text",
+          "index",
+          "nse",
+          "nse/text",
+          "sdk",
+          "sdk/testing"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/TextFX/TFXFont.ts",
+      "line": 162,
+      "name": "TFXFont.create",
+      "signature": "(bytes: Uint8Array, descriptor: TFXFontDescriptor, signal?: AbortSignal): Promise<TFXFont>",
+      "entries": [
+        "browser",
+        "fx/animation",
+        "fx/image",
+        "fx/text",
+        "fx/video",
+        "index",
+        "nse",
+        "nse/page",
+        "nse/text",
+        "sdk",
+        "sdk/animation-host",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 163,
+        "signature": "(input: NSEDataConvertible, descriptor: TFXFontDescriptor, signal?: AbortSignal): Promise<TFXFont>",
+        "entries": [
+          "browser",
+          "fx/animation",
+          "fx/image",
+          "fx/text",
+          "fx/video",
+          "index",
+          "nse",
+          "nse/page",
+          "nse/text",
+          "sdk",
+          "sdk/animation-host",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/VideoFX/VFXContainerReader.ts",
+      "line": 43,
+      "name": "VFXContainerBackendReadSession.push",
+      "signature": "(bytes: Uint8Array): void",
+      "entries": [
+        "fx/video",
+        "fx/video/webm"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 46,
+        "signature": "(bytes: NSEDataConvertible): void",
+        "entries": [
+          "fx/video",
+          "fx/video/webm"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/VideoFX/VFXContainerReader.ts",
+      "line": 91,
+      "name": "VFXContainerReader.read",
+      "signature": "(input: Uint8Array | AsyncIterable<Uint8Array>): Promise<VFXContainerReadResult>",
+      "entries": [
+        "fx/video"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 98,
+        "signature": "(input: NSEDataConvertible | AsyncIterable<NSEDataConvertible>): Promise<VFXContainerReadResult>",
+        "entries": [
+          "fx/video"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/VideoFX/VFXContainerWriter.ts",
+      "line": 30,
+      "name": "VFXVideoContainerTrack.description",
+      "signature": "Uint8Array",
+      "entries": [
+        "fx/video",
+        "fx/video/webm"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 33,
+        "signature": "NSEData",
+        "entries": [
+          "fx/video",
+          "fx/video/webm"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/VideoFX/VFXContainerWriter.ts",
+      "line": 57,
+      "name": "VFXContainerBackendWriter.start",
+      "signature": "(): readonly Uint8Array[]",
+      "entries": [
+        "fx/video",
+        "fx/video/webm"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 61,
+        "signature": "(): readonly NSEData[]",
+        "entries": [
+          "fx/video",
+          "fx/video/webm"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/VideoFX/VFXContainerWriter.ts",
+      "line": 58,
+      "name": "VFXContainerBackendWriter.write",
+      "signature": "(chunk: VFXEncodedChunk): readonly Uint8Array[]",
+      "entries": [
+        "fx/video",
+        "fx/video/webm"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 62,
+        "signature": "(chunk: VFXEncodedChunk): readonly NSEData[]",
+        "entries": [
+          "fx/video",
+          "fx/video/webm"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/VideoFX/VFXContainerWriter.ts",
+      "line": 59,
+      "name": "VFXContainerBackendWriter.close",
+      "signature": "(): readonly Uint8Array[]",
+      "entries": [
+        "fx/video",
+        "fx/video/webm"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 63,
+        "signature": "(): readonly NSEData[]",
+        "entries": [
+          "fx/video",
+          "fx/video/webm"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/VideoFX/VFXContainerWriter.ts",
+      "line": 70,
+      "name": "VFXContainerByteSink.write",
+      "signature": "(bytes: Uint8Array): void | Promise<void>",
+      "entries": [
+        "fx/video"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 74,
+        "signature": "(bytes: NSEData): void | Promise<void>",
+        "entries": [
+          "fx/video"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/VideoFX/VFXEncodedChunk.ts",
+      "line": 28,
+      "name": "VFXEncodedChunkInit.data",
+      "signature": "Uint8Array",
+      "entries": [
+        "browser",
+        "fx/video",
+        "fx/video/webm",
+        "index",
+        "nse",
+        "nse/page",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 31,
+        "signature": "NSEDataConvertible",
+        "entries": [
+          "browser",
+          "fx/video",
+          "fx/video/webm",
+          "index",
+          "nse",
+          "nse/page",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/VideoFX/VFXEncodedChunk.ts",
+      "line": 101,
+      "name": "VFXEncodedChunk.copyData",
+      "signature": "(): Uint8Array",
+      "entries": [
+        "browser",
+        "fx/video",
+        "fx/video/webm",
+        "index",
+        "nse",
+        "nse/page",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 104,
+        "signature": "(): NSEData",
+        "entries": [
+          "browser",
+          "fx/video",
+          "fx/video/webm",
+          "index",
+          "nse",
+          "nse/page",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/VideoFX/VFXEncoder.ts",
+      "line": 57,
+      "name": "VFXEncoderDecoderConfig.description",
+      "signature": "Uint8Array",
+      "entries": [
+        "browser",
+        "fx/video",
+        "index",
+        "nse",
+        "nse/page",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 60,
+        "signature": "NSEData",
+        "entries": [
+          "browser",
+          "fx/video",
+          "index",
+          "nse",
+          "nse/page",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/VideoFX/VFXPixelBuffer.ts",
+      "line": 26,
+      "name": "VFXPixelBacking.bytes",
+      "signature": "Uint8Array",
+      "entries": [
+        "browser",
+        "fx/animation",
+        "fx/video",
+        "index",
+        "nse",
+        "nse/page",
+        "sdk",
+        "sdk/animation-host",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "private-host-protocol",
+    "after": []
+  },
+  {
+    "before": {
+      "path": "src/FX/VideoFX/VFXPixelBuffer.ts",
+      "line": 58,
+      "name": "VFXPixelBuffer.constructor",
+      "signature": "(format: VFXVideoFormat, data?: Uint8Array): VFXPixelBuffer",
+      "entries": [
+        "browser",
+        "fx/animation",
+        "fx/video",
+        "index",
+        "nse",
+        "nse/page",
+        "sdk",
+        "sdk/animation-host",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "carve-out",
+    "reason": "Initialises an unencoded numerical video pixel plane.",
+    "after": [
+      {
+        "line": 66,
+        "signature": "(format: VFXVideoFormat, data?: Uint8Array): VFXPixelBuffer",
+        "entries": [
+          "browser",
+          "fx/animation",
+          "fx/video",
+          "index",
+          "nse",
+          "nse/page",
+          "sdk",
+          "sdk/animation-host",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/VideoFX/VFXPixelBuffer.ts",
+      "line": 140,
+      "name": "VFXPixelBuffer.copyData",
+      "signature": "(): Uint8Array",
+      "entries": [
+        "browser",
+        "fx/animation",
+        "fx/video",
+        "index",
+        "nse",
+        "nse/page",
+        "sdk",
+        "sdk/animation-host",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "carve-out",
+    "reason": "Copies unencoded numeric video pixel planes, not a container or encoded chunk.",
+    "after": [
+      {
+        "line": 141,
+        "signature": "(): Uint8Array",
+        "entries": [
+          "browser",
+          "fx/animation",
+          "fx/video",
+          "index",
+          "nse",
+          "nse/page",
+          "sdk",
+          "sdk/animation-host",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/VideoFX/VFXPixelBuffer.ts",
+      "line": 144,
+      "name": "VFXPixelBuffer.copyPlane",
+      "signature": "(index: number): Uint8Array",
+      "entries": [
+        "browser",
+        "fx/animation",
+        "fx/video",
+        "index",
+        "nse",
+        "nse/page",
+        "sdk",
+        "sdk/animation-host",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "carve-out",
+    "reason": "Copies one unencoded numerical video pixel plane.",
+    "after": [
+      {
+        "line": 145,
+        "signature": "(index: number): Uint8Array",
+        "entries": [
+          "browser",
+          "fx/animation",
+          "fx/video",
+          "index",
+          "nse",
+          "nse/page",
+          "sdk",
+          "sdk/animation-host",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/FX/VideoFX/VFXPixelBuffer.ts",
+      "line": 230,
+      "name": "VFXPixelBufferPool.acquire",
+      "signature": "(format: VFXVideoFormat, data?: Uint8Array): VFXPixelBuffer",
+      "entries": [
+        "fx/video"
+      ]
+    },
+    "disposition": "carve-out",
+    "reason": "Pool acquisition accepts initial numerical pixel-plane storage.",
+    "after": [
+      {
+        "line": 231,
+        "signature": "(format: VFXVideoFormat, data?: Uint8Array): VFXPixelBuffer",
+        "entries": [
+          "fx/video"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/NSE/Typography/NSEFontLibrary.ts",
+      "line": 49,
+      "name": "NSEStoredUserFont.bytes",
+      "signature": "ArrayBuffer",
+      "entries": [
+        "index",
+        "nse",
+        "sdk"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 50,
+        "signature": "NSEData",
+        "entries": [
+          "index",
+          "nse",
+          "sdk"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/NSE/Typography/NSEFontLibrary.ts",
+      "line": 61,
+      "name": "NSEUserFontFaceHost.register",
+      "signature": "(cssFamily: string, bytes: ArrayBuffer): Promise<() => void>",
+      "entries": [
+        "index",
+        "nse",
+        "sdk"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 62,
+        "signature": "(cssFamily: string, bytes: NSEDataConvertible): Promise<() => void>",
+        "entries": [
+          "index",
+          "nse",
+          "sdk"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/NSE/Typography/NSEFontLibrary.ts",
+      "line": 214,
+      "name": "NSEFontLibrary.fontBytes",
+      "signature": "(id: string): Uint8Array | null",
+      "entries": [
+        "index",
+        "nse",
+        "sdk"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 215,
+        "signature": "(id: string): NSEData | null",
+        "entries": [
+          "index",
+          "nse",
+          "sdk"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/AppSDK/appClientTypes.ts",
+      "line": 225,
+      "name": "AppDocumentResourcesClient.resolve",
+      "signature": "(documentId: string, descriptor: DocumentResourceDescriptor, signal?: AbortSignal): Uint8Array | null",
+      "entries": [
+        "index",
+        "sdk",
+        "sdk/testing"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 226,
+        "signature": "(documentId: string, descriptor: DocumentResourceDescriptor, signal?: AbortSignal): NSEData | null",
+        "entries": [
+          "index",
+          "sdk",
+          "sdk/testing"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/Documents/DocumentAssetSaveCoordinator.ts",
+      "line": 38,
+      "name": "DocumentAssetSaveOptions.hash",
+      "signature": "(bytes: Uint8Array) => Promise<string>",
+      "entries": [
+        "browser",
+        "index",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 39,
+        "signature": "(bytes: NSEData) => Promise<string>",
+        "entries": [
+          "browser",
+          "index",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/Documents/DocumentAssetSaveCoordinator.ts",
+      "line": 38,
+      "name": "__type",
+      "signature": "(bytes: Uint8Array): Promise<string>",
+      "entries": [
+        "browser",
+        "index",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 39,
+        "signature": "(bytes: NSEData): Promise<string>",
+        "entries": [
+          "browser",
+          "index",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/Documents/DocumentAssetStore.ts",
+      "line": 35,
+      "name": "DocumentAssetStoreOptions.hash",
+      "signature": "(bytes: Uint8Array) => Promise<string>",
+      "entries": [
+        "browser"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 36,
+        "signature": "(bytes: NSEData) => Promise<string>",
+        "entries": [
+          "browser"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/Documents/DocumentAssetStore.ts",
+      "line": 35,
+      "name": "__type",
+      "signature": "(bytes: Uint8Array): Promise<string>",
+      "entries": [
+        "browser"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 36,
+        "signature": "(bytes: NSEData): Promise<string>",
+        "entries": [
+          "browser"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/Documents/documentAssetTypes.ts",
+      "line": 64,
+      "name": "DocumentAssetInput.bytes",
+      "signature": "Uint8Array",
+      "entries": [
+        "browser",
+        "index",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 67,
+        "signature": "NSEDataConvertible",
+        "entries": [
+          "browser",
+          "index",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/Documents/documentAssetTypes.ts",
+      "line": 87,
+      "name": "DocumentAssetStore.read",
+      "signature": "(scope: DocumentAssetScope, reference: DocumentAssetReference, signal?: AbortSignal): Promise<Uint8Array>",
+      "entries": [
+        "browser",
+        "index",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 90,
+        "signature": "(scope: DocumentAssetScope, reference: DocumentAssetReference, signal?: AbortSignal): Promise<NSEData>",
+        "entries": [
+          "browser",
+          "index",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/Documents/documentOutputTypes.ts",
+      "line": 109,
+      "name": "DocumentOutputPDFResult",
+      "signature": "| { readonly status: \"exported\"; readonly bytes: Uint8Array; readonly mimeType: \"application/pdf\"; readonly receipt: DocumentOutputReceipt } | { readonly status: \"canceled\" | \"failed\"; readonly receipt: DocumentOutputReceipt }",
+      "entries": [
+        "index",
+        "sdk"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 110,
+        "signature": "| { readonly status: \"exported\"; readonly bytes: NSEData; readonly mimeType: \"application/pdf\"; readonly receipt: DocumentOutputReceipt } | { readonly status: \"canceled\" | \"failed\"; readonly receipt: DocumentOutputReceipt }",
+        "entries": [
+          "index",
+          "sdk"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/Documents/documentOutputTypes.ts",
+      "line": 110,
+      "name": "__type.bytes",
+      "signature": "Uint8Array",
+      "entries": [
+        "index",
+        "sdk"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 111,
+        "signature": "NSEData",
+        "entries": [
+          "index",
+          "sdk"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/Documents/DocumentResourceService.ts",
+      "line": 39,
+      "name": "DocumentResourceInput.arrayBuffer",
+      "signature": "(): Promise<ArrayBuffer>",
+      "entries": [
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing"
+      ]
+    },
+    "disposition": "migrated",
+    "after": []
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/Documents/DocumentResourceService.ts",
+      "line": 55,
+      "name": "DocumentResourceService.resolve",
+      "signature": "(documentId: string, descriptor: DocumentResourceDescriptor, signal?: AbortSignal): Uint8Array | null",
+      "entries": [
+        "index",
+        "nse",
+        "sdk"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 56,
+        "signature": "(documentId: string, descriptor: DocumentResourceDescriptor, signal?: AbortSignal): NSEData | null",
+        "entries": [
+          "index",
+          "nse",
+          "sdk"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/Documents/documentTypes.ts",
+      "line": 264,
+      "name": "DocumentImportSource",
+      "signature": "| { readonly kind: \"text\"; readonly text: string; readonly mediaType: string } | { readonly kind: \"bytes\"; readonly bytes: Uint8Array; readonly mediaType: string }",
+      "entries": [
+        "index",
+        "nse",
+        "sdk"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 265,
+        "signature": "| { readonly kind: \"text\"; readonly text: string; readonly mediaType: string } | { readonly kind: \"bytes\"; readonly bytes: NSEDataConvertible; readonly mediaType: string }",
+        "entries": [
+          "index",
+          "nse",
+          "sdk"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/Documents/documentTypes.ts",
+      "line": 266,
+      "name": "__type.bytes",
+      "signature": "Uint8Array",
+      "entries": [
+        "index",
+        "nse",
+        "sdk"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 267,
+        "signature": "NSEDataConvertible",
+        "entries": [
+          "index",
+          "nse",
+          "sdk"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/FilePanels/filePanelTypes.ts",
+      "line": 50,
+      "name": "FilePanelWritable.write",
+      "signature": "(data: Blob | Uint8Array | string): Promise<void>",
+      "entries": [
+        "browser",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 51,
+        "signature": "(data: NSEDataConvertible | string): Promise<void>",
+        "entries": [
+          "browser",
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/FilePanels/filePanelTypes.ts",
+      "line": 149,
+      "name": "FilePanelExportPayload.blob",
+      "signature": "Blob",
+      "entries": [
+        "browser",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": []
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/Images/imageTypes.ts",
+      "line": 47,
+      "name": "RuntimeImageSource",
+      "signature": "| Readonly<{ kind: \"url\"; url: string; cors: \"none\" | \"anonymous\" | \"use-credentials\" }> | Readonly<{ kind: \"app-asset\"; path: string }> | Readonly<{ kind: \"bytes\"; mimeType: RuntimeImageBinaryMimeType; bytes: Uint8Array }> | Readonly<{ kind: \"generated-svg\"; svg: string; intrinsicSize?: GFXSize; density?: number }> | Readonly<{ kind: \"document-resource\"; documentId: string; descriptor: DocumentResourceDescriptor }>",
+      "entries": [
+        "browser",
+        "index",
+        "nse",
+        "sdk",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 48,
+        "signature": "| Readonly<{ kind: \"url\"; url: string; cors: \"none\" | \"anonymous\" | \"use-credentials\" }> | Readonly<{ kind: \"app-asset\"; path: string }> | Readonly<{ kind: \"bytes\"; mimeType: RuntimeImageBinaryMimeType; bytes: NSEDataConvertible }> | Readonly<{ kind: \"generated-svg\"; svg: string; intrinsicSize?: GFXSize; density?: number }> | Readonly<{ kind: \"document-resource\"; documentId: string; descriptor: DocumentResourceDescriptor }>",
+        "entries": [
+          "browser",
+          "index",
+          "nse",
+          "sdk",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/Images/imageTypes.ts",
+      "line": 50,
+      "name": "__type.bytes",
+      "signature": "Uint8Array",
+      "entries": [
+        "browser",
+        "index",
+        "nse",
+        "sdk",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 51,
+        "signature": "NSEDataConvertible",
+        "entries": [
+          "browser",
+          "index",
+          "nse",
+          "sdk",
+          "webspring"
+        ]
+      },
+      {
+        "line": 57,
+        "signature": "NSEData",
+        "entries": [
+          "browser",
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/Images/imageTypes.ts",
+      "line": 54,
+      "name": "RuntimeImageAdapterSource",
+      "signature": "| Readonly<{ kind: \"url\"; url: string; cors: \"none\" | \"anonymous\" | \"use-credentials\" }> | Readonly<{ kind: \"bytes\"; mimeType: RuntimeImageBinaryMimeType; bytes: Uint8Array }>",
+      "entries": [
+        "browser",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 55,
+        "signature": "| Readonly<{ kind: \"url\"; url: string; cors: \"none\" | \"anonymous\" | \"use-credentials\" }> | Readonly<{ kind: \"bytes\"; mimeType: RuntimeImageBinaryMimeType; bytes: NSEData }>",
+        "entries": [
+          "browser",
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/Images/imageTypes.ts",
+      "line": 56,
+      "name": "__type.bytes",
+      "signature": "Uint8Array",
+      "entries": [
+        "browser",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 51,
+        "signature": "NSEDataConvertible",
+        "entries": [
+          "browser",
+          "index",
+          "nse",
+          "sdk",
+          "webspring"
+        ]
+      },
+      {
+        "line": 57,
+        "signature": "NSEData",
+        "entries": [
+          "browser",
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/Images/imageTypes.ts",
+      "line": 70,
+      "name": "RuntimeDecodedImageLease.sourceICCProfile",
+      "signature": "Uint8Array",
+      "entries": [
+        "browser",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 71,
+        "signature": "NSEData",
+        "entries": [
+          "browser",
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/Images/imageTypes.ts",
+      "line": 79,
+      "name": "RuntimeImageAdapter.export",
+      "signature": "(lease: RuntimeDecodedImageLease, format: \"image/png\" | \"image/webp\", signal: AbortSignal): Promise<Uint8Array>",
+      "entries": [
+        "browser",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 80,
+        "signature": "(lease: RuntimeDecodedImageLease, format: \"image/png\" | \"image/webp\", signal: AbortSignal): Promise<NSEData>",
+        "entries": [
+          "browser",
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/Images/imageTypes.ts",
+      "line": 115,
+      "name": "RuntimeImageResource.sourceICCProfile",
+      "signature": "Uint8Array | null",
+      "entries": [
+        "index",
+        "nse",
+        "nse/controls",
+        "sdk"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 116,
+        "signature": "NSEData | null",
+        "entries": [
+          "index",
+          "nse",
+          "nse/controls",
+          "sdk"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/Images/imageTypes.ts",
+      "line": 141,
+      "name": "RuntimeImageService.export",
+      "signature": "(resource: RuntimeImageResource, format: \"image/png\" | \"image/webp\", signal?: AbortSignal): Promise<Uint8Array>",
+      "entries": [
+        "index",
+        "nse",
+        "sdk"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 142,
+        "signature": "(resource: RuntimeImageResource, format: \"image/png\" | \"image/webp\", signal?: AbortSignal): Promise<NSEData>",
+        "entries": [
+          "index",
+          "nse",
+          "sdk"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/Pasteboard/pasteboardTypes.ts",
+      "line": 51,
+      "name": "PasteboardRepresentation",
+      "signature": "| { readonly type: \"text/plain\" | \"text/html\" | \"text/uri-list\" | \"text/rtf\"; readonly value: string } | { readonly type: \"application/x-syncloudos-colour\"; readonly value: string } | { readonly type: \"application/x-syncloudos-document\"; readonly value: { readonly typeId: string; readonly documentId: string }; } | { readonly type: `application/x-syncloudos-${string}`; readonly value: PasteboardCanonicalValue } | { readonly type: `image/${string}` | \"application/octet-stream\"; readonly value: Blob }",
+      "entries": [
+        "browser",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 52,
+        "signature": "| { readonly type: \"text/plain\" | \"text/html\" | \"text/uri-list\" | \"text/rtf\"; readonly value: string } | { readonly type: \"application/x-syncloudos-colour\"; readonly value: string } | { readonly type: \"application/x-syncloudos-document\"; readonly value: { readonly typeId: string; readonly documentId: string }; } | { readonly type: `application/x-syncloudos-${string}`; readonly value: PasteboardCanonicalValue } | { readonly type: `image/${string}` | \"application/octet-stream\"; readonly value: NSEData }",
+        "entries": [
+          "browser",
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/Pasteboard/pasteboardTypes.ts",
+      "line": 59,
+      "name": "__type.value",
+      "signature": "Blob",
+      "entries": [
+        "browser",
+        "index",
+        "nse",
+        "sdk",
+        "sdk/testing",
+        "webspring"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 60,
+        "signature": "NSEData",
+        "entries": [
+          "browser",
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing",
+          "webspring"
+        ]
+      },
+      {
+        "line": 68,
+        "signature": "NSEData",
+        "entries": [
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing"
+        ]
+      },
+      {
+        "line": 69,
+        "signature": "NSEDataConvertible",
+        "entries": [
+          "index",
+          "nse",
+          "sdk",
+          "sdk/testing"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/PlatformAdapters/BrowserImageProcessingWorker.ts",
+      "line": 270,
+      "name": "BrowserImageProcessingWorker.renderEncoded",
+      "signature": "(image: IFXImage, options: Readonly<{ format: \"image/png\" | \"image/webp\"; colourSpace?: \"srgb\"; orientation?: \"up\"; signal?: AbortSignal; interpolation?: \"nearest\" | \"linear\"; }>): Promise<Readonly<{ blob: Blob; metadata: IFXEncodedImageMetadata; }>>",
+      "entries": [
+        "browser"
+      ]
+    },
+    "disposition": "migrated",
+    "after": [
+      {
+        "line": 273,
+        "signature": "(image: IFXImage, options: Readonly<{ format: \"image/png\" | \"image/webp\"; colourSpace?: \"srgb\"; orientation?: \"up\"; signal?: AbortSignal; interpolation?: \"nearest\" | \"linear\"; }>): Promise<Readonly<{ data: NSEData; metadata: IFXEncodedImageMetadata; }>>",
+        "entries": [
+          "browser"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/PlatformAdapters/BrowserImageProcessingWorker.ts",
+      "line": 270,
+      "name": "__type.blob",
+      "signature": "Blob",
+      "entries": [
+        "browser"
+      ]
+    },
+    "disposition": "migrated",
+    "after": []
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/PlatformAdapters/BrowserWebGPUImageProcessingBackend.ts",
+      "line": 36,
+      "name": "BrowserWebGPUImageExecutionRequest.pixels",
+      "signature": "Uint8Array",
+      "entries": [
+        "browser"
+      ]
+    },
+    "disposition": "carve-out",
+    "reason": "GPU execution uploads unencoded numerical RGBA pixel components.",
+    "after": [
+      {
+        "line": 36,
+        "signature": "Uint8Array",
+        "entries": [
+          "browser"
+        ]
+      }
+    ]
+  },
+  {
+    "before": {
+      "path": "src/SynCloudOS/PlatformAdapters/BrowserWebGPUImageProcessingBackend.ts",
+      "line": 42,
+      "name": "BrowserWebGPUImageExecutor.execute",
+      "signature": "(request: BrowserWebGPUImageExecutionRequest, signal?: AbortSignal): Promise<Uint8Array>",
+      "entries": [
+        "browser"
+      ]
+    },
+    "disposition": "carve-out",
+    "reason": "GPU readback returns an unencoded numerical RGBA component plane.",
+    "after": [
+      {
+        "line": 42,
+        "signature": "(request: BrowserWebGPUImageExecutionRequest, signal?: AbortSignal): Promise<Uint8Array>",
+        "entries": [
+          "browser"
+        ]
+      }
+    ]
+  }
+]

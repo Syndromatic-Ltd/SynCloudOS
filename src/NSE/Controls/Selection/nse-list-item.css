@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -18,20 +21,24 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-.nse-control-list-item {
+.nse-control-list-item,
+:where(:scope):is(.nse-control-list-item) {
   display: flex;
   gap: 10px;
   align-items: center;
 }
 
 .nse-control-list-leading,
-.nse-control-list-trailing {
+:where(:scope):is(.nse-control-list-leading),
+.nse-control-list-trailing,
+:where(:scope):is(.nse-control-list-trailing) {
   display: inline-grid;
   flex: 0 0 auto;
   place-items: center;
 }
 
-.nse-control-list-body {
+.nse-control-list-body,
+:where(:scope):is(.nse-control-list-body) {
   display: grid;
   flex: 1 1 auto;
   min-width: 0;
@@ -39,8 +46,14 @@
 }
 
 .nse-control-list-primary,
-.nse-control-list-meta {
+:where(:scope):is(.nse-control-list-primary),
+.nse-control-list-meta,
+:where(:scope):is(.nse-control-list-meta) {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+}
+
 }

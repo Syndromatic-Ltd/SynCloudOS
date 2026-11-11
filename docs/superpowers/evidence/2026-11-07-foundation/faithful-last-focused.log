@@ -1,0 +1,11 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run vitest run tests/runtime/about-app.test.tsx tests/runtime/about-fx-lifetime.test.tsx tests/runtime/layer-artwork.test.tsx tests/runtime/about-particle-sprite.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site
+
+
+ Test Files  4 passed (4)
+      Tests  13 passed (13)
+   Start at  22:50:27
+   Duration  12.66s (transform 3.78s, setup 29ms, import 5.73s, tests 2.53s, environment 3.81s)
+

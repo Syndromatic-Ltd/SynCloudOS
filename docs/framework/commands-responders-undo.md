@@ -1,16 +1,18 @@
 # Commands, responders and undo
 
+The [class authoring guide](cocoa-authoring.md#actions-and-undo) describes typed references, declared action results/undo and their unchanged canonical admission path.
+
 Desktop applications route user intent through a shared vocabulary: a menu item, a key press and a toolbar button all ask the application to do the same thing. SynCloudOS provides that vocabulary through three cooperating parts. Commands name the operations, the responder chain decides who handles them, and undo histories record how to reverse them.
 
 ## Commands
 
-A command has an identifier, a title, an `execute` function and, when useful, a `validate` function, key bindings and an undo policy. You declare commands with `useSynWareCommands`, which registers them on mount and removes them on unmount.
+A command has an identifier, a title, an `execute` function and, when useful, a `validate` function, key bindings and an undo policy. You declare commands with `useCommands`, which registers them on mount and removes them on unmount.
 
 ```tsx
-import { useSynWareCommands } from "@syndromatic/syncloudos/sdk";
+import { useCommands } from "@syndromatic/syncloudos/sdk";
 
 export function useNoteCommands(notes: { add(): string; remove(id: string): void; count: number }) {
-  return useSynWareCommands([
+  return useCommands([
     {
       id: "com.example.notes.add",
       title: { key: "notes.add", fallback: "Add Note" },
@@ -58,6 +60,8 @@ const payload = {
 
 `validate` returns an object with `enabled`, and optionally `denied`, `hidden`, `state` (`"off"`, `"on"` or `"mixed"`, for checkable items), a replacement `title` and a `disabledReason`. Menus and buttons read this result, so a command disables everywhere at once. Validation may be asynchronous and receives the command context, including the payload.
 
+Synchronous validators finish in the sender's event, so closing a picker does not invalidate a completed check. Asynchronous checks retain their authority and cancellation fences. Standard controls, pickers and callback menus inherit their class controller's modal ancestry; app code does not supply focus provenance for these ordinary cases. UI activation also honours visibility from the validation that admits the command. `hidden` remains a presentation rule; direct API calls still use `enabled` and `denied` for admission.
+
 ### Execution context
 
 `execute` receives a context with the `commandId`, the `payload`, an `operationId` and `correlationId` for tracing, an `AbortSignal` that fires when the dispatch is superseded or cancelled, and the `source` of the request (menu, key binding, code and so on). Treat an aborted signal as a cancelled operation and skip the late result.
@@ -69,10 +73,10 @@ Every mounted application has a responder, and controls inside it may add their 
 `app.responders` exposes the chain to your code:
 
 ```tsx
-import { useSynWare } from "@syndromatic/syncloudos/sdk";
+import { useSCOS } from "@syndromatic/syncloudos/sdk";
 
 export function useEditorFocus() {
-  const { responders } = useSynWare();
+  const { responders } = useSCOS();
   return {
     focusEditor: () => responders.requestFocus("com.example.notes.editor"),
     focused: () => responders.getFocusedResponderId(),
@@ -81,6 +85,35 @@ export function useEditorFocus() {
 ```
 
 A dispatch that reaches no responder returns an unhandled result. It never throws, and the calling control shows the command as unavailable.
+
+## Actions on class-based applications
+
+An application written as classes (see [Applications](applications.md)) declares commands as methods. `@action` registers a command on the object that owns the method, so the object becomes a responder: an `NSEApplication`, an `NSEWindowController` or an `NSEViewController`.
+
+```ts
+import { NSEWindowController, action } from "@syndromatic/syncloudos";
+
+class NotesWindowController extends NSEWindowController<NotesApp> {
+  @action newNote() { this.app.notes.add(createNote()); }
+  validateNewNote() { return !this.app.readOnly; }
+
+  @action rename(payload: { title: string }) { this.app.notes.selection.title = payload.title; }
+  @action("document.save") save() { return this.app.save(); }
+}
+```
+
+- The command ID is the method name, scoped to the bundle identifier (`newNote` becomes `<bundleIdentifier>.newNote`). `@action("document.save")` answers a standard command ID instead, so the standard menu items and key bindings reach it. `@action({ id, title, payload })` also sets the menu title and a payload schema.
+- `validate<Name>()`, found by name (`validateNewNote` for `newNote`), supplies `validate`. It returns a boolean or a validation object (`{ enabled, state, title, hidden, disabledReason }`) and may be asynchronous.
+- A method takes at most one parameter, the payload. A method with no parameter rejects a payload; otherwise pass a `payload` schema to check one.
+- Controls and menu items send actions by name: `<NSEButton action="newNote" title="New Note" />`, `NSESegmentedControl` items with `action`, and menu items `{ action: "newNote" }`. The payload goes in `actionPayload` on a control or item, and `payload` on a menu item. A name containing a dot, such as `document.save`, is taken as written. Each control enables, disables and shows state from the action's validation, so one `validateNewNote()` greys out the menu item and every button.
+- Dispatch walks the responder chain: the focused view controller answers first, then its window controller, then the application. The first object that declares the action runs it.
+- `useAction` and action controls revalidate when logical focus, focus scopes or active responder anchors change, even if no command or responder is registered or removed. A newly mounted action control stays unavailable until its asynchronous validation result arrives; this also applies to actions in segmented-control overflow menus.
+- Replacing a class during development (hot reload) re-reads its actions and validation without re-registering the application.
+- Action availability follows observable changes on its controller and recorded lifetime owners, including application state read by a window validator. Disposing the controller removes its registrations and prevents delayed work from executing through that binding.
+- A declared `validate<Name>` must be a method. Invalid declarations report an error instead of silently enabling the action. Failed action registration or hot refresh removes the entire binding's command set.
+- Default and rest payload parameters accept payloads; genuinely parameterless methods reject them. Standard controls prepare current authority when activated and suppress late value/selection callbacks after unmount or rebinding. App code does not need to schedule focus-driven menu validation.
+
+`useCommands` stays the way to declare commands in a function-component application.
 
 ## Key bindings
 
@@ -91,10 +124,10 @@ A dispatch that reaches no responder returns an unhandled result. It never throw
 Undo histories belong to an owner, either the application or one document. Get or create the history for an owner, then register an action that knows how to reverse and reapply a change.
 
 ```tsx
-import { useSynWare } from "@syndromatic/syncloudos/sdk";
+import { useSCOS } from "@syndromatic/syncloudos/sdk";
 
 export function useRenameWithUndo(documentId: string, setTitle: (title: string) => void) {
-  const { undo } = useSynWare();
+  const { undo } = useSCOS();
   const owner = { kind: "document", id: documentId } as const;
   const history = undo.get(owner) ?? undo.create(owner);
 
@@ -110,7 +143,7 @@ export function useRenameWithUndo(documentId: string, setTitle: (title: string) 
 }
 ```
 
-`AppUndoHistory` reports `canUndo`, `canRedo`, `undoTitle` and `redoTitle`, and offers `undo()`, `redo()` and `subscribe()`. Menus read the titles to show entries such as "Undo Rename Note".
+`AppUndoHistory` reports `canUndo`, `canRedo`, `undoTitle` and `redoTitle`, and offers `undo()`, `redo()` and `subscribe()`. The titles are complete menu titles with the verb included, such as "Undo Rename Note" (or "Undo" when nothing can be undone), so use them as given rather than prefixing "Undo". The standard Edit menu commands already show them.
 
 For an operation that first has to finish work before it knows what to reverse, call `reserve()`. It returns a reservation you either `commit(action)` or `cancel()`.
 

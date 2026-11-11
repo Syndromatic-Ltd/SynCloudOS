@@ -1,6 +1,6 @@
 # FX frameworks
 
-The FX frameworks are twelve TypeScript libraries for animation, graphics, imaging, text, sound, touch, motion, media, video, MIDI, location and search. They are web-native analogues of Apple's Core frameworks: the same concepts and the same division of labour, expressed as immutable values, explicit lifetimes and standard web platform primitives.
+The FX frameworks are TypeScript libraries shaped after Apple's frameworks, expressed as immutable values, explicit lifetimes and standard web platform primitives.
 
 Each framework has a short prefix that appears on every public type, so a name tells you where it belongs.
 
@@ -16,8 +16,18 @@ Each framework has a short prefix that appears on every public type, so a name t
 | [MediaFX](media.md) | `MEFX` | Core Media | `fx/media` | Rational time, timebases, sample buffers |
 | [VideoFX](video.md) | `VFX` | Video Toolbox and AVFoundation | `fx/video`, `fx/video/webm` | Frames, codecs, capture, containers |
 | [MIDIFX](midi.md) | `MIFX` | Core MIDI | `fx/midi` | MIDI 2.0 packets, parsing and scheduling |
+| [BluetoothFX](bluetooth.md) | `BTFX` | Core Bluetooth | `fx/bluetooth` | Central-role GATT |
+| [NFCFX](nfc.md) | `NFX` | Core NFC | `fx/nfc` | Foreground NDEF |
+| [SpeechFX](speech.md) | `SPFX` | Speech | `fx/speech` | Supplied audio requests; web sources unavailable |
+| [ContactsFX](contacts.md) | `CNFX` | Contacts | `fx/contacts` | Per-request contact picker |
+| [PassFX](pass.md) | `PKFX` | PassKit | `fx/pass` | PassKit payment classes; browser presentation unavailable |
+| [XRFX](xr.md) | `XRFX` | ARKit sessions | `fx/xr` | ARKit sessions, immutable frames, anchors and raycasts |
 | [LocationFX](location.md) | `LFX` | Core Location | `fx/location` | Position, course and authorisation |
 | [LuminaFX](lumina.md) | `LUFX` | Core Spotlight | `fx/lumina` | On-device indexing and search |
+| [CompressionFX](compression.md) | `CPFX` | Compression | `fx/compression` | Apple's input/output closure filters |
+| [NetworkFX](network.md) | `NWFX` | Network | `fx/network` | Apple path monitors with app-scoped Dispatch delivery |
+| [CryptoFX](crypto.md) | `CRFX` | CryptoKit | `fx/crypto` | Typed SHA/HMAC/HKDF, AES.GCM, P256/P384/P521 and Curve25519 with Foundation bytes |
+| [DispatchFX](dispatch.md) | `DFX` | Dispatch | `fx/dispatch` | Time, QoS queues, work items, groups, semaphores, delayed submission, sources, specifics and execution preconditions |
 
 ## Where each framework is documented
 
@@ -40,23 +50,32 @@ import { offsetRect } from "@syndromatic/syncloudos/fx/graphics";
 const moved = offsetRect({ x: 2, y: 3, width: 4, height: 5 }, 10, 20);
 ```
 
+CompressionFX is also a direct library: its input/output filters use read/write closures without a mounted session or permission. Its internal codec implementation lives in [Foundation](../foundation.md), beneath FX. Each framework keeps Apple's own algorithm enum.
+
 **Through the session.** Anything that touches a device, the page or the user's attention comes from the mounted SynWare session. Cameras, microphones, speakers, sensors, location, layers bound to elements and decoded resources belong to the application's lifetime, so the host can enforce permissions, honour the user's settings and release everything when the application closes.
 
 | Hook | Client | Permission |
 | --- | --- | --- |
-| `useSynWareAnimations` | Layers bound to page elements, canvas renderers | None |
-| `useSynWareImages` | Decoded image resources | None |
-| `useSynWareTextLayout` | Text measurement and fonts | None |
-| `useSynWareAudio` | Audio engines and sessions | `audio.play`, `audio.record` |
-| `useSynWareHaptics` | Haptic engine | `haptics.play` |
-| `useSynWareMotion` | Motion manager | `motion.read` |
-| `useSynWareMedia` | Media clocks | None |
-| `useSynWareVideo` | Capture, decode, encode | `video.capture.camera` and related |
-| `useSynWareMIDI` | MIDI access | `midi.access` |
-| `useSynWareLocation` | Location manager | `location.read`, `location.request` |
-| `useSynWareLumina` | Search index | `lumina.query` |
+| `useAnimations` | Layers bound to page elements, canvas renderers | None |
+| `useImages` | Decoded image resources | None |
+| `useTextLayout` | Text measurement and fonts | None |
+| `useAudio` | Audio engines and sessions | `audio.play`, `audio.record` |
+| `useHaptics` | Haptic engine | `haptics.play` |
+| `useMotion` | Motion manager | `motion.read` |
+| `useMedia` | Media clocks | None |
+| `useVideo` | Capture, decode, encode | `video.capture.camera` and related |
+| `useMIDI` | MIDI access | `midi.access` |
+| `useBluetooth` | Central manager | `bluetooth.access` |
+| `useNFC` | Real component-owned `NFXNDEFReaderSession` | `nfc.read`, `nfc.write` |
+| `useSpeech` | Recognizer | `speech.recognize` |
+| `useContacts` | Real CNFXContactStore; selection via NSE-presented picker | `contacts.select` |
+| `usePayment(request)` | Real component-owned `PKFXPaymentAuthorizationController` | `payment.request` |
+| `useXR` | Component-owned `XRFXSession` | `xr.session` |
+| `useLocation` | Location manager | `location.read`, `location.request` |
+| `useLumina` | Search index | `lumina.query` |
+| `useNetwork` | Component-owned `NWFXPathMonitor` | `network.read` |
 
-Declare the permissions an application needs in its manifest `permissions` list. A denied capability arrives as an ordinary result the application can explain to the user.
+Declare the permissions an application needs in its manifest `entitlements` list. A denied capability arrives as an ordinary result the application can explain to the user.
 
 ## Shared conventions
 

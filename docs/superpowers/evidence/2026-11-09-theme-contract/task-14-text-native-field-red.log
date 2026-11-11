@@ -1,0 +1,29 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-text-drawing-state.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-text-drawing-state.test.tsx (5 tests | 1 failed) 90ms
+   × publishes native editors in an input group while preserving nested control ownership 71ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-text-drawing-state.test.tsx > publishes native editors in an input group while preserving nested control ownership
+AssertionError: expected null to be 'field' // Object.is equality
+
+- Expected:
+"field"
+
++ Received:
+null
+
+ ❯ tests/runtime/nse-text-drawing-state.test.tsx:13:120
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  01:57:33
+   Duration  2.04s (transform 630ms, setup 28ms, import 899ms, tests 90ms, environment 890ms)

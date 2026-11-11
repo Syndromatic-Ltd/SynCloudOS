@@ -25,9 +25,26 @@ export interface RuntimePersistenceOptions {
   readonly storage: Storage | null;
   readonly namespace?: string;
 }
+
+const preferenceListeners = new WeakMap<SynCloudOSPersistence, Set<(key: string) => void>>();
+
+/** @internal Observes committed writes/removals on the canonical runtime manager. */
+export function subscribePersistencePreferences(persistence: SynCloudOSPersistence, listener: (key: string) => void): () => void {
+  const listeners = preferenceListeners.get(persistence);
+  if (!listeners) throw new TypeError("Preference notifications require the canonical runtime persistence manager.");
+  listeners.add(listener);
+  return () => { listeners.delete(listener); };
+}
+
 export function createPersistence({ runtimeId, storage, namespace: requestedNamespace }: RuntimePersistenceOptions): SynCloudOSPersistence {
   const scopedNamespace = requestedNamespace ?? `SynCloudOS4:${runtimeId}`;
-  return {
+  const listeners = new Set<(key: string) => void>();
+  const notify = (key: string) => {
+    for (const listener of [...listeners]) {
+      try { listener(key); } catch (error) { queueMicrotask(() => { throw error; }); }
+    }
+  };
+  const persistence: SynCloudOSPersistence = {
     runtimeId,
     getPreference<T>(key: string, fallback: T): T {
       if (!storage) return fallback;
@@ -42,10 +59,11 @@ export function createPersistence({ runtimeId, storage, namespace: requestedName
       if (!storage) return false;
       try {
         storage.setItem(`${scopedNamespace}:${key}`, JSON.stringify(value));
-        return true;
       } catch {
         return false;
       }
+      notify(key);
+      return true;
     },
     readPreferenceText(key: string) {
       if (!storage) return null;
@@ -59,16 +77,20 @@ export function createPersistence({ runtimeId, storage, namespace: requestedName
       if (!storage) return false;
       try {
         storage.setItem(`${scopedNamespace}:${key}`, text);
-        return true;
       } catch {
         return false;
       }
+      notify(key);
+      return true;
     },
     removePreference(key: string) {
       storage?.removeItem(`${scopedNamespace}:${key}`);
+      if (storage) notify(key);
     },
     dispose() {
-      return undefined;
+      listeners.clear();
     },
   };
+  preferenceListeners.set(persistence, listeners);
+  return persistence;
 }

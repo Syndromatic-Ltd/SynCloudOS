@@ -86,7 +86,7 @@ describe("GraphicsFX structured searchable PDF text", () => {
       writer.drawPositionedText(indic.runs);
       writer.endPage();
 
-      const bytes = await writer.finish();
+      const bytes = (await writer.finish()).bytes;
       const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs");
       const task = getDocument({ data: bytes, useSystemFonts: false, disableFontFace: true });
       const pdf = await task.promise;
@@ -127,7 +127,7 @@ describe("GraphicsFX structured searchable PDF text", () => {
       writer.beginPage({ width: 100, height: 40 });
       expect(() => writer.drawPositionedText(runs)).toThrowError(DOMException);
       writer.endPage();
-      const bytes = await writer.finish();
+      const bytes = (await writer.finish()).bytes;
       const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs");
       const task = getDocument({ data: bytes, disableFontFace: true });
       const pdf = await task.promise;
@@ -157,7 +157,7 @@ describe("GraphicsFX structured searchable PDF text", () => {
     writer.endPage();
     writer.addOutline({ title: "Introduction", pageIndex: 0 });
 
-    const bytes = await writer.finish(), inspectionBytes = bytes.slice();
+    const bytes = (await writer.finish()).bytes, inspectionBytes = bytes.slice();
     const backend = await PDFDocument.load(inspectionBytes);
     const language = backend.catalog.lookup(PDFName.of("Lang"));
     expect(language).toBeInstanceOf(PDFString);
@@ -202,7 +202,7 @@ describe("GraphicsFX structured searchable PDF text", () => {
     ]));
     writer.endPage();
 
-    const bytes = await writer.finish(), inspectionBytes = bytes.slice();
+    const bytes = (await writer.finish()).bytes, inspectionBytes = bytes.slice();
     const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs"), task = getDocument({ data: bytes, disableFontFace: true }), pdf = await task.promise;
     try {
       const page = await pdf.getPage(1), canvas = createCanvas(120, 40), context = canvas.getContext("2d");

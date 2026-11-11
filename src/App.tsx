@@ -18,12 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useCallback, useEffect, useMemo, useState, type ComponentType } from "react";
+import { getSynWareNamespace } from "./SynCloudOS/AppSDK/useStrings";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState, type ComponentType } from "react";
 import { WebspringHost } from "./Webspring/WebspringHost";
 import type { SynCloudOSShellResources } from "./Webspring/WebspringController";
 import type { AuthenticationInput, WebspringDefinition } from "./Webspring/webspringTypes";
-import type { WebspringContentSources } from "./Webspring/webspringContent";
-import { WindowContentRendererRegistry, WindowLayer } from "./Webspring/WindowLayer";
+import { WindowContentRendererRegistry, WindowLayer, syncApplicationWindowContentRenderers, type ApplicationWindowRendererRegistrations } from "./Webspring/WindowLayer";
 import type { SystemStartupPhase } from "./Webspring/SystemStartupLayer";
 import { useRuntimeSelector, useKernelSynCloudOS } from "./SynCloudOSReact";
 import { SystemUILayer } from "./Webspring/SystemUILayer";
@@ -39,16 +39,15 @@ function selectRuntimePresentationReady(snapshot: import("./SynCloudOS/Runtime/r
   return snapshot.booted || snapshot.statechart.currentState !== "booting";
 }
 
-const emptyContentSources: WebspringContentSources = Object.freeze({});
-
-export function App({ shell, shellResources, authentication, contentSources = emptyContentSources }: {
+export function App({ shell, shellResources, authentication }: {
   readonly shell: WebspringDefinition;
   readonly shellResources?: SynCloudOSShellResources;
   readonly authentication?: AuthenticationInput;
-  readonly contentSources?: WebspringContentSources;
 }) {
   const runtime = useKernelSynCloudOS();
   const frameworkWindowRenderers = useMemo(() => new WindowContentRendererRegistry(), []);
+  const frameworkApplicationRenderers = useMemo<ApplicationWindowRendererRegistrations>(() => new Map(), []);
+  const apps = useRuntimeSelector(snapshot => snapshot.appInfo);
   const frameworkWindowRendererRegistration = useMemo(() => ({
     register: frameworkWindowRenderers.register.bind(frameworkWindowRenderers),
   }), [frameworkWindowRenderers]);
@@ -56,11 +55,15 @@ export function App({ shell, shellResources, authentication, contentSources = em
     ? runtime.environment.browser.getLocation().pathname
     : null;
   const [FrameworkTestHost, setFrameworkTestHost] = useState<ComponentType<DevelopmentTestHostProps> | null>(null);
+  useLayoutEffect(() => {
+    if (!frameworkTestPath?.startsWith("/__framework-tests/")) return;
+    syncApplicationWindowContentRenderers(frameworkWindowRenderers, runtime, apps, frameworkApplicationRenderers);
+  }, [apps, frameworkApplicationRenderers, frameworkTestPath, frameworkWindowRenderers, runtime]);
   const presentationReady = useRuntimeSelector(selectRuntimePresentationReady);
   const localeVersion = useRuntimeSelector((snapshot) => snapshot.localeServices.dictionaryVersion);
   const siteNameKey = shell.manifest.webspringShell.branding.name.key;
   const siteName = useMemo(() => {
-    const translated = runtime.locale.t(siteNameKey, undefined, shell.manifest.id);
+    const translated = runtime.locale.t(siteNameKey, undefined, getSynWareNamespace(shell.manifest.bundleIdentifier));
     return translated === siteNameKey ? shell.manifest.webspringShell.branding.name.fallback ?? siteNameKey : translated;
   }, [localeVersion, runtime, shell, siteNameKey]);
   const [startupPhase, setStartupPhase] = useState<SystemStartupPhase>("booting");
@@ -85,24 +88,26 @@ export function App({ shell, shellResources, authentication, contentSources = em
     }
     return result.status === "executed";
   }, [runtime]);
+  const authenticationPolicy = (typeof authentication === "object" ? authentication.policy : authentication) ?? "disabled";
 
   if (frameworkTestPath?.startsWith("/__framework-tests/") && FrameworkTestHost) {
     const windowManagement = frameworkTestPath.startsWith("/__framework-tests/windows/management");
+    const usesWindows = windowManagement || frameworkTestPath.startsWith("/__framework-tests/navigation/adaptive");
     return (
       <>
         <FrameworkTestHost
           pathname={frameworkTestPath}
           windowRendererRegistration={windowManagement ? frameworkWindowRendererRegistration : undefined}
         />
-        {windowManagement ? <WindowLayer contentRegistry={frameworkWindowRenderers} /> : null}
+        {usesWindows ? <WindowLayer contentRegistry={frameworkWindowRenderers} /> : null}
       </>
     );
   }
 
   return (
     <>
-      <WebspringHost shell={shell} shellResources={shellResources} authentication={authentication} startupPhase={startupPhase} contentSources={contentSources} />
-      <SystemUILayer onLogOut={handleLogOut} siteName={siteName} />
+      <WebspringHost shell={shell} shellResources={shellResources} authentication={authentication} startupPhase={startupPhase} />
+      <SystemUILayer onLogOut={authenticationPolicy === "disabled" ? undefined : handleLogOut} preferences={shell.preferences} siteName={siteName} />
     </>
   );
 }

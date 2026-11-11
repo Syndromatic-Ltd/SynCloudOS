@@ -1,0 +1,298 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/integration/nse-open-panel.test.tsx tests/nse/file-panels/nse-path-control.test.tsx tests/nse/file-panels/nse-workspace.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+stderr | tests/integration/nse-open-panel.test.tsx > drawn Open panel > composes Atmo push, tool, segmented and path controls without panel artwork stand-ins
+An error occurred in the <NSEOpenPanelCollection> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+
+stderr | tests/integration/nse-open-panel.test.tsx > drawn Open panel > browses a grant, filters content, navigates history and returns file references
+An error occurred in the <NSEOpenPanelCollection> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+
+stderr | tests/integration/nse-open-panel.test.tsx > drawn Open panel > starts compact on Sources and drills into a collection with a back action
+An error occurred in the <NSEOpenPanelCollection> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+
+stderr | tests/integration/nse-open-panel.test.tsx > drawn Open panel > drills into a compact folder once and waits for Open before accepting a file
+An error occurred in the <NSEOpenPanelCollection> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+
+stderr | tests/integration/nse-open-panel.test.tsx > drawn Open panel > searches the current directory and clears a hidden selection
+An error occurred in the <NSEOpenPanelCollection> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+
+ ❯ tests/integration/nse-open-panel.test.tsx (9 tests | 5 failed) 5361ms
+     × composes Atmo push, tool, segmented and path controls without panel artwork stand-ins 1132ms
+     × browses a grant, filters content, navigates history and returns file references 1025ms
+     × starts compact on Sources and drills into a collection with a back action 1020ms
+     × drills into a compact folder once and waits for Open before accepting a file 1016ms
+     × searches the current directory and clears a hidden selection 1025ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/nse-open-panel.test.tsx > drawn Open panel > composes Atmo push, tool, segmented and path controls without panel artwork stand-ins
+TestingLibraryElementError: Unable to find an element with the text: sunset.png. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+<body>
+  <div />
+</body>
+
+Ignored nodes: comments, script, style
+<body>
+  <div />
+</body>
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ tests/integration/nse-open-panel.test.tsx:33:44
+     31|     expect(screen.getByRole("button", { name: "Open" }).getAttribute("…
+     32|     expect(screen.getByRole("button", { name: "System Chooser…" }).get…
+     33|     await choose("Projects"); await screen.findByText("sunset.png");
+       |                                            ^
+     34|     expect(container.querySelector('[data-segment-style="texturedRound…
+     35|     expect(container.querySelector('[data-nse-control="path-control"]'…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/integration/nse-open-panel.test.tsx > drawn Open panel > browses a grant, filters content, navigates history and returns file references
+TestingLibraryElementError: Unable to find an element with the text: sunset.png. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+<body>
+  <div />
+</body>
+
+Ignored nodes: comments, script, style
+<body>
+  <div />
+</body>
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ tests/integration/nse-open-panel.test.tsx:46:44
+     44|   it("browses a grant, filters content, navigates history and returns …
+     45|     const { session } = fixture(); render(<NSEOpenPanelContent session…
+     46|     await choose("Projects"); await screen.findByText("sunset.png");
+       |                                            ^
+     47|     expect(screen.queryByText("notes.txt")).toBeNull();
+     48|     fireEvent.doubleClick(screen.getByText("Drone")); await screen.fin…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/integration/nse-open-panel.test.tsx > drawn Open panel > starts compact on Sources and drills into a collection with a back action
+TestingLibraryElementError: Unable to find an element with the text: sunset.png. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+<body>
+  <div />
+</body>
+
+Ignored nodes: comments, script, style
+<body>
+  <div />
+</body>
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ tests/integration/nse-open-panel.test.tsx:59:18
+     57|     expect(screen.getByText("Sources", { selector: "strong" })).toBeTr…
+     58|     expect(screen.queryByRole("searchbox")).toBeNull(); await choose("…
+     59|     await screen.findByText("sunset.png"); expect(screen.getByRole("se…
+       |                  ^
+     60|     fireEvent.click(screen.getByRole("button", { name: "Sources" })); …
+     61|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/integration/nse-open-panel.test.tsx > drawn Open panel > drills into a compact folder once and waits for Open before accepting a file
+TestingLibraryElementError: Unable to find an element with the text: Drone. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+<body>
+  <div />
+</body>
+
+Ignored nodes: comments, script, style
+<body>
+  <div />
+</body>
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ choose tests/integration/nse-open-panel.test.tsx:26:71
+     24|   return { root, locked, port, session };
+     25| }
+     26| const choose = async (name: string) => { fireEvent.click(await screen.…
+       |                                                                       ^
+     27| describe("drawn Open panel", () => {
+     28|   it("composes Atmo push, tool, segmented and path controls without pa…
+ ❯ tests/integration/nse-open-panel.test.tsx:64:37
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/integration/nse-open-panel.test.tsx > drawn Open panel > searches the current directory and clears a hidden selection
+TestingLibraryElementError: Unable to find an element with the text: sunset.png. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+<body>
+  <div />
+</body>
+
+Ignored nodes: comments, script, style
+<body>
+  <div />
+</body>
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ tests/integration/nse-open-panel.test.tsx:79:44
+     77|   it("searches the current directory and clears a hidden selection", a…
+     78|     const { session } = fixture(); render(<NSEOpenPanelContent session…
+     79|     await choose("Projects"); await screen.findByText("sunset.png"); f…
+       |                                            ^
+     80|     fireEvent.change(screen.getByRole("searchbox"), { target: { value:…
+     81|     await waitFor(() => expect(screen.queryByText("sunset.png")).toBeN…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 5 unhandled errors during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯⎯ Uncaught Exception ⎯⎯⎯⎯⎯
+TypeError: Controller snapshots require cloneable own-data values: the value could not be cloned safely.
+ ❯ immutableFailure src/NSE/Controllers/immutableValue.ts:25:9
+     23|
+     24| function immutableFailure(message: string): never {
+     25|   throw new TypeError(`Controller snapshots require cloneable own-data…
+       |         ^
+     26| }
+     27|
+ ❯ ownershipFailure src/NSE/Controllers/immutableValue.ts:35:10
+ ❯ ownImmutable src/NSE/Controllers/immutableValue.ts:317:12
+ ❯ NSEArrayController.#owned src/NSE/Controllers/NSEArrayController.ts:411:12
+ ❯ src/NSE/Controllers/NSEArrayController.ts:415:53
+ ❯ NSEArrayController.#ownedContent src/NSE/Controllers/NSEArrayController.ts:415:34
+ ❯ new NSEArrayController src/NSE/Controllers/NSEArrayController.ts:164:26
+ ❯ src/NSE/Controllers/useNSEOwnedController.ts:103:22
+ ❯ createSlot src/NSE/Controllers/useNSEOwnedController.ts:41:24
+
+This error originated in "tests/integration/nse-open-panel.test.tsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "composes Atmo push, tool, segmented and path controls without panel artwork stand-ins". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯⎯ Uncaught Exception ⎯⎯⎯⎯⎯
+TypeError: Controller snapshots require cloneable own-data values: the value could not be cloned safely.
+ ❯ immutableFailure src/NSE/Controllers/immutableValue.ts:25:9
+     23|
+     24| function immutableFailure(message: string): never {
+     25|   throw new TypeError(`Controller snapshots require cloneable own-data…
+       |         ^
+     26| }
+     27|
+ ❯ ownershipFailure src/NSE/Controllers/immutableValue.ts:35:10
+ ❯ ownImmutable src/NSE/Controllers/immutableValue.ts:317:12
+ ❯ NSEArrayController.#owned src/NSE/Controllers/NSEArrayController.ts:411:12
+ ❯ src/NSE/Controllers/NSEArrayController.ts:415:53
+ ❯ NSEArrayController.#ownedContent src/NSE/Controllers/NSEArrayController.ts:415:34
+ ❯ new NSEArrayController src/NSE/Controllers/NSEArrayController.ts:164:26
+ ❯ src/NSE/Controllers/useNSEOwnedController.ts:103:22
+ ❯ createSlot src/NSE/Controllers/useNSEOwnedController.ts:41:24
+
+This error originated in "tests/integration/nse-open-panel.test.tsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "browses a grant, filters content, navigates history and returns file references". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯⎯ Uncaught Exception ⎯⎯⎯⎯⎯
+TypeError: Controller snapshots require cloneable own-data values: the value could not be cloned safely.
+ ❯ immutableFailure src/NSE/Controllers/immutableValue.ts:25:9
+     23|
+     24| function immutableFailure(message: string): never {
+     25|   throw new TypeError(`Controller snapshots require cloneable own-data…
+       |         ^
+     26| }
+     27|
+ ❯ ownershipFailure src/NSE/Controllers/immutableValue.ts:35:10
+ ❯ ownImmutable src/NSE/Controllers/immutableValue.ts:317:12
+ ❯ NSEArrayController.#owned src/NSE/Controllers/NSEArrayController.ts:411:12
+ ❯ src/NSE/Controllers/NSEArrayController.ts:415:53
+ ❯ NSEArrayController.#ownedContent src/NSE/Controllers/NSEArrayController.ts:415:34
+ ❯ new NSEArrayController src/NSE/Controllers/NSEArrayController.ts:164:26
+ ❯ src/NSE/Controllers/useNSEOwnedController.ts:103:22
+ ❯ createSlot src/NSE/Controllers/useNSEOwnedController.ts:41:24
+
+This error originated in "tests/integration/nse-open-panel.test.tsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "starts compact on Sources and drills into a collection with a back action". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯⎯ Uncaught Exception ⎯⎯⎯⎯⎯
+TypeError: Controller snapshots require cloneable own-data values: the value could not be cloned safely.
+ ❯ immutableFailure src/NSE/Controllers/immutableValue.ts:25:9
+     23|
+     24| function immutableFailure(message: string): never {
+     25|   throw new TypeError(`Controller snapshots require cloneable own-data…
+       |         ^
+     26| }
+     27|
+ ❯ ownershipFailure src/NSE/Controllers/immutableValue.ts:35:10
+ ❯ ownImmutable src/NSE/Controllers/immutableValue.ts:317:12
+ ❯ NSEArrayController.#owned src/NSE/Controllers/NSEArrayController.ts:411:12
+ ❯ src/NSE/Controllers/NSEArrayController.ts:415:53
+ ❯ NSEArrayController.#ownedContent src/NSE/Controllers/NSEArrayController.ts:415:34
+ ❯ new NSEArrayController src/NSE/Controllers/NSEArrayController.ts:164:26
+ ❯ src/NSE/Controllers/useNSEOwnedController.ts:103:22
+ ❯ createSlot src/NSE/Controllers/useNSEOwnedController.ts:41:24
+
+This error originated in "tests/integration/nse-open-panel.test.tsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "drills into a compact folder once and waits for Open before accepting a file". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯⎯ Uncaught Exception ⎯⎯⎯⎯⎯
+TypeError: Controller snapshots require cloneable own-data values: the value could not be cloned safely.
+ ❯ immutableFailure src/NSE/Controllers/immutableValue.ts:25:9
+     23|
+     24| function immutableFailure(message: string): never {
+     25|   throw new TypeError(`Controller snapshots require cloneable own-data…
+       |         ^
+     26| }
+     27|
+ ❯ ownershipFailure src/NSE/Controllers/immutableValue.ts:35:10
+ ❯ ownImmutable src/NSE/Controllers/immutableValue.ts:317:12
+ ❯ NSEArrayController.#owned src/NSE/Controllers/NSEArrayController.ts:411:12
+ ❯ src/NSE/Controllers/NSEArrayController.ts:415:53
+ ❯ NSEArrayController.#ownedContent src/NSE/Controllers/NSEArrayController.ts:415:34
+ ❯ new NSEArrayController src/NSE/Controllers/NSEArrayController.ts:164:26
+ ❯ src/NSE/Controllers/useNSEOwnedController.ts:103:22
+ ❯ createSlot src/NSE/Controllers/useNSEOwnedController.ts:41:24
+
+This error originated in "tests/integration/nse-open-panel.test.tsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "searches the current directory and clears a hidden selection". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  5 failed | 7 passed (12)
+     Errors  5 errors
+   Start at  09:36:12
+   Duration  8.34s (transform 1.52s, setup 90ms, import 2.36s, tests 5.46s, environment 2.02s)
+

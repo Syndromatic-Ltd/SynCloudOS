@@ -50,7 +50,7 @@ export function NSEAppFrame({
         {sidebar ? <div className="nse-app-frame-sidebar">{sidebar}</div> : null}
         <div className="nse-app-frame-content">{children}</div>
       </div>
-      {statusBar ? <div className="nse-app-frame-statusbar">{statusBar}</div> : null}
+      {statusBar ? <div data-nse-control="status-bar" data-nse-part="background" className="nse-app-frame-statusbar">{statusBar}</div> : null}
     </main>
   );
 }

@@ -20,9 +20,8 @@
 
 import { useEffect, useId, useMemo } from "react";
 
-import { NSEArrayController } from "../Controllers";
+import { useNSEArrayController } from "../Controllers";
 import { NSECollectionView, createAdaptiveCollectionLayout, type NSEDataViewAdapter } from "../DataViews";
-import { useNSEDeferredDisposal, type NSEDisposalScheduler } from "../interactionLifecycle";
 import type { MediaPanelItem } from "../../SynCloudOS/SynCloudOS";
 import { encodeOpaqueIdentity } from "../../SynCloudOS/nseRuntimeContracts";
 
@@ -41,20 +40,14 @@ export function mediaCollectionItemId(item: MediaPanelItem): string {
   return encodeOpaqueIdentity([item.providerId, item.id]);
 }
 
-const disposalScheduler: NSEDisposalScheduler = {
-  setTimeout: (callback, delay) => globalThis.setTimeout(callback, delay),
-  clearTimeout: (handle) => globalThis.clearTimeout(handle as number),
-};
-
 export function NSEMediaCollectionPresenter({ items, selectedIds, selection, direction, onSelectionChange, onActivate }: MediaCollectionPresenterProps) {
   const instanceId = useId().replace(/:/g, "");
-  const controller = useMemo(() => new NSEArrayController<MediaPanelItem, string>({
+  const controller = useNSEArrayController<MediaPanelItem, string>({
     id: `media-collection-${instanceId}`,
     content: items,
     getId: mediaCollectionItemId,
     selection: { mode: selection, allowsEmpty: true, preservesSelection: true },
-  }), [instanceId, selection]);
-  useNSEDeferredDisposal(controller, disposalScheduler);
+  }, [selection]);
   useEffect(() => {
     controller.setContent(items);
     const available = new Set(items.map(mediaCollectionItemId));
@@ -79,8 +72,8 @@ export function NSEMediaCollectionPresenter({ items, selectedIds, selection, dir
         onSelectionChange={({ snapshot }) => onSelectionChange(snapshot.selectedIds)}
         onActivate={(_id, item) => onActivate(item)}
         renderItem={({ item, selected }) => (
-          <div className="nse-media-grid-item" aria-label={`${item.name}, ${item.kind}`} data-selected={selected ? "true" : "false"} data-nse-part="media-item">
-            {item.thumbnailUrl ? <img className="nse-media-grid-thumbnail" src={item.thumbnailUrl} alt="" /> : <span className="nse-media-grid-placeholder" aria-hidden="true">{item.kind}</span>}
+          <div className="nse-media-grid-item" aria-label={`${item.name}, ${item.kind}`} data-selected={selected ? "true" : "false"} data-nse-part="media-item" data-nse-selected={selected ? "" : undefined}>
+            {item.thumbnailUrl ? <img data-nse-part="image" className="nse-media-grid-thumbnail" src={item.thumbnailUrl} alt="" /> : <span className="nse-media-grid-placeholder" aria-hidden="true">{item.kind}</span>}
             <span className="nse-media-grid-name">{item.name}</span>
           </div>
         )}

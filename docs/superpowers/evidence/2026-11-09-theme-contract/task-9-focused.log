@@ -1,0 +1,34 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-theme-system-surface-coverage.test.tsx tests/runtime/login-window-parity.test.tsx tests/runtime/login-gate-presentation.test.tsx tests/runtime/notification-presenter.test.ts tests/runtime/notification-centre-presentation.test.tsx tests/runtime/webspring-quickswitch-presentation.test.tsx tests/runtime/webspring-folders-host.test.tsx tests/runtime/webspring-folder-tile.test.tsx tests/runtime/webspring-folder-presentation.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-theme-system-surface-coverage.test.tsx (10 tests | 1 failed) 345ms
+     × confirm-dialog 12ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-theme-system-surface-coverage.test.tsx > system surface theme hooks > confirm-dialog
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/runtime/nse-theme-system-surface-coverage.test.tsx:27:48
+     25|         return element!;
+     26|       });
+     27|       expect(parts.has(root.dataset.nsePart!)).toBe(true);
+       |                                                ^
+     28|       for (const part of root.querySelectorAll<HTMLElement>("[data-nse…
+     29|       if (identity === "board") {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 8 passed (9)
+      Tests  1 failed | 50 passed (51)
+   Start at  21:29:43
+   Duration  14.88s (transform 7.35s, setup 120ms, import 18.45s, tests 1.87s, environment 7.04s)

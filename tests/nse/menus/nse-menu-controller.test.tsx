@@ -1,3 +1,4 @@
+import { createTestTheme } from "../../fixtures/themes";
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -20,31 +21,149 @@
 
 // @vitest-environment jsdom
 import { installNSEScrollIntoViewFixture } from "../fixtures/browser";
+import { nseMenuModel } from "../../../src/NSE/Menus/menuTypes";
 installNSEScrollIntoViewFixture();
 import React, { useMemo, useState } from "react";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  NSEMenuView,
   NSEMenu,
-  NSEContextMenu,
-  NSEMenuController,
   NSEMenuBar,
   NSEMenuOverlay,
-  NSEPopupButton,
   orderMenuEntries,
   type NSEMenuModel,
   type NSEMenuRuntimePort,
 } from "../../../src/NSE/Menus";
 import { NSEOverlayProvider } from "../../../src/NSE/Overlays";
-import { defineNSEAppearance, NSEAppearanceProvider } from "../../../src/NSE/Appearance";
-import { NSEPicker, NSEPopup } from "../../../src/NSE/Menus";
+import { NSEView } from "../../../src/NSE/Views/NSEView";
+import { NSEMenuRuntimeProvider } from "../../../src/NSE/Menus/menuRuntimeContext";
+import { NSEAppearanceProvider } from "../../../src/NSE/Appearance";
+import { NSEPopUpButton, NSEPopup } from "../../../src/NSE/Menus";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 
-const customAppearance = defineNSEAppearance({ id: "test-custom", displayName: "Test custom" });
+import { NSEMenuOverlayPresentationScope } from "../../../src/NSE/Menus/menuPresentationContext";
+
+const customAppearance = createTestTheme("com.example.test-custom", "Test custom");
 
 afterEach(() => {
   document.body.replaceChildren();
   vi.useRealTimers();
+});
+
+it("revalidates a visible menu activation after focus changes without dispatching stale presentations", async () => {
+  let responderGeneration = 1;
+  const validateMany = vi.fn(async (requests: readonly { key: string; commandId: string }[]) => new Map(requests.map(request => [request.key, presentation(request.commandId)])));
+  const port = runtime(validateMany);
+  port.commands.getPresentationGeneration = () => ({ registryGeneration: 0, responderGeneration });
+  const controller = new NSEMenu({ [nseMenuModel]: model, runtime: port });
+  render(<NSEMenuView model={model} controller={controller} open />);
+  const button = await screen.findByRole("menuitem", { name: "Bold" });
+  responderGeneration++;
+  fireEvent.click(button);
+  await waitFor(() => expect(port.commands.dispatch).toHaveBeenCalledTimes(1));
+  expect(validateMany.mock.calls.length).toBeGreaterThan(1);
+  controller.dispose();
+});
+
+it("keeps a pointer activation when focus settles during its revalidation", async () => {
+  // A click focuses the row; in a compact sheet the focus scope settles while
+  // the activation is being revalidated, moving responder authority once more.
+  let responderGeneration = 1;
+  const validateMany = vi.fn(async (requests: readonly { key: string; commandId: string }[]) => {
+    if (validateMany.mock.calls.length === 2) responderGeneration++;
+    return new Map(requests.map(request => [request.key, presentation(request.commandId)]));
+  });
+  const port = runtime(validateMany);
+  port.commands.getPresentationGeneration = () => ({ registryGeneration: 0, responderGeneration });
+  const controller = new NSEMenu({ [nseMenuModel]: model, runtime: port });
+  render(<NSEMenuView model={model} controller={controller} open />);
+  fireEvent.click(await screen.findByRole("menuitem", { name: "Bold" }));
+  await waitFor(() => expect(port.commands.dispatch).toHaveBeenCalledTimes(1));
+  expect(validateMany).toHaveBeenCalledTimes(3);
+  controller.dispose();
+});
+
+it("closes rather than dispatching when command authority never settles", async () => {
+  let responderGeneration = 1;
+  const validateMany = vi.fn(async (requests: readonly { key: string; commandId: string }[]) => {
+    if (validateMany.mock.calls.length >= 2) responderGeneration++;
+    return new Map(requests.map(request => [request.key, presentation(request.commandId)]));
+  });
+  const port = runtime(validateMany);
+  port.commands.getPresentationGeneration = () => ({ registryGeneration: 0, responderGeneration });
+  const controller = new NSEMenu({ [nseMenuModel]: model, runtime: port });
+  render(<NSEMenuView model={model} controller={controller} open />);
+  fireEvent.click(await screen.findByRole("menuitem", { name: "Bold" }));
+  await waitFor(() => expect(controller.snapshot.open).toBe(false));
+  expect(port.commands.dispatch).not.toHaveBeenCalled();
+  controller.dispose();
+});
+
+it("retains the selected submenu while revalidating its activation", async () => {
+  let responderGeneration = 1;
+  const validateMany = vi.fn(async (requests: readonly { key: string; commandId: string }[]) => new Map(requests.map(request => [request.key, presentation(request.commandId)])));
+  const port = runtime(validateMany);
+  port.commands.getPresentationGeneration = () => ({ registryGeneration: 0, responderGeneration });
+  const controller = new NSEMenu({ [nseMenuModel]: model, runtime: port });
+  render(<NSEMenuView model={model} controller={controller} open />);
+  fireEvent.click(await screen.findByRole("menuitem", { name: "Alignment" }));
+  const item = await screen.findByRole("menuitem", { name: "Align Left" });
+  responderGeneration++;
+  fireEvent.click(item);
+  await waitFor(() => expect(port.commands.dispatch).toHaveBeenCalledWith("text.align", { edge: "left" }, expect.anything()));
+  controller.dispose();
+});
+
+it("refuses a menu action that becomes disabled during activation revalidation", async () => {
+  let enabled = true;
+  const validateMany = vi.fn(async (requests: readonly { key: string; commandId: string }[]) => new Map(requests.map(request => [request.key, presentation(request.commandId, { enabled })])));
+  const port = runtime(validateMany);
+  const controller = new NSEMenu({ [nseMenuModel]: model, runtime: port });
+  render(<NSEMenuView model={model} controller={controller} open />);
+  const item = await screen.findByRole("menuitem", { name: "Bold" });
+  enabled = false;
+  fireEvent.click(item);
+  await waitFor(() => expect(screen.getByRole("menuitem", { name: "Bold" }).getAttribute("aria-disabled")).toBe("true"));
+  expect(port.commands.dispatch).not.toHaveBeenCalled();
+  controller.dispose();
+});
+
+it("does not retarget the displayed menu command to another document's responder", async () => {
+  let responderId = "original-document";
+  const validateMany = vi.fn(async (requests: readonly { key: string; commandId: string }[]) => new Map(requests.map(request => [request.key, { ...presentation(request.commandId), responderId }])));
+  const port = runtime(validateMany);
+  const controller = new NSEMenu({ [nseMenuModel]: model, runtime: port });
+  render(<NSEMenuView model={model} controller={controller} open />);
+  const item = await screen.findByRole("menuitem", { name: "Bold" });
+  responderId = "other-document";
+  fireEvent.click(item);
+  await waitFor(() => expect(controller.snapshot.open).toBe(false));
+  expect(port.commands.dispatch).not.toHaveBeenCalled();
+  controller.dispose();
+});
+
+it("does not carry a pending activation into a dismissed and reopened menu", async () => {
+  type Request = { key: string; commandId: string };
+  let finish!: (value: ReadonlyMap<string, ReturnType<typeof presentation>>) => void;
+  let pending: readonly Request[] = [];
+  let count = 0;
+  const projected = (requests: readonly Request[]) => new Map(requests.map(request => [request.key, presentation(request.commandId)]));
+  const validateMany = vi.fn(async (requests: readonly Request[]) => {
+    if (++count === 2) { pending = requests; return new Promise<ReadonlyMap<string, ReturnType<typeof presentation>>>(resolve => { finish = resolve; }); }
+    return projected(requests);
+  });
+  const port = runtime(validateMany);
+  const controller = new NSEMenu({ [nseMenuModel]: model, runtime: port });
+  render(<NSEMenuView model={model} controller={controller} open />);
+  fireEvent.click(await screen.findByRole("menuitem", { name: "Bold" }));
+  await waitFor(() => expect(validateMany).toHaveBeenCalledTimes(2));
+  await act(async () => { controller.dismiss("escape"); await controller.open(); });
+  const reopened = controller.snapshot.generation;
+  await act(async () => { finish(projected(pending)); });
+  expect(port.commands.dispatch).not.toHaveBeenCalled();
+  expect(controller.snapshot).toMatchObject({ open: true, generation: reopened });
+  controller.dispose();
 });
 
 function presentation(commandId: string, overrides: Partial<{
@@ -139,11 +258,11 @@ function MenuOverlayHarness({
   return <NSEOverlayProvider runtimePort={runtimePort}>{children}</NSEOverlayProvider>;
 }
 
-describe("NSEMenuController", () => {
+describe("NSEMenu", () => {
   it("uses explicit item-menu overlay provenance when the host has no default responder", async () => {
     render(
       <MenuOverlayHarness>
-        <NSEMenu
+        <NSEMenuView
           label="Actions"
           defaultOpen
           menuOverlay={{ id: "gallery:actions", parentResponderId: "application:nse-control-gallery" }}
@@ -154,6 +273,29 @@ describe("NSEMenuController", () => {
 
     expect((await screen.findByRole("menu")).getAttribute("data-nse-menu-id")).toContain("nse-item-menu:");
     expect((screen.getByRole("menuitem", { name: "Go to today" }) as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it("shows an unavailable-reason tooltip only while the command is disabled", async () => {
+    const validateMany = vi.fn(async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
+      requests.map((request) => [request.key, {
+        ...presentation(request.commandId, { enabled: request.commandId !== "text.align" }),
+        disabledReason: "Alignment is unavailable.",
+      }]),
+    ));
+    const controller = new NSEMenu({ [nseMenuModel]: model, runtime: runtime(validateMany) });
+    const view = render(<NSEMenuView model={model} controller={controller} open />);
+    try {
+      const bold = await screen.findByRole("menuitem", { name: "Bold" });
+      await waitFor(() => expect(bold.hasAttribute("disabled")).toBe(false));
+      expect(bold.getAttribute("title")).toBeNull();
+      fireEvent.click(screen.getByRole("menuitem", { name: "Alignment" }));
+      const alignment = await screen.findByRole("menuitem", { name: "Align Left" });
+      await waitFor(() => expect(alignment.hasAttribute("disabled")).toBe(true));
+      expect(alignment.getAttribute("title")).toBeTruthy();
+    } finally {
+      view.unmount();
+      controller.dispose();
+    }
   });
 
   it("cancels a displayed command when its command registry or responder generation is replaced", async () => {
@@ -168,7 +310,7 @@ describe("NSEMenuController", () => {
       getPresentationGeneration: () => ({ registryGeneration, responderGeneration }),
       prepareDispatch,
     });
-    const controller = new NSEMenuController({ model, runtime: port });
+    const controller = new NSEMenu({ [nseMenuModel]: model, runtime: port });
     await controller.open();
 
     registryGeneration += 1;
@@ -190,7 +332,7 @@ describe("NSEMenuController", () => {
       getPresentationGeneration: () => ({ registryGeneration: 4, responderGeneration: 9 }),
       prepareDispatch,
     });
-    const controller = new NSEMenuController({ model, runtime: port });
+    const controller = new NSEMenu({ [nseMenuModel]: model, runtime: port });
     await controller.open();
     await controller.dispatch("bold-plain");
 
@@ -211,7 +353,7 @@ describe("NSEMenuController", () => {
     ));
     const port = runtime(validateMany);
     Object.assign(port.commands, { prepareDispatch });
-    const controller = new NSEMenuController({ model, runtime: port });
+    const controller = new NSEMenu({ [nseMenuModel]: model, runtime: port });
     await controller.open();
 
     const pending = controller.dispatch("bold-plain");
@@ -232,7 +374,7 @@ describe("NSEMenuController", () => {
       resolveValidation = resolve;
     }));
     const port = runtime(validateMany);
-    const controller = new NSEMenuController({ model, runtime: port });
+    const controller = new NSEMenu({ [nseMenuModel]: model, runtime: port });
 
     const opening = controller.open();
     expect(validateMany).toHaveBeenCalledTimes(1);
@@ -262,9 +404,9 @@ describe("NSEMenuController", () => {
       })]),
     ));
     const port = runtime(validateMany);
-    const controller = new NSEMenuController({ model, runtime: port });
+    const controller = new NSEMenu({ [nseMenuModel]: model, runtime: port });
 
-    render(<NSEMenu model={model} controller={controller} open />);
+    render(<NSEMenuView model={model} controller={controller} open />);
     const bold = await screen.findByRole("menuitemcheckbox", { name: "Bold" });
     const surface = screen.getByRole("menu").querySelector('[data-nse-nine-slice="menu-surface"]');
     expect(surface?.querySelectorAll("[data-nse-nine-slice-part]")).toHaveLength(9);
@@ -283,8 +425,8 @@ describe("NSEMenuController", () => {
     const validateMany = vi.fn(async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
       requests.map((request) => [request.key, presentation(request.commandId)]),
     ));
-    const controller = new NSEMenuController({ model, runtime: runtime(validateMany) });
-    render(<React.StrictMode><NSEMenu model={model} controller={controller} open /></React.StrictMode>);
+    const controller = new NSEMenu({ [nseMenuModel]: model, runtime: runtime(validateMany) });
+    render(<React.StrictMode><NSEMenuView model={model} controller={controller} open /></React.StrictMode>);
 
     await screen.findByRole("menuitem", { name: "Bold" });
     expect(validateMany).toHaveBeenCalledTimes(1);
@@ -309,13 +451,13 @@ describe("NSEMenuController", () => {
         { kind: "command", id: "apricot", commandId: "choose.apricot", labelOverride: "Apricot" },
       ],
     };
-    const controller = new NSEMenuController({
-      model: typeaheadModel,
+    const controller = new NSEMenu({
+      [nseMenuModel]: typeaheadModel,
       runtime: runtime(async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
         requests.map((request) => [request.key, presentation(request.commandId)]),
       ), { scheduler }),
     });
-    const rendered = render(<NSEMenu model={typeaheadModel} controller={controller} open />);
+    const rendered = render(<NSEMenuView model={typeaheadModel} controller={controller} open />);
     const menu = await screen.findByRole("menu");
     fireEvent.keyDown(menu, { key: "a" });
     fireEvent.keyDown(menu, { key: "p" });
@@ -332,7 +474,7 @@ describe("NSEMenuController", () => {
         : { hidden: true },
       )]),
     ));
-    const controller = new NSEMenuController({ model, runtime: runtime(validateMany) });
+    const controller = new NSEMenu({ [nseMenuModel]: model, runtime: runtime(validateMany) });
 
     await controller.open();
 
@@ -350,13 +492,13 @@ describe("NSEMenuController", () => {
       label: "Sort",
       entries: [{ kind: "command", id: "newest", commandId: "sort.newest", labelOverride: "Newest", selectionKind: "radio" }],
     };
-    const controller = new NSEMenuController({
-      model: radioModel,
+    const controller = new NSEMenu({
+      [nseMenuModel]: radioModel,
       runtime: runtime(async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
         requests.map((request) => [request.key, presentation(request.commandId, { state: "on" })]),
       )),
     });
-    render(<NSEMenu model={radioModel} controller={controller} open />);
+    render(<NSEMenuView model={radioModel} controller={controller} open />);
     expect((await screen.findByRole("menuitemradio", { name: "Newest" })).getAttribute("aria-checked")).toBe("true");
   });
 
@@ -381,7 +523,7 @@ describe("NSEMenuController", () => {
     const validateMany = vi.fn(async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
       requests.map((request) => [request.key, presentation(request.commandId)]),
     ));
-    const controller = new NSEMenuController({ model, runtime: runtime(validateMany, { scheduler }) });
+    const controller = new NSEMenu({ [nseMenuModel]: model, runtime: runtime(validateMany, { scheduler }) });
     await controller.open();
     const delayed = controller.openSubmenu("alignment", 180);
     expect(validateMany).toHaveBeenCalledTimes(1);
@@ -396,7 +538,7 @@ describe("NSEMenuController", () => {
     const validateMany = vi.fn(async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
       requests.map((request) => [request.key, presentation(request.commandId)]),
     ));
-    const controller = new NSEMenuController({ model, runtime: runtime(validateMany) });
+    const controller = new NSEMenu({ [nseMenuModel]: model, runtime: runtime(validateMany) });
     await controller.open();
     await controller.openSubmenu("alignment");
     expect(validateMany).toHaveBeenCalledTimes(2);
@@ -417,7 +559,7 @@ describe("NSEMenuController", () => {
     const validateMany = vi.fn(() => new Promise<ReadonlyMap<string, ReturnType<typeof presentation>>>((resolve) => {
       resolveValidation = resolve;
     }));
-    const controller = new NSEMenuController({ model, runtime: runtime(validateMany, { signal: abort.signal }) });
+    const controller = new NSEMenu({ [nseMenuModel]: model, runtime: runtime(validateMany, { signal: abort.signal }) });
     const opening = controller.open();
     abort.abort();
     resolveValidation(new Map([
@@ -430,8 +572,8 @@ describe("NSEMenuController", () => {
   });
 
   it("closes a visible branch when command marks any validation presentation stale", async () => {
-    const controller = new NSEMenuController({
-      model,
+    const controller = new NSEMenu({
+      [nseMenuModel]: model,
       runtime: runtime(async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
         requests.map((request) => [request.key, presentation(request.commandId, { stale: request.key.endsWith("bold-plain") })]),
       )),
@@ -447,8 +589,8 @@ describe("NSEMenuController", () => {
       acceptance: {},
     }));
     const handleKeyboardEvent = vi.fn(async () => ({ handled: true, reason: "handled" }));
-    const controller = new NSEMenuController({
-      model,
+    const controller = new NSEMenu({
+      [nseMenuModel]: model,
       runtime: runtime(async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
         requests.map((request) => [request.key, presentation(request.commandId)]),
       ), {
@@ -479,13 +621,12 @@ describe("NSEMenuController", () => {
       const menuRuntime = useMemo(() => runtime(async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
         requests.map((request) => [request.key, presentation(request.commandId)]),
       )), []);
-      const controller = useMemo(() => new NSEMenuController({ model, runtime: menuRuntime }), [menuRuntime]);
+      const controller = useMemo(() => new NSEMenu({ [nseMenuModel]: model, runtime: menuRuntime }), [menuRuntime]);
       return (
         <MenuOverlayHarness onScope={scope}>
-          <NSEPopupButton
-            label="Format"
-            model={model}
-            controller={controller}
+          <NSEPopUpButton pullsDown
+            title="Format"
+            menu={controller}
             overlay={{ id: "format-menu", parentResponderId: "editor" }}
           />
         </MenuOverlayHarness>
@@ -509,10 +650,10 @@ describe("NSEMenuController", () => {
       const menuRuntime = useMemo(() => runtime(async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
         requests.map((request) => [request.key, presentation(request.commandId)]),
       )), []);
-      const controller = useMemo(() => new NSEMenuController({ model, runtime: menuRuntime }), [menuRuntime]);
+      const controller = useMemo(() => new NSEMenu({ [nseMenuModel]: model, runtime: menuRuntime }), [menuRuntime]);
       return (
         <MenuOverlayHarness>
-          <NSEPopupButton label="Format" model={model} controller={controller} overlay={{ id: "format-selection", parentResponderId: "editor" }} />
+          <NSEPopUpButton pullsDown title="Format" menu={controller} overlay={{ id: "format-selection", parentResponderId: "editor" }} />
         </MenuOverlayHarness>
       );
     }
@@ -530,10 +671,10 @@ describe("NSEMenuController", () => {
     ));
     function Fixture() {
       const menuRuntime = useMemo(() => runtime(validateMany), []);
-      const controller = useMemo(() => new NSEMenuController({ model, runtime: menuRuntime }), [menuRuntime]);
+      const controller = useMemo(() => new NSEMenu({ [nseMenuModel]: model, runtime: menuRuntime }), [menuRuntime]);
       return (
         <MenuOverlayHarness>
-          <NSEPopupButton label="Reopen format" model={model} controller={controller} overlay={{ id: "format-reopen", parentResponderId: "editor" }} />
+          <NSEPopUpButton pullsDown title="Reopen format" menu={controller} overlay={{ id: "format-reopen", parentResponderId: "editor" }} />
         </MenuOverlayHarness>
       );
     }
@@ -556,12 +697,12 @@ describe("NSEMenuController", () => {
       const menuRuntime = useMemo(() => runtime(async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
         requests.map((request) => [request.key, presentation(request.commandId)]),
       )), []);
-      const controller = useMemo(() => new NSEMenuController({ model, runtime: menuRuntime }), [menuRuntime]);
+      const controller = useMemo(() => new NSEMenu({ [nseMenuModel]: model, runtime: menuRuntime }), [menuRuntime]);
       return (
         <MenuOverlayHarness mode="mobile">
           <button ref={setAnchor} type="button">Open format</button>
           <NSEMenuOverlay overlay={{ id: "format-mobile", parentResponderId: "editor" }} controller={controller} open anchor={anchor} onOpenChange={() => undefined}>
-            <NSEMenu model={model} controller={controller} open />
+            <NSEMenuView model={model} controller={controller} open />
           </NSEMenuOverlay>
         </MenuOverlayHarness>
       );
@@ -577,12 +718,12 @@ describe("NSEMenuController", () => {
       const menuRuntime = useMemo(() => runtime(async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
         requests.map((request) => [request.key, presentation(request.commandId)]),
       )), []);
-      const controller = useMemo(() => new NSEMenuController({ model, runtime: menuRuntime }), [menuRuntime]);
+      const controller = useMemo(() => new NSEMenu({ [nseMenuModel]: model, runtime: menuRuntime }), [menuRuntime]);
       return (
         <MenuOverlayHarness>
-          <NSEContextMenu model={model} controller={controller} overlay={{ id: "canvas-context", parentResponderId: "canvas" }}>
+          <NSEView menu={controller} menuOverlay={{ id: "canvas-context", parentResponderId: "canvas" }}>
             <span>Canvas</span>
-          </NSEContextMenu>
+          </NSEView>
         </MenuOverlayHarness>
       );
     }
@@ -603,16 +744,15 @@ describe("NSEMenuController", () => {
     const validation = async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
       requests.map((request) => [request.key, presentation(request.commandId)]),
     );
-    const firstController = new NSEMenuController({ model, runtime: runtime(validation) });
-    const secondController = new NSEMenuController({ model: secondModel, runtime: runtime(validation) });
+    const mainMenu = new NSEMenu({ [nseMenuModel]: { id: "main", label: "Main Menu", entries: [
+      { kind: "submenu", id: model.id, label: model.label, entries: model.entries },
+      { kind: "submenu", id: secondModel.id, label: secondModel.label, entries: secondModel.entries },
+    ] }, runtime: runtime(validation) });
     render(
       <MenuOverlayHarness>
         <NSEMenuBar
-          items={[
-            { model, controller: firstController },
-            { model: secondModel, controller: secondController },
-          ]}
-          overlay={{ parentResponderId: "editor", idForItem: (item) => `menubar:${item.model.id}` }}
+          menu={mainMenu}
+          overlay={{ parentResponderId: "editor", idForMenu: (item) => `menubar:${item.identifier}` }}
         />
       </MenuOverlayHarness>,
     );
@@ -624,17 +764,41 @@ describe("NSEMenuController", () => {
     await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("menuitem", { name: "Toggle Sidebar" })));
   });
 
+  it("validates a main menu's items in the window that draws its menu bar", async () => {
+    const appLevel = vi.fn(async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
+      requests.map((request) => [request.key, presentation(request.commandId, { enabled: false })]),
+    ));
+    const windowLevel = vi.fn(async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
+      requests.map((request) => [request.key, presentation(request.commandId)]),
+    ));
+    const mainMenu = new NSEMenu({ [nseMenuModel]: { id: "main", label: "Main Menu", entries: [
+      { kind: "submenu", id: "view", label: "View", entries: [{ kind: "command", id: "toggle-sidebar", commandId: "view.toggleSidebar", labelOverride: "Toggle Sidebar" }] },
+    ] }, runtime: runtime(appLevel) });
+    render(
+      <MenuOverlayHarness>
+        <NSEMenuRuntimeProvider port={runtime(windowLevel)}>
+          <NSEMenuBar menu={mainMenu} overlay={{ parentResponderId: "editor" }} />
+        </NSEMenuRuntimeProvider>
+      </MenuOverlayHarness>,
+    );
+    fireEvent.click(screen.getByRole("menuitem", { name: "View" }));
+    const item = await screen.findByRole("menuitem", { name: "Toggle Sidebar" });
+    await waitFor(() => expect(item.getAttribute("aria-disabled")).toBeNull());
+    expect(windowLevel).toHaveBeenCalled();
+    expect(appLevel).not.toHaveBeenCalled();
+  });
+
   it("propagates a custom appearance through the picker listbox with explicit provenance", async () => {
     const onValueChange = vi.fn();
     render(
       <MenuOverlayHarness>
-        <NSEAppearanceProvider appearance={customAppearance}>
-          <NSEPicker
+        <NSEAppearanceProvider theme={customAppearance}>
+          <NSEPopUpButton
             label="Density"
             value="balanced"
-            options={[{ value: "balanced", label: "Balanced" }, { value: "compact", label: "Compact" }]}
+            items={[{ value: "balanced", title: "Balanced" }, { value: "compact", title: "Compact" }]}
             onValueChange={onValueChange}
-            listboxOverlay={{ id: "density-listbox", parentResponderId: "editor" }}
+            overlay={{ id: "density-listbox", parentResponderId: "editor" }}
           />
         </NSEAppearanceProvider>
       </MenuOverlayHarness>,
@@ -642,7 +806,8 @@ describe("NSEMenuController", () => {
     fireEvent.click(screen.getByRole("button", { name: /balanced/i }));
     const listbox = await screen.findByRole("listbox");
     expect(listbox.getAttribute("data-nse-overlay-kind")).toBe("listbox");
-    expect(listbox.closest(".nse-overlay-popup")?.getAttribute("data-nse-appearance")).toBe("test-custom");
+    // The popup host is the theme root; the surface inside it draws in that theme.
+    expect(listbox.closest(".nse-overlay-popup")?.closest("[data-nse-theme]")?.getAttribute("data-nse-theme")).toBe("com.example.test-custom");
     fireEvent.click(screen.getByRole("option", { name: "Compact" }));
     expect(onValueChange).toHaveBeenCalledWith("compact");
   });
@@ -650,31 +815,42 @@ describe("NSEMenuController", () => {
   it("propagates a custom appearance and keeps listbox semantics inside the mobile action sheet", async () => {
     render(
       <MenuOverlayHarness mode="mobile">
-        <NSEAppearanceProvider appearance={customAppearance}>
-          <NSEPicker
+        <NSEAppearanceProvider theme={customAppearance}>
+          <NSEPopUpButton
             label="Density"
             value="balanced"
-            options={[{ value: "balanced", label: "Balanced" }, { value: "compact", label: "Compact" }]}
-            listboxOverlay={{ id: "density-mobile-listbox", parentResponderId: "editor" }}
+            items={[{ value: "balanced", title: "Balanced" }, { value: "compact", title: "Compact" }]}
+            overlay={{ id: "density-mobile-listbox", parentResponderId: "editor" }}
           />
         </NSEAppearanceProvider>
       </MenuOverlayHarness>,
     );
     fireEvent.click(screen.getByRole("button", { name: /balanced/i }));
     const listbox = await screen.findByRole("listbox");
-    expect(listbox.closest(".nse-overlay-popup")?.getAttribute("data-nse-appearance")).toBe("test-custom");
+    // The popup host is the theme root; the surface inside it draws in that theme.
+    expect(listbox.closest(".nse-overlay-popup")?.closest("[data-nse-theme]")?.getAttribute("data-nse-theme")).toBe("com.example.test-custom");
     expect(listbox.closest("[data-nse-overlay-kind]")?.getAttribute("data-nse-overlay-kind")).toBe("action-sheet");
     expect(listbox.closest("[aria-modal]")?.getAttribute("aria-modal")).toBe("true");
   });
 });
 
 describe("NSE runtime overlay contracts", () => {
-  it("does not silently start picker authority inside an NSE runtime provider", () => {
+  it("draws a native select rather than start pop-up authority without a responder", () => {
+    const { container } = render(
+      <MenuOverlayHarness>
+        <NSEPopUpButton label="Runtime density" items={[{ value: "regular", title: "Regular" }]} />
+      </MenuOverlayHarness>,
+    );
+    expect(container.querySelector("select")?.getAttribute("aria-label")).toBe("Runtime density");
+    expect(container.querySelector("[role=listbox]")).toBeNull();
+  });
+
+  it("refuses a pull-down button without overlay provenance", () => {
     expect(() => render(
       <MenuOverlayHarness>
-        <NSEPicker label="Runtime density" options={[{ value: "regular", label: "Regular" }]} />
+        <NSEPopUpButton pullsDown title="Density" items={[{ value: "regular", title: "Regular" }]} />
       </MenuOverlayHarness>,
-    )).toThrow(/listboxOverlay|provenance|standalone/i);
+    )).toThrow(/overlay host/i);
   });
 
   it("does not silently start popup authority inside an NSE runtime provider", () => {
@@ -684,4 +860,64 @@ describe("NSE runtime overlay contracts", () => {
       </MenuOverlayHarness>,
     )).toThrow(/id|parentResponderId|provenance|standalone/i);
   });
+});
+
+
+describe("menu presentation readiness", () => {
+  function fixture(ready: boolean, controller: NSEMenu, open = true) {
+    return <NSEMenuOverlayPresentationScope ready={ready}><NSEMenuView model={model} controller={controller} open={open} /></NSEMenuOverlayPresentationScope>;
+  }
+  function readyController() {
+    return new NSEMenu({ [nseMenuModel]: model, runtime: runtime(async requests => new Map(requests.map(request => [request.key, presentation(request.commandId)]))) });
+  }
+  it("waits for the popup's visible content commit before initial focus", async () => {
+    const controller = readyController();
+    const prior = document.createElement("button"); document.body.append(prior); prior.focus();
+    const view = render(fixture(false, controller));
+    await screen.findByRole("menuitem", { name: "Bold" });
+    await waitFor(() => expect(screen.getByRole("menuitem", { name: "Bold" }).tabIndex).toBe(0));
+    expect(document.activeElement).toBe(prior);
+    view.rerender(fixture(true, controller));
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("menuitem", { name: "Bold" })));
+  });
+  it("does not steal an intervening focus choice when content becomes ready", async () => {
+    const controller = readyController();
+    const prior = document.createElement("button"), next = document.createElement("button"); document.body.append(prior, next); prior.focus();
+    const view = render(fixture(false, controller));
+    await screen.findByRole("menuitem", { name: "Bold" });
+    await waitFor(() => expect(screen.getByRole("menuitem", { name: "Bold" }).tabIndex).toBe(0));
+    next.focus();
+    view.rerender(fixture(true, controller));
+    expect(document.activeElement).toBe(next);
+  });
+  it("retires a pending focus on close and focuses a fresh reopening", async () => {
+    const controller = readyController();
+    const prior = document.createElement("button"); document.body.append(prior); prior.focus();
+    const view = render(fixture(false, controller));
+    await screen.findByRole("menuitem", { name: "Bold" });
+    await waitFor(() => expect(screen.getByRole("menuitem", { name: "Bold" }).tabIndex).toBe(0));
+    view.rerender(fixture(true, controller, false));
+    expect(document.activeElement).toBe(prior);
+    view.rerender(fixture(true, controller));
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("menuitem", { name: "Bold" })));
+  });
+});
+
+
+it("keeps a validating popup inert and measurable, then publishes focusable content", async () => {
+  let finish!: () => void;
+  const held = new Promise<void>(resolve => { finish = resolve; });
+  const controller = new NSEMenu({ [nseMenuModel]: model, runtime: runtime(async requests => { await held; return new Map(requests.map(request => [request.key, presentation(request.commandId)])); }) });
+  function Fixture() {
+    const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
+    return <MenuOverlayHarness><button ref={setAnchor}>Generated trigger</button><NSEMenuOverlay overlay={{ id: 'pending-observed', parentResponderId: 'editor' }} controller={controller} open anchor={anchor} onOpenChange={() => undefined}><NSEMenuView model={model} controller={controller} open /></NSEMenuOverlay></MenuOverlayHarness>;
+  }
+  render(<Fixture />);
+  const popup = await waitFor(() => { const e = document.querySelector('[data-nse-content-pending=true]'); expect(e).not.toBeNull(); return e!; });
+  expect(popup.hasAttribute('inert')).toBe(true);
+  await act(async () => { finish(); await held; });
+  const item = await screen.findByRole('menuitem', { name: 'Bold' });
+  await waitFor(() => expect(document.activeElement).toBe(item));
+  expect(popup.hasAttribute('inert')).toBe(false);
+  expect(popup.hasAttribute('data-nse-content-pending')).toBe(false);
 });

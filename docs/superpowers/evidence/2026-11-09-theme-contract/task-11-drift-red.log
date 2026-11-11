@@ -1,0 +1,45 @@
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-theme-contract-drift.test.tsx (681 tests) 3052ms
+
+ Test Files  1 failed (1)
+      Tests  681 passed (681)
+   Start at  22:15:52
+   Duration  12.17s (transform 6.07s, setup 29ms, import 8.10s, tests 3.05s, environment 855ms)
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-theme-contract-drift.test.tsx [ tests/runtime/nse-theme-contract-drift.test.tsx ]
+AssertionError: Rendered hooks differ from the published contract; review the API change before regenerating.: expected { themeContractVersion: 1, …(7) } to deeply equal { themeContractVersion: 1, …(7) }
+
+- Expected
++ Received
+
+@@ -177,11 +177,10 @@
+          "indicator",
+          "path-item",
+          "tab-icon",
+          "title",
+          "title-measurement",
+-         "unrendered-part",
+        ],
+        "states": [
+          "enabled=false",
+          "focused",
+          "highlighted",
+
+ ❯ tests/runtime/nse-theme-contract-drift.test.tsx:84:117
+     82|   if (process.env.THEME_CONTRACT_WRITE === "1" && !renderingFailed) { …
+     83|   expect(existsSync(path), "Generate the rendered contract with node s…
+     84|   expect(contract, "Rendered hooks differ from the published contract;…
+       |                                                                                                                     ^
+     85| });
+     86|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯

@@ -1,0 +1,241 @@
+{
+  "controls": [
+    {
+      "tag": "BUTTON",
+      "text": "Reorder applications",
+      "aria": null,
+      "className": "nse-control-button"
+    },
+    {
+      "tag": "BUTTON",
+      "text": "About",
+      "aria": "Open About",
+      "className": "webspring-board-icon   "
+    },
+    {
+      "tag": "BUTTON",
+      "text": "Portfolio Hub",
+      "aria": "Open Portfolio Hub",
+      "className": "webspring-board-icon   "
+    },
+    {
+      "tag": "BUTTON",
+      "text": "Experiments",
+      "aria": "Open folder Experiments",
+      "className": "webspring-board-icon is-folder  "
+    },
+    {
+      "tag": "BUTTON",
+      "text": "2Journal",
+      "aria": "Open Journal",
+      "className": "webspring-board-icon   "
+    },
+    {
+      "tag": "BUTTON",
+      "text": "Software",
+      "aria": "Open Software",
+      "className": "webspring-board-icon   "
+    },
+    {
+      "tag": "A",
+      "text": "Webspring 4.0 enters first implementation",
+      "aria": null,
+      "className": ""
+    },
+    {
+      "tag": "A",
+      "text": "NSE and Atmo define the interface layer",
+      "aria": null,
+      "className": ""
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "aria": "Back",
+      "className": "nse-control-button nse-extended-tool-button journal-floating-tool"
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "aria": "Return to Webspring",
+      "className": "nse-control-button nse-extended-tool-button journal-floating-tool"
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "aria": "Journal",
+      "className": "nse-control-button nse-extended-tool-button journal-floating-tool"
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "aria": "Return to Webspring",
+      "className": "journal-mobile-return"
+    },
+    {
+      "tag": "BUTTON",
+      "text": "All Notes",
+      "aria": "All Notes",
+      "className": ""
+    },
+    {
+      "tag": "BUTTON",
+      "text": "Notes",
+      "aria": "Notes",
+      "className": ""
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "aria": "Return to Webspring",
+      "className": "nse-control-button nse-extended-tool-button journal-return-home"
+    },
+    {
+      "tag": "BUTTON",
+      "text": "Folders",
+      "aria": "Back to folders",
+      "className": "journal-mobile-back journal-list-back"
+    },
+    {
+      "tag": "BUTTON",
+      "text": "4 notes",
+      "aria": "Open QuickSwitch",
+      "className": "journal-sidebar-count journal-count-switch"
+    },
+    {
+      "tag": "BUTTON",
+      "text": "Notes (4)",
+      "aria": "Open QuickSwitch",
+      "className": "journal-phone-list-title journal-count-switch"
+    },
+    {
+      "tag": "BUTTON",
+      "text": "Store-backed reader rollout7 November 2026",
+      "aria": null,
+      "className": "journal-note-row journal-note-row"
+    },
+    {
+      "tag": "BUTTON",
+      "text": "Webspring 4.0 enters first implementation14 May 2026",
+      "aria": null,
+      "className": "journal-note-row journal-note-row"
+    },
+    {
+      "tag": "BUTTON",
+      "text": "NSE and Atmo define the interface layer6 May 2026",
+      "aria": null,
+      "className": "journal-note-row journal-note-row"
+    },
+    {
+      "tag": "BUTTON",
+      "text": "Webspring Archive remains part of the story1 May 2026",
+      "aria": null,
+      "className": "journal-note-row journal-note-row"
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "aria": "Hide folders",
+      "className": "journal-two-column-button"
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "aria": "Show folders",
+      "className": "journal-three-column-button"
+    },
+    {
+      "tag": "BUTTON",
+      "text": "Notes",
+      "aria": "Back to Notes",
+      "className": "journal-mobile-back"
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "aria": "Open note in a new window",
+      "className": "journal-action-detach"
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "aria": "Share note",
+      "className": "journal-action-share"
+    },
+    {
+      "tag": "BUTTON",
+      "text": "Edit",
+      "aria": null,
+      "className": "journal-action-edit"
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "aria": "Delete in Publisher",
+      "className": "journal-action-delete"
+    }
+  ],
+  "targets": [
+    {
+      "parent": "<button type=\"button\" role=\"option\" aria-selected=\"false\" tabindex=\"-1\" data-post-id=\"journal-post-webspring-4-0-enters-first-implementation\" class=\"journal-note-row journal-note-row\"><strong>Webspring 4.0 enters first implementation</strong><span data-phone-date=\"14/05/26\">14 May 2026</span><i class=\"journal-row-disclosure\" aria-hidden=\"true\"></i></button>",
+      "rect": {
+        "x": 121.20001220703125,
+        "y": 124.5,
+        "w": 275.96875,
+        "h": 18
+      },
+      "stack": [
+        [
+          "SPAN",
+          "",
+          "Notes"
+        ],
+        [
+          "BUTTON",
+          "",
+          "Notes"
+        ],
+        [
+          "LI",
+          "",
+          "Notes"
+        ],
+        [
+          "UL",
+          "journal-folder-tree",
+          "All NotesNotes"
+        ],
+        [
+          "NAV",
+          "journal-folder-pane",
+          "FoldersAll NotesNotes"
+        ],
+        [
+          "DIV",
+          "",
+          "FoldersAll NotesNotes"
+        ]
+      ]
+    }
+  ],
+  "panes": [
+    {
+      "c": "journal-folder-slot",
+      "style": "opacity: 1; z-index: 2;",
+      "inert": false,
+      "parent": "<div tabindex=\"-1\" class=\"site-animation-owner\" data-nse-view-controller=\"\" style=\"display: block; width: 100%; height: 100%; min-"
+    },
+    {
+      "c": "journal-note-slot",
+      "style": "opacity: 0; transform: translate3d(28%, 0%, 0px) scale(1) rotate(0deg) rotateX(0deg) rotateY(0deg); z-index: 1;",
+      "inert": true,
+      "parent": "<div tabindex=\"-1\" class=\"site-animation-owner\" data-nse-view-controller=\"\" style=\"display: block; width: 100%; height: 100%; min-"
+    },
+    {
+      "c": "journal-pad",
+      "style": "opacity: 0; transform: translate3d(28%, 0%, 0px) scale(1) rotate(0deg) rotateX(0deg) rotateY(0deg); z-index: 1;",
+      "inert": true,
+      "parent": "<div tabindex=\"-1\" class=\"site-animation-owner\" data-nse-view-controller=\"\" style=\"display: block; width: 100%; height: 100%; min-"
+    }
+  ]
+}

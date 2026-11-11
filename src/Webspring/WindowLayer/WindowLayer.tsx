@@ -20,6 +20,7 @@
 
 import React, { useEffect, useRef, useSyncExternalStore } from "react";
 import { NSEPresence } from "../../NSE/Animation";
+import { useNSEAppearanceProjection } from "../../NSE/Appearance";
 import { useKernelSynCloudOS } from "../../SynCloudOSReact";
 import { WindowHost, type WindowLayerDiagnostic } from "./WindowHost";
 import type { WindowContentRendererRegistry } from "./WindowContentRendererRegistry";
@@ -46,6 +47,16 @@ function hasOwnedAnchor(root: HTMLElement, runtimeId: string, anchorId: string):
   ));
 }
 
+function PopoverModalBackdrop({ zIndex }: { readonly zIndex: number }) {
+  const appearance = useNSEAppearanceProjection();
+  return <div {...appearance} style={{ display: "contents" }}>
+    <div className="nse-overlay-popup-modal-host">
+      <div className="nse-overlay-popup-backdrop" data-window-modal-backdrop="" data-nse-part="backdrop" aria-hidden
+        style={{ zIndex, pointerEvents: "auto" }} onPointerDown={event => event.stopPropagation()} />
+    </div>
+  </div>;
+}
+
 export function WindowLayer({ contentRegistry, onDiagnostic }: WindowLayerProps) {
   const runtime = useKernelSynCloudOS();
   const layerRef = useRef<HTMLDivElement>(null);
@@ -69,23 +80,46 @@ export function WindowLayer({ contentRegistry, onDiagnostic }: WindowLayerProps)
     const layer = layerRef.current;
     if (!documentPort || !layer) return;
     const ownerRoot = runtimeOwnerRoot(layer, runtime.runtimeId);
+    const dismissTransients = (reason: "outside-pointer" | "anchor-removed", except?: string) => {
+      const popoverSheets = runtime.windows.list({ role: "sheet" }).filter(controller => {
+        const state = controller.contentState;
+        return state.status === "loaded" && contentRegistry.surface(state.mountKey)?.request.drawsBackground !== undefined;
+      });
+      const candidates = [...runtime.windows.list({ role: "popover" }), ...popoverSheets].filter(({ record }) => !record.pinned && record.id !== except);
+      const eligible = candidates.filter(controller => {
+        const state = controller.contentState;
+        const request = state.status === "loaded" ? contentRegistry.surface(state.mountKey)?.request : null;
+        if (reason === "anchor-removed") return request?.anchor
+          ? !request.anchor.isConnected
+          : controller.record.anchor && !hasOwnedAnchor(ownerRoot, runtime.runtimeId, controller.record.anchor.id);
+        return !request?.behavior || request.behavior === "transient";
+      });
+      if (eligible.length === candidates.length && candidates.every(({ record }) => record.role === "popover")) {
+        void runtime.windows.dismissTransientWindows({ reason, ...(except ? { except } : {}) }).catch(() => undefined);
+      } else {
+        for (const controller of eligible) void runtime.windows.requestClose(controller.id, { reason: "command" }).catch(() => undefined);
+      }
+    };
     const dismissOutside = (event: PointerEvent) => {
       const ElementPort = documentPort.defaultView?.Element;
       const target = ElementPort && event.target instanceof ElementPort ? event.target : null;
       if (target?.closest<HTMLElement>("[data-syncloudos-runtime-owner]")?.dataset.syncloudosRuntimeOwner !== runtime.runtimeId) return;
       const host = target?.closest<HTMLElement>("[data-window-host]") ?? null;
       const except = host?.dataset.windowHost;
-      void runtime.windows.dismissTransientWindows({
-        reason: "outside-pointer",
-        ...(except ? { except } : {}),
-      }).catch(() => undefined);
+      dismissTransients("outside-pointer", except);
     };
     ownerRoot.addEventListener("pointerdown", dismissOutside, true);
     const MutationObserverPort = documentPort.defaultView?.MutationObserver;
     const observer = MutationObserverPort && transientAnchors.length > 0
       ? new MutationObserverPort(() => {
-          if (transientAnchors.some((anchorId) => !hasOwnedAnchor(ownerRoot, runtime.runtimeId, anchorId))) {
-            void runtime.windows.dismissTransientWindows({ reason: "anchor-removed" }).catch(() => undefined);
+          // The bridge may have replaced an anchor or closed its surface since
+          // this observer was installed. Inspect the current records so releasing
+          // an old generated identity cannot dismiss the replacement surface.
+          const currentAnchors = runtime.windows.list({ role: "popover" }).flatMap(({ record }) => (
+            !record.pinned && record.anchor ? [record.anchor.id] : []
+          ));
+          if (currentAnchors.some((anchorId) => !hasOwnedAnchor(ownerRoot, runtime.runtimeId, anchorId))) {
+            dismissTransients("anchor-removed");
           }
         })
       : null;
@@ -94,21 +128,26 @@ export function WindowLayer({ contentRegistry, onDiagnostic }: WindowLayerProps)
       ownerRoot.removeEventListener("pointerdown", dismissOutside, true);
       observer?.disconnect();
     };
-  }, [documentPort, managerSnapshot.generation, runtime, transientAnchors.join("\u0000")]);
+  }, [contentRegistry, documentPort, managerSnapshot.generation, runtime, transientAnchors.join("\u0000")]);
 
   const modalControllers = managerSnapshot.windowControllerIds
     .map((id) => runtime.windows.select(id))
-    .filter(({ record }) => record.state === "open" && (record.role === "modal" || record.role === "sheet"));
-  const topModalZ = modalControllers.at(-1)?.record.zIndex ?? null;
+    .filter(controller => {
+      const { record, contentState } = controller;
+      const request = contentState.status === "loaded" ? contentRegistry.surface(contentState.mountKey)?.request : null;
+      return record.state === "open" && (record.role === "modal" || record.role === "sheet" || record.role === "popover" && request && (screen.breakpoint === "compact" || request.presentation?.mode === "sheet"));
+    });
+  const topModal = modalControllers.at(-1);
+  const topModalZ = topModal?.record.zIndex ?? null;
 
   return (
     <div
       ref={layerRef}
       className="webspring-window-layer"
       data-window-layer=""
-      data-window-modal-active={managerSnapshot.blockedWindowControllerIds.length > 0 ? "true" : "false"}
+      data-window-modal-active={topModalZ !== null || managerSnapshot.blockedWindowControllerIds.length > 0 ? "true" : "false"}
     >
-      {topModalZ !== null ? (
+      {topModalZ !== null && topModal?.record.role === "popover" ? <PopoverModalBackdrop zIndex={Math.max(0, topModalZ - 0.5)} /> : topModalZ !== null ? (
         <div
           className="webspring-window-modal-backdrop"
           data-window-modal-backdrop=""

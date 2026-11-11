@@ -35,6 +35,7 @@ afterEach(() => {
 function fixtureRoot(): string {
   const root = mkdtempSync(resolve(tmpdir(), "syncloudos-vite-assets-"));
   temporaryRoots.push(root);
+  writeFileSync(resolve(root, "package.json"), JSON.stringify({ version: "1.0.0" }));
   mkdirSync(resolve(root, "src/SynWare"), { recursive: true });
   const assets = resolve(root, "node_modules/@syndromatic/syncloudos/assets");
   mkdirSync(assets, { recursive: true });
@@ -51,7 +52,7 @@ describe("SynCloudOS Vite packed SDK assets", () => {
     const root = fixtureRoot();
     const cacheDir = resolve(root, cache);
     const plugin = synCloudOS({ webspringEntry: false });
-    plugin.configResolved?.({ root, base, cacheDir });
+    await plugin.configResolved?.({ root, base, cacheDir });
     const mounted = new Map<string, (request: object, response: object, next: () => void) => void>();
     plugin.configureServer?.({
       middlewares: { use: (path: string, handler: (request: object, response: object, next: () => void) => void) => mounted.set(path, handler) },
@@ -78,10 +79,10 @@ describe("SynCloudOS Vite packed SDK assets", () => {
     expect(next).toHaveBeenCalledTimes(1);
   });
 
-  it("mounts optimized SDK assets beneath a configured deployment base", () => {
+  it("mounts optimized SDK assets beneath a configured deployment base", async () => {
     const root = fixtureRoot();
     const plugin = synCloudOS({ webspringEntry: false });
-    plugin.configResolved?.({ root, base: "/nested/showcase/" });
+    await plugin.configResolved?.({ root, base: "/nested/showcase/" });
 
     const mounted: string[] = [];
     const watcher = {

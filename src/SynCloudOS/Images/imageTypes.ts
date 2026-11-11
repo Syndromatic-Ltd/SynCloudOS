@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import type { GFXImage } from "../../FX/GraphicsFX/GFXImage";
 import type { GFXIdentifierIssuer } from "../../FX/GraphicsFX/identifierAuthority";
 import type { DocumentResourceDescriptor } from "../Documents";
@@ -47,13 +48,13 @@ export interface RuntimeImageCapInsets {
 export type RuntimeImageSource =
   | Readonly<{ kind: "url"; url: string; cors: "none" | "anonymous" | "use-credentials" }>
   | Readonly<{ kind: "app-asset"; path: string }>
-  | Readonly<{ kind: "bytes"; mimeType: RuntimeImageBinaryMimeType; bytes: Uint8Array }>
+  | Readonly<{ kind: "bytes"; mimeType: RuntimeImageBinaryMimeType; bytes: NSEDataConvertible }>
   | Readonly<{ kind: "generated-svg"; svg: string; intrinsicSize?: GFXSize; density?: number }>
   | Readonly<{ kind: "document-resource"; documentId: string; descriptor: DocumentResourceDescriptor }>;
 
 export type RuntimeImageAdapterSource =
   | Readonly<{ kind: "url"; url: string; cors: "none" | "anonymous" | "use-credentials" }>
-  | Readonly<{ kind: "bytes"; mimeType: RuntimeImageBinaryMimeType; bytes: Uint8Array }>;
+  | Readonly<{ kind: "bytes"; mimeType: RuntimeImageBinaryMimeType; bytes: NSEData }>;
 
 export interface RuntimeImageDecodeRequest {
   readonly cacheKey: string;
@@ -67,7 +68,7 @@ export interface RuntimeDecodedImageLease {
   readonly density: number;
   /** Encoded-source EXIF value; pixels may already be display-oriented by the decoder. */
   readonly sourceOrientation?: RuntimeImageSourceOrientation;
-  readonly sourceICCProfile?: Uint8Array;
+  readonly sourceICCProfile?: NSEData;
   readonly byteLength: number;
   readonly corsClean: boolean;
   release(): void;
@@ -76,7 +77,7 @@ export interface RuntimeDecodedImageLease {
 export interface RuntimeImageAdapter {
   decode(request: RuntimeImageDecodeRequest): Promise<RuntimeDecodedImageLease>;
   readPixels?(lease: RuntimeDecodedImageLease, signal: AbortSignal): Promise<GFXImage>;
-  export(lease: RuntimeDecodedImageLease, format: "image/png" | "image/webp", signal: AbortSignal): Promise<Uint8Array>;
+  export(lease: RuntimeDecodedImageLease, format: "image/png" | "image/webp", signal: AbortSignal): Promise<NSEData>;
   dispose(): void;
 }
 
@@ -112,7 +113,7 @@ export interface RuntimeImageResource {
   readonly density: number | null;
   readonly sourceOrientation: RuntimeImageSourceOrientation | null;
   /** Owned copy of the encoded source profile, if present; decoded pixels are sRGB. */
-  readonly sourceICCProfile: Uint8Array | null;
+  readonly sourceICCProfile: NSEData | null;
   readonly accessibleLabel: string;
   readonly renderingMode: RuntimeImageRenderingMode;
   readonly tintColour: string | null;
@@ -138,7 +139,7 @@ export interface RuntimeImageService {
    * adapter work has settled, including after the public resource is released. */
   whenActivationSettled(resource: RuntimeImageResource): Promise<void>;
   readPixels(resource: RuntimeImageResource, signal?: AbortSignal): Promise<GFXImage>;
-  export(resource: RuntimeImageResource, format: "image/png" | "image/webp", signal?: AbortSignal): Promise<Uint8Array>;
+  export(resource: RuntimeImageResource, format: "image/png" | "image/webp", signal?: AbortSignal): Promise<NSEData>;
   diagnostics(): RuntimeImageDiagnostics;
   dispose(): void;
 }

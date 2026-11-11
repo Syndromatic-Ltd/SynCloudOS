@@ -55,7 +55,8 @@ function staticServer(directory) {
 
 const probeSource = `import { useEffect } from "react";
 import { mountSynCloudOS } from "@syndromatic/syncloudos/browser";
-import { createSynWare, useSynWare } from "@syndromatic/syncloudos/sdk";
+import { useSCOS } from "@syndromatic/syncloudos/sdk";
+import { createSynWare } from "@syndromatic/syncloudos/sdk/testing";
 import { IFXFilterRegistry } from "@syndromatic/syncloudos/fx/image";
 import { MEFXSampleTimingInfo, MEFXTime } from "@syndromatic/syncloudos/fx/media";
 import {
@@ -132,7 +133,7 @@ async function externalPlayer(bytes: Uint8Array) {
 }
 
 function Probe() {
-  const app = useSynWare();
+  const app = useSCOS();
   useEffect(() => {
     void (async () => {
       const encoderConfig = { codec: "vp8", codedWidth: 16, codedHeight: 16, bitrate: 120_000, framerate: 30 } as const;
@@ -204,7 +205,7 @@ function Probe() {
       const backend = new VFXWebMContainerBackend();
       const writer = new VFXContainerWriter({
         backend,
-        sink: { async write(bytes) { fragments.push(bytes.slice()); await Promise.resolve(); } },
+        sink: { async write(bytes) { fragments.push(new Uint8Array(bytes.bytes)); await Promise.resolve(); } },
         track: { id: 1, kind: "video", codec: "vp8", codedWidth: 16, codedHeight: 16, timescale: 1_000_000 },
         maximumBufferedBytes: 64 * 1024,
       });
@@ -278,9 +279,9 @@ function Website({ actions, applicationOutlet }: WebspringViewProps) {
 const shell = defineWebspring({
   manifest: {
     schemaVersion: 1,
-    id: "org.example.vfx03-shell",
+    bundleIdentifier: "org.example.vfx03-shell",
     version: "1.0.0",
-    title: "VFX-03 shell",
+    displayName: "VFX-03 shell",
     webspringShell: {
       views: [{ id: "website", presentations: ["desktop", "tablet", "mobile"], mode: "persistent" }],
       defaults: { desktop: "website", tablet: "website", mobile: "website" },
@@ -294,9 +295,9 @@ const shell = defineWebspring({
 const app = createSynWare({
   manifest: {
     schemaVersion: 1,
-    id: "org.example.vfx03",
+    bundleIdentifier: "org.example.vfx03",
     version: "1.0.0",
-    title: "VFX-03 Probe",
+    displayName: "VFX-03 Probe",
     runtime: { policy: { public: true } },
     presentations: ["desktop", "tablet", "mobile"],
     routes: [{ path: "/vfx03", primary: true }],

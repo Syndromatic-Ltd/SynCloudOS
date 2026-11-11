@@ -113,7 +113,7 @@ export function NSEFilePanelView({
   }, [onOpenChange]);
 
   const content = (
-    <section className="nse-file-panel-content" data-nse-part="content" data-nse-control="file-panel" data-state={status}>
+    <section className="nse-file-panel-content" data-nse-part="content" data-nse-control="save-panel" data-state={status}>
       {message ? <p className="nse-file-panel-status" role="status" data-state={status}>{message}</p> : null}
       {children}
     </section>
@@ -155,10 +155,10 @@ export function NSEFilePanelView({
       title={title}
       aria-label={title}
       className="nse-file-panel"
-      data-nse-control="file-panel"
+      data-nse-control="save-panel"
       data-nse-part="surface"
       data-state={status}
-      data-appearance-recipe={`file-panel.${compact ? "sheet" : "panel"}`}
+
       onOpenChange={dismiss}
     >
       {content}

@@ -22,7 +22,7 @@ import type { MFXMotionClient } from "../../FX/MotionFX/public";
 import type { LFXLocationClient } from "../../FX/LocationFX/public";
 import type { MIFXClient } from "../../FX/MIDIFX/public";
 import type { MEFXMediaClient } from "../../FX/MediaFX/MEFXMediaClient";
-import type { VFXVideoClient } from "../../FX/VideoFX/public";
+import type { AppVideoClient } from "./appClientTypes";
 import type { LUFXIndexClient } from "../../FX/LuminaFX/public";
 import type {
   AppAppearanceClient,
@@ -42,6 +42,7 @@ import type {
   AppWindowClient,
 } from "./appClientTypes";
 import type {
+  AppAlertClient,
   AppAnimationClient,
   AppConnectivityClient,
   AppErrorClient,
@@ -50,6 +51,7 @@ import type {
   AppIdentityClient,
   AppFilePanelClient,
   AppImageClient,
+  AppLauncherClient,
   AppMediaQueryClient,
   AppNotificationClient,
   AppPersistenceClient,
@@ -86,6 +88,11 @@ export interface SynWareContextValue {
   readonly runtimeInfo: SynWareRuntimeInfo;
   readonly branding: SynWareSiteBranding;
   readonly appId: string;
+  /** Static identity beyond the ID: the version the app declared and the
+   * display title error messages and `SCOS.app` use. */
+  readonly appInfo: Readonly<{ readonly bundleIdentifier: string; readonly version: string; readonly displayName: string }>;
+  /** Catalogue lookups for `SCOS.open` when the caller names an app ID. */
+  readonly launcher: AppLauncherClient;
   /** The mount's own responder identity; no foreign responder lookup is
    * exposed through this presentation-scoped value. */
   readonly responderId: string;
@@ -112,8 +119,11 @@ export interface SynWareContextValue {
   readonly identity: AppIdentityClient;
   readonly notifications: AppNotificationClient;
   readonly errors: AppErrorClient;
+  readonly alerts: AppAlertClient;
   readonly externalActions: AppExternalActionClient;
   readonly share: AppShareClient;
+  readonly storageDiagnostics: import("./storageDiagnosticsTypes").AppStorageDiagnosticsClient;
+  readonly screenWakeLock: import("./playbackPresentationTypes").AppScreenWakeClient;
   readonly workArea: AppWorkAreaClient;
   readonly settingsAvailability: AppSettingsAvailabilityClient;
   readonly connectivity: AppConnectivityClient;
@@ -124,10 +134,14 @@ export interface SynWareContextValue {
   readonly images: AppImageClient;
   /** The application's Open panel; see AppFilePanelClient. */
   readonly filePanels: AppFilePanelClient;
+  /** FileManager application-support lookup; directories are scoped to this application bundle. */
+  readonly fileManager: import("./fileManagerClient").AppFileManager;
   readonly motion: MFXMotionClient;
   readonly media: MEFXMediaClient;
-  readonly video: VFXVideoClient;
+  readonly video: AppVideoClient;
   readonly location: LFXLocationClient;
+  readonly speechSynthesis: import("../../FX/AudioFX/AUFXSpeechSynthesizer").AUFXSpeechClient;
+  readonly videoPresentation: import("../../FX/VideoFX/VFXPictureInPictureController").VFXVideoPresentationClient;
   readonly midi: MIFXClient;
   readonly lumina: LUFXIndexClient;
   readonly haptics: HFXHapticClient;

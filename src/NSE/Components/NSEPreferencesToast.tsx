@@ -21,7 +21,7 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState, type HTMLAttributes, type ReactNode, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import "./nsePreferencesToast.css";
-import { NSEPresence, useNSEAnimationEnvironment, useNSEPresentation } from "../Animation";
+import { NSEPresence, useNSEAnimationEnvironment, useNSEPresentation, useNSEPresenceExiting } from "../Animation";
 import {
   resolveNSEPreferencesTransitions,
   type NSEPreferencesPaneDirection,
@@ -29,8 +29,12 @@ import {
 } from "./NSEPreferencesToast.transitions";
 import { NSEListItem } from "../Controls/Selection/NSEListItem";
 import { NSEFocusScope, resolveNSEFocusReturnTarget } from "../Focus";
-import { NSEPageHeader } from "../Windows/Chrome/NSEPageHeader";
-import { NSEToolButton } from "../Controls/Buttons/NSEButtonFamilies";
+import { NSEWindowController } from "../Application/NSEWindowController";
+import { NSETitlebarAccessoryViewController } from "../Application/NSETitlebarAccessoryViewController";
+import { NSEWindowTitlebarContent } from "../Windows/windowTitlebarContext";
+import { NSEImage } from "../Controls/Images/NSEImageResource";
+import { NSEControlImage } from "../Controls/Images/NSEControlImage";
+import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { projectNSEAppearance, useNSEAppearance } from "../Appearance";
 
 /**
@@ -40,13 +44,14 @@ import { projectNSEAppearance, useNSEAppearance } from "../Appearance";
  * Navigation is a push stack rather than a split view: the list slides out to
  * the left and the chosen pane comes in from the right, with a back control in
  * the header, which is what a panel this narrow wants.
- * The header is the real NSEPageHeader in its centred variant, so the plate,
- * the corner radius and the type come from the skin rather than from here.
+ * Its panel owns a preference-style title bar. Atmo supplies its plate and typography.
  */
 
 export interface NSEPreferencePane {
   id: string;
   label: ReactNode;
+  /** Artwork beside the label on the list row. */
+  icon?: ReactNode;
   /** Secondary line on the list row — usually the current value. */
   meta?: ReactNode;
   /**
@@ -74,19 +79,6 @@ export interface NSEPreferencesToastProps {
   onClose: () => void;
 }
 
-const BackArrow = (
-  <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" focusable="false">
-    <path
-      d="M15 4 L7 12 L15 20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="3"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
 type PaneDirection = NSEPreferencesPaneDirection;
 
 /** The way the pane stack last moved. A context rather than a prop, so a title
@@ -110,20 +102,22 @@ function PreferencesVeil() {
 function PaneTitle({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLSpanElement>(null);
   useNSEPresentation(ref, usePreferencesTransitions().title(useContext(PaneDirectionContext)));
-  return <span ref={ref} className="nse-prefs-title">{children}</span>;
+  return <span ref={ref} data-nse-part="title" className="nse-prefs-title">{children}</span>;
 }
 
 /** A pane, pushed in and popped out as the stack moves. */
 function PaneSlide({ children }: { children: ReactNode }) {
+  const exiting = useNSEPresenceExiting();
   const ref = useRef<HTMLDivElement>(null);
   useNSEPresentation(ref, usePreferencesTransitions().pane(useContext(PaneDirectionContext)));
-  return <div ref={ref} className="nse-prefs-pane">{children}</div>;
+  return <div ref={ref} data-nse-part="content" className="nse-prefs-pane" inert={exiting || undefined} aria-hidden={exiting || undefined}>{children}</div>;
 }
 
 function BackSlot({ children }: { children: ReactNode }) {
+  const exiting = useNSEPresenceExiting();
   const ref = useRef<HTMLSpanElement>(null);
   useNSEPresentation(ref, usePreferencesTransitions().back);
-  return <span ref={ref} className="nse-prefs-back-slot">{children}</span>;
+  return <span ref={ref} data-nse-part="leading" className="nse-prefs-back-slot" inert={exiting || undefined} aria-hidden={exiting || undefined}>{children}</span>;
 }
 
 /** The panel's body, at the height of the pane it shows, springing between
@@ -139,7 +133,7 @@ function PreferencesBody({ height, children }: { height: number | null; children
       tracks: [{ keyPath: "height", values: [Number(previous), height] }],
     },
   });
-  return <div ref={ref} className="nse-prefs-body" style={{ height: height ?? "auto" }}>{children}</div>;
+  return <div ref={ref} data-nse-part="content" className="nse-prefs-body" style={{ height: height ?? "auto" }}>{children}</div>;
 }
 
 /** The panel itself, gliding up from the lower screen. */
@@ -148,6 +142,34 @@ function PreferencesPanel({ panelRef, ...attributes }: HTMLAttributes<HTMLDivEle
   return <div ref={panelRef} {...attributes} />;
 }
 
+
+class PreferencesBackAccessory extends NSETitlebarAccessoryViewController {
+  content: ReactNode = null;
+  constructor(owner: NSEWindowController) { super({ owner }); this.layoutAttribute = "leading"; }
+  static override view = ({ controller }: { controller: PreferencesBackAccessory }) => <>{controller.content}</>;
+}
+
+/** The panel owns its window chrome and its Back accessory for the panel's lifetime. */
+function PreferencesTitlebar({ title, titleView, leading }: { title: ReactNode; titleView: ReactNode; leading: ReactNode }) {
+  const [panel, setPanel] = useState<NSEWindowController | null>(null);
+  useLayoutEffect(() => {
+    const lifetime = new AbortController();
+    const panel = new NSEWindowController({ ownerSignal: lifetime.signal });
+    panel.window.toolbarStyle = "preference";
+    panel.window.addTitlebarAccessoryViewController(new PreferencesBackAccessory(panel));
+    setPanel(panel);
+    return () => lifetime.abort();
+  }, []);
+  useLayoutEffect(() => {
+    if (panel && !panel.isDisposed) panel.window.title = typeof title === "string" ? title : "";
+  }, [panel, title]);
+  // Layout effects install the panel before paint, including StrictMode's mount replay.
+  if (!panel || panel.isDisposed) return null;
+  const back = panel.window.titlebarAccessoryViewControllers[0] as PreferencesBackAccessory;
+  back.content = leading;
+  return <NSEWindowTitlebarContent toolbarStyle={panel.window.toolbarStyle} title={titleView}
+    leading={<PreferencesBackAccessory.view controller={back} />} className="nse-prefs-header" />;
+}
 
 export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialPane, backLabel, appearance, resolvedMode, runtimeOwner, onClose }: NSEPreferencesToastProps) {
   const inheritedAppearance = useNSEAppearance();
@@ -204,6 +226,9 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
   }, [contentNode]);
 
   const goToPane = useCallback((id: string | null) => {
+    // Keep keyboard ownership on the stable dialog before its outgoing pane
+    // unmounts. Otherwise focus can fall to the page and Escape stops reaching it.
+    if (dialogRef.current?.contains(document.activeElement)) dialogRef.current.focus({ preventScroll: true });
     setDirection(id === null ? "back" : "forward");
     setActiveId(id);
   }, []);
@@ -243,6 +268,7 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
             {...appearanceProjection}
             data-appearance={requestedAppearance}
             data-mode={projectedMode}
+            data-nse-colour-scheme-resolved={projectedMode}
             data-syncloudos-runtime-owner={runtimeOwner}
             onMouseDown={(event) => {
               if (event.target === event.currentTarget) onClose();
@@ -251,10 +277,10 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
           <PreferencesVeil />
           <PreferencesPanel
             panelRef={dialogRef}
-            className="nse-prefs-toast"
+            data-nse-control="panel" data-nse-part="background" data-nse-style="preferences" className="nse-prefs-toast"
             role="dialog"
             aria-modal="true"
-            aria-label={typeof title === "string" ? title : undefined}
+            aria-label={typeof (active?.label ?? title) === "string" ? (active?.label ?? title) as string : undefined}
             tabIndex={-1}
             onKeyDown={(event) => {
               if (event.key !== "Escape") return;
@@ -268,14 +294,13 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                 carry the same radius as the panel's own bottom two, so the header
                 reads as the cap of one shape rather than a rounded box stacked on
                 another. */}
-            <NSEPageHeader
-              className="nse-prefs-header"
-              align="center"
-              title={(
+            <PreferencesTitlebar
+              title={active ? active.label : title}
+              titleView={(
                 // Clipped and relatively positioned so the two titles can pass
                 // through each other without either escaping the plate or
                 // changing the header's height while it happens.
-                <span className="nse-prefs-title-clip">
+                <span data-nse-part="header" className="nse-prefs-title-clip">
                   <NSEPresence initial={false}>
                     <PaneTitle key={active ? active.id : "__root"}>
                       {active ? active.label : title}
@@ -287,10 +312,12 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                 <NSEPresence initial={false}>
                   {active ? (
                     <BackSlot key="back">
-                      <NSEToolButton
+                      <NSEButton
+                        bezelStyle="texturedRounded"
+                        title={backLabel}
+                        image={NSEImage.named(NSEImage.goBackTemplateName)}
+                        imagePosition="imageOnly"
                         className="nse-prefs-back"
-                        icon={BackArrow}
-                        label={backLabel}
                         onClick={() => goToPane(null)}
                       />
                     </BackSlot>
@@ -303,36 +330,39 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                   in one grid cell. Waiting made the swap a two-beat — content
                   changed, THEN the box resized — and doubled how long the whole
                   move took. */}
-              <div className="nse-prefs-panes">
+              <div data-nse-part="content" className="nse-prefs-panes">
                 <NSEPresence initial={false}>
                 <PaneSlide key={active ? active.id : "__list"}>
-                  <div className="nse-prefs-pane-content" ref={trackContent}>
+                  <div data-nse-part="content" className="nse-prefs-pane-content" ref={trackContent}>
                   {active ? active.render() : (
-                    <div className="nse-prefs-list">
+                    <div data-nse-part="content" className="nse-prefs-list">
                       {panes.map((pane) => (
                         <NSEListItem
                           key={pane.id}
+                          leading={pane.icon}
                           meta={pane.meta}
                           trailing={(
-                            <span className="nse-prefs-row-tail">
+                            <span data-nse-part="trailing" className="nse-prefs-row-tail">
                               {pane.accessory ? (
                                 // The switch is a control in its own right, not
                                 // part of the row's hit area — tapping it must
                                 // not also push the pane it belongs to.
                                 <span
-                                  className="nse-prefs-row-accessory"
+                                  data-nse-part="accessory" className="nse-prefs-row-accessory"
                                   onClick={(event) => event.stopPropagation()}
                                   onMouseDown={(event) => event.stopPropagation()}
                                 >
                                   {pane.accessory}
                                 </span>
                               ) : null}
-                              <span className="nse-prefs-chevron" aria-hidden="true">›</span>
+                              <span data-nse-part="disclosure" className="nse-prefs-chevron" aria-hidden="true"><NSEControlImage image={NSEImage.named(NSEImage.goForwardTemplateName)} /></span>
                             </span>
                           )}
                           onClick={() => goToPane(pane.id)}
                         >
-                          {pane.label}
+                          {/* Native keyboard activation bubbles through the same row action.
+                              Accessories remain siblings, never children of this button. */}
+                          <button type="button" data-nse-part="cell" className="nse-prefs-pane-link">{pane.label}</button>
                         </NSEListItem>
                       ))}
                     </div>

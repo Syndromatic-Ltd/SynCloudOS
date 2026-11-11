@@ -18,10 +18,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import type { GFXPoint, GFXRect, GFXSize } from "../GraphicsFX/GFXGeometry";
 import type { TFXFont } from "./TFXFont";
 import type { TFXFontDescriptor } from "./TFXFontDescriptor";
-interface RangeValue { readonly location: number; readonly length: number }
+import type { NSERange } from "../../Foundation/NSERange";
 type SynCloudOSRuntimeId = string;
 
 export type TFXTextDirection = "ltr" | "rtl";
@@ -55,7 +56,7 @@ export interface TFXTextRequestBase {
 export interface TFXTextMeasureRequest extends TFXTextRequestBase {}
 
 export interface TFXTextRangeRectsRequest extends TFXTextRequestBase {
-  readonly range: RangeValue;
+  readonly range: NSERange;
 }
 
 export interface TFXTextHitTestRequest extends TFXTextRequestBase {
@@ -154,8 +155,8 @@ export interface TFXLogicalTextInput {
 
 export interface TFXTextFragment {
   readonly text: string;
-  readonly range: RangeValue;
-  readonly graphemeRange: RangeValue;
+  readonly range: NSERange;
+  readonly graphemeRange: NSERange;
   readonly rect: GFXRect;
   readonly baseline: number;
   readonly containerIndex: number;
@@ -164,7 +165,7 @@ export interface TFXTextFragment {
 export interface TFXTextLayoutResult {
   readonly geometry?: Readonly<{ kind: "logical-dom" | "shaped"; units: "css-pixels" | "points"; fontGeneration: number; complete: boolean }>;
   readonly fragments: readonly TFXTextFragment[];
-  readonly laidOutRange: RangeValue;
+  readonly laidOutRange: NSERange;
   readonly truncated: boolean;
 }
 
@@ -181,7 +182,7 @@ export interface TFXTextLayoutDiagnostics {
 
 export interface TFXFontFaceRegistrationRequest {
   readonly familyName: string;
-  readonly bytes: Uint8Array;
+  readonly bytes: NSEDataConvertible;
   readonly descriptor: TFXFontDescriptor;
   readonly signal: AbortSignal;
 }
@@ -233,7 +234,7 @@ export interface TFXFontRegistration {
 export type TFXFontResourceMimeType = "font/woff" | "font/woff2" | "font/ttf" | "font/otf";
 
 export interface TFXPackagedFontResource {
-  readonly bytes: Uint8Array;
+  readonly bytes: NSEData;
   readonly mimeType: TFXFontResourceMimeType;
 }
 
@@ -245,7 +246,7 @@ export type TFXPackagedFontResourceLoader = (
 
 export interface TFXFontClient {
   readonly fontReadinessGeneration: number;
-  registerFont(bytes: Uint8Array, descriptor: TFXFontDescriptor, signal?: AbortSignal): Promise<TFXFontRegistration>;
+  registerFont(bytes: NSEDataConvertible, descriptor: TFXFontDescriptor, signal?: AbortSignal): Promise<TFXFontRegistration>;
   registerFontResource(relativeBundlePath: string, descriptor: TFXFontDescriptor, signal?: AbortSignal): Promise<TFXFontRegistration>;
   subscribeFontReadiness(listener: (change: TFXFontReadinessChange) => void): () => void;
 }

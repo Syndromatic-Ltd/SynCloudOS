@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { HTMLAttributes, ReactNode } from "react";
+import type { HTMLAttributes, PointerEventHandler, ReactNode } from "react";
 import type { NSELogicalPlacement } from "../Overlays";
 
 export type NSETooltipContent = ReactNode;
@@ -33,6 +33,7 @@ export interface NSETooltipOptions {
 }
 
 export interface NSETooltipBinding {
+  readonly dismiss?: () => void;
   readonly anchorProps: HTMLAttributes<HTMLElement>;
   readonly tooltip: ReactNode;
 }
@@ -44,6 +45,8 @@ export interface NSETooltipProps {
   readonly anchor: HTMLElement | null;
   readonly placement?: NSELogicalPlacement;
   onOpenChange?(open: boolean): void;
+  onPointerEnter?: PointerEventHandler<HTMLDivElement>;
+  onPointerLeave?: PointerEventHandler<HTMLDivElement>;
 }
 
 export interface NSETooltipScheduler {

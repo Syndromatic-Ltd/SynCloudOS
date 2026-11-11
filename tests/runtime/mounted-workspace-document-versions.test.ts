@@ -50,8 +50,8 @@ function noteType(): DocumentType<{ value: string }> {
     schemaVersion: 1,
     extensions: [],
     mimeTypes: [],
-    creatingApplicationId: "workspace-owner",
-    openingApplicationIds: ["workspace-owner"],
+    creatingApplicationId: "com.example.workspace-owner",
+    openingApplicationIds: ["com.example.workspace-owner"],
     capabilities: { versions: true, conflicts: true },
     autosave: "disabled",
     create: () => ({ value: "new" }),
@@ -71,24 +71,24 @@ function fixture(options: {
     ...(options.environment ? { environment: options.environment } : {}),
     ...(options.adapter ? { applicationDocuments: { initialAdapters: [options.adapter] } } : {}),
     initialBundles: [
-      createTestBundle({ id: "workspace-owner", route: "/workspace-owner" }),
-      createTestBundle({ id: "workspace-observer", route: "/workspace-observer" }),
+      createTestBundle({ bundleIdentifier: "com.example.workspace-owner", route: "/workspace-owner" }),
+      createTestBundle({ bundleIdentifier: "com.example.workspace-observer", route: "/workspace-observer" }),
     ],
   });
   runtimes.push(runtime);
   runtime.documents.registerType(noteType());
-  const ownerApp = runtime.apps.getApp("workspace-owner")!;
-  const observerApp = runtime.apps.getApp("workspace-observer")!;
-  runtime.responders.register({ id: "application:workspace-owner", kind: "application", parentId: "workspace", scopeId: "application:workspace-owner" });
-  runtime.responders.register({ id: "application:workspace-observer", kind: "application", parentId: "workspace", scopeId: "application:workspace-observer" });
-  runtime.responders.register({ id: "application:workspace-owner:first", kind: "control", parentId: "application:workspace-owner", scopeId: "workspace-owner:first" });
-  runtime.responders.register({ id: "application:workspace-owner:replacement", kind: "control", parentId: "application:workspace-owner", scopeId: "workspace-owner:replacement" });
-  runtime.responders.register({ id: "application:workspace-observer:main", kind: "control", parentId: "application:workspace-observer", scopeId: "workspace-observer:main" });
+  const ownerApp = runtime.apps.getApp("com.example.workspace-owner")!;
+  const observerApp = runtime.apps.getApp("com.example.workspace-observer")!;
+  runtime.responders.register({ id: "application:com.example.workspace-owner", kind: "application", parentId: "workspace", scopeId: "application:com.example.workspace-owner" });
+  runtime.responders.register({ id: "application:com.example.workspace-observer", kind: "application", parentId: "workspace", scopeId: "application:com.example.workspace-observer" });
+  runtime.responders.register({ id: "application:com.example.workspace-owner:first", kind: "control", parentId: "application:com.example.workspace-owner", scopeId: "workspace-owner:first" });
+  runtime.responders.register({ id: "application:com.example.workspace-owner:replacement", kind: "control", parentId: "application:com.example.workspace-owner", scopeId: "workspace-owner:replacement" });
+  runtime.responders.register({ id: "application:com.example.workspace-observer:main", kind: "control", parentId: "application:com.example.workspace-observer", scopeId: "workspace-observer:main" });
   return {
     runtime,
-    first: createMountedSynWareRuntime({ runtime, app: ownerApp, responderId: "application:workspace-owner:first" }),
-    replacement: createMountedSynWareRuntime({ runtime, app: ownerApp, responderId: "application:workspace-owner:replacement" }),
-    observer: createMountedSynWareRuntime({ runtime, app: observerApp, responderId: "application:workspace-observer:main" }),
+    first: createMountedSynWareRuntime({ runtime, app: ownerApp, responderId: "application:com.example.workspace-owner:first" }),
+    replacement: createMountedSynWareRuntime({ runtime, app: ownerApp, responderId: "application:com.example.workspace-owner:replacement" }),
+    observer: createMountedSynWareRuntime({ runtime, app: observerApp, responderId: "application:com.example.workspace-observer:main" }),
   };
 }
 
@@ -277,12 +277,12 @@ describe("mounted workspace document version and conflict port", () => {
     first.dispose("mounted owner disposal while restoring");
 
     try {
-      expect(runtime.documents.hasActiveDocumentOwnerLease(document.id, "workspace-owner")).toBe(true);
+      expect(runtime.documents.hasActiveDocumentOwnerLease(document.id, "com.example.workspace-owner")).toBe(true);
     } finally {
       gate.resolve(undefined);
     }
     await expect(restoring).rejects.toThrow();
-    await vi.waitFor(() => expect(runtime.documents.hasActiveDocumentOwnerLease(document.id, "workspace-owner")).toBe(false));
+    await vi.waitFor(() => expect(runtime.documents.hasActiveDocumentOwnerLease(document.id, "com.example.workspace-owner")).toBe(false));
   });
 
   it("does not let a disposed same-ID owner apply a late version read over the replacement mount", async () => {

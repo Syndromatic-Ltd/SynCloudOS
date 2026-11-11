@@ -25,7 +25,7 @@ import * as React from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import type { WindowPresentation } from "../../src/SynCloudOS/Windows";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
-import { useSynWare } from "../../src/SynCloudOS/AppSDK";
+import { useSCOS } from "../../src/SynCloudOS/AppSDK";
 import { HostSiteBrandingProvider } from "../../src/SynCloudOSReact";
 import { createApplicationWindowContentRendererRegistry } from "../../src/Webspring/WindowLayer";
 import { standardWindow } from "../fixtures/windowTestDependencies";
@@ -34,18 +34,18 @@ import { createTestBundle, createTestRuntime } from "./helpers";
 afterEach(cleanup);
 
 describe("ApplicationWindowContent scoped app runtime", () => {
-  it("does not expose kernel controls through mounted props or the useSynWare client", async () => {
+  it("does not expose kernel controls through mounted props or the useSCOS client", async () => {
     const runtime = createTestRuntime();
     let receivedProps: Record<string, unknown> | null = null;
     let appClient: Record<string, unknown> | null = null;
     let missingDocument: unknown = undefined;
     runtime.apps.registerBundle(createTestBundle(
-      { id: "test-app", route: "/test" },
+      { bundleIdentifier: "com.example.test-app", route: "/test" },
       {
         loadModule: async () => ({
           default: (props: Record<string, unknown>) => {
             receivedProps = props;
-            const app = useSynWare();
+            const app = useSCOS();
             appClient = app as unknown as Record<string, unknown>;
             missingDocument = app.documents.workspaceDocuments.getDocument("document:missing");
             return <p>Scoped window application</p>;
@@ -53,18 +53,18 @@ describe("ApplicationWindowContent scoped app runtime", () => {
         }),
       },
     ));
-    runtime.responders.register({ id: "application:test-app", kind: "application", parentId: "workspace", scopeId: "application:test-app" });
+    runtime.responders.register({ id: "application:com.example.test-app", kind: "application", parentId: "workspace", scopeId: "application:com.example.test-app" });
     const window = runtime.windows.create(standardWindow("window:test-app", {
-      applicationId: "test-app",
-      applicationSessionId: "test-app",
-      content: { rendererId: "application", parameters: { appId: "test-app" } },
+      applicationId: "com.example.test-app",
+      applicationSessionId: "com.example.test-app",
+      content: { rendererId: "application", parameters: { appId: "com.example.test-app" } },
       restorationKey: "application-window-runtime-facade.test-app",
     }));
     await runtime.windows.open(window.id);
-    await runtime.bundles.loadBundle("test-app");
-    const registry = createApplicationWindowContentRendererRegistry(runtime, { "test-app": runtime.apps.getApp("test-app")! });
-    const content = registry.render("application:test-app", {
-      mountKey: "application:test-app",
+    await runtime.bundles.loadBundle("com.example.test-app");
+    const registry = createApplicationWindowContentRendererRegistry(runtime, { "com.example.test-app": runtime.apps.getApp("com.example.test-app")! });
+    const content = registry.render("application:com.example.test-app", {
+      mountKey: "application:com.example.test-app",
       presentation: {} as WindowPresentation,
       window: window.record,
     });

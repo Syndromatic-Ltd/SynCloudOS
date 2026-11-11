@@ -1,0 +1,12 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/animation tests/runtime/fx/browser-animation tests/runtime/nse-animation tests/runtime/nse-tab-transition-lifetime.test.tsx tests/runtime/nse-custom-presentation.test.tsx --reporter=dot
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+···················································································································································································································································
+
+ Test Files  41 passed (41)
+      Tests  243 passed (243)
+   Start at  11:02:22
+   Duration  47.65s (transform 12.94s, setup 491ms, import 37.71s, tests 7.79s, environment 40.88s)
+

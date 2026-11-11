@@ -79,7 +79,7 @@ describe("DocumentTypeRegistry", () => {
       registry.decode(noteType.id, { schemaVersion: 0, text: "Old" }),
     ).toThrow(DocumentSchemaError);
     expect(() =>
-      registry.decode(noteType.id, { schemaVersion: 3, title: "Future", body: "" }),
+      registry.decode(noteType.id, { schemaVersion: 3, displayName: "Future", body: "" }),
     ).toThrow(DocumentSchemaError);
   });
 

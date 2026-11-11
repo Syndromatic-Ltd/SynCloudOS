@@ -1,0 +1,28 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 typecheck
+npm notice run tsc -b --pretty false
+src/SynCloudOS/AppManager/AppManager.ts(48,54): error TS2344: Type '"documents" | "undo" | "policy" | "login"' does not satisfy the constraint 'keyof SynCloudOSRuntime'.
+  Type '"policy"' is not assignable to type 'keyof SynCloudOSRuntime'.
+src/SynCloudOS/AppManager/AppManager.ts(260,18): error TS2339: Property 'configurationProfiles' does not exist on type 'AppManagerRuntimePort'.
+src/SynCloudOS/AppManager/AppManagerController.ts(33,72): error TS2322: Type 'SynCloudOSRuntime' is not assignable to type 'AppManagerRuntimePort'.
+  Property 'policy' is missing in type 'SynCloudOSRuntime' but required in type 'Pick<SynCloudOSRuntime, "documents" | "undo" | "policy" | "login">'.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(237,14): error TS7006: Parameter 'action' implicitly has an 'any' type.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(237,22): error TS7006: Parameter 'options' implicitly has an 'any' type.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(254,15): error TS7006: Parameter 'listener' implicitly has an 'any' type.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4975,7): error TS1360: Type '{ audioGraphs: Readonly<{ createEngine(format: AUFXAudioFormat, signal?: AbortSignal): AUFXAudioEngine; }>; audioSessions: MountedAudioSessionFactory; ... 30 more ...; trusted: AppTrustedClient; }' does not satisfy the expected type 'MountedAppEnvironmentClients'.
+  Type '{ audioGraphs: Readonly<{ createEngine(format: AUFXAudioFormat, signal?: AbortSignal | undefined): AUFXAudioEngine; }>; ... 31 more ...; trusted: AppTrustedClient; }' is missing the following properties from type 'MountedAppEnvironmentClients': bluetooth, nfc, speech, contacts, and 2 more.
+src/SynCloudOS/AppSDK/appRuntimeFacade.ts(4976,54): error TS2345: Argument of type 'Readonly<{ audioGraphs: Readonly<{ createEngine(format: AUFXAudioFormat, signal?: AbortSignal | undefined): AUFXAudioEngine; }>; ... 31 more ...; trusted: AppTrustedClient; }>' is not assignable to parameter of type 'MountedAppEnvironmentClients'.
+  Type 'Readonly<{ audioGraphs: Readonly<{ createEngine(format: AUFXAudioFormat, signal?: AbortSignal | undefined): AUFXAudioEngine; }>; ... 31 more ...; trusted: AppTrustedClient; }>' is missing the following properties from type 'MountedAppEnvironmentClients': bluetooth, nfc, speech, contacts, and 2 more.
+src/SynCloudOS/AppSDK/hooks/useNetwork.ts(25,28): error TS2339: Property 'network' does not exist on type 'SCOSFacade'.
+src/SynCloudOS/AppSDK/hooks/useVideoPresentation.ts(25,28): error TS2551: Property 'videoPresentation' does not exist on type 'SCOSFacade'. Did you mean 'presentation'?
+src/SynCloudOS/LuminaFX/LUFXHostService.ts(113,65): error TS2339: Property 'configurationProfiles' does not exist on type 'LUFXHostServiceOptions'.
+src/SynCloudOS/LuminaFX/LUFXHostService.ts(119,68): error TS2339: Property 'configurationProfiles' does not exist on type 'LUFXHostServiceOptions'.
+src/SynCloudOS/LuminaFX/LUFXHostService.ts(120,45): error TS2339: Property 'configurationProfiles' does not exist on type 'LUFXHostServiceOptions'.
+src/SynCloudOS/LuminaFX/LUFXHostService.ts(122,28): error TS2339: Property 'configurationProfiles' does not exist on type 'LUFXHostServiceOptions'.
+src/SynCloudOS/LuminaFX/LUFXHostService.ts(135,53): error TS2339: Property 'configurationProfiles' does not exist on type 'LUFXHostServiceOptions'.
+src/SynCloudOS/LuminaFX/LUFXHostService.ts(291,124): error TS2339: Property 'configurationProfiles' does not exist on type 'LUFXHostServiceOptions'.
+src/SynCloudOS/LuminaFX/LUFXHostService.ts(332,71): error TS2339: Property 'configurationProfiles' does not exist on type 'LUFXHostServiceOptions'.
+src/SynCloudOS/LuminaFX/LUFXHostService.ts(364,109): error TS2339: Property 'configurationProfiles' does not exist on type 'LUFXHostServiceOptions'.
+src/SynCloudOS/LuminaFX/LUFXHostService.ts(370,35): error TS2339: Property 'configurationProfiles' does not exist on type 'LUFXHostServiceOptions'.
+src/SynCloudOS/LuminaFX/LUFXHostService.ts(371,36): error TS2339: Property 'configurationProfiles' does not exist on type 'LUFXHostServiceOptions'.
+src/SynCloudOS/VideoFX/VideoCaptureService.ts(310,30): error TS7006: Parameter 'filter' implicitly has an 'any' type.
+src/SynCloudOS/VideoFX/VideoCaptureService.ts(310,38): error TS7006: Parameter 'signal' implicitly has an 'any' type.

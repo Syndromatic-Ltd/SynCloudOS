@@ -20,9 +20,10 @@
 
 import { Children, cloneElement, isValidElement, useContext, useInsertionEffect, useMemo, type FocusEvent, type PropsWithChildren, type ReactElement } from "react";
 import type { ResponderKind, UndoOwner } from "../SynCloudOS/SynCloudOS";
-import { registerMountedAppResponder } from "../SynCloudOS/SynCloudOS";
+import { getMountedAppDOMRuntimeId, registerMountedAppResponder } from "../SynCloudOS/SynCloudOS";
 import { SynWareRuntimeContext, SynCloudOSRuntimeContext } from "./runtimeContext";
 import { activateResponderHierarchy, clearOwnedResponderAnchor, ResponderHierarchyContext, useResponderHierarchy } from "./responderHierarchy";
+import { applicationSessionFor } from "../SynCloudOS/AppHosting/runtimeEntry";
 
 export interface ResponderScopeProps extends PropsWithChildren {
   readonly responderId: string;
@@ -41,7 +42,8 @@ export function ResponderScope({ responderId, kind, parentResponderId, scopeId, 
   const kernelRuntime = useContext(SynCloudOSRuntimeContext);
   const runtime = appRuntime ?? kernelRuntime;
   if (!runtime) throw new Error("ResponderScope must be used within SynCloudOSProvider or a mounted SynWare.");
-  const runtimeId = appRuntime ? `app:${appRuntime.app.id}` : kernelRuntime!.runtimeId;
+  const runtimeId = appRuntime ? `app:${appRuntime.app.bundleIdentifier}` : kernelRuntime!.runtimeId;
+  const domRuntimeId = appRuntime ? getMountedAppDOMRuntimeId(appRuntime) : runtimeId;
   const parentHierarchy = useResponderHierarchy();
   const resolvedParentResponderId = parentResponderId ?? parentHierarchy.responderId ?? undefined;
   const hierarchy = useMemo(() => ({
@@ -58,6 +60,8 @@ export function ResponderScope({ responderId, kind, parentResponderId, scopeId, 
   // effect, including for portal descendants.
   useInsertionEffect(() => {
     if (disabled || appRuntime) return;
+    if (kind === "application" && responderId.startsWith("application:") &&
+      applicationSessionFor({ runtimeId: kernelRuntime!.runtimeId, appId: responderId.slice("application:".length) })?.ownsApplicationResponder) return;
     const registration = kernelRuntime!.responders.register({ id: responderId, kind, parentId: resolvedParentResponderId, scopeId, undoOwner, diagnosticsLabel });
     return () => {
       clearOwnedResponderAnchor(kernelRuntime!, kind, responderId);
@@ -69,17 +73,25 @@ export function ResponderScope({ responderId, kind, parentResponderId, scopeId, 
   // the mounted registrar still queues a child whose parent insertion is later
   // in React's traversal.
   useInsertionEffect(() => {
-    if (disabled || !appRuntime) return;
+    if (disabled || !appRuntime || appRuntime.signal.aborted) return;
     const registration = registerMountedAppResponder(appRuntime, { id: responderId, kind, parentId: resolvedParentResponderId, scopeId, undoOwner, diagnosticsLabel });
     return () => { registration.dispose({ cascade: true }); };
   }, [appRuntime, responderId, kind, resolvedParentResponderId, scopeId, undoOwner, disabled, diagnosticsLabel]);
-  const handleFocusCapture = (_event: FocusEvent<HTMLElement>) => {
-    if (disabled || !(kind === "application" || kind === "window" || kind === "document")) return;
+  const handleFocusCapture = (event: FocusEvent<HTMLElement>) => {
+    if (disabled || appRuntime?.signal.aborted) return;
+    if (kind === "view") {
+      // A plain descendant belongs to this view; an independently registered
+      // control or child view keeps its own first-responder authority.
+      if (event.target.closest("[data-syncloudos-responder-id]") !== event.currentTarget || appRuntime?.signal.aborted) return;
+      runtime.focus.requestFocus(responderId);
+      return;
+    }
+    if (!(kind === "application" || kind === "window" || kind === "document")) return;
     if (appRuntime) appRuntime.focus.requestFocus(responderId);
     else activateResponderHierarchy(kernelRuntime!, hierarchy);
   };
   const hostProps = {
-    "data-syncloudos-runtime-owner": runtimeId,
+    "data-syncloudos-runtime-owner": domRuntimeId,
     "data-syncloudos-responder-id": disabled ? undefined : responderId,
     "data-syncloudos-focus-scope": scopeId,
     onFocusCapture: handleFocusCapture,
@@ -93,6 +105,7 @@ export function ResponderScope({ responderId, kind, parentResponderId, scopeId, 
     host = cloneElement(element, {
       ...hostProps,
       onFocusCapture: (event: FocusEvent<HTMLElement>) => {
+        if (appRuntime?.signal.aborted) return;
         childFocusCapture?.(event);
         if (!event.isPropagationStopped()) handleFocusCapture(event);
       },

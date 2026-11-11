@@ -25,6 +25,11 @@ import { createAppLifecycleRules } from "./AppManager/AppLifecycle";
 import type { RuntimeSnapshot } from "./Runtime/runtimeTypes";
 import type { SynCloudOSRuntime } from "./Runtime/runtimeInstanceTypes";
 
+export { resolveViewportBookRegions, resolveViewportFoldRegions, selectViewportBookRegion, selectViewportFoldRegion, screenViewportRegionGeometry } from "./Windows/viewportFeatures";
+export { sameViewportFeatures } from "./Windows/viewportFeatures";
+export type { RuntimeViewportFeaturesSnapshot } from "./Windows/viewportFeatures";
+export { createStorageDiagnosticsClient } from "./Persistence/storageDiagnostics";
+export type { StorageDiagnosticsClient, StorageDiagnosticsSnapshot, StorageEstimateObservation, StoragePersistenceObservation, StorageDiagnosticsUnavailable } from "./Persistence/storageDiagnostics";
 export { createSynCloudOS } from "./Runtime/createSynCloudOS";
 export { createContentBoundPresentationTraitsService } from "./ResponsiveModeManager/ResponsiveModeManager";
 export { Config } from "./Config/Config";
@@ -52,10 +57,10 @@ export type {
   SynCloudOSAppWindowManifest,
   SynCloudOSStagePoint,
 } from "./AppRegistry/appRegistryTypes";
-export type { SynCloudOSAppFrameSmoothSurfaceManifest } from "./AppRegistry/appRegistryTypes";
-export type { SynCloudOSAppAccessPolicy } from "./PolicyKit/policyTypes";
-export type { SynCloudOSPolicySubject } from "./PolicyKit/policyTypes";
-export type { SynCloudOSPolicyProfile, SynCloudOSPolicyProfileSession, SynCloudOSPolicySubjectGrant } from "./PolicyKit/policyTypes";
+export type { SynCloudOSAppFrameBackground, SynCloudOSAppFrameRightSlot, SynCloudOSAppFrameSmoothSurfaceManifest } from "./AppRegistry/appRegistryTypes";
+export type { SynCloudOSAppAccessPolicy } from "./ConfigurationProfiles/policyTypes";
+export type { SynCloudOSPolicySubject } from "./ConfigurationProfiles/policyTypes";
+export type { SynCloudOSConfigurationProfile, SynCloudOSConfigurationProfileSession, SynCloudOSPolicySubjectGrant } from "./ConfigurationProfiles/policyTypes";
 /** Runtime-owned, presentation-safe inspector wire contracts. The producer
  * remains private; consumers receive only immutable snapshot values. */
 export type {
@@ -102,7 +107,7 @@ export type {
   SynCloudOSDocumentUnpublishOptions,
 } from "./DocumentStore/documentStoreTypes";
 export type { SynCloudOSDocument, SynCloudOSDocumentOwnership } from "./DocumentStore/documentStoreTypes";
-export type { SynCloudOSDocumentStoreTerminalMutationLease } from "./DocumentStore/PersistenceDocumentStore";
+export type { SynCloudOSDocumentStoreLock, SynCloudOSDocumentStoreTerminalMutationLease } from "./DocumentStore/PersistenceDocumentStore";
 export * from "./FilePanels";
 export * from "./MediaPanels";
 export * from "./Windows";
@@ -117,6 +122,7 @@ export {
 } from "./Responders/MountedAppResponderBridge";
 export {
   getMountedAppOverlayAuthority,
+  getMountedAppDOMRuntimeId,
   setMountedAppOverlayAuthority,
   clearMountedAppOverlayAuthority,
 } from "./Runtime/MountedAppOverlayBridge";
@@ -127,7 +133,7 @@ export * from "./Images";
 export * from "./AnimationFX";
 export * from "./AudioFX";
 export * from "./WebContent";
-export * from "./Models/GeometryValues";
+
 export type { SynCloudOSAppInfo } from "./AppInfo/appInfoTypes";
 export { AppInfo };
 export { prepareRenderedCanvasCapture } from "./AnimationFX/renderedCanvasCapture";
@@ -148,7 +154,25 @@ export type {
   UserNotificationState,
 } from "./NotificationCenter/notificationDeliveryTypes";
 export type { CapturedSynCloudOSError } from "./ErrorManager/errorTypes";
-export { getOrderedVisibleWebspringApps } from "./WebspringState/webspringStateProjection";
+export {
+  DESKTOP_DIAL_ITEM_LIMIT,
+  EMPTY_WEBSPRING_FOLDER_CONFIGURATION,
+  WEBSPRING_LAYOUT_PREFERENCE_KEY,
+  WEBSPRING_STAGE,
+  getDesktopDialAngles,
+  getDesktopWebspringSlots,
+  getDialPoint,
+  getKeyboardReorderIndex,
+  getOrderedVisibleWebspringApps,
+  reconcileWebspringLayout,
+} from "./WebspringState/webspringStateProjection";
+export type {
+  WebspringDesktopLayout,
+  WebspringDesktopSlot,
+  WebspringDesktopSlotRegion,
+  WebspringLayoutInput,
+  WebspringLayoutProjection,
+} from "./WebspringState/webspringStateProjection";
 export {
   WEBSPRING_MULTI_SWITCH_ROLES,
   WEBSPRING_PRESENTATION_ROLES,
@@ -156,15 +180,16 @@ export {
   webspringPresentationRoles,
 } from "./WebspringState/webspringPresentation";
 export type { WebspringMultiSwitchRole, WebspringReturnRole } from "./WebspringState/webspringPresentation";
-export type {
-  WebspringContentItem,
-  WebspringContentReadRequest,
-  WebspringContentSource,
-  WebspringContentSources,
-} from "./WebspringState/webspringContentTypes";
 export type { SynCloudOSMultiSwitchState } from "./ApplicationState/applicationStateTypes";
 export { AppPresentationErrorFallback, SynCloudOSWatchdog } from "./ErrorManager/SynCloudOSWatchdog";
-export { toTechnicalReport } from "./ErrorManager/ErrorManager";
+export { toTechnicalReport } from "./ErrorManager/errorReport";
+export { SynCloudOSLifecycleError } from "./ErrorManager/lifecycleError";
+export type {
+  SynCloudOSLifecycleDisposal,
+  SynCloudOSLifecycleDisposalReason,
+  SynCloudOSLifecycleErrorOptions,
+  SynCloudOSLifecycleResource,
+} from "./ErrorManager/lifecycleError";
 export type { SynCloudOSAppearance, SynCloudOSResolvedMode } from "./Appearance/appearanceService";
 export type { SynCloudOSSettings } from "./Settings/settingsService";
 export type { SynCloudOSRole } from "./PermissionManager/permissionTypes";
@@ -179,9 +204,11 @@ export type {
 } from "./LocaleServices/localeTypes";
 export { DocumentError, DocumentNotFoundError } from "./Documents/DocumentErrors";
 export { useResolvedMode } from "./Appearance/useAppearance";
-export type { PreferencePaneDescriptor, PreferencePaneRegistry } from "./Preferences";
+export type { PreferencePaneDefinition, PreferencePaneRegistry, PreferencePaneViewProps } from "./Preferences";
 export { WEBSPRING_LAYOUT_PREFERENCE_VERSION } from "./WebspringState/webspringStateTypes";
 export type {
+  SynCloudOSWebspringFolderConfiguration,
+  SynCloudOSWebspringFolderDefinition,
   SynCloudOSWebspringLayoutPreference,
   SynCloudOSWebspringLayoutPreferenceSource,
   SynCloudOSWebspringLayoutState,
@@ -257,7 +284,7 @@ export function createSynCloudOSFacade(runtime: SynCloudOSRuntime) {
     Inspector: runtime.inspector,
     Lifecycle: runtime.lifecycle,
     PermissionManager: runtime.permissions,
-    PolicyKit: runtime.policy,
+    ConfigurationProfiles: runtime.configurationProfiles,
     PluginRegistry: runtime.pluginRegistry,
     ResponsiveModeManager: runtime.responsiveModeManager,
     Persistence: runtime.persistence,
@@ -269,3 +296,20 @@ export function createSynCloudOSFacade(runtime: SynCloudOSRuntime) {
   facadeCache.set(runtime, facade);
   return facade;
 }
+
+export * from "./Updates";
+
+export { SCAuthorization, SCAuthorizationRights } from "./Authorization/SCAuthorization";
+export type { SCAuthorizationRight, SCAuthorizationResult, SCAuthorizationOptions } from "./Authorization/SCAuthorization";
+
+export type { PrivacyStore, PrivacyAuthorizationRecord, PrivacyAuthorizationStatus, PrivacyDecision } from "./Privacy";
+
+export type { InstalledApplicationConfiguration, InstalledApplicationSnapshot } from "./InstalledApplications/installedApplicationTypes";
+export type { BGTaskScheduler, BGTaskRequest, BGDownloadTaskRequest } from "./BackgroundTasks/BackgroundTasks";
+export type { UNUserNotificationCenter, UNRemoteNotificationRegistration, UNNotificationSettings, UNNotificationCategory, UNNotificationAction, UNPushConfiguration } from "./UserNotifications/UserNotifications";
+export { installedApplicationForDocument } from "./InstalledApplications/installedApplicationRegistry";
+export { systemCapabilityReport } from "./InstalledApplications/capabilityReport";
+export type { SystemCapabilityRow } from "./InstalledApplications/capabilityReport";
+
+export { applicationSystemServices } from "./InstalledApplications/applicationSystemServices";
+export { shortcutCommandIdentifier } from "./InstalledApplications/installedApplicationLaunch";

@@ -43,8 +43,8 @@ const projectionFacadeType: DocumentType<ProjectionFacadeModel> = Object.freeze(
   schemaVersion: 1,
   extensions: Object.freeze([".projection-facade-test"]),
   mimeTypes: Object.freeze(["application/x-syncloudos-projection-facade-test"]),
-  creatingApplicationId: "projection-owner",
-  openingApplicationIds: Object.freeze(["projection-owner"]),
+  creatingApplicationId: "com.example.projection-owner",
+  openingApplicationIds: Object.freeze(["com.example.projection-owner"]),
   capabilities: Object.freeze({ versions: true, conflicts: true }),
   autosave: "disabled",
   create: () => Object.freeze({ version: 1, text: "Untitled" }),
@@ -78,9 +78,9 @@ function createProjectionFacadeFixture() {
   activeRuntimes.push(runtime);
   registerTestSynWare(runtime, {
     schemaVersion: 1,
-    id: "projection-owner",
+    bundleIdentifier: "com.example.projection-owner",
     version: "1.0.0",
-    title: "Projection Owner",
+    displayName: "Projection Owner",
     routes: [{ path: "/projection-owner", primary: true }],
     windowDefaults: {
       title: "Projection Owner",
@@ -92,7 +92,7 @@ function createProjectionFacadeFixture() {
     },
     documentTypes: [{ id: projectionFacadeType.id, displayName: projectionFacadeType.displayName }],
   });
-  const mount = mountTestSynWareRuntime(runtime, "projection-owner");
+  const mount = mountTestSynWareRuntime(runtime, "com.example.projection-owner");
   activeMounts.push(mount);
   return createSynWareContextValue(mount.runtime).documents.workspaceDocuments;
 }
@@ -107,7 +107,7 @@ describe("projection facade", () => {
     });
     expect(snapshot).toMatchObject({
       id: "facade-projection",
-      applicationId: "projection-owner",
+      applicationId: "com.example.projection-owner",
       documentKind: "projection",
       readOnly: true,
       dirtyRevision: 0,
@@ -122,7 +122,7 @@ describe("projection facade", () => {
       initialModel: { version: 1, text: "Published" },
     };
     await expect(workspaceDocuments.newProjectionDocument({
-      ...base, applicationId: "someone-else",
+      ...base, applicationId: "com.example.someone-else",
     } as never)).rejects.toThrow(/another application/);
     await expect(workspaceDocuments.newProjectionDocument({
       ...base, location: { kind: "memory", namespace: "x", key: "y" },

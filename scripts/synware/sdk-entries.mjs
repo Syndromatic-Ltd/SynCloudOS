@@ -20,6 +20,9 @@
 
 /** Canonical SynWare SDK public entry points. No source-tree wildcard aliases. */
 export const synWareSdkEntries = Object.freeze({
+  "foundation": "src/Foundation/public.ts",
+  "fx/compression": "src/FX/CompressionFX/public.ts",
+  "index": "src/SynCloudOS/AppSDK/rootPackageEntry.ts",
   "fx/animation": "src/FX/AnimationFX/public.ts",
   "sdk/animation-host": "src/FX/AnimationFX/host.ts",
   "fx/image": "src/FX/ImageFX/public.ts",
@@ -32,12 +35,23 @@ export const synWareSdkEntries = Object.freeze({
   "fx/video/webm": "src/FX/VideoFX/webm.ts",
   "fx/midi": "src/FX/MIDIFX/public.ts",
   "fx/location": "src/FX/LocationFX/public.ts",
+  "fx/network": "src/FX/NetworkFX/public.ts",
+  "fx/crypto": "src/FX/CryptoFX/public.ts",
+  "fx/dispatch": "src/FX/DispatchFX/public.ts",
+  "fx/bluetooth": "src/FX/BluetoothFX/public.ts",
+  "fx/nfc": "src/FX/NFCFX/public.ts",
+  "fx/speech": "src/FX/SpeechFX/public.ts",
+  "fx/contacts": "src/FX/ContactsFX/public.ts",
+  "fx/pass": "src/FX/PassFX/public.ts",
+  "fx/xr": "src/FX/XRFX/public.ts",
   "fx/lumina": "src/FX/LuminaFX/public.ts",
   "fx/graphics": "src/FX/GraphicsFX/public.ts",
   "sdk": "src/SynCloudOS/AppSDK/sdkPackageEntry.ts",
   "sdk/testing": "src/SynCloudOS/AppSDK/testing/sdkPackageEntry.ts",
   "server/auth": "src/SynCloudOS/Server/Auth/index.ts",
   "auth": "src/SynCloudOS/Authentication/index.ts",
+  "authentication-services": "src/SynCloudOS/AuthenticationServices/index.ts",
+  "auth/passkey": "src/SynCloudOS/Authentication/providers/passkey/index.ts",
   "webspring": "src/Webspring/public.ts",
   "chronosphere": "src/SynCloudOS/AppSDK/Chronosphere/public.ts",
   "browser": "src/SynCloudOSReact/browser.tsx",
@@ -46,16 +60,16 @@ export const synWareSdkEntries = Object.freeze({
   "nse/controls": "src/NSE/public/controls.ts",
   "nse/text": "src/NSE/public/text.ts",
   "nse/content": "src/NSE/public/content.ts",
+  "nse/theme": "src/NSE/public/theme.ts",
   "nse/appearance": "src/NSE/public/appearance.ts",
-  "nse/themes/atmo": "src/NSE/Themes/Atmo/index.ts",
+  "nse/themes/atmo": "src/NSE/Appearance/atmo.ts",
   "nse/scroll": "src/NSE/public/scroll.ts",
   "nse/page": "src/NSE/public/page.ts",
   "nse/layout": "src/NSE/public/layout.ts",
-  "nse/cover-flow": "src/NSE/public/cover-flow.ts",
   "nse/system-ui": "src/NSE/public/system-ui.ts",
 });
 export const synWareSdkStyles = Object.freeze({
-  "nse/themes/atmo/styles.css": "src/NSE/Themes/Atmo/Resources/atmo.css",
+  "nse/themes/atmo/styles.css": "src/NSE/Appearance/atmo-theme.css",
 });
 export const synWareSdkGeneratedStyles = Object.freeze({
   "browser/styles.css": "browser",

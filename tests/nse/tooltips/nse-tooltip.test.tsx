@@ -23,6 +23,7 @@ import React, { useMemo, useState } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEOverlayProvider } from "../../../src/NSE/Overlays";
+import { NSELabelHelp } from "../../../src/NSE/Tooltips/NSELabelHelp";
 import { NSETooltipProvider, useNSETooltip } from "../../../src/NSE/Tooltips";
 
 interface ScheduledTask {
@@ -62,6 +63,8 @@ const workAreaSnapshot = Object.freeze({
 function presentationSnapshot(reducedMotion: boolean) {
   return Object.freeze({
     revision: 1,
+    geometryState: "current" as const,
+    safeAreaAvailability: "available" as const,
     contentBounds: Object.freeze({ x: 0, y: 0, width: 1280, height: 720 }),
     hostViewportBounds: Object.freeze({ x: 0, y: 0, width: 1280, height: 720 }),
     horizontalSizeClass: "wide" as const,
@@ -91,24 +94,28 @@ function TooltipHarness({
   readonly runtimeController?: AbortController;
   readonly children: React.ReactNode;
 }) {
-  const runtimePort = useMemo(() => ({
-    runtimeId: "runtime:tooltip-tests",
-    signal: runtimeController?.signal ?? new AbortController().signal,
-    environment: {
-      browser: { getDocument: () => document, getWindow: () => window },
-      workArea: { getSnapshot: () => workAreaSnapshot, subscribe: () => () => undefined },
-      visualViewport: { getSnapshot: () => null, subscribe: () => () => undefined },
-      presentation: {
-        getSnapshot: () => presentationSnapshot(reducedMotion),
-        subscribe: () => () => undefined,
+  const runtimePort = useMemo(() => {
+    // useSyncExternalStore requires a stable snapshot until the source changes, as real sources keep.
+    const presentation = presentationSnapshot(reducedMotion);
+    return {
+      runtimeId: "runtime:tooltip-tests",
+      signal: runtimeController?.signal ?? new AbortController().signal,
+      environment: {
+        browser: { getDocument: () => document, getWindow: () => window },
+        workArea: { getSnapshot: () => workAreaSnapshot, subscribe: () => () => undefined },
+        visualViewport: { getSnapshot: () => null, subscribe: () => () => undefined },
+        presentation: {
+          getSnapshot: () => presentation,
+          subscribe: () => () => undefined,
+        },
+        setTimeout: scheduler.setTimeout,
+        clearTimeout: scheduler.clearTimeout,
       },
-      setTimeout: scheduler.setTimeout,
-      clearTimeout: scheduler.clearTimeout,
-    },
-    restoreFocus: vi.fn(),
-    reportPlacementFailure: vi.fn(),
-    wrapFocusScope: (_options: unknown, node: React.ReactNode) => node,
-  }), [reducedMotion, runtimeController, scheduler]);
+      restoreFocus: vi.fn(),
+      reportPlacementFailure: vi.fn(),
+      wrapFocusScope: (_options: unknown, node: React.ReactNode) => node,
+    };
+  }, [reducedMotion, runtimeController, scheduler]);
   return (
     <NSEOverlayProvider runtimePort={runtimePort}>
       <NSETooltipProvider leaveDelayMs={50}>{children}</NSETooltipProvider>
@@ -138,6 +145,55 @@ afterEach(() => {
 });
 
 describe("NSE tooltip service", () => {
+  it("dismisses old label help when the same control changes semantic context", async () => {
+    const scheduler=createScheduler(),ref=React.createRef<HTMLButtonElement>();
+    const view=(label:string)=><TooltipHarness scheduler={scheduler} reducedMotion><NSELabelHelp label={label}><button ref={ref}>Context title</button></NSELabelHelp></TooltipHarness>;
+    const {rerender}=render(view("Categories"));const anchor=screen.getByRole("button",{name:"Context title"});
+    fireEvent.pointerEnter(anchor,{pointerType:"mouse"});expect((await screen.findByRole("tooltip")).textContent).toBe("Categories");
+    rerender(view("Date and Time"));
+    await waitFor(()=>expect(screen.queryByRole("tooltip")).toBeNull());
+    expect(ref.current).toBe(anchor);expect(anchor.getAttribute("aria-describedby")).toBeNull();
+  });
+
+  it("preserves the original control ref, handlers and existing description", async () => {
+    const scheduler=createScheduler(), ref=React.createRef<HTMLButtonElement>(), click=vi.fn();
+    const {unmount}=render(<TooltipHarness scheduler={scheduler} reducedMotion><NSELabelHelp label="Complete destination"><button ref={ref} aria-describedby="existing-description" onClick={click}>Short</button></NSELabelHelp></TooltipHarness>);
+    const anchor=screen.getByRole("button",{name:"Short"});expect(ref.current).toBe(anchor);
+    fireEvent.pointerEnter(anchor,{pointerType:"mouse"});const help=await screen.findByRole("tooltip");
+    expect(anchor.getAttribute("aria-describedby")).toContain("existing-description");expect(anchor.getAttribute("aria-describedby")).toContain(help.id);
+    fireEvent.click(anchor);expect(click).toHaveBeenCalledOnce();await waitFor(()=>expect(screen.queryByRole("tooltip")).toBeNull());expect(ref.current).toBe(anchor);
+    unmount();expect(ref.current).toBeNull();
+  });
+
+  it("releases surface hover after Escape and a subsequent pointer visit", async () => {
+    const scheduler=createScheduler();
+    render(<TooltipHarness scheduler={scheduler} reducedMotion><TooltipProbe label="Revisited help" content="Complete label" /></TooltipHarness>);
+    const anchor=screen.getByRole("button",{name:"Revisited help"});
+    fireEvent.pointerEnter(anchor,{pointerType:"mouse"});
+    const help=await screen.findByRole("tooltip");
+    fireEvent.pointerLeave(anchor,{pointerType:"mouse"});fireEvent.pointerEnter(help,{pointerType:"mouse"});
+    fireEvent.keyDown(help,{key:"Escape"});await waitFor(()=>expect(screen.queryByRole("tooltip")).toBeNull());
+    fireEvent.pointerEnter(anchor,{pointerType:"mouse"});await screen.findByRole("tooltip");
+    fireEvent.pointerLeave(anchor,{pointerType:"mouse"});expect(scheduler.pendingDelays).toContain(50);scheduler.runDelay(50);
+    await waitFor(()=>expect(screen.queryByRole("tooltip")).toBeNull());
+  });
+
+  it("keeps help hoverable through the pointer gap even with reduced motion", async () => {
+    const scheduler = createScheduler();
+    render(<TooltipHarness scheduler={scheduler} reducedMotion><TooltipProbe label="Readable label" content="Full destination name" /></TooltipHarness>);
+    const anchor = screen.getByRole("button", {name:"Readable label"});
+    fireEvent.pointerEnter(anchor, {pointerType:"mouse"});
+    const help = await screen.findByRole("tooltip");
+    fireEvent.pointerLeave(anchor, {pointerType:"mouse"});
+    expect(scheduler.pendingDelays).toContain(50);
+    fireEvent.pointerEnter(help, {pointerType:"mouse"});
+    expect(scheduler.pendingDelays).not.toContain(50);
+    expect(screen.getByRole("tooltip").textContent).toContain("Full destination name");
+    fireEvent.pointerLeave(help, {pointerType:"mouse"});
+    scheduler.runDelay(50);
+    await waitFor(() => expect(screen.queryByRole("tooltip")).toBeNull());
+  });
+
   it("cancels or closes a touch long press on move, up, and cancel", async () => {
     const scheduler = createScheduler();
     render(

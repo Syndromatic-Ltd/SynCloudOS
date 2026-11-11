@@ -1,0 +1,8 @@
+{
+  "typecheck": 0,
+  "checkedAt": "2026-11-07T22:13:37.0304009+00:00",
+  "tests": 1,
+  "archiveStable": false,
+  "afterCommit": "44826f7a897b7a4e2d1e3451e7d3bf5daf61d54e",
+  "beforeCommit": "43237d31000055c2d1ee8372d38dab8da0a40dc3"
+}

@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run tsc -b --pretty false
+src/NSE/Controls/Media/NSERoutePickerView.tsx(22,39): error TS2307: Cannot find module '../../../FX/VideoFX/VFXRouteDetector' or its corresponding type declarations.
+src/NSE/Controls/Media/NSERoutePickerView.tsx(39,56): error TS7006: Parameter 'error' implicitly has an 'any' type.
+src/SynCloudOS/AppSDK/hooks/useBluetooth.ts(26,28): error TS2339: Property 'bluetooth' does not exist on type 'SCOSFacade'.
+src/SynCloudOS/AppSDK/hooks/useContacts.ts(26,28): error TS2339: Property 'contacts' does not exist on type 'SCOSFacade'.
+src/SynCloudOS/AppSDK/hooks/useNetwork.ts(25,28): error TS2339: Property 'network' does not exist on type 'SCOSFacade'.
+src/SynCloudOS/AppSDK/hooks/useNFC.ts(26,28): error TS2339: Property 'nfc' does not exist on type 'SCOSFacade'.
+src/SynCloudOS/AppSDK/hooks/usePayment.ts(26,28): error TS2339: Property 'payment' does not exist on type 'SCOSFacade'.
+src/SynCloudOS/AppSDK/hooks/useSpeech.ts(26,28): error TS2339: Property 'speech' does not exist on type 'SCOSFacade'.
+src/SynCloudOS/AppSDK/hooks/useXR.ts(26,28): error TS2339: Property 'xr' does not exist on type 'SCOSFacade'.

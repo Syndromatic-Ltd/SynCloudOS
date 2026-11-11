@@ -1,0 +1,101 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/nse/scroll/nse-appkit-view-access.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/nse/scroll/nse-appkit-view-access.test.tsx (3 tests | 3 failed) 37ms
+     × commits NSScrollView.contentView before the owning view's appearance 28ms
+     × observes changed clip bounds and disconnects on unmount 3ms
+     × exposes a layer only when the image view is layer backed and releases it 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/nse/scroll/nse-appkit-view-access.test.tsx > AppKit view access > commits NSScrollView.contentView before the owning view's appearance
+AssertionError: expected undefined to be <div class="nse-scroll-view" …(5)>…(1)</div> // Object.is equality
+
+- Expected:
+<div
+  class="nse-scroll-view"
+  data-axis="y"
+  data-horizontal-scroller-policy="automatic"
+  data-vertical-scroller-policy="automatic"
+  style="overflow-x: hidden; overflow-y: auto;"
+  tabindex="0"
+>
+  <div
+    class="nse-scroll-view-content"
+    style="padding: 0px;"
+  >
+    Document
+  </div>
+</div>
+
++ Received:
+undefined
+
+ ❯ tests/nse/scroll/nse-appkit-view-access.test.tsx:37:16
+     35|   function Owner() { useLayoutEffect(()=>{clip=ref.current?.contentVie…
+     36|   const view=render(<Owner/>);
+     37|   expect(clip).toBe(view.container.querySelector('.nse-scroll-view'));
+       |                ^
+     38|   Object.defineProperties(clip!,{clientWidth:{value:120},clientHeight:…
+     39|   clip!.scrollTop=31; clip!.scrollLeft=12;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/nse/scroll/nse-appkit-view-access.test.tsx > AppKit view access > observes changed clip bounds and disconnects on unmount
+TypeError: Cannot read properties of null (reading 'contentView')
+ ❯ tests/nse/scroll/nse-appkit-view-access.test.tsx:46:48
+     44|   const ref=createRef<NSEScrollViewHandle>(); const listener=vi.fn();
+     45|   const view=render(<NSEScrollView ref={ref} rubberBand={false}/>);
+     46|   const handle=ref.current!; const clip=handle.contentView;
+       |                                                ^
+     47|   clip.postsBoundsChangedNotifications=true;
+     48|   clip.observeBoundsChanges(listener);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/nse/scroll/nse-appkit-view-access.test.tsx > AppKit view access > exposes a layer only when the image view is layer backed and releases it
+AssertionError: expected undefined to be <div …(2)>…(1)</div> // Object.is equality
+
+- Expected:
+<div
+  class="nse-control-image-view"
+  data-image-scaling="proportionallyUpOrDown"
+>
+  <div
+    class="nse-control-sizeable-image"
+    data-pannable="false"
+    data-zoomed="false"
+  >
+    <img
+      alt=""
+      class="nse-control-sizeable-image-media"
+      data-nse-image-rendering="original"
+      data-nse-image-resizing="stretch"
+      draggable="false"
+      src="/art.svg"
+      style="transform: translate(-50%, -50%) translate(0px, 0px);"
+    />
+  </div>
+</div>
+
++ Received:
+undefined
+
+ ❯ tests/nse/scroll/nse-appkit-view-access.test.tsx:61:32
+     59|   const layers={bindLayer,createRenderer:vi.fn()};
+     60|   const view=render(<NSEAnimationEnvironmentProvider layers={layers}><…
+     61|   expect(ref.current?.element).toBe(view.container.querySelector('.nse…
+       |                                ^
+     62|   expect(ref.current?.layer).toBeNull(); expect(bindLayer).not.toHaveB…
+     63|   view.rerender(<NSEAnimationEnvironmentProvider layers={layers}><NSEI…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed (3)
+   Start at  19:03:48
+   Duration  2.19s (transform 627ms, setup 35ms, import 948ms, tests 37ms, environment 1.03s)
+

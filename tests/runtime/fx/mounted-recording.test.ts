@@ -22,7 +22,8 @@ import { expect, it, vi } from "vitest";
 import { createMountedAudioSessions } from "../../../src/SynCloudOS/AppSDK/mountedAudioSessions";
 import { BrowserAudioCaptureAdapter } from "../../../src/SynCloudOS/PlatformAdapters/BrowserAudioCaptureAdapter";
 import { AUFXAudioSession } from "../../../src/FX/AudioFX/AUFXAudioSession";
-import { AUFXAudioRecorder } from "../../../src/FX/AudioFX/AUFXAudioRecorder";
+import { createHostAUFXAudioRecorder } from "../../../src/FX/AudioFX/AUFXAudioRecorder";
+import { createPrivacyStore } from "../../../src/SynCloudOS/Privacy";
 
 it("does not acquire a recording session without the current declaration", () => {
   const createSession = vi.fn();
@@ -56,6 +57,20 @@ it("passes only the mount-issued opaque input capability to its capture host", (
   expect(createSession.mock.calls[0][1]).toBe(capability); expect(Object.keys(session)).not.toContain("capability"); session.dispose();
 });
 
+it("keeps an unavailable capture host inspectable when privacy mediation is enabled", () => {
+  const owner = new AbortController();
+  const store = createPrivacyStore({ runtimeId: "unavailable-audio-privacy" });
+  const privacy = store.forApplication({ userId: "listener", appId: "com.example.recorder", service: "microphone" });
+  const session = createMountedAudioSessions(
+    new BrowserAudioCaptureAdapter(null), owner.signal, () => ["audio.record"],
+    Object.freeze({}), "com.example.recorder", undefined, privacy,
+  ).createSession();
+  expect(session.state).toBe("unavailable");
+  expect(session.capabilities.capture).toBe(false);
+  owner.abort();
+  expect(session.state).toBe("disposed");
+});
+
 it("excludes continuous recording and tracks its real asynchronous stop finalization", async () => {
   let recorderListener: ((event: any) => void) | null = null;
   const recorderPort = {
@@ -69,7 +84,7 @@ it("excludes continuous recording and tracks its real asynchronous stop finaliza
     dispose: vi.fn(),
     decode: vi.fn(async () => ({ duration: 1, frameCount: 48_000, sampleRate: 48_000, channelCount: 1 })),
   };
-  const recorder = new AUFXAudioRecorder(recorderPort);
+  const recorder = createHostAUFXAudioRecorder(recorderPort);
   const session = new AUFXAudioSession({
     state: "active",
     route: { desiredInput: null, actualInput: null, desiredOutput: null, actualOutput: null },

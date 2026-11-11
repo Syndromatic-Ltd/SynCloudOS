@@ -18,13 +18,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useRef, type FocusEvent, type KeyboardEvent as ReactKeyboardEvent, type PropsWithChildren } from "react";
+import { useNSEScreenSafeAreaProperties } from "../NSE/applicationHostInterop";
+import { useSyncExternalStore, useRef, type CSSProperties, type FocusEvent, type KeyboardEvent as ReactKeyboardEvent, type PropsWithChildren } from "react";
 import { useAppearance, useResolvedMode } from "./serviceHooks";
 import { useKernelSynCloudOS } from "./SynCloudOSProvider";
 import { RuntimeInputProtocolProvider, createRuntimeInputProtocol, focusScopeFromEvent } from "./runtimeInputProtocol";
 
 export function RuntimeInputBoundary({ children }: PropsWithChildren) {
   const runtime = useKernelSynCloudOS();
+  const screen = useSyncExternalStore(runtime.screen.subscribe, runtime.screen.getSnapshot, runtime.screen.getSnapshot);
+  const safeArea = useNSEScreenSafeAreaProperties(screen.safeAreaInsets);
+  const safeAreaProperties = { ...safeArea.properties, ...Object.fromEntries(Object.entries(safeArea.insets).map(([edge, value]) => [`--nse-safe-area-inset-${edge}`, `${value}px`])) } as CSSProperties;
   const appearance = useAppearance();
   const resolvedMode = useResolvedMode();
   const lastAcceptedFocusTarget = useRef<HTMLElement | null>(null);
@@ -74,11 +78,14 @@ export function RuntimeInputBoundary({ children }: PropsWithChildren) {
   return (
     <RuntimeInputProtocolProvider value={protocol}>
       <div
+        ref={safeArea.ref}
+        style={safeAreaProperties}
         data-syncloudos-runtime-id={runtime.runtimeId}
         data-syncloudos-runtime-owner={runtime.runtimeId}
         data-syncloudos-runtime-root="true"
         data-appearance={appearance}
         data-mode={resolvedMode}
+        data-nse-colour-scheme-resolved={resolvedMode}
         onFocusCapture={handleFocusCapture}
         onKeyDownCapture={handleKeyDownCapture}
       >

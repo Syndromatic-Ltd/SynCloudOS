@@ -19,6 +19,7 @@
  */
 
 import type { HTMLAttributes, ReactNode } from "react";
+import type { NSELayoutGap } from "./layoutSpacing";
 
 /** A neutral, CPStackView-compatible main-axis distribution. */
 export type NSEStackDistribution =
@@ -39,7 +40,15 @@ export type NSEStackAlignment =
 
 export type NSEStackOrientation = "horizontal" | "vertical";
 export type NSEStackGravity = "leading" | "centre" | "trailing";
-export type NSEStackOverflowPolicy = "menu" | "preserve";
+/**
+ * What a stack does with views that do not fit: `menu` detaches views below
+ * mustHold priority into an overflow menu, `preserve` keeps them all, and
+ * `wrap` continues a row on the next line, for narrow windows.
+ */
+export type NSEStackOverflowPolicy = "menu" | "preserve" | "wrap";
+
+/** NSStackView.VisibilityPriority. A view below mustHold detaches, lowest first, when the stack runs out of space. */
+export const NSEStackVisibilityPriority = Object.freeze({ mustHold: 1000, detachOnlyIfNecessary: 900, notVisible: 0 });
 
 export interface NSEStackEdgeInsets {
   readonly inlineStart?: number;
@@ -135,7 +144,8 @@ export interface NSEStackViewProps extends Omit<HTMLAttributes<HTMLDivElement>, 
   readonly orientation?: NSEStackOrientation;
   readonly distribution?: NSEStackDistribution;
   readonly alignment?: NSEStackAlignment;
-  readonly spacing?: number;
+  /** The space between views: a named spacing, pixels or a CSS length. Default inline in a row, standard in a column. */
+  readonly spacing?: NSELayoutGap;
   readonly edgeInsets?: NSEStackEdgeInsets;
   /** Use this when geometry is already owned by the surrounding layout authority. */
   readonly availableSize?: number;

@@ -24,82 +24,92 @@ import { cleanup, render, screen } from "@testing-library/react";
 import React from "react";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { NSEBox, NSEGroupBox } from "../../src/NSE/Controls/Fields/NSEFields";
+import { NSEBox } from "../../src/NSE/Controls/Fields/NSEFields";
 import { NSE } from "../../src/NSE/NSE";
 
 afterEach(cleanup);
 
 describe("NSEBox", () => {
-  it("preserves grouping semantics across every supported title position", () => {
+  it("preserves grouping semantics across every NSBox title position", () => {
     const positions = [
-      "none",
-      "above-top",
-      "at-top",
-      "below-top",
-      "above-bottom",
-      "at-bottom",
-      "below-bottom",
+      ["noTitle", "none"],
+      ["aboveTop", "above-top"],
+      ["atTop", "at-top"],
+      ["belowTop", "below-top"],
+      ["aboveBottom", "above-bottom"],
+      ["atBottom", "at-bottom"],
+      ["belowBottom", "below-bottom"],
     ] as const;
 
-    for (const titlePosition of positions) {
+    for (const [titlePosition, attribute] of positions) {
       const { unmount } = render(
-        <NSEBox title="Account" titlePosition={titlePosition} kind="primary" border="bezel">
+        <NSEBox title="Account" titlePosition={titlePosition} boxType="primary" borderType="bezelBorder">
           <input aria-label="Username" />
         </NSEBox>,
       );
       const box = screen.getByRole("group", { name: "Account" });
-      expect(box.getAttribute("data-title-position")).toBe(titlePosition);
+      expect(box.getAttribute("data-title-position")).toBe(attribute);
       expect(box.getAttribute("data-box-kind")).toBe("primary");
       expect(box.getAttribute("data-border-style")).toBe("bezel");
-      if (titlePosition === "none") {
+      if (titlePosition === "noTitle") {
         expect(screen.getByText("Account").classList.contains("nse-control-visually-hidden")).toBe(true);
       }
       unmount();
     }
   });
 
-  it("publishes every kind and border as a stable appearance key", () => {
-    const kinds = ["primary", "secondary", "legacy", "custom"] as const;
-    const borders = ["none", "line", "bezel", "groove"] as const;
-    for (const kind of kinds) {
-      for (const border of borders) {
-        const { unmount } = render(<NSEBox aria-label={`${kind}-${border}`} kind={kind} border={border} />);
-        const box = screen.getByRole("group", { name: `${kind}-${border}` });
-        expect(box.getAttribute("data-appearance-recipe")).toBe(`box.${kind}.${border}.none`);
+  it("publishes every box type and border type as a stable appearance key", () => {
+    const boxTypes = ["primary", "secondary", "custom"] as const;
+    const borderTypes = [["noBorder", "none"], ["lineBorder", "line"], ["bezelBorder", "bezel"], ["grooveBorder", "groove"]] as const;
+    for (const boxType of boxTypes) {
+      for (const [borderType, border] of borderTypes) {
+        const { unmount } = render(<NSEBox aria-label={`${boxType}-${borderType}`} boxType={boxType} borderType={borderType} />);
+        const box = screen.getByRole("group", { name: `${boxType}-${borderType}` });
+
         unmount();
       }
     }
   });
 
-  it("validates custom fill and content insets before exposing CSS variables", () => {
+  it("validates fillColour and contentViewMargins before exposing CSS variables", () => {
     render(
       <NSEBox
         aria-label="Custom"
-        kind="custom"
-        fill="linear-gradient(#fff, #ddd)"
-        contentInsets={{ top: 1, right: 2, bottom: 3, left: 4 }}
+        boxType="custom"
+        fillColour="linear-gradient(#fff, #ddd)"
+        contentViewMargins={{ width: 6, height: 3 }}
       />,
     );
-    const style = screen.getByRole("group", { name: "Custom" }).getAttribute("style") ?? "";
+    const box = screen.getByRole("group", { name: "Custom" });
+    const style = box.getAttribute("style") ?? "";
     expect(style).toContain("--nse-box-fill: linear-gradient(#fff, #ddd)");
-    expect(style).toContain("--nse-box-inset-top: 1px");
-    expect(style).toContain("--nse-box-inset-right: 2px");
+    expect(style).toContain("--nse-box-inset-top: 3px");
+    expect(style).toContain("--nse-box-inset-right: 6px");
     expect(style).toContain("--nse-box-inset-bottom: 3px");
-    expect(style).toContain("--nse-box-inset-left: 4px");
+    expect(style).toContain("--nse-box-inset-left: 6px");
+    expect(box.getAttribute("data-nse-layout-margins")).toBeNull();
 
-    expect(() => render(<NSEBox aria-label="Bad fill" fill="red; color: blue" />)).toThrow(/fill/i);
-    expect(() => render(<NSEBox aria-label="Bad inset" contentInsets={{ top: -1, right: 0, bottom: 0, left: 0 }} />)).toThrow(/inset/i);
-    expect(() => render(<NSEBox aria-label="Infinite inset" contentInsets={{ top: Infinity, right: 0, bottom: 0, left: 0 }} />)).toThrow(/inset/i);
+    expect(() => render(<NSEBox aria-label="Bad fill" fillColour="red; color: blue" />)).toThrow(/fillColour/i);
+    expect(() => render(<NSEBox aria-label="Bad margin" contentViewMargins={{ width: -1, height: 0 }} />)).toThrow(/contentViewMargins/i);
+    expect(() => render(<NSEBox aria-label="Infinite margin" contentViewMargins={{ width: 0, height: Infinity }} />)).toThrow(/contentViewMargins/i);
   });
 
-  it("uses a semantic separator adapter and rejects separator children", () => {
-    render(<NSEBox title="Section break" kind="separator" />);
+  it("draws a separator box and rejects separator children", () => {
+    render(<NSEBox aria-label="Section break" boxType="separator" titlePosition="noTitle" />);
     expect(screen.getByRole("separator", { name: "Section break" }).getAttribute("data-box-kind")).toBe("separator");
-    expect(() => render(<NSEBox kind="separator"><span>Not allowed</span></NSEBox>)).toThrow(/separator.*children/i);
+    expect(() => render(<NSEBox boxType="separator"><span>Not allowed</span></NSEBox>)).toThrow(/separator.*children/i);
   });
 
-  it("keeps NSEGroupBox as a source-compatible NSEBox composition and public export", () => {
-    render(<NSEGroupBox label="Advanced"><button>Reset</button></NSEGroupBox>);
+  it("draws a titled separator as the theme's captioned separator", () => {
+    render(<NSEBox boxType="separator" title="Built with" className="consumer-separator" />);
+    const separator = screen.getByRole("separator", { name: "Built with" });
+    expect(separator.classList.contains("nse-box-separator-titled")).toBe(true);
+    expect(separator.classList.contains("consumer-separator")).toBe(true);
+    expect(separator.textContent).toBe("Built with");
+  });
+
+  it("titles a primary box at the top by default", () => {
+    render(<NSEBox title="Advanced"><button>Reset</button></NSEBox>);
     const box = screen.getByRole("group", { name: "Advanced" });
     expect(box.getAttribute("data-title-position")).toBe("at-top");
     expect(box.getAttribute("data-box-kind")).toBe("primary");

@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -18,7 +21,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-.nse-stack-view {
+.nse-stack-view,
+:where(:scope):is(.nse-stack-view) {
   box-sizing: border-box;
   display: flex;
   min-inline-size: 0;
@@ -26,30 +30,58 @@
   position: relative;
 }
 
-.nse-stack-view[data-orientation="horizontal"] {
+.nse-stack-view[data-orientation="horizontal"],
+:where(:scope):is(.nse-stack-view[data-orientation="horizontal"]) {
   flex-direction: row;
 }
 
-.nse-stack-view[data-orientation="vertical"] {
+.nse-stack-view[data-orientation="vertical"],
+:where(:scope):is(.nse-stack-view[data-orientation="vertical"]) {
   flex-direction: column;
 }
 
-.nse-stack-view[data-overflow-open="true"] {
+.nse-stack-view[data-overflow-open="true"],
+:where(:scope):is(.nse-stack-view[data-overflow-open="true"]) {
   z-index: 2;
 }
 
-.nse-stack-view-item {
+.nse-stack-view-item,
+:where(:scope):is(.nse-stack-view-item) {
   box-sizing: border-box;
   min-inline-size: 0;
   min-block-size: 0;
   transition: inline-size 160ms ease, block-size 160ms ease, margin 160ms ease, opacity 160ms ease;
 }
 
-.nse-stack-view-item[data-stack-hidden="true"]:not([data-stack-overflow-action]) {
+/* An item's content. Without a preferred size the item takes the content's
+ * fitting size along the stack's axis (NSView.fittingSize), so the content
+ * keeps its natural extent there; with one, the content fills the item. */
+.nse-stack-view-item-content,
+:where(:scope):is(.nse-stack-view-item-content) {
+  box-sizing: border-box;
+  display: flow-root;
+  min-inline-size: 0;
+}
+
+.nse-stack-view-item:not([data-stack-fitting="true"])>.nse-stack-view-item-content,
+:where(:scope):is(.nse-stack-view-item:not([data-stack-fitting="true"]))>.nse-stack-view-item-content {
+  block-size: 100%;
+  inline-size: 100%;
+}
+
+.nse-stack-view-item[data-stack-fitting="true"][data-stack-orientation="horizontal"]>.nse-stack-view-item-content,
+:where(:scope):is(.nse-stack-view-item[data-stack-fitting="true"][data-stack-orientation="horizontal"])>.nse-stack-view-item-content {
+  block-size: 100%;
+  inline-size: max-content;
+}
+
+.nse-stack-view-item[data-stack-hidden="true"]:not([data-stack-overflow-action]),
+:where(:scope):is(.nse-stack-view-item[data-stack-hidden="true"]:not([data-stack-overflow-action])) {
   display: none;
 }
 
-.nse-stack-view[data-reduced-motion="true"] .nse-stack-view-item {
+.nse-stack-view[data-reduced-motion="true"] .nse-stack-view-item,
+:where(:scope):is(.nse-stack-view[data-reduced-motion="true"]) .nse-stack-view-item {
   transition: none;
 }
 
@@ -57,32 +89,40 @@
  * between the normal stack and overflow presentation. They must not add a
  * layout box in either surface. */
 .nse-stack-view-items,
-.nse-stack-view-item-host {
+:where(:scope):is(.nse-stack-view-items),
+.nse-stack-view-item-host,
+:where(:scope):is(.nse-stack-view-item-host) {
   display: contents;
 }
 
-.nse-stack-view-retained-items {
+.nse-stack-view-retained-items,
+:where(:scope):is(.nse-stack-view-retained-items) {
   display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nse-stack-view-item {
+  .nse-stack-view-item,
+:where(:scope):is(.nse-stack-view-item) {
     transition: none;
   }
 }
 
-.nse-stack-view-overflow {
+.nse-stack-view-overflow,
+:where(:scope):is(.nse-stack-view-overflow) {
   align-self: center;
   flex: 0 0 auto;
   position: relative;
 }
 
 .nse-stack-view-overflow-trigger,
-.nse-stack-view-overflow-item {
+:where(:scope):is(.nse-stack-view-overflow-trigger),
+.nse-stack-view-overflow-item,
+:where(:scope):is(.nse-stack-view-overflow-item) {
   font: inherit;
 }
 
-.nse-stack-view-overflow-trigger {
+.nse-stack-view-overflow-trigger,
+:where(:scope):is(.nse-stack-view-overflow-trigger) {
   align-items: center;
   background: transparent;
   border: 1px solid currentColor;
@@ -101,13 +141,17 @@
 }
 
 .nse-stack-view-overflow-trigger:focus-visible,
+:where(:scope):is(.nse-stack-view-overflow-trigger:focus-visible),
 .nse-stack-view-overflow-item:focus-visible,
-.nse-stack-view-overflow-action :focus-visible {
+:where(:scope):is(.nse-stack-view-overflow-item:focus-visible),
+.nse-stack-view-overflow-action :focus-visible,
+:where(:scope):is(.nse-stack-view-overflow-action) :focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 2px;
 }
 
-.nse-stack-view-overflow-menu {
+.nse-stack-view-overflow-menu,
+:where(:scope):is(.nse-stack-view-overflow-menu) {
   background: Canvas;
   border: 1px solid currentColor;
   display: grid;
@@ -120,7 +164,8 @@
   z-index: 1;
 }
 
-.nse-stack-view-overflow-item {
+.nse-stack-view-overflow-item,
+:where(:scope):is(.nse-stack-view-overflow-item) {
   background: transparent;
   border: 0;
   color: inherit;
@@ -132,18 +177,26 @@
 
 /* The real child action, including a function component's nested control,
  * stays authoritative in this presentation. It is not a proxy button. */
-.nse-stack-view-overflow-action {
+.nse-stack-view-overflow-action,
+:where(:scope):is(.nse-stack-view-overflow-action) {
   min-inline-size: 0;
 }
 
-.nse-stack-view-overflow-item[aria-disabled="true"] {
+.nse-stack-view-overflow-item[aria-disabled="true"],
+:where(:scope):is(.nse-stack-view-overflow-item[aria-disabled="true"]) {
   cursor: default;
   opacity: 0.6;
 }
 
 @media (forced-colors: active) {
   .nse-stack-view-overflow-menu,
-  .nse-stack-view-overflow-trigger {
+:where(:scope):is(.nse-stack-view-overflow-menu),
+.nse-stack-view-overflow-trigger,
+:where(:scope):is(.nse-stack-view-overflow-trigger) {
     forced-color-adjust: auto;
   }
+}
+
+}
+
 }

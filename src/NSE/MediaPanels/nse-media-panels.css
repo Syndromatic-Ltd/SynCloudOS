@@ -1,3 +1,6 @@
+
+@layer nse.atmo {
+@scope ([data-nse-theme]) to ([data-nse-theme]) {
 /*
  * SynCloudOS
  * Copyright © 2026 Syndromatic Ltd. All rights reserved.
@@ -19,15 +22,31 @@
  */
 
 /* The media panel lays out at the collection's measure; its window fits it. */
-.nse-media-panel-content { box-sizing: border-box; display: grid; gap: 12px; inline-size: 640px; max-inline-size: calc(100vw - 48px); padding: 14px 18px 18px; }
-.nse-media-panel-tabs { display: flex; justify-content: center; overflow-x: auto; }
-.nse-media-panel-search { inline-size: 100%; }
-.nse-media-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; max-block-size: min(54vh, 28rem); overflow: auto; }
-.nse-media-grid-item { box-sizing: border-box; display: grid; gap: 6px; block-size: 100%; min-block-size: 3.25rem; padding: 6px; border-radius: 6px; text-align: center; }
-.nse-media-grid-item[data-selected="true"] { outline: 2px solid currentColor; outline-offset: 2px; }
-.nse-media-grid-thumbnail { inline-size: 100%; block-size: 5rem; object-fit: cover; }
-.nse-media-grid-placeholder { display: grid; min-block-size: 5rem; place-items: center; border-radius: 4px; background: rgba(127, 127, 127, 0.14); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.8; }
-.nse-media-grid-name { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
-.nse-media-panel-preview { display: grid; gap: 0.15rem; }
-.nse-media-panel-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-block-start: 4px; }
-@media (max-width: 42rem) { .nse-media-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.nse-media-panel-content,
+:where(:scope):is(.nse-media-panel-content) { box-sizing: border-box; display: grid; gap: 12px; inline-size: 640px; max-inline-size: calc(100vw - 48px); padding: 14px 18px 18px; }
+.nse-media-panel-tabs,
+:where(:scope):is(.nse-media-panel-tabs) { display: flex; justify-content: center; overflow-x: auto; }
+.nse-media-panel-search,
+:where(:scope):is(.nse-media-panel-search) { inline-size: 100%; }
+.nse-media-grid,
+:where(:scope):is(.nse-media-grid) { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; max-block-size: min(54vh, 28rem); overflow: auto; }
+.nse-media-grid-item,
+:where(:scope):is(.nse-media-grid-item) { box-sizing: border-box; display: grid; gap: 6px; block-size: 100%; min-block-size: 3.25rem; padding: 6px; border-radius: 6px; text-align: center; }
+.nse-media-grid-item[data-selected="true"],
+:where(:scope):is(.nse-media-grid-item[data-selected="true"]) { outline: 2px solid currentColor; outline-offset: 2px; }
+.nse-media-grid-thumbnail,
+:where(:scope):is(.nse-media-grid-thumbnail) { inline-size: 100%; block-size: 5rem; object-fit: cover; }
+.nse-media-grid-placeholder,
+:where(:scope):is(.nse-media-grid-placeholder) { display: grid; min-block-size: 5rem; place-items: center; border-radius: 4px; background: rgba(127, 127, 127, 0.14); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.8; }
+.nse-media-grid-name,
+:where(:scope):is(.nse-media-grid-name) { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.nse-media-panel-preview,
+:where(:scope):is(.nse-media-panel-preview) { display: grid; gap: 0.15rem; }
+.nse-media-panel-actions,
+:where(:scope):is(.nse-media-panel-actions) { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-block-start: 4px; }
+@media (max-width: 42rem) { .nse-media-grid,
+:where(:scope):is(.nse-media-grid) { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+}
+
+}

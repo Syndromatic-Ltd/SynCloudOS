@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { testPolicyProfile } from "./testPolicyProfile";
+import { testConfigurationProfile } from "./testConfigurationProfile";
 import { vi } from "vitest";
 import { choreographyTimings } from "../../src/FX/AnimationFX/choreographyTimings";
 import type {
@@ -44,7 +44,7 @@ import { createSynCloudOSFacade } from "../../src/SynCloudOS/SynCloudOS";
 import { createBrowserRuntimeEnvironment, hasNativeProxyBrand } from "../../src/SynCloudOS/PlatformAdapters/BrowserRuntimeEnvironment";
 import { createSynCloudOSBrowserRouteSynchronizer } from "../../src/SynCloudOS/PlatformAdapters/BrowserRouteSync";
 import type { SynCloudOSRuntime, SynCloudOSRuntimeConfig } from "../../src/SynCloudOS/Runtime/runtimeInstanceTypes";
-import type { SynCloudOSPolicySubject, SynCloudOSPolicySubjectGrant } from "../../src/SynCloudOS/PolicyKit/policyTypes";
+import type { SynCloudOSPolicySubject, SynCloudOSPolicySubjectGrant } from "../../src/SynCloudOS/ConfigurationProfiles/policyTypes";
 import type { IdentitySessionAdapter, IdentitySessionAdapterSnapshot } from "../../src/SynCloudOS/Identity/identitySessionTypes";
 import { createMountedSynWareRuntime, type MountedSynWareRuntime } from "../../src/SynCloudOS/AppSDK/appRuntimeFacade";
 import {
@@ -60,7 +60,6 @@ import {
   type SynWareTrustedPrivilege,
 } from "../../src/SynCloudOS/BundleLoader/trustedBundleProvenance";
 import type { SynWareDefinition } from "../../src/SynCloudOS/AppSDK/appDefinitionTypes";
-import type { WebspringContentSource } from "../../src/Webspring/webspringContent";
 import { InMemoryDocumentAdapter } from "../../src/SynCloudOS/Documents/Adapters/InMemoryDocumentAdapter";
 
 type TestManifestOverrides = Partial<
@@ -84,27 +83,27 @@ function titleCase(value: string) {
 }
 
 export function createTestManifest(overrides: TestManifestOverrides = {}): SynCloudOSAppManifest {
-  const id = overrides.id ?? "test-app";
-  const displayName = overrides.displayName ?? titleCase(id);
+  const bundleIdentifier = overrides.bundleIdentifier ?? "com.example.test-app";
+  const displayName = overrides.displayName ?? titleCase(bundleIdentifier.split(".").at(-1)!);
   const packageName = overrides.packageName ?? `${displayName.replace(/\s+/g, "")}.app`;
 
   return {
-    id,
-    name: overrides.name ?? id,
+    bundleIdentifier,
+    version: overrides.version ?? "1.0.0",
+    name: overrides.name ?? bundleIdentifier,
     packageName,
-    bundleId: overrides.bundleId ?? `com.syndromatic.tests.${id}`,
     displayName,
     shortName: overrides.shortName ?? displayName,
     description: overrides.description ?? `${displayName} test fixture.`,
     type: overrides.type ?? "internal",
-    route: overrides.route ?? `/${id}`,
+    route: overrides.route ?? `/${bundleIdentifier.split(".").at(-1)}`,
     path: overrides.path ?? `${packageName}/`,
     componentKey: overrides.componentKey ?? `${displayName.replace(/\s+/g, "")}Component`,
     presentation: overrides.presentation ?? "appView",
     requiredServices: overrides.requiredServices ?? ["webspring", "routing", "windowing"],
     optionalServices: overrides.optionalServices ?? [],
     icon: {
-      src: `/test-assets/icons/${id}.png`,
+      src: `/test-assets/icons/${bundleIdentifier}.png`,
       alt: `${displayName} icon`,
       ...overrides.icon
     },
@@ -146,20 +145,25 @@ export function createTestBundle(
   overrides: TestManifestOverrides | SynCloudOSAppManifest = {},
   bundleOverrides: Omit<Partial<TrustedSynWareBundle>, "manifest"> = {}
 ): TrustedSynWareBundle {
-  const manifest = "icon" in overrides && "webspring" in overrides && "window" in overrides
+  const sourceManifest = "icon" in overrides && "webspring" in overrides && "window" in overrides
     ? overrides
     : createTestManifest(overrides);
+  const manifest = sourceManifest.policy || sourceManifest.type === "system"
+    ? sourceManifest
+    : { ...sourceManifest, policy: { public: true } };
+  const entitlements = bundleOverrides.entitlements ?? (manifest.type === "system" ? ["diagnostics.view"] : []);
   const testManifest = {
     schemaVersion: 1,
-    id: manifest.id,
-    version: "1.0.0",
-    title: manifest.displayName,
+    bundleIdentifier: manifest.bundleIdentifier,
+    version: manifest.version,
+    displayName: manifest.displayName,
     routes: [{ path: manifest.route, primary: true }],
     services: [...manifest.requiredServices, ...(manifest.optionalServices ?? [])].map((id) => ({
       id,
       required: manifest.requiredServices.includes(id),
     })),
-    permissions: manifest.type === "system" ? ["diagnostics.view"] : ["app.open.public"],
+    entitlements: [...entitlements],
+    runtime: { type: manifest.type, ...(manifest.policy ? { policy: manifest.policy } : {}) },
     webspring: {
       visible: manifest.webspring.visible,
       order: manifest.webspring.order,
@@ -187,7 +191,7 @@ export function createTestBundle(
     modulePath: `${manifest.path}Contents/index.tsx`,
     services: [...manifest.requiredServices, ...(manifest.optionalServices ?? [])],
     optionalServices: manifest.optionalServices,
-    permissions: manifest.type === "system" ? ["diagnostics.view"] : ["app.open.public"],
+    entitlements: [...entitlements],
     loadModule,
     ...remainingBundleOverrides
   };
@@ -219,7 +223,7 @@ export function createRuntimeHarness(runtime: SynCloudOSRuntime) {
     LoginServices: SynCloudOS.LoginServices,
     PermissionManager: SynCloudOS.PermissionManager,
     PluginRegistry: SynCloudOS.PluginRegistry,
-    PolicyKit: SynCloudOS.PolicyKit,
+    ConfigurationProfiles: SynCloudOS.ConfigurationProfiles,
     ResponsiveModeManager: SynCloudOS.ResponsiveModeManager,
     RouteManager: SynCloudOS.RouteManager,
     ServiceRegistry: SynCloudOS.ServiceRegistry,
@@ -477,7 +481,7 @@ export function createTestRuntime(
     id: overrides.id ?? `runtime:test:${testRuntimeSequence}`,
     environment,
     initialBundles: overrides.initialBundles ?? [],
-    policyProfile: testPolicyProfile,
+    configurationProfile: testConfigurationProfile,
     applicationDocuments: {
       ...(applicationDocuments ?? {}),
       initialAdapters: applicationDocuments?.initialAdapters ?? [new InMemoryDocumentAdapter(environment)],
@@ -526,7 +530,6 @@ export async function installTestHostContributions(
   resources: Readonly<Record<string, string>> = {},
 ): Promise<TestHostContributionsInstallation> {
   const prepared = await prepareSynCloudOSHostContributions(contributions, runtime.environment);
-  const contentSources: Record<string, WebspringContentSource> = Object.create(null) as Record<string, WebspringContentSource>;
   const installed: Array<{
     readonly context: SynCloudOSHostInstallContext;
     readonly runBootNotifications(): Promise<void>;
@@ -539,12 +542,12 @@ export async function installTestHostContributions(
   try {
     for (const contribution of prepared) {
       for (const bundle of contribution.initialBundles) {
-        const appId = bundle.synWareManifest?.id ?? bundle.manifest.id;
+        const appId = bundle.synWareManifest?.bundleIdentifier ?? bundle.manifest.bundleIdentifier;
         if (!runtime.bundles.getBundle(appId) && !runtime.apps.register(bundle)) {
           throw new Error(`Test host contribution bundle ${appId} could not be registered.`);
         }
       }
-      const handle = createSynCloudOSHostInstallContext(contribution, runtime, contentSources, resources);
+      const handle = createSynCloudOSHostInstallContext(contribution, runtime, resources);
       let contributionCleanup: (() => void | Promise<void>) | undefined;
       try {
         for (const adapter of contribution.applicationDocuments?.initialAdapters ?? []) {
@@ -603,7 +606,7 @@ export function registerTestSynWare(
   const manifest = isDefinition
     ? (definition as SynWareDefinition).manifest
     : definition as Readonly<SynWareManifestV1>;
-  const appId = manifest.id;
+  const appId = manifest.bundleIdentifier;
   const existing = runtime.apps.getApp(appId);
   if (existing) {
     
@@ -630,9 +633,9 @@ export function createTrustedTestSynWareBundle(
   appDefinition?: SynWareDefinition,
 ) {
   const definition = appDefinition ? createSynWare(appDefinition) : createSynWare({ manifest, root: () => null });
-  if (definition.manifest.id !== manifest.id) throw new Error("Trusted test definition must belong to its declared manifest.");
+  if (definition.manifest.bundleIdentifier !== manifest.bundleIdentifier) throw new Error("Trusted test definition must belong to its declared manifest.");
   return trustSynWareBundleForTest(createSynWareBundle(definition), {
-    sourceKey: `tests/runtime/${manifest.id}`,
+    sourceKey: `tests/runtime/${manifest.bundleIdentifier}`,
     privileges,
   });
 }
@@ -644,11 +647,11 @@ export function registerTrustedTestSynWare(
   privileges: readonly SynWareTrustedPrivilege[],
   appDefinition?: SynWareDefinition,
 ) {
-  const existing = runtime.apps.getApp(manifest.id);
+  const existing = runtime.apps.getApp(manifest.bundleIdentifier);
   if (existing) {
-    const provenance = runtime.bundles.getTrustedBundleProvenance(manifest.id);
+    const provenance = runtime.bundles.getTrustedBundleProvenance(manifest.bundleIdentifier);
     if (!provenance || privileges.some((privilege) => !provenance.privileges.has(privilege))) {
-      throw new Error(`Existing test application ${manifest.id} does not hold the requested trusted provenance.`);
+      throw new Error(`Existing test application ${manifest.bundleIdentifier} does not hold the requested trusted provenance.`);
     }
     return existing;
   }
@@ -656,9 +659,9 @@ export function registerTrustedTestSynWare(
   const { devOnly: _devOnly, route: _route, ...canonicalManifest } = candidate;
   const bundle = createTrustedTestSynWareBundle(canonicalManifest as SynWareManifestV1, privileges, appDefinition);
   const app = runtime.apps.register(bundle);
-  if (!app) throw new Error(`Trusted test application ${manifest.id} could not be registered.`);
-  if (!runtime.bundles.getTrustedBundleProvenance(manifest.id)) {
-    throw new Error(`Trusted test application ${manifest.id} lost its provenance during registration.`);
+  if (!app) throw new Error(`Trusted test application ${manifest.bundleIdentifier} could not be registered.`);
+  if (!runtime.bundles.getTrustedBundleProvenance(manifest.bundleIdentifier)) {
+    throw new Error(`Trusted test application ${manifest.bundleIdentifier} lost its provenance during registration.`);
   }
   return app;
 }
@@ -666,11 +669,11 @@ export function registerTrustedTestSynWare(
 /**
  * Request fields that evaluate a policy request as `subject`. Request metadata
  * is never authority, so this issues a grant through the same host-only
- * PolicyKit API that host contributions and the plugin registry use.
+ * ConfigurationProfiles API that host contributions and the plugin registry use.
  */
 export function asPolicySubject(
-  policyKit: { issueSubject(subject: SynCloudOSPolicySubject, options: { purpose: string }): SynCloudOSPolicySubjectGrant },
+  configurationProfiles: { issueSubject(subject: SynCloudOSPolicySubject, options: { purpose: string }): SynCloudOSPolicySubjectGrant },
   subject: SynCloudOSPolicySubject,
 ) {
-  return { subject, subjectGrant: policyKit.issueSubject(subject, { purpose: "test" }) };
+  return { subject, subjectGrant: configurationProfiles.issueSubject(subject, { purpose: "test" }) };
 }

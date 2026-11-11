@@ -1,0 +1,58 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-view-safe-area.test.tsx tests/runtime/nse-window-content-layout.test.tsx tests/runtime/nse-view-controller.test.tsx tests/runtime/nse-view-draw.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/nse-view-controller.test.tsx (13 tests | 2 failed) 354ms
+     × keeps a native backing layer inside its CSS-sized outlet across FX writes, resize, and unmount 42ms
+     × calls layout hooks after DOM commits and frame resizes, and disconnects on unmount 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-view-controller.test.tsx > view.layer > keeps a native backing layer inside its CSS-sized outlet across FX writes, resize, and unmount
+AssertionError: expected '--nse-safe-area-inset-top: 0px; --nse…' to be null
+
+- Expected:
+null
+
++ Received:
+"--nse-safe-area-inset-top: 0px; --nse-safe-area-inset-left: 0px; --nse-safe-area-inset-bottom: 0px; --nse-safe-area-inset-right: 0px;"
+
+ ❯ tests/runtime/nse-view-controller.test.tsx:248:44
+    246|       expect(outlet.contains(projection)).toBe(false);
+    247|       expect(() => { orb.opacity = 1; }).toThrowError(expect.objectCon…
+    248|       expect(outlet.getAttribute("style")).toBeNull();
+       |                                            ^
+    249|       for (const { observer } of observed.values()) expect(disconnecte…
+    250|     } finally {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/runtime/nse-view-controller.test.tsx > child view controllers > calls layout hooks after DOM commits and frame resizes, and disconnects on unmount
+AssertionError: expected [ 'will:Measured content', …(3) ] to deeply equal [ 'will:Measured content', …(1) ]
+
+- Expected
++ Received
+
+  [
+    "will:Measured content",
+    "did:Measured content",
++   "will:Measured content",
++   "did:Measured content",
+  ]
+
+ ❯ tests/runtime/nse-view-controller.test.tsx:296:22
+    294|     try {
+    295|       const view = render(<NSEViewControllerView controller={controlle…
+    296|       expect(events).toEqual(["will:Measured content", "did:Measured c…
+       |                      ^
+    297|       act(() => { resized!([], {} as ResizeObserver); });
+    298|       expect(events).toHaveLength(4);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  2 failed | 31 passed (33)
+   Start at  18:44:53
+   Duration  8.48s (transform 7.65s, setup 71ms, import 11.86s, tests 661ms, environment 3.59s)

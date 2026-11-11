@@ -139,21 +139,21 @@ describe("DocumentController terminal provider receipts", () => {
   it("allows receipt adoption only by the service that reserved it", async () => {
     const { controller } = configuredController();
     const document = await controller.newDocument({
-      documentId: "service-scoped-receipt", typeId: noteType.id, applicationId: "receipt-app",
+      documentId: "service-scoped-receipt", typeId: noteType.id, applicationId: "com.example.receipt-app",
     });
     const initial = controller.reserveTerminalProviderOperation({
-      serviceId: "provider.first", applicationId: "receipt-app", documentId: document.id,
+      serviceId: "provider.first", applicationId: "com.example.receipt-app", documentId: document.id,
       providerDocumentId: document.id, operationKind: "publish", operationIdentity: "scope-test",
       initialState: { phase: "pending" }, initialClaim: { claimant: {}, windowControllerId: null },
       execute: () => ({ promise: Promise.resolve({ accepted: true }), releaseProviderLock: () => true }),
     });
     await initial.receipt.waitForProvider();
     initial.release();
-    const other = controller.claimTerminalProviderOperation("receipt-app", {
+    const other = controller.claimTerminalProviderOperation("com.example.receipt-app", {
       serviceId: "provider.other", claimant: {}, windowControllerId: null,
     });
     try { expect(other).toBeNull(); } finally { other?.release(); }
-    const owner = controller.claimTerminalProviderOperation("receipt-app", {
+    const owner = controller.claimTerminalProviderOperation("com.example.receipt-app", {
       serviceId: "provider.first", claimant: {}, windowControllerId: null,
     });
     expect(owner?.receipt.snapshot()).toMatchObject({ serviceId: "provider.first", documentId: document.id });
@@ -163,11 +163,11 @@ describe("DocumentController terminal provider receipts", () => {
   it("does not acquire terminal authority when initial state cannot be cloned", async () => {
     const { controller } = configuredController();
     const document = await controller.newDocument({
-      documentId: "invalid-terminal-state", typeId: noteType.id, applicationId: "receipt-app",
+      documentId: "invalid-terminal-state", typeId: noteType.id, applicationId: "com.example.receipt-app",
     });
     const execute = vi.fn(() => ({ promise: Promise.resolve(true), releaseProviderLock: () => true }));
     const request = {
-      serviceId: "provider.first", applicationId: "receipt-app", documentId: document.id,
+      serviceId: "provider.first", applicationId: "com.example.receipt-app", documentId: document.id,
       providerDocumentId: document.id, operationKind: "publish", operationIdentity: "invalid-state",
       initialClaim: { claimant: {}, windowControllerId: null }, execute,
     };
@@ -181,7 +181,7 @@ describe("DocumentController terminal provider receipts", () => {
     const document = await controller.newDocument({
       documentId: "terminal-provider-close",
       typeId: noteType.id,
-      applicationId: "example-document",
+      applicationId: "com.example.example-document",
       initialModel: { title: "Accepted provider result", body: "Canonical" },
     });
     await controller.saveAsDocument({
@@ -191,7 +191,7 @@ describe("DocumentController terminal provider receipts", () => {
     let providerLockReleases = 0;
     const receipt = terminalReceiptOf(controller.reserveTerminalProviderOperation({
       serviceId: "receipt.provider",
-      applicationId: "example-document",
+      applicationId: "com.example.example-document",
       documentId: document.id,
       providerDocumentId: document.id,
       operationKind: "publish",
@@ -212,7 +212,7 @@ describe("DocumentController terminal provider receipts", () => {
       outcome: "closed",
       documentId: document.id,
     });
-    expect(controller.getTerminalProviderOperationSnapshot("example-document", document.id)).toBeNull();
+    expect(controller.getTerminalProviderOperationSnapshot("com.example.example-document", document.id)).toBeNull();
     expect(providerLockReleases).toBe(1);
     await expect(receipt.complete()).resolves.toBe(true);
     expect(providerLockReleases).toBe(1);
@@ -223,7 +223,7 @@ describe("DocumentController terminal provider receipts", () => {
     const document = await controller.newDocument({
       documentId: "terminal-provider-live-unknown",
       typeId: noteType.id,
-      applicationId: "example-document",
+      applicationId: "com.example.example-document",
       initialModel: { title: "Before terminal write", body: "Canonical" },
     });
     await controller.saveAsDocument({
@@ -242,7 +242,7 @@ describe("DocumentController terminal provider receipts", () => {
     });
     const receipt = terminalReceiptOf(controller.reserveTerminalProviderOperation({
       serviceId: "receipt.provider",
-      applicationId: "example-document",
+      applicationId: "com.example.example-document",
       documentId: document.id,
       providerDocumentId: document.id,
       operationKind: "publish",
@@ -269,7 +269,7 @@ describe("DocumentController terminal provider receipts", () => {
     const document = await controller.newDocument({
       documentId: "terminal-provider-failed-inherited-write",
       typeId: noteType.id,
-      applicationId: "example-document",
+      applicationId: "com.example.example-document",
       initialModel: { title: "Before provider rejection", body: "Canonical" },
     });
     await controller.saveAsDocument({
@@ -296,7 +296,7 @@ describe("DocumentController terminal provider receipts", () => {
     let providerLockReleases = 0;
     const receipt = terminalReceiptOf(controller.reserveTerminalProviderOperation({
       serviceId: "receipt.provider",
-      applicationId: "example-document",
+      applicationId: "com.example.example-document",
       documentId: document.id,
       providerDocumentId: document.id,
       operationKind: "publish",
@@ -314,12 +314,12 @@ describe("DocumentController terminal provider receipts", () => {
 
     await expect(ordinarySave).rejects.toBeInstanceOf(DocumentWriteOutcomeUnknownError);
     expect(document.hasIndeterminateTerminalWrite).toBe(true);
-    expect(controller.getTerminalProviderOperationSnapshot("example-document", document.id)).toMatchObject({
+    expect(controller.getTerminalProviderOperationSnapshot("com.example.example-document", document.id)).toMatchObject({
       providerStatus: "failed",
       canonicalWriteOutcomeUnknown: true,
     });
     await expect(receipt.waitForProvider()).rejects.toThrow("provider rejected");
-    expect(controller.getTerminalProviderOperationSnapshot("example-document", document.id)).toMatchObject({
+    expect(controller.getTerminalProviderOperationSnapshot("com.example.example-document", document.id)).toMatchObject({
       providerStatus: "failed",
       canonicalWriteOutcomeUnknown: true,
     });
@@ -328,7 +328,7 @@ describe("DocumentController terminal provider receipts", () => {
     await lateWrite;
     await Promise.resolve();
     await expect(receipt.recoverWrite()).resolves.toBeUndefined();
-    expect(controller.getTerminalProviderOperationSnapshot("example-document", document.id)).toBeNull();
+    expect(controller.getTerminalProviderOperationSnapshot("com.example.example-document", document.id)).toBeNull();
     expect(document.snapshot()).toMatchObject({
       model: { title: "Autosave before terminal provider", body: "Canonical" },
       state: "clean",
@@ -341,12 +341,12 @@ describe("DocumentController terminal provider receipts", () => {
     const document = await controller.newDocument({
       documentId: "terminal-provider-unavailable-result",
       typeId: noteType.id,
-      applicationId: "example-document",
+      applicationId: "com.example.example-document",
       initialModel: { title: "Accepted result", body: "Canonical" },
     });
     const receipt = terminalReceiptOf(controller.reserveTerminalProviderOperation({
       serviceId: "receipt.provider",
-      applicationId: "example-document",
+      applicationId: "com.example.example-document",
       documentId: document.id,
       providerDocumentId: document.id,
       operationKind: "publish",
@@ -368,12 +368,12 @@ describe("DocumentController terminal provider receipts", () => {
     const document = await controller.newDocument({
       documentId: "terminal-provider-snapshot-listing",
       typeId: noteType.id,
-      applicationId: "example-document",
+      applicationId: "com.example.example-document",
       initialModel: { title: "Receipt listing", body: "Canonical" },
     });
     controller.reserveTerminalProviderOperation({
       serviceId: "receipt.provider",
-      applicationId: "example-document",
+      applicationId: "com.example.example-document",
       documentId: document.id,
       providerDocumentId: document.id,
       operationKind: "publish",
@@ -383,7 +383,7 @@ describe("DocumentController terminal provider receipts", () => {
       execute: () => ({ promise: new Promise<never>(() => undefined), releaseProviderLock: () => true }),
     });
 
-    const listed = controller.listTerminalProviderOperations("example-document") as readonly Record<string, unknown>[];
+    const listed = controller.listTerminalProviderOperations("com.example.example-document") as readonly Record<string, unknown>[];
     expect(listed).toHaveLength(1);
     expect(listed[0]).not.toHaveProperty("save");
     expect(Object.isFrozen(listed[0]!)).toBe(true);
@@ -394,18 +394,18 @@ describe("DocumentController terminal provider receipts", () => {
     const firstDocument = await controller.newDocument({
       documentId: "terminal-provider-claim-first",
       typeId: noteType.id,
-      applicationId: "example-document",
+      applicationId: "com.example.example-document",
       initialModel: { title: "First", body: "Canonical" },
     });
     const secondDocument = await controller.newDocument({
       documentId: "terminal-provider-claim-second",
       typeId: noteType.id,
-      applicationId: "example-document",
+      applicationId: "com.example.example-document",
       initialModel: { title: "Second", body: "Canonical" },
     });
     const firstInitial = controller.reserveTerminalProviderOperation({
       serviceId: "receipt.provider",
-      applicationId: "example-document",
+      applicationId: "com.example.example-document",
       documentId: firstDocument.id,
       providerDocumentId: firstDocument.id,
       operationKind: "publish",
@@ -416,7 +416,7 @@ describe("DocumentController terminal provider receipts", () => {
     });
     const secondInitial = controller.reserveTerminalProviderOperation({
       serviceId: "receipt.provider",
-      applicationId: "example-document",
+      applicationId: "com.example.example-document",
       documentId: secondDocument.id,
       providerDocumentId: secondDocument.id,
       operationKind: "publish",
@@ -428,13 +428,13 @@ describe("DocumentController terminal provider receipts", () => {
     expect(firstInitial.release()).toBe(true);
     expect(secondInitial.release()).toBe(true);
 
-    const firstClaim = controller.claimTerminalProviderOperation("example-document", {
+    const firstClaim = controller.claimTerminalProviderOperation("com.example.example-document", {
       serviceId: "receipt.provider",
       claimant: Object.freeze({ mount: "window:first" }),
       windowControllerId: "window:first",
       preferredDocumentId: firstDocument.id,
     })!;
-    const secondClaim = controller.claimTerminalProviderOperation("example-document", {
+    const secondClaim = controller.claimTerminalProviderOperation("com.example.example-document", {
       serviceId: "receipt.provider",
       claimant: Object.freeze({ mount: "window:second" }),
       windowControllerId: "window:second",
@@ -442,7 +442,7 @@ describe("DocumentController terminal provider receipts", () => {
     })!;
     expect(firstClaim.documentId).toBe(firstDocument.id);
     expect(secondClaim.documentId).toBe(secondDocument.id);
-    expect(controller.claimTerminalProviderOperation("example-document", {
+    expect(controller.claimTerminalProviderOperation("com.example.example-document", {
       serviceId: "receipt.provider",
       claimant: Object.freeze({ mount: "blocked" }),
       windowControllerId: "window:blocked",
@@ -450,7 +450,7 @@ describe("DocumentController terminal provider receipts", () => {
 
     expect(firstClaim.release()).toBe(true);
     expect(() => firstClaim.receipt.snapshot()).toThrow(/claim/i);
-    const takeover = controller.claimTerminalProviderOperation("example-document", {
+    const takeover = controller.claimTerminalProviderOperation("com.example.example-document", {
       serviceId: "receipt.provider",
       claimant: Object.freeze({ mount: "window:takeover" }),
       windowControllerId: "window:takeover",

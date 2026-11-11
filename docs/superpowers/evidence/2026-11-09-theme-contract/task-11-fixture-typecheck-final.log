@@ -1,0 +1,2 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run tsc -p tests/e2e/fixtures/theme-additional/tsconfig.json --noEmit

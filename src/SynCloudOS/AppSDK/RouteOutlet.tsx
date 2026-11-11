@@ -103,7 +103,7 @@ export function SynWareRouteSessionProvider({
   );
 }
 
-export function useSynWareRoutePresentation() {
+export function useRoutePresentation() {
   const context = useContext(RoutePresentationContext);
   if (!context) throw new Error("RouteOutlet requires a mounted SynWare route session.");
   return context;
@@ -191,7 +191,7 @@ class RouteRenderBoundary extends Component<RouteRenderBoundaryProps, RouteRende
 }
 
 export function RouteOutlet() {
-  const { graph, session, retry: retryRoute, onRenderError } = useSynWareRoutePresentation();
+  const { graph, session, retry: retryRoute, onRenderError } = useRoutePresentation();
   const depth = useContext(RouteDepthContext);
   const snapshot = useSessionSnapshot(session);
   const route = snapshot.route;

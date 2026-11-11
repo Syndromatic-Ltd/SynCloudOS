@@ -1,0 +1,35 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/foundation-faithful-decimal.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/foundation-faithful-decimal.test.ts (3 tests | 1 failed) 7ms
+   × rounds signed values and reports unrepresentable underflow 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/foundation-faithful-decimal.test.ts > rounds signed values and reports unrepresentable underflow
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ tests/runtime/foundation-faithful-decimal.test.ts:24:47
+     22|   expect(n("-2.51").dividing(n("1"),new NSEDecimalNumberHandler({scale…
+     23|   expect(n("-2.51").dividing(n("1"),new NSEDecimalNumberHandler({scale…
+     24|   expect(() => n("1e-128").dividing(n("10"))).toThrow(/underflow/i);
+       |                                               ^
+     25| });
+     26|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  19:13:53
+   Duration  188ms (transform 34ms, setup 26ms, import 21ms, tests 7ms, environment 0ms)
+

@@ -25,7 +25,7 @@ const content = (text: string) => attributedContent([paragraph([textRun(text)])]
 describe("retained text target lifetime", () => {
   it("maps a retained semantic target through another view's edit", () => {
     const owner = createInMemoryNSETextOwner({ content: content("hello") });
-    const session = new TextEditingSession({ id: "origin", owner, documentId: "doc" });
+    const session = new TextEditingSession({ id: "origin", textOwner: owner, documentId: "doc" });
     session.select(1, 4); const target = session.captureTarget();
     owner.commit({ expectedRevision: 0, operations: [{ kind: "replace", range: { location: 0, length: 0 }, content: content("!") }] });
     expect(session.resolveTarget(target)?.range).toEqual({ location: 2, length: 3 });
@@ -33,7 +33,7 @@ describe("retained text target lifetime", () => {
   });
   it("rejects foreign flow, owner revocation and deleted selection", () => {
     const owner = createInMemoryNSETextOwner({ content: content("hello"), flowId: "one" });
-    const session = new TextEditingSession({ id: "origin", owner });
+    const session = new TextEditingSession({ id: "origin", textOwner: owner });
     session.select(1, 4); const target = session.captureTarget();
     expect(session.resolveTarget({ ...target, flowId: "two" })).toBeNull();
     owner.commit({ expectedRevision: 0, operations: [{ kind: "replace", range: { location: 0, length: 5 }, content: content("") }] });

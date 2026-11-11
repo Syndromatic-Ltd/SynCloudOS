@@ -75,7 +75,7 @@ export function ApplicationStageHost({
     let outerFrame: unknown = null;
     let innerFrame: unknown = null;
     const report = () => {
-      if (!cancelled) runtime.webspring.completeLaunchStage(launchTransitionId, app.id);
+      if (!cancelled) runtime.webspring.completeLaunchStage(launchTransitionId, app.bundleIdentifier);
     };
     outerFrame = runtime.environment.requestAnimationFrame(() => {
       innerFrame = runtime.environment.requestAnimationFrame(() => {
@@ -90,7 +90,7 @@ export function ApplicationStageHost({
       if (outerFrame !== null) runtime.environment.cancelAnimationFrame(outerFrame);
       if (innerFrame !== null) runtime.environment.cancelAnimationFrame(innerFrame);
     };
-  }, [app.id, launchTransitionId, runtime, staged]);
+  }, [app.bundleIdentifier, launchTransitionId, runtime, staged]);
 
   return (
     <SynCloudOSWatchdog
@@ -99,7 +99,7 @@ export function ApplicationStageHost({
       scope="app"
       app={app}
       presentation={{ id: stage.id, kind: "appView", zIndex: stage.zIndex }}
-      resetKey={`${stage.id}:${app.id}`}
+      resetKey={`${stage.id}:${app.bundleIdentifier}`}
       fallback={() => <AppPresentationErrorFallback app={app} presentation={{ id: stage.id, kind: "appView", zIndex: stage.zIndex }} />}
     >
         <ApplicationStageView

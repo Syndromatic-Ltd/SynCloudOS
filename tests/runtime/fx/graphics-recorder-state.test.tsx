@@ -20,11 +20,11 @@
 
 // @vitest-environment jsdom
 import React from "react";
-import { render } from "@testing-library/react";
+import { renderGraphics as render, drawFigure } from "./graphicsViewFixture";
 import { describe, expect, it } from "vitest";
 import { GFXBitmapContext, GFXColour, GFXContext, GFXGradient, GFXIdentityTransform, GFXPath, GFXShading } from "../../../src/FX/GraphicsFX/public";
 import { createOwnedGFXIdentifierIssuer } from "../../../src/FX/GraphicsFX/identifierAuthority";
-import { NSEGraphicsView } from "../../../src/NSE/Graphics/NSEGraphicsView";
+import { NSEView } from "../../../src/NSE/Views/NSEView";
 const context = () => {
     let i = 0;
     return GFXContext.recording({ size: { width: 10, height: 10 }, identifiers: createOwnedGFXIdentifierIssuer(() => () => `state${++i}`) });
@@ -63,7 +63,7 @@ describe("GraphicsFX recorder coordinate and fill state", () => {
         expect(svg).toContain('clip-rule="evenodd"');
         expect(svg).toContain('stroke-dashoffset="0.5"');
         expect(svg).toContain('stroke-miterlimit="3"');
-        const { container } = render(<NSEGraphicsView displayList={recorder.displayList} label="Rules"/>);
+        const { container } = render(<NSEView draw={drawFigure(recorder.displayList)} aria-label="Rules"/>);
         expect(container.querySelector('clipPath path')?.getAttribute('clip-rule')).toBe("evenodd");
         const strokes = container.querySelectorAll('path[stroke]');
         expect(strokes[0]?.getAttribute('stroke-dashoffset')).toBe("0.5");
@@ -82,7 +82,7 @@ describe("GraphicsFX recorder coordinate and fill state", () => {
         expect(svg).toContain("linearGradient");
         expect(svg).toContain("radialGradient");
         expect(svg).toContain("data:image/png;base64,");
-        const { container } = render(<NSEGraphicsView displayList={recorder.displayList} label="Shading"/>);
+        const { container } = render(<NSEView draw={drawFigure(recorder.displayList)} aria-label="Shading"/>);
         expect(container.querySelector('pattern image')?.getAttribute('href')).toMatch(/^data:image\/png;base64,/);
     });
     it("uses even-odd holes in bitmap fills and clips", () => {

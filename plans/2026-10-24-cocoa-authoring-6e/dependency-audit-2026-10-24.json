@@ -1,0 +1,425 @@
+{
+  "kind": "planning-only dependency audit",
+  "date": "2026-10-24",
+  "command": "npm.cmd audit --json --ignore-scripts",
+  "sourceHeads": {
+    "framework": "a916cea4465d2b2d5ef56b49717b231da6ea02b8",
+    "site": "9a78fd30f6b2cab61fcf469a72c37c08ae202b23"
+  },
+  "notes": [
+    "No audit fix or dependency installation was performed.",
+    "Counts are affected package records, not unique vulnerabilities or established production exploitability.",
+    "Suggested Cloudflare downgrades require review and are not selected fixes."
+  ],
+  "checkouts": {
+    "framework": {
+      "exitCode": 1,
+      "metadata": {
+        "vulnerabilities": {
+          "info": 0,
+          "low": 0,
+          "moderate": 3,
+          "high": 4,
+          "critical": 0,
+          "total": 7
+        },
+        "dependencies": {
+          "prod": 118,
+          "dev": 202,
+          "optional": 93,
+          "peer": 10,
+          "peerOptional": 0,
+          "total": 384
+        }
+      },
+      "packages": [
+        {
+          "name": "@vitest/mocker",
+          "severity": "moderate",
+          "isDirect": false,
+          "range": "<=4.1.11",
+          "nodes": [
+            "node_modules/@vitest/mocker"
+          ],
+          "reportedFix": true,
+          "via": [
+            {
+              "title": "Vitest: Code injection via unauthenticated manual mock registration",
+              "severity": "moderate",
+              "range": ">=2.1.0-beta.7 <4.1.12",
+              "url": "https://github.com/advisories/GHSA-qxg6-89mg-rqv8"
+            },
+            {
+              "title": "Vitest: Windows backslash traversal bypasses the @vitest/mocker redirect allowlist fix",
+              "severity": "moderate",
+              "range": ">=4.1.11 <4.1.12",
+              "url": "https://github.com/advisories/GHSA-xp26-3454-mjgp"
+            }
+          ]
+        },
+        {
+          "name": "body-parser",
+          "severity": "high",
+          "isDirect": false,
+          "range": "2.0.0 - 2.3.0",
+          "nodes": [
+            "node_modules/body-parser"
+          ],
+          "reportedFix": true,
+          "via": [
+            {
+              "title": "body-parser vulnerable to Denial of Service via trailing bytes after a compressed request body",
+              "severity": "high",
+              "range": ">=2.0.0 <2.4.0",
+              "url": "https://github.com/advisories/GHSA-27r3-jxmh-p828"
+            }
+          ]
+        },
+        {
+          "name": "fast-uri",
+          "severity": "moderate",
+          "isDirect": false,
+          "range": "3.0.0 - 3.1.8",
+          "nodes": [
+            "node_modules/fast-uri"
+          ],
+          "reportedFix": true,
+          "via": [
+            {
+              "title": "fast-uri vulnerable to URI scheme spoofing via percent-encoded scheme decoding",
+              "severity": "moderate",
+              "range": ">=3.0.0 <3.1.9",
+              "url": "https://github.com/advisories/GHSA-w74x-v6f9-j3xg"
+            },
+            {
+              "title": "fast-uri vulnerable to improper path equivalence in relative reference normalization",
+              "severity": "low",
+              "range": ">=3.0.0 <3.1.9",
+              "url": "https://github.com/advisories/GHSA-xhq7-xmqj-769h"
+            },
+            {
+              "title": "fast-uri vulnerable to host confusion via unchecked WHATWG host canonicalization",
+              "severity": "moderate",
+              "range": ">=3.1.3 <3.1.9",
+              "url": "https://github.com/advisories/GHSA-wjr9-j795-jxcr"
+            },
+            {
+              "title": "fast-uri vulnerable to scheme injection via an unescaped first-segment colon in suffix references",
+              "severity": "low",
+              "range": ">=3.0.0 <3.1.9",
+              "url": "https://github.com/advisories/GHSA-333x-w4r6-6crp"
+            }
+          ]
+        },
+        {
+          "name": "undici",
+          "severity": "high",
+          "isDirect": false,
+          "range": "7.0.0 - 7.30.0",
+          "nodes": [
+            "node_modules/undici"
+          ],
+          "reportedFix": true,
+          "via": [
+            {
+              "title": "undici vulnerable to Denial of Service via unbounded memory in the EventSource parser",
+              "severity": "moderate",
+              "range": ">=7.0.0 <7.30.1",
+              "url": "https://github.com/advisories/GHSA-4qv8-2p9j-2685"
+            },
+            {
+              "title": "undici vulnerable to Subresource Integrity bypass via non-lowercase algorithm tokens",
+              "severity": "moderate",
+              "range": ">=7.15.0 <7.30.1",
+              "url": "https://github.com/advisories/GHSA-f72v-6w45-q472"
+            },
+            {
+              "title": "undici vulnerable to Denial of Service via unhandled error on excessive content-encodings",
+              "severity": "high",
+              "range": ">=7.18.0 <7.30.1",
+              "url": "https://github.com/advisories/GHSA-xjj6-f33q-929c"
+            }
+          ]
+        },
+        {
+          "name": "vite",
+          "severity": "high",
+          "isDirect": true,
+          "range": "7.0.0 - 7.3.6",
+          "nodes": [
+            "node_modules/vite"
+          ],
+          "reportedFix": true,
+          "via": [
+            {
+              "title": "launch-editor: escapeCmdArgs() omits % escaping on Windows",
+              "severity": "moderate",
+              "range": ">=7.0.0 <=7.3.6",
+              "url": "https://github.com/advisories/GHSA-698v-4r3x-3vcv"
+            },
+            {
+              "title": "launch-editor: Editor CLI flag misinterpretation causing arbitrary command execution for some editors",
+              "severity": "moderate",
+              "range": ">=7.0.0 <=7.3.6",
+              "url": "https://github.com/advisories/GHSA-r825-w8mm-5pxw"
+            },
+            {
+              "title": "launch-editor: `fs.existsSync()` existence check can be bypassed on Windows",
+              "severity": "high",
+              "range": ">=7.0.0 <=7.3.6",
+              "url": "https://github.com/advisories/GHSA-587h-7wmj-h5pm"
+            },
+            {
+              "title": "Vite: Cross origin script execution through Vite custom middleware",
+              "severity": "low",
+              "range": ">=7.0.0 <=7.3.6",
+              "url": "https://github.com/advisories/GHSA-9jrq-w75r-8gcw"
+            },
+            {
+              "title": "Vite: Files outside `server.fs.allow` could be served when project paths match system paths on non-Windows machine",
+              "severity": "moderate",
+              "range": ">=7.0.0 <=7.3.6",
+              "url": "https://github.com/advisories/GHSA-rq7h-c2jc-7f22"
+            }
+          ]
+        },
+        {
+          "name": "vitest",
+          "severity": "moderate",
+          "isDirect": true,
+          "range": "2.1.0-beta.1 - 4.1.11",
+          "nodes": [
+            "node_modules/vitest"
+          ],
+          "reportedFix": true,
+          "via": [
+            "@vitest/mocker"
+          ]
+        },
+        {
+          "name": "zod",
+          "severity": "high",
+          "isDirect": true,
+          "range": "<4.6.6",
+          "nodes": [
+            "node_modules/zod"
+          ],
+          "reportedFix": {
+            "name": "zod",
+            "version": "4.6.7",
+            "isSemVerMajor": true
+          },
+          "via": [
+            {
+              "title": "Zod can exhaust memory while validating oversized constrained collections",
+              "severity": "high",
+              "range": "<4.6.6",
+              "url": "https://github.com/advisories/GHSA-mrhx-c7xc-m3w5"
+            }
+          ]
+        }
+      ]
+    },
+    "site": {
+      "exitCode": 1,
+      "metadata": {
+        "vulnerabilities": {
+          "info": 0,
+          "low": 0,
+          "moderate": 5,
+          "high": 2,
+          "critical": 0,
+          "total": 7
+        },
+        "dependencies": {
+          "prod": 38,
+          "dev": 244,
+          "optional": 86,
+          "peer": 0,
+          "peerOptional": 0,
+          "total": 281
+        }
+      },
+      "packages": [
+        {
+          "name": "@cloudflare/vite-plugin",
+          "severity": "moderate",
+          "isDirect": true,
+          "range": ">=1.13.0",
+          "nodes": [
+            "node_modules/@cloudflare/vite-plugin"
+          ],
+          "reportedFix": {
+            "name": "@cloudflare/vite-plugin",
+            "version": "1.12.4",
+            "isSemVerMajor": true
+          },
+          "via": [
+            "miniflare",
+            "wrangler"
+          ]
+        },
+        {
+          "name": "@vitest/mocker",
+          "severity": "moderate",
+          "isDirect": false,
+          "range": "<=4.1.11",
+          "nodes": [
+            "node_modules/@vitest/mocker"
+          ],
+          "reportedFix": {
+            "name": "vitest",
+            "version": "4.1.12",
+            "isSemVerMajor": false
+          },
+          "via": [
+            {
+              "title": "Vitest: Code injection via unauthenticated manual mock registration",
+              "severity": "moderate",
+              "range": ">=2.1.0-beta.7 <4.1.12",
+              "url": "https://github.com/advisories/GHSA-qxg6-89mg-rqv8"
+            },
+            {
+              "title": "Vitest: Windows backslash traversal bypasses the @vitest/mocker redirect allowlist fix",
+              "severity": "moderate",
+              "range": ">=4.1.11 <4.1.12",
+              "url": "https://github.com/advisories/GHSA-xp26-3454-mjgp"
+            }
+          ]
+        },
+        {
+          "name": "miniflare",
+          "severity": "moderate",
+          "isDirect": false,
+          "range": ">=4.20250906.1",
+          "nodes": [
+            "node_modules/miniflare"
+          ],
+          "reportedFix": {
+            "name": "@cloudflare/vite-plugin",
+            "version": "1.12.4",
+            "isSemVerMajor": true
+          },
+          "via": [
+            "undici"
+          ]
+        },
+        {
+          "name": "undici",
+          "severity": "high",
+          "isDirect": false,
+          "range": "7.0.0 - 7.30.0",
+          "nodes": [
+            "node_modules/miniflare/node_modules/undici",
+            "node_modules/undici"
+          ],
+          "reportedFix": {
+            "name": "@cloudflare/vite-plugin",
+            "version": "1.12.4",
+            "isSemVerMajor": true
+          },
+          "via": [
+            {
+              "title": "undici vulnerable to Denial of Service via unbounded memory in the EventSource parser",
+              "severity": "moderate",
+              "range": ">=7.0.0 <7.30.1",
+              "url": "https://github.com/advisories/GHSA-4qv8-2p9j-2685"
+            },
+            {
+              "title": "undici vulnerable to Subresource Integrity bypass via non-lowercase algorithm tokens",
+              "severity": "moderate",
+              "range": ">=7.15.0 <7.30.1",
+              "url": "https://github.com/advisories/GHSA-f72v-6w45-q472"
+            },
+            {
+              "title": "undici vulnerable to Denial of Service via unhandled error on excessive content-encodings",
+              "severity": "high",
+              "range": ">=7.18.0 <7.30.1",
+              "url": "https://github.com/advisories/GHSA-xjj6-f33q-929c"
+            }
+          ]
+        },
+        {
+          "name": "vite",
+          "severity": "high",
+          "isDirect": true,
+          "range": "7.0.0 - 7.3.6",
+          "nodes": [
+            "node_modules/vite"
+          ],
+          "reportedFix": {
+            "name": "vite",
+            "version": "7.3.7",
+            "isSemVerMajor": false
+          },
+          "via": [
+            {
+              "title": "launch-editor: escapeCmdArgs() omits % escaping on Windows",
+              "severity": "moderate",
+              "range": ">=7.0.0 <=7.3.6",
+              "url": "https://github.com/advisories/GHSA-698v-4r3x-3vcv"
+            },
+            {
+              "title": "launch-editor: Editor CLI flag misinterpretation causing arbitrary command execution for some editors",
+              "severity": "moderate",
+              "range": ">=7.0.0 <=7.3.6",
+              "url": "https://github.com/advisories/GHSA-r825-w8mm-5pxw"
+            },
+            {
+              "title": "launch-editor: `fs.existsSync()` existence check can be bypassed on Windows",
+              "severity": "high",
+              "range": ">=7.0.0 <=7.3.6",
+              "url": "https://github.com/advisories/GHSA-587h-7wmj-h5pm"
+            },
+            {
+              "title": "Vite: Cross origin script execution through Vite custom middleware",
+              "severity": "low",
+              "range": ">=7.0.0 <=7.3.6",
+              "url": "https://github.com/advisories/GHSA-9jrq-w75r-8gcw"
+            },
+            {
+              "title": "Vite: Files outside `server.fs.allow` could be served when project paths match system paths on non-Windows machine",
+              "severity": "moderate",
+              "range": ">=7.0.0 <=7.3.6",
+              "url": "https://github.com/advisories/GHSA-rq7h-c2jc-7f22"
+            }
+          ]
+        },
+        {
+          "name": "vitest",
+          "severity": "moderate",
+          "isDirect": true,
+          "range": "2.1.0-beta.1 - 4.1.11",
+          "nodes": [
+            "node_modules/vitest"
+          ],
+          "reportedFix": {
+            "name": "vitest",
+            "version": "4.1.12",
+            "isSemVerMajor": false
+          },
+          "via": [
+            "@vitest/mocker"
+          ]
+        },
+        {
+          "name": "wrangler",
+          "severity": "moderate",
+          "isDirect": true,
+          "range": "<=0.0.0-31bfd374c || >=4.36.0",
+          "nodes": [
+            "node_modules/wrangler"
+          ],
+          "reportedFix": {
+            "name": "wrangler",
+            "version": "4.35.0",
+            "isSemVerMajor": true
+          },
+          "via": [
+            "miniflare"
+          ]
+        }
+      ]
+    }
+  }
+}

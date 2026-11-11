@@ -28,8 +28,8 @@ it("reads owned PCM file frames with cursor/EOF and writes bounded segments", ()
   const chunk = new AUFXAudioPCMBuffer(format, 3); expect(file.read(chunk, 2)).toBe(2); expect(chunk.getSample(0, 0)).toBe(0); expect(file.framePosition).toBe(2);
   file.framePosition = 4; file.write(chunk); expect(file.length).toBe(6);
   file.framePosition = 5; expect(file.read(chunk, 3)).toBe(1); expect(chunk.getSample(0, 0)).toBe(0.25); expect(file.read(chunk)).toBe(0);
-  const decoded = AUFXAudioFile.decodeWAV(file.toWAV()); expect(decoded.frameLength).toBe(6); expect(decoded.getSample(0, 5)).toBeCloseTo(0.25, 4);
-  expect(() => { file.framePosition = 7; }).toThrow(); file.dispose(); expect(() => file.read(chunk)).toThrow("disposed");
+  const decoded = AUFXAudioFile.decodeWAV(file.toWAV().bytes); expect(decoded.frameLength).toBe(6); expect(decoded.getSample(0, 5)).toBeCloseTo(0.25, 4);
+  expect(() => { file.framePosition = 7; }).toThrow(); file.dispose(); expect(() => file.read(chunk)).toThrow(expect.objectContaining({ code: "AUFX_AUDIO_FILE_DISPOSED" }));
 });
 
 it("does not permit writes to read-only files or incompatible destinations", () => {

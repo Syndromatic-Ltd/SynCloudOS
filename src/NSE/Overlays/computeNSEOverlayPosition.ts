@@ -29,7 +29,10 @@ import {
   type Padding,
   type Placement,
 } from "@floating-ui/dom";
+import type { NSEOverlayRegionBounds } from "./overlayRegion";
 import type { NSELogicalPlacement } from "./overlayTypes";
+import { updateNSEPopoverFrame } from "./popoverFrame";
+import { applyNSEPopoverPosition, computeNSEPopoverPosition, nsePopoverReference } from "./popoverPosition";
 
 export type NSEOverlayDirection = "ltr" | "rtl";
 export type NSEOverlayCollisionPadding = Padding;
@@ -44,9 +47,24 @@ export interface NSEOverlayPositionScheduler {
   clearTimeout(handle: unknown): void;
 }
 
+/** A point in viewport coordinates. */
+export interface NSEOverlayAnchorPoint {
+  readonly x: number;
+  readonly y: number;
+}
+
 export interface NSEOverlayPositionOptions {
   readonly anchor: HTMLElement;
+  /**
+   * Place against this point instead of the anchor's box, as
+   * NSMenu.popUpContextMenu(_:with:for:) places a menu at the event's location.
+   * The anchor still owns the surface's lifetime and focus.
+   */
+  readonly anchorPoint?: NSEOverlayAnchorPoint | null;
+  /** A rectangle in the positioning view's local coordinates. */
+  readonly anchorRect?: Pick<DOMRectReadOnly, "x" | "y" | "width" | "height">;
   readonly floating: HTMLElement;
+  readonly boundary?: () => NSEOverlayRegionBounds | null;
   readonly arrow?: HTMLElement | null;
   readonly placement?: NSELogicalPlacement;
   readonly direction?: NSEOverlayDirection;
@@ -62,6 +80,7 @@ export interface NSEOverlayPositionOptions {
 export interface NSEViewportCornerPositionOptions {
   readonly anchor: HTMLElement;
   readonly floating: HTMLElement;
+  readonly boundary?: NSEOverlayRegionBounds | null;
   readonly insetBlockStart: number;
   readonly insetInlineEnd: number;
   readonly availableInlineSize: number;
@@ -91,7 +110,10 @@ export function logicalPlacementToFloatingPlacement(
 
 export function computeNSEOverlayPosition({
   anchor,
+  anchorPoint = null,
+  anchorRect,
   floating,
+  boundary,
   arrow,
   placement = "block-end-inline-start",
   direction = "ltr",
@@ -137,6 +159,23 @@ export function computeNSEOverlayPosition({
     onError?.();
   };
 
+  const reference = anchorPoint
+    ? {
+        contextElement: anchor,
+        getBoundingClientRect: () => ({ x: anchorPoint.x, y: anchorPoint.y, top: anchorPoint.y, left: anchorPoint.x, bottom: anchorPoint.y, right: anchorPoint.x, width: 0, height: 0 }),
+      }
+    : anchorRect ? {
+        contextElement: anchor,
+        getBoundingClientRect: () => {
+          const bounds = anchor.getBoundingClientRect();
+          const scaleX = anchor.offsetWidth ? bounds.width / anchor.offsetWidth : 1;
+          const scaleY = anchor.offsetHeight ? bounds.height / anchor.offsetHeight : 1;
+          const x = bounds.x + anchorRect.x * scaleX, y = bounds.y + anchorRect.y * scaleY;
+          const width = anchorRect.width * scaleX, height = anchorRect.height * scaleY;
+          return { x, y, top: y, left: x, right: x + width, bottom: y + height, width, height };
+        },
+      } : anchor;
+
   const performUpdate = () => {
     if (!active) return;
     if (!anchor.isConnected) {
@@ -145,7 +184,32 @@ export function computeNSEOverlayPosition({
     }
     const updateGeneration = ++generation;
     try {
-      void computePosition(anchor, floating, {
+      const region = boundary?.() ?? null;
+      if (arrow && floating.classList.contains("nse-popover")) {
+        const view = floating.ownerDocument.defaultView;
+        const viewport = region ?? { x: 0, y: 0, width: view?.innerWidth ?? 0, height: view?.innerHeight ?? 0 };
+        const padding = typeof collisionPadding === "number" ? collisionPadding : Math.max(0, ...Object.values(collisionPadding));
+        // Measure the preferred plate again, rather than retaining a size
+        // constrained by the anchor's previous edge or viewport.
+        floating.style.setProperty("--nse-overlay-available-inline-size", `${Math.max(1, viewport.width - padding * 2)}px`);
+        floating.style.setProperty("--nse-overlay-available-block-size", `${Math.max(1, viewport.height - padding * 2)}px`);
+        void computeNSEPopoverPosition({
+          reference: nsePopoverReference(anchor, anchorRect),
+          contentSize: { width: floating.offsetWidth, height: floating.offsetHeight },
+          boundary: viewport,
+          placement: logicalPlacementToFloatingPlacement(placement, direction),
+          collisionPadding: padding,
+        }).then(position => {
+          if (!active || generation !== updateGeneration || !anchor.isConnected) return;
+          floating.style.left = `${position.bounds.x}px`; floating.style.top = `${position.bounds.y}px`;
+          floating.style.setProperty("--nse-overlay-available-inline-size", `${position.bounds.width}px`);
+          floating.style.setProperty("--nse-overlay-available-block-size", `${position.bounds.height}px`);
+          applyNSEPopoverPosition(floating, arrow, position);
+        }).catch(reportPlacementFailure);
+        return;
+      }
+      const clipping = region ? { rootBoundary: region, boundary: [] as Element[] } : {};
+      void computePosition(reference, floating, {
         // The surface is written as position: fixed, so it is placed in
         // viewport coordinates. The default "absolute" strategy answers in
         // document coordinates, which differ by the scroll offset whenever
@@ -153,24 +217,29 @@ export function computeNSEOverlayPosition({
         strategy: "fixed",
         placement: logicalPlacementToFloatingPlacement(placement, direction),
         middleware: [
-          offset(offsetValue),
-          flip({ fallbackAxisSideDirection: "start" }),
-          shift({ padding: collisionPadding }),
+          offset(anchorPoint ? 0 : offsetValue),
+          flip({ ...clipping, padding: collisionPadding, ...(arrow ? { crossAxis: false } : { fallbackAxisSideDirection: "start" as const }) }),
+          // Shift along the edge. Size, rather than primary-axis shifting,
+          // keeps a tall popover beside the anchor instead of covering it.
+          shift({ ...clipping, padding: collisionPadding }),
           size({
+            ...clipping,
             padding: collisionPadding,
-            apply: ({ availableWidth, availableHeight, elements }) => {
-              elements.floating.style.setProperty("--nse-overlay-available-inline-size", `${availableWidth}px`);
-              elements.floating.style.setProperty("--nse-overlay-available-block-size", `${availableHeight}px`);
+            apply: ({ availableWidth, availableHeight, elements, rects }) => {
+              elements.floating.style.setProperty("--nse-overlay-anchor-inline-size", `${rects.reference.width}px`);
+              elements.floating.style.setProperty("--nse-overlay-available-inline-size", `${region ? Math.max(0, availableWidth) : availableWidth}px`);
+              elements.floating.style.setProperty("--nse-overlay-available-block-size", `${region ? Math.max(0, availableHeight) : availableHeight}px`);
             },
           }),
-          ...(arrow ? [floatingArrow({ element: arrow })] : []),
+          ...(arrow ? [floatingArrow({ element: arrow, padding: 12 })] : []),
         ],
       }).then(({ x, y, placement: resolvedPlacement, middlewareData }) => {
         if (!active || generation !== updateGeneration || !anchor.isConnected) return;
         const viewport = floating.ownerDocument.defaultView;
         const viewportWidth = viewport?.innerWidth ?? floating.ownerDocument.documentElement.clientWidth;
         const viewportHeight = viewport?.innerHeight ?? floating.ownerDocument.documentElement.clientHeight;
-        const floatingRect = floating.getBoundingClientRect();
+        // Presentation scaling must not change the collision geometry.
+        const floatingRect = { width: floating.offsetWidth, height: floating.offsetHeight };
         const padding = typeof collisionPadding === "number" ? {
           top: collisionPadding,
           right: collisionPadding,
@@ -186,25 +255,36 @@ export function computeNSEOverlayPosition({
         // placement before the portal surface's first measured rect. Clamp
         // that result once more at the owning viewport so an interactive
         // overlay cannot be rendered outside the hit-testable area.
-        const boundedX = Math.min(Math.max(x, padding.left), Math.max(padding.left, viewportWidth - floatingRect.width - padding.right));
-        const boundedY = Math.min(Math.max(y, padding.top), Math.max(padding.top, viewportHeight - floatingRect.height - padding.bottom));
+        const boundedX = Math.min(Math.max(x, (region?.x ?? 0) + padding.left), Math.max((region?.x ?? 0) + padding.left, (region ? region.x + region.width : viewportWidth) - floatingRect.width - padding.right));
+        const boundedY = Math.min(Math.max(y, (region?.y ?? 0) + padding.top), Math.max((region?.y ?? 0) + padding.top, (region ? region.y + region.height : viewportHeight) - floatingRect.height - padding.bottom));
         floating.style.position = "fixed";
         floating.style.left = `${boundedX}px`;
         floating.style.top = `${boundedY}px`;
         floating.dataset.placement = resolvedPlacement;
+        floating.dataset.nsePlacement = resolvedPlacement;
         const arrowData = middlewareData.arrow;
-        if (!arrow || !arrowData) return;
+        if (!arrow || !arrowData) { floating.dataset.nsePositioned = "true"; return; }
         const staticSide = {
           top: "bottom",
           right: "left",
           bottom: "top",
           left: "right",
         }[resolvedPlacement.split("-")[0] as "top" | "right" | "bottom" | "left"];
-        arrow.style.left = arrowData.x == null ? "" : `${arrowData.x}px`;
-        arrow.style.top = arrowData.y == null ? "" : `${arrowData.y}px`;
+        // The final viewport guard can shift a first WebKit measurement after
+        // middleware ran. Correct the arrow by that same displacement.
+        const arrowWidth = arrow.offsetWidth, arrowHeight = arrow.offsetHeight;
+        const arrowX = arrowData.x == null ? null : Math.max(12, Math.min(floatingRect.width - 12 - arrowWidth, arrowData.x + x - boundedX));
+        const arrowY = arrowData.y == null ? null : Math.max(12, Math.min(floatingRect.height - 12 - arrowHeight, arrowData.y + y - boundedY));
+        arrow.style.left = arrowX == null ? "" : `${arrowX}px`;
+        arrow.style.top = arrowY == null ? "" : `${arrowY}px`;
         arrow.style.right = "";
         arrow.style.bottom = "";
-        arrow.style.setProperty(staticSide, "-4px");
+        arrow.style.setProperty(staticSide, `${-(staticSide === "left" || staticSide === "right" ? arrowWidth : arrowHeight) / 2}px`);
+        const originX = arrowX == null ? (staticSide === "left" ? -arrowWidth / 2 : floatingRect.width + arrowWidth / 2) : arrowX + arrowWidth / 2;
+        const originY = arrowY == null ? (staticSide === "top" ? -arrowHeight / 2 : floatingRect.height + arrowHeight / 2) : arrowY + arrowHeight / 2;
+        floating.style.transformOrigin = `${originX}px ${originY}px`;
+        updateNSEPopoverFrame(floating, arrow);
+        floating.dataset.nsePositioned = "true";
       }).catch(reportPlacementFailure);
     } catch {
       reportPlacementFailure();
@@ -253,7 +333,7 @@ export function computeNSEOverlayPosition({
   // Out of the page flow before anything measures it: an in-flow surface
   // lengthens the document and is measured at its flow width.
   floating.style.position = "fixed";
-  stopAutoUpdate = autoUpdate(anchor, floating, update);
+  stopAutoUpdate = autoUpdate(reference, floating, update);
   return dispose;
 }
 
@@ -266,6 +346,7 @@ export function computeNSEOverlayPosition({
 export function computeNSEViewportCornerPosition({
   anchor,
   floating,
+  boundary,
   insetBlockStart,
   insetInlineEnd,
   availableInlineSize,
@@ -291,18 +372,19 @@ export function computeNSEViewportCornerPosition({
       return;
     }
     floating.style.position = "fixed";
-    floating.style.top = `${insetBlockStart}px`;
+    floating.style.top = `${(boundary?.y ?? 0) + insetBlockStart}px`;
     floating.style.bottom = "auto";
     if (direction === "rtl") {
-      floating.style.left = `${insetInlineEnd}px`;
+      floating.style.left = `${(boundary?.x ?? 0) + insetInlineEnd}px`;
       floating.style.right = "auto";
     } else {
-      floating.style.right = `${insetInlineEnd}px`;
+      floating.style.right = `${(boundary ? (floating.ownerDocument.defaultView?.innerWidth ?? boundary.x + boundary.width) - boundary.x - boundary.width : 0) + insetInlineEnd}px`;
       floating.style.left = "auto";
     }
     floating.style.setProperty("--nse-overlay-available-inline-size", `${availableInlineSize}px`);
     floating.style.setProperty("--nse-overlay-available-block-size", `${availableBlockSize}px`);
     floating.dataset.placement = "viewport-block-start-inline-end";
+    floating.dataset.nsePlacement = "viewport-block-start-inline-end";
   };
   if (signal?.aborted) return () => undefined;
   signal?.addEventListener("abort", dispose, { once: true });

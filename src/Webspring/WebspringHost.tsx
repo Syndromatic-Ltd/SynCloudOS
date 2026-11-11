@@ -18,25 +18,24 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Component, createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ErrorInfo, type PropsWithChildren, type ReactNode } from "react";
+import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
+import { Component, createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ErrorInfo, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { useNSEDeferredDisposal } from "../NSE/NSE";
-import { NSEPresence, useNSEAnimationEnvironment, useNSEPresentation } from "../NSE/Animation";
-import { useWebspringMotion } from "./Webspring.transitions";
-import { nseDeferredDisposalMicrotaskScheduler, useNSEFeedback } from "../NSE/hostComposition";
+import { NSEFocusPortProvider, useNSEDeferredDisposal } from "../NSE/NSE";
+import { useNSEAnimationEnvironment } from "../NSE/Animation";
+import { useNSEFeedback } from "../NSE/hostComposition";
 import { MaterialProvider } from "../NSE/Material";
-import { LoginWindow } from "../NSE/SystemUI";
-import { LoginGatePresenter } from "../SynCloudOS/RootRuntime";
+import { HostLoginGate } from "./HostLoginGate";
 import type { RuntimeSnapshot } from "../SynCloudOS/SynCloudOS";
 import type { AuthenticationInput, Presentation, WebspringDefinition, WebspringViewComponent } from "./webspringTypes";
 import { SystemStartupLayer, type SystemStartupPhase } from "./SystemStartupLayer";
 import { ApplicationStageLayer } from "./ApplicationStageLayer";
 import { syncApplicationWindowContentRenderers, WindowContentRendererRegistry, WindowLayer, type ApplicationWindowRendererRegistrations } from "./WindowLayer";
-import { FocusScope, HostSiteBrandingProvider, useKernelSynCloudOS, useRuntimeSelector } from "../SynCloudOSReact";
+import { HostSiteBrandingProvider, useKernelSynCloudOS, useRuntimeNSEFocusPort, useRuntimeSelector } from "../SynCloudOSReact";
 import { presentationForSizeClass, WebspringController, type SynCloudOSShellResources } from "./WebspringController";
-import { createWebspringLayout } from "./webspringLayout";
 import { WebspringQuickSwitchView } from "./WebspringQuickSwitchView";
 import { WebspringIconEffectProvider } from "./WebspringIconEffect";
+import { WebspringFolderAppearanceProvider } from "./WebspringFolderAppearance";
 import { SystemPanelsLayer } from "./SystemPanelsLayer";
 import { NotificationCentrePresenter } from "./NotificationCentrePresenter";
 import { WebspringStatusLayer } from "./WebspringStatusLayer";
@@ -46,8 +45,7 @@ import { defaultWebspringLaunchZoom, defaultWebspringReturnTracks } from "./Webs
 import { WebspringLaunchZoomContext } from "./WebspringLaunchZoomContext";
 import { useWebspringEntrance } from "./useWebspringEntrance";
 import { scheduleWebspringIdlePrefetch } from "./webspringPrefetch";
-import { WebspringContentController, type WebspringContentSources } from "./webspringContent";
-import { WEBSPRING_PRESENTATION_ROLES } from "../SynCloudOS/SynCloudOS";
+import { EMPTY_WEBSPRING_FOLDER_CONFIGURATION, WEBSPRING_PRESENTATION_ROLES, getOrderedVisibleWebspringApps } from "../SynCloudOS/SynCloudOS";
 import "./WebspringHost.css";
 
 interface WebspringHostPresentationContextValue {
@@ -55,7 +53,6 @@ interface WebspringHostPresentationContextValue {
   readonly requestNotificationCentre: (notificationId?: string) => void;
 }
 
-const emptyContentSources: WebspringContentSources = Object.freeze({});
 const emptyAuthenticationSnapshot = Object.freeze({ status: "disabled" as const, methods: Object.freeze([]), profile: null, expiresAt: null, error: null });
 const emptyAuthenticationGetter = () => emptyAuthenticationSnapshot;
 const emptySubscribe = () => () => undefined;
@@ -67,17 +64,6 @@ const WebspringHostPresentationContext = createContext<WebspringHostPresentation
 
 export function useWebspringHostPresentation() {
   return useContext(WebspringHostPresentationContext);
-}
-
-function LoginModalFocusScope({ children }: PropsWithChildren) {
-  return <FocusScope scopeId="system-ui:login" kind="modal" parentResponderId="runtime" modal trapFocus>{children}</FocusScope>;
-}
-
-/** Dims the shell behind the login window, presented through AnimationFX. */
-function LoginBackdrop() {
-  const backdropRef = useRef<HTMLDivElement>(null);
-  useNSEPresentation(backdropRef, useWebspringMotion().loginBackdropDim);
-  return <div ref={backdropRef} className="syncloudos-login-backdrop" aria-hidden="true" />;
 }
 
 function equalHostSnapshot(left: RuntimeSnapshot, right: RuntimeSnapshot) {
@@ -115,13 +101,57 @@ class WebspringViewBoundary extends Component<ViewBoundaryProps, ViewBoundarySta
   }
 }
 
-function ApplicationOutletSlot({ container }: { readonly container: HTMLElement }) {
+interface OutletFocusSnapshot {
+  readonly element: HTMLElement;
+  readonly visible: boolean;
+  readonly selection: { readonly anchor: Node; readonly anchorOffset: number; readonly focus: Node; readonly focusOffset: number } | null;
+}
+
+function captureOutletFocus(container: HTMLElement): OutletFocusSnapshot | null {
+  const active = container.ownerDocument.activeElement;
+  if (!(active instanceof HTMLElement) || !container.contains(active)) return null;
+  const selection = container.ownerDocument.getSelection();
+  let visible = false;
+  try { visible = active.matches(":focus-visible"); } catch { /* Older engines retain their native focus treatment. */ }
+  return {
+    element: active, visible,
+    selection: selection?.anchorNode && selection.focusNode && container.contains(selection.anchorNode) && container.contains(selection.focusNode)
+      ? { anchor: selection.anchorNode, anchorOffset: selection.anchorOffset, focus: selection.focusNode, focusOffset: selection.focusOffset } : null,
+  };
+}
+
+function validSelectionOffset(node: Node, offset: number): boolean {
+  const characterData = node.nodeType === Node.TEXT_NODE || node.nodeType === Node.CDATA_SECTION_NODE || node.nodeType === Node.COMMENT_NODE;
+  return offset >= 0 && offset <= (characterData ? node.nodeValue?.length ?? 0 : node.childNodes.length);
+}
+
+function ApplicationOutletSlot({ container, focusHandoff }: { readonly container: HTMLElement; readonly focusHandoff: { current: OutletFocusSnapshot | null } }) {
   const slot = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const element = slot.current;
     if (!element) return;
-    element.appendChild(container);
-  }, [container]);
+    // A shell view can detach its slot before the successor adopts the same
+    // live application DOM. Capture on detach as well as before a direct move.
+    const previous = captureOutletFocus(container) ?? focusHandoff.current;
+    focusHandoff.current = null;
+    if (container.parentElement !== element) element.appendChild(container);
+    const document = container.ownerDocument;
+    const active = document.activeElement;
+    if (previous?.element.isConnected && container.contains(previous.element)
+      && !previous.element.closest("[inert], [hidden], [aria-hidden='true']") && !previous.element.matches(":disabled")
+      && (!active || active === document.body || active === document.documentElement || active === previous.element)) {
+      previous.element.focus({ preventScroll: true, ...(previous.visible ? { focusVisible: true } : {}) } as FocusOptions);
+      const selection = previous.selection;
+      if (document.activeElement === previous.element && selection?.anchor.isConnected && selection.focus.isConnected
+        && container.contains(selection.anchor) && container.contains(selection.focus)
+        && validSelectionOffset(selection.anchor, selection.anchorOffset) && validSelectionOffset(selection.focus, selection.focusOffset)) {
+        document.getSelection()?.setBaseAndExtent(selection.anchor, selection.anchorOffset, selection.focus, selection.focusOffset);
+      }
+    }
+    return () => {
+      if (container.parentElement === element) focusHandoff.current = captureOutletFocus(container);
+    };
+  }, [container, focusHandoff]);
   return <div ref={slot} className="webspring-application-outlet" />;
 }
 
@@ -130,13 +160,11 @@ export function WebspringHost({
   shellResources,
   authentication = "disabled",
   startupPhase,
-  contentSources = emptyContentSources,
 }: {
   readonly shell: WebspringDefinition;
   readonly shellResources?: SynCloudOSShellResources;
   readonly authentication?: AuthenticationInput;
   readonly startupPhase?: SystemStartupPhase;
-  readonly contentSources?: WebspringContentSources;
 }) {
   const runtime = useKernelSynCloudOS();
   const snapshot = useRuntimeSelector((state) => state, equalHostSnapshot);
@@ -145,31 +173,21 @@ export function WebspringHost({
   const authenticationService = typeof authentication === "object" ? authentication.service : null;
   useSyncExternalStore(authenticationService?.subscribe ?? emptySubscribe, authenticationService?.getSnapshot ?? emptyAuthenticationGetter, authenticationService?.getSnapshot ?? emptyAuthenticationGetter);
   const [controllerRetry, setControllerRetry] = useState(0);
-  const contentController = useMemo(() => new WebspringContentController(shell.content, contentSources), [contentSources, shell]);
-  const contentSections = useSyncExternalStore(contentController.subscribe, contentController.getSnapshot, contentController.getSnapshot);
-  useEffect(() => {
-    contentController.start();
-    const browserWindow = runtime.environment.browser.getWindow();
-    const refresh = () => { void contentController.refresh(); };
-    browserWindow?.addEventListener("focus", refresh);
-    return () => {
-      browserWindow?.removeEventListener("focus", refresh);
-      contentController.dispose();
-    };
-  }, [contentController, runtime]);
   const controllerOutcome = useMemo(() => {
     try {
-      return { controller: new WebspringController(runtime, shell, shellResources, authentication, contentController), error: null };
+      return { controller: new WebspringController(runtime, shell, shellResources, authentication), error: null };
     } catch (error) {
       return { controller: null, error: error instanceof Error ? error : new Error("Webspring host configuration failed.") };
     }
-  }, [authentication, contentController, controllerRetry, runtime, shell, shellResources]);
+  }, [authentication, controllerRetry, runtime, shell, shellResources]);
   const controller = controllerOutcome.controller;
   const [viewOverride, setViewOverride] = useState<{ presentation: Presentation; id: string } | null>(null);
   const viewId = viewOverride?.presentation === presentation ? viewOverride.id : controller?.viewId(presentation) ?? "configuration-error";
   const returnTracks = shell.returnTracks[viewId] ?? defaultWebspringReturnTracks;
   const { completeTrack } = useWebspringReturnCompletion(snapshot.webspring.returnTransitionId, returnTracks);
   const viewActions = useMemo(() => controller ? Object.freeze({ ...controller.actions, completeReturnTrack: completeTrack }) : null, [completeTrack, controller]);
+  // Shell views' modal surfaces (an open folder) trap focus in the runtime's focus graph.
+  const viewFocusPort = useRuntimeNSEFocusPort("webspring");
   const View = (shell.components[viewId] ?? function MissingWebspringView(): never {
     throw new TypeError(`Webspring view ${viewId} is not registered.`);
   }) as WebspringViewComponent;
@@ -182,7 +200,7 @@ export function WebspringHost({
   useLayoutEffect(() => {
     syncApplicationWindowContentRenderers(registry, runtime, snapshot.appInfo, applicationRenderers);
   }, [applicationRenderers, registry, runtime, snapshot.appInfo]);
-  useNSEDeferredDisposal(registry, nseDeferredDisposalMicrotaskScheduler);
+  useNSEDeferredDisposal(registry);
   const [outletContainer] = useState(() => {
     const document = runtime.environment.browser.getDocument();
     if (!document) throw new TypeError("WebspringHost requires a browser document.");
@@ -196,7 +214,7 @@ export function WebspringHost({
   const phase = startupPhase ?? "complete";
   const authenticationPolicy = typeof authentication === "object" ? authentication.policy : authentication;
   const gateRequested = authenticationPolicy !== "disabled" && snapshot.statechart.currentState === "locked.loginWindow";
-  const loginContinuationKey = `webspring:${shell.manifest.id}:${shell.manifest.webspringShell.homeRoute}:login-continuation`;
+  const loginContinuationKey = `webspring:${normalizeBundleIdentifier(shell.manifest.bundleIdentifier)}:${shell.manifest.webspringShell.homeRoute}:login-continuation`;
   const [resumeLogin] = useState(() => {
     try { return authenticationPolicy !== "disabled" && runtime.environment.sessionStorage?.getItem(loginContinuationKey) === "pending"; }
     catch { return false; }
@@ -214,14 +232,15 @@ export function WebspringHost({
     setLoginContinuation(false);
     onLoginExited();
   }, [gateRequested, onLoginExited, setLoginContinuation]);
-  const model = controller?.model(runtime.store.getSnapshot(), presentation, contentSections, entrancePhase) ?? null;
+  const model = controller?.model(runtime.store.getSnapshot(), presentation, entrancePhase) ?? null;
   const [notificationCentreRequest, setNotificationCentreRequest] = useState<{ key: number; notificationId?: string | null } | null>(null);
   const [quickSwitchOpen, setQuickSwitchOpen] = useState(false);
   const applicationMenuToggleRef = useRef<{ appId: string; toggle: () => void } | null>(null);
-  const layoutOrder = snapshot.webspring.layout.preference.order;
+  const layoutPreference = snapshot.webspring.layout.preference;
+  const folderConfiguration = snapshot.webspring.layout.folderConfiguration;
   const orderedApps = useMemo(
-    () => createWebspringLayout(Object.values(snapshot.appInfo), layoutOrder).orderedApps,
-    [snapshot.appInfo, layoutOrder],
+    () => getOrderedVisibleWebspringApps(Object.values(snapshot.appInfo), layoutPreference, folderConfiguration),
+    [snapshot.appInfo, layoutPreference, folderConfiguration],
   );
   const canUseQuickSwitch = !snapshot.webspring.layout.isEditing &&
     phase === "complete" && !gateRequested &&
@@ -236,7 +255,7 @@ export function WebspringHost({
     feedback?.trigger("selection");
   }, [canUseQuickSwitch, feedback]);
   const registerApplicationMenuToggle = useCallback((appId: string, toggle: () => void, ready: boolean) => {
-    if (ready && appId === runtime.store.getSnapshot().application.activeAppId) applicationMenuToggleRef.current = { appId, toggle };
+    if (ready && normalizeBundleIdentifier(appId) === normalizeBundleIdentifier(runtime.store.getSnapshot().application.activeAppId)) applicationMenuToggleRef.current = { appId, toggle };
     return () => {
       if (applicationMenuToggleRef.current?.toggle === toggle) applicationMenuToggleRef.current = null;
     };
@@ -244,11 +263,14 @@ export function WebspringHost({
   const requestApplicationMenuToggle = useCallback(() => {
     const entry = applicationMenuToggleRef.current;
     const current = runtime.store.getSnapshot();
-    if (!entry || entry.appId !== current.application.activeAppId || current.application.multiSwitch.status === "switching") return;
+    if (!entry || normalizeBundleIdentifier(entry.appId) !== normalizeBundleIdentifier(current.application.activeAppId) || current.application.multiSwitch.status === "switching") return;
     entry.toggle();
   }, [runtime]);
   useWebspringResponder({ onNotificationCentreRequest: requestNotificationCentre, onApplicationMenuToggle: requestApplicationMenuToggle });
-  useEffect(() => { runtime.webspring.hydrateLayoutPreference(); }, [runtime]);
+  useEffect(() => {
+    runtime.webspring.configureFolders(shell.manifest.webspringShell.folders ?? EMPTY_WEBSPRING_FOLDER_CONFIGURATION);
+    runtime.webspring.hydrateLayoutPreference();
+  }, [runtime, shell]);
   useEffect(() => {
     if (startupPhase === "complete" && snapshot.loginServices.isAuthorised) scheduleWebspringIdlePrefetch(runtime);
   }, [runtime, snapshot.loginServices.isAuthorised, startupPhase]);
@@ -256,7 +278,8 @@ export function WebspringHost({
   useEffect(() => {
     if (quickSwitchOpen && !canUseQuickSwitch) setQuickSwitchOpen(false);
   }, [canUseQuickSwitch, quickSwitchOpen]);
-  const applicationOutlet = <ApplicationOutletSlot container={outletContainer} />;
+  const outletFocusHandoff = useRef<OutletFocusSnapshot | null>(null);
+  const applicationOutlet = <ApplicationOutletSlot container={outletContainer} focusHandoff={outletFocusHandoff} />;
   const launchZoom = shell.launchZooms?.[viewId] ?? defaultWebspringLaunchZoom;
   const applicationStage = <WebspringLaunchZoomContext.Provider value={launchZoom}><ApplicationStageLayer
     windowContentRegistry={registry}
@@ -288,6 +311,7 @@ export function WebspringHost({
   if (model?.branding) lastBranding.current = model.branding;
 
   return <HostSiteBrandingProvider value={model?.branding ?? lastBranding.current}><MaterialProvider><WebspringIconEffectProvider component={shell.iconEffect}>
+    <WebspringFolderAppearanceProvider value={shell.folderAppearance}>
     <WebspringHostPresentationContext.Provider value={presentationContext}>
     <div className="webspring-view-host">
     {/* Keep entrance-owned inertness separate from the modal focus scope's sibling restoration. */}
@@ -297,7 +321,9 @@ export function WebspringHost({
       fallbackViewId={fallbackViewId}
       onFallback={() => { if (fallbackViewId) setViewOverride({ presentation, id: fallbackViewId }); }}
     >
-      <View model={model} actions={viewActions} applicationOutlet={applicationOutlet} />
+      <NSEFocusPortProvider port={viewFocusPort}>
+        <View model={model} actions={viewActions} applicationOutlet={applicationOutlet} folderPresentation={shell.folderPresentation} />
+      </NSEFocusPortProvider>
     </WebspringViewBoundary> : <section role="alert" className="webspring-view-recovery">
       <h1>Webspring host unavailable</h1>
       <p>{controllerOutcome.error?.message}</p>
@@ -326,16 +352,11 @@ export function WebspringHost({
       openRequest={notificationCentreRequest}
       presentationReady={phase === "complete" && snapshot.loginServices.isAuthorised}
     />
-    <LoginGatePresenter
+    <HostLoginGate
       runtime={runtime}
       snapshot={snapshot}
-      LoginWindowComponent={typeof authentication === "object" && authentication.loginComponent ? authentication.loginComponent : LoginWindow}
-      ModalFocusScopeComponent={LoginModalFocusScope}
-      BackdropComponent={LoginBackdrop}
-      PresenceComponent={NSEPresence}
       title={model ? `Sign in to ${model.branding.name}` : undefined}
       branding={model?.branding}
-      cancelLabel={runtime.locale.t("authentication.cancel", "Cancel")}
       authentication={authentication}
       ready={loginReady}
       restoring={restoringLogin}
@@ -344,5 +365,6 @@ export function WebspringHost({
     />
     <WebspringStatusLayer errors={snapshot.errors} />
     <SystemStartupLayer phase={phase} />
+    </WebspringFolderAppearanceProvider>
   </WebspringIconEffectProvider></MaterialProvider></HostSiteBrandingProvider>;
 }

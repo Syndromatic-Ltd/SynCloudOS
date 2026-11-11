@@ -1,0 +1,4 @@
+before/**/*.png
+after/**/*.png
+comparison/
+probe/

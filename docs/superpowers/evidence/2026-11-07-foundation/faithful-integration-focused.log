@@ -1,0 +1,196 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/foundation-faithful-values.test.ts tests/runtime/foundation-faithful-date.test.ts tests/runtime/foundation-faithful-decimal.test.ts tests/runtime/foundation-undo.test.ts tests/runtime/undo-manager.test.ts tests/runtime/app-undo-client.test.ts tests/runtime/application-undo-ownership.test.ts tests/nse/scroll/nse-appkit-view-access.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/app-undo-client.test.ts (1 test | 1 failed) 7ms
+     × keeps an application undo facade partitioned to its own mount 6ms
+ ❯ tests/runtime/application-undo-ownership.test.ts (9 tests | 9 failed) 11ms
+     × revokes only one application undo registration segment and retires its entries 7ms
+     × keeps the cursor and sibling action intact when revoking from a mixed group 1ms
+     × gives a document observer a read-only undo status projection 0ms
+     × rejects array getters, custom methods, proxies, holes and oversized lengths without host dispatch 0ms
+     × revokes a transfer mount when its responder is removed and never revives it by ID 0ms
+     × rejects an uncompensable empty Save As before writing 0ms
+     × stales new-document admissions when a type or adapter is replaced during non-cooperative read 0ms
+     × compensates exactly once when the Save As adapter generation is replaced during write 0ms
+     × restores the old document binding and removes a committed Save As when watch adoption throws 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/app-undo-client.test.ts > mounted application undo client > keeps an application undo facade partitioned to its own mount
+SynWareManifestValidationError: SynWare manifest validation failed: /permissions must NOT have additional properties
+ ❯ captureDefinition src/SynCloudOS/AppSDK/createSynWare.ts:126:29
+    124|   if (typeof root !== "function") throw new TypeError("A SynWare defin…
+    125|   const validation = captureSynWareManifest(dataProperty(value, "manif…
+    126|   if (!validation.ok) throw new SynWareManifestValidationError(validat…
+       |                             ^
+    127|   const declaredRoutes = dataProperty(value, "routes");
+    128|   if (declaredRoutes !== undefined && !isSynWareRouteGraph(declaredRou…
+ ❯ captureSynWareDefinition src/SynCloudOS/AppSDK/createSynWare.ts:173:10
+ ❯ createSynWare src/SynCloudOS/AppSDK/createSynWare.ts:184:10
+ ❯ createTestBundle tests/runtime/helpers.ts:168:29
+ ❯ fixture tests/runtime/app-undo-client.test.ts:35:56
+ ❯ tests/runtime/app-undo-client.test.ts:49:63
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+ FAIL  tests/runtime/application-undo-ownership.test.ts > transactional generations and application undo ownership > revokes only one application undo registration segment and retires its entries
+SynWareManifestValidationError: SynWare manifest validation failed: /permissions must NOT have additional properties
+ ❯ captureDefinition src/SynCloudOS/AppSDK/createSynWare.ts:126:29
+    124|   if (typeof root !== "function") throw new TypeError("A SynWare defin…
+    125|   const validation = captureSynWareManifest(dataProperty(value, "manif…
+    126|   if (!validation.ok) throw new SynWareManifestValidationError(validat…
+       |                             ^
+    127|   const declaredRoutes = dataProperty(value, "routes");
+    128|   if (declaredRoutes !== undefined && !isSynWareRouteGraph(declaredRou…
+ ❯ captureSynWareDefinition src/SynCloudOS/AppSDK/createSynWare.ts:173:10
+ ❯ createSynWare src/SynCloudOS/AppSDK/createSynWare.ts:184:10
+ ❯ createTestBundle tests/runtime/helpers.ts:168:29
+ ❯ fixture tests/runtime/application-undo-ownership.test.ts:36:56
+ ❯ tests/runtime/application-undo-ownership.test.ts:75:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯
+
+ FAIL  tests/runtime/application-undo-ownership.test.ts > transactional generations and application undo ownership > keeps the cursor and sibling action intact when revoking from a mixed group
+SynWareManifestValidationError: SynWare manifest validation failed: /permissions must NOT have additional properties
+ ❯ captureDefinition src/SynCloudOS/AppSDK/createSynWare.ts:126:29
+    124|   if (typeof root !== "function") throw new TypeError("A SynWare defin…
+    125|   const validation = captureSynWareManifest(dataProperty(value, "manif…
+    126|   if (!validation.ok) throw new SynWareManifestValidationError(validat…
+       |                             ^
+    127|   const declaredRoutes = dataProperty(value, "routes");
+    128|   if (declaredRoutes !== undefined && !isSynWareRouteGraph(declaredRou…
+ ❯ captureSynWareDefinition src/SynCloudOS/AppSDK/createSynWare.ts:173:10
+ ❯ createSynWare src/SynCloudOS/AppSDK/createSynWare.ts:184:10
+ ❯ createTestBundle tests/runtime/helpers.ts:168:29
+ ❯ fixture tests/runtime/application-undo-ownership.test.ts:36:56
+ ❯ tests/runtime/application-undo-ownership.test.ts:92:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯
+
+ FAIL  tests/runtime/application-undo-ownership.test.ts > transactional generations and application undo ownership > gives a document observer a read-only undo status projection
+SynWareManifestValidationError: SynWare manifest validation failed: /permissions must NOT have additional properties
+ ❯ captureDefinition src/SynCloudOS/AppSDK/createSynWare.ts:126:29
+    124|   if (typeof root !== "function") throw new TypeError("A SynWare defin…
+    125|   const validation = captureSynWareManifest(dataProperty(value, "manif…
+    126|   if (!validation.ok) throw new SynWareManifestValidationError(validat…
+       |                             ^
+    127|   const declaredRoutes = dataProperty(value, "routes");
+    128|   if (declaredRoutes !== undefined && !isSynWareRouteGraph(declaredRou…
+ ❯ captureSynWareDefinition src/SynCloudOS/AppSDK/createSynWare.ts:173:10
+ ❯ createSynWare src/SynCloudOS/AppSDK/createSynWare.ts:184:10
+ ❯ createTestBundle tests/runtime/helpers.ts:168:29
+ ❯ fixture tests/runtime/application-undo-ownership.test.ts:36:56
+ ❯ tests/runtime/application-undo-ownership.test.ts:115:43
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯
+
+ FAIL  tests/runtime/application-undo-ownership.test.ts > transactional generations and application undo ownership > rejects array getters, custom methods, proxies, holes and oversized lengths without host dispatch
+SynWareManifestValidationError: SynWare manifest validation failed: /permissions must NOT have additional properties
+ ❯ captureDefinition src/SynCloudOS/AppSDK/createSynWare.ts:126:29
+    124|   if (typeof root !== "function") throw new TypeError("A SynWare defin…
+    125|   const validation = captureSynWareManifest(dataProperty(value, "manif…
+    126|   if (!validation.ok) throw new SynWareManifestValidationError(validat…
+       |                             ^
+    127|   const declaredRoutes = dataProperty(value, "routes");
+    128|   if (declaredRoutes !== undefined && !isSynWareRouteGraph(declaredRou…
+ ❯ captureSynWareDefinition src/SynCloudOS/AppSDK/createSynWare.ts:173:10
+ ❯ createSynWare src/SynCloudOS/AppSDK/createSynWare.ts:184:10
+ ❯ createTestBundle tests/runtime/helpers.ts:168:29
+ ❯ fixture tests/runtime/application-undo-ownership.test.ts:36:56
+ ❯ tests/runtime/application-undo-ownership.test.ts:133:43
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/10]⎯
+
+ FAIL  tests/runtime/application-undo-ownership.test.ts > transactional generations and application undo ownership > revokes a transfer mount when its responder is removed and never revives it by ID
+SynWareManifestValidationError: SynWare manifest validation failed: /permissions must NOT have additional properties
+ ❯ captureDefinition src/SynCloudOS/AppSDK/createSynWare.ts:126:29
+    124|   if (typeof root !== "function") throw new TypeError("A SynWare defin…
+    125|   const validation = captureSynWareManifest(dataProperty(value, "manif…
+    126|   if (!validation.ok) throw new SynWareManifestValidationError(validat…
+       |                             ^
+    127|   const declaredRoutes = dataProperty(value, "routes");
+    128|   if (declaredRoutes !== undefined && !isSynWareRouteGraph(declaredRou…
+ ❯ captureSynWareDefinition src/SynCloudOS/AppSDK/createSynWare.ts:173:10
+ ❯ createSynWare src/SynCloudOS/AppSDK/createSynWare.ts:184:10
+ ❯ createTestBundle tests/runtime/helpers.ts:168:29
+ ❯ fixture tests/runtime/application-undo-ownership.test.ts:36:56
+ ❯ tests/runtime/application-undo-ownership.test.ts:163:43
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/10]⎯
+
+ FAIL  tests/runtime/application-undo-ownership.test.ts > transactional generations and application undo ownership > rejects an uncompensable empty Save As before writing
+SynWareManifestValidationError: SynWare manifest validation failed: /permissions must NOT have additional properties
+ ❯ captureDefinition src/SynCloudOS/AppSDK/createSynWare.ts:126:29
+    124|   if (typeof root !== "function") throw new TypeError("A SynWare defin…
+    125|   const validation = captureSynWareManifest(dataProperty(value, "manif…
+    126|   if (!validation.ok) throw new SynWareManifestValidationError(validat…
+       |                             ^
+    127|   const declaredRoutes = dataProperty(value, "routes");
+    128|   if (declaredRoutes !== undefined && !isSynWareRouteGraph(declaredRou…
+ ❯ captureSynWareDefinition src/SynCloudOS/AppSDK/createSynWare.ts:173:10
+ ❯ createSynWare src/SynCloudOS/AppSDK/createSynWare.ts:184:10
+ ❯ createTestBundle tests/runtime/helpers.ts:168:29
+ ❯ fixture tests/runtime/application-undo-ownership.test.ts:36:56
+ ❯ tests/runtime/application-undo-ownership.test.ts:181:43
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/10]⎯
+
+ FAIL  tests/runtime/application-undo-ownership.test.ts > transactional generations and application undo ownership > stales new-document admissions when a type or adapter is replaced during non-cooperative read
+SynWareManifestValidationError: SynWare manifest validation failed: /permissions must NOT have additional properties
+ ❯ captureDefinition src/SynCloudOS/AppSDK/createSynWare.ts:126:29
+    124|   if (typeof root !== "function") throw new TypeError("A SynWare defin…
+    125|   const validation = captureSynWareManifest(dataProperty(value, "manif…
+    126|   if (!validation.ok) throw new SynWareManifestValidationError(validat…
+       |                             ^
+    127|   const declaredRoutes = dataProperty(value, "routes");
+    128|   if (declaredRoutes !== undefined && !isSynWareRouteGraph(declaredRou…
+ ❯ captureSynWareDefinition src/SynCloudOS/AppSDK/createSynWare.ts:173:10
+ ❯ createSynWare src/SynCloudOS/AppSDK/createSynWare.ts:184:10
+ ❯ createTestBundle tests/runtime/helpers.ts:168:29
+ ❯ fixture tests/runtime/application-undo-ownership.test.ts:36:56
+ ❯ tests/runtime/application-undo-ownership.test.ts:203:43
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/10]⎯
+
+ FAIL  tests/runtime/application-undo-ownership.test.ts > transactional generations and application undo ownership > compensates exactly once when the Save As adapter generation is replaced during write
+SynWareManifestValidationError: SynWare manifest validation failed: /permissions must NOT have additional properties
+ ❯ captureDefinition src/SynCloudOS/AppSDK/createSynWare.ts:126:29
+    124|   if (typeof root !== "function") throw new TypeError("A SynWare defin…
+    125|   const validation = captureSynWareManifest(dataProperty(value, "manif…
+    126|   if (!validation.ok) throw new SynWareManifestValidationError(validat…
+       |                             ^
+    127|   const declaredRoutes = dataProperty(value, "routes");
+    128|   if (declaredRoutes !== undefined && !isSynWareRouteGraph(declaredRou…
+ ❯ captureSynWareDefinition src/SynCloudOS/AppSDK/createSynWare.ts:173:10
+ ❯ createSynWare src/SynCloudOS/AppSDK/createSynWare.ts:184:10
+ ❯ createTestBundle tests/runtime/helpers.ts:168:29
+ ❯ fixture tests/runtime/application-undo-ownership.test.ts:36:56
+ ❯ tests/runtime/application-undo-ownership.test.ts:235:43
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/10]⎯
+
+ FAIL  tests/runtime/application-undo-ownership.test.ts > transactional generations and application undo ownership > restores the old document binding and removes a committed Save As when watch adoption throws
+SynWareManifestValidationError: SynWare manifest validation failed: /permissions must NOT have additional properties
+ ❯ captureDefinition src/SynCloudOS/AppSDK/createSynWare.ts:126:29
+    124|   if (typeof root !== "function") throw new TypeError("A SynWare defin…
+    125|   const validation = captureSynWareManifest(dataProperty(value, "manif…
+    126|   if (!validation.ok) throw new SynWareManifestValidationError(validat…
+       |                             ^
+    127|   const declaredRoutes = dataProperty(value, "routes");
+    128|   if (declaredRoutes !== undefined && !isSynWareRouteGraph(declaredRou…
+ ❯ captureSynWareDefinition src/SynCloudOS/AppSDK/createSynWare.ts:173:10
+ ❯ createSynWare src/SynCloudOS/AppSDK/createSynWare.ts:184:10
+ ❯ createTestBundle tests/runtime/helpers.ts:168:29
+ ❯ fixture tests/runtime/application-undo-ownership.test.ts:36:56
+ ❯ tests/runtime/application-undo-ownership.test.ts:265:43
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/10]⎯
+
+
+ Test Files  2 failed | 6 passed (8)
+      Tests  10 failed | 48 passed (58)
+   Start at  19:22:24
+   Duration  7.75s (transform 7.77s, setup 85ms, import 11.31s, tests 152ms, environment 2.76s)
+

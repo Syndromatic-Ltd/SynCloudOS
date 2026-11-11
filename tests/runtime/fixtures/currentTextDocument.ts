@@ -57,8 +57,8 @@ export async function currentTextDocumentFixture(
   }));
   runtime.store.mutate(draft => { draft.loginServices.accessClass = "team"; });
   runtime.documents.registerCloseReviewer({ review: async () => "discard" });
-  const appId = "current-text-tests";
-  registerTestSynWare(runtime, { schemaVersion: 1, id: appId, version: "1.0.0", title: "Current text tests",
+  const appId = "com.example.current-text-tests";
+  registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: appId, version: "1.0.0", displayName: "Current text tests",
     routes: [{ path: "/current-text-tests", primary: true }], documentTypes: [{ id: type.id, displayName: type.displayName }],
   });
   const mounted = mountTestSynWareRuntime(runtime, appId);
@@ -71,7 +71,7 @@ export async function currentTextDocumentFixture(
   const add = async (value: string | NSEAttributedContent) => {
     const index = ++next;
     const document = await documents.newDocument<CurrentTextTestModel>({ typeId: type.id,
-      location: { kind: "memory", namespace: "current-text-tests", key: String(index) },
+      location: { kind: "memory", namespace: "com.example.current-text-tests", key: String(index) },
       initialModel: { title: `Text ${index}`, content: typeof value === "string" ? plainNSETextContent(value) : value },
     });
     const owner = createSynWareNSETextOwner<CurrentTextTestModel>({ documents, documentId: document.id,
@@ -80,7 +80,7 @@ export async function currentTextDocumentFixture(
     });
     owners.push(owner);
     const history = documents.getUndoManager(document.id);
-    const session = new TextEditingSession({ id: `text-view-${index}`, documentId: document.id, owner, history });
+    const session = new TextEditingSession({ id: `text-view-${index}`, documentId: document.id, textOwner: owner, history });
     sessions.push(session);
     const commands = new NSETextCommands({ session, clipboard: options.clipboard,
       signal: mounted.runtime.signal, historyPresentation: () => history,

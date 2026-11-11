@@ -18,6 +18,7 @@
  */
 
 import type { ComponentType } from "react";
+import type { NSEApplicationClass } from "../../NSE/applicationHostInterop";
 import type { SynWareManifestV1, SynWareRuntimeManifestContext } from "./manifest/manifestTypes";
 import type { SynWareRouteDefinition, SynWareRouteGraph } from "../Routing/appSdkRoutePort";
 import type { AppServiceClient } from "./appClientTypes";
@@ -118,7 +119,7 @@ export interface SynWareBundleLoadContext extends SynWareRuntimeManifestContext 
 
 /** Canonical JavaScript module shape produced by a SynWare application. */
 export interface SynCloudOSAppModule {
-  readonly default: Readonly<SynWareDefinition>;
+  readonly default: Readonly<SynWareDefinition> | ComponentType | NSEApplicationClass;
 }
 
 export interface SynWareDefinition<

@@ -48,7 +48,7 @@ describe("runtime cache lifecycle ownership", () => {
 
   it("prunes expired entries when an app suspends and disposes the registry", async () => {
     const runtime = createTestRuntime({
-      initialBundles: [createTestBundle({ id: "cache-app", route: "/cache-app" })],
+      initialBundles: [createTestBundle({ bundleIdentifier: "com.example.cache-app", route: "/cache-app" })],
     });
     await runtime.boot({ initialPathname: "/" });
     runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
@@ -60,7 +60,7 @@ describe("runtime cache lifecycle ownership", () => {
     });
     cache.set("value", "entry");
     await runtime.routes.openRoute("/cache-app", { source: "test", syncRoute: false }).result;
-    await runtime.lifecycle.suspend("cache-app", { reason: "memory-pressure" }).result;
+    await runtime.lifecycle.suspend("com.example.cache-app", { reason: "memory-pressure" }).result;
     expect(cache.stats().entries).toBe(0);
     await runtime.dispose("cache-test");
     expect(runtime.caches.get("app-data")).toBeNull();

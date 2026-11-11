@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/atmo-structure.test.ts tests/runtime/atmo-vector-coverage.test.ts tests/runtime/nse-window-roles.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  3 passed (3)
+      Tests  17 passed (17)
+   Start at  22:39:30
+   Duration  8.88s (transform 5.92s, setup 46ms, import 7.82s, tests 598ms, environment 916ms)

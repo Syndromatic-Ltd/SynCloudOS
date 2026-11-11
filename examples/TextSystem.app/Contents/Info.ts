@@ -20,9 +20,9 @@
 
 export default {
   schemaVersion: 1,
-  id: "com.syncloudos.examples.text-system",
+  bundleIdentifier: "com.syncloudos.examples.text-system",
   version: "0.1.0",
-  title: "Text System",
+  displayName: "Text System",
   routes: [{ path: "/examples/text-system", primary: true }],
   presentations: ["desktop", "tablet", "mobile"],
   // This private local demo deliberately admits guest launch through the ordinary app policy.

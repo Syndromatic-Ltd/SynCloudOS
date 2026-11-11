@@ -1,0 +1,46 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-theme-contract-drift.test.tsx tests/runtime/nse-theme-hooks.test.tsx tests/runtime/nse-semantic-colours.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+ ❯ tests/runtime/nse-theme-contract-drift.test.tsx (681 tests | 4 failed) 3278ms
+   × renders supplemental configured-toolbar-50-false 5ms
+   × renders supplemental configured-toolbar-50-true 2ms
+   × renders supplemental configured-toolbar-500-false 2ms
+   × renders supplemental configured-toolbar-500-true 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/nse-theme-contract-drift.test.tsx > renders supplemental configured-toolbar-50-false
+ FAIL  tests/runtime/nse-theme-contract-drift.test.tsx > renders supplemental configured-toolbar-50-true
+ FAIL  tests/runtime/nse-theme-contract-drift.test.tsx > renders supplemental configured-toolbar-500-false
+ FAIL  tests/runtime/nse-theme-contract-drift.test.tsx > renders supplemental configured-toolbar-500-true
+TypeError: Cannot read properties of undefined (reading 'trim')
+ ❯ new NSEToolbarController src/NSE/Toolbars/NSEToolbarController.ts:231:80
+    229|       if (catalogue.has(item.id)) throw new TypeError(`NSE toolbar ite…
+    230|       if (item.kind === "command") {
+    231|         if (!item.commandId.trim() || !item.label.trim() || !item.pale…
+       |                                                                                ^
+    232|           throw new TypeError(`NSE command toolbar item "${item.id}" r…
+    233|         }
+ ❯ tests/e2e/fixtures/theme-additional/supplemental.tsx:28:12
+ ❯ mountStateImpl node_modules/react-dom/cjs/react-dom-client.development.js:8268:24
+ ❯ mountState node_modules/react-dom/cjs/react-dom-client.development.js:8289:22
+ ❯ Object.useState node_modules/react-dom/cjs/react-dom-client.development.js:26243:18
+ ❯ process.env.NODE_ENV.exports.useState node_modules/react/cjs/react.development.js:1263:34
+ ❯ Toolbar tests/e2e/fixtures/theme-additional/supplemental.tsx:24:24
+ ❯ Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25904:20
+ ❯ renderWithHooks node_modules/react-dom/cjs/react-dom-client.development.js:7662:22
+ ❯ updateFunctionComponent node_modules/react-dom/cjs/react-dom-client.development.js:10166:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  4 failed | 683 passed (687)
+   Start at  22:12:41
+   Duration  11.58s (transform 5.51s, setup 44ms, import 7.31s, tests 3.30s, environment 817ms)

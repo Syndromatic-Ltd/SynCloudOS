@@ -1,0 +1,32 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/integration/nse-open-panel.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/integration/nse-open-panel.test.tsx (9 tests | 1 failed) 577ms
+     × composes Atmo push, tool, segmented and path controls without panel artwork stand-ins 102ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/nse-open-panel.test.tsx > drawn Open panel > composes Atmo push, tool, segmented and path controls without panel artwork stand-ins
+AssertionError: expected 'rounded' to be 'texturedRounded' // Object.is equality
+
+Expected: "texturedRounded"
+Received: "rounded"
+
+ ❯ tests/integration/nse-open-panel.test.tsx:32:102
+     30|     expect(screen.getByRole("button", { name: "Cancel" }).getAttribute…
+     31|     expect(screen.getByRole("button", { name: "Open" }).getAttribute("…
+     32|     expect(screen.getByRole("button", { name: "System Chooser…" }).get…
+       |                                                                                                      ^
+     33|     await choose("Projects"); await screen.findByText("sunset.png");
+     34|     expect(container.querySelector('[data-segment-style="texturedRound…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 8 passed (9)
+   Start at  09:34:20
+   Duration  3.26s (transform 1.15s, setup 27ms, import 1.56s, tests 577ms, environment 901ms)
+

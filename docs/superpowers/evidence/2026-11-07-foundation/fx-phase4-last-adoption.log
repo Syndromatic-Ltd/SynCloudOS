@@ -1,0 +1,28 @@
+npm error code ENOTEMPTY
+npm error syscall rmdir
+npm error path C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\site\node_modules\@syndromatic\syncloudos\types
+npm error errno -4051
+npm error ENOTEMPTY: directory not empty, rmdir 'C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\site\node_modules\@syndromatic\syncloudos\types'
+npm error A complete log of this run can be found in: C:\Users\Kavish Krishnakumar\AppData\Local\npm-cache\_logs\2026-11-07T22_34_59_547Z-debug-0.log
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: npm install --ignore-scripts --no-audit --no-fund failed
+
+4294963245 !== 0
+
+    at run (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/scripts/use-framework.mjs:19:10)
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site/scripts/use-framework.mjs:58:1
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 4294963245,
+  expected: 0,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.22.1

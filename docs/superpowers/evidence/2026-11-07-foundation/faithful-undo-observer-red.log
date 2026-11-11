@@ -1,0 +1,34 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/undo-manager.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/undo-manager.test.ts (16 tests | 1 failed) 15ms
+   × publishes the new frontier before replay-completion observers run 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/undo-manager.test.ts > publishes the new frontier before replay-completion observers run
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/runtime/undo-manager.test.ts:416:25
+    414|   manager.subscribe(() => { if (!manager.isExecuting) states.push(mana…
+    415|   await manager.undo();
+    416|   expect(states.at(-1)).toBe(true);
+       |                         ^
+    417| });
+    418|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 passed (16)
+   Start at  19:17:04
+   Duration  264ms (transform 73ms, setup 31ms, import 66ms, tests 15ms, environment 0ms)

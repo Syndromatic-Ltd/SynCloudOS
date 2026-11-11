@@ -1,0 +1,19 @@
+[
+  {
+    "name": "phone-dark",
+    "panel": {
+      "x": 0,
+      "y": 56,
+      "width": 390,
+      "height": 788,
+      "top": 56,
+      "right": 390,
+      "bottom": 844,
+      "left": 0
+    },
+    "compact": true,
+    "mode": "dark",
+    "focusRestored": true,
+    "errors": []
+  }
+]

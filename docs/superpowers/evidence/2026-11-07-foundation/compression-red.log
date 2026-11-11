@@ -1,0 +1,38 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/foundation-data.test.ts tests/runtime/compression-fx.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/compression-fx.test.ts (0 test)
+ ❯ tests/runtime/foundation-data.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/compression-fx.test.ts [ tests/runtime/compression-fx.test.ts ]
+Error: Cannot find module '../../src/Foundation/NSEData' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/compression-fx.test.ts
+ ❯ tests/runtime/compression-fx.test.ts:2:1
+      1| import { afterEach, describe, expect, it, vi } from "vitest";
+      2| import { NSEData } from "../../src/Foundation/NSEData";
+       | ^
+      3| import { CPFXAlgorithm, CPFXCapabilities, CPFXCompress, CPFXDecompress…
+      4|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/runtime/foundation-data.test.ts [ tests/runtime/foundation-data.test.ts ]
+Error: Cannot find module '../../src/Foundation/NSEData' imported from C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/foundation-data.test.ts
+ ❯ tests/runtime/foundation-data.test.ts:2:1
+      1| import { describe, expect, it } from "vitest";
+      2| import { NSEData, NSEDataCompressionAlgorithm } from "../../src/Founda…
+       | ^
+      3|
+      4| describe("NSEData", () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  no tests
+   Start at  08:18:45
+   Duration  500ms (transform 94ms, setup 92ms, import 0ms, tests 0ms, environment 0ms)
+

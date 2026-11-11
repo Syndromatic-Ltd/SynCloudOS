@@ -25,10 +25,11 @@ import type { MFXMotionClient } from "../../FX/MotionFX/public";
 import type { LFXLocationClient } from "../../FX/LocationFX/public";
 import type { MIFXClient } from "../../FX/MIDIFX/public";
 import type { MEFXMediaClient } from "../../FX/MediaFX/MEFXMediaClient";
-import type { VFXVideoClient } from "../../FX/VideoFX/public";
+import type { AppVideoClient } from "./appClientTypes";
 import type { LUFXIndexClient } from "../../FX/LuminaFX/public";
 import type { SynWareRuntime } from "./appRuntimeTypes";
 import type {
+  AppAlertClient,
   AppAnimationClient,
   AppConnectivityClient,
   AppErrorClient,
@@ -36,6 +37,7 @@ import type {
   AppExternalActionClient,
   AppIdentityClient,
   AppFilePanelClient, AppImageClient,
+  AppLauncherClient,
   AppMediaQueryClient,
   AppNotificationClient,
   AppPersistenceClient,
@@ -58,8 +60,12 @@ export interface MountedAppEnvironmentClients {
   readonly identity: AppIdentityClient;
   readonly notifications: AppNotificationClient;
   readonly errors: AppErrorClient;
+  readonly alerts: AppAlertClient;
+  readonly launcher: AppLauncherClient;
   readonly externalActions: AppExternalActionClient;
   readonly share: AppShareClient;
+  readonly storageDiagnostics: import("./storageDiagnosticsTypes").AppStorageDiagnosticsClient;
+  readonly screenWakeLock: import("./playbackPresentationTypes").AppScreenWakeClient;
   readonly workArea: AppWorkAreaClient;
   readonly settingsAvailability: AppSettingsAvailabilityClient;
   readonly connectivity: AppConnectivityClient;
@@ -71,8 +77,17 @@ export interface MountedAppEnvironmentClients {
   readonly filePanels: AppFilePanelClient;
   readonly motion: MFXMotionClient;
   readonly media: MEFXMediaClient;
-  readonly video: VFXVideoClient;
+  readonly video: AppVideoClient;
   readonly location: LFXLocationClient;
+  readonly network: import("../../FX/NetworkFX/internal/networkPort").NetworkPort;
+  readonly speechSynthesis: import("../../FX/AudioFX/AUFXSpeechSynthesizer").AUFXSpeechClient;
+  readonly videoPresentation: import("../../FX/VideoFX/VFXPictureInPictureController").VFXVideoPresentationClient;
+  readonly bluetooth: import("../../FX/BluetoothFX/internal/bluetoothPort").BluetoothPort;
+  readonly nfc: import("../../FX/NFCFX/internal/nfcPort").NFCPort;
+  readonly speech: import("../../FX/SpeechFX/internal/speechPort").SpeechPort;
+  readonly contacts: import("../../FX/ContactsFX/internal/contactsPort").ContactsPort;
+  readonly payment: import("../../FX/PassFX/internal/paymentPort").PaymentPort;
+  readonly xr: import("../../FX/XRFX/internal/xrPort").XRPort;
   readonly midi: MIFXClient;
   readonly lumina: LUFXIndexClient;
   readonly haptics: HFXHapticClient;

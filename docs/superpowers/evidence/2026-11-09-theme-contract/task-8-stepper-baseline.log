@@ -1,0 +1,29 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run playwright test tests/e2e/theme-baseline.spec.ts --project=chromium --project=chromium-high-dpr --workers=2 --grep catalogue partition [123]$
+[WebServer] (node:72388) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 12 tests using 2 workers
+
+(node:51336) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:59224) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  2 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2 (19.9s)
+  ok  1 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 (20.0s)
+  ok  3 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3 (1.2s)
+  ok  4 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (1.2s)
+  ok  5 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 2 (1.2s)
+  ok  6 [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 3 (1.2s)
+(node:93752) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:82932) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  7 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1 (1.3s)
+  ok  8 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2 (1.3s)
+  ok  9 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3 (1.2s)
+  ok 10 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1 (1.2s)
+  ok 11 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 2 (1.2s)
+  ok 12 [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 3 (1.2s)
+
+  12 passed (28.6s)

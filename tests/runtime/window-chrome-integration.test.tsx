@@ -21,12 +21,13 @@
 // @vitest-environment jsdom
 
 import { cleanup } from "@testing-library/react";
+import { withoutScopeTwins } from "../fixtures/atmoStylesheets";
 import React from "react";
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   createSynWare,
-  useSynWareWindowChrome,
+  useWindowChrome,
   type AppWindowChromeProps,
 } from "../../src/SynCloudOS/AppSDK";
 import * as AppSDKBarrel from "../../src/SynCloudOS/AppSDK";
@@ -46,7 +47,7 @@ import { createWindowTestDependencies, standardWindow } from "../fixtures/window
 import { projectChromeCloseError, projectChromeCloseResult } from "../../src/Webspring/WindowLayer/windowChromeResults";
 import type { CommandDispatchResult, WindowCloseResult } from "../../src/SynCloudOS/SynCloudOS";
 
-const windowCSS = readFileSync("src/NSE/Windows/nse-windows.css", "utf8");
+const windowCSS = withoutScopeTwins(readFileSync("src/NSE/Windows/nse-windows.css", "utf8"));
 
 afterEach(cleanup);
 
@@ -55,9 +56,9 @@ const hookLog: Array<AppWindowChromeProps | null> = [];
 const HookChromeApp = createSynWare({
   manifest: {
     schemaVersion: 1,
-    id: "com.syndromatic.hook-chrome",
+    bundleIdentifier: "com.syndromatic.hook-chrome",
     version: "1.0.0",
-    title: "Hook Chrome",
+    displayName: "Hook Chrome",
     routes: [{ path: "/hook-chrome", primary: true }],
     windowDefaults: { title: "Hook Chrome", chrome: "custom", smoothSurface: "off" },
   },
@@ -70,7 +71,7 @@ const HookChromeApp = createSynWare({
 });
 
 function HookChromeProbe({ props }: { props: AppWindowChromeProps }) {
-  hookLog.push(useSynWareWindowChrome());
+  hookLog.push(useWindowChrome());
   return (
     <div data-testid="hook-chrome">
       <h2 id={props.titleId}>{props.title}</h2>
@@ -81,9 +82,9 @@ function HookChromeProbe({ props }: { props: AppWindowChromeProps }) {
 const CustomWithoutRendererApp = createSynWare({
   manifest: {
     schemaVersion: 1,
-    id: "com.syndromatic.chrome-missing",
+    bundleIdentifier: "com.syndromatic.chrome-missing",
     version: "1.0.0",
-    title: "Chrome Missing",
+    displayName: "Chrome Missing",
     routes: [{ path: "/chrome-missing", primary: true }],
     windowDefaults: { title: "Chrome Missing", chrome: "custom", smoothSurface: "off" },
   },
@@ -95,9 +96,9 @@ const CustomWithoutRendererApp = createSynWare({
 const CrashingChromeApp = createSynWare({
   manifest: {
     schemaVersion: 1,
-    id: "com.syndromatic.chrome-crash",
+    bundleIdentifier: "com.syndromatic.chrome-crash",
     version: "1.0.0",
-    title: "Chrome Crash",
+    displayName: "Chrome Crash",
     routes: [{ path: "/chrome-crash", primary: true }],
     windowDefaults: { title: "Chrome Crash", chrome: "custom", smoothSurface: "off" },
   },
@@ -220,7 +221,7 @@ describe("custom chrome host integration", () => {
     // fixture apps above, which type their chrome against
     // AppWindowChromeProps). Type-only exports leave no runtime trace, so
     // their presence is proven by this file compiling.
-    expect(typeof AppSDKBarrel.useSynWareWindowChrome).toBe("function");
+    expect(typeof AppSDKBarrel.useWindowChrome).toBe("function");
     expect(typeof AppSDKBarrel.createSynWare).toBe("function");
   });
   it("binds chrome actions to the mounting window with no target parameter", async () => {

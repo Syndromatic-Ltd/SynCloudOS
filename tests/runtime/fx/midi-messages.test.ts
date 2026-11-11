@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../../src/Foundation/NSEData";
+
 import { describe, expect, it } from "vitest";
 
 import { MIFXEncoder } from "../../../src/FX/MIDIFX/MIFXEncoder";
@@ -52,7 +54,7 @@ describe("MIDIFX MIDI 1 messages", () => {
       [[0xfc], { kind: "stop" }],
       [[0xfe], { kind: "active-sensing" }],
       [[0xff], { kind: "reset" }],
-      [[0xf0, 0x01, 0x02, 0x7f, 0xf7], { kind: "sysex", data: new Uint8Array([0x01, 0x02, 0x7f]) }],
+      [[0xf0, 0x01, 0x02, 0x7f, 0xf7], { kind: "sysex", data: NSEData.from(new Uint8Array([0x01, 0x02, 0x7f])) }],
     ];
 
     for (const [wire, expected] of corpus) {
@@ -60,7 +62,7 @@ describe("MIDIFX MIDI 1 messages", () => {
       const parsed = messages(parser.push(new Uint8Array(wire)));
       expect(parsed).toHaveLength(1);
       expect(parsed[0]).toEqual(expected);
-      expect(MIFXEncoder.encode(parsed[0]!)).toEqual(new Uint8Array(wire));
+      expect(MIFXEncoder.encode(parsed[0]!).bytes).toEqual(new Uint8Array(wire));
     }
 
     for (let channel = 0; channel < 16; channel += 1) {
@@ -71,11 +73,11 @@ describe("MIDIFX MIDI 1 messages", () => {
   });
 
   it("preserves all 14 pitch-bend bits and validates complete output messages", () => {
-    expect(MIFXEncoder.encode({ kind: "pitch-bend", channel: 3, value: 8_192 })).toEqual(new Uint8Array([0xe3, 0x00, 0x40]));
-    expect(() => MIFXEncoder.encode({ kind: "pitch-bend", channel: 3, value: 16_384 } as MIFXMessage)).toThrow(/pitch bend/i);
-    expect(() => MIFXEncoder.encode({ kind: "note-on", channel: 16, note: 1, velocity: 1 } as MIFXMessage)).toThrow(/channel/i);
-    expect(() => MIFXEncoder.encode({ kind: "note-on", channel: 0, note: 128, velocity: 1 } as MIFXMessage)).toThrow(/note/i);
-    expect(() => MIFXEncoder.encode({ kind: "sysex", data: new Uint8Array([0x01, 0x80]) })).toThrow(/sysex.*data/i);
+    expect(MIFXEncoder.encode({ kind: "pitch-bend", channel: 3, value: 8_192 }).bytes).toEqual(new Uint8Array([0xe3, 0x00, 0x40]));
+    expect(() => MIFXEncoder.encode({ kind: "pitch-bend", channel: 3, value: 16_384 } as MIFXMessage).bytes).toThrow(/pitch bend/i);
+    expect(() => MIFXEncoder.encode({ kind: "note-on", channel: 16, note: 1, velocity: 1 } as MIFXMessage).bytes).toThrow(/channel/i);
+    expect(() => MIFXEncoder.encode({ kind: "note-on", channel: 0, note: 128, velocity: 1 } as MIFXMessage).bytes).toThrow(/note/i);
+    expect(() => MIFXEncoder.encode({ kind: "sysex", data: NSEData.from(new Uint8Array([0x01, 0x80])) }).bytes).toThrow(/sysex.*data/i);
   });
 
   it("parses running status across fragments while realtime bytes stay out-of-band", () => {
@@ -108,7 +110,7 @@ describe("MIDIFX MIDI 1 messages", () => {
     ]);
     expect(parser.push(new Uint8Array([0xfe, 0xf7]))).toEqual([
       { kind: "message", offset: 4, message: { kind: "active-sensing" } },
-      { kind: "message", offset: 0, message: { kind: "sysex", data: new Uint8Array([0x01, 0x02]) } },
+      { kind: "message", offset: 0, message: { kind: "sysex", data: NSEData.from(new Uint8Array([0x01, 0x02])) } },
     ]);
   });
 

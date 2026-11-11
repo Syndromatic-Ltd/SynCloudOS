@@ -296,6 +296,7 @@ function StandaloneUtilityPanel({ id, title, anchor, fitting, closing, onExited,
       inert={closing || undefined}
       {...appearanceProjection}
       style={{
+        ...appearanceProjection.style,
         position: "fixed",
         left: frame?.x ?? 0,
         top: frame?.y ?? 0,

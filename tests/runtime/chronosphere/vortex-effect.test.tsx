@@ -26,7 +26,7 @@ import { GFXImage } from "../../../src/FX/GraphicsFX/GFXImage";
 
 const host = vi.hoisted(() => ({ environment: {} as Record<string, unknown>, app: {} as Record<string, unknown> }));
 vi.mock("../../../src/NSE/Animation/NSEAnimationEnvironment", () => ({ useNSEAnimationEnvironment: () => host.environment }));
-vi.mock("../../../src/SynCloudOS/AppSDK/SynWareContext", () => ({ useSynWare: () => host.app }));
+vi.mock("../../../src/SynCloudOS/AppSDK/scos/useSCOS", () => ({ useSCOS: () => host.app }));
 vi.mock("../../../src/FX/ImageFX/IFXShader", () => ({
   IFXShader: class Shader {
     constructor(readonly source: string, readonly uniforms: Record<string, { type: string; value: number | readonly number[] }> = {}) {}
@@ -71,9 +71,23 @@ beforeEach(() => {
   host.app = { images: { load: vi.fn(() => ({ pixelLease: async () => ({ transferImage: () => image, release: vi.fn() }), release: vi.fn() })) } };
 });
 afterEach(async () => { await act(async () => root.unmount()); container.remove(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
-async function step(ms = 16) { await act(async () => { time += ms; const callbacks = [...pending]; pending.clear(); callbacks.forEach(callback => callback(time)); }); }
+// The mounted AFX frame source supplies monotonic seconds, including now().
+async function step(ms = 16) { await act(async () => { time += ms / 1000; const callbacks = [...pending]; pending.clear(); callbacks.forEach(callback => callback(time)); }); }
 
 describe("Vortex effect", () => {
+  it("fades the galaxy in and advances its simulation at real speed on the canonical seconds clock", async () => {
+    vi.spyOn(Element.prototype, "clientWidth", "get").mockReturnValue(800);
+    vi.spyOn(Element.prototype, "clientHeight", "get").mockReturnValue(600);
+    const preparedImages = { starNebula: image, galaxySupernova: image, cloudParticle: image, coreGlow: image };
+    await act(async () => root.render(<VortexEffect active preset="chronosphere" preparedImages={preparedImages} />));
+    for (let frame = 0; frame < 60; frame++) await step(1000 / 60);
+    const [nebula, stars, , , , glow] = scenes[0].layers;
+    expect(stars.opacity).toBeGreaterThan(0.6);
+    expect(stars.opacity).toBeLessThan(0.8);
+    expect(nebula.opacity).toBeGreaterThan(0.6);
+    expect(glow.transform.values[0]).toBeCloseTo(1 + Math.sin(0.7) * 0.06, 5);
+    expect(pending.size).toBe(1);
+  });
   it("pulses the filtered glow with a transform while retaining its offscreen dimensions", async () => {
     vi.spyOn(Element.prototype, "clientWidth", "get").mockReturnValue(800);
     vi.spyOn(Element.prototype, "clientHeight", "get").mockReturnValue(600);

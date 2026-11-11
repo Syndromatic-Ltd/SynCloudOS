@@ -69,6 +69,34 @@ function declaration(overrides: Partial<CommandDeclaration<{ delta: number }, nu
 }
 
 describe("runtime command system", () => {
+  it("keeps an explicit window action live when opening a document adds a fallback anchor", async () => {
+    const runtime = createTestRuntime();
+    runtime.responders.register({ id: "controller:publisher", kind: "controller", parentId: "workspace", scopeId: "publisher" });
+    runtime.commands.register(declaration({
+      id: "publisher.open",
+      responderId: "controller:publisher",
+      execute: async () => {
+        await Promise.resolve();
+        runtime.responders.register({ id: "document:new", kind: "document", parentId: "workspace", scopeId: "publisher" });
+        runtime.focus.setActiveAnchors({ documentResponderId: "document:new" });
+        return 1;
+      },
+    }));
+    await expect(runtime.commands.dispatch("publisher.open", { delta: 0 }, { responderId: "controller:publisher" })).resolves.toMatchObject({ status: "executed" });
+    await runtime.dispose("test complete");
+  });
+
+  it("does not route an explicitly targeted action to an unrelated active document", async () => {
+    const runtime = createTestRuntime();
+    runtime.responders.register({ id: "controller:publisher", kind: "controller", parentId: "workspace", scopeId: "publisher" });
+    runtime.responders.register({ id: "document:other", kind: "document", parentId: "workspace", scopeId: "other" });
+    runtime.focus.setActiveAnchors({ documentResponderId: "document:other" });
+    const execute = vi.fn(() => 1);
+    runtime.commands.register(declaration({ id: "publisher.other", responderId: "document:other", execute }));
+    await expect(runtime.commands.dispatch("publisher.other", { delta: 0 }, { responderId: "controller:publisher" })).resolves.toMatchObject({ status: "unhandled" });
+    expect(execute).not.toHaveBeenCalled();
+    await runtime.dispose("test complete");
+  });
   it("cannot use an accepted tuple to execute a replacement declaration", async () => {
     const runtime = createTestRuntime();
     const commands = createCommandSystem({ runtime, responderResolver: resolver(["editor:one", "runtime"]) });

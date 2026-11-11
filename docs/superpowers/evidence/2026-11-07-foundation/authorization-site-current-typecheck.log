@@ -1,0 +1,13 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run tsc -b --pretty false
+src/Integrations/Journal.integration.ts(291,17): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/Integrations/Journal.integration.ts(312,15): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/Integrations/Portfolio.integration.ts(253,17): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/Integrations/Portfolio.integration.ts(264,71): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/Integrations/SynCal.integration.ts(126,17): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+src/Integrations/SynCal.integration.ts(143,15): error TS2339: Property 'permissions' does not exist on type 'Readonly<SynWareManifestV1>'.
+tests/runtime/gallery-text-document.test.tsx(30,5): error TS2353: Object literal may only specify known properties, and 'permissions' does not exist in type '{ readonly app: Readonly<SynWareDefinition<SynWareManifestV1, readonly SynWareRouteDefinition[]>>; readonly application?: undefined; readonly manifest?: undefined; } & { ...; }'.
+tests/runtime/publisher/product-controller.test.tsx(32,58): error TS2353: Object literal may only specify known properties, and 'permissions' does not exist in type '{ readonly application: NSEApplicationClass<NSEApplication>; readonly manifest: SynWareManifestV1; readonly app?: undefined; } & { ...; }'.
+tests/runtime/publisher/publisher-class.test.tsx(43,5): error TS2353: Object literal may only specify known properties, and 'permissions' does not exist in type '{ readonly application: NSEApplicationClass<NSEApplication>; readonly manifest: SynWareManifestV1; readonly app?: undefined; } & { ...; }'.
+tests/runtime/publisher/publisher-file-image-ui.test.tsx(33,58): error TS2353: Object literal may only specify known properties, and 'permissions' does not exist in type '{ readonly application: NSEApplicationClass<NSEApplication>; readonly manifest: SynWareManifestV1; readonly app?: undefined; } & { ...; }'.
+tests/runtime/syncal-class.test.tsx(34,143): error TS2353: Object literal may only specify known properties, and 'permissions' does not exist in type '{ readonly application: NSEApplicationClass<NSEApplication>; readonly manifest: SynWareManifestV1; readonly app?: undefined; } & { ...; }'.

@@ -38,9 +38,10 @@ export function NSEModalWindowView(props: NSEWindowViewProps) {
   return (
     <NSEWindowView
       {...props}
+      hasShadow
       className="nse-window-view--modal"
-      appearanceRecipe="window.standard.frame"
-      shadowRecipe="window.standard.shadow"
+
+
       titleBar={titleBar}
       focusScope="modal"
     />

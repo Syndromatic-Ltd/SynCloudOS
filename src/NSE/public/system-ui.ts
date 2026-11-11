@@ -28,3 +28,5 @@ export type {
   NSEAboutDialogProps,
   NSEConfirmDialogProps,
 } from "../Components/NSESystemDialogs";
+
+export { Badge } from "../Components/Badge";

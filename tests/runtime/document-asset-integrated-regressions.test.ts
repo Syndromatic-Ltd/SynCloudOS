@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData } from "../../src/Foundation/NSEData";
 import { afterEach, describe, expect, it } from "vitest";
 import { createSynWareContextValue } from "../../src/SynCloudOS/AppSDK/createSynWareContextValue";
 import { createInMemoryDocumentAssetStore } from "../../src/SynCloudOS/Documents/DocumentAssetStore";
@@ -39,7 +40,7 @@ const type: DocumentType<Model> = {
 };
 const cleanups: Array<() => void | Promise<void>> = [];
 afterEach(async () => { for (const cleanup of cleanups.splice(0).reverse()) await cleanup(); });
-const scope = { authorizationId: "review-owner", documentId: "review-document" };
+const scope = { authorizationId: "com.example.review-owner", documentId: "review-document" };
 const location = { kind: "memory" as const, namespace: "review-integrated", key: "a" };
 const observe = (name: string, facts: unknown) => console.info("REVIEW-PROBE", name, JSON.stringify(facts));
 function deferred() {
@@ -50,8 +51,8 @@ function deferred() {
 
 async function fixture() {
   let pause: (() => Promise<void>) | undefined;
-  const hash = async (bytes: Uint8Array) => {
-    const result = "sha256:" + Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes.slice().buffer)), byte => byte.toString(16).padStart(2, "0")).join("");
+  const hash = async (bytes: NSEData) => {
+    const result = "sha256:" + Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes.bytes.buffer)), byte => byte.toString(16).padStart(2, "0")).join("");
     await pause?.();
     return result;
   };
@@ -63,7 +64,7 @@ async function fixture() {
   } });
   runtime.documents.registerCloseReviewer({ review: async () => "discard" });
   cleanups.push(async () => { await runtime.dispose("review"); });
-  registerTestSynWare(runtime, { schemaVersion: 1, id: scope.authorizationId, version: "1.0.0", title: "Review", routes: [{ path: "/review", primary: true }], documentTypes: [{ id: type.id, displayName: type.displayName }] });
+  registerTestSynWare(runtime, { schemaVersion: 1, bundleIdentifier: scope.authorizationId, version: "1.0.0", displayName: "Review", routes: [{ path: "/review", primary: true }], documentTypes: [{ id: type.id, displayName: type.displayName }] });
   const mounted = mountTestSynWareRuntime(runtime, scope.authorizationId);
   cleanups.push(() => mounted.dispose("review"));
   const app = createSynWareContextValue(mounted.runtime).documents;
@@ -128,7 +129,7 @@ describe("integrated asset ownership regressions", () => {
     observe("reversible-refusal", { status: result.status, revision: f.canonical.dirtyRevision, gc });
     expect(result.status).toBe("rejected"); expect(f.canonical.dirtyRevision).toBe(revision);
     expect(f.canonical.model).toEqual(before); expect(f.canonical.undoManager.canUndo).toBe(false);
-    expect(await f.store.read(scope, oldRef)).toEqual(new Uint8Array([1]));
+    expect((await f.store.read(scope, oldRef)).bytes).toEqual(new Uint8Array([1]));
     expect(gc).toEqual({ removedAssets: 1, removedBytes: 1 });
     await expect(f.store.read(scope, nextRef)).rejects.toMatchObject({ code: "asset-missing" });
   });
@@ -174,7 +175,7 @@ describe("integrated asset ownership regressions", () => {
     const gc = await store.collectGarbage(scope);
     observe("eviction-generation", { count, suppliedToken: releaseToken ?? null, generationChanged: oldToken !== newToken, nativeVersionPresent: !!await base.readVersion(location, first.record.version), currentVersionPresent: (await base.read(location))?.version.id === first.record.version.id, gc });
     expect(count).toBe(0); expect(gc.removedAssets).toBe(0);
-    expect(await store.read(scope, ref)).toEqual(new Uint8Array([1]));
+    expect((await store.read(scope, ref)).bytes).toEqual(new Uint8Array([1]));
   });
 
   it("converges a recovered unknown sent write to its one acknowledged native version root", async () => {

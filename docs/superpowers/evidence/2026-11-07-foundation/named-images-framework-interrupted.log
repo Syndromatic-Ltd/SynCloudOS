@@ -1,0 +1,173 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+✘ [ERROR] No loader is configured for ".png" files: src/SynCloudOSReact/Resources/AlertCautionIcon.png?url&no-inline
+
+    src/SynCloudOSReact/SystemAlert.tsx:26:24:
+      26 │ ...cautionIcon from "./Resources/AlertCautionIcon.png?url&no-inline";
+         ╵                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/SynCloudOSReact/Resources/SynCloudOSLogo.png?url&no-inline
+
+    src/SynCloudOS/Resources/frameworkAssets.ts:23:27:
+      23 │ ...Logo from "../../SynCloudOSReact/Resources/SynCloudOSLogo.png?u...
+         ╵              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".wasm" files: node_modules/harfbuzzjs/dist/harfbuzz.wasm?url
+
+    src/FX/TextFX/vendor/harfbuzzRuntime.mjs:2:28:
+      2 │ import harfbuzzWasmUrl from "harfbuzzjs/dist/harfbuzz.wasm?url";
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] Could not resolve "fs"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:563:
+      1 │ ...NMENT_IS_NODE){var fs=require("fs");if(_scriptName.startsWith("f...
+        ╵                                  ~~~~
+
+  The package "fs" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/user-info.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:23:21:
+      23 │ ...serInfo from "./Resources/AtmoTopBar/user-info.svg?url&no-inline";
+         ╵                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/settings.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:22:21:
+      22 │ ...settings from "./Resources/AtmoTopBar/settings.svg?url&no-inline";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/home.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:21:17:
+      21 │ import home from "./Resources/AtmoTopBar/home.svg?url&no-inline";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] Could not resolve "path"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:629:
+      1 │ ...:")){scriptDirectory=require("path").dirname(require("url").file...
+        ╵                                 ~~~~~~
+
+  The package "path" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] Could not resolve "url"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:653:
+      1 │ ...quire("path").dirname(require("url").fileURLToPath(_scriptName))...
+        ╵                                  ~~~~~
+
+  The package "url" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] No loader is configured for ".png" files: src/SynCloudOSReact/Resources/AlertCautionIcon.png?url&no-inline
+
+    src/SynCloudOSReact/SystemAlert.tsx:26:24:
+      26 │ ...cautionIcon from "./Resources/AlertCautionIcon.png?url&no-inline";
+         ╵                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".png" files: src/SynCloudOSReact/Resources/SynCloudOSLogo.png?url&no-inline
+
+    src/SynCloudOS/Resources/frameworkAssets.ts:23:27:
+      23 │ ...Logo from "../../SynCloudOSReact/Resources/SynCloudOSLogo.png?u...
+         ╵              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/user-info.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:23:21:
+      23 │ ...serInfo from "./Resources/AtmoTopBar/user-info.svg?url&no-inline";
+         ╵                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/home.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:21:17:
+      21 │ import home from "./Resources/AtmoTopBar/home.svg?url&no-inline";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".svg" files: src/NSE/Windows/Chrome/Resources/AtmoTopBar/settings.svg?url&no-inline
+
+    src/NSE/Windows/Chrome/nseTopBarAssets.ts:22:21:
+      22 │ ...settings from "./Resources/AtmoTopBar/settings.svg?url&no-inline";
+         ╵                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] No loader is configured for ".wasm" files: node_modules/harfbuzzjs/dist/harfbuzz.wasm?url
+
+    src/FX/TextFX/vendor/harfbuzzRuntime.mjs:2:28:
+      2 │ import harfbuzzWasmUrl from "harfbuzzjs/dist/harfbuzz.wasm?url";
+        ╵                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] Could not resolve "fs"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:563:
+      1 │ ...NMENT_IS_NODE){var fs=require("fs");if(_scriptName.startsWith("f...
+        ╵                                  ~~~~
+
+  The package "fs" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] Could not resolve "path"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:629:
+      1 │ ...:")){scriptDirectory=require("path").dirname(require("url").file...
+        ╵                                 ~~~~~~
+
+  The package "path" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+✘ [ERROR] Could not resolve "url"
+
+    src/FX/TextFX/vendor/harfbuzzEmscripten.mjs:1:653:
+      1 │ ...quire("path").dirname(require("url").fileURLToPath(_scriptName))...
+        ╵                                  ~~~~~
+
+  The package "url" wasn't found on the file system but is built into node. Are you trying to bundle for node? You can use "platform: 'node'" to do that, which will remove this error.
+
+ ❯ tests/runtime/heritage-inspector-dev.test.ts (7 tests | 2 failed) 386ms
+     × excludes the lazy Inspector graph and CSS from the production host region 150ms
+     × removes the bridge and UI from the production import graph without a package rebuild 134ms
+stdout | tests/runtime/document-asset-browser.test.ts > genuine IndexedDB native document assets > webkit: survives page reload with new store/service instances, renders bytes, enforces concurrent quota, detects corruption
+13:06:57 [vite] changed tsconfig file detected: C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/.artifacts/synware-external-GQHLhQ/tsconfig.json - Clearing cache and forcing full-reload to ensure TypeScript is compiled with updated config values.
+
+stdout | tests/runtime/document-asset-browser.test.ts
+13:06:26 [vite] (client) Re-optimizing dependencies because vite config has changed
+
+ ❯ tests/runtime/document-asset-browser.test.ts (6 tests | 1 failed) 31515ms
+     × webkit: survives page reload with new store/service instances, renders bytes, enforces concurrent quota, detects corruption 1402ms
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+▲ [WARNING] "import.meta" is not available with the "iife" output format and will be empty [empty-import-meta]
+
+    src/NSE/Themes/Atmo/namedImages.ts:23:84:
+      23 │ ...ces/navigation-back.svg", import.meta.url).href, size: Object.f...
+         ╵                              ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work correctly.
+
+▲ [WARNING] "import.meta" is not available with the "iife" output format and will be empty [empty-import-meta]
+
+    src/NSE/Themes/Atmo/namedImages.ts:24:90:
+      24 │ .../navigation-forward.svg", import.meta.url).href, size: Object.f...
+         ╵                              ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work correctly.
+
+ ❯ tests/runtime/nse-view-draw-browser.test.ts (2 tests | 2 failed) 60371ms
+     × keeps subviews above drawing, class positioning, resizing and accessible images at DPR 1 30002ms
+     × keeps subviews above drawing, class positioning, resizing and accessible images at DPR 2 30002ms

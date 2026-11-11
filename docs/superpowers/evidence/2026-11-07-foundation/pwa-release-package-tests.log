@@ -1,0 +1,122 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/synapp-sdk-package.test.ts tests/runtime/foundation-packed-consumer.test.ts tests/runtime/managed-typography-packed-consumer.test.ts tests/runtime/text-system-packed-consumer.test.ts tests/runtime/chronosphere/chronosphere-packed-consumer.test.ts tests/runtime/fx/packed-fx.test.ts tests/runtime/fx/phase5-packed.test.ts --maxWorkers=1 --no-file-parallelism --reporter=default --reporter=json --outputFile.json=C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\docs\superpowers\evidence\2026-11-07-foundation\pwa-release-package-tests.json
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-pwa-release-8e1c2b0b-20261107215535
+
+ ✓ tests/runtime/fx/packed-fx.test.ts (1 test) 27108ms
+   ✓ executes substantive FX operations from the built npm archive outside the repository  27107ms
+ ❯ tests/runtime/synapp-sdk-package.test.ts (9 tests | 1 failed) 219044ms
+     ✓ keeps the public page entry limited to the controller contract 11ms
+     ✓ pins the removal of the old navigation, source-list and sliding-pane exports 18ms
+     ✓ captures shell view components without invoking author-owned values 10ms
+     ✓ rejects inconsistent shell view bindings during capture 2ms
+     × compiles, bundles and mounts a genuinely external consumer against packed public exports 120580ms
+     ✓ keeps the reviewed runtime entry graph free of privileged exports 7ms
+     ✓ uses exact portable package aliases and keeps public client contracts host-free 7ms
+     ✓ keeps mounted runtime hooks out of public barrels 3ms
+     ✓ derives archive declarations from the reviewed public entries instead of open handwritten mirrors  98405ms
+ ✓ tests/runtime/text-system-packed-consumer.test.ts (16 tests) 3682ms
+     ✓ prepares the actual example and verified licensed font as a standalone consumer graph  3552ms
+ ✓ tests/runtime/foundation-packed-consumer.test.ts (1 test) 28739ms
+   ✓ uses Foundation and CPFX from an independent SDK installation in a worker and strict worker-lib consumer  28738ms
+ ✓ tests/runtime/fx/phase5-packed.test.ts (1 test) 30568ms
+   ✓ loads all six new FX roots and hooks from an independently installed SDK archive  30567ms
+ ✓ tests/runtime/managed-typography-packed-consumer.test.ts (1 test) 32974ms
+   ✓ uses managed typography from an independently installed package in Node and app code  32973ms
+ ✓ tests/runtime/chronosphere/chronosphere-packed-consumer.test.ts (1 test) 32655ms
+   ✓ preserves typed neutral versions and prepared custom views in an installed SDK  32654ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/synapp-sdk-package.test.ts > portable SynWare SDK packages > compiles, bundles and mounts a genuinely external consumer against packed public exports
+Error: Command failed: C:\Program Files\nodejs\node.exe shared-identity.mjs
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
++ actual - expected
+
+  [
+    'BrowserImageProcessingWorker',
+    'BrowserWebGPUImageProcessingBackend',
+    'InMemoryDocumentAdapter',
+    'IndexedDBDocumentRecoveryStore',
++   'SCAuthorization',
++   'SCAuthorizationRights',
+    'createBrowserAcceleratedImageProcessingPipeline',
+    'createBrowserImageProcessingPipeline',
+    'createBrowserImageProcessingWorkerBackend',
+    'createBrowserWebGPUImageProcessingBackend',
+    'createDocumentAssetSaveCoordinator',
+
+    at file:///C:/Users/Kavish%20Krishnakumar/AppData/Local/Temp/syncloudos-pwa-release-8e1c2b0b-20261107215535/.artifacts/synware-external-O8pWbM/shared-identity.mjs:77:8
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: [
+    'BrowserImageProcessingWorker',
+    'BrowserWebGPUImageProcessingBackend',
+    'InMemoryDocumentAdapter',
+    'IndexedDBDocumentRecoveryStore',
+    'SCAuthorization',
+    'SCAuthorizationRights',
+    'createBrowserAcceleratedImageProcessingPipeline',
+    'createBrowserImageProcessingPipeline',
+    'createBrowserImageProcessingWorkerBackend',
+    'createBrowserWebGPUImageProcessingBackend',
+    'createDocumentAssetSaveCoordinator',
+    'createDocumentAssetStorageAdapter',
+    'createInMemoryDocumentAssetStore',
+    'createIndexedDBDocumentAssetStore',
+    'createRegisteredFontResourceLoader',
+    'createSynCloudOSHostContribution',
+    'fontResourceMimeTypeForPath',
+    'mountSynCloudOS',
+    'trustSynWareBundleForCanonicalHost'
+  ],
+  expected: [
+    'BrowserImageProcessingWorker',
+    'BrowserWebGPUImageProcessingBackend',
+    'InMemoryDocumentAdapter',
+    'IndexedDBDocumentRecoveryStore',
+    'createBrowserAcceleratedImageProcessingPipeline',
+    'createBrowserImageProcessingPipeline',
+    'createBrowserImageProcessingWorkerBackend',
+    'createBrowserWebGPUImageProcessingBackend',
+    'createDocumentAssetSaveCoordinator',
+    'createDocumentAssetStorageAdapter',
+    'createInMemoryDocumentAssetStore',
+    'createIndexedDBDocumentAssetStore',
+    'createRegisteredFontResourceLoader',
+    'createSynCloudOSHostContribution',
+    'fontResourceMimeTypeForPath',
+    'mountSynCloudOS',
+    'trustSynWareBundleForCanonicalHost'
+  ],
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.22.1
+
+ ❯ ../../../../../Kavish%20Krishnakumar/AppData/Local/Temp/syncloudos-pwa-release-8e1c2b0b-20261107215535/.artifacts/synware-external-O8pWbM/shared-identity.mjs:77:8
+ ❯ tests/runtime/synapp-sdk-package.test.ts:416:5
+    414| }
+    415| `, "utf8");
+    416|     execFileSync(process.execPath, ["shared-identity.mjs"], { cwd: fix…
+       |     ^
+    417|     writeFileSync(join(fixture, "tsconfig.json"), `${JSON.stringify({
+    418|       compilerOptions: {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 6 passed (7)
+      Tests  1 failed | 29 passed (30)
+   Start at  22:02:32
+   Duration  388.62s (transform 9.08s, setup 101ms, import 11.54s, tests 374.77s, environment 1.01s)
+
+JSON report written to C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/docs/superpowers/evidence/2026-11-07-foundation/pwa-release-package-tests.json

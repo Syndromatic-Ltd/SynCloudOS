@@ -22,10 +22,11 @@
 
 
 import React, { useState } from "react";
+import { nseMenuModel } from "../../src/NSE/Menus/menuTypes";
 import { act, cleanup, render, waitFor } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 
-import { NSEMenu, NSEMenuController, NSEMenuOverlay, type NSEMenuModel, type NSEMenuRuntimePort } from "../../src/NSE/Menus";
+import { NSEMenuView, NSEMenu, NSEMenuOverlay, type NSEMenuModel, type NSEMenuRuntimePort } from "../../src/NSE/Menus";
 import { NSEOverlayProvider, createNSEOverlayManager, type NSEOverlayRuntimePort } from "../../src/NSE/Overlays";
 import budgets from "../fixtures/conformance-performance-budgets.json";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
@@ -99,7 +100,7 @@ function CycleFixture({
   runtimePort,
   open,
 }: {
-  readonly controller: NSEMenuController;
+  readonly controller: NSEMenu;
   readonly manager: ReturnType<typeof createNSEOverlayManager>;
   readonly runtimePort: NSEOverlayRuntimePort;
   readonly open: boolean;
@@ -115,7 +116,7 @@ function CycleFixture({
         anchor={anchor}
         onOpenChange={() => undefined}
       >
-        <NSEMenu model={menuModel} controller={controller} open={open} onOpenChange={() => undefined} />
+        <NSEMenuView model={menuModel} controller={controller} open={open} onOpenChange={() => undefined} />
       </NSEMenuOverlay>
     </NSEOverlayProvider>
   );
@@ -172,7 +173,7 @@ it("opens and paints 100 menu generations without retained portals, listener set
         requests.map((request) => [request.key, presentation(request.commandId)]),
       ));
       const runtimePort = createRuntimePort(validateMany);
-      const controller = new NSEMenuController({ model: menuModel, runtime: runtimePort });
+      const controller = new NSEMenu({ [nseMenuModel]: menuModel, runtime: runtimePort });
       const manager = createNSEOverlayManager();
       let menuPublications = 0;
       let overlayPublications = 0;

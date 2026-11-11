@@ -18,9 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useNSEAppearance } from "./NSEAppearanceProvider";
-import type { NSEAppearanceSlotProjection } from "./appearanceProjection";
+
 import "./nse-chrome-primitives.css";
+import { nseStateHooks } from "../Theme/contract/hooks";
 
 export type NSEChromePrimitiveKind =
   | "surface"
@@ -39,10 +39,8 @@ export type NSEChromeVisualState =
   | "focused"
   | "disabled";
 
-export type NSEChromeSlot = NSEAppearanceSlotProjection;
 
 export interface NSEChromePrimitiveProps {
-  readonly slot: NSEChromeSlot;
   readonly state: NSEChromeVisualState;
   readonly className?: string;
   readonly id?: string;
@@ -64,23 +62,22 @@ function classes(...values: readonly (string | undefined)[]) {
  */
 export function NSEChromePrimitive({
   kind,
-  slot,
   state,
   className,
   ...attributes
 }: NSEChromeLayerProps) {
-  const appearance = useNSEAppearance();
-  const active = slot.recipeId !== null;
+
   return (
     <span
       {...attributes}
       className={classes("nse-chrome-primitive", className)}
       aria-hidden="true"
-      {...slot.attributes}
-      data-nse-chrome-appearance={appearance.appearance.id}
       data-nse-chrome-primitive={kind}
       data-nse-chrome-state={state}
-      data-nse-chrome-active={active ? "true" : "false"}
+      data-nse-chrome-active="true"
+      data-nse-style={kind}
+      {...nseStateHooks({ hovered: state === "hover", highlighted: state === "pressed", selected: state === "selected", focused: state === "focused", enabled: state !== "disabled" })}
+      data-nse-part={kind === "surface" ? "background" : kind === "bevel" || kind === "cap" ? "border" : kind === "splice" || kind === "separator" ? "separator" : kind === "gloss" ? "highlight" : "shadow"}
     />
   );
 }

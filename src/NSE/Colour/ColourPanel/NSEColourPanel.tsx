@@ -215,7 +215,7 @@ export function NSEColourPanel({ controller: supplied, "aria-label": label = "Co
     // An inspector: it stays open while the user works elsewhere, and its
     // close control keeps the colour shown, as NSColorPanel does.
     <NSEUtilityPanel id={`colour-panel-${instanceId}`} open={presents && snapshot.open} title={title} anchor={anchor} contentInset="none" onClose={() => { if (controller.getSnapshot().open) controller.close("commit"); }}>
-    <section data-nse-control="colour-panel" data-state={hexError ? "invalid" : contentState === "ready" ? snapshot.status : contentState} data-appearance-recipe="colour-panel" aria-label={label} aria-busy={contentState === "loading" || undefined}>
+    <section data-nse-control="colour-panel" data-nse-part="background" data-state={hexError ? "invalid" : contentState === "ready" ? snapshot.status : contentState}  aria-label={label} aria-busy={contentState === "loading" || undefined}>
       {contentState !== "ready" ? <p role={contentState === "loading" || contentState === "empty" || contentState === "disabled" || contentState === "read-only" ? "status" : "alert"} data-nse-part="content-message">{contentMessages[contentState]}</p> : null}
       <fieldset disabled={disabled}>
         <NSETabView
@@ -227,7 +227,7 @@ export function NSEColourPanel({ controller: supplied, "aria-label": label = "Co
           items={controller.getPickers().map((picker) => ({ id: picker.id, label: picker.label, accessibleLabel: picker.label, icon: picker.icon, render: () => picker.render(pickerContext) }))}
         />
         <div data-nse-part="sample-row">
-          <button type="button" data-nse-part="eyedropper" aria-label="Pick a colour from the screen" aria-pressed={eyeDropperState === "picking"} disabled={disabled || !eyeDropper || eyeDropper.availability() !== "available"} onClick={() => { void pick(); }}>
+          <button type="button" data-nse-part="eyedropper" data-nse-state={eyeDropperState === "picking" ? "on" : "off"} aria-label="Pick a colour from the screen" aria-pressed={eyeDropperState === "picking"} disabled={disabled || !eyeDropper || eyeDropper.availability() !== "available"} onClick={() => { void pick(); }}>
             <NSEColourMagnifierIcon />
           </button>
           <div data-nse-part="current-colour" role="img" aria-label={`Current colour ${currentHex}`} title="Drag to a colour well or a saved-colour slot" draggable={!disabled} style={{ "--nse-colour-sample": current.toCSS() } as CSSProperties} onDragStart={(event) => { writeDraggedColour(event, current); }} />
@@ -235,7 +235,7 @@ export function NSEColourPanel({ controller: supplied, "aria-label": label = "Co
         {eyeDropperState !== "idle" && eyeDropperState !== "picking" ? <p role="status" data-nse-part="eyedropper-status">{eyeDropperMessages[eyeDropperState]}</p> : null}
         {showsAlpha ? <div data-nse-part="opacity-row" style={{ "--nse-colour-channel-track": `linear-gradient(to right, ${current.withAlpha(0).toCSS()}, ${current.withAlpha(1).toCSS()})` } as CSSProperties}>
           <span data-nse-part="row-label" aria-hidden="true">Opacity</span>
-          <NSESlider controlSize="mini" aria-label="Opacity" minimum={0} maximum={100} disabled={disabled} value={opacity} onValueChange={(value, phase) => {
+          <NSESlider controlSize="mini" aria-label="Opacity" minimum={0} maximum={100} isEnabled={!disabled} value={opacity} onValueChange={(value, phase) => {
             const live = controller.getSnapshot().current ?? initialPanelColour;
             const next = live.withAlpha(value / 100);
             if (phase === "commit") controller.commit(next, "pointer");

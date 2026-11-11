@@ -1,0 +1,194 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/configuration-profiles-hardening.test.ts --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/configuration-profiles-hardening.test.ts (25 tests | 19 failed) 21ms
+     × R3 gives restrictions deep frozen data without freezing or mutating the original request or app 7ms
+     × R3 fails closed and audits a throwing getter returned by a restriction 1ms
+     × R3 fails closed and audits a throwing proxy returned by a restriction 0ms
+     × R3 fails closed and audits a throwing reason returned by a restriction 0ms
+     × R2 applies fullyLocked login requirements before the system-app branch 1ms
+     × R2 applies enterprisePrivate login requirements before the system-app branch 0ms
+     × R2 applies developer login requirements before the system-app branch 1ms
+     × R2 applies webspringVisibleAppProtected login requirements before the system-app branch 1ms
+     × R2 rejects an invalid boot mode before granting any action 0ms
+     × R2 rejects an invalid environment access mode 0ms
+     × R2 rejects an invalid mode update while retaining the last valid restriction 0ms
+     × R8 redacts URL credentials, query and fragment data inside context values 1ms
+     × R8 redacts credential field api_key 1ms
+     × R8 redacts credential field api-key 0ms
+     × R8 redacts credential field privateKey 0ms
+     × R8 redacts credential field private_key 0ms
+     × R8 redacts credential field passphrase 0ms
+     × R8 redacts credential field authorisation 0ms
+     × R8 redacts credential field session-key 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 19 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/configuration-profiles-hardening.test.ts > configuration profile hardening > R3 gives restrictions deep frozen data without freezing or mutating the original request or app
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/runtime/configuration-profiles-hardening.test.ts:62:47
+     60|     });
+     61|     expect(engine.authorise(request).allowed).toBe(false);
+     62|     expect(engine.authorise(request).allowed).toBe(false);
+       |                                               ^
+     63|     expect(app.policy!.requiredCapabilities).toEqual(["missing.capabil…
+     64|     expect(context.details.nested).toEqual(["unchanged"]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/19]⎯
+
+ FAIL  tests/runtime/configuration-profiles-hardening.test.ts > configuration profile hardening > R3 fails closed and audits a throwing getter returned by a restriction
+Error: secret getter
+ ❯ Object.get tests/runtime/configuration-profiles-hardening.test.ts:82:84
+     80|   });
+     81|   it.each([
+     82|     ["throwing getter", () => Object.defineProperty({}, "allowed", { g…
+       |                                                                                    ^
+     83|     ["throwing proxy", () => new Proxy({}, { get() { throw new Error("…
+     84|     ["throwing reason", () => Object.defineProperty({ allowed: true },…
+ ❯ applyRegisteredPolicies src/SynCloudOS/ConfigurationProfiles/ConfigurationProfiles.ts:658:72
+ ❯ evaluateRequest src/SynCloudOS/ConfigurationProfiles/ConfigurationProfiles.ts:686:10
+ ❯ Object.authorise src/SynCloudOS/ConfigurationProfiles/ConfigurationProfiles.ts:785:18
+ ❯ tests/runtime/configuration-profiles-hardening.test.ts:88:29
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/19]⎯
+
+ FAIL  tests/runtime/configuration-profiles-hardening.test.ts > configuration profile hardening > R3 fails closed and audits a throwing proxy returned by a restriction
+Error: secret proxy
+ ❯ Object.get tests/runtime/configuration-profiles-hardening.test.ts:83:60
+     81|   it.each([
+     82|     ["throwing getter", () => Object.defineProperty({}, "allowed", { g…
+     83|     ["throwing proxy", () => new Proxy({}, { get() { throw new Error("…
+       |                                                            ^
+     84|     ["throwing reason", () => Object.defineProperty({ allowed: true },…
+     85|   ])("R3 fails closed and audits a %s returned by a restriction", (_na…
+ ❯ applyRegisteredPolicies src/SynCloudOS/ConfigurationProfiles/ConfigurationProfiles.ts:658:72
+ ❯ evaluateRequest src/SynCloudOS/ConfigurationProfiles/ConfigurationProfiles.ts:686:10
+ ❯ Object.authorise src/SynCloudOS/ConfigurationProfiles/ConfigurationProfiles.ts:785:18
+ ❯ tests/runtime/configuration-profiles-hardening.test.ts:88:29
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/19]⎯
+
+ FAIL  tests/runtime/configuration-profiles-hardening.test.ts > configuration profile hardening > R3 fails closed and audits a throwing reason returned by a restriction
+Error: secret reason
+ ❯ Object.get tests/runtime/configuration-profiles-hardening.test.ts:84:98
+     82|     ["throwing getter", () => Object.defineProperty({}, "allowed", { g…
+     83|     ["throwing proxy", () => new Proxy({}, { get() { throw new Error("…
+     84|     ["throwing reason", () => Object.defineProperty({ allowed: true },…
+       |                                                                                                  ^
+     85|   ])("R3 fails closed and audits a %s returned by a restriction", (_na…
+     86|     const { engine, diagnostics } = fixture();
+ ❯ applyRegisteredPolicies src/SynCloudOS/ConfigurationProfiles/ConfigurationProfiles.ts:659:22
+ ❯ evaluateRequest src/SynCloudOS/ConfigurationProfiles/ConfigurationProfiles.ts:686:10
+ ❯ Object.authorise src/SynCloudOS/ConfigurationProfiles/ConfigurationProfiles.ts:785:18
+ ❯ tests/runtime/configuration-profiles-hardening.test.ts:88:29
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/19]⎯
+
+ FAIL  tests/runtime/configuration-profiles-hardening.test.ts > configuration profile hardening > R2 applies fullyLocked login requirements before the system-app branch
+ FAIL  tests/runtime/configuration-profiles-hardening.test.ts > configuration profile hardening > R2 applies enterprisePrivate login requirements before the system-app branch
+ FAIL  tests/runtime/configuration-profiles-hardening.test.ts > configuration profile hardening > R2 applies developer login requirements before the system-app branch
+ FAIL  tests/runtime/configuration-profiles-hardening.test.ts > configuration profile hardening > R2 applies webspringVisibleAppProtected login requirements before the system-app branch
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/runtime/configuration-profiles-hardening.test.ts:104:129
+    102|   it.each(["fullyLocked", "enterprisePrivate", "developer", "webspring…
+    103|     const { engine } = fixture(mode, ["diagnostics.view"]);
+    104|     for (const action of ["app.launch", "route.open"]) expect(engine.a…
+       |                                                                                                                                 ^
+    105|   });
+    106|   it("R2 preserves explicit public diagnostics in mixed mode", () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/19]⎯
+
+ FAIL  tests/runtime/configuration-profiles-hardening.test.ts > configuration profile hardening > R2 rejects an invalid boot mode before granting any action
+AssertionError: expected function to throw an error, but it didn't
+ ❯ tests/runtime/configuration-profiles-hardening.test.ts:110:66
+    108|   });
+    109|   it("R2 rejects an invalid boot mode before granting any action", () …
+    110|     expect(() => fixture("fullyLokced" as SynCloudOSAccessMode)).toThr…
+       |                                                                  ^
+    111|   });
+    112|   it("R2 rejects an invalid environment access mode", () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/19]⎯
+
+ FAIL  tests/runtime/configuration-profiles-hardening.test.ts > configuration profile hardening > R2 rejects an invalid environment access mode
+AssertionError: expected function to throw an error, but it didn't
+ ❯ tests/runtime/configuration-profiles-hardening.test.ts:114:38
+    112|   it("R2 rejects an invalid environment access mode", () => {
+    113|     vi.stubEnv("VITE_SYNCLOUDOS_ACCESS_MODE", "fullyLokced");
+    114|     expect(() => fixture(undefined)).toThrow(TypeError);
+       |                                      ^
+    115|   });
+    116|   it("R2 rejects an invalid mode update while retaining the last valid…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/19]⎯
+
+ FAIL  tests/runtime/configuration-profiles-hardening.test.ts > configuration profile hardening > R2 rejects an invalid mode update while retaining the last valid restriction
+AssertionError: expected function to throw an error, but it didn't
+ ❯ tests/runtime/configuration-profiles-hardening.test.ts:118:79
+    116|   it("R2 rejects an invalid mode update while retaining the last valid…
+    117|     const { engine } = fixture("fullyLocked");
+    118|     expect(() => engine.setAccessMode("fullyLokced" as SynCloudOSAcces…
+       |                                                                               ^
+    119|     expect(engine.getAccessMode()).toBe("fullyLocked");
+    120|     expect(engine.authorise({ action: "app.launch", app: application()…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/19]⎯
+
+ FAIL  tests/runtime/configuration-profiles-hardening.test.ts > configuration profile hardening > R8 redacts URL credentials, query and fragment data inside context values
+AssertionError: expected '[{"id":"policy-1794079387376-0adc8d06…' not to match /password|secret|user:/
+
+- Expected:
+/password|secret|user:/
+
++ Received:
+"[{\"id\":\"policy-1794079387376-0adc8d06d708a8\",\"action\":\"external.open\",\"decision\":\"allow\",\"allowed\":true,\"reason\":\"External route allowed.\",\"mode\":\"mixed\",\"subjectRole\":\"public\",\"subjectId\":\"public.anonymous\",\"resource\":\"external.open\",\"at\":1794079387376,\"sessionAuthorised\":false,\"accessClass\":null,\"requiredCapabilities\":[],\"requiredRoles\":[],\"requiredAccessClasses\":[],\"matchedCapabilities\":[],\"missingCapabilities\":[],\"matchedRoles\":[],\"missingRoles\":[],\"matchedAccessClasses\":[],\"missingAccessClasses\":[],\"trace\":[{\"step\":\"policy.mode\",\"result\":\"info\",\"message\":\"Evaluating in mixed access mode.\",\"requiredCapabilities\":[],\"requiredRoles\":[],\"requiredAccessClasses\":[],\"matchedCapabilities\":[],\"missingCapabilities\":[],\"matchedRoles\":[],\"missingRoles\":[],\"matchedAccessClasses\":[],\"missingAccessClasses\":[]},{\"step\":\"policy.subject\",\"result\":\"info\",\"message\":\"Resolved public policy subject.\",\"requiredCapabilities\":[],\"requiredRoles\":[],\"requiredAccessClasses\":[],\"matchedCapabilities\":[],\"missingCapabilities\":[],\"matchedRoles\":[],\"missingRoles\":[],\"matchedAccessClasses\":[],\"missingAccessClasses\":[]},{\"step\":\"policy.requirements\",\"result\":\"info\",\"message\":\"Collected request, app, and bundle policy requirements.\",\"requiredCapabilities\":[],\"requiredRoles\":[],\"requiredAccessClasses\":[],\"matchedCapabilities\":[],\"missingCapabilities\":[],\"matchedRoles\":[],\"missingRoles\":[],\"matchedAccessClasses\":[],\"missingAccessClasses\":[]},{\"step\":\"policy.decision\",\"result\":\"allow\",\"message\":\"External route allowed.\",\"requiredCapabilities\":[],\"requiredRoles\":[],\"requiredAccessClasses\":[],\"matchedCapabilities\":[],\"missingCapabilities\":[],\"matchedRoles\":[],\"missingRoles\":[],\"matchedAccessClasses\":[],\"missingAccessClasses\":[]}],\"originSummary\":{\"action\":\"external.open\",\"resource\":\"external.open\"},\"contextSummary\":{\"keys\":[\"resourceURL\",\"returnPath\",\"description\",\"appId\"],\"values\":{\"resourceURL\":\"https://user:password@example.com/path?token=secret#secret\",\"returnPath\":\"/workspace?code=secret#secret\",\"description\":\"Fetch https://user:password@example.com/file?token=secret now.\",\"appId\":\"safe-app\"}}}]"
+
+ ❯ tests/runtime/configuration-profiles-hardening.test.ts:126:23
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/19]⎯
+
+ FAIL  tests/runtime/configuration-profiles-hardening.test.ts > configuration profile hardening > R8 redacts credential field api_key
+ FAIL  tests/runtime/configuration-profiles-hardening.test.ts > configuration profile hardening > R8 redacts credential field api-key
+ FAIL  tests/runtime/configuration-profiles-hardening.test.ts > configuration profile hardening > R8 redacts credential field privateKey
+ FAIL  tests/runtime/configuration-profiles-hardening.test.ts > configuration profile hardening > R8 redacts credential field private_key
+ FAIL  tests/runtime/configuration-profiles-hardening.test.ts > configuration profile hardening > R8 redacts credential field passphrase
+ FAIL  tests/runtime/configuration-profiles-hardening.test.ts > configuration profile hardening > R8 redacts credential field authorisation
+ FAIL  tests/runtime/configuration-profiles-hardening.test.ts > configuration profile hardening > R8 redacts credential field session-key
+AssertionError: expected 'must-not-be-retained' to be '[redacted]' // Object.is equality
+
+Expected: "[redacted]"
+Received: "must-not-be-retained"
+
+ ❯ tests/runtime/configuration-profiles-hardening.test.ts:133:65
+    131|     const { engine } = fixture();
+    132|     engine.authorise({ action: "runtime.inspect", context: { [key]: "m…
+    133|     expect(engine.getAuditLog()[0].contextSummary!.values[key]).toBe("…
+       |                                                                 ^
+    134|     expect(JSON.stringify(engine.getAuditLog())).not.toContain("must-n…
+    135|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/19]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  19 failed | 6 passed (25)
+   Start at  19:23:07
+   Duration  278ms (transform 78ms, setup 29ms, import 69ms, tests 21ms, environment 0ms)

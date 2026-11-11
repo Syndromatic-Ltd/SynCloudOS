@@ -1,0 +1,11 @@
+npm notice run @syndromatic/website@0.1.0 npx
+npm notice run vitest run tests/runtime/about-app.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/site
+
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  21:39:20
+   Duration  10.61s (transform 5.46s, setup 25ms, import 6.42s, tests 2.69s, environment 1.31s)
+

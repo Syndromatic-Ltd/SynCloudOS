@@ -1,0 +1,127 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/synapp-sdk-package.test.ts tests/runtime/developer-mcp.test.ts tests/runtime/fx/packed-fx.test.ts tests/runtime/foundation-packed-consumer.test.ts tests/runtime/managed-typography-packed-consumer.test.ts tests/runtime/text-system-packed-consumer.test.ts tests/runtime/chronosphere/chronosphere-packed-consumer.test.ts tests/runtime/fx/phase5-packed.test.ts --maxWorkers=1 --no-file-parallelism --testTimeout=60000 --reporter=default --reporter=json --outputFile.json=C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\docs\superpowers\evidence\2026-11-07-foundation/authorization-package-recheck.json
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/AppData/Local/Temp/syncloudos-authorization-final-8c78a917def1-28840fd8
+
+ ✓ tests/runtime/developer-mcp.test.ts (62 tests) 14705ms
+     ✓ launches the host entry in a page and reports launch failures and system alerts  8762ms
+     ✓ type-checks each project a solution-style tsconfig references  491ms
+     ✓ reports manifest, missing bundle entry and TypeScript findings structurally  572ms
+     ✓ serves real MCP tool schemas and structured results over stdio  661ms
+ ❯ tests/runtime/synapp-sdk-package.test.ts (9 tests | 1 failed) 399541ms
+     ✓ keeps the public page entry limited to the controller contract 7ms
+     ✓ pins the removal of the old navigation, source-list and sliding-pane exports 16ms
+     ✓ captures shell view components without invoking author-owned values 7ms
+     ✓ rejects inconsistent shell view bindings during capture 1ms
+     × compiles, bundles and mounts a genuinely external consumer against packed public exports 323367ms
+     ✓ keeps the reviewed runtime entry graph free of privileged exports 8ms
+     ✓ uses exact portable package aliases and keeps public client contracts host-free 6ms
+     ✓ keeps mounted runtime hooks out of public barrels 2ms
+     ✓ derives archive declarations from the reviewed public entries instead of open handwritten mirrors  76125ms
+ ✓ tests/runtime/fx/packed-fx.test.ts (1 test) 26213ms
+   ✓ executes substantive FX operations from the built npm archive outside the repository  26212ms
+ ✓ tests/runtime/managed-typography-packed-consumer.test.ts (1 test) 33529ms
+   ✓ uses managed typography from an independently installed package in Node and app code  33528ms
+ ✓ tests/runtime/fx/phase5-packed.test.ts (1 test) 33510ms
+   ✓ loads all six new FX roots and hooks from an independently installed SDK archive  33509ms
+ ✓ tests/runtime/foundation-packed-consumer.test.ts (1 test) 31419ms
+   ✓ uses Foundation and CPFX from an independent SDK installation in a worker and strict worker-lib consumer  31418ms
+ ✓ tests/runtime/chronosphere/chronosphere-packed-consumer.test.ts (1 test) 35803ms
+   ✓ preserves typed neutral versions and prepared custom views in an installed SDK  35802ms
+ ✓ tests/runtime/text-system-packed-consumer.test.ts (16 tests) 3615ms
+     ✓ prepares the actual example and verified licensed font as a standalone consumer graph  3486ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/synapp-sdk-package.test.ts > portable SynWare SDK packages > compiles, bundles and mounts a genuinely external consumer against packed public exports
+Error: Command failed: C:\Program Files\nodejs\node.exe shared-identity.mjs
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
++ actual - expected
+
+  [
+    'BrowserImageProcessingWorker',
+    'BrowserWebGPUImageProcessingBackend',
+    'InMemoryDocumentAdapter',
+    'IndexedDBDocumentRecoveryStore',
++   'SCAuthorization',
++   'SCAuthorizationRights',
+    'createBrowserAcceleratedImageProcessingPipeline',
+    'createBrowserImageProcessingPipeline',
+    'createBrowserImageProcessingWorkerBackend',
+    'createBrowserWebGPUImageProcessingBackend',
+    'createDocumentAssetSaveCoordinator',
+
+    at file:///C:/Users/Kavish%20Krishnakumar/AppData/Local/Temp/syncloudos-authorization-final-8c78a917def1-28840fd8/.artifacts/synware-external-DrzRpR/shared-identity.mjs:77:8
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: [
+    'BrowserImageProcessingWorker',
+    'BrowserWebGPUImageProcessingBackend',
+    'InMemoryDocumentAdapter',
+    'IndexedDBDocumentRecoveryStore',
+    'SCAuthorization',
+    'SCAuthorizationRights',
+    'createBrowserAcceleratedImageProcessingPipeline',
+    'createBrowserImageProcessingPipeline',
+    'createBrowserImageProcessingWorkerBackend',
+    'createBrowserWebGPUImageProcessingBackend',
+    'createDocumentAssetSaveCoordinator',
+    'createDocumentAssetStorageAdapter',
+    'createInMemoryDocumentAssetStore',
+    'createIndexedDBDocumentAssetStore',
+    'createRegisteredFontResourceLoader',
+    'createSynCloudOSHostContribution',
+    'fontResourceMimeTypeForPath',
+    'mountSynCloudOS',
+    'trustSynWareBundleForCanonicalHost'
+  ],
+  expected: [
+    'BrowserImageProcessingWorker',
+    'BrowserWebGPUImageProcessingBackend',
+    'InMemoryDocumentAdapter',
+    'IndexedDBDocumentRecoveryStore',
+    'createBrowserAcceleratedImageProcessingPipeline',
+    'createBrowserImageProcessingPipeline',
+    'createBrowserImageProcessingWorkerBackend',
+    'createBrowserWebGPUImageProcessingBackend',
+    'createDocumentAssetSaveCoordinator',
+    'createDocumentAssetStorageAdapter',
+    'createInMemoryDocumentAssetStore',
+    'createIndexedDBDocumentAssetStore',
+    'createRegisteredFontResourceLoader',
+    'createSynCloudOSHostContribution',
+    'fontResourceMimeTypeForPath',
+    'mountSynCloudOS',
+    'trustSynWareBundleForCanonicalHost'
+  ],
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.22.1
+
+ ❯ ../../../../../Kavish%20Krishnakumar/AppData/Local/Temp/syncloudos-authorization-final-8c78a917def1-28840fd8/.artifacts/synware-external-DrzRpR/shared-identity.mjs:77:8
+ ❯ tests/runtime/synapp-sdk-package.test.ts:416:5
+    414| }
+    415| `, "utf8");
+    416|     execFileSync(process.execPath, ["shared-identity.mjs"], { cwd: fix…
+       |     ^
+    417|     writeFileSync(join(fixture, "tsconfig.json"), `${JSON.stringify({
+    418|       compilerOptions: {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 7 passed (8)
+      Tests  1 failed | 91 passed (92)
+   Start at  22:18:50
+   Duration  594.16s (transform 10.01s, setup 113ms, import 13.28s, tests 578.33s, environment 1.13s)
+
+JSON report written to C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/docs/superpowers/evidence/2026-11-07-foundation/authorization-package-recheck.json

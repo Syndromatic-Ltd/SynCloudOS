@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEData, type NSEDataConvertible } from "../../Foundation/NSEData";
 import type { RuntimeResourceLedger } from "../Resources/RuntimeResourceLedger";
 import { GFXImage } from "../../FX/GraphicsFX/GFXImage";
 import type { RuntimeCacheRegistry, RuntimeCache } from "../Cache";
@@ -98,7 +99,8 @@ function normaliseSubject(value: unknown): RuntimeImagePolicySubject {
   return Object.freeze(subject);
 }
 
-function bytesKey(bytes: Uint8Array): string {
+function bytesKey(data: NSEData): string {
+  const bytes = data.bytes;
   let hash = 0x811c9dc5;
   for (const value of bytes) { hash ^= value; hash = Math.imul(hash, 0x01000193); }
   return `${bytes.byteLength}:${(hash >>> 0).toString(16)}`;
@@ -280,10 +282,12 @@ function normaliseResizingMode(value: unknown): RuntimeImageResizingMode {
   return value;
 }
 
-function copyImageBytes(value: unknown, name: string): Uint8Array {
-  if (!(value instanceof Uint8Array) || Object.getPrototypeOf(value) !== Uint8Array.prototype || Object.getOwnPropertySymbols(value).length || Object.prototype.hasOwnProperty.call(value, "byteLength") || Object.prototype.hasOwnProperty.call(value, "buffer") || Object.prototype.hasOwnProperty.call(value, "byteOffset")) throw new TypeError(`${name} must be a canonical Uint8Array.`);
-  if (value.byteLength === 0 || value.byteLength > maximumImageBytes) throw new RangeError(`${name} length is invalid.`);
-  return intrinsicUint8ArraySlice.call(value) as Uint8Array;
+function copyImageBytes(value: unknown, name: string): NSEData {
+  let bytes: NSEData;
+  try { bytes = NSEData.from(value as NSEDataConvertible); }
+  catch { throw new TypeError(`${name} must be NSEDataConvertible.`); }
+  if (bytes.count === 0 || bytes.count > maximumImageBytes) throw new RangeError(`${name} length is invalid.`);
+  return bytes;
 }
 
 function snapshotDocumentDescriptor(value: unknown): DocumentResourceDescriptor {
@@ -364,7 +368,7 @@ function normaliseSource(value: unknown, documents: DocumentResourceService, ori
     if (typeof raw.mimeType !== "string" || !allowedBinaryTypes.has(raw.mimeType)) throw new TypeError("Binary image MIME type is unsupported.");
     const bytes = copyImageBytes(raw.bytes, "Binary image bytes");
     const mimeType = raw.mimeType as "image/png" | "image/jpeg" | "image/webp" | "image/gif" | "image/svg+xml";
-    if (mimeType === "image/svg+xml") sanitiseSVGMarkup(new TextDecoder().decode(bytes), "Binary SVG image");
+    if (mimeType === "image/svg+xml") sanitiseSVGMarkup(new TextDecoder().decode(bytes.bytes), "Binary SVG image");
     const source = Object.freeze({ kind, mimeType, bytes });
     const adapterSource = Object.freeze({ kind, mimeType, bytes });
     return { source, adapterSource, identity: JSON.stringify(["bytes", raw.mimeType, bytesKey(bytes)]) };
@@ -381,7 +385,7 @@ function normaliseSource(value: unknown, documents: DocumentResourceService, ori
     if (raw.density !== undefined && (typeof raw.density !== "number" || !Number.isFinite(raw.density) || raw.density < 0.125 || raw.density > 8)) {
       throw new TypeError("Generated SVG density is invalid.");
     }
-    const bytes = svgToBytes(svg);
+    const bytes = NSEData.from(svgToBytes(svg));
     const source = Object.freeze({
       kind,
       svg,
@@ -402,7 +406,7 @@ function normaliseSource(value: unknown, documents: DocumentResourceService, ori
     const bytes = documents.resolve(documentId, descriptor);
     if (!bytes) throw new TypeError("Document image resource cannot be resolved.");
     if (!allowedBinaryTypes.has(descriptor.mimeType)) throw new TypeError("Document image MIME type is unsupported.");
-    if (descriptor.mimeType === "image/svg+xml") sanitiseSVGMarkup(new TextDecoder().decode(bytes), "Document SVG image");
+    if (descriptor.mimeType === "image/svg+xml") sanitiseSVGMarkup(new TextDecoder().decode(bytes.bytes), "Document SVG image");
     const source = Object.freeze({ kind, documentId, descriptor }) as RuntimeImageSource;
     return {
       source,
@@ -435,7 +439,9 @@ function inspectLease(value: RuntimeDecodedImageLease): InspectedDecodedImageLea
   if (typeof density !== "number" || !Number.isFinite(density) || density < 0.125 || density > 8) throw new RangeError("Decoded image density is invalid.");
   if ("sourceOrientation" in raw && (!Number.isSafeInteger(raw.sourceOrientation) || (raw.sourceOrientation as number) < 1 || (raw.sourceOrientation as number) > 8)) throw new RangeError("Decoded image source orientation is invalid.");
   if ("sourceICCProfile" in raw) {
-    const profile = raw.sourceICCProfile;
+    const data = raw.sourceICCProfile;
+    if (!(data instanceof NSEData)) throw new TypeError("Decoded image source ICC profile must be NSEData.");
+    const profile = data.bytes;
     // Encoded length is not an upper bound for a PNG's compressed iCCP profile.
     if (!(profile instanceof Uint8Array) || Object.getPrototypeOf(profile) !== Uint8Array.prototype || profile.byteLength < 132 || profile.byteLength > 4 * 1024 * 1024) throw new TypeError("Decoded image source ICC profile exceeds the bounded size.");
     const view = new DataView(profile.buffer, profile.byteOffset, profile.byteLength);
@@ -447,7 +453,7 @@ function inspectLease(value: RuntimeDecodedImageLease): InspectedDecodedImageLea
     intrinsicSize: Object.freeze({ width, height }),
     density,
     ...("sourceOrientation" in raw ? { sourceOrientation: raw.sourceOrientation as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 } : {}),
-    ...("sourceICCProfile" in raw ? { sourceICCProfile: intrinsicUint8ArraySlice.call(raw.sourceICCProfile) as Uint8Array } : {}),
+    ...("sourceICCProfile" in raw ? { sourceICCProfile: NSEData.from(raw.sourceICCProfile as NSEData) } : {}),
     byteLength: byteLength as number,
     corsClean: raw.corsClean,
     release: () => (raw.release as () => void).call(value),
@@ -464,16 +470,13 @@ function releaseRejectedLease(value: unknown): void {
 }
 
 function adapterSourcesEqual(left: RuntimeImageAdapterSource, right: RuntimeImageAdapterSource): boolean {
-  if (left.kind !== right.kind) return false;
   if (left.kind === "url" && right.kind === "url") return left.url === right.url && left.cors === right.cors;
-  if (left.kind !== "bytes" || right.kind !== "bytes" || left.mimeType !== right.mimeType || left.bytes.byteLength !== right.bytes.byteLength) return false;
-  for (let index = 0; index < left.bytes.byteLength; index += 1) if (left.bytes[index] !== right.bytes[index]) return false;
-  return true;
+  return left.kind === "bytes" && right.kind === "bytes" && left.mimeType === right.mimeType && left.bytes.isEqual(right.bytes);
 }
 
 function adapterSourceForDecode(source: RuntimeImageAdapterSource): RuntimeImageAdapterSource {
   if (source.kind !== "bytes") return source;
-  return Object.freeze({ kind: "bytes", mimeType: source.mimeType, bytes: intrinsicUint8ArraySlice.call(source.bytes) as Uint8Array });
+  return Object.freeze({ kind: "bytes", mimeType: source.mimeType, bytes: NSEData.from(source.bytes) });
 }
 
 interface ImageActivation {
@@ -792,7 +795,7 @@ export function createRuntimeImageService(options: {
          get sourceICCProfile() {
            if (released || ownedEntry.invalidated || state !== "ready" || ownedEntry.activation !== ownedActivation || !ownedActivation.authorised) return null;
            const profile = ownedEntry.lease?.sourceICCProfile;
-           return profile ? intrinsicUint8ArraySlice.call(profile) as Uint8Array : null;
+           return profile ?? null;
          },
         accessibleLabel: label,
         renderingMode,

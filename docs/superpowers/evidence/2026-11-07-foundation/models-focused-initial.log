@@ -1,0 +1,68 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/foundation-models.test.ts tests/runtime/model-indexes.test.ts tests/runtime/model-native-boundaries.test.ts tests/runtime/model-formatters-transformers.test.ts tests/runtime/model-predicates-sort.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/model-formatters-transformers.test.ts (8 tests | 2 failed) 32ms
+   × formats and parses locale-aware values with structured failures 17ms
+   × round-trips accounting currency signs and configured unit affixes 1ms
+ ❯ tests/runtime/model-predicates-sort.test.ts (9 tests | 1 failed) 24ms
+   × validates operator values and nullable fields 3ms
+ ❯ tests/runtime/model-native-boundaries.test.ts (4 tests | 1 failed) 8ms
+     × keeps exact decimal arithmetic and rounding deliberate 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/model-formatters-transformers.test.ts > formats and parses locale-aware values with structured failures
+TypeError: (intermediate value).format is not a function
+ ❯ tests/runtime/model-formatters-transformers.test.ts:43:57
+     41|   });
+     42|   expect(
+     43|     new NSEByteCountFormatter({ unitSystem: "binary" }).format(1536, {
+       |                                                         ^
+     44|       locale: "en-GB",
+     45|     }),
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/runtime/model-formatters-transformers.test.ts > round-trips accounting currency signs and configured unit affixes
+TypeError: kilometres.format is not a function
+ ❯ tests/runtime/model-formatters-transformers.test.ts:172:36
+    170|     maximumFractionDigits: 0,
+    171|   });
+    172|   const kilometreText = kilometres.format(123, { locale: "en-GB" });
+       |                                    ^
+    173|   expect(kilometreText).toBe("123 km");
+    174|   expect(kilometres.parse(kilometreText, { locale: "en-GB" })).toEqual…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/runtime/model-native-boundaries.test.ts > native model value boundaries > keeps exact decimal arithmetic and rounding deliberate
+TypeError: DecimalValue.parse(...).addObject is not a function
+ ❯ tests/runtime/model-native-boundaries.test.ts:62:33
+     60|   it("keeps exact decimal arithmetic and rounding deliberate", () => {
+     61|     expect(
+     62|       DecimalValue.parse("0.1").addObject(DecimalValue.parse("0.2")).t…
+       |                                 ^
+     63|     ).toBe("0.3");
+     64|     expect(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/runtime/model-predicates-sort.test.ts > validates operator values and nullable fields
+TypeError: NSEPredicate.compile(...).test is not a function
+ ❯ tests/runtime/model-predicates-sort.test.ts:144:8
+    142|       field: "team",
+    143|       operator: "isNull",
+    144|     }).test({ id: "a", name: "Ana", age: 30, team: null }),
+       |        ^
+    145|   ).toBe(true);
+    146| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  3 failed | 2 passed (5)
+      Tests  4 failed | 25 passed (29)
+   Start at  08:23:42
+   Duration  938ms (transform 305ms, setup 121ms, import 402ms, tests 101ms, environment 0ms)

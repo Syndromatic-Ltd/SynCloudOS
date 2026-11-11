@@ -1,0 +1,35 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 test
+npm notice run vitest run tests/runtime/foundation-faithful-date.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/foundation-faithful-date.test.ts (4 tests | 1 failed) 23ms
+   × parses local day periods and rejects impossible wall times 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/foundation-faithful-date.test.ts > parses local day periods and rejects impossible wall times
+AssertionError: expected undefined to be '2026-08-09T18:30:00.000Z' // Object.is equality
+
+- Expected:
+"2026-08-09T18:30:00.000Z"
+
++ Received:
+undefined
+
+ ❯ tests/runtime/foundation-faithful-date.test.ts:23:46
+     21|   const f = new NSEDateFormatter({locale:"en-US", timeZone:"America/Ne…
+     22|   const d = new Date("2026-08-09T18:30:00Z");
+     23|   expect(f.date(f.string(d))?.toISOString()).toBe(d.toISOString());
+       |                                              ^
+     24|   const gap = new NSEDateFormatter({locale:"en-US", timeZone:"America/…
+     25|   expect(gap.date("2026-03-08 02:30")).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 passed (4)
+   Start at  19:12:55
+   Duration  250ms (transform 44ms, setup 33ms, import 27ms, tests 23ms, environment 0ms)
+

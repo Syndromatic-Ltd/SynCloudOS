@@ -1,0 +1,60 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/framework-doc-links.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ tests/runtime/framework-doc-links.test.ts (4 tests | 2 failed) 310ms
+     × links only to files and headings that exist 135ms
+     × links every guide from the framework index 55ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/framework-doc-links.test.ts > framework documentation > links only to files and headings that exist
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "docs\\framework\\documents.md links to missing heading synware-manifest.md#permissions",
++ ]
+
+ ❯ tests/runtime/framework-doc-links.test.ts:85:20
+     83|       }
+     84|     }
+     85|     expect(errors).toEqual([]);
+       |                    ^
+     86|   });
+     87|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/runtime/framework-doc-links.test.ts > framework documentation > links every guide from the framework index
+AssertionError: expected [ …(2) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "docs\\framework\\installed-applications.md",
++   "docs\\framework\\privacy.md",
++ ]
+
+ ❯ tests/runtime/framework-doc-links.test.ts:104:22
+    102|       .filter((file) => !linked.has(file))
+    103|       .map((file) => relative(repositoryRoot, file));
+    104|     expect(unlinked).toEqual([]);
+       |                      ^
+    105|   });
+    106|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 2 passed (4)
+   Start at  21:39:20
+   Duration  603ms (transform 41ms, setup 37ms, import 28ms, tests 310ms, environment 0ms)
+

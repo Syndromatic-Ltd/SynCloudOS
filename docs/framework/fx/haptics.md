@@ -4,7 +4,7 @@ HapticsFX (`HFX`) is the web-native analogue of Core Haptics. It describes tacti
 
 Feedback gets a portable description that designers can author, store and exchange, including the AHAP interchange format that Core Haptics uses. Playback gets a controllable transport with pause, seek, looping, rate and dynamic parameter changes. Applications get an honest capability report, because browsers differ widely: many have no vibration hardware, and where the Vibration API exists it offers timed pulses without amplitude control.
 
-HapticsFX runs in two places. The value types (`HFXHapticPattern`, `HFXHapticParameterCurve`, `HFXHapticPatternCodec` and the plain interfaces) are a library that runs anywhere JavaScript runs, including tests and workers. Playback goes through the mounted SynWare session: `useSynWareHaptics()` returns an `HFXHapticSession` that the host creates for your component, so the host can enforce permissions, honour the user's feedback settings and release everything when the component unmounts.
+HapticsFX runs in two places. The value types (`HFXHapticPattern`, `HFXHapticParameterCurve`, `HFXHapticPatternCodec` and the plain interfaces) are a library that runs anywhere JavaScript runs, including tests and workers. Playback goes through the mounted SynWare session: `useHaptics()` returns an `HFXHapticSession` that the host creates for your component, so the host can enforce permissions, honour the user's feedback settings and release everything when the component unmounts.
 
 ```ts
 import { HFXHapticPattern } from "@syndromatic/syncloudos/fx/haptics";
@@ -16,7 +16,7 @@ import { HFXHapticPattern } from "@syndromatic/syncloudos/fx/haptics";
 | --- | --- |
 | Prefix | `HFX` |
 | Entry | `@syndromatic/syncloudos/fx/haptics` |
-| Hook | `useSynWareHaptics`, from `@syndromatic/syncloudos/sdk` |
+| Hook | `useHaptics`, from `@syndromatic/syncloudos/sdk` |
 | Permission | `haptics.play` in the manifest `permissions` list |
 | Analogue | Core Haptics (`CHHapticEngine`, `CHHapticPattern`, `CHHapticAdvancedPatternPlayer`, AHAP) |
 
@@ -39,10 +39,10 @@ Presets are the simplest way to give feedback. `trigger()` accepts one of eleven
 
 ```tsx
 import { useState } from "react";
-import { useSynWareHaptics } from "@syndromatic/syncloudos/sdk";
+import { useHaptics } from "@syndromatic/syncloudos/sdk";
 
 export function SaveButton() {
-  const haptics = useSynWareHaptics();
+  const haptics = useHaptics();
   const [saved, setSaved] = useState(false);
 
   const onClick = async () => {
@@ -110,13 +110,13 @@ The audio modes behave as follows in the browser host. All of them stay silent w
 ### Preset feedback with options
 
 ```tsx
-import { useSynWareHaptics } from "@syndromatic/syncloudos/sdk";
+import { useHaptics } from "@syndromatic/syncloudos/sdk";
 import type { HFXFeedbackOptions, HFXFeedbackPresetName } from "@syndromatic/syncloudos/fx/haptics";
 
 const quiet: HFXFeedbackOptions = { intensity: 0.4, audio: "off" };
 
 export function Stepper() {
-  const haptics = useSynWareHaptics();
+  const haptics = useHaptics();
 
   const tick = (name: HFXFeedbackPresetName) => {
     haptics.trigger(name, quiet).catch((error: unknown) => {
@@ -282,7 +282,7 @@ console.log(swell.curves[1]?.valueAt(0)); // 0 (held before the first point)
 
 ### `HFXHapticClient`
 
-The mounted application's authority for creating engines. Applications rarely use it directly, because `useSynWareHaptics()` creates and disposes an engine for each component.
+The mounted application's authority for creating engines. Applications rarely use it directly, because `useHaptics()` creates and disposes an engine for each component.
 
 | Member | Type or signature | Description |
 | --- | --- | --- |
@@ -290,7 +290,7 @@ The mounted application's authority for creating engines. Applications rarely us
 
 ### `HFXHapticSession`
 
-The engine authority that an application receives. It exposes playback and inspection and leaves out host policy such as the user's vibration and button sound switches, which the host applies to every session for you. A session is a live resource: dispose it when you are done. The session that `useSynWareHaptics()` returns is disposed for you when the component unmounts.
+The engine authority that an application receives. It exposes playback and inspection and leaves out host policy such as the user's vibration and button sound switches, which the host applies to every session for you. A session is a live resource: dispose it when you are done. The session that `useHaptics()` returns is disposed for you when the component unmounts.
 
 | Member | Type or signature | Description |
 | --- | --- | --- |
@@ -309,7 +309,7 @@ The engine authority that an application receives. It exposes playback and inspe
 | `makeAdvancedPlayer(pattern)` | `(pattern: HFXHapticPattern) => HFXHapticAdvancedPatternPlayer` | Creates a player with pause, seek, looping, rate and mute. |
 | `dispose()` | `() => void` | Ends the session: emits `stopped` with reason `"disposed"` if it was running, cancels output, releases audio resources and drops observers. Idempotent. |
 
-After disposal, `trigger`, `start`, `reset`, `observe`, `configurePlayback`, the player factories and the resource methods throw `Error("Haptic engine is disposed.")`. `stop()` and `dispose()` do nothing. `isSupported` is `false` and `capabilities.state` is `"disposed"`.
+After disposal, `trigger`, `start`, `reset`, `observe`, `configurePlayback`, the player factories and the resource methods throw `SynCloudOSLifecycleError` with code `HFX_HAPTIC_ENGINE_DISPOSED`. Branch on the type and code, not the message; see [Errors and outcomes](../errors.md). `stop()` and `dispose()` do nothing. `isSupported` is `false` and `capabilities.state` is `"disposed"`.
 
 `makeAdvancedPlayer` (and `makePlayer`) throw in these cases.
 
@@ -321,7 +321,7 @@ After disposal, `trigger`, `start`, `reset`, `observe`, `configurePlayback`, the
 
 ### The session in a component
 
-`useSynWareHaptics()` creates the session after the component commits (in a layout effect), never asks the browser for any permission, and disposes it on unmount. Each component that calls the hook owns its own session.
+`useHaptics()` creates the session after the component commits (in a layout effect), never asks the browser for any permission, and disposes it on unmount. Each component that calls the hook owns its own session.
 
 Before the session exists, the object the hook returns is safe to read. `isSupported` is `false`, `currentTime` is 0, and `capabilities` reports `state: "unavailable"` with the reason "The component haptic owner is not mounted." Calling an action such as `trigger` before mount throws that message as an `Error`. `stop()` and `dispose()` do nothing. Create players and observe events inside effects and handlers, which run after mount.
 
@@ -329,10 +329,10 @@ The next example checks capabilities and falls back to a visual cue.
 
 ```tsx
 import { useEffect, useState } from "react";
-import { useSynWareHaptics } from "@syndromatic/syncloudos/sdk";
+import { useHaptics } from "@syndromatic/syncloudos/sdk";
 
 export function ConnectionBadge({ online }: { online: boolean }) {
-  const haptics = useSynWareHaptics();
+  const haptics = useHaptics();
   const [canVibrate, setCanVibrate] = useState(false);
 
   useEffect(() => {
@@ -380,12 +380,12 @@ new HFXHapticAdvancedPatternPlayer(engine: HFXHapticEngine, pattern: HFXHapticPa
 | `playbackRate` | `number` | Speed multiplier, default 1. Must be above 0 and at most 4, or the setter throws `RangeError("Invalid playback rate.")`. Setting it while playing pauses and resumes from the current position. |
 | `isMuted` | `boolean` | Default `false`. Setting `true` cancels current output immediately and suppresses events and parameter updates. The timeline keeps running, so unmuting rejoins playback in time. |
 | `completionHandler` | `((reason: "completed" \| "cancelled" \| "error") => void) \| undefined` | Called once when playback ends. `"completed"` means the pattern reached its end, `"cancelled"` means `stop()` or `dispose()`, and `"error"` means the host failed to play an event or parameter. Exceptions from the handler are swallowed. |
-| `start(delay?)` | `(delay?: number) => void` | Starts playback after `delay` seconds (default 0) from the current start offset, which is the start of the pattern unless you called `seek` or `pause`. Calling it on a running player cancels pending output and schedules playback again from that offset. Throws `RangeError("Invalid player timing.")` for a negative or non-finite delay, `Error("Haptic player is disposed.")` after disposal, and `Error("Haptic engine is disposed.")` after the session ends. |
+| `start(delay?)` | `(delay?: number) => void` | Starts playback after `delay` seconds (default 0) from the current start offset, which is the start of the pattern unless you called `seek` or `pause`. Calling it on a running player cancels pending output and schedules playback again from that offset. Throws `RangeError("Invalid player timing.")` for a negative or non-finite delay, and `SynCloudOSLifecycleError` with code `HFX_HAPTIC_ADVANCED_PATTERN_PLAYER_DISPOSED` after player disposal or `HFX_HAPTIC_ENGINE_DISPOSED` when checking an ended engine. |
 | `stop()` | `() => void` | Ends playback, resets the offset to the start, cancels output and calls `completionHandler("cancelled")`. It does nothing on a player that is not in a started state. |
 | `pause()` | `() => void` | Records the current position, cancels pending output and scheduled parameter changes, and holds the position. It does not call `completionHandler`. The session treats a paused player as active, so it does not report `players-finished`. Does nothing when the player is not running. |
 | `resume()` | `() => void` | Continues from the paused position. On a stopped or never-started player it starts playback. |
 | `seek(offset)` | `(offset: number) => void` | Moves the start offset to `offset` seconds. Must be finite and within 0 to `pattern.duration`, or it throws `RangeError("Invalid seek offset.")`. On a running player playback restarts from there. On an idle player the next `start()` begins there. Continuous and audio events that span the offset resume part-way through. |
-| `sendParameters(parameters)` | `(parameters: readonly HFXHapticDynamicParameter[]) => void` | Applies parameter changes. A `relativeTime` of 0 applies the change immediately. A value you send stays in force, overriding the pattern's curves for that parameter, until you dispose the player. A positive `relativeTime` schedules the change that many seconds from now, in real time (the playback rate does not scale it). Scheduled changes are cancelled when the player stops, pauses, seeks or restarts. Throws `RangeError` when the list has more than 128 entries or an entry is invalid, `Error("Dynamic parameters are unavailable on this host.")` when the host cannot change parameters live, and `Error("Haptic player is disposed.")` after disposal. Values you send override the pattern's curves for the same parameter. |
+| `sendParameters(parameters)` | `(parameters: readonly HFXHapticDynamicParameter[]) => void` | Applies parameter changes. A `relativeTime` of 0 applies the change immediately. A value you send stays in force, overriding the pattern's curves for that parameter, until you dispose the player. A positive `relativeTime` schedules the change that many seconds from now, in real time (the playback rate does not scale it). Scheduled changes are cancelled when the player stops, pauses, seeks or restarts. Throws `RangeError` when the list has more than 128 entries or an entry is invalid, `Error("Dynamic parameters are unavailable on this host.")` when the host cannot change parameters live, and `SynCloudOSLifecycleError` with code `HFX_HAPTIC_ADVANCED_PATTERN_PLAYER_DISPOSED` after disposal. Values you send override the pattern's curves for the same parameter. |
 | `dispose()` | `() => void` | Stops the player (calling `completionHandler("cancelled")` if it was playing), clears parameter overrides and releases the player from the session. Idempotent. Every later call to `start` or `sendParameters` throws. |
 
 Timing behaviour to rely on:
@@ -422,7 +422,7 @@ The handler disposes the player after it reports. Disposing a finished player is
 
 ```tsx
 import { useEffect, useRef, useState } from "react";
-import { useSynWareHaptics } from "@syndromatic/syncloudos/sdk";
+import { useHaptics } from "@syndromatic/syncloudos/sdk";
 import { HFXHapticParameterCurve, HFXHapticPattern } from "@syndromatic/syncloudos/fx/haptics";
 import type { HFXHapticAdvancedPatternPlayer } from "@syndromatic/syncloudos/fx/haptics";
 
@@ -435,7 +435,7 @@ const pattern = new HFXHapticPattern(
 );
 
 export function PatternDeck() {
-  const haptics = useSynWareHaptics();
+  const haptics = useHaptics();
   const player = useRef<HFXHapticAdvancedPatternPlayer | null>(null);
   const [state, setState] = useState("idle");
 
@@ -532,14 +532,14 @@ Observers run in registration order. An exception thrown by one observer is swal
 
 ```tsx
 import { useEffect, useState } from "react";
-import { useSynWareHaptics } from "@syndromatic/syncloudos/sdk";
+import { useHaptics } from "@syndromatic/syncloudos/sdk";
 import { HFXHapticPattern } from "@syndromatic/syncloudos/fx/haptics";
 import type { HFXHapticLifecycleEvent } from "@syndromatic/syncloudos/fx/haptics";
 
 const pulse = new HFXHapticPattern([{ type: "continuous", relativeTime: 0, duration: 0.3, intensity: 0.7 }]);
 
 export function PulseStatus() {
-  const haptics = useSynWareHaptics();
+  const haptics = useHaptics();
   const [log, setLog] = useState<string[]>([]);
 
   useEffect(() => {
@@ -585,7 +585,7 @@ A frozen handle to audio that a session holds.
 - It takes a copy of the buffer, so later edits to your `AUFXAudioPCMBuffer` do not affect the resource. The buffer must contain at least one frame, so set `frameLength` before you register it.
 - A session holds up to 64 resources. Registering beyond that, or on a host without audio support, rejects with an `Error`. The browser host also limits the total retained audio and rejects a registration that exceeds it with a `RangeError`.
 - If the signal is already aborted, or aborts during registration, the promise rejects with the signal's reason and the host releases the audio.
-- If `reset()` runs during registration, or the session is disposed, the promise rejects with an `Error` and the host releases the audio.
+- If `reset()` runs during registration, the promise rejects with an `Error`. If the session ends during registration, it rejects with `SynCloudOSLifecycleError` (`HFX_HAPTIC_ENGINE_DISPOSED`), unless an earlier cancellation or reset takes precedence. The host releases the audio in each case.
 - Call `unregisterAudioResource(resource)` when you no longer need the sound. `reset()` and `dispose()` release every remaining resource.
 - Playback of an audio event fails with `completionHandler("error")` when its resource has been unregistered, so keep a resource registered for as long as any player that uses it can run.
 
@@ -679,13 +679,13 @@ The browser host reports the following. Vibration reaches the device only where 
 | Browser with the Vibration API | `state: "available"`, `timing` `"approximate"`, `amplitude` and `sharpness` `false`, `fidelity.amplitude` `"timing-approximation"`, `fidelity.sharpness` `"unavailable"`, and `dynamicParameters` `true` with `"timing-approximation"` fidelity. |
 | Browser without the Vibration API | `state: "unavailable"`, `isSupported` `false`, with the reason "Haptic actuator is unavailable; audio playback remains available." when audio can play. |
 | Component not yet mounted | `state: "unavailable"`, with the reason "The component haptic owner is not mounted." |
-| Disposed session | `state: "disposed"`, with the reason "Haptic engine is disposed." |
+| Disposed session | `state: "disposed"`, with the status reason "Haptic engine is disposed." (not a thrown-error message contract) |
 
 Where haptic hardware is missing, NSE controls that request feedback fall back to audio through the same engines. In your own code, do the same: check `isSupported` and provide an equivalent visual or audible cue.
 
 ### Permissions and denial
 
-Declare `haptics.play` in the manifest `permissions` list. The permission is checked when a session is created, which happens after the component mounts. Without it, `createEngine` throws a `DOMException` with name `SecurityError` and the message "SynWare capability haptics.play must be declared." Because `useSynWareHaptics()` creates its session in a layout effect, the exception surfaces as a render error at mount, so declare the permission before you ship a component that uses the hook. If the application is closing, session creation rethrows the owner's abort reason instead.
+Declare `haptics.play` in the manifest `permissions` list. The permission is checked when a session is created, which happens after the component mounts. Without it, `createEngine` throws a `DOMException` with name `SecurityError` and the message "SynWare capability haptics.play must be declared." Because `useHaptics()` creates its session in a layout effect, the exception surfaces as a render error at mount, so declare the permission before you ship a component that uses the hook. If the application is closing, session creation rethrows the owner's abort reason instead.
 
 The hook never prompts the user. The user's vibration and button sound switches, and the browser's audio policy, remain in force for every session. A pattern never turns on feedback that the user has turned off.
 
@@ -780,7 +780,7 @@ Session members that the engine also has: `currentTime`, `isSupported`, `capabil
 
 | Member | Type or signature | Description |
 | --- | --- | --- |
-| `assertActive()` | `() => void` | Throws `Error("Haptic engine is disposed.")` after disposal. |
+| `assertActive()` | `() => void` | Throws `SynCloudOSLifecycleError` with code `HFX_HAPTIC_ENGINE_DISPOSED` after disposal. |
 | `emit(event, delay?, offset?, rate?, originalDuration?)` | `(event: HFXHapticEvent, delay?: number, offset?: number, rate?: number, originalDuration?: number) => void` | Sends one event straight to the port outside any player. Delay and offset are in seconds and rate defaults to 1. Applies the audio-only, haptics-only and vibration switches. Throws when the port has no `event` operation. |
 | `emitFromPlayer(player, event, delay?, offset?, rate?, originalDuration?)` | `(player: HFXHapticAdvancedPatternPlayer, event: HFXHapticEvent, ...) => void` | Sends an event on behalf of a player, through the port's `playerEvent`. Players call this. For an `audio` event it swaps the resource `id` for the port's own identifier. |
 | `sendParameters(parameters, actuatorOwner?)` | `(parameters: readonly HFXHapticDynamicParameter[], actuatorOwner?: object) => void` | Validates up to 128 parameters and forwards them, to the player's owner when one is given. Throws `RangeError` for an invalid parameter or more than 128, and `Error` when the port has no `parameters` operation. |
@@ -864,7 +864,7 @@ export const events = recordPattern(new HFXHapticPattern([{ type: "transient", r
 | --- | --- |
 | Manifest lacks `haptics.play` | The hook throws a `SecurityError` `DOMException` while the component mounts. |
 | Action called before the component mounts | Throws `Error("The component haptic owner is not mounted.")`. `stop()` and `dispose()` do nothing. |
-| Action called on a disposed session | Throws `Error("Haptic engine is disposed.")`. `stop()` and `dispose()` do nothing. |
+| Action called on a disposed session | Throws `SynCloudOSLifecycleError` with code `HFX_HAPTIC_ENGINE_DISPOSED`. `stop()` and `dispose()` do nothing. |
 | Device has no haptic hardware | `isSupported` is `false`. Presets and pattern haptic events do nothing, and audio events still play when audio is available. |
 | Sharpness or amplitude requested on a host that lacks them | The value is accepted and ignored, and `capabilities.reason` says so. |
 | `trigger` given an invalid preset, option key or option value | Rejects with `TypeError` or `RangeError` as described in the presets section. |
@@ -877,7 +877,7 @@ export const events = recordPattern(new HFXHapticPattern([{ type: "transient", r
 
 ## Lifetimes and disposal
 
-- A session belongs to the component that called `useSynWareHaptics()`. The hook disposes it on unmount, and the host disposes any session that outlives its application.
+- A session belongs to the component that called `useHaptics()`. The hook disposes it on unmount, and the host disposes any session that outlives its application.
 - Dispose each player you create when you finish with it. A session holds at most 128 players, and a disposed player is released immediately.
 - A player's `completionHandler` runs once per run. `pause()` does not count as an end.
 - `session.stop()` cancels output and leaves players usable. `session.reset()` also invalidates audio resources. `session.dispose()` ends everything, and the session cannot be used again.

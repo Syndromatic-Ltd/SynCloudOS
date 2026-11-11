@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { NSEStackVisibilityPriority } from "./stackViewTypes";
 import type {
   NSEStackDistribution,
   NSEStackGravity,
@@ -52,7 +53,7 @@ function normaliseItem(item: NSEStackItemLayout, sourceIndex: number): Normalise
     preferredSize: Math.min(preferredSize, maximumSize),
     maximumSize,
     weight: nonNegative(item.weight, 1),
-    visibilityPriority: nonNegative(item.visibilityPriority, 0),
+    visibilityPriority: nonNegative(item.visibilityPriority, NSEStackVisibilityPriority.mustHold),
     detachedWhenHidden: item.detachedWhenHidden === true,
     gravity: item.gravity ?? "leading",
     hidden: item.hidden === true,
@@ -256,7 +257,7 @@ export function resolveStackLayout(input: NSEStackLayoutInput): NSEStackLayoutRe
   const triggerSpacingFor = () => triggerSizeFor() > 0 && active.length > 0 ? spacing : 0;
 
   if (overflowPolicy === "menu" && Number.isFinite(contentAvailableSize)) {
-    const candidates = [...visible].sort((left, right) => (
+    const candidates = visible.filter((item) => item.visibilityPriority < NSEStackVisibilityPriority.mustHold).sort((left, right) => (
       left.visibilityPriority - right.visibilityPriority || left.sourceIndex - right.sourceIndex
     ));
     while (active.length > 0 && requiredMinimum(active, spacing) + triggerSizeFor() + triggerSpacingFor() > contentAvailableSize) {

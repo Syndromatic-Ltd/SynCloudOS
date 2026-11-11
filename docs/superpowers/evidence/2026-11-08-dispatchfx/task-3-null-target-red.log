@@ -1,0 +1,30 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run src/FX/DispatchFX/__tests__/sync.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts (28 tests | 1 failed) 16ms
+   × nullable construction uses the default root and null reset preserves active submissions 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/FX/DispatchFX/__tests__/sync.test.ts > nullable construction uses the default root and null reset preserves active submissions
+Error: BUG IN CLIENT OF LIBDISPATCH: invalid dispatch object
+ ❯ clientError src/FX/DispatchFX/internal/time.ts:11:9
+      9|
+     10| export function clientError(message: string): never {
+     11|   throw new Error(`BUG IN CLIENT OF LIBDISPATCH: ${message}`);
+       |         ^
+     12| }
+     13| export function checkedInteger(value: number, label: string): number {
+ ❯ objectState src/FX/DispatchFX/internal/queueState.ts:36:15
+ ❯ new DFXQueue src/FX/DispatchFX/DFXQueue.ts:39:41
+ ❯ src/FX/DispatchFX/__tests__/sync.test.ts:43:24
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 27 passed (28)
+   Start at  09:33:50
+   Duration  316ms (transform 119ms, setup 26ms, import 128ms, tests 16ms, environment 0ms)

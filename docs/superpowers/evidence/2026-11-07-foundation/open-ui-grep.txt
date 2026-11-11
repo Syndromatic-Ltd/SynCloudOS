@@ -1,0 +1,3 @@
+rg -n '<button|‹|›|<svg|appearance="aqua"' -- 'src/NSE/FilePanels/NSEOpenPanelContent.tsx' 'src/NSE/FilePanels/NSEOpenPanelSources.tsx' 'src/NSE/FilePanels/NSEOpenPanelCollection.tsx' 'src/NSE/FilePanels/NSEOpenPanelItemImage.tsx' 'src/NSE/FilePanels/NSEFilePanelView.tsx'
+exit: 1
+No matches.

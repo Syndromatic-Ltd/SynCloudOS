@@ -27,15 +27,27 @@ export const AFXEdgeAntialiasingMask = Object.freeze({
   layerLeftEdge: 1, layerRightEdge: 2, layerBottomEdge: 4, layerTopEdge: 8,
 } as const);
 export type AFXEdgeAntialiasingMask = number;
+/**
+ * How a layer's contents are sampled when drawn smaller or larger than their pixels, after CALayer's
+ * `minificationFilter` and `magnificationFilter` (kCAFilterLinear, kCAFilterNearest, kCAFilterTrilinear).
+ * `"trilinear"` samples a mipmapped copy of the contents and applies to minification only, so fine detail drawn
+ * at a fraction of its size stays steady as it moves instead of sparkling.
+ */
+export type AFXLayerContentsFilter = "linear" | "nearest" | "trilinear";
+/** CALayerCornerCurve. Continuous corners use a smooth squircle. */
+export type AFXLayerCornerCurve = "circular" | "continuous";
 export interface AFXLayerStyle {
   readonly hidden: boolean;
   readonly doubleSided: boolean;
   readonly allowsEdgeAntialiasing: boolean;
   readonly edgeAntialiasingMask: AFXEdgeAntialiasingMask;
+  readonly minificationFilter: AFXLayerContentsFilter;
+  readonly magnificationFilter: Exclude<AFXLayerContentsFilter, "trilinear">;
   readonly backgroundColour: GFXColour | null;
   readonly borderColour: GFXColour | null;
   readonly borderWidth: number;
   readonly cornerRadius: number;
+  readonly cornerCurve: AFXLayerCornerCurve;
   readonly maskedCorners: readonly AFXLayerCorner[];
   readonly shadowColour: GFXColour | null;
   readonly shadowOpacity: number;
@@ -47,10 +59,13 @@ export const defaultAFXLayerStyle: AFXLayerStyle = Object.freeze({
   doubleSided: true,
   allowsEdgeAntialiasing: false,
   edgeAntialiasingMask: 15,
+  minificationFilter: "linear",
+  magnificationFilter: "linear",
   backgroundColour: null,
   borderColour: null,
   borderWidth: 0,
   cornerRadius: 0,
+  cornerCurve: "circular",
   maskedCorners: Object.freeze([
     "top-left",
     "top-right",

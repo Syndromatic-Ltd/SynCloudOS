@@ -30,9 +30,3 @@ export * from "./NSESheetView";
 export * from "./NSEPopoverWindowView";
 export * from "./Chrome";
 export * from "./NSEBorderlessWindowView";
-export { NSEAppFrame } from "./NSEAppFrame";
-export type { NSEAppFrameProps, NSEAppFrameVariant } from "./NSEAppFrame";
-
-// Public AppKit-equivalent spelling. This is the canonical runtime controller
-// class itself, not a second wrapper or state graph.
-export { WindowController as NSEWindowController } from "../../SynCloudOS/SynCloudOS";

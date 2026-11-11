@@ -20,6 +20,7 @@
 import { createAudioSessionFacade } from "./audioSessionFacade";
 import { AUFXAudioSession } from "../../FX/AudioFX/AUFXAudioSession";
 import { createMountedResourceScope } from "../HostServices/mountedResourceScope";
+import type { PrivacyApplicationPort } from "../HostServices/AppSDKHostServiceTypes";
 import type { MountedSettlementPort } from "./mountedSettlementPort";
 
 export interface MountedAudioSessionFactory {
@@ -34,16 +35,20 @@ export function createMountedAudioSessions(
   capability: object = Object.freeze({}),
   appId?: string,
   settlement?: MountedSettlementPort,
+  privacy?: PrivacyApplicationPort,
 ): MountedAudioSessionFactory {
   const scope = createMountedResourceScope(owner);
   return Object.freeze({
     createSession(signal?: AbortSignal) {
       owner.throwIfAborted();
-      if (!permissions().includes("audio.record")) throw new DOMException("SynWare capability audio.record must be declared.", "SecurityError");
+      if (!permissions().includes("audio.record") && !permissions().includes("audio.session")) throw new DOMException("SynWare capability audio.record or audio.session must be declared.", "SecurityError");
       if (!host) throw new DOMException("Audio recording is unavailable on this host.", "NotSupportedError");
       return scope.acquire(signal, (lease, release) => {
         const session = host.createSession(lease, capability);
-        return createAudioSessionFacade(session, release, appId, settlement);
+        const requirePermission = (permission: string) => { lease.throwIfAborted(); if (!permissions().includes(permission)) throw new DOMException(`SynWare capability ${permission} must be declared.`, "SecurityError"); };
+        const facade = createAudioSessionFacade(session, release, appId, settlement, () => requirePermission("audio.record"), () => requirePermission("audio.session"), privacy);
+        lease.addEventListener("abort", () => facade.dispose(), { once: true });
+        return facade;
       }, (session) => session.dispose());
     },
   });

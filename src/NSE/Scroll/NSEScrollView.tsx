@@ -18,16 +18,28 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useRef, useState, type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
+import { forwardRef, useImperativeHandle, useLayoutEffect, useRef, useState, type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
 import { useNSERubberBandScroll } from "./index";
 import { NSEScroller } from "./NSEScroller";
-import { NSEScrollViewController, type NSEScrollerPolicy, type NSEScrollInsets } from "./scrollTypes";
+import { NSEScrollViewController, type NSEScrollerPolicy } from "./scrollTypes";
+import { NSEEdgeInsetsZero, type NSEEdgeInsets } from "../Layout/NSEEdgeInsets";
+import { NSEViewSafeAreaContext, useNSEViewSafeArea } from "../Layout/useNSESafeArea";
+import { nseUnowned } from "../Controllers/ownership";
+import { NSEClipView } from "./NSEClipView";
+import type { NSEClipViewHandle, NSEScrollRect } from "./scrollTypes";
+
+/** The NSScrollView object reached through a committed React ref. */
+export interface NSEScrollViewHandle {
+  readonly contentView: NSEClipViewHandle;
+  readonly documentVisibleRect: NSEScrollRect;
+  scrollRectToVisible(rect: NSEScrollRect, behavior?: ScrollBehavior): void;
+}
 
 export interface NSEScrollViewGeometrySnapshot {
   readonly viewport: { readonly width: number; readonly height: number };
   readonly content: { readonly width: number; readonly height: number };
   readonly position: { readonly left: number; readonly top: number };
-  readonly insets: NSEScrollInsets;
+  readonly insets: NSEEdgeInsets;
 }
 
 export interface NSEScrollViewProps extends HTMLAttributes<HTMLDivElement> {
@@ -37,21 +49,25 @@ export interface NSEScrollViewProps extends HTMLAttributes<HTMLDivElement> {
   axis?: "y" | "x" | "both";
   horizontalScrollerPolicy?: NSEScrollerPolicy;
   verticalScrollerPolicy?: NSEScrollerPolicy;
-  scrollInsets?: Partial<NSEScrollInsets>;
+  automaticallyAdjustsContentInsets?: boolean;
+  contentInsets?: NSEEdgeInsets;
+  scrollerInsets?: NSEEdgeInsets;
   onScrollSnapshot?(): void;
   onGeometryChange?(snapshot: NSEScrollViewGeometrySnapshot): void;
   controllerRef?(controller: NSEScrollViewController | null): void;
 }
 
 /** Canonical scroll surface with distinct passive observation and rubber-band ownership. */
-export function NSEScrollView({
+export const NSEScrollView = forwardRef<NSEScrollViewHandle, NSEScrollViewProps>(function NSEScrollView({
   children,
   rubberBand = true,
   rubberBandCoeff = 0.55,
   axis = "y",
   horizontalScrollerPolicy = "automatic",
   verticalScrollerPolicy = "automatic",
-  scrollInsets,
+  automaticallyAdjustsContentInsets = true,
+  contentInsets = NSEEdgeInsetsZero,
+  scrollerInsets = NSEEdgeInsetsZero,
   onScrollSnapshot,
   onGeometryChange,
   controllerRef,
@@ -60,17 +76,18 @@ export function NSEScrollView({
   onKeyDown,
   tabIndex,
   ...props
-}: NSEScrollViewProps) {
+}: NSEScrollViewProps, ref) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const safeArea = useNSEViewSafeArea(scrollRef, undefined, undefined, () => publishGeometry(), contentRef);
+  const controller = useRef<NSEScrollViewController | null>(null);
   const callbacks = useRef({ onScrollSnapshot, onGeometryChange });
   const [geometry, setGeometry] = useState<NSEScrollViewGeometrySnapshot>(() => ({ viewport: { width: 0, height: 0 }, content: { width: 0, height: 0 }, position: { left: 0, top: 0 }, insets: { top: 0, right: 0, bottom: 0, left: 0 } }));
   callbacks.current = { onScrollSnapshot, onGeometryChange };
-  const insets: NSEScrollInsets = {
-    top: scrollInsets?.top ?? 0,
-    right: scrollInsets?.right ?? 0,
-    bottom: scrollInsets?.bottom ?? 0,
-    left: scrollInsets?.left ?? 0,
+  const insets = automaticallyAdjustsContentInsets ? safeArea.value.safeAreaInsets : contentInsets;
+  const trackInsets = {
+    top: insets.top + scrollerInsets.top, left: insets.left + scrollerInsets.left,
+    bottom: insets.bottom + scrollerInsets.bottom, right: insets.right + scrollerInsets.right,
   };
   const insetsRef = useRef(insets);
   insetsRef.current = insets;
@@ -87,38 +104,36 @@ export function NSEScrollView({
     callbacks.current.onGeometryChange?.(next);
   };
   useNSERubberBandScroll(scrollRef, contentRef, { enabled: rubberBand, coeff: rubberBandCoeff, axis });
-  useEffect(() => {
+  useLayoutEffect(() => {
     const host = scrollRef.current;
     if (!host) return;
-    const controller = new NSEScrollViewController(host, insetsRef.current);
-    controllerRef?.(controller);
-    const disconnect = controller.connect(() => {
+    const liveInsets = Object.freeze({
+      get top() { return insetsRef.current.top; }, get left() { return insetsRef.current.left; },
+      get bottom() { return insetsRef.current.bottom; }, get right() { return insetsRef.current.right; },
+    });
+    const instance = new NSEScrollViewController(host, liveInsets, { owner: nseUnowned });
+    controller.current = instance;
+    const disconnect = instance.connect(() => {
       callbacks.current.onScrollSnapshot?.();
       publishGeometry();
     });
     publishGeometry();
-    return () => { disconnect(); controllerRef?.(null); };
+    return () => { disconnect(); instance.dispose(); controller.current = null; };
   }, []);
-  useEffect(() => {
-    const host = scrollRef.current;
-    const content = contentRef.current;
-    if (!host || !content) return;
-    const ResizeObserverConstructor = host.ownerDocument.defaultView?.ResizeObserver ?? globalThis.ResizeObserver;
-    publishGeometry();
-    if (!ResizeObserverConstructor) return;
-    const observer = new ResizeObserverConstructor(publishGeometry);
-    observer.observe(host);
-    observer.observe(content);
-    return () => observer.disconnect();
-  }, []);
+  useLayoutEffect(() => { publishGeometry(); }, [insets.top, insets.left, insets.bottom, insets.right]);
+  useImperativeHandle(ref, () => controller.current!, []);
+  useLayoutEffect(() => {
+    controllerRef?.(controller.current);
+    return () => controllerRef?.(null);
+  }, [controllerRef]);
   const overflow = (policy: NSEScrollerPolicy, enabled: boolean): CSSProperties["overflowX"] => !enabled || policy === "hidden" ? "hidden" : policy === "always" ? "scroll" : "auto";
-  const hostStyle: CSSProperties = { ...style, overflowX: overflow(horizontalScrollerPolicy, axis !== "y"), overflowY: overflow(verticalScrollerPolicy, axis !== "x") };
+  const hostStyle: CSSProperties = { ...safeArea.properties, ...style, overflowX: overflow(horizontalScrollerPolicy, axis !== "y"), overflowY: overflow(verticalScrollerPolicy, axis !== "x") };
   const contentStyle: CSSProperties = { padding: `${insets.top}px ${insets.right}px ${insets.bottom}px ${insets.left}px` };
 
   const maximumLeft = Math.max(0, geometry.content.width - geometry.viewport.width);
   const maximumTop = Math.max(0, geometry.content.height - geometry.viewport.height);
-  return <div className="nse-scroll-view-frame" data-nse-control="scroll-view-frame">
-  <div {...props} ref={scrollRef} className={["nse-scroll-view", className].filter(Boolean).join(" ")} data-axis={axis} data-horizontal-scroller-policy={horizontalScrollerPolicy} data-vertical-scroller-policy={verticalScrollerPolicy} style={hostStyle} tabIndex={tabIndex ?? 0} onKeyDown={(event) => {
+  return <NSEViewSafeAreaContext.Provider value={safeArea.value}><div className="nse-scroll-view-frame" data-nse-control="scroll-view" data-nse-part="background">
+  <NSEClipView mode="scroll" {...props} ref={scrollRef} className={["nse-scroll-view", className].filter(Boolean).join(" ")} data-axis={axis} data-horizontal-scroller-policy={horizontalScrollerPolicy} data-vertical-scroller-policy={verticalScrollerPolicy} style={hostStyle} tabIndex={tabIndex ?? 0} onKeyDown={(event) => {
     onKeyDown?.(event);
     if (event.defaultPrevented) return;
     const host = event.currentTarget;
@@ -132,10 +147,10 @@ export function NSEScrollView({
       host.scrollTo(horizontal ? { left: Math.max(0, Math.min(maximumLeft, host.scrollLeft + direction * host.clientWidth)), top: host.scrollTop, behavior: "auto" } : { left: host.scrollLeft, top: Math.max(0, Math.min(maximumTop, host.scrollTop + direction * host.clientHeight)), behavior: "auto" });
     }
   }}>
-    <div ref={contentRef} className="nse-scroll-view-content" style={contentStyle}>{children}</div>
-  </div>
-  {axis !== "y" ? <NSEScroller orientation="horizontal" policy={horizontalScrollerPolicy} value={geometry.position.left} maximum={maximumLeft} onValueChange={(left) => scrollRef.current?.scrollTo({ left, top: scrollRef.current.scrollTop, behavior: "auto" })} /> : null}
-  {axis !== "x" ? <NSEScroller orientation="vertical" policy={verticalScrollerPolicy} value={geometry.position.top} maximum={maximumTop} onValueChange={(top) => scrollRef.current?.scrollTo({ left: scrollRef.current.scrollLeft, top, behavior: "auto" })} /> : null}
+    <div ref={contentRef} data-nse-part="content" className="nse-scroll-view-content" style={contentStyle}>{children}</div>
+  </NSEClipView>
+  {axis !== "y" ? <NSEScroller orientation="horizontal" style={trackInsets.left || trackInsets.right ? { marginLeft: trackInsets.left, marginRight: trackInsets.right, width: `calc(100% - ${trackInsets.left + trackInsets.right}px)` } : undefined} policy={horizontalScrollerPolicy} value={geometry.position.left} maximum={maximumLeft} onValueChange={(left) => scrollRef.current?.scrollTo({ left, top: scrollRef.current.scrollTop, behavior: "auto" })} /> : null}
+  {axis !== "x" ? <NSEScroller orientation="vertical" style={trackInsets.top || trackInsets.bottom ? { marginTop: trackInsets.top, marginBottom: trackInsets.bottom, height: `calc(100% - ${trackInsets.top + trackInsets.bottom}px)` } : undefined} policy={verticalScrollerPolicy} value={geometry.position.top} maximum={maximumTop} onValueChange={(top) => scrollRef.current?.scrollTo({ left: scrollRef.current.scrollLeft, top, behavior: "auto" })} /> : null}
   {axis === "both" && horizontalScrollerPolicy !== "hidden" && verticalScrollerPolicy !== "hidden" ? <span aria-hidden="true" data-nse-part="scroller-corner" /> : null}
-  </div>;
-}
+  </div></NSEViewSafeAreaContext.Provider>;
+});

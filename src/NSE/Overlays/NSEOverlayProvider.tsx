@@ -18,7 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type PropsWithChildren } from "react";
+import { useNSEScreenSafeAreaProperties } from "../Layout/screenSafeAreaProperties";
+import { useSyncExternalStore, createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type PropsWithChildren } from "react";
 import { createPortal } from "react-dom";
 import { createNSEOverlayManager } from "./NSEOverlayManager";
 import { belongsToNearestNSEOverlayProvider, isWithinNSEOverlay, markNSEOverlayDocumentProviderActive, nseOverlayEventPath, retainNSEOverlayDocumentProvider } from "./overlayEventOwnership";
@@ -72,6 +73,9 @@ export function NSEOverlayProvider({
   portalContainer,
   children,
 }: NSEOverlayProviderProps) {
+  const presentation = runtime.environment.presentation;
+  const traits = useSyncExternalStore(presentation.subscribe, presentation.getSnapshot, presentation.getSnapshot);
+  const screenSafeArea = useNSEScreenSafeAreaProperties(traits.safeAreaInsets);
   const parent = useContext(NSEOverlayContext);
   const destination = portalContainer === undefined ? parent?.portalContainer : portalContainer;
   const appearanceProjection = useNSEAppearanceProjection();
@@ -120,6 +124,10 @@ export function NSEOverlayProvider({
       const registration = manager.getRegistration(topmostId);
       if (!registration || !registration.dismissOn.has(reason)) return false;
       if (reason !== "escape" && isWithinNSEOverlay(nseOverlayEventPath(event), registration)) return false;
+      // Pressing an open menu's or pop-up list's own button (which also focuses it) closes the menu through
+      // that button, as a pop-up button does; dismissing here first would let the button's click open it again.
+      if ((reason === "outside-pointer" || reason === "focus-left") && (registration.kind === "menu" || registration.kind === "listbox")
+        && registration.anchor && nseOverlayEventPath(event).includes(registration.anchor)) return false;
       return manager.dismiss(topmostId, reason);
     };
     const handlePointerDown = (event: PointerEvent) => {
@@ -201,6 +209,7 @@ export function NSEOverlayProvider({
     <div
       ref={setPortalHost}
       {...appearanceProjection}
+      style={{ ...appearanceProjection.style, ...screenSafeArea.properties }}
       // Mounted away from the provider element, the host carries the provider
       // marker itself so events from its overlays still resolve here.
       data-nse-overlay-provider={relocated ? providerId : undefined}
@@ -217,7 +226,8 @@ export function NSEOverlayProvider({
         // Providers are logical event/focus boundaries, never a new layout
         // surface. In particular, Webspring's staged application frame must
         // remain an effective direct child of its positioning container.
-        style={{ display: "contents" }}
+        ref={screenSafeArea.ref}
+        style={{ ...screenSafeArea.properties, display: "contents" }}
       >
         {children}
         {relocated

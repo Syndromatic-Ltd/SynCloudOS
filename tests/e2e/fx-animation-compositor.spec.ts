@@ -23,14 +23,15 @@ import { expect, test } from "playwright/test";
 test("live AFXLayer opacity uses native playback without frame sampling and preserves retarget settlement", async ({ page }) => {
   await page.goto("/");
   const initial = await page.evaluate(async () => {
-    const [afx, browser] = await Promise.all([
+    const [afx, browser, host] = await Promise.all([
       import("/src/FX/AnimationFX/public.ts"),
       import("/src/SynCloudOS/PlatformAdapters/BrowserAnimationAdapter.ts"),
+      import("/src/FX/AnimationFX/host.ts"),
     ]);
     const element = document.createElement("div");
     document.body.append(element);
     let frameRequests = 0;
-    const layer = new afx.AFXLayer(new browser.BrowserAnimationLayerSurface(element), {
+    const layer = host.createAFXLayer(new browser.BrowserAnimationLayerSurface(element), {
       now: () => performance.now() / 1000,
       reducedMotion: false,
       suspended: false,
@@ -93,14 +94,15 @@ test("live AFXLayer opacity uses native playback without frame sampling and pres
 test("live AFXLayer transform uses native playback and cancellation releases it", async ({ page }) => {
   await page.goto("/");
   const result = await page.evaluate(async () => {
-    const [afx, browser] = await Promise.all([
+    const [afx, browser, host] = await Promise.all([
       import("/src/FX/AnimationFX/public.ts"),
       import("/src/SynCloudOS/PlatformAdapters/BrowserAnimationAdapter.ts"),
+      import("/src/FX/AnimationFX/host.ts"),
     ]);
     const element = document.createElement("div");
     document.body.append(element);
     let frameRequests = 0;
-    const layer = new afx.AFXLayer(new browser.BrowserAnimationLayerSurface(element), {
+    const layer = host.createAFXLayer(new browser.BrowserAnimationLayerSurface(element), {
       now: () => performance.now() / 1000,
       reducedMotion: false,
       suspended: false,
@@ -126,13 +128,14 @@ test("live AFXLayer transform uses native playback and cancellation releases it"
 test("a live compositor transform follows layer geometry changes without losing its timeline", async ({ page }) => {
   await page.goto("/");
   const result = await page.evaluate(async () => {
-    const [afx, browser] = await Promise.all([
+    const [afx, browser, host] = await Promise.all([
       import("/src/FX/AnimationFX/public.ts"),
       import("/src/SynCloudOS/PlatformAdapters/BrowserAnimationAdapter.ts"),
+      import("/src/FX/AnimationFX/host.ts"),
     ]);
     const element = document.createElement("div");
     document.body.append(element);
-    const layer = new afx.AFXLayer(new browser.BrowserAnimationLayerSurface(element), {
+    const layer = host.createAFXLayer(new browser.BrowserAnimationLayerSurface(element), {
       now: () => performance.now() / 1000,
       reducedMotion: false,
       suspended: false,
@@ -162,9 +165,10 @@ test("a live compositor transform follows layer geometry changes without losing 
 test("native playback keeps pause, seek, reduced-motion and owner-abort settlement", async ({ page }) => {
   await page.goto("/");
   const result = await page.evaluate(async () => {
-    const [afx, browser] = await Promise.all([
+    const [afx, browser, host] = await Promise.all([
       import("/src/FX/AnimationFX/public.ts"),
       import("/src/SynCloudOS/PlatformAdapters/BrowserAnimationAdapter.ts"),
+      import("/src/FX/AnimationFX/host.ts"),
     ]);
     const element = document.createElement("div");
     document.body.append(element);
@@ -172,7 +176,7 @@ test("native playback keeps pause, seek, reduced-motion and owner-abort settleme
     let reduced = false;
     let frames = 0;
     const owner = new AbortController();
-    const layer = new afx.AFXLayer(new browser.BrowserAnimationLayerSurface(element), {
+    const layer = host.createAFXLayer(new browser.BrowserAnimationLayerSurface(element), {
       now: () => performance.now() / 1000,
       get reducedMotion() { return reduced; },
       suspended: false,

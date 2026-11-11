@@ -1,0 +1,11 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/fx/animation-loops.test.ts tests/runtime/fx/animation-layer-frame-coalescing.test.ts tests/runtime/fx/animation-browser-clock.test.ts
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  3 passed (3)
+      Tests  12 passed (12)
+   Start at  09:05:14
+   Duration  2.09s (transform 1.25s, setup 57ms, import 1.67s, tests 58ms, environment 1.14s)
+

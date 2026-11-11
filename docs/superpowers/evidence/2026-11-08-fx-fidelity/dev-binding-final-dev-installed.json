@@ -1,0 +1,23 @@
+{
+  "archiveSha256": "b46e41f273adfa7aa885dc1fbcc3b85a1efc5ef98aa8e7561f964a9551bd58ae",
+  "sourceSha256": "e4d9730c74e9a29ed2e309cdd71f1dc5d5ad37d36f805958ccfd8999cf953eea",
+  "resourcesSha256": "fd3a98110baab1d39e704197e17bc59b489f0b0774585ef7527dcb3962b15e31",
+  "integrity": "sha512-MBTgr8vrJrlM4ROXHNsUth8VGsIG8Tx8GaJ268LzytGGZ0ADcguZs6wO9Gf+dyn8Y48pXUDTpVMEJXw3v1Np0Q==",
+  "installedOutsideRepository": true,
+  "linked": false,
+  "browser": "chromium",
+  "realDevServer": true,
+  "optimizerEnabled": true,
+  "strictInstalledTypes": true,
+  "unrelatedReactOptimized": true,
+  "reactDomOptimized": true,
+  "sdkOptimized": false,
+  "awaitTimerCallbackCases": 3,
+  "sharedBaseIdentity": true,
+  "sharedContext": true,
+  "hmrLiveMethodUpdate": true,
+  "hmrPreservedPageAndApplication": true,
+  "terminalSession": true,
+  "resourceIntegrityAfterProof": true,
+  "devServerLog": ""
+}

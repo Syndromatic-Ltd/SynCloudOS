@@ -20,7 +20,7 @@
 
 import { afterAll, afterEach, expect, it, vi } from "vitest";
 
-import { IndexPath, Predicate, SortDescriptor } from "../../src/SynCloudOS/Models";
+import { NSEIndexPath, NSEPredicate, NSESortDescriptor } from "../../src/Foundation/public";
 import { createUndoManager } from "../../src/SynCloudOS/Undo";
 import { NSETreeController } from "../../src/NSE/Controllers";
 import { createTestRuntime } from "./helpers";
@@ -80,7 +80,7 @@ it("arranges, expands, moves and selects trees by identity", () => {
   expect(() =>
     (controller.getSnapshot().errors as Map<string, string>).set("root", "unsafe"),
   ).toThrow(TypeError);
-  expect(controller.nodeAt(IndexPath.from(0, 1))?.id).toBe("power");
+  expect(controller.nodeAt(NSEIndexPath.from(0, 1))?.id).toBe("power");
   controller.select(["power"]);
   const beforeSelection = controller.getSnapshot();
   controller.select(["cloud", "power"]);
@@ -145,7 +145,7 @@ it("filters ancestors, sorts siblings and rejects duplicate identities", () => {
     },
   ]);
   controller.setSortDescriptors([
-    new SortDescriptor({ id: "label", select: (item: Item) => item.label }),
+    new NSESortDescriptor({ id: "label", select: (item: Item) => item.label }),
   ]);
   const schema = {
     id: "tree",
@@ -154,7 +154,7 @@ it("filters ancestors, sorts siblings and rejects duplicate identities", () => {
     },
   } as const;
   controller.setPredicate(
-    Predicate.compile(schema, {
+    NSEPredicate.compile(schema, {
       kind: "comparison",
       field: "label",
       operator: "contains",

@@ -45,7 +45,7 @@ export default fonts;
   expect(runNode(["declaration.mjs"], consumer.root)).toBe("");
   writeFileSync(join(consumer.root, "consumer.tsx"), `
 import { defineFontDeclaration, type FontDeclaration } from "@syndromatic/syncloudos/typography";
-import { useSynWareFonts } from "@syndromatic/syncloudos/sdk";
+import { useFonts } from "@syndromatic/syncloudos/sdk";
 import { TFXFontDescriptor } from "@syndromatic/syncloudos/fx/text";
 import type { MountSynCloudOSOptions } from "@syndromatic/syncloudos/browser";
 
@@ -60,7 +60,7 @@ export const configuration: MountSynCloudOSOptions["fonts"] = {
   declaration: fonts, resourceUrls: { "Resources/Inter.woff2": "/assets/Inter.woff2" },
 };
 export function FontConsumer() {
-  const access = useSynWareFonts();
+  const access = useFonts();
   const preset = access.manager.getPreset("inter.regular");
   async function shape() {
     const registration = await access.loadFace("inter.regular", new TFXFontDescriptor({ size: 18 }));

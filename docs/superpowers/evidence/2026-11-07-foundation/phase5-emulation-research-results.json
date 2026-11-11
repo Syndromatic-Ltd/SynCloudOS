@@ -1,0 +1,215 @@
+[
+  {
+    "channel": "default-headless-shell",
+    "calls": [
+      {
+        "target": "browser",
+        "method": "Browser.getVersion",
+        "ok": true,
+        "value": {
+          "protocolVersion": "1.3",
+          "product": "HeadlessChrome/149.0.7827.55",
+          "revision": "@3188f8a607ae7e067593be8aab7f02d2451fec07",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36",
+          "jsVersion": "14.9.207.21"
+        }
+      },
+      {
+        "target": "browser",
+        "method": "Page.setSPCTransactionMode",
+        "ok": false,
+        "error": "cdpSession.send: Protocol error (Page.setSPCTransactionMode): 'Page.setSPCTransactionMode' wasn't found"
+      },
+      {
+        "target": "browser",
+        "method": "BluetoothEmulation.enable",
+        "ok": true,
+        "value": {}
+      },
+      {
+        "target": "browser",
+        "method": "WebAuthn.enable",
+        "ok": false,
+        "error": "cdpSession.send: Protocol error (WebAuthn.enable): 'WebAuthn.enable' wasn't found"
+      },
+      {
+        "target": "browser",
+        "method": "WebAuthn.addVirtualAuthenticator",
+        "ok": false,
+        "error": "cdpSession.send: Protocol error (WebAuthn.addVirtualAuthenticator): 'WebAuthn.addVirtualAuthenticator' wasn't found"
+      },
+      {
+        "target": "page",
+        "method": "Browser.getVersion",
+        "ok": true,
+        "value": {
+          "protocolVersion": "1.3",
+          "product": "HeadlessChrome/149.0.7827.55",
+          "revision": "@3188f8a607ae7e067593be8aab7f02d2451fec07",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36",
+          "jsVersion": "14.9.207.21"
+        }
+      },
+      {
+        "target": "page",
+        "method": "Page.setSPCTransactionMode",
+        "ok": false,
+        "error": "cdpSession.send: Protocol error (Page.setSPCTransactionMode): 'Page.setSPCTransactionMode' wasn't found"
+      },
+      {
+        "target": "page",
+        "method": "BluetoothEmulation.enable",
+        "ok": false,
+        "error": "cdpSession.send: Protocol error (BluetoothEmulation.enable): 'BluetoothEmulation.enable' wasn't found"
+      },
+      {
+        "target": "page",
+        "method": "WebAuthn.enable",
+        "ok": true,
+        "value": {}
+      },
+      {
+        "target": "page",
+        "method": "WebAuthn.addVirtualAuthenticator",
+        "ok": true,
+        "value": {
+          "authenticatorId": "ada9f9b4-65cf-4fe1-8ef8-732900a042c8"
+        }
+      }
+    ],
+    "version": "149.0.7827.55",
+    "features": {
+      "secure": true,
+      "paymentRequest": "function",
+      "bluetooth": "object",
+      "publicKeyCredential": "function"
+    },
+    "enrollment": {
+      "ok": false,
+      "name": "NotSupportedError",
+      "error": "Error connecting to Secure Payment Confirmation service."
+    },
+    "payment": {
+      "constructed": true,
+      "canMakePayment": {
+        "ok": false,
+        "name": "UnknownError",
+        "error": "Renderer process could not establish or lost IPC connection to the PaymentRequest service in the browser process.",
+        "text": "UnknownError: Renderer process could not establish or lost IPC connection to the PaymentRequest service in the browser process."
+      },
+      "show": {
+        "ok": false,
+        "name": "InvalidStateError",
+        "error": "Failed to execute 'show' on 'PaymentRequest': Already called show() once",
+        "text": "InvalidStateError: Failed to execute 'show' on 'PaymentRequest': Already called show() once"
+      }
+    }
+  },
+  {
+    "channel": "chromium",
+    "calls": [
+      {
+        "target": "browser",
+        "method": "Browser.getVersion",
+        "ok": true,
+        "value": {
+          "protocolVersion": "1.3",
+          "product": "Chrome/149.0.7827.55",
+          "revision": "@3188f8a607ae7e067593be8aab7f02d2451fec07",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.0.0 Safari/537.36",
+          "jsVersion": "14.9.207.21"
+        }
+      },
+      {
+        "target": "browser",
+        "method": "Page.setSPCTransactionMode",
+        "ok": false,
+        "error": "cdpSession.send: Protocol error (Page.setSPCTransactionMode): 'Page.setSPCTransactionMode' wasn't found"
+      },
+      {
+        "target": "browser",
+        "method": "BluetoothEmulation.enable",
+        "ok": true,
+        "value": {}
+      },
+      {
+        "target": "browser",
+        "method": "WebAuthn.enable",
+        "ok": false,
+        "error": "cdpSession.send: Protocol error (WebAuthn.enable): 'WebAuthn.enable' wasn't found"
+      },
+      {
+        "target": "browser",
+        "method": "WebAuthn.addVirtualAuthenticator",
+        "ok": false,
+        "error": "cdpSession.send: Protocol error (WebAuthn.addVirtualAuthenticator): 'WebAuthn.addVirtualAuthenticator' wasn't found"
+      },
+      {
+        "target": "page",
+        "method": "Browser.getVersion",
+        "ok": true,
+        "value": {
+          "protocolVersion": "1.3",
+          "product": "Chrome/149.0.7827.55",
+          "revision": "@3188f8a607ae7e067593be8aab7f02d2451fec07",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.0.0 Safari/537.36",
+          "jsVersion": "14.9.207.21"
+        }
+      },
+      {
+        "target": "page",
+        "method": "Page.setSPCTransactionMode",
+        "ok": true,
+        "value": {}
+      },
+      {
+        "target": "page",
+        "method": "BluetoothEmulation.enable",
+        "ok": false,
+        "error": "cdpSession.send: Protocol error (BluetoothEmulation.enable): 'BluetoothEmulation.enable' wasn't found"
+      },
+      {
+        "target": "page",
+        "method": "WebAuthn.enable",
+        "ok": true,
+        "value": {}
+      },
+      {
+        "target": "page",
+        "method": "WebAuthn.addVirtualAuthenticator",
+        "ok": true,
+        "value": {
+          "authenticatorId": "f03d30ce-172e-47e5-a0d3-835a05677f6d"
+        }
+      }
+    ],
+    "version": "149.0.7827.55",
+    "features": {
+      "secure": true,
+      "paymentRequest": "function",
+      "bluetooth": "object",
+      "publicKeyCredential": "function"
+    },
+    "enrollment": {
+      "ok": true,
+      "id": "WYA6_9_51c_XCLwXqKrUhaAo3tGA0SwhEVh4A7BhbDw",
+      "bytes": 32,
+      "extensions": {}
+    },
+    "payment": {
+      "constructed": true,
+      "canMakePayment": {
+        "ok": true,
+        "value": true
+      },
+      "show": {
+        "ok": true,
+        "methodName": "secure-payment-confirmation",
+        "detailType": "PublicKeyCredential",
+        "rawIdBytes": 32,
+        "signatureBytes": 71,
+        "completed": true
+      }
+    }
+  }
+]

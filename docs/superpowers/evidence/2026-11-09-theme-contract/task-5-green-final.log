@@ -1,0 +1,10 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run tests/runtime/nse-scroll-content-insets.test.tsx tests/runtime/nse-view-safe-area.test.tsx tests/nse/controls/nse-scroll-progress-navigation.test.tsx tests/runtime/nse-view-controller.test.tsx
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+
+ Test Files  4 passed (4)
+      Tests  47 passed (47)
+   Start at  18:52:12
+   Duration  8.37s (transform 5.53s, setup 67ms, import 8.07s, tests 676ms, environment 3.37s)

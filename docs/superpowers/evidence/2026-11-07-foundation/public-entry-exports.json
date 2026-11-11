@@ -1,0 +1,246 @@
+{
+  "foundation": [
+    {
+      "name": "compareNSEIndexPaths",
+      "value": true,
+      "type": false
+    },
+    {
+      "name": "normaliseNSERange",
+      "value": true,
+      "type": false
+    },
+    {
+      "name": "NSEBinaryByteUnit",
+      "value": false,
+      "type": true
+    },
+    {
+      "name": "NSEByteCountFormatter",
+      "value": true,
+      "type": true
+    },
+    {
+      "name": "NSEByteCountFormatterOptions",
+      "value": false,
+      "type": true
+    },
+    {
+      "name": "NSEByteUnit",
+      "value": false,
+      "type": true
+    },
+    {
+      "name": "NSEByteUnitSystem",
+      "value": false,
+      "type": true
+    },
+    {
+      "name": "NSECharacterSet",
+      "value": true,
+      "type": true
+    },
+    {
+      "name": "NSECountedSet",
+      "value": true,
+      "type": true
+    },
+    {
+      "name": "NSEData",
+      "value": true,
+      "type": true
+    },
+    {
+      "name": "NSEDataCompressionAlgorithm",
+      "value": true,
+      "type": true
+    },
+    {
+      "name": "NSEDataConvertible",
+      "value": false,
+      "type": true
+    },
+    {
+      "name": "NSEDecimalByteUnit",
+      "value": false,
+      "type": true
+    },
+    {
+      "name": "NSEEqualRanges",
+      "value": true,
+      "type": false
+    },
+    {
+      "name": "NSEFormatter",
+      "value": true,
+      "type": true
+    },
+    {
+      "name": "NSEFormatterContext",
+      "value": false,
+      "type": true
+    },
+    {
+      "name": "NSEFormatterError",
+      "value": false,
+      "type": true
+    },
+    {
+      "name": "NSEFormatterResult",
+      "value": false,
+      "type": true
+    },
+    {
+      "name": "NSEIndexPath",
+      "value": true,
+      "type": true
+    },
+    {
+      "name": "NSEIndexSet",
+      "value": true,
+      "type": true
+    },
+    {
+      "name": "NSEIntersectionRange",
+      "value": true,
+      "type": false
+    },
+    {
+      "name": "NSENumberFormatter",
+      "value": true,
+      "type": true
+    },
+    {
+      "name": "NSENumberFormatterOptions",
+      "value": false,
+      "type": true
+    },
+    {
+      "name": "NSEPredicate",
+      "value": true,
+      "type": true
+    },
+    {
+      "name": "NSEPredicateComparisonOperator",
+      "value": false,
+      "type": true
+    },
+    {
+      "name": "NSEPredicateExpression",
+      "value": false,
+      "type": true
+    },
+    {
+      "name": "NSEPredicateField",
+      "value": false,
+      "type": true
+    },
+    {
+      "name": "NSEPredicateLiteral",
+      "value": false,
+      "type": true
+    },
+    {
+      "name": "NSEPredicateScalar",
+      "value": false,
+      "type": true
+    },
+    {
+      "name": "NSEPredicateSchema",
+      "value": false,
+      "type": true
+    },
+    {
+      "name": "NSEPredicateTextOptions",
+      "value": false,
+      "type": true
+    },
+    {
+      "name": "NSERange",
+      "value": false,
+      "type": true
+    },
+    {
+      "name": "NSESortComparator",
+      "value": false,
+      "type": true
+    },
+    {
+      "name": "NSESortDescriptor",
+      "value": true,
+      "type": true
+    },
+    {
+      "name": "NSESortDescriptorOptions",
+      "value": false,
+      "type": true
+    },
+    {
+      "name": "NSESortDirection",
+      "value": false,
+      "type": true
+    },
+    {
+      "name": "NSESortNulls",
+      "value": false,
+      "type": true
+    },
+    {
+      "name": "NSEUnicodePropertyName",
+      "value": false,
+      "type": true
+    },
+    {
+      "name": "NSEUserDefaults",
+      "value": true,
+      "type": true
+    },
+    {
+      "name": "NSEUserDefaultsStore",
+      "value": false,
+      "type": true
+    }
+  ],
+  "fx/compression": [
+    {
+      "name": "CPFXAlgorithm",
+      "value": true,
+      "type": true
+    },
+    {
+      "name": "CPFXCapabilities",
+      "value": true,
+      "type": true
+    },
+    {
+      "name": "CPFXCapabilitySnapshot",
+      "value": false,
+      "type": true
+    },
+    {
+      "name": "CPFXCompress",
+      "value": true,
+      "type": false
+    },
+    {
+      "name": "CPFXDecompress",
+      "value": true,
+      "type": false
+    },
+    {
+      "name": "CPFXInputFilter",
+      "value": true,
+      "type": true
+    },
+    {
+      "name": "CPFXOperation",
+      "value": false,
+      "type": true
+    },
+    {
+      "name": "CPFXOutputFilter",
+      "value": true,
+      "type": true
+    }
+  ]
+}
