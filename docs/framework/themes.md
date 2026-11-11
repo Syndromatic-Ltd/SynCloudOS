@@ -146,7 +146,7 @@ const host = await mountSynCloudOS({ element, application: { bundleIdentifier: "
 
 `themes` holds every discovered bundle's `NSETheme`, keyed by bundle identifier. A theme's stylesheets are built only if the host names it or your code references it through `themes`. Without `theme`, the host uses Atmo.
 
-A standalone React page passes the theme to its provider: `<NSEAppearanceProvider theme={themes["com.example.dusk"]}>`.
+A standalone React page sets it on its root view: `<NSEView appearance={new NSEAppearance("aqua", { theme: themes["com.example.dusk"] })}>`.
 
 ## Nesting
 
