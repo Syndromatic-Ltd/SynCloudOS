@@ -320,13 +320,17 @@
       "parts": [
         "actions",
         "bezel",
+        "body",
+        "cell",
         "centre",
         "clock",
         "clock-affix",
+        "column-caption",
         "date-entry",
         "date-time-editor",
         "day",
         "face",
+        "field",
         "header",
         "hour-hand",
         "hour-segment",
@@ -337,6 +341,7 @@
         "numeric",
         "previous-month",
         "previous-year",
+        "row",
         "segments",
         "separator",
         "today",
@@ -361,8 +366,22 @@
           "textField",
           "textFieldAndStepper"
         ],
+        "flow": [
+          "ltr"
+        ],
+        "position": [
+          "end",
+          "middle",
+          "start"
+        ],
         "role": [
           "calendar",
+          "field",
+          "today"
+        ],
+        "type": [
+          "adjacent",
+          "clock",
           "field"
         ]
       }

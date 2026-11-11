@@ -171,7 +171,7 @@ export function NSEDateRangeEntry({ value, defaultValue = null, onValueChange, .
       <NSETextField controlSize="small" label="End" aria-label={`${props["aria-label"]} end`} value={endText} isEnabled={!disabled} readOnly={props.readOnly} onValueChange={(text, phase) => { if (phase === "preview") setEndText(text); else if (phase === "commit") { if (overlay) previewText(startText, text); } }} />
     </div>
   );
-  return <section ref={hostRef} {...drawing.attributes} {...drawing.events} data-state={invalid ? "invalid" : disabled ? "disabled" : props.readOnly ? "read-only" : open ? "open" : "ready"}>
+  return <section ref={hostRef} {...drawing.attributes} {...drawing.events} data-state={invalid ? "invalid" : disabled ? "disabled" : props.readOnly ? "read-only" : open ? "open" : "ready"} data-nse-validation={invalid ? "invalid" : undefined}>
     {overlay ? <button ref={triggerRef} type="button" aria-label={`Choose ${props["aria-label"].toLowerCase()} dates`} aria-describedby={current ? valueId : undefined} aria-expanded={open} disabled={disabled || props.readOnly} onClick={openCalendar} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openCalendar(); } }} onKeyUp={(event) => { if (event.key === " ") event.preventDefault(); }}><span id={valueId} data-nse-part="value" data-placeholder={current ? undefined : "true"}>{current ? displayRange(current, props.locale) : `${plainDatePlaceholder(props.locale)} – ${plainDatePlaceholder(props.locale)}`}</span></button> : <>
       {fields}
       <span data-nse-part="actions">

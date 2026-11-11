@@ -95,7 +95,7 @@ function NSEDateSegmentEditor({
   };
 
   return (
-    <span role="group" aria-label={label} data-value={serializePlainDate(active)} data-locale-order={parts.join("-")} data-field-editor="segments">
+    <span role="group" aria-label={label} data-value={serializePlainDate(active)} data-locale-order={parts.join("-")} data-nse-part="segments" data-field-editor="segments">
       {parts.filter((part) => !hidden.has(part)).map((part) => editors[part])}
     </span>
   );
@@ -205,7 +205,7 @@ export function NSEDateEntry({
   const titleId = `date-picker-title-${instanceId}`;
 
 
-  return <span {...hostProps} {...drawing.attributes} {...drawing.events} data-state={invalid ? "invalid" : disabled ? "disabled" : readOnly ? "read-only" : open ? "open" : "ready"}  onFocusCapture={(event) => { drawing.events.onFocusCapture?.(event); setFocused(true); onFocusCapture?.(event); }} onBlurCapture={(event) => { drawing.events.onBlurCapture?.(event); if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false); onBlurCapture?.(event); }}>
+  return <span {...hostProps} {...drawing.attributes} {...drawing.events} data-state={invalid ? "invalid" : disabled ? "disabled" : readOnly ? "read-only" : open ? "open" : "ready"} data-nse-validation={invalid ? "invalid" : undefined}  onFocusCapture={(event) => { drawing.events.onFocusCapture?.(event); setFocused(true); onFocusCapture?.(event); }} onBlurCapture={(event) => { drawing.events.onBlurCapture?.(event); if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false); onBlurCapture?.(event); }}>
     {mode === "automatic" ? <button ref={triggerRef} type="button" aria-label={`Choose ${label.toLocaleLowerCase()}`} aria-expanded={open} disabled={disabled || readOnly} onClick={() => { setCalendarDraft(current); setOpen(true); }}>▦</button> : null}
     {renderEditor ? renderEditor({ value: current, isEnabled: !disabled, readOnly: Boolean(readOnly), commit: commitEditor }) : segmentEditor ?? (!showCalendar ? <input data-nse-part="date-entry" aria-label={label} type="text" inputMode="numeric" placeholder={plainDatePlaceholder(locale)} value={draft} disabled={disabled} readOnly={readOnly} required={required} aria-invalid={invalid || undefined} onChange={(event) => { if (readOnly) return; setDraft(event.currentTarget.value); setInvalid(false); }} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); commitText(); } else if (event.key === "Escape") { if (invalid || draft !== (current ? formatPlainDate(current, locale) : "")) event.preventDefault(); setInvalid(false); setDraft(current ? formatPlainDate(current, locale) : ""); } }} onBlur={commitText} /> : null)}
     {showCalendar && !renderEditor ? calendar : null}
