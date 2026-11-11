@@ -7,7 +7,7 @@ import { NSEView } from '../../../../src/NSE/Views/NSEView';
 import { NSEButton } from '../../../../src/NSE/Controls/Buttons/NSEButton';
 import { NSEImage } from '../../../../src/NSE/Controls/Images/NSEImageResource';
 import { LoginWindow } from '../../../../src/NSE/SystemUI/LoginWindow';
-import { atmoTheme } from '../../../../src/NSE/Themes/Atmo';
+import { atmoTheme } from '../../../../src/NSE/Appearance/atmo';
 import { freezeNSETheme } from '../../../../src/NSE/Theme/NSETheme';
 import { NSEStandaloneControlHost } from '../../../../src/NSE/Overlays';
 import { NSEViewController, nseUpdateTraits } from '../../../../src/NSE/Application/NSEViewController';
