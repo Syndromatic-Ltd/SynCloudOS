@@ -773,6 +773,7 @@ export function NSETabBarOverflowList({
           id={morePanelId}
           className={classes("nse-tab-bar-panel nse-tab-bar-more-panel", className)}
           role="tabpanel"
+          data-nse-role="tabpanel"
           aria-label="More destinations"
           aria-labelledby={moreTabId}
           aria-hidden={snapshot.activeTabId !== NSETabBarMoreDestinationId || undefined}

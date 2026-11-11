@@ -154,7 +154,7 @@ export function NSEAdaptiveTabView({ controller, scope }: { readonly controller:
       <div className="nse-adaptive-tab-content">
         {controller.tabViewItems.filter(item => visited.current.has(item.identifier)).map(item => <div key={item.identifier}
           className="nse-adaptive-tab-panel" hidden={item !== selected || moreListOpen} inert={item !== selected || moreListOpen}
-          role={compact ? "tabpanel" : undefined} id={getNSETabBarPanelId(scope, item.identifier)}
+          role={compact ? "tabpanel" : undefined} data-nse-role={compact ? "tabpanel" : undefined} id={getNSETabBarPanelId(scope, item.identifier)}
           aria-labelledby={compact ? getNSETabBarTabId(scope, item.identifier) : undefined}>
           <item.viewController.view />
         </div>)}

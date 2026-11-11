@@ -49,7 +49,7 @@ export function NSETabView(props: NSETabViewProps) {
           return panels.map((item): ReactNode => (
             <div
               key={item.id}
-              data-nse-part="content" role="tabpanel"
+              data-nse-part="content" role="tabpanel" data-nse-role="tabpanel"
               id={item.panelId ?? `tab-panel-${instanceId}-${item.id}`}
               aria-labelledby={`tab-${instanceId}-${item.id}`}
               hidden={item.id !== selected?.id}

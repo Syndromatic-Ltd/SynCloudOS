@@ -297,7 +297,7 @@ function NSETabViewControllerView({ controller }: { readonly controller: NSETabV
     : null;
   return <div className="nse-tab-view-controller" data-tab-style={controller.tabStyle}>
     {controller.tabStyle === "segmentedControlOnTop" ? bar : null}
-    <div className="nse-tab-view-controller-content" role={bar && selected ? "tabpanel" : undefined}
+    <div className="nse-tab-view-controller-content" role={bar && selected ? "tabpanel" : undefined} data-nse-role={bar && selected ? "tabpanel" : undefined}
       id={selected ? getNSETabBarPanelId(scope, selected.identifier) : undefined}
       aria-labelledby={bar && selected ? getNSETabBarTabId(scope, selected.identifier) : undefined}>
       {/* One superview slot owns both children through a swap. A keyed presence

@@ -227,7 +227,7 @@ export function NSEColourPanel({ controller: supplied, "aria-label": label = "Co
           items={controller.getPickers().map((picker) => ({ id: picker.id, label: picker.label, accessibleLabel: picker.label, icon: picker.icon, render: () => picker.render(pickerContext) }))}
         />
         <div data-nse-part="sample-row">
-          <button type="button" data-nse-part="eyedropper" aria-label="Pick a colour from the screen" aria-pressed={eyeDropperState === "picking"} disabled={disabled || !eyeDropper || eyeDropper.availability() !== "available"} onClick={() => { void pick(); }}>
+          <button type="button" data-nse-part="eyedropper" data-nse-state={eyeDropperState === "picking" ? "on" : "off"} aria-label="Pick a colour from the screen" aria-pressed={eyeDropperState === "picking"} disabled={disabled || !eyeDropper || eyeDropper.availability() !== "available"} onClick={() => { void pick(); }}>
             <NSEColourMagnifierIcon />
           </button>
           <div data-nse-part="current-colour" role="img" aria-label={`Current colour ${currentHex}`} title="Drag to a colour well or a saved-colour slot" draggable={!disabled} style={{ "--nse-colour-sample": current.toCSS() } as CSSProperties} onDragStart={(event) => { writeDraggedColour(event, current); }} />

@@ -3375,7 +3375,7 @@
 }
 
 :scope [data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="header"]>:where(:is([data-nse-part="previous-month"],[data-nse-part="today"],[data-nse-part="next-month"],[data-nse-part="previous-year"],[data-nse-part="next-year"])),
-:scope:is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>:where(:is([data-nse-part="previous-year"], [data-nse-part="previous-month"], [data-nse-part="today"], [data-nse-part="next-month"], [data-nse-part="next-year"])),
+:scope:is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>:where(:is([data-nse-part="previous-year"],[data-nse-part="previous-month"],[data-nse-part="today"],[data-nse-part="next-month"],[data-nse-part="next-year"])),
 :scope[data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="header"]>:where(:is([data-nse-part="previous-month"],[data-nse-part="today"],[data-nse-part="next-month"],[data-nse-part="previous-year"],[data-nse-part="next-year"])) {
   color: var(--nse-atmo-cal-nav-glyph);
   border: 1px solid;
@@ -3385,7 +3385,7 @@
 }
 
 :scope [data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="header"]>:where(:is([data-nse-part="previous-month"],[data-nse-part="today"],[data-nse-part="next-month"],[data-nse-part="previous-year"],[data-nse-part="next-year"])):active,
-:scope:is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>:where(:is([data-nse-part="previous-year"], [data-nse-part="previous-month"], [data-nse-part="today"], [data-nse-part="next-month"], [data-nse-part="next-year"])):active,
+:scope:is([data-nse-control="date-picker"]:where([data-nse-role="calendar"]))>[data-nse-part="header"]>:where(:is([data-nse-part="previous-year"],[data-nse-part="previous-month"],[data-nse-part="today"],[data-nse-part="next-month"],[data-nse-part="next-year"])):active,
 :scope[data-nse-control="date-picker"]:where([data-nse-role="calendar"])>[data-nse-part="header"]>:where(:is([data-nse-part="previous-month"],[data-nse-part="today"],[data-nse-part="next-month"],[data-nse-part="previous-year"],[data-nse-part="next-year"])):active {
   background: var(--nse-atmo-cal-nav-pressed) padding-box;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
@@ -3486,16 +3486,16 @@
   border-end-start-radius: 0;
 }
 
-:scope [data-nse-control="date-picker"]:where([data-nse-role="calendar"]) [data-nse-part="row"]>:where(:is([data-nse-part="cell"], [data-nse-part="column-caption"])):first-child>[data-nse-part="day"]:is([data-nse-position="middle"],[data-nse-position="end"]),
-:scope:is([data-nse-control="date-picker"]:where([data-nse-role="calendar"])) [data-nse-part="row"]>:where(:is([data-nse-part="cell"], [data-nse-part="column-caption"])):first-child>[data-nse-part="day"]:is([data-nse-position="middle"],[data-nse-position="end"]),
-:scope[data-nse-control="date-picker"]:where([data-nse-role="calendar"]) [data-nse-part="row"]>:where(:is([data-nse-part="cell"], [data-nse-part="column-caption"])):first-child>[data-nse-part="day"]:is([data-nse-position="middle"],[data-nse-position="end"]) {
+:scope [data-nse-control="date-picker"]:where([data-nse-role="calendar"]) [data-nse-part="row"]>:where(:is([data-nse-part="cell"],[data-nse-part="column-caption"])):first-child>[data-nse-part="day"]:is([data-nse-position="middle"],[data-nse-position="end"]),
+:scope:is([data-nse-control="date-picker"]:where([data-nse-role="calendar"])) [data-nse-part="row"]>:where(:is([data-nse-part="cell"],[data-nse-part="column-caption"])):first-child>[data-nse-part="day"]:is([data-nse-position="middle"],[data-nse-position="end"]),
+:scope[data-nse-control="date-picker"]:where([data-nse-role="calendar"]) [data-nse-part="row"]>:where(:is([data-nse-part="cell"],[data-nse-part="column-caption"])):first-child>[data-nse-part="day"]:is([data-nse-position="middle"],[data-nse-position="end"]) {
   border-start-start-radius: 7px;
   border-end-start-radius: 7px;
 }
 
-:scope [data-nse-control="date-picker"]:where([data-nse-role="calendar"]) [data-nse-part="row"]>:where(:is([data-nse-part="cell"], [data-nse-part="column-caption"])):last-child>[data-nse-part="day"]:is([data-nse-position="middle"],[data-nse-position="start"]),
-:scope:is([data-nse-control="date-picker"]:where([data-nse-role="calendar"])) [data-nse-part="row"]>:where(:is([data-nse-part="cell"], [data-nse-part="column-caption"])):last-child>[data-nse-part="day"]:is([data-nse-position="middle"],[data-nse-position="start"]),
-:scope[data-nse-control="date-picker"]:where([data-nse-role="calendar"]) [data-nse-part="row"]>:where(:is([data-nse-part="cell"], [data-nse-part="column-caption"])):last-child>[data-nse-part="day"]:is([data-nse-position="middle"],[data-nse-position="start"]) {
+:scope [data-nse-control="date-picker"]:where([data-nse-role="calendar"]) [data-nse-part="row"]>:where(:is([data-nse-part="cell"],[data-nse-part="column-caption"])):last-child>[data-nse-part="day"]:is([data-nse-position="middle"],[data-nse-position="start"]),
+:scope:is([data-nse-control="date-picker"]:where([data-nse-role="calendar"])) [data-nse-part="row"]>:where(:is([data-nse-part="cell"],[data-nse-part="column-caption"])):last-child>[data-nse-part="day"]:is([data-nse-position="middle"],[data-nse-position="start"]),
+:scope[data-nse-control="date-picker"]:where([data-nse-role="calendar"]) [data-nse-part="row"]>:where(:is([data-nse-part="cell"],[data-nse-part="column-caption"])):last-child>[data-nse-part="day"]:is([data-nse-position="middle"],[data-nse-position="start"]) {
   border-start-end-radius: 7px;
   border-end-end-radius: 7px;
   box-shadow: none;
@@ -3519,9 +3519,9 @@
   background: #fff;
 }
 
-:scope [data-nse-control="date-picker"]:where([data-nse-role="calendar"]) :is([data-nse-part="day"],[data-nse-part="header"]>:where(:is([data-nse-part="previous-year"], [data-nse-part="previous-month"], [data-nse-part="today"], [data-nse-part="next-month"], [data-nse-part="next-year"]))):focus-visible,
-:scope:is([data-nse-control="date-picker"]:where([data-nse-role="calendar"])) :is([data-nse-part="day"],[data-nse-part="header"]>:where(:is([data-nse-part="previous-year"], [data-nse-part="previous-month"], [data-nse-part="today"], [data-nse-part="next-month"], [data-nse-part="next-year"]))):focus-visible,
-:scope[data-nse-control="date-picker"]:where([data-nse-role="calendar"]) :is([data-nse-part="day"],[data-nse-part="header"]>:where(:is([data-nse-part="previous-year"], [data-nse-part="previous-month"], [data-nse-part="today"], [data-nse-part="next-month"], [data-nse-part="next-year"]))):focus-visible {
+:scope [data-nse-control="date-picker"]:where([data-nse-role="calendar"]) :is([data-nse-part="day"],[data-nse-part="header"]>:where(:is([data-nse-part="previous-year"],[data-nse-part="previous-month"],[data-nse-part="today"],[data-nse-part="next-month"],[data-nse-part="next-year"]))):focus-visible,
+:scope:is([data-nse-control="date-picker"]:where([data-nse-role="calendar"])) :is([data-nse-part="day"],[data-nse-part="header"]>:where(:is([data-nse-part="previous-year"],[data-nse-part="previous-month"],[data-nse-part="today"],[data-nse-part="next-month"],[data-nse-part="next-year"]))):focus-visible,
+:scope[data-nse-control="date-picker"]:where([data-nse-role="calendar"]) :is([data-nse-part="day"],[data-nse-part="header"]>:where(:is([data-nse-part="previous-year"],[data-nse-part="previous-month"],[data-nse-part="today"],[data-nse-part="next-month"],[data-nse-part="next-year"]))):focus-visible {
   z-index: 1;
   outline: none;
   box-shadow: 0 0 0 2px rgba(76, 164, 255, 0.95), 0 0 6px 2px rgba(62, 151, 247, 0.5);
@@ -3809,18 +3809,18 @@
   color: var(--nse-atmo-alert-ink);
 }
 
-:scope :is([data-nse-part="calendar-sheet"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]) :where(:is([data-nse-control="date-picker"], [data-nse-part="clock"], [data-nse-part="date-time-editor"], [data-nse-part="clock-sheet"])))>:where([data-nse-part="title"]),
-:scope:is(:is([data-nse-part="calendar-sheet"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]) :where(:is([data-nse-control="date-picker"], [data-nse-part="clock"], [data-nse-part="date-time-editor"], [data-nse-part="clock-sheet"]))))>:where([data-nse-part="title"]),
-:scope:is([data-nse-part="calendar-sheet"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]) :where(:is([data-nse-control="date-picker"], [data-nse-part="clock"], [data-nse-part="date-time-editor"], [data-nse-part="clock-sheet"])))>:where([data-nse-part="title"]),
+:scope :is([data-nse-part="calendar-sheet"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]) :where(:is([data-nse-control="date-picker"],[data-nse-part="clock"],[data-nse-part="date-time-editor"],[data-nse-part="clock-sheet"])))>:where([data-nse-part="title"]),
+:scope:is(:is([data-nse-part="calendar-sheet"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]) :where(:is([data-nse-control="date-picker"],[data-nse-part="clock"],[data-nse-part="date-time-editor"],[data-nse-part="clock-sheet"]))))>:where([data-nse-part="title"]),
+:scope:is([data-nse-part="calendar-sheet"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]) :where(:is([data-nse-control="date-picker"],[data-nse-part="clock"],[data-nse-part="date-time-editor"],[data-nse-part="clock-sheet"])))>:where([data-nse-part="title"]),
 :scope [data-nse-part="date-time-editor"]>label,
 :scope:is([data-nse-part="date-time-editor"])>label,
 :scope[data-nse-part="date-time-editor"]>label {
   color: var(--nse-atmo-well-muted);
 }
 
-:scope :is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-part="date-time-editor"],[data-nse-part="clock"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])) :where([data-nse-control="pop-up-button"] > [data-nse-part="bezel"]),
-:scope:is(:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-part="date-time-editor"],[data-nse-part="clock"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]))) :where([data-nse-control="pop-up-button"] > [data-nse-part="bezel"]),
-:scope:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-part="date-time-editor"],[data-nse-part="clock"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])) :where([data-nse-control="pop-up-button"] > [data-nse-part="bezel"]) {
+:scope :is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-part="date-time-editor"],[data-nse-part="clock"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])) :where([data-nse-control="pop-up-button"]>[data-nse-part="bezel"]),
+:scope:is(:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-part="date-time-editor"],[data-nse-part="clock"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]))) :where([data-nse-control="pop-up-button"]>[data-nse-part="bezel"]),
+:scope:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-part="date-time-editor"],[data-nse-part="clock"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])) :where([data-nse-control="pop-up-button"]>[data-nse-part="bezel"]) {
   color: var(--nse-atmo-well-ink);
   border: 1px solid;
   border-color: var(--nse-atmo-select-stroke);
@@ -3828,16 +3828,16 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
-:scope :is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-part="date-time-editor"],[data-nse-part="clock"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])) :where([data-nse-control="pop-up-button"] > [data-nse-part="bezel"]):focus-visible,
-:scope:is(:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-part="date-time-editor"],[data-nse-part="clock"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]))) :where([data-nse-control="pop-up-button"] > [data-nse-part="bezel"]):focus-visible,
-:scope:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-part="date-time-editor"],[data-nse-part="clock"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])) :where([data-nse-control="pop-up-button"] > [data-nse-part="bezel"]):focus-visible {
+:scope :is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-part="date-time-editor"],[data-nse-part="clock"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])) :where([data-nse-control="pop-up-button"]>[data-nse-part="bezel"]):focus-visible,
+:scope:is(:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-part="date-time-editor"],[data-nse-part="clock"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]))) :where([data-nse-control="pop-up-button"]>[data-nse-part="bezel"]):focus-visible,
+:scope:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-part="date-time-editor"],[data-nse-part="clock"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])) :where([data-nse-control="pop-up-button"]>[data-nse-part="bezel"]):focus-visible {
   outline: none;
   box-shadow: var(--nse-atmo-focus-ring);
 }
 
-:scope :is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-part="date-time-editor"],[data-nse-part="clock"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])) :where([data-nse-control="pop-up-button"] > [data-nse-part="bezel"]):disabled,
-:scope:is(:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-part="date-time-editor"],[data-nse-part="clock"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]))) :where([data-nse-control="pop-up-button"] > [data-nse-part="bezel"]):disabled,
-:scope:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-part="date-time-editor"],[data-nse-part="clock"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])) :where([data-nse-control="pop-up-button"] > [data-nse-part="bezel"]):disabled {
+:scope :is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-part="date-time-editor"],[data-nse-part="clock"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])) :where([data-nse-control="pop-up-button"]>[data-nse-part="bezel"]):disabled,
+:scope:is(:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-part="date-time-editor"],[data-nse-part="clock"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"]))) :where([data-nse-control="pop-up-button"]>[data-nse-part="bezel"]):disabled,
+:scope:is([data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay hourMinute"][data-nse-role="field"]),[data-nse-part="date-time-editor"],[data-nse-part="clock"],[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="hourMinute"][data-nse-role="field"]),[data-nse-control="date-picker"]:where([data-nse-date-picker-elements="yearMonthDay"][data-nse-date-picker-mode="single"][data-nse-role="field"])) :where([data-nse-control="pop-up-button"]>[data-nse-part="bezel"]):disabled {
   cursor: default;
   opacity: 0.5;
 }
@@ -3863,9 +3863,9 @@
    position produces (alpha over a checkerboard); the stock slider knob rides
    on them. Labels take the field-well ink tokens, so dark mode follows.
    ========================================================================= */
-:scope [data-nse-control="colour-well"]>button,
-:scope:is([data-nse-control="colour-well"])>button,
-:scope[data-nse-control="colour-well"]>button {
+:scope [data-nse-control="colour-well"]>:where([data-nse-part="button"]),
+:scope:is([data-nse-control="colour-well"])>:where([data-nse-part="button"]),
+:scope[data-nse-control="colour-well"]>:where([data-nse-part="button"]) {
   color: var(--nse-atmo-well-ink);
   border: 1px solid;
   border-color: var(--nse-atmo-select-stroke);
@@ -3873,19 +3873,19 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
-:scope [data-nse-control="colour-well"]>button:is(:active,[data-nse-highlighted]):not(:disabled),
-:scope:is([data-nse-control="colour-well"])>button:is(:active,[data-nse-highlighted]):not(:disabled),
-:scope[data-nse-control="colour-well"]>button:is(:active,[data-nse-highlighted]):not(:disabled),
-:scope [data-nse-control="colour-well"]>button[aria-pressed="true"],
-:scope:is([data-nse-control="colour-well"])>button[aria-pressed="true"],
-:scope[data-nse-control="colour-well"]>button[aria-pressed="true"] {
+:scope [data-nse-control="colour-well"]>:where([data-nse-part="button"]):is(:active,[data-nse-highlighted]):not(:disabled),
+:scope:is([data-nse-control="colour-well"])>:where([data-nse-part="button"]):is(:active,[data-nse-highlighted]):not(:disabled),
+:scope[data-nse-control="colour-well"]>:where([data-nse-part="button"]):is(:active,[data-nse-highlighted]):not(:disabled),
+:scope [data-nse-control="colour-well"]>:where([data-nse-part="button"])[data-nse-state="on"],
+:scope:is([data-nse-control="colour-well"])>:where([data-nse-part="button"])[data-nse-state="on"],
+:scope[data-nse-control="colour-well"]>:where([data-nse-part="button"])[data-nse-state="on"] {
   background: var(--nse-atmo-well-pressed) padding-box;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-:scope [data-nse-control="colour-well"]>button:disabled,
-:scope:is([data-nse-control="colour-well"])>button:disabled,
-:scope[data-nse-control="colour-well"]>button:disabled {
+:scope [data-nse-control="colour-well"]>:where([data-nse-part="button"]):disabled,
+:scope:is([data-nse-control="colour-well"])>:where([data-nse-part="button"]):disabled,
+:scope[data-nse-control="colour-well"]>:where([data-nse-part="button"]):disabled {
   cursor: default;
   opacity: 0.5;
 }
@@ -3893,9 +3893,9 @@
 :scope [data-nse-control="colour-well"] [data-nse-part="colour-sample"],
 :scope:is([data-nse-control="colour-well"]) [data-nse-part="colour-sample"],
 :scope[data-nse-control="colour-well"] [data-nse-part="colour-sample"],
-:scope [data-nse-control="colour-swatches"] [role="gridcell"],
-:scope:is([data-nse-control="colour-swatches"]) [role="gridcell"],
-:scope[data-nse-control="colour-swatches"] [role="gridcell"] {
+:scope [data-nse-control="colour-swatches"] [data-nse-part="swatch"],
+:scope:is([data-nse-control="colour-swatches"]) [data-nse-part="swatch"],
+:scope[data-nse-control="colour-swatches"] [data-nse-part="swatch"] {
   border: 1px solid rgba(0, 0, 0, 0.45);
   box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.85), 0 1px 0 rgba(255, 255, 255, 0.4);
 }
@@ -3906,9 +3906,9 @@
   color: var(--nse-atmo-well-muted);
 }
 
-:scope [data-nse-control="colour-wheel"]>[role="slider"],
-:scope:is([data-nse-control="colour-wheel"])>[role="slider"],
-:scope[data-nse-control="colour-wheel"]>[role="slider"] {
+:scope [data-nse-control="colour-wheel"]>[data-nse-part="wheel"],
+:scope:is([data-nse-control="colour-wheel"])>[data-nse-part="wheel"],
+:scope[data-nse-control="colour-wheel"]>[data-nse-part="wheel"] {
   border: 5px solid transparent;
   background:
     radial-gradient(circle, #fff 0, rgba(255, 255, 255, 0) 70%) padding-box,
@@ -3923,23 +3923,23 @@
   display: none;
 }
 
-:scope [data-nse-control="colour-wheel"]>[role="slider"]::after,
-:scope:is([data-nse-control="colour-wheel"])>[role="slider"]::after,
-:scope[data-nse-control="colour-wheel"]>[role="slider"]::after {
+:scope [data-nse-control="colour-wheel"]>[data-nse-part="wheel"]::after,
+:scope:is([data-nse-control="colour-wheel"])>[data-nse-part="wheel"]::after,
+:scope[data-nse-control="colour-wheel"]>[data-nse-part="wheel"]::after {
   border: 2px solid #fff;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
-:scope [data-nse-control="colour-wheel"]>[role="slider"]:focus-visible,
-:scope:is([data-nse-control="colour-wheel"])>[role="slider"]:focus-visible,
-:scope[data-nse-control="colour-wheel"]>[role="slider"]:focus-visible {
+:scope [data-nse-control="colour-wheel"]>[data-nse-part="wheel"]:focus-visible,
+:scope:is([data-nse-control="colour-wheel"])>[data-nse-part="wheel"]:focus-visible,
+:scope[data-nse-control="colour-wheel"]>[data-nse-part="wheel"]:focus-visible {
   outline: none;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(0, 0, 0, 0.3), var(--nse-atmo-focus-ring);
 }
 
-:scope [data-nse-control="colour-wheel"][data-state="disabled"],
-:scope:is([data-nse-control="colour-wheel"][data-state="disabled"]),
-:scope[data-nse-control="colour-wheel"][data-state="disabled"] {
+:scope [data-nse-control="colour-wheel"][data-nse-enabled="false"],
+:scope:is([data-nse-control="colour-wheel"][data-nse-enabled="false"]),
+:scope[data-nse-control="colour-wheel"][data-nse-enabled="false"] {
   opacity: 0.5;
 }
 
@@ -3960,9 +3960,9 @@
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.38), inset 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
-:scope :is([data-nse-control="colour-sliders"],[data-nse-control="colour-panel"],[data-nse-control="colour-wheel"]) :is(legend,[data-nse-part="channel-key"],[data-nse-part="opacity-value"],.nse-control-field-label),
-:scope:is(:is([data-nse-control="colour-sliders"],[data-nse-control="colour-panel"],[data-nse-control="colour-wheel"])) :is(legend,[data-nse-part="channel-key"],[data-nse-part="opacity-value"],.nse-control-field-label),
-:scope:is([data-nse-control="colour-sliders"],[data-nse-control="colour-panel"],[data-nse-control="colour-wheel"]) :is(legend,[data-nse-part="channel-key"],[data-nse-part="opacity-value"],.nse-control-field-label) {
+:scope :is([data-nse-control="colour-sliders"],[data-nse-control="colour-panel"],[data-nse-control="colour-wheel"]) :is(:where([data-nse-part="title"]:where([data-nse-control="colour-sliders"] > *)),[data-nse-part="channel-key"],[data-nse-part="opacity-value"],[data-nse-part="label"]:where([data-nse-control="text-field"] *)),
+:scope:is(:is([data-nse-control="colour-sliders"],[data-nse-control="colour-panel"],[data-nse-control="colour-wheel"])) :is(:where([data-nse-part="title"]:where([data-nse-control="colour-sliders"] > *)),[data-nse-part="channel-key"],[data-nse-part="opacity-value"],[data-nse-part="label"]:where([data-nse-control="text-field"] *)),
+:scope:is([data-nse-control="colour-sliders"],[data-nse-control="colour-panel"],[data-nse-control="colour-wheel"]) :is(:where([data-nse-part="title"]:where([data-nse-control="colour-sliders"] > *)),[data-nse-part="channel-key"],[data-nse-part="opacity-value"],[data-nse-part="label"]:where([data-nse-control="text-field"] *)) {
   color: var(--nse-atmo-well-muted);
 }
 
@@ -4040,9 +4040,9 @@
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 1px 1px rgba(0, 0, 0, 0.3);
 }
 
-:scope [data-nse-control="colour-panel"] [data-nse-part="eyedropper"]:is(:active,[aria-pressed="true"]):not(:disabled),
-:scope:is([data-nse-control="colour-panel"]) [data-nse-part="eyedropper"]:is(:active,[aria-pressed="true"]):not(:disabled),
-:scope[data-nse-control="colour-panel"] [data-nse-part="eyedropper"]:is(:active,[aria-pressed="true"]):not(:disabled) {
+:scope [data-nse-control="colour-panel"] [data-nse-part="eyedropper"]:is(:active,[data-nse-state="on"]):not(:disabled),
+:scope:is([data-nse-control="colour-panel"]) [data-nse-part="eyedropper"]:is(:active,[data-nse-state="on"]):not(:disabled),
+:scope[data-nse-control="colour-panel"] [data-nse-part="eyedropper"]:is(:active,[data-nse-state="on"]):not(:disabled) {
   background: linear-gradient(#b9c0c9, #d3d8de);
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.4), inset 0 1px 3px rgba(0, 0, 0, 0.35);
 }
@@ -4060,16 +4060,16 @@
   opacity: 0.5;
 }
 
-:scope [data-nse-control="colour-panel"] :is([data-nse-part="current-colour"],[data-nse-part="grey-presets"]>button,[data-nse-part="colour-list-chip"]),
-:scope:is([data-nse-control="colour-panel"]) :is([data-nse-part="current-colour"],[data-nse-part="grey-presets"]>button,[data-nse-part="colour-list-chip"]),
-:scope[data-nse-control="colour-panel"] :is([data-nse-part="current-colour"],[data-nse-part="grey-presets"]>button,[data-nse-part="colour-list-chip"]) {
+:scope [data-nse-control="colour-panel"] :is([data-nse-part="current-colour"],[data-nse-part="grey-presets"]>:where([data-nse-part="swatch"]),[data-nse-part="colour-list-chip"]),
+:scope:is([data-nse-control="colour-panel"]) :is([data-nse-part="current-colour"],[data-nse-part="grey-presets"]>:where([data-nse-part="swatch"]),[data-nse-part="colour-list-chip"]),
+:scope[data-nse-control="colour-panel"] :is([data-nse-part="current-colour"],[data-nse-part="grey-presets"]>:where([data-nse-part="swatch"]),[data-nse-part="colour-list-chip"]) {
   border: 0;
   box-shadow: inset 0 0 0 1px var(--nse-atmo-colour-well-edge), inset 0 0 0 2px rgba(255, 255, 255, 0.55);
 }
 
-:scope [data-nse-control="colour-panel"] [data-nse-part="grey-presets"]>button:focus-visible,
-:scope:is([data-nse-control="colour-panel"]) [data-nse-part="grey-presets"]>button:focus-visible,
-:scope[data-nse-control="colour-panel"] [data-nse-part="grey-presets"]>button:focus-visible {
+:scope [data-nse-control="colour-panel"] [data-nse-part="grey-presets"]>:where([data-nse-part="swatch"]):focus-visible,
+:scope:is([data-nse-control="colour-panel"]) [data-nse-part="grey-presets"]>:where([data-nse-part="swatch"]):focus-visible,
+:scope[data-nse-control="colour-panel"] [data-nse-part="grey-presets"]>:where([data-nse-part="swatch"]):focus-visible {
   outline: none;
   box-shadow: inset 0 0 0 1px var(--nse-atmo-colour-well-edge), var(--nse-atmo-focus-ring);
 }
@@ -4094,9 +4094,9 @@
   background: var(--nse-atmo-colour-list-stripe);
 }
 
-:scope [data-nse-control="colour-panel"] [data-nse-part="colour-list-row"][aria-selected="true"],
-:scope:is([data-nse-control="colour-panel"]) [data-nse-part="colour-list-row"][aria-selected="true"],
-:scope[data-nse-control="colour-panel"] [data-nse-part="colour-list-row"][aria-selected="true"] {
+:scope [data-nse-control="colour-panel"] [data-nse-part="colour-list-row"][data-nse-selected],
+:scope:is([data-nse-control="colour-panel"]) [data-nse-part="colour-list-row"][data-nse-selected],
+:scope[data-nse-control="colour-panel"] [data-nse-part="colour-list-row"][data-nse-selected] {
   color: #fff;
   background: linear-gradient(#5b9be6, #2f73cf);
 }
@@ -4107,15 +4107,15 @@
   box-shadow: var(--nse-atmo-focus-ring);
 }
 
-:scope [data-nse-control="colour-panel"] [data-nse-part="image-palette"]>canvas,
-:scope:is([data-nse-control="colour-panel"]) [data-nse-part="image-palette"]>canvas,
-:scope[data-nse-control="colour-panel"] [data-nse-part="image-palette"]>canvas {
+:scope [data-nse-control="colour-panel"] [data-nse-part="image-palette"]>:where([data-nse-part="image"]),
+:scope:is([data-nse-control="colour-panel"]) [data-nse-part="image-palette"]>:where([data-nse-part="image"]),
+:scope[data-nse-control="colour-panel"] [data-nse-part="image-palette"]>:where([data-nse-part="image"]) {
   box-shadow: 0 0 0 1px var(--nse-atmo-colour-well-edge);
 }
 
-:scope [data-nse-control="colour-panel"] [data-nse-part="image-palette"]>canvas:focus-visible,
-:scope:is([data-nse-control="colour-panel"]) [data-nse-part="image-palette"]>canvas:focus-visible,
-:scope[data-nse-control="colour-panel"] [data-nse-part="image-palette"]>canvas:focus-visible {
+:scope [data-nse-control="colour-panel"] [data-nse-part="image-palette"]>:where([data-nse-part="image"]):focus-visible,
+:scope:is([data-nse-control="colour-panel"]) [data-nse-part="image-palette"]>:where([data-nse-part="image"]):focus-visible,
+:scope[data-nse-control="colour-panel"] [data-nse-part="image-palette"]>:where([data-nse-part="image"]):focus-visible {
   outline: none;
   box-shadow: var(--nse-atmo-focus-ring);
 }
@@ -4150,29 +4150,29 @@
 
 /* Saved colours: filled wells show their colour in a fine frame; empty ones
    are shallow recesses. */
-:scope [data-nse-control="colour-panel"] [data-nse-part="swatch-strip"] [role="gridcell"],
-:scope:is([data-nse-control="colour-panel"]) [data-nse-part="swatch-strip"] [role="gridcell"],
-:scope[data-nse-control="colour-panel"] [data-nse-part="swatch-strip"] [role="gridcell"] {
+:scope [data-nse-control="colour-panel"] [data-nse-part="swatch-strip"] [data-nse-part="swatch"],
+:scope:is([data-nse-control="colour-panel"]) [data-nse-part="swatch-strip"] [data-nse-part="swatch"],
+:scope[data-nse-control="colour-panel"] [data-nse-part="swatch-strip"] [data-nse-part="swatch"] {
   border: 0;
   box-shadow: inset 0 0 0 1px var(--nse-atmo-colour-well-edge), inset 0 0 0 2px rgba(255, 255, 255, 0.5);
 }
 
-:scope [data-nse-control="colour-panel"] [data-nse-part="swatch-strip"] [role="gridcell"][data-state="empty"],
-:scope:is([data-nse-control="colour-panel"]) [data-nse-part="swatch-strip"] [role="gridcell"][data-state="empty"],
-:scope[data-nse-control="colour-panel"] [data-nse-part="swatch-strip"] [role="gridcell"][data-state="empty"] {
+:scope [data-nse-control="colour-panel"] [data-nse-part="swatch-strip"] [data-nse-part="swatch"][data-nse-value-state="empty"],
+:scope:is([data-nse-control="colour-panel"]) [data-nse-part="swatch-strip"] [data-nse-part="swatch"][data-nse-value-state="empty"],
+:scope[data-nse-control="colour-panel"] [data-nse-part="swatch-strip"] [data-nse-part="swatch"][data-nse-value-state="empty"] {
   background: var(--nse-atmo-colour-empty-well);
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 1px 2px rgba(0, 0, 0, 0.14);
 }
 
-:scope [data-nse-control="colour-panel"] [data-nse-part="swatch-strip"] [role="gridcell"][aria-selected="true"],
-:scope:is([data-nse-control="colour-panel"]) [data-nse-part="swatch-strip"] [role="gridcell"][aria-selected="true"],
-:scope[data-nse-control="colour-panel"] [data-nse-part="swatch-strip"] [role="gridcell"][aria-selected="true"] {
+:scope [data-nse-control="colour-panel"] [data-nse-part="swatch-strip"] [data-nse-part="swatch"][data-nse-selected],
+:scope:is([data-nse-control="colour-panel"]) [data-nse-part="swatch-strip"] [data-nse-part="swatch"][data-nse-selected],
+:scope[data-nse-control="colour-panel"] [data-nse-part="swatch-strip"] [data-nse-part="swatch"][data-nse-selected] {
   box-shadow: inset 0 0 0 1px var(--nse-atmo-colour-well-edge), inset 0 0 0 2px rgba(255, 255, 255, 0.9), 0 0 0 1.5px #3d86d6;
 }
 
-:scope [data-nse-control="colour-panel"] [data-nse-part="swatch-strip"] [role="gridcell"]:is(:focus-visible,[data-drop-target="true"]),
-:scope:is([data-nse-control="colour-panel"]) [data-nse-part="swatch-strip"] [role="gridcell"]:is(:focus-visible,[data-drop-target="true"]),
-:scope[data-nse-control="colour-panel"] [data-nse-part="swatch-strip"] [role="gridcell"]:is(:focus-visible,[data-drop-target="true"]) {
+:scope [data-nse-control="colour-panel"] [data-nse-part="swatch-strip"] [data-nse-part="swatch"]:is(:focus-visible,[data-nse-highlighted]),
+:scope:is([data-nse-control="colour-panel"]) [data-nse-part="swatch-strip"] [data-nse-part="swatch"]:is(:focus-visible,[data-nse-highlighted]),
+:scope[data-nse-control="colour-panel"] [data-nse-part="swatch-strip"] [data-nse-part="swatch"]:is(:focus-visible,[data-nse-highlighted]) {
   outline: none;
   box-shadow: inset 0 0 0 1px var(--nse-atmo-colour-well-edge), var(--nse-atmo-focus-ring);
 }
@@ -4191,15 +4191,15 @@
   box-shadow: var(--nse-atmo-focus-ring);
 }
 
-:scope [data-nse-control="colour-swatches"] [role="gridcell"][data-state="selected"],
-:scope:is([data-nse-control="colour-swatches"]) [role="gridcell"][data-state="selected"],
-:scope[data-nse-control="colour-swatches"] [role="gridcell"][data-state="selected"] {
+:scope [data-nse-control="colour-swatches"] [data-nse-part="swatch"][data-nse-selected],
+:scope:is([data-nse-control="colour-swatches"]) [data-nse-part="swatch"][data-nse-selected],
+:scope[data-nse-control="colour-swatches"] [data-nse-part="swatch"][data-nse-selected] {
   box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.9), 0 0 0 2px #3d86d6;
 }
 
-:scope [data-nse-control="colour-swatches"] [role="gridcell"]:focus-visible,
-:scope:is([data-nse-control="colour-swatches"]) [role="gridcell"]:focus-visible,
-:scope[data-nse-control="colour-swatches"] [role="gridcell"]:focus-visible {
+:scope [data-nse-control="colour-swatches"] [data-nse-part="swatch"]:focus-visible,
+:scope:is([data-nse-control="colour-swatches"]) [data-nse-part="swatch"]:focus-visible,
+:scope[data-nse-control="colour-swatches"] [data-nse-part="swatch"]:focus-visible {
   outline: none;
   box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.9), var(--nse-atmo-focus-ring);
 }
@@ -5546,16 +5546,16 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
 /* With an overflow cell after it, the last tab is a middle cell, not a cap:
    the tab-item :last-child rules above do not match it, so it keeps its
    right seam and the capsule closes on the overflow. */
-:scope [data-nse-control="tab-view"] [role="tabpanel"],
-:scope:is([data-nse-control="tab-view"]) [role="tabpanel"],
-:scope[data-nse-control="tab-view"] [role="tabpanel"] {
+:scope [data-nse-control="tab-view"] [data-nse-role="tabpanel"],
+:scope:is([data-nse-control="tab-view"]) [data-nse-role="tabpanel"],
+:scope[data-nse-control="tab-view"] [data-nse-role="tabpanel"] {
   padding-block-start: 12px;
 }
 
 /* The colour inspector owns a fixed mode slot and its surrounding rhythm. */
-:scope [data-nse-control="colour-panel"] [role="tabpanel"],
-:scope:is([data-nse-control="colour-panel"]) [role="tabpanel"],
-:scope[data-nse-control="colour-panel"] [role="tabpanel"] {
+:scope [data-nse-control="colour-panel"] [data-nse-role="tabpanel"],
+:scope:is([data-nse-control="colour-panel"]) [data-nse-role="tabpanel"],
+:scope[data-nse-control="colour-panel"] [data-nse-role="tabpanel"] {
   padding: 0;
 }
 

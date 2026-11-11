@@ -157,7 +157,7 @@ export function NSEColourSliderPicker({ model, colour, showAlpha, controlHeight,
   };
 
   const alphaTrack = `linear-gradient(to right, ${draft.withAlpha(0).toCSS()}, ${css(draft)})`;
-  return <fieldset data-nse-control="colour-sliders" data-nse-part="content" data-model={model} data-state="ready" ><legend>{legends[model]}</legend>
+  return <fieldset data-nse-control="colour-sliders" data-nse-part="content" data-model={model} data-state="ready" ><legend data-nse-part="title">{legends[model]}</legend>
     {channels.map((channel, index) => <div key={channel.name} data-nse-part="channel" data-unit={channel.unit} style={{ "--nse-colour-channel-track": channel.track } as CSSProperties}>
       <span data-nse-part="channel-key" aria-hidden="true">{channel.key}</span>
       <span data-nse-part="channel-name" aria-hidden="true">{channel.name}</span>

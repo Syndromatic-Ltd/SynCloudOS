@@ -86,8 +86,8 @@ export function NSEColourSwatchStrip({ swatches, current, disabled = false, onCh
     cells.current.get(next)?.focus();
   };
   return <div data-nse-part="swatch-strip" data-rows={rows}>
-    <div role="grid" aria-label="Saved colours" aria-disabled={disabled || undefined}>
-      {Array.from({ length: rows }, (_, row) => <div key={row} role="row">
+    <div role="grid" data-nse-part="body" aria-label="Saved colours" aria-disabled={disabled || undefined}>
+      {Array.from({ length: rows }, (_, row) => <div key={row} role="row" data-nse-part="row">
         {Array.from({ length: COLUMNS }, (_, column) => {
           const index = row * COLUMNS + column;
           const colour = swatches[index] ?? null;
@@ -96,6 +96,10 @@ export function NSEColourSwatchStrip({ swatches, current, disabled = false, onCh
             ref={(node) => { if (node) cells.current.set(index, node); else cells.current.delete(index); }}
             type="button"
             role="gridcell"
+            data-nse-part="swatch"
+            data-nse-value-state={colour ? "populated" : "empty"}
+            data-nse-selected={colour !== null && current !== null && colour.equals(current) ? "" : undefined}
+            data-nse-highlighted={dropIndex === index ? "" : undefined}
             tabIndex={index === 0 ? 0 : -1}
             disabled={disabled}
             aria-label={colour ? `Saved colour ${colour.toHex().toUpperCase()}` : "Empty: keep the current colour here"}
