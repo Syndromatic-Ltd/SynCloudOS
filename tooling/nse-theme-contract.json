@@ -367,7 +367,8 @@
           "textFieldAndStepper"
         ],
         "flow": [
-          "ltr"
+          "ltr",
+          "rtl"
         ],
         "position": [
           "end",
@@ -980,6 +981,9 @@
           "regular",
           "small"
         ],
+        "distribution": [
+          "fill-equally"
+        ],
         "expanded": [
           "false",
           "true"
@@ -1234,6 +1238,7 @@
           "false"
         ],
         "highlight-style": [
+          "none",
           "regular"
         ],
         "style": [
