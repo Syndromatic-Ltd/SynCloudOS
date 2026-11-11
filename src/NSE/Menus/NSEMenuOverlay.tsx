@@ -39,6 +39,8 @@ export interface NSEMenuOverlayProps {
   readonly presentationMode?: "responsive" | "anchored" | "viewport-block-start-inline-end";
   /** Transparent frame bleed needed to align the recipe's painted edge to the work area. */
   readonly viewportCornerBleed?: Readonly<{ blockStart: number; inlineEnd: number }>;
+  /** Matches NSEMenuView's appearance; an application menu draws its own surface recipe. */
+  readonly appearance?: "default" | "application-menu";
   readonly className?: string;
   readonly exitDuration?: number;
   /** Application menus can launch another surface from a command selection. */
@@ -52,7 +54,7 @@ export interface NSEMenuOverlayProps {
  * controller/model while their physical form changes from anchored overlay to
  * an action-sheet/drill-in boundary on a constrained runtime.
  */
-export function NSEMenuOverlay({ overlay, controller, open, anchor, anchorPoint, labelledBy, kind = "menu", presentationMode = "responsive", viewportCornerBleed, className, exitDuration, restoreFocus = true, children, onOpenChange }: NSEMenuOverlayProps) {
+export function NSEMenuOverlay({ overlay, controller, open, anchor, anchorPoint, labelledBy, kind = "menu", presentationMode = "responsive", viewportCornerBleed, appearance = "default", className, exitDuration, restoreFocus = true, children, onOpenChange }: NSEMenuOverlayProps) {
   const { runtime } = useNSEOverlayProvider();
   if (!overlay.id.trim()) throw new TypeError("NSE menu overlay IDs must not be empty.");
   if (!overlay.parentResponderId.trim()) throw new TypeError("NSE menu overlays require a parent responder ID.");
@@ -135,6 +137,7 @@ export function NSEMenuOverlay({ overlay, controller, open, anchor, anchorPoint,
       role="presentation"
       labelledBy={labelledBy}
       className={className}
+      {...(appearance === "application-menu" ? { "data-nse-style": "application-menu" } : {})}
       exitDuration={exitDuration}
       restoreFocus={restoreFocus}
       onOpenChange={handleOpenChange}
