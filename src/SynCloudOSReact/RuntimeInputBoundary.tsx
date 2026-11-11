@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useNSEScreenSafeAreaProperties } from "../NSE/Layout/screenSafeAreaProperties";
+import { useNSEScreenSafeAreaProperties } from "../NSE/applicationHostInterop";
 import { useSyncExternalStore, useRef, type CSSProperties, type FocusEvent, type KeyboardEvent as ReactKeyboardEvent, type PropsWithChildren } from "react";
 import { useAppearance, useResolvedMode } from "./serviceHooks";
 import { useKernelSynCloudOS } from "./SynCloudOSProvider";

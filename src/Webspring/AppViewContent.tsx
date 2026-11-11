@@ -19,7 +19,7 @@
  */
 
 import { useRef } from "react";
-import { useNSEViewSafeArea } from "../NSE/Layout/useNSESafeArea";
+import { useNSEViewSafeArea } from "../NSE/hostComposition";
 import type { CSSProperties, ReactNode } from "react";
 import {
   NSESmoothSurface,

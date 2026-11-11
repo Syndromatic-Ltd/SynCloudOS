@@ -18,9 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useNSEAppearance } from "../NSE/Appearance/NSEAppearanceProvider";
-import { nseStateHooks } from "../NSE/Theme/contract/hooks";
-import { useNSEThemeInteraction } from "../NSE/Theme/contract/useThemeInteraction";
+import { useNSEAppearance } from "../NSE/Appearance";
+import { nseStateHooks } from "../NSE/hostComposition";
+import { useNSEThemeInteraction } from "../NSE/hostComposition";
 import { normalizeBundleIdentifier } from "../SynCloudOS/Identity/bundleIdentifier.mjs";
 import { newsIconUrl } from "../SynCloudOS/Resources/frameworkAssets";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type ReactNode, type RefObject } from "react";

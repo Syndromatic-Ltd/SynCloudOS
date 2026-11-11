@@ -18,9 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEViewSafeAreaContext, useNSEViewSafeArea } from "../../NSE/Layout/useNSESafeArea";
-import { nseUpdateSafeArea } from "../../NSE/Application/NSEViewController";
-import { NSEWindowLayoutContext } from "../../NSE/Layout/windowChromeObstructions";
+import { NSEViewSafeAreaContext, useNSEViewSafeArea } from "../../NSE/applicationHostInterop";
+import { nseUpdateSafeArea } from "../../NSE/applicationHostInterop";
+import { NSEWindowLayoutContext } from "../../NSE/applicationHostInterop";
 import { nativePresentations } from "../../NSE/applicationHostInterop";
 
 import { NSEWindowTitleSlotContext, NSEWindowTitlebarContent } from "../../NSE/applicationHostInterop";

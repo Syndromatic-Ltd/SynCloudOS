@@ -18,7 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { NSEWindowLayoutContext, useNSEWindowChromeElement, useNSEWindowChromeObstruction } from "../../NSE/Layout/windowChromeObstructions";
+import { NSEWindowLayoutContext, useNSEWindowChromeElement } from "../../NSE/applicationHostInterop";
+import { useNSEWindowChromeObstruction } from "../../NSE/NSE";
 
 import { Fragment, createContext, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
