@@ -398,6 +398,7 @@ export function NSEListboxPopup<T = unknown>({
         data-nse-overlay-kind={resolvedPresentation.mode === "sheet" ? undefined : "listbox"}
         data-popup-align={popupAlign}
         data-size={controlSize === "small" ? "small" : undefined}
+        data-nse-control-size={controlSize}
         data-fade-top={fadeTop ? "true" : "false"}
         data-fade-bottom={fadeBottom ? "true" : "false"}
         onKeyDown={handleKeyDown}
