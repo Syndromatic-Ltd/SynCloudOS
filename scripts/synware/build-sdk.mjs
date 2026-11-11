@@ -397,7 +397,7 @@ async function main() {
     .replace("../../src/SynCloudOS/AppSDK/fx/runtime.ts", "./fx-attribution-runtime.js")
     .replace("../../src/SynCloudOS/AppSDK/manifest/synappManifestValidator.generated.mjs", "./manifest-validator.mjs")
     .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs"));
-  for (const file of ["theme-bundles.mjs","theme-loading.mjs","built-in-theme-css.mjs","bundle-paths.mjs","project-derivation.mjs","manifest-source.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs","pwa-plugin.mjs"]) {
+  for (const file of ["theme-bundles.mjs","theme-loading.mjs","selector-performance.mjs","built-in-theme-css.mjs","bundle-paths.mjs","project-derivation.mjs","manifest-source.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs","pwa-plugin.mjs"]) {
     writeFileSync(resolve(directory, file), readFileSync(resolve(repositoryRoot, "scripts/synware", file), "utf8")
       .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs")
       .replace("../../src/SynCloudOS/InstalledApplications/webAppManifest.mjs", "./web-app-manifest.mjs")

@@ -156,7 +156,7 @@ export function assertReviewedPackageFiles(files) {
     }
     if (["LICENSE", "NOTICE", "THIRD_PARTY.md", "ARTWORK.md", "AGENTS.md", "sdk/LICENSE", "sdk/NOTICE", "sdk/package.json", "licenses/dependencies.json"].includes(file)) continue;
     if (["fx-attribution-runtime.js", "fx-app-module-source.mjs"].includes(file)) continue;
-    if (["index.js","index.d.ts","app-module-source.mjs","theme-bundles.mjs","theme-loading.mjs","built-in-theme-css.mjs","project-derivation.mjs","manifest-source.mjs","manifest-validator.mjs","bundleIdentifier.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs","bundle-paths.mjs","pwa-plugin.mjs","web-app-manifest.mjs","service-worker.mjs"].includes(file) || /^tooling\/(?:manifest\.schema|error-catalogue|build-receipt|nse-theme-contract)\.json$/u.test(file)) continue;
+    if (["index.js","index.d.ts","app-module-source.mjs","theme-bundles.mjs","theme-loading.mjs","selector-performance.mjs","built-in-theme-css.mjs","project-derivation.mjs","manifest-source.mjs","manifest-validator.mjs","bundleIdentifier.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs","bundle-paths.mjs","pwa-plugin.mjs","web-app-manifest.mjs","service-worker.mjs"].includes(file) || /^tooling\/(?:manifest\.schema|error-catalogue|build-receipt|nse-theme-contract)\.json$/u.test(file)) continue;
     if (/^docs\/framework\/(?:[A-Za-z0-9][A-Za-z0-9._-]*\/)*[A-Za-z0-9][A-Za-z0-9._-]*\.(?:md|json|png|webp|svg|jpg|jpeg|gif)$/u.test(file)) continue;
     if (/^licenses\/(?:dependencies\/)?[A-Za-z0-9._-]+\/(?:(?:MIT|APACHE|BSD)[.-])?(?:LICENSE|LICENCE|COPYING|NOTICE)(?:[.-][A-Za-z0-9._-]+)?$/iu.test(file)) continue;
     if (/^licenses\/[A-Za-z0-9._-]+\.(?:txt|md)$/u.test(file)) continue;
