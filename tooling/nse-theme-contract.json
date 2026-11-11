@@ -953,6 +953,9 @@
           "capsule",
           "rounded",
           "texturedRounded"
+        ],
+        "style": [
+          "grouped"
         ]
       }
     },
@@ -1142,6 +1145,12 @@
           "horizontal",
           "vertical"
         ],
+        "position": [
+          "first",
+          "last",
+          "middle",
+          "only"
+        ],
         "role": [
           "tab"
         ],
@@ -1149,6 +1158,10 @@
           "capsule",
           "icons",
           "navigation"
+        ],
+        "type": [
+          "template",
+          "vector"
         ]
       }
     },
@@ -1305,6 +1318,9 @@
           "bottom",
           "inline",
           "top"
+        ],
+        "style": [
+          "grouped"
         ]
       }
     },

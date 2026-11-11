@@ -397,7 +397,7 @@ function NSEChildrenToolbar({
   return (
     <div
       className={classes("nse-control-toolbar", keyboardUp && "nse-control-toolbar-fade-in", surfaceProps.className)}
-      data-nse-control="toolbar" data-nse-part="background" data-nse-position={position}
+      data-nse-control="toolbar" data-nse-part="background" data-nse-position={position} data-nse-style={grouped ? "grouped" : undefined}
       data-position={position}
       data-grouped={grouped ? "true" : "false"}
       data-fade-on-keyboard={fadeOnKeyboard ? "true" : undefined}
