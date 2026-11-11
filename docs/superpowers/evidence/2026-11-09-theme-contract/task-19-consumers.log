@@ -1,0 +1,863 @@
+==== scripts\synware\check-custom-text-system-consumer.mjs 
+Installed custom text consumer passed: strict public declarations, independent archive bundle, private engine codec, native shared history, inspector, shaped geometry, immutable searchable PDF and disposal.
+exit=0
+==== scripts\synware\check-developer-mcp-consumer.mjs 
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: [{"rule":"theme.undrawn-part","part":"badge.badge","message":"badge.badge is not drawn by this theme."},{"rule":"theme.undrawn-part","part":"board.group","message":"board.group is not drawn by this theme."},{"rule":"theme.undrawn-part","part":"board.header","message":"board.header is not drawn by this theme."},{"rule":"theme.undrawn-part","part":"box.header","message":"box.header is not drawn by this theme."},{"rule":"theme.undrawn-part","part":"button.cancel","message":"button.cancel is not drawn by this theme."},{"rule":"theme.undrawn-part","part":"button.choose","message":"button.choose is not drawn by this theme."},{"rule":"theme.undrawn-part","part":"button.effect-colour","message":"button.effect-colour is not drawn by this theme."},{"rule":"theme.undrawn-part","part":"button.effect-glyph","message":"button.effect-glyph is not drawn by this theme."},{"rule":"theme.undrawn-part","part":"button.tab-icon","message":"button.tab-icon is not drawn by this theme."},{"rule":"theme.undrawn-part","part":"clip-view.colour-list-name","message":"clip-view.colour-list-name is not drawn by this theme."},{"rule":"theme.undrawn-part","part":"colour-sliders.channel-name","message":"colour-sliders.channel-name is not drawn by this theme."},{"rule":"theme.undrawn-part","part":"colour-well.status","message":"colour-well.status is not drawn by this theme."},{"rule":"theme.undrawn-part","part":"colour-wheel.wheel-surface","message":"colour-wheel.wheel-surface is not drawn by this theme."},{"rule":"theme.undrawn-part","part":"date-picker.value","message":"date-picker.value is not drawn by this theme."},{"rule":"theme.undrawn-part","part":"folder-presentation.group","message":"folder-presentation.group is not drawn by this theme."},{"rule":"theme.undrawn-part","part":"folder-presentation.preview","message":"folder-presentation.preview is not drawn by this theme."},{"rule":"theme.undrawn-part","part":"font-panel.font-file-input","message":"font-panel.font-file-input is not drawn by this theme."},{"rule":"theme.undrawn-part","part":"level-indicator.segment","message":"level-indicator.segment is not drawn by this theme."},{"rule":"theme.undrawn-part","part":"level-indicator.track","message":"level-indicator.track is not drawn by this theme."},{"rule":"theme.undrawn-part","part":"login-window.attachment","message":"login-window.attachment is not drawn by this theme."}]
++ actual - expected
+
++ [
++   {
++     message: 'badge.badge is not drawn by this theme.',
++     part: 'badge.badge',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'board.group is not drawn by this theme.',
++     part: 'board.group',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'board.header is not drawn by this theme.',
++     part: 'board.header',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'box.header is not drawn by this theme.',
++     part: 'box.header',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'button.cancel is not drawn by this theme.',
++     part: 'button.cancel',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'button.choose is not drawn by this theme.',
++     part: 'button.choose',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'button.effect-colour is not drawn by this theme.',
++     part: 'button.effect-colour',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'button.effect-glyph is not drawn by this theme.',
++     part: 'button.effect-glyph',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'button.tab-icon is not drawn by this theme.',
++     part: 'button.tab-icon',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'clip-view.colour-list-name is not drawn by this theme.',
++     part: 'clip-view.colour-list-name',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'colour-sliders.channel-name is not drawn by this theme.',
++     part: 'colour-sliders.channel-name',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'colour-well.status is not drawn by this theme.',
++     part: 'colour-well.status',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'colour-wheel.wheel-surface is not drawn by this theme.',
++     part: 'colour-wheel.wheel-surface',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'date-picker.value is not drawn by this theme.',
++     part: 'date-picker.value',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'folder-presentation.group is not drawn by this theme.',
++     part: 'folder-presentation.group',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'folder-presentation.preview is not drawn by this theme.',
++     part: 'folder-presentation.preview',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'font-panel.font-file-input is not drawn by this theme.',
++     part: 'font-panel.font-file-input',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'level-indicator.segment is not drawn by this theme.',
++     part: 'level-indicator.segment',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'level-indicator.track is not drawn by this theme.',
++     part: 'level-indicator.track',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'login-window.attachment is not drawn by this theme.',
++     part: 'login-window.attachment',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'login-window.badge is not drawn by this theme.',
++     part: 'login-window.badge',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'login-window.decoration is not drawn by this theme.',
++     part: 'login-window.decoration',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'login-window.effects is not drawn by this theme.',
++     part: 'login-window.effects',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'login-window.leading is not drawn by this theme.',
++     part: 'login-window.leading',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'login-window.suspension is not drawn by this theme.',
++     part: 'login-window.suspension',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'login-window.trailing is not drawn by this theme.',
++     part: 'login-window.trailing',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'menu-item.back-indicator is not drawn by this theme.',
++     part: 'menu-item.back-indicator',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'notification-banner.cancel is not drawn by this theme.',
++     part: 'notification-banner.cancel',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'notification-banner.effects is not drawn by this theme.',
++     part: 'notification-banner.effects',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'notification-centre.cancel is not drawn by this theme.',
++     part: 'notification-centre.cancel',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'notification-centre.group is not drawn by this theme.',
++     part: 'notification-centre.group',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'notification-centre.header is not drawn by this theme.',
++     part: 'notification-centre.header',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'notification-centre.row is not drawn by this theme.',
++     part: 'notification-centre.row',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'panel.value is not drawn by this theme.',
++     part: 'panel.value',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'pop-up-button.action-menu is not drawn by this theme.',
++     part: 'pop-up-button.action-menu',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'popover.arrow is not drawn by this theme.',
++     part: 'popover.arrow',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'popover.popover-arrow-fill is not drawn by this theme.',
++     part: 'popover.popover-arrow-fill',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'popover.popover-frame is not drawn by this theme.',
++     part: 'popover.popover-frame',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'popover.popover-outline is not drawn by this theme.',
++     part: 'popover.popover-outline',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'quick-switch.leading is not drawn by this theme.',
++     part: 'quick-switch.leading',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'quick-switch.trailing is not drawn by this theme.',
++     part: 'quick-switch.trailing',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'save-panel.prompt is not drawn by this theme.',
++     part: 'save-panel.prompt',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'save-panel.suggested-name is not drawn by this theme.',
++     part: 'save-panel.suggested-name',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'secure-text-field.reveal-glyph is not drawn by this theme.',
++     part: 'secure-text-field.reveal-glyph',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'slider.fill is not drawn by this theme.',
++     part: 'slider.fill',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'split-view.divider is not drawn by this theme.',
++     part: 'split-view.divider',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'split-view.handle is not drawn by this theme.',
++     part: 'split-view.handle',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'split-view.sidebar is not drawn by this theme.',
++     part: 'split-view.sidebar',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'tab-view.swatch is not drawn by this theme.',
++     part: 'tab-view.swatch',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'table-cell-view.badge is not drawn by this theme.',
++     part: 'table-cell-view.badge',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'table-cell-view.leading is not drawn by this theme.',
++     part: 'table-cell-view.leading',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'table-cell-view.primary-text is not drawn by this theme.',
++     part: 'table-cell-view.primary-text',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'table-cell-view.row is not drawn by this theme.',
++     part: 'table-cell-view.row',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'table-cell-view.trailing is not drawn by this theme.',
++     part: 'table-cell-view.trailing',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'table-view.column-resize-handle is not drawn by this theme.',
++     part: 'table-view.column-resize-handle',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'table-view.font-list-label is not drawn by this theme.',
++     part: 'table-view.font-list-label',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'table-view.sort-glyph is not drawn by this theme.',
++     part: 'table-view.sort-glyph',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'toolbar.flexible-space is not drawn by this theme.',
++     part: 'toolbar.flexible-space',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'toolbar.space is not drawn by this theme.',
++     part: 'toolbar.space',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'toolbar-customisation-palette.configured-item is not drawn by this theme.',
++     part: 'toolbar-customisation-palette.configured-item',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'toolbar-customisation-palette.drag-handle is not drawn by this theme.',
++     part: 'toolbar-customisation-palette.drag-handle',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'toolbar-item.item is not drawn by this theme.',
++     part: 'toolbar-item.item',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'window.content-border is not drawn by this theme.',
++     part: 'window.content-border',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'window.sheet is not drawn by this theme.',
++     part: 'window.sheet',
++     rule: 'theme.undrawn-part'
++   },
++   {
++     message: 'window.window-fitting-content is not drawn by this theme.',
++     part: 'window.window-fitting-content',
++     rule: 'theme.undrawn-part'
++   }
++ ]
+- []
+
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/scripts/synware/check-developer-mcp-consumer.mjs:79:10
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: [
+    {
+      rule: 'theme.undrawn-part',
+      part: 'badge.badge',
+      message: 'badge.badge is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'board.group',
+      message: 'board.group is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'board.header',
+      message: 'board.header is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'box.header',
+      message: 'box.header is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'button.cancel',
+      message: 'button.cancel is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'button.choose',
+      message: 'button.choose is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'button.effect-colour',
+      message: 'button.effect-colour is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'button.effect-glyph',
+      message: 'button.effect-glyph is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'button.tab-icon',
+      message: 'button.tab-icon is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'clip-view.colour-list-name',
+      message: 'clip-view.colour-list-name is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'colour-sliders.channel-name',
+      message: 'colour-sliders.channel-name is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'colour-well.status',
+      message: 'colour-well.status is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'colour-wheel.wheel-surface',
+      message: 'colour-wheel.wheel-surface is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'date-picker.value',
+      message: 'date-picker.value is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'folder-presentation.group',
+      message: 'folder-presentation.group is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'folder-presentation.preview',
+      message: 'folder-presentation.preview is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'font-panel.font-file-input',
+      message: 'font-panel.font-file-input is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'level-indicator.segment',
+      message: 'level-indicator.segment is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'level-indicator.track',
+      message: 'level-indicator.track is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'login-window.attachment',
+      message: 'login-window.attachment is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'login-window.badge',
+      message: 'login-window.badge is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'login-window.decoration',
+      message: 'login-window.decoration is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'login-window.effects',
+      message: 'login-window.effects is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'login-window.leading',
+      message: 'login-window.leading is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'login-window.suspension',
+      message: 'login-window.suspension is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'login-window.trailing',
+      message: 'login-window.trailing is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'menu-item.back-indicator',
+      message: 'menu-item.back-indicator is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'notification-banner.cancel',
+      message: 'notification-banner.cancel is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'notification-banner.effects',
+      message: 'notification-banner.effects is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'notification-centre.cancel',
+      message: 'notification-centre.cancel is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'notification-centre.group',
+      message: 'notification-centre.group is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'notification-centre.header',
+      message: 'notification-centre.header is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'notification-centre.row',
+      message: 'notification-centre.row is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'panel.value',
+      message: 'panel.value is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'pop-up-button.action-menu',
+      message: 'pop-up-button.action-menu is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'popover.arrow',
+      message: 'popover.arrow is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'popover.popover-arrow-fill',
+      message: 'popover.popover-arrow-fill is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'popover.popover-frame',
+      message: 'popover.popover-frame is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'popover.popover-outline',
+      message: 'popover.popover-outline is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'quick-switch.leading',
+      message: 'quick-switch.leading is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'quick-switch.trailing',
+      message: 'quick-switch.trailing is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'save-panel.prompt',
+      message: 'save-panel.prompt is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'save-panel.suggested-name',
+      message: 'save-panel.suggested-name is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'secure-text-field.reveal-glyph',
+      message: 'secure-text-field.reveal-glyph is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'slider.fill',
+      message: 'slider.fill is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'split-view.divider',
+      message: 'split-view.divider is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'split-view.handle',
+      message: 'split-view.handle is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'split-view.sidebar',
+      message: 'split-view.sidebar is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'tab-view.swatch',
+      message: 'tab-view.swatch is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'table-cell-view.badge',
+      message: 'table-cell-view.badge is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'table-cell-view.leading',
+      message: 'table-cell-view.leading is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'table-cell-view.primary-text',
+      message: 'table-cell-view.primary-text is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'table-cell-view.row',
+      message: 'table-cell-view.row is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'table-cell-view.trailing',
+      message: 'table-cell-view.trailing is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'table-view.column-resize-handle',
+      message: 'table-view.column-resize-handle is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'table-view.font-list-label',
+      message: 'table-view.font-list-label is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'table-view.sort-glyph',
+      message: 'table-view.sort-glyph is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'toolbar.flexible-space',
+      message: 'toolbar.flexible-space is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'toolbar.space',
+      message: 'toolbar.space is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'toolbar-customisation-palette.configured-item',
+      message: 'toolbar-customisation-palette.configured-item is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'toolbar-customisation-palette.drag-handle',
+      message: 'toolbar-customisation-palette.drag-handle is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'toolbar-item.item',
+      message: 'toolbar-item.item is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'window.content-border',
+      message: 'window.content-border is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'window.sheet',
+      message: 'window.sheet is not drawn by this theme.'
+    },
+    {
+      rule: 'theme.undrawn-part',
+      part: 'window.window-fitting-content',
+      message: 'window.window-fitting-content is not drawn by this theme.'
+    }
+  ],
+  expected: [],
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.22.1
+exit=1
+==== scripts\synware\check-fx-audio-codec-consumer.mjs 
+{
+  "passed": true,
+  "archiveSHA256": "ba6a5db828e31b52feff45e2e6f0bb0aeb32137f2dc4e5cea02bdf61c48ec271",
+  "chromium": {
+    "ready": true,
+    "mimeType": "audio/webm",
+    "byteLength": 458,
+    "cursorPreserved": true,
+    "track": {
+      "id": 1,
+      "kind": "audio",
+      "codec": "opus",
+      "sampleRate": 48000,
+      "channelCount": 1,
+      "preSkip": 312,
+      "timescale": 1000000
+    },
+    "packets": 1,
+    "decodedFrames": 480,
+    "peak": 0.254696786403656,
+    "encodeObserved": true,
+    "decodeObserved": true,
+    "streamed": {
+      "mimeType": "audio/webm",
+      "byteLength": 712,
+      "actualBytes": 712,
+      "track": {
+        "id": 1,
+        "kind": "audio",
+        "codec": "opus",
+        "sampleRate": 48000,
+        "channelCount": 1,
+        "preSkip": 312,
+        "timescale": 1000000
+      },
+      "packets": 2,
+      "released": 1,
+      "sinkUnlocked": true,
+      "hasBlob": false
+    },
+    "pageErrors": []
+  }
+}
+exit=0
+==== scripts\synware\check-fx-browser-lifecycle-consumer.mjs 
+Installed FX browser lifecycle passed for animation, haptics, motion, midi, location across Chromium, Firefox and WebKit.
+exit=0
+==== scripts\synware\check-fx-compression-consumer.mjs 
+[{"engine":"chromium","algorithms":["zlib"],"count":19456,"hasDocument":false},{"engine":"firefox","algorithms":["zlib"],"count":19456,"hasDocument":false},{"engine":"webkit","algorithms":["zlib"],"count":19456,"hasDocument":false}]
+exit=0
+==== scripts\synware\check-fx-crypto-consumer.mjs 
+[{"engine":"chromium","hash":32,"hasDocument":false,"scalarOnlyPublicPoints":[{"width":32,"state":"available"},{"width":48,"state":"available"},{"width":66,"state":"available"}],"privateImportChecks":282},{"engine":"firefox","hash":32,"hasDocument":false,"scalarOnlyPublicPoints":[{"width":32,"state":"unavailable"},{"width":48,"state":"unavailable"},{"width":66,"state":"unavailable"}],"privateImportChecks":282},{"engine":"webkit","hash":32,"hasDocument":false,"scalarOnlyPublicPoints":[{"width":32,"state":"available"},{"width":48,"state":"available"},{"width":66,"state":"available"}],"privateImportChecks":282}]
+exit=0
+==== scripts\synware\check-fx-image-metadata-consumer.mjs 
+{
+  "passed": true,
+  "archiveSHA256": "ba6a5db828e31b52feff45e2e6f0bb0aeb32137f2dc4e5cea02bdf61c48ec271",
+  "chromium": {
+    "ready": true,
+    "sourceOrientation": 6,
+    "profileLength": 312,
+    "profileBytes": [
+      97,
+      99,
+      115,
+      112
+    ],
+    "copied": true,
+    "size": {
+      "width": 2,
+      "height": 3
+    },
+    "pixelSize": [
+      2,
+      3
+    ],
+    "topRight": {
+      "r": 1,
+      "g": 0,
+      "b": 0,
+      "a": 1
+    },
+    "bottomLeft": {
+      "r": 0,
+      "g": 0,
+      "b": 1,
+      "a": 1
+    },
+    "webp": {
+      "sourceOrientation": 6,
+      "profileLength": 312,
+      "profileBytes": [
+        97,
+        99,
+        115,
+        112
+      ],
+      "size": {
+        "width": 3,
+        "height": 2
+      },
+      "pixelSize": [
+        3,
+        2
+      ],
+      "topLeft": {
+        "r": 1,
+        "g": 0,
+        "b": 0,
+        "a": 1
+      },
+      "topRight": {
+        "r": 0,
+        "g": 0,
+        "b": 1,
+        "a": 1
+      },
+      "releasedOrientation": null,
+      "releasedProfile": null
+    },
+    "png": {
+      "sourceOrientation": 6,
+      "profileLength": 312,
+      "pngProfileBytes": [
+        97,
+        99,
+        115,
+        112
+      ],
+      "copied": true,
+      "size": {
+        "width": 3,
+        "height": 2
+      },
+      "pixelSize": [
+        3,
+        2
+      ],
+      "releasedOrientation": null,
+      "releasedProfile": null
+    },
+    "gif": {
+      "size": {
+        "width": 1,
+        "height": 1
+      },
+      "profileLength": 312,
+      "profileBytes": [
+        97,
+        99,
+        115,
+        112
+      ],
+      "copied": true,
+      "releasedProfile": null
+    },
+    "releasedOrientation": null,
+    "releasedProfile": null,
+    "pageErrors": []
+  }
+}
+exit=0
+==== scripts\synware\check-fx-media-timeline-consumer.mjs 
+VFX-06 installed consumer passed for supported engines: actual mounted PCM seek/pause/rate/loop, renderer cancellation, processed title canvas and teardown. See per-engine capability results.
+exit=0
+==== scripts\synware\check-fx-pdf-consumer.mjs 
+FX-09 installed consumer passed: package-only graph, multilingual extraction, structure, strict CSP, and packaged PDF workers executed.
+exit=0
+==== scripts\synware\check-fx-text-consumer.mjs 
+FX-16 installed consumer passed: mounted font readiness, HarfBuzz shaping, vertical combine, fallback metrics, and package-only graph.
+exit=0
+==== scripts\synware\check-fx-video-consumer.mjs 
+VFX-02 installed consumer passed: package-only graph, mounted app.video decoder, VP8 roundtrip where supported, and unsupported-codec probes.
+exit=0
+==== scripts\synware\check-fx-video-encode-consumer.mjs 
+VFX-03 installed consumer passed: mounted encode, bounded WebM export/reimport, external player metadata, decode roundtrip, and unsupported probe.
+exit=0
+==== scripts\synware\check-omitted-products-consumer.mjs 
+Installed consumer passed: independent npm installation, declarations, browser omissions, and five theme configurations.
+exit=0
+==== scripts\synware\check-text-system-consumer.mjs 
+Installed text-system consumer passed: strict public declarations, retired editor absence, native typing/undo, fresh IndexedDB assets, PDF and package-only resolution.
+Installed custom text consumer passed: strict public declarations, independent archive bundle, private engine codec, native shared history, inspector, shaped geometry, immutable searchable PDF and disposal.
+exit=0

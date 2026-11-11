@@ -1,0 +1,875 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run vitest run --reporter=dot
+
+ RUN  v4.1.12 C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework
+
+xxxx······xxxxxxxxxxxxxxx·····································································································································································································································································································································································································································································································································································································································································································stderr | tests/runtime/nse-theme-contract-drift.test.tsx > renders secure-text-field-normal
+React does not recognize the `isEnabled` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `isenabled` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
+
+·····························································································································Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+·Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+·Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+·Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+···············································Not implemented: Window's getComputedStyle() method: with pseudo-elements
+Not implemented: Window's getComputedStyle() method: with pseudo-elements
+······························································Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+········Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+············································································································································stderr | tests/runtime/browser-application-host.test.tsx > application-only browser host > opens another registered application in a window over the primary and returns when it closes
+The current testing environment is not configured to support act(...)
+
+····stderr | tests/runtime/browser-application-host.test.tsx > keeps a discovered bundle's folder name independent from its case-insensitive identity
+<ref *1> DOMException {
+  [stack]: [Getter/Setter],
+  [Symbol(impl)]: DOMExceptionImpl {
+    name: 'SecurityError',
+    message: 'Application capabilities may only target owned responders.',
+    Symbol(wrapper): [Circular *1],
+    [code]: [Getter]
+  },
+  name: [Getter],
+  message: [Getter],
+  code: [Getter],
+  INDEX_SIZE_ERR: 1,
+  DOMSTRING_SIZE_ERR: 2,
+  HIERARCHY_REQUEST_ERR: 3,
+  WRONG_DOCUMENT_ERR: 4,
+  INVALID_CHARACTER_ERR: 5,
+  NO_DATA_ALLOWED_ERR: 6,
+  NO_MODIFICATION_ALLOWED_ERR: 7,
+  NOT_FOUND_ERR: 8,
+  NOT_SUPPORTED_ERR: 9,
+  INUSE_ATTRIBUTE_ERR: 10,
+  INVALID_STATE_ERR: 11,
+  SYNTAX_ERR: 12,
+  INVALID_MODIFICATION_ERR: 13,
+  NAMESPACE_ERR: 14,
+  INVALID_ACCESS_ERR: 15,
+  VALIDATION_ERR: 16,
+  TYPE_MISMATCH_ERR: 17,
+  SECURITY_ERR: 18,
+  NETWORK_ERR: 19,
+  ABORT_ERR: 20,
+  URL_MISMATCH_ERR: 21,
+  QUOTA_EXCEEDED_ERR: 22,
+  TIMEOUT_ERR: 23,
+  INVALID_NODE_TYPE_ERR: 24,
+  DATA_CLONE_ERR: 25,
+  [Symbol(Symbol.toStringTag)]: 'DOMException'
+}
+
+The above error occurred in the <Application> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, SynCloudOSWatchdog.
+
+<ref *1> DOMException {
+  [stack]: [Getter/Setter],
+  [Symbol(impl)]: DOMExceptionImpl {
+    name: 'SecurityError',
+    message: 'Application capabilities may only target owned responders.',
+    Symbol(wrapper): [Circular *1],
+    [code]: [Getter]
+  },
+  name: [Getter],
+  message: [Getter],
+  code: [Getter],
+  INDEX_SIZE_ERR: 1,
+  DOMSTRING_SIZE_ERR: 2,
+  HIERARCHY_REQUEST_ERR: 3,
+  WRONG_DOCUMENT_ERR: 4,
+  INVALID_CHARACTER_ERR: 5,
+  NO_DATA_ALLOWED_ERR: 6,
+  NO_MODIFICATION_ALLOWED_ERR: 7,
+  NOT_FOUND_ERR: 8,
+  NOT_SUPPORTED_ERR: 9,
+  INUSE_ATTRIBUTE_ERR: 10,
+  INVALID_STATE_ERR: 11,
+  SYNTAX_ERR: 12,
+  INVALID_MODIFICATION_ERR: 13,
+  NAMESPACE_ERR: 14,
+  INVALID_ACCESS_ERR: 15,
+  VALIDATION_ERR: 16,
+  TYPE_MISMATCH_ERR: 17,
+  SECURITY_ERR: 18,
+  NETWORK_ERR: 19,
+  ABORT_ERR: 20,
+  URL_MISMATCH_ERR: 21,
+  QUOTA_EXCEEDED_ERR: 22,
+  TIMEOUT_ERR: 23,
+  INVALID_NODE_TYPE_ERR: 24,
+  DATA_CLONE_ERR: 25,
+  [Symbol(Symbol.toStringTag)]: 'DOMException'
+}
+
+The above error occurred in the <Application> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, SynCloudOSWatchdog.
+
+
+································································································································································································································································································································································································································································································································stderr | tests/runtime/nse-theme-hook-coverage.test.tsx > public theme hook coverage > secure-text-field-normal
+React does not recognize the `isEnabled` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `isenabled` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
+
+·····································································································································································Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+·Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+·Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+··Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+···Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+··Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+···Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+·Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+·Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+··Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+··································Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+·····························································································································stderr | tests/runtime/chronosphere/chronosphere-presentation.test.tsx > gives Restore its own document return choreography
+React does not recognize the `bezelStyle` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `bezelstyle` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
+React does not recognize the `imagePosition` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `imageposition` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
+
+·····································stderr | tests/runtime/chronosphere/chronosphere-presentation.test.tsx > lays every version out in the grid view, chooses with the keyboard, restores and leaves
+React does not recognize the `keyEquivalent` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `keyequivalent` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
+
+·································································································································································Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+················Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+··Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+··································································································································································································································································································································································································································································································································································································································································································································································································································································stderr | tests/nse/data-views/nse-table-view.test.tsx > NSETableView > fills its container when viewportBlockSize is "fill", following the container as it resizes
+The current testing environment is not configured to support act(...)
+
+··················································································································stderr | tests/runtime/nse-stack-view.test.tsx > NSEStackView > sizes an item without a preferred size to its content's fitting size, and follows the content
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+··············································stderr | tests/runtime/webspring-window-host.test.tsx > Webspring window host > keeps one mounted application instance through a throwing view and fallback view switch
+Error: fixture view failed
+    at ThrowingView (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/webspring-window-host.test.tsx:90:44)
+    at Object.react_stack_bottom_frame (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:25904:20)
+    at renderWithHooks (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:7662:22)
+    at updateFunctionComponent (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:10166:19)
+    at beginWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:11778:18)
+    at runWithFiberInDEV (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+    at performUnitOfWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17641:22)
+    at workLoopSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17469:41)
+    at renderRootSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17450:11)
+    at performWorkOnRoot (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35) {
+  [stack]: [Getter/Setter],
+  [message]: 'fixture view failed'
+}
+
+The above error occurred in the <ThrowingView> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, WebspringViewBoundary.
+
+
+················stderr | tests/runtime/host-diagnostics-provision.test.tsx > revalidates useAction availability on host replacement and revocation without an app hook bridge
+useInsertionEffect must not schedule updates.
+useInsertionEffect must not schedule updates.
+useInsertionEffect must not schedule updates.
+useInsertionEffect must not schedule updates.
+
+·····················································································stderr | tests/nse/controls/nse-completion-fields.test.tsx > completion and field families > conceals secure text on capture loss, blur, Escape, visibility and disable
+React does not recognize the `isEnabled` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `isenabled` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
+
+··················································································································stderr | tests/runtime/window-chrome-integration.test.tsx > custom chrome host integration > restores the complete system titlebar when custom chrome crashes without taking content down
+Error: chrome renderer exploded
+    at windowChrome (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/window-chrome-integration.test.tsx:106:46)
+    at Object.react_stack_bottom_frame (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:25904:20)
+    at renderWithHooks (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:7662:22)
+    at updateFunctionComponent (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:10166:19)
+    at beginWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:11778:18)
+    at runWithFiberInDEV (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+    at performUnitOfWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17641:22)
+    at workLoopSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17469:41)
+    at renderRootSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17450:11)
+    at performWorkOnRoot (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35) {
+  [stack]: [Getter/Setter],
+  [message]: 'chrome renderer exploded'
+}
+
+The above error occurred in the <windowChrome> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, WindowChromeFailureBoundary.
+
+
+······························································································································································································································································································································································································stderr | tests/runtime/routing-ii-outlets.test.tsx > Routing II React outlets > inherits the nearest error view for a lazy-render failure and routes retry through the host
+Error: child-lazy-render-failed
+    at C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/routing-ii-outlets.test.tsx:277:24
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2027:60
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20
+    at new Promise (<anonymous>)
+    at runWithCancel (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)
+    at file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///C:/Users/Kavish%20Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10) {
+  [stack]: [Getter/Setter],
+  [message]: 'child-lazy-render-failed'
+}
+
+The above error occurred in the <component> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, RouteRenderBoundary.
+
+
+stderr | tests/runtime/routing-ii-outlets.test.tsx > Routing II React outlets > bubbles a failing inherited error presentation past its declaring route
+RoutePresentationFailure [Error]: Route boundary presentation failed.
+    at RouteFallbackGuard.render (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/src/SynCloudOS/AppSDK/RouteOutlet.tsx:151:35)
+    at Object.react_stack_bottom_frame (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:25917:29)
+    at updateClassComponent (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:10719:25)
+    at beginWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:11792:13)
+    at runWithFiberInDEV (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+    ... 3 lines matching cause stack trace ...
+    at performWorkOnRoot (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35)
+    at performWorkOnRootViaSchedulerTask (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:18957:7) {
+  [stack]: [Getter/Setter],
+  [message]: 'Route boundary presentation failed.',
+  [cause]: Error: artist-boundary-render-failed
+      at ArtistError (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/routing-ii-outlets.test.tsx:118:42)
+      at Object.react_stack_bottom_frame (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:25904:20)
+      at renderWithHooks (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:10166:19)
+      at beginWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+      at performUnitOfWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17641:22)
+      at workLoopSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17469:41)
+      at renderRootSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35) {
+    [stack]: [Getter/Setter],
+    [message]: 'artist-boundary-render-failed'
+  },
+  error: Error: artist-boundary-render-failed
+      at ArtistError (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/routing-ii-outlets.test.tsx:118:42)
+      at Object.react_stack_bottom_frame (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:25904:20)
+      at renderWithHooks (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:7662:22)
+      at updateFunctionComponent (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:10166:19)
+      at beginWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:11778:18)
+      at runWithFiberInDEV (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+      at performUnitOfWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17641:22)
+      at workLoopSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17469:41)
+      at renderRootSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17450:11)
+      at performWorkOnRoot (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35) {
+    [stack]: [Getter/Setter],
+    [message]: 'artist-boundary-render-failed'
+  },
+  boundaryDepth: 1
+}
+
+The above error occurred in the <RouteFallbackGuard> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, RouteRenderBoundary.
+
+
+stderr | tests/runtime/routing-ii-outlets.test.tsx > Routing II React outlets > bubbles a render exception to the nearest ancestor error boundary
+Error: album-render-failed
+    at Album (C:/Users/Kavish Krishnakumar/Developer/SynCloudOS-Workspace/.worktrees/webspring-folders/framework/tests/runtime/routing-ii-outlets.test.tsx:102:42)
+    at Object.react_stack_bottom_frame (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:25904:20)
+    at renderWithHooks (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:7662:22)
+    at updateFunctionComponent (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:10166:19)
+    at beginWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:11778:18)
+    at runWithFiberInDEV (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:874:13)
+    at performUnitOfWork (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17641:22)
+    at workLoopSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17469:41)
+    at renderRootSync (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:17450:11)
+    at performWorkOnRoot (C:\Users\Kavish Krishnakumar\Developer\SynCloudOS-Workspace\.worktrees\webspring-folders\framework\node_modules\react-dom\cjs\react-dom-client.development.js:16583:35) {
+  [stack]: [Getter/Setter],
+  [message]: 'album-render-failed'
+}
+
+The above error occurred in the <Album> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, RouteRenderBoundary.
+
+
+······························································································································································································································································stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > holds settlement until an actual React layout effect acknowledges the exact operation and revision
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > holds settlement until an actual React layout effect acknowledges the exact operation and revision
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > observes the real overlay focus-restoration receipt after close
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > observes the real overlay focus-restoration receipt after close
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+···stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > observes the real overlay focus-restoration receipt after close
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > observes the real overlay focus-restoration receipt after close
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > observes the real overlay focus-restoration receipt after close
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > settles one real cross-owner action chain only after every finite owner completes
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > settles one real cross-owner action chain only after every finite owner completes
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > settles one real cross-owner action chain only after every finite owner completes
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > settles one real cross-owner action chain only after every finite owner completes
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > settles one real cross-owner action chain only after every finite owner completes
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+stderr | tests/runtime/framework-settlement.test.ts > framework finite-work settlement > settles one real cross-owner action chain only after every finite owner completes
+The current testing environment is not configured to support act(...)
+The current testing environment is not configured to support act(...)
+
+·····························································································································stderr | tests/runtime/app-quit-detached-windows.test.tsx > application quit with detached windows > surfaces registry corruption when the app is removed while its lifecycle is active
+<ref *1> DOMException {
+  [stack]: [Getter/Setter],
+  [Symbol(impl)]: DOMExceptionImpl {
+    name: 'SecurityError',
+    message: 'Application com.example.window-owner is no longer registered.',
+    Symbol(wrapper): [Circular *1],
+    [code]: [Getter]
+  },
+  name: [Getter],
+  message: [Getter],
+  code: [Getter],
+  INDEX_SIZE_ERR: 1,
+  DOMSTRING_SIZE_ERR: 2,
+  HIERARCHY_REQUEST_ERR: 3,
+  WRONG_DOCUMENT_ERR: 4,
+  INVALID_CHARACTER_ERR: 5,
+  NO_DATA_ALLOWED_ERR: 6,
+  NO_MODIFICATION_ALLOWED_ERR: 7,
+  NOT_FOUND_ERR: 8,
+  NOT_SUPPORTED_ERR: 9,
+  INUSE_ATTRIBUTE_ERR: 10,
+  INVALID_STATE_ERR: 11,
+  SYNTAX_ERR: 12,
+  INVALID_MODIFICATION_ERR: 13,
+  NAMESPACE_ERR: 14,
+  INVALID_ACCESS_ERR: 15,
+  VALIDATION_ERR: 16,
+  TYPE_MISMATCH_ERR: 17,
+  SECURITY_ERR: 18,
+  NETWORK_ERR: 19,
+  ABORT_ERR: 20,
+  URL_MISMATCH_ERR: 21,
+  QUOTA_EXCEEDED_ERR: 22,
+  TIMEOUT_ERR: 23,
+  INVALID_NODE_TYPE_ERR: 24,
+  DATA_CLONE_ERR: 25,
+  [Symbol(Symbol.toStringTag)]: 'DOMException'
+}
+
+The above error occurred in the <SynWareRuntimeMount> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, SynCloudOSWatchdog.
+
+
+·························································································································································································································································································stderr | tests/runtime/fx/graphics-pdf-render.test.ts > GraphicsFX canonical PDF page rendering > has independent known vector, text and image pixel evidence
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+
+·············································································································································································································································································································································································································································································································································································································································································································································································································································································································································································stdout | tests/runtime/document-asset-integrated-regressions.test.ts > integrated asset ownership regressions > keeps a second independent preparation alive when the first shared candidate caller aborts
+REVIEW-PROBE independent-cancel {"first":"asset-aborted","second":"prepared","revision":1,"roots":0}
+
+stdout | tests/runtime/document-asset-integrated-regressions.test.ts > integrated asset ownership regressions > enforces the full captured candidate identity with automatic resource admission
+REVIEW-PROBE candidate-automatic {"status":"rejected","title":"New","revision":1}
+
+stdout | tests/runtime/document-asset-integrated-regressions.test.ts > integrated asset ownership regressions > enforces the full captured candidate identity with explicit resource admission
+REVIEW-PROBE candidate-explicit {"status":"rejected","title":"New","revision":1}
+
+stdout | tests/runtime/document-asset-integrated-regressions.test.ts > integrated asset ownership regressions > restores the old current owner and collects only the new candidate after synchronous retention refusal
+REVIEW-PROBE reversible-refusal {"status":"rejected","revision":2,"gc":{"removedAssets":1,"removedBytes":1}}
+
+stdout | tests/runtime/document-asset-integrated-regressions.test.ts > integrated asset ownership regressions > refuses an unprepared canonical reference and a mount revoked inside model validation
+REVIEW-PROBE prepublication-revocation {"unprepared":"rejected","revoked":"rejected","revision":1}
+
+·····stdout | tests/runtime/document-asset-integrated-regressions.test.ts > integrated asset ownership regressions > fences reconcile eviction against a newer retention generation at the same native version root
+REVIEW-PROBE eviction-generation {"count":0,"suppliedToken":"365a14da-926e-4d66-ad68-03c799940f8f","generationChanged":true,"nativeVersionPresent":true,"currentVersionPresent":true,"gc":{"removedAssets":0,"removedBytes":0}}
+
+stdout | tests/runtime/document-asset-integrated-regressions.test.ts > integrated asset ownership regressions > fences explicit eviction against a newer retention generation at the same native version root
+REVIEW-PROBE eviction-generation {"count":0,"suppliedToken":"facebd24-adaa-4f11-bbca-971d3c957732","generationChanged":true,"nativeVersionPresent":true,"currentVersionPresent":true,"gc":{"removedAssets":0,"removedBytes":0}}
+
+stdout | tests/runtime/document-asset-integrated-regressions.test.ts > integrated asset ownership regressions > converges a recovered unknown sent write to its one acknowledged native version root
+REVIEW-PROBE unknown-write-recovery {"sameVersion":true,"roots":["native-version:eb1add02041437e666c13d5d924d9ea13e4c02ee6be2934519ac2ee218621f61:%7B%22etag%22%3A%22%5C%22a8316e0f%5C%22%22%2C%22id%22%3A%2249b130bc-8f20-40a3-93da-6c1b1de5d2bd%22%2C%22savedAt%22%3A%221970-01-01T00%3A00%3A01.000Z%22%2C%22sequence%22%3A1%7D"]}
+
+stdout | tests/runtime/document-asset-integrated-regressions.test.ts > integrated asset ownership regressions > does not exhaust root quota on repeated acknowledgement of one formerly unknown write
+REVIEW-PROBE unknown-write-quota {"acknowledgedVersion":"4151d4d3-0498-45c2-95aa-742a3ded224f","sameVersion":true,"retry":"acknowledged","roots":["native-version:eb1add02041437e666c13d5d924d9ea13e4c02ee6be2934519ac2ee218621f61:%7B%22etag%22%3A%22%5C%22d327ea75%5C%22%22%2C%22id%22%3A%224151d4d3-0498-45c2-95aa-742a3ded224f%22%2C%22savedAt%22%3A%221970-01-01T00%3A00%3A01.000Z%22%2C%22sequence%22%3A1%7D"]}
+
+stdout | tests/runtime/document-asset-integrated-regressions.test.ts > integrated asset ownership regressions > returns the actual committed receipt after cancellation and rejected postcommit pin promotion
+REVIEW-PROBE committed-receipt-truth {"nativePresent":true,"abortedAfterCommit":true,"pin":"version","durability":"memory"}
+
+·················································································································Not implemented: navigation to another Document
+···························stdout | tests/runtime/synware-text-adapter-targets.test.ts > SDK adapter construction targets > keeps a text owner on its originally supplied document port when the caller reuses its options object
+TEXT_TARGET_PROBE {"first":"!Original","second":"Other runtime","projected":"!Original"}
+
+stdout | tests/runtime/synware-text-adapter-targets.test.ts > SDK adapter construction targets > captures the same document it settled when selection options change during an async barrier
+OUTPUT_TARGET_PROBE {"documentId":"review-document","body":"Original","otherMarked":"未確定","engineCalls":1}
+
+·····································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································stderr | tests/runtime/webspring-folder-tile.test.tsx > WebspringFolderTile > draws the default inset squircle from NSESmoothSurface geometry sized to the tile
+Each child in a list should have a unique "key" prop.
+
+Check the render method of `span`. It was passed a child from WebspringFolderTile. See https://react.dev/link/warning-keys for more information.
+
+································································································································································································································································································································································stderr | tests/nse/chronosphere/chronosphere-environment.test.tsx > browses and restores through an injected NSE environment without an app mount
+The current testing environment is not configured to support act(...)
+
+stderr | tests/nse/chronosphere/chronosphere-environment.test.tsx > browses and restores through an injected NSE environment without an app mount
+The current testing environment is not configured to support act(...)
+
+stderr | tests/nse/chronosphere/chronosphere-environment.test.tsx > browses and restores through an injected NSE environment without an app mount
+The current testing environment is not configured to support act(...)
+
+stderr | tests/nse/chronosphere/chronosphere-environment.test.tsx > browses and restores through an injected NSE environment without an app mount
+The current testing environment is not configured to support act(...)
+
+···························································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 19 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/runtime/foundation-packed-consumer.test.ts > uses Foundation and CPFX from an independent SDK installation in a worker and strict worker-lib consumer
+AssertionError: SDK source changed during build/acceptance; freeze the working source and rebuild before publishing a receipt.
++ actual - expected
+
++ 'a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c'
+- 'b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5'
+
+
+Expected: "b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5"
+Received: "a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c"
+
+ ❯ assertSdkSourceUnchanged scripts/synware/sdk-package-manifest.mjs:110:10
+    108|
+    109| export function assertSdkSourceUnchanged(before, after) {
+    110|   assert.equal(after.sha256, before.sha256, "SDK source changed during…
+       |          ^
+    111| }
+    112|
+ ❯ createInstalledConsumer scripts/synware/installed-consumer.mjs:133:27
+ ❯ tests/runtime/foundation-packed-consumer.test.ts:27:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/19]⎯
+
+ FAIL  tests/runtime/managed-typography-packed-consumer.test.ts > uses managed typography from an independently installed package in Node and app code
+AssertionError: SDK source changed during build/acceptance; freeze the working source and rebuild before publishing a receipt.
++ actual - expected
+
++ 'a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c'
+- 'b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5'
+
+
+Expected: "b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5"
+Received: "a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c"
+
+ ❯ assertSdkSourceUnchanged scripts/synware/sdk-package-manifest.mjs:110:10
+    108|
+    109| export function assertSdkSourceUnchanged(before, after) {
+    110|   assert.equal(after.sha256, before.sha256, "SDK source changed during…
+       |          ^
+    111| }
+    112|
+ ❯ createInstalledConsumer scripts/synware/installed-consumer.mjs:133:27
+ ❯ tests/runtime/managed-typography-packed-consumer.test.ts:27:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/19]⎯
+
+ FAIL  tests/runtime/nse-file-browser-packed.test.ts > exports usable path items and workspace artwork from an independently installed SDK
+AssertionError: SDK source changed during build/acceptance; freeze the working source and rebuild before publishing a receipt.
++ actual - expected
+
++ 'a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c'
+- 'b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5'
+
+
+Expected: "b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5"
+Received: "a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c"
+
+ ❯ assertSdkSourceUnchanged scripts/synware/sdk-package-manifest.mjs:110:10
+    108|
+    109| export function assertSdkSourceUnchanged(before, after) {
+    110|   assert.equal(after.sha256, before.sha256, "SDK source changed during…
+       |          ^
+    111| }
+    112|
+ ❯ createInstalledConsumer scripts/synware/installed-consumer.mjs:133:27
+ ❯ tests/runtime/nse-file-browser-packed.test.ts:8:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/19]⎯
+
+ FAIL  tests/runtime/project-conventions-packed.test.ts > bundles an installed browser host with discovery plugin=false
+ FAIL  tests/runtime/project-conventions-packed.test.ts > bundles an installed browser host with discovery plugin=true
+AssertionError: SDK source changed during build/acceptance; freeze the working source and rebuild before publishing a receipt.
++ actual - expected
+
++ 'a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c'
+- 'b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5'
+
+
+Expected: "b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5"
+Received: "a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c"
+
+ ❯ assertSdkSourceUnchanged scripts/synware/sdk-package-manifest.mjs:110:10
+    108|
+    109| export function assertSdkSourceUnchanged(before, after) {
+    110|   assert.equal(after.sha256, before.sha256, "SDK source changed during…
+       |          ^
+    111| }
+    112|
+ ❯ createInstalledConsumer scripts/synware/installed-consumer.mjs:133:27
+ ❯ tests/runtime/project-conventions-packed.test.ts:7:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/19]⎯
+
+ FAIL  tests/runtime/synware-public-api-repairs-packed.test.ts > typechecks and executes repaired APIs through an independently installed SDK
+AssertionError: SDK source changed during build/acceptance; freeze the working source and rebuild before publishing a receipt.
++ actual - expected
+
++ 'a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c'
+- 'b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5'
+
+
+Expected: "b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5"
+Received: "a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c"
+
+ ❯ assertSdkSourceUnchanged scripts/synware/sdk-package-manifest.mjs:110:10
+    108|
+    109| export function assertSdkSourceUnchanged(before, after) {
+    110|   assert.equal(after.sha256, before.sha256, "SDK source changed during…
+       |          ^
+    111| }
+    112|
+ ❯ createInstalledConsumer scripts/synware/installed-consumer.mjs:133:27
+ ❯ tests/runtime/synware-public-api-repairs-packed.test.ts:27:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/19]⎯
+
+ FAIL  tests/runtime/chronosphere/chronosphere-packed-consumer.test.ts > preserves typed neutral versions and prepared custom views in an installed SDK
+AssertionError: SDK source changed during build/acceptance; freeze the working source and rebuild before publishing a receipt.
++ actual - expected
+
++ 'a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c'
+- 'b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5'
+
+
+Expected: "b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5"
+Received: "a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c"
+
+ ❯ assertSdkSourceUnchanged scripts/synware/sdk-package-manifest.mjs:110:10
+    108|
+    109| export function assertSdkSourceUnchanged(before, after) {
+    110|   assert.equal(after.sha256, before.sha256, "SDK source changed during…
+       |          ^
+    111| }
+    112|
+ ❯ createInstalledConsumer scripts/synware/installed-consumer.mjs:133:27
+ ❯ tests/runtime/chronosphere/chronosphere-packed-consumer.test.ts:28:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/19]⎯
+
+ FAIL  tests/runtime/fx/app-attribution-dev.test.ts > keeps attributed classes and sessions in one installed SDK graph with real dev optimisation and HMR
+AssertionError: SDK source changed during build/acceptance; freeze the working source and rebuild before publishing a receipt.
++ actual - expected
+
++ 'a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c'
+- 'b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5'
+
+
+Expected: "b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5"
+Received: "a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c"
+
+ ❯ assertSdkSourceUnchanged scripts/synware/sdk-package-manifest.mjs:110:10
+    108|
+    109| export function assertSdkSourceUnchanged(before, after) {
+    110|   assert.equal(after.sha256, before.sha256, "SDK source changed during…
+       |          ^
+    111| }
+    112|
+ ❯ createInstalledConsumer scripts/synware/installed-consumer.mjs:133:27
+ ❯ tests/runtime/fx/app-attribution-dev.test.ts:9:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/19]⎯
+
+ FAIL  tests/runtime/fx/app-attribution-packed.test.ts > compiles attributed apps from the immutable installed SDK and emits their PWA chunks
+AssertionError: SDK source changed during build/acceptance; freeze the working source and rebuild before publishing a receipt.
++ actual - expected
+
++ 'a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c'
+- 'b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5'
+
+
+Expected: "b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5"
+Received: "a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c"
+
+ ❯ assertSdkSourceUnchanged scripts/synware/sdk-package-manifest.mjs:110:10
+    108|
+    109| export function assertSdkSourceUnchanged(before, after) {
+    110|   assert.equal(after.sha256, before.sha256, "SDK source changed during…
+       |          ^
+    111| }
+    112|
+ ❯ createInstalledConsumer scripts/synware/installed-consumer.mjs:133:27
+ ❯ tests/runtime/fx/app-attribution-packed.test.ts:7:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/19]⎯
+
+ FAIL  tests/runtime/fx/bluetooth-packed.test.ts > proves real installed Bluetooth .app attribution, declaration boundaries and immutable resources
+AssertionError: SDK source changed during build/acceptance; freeze the working source and rebuild before publishing a receipt.
++ actual - expected
+
++ 'a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c'
+- 'b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5'
+
+
+Expected: "b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5"
+Received: "a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c"
+
+ ❯ assertSdkSourceUnchanged scripts/synware/sdk-package-manifest.mjs:110:10
+    108|
+    109| export function assertSdkSourceUnchanged(before, after) {
+    110|   assert.equal(after.sha256, before.sha256, "SDK source changed during…
+       |          ^
+    111| }
+    112|
+ ❯ createInstalledConsumer scripts/synware/installed-consumer.mjs:133:27
+ ❯ tests/runtime/fx/bluetooth-packed.test.ts:6:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/19]⎯
+
+ FAIL  tests/runtime/fx/contacts-packed.test.ts > proves real installed Contacts .app attribution, declaration boundaries and immutable resources
+AssertionError: SDK source changed during build/acceptance; freeze the working source and rebuild before publishing a receipt.
++ actual - expected
+
++ 'a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c'
+- 'b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5'
+
+
+Expected: "b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5"
+Received: "a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c"
+
+ ❯ assertSdkSourceUnchanged scripts/synware/sdk-package-manifest.mjs:110:10
+    108|
+    109| export function assertSdkSourceUnchanged(before, after) {
+    110|   assert.equal(after.sha256, before.sha256, "SDK source changed during…
+       |          ^
+    111| }
+    112|
+ ❯ createInstalledConsumer scripts/synware/installed-consumer.mjs:133:27
+ ❯ tests/runtime/fx/contacts-packed.test.ts:6:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/19]⎯
+
+ FAIL  tests/runtime/fx/dispatch-packed.test.ts > packed third-party consumer gets per-app DFXQueue in compiled apps with one immutable SDK graph
+AssertionError: SDK source changed during build/acceptance; freeze the working source and rebuild before publishing a receipt.
++ actual - expected
+
++ 'a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c'
+- 'b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5'
+
+
+Expected: "b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5"
+Received: "a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c"
+
+ ❯ assertSdkSourceUnchanged scripts/synware/sdk-package-manifest.mjs:110:10
+    108|
+    109| export function assertSdkSourceUnchanged(before, after) {
+    110|   assert.equal(after.sha256, before.sha256, "SDK source changed during…
+       |          ^
+    111| }
+    112|
+ ❯ createInstalledConsumer scripts/synware/installed-consumer.mjs:133:27
+ ❯ tests/runtime/fx/dispatch-packed.test.ts:7:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/19]⎯
+
+ FAIL  tests/runtime/fx/hooks-packed.test.ts > proves compiled hook identity and all seven hook declaration boundaries in the immutable installed SDK
+AssertionError: SDK source changed during build/acceptance; freeze the working source and rebuild before publishing a receipt.
++ actual - expected
+
++ 'a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c'
+- 'b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5'
+
+
+Expected: "b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5"
+Received: "a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c"
+
+ ❯ assertSdkSourceUnchanged scripts/synware/sdk-package-manifest.mjs:110:10
+    108|
+    109| export function assertSdkSourceUnchanged(before, after) {
+    110|   assert.equal(after.sha256, before.sha256, "SDK source changed during…
+       |          ^
+    111| }
+    112|
+ ❯ createInstalledConsumer scripts/synware/installed-consumer.mjs:133:27
+ ❯ tests/runtime/fx/hooks-packed.test.ts:7:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/19]⎯
+
+ FAIL  tests/runtime/fx/network-packed.test.ts > installed Network entry compiles real apps and excludes old factories and private types
+AssertionError: SDK source changed during build/acceptance; freeze the working source and rebuild before publishing a receipt.
++ actual - expected
+
++ 'a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c'
+- 'b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5'
+
+
+Expected: "b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5"
+Received: "a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c"
+
+ ❯ assertSdkSourceUnchanged scripts/synware/sdk-package-manifest.mjs:110:10
+    108|
+    109| export function assertSdkSourceUnchanged(before, after) {
+    110|   assert.equal(after.sha256, before.sha256, "SDK source changed during…
+       |          ^
+    111| }
+    112|
+ ❯ createInstalledConsumer scripts/synware/installed-consumer.mjs:133:27
+ ❯ tests/runtime/fx/network-packed.test.ts:6:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/19]⎯
+
+ FAIL  tests/runtime/fx/network-packed.test.ts > strict installed browser and testing signatures hide Network adapters
+AssertionError: SDK source changed during build/acceptance; freeze the working source and rebuild before publishing a receipt.
++ actual - expected
+
++ 'a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c'
+- 'b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5'
+
+
+Expected: "b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5"
+Received: "a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c"
+
+ ❯ assertSdkSourceUnchanged scripts/synware/sdk-package-manifest.mjs:110:10
+    108|
+    109| export function assertSdkSourceUnchanged(before, after) {
+    110|   assert.equal(after.sha256, before.sha256, "SDK source changed during…
+       |          ^
+    111| }
+    112|
+ ❯ createInstalledConsumer scripts/synware/installed-consumer.mjs:133:27
+ ❯ tests/runtime/fx/network-packed.test.ts:62:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/19]⎯
+
+ FAIL  tests/runtime/fx/nfc-packed.test.ts > proves real installed NFC .app attribution, declaration boundaries and immutable resources
+AssertionError: SDK source changed during build/acceptance; freeze the working source and rebuild before publishing a receipt.
++ actual - expected
+
++ 'a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c'
+- 'b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5'
+
+
+Expected: "b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5"
+Received: "a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c"
+
+ ❯ assertSdkSourceUnchanged scripts/synware/sdk-package-manifest.mjs:110:10
+    108|
+    109| export function assertSdkSourceUnchanged(before, after) {
+    110|   assert.equal(after.sha256, before.sha256, "SDK source changed during…
+       |          ^
+    111| }
+    112|
+ ❯ createInstalledConsumer scripts/synware/installed-consumer.mjs:133:27
+ ❯ tests/runtime/fx/nfc-packed.test.ts:6:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/19]⎯
+
+ FAIL  tests/runtime/fx/pass-packed.test.ts > proves real installed Pass .app attribution, declaration boundaries and immutable resources
+AssertionError: SDK source changed during build/acceptance; freeze the working source and rebuild before publishing a receipt.
++ actual - expected
+
++ 'a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c'
+- 'b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5'
+
+
+Expected: "b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5"
+Received: "a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c"
+
+ ❯ assertSdkSourceUnchanged scripts/synware/sdk-package-manifest.mjs:110:10
+    108|
+    109| export function assertSdkSourceUnchanged(before, after) {
+    110|   assert.equal(after.sha256, before.sha256, "SDK source changed during…
+       |          ^
+    111| }
+    112|
+ ❯ createInstalledConsumer scripts/synware/installed-consumer.mjs:133:27
+ ❯ tests/runtime/fx/pass-packed.test.ts:6:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/19]⎯
+
+ FAIL  tests/runtime/fx/speech-packed.test.ts > proves real installed Speech .app attribution, declaration boundaries and immutable resources
+AssertionError: SDK source changed during build/acceptance; freeze the working source and rebuild before publishing a receipt.
++ actual - expected
+
++ 'a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c'
+- 'b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5'
+
+
+Expected: "b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5"
+Received: "a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c"
+
+ ❯ assertSdkSourceUnchanged scripts/synware/sdk-package-manifest.mjs:110:10
+    108|
+    109| export function assertSdkSourceUnchanged(before, after) {
+    110|   assert.equal(after.sha256, before.sha256, "SDK source changed during…
+       |          ^
+    111| }
+    112|
+ ❯ createInstalledConsumer scripts/synware/installed-consumer.mjs:133:27
+ ❯ tests/runtime/fx/speech-packed.test.ts:6:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/19]⎯
+
+ FAIL  tests/runtime/fx/xr-packed.test.ts > proves real installed XR .app attribution, declaration boundaries and immutable resources
+AssertionError: SDK source changed during build/acceptance; freeze the working source and rebuild before publishing a receipt.
++ actual - expected
+
++ 'a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c'
+- 'b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5'
+
+
+Expected: "b641bf317ebb956b1e94b9bc707e7dba4ecd8d619b44c35b855d4cbc62cf47c5"
+Received: "a46db990b45b1859b184a4c0ce84ea25883ea27b27d8c02baa6a827468c24d9c"
+
+ ❯ assertSdkSourceUnchanged scripts/synware/sdk-package-manifest.mjs:110:10
+    108|
+    109| export function assertSdkSourceUnchanged(before, after) {
+    110|   assert.equal(after.sha256, before.sha256, "SDK source changed during…
+       |          ^
+    111| }
+    112|
+ ❯ createInstalledConsumer scripts/synware/installed-consumer.mjs:133:27
+ ❯ tests/runtime/fx/xr-packed.test.ts:6:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/19]⎯
+
+
+ Test Files  17 failed | 1002 passed (1019)
+      Tests  19 failed | 9800 passed (9819)
+   Start at  20:02:03
+   Duration  907.87s (transform 32.54s, setup 6.89s, import 643.13s, tests 743.56s, environment 300.93s)
+
+done=0 

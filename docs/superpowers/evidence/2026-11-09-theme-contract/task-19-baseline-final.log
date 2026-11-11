@@ -1,0 +1,199 @@
+npm notice run @syndromatic/syncloudos-source@1.0.0-beta.2 npx
+npm notice run playwright test tests/e2e/theme-baseline.spec.ts tests/e2e/theme-nesting.spec.ts --project=chromium --project=chromium-high-dpr --project=chromium-reduced-motion --workers=1 --reporter=line
+
+[WebServer] (node:64984) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 177 tests using 1 worker
+
+
+(node:54996) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[1/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1
+[2/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2
+[3/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3
+[4/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 4
+[5/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 5
+[6/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 6
+[7/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 7
+[8/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 8
+[9/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 9
+[10/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 10
+[11/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 11
+[12/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 12
+[13/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 13
+[14/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 14
+[15/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 15
+[16/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 16
+[17/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 17
+[18/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 18
+[19/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 19
+[20/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 20
+[21/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1
+[22/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 2
+[23/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 3
+[24/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 4
+[25/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 5
+[26/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 6
+[27/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 7
+[28/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 8
+[29/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 9
+[30/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 10
+[31/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 11
+[32/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 12
+[33/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 13
+[34/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 14
+[35/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 15
+[36/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 16
+[37/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 17
+[38/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 18
+[39/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 19
+[40/177] [chromium] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 20
+[41/177] [chromium] › tests\e2e\theme-baseline.spec.ts:113:1 › stepper hit targets preserve the painted bezel
+[42/177] [chromium] › tests\e2e\theme-nesting.spec.ts:4:1 › nested themes isolate paint and colours; omitted highlighted paint falls back to Atmo
+[43/177] [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start in-flow ltr keeps content clear
+[44/177] [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start in-flow rtl keeps content clear
+[45/177] [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start overlay ltr keeps content clear
+[46/177] [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start overlay rtl keeps content clear
+[47/177] [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end in-flow ltr keeps content clear
+[48/177] [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end in-flow rtl keeps content clear
+[49/177] [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end overlay ltr keeps content clear
+[50/177] [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end overlay rtl keeps content clear
+[51/177] [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list in-flow ltr keeps content clear
+[52/177] [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list in-flow rtl keeps content clear
+[53/177] [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list overlay ltr keeps content clear
+[54/177] [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list overlay rtl keeps content clear
+[55/177] [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start in-flow ltr keeps content clear
+[56/177] [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start in-flow rtl keeps content clear
+[57/177] [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start overlay ltr keeps content clear
+[58/177] [chromium] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start overlay rtl keeps content clear
+[59/177] [chromium] › tests\e2e\theme-nesting.spec.ts:29:1 › plain login keeps the existing window without ornaments for owner review
+
+(node:82200) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[60/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1
+[61/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2
+[62/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3
+[63/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 4
+[64/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 5
+[65/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 6
+[66/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 7
+[67/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 8
+[68/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 9
+[69/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 10
+[70/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 11
+[71/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 12
+[72/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 13
+[73/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 14
+[74/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 15
+[75/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 16
+[76/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 17
+[77/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 18
+[78/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 19
+[79/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 20
+[80/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1
+[81/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 2
+[82/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 3
+[83/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 4
+[84/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 5
+[85/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 6
+[86/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 7
+[87/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 8
+[88/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 9
+[89/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 10
+[90/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 11
+[91/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 12
+[92/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 13
+[93/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 14
+[94/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 15
+[95/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 16
+[96/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 17
+[97/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 18
+[98/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 19
+[99/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 20
+[100/177] [chromium-high-dpr] › tests\e2e\theme-baseline.spec.ts:113:1 › stepper hit targets preserve the painted bezel
+[101/177] [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:4:1 › nested themes isolate paint and colours; omitted highlighted paint falls back to Atmo
+[102/177] [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start in-flow ltr keeps content clear
+[103/177] [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start in-flow rtl keeps content clear
+[104/177] [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start overlay ltr keeps content clear
+[105/177] [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start overlay rtl keeps content clear
+[106/177] [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end in-flow ltr keeps content clear
+[107/177] [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end in-flow rtl keeps content clear
+[108/177] [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end overlay ltr keeps content clear
+[109/177] [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end overlay rtl keeps content clear
+[110/177] [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list in-flow ltr keeps content clear
+[111/177] [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list in-flow rtl keeps content clear
+[112/177] [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list overlay ltr keeps content clear
+[113/177] [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list overlay rtl keeps content clear
+[114/177] [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start in-flow ltr keeps content clear
+[115/177] [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start in-flow rtl keeps content clear
+[116/177] [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start overlay ltr keeps content clear
+[117/177] [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start overlay rtl keeps content clear
+[118/177] [chromium-high-dpr] › tests\e2e\theme-nesting.spec.ts:29:1 › plain login keeps the existing window without ornaments for owner review
+
+(node:48636) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[119/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 1
+[120/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 2
+[121/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 3
+[122/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 4
+[123/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 5
+[124/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 6
+[125/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 7
+[126/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 8
+[127/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 9
+[128/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 10
+[129/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 11
+[130/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 12
+[131/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 13
+[132/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 14
+[133/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 15
+[134/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 16
+[135/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 17
+[136/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 18
+[137/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 19
+[138/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › light catalogue partition 20
+[139/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 1
+[140/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 2
+[141/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 3
+[142/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 4
+[143/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 5
+[144/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 6
+[145/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 7
+[146/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 8
+[147/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 9
+[148/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 10
+[149/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 11
+[150/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 12
+[151/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 13
+[152/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 14
+[153/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 15
+[154/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 16
+[155/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 17
+[156/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 18
+[157/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 19
+[158/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:7:3 › dark catalogue partition 20
+[159/177] [chromium-reduced-motion] › tests\e2e\theme-baseline.spec.ts:113:1 › stepper hit targets preserve the painted bezel
+[160/177] [chromium-reduced-motion] › tests\e2e\theme-nesting.spec.ts:4:1 › nested themes isolate paint and colours; omitted highlighted paint falls back to Atmo
+[161/177] [chromium-reduced-motion] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start in-flow ltr keeps content clear
+[162/177] [chromium-reduced-motion] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start in-flow rtl keeps content clear
+[163/177] [chromium-reduced-motion] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start overlay ltr keeps content clear
+[164/177] [chromium-reduced-motion] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-start overlay rtl keeps content clear
+[165/177] [chromium-reduced-motion] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end in-flow ltr keeps content clear
+[166/177] [chromium-reduced-motion] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end in-flow rtl keeps content clear
+[167/177] [chromium-reduced-motion] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end overlay ltr keeps content clear
+[168/177] [chromium-reduced-motion] › tests\e2e\theme-nesting.spec.ts:15:216 › compact block-end overlay rtl keeps content clear
+[169/177] [chromium-reduced-motion] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list in-flow ltr keeps content clear
+[170/177] [chromium-reduced-motion] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list in-flow rtl keeps content clear
+[171/177] [chromium-reduced-motion] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list overlay ltr keeps content clear
+[172/177] [chromium-reduced-motion] › tests\e2e\theme-nesting.spec.ts:15:216 › regular source-list overlay rtl keeps content clear
+[173/177] [chromium-reduced-motion] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start in-flow ltr keeps content clear
+[174/177] [chromium-reduced-motion] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start in-flow rtl keeps content clear
+[175/177] [chromium-reduced-motion] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start overlay ltr keeps content clear
+[176/177] [chromium-reduced-motion] › tests\e2e\theme-nesting.spec.ts:15:216 › regular block-start overlay rtl keeps content clear
+[177/177] [chromium-reduced-motion] › tests\e2e\theme-nesting.spec.ts:29:1 › plain login keeps the existing window without ornaments for owner review
+  177 passed (14.0m)
+done=0 
