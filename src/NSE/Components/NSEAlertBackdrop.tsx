@@ -110,6 +110,10 @@ export function NSEAlertBackdrop({
     <div
       ref={backdropRef}
       data-nse-control="system-alert" data-nse-part="backdrop" className={["nse-control-alert-backdrop", className].filter(Boolean).join(" ")}
+      // An alert begun as a sheet (beginSheetModal) is attached to its window,
+      // and its theme draws it so: the backdrop is the theme's scope root, so
+      // the presentation is stated here rather than read from the window.
+      data-nse-presentation={motion === "sheet" ? "sheet" : undefined}
       data-nse-overlay-region={region ? "true" : undefined}
       tabIndex={-1}
       {...appearanceProjection}
