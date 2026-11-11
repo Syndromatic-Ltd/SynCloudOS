@@ -304,7 +304,8 @@
         "bezel",
         "button",
         "colour-sample",
-        "colour-value"
+        "colour-value",
+        "status"
       ],
       "states": [
         "enabled=false",

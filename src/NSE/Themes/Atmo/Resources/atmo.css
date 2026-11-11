@@ -3256,9 +3256,9 @@
 :scope [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *):focus-visible,
 :scope:is([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *):focus-visible),
 :scope[data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-pulls-down="false"] *):focus-visible,
-:scope .nse-control-radio:has(input:focus-visible),
-:scope:is(.nse-control-radio:has(input:focus-visible)),
-:scope.nse-control-radio:has(input:focus-visible),
+:scope [data-nse-part="cell"]:where([data-nse-button-type="radio"]):has(:where([data-nse-part="field"]):focus-visible),
+:scope:is([data-nse-part="cell"]:where([data-nse-button-type="radio"]):has(:where([data-nse-part="field"]):focus-visible)),
+:scope[data-nse-part="cell"]:where([data-nse-button-type="radio"]):has(:where([data-nse-part="field"]):focus-visible),
 :scope [data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-button-type="switch"]) :where([data-nse-part="field"]):focus-visible+[data-nse-part="indicator"]:where([data-nse-control="button"] *):where([data-nse-button-type="switch"] *),
 :scope:is([data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-button-type="switch"])) :where([data-nse-part="field"]):focus-visible+[data-nse-part="indicator"]:where([data-nse-control="button"] *):where([data-nse-button-type="switch"] *),
 :scope[data-nse-control="button"]:where([data-nse-part="background"]):where([data-nse-button-type="switch"]) :where([data-nse-part="field"]):focus-visible+[data-nse-part="indicator"]:where([data-nse-control="button"] *):where([data-nse-button-type="switch"] *),
@@ -3297,9 +3297,9 @@
 }
 
 /* Slider: around the knob (27px, centred in the 50px thumb cell). */
-:scope .nse-control-slider:has(input:focus-visible) .nse-control-slider-thumb-visual::after,
-:scope:is(.nse-control-slider:has(input:focus-visible)) .nse-control-slider-thumb-visual::after,
-:scope.nse-control-slider:has(input:focus-visible) .nse-control-slider-thumb-visual::after {
+:scope [data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"]):has(:where([data-nse-part="field"]):focus-visible) [data-nse-part="knob"]:where([data-nse-slider-type="linear"] *)::after,
+:scope:is([data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"]):has(:where([data-nse-part="field"]):focus-visible)) [data-nse-part="knob"]:where([data-nse-slider-type="linear"] *)::after,
+:scope[data-nse-control="slider"]:where([data-nse-part="content"]):where([data-nse-slider-type="linear"]):has(:where([data-nse-part="field"]):focus-visible) [data-nse-part="knob"]:where([data-nse-slider-type="linear"] *)::after {
   content:"";
   position:absolute;
   left:50%;
@@ -4450,17 +4450,17 @@
 
 
 
-:scope .nse-table-view [role="columnheader"],
-:scope:is(.nse-table-view) [role="columnheader"],
-:scope.nse-table-view [role="columnheader"] {
+:scope [data-nse-control="table-view"]:where([data-nse-part="background"]) [data-nse-part="column"],
+:scope:is([data-nse-control="table-view"]:where([data-nse-part="background"])) [data-nse-part="column"],
+:scope[data-nse-control="table-view"]:where([data-nse-part="background"]) [data-nse-part="column"] {
   display:flex;
   align-items:center;
   font-size:11px;
 }
 
-:scope .nse-table-view [role="columnheader"]>:where([data-nse-part="title"][data-nse-role="sort"]),
-:scope:is(.nse-table-view) [role="columnheader"]>button,
-:scope.nse-table-view [role="columnheader"]>:where([data-nse-part="title"][data-nse-role="sort"]) {
+:scope [data-nse-control="table-view"]:where([data-nse-part="background"]) [data-nse-part="column"]>:where([data-nse-part="title"][data-nse-role="sort"]),
+:scope:is([data-nse-control="table-view"]:where([data-nse-part="background"])) [data-nse-part="column"]>:where([data-nse-part="title"][data-nse-role="sort"]),
+:scope[data-nse-control="table-view"]:where([data-nse-part="background"]) [data-nse-part="column"]>:where([data-nse-part="title"][data-nse-role="sort"]) {
   display:flex;
   align-items:center;
   font:inherit;
@@ -5055,9 +5055,9 @@
   inset:3px 1px;
 }
 
-:scope :is([data-nse-control="combo-box"],[data-nse-control="token-field"],[data-nse-control="secure-text-field"])>:where([data-nse-part="field"]):not([type="hidden"]),
-:scope:is(:is([data-nse-control="combo-box"],[data-nse-control="token-field"],[data-nse-control="secure-text-field"]))>input:not([type="hidden"]),
-:scope:is([data-nse-control="combo-box"],[data-nse-control="token-field"],[data-nse-control="secure-text-field"])>:where([data-nse-part="field"]):not([type="hidden"]) {
+:scope :is([data-nse-control="combo-box"],[data-nse-control="token-field"],[data-nse-control="secure-text-field"])>[data-nse-part="field"],
+:scope:is(:is([data-nse-control="combo-box"],[data-nse-control="token-field"],[data-nse-control="secure-text-field"]))>[data-nse-part="field"],
+:scope:is([data-nse-control="combo-box"],[data-nse-control="token-field"],[data-nse-control="secure-text-field"])>[data-nse-part="field"] {
   flex:1 1 120px;
   outline:0;
   font:inherit;
@@ -5095,7 +5095,7 @@
 
 
 :scope [data-nse-control="token-field"] [data-nse-part="token"]>:where(:is([data-nse-part="token-label"],[data-nse-part="token-disclosure"])):focus-visible,
-:scope:is([data-nse-control="token-field"]) [data-nse-part="token"]>button:focus-visible,
+:scope:is([data-nse-control="token-field"]) [data-nse-part="token"]>:where(:is([data-nse-part="token-label"], [data-nse-part="token-disclosure"])):focus-visible,
 :scope[data-nse-control="token-field"] [data-nse-part="token"]>:where(:is([data-nse-part="token-label"],[data-nse-part="token-disclosure"])):focus-visible {
   outline: none;
 }
@@ -5114,7 +5114,7 @@
 
 
 :scope [data-nse-control="secure-text-field"]>:where([data-nse-part="reveal"][data-nse-revealed="false"]):focus-visible,
-:scope:is([data-nse-control="secure-text-field"])>button:focus-visible,
+:scope:is([data-nse-control="secure-text-field"])>:where([data-nse-part="button"]):focus-visible,
 :scope[data-nse-control="secure-text-field"]>:where([data-nse-part="reveal"][data-nse-revealed="false"]):focus-visible {
   outline:none;
 }
@@ -5215,12 +5215,12 @@
 /* Last cell (the overflow button, or the last segment's last button). */
 
 
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>:where([data-nse-expanded="false"][data-nse-part="overflow"]):is(:last-child,:has(+input[type="hidden"]:last-child))::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>button:is(:last-child,:has(+input[type="hidden"]:last-child))::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>:where([data-nse-expanded="false"][data-nse-part="overflow"]):is(:last-child,:has(+input[type="hidden"]:last-child))::after,
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>:where([data-nse-part="bezel"]):last-child::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>:where([data-nse-part="bezel"]):last-child::after {
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>:where([data-nse-expanded="false"][data-nse-part="overflow"]):is(:last-child,:has(+[data-nse-part="field"]:last-child))::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>:where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])):is(:last-child,:has(+[data-nse-part="field"]:last-child))::after,
+:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>:where([data-nse-expanded="false"][data-nse-part="overflow"]):is(:last-child,:has(+[data-nse-part="field"]:last-child))::after,
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>[data-nse-part="segment"]:is(:last-child,:has(+[data-nse-part="field"]:last-child))>:where([data-nse-part="bezel"]):last-child::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])))>[data-nse-part="segment"]:is(:last-child,:has(+[data-nse-part="field"]:last-child))>:where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])):last-child::after,
+:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))>[data-nse-part="segment"]:is(:last-child,:has(+[data-nse-part="field"]:last-child))>:where([data-nse-part="bezel"]):last-child::after {
   inset-inline-end:2px;
 }
 
@@ -5418,9 +5418,9 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
   display: inline-flex;
 }
 
-:scope [data-nse-control="tab-view"]>.nse-control-toolbar>[data-nse-part="tab-item"]:has(>button+button)>.nse-control-button,
-:scope:is([data-nse-control="tab-view"])>.nse-control-toolbar>[data-nse-part="tab-item"]:has(>button+button)>.nse-control-button,
-:scope[data-nse-control="tab-view"]>.nse-control-toolbar>[data-nse-part="tab-item"]:has(>button+button)>.nse-control-button {
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>[data-nse-part="tab-item"]:has(>:where(:is([data-nse-control="button"], [data-nse-part="button"]))+:where(:is([data-nse-control="button"], [data-nse-part="button"])))>:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"])),
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>[data-nse-part="tab-item"]:has(>:where(:is([data-nse-control="button"], [data-nse-part="button"]))+:where(:is([data-nse-control="button"], [data-nse-part="button"])))>:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"])),
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>[data-nse-part="tab-item"]:has(>:where(:is([data-nse-control="button"], [data-nse-part="button"]))+:where(:is([data-nse-control="button"], [data-nse-part="button"])))>:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"])) {
   padding-inline-end: 34px;
 }
 
@@ -5444,9 +5444,9 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
   cursor: default;
 }
 
-:scope [data-nse-control="tab-view"]>.nse-control-toolbar>[data-nse-part="tab-item"]:has(>[data-selected="true"])>button:not(.nse-control-button),
-:scope:is([data-nse-control="tab-view"])>.nse-control-toolbar>[data-nse-part="tab-item"]:has(>[data-selected="true"])>button:not(.nse-control-button),
-:scope[data-nse-control="tab-view"]>.nse-control-toolbar>[data-nse-part="tab-item"]:has(>[data-selected="true"])>button:not(.nse-control-button) {
+:scope [data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>[data-nse-part="tab-item"]:has(>[data-nse-selected])>:where(:is([data-nse-control="button"], [data-nse-part="button"])):not(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"]))),
+:scope:is([data-nse-control="tab-view"])>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>[data-nse-part="tab-item"]:has(>[data-nse-selected])>:where(:is([data-nse-control="button"], [data-nse-part="button"])):not(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"]))),
+:scope[data-nse-control="tab-view"]>:is([data-nse-part="background"]:where([data-nse-control="toolbar"]), [data-nse-part="header"]:where([data-nse-control="tab-view"]:not([data-nse-style="icons"])), [data-nse-part="header"]:where([data-nse-control-size="large"]))>[data-nse-part="tab-item"]:has(>[data-nse-selected])>:where(:is([data-nse-control="button"], [data-nse-part="button"])):not(:is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"]))) {
   color: #fff;
   background: rgba(255, 255, 255, 0.18);
 }
@@ -5607,7 +5607,7 @@ meter:scope[data-nse-control="level-indicator"]::-moz-meter-bar {
    ========================================================================= */
 :scope :where([data-nse-control="scroller"][data-nse-orientation="vertical"][data-nse-part="track"])[data-nse-control="scroller"],
 :scope:is(:where([data-nse-control="scroller"][data-nse-orientation="vertical"][data-nse-part="track"])[data-nse-control="scroller"]),
-input:scope[data-nse-control="scroller"] {
+:scope[data-nse-control="scroller"] {
   appearance:none;
   -webkit-appearance:none;
   box-sizing:border-box;
@@ -5621,7 +5621,7 @@ input:scope[data-nse-control="scroller"] {
 
 :scope :where([data-nse-control="scroller"][data-nse-orientation="vertical"][data-nse-part="track"])[data-nse-control="scroller"]::-webkit-slider-thumb,
 :scope:is(:where([data-nse-control="scroller"][data-nse-orientation="vertical"][data-nse-part="track"])[data-nse-control="scroller"]::-webkit-slider-thumb),
-input:scope[data-nse-control="scroller"]::-webkit-slider-thumb {
+:scope[data-nse-control="scroller"]::-webkit-slider-thumb {
   -webkit-appearance:none;
   appearance:none;
 }
@@ -5634,7 +5634,7 @@ input:scope[data-nse-control="scroller"]::-webkit-slider-thumb {
 
 :scope :where([data-nse-control="scroller"][data-nse-orientation="vertical"][data-nse-part="track"])[data-nse-control="scroller"]:focus-visible,
 :scope:is(:where([data-nse-control="scroller"][data-nse-orientation="vertical"][data-nse-part="track"])[data-nse-control="scroller"]:focus-visible),
-input:scope[data-nse-control="scroller"]:focus-visible {
+:scope[data-nse-control="scroller"]:focus-visible {
   outline:none;
 }
 
@@ -5946,9 +5946,9 @@ input:scope[data-nse-control="scroller"]:focus-visible {
   inset-inline-start:2px;
 }
 
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child[aria-pressed="true"]::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"])>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child[aria-pressed="true"]::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child[aria-pressed="true"]::after {
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]>[data-nse-part="segment"]:is(:last-child,:has(+[data-nse-part="field"]:last-child))>:where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])):last-child[data-nse-selected]::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"])>[data-nse-part="segment"]:is(:last-child,:has(+[data-nse-part="field"]:last-child))>:where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])):last-child[data-nse-selected]::after,
+:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]>[data-nse-part="segment"]:is(:last-child,:has(+[data-nse-part="field"]:last-child))>:where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])):last-child[data-nse-selected]::after {
   inset-inline-end:2px;
 }
 
@@ -5996,12 +5996,12 @@ input:scope[data-nse-control="scroller"]:focus-visible {
 }
 
 /* The end cap. */
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>:where([data-nse-part="bezel"]):last-child::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size])>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>:where([data-nse-part="bezel"]):last-child::after,
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>button:is(:last-child,:has(+input[type="hidden"]:last-child))::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size])>button:is(:last-child,:has(+input[type="hidden"]:last-child))::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-size]>button:is(:last-child,:has(+input[type="hidden"]:last-child))::after {
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])):is([data-nse-height], [data-nse-control-size="small"])>[data-nse-part="segment"]:is(:last-child,:has(+[data-nse-part="field"]:last-child))>:where([data-nse-part="bezel"]):last-child::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])):is([data-nse-height], [data-nse-control-size="small"]))>[data-nse-part="segment"]:is(:last-child,:has(+[data-nse-part="field"]:last-child))>:where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])):last-child::after,
+:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])):is([data-nse-height], [data-nse-control-size="small"])>[data-nse-part="segment"]:is(:last-child,:has(+[data-nse-part="field"]:last-child))>:where([data-nse-part="bezel"]):last-child::after,
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])):is([data-nse-height], [data-nse-control-size="small"])>:where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])):is(:last-child,:has(+[data-nse-part="field"]:last-child))::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])):is([data-nse-height], [data-nse-control-size="small"]))>:where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])):is(:last-child,:has(+[data-nse-part="field"]:last-child))::after,
+:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"])):is([data-nse-height], [data-nse-control-size="small"])>:where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])):is(:last-child,:has(+[data-nse-part="field"]:last-child))::after {
   inset-inline-end:calc(var(--nse-atmo-rg-band)*0.04);
 }
 
@@ -6017,9 +6017,9 @@ input:scope[data-nse-control="scroller"]:focus-visible {
 :scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]:is([data-nse-height],[data-nse-control-size="small"])>:first-child>:where([data-nse-part="bezel"][data-nse-selected]):first-child[data-nse-selected]::after {
   inset-inline-start:calc(var(--nse-atmo-rg-band)*0.04);
 }
-:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child[aria-pressed="true"]::after,
-:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size])>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child[aria-pressed="true"]::after,
-:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-segment-style="capsule"][data-size]>[data-nse-part="segment"]:is(:last-child,:has(+input[type="hidden"]:last-child))>button:last-child[aria-pressed="true"]::after {
+:scope [data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]:is([data-nse-height], [data-nse-control-size="small"])>[data-nse-part="segment"]:is(:last-child,:has(+[data-nse-part="field"]:last-child))>:where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])):last-child[data-nse-selected]::after,
+:scope:is([data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]:is([data-nse-height], [data-nse-control-size="small"]))>[data-nse-part="segment"]:is(:last-child,:has(+[data-nse-part="field"]:last-child))>:where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])):last-child[data-nse-selected]::after,
+:scope[data-nse-control="segmented-control"]:where(:not([data-nse-segment-style="texturedRounded"]))[data-nse-segment-style="capsule"]:is([data-nse-height], [data-nse-control-size="small"])>[data-nse-part="segment"]:is(:last-child,:has(+[data-nse-part="field"]:last-child))>:where(:is([data-nse-part="bezel"], [data-nse-part="disclosure"], [data-nse-part="overflow"])):last-child[data-nse-selected]::after {
   inset-inline-end:calc(var(--nse-atmo-rg-band)*0.04);
 }
 
@@ -6030,15 +6030,15 @@ input:scope[data-nse-control="scroller"]:focus-visible {
   --nse-control-height: 28px;
 }
 
-:scope :is(.nse-extended-tool-button,.nse-extended-tool-button-group,.nse-extended-radio-tool-button-group)[data-size],
-:scope:is(:is(.nse-extended-tool-button,.nse-extended-tool-button-group,.nse-extended-radio-tool-button-group)[data-size]),
-:scope:is(.nse-extended-tool-button,.nse-extended-tool-button-group,.nse-extended-radio-tool-button-group)[data-size] {
+:scope :is([data-nse-bezel-style="texturedRounded"]:where([data-nse-control="button"]:not([data-nse-button-type="switch"])),[data-nse-type="tool-button-group"]:where([data-nse-control="toolbar"]),[data-nse-segment-style="texturedRounded"]:where([data-nse-control="segmented-control"])):is([data-nse-height], [data-nse-control-size="small"], [data-nse-control-size="mini"]:where([data-nse-control="button"]), [data-nse-control-size="large"]:where([data-nse-control="button"])),
+:scope:is(:is([data-nse-bezel-style="texturedRounded"]:where([data-nse-control="button"]:not([data-nse-button-type="switch"])),[data-nse-type="tool-button-group"]:where([data-nse-control="toolbar"]),[data-nse-segment-style="texturedRounded"]:where([data-nse-control="segmented-control"])):is([data-nse-height], [data-nse-control-size="small"], [data-nse-control-size="mini"]:where([data-nse-control="button"]), [data-nse-control-size="large"]:where([data-nse-control="button"]))),
+:scope:is([data-nse-bezel-style="texturedRounded"]:where([data-nse-control="button"]:not([data-nse-button-type="switch"])),[data-nse-type="tool-button-group"]:where([data-nse-control="toolbar"]),[data-nse-segment-style="texturedRounded"]:where([data-nse-control="segmented-control"])):is([data-nse-height], [data-nse-control-size="small"], [data-nse-control-size="mini"]:where([data-nse-control="button"]), [data-nse-control-size="large"]:where([data-nse-control="button"])) {
   --nse-atmo-bar-h: var(--nse-control-height, 24px);
 }
 
-:scope :is(.nse-extended-tool-button-group,.nse-extended-radio-tool-button-group)[data-size],
-:scope:is(:is(.nse-extended-tool-button-group,.nse-extended-radio-tool-button-group)[data-size]),
-:scope:is(.nse-extended-tool-button-group,.nse-extended-radio-tool-button-group)[data-size] {
+:scope :is([data-nse-type="tool-button-group"]:where([data-nse-control="toolbar"]),[data-nse-segment-style="texturedRounded"]:where([data-nse-control="segmented-control"])):is([data-nse-height], [data-nse-control-size="small"], [data-nse-control-size="mini"]:where([data-nse-control="button"]), [data-nse-control-size="large"]:where([data-nse-control="button"])),
+:scope:is(:is([data-nse-type="tool-button-group"]:where([data-nse-control="toolbar"]),[data-nse-segment-style="texturedRounded"]:where([data-nse-control="segmented-control"])):is([data-nse-height], [data-nse-control-size="small"], [data-nse-control-size="mini"]:where([data-nse-control="button"]), [data-nse-control-size="large"]:where([data-nse-control="button"]))),
+:scope:is([data-nse-type="tool-button-group"]:where([data-nse-control="toolbar"]),[data-nse-segment-style="texturedRounded"]:where([data-nse-control="segmented-control"])):is([data-nse-height], [data-nse-control-size="small"], [data-nse-control-size="mini"]:where([data-nse-control="button"]), [data-nse-control-size="large"]:where([data-nse-control="button"])) {
   min-height: var(--nse-atmo-bar-h);
 }
 
@@ -6052,9 +6052,9 @@ input:scope[data-nse-control="scroller"]:focus-visible {
 /* The icon slot follows the band: a small capsule's glyph box is 16px of its
    24px, the scale inspector glyphs are drawn at, with images fitted inside. A
    wider face (a glyph and a colour chip) widens the slot. */
-:scope :is(.nse-extended-tool-button[data-size],:is(.nse-extended-tool-button-group,.nse-extended-radio-tool-button-group)[data-size] .nse-control-button) .nse-control-button-icon,
-:scope:is(:is(.nse-extended-tool-button[data-size],:is(.nse-extended-tool-button-group,.nse-extended-radio-tool-button-group)[data-size] .nse-control-button)) .nse-control-button-icon,
-:scope:is(.nse-extended-tool-button[data-size],:is(.nse-extended-tool-button-group,.nse-extended-radio-tool-button-group)[data-size] .nse-control-button) .nse-control-button-icon {
+:scope :is([data-nse-bezel-style="texturedRounded"]:where([data-nse-control="button"]:not([data-nse-button-type="switch"]))[data-nse-control-size]:where([data-nse-button-type]):where(:not([data-nse-control-size="regular"])),:is([data-nse-type="tool-button-group"]:where([data-nse-control="toolbar"]),[data-nse-segment-style="texturedRounded"]:where([data-nse-control="segmented-control"])):is([data-nse-height], [data-nse-control-size="small"], [data-nse-control-size="mini"]:where([data-nse-control="button"]), [data-nse-control-size="large"]:where([data-nse-control="button"])) :is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"]))) [data-nse-part="image"]:where([data-nse-control="button"] *):where(:not([data-nse-control="button"] [data-nse-control] *)),
+:scope:is(:is([data-nse-bezel-style="texturedRounded"]:where([data-nse-control="button"]:not([data-nse-button-type="switch"]))[data-nse-control-size]:where([data-nse-button-type]):where(:not([data-nse-control-size="regular"])),:is([data-nse-type="tool-button-group"]:where([data-nse-control="toolbar"]),[data-nse-segment-style="texturedRounded"]:where([data-nse-control="segmented-control"])):is([data-nse-height], [data-nse-control-size="small"], [data-nse-control-size="mini"]:where([data-nse-control="button"]), [data-nse-control-size="large"]:where([data-nse-control="button"])) :is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"])))) [data-nse-part="image"]:where([data-nse-control="button"] *):where(:not([data-nse-control="button"] [data-nse-control] *)),
+:scope:is([data-nse-bezel-style="texturedRounded"]:where([data-nse-control="button"]:not([data-nse-button-type="switch"]))[data-nse-control-size]:where([data-nse-button-type]):where(:not([data-nse-control-size="regular"])),:is([data-nse-type="tool-button-group"]:where([data-nse-control="toolbar"]),[data-nse-segment-style="texturedRounded"]:where([data-nse-control="segmented-control"])):is([data-nse-height], [data-nse-control-size="small"], [data-nse-control-size="mini"]:where([data-nse-control="button"]), [data-nse-control-size="large"]:where([data-nse-control="button"])) :is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"]))) [data-nse-part="image"]:where([data-nse-control="button"] *):where(:not([data-nse-control="button"] [data-nse-control] *)) {
   width: auto;
   min-width: calc(var(--nse-atmo-bar-h) * 0.66);
   --nse-control-minimum-inline-size: calc(var(--nse-atmo-bar-h) * 0.66);
@@ -6229,9 +6229,9 @@ input:scope[data-nse-control="scroller"]:focus-visible {
   outline:none;
 }
 
-:scope .nse-browser-column [role="status"],
-:scope:is(.nse-browser-column) [role="status"],
-:scope.nse-browser-column [role="status"] {
+:scope [data-nse-part="column"]:where([data-nse-control="browser"] *) [data-nse-part="status"],
+:scope:is([data-nse-part="column"]:where([data-nse-control="browser"] *)) [data-nse-part="status"],
+:scope[data-nse-part="column"]:where([data-nse-control="browser"] *) [data-nse-part="status"] {
   font-size:12px;
 }
 
@@ -6436,9 +6436,9 @@ input:scope[data-nse-control="scroller"]:focus-visible {
 }
 
 /* A window's toolbar sits on the window's metal strip, which draws its own fade. */
-:scope [data-nse-part="toolbar"] [data-nse-control="toolbar"]:where([data-nse-part="background"]):where(:not([data-nse-position]))>:is([data-nse-part="background"]:where([data-nse-part="background"] *):where([data-nse-control="toolbar"] *):where(:not([data-nse-control="button"])), [data-nse-part="border"]:where([data-nse-control="toolbar"] *), [data-nse-part="highlight"]:where(:not([data-nse-style="roundedRect"] *)), [data-nse-part="shadow"]:where([data-nse-control="toolbar"] *), [data-nse-part="separator"]:where([data-nse-part="background"] *):where(:not([data-nse-role="overlay"] *)):where(:not([data-nse-part="background"] > *)))[data-nse-style="surface"]:where([data-nse-part="background"]),
-:scope:is([data-nse-part="toolbar"]) [data-nse-control="toolbar"]:where([data-nse-part="background"]):where(:not([data-nse-position]))>:is([data-nse-part="background"]:where([data-nse-part="background"] *):where([data-nse-control="toolbar"] *):where(:not([data-nse-control="button"])), [data-nse-part="border"]:where([data-nse-control="toolbar"] *), [data-nse-part="highlight"]:where(:not([data-nse-style="roundedRect"] *)), [data-nse-part="shadow"]:where([data-nse-control="toolbar"] *), [data-nse-part="separator"]:where([data-nse-part="background"] *):where(:not([data-nse-role="overlay"] *)):where(:not([data-nse-part="background"] > *)))[data-nse-style="surface"]:where([data-nse-part="background"]),
-:scope[data-nse-part="toolbar"] [data-nse-control="toolbar"]:where([data-nse-part="background"]):where(:not([data-nse-position]))>:is([data-nse-part="background"]:where([data-nse-part="background"] *):where([data-nse-control="toolbar"] *):where(:not([data-nse-control="button"])), [data-nse-part="border"]:where([data-nse-control="toolbar"] *), [data-nse-part="highlight"]:where(:not([data-nse-style="roundedRect"] *)), [data-nse-part="shadow"]:where([data-nse-control="toolbar"] *), [data-nse-part="separator"]:where([data-nse-part="background"] *):where(:not([data-nse-role="overlay"] *)):where(:not([data-nse-part="background"] > *)))[data-nse-style="surface"]:where([data-nse-part="background"]) {
+:scope [data-nse-part="toolbar"] [data-nse-control="toolbar"]:where([data-nse-part="background"]):where(:not([data-nse-position]))>:is([data-nse-part="background"]:where([data-nse-part="background"] *):where([data-nse-control="toolbar"] *):where(:not([data-nse-control="button"])),[data-nse-part="border"]:where([data-nse-control="toolbar"] *),[data-nse-part="highlight"]:where(:not([data-nse-style="roundedRect"] *)),[data-nse-part="shadow"]:where([data-nse-control="toolbar"] *),[data-nse-part="separator"]:where([data-nse-part="background"] *):where(:not([data-nse-role="overlay"] *)):where(:not([data-nse-part="background"]>*)))[data-nse-style="surface"]:where([data-nse-part="background"]),
+:scope:is([data-nse-part="toolbar"]) [data-nse-control="toolbar"]:where([data-nse-part="background"]):where(:not([data-nse-position]))>:is([data-nse-part="background"]:where([data-nse-part="background"] *):where([data-nse-control="toolbar"] *):where(:not([data-nse-control="button"])),[data-nse-part="border"]:where([data-nse-control="toolbar"] *),[data-nse-part="highlight"]:where(:not([data-nse-style="roundedRect"] *)),[data-nse-part="shadow"]:where([data-nse-control="toolbar"] *),[data-nse-part="separator"]:where([data-nse-part="background"] *):where(:not([data-nse-role="overlay"] *)):where(:not([data-nse-part="background"]>*)))[data-nse-style="surface"]:where([data-nse-part="background"]),
+:scope[data-nse-part="toolbar"] [data-nse-control="toolbar"]:where([data-nse-part="background"]):where(:not([data-nse-position]))>:is([data-nse-part="background"]:where([data-nse-part="background"] *):where([data-nse-control="toolbar"] *):where(:not([data-nse-control="button"])),[data-nse-part="border"]:where([data-nse-control="toolbar"] *),[data-nse-part="highlight"]:where(:not([data-nse-style="roundedRect"] *)),[data-nse-part="shadow"]:where([data-nse-control="toolbar"] *),[data-nse-part="separator"]:where([data-nse-part="background"] *):where(:not([data-nse-role="overlay"] *)):where(:not([data-nse-part="background"]>*)))[data-nse-style="surface"]:where([data-nse-part="background"]) {
   display: none;
 }
 
@@ -6659,9 +6659,9 @@ input:scope[data-nse-control="scroller"]:focus-visible {
   line-height: 1.2;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.62);
 }
-:scope [data-nse-control="toolbar-item"]:where([data-nse-part="custom"])[data-nse-style="labelled"]>:is([data-nse-part="background"]:where([data-nse-part="background"] *):where([data-nse-control="toolbar"] *):where(:not([data-nse-control="button"])), [data-nse-part="border"]:where([data-nse-control="toolbar"] *), [data-nse-part="highlight"]:where(:not([data-nse-style="roundedRect"] *)), [data-nse-part="shadow"]:where([data-nse-control="toolbar"] *), [data-nse-part="separator"]:where([data-nse-part="background"] *):where(:not([data-nse-role="overlay"] *)):where(:not([data-nse-part="background"] > *)))[data-nse-style="surface"]:where([data-nse-part="background"]),
-:scope:is([data-nse-control="toolbar-item"]:where([data-nse-part="custom"])[data-nse-style="labelled"])>:is([data-nse-part="background"]:where([data-nse-part="background"] *):where([data-nse-control="toolbar"] *):where(:not([data-nse-control="button"])), [data-nse-part="border"]:where([data-nse-control="toolbar"] *), [data-nse-part="highlight"]:where(:not([data-nse-style="roundedRect"] *)), [data-nse-part="shadow"]:where([data-nse-control="toolbar"] *), [data-nse-part="separator"]:where([data-nse-part="background"] *):where(:not([data-nse-role="overlay"] *)):where(:not([data-nse-part="background"] > *)))[data-nse-style="surface"]:where([data-nse-part="background"]),
-:scope[data-nse-control="toolbar-item"]:where([data-nse-part="custom"])[data-nse-style="labelled"]>:is([data-nse-part="background"]:where([data-nse-part="background"] *):where([data-nse-control="toolbar"] *):where(:not([data-nse-control="button"])), [data-nse-part="border"]:where([data-nse-control="toolbar"] *), [data-nse-part="highlight"]:where(:not([data-nse-style="roundedRect"] *)), [data-nse-part="shadow"]:where([data-nse-control="toolbar"] *), [data-nse-part="separator"]:where([data-nse-part="background"] *):where(:not([data-nse-role="overlay"] *)):where(:not([data-nse-part="background"] > *)))[data-nse-style="surface"]:where([data-nse-part="background"]) {
+:scope [data-nse-control="toolbar-item"]:where([data-nse-part="custom"])[data-nse-style="labelled"]>:is([data-nse-part="background"]:where([data-nse-part="background"] *):where([data-nse-control="toolbar"] *):where(:not([data-nse-control="button"])),[data-nse-part="border"]:where([data-nse-control="toolbar"] *),[data-nse-part="highlight"]:where(:not([data-nse-style="roundedRect"] *)),[data-nse-part="shadow"]:where([data-nse-control="toolbar"] *),[data-nse-part="separator"]:where([data-nse-part="background"] *):where(:not([data-nse-role="overlay"] *)):where(:not([data-nse-part="background"]>*)))[data-nse-style="surface"]:where([data-nse-part="background"]),
+:scope:is([data-nse-control="toolbar-item"]:where([data-nse-part="custom"])[data-nse-style="labelled"])>:is([data-nse-part="background"]:where([data-nse-part="background"] *):where([data-nse-control="toolbar"] *):where(:not([data-nse-control="button"])),[data-nse-part="border"]:where([data-nse-control="toolbar"] *),[data-nse-part="highlight"]:where(:not([data-nse-style="roundedRect"] *)),[data-nse-part="shadow"]:where([data-nse-control="toolbar"] *),[data-nse-part="separator"]:where([data-nse-part="background"] *):where(:not([data-nse-role="overlay"] *)):where(:not([data-nse-part="background"]>*)))[data-nse-style="surface"]:where([data-nse-part="background"]),
+:scope[data-nse-control="toolbar-item"]:where([data-nse-part="custom"])[data-nse-style="labelled"]>:is([data-nse-part="background"]:where([data-nse-part="background"] *):where([data-nse-control="toolbar"] *):where(:not([data-nse-control="button"])),[data-nse-part="border"]:where([data-nse-control="toolbar"] *),[data-nse-part="highlight"]:where(:not([data-nse-style="roundedRect"] *)),[data-nse-part="shadow"]:where([data-nse-control="toolbar"] *),[data-nse-part="separator"]:where([data-nse-part="background"] *):where(:not([data-nse-role="overlay"] *)):where(:not([data-nse-part="background"]>*)))[data-nse-style="surface"]:where([data-nse-part="background"]) {
   display: none;
 }
 [data-nse-colour-scheme-resolved="dark"] :scope [data-nse-control="toolbar-item"]:where([data-nse-part="custom"])[data-nse-style="labelled"],
@@ -6720,9 +6720,9 @@ input:scope[data-nse-control="scroller"]:focus-visible {
 
 /* A text glyph used as a sized tool button's icon (↺, ✎) is drawn at the
    icon slot's scale, not the caption's small type. */
-:scope :is(.nse-extended-tool-button[data-size],:is(.nse-extended-tool-button-group,.nse-extended-radio-tool-button-group)[data-size] .nse-control-button) .nse-control-button-icon,
-:scope:is(:is(.nse-extended-tool-button[data-size],:is(.nse-extended-tool-button-group,.nse-extended-radio-tool-button-group)[data-size] .nse-control-button)) .nse-control-button-icon,
-:scope:is(.nse-extended-tool-button[data-size],:is(.nse-extended-tool-button-group,.nse-extended-radio-tool-button-group)[data-size] .nse-control-button) .nse-control-button-icon {
+:scope :is([data-nse-bezel-style="texturedRounded"]:where([data-nse-control="button"]:not([data-nse-button-type="switch"]))[data-nse-control-size]:where([data-nse-button-type]):where(:not([data-nse-control-size="regular"])),:is([data-nse-type="tool-button-group"]:where([data-nse-control="toolbar"]),[data-nse-segment-style="texturedRounded"]:where([data-nse-control="segmented-control"])):is([data-nse-height], [data-nse-control-size="small"], [data-nse-control-size="mini"]:where([data-nse-control="button"]), [data-nse-control-size="large"]:where([data-nse-control="button"])) :is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"]))) [data-nse-part="image"]:where([data-nse-control="button"] *):where(:not([data-nse-control="button"] [data-nse-control] *)),
+:scope:is(:is([data-nse-bezel-style="texturedRounded"]:where([data-nse-control="button"]:not([data-nse-button-type="switch"]))[data-nse-control-size]:where([data-nse-button-type]):where(:not([data-nse-control-size="regular"])),:is([data-nse-type="tool-button-group"]:where([data-nse-control="toolbar"]),[data-nse-segment-style="texturedRounded"]:where([data-nse-control="segmented-control"])):is([data-nse-height], [data-nse-control-size="small"], [data-nse-control-size="mini"]:where([data-nse-control="button"]), [data-nse-control-size="large"]:where([data-nse-control="button"])) :is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"])))) [data-nse-part="image"]:where([data-nse-control="button"] *):where(:not([data-nse-control="button"] [data-nse-control] *)),
+:scope:is([data-nse-bezel-style="texturedRounded"]:where([data-nse-control="button"]:not([data-nse-button-type="switch"]))[data-nse-control-size]:where([data-nse-button-type]):where(:not([data-nse-control-size="regular"])),:is([data-nse-type="tool-button-group"]:where([data-nse-control="toolbar"]),[data-nse-segment-style="texturedRounded"]:where([data-nse-control="segmented-control"])):is([data-nse-height], [data-nse-control-size="small"], [data-nse-control-size="mini"]:where([data-nse-control="button"]), [data-nse-control-size="large"]:where([data-nse-control="button"])) :is([data-nse-control="button"]:where(:not([data-nse-bezel-style="disclosure"])):where([data-nse-bezel-style]):where(:not([data-nse-button-type="switch"])), [data-nse-part="cell"]:where([data-nse-role="tab"]), [data-nse-control="route-picker-view"]:where([data-nse-part="background"]))) [data-nse-part="image"]:where([data-nse-control="button"] *):where(:not([data-nse-control="button"] [data-nse-control] *)) {
   font-size: calc(var(--nse-atmo-bar-h) * 0.58);
 }
 
