@@ -131,7 +131,7 @@ export function NSEAppearanceProvider({
   if (!projectBoundary) return contextualChildren;
   return (
     <NSEAppearanceContext.Provider value={value}>
-      <div className="nse-appearance-provider" {...projection}>
+      <div className="nse-appearance-provider" {...projection} data-nse-role="appearance-provider">
         {children}
       </div>
     </NSEAppearanceContext.Provider>

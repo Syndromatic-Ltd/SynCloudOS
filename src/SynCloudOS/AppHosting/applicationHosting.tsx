@@ -530,7 +530,7 @@ export function NSEWindowControllerView({ controller }: NSEWindowControllerViewP
             {toolbar ? <NSEWindowToolbar controller={controller} toolbar={toolbar} /> : null}
             <NSEWindowTitlebarAccessories accessories={accessories} renderController={renderAccessory} host={accessoryHost} placement="row" />
             {titleSlot ? createPortal(ownTitle, titleSlot) : ownTitle}
-            <div className="nse-window-chrome-content" data-content-border={bottomBorder > 0 ? nseContentBorderSize(bottomBorder) : undefined}>
+            <div data-nse-part="content-view" data-nse-content-border={bottomBorder > 0 ? nseContentBorderSize(bottomBorder) : undefined} className="nse-window-chrome-content" data-content-border={bottomBorder > 0 ? nseContentBorderSize(bottomBorder) : undefined}>
               <div className="nse-window-content-above-bottom-bar" style={{ bottom: hasBottomAccessory ? bottomBorder : 0 }}>{content}</div>
               {hasBottomAccessory ? <div className="nse-window-bottom-bar-accessory" data-nse-part="bottom-bar-accessory" style={{ height: bottomBorder }}>{bottomBarAccessory}</div> : null}
               {bottomBorder > 0 ? <NSEWindowContentBorder thickness={bottomBorder} /> : null}

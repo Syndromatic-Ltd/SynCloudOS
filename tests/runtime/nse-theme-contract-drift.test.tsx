@@ -127,6 +127,7 @@ it("renders a hosted application window", async () => {
     override windowDidLoad() {
       this.window.toolbar = new NSEToolbar({ identifier: "main", items: [{ id: "share", kind: "button", label: "Share" }], defaultItemIdentifiers: ["share"] });
       this.window.addTitlebarAccessoryViewController(this.accessory);
+      this.window.setContentBorderThickness(24, "minY");
     }
   }
   class Application extends NSEApplication { static override mainWindow = MainWindow; }
