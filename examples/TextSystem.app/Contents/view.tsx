@@ -160,10 +160,10 @@ export function TextSystemExampleView({ example, onInputClient }: TextSystemExam
         if (prepared.status !== "prepared") { setPDFStatus(prepared.status); return; }
         const result = await prepared.output.exportPDF();
         if (result.status !== "exported") { setPDFStatus(result.status); return; }
-        const url = URL.createObjectURL(new Blob([new Uint8Array(result.bytes)], { type: result.mimeType }));
+        const url = URL.createObjectURL(result.bytes.blob(result.mimeType));
         const link = document.createElement("a"); link.href = url; link.download = "TextSystem-example.pdf"; link.click();
         setTimeout(() => URL.revokeObjectURL(url), 0);
-        setPDFStatus(`PDF revision ${result.receipt.revision} Â· ${result.bytes.length} bytes`);
+        setPDFStatus(`PDF revision ${result.receipt.revision} Â· ${result.bytes.count} bytes`);
       })}>Export snapshot PDF</button>
     </section>
     <p className="readiness" role="status">{state.error ?? (status || (state.geometryReady ? "Fonts and object ready. Geometry matches the document." : "Resolving fonts and geometryâ€¦"))}</p>
