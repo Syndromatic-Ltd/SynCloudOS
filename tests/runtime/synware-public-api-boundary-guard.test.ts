@@ -19,7 +19,7 @@
  */
 
 import { existsSync, readFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { runInNewContext } from "node:vm";
 import ts from "typescript";
@@ -361,13 +361,14 @@ describe("SDK build public API boundaries", () => {
       "node:child_process": { execFileSync: buildWork },
       "node:fs": Object.fromEntries(["cpSync", "existsSync", "mkdirSync", "readdirSync", "readFileSync", "renameSync", "rmSync", "writeFileSync"].map((name) => [name, buildWork])),
       "node:crypto": { createHash: buildWork },
-      "node:path": { dirname, resolve },
+      "node:path": { dirname, relative, resolve },
       "node:url": { fileURLToPath },
       vite: { build: buildWork },
       "@vitejs/plugin-react": { default: buildWork },
       "./sdk-entries.mjs": { synWareSdkEntries },
       "./sdk-package-manifest.mjs": { captureSdkSourceFingerprint },
       "./sdk-package-styles.mjs": {},
+      "./built-in-theme-css.mjs": { builtInThemeCSS: buildWork },
       "./sdk-browser-dependencies.mjs": { sdkBrowserDependencies: buildWork },
       "./public-api-boundaries.mjs": { assertPublicApiBoundaries },
       "../developer-mcp/build-package.mjs": { writeDeveloperSdkData: buildWork, writeDeveloperMcpPackage: buildWork },

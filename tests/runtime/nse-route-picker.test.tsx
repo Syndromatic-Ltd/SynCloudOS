@@ -31,7 +31,7 @@ it("uses NSEButton and invokes the native route chooser from the click", () => {
   const detector = { capabilities: { remotePlayback: true }, connectionState: "connected", subscribe: () => () => {}, prompt } as unknown as VFXRouteDetector;
   render(<NSERoutePickerView routeDetector={detector} />);
   const button = screen.getByRole("button", { name: "Choose playback device" });
-  expect(button.getAttribute("data-nse-control")).toBe("route-picker");
+  expect(button.getAttribute("data-nse-control")).toBe("route-picker-view");
   expect(button.getAttribute("aria-pressed")).toBe("true");
   fireEvent.click(button); expect(prompt).toHaveBeenCalledTimes(1);
 });

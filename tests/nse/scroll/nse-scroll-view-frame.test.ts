@@ -20,6 +20,7 @@
 
 // @vitest-environment jsdom
 import { readFileSync } from "node:fs";
+import { withoutScopeTwins } from "../../fixtures/atmoStylesheets";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -27,7 +28,7 @@ describe("NSEScrollView as a view controller's view", () => {
   // jsdom does not lay out, so the guarantee is the stylesheet's: a scroll view sized
   // to its own content inside a clipped view controller frame has no scroll range.
   it("fills the frame its view controller is given", () => {
-    const css = readFileSync(resolve(process.cwd(), "src/NSE/Scroll/scroll.css"), "utf8");
-    expect(css).toMatch(/\[data-nse-view-controller\] > \.nse-scroll-view-frame:only-child \{\s*block-size: 100%;\s*\}/u);
+    const css = withoutScopeTwins(readFileSync(resolve(process.cwd(), "src/NSE/Scroll/scroll.css"), "utf8"));
+    expect(css).toMatch(/\[data-nse-view-controller\]\s*>\s*\.nse-scroll-view-frame:only-child \{\s*block-size: 100%;\s*\}/u);
   });
 });

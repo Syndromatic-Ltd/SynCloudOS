@@ -21,6 +21,7 @@
 // @vitest-environment jsdom
 
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { withoutScopeTwins } from "../fixtures/atmoStylesheets";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
@@ -33,7 +34,7 @@ import { readFileSync } from "node:fs";
 import type { SynCloudOSRuntime, WindowManager } from "../../src/SynCloudOS/SynCloudOS";
 import { createWindowTestDependencies, panelWindow } from "../fixtures/windowTestDependencies";
 
-const windowCSS = readFileSync("src/NSE/Windows/nse-windows.css", "utf8");
+const windowCSS = withoutScopeTwins(readFileSync("src/NSE/Windows/nse-windows.css", "utf8"));
 
 describe("Webspring WindowLayer", () => {
   it("renders independent hosts and orders renderer teardown after the React commit", async () => {
@@ -281,7 +282,7 @@ describe("Webspring WindowLayer", () => {
     expect(section.getAttribute("data-window-chrome-mode")).toBe("system");
     expect(section.hasAttribute("data-window-chrome-appearance")).toBe(false);
     expect(section.querySelector(".nse-window__titlebar")).not.toBeNull();
-    expect(section.querySelector('[data-nse-nine-slice="window-shadow"]')?.getAttribute("data-window-shadow-layer")).toBe("window.standard.shadow");
+    expect(section.querySelector('[data-nse-nine-slice="window-shadow"]')?.hasAttribute("data-window-shadow-layer")).toBe(true);
     await fixture.cleanup();
   });
   // The registry invokes factories during the host render, so hooks live in

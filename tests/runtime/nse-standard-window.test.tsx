@@ -21,6 +21,7 @@
 // @vitest-environment jsdom
 
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { withoutScopeTwins } from "../fixtures/atmoStylesheets";
 import React from "react";
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -28,7 +29,7 @@ import type { WindowPresentation, WindowRecord } from "../../src/SynCloudOS/Wind
 import { NSEStandardWindowView } from "../../src/NSE/Windows";
 import { standardWindow } from "../fixtures/windowTestDependencies";
 
-const windowCSS = readFileSync("src/NSE/Windows/nse-windows.css", "utf8");
+const windowCSS = withoutScopeTwins(readFileSync("src/NSE/Windows/nse-windows.css", "utf8"));
 afterEach(cleanup);
 
 function standardWindowViewProps(overrides: Partial<WindowRecord> = {}) {

@@ -60,7 +60,9 @@ async function mountPopup(contrast: "normal" | "forced" = "normal") {
 describe("popup variants retain their selected appearance", () => {
   it("keeps the selected theme ID and popup variant on the actual menu", async () => {
     const menu = await mountPopup();
-    expect(menu.getAttribute("data-nse-theme")).toBe("com.syndromatic.atmo");
+    // The popup shares its host's theme boundary rather than starting its own.
+    expect(menu.hasAttribute("data-nse-theme")).toBe(false);
+    expect(menu.parentElement?.closest("[data-nse-theme]")?.getAttribute("data-nse-theme")).toBe("com.syndromatic.atmo");
     expect(menu.getAttribute("data-nse-menu-variant")).toBe("popup");
   });
 
