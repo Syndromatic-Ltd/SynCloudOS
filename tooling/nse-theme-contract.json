@@ -540,6 +540,10 @@
         ],
         "role": [
           "overlay"
+        ],
+        "style": [
+          "listbox",
+          "menu"
         ]
       }
     },
@@ -714,6 +718,9 @@
         ],
         "role": [
           "overlay"
+        ],
+        "style": [
+          "popover"
         ]
       }
     },
@@ -831,6 +838,10 @@
         ],
         "role": [
           "overlay"
+        ],
+        "style": [
+          "action-sheet",
+          "popover"
         ]
       }
     },
@@ -972,6 +983,9 @@
         ],
         "role": [
           "overlay"
+        ],
+        "style": [
+          "action-sheet"
         ]
       }
     },
@@ -1339,6 +1353,9 @@
         ],
         "role": [
           "overlay"
+        ],
+        "style": [
+          "action-sheet"
         ]
       }
     },

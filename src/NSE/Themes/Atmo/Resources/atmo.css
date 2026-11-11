@@ -1141,9 +1141,9 @@
   );
 }
 
-:scope .nse-control-list-item,
-:scope:is(.nse-control-list-item),
-:scope.nse-control-list-item {
+:scope :is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)),
+:scope:is(:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *))),
+:scope:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)) {
   font-size:16px;
 }
 
@@ -1341,9 +1341,9 @@
    insets must subtract THIS element's border to land on the same border-box
    coords the menu uses: 2px 6px 10px for the stroke ring, 3px 7px 11px for the
    bevel ring. */
-:scope .nse-control-app-menu-surface,
-:scope:is(.nse-control-app-menu-surface),
-:scope.nse-control-app-menu-surface {
+:scope [data-nse-role="application-menu"]:where([data-nse-part="bezel"]),
+:scope:is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])),
+:scope[data-nse-role="application-menu"]:where([data-nse-part="bezel"]) {
   position: relative;
   isolation: isolate;
   min-width: 220px;
@@ -1412,9 +1412,9 @@
   }
 }
 
-:scope .nse-control-app-menu-title,
-:scope:is(.nse-control-app-menu-title),
-:scope.nse-control-app-menu-title {
+:scope [data-nse-part="title"]:where([data-nse-role="application-menu"] > *),
+:scope:is([data-nse-part="title"]:where([data-nse-role="application-menu"] > *)),
+:scope[data-nse-part="title"]:where([data-nse-role="application-menu"] > *) {
   display: grid;
   grid-template-columns: 22px minmax(0, 1fr);
   gap: 7px;
@@ -1426,17 +1426,17 @@
 
 /* Canonical Atmo preserves the title geometry without importing the Heritage
    app-menu-icon-meta PNG. */
-:scope .nse-control-app-menu-title::before,
-:scope:is(.nse-control-app-menu-title::before),
-:scope.nse-control-app-menu-title::before {
+:scope [data-nse-part="title"]:where([data-nse-role="application-menu"] > *)::before,
+:scope:is([data-nse-part="title"]:where([data-nse-role="application-menu"] > *)::before),
+:scope[data-nse-part="title"]:where([data-nse-role="application-menu"] > *)::before {
   content: "";
   width: 22px;
   height: 22px;
 }
 
-:scope .nse-control-app-menu-inner,
-:scope:is(.nse-control-app-menu-inner),
-:scope.nse-control-app-menu-inner {
+:scope [data-nse-part="body"]:where([data-nse-role="application-menu"] > *),
+:scope:is([data-nse-part="body"]:where([data-nse-role="application-menu"] > *)),
+:scope[data-nse-part="body"]:where([data-nse-role="application-menu"] > *) {
   display: grid;
   gap: 0;
   margin: 0 -22px -8px;
@@ -1445,9 +1445,9 @@
   overscroll-behavior: contain;
 }
 
-:scope .nse-control-app-menu-surface::before,
-:scope:is(.nse-control-app-menu-surface::before),
-:scope.nse-control-app-menu-surface::before {
+:scope [data-nse-role="application-menu"]:where([data-nse-part="bezel"])::before,
+:scope:is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])::before),
+:scope[data-nse-role="application-menu"]:where([data-nse-part="bezel"])::before {
   content: "";
   position: absolute;
   inset: -28px -24px -20px;
@@ -1459,9 +1459,9 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.55);
 }
 
-:scope .nse-control-app-menu-surface::after,
-:scope:is(.nse-control-app-menu-surface::after),
-:scope.nse-control-app-menu-surface::after {
+:scope [data-nse-role="application-menu"]:where([data-nse-part="bezel"])::after,
+:scope:is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])::after),
+:scope[data-nse-role="application-menu"]:where([data-nse-part="bezel"])::after {
   content: "";
   position: absolute;
   inset: -27px -23px -19px;
@@ -1483,18 +1483,18 @@
    the same treatment reached through .nse-control-app-menu-inner's child selector.
    Border-image is cleared and the rule restates the 1px top border it was
    carrying, so row rhythm is unchanged. */
-:scope .nse-control-app-menu-inner>*,
-:scope:is(.nse-control-app-menu-inner)>*,
-:scope.nse-control-app-menu-inner>* {
+:scope [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>*,
+:scope:is([data-nse-part="body"]:where([data-nse-role="application-menu"] > *))>*,
+:scope[data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>* {
   border-image: none;
   border-top: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.36);
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.55);
 }
 
-:scope .nse-control-app-menu-surface.nse-application-menu .nse-application-menu-list>.nse-control-list-item,
-:scope:is(.nse-control-app-menu-surface.nse-application-menu) .nse-application-menu-list>.nse-control-list-item,
-:scope.nse-control-app-menu-surface.nse-application-menu .nse-application-menu-list>.nse-control-list-item {
+:scope [data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))>:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)),
+:scope:is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"])) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))>:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)),
+:scope[data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))>:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)) {
   display: flex;
   align-items: center;
   width: 100%;
@@ -1511,34 +1511,34 @@
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.55);
 }
 
-:scope .nse-control-app-menu-surface.nse-application-menu .nse-menu-shortcut,
-:scope:is(.nse-control-app-menu-surface.nse-application-menu) .nse-menu-shortcut,
-:scope.nse-control-app-menu-surface.nse-application-menu .nse-menu-shortcut,
-:scope .nse-control-app-menu-surface.nse-application-menu .nse-menu-submenu-arrow,
-:scope:is(.nse-control-app-menu-surface.nse-application-menu) .nse-menu-submenu-arrow,
-:scope.nse-control-app-menu-surface.nse-application-menu .nse-menu-submenu-arrow {
+:scope [data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-part="shortcut-column"]:where([data-nse-control="menu-item"] *),
+:scope:is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"])) [data-nse-part="shortcut-column"]:where([data-nse-control="menu-item"] *),
+:scope[data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-part="shortcut-column"]:where([data-nse-control="menu-item"] *),
+:scope [data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-part="submenu-arrow"]:where([data-nse-control="menu-item"] *),
+:scope:is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"])) [data-nse-part="submenu-arrow"]:where([data-nse-control="menu-item"] *),
+:scope[data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-part="submenu-arrow"]:where([data-nse-control="menu-item"] *) {
   margin-inline-start: auto;
 }
 
-:scope .nse-control-app-menu-surface.nse-application-menu .nse-application-menu-list>.nse-menu-separator,
-:scope:is(.nse-control-app-menu-surface.nse-application-menu) .nse-application-menu-list>.nse-menu-separator,
-:scope.nse-control-app-menu-surface.nse-application-menu .nse-application-menu-list>.nse-menu-separator {
+:scope [data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))>[data-nse-part="separator"]:where([data-nse-role="overlay"] *):where([data-nse-control="menu"] > *),
+:scope:is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"])) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))>[data-nse-part="separator"]:where([data-nse-role="overlay"] *):where([data-nse-control="menu"] > *),
+:scope[data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))>[data-nse-part="separator"]:where([data-nse-role="overlay"] *):where([data-nse-control="menu"] > *) {
   height: 0;
   margin: 0;
   background: transparent;
   box-shadow: none;
 }
 
-:scope .nse-control-app-menu-surface.nse-application-menu .nse-application-menu-list>.nse-control-list-item:first-of-type,
-:scope:is(.nse-control-app-menu-surface.nse-application-menu) .nse-application-menu-list>.nse-control-list-item:first-of-type,
-:scope.nse-control-app-menu-surface.nse-application-menu .nse-application-menu-list>.nse-control-list-item:first-of-type {
+:scope [data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))>:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):first-of-type,
+:scope:is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"])) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))>:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):first-of-type,
+:scope[data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))>:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):first-of-type {
   border-top-width: 0;
   box-shadow: none;
 }
 
-:scope .nse-control-app-menu-surface.nse-application-menu .nse-application-menu-list>.nse-control-list-item:last-of-type,
-:scope:is(.nse-control-app-menu-surface.nse-application-menu) .nse-application-menu-list>.nse-control-list-item:last-of-type,
-:scope.nse-control-app-menu-surface.nse-application-menu .nse-application-menu-list>.nse-control-list-item:last-of-type {
+:scope [data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))>:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):last-of-type,
+:scope:is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"])) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))>:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):last-of-type,
+:scope[data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))>:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):last-of-type {
   border-bottom-width: 0;
 }
 
@@ -1559,9 +1559,9 @@
    painted white, so the text appeared only under the pointer.
    Now (0,4,0) — surface + inner + :not() — so it wins on weight, not on order.
    See probe-app-menu-popup-text.mjs: nothing in this toolchain scores type. */
-:scope .nse-control-app-menu-surface .nse-control-app-menu-inner>*:not(.is-disabled),
-:scope:is(.nse-control-app-menu-surface) .nse-control-app-menu-inner>*:not(.is-disabled),
-:scope.nse-control-app-menu-surface .nse-control-app-menu-inner>*:not(.is-disabled) {
+:scope [data-nse-role="application-menu"]:where([data-nse-part="bezel"]) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>*:not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))),
+:scope:is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>*:not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))),
+:scope[data-nse-role="application-menu"]:where([data-nse-part="bezel"]) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>*:not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))) {
   color: #fff;
 }
 
@@ -1569,16 +1569,16 @@
    which ties atmo-controls.css's app-menu padding and wins on import order —
    rows would keep their labels but lose the 20px that keeps the plate full
    width. (0,3,0) settles it on weight. */
-:scope .nse-control-app-menu-surface .nse-control-app-menu-inner>*,
-:scope:is(.nse-control-app-menu-surface) .nse-control-app-menu-inner>*,
-:scope.nse-control-app-menu-surface .nse-control-app-menu-inner>* {
+:scope [data-nse-role="application-menu"]:where([data-nse-part="bezel"]) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>*,
+:scope:is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>*,
+:scope[data-nse-role="application-menu"]:where([data-nse-part="bezel"]) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>* {
   padding-right: 20px;
   padding-left: 20px;
 }
 
-:scope .nse-control-app-menu-surface.nse-application-menu .nse-control-app-menu-inner>.nse-menu,
-:scope:is(.nse-control-app-menu-surface.nse-application-menu) .nse-control-app-menu-inner>.nse-menu,
-:scope.nse-control-app-menu-surface.nse-application-menu .nse-control-app-menu-inner>.nse-menu {
+:scope [data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>[data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]),
+:scope:is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"])) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>[data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]),
+:scope[data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>[data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]) {
   width: 100%;
   min-width: 0;
   padding: 0;
@@ -1587,16 +1587,16 @@
   background: transparent;
 }
 
-:scope .nse-control-app-menu-inner>*:first-child,
-:scope:is(.nse-control-app-menu-inner)>*:first-child,
-:scope.nse-control-app-menu-inner>*:first-child {
+:scope [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>*:first-child,
+:scope:is([data-nse-part="body"]:where([data-nse-role="application-menu"] > *))>*:first-child,
+:scope[data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>*:first-child {
   border-top-width: 0;
   box-shadow: none;
 }
 
-:scope .nse-control-app-menu-inner>*.is-disabled,
-:scope:is(.nse-control-app-menu-inner)>*.is-disabled,
-:scope.nse-control-app-menu-inner>*.is-disabled {
+:scope [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>*[data-nse-enabled="false"]:where(:not([data-nse-control="search-field"])),
+:scope:is([data-nse-part="body"]:where([data-nse-role="application-menu"] > *))>*[data-nse-enabled="false"]:where(:not([data-nse-control="search-field"])),
+:scope[data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>*[data-nse-enabled="false"]:where(:not([data-nse-control="search-field"])) {
   color: #8c8c8c;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
 }
@@ -1607,26 +1607,26 @@
 
    The application-menu NSEListItem recipe below owns the distinct held
    #555 → #888 ramp; generic NSE menu rows remain untouched. */
-:scope .nse-control-app-menu-inner>*:not(.is-disabled):hover,
-:scope:is(.nse-control-app-menu-inner)>*:not(.is-disabled):hover,
-:scope.nse-control-app-menu-inner>*:not(.is-disabled):hover {
+:scope [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>*:not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):hover,
+:scope:is([data-nse-part="body"]:where([data-nse-role="application-menu"] > *))>*:not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):hover,
+:scope[data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>*:not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):hover {
   color: #fff;
   background: rgba(255, 255, 255, 0.16);
 }
 
-:scope .nse-control-app-menu-surface.nse-application-menu .nse-application-menu-list>.nse-control-list-item:not(.is-disabled):active,
-:scope:is(.nse-control-app-menu-surface.nse-application-menu) .nse-application-menu-list>.nse-control-list-item:not(.is-disabled):active,
-:scope.nse-control-app-menu-surface.nse-application-menu .nse-application-menu-list>.nse-control-list-item:not(.is-disabled):active {
+:scope [data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))>:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):active,
+:scope:is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"])) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))>:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):active,
+:scope[data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"] > *))>:is([data-nse-control="table-cell-view"]:where([data-nse-style="list"]), [data-nse-control="menu-item"]:where([data-nse-style="application-menu"] *)):not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):active {
   color: #fff;
   background: linear-gradient(#555, #888);
 }
 
-:scope .nse-control-app-menu-surface.nse-application-menu .nse-control-app-menu-inner>.nse-menu:hover,
-:scope:is(.nse-control-app-menu-surface.nse-application-menu) .nse-control-app-menu-inner>.nse-menu:hover,
-:scope.nse-control-app-menu-surface.nse-application-menu .nse-control-app-menu-inner>.nse-menu:hover,
-:scope .nse-control-app-menu-surface.nse-application-menu .nse-control-app-menu-inner>.nse-menu:active,
-:scope:is(.nse-control-app-menu-surface.nse-application-menu) .nse-control-app-menu-inner>.nse-menu:active,
-:scope.nse-control-app-menu-surface.nse-application-menu .nse-control-app-menu-inner>.nse-menu:active {
+:scope [data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>[data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):hover,
+:scope:is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"])) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>[data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):hover,
+:scope[data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>[data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):hover,
+:scope [data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>[data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):active,
+:scope:is([data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"])) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>[data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):active,
+:scope[data-nse-role="application-menu"]:where([data-nse-part="bezel"])[data-nse-style="application-menu"]:where([data-nse-part="bezel"]) [data-nse-part="body"]:where([data-nse-role="application-menu"] > *)>[data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):active {
   background: transparent;
 }
 
@@ -2850,13 +2850,13 @@
    the system menu and picker list above (system-menu-background.png,
    popup-picker.png). Box geometry is the shared Atmo control structure's, so
    the pseudo-element insets are the .nse-control-menu / picker-list ones. */
-.nse-overlay-popup[data-nse-part="surface"]:is(.nse-overlay-popup--menu,.nse-overlay-popup--submenu,.nse-overlay-popup--context-menu):not(.nse-overlay-popup--application-menu),
-.nse-overlay-popup[data-nse-part="surface"].nse-overlay-popup--listbox {
+[data-nse-part="surface"]:where(:not([data-nse-control="tooltip"]))[data-nse-part="surface"]:is([data-nse-style="menu"]:where([data-nse-part="surface"]),[data-nse-style="submenu"]:where([data-nse-part="surface"]),[data-nse-style="context-menu"]:where([data-nse-part="surface"])):not([data-nse-part="surface"]:where(:has([data-nse-style="application-menu"][data-nse-part="bezel"]))),
+[data-nse-part="surface"]:where(:not([data-nse-control="tooltip"]))[data-nse-part="surface"][data-nse-style="listbox"]:where([data-nse-part="surface"]) {
   border-image: none;
   isolation: isolate;
 }
 
-.nse-overlay-popup[data-nse-part="surface"]:is(.nse-overlay-popup--menu,.nse-overlay-popup--submenu,.nse-overlay-popup--context-menu):not(.nse-overlay-popup--application-menu)::before {
+[data-nse-part="surface"]:where(:not([data-nse-control="tooltip"]))[data-nse-part="surface"]:is([data-nse-style="menu"]:where([data-nse-part="surface"]),[data-nse-style="submenu"]:where([data-nse-part="surface"]),[data-nse-style="context-menu"]:where([data-nse-part="surface"])):not([data-nse-part="surface"]:where(:has([data-nse-style="application-menu"][data-nse-part="bezel"])))::before {
   content: "";
   position: absolute;
   inset: -28px -22px -25px;
@@ -2868,7 +2868,7 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.55);
 }
 
-.nse-overlay-popup[data-nse-part="surface"]:is(.nse-overlay-popup--menu,.nse-overlay-popup--submenu,.nse-overlay-popup--context-menu):not(.nse-overlay-popup--application-menu)::after {
+[data-nse-part="surface"]:where(:not([data-nse-control="tooltip"]))[data-nse-part="surface"]:is([data-nse-style="menu"]:where([data-nse-part="surface"]),[data-nse-style="submenu"]:where([data-nse-part="surface"]),[data-nse-style="context-menu"]:where([data-nse-part="surface"])):not([data-nse-part="surface"]:where(:has([data-nse-style="application-menu"][data-nse-part="bezel"])))::after {
   content: "";
   position: absolute;
   inset: -27px -21px -24px;
@@ -2885,7 +2885,7 @@
   ) padding-box;
 }
 
-.nse-overlay-popup[data-nse-part="surface"].nse-overlay-popup--listbox::before {
+[data-nse-part="surface"]:where(:not([data-nse-control="tooltip"]))[data-nse-part="surface"][data-nse-style="listbox"]:where([data-nse-part="surface"])::before {
   content: "";
   position: absolute;
   inset: -15px -18px;
@@ -2904,9 +2904,9 @@
 
 [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"])[data-nse-part="background"]:not([data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"]>*))) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-control="menu"]>*)+[data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-control="menu"]>*)::before,
 [data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"])[data-nse-part="background"]:not([data-nse-control="menu"]:where([data-nse-part="background"]):where([data-nse-chrome="standard"]):where(:not([data-nse-part="content"]>*))) [data-nse-part="separator"]:where([data-nse-role="overlay"] *):where([data-nse-control="menu"]>*),
-:scope .nse-overlay-popup--listbox .nse-overlay-listbox-option+.nse-overlay-listbox-option::before,
-:scope:is(.nse-overlay-popup--listbox) .nse-overlay-listbox-option+.nse-overlay-listbox-option::before,
-:scope.nse-overlay-popup--listbox .nse-overlay-listbox-option+.nse-overlay-listbox-option::before {
+:scope [data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *)+[data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *)::before,
+:scope:is([data-nse-style="listbox"]:where([data-nse-part="surface"])) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *)+[data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *)::before,
+:scope[data-nse-style="listbox"]:where([data-nse-part="surface"]) [data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *)+[data-nse-control="menu-item"]:where([data-nse-part="cell"]):where([data-nse-part="content"] > *)::before {
   background: linear-gradient(to right,
     rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0.35) 15%, rgba(0, 0, 0, 0.47) 38%,
     rgba(0, 0, 0, 0.51) 50%, rgba(0, 0, 0, 0.47) 62%, rgba(0, 0, 0, 0.35) 85%,
@@ -2951,14 +2951,14 @@
 }
 
 @media (forced-colors: active) {
-  .nse-overlay-popup[data-nse-part="surface"]:is(.nse-overlay-popup--menu,.nse-overlay-popup--submenu,.nse-overlay-popup--context-menu,.nse-overlay-popup--listbox) {
+  [data-nse-part="surface"]:where(:not([data-nse-control="tooltip"]))[data-nse-part="surface"]:is([data-nse-style="menu"]:where([data-nse-part="surface"]),[data-nse-style="submenu"]:where([data-nse-part="surface"]),[data-nse-style="context-menu"]:where([data-nse-part="surface"]),[data-nse-style="listbox"]:where([data-nse-part="surface"])) {
     border: 1px solid CanvasText;
     background: Canvas;
     color: CanvasText;
     filter: none;
   }
-  .nse-overlay-popup[data-nse-part="surface"]:is(.nse-overlay-popup--menu,.nse-overlay-popup--submenu,.nse-overlay-popup--context-menu,.nse-overlay-popup--listbox)::before,
-.nse-overlay-popup[data-nse-part="surface"]:is(.nse-overlay-popup--menu,.nse-overlay-popup--submenu,.nse-overlay-popup--context-menu):not(.nse-overlay-popup--application-menu)::after {
+  [data-nse-part="surface"]:where(:not([data-nse-control="tooltip"]))[data-nse-part="surface"]:is([data-nse-style="menu"]:where([data-nse-part="surface"]),[data-nse-style="submenu"]:where([data-nse-part="surface"]),[data-nse-style="context-menu"]:where([data-nse-part="surface"]),[data-nse-style="listbox"]:where([data-nse-part="surface"]))::before,
+[data-nse-part="surface"]:where(:not([data-nse-control="tooltip"]))[data-nse-part="surface"]:is([data-nse-style="menu"]:where([data-nse-part="surface"]),[data-nse-style="submenu"]:where([data-nse-part="surface"]),[data-nse-style="context-menu"]:where([data-nse-part="surface"])):not([data-nse-part="surface"]:where(:has([data-nse-style="application-menu"][data-nse-part="bezel"])))::after {
     content: none;
   }
 }
@@ -2981,12 +2981,12 @@
    The surface is already positioned (fixed or anchored), so the frame hangs
    off it without changing its position. Insets subtract the 24px frame to
    land at border-box 8px 7px, as on .nse-control-popup. */
-.nse-overlay-popup[data-nse-part="surface"]:is(.nse-overlay-popup--popover,.nse-overlay-popup--action-sheet) {
+[data-nse-part="surface"]:where(:not([data-nse-control="tooltip"]))[data-nse-part="surface"]:is([data-nse-style="popover"]:where([data-nse-part="surface"]),[data-nse-style="action-sheet"]:where([data-nse-part="surface"])) {
   isolation: isolate;
   border-image: none;
 }
 
-.nse-overlay-popup[data-nse-part="surface"]:is(.nse-overlay-popup--popover,.nse-overlay-popup--action-sheet)::before {
+[data-nse-part="surface"]:where(:not([data-nse-control="tooltip"]))[data-nse-part="surface"]:is([data-nse-style="popover"]:where([data-nse-part="surface"]),[data-nse-style="action-sheet"]:where([data-nse-part="surface"]))::before {
   content: "";
   position: absolute;
   inset: -16px -17px;
@@ -3009,7 +3009,7 @@
    its .72 black hairline and 7% top rim, and a deeper drop. Content takes the
    page mode's ink, so wells, selects, calendars and clocks inside go dark with
    the panel instead of leaving a light plate in a dark room. */
-.nse-overlay-popup[data-nse-part="surface"][data-mode="dark"]:is(.nse-overlay-popup--popover,.nse-overlay-popup--action-sheet),
+[data-nse-part="surface"]:where(:not([data-nse-control="tooltip"]))[data-nse-part="surface"][data-nse-colour-scheme-resolved="dark"]:is([data-nse-style="popover"]:where([data-nse-part="surface"]),[data-nse-style="action-sheet"]:where([data-nse-part="surface"])),
 :scope[data-nse-colour-scheme-resolved="dark"] [data-nse-control="window"]:where([data-nse-part="background"])[data-nse-role="popover"]:where([data-nse-control="window"][data-nse-part="background"]) [data-nse-part="bezel"]:where([data-nse-control="window"] *):where(:not([data-nse-control="window"] [data-nse-control] *)),
 :scope[data-nse-colour-scheme-resolved="dark"]:is([data-nse-control="window"]:where([data-nse-part="background"])[data-nse-role="popover"]:where([data-nse-control="window"][data-nse-part="background"])) [data-nse-part="bezel"]:where([data-nse-control="window"] *):where(:not([data-nse-control="window"] [data-nse-control] *)),
 :scope [data-nse-colour-scheme-resolved="dark"] [data-nse-control="window"]:where([data-nse-part="background"])[data-nse-role="popover"]:where([data-nse-control="window"][data-nse-part="background"]) [data-nse-part="bezel"]:where([data-nse-control="window"] *):where(:not([data-nse-control="window"] [data-nse-control] *)),
@@ -3047,7 +3047,7 @@
   color-scheme: dark;
 }
 
-.nse-overlay-popup[data-nse-part="surface"][data-mode="dark"]:is(.nse-overlay-popup--popover,.nse-overlay-popup--action-sheet)::before,
+[data-nse-part="surface"]:where(:not([data-nse-control="tooltip"]))[data-nse-part="surface"][data-nse-colour-scheme-resolved="dark"]:is([data-nse-style="popover"]:where([data-nse-part="surface"]),[data-nse-style="action-sheet"]:where([data-nse-part="surface"]))::before,
 :scope[data-mode="dark"] .nse-control-dialog-surface::before,
 :scope[data-mode="dark"]:is(.nse-control-dialog-surface::before),
 :scope [data-mode="dark"] .nse-control-dialog-surface::before,
@@ -6528,9 +6528,9 @@ input:scope[data-nse-control="scroller"]:focus-visible {
 
 /* Borderless items (NSToolbarItem.isBordered = false) are Pages' toolbar: the icon
    alone, its label engraved beneath it, and a press that darkens only the icon. */
-:scope .nse-toolbar-item[data-nse-toolbar-bordered="false"],
-:scope:is(.nse-toolbar-item[data-nse-toolbar-bordered="false"]),
-:scope.nse-toolbar-item[data-nse-toolbar-bordered="false"] {
+:scope [data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"],
+:scope:is([data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"]),
+:scope[data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"] {
   flex-direction: column;
   gap: 3px;
   block-size: auto;
@@ -6548,9 +6548,9 @@ input:scope[data-nse-control="scroller"]:focus-visible {
   display: none;
 }
 
-:scope .nse-toolbar-item[data-nse-toolbar-bordered="false"] .nse-toolbar-item-icon,
-:scope:is(.nse-toolbar-item[data-nse-toolbar-bordered="false"]) .nse-toolbar-item-icon,
-:scope.nse-toolbar-item[data-nse-toolbar-bordered="false"] .nse-toolbar-item-icon {
+:scope [data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"] [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+:scope:is([data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"]) [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+:scope[data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"] [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *) {
   inline-size: 28px;
   block-size: 28px;
   filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.5));
@@ -6564,89 +6564,89 @@ input:scope[data-nse-control="scroller"]:focus-visible {
   block-size: 100%;
 }
 
-:scope .nse-toolbar-item[data-nse-toolbar-bordered="false"]:active:not(:disabled) .nse-toolbar-item-icon,
-:scope:is(.nse-toolbar-item[data-nse-toolbar-bordered="false"]:active:not(:disabled)) .nse-toolbar-item-icon,
-:scope.nse-toolbar-item[data-nse-toolbar-bordered="false"]:active:not(:disabled) .nse-toolbar-item-icon,
-:scope .nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"] .nse-toolbar-item-icon,
-:scope:is(.nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"]) .nse-toolbar-item-icon,
-:scope.nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"] .nse-toolbar-item-icon {
+:scope [data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"]:active:not(:disabled) [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+:scope:is([data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"]:active:not(:disabled)) [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+:scope[data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"]:active:not(:disabled) [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+:scope [data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"])) [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+:scope:is([data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"]))) [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+:scope[data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"])) [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *) {
   filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.5)) brightness(0.7) contrast(1.15);
 }
 
-:scope .nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"],
-:scope:is(.nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"]),
-:scope.nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"] {
+:scope [data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"])),
+:scope:is([data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"]))),
+:scope[data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"])) {
   color: #1d1e21;
 }
 
-:scope .nse-toolbar-item[data-nse-toolbar-bordered="false"]:disabled,
-:scope:is(.nse-toolbar-item[data-nse-toolbar-bordered="false"]:disabled),
-:scope.nse-toolbar-item[data-nse-toolbar-bordered="false"]:disabled {
+:scope [data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"]:disabled,
+:scope:is([data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"]:disabled),
+:scope[data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"]:disabled {
   color: rgba(69, 71, 76, 0.5);
 }
 
-:scope .nse-toolbar-item[data-nse-toolbar-bordered="false"]:disabled .nse-toolbar-item-icon,
-:scope:is(.nse-toolbar-item[data-nse-toolbar-bordered="false"]:disabled) .nse-toolbar-item-icon,
-:scope.nse-toolbar-item[data-nse-toolbar-bordered="false"]:disabled .nse-toolbar-item-icon {
+:scope [data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"]:disabled [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+:scope:is([data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"]:disabled) [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+:scope[data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"]:disabled [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *) {
   opacity: 0.42;
 }
 
-:scope .nse-toolbar-item[data-nse-toolbar-bordered="false"]:focus-visible .nse-toolbar-item-icon,
-:scope:is(.nse-toolbar-item[data-nse-toolbar-bordered="false"]:focus-visible) .nse-toolbar-item-icon,
-:scope.nse-toolbar-item[data-nse-toolbar-bordered="false"]:focus-visible .nse-toolbar-item-icon {
+:scope [data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"]:focus-visible [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+:scope:is([data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"]:focus-visible) [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+:scope[data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"]:focus-visible [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *) {
   filter: drop-shadow(0 0 2px rgba(76, 164, 255, 0.95)) drop-shadow(0 0 4px rgba(108, 188, 255, 0.6));
 }
 
-[data-mode="dark"] :scope .nse-toolbar-item[data-nse-toolbar-bordered="false"],
-:where(:scope):is([data-mode="dark"]) :scope .nse-toolbar-item[data-nse-toolbar-bordered="false"],
-[data-mode="dark"]:is(:scope) .nse-toolbar-item[data-nse-toolbar-bordered="false"],
-[data-mode="dark"]:is(:scope):is(.nse-toolbar-item[data-nse-toolbar-bordered="false"]),
-[data-mode="dark"] :scope.nse-toolbar-item[data-nse-toolbar-bordered="false"],
-:where(:scope):is([data-mode="dark"]) :scope.nse-toolbar-item[data-nse-toolbar-bordered="false"],
-[data-mode="dark"]:is(:scope.nse-toolbar-item[data-nse-toolbar-bordered="false"]),
-[data-mode="dark"]:scope .nse-toolbar-item[data-nse-toolbar-bordered="false"],
-[data-mode="dark"]:scope:is(.nse-toolbar-item[data-nse-toolbar-bordered="false"]),
-[data-mode="dark"]:scope.nse-toolbar-item[data-nse-toolbar-bordered="false"] {
+[data-nse-colour-scheme-resolved="dark"] :scope [data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"],
+:where(:scope):is([data-nse-colour-scheme-resolved="dark"]) :scope [data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"],
+[data-nse-colour-scheme-resolved="dark"]:is(:scope) [data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"],
+[data-nse-colour-scheme-resolved="dark"]:is(:scope):is([data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"]),
+[data-nse-colour-scheme-resolved="dark"] :scope[data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"],
+:where(:scope):is([data-nse-colour-scheme-resolved="dark"]) :scope[data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"],
+[data-nse-colour-scheme-resolved="dark"]:is(:scope[data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"]),
+[data-nse-colour-scheme-resolved="dark"]:scope [data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"],
+[data-nse-colour-scheme-resolved="dark"]:scope:is([data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"]),
+[data-nse-colour-scheme-resolved="dark"]:scope[data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"] {
   color: #c9cbd0;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.7);
 }
 
-[data-mode="dark"] :scope .nse-toolbar-item[data-nse-toolbar-bordered="false"] .nse-toolbar-item-icon,
-:where(:scope):is([data-mode="dark"]) :scope .nse-toolbar-item[data-nse-toolbar-bordered="false"] .nse-toolbar-item-icon,
-[data-mode="dark"]:is(:scope) .nse-toolbar-item[data-nse-toolbar-bordered="false"] .nse-toolbar-item-icon,
-[data-mode="dark"]:is(:scope):is(.nse-toolbar-item[data-nse-toolbar-bordered="false"]) .nse-toolbar-item-icon,
-[data-mode="dark"] :scope.nse-toolbar-item[data-nse-toolbar-bordered="false"] .nse-toolbar-item-icon,
-:where(:scope):is([data-mode="dark"]) :scope.nse-toolbar-item[data-nse-toolbar-bordered="false"] .nse-toolbar-item-icon,
-[data-mode="dark"]:is(:scope.nse-toolbar-item[data-nse-toolbar-bordered="false"]) .nse-toolbar-item-icon,
-[data-mode="dark"]:scope .nse-toolbar-item[data-nse-toolbar-bordered="false"] .nse-toolbar-item-icon,
-[data-mode="dark"]:scope:is(.nse-toolbar-item[data-nse-toolbar-bordered="false"]) .nse-toolbar-item-icon,
-[data-mode="dark"]:scope.nse-toolbar-item[data-nse-toolbar-bordered="false"] .nse-toolbar-item-icon {
+[data-nse-colour-scheme-resolved="dark"] :scope [data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"] [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+:where(:scope):is([data-nse-colour-scheme-resolved="dark"]) :scope [data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"] [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+[data-nse-colour-scheme-resolved="dark"]:is(:scope) [data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"] [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+[data-nse-colour-scheme-resolved="dark"]:is(:scope):is([data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"]) [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+[data-nse-colour-scheme-resolved="dark"] :scope[data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"] [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+:where(:scope):is([data-nse-colour-scheme-resolved="dark"]) :scope[data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"] [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+[data-nse-colour-scheme-resolved="dark"]:is(:scope[data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"]) [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+[data-nse-colour-scheme-resolved="dark"]:scope [data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"] [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+[data-nse-colour-scheme-resolved="dark"]:scope:is([data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"]) [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+[data-nse-colour-scheme-resolved="dark"]:scope[data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"] [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *) {
   filter: drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.6));
 }
 
-[data-mode="dark"] :scope .nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"],
-:where(:scope):is([data-mode="dark"]) :scope .nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"],
-[data-mode="dark"]:is(:scope) .nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"],
-[data-mode="dark"]:is(:scope):is(.nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"]),
-[data-mode="dark"] :scope.nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"],
-:where(:scope):is([data-mode="dark"]) :scope.nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"],
-[data-mode="dark"]:is(:scope.nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"]),
-[data-mode="dark"]:scope .nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"],
-[data-mode="dark"]:scope:is(.nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"]),
-[data-mode="dark"]:scope.nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"] {
+[data-nse-colour-scheme-resolved="dark"] :scope [data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"])),
+:where(:scope):is([data-nse-colour-scheme-resolved="dark"]) :scope [data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"])),
+[data-nse-colour-scheme-resolved="dark"]:is(:scope) [data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"])),
+[data-nse-colour-scheme-resolved="dark"]:is(:scope):is([data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"]))),
+[data-nse-colour-scheme-resolved="dark"] :scope[data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"])),
+:where(:scope):is([data-nse-colour-scheme-resolved="dark"]) :scope[data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"])),
+[data-nse-colour-scheme-resolved="dark"]:is(:scope[data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"]))),
+[data-nse-colour-scheme-resolved="dark"]:scope [data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"])),
+[data-nse-colour-scheme-resolved="dark"]:scope:is([data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"]))),
+[data-nse-colour-scheme-resolved="dark"]:scope[data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"])) {
   color: #fff;
 }
 
-[data-mode="dark"] :scope .nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"] .nse-toolbar-item-icon,
-:where(:scope):is([data-mode="dark"]) :scope .nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"] .nse-toolbar-item-icon,
-[data-mode="dark"]:is(:scope) .nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"] .nse-toolbar-item-icon,
-[data-mode="dark"]:is(:scope):is(.nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"]) .nse-toolbar-item-icon,
-[data-mode="dark"] :scope.nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"] .nse-toolbar-item-icon,
-:where(:scope):is([data-mode="dark"]) :scope.nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"] .nse-toolbar-item-icon,
-[data-mode="dark"]:is(:scope.nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"]) .nse-toolbar-item-icon,
-[data-mode="dark"]:scope .nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"] .nse-toolbar-item-icon,
-[data-mode="dark"]:scope:is(.nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"]) .nse-toolbar-item-icon,
-[data-mode="dark"]:scope.nse-toolbar-item[data-nse-toolbar-bordered="false"][data-state="selected"] .nse-toolbar-item-icon {
+[data-nse-colour-scheme-resolved="dark"] :scope [data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"])) [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+:where(:scope):is([data-nse-colour-scheme-resolved="dark"]) :scope [data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"])) [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+[data-nse-colour-scheme-resolved="dark"]:is(:scope) [data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"])) [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+[data-nse-colour-scheme-resolved="dark"]:is(:scope):is([data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"]))) [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+[data-nse-colour-scheme-resolved="dark"] :scope[data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"])) [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+:where(:scope):is([data-nse-colour-scheme-resolved="dark"]) :scope[data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"])) [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+[data-nse-colour-scheme-resolved="dark"]:is(:scope[data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"]))) [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+[data-nse-colour-scheme-resolved="dark"]:scope [data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"])) [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+[data-nse-colour-scheme-resolved="dark"]:scope:is([data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"]))) [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *),
+[data-nse-colour-scheme-resolved="dark"]:scope[data-nse-control="toolbar-item"]:where(:not([data-nse-part="custom"]))[data-nse-style="borderless"][data-nse-selected]:where([data-nse-control="toolbar-item"]):where(:not([data-nse-enabled="false"])) [data-nse-part="image"]:where([data-nse-control="toolbar-item"] *) {
   filter: drop-shadow(0 0 5px rgba(120, 180, 255, 0.55)) brightness(1.15);
 }
 

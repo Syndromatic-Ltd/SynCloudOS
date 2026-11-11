@@ -62,7 +62,7 @@ export function PopoverWindowSurface({ surface, windowControllerId, anchored, ch
     ref={setElement}
     {...appearance}
     className={`nse-overlay-popup nse-popover nse-overlay-popup--${anchored ? "popover" : "action-sheet"}`}
-    data-nse-control="popover" data-nse-role="overlay" data-nse-part="surface"
+    data-nse-control="popover" data-nse-role="overlay" data-nse-part="surface" data-nse-style={anchored ? "popover" : "action-sheet"}
     data-nse-window-popover=""
     data-nse-popover-draws-background={String(request.drawsBackground ?? true)}
     data-nse-reduced-motion={String(reducedMotion)}

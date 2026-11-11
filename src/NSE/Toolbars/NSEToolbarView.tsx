@@ -286,7 +286,7 @@ function NSEConfiguredToolbar({
             data-nse-toolbar-item-id={entry.instanceId}
             data-nse-toolbar-command={item.commandId}
             data-nse-toolbar-state={item.checked}
-            data-nse-toolbar-bordered={item.bordered ? undefined : "false"}
+            data-nse-toolbar-bordered={item.bordered ? undefined : "false"} data-nse-style={item.bordered ? undefined : "borderless"}
             data-nse-part="item"
             data-state={!item.enabled ? "disabled" : item.checked === "on" || item.checked === "mixed" ? "selected" : "normal"}
 

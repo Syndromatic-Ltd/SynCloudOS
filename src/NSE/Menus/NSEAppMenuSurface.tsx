@@ -27,9 +27,9 @@ export interface NSEAppMenuSurfaceProps extends Omit<HTMLAttributes<HTMLElement>
 
 export function NSEAppMenuSurface({ title, className = "", children, ...props }: NSEAppMenuSurfaceProps) {
   return (
-    <section className={classes("nse-control-app-menu-surface", className)} {...props}>
-      {title ? <div className="nse-control-app-menu-title">{title}</div> : null}
-      <div className="nse-control-app-menu-inner">{children}</div>
+    <section data-nse-part="bezel" data-nse-role="application-menu" className={classes("nse-control-app-menu-surface", className)} {...props}>
+      {title ? <div data-nse-part="title" className="nse-control-app-menu-title">{title}</div> : null}
+      <div data-nse-part="body" className="nse-control-app-menu-inner">{children}</div>
     </section>
   );
 }

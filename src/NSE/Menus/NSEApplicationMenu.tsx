@@ -70,7 +70,7 @@ export function NSEApplicationMenu({ model, controller, overlay, open, anchor, t
       restoreFocus={false}
       onOpenChange={onOpenChange}
     >
-      <NSEAppMenuSurface className="nse-application-menu" title={title} data-nse-application-menu="true">
+      <NSEAppMenuSurface className="nse-application-menu" title={title} data-nse-style="application-menu" data-nse-application-menu="true">
         <NSEMenuView appearance="application-menu" model={model} controller={controller} open={open} onOpenChange={handleMenuOpenChange} />
       </NSEAppMenuSurface>
     </NSEMenuOverlay>
