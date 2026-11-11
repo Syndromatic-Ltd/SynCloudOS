@@ -58,3 +58,9 @@
   border-start-start-radius: 0;
   border-start-end-radius: 0;
 }
+/* A presented view controller taller than the window scrolls inside the sheet's padding, so its
+   content never runs past the drawn panel. */
+.nse-window-sheet-backdrop > .nse-sheet > [data-nse-view-controller] {
+  min-block-size: 0;
+  overflow: auto;
+}

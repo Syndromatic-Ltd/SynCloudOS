@@ -137,6 +137,9 @@
   position: relative;
   width: 50px;
   min-width: 50px;
+  /* The protected control minimum (limits.css, !important) reads this; Atmo's
+     push-button minimum is 76px, which stretched the circle into a capsule. */
+  --nse-control-minimum-inline-size: 50px;
   height: 50px;
   min-height: 50px;
   padding: 0;
