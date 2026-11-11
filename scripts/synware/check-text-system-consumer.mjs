@@ -57,12 +57,12 @@ async function probe() {
  await first.retain({scope,kind:"committed",id:"model"},[reference]); first.dispose();
  const fresh = createIndexedDBDocumentAssetStore({ databaseName });
  const bytes = await fresh.read(scope, reference);
- window.textSystem.durable = fresh.capabilities.durability === "durable" && bytes.join(",") === "1,2,3";
+ window.textSystem.durable = fresh.capabilities.durability === "durable" && bytes.bytes.join(",") === "1,2,3";
  fresh.dispose();
  const output = await createDocumentOutputPreparation({settle:()=>({status:"settled"}),capture:()=>({documentId:"one",revision:1,model:{text:"native"}})}).prepare({engine:()=>({pages:[{geometry:{width:72,height:96},draw:context=>{context.fill(GFXPath.rect({x:10,y:10,width:20,height:20}));}}]})});
  if(output.status !== "prepared") throw new Error(output.status);
  const pdf = await output.output.exportPDF(); if(pdf.status !== "exported") throw new Error(pdf.status);
- window.textSystem.pdfBytes = pdf.bytes.byteLength; window.textSystem.ready=true;
+ window.textSystem.pdfBytes = pdf.bytes.count; window.textSystem.ready=true;
 }
 void probe().catch(error => { window.textSystem.error=String(error); });
 `;

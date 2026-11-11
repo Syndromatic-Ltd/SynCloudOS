@@ -105,7 +105,8 @@ function Probe() {
       titledPixels?.close(); font?.dispose(); processor.dispose(); timebase.dispose(); engine.dispose(); canvas.remove();
     }
   };
-  return <button id="run" onClick={() => { void run().catch(error => {
+  // The probe sits inside the view's safe area, clear of the top bar's buttons, whose hit targets overhang the bar.
+  return <button id="run" style={{ display: "block", margin: "calc(var(--nse-safe-area-inset-top, 0px) + 24px) auto 0" }} onClick={() => { void run().catch(error => {
     const previous = window.fxMediaTimeline ?? {};
     window.fxMediaTimeline = { ...previous, ready: false, error: error instanceof Error ? error.message || String(error) : String(error),
       errorName: error instanceof Error ? error.name : typeof error, stack: error instanceof Error ? error.stack ?? null : null };
