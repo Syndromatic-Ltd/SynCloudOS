@@ -20,6 +20,7 @@
 
 
 import "./nse-chrome-primitives.css";
+import { nseStateHooks } from "../Theme/contract/hooks";
 
 export type NSEChromePrimitiveKind =
   | "surface"
@@ -74,6 +75,8 @@ export function NSEChromePrimitive({
       data-nse-chrome-primitive={kind}
       data-nse-chrome-state={state}
       data-nse-chrome-active="true"
+      data-nse-style={kind}
+      {...nseStateHooks({ hovered: state === "hover", highlighted: state === "pressed", selected: state === "selected", focused: state === "focused", enabled: state !== "disabled" })}
       data-nse-part={kind === "surface" ? "background" : kind === "bevel" || kind === "cap" ? "border" : kind === "splice" || kind === "separator" ? "separator" : kind === "gloss" ? "highlight" : "shadow"}
     />
   );
