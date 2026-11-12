@@ -14,6 +14,30 @@ Evidence for `docs/superpowers/plans/2026-11-11-performance-lifecycle-structure.
 | --- | --- |
 | `baseline.json` | The scenario table at framework `90e7fbf9` (the site vendors that commit), 11 November 2026. |
 | `baseline-digest.json` | The computed-style digest at the same commit. Two consecutive recordings compared equal: 0 differences in 14,361 styles. |
+| `after-mirror.json` | The same table at framework `b95e5e3c` (mirror classes, Tasks 2 to 4), vendored into the site as a local experiment, 12 November 2026. |
+| `after-mirror-digest.json` | The digest at `b95e5e3c`. Compared with `baseline-digest.json`: 0 differences in 14,361 styles. |
+
+## Mirror classes, before and after
+
+Style time in milliseconds, median of five passes.
+
+| Scenario | Measure | `90e7fbf9` | `b95e5e3c` | Plan target |
+| --- | --- | ---: | ---: | --- |
+| cold-load-board | style | 77.1 | 56.0 | |
+| launch-about | style | 168.3 | 74.5 | ≤ 60: missed, carried to Task 5 |
+| about-full-recalc | full recalc | 20.8 | 5.7 | |
+| quickswitch-open | style | 22.2 | 7.2 | |
+| quickswitch-select | style | 20.8 | 7.5 | |
+| return-to-webspring | style | 48.0 | 20.2 | |
+| cold-load-gallery | style | 1,905.2 | 571.5 | ≤ 480: missed, carried to Task 5 |
+| gallery-full-recalc | full recalc | 192.6 | 53.4 | ≤ 55: met |
+| gallery-hover-sweep | style | 266.3 | 58.4 | |
+| gallery-section: Tables & Trees | style | 445.5 | 101.6 | |
+| gallery-section: Buttons | style | 435.6 | 115.8 | |
+| gallery-section: Menus & Popups | style | 187.5 | 44.8 | |
+| gallery-section mean | style | 356.2 | 87.4 | ≤ 90: met |
+
+The site's dev server for these runs is `npx vite --config vite.local-auth.config.mts --host 127.0.0.1 --force` in the site worktree; the plain config has no local sign-in and the harness cannot get past the login window.
 
 ## Notes
 
