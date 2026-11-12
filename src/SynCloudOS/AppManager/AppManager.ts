@@ -34,6 +34,7 @@ import type {
 } from "../Lifecycle/lifecycleTypes";
 import type { AppManagerLaunchExplanation, AppManagerRuntimeRecord, SynCloudOSAppLifecycleState } from "./appManagerTypes";
 import type { ApplicationSessionMutationTicket } from "../Documents";
+import { appReadinessByLifecycleState } from "./AppLifecycle";
 import { DocumentUnavailableError } from "../Documents/DocumentErrors";
 
 type AppManagerLifecyclePort = Pick<SynCloudOSLifecycle, "launch" | "activate"> & {
@@ -87,16 +88,7 @@ export class AppManager {
   createRecord(previousRecord: AppManagerRuntimeRecord | null = null, lifecycleState: SynCloudOSAppLifecycleState = this.getState()): AppManagerRuntimeRecord {
     const appInfo = this.getCurrentAppInfo();
     const disabled = appInfo.isDisabled || lifecycleState === "disabled";
-    const readiness =
-      disabled
-        ? "cold"
-        : lifecycleState === "failed"
-          ? "failed"
-          : lifecycleState === "loading"
-            ? "loading"
-            : lifecycleState === "ready" || lifecycleState === "launching" || lifecycleState === "active" || lifecycleState === "suspended"
-              ? "ready"
-              : previousRecord?.readiness ?? "cold";
+    const readiness = disabled ? "cold" : appReadinessByLifecycleState[lifecycleState] ?? previousRecord?.readiness ?? "cold";
 
     return {
       appId: this.bundleIdentifier,
