@@ -29,7 +29,6 @@ import { nseNonNegative, useNSEViewLayerProperties, type NSEViewLayerProperties 
 import {
   Children,
   Fragment,
-  cloneElement,
   isValidElement,
   useCallback,
   useEffect,
@@ -45,6 +44,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode
 } from "react";
+import { cloneElement } from "../../Theme/contract/hookMirrorReact";
 import type { NSEFormatter, NSEFormatterContext } from "../../../Foundation/public";
 import {
   useNSEControlCommand,

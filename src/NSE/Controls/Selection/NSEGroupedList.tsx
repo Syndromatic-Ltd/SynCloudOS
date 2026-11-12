@@ -18,7 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Children, cloneElement, isValidElement, type ReactElement, type ReactNode } from "react";
+import { Children, isValidElement, type ReactElement, type ReactNode } from "react";
+import { cloneElement } from "../../Theme/contract/hookMirrorReact";
 import { NSEBox, type NSEBoxProps } from "../Fields/NSEFields";
 import { classes } from "../Core/nseControlsShared";
 

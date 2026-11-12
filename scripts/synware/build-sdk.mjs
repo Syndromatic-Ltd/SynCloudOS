@@ -397,9 +397,10 @@ async function main() {
     .replace("../../src/SynCloudOS/AppSDK/fx/runtime.ts", "./fx-attribution-runtime.js")
     .replace("../../src/SynCloudOS/AppSDK/manifest/synappManifestValidator.generated.mjs", "./manifest-validator.mjs")
     .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs"));
-  for (const file of ["theme-bundles.mjs","theme-loading.mjs","selector-performance.mjs","built-in-theme-css.mjs","bundle-paths.mjs","project-derivation.mjs","manifest-source.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs","pwa-plugin.mjs"]) {
+  for (const file of ["theme-bundles.mjs","theme-loading.mjs","selector-performance.mjs","hook-mirror-jsx.mjs","built-in-theme-css.mjs","bundle-paths.mjs","project-derivation.mjs","manifest-source.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs","pwa-plugin.mjs"]) {
     writeFileSync(resolve(directory, file), readFileSync(resolve(repositoryRoot, "scripts/synware", file), "utf8")
       .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs")
+      .replaceAll("../../src/NSE/Theme/contract/hookMirror", "./hookMirror")
       .replace("../../src/SynCloudOS/InstalledApplications/webAppManifest.mjs", "./web-app-manifest.mjs")
       .replace("../../src/SynCloudOS/InstalledApplications/serviceWorker.mjs", "./service-worker.mjs")
       .replace('new URL("../../tooling/nse-theme-contract.json", import.meta.url)', 'new URL("./tooling/nse-theme-contract.json", import.meta.url)'));
@@ -407,6 +408,8 @@ async function main() {
   cpSync(resolve(repositoryRoot, "src/SynCloudOS/InstalledApplications/webAppManifest.mjs"), resolve(directory, "web-app-manifest.mjs"));
   cpSync(resolve(repositoryRoot, "src/SynCloudOS/InstalledApplications/serviceWorker.mjs"), resolve(directory, "service-worker.mjs"));
   cpSync(resolve(repositoryRoot, "src/SynCloudOS/Identity/bundleIdentifier.mjs"), resolve(directory, "bundleIdentifier.mjs"));
+  // The mirroring JSX runtime is served to the browser from the package, beside the plugin that resolves it.
+  for (const file of ["hookMirror.mjs","hookMirrorJSXRuntime.mjs","hookMirrorJSXDevRuntime.mjs"]) cpSync(resolve(repositoryRoot, "src/NSE/Theme/contract", file), resolve(directory, file));
   mkdirSync(resolve(typesDirectory, "SynCloudOS/Identity"), { recursive: true });
   for (const extension of ["mjs", "d.mts"]) cpSync(resolve(repositoryRoot, `src/SynCloudOS/Identity/bundleIdentifier.${extension}`), resolve(typesDirectory, `SynCloudOS/Identity/bundleIdentifier.${extension}`));
   cpSync(resolve(repositoryRoot, "src/SynCloudOS/AppSDK/scos/appModuleSource.mjs"), resolve(directory, "app-module-source.mjs"));

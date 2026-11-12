@@ -20,12 +20,15 @@
 
 import { synWareSdkEntries, synWarePackageName } from "./scripts/synware/sdk-entries.mjs";
 import { decoratorEsbuildOptions } from "./scripts/synware/decorators.mjs";
+import { hookMirrorJSX } from "./scripts/synware/hook-mirror-jsx.mjs";
 import { defineConfig } from "vitest/config";
 import { resolve } from "node:path";
 
 export default defineConfig({
   // Standard decorators (`@action`, `@observable accessor`) are lowered by esbuild; Node cannot parse them.
   esbuild: { ...decoratorEsbuildOptions },
+  // Tests render through the same mirroring JSX runtime the SynWare plugin gives a project.
+  plugins: [hookMirrorJSX()],
   resolve: {
     alias: [
         ...Object.entries(synWareSdkEntries).map(([entry, source]) => ({ find: new RegExp("^" + synWarePackageName + (entry === "index" ? "" : "/" + entry) + "$"), replacement: resolve(import.meta.dirname, source) })),

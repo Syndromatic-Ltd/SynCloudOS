@@ -19,7 +19,6 @@
  */
 
 import {
-  createElement,
   useCallback,
   useContext,
   useEffect,
@@ -30,6 +29,7 @@ import {
   type HTMLAttributes,
   type ReactNode,
 } from "react";
+import { createElement } from "../Theme/contract/hookMirrorReact";
 import { useNSEAnimationEnvironment } from "../Animation/NSEAnimationEnvironment";
 import { nsePopoverSpringEasing, useNSEPopoverSurface } from "./useNSEPopoverSurface";
 import { NSEPopoverFrame } from "./NSEPopoverFrame";

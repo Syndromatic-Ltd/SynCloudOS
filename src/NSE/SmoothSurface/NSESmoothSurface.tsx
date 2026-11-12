@@ -19,7 +19,6 @@
  */
 
 import {
-  createElement,
   forwardRef,
   useMemo,
   useState,
@@ -27,6 +26,7 @@ import {
   type ForwardedRef,
   type HTMLAttributes
 } from "react";
+import { createElement } from "../Theme/contract/hookMirrorReact";
 import {
   getNSESmoothSurfaceClassName,
   getNSESmoothSurfaceStyle,
