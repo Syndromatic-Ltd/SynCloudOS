@@ -272,22 +272,4 @@ export class AppManager {
     return ok;
   }
 
-  suspend() {
-    void this.dependencies.bundleLoader.invokeLifecycleHook(this.bundleIdentifier, "applicationWillSuspend", { reason: "WindowManager.closeWindow" });
-    const ok = this.transition("suspended", "WindowManager.closeWindow");
-    if (ok) void this.dependencies.bundleLoader.invokeLifecycleHook(this.bundleIdentifier, "applicationDidSuspend", { reason: "WindowManager.closeWindow" });
-  }
-
-  async suspendForApplicationClose(reason = "WindowManager.closeApplication") {
-    await this.dependencies.bundleLoader.invokeLifecycleHook(this.bundleIdentifier, "applicationWillSuspend", { reason });
-    const ok = this.transition("suspended", reason);
-    if (ok) await this.dependencies.bundleLoader.invokeLifecycleHook(this.bundleIdentifier, "applicationDidSuspend", { reason });
-    return ok;
-  }
-
-  close() {
-    void this.dependencies.bundleLoader.invokeLifecycleHook(this.bundleIdentifier, "applicationWillClose", { reason: "close" });
-    const ok = this.transition("closed", "close");
-    if (ok) void this.dependencies.bundleLoader.invokeLifecycleHook(this.bundleIdentifier, "applicationDidClose", { reason: "close" });
-  }
 }

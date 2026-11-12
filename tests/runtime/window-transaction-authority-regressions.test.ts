@@ -867,25 +867,31 @@ describe("application-session close lease", () => {
     expect(harness.AppRegistry.getApp(appId)).toBeNull();
   });
 
-  it("keeps LaunchServices close inside the same application lease through manager suspension", async () => {
+  it("keeps LaunchServices close inside the same application lease through the lifecycle close", async () => {
     const runtime = createTestRuntime();
     cleanups.push(async () => { await runtime.dispose("launch-lease-test"); });
+    runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
     const harness = createRuntimeHarness(runtime);
+    harness.ConfigurationProfiles.setAccessMode("public");
     const appId = "com.example.launch-close-lease";
-    harness.AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: appId }));
-    const manager = harness.AppManagerController.createManagerForApp(harness.AppRegistry.getApp(appId));
     let lateAdmissionError: unknown = null;
-    vi.spyOn(manager, "suspendForApplicationClose").mockImplementation(async () => {
-      try {
-        runtime.windows.create(standardWindow("late-launch-window", {
-          applicationId: appId,
-          applicationSessionId: appId,
-        }));
-      } catch (error) {
-        lateAdmissionError = error;
-      }
-      return false;
-    });
+    harness.AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: appId, policy: { public: true } }, {
+      lifecycleHooks: {
+        applicationWillClose: () => {
+          try {
+            runtime.windows.create(standardWindow("late-launch-window", {
+              applicationId: appId,
+              applicationSessionId: appId,
+            }));
+          } catch (error) {
+            lateAdmissionError = error;
+          }
+        },
+      },
+    }));
+    harness.LaunchServices.openApp(appId, { source: "developer" });
+    await vi.waitFor(() => { expect(runtime.store.getSnapshot().lifecycle[appId]).toBe("active"); });
+    await vi.waitFor(() => { expect(harness.LaunchServices.inspect().active).toBeNull(); });
 
     await harness.LaunchServices.closeApp(appId);
     expect(lateAdmissionError).toBeInstanceOf(Error);
@@ -938,23 +944,27 @@ describe("application-session close lease", () => {
       .map((entry: { action: string }) => entry.action)).toContain("cancelled");
   });
 
-  it("holds application close authority until asynchronous suspend hooks settle", async () => {
+  it("holds application close authority until asynchronous close hooks settle", async () => {
     const suspendEntered = deferred<void>();
     const releaseSuspend = deferred<void>();
     const runtime = createTestRuntime();
     cleanups.push(async () => { await runtime.dispose("awaited-suspend-test"); });
     runtime.documents.registerType(noteType);
+    runtime.store.mutate((draft) => { draft.loginServices.isAuthorised = true; });
     const harness = createRuntimeHarness(runtime);
+    harness.ConfigurationProfiles.setAccessMode("public");
     const appId = "com.example.awaited-suspend-close";
-    harness.AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: appId }, {
+    harness.AppRegistry.registerBundle(createTestBundle({ bundleIdentifier: appId, policy: { public: true } }, {
       lifecycleHooks: {
-        applicationWillSuspend: async () => {
+        applicationWillClose: async () => {
           suspendEntered.resolve();
           await releaseSuspend.promise;
         },
       },
     }));
-    harness.AppManagerController.createManagerForApp(harness.AppRegistry.getApp(appId));
+    harness.LaunchServices.openApp(appId, { source: "developer" });
+    await vi.waitFor(() => { expect(runtime.store.getSnapshot().lifecycle[appId]).toBe("active"); });
+    await vi.waitFor(() => { expect(harness.LaunchServices.inspect().active).toBeNull(); });
 
     const closing = harness.LaunchServices.closeApp(appId);
     await suspendEntered.promise;
