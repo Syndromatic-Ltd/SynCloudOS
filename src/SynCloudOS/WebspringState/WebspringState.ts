@@ -36,6 +36,7 @@ import type {
   SynCloudOSWebspringStateController,
 } from "../Runtime/runtimeInstanceTypes";
 import type { RuntimeSnapshot } from "../Runtime/runtimeTypes";
+import { sendWebspringLaunchPhase } from "./launchPhaseMachine";
 import type {
   SynCloudOSWebspringFolderConfiguration,
   SynCloudOSWebspringLayoutPreference,
@@ -503,10 +504,9 @@ const webspringState = {
     if (appId) appId = runtime.apps.getApp(appId)?.bundleIdentifier ?? appId;
     RuntimeStore.mutate((draft) => {
       if (!appId) {
-        if (draft.webspring.launchPhase !== "staging") return;
+        if (!sendWebspringLaunchPhase(draft, "cancelStage")) return;
         draft.webspring.launchingAppId = null;
         draft.webspring.launchTransitionId = null;
-        draft.webspring.launchPhase = "idle";
         draft.webspring.isAnimating = false;
         draft.webspring.lowerShelfMode = draft.webspring.previewAppId ? "preview" : "news";
         syncSelector(draft, draft.webspring.previewAppId);
@@ -515,7 +515,7 @@ const webspringState = {
 
       draft.webspring.launchingAppId = appId;
       draft.webspring.launchTransitionId = launchTransitionId ?? draft.webspring.launchTransitionId;
-      draft.webspring.launchPhase = "staging";
+      sendWebspringLaunchPhase(draft, "stage");
       draft.webspring.returningAppId = null;
       draft.webspring.returnTransitionId = null;
       draft.webspring.isAnimating = true;
@@ -529,7 +529,7 @@ const webspringState = {
     RuntimeStore.mutate((draft) => {
       draft.webspring.launchingAppId = appId;
       draft.webspring.launchTransitionId = appId ? launchTransitionId ?? draft.webspring.launchTransitionId : null;
-      draft.webspring.launchPhase = appId ? "launching" : draft.webspring.launchPhase === "launching" ? "idle" : draft.webspring.launchPhase;
+      sendWebspringLaunchPhase(draft, appId ? "launch" : "cancelLaunch");
       draft.webspring.returningAppId = null;
       draft.webspring.returnTransitionId = null;
       draft.webspring.isAnimating = Boolean(appId);
@@ -552,7 +552,7 @@ const webspringState = {
       }
       draft.webspring.launchingAppId = null;
       draft.webspring.launchTransitionId = appId ? launchTransitionId ?? draft.webspring.launchTransitionId : null;
-      draft.webspring.launchPhase = appId && !contentMotion ? "covered" : "idle";
+      sendWebspringLaunchPhase(draft, appId && !contentMotion ? "cover" : "reset");
       draft.webspring.returningAppId = null;
       draft.webspring.returnTransitionId = null;
       draft.webspring.isAnimating = Boolean(appId) && !contentMotion;
@@ -566,7 +566,7 @@ const webspringState = {
     RuntimeStore.mutate((draft) => {
       draft.webspring.launchingAppId = null;
       draft.webspring.launchTransitionId = null;
-      draft.webspring.launchPhase = "returning";
+      sendWebspringLaunchPhase(draft, "beginReturn");
       draft.webspring.returningAppId = appId;
       draft.webspring.returnTransitionId = returnTransitionId;
       draft.webspring.isAnimating = true;
@@ -582,7 +582,7 @@ const webspringState = {
   finishReturn(returnTransitionId?: string | null) {
     RuntimeStore.mutate((draft) => {
       if (returnTransitionId && draft.webspring.returnTransitionId !== returnTransitionId) return;
-      draft.webspring.launchPhase = "idle";
+      sendWebspringLaunchPhase(draft, "finishReturn");
       draft.webspring.returningAppId = null;
       draft.webspring.returnTransitionId = null;
       draft.webspring.isAnimating = false;
