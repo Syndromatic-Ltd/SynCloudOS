@@ -15,6 +15,7 @@ Evidence for `docs/superpowers/plans/2026-11-11-performance-lifecycle-structure.
 | `baseline.json` | The scenario table at framework `90e7fbf9` (the site vendors that commit), 11 November 2026. |
 | `baseline-digest.json` | The computed-style digest at the same commit. Two consecutive recordings compared equal: 0 differences in 14,361 styles. |
 | `after-mirror.json` | The same table at framework `b95e5e3c` (mirror classes, Tasks 2 to 4), vendored into the site as a local experiment, 12 November 2026. |
+| `after-store-noop.json`, `after-store-noop-digest.json` | The table and digest at `30752974` (store no longer publishes same-value writes, Task 6). |
 | `after-mirror-digest.json` | The digest at `b95e5e3c`. Compared with `baseline-digest.json`: 0 differences in 14,361 styles. |
 
 ## Mirror classes, before and after
@@ -55,6 +56,26 @@ The site's dev server for these runs is `npx vite --config vite.local-auth.confi
 - Wall-clock full recalc did not move: 52 to 64 ms over eight runs at `c31f7215`, against 53.4 ms at `b95e5e3c` (`after-nested-split.json` records a 62 ms median). The attempts removed were ones the engine already rejected cheaply.
 - **The ≤ 45 ms target is not met, and per the plan the work stops here for the owner's decision.** What remains is not selector filing. 2,202 selectors are already filed under a value class and account for most of the remaining time: a button is tested against every button rule, and Atmo has many rules per control. Each element also inherits 414 custom properties. Going lower means fewer rules per control or fewer custom properties in Atmo itself, which the plan rules out without the owner's say.
 - Also not met, for the same reason: cold gallery style 558 ms (target ≤ 480) and launch About style 74 ms (target ≤ 60).
+
+## Pointer movement re-rendered the whole host (Task 6)
+
+The plan blamed per-control hover state. A commit-by-commit probe of React's tree during the sweep said otherwise: every pointer move produced six commits and re-rendered about 1,900 components, starting at `WebspringHost`.
+
+- **Cause.** The Webspring dial view, still mounted behind an open application, calls `previewApp(null)` as the pointer moves. `WebspringState.hoverApp` wrote the same four values back, and the runtime store's draft counted any assignment as a change, so each move replaced the `webspring` slice and `WebspringHost`, which selects the whole snapshot, re-rendered everything beneath it.
+- **Fix (`30752974`).** A write of the value a property already holds is no longer a change. This is in the store, so every caller benefits, not only the dial.
+- **Result** (`after-store-noop.json`, median of five passes):
+
+| gallery-hover-sweep | `90e7fbf9` | `c31f7215` | `30752974` |
+| --- | ---: | ---: | ---: |
+| script | 3,031.7 ms | 3,159.7 ms | 38.8 ms |
+| style | 266.3 ms | 57.8 ms | 1.8 ms |
+| style recalculations | 211 | 172 | 8 |
+| layout | 26.6 ms | 26.1 ms | 0.1 ms |
+| tasks over 50 ms | 6 | 8 | 0 |
+
+- The target was script time down by half; it is down 98.7%. The digest (`after-store-noop-digest.json`) shows 0 differences in 14,361 styles.
+- The planned conversion of hover, focus and highlight from React state to attributes was not done. With the host no longer re-rendering, a control that is hovered re-renders only itself (four components over the whole sweep), so the conversion would buy almost nothing and would touch every control family.
+- Still open for the owner: `WebspringHost` selects the whole runtime snapshot and passes slices down, so any real change to `webspring`, `application` or `lifecycle` re-renders every open window's content. Narrowing that is a larger change to the host and is not started.
 
 ## Notes
 
