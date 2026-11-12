@@ -32,6 +32,7 @@ import {
 import type { NSEOverlayRegionBounds } from "./overlayRegion";
 import type { NSELogicalPlacement } from "./overlayTypes";
 import { updateNSEPopoverFrame } from "./popoverFrame";
+import { setNSEHook } from "../Theme/contract/hookMirrorDOM";
 import { applyNSEPopoverPosition, computeNSEPopoverPosition, nsePopoverReference } from "./popoverPosition";
 
 export type NSEOverlayDirection = "ltr" | "rtl";
@@ -261,7 +262,7 @@ export function computeNSEOverlayPosition({
         floating.style.left = `${boundedX}px`;
         floating.style.top = `${boundedY}px`;
         floating.dataset.placement = resolvedPlacement;
-        floating.dataset.nsePlacement = resolvedPlacement;
+        setNSEHook(floating, "placement", resolvedPlacement);
         const arrowData = middlewareData.arrow;
         if (!arrow || !arrowData) { floating.dataset.nsePositioned = "true"; return; }
         const staticSide = {
@@ -384,7 +385,7 @@ export function computeNSEViewportCornerPosition({
     floating.style.setProperty("--nse-overlay-available-inline-size", `${availableInlineSize}px`);
     floating.style.setProperty("--nse-overlay-available-block-size", `${availableBlockSize}px`);
     floating.dataset.placement = "viewport-block-start-inline-end";
-    floating.dataset.nsePlacement = "viewport-block-start-inline-end";
+    setNSEHook(floating, "placement", "viewport-block-start-inline-end");
   };
   if (signal?.aborted) return () => undefined;
   signal?.addEventListener("abort", dispose, { once: true });
