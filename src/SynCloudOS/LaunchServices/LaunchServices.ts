@@ -949,14 +949,36 @@ async function runLaunch(request: SynCloudOSLaunchRequestDetails) {
     // Lifecycle validation and will hooks must finish before windows or routes
     // become observable. Its commit callback establishes the parent's authority.
     const requestedLifecycle = request.options.lifecycle;
-    await request.manager.launch(request.applicationMutation, multiSwitch ? {
+    // The lifecycle presents between commit and the did callbacks. An application that is
+    // already active runs no lifecycle, so it is presented directly afterwards.
+    let presentation: Promise<boolean> | null = null;
+    await request.manager.launch(request.applicationMutation, {
       ...requestedLifecycle,
-      onCommit: () => {
-        requestedLifecycle?.onCommit?.();
-        multiSwitchId = ApplicationState.beginMultiSwitch(multiSwitch!);
-      },
-    } : requestedLifecycle);
+      ...(multiSwitch ? {
+        onCommit: () => {
+          requestedLifecycle?.onCommit?.();
+          multiSwitchId = ApplicationState.beginMultiSwitch(multiSwitch!);
+        },
+      } : {}),
+      presentAfterCommit: async () => { await (presentation = present()); },
+    });
+    // The window's own outcome decides the launch, even when the lifecycle stopped waiting for it.
+    if (!await (presentation ?? present())) return;
+    recordRequestHistory("complete", request, [`${app.packageName} is active.`]);
+  } catch (error) {
+    clearLaunchTimers(request.requestId);
+    if (multiSwitchId) ApplicationState.clearMultiSwitch(multiSwitchId);
     if (!launchAuthorityIsCurrent(request)) return;
+    const captured = ErrorManager.createAppLaunchFailedError(app, error, {
+      source: "SynCloudOS.LaunchServices.openApp",
+      request: toQueueItem(request)
+    });
+    failRunningLaunch(request, error, "APP_LAUNCH_FAILED", captured);
+  }
+
+  /** Opens the main window and publishes the launch; false when the request lost its authority. */
+  async function present(): Promise<boolean> {
+    if (!launchAuthorityIsCurrent(request)) return false;
     const hadWindowBeforeLaunch = WindowManager.list({ applicationId: request.appId }).length > 0;
     const openedWindow = await WindowManager.openApplicationWindow(
       request.appId,
@@ -966,7 +988,7 @@ async function runLaunch(request: SynCloudOSLaunchRequestDetails) {
     const openedWindowId = !hadWindowBeforeLaunch ? openedWindow?.id ?? null : null;
     if (!launchAuthorityIsCurrent(request)) {
       if (openedWindowId) await WindowManager.requestClose(openedWindowId, { reason: "application-quit" });
-      return;
+      return false;
     }
     if (multiSwitch) {
       if (!multiSwitchId) throw new Error("Route-aware MultiSwitch did not establish presentation ownership at lifecycle commit.");
@@ -996,16 +1018,7 @@ async function runLaunch(request: SynCloudOSLaunchRequestDetails) {
       },
       app.packageName
     );
-    recordRequestHistory("complete", request, [`${app.packageName} is active.`]);
-  } catch (error) {
-    clearLaunchTimers(request.requestId);
-    if (multiSwitchId) ApplicationState.clearMultiSwitch(multiSwitchId);
-    if (!launchAuthorityIsCurrent(request)) return;
-    const captured = ErrorManager.createAppLaunchFailedError(app, error, {
-      source: "SynCloudOS.LaunchServices.openApp",
-      request: toQueueItem(request)
-    });
-    failRunningLaunch(request, error, "APP_LAUNCH_FAILED", captured);
+    return true;
   }
 }
 
