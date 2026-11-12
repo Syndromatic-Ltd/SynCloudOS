@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { nextState } from "../../Foundation/internal/StateMachine";
+import { dragPhaseMachine } from "./dragPhaseMachine";
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import { normalisePasteboardRepresentations } from "../Pasteboard";
 import type {
@@ -252,7 +254,7 @@ export function createDragSessionManager(options: CreateDragSessionManagerOption
       const resolvedSource = resolveEndpointAuthority(ownedInput.source, "source");
       const next: DragSession = {
         id: `${options.runtimeId}:drag:${leaseId(options.randomUUID())}`,
-        phase: "dragging",
+        phase: dragPhaseMachine.definition.initial,
         source: resolvedSource.endpoint,
         destination: null,
         operations: operations(ownedInput.operations),
@@ -318,7 +320,9 @@ export function createDragSessionManager(options: CreateDragSessionManagerOption
         destinationAuthority = resolvedDestination.authority;
         destinationEndpointValue = ownedRequest.endpoint;
         grant = selectedGrant;
-        replace({ ...session, phase: "over-destination", destination: target, operation: selected });
+        const over = nextState(dragPhaseMachine.definition, session.phase, "enterDestination");
+        if (!over) throw abortError();
+        replace({ ...session, phase: over, destination: target, operation: selected });
         return active!;
       } catch (error) {
         if (active?.id === id) this.cancel(id, "Drag destination authorisation failed.");
@@ -354,13 +358,14 @@ export function createDragSessionManager(options: CreateDragSessionManagerOption
     },
     async performDrop(id) {
       const session = current(id);
-      if (!destination || !grant || session.phase !== "over-destination" || session.operation === "none") {
+      const dropping = nextState(dragPhaseMachine.definition, session.phase, "drop");
+      if (!destination || !grant || !dropping || session.operation === "none") {
         this.cancel(id, "No authorised drop destination.");
         return { accepted: false, operation: "none" };
       }
       const authority = ++generation;
       const operation = beginOperation(id);
-      replace({ ...session, phase: "dropping" });
+      replace({ ...session, phase: dropping });
       try {
         if (!authorityStillLive(sourceEndpointValue, "source", sourceAuthority, session.source) ||
           !authorityStillLive(destinationEndpointValue, "destination", destinationAuthority, session.destination)) throw authorityError();
@@ -380,7 +385,7 @@ export function createDragSessionManager(options: CreateDragSessionManagerOption
           !authorityStillLive(destinationEndpointValue, "destination", destinationAuthority, session.destination)) throw authorityError();
         if (authority !== generation || active?.id !== id) throw abortError();
         const selected = active.operation;
-        replace({ ...active, phase: accepted ? "completed" : "cancelled" });
+        replace({ ...active, phase: nextState(dragPhaseMachine.definition, active.phase, accepted ? "accept" : "refuse") ?? active.phase });
         replace(null);
         destination = null;
         grant = null;

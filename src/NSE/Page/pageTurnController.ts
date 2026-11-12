@@ -30,6 +30,8 @@ import type {
   NSEPageTurnOptions
 } from "./nsePageTypes";
 
+import { pageTurnPhaseAfter } from "./pageTurnPhaseMachine";
+
 type PageTurnListener = (snapshot: NSEPageTurnSnapshot) => void;
 
 export class PageTurnController {
@@ -80,7 +82,7 @@ export class PageTurnController {
     return this.commit({
       progress: options.progress,
       targetProgress: options.targetProgress ?? 1,
-      phase: "turning",
+      phase: pageTurnPhaseAfter(this.snapshot.phase, "startTurn"),
       mode: options.mode,
       edge: options.edge,
       direction: options.direction,
@@ -93,7 +95,7 @@ export class PageTurnController {
     return this.commit({
       progress: options.progress,
       targetProgress: options.targetProgress,
-      phase: "dragging",
+      phase: pageTurnPhaseAfter(this.snapshot.phase, "startDrag"),
       mode: options.mode,
       edge: options.edge,
       direction: options.direction,
@@ -106,7 +108,7 @@ export class PageTurnController {
     return this.commit({
       progress: options.progress,
       targetProgress: options.targetProgress ?? options.progress,
-      phase: "settling",
+      phase: pageTurnPhaseAfter(this.snapshot.phase, "settle"),
       reason: options.reason ?? "programmatic"
     });
   }
@@ -115,7 +117,7 @@ export class PageTurnController {
     return this.commit({
       progress,
       targetProgress: progress,
-      phase: "idle",
+      phase: pageTurnPhaseAfter(this.snapshot.phase, "complete"),
       reason
     });
   }
@@ -123,7 +125,7 @@ export class PageTurnController {
   cancel(reason: Extract<NSEPageCompletionReason, "cancel" | "superseded"> = "cancel") {
     return this.commit({
       targetProgress: 0,
-      phase: "canceling",
+      phase: pageTurnPhaseAfter(this.snapshot.phase, "cancel"),
       reason
     });
   }
@@ -132,7 +134,7 @@ export class PageTurnController {
     return this.commit({
       progress: options.progress ?? 1,
       targetProgress: 1,
-      phase: "torn",
+      phase: pageTurnPhaseAfter(this.snapshot.phase, "tear"),
       mode: "tear",
       edge: options.edge,
       direction: options.direction,
@@ -146,7 +148,7 @@ export class PageTurnController {
     return this.commit({
       progress: options.progress ?? 0,
       targetProgress: options.targetProgress ?? 0,
-      phase: "idle",
+      phase: pageTurnPhaseAfter(this.snapshot.phase, "reset"),
       mode: options.mode,
       edge: options.edge,
       direction: options.direction,
