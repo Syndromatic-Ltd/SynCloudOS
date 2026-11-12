@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { defineStateMachine, nextState } from "../Statechart/StateMachine";
+import { defineStateMachine, nextState } from "../../Foundation/internal/StateMachine";
 import type { SynCloudOSWebspringState } from "./webspringStateTypes";
 
 type Phase = SynCloudOSWebspringState["launchPhase"];

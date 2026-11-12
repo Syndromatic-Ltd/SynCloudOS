@@ -19,6 +19,7 @@
  */
 
 import type { RuntimeBrowserPort } from "../Runtime/runtimeInstanceTypes";
+import { systemStartupPhaseMachine, type SystemStartupPhase } from "./startupPhaseMachine";
 
 export interface RootRuntimeScheduler {
   setTimeout(callback: () => void, delayMs: number): unknown;
@@ -33,11 +34,12 @@ export interface RootRuntimeManagerDependencies {
   boot(initialPathname: string): void | Promise<void>;
   resolveAppearance(): string;
 }
-export type RootRuntimeStartupPhase = "booting" | "material" | "complete";
 
 export function createRootRuntimeManager(dependencies: RootRuntimeManagerDependencies) {
   return {
-    start(onStartupPhase: (phase: RootRuntimeStartupPhase) => void) {
+    start(onStartupPhase: (phase: SystemStartupPhase) => void) {
+      const startup = systemStartupPhaseMachine.create();
+      startup.subscribe(onStartupPhase);
       const location = dependencies.browser.getLocation();
       const initialPathname = `${location.pathname}${location.search}${location.hash}`;
       let stopped = false;
@@ -46,12 +48,12 @@ export function createRootRuntimeManager(dependencies: RootRuntimeManagerDepende
       if (document) document.documentElement.dataset.mode = dependencies.resolveAppearance();
 
       const materialTimer = dependencies.scheduler.setTimeout(() => {
-        if (!stopped) onStartupPhase("material");
+        if (!stopped) startup.send("presentationPending");
       }, 90);
       const bootTimer = dependencies.scheduler.setTimeout(() => {
         if (stopped) return;
         void Promise.resolve(dependencies.boot(initialPathname)).then(() => {
-          if (!stopped) onStartupPhase("complete");
+          if (!stopped) startup.send("presentationReady");
         });
       }, 560);
 

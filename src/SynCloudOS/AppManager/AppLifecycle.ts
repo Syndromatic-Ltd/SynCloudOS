@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { canEnterState, defineStateMachine } from "../Statechart/StateMachine";
+import { canEnterState, defineStateMachine } from "../../Foundation/internal/StateMachine";
 import type { AppManagerRuntimeRecord, SynCloudOSAppLifecycleState } from "./appManagerTypes";
 
 export type AppLifecycleMove = "prepare" | "load" | "loaded" | "launch" | "activate" | "suspend" | "close" | "fail" | "disable" | "enable";

@@ -23,6 +23,10 @@ import { NSELayoutView } from "../NSE/Animation";
 import { NSEFocusScope } from "../NSE/NSE";
 import { webspringIconSprings } from "./Webspring.transitions";
 import type { WebspringFolderPresentationComponent, WebspringFolderPresentationProps } from "./webspringTypes";
+import { folderSplitPhaseMachine, type FolderSplitPhase } from "./folderSplitPhaseMachine";
+import { nextState } from "../Foundation/internal/StateMachine";
+
+const part = (phase: FolderSplitPhase) => nextState(folderSplitPhaseMachine.definition, phase, "part") ?? phase;
 import "./WebspringFolderSplitPresentation.css";
 
 /** How the default split presentation looks and moves. */
@@ -58,7 +62,6 @@ const STAGE_MARGIN = 24;
 /** Marks an icon in a clone as the opened folder's own or as part of the backdrop. */
 const BACKDROP_ATTRIBUTE = "data-webspring-folder-backdrop";
 
-type SplitPhase = "closed" | "open" | "closing";
 
 function resolveOptions(options: WebspringFolderSplitOptions): ResolvedSplitOptions {
   const { underlay = {}, panelHeight = "content", notch = true, edgeShadow = 0.55, duration = 0.42 } = options;
@@ -168,7 +171,7 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
   const bottomHostRef = useRef<HTMLDivElement>(null);
   const tabHostRef = useRef<HTMLDivElement>(null);
   const [stageRect, setStageRect] = useState(() => visibleStageRect(stage));
-  const [phase, setPhase] = useState<SplitPhase>("closed");
+  const [phase, setPhase] = useState<FolderSplitPhase>(folderSplitPhaseMachine.definition.initial);
   const [contentHeight, setContentHeight] = useState(0);
   const closeTimer = useRef(0);
   const closed = useRef(false);
@@ -234,12 +237,12 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
     if (phase !== "closed") return;
     const view = stage.ownerDocument.defaultView;
     if (!view) {
-      setPhase("open");
+      setPhase(part);
       return;
     }
     let second = 0;
     const first = view.requestAnimationFrame(() => {
-      second = view.requestAnimationFrame(() => setPhase((current) => current === "closed" ? "open" : current));
+      second = view.requestAnimationFrame(() => setPhase(part));
     });
     return () => {
       view.cancelAnimationFrame(first);
@@ -263,16 +266,14 @@ function FolderSplit({ folder, stage, anchor, reducedMotion, renderApp, onClose,
 
   const close = useCallback(() => {
     if (closed.current || phase === "closing") return;
-    if (phase !== "open") {
-      finish();
-      return;
-    }
+    const closing = nextState(folderSplitPhaseMachine.definition, phase, "beginClose");
     const view = stage.ownerDocument.defaultView;
-    if (!view) {
+    // A folder that has not parted yet, or has no window to time against, closes at once.
+    if (!closing || !view) {
       finish();
       return;
     }
-    setPhase("closing");
+    setPhase(closing);
     closeTimer.current = view.setTimeout(finish, options.duration * 1000 + 60);
   }, [finish, options.duration, phase, stage]);
 

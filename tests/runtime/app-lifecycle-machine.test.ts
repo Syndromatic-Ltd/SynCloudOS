@@ -7,7 +7,7 @@ import {
   createAppLifecycleRules,
 } from "../../src/SynCloudOS/AppManager/AppLifecycle";
 import type { SynCloudOSAppLifecycleState } from "../../src/SynCloudOS/AppManager/appManagerTypes";
-import { canEnterState } from "../../src/SynCloudOS/Statechart/StateMachine";
+import { canEnterState } from "../../src/Foundation/internal/StateMachine";
 
 type State = SynCloudOSAppLifecycleState;
 const states: State[] = ["registered", "idle", "loading", "ready", "launching", "active", "suspended", "failed", "closed", "disabled"];

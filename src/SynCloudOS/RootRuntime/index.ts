@@ -21,3 +21,5 @@
 /** Runtime-owned presentation seams used by the hosted shell. */
 export { LoginGatePresenter } from "./LoginGatePresenter";
 export type { LoginGatePresenterProps } from "./LoginGatePresenter";
+export { systemStartupPhaseMachine } from "./startupPhaseMachine";
+export type { SystemStartupEvent, SystemStartupPhase } from "./startupPhaseMachine";
