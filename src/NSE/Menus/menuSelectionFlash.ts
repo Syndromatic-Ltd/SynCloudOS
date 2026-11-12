@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { setNSEHook } from "../Theme/contract/hookMirrorDOM";
+
 /** How long a chosen row stays unhighlighted, then highlighted again, before its menu acts and fades. */
 const flashOffMs = 100;
 const flashOnMs = 120;
@@ -42,11 +44,12 @@ export function nseFlashMenuSelection(row: HTMLElement | null | undefined): Prom
   if (!row || !view || typeof view.matchMedia !== "function" || !view.matchMedia("(hover: hover) and (pointer: fine)").matches) {
     return null;
   }
-  row.closest(".nse-overlay-popup")?.setAttribute(nseMenuChosenAttribute, "");
+  const popup = row.closest(".nse-overlay-popup");
+  if (popup) setNSEHook(popup, "menu-chosen", "");
   return new Promise((resolve) => {
-    row.dataset.nseMenuFlash = "off";
+    setNSEHook(row, "menu-flash", "off");
     view.setTimeout(() => {
-      row.dataset.nseMenuFlash = "on";
+      setNSEHook(row, "menu-flash", "on");
       view.setTimeout(resolve, flashOnMs);
     }, flashOffMs);
   });

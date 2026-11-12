@@ -21,6 +21,7 @@
 import { arrow, computePosition, flip, offset, shift, size, platform, type Placement } from "@floating-ui/dom";
 import type { NSELogicalPlacement } from "./overlayTypes";
 import { updateNSEPopoverFrame } from "./popoverFrame";
+import { setNSEHook } from "../Theme/contract/hookMirrorDOM";
 
 type Rect = Readonly<{ x: number; y: number; width: number; height: number }>;
 export interface NSEPopoverPosition {
@@ -86,7 +87,7 @@ export const nsePopoverEdgePlacement = { minX: "inline-start", maxX: "inline-end
 /** Shared arrow coordinates, animation origin and continuous outline. */
 export function applyNSEPopoverPosition(surface: HTMLElement, pointer: HTMLElement | null, position: NSEPopoverPosition): void {
   surface.dataset.placement = position.placement;
-  surface.dataset.nsePlacement = position.placement;
+  setNSEHook(surface, "placement", position.placement);
   const { width, height } = position.bounds;
   const side = position.placement.split("-")[0] as "top" | "bottom" | "left" | "right";
   if (pointer) {

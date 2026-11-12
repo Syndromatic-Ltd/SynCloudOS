@@ -19,6 +19,7 @@
  */
 
 import { GFXColour } from "../../../FX/GraphicsFX/public";
+import { setNSEHook } from "../../Theme/contract/hookMirrorDOM";
 import { classifyEyeDropperError, type NSEEyeDropperAdapter, type NSEEyeDropperResult } from "./NSEEyeDropperAdapter";
 
 interface NativeEyeDropper {
@@ -181,7 +182,7 @@ function pickFromCapture(view: Window, signal: AbortSignal | undefined): Promise
     // The loupe stands in for the pointer, as the system eyedropper's does.
     Object.assign(shield.style, { position: "fixed", inset: "0", zIndex: "2147483647", cursor: "none", outline: "none" });
     const loupe = document.createElement("div");
-    loupe.setAttribute("data-nse-part", "loupe");
+    setNSEHook(loupe, "part", "loupe");
     Object.assign(loupe.style, {
       position: "fixed", width: `${LOUPE_SIZE}px`, height: `${LOUPE_SIZE}px`, borderRadius: "50%", overflow: "hidden", pointerEvents: "none",
       boxShadow: "0 6px 16px rgba(0, 0, 0, 0.32)", visibility: "hidden",
