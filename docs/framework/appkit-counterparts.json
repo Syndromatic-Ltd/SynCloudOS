@@ -21,6 +21,16 @@
     "Metrics",
     "Spec"
   ],
+  "internalDerivedSuffixes": [
+    "Context",
+    "Provider",
+    "Port",
+    "Controller",
+    "Handle",
+    "Internals",
+    "Error"
+  ],
+  "internalCounterparts": {},
   "members": {
     "SCAuthorization.copyRights": "AuthorizationCopyRights",
     "ASAuthorizationController.performRequests": "ASAuthorizationController.performRequests()",

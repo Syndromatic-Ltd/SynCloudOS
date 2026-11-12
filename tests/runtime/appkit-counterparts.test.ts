@@ -3,13 +3,18 @@ import { resolve } from "node:path";
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
 import { appkitCounterpartFor } from "../../scripts/developer-mcp/lookup.mjs";
+import { collectSrcNSEDeclarations, internalAppkitCounterpartFor } from "../../scripts/quality/nse-internal-names.mjs";
 import { synWareSdkEntries } from "../../scripts/synware/sdk-entries.mjs";
 
 interface CounterpartMap {
   readonly members: Readonly<Record<string, string>>;
   readonly derivedSuffixes: readonly string[];
+  readonly internalDerivedSuffixes?: readonly string[];
   readonly counterparts: Readonly<Record<string, string | { readonly none: string; readonly replacement?: string }>>;
+  readonly internalCounterparts?: Readonly<Record<string, string>>;
 }
+
+const APPKIT_COUNTERPART_PATTERN = /^(?:NS|AV|CA|CG|CT|WK|@IB|UndoManager$|OperationQueue$|UserDefaults$|Date$)/u;
 
 const map = JSON.parse(readFileSync(resolve("docs/framework/appkit-counterparts.json"), "utf8")) as CounterpartMap;
 
@@ -53,9 +58,21 @@ describe("NSE names are AppKit names", () => {
 
   it("names a counterpart or a reason for each entry", () => {
     for (const [name, value] of Object.entries(map.counterparts)) {
-      if (typeof value === "string") expect(value, name).toMatch(/^(?:NS|AV|CA|CG|CT|WK|@IB|UndoManager$|OperationQueue$|UserDefaults$|Date$)/u);
+      if (typeof value === "string") expect(value, name).toMatch(APPKIT_COUNTERPART_PATTERN);
       else expect(value.none.length, name).toBeGreaterThan(10);
     }
+  });
+
+  it("every NSE-prefixed declaration in src has an AppKit counterpart", () => {
+    for (const [name, value] of Object.entries(map.internalCounterparts ?? {})) {
+      expect(typeof value, name).toBe("string");
+      expect(value, name).toMatch(APPKIT_COUNTERPART_PATTERN);
+    }
+    const declared = [...new Set(collectSrcNSEDeclarations().map((entry) => entry.name))].sort();
+    expect(declared.length).toBeGreaterThan(1000);
+    const missing = declared.filter((name) => internalAppkitCounterpartFor(name, map) === undefined);
+    // Ceiling pinned at Task 22; Task 23 lowers this per family until missing.length === 0.
+    expect(missing.length).toBeLessThanOrEqual(708);
   });
 
   it("records the NSImage named lookup and both template name constants", () => {
@@ -73,5 +90,6 @@ describe("NSE names are AppKit names", () => {
     expect(appkitCounterpartFor("NSEColourWell", map)).toBe("NSColorWell");
     expect(appkitCounterpartFor("NSETabBarProps", map)).toBeUndefined();
     expect(appkitCounterpartFor("NSEUnknownThing", map)).toBeUndefined();
+    expect(internalAppkitCounterpartFor("NSEColourPanelProvider", map)).toBe("NSColorPanel");
   });
 });
