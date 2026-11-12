@@ -85,6 +85,39 @@ describe("selector performance rewriting", () => {
     }
   });
 
+  it("splits a nested list so each branch can be filed under its own class", () => {
+    // Chrome files `:where(.a)` under .a, but `:where(:is(.a, .b))` under nothing.
+    const original = ".p > :where(:is(.a, .b))::after";
+    const out = selectors(optimiseSelectors(`${original} { color: red }`));
+    expect(out).toEqual([".p>:where(.a)::after", ".p>:where(.b)::after"]);
+    for (const selector of out) expect(weight(selector)).toBe(weight(original));
+  });
+
+  it("keeps the weight of a nested :is() list when it splits", () => {
+    const original = ".p > :is(:is(.a, .b.c)):hover";
+    const out = selectors(optimiseSelectors(`${original} { color: red }`));
+    expect(out).toHaveLength(2);
+    expect(out[1]).toBe(".p>.b.c:hover");
+    for (const selector of out) expect(weight(selector)).toBe(weight(original));
+  });
+
+  it("drops the weight of :is() inside :where(), and of :where() inside :is()", () => {
+    for (const original of [".p > :first-child:where(:is(.a, .b))", ".p > :first-child:is(:where(.a, .b))"]) {
+      const out = selectors(optimiseSelectors(`${original} { color: red }`));
+      expect(out, original).toEqual([".p>:where(.a):first-child", ".p>:where(.b):first-child"]);
+      for (const selector of out) expect(weight(selector)).toBe(weight(original));
+    }
+  });
+
+  it("does not split a nested list whose branches cross a combinator or name the scope", () => {
+    // A branch with a combinator is not a compound, and a branch naming :scope cannot be moved.
+    for (const kept of [".p > :where(:is(.a > .b, .c))", ".p > :where(:is(:scope, .c))"]) {
+      const out = selectors(optimiseSelectors(`${kept} { color: red }`));
+      expect(out, kept).toHaveLength(1);
+      expect(weight(out[0])).toBe(weight(kept));
+    }
+  });
+
   it("leaves almost no contract hook in the Atmo bundle as an attribute selector", () => {
     const resources = resolve(import.meta.dirname, "../../src/Themes/Atmo.scostheme/Contents/Resources");
     let before = 0, after = 0;

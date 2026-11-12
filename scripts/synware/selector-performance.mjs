@@ -13,6 +13,7 @@
  * - `:scope:is(X)` and `:where(:scope):is(X)` become `X:scope` and `X:where(:scope)`.
  * - A rightmost compound with nothing to file it under, holding a multi-argument `:is()` or `:where()`,
  *   is split into one selector per argument; `:is()` branches are padded to the list's specificity.
+ *   A list nested in a single-argument wrapper, `:where(:is(a, b))`, is unwrapped first.
  * - Every compound puts its type, id, class and attribute selectors first.
  * - A contract hook selector, `[data-nse-part="bezel"]`, becomes its mirror class, `.nse\:part\=bezel`:
  *   Chrome files attribute rules by attribute name alone, so every hooked element was tested against every
@@ -131,6 +132,20 @@ function mirrorHooks(selector) {
   return selector;
 }
 
+/**
+ * `:where(:is(L))`, `:is(:where(L))` and `:is(:is(L))` say the same as one list: :where() weighs nothing
+ * whatever it holds, and :is() weighs its heaviest argument. Returns null when `node` is not such a wrapper.
+ */
+function unwrapNestedList(node) {
+  if (!isPseudo(node, "is", "where")) return null;
+  const args = argumentList(node);
+  if (args?.length !== 1) return null;
+  const inner = args[0].children.toArray();
+  if (inner.length !== 1 || !isPseudo(inner[0], "is", "where") || !argumentList(inner[0])) return null;
+  const name = isPseudo(node, "where") || isPseudo(inner[0], "where") ? "where" : "is";
+  return parseSelector(`:${name}(${argumentList(inner[0]).map(generate).join(",")})`).children.first;
+}
+
 /** Rewrites one complex selector (text) into one or more selectors with identical meaning. */
 function rewriteSelector(text) {
   const selector = mirrorHooks(parseSelector(text));
@@ -153,6 +168,9 @@ function rewriteSelector(text) {
   // 2. Rightmost compound with nothing indexable: split a multi-argument :is()/:where().
   const subject = list.at(-1);
   if (!subject.parts.some(node => indexable.has(node.type))) {
+    for (let index = 0; index < subject.parts.length; index++) {
+      for (let flat = unwrapNestedList(subject.parts[index]); flat; flat = unwrapNestedList(flat)) subject.parts[index] = flat;
+    }
     const at = subject.parts.findIndex(node => isPseudo(node, "is", "where") && (argumentList(node)?.length ?? 0) > 1 && argumentList(node).every(arg => compounds(arg).length === 1 && !mentionsScope(arg)));
     if (at >= 0) {
       const args = argumentList(subject.parts[at]);
