@@ -354,11 +354,13 @@ it("the legacy bundle hooks applicationWillClose/DidClose still fire once, throu
 - Modify: `scripts/perf/style-recalc.mjs` (add `performance.mark`-based launch phases read from the `app.launch.*` events), files named by the findings
 - Test: `tests/runtime/launch-does-not-wait-on-style.test.ts`
 
-- [ ] **Step 1:** Add marks at `app.launch.started`, `authorised`, bundle ready, lifecycle committed, window opened, `app.launch.complete`, and first frame after complete. Record the phase table for About, Journal and the gallery (cold and warm) in `docs/superpowers/evidence/2026-11-11-performance/launch.md`.
-- [ ] **Step 2:** In a trace of a cold launch, find the `UpdateLayoutTree` that follows the app's stylesheet insertion and record its element count. If it re-matches the whole document, fix at the source: the Vite plugin emits app CSS so that insertion cannot change rules outside the app's subtree (the app's sheet is already scoped; confirm the `@layer` statement order is declared once up front in `src/NSE/Structure/layers.css` so a late sheet does not reorder layers). Write the test first: a jsdom-free unit test on the plugin's emitted CSS that asserts every app rule is inside the app's `@scope` and declares no new top-level `@layer` name.
-- [ ] **Step 3:** Prefetch on intent: `src/Webspring/webspringPrefetch.ts` exists. Verify with the trace that hovering or focusing an icon starts the bundle and CSS fetch; if it only fetches JS, extend it to the CSS chunk. Test in `tests/runtime/webspring-prefetch.test.ts`.
-- [ ] **Step 4:** Re-measure; check the table above; save `launch-after.json`.
-- [ ] **Step 5:** Commit per fix: `Launch: <what no longer waits>`.
+**Outcome (12 November 2026, `3de36cac`):** see `docs/superpowers/evidence/2026-11-11-performance/launch.md`. The timeline is `scripts/perf/launch-timeline.mjs` (a separate script, reading the runtime's events from the page, so no marks were added to the framework). Nothing waits on a theme; stylesheet insertion re-matches at most 91 elements, so Step 2 needed no fix and `launch-does-not-wait-on-style.test.ts` was not written; the prefetch already brings CSS with the bundle. The one code change is the safe-area read memo, which did not move launch time.
+
+- [x] **Step 1:** Add marks at `app.launch.started`, `authorised`, bundle ready, lifecycle committed, window opened, `app.launch.complete`, and first frame after complete. Record the phase table for About, Journal and the gallery (cold and warm) in `docs/superpowers/evidence/2026-11-11-performance/launch.md`.
+- [x] **Step 2:** In a trace of a cold launch, find the `UpdateLayoutTree` that follows the app's stylesheet insertion and record its element count. If it re-matches the whole document, fix at the source: the Vite plugin emits app CSS so that insertion cannot change rules outside the app's subtree (the app's sheet is already scoped; confirm the `@layer` statement order is declared once up front in `src/NSE/Structure/layers.css` so a late sheet does not reorder layers). Write the test first: a jsdom-free unit test on the plugin's emitted CSS that asserts every app rule is inside the app's `@scope` and declares no new top-level `@layer` name.
+- [x] **Step 3:** Prefetch on intent: `src/Webspring/webspringPrefetch.ts` exists. Verify with the trace that hovering or focusing an icon starts the bundle and CSS fetch; if it only fetches JS, extend it to the CSS chunk. Test in `tests/runtime/webspring-prefetch.test.ts`.
+- [x] **Step 4:** Re-measure; check the table above; save `launch-after.json`.
+- [x] **Step 5:** Commit per fix: `Launch: <what no longer waits>`.
 
 ---
 
@@ -634,4 +636,4 @@ Add one line per stop: date, last commit, next unchecked box, anything a success
   - Task 4 missed two targets, carried into Task 5: cold gallery style 571 ms (target ≤ 480) and launch About style 74.5 ms (target ≤ 60). Gallery full recalc (53 ms) and section mean (87 ms) are met; the digest shows 0 differences.
   - Do not edit framework source while the baseline spec runs: Vite reloads the page and the step fails with "Execution context was destroyed". Baseline with theme-nesting is 177 tests over three projects.
   - Shell heredocs in this environment halve backslashes; write files that contain `\:` with the Write tool.
-- 2026-11-12: Tasks 5, 6 and 10 done at `30752974`. Next: Task 11. The site worktree's experimental vendoring is now of `30752974`. Packed-SDK tests fail with "SDK source changed" after any source edit until `npm run sdk:build` is rerun; that is not a regression.
+- 2026-11-12: Tasks 5, 6, 10 and 11 done at `3de36cac`. Next: Task 12. The site worktree's experimental vendoring is now of `3de36cac`. Packed-SDK tests fail with "SDK source changed" after any source edit until `npm run sdk:build` is rerun; that is not a regression.
