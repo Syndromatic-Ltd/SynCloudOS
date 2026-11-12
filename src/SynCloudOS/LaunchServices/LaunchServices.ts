@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { sendWebspringLaunchPhase } from "../WebspringState/launchPhaseMachine";
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import { getCanonicalExternalHref } from "../Routing/routeNormalization";
 import { WEBSPRING_PRESENTATION_ROLES } from "../WebspringState/webspringPresentation";
@@ -868,7 +869,7 @@ function reconcileAbandonedHotLaunch(request: SynCloudOSLaunchRequestDetails | n
     if (normalizeBundleIdentifier(draft.application.launchingAppId) === normalizeBundleIdentifier(request.appId)) draft.application.launchingAppId = null;
     if (normalizeBundleIdentifier(draft.webspring.launchingAppId) === normalizeBundleIdentifier(request.appId)) {
       draft.webspring.launchingAppId = null;
-      draft.webspring.launchPhase = "idle";
+      sendWebspringLaunchPhase(draft, "reset");
       draft.webspring.isAnimating = false;
     }
   });
