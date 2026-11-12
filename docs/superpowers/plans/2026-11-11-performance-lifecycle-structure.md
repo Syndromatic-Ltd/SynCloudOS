@@ -252,14 +252,16 @@ it("mirrors hooks spread from nseControlHooks and nsePartHooks", …);
 
 **Finding:** hover, focus and highlight are React state, so each pointer crossing re-renders the control. The attributes are drawing state only; nothing reads the booleans for behaviour except `highlighted && enabled`.
 
+**Outcome (12 November 2026, `30752974`):** the finding above was wrong about where the cost was. The whole host re-rendered on every pointer move because the runtime store published same-value writes (evidence README, "Pointer movement re-rendered the whole host"). Fixing the store took the sweep's script time from 3,132 ms to 39 ms, so Steps 1 to 3 below were not carried out; Steps 4 and 5 were met by the store commit. Test: `tests/runtime/runtime-store-performance.test.ts`.
+
 **Interfaces:**
 - `useNSEThemeInteraction` keeps its signature and return shape for callers that read the booleans; add an internal option `{ publish: "attributes" }` under which it writes `data-nse-hovered`, `data-nse-focused` and `data-nse-highlighted` with `setNSEHook` on the event's `currentTarget` and holds no state. Convert each caller that only spreads the booleans into `nseStateHooks`.
 
 - [ ] **Step 1:** Failing test: render an `NSEButton` with a render counter; hover, focus, press and release; assert the three attributes appear and disappear and the render count does not change.
 - [ ] **Step 2:** Run. Expected: FAIL (render count rises).
 - [ ] **Step 3:** Implement; convert callers one family per commit if the diff is large (buttons, values, text, selection).
-- [ ] **Step 4:** Focused tests, the rendered-contract suite, baseline (hover, focus and press surfaces are in the catalogue), and the harness `gallery-hover-sweep`. Target: script time during the sweep falls by at least 50% against Task 1's figure.
-- [ ] **Step 5:** Commit: `NSE: publish hover, focus and highlight without re-rendering the control`.
+- [x] **Step 4:** Focused tests, the rendered-contract suite, baseline (hover, focus and press surfaces are in the catalogue), and the harness `gallery-hover-sweep`. Target: script time during the sweep falls by at least 50% against Task 1's figure.
+- [x] **Step 5:** Commit: `NSE: publish hover, focus and highlight without re-rendering the control`.
 
 ---
 
@@ -374,7 +376,7 @@ it("the legacy bundle hooks applicationWillClose/DidClose still fire once, throu
 | 4 | Launch request (`queued` → `started` → `authorised` → `loading` → `ready` → `complete` / `failed` / `cancelled`) | `LaunchServices.ts` `recordRequestHistory(...)` strings, `activeLaunchRequest`, `launchAuthorityIsCurrent` checked six times in `runLaunch` | History strings are the only record of the state |
 | 5 | Folder split presentation (`closed`, `open`, `closing`) | `src/Webspring/WebspringFolderSplitPresentation.tsx:61` | `SplitPhase` set from effects |
 | 6 | System startup (`booting`, `material`, `complete`) | `RootRuntime/RootRuntimeManager.ts:36` and `Webspring/SystemStartupLayer.tsx:26` | The same union declared twice |
-| 7 | Control interaction (hover, focus, highlight) | `useThemeInteraction.ts` | Three booleans; removed as state by Task 6, so it needs no machine |
+| 7 | Control interaction (hover, focus, highlight) | `useThemeInteraction.ts` | Three independent booleans, kept as React state (see Task 6 outcome); any combination is legal, so there is no machine to define |
 | 8 | Worker request protocols (pending → posted → settled / cancelled) ×4 | `BrowserImageProcessingWorker.ts`, `VideoWorkerTransport.ts`, `BrowserPDFDocumentWorker.ts`, `WorkerLuminaIndexBackend.ts` | Request-id maps plus cancel messages; deleted by Workstream E's adoption, so not converted here |
 | 9 | Page turn (`idle`, `dragging`, `turning`, `settling`, `canceling`, `torn`, `reduced`) | `src/NSE/Page/` (`NSEPagePhase`) | Phase written from pointer handlers |
 | 10 | Drag session (`dragging`, `over-destination`, `dropping`, `completed`, `cancelled`) | `src/SynCloudOS/Drag/` (`DragPhase`) | Phase written from several handlers |
@@ -632,3 +634,4 @@ Add one line per stop: date, last commit, next unchecked box, anything a success
   - Task 4 missed two targets, carried into Task 5: cold gallery style 571 ms (target ≤ 480) and launch About style 74.5 ms (target ≤ 60). Gallery full recalc (53 ms) and section mean (87 ms) are met; the digest shows 0 differences.
   - Do not edit framework source while the baseline spec runs: Vite reloads the page and the step fails with "Execution context was destroyed". Baseline with theme-nesting is 177 tests over three projects.
   - Shell heredocs in this environment halve backslashes; write files that contain `\:` with the Write tool.
+- 2026-11-12: Tasks 5, 6 and 10 done at `30752974`. Next: Task 11. The site worktree's experimental vendoring is now of `30752974`. Packed-SDK tests fail with "SDK source changed" after any source edit until `npm run sdk:build` is rerun; that is not a regression.
