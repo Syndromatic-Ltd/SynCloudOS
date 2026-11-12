@@ -238,11 +238,11 @@ it("mirrors hooks spread from nseControlHooks and nsePartHooks", …);
 
 **Files:** decided by the profile; expected `scripts/synware/theme-loading.mjs`, `scripts/synware/selector-performance.mjs`.
 
-- [ ] **Step 1:** With Task 4 in place, capture a Chromium trace of `gallery-full-recalc` with `blink.debug` selector statistics (`--enable-blink-features=…` is not needed; use DevTools "Selector stats" via CDP `Tracing` category `disabled-by-default-blink.debug`) and list the 30 costliest selectors by elapsed time and by match-attempt count. Save as `selector-stats.json`.
-- [ ] **Step 2:** Apply only rewrites that are provably equivalent, each with a unit test in `selector-performance.test.ts` and the specificity guard: (a) drop the duplicate twin when `:scope X` and `X:scope` can both be expressed as one rule after mirroring; (b) hoist a leading class out of `:where(.a …)` ancestor arguments so the Bloom filter sees it; (c) anything else the stats name, one rewrite per commit if they are independent.
-- [ ] **Step 3:** Re-run harness, digest (0 differences) and baseline (123/123). Target: gallery full recalc ≤ 45 ms. Record CSS byte size before and after.
-- [ ] **Step 4:** If the target is not met, stop here: write the profile and the remaining top selectors into `docs/superpowers/evidence/2026-11-11-performance/README.md` and report to the owner. Do not regenerate Atmo's rules.
-- [ ] **Step 5:** Commit: `Style performance: <the specific rewrite>`.
+- [x] **Step 1:** With Task 4 in place, capture a Chromium trace of `gallery-full-recalc` with `blink.debug` selector statistics (`--enable-blink-features=…` is not needed; use DevTools "Selector stats" via CDP `Tracing` category `disabled-by-default-blink.debug`) and list the 30 costliest selectors by elapsed time and by match-attempt count. Save as `selector-stats.json`.
+- [x] **Step 2:** Apply only rewrites that are provably equivalent, each with a unit test in `selector-performance.test.ts` and the specificity guard: (a) drop the duplicate twin when `:scope X` and `X:scope` can both be expressed as one rule after mirroring; (b) hoist a leading class out of `:where(.a …)` ancestor arguments so the Bloom filter sees it; (c) anything else the stats name, one rewrite per commit if they are independent.
+- [x] **Step 3:** Re-run harness, digest (0 differences) and baseline (123/123). Target: gallery full recalc ≤ 45 ms. Record CSS byte size before and after.
+- [x] **Step 4:** If the target is not met, stop here: write the profile and the remaining top selectors into `docs/superpowers/evidence/2026-11-11-performance/README.md` and report to the owner. Do not regenerate Atmo's rules.
+- [x] **Step 5:** Commit: `Style performance: <the specific rewrite>`.
 
 ### Task 6: Interaction state without re-rendering
 
@@ -311,7 +311,7 @@ it("a resumed (suspended) application is not told it finished launching again", 
 - `closeApp(appId)` becomes: cancel pending launches → `Lifecycle.close(appId, { reason: "LaunchServices.closeApp", closeTransaction })`, where the transaction carries the window-close preparation and authority the function builds today (`Lifecycle.close` already closes the application's windows in its `will` phase after `close:will` and calls `WindowManager.commitCloseApplication` at commit). Returns the same `closeResult` shape. Read `closeApplicationWindows` and `commitCloseApplication` in `Lifecycle.ts:721–830` before writing; the mechanism exists and `closeApp` simply does not use it.
 - No replacement methods are added to `AppManager`. Any other caller of the three removed methods is moved to `runtime.lifecycle` in this commit.
 
-- [ ] **Step 1: Write the failing tests:**
+- [x] **Step 1: Write the failing tests:**
 
 ```ts
 it("MultiSwitch tells the outgoing application it will resign active", …);          // applicationWillResignActive called once
@@ -322,10 +322,10 @@ it("quit during an in-flight launch cancels it and never calls applicationWillTe
 it("the legacy bundle hooks applicationWillClose/DidClose still fire once, through the lifecycle", …);
 ```
 
-- [ ] **Step 2:** Run. Expected: FAIL (callbacks never called).
-- [ ] **Step 3:** Implement.
-- [ ] **Step 4:** Focused tests, `npx vitest run tests/runtime tests/integration -t "close|quit|suspend|MultiSwitch"`, typecheck, boundaries.
-- [ ] **Step 5:** Commit: `Lifecycle: suspend and quit through the class-aware operations`.
+- [x] **Step 2:** Run. Expected: FAIL (callbacks never called).
+- [x] **Step 3:** Implement.
+- [x] **Step 4:** Focused tests, `npx vitest run tests/runtime tests/integration -t "close|quit|suspend|MultiSwitch"`, typecheck, boundaries.
+- [x] **Step 5:** Commit: `Lifecycle: suspend and quit through the class-aware operations`.
 
 ---
 
