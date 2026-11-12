@@ -20,6 +20,7 @@
 
 import { sendWebspringLaunchPhase } from "../WebspringState/launchPhaseMachine";
 import { beginMultiSwitchSettlement, type MultiSwitchSettlement } from "./multiSwitchSettlement";
+import { advanceLaunchRequest, isLaunchRequestStep } from "./launchRequestMachine";
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import { getCanonicalExternalHref } from "../Routing/routeNormalization";
 import { WEBSPRING_PRESENTATION_ROLES } from "../WebspringState/webspringPresentation";
@@ -570,6 +571,9 @@ function recordLaunchHistory(
 }
 
 function recordRequestHistory(action: SynCloudOSLaunchHistoryAction, request: SynCloudOSLaunchRequestDetails, notes: string[] = [], code?: string) {
+  // The record is kept either way; a step the table does not allow is marked rather than dropped.
+  const step = isLaunchRequestStep(action) ? advanceLaunchRequest(request, action) : null;
+  if (step && !step.legal) notes = [...notes, `Out of order: "${action}" after "${step.previous}".`];
   return recordLaunchHistory(action, {
     appId: request.appId,
     packageName: request.app.packageName,
