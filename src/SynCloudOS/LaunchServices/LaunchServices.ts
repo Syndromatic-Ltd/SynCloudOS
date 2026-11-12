@@ -19,6 +19,7 @@
  */
 
 import { sendWebspringLaunchPhase } from "../WebspringState/launchPhaseMachine";
+import { beginMultiSwitchSettlement, type MultiSwitchSettlement } from "./multiSwitchSettlement";
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import { getCanonicalExternalHref } from "../Routing/routeNormalization";
 import { WEBSPRING_PRESENTATION_ROLES } from "../WebspringState/webspringPresentation";
@@ -149,12 +150,7 @@ const launchHistoryLimit = 140;
 const launchAttempts = new Map<string, number>(launchServicesHotData?.launchAttempts ?? []);
 let deferredAuthorisationWatcherArmed = false;
 let launchServicesDisposed = false;
-type MultiSwitchFallback = {
-  firstFrame: unknown | null;
-  presentationFrame: unknown | null;
-  settleTimer: unknown | null;
-};
-const multiSwitchFallbackTimers = new Map<string, MultiSwitchFallback>();
+const multiSwitchSettlements = new Map<string, MultiSwitchSettlement>();
 const launchStageFallbackTimers = new Map<string, unknown>();
 const launchCoverFallbackTimers = new Map<string, unknown>();
 
@@ -301,48 +297,26 @@ function settleMultiSwitch(
 }
 
 function clearMultiSwitchFallback(switchId: string) {
-  const pending = multiSwitchFallbackTimers.get(switchId);
-  if (!pending) return;
-  if (pending.firstFrame !== null) runtime.environment.cancelAnimationFrame(pending.firstFrame);
-  if (pending.presentationFrame !== null) runtime.environment.cancelAnimationFrame(pending.presentationFrame);
-  if (pending.settleTimer !== null) runtime.environment.clearTimeout(pending.settleTimer);
-  multiSwitchFallbackTimers.delete(switchId);
+  multiSwitchSettlements.get(switchId)?.cancel();
+  multiSwitchSettlements.delete(switchId);
 }
 
 function finishMultiSwitchLater(switchId: string, switchDetails: RouteAwareMultiSwitch) {
   clearMultiSwitchFallback(switchId);
-  const pending: MultiSwitchFallback = { firstFrame: null, presentationFrame: null, settleTimer: null };
-  multiSwitchFallbackTimers.set(switchId, pending);
-  const stillSwitching = () => {
-    const current = RuntimeStore.getSnapshot().application.multiSwitch;
-    return current.id === switchId && current.status === "switching";
-  };
-  const armSettleTimer = () => {
-    if (multiSwitchFallbackTimers.get(switchId) !== pending || !stillSwitching()) {
-      clearMultiSwitchFallback(switchId);
-      return;
-    }
-    pending.settleTimer = runtime.environment.setTimeout(() => {
-      if (multiSwitchFallbackTimers.get(switchId) !== pending) return;
-      pending.settleTimer = null;
-      settleMultiSwitch(switchId, switchDetails, "fallback");
-    }, choreographyTimings.multiSwitchSettleFallbackMs);
-  };
-  // Direct public LaunchServices calls use the same visual contract as route
-  // launches: first let the mounted stage reach a paint opportunity, then
-  // begin the bounded liveness watchdog.
-  pending.firstFrame = runtime.environment.requestAnimationFrame(() => {
-    pending.firstFrame = null;
-    if (multiSwitchFallbackTimers.get(switchId) !== pending || !stillSwitching()) {
-      clearMultiSwitchFallback(switchId);
-      return;
-    }
-    pending.presentationFrame = runtime.environment.requestAnimationFrame(() => {
-      pending.presentationFrame = null;
-      armSettleTimer();
-    });
+  // Direct public LaunchServices calls use the same visual contract as route launches:
+  // let the mounted stage reach a paint opportunity, then begin the bounded liveness watchdog.
+  const settlement = beginMultiSwitchSettlement({
+    clock: runtime.environment,
+    settleAfterMs: choreographyTimings.multiSwitchSettleFallbackMs,
+    stillSwitching: () => {
+      const current = RuntimeStore.getSnapshot().application.multiSwitch;
+      return multiSwitchSettlements.get(switchId) === settlement && current.id === switchId && current.status === "switching";
+    },
+    onTimedOut: () => { settleMultiSwitch(switchId, switchDetails, "fallback"); },
   });
+  multiSwitchSettlements.set(switchId, settlement);
 }
+
 function completeLaunchCoverTransition(
   launchTransitionId: string,
   appId: string | null | undefined,
@@ -1678,7 +1652,7 @@ const launchServices = {
 
   dispose() {
     launchServicesDisposed = true;
-    for (const switchId of [...multiSwitchFallbackTimers.keys()]) clearMultiSwitchFallback(switchId);
+    for (const switchId of [...multiSwitchSettlements.keys()]) clearMultiSwitchFallback(switchId);
     clearAllLaunchTimers();
     unsubscribeWebspringReturn();
     queuedLaunches.splice(0, queuedLaunches.length);
