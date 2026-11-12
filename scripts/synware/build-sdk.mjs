@@ -396,7 +396,14 @@ async function main() {
     .replace("../../src/SynCloudOS/AppSDK/fx/fxAppModuleSource.mjs", "./fx-app-module-source.mjs")
     .replace("../../src/SynCloudOS/AppSDK/fx/runtime.ts", "./fx-attribution-runtime.js")
     .replace("../../src/SynCloudOS/AppSDK/manifest/synappManifestValidator.generated.mjs", "./manifest-validator.mjs")
-    .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs"));
+    .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs")
+    .replace("./dispatch/closureConversion.mjs", "./dispatch-closure-conversion.mjs")
+    .replace("../../src/FX/DispatchFX/internal/workerSafeEntries.json", "./dispatch-worker-safe-entries.json"));
+  writeFileSync(resolve(directory, "dispatch-closure-conversion.mjs"), readFileSync(resolve(repositoryRoot, "scripts/synware/dispatch/closureConversion.mjs"), "utf8")
+    .replace("./workerGlobals.mjs", "./dispatch-worker-globals.mjs")
+    .replace("../../../src/FX/DispatchFX/internal/workerSafeEntries.json", "./dispatch-worker-safe-entries.json"));
+  cpSync(resolve(repositoryRoot, "scripts/synware/dispatch/workerGlobals.mjs"), resolve(directory, "dispatch-worker-globals.mjs"));
+  cpSync(resolve(repositoryRoot, "src/FX/DispatchFX/internal/workerSafeEntries.json"), resolve(directory, "dispatch-worker-safe-entries.json"));
   for (const file of ["theme-bundles.mjs","theme-loading.mjs","selector-performance.mjs","hook-mirror-jsx.mjs","built-in-theme-css.mjs","bundle-paths.mjs","project-derivation.mjs","manifest-source.mjs","application-toolchain.mjs","decorators.mjs","hot-applications.mjs","pwa-plugin.mjs"]) {
     writeFileSync(resolve(directory, file), readFileSync(resolve(repositoryRoot, "scripts/synware", file), "utf8")
       .replace("../../src/SynCloudOS/Identity/bundleIdentifier.mjs", "./bundleIdentifier.mjs")
