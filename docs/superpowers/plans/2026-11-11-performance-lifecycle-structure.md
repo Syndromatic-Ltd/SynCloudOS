@@ -43,24 +43,28 @@
 
 Every slice runs typecheck and its focused tests. Any slice that touches CSS, a rendered attribute, a class name or a component's DOM also runs baseline. The full suite, packaging and boundaries run at the end of each workstream and in Task 28.
 
-## Measurements taken while planning (the "before")
+## Measurements (the "before")
 
-Taken on 11 November 2026 on the owner's machine against the site dev server (5387, vendoring `90e7fbf9`), headless Chromium 1440×900, signed in with the local test account. "Style" is the sum of `UpdateLayoutTree` trace events; "full recalc" forces every element to re-match (toggle an attribute on `<html>` that a `[attr] *` rule depends on, read a computed style; median of 9).
+Recorded on 11 November 2026 by `scripts/perf/style-recalc.mjs` (Task 1) against the site dev server (5387, vendoring `90e7fbf9`), headless Chromium 1440×900, signed in with the local test account, median of 5 passes; the file is `docs/superpowers/evidence/2026-11-11-performance/baseline.json`. "Style" is the sum of `UpdateLayoutTree` trace events; "full recalc" forces every element to re-match (toggle an attribute on `<html>` that a `[attr] *` rule depends on, read a computed style; median of 9).
 
-| Scenario | Elements | Style total | Largest single recalc |
-| --- | --- | --- | --- |
-| Cold load `/` (login board) | 208 | 80 ms | 16 ms |
-| Launch About from the board | 319 | 259 ms in 157 recalcs | 51 ms |
-| Cold load `/__syncloudos/nse-gallery` | 982 | 3,807 ms in 204 recalcs | 426 ms |
-| Gallery section change → Tables & Trees | 1,223 | 928 ms | 169 ms |
-| Gallery section change → Buttons | 1,223 | 900 ms | 286 ms |
-| Gallery section change → Menus & Popups | 1,463 | 397 ms | 174 ms |
-| Gallery forced full recalc | 982 | **400–418 ms** | n/a |
-| About forced full recalc | 319 | 38 ms | n/a |
+| Scenario | Elements | Style total | Largest single recalc | Longest task |
+| --- | --- | --- | --- | --- |
+| Cold load `/` (login board) | 208 | 77 ms | 15 ms | 206 ms |
+| Launch About from the board | 319 | 168 ms in 200 recalcs | 28 ms | 71 ms |
+| QuickSwitch open | 367 | 22 ms | 8 ms | 63 ms |
+| QuickSwitch select | 319 | 21 ms | 3 ms | 51 ms |
+| Return to Webspring | 177 | 48 ms | 17 ms | 95 ms |
+| Cold load `/__syncloudos/nse-gallery` | 985 | 1,905 ms in 215 recalcs | 217 ms | 369 ms |
+| Gallery section change → Tables & Trees | 1,223 | 446 ms | 71 ms | 648 ms |
+| Gallery section change → Buttons | 1,223 | 436 ms | 147 ms | 549 ms |
+| Gallery section change → Menus & Popups | 1,463 | 188 ms | 84 ms | 367 ms |
+| Gallery hover sweep (82 pointer moves) | 982 | 266 ms | 8 ms | 107 ms (3,032 ms of script) |
+| Gallery forced full recalc | 985 | **193 ms** | n/a | n/a |
+| About forced full recalc | 319 | 21 ms | n/a | n/a |
 
-The owner's own figures for the same build are 182 ms (gallery full recalc) and 435 ms (section change); this harness reads roughly twice as high, so targets below are stated on this harness and as ratios.
+These agree with the owner's figures for the same build (182 ms full recalc, 435 ms section change). The first numbers taken while planning read twice as high because a stray headless browser from an experiment was holding the CPU; they are not used.
 
-**Design experiment (planning, not committed).** In the live gallery page, every `[data-nse-<name>]` and `[data-nse-<name>="<value>"]` selector in the served stylesheets (207,006 occurrences) was rewritten to a class selector and each element given matching classes (1,661 mirrored attributes). Gallery forced full recalc fell from **400 ms to 84 ms**. Mirroring only `control` and `part` gave 105 ms. This confirms the owner's experiment (182 → about 45 ms on their measurement) and fixes the design of Workstream A.
+**Design experiment (planning, not committed).** In the live gallery page, every `[data-nse-<name>]` and `[data-nse-<name>="<value>"]` selector in the served stylesheets (207,006 occurrences) was rewritten to a class selector and each element given matching classes (1,661 mirrored attributes). Under the same CPU contention, gallery forced full recalc fell from 400 ms to 84 ms (to 21%); mirroring only `control` and `part` reached 26%. This agrees with the owner's experiment (182 → about 45 ms) and fixes the design of Workstream A. The mirrored vocabulary covers 51,026 of the 51,076 hook selectors in the Atmo, structure and appearance sources; the other 50 use `menu-variant`, `theme-authority`, `nine-slice`, `overlay-kind` and `chrome-active`.
 
 ## Owner decisions needed
 
@@ -117,14 +121,14 @@ Measured with `scripts/perf/style-recalc.mjs` on the site dev server, median of 
 
 | Metric | Before | Target |
 | --- | --- | --- |
-| Gallery forced full recalc | 400 ms | **≤ 100 ms** after Task 4; **≤ 60 ms** after Task 5 |
-| Gallery section change, style total (mean of the three sections) | 742 ms | **≤ 185 ms** (≤ 25%) |
-| Gallery cold load, style total | 3,807 ms | **≤ 950 ms** (≤ 25%) |
-| Launch About, style total | 259 ms | **≤ 90 ms** |
+| Gallery forced full recalc | 193 ms | **≤ 55 ms** after Task 4; **≤ 45 ms** after Task 5 |
+| Gallery section change, style total (mean of the three sections) | 357 ms | **≤ 90 ms** (≤ 25%) |
+| Gallery cold load, style total | 1,905 ms | **≤ 480 ms** (≤ 25%) |
+| Launch About, style total | 168 ms | **≤ 60 ms** |
 | Computed styles, 2,946 gallery element and pseudo-element styles, before vs after | n/a | **0 differences** |
 | Frozen baseline | 123/123 | **123/123**, 0 pixels |
 
-The ≤ 60 ms line corresponds to the owner's "about 45 ms" on a harness that reads half as high. If Task 5 cannot reach it without regenerating Atmo's rules, stop, record the profile, and report: regenerating 12,000 rules is a separate job that needs the owner's go-ahead.
+The ≤ 45 ms line is the owner's experiment figure. If Task 5 cannot reach it without regenerating Atmo's rules, stop, record the profile, and report: regenerating 12,000 rules is a separate job that needs the owner's go-ahead.
 
 ---
 
@@ -138,21 +142,21 @@ The ≤ 60 ms line corresponds to the owner's "about 45 ms" on a harness that re
 - Produces: `node scripts/perf/style-recalc.mjs --base <url> [--runs 5] [--json <file>]` printing one JSON object per scenario: `{ label, elements, styleMs, styleCount, maxStyleMs, parseCssMs, layoutMs, longestTaskMs, tasksOver50, fullRecalcMs? }`. Scenarios, in order: `cold-load-board`, `launch-about`, `quickswitch-open`, `quickswitch-select`, `return-to-webspring`, `cold-load-gallery`, `gallery-section:Tables & Trees`, `gallery-section:Buttons`, `gallery-section:Menus & Popups`, `gallery-full-recalc`, `gallery-hover-sweep` (move the pointer across the visible toolbar and sidebar in 40 steps).
 - Produces: `node scripts/perf/computed-style-digest.mjs --base <url> --out <file>` writing an FNV-1a hash per element and per `::before`/`::after` of every computed property, for the gallery route after each of the three section changes; `--compare <a> <b>` prints the count of differing entries and exits 1 when it is not 0.
 
-- [ ] **Step 1:** Write `style-recalc.mjs`. Playwright Chromium, viewport 1440×900, one browser context. Sign in with the page's own "Sign in locally …" button (a local test account on the owner's own dev server; no credentials are typed). Trace with CDP `Tracing.start`, categories `devtools.timeline`, `toplevel`, `blink.user_timing`; sum `UpdateLayoutTree`, `ParseAuthorStyleSheet`, `Layout`; longest task from `RunTask`. Forced full recalc: append `<style>[data-perf-probe] * { --perf-probe: 1 }</style>`, toggle `data-perf-probe` on `<html>`, time `getComputedStyle(document.body).color; document.body.offsetWidth`, median of 9. Reference implementations from planning are in the session scratchpad (`scenarios.mjs`, `mirror2.mjs`); they are not in the repository, so write these from this description.
-- [ ] **Step 2:** Write `computed-style-digest.mjs`. Return hashes, not strings: returning 2,946 full style strings over CDP takes minutes.
-- [ ] **Step 3:** Run both against 5387 at the current framework commit, five runs. Save `baseline.json` and the digest as `baseline-digest.json`. Record in `README.md`: machine, Chromium version, the commit, and whether the dev server's own (non-SDK) stylesheets pass through `selectorPerformance()` (inspect one served app stylesheet for an unsplit `:scope:is(` twin).
-- [ ] **Step 4:** Commit: `Perf: add the style-recalc harness and record baselines`.
+- [x] **Step 1:** Write `style-recalc.mjs`. Playwright Chromium, viewport 1440×900, one browser context. Sign in with the page's own "Sign in locally …" button (a local test account on the owner's own dev server; no credentials are typed). Trace with CDP `Tracing.start`, categories `devtools.timeline`, `toplevel`, `blink.user_timing`; sum `UpdateLayoutTree`, `ParseAuthorStyleSheet`, `Layout`; longest task from `RunTask`. Forced full recalc: append `<style>[data-perf-probe] * { --perf-probe: 1 }</style>`, toggle `data-perf-probe` on `<html>`, time `getComputedStyle(document.body).color; document.body.offsetWidth`, median of 9. Reference implementations from planning are in the session scratchpad (`scenarios.mjs`, `mirror2.mjs`); they are not in the repository, so write these from this description.
+- [x] **Step 2:** Write `computed-style-digest.mjs`. Return hashes, not strings: returning 2,946 full style strings over CDP takes minutes.
+- [x] **Step 3:** Run both against 5387 at the current framework commit, five runs. Save `baseline.json` and the digest as `baseline-digest.json`. Record in `README.md`: machine, Chromium version, the commit, and whether the dev server's own (non-SDK) stylesheets pass through `selectorPerformance()` (inspect one served app stylesheet for an unsplit `:scope:is(` twin).
+- [x] **Step 4:** Commit: `Perf: add the style-recalc harness and record baselines`.
 
 ### Task 2: Selector rewrite to mirror classes
 
 **Files:**
-- Create: `scripts/synware/hook-mirror.mjs`
+- Create: `src/NSE/Theme/contract/hookMirror.mjs` and `hookMirror.d.mts` (shared by the build scripts and the browser, shipped beside the plugin as `bundleIdentifier.mjs` is)
 - Modify: `scripts/synware/selector-performance.mjs`
 - Modify: `scripts/synware/build-theme-contract.mjs` (emit the mirrored-name list into `tooling/nse-appearance-contract.json`)
 - Test: `tests/runtime/selector-performance.test.ts`, `tests/runtime/hook-mirror.test.ts`
 
 **Interfaces:**
-- Produces (`hook-mirror.mjs`, plain ESM, no dependencies, importable from Node and from the browser bundle):
+- Produces (`hookMirror.mjs`, plain ESM, no dependencies, importable from Node and from the browser bundle):
   - `mirroredHookNames: ReadonlySet<string>` (names without the `data-nse-` prefix);
   - `isMirrorValue(value: string): boolean` (non-empty, no `\s`);
   - `mirrorTokens(name: string, value: string): readonly string[]` → `["nse:<name>"]` or `["nse:<name>", "nse:<name>=<value>"]`;
@@ -179,14 +183,14 @@ expect(mirrorTokens("key-equivalent", "\r")).toEqual(["nse:key-equivalent"]);
   Add one test that runs `optimiseSelectors` over the whole built Atmo stylesheet and asserts no throw (the specificity guard) and that fewer than 1% of `[data-nse-control` / `[data-nse-part` occurrences remain.
 - [ ] **Step 2:** Run `npx vitest run tests/runtime/hook-mirror.test.ts tests/runtime/selector-performance.test.ts`. Expected: FAIL (module missing).
 - [ ] **Step 3:** Implement `hook-mirror.mjs` and the rewrite. `rank()` already treats `ClassSelector` as rank 1, so rewritten selectors sort first without further change.
-- [ ] **Step 4:** Run the two test files and typecheck. Expected: PASS. Do **not** run the baseline yet: the DOM has no mirror classes until Task 3, so this commit alone would draw nothing. Tasks 2–4 land as three commits but only Task 4's commit is a releasable state; say so in each commit body.
+- [ ] **Step 4:** Run the two test files and typecheck. Expected: PASS. **Commit order:** the runtime mirror (Task 3) and the observer and helper (Task 4, steps 1–3) are committed first, because classes without rewritten CSS are harmless while rewritten CSS without classes draws nothing; this task's rewrite is committed after them, so every commit draws correctly.
 - [ ] **Step 5:** Commit: `Style performance: rewrite contract attribute selectors to mirror classes`.
 
 ### Task 3: Synchronous mirror in the JSX runtime
 
 **Files:**
-- Create: `src/NSE/Theme/contract/jsx-runtime.ts`, `src/NSE/Theme/contract/jsx-dev-runtime.ts`, `src/NSE/Theme/contract/hookMirror.ts` (typed re-export of `scripts/synware/hook-mirror.mjs`, following how `bundleIdentifier.mjs` is shared)
-- Modify: `scripts/synware/vite-plugin.mjs` (`resolveId` for `react/jsx-runtime` and `react/jsx-dev-runtime`), `scripts/synware/sdk-entries.mjs` (ship the two modules as internal, non-documented entries), `vitest.config.ts` and `tests/e2e/vite.config.ts` (same alias)
+- Create: `src/NSE/Theme/contract/hookMirrorJSXRuntime.mjs`, `hookMirrorJSXDevRuntime.mjs` (plain ESM so an installed package serves them unbuilt), `src/NSE/Theme/contract/hookMirrorReact.ts` (mirroring `createElement` and `cloneElement` for the six framework files that build host elements without JSX), `scripts/synware/hook-mirror-jsx.mjs` (`resolveHookMirrorJSX(id, importer)` and a standalone `hookMirrorJSX()` plugin)
+- Modify: `scripts/synware/vite-plugin.mjs` (call `resolveHookMirrorJSX` first in `resolveId`), `scripts/synware/build-sdk.mjs` and `sdk-package-manifest.mjs` (ship the four modules beside `vite.mjs`; no new package export), `vitest.config.ts` (`plugins: [hookMirrorJSX()]`)
 - Test: `tests/nse/hook-mirror-jsx.test.tsx`
 
 **Interfaces:**
@@ -215,7 +219,7 @@ it("mirrors hooks spread from nseControlHooks and nsePartHooks", …);
 ### Task 4: Reconciling observer, imperative helper, acceptance
 
 **Files:**
-- Create: `src/NSE/Theme/contract/hookMirrorObserver.ts`, `src/NSE/Theme/contract/setNSEHook.ts`
+- Create: `src/NSE/Theme/contract/hookMirrorDOM.ts` (`installNSEHookMirror`, `setNSEHook`; the observer also watches `class`, so a renderer rewriting `className` cannot drop tokens set by hand)
 - Modify: the 24 imperative writes (`grep -rn 'dataset\.nse\|setAttribute("data-nse\|toggleAttribute("data-nse' src`), limited to mirrored names; `src/NSE/Appearance/NSEAppearanceProvider.tsx` (install the observer once per document); `scripts/synware/idiom-errors.mjs` (reject `.nse\:` selectors in authored CSS); `docs/framework/theme-contract.md`
 - Test: `tests/nse/hook-mirror-observer.test.tsx`, `tests/e2e/hook-mirror.spec.ts`
 
@@ -226,7 +230,7 @@ it("mirrors hooks spread from nseControlHooks and nsePartHooks", …);
 - [ ] **Step 2:** Run. Expected: FAIL.
 - [ ] **Step 3:** Implement. The observer batches by element per callback and reads `attributes` once per element.
 - [ ] **Step 4:** Run focused tests, typecheck, then `npm run sdk:build`, vendor into the site with `npm run framework:sync -- --allow-dirty` **as a local experiment only** (the receipt stays out of any commit; the site worktree is restored with `git checkout -- package.json package-lock.json vendor/framework-receipt.json` afterwards and the experiment archive deleted), restart 5387 with `--force`, and run the harness and the digest.
-- [ ] **Step 5:** Check the targets: gallery full recalc ≤ 100 ms; section-change mean ≤ 185 ms; cold gallery load style ≤ 950 ms; launch About style ≤ 90 ms; digest compare against `baseline-digest.json` = 0 differences. Save `after-mirror.json` beside the baseline. If the digest differs, the differing elements name the selector class that was mis-rewritten; fix in Task 2's code, do not special-case elements.
+- [ ] **Step 5:** Check the targets: gallery full recalc ≤ 55 ms; section-change mean ≤ 90 ms; cold gallery load style ≤ 480 ms; launch About style ≤ 60 ms; digest compare against `baseline-digest.json` = 0 differences. Save `after-mirror.json` beside the baseline. If the digest differs, the differing elements name the selector class that was mis-rewritten; fix in Task 2's code, do not special-case elements.
 - [ ] **Step 6:** Run baseline (123/123) and the `theme-nesting` spec (third-party attribute-only theme, Review Focus 3).
 - [ ] **Step 7:** Commit: `NSE: keep mirror classes in step for imperative and unbundled hooks`.
 
@@ -236,7 +240,7 @@ it("mirrors hooks spread from nseControlHooks and nsePartHooks", …);
 
 - [ ] **Step 1:** With Task 4 in place, capture a Chromium trace of `gallery-full-recalc` with `blink.debug` selector statistics (`--enable-blink-features=…` is not needed; use DevTools "Selector stats" via CDP `Tracing` category `disabled-by-default-blink.debug`) and list the 30 costliest selectors by elapsed time and by match-attempt count. Save as `selector-stats.json`.
 - [ ] **Step 2:** Apply only rewrites that are provably equivalent, each with a unit test in `selector-performance.test.ts` and the specificity guard: (a) drop the duplicate twin when `:scope X` and `X:scope` can both be expressed as one rule after mirroring; (b) hoist a leading class out of `:where(.a …)` ancestor arguments so the Bloom filter sees it; (c) anything else the stats name, one rewrite per commit if they are independent.
-- [ ] **Step 3:** Re-run harness, digest (0 differences) and baseline (123/123). Target: gallery full recalc ≤ 60 ms. Record CSS byte size before and after.
+- [ ] **Step 3:** Re-run harness, digest (0 differences) and baseline (123/123). Target: gallery full recalc ≤ 45 ms. Record CSS byte size before and after.
 - [ ] **Step 4:** If the target is not met, stop here: write the profile and the remaining top selectors into `docs/superpowers/evidence/2026-11-11-performance/README.md` and report to the owner. Do not regenerate Atmo's rules.
 - [ ] **Step 5:** Commit: `Style performance: <the specific rewrite>`.
 
@@ -329,7 +333,7 @@ it("the legacy bundle hooks applicationWillClose/DidClose still fire once, throu
 
 ## Findings
 
-- No launch path awaits a theme promise or `document.fonts.ready` (the one `fonts.ready` is in the notification presenter). The cost of themes on launch is style recalc: launching About spends 259 ms in 157 recalcs for 319 elements, and a cold gallery load spends 3.8 s. Workstream A removes most of it.
+- No launch path awaits a theme promise or `document.fonts.ready` (the one `fonts.ready` is in the notification presenter). The cost of themes on launch is style recalc: launching About spends 168 ms in 200 recalcs for 319 elements, and a cold gallery load spends 1.9 s. Workstream A removes most of it.
 - Launch awaits, in order: configuration-profile authorisation, `manager.getReady()` (bundle chunk import), the lifecycle `will` hooks, the lifecycle `did` hooks (removed from the path by Task 9), then the window open.
 - Vite injects an app's CSS chunk when its JS chunk loads. Whether that injection forces a document-wide recalc under `@layer`/`@scope` is not yet measured.
 
@@ -338,9 +342,9 @@ it("the legacy bundle hooks applicationWillClose/DidClose still fire once, throu
 | Metric (harness, median of 5) | Before | Target |
 | --- | --- | --- |
 | Launch About: click → `app.launch.complete` | recorded in Task 11 | **≤ 60% of before**, and no step in it waits on a stylesheet or font |
-| Launch About: longest main-thread task | recorded in Task 11 | **≤ 100 ms** |
-| Launch About: style total | 259 ms | **≤ 90 ms** |
-| QuickSwitch open and select: style total, longest task | recorded in Task 1 | **≤ 25%** of before for style; longest task **≤ 100 ms** |
+| Launch About: longest main-thread task | 71 ms | **≤ 50 ms** |
+| Launch About: style total | 168 ms | **≤ 60 ms** |
+| QuickSwitch open, QuickSwitch select, return to Webspring: longest task | 63, 51, 95 ms | **≤ 50 ms** each (style is already small: 22, 21, 48 ms) |
 
 ### Task 11: Launch timeline, then remove what waits
 
