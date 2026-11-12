@@ -49,6 +49,8 @@ export function renderNSEThemeContractMarkdown(contract) {
     "",
     "A theme draws controls through these hooks only: " + tick("[data-nse-control]") + ", " + tick("[data-nse-part]") + ", the state and variant attributes listed here, and the appearance attributes on the theme boundary. [Themes](themes.md) explains how to use them.",
     "",
+    "Each hook is also mirrored on its element as a class token beginning " + tick("nse:") + ", and the build rewrites hook selectors to those classes so the browser can index them. The classes are private and may change without notice: write the attributes, and never select on the classes.",
+    "",
     "Contract version " + contract.themeContractVersion + ": " + Object.keys(contract.controls).length + " controls, " + contract.colours.length + " colours.",
     "",
     "## Controls",

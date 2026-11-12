@@ -49,6 +49,9 @@ describe("definite authoring errors", () => {
   it("rejects class selectors into NSE internals but accepts an app class", () => {
     expect(inspectStyleErrors({file:"view.css", text:'.lab .nse-button__label { font-size: 20px; }'})).toContainEqual(expect.objectContaining({rule:"idiom.control-internals", severity:"error"}));
     expect(inspectStyleErrors({file:"view.css", text:'.lab-label { font-size: 20px; }'})).toEqual([]);
+    // Mirror classes are private: neither an app nor a theme may select on them.
+    expect(inspectStyleErrors({file:"view.css", text:String.raw`.nse\:control\=button { font-size: 20px; }`})).toContainEqual(expect.objectContaining({rule:"idiom.control-internals", severity:"error"}));
+    expect(inspectStyleErrors({file:"Paper.scostheme/Contents/Resources/button.css", text:String.raw`.nse\:part\=bezel { background: white; }`})).toContainEqual(expect.objectContaining({rule:"idiom.theme-private-class", severity:"error"}));
     expect(inspectStyleErrors({file:"view.css", text:'.label[data-copy=".nse-button"] { font-size: 20px; }'})).toEqual([]);
   });
   it("warns about CSS scrolling without failing legitimate code samples", () => {
