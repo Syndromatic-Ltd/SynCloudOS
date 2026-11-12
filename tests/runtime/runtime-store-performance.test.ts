@@ -188,6 +188,44 @@ describe("RuntimeStore performance primitives", () => {
     expect(RuntimeStore.getSnapshot()).not.toBe(before);
   });
 
+  it("does not publish a write of the value a property already holds", () => {
+    const { RuntimeStore, runtime } = createRuntimeHarness(createTestRuntime());
+    const listener = vi.fn();
+    RuntimeStore.subscribe(listener);
+    const before = RuntimeStore.getSnapshot();
+
+    RuntimeStore.mutate((draft) => { draft.responsive.width = before.responsive.width; });
+    RuntimeStore.batch(() => {
+      RuntimeStore.mutate((draft) => { draft.webspring.hoveredAppId = before.webspring.hoveredAppId; });
+    });
+    // What a pointer crossing empty desktop does on every move.
+    runtime.webspring.hoverApp(null);
+    runtime.webspring.hoverApp(null);
+
+    expect(RuntimeStore.getSnapshot().webspring).toBe(before.webspring);
+    expect(RuntimeStore.getSnapshot()).toBe(before);
+    expect(listener).not.toHaveBeenCalled();
+  });
+
+  it("publishes a write that restores a value changed earlier in the same mutation", () => {
+    const { RuntimeStore } = createRuntimeHarness(createTestRuntime());
+    const before = RuntimeStore.getSnapshot();
+    const order = before.webspring.layout.preference.order;
+
+    RuntimeStore.mutate((draft) => {
+      draft.webspring.layout.preference.order.push("com.example.added");
+      draft.webspring.layout.preference.order = order;
+      draft.responsive.width = before.responsive.width + 5;
+      draft.responsive.width = before.responsive.width;
+      (draft.responsive as { probe?: undefined }).probe = undefined;
+    });
+
+    const after = RuntimeStore.getSnapshot();
+    expect(after.webspring.layout.preference.order).toEqual([...order]);
+    expect(after.responsive.width).toBe(before.responsive.width);
+    expect(Object.hasOwn(after.responsive, "probe")).toBe(true);
+  });
+
   it("records events and transaction history without publishing runtime state", () => {
     const runtime = createTestRuntime();
     const { RuntimeStore, RuntimeController } = createRuntimeHarness(runtime);
