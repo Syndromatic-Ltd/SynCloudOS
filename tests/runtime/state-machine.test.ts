@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { canEnterState, defineStateMachine, nextState } from "../../src/SynCloudOS/Statechart/StateMachine";
+import { canEnterState, defineStateMachine, nextState } from "../../src/Foundation/internal/StateMachine";
 
 type Door = "closed" | "open" | "locked";
 type Action = "open" | "close" | "lock" | "unlock";

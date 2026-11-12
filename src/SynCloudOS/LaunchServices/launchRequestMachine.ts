@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { defineStateMachine, type StateMachine } from "../Statechart/StateMachine";
+import { defineStateMachine, type StateMachine } from "../../Foundation/internal/StateMachine";
 
 /** The history actions that move a request on. Each names the phase it leads to. */
 export type LaunchRequestStep = "requested" | "queued" | "deferred" | "started" | "authorised" | "loading" | "ready" | "complete" | "failed" | "cancelled";

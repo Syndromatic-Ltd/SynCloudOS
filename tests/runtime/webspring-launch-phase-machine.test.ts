@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { sendWebspringLaunchPhase, webspringLaunchPhaseMachine, type WebspringLaunchPhaseEvent } from "../../src/SynCloudOS/WebspringState/launchPhaseMachine";
 import type { SynCloudOSWebspringState } from "../../src/SynCloudOS/WebspringState/webspringStateTypes";
-import { nextState } from "../../src/SynCloudOS/Statechart/StateMachine";
+import { nextState } from "../../src/Foundation/internal/StateMachine";
 import { createRuntimeHarness, createTestBundle, createTestRuntime } from "./helpers";
 
 type Phase = SynCloudOSWebspringState["launchPhase"];

@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { defineStateMachine } from "../Statechart/StateMachine";
+import { defineStateMachine } from "../../Foundation/internal/StateMachine";
 
 export type MultiSwitchSettlementState = "awaitingFirstFrame" | "awaitingPresentationFrame" | "settling" | "finished";
 export type MultiSwitchSettlementEvent = "framePainted" | "timedOut" | "cancel";

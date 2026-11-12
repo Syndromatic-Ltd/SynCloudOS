@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { advanceLaunchRequest, isLaunchRequestStep, launchRequestMachine, launchRequestPhase, type LaunchRequestPhase, type LaunchRequestStep } from "../../src/SynCloudOS/LaunchServices/launchRequestMachine";
-import { nextState } from "../../src/SynCloudOS/Statechart/StateMachine";
+import { nextState } from "../../src/Foundation/internal/StateMachine";
 import { createRuntimeHarness, createTestBundle, createTestRuntime } from "./helpers";
 
 const steps: LaunchRequestStep[] = ["requested", "queued", "deferred", "started", "authorised", "loading", "ready", "complete", "failed", "cancelled"];

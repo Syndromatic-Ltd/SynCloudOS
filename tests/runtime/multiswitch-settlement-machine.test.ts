@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { beginMultiSwitchSettlement, multiSwitchSettlementMachine } from "../../src/SynCloudOS/LaunchServices/multiSwitchSettlement";
-import { nextState } from "../../src/SynCloudOS/Statechart/StateMachine";
+import { nextState } from "../../src/Foundation/internal/StateMachine";
 
 /** A clock whose frames and timers run only when the test says so. */
 function manualClock() {

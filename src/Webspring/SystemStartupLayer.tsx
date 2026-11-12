@@ -18,12 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import type { SystemStartupPhase } from "../SynCloudOS/RootRuntime";
 import { useRef, type CSSProperties, type ReactNode } from "react";
 import { NSEPresence, useNSEPresentation } from "../NSE/Animation";
 import { LoadingSpinner } from "../NSE/NSE";
 import { useWebspringLocale } from "./webspringLocale";
 import { useSystemStartupMotion, type SystemStartupMotionPreset } from "./SystemStartupLayer.transitions";
-export type SystemStartupPhase = "booting" | "material" | "complete";
 
 /** One boot-screen part: it rests at its model style and its AnimationFX
  * presentations play over it, entering on mount and exiting with the layer. */
