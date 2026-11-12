@@ -105,6 +105,8 @@ function createRuntimeDraft<T extends RuntimeDraftObject>(base: T): T {
       return draft;
     },
     set(target, property, value, receiver) {
+      // Writing back the value already held is not a change. A property read as a draft may have edits to discard, so that write counts.
+      if (!state.drafts.has(property) && Object.hasOwn(target, property) && Object.is(Reflect.get(target, property, receiver), value)) return true;
       state.modified = true;
       state.assigned.set(property, true);
       state.drafts.delete(property);
@@ -139,8 +141,8 @@ function finishRuntimeDraft<T extends RuntimeDraftObject>(draft: T): T {
   return (changed ? state.copy : state.base) as T;
 }
 
-/** Returns `snapshot` itself when the mutator performed no writes. Any
- * assignment or deletion, even of an equal value, yields a new root. */
+/** Returns `snapshot` itself when the mutator changed nothing: no writes, or
+ * only writes of the value each property already held. */
 function produceRuntimeSnapshot(snapshot: RuntimeSnapshot, mutator: RuntimeMutator): RuntimeSnapshot {
   const draft = createRuntimeDraft(snapshot as unknown as RuntimeDraftObject);
   mutator(draft as unknown as RuntimeSnapshot);
@@ -346,7 +348,7 @@ export class SynCloudOSRuntimeStore implements SynCloudOSRuntimeStoreContract {
     }
 
     const next = produceRuntimeSnapshot(this.snapshot, mutator);
-    // A mutator that wrote nothing is not a publication: the snapshot keeps
+    // A mutator that changed nothing is not a publication: the snapshot keeps
     // its identity and no listener runs.
     if (next === this.snapshot) return;
     this.snapshot = next;
