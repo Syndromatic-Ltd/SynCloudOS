@@ -39,6 +39,23 @@ Style time in milliseconds, median of five passes.
 
 The site's dev server for these runs is `npx vite --config vite.local-auth.config.mts --host 127.0.0.1 --force` in the site worktree; the plain config has no local sign-in and the harness cannot get past the login window.
 
+## What still costs after the mirror (Task 5)
+
+`node scripts/perf/selector-stats.mjs --base http://127.0.0.1:5387 --json selector-stats.json` records Blink's selector statistics for one full re-match of the gallery (985 elements, 12,220 style rules, 3,769 distinct selectors). The statistics slow matching themselves, so read shares, not absolute times.
+
+| Rightmost compound is filed under | Selectors | Match attempts at `b95e5e3c` | at `c31f7215` |
+| --- | ---: | ---: | ---: |
+| a value class (`.nse\:part\=bezel`) | 2,202 | 256,020 | 256,020 |
+| nothing: only `:is()` / `:where()` | 307 | 275,211 | 50,814 |
+| a plain class | 876 | 37,446 | 37,698 |
+| everything else (universal, tag, attribute, lone pseudo-class) | 384 | 155,846 | 155,846 |
+| **Total** | 3,769 | **724,523** | **500,378** |
+
+- `c31f7215` unwraps `:where(:is(a, b))` so each branch is filed under its own class. Attempts fall 31%; the computed-style digest still shows 0 differences (`after-nested-split-digest.json`). Atmo's rewritten CSS grows from 4,386,048 to 4,401,970 characters (+0.4%).
+- Wall-clock full recalc did not move: 52 to 64 ms over eight runs at `c31f7215`, against 53.4 ms at `b95e5e3c` (`after-nested-split.json` records a 62 ms median). The attempts removed were ones the engine already rejected cheaply.
+- **The ≤ 45 ms target is not met, and per the plan the work stops here for the owner's decision.** What remains is not selector filing. 2,202 selectors are already filed under a value class and account for most of the remaining time: a button is tested against every button rule, and Atmo has many rules per control. Each element also inherits 414 custom properties. Going lower means fewer rules per control or fewer custom properties in Atmo itself, which the plan rules out without the owner's say.
+- Also not met, for the same reason: cold gallery style 558 ms (target ≤ 480) and launch About style 74 ms (target ≤ 60).
+
 ## Notes
 
 - Custom properties are left out of the digest. They carry per-run values (identifiers, clocks), and every one of the 14,361 styles differed between two runs of the same build while they were included; what they draw still shows in the standard properties.
