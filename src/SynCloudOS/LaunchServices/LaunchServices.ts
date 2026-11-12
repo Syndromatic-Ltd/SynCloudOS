@@ -94,7 +94,9 @@ type LaunchWindowManagerPort = Pick<
   | "validateApplicationCloseAuthority"
   | "endApplicationClose"
   | "openApplicationWindow"
-  | "requestCloseApplication"
+  | "prepareCloseApplication"
+  | "commitCloseApplication"
+  | "rollbackCloseApplication"
   | "requestClose"
   | "list"
 >;
@@ -268,8 +270,10 @@ function settleMultiSwitch(
     snapshot.application.activeAppId === switchDetails.toAppId &&
     snapshot.application.routePath === switchDetails.toRoute;
 
-  if (targetStillActive) {
-    AppManagerController.getManagerForApp(switchDetails.fromAppId)?.suspend();
+  // Activating the target already resigned the outgoing application through the lifecycle.
+  // Only one that became active again without the switch noticing still needs suspending.
+  if (targetStillActive && RuntimeStore.getSnapshot().lifecycle[normalizeBundleIdentifier(switchDetails.fromAppId)] === "active") {
+    void runtime.lifecycle.suspend(switchDetails.fromAppId, { reason: "LaunchServices.multiSwitch" }).result;
   }
 
   ApplicationState.finishMultiSwitch(switchId);
@@ -1472,28 +1476,47 @@ const launchServices = {
 
   async closeApp(appId: string) {
     appId = AppRegistry.getApp(appId)?.bundleIdentifier ?? appId;
+    // The lease is held for the whole quit, so nothing can admit a window or document meanwhile.
     const authority = WindowManager.beginApplicationClose(appId);
+    let preparation: Awaited<ReturnType<typeof WindowManager.prepareCloseApplication>> = null;
+    let committed = false;
     try {
       const manager = AppManagerController.getManagerForApp(appId);
       cancelPendingLaunchesForApplication(appId);
       if (manager) await manager.cancelApplicationWorkForClose("LaunchServices.closeApp");
-      const closeResult = await WindowManager.requestCloseApplication(
-        appId,
-        { reason: "application-quit" },
-        authority,
-      );
-      if (closeResult && closeResult.outcome !== "closed") return closeResult;
+      const hadWindows = WindowManager.list({ applicationId: appId }).length > 0;
+      // Preparation reviews documents and reserves the windows; nothing closes until the lifecycle commits.
+      preparation = await WindowManager.prepareCloseApplication(appId, { reason: "application-quit" }, authority);
+      if (preparation?.status === "cancelled") return { outcome: "cancelled" as const, windowControllerId: preparation.windowControllerId };
+      if (preparation?.status === "refused") return { outcome: "refused" as const, windowControllerId: preparation.windowControllerId, reason: preparation.reason };
       WindowManager.validateApplicationCloseAuthority(authority);
       if (manager && AppManagerController.getManagerForApp(appId) !== manager) {
         throw new Error(`Application "${appId}" manager changed during close.`);
       }
-      if (manager) await manager.suspendForApplicationClose("LaunchServices.closeApp");
+      const windowControllerId = preparation?.token.resultWindowControllerId ?? `application:${appId}`;
+      const state = RuntimeStore.getSnapshot().lifecycle[normalizeBundleIdentifier(appId)] ?? "registered";
+      if (state !== "active" && state !== "suspended") {
+        // An application that is not running has nobody to ask; only its windows and documents close.
+        if (preparation) await WindowManager.commitCloseApplication(preparation.token, authority);
+        committed = true;
+        return hadWindows ? { outcome: "closed" as const, windowControllerId } : null;
+      }
+      const result = await runtime.lifecycle.close(appId, {
+        reason: "LaunchServices.closeApp",
+        ...(preparation ? { closeTransaction: { authority, preparation: preparation.token } } : {}),
+      }).result;
+      if (!result.committed) {
+        // applicationShouldTerminate declined, or a will hook failed: the application keeps its windows.
+        return { outcome: "refused" as const, windowControllerId, reason: "delegate-refused" as const };
+      }
+      committed = true;
       WindowManager.validateApplicationCloseAuthority(authority);
       if (manager && AppManagerController.getManagerForApp(appId) !== manager) {
-        throw new Error(`Application "${appId}" manager changed during suspension.`);
+        throw new Error(`Application "${appId}" manager changed during termination.`);
       }
-      return closeResult;
+      return hadWindows ? { outcome: "closed" as const, windowControllerId } : null;
     } finally {
+      if (!committed && preparation?.status === "ready") await WindowManager.rollbackCloseApplication(preparation.token, authority);
       WindowManager.endApplicationClose(authority);
     }
   },
