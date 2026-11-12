@@ -125,13 +125,28 @@ function setWorkingPreference(
   return preference;
 }
 
-function syncSelector(draft: RuntimeSnapshot, appId: string | null) {
-  const app = appId ? draft.appInfo[normalizeBundleIdentifier(appId)] : null;
-  const slot = getDesktopWebspringSlotForApp(getProjection(draft), appId);
+function selectorFor(state: RuntimeSnapshot, appId: string | null) {
+  const app = appId ? state.appInfo[normalizeBundleIdentifier(appId)] : null;
+  const slot = getDesktopWebspringSlotForApp(getProjection(state), appId);
+  return {
+    activeIndicatorId: slot?.region === "dial" ? slot.id : null,
+    selectorAngle: slot?.angle ?? app?.webspring.selectorAngle ?? app?.webspring.dialPosition ?? 180,
+    selectorPosition: slot?.indicatorPosition ?? null,
+  };
+}
 
-  draft.webspring.activeIndicatorId = slot?.region === "dial" ? slot.id : null;
-  draft.webspring.selectorAngle = slot?.angle ?? app?.webspring.selectorAngle ?? app?.webspring.dialPosition ?? 180;
-  draft.webspring.selectorPosition = slot?.indicatorPosition ?? null;
+function syncSelector(draft: RuntimeSnapshot, appId: string | null) {
+  Object.assign(draft.webspring, selectorFor(draft, appId));
+}
+
+/** Whether hovering this app would leave every field it writes as it is. */
+function hoverAlreadyShown(state: RuntimeSnapshot, appId: string | null) {
+  const { webspring } = state;
+  if (webspring.hoveredAppId !== appId || webspring.previewAppId !== appId || webspring.hoverLabelAppId !== appId) return false;
+  if (webspring.lowerShelfMode !== (appId ? "preview" : "news")) return false;
+  const selector = selectorFor(state, appId);
+  return webspring.activeIndicatorId === selector.activeIndicatorId && webspring.selectorAngle === selector.selectorAngle
+    && webspring.selectorPosition?.x === selector.selectorPosition?.x && webspring.selectorPosition?.y === selector.selectorPosition?.y;
 }
 
 function persistPreference(preference: SynCloudOSWebspringLayoutPreference | null) {
@@ -211,7 +226,8 @@ const webspringState = {
 
   hoverApp(appId: string | null) {
     if (appId) appId = runtime.apps.getApp(appId)?.bundleIdentifier ?? appId;
-    RuntimeStore.mutate((draft) => {
+    // Pointer movement repeats the same hover many times a second. Every store write is published, so skip the ones that change nothing.
+    if (!hoverAlreadyShown(RuntimeStore.getSnapshot(), appId)) RuntimeStore.mutate((draft) => {
       draft.webspring.hoveredAppId = appId;
       draft.webspring.previewAppId = appId;
       draft.webspring.hoverLabelAppId = appId;
