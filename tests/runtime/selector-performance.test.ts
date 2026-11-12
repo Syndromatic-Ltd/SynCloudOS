@@ -13,9 +13,9 @@ const selectors = (css: string) => {
 const weight = (selector: string) => specificity(cssTree.parse(selector, { context: "selector" })).join(",");
 
 describe("selector performance rewriting", () => {
-  it("files a root twin under its own attribute instead of under nothing", () => {
+  it("files a root twin under its own hook instead of under nothing", () => {
     const out = optimiseSelectors(':scope:is([data-nse-control="tab-view"]) [data-nse-role="tabpanel"] { color: red }');
-    expect(selectors(out)).toEqual(['[data-nse-control="tab-view"]:scope [data-nse-role="tabpanel"]']);
+    expect(selectors(out)).toEqual(['.nse\\:control\\=tab-view:scope .nse\\:role\\=tabpanel']);
     expect(weight(selectors(out)[0])).toBe(weight(':scope:is([data-nse-control="tab-view"]) [data-nse-role="tabpanel"]'));
   });
 
@@ -28,7 +28,7 @@ describe("selector performance rewriting", () => {
 
   it("keeps :where() branches weightless", () => {
     const out = selectors(optimiseSelectors(':where(:scope) :where([data-nse-part="a"], [data-nse-part="b"]) { color: red }'));
-    expect(out).toEqual([':where(:scope) :where([data-nse-part="a"])', ':where(:scope) :where([data-nse-part="b"])']);
+    expect(out).toEqual([':where(:scope) :where(.nse\\:part\\=a)', ':where(:scope) :where(.nse\\:part\\=b)']);
   });
 
   it("puts indexable tests first but never moves anything past a pseudo-element", () => {
@@ -65,5 +65,35 @@ describe("selector performance rewriting", () => {
   it("gives third-party themes the same treatment", () => {
     const css = scopeThemeCSS('[data-nse-control="button"] [data-nse-part="bezel"] { background: white; }', "com.example.paper");
     expect(css).not.toContain(":scope:is(");
+    // The author wrote attributes; the engine is handed classes it can index.
+    expect(css).toContain(".nse\\:control\\=button");
+    expect(css).toContain(".nse\\:part\\=bezel");
+    expect(css).not.toContain('[data-nse-part="bezel"]');
   });
+
+  it("rewrites contract hook selectors to their mirror classes at the same weight", () => {
+    const original = '[data-nse-control="button"][data-nse-hovered] [data-nse-part="bezel"]:not([data-nse-enabled="false"])';
+    const out = selectors(optimiseSelectors(`${original} { color: red }`));
+    expect(out).toEqual(['.nse\\:control\\=button.nse\\:hovered .nse\\:part\\=bezel:not(.nse\\:enabled\\=false)']);
+    expect(weight(out[0])).toBe(weight(original));
+  });
+
+  it("keeps the attribute form where a class cannot say the same thing", () => {
+    // Values that are not class tokens, other operators, case flags and data-carrying attributes.
+    for (const kept of ['[data-nse-key-equivalent=" "]', '[data-nse-style=""]', '[data-nse-style~="a"]', '[data-nse-style^="a"]', '[data-nse-style="a"i]', '[data-nse-toolbar-item-id="x"]', '[data-state="on"]']) {
+      expect(selectors(optimiseSelectors(`${kept} { color: red }`)), kept).toEqual([kept]);
+    }
+  });
+
+  it("leaves almost no contract hook in the Atmo bundle as an attribute selector", () => {
+    const resources = resolve(import.meta.dirname, "../../src/Themes/Atmo.scostheme/Contents/Resources");
+    let before = 0, after = 0;
+    for (const file of readdirSync(resources).filter((name) => name.endsWith(".css"))) {
+      const source = readFileSync(resolve(resources, file), "utf8");
+      before += source.match(/\[data-nse-(?:control|part)[=\]]/gu)?.length ?? 0;
+      after += optimiseSelectors(source).match(/\[data-nse-(?:control|part)[=\]]/gu)?.length ?? 0;
+    }
+    expect(before).toBeGreaterThan(10_000);
+    expect(after).toBeLessThan(before / 100);
+  }, 120_000);
 });
