@@ -163,7 +163,7 @@ The ≤ 45 ms line is the owner's experiment figure. If Task 5 cannot reach it w
   - `mirrorSelector(name: string, value: string | null): string | null` → the escaped class selector, or `null` when the attribute form must stay.
 - `selector-performance.mjs` calls `mirrorSelector` for every `AttributeSelector` whose matcher is absent or `=` and whose flags are empty, before step 3 (reordering). The mirrored-name set comes from one source: a test asserts `mirroredHookNames` equals `control`, `part`, `nseThemeStates`, `nseThemeVariants` and the four appearance names.
 
-- [ ] **Step 1: Write the failing tests** in `tests/runtime/hook-mirror.test.ts` and extend `selector-performance.test.ts`:
+- [x] **Step 1: Write the failing tests** in `tests/runtime/hook-mirror.test.ts` and extend `selector-performance.test.ts`:
 
 ```ts
 expect(optimiseSelectors('[data-nse-control="button"] [data-nse-part="bezel"]{color:red}'))
@@ -181,10 +181,10 @@ expect(mirrorTokens("key-equivalent", "\r")).toEqual(["nse:key-equivalent"]);
 ```
 
   Add one test that runs `optimiseSelectors` over the whole built Atmo stylesheet and asserts no throw (the specificity guard) and that fewer than 1% of `[data-nse-control` / `[data-nse-part` occurrences remain.
-- [ ] **Step 2:** Run `npx vitest run tests/runtime/hook-mirror.test.ts tests/runtime/selector-performance.test.ts`. Expected: FAIL (module missing).
-- [ ] **Step 3:** Implement `hook-mirror.mjs` and the rewrite. `rank()` already treats `ClassSelector` as rank 1, so rewritten selectors sort first without further change.
-- [ ] **Step 4:** Run the two test files and typecheck. Expected: PASS. **Commit order:** the runtime mirror (Task 3) and the observer and helper (Task 4, steps 1–3) are committed first, because classes without rewritten CSS are harmless while rewritten CSS without classes draws nothing; this task's rewrite is committed after them, so every commit draws correctly.
-- [ ] **Step 5:** Commit: `Style performance: rewrite contract attribute selectors to mirror classes`.
+- [x] **Step 2:** Run `npx vitest run tests/runtime/hook-mirror.test.ts tests/runtime/selector-performance.test.ts`. Expected: FAIL (module missing).
+- [x] **Step 3:** Implement `hook-mirror.mjs` and the rewrite. `rank()` already treats `ClassSelector` as rank 1, so rewritten selectors sort first without further change.
+- [x] **Step 4:** Run the two test files and typecheck. Expected: PASS. **Commit order:** the runtime mirror (Task 3) and the observer and helper (Task 4, steps 1–3) are committed first, because classes without rewritten CSS are harmless while rewritten CSS without classes draws nothing; this task's rewrite is committed after them, so every commit draws correctly.
+- [x] **Step 5:** Commit: `Style performance: rewrite contract attribute selectors to mirror classes`.
 
 ### Task 3: Synchronous mirror in the JSX runtime
 
@@ -197,7 +197,7 @@ expect(mirrorTokens("key-equivalent", "\r")).toEqual(["nse:key-equivalent"]);
 - Produces: `jsx`, `jsxs`, `Fragment` (and `jsxDEV`, `Fragment` in the dev module) with React's signatures. For a string `type` whose props include a mirrored `data-nse-*` key with a non-null, non-`false` value, the returned element's `className` is the caller's `className` followed by the tokens, space-separated. Other elements pass straight through. Token strings are cached in a `Map` keyed by `name + "\0" + value`.
 - The wrapper imports React's own runtime by a path the plugin's `resolveId` does not intercept (resolve with `skipSelf` from the wrapper's importer check; a recursion here hangs the build, so the test below imports through the alias).
 
-- [ ] **Step 1: Write the failing test:**
+- [x] **Step 1: Write the failing test:**
 
 ```tsx
 it("mirrors contract hooks into classes beside the caller's own", () => {
@@ -211,10 +211,10 @@ it("leaves elements without hooks and component types untouched", …);     // r
 it("mirrors hooks spread from nseControlHooks and nsePartHooks", …);
 ```
 
-- [ ] **Step 2:** Run it. Expected: FAIL.
-- [ ] **Step 3:** Implement the two runtime modules and the three aliases.
-- [ ] **Step 4:** Run the test, then the rendered-contract suite (`npx vitest run tests/nse`), which asserts attributes on about 700 specimens. Fix any test that compares `className` for exact equality by asserting the tokens it cares about; do not weaken attribute assertions. Expected: PASS.
-- [ ] **Step 5:** Commit: `NSE: mirror contract hooks into classes in the JSX runtime`.
+- [x] **Step 2:** Run it. Expected: FAIL.
+- [x] **Step 3:** Implement the two runtime modules and the three aliases.
+- [x] **Step 4:** Run the test, then the rendered-contract suite (`npx vitest run tests/nse`), which asserts attributes on about 700 specimens. Fix any test that compares `className` for exact equality by asserting the tokens it cares about; do not weaken attribute assertions. Expected: PASS.
+- [x] **Step 5:** Commit: `NSE: mirror contract hooks into classes in the JSX runtime`.
 
 ### Task 4: Reconciling observer, imperative helper, acceptance
 
@@ -226,13 +226,13 @@ it("mirrors hooks spread from nseControlHooks and nsePartHooks", …);
 **Interfaces:**
 - Produces: `installNSEHookMirror(document: Document): () => void` (idempotent per document; returns the uninstall function), `setNSEHook(element: Element, name: string, value: string | null): void`.
 
-- [ ] **Step 1: Write the failing tests.** Vitest (jsdom): an element created with `document.createElement` and given `data-nse-part="row"` has the tokens after a microtask; changing the value swaps the value token; removing the attribute removes both; an element the JSX wrapper already mirrored is not written again (spy on `classList.add`). Playwright (Review Focus 2): a fixture page that renders one `NSEButton` through React and one hand-built `<button data-nse-control="button" data-nse-bezel-style="rounded">` appended in a `useLayoutEffect`; assert both have the same computed `border-radius` by the next animation frame, and that `setNSEHook` gives it synchronously.
-- [ ] **Step 2:** Run. Expected: FAIL.
-- [ ] **Step 3:** Implement. The observer batches by element per callback and reads `attributes` once per element.
-- [ ] **Step 4:** Run focused tests, typecheck, then `npm run sdk:build`, vendor into the site with `npm run framework:sync -- --allow-dirty` **as a local experiment only** (the receipt stays out of any commit; the site worktree is restored with `git checkout -- package.json package-lock.json vendor/framework-receipt.json` afterwards and the experiment archive deleted), restart 5387 with `--force`, and run the harness and the digest.
-- [ ] **Step 5:** Check the targets: gallery full recalc ≤ 55 ms; section-change mean ≤ 90 ms; cold gallery load style ≤ 480 ms; launch About style ≤ 60 ms; digest compare against `baseline-digest.json` = 0 differences. Save `after-mirror.json` beside the baseline. If the digest differs, the differing elements name the selector class that was mis-rewritten; fix in Task 2's code, do not special-case elements.
-- [ ] **Step 6:** Run baseline (123/123) and the `theme-nesting` spec (third-party attribute-only theme, Review Focus 3).
-- [ ] **Step 7:** Commit: `NSE: keep mirror classes in step for imperative and unbundled hooks`.
+- [x] **Step 1: Write the failing tests.** Vitest (jsdom): an element created with `document.createElement` and given `data-nse-part="row"` has the tokens after a microtask; changing the value swaps the value token; removing the attribute removes both; an element the JSX wrapper already mirrored is not written again (spy on `classList.add`). Playwright (Review Focus 2): a fixture page that renders one `NSEButton` through React and one hand-built `<button data-nse-control="button" data-nse-bezel-style="rounded">` appended in a `useLayoutEffect`; assert both have the same computed `border-radius` by the next animation frame, and that `setNSEHook` gives it synchronously.
+- [x] **Step 2:** Run. Expected: FAIL.
+- [x] **Step 3:** Implement. The observer batches by element per callback and reads `attributes` once per element.
+- [x] **Step 4:** Run focused tests, typecheck, then `npm run sdk:build`, vendor into the site with `npm run framework:sync -- --allow-dirty` **as a local experiment only** (the receipt stays out of any commit; the site worktree is restored with `git checkout -- package.json package-lock.json vendor/framework-receipt.json` afterwards and the experiment archive deleted), restart 5387 with `--force`, and run the harness and the digest.
+- [x] **Step 5:** Check the targets: gallery full recalc ≤ 55 ms; section-change mean ≤ 90 ms; cold gallery load style ≤ 480 ms; launch About style ≤ 60 ms; digest compare against `baseline-digest.json` = 0 differences. Save `after-mirror.json` beside the baseline. If the digest differs, the differing elements name the selector class that was mis-rewritten; fix in Task 2's code, do not special-case elements.
+- [x] **Step 6:** Run baseline (123/123) and the `theme-nesting` spec (third-party attribute-only theme, Review Focus 3).
+- [x] **Step 7:** Commit: `NSE: keep mirror classes in step for imperative and unbundled hooks`.
 
 ### Task 5: Remaining recalc cost, measured then cut
 
@@ -281,7 +281,7 @@ it("mirrors hooks spread from nseControlHooks and nsePartHooks", …);
 - Produces: `LifecycleRequestOptions.presentAfterCommit?: (context: { readonly signal: AbortSignal }) => void | Promise<void>` (`@internal`). `Lifecycle.launch()` runs it as the first `effects` step (`onError: "stop"`), which the operation coordinator already runs after `commit` and before `did`.
 - `runLaunch` passes everything it does today between `manager.launch()` resolving and `recordRequestHistory("complete", …)` as `presentAfterCommit` (window open, stale-authority close, MultiSwitch begin, `selectApp`, route sync, `app.launch.complete`). The `catch` path is unchanged: an effect failure with `onError: "stop"` rejects the launch exactly as a failed window open does today.
 
-- [ ] **Step 1: Write the failing tests** with a real runtime and an `NSEApplication` subclass that records calls, and a window-manager spy:
+- [x] **Step 1: Write the failing tests** with a real runtime and an `NSEApplication` subclass that records calls, and a window-manager spy:
 
 ```ts
 expect(order).toEqual([
@@ -295,10 +295,10 @@ it("fails the launch and runs no did hook when the window cannot open", …);
 it("a resumed (suspended) application is not told it finished launching again", …);
 ```
 
-- [ ] **Step 2:** Run. Expected: FAIL on order.
-- [ ] **Step 3:** Implement.
-- [ ] **Step 4:** Focused tests plus `npx vitest run tests/runtime tests/integration -t "launch"`; typecheck. Expected: PASS. Update `docs/framework/applications.md` only if a sentence is now wrong.
-- [ ] **Step 5:** Commit: `Lifecycle: run launch callbacks after the main window opens`.
+- [x] **Step 2:** Run. Expected: FAIL on order.
+- [x] **Step 3:** Implement.
+- [x] **Step 4:** Focused tests plus `npx vitest run tests/runtime tests/integration -t "launch"`; typecheck. Expected: PASS. Update `docs/framework/applications.md` only if a sentence is now wrong.
+- [x] **Step 5:** Commit: `Lifecycle: run launch callbacks after the main window opens`.
 
 ### Task 10: Suspend and quit go through the class-aware lifecycle
 
@@ -626,3 +626,9 @@ Webspring stays at `src/Webspring/`.
 Add one line per stop: date, last commit, next unchecked box, anything a successor could not infer.
 
 - 2026-11-11: plan written at `90e7fbf9`; no source changed. The planning harness scripts live only in the session scratchpad; Task 1 rewrites them from its description.
+- 2026-11-12: Tasks 2, 3, 4 and 9 done at `b358da22`. Next: Task 10, then Task 5. Things a successor could not infer:
+  - The site dev server for the harness is `npx vite --config vite.local-auth.config.mts --host 127.0.0.1 --force` in the site worktree (port 5387 comes from that config). The plain config has no local sign-in.
+  - The site worktree currently holds an experimental `--allow-dirty` vendoring of `b95e5e3c` (`package.json`, `package-lock.json`, `vendor/`). The files as they were before are saved in the session scratchpad under `site-backup/`; Task 28 replaces the experiment with a clean vendoring.
+  - Task 4 missed two targets, carried into Task 5: cold gallery style 571 ms (target ≤ 480) and launch About style 74.5 ms (target ≤ 60). Gallery full recalc (53 ms) and section mean (87 ms) are met; the digest shows 0 differences.
+  - Do not edit framework source while the baseline spec runs: Vite reloads the page and the step fails with "Execution context was destroyed". Baseline with theme-nesting is 177 tests over three projects.
+  - Shell heredocs in this environment halve backslashes; write files that contain `\:` with the Write tool.
