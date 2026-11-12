@@ -929,6 +929,10 @@ export function createLifecycle(
         }
         return result.transition;
       },
+      // AppKit sends applicationDidFinishLaunching once the main window is up, so presentation precedes did.
+      effects: options.presentAfterCommit
+        ? [{ onError: "stop", run: (context) => options.presentAfterCommit!({ signal: context.signal }) }]
+        : undefined,
       did,
     });
     return linkExternalSignal(retainOperation(handle), options.signal);
