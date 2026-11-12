@@ -14,8 +14,12 @@
  * - A rightmost compound with nothing to file it under, holding a multi-argument `:is()` or `:where()`,
  *   is split into one selector per argument; `:is()` branches are padded to the list's specificity.
  * - Every compound puts its type, id, class and attribute selectors first.
+ * - A contract hook selector, `[data-nse-part="bezel"]`, becomes its mirror class, `.nse\:part\=bezel`:
+ *   Chrome files attribute rules by attribute name alone, so every hooked element was tested against every
+ *   hook rule. The runtime writes the classes beside the attributes (src/NSE/Theme/contract/hookMirror.mjs).
  */
 import * as cssTree from "css-tree";
+import { mirrorSelector } from "../../src/NSE/Theme/contract/hookMirror.mjs";
 
 const indexable = new Set(["TypeSelector", "IdSelector", "ClassSelector", "AttributeSelector"]);
 const zero = [0, 0, 0];
@@ -110,9 +114,26 @@ function padding(missing) {
   return `:is(*, ${"_ ".repeat(Math.max(0, missing[2] - 1))}${last})`;
 }
 
+const hookPrefix = "data-nse-";
+/**
+ * Replaces exact-match and presence hook selectors with their mirror classes, wherever they sit in the
+ * selector. A class and an attribute selector weigh the same. Other operators, case flags and values that
+ * cannot be class tokens keep the attribute form, which still matches.
+ */
+function mirrorHooks(selector) {
+  cssTree.walk(selector, { visit: "AttributeSelector", enter(node, item, list) {
+    const attribute = node.name.name;
+    if (!attribute.startsWith(hookPrefix) || node.flags || node.matcher !== null && node.matcher !== "=") return;
+    const value = node.matcher === null ? null : node.value.type === "String" ? node.value.value : node.value.name;
+    const mirrored = mirrorSelector(attribute.slice(hookPrefix.length), value);
+    if (mirrored) list.replace(item, list.createItem({ type: "ClassSelector", loc: null, name: mirrored.slice(1) }));
+  } });
+  return selector;
+}
+
 /** Rewrites one complex selector (text) into one or more selectors with identical meaning. */
 function rewriteSelector(text) {
-  const selector = parseSelector(text);
+  const selector = mirrorHooks(parseSelector(text));
   const target = specificity(selector);
   let list = compounds(selector);
 

@@ -27,7 +27,8 @@ describe("theme loading", () => {
   it("bounds foreign nested themes and keeps unspecified states on Atmo", () => {
     const css = scopeThemeCSS('[data-nse-control="button"] [data-nse-part="bezel"] { background: white; }', "com.example.paper");
     expect(css).toContain('@layer nse.theme'); expect(css).toContain('@scope ([data-nse-theme="com.example.paper"]) to ([data-nse-theme]:not([data-nse-theme="com.example.paper"]))');
-    expect(css).toContain(":not([data-nse-highlighted])");
+    // Hooks inside the scope are filed as mirror classes; the scope prelude keeps the public attribute.
+    expect(css).toContain(":not(.nse\\:highlighted)"); expect(css).not.toContain("[data-nse-control");
   });
   it("emits only statically referenced themes' CSS in a real Vite build", async () => {
     const root = project(); writeFileSync(join(root, "src/main.ts"), 'import { themes } from "virtual:syncloudos/themes"; console.log(themes["com.example.paper"]);');
