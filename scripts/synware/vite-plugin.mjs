@@ -72,6 +72,9 @@ const fxRuntimeModuleId = "virtual:syncloudos/fx-runtime";
 const fxRuntimePath = fileURLToPath(new URL("../../src/SynCloudOS/AppSDK/fx/runtime.ts", import.meta.url));
 const dispatchSendableModuleId = "virtual:syncloudos/dispatch-sendable";
 const resolvedDispatchSendableModuleId = `\0${dispatchSendableModuleId}`;
+const dispatchWorkerSuffix = "/dispatch-worker";
+const dispatchWorkerPlaceholderPrefix = "__SYNCLOUDOS_DFX_WORKER_CHUNK__";
+const dispatchWorkerPlaceholderSuffix = "__";
 const resolvedProjectModuleId = `\0${projectModuleId}`;
 const browserModuleId = "virtual:syncloudos/browser";
 const resolvedBrowserModuleId = `\0${browserModuleId}`;
@@ -792,6 +795,143 @@ export function synCloudOS(options) {
   // Standard decorators and hot reload of application modules (scripts/synware/application-toolchain.mjs).
   const toolchain = createApplicationToolchain();
   const extractedDispatchClosures = new Map();
+  const transformedDispatchFiles = new Set();
+  const dispatchWorkerVersions = new Map();
+  const dispatchWorkerEmitRefs = new Map();
+
+  const findOwningBundle = (current, filePath) =>
+    current.bundles.find(bundle => isPathInside(dirname(dirname(bundle.entryPath)), filePath));
+
+  const collectBundleSourceFiles = (directory, out = []) => {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      if (entry.name === "node_modules" || entry.name === "dist" || entry.name === "__tests__") continue;
+      const fullPath = resolve(directory, entry.name);
+      if (entry.isSymbolicLink()) continue;
+      if (entry.isDirectory()) collectBundleSourceFiles(fullPath, out);
+      else if (/\.(?:[cm]?[jt]sx?)$/u.test(entry.name)) out.push(fullPath);
+    }
+    return out;
+  };
+
+  const resolveDispatchClosureImports = (closures, importerFile) =>
+    closures.map(closure => ({
+      ...closure,
+      imports: closure.imports.map(imp => ({
+        ...imp,
+        specifier: imp.specifier.startsWith(".") ? slash(resolve(dirname(importerFile), imp.specifier)) : imp.specifier,
+      })),
+    }));
+
+  const extractDispatchClosures = (pluginContext, rawCode, cleanId, owningBundle, emitWarnings = true) => {
+    const frameworkSrcRoot = resolve(resolvedConfig?.root ?? process.cwd(), "src");
+    const isFrameworkDispatchModule = !owningBundle && isPathInside(frameworkSrcRoot, cleanId);
+    if (!owningBundle && !isFrameworkDispatchModule) return null;
+    transformedDispatchFiles.add(cleanId);
+    if (!/fx\/dispatch|DispatchFX/u.test(rawCode)) {
+      extractedDispatchClosures.delete(cleanId);
+      return null;
+    }
+    const sourceForParse = /\.(?:[cm]?tsx?|jsx)$/u.test(cleanId)
+      ? ts.transpileModule(rawCode, {
+          fileName: cleanId,
+          compilerOptions: {
+            target: ts.ScriptTarget.ES2022,
+            module: ts.ModuleKind.ESNext,
+            jsx: ts.JsxEmit.ReactJSX,
+          },
+        }).outputText
+      : rawCode;
+    const result = convertDispatchClosures(sourceForParse, cleanId, {
+      parse: typeof pluginContext?.parse === "function" ? src => pluginContext.parse(src) : undefined,
+      strict: Boolean(pluginOptions.dispatch?.strict),
+      isWorkerSafe: createWorkerSafeClassifier(cleanId, resolvedConfig?.root ?? process.cwd()),
+      runtimeSpecifier: dispatchSendableModuleId,
+    });
+    if (emitWarnings) {
+      for (const diagnostic of result.diagnostics) {
+        const message = `${diagnostic.file}:${diagnostic.line}:${diagnostic.column} DispatchFX closure not sendable: ${diagnostic.reason}`;
+        console.warn(message);
+        if (typeof pluginContext?.warn === "function") pluginContext.warn(message);
+      }
+    }
+    if (result.closures.length > 0) {
+      extractedDispatchClosures.set(cleanId, {
+        bundleIdentifier: owningBundle ? normalizeBundleIdentifier(owningBundle.bundleIdentifier) : null,
+        closures: resolveDispatchClosureImports(result.closures, cleanId),
+      });
+      return result;
+    }
+    extractedDispatchClosures.delete(cleanId);
+    return null;
+  };
+
+  const ensureBundleClosuresExtracted = (pluginContext, normalizedBundle) => {
+    const current = discovery ?? refresh();
+    const owningBundle = current.bundles.find(bundle => normalizeBundleIdentifier(bundle.bundleIdentifier) === normalizedBundle);
+    if (!owningBundle) return;
+    const bundleRoot = dirname(dirname(owningBundle.entryPath));
+    for (const filePath of collectBundleSourceFiles(bundleRoot)) {
+      const cleanPath = displayPath(filePath);
+      if (transformedDispatchFiles.has(cleanPath)) continue;
+      extractDispatchClosures(pluginContext, readFileSync(filePath, "utf8"), cleanPath, owningBundle, false);
+    }
+  };
+
+  const createDispatchWorkerModuleSource = (pluginContext, normalizedBundle) => {
+    if (resolvedConfig.command === "build") ensureBundleClosuresExtracted(pluginContext, normalizedBundle);
+    const importLines = [];
+    const importBindings = new Map();
+    let importSeq = 0;
+    const bindImport = (imp) => {
+      const key = `${imp.specifier}\0${imp.imported}`;
+      let alias = importBindings.get(key);
+      if (!alias) {
+        alias = `__dfxImp_${importSeq++}`;
+        importBindings.set(key, alias);
+        if (imp.imported === "*") importLines.push(`import * as ${alias} from ${quote(imp.specifier)};`);
+        else if (imp.imported === "default") importLines.push(`import ${alias} from ${quote(imp.specifier)};`);
+        else importLines.push(`import { ${imp.imported} as ${alias} } from ${quote(imp.specifier)};`);
+      }
+      return alias;
+    };
+    const entries = [];
+    for (const item of extractedDispatchClosures.values()) {
+      if (item.bundleIdentifier !== normalizedBundle) continue;
+      for (const closure of item.closures) {
+        const localNames = [];
+        const boundAliases = [];
+        const seenLocals = new Set();
+        for (const imp of closure.imports) {
+          if (seenLocals.has(imp.local)) continue;
+          seenLocals.add(imp.local);
+          localNames.push(imp.local);
+          boundAliases.push(bindImport(imp));
+        }
+        const constLines = closure.constants.map(c => `const ${c.local} = ${c.initSource};`).join(" ");
+        entries.push(`${quote(closure.closureId)}: ((${localNames.join(", ")}) => { ${constLines} return (${closure.body}); })(${boundAliases.join(", ")})`);
+      }
+    }
+    return `${importLines.join("\n")}\nexport const __dfxClosures = Object.freeze({\n  ${entries.join(",\n  ")}\n});\n`;
+  };
+
+  const createDispatchWorkerRegistrySnippet = (pluginContext, normalizedBundle) => {
+    if (resolvedConfig.command === "build") {
+      if (!dispatchWorkerEmitRefs.has(normalizedBundle)) {
+        const refId = pluginContext.emitFile({
+          type: "chunk",
+          id: `\0${appModulePrefix}${normalizedBundle}${dispatchWorkerSuffix}`,
+          preserveSignature: "strict",
+        });
+        dispatchWorkerEmitRefs.set(normalizedBundle, refId);
+      }
+      const placeholder = `${dispatchWorkerPlaceholderPrefix}${normalizedBundle}${dispatchWorkerPlaceholderSuffix}`;
+      return `\nconst __dfxReg = (globalThis[Symbol.for("syncloudos.dfx.workerChunks")] ??= new Map());\n__dfxReg.set(${quote(normalizedBundle)}, new URL(${quote(placeholder)}, import.meta.url).href);\n`;
+    }
+    const basePath = deploymentBasePath(resolvedConfig.base);
+    const workerIdPath = `${basePath}@id/__x00__${appModulePrefix}${normalizedBundle}${dispatchWorkerSuffix}`;
+    const initialVersion = dispatchWorkerVersions.get(normalizedBundle) ?? 0;
+    return `\nconst __dfxReg = (globalThis[Symbol.for("syncloudos.dfx.workerChunks")] ??= new Map());\nconst __dfxAppKey = ${quote(normalizedBundle)};\nconst __dfxSetChunk = (ver) => {\n  const base = new URL(${quote(workerIdPath)}, typeof location !== "undefined" ? location.href : import.meta.url).href;\n  __dfxReg.set(__dfxAppKey, ver > 0 ? \`\${base}?v=\${ver}\` : base);\n};\n__dfxSetChunk(${initialVersion});\nif (import.meta.hot) {\n  import.meta.hot.on("syncloudos:dispatch-worker-updated", (payload) => {\n    if (payload && payload.normalizedBundle === __dfxAppKey) __dfxSetChunk(payload.version);\n  });\n}\n`;
+  };
 
   return {
     name: "syncloudos:project",
@@ -827,45 +967,10 @@ export function synCloudOS(options) {
       if (cleanId.startsWith("\0") || !/\.(?:[cm]?[jt]sx?)$/u.test(cleanId) || cleanId.includes("/node_modules/") || cleanId.includes("\\node_modules\\")) {
         return hotResult;
       }
-      if (!/fx\/dispatch|DispatchFX/u.test(hotCode)) {
-        return hotResult;
-      }
       const current = discovery ?? refresh();
-      const owningBundle = current.bundles.find(bundle => isPathInside(dirname(dirname(bundle.entryPath)), cleanId));
-      const frameworkSrcRoot = resolve(resolvedConfig?.root ?? process.cwd(), "src");
-      const isFrameworkDispatchModule = !owningBundle && isPathInside(frameworkSrcRoot, cleanId);
-      if (!owningBundle && !isFrameworkDispatchModule) {
-        return hotResult;
-      }
-      const sourceForParse = /\.(?:[cm]?tsx?|jsx)$/u.test(cleanId)
-        ? ts.transpileModule(hotCode, {
-            fileName: cleanId,
-            compilerOptions: {
-              target: ts.ScriptTarget.ES2022,
-              module: ts.ModuleKind.ESNext,
-              jsx: ts.JsxEmit.ReactJSX,
-            },
-          }).outputText
-        : hotCode;
-      const result = convertDispatchClosures(sourceForParse, cleanId, {
-        parse: src => this.parse(src),
-        strict: Boolean(pluginOptions.dispatch?.strict),
-        isWorkerSafe: createWorkerSafeClassifier(cleanId, resolvedConfig?.root ?? process.cwd()),
-        runtimeSpecifier: dispatchSendableModuleId,
-      });
-      for (const diagnostic of result.diagnostics) {
-        const message = `${diagnostic.file}:${diagnostic.line}:${diagnostic.column} DispatchFX closure not sendable: ${diagnostic.reason}`;
-        console.warn(message);
-        if (typeof this.warn === "function") this.warn(message);
-      }
-      if (result.closures.length > 0) {
-        extractedDispatchClosures.set(cleanId, {
-          bundleIdentifier: owningBundle ? normalizeBundleIdentifier(owningBundle.bundleIdentifier) : null,
-          closures: result.closures,
-        });
-        return { code: result.code, map: result.map };
-      }
-      extractedDispatchClosures.delete(cleanId);
+      const owningBundle = findOwningBundle(current, cleanId);
+      const result = extractDispatchClosures(this, hotCode, cleanId, owningBundle, true);
+      if (result) return { code: result.code, map: result.map };
       return hotResult;
     },
 
@@ -876,6 +981,7 @@ export function synCloudOS(options) {
     },
 
     async buildStart() {
+      dispatchWorkerEmitRefs.clear();
       const current = refresh();
       addWatchFiles(this, current.watchPaths);
       addWatchFiles(this, themeBundles.flatMap(bundle => bundle.files));
@@ -899,10 +1005,11 @@ export function synCloudOS(options) {
       if (id === themesModuleId || id.startsWith(themeStylePrefix)) return "\0" + id;
       if (id === browserModuleId) return resolvedBrowserModuleId;
       if (id === "@syndromatic/syncloudos/browser" && importer !== resolvedBrowserModuleId) return resolvedBrowserModuleId;
+      if (id.startsWith(`\0${appModulePrefix}`)) return id;
       if (id.startsWith(appModulePrefix)) { const resolved = `\0${id}`; appVirtualModules.add(resolved); return resolved; }
       const fxFamily = id.startsWith("@syndromatic/syncloudos/fx/") ? id.slice("@syndromatic/syncloudos/fx/".length) : null;
       if ((id === "@syndromatic/syncloudos" || (fxFamily && isFXFamily(fxFamily))) && importer && !importer.startsWith("\0")) {
-        const bundle = (discovery ?? refresh()).bundles.find(bundle => isPathInside(dirname(dirname(bundle.entryPath)), importer.split("?")[0]));
+        const bundle = findOwningBundle(discovery ?? refresh(), importer.split("?")[0]);
         if (bundle) {
           const resolved = `\0${appModulePrefix}${normalizeBundleIdentifier(bundle.bundleIdentifier)}${fxFamily ? `/fx/${fxFamily}` : ""}`;
           appVirtualModules.add(resolved); return resolved;
@@ -918,10 +1025,18 @@ export function synCloudOS(options) {
       if (id === resolvedDispatchSendableModuleId) return createDispatchSendableSource();
       if (id === resolvedThemesModuleId) return themeModuleSource(themeBundles, selectedThemes, toViteFileImport, themeStylePrefix);
       if (id.startsWith("\0" + themeStylePrefix)) { const bundleIdentifier = id.slice(themeStylePrefix.length + 1, -4); const bundle = themeBundles.find(bundle => bundle.theme.bundleIdentifier === bundleIdentifier); if (!bundle) throw new Error("Unknown theme: " + bundleIdentifier); return themeStylesheet(bundle, toViteFileImport); }
-      if (id.startsWith(`\0${appModulePrefix}`)) {
-        const app = id.slice(appModulePrefix.length + 1);
+      const cleanVirtual = id.split("?")[0];
+      if (cleanVirtual.startsWith(`\0${appModulePrefix}`)) {
+        const app = cleanVirtual.slice(appModulePrefix.length + 1);
+        if (app.endsWith(dispatchWorkerSuffix)) {
+          return createDispatchWorkerModuleSource(this, app.slice(0, -dispatchWorkerSuffix.length));
+        }
         const separator = app.indexOf("/fx/");
-        return separator < 0 ? createScosAppModuleSource(app) : createFXAppModuleSource(app.slice(0, separator), app.slice(separator + 4), fxRuntimeModuleId);
+        if (separator < 0) return createScosAppModuleSource(app);
+        const normalizedBundle = app.slice(0, separator);
+        const family = app.slice(separator + 4);
+        const source = createFXAppModuleSource(normalizedBundle, family, fxRuntimeModuleId);
+        return family === "dispatch" ? `${source}${createDispatchWorkerRegistrySnippet(this, normalizedBundle)}` : source;
       }
       if (id === resolvedBrowserModuleId) return 'export * from "@syndromatic/syncloudos/browser";\nimport { mountSynCloudOS as mount } from "@syndromatic/syncloudos/browser";\nimport * as project from "virtual:syncloudos/project";\nexport function mountSynCloudOS(options) { return mount({ ...options, composition: options.composition ?? project }); }';
       if (id === resolvedTypographyModuleId) return typographyCode();
@@ -960,12 +1075,25 @@ export function synCloudOS(options) {
     },
 
     async handleHotUpdate(context) {
+      const current = discovery ?? refresh();
+      const cleanFile = displayPath(context.file);
+      const owningBundle = findOwningBundle(current, cleanFile);
+      if (owningBundle && /\.(?:[cm]?[jt]sx?)$/u.test(cleanFile)) {
+        const normalizedBundle = normalizeBundleIdentifier(owningBundle.bundleIdentifier);
+        const updatedRaw = typeof context.read === "function" ? await context.read() : readFileSync(context.file, "utf8");
+        extractDispatchClosures(null, updatedRaw, cleanFile, owningBundle, false);
+        const version = (dispatchWorkerVersions.get(normalizedBundle) ?? 0) + 1;
+        dispatchWorkerVersions.set(normalizedBundle, version);
+        const workerVirtualId = `\0${appModulePrefix}${normalizedBundle}${dispatchWorkerSuffix}`;
+        const workerNode = server?.moduleGraph?.getModuleById(workerVirtualId);
+        if (workerNode) server.moduleGraph.invalidateModule(workerNode);
+        server?.ws?.send({ type: "custom", event: "syncloudos:dispatch-worker-updated", data: { normalizedBundle, version } });
+      }
       // An application module takes its own update; the project is unchanged.
       if (toolchain.acceptsHotUpdate(context)) return undefined;
-      if (typography?.watchPaths.some(path => caseKey(path) === caseKey(displayPath(context.file)))) {
+      if (typography?.watchPaths.some(path => caseKey(path) === caseKey(cleanFile))) {
         await refreshTypography(); invalidateVirtualModule(); return [];
       }
-      const current = discovery ?? refresh();
       if (!isWatchedFile(context.file, current.watchRoots)) return undefined;
       const next = refresh();
       server?.watcher.add(next.watchPaths);
@@ -975,6 +1103,18 @@ export function synCloudOS(options) {
 
     renderStart() {
       typographyAssetPaths = new Map([...typographyAssets].map(([id, reference]) => [id, this.getFileName(reference)]));
+    },
+    renderChunk(code, chunk) {
+      if (dispatchWorkerEmitRefs.size === 0 || !code.includes(dispatchWorkerPlaceholderPrefix)) return null;
+      let rewritten = code;
+      for (const [normalizedBundle, refId] of dispatchWorkerEmitRefs) {
+        const token = `${dispatchWorkerPlaceholderPrefix}${normalizedBundle}${dispatchWorkerPlaceholderSuffix}`;
+        if (!rewritten.includes(token)) continue;
+        const emittedFile = this.getFileName(refId);
+        const rel = posix.relative(posix.dirname(chunk.fileName), emittedFile);
+        rewritten = rewritten.replaceAll(token, rel.startsWith(".") ? rel : `./${rel}`);
+      }
+      return rewritten === code ? null : { code: rewritten, map: null };
     },
     generateBundle: {
       order: "post",
