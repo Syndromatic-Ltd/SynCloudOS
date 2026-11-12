@@ -168,6 +168,7 @@ export function assertReviewedPackageFiles(files) {
     if (/^assets\/image-processing\.worker-[A-Za-z0-9_-]+\.js$/u.test(file)) continue;
     if (/^assets\/video-processing\.worker-[A-Za-z0-9_-]+\.js$/u.test(file)) continue;
     if (/^assets\/browserResponsiveness\.worker-[A-Za-z0-9_-]+\.js$/u.test(file)) continue;
+    if (/^assets\/poolWorker-[A-Za-z0-9_-]+\.js$/u.test(file)) continue;
     if (/^themes\/Atmo\.scostheme\/Contents\/(?:Info\.ts|Theme\.json|Licences\/[A-Za-z0-9._-]+|Resources\/(?:[A-Za-z0-9._-]+\/)*[A-Za-z0-9._@-]+\.(?:css|png|svg))$/u.test(file)) continue;
     if (/^nse\/themes\/atmo\/(?:[A-Za-z0-9._-]+\/)*[A-Za-z0-9._@-]+\.(?:css|png|webp|svg|jpg|jpeg|gif|avif|woff2?|ttf|otf)$/u.test(file)) continue;
     if (/^assets\/[A-Za-z0-9_-]+\.css$/u.test(file)) continue;
