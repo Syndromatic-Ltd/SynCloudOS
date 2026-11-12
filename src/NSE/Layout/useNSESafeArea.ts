@@ -48,16 +48,33 @@ export function nseLayoutOrigin(element: HTMLElement): { readonly x: number; rea
  * window root. Only then does the client rectangle differ from the laid-out
  * frame; otherwise it is the frame, at sub-pixel precision offsets lack.
  */
+// Answers for one synchronous pass of layout effects, per window root. Views in a commit share
+// ancestors, so each is read once; a microtask later the answers are dropped.
+let transformedAnswers: Map<HTMLElement | null, Map<HTMLElement, boolean>> | null = null;
+
 function nseTransformedWithin(element: HTMLElement, root: HTMLElement | null | undefined): boolean {
   const view = element.ownerDocument.defaultView;
   if (!view) return false;
+  if (!transformedAnswers) {
+    const answers = transformedAnswers = new Map();
+    queueMicrotask(() => { if (transformedAnswers === answers) transformedAnswers = null; });
+  }
+  let known = transformedAnswers.get(root ?? null);
+  if (!known) transformedAnswers.set(root ?? null, known = new Map());
   const set = (value: string) => value !== "" && value !== "none";
+  const walked: HTMLElement[] = [];
+  let answer = false;
   for (let node: HTMLElement | null = element; node; node = node.parentElement) {
+    const earlier = known.get(node);
+    if (earlier !== undefined) { answer = earlier; break; }
+    walked.push(node);
     const style = view.getComputedStyle(node);
-    if (set(style.transform) || set(style.translate) || set(style.scale) || set(style.rotate)) return true;
+    if (set(style.transform) || set(style.translate) || set(style.scale) || set(style.rotate)) { answer = true; break; }
     if (node === root) break;
   }
-  return false;
+  // Every element walked lies below the one that decided the answer, so it shares that answer.
+  for (const node of walked) known.set(node, answer);
+  return answer;
 }
 
 /** @internal Measures an existing view element; never inserts a layout wrapper. */
