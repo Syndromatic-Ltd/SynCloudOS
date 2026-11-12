@@ -20,7 +20,6 @@
 
 import {
   Children,
-  cloneElement,
   isValidElement,
   useCallback,
   useEffect,
@@ -32,6 +31,7 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
+import { cloneElement } from "../Theme/contract/hookMirrorReact";
 import { createPortal } from "react-dom";
 import { NSEFlowStackView, stackNeedsArrangedLayout } from "./flowStackView";
 import { resolveNSESpacing } from "./layoutSpacing";

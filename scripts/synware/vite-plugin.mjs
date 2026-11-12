@@ -21,6 +21,7 @@
 import { discoverThemeBundles } from "./theme-bundles.mjs";
 import { builtInThemeCSS } from "./built-in-theme-css.mjs";
 import { selectorPerformance } from "./selector-performance.mjs";
+import { resolveHookMirrorJSX } from "./hook-mirror-jsx.mjs";
 import { referencedThemeIdentifiers, themeModuleSource, themeStylesheet } from "./theme-loading.mjs";
 import {
   createReadStream,
@@ -761,6 +762,8 @@ export function synCloudOS(options) {
     },
 
     resolveId(id, importer) {
+      const mirroringRuntime = resolveHookMirrorJSX(id, importer);
+      if (mirroringRuntime) return mirroringRuntime;
       // Use the same canonical path and dependency version query as relative SDK imports.
       if (id === fxRuntimeModuleId) return this.resolve(displayPath(fxRuntimePath), importer, { skipSelf: true });
       if (id === themesModuleId || id.startsWith(themeStylePrefix)) return "\0" + id;
