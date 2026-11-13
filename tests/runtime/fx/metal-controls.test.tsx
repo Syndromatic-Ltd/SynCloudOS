@@ -163,6 +163,26 @@ describe("metal material controls", () => {
     expect(h.states.size).toBe(0);
     expect(h.authorize).not.toHaveBeenCalled();
   });
+  it("treats the held pose as rest and answers a turn away from it, however the device is held", () => {
+    const h = harness();
+    const release = h.store.subscribe(() => {});
+    // Held upright and still: no light movement, although the pose is far from flat.
+    h.sample(1.4, 0);
+    h.advance(0.05);
+    h.sample(1.4, 0);
+    h.advance(0.1);
+    expect(h.store.getSnapshot().active).toBe(true);
+    expect(Math.abs(h.store.getSnapshot().angle)).toBeLessThan(0.01);
+    // Turned half a radian about the device's upright axis.
+    for (let time = 0.15; time < 0.6; time += 0.05) {
+      h.sample(1.4, 0.5);
+      h.advance(time);
+    }
+    expect(h.store.getSnapshot().angle).toBeGreaterThan(0.3);
+    expect(h.store.getSnapshot().angle).toBeLessThan(0.7);
+    release();
+  });
+
   it("suspends subscriptions for hidden and reduced states and resumes without a prompt", () => {
     const h = harness(),
       release = h.store.subscribe(() => {});
