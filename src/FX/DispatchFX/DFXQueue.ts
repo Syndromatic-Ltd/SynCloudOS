@@ -168,7 +168,7 @@ function submitScheduledAsync(params: {
         return;
       }
       ensureAppWorkerCancellation(lifetime);
-      const activeChain = queueChain(queue);
+      const activeChain = currentExecution()?.chain ?? queueChain(queue);
       const held = acquireWorkerInFlight(queue, activeChain, barrier);
       const serialQueue =
         activeChain.find(entry => {

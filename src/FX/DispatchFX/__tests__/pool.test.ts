@@ -842,4 +842,59 @@ describe("DispatchFX runtime fault regressions", () => {
     expect(seenA).toEqual([]);
     expect(seenB).toEqual(["alive-b"]);
   });
+
+  it("barrier on original target waits when active child queue work was submitted before retargeting", async () => {
+    const workers: FakeWorker[] = [];
+    vi.stubGlobal(
+      "Worker",
+      class {
+        constructor() {
+          const fw = new FakeWorker();
+          workers.push(fw);
+          return fw;
+        }
+      },
+    );
+
+    const reg = new Map<string, string>([["com.example.retargetbarrier", "/virtual/retarget-barrier.js"]]);
+    (globalThis as Record<symbol, unknown>)[Symbol.for("syncloudos.dfx.workerChunks")] = reg;
+
+    const appLifetime: DispatchLifetime = {
+      appId: "com.example.retargetbarrier",
+      ended: false,
+      jobs: new Set(),
+      resources: new Set(),
+    };
+    const AppQueue = classForLifetime(D.DFXQueue, appLifetime);
+    const originalTarget = new AppQueue("orig.concurrent", { attributes: [D.DFXQueueAttributes.concurrent] });
+    const newTarget = new AppQueue("new.concurrent", { attributes: [D.DFXQueueAttributes.concurrent] });
+    const child = new AppQueue("retarget.child", { target: originalTarget });
+
+    const sendableSymbol = Symbol.for("syncloudos.dfx.sendable");
+    const makeSendable = (id: string) => {
+      const fn = () => {};
+      Object.defineProperty(fn, sendableSymbol, {
+        value: { id, getCaptures: () => [] },
+        configurable: true,
+      });
+      return fn;
+    };
+
+    // Active submission snapshots [child, originalTarget]; retargeting child afterward leaves that saved target chain.
+    child.async(makeSendable("w_before_retarget"));
+    child.setTarget(newTarget);
+    const barrierLog: string[] = [];
+    originalTarget.async({ flags: [D.DFXWorkItemFlags.barrier] }, () => { barrierLog.push("barrier_original"); });
+
+    await new Promise(resolve => setTimeout(resolve, 30));
+
+    expect(workers).toHaveLength(1);
+    const posted = workers[0].posted.flatMap(p => p.message.jobs);
+    expect(posted.map(j => j.closureId)).toEqual(["w_before_retarget"]);
+    expect(barrierLog).toEqual([]);
+
+    workers[0].emitResult(posted[0].jobId, []);
+    await new Promise(resolve => setTimeout(resolve, 30));
+    expect(barrierLog).toEqual(["barrier_original"]);
+  });
 });
