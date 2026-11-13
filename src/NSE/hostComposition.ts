@@ -59,7 +59,7 @@ export { registerNSEHapticFeedbackEngine } from "./Feedback/NSEHapticFeedbackMan
 export { NSEViewDrawingEnvironmentContext } from "./Views/NSEViewDrawingEnvironment";
 // Window layout and safe areas for framework chrome, and the theme hooks system surfaces publish.
 export { NSEWindowLayoutContext, NSEWindowLayoutModel, useNSEContentLayoutProperties } from "./Layout/windowChromeObstructions";
-export { useNSEViewSafeArea } from "./Layout/useNSESafeArea";
+export { NSESafeAreaMeasurementProvider, useNSEViewSafeArea } from "./Layout/useNSESafeArea";
 export { useNSEDeferredDisposal } from "./interactionLifecycle";
 export { createReactOwnedNSEMenu } from "./Menus/NSEMenu";
 export { useNSEMenuLifetime } from "./Menus/useNSEMenuLifetime";

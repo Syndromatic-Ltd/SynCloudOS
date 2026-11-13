@@ -6,7 +6,7 @@ import { NSEView } from "../../src/NSE/Views/NSEView";
 import { NSEViewController, nseUpdateSafeArea } from "../../src/NSE/Application/NSEViewController";
 import { NSEEdgeInsetsMake } from "../../src/NSE/Layout/NSEEdgeInsets";
 import { NSEWindowLayoutContext, NSEWindowLayoutModel } from "../../src/NSE/Layout/windowChromeObstructions";
-import { useNSESafeArea } from "../../src/NSE/Layout/useNSESafeArea";
+import { NSESafeAreaMeasurementProvider, useNSESafeArea } from "../../src/NSE/Layout/useNSESafeArea";
 
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 function Read({ id = "read" }: { id?: string }) {
@@ -23,6 +23,40 @@ function fixture() {
   return model;
 }
 describe("view safe areas", () => {
+  it("measures sibling views together after layout writes and publishes before a child-only commit returns", () => {
+    const model = fixture();
+    const events: string[] = [];
+    let move: (value: boolean) => void = () => {};
+    let y = 300;
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
+      if (this.dataset.testid?.startsWith("batch-")) events.push(this.dataset.testid);
+      return new DOMRect(0, y, 800, 300);
+    });
+    function WriteLayout({ moved }: { moved: boolean }) {
+      React.useLayoutEffect(() => {
+        events.push("write");
+        y = moved ? 0 : 300;
+      }, [moved]);
+      return null;
+    }
+    function Views() {
+      const [moved, setMoved] = React.useState(false);
+      move = setMoved;
+      return <>
+        <NSEView data-testid="batch-first"><Read id="first-insets" /></NSEView>
+        <WriteLayout moved={moved} />
+        <NSEView data-testid="batch-second"><Read id="second-insets" /></NSEView>
+      </>;
+    }
+    render(<React.StrictMode><NSEWindowLayoutContext.Provider value={model}><NSESafeAreaMeasurementProvider><Views /></NSESafeAreaMeasurementProvider></NSEWindowLayoutContext.Provider></React.StrictMode>);
+    events.length = 0;
+    act(() => move(true));
+    expect(events[0]).toBe("write");
+    for (const id of ["first-insets", "second-insets"]) {
+      expect(JSON.parse(screen.getByTestId(id).textContent!).safeAreaInsets.top).toBe(82);
+    }
+    model.dispose();
+  });
   it("inherits the overlapping window insets and publishes physical CSS properties", () => {
     const model = fixture();
     render(<NSEWindowLayoutContext.Provider value={model}><NSEView data-testid="view"><Read /></NSEView></NSEWindowLayoutContext.Provider>);
@@ -77,6 +111,31 @@ describe("view safe areas", () => {
     const stop = model.connectRoot(root);
     render(<NSEWindowLayoutContext.Provider value={model}><NSEView data-testid="zooming"><Read id="zooming-read" /></NSEView></NSEWindowLayoutContext.Provider>, { container: root.appendChild(document.createElement("div")) });
     expect(JSON.parse(screen.getByTestId("zooming-read").textContent!).safeAreaInsets).toEqual({ top: 82, left: 0, bottom: 0, right: 0 });
+    stop(); root.remove(); model.dispose();
+  });
+
+  it("reads a changed ancestor transform on the next synchronous measurement pass", () => {
+    const model = fixture();
+    const root = document.createElement("div");
+    document.body.append(root);
+    vi.spyOn(HTMLElement.prototype, "offsetWidth", "get").mockReturnValue(800);
+    vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockReturnValue(600);
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
+      if (this.dataset.testid !== "transform-probe") return new DOMRect(0, 0, 800, 600);
+      return root.style.transform ? new DOMRect(200, 150, 400, 300) : new DOMRect(0, 0, 800, 600);
+    });
+    const stop = model.connectRoot(root);
+    let zoom: () => void = () => {};
+    function Zoom() {
+      const [zoomed, setZoomed] = React.useState(false);
+      zoom = () => setZoomed(true);
+      React.useLayoutEffect(() => { root.style.transform = zoomed ? "scale(0.5)" : ""; }, [zoomed]);
+      return <NSEView data-testid="transform-probe"><Read /></NSEView>;
+    }
+    render(<NSEWindowLayoutContext.Provider value={model}><NSESafeAreaMeasurementProvider><Zoom /></NSESafeAreaMeasurementProvider></NSEWindowLayoutContext.Provider>, { container: root.appendChild(document.createElement("div")) });
+    expect(JSON.parse(screen.getByTestId("read").textContent!).safeAreaInsets.top).toBe(82);
+    act(() => zoom());
+    expect(JSON.parse(screen.getByTestId("read").textContent!).safeAreaInsets.top).toBe(82);
     stop(); root.remove(); model.dispose();
   });
 });
