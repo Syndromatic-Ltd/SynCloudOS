@@ -1,5 +1,5 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
-import { createContext, useContext, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from "react";
+import { createContext, createElement, Fragment, useContext, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PropsWithChildren, type RefObject } from "react";
 import { NSEEdgeInsetsMake, NSEEdgeInsetsZero, type NSEEdgeInsets } from "./NSEEdgeInsets";
 import { nseEmptyLayoutRect, nseEqualRects } from "./NSELayoutGuide";
 import { NSEWindowLayoutContext, useNSEWindowLayoutSnapshot } from "./windowChromeObstructions";
@@ -13,6 +13,61 @@ export const nseEqualInsets = (a: NSEEdgeInsets, b: NSEEdgeInsets) => a.top === 
 interface ViewSafeArea extends NSESafeArea { readonly additional: NSEEdgeInsets }
 /** @internal The accumulated additional insets are distinct from the window overlap. */
 export const NSEViewSafeAreaContext = createContext<ViewSafeArea | null>(null);
+
+type TransformAnswers = Map<HTMLElement | null, Map<HTMLElement, boolean>>;
+type MeasureView = (answers?: TransformAnswers) => (() => void) | undefined;
+let standaloneTransformAnswers: TransformAnswers | null = null;
+
+function transformAnswersForStandaloneViews(): TransformAnswers {
+  if (!standaloneTransformAnswers) {
+    standaloneTransformAnswers = new Map();
+    queueMicrotask(() => { standaloneTransformAnswers = null; });
+  }
+  return standaloneTransformAnswers;
+}
+
+interface SafeAreaMeasurementQueue {
+  enqueue(ref: RefObject<HTMLElement | null>, measure: MeasureView): void;
+  remove(ref: RefObject<HTMLElement | null>): void;
+}
+const SafeAreaMeasurements = createContext<SafeAreaMeasurementQueue | null>(null);
+
+/** @internal A layout update schedules the reader even when only a descendant commits. */
+export function NSESafeAreaMeasurementProvider({ children }: PropsWithChildren) {
+  const batch = useMemo(() => {
+    const pending = new Map<RefObject<HTMLElement | null>, MeasureView>();
+    let schedule: (() => void) | undefined;
+    return {
+      enqueue(ref: RefObject<HTMLElement | null>, measure: MeasureView) {
+        const first = pending.size === 0;
+        pending.set(ref, measure);
+        if (first) schedule?.();
+      },
+      remove(ref: RefObject<HTMLElement | null>) { pending.delete(ref); },
+      connect(request: () => void) {
+        schedule = request;
+        return () => { schedule = undefined; pending.clear(); };
+      },
+      flush() {
+        if (!pending.size) return;
+        const measurements = [...pending.values()];
+        pending.clear();
+        const answers: TransformAnswers = new Map();
+        const apply = measurements.map(measure => measure(answers));
+        for (const update of apply) update?.();
+      },
+    };
+  }, []);
+  return createElement(SafeAreaMeasurements.Provider, { value: batch },
+    createElement(Fragment, null, children, createElement(SafeAreaReader, { batch })));
+}
+
+function SafeAreaReader({ batch }: { batch: { connect(request: () => void): () => void; flush(): void } }) {
+  const [, schedule] = useState(0);
+  useLayoutEffect(() => batch.connect(() => schedule(pass => pass + 1)), [batch]);
+  useLayoutEffect(() => batch.flush());
+  return null;
+}
 
 export function useNSESafeArea(): NSESafeArea {
   const inherited = useContext(NSEViewSafeAreaContext);
@@ -48,19 +103,11 @@ export function nseLayoutOrigin(element: HTMLElement): { readonly x: number; rea
  * window root. Only then does the client rectangle differ from the laid-out
  * frame; otherwise it is the frame, at sub-pixel precision offsets lack.
  */
-// Answers for one synchronous pass of layout effects, per window root. Views in a commit share
-// ancestors, so each is read once; a microtask later the answers are dropped.
-let transformedAnswers: Map<HTMLElement | null, Map<HTMLElement, boolean>> | null = null;
-
-function nseTransformedWithin(element: HTMLElement, root: HTMLElement | null | undefined): boolean {
+function nseTransformedWithin(element: HTMLElement, root: HTMLElement | null | undefined, answers: TransformAnswers): boolean {
   const view = element.ownerDocument.defaultView;
   if (!view) return false;
-  if (!transformedAnswers) {
-    const answers = transformedAnswers = new Map();
-    queueMicrotask(() => { if (transformedAnswers === answers) transformedAnswers = null; });
-  }
-  let known = transformedAnswers.get(root ?? null);
-  if (!known) transformedAnswers.set(root ?? null, known = new Map());
+  let known = answers.get(root ?? null);
+  if (!known) answers.set(root ?? null, known = new Map());
   const set = (value: string) => value !== "" && value !== "none";
   const walked: HTMLElement[] = [];
   let answer = false;
@@ -80,47 +127,47 @@ function nseTransformedWithin(element: HTMLElement, root: HTMLElement | null | u
 /** @internal Measures an existing view element; never inserts a layout wrapper. */
 export function useNSEViewSafeArea(ref: RefObject<HTMLElement | null>, additional: NSEEdgeInsets = NSEEdgeInsetsZero, onChange?: (insets: NSEEdgeInsets) => void, onResize?: () => void, contentRef?: RefObject<HTMLElement | null>) {
   const model = useContext(NSEWindowLayoutContext);
+  const measurements = useContext(SafeAreaMeasurements);
   const parent = useContext(NSEViewSafeAreaContext);
   const window = useNSEWindowLayoutSnapshot(model);
   const [rect, setRect] = useState<NSEScrollRect>(nseEmptyLayoutRect);
   const resizeCallback = useRef(onResize);
   resizeCallback.current = onResize;
   const accumulated = useMemo(() => NSEEdgeInsetsMake(additional.top + (parent?.additional.top ?? 0), additional.left + (parent?.additional.left ?? 0), additional.bottom + (parent?.additional.bottom ?? 0), additional.right + (parent?.additional.right ?? 0)), [additional.top, additional.left, additional.bottom, additional.right, parent?.additional]);
-  const measure = () => {
+  const read: MeasureView = (answers = new Map()) => {
     const element = ref.current;
     if (!element) return;
-    const transformed = nseTransformedWithin(element, model?.root);
+    const transformed = nseTransformedWithin(element, model?.root, answers);
     const origin = transformed ? nseLayoutOrigin(element) : null;
     const rootOrigin = model?.root ? nseLayoutOrigin(model.root) : { x: window.bounds.x, y: window.bounds.y };
     if (origin && rootOrigin) {
       const laidOut = Object.freeze({ x: origin.x - rootOrigin.x, y: origin.y - rootOrigin.y, width: element.offsetWidth, height: element.offsetHeight });
-      setRect(previous => previous && nseEqualRects(previous, laidOut) ? previous : laidOut);
-      return;
+      return () => setRect(previous => previous && nseEqualRects(previous, laidOut) ? previous : laidOut);
     }
     const measured = element.getBoundingClientRect();
     const root = model?.root?.getBoundingClientRect();
     const scaleX = root?.width ? window.bounds.width / root.width : 1;
     const scaleY = root?.height ? window.bounds.height / root.height : 1;
     const next = Object.freeze({ x: (measured.x - (root?.x ?? window.bounds.x)) * scaleX, y: (measured.y - (root?.y ?? window.bounds.y)) * scaleY, width: element.offsetWidth || measured.width * scaleX, height: element.offsetHeight || measured.height * scaleY });
-    setRect(previous => previous && nseEqualRects(previous, next) ? previous : next);
+    return () => setRect(previous => previous && nseEqualRects(previous, next) ? previous : next);
   };
   // Re-measure on a committed parent layout as well as on size notifications:
   // sibling chrome can move a view without changing its own size.
-  useLayoutEffect(measure);
+  useLayoutEffect(() => {
+    if (!measurements) { read(transformAnswersForStandaloneViews())?.(); return; }
+    measurements.enqueue(ref, read);
+    return () => measurements.remove(ref);
+  });
   useLayoutEffect(() => {
     const element = ref.current;
     if (!element) return;
     if (model) {
-      let initial = true;
-      const stop = model.observeElement(element, () => { measure(); if (!initial) resizeCallback.current?.(); });
-      initial = false;
-      let initialContent = true;
-      const stopContent = contentRef?.current ? model.observeElement(contentRef.current, () => { if (!initialContent) resizeCallback.current?.(); }) : undefined;
-      initialContent = false;
+      const stop = model.observeElement(element, () => { read()?.(); resizeCallback.current?.(); }, false);
+      const stopContent = contentRef?.current ? model.observeElement(contentRef.current, () => resizeCallback.current?.(), false) : undefined;
       return () => { stop(); stopContent?.(); };
     }
     const Observer = element.ownerDocument.defaultView?.ResizeObserver;
-    const observer = Observer ? new Observer(() => { measure(); resizeCallback.current?.(); }) : null;
+    const observer = Observer ? new Observer(() => { read()?.(); resizeCallback.current?.(); }) : null;
     observer?.observe(element);
     if (contentRef?.current) observer?.observe(contentRef.current);
     return () => observer?.disconnect();

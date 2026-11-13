@@ -72,10 +72,11 @@ export class NSEWindowLayoutModel extends NSELayoutGuideStore {
     });
     return () => { stop(); this.#leadingChrome.delete(token); if (this.#chrome.delete(token)) this.#schedule(); };
   }
-  observeElement(element: HTMLElement, listener: (rect: NSEScrollRect) => void): () => void {
+  observeElement(element: HTMLElement, listener: (rect: NSEScrollRect) => void, notifyImmediately = true): () => void {
     let listeners = this.#measurements.get(element);
     if (!listeners) { listeners = new Set(); this.#measurements.set(element, listeners); this.#ensureObserver(element); this.#observer?.observe(element); }
-    listeners.add(listener); listener(this.#measure(element));
+    listeners.add(listener);
+    if (notifyImmediately) listener(this.#measure(element));
     return () => {
       listeners.delete(listener);
       if (!listeners.size) { this.#measurements.delete(element); this.#observer?.unobserve(element); }
