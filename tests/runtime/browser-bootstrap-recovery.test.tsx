@@ -236,6 +236,23 @@ describe("browser bootstrap recovery", () => {
     expect(window.location.pathname).toBe("/");
   });
 
+  it("rubber-bands the recovery window's technical details", async () => {
+    window.history.replaceState(null, "", "/studio");
+    const target = element();
+    await fail(target);
+    await act(async () => { await new Promise(resolve => setTimeout(resolve, 0)); });
+    const disclosure = Array.from(target.querySelectorAll("button, summary")).find(node => node.textContent?.includes("Technical details")) as HTMLElement;
+    expect(disclosure).toBeDefined();
+    await act(async () => { disclosure.click(); });
+    const details = target.querySelector<HTMLElement>(".nse-alert-details")!;
+    // jsdom has no layout: give the box the overflow its stylesheet gives it.
+    details.style.overflowY = "auto";
+    Object.defineProperty(details, "scrollHeight", { configurable: true, value: 600 });
+    Object.defineProperty(details, "clientHeight", { configurable: true, value: 120 });
+    await act(async () => { details.firstElementChild!.dispatchEvent(new WheelEvent("wheel", { deltaY: -80, bubbles: true, cancelable: true })); });
+    expect(details.style.getPropertyValue("--nse-rubber-band-offset-y")).not.toBe("");
+  });
+
   it("keeps recovery and successor ownership when an older normal host disposes again", async () => {
     const target = element();
     const original = await succeed(target);
