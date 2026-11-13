@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { classForLifetime, type DispatchLifetime } from "../internal/lifetime";
 import { WorkerPool, computePoolSize } from "../internal/pool/WorkerPool";
 import { dedicatedThread, submitDedicatedThreadJob } from "../internal/pool/dedicatedThread";
 import type { PoolJob, PoolRequestMessage, PoolResponseMessage, PoolWorkerLike } from "../internal/pool/protocol";
@@ -292,5 +293,113 @@ describe("DispatchFX WorkerPool", () => {
     const jobId = workers[0].posted[0].message.jobs[0].jobId;
     workers[0].emitResult(jobId, [99]);
     expect(onResult).toHaveBeenCalledWith([99], undefined);
+  });
+});
+
+describe("DFXQueue worker error parity with main-thread throws", () => {
+  afterEach(() => {
+    WorkerPool.shared.terminateAll();
+    delete (globalThis as Record<symbol, unknown>)[Symbol.for("syncloudos.dfx.workerChunks")];
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it("wraps worker errors with the queue label like main-thread throws, notifies work item/group, and skips reporting if cancelled", async () => {
+    const reported: unknown[] = [];
+    vi.stubGlobal("reportError", (err: unknown) => reported.push(err));
+
+    const workers: FakeWorker[] = [];
+    vi.stubGlobal(
+      "Worker",
+      class {
+        constructor() {
+          const fw = new FakeWorker();
+          workers.push(fw);
+          return fw;
+        }
+      },
+    );
+
+    const reg = new Map<string, string>([["com.example.workererr", "/virtual/worker-err.js"]]);
+    (globalThis as Record<symbol, unknown>)[Symbol.for("syncloudos.dfx.workerChunks")] = reg;
+
+    const appLifetime: DispatchLifetime = {
+      appId: "com.example.workererr",
+      ended: false,
+      jobs: new Set(),
+      resources: new Set(),
+    };
+    const AppQueue = classForLifetime(D.DFXQueue, appLifetime);
+    const AppGroup = classForLifetime(D.DFXGroup, appLifetime);
+    const AppWorkItem = classForLifetime(D.DFXWorkItem, appLifetime);
+    const queue = new AppQueue("worker.err.probe");
+
+    // 1. Main-thread reference behaviour when a DFXWorkItem throws.
+    const mainGroup = new AppGroup();
+    let mainItemNotified = false;
+    let mainGroupNotified = false;
+    const mainItem = new AppWorkItem(() => {
+      throw new Error("main boom");
+    });
+    mainItem.notify(AppQueue.main, () => { mainItemNotified = true; });
+    queue.async(mainGroup, mainItem);
+    mainGroup.notify(AppQueue.main, () => { mainGroupNotified = true; });
+    await new Promise(resolve => setTimeout(resolve, 30));
+
+    expect(reported).toHaveLength(1);
+    const mainErr = reported[0] as Error;
+    expect(mainErr.message).toContain("worker.err.probe");
+    expect(mainErr.message).toContain("work item threw");
+    expect((mainErr.cause as Error).message).toBe("main boom");
+    expect(mainItemNotified).toBe(true);
+    expect(mainGroupNotified).toBe(true);
+
+    // 2. Worker-thread throwing DFXWorkItem should match main-thread error wrapping and completion.
+    reported.length = 0;
+    const sendableSymbol = Symbol.for("syncloudos.dfx.sendable");
+    const workerFn = () => {
+      throw new Error("worker boom");
+    };
+    Object.defineProperty(workerFn, sendableSymbol, {
+      value: { id: "Contents/index.tsx#0", getCaptures: () => [] },
+      configurable: true,
+    });
+    const workerGroup = new AppGroup();
+    let workerItemNotified = false;
+    let workerGroupNotified = false;
+    const workerItem = new AppWorkItem(workerFn);
+    workerItem.notify(AppQueue.main, () => { workerItemNotified = true; });
+    queue.async(workerGroup, workerItem);
+    workerGroup.notify(AppQueue.main, () => { workerGroupNotified = true; });
+
+    await new Promise(resolve => setTimeout(resolve, 30));
+    expect(workers).toHaveLength(1);
+    expect(workers[0].posted).toHaveLength(1);
+    const jobId = workers[0].posted[0].message.jobs[0].jobId;
+    workers[0].emitError(jobId, { name: "Error", message: "worker boom" });
+    await new Promise(resolve => setTimeout(resolve, 30));
+
+    expect(reported).toHaveLength(1);
+    const workerErr = reported[0] as Error;
+    expect(workerErr.message).toContain("worker.err.probe");
+    expect(workerErr.message).toContain("work item threw");
+    expect((workerErr.cause as Error).message).toBe("worker boom");
+    expect(workerItemNotified).toBe(true);
+    expect(workerGroupNotified).toBe(true);
+
+    // 3. Cancelled DFXWorkItem whose worker fails before error delivery does not report error, yet still notifies.
+    reported.length = 0;
+    let cancelledNotified = false;
+    const cancelItem = new AppWorkItem(workerFn);
+    cancelItem.notify(AppQueue.main, () => { cancelledNotified = true; });
+    queue.async(cancelItem);
+    await new Promise(resolve => setTimeout(resolve, 30));
+    cancelItem.cancel();
+    const cancelJobId = workers[0].posted[1].message.jobs[0].jobId;
+    workers[0].emitError(cancelJobId, { name: "Error", message: "cancelled boom" });
+    await new Promise(resolve => setTimeout(resolve, 30));
+
+    expect(reported).toHaveLength(0);
+    expect(cancelledNotified).toBe(true);
   });
 });
