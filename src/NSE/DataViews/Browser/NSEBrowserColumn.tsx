@@ -21,7 +21,7 @@
 import { useId, useRef, useState, type KeyboardEvent } from "react";
 
 import { dataViewEventIsComposing, encodeNSEDataViewKey, type NSEDataViewKey } from "../Core";
-import { useNSEVirtualiser } from "../Virtualisation";
+import { useVirtualiser } from "../Virtualisation";
 import type { NSEBrowserColumnState, NSEBrowserItemPresentation } from "./browserTypes";
 
 interface NSEBrowserColumnProps<T, TId extends NSEDataViewKey> {
@@ -41,7 +41,7 @@ export function NSEBrowserColumn<T, TId extends NSEDataViewKey>({ label, index, 
   const activeIndex = state.activeId === null ? -1 : state.presentation.findIndex(({ id }) => Object.is(id, state.activeId));
   const optionId = (id: TId) => `nse-browser-${instanceId}-${encodeNSEDataViewKey(id)}`;
   const viewportRef = useRef<HTMLDivElement>(null);
-  const virtualiser = useNSEVirtualiser({
+  const virtualiser = useVirtualiser({
     count: state.items.length,
     axis: "block",
     overscan: 2,

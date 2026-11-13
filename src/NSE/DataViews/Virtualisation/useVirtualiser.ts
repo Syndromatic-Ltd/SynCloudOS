@@ -20,21 +20,21 @@
 
 import { useCallback, useLayoutEffect, useMemo, useState, type RefObject } from "react";
 
-import { computeNSEVirtualRangeFromIndex, NSEVirtualSizeIndex } from "./computeVirtualRange";
-import type { NSEVirtualItem, NSEVirtualiser, NSEVirtualiserOptions } from "./virtualisationTypes";
+import { computeVirtualRangeFromIndex, VirtualSizeIndex } from "./computeVirtualRange";
+import type { VirtualItem, Virtualiser, VirtualiserOptions } from "./virtualisationTypes";
 
-export interface NSEVirtualiserHookOptions extends NSEVirtualiserOptions {
+export interface VirtualiserHookOptions extends VirtualiserOptions {
   readonly viewportRef?: RefObject<HTMLElement | null>;
   readonly viewportStart?: number;
   readonly viewportSize?: number;
   readonly viewportInsetEnd?: number;
 }
 
-export function useNSEVirtualiser(options: NSEVirtualiserHookOptions): NSEVirtualiser {
+export function useVirtualiser(options: VirtualiserHookOptions): Virtualiser {
   const [attachedViewport, setAttachedViewport] = useState<HTMLElement | null>(null);
   const [measurementRevision, setMeasurementRevision] = useState(0);
   const [viewport, setViewport] = useState({ start: options.viewportStart ?? 0, size: options.viewportSize ?? 0 });
-  const sizeIndex = useMemo(() => new NSEVirtualSizeIndex(options.count, options.estimateSize), [options.count, options.estimateSize, options.sizingGeneration]);
+  const sizeIndex = useMemo(() => new VirtualSizeIndex(options.count, options.estimateSize), [options.count, options.estimateSize, options.sizingGeneration]);
   const viewportNode = attachedViewport ?? viewportRefCurrent(options.viewportRef);
 
   useLayoutEffect(() => {
@@ -53,7 +53,7 @@ export function useNSEVirtualiser(options: NSEVirtualiserHookOptions): NSEVirtua
     return () => { node.removeEventListener("scroll", readViewport); observer?.disconnect(); };
   }, [attachedViewport, options.axis, options.viewportInsetEnd, options.viewportRef, options.viewportSize]);
 
-  const range = useMemo(() => computeNSEVirtualRangeFromIndex({
+  const range = useMemo(() => computeVirtualRangeFromIndex({
     viewportStart: viewportNode ? viewport.start : options.viewportStart ?? viewport.start,
     viewportSize: viewportNode ? viewport.size : options.viewportSize ?? viewport.size,
     overscan: options.overscan,
@@ -61,7 +61,7 @@ export function useNSEVirtualiser(options: NSEVirtualiserHookOptions): NSEVirtua
   }, sizeIndex), [measurementRevision, options.overscan, options.retainedIndices, options.viewportSize, options.viewportStart, sizeIndex, viewport.size, viewport.start, viewportNode]);
 
   const items = useMemo(() => {
-    const result: NSEVirtualItem[] = [];
+    const result: VirtualItem[] = [];
     for (const rendered of range.rendered) for (let itemIndex = rendered.start; itemIndex < rendered.start + rendered.length; itemIndex += 1) {
       const start = sizeIndex.startAt(itemIndex);
       const size = sizeIndex.sizeAt(itemIndex);

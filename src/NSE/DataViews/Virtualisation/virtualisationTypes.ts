@@ -18,12 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export interface NSEVirtualIndexRange { readonly start: number; readonly length: number }
+export interface VirtualIndexRange { readonly start: number; readonly length: number }
 
-export type NSEVirtualAxis = "block" | "inline";
-export type NSEVirtualSizeEstimate = number | ((index: number) => number);
+export type VirtualAxis = "block" | "inline";
+export type VirtualSizeEstimate = number | ((index: number) => number);
 
-export interface NSEVirtualItem {
+export interface VirtualItem {
   readonly index: number;
   readonly key: string;
   readonly start: number;
@@ -31,42 +31,42 @@ export interface NSEVirtualItem {
   readonly end: number;
 }
 
-export interface NSEVirtualRange {
-  readonly visible: NSEVirtualIndexRange;
-  readonly rendered: readonly NSEVirtualIndexRange[];
+export interface VirtualRange {
+  readonly visible: VirtualIndexRange;
+  readonly rendered: readonly VirtualIndexRange[];
   readonly totalSize: number;
 }
 
-export interface NSEVirtualiserOptions {
+export interface VirtualiserOptions {
   readonly count: number;
-  readonly axis: NSEVirtualAxis;
+  readonly axis: VirtualAxis;
   readonly overscan: number;
   /** A scalar is a bounded uniform estimate. A function is evaluated for every index to preserve heterogeneous estimates. */
-  readonly estimateSize: NSEVirtualSizeEstimate;
+  readonly estimateSize: VirtualSizeEstimate;
   readonly getKey: (index: number) => string;
   readonly retainedIndices?: ReadonlySet<number>;
   /** Changes when the meaning of estimateSize changes without changing count. */
   readonly sizingGeneration?: string | number;
 }
 
-export interface NSEVirtualiserSnapshot {
-  readonly axis: NSEVirtualAxis;
-  readonly range: NSEVirtualRange;
-  readonly items: readonly NSEVirtualItem[];
+export interface VirtualiserSnapshot {
+  readonly axis: VirtualAxis;
+  readonly range: VirtualRange;
+  readonly items: readonly VirtualItem[];
 }
 
-export interface NSEVirtualiser {
-  readonly snapshot: NSEVirtualiserSnapshot;
+export interface Virtualiser {
+  readonly snapshot: VirtualiserSnapshot;
   measure(index: number, size: number): void;
   scrollToIndex(index: number, alignment?: "start" | "centre" | "end" | "nearest"): void;
   attachViewport?(node: HTMLElement | null): void;
 }
 
-export interface NSEVirtualRangeOptions {
+export interface VirtualRangeOptions {
   readonly count: number;
   readonly viewportStart: number;
   readonly viewportSize: number;
-  readonly estimateSize: NSEVirtualSizeEstimate;
+  readonly estimateSize: VirtualSizeEstimate;
   readonly overscan: number;
   readonly retainedIndices?: ReadonlySet<number>;
 }

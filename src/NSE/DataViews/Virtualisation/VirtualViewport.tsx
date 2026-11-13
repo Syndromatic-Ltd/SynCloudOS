@@ -28,11 +28,11 @@ import {
   type ReactNode,
 } from "react";
 
-import type { NSEVirtualItem, NSEVirtualiser } from "./virtualisationTypes";
+import type { VirtualItem, Virtualiser } from "./virtualisationTypes";
 
-export interface NSEVirtualViewportProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
-  readonly virtualiser: NSEVirtualiser;
-  readonly renderItem: (item: NSEVirtualItem) => ReactNode;
+export interface VirtualViewportProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
+  readonly virtualiser: Virtualiser;
+  readonly renderItem: (item: VirtualItem) => ReactNode;
   readonly activeDescendantId?: string;
   readonly busy?: boolean;
   readonly status?: string;
@@ -45,8 +45,8 @@ function NSEMeasuredVirtualItem({
   axis,
   children,
 }: {
-  readonly item: NSEVirtualItem;
-  readonly virtualiser: NSEVirtualiser;
+  readonly item: VirtualItem;
+  readonly virtualiser: Virtualiser;
   readonly axis: "block" | "inline";
   readonly children: ReactNode;
 }) {
@@ -77,7 +77,7 @@ function NSEMeasuredVirtualItem({
   );
 }
 
-export const NSEVirtualViewport = forwardRef<HTMLDivElement, NSEVirtualViewportProps>(function NSEVirtualViewport({
+export const VirtualViewport = forwardRef<HTMLDivElement, VirtualViewportProps>(function VirtualViewport({
   virtualiser,
   renderItem,
   activeDescendantId,

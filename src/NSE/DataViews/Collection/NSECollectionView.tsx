@@ -21,7 +21,7 @@
 import { useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 
 import { dataViewAllowsMutation, dataViewAnnouncement, dataViewEventIsComposing, encodeNSEDataViewKey, useNSEDataView } from "../Core";
-import { useNSEVirtualiser } from "../Virtualisation";
+import { useVirtualiser } from "../Virtualisation";
 import { useNSEDataViewDragHost } from "../../Drag";
 import type { NSECollectionViewCoverFlowProps, NSECollectionViewGridProps, NSECollectionViewProps } from "./collectionTypes";
 import { CoverFlowCollectionView } from "./CoverFlowCollectionView";
@@ -89,7 +89,7 @@ function GridCollectionView<T, TId extends string | number>({
     setInheritedDirection(inherited === "rtl" ? "rtl" : "ltr");
   }, [dir]);
   const effectiveDirection = dir === "rtl" ? "rtl" : dir ? "ltr" : inheritedDirection;
-  const virtualiser = useNSEVirtualiser({
+  const virtualiser = useVirtualiser({
     count: rowCount,
     axis: "block",
     overscan: 2,
