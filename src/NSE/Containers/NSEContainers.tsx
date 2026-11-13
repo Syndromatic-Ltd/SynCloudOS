@@ -29,9 +29,9 @@ import { createElement } from "../Theme/contract/hookMirrorReact";
 import "../Navigation/SourceList/nse-sourcelist.css";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
 import {
-  getOptionalNSESmoothSurfaceProps,
-  type NSESmoothSurfaceRequest,
-  type NSESmoothSurfaceStyle
+  getOptionalSmoothSurfaceProps,
+  type SmoothSurfaceRequest,
+  type SmoothSurfaceStyle
 } from "../SmoothSurface";
 
 type NSEContainerElement = "div" | "section" | "aside" | "main" | "nav" | "article" | "ul" | "ol";
@@ -58,7 +58,7 @@ export interface ContainerPaneProps extends Omit<HTMLAttributes<HTMLElement>, "t
   actions?: ReactNode;
   footer?: ReactNode;
   variant?: ContainerPaneVariant;
-  smoothSurface?: NSESmoothSurfaceRequest;
+  smoothSurface?: SmoothSurfaceRequest;
   contentLayout?: NSEContainerContentLayout;
 }
 
@@ -71,7 +71,7 @@ export interface NSEDrawerProps extends Omit<HTMLAttributes<HTMLElement>, "title
   modal?: boolean;
   keepMounted?: boolean;
   closeLabel?: string;
-  smoothSurface?: NSESmoothSurfaceRequest;
+  smoothSurface?: SmoothSurfaceRequest;
   contentLayout?: NSEContainerContentLayout;
 }
 
@@ -109,10 +109,10 @@ export function ContainerPane({
 }: ContainerPaneProps) {
   const titleId = useId();
   const labelledBy = props["aria-labelledby"] ?? (title ? titleId : undefined);
-  const surfaceProps = getOptionalNSESmoothSurfaceProps(
+  const surfaceProps = getOptionalSmoothSurfaceProps(
     smoothSurface,
     classes("nse-container-pane", className),
-    style as NSESmoothSurfaceStyle | undefined
+    style as SmoothSurfaceStyle | undefined
   );
 
   return createElement(

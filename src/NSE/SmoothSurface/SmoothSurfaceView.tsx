@@ -28,17 +28,17 @@ import {
 } from "react";
 import { createElement } from "../Theme/contract/hookMirrorReact";
 import {
-  getNSESmoothSurfaceClassName,
-  getNSESmoothSurfaceStyle,
-  normaliseNSESmoothSurfaceRequest,
-  NSESmoothSurfaceAPI
+  getSmoothSurfaceClassName,
+  getSmoothSurfaceStyle,
+  normaliseSmoothSurfaceRequest,
+  SmoothSurfaceAPI
 } from "./smoothSurface";
-import { useNSESmoothSurface } from "./useNSESmoothSurface";
+import { useSmoothSurface } from "./useSmoothSurface";
 import type {
-  NSESmoothSurfaceBorderConfig,
-  NSESmoothSurfaceComponentProps,
-  NSESmoothSurfaceRequest,
-  NSESmoothSurfaceShadowConfig
+  SmoothSurfaceBorderConfig,
+  SmoothSurfaceComponentProps,
+  SmoothSurfaceRequest,
+  SmoothSurfaceShadowConfig
 } from "./smoothSurfaceTypes";
 
 function composeRefs<T>(...refs: Array<ForwardedRef<T> | undefined>) {
@@ -54,13 +54,13 @@ function composeRefs<T>(...refs: Array<ForwardedRef<T> | undefined>) {
   };
 }
 
-function shadowToFilter(shadow: NSESmoothSurfaceShadowConfig | NSESmoothSurfaceShadowConfig[] | undefined) {
+function shadowToFilter(shadow: SmoothSurfaceShadowConfig | SmoothSurfaceShadowConfig[] | undefined) {
   const first = Array.isArray(shadow) ? shadow[0] : shadow;
   if (!first) return undefined;
   return `drop-shadow(${first.offsetX}px ${first.offsetY}px ${first.blur}px ${first.color})`;
 }
 
-function borderToPathProps(border: NSESmoothSurfaceBorderConfig | undefined) {
+function borderToPathProps(border: SmoothSurfaceBorderConfig | undefined) {
   if (!border || border.width <= 0 || border.opacity <= 0) return null;
   const dash = border.style === "dashed"
     ? `${border.dash ?? border.width * 3} ${border.gap ?? border.width * 2}`
@@ -78,7 +78,7 @@ function borderToPathProps(border: NSESmoothSurfaceBorderConfig | undefined) {
 }
 
 function SmoothSurfaceImpl(
-  props: NSESmoothSurfaceComponentProps & Omit<HTMLAttributes<HTMLElement>, keyof NSESmoothSurfaceComponentProps>,
+  props: SmoothSurfaceComponentProps & Omit<HTMLAttributes<HTMLElement>, keyof SmoothSurfaceComponentProps>,
   forwardedRef: ForwardedRef<HTMLElement>
 ) {
   const {
@@ -91,18 +91,18 @@ function SmoothSurfaceImpl(
     ...rest
   } = props;
   const [surfaceNode, setSurfaceNode] = useState<HTMLElement | null>(null);
-  const request: NSESmoothSurfaceRequest = typeof smoothSurface === "object" && smoothSurface !== null
+  const request: SmoothSurfaceRequest = typeof smoothSurface === "object" && smoothSurface !== null
     ? { ...smoothSurface, autoEffects: autoEffects ?? smoothSurface.autoEffects }
     : smoothSurface;
-  const resolved = normaliseNSESmoothSurfaceRequest(request);
-  const geometry = useNSESmoothSurface(surfaceNode, request);
+  const resolved = normaliseSmoothSurfaceRequest(request);
+  const geometry = useSmoothSurface(surfaceNode, request);
   const mergedClassName = resolved === false
     ? className
-    : getNSESmoothSurfaceClassName(resolved, className);
+    : getSmoothSurfaceClassName(resolved, className);
   const mergedStyle = resolved === false
     ? style
     : {
-        ...getNSESmoothSurfaceStyle(resolved, style as unknown as Record<string, string | number>)
+        ...getSmoothSurfaceStyle(resolved, style as unknown as Record<string, string | number>)
       } as CSSProperties;
   const ref = useMemo(() => composeRefs(setSurfaceNode, forwardedRef), [forwardedRef]);
   const Component = as;
@@ -146,7 +146,7 @@ function SmoothSurfaceImpl(
   );
 }
 
-export const NSESmoothSurface = Object.assign(
+export const SmoothSurface = Object.assign(
   forwardRef(SmoothSurfaceImpl),
-  NSESmoothSurfaceAPI
+  SmoothSurfaceAPI
 );

@@ -19,7 +19,7 @@
  */
 
 import type { ComponentType, ExoticComponent, ReactNode } from "react";
-import type { NSESmoothSurfaceCurve, NSESmoothSurfaceRadius } from "../NSE/SmoothSurface";
+import type { SmoothSurfaceCurve, SmoothSurfaceRadius } from "../NSE/SmoothSurface";
 import type {
   SynWareLocalisedText,
   SynWareManifestV1,
@@ -348,14 +348,14 @@ export interface WebspringQuickSwitchOptions {
 
 /** A corner radius: a percentage of the folder tile's shorter side (up to `"50%"`),
  *  pixels, or an NSE radius token. A percentage keeps the shape as the tile scales. */
-export type WebspringFolderCornerRadius = `${number}%` | NSESmoothSurfaceRadius;
+export type WebspringFolderCornerRadius = `${number}%` | SmoothSurfaceRadius;
 
-/** A rounded-rectangle folder's corners, drawn with NSESmoothSurface geometry. */
+/** A rounded-rectangle folder's corners, drawn with SmoothSurface geometry. */
 export interface WebspringFolderSmoothSurface {
   /** Defaults to `"36%"`. */
   readonly radius?: WebspringFolderCornerRadius;
   /** Defaults to `squircle`. */
-  readonly curve?: NSESmoothSurfaceCurve;
+  readonly curve?: SmoothSurfaceCurve;
   /** From 0 to 1. Defaults to 0.6. */
   readonly smoothing?: number;
 }

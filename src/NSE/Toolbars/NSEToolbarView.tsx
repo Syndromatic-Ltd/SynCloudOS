@@ -31,7 +31,7 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react";
-import type { NSESmoothSurfaceRequest } from "../SmoothSurface";
+import type { SmoothSurfaceRequest } from "../SmoothSurface";
 import { classes, getControlSmoothSurfaceProps } from "../Controls/Core/nseControlsShared";
 import {
   NSEChromeBevel,
@@ -68,7 +68,7 @@ type NSEToolbarChildrenProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> 
   readonly position?: "top" | "bottom" | "inline";
   readonly grouped?: boolean;
   readonly fadeOnKeyboard?: boolean;
-  readonly smoothSurface?: NSESmoothSurfaceRequest;
+  readonly smoothSurface?: SmoothSurfaceRequest;
   readonly children?: ReactNode;
   readonly controller?: never;
   readonly width?: never;

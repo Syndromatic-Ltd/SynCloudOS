@@ -21,9 +21,9 @@
 import { useCallback, useState, type CSSProperties } from "react";
 import { useNSEFeedback, type HFXFeedbackRequest } from "../../Feedback";
 import {
-  getOptionalNSESmoothSurfaceProps,
-  type NSESmoothSurfaceRequest,
-  type NSESmoothSurfaceStyle
+  getOptionalSmoothSurfaceProps,
+  type SmoothSurfaceRequest,
+  type SmoothSurfaceStyle
 } from "../../SmoothSurface";
 
 export type CSSVarStyle = CSSProperties & Record<`--${string}`, string | number>;
@@ -101,14 +101,14 @@ export function resolveNSEControlHaptic(request: HFXFeedbackRequest, fallback: H
 }
 
 export function getControlSmoothSurfaceProps(
-  smoothSurface: NSESmoothSurfaceRequest,
+  smoothSurface: SmoothSurfaceRequest,
   className: string,
   style?: CSSProperties
 ) {
-  const resolved = getOptionalNSESmoothSurfaceProps(
+  const resolved = getOptionalSmoothSurfaceProps(
     smoothSurface,
     className,
-    style as NSESmoothSurfaceStyle | undefined
+    style as SmoothSurfaceStyle | undefined
   );
 
   return {

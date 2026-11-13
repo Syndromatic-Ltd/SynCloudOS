@@ -20,7 +20,7 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import type { HFXFeedbackRequest } from "../../Feedback";
-import type { NSESmoothSurfaceRequest } from "../../SmoothSurface";
+import type { SmoothSurfaceRequest } from "../../SmoothSurface";
 
 export type NSETopBarVariant = "atmoCumulus" | "atmoMetal";
 export type NSETopBarItemKind = "webspring" | "userInfo" | "settings" | "custom";
@@ -98,7 +98,7 @@ export interface NSETopBarProps {
   className?: string;
   /** @internal The bar is a document window's titlebar: the window's represented document title sits in it. */
   documentTitlebar?: boolean;
-  smoothSurface?: NSESmoothSurfaceRequest;
+  smoothSurface?: SmoothSurfaceRequest;
   style?: CSSProperties;
 }
 

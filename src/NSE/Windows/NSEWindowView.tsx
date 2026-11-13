@@ -23,9 +23,9 @@ import { useNSEContentLayoutProperties } from "../Layout/windowChromeObstruction
 
 import React, { type KeyboardEventHandler, type ReactNode } from "react";
 import { NSEAppearanceNineSlice } from "../Appearance/NSEAppearanceNineSlice";
-import { getOptionalNSESmoothSurfaceProps, useNSESmoothSurface } from "../SmoothSurface";
+import { getOptionalSmoothSurfaceProps, useSmoothSurface } from "../SmoothSurface";
 
-import type { NSESmoothSurfaceRequest } from "../SmoothSurface";
+import type { SmoothSurfaceRequest } from "../SmoothSurface";
 import type { SynCloudOSAppFrameSmoothSurfaceManifest } from "../../SynCloudOS/SynCloudOS";
 import type { NSEWindowViewProps } from "./windowViewTypes";
 import "./nse-windows.css";
@@ -50,7 +50,7 @@ export interface NSEWindowFrameProps extends NSEWindowViewProps {
 }
 
 
-const windowSmoothSurfaceRequest = (value: SynCloudOSAppFrameSmoothSurfaceManifest | null): NSESmoothSurfaceRequest => {
+const windowSmoothSurfaceRequest = (value: SynCloudOSAppFrameSmoothSurfaceManifest | null): SmoothSurfaceRequest => {
   if (value === null) return "off";
   if (typeof value === "object") {
     const { physicality, ...rest } = value;
@@ -94,7 +94,7 @@ export function NSEWindowView({
   const titlebarHost = React.useMemo(() => ({ setDocument: setTitlebarDocument, leadingAccessories: null, trailingAccessories: null }), []);
   const [surfaceNode, setSurfaceNode] = React.useState<HTMLDivElement | null>(null);
   const smoothSurfaceRequest = windowSmoothSurfaceRequest(record.smoothSurface ?? null);
-  useNSESmoothSurface(surfaceNode, smoothSurfaceRequest);
+  useSmoothSurface(surfaceNode, smoothSurfaceRequest);
   if (record.state !== "open" || !presentation.visible) return null;
   const modal = record.role === "modal" || record.role === "sheet";
   const resolvedSemanticRole = semanticRole ?? (record.role === "borderless" ? "presentation" : "dialog");
@@ -103,7 +103,7 @@ export function NSEWindowView({
     ? record.title
     : accessibleName;
 
-  const smoothSurfaceProps = getOptionalNSESmoothSurfaceProps(smoothSurfaceRequest);
+  const smoothSurfaceProps = getOptionalSmoothSurfaceProps(smoothSurfaceRequest);
   return (
     <NSEWindowTitlebarHostContext.Provider value={titlebarHost}>
     <section

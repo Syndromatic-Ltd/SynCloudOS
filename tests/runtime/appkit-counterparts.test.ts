@@ -72,7 +72,7 @@ describe("NSE names are AppKit names", () => {
     expect(declared.length).toBeGreaterThan(1000);
     const missing = declared.filter((name) => internalAppkitCounterpartFor(name, map) === undefined);
     // Ceiling pinned at Task 22; Task 23 lowers this per family until missing.length === 0.
-    expect(missing.length).toBeLessThanOrEqual(676);
+    expect(missing.length).toBeLessThanOrEqual(646);
   });
 
   it("records the NSImage named lookup and both template name constants", () => {
