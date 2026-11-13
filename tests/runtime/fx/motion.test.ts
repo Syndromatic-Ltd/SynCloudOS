@@ -68,6 +68,12 @@ describe("MotionFX portable values and streams", () => {
     expect(attitude.yaw).toBeCloseTo(0.7);
     expect(Math.hypot(...Object.values(attitude.quaternion))).toBeCloseTo(1);
     expect(attitude.multiplyByInverseOf(attitude).quaternion.w).toBeCloseTo(1);
+    // A quarter turn about the device's x axis, made after the device had already yawed, is still about x.
+    const yawed = MFXAttitude.fromEuler(0, 0, Math.PI / 2);
+    const change = yawed.multiply(MFXAttitude.fromEuler(Math.PI / 2, 0, 0)).multiplyByInverseOf(yawed);
+    expect(change.roll).toBeCloseTo(Math.PI / 2);
+    expect(change.pitch).toBeCloseTo(0);
+    expect(change.yaw).toBeCloseTo(0);
     expect(Object.isFrozen(attitude.rotationMatrix)).toBe(true);
     expect(
       MFXAttitude.fromRotationMatrix(attitude.rotationMatrix).roll,
