@@ -25,6 +25,7 @@ import { isTFXStringBoundary, TFXAttributedString, type TFXTextAttributes } from
 import { TFXLine, type TFXPositionedGlyphRun, type TFXPositionedRubyRun } from "./TFXLine";
 import { inlineAdvance, glyphInlineAdvance, logicalDirection, positionedInlineAdvance, type TFXLineOrientation } from "./TFXInlineGeometry";
 import { TFXParagraphStyle } from "./TFXParagraphStyle";
+import { measureTFXSafePrefixes } from "./TFXFont";
 import { layoutTFXRuby, tfxRubyGlyphOffsets } from "./TFXRubyLayout";
 import {
   tfxAllowsLineBreak,
@@ -35,6 +36,7 @@ import {
 const bidi = createBidi();
 const graphemes = new Intl.Segmenter(undefined, { granularity: "grapheme" });
 const defaultParagraphStyle = new TFXParagraphStyle();
+const trailingLineSeparators = /[\r\n\u000b\u000c\u0085\u2028\u2029]+$/u;
 
 interface TFXLogicalRun {
   readonly start: number;
@@ -146,10 +148,10 @@ function adjustedBreakCandidate(
   input: TFXAttributedString,
   start: number,
   candidate: number,
+  attributes: TFXTextAttributes | undefined,
 ): number {
   let absolute = start + candidate;
-  const attributes = input.runs.find(run => absolute > run.start && absolute < run.end);
-  if (!attributes) return candidate;
+  if (!attributes || absolute <= attributes.start) return candidate;
   if (
     attributes.textCombine === "digits2" &&
     /^[0-9]$/u.test(input.text.slice(absolute - 1, absolute)) &&
@@ -168,6 +170,16 @@ function adjustedBreakCandidate(
     }
   }
   return absolute - start;
+}
+
+function runIndexAt(runs: readonly TFXTextAttributes[], offset: number): number {
+  let low = 0, high = runs.length;
+  while (low < high) {
+    const middle = low + Math.floor((high - low) / 2);
+    if (runs[middle]!.end <= offset) low = middle + 1;
+    else high = middle;
+  }
+  return low;
 }
 
 function createRubyRuns(run: { readonly attributes: TFXTextAttributes; readonly direction: "ltr" | "rtl" | "ttb" | "btt"; readonly script: string }, baseWidth: number, orientation: TFXLineOrientation, signal?: AbortSignal): { readonly baseOffset: number; readonly cellWidth: number; readonly ruby: readonly TFXPositionedRubyRun[] } {
@@ -276,13 +288,18 @@ export class TFXTypesetter {
     const end = start + length;
     const text = this.#input.text;
     if (length < 0 || !isTFXStringBoundary(text, start) || !isTFXStringBoundary(text, end)) throw new RangeError("Invalid line range.");
-    if (this.#input.runs.some(run => run.rubyAnnotation && run.start < end && run.end > start && (start > run.start || end < run.end))) throw new RangeError("A line may not split an atomic ruby base range.");
-    const content = text.slice(start, end).replace(/[\r\n\u000b\u000c\u0085\u2028\u2029]+$/u, "");
+    const { runs: attributes } = this.#input;
+    const first = attributes[runIndexAt(attributes, start)];
+    const last = attributes[runIndexAt(attributes, end)];
+    const splitsFirst = first?.rubyAnnotation && first.start < start && first.start < end;
+    const splitsLast = last?.rubyAnnotation && last.start < end && last.end > start;
+    if (splitsFirst || splitsLast) throw new RangeError("A line may not split an atomic ruby base range.");
+    const content = text.slice(start, end).replace(trailingLineSeparators, "");
     if (!content.includes("\t")) return this.#createUntabbedLine(start, length, signal);
     const tabs = [...content.matchAll(/\t/gu)].map((match) => start + match.index);
     if (tabs.length > 1024) throw new RangeError("A TextFX line accepts at most 1024 tab controls.");
     const paragraphStart = start === 0 ? 0 : Math.max(text.lastIndexOf("\n", start - 1), text.lastIndexOf("\r", start - 1), text.lastIndexOf("\u2029", start - 1)) + 1;
-    const paragraphStyle = this.#input.runs.find((run) => run.start <= paragraphStart && run.end > paragraphStart)?.paragraphStyle ?? defaultParagraphStyle;
+    const paragraphStyle = attributes[runIndexAt(attributes, paragraphStart)]?.paragraphStyle ?? defaultParagraphStyle;
     const fields = [start, ...tabs.map((index) => index + 1)];
     const fieldEnds = [...tabs, start + content.length];
     const lines = fields.map((fieldStart, index) => this.#createUntabbedLine(fieldStart, fieldEnds[index]! - fieldStart, signal));
@@ -340,15 +357,19 @@ export class TFXTypesetter {
     const end = start + length;
     const text = this.#input.text;
     if (length < 0 || !isTFXStringBoundary(text, start) || !isTFXStringBoundary(text, end)) throw new RangeError("Invalid line range.");
-    const content = text.slice(start, end).replace(/[\r\n\u000b\u000c\u0085\u2028\u2029]+$/u, "");
+    const content = text.slice(start, end).replace(trailingLineSeparators, "");
     const { levels } = bidi.getEmbeddingLevels(content, this.#direction);
     const scripts = scriptsForText(content);
     let logical: TFXLogicalRun[] = [];
     const resolved: TFXTextAttributes[] = [];
-    for (const run of this.#input.runs) {
+    const contentEnd = start + content.length;
+    const { runs: attributes } = this.#input;
+    for (let index = runIndexAt(attributes, start); index < attributes.length; index++) {
+      const run = attributes[index]!;
+      if (run.start >= contentEnd) break;
       signal?.throwIfAborted();
       if (!run.fallbackFonts) { resolved.push(run); continue; }
-      const begin = Math.max(start, run.start), finish = Math.min(start + content.length, run.end);
+      const begin = Math.max(start, run.start), finish = Math.min(contentEnd, run.end);
       for (const segment of graphemes.segment(text.slice(begin, finish))) {
         const font = run.fallbackFonts.fontForText(segment.segment, run.font) ?? run.font;
         const segmentStart = begin + segment.index, segmentEnd = segmentStart + segment.segment.length;
@@ -359,7 +380,7 @@ export class TFXTypesetter {
     }
     for (const attributes of resolved) {
       let cursor = Math.max(start, attributes.start);
-      const finish = Math.min(start + content.length, attributes.end);
+      const finish = Math.min(contentEnd, attributes.end);
       if (attributes.rubyAnnotation && cursor < finish) {
         const level = levels[cursor - start] ?? 0;
         const script = scripts[cursor - start];
@@ -446,6 +467,36 @@ export class TFXTypesetter {
       sum + (run.start + glyph.cluster >= trailingStart ? glyphInlineAdvance(glyph, run.shaped.direction) : 0), 0), 0);
     return new TFXLine(start, end, runs, trailingWidth, this.#direction, null, this.#orientation);
   }
+
+  #prefixWidths(start: number): ((candidate: number) => number | undefined) | undefined {
+    const { runs, text } = this.#input;
+    const run = runs[runIndexAt(runs, start)];
+    if (this.#orientation !== "horizontal" || this.#direction !== "ltr" || !run
+      || run.fallbackFonts || run.runDelegate || run.rubyAnnotation
+      || (run.textCombine && run.textCombine !== "none")
+      || (run.lineBreakPolicy && run.lineBreakPolicy !== "auto")) return;
+
+    let limit = 0, length = 0, firstLetter = 0;
+    let widths: ReadonlyMap<number, number> | undefined;
+    return candidate => {
+      const available = run.end - start;
+      if (candidate > available) return;
+      const end = candidate <= length ? candidate : text.slice(start, start + candidate).replace(trailingLineSeparators, "").length;
+      if (!limit || (end > length && length === limit && limit < available)) {
+        limit = Math.min(Math.max(128, limit * 2, end), available);
+        // Reuse widths only within a single LTR Latin shaping run, expanding the sample on demand.
+        const prefix = /^ *[A-Za-z][A-Za-z \u0300-\u036f]*/u.exec(text.slice(start, start + limit))?.[0];
+        length = prefix?.length ?? 0;
+        firstLetter = prefix?.search(/[A-Za-z]/u) ?? 0;
+        widths = undefined;
+      }
+      if (end > firstLetter && end <= length) {
+        widths ??= measureTFXSafePrefixes(run.font, text.slice(start, start + length), { direction: "ltr", script: "Latn", language: run.language, features: run.features });
+        return widths.get(end);
+      }
+    };
+  }
+
   suggestLineBreak(start: number, width: number, signal?: AbortSignal): number {
     signal?.throwIfAborted();
     const text = this.#input.text;
@@ -453,11 +504,15 @@ export class TFXTypesetter {
     if (start === text.length) return 0;
     const suffix = text.slice(start);
     const breaker = new LineBreaker(suffix);
+    const prefixWidth = this.#prefixWidths(start);
+    const widthAt = (candidate: number) => prefixWidth?.(candidate) ?? this.createLine(start, candidate, signal).width;
     let accepted = 0;
     const atomicEnd = (candidate: number) => {
       const absolute = start + candidate;
-      const ruby = this.#input.runs.find(run => run.rubyAnnotation && absolute > run.start && absolute < run.end);
-      return adjustedBreakCandidate(this.#input, start, ruby ? ruby.end - start : candidate);
+      const { runs } = this.#input;
+      const attributes = runs[runIndexAt(runs, absolute)];
+      if (attributes?.rubyAnnotation && absolute > attributes.start) return attributes.end - start;
+      return adjustedBreakCandidate(this.#input, start, candidate, attributes);
     };
     let lastCandidate = -1;
     for (let next = breaker.nextBreak(); next; next = breaker.nextBreak()) {
@@ -465,7 +520,7 @@ export class TFXTypesetter {
       const candidate = atomicEnd(next.position);
       if (candidate === lastCandidate) continue;
       lastCandidate = candidate;
-      if (this.createLine(start, candidate, signal).width > width) break;
+      if (widthAt(candidate) > width) break;
       accepted = candidate;
       if (next.required) return accepted;
     }
@@ -478,9 +533,10 @@ export class TFXTypesetter {
       const end = atomicEnd(segment.index + segment.segment.length);
       if (end === lastCandidate) continue;
       lastCandidate = end;
-      if (accepted && this.createLine(start, end, signal).width > width) break;
+      const tooWide = widthAt(end) > width;
+      if (accepted && tooWide) break;
       accepted = end;
-      if (this.createLine(start, end, signal).width > width) break;
+      if (tooWide) break;
     }
     return accepted;
   }
