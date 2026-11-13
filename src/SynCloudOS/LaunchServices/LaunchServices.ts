@@ -21,6 +21,7 @@
 import { sendWebspringLaunchPhase } from "../WebspringState/launchPhaseMachine";
 import { beginMultiSwitchSettlement, type MultiSwitchSettlement } from "./multiSwitchSettlement";
 import { advanceLaunchRequest, isLaunchRequestStep } from "./launchRequestMachine";
+import { toHistoryOptions } from "./launchHistoryOptions";
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import { getCanonicalExternalHref } from "../Routing/routeNormalization";
 import { WEBSPRING_PRESENTATION_ROLES } from "../WebspringState/webspringPresentation";
@@ -45,7 +46,6 @@ import type {
   SynCloudOSExternalAppExplanation,
   SynCloudOSLaunchExplanation,
   SynCloudOSLaunchHistoryAction,
-  SynCloudOSLaunchHistoryOptions,
   SynCloudOSLaunchHistoryRecord,
   SynCloudOSLaunchQueueItem,
   SynCloudOSLaunchQueueSnapshot,
@@ -518,19 +518,6 @@ function getLaunchQueueSnapshot(): SynCloudOSLaunchQueueSnapshot {
     active: activeLaunchRequest ? toQueueItem(activeLaunchRequest) : null,
     queued: queuedLaunches.map(toQueueItem),
     deferred: deferredLaunches.map(toQueueItem)
-  };
-}
-
-function toHistoryOptions(options: SynCloudOSOpenAppOptions): SynCloudOSLaunchHistoryOptions {
-  return {
-    source: options.source,
-    focus: options.focus,
-    syncRoute: options.syncRoute,
-    queue: options.queue,
-    deferUntilAuthorised: options.deferUntilAuthorised,
-    hold: options.hold,
-    reason: options.reason,
-    context: options.context ? { ...options.context } : undefined
   };
 }
 

@@ -25,6 +25,27 @@ import { choreographyTimings } from "../../src/FX/AnimationFX/choreographyTiming
 
 
 describe("RouteManager and LaunchServices route/launch contracts", () => {
+  it("keeps launch authority in the live event and records only diagnostic options", async () => {
+    const runtime = createTestRuntime();
+    const { AppRegistry, LaunchServices, SynCloudOS } = createRuntimeHarness(runtime);
+    const appId = "com.example.launch-diagnostics";
+    AppRegistry.register(createTestManifest({ bundleIdentifier: appId, route: "/launch-diagnostics" }));
+    const listener = vi.fn();
+    const unsubscribe = SynCloudOS.EventBus.subscribe("app.launch.requested", listener);
+    const lifecycle = { signal: new AbortController().signal, onCommit: vi.fn() };
+    const options = { lifecycle, source: "developer" as const, focus: false, statechart: { onReady: vi.fn() } };
+    try {
+      LaunchServices.openApp(appId, options);
+      const event = listener.mock.calls[0]?.[0];
+      expect(event.payload.options).toBe(options);
+      const diagnostic = SynCloudOS.EventBus.getHistory().find((entry) => entry.id === event.id);
+      expect(diagnostic?.payload).toEqual({ appId, options: { source: "developer", focus: false } });
+    } finally {
+      unsubscribe();
+      await runtime.dispose("launch-diagnostics-test");
+    }
+  });
+
   it("returns the public route-not-found failure for unregistered deep links", async () => {
     const { AppRegistry, RouteManager } = createRuntimeHarness(createTestRuntime());
     AppRegistry.register(createTestManifest({ bundleIdentifier: "com.example.current-app", route: "/current-app" }));
