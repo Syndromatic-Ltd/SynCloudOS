@@ -422,18 +422,22 @@ function createMediaQuery(query: string): RuntimeMediaQuery {
     : null;
   const listeners = new Set<(matches: boolean) => void>();
   const handleChange = (event: MediaQueryListEvent) => listeners.forEach((listener) => listener(event.matches));
-  media?.addEventListener?.("change", handleChange);
   return {
     media: query,
     get matches() {
       return media?.matches ?? false;
     },
     subscribe(listener) {
+      if (listeners.size === 0) media?.addEventListener?.("change", handleChange);
       listeners.add(listener);
-      return () => listeners.delete(listener);
+      return () => {
+        const removed = listeners.delete(listener);
+        if (removed && listeners.size === 0) media?.removeEventListener?.("change", handleChange);
+        return removed;
+      };
     },
     dispose() {
-      media?.removeEventListener?.("change", handleChange);
+      if (listeners.size > 0) media?.removeEventListener?.("change", handleChange);
       listeners.clear();
     },
   };
