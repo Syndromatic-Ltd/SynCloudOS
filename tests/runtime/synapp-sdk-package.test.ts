@@ -249,6 +249,19 @@ describe("portable SynWare SDK packages", () => {
     const packagedNSEStylesheet = readFileSync(packagedNSEStyles, "utf8");
     const importedNSEStyles = [...packagedNSEStylesheet.matchAll(/@import "([^"]+)";/g)].map((match) => readFileSync(join(dirname(packagedNSEStyles), match[1]!), "utf8"));
     expect([packagedNSEStylesheet, ...importedNSEStyles].join("\n")).toContain("[data-nse-view-drawing-layer]");
+    // Two published stylesheets list the theme. Imported from script they become imports of the same files, so the theme loads once.
+    // Plain Node loads the packaged plugin, as a consumer's Vite does.
+    const stylesheetFiles = (entry: string): string[] => JSON.parse(execFileSync(process.execPath, ["--input-type=module", "-e", [
+      `const { synCloudOS } = await import(${JSON.stringify(pathToFileURL(join(repositoryRoot, ".artifacts", "synapp-sdk", "packages", "syncloudos", "vite.mjs")).href)});`,
+      `const plugin = [synCloudOS({ webspringEntry: false })].flat().find(candidate => candidate.name === "syncloudos:project");`,
+      `const id = plugin.resolveId("@syndromatic/syncloudos/${entry}/styles.css", "/consumer/src/main.tsx");`,
+      `console.log(JSON.stringify([...plugin.load(id).matchAll(/import "([^"]+)";/gu)].map(match => match[1])));`,
+    ].join("\n")], { cwd: repositoryRoot, encoding: "utf8" }));
+    const browserFiles = stylesheetFiles("browser");
+    const sharedTheme = browserFiles.filter((file) => /\/assets\/atmo-[^/]+\.css$/u.test(file));
+    expect(sharedTheme.length).toBe(1);
+    expect(stylesheetFiles("webspring")).toContain(sharedTheme[0]);
+    expect(browserFiles.every((file) => existsSync(file))).toBe(true);
     const viewDeclarations = readFileSync(join(repositoryRoot, ".artifacts", "synapp-sdk", "packages", "syncloudos", "types", "NSE", "Views", "NSEView.d.ts"), "utf8");
     expect(viewDeclarations).toMatch(/draw\?:.*GFXContext/u);
     expect(viewDeclarations).toContain("NSEViewLayerContentsPlacement");
