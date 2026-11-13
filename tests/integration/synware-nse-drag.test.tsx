@@ -341,3 +341,13 @@ describe("mounted colour provider drag identity", () => {
     expect(dragRegistrations(second)).toEqual([]);
   });
 });
+
+describe("the shared colour panel is every application's", () => {
+  it("gives a colour well its panel without the application supplying a provider", () => {
+    const fixture = mountedDrag();
+    render(<SynWareProvider value={fixture.app}>
+      <NSEColourWell id="bare" responderId="studio:bare" aria-label="Bare colour" defaultValue={GFXColour.parse("#224466")} />
+    </SynWareProvider>);
+    expect(screen.getByRole("button", { name: "Bare colour" })).toBeTruthy();
+  });
+});

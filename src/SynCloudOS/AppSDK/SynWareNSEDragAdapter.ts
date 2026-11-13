@@ -143,7 +143,8 @@ export function createSynWareNSEColourPanelDragPort(
   const manager = createNSEDragSessionPort(drag, ownerToken);
   return Object.freeze({
     manager,
-    endpoint: drag.endpoint(),
+    // Asked for when a colour drag needs it: mounting the provider must not require the drag capability.
+    get endpoint() { return drag.endpoint(); },
     endpointForResponder(responderId: string) {
       return drag.endpoint({ responderId });
     },

@@ -62,10 +62,11 @@ export function NSEColourPanelProvider({ service, options, commands, responderId
   const controller = useMemo(() => new NSEColourPanelController(service, { owner: nseUnowned, ...options }), [service, options?.owner, options?.ownerSignal, options?.preferences, options?.transferAdapter, options?.undoManager]);
   useNSEDeferredDisposal(controller);
   const commandResponderId = responderId ?? "colour-panel";
-  // The panel's commands (Show Colours, …) belong to the one shared panel: a
-  // provider nested inside another over the same service leaves them there.
+  // The panel's commands (Show Colours, …) belong to the one shared panel: a provider nested
+  // inside another that already registered them over the same service leaves them there.
   const outerService = useContext(NSEColourPanelServiceContext);
-  const registersCommands = Boolean(commands) && outerService !== service;
+  const outerCommands = useContext(NSEColourPanelCommandsContext);
+  const registersCommands = Boolean(commands) && !(outerService === service && outerCommands);
   useEffect(() => registersCommands && commands ? controller.registerCommands(commands, commandResponderId) : undefined, [commands, commandResponderId, controller, registersCommands]);
   return <NSEColourPanelServiceContext.Provider value={service}><NSEColourPanelControllerContext.Provider value={controller}><NSEColourPanelResponderContext.Provider value={responderId ?? null}><NSEColourPanelCommandsContext.Provider value={commands ?? null}><NSEColourPanelDragContext.Provider value={drag ?? null}>{children}</NSEColourPanelDragContext.Provider></NSEColourPanelCommandsContext.Provider></NSEColourPanelResponderContext.Provider></NSEColourPanelControllerContext.Provider></NSEColourPanelServiceContext.Provider>;
 }
