@@ -58,6 +58,17 @@
   border-start-start-radius: 0;
   border-start-end-radius: 0;
 }
+/* A full-size content view is the sheet: the system panel, its margins and its text treatment step aside. */
+.nse-window-sheet-backdrop > .nse-sheet.nse-control-alert[data-nse-full-size-content-view],
+.nse-sheet.nse-control-alert[data-nse-full-size-content-view] {
+  min-block-size: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: start;
+  text-shadow: none;
+}
 /* A presented view controller taller than the window scrolls inside the sheet's padding, so its
    content never runs past the drawn panel. */
 .nse-window-sheet-backdrop > .nse-sheet > [data-nse-view-controller] {

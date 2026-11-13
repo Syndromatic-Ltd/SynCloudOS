@@ -513,6 +513,13 @@ export class NSEViewController<TSnapshot = number> extends NSEObject<TSnapshot> 
   }
 
   /**
+   * Whether this controller's view fills its sheet edge to edge and draws its own background
+   * (NSWindow.StyleMask.fullSizeContentView on the sheet's window). The sheet keeps its attachment,
+   * shadow and motion; the system panel, its margins and its title heading are not drawn. Set it before presenting.
+   */
+  sheetHasFullSizeContentView = false;
+
+  /**
    * The size the view prefers when it is presented (NSViewController.preferredContentSize): a sheet is
    * this wide, up to the window's width. `null` lets the content decide.
    */
