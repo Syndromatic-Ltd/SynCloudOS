@@ -226,6 +226,20 @@ function samePresentationGeneration(left: PresentationGeneration | null, right: 
   return left?.registryGeneration === right.registryGeneration && left.responderGeneration === right.responderGeneration;
 }
 
+const deferMenuObservation = Symbol("nse.deferMenuObservation");
+const reactMenuObservers = new WeakMap<NSEMenu, () => () => void>();
+
+/** @internal Create a menu whose subscriptions start only when React commits it. */
+export function createReactOwnedNSEMenu(options: NSEMenuModelOptions): NSEMenu {
+  const deferred = { ...options, [deferMenuObservation]: true };
+  return new NSEMenu(deferred);
+}
+
+/** @internal */
+export function observeReactOwnedNSEMenu(menu: NSEMenu): (() => void) | undefined {
+  return reactMenuObservers.get(menu)?.();
+}
+
 /**
  * NSMenu: a menu of NSEMenuItems. It has no responder, focus or undo graph of
  * its own: each time a branch opens it validates the items' actions along the
@@ -280,8 +294,24 @@ export class NSEMenu<const Items extends readonly NSEMenuItem[] = readonly NSEMe
     this.#rootEntries = rootEntries;
     this.model = model;
     this.runtime = runtime;
-    if (runtime.signal.aborted) this.#runtimeAbort();
-    else runtime.signal.addEventListener("abort", this.#runtimeAbort, { once: true });
+    if (deferMenuObservation in options) {
+      reactMenuObservers.set(this, () => {
+        this.#observeLifetime();
+        return () => {
+          // The surface is being removed, so disposal must not schedule a React update.
+          this.#listeners.clear();
+          this.dispose();
+        };
+      });
+    } else {
+      this.#observeLifetime();
+    }
+  }
+
+  #observeLifetime(): void {
+    const { signal } = this.runtime;
+    if (signal.aborted) this.#runtimeAbort();
+    else signal.addEventListener("abort", this.#runtimeAbort, { once: true });
     this.#ownership.bind(() => this.dispose());
   }
 

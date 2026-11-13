@@ -28,7 +28,8 @@ import { sizedControlStyle, useNSEControlFeedback } from "../Controls/Core/nseCo
 import { NSEButton, nseButtonToneProps, type NSEButtonTone, type NSEButtonProps } from "../Controls/Buttons/NSEButton";
 import { useNSEOverlayProvider } from "../Overlays";
 import { NSEMenuOverlay } from "./NSEMenuOverlay";
-import { NSEMenu, nseRefreshMenuPresentation } from "./NSEMenu";
+import { createReactOwnedNSEMenu, nseRefreshMenuPresentation, type NSEMenu } from "./NSEMenu";
+import { useNSEMenuLifetime } from "./useNSEMenuLifetime";
 import { nseMenuModel } from "./menuTypes";
 import type {
   NSEMenuEntry,
@@ -688,7 +689,8 @@ function NSEItemMenu({
       selectedRef.current?.(value);
     },
   ), [localMenu.records, resolvedParentResponderId, runtimeSource, selectionHaptic, triggerNSEControlHaptic]);
-  const controller = useMemo(() => new NSEMenu({ ownerSignal: localRuntime.signal, [nseMenuModel]: localMenu.model, runtime: localRuntime }), [localMenu.model, localRuntime]);
+  const controller = useMemo(() => createReactOwnedNSEMenu({ ownerSignal: localRuntime.signal, [nseMenuModel]: localMenu.model, runtime: localRuntime }), [localMenu.model, localRuntime]);
+  useNSEMenuLifetime(controller);
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const [keyboardInitialFocus, setKeyboardInitialFocus] = useState<"first" | "last" | null>(null);
   const isOpen = open ?? uncontrolledOpen;
