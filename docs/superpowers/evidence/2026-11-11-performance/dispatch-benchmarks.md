@@ -43,7 +43,23 @@ Inclusive time inside the profiled task, so read it as a share of that task, not
 | 6 | `animateArtwork` → `addAnimation` → `toRuntime` | site `src/Effects/LayerArtwork.tsx`, `fx/animation.js` | return-to-webspring | 23 of 182 ms | leave: the site builds its board artwork animations on return |
 | 7 | `viewDidAppear` → `manageRenderer` | site `src/Effects/NetburstIconEffect.tsx` | cold-load-board, quickswitch-open | 9 to 12 ms | leave |
 
-Rows 1 and 3 are proposed as slices of their own, each with a before and after in this file. Neither is started.
+Row 1 is done at `9520f4b2`; see below. Row 3 is the next slice.
+
+## Fix in place: the PDF library leaves start-up (`9520f4b2`)
+
+The colour controls imported `GFXColour` through the GraphicsFX barrel, and output preparation imported the PDF context statically, so the bundler tied the 1.7 MB PDF chunk to every shell entry. The colour controls now import the colour module, and output preparation loads the PDF context when the first output is prepared. A packaging test follows the static imports of `index.js`, `sdk.js`, `nse.js` and `webspring.js` and fails if a PDF chunk is among them.
+
+| cold-load-board (plain run, median of three) | Before (`22cb33ce`) | After (`9520f4b2`) |
+| --- | ---: | ---: |
+| Script time | 338 ms | 309 ms |
+| Longest task | 177 ms | 165 ms |
+| Tasks over 50 ms | 3 | 3 |
+| Bytes of PDF code in the entries' static imports | 1.72 MB | 2.4 kB (the font subset recorder) |
+
+- The dev server serves from disk, so the saving in download and parse on a real connection is not in these figures.
+- Cold gallery and launch About moved within their run-to-run spread (script 1,823 to 1,859 ms and 653 to 633 ms).
+- `fx/graphics` still exports the PDF classes, so an app that imports that entry loads the library with the app. Splitting PDF into its own public entry would be a public API change and is a proposal, not done.
+- After-figures are in `inventory-plain-after-pdf.json`.
 
 ## Heap across ten launches of About
 
