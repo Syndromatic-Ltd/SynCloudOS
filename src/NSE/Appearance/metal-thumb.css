@@ -36,9 +36,9 @@
     rgba(255,255,255,0) 136deg, rgba(255,255,255,.4) 150deg, rgba(255,255,255,0) 164deg,
     rgba(255,255,255,0) 224deg, rgba(255,255,255,.55) 240deg, rgba(255,255,255,0) 256deg,
     rgba(255,255,255,0) 316deg, rgba(255,255,255,.4) 330deg, rgba(255,255,255,0) 344deg, rgba(255,255,255,0) 360deg); transform:rotate(calc(var(--nse-metal-angle,0rad) * -1.6)); }
-/* The plate art turns about 49.94% / 21.52%; that point sits on the thumb's centre. */
+/* The plate art cropped square about its turning centre, so the rings sit on the thumb's centre at any size. */
 .nse-metal-thumb-texture,
-:where(:scope):is(.nse-metal-thumb-texture) { position:absolute; left:calc(50% - 69.92px); top:calc(50% - 31.42px); width:140px; height:146px; background:url("/assets/nse/atmo/shell/login-window/generated/plate-texture.webp") 0 0 / 100% 100%; mix-blend-mode:multiply; filter:brightness(.56) contrast(4.2) brightness(1.32); opacity:.8; }
+:where(:scope):is(.nse-metal-thumb-texture) { position:absolute; inset:0; background:url("/assets/nse/atmo/shell/login-window/generated/thumb-texture.webp") 50% 50% / 100% 100% no-repeat; mix-blend-mode:multiply; opacity:.8; }
 .nse-metal-thumb-rim,
 :where(:scope):is(.nse-metal-thumb-rim) { position:absolute; inset:0; border-radius:inherit; box-shadow:inset 0 0.7px 0 rgba(255,255,255,.9), inset 0 -0.8px 1px rgba(0,0,0,.65), inset 0 0 0 0.6px rgba(0,0,0,.35); }
 .nse-control-slider[data-thumb-material="metal"] .nse-control-slider-thumb-visual,
