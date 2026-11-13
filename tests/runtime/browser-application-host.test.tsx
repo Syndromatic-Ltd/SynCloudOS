@@ -123,6 +123,31 @@ function authenticationService() {
   };
 }
 describe("application-only browser host", () => {
+  it("releases the host menu subscription after the StrictMode host unmounts", async () => {
+    const held = new Set<EventListenerOrEventListenerObject>();
+    const add = AbortSignal.prototype.addEventListener;
+    const remove = AbortSignal.prototype.removeEventListener;
+    const added = vi.spyOn(AbortSignal.prototype, "addEventListener").mockImplementation(function (this: AbortSignal, type, listener, options) {
+      if (type === "abort" && typeof listener === "function" && listener.name === "#runtimeAbort") held.add(listener);
+      add.call(this, type, listener, options);
+    });
+    const removed = vi.spyOn(AbortSignal.prototype, "removeEventListener").mockImplementation(function (this: AbortSignal, type, listener, options) {
+      if (type === "abort" && listener) held.delete(listener);
+      remove.call(this, type, listener, options);
+    });
+    try {
+      const before = held.size;
+      const { host } = await mount();
+      expect(await screen.findByTestId("application")).toBeTruthy();
+      expect(held.size - before).toBe(1);
+      await act(async () => { await host.dispose("menu-lifetime-test"); });
+      expect(held.size).toBe(before);
+    } finally {
+      added.mockRestore();
+      removed.mockRestore();
+    }
+  });
+
   it.each(["definition", "discovered"] as const)("offers the host's About attribution for a %s bundle", async (kind) => {
     const about = { copyright: "© 2026 Example Ltd.", trademark: "Example is a registered trademark.", tagline: "Made in Manchester." };
     const overrides = kind === "definition" ? { bundles: [menuBundle] } : {

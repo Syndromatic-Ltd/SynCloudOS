@@ -22,8 +22,8 @@ import { useContext, useId, useMemo, useRef, useState, type KeyboardEvent } from
 import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
 import { useOptionalNSEOverlayProvider } from "../Overlays";
 import { NSEMenuView } from "./NSEMenuView";
-import { NSEMenu } from "./NSEMenu";
-import { useNSEDeferredDisposal } from "../interactionLifecycle";
+import { createReactOwnedNSEMenu, type NSEMenu } from "./NSEMenu";
+import { useNSEMenuLifetime } from "./useNSEMenuLifetime";
 import { useOptionalNSEMenuRuntimePort } from "./menuRuntimeContext";
 import { NSEMenuOverlay } from "./NSEMenuOverlay";
 import { nseMenuModel, type NSEMenuOverlayOptions } from "./menuTypes";
@@ -58,16 +58,13 @@ export interface NSEMenuBarProps {
  */
 function useBarMenus(mainMenu: NSEMenu): readonly NSEMenu[] {
   const runtime = useOptionalNSEMenuRuntimePort() ?? mainMenu.runtime;
-  const menus = useMemo(() => {
-    const menus = mainMenu.model.entries.flatMap((entry) => entry.kind === "submenu"
-      ? [new NSEMenu({
-          [nseMenuModel]: { id: `${mainMenu.model.id}:${entry.id}`, label: typeof entry.label === "string" ? entry.label : entry.id, entries: entry.entries },
-          runtime,
-        })]
-      : []);
-    return Object.assign(menus, { dispose: () => { for (const menu of menus) menu.dispose(); } });
-  }, [mainMenu, runtime]);
-  useNSEDeferredDisposal(menus, runtime.scheduler);
+  const menus = useMemo(() => mainMenu.model.entries.flatMap((entry) => entry.kind === "submenu"
+    ? [createReactOwnedNSEMenu({
+        [nseMenuModel]: { id: `${mainMenu.model.id}:${entry.id}`, label: typeof entry.label === "string" ? entry.label : entry.id, entries: entry.entries },
+        runtime,
+      })]
+    : []), [mainMenu, runtime]);
+  useNSEMenuLifetime(menus);
   return menus;
 }
 

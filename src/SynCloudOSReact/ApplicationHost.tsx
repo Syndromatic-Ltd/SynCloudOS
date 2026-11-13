@@ -4,7 +4,9 @@ import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useSta
 import { NSETooltipProvider } from "../NSE/Tooltips";
 import { NSEAlertBackdrop } from "../NSE/SystemUI";
 import { SCOSAlertPresenter } from "./SCOSAlertPresenter";
-import { NSEMenu, NSEOverlayProvider, NSEWindowSurfaceBridgeProvider, useNSEDeferredDisposal } from "../NSE/NSE";
+import { NSEOverlayProvider, NSEWindowSurfaceBridgeProvider, useNSEDeferredDisposal } from "../NSE/NSE";
+import { createReactOwnedNSEMenu } from "../NSE/Menus/NSEMenu";
+import { useNSEMenuLifetime } from "../NSE/Menus/useNSEMenuLifetime";
 import { nseMenuModel } from "../NSE/Menus/menuTypes";
 import { NSEButton } from "@syndromatic/syncloudos/nse/controls";
 import { SynWareEntryRenderer } from "../Webspring/SynWareEntryRenderer";
@@ -173,8 +175,8 @@ export function ApplicationHost({ applicationId, authentication, home }: Applica
     ],
   }), [appName, appPreferences, applicationId, authenticationPolicy, declaresAbout, locale, menuLabels, signedIn]);
   const menuPort = useRuntimeNSEMenuPort();
-  const menuController = useMemo(() => new NSEMenu({ ownerSignal: menuPort.signal, [nseMenuModel]: menuModel, runtime: menuPort }), [menuModel, menuPort]);
-  useNSEDeferredDisposal(menuController);
+  const menuController = useMemo(() => createReactOwnedNSEMenu({ ownerSignal: menuPort.signal, [nseMenuModel]: menuModel, runtime: menuPort }), [menuModel, menuPort]);
+  useNSEMenuLifetime(menuController);
   const logOut = useCallback(async () => {
     const result = await runtime.commands.dispatch("session.logOut", undefined, { source: "system" });
     return result.status === "executed";

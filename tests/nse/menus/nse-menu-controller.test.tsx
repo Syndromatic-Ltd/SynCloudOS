@@ -23,7 +23,7 @@ import { createTestTheme } from "../../fixtures/themes";
 import { installNSEScrollIntoViewFixture } from "../fixtures/browser";
 import { nseMenuModel } from "../../../src/NSE/Menus/menuTypes";
 installNSEScrollIntoViewFixture();
-import React, { useMemo, useState } from "react";
+import React, { StrictMode, useMemo, useState } from "react";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
@@ -220,6 +220,36 @@ const model: NSEMenuModel = {
   ],
 };
 
+it.each(["item menu", "menu bar"])("releases the %s subscriptions after a StrictMode mount", async (surface) => {
+  const port = runtime();
+  const mainMenu = new NSEMenu({ [nseMenuModel]: { id: "main", label: "Main", entries: [
+    { kind: "submenu", id: model.id, label: model.label, entries: model.entries },
+  ] }, runtime: port });
+  const add = vi.spyOn(port.signal, "addEventListener");
+  const remove = vi.spyOn(port.signal, "removeEventListener");
+  const held = () => add.mock.calls.filter(([type, listener]) => type === "abort"
+    && !remove.mock.calls.some(([removedType, removed]) => removedType === type && removed === listener)).length;
+  const before = held();
+  try {
+    const view = render(
+      <StrictMode>
+        <MenuOverlayHarness signal={port.signal}>
+          {surface === "item menu"
+            ? <NSEMenuView label="Format" items={[{ value: "bold", label: "Bold" }]} parentResponderId="editor" />
+            : <NSEMenuBar menu={mainMenu} overlay={{ parentResponderId: "editor" }} />}
+        </MenuOverlayHarness>
+      </StrictMode>,
+    );
+    expect(held()).toBeGreaterThan(before);
+    await act(async () => { view.unmount(); });
+    expect(held()).toBe(before);
+  } finally {
+    mainMenu.dispose();
+    add.mockRestore();
+    remove.mockRestore();
+  }
+});
+
 const workAreaSnapshot = Object.freeze({
   width: 1280,
   height: 720,
@@ -232,14 +262,16 @@ function MenuOverlayHarness({
   children,
   mode = "desktop",
   onScope,
+  signal,
 }: {
   readonly children: React.ReactNode;
   readonly mode?: "desktop" | "mobile";
   readonly onScope?: (options: unknown) => void;
+  readonly signal?: AbortSignal;
 }) {
   const runtimePort = useMemo(() => ({
     runtimeId: "runtime:menu-tests",
-    signal: new AbortController().signal,
+    signal: signal ?? new AbortController().signal,
     environment: {
       browser: { getDocument: () => document, getWindow: () => window },
       workArea: { getSnapshot: () => workAreaSnapshot, subscribe: () => () => undefined },
@@ -254,7 +286,7 @@ function MenuOverlayHarness({
       onScope?.(options);
       return node;
     },
-  }), [mode, onScope]);
+  }), [mode, onScope, signal]);
   return <NSEOverlayProvider runtimePort={runtimePort}>{children}</NSEOverlayProvider>;
 }
 
