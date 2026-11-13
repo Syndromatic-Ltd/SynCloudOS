@@ -391,7 +391,7 @@ function NSEPresentedSheet({ controller }: { readonly controller: NSEViewControl
     if (typeof operation === "function") void operation.call(controller);
     else controller.dismiss();
   };
-  const sheet = <NSEControllerSheetSurface scopeId={`nse-sheet:${sheetKey(controller)}`} attached={Boolean(sheetHost)} title={controller.title} titleId={titleId} width={size?.width} onCancel={cancel}>
+  const sheet = <NSEControllerSheetSurface scopeId={`nse-sheet:${sheetKey(controller)}`} attached={Boolean(sheetHost)} title={controller.title} titleId={titleId} width={size?.width} fullSizeContentView={controller.sheetHasFullSizeContentView} onCancel={cancel}>
     <NSEViewControllerView controller={controller} />
   </NSEControllerSheetSurface>;
   // A window attaches the sheet under its title bar and toolbar; outside a window it covers the page.

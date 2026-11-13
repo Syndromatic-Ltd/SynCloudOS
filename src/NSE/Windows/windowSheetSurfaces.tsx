@@ -10,22 +10,25 @@ import type { NSEWindowAlertRequest } from "../Application/NSEWindowController";
 import type { NSEWindowSurfaceRequest } from "../Overlays/NSEWindowSurfaceBridge";
 
 /** @internal NSE owns sheet drawing; the application host owns presentation and dismissal. */
-export function NSEControllerSheetSurface({ scopeId, attached, title, titleId, width, onCancel, children }: {
+export function NSEControllerSheetSurface({ scopeId, attached, title, titleId, width, fullSizeContentView = false, onCancel, children }: {
   readonly scopeId: string;
   readonly attached: boolean;
   readonly title?: string;
   readonly titleId: string;
   readonly width?: number;
+  /** The presented view owns the whole sheet: no system panel, margins or title heading. */
+  readonly fullSizeContentView?: boolean;
   readonly onCancel: () => void;
   readonly children: ReactNode;
 }) {
   const colourScheme = useNSEAppearance().resolvedColourScheme;
   return <NSEFocusScope options={{ scopeId, kind: "modal", modal: true, trapFocus: true, asChild: true }}>
     <NSEAlertBackdrop onSafeDismiss={onCancel} className={attached ? "nse-window-sheet-backdrop" : undefined} motion={attached ? "sheet" : "alert"}>
-      <NSEAlertSurface role="dialog" labelledBy={title ? titleId : undefined} className="nse-sheet" motion={attached ? "sheet" : "alert"}
+      <NSEAlertSurface role="dialog" labelledBy={title && !fullSizeContentView ? titleId : undefined} aria-label={title && fullSizeContentView ? title : undefined}
+        data-nse-full-size-content-view={fullSizeContentView ? "" : undefined} className="nse-sheet" motion={attached ? "sheet" : "alert"}
         appearance={attached ? colourScheme : "dark"}
         style={width === undefined ? undefined : { width: `min(${width}px, calc(100% - 32px))` }}>
-        {title ? <h2 id={titleId} className="nse-sheet-title">{title}</h2> : null}
+        {title && !fullSizeContentView ? <h2 id={titleId} className="nse-sheet-title">{title}</h2> : null}
         {children}
       </NSEAlertSurface>
     </NSEAlertBackdrop>
