@@ -1060,7 +1060,43 @@ describe("DispatchFX runtime fault regressions", () => {
     expect(workers[1].posted.flatMap(p => p.message.jobs.map(j => j.closureId))).toEqual(["fresh_b"]);
   });
 
-  it("reuses the session's busy worker and leaves capacity for another session", async () => {
+  it("spreads one session's concurrent work across free workers", async () => {
+    const workers: FakeWorker[] = [];
+    const pool = new WorkerPool({ maxWorkers: 3, createWorker: () => {
+      const worker = new FakeWorker();
+      workers.push(worker);
+      return worker;
+    } });
+    const session = {};
+    for (const closureId of ["a", "b", "c"]) pool.submit(makeJob({ sessionKey: session, closureId }));
+    await Promise.resolve();
+    expect(workers.map(worker => worker.posted[0].message.jobs.map(job => job.closureId))).toEqual([["a"], ["b"], ["c"]]);
+    pool.terminateAll();
+  });
+
+  it("returns a session to the idle worker it warmed", async () => {
+    const workers: FakeWorker[] = [];
+    const pool = new WorkerPool({ maxWorkers: 2, createWorker: () => {
+      const worker = new FakeWorker();
+      workers.push(worker);
+      return worker;
+    } });
+    const sessionA = {};
+    const sessionB = {};
+    pool.submit(makeJob({ sessionKey: sessionA, closureId: "first_a" }));
+    pool.submit(makeJob({ sessionKey: sessionB, closureId: "first_b" }));
+    await Promise.resolve();
+    workers[0].emitResult(workers[0].posted[0].message.jobs[0].jobId);
+    workers[1].emitResult(workers[1].posted[0].message.jobs[0].jobId);
+    pool.submit(makeJob({ sessionKey: sessionB, closureId: "second_b" }));
+    await Promise.resolve();
+    expect(workers).toHaveLength(2);
+    expect(workers[1].posted.at(-1)?.message.jobs.map(job => job.closureId)).toEqual(["second_b"]);
+    expect(workers[0].posted).toHaveLength(1);
+    pool.terminateAll();
+  });
+
+  it("queues behind the session's own worker when the pool is full, and another session's worker is untouched", async () => {
     vi.useFakeTimers();
     const workers: FakeWorker[] = [];
     const pool = new WorkerPool({ maxWorkers: 2, createWorker: () => {
@@ -1073,14 +1109,14 @@ describe("DispatchFX runtime fault regressions", () => {
     const onResult = vi.fn();
     const onError = vi.fn();
     pool.submit(makeJob({ sessionKey: sessionA, closureId: "hung_a" }));
-    pool.submit(makeJob({ sessionKey: sessionA, closureId: "second_a" }));
     await Promise.resolve();
-    expect(workers).toHaveLength(1);
-    expect(workers[0].posted[0].message.jobs.map(job => job.closureId)).toEqual(["hung_a", "second_a"]);
-
     pool.submit(makeJob({ sessionKey: sessionB, closureId: "live_b", onResult, onError }));
     await Promise.resolve();
     expect(workers).toHaveLength(2);
+    pool.submit(makeJob({ sessionKey: sessionA, closureId: "second_a" }));
+    await Promise.resolve();
+    expect(workers[0].posted.map(post => post.message.jobs.map(job => job.closureId))).toEqual([["hung_a"], ["second_a"]]);
+    expect(workers[1].posted).toHaveLength(1);
     const [liveJob] = workers[1].posted[0].message.jobs;
     expect(liveJob.closureId).toBe("live_b");
     pool.cancelApp(sessionA);
