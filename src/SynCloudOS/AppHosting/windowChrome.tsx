@@ -19,6 +19,7 @@
  */
 
 import { NSEWindowLayoutContext, useNSEWindowChromeElement } from "../../NSE/applicationHostInterop";
+import { contentInlineSize } from "./contentInlineSize";
 import { useNSEWindowChromeObstruction } from "../../NSE/NSE";
 
 import { Fragment, createContext, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
@@ -182,9 +183,11 @@ export function NSEWindowToolbar({ controller, toolbar }: { readonly controller:
     if (!node) return undefined;
     // Before layout reports a size (or where there is no layout), the toolbar spans the window.
     const view = node.ownerDocument.defaultView;
+    // Items are laid out inside the bar's padding, so the width they share is its content box, not its frame.
     const measure = (width: number) => Math.floor(width || view?.innerWidth || 0);
-    setWidth(measure(node.getBoundingClientRect().width));
-    if (layout) return layout.observeElement(node, rect => setWidth(measure(rect.width)));
+    const measureFrame = (width: number) => width ? Math.floor(contentInlineSize(node, width)) : measure(width);
+    setWidth(measureFrame(node.getBoundingClientRect().width));
+    if (layout) return layout.observeElement(node, rect => setWidth(measureFrame(rect.width)));
     const Observer = view?.ResizeObserver;
     if (!view || !Observer) return undefined;
     let frame: number | null = null;
