@@ -53,13 +53,11 @@ export function createPoolWorkerHandler(
     return cached;
   }
 
-  return async function handleMessage(event: MessageEvent<PoolRequestMessage>): Promise<void> {
-    const message = event.data;
-    if (!message || message.type !== "run-batch" || !Array.isArray(message.jobs)) return;
+  let pendingBatch = Promise.resolve();
 
-    for (const job of message.jobs) {
+  const processBatch = async (jobs: PoolRequestMessage["jobs"]): Promise<void> => {
+    for (const job of jobs) {
       const continuations: SerializedContinuation[] = [];
-      activeContinuationsStack.push(continuations);
       try {
         const mod = await loadChunk(job.chunkURL);
         const table = mod.__dfxClosures ?? mod.closures;
@@ -68,7 +66,14 @@ export function createPoolWorkerHandler(
           throw new Error(`DispatchFX worker closure "${job.closureId}" not found in "${job.chunkURL}"`);
         }
         const frozenCaptures = job.captures.map(capture => deepFreezeWorkerValue(capture));
-        const returned = await fn(...frozenCaptures);
+        activeContinuationsStack.push(continuations);
+        let returned: unknown;
+        try {
+          returned = await fn(...frozenCaptures);
+        } finally {
+          const stackIndex = activeContinuationsStack.lastIndexOf(continuations);
+          if (stackIndex >= 0) activeContinuationsStack.splice(stackIndex, 1);
+        }
         const workerValues = Array.isArray(returned) ? returned : returned === undefined ? [] : [returned];
         const response: PoolResponseMessage = continuations.length
           ? { type: "result", jobId: job.jobId, workerValues, continuations }
@@ -81,10 +86,19 @@ export function createPoolWorkerHandler(
           jobId: job.jobId,
           error: serializeWorkerError(error),
         });
-      } finally {
-        activeContinuationsStack.pop();
       }
     }
+  };
+
+  return function handleMessage(event: MessageEvent<PoolRequestMessage>): Promise<void> {
+    const message = event.data;
+    if (!message || message.type !== "run-batch" || !Array.isArray(message.jobs)) {
+      return Promise.resolve();
+    }
+    const run = () => processBatch(message.jobs);
+    const next = pendingBatch.then(run, run);
+    pendingBatch = next;
+    return next;
   };
 }
 
