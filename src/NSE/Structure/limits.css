@@ -8,8 +8,9 @@
     --nse-control-minimum-block-size: 0px;
   }
   [data-nse-control]:where(:not(meter, [role="progressbar"])):is([data-nse-control-size="regular"], [data-nse-control-size="large"]) {
-    min-inline-size: max(24px, var(--nse-control-minimum-inline-size)) !important;
-    min-block-size: max(24px, var(--nse-control-minimum-block-size)) !important;
+    /* A default, not a lock: like a frame in AppKit, an app's own stylesheet may size its control. */
+    min-inline-size: max(24px, var(--nse-control-minimum-inline-size));
+    min-block-size: max(24px, var(--nse-control-minimum-block-size));
   }
 
   /* The stepper's two targets extend around its bezel. Negative margins keep
