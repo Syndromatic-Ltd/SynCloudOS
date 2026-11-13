@@ -141,7 +141,7 @@ export class NSEMaterialLighting implements NSEMaterialLightingPort {
       this.#manager = manager;
       manager.setDeviceMotionUpdateInterval(1 / 30);
       manager.startDeviceMotionUpdates(
-        { referenceFrame: "relative" },
+        { referenceFrame: "xArbitraryZVertical" },
         (sample) => {
           if (!sample.attitude || this.#manager !== manager) return;
           const now = this.#scheduler.now();

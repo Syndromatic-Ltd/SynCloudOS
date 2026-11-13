@@ -125,7 +125,7 @@ describe("MotionFX acceptance conformance", () => {
     stop();
   });
 
-  it("keeps interleaved sources, cadence and reference resets isolated across clients", () => {
+  it("keeps interleaved sources and cadence isolated across clients", () => {
     const fixture = motionFixture();
     const service = new MotionService(fixture.adapter);
     const first = service.createManager();
@@ -133,21 +133,20 @@ describe("MotionFX acceptance conformance", () => {
     const firstSamples: number[] = [];
     const secondSamples: number[] = [];
     first.setDeviceMotionUpdateInterval(1);
-    first.startDeviceMotionUpdates({ referenceFrame: "relative" }, (sample) =>
+    first.startDeviceMotionUpdates({ referenceFrame: "xArbitraryZVertical" }, (sample) =>
       firstSamples.push(sample.timestamp),
     );
-    second.startDeviceMotionUpdates({ referenceFrame: "relative" }, (sample) =>
+    second.startDeviceMotionUpdates({ referenceFrame: "xArbitraryZVertical" }, (sample) =>
       secondSamples.push(sample.timestamp),
     );
 
     fixture.emit(10, MFXAttitude.fromEuler(0, 0, 0));
     fixture.emit(10.25, MFXAttitude.fromEuler(0.1, 0, 0));
-    first.resetReferenceFrame();
     fixture.emit(11.1, MFXAttitude.fromEuler(0.2, 0, 0));
 
     expect(firstSamples).toEqual([10, 11.1]);
     expect(first.observedUpdateInterval).toBeCloseTo(1.1, 9);
-    expect(first.deviceMotion?.attitude?.roll).toBeCloseTo(0.1, 9);
+    expect(first.deviceMotion?.attitude?.roll).toBeCloseTo(0.2, 9);
     expect(second.deviceMotion?.attitude?.roll).toBeCloseTo(0.2, 9);
     expect(secondSamples).toEqual([10, 10.25, 11.1]);
 

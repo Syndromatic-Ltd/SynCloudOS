@@ -62,7 +62,6 @@ export interface MFXMotionManager extends MFXMotionAuthorization {
   stopDeviceMotionUpdates(): void;
   stopAccelerometerUpdates(): void;
   stopGyroUpdates(): void;
-  resetReferenceFrame(): void;
   createRecorder(
     options?: Readonly<{
       maximumSamples?: number;

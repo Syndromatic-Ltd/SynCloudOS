@@ -26,8 +26,12 @@ export interface MFXVector3 {
 export interface MFXQuaternion extends MFXVector3 {
   readonly w: number;
 }
+/** After CMAttitudeReferenceFrame. The browser backs xArbitraryZVertical: z is vertical, heading is arbitrary. */
 export type MFXAttitudeReferenceFrame =
-  "relative" | "gravity-aligned" | "magnetic-north" | "true-north";
+  | "xArbitraryZVertical"
+  | "xArbitraryCorrectedZVertical"
+  | "xMagneticNorthZVertical"
+  | "xTrueNorthZVertical";
 export type MFXRotationMatrix = readonly [
   number,
   number,

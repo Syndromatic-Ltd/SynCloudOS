@@ -48,9 +48,9 @@ These are the value shapes the rest of the framework uses.
 | `MFXVector3` | `{ readonly x: number; readonly y: number; readonly z: number }` | A three-component vector. Units depend on the property that carries it. |
 | `MFXQuaternion` | `MFXVector3` plus `readonly w: number` | A quaternion with the scalar part in `w`. |
 | `MFXRotationMatrix` | Readonly tuple of nine numbers | A 3 by 3 rotation matrix in row-major order: `[m00, m01, m02, m10, m11, m12, m20, m21, m22]`. |
-| `MFXAttitudeReferenceFrame` | `"relative"`, `"gravity-aligned"`, `"magnetic-north"` or `"true-north"` | The frame an attitude is measured against. |
+| `MFXAttitudeReferenceFrame` | `"xArbitraryZVertical"`, `"xArbitraryCorrectedZVertical"`, `"xMagneticNorthZVertical"` or `"xTrueNorthZVertical"` | The frame an attitude is measured against. |
 
-`startDeviceMotionUpdates` accepts only `"relative"` at present. It throws for the other three values, which the type keeps so that later hosts can offer them without an API change. In the `"relative"` frame the attitude is measured from the orientation the device reported when the reference was set (see `resetReferenceFrame()`), or from the host's own orientation frame when no reference has been set.
+`startDeviceMotionUpdates` accepts only `"xArbitraryZVertical"` at present. It throws for the other three values, which the type keeps so that later hosts can offer them without an API change. The names and meanings are Core Motion's `CMAttitudeReferenceFrame`: in `"xArbitraryZVertical"` the z axis is vertical and the heading is arbitrary.
 
 ### `MFXAttitude`
 
@@ -150,7 +150,7 @@ A fused device-motion sample. It extends `MFXLogItem`.
 | `rotationRate` | `MFXVector3 \| null` | Angular velocity in radians per second. `null` when unavailable. |
 | `gravity` | `MFXVector3 \| null` | Gravity in metres per second squared. The host derives it only when the acceleration with and without gravity arrive together, so it is often `null`. |
 | `userAcceleration` | `MFXVector3 \| null` | Acceleration from the user's movement, with gravity removed, in metres per second squared. `null` when unavailable. |
-| `referenceFrame` | `MFXAttitudeReferenceFrame` | The frame you requested. Currently always `"relative"`. |
+| `referenceFrame` | `MFXAttitudeReferenceFrame` | The frame you requested. Currently always `"xArbitraryZVertical"`. |
 | `timestamp` | `number` | Inherited. Seconds. |
 
 Browsers deliver orientation and motion as two independent event streams, so one device-motion sample usually carries the attitude or the rate and acceleration channels, and each missing channel is `null`. Check each channel you use. The update interval applies to the two streams independently, so an orientation event never uses up the slot of a motion event.
@@ -193,7 +193,7 @@ Subscriptions are passive. Starting one never triggers a permission prompt. If t
 | Member | Type or signature | Description |
 | --- | --- | --- |
 | `capabilities` | `readonly MFXMotionCapabilities` | A new frozen snapshot of what the host can deliver for each sensor on every read. It does not notify you of changes, so read it again when you need it. See [Capabilities and permissions](#capabilities-and-permissions). |
-| `deviceMotion` | `readonly MFXDeviceMotion \| null` | The latest sample delivered to a device-motion subscriber. `null` while no device-motion subscription is active, after `stopDeviceMotionUpdates()`, and after `resetReferenceFrame()` until the next sample. |
+| `deviceMotion` | `readonly MFXDeviceMotion \| null` | The latest sample delivered to a device-motion subscriber. `null` while no device-motion subscription is active, and after `stopDeviceMotionUpdates()`. |
 | `accelerometerData` | `readonly MFXAccelerometerData \| null` | The latest accelerometer sample. `null` while no accelerometer subscription is active. |
 | `gyroData` | `readonly MFXGyroData \| null` | The latest gyro sample. `null` while no gyro subscription is active. |
 | `deviceMotionUpdateInterval` | `readonly number` | Minimum seconds between device-motion samples. Defaults to 1/60. |
@@ -203,14 +203,13 @@ Subscriptions are passive. Starting one never triggers a permission prompt. If t
 | `setDeviceMotionUpdateInterval(seconds)` | `(seconds: number) => void` | Sets the minimum spacing. Throws `RangeError` unless `seconds` is finite, greater than 0 and at most 3600. Throws `SynCloudOSLifecycleError` with code `MFX_MOTION_MANAGER_DISPOSED` when the manager is disposed. Takes effect on the next sample. |
 | `setAccelerometerUpdateInterval(seconds)` | `(seconds: number) => void` | As above, for the accelerometer. |
 | `setGyroUpdateInterval(seconds)` | `(seconds: number) => void` | As above, for the gyroscope. |
-| `startDeviceMotionUpdates(options, handler)` | `(options: Readonly<{ referenceFrame: MFXAttitudeReferenceFrame; signal?: AbortSignal }>, handler: (sample: MFXDeviceMotion) => void) => MFXMotionSubscription` | Subscribes to device motion. Throws `Error` for any `referenceFrame` other than `"relative"`, and `SynCloudOSLifecycleError` with code `MFX_MOTION_MANAGER_DISPOSED` when the manager is disposed. |
+| `startDeviceMotionUpdates(options, handler)` | `(options: Readonly<{ referenceFrame: MFXAttitudeReferenceFrame; signal?: AbortSignal }>, handler: (sample: MFXDeviceMotion) => void) => MFXMotionSubscription` | Subscribes to device motion. Throws `Error` for any `referenceFrame` other than `"xArbitraryZVertical"`, and `SynCloudOSLifecycleError` with code `MFX_MOTION_MANAGER_DISPOSED` when the manager is disposed. |
 | `startAccelerometerUpdates(handler, signal?)` | `(handler: (sample: MFXAccelerometerData) => void, signal?: AbortSignal) => MFXMotionSubscription` | Subscribes to accelerometer readings. |
 | `startGyroUpdates(handler, signal?)` | `(handler: (sample: MFXGyroData) => void, signal?: AbortSignal) => MFXMotionSubscription` | Subscribes to gyroscope readings. |
 | `stopDeviceMotionUpdates()` | `() => void` | Disposes every device-motion subscription and every recorder on this manager, and clears `deviceMotion`. |
 | `stopAccelerometerUpdates()` | `() => void` | Disposes every accelerometer subscription and clears `accelerometerData`. |
 | `stopGyroUpdates()` | `() => void` | Disposes every gyroscope subscription and clears `gyroData`. |
-| `resetReferenceFrame()` | `() => void` | Makes the current orientation the zero for later `"relative"` attitudes, and clears `deviceMotion` until the next sample. Throws when the manager is disposed. |
-| `createRecorder(options?)` | `(options?: Readonly<{ maximumSamples?: number; maximumAge?: number; signal?: AbortSignal }>) => MFXMotionRecorder` | Starts device-motion updates in the `"relative"` frame into a bounded history. See [`MFXMotionRecorder`](#mfxmotionrecorder). |
+| `createRecorder(options?)` | `(options?: Readonly<{ maximumSamples?: number; maximumAge?: number; signal?: AbortSignal }>) => MFXMotionRecorder` | Starts device-motion updates in the `"xArbitraryZVertical"` frame into a bounded history. See [`MFXMotionRecorder`](#mfxmotionrecorder). |
 | `requestAuthorization()` | `() => Promise<MFXAvailability>` | Asks the user for sensor access. See [Authorisation](#authorisation). |
 | `dispose()` | `() => void` | Ends the manager and everything it owns. Safe to call more than once. |
 
@@ -230,7 +229,7 @@ The options argument of `startDeviceMotionUpdates` is an inline object type with
 
 | Field | Type | Default | Meaning |
 | --- | --- | --- | --- |
-| `referenceFrame` | `MFXAttitudeReferenceFrame` | Required | The frame to measure attitude in. Only `"relative"` is supported. |
+| `referenceFrame` | `MFXAttitudeReferenceFrame` | Required | The frame to measure attitude in. Only `"xArbitraryZVertical"` is supported. |
 | `signal` | `AbortSignal` | None | Disposes the subscription when it aborts. |
 
 #### Recorder options
@@ -316,7 +315,7 @@ export function TiltReadout() {
   useEffect(() => {
     motion.setDeviceMotionUpdateInterval(1 / 30);
     const subscription = motion.startDeviceMotionUpdates(
-      { referenceFrame: "relative" },
+      { referenceFrame: "xArbitraryZVertical" },
       (sample) => {
         if (sample.attitude) {
           setTilt({ roll: sample.attitude.roll, pitch: sample.attitude.pitch });
@@ -336,7 +335,7 @@ export function TiltReadout() {
 }
 ```
 
-Start subscriptions in `useEffect`. The hook acquires the host manager in a layout effect, and a child's layout effects run before its parent's. Passive effects run after every layout effect in the tree, so the manager exists by then. Calling `start`, `set...Interval`, `resetReferenceFrame`, `createRecorder` or `requestAuthorization` before the manager is acquired throws `Error("The component motion owner is not mounted.")`. Before that point the facade reports every sensor as unavailable, every latest-sample property as `null` and every interval as 1/60. The `stop` methods and `dispose()` do nothing.
+Start subscriptions in `useEffect`. The hook acquires the host manager in a layout effect, and a child's layout effects run before its parent's. Passive effects run after every layout effect in the tree, so the manager exists by then. Calling `start`, `set...Interval`, `createRecorder` or `requestAuthorization` before the manager is acquired throws `Error("The component motion owner is not mounted.")`. Before that point the facade reports every sensor as unavailable, every latest-sample property as `null` and every interval as 1/60. The `stop` methods and `dispose()` do nothing.
 
 If the manifest does not declare `motion.read`, acquisition throws a `SecurityError` while React commits the component, and your error boundary receives it. Declare the permission before you use the hook.
 
@@ -381,9 +380,9 @@ export function peakRotationRate(
 
 The promise rejects when `createManager` throws, for example with a `SecurityError` when `motion.read` is missing. It resolves `null` when the signal aborts before any gyro sample arrives. Disposing the manager from inside a handler is safe: the manager finishes the current delivery round and skips subscriptions that have ended.
 
-### Reference frames and resetting
+### Reference frames and measuring a change
 
-Attitudes arrive in the `"relative"` frame. Call `resetReferenceFrame()` to make the device's current orientation the zero point, for example when a game starts or the user taps "centre". The reset uses the latest orientation the manager has seen, so it has an effect only while at least one device-motion subscription (or recorder) is running. The reference ends when the last device-motion subscription ends. After a reset, `deviceMotion` is `null` until the next sample arrives.
+Attitudes arrive in the `"xArbitraryZVertical"` frame. To measure movement from a starting pose, for example when a game starts or the user taps "centre", keep that sample's attitude and call `attitude.multiplyByInverseOf(reference)` on later ones, as with `CMAttitude.multiply(byInverseOf:)`. The result is the change in the device's own axes.
 
 Attitudes a manager delivers keep quaternion signs continuous within each subscription, so component-wise filtering and interpolation do not jump.
 
@@ -536,10 +535,10 @@ The click handler calls `requestAuthorization()` before it awaits anything, so t
 | `createManager` with an aborted signal or a closing session | The abort reason is thrown |
 | `createManager` with eight live managers in the session | `QuotaExceededError` `DOMException` |
 | Interval outside (0, 3600] or not finite | `RangeError` |
-| `startDeviceMotionUpdates` with a frame other than `"relative"` | `Error` |
+| `startDeviceMotionUpdates` with a frame other than `"xArbitraryZVertical"` | `Error` |
 | More than 128 live subscriptions on one manager | `RangeError` |
 | `createRecorder` with `maximumSamples` outside 1 to 10000 or not an integer, or `maximumAge` outside (0, 3600] | `RangeError` |
-| Any `start`, `set...Interval`, `resetReferenceFrame` or `createRecorder` call after `dispose()` | `Error` |
+| Any `start`, `set...Interval` or `createRecorder` call after `dispose()` | `Error` |
 | `requestAuthorization()` without `motion.requestAuthorization`, without a user gesture, or after disposal | Rejected promise with `Error` |
 | A handler that throws | The error is swallowed and other subscribers still receive the sample |
 | A subscription with an already aborted signal | An inert subscription, and the handler is never called |
@@ -561,7 +560,7 @@ export function startSafely(
   report: (message: string) => void,
 ): MFXMotionSubscription | null {
   try {
-    return manager.startDeviceMotionUpdates({ referenceFrame: "relative" }, (sample) => {
+    return manager.startDeviceMotionUpdates({ referenceFrame: "xArbitraryZVertical" }, (sample) => {
       try {
         handler(sample);
       } catch (error) {
@@ -599,7 +598,7 @@ Ordering guarantees:
 
 ## Material lighting
 
-NSE uses MotionFX for the light direction on metallic materials. Sliders and toggles accept `thumbMaterial="metal"`, and `NSEMaterialLightingProvider` from `@syndromatic/syncloudos/nse/appearance` binds one shared, passive lighting controller. The controller requests device motion at 30 samples per second in the `"relative"` frame and maps pitch and roll to a light offset with a short smoothing time. It never calls `requestAuthorization()`. Reduced motion, hidden pages, disabled controls and missing or stale samples all give a static light. See [Appearance](../appearance.md).
+NSE uses MotionFX for the light direction on metallic materials. Sliders and toggles accept `thumbMaterial="metal"`, and `NSEMaterialLightingProvider` from `@syndromatic/syncloudos/nse/appearance` binds one shared, passive lighting controller. The controller requests device motion at 30 samples per second in the `"xArbitraryZVertical"` frame and maps the rotation away from a slowly following rest pose to a light offset with a short smoothing time. It never calls `requestAuthorization()`. Reduced motion, hidden pages, disabled controls and missing or stale samples all give a static light. See [Appearance](../appearance.md).
 
 ## Related
 
