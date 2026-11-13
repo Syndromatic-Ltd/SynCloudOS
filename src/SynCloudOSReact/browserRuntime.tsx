@@ -382,13 +382,14 @@ function renderHost(
       <SynCloudOSProvider runtime={runtime}>
         <NSEAppearanceProvider theme={appearance} appearanceService={runtime.appearance}>
           <RuntimeInputBoundary>
-            <RootRecoveryBoundary runtime={runtime} options={options} fontCatalogue={fontCatalogue}>
+            {/* Above the recovery boundary, so the root error window scrolls like every other surface. */}
+            <NSERubberBandProvider><RootRecoveryBoundary runtime={runtime} options={options} fontCatalogue={fontCatalogue}>
               <InstalledApplicationTitleBar />
-              <NSERubberBandProvider>{home
+              {home
                 ? <ApplicationHost applicationId={home.primaryId} authentication={options.authentication ?? "disabled"} home={home} />
-                : Shell && <Shell shell={options.shell!} shellResources={options.shellResources} authentication={options.authentication} />}</NSERubberBandProvider>
+                : Shell && <Shell shell={options.shell!} shellResources={options.shellResources} authentication={options.authentication} />}
               {!home ? <SCOSAlertPresenter center={runtime.alerts} presentation={runtime.presentationTraits} /> : null}
-            </RootRecoveryBoundary>
+            </RootRecoveryBoundary></NSERubberBandProvider>
           </RuntimeInputBoundary>
         </NSEAppearanceProvider>
       </SynCloudOSProvider>
@@ -519,12 +520,12 @@ function renderBootstrapRecovery(element: Element, attempt: BrowserMountAttempt,
   // NSE backdrop owns physical focus; no disposed kernel provider is retained.
   root.render(<HostSiteBrandingProvider value={recovery.branding}>
     <NSEAppearanceProvider theme={appearance} colourScheme={recovery.appearance}>
-      <div className="syncloudos-root-error-shell"><NSEAlertBackdrop>
+      <NSERubberBandProvider><div className="syncloudos-root-error-shell"><NSEAlertBackdrop>
         <SystemAlert error={recovery.error}
           appearance={recovery.appearance} applicationIcon={recovery.applicationIcon}
           onDismiss={() => navigate(home)} onReturn={() => navigate(home)} onReload={() => navigate()}
           onOpenMailClient={(destination) => navigate(destination)} />
-      </NSEAlertBackdrop></div>
+      </NSEAlertBackdrop></div></NSERubberBandProvider>
     </NSEAppearanceProvider>
   </HostSiteBrandingProvider>);
 }
