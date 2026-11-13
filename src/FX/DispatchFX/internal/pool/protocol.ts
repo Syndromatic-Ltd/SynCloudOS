@@ -52,6 +52,7 @@ export interface PoolWorkerLike {
 
 export interface PoolJob {
   readonly appId: string | null;
+  readonly sessionKey?: object | null;
   readonly closureId: string;
   readonly chunkURL: string;
   readonly captures: unknown[];

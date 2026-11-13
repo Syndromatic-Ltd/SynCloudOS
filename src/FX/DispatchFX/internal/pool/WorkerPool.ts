@@ -116,15 +116,20 @@ export class WorkerPool {
     this.#scheduleFlush();
   }
 
-  cancelApp(appId: string | null): void {
+  cancelApp(target: object | string | null): void {
+    const matches =
+      target !== null && typeof target === "object"
+        ? (job: PoolJob) => job.sessionKey === target
+        : (job: PoolJob) => job.appId === target;
+
     for (let i = this.#queue.length - 1; i >= 0; i--) {
-      if (this.#queue[i].job.appId === appId) this.#queue.splice(i, 1);
+      if (matches(this.#queue[i].job)) this.#queue.splice(i, 1);
     }
 
     for (const slot of [...this.#slots]) {
       let hitActive = false;
       for (const entry of slot.inFlight.values()) {
-        if (entry.job.appId === appId) {
+        if (matches(entry.job)) {
           entry.cancelled = true;
           hitActive = true;
         }

@@ -25,8 +25,10 @@ class FakeWorker implements PoolWorkerLike {
     this.terminated = true;
   }
 
-  emitResult(jobId: number, workerValues: unknown[] = []): void {
-    this.onmessage?.({ data: { type: "result", jobId, workerValues } } as MessageEvent<PoolResponseMessage>);
+  emitResult(jobId: number, workerValues: unknown[] = [], continuations?: { id: string; workerValues: unknown[] }[]): void {
+    this.onmessage?.({
+      data: continuations ? { type: "result", jobId, workerValues, continuations } : { type: "result", jobId, workerValues },
+    } as unknown as MessageEvent<PoolResponseMessage>);
   }
 
   emitError(jobId: number, error: { name: string; message: string; stack?: string }): void {
@@ -696,5 +698,148 @@ describe("DispatchFX runtime fault regressions", () => {
     expect(cRes).toHaveBeenCalledTimes(1);
     expect(q1Err).toHaveBeenCalledTimes(1);
     expect(q2Err).toHaveBeenCalledTimes(1);
+  });
+
+  it("cancelling an in-flight work item suppresses its main-thread continuation", async () => {
+    const workers: FakeWorker[] = [];
+    vi.stubGlobal(
+      "Worker",
+      class {
+        constructor() {
+          const fw = new FakeWorker();
+          workers.push(fw);
+          return fw;
+        }
+      },
+    );
+
+    const reg = new Map<string, string>([["com.example.cancelcont", "/virtual/cancel-cont.js"]]);
+    (globalThis as Record<symbol, unknown>)[Symbol.for("syncloudos.dfx.workerChunks")] = reg;
+
+    const appLifetime: DispatchLifetime = {
+      appId: "com.example.cancelcont",
+      ended: false,
+      jobs: new Set(),
+      resources: new Set(),
+    };
+    const AppQueue = classForLifetime(D.DFXQueue, appLifetime);
+    const AppWorkItem = classForLifetime(D.DFXWorkItem, appLifetime);
+    const queue = new AppQueue("cancel.cont.probe");
+    const sendableSymbol = Symbol.for("syncloudos.dfx.sendable");
+
+    const contCalls: unknown[] = [];
+    let itemNotified = false;
+    const itemFn = () => {};
+    Object.defineProperty(itemFn, sendableSymbol, {
+      value: {
+        id: "Contents/index.tsx#0",
+        getCaptures: () => [],
+        continuations: [{ id: "cont_0", fn: (...vals: unknown[]) => contCalls.push(vals) }],
+      },
+      configurable: true,
+    });
+    const item = new AppWorkItem(itemFn);
+    item.notify(AppQueue.main, () => { itemNotified = true; });
+    queue.async(item);
+
+    await new Promise(resolve => setTimeout(resolve, 30));
+    expect(workers).toHaveLength(1);
+    expect(workers[0].posted).toHaveLength(1);
+    const jobId1 = workers[0].posted[0].message.jobs[0].jobId;
+
+    // Cancel while in flight on the worker, then let worker respond with a continuation.
+    item.cancel();
+    workers[0].emitResult(jobId1, [], [{ id: "cont_0", workerValues: ["stale-after-cancel"] }]);
+    await new Promise(resolve => setTimeout(resolve, 30));
+
+    expect(contCalls).toEqual([]);
+    expect(itemNotified).toBe(true);
+
+    // Also verify cancelling after result arrives before mainQueue runs suppresses the continuation.
+    let item2Notified = false;
+    const item2 = new AppWorkItem(itemFn);
+    item2.notify(AppQueue.main, () => { item2Notified = true; });
+    queue.async(item2);
+    await new Promise(resolve => setTimeout(resolve, 30));
+    const jobId2 = workers[0].posted[1].message.jobs[0].jobId;
+    workers[0].emitResult(jobId2, [], [{ id: "cont_0", workerValues: ["cancelled-before-main"] }]);
+    item2.cancel();
+    await new Promise(resolve => setTimeout(resolve, 30));
+
+    expect(contCalls).toEqual([]);
+    expect(item2Notified).toBe(true);
+  });
+
+  it("ending one session does not suppress a live sibling session with the same bundle ID", async () => {
+    const workers: FakeWorker[] = [];
+    vi.stubGlobal(
+      "Worker",
+      class {
+        constructor() {
+          const fw = new FakeWorker();
+          workers.push(fw);
+          return fw;
+        }
+      },
+    );
+
+    const sharedAppId = "com.example.sharedsibling";
+    const reg = new Map<string, string>([[sharedAppId, "/virtual/shared-sibling.js"]]);
+    (globalThis as Record<symbol, unknown>)[Symbol.for("syncloudos.dfx.workerChunks")] = reg;
+
+    const makeLifetime = (): DispatchLifetime => ({
+      appId: sharedAppId,
+      ended: false,
+      jobs: new Set(),
+      resources: new Set(),
+    });
+    const endLifetime = (lifetime: DispatchLifetime) => {
+      lifetime.ended = true;
+      for (const set of [lifetime.jobs, lifetime.resources]) {
+        for (const dispose of [...set]) dispose();
+        set.clear();
+      }
+    };
+
+    const lifetimeA = makeLifetime();
+    const lifetimeB = makeLifetime();
+    const QueueA = classForLifetime(D.DFXQueue, lifetimeA);
+    const QueueB = classForLifetime(D.DFXQueue, lifetimeB);
+    const qA = new QueueA("sibling.a");
+    const qB = new QueueB("sibling.b");
+
+    const sendableSymbol = Symbol.for("syncloudos.dfx.sendable");
+    const seenA: unknown[] = [];
+    const seenB: unknown[] = [];
+    const fnA = () => {};
+    Object.defineProperty(fnA, sendableSymbol, {
+      value: { id: "sibA#0", getCaptures: () => [], continuations: [{ id: "cA", fn: (v: unknown) => seenA.push(v) }] },
+      configurable: true,
+    });
+    const fnB = () => {};
+    Object.defineProperty(fnB, sendableSymbol, {
+      value: { id: "sibB#0", getCaptures: () => [], continuations: [{ id: "cB", fn: (v: unknown) => seenB.push(v) }] },
+      configurable: true,
+    });
+
+    qA.async(fnA);
+    qB.async(fnB);
+    await new Promise(resolve => setTimeout(resolve, 30));
+
+    const postedJobs = workers.flatMap(w => w.posted.flatMap(p => p.message.jobs.map(j => ({ worker: w, job: j }))));
+    const jobA = postedJobs.find(x => x.job.closureId === "sibA#0")!;
+    const jobB = postedJobs.find(x => x.job.closureId === "sibB#0")!;
+    expect(jobA).toBeDefined();
+    expect(jobB).toBeDefined();
+
+    // Ending session A must cancel A without suppressing live sibling session B (same bundle ID).
+    endLifetime(lifetimeA);
+
+    jobA.worker.emitResult(jobA.job.jobId, [], [{ id: "cA", workerValues: ["stale-a"] }]);
+    jobB.worker.emitResult(jobB.job.jobId, [], [{ id: "cB", workerValues: ["alive-b"] }]);
+
+    await new Promise(resolve => setTimeout(resolve, 30));
+    expect(seenA).toEqual([]);
+    expect(seenB).toEqual(["alive-b"]);
   });
 });
