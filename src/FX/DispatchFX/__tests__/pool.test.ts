@@ -403,3 +403,87 @@ describe("DFXQueue worker error parity with main-thread throws", () => {
     expect(cancelledNotified).toBe(true);
   });
 });
+
+describe("DispatchFX runtime fault regressions", () => {
+  afterEach(() => {
+    WorkerPool.shared.terminateAll();
+    delete (globalThis as Record<symbol, unknown>)[Symbol.for("syncloudos.dfx.workerChunks")];
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it("barrier waits for earlier concurrent worker jobs before running and blocks later jobs until done", async () => {
+    const workers: FakeWorker[] = [];
+    vi.stubGlobal(
+      "Worker",
+      class {
+        constructor() {
+          const fw = new FakeWorker();
+          workers.push(fw);
+          return fw;
+        }
+      },
+    );
+
+    const reg = new Map<string, string>([["com.example.barrierprobe", "/virtual/barrier-probe.js"]]);
+    (globalThis as Record<symbol, unknown>)[Symbol.for("syncloudos.dfx.workerChunks")] = reg;
+
+    const appLifetime: DispatchLifetime = {
+      appId: "com.example.barrierprobe",
+      ended: false,
+      jobs: new Set(),
+      resources: new Set(),
+    };
+    const AppQueue = classForLifetime(D.DFXQueue, appLifetime);
+    const concurrent = new AppQueue("conc.barrier.probe", { attributes: [D.DFXQueueAttributes.concurrent] });
+    const child = new AppQueue("conc.barrier.child", { target: concurrent });
+    const sendableSymbol = Symbol.for("syncloudos.dfx.sendable");
+    const makeSendable = (id: string) => {
+      const fn = () => {};
+      Object.defineProperty(fn, sendableSymbol, {
+        value: { id, getCaptures: () => [] },
+        configurable: true,
+      });
+      return fn;
+    };
+
+    const log: string[] = [];
+    concurrent.async(makeSendable("w1"));
+    child.async(makeSendable("w2_child"));
+    concurrent.async({ flags: [D.DFXWorkItemFlags.barrier] }, () => { log.push("barrier"); });
+    concurrent.async({ flags: [D.DFXWorkItemFlags.barrier] }, makeSendable("w3_sendable_barrier"));
+    concurrent.async(makeSendable("w4_after_barrier"));
+
+    await new Promise(resolve => setTimeout(resolve, 30));
+
+    // Concurrent worker jobs (direct + child) dispatch in parallel, while both barriers and post-barrier work wait.
+    const postedBeforeFinish = workers.flatMap(w => w.posted.flatMap(p => p.message.jobs.map(j => ({ worker: w, job: j }))));
+    expect(postedBeforeFinish.map(x => x.job.closureId).sort()).toEqual(["w1", "w2_child"]);
+    expect(log).toEqual([]);
+
+    // Finishing only w1 must not unblock the barrier while w2_child is still in flight.
+    const w1 = postedBeforeFinish.find(x => x.job.closureId === "w1")!;
+    w1.worker.emitResult(w1.job.jobId, []);
+    await new Promise(resolve => setTimeout(resolve, 30));
+    expect(log).toEqual([]);
+
+    // Finishing w2_child runs the main-thread barrier and dispatches the sendable barrier, still blocking w4_after_barrier.
+    const w2 = postedBeforeFinish.find(x => x.job.closureId === "w2_child")!;
+    w2.worker.emitResult(w2.job.jobId, []);
+    await new Promise(resolve => setTimeout(resolve, 30));
+
+    expect(log).toEqual(["barrier"]);
+    const postedAfterBarrier = workers.flatMap(w => w.posted.flatMap(p => p.message.jobs.map(j => ({ worker: w, job: j }))));
+    expect(postedAfterBarrier.map(x => x.job.closureId)).toContain("w3_sendable_barrier");
+    expect(postedAfterBarrier.map(x => x.job.closureId)).not.toContain("w4_after_barrier");
+
+    // Completing the sendable barrier releases w4_after_barrier.
+    const w3 = postedAfterBarrier.find(x => x.job.closureId === "w3_sendable_barrier")!;
+    w3.worker.emitResult(w3.job.jobId, []);
+    await new Promise(resolve => setTimeout(resolve, 30));
+    const finalClosures = workers.flatMap(w => w.posted.flatMap(p => p.message.jobs.map(j => j.closureId)));
+    expect(finalClosures).toContain("w4_after_barrier");
+    const w4 = workers.flatMap(w => w.posted.flatMap(p => p.message.jobs.map(j => ({ worker: w, job: j })))).find(x => x.job.closureId === "w4_after_barrier")!;
+    w4.worker.emitResult(w4.job.jobId, []);
+  });
+});

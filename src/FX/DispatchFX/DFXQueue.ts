@@ -29,6 +29,11 @@ import { performWorkItem, workItemState } from "./internal/workItemState";
 import { assertOwner, classForLifetime, onLifetimeEnd, selectLifetime, type DispatchLifetime } from "./internal/lifetime";
 const dispatchWorkerChunksSymbol = Symbol.for("syncloudos.dfx.workerChunks");
 const workerInFlightCounts = new WeakMap<DFXQueue, number>();
+const workerActiveCounts = new WeakMap<DFXQueue, number>();
+interface HeldWorkerQueue {
+  readonly queue: DFXQueue;
+  readonly exclusive: boolean;
+}
 const observedWorkerLifetimes = new WeakSet<DispatchLifetime>();
 const caches = new WeakMap<DispatchLifetime, { main?: DFXQueue; globals: Map<DFXQoSClass, DFXQueue> }>();
 function cache(lifetime: DispatchLifetime) {
@@ -64,32 +69,49 @@ function resolveWorkerTarget(
   const chunkURL = resolveDispatchChunkURL(lifetime.appId);
   return chunkURL ? { sendable, chunkURL } : undefined;
 }
-function acquireWorkerInFlight(leaf: DFXQueue, chain: readonly DFXQueue[], barrier: boolean): DFXQueue[] {
-  const held: DFXQueue[] = [];
+function acquireWorkerInFlight(leaf: DFXQueue, chain: readonly DFXQueue[], barrier: boolean): HeldWorkerQueue[] {
+  const held: HeldWorkerQueue[] = [];
   for (const queue of chain) {
     const state = objectState(queue);
     if (state.global) continue;
-    if (!state.concurrent || (queue === leaf && barrier)) {
-      const next = (workerInFlightCounts.get(queue) ?? 0) + 1;
-      workerInFlightCounts.set(queue, next);
+    const exclusive = !state.concurrent || (queue === leaf && barrier);
+    workerActiveCounts.set(queue, (workerActiveCounts.get(queue) ?? 0) + 1);
+    state.workerActiveInFlight = true;
+    if (exclusive) {
+      workerInFlightCounts.set(queue, (workerInFlightCounts.get(queue) ?? 0) + 1);
       state.workerInFlight = true;
-      held.push(queue);
     }
+    held.push({ queue, exclusive });
   }
   return held;
 }
-function releaseWorkerInFlight(held: readonly DFXQueue[]): void {
-  for (const queue of held) {
-    const current = workerInFlightCounts.get(queue) ?? 0;
-    if (current <= 0) continue;
-    const next = current - 1;
-    if (next === 0) {
-      workerInFlightCounts.delete(queue);
-      objectState(queue).workerInFlight = false;
-      objectChanged(queue);
-    } else {
-      workerInFlightCounts.set(queue, next);
+function releaseWorkerInFlight(held: readonly HeldWorkerQueue[]): void {
+  for (const { queue, exclusive } of held) {
+    const state = objectState(queue);
+    let changed = false;
+    const active = workerActiveCounts.get(queue) ?? 0;
+    if (active > 0) {
+      if (active === 1) {
+        workerActiveCounts.delete(queue);
+        state.workerActiveInFlight = false;
+        changed = true;
+      } else {
+        workerActiveCounts.set(queue, active - 1);
+      }
     }
+    if (exclusive) {
+      const current = workerInFlightCounts.get(queue) ?? 0;
+      if (current > 0) {
+        if (current === 1) {
+          workerInFlightCounts.delete(queue);
+          state.workerInFlight = false;
+          changed = true;
+        } else {
+          workerInFlightCounts.set(queue, current - 1);
+        }
+      }
+    }
+    if (changed) objectChanged(queue);
   }
 }
 function ensureAppWorkerCancellation(lifetime: DispatchLifetime): void {
