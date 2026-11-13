@@ -20,7 +20,7 @@
 
 import { NSEUserDefaults } from "../../../Foundation/NSEUserDefaults";
 import { NSEUserDefaultsController, PreferencePersistenceError, type NSEControllerOwnership } from "../../Controllers";
-import { GFXColour } from "../../../FX/GraphicsFX/public";
+import { GFXColour } from "../../../FX/GraphicsFX/GFXColour";
 
 export interface NSEColourPanelPreferences {
   readonly recents: readonly string[];

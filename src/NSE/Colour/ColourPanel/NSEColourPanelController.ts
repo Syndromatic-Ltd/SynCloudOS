@@ -20,7 +20,7 @@
 
 import type { ColourPanelCloseReason, ColourPanelService, ColourPanelServiceChange, CommandPayloadSchema, CommandSystem, SynCloudOSRuntime } from "../../../SynCloudOS/SynCloudOS";
 import { defineSyncUndoAction } from "../../../SynCloudOS/nseRuntimeContracts";
-import { GFXColour } from "../../../FX/GraphicsFX/public";
+import { GFXColour } from "../../../FX/GraphicsFX/GFXColour";
 import { parseNSEColourTransfer, serialiseNSEColourTransfer } from "../Transfer";
 import type { NSEColourChange, NSEColourPanelControllerOptions, NSEColourPanelSnapshot, NSEColourPicker, NSEColourTarget } from "./colourPanelTypes";
 import { NSEControllerLifetime } from "../../Controllers/controllerLifetime";

@@ -20,7 +20,8 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 
-import { GFXColour, type GFXCMYKAComponents } from "../../../FX/GraphicsFX/public";
+import { GFXColour } from "../../../FX/GraphicsFX/GFXColour";
+import type { GFXCMYKAComponents } from "../../../FX/GraphicsFX/colourTypes";
 import { NSESlider } from "../../Controls/Values/NSESlider";
 import { NSETextField } from "../../Controls/Fields/NSEFields";
 

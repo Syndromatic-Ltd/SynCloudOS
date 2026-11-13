@@ -19,7 +19,7 @@
  */
 
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
-import { GFXColour } from "../../FX/GraphicsFX/public";
+import { GFXColour } from "../../FX/GraphicsFX/GFXColour";
 import { useNSEColourPanelContextCarrier, useOptionalNSEColourPanelController, useOptionalNSEColourPanelResponderId } from "../Colour/ColourPanel/NSEColourPanelProvider";
 import { NSEToolButtonGroup } from "../Controls/Buttons/NSEButtonFamilies";
 import { NSEButton } from "../Controls/Buttons/NSEButton";

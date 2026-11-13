@@ -21,7 +21,7 @@
 import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { useNSEOverlayProvider } from "../../Overlays";
 import { NSEUtilityPanel } from "../../Overlays/NSEUtilityPanel";
-import { GFXColour } from "../../../FX/GraphicsFX/public";
+import { GFXColour } from "../../../FX/GraphicsFX/GFXColour";
 import { createNSEBrowserEyeDropper, type NSEEyeDropperAdapter } from "../Pickers";
 import { NSEColourPanelController } from "./NSEColourPanelController";
 import { useOptionalNSEColourPanelController } from "./NSEColourPanelProvider";

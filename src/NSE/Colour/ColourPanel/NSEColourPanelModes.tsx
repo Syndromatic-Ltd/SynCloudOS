@@ -19,7 +19,7 @@
  */
 
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent as ReactPointerEvent } from "react";
-import { GFXColour } from "../../../FX/GraphicsFX/public";
+import { GFXColour } from "../../../FX/GraphicsFX/GFXColour";
 import { NSEColourSliderPicker, NSEColourWheelPicker, type NSEColourSliderModel } from "../Pickers";
 import { NSEPopUpButton } from "../../Menus/NSEPopUpButton";
 import { NSESearchField } from "../../Controls/Fields/NSESearchField";

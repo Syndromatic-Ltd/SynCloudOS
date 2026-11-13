@@ -19,7 +19,7 @@
  */
 
 import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { GFXColour } from "../../../FX/GraphicsFX/public";
+import { GFXColour } from "../../../FX/GraphicsFX/GFXColour";
 
 import { useNSEColourPanelController, useNSEColourPanelService, useOptionalNSEColourPanelCommands, useOptionalNSEColourPanelDrag, useOptionalNSEColourPanelResponderId } from "../ColourPanel/NSEColourPanelProvider";
 import type { NSEEyeDropperAdapter } from "../Pickers/NSEEyeDropperAdapter";
