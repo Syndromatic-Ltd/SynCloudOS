@@ -298,9 +298,8 @@ export class NSEMenu<const Items extends readonly NSEMenuItem[] = readonly NSEMe
       reactMenuObservers.set(this, () => {
         this.#observeLifetime();
         return () => {
-          // The surface is being removed, so disposal must not schedule a React update.
-          this.#listeners.clear();
-          this.dispose();
+          this.#stopObservingLifetime();
+          this.#dismiss(false);
         };
       });
     } else {
@@ -309,10 +308,16 @@ export class NSEMenu<const Items extends readonly NSEMenuItem[] = readonly NSEMe
   }
 
   #observeLifetime(): void {
+    if (this.#disposed) return;
     const { signal } = this.runtime;
     if (signal.aborted) this.#runtimeAbort();
     else signal.addEventListener("abort", this.#runtimeAbort, { once: true });
     this.#ownership.bind(() => this.dispose());
+  }
+
+  #stopObservingLifetime(): void {
+    this.runtime.signal.removeEventListener("abort", this.#runtimeAbort);
+    this.#ownership.unbind();
   }
 
   /** NSMenu.title. */
@@ -410,6 +415,10 @@ export class NSEMenu<const Items extends readonly NSEMenuItem[] = readonly NSEMe
   }
 
   dismiss(_reason: NSEMenuDismissReason): void {
+    this.#dismiss(true);
+  }
+
+  #dismiss(notify: boolean): void {
     this.#generation += 1;
     this.#cancelPendingSubmenu();
     this.#validation?.dispose();
@@ -425,7 +434,7 @@ export class NSEMenu<const Items extends readonly NSEMenuItem[] = readonly NSEMe
       generation: this.#generation,
       branchPath: [],
       entries: [],
-    });
+    }, notify);
   }
 
   async dispatch(entryId: string): Promise<CommandDispatchResult<unknown>> {
@@ -482,9 +491,9 @@ export class NSEMenu<const Items extends readonly NSEMenuItem[] = readonly NSEMe
   dispose(): void {
     if (this.#disposed) return;
     this.#disposed = true;
+    this.#stopObservingLifetime();
     this.#ownership.dispose();
     this.dismiss("programmatic");
-    this.runtime.signal.removeEventListener("abort", this.#runtimeAbort);
     this.#listeners.clear();
   }
 
@@ -545,7 +554,7 @@ export class NSEMenu<const Items extends readonly NSEMenuItem[] = readonly NSEMe
     }
   }
 
-  #publish(next: NSEMenuSnapshot): void {
+  #publish(next: NSEMenuSnapshot, notify = true): void {
     this.#snapshot = Object.freeze({
       open: next.open,
       validating: next.validating,
@@ -553,7 +562,7 @@ export class NSEMenu<const Items extends readonly NSEMenuItem[] = readonly NSEMe
       branchPath: Object.freeze([...next.branchPath]),
       entries: Object.freeze(next.entries.map((entry) => Object.freeze({ ...entry }))),
     });
-    for (const listener of [...this.#listeners]) listener();
+    if (notify) for (const listener of [...this.#listeners]) listener();
   }
 
   #cancelPendingSubmenu(): void {

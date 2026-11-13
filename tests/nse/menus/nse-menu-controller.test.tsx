@@ -21,6 +21,8 @@ import { createTestTheme } from "../../fixtures/themes";
 
 // @vitest-environment jsdom
 import { installNSEScrollIntoViewFixture } from "../fixtures/browser";
+import { createReactOwnedNSEMenu } from "../../../src/NSE/Menus/NSEMenu";
+import { useNSEMenuLifetime } from "../../../src/NSE/Menus/useNSEMenuLifetime";
 import { nseMenuModel } from "../../../src/NSE/Menus/menuTypes";
 installNSEScrollIntoViewFixture();
 import React, { StrictMode, useMemo, useState } from "react";
@@ -248,6 +250,30 @@ it.each(["item menu", "menu bar"])("releases the %s subscriptions after a Strict
     add.mockRestore();
     remove.mockRestore();
   }
+});
+
+it("reopens the same menu after its insertion effect is replayed", async () => {
+  const owner = new AbortController();
+  const validate = vi.fn(async (requests: readonly { key: string; commandId: string }[]) =>
+    new Map(requests.map(request => [request.key, presentation(request.commandId)])));
+  const port = runtime(validate, { signal: owner.signal });
+  const menu = createReactOwnedNSEMenu({ [nseMenuModel]: model, runtime: port });
+  const add = vi.spyOn(owner.signal, "addEventListener");
+  const remove = vi.spyOn(owner.signal, "removeEventListener");
+  function Surface({ generation, open }: { generation: number; open: boolean }) {
+    const controllers = useMemo(() => [menu], [generation]);
+    useNSEMenuLifetime(controllers);
+    return <NSEMenuView model={model} controller={menu} open={open} />;
+  }
+  const view = render(<Surface generation={0} open={false} />);
+  view.rerender(<Surface generation={1} open={false} />);
+  view.rerender(<Surface generation={1} open />);
+  expect(await screen.findByRole("menuitem", { name: "Bold" })).toBeTruthy();
+  expect(menu.isDisposed).toBe(false);
+  view.unmount();
+  const held = add.mock.calls.filter(([event, listener]) => event === "abort"
+    && !remove.mock.calls.some(([removedEvent, removed]) => removedEvent === event && removed === listener));
+  expect(held).toEqual([]);
 });
 
 const workAreaSnapshot = Object.freeze({
