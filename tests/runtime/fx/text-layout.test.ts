@@ -19,12 +19,83 @@
  */
 
 import { readFileSync } from "node:fs";
-import { expect, it } from "vitest";
+import { Buffer as ShapingBuffer } from "harfbuzzjs";
+import LineBreaker from "linebreak";
+import { expect, it, vi } from "vitest";
 import { TFXFont, TFXFontDescriptor, TFXAttributedString, TFXTypesetter } from "../../../src/FX/TextFX/public";
 
 async function font() {
   return TFXFont.create(new Uint8Array(readFileSync("tests/fixtures/fx/fonts/notosans-NotoSans[wdth,wght].ttf")), new TFXFontDescriptor({ size: 16 }));
 }
+
+function suggestLineBreakByShaping(setter: TFXTypesetter, text: string, start: number, width: number): number {
+  const suffix = text.slice(start);
+  const breaker = new LineBreaker(suffix);
+  let accepted = 0;
+  for (let next = breaker.nextBreak(); next; next = breaker.nextBreak()) {
+    if (setter.createLine(start, next.position).width > width) break;
+    accepted = next.position;
+    if (next.required) return accepted;
+  }
+  if (accepted) return accepted;
+  for (const { index, segment } of new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(suffix)) {
+    const end = index + segment.length;
+    if (setter.createLine(start, end).width > width) return accepted || end;
+    accepted = end;
+  }
+  return accepted;
+}
+
+it("matches the prefix-shaping break offsets at exact widths and on either side", async () => {
+  const f = await font();
+  try {
+    const vocabularies = [
+      ["office", "AVATAR", "e\u0301", "fitness", "fluff", "wait"],
+      ["slow", "word\tcell", "after\r\nlast", "left", "e\u0301", "long"],
+      ["A", "אבג", "مرحبا", "漢字", "😀", "456"],
+    ];
+    for (const [group, words] of vocabularies.entries()) {
+      for (let seed = 0; seed < 9; seed += 1) {
+        const text = " ".repeat(seed % 3) + Array.from({ length: 7 }, (_, index) => words[(seed + index * (seed + 1)) % words.length]).join(seed % 2 ? " " : "  ");
+        const split = text.indexOf(" ", seed % 3) + 1;
+        const runs = [{ start: 0, end: text.length, font: f, ...(seed % 2 ? { language: "en", features: { kern: 0, liga: 0 } } : {}) }];
+        if (group === 2 && split > 0 && split < text.length) runs.splice(0, 1, { ...runs[0]!, end: split }, { ...runs[0]!, start: split });
+        const setter = new TFXTypesetter(new TFXAttributedString(text, runs), seed % 3 === 1 && group === 2 ? "rtl" : "ltr", group === 2 && seed % 3 === 2 ? "vertical" : "horizontal");
+        for (const start of new Set([0, seed % 3, split])) {
+          const exact = setter.createLine(start, text.length - start).width;
+          for (const width of [0, 1, 50, 97, exact - 1e-8, exact, exact + 1e-8]) {
+            expect(setter.suggestLineBreak(start, width), JSON.stringify({ text, start, width })).toBe(suggestLineBreakByShaping(setter, text, start, width));
+          }
+          const breaker = new LineBreaker(text.slice(start));
+          for (let next = breaker.nextBreak(); next; next = breaker.nextBreak()) {
+            const width = setter.createLine(start, next.position).width;
+            for (const threshold of [Math.max(0, width - 1e-8), width, width + 1e-8]) {
+              expect(setter.suggestLineBreak(start, threshold), JSON.stringify({ text, start, threshold })).toBe(suggestLineBreakByShaping(setter, text, start, threshold));
+            }
+            if (next.required) break;
+          }
+        }
+      }
+    }
+  } finally { f.dispose(); }
+});
+
+it("shapes far fewer prefixes of a fitting Latin line", async () => {
+  const f = await font();
+  try {
+    const text = "office e\u0301 one two three four five six seven eight nine ".repeat(10).trimEnd();
+    const setter = new TFXTypesetter(new TFXAttributedString(text, [{ start: 0, end: text.length, font: f }]));
+    const shape = vi.spyOn(ShapingBuffer.prototype, "getGlyphPositions");
+    try {
+      expect(setter.suggestLineBreak(0, 10000)).toBe(text.length);
+      expect(shape.mock.calls.length).toBeLessThanOrEqual(5);
+    } finally { shape.mockRestore(); }
+    const width = setter.createLine(0, 304).width;
+    for (const threshold of [width - 1e-8, width, width + 1e-8]) {
+      expect(setter.suggestLineBreak(0, threshold)).toBe(suggestLineBreakByShaping(setter, text, 0, threshold));
+    }
+  } finally { f.dispose(); }
+});
 
 it("preserves attributed UTF-16 ranges and breaks at actual shaped widths", async () => {
   const f = await font();
