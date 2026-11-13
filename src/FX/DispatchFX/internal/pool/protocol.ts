@@ -46,6 +46,7 @@ export type PoolResponseMessage = PoolResultMessage | PoolErrorMessage;
 export interface PoolWorkerLike {
   onmessage: ((event: MessageEvent<PoolResponseMessage>) => void) | null;
   onerror: ((event: ErrorEvent) => void) | null;
+  /** Sends a batch to the worker; pre-delivery clone failures throw DataCloneError before queuing, while other throws leave delivery unknown and must not be retried. */
   postMessage(message: PoolRequestMessage, transfer?: Transferable[]): void;
   terminate(): void;
 }
