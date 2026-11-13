@@ -88,6 +88,13 @@ function defaultWorkerFactory(): PoolWorkerLike {
   });
 }
 
+export class DFXWorkerInterruptedError extends Error {
+  constructor() {
+    super("DispatchFX work was interrupted when a shared worker exceeded cancellation grace");
+    this.name = "DFXWorkerInterruptedError";
+  }
+}
+
 export class WorkerPool {
   static #shared: WorkerPool | null = null;
   static get shared(): WorkerPool {
@@ -200,7 +207,7 @@ export class WorkerPool {
       if (slot.terminated) return;
       const stillCancelledInFlight = [...slot.inFlight.values()].some(entry => entry.cancelled);
       if (!stillCancelledInFlight) return;
-      this.#destroySlot(slot, new Error("DispatchFX worker terminated after cancellation timeout"));
+      this.#destroySlot(slot, new DFXWorkerInterruptedError());
       this.#flush();
     }, this.#cancelGraceMs);
   }
@@ -308,32 +315,41 @@ export class WorkerPool {
 
   #selectSlot(job: PoolJob, staged: Map<WorkerSlot, QueuedJob[]>, stagedLowSlots: Set<WorkerSlot>): WorkerSlot | null {
     const lowQoS = isLowQoS(job.qos);
-    if (lowQoS) {
-      const preferredSerial = job.queueKey !== null ? this.#serialAffinities.get(job.queueKey) : undefined;
-      const serialReusesSlot = Boolean(preferredSerial && !preferredSerial.terminated && !preferredSerial.tainted && (preferredSerial.lowQoSInFlight > 0 || stagedLowSlots.has(preferredSerial)));
-      if (!serialReusesSlot && this.#activeLowQoSWorkers(stagedLowSlots) >= this.#lowQoSCap()) {
-        return null;
-      }
+    const serial = job.queueKey === null ? undefined : this.#serialAffinities.get(job.queueKey);
+    const healthy = this.#slots.filter(slot => !slot.terminated && !slot.tainted);
+    const stagedJobs = (slot: WorkerSlot) => staged.get(slot) ?? [];
+    const busy = (slot: WorkerSlot) => slot.inFlight.size > 0 || stagedJobs(slot).length > 0;
+    const admitsQoS = (slot: WorkerSlot) => !lowQoS || slot.lowQoSInFlight > 0 || stagedLowSlots.has(slot)
+      || this.#activeLowQoSWorkers(stagedLowSlots) < this.#lowQoSCap();
+    const prefers = (predicate: (slot: WorkerSlot) => boolean) => {
+      if (serial && healthy.includes(serial) && predicate(serial) && admitsQoS(serial)) return serial;
+      return healthy.find(slot => predicate(slot) && admitsQoS(slot));
+    };
+
+    // Keep queued work on its serial lane until the previously admitted work settles.
+    if (serial && ([...serial.inFlight.values()].some(entry => entry.job.queueKey === job.queueKey)
+      || stagedJobs(serial).some(entry => entry.job.queueKey === job.queueKey))) {
+      return healthy.includes(serial) && admitsQoS(serial) ? serial : null;
     }
 
-    if (job.queueKey !== null) {
-      const preferred = this.#serialAffinities.get(job.queueKey);
-      if (preferred && !preferred.terminated && !preferred.tainted) {
-        return preferred;
-      }
+    if (job.sessionKey) {
+      const session = prefers(slot => busy(slot)
+        && [...slot.inFlight.values()].every(entry => entry.job.sessionKey === job.sessionKey)
+        && stagedJobs(slot).every(entry => entry.job.sessionKey === job.sessionKey));
+      if (session) return session;
+    } else if (serial && healthy.includes(serial) && admitsQoS(serial)) {
+      return serial;
     }
 
-    const idleSlot = this.#slots.find(slot => !slot.terminated && !slot.tainted && slot.inFlight.size === 0 && !staged.has(slot));
-    if (idleSlot) return idleSlot;
+    const idle = prefers(slot => !busy(slot));
+    if (idle) return idle;
 
+    if (lowQoS && this.#activeLowQoSWorkers(stagedLowSlots) >= this.#lowQoSCap()) return null;
     if (this.#slots.length < this.maxWorkers) return this.#spawnSlot();
 
-    // All pool workers exist; stage non-low-QoS or same-turn overflow onto the least-loaded healthy slot.
-    if (lowQoS && this.#activeLowQoSWorkers(stagedLowSlots) >= this.#lowQoSCap()) return null;
     let best: WorkerSlot | null = null;
-    for (const slot of this.#slots) {
-      if (slot.terminated || slot.tainted) continue;
-      if (!best || slot.inFlight.size + (staged.get(slot)?.length ?? 0) < best.inFlight.size + (staged.get(best)?.length ?? 0)) {
+    for (const slot of healthy) {
+      if (!best || slot.inFlight.size + stagedJobs(slot).length < best.inFlight.size + stagedJobs(best).length) {
         best = slot;
       }
     }

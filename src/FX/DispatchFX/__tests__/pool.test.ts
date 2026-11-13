@@ -4,7 +4,7 @@
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { classForLifetime, type DispatchLifetime } from "../internal/lifetime";
-import { WorkerPool, computePoolSize } from "../internal/pool/WorkerPool";
+import { DFXWorkerInterruptedError, WorkerPool, computePoolSize } from "../internal/pool/WorkerPool";
 import { createPoolWorkerHandler, enqueueWorkerContinuation } from "../internal/pool/poolWorker";
 import { dedicatedThread, submitDedicatedThreadJob } from "../internal/pool/dedicatedThread";
 import type { PoolJob, PoolRequestMessage, PoolResponseMessage, PoolWorkerLike } from "../internal/pool/protocol";
@@ -1011,5 +1011,85 @@ describe("DispatchFX runtime fault regressions", () => {
     expect(postSpy).toHaveBeenCalledTimes(1);
     expect(err1).toHaveBeenCalledTimes(1);
     expect(err2).toHaveBeenCalledTimes(1);
+  });
+
+  it("fails an unrelated job once with a typed error when a shared worker exceeds cancellation grace", async () => {
+    vi.useFakeTimers();
+    const workers: FakeWorker[] = [];
+    const pool = new WorkerPool({
+      maxWorkers: 1,
+      createWorker: () => {
+        const fw = new FakeWorker();
+        workers.push(fw);
+        return fw;
+      },
+    });
+
+    const sessionA = { id: "cancelledSession" };
+    const sessionB = { id: "liveSiblingSession" };
+    const sibBResult = vi.fn();
+    const sibBError = vi.fn();
+
+    pool.submit(makeJob({ appId: "com.example.sibA", sessionKey: sessionA, closureId: "hung_a" }));
+    pool.submit(
+      makeJob({
+        appId: "com.example.sibB",
+        sessionKey: sessionB,
+        closureId: "live_b",
+        onResult: sibBResult,
+        onError: sibBError,
+      }),
+    );
+
+    await Promise.resolve();
+    expect(workers).toHaveLength(1);
+    expect(workers[0].posted.flatMap(p => p.message.jobs.map(j => j.closureId))).toEqual(["hung_a", "live_b"]);
+
+    const liveJob = workers[0].posted[0].message.jobs[1];
+    pool.cancelApp(sessionA);
+    vi.advanceTimersByTime(2_000);
+    expect(workers[0].terminated).toBe(true);
+    expect(sibBError).toHaveBeenCalledExactlyOnceWith(expect.any(DFXWorkerInterruptedError));
+    expect(sibBError.mock.calls[0][0].name).toBe("DFXWorkerInterruptedError");
+    workers[0].emitResult(liveJob.jobId);
+    pool.submit(makeJob({ sessionKey: sessionB, closureId: "fresh_b" }));
+    await Promise.resolve();
+    expect(sibBError).toHaveBeenCalledTimes(1);
+    expect(sibBResult).not.toHaveBeenCalled();
+    expect(workers).toHaveLength(2);
+    expect(workers[1].posted.flatMap(p => p.message.jobs.map(j => j.closureId))).toEqual(["fresh_b"]);
+  });
+
+  it("reuses the session's busy worker and leaves capacity for another session", async () => {
+    vi.useFakeTimers();
+    const workers: FakeWorker[] = [];
+    const pool = new WorkerPool({ maxWorkers: 2, createWorker: () => {
+      const worker = new FakeWorker();
+      workers.push(worker);
+      return worker;
+    } });
+    const sessionA = {};
+    const sessionB = {};
+    const onResult = vi.fn();
+    const onError = vi.fn();
+    pool.submit(makeJob({ sessionKey: sessionA, closureId: "hung_a" }));
+    pool.submit(makeJob({ sessionKey: sessionA, closureId: "second_a" }));
+    await Promise.resolve();
+    expect(workers).toHaveLength(1);
+    expect(workers[0].posted[0].message.jobs.map(job => job.closureId)).toEqual(["hung_a", "second_a"]);
+
+    pool.submit(makeJob({ sessionKey: sessionB, closureId: "live_b", onResult, onError }));
+    await Promise.resolve();
+    expect(workers).toHaveLength(2);
+    const [liveJob] = workers[1].posted[0].message.jobs;
+    expect(liveJob.closureId).toBe("live_b");
+    pool.cancelApp(sessionA);
+    vi.advanceTimersByTime(2_000);
+    expect(workers[0].terminated).toBe(true);
+    expect(workers[1].terminated).toBe(false);
+    workers[1].emitResult(liveJob.jobId, [42]);
+    expect(onResult).toHaveBeenCalledExactlyOnceWith([42], undefined);
+    expect(onError).not.toHaveBeenCalled();
+    pool.terminateAll();
   });
 });
