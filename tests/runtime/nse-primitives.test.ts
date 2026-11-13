@@ -38,12 +38,12 @@ function createFeedbackAdapter(options: HFXFeedbackOptions = {}) {
   return new BrowserHapticsAdapter(new AUFXSystemFeedbackBus(options.audioContextFactory ?? (() => null)), options);
 }
 import {
-  getNSESmoothSurfaceClassName,
-  getNSESmoothSurfaceProps,
-  getNSESmoothSurfaceRadiusValue,
-  getNSESmoothSurfaceStyle,
-  getOptionalNSESmoothSurfaceProps,
-  resolveNSESmoothSurface
+  getSmoothSurfaceClassName,
+  getSmoothSurfaceProps,
+  getSmoothSurfaceRadiusValue,
+  getSmoothSurfaceStyle,
+  getOptionalSmoothSurfaceProps,
+  resolveSmoothSurface
 } from "../../src/NSE/SmoothSurface";
 import { attributedContent, paragraph, textRun, serializeAttributedContent, parseAttributedContent, attributedContentText } from "../../src/NSE/Text";
 
@@ -423,9 +423,9 @@ describe("HapticsFX feedback preservation", () => {
   });
 });
 
-describe("NSESmoothSurface", () => {
+describe("SmoothSurface", () => {
   it("resolves stable classes and styles for smooth surface options", () => {
-    const resolved = resolveNSESmoothSurface({
+    const resolved = resolveSmoothSurface({
       radius: "lg",
       focus: "within",
       overflow: "clip",
@@ -460,14 +460,14 @@ describe("NSESmoothSurface", () => {
   });
 
   it("keeps radius, class, style, and prop helpers explicit and composable", () => {
-    expect(getNSESmoothSurfaceRadiusValue(18)).toBe("18px");
-    expect(getNSESmoothSurfaceRadiusValue("pill")).toBe("999px");
+    expect(getSmoothSurfaceRadiusValue(18)).toBe("18px");
+    expect(getSmoothSurfaceRadiusValue("pill")).toBe("999px");
 
-    expect(getNSESmoothSurfaceClassName({ radius: 18, className: "local" }, "external").split(" ")).toEqual(
+    expect(getSmoothSurfaceClassName({ radius: 18, className: "local" }, "external").split(" ")).toEqual(
       expect.arrayContaining(["nse-smooth-surface-radius-custom", "local", "external"])
     );
 
-    expect(getNSESmoothSurfaceStyle(
+    expect(getSmoothSurfaceStyle(
       {
         radius: 18,
         shadow: "none",
@@ -487,7 +487,7 @@ describe("NSESmoothSurface", () => {
       boxShadow: "none"
     });
 
-    expect(getNSESmoothSurfaceProps({ radius: "sm" })).toMatchObject({
+    expect(getSmoothSurfaceProps({ radius: "sm" })).toMatchObject({
       className: expect.stringContaining("nse-smooth-surface-radius-sm"),
       style: {
         "--nse-smooth-surface-radius": "6px"
@@ -496,7 +496,7 @@ describe("NSESmoothSurface", () => {
   });
 
   it("keeps smooth surface wiring opt-in for panels and app bars", () => {
-    expect(getOptionalNSESmoothSurfaceProps(false, "plain-surface")).toEqual({
+    expect(getOptionalSmoothSurfaceProps(false, "plain-surface")).toEqual({
       className: "plain-surface",
       style: undefined
     });

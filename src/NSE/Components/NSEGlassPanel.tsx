@@ -20,9 +20,9 @@
 
 import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
 import {
-  getOptionalNSESmoothSurfaceProps,
-  type NSESmoothSurfaceRequest,
-  type NSESmoothSurfaceStyle
+  getOptionalSmoothSurfaceProps,
+  type SmoothSurfaceRequest,
+  type SmoothSurfaceStyle
 } from "../SmoothSurface";
 
 export function NSEGlassPanel({
@@ -31,11 +31,11 @@ export function NSEGlassPanel({
   className = "",
   style,
   ...props
-}: HTMLAttributes<HTMLDivElement> & { children: ReactNode; smoothSurface?: NSESmoothSurfaceRequest }) {
-  const surfaceProps = getOptionalNSESmoothSurfaceProps(
+}: HTMLAttributes<HTMLDivElement> & { children: ReactNode; smoothSurface?: SmoothSurfaceRequest }) {
+  const surfaceProps = getOptionalSmoothSurfaceProps(
     smoothSurface,
     className,
-    style as NSESmoothSurfaceStyle | undefined
+    style as SmoothSurfaceStyle | undefined
   );
 
   return (

@@ -56,7 +56,7 @@ import {
   type NSEControlValidation,
 } from "../Core";
 import type { HFXFeedbackRequest } from "../../Feedback";
-import type { NSESmoothSurfaceRequest } from "../../SmoothSurface";
+import type { SmoothSurfaceRequest } from "../../SmoothSurface";
 import {
   classes,
   clamp,

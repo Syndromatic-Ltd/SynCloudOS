@@ -20,19 +20,19 @@
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
-  generateNSESmoothSurfaceClipPath,
-  generateNSESmoothSurfacePath
+  generateSmoothSurfaceClipPath,
+  generateSmoothSurfacePath
 } from "./smoothSurfacePath";
 import {
-  getMobileNSESmoothSurfaceOptions,
-  normaliseNSESmoothSurfaceRequest,
+  getMobileSmoothSurfaceOptions,
+  normaliseSmoothSurfaceRequest,
   nseSmoothSurfaceMobileQuery
 } from "./smoothSurface";
-import type { NSESmoothSurfaceRequest, NSESmoothSurfaceResolvedOptions } from "./smoothSurfaceTypes";
+import type { SmoothSurfaceRequest, SmoothSurfaceResolvedOptions } from "./smoothSurfaceTypes";
 
 const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-export interface NSESmoothSurfaceGeometry {
+export interface SmoothSurfaceGeometry {
   width: number;
   height: number;
   path: string;
@@ -40,26 +40,26 @@ export interface NSESmoothSurfaceGeometry {
   ready: boolean;
 }
 
-export function useNSESmoothSurface<T extends HTMLElement>(
+export function useSmoothSurface<T extends HTMLElement>(
   element: T | null,
-  request: NSESmoothSurfaceRequest
-): NSESmoothSurfaceGeometry {
-  const options = normaliseNSESmoothSurfaceRequest(request);
+  request: SmoothSurfaceRequest
+): SmoothSurfaceGeometry {
+  const options = normaliseSmoothSurfaceRequest(request);
   const [isMobile, setIsMobile] = useState(false);
-  const geometryOptions: NSESmoothSurfaceResolvedOptions | false = options === false
+  const geometryOptions: SmoothSurfaceResolvedOptions | false = options === false
     ? false
     : isMobile
-      ? getMobileNSESmoothSurfaceOptions(options)
+      ? getMobileSmoothSurfaceOptions(options)
       : options;
   const optionsKey = JSON.stringify({ options: geometryOptions, isMobile });
-  const [geometry, setGeometry] = useState<NSESmoothSurfaceGeometry>({
+  const [geometry, setGeometry] = useState<SmoothSurfaceGeometry>({
     width: 0,
     height: 0,
     path: "",
     clipPath: "",
     ready: false
   });
-  const optionsRef = useRef<NSESmoothSurfaceResolvedOptions | false>(geometryOptions);
+  const optionsRef = useRef<SmoothSurfaceResolvedOptions | false>(geometryOptions);
   optionsRef.current = geometryOptions;
   const ownershipRef = useRef<{
     element: T;
@@ -123,8 +123,8 @@ export function useNSESmoothSurface<T extends HTMLElement>(
       const currentOptions = optionsRef.current;
       if (width <= 0 || height <= 0 || currentOptions === false) return;
 
-      const path = generateNSESmoothSurfacePath(width, height, currentOptions);
-      const clipPath = generateNSESmoothSurfaceClipPath(width, height, currentOptions);
+      const path = generateSmoothSurfacePath(width, height, currentOptions);
+      const clipPath = generateSmoothSurfaceClipPath(width, height, currentOptions);
       element.style.clipPath = clipPath;
       element.style.setProperty("-webkit-clip-path", clipPath);
       element.setAttribute("data-nse-smooth-surface-state", "ready");

@@ -24,31 +24,31 @@ export { GlassPanel, LinenSurface } from "./surfaces";
 export { NSEMetalSurface } from "./NSEMetalSurface";
 export type { NSEMetalSurfaceProps } from "./NSEMetalSurface";
 export {
-  getNSESmoothSurfaceClassName,
-  getNSESmoothSurfaceProps,
-  getNSESmoothSurfaceRadiusValue,
-  getNSESmoothSurfaceStyle,
-  getOptionalNSESmoothSurfaceProps,
-  normaliseNSESmoothSurfaceOptions,
+  getSmoothSurfaceClassName,
+  getSmoothSurfaceProps,
+  getSmoothSurfaceRadiusValue,
+  getSmoothSurfaceStyle,
+  getOptionalSmoothSurfaceProps,
+  normaliseSmoothSurfaceOptions,
   nseSmoothSurfaceClassNames,
   nseSmoothSurfaceDefaultOptions,
   nseSmoothSurfaceTokens,
-  resolveNSESmoothSurface
+  resolveSmoothSurface
 } from "../SmoothSurface";
 export type { MaterialAppearance } from "./MaterialProvider";
 export type {
-  NSESmoothSurfaceFocus,
-  NSESmoothSurfaceOptions,
-  NSESmoothSurfaceOverflow,
-  NSESmoothSurfacePerformance,
-  NSESmoothSurfaceProps,
-  NSESmoothSurfaceRadius,
-  NSESmoothSurfaceRequest,
-  NSESmoothSurfaceResolution,
-  NSESmoothSurfaceResolvedOptions,
-  NSESmoothSurfaceScroll,
-  NSESmoothSurfaceShadow,
-  NSESmoothSurfaceStyle,
-  NSESmoothSurfaceStyleValue,
+  SmoothSurfaceFocus,
+  SmoothSurfaceOptions,
+  SmoothSurfaceOverflow,
+  SmoothSurfacePerformance,
+  SmoothSurfaceProps,
+  SmoothSurfaceRadius,
+  SmoothSurfaceRequest,
+  SmoothSurfaceResolution,
+  SmoothSurfaceResolvedOptions,
+  SmoothSurfaceScroll,
+  SmoothSurfaceShadow,
+  SmoothSurfaceStyle,
+  SmoothSurfaceStyleValue,
   NSEOptionalSmoothSurfaceProps
 } from "../SmoothSurface";

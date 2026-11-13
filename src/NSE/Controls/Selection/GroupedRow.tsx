@@ -23,7 +23,7 @@ import { forwardRef, type HTMLAttributes, type ReactNode } from "react";
 import "./nse-list-item.css";
 import "../../Navigation/SourceList/nse-sourcelist.css";
 import type { HFXFeedbackRequest } from "../../Feedback";
-import type { NSESmoothSurfaceRequest } from "../../SmoothSurface";
+import type { SmoothSurfaceRequest } from "../../SmoothSurface";
 import { classes, getControlSmoothSurfaceProps, useNSEControlFeedback } from "../Core/nseControlsShared";
 
 export interface GroupedRowProps extends HTMLAttributes<HTMLDivElement> {
@@ -35,7 +35,7 @@ export interface GroupedRowProps extends HTMLAttributes<HTMLDivElement> {
   trailing?: ReactNode;
   meta?: ReactNode;
   selectionHaptic?: HFXFeedbackRequest;
-  smoothSurface?: NSESmoothSurfaceRequest;
+  smoothSurface?: SmoothSurfaceRequest;
 }
 
 export const GroupedRow = forwardRef<HTMLDivElement, GroupedRowProps>(function GroupedRow({

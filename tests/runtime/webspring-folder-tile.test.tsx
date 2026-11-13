@@ -22,7 +22,7 @@
 import React from "react";
 import { cleanup, render, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { generateNSESmoothSurfaceClipPath, generateNSESmoothSurfacePath } from "../../src/NSE/SmoothSurface";
+import { generateSmoothSurfaceClipPath, generateSmoothSurfacePath } from "../../src/NSE/SmoothSurface";
 import { useWebspringFolderAppearance, WebspringFolderTile, type WebspringFolderAppearance, type WebspringFolderItem } from "../../src/Webspring/public";
 import { WebspringFolderAppearanceProvider, resolveWebspringFolderTileGeometry } from "../../src/Webspring/WebspringFolderAppearance";
 
@@ -60,14 +60,14 @@ function renderTile(appearance: WebspringFolderAppearance | null, dropTarget = f
 }
 
 describe("WebspringFolderTile", () => {
-  it("draws the default inset squircle from NSESmoothSurface geometry sized to the tile", () => {
+  it("draws the default inset squircle from SmoothSurface geometry sized to the tile", () => {
     const tile = renderTile(null);
     const options = { radius: 21.6, curve: "squircle" as const, smoothing: 0.6 };
-    const path = generateNSESmoothSurfacePath(60, 60, options);
+    const path = generateSmoothSurfacePath(60, 60, options);
 
     expect(tile.dataset.shape).toBe("roundedRect");
     expect(tile.dataset.fill).toBe("inset");
-    expect(tile.style.getPropertyValue("--webspring-folder-tile-clip")).toBe(generateNSESmoothSurfaceClipPath(60, 60, options));
+    expect(tile.style.getPropertyValue("--webspring-folder-tile-clip")).toBe(generateSmoothSurfaceClipPath(60, 60, options));
     // The well's shading is a frame around the same outline, clipped with the well.
     for (const shading of tile.querySelectorAll(".webspring-folder-tile-surface path")) {
       expect(shading.getAttribute("fill-rule")).toBe("evenodd");
@@ -82,9 +82,9 @@ describe("WebspringFolderTile", () => {
 
   it("scales a percentage radius with the tile", () => {
     expect(resolveWebspringFolderTileGeometry(squircle.shape, 120, 120).path)
-      .toBe(generateNSESmoothSurfacePath(120, 120, { radius: 43.2, curve: "squircle", smoothing: 0.6 }));
+      .toBe(generateSmoothSurfacePath(120, 120, { radius: 43.2, curve: "squircle", smoothing: 0.6 }));
     expect(resolveWebspringFolderTileGeometry({ kind: "roundedRect", smoothSurface: { radius: 12, curve: "arc", smoothing: 0 } }, 120, 120).path)
-      .toBe(generateNSESmoothSurfacePath(120, 120, { radius: 12, curve: "arc", smoothing: 0 }));
+      .toBe(generateSmoothSurfacePath(120, 120, { radius: 12, curve: "arc", smoothing: 0 }));
   });
 
   it("clips a circle and lines it with the configured texture", () => {

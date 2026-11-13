@@ -30,8 +30,8 @@ function leadingLabelHelp(node: ReactNode) {
   return label ? <NSELabelHelp label={label}>{node as ReactElement<HTMLAttributes<HTMLElement>>}</NSELabelHelp> : node;
 }
 import {
-  getOptionalNSESmoothSurfaceProps,
-  type NSESmoothSurfaceStyle
+  getOptionalSmoothSurfaceProps,
+  type SmoothSurfaceStyle
 } from "../../SmoothSurface";
 import { useNSEFeedback } from "../../Feedback";
 import { NSETopBarButton } from "./NSETopBarButton";
@@ -221,10 +221,10 @@ function NSETopBarCumulus(props: NSETopBarProps) {
     style
   } = props;
   const styleDefinition = nseTopBarStyles.atmoCumulus;
-  const surfaceProps = getOptionalNSESmoothSurfaceProps(
+  const surfaceProps = getOptionalSmoothSurfaceProps(
     smoothSurface,
     className,
-    style as NSESmoothSurfaceStyle | undefined
+    style as SmoothSurfaceStyle | undefined
   );
 
   return (

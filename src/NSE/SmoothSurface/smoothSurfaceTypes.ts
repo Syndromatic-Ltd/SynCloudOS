@@ -20,42 +20,42 @@
 
 import type { CSSProperties, ElementType, ReactNode } from "react";
 
-export type NSESmoothSurfaceRadius = "none" | "xs" | "sm" | "md" | "lg" | "xl" | "xxl" | "app" | "pill" | number;
+export type SmoothSurfaceRadius = "none" | "xs" | "sm" | "md" | "lg" | "xl" | "xxl" | "app" | "pill" | number;
 
-export type NSESmoothSurfaceCurve = "arc" | "squircle" | "superellipse" | "clothoid";
+export type SmoothSurfaceCurve = "arc" | "squircle" | "superellipse" | "clothoid";
 
-export type NSESmoothSurfaceFocus = "none" | "ring" | "within" | "inset";
+export type SmoothSurfaceFocus = "none" | "ring" | "within" | "inset";
 
-export type NSESmoothSurfaceOverflow = "visible" | "hidden" | "clip" | "auto" | "scroll";
+export type SmoothSurfaceOverflow = "visible" | "hidden" | "clip" | "auto" | "scroll";
 
-export type NSESmoothSurfaceScroll = "none" | "contained" | "momentum" | "panel";
+export type SmoothSurfaceScroll = "none" | "contained" | "momentum" | "panel";
 
-export type NSESmoothSurfaceShadow = "none" | "hairline" | "soft" | "raised" | "floating" | "inset" | "physical";
+export type SmoothSurfaceShadow = "none" | "hairline" | "soft" | "raised" | "floating" | "inset" | "physical";
 
-export type NSESmoothSurfacePerformance = "auto" | "static" | "transform" | "paint" | "strict";
+export type SmoothSurfacePerformance = "auto" | "static" | "transform" | "paint" | "strict";
 
-export type NSESmoothSurfaceStyleValue = string | number;
+export type SmoothSurfaceStyleValue = string | number;
 
-export type NSESmoothSurfaceStyle = Record<string, NSESmoothSurfaceStyleValue>;
+export type SmoothSurfaceStyle = Record<string, SmoothSurfaceStyleValue>;
 
-export interface NSESmoothSurfaceCornerConfig {
-  radius: NSESmoothSurfaceRadius;
-  curve?: NSESmoothSurfaceCurve;
+export interface SmoothSurfaceCornerConfig {
+  radius: SmoothSurfaceRadius;
+  curve?: SmoothSurfaceCurve;
   smoothing?: number;
   exponent?: number;
   preserveSmoothing?: boolean;
 }
 
-export type NSESmoothSurfaceCorner = NSESmoothSurfaceRadius | NSESmoothSurfaceCornerConfig;
+export type SmoothSurfaceCorner = SmoothSurfaceRadius | SmoothSurfaceCornerConfig;
 
-export interface NSESmoothSurfacePerCornerConfig {
-  topLeft?: NSESmoothSurfaceCorner;
-  topRight?: NSESmoothSurfaceCorner;
-  bottomRight?: NSESmoothSurfaceCorner;
-  bottomLeft?: NSESmoothSurfaceCorner;
+export interface SmoothSurfacePerCornerConfig {
+  topLeft?: SmoothSurfaceCorner;
+  topRight?: SmoothSurfaceCorner;
+  bottomRight?: SmoothSurfaceCorner;
+  bottomLeft?: SmoothSurfaceCorner;
 }
 
-export interface NSESmoothSurfacePhysicalityStop {
+export interface SmoothSurfacePhysicalityStop {
   offsetX?: number;
   offsetY: number;
   blur?: number;
@@ -64,26 +64,26 @@ export interface NSESmoothSurfacePhysicalityStop {
   opacity: number;
 }
 
-export interface NSESmoothSurfacePhysicalityConfig {
-  top?: NSESmoothSurfacePhysicalityStop;
-  bottom?: NSESmoothSurfacePhysicalityStop;
+export interface SmoothSurfacePhysicalityConfig {
+  top?: SmoothSurfacePhysicalityStop;
+  bottom?: SmoothSurfacePhysicalityStop;
 }
 
-export type NSESmoothSurfacePhysicality = "off" | false | NSESmoothSurfacePhysicalityConfig;
+export type SmoothSurfacePhysicality = "off" | false | SmoothSurfacePhysicalityConfig;
 
-export type NSESmoothSurfaceBorderStyle = "solid" | "dashed" | "dotted" | "double" | "groove" | "ridge";
+export type SmoothSurfaceBorderStyle = "solid" | "dashed" | "dotted" | "double" | "groove" | "ridge";
 
-export interface NSESmoothSurfaceBorderConfig {
+export interface SmoothSurfaceBorderConfig {
   width: number;
   color: string;
   opacity: number;
-  style?: NSESmoothSurfaceBorderStyle;
+  style?: SmoothSurfaceBorderStyle;
   dash?: number;
   gap?: number;
   lineCap?: "butt" | "round" | "square";
 }
 
-export interface NSESmoothSurfaceShadowConfig {
+export interface SmoothSurfaceShadowConfig {
   offsetX: number;
   offsetY: number;
   blur: number;
@@ -92,93 +92,93 @@ export interface NSESmoothSurfaceShadowConfig {
   opacity: number;
 }
 
-export interface NSESmoothSurfaceEffectsConfig {
-  innerBorder?: NSESmoothSurfaceBorderConfig;
-  outerBorder?: NSESmoothSurfaceBorderConfig;
-  middleBorder?: NSESmoothSurfaceBorderConfig;
-  innerShadow?: NSESmoothSurfaceShadowConfig | NSESmoothSurfaceShadowConfig[];
-  shadow?: NSESmoothSurfaceShadowConfig | NSESmoothSurfaceShadowConfig[];
+export interface SmoothSurfaceEffectsConfig {
+  innerBorder?: SmoothSurfaceBorderConfig;
+  outerBorder?: SmoothSurfaceBorderConfig;
+  middleBorder?: SmoothSurfaceBorderConfig;
+  innerShadow?: SmoothSurfaceShadowConfig | SmoothSurfaceShadowConfig[];
+  shadow?: SmoothSurfaceShadowConfig | SmoothSurfaceShadowConfig[];
 }
 
-export interface NSESmoothSurfaceOptions extends NSESmoothSurfacePerCornerConfig {
-  radius?: NSESmoothSurfaceRadius;
-  curve?: NSESmoothSurfaceCurve;
+export interface SmoothSurfaceOptions extends SmoothSurfacePerCornerConfig {
+  radius?: SmoothSurfaceRadius;
+  curve?: SmoothSurfaceCurve;
   smoothing?: number;
   exponent?: number;
   preserveSmoothing?: boolean;
-  focus?: NSESmoothSurfaceFocus;
-  overflow?: NSESmoothSurfaceOverflow;
-  scroll?: NSESmoothSurfaceScroll;
-  shadow?: NSESmoothSurfaceShadow | NSESmoothSurfaceShadowConfig | NSESmoothSurfaceShadowConfig[];
-  physicality?: NSESmoothSurfacePhysicality;
-  performance?: NSESmoothSurfacePerformance;
+  focus?: SmoothSurfaceFocus;
+  overflow?: SmoothSurfaceOverflow;
+  scroll?: SmoothSurfaceScroll;
+  shadow?: SmoothSurfaceShadow | SmoothSurfaceShadowConfig | SmoothSurfaceShadowConfig[];
+  physicality?: SmoothSurfacePhysicality;
+  performance?: SmoothSurfacePerformance;
   autoEffects?: boolean;
-  innerBorder?: NSESmoothSurfaceBorderConfig;
-  outerBorder?: NSESmoothSurfaceBorderConfig;
-  middleBorder?: NSESmoothSurfaceBorderConfig;
-  innerShadow?: NSESmoothSurfaceShadowConfig | NSESmoothSurfaceShadowConfig[];
+  innerBorder?: SmoothSurfaceBorderConfig;
+  outerBorder?: SmoothSurfaceBorderConfig;
+  middleBorder?: SmoothSurfaceBorderConfig;
+  innerShadow?: SmoothSurfaceShadowConfig | SmoothSurfaceShadowConfig[];
   className?: string;
-  style?: NSESmoothSurfaceStyle;
+  style?: SmoothSurfaceStyle;
 }
 
-export type NSESmoothSurfaceRequest = NSESmoothSurfaceOptions | NSESmoothSurfaceRadius | "off" | false | null | undefined;
+export type SmoothSurfaceRequest = SmoothSurfaceOptions | SmoothSurfaceRadius | "off" | false | null | undefined;
 
-export interface NSESmoothSurfaceResolvedCorner {
+export interface SmoothSurfaceResolvedCorner {
   radius: number;
-  curve: NSESmoothSurfaceCurve;
+  curve: SmoothSurfaceCurve;
   smoothing: number;
   exponent: number;
   preserveSmoothing: boolean;
 }
 
-export interface NSESmoothSurfaceResolvedCorners {
-  topLeft: NSESmoothSurfaceResolvedCorner;
-  topRight: NSESmoothSurfaceResolvedCorner;
-  bottomRight: NSESmoothSurfaceResolvedCorner;
-  bottomLeft: NSESmoothSurfaceResolvedCorner;
+export interface SmoothSurfaceResolvedCorners {
+  topLeft: SmoothSurfaceResolvedCorner;
+  topRight: SmoothSurfaceResolvedCorner;
+  bottomRight: SmoothSurfaceResolvedCorner;
+  bottomLeft: SmoothSurfaceResolvedCorner;
 }
 
-export interface NSESmoothSurfaceResolvedOptions {
-  radius: NSESmoothSurfaceRadius;
-  curve: NSESmoothSurfaceCurve;
+export interface SmoothSurfaceResolvedOptions {
+  radius: SmoothSurfaceRadius;
+  curve: SmoothSurfaceCurve;
   smoothing: number;
   exponent: number;
   preserveSmoothing: boolean;
-  focus: NSESmoothSurfaceFocus;
-  overflow: NSESmoothSurfaceOverflow;
-  scroll: NSESmoothSurfaceScroll;
-  shadow: NSESmoothSurfaceShadow | NSESmoothSurfaceShadowConfig | NSESmoothSurfaceShadowConfig[];
-  physicality: NSESmoothSurfacePhysicality;
-  performance: NSESmoothSurfacePerformance;
+  focus: SmoothSurfaceFocus;
+  overflow: SmoothSurfaceOverflow;
+  scroll: SmoothSurfaceScroll;
+  shadow: SmoothSurfaceShadow | SmoothSurfaceShadowConfig | SmoothSurfaceShadowConfig[];
+  physicality: SmoothSurfacePhysicality;
+  performance: SmoothSurfacePerformance;
   autoEffects: boolean;
-  corners: NSESmoothSurfaceResolvedCorners;
-  innerBorder?: NSESmoothSurfaceBorderConfig;
-  outerBorder?: NSESmoothSurfaceBorderConfig;
-  middleBorder?: NSESmoothSurfaceBorderConfig;
-  innerShadow?: NSESmoothSurfaceShadowConfig | NSESmoothSurfaceShadowConfig[];
-  dropShadow?: NSESmoothSurfaceShadowConfig | NSESmoothSurfaceShadowConfig[];
+  corners: SmoothSurfaceResolvedCorners;
+  innerBorder?: SmoothSurfaceBorderConfig;
+  outerBorder?: SmoothSurfaceBorderConfig;
+  middleBorder?: SmoothSurfaceBorderConfig;
+  innerShadow?: SmoothSurfaceShadowConfig | SmoothSurfaceShadowConfig[];
+  dropShadow?: SmoothSurfaceShadowConfig | SmoothSurfaceShadowConfig[];
 }
 
-export interface NSESmoothSurfaceResolution {
+export interface SmoothSurfaceResolution {
   readonly className: string;
-  readonly style: NSESmoothSurfaceStyle;
-  readonly options: NSESmoothSurfaceResolvedOptions;
+  readonly style: SmoothSurfaceStyle;
+  readonly options: SmoothSurfaceResolvedOptions;
 }
 
-export interface NSESmoothSurfaceProps {
+export interface SmoothSurfaceProps {
   readonly className: string;
-  readonly style: NSESmoothSurfaceStyle;
+  readonly style: SmoothSurfaceStyle;
 }
 
 export interface NSEOptionalSmoothSurfaceProps {
   readonly className?: string;
-  readonly style?: NSESmoothSurfaceStyle;
+  readonly style?: SmoothSurfaceStyle;
 }
 
-export interface NSESmoothSurfaceComponentProps {
+export interface SmoothSurfaceComponentProps {
   as?: ElementType;
   children?: ReactNode;
-  smoothSurface?: NSESmoothSurfaceRequest;
+  smoothSurface?: SmoothSurfaceRequest;
   className?: string;
   style?: CSSProperties;
   autoEffects?: boolean;
