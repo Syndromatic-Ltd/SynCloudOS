@@ -161,7 +161,8 @@ export class NSEMaterialLighting implements NSEMaterialLightingPort {
     this.#publish(
       Object.freeze({
         offset,
-        angle: offset.x * 0.16 + offset.y * 0.08,
+        // Roll leads, as when a knob is turned under a lamp: 30° of tilt swings the cones about 26°.
+        angle: offset.y * 0.9 + offset.x * 0.45,
         active: true,
       }),
     );
