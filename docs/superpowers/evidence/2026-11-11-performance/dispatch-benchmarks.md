@@ -52,10 +52,12 @@ Rows 1 and 3 are proposed as slices of their own, each with a before and after i
 | before either fix (`heap-before.json`) | +3,951 | about +1,370 | +3.50 MB |
 | `f2bc2507`, window surface bridge holds nothing until it presents (`heap-after-bridge.json`) | 0 | +28 | +3.26 MB |
 | `22cb33ce`, route session observes authority once it commits (`heap-after-route-session.json`) | 0 | +29 | +2.64 MB |
+| `9e2c8fa5`, menus, media queries and launch history hold nothing from a discarded render (`heap-after-sol.json`) | 0 | -2 | +2.51 MB |
 
 - The first row was taken with the harness's earlier detached-node query, which itself pins the trees it reports. A probe that read counters only confirmed the leak was real on that build: +439 DOM nodes and about +152 listeners per cycle. The listener figure in that row comes from that probe; the file records only heap and nodes.
 - Both leaks had one cause: an object made during render subscribed to the runtime in its constructor, and React discarded that render without running any cleanup. Each now subscribes only after it commits or when its work starts, with a test that fails without the change.
 - **The plan's bar is 2 MB over the ten launches, and 2.64 MB misses it.** About three listeners per cycle also remain. Not yet traced: per-launch application client closures (`requestAuthorization`, `observeAccessLoss`, `bindResource`, the pasteboard `snapshot`) held in tables keyed by objects that outlive the launch, and development-only stack frames. How much of the remainder exists in a production build is not known.
+- At `9e2c8fa5` listeners are flat. A second agent's production-mode run of the same build gave +2.52 MB over cycles 1 to 10 and +2.01 MB over cycles 2 to 11; its snapshots at cycles 25 and 40 put three quarters of the growth in V8 instruction streams and trusted byte arrays (compiled code), with controllers, sessions, closures and listeners flat. The 2 MB bar is still missed on the plan's interval.
 - Two holders are bounded and do not grow: the runtime root's focus tracker keeps the last focused element after it is removed (one application stage stays alive until focus moves), and the site's About particle canvas is held by its manager.
 
 ## Files
@@ -64,4 +66,4 @@ Rows 1 and 3 are proposed as slices of their own, each with a before and after i
 | --- | --- |
 | `inventory-plain.json` | The scenario table at `22cb33ce`, three passes, no profiler. |
 | `inventory-cpu.json` | The same with `--cpu`: per long task, owner shares and the twelve framework or site functions with the most inclusive time. |
-| `heap-before.json`, `heap-after-bridge.json`, `heap-after-route-session.json` | The heap harness's output for the three rows above. |
+| `heap-before.json`, `heap-after-bridge.json`, `heap-after-route-session.json`, `heap-after-sol.json` | The heap harness's output for the four rows above. |
