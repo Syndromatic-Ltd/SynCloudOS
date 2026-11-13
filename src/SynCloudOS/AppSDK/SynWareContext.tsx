@@ -20,6 +20,7 @@
 import { NSELocalisationProvider } from "../../NSE/applicationHostInterop";
 import { createContext, useContext, type PropsWithChildren } from "react";
 import type { SynWareContextValue } from "./appContextTypes";
+import { SynWareColourPanelProvider } from "./SynWareColourPanelProvider";
 
 const SynWareContext = createContext<SynWareContextValue | null>(null);
 
@@ -28,7 +29,9 @@ export interface SynWareProviderProps extends PropsWithChildren {
 }
 
 export function SynWareProvider({ value, children }: SynWareProviderProps) {
-  return <SynWareContext.Provider value={value}><NSELocalisationProvider value={value.locale}>{children}</NSELocalisationProvider></SynWareContext.Provider>;
+  // Every application has the shared colour panel, as NSColorPanel.shared is always there. Popovers, sheets and panels inherit it.
+  const content = value.colourPanel ? <SynWareColourPanelProvider service={value.colourPanel} drag={value.drag}>{children}</SynWareColourPanelProvider> : children;
+  return <SynWareContext.Provider value={value}><NSELocalisationProvider value={value.locale}>{content}</NSELocalisationProvider></SynWareContext.Provider>;
 }
 
 /** Internal framework consumer for components which can also be hosted by a
