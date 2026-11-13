@@ -29,7 +29,7 @@ const sample = (timestamp: number, attitude: boolean): MFXRawMotionSample => ({ 
 describe("MotionFX portable values and streams", () => {
   it("preserves interleaved orientation updates instead of starving them behind motion cadence", () => {
     const fixture = motionFixture(), manager = new MotionService(fixture.adapter).createManager(), delivered: MFXRawMotionSample[] = [];
-    manager.startDeviceMotionUpdates({ referenceFrame: "relative" }, value => delivered.push({ ...value, accelerationIncludingGravity: null }));
+    manager.startDeviceMotionUpdates({ referenceFrame: "xArbitraryZVertical" }, value => delivered.push({ ...value, accelerationIncludingGravity: null }));
     for (let index = 0; index < 5; index++) {
       for (const listener of fixture.listeners) listener(sample(index * 0.02, false));
       for (const listener of fixture.listeners) listener(sample(index * 0.02 + 0.001, true));
@@ -42,7 +42,7 @@ describe("MotionFX portable values and streams", () => {
 
   it("clears device-motion state when its last subscription releases while gyro stays active", () => {
     const fixture = motionFixture(), manager = new MotionService(fixture.adapter).createManager(), gyro = vi.fn();
-    const subscription = manager.startDeviceMotionUpdates({ referenceFrame: "relative" }, () => {});
+    const subscription = manager.startDeviceMotionUpdates({ referenceFrame: "xArbitraryZVertical" }, () => {});
     manager.startGyroUpdates(gyro); fixture.emit(0); fixture.emit(0.02);
     expect(manager.deviceMotion).not.toBeNull(); expect(manager.observedUpdateInterval).toBeCloseTo(0.02);
     subscription.dispose(); expect(manager.deviceMotion).toBeNull(); expect(manager.observedUpdateInterval).toBeNull();
@@ -123,17 +123,17 @@ describe("MotionFX portable values and streams", () => {
     expect(recorder.samples).toEqual([]);
     expect(f.listeners.size).toBe(0);
   });
-  it("keeps reference resets and stopping isolated across managers", () => {
+  it("measures a change from a kept attitude, and keeps stopping isolated across managers", () => {
     const f = motionFixture(),
       service = new MotionService(f.adapter),
       a = service.createManager(),
       b = service.createManager();
-    a.startDeviceMotionUpdates({ referenceFrame: "relative" }, () => {});
-    b.startDeviceMotionUpdates({ referenceFrame: "relative" }, () => {});
+    a.startDeviceMotionUpdates({ referenceFrame: "xArbitraryZVertical" }, () => {});
+    b.startDeviceMotionUpdates({ referenceFrame: "xArbitraryZVertical" }, () => {});
     f.emit(0, MFXAttitude.fromEuler(0.2, 0, 0));
-    a.resetReferenceFrame();
+    const reference = a.deviceMotion!.attitude!;
     f.emit(1, MFXAttitude.fromEuler(0.3, 0, 0));
-    expect(a.deviceMotion?.attitude?.roll).toBeCloseTo(0.1);
+    expect(a.deviceMotion?.attitude?.multiplyByInverseOf(reference).roll).toBeCloseTo(0.1);
     expect(b.deviceMotion?.attitude?.roll).toBeCloseTo(0.3);
     a.stopDeviceMotionUpdates();
     expect(f.listeners.size).toBe(1);
@@ -144,7 +144,7 @@ describe("MotionFX portable values and streams", () => {
     const manager = new MotionService().createManager();
     expect(() =>
       manager.startDeviceMotionUpdates(
-        { referenceFrame: "magnetic-north" },
+        { referenceFrame: "xMagneticNorthZVertical" },
         () => {},
       ),
     ).toThrow(/Unsupported/);

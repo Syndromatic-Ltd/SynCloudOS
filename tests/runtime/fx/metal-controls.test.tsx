@@ -90,7 +90,7 @@ function harness() {
         callback({
           attitude: MFXAttitude.fromEuler(roll, pitch, 0),
           timestamp: now,
-          referenceFrame: "relative",
+          referenceFrame: "xArbitraryZVertical",
           gravity: null,
           userAcceleration: null,
           rotationRate: null,
