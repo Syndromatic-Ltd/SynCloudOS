@@ -21,15 +21,9 @@ async function sampleHeap(page, cdp) {
   await cdp.send("HeapProfiler.collectGarbage");
   const { metrics } = await cdp.send("Performance.getMetrics");
   const metric = name => metrics.find(entry => entry.name === name)?.value ?? 0;
-  let detachedNodes = null;
-  try {
-    const result = await cdp.send("DOM.getDetachedDomNodes");
-    detachedNodes = result.detachedNodes?.length ?? 0;
-  } catch {
-    detachedNodes = null;
-  }
+  // Counters only: asking the DOM agent for detached nodes pins every tree it reports, which the next sample then counts.
   const jsHeapUsedSize = metric("JSHeapUsedSize");
-  return { jsHeapUsedSize, jsHeapUsedMB: toMB(jsHeapUsedSize), domNodes: metric("Nodes"), detachedNodes };
+  return { jsHeapUsedSize, jsHeapUsedMB: toMB(jsHeapUsedSize), domNodes: metric("Nodes"), eventListeners: metric("JSEventListeners") };
 }
 
 async function runCycle(page) {
@@ -56,7 +50,6 @@ const page = await context.newPage();
 const cdp = await context.newCDPSession(page);
 await cdp.send("HeapProfiler.enable");
 await cdp.send("Performance.enable");
-await cdp.send("DOM.enable");
 
 await page.goto(`${base}/`, { waitUntil: "load" });
 const signInButton = page.getByRole("button", { name: /Sign in locally/u });
@@ -89,7 +82,7 @@ const summary = {
     jsHeapUsedBytes: last.jsHeapUsedSize - first.jsHeapUsedSize,
     jsHeapUsedMB: toMB(last.jsHeapUsedSize - first.jsHeapUsedSize),
     domNodes: last.domNodes - first.domNodes,
-    detachedNodes: first.detachedNodes !== null && last.detachedNodes !== null ? last.detachedNodes - first.detachedNodes : null,
+    eventListeners: first.eventListeners !== null && last.eventListeners !== null ? last.eventListeners - first.eventListeners : null,
   },
 };
 
