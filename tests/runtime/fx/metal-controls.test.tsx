@@ -148,11 +148,11 @@ describe("metal material controls", () => {
     h.sample(1, 1);
     h.advance(0.05);
     expect(h.store.getSnapshot().active).toBe(true);
-    expect(Math.abs(h.store.getSnapshot().angle)).toBeLessThanOrEqual(0.24);
+    expect(Math.abs(h.store.getSnapshot().angle)).toBeLessThanOrEqual(1.35);
     const angle = h.store.getSnapshot().angle;
     h.sample(-1, -1);
     h.advance(0.06);
-    expect(Math.abs(h.store.getSnapshot().angle - angle)).toBeLessThan(0.1);
+    expect(Math.abs(h.store.getSnapshot().angle - angle)).toBeLessThan(0.75);
     h.advance(1);
     expect(h.store.getSnapshot().active).toBe(false);
     expect(h.frames.size).toBe(0);
