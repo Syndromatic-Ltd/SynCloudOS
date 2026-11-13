@@ -95,6 +95,15 @@ describe("window-hosted transient surface bridge", () => {
     } finally { view.unmount(); bridge.dispose(); anchor.remove(); await runtime.dispose("test"); }
   });
 
+  it("holds nothing of the runtime until it presents a surface", async () => {
+    // React may discard the render that made a bridge; nothing then disposes it.
+    const runtime = createTestRuntime();
+    const listen = vi.spyOn(runtime.signal, "addEventListener");
+    try {
+      createTransientWindowSurfaceBridge({ runtime, renderers: new WindowContentRendererRegistry(), physicalHostId: "discarded", owner: { workspaceId: "workspace", applicationId: "com.example.gallery", applicationSessionId: "com.example.gallery" } });
+      expect(listen).not.toHaveBeenCalled();
+    } finally { listen.mockRestore(); await runtime.dispose("test"); }
+  });
   it("finishes the initial focus handoff when a popover's command controls become available", async () => {
     const runtime = createTestRuntime();
     const renderers = new WindowContentRendererRegistry();
