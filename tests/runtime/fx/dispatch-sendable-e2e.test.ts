@@ -588,6 +588,17 @@ await host.render();
       expect(code.includes(repoForward), `${file} contains repoForward: ${snippet(repoForward)}`).toBe(false);
     }
 
+    // Verify emitted main bundle closure ID exists in the emitted dispatch-worker chunk (even with decorated app class + pre-scan).
+    const workerAssetFiles = jsAssets.filter(f => f.includes("dispatch-worker"));
+    expect(workerAssetFiles.length).toBeGreaterThan(0);
+    const workerChunkCode = workerAssetFiles.map(f => readFileSync(join(assetsDir, f), "utf8")).join("\n");
+    const nonWorkerCode = jsAssets.filter(f => !f.includes("dispatch-worker")).map(f => readFileSync(join(assetsDir, f), "utf8")).join("\n");
+    const registeredIds = [...new Set([...nonWorkerCode.matchAll(/["']([^"']+\.[cm]?[jt]sx?#\d+)["']/gu)].map(m => m[1]))];
+    expect(registeredIds).toContain("Contents/index.tsx#0");
+    for (const cid of registeredIds) {
+      expect(workerChunkCode.includes(JSON.stringify(cid)), `worker chunk missing ${cid}`).toBe(true);
+    }
+
     // Hook-mirroring preserved (react/jsx-runtime was intercepted, not bypassed by ts.transpileModule)
     const combinedJs = jsAssets.map(f => readFileSync(join(assetsDir, f), "utf8")).join("\n");
     expect(combinedJs.includes("Contents/index.tsx#0")).toBe(true);
@@ -635,6 +646,158 @@ await host.render();
     }
   } finally {
     warnSpy.mockRestore();
+    rmSync(root, { recursive: true, force: true });
+  }
+}, 60_000);
+
+it("modules outside an owning bundle run on the main thread under an app lifetime without worker errors", async () => {
+  const repoRoot = realpathSync.native(process.cwd());
+  const root = realpathSync.native(mkdtempSync(join(tmpdir(), "dfx-outside-bundle-")));
+
+  try {
+    const appDir = join(root, "src/SynWare/OutsideProbe.app/Contents");
+    mkdirSync(appDir, { recursive: true });
+    writeFileSync(join(root, "index.html"), `<!doctype html><html><body><script type="module" src="/src/main.ts"></script></body></html>\n`);
+    writeFileSync(join(appDir, "Info.ts"), `export default { bundleIdentifier: "com.example.outside-probe", displayName: "OutsideProbe", version: "1.0.0", routes: [{ path: "/outside", primary: true }] };\n`);
+    writeFileSync(
+      join(root, "src/outsideHelper.ts"),
+      `import { DFXQueue } from "@syndromatic/syncloudos/fx/dispatch";
+export function runOutsideUnderAppQueue(appQueue: DFXQueue): Promise<{ inWindow: boolean; value: number }> {
+  void DFXQueue;
+  return new Promise(resolvePromise => {
+    appQueue.async(() => {
+      const inWindow = typeof (self as { document?: unknown }).document !== "undefined";
+      resolvePromise({ inWindow, value: 99 });
+    });
+  });
+}
+`,
+    );
+    writeFileSync(
+      join(appDir, "index.tsx"),
+      `import { NSEApplication } from "@syndromatic/syncloudos";
+import { DFXQoSClass, DFXQueue } from "@syndromatic/syncloudos/fx/dispatch";
+import { runOutsideUnderAppQueue } from "../../../outsideHelper";
+export default class OutsideProbe extends NSEApplication {}
+export function triggerOutside(): Promise<{ inWindow: boolean; value: number }> {
+  return runOutsideUnderAppQueue(DFXQueue.global(DFXQoSClass.userInitiated));
+}
+export function runApp(): Promise<number> {
+  return new Promise(res => {
+    DFXQueue.global(DFXQoSClass.userInitiated).async(() => {
+      DFXQueue.main.async(() => res(1));
+    });
+  });
+}
+`,
+    );
+    writeFileSync(
+      join(root, "src/main.ts"),
+      `import { createSynWareTestHost } from "@syndromatic/syncloudos/sdk/testing";
+import OutsideProbe, { runApp, triggerOutside } from "./SynWare/OutsideProbe.app/Contents/index";
+import info from "./SynWare/OutsideProbe.app/Contents/Info";
+const host = createSynWareTestHost({ application: OutsideProbe, manifest: { schemaVersion: 1, ...info }, document });
+await host.render();
+(globalThis as Record<string, unknown>).__outside = () => triggerOutside();
+void runApp;
+`,
+    );
+
+    await build({
+      configFile: false,
+      root,
+      mode: "production",
+      logLevel: "silent",
+      esbuild: { jsxDev: false },
+      plugins: [synCloudOS({ webspringEntry: false }), localSdkFallbackPlugin(repoRoot)],
+      resolve: { alias: sdkResolveAliases(repoRoot) },
+      build: { outDir: "dist", minify: false },
+    });
+
+    const distServer = createStaticServer(join(root, "dist"));
+    const distPort = await getFreePort();
+    await new Promise<void>(resolveListen => distServer.listen(distPort, "127.0.0.1", resolveListen));
+    const browser = await chromium.launch({ headless: true });
+    try {
+      const page = await browser.newPage();
+      const pageErrors: string[] = [];
+      page.on("pageerror", e => pageErrors.push(e.message));
+      await page.goto(`http://127.0.0.1:${distPort}/`);
+      await page.waitForFunction(() => Boolean((globalThis as { __outside?: unknown }).__outside));
+      const res = await Promise.race([
+        page.evaluate(() => (globalThis as unknown as { __outside(): Promise<{ inWindow: boolean; value: number }> }).__outside()),
+        new Promise((_, rej) => setTimeout(() => rej(new Error("timed out waiting for outside-bundle work")), 5000)),
+      ]);
+      expect(res).toEqual({ inWindow: true, value: 99 });
+      expect(pageErrors).toEqual([]);
+    } finally {
+      await browser.close();
+      await new Promise<void>(resolveClose => distServer.close(() => resolveClose()));
+    }
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+}, 60_000);
+
+it("handleHotUpdate only sends syncloudos:dispatch-worker-updated when a file's extracted closures change", async () => {
+  const repoRoot = realpathSync.native(process.cwd());
+  const root = realpathSync.native(mkdtempSync(join(tmpdir(), "dfx-hmr-noise-")));
+  const appDir = writeAppFixture(root, 2);
+  writeFileSync(join(appDir, "uiOnly.ts"), `export const badgeLabel = "v1";\n`);
+  const devPort = await getFreePort();
+  const server = await createViteServer({
+    configFile: false,
+    root,
+    logLevel: "silent",
+    server: { host: "127.0.0.1", port: devPort, strictPort: true, fs: { allow: [root, realpathSync(root), repoRoot, realpathSync(repoRoot)] } },
+    plugins: [synCloudOS({ webspringEntry: false }), localSdkFallbackPlugin(repoRoot)],
+    resolve: { alias: sdkResolveAliases(repoRoot) },
+  });
+  await server.listen();
+
+  const sentEvents: string[] = [];
+  const origSend = server.ws.send.bind(server.ws);
+  server.ws.send = ((payload: { event?: string }) => {
+    if (payload && typeof payload === "object" && payload.event) sentEvents.push(payload.event);
+    return origSend(payload as never);
+  }) as typeof server.ws.send;
+
+  try {
+    await server.transformRequest("/src/SynWare/WorkerProbe.app/Contents/index.tsx");
+    const plugin = server.config.plugins.find(p => p.name === "syncloudos:project");
+    expect(plugin?.handleHotUpdate).toBeTruthy();
+
+    // 1. Edit a file inside the bundle with NO closures -> no dispatch-worker update notification
+    writeFileSync(join(appDir, "uiOnly.ts"), `export const badgeLabel = "v2";\n`);
+    await (plugin!.handleHotUpdate as (ctx: unknown) => Promise<unknown>)({
+      file: join(appDir, "uiOnly.ts"),
+      read: async () => `export const badgeLabel = "v2";\n`,
+      modules: [],
+    });
+    expect(sentEvents.filter(e => e === "syncloudos:dispatch-worker-updated")).toHaveLength(0);
+
+    // 2. Edit the closure file outside its closures (append a UI constant) -> no dispatch-worker update notification
+    const originalIndex = readFileSync(join(appDir, "index.tsx"), "utf8");
+    const cosmeticIndex = `${originalIndex}\nexport const uiBanner = "updated banner";\n`;
+    writeFileSync(join(appDir, "index.tsx"), cosmeticIndex);
+    await (plugin!.handleHotUpdate as (ctx: unknown) => Promise<unknown>)({
+      file: join(appDir, "index.tsx"),
+      read: async () => cosmeticIndex,
+      modules: [],
+    });
+    expect(sentEvents.filter(e => e === "syncloudos:dispatch-worker-updated")).toHaveLength(0);
+
+    // 3. Edit the actual closure body -> emits syncloudos:dispatch-worker-updated
+    writeAppModule(appDir, 99);
+    const modifiedIndex = readFileSync(join(appDir, "index.tsx"), "utf8");
+    await (plugin!.handleHotUpdate as (ctx: unknown) => Promise<unknown>)({
+      file: join(appDir, "index.tsx"),
+      read: async () => modifiedIndex,
+      modules: [],
+    });
+    expect(sentEvents.filter(e => e === "syncloudos:dispatch-worker-updated")).toHaveLength(1);
+  } finally {
+    await server.close();
     rmSync(root, { recursive: true, force: true });
   }
 }, 60_000);

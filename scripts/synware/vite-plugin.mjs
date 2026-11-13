@@ -955,18 +955,14 @@ export function synCloudOS(options) {
   };
 
   const extractDispatchClosures = (pluginContext, rawCode, cleanId, owningBundle, emitWarnings = true) => {
-    const frameworkSrcRoot = resolve(resolvedConfig?.root ?? process.cwd(), "src");
-    const isFrameworkDispatchModule = !owningBundle && isPathInside(frameworkSrcRoot, cleanId);
-    if (!owningBundle && !isFrameworkDispatchModule) return null;
+    if (!owningBundle) return null;
     transformedDispatchFiles.add(cleanId);
     if (!/fx\/dispatch|DispatchFX/u.test(rawCode)) {
       extractedDispatchClosures.delete(cleanId);
       return null;
     }
     const lowered = transpileWithProjectEsbuild(rawCode, cleanId);
-    const closureIdPrefix = owningBundle
-      ? slash(relative(dirname(dirname(owningBundle.entryPath)), cleanId))
-      : slash(relative(resolvedConfig?.root ?? process.cwd(), cleanId));
+    const closureIdPrefix = slash(relative(dirname(dirname(owningBundle.entryPath)), cleanId));
     const result = convertDispatchClosures(lowered.code, cleanId, {
       closureIdPrefix,
       parse: typeof pluginContext?.parse === "function" ? src => pluginContext.parse(src) : undefined,
@@ -983,7 +979,7 @@ export function synCloudOS(options) {
     }
     if (result.closures.length > 0) {
       extractedDispatchClosures.set(cleanId, {
-        bundleIdentifier: owningBundle ? normalizeBundleIdentifier(owningBundle.bundleIdentifier) : null,
+        bundleIdentifier: normalizeBundleIdentifier(owningBundle.bundleIdentifier),
         closures: resolveDispatchClosureImports(result.closures, cleanId),
       });
       return {
@@ -1210,14 +1206,22 @@ export function synCloudOS(options) {
       const owningBundle = findOwningBundle(current, cleanFile);
       if (owningBundle && /\.(?:[cm]?[jt]sx?)$/u.test(cleanFile)) {
         const normalizedBundle = normalizeBundleIdentifier(owningBundle.bundleIdentifier);
-        const updatedRaw = typeof context.read === "function" ? await context.read() : readFileSync(context.file, "utf8");
-        extractDispatchClosures(null, updatedRaw, cleanFile, owningBundle, false);
-        const version = (dispatchWorkerVersions.get(normalizedBundle) ?? 0) + 1;
-        dispatchWorkerVersions.set(normalizedBundle, version);
-        const workerVirtualId = `\0${appModulePrefix}${normalizedBundle}${dispatchWorkerSuffix}`;
-        const workerNode = server?.moduleGraph?.getModuleById(workerVirtualId);
-        if (workerNode) server.moduleGraph.invalidateModule(workerNode);
-        server?.ws?.send({ type: "custom", event: "syncloudos:dispatch-worker-updated", data: { normalizedBundle, version } });
+        const previousSnapshot = JSON.stringify(extractedDispatchClosures.get(cleanFile) ?? null);
+        if (existsSync(context.file)) {
+          const updatedRaw = typeof context.read === "function" ? await context.read() : readFileSync(context.file, "utf8");
+          extractDispatchClosures(null, updatedRaw, cleanFile, owningBundle, false);
+        } else {
+          extractedDispatchClosures.delete(cleanFile);
+        }
+        const nextSnapshot = JSON.stringify(extractedDispatchClosures.get(cleanFile) ?? null);
+        if (nextSnapshot !== previousSnapshot) {
+          const version = (dispatchWorkerVersions.get(normalizedBundle) ?? 0) + 1;
+          dispatchWorkerVersions.set(normalizedBundle, version);
+          const workerVirtualId = `\0${appModulePrefix}${normalizedBundle}${dispatchWorkerSuffix}`;
+          const workerNode = server?.moduleGraph?.getModuleById(workerVirtualId);
+          if (workerNode) server.moduleGraph.invalidateModule(workerNode);
+          server?.ws?.send({ type: "custom", event: "syncloudos:dispatch-worker-updated", data: { normalizedBundle, version } });
+        }
       }
       // An application module takes its own update; the project is unchanged.
       if (toolchain.acceptsHotUpdate(context)) return undefined;

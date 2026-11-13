@@ -23,7 +23,7 @@ import { sendableMetadataOf, type SendableMetadata } from "./internal/sendable";
 import { assertSyncAvailable } from "./internal/sync";
 import { checkedInteger, clientError } from "./internal/time";
 import { scheduleTimer } from "./internal/timerWheel";
-import { executeSyncWork, executeWork, prepareWork, type DFXWork, type DFXIterationWork } from "./internal/work";
+import { executeSyncWork, executeWork, prepareWork, reportDispatchError, type DFXWork, type DFXIterationWork } from "./internal/work";
 import { performWorkItem, workItemState } from "./internal/workItemState";
 
 import { assertOwner, classForLifetime, onLifetimeEnd, selectLifetime, type DispatchLifetime } from "./internal/lifetime";
@@ -96,10 +96,6 @@ function ensureAppWorkerCancellation(lifetime: DispatchLifetime): void {
   if (observedWorkerLifetimes.has(lifetime)) return;
   observedWorkerLifetimes.add(lifetime);
   onLifetimeEnd(lifetime, () => WorkerPool.shared.cancelApp(lifetime.appId));
-}
-function reportWorkerError(error: Error): void {
-  if (typeof globalThis.reportError === "function") globalThis.reportError(error);
-  else console.error(error);
 }
 function submitScheduledAsync(params: {
   queue: DFXQueue;
@@ -198,8 +194,13 @@ function submitScheduledAsync(params: {
           settled = true;
           stopRelease();
           releaseWorkerInFlight(held);
-          if (!lifetime.ended) reportWorkerError(error);
-          cleanupTracking(job, true);
+          const wrapped = new Error(`DispatchFX queue "${queue.label}": work item threw`, { cause: error });
+          if (item && !lifetime.ended) {
+            performWorkItem(item, () => reportDispatchError(wrapped), lifetime);
+          } else if (!lifetime.ended && !itemData?.cancelled) {
+            reportDispatchError(wrapped);
+          }
+          cleanupTracking(job, false);
         },
       });
     },
