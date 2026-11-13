@@ -1332,8 +1332,8 @@
 }
 :where(:scope) [data-nse-control="colour-panel"]>fieldset,
 :where(:scope):is([data-nse-control="colour-panel"])>fieldset,
-:where(:scope) [data-nse-control="colour-panel"] [data-nse-control="tab-view"],
-:where(:scope):is([data-nse-control="colour-panel"]) [data-nse-control="tab-view"] {
+:where(:scope) [data-nse-control="colour-panel"] [data-nse-control="tab-view"]:where([data-nse-part="background"]),
+:where(:scope):is([data-nse-control="colour-panel"]) [data-nse-control="tab-view"]:where([data-nse-part="background"]) {
   display: contents;
 }
 :where(:scope) [data-nse-control="colour-panel"] [data-nse-part="content-message"],
