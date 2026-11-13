@@ -23,14 +23,14 @@ import { cloneElement } from "../../Theme/contract/hookMirrorReact";
 import { NSEBox, type NSEBoxProps } from "../Fields/NSEFields";
 import { classes } from "../Core/nseControlsShared";
 
-export type NSEGroupedListEdge = "first" | "middle" | "last" | "only";
+export type GroupedRowsEdge = "first" | "middle" | "last" | "only";
 
-export interface NSEGroupedListProps extends Omit<NSEBoxProps, "children"> {
-  /** Direct NSEListItem children; adjacent row bevels form the shared seams. */
+export interface GroupedRowsProps extends Omit<NSEBoxProps, "children"> {
+  /** Direct GroupedRow children; adjacent row bevels form the shared seams. */
   readonly children: ReactNode;
 }
 
-function edgeFor(index: number, count: number): NSEGroupedListEdge {
+function edgeFor(index: number, count: number): GroupedRowsEdge {
   if (count === 1) return "only";
   if (index === 0) return "first";
   if (index === count - 1) return "last";
@@ -45,7 +45,7 @@ function edgeFor(index: number, count: number): NSEGroupedListEdge {
  * It also publishes the frame-minus-inset edge geometry for every selected,
  * held, and focused paint layer.
  */
-export function NSEGroupedList({ children, className = "", ...props }: NSEGroupedListProps) {
+export function GroupedRows({ children, className = "", ...props }: GroupedRowsProps) {
   const items = Children.toArray(children).filter(isValidElement) as Array<ReactElement<Record<string, unknown>>>;
 
   return (

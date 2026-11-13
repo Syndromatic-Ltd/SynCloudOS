@@ -3,7 +3,7 @@ import React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
 import { NSEBrowser } from "../../src/NSE/DataViews/Browser";
-import { NSEListItem } from "../../src/NSE/Controls/Selection/NSEListItem";
+import { GroupedRow } from "../../src/NSE/Controls/Selection/GroupedRow";
 import { NSEOutlineView } from "../../src/NSE/DataViews/Outline";
 import { NSETreeController } from "../../src/NSE/Controllers";
 import { nseUnowned } from "../../src/NSE/Controllers/ownership";
@@ -22,7 +22,7 @@ it("publishes browser columns and native disclosure state through drawing hooks"
   expect(folder.getAttribute("aria-expanded")).toBe("true");
 });
 it("gives the existing list cell neutral text and accessory slots", () => {
-  const { container } = render(<NSEListItem selected leading="Icon" trailing="Accessory" meta="Detail">Title</NSEListItem>);
+  const { container } = render(<GroupedRow selected leading="Icon" trailing="Accessory" meta="Detail">Title</GroupedRow>);
   const cell = container.firstElementChild!;
   expect(cell.getAttribute("data-nse-control")).toBe("table-cell-view");
   expect(cell.hasAttribute("data-nse-selected")).toBe(true);

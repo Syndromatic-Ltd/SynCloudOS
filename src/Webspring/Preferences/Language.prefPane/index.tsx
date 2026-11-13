@@ -19,7 +19,7 @@
  */
 
 import { NSEBox } from "../../../NSE/public/controls";
-import { NSEListItem } from "../../../NSE/Controls/Selection/NSEListItem";
+import { GroupedRow } from "../../../NSE/Controls/Selection/GroupedRow";
 import { definePreferencePane, type PreferencePaneViewProps } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS } from "../../../SynCloudOSReact";
 
@@ -33,14 +33,14 @@ function LanguagePane({ locale }: PreferencePaneViewProps) {
     <div className="nse-prefs-section">
       <NSEBox>
         {locale.supportedLocales.map((entry) => (
-          <NSEListItem
+          <GroupedRow
             key={entry.code}
             selected={entry.code === locale.activeLocale}
             meta={entry.code}
             onClick={() => runtime.locale.setLocale(entry.code)}
           >
             {entry.nativeName || entry.englishName}
-          </NSEListItem>
+          </GroupedRow>
         ))}
       </NSEBox>
     </div>

@@ -19,7 +19,7 @@
  */
 
 import { NSEBox } from "../../../NSE/public/controls";
-import { NSEListItem } from "../../../NSE/Controls/Selection/NSEListItem";
+import { GroupedRow } from "../../../NSE/Controls/Selection/GroupedRow";
 import { definePreferencePane, type PreferencePaneViewProps } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS } from "../../../SynCloudOSReact";
 import { useSystemText } from "../useSystemText";
@@ -40,13 +40,13 @@ function MotionPane({ settings }: PreferencePaneViewProps) {
           { value: "standard" as const, label: t("preferences.standard", "Standard") },
           { value: "reduced" as const, label: t("preferences.reduced", "Reduced") },
         ]).map((choice) => (
-          <NSEListItem
+          <GroupedRow
             key={choice.value}
             selected={motion === choice.value}
             onClick={() => runtime.settings.set("motion", choice.value)}
           >
             {choice.label}
-          </NSEListItem>
+          </GroupedRow>
         ))}
       </NSEBox>
       <p className="nse-prefs-note">

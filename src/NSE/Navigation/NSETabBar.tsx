@@ -42,8 +42,8 @@ import {
   NSENavigationDestinationHost,
 } from "./NSENavigationDestinationHost";
 import { NSEMetalSurface } from "../Material/NSEMetalSurface";
-import { NSEGroupedList } from "../Controls/Selection/NSEGroupedList";
-import { NSEListItem } from "../Controls/Selection/NSEListItem";
+import { GroupedRows } from "../Controls/Selection/GroupedRows";
+import { GroupedRow } from "../Controls/Selection/GroupedRow";
 import { NSEHierarchyStack } from "./NSEHierarchyStack";
 import { NSETabBarMoreDestinationId, NSETabBarController } from "./NSETabBarController";
 import {
@@ -672,7 +672,7 @@ export function NSETabBarOverflowList({
             overflowScrollTopRef.current = event.currentTarget.scrollTop;
           }}
         >
-          <NSEGroupedList className="nse-tab-bar-overflow-group" aria-label="More destinations">
+          <GroupedRows className="nse-tab-bar-overflow-group" aria-label="More destinations">
             {overflowDestinations.map((destination) => {
               const selected = snapshot.selectedDestinationId === destination.id;
               const pressed = pressedDestinationId === destination.id;
@@ -686,7 +686,7 @@ export function NSETabBarOverflowList({
               const icon = projectNSENavigationIcon(destination.icon, state);
               const iconStyle = tabIconStyle(destination.icon);
               return (
-                <NSEListItem
+                <GroupedRow
                   key={destination.id}
                   className="nse-tab-bar-overflow-option"
                   ref={(node) => {
@@ -745,10 +745,10 @@ export function NSETabBarOverflowList({
                   }}
                 >
                   {destination.label}
-                </NSEListItem>
+                </GroupedRow>
               );
             })}
-          </NSEGroupedList>
+          </GroupedRows>
         </NSEMetalSurface>
       </div>
     </section>

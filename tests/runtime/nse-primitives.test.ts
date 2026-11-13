@@ -24,7 +24,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { NSEMenuView } from "../../src/NSE/Menus";
 import { NSESwitch, NSEButton, NSEBox, NSEPopUpButton, NSESegmentedControl, useNSEControlFeedback } from "../../src/NSE/public/controls";
 import { NSETopBar } from "../../src/NSE/Windows/Chrome";
-import { NSEListItem } from "../../src/NSE/Controls/Selection/NSEListItem";
+import { GroupedRow } from "../../src/NSE/Controls/Selection/GroupedRow";
 import { NSEGlassPanel } from "../../src/NSE/Components/NSEGlassPanel";
 import { BrowserHapticsAdapter, createHFXVibratePattern, normalizeHFXFeedbackInput } from "../../src/SynCloudOS/PlatformAdapters/BrowserHapticsAdapter";
 import { defaultHFXFeedbackPatterns, HFX_FEEDBACK_PRESET_NAMES } from "../../src/SynCloudOS/HapticsFX/feedbackPatterns";
@@ -316,7 +316,7 @@ describe("HapticsFX feedback preservation", () => {
           selection: { mode: "select-one", selectedIds: new Set(["a"]), allowsEmpty: false },
           onSelectionChange: vi.fn()
         }),
-        createElement(NSEListItem, { role: "button", onClick: vi.fn() }, "List item"),
+        createElement(GroupedRow, { role: "button", onClick: vi.fn() }, "List item"),
         createElement(NSETopBar, {
           title: "Journal",
           leadingItems: [{ kind: "webspring", label: "Return", onClick: vi.fn() }]

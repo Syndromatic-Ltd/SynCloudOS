@@ -67,7 +67,7 @@ import { NSEMediaCollectionPresenter } from "../../../../src/NSE/MediaPanels/NSE
 import { ApplicationHostTitlebar } from "../../../../src/SynCloudOSReact/ApplicationHostTitlebar";
 import { createApplicationMenuStore } from "../../../../src/SynCloudOSReact/ApplicationMenuTrigger";
 import { NSEPopUpButton } from "../../../../src/NSE/Menus/NSEPopUpButton";
-import { NSEListItem } from "../../../../src/NSE/Controls/Selection/NSEListItem";
+import { GroupedRow } from "../../../../src/NSE/Controls/Selection/GroupedRow";
 import { NSEDatePicker } from "../../../../src/NSE/DateTime/Pickers/NSEDatePicker";
 import { NSEMenuView } from "../../../../src/NSE/Menus/NSEMenuView";
 import { SpecimenApplicationMenu, SpecimenContextMenu, SpecimenMenuBar } from "./menuSpecimens";
@@ -111,7 +111,7 @@ export const supplementalThemeCatalogue: readonly { id: string; ready?: string; 
   { id: "view-layer-circular", render: () => <NSEView cornerRadius={8} cornerCurve="circular">Layer</NSEView> },
   { id: "surface-ink-light", render: () => <NSEView><section data-nse-surface-ink="light">Paper</section></NSEView> },  { id: "pop-up-native", bare: true, render: () => <NSEPopUpButton label="Zone" value="a" items={[{ value: "a", title: "A" }, { value: "b", title: "B" }]} onValueChange={noop} /> },
   { id: "label-raised", render: () => <NSETextField isEditable={false} backgroundStyle="raised">Raised</NSETextField> },
-  { id: "list-item-no-highlight", render: () => <NSEListItem tapHighlight={false}>Static row</NSEListItem> },
+  { id: "list-item-no-highlight", render: () => <GroupedRow tapHighlight={false}>Static row</GroupedRow> },
   { id: "segment-fill-equally", render: () => <NSESegmentedControl selection={{ mode: "select-one", selectedIds: new Set(["a"]), allowsEmpty: false }} aria-label="Fill" distribution="fill-equally" name="fill" items={[{ id: "a", label: "A" }, { id: "b", label: "Longer" }]} onSelectionChange={noop} /> },
   { id: "calendar-rtl", render: () => <NSEDatePicker aria-label="Date" locale="he-IL" timeZone="Asia/Jerusalem" datePickerStyle="clockAndCalendar" datePickerElements={["yearMonthDay"]} defaultValue={{ year: 2026, month: 11, day: 9 }} /> },  { id: "material-metal", render: () => <MaterialProvider appearance="metal"><p>Metal</p></MaterialProvider> },
   ...windowSpecimens,
