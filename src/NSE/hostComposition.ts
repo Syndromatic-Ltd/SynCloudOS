@@ -61,6 +61,8 @@ export { NSEViewDrawingEnvironmentContext } from "./Views/NSEViewDrawingEnvironm
 export { NSEWindowLayoutContext, NSEWindowLayoutModel, useNSEContentLayoutProperties } from "./Layout/windowChromeObstructions";
 export { useNSEViewSafeArea } from "./Layout/useNSESafeArea";
 export { useNSEDeferredDisposal } from "./interactionLifecycle";
+export { createReactOwnedNSEMenu } from "./Menus/NSEMenu";
+export { useNSEMenuLifetime } from "./Menus/useNSEMenuLifetime";
 export { nseStateHooks } from "./Theme/contract/hooks";
 export { useNSEThemeInteraction } from "./Theme/contract/useThemeInteraction";
 export type { NSETheme } from "./Theme/NSETheme";

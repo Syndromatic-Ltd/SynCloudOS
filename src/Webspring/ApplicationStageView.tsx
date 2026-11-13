@@ -30,7 +30,6 @@ import {
   NSEControlRuntimeProvider,
   NSEApplicationNavigationChromeController,
   NSEApplicationNavigationChromeProvider,
-  NSEMenu,
   NSEOverlayProvider,
   NSETooltipProvider,
   NSEWindowSurfaceBridgeProvider,
@@ -39,7 +38,7 @@ import {
 import { nseMenuModel } from "../NSE/NSE";
 import { ApplicationNavigationBackButton } from "./ApplicationNavigationBackButton";
 import { NSEButton } from "@syndromatic/syncloudos/nse/controls";
-import { NSETopBar } from "../NSE/hostComposition";
+import { createReactOwnedNSEMenu, NSETopBar, useNSEMenuLifetime } from "../NSE/hostComposition";
 import { SourceListFrameProvider, type SourceListFrameContextValue } from "../NSE/hostComposition";
 import { activateResponderHierarchy, clearOwnedResponderAnchor, QuickSwitchTriggerProvider, ResponderScope, useHostSiteBranding, useResolvedMode, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEMenuPort, useRuntimeNSEOverlayPort, useRuntimeSelector, useKernelSynCloudOS } from "../SynCloudOSReact";
 import type { SynCloudOSAppInfo } from "../SynCloudOS/SynCloudOS";
@@ -260,12 +259,10 @@ export function ApplicationStageView({
   }, [activateMenu, app, frame.rightSlot, hasRightSlot, locale, opensPreferencesDirectly]);
   const appMenuRuntime = useRuntimeNSEMenuPort();
   const appMenuController = useMemo(
-    () => new NSEMenu({ ownerSignal: appMenuRuntime.signal, [nseMenuModel]: appMenuModel, runtime: appMenuRuntime }),
+    () => createReactOwnedNSEMenu({ ownerSignal: appMenuRuntime.signal, [nseMenuModel]: appMenuModel, runtime: appMenuRuntime }),
     [appMenuModel, appMenuRuntime],
   );
-  // `useRuntimeNSEMenuPort` remains the canonical command bridge; the controller
-  // is shell-owned, so StrictMode-safe disposal follows the shell microtask lifetime.
-  useNSEDeferredDisposal(appMenuController);
+  useNSEMenuLifetime(appMenuController);
   const { reducedMotion } = useNSEAnimationEnvironment();
   const stageMotion = useApplicationStageMotion({
     role: multiSwitchRole,
