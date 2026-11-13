@@ -23,9 +23,25 @@ const gallerySections = ["Tables & Trees", "Buttons", "Menus & Popups"];
 const median = values => [...values].sort((a, b) => a - b)[Math.floor(values.length / 2)];
 const round = value => Math.round(value * 10) / 10;
 
+/** Who a profile frame belongs to: the engine, a DOM call, the collector, React, dev tooling, the framework or the site. */
+function frameOwner(frame) {
+  const url = frame.url ?? "";
+  if (!url) {
+    if (frame.functionName === "(program)") return "engine";
+    if (frame.functionName === "(garbage collector)") return "gc";
+    return "dom";
+  }
+  if (url.includes("/@vite/") || url.includes("@react-refresh")) return "tooling";
+  if (/\/\.vite\/deps\/(react|scheduler)/u.test(url)) return "react";
+  if (url.includes("@syndromatic/syncloudos")) return "framework";
+  return "site";
+}
+
 function extractCpuTasks(longTasks, profile) {
   if (!longTasks.length || !profile?.samples?.length) return [];
   const nodeById = new Map((profile.nodes ?? []).map(node => [node.id, node]));
+  const parentOf = new Map();
+  for (const node of profile.nodes ?? []) for (const child of node.children ?? []) parentOf.set(child, node.id);
   const samples = profile.samples;
   const deltas = profile.timeDeltas ?? [];
   const timedSamples = [];
@@ -42,12 +58,28 @@ function extractCpuTasks(longTasks, profile) {
       const start = task.ts;
       const end = task.ts + task.dur;
       const byFrame = new Map();
+      const owners = {};
+      const inclusive = new Map();
       for (const sample of timedSamples) {
         if (sample.ts < start || sample.ts > end) continue;
         const frame = nodeById.get(sample.nodeId)?.callFrame;
         if (!frame) continue;
         const functionName = frame.functionName || "(anonymous)";
         if (functionName === "(root)" || functionName === "(idle)") continue;
+        const owner = frameOwner(frame);
+        owners[owner] = (owners[owner] ?? 0) + sample.dur;
+        // Charge the sample once to every framework or site function on its stack.
+        const seen = new Set();
+        for (let id = sample.nodeId; id !== undefined; id = parentOf.get(id)) {
+          const caller = nodeById.get(id)?.callFrame;
+          if (!caller?.url) continue;
+          const callerOwner = frameOwner(caller);
+          if (callerOwner !== "framework" && callerOwner !== "site") continue;
+          const callerKey = `${caller.functionName || "(anonymous)"}\t${caller.url}\t${caller.lineNumber + 1}`;
+          if (seen.has(callerKey)) continue;
+          seen.add(callerKey);
+          inclusive.set(callerKey, (inclusive.get(callerKey) ?? 0) + sample.dur);
+        }
         const file = frame.url || "(native)";
         const line = typeof frame.lineNumber === "number" && frame.lineNumber >= 0 ? frame.lineNumber + 1 : 0;
         const key = `${functionName}\t${file}\t${line}`;
@@ -56,7 +88,12 @@ function extractCpuTasks(longTasks, profile) {
         byFrame.set(key, existing);
       }
       const top = [...byFrame.values()].sort((a, b) => b.selfUs - a.selfUs)[0] ?? { functionName: "(no JS sample)", file: "(native)", line: 0, selfUs: 0 };
-      return { taskMs: round(task.dur / 1000), selfMs: round(top.selfUs / 1000), functionName: top.functionName, file: top.file, line: top.line };
+      const ownerMs = Object.fromEntries(Object.entries(owners).sort((a, b) => b[1] - a[1]).map(([owner, us]) => [owner, round(us / 1000)]));
+      const callers = [...inclusive.entries()].sort((a, b) => b[1] - a[1]).slice(0, 12).map(([key, us]) => {
+        const [functionName, file, line] = key.split("\t");
+        return { functionName, file, line: Number(line), inclusiveMs: round(us / 1000) };
+      });
+      return { taskMs: round(task.dur / 1000), selfMs: round(top.selfUs / 1000), functionName: top.functionName, file: top.file, line: top.line, ownerMs, callers };
     });
 }
 
