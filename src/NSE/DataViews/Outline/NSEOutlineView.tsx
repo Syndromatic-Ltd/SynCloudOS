@@ -37,7 +37,7 @@ import {
 
 import { createSelectionChange, dataViewAllowsMutation, dataViewAllowsNavigation, dataViewAnnouncement, dataViewEventIsComposing, dataViewIsBusy, dataViewIsDisabled, encodeNSEDataViewKey } from "../Core";
 import { dataViewDisposedControllerState, warnDisposedDataViewController } from "../Core/disposedController";
-import { useNSEVirtualiser } from "../Virtualisation";
+import { useVirtualiser } from "../Virtualisation";
 import { useNSEDataViewDragHost } from "../../Drag";
 import { NSEDivider } from "../../Controls/Selection/NSEDivider";
 import { GroupedRow } from "../../Controls/Selection/GroupedRow";
@@ -137,7 +137,7 @@ export function NSEOutlineView<T, TId extends string | number>({
   // A source list scrolls with the system rubber band, as the sidebar rail always has.
   useNSERubberBandScroll(viewportRef, sourceListContentRef);
   const activeIndex = activeId === null ? -1 : rows.findIndex(({ id }) => Object.is(id, activeId));
-  const virtualiser = useNSEVirtualiser({
+  const virtualiser = useVirtualiser({
     count: rows.length,
     axis: "block",
     overscan: 2,

@@ -31,7 +31,7 @@ import {
 
 import { NSESortDescriptor } from "../../../Foundation/public";
 import { dataViewAllowsMutation, dataViewAnnouncement, dataViewEventIsComposing, dataViewIsBusy, encodeNSEDataViewKey, useNSEDataView } from "../Core";
-import { useNSEVirtualiser } from "../Virtualisation";
+import { useVirtualiser } from "../Virtualisation";
 import { nseDragCommandIds, nseDragNoPayload, useNSEDataViewDragHost } from "../../Drag";
 
 import { NSETableCell } from "./NSETableCell";
@@ -167,7 +167,7 @@ export function NSETableView<T, TId extends string | number>({
   const activeRowIndex = view.snapshot.activeId === null
     ? 0
     : Math.max(0, view.coordinator.indexForId(view.snapshot.activeId));
-  const virtualiser = useNSEVirtualiser({
+  const virtualiser = useVirtualiser({
     count: view.snapshot.items.length,
     axis: "block",
     overscan: 2,

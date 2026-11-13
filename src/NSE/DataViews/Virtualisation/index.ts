@@ -18,17 +18,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { coalesceNSEVirtualRanges, computeNSEVirtualRange } from "./computeVirtualRange";
-export { NSEVirtualViewport } from "./NSEVirtualViewport";
-export { useNSEVirtualiser } from "./useNSEVirtualiser";
-export type { NSEVirtualViewportProps } from "./NSEVirtualViewport";
-export type { NSEVirtualiserHookOptions } from "./useNSEVirtualiser";
+export { coalesceNSEVirtualRanges, computeVirtualRange } from "./computeVirtualRange";
+export { VirtualViewport } from "./VirtualViewport";
+export { useVirtualiser } from "./useVirtualiser";
+export type { VirtualViewportProps } from "./VirtualViewport";
+export type { VirtualiserHookOptions } from "./useVirtualiser";
 export type {
-  NSEVirtualAxis,
-  NSEVirtualItem,
-  NSEVirtualRange,
-  NSEVirtualRangeOptions,
-  NSEVirtualiser,
-  NSEVirtualiserOptions,
-  NSEVirtualiserSnapshot,
+  VirtualAxis,
+  VirtualItem,
+  VirtualRange,
+  VirtualRangeOptions,
+  Virtualiser,
+  VirtualiserOptions,
+  VirtualiserSnapshot,
 } from "./virtualisationTypes";

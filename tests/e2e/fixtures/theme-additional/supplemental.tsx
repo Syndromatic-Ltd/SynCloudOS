@@ -13,7 +13,7 @@ import { NSESegmentedControl } from "../../../../src/NSE/Controls/Values/NSESegm
 import { NSEColourSwatches } from "../../../../src/NSE/Colour/Pickers/NSEColourSwatches";
 import { GFXColour } from "../../../../src/FX/GraphicsFX/GFXColour";
 import { NSETooltip } from "../../../../src/NSE/Tooltips/NSETooltip";
-import { NSEVirtualViewport, useNSEVirtualiser } from "../../../../src/NSE/DataViews/Virtualisation";
+import { VirtualViewport, useVirtualiser } from "../../../../src/NSE/DataViews/Virtualisation";
 import { NSEToolbarView } from "../../../../src/NSE/Toolbars/NSEToolbarView";
 import { NSEToolbarConfigurationSheet } from "../../../../src/NSE/Toolbars/NSEToolbarConfigurationSheet";
 import { NSEToolbarController } from "../../../../src/NSE/Toolbars/NSEToolbarController";
@@ -34,8 +34,8 @@ function SortableTable() {
 }
 function Virtual() {
   const viewportRef = useRef<HTMLDivElement>(null);
-  const virtualiser = useNSEVirtualiser({ count: 20, axis: "block", overscan: 1, estimateSize: 24, getKey: String, viewportRef, viewportSize: 100 });
-  return <NSEVirtualViewport ref={viewportRef} virtualiser={virtualiser} viewportSize={100} renderItem={item => <span>{item.key}</span>} />;
+  const virtualiser = useVirtualiser({ count: 20, axis: "block", overscan: 1, estimateSize: 24, getKey: String, viewportRef, viewportSize: 100 });
+  return <VirtualViewport ref={viewportRef} virtualiser={virtualiser} viewportSize={100} renderItem={item => <span>{item.key}</span>} />;
 }
 function Tooltip() {
   const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
