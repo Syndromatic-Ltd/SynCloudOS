@@ -117,7 +117,7 @@ function releaseWorkerInFlight(held: readonly HeldWorkerQueue[]): void {
 function ensureAppWorkerCancellation(lifetime: DispatchLifetime): void {
   if (observedWorkerLifetimes.has(lifetime)) return;
   observedWorkerLifetimes.add(lifetime);
-  onLifetimeEnd(lifetime, () => WorkerPool.shared.cancelApp(lifetime.appId));
+  onLifetimeEnd(lifetime, () => WorkerPool.shared.cancelApp(lifetime));
 }
 function submitScheduledAsync(params: {
   queue: DFXQueue;
@@ -185,6 +185,7 @@ function submitScheduledAsync(params: {
       const mainBase = queue.constructor as typeof DFXQueue;
       WorkerPool.shared.submit({
         appId: lifetime.appId,
+        sessionKey: lifetime,
         closureId: workerTarget.sendable.id,
         chunkURL: workerTarget.chunkURL,
         captures: workerCaptures!,
@@ -195,8 +196,8 @@ function submitScheduledAsync(params: {
           settled = true;
           stopRelease();
           releaseWorkerInFlight(held);
-          if (lifetime.ended) {
-            cleanupTracking(job, false);
+          if (lifetime.ended || itemData?.cancelled) {
+            cleanupTracking(job, !lifetime.ended);
             return;
           }
           const contDefs = workerTarget.sendable.continuations;
@@ -204,7 +205,7 @@ function submitScheduledAsync(params: {
             const mainQueue = mainQueueForLifetime(mainBase, lifetime);
             for (const cont of continuations) {
               const def = contDefs.find(candidate => candidate.id === cont.id);
-              if (def) mainQueue.async(() => { if (!lifetime.ended) def.fn(...cont.workerValues); });
+              if (def) mainQueue.async(() => { if (!lifetime.ended && !itemData?.cancelled) def.fn(...cont.workerValues); });
             }
             mainQueue.async(() => cleanupTracking(job, true));
             return;
