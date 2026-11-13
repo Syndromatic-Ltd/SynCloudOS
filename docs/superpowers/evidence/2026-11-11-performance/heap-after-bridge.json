@@ -1,0 +1,25 @@
+{
+  "base": "http://127.0.0.1:5387",
+  "cycles": 10,
+  "recordedAt": "2026-11-13T04:14:30.268Z",
+  "cycle1": {
+    "cycle": 1,
+    "jsHeapUsedSize": 87119312,
+    "jsHeapUsedMB": 83.08,
+    "domNodes": 4555,
+    "eventListeners": 934
+  },
+  "cycleLast": {
+    "cycle": 10,
+    "jsHeapUsedSize": 90539060,
+    "jsHeapUsedMB": 86.34,
+    "domNodes": 4555,
+    "eventListeners": 962
+  },
+  "delta": {
+    "jsHeapUsedBytes": 3419748,
+    "jsHeapUsedMB": 3.26,
+    "domNodes": 0,
+    "eventListeners": 28
+  }
+}
