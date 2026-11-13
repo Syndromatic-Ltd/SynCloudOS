@@ -216,6 +216,7 @@ function isPropertyIdentifier(node, parent) {
   if ((parent.type === "BreakStatement" || parent.type === "ContinueStatement") && parent.label === node) return true;
   if (parent.type === "ImportSpecifier" && parent.imported === node && parent.local !== node) return true;
   if (parent.type === "ExportSpecifier" && parent.exported === node && parent.local !== node) return true;
+  if (parent.type === "ExportAllDeclaration" && parent.exported === node) return true;
   return false;
 }
 
@@ -225,6 +226,7 @@ function isBindingIdentifier(node, parent) {
   if ((parent.type === "FunctionDeclaration" || parent.type === "FunctionExpression" || parent.type === "ClassDeclaration" || parent.type === "ClassExpression") && parent.id === node) return true;
   if (parent.type === "CatchClause" && parent.param === node) return true;
   if (parent.type === "ImportSpecifier" || parent.type === "ImportDefaultSpecifier" || parent.type === "ImportNamespaceSpecifier") return true;
+  if (parent.type === "ExportAllDeclaration" && parent.exported === node) return true;
   return false;
 }
 
@@ -274,23 +276,197 @@ function encodeVLQ(value) {
   return encoded;
 }
 
-function buildLineSourceMap(id, original, generated) {
-  const origLines = original.split("\n").length;
-  const genLines = generated.split("\n").length;
-  const mappings = [];
-  let prevSrcLine = 0;
-  for (let i = 0; i < genLines; i++) {
-    const targetSrcLine = Math.min(i, origLines - 1);
-    mappings.push(encodeVLQ(0) + encodeVLQ(0) + encodeVLQ(targetSrcLine - prevSrcLine) + encodeVLQ(0));
-    prevSrcLine = targetSrcLine;
+function decodeVLQ(str, ref) {
+  let result = 0;
+  let shift = 0;
+  let cont = true;
+  while (cont) {
+    const digit = VLQ_CHARS.indexOf(str[ref.i++]);
+    cont = (digit & 32) !== 0;
+    result += (digit & 31) << shift;
+    shift += 5;
   }
+  const neg = (result & 1) === 1;
+  result >>= 1;
+  return neg ? -result : result;
+}
+
+function decodeSourceMapLines(mappings) {
+  const out = [];
+  let srcIdx = 0;
+  let srcLine = 0;
+  let srcCol = 0;
+  for (const line of mappings.split(";")) {
+    const segs = [];
+    let genCol = 0;
+    if (line.length > 0) {
+      for (const seg of line.split(",")) {
+        if (!seg) continue;
+        const ref = { i: 0 };
+        genCol += decodeVLQ(seg, ref);
+        if (ref.i < seg.length) {
+          srcIdx += decodeVLQ(seg, ref);
+          srcLine += decodeVLQ(seg, ref);
+          srcCol += decodeVLQ(seg, ref);
+          segs.push({ genCol, srcIdx, srcLine, srcCol });
+        }
+      }
+    }
+    out.push(segs);
+  }
+  return out;
+}
+
+/** Compose an outer transform map (generated -> mid) over an inner map (mid -> original). */
+export function composeSourceMaps(innerMap, outerMap) {
+  if (!innerMap) return outerMap;
+  if (!outerMap) return innerMap;
+  const innerLines = decodeSourceMapLines(innerMap.mappings);
+  const outerLines = decodeSourceMapLines(outerMap.mappings);
+  const findOrig = (midLine, midCol) => {
+    const segs = innerLines[midLine];
+    if (!segs || segs.length === 0) return null;
+    let best = segs[0];
+    for (const seg of segs) {
+      if (seg.genCol <= midCol) best = seg;
+      else break;
+    }
+    return { srcIdx: best.srcIdx, srcLine: best.srcLine, srcCol: Math.max(0, best.srcCol + (midCol - best.genCol)) };
+  };
+  let prevSrcIdx = 0;
+  let prevSrcLine = 0;
+  let prevSrcCol = 0;
+  const encodedLines = outerLines.map(segs => {
+    let prevGenCol = 0;
+    const encodedSegs = [];
+    for (const seg of segs) {
+      const orig = findOrig(seg.srcLine, seg.srcCol);
+      if (!orig) continue;
+      encodedSegs.push(
+        encodeVLQ(seg.genCol - prevGenCol) +
+        encodeVLQ(orig.srcIdx - prevSrcIdx) +
+        encodeVLQ(orig.srcLine - prevSrcLine) +
+        encodeVLQ(orig.srcCol - prevSrcCol),
+      );
+      prevGenCol = seg.genCol;
+      prevSrcIdx = orig.srcIdx;
+      prevSrcLine = orig.srcLine;
+      prevSrcCol = orig.srcCol;
+    }
+    return encodedSegs.join(",");
+  });
+  return {
+    version: 3,
+    file: outerMap.file ?? innerMap.file,
+    sources: innerMap.sources,
+    sourcesContent: innerMap.sourcesContent,
+    names: [],
+    mappings: encodedLines.join(";"),
+  };
+}
+
+function buildLineStarts(text) {
+  const starts = [0];
+  for (let i = 0; i < text.length; i++) {
+    if (text.charCodeAt(i) === 10) starts.push(i + 1);
+  }
+  return starts;
+}
+
+function offsetToLineCol(lineStarts, offset) {
+  let lo = 0;
+  let hi = lineStarts.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if (lineStarts[mid] <= offset) lo = mid;
+    else hi = mid - 1;
+  }
+  return { line: lo, col: offset - lineStarts[lo] };
+}
+
+function buildSpliceSourceMap(id, code, splices) {
+  const lineStarts = buildLineStarts(code);
+  const ordered = [...splices].sort((a, b) => a.start - b.start || a.end - b.end);
+  const lines = [[]];
+  let genLine = 0;
+  let genCol = 0;
+  let prevGenCol = 0;
+  let prevSrcLine = 0;
+  let prevSrcCol = 0;
+
+  const pushMapping = (srcLine, srcCol) => {
+    lines[genLine].push(
+      encodeVLQ(genCol - prevGenCol) +
+      encodeVLQ(0) +
+      encodeVLQ(srcLine - prevSrcLine) +
+      encodeVLQ(srcCol - prevSrcCol),
+    );
+    prevGenCol = genCol;
+    prevSrcLine = srcLine;
+    prevSrcCol = srcCol;
+  };
+
+  const newline = () => {
+    lines.push([]);
+    genLine++;
+    genCol = 0;
+    prevGenCol = 0;
+  };
+
+  const emitUnchanged = (fromOffset, toOffset) => {
+    if (toOffset <= fromOffset) return;
+    let pos = offsetToLineCol(lineStarts, fromOffset);
+    pushMapping(pos.line, pos.col);
+    let i = fromOffset;
+    while (i < toOffset) {
+      const nl = code.indexOf("\n", i);
+      if (nl === -1 || nl >= toOffset) {
+        genCol += toOffset - i;
+        break;
+      }
+      newline();
+      i = nl + 1;
+      if (i < toOffset) {
+        pos = offsetToLineCol(lineStarts, i);
+        pushMapping(pos.line, pos.col);
+      }
+    }
+  };
+
+  const emitInserted = (text, mapOffset = null) => {
+    if (!text) return;
+    if (mapOffset !== null) {
+      const pos = offsetToLineCol(lineStarts, mapOffset);
+      pushMapping(pos.line, pos.col);
+    }
+    let i = 0;
+    while (i < text.length) {
+      const nl = text.indexOf("\n", i);
+      if (nl === -1) {
+        genCol += text.length - i;
+        break;
+      }
+      newline();
+      i = nl + 1;
+    }
+  };
+
+  let cursor = 0;
+  for (const s of ordered) {
+    if (s.start < cursor) continue;
+    emitUnchanged(cursor, s.start);
+    emitInserted(s.text, s.mapSource ? s.start : null);
+    cursor = s.end;
+  }
+  emitUnchanged(cursor, code.length);
+
   return {
     version: 3,
     file: id,
     sources: [id],
-    sourcesContent: [original],
+    sourcesContent: [code],
     names: [],
-    mappings: mappings.join(";"),
+    mappings: lines.map(segs => segs.join(",")).join(";"),
   };
 }
 
@@ -316,53 +492,66 @@ export function convertDispatchClosures(code, id, options = {}) {
   const checkWorkerSafe = options.isWorkerSafe ?? defaultIsWorkerSafe;
   const strict = Boolean(options.strict);
   const runtimeSpecifier = options.runtimeSpecifier ?? "virtual:syncloudos/dispatch-sendable";
+  const closureIdPrefix = options.closureIdPrefix ?? id.replaceAll("\\", "/");
 
   const ast = parse(code);
-  const moduleBindings = new Map();
   const entries = getDefaultWorkerSafeEntries();
-
-  for (const stmt of ast.body) {
-    if (stmt.type === "ImportDeclaration") {
-      const source = stmt.source.value;
-      for (const spec of stmt.specifiers) {
-        const imported =
-          spec.type === "ImportDefaultSpecifier" ? "default"
-            : spec.type === "ImportNamespaceSpecifier" ? "*"
-              : spec.imported.name;
-        moduleBindings.set(spec.local.name, {
-          name: spec.local.name,
-          kind: "import",
-          specifier: source,
-          imported,
-          safe: isImportWorkerSafe(source, imported, checkWorkerSafe, entries),
-        });
-      }
-    } else if (stmt.type === "VariableDeclaration") {
-      for (const decl of stmt.declarations) {
-        const literalInit = stmt.kind === "const" && isSimpleLiteral(decl.init);
-        const shape = inferCloneShape(decl.init);
-        const initSource = literalInit ? code.slice(decl.init.start, decl.init.end) : null;
-        for (const name of collectPatternBindings(decl.id)) {
-          moduleBindings.set(name, { name, kind: stmt.kind, shape, literalInit, initSource, declNode: decl });
+  function collectModuleBindings(astBody, sourceCode) {
+    const bindings = new Map();
+    for (const stmt of astBody) {
+      if (stmt.type === "ImportDeclaration") {
+        const source = stmt.source.value;
+        for (const spec of stmt.specifiers) {
+          const imported =
+            spec.type === "ImportDefaultSpecifier" ? "default"
+              : spec.type === "ImportNamespaceSpecifier" ? "*"
+                : spec.imported.name;
+          bindings.set(spec.local.name, {
+            name: spec.local.name,
+            kind: "import",
+            specifier: source,
+            imported,
+            safe: isImportWorkerSafe(source, imported, checkWorkerSafe, entries),
+          });
         }
-      }
-    } else if (stmt.type === "FunctionDeclaration" && stmt.id) {
-      moduleBindings.set(stmt.id.name, { name: stmt.id.name, kind: "function", shape: "function", literalInit: false });
-    } else if (stmt.type === "ClassDeclaration" && stmt.id) {
-      moduleBindings.set(stmt.id.name, { name: stmt.id.name, kind: "class", shape: "class", literalInit: false });
-    } else if (stmt.type === "ExportNamedDeclaration" && stmt.declaration) {
-      const declNode = stmt.declaration;
-      if (declNode.type === "VariableDeclaration") {
-        for (const decl of declNode.declarations) {
-          const literalInit = declNode.kind === "const" && isSimpleLiteral(decl.init);
-          const initSource = literalInit ? code.slice(decl.init.start, decl.init.end) : null;
+      } else if (stmt.type === "VariableDeclaration") {
+        for (const decl of stmt.declarations) {
+          const literalInit = stmt.kind === "const" && isSimpleLiteral(decl.init);
+          const shape = inferCloneShape(decl.init);
+          const initSource = literalInit ? sourceCode.slice(decl.init.start, decl.init.end) : null;
           for (const name of collectPatternBindings(decl.id)) {
-            moduleBindings.set(name, { name, kind: declNode.kind, shape: inferCloneShape(decl.init), literalInit, initSource });
+            bindings.set(name, { name, kind: stmt.kind, shape, literalInit, initSource, declNode: decl });
           }
         }
+      } else if (stmt.type === "FunctionDeclaration" && stmt.id) {
+        bindings.set(stmt.id.name, { name: stmt.id.name, kind: "function", shape: "function", literalInit: false });
+      } else if (stmt.type === "ClassDeclaration" && stmt.id) {
+        bindings.set(stmt.id.name, { name: stmt.id.name, kind: "class", shape: "class", literalInit: false });
+      } else if (stmt.type === "ExportNamedDeclaration" && stmt.declaration) {
+        const declNode = stmt.declaration;
+        if (declNode.type === "VariableDeclaration") {
+          for (const decl of declNode.declarations) {
+            const literalInit = declNode.kind === "const" && isSimpleLiteral(decl.init);
+            const initSource = literalInit ? sourceCode.slice(decl.init.start, decl.init.end) : null;
+            for (const name of collectPatternBindings(decl.id)) {
+              bindings.set(name, { name, kind: declNode.kind, shape: inferCloneShape(decl.init), literalInit, initSource });
+            }
+          }
+        } else if (declNode.type === "FunctionDeclaration" && declNode.id) {
+          bindings.set(declNode.id.name, { name: declNode.id.name, kind: "function", shape: "function", literalInit: false });
+        } else if (declNode.type === "ClassDeclaration" && declNode.id) {
+          bindings.set(declNode.id.name, { name: declNode.id.name, kind: "class", shape: "class", literalInit: false });
+        }
+      } else if (stmt.type === "ExportDefaultDeclaration" && stmt.declaration?.id) {
+        const declNode = stmt.declaration;
+        const kind = declNode.type === "ClassDeclaration" ? "class" : "function";
+        bindings.set(declNode.id.name, { name: declNode.id.name, kind, shape: kind, literalInit: false });
       }
     }
+    return bindings;
   }
+
+  const moduleBindings = collectModuleBindings(ast.body, code);
 
   const closures = [];
   const diagnostics = [];
@@ -431,7 +620,7 @@ export function convertDispatchClosures(code, id, options = {}) {
 
   function analyzeCandidate(candidate, outerScopes) {
     const fn = candidate.fn;
-    const closureId = `${id}#${closureCounter++}`;
+    const closureId = `${closureIdPrefix}#${closureCounter++}`;
     const pos = lineColumnAt(code, fn.start);
 
     if (fn.async || fn.generator) {
@@ -673,11 +862,10 @@ export function convertDispatchClosures(code, id, options = {}) {
     const contArg = continuations.length
       ? `, [${continuations.map(c => c.hoistedCode).join(", ")}]`
       : "";
-    mainSplices.push({
-      start: fn.start,
-      end: fn.end,
-      text: `__dfxSendable(${originalSlice}, ${JSON.stringify(closureId)}, () => [${captures.join(", ")}]${contArg})`,
-    });
+    mainSplices.push(
+      { start: fn.start, end: fn.start, text: "__dfxSendable(", mapSource: true },
+      { start: fn.end, end: fn.end, text: `, ${JSON.stringify(closureId)}, () => [${captures.join(", ")}]${contArg})`, mapSource: false },
+    );
   }
 
   const scanScopes = [];
@@ -719,12 +907,113 @@ export function convertDispatchClosures(code, id, options = {}) {
   });
 
   const output = applySplices(code, mainSplices);
-  const map = buildLineSourceMap(id, code, output);
+  const map = buildSpliceSourceMap(id, code, mainSplices);
   return { code: output, map, closures, diagnostics };
 }
 
+/** Return unresolved global identifiers outside WORKER_SAFE_GLOBALS in an AST module. */
+export function findNonWorkerSafeGlobals(ast) {
+  const topNames = new Set();
+  const topHoisted = collectHoistedDeclarations(ast.body);
+  for (const h of topHoisted) topNames.add(h.name);
+  for (const stmt of ast.body) {
+    if (stmt.type === "ImportDeclaration") {
+      for (const spec of stmt.specifiers) topNames.add(spec.local.name);
+    } else if (stmt.type === "VariableDeclaration") {
+      for (const decl of stmt.declarations) for (const name of collectPatternBindings(decl.id)) topNames.add(name);
+    } else if ((stmt.type === "FunctionDeclaration" || stmt.type === "ClassDeclaration") && stmt.id) {
+      topNames.add(stmt.id.name);
+    } else if (stmt.type === "ExportNamedDeclaration" && stmt.declaration) {
+      const declNode = stmt.declaration;
+      if (declNode.type === "VariableDeclaration") {
+        for (const decl of declNode.declarations) for (const name of collectPatternBindings(decl.id)) topNames.add(name);
+      } else if (declNode.id) {
+        topNames.add(declNode.id.name);
+      }
+    } else if (stmt.type === "ExportDefaultDeclaration" && stmt.declaration?.id) {
+      topNames.add(stmt.declaration.id.name);
+    }
+  }
+
+  const scopes = [new Set(topNames)];
+  const unsafe = new Set();
+
+  const isBound = name => {
+    for (let i = scopes.length - 1; i >= 0; i--) {
+      if (scopes[i].has(name)) return true;
+    }
+    return false;
+  };
+
+  function enterNode(node, parent) {
+    const names = new Set();
+    if (isFunctionNode(node) || node.type === "FunctionDeclaration") {
+      if ((node.type === "FunctionExpression" || node.type === "FunctionDeclaration") && node.id) names.add(node.id.name);
+      for (const p of node.params) for (const n of collectPatternBindings(p)) names.add(n);
+      for (const h of collectHoistedDeclarations(node.body)) names.add(h.name);
+      for (const l of collectLexicalBlockDeclarations(node.body)) names.add(l.name);
+      names.add("arguments");
+      scopes.push(names);
+      return true;
+    }
+    if (node.type === "ClassExpression" || node.type === "ClassDeclaration") {
+      if (node.id) names.add(node.id.name);
+      if (names.size > 0) {
+        scopes.push(names);
+        return true;
+      }
+      return false;
+    }
+    if (node.type === "CatchClause" && node.param) {
+      for (const n of collectPatternBindings(node.param)) names.add(n);
+      scopes.push(names);
+      return true;
+    }
+    if (node.type === "ForStatement" || node.type === "ForInStatement" || node.type === "ForOfStatement") {
+      const decl = node.init?.type === "VariableDeclaration" ? node.init : node.left?.type === "VariableDeclaration" ? node.left : null;
+      if (decl && decl.kind !== "var") {
+        for (const item of decl.declarations) for (const n of collectPatternBindings(item.id)) names.add(n);
+      }
+      if (names.size > 0) {
+        scopes.push(names);
+        return true;
+      }
+      return false;
+    }
+    if (node.type === "BlockStatement" && !(parent && (isFunctionNode(parent) || parent.type === "FunctionDeclaration"))) {
+      for (const l of collectLexicalBlockDeclarations(node)) names.add(l.name);
+      if (names.size > 0) {
+        scopes.push(names);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function walk(node, parent) {
+    if (!node || typeof node !== "object") return;
+    const pushed = enterNode(node, parent);
+    if (node.type === "Identifier" && !isPropertyIdentifier(node, parent) && !isBindingIdentifier(node, parent)) {
+      const isParam = parent && (isFunctionNode(parent) || parent.type === "FunctionDeclaration") && parent.params.includes(node);
+      if (!isParam && !isBound(node.name) && !WORKER_SAFE_GLOBALS.has(node.name)) {
+        unsafe.add(node.name);
+      }
+    }
+    for (const key of Object.keys(node)) {
+      if (key === "start" || key === "end" || key === "type") continue;
+      const val = node[key];
+      if (Array.isArray(val)) for (const item of val) walk(item, node);
+      else if (val && typeof val.type === "string") walk(val, node);
+    }
+    if (pushed) scopes.pop();
+  }
+
+  walk(ast, null);
+  return [...unsafe];
+}
+
 function isImportWorkerSafe(specifier, importedName, checkWorkerSafe, entries) {
-  if (!checkWorkerSafe(specifier)) return false;
+  if (!checkWorkerSafe(specifier, [importedName])) return false;
   const blocked = entries.unsafeExports?.[specifier];
   if (blocked && blocked.includes(importedName)) return false;
   return true;

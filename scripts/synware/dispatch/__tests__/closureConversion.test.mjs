@@ -8,7 +8,7 @@ import { dirname, join } from "node:path";
 import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 import { parseAst } from "rollup/parseAst";
-import { convertDispatchClosures } from "../closureConversion.mjs";
+import { convertDispatchClosures, findNonWorkerSafeGlobals } from "../closureConversion.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const fixturesDir = join(here, "__fixtures__");
@@ -150,4 +150,92 @@ describe("DispatchFX closure conversion", () => {
     assert.equal(result.map.version, 3);
     assert.ok(Array.isArray(result.map.sources));
   });
+
+  it("uses closureIdPrefix so emitted code contains no absolute file path", () => {
+    const absId = "/Users/dev/project/src/SynWare/App.app/Contents/index.tsx";
+    const result = convertDispatchClosures(readFixture("accept-04-nested-main-async.js"), absId, {
+      parse: source => parseAst(source),
+      isWorkerSafe: specifier => workerSafeModules.has(specifier),
+      closureIdPrefix: "Contents/index.tsx",
+    });
+    assert.equal(result.closures.length, 1);
+    assert.equal(result.closures[0].closureId, "Contents/index.tsx#0");
+    assert.equal(result.closures[0].continuations[0].id, "Contents/index.tsx#0:c0");
+    assert.equal(result.code.includes(absId), false);
+  });
+
+  it("maps converted lines back to their exact original lines after import insertion", () => {
+    const source = [
+      'import { DFXQueue } from "@syndromatic/syncloudos/fx/dispatch";',
+      "",
+      "export function compute(x) {",
+      "  const marker = x + 1;",
+      "  DFXQueue.global().async(() => {",
+      "    const doubled = marker * 2;",
+      "    return doubled;",
+      "  });",
+      "}",
+    ].join("\n");
+    const result = convertDispatchClosures(source, "Contents/index.js", {
+      parse: src => parseAst(src),
+      isWorkerSafe: specifier => workerSafeModules.has(specifier),
+      closureIdPrefix: "Contents/index.js",
+    });
+    assert.ok(result.map);
+    const decoded = decodeFirstSegmentsPerLine(result.map.mappings);
+    const genLine = result.code.split("\n").findIndex(line => line.includes("const doubled = marker * 2;"));
+    const origLine = source.split("\n").findIndex(line => line.includes("const doubled = marker * 2;"));
+    assert.ok(genLine > origLine, "import insertion shifts later lines down");
+    assert.equal(decoded[genLine]?.srcLine, origLine);
+  });
+
+  it("findNonWorkerSafeGlobals flags DOM globals in relative helpers while allowing worker globals", () => {
+    const unsafeAst = parseAst("export function readTitle() { return document.title; }");
+    assert.deepEqual(findNonWorkerSafeGlobals(unsafeAst), ["document"]);
+
+    const safeAst = parseAst("import { x } from './other'; export class Helper { method(n) { return Math.round(n) + x; } }");
+    assert.deepEqual(findNonWorkerSafeGlobals(safeAst), []);
+  });
 });
+
+function decodeVLQValue(str, indexRef) {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  let result = 0;
+  let shift = 0;
+  let continuation = true;
+  while (continuation) {
+    const digit = chars.indexOf(str[indexRef.i++]);
+    continuation = (digit & 32) !== 0;
+    result += (digit & 31) << shift;
+    shift += 5;
+  }
+  const neg = (result & 1) === 1;
+  result >>= 1;
+  return neg ? -result : result;
+}
+
+function decodeFirstSegmentsPerLine(mappings) {
+  const out = [];
+  let srcLine = 0;
+  let srcCol = 0;
+  let srcIdx = 0;
+  for (const line of mappings.split(";")) {
+    let genCol = 0;
+    let first = null;
+    if (line.length > 0) {
+      for (const seg of line.split(",")) {
+        if (!seg) continue;
+        const ref = { i: 0 };
+        genCol += decodeVLQValue(seg, ref);
+        if (ref.i < seg.length) {
+          srcIdx += decodeVLQValue(seg, ref);
+          srcLine += decodeVLQValue(seg, ref);
+          srcCol += decodeVLQValue(seg, ref);
+          if (first === null) first = { genCol, srcIdx, srcLine, srcCol };
+        }
+      }
+    }
+    out.push(first);
+  }
+  return out;
+}

@@ -30,12 +30,14 @@ import {
   readdirSync,
   realpathSync,
   readFileSync,
+  statSync,
 } from "node:fs";
 import { createHash } from "node:crypto";
+import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
-import ts from "typescript";
+import { parseAst } from "rollup/parseAst";
 import { loadConfigFromFile } from "vite";
-import { convertDispatchClosures } from "./dispatch/closureConversion.mjs";
+import { composeSourceMaps, convertDispatchClosures, findNonWorkerSafeGlobals } from "./dispatch/closureConversion.mjs";
 import { captureFontDeclaration, fontDeclarationCSS } from "../../src/NSE/Typography/fontDeclaration.mjs";
 import { installedApplicationBuild } from "./pwa-plugin.mjs";
 import { bundlePaths } from "./bundle-paths.mjs";
@@ -685,22 +687,130 @@ export function __dfxContinuation(id, fn) {
 `;
 }
 
-function createWorkerSafeClassifier(importerFile) {
+const requireFromHere = createRequire(import.meta.url);
+let cachedEsbuild = null;
+function loadEsbuild() {
+  if (!cachedEsbuild) {
+    const viteRequire = createRequire(requireFromHere.resolve("vite"));
+    cachedEsbuild = viteRequire("esbuild");
+  }
+  return cachedEsbuild;
+}
+
+const scriptExtensions = [".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs"];
+const scriptExtensionSet = new Set(scriptExtensions);
+
+function esbuildLoaderFor(filePath) {
+  const ext = extname(filePath).toLowerCase();
+  if (ext === ".tsx") return "tsx";
+  if (ext === ".jsx") return "jsx";
+  if (ext === ".ts" || ext === ".mts" || ext === ".cts") return "ts";
+  return "js";
+}
+
+function isRegularFile(candidate) {
+  try {
+    return existsSync(candidate) && statSync(candidate).isFile();
+  } catch {
+    return false;
+  }
+}
+
+function resolveRelativeScriptModule(importerFile, specifier) {
+  const cleanSpec = specifier.split(/[?#]/u)[0];
+  const explicitExt = extname(cleanSpec).toLowerCase();
+  const base = resolve(dirname(importerFile), cleanSpec);
+  if (explicitExt) {
+    return scriptExtensionSet.has(explicitExt) && isRegularFile(base) ? base : null;
+  }
+  const candidates = [
+    ...scriptExtensions.map(ext => `${base}${ext}`),
+    ...scriptExtensions.map(ext => resolve(base, `index${ext}`)),
+  ];
+  return candidates.find(isRegularFile) ?? null;
+}
+
+function collectDynamicImportSpecifiers(ast) {
+  const specifiers = [];
+  let hasDynamicNonLiteral = false;
+  const walk = node => {
+    if (!node || typeof node !== "object") return;
+    if (node.type === "ImportExpression") {
+      if (node.source?.type === "Literal" && typeof node.source.value === "string") {
+        specifiers.push(node.source.value);
+      } else {
+        hasDynamicNonLiteral = true;
+      }
+    }
+    for (const key of Object.keys(node)) {
+      if (key === "start" || key === "end" || key === "type") continue;
+      const val = node[key];
+      if (Array.isArray(val)) for (const item of val) walk(item);
+      else if (val && typeof val.type === "string") walk(val);
+    }
+  };
+  walk(ast);
+  return { specifiers, hasDynamicNonLiteral };
+}
+
+/** @internal Exported for tests. Classify whether a module specifier and its transitive relative graph are worker-safe. */
+export function createWorkerSafeClassifier(importerFile) {
   const entries = readDispatchWorkerSafeEntries();
-  return function isWorkerSafe(specifier, _importedNames = [], visited = new Set()) {
-    if (entries.safeEntries.includes(specifier)) return true;
-    if (entries.safeSubpaths.some(prefix => specifier === prefix || specifier.startsWith(`${prefix}/`))) return true;
+  return function isWorkerSafe(specifier, importedNames = [], visited = new Set()) {
+    const blocked = entries.unsafeExports?.[specifier];
+    const hasBlockedImport = Array.isArray(blocked) && importedNames.some(name => blocked.includes(name));
+    if (entries.safeEntries.includes(specifier)) return !hasBlockedImport;
+    if (entries.safeSubpaths.some(prefix => specifier === prefix || specifier.startsWith(`${prefix}/`))) {
+      return !hasBlockedImport;
+    }
     if (specifier.startsWith("@syndromatic/syncloudos/")) return false;
     if (specifier.startsWith(".")) {
-      const base = resolve(dirname(importerFile), specifier);
-      const candidates = [base, `${base}.ts`, `${base}.tsx`, `${base}.js`, `${base}.mjs`, resolve(base, "index.ts"), resolve(base, "index.js")];
-      const target = candidates.find(candidate => existsSync(candidate));
-      if (!target || visited.has(target)) return true;
+      const target = resolveRelativeScriptModule(importerFile, specifier);
+      if (!target) return false;
+      if (visited.has(target)) return true;
       visited.add(target);
-      const text = readFileSync(target, "utf8");
-      const importRegex = /\bimport\s+(?:[^"']*?\sfrom\s+)?["']([^"']+)["']/gu;
-      for (const match of text.matchAll(importRegex)) {
-        if (!createWorkerSafeClassifier(target)(match[1], [], visited)) return false;
+      const raw = readFileSync(target, "utf8");
+      let stripped;
+      try {
+        stripped = loadEsbuild().transformSync(raw, {
+          sourcefile: target,
+          loader: esbuildLoaderFor(target),
+          format: "esm",
+          target: "es2022",
+          jsx: "automatic",
+          supported: { decorators: false },
+        }).code;
+      } catch {
+        return false;
+      }
+      let ast;
+      try {
+        ast = parseAst(stripped);
+      } catch {
+        return false;
+      }
+      if (findNonWorkerSafeGlobals(ast).length > 0) return false;
+
+      const classifyChild = createWorkerSafeClassifier(target);
+      for (const stmt of ast.body) {
+        if (stmt.type === "ImportDeclaration") {
+          const names = stmt.specifiers.map(spec =>
+            spec.type === "ImportDefaultSpecifier" ? "default"
+              : spec.type === "ImportNamespaceSpecifier" ? "*"
+                : (spec.imported?.name ?? spec.imported?.value),
+          );
+          if (!classifyChild(stmt.source.value, names, visited)) return false;
+        } else if (stmt.type === "ExportNamedDeclaration" && stmt.source) {
+          const names = stmt.specifiers.map(spec => spec.local?.name ?? spec.local?.value);
+          if (!classifyChild(stmt.source.value, names, visited)) return false;
+        } else if (stmt.type === "ExportAllDeclaration" && stmt.source) {
+          if (!classifyChild(stmt.source.value, ["*"], visited)) return false;
+        }
+      }
+      const dynamic = collectDynamicImportSpecifiers(ast);
+      if (dynamic.hasDynamicNonLiteral) return false;
+      for (const dep of dynamic.specifiers) {
+        if (!classifyChild(dep, ["*"], visited)) return false;
       }
       return true;
     }
@@ -822,6 +932,28 @@ export function synCloudOS(options) {
       })),
     }));
 
+  const transpileWithProjectEsbuild = (rawCode, cleanPath) => {
+    if (!/\.(?:[cm]?tsx?|jsx)$/u.test(cleanPath)) return { code: rawCode, map: null };
+    const esbuildConfig = typeof resolvedConfig?.esbuild === "object" && resolvedConfig.esbuild ? resolvedConfig.esbuild : {};
+    const jsxDev =
+      typeof esbuildConfig.jsxDev === "boolean"
+        ? esbuildConfig.jsxDev
+        : (resolvedConfig?.command === "serve" && resolvedConfig?.mode !== "production");
+    const out = loadEsbuild().transformSync(rawCode, {
+      sourcefile: cleanPath,
+      loader: esbuildLoaderFor(cleanPath),
+      format: "esm",
+      target: esbuildConfig.target ?? "esnext",
+      jsx: esbuildConfig.jsx === "preserve" ? "preserve" : "automatic",
+      jsxDev,
+      jsxImportSource: esbuildConfig.jsxImportSource ?? "react",
+      supported: { decorators: false, ...(esbuildConfig.supported ?? {}) },
+      sourcemap: true,
+      sourcesContent: true,
+    });
+    return { code: out.code, map: out.map ? JSON.parse(out.map) : null };
+  };
+
   const extractDispatchClosures = (pluginContext, rawCode, cleanId, owningBundle, emitWarnings = true) => {
     const frameworkSrcRoot = resolve(resolvedConfig?.root ?? process.cwd(), "src");
     const isFrameworkDispatchModule = !owningBundle && isPathInside(frameworkSrcRoot, cleanId);
@@ -831,20 +963,15 @@ export function synCloudOS(options) {
       extractedDispatchClosures.delete(cleanId);
       return null;
     }
-    const sourceForParse = /\.(?:[cm]?tsx?|jsx)$/u.test(cleanId)
-      ? ts.transpileModule(rawCode, {
-          fileName: cleanId,
-          compilerOptions: {
-            target: ts.ScriptTarget.ES2022,
-            module: ts.ModuleKind.ESNext,
-            jsx: ts.JsxEmit.ReactJSX,
-          },
-        }).outputText
-      : rawCode;
-    const result = convertDispatchClosures(sourceForParse, cleanId, {
+    const lowered = transpileWithProjectEsbuild(rawCode, cleanId);
+    const closureIdPrefix = owningBundle
+      ? slash(relative(dirname(dirname(owningBundle.entryPath)), cleanId))
+      : slash(relative(resolvedConfig?.root ?? process.cwd(), cleanId));
+    const result = convertDispatchClosures(lowered.code, cleanId, {
+      closureIdPrefix,
       parse: typeof pluginContext?.parse === "function" ? src => pluginContext.parse(src) : undefined,
       strict: Boolean(pluginOptions.dispatch?.strict),
-      isWorkerSafe: createWorkerSafeClassifier(cleanId, resolvedConfig?.root ?? process.cwd()),
+      isWorkerSafe: createWorkerSafeClassifier(cleanId),
       runtimeSpecifier: dispatchSendableModuleId,
     });
     if (emitWarnings) {
@@ -859,7 +986,10 @@ export function synCloudOS(options) {
         bundleIdentifier: owningBundle ? normalizeBundleIdentifier(owningBundle.bundleIdentifier) : null,
         closures: resolveDispatchClosureImports(result.closures, cleanId),
       });
-      return result;
+      return {
+        ...result,
+        map: lowered.map ? composeSourceMaps(lowered.map, result.map) : result.map,
+      };
     }
     extractedDispatchClosures.delete(cleanId);
     return null;
