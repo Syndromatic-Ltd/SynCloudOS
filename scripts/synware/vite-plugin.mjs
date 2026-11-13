@@ -626,6 +626,28 @@ export function sdkBuildFingerprint(directory) {
   return hash.digest("hex").slice(0, 16);
 }
 
+const publishedStylesheetPackage = "@syndromatic/syncloudos/";
+const publishedStylesheetPrefix = "\0virtual:syncloudos/stylesheet/";
+const publishedStylesheets = new Map();
+
+/**
+ * A published stylesheet is a list of imports of shared files, and two entries may list the same file.
+ * Returns the files it lists, or null when this is not such a stylesheet (the framework's own source tree has none).
+ */
+function publishedStylesheetFiles(id) {
+  if (!id.startsWith(publishedStylesheetPackage) || !id.endsWith("/styles.css")) return null;
+  if (publishedStylesheets.has(id)) return publishedStylesheets.get(id);
+  const file = fileURLToPath(new URL(`./${id.slice(publishedStylesheetPackage.length)}`, import.meta.url));
+  let files = null;
+  if (existsSync(file)) {
+    const lines = readFileSync(file, "utf8").split(/\r?\n/u).filter(line => line.trim());
+    const imports = lines.map(line => /^@import "([^"]+\.css)";$/u.exec(line.trim())?.[1]);
+    if (imports.length > 0 && imports.every(Boolean)) files = imports.map(specifier => slash(resolve(dirname(file), specifier)));
+  }
+  publishedStylesheets.set(id, files);
+  return files;
+}
+
 export function synCloudOS(options) {
   const pluginOptions = normaliseOptions(options);
   let resolvedConfig = { root: resolve(process.cwd()) };
@@ -766,6 +788,8 @@ export function synCloudOS(options) {
       if (mirroringRuntime) return mirroringRuntime;
       // Use the same canonical path and dependency version query as relative SDK imports.
       if (id === fxRuntimeModuleId) return this.resolve(displayPath(fxRuntimePath), importer, { skipSelf: true });
+      // Imported from script, a published stylesheet becomes imports of its files, so a file two entries share loads once.
+      if (importer && !/\.(?:css|scss|sass|less|styl)(?:\?|$)/u.test(importer) && publishedStylesheetFiles(id)) return `${publishedStylesheetPrefix}${id}.js`;
       if (id === themesModuleId || id.startsWith(themeStylePrefix)) return "\0" + id;
       if (id === browserModuleId) return resolvedBrowserModuleId;
       if (id === "@syndromatic/syncloudos/browser" && importer !== resolvedBrowserModuleId) return resolvedBrowserModuleId;
@@ -782,6 +806,9 @@ export function synCloudOS(options) {
     },
 
     load(id) {
+      if (id.startsWith(publishedStylesheetPrefix)) {
+        return publishedStylesheetFiles(id.slice(publishedStylesheetPrefix.length, -3)).map(file => `import ${JSON.stringify(file)};`).join("\n") + "\n";
+      }
       if (id === resolvedThemesModuleId) return themeModuleSource(themeBundles, selectedThemes, toViteFileImport, themeStylePrefix);
       if (id.startsWith("\0" + themeStylePrefix)) { const bundleIdentifier = id.slice(themeStylePrefix.length + 1, -4); const bundle = themeBundles.find(bundle => bundle.theme.bundleIdentifier === bundleIdentifier); if (!bundle) throw new Error("Unknown theme: " + bundleIdentifier); return themeStylesheet(bundle, toViteFileImport); }
       if (id.startsWith(`\0${appModulePrefix}`)) {
