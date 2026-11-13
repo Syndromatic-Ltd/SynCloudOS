@@ -21,7 +21,7 @@
 import "./audioHapticsPane.css";
 import { useSyncExternalStore } from "react";
 import { NSESwitch, NSEBox, NSESlider } from "../../../NSE/public/controls";
-import { NSEListItem } from "../../../NSE/Controls/Selection/NSEListItem";
+import { GroupedRow } from "../../../NSE/Controls/Selection/GroupedRow";
 import { useNSEFeedback } from "../../../NSE/hostComposition";
 import { useKernelSynCloudOS, useRuntimeSelector } from "../../../SynCloudOSReact";
 import type { RuntimeSnapshot } from "../../../SynCloudOS/SynCloudOS";
@@ -47,35 +47,35 @@ export function AudioHapticsPane() {
   );
   return <div className="nse-prefs-section">
     <NSEBox title={systemT("preferences.audio", "Audio")}>
-      <NSEListItem tapHighlight={false} trailing={<NSESwitch
+      <GroupedRow tapHighlight={false} trailing={<NSESwitch
         state={settings.soundEnabled ? "on" : "off"}
         onStateChange={(state) => runtime.settings.set("soundEnabled", (state === "on"))}
         thumbMaterial="metal"
         aria-label={systemT("preferences.audioEnabled", "Audio enabled")}
       />}>
         {systemT("preferences.audioEnabled", "Audio enabled")}
-      </NSEListItem>
-      <NSEListItem tapHighlight={false}>
+      </GroupedRow>
+      <GroupedRow tapHighlight={false}>
         {volumeSlider(systemT("preferences.masterVolume", "Master volume"), mixer.masterVolume, runtime.audio.setMasterVolume)}
-      </NSEListItem>
+      </GroupedRow>
     </NSEBox>
     {rows.length > 0 ? <NSEBox title={systemT("preferences.applications", "Applications")}>
       {rows.map((session) => {
         const app = apps[session.appId];
-        return <NSEListItem key={app.bundleIdentifier} tapHighlight={false} leading={<img className="nse-prefs-app-icon" src={app.icon.src} alt="" aria-hidden="true" />}>
+        return <GroupedRow key={app.bundleIdentifier} tapHighlight={false} leading={<img className="nse-prefs-app-icon" src={app.icon.src} alt="" aria-hidden="true" />}>
           {volumeSlider(app.displayName, session.volume, (value) => runtime.audio.setAppVolume(app.bundleIdentifier, value))}
-        </NSEListItem>;
+        </GroupedRow>;
       })}
     </NSEBox> : null}
     {supportsHaptics ? <NSEBox title={systemT("preferences.haptics", "Haptics")}>
-      <NSEListItem tapHighlight={false} trailing={<NSESwitch
+      <GroupedRow tapHighlight={false} trailing={<NSESwitch
         state={settings.vibrationEnabled ? "on" : "off"}
         onStateChange={(state) => runtime.settings.set("vibrationEnabled", (state === "on"))}
         thumbMaterial="metal"
         aria-label={systemT("preferences.hapticsEnabled", "Haptics enabled")}
       />}>
         {systemT("preferences.hapticsEnabled", "Haptics enabled")}
-      </NSEListItem>
+      </GroupedRow>
     </NSEBox> : null}
   </div>;
 }

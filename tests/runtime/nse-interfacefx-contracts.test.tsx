@@ -26,7 +26,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testi
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAppFrame } from "../../src/NSE/Windows/NSEAppFrame";
-import { NSEListItem } from "../../src/NSE/Controls/Selection/NSEListItem";
+import { GroupedRow } from "../../src/NSE/Controls/Selection/GroupedRow";
 import { NSEProgressIndicator } from "../../src/NSE/Progress";
 import { NSESlider } from "../../src/NSE/Controls/Values";
 import { NSESplitView } from "../../src/NSE/DataViews/Split";
@@ -47,9 +47,9 @@ afterEach(() => {
 });
 
 describe("NSE semantic contracts", () => {
-  it("forwards an NSEListItem ref to the focusable row element", () => {
+  it("forwards a GroupedRow ref to the focusable row element", () => {
     const rowRef = React.createRef<HTMLDivElement>();
-    render(<NSEListItem ref={rowRef} role="button" tabIndex={0}>Focusable row</NSEListItem>);
+    render(<GroupedRow ref={rowRef} role="button" tabIndex={0}>Focusable row</GroupedRow>);
 
     const row = screen.getByRole("button", { name: "Focusable row" });
     expect(rowRef.current).toBe(row);

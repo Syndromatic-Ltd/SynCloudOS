@@ -26,7 +26,7 @@ import type { HFXFeedbackRequest } from "../../Feedback";
 import type { NSESmoothSurfaceRequest } from "../../SmoothSurface";
 import { classes, getControlSmoothSurfaceProps, useNSEControlFeedback } from "../Core/nseControlsShared";
 
-export interface NSEListItemProps extends HTMLAttributes<HTMLDivElement> {
+export interface GroupedRowProps extends HTMLAttributes<HTMLDivElement> {
   selected?: boolean;
   isEnabled?: boolean;
   /** Show the held (#555→#888) press highlight on tap. Default true. */
@@ -38,7 +38,7 @@ export interface NSEListItemProps extends HTMLAttributes<HTMLDivElement> {
   smoothSurface?: NSESmoothSurfaceRequest;
 }
 
-export const NSEListItem = forwardRef<HTMLDivElement, NSEListItemProps>(function NSEListItem({
+export const GroupedRow = forwardRef<HTMLDivElement, GroupedRowProps>(function GroupedRow({
   selected = false,
   isEnabled = true,
   tapHighlight = true,
@@ -52,7 +52,7 @@ export const NSEListItem = forwardRef<HTMLDivElement, NSEListItemProps>(function
   onClick,
   style,
   ...props
-}: NSEListItemProps, ref) {
+}: GroupedRowProps, ref) {
   const disabled = !isEnabled;
   const { triggerNSEControlHaptic, triggerNSEControlHapticForEvent } = useNSEControlFeedback();
 

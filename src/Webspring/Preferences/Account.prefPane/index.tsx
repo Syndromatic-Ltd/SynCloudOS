@@ -19,7 +19,7 @@
  */
 
 import { NSEButton, NSEBox } from "../../../NSE/public/controls";
-import { NSEListItem } from "../../../NSE/Controls/Selection/NSEListItem";
+import { GroupedRow } from "../../../NSE/Controls/Selection/GroupedRow";
 import { definePreferencePane } from "../../../SynCloudOS/Preferences";
 import { useKernelSynCloudOS } from "../../../SynCloudOSReact";
 import { useSystemUIAccount } from "../systemAccount";
@@ -43,7 +43,7 @@ function AccountPane() {
   return (
     <div className="nse-prefs-section">
       <NSEBox>
-        <NSEListItem
+        <GroupedRow
           tapHighlight={false}
           trailing={account.signedIn ? (
             <NSEButton
@@ -64,7 +64,7 @@ function AccountPane() {
           )}
         >
           {label}
-        </NSEListItem>
+        </GroupedRow>
       </NSEBox>
     </div>
   );

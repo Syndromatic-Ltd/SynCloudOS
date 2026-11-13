@@ -1286,7 +1286,7 @@
    the pale Onyx selection gloss over this, which on a dark system menu reads as
    a light plate dropped into it.
 
-   The application-menu NSEListItem recipe below owns the distinct held
+   The application-menu GroupedRow recipe below owns the distinct held
    #555 → #888 ramp; generic NSE menu rows remain untouched. */
 :scope [data-nse-part="body"]:where([data-nse-role="application-menu"]>*)>*:not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):hover,
 :scope:is([data-nse-part="body"]:where([data-nse-role="application-menu"]>*))>*:not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):hover,

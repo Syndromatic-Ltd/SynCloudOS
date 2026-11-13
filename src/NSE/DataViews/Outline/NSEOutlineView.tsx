@@ -40,7 +40,7 @@ import { dataViewDisposedControllerState, warnDisposedDataViewController } from 
 import { useNSEVirtualiser } from "../Virtualisation";
 import { useNSEDataViewDragHost } from "../../Drag";
 import { NSEDivider } from "../../Controls/Selection/NSEDivider";
-import { NSEListItem } from "../../Controls/Selection/NSEListItem";
+import { GroupedRow } from "../../Controls/Selection/GroupedRow";
 import { NSETableCellView } from "../Table/NSETableCellView";
 import type { NSETableCellViewProps } from "../Core/dataViewTypes";
 import { useNSERubberBandScroll } from "../../Scroll";
@@ -430,7 +430,7 @@ export function NSEOutlineView<T, TId extends string | number>({
             ) : null}
           </div>
         ) : (
-          <NSEListItem
+          <GroupedRow
             {...rowProps(row, selected)}
             className="nse-outline-source-row"
             data-nse-part="row"
@@ -443,7 +443,7 @@ export function NSEOutlineView<T, TId extends string | number>({
           >
             {cell ? cell.primary : content}
             {rowStatus(row)}
-          </NSEListItem>
+          </GroupedRow>
         )}
         {children.length ? (
           <div className="nse-outline-children" data-collapsed={row.expanded ? "false" : "true"} inert={!row.expanded}>

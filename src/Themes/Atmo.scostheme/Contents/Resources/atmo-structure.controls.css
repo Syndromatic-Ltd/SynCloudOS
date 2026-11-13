@@ -911,7 +911,7 @@
   border-top-width: 0;
 }
 
-/* Hover is a soft wash. Held state comes from the NSEListItem recipe below. */
+/* Hover is a soft wash. Held state comes from the GroupedRow recipe below. */
 :where(:scope) [data-nse-part="body"]:where([data-nse-role="application-menu"]>*)>*:not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):hover,
 :where(:scope):is([data-nse-part="body"]:where([data-nse-role="application-menu"]>*))>*:not([data-nse-enabled="false"]:where(:not([data-nse-control="search-field"]))):hover {
   background-color: rgba(255, 255, 255, 0.16);

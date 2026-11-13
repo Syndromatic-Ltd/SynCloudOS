@@ -164,7 +164,7 @@
   outline-offset: -2px;
 }
 
-/* Preferences derives its row seams from the adjacent NSEListItem bevels,
+/* Preferences derives its row seams from the adjacent GroupedRow bevels,
    rather than placing a generic divider control between rows. Retaining the
    canonical top/bottom borders gives one crisp internal joined bevel, omits
    the outer first/last edges, and lets selected/held/focused row paint cover

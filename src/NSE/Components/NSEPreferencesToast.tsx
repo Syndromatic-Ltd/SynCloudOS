@@ -27,7 +27,7 @@ import {
   type NSEPreferencesPaneDirection,
   type NSEPreferencesTransitions,
 } from "./NSEPreferencesToast.transitions";
-import { NSEListItem } from "../Controls/Selection/NSEListItem";
+import { GroupedRow } from "../Controls/Selection/GroupedRow";
 import { NSEFocusScope, resolveNSEFocusReturnTarget } from "../Focus";
 import { NSEWindowController } from "../Application/NSEWindowController";
 import { NSETitlebarAccessoryViewController } from "../Application/NSETitlebarAccessoryViewController";
@@ -337,7 +337,7 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                   {active ? active.render() : (
                     <div data-nse-part="content" className="nse-prefs-list">
                       {panes.map((pane) => (
-                        <NSEListItem
+                        <GroupedRow
                           key={pane.id}
                           leading={pane.icon}
                           meta={pane.meta}
@@ -363,7 +363,7 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                           {/* Native keyboard activation bubbles through the same row action.
                               Accessories remain siblings, never children of this button. */}
                           <button type="button" data-nse-part="cell" className="nse-prefs-pane-link">{pane.label}</button>
-                        </NSEListItem>
+                        </GroupedRow>
                       ))}
                     </div>
                   )}
