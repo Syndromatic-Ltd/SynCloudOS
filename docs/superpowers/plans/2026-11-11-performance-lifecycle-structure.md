@@ -423,22 +423,22 @@ export function defineStateMachine<S extends string, E extends string>(definitio
 
   Machines whose state lives in `RuntimeStore` use `definition` and a pure `next(state, event): S | null` helper exported from the same file, so the store stays the single owner of the value.
 
-- [ ] **Step 1:** Failing tests: legal send moves and notifies once; illegal send returns `null`, keeps state, notifies nobody; `canEnter`; a listener that sends re-entrantly sees a consistent order; a definition naming an unknown target state throws at `defineStateMachine`.
-- [ ] **Step 2:** Run. Expected: FAIL.
-- [ ] **Step 3:** Implement (about 60 lines).
-- [ ] **Step 4:** Run; typecheck.
-- [ ] **Step 5:** Commit: `Statechart: add an explicit state-machine primitive`.
+- [x] **Step 1:** Failing tests: legal send moves and notifies once; illegal send returns `null`, keeps state, notifies nobody; `canEnter`; a listener that sends re-entrantly sees a consistent order; a definition naming an unknown target state throws at `defineStateMachine`.
+- [x] **Step 2:** Run. Expected: FAIL.
+- [x] **Step 3:** Implement (about 60 lines).
+- [x] **Step 4:** Run; typecheck.
+- [x] **Step 5:** Commit: `Statechart: add an explicit state-machine primitive`.
 
 ### Tasks 13–18: Convert one machine per commit
 
 Same five steps each: write the table test from the machine's current behaviour (walk every state × event; assert the transitions the existing code allows and no others, deriving the expected table by reading the writers and guards listed in Findings), run it red against a table with one deliberate hole, implement by replacing each writer with `send`/`next` and each scattered guard with `canSend` or a state read, run that area's existing suite unchanged, commit.
 
-- [ ] **Task 13: Application lifecycle.** Files: `AppManager/AppLifecycle.ts` (becomes the machine: states = `SynCloudOSAppLifecycleState`, events = `prepare`, `load`, `loaded`, `launch`, `activate`, `suspend`, `close`, `fail`, `disable`, `enable`), `Lifecycle/Lifecycle.ts` (`legalLifecycleState` reads the same table), `AppManager.ts` (`createRecord`'s readiness becomes a per-state lookup). Commit: `Lifecycle: one transition table for application state`.
-- [ ] **Task 14: Webspring launch phase.** Files: `WebspringState/WebspringState.ts`, new `WebspringState/launchPhaseMachine.ts` (events: `stage`, `launch`, `cover`, `beginReturn`, `finishReturn`, `reset`), and the guards in `LaunchServices.ts`, `WebspringChoreography.ts`, `Lifecycle.ts`, `Statechart.ts`. Commit: `Webspring: make the launch phase an explicit machine`.
-- [ ] **Task 15: MultiSwitch.** Files: `ApplicationState/`, `LaunchServices.ts:245–330`; states `idle`, `awaitingFirstFrame`, `awaitingPresentationFrame`, `settling`, with the three handles owned by the state they belong to. Commit: `LaunchServices: make MultiSwitch settlement an explicit machine`.
-- [ ] **Task 16: Launch request.** Files: `LaunchServices.ts`, new `LaunchServices/launchRequestMachine.ts`; `recordRequestHistory` is driven by the machine's listener, so history and state cannot disagree. Commit: `LaunchServices: make the launch request an explicit machine`.
-- [ ] **Task 17: Folder split and system startup.** Files: `Webspring/WebspringFolderSplitPresentation.tsx`, `RootRuntime/RootRuntimeManager.ts`, `Webspring/SystemStartupLayer.tsx` (one shared union). Baseline must pass (the folder presentation is the catalogue's timing-sensitive case; run it three times serially). Commit: `Webspring: explicit machines for folder presentation and startup`.
-- [ ] **Task 18: Page turn and drag session.** Files: `src/NSE/Page/`, `src/SynCloudOS/Drag/`. NSE may not import from `src/SynCloudOS`; check `scripts/quality/architecture-boundaries.json` first and, if the edge is forbidden, place the primitive's file where both layers may import it (propose the location in the commit body; do not add an allow-list entry). Commit: `NSE and Drag: explicit machines for page turns and drag sessions`.
+- [x] **Task 13: Application lifecycle.** Files: `AppManager/AppLifecycle.ts` (becomes the machine: states = `SynCloudOSAppLifecycleState`, events = `prepare`, `load`, `loaded`, `launch`, `activate`, `suspend`, `close`, `fail`, `disable`, `enable`), `Lifecycle/Lifecycle.ts` (`legalLifecycleState` reads the same table), `AppManager.ts` (`createRecord`'s readiness becomes a per-state lookup). Commit: `Lifecycle: one transition table for application state`.
+- [x] **Task 14: Webspring launch phase.** Files: `WebspringState/WebspringState.ts`, new `WebspringState/launchPhaseMachine.ts` (events: `stage`, `launch`, `cover`, `beginReturn`, `finishReturn`, `reset`), and the guards in `LaunchServices.ts`, `WebspringChoreography.ts`, `Lifecycle.ts`, `Statechart.ts`. Commit: `Webspring: make the launch phase an explicit machine`.
+- [x] **Task 15: MultiSwitch.** Files: `ApplicationState/`, `LaunchServices.ts:245–330`; states `idle`, `awaitingFirstFrame`, `awaitingPresentationFrame`, `settling`, with the three handles owned by the state they belong to. Commit: `LaunchServices: make MultiSwitch settlement an explicit machine`.
+- [x] **Task 16: Launch request.** Files: `LaunchServices.ts`, new `LaunchServices/launchRequestMachine.ts`; `recordRequestHistory` is driven by the machine's listener, so history and state cannot disagree. Commit: `LaunchServices: make the launch request an explicit machine`.
+- [x] **Task 17: Folder split and system startup.** Files: `Webspring/WebspringFolderSplitPresentation.tsx`, `RootRuntime/RootRuntimeManager.ts`, `Webspring/SystemStartupLayer.tsx` (one shared union). Baseline must pass (the folder presentation is the catalogue's timing-sensitive case; run it three times serially). Commit: `Webspring: explicit machines for folder presentation and startup`.
+- [x] **Task 18: Page turn and drag session.** Files: `src/NSE/Page/`, `src/SynCloudOS/Drag/`. NSE may not import from `src/SynCloudOS`; check `scripts/quality/architecture-boundaries.json` first and, if the edge is forbidden, place the primitive's file where both layers may import it (propose the location in the commit body; do not add an allow-list entry). Commit: `NSE and Drag: explicit machines for page turns and drag sessions`.
 
 After Task 18 add the guard test described under Done and commit it with Task 18.
 
@@ -466,8 +466,8 @@ Execute the approved DispatchFX plan Tasks 7, 8, 9, 10 and 12–15 as written th
 
 ### Task 19: Trace-led inventory
 
-- [ ] **Step 1:** Extend `scripts/perf/style-recalc.mjs` with `--cpu`: record a CPU profile per scenario and print main-thread tasks over 50 ms with their top self-time function and file.
-- [ ] **Step 2:** Add `scripts/perf/heap-cycles.mjs`: launch and quit About ten times, force GC through CDP `HeapProfiler.collectGarbage`, print `JSHeapUsedSize` after cycle 1 and cycle 10 and the count of detached DOM nodes.
+- [x] **Step 1:** Extend `scripts/perf/style-recalc.mjs` with `--cpu`: record a CPU profile per scenario and print main-thread tasks over 50 ms with their top self-time function and file.
+- [x] **Step 2:** Add `scripts/perf/heap-cycles.mjs`: launch and quit About ten times, force GC through CDP `HeapProfiler.collectGarbage`, print `JSHeapUsedSize` after cycle 1 and cycle 10 and the count of detached DOM nodes.
 - [ ] **Step 3:** Write the inventory table (scenario, task ms, function, file, verdict: render / move to DFX / fix in place) into `dispatch-benchmarks.md`. Each "move to DFX" row becomes a slice after Task 21 with its own before and after.
 - [ ] **Step 4:** Commit: `Perf: record main-thread and heap inventories`.
 
@@ -524,9 +524,9 @@ An `NSE`-prefixed declaration anywhere in `src/` must be one of:
 - Modify: `tests/runtime/appkit-counterparts.test.ts`, `docs/framework/appkit-counterparts.json` (add `internalCounterparts: {}` and the extended `internalDerivedSuffixes`), `scripts/developer-mcp/lookup.mjs` only if it must ignore the new section
 - Create: `scripts/quality/nse-internal-names.mjs` (prints every unmapped name with its declaring file and proposed disposition: `maps:<AppKit>`, `derived:<base>`, `rename:<new>`, `remove`), `docs/superpowers/evidence/2026-11-11-performance/nse-internal-names.json` (its output, reviewed by hand)
 
-- [ ] **Step 1:** Add the failing test with the current count pinned as a ceiling that may only fall: `expect(missing.length).toBeLessThanOrEqual(708)`; the final slice changes it to `toEqual([])`.
-- [ ] **Step 2:** Write the inventory script and commit its reviewed output. Rule 1 entries need a real AppKit name; when unsure whether AppKit has the type, treat it as rule 3. The existing test's counterpart pattern (`^(NS|AV|CA|CG|CT|WK|…)`) applies to the new section too.
-- [ ] **Step 3:** Commit: `Counterparts: cover internal NSE names and record the inventory`.
+- [x] **Step 1:** Add the failing test with the current count pinned as a ceiling that may only fall: `expect(missing.length).toBeLessThanOrEqual(708)`; the final slice changes it to `toEqual([])`.
+- [x] **Step 2:** Write the inventory script and commit its reviewed output. Rule 1 entries need a real AppKit name; when unsure whether AppKit has the type, treat it as rule 3. The existing test's counterpart pattern (`^(NS|AV|CA|CG|CT|WK|…)`) applies to the new section too.
+- [x] **Step 3:** Commit: `Counterparts: cover internal NSE names and record the inventory`.
 
 ### Task 23: Apply the dispositions, one family per commit
 
@@ -605,7 +605,7 @@ Webspring stays at `src/Webspring/`.
 
 ### Task 28: Whole-job verification and vendoring
 
-- [ ] **Step 1:** `tests/runtime/fx/dispatch-packed.test.ts:60` writes its receipt to `.artifacts/dispatchfx/task-6-installed.json` instead of the tracked evidence file (test first: assert the tracked file's bytes are unchanged after the test runs). Commit: `Tests: the packed Dispatch receipt is a build artefact`. Do not stage the evidence file.
+- [x] **Step 1:** `tests/runtime/fx/dispatch-packed.test.ts:60` writes its receipt to `.artifacts/dispatchfx/task-6-installed.json` instead of the tracked evidence file (test first: assert the tracked file's bytes are unchanged after the test runs). Commit: `Tests: the packed Dispatch receipt is a build artefact`. Do not stage the evidence file.
 - [ ] **Step 2:** typecheck, `typecheck:authoring`, `typecheck:contracts`, boundaries, full Vitest, packaging, `npm run sdk:build`, the `sdk:*` and `fx:installed` checks. Record counts.
 - [ ] **Step 3:** Baseline: 123 passed, with the snapshot directory's `git status` clean and `baseline-sha256.json` unmodified (`git diff --stat` shows neither).
 - [ ] **Step 4:** Vendor without `--allow-dirty`, per owner decision 2: clean detached checkout of `HEAD` in the scratchpad, `npm ci` there, `npm run framework:sync -- <that path>` from the site. The receipt must have no `dirty` key. Remove the temporary worktree with `git worktree remove`.
@@ -637,3 +637,11 @@ Add one line per stop: date, last commit, next unchecked box, anything a success
   - Do not edit framework source while the baseline spec runs: Vite reloads the page and the step fails with "Execution context was destroyed". Baseline with theme-nesting is 177 tests over three projects.
   - Shell heredocs in this environment halve backslashes; write files that contain `\:` with the Write tool.
 - 2026-11-12: Tasks 5, 6, 10 and 11 done at `3de36cac`. Next: Task 12. The site worktree's experimental vendoring is now of `3de36cac`. Packed-SDK tests fail with "SDK source changed" after any source edit until `npm run sdk:build` is rerun; that is not a regression.
+- 2026-11-13: Workstream D (Tasks 12–18) done at `9692e3a6`; Task 22, Task 19 steps 1–2 and Task 28 step 1 picked from a second agent's branch (`gemini/handoff-tasks`, worktree `.worktrees/gemini/fw`) at `9bf9dbc5`. Next: Task 19 step 3 (run the harnesses, write the inventory), then Task 23. Things a successor could not infer:
+  - `30752974` (the store ignoring a write of the held value) was reverted in `5909e60c`: it broke `controller-route-observation` (a route committed again at the same path must still notify). The hover churn is now stopped in `WebspringState.hoverApp`. The hover-sweep numbers in the evidence README were measured with the old fix and must be measured again.
+  - The state-machine primitive lives at `src/Foundation/internal/StateMachine.ts` (every layer may import Foundation). Task 16 departs from the plan: history records are always kept and an out-of-order step is marked with a note, not dropped. The launch-phase and page-turn tables record today's permissive behaviour.
+  - `tests/runtime/state-machines.test.ts` is the guard: a phase field written outside its machine file fails it.
+  - Task 22's inventory dispositions are mechanical (mostly "strip the NSE prefix"); they are not approved names. Classify by hand in Task 23.
+  - The second agent's DispatchFX commits (plan Tasks 7–10: `e52626dd`, `c0cf51b3`, `044efbde`, `914ae3fb`) are reviewed but not picked: 9 and 10 have eight requested fixes (absolute paths in closure IDs, unresolved imports treated as worker-safe, transpiled module replacing Vite's output, and others).
+  - `npm run fx:installed` fails at this head without any DispatchFX work (family list 13 against the manifest's 22). Not caused by this job; raise with the owner.
+  - Two unit tests time out when run alone and are not understood yet: `theme-bundles` "rejects too many resource files" (about 10 s against 5 s) and `document-asset-browser` (`page.goto` 30 s). Neither file nor its subject was edited in this job.
