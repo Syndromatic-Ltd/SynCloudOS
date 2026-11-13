@@ -49,6 +49,21 @@ export class NSEColourCommitCompensationError extends AggregateError {
   }
 }
 
+const deferColourPanelObservation = Symbol("nse.deferColourPanelObservation");
+const panelObservers = new WeakMap<NSEColourPanelController, () => () => void>();
+
+export function createReactOwnedColourPanelController(
+  service: NSEColourPanelServicePort,
+  options: NSEColourPanelControllerOptions,
+): NSEColourPanelController {
+  const deferred = { ...options, [deferColourPanelObservation]: true };
+  return new NSEColourPanelController(service, deferred);
+}
+
+export function observeReactOwnedColourPanelController(controller: NSEColourPanelController): (() => void) | undefined {
+  return panelObservers.get(controller)?.();
+}
+
 export class NSEColourPanelController {
   readonly #service: NSEColourPanelServicePort;
   readonly #pickers = new Map<string, NSEColourPicker>();
@@ -73,7 +88,12 @@ export class NSEColourPanelController {
       this.#service.setSwatches(palette.swatches);
       for (const recent of [...palette.recents].reverse()) this.#service.addRecent(recent);
     }
-    this.#lifetime.bind(() => this.dispose());
+    const observe = () => {
+      this.#lifetime.bind(() => this.dispose());
+      return () => this.#lifetime.unbind();
+    };
+    if (deferColourPanelObservation in options) panelObservers.set(this, observe);
+    else observe();
   }
 
   get isDisposed(): boolean { return this.#lifetime.isDisposed; }

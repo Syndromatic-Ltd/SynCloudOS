@@ -32,7 +32,7 @@ import { NSEOverlayProvider } from "../../../src/NSE/Overlays";
 import { SynCloudOSProvider } from "../../../src/SynCloudOSReact";
 import { createSynCloudOS } from "../../../src/SynCloudOS/Runtime/createSynCloudOS";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
-import { createTestRuntimeEnvironment } from "../../runtime/helpers";
+import { createTestRuntime, createTestRuntimeEnvironment } from "../../runtime/helpers";
 
 afterEach(cleanup);
 const wrapper = (child: React.ReactNode) => {
@@ -82,6 +82,28 @@ function HostedColourHarness({ runtime, eyeDropper, children }: { readonly runti
 }
 
 describe("colour controls", () => {
+  it("releases the panel owner subscription after a StrictMode unmount", async () => {
+    const runtime = createTestRuntime();
+    const owner = new AbortController();
+    const add = vi.spyOn(owner.signal, "addEventListener");
+    const remove = vi.spyOn(owner.signal, "removeEventListener");
+    const held = () => add.mock.calls.filter(([type, listener]) => type === "abort"
+      && !remove.mock.calls.some(([event, removed]) => event === type && removed === listener)).length;
+    try {
+      const before = held();
+      const view = render(<React.StrictMode>
+        <NSEColourPanelProvider service={runtime.colourPanel} options={{ ownerSignal: owner.signal }} />
+      </React.StrictMode>);
+      expect(held()).toBeGreaterThan(before);
+      view.unmount();
+      await Promise.resolve();
+      expect(held()).toBe(before);
+    } finally {
+      owner.abort();
+      await runtime.dispose("colour-panel-lifetime-test");
+    }
+  });
+
   it("renders actionable loading empty denied interrupted invalid and error panel states", () => {
     const runtime = createSynCloudOS({ id: "colour:semantic-states", environment: createTestRuntimeEnvironment() });
     const controller = new NSEColourPanelController(runtime);
