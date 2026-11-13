@@ -561,4 +561,140 @@ describe("DispatchFX runtime fault regressions", () => {
       continuations: [{ id: "contA", workerValues: ["valA"] }],
     });
   });
+
+  it("postMessage clone failure fails only the non-cloneable job once and never strands or replays valid siblings", async () => {
+    const workers: FakeWorker[] = [];
+    class CloneCheckingWorker extends FakeWorker {
+      override postMessage(message: PoolRequestMessage, transfer?: Transferable[]): void {
+        if (message.jobs.some(j => j.captures.some(c => typeof c === "function"))) {
+          throw new DOMException("Function object could not be cloned.", "DataCloneError");
+        }
+        super.postMessage(message, transfer);
+      }
+    }
+    const pool = new WorkerPool({
+      maxWorkers: 1,
+      createWorker: () => {
+        const fw = new CloneCheckingWorker();
+        workers.push(fw);
+        return fw;
+      },
+    });
+
+    const j1Res = vi.fn();
+    const j1Err = vi.fn();
+    const j2Res = vi.fn();
+    const j2Err = vi.fn();
+    const j3Res = vi.fn();
+    const j3Err = vi.fn();
+    const j4Res = vi.fn();
+    const j4Err = vi.fn();
+
+    pool.submit(makeJob({ closureId: "valid_1", captures: [1], onResult: j1Res, onError: j1Err }));
+    pool.submit(makeJob({ closureId: "bad_clone", captures: [() => {}], onResult: j2Res, onError: j2Err }));
+    pool.submit(makeJob({ closureId: "valid_3", captures: [3], onResult: j3Res, onError: j3Err }));
+
+    await Promise.resolve();
+
+    expect(j2Err).toHaveBeenCalledTimes(1);
+    expect(j2Res).not.toHaveBeenCalled();
+
+    const sentJobs = workers[0].posted.flatMap(p => p.message.jobs);
+    expect(sentJobs.map(j => j.closureId)).toEqual(["valid_1", "valid_3"]);
+
+    for (const j of sentJobs) workers[0].emitResult(j.jobId, [j.closureId]);
+    expect(j1Res).toHaveBeenCalledTimes(1);
+    expect(j1Err).not.toHaveBeenCalled();
+    expect(j3Res).toHaveBeenCalledTimes(1);
+    expect(j3Err).not.toHaveBeenCalled();
+
+    // Subsequent job must run alone with zero replay of valid_1, bad_clone, or valid_3.
+    const countBefore = workers[0].posted.length;
+    pool.submit(makeJob({ closureId: "after_valid_4", captures: [4], onResult: j4Res, onError: j4Err }));
+    await Promise.resolve();
+    const afterJobs = workers[0].posted.slice(countBefore).flatMap(p => p.message.jobs);
+    expect(afterJobs.map(j => j.closureId)).toEqual(["after_valid_4"]);
+    workers[0].emitResult(afterJobs[0].jobId, ["ok"]);
+    expect(j4Res).toHaveBeenCalledTimes(1);
+    expect(j1Res).toHaveBeenCalledTimes(1);
+    expect(j2Err).toHaveBeenCalledTimes(1);
+    expect(j3Res).toHaveBeenCalledTimes(1);
+  });
+
+  it("worker-constructor failure settles affected jobs once with no replay and does not strand sibling workers", async () => {
+    const workers: FakeWorker[] = [];
+    let spawnCount = 0;
+    let throwAlways = false;
+    const pool = new WorkerPool({
+      maxWorkers: 2,
+      createWorker: () => {
+        spawnCount++;
+        if (throwAlways || spawnCount === 2) {
+          throw new Error(`worker spawn failed #${spawnCount}`);
+        }
+        const fw = new FakeWorker();
+        workers.push(fw);
+        return fw;
+      },
+    });
+
+    const aRes = vi.fn();
+    const aErr = vi.fn();
+    const bRes = vi.fn();
+    const bErr = vi.fn();
+    const q1Res = vi.fn();
+    const q1Err = vi.fn();
+    const q2Res = vi.fn();
+    const q2Err = vi.fn();
+    const cRes = vi.fn();
+    const cErr = vi.fn();
+
+    // Part A: spawn #1 succeeds for jobA; spawn #2 fails for jobB -> jobA must still dispatch & settle, jobB settles once with error.
+    pool.submit(makeJob({ closureId: "sib_ok", onResult: aRes, onError: aErr }));
+    pool.submit(makeJob({ closureId: "sib_spawn_fail", onResult: bRes, onError: bErr }));
+    await Promise.resolve();
+
+    expect(workers).toHaveLength(1);
+    const postedA = workers[0].posted.flatMap(p => p.message.jobs);
+    expect(postedA.map(j => j.closureId)).toEqual(["sib_ok"]);
+    expect(bErr).toHaveBeenCalledTimes(1);
+    expect(bRes).not.toHaveBeenCalled();
+
+    workers[0].emitResult(postedA[0].jobId, ["a_done"]);
+    expect(aRes).toHaveBeenCalledTimes(1);
+    expect(aErr).not.toHaveBeenCalled();
+
+    // Part B: constructor fails permanently while two jobs wait; recovery later must not replay failed jobs.
+    const pool2Workers: FakeWorker[] = [];
+    throwAlways = true;
+    const pool2 = new WorkerPool({
+      maxWorkers: 2,
+      createWorker: () => {
+        if (throwAlways) throw new Error("ctor down");
+        const fw = new FakeWorker();
+        pool2Workers.push(fw);
+        return fw;
+      },
+    });
+
+    pool2.submit(makeJob({ closureId: "down_1", onResult: q1Res, onError: q1Err }));
+    pool2.submit(makeJob({ closureId: "down_2", onResult: q2Res, onError: q2Err }));
+    await Promise.resolve();
+
+    expect(q1Err).toHaveBeenCalledTimes(1);
+    expect(q2Err).toHaveBeenCalledTimes(1);
+    expect(q1Res).not.toHaveBeenCalled();
+    expect(q2Res).not.toHaveBeenCalled();
+
+    throwAlways = false;
+    pool2.submit(makeJob({ closureId: "recovered_3", onResult: cRes, onError: cErr }));
+    await Promise.resolve();
+    expect(pool2Workers).toHaveLength(1);
+    const postedC = pool2Workers[0].posted.flatMap(p => p.message.jobs);
+    expect(postedC.map(j => j.closureId)).toEqual(["recovered_3"]);
+    pool2Workers[0].emitResult(postedC[0].jobId, ["ok"]);
+    expect(cRes).toHaveBeenCalledTimes(1);
+    expect(q1Err).toHaveBeenCalledTimes(1);
+    expect(q2Err).toHaveBeenCalledTimes(1);
+  });
 });
