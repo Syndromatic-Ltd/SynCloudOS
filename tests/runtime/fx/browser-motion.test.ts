@@ -110,6 +110,20 @@ describe("BrowserMotionAdapter", () => {
     b();
     expect(remove).toHaveBeenCalledTimes(4);
   });
+  it("takes a delivered sample as authorisation where the browser offers a permission request it does not require", () => {
+    const f = browser(async () => "granted"),
+      samples: MFXRawMotionSample[] = [];
+    const stop = f.adapter.subscribe((sample) => samples.push(sample));
+    expect(f.adapter.capabilities.deviceMotion.state).toBe("permission-required");
+    f.emit("devicemotion", { acceleration: null, accelerationIncludingGravity: null, rotationRate: null });
+    expect(samples).toHaveLength(0);
+    f.emit("deviceorientation", { alpha: 10, beta: 20, gamma: 30 });
+    f.emit("devicemotion", { acceleration: null, accelerationIncludingGravity: { x: 0, y: 0, z: 9.8 }, rotationRate: null });
+    expect(samples.map((sample) => sample.attitude !== null)).toEqual([true, false]);
+    expect(f.adapter.capabilities.deviceMotion.state).toBe("available");
+    expect(f.adapter.capabilities.accelerometer.state).toBe("available");
+    stop();
+  });
   it("requests permission only explicitly within a user gesture, and reports denial", async () => {
     const permission = vi.fn(async () => "denied"),
       f = browser(permission);

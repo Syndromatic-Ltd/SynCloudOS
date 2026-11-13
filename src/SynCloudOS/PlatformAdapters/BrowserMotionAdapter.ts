@@ -235,7 +235,6 @@ class BrowserMotionHub {
     }
   }
   private motion = (event: DeviceMotionEvent): void => {
-    if (this.motionPermission !== "available") return;
     const a = event.acceleration,
       g = event.accelerationIncludingGravity,
       r = event.rotationRate;
@@ -254,6 +253,9 @@ class BrowserMotionHub {
             accelerationIncludingGravity.z - userAcceleration.z,
           )
         : null;
+    // The browser withholds events it has not authorised, so a real sample is the authorisation.
+    if (rotationRate || userAcceleration || accelerationIncludingGravity) this.motionPermission = "available";
+    else if (this.motionPermission !== "available") return;
     this.emit({
       timestamp: event.timeStamp / 1000,
       attitude: null,
@@ -264,9 +266,9 @@ class BrowserMotionHub {
     });
   };
   private orientation = (event: DeviceOrientationEvent): void => {
-    if (this.orientationPermission !== "available") return;
     const angles = vector(event.alpha, event.beta, event.gamma);
     if (!angles) return;
+    this.orientationPermission = "available";
     // Device Orientation intrinsic Z-X-Y; transform device axes into the current screen axes.
     const z = MFXAttitude.fromEuler(0, 0, angles.x * radians),
       x = MFXAttitude.fromEuler(angles.y * radians, 0, 0),
