@@ -21,6 +21,7 @@
 import {
   useEffect,
   useId,
+  useInsertionEffect,
   useMemo,
   useRef,
   useSyncExternalStore,
@@ -29,7 +30,7 @@ import {
 import { useNSEDeferredDisposal } from "../../interactionLifecycle";
 
 import { dataViewAnnouncement, dataViewEventIsComposing, dataViewIsBusy, dataViewIsDisabled } from "./dataViewAccessibility";
-import { NSEDataViewCoordinator } from "./NSEDataViewCoordinator";
+import { createReactOwnedDataViewCoordinator, observeReactOwnedDataViewCoordinator } from "./NSEDataViewCoordinator";
 import { encodeNSEDataViewKey } from "./dataViewIdentity";
 import type {
   NSEDataViewAdapter,
@@ -64,7 +65,8 @@ export function useNSEDataView<T, TId extends NSEDataViewKey>(
   // The memo reads the adapter of the render that creates the coordinator;
   // later adapters for the same controller arrive through updateAdapter.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const coordinator = useMemo(() => new NSEDataViewCoordinator(adapter, options), [adapter.controller]);
+  const coordinator = useMemo(() => createReactOwnedDataViewCoordinator(adapter, options), [adapter.controller]);
+  useInsertionEffect(() => observeReactOwnedDataViewCoordinator(coordinator), [coordinator]);
   coordinator.updateAdapter(adapter);
   coordinator.updateOptions(options);
   useNSEDeferredDisposal(coordinator);

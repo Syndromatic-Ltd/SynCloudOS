@@ -106,6 +106,25 @@ function CoreHarness({
 afterEach(cleanup);
 
 describe("structured data-view coordination", () => {
+  it("releases all controller subscriptions after a StrictMode unmount", async () => {
+    const { adapter, controller } = createAdapter();
+    const held = new Set<() => boolean>();
+    const subscribeChanges = controller.subscribeChanges.bind(controller);
+    const onDispose = controller.onDispose.bind(controller);
+    vi.spyOn(controller, "subscribeChanges").mockImplementation(listener => track(subscribeChanges(listener)));
+    vi.spyOn(controller, "onDispose").mockImplementation(listener => track(onDispose(listener)));
+    function track(release: () => boolean) {
+      held.add(release);
+      return () => { held.delete(release); return release(); };
+    }
+    const before = held.size;
+    const view = render(<React.StrictMode><CoreHarness adapter={adapter} /></React.StrictMode>);
+    expect(held.size).toBeGreaterThan(before);
+    view.unmount();
+    await Promise.resolve();
+    expect(held.size).toBe(before);
+  });
+
   it("projects controller content and publishes pointer and keyboard-range selection", () => {
     const { adapter } = createAdapter();
     const changes = vi.fn();
