@@ -158,6 +158,9 @@ function MountedAppPresentationBoundary({
  * the authoritative React ownership boundary and disposes synchronously on a
  * real unmount or identity replacement.
  */
+/** Subscribes a committed route session to the runtime's authority changes. */
+const routeAuthorityObservers = new WeakMap<object, () => void>();
+
 export function SynWareRuntimeMount({ runtime, app, responderId, windowControllerId, children }: SynWareRuntimeMountProps) {
   const branding = useHostSiteBranding();
   const fontCatalogue = useFontCatalogue(runtime);
@@ -300,6 +303,10 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
     let bundleIdentity = runtime.bundles.getBundle(app.bundleIdentifier);
     let bundleGeneration = 0;
     let session: ReturnType<typeof createAppRouteSession> | null = null;
+    // The session is made during render, and React may discard that render without any cleanup.
+    // So it only records its authority listener here; the runtime is subscribed once the session commits.
+    let authorityListener: (() => void) | null = null;
+    let releaseAuthority: (() => void) | null = null;
     const created = createAppRouteSession({
       graph: routeGraph,
       getBundleGeneration() {
@@ -313,15 +320,14 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
       getAuthorizationGeneration: runtime.routes.routeGraph.getAuthorizationGeneration,
       getSessionId: () => context.sessionId,
       subscribeAuthorityChanges(listener) {
-        const notify = () => {
+        authorityListener = () => {
           listener();
           if (session) trackRouteSessionCleanup(session);
         };
-        const identity = runtime.identity.session.subscribe(notify);
-        const updated = runtime.events.subscribe("bundle.update", notify);
-        const removed = runtime.events.subscribe("bundle.unregister", notify);
         return () => {
-          identity(); updated(); removed();
+          authorityListener = null;
+          releaseAuthority?.();
+          releaseAuthority = null;
         };
       },
       createLoaderServices: ({ signal }) => createRouteServiceScope(runtime, app.bundleIdentifier, signal, "mounted"),
@@ -331,6 +337,16 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
       clearTimeout: runtime.environment.clearTimeout,
     });
     session = created;
+    routeAuthorityObservers.set(created, () => {
+      const notify = authorityListener;
+      if (!notify || releaseAuthority) return;
+      const identity = runtime.identity.session.subscribe(notify);
+      const updated = runtime.events.subscribe("bundle.update", notify);
+      const removed = runtime.events.subscribe("bundle.unregister", notify);
+      releaseAuthority = () => { identity(); updated(); removed(); };
+      // Authority may have changed between the render and its commit.
+      notify();
+    });
     return created;
   }, [app.bundleIdentifier, context, mounted, routeGraph, runtime]);
   const routeParticipant = useMemo(() => routeSession && context ? createMountedRouteParticipant({
@@ -340,10 +356,13 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
     clearTimeout: runtime.environment.clearTimeout,
   }) : null, [routeSession, context, runtime]);
   // Session disposal follows actual ownership, not StrictMode layout probes.
-  useInsertionEffect(() => () => {
+  useInsertionEffect(() => {
     if (!routeSession) return;
-    routeSession.dispose();
-    trackRouteSessionCleanup(routeSession);
+    routeAuthorityObservers.get(routeSession)?.();
+    return () => {
+      routeSession.dispose();
+      trackRouteSessionCleanup(routeSession);
+    };
   }, [routeSession, runtime, app.bundleIdentifier]);
   useLayoutEffect(() => {
     if (!routeParticipant || !context) return;
