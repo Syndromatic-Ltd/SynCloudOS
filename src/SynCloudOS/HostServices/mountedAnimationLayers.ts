@@ -20,10 +20,16 @@
 
 import type { AnimationLayerHost, AnimationLayerKinds } from "./AppSDKHostServiceTypes";
 import { createMountedResourceScope, type MountedResourceAccounting } from "./mountedResourceScope";
+const layerObservers = new WeakMap<object, () => () => void>();
+
+export function observeMountedAnimationLayers(layers: object): (() => void) | undefined {
+  return layerObservers.get(layers)?.();
+}
+
 export function createMountedAnimationLayers(host: AnimationLayerHost | undefined, owner: AbortSignal, assertLive: () => void,
-  accounting?: MountedResourceAccounting) {
+  accounting?: MountedResourceAccounting, observeImmediately = true) {
   let rendererSerial = 0;
-  const scope = createMountedResourceScope(owner, 64);
+  const scope = createMountedResourceScope(owner, 64, observeImmediately);
   const bind = <K extends keyof AnimationLayerKinds>(kind: K, target: object, signal?: AbortSignal,
     options?: Parameters<AnimationLayerHost["bind"]>[3]): AnimationLayerKinds[K] => {
     assertLive();
@@ -35,7 +41,7 @@ export function createMountedAnimationLayers(host: AnimationLayerHost | undefine
       return layer;
     }, (layer) => layer.dispose());
   };
-  return Object.freeze({
+  const layers = Object.freeze({
     createRenderer: (target: object, options: Parameters<AnimationLayerHost["createRenderer"]>[1] = {}, signal?: AbortSignal) => {
       assertLive();
       if (!host) throw new DOMException("Animation layer rendering is unavailable.", "NotSupportedError");
@@ -75,4 +81,6 @@ export function createMountedAnimationLayers(host: AnimationLayerHost | undefine
     bindEmitterLayer: (target: object, signal?: AbortSignal) => bind("emitter", target, signal),
     bindTiledLayer: (target: object, signal?: AbortSignal) => bind("tiled", target, signal),
   });
+  if (!observeImmediately) layerObservers.set(layers, scope.observeOwner);
+  return layers;
 }

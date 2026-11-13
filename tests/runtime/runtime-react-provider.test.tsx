@@ -21,7 +21,7 @@
 // @vitest-environment jsdom
 
 import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createElement, StrictMode } from "react";
 import {
   SynCloudOSProvider,
@@ -58,6 +58,25 @@ describe("SynCloudOS React provider", () => {
     render(createElement(StrictMode, null, createElement(SynCloudOSProvider, { runtime }, createElement(Probe))));
     expect(runtime.store.getSnapshot().booted).toBe(false);
     expect(runtime.operations.inspectPending()).toEqual([]);
+  });
+
+  it("releases the shell animation lifetime after a StrictMode unmount", async () => {
+    const runtime = createTestRuntime({ id: "runtime:shell-animation-lifetime" });
+    const add = vi.spyOn(runtime.signal, "addEventListener");
+    const remove = vi.spyOn(runtime.signal, "removeEventListener");
+    const held = () => add.mock.calls.filter(([type, listener]) => type === "abort"
+      && !remove.mock.calls.some(([event, removed]) => event === type && removed === listener)).length;
+    try {
+      const before = held();
+      const view = render(createElement(StrictMode, null, createElement(SynCloudOSProvider, { runtime }, createElement(Probe))));
+      expect(held()).toBeGreaterThan(before);
+      view.unmount();
+      expect(held()).toBe(before);
+    } finally {
+      add.mockRestore();
+      remove.mockRestore();
+      await runtime.dispose("shell-animation-lifetime-test");
+    }
   });
 
   it("rejects every public runtime hook outside a provider", () => {

@@ -29,13 +29,14 @@ import { NSEViewControllerView } from "../SynCloudOS/AppHosting/runtimeEntry";
 import { registerNSEHapticFeedbackEngine } from "../NSE/hostComposition";
 import { NSEViewDrawingEnvironmentContext, type NSEViewDrawingEnvironment } from "../NSE/hostComposition";
 import {
+  useInsertionEffect,
   useLayoutEffect,
   useMemo,
   useSyncExternalStore,
   type PropsWithChildren,
 } from "react";
 import type { SynCloudOSRuntime } from "../SynCloudOS/SynCloudOS";
-import { createMountedAnimationLayers } from "../SynCloudOS/HostServices/mountedAnimationLayers";
+import { createMountedAnimationLayers, observeMountedAnimationLayers } from "../SynCloudOS/HostServices/mountedAnimationLayers";
 import type { AFXFrameScheduler } from "../FX/AnimationFX/AFXLayer";
 import { createRuntimeAnimationState, createScopedAnimationFrames } from "../SynCloudOS/AnimationFX/scopedAnimationFrames";
 import { ResponderHierarchyContext } from "./responderHierarchy";
@@ -74,7 +75,9 @@ export function SynCloudOSProvider({
     runtime.environment.animationLayers, runtime.signal,
     () => runtime.signal.throwIfAborted(),
     { owner: "syncloudos.system", register: participant => runtime.resources.register(participant) },
+    false,
   ), [runtime]);
+  useInsertionEffect(() => observeMountedAnimationLayers(shellLayers), [shellLayers]);
   const shellFrames = useMemo<AFXFrameScheduler | null>(() => {
     const frames = runtime.environment.animationFrames;
     if (!frames) return null;
