@@ -64,6 +64,8 @@ interface WorkerSlot {
   readonly worker: PoolWorkerLike;
   readonly inFlight: Map<number, InFlightJob>;
   lowQoSInFlight: number;
+  /** The session this worker last ran for; its chunks are still loaded there. */
+  lastSession: WeakRef<object> | null;
   tainted: boolean;
   terminated: boolean;
   idleTimer: ReturnType<typeof setTimeout> | null;
@@ -262,6 +264,7 @@ export class WorkerPool {
       worker,
       inFlight: new Map(),
       lowQoSInFlight: 0,
+      lastSession: null,
       tainted: false,
       terminated: false,
       idleTimer: null,
@@ -332,28 +335,25 @@ export class WorkerPool {
       return healthy.includes(serial) && admitsQoS(serial) ? serial : null;
     }
 
-    if (job.sessionKey) {
-      const session = prefers(slot => busy(slot)
-        && [...slot.inFlight.values()].every(entry => entry.job.sessionKey === job.sessionKey)
-        && stagedJobs(slot).every(entry => entry.job.sessionKey === job.sessionKey));
-      if (session) return session;
-    } else if (serial && healthy.includes(serial) && admitsQoS(serial)) {
-      return serial;
-    }
+    if (!job.sessionKey && serial && healthy.includes(serial) && admitsQoS(serial)) return serial;
 
-    const idle = prefers(slot => !busy(slot));
+    // A free core comes first: an idle worker this session warmed, then any idle worker, then a new one.
+    const idle = prefers(slot => !busy(slot) && slot.lastSession?.deref() === job.sessionKey)
+      ?? prefers(slot => !busy(slot));
     if (idle) return idle;
 
     if (lowQoS && this.#activeLowQoSWorkers(stagedLowSlots) >= this.#lowQoSCap()) return null;
     if (this.#slots.length < this.maxWorkers) return this.#spawnSlot();
 
-    let best: WorkerSlot | null = null;
-    for (const slot of healthy) {
-      if (!best || slot.inFlight.size + stagedJobs(slot).length < best.inFlight.size + stagedJobs(best).length) {
-        best = slot;
-      }
-    }
-    return best;
+    // The pool is full. Queue behind the session's own work before sharing a worker with another session.
+    const load = (slot: WorkerSlot) => slot.inFlight.size + stagedJobs(slot).length;
+    const ownsSlot = (slot: WorkerSlot) => Boolean(job.sessionKey)
+      && [...slot.inFlight.values()].every(entry => entry.job.sessionKey === job.sessionKey)
+      && stagedJobs(slot).every(entry => entry.job.sessionKey === job.sessionKey);
+    const leastLoaded = (slots: readonly WorkerSlot[]) => slots.reduce<WorkerSlot | null>(
+      (best, slot) => (!best || load(slot) < load(best) ? slot : best), null);
+    const candidates = healthy.filter(admitsQoS);
+    return leastLoaded(candidates.filter(ownsSlot)) ?? leastLoaded(candidates);
   }
 
   #dispatchBatch(slot: WorkerSlot, items: QueuedJob[]): void {
@@ -384,6 +384,7 @@ export class WorkerPool {
       const requests: PoolWorkRequest[] = [];
       for (const item of batch) {
         slot.inFlight.set(item.jobId, { entry: item, job: item.job, cancelled: false });
+        if (item.job.sessionKey && slot.lastSession?.deref() !== item.job.sessionKey) slot.lastSession = new WeakRef(item.job.sessionKey);
         if (isLowQoS(item.job.qos)) slot.lowQoSInFlight++;
         requests.push(toRequest(item));
       }
