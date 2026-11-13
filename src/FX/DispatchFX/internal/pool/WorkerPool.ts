@@ -42,11 +42,17 @@ function compareQoSValues(left: DFXQoS, right: DFXQoS): number {
 interface QueuedJob {
   readonly jobId: number;
   readonly job: PoolJob;
+  settled: boolean;
 }
 
 interface InFlightJob {
+  readonly entry: QueuedJob;
   readonly job: PoolJob;
   cancelled: boolean;
+}
+
+function toError(cause: unknown): Error {
+  return cause instanceof Error ? cause : new Error(String(cause));
 }
 
 interface WorkerSlot {
@@ -106,7 +112,7 @@ export class WorkerPool {
   }
 
   submit(job: PoolJob): void {
-    this.#queue.push({ jobId: this.#nextJobId++, job });
+    this.#queue.push({ jobId: this.#nextJobId++, job, settled: false });
     this.#scheduleFlush();
   }
 
@@ -182,6 +188,26 @@ export class WorkerPool {
     }, this.#cancelGraceMs);
   }
 
+  #settleError(queued: QueuedJob, error: Error): void {
+    if (queued.settled) return;
+    queued.settled = true;
+    try {
+      queued.job.onError(error);
+    } catch {
+      // Prevent one failing handler from stranding sibling jobs.
+    }
+  }
+
+  #settleResult(
+    queued: QueuedJob,
+    workerValues: unknown[],
+    continuations?: PoolResponseMessage & { type: "result" } extends { continuations?: infer C } ? C : never,
+  ): void {
+    if (queued.settled) return;
+    queued.settled = true;
+    queued.job.onResult(workerValues, continuations);
+  }
+
   #destroySlot(slot: WorkerSlot, abortError?: Error): void {
     if (slot.terminated) return;
     slot.terminated = true;
@@ -195,13 +221,14 @@ export class WorkerPool {
     try {
       slot.worker.terminate();
     } finally {
-      if (abortError) {
-        for (const entry of slot.inFlight.values()) {
-          if (!entry.cancelled) entry.job.onError(abortError);
-        }
-      }
+      const pendingEntries = [...slot.inFlight.values()];
       slot.inFlight.clear();
       slot.lowQoSInFlight = 0;
+      if (abortError) {
+        for (const entry of pendingEntries) {
+          if (!entry.cancelled) this.#settleError(entry.entry, abortError);
+        }
+      }
     }
   }
 
@@ -240,8 +267,8 @@ export class WorkerPool {
     }
 
     if (!entry.cancelled) {
-      if (data.type === "result") entry.job.onResult(data.workerValues, data.continuations);
-      else entry.job.onError(deserializeWorkerError(data.error));
+      if (data.type === "result") this.#settleResult(entry.entry, data.workerValues, data.continuations);
+      else this.#settleError(entry.entry, deserializeWorkerError(data.error));
     }
 
     if (slot.inFlight.size === 0) this.#armIdleTimer(slot);
@@ -294,50 +321,106 @@ export class WorkerPool {
     return best;
   }
 
+  #dispatchBatch(slot: WorkerSlot, items: QueuedJob[]): void {
+    if (slot.terminated) {
+      const err = new Error("DispatchFX worker terminated");
+      for (const item of items) this.#settleError(item, err);
+      return;
+    }
+
+    const toRequest = (item: QueuedJob): PoolWorkRequest => ({
+      jobId: item.jobId,
+      closureId: item.job.closureId,
+      chunkURL: item.job.chunkURL,
+      captures: item.job.captures,
+    });
+
+    const stageItems = (batch: QueuedJob[]): PoolWorkRequest[] => {
+      const requests: PoolWorkRequest[] = [];
+      for (const item of batch) {
+        slot.inFlight.set(item.jobId, { entry: item, job: item.job, cancelled: false });
+        if (isLowQoS(item.job.qos)) slot.lowQoSInFlight++;
+        requests.push(toRequest(item));
+      }
+      return requests;
+    };
+
+    const rollbackItems = (batch: QueuedJob[]): void => {
+      for (const item of batch) {
+        if (!slot.inFlight.delete(item.jobId)) continue;
+        if (isLowQoS(item.job.qos) && slot.lowQoSInFlight > 0) slot.lowQoSInFlight--;
+      }
+    };
+
+    this.#clearIdleTimer(slot);
+    const batchRequests = stageItems(items);
+    try {
+      // Captures are structured-cloned so caller buffers remain readable on the main thread.
+      slot.worker.postMessage({ type: "run-batch", jobs: batchRequests });
+      return;
+    } catch (batchError) {
+      rollbackItems(items);
+      if (items.length === 1) {
+        if (slot.inFlight.size === 0 && !slot.terminated) this.#armIdleTimer(slot);
+        this.#settleError(items[0], toError(batchError));
+        return;
+      }
+    }
+
+    // Isolate clone failures so valid siblings in the same batch still execute once without replay.
+    for (const item of items) {
+      if (slot.terminated) {
+        this.#settleError(item, new Error("DispatchFX worker terminated"));
+        continue;
+      }
+      this.#clearIdleTimer(slot);
+      const req = stageItems([item]);
+      try {
+        slot.worker.postMessage({ type: "run-batch", jobs: req });
+      } catch (itemError) {
+        rollbackItems([item]);
+        this.#settleError(item, toError(itemError));
+      }
+    }
+    if (slot.inFlight.size === 0 && !slot.terminated) this.#armIdleTimer(slot);
+  }
+
   #flush(): void {
     if (this.#queue.length === 0) return;
 
-    // Sort highest QoS first while preserving submission order within equal QoS.
-    this.#queue.sort((left, right) => compareQoSValues(right.job.qos, left.job.qos));
+    // Drain upfront so constructor/postMessage errors never leave failed jobs queued for replay.
+    const batch = this.#queue.splice(0, this.#queue.length);
+    batch.sort((left, right) => compareQoSValues(right.job.qos, left.job.qos));
 
     const staged = new Map<WorkerSlot, QueuedJob[]>();
     const stagedLowSlots = new Set<WorkerSlot>();
-    const remaining: QueuedJob[] = [];
+    const deferred: QueuedJob[] = [];
+    const spawnFailures: { item: QueuedJob; error: Error }[] = [];
 
-    for (const item of this.#queue) {
-      const slot = this.#selectSlot(item.job, staged, stagedLowSlots);
+    for (const item of batch) {
+      let slot: WorkerSlot | null;
+      try {
+        slot = this.#selectSlot(item.job, staged, stagedLowSlots);
+      } catch (error) {
+        spawnFailures.push({ item, error: toError(error) });
+        continue;
+      }
       if (!slot) {
-        remaining.push(item);
+        deferred.push(item);
         continue;
       }
       if (item.job.queueKey !== null) this.#serialAffinities.set(item.job.queueKey, slot);
       if (isLowQoS(item.job.qos)) stagedLowSlots.add(slot);
-      let batch = staged.get(slot);
-      if (!batch) {
-        batch = [];
-        staged.set(slot, batch);
+      let slotBatch = staged.get(slot);
+      if (!slotBatch) {
+        slotBatch = [];
+        staged.set(slot, slotBatch);
       }
-      batch.push(item);
+      slotBatch.push(item);
     }
 
-    this.#queue.length = 0;
-    this.#queue.push(...remaining);
-
-    for (const [slot, items] of staged) {
-      this.#clearIdleTimer(slot);
-      const requests: PoolWorkRequest[] = [];
-      for (const { jobId, job } of items) {
-        slot.inFlight.set(jobId, { job, cancelled: false });
-        if (isLowQoS(job.qos)) slot.lowQoSInFlight++;
-        requests.push({
-          jobId,
-          closureId: job.closureId,
-          chunkURL: job.chunkURL,
-          captures: job.captures,
-        });
-      }
-      // Captures are structured-cloned so caller buffers remain readable on the main thread.
-      slot.worker.postMessage({ type: "run-batch", jobs: requests });
-    }
+    if (deferred.length > 0) this.#queue.unshift(...deferred);
+    for (const { item, error } of spawnFailures) this.#settleError(item, error);
+    for (const [slot, items] of staged) this.#dispatchBatch(slot, items);
   }
 }
