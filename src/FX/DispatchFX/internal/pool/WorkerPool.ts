@@ -42,6 +42,7 @@ function compareQoSValues(left: DFXQoS, right: DFXQoS): number {
 interface QueuedJob {
   readonly jobId: number;
   readonly job: PoolJob;
+  cancelled: boolean;
   settled: boolean;
 }
 
@@ -53,6 +54,10 @@ interface InFlightJob {
 
 function toError(cause: unknown): Error {
   return cause instanceof Error ? cause : new Error(String(cause));
+}
+
+function isPreDeliveryCloneError(error: unknown): boolean {
+  return typeof error === "object" && error !== null && (error as { name?: unknown }).name === "DataCloneError";
 }
 
 interface WorkerSlot {
@@ -96,6 +101,7 @@ export class WorkerPool {
 
   readonly #slots: WorkerSlot[] = [];
   readonly #queue: QueuedJob[] = [];
+  readonly #staged = new Set<QueuedJob>();
   readonly #serialAffinities = new Map<object | string, WorkerSlot>();
   #nextJobId = 1;
   #flushScheduled = false;
@@ -112,7 +118,7 @@ export class WorkerPool {
   }
 
   submit(job: PoolJob): void {
-    this.#queue.push({ jobId: this.#nextJobId++, job, settled: false });
+    this.#queue.push({ jobId: this.#nextJobId++, job, cancelled: false, settled: false });
     this.#scheduleFlush();
   }
 
@@ -124,6 +130,10 @@ export class WorkerPool {
 
     for (let i = this.#queue.length - 1; i >= 0; i--) {
       if (matches(this.#queue[i].job)) this.#queue.splice(i, 1);
+    }
+
+    for (const item of this.#staged) {
+      if (matches(item.job)) item.cancelled = true;
     }
 
     for (const slot of [...this.#slots]) {
@@ -143,6 +153,8 @@ export class WorkerPool {
 
   terminateAll(): void {
     this.#queue.length = 0;
+    for (const item of this.#staged) item.cancelled = true;
+    this.#staged.clear();
     for (const slot of [...this.#slots]) {
       this.#destroySlot(slot, new Error("DispatchFX worker pool terminated"));
     }
@@ -270,14 +282,16 @@ export class WorkerPool {
       slot.tainted = false;
       this.#clearCancelTimer(slot);
     }
-
-    if (!entry.cancelled) {
-      if (data.type === "result") this.#settleResult(entry.entry, data.workerValues, data.continuations);
-      else this.#settleError(entry.entry, deserializeWorkerError(data.error));
-    }
-
     if (slot.inFlight.size === 0) this.#armIdleTimer(slot);
-    this.#flush();
+
+    try {
+      if (!entry.cancelled) {
+        if (data.type === "result") this.#settleResult(entry.entry, data.workerValues, data.continuations);
+        else this.#settleError(entry.entry, deserializeWorkerError(data.error));
+      }
+    } finally {
+      this.#flush();
+    }
   }
 
   #lowQoSCap(): number {
@@ -327,9 +341,19 @@ export class WorkerPool {
   }
 
   #dispatchBatch(slot: WorkerSlot, items: QueuedJob[]): void {
+    const activeItems = items.filter(item => {
+      if (!item.cancelled) return true;
+      this.#staged.delete(item);
+      return false;
+    });
+    if (activeItems.length === 0) return;
+
     if (slot.terminated) {
       const err = new Error("DispatchFX worker terminated");
-      for (const item of items) this.#settleError(item, err);
+      for (const item of activeItems) {
+        this.#staged.delete(item);
+        if (!item.cancelled) this.#settleError(item, err);
+      }
       return;
     }
 
@@ -358,22 +382,29 @@ export class WorkerPool {
     };
 
     this.#clearIdleTimer(slot);
-    const batchRequests = stageItems(items);
+    const batchRequests = stageItems(activeItems);
     try {
       // Captures are structured-cloned so caller buffers remain readable on the main thread.
       slot.worker.postMessage({ type: "run-batch", jobs: batchRequests });
+      for (const item of activeItems) this.#staged.delete(item);
       return;
     } catch (batchError) {
-      rollbackItems(items);
-      if (items.length === 1) {
+      rollbackItems(activeItems);
+      if (activeItems.length === 1 || !isPreDeliveryCloneError(batchError)) {
+        for (const item of activeItems) this.#staged.delete(item);
         if (slot.inFlight.size === 0 && !slot.terminated) this.#armIdleTimer(slot);
-        this.#settleError(items[0], toError(batchError));
+        const error = toError(batchError);
+        for (const item of activeItems) {
+          if (!item.cancelled) this.#settleError(item, error);
+        }
         return;
       }
     }
 
-    // Isolate clone failures so valid siblings in the same batch still execute once without replay.
-    for (const item of items) {
+    // Isolate pre-delivery DataCloneError failures while keeping remaining items visible to cancellation.
+    for (const item of activeItems) {
+      this.#staged.delete(item);
+      if (item.cancelled) continue;
       if (slot.terminated) {
         this.#settleError(item, new Error("DispatchFX worker terminated"));
         continue;
@@ -384,7 +415,8 @@ export class WorkerPool {
         slot.worker.postMessage({ type: "run-batch", jobs: req });
       } catch (itemError) {
         rollbackItems([item]);
-        this.#settleError(item, toError(itemError));
+        if (slot.inFlight.size === 0 && !slot.terminated) this.#armIdleTimer(slot);
+        if (!item.cancelled) this.#settleError(item, toError(itemError));
       }
     }
     if (slot.inFlight.size === 0 && !slot.terminated) this.#armIdleTimer(slot);
@@ -414,6 +446,7 @@ export class WorkerPool {
         deferred.push(item);
         continue;
       }
+      this.#staged.add(item);
       if (item.job.queueKey !== null) this.#serialAffinities.set(item.job.queueKey, slot);
       if (isLowQoS(item.job.qos)) stagedLowSlots.add(slot);
       let slotBatch = staged.get(slot);
@@ -425,7 +458,15 @@ export class WorkerPool {
     }
 
     if (deferred.length > 0) this.#queue.unshift(...deferred);
-    for (const { item, error } of spawnFailures) this.#settleError(item, error);
-    for (const [slot, items] of staged) this.#dispatchBatch(slot, items);
+    try {
+      for (const { item, error } of spawnFailures) {
+        if (!item.cancelled) this.#settleError(item, error);
+      }
+      for (const [slot, items] of staged) this.#dispatchBatch(slot, items);
+    } finally {
+      for (const items of staged.values()) {
+        for (const item of items) this.#staged.delete(item);
+      }
+    }
   }
 }

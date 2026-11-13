@@ -897,4 +897,119 @@ describe("DispatchFX runtime fault regressions", () => {
     await new Promise(resolve => setTimeout(resolve, 30));
     expect(barrierLog).toEqual(["barrier_original"]);
   });
+
+  it("cancelling a session from an error callback during individual reposting suppresses that session's next staged job", async () => {
+    const workers: FakeWorker[] = [];
+    class CloneCheckingWorker extends FakeWorker {
+      override postMessage(message: PoolRequestMessage, transfer?: Transferable[]): void {
+        if (message.jobs.some(j => j.captures.some(c => typeof c === "function"))) {
+          throw new DOMException("Function object could not be cloned.", "DataCloneError");
+        }
+        super.postMessage(message, transfer);
+      }
+    }
+    const pool = new WorkerPool({
+      maxWorkers: 1,
+      createWorker: () => {
+        const fw = new CloneCheckingWorker();
+        workers.push(fw);
+        return fw;
+      },
+    });
+
+    const sessionA = { id: "sessionA" };
+    const nextRes = vi.fn();
+    const nextErr = vi.fn();
+    pool.submit(
+      makeJob({
+        appId: "com.example.cancelstage",
+        sessionKey: sessionA,
+        closureId: "bad_first",
+        captures: [() => {}],
+        onError: () => {
+          pool.cancelApp(sessionA);
+        },
+      }),
+    );
+    pool.submit(
+      makeJob({
+        appId: "com.example.cancelstage",
+        sessionKey: sessionA,
+        closureId: "staged_second",
+        captures: [42],
+        onResult: nextRes,
+        onError: nextErr,
+      }),
+    );
+
+    await Promise.resolve();
+    const postedClosures = workers[0].posted.flatMap(p => p.message.jobs.map(j => j.closureId));
+    expect(postedClosures).toEqual([]);
+    expect(nextRes).not.toHaveBeenCalled();
+  });
+
+  it("throwing result callback still drains deferred low-QoS work and arms idle timer", async () => {
+    const workers: FakeWorker[] = [];
+    const pool = new WorkerPool({
+      cores: 2, // maxWorkers = 1, lowQoS cap = 1
+      idleTimeoutMs: 500,
+      createWorker: () => {
+        const fw = new FakeWorker();
+        workers.push(fw);
+        return fw;
+      },
+    });
+
+    const deferredRes = vi.fn();
+    pool.submit(
+      makeJob({
+        closureId: "low_throws_in_result",
+        qos: DFXQoS.background,
+        onResult: () => {
+          throw new Error("result callback exploded");
+        },
+      }),
+    );
+    pool.submit(makeJob({ closureId: "low_deferred", qos: DFXQoS.background, onResult: deferredRes }));
+
+    await Promise.resolve();
+    expect(workers[0].posted).toHaveLength(1);
+    const firstJobId = workers[0].posted[0].message.jobs[0].jobId;
+
+    expect(() => workers[0].emitResult(firstJobId, ["v1"])).toThrow("result callback exploded");
+
+    // Deferred job must still have been drained in finally despite the throwing onResult callback.
+    expect(workers[0].posted).toHaveLength(2);
+    const secondJobId = workers[0].posted[1].message.jobs[0].jobId;
+    workers[0].emitResult(secondJobId, ["v2"]);
+    expect(deferredRes).toHaveBeenCalledWith(["v2"], undefined);
+  });
+
+  it("non-clone synchronous postMessage throw fails the batch once without individual retry", async () => {
+    const workers: FakeWorker[] = [];
+    class UnknownThrowWorker extends FakeWorker {
+      override postMessage(_message: PoolRequestMessage): void {
+        throw new Error("postMessage failed after delivery");
+      }
+    }
+    const pool = new WorkerPool({
+      maxWorkers: 1,
+      createWorker: () => {
+        const fw = new UnknownThrowWorker();
+        workers.push(fw);
+        return fw;
+      },
+    });
+
+    const postSpy = vi.spyOn(UnknownThrowWorker.prototype, "postMessage");
+    const err1 = vi.fn();
+    const err2 = vi.fn();
+    pool.submit(makeJob({ closureId: "job_1", onError: err1 }));
+    pool.submit(makeJob({ closureId: "job_2", onError: err2 }));
+
+    await Promise.resolve();
+    expect(postSpy).toHaveBeenCalledTimes(1);
+    expect(err1).toHaveBeenCalledTimes(1);
+    expect(err2).toHaveBeenCalledTimes(1);
+  });
 });
