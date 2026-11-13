@@ -6,14 +6,15 @@ import { execFileSync } from "node:child_process";
 import { createServer as createHttpServer } from "node:http";
 import { createServer as createNetServer } from "node:net";
 import { extname, join, resolve } from "node:path";
-import { mkdtempSync, mkdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { pathToFileURL } from "node:url";
+import react from "@vitejs/plugin-react";
 import { chromium } from "playwright";
 import { build, createServer as createViteServer } from "vite";
 import { expect, it, vi } from "vitest";
 import { createInstalledConsumer } from "../../../scripts/synware/installed-consumer.mjs";
-import { synCloudOS } from "../../../scripts/synware/vite-plugin.mjs";
+import { createWorkerSafeClassifier, synCloudOS } from "../../../scripts/synware/vite-plugin.mjs";
 import { synWarePackageName, synWareSdkEntries } from "../../../scripts/synware/sdk-entries.mjs";
 
 const MIME_TYPES: Record<string, string> = {
@@ -26,11 +27,9 @@ const MIME_TYPES: Record<string, string> = {
 
 function sdkResolveAliases(repoRoot: string) {
   return [
-    { find: "react/jsx-dev-runtime", replacement: resolve(repoRoot, "node_modules/react/jsx-dev-runtime.js") },
-    { find: "react/jsx-runtime", replacement: resolve(repoRoot, "node_modules/react/jsx-runtime.js") },
-    { find: "react-dom/client", replacement: resolve(repoRoot, "node_modules/react-dom/client.js") },
-    { find: "react-dom", replacement: resolve(repoRoot, "node_modules/react-dom/index.js") },
-    { find: "react", replacement: resolve(repoRoot, "node_modules/react/index.js") },
+    { find: /^react-dom\/client$/, replacement: resolve(repoRoot, "node_modules/react-dom/client.js") },
+    { find: /^react-dom$/, replacement: resolve(repoRoot, "node_modules/react-dom/index.js") },
+    { find: /^react$/, replacement: resolve(repoRoot, "node_modules/react/index.js") },
   ];
 }
 
@@ -41,6 +40,8 @@ function localSdkFallbackPlugin(repoRoot: string) {
       resolve(repoRoot, target),
     ]),
     ["@syndromatic/syncloudos/nse/styles.css", resolve(repoRoot, "src/NSE/public/styles.css")],
+    ["react/jsx-dev-runtime", resolve(repoRoot, "node_modules/react/jsx-dev-runtime.js")],
+    ["react/jsx-runtime", resolve(repoRoot, "node_modules/react/jsx-runtime.js")],
   ]);
   return {
     name: "local-sdk-fallback",
@@ -443,3 +444,197 @@ it("packed consumer runs sendable closures on the worker pool in Chromium", asyn
     await new Promise<void>(resolveClose => distServer.close(() => resolveClose()));
   }
 }, 120_000);
+
+function decodeVLQValue(str: string, indexRef: { i: number }): number {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  let result = 0;
+  let shift = 0;
+  let cont = true;
+  while (cont) {
+    const digit = chars.indexOf(str[indexRef.i++]);
+    cont = (digit & 32) !== 0;
+    result += (digit & 31) << shift;
+    shift += 5;
+  }
+  const neg = (result & 1) === 1;
+  result >>= 1;
+  return neg ? -result : result;
+}
+
+function findMappedSourceLine(
+  map: { sources: string[]; mappings: string },
+  genLineIndex: number,
+): { source: string; line: number } | null {
+  let srcIdx = 0;
+  let srcLine = 0;
+  let srcCol = 0;
+  const lines = map.mappings.split(";");
+  for (let l = 0; l < lines.length; l++) {
+    let genCol = 0;
+    let firstOnLine: { source: string; line: number } | null = null;
+    for (const seg of lines[l].split(",")) {
+      if (!seg) continue;
+      const ref = { i: 0 };
+      genCol += decodeVLQValue(seg, ref);
+      if (ref.i < seg.length) {
+        srcIdx += decodeVLQValue(seg, ref);
+        srcLine += decodeVLQValue(seg, ref);
+        srcCol += decodeVLQValue(seg, ref);
+        if (!firstOnLine) firstOnLine = { source: map.sources[srcIdx], line: srcLine };
+      }
+    }
+    if (l === genLineIndex) return firstOnLine;
+  }
+  return null;
+}
+
+it("builds reproducible relative closure IDs, rejects unsafe transitive helpers, and preserves JSX hook-mirroring, decorators, and source maps", async () => {
+  const repoRoot = realpathSync.native(process.cwd());
+  const root = realpathSync.native(mkdtempSync(join(tmpdir(), "dfx-repro-safety-")));
+  const warnings: string[] = [];
+  const warnSpy = vi.spyOn(console, "warn").mockImplementation((...args) => warnings.push(args.map(String).join(" ")));
+
+  try {
+    const appDir = join(root, "src/SynWare/SafeProbe.app/Contents");
+    mkdirSync(appDir, { recursive: true });
+    writeFileSync(join(root, "index.html"), `<!doctype html><html><body><script type="module" src="/src/main.ts"></script></body></html>\n`);
+    writeFileSync(join(appDir, "Info.ts"), `export default { bundleIdentifier: "com.example.safe-probe", displayName: "SafeProbe", version: "1.0.0", routes: [{ path: "/safe", primary: true }] };\n`);
+    writeFileSync(join(appDir, "styles.css"), `.box { color: red; }\n`);
+    writeFileSync(join(appDir, "domHelper.ts"), `export function readDomTitle(): string { return typeof document !== "undefined" ? document.title : "missing"; }\n`);
+    writeFileSync(join(appDir, "barrel.ts"), `export { readDomTitle } from "./domHelper";\n`);
+    writeFileSync(join(appDir, "pureHelper.ts"), `export function scaleValue(n: number): number { return n * 7; }\n`);
+
+    const appSource = [
+      `import { NSEApplication } from "@syndromatic/syncloudos";`,
+      `import { DFXQoSClass, DFXQueue } from "@syndromatic/syncloudos/fx/dispatch";`,
+      `import { readDomTitle } from "./domHelper";`,
+      `import { readDomTitle as readBarrelTitle } from "./barrel";`,
+      `import { scaleValue } from "./pureHelper";`,
+      `import "./styles.css";`,
+      `const trackLog: string[] = [];`,
+      `function track(_target: unknown, context: { name: string | symbol }) { trackLog.push(String(context.name)); }`,
+      `export default class SafeProbe extends NSEApplication {`,
+      `  @track accessor badge = "ok";`,
+      `}`,
+      `export function ProbeView() { return <div data-nse-hook="title">ok</div>; }`,
+      `export function runSafe(input: number): Promise<{ onWorker: boolean; val: number; tracked: string[] }> {`,
+      `  return new Promise(res => {`,
+      `    DFXQueue.global(DFXQoSClass.userInitiated).async(() => {`,
+      `      const val = scaleValue(input);`,
+      `      const onWorker = typeof (globalThis as { window?: unknown }).window === "undefined";`,
+      `      DFXQueue.main.async(() => res({ onWorker, val, tracked: trackLog }));`,
+      `    });`,
+      `  });`,
+      `}`,
+      `export function runUnsafeHelpers(): Promise<{ directTitle: string; barrelTitle: string }> {`,
+      `  return new Promise(res => {`,
+      `    DFXQueue.global().async(() => {`,
+      `      const directTitle = readDomTitle();`,
+      `      DFXQueue.main.async(() => res({ directTitle, barrelTitle: readBarrelTitle() }));`,
+      `    });`,
+      `  });`,
+      `}`,
+    ].join("\n");
+    writeFileSync(join(appDir, "index.tsx"), appSource);
+
+    // Verify classifier directly: unresolved relative, non-script asset, DOM helper, and export-from barrel are rejected; pure helper passes.
+    const classify = createWorkerSafeClassifier(join(appDir, "index.tsx"));
+    expect(classify("./missing")).toBe(false);
+    expect(classify("./styles.css")).toBe(false);
+    expect(classify("./domHelper")).toBe(false);
+    expect(classify("./barrel")).toBe(false);
+    expect(classify("./pureHelper")).toBe(true);
+
+    writeFileSync(
+      join(root, "src/main.ts"),
+      `import { createSynWareTestHost } from "@syndromatic/syncloudos/sdk/testing";
+import SafeProbe, { ProbeView, runSafe, runUnsafeHelpers } from "./SynWare/SafeProbe.app/Contents/index";
+import info from "./SynWare/SafeProbe.app/Contents/Info";
+const host = createSynWareTestHost({ application: SafeProbe, manifest: { schemaVersion: 1, ...info }, document });
+await host.render();
+(globalThis as Record<string, unknown>).__safeProbe = { ProbeView, runSafe, runUnsafeHelpers };
+`,
+    );
+
+    await build({
+      configFile: false,
+      root,
+      mode: "production",
+      logLevel: "silent",
+      esbuild: { jsxDev: false },
+      plugins: [synCloudOS({ webspringEntry: false }), localSdkFallbackPlugin(repoRoot)],
+      resolve: { alias: sdkResolveAliases(repoRoot) },
+      build: { outDir: "dist", minify: false, sourcemap: true },
+    });
+    warnSpy.mockRestore();
+
+    // Warnings should reject closures importing domHelper (or missing module in unit check).
+    expect(warnings.some(w => w.includes("./domHelper") || w.includes("not worker-safe")), JSON.stringify(warnings)).toBe(true);
+
+    const assetsDir = join(root, "dist/assets");
+    const assetFiles = readdirSync(assetsDir);
+    const jsAssets = assetFiles.filter(f => f.endsWith(".js"));
+    const rootForward = root.replaceAll("\\", "/");
+    const repoForward = repoRoot.replaceAll("\\", "/");
+    for (const file of jsAssets) {
+      const code = readFileSync(join(assetsDir, file), "utf8");
+      const snippet = (needle: string) => {
+        const i = code.indexOf(needle);
+        return i < 0 ? "" : code.slice(Math.max(0, i - 40), i + needle.length + 60);
+      };
+      expect(code.includes(root), `${file} contains root: ${snippet(root)}`).toBe(false);
+      expect(code.includes(rootForward), `${file} contains rootForward: ${snippet(rootForward)}`).toBe(false);
+      expect(code.includes(repoRoot), `${file} contains repoRoot: ${snippet(repoRoot)}`).toBe(false);
+      expect(code.includes(repoForward), `${file} contains repoForward: ${snippet(repoForward)}`).toBe(false);
+    }
+
+    // Hook-mirroring preserved (react/jsx-runtime was intercepted, not bypassed by ts.transpileModule)
+    const combinedJs = jsAssets.map(f => readFileSync(join(assetsDir, f), "utf8")).join("\n");
+    expect(combinedJs.includes("Contents/index.tsx#0")).toBe(true);
+    expect(combinedJs.includes("mirrorProps")).toBe(true);
+
+    // Check source map resolves the closure statement line back to original .tsx line index (15 = `const val = scaleValue(input);`)
+    const expectedOrigLine = appSource.split("\n").findIndex(l => l.includes("const val = scaleValue(input);"));
+    let resolvedLineMatch = false;
+    for (const file of jsAssets) {
+      const mapPath = join(assetsDir, `${file}.map`);
+      const jsLines = readFileSync(join(assetsDir, file), "utf8").split("\n");
+      const targetGenLine = jsLines.findIndex(l => l.includes("scaleValue(input)"));
+      if (targetGenLine >= 0) {
+        const parsedMap = JSON.parse(readFileSync(mapPath, "utf8")) as { sources: string[]; mappings: string };
+        const mapped = findMappedSourceLine(parsedMap, targetGenLine);
+        if (mapped && mapped.source.includes("Contents/index.tsx") && mapped.line === expectedOrigLine) {
+          resolvedLineMatch = true;
+        }
+      }
+    }
+    expect(resolvedLineMatch).toBe(true);
+
+    // Check Vite dev server transforms .tsx with jsxDEV from hookMirrorJSXDevRuntime (when NODE_ENV=test override isn't forcing non-dev JSX)
+    const devPort = await getFreePort();
+    const prevNodeEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "development";
+    let devServer;
+    try {
+      devServer = await createViteServer({
+        configFile: false,
+        root,
+        mode: "development",
+        logLevel: "silent",
+        server: { host: "127.0.0.1", port: devPort, strictPort: true, fs: { allow: [root, realpathSync(root), repoRoot, realpathSync(repoRoot)] } },
+        plugins: [synCloudOS({ webspringEntry: false }), react(), localSdkFallbackPlugin(repoRoot)],
+        resolve: { alias: sdkResolveAliases(repoRoot) },
+      });
+      const transformed = await devServer.transformRequest("/src/SynWare/SafeProbe.app/Contents/index.tsx");
+      expect(transformed?.code.includes("jsxDEV"), transformed?.code.slice(0, 600)).toBe(true);
+      expect(transformed?.code.includes("hookMirrorJSXDevRuntime"), transformed?.code.slice(0, 600)).toBe(true);
+      expect(transformed?.code.includes("$RefreshReg$"), transformed?.code.slice(0, 600)).toBe(true);
+    } finally {
+      process.env.NODE_ENV = prevNodeEnv;
+      await devServer?.close();
+    }
+  } finally {
+    warnSpy.mockRestore();
+    rmSync(root, { recursive: true, force: true });
+  }
+}, 60_000);
