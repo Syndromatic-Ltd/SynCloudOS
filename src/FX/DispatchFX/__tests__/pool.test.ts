@@ -5,6 +5,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { classForLifetime, type DispatchLifetime } from "../internal/lifetime";
 import { WorkerPool, computePoolSize } from "../internal/pool/WorkerPool";
+import { createPoolWorkerHandler, enqueueWorkerContinuation } from "../internal/pool/poolWorker";
 import { dedicatedThread, submitDedicatedThreadJob } from "../internal/pool/dedicatedThread";
 import type { PoolJob, PoolRequestMessage, PoolResponseMessage, PoolWorkerLike } from "../internal/pool/protocol";
 import { DFXQoS } from "../DFXQoS";
@@ -485,5 +486,79 @@ describe("DispatchFX runtime fault regressions", () => {
     expect(finalClosures).toContain("w4_after_barrier");
     const w4 = workers.flatMap(w => w.posted.flatMap(p => p.message.jobs.map(j => ({ worker: w, job: j })))).find(x => x.job.closureId === "w4_after_barrier")!;
     w4.worker.emitResult(w4.job.jobId, []);
+  });
+
+  it("overlapping run-batch messages deliver each continuation strictly to its own job", async () => {
+    const responses: PoolResponseMessage[] = [];
+    type ChunkMod = { __dfxClosures: Record<string, (...args: unknown[]) => unknown> };
+    const deferred = (url: string) => {
+      let resolve!: (mod: ChunkMod) => void;
+      const promise = new Promise<ChunkMod>(res => { resolve = res; });
+      return { url, promise, resolve };
+    };
+    const slowChunk = deferred("/chunk-slow.js");
+    const fastChunk = deferred("/chunk-fast.js");
+
+    const handler = createPoolWorkerHandler(
+      msg => { responses.push(msg); },
+      url => {
+        if (url === slowChunk.url) return slowChunk.promise;
+        if (url === fastChunk.url) return fastChunk.promise;
+        return Promise.reject(new Error("chunk load failed"));
+      },
+    );
+
+    const batchEvent = (jobs: PoolRequestMessage["jobs"]) =>
+      ({ data: { type: "run-batch", jobs } }) as unknown as MessageEvent<PoolRequestMessage>;
+
+    // Overlap batch 1 and batch 2; resolve fastChunk first as well to cover out-of-order chunk availability.
+    const batch1 = handler(batchEvent([{ jobId: 101, closureId: "jobA", chunkURL: "/chunk-slow.js", captures: [] }]));
+    const batch2 = handler(batchEvent([{ jobId: 202, closureId: "jobB", chunkURL: "/chunk-fast.js", captures: [] }]));
+
+    fastChunk.resolve({
+      __dfxClosures: {
+        jobB: () => {
+          enqueueWorkerContinuation("contB", ["valB"]);
+          return ["resB"];
+        },
+      },
+    });
+    await Promise.resolve();
+    slowChunk.resolve({
+      __dfxClosures: {
+        jobA: () => {
+          enqueueWorkerContinuation("contA", ["valA"]);
+          return ["resA"];
+        },
+      },
+    });
+
+    await Promise.all([batch1, batch2]);
+    const r1 = responses.find(r => r.jobId === 101);
+    const r2 = responses.find(r => r.jobId === 202);
+    expect(r1).toEqual({
+      type: "result",
+      jobId: 101,
+      workerValues: ["resA"],
+      continuations: [{ id: "contA", workerValues: ["valA"] }],
+    });
+    expect(r2).toEqual({
+      type: "result",
+      jobId: 202,
+      workerValues: ["resB"],
+      continuations: [{ id: "contB", workerValues: ["valB"] }],
+    });
+
+    // A chunk load error in an earlier job must still let a subsequent overlapping job settle cleanly.
+    const batchFail = handler(batchEvent([{ jobId: 303, closureId: "jobFail", chunkURL: "/chunk-fail.js", captures: [] }]));
+    const batchAfterFail = handler(batchEvent([{ jobId: 404, closureId: "jobA", chunkURL: "/chunk-slow.js", captures: [] }]));
+    await Promise.all([batchFail, batchAfterFail]);
+    expect(responses.find(r => r.jobId === 303)?.type).toBe("error");
+    expect(responses.find(r => r.jobId === 404)).toEqual({
+      type: "result",
+      jobId: 404,
+      workerValues: ["resA"],
+      continuations: [{ id: "contA", workerValues: ["valA"] }],
+    });
   });
 });
