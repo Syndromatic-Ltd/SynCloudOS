@@ -22,7 +22,7 @@
 
 import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import ts from "typescript";
 import { forwardRef, memo } from "react";
@@ -553,6 +553,27 @@ interface ImportMeta { glob(pattern: string, options: { eager: true; query?: str
       value instanceof Error ? `${value.name}: ${value.message}\n${value.stack ?? ""}` : String(value)
     )))).toEqual([]);
   }, 300_000);
+
+  it("keeps the PDF library out of what the shell entries load at start-up", () => {
+    const packageDirectory = join(repositoryRoot, ".artifacts", "synapp-sdk", "packages", "syncloudos");
+    for (const entry of ["index.js", "sdk.js", "nse.js", "webspring.js"]) {
+      // Follow static imports only: a dynamic import loads when a PDF is first made.
+      const seen = new Set<string>();
+      const pending = [join(packageDirectory, entry)];
+      while (pending.length) {
+        const file = pending.pop()!;
+        if (seen.has(file)) continue;
+        seen.add(file);
+        const source = readFileSync(file, "utf8");
+        for (const match of source.matchAll(/(?:^|[;\n])\s*(?:import|export)\s*(?:[^"'()]*?from\s*)?["'](\.{1,2}\/[^"']+\.js)["']/gu)) {
+          pending.push(resolve(dirname(file), match[1]));
+        }
+      }
+      expect(seen.size, entry).toBeGreaterThan(1);
+      // The font subset recorder is ours and small; the document and context chunks carry the library.
+      expect([...seen].map(file => basename(file)).filter(name => /PDF/u.test(name) && !name.startsWith("GFXPDFFontSubset-")), entry).toEqual([]);
+    }
+  });
 
   it("keeps the reviewed runtime entry graph free of privileged exports", () => {
     const exports = [

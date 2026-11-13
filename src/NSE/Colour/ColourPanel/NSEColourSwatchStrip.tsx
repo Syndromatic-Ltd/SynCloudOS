@@ -19,7 +19,7 @@
  */
 
 import { useRef, useState, type DragEvent, type KeyboardEvent } from "react";
-import { GFXColour } from "../../../FX/GraphicsFX/public";
+import { GFXColour } from "../../../FX/GraphicsFX/GFXColour";
 
 /** The media type a colour carries when dragged between colour surfaces. */
 export const NSE_COLOUR_DRAG_TYPE = "application/x-nse-colour";

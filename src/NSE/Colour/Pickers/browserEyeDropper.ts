@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { GFXColour } from "../../../FX/GraphicsFX/public";
+import { GFXColour } from "../../../FX/GraphicsFX/GFXColour";
 import { setNSEHook } from "../../Theme/contract/hookMirrorDOM";
 import { classifyEyeDropperError, type NSEEyeDropperAdapter, type NSEEyeDropperResult } from "./NSEEyeDropperAdapter";
 
