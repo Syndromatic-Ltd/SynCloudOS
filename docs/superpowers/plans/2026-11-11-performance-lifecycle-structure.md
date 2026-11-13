@@ -468,8 +468,8 @@ Execute the approved DispatchFX plan Tasks 7, 8, 9, 10 and 12–15 as written th
 
 - [x] **Step 1:** Extend `scripts/perf/style-recalc.mjs` with `--cpu`: record a CPU profile per scenario and print main-thread tasks over 50 ms with their top self-time function and file.
 - [x] **Step 2:** Add `scripts/perf/heap-cycles.mjs`: launch and quit About ten times, force GC through CDP `HeapProfiler.collectGarbage`, print `JSHeapUsedSize` after cycle 1 and cycle 10 and the count of detached DOM nodes.
-- [ ] **Step 3:** Write the inventory table (scenario, task ms, function, file, verdict: render / move to DFX / fix in place) into `dispatch-benchmarks.md`. Each "move to DFX" row becomes a slice after Task 21 with its own before and after.
-- [ ] **Step 4:** Commit: `Perf: record main-thread and heap inventories`.
+- [x] **Step 3:** Write the inventory table (scenario, task ms, function, file, verdict: render / move to DFX / fix in place) into `dispatch-benchmarks.md`. Each "move to DFX" row becomes a slice after Task 21 with its own before and after.
+- [x] **Step 4:** Commit: `Perf: record main-thread and heap inventories`.
 
 ### Task 20: DispatchFX Tier 1
 
@@ -653,3 +653,4 @@ Add one line per stop: date, last commit, next unchecked box, anything a success
   - The same trace showed two bounded holders, not growth: the runtime root's focus tracker keeps the last focused element after it is removed (one application stage stays alive until focus moves), and the site's About particle canvas is held by its manager.
   - A stopped background Vite on Windows leaves its node process on 5387; find the PID with `netstat -ano` and stop it before starting another.
   - A third agent (Sol) audited read-only: its four DispatchFX runtime faults (barrier overtaking, crossed continuations between batches, stranded siblings after a clone failure, cancelled items still continuing) gate picking the second agent's Tasks 7–10, now with fix commits `33b085a7` and `9f67556c` that are not yet reviewed here.
+- 2026-11-13 (inventory): Task 19 done; the inventory is `docs/superpowers/evidence/2026-11-11-performance/dispatch-benchmarks.md`. No scenario has a "move to DFX" row. Two fix-in-place slices are proposed and not started: the 1.7 MB PDF chunk is evaluated on every page through a bare import in each entry, and the safe-area layout hook forces style once per view. The route session leak is fixed at `22cb33ce` (heap +2.64 MB over ten About launches, still over the 2 MB bar). The full suite and the frozen baseline have not run since `f2bc2507`; run both before picking anything else.

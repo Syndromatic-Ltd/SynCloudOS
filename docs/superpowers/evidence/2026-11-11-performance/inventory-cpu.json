@@ -1,0 +1,2167 @@
+{
+  "base": "http://127.0.0.1:5387",
+  "runs": 3,
+  "chromium": "149.0.7827.55",
+  "recordedAt": "2026-11-13T06:36:47.328Z",
+  "scenarios": {
+    "cold-load-board": {
+      "styleMs": 50.3,
+      "styleCount": 286,
+      "maxStyleMs": 7.7,
+      "parseCssMs": 0,
+      "layoutMs": 10.9,
+      "scriptMs": 378.8,
+      "longestTaskMs": 155.4,
+      "tasksOver50": 3,
+      "elements": 227
+    },
+    "launch-about": {
+      "styleMs": 124.3,
+      "styleCount": 150,
+      "maxStyleMs": 35.6,
+      "parseCssMs": 0,
+      "layoutMs": 19.5,
+      "scriptMs": 790.9,
+      "longestTaskMs": 142.8,
+      "tasksOver50": 7,
+      "elements": 338
+    },
+    "about-full-recalc": {
+      "fullRecalcMs": 6.7,
+      "elements": 338
+    },
+    "quickswitch-open": {
+      "styleMs": 9.4,
+      "styleCount": 34,
+      "maxStyleMs": 2.9,
+      "parseCssMs": 0,
+      "layoutMs": 1.4,
+      "scriptMs": 180.7,
+      "longestTaskMs": 169.1,
+      "tasksOver50": 3,
+      "elements": 386
+    },
+    "quickswitch-select": {
+      "styleMs": 7.2,
+      "styleCount": 43,
+      "maxStyleMs": 0.7,
+      "parseCssMs": 0,
+      "layoutMs": 0.9,
+      "scriptMs": 143.8,
+      "longestTaskMs": 163.9,
+      "tasksOver50": 2,
+      "elements": 338
+    },
+    "return-to-webspring": {
+      "styleMs": 26.7,
+      "styleCount": 83,
+      "maxStyleMs": 10.2,
+      "parseCssMs": 0,
+      "layoutMs": 1.7,
+      "scriptMs": 320.2,
+      "longestTaskMs": 182.4,
+      "tasksOver50": 2,
+      "elements": 196
+    },
+    "cold-load-gallery": {
+      "styleMs": 488.4,
+      "styleCount": 208,
+      "maxStyleMs": 52.9,
+      "parseCssMs": 0,
+      "layoutMs": 79.3,
+      "scriptMs": 2668.3,
+      "longestTaskMs": 258.6,
+      "tasksOver50": 11,
+      "elements": 1003
+    },
+    "gallery-full-recalc": {
+      "fullRecalcMs": 29.9,
+      "elements": 1003
+    },
+    "gallery-hover-sweep": {
+      "styleMs": 1.3,
+      "styleCount": 8,
+      "maxStyleMs": 0.4,
+      "parseCssMs": 0,
+      "layoutMs": 0.1,
+      "scriptMs": 51.7,
+      "longestTaskMs": 211.4,
+      "tasksOver50": 1,
+      "elements": 1000
+    },
+    "gallery-section:Tables & Trees": {
+      "styleMs": 75.5,
+      "styleCount": 20,
+      "maxStyleMs": 13.3,
+      "parseCssMs": 0,
+      "layoutMs": 7.2,
+      "scriptMs": 846,
+      "longestTaskMs": 852.7,
+      "tasksOver50": 3,
+      "elements": 1241
+    },
+    "gallery-section:Buttons": {
+      "styleMs": 76.2,
+      "styleCount": 6,
+      "maxStyleMs": 27,
+      "parseCssMs": 0,
+      "layoutMs": 3.1,
+      "scriptMs": 560.3,
+      "longestTaskMs": 548.8,
+      "tasksOver50": 3,
+      "elements": 1241
+    },
+    "gallery-section:Menus & Popups": {
+      "styleMs": 29.5,
+      "styleCount": 6,
+      "maxStyleMs": 13.2,
+      "parseCssMs": 0,
+      "layoutMs": 7.4,
+      "scriptMs": 653.9,
+      "longestTaskMs": 655.8,
+      "tasksOver50": 3,
+      "elements": 1481
+    }
+  },
+  "cpuTasks": {
+    "cold-load-board": [
+      {
+        "taskMs": 155.4,
+        "selfMs": 38.2,
+        "functionName": "updateStyle",
+        "file": "http://127.0.0.1:5387/@vite/client",
+        "line": 1060,
+        "ownerMs": {
+          "framework": 100.4,
+          "tooling": 38.7,
+          "gc": 6,
+          "site": 5.9,
+          "react": 2,
+          "engine": 2
+        },
+        "callers": [
+          {
+            "functionName": "Vu",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/browser-CSpGk9Nz.js?v=a2aeda44",
+            "line": 9110,
+            "inclusiveMs": 46.1
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/assets/atmo-C1Rbj4KL.css",
+            "line": 1,
+            "inclusiveMs": 33.2
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/GFXPDFDocument-1917fSwF.js?v=a2aeda44",
+            "line": 1,
+            "inclusiveMs": 26.4
+          },
+          {
+            "functionName": "Js",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/syncloudos-runtime-CG-Ksnuv.js?v=a2aeda44",
+            "line": 53,
+            "inclusiveMs": 23.7
+          },
+          {
+            "functionName": "register",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 13745,
+            "inclusiveMs": 11.8
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 13826,
+            "inclusiveMs": 11.8
+          },
+          {
+            "functionName": "registerMany",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 13825,
+            "inclusiveMs": 11.8
+          },
+          {
+            "functionName": "bu",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/browser-CSpGk9Nz.js?v=a2aeda44",
+            "line": 8162,
+            "inclusiveMs": 9.3
+          },
+          {
+            "functionName": "l5",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/GFXPDFDocument-1917fSwF.js?v=a2aeda44",
+            "line": 24425,
+            "inclusiveMs": 8.1
+          },
+          {
+            "functionName": "e.init",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/GFXPDFDocument-1917fSwF.js?v=a2aeda44",
+            "line": 24431,
+            "inclusiveMs": 8.1
+          },
+          {
+            "functionName": "tk",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useMotion-DxpSf7xY.js?v=a2aeda44",
+            "line": 6660,
+            "inclusiveMs": 8.1
+          },
+          {
+            "functionName": "Lt",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/browser-CSpGk9Nz.js?v=a2aeda44",
+            "line": 8042,
+            "inclusiveMs": 7.7
+          }
+        ]
+      },
+      {
+        "taskMs": 129.9,
+        "selfMs": 10.5,
+        "functionName": "exports.jsx",
+        "file": "http://127.0.0.1:5387/node_modules/.vite/deps/react_jsx-runtime.js?v=9276e6c2",
+        "line": 237,
+        "ownerMs": {
+          "react": 68.6,
+          "framework": 49.8,
+          "site": 5.3,
+          "engine": 3.1,
+          "dom": 2,
+          "gc": 1.5
+        },
+        "callers": [
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/NSEViewController-BuI_Fell.js?v=a2aeda44",
+            "line": 1258,
+            "inclusiveMs": 12.5
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useMotion-DxpSf7xY.js?v=a2aeda44",
+            "line": 16165,
+            "inclusiveMs": 12.5
+          },
+          {
+            "functionName": "viewDidAppear",
+            "file": "http://127.0.0.1:5387/src/Effects/NetburstIconEffect.tsx",
+            "line": 99,
+            "inclusiveMs": 12.4
+          },
+          {
+            "functionName": "N",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 218,
+            "inclusiveMs": 12
+          },
+          {
+            "functionName": "#g",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/NSEViewController-BuI_Fell.js?v=a2aeda44",
+            "line": 642,
+            "inclusiveMs": 11.9
+          },
+          {
+            "functionName": "tt",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/NSEViewController-BuI_Fell.js?v=a2aeda44",
+            "line": 532,
+            "inclusiveMs": 11.9
+          },
+          {
+            "functionName": "ge",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/NSEViewController-BuI_Fell.js?v=a2aeda44",
+            "line": 734,
+            "inclusiveMs": 11.9
+          },
+          {
+            "functionName": "it",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/NSEViewController-BuI_Fell.js?v=a2aeda44",
+            "line": 750,
+            "inclusiveMs": 11.9
+          },
+          {
+            "functionName": "manageRenderer",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/NSEViewController-BuI_Fell.js?v=a2aeda44",
+            "line": 775,
+            "inclusiveMs": 11.9
+          },
+          {
+            "functionName": "wake",
+            "file": "http://127.0.0.1:5387/src/Effects/NetburstIconEffect.tsx",
+            "line": 105,
+            "inclusiveMs": 11.9
+          },
+          {
+            "functionName": "jsx",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXRuntime.mjs",
+            "line": 13,
+            "inclusiveMs": 11.4
+          },
+          {
+            "functionName": "acquire",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useMotion-DxpSf7xY.js?v=a2aeda44",
+            "line": 7083,
+            "inclusiveMs": 10.1
+          }
+        ]
+      },
+      {
+        "taskMs": 98.4,
+        "selfMs": 98,
+        "functionName": "(program)",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "engine": 98,
+          "framework": 0.5
+        },
+        "callers": [
+          {
+            "functionName": "#C",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 31690,
+            "inclusiveMs": 0.5
+          },
+          {
+            "functionName": "render",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 31648,
+            "inclusiveMs": 0.5
+          },
+          {
+            "functionName": "render",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/AFXTiledLayer-DMilLccE.js?v=a2aeda44",
+            "line": 484,
+            "inclusiveMs": 0.5
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/AFXTiledLayer-DMilLccE.js?v=a2aeda44",
+            "line": 741,
+            "inclusiveMs": 0.5
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/AFXTiledLayer-DMilLccE.js?v=a2aeda44",
+            "line": 276,
+            "inclusiveMs": 0.5
+          },
+          {
+            "functionName": "l",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 30921,
+            "inclusiveMs": 0.5
+          },
+          {
+            "functionName": "u",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 30930,
+            "inclusiveMs": 0.5
+          }
+        ]
+      }
+    ],
+    "launch-about": [
+      {
+        "taskMs": 142.8,
+        "selfMs": 0.4,
+        "functionName": "(program)",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "engine": 0.4
+        },
+        "callers": []
+      },
+      {
+        "taskMs": 133.9,
+        "selfMs": 129.5,
+        "functionName": "(program)",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "engine": 129.5,
+          "framework": 4.1,
+          "site": 0.4
+        },
+        "callers": [
+          {
+            "functionName": "l",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 30921,
+            "inclusiveMs": 4.5
+          },
+          {
+            "functionName": "u",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 30930,
+            "inclusiveMs": 4.5
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/NSEViewController-BuI_Fell.js?v=a2aeda44",
+            "line": 673,
+            "inclusiveMs": 3.3
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 12035,
+            "inclusiveMs": 3.3
+          },
+          {
+            "functionName": "withUniforms",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/IFXFilterRegistry-CE8TN8WW.js?v=a2aeda44",
+            "line": 43,
+            "inclusiveMs": 2.9
+          },
+          {
+            "functionName": "draw",
+            "file": "http://127.0.0.1:5387/src/Effects/NetburstIconEffect.tsx",
+            "line": 113,
+            "inclusiveMs": 2.9
+          },
+          {
+            "functionName": "stopFrames.managed.onFrame.reducedMotion",
+            "file": "http://127.0.0.1:5387/src/Effects/NetburstIconEffect.tsx",
+            "line": 133,
+            "inclusiveMs": 2.9
+          },
+          {
+            "functionName": "#C",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 31690,
+            "inclusiveMs": 1.3
+          },
+          {
+            "functionName": "render",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 31648,
+            "inclusiveMs": 1.3
+          },
+          {
+            "functionName": "render",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/AFXTiledLayer-DMilLccE.js?v=a2aeda44",
+            "line": 484,
+            "inclusiveMs": 1.3
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/AFXTiledLayer-DMilLccE.js?v=a2aeda44",
+            "line": 741,
+            "inclusiveMs": 1.3
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/AFXTiledLayer-DMilLccE.js?v=a2aeda44",
+            "line": 276,
+            "inclusiveMs": 1.3
+          }
+        ]
+      },
+      {
+        "taskMs": 100.8,
+        "selfMs": 63.9,
+        "functionName": "(program)",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "engine": 63.9,
+          "dom": 16.3,
+          "react": 10.7,
+          "framework": 6.8,
+          "site": 3.3
+        },
+        "callers": [
+          {
+            "functionName": "N",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 218,
+            "inclusiveMs": 5.7
+          },
+          {
+            "functionName": "T",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 172,
+            "inclusiveMs": 5.6
+          },
+          {
+            "functionName": "l",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 30921,
+            "inclusiveMs": 3.2
+          },
+          {
+            "functionName": "u",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 30930,
+            "inclusiveMs": 3.2
+          },
+          {
+            "functionName": "jsx",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXRuntime.mjs",
+            "line": 13,
+            "inclusiveMs": 2.1
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/NSEViewController-BuI_Fell.js?v=a2aeda44",
+            "line": 673,
+            "inclusiveMs": 1.7
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 12035,
+            "inclusiveMs": 1.7
+          },
+          {
+            "functionName": "ct",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 215,
+            "inclusiveMs": 1.5
+          },
+          {
+            "functionName": "$t",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useMotion-DxpSf7xY.js?v=a2aeda44",
+            "line": 16148,
+            "inclusiveMs": 1.5
+          },
+          {
+            "functionName": "onPointerLeave",
+            "file": "http://127.0.0.1:5387/src/Webspring/Contents/Views/WebspringDialView/WebspringButtonView.tsx",
+            "line": 185,
+            "inclusiveMs": 1.3
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/src/Webspring/Contents/Views/WebspringDialView/RotaryDialView.tsx",
+            "line": 118,
+            "inclusiveMs": 1.3
+          },
+          {
+            "functionName": "endHoverPresentation",
+            "file": "http://127.0.0.1:5387/src/Webspring/Contents/Views/WebspringDialView/WebspringButtonView.tsx",
+            "line": 72,
+            "inclusiveMs": 1.3
+          }
+        ]
+      },
+      {
+        "taskMs": 87.9,
+        "selfMs": 33.7,
+        "functionName": "(program)",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "engine": 33.7,
+          "framework": 26.1,
+          "react": 13,
+          "dom": 10.1,
+          "site": 5
+        },
+        "callers": [
+          {
+            "functionName": "jsx",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXRuntime.mjs",
+            "line": 13,
+            "inclusiveMs": 14.2
+          },
+          {
+            "functionName": "$t",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useMotion-DxpSf7xY.js?v=a2aeda44",
+            "line": 16148,
+            "inclusiveMs": 5.8
+          },
+          {
+            "functionName": "jsxDEV",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXDevRuntime.mjs",
+            "line": 9,
+            "inclusiveMs": 5.3
+          },
+          {
+            "functionName": "jsxs",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXRuntime.mjs",
+            "line": 16,
+            "inclusiveMs": 3
+          },
+          {
+            "functionName": "exports.createElement",
+            "file": "http://127.0.0.1:5387/node_modules/.vite/deps/chunk-NDQK2F7T.js?v=a2aeda44",
+            "line": 766,
+            "inclusiveMs": 3
+          },
+          {
+            "functionName": "yi",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/progressCore-Cgp0W1ul.js?v=a2aeda44",
+            "line": 2338,
+            "inclusiveMs": 2.5
+          },
+          {
+            "functionName": "renderView",
+            "file": "http://127.0.0.1:5387/src/Effects/LayerArtwork.tsx",
+            "line": 121,
+            "inclusiveMs": 2.5
+          },
+          {
+            "functionName": "ay",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useMotion-DxpSf7xY.js?v=a2aeda44",
+            "line": 16102,
+            "inclusiveMs": 2.5
+          },
+          {
+            "functionName": "l",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 30921,
+            "inclusiveMs": 2.2
+          },
+          {
+            "functionName": "u",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 30930,
+            "inclusiveMs": 2.2
+          },
+          {
+            "functionName": "et",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 185,
+            "inclusiveMs": 2.1
+          },
+          {
+            "functionName": "N",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 218,
+            "inclusiveMs": 2.1
+          }
+        ]
+      },
+      {
+        "taskMs": 63.6,
+        "selfMs": 31.9,
+        "functionName": "(program)",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "engine": 31.9,
+          "framework": 18.1,
+          "dom": 4.7,
+          "react": 4.3,
+          "site": 4.3
+        },
+        "callers": [
+          {
+            "functionName": "N",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 218,
+            "inclusiveMs": 11.1
+          },
+          {
+            "functionName": "et",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 185,
+            "inclusiveMs": 10.5
+          },
+          {
+            "functionName": "l",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 30921,
+            "inclusiveMs": 6
+          },
+          {
+            "functionName": "u",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 30930,
+            "inclusiveMs": 6
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 12035,
+            "inclusiveMs": 5.3
+          },
+          {
+            "functionName": "frame",
+            "file": "http://127.0.0.1:5387/src/SynWare/About.app/Contents/AboutParticleField.ts",
+            "line": 436,
+            "inclusiveMs": 4.8
+          },
+          {
+            "functionName": "surface.onFrame.reducedMotion",
+            "file": "http://127.0.0.1:5387/src/SynWare/About.app/Contents/AboutParticles.tsx",
+            "line": 101,
+            "inclusiveMs": 4.8
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/NSEViewController-BuI_Fell.js?v=a2aeda44",
+            "line": 673,
+            "inclusiveMs": 4.8
+          },
+          {
+            "functionName": "refresh",
+            "file": "http://127.0.0.1:5387/src/SynWare/About.app/Contents/AboutParticleField.ts",
+            "line": 166,
+            "inclusiveMs": 3.6
+          },
+          {
+            "functionName": "jsx",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXRuntime.mjs",
+            "line": 13,
+            "inclusiveMs": 2.3
+          },
+          {
+            "functionName": "jsxDEV",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXDevRuntime.mjs",
+            "line": 9,
+            "inclusiveMs": 1.5
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 4943,
+            "inclusiveMs": 1
+          }
+        ]
+      },
+      {
+        "taskMs": 61.4,
+        "selfMs": 59.2,
+        "functionName": "(program)",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "engine": 59.2,
+          "dom": 1.4,
+          "framework": 1
+        },
+        "callers": [
+          {
+            "functionName": "l",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 30921,
+            "inclusiveMs": 2.5
+          },
+          {
+            "functionName": "u",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 30930,
+            "inclusiveMs": 2.5
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/AFXTiledLayer-DMilLccE.js?v=a2aeda44",
+            "line": 276,
+            "inclusiveMs": 2
+          },
+          {
+            "functionName": "#C",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 31690,
+            "inclusiveMs": 1.8
+          },
+          {
+            "functionName": "render",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 31648,
+            "inclusiveMs": 1.8
+          },
+          {
+            "functionName": "render",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/AFXTiledLayer-DMilLccE.js?v=a2aeda44",
+            "line": 484,
+            "inclusiveMs": 1.8
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/AFXTiledLayer-DMilLccE.js?v=a2aeda44",
+            "line": 741,
+            "inclusiveMs": 1.8
+          },
+          {
+            "functionName": "begin",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 31021,
+            "inclusiveMs": 1
+          },
+          {
+            "functionName": "#D",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 31708,
+            "inclusiveMs": 0.8
+          },
+          {
+            "functionName": "Bd",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 30980,
+            "inclusiveMs": 0.8
+          },
+          {
+            "functionName": "acquire",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 31060,
+            "inclusiveMs": 0.7
+          },
+          {
+            "functionName": "Nc",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/IFXFilterRegistry-CE8TN8WW.js?v=a2aeda44",
+            "line": 23,
+            "inclusiveMs": 0.5
+          }
+        ]
+      },
+      {
+        "taskMs": 56.9,
+        "selfMs": 0.3,
+        "functionName": "(program)",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "engine": 0.3
+        },
+        "callers": []
+      }
+    ],
+    "quickswitch-open": [
+      {
+        "taskMs": 169.1,
+        "selfMs": 0.4,
+        "functionName": "(program)",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "engine": 0.4
+        },
+        "callers": []
+      },
+      {
+        "taskMs": 91.6,
+        "selfMs": 86.7,
+        "functionName": "(program)",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "engine": 86.7,
+          "dom": 3.4,
+          "framework": 0.9,
+          "site": 0.5
+        },
+        "callers": [
+          {
+            "functionName": "l",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 30921,
+            "inclusiveMs": 4.8
+          },
+          {
+            "functionName": "u",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 30930,
+            "inclusiveMs": 4.8
+          },
+          {
+            "functionName": "#C",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 31690,
+            "inclusiveMs": 3.4
+          },
+          {
+            "functionName": "render",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 31648,
+            "inclusiveMs": 3.4
+          },
+          {
+            "functionName": "render",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/AFXTiledLayer-DMilLccE.js?v=a2aeda44",
+            "line": 484,
+            "inclusiveMs": 3.4
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/AFXTiledLayer-DMilLccE.js?v=a2aeda44",
+            "line": 741,
+            "inclusiveMs": 3.4
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/AFXTiledLayer-DMilLccE.js?v=a2aeda44",
+            "line": 276,
+            "inclusiveMs": 3.4
+          },
+          {
+            "functionName": "Bd",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 30980,
+            "inclusiveMs": 2
+          },
+          {
+            "functionName": "begin",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 31021,
+            "inclusiveMs": 2
+          },
+          {
+            "functionName": "frame",
+            "file": "http://127.0.0.1:5387/src/SynWare/About.app/Contents/AboutParticleField.ts",
+            "line": 436,
+            "inclusiveMs": 1.4
+          },
+          {
+            "functionName": "surface.onFrame.reducedMotion",
+            "file": "http://127.0.0.1:5387/src/SynWare/About.app/Contents/AboutParticles.tsx",
+            "line": 101,
+            "inclusiveMs": 1.4
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/NSEViewController-BuI_Fell.js?v=a2aeda44",
+            "line": 673,
+            "inclusiveMs": 1.4
+          }
+        ]
+      },
+      {
+        "taskMs": 91.3,
+        "selfMs": 12,
+        "functionName": "exports.jsx",
+        "file": "http://127.0.0.1:5387/node_modules/.vite/deps/react_jsx-runtime.js?v=9276e6c2",
+        "line": 237,
+        "ownerMs": {
+          "react": 28.1,
+          "framework": 26.8,
+          "dom": 25.1,
+          "engine": 4.3,
+          "site": 3.6,
+          "gc": 3.6
+        },
+        "callers": [
+          {
+            "functionName": "jsx",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXRuntime.mjs",
+            "line": 13,
+            "inclusiveMs": 17.5
+          },
+          {
+            "functionName": "viewDidAppear",
+            "file": "http://127.0.0.1:5387/src/Effects/NetburstIconEffect.tsx",
+            "line": 99,
+            "inclusiveMs": 9.4
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/NSEViewController-BuI_Fell.js?v=a2aeda44",
+            "line": 1258,
+            "inclusiveMs": 9.4
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useMotion-DxpSf7xY.js?v=a2aeda44",
+            "line": 16165,
+            "inclusiveMs": 9.4
+          },
+          {
+            "functionName": "tt",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/NSEViewController-BuI_Fell.js?v=a2aeda44",
+            "line": 532,
+            "inclusiveMs": 9.2
+          },
+          {
+            "functionName": "ge",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/NSEViewController-BuI_Fell.js?v=a2aeda44",
+            "line": 734,
+            "inclusiveMs": 9.2
+          },
+          {
+            "functionName": "it",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/NSEViewController-BuI_Fell.js?v=a2aeda44",
+            "line": 750,
+            "inclusiveMs": 9.2
+          },
+          {
+            "functionName": "manageRenderer",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/NSEViewController-BuI_Fell.js?v=a2aeda44",
+            "line": 775,
+            "inclusiveMs": 9.2
+          },
+          {
+            "functionName": "wake",
+            "file": "http://127.0.0.1:5387/src/Effects/NetburstIconEffect.tsx",
+            "line": 105,
+            "inclusiveMs": 9.2
+          },
+          {
+            "functionName": "#g",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/NSEViewController-BuI_Fell.js?v=a2aeda44",
+            "line": 642,
+            "inclusiveMs": 8.6
+          },
+          {
+            "functionName": "$t",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useMotion-DxpSf7xY.js?v=a2aeda44",
+            "line": 16148,
+            "inclusiveMs": 8
+          },
+          {
+            "functionName": "createRenderer",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 32024,
+            "inclusiveMs": 7.9
+          }
+        ]
+      }
+    ],
+    "quickswitch-select": [
+      {
+        "taskMs": 163.9,
+        "selfMs": 0.5,
+        "functionName": "(program)",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "engine": 0.5
+        },
+        "callers": []
+      },
+      {
+        "taskMs": 105.9,
+        "selfMs": 24.3,
+        "functionName": "exports.jsx",
+        "file": "http://127.0.0.1:5387/node_modules/.vite/deps/react_jsx-runtime.js?v=9276e6c2",
+        "line": 237,
+        "ownerMs": {
+          "react": 50.5,
+          "framework": 26.1,
+          "dom": 21.8,
+          "engine": 4,
+          "site": 3.3
+        },
+        "callers": [
+          {
+            "functionName": "jsx",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXRuntime.mjs",
+            "line": 13,
+            "inclusiveMs": 30.2
+          },
+          {
+            "functionName": "$t",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useMotion-DxpSf7xY.js?v=a2aeda44",
+            "line": 16148,
+            "inclusiveMs": 10.7
+          },
+          {
+            "functionName": "jsxDEV",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXDevRuntime.mjs",
+            "line": 9,
+            "inclusiveMs": 9.6
+          },
+          {
+            "functionName": "jsxs",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXRuntime.mjs",
+            "line": 16,
+            "inclusiveMs": 7.7
+          },
+          {
+            "functionName": "yi",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/progressCore-Cgp0W1ul.js?v=a2aeda44",
+            "line": 2338,
+            "inclusiveMs": 4.9
+          },
+          {
+            "functionName": "#l",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 663,
+            "inclusiveMs": 3.7
+          },
+          {
+            "functionName": "u",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 682,
+            "inclusiveMs": 3.7
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useMotion-DxpSf7xY.js?v=a2aeda44",
+            "line": 2639,
+            "inclusiveMs": 3.6
+          },
+          {
+            "functionName": "emit",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useMotion-DxpSf7xY.js?v=a2aeda44",
+            "line": 2622,
+            "inclusiveMs": 3.6
+          },
+          {
+            "functionName": "mutate",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useMotion-DxpSf7xY.js?v=a2aeda44",
+            "line": 2641,
+            "inclusiveMs": 3.6
+          },
+          {
+            "functionName": "pi",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useMotion-DxpSf7xY.js?v=a2aeda44",
+            "line": 16144,
+            "inclusiveMs": 3.5
+          },
+          {
+            "functionName": "#n",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/textLayoutTypes-DcR5d3sQ.js?v=a2aeda44",
+            "line": 275,
+            "inclusiveMs": 3.4
+          }
+        ]
+      }
+    ],
+    "return-to-webspring": [
+      {
+        "taskMs": 182.4,
+        "selfMs": 25.7,
+        "functionName": "exports.jsx",
+        "file": "http://127.0.0.1:5387/node_modules/.vite/deps/react_jsx-runtime.js?v=9276e6c2",
+        "line": 237,
+        "ownerMs": {
+          "framework": 71.4,
+          "react": 57,
+          "dom": 33,
+          "gc": 11.6,
+          "engine": 5.3,
+          "site": 4.2
+        },
+        "callers": [
+          {
+            "functionName": "jsx",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXRuntime.mjs",
+            "line": 13,
+            "inclusiveMs": 32
+          },
+          {
+            "functionName": "animateArtwork",
+            "file": "http://127.0.0.1:5387/src/Effects/LayerArtwork.tsx",
+            "line": 61,
+            "inclusiveMs": 23.4
+          },
+          {
+            "functionName": "viewDidLayout",
+            "file": "http://127.0.0.1:5387/src/Effects/LayerArtwork.tsx",
+            "line": 126,
+            "inclusiveMs": 23.4
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useMotion-DxpSf7xY.js?v=a2aeda44",
+            "line": 16188,
+            "inclusiveMs": 23.4
+          },
+          {
+            "functionName": "addAnimation",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/host-WL15Xjai.js?v=a2aeda44",
+            "line": 1568,
+            "inclusiveMs": 22.5
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/src/Effects/LayerArtwork.tsx",
+            "line": 100,
+            "inclusiveMs": 22.5
+          },
+          {
+            "functionName": "$t",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useMotion-DxpSf7xY.js?v=a2aeda44",
+            "line": 16148,
+            "inclusiveMs": 16.1
+          },
+          {
+            "functionName": "toRuntime",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/fx/animation.js?v=a2aeda44",
+            "line": 69,
+            "inclusiveMs": 15.6
+          },
+          {
+            "functionName": "jsxDEV",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXDevRuntime.mjs",
+            "line": 9,
+            "inclusiveMs": 14.6
+          },
+          {
+            "functionName": "N",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 218,
+            "inclusiveMs": 12.4
+          },
+          {
+            "functionName": "et",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 185,
+            "inclusiveMs": 11.9
+          },
+          {
+            "functionName": "mutate",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useMotion-DxpSf7xY.js?v=a2aeda44",
+            "line": 2641,
+            "inclusiveMs": 10.2
+          }
+        ]
+      },
+      {
+        "taskMs": 99,
+        "selfMs": 0.4,
+        "functionName": "(program)",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "engine": 0.4
+        },
+        "callers": []
+      }
+    ],
+    "cold-load-gallery": [
+      {
+        "taskMs": 258.6,
+        "selfMs": 49.8,
+        "functionName": "et",
+        "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+        "line": 185,
+        "ownerMs": {
+          "react": 121.7,
+          "framework": 81.3,
+          "dom": 36.7,
+          "engine": 12.4,
+          "gc": 4,
+          "site": 2.4
+        },
+        "callers": [
+          {
+            "functionName": "N",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 218,
+            "inclusiveMs": 50.9
+          },
+          {
+            "functionName": "et",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 185,
+            "inclusiveMs": 49.8
+          },
+          {
+            "functionName": "jsx",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXRuntime.mjs",
+            "line": 13,
+            "inclusiveMs": 43.3
+          },
+          {
+            "functionName": "jsxs",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXRuntime.mjs",
+            "line": 16,
+            "inclusiveMs": 39.4
+          },
+          {
+            "functionName": "hi",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 1554,
+            "inclusiveMs": 33.7
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 1803,
+            "inclusiveMs": 29.5
+          },
+          {
+            "functionName": "rn",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 1803,
+            "inclusiveMs": 29.5
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/splitViewController-C7wVTIQd.js?v=a2aeda44",
+            "line": 1939,
+            "inclusiveMs": 22
+          },
+          {
+            "functionName": "jsxDEV",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXDevRuntime.mjs",
+            "line": 9,
+            "inclusiveMs": 13.2
+          },
+          {
+            "functionName": "$t",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useMotion-DxpSf7xY.js?v=a2aeda44",
+            "line": 16148,
+            "inclusiveMs": 8.6
+          },
+          {
+            "functionName": "nn",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 1751,
+            "inclusiveMs": 5.9
+          },
+          {
+            "functionName": "mirrorProps",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirror.mjs?v=a2aeda44",
+            "line": 58,
+            "inclusiveMs": 5.5
+          }
+        ]
+      },
+      {
+        "taskMs": 249.4,
+        "selfMs": 51.4,
+        "functionName": "exports.jsx",
+        "file": "http://127.0.0.1:5387/node_modules/.vite/deps/react_jsx-runtime.js?v=9276e6c2",
+        "line": 237,
+        "ownerMs": {
+          "react": 157.6,
+          "dom": 47.4,
+          "framework": 33.2,
+          "site": 4.9,
+          "gc": 3.5,
+          "engine": 2.9
+        },
+        "callers": [
+          {
+            "functionName": "jsx",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXRuntime.mjs",
+            "line": 13,
+            "inclusiveMs": 64.8
+          },
+          {
+            "functionName": "jsxs",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXRuntime.mjs",
+            "line": 16,
+            "inclusiveMs": 58.8
+          },
+          {
+            "functionName": "hi",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 1554,
+            "inclusiveMs": 55.3
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 1803,
+            "inclusiveMs": 50
+          },
+          {
+            "functionName": "rn",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 1803,
+            "inclusiveMs": 50
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/splitViewController-C7wVTIQd.js?v=a2aeda44",
+            "line": 1939,
+            "inclusiveMs": 32.5
+          },
+          {
+            "functionName": "jsxDEV",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXDevRuntime.mjs",
+            "line": 9,
+            "inclusiveMs": 17.1
+          },
+          {
+            "functionName": "$t",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useMotion-DxpSf7xY.js?v=a2aeda44",
+            "line": 16148,
+            "inclusiveMs": 9.5
+          },
+          {
+            "functionName": "nn",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 1751,
+            "inclusiveMs": 8.8
+          },
+          {
+            "functionName": "exports.useSyncExternalStore",
+            "file": "http://127.0.0.1:5387/node_modules/.vite/deps/chunk-NDQK2F7T.js?v=a2aeda44",
+            "line": 966,
+            "inclusiveMs": 6.6
+          },
+          {
+            "functionName": "renderItem",
+            "file": "http://127.0.0.1:5387/src/SynWare/NSEControlGallery.app/Contents/Gallery/GallerySourceList.tsx",
+            "line": 58,
+            "inclusiveMs": 6.6
+          },
+          {
+            "functionName": "gi",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 4830,
+            "inclusiveMs": 5.9
+          }
+        ]
+      },
+      {
+        "taskMs": 197.8,
+        "selfMs": 51.5,
+        "functionName": "et",
+        "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+        "line": 185,
+        "ownerMs": {
+          "framework": 71.2,
+          "dom": 61.3,
+          "react": 50.5,
+          "engine": 10.1,
+          "site": 3,
+          "gc": 2
+        },
+        "callers": [
+          {
+            "functionName": "N",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 218,
+            "inclusiveMs": 82.5
+          },
+          {
+            "functionName": "et",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 185,
+            "inclusiveMs": 52
+          },
+          {
+            "functionName": "T",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 172,
+            "inclusiveMs": 30.2
+          },
+          {
+            "functionName": "jsx",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXRuntime.mjs",
+            "line": 13,
+            "inclusiveMs": 17
+          },
+          {
+            "functionName": "hi",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 1554,
+            "inclusiveMs": 16.1
+          },
+          {
+            "functionName": "jsxs",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXRuntime.mjs",
+            "line": 16,
+            "inclusiveMs": 15.5
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 1803,
+            "inclusiveMs": 13.6
+          },
+          {
+            "functionName": "rn",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 1803,
+            "inclusiveMs": 13.6
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/splitViewController-C7wVTIQd.js?v=a2aeda44",
+            "line": 1939,
+            "inclusiveMs": 8.9
+          },
+          {
+            "functionName": "jsxDEV",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXDevRuntime.mjs",
+            "line": 9,
+            "inclusiveMs": 6
+          },
+          {
+            "functionName": "GalleryExample",
+            "file": "http://127.0.0.1:5387/src/SynWare/NSEControlGallery.app/Contents/Gallery/GalleryPrimitives.tsx",
+            "line": 41,
+            "inclusiveMs": 3.8
+          },
+          {
+            "functionName": "pt",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/NSEStackView-B3XcOzd-.js?v=a2aeda44",
+            "line": 402,
+            "inclusiveMs": 3.4
+          }
+        ]
+      },
+      {
+        "taskMs": 194.2,
+        "selfMs": 61.6,
+        "functionName": "insertAdjacentElement",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "framework": 114.6,
+          "dom": 67.5,
+          "site": 5.5,
+          "gc": 3,
+          "engine": 1.6,
+          "react": 1.5,
+          "tooling": 0.6
+        },
+        "callers": [
+          {
+            "functionName": "Vu",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/browser-CSpGk9Nz.js?v=a2aeda44",
+            "line": 9110,
+            "inclusiveMs": 55.4
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/assets/atmo-C1Rbj4KL.css",
+            "line": 0,
+            "inclusiveMs": 53.1
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/GFXPDFDocument-1917fSwF.js?v=a2aeda44",
+            "line": 0,
+            "inclusiveMs": 31.5
+          },
+          {
+            "functionName": "Js",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/syncloudos-runtime-CG-Ksnuv.js?v=a2aeda44",
+            "line": 53,
+            "inclusiveMs": 25.5
+          },
+          {
+            "functionName": "bu",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/browser-CSpGk9Nz.js?v=a2aeda44",
+            "line": 8162,
+            "inclusiveMs": 13.6
+          },
+          {
+            "functionName": "l5",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/GFXPDFDocument-1917fSwF.js?v=a2aeda44",
+            "line": 24425,
+            "inclusiveMs": 13
+          },
+          {
+            "functionName": "e.init",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/GFXPDFDocument-1917fSwF.js?v=a2aeda44",
+            "line": 24431,
+            "inclusiveMs": 13
+          },
+          {
+            "functionName": "register",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 13745,
+            "inclusiveMs": 12.5
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 13826,
+            "inclusiveMs": 12.5
+          },
+          {
+            "functionName": "registerMany",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 13825,
+            "inclusiveMs": 12.5
+          },
+          {
+            "functionName": "pu",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/browser-CSpGk9Nz.js?v=a2aeda44",
+            "line": 8101,
+            "inclusiveMs": 12.1
+          },
+          {
+            "functionName": "Lt",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/browser-CSpGk9Nz.js?v=a2aeda44",
+            "line": 8042,
+            "inclusiveMs": 12.1
+          }
+        ]
+      },
+      {
+        "taskMs": 176.4,
+        "selfMs": 26.9,
+        "functionName": "exports.jsx",
+        "file": "http://127.0.0.1:5387/node_modules/.vite/deps/react_jsx-runtime.js?v=9276e6c2",
+        "line": 237,
+        "ownerMs": {
+          "react": 77.7,
+          "dom": 43.8,
+          "framework": 41.7,
+          "site": 8.9,
+          "engine": 2.4,
+          "gc": 1.9
+        },
+        "callers": [
+          {
+            "functionName": "jsx",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXRuntime.mjs",
+            "line": 13,
+            "inclusiveMs": 33.4
+          },
+          {
+            "functionName": "N",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 218,
+            "inclusiveMs": 19.2
+          },
+          {
+            "functionName": "$t",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useMotion-DxpSf7xY.js?v=a2aeda44",
+            "line": 16148,
+            "inclusiveMs": 16.6
+          },
+          {
+            "functionName": "et",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 185,
+            "inclusiveMs": 15.2
+          },
+          {
+            "functionName": "jsxDEV",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXDevRuntime.mjs",
+            "line": 9,
+            "inclusiveMs": 14.6
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/NSEViewController-BuI_Fell.js?v=a2aeda44",
+            "line": 1258,
+            "inclusiveMs": 13.1
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useMotion-DxpSf7xY.js?v=a2aeda44",
+            "line": 16165,
+            "inclusiveMs": 13.1
+          },
+          {
+            "functionName": "#g",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/NSEViewController-BuI_Fell.js?v=a2aeda44",
+            "line": 642,
+            "inclusiveMs": 12.9
+          },
+          {
+            "functionName": "tt",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/NSEViewController-BuI_Fell.js?v=a2aeda44",
+            "line": 532,
+            "inclusiveMs": 12.9
+          },
+          {
+            "functionName": "ge",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/NSEViewController-BuI_Fell.js?v=a2aeda44",
+            "line": 734,
+            "inclusiveMs": 12.9
+          },
+          {
+            "functionName": "it",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/NSEViewController-BuI_Fell.js?v=a2aeda44",
+            "line": 750,
+            "inclusiveMs": 12.9
+          },
+          {
+            "functionName": "manageRenderer",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/NSEViewController-BuI_Fell.js?v=a2aeda44",
+            "line": 775,
+            "inclusiveMs": 12.9
+          }
+        ]
+      },
+      {
+        "taskMs": 164.7,
+        "selfMs": 164.6,
+        "functionName": "(program)",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "engine": 164.6,
+          "framework": 0.2
+        },
+        "callers": [
+          {
+            "functionName": "m",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/BrowserAnimationLayerHost-DXIHnHjj.js?v=a2aeda44",
+            "line": 30934,
+            "inclusiveMs": 0.2
+          }
+        ]
+      },
+      {
+        "taskMs": 161.2,
+        "selfMs": 161.5,
+        "functionName": "(program)",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "engine": 161.5
+        },
+        "callers": []
+      },
+      {
+        "taskMs": 115.2,
+        "selfMs": 0.3,
+        "functionName": "(program)",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "engine": 0.3
+        },
+        "callers": []
+      },
+      {
+        "taskMs": 101.6,
+        "selfMs": 0.4,
+        "functionName": "(program)",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "engine": 0.4
+        },
+        "callers": []
+      },
+      {
+        "taskMs": 95.5,
+        "selfMs": 95.3,
+        "functionName": "(program)",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "engine": 95.3
+        },
+        "callers": []
+      },
+      {
+        "taskMs": 86.7,
+        "selfMs": 16.3,
+        "functionName": "exports.jsxs",
+        "file": "http://127.0.0.1:5387/node_modules/.vite/deps/react_jsx-runtime.js?v=9276e6c2",
+        "line": 248,
+        "ownerMs": {
+          "react": 53.3,
+          "framework": 21.4,
+          "dom": 9.6,
+          "site": 1.8,
+          "engine": 0.6,
+          "gc": 0.5
+        },
+        "callers": [
+          {
+            "functionName": "hi",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 1554,
+            "inclusiveMs": 22.7
+          },
+          {
+            "functionName": "jsxs",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXRuntime.mjs",
+            "line": 16,
+            "inclusiveMs": 21.3
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 1803,
+            "inclusiveMs": 20.3
+          },
+          {
+            "functionName": "rn",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 1803,
+            "inclusiveMs": 20.3
+          },
+          {
+            "functionName": "jsx",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXRuntime.mjs",
+            "line": 13,
+            "inclusiveMs": 16.6
+          },
+          {
+            "functionName": "y",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/progressCore-Cgp0W1ul.js?v=a2aeda44",
+            "line": 1407,
+            "inclusiveMs": 13.6
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/progressCore-Cgp0W1ul.js?v=a2aeda44",
+            "line": 1404,
+            "inclusiveMs": 13.6
+          },
+          {
+            "functionName": "jsxDEV",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXDevRuntime.mjs",
+            "line": 9,
+            "inclusiveMs": 7.1
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/splitViewController-C7wVTIQd.js?v=a2aeda44",
+            "line": 1939,
+            "inclusiveMs": 5
+          },
+          {
+            "functionName": "nn",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 1751,
+            "inclusiveMs": 3.6
+          },
+          {
+            "functionName": "gi",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 4830,
+            "inclusiveMs": 3
+          },
+          {
+            "functionName": "mirrorProps",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirror.mjs?v=a2aeda44",
+            "line": 58,
+            "inclusiveMs": 2.5
+          }
+        ]
+      }
+    ],
+    "gallery-hover-sweep": [
+      {
+        "taskMs": 211.4,
+        "selfMs": 0.8,
+        "functionName": "(program)",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "engine": 0.8
+        },
+        "callers": []
+      }
+    ],
+    "gallery-section:Tables & Trees": [
+      {
+        "taskMs": 852.7,
+        "selfMs": 63.7,
+        "functionName": "exports.jsxs",
+        "file": "http://127.0.0.1:5387/node_modules/.vite/deps/react_jsx-runtime.js?v=9276e6c2",
+        "line": 248,
+        "ownerMs": {
+          "react": 423.2,
+          "framework": 227.9,
+          "dom": 161.9,
+          "site": 17.1,
+          "gc": 11.5,
+          "engine": 11.1
+        },
+        "callers": [
+          {
+            "functionName": "hi",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 1554,
+            "inclusiveMs": 111.6
+          },
+          {
+            "functionName": "jsx",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXRuntime.mjs",
+            "line": 13,
+            "inclusiveMs": 111
+          },
+          {
+            "functionName": "jsxs",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXRuntime.mjs",
+            "line": 16,
+            "inclusiveMs": 110.4
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 1803,
+            "inclusiveMs": 89.6
+          },
+          {
+            "functionName": "rn",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 1803,
+            "inclusiveMs": 89.6
+          },
+          {
+            "functionName": "N",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 218,
+            "inclusiveMs": 68.9
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/splitViewController-C7wVTIQd.js?v=a2aeda44",
+            "line": 1939,
+            "inclusiveMs": 66.6
+          },
+          {
+            "functionName": "mirrorProps",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirror.mjs?v=a2aeda44",
+            "line": 58,
+            "inclusiveMs": 35.7
+          },
+          {
+            "functionName": "T",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 172,
+            "inclusiveMs": 35.6
+          },
+          {
+            "functionName": "et",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 185,
+            "inclusiveMs": 31.9
+          },
+          {
+            "functionName": "gi",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 4830,
+            "inclusiveMs": 24.2
+          },
+          {
+            "functionName": "exports.useSyncExternalStore",
+            "file": "http://127.0.0.1:5387/node_modules/.vite/deps/chunk-NDQK2F7T.js?v=a2aeda44",
+            "line": 966,
+            "inclusiveMs": 21
+          }
+        ]
+      },
+      {
+        "taskMs": 170.3,
+        "selfMs": 0.3,
+        "functionName": "(program)",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "engine": 0.3
+        },
+        "callers": []
+      },
+      {
+        "taskMs": 133.2,
+        "selfMs": 0.6,
+        "functionName": "(program)",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "engine": 0.6
+        },
+        "callers": []
+      }
+    ],
+    "gallery-section:Buttons": [
+      {
+        "taskMs": 548.8,
+        "selfMs": 64.2,
+        "functionName": "exports.jsx",
+        "file": "http://127.0.0.1:5387/node_modules/.vite/deps/react_jsx-runtime.js?v=9276e6c2",
+        "line": 237,
+        "ownerMs": {
+          "react": 245.7,
+          "framework": 145,
+          "dom": 128.5,
+          "gc": 14.7,
+          "site": 9.9,
+          "engine": 5.3
+        },
+        "callers": [
+          {
+            "functionName": "jsx",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXRuntime.mjs",
+            "line": 13,
+            "inclusiveMs": 91.5
+          },
+          {
+            "functionName": "N",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 218,
+            "inclusiveMs": 79.6
+          },
+          {
+            "functionName": "jsxs",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXRuntime.mjs",
+            "line": 16,
+            "inclusiveMs": 67.7
+          },
+          {
+            "functionName": "hi",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 1554,
+            "inclusiveMs": 63
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 1803,
+            "inclusiveMs": 54.3
+          },
+          {
+            "functionName": "rn",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 1803,
+            "inclusiveMs": 54.3
+          },
+          {
+            "functionName": "et",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 185,
+            "inclusiveMs": 51.7
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/splitViewController-C7wVTIQd.js?v=a2aeda44",
+            "line": 1939,
+            "inclusiveMs": 38.5
+          },
+          {
+            "functionName": "T",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 172,
+            "inclusiveMs": 27.7
+          },
+          {
+            "functionName": "jsxDEV",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXDevRuntime.mjs",
+            "line": 9,
+            "inclusiveMs": 23
+          },
+          {
+            "functionName": "mirrorProps",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirror.mjs?v=a2aeda44",
+            "line": 58,
+            "inclusiveMs": 19.1
+          },
+          {
+            "functionName": "gi",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 4830,
+            "inclusiveMs": 13.2
+          }
+        ]
+      },
+      {
+        "taskMs": 184.3,
+        "selfMs": 0.8,
+        "functionName": "(program)",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "engine": 0.8
+        },
+        "callers": []
+      },
+      {
+        "taskMs": 65.2,
+        "selfMs": 0.2,
+        "functionName": "(program)",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "engine": 0.2
+        },
+        "callers": []
+      }
+    ],
+    "gallery-section:Menus & Popups": [
+      {
+        "taskMs": 655.8,
+        "selfMs": 91.2,
+        "functionName": "measure",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "react": 286.8,
+          "framework": 166.8,
+          "dom": 166.2,
+          "site": 18.5,
+          "gc": 13.5,
+          "engine": 4.3
+        },
+        "callers": [
+          {
+            "functionName": "jsx",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXRuntime.mjs",
+            "line": 13,
+            "inclusiveMs": 92.6
+          },
+          {
+            "functionName": "jsxs",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXRuntime.mjs",
+            "line": 16,
+            "inclusiveMs": 78.9
+          },
+          {
+            "functionName": "hi",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 1554,
+            "inclusiveMs": 67.1
+          },
+          {
+            "functionName": "rn",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 1803,
+            "inclusiveMs": 50.5
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 1803,
+            "inclusiveMs": 50.3
+          },
+          {
+            "functionName": "(anonymous)",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/splitViewController-C7wVTIQd.js?v=a2aeda44",
+            "line": 1939,
+            "inclusiveMs": 42.7
+          },
+          {
+            "functionName": "N",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 218,
+            "inclusiveMs": 40.3
+          },
+          {
+            "functionName": "jsxDEV",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirrorJSXDevRuntime.mjs",
+            "line": 9,
+            "inclusiveMs": 26.3
+          },
+          {
+            "functionName": "mirrorProps",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/hookMirror.mjs?v=a2aeda44",
+            "line": 58,
+            "inclusiveMs": 26.3
+          },
+          {
+            "functionName": "et",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 185,
+            "inclusiveMs": 20
+          },
+          {
+            "functionName": "gi",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/nse.js?v=a2aeda44",
+            "line": 4830,
+            "inclusiveMs": 19.6
+          },
+          {
+            "functionName": "T",
+            "file": "http://127.0.0.1:5387/node_modules/@syndromatic/syncloudos/chunks/useNSESafeArea-CShmDzyh.js?v=a2aeda44",
+            "line": 172,
+            "inclusiveMs": 19.5
+          }
+        ]
+      },
+      {
+        "taskMs": 172.7,
+        "selfMs": 0.6,
+        "functionName": "(program)",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "engine": 0.6
+        },
+        "callers": []
+      },
+      {
+        "taskMs": 86.1,
+        "selfMs": 0.2,
+        "functionName": "(program)",
+        "file": "(native)",
+        "line": 0,
+        "ownerMs": {
+          "engine": 0.2
+        },
+        "callers": []
+      }
+    ]
+  }
+}
