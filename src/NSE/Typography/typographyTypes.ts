@@ -24,15 +24,15 @@ import { normaliseTextShadow, type NSETextShadow } from "../Text/textAttributes"
 export { normaliseTextShadow };
 export type { NSETextShadow };
 
-export interface NSEFontCommandPayload {
+export interface FontCommandPayload {
   readonly fontId: string;
   readonly size: number;
 }
 
-export type NSEParagraphAlignment = "start" | "centre" | "end" | "justify";
+export type ParagraphAlignment = "start" | "centre" | "end" | "justify";
 
 export interface NSEParagraphStyle {
-  readonly alignment: NSEParagraphAlignment;
+  readonly alignment: ParagraphAlignment;
   readonly firstLineIndent: number;
   readonly headIndent: number;
   readonly tailIndent: number;
@@ -41,7 +41,7 @@ export interface NSEParagraphStyle {
 }
 
 const fontIdPattern = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
-const alignments = new Set<NSEParagraphAlignment>(["start", "centre", "end", "justify"]);
+const alignments = new Set<ParagraphAlignment>(["start", "centre", "end", "justify"]);
 
 function dataRecord(value: unknown, label: string, allowed: readonly string[]): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new TypeError(`${label} must be a plain data-only object.`);
@@ -79,7 +79,7 @@ function finiteNumber(value: unknown, label: string, minimum: number, maximum: n
   return value;
 }
 
-export function normaliseFontCommandPayload(value: unknown): NSEFontCommandPayload {
+export function normaliseFontCommandPayload(value: unknown): FontCommandPayload {
   const record = dataRecord(value, "Font command", ["fontId", "size"]);
   if (typeof record.fontId !== "string" || !fontIdPattern.test(record.fontId)) throw new TypeError("Font command requires a stable font ID.");
   return Object.freeze({ fontId: record.fontId, size: finiteNumber(record.size, "Font size", 1, 512) });
@@ -88,7 +88,7 @@ export function normaliseFontCommandPayload(value: unknown): NSEFontCommandPaylo
 export function normaliseParagraphStyle(value: unknown): NSEParagraphStyle {
   const record = dataRecord(value, "Paragraph style", ["alignment", "firstLineIndent", "headIndent", "tailIndent", "lineHeight", "tabStops"]);
   const alignment = record.alignment ?? "start";
-  if (!alignments.has(alignment as NSEParagraphAlignment)) throw new TypeError("Unsupported paragraph alignment.");
+  if (!alignments.has(alignment as ParagraphAlignment)) throw new TypeError("Unsupported paragraph alignment.");
   const firstLineIndent = finiteNumber(record.firstLineIndent ?? 0, "First-line indent", 0, 100_000);
   const headIndent = finiteNumber(record.headIndent ?? 0, "Head indent", 0, 100_000);
   const tailIndent = finiteNumber(record.tailIndent ?? 0, "Tail indent", 0, 100_000);
@@ -99,7 +99,7 @@ export function normaliseParagraphStyle(value: unknown): NSEParagraphStyle {
   for (let index = 1; index < tabStops.length; index += 1) {
     if (tabStops[index]! <= tabStops[index - 1]!) throw new TypeError("Tab stops must be strictly ascending.");
   }
-  return Object.freeze({ alignment: alignment as NSEParagraphAlignment, firstLineIndent, headIndent, tailIndent, lineHeight: lineHeight as number | "normal", tabStops: Object.freeze(tabStops) });
+  return Object.freeze({ alignment: alignment as ParagraphAlignment, firstLineIndent, headIndent, tailIndent, lineHeight: lineHeight as number | "normal", tabStops: Object.freeze(tabStops) });
 }
 
 export function normaliseParagraphStyleMutation(value: unknown): NSEParagraphStyle {
@@ -111,7 +111,7 @@ export function normaliseParagraphStyleMutation(value: unknown): NSEParagraphSty
  * text effects. A key left out is left alone; null clears that effect.
  * documentColour is the text view's background, not the selection's.
  */
-export interface NSETextAttributesMutation {
+export interface TextAttributesMutation {
   readonly underline?: boolean;
   readonly strike?: boolean;
   readonly foregroundColour?: string | null;
@@ -127,10 +127,10 @@ function optionalColour(value: unknown, label: string): string | null {
   return value.toLowerCase();
 }
 
-export function normaliseTextAttributesMutation(value: unknown): NSETextAttributesMutation {
+export function normaliseTextAttributesMutation(value: unknown): TextAttributesMutation {
   const record = dataRecord(value, "Text attributes", ["underline", "strike", "foregroundColour", "shadow", "documentColour"]);
   if (Object.keys(record).length === 0) throw new TypeError("Text attributes must change at least one effect.");
-  const mutation: { -readonly [K in keyof NSETextAttributesMutation]: NSETextAttributesMutation[K] } = {};
+  const mutation: { -readonly [K in keyof TextAttributesMutation]: TextAttributesMutation[K] } = {};
   for (const key of ["underline", "strike"] as const) {
     if (!(key in record)) continue;
     if (typeof record[key] !== "boolean") throw new TypeError(`${key} must be boolean.`);

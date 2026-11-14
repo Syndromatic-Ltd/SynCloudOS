@@ -22,7 +22,7 @@ import { NSEData } from "../../src/Foundation/NSEData";
 import { describe, expect, it, vi } from "vitest";
 import { createSynWareFontAccess, createFontCatalogueResourceLoader, type SynWareFontCatalogue } from "../../src/SynCloudOS/AppSDK/fontAccess";
 import { defineFontDeclaration } from "../../src/NSE/Typography";
-import { NSEFontLibrary } from "../../src/NSE/Typography/NSEFontLibrary";
+import { FontLibrary } from "../../src/NSE/Typography/NSEFontLibrary";
 import { NSEFontManager } from "../../src/NSE/Typography/NSEFontManager";
 import { createRuntimeCacheRegistry } from "../../src/SynCloudOS/Cache";
 import { createTFXFontHost } from "../../src/SynCloudOS/TextFX/TFXFontHost";
@@ -109,7 +109,7 @@ describe("managed byte-backed font resolution",()=>{
   });
   it("restores imported bytes and registers them through the same real mount authority",async()=>{
     const {owner,host,scope}=setup(); const source=readNotoSans();
-    const library=new NSEFontLibrary({storage:null,preferences:null,faceHost:{register:async()=>()=>{}}});
+    const library=new FontLibrary({storage:null,preferences:null,faceHost:{register:async()=>()=>{}}});
     const imported=await library.addFonts([{name:"Imported.ttf",size:source.length,arrayBuffer:async()=>source.slice().buffer as ArrayBuffer}]);
     const manager=new NSEFontManager({families:declaration.families,library});
     const access=createSynWareFontAccess({manager,declaration},scope,owner.signal);

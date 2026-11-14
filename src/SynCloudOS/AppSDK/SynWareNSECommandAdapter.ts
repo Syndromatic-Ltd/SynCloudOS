@@ -18,7 +18,7 @@
  */
 
 import type { NSEDragCommandPort } from "../../NSE/Drag";
-import type { NSEFontPanelCommandPort, NSEFontPanelCommandResult } from "../../NSE/Typography";
+import type { FontPanelCommandPort, FontPanelCommandResult } from "../../NSE/Typography";
 import type { AppCommandClient } from "./appClientTypes";
 
 /** Bridges the two drag-command operations NSE controls require. This keeps
@@ -41,11 +41,11 @@ export function createSynWareNSEDragCommandPort(commands: AppCommandClient): NSE
 
 /** Font-panel actions are dispatch-only from an app's point of view. The
  * command responder, validation, and acceptance records stay host-owned. */
-export function createSynWareNSEFontPanelCommandPort(commands: AppCommandClient): NSEFontPanelCommandPort {
-  const port: NSEFontPanelCommandPort = {
+export function createSynWareNSEFontPanelCommandPort(commands: AppCommandClient): FontPanelCommandPort {
+  const port: FontPanelCommandPort = {
     async execute(commandId, payload, signal) {
       signal.throwIfAborted();
-      const result = await commands.dispatch<NSEFontPanelCommandResult>(
+      const result = await commands.dispatch<FontPanelCommandResult>(
         commandId,
         payload,
         { source: "toolbar", signal },

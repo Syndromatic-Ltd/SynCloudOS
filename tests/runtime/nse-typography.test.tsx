@@ -31,7 +31,7 @@ import {
   NSERulerView,
   normaliseFontDescriptor,
   normaliseParagraphStyle,
-  type NSEFontPanelCommandPort,
+  type FontPanelCommandPort,
   type NSEParagraphStyle,
 } from "../../src/NSE/Typography";
 import { OverlayProvider } from "../../src/NSE/Overlays/OverlayProvider";
@@ -172,7 +172,7 @@ describe("hosted font panel and focused commands", () => {
     document.body.append(anchor);
     const present = vi.fn(async () => "font-panel-window");
     const dismiss = vi.fn(async () => ({ outcome: "closed" as const }));
-    const commandPort: NSEFontPanelCommandPort = { execute: vi.fn(async () => ({ status: "executed" as const })) };
+    const commandPort: FontPanelCommandPort = { execute: vi.fn(async () => ({ status: "executed" as const })) };
 
     render(<SynCloudOSProvider runtime={runtime}><OverlayHarness runtime={runtime}><WindowSurfaceBridgeProvider bridge={{ present, dismiss }}><NSEFontPanel open anchor={anchor} manager={manager} commandPort={commandPort} parentResponderId="workspace" onOpenChange={() => undefined} /></WindowSurfaceBridgeProvider></OverlayHarness></SynCloudOSProvider>);
 
@@ -308,8 +308,8 @@ describe("hosted font panel and focused commands", () => {
     const anchor = document.createElement("button");
     document.body.append(anchor);
     const pending: Array<{ commandId: string; signal: AbortSignal; resolve: (value: { status: "executed" }) => void }> = [];
-    const commandPort: NSEFontPanelCommandPort = {
-      execute: vi.fn<NSEFontPanelCommandPort["execute"]>((commandId, _payload, signal) => new Promise((resolve) => pending.push({ commandId, signal, resolve }))),
+    const commandPort: FontPanelCommandPort = {
+      execute: vi.fn<FontPanelCommandPort["execute"]>((commandId, _payload, signal) => new Promise((resolve) => pending.push({ commandId, signal, resolve }))),
     };
     const manager = fixtureManager();
     const panel = (open: boolean) => <SynCloudOSProvider runtime={runtime}><OverlayHarness runtime={runtime}><NSEFontPanel open={open} showsRuler anchor={anchor} manager={manager} commandPort={commandPort} parentResponderId="workspace" onOpenChange={() => undefined} /></OverlayHarness></SynCloudOSProvider>;
@@ -338,8 +338,8 @@ describe("hosted font panel and focused commands", () => {
     const anchor = document.createElement("button");
     document.body.append(anchor);
     const signals: AbortSignal[] = [];
-    const commandPort: NSEFontPanelCommandPort = {
-      execute: vi.fn<NSEFontPanelCommandPort["execute"]>((_commandId, _payload, signal) => {
+    const commandPort: FontPanelCommandPort = {
+      execute: vi.fn<FontPanelCommandPort["execute"]>((_commandId, _payload, signal) => {
         signals.push(signal);
         return new Promise(() => undefined);
       }),
