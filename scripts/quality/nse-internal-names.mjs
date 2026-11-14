@@ -76,6 +76,8 @@ export function collectSrcNSEDeclarations(repositoryRoot = process.cwd()) {
 
   for (const filePath of files) {
     const text = readFileSync(filePath, "utf8");
+    // Escaped identifier spellings still need TypeScript parsing.
+    if (!/NSE[A-Z]|\\u/u.test(text)) continue;
     const sourceFile = ts.createSourceFile(filePath, text, ts.ScriptTarget.ES2022, true);
     const relativePath = relative(root, filePath).replaceAll("\\", "/");
 

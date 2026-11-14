@@ -2,7 +2,7 @@
 import React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
-import { NSEInputBox, NSETextField } from "../../src/NSE/Controls/Fields/NSEFields";
+import { InputBox, NSETextField } from "../../src/NSE/Controls/Fields/NSEFields";
 import { NSESearchField } from "../../src/NSE/Controls/Fields/NSESearchField";
 import { NSESecureTextField } from "../../src/NSE/Controls/Fields/NSESecureTextField";
 import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
@@ -10,7 +10,7 @@ import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 afterEach(cleanup);
 it("publishes native editors in an input group while preserving nested control ownership", () => {
   const field = React.createRef<HTMLInputElement>();
-  const { container } = render(<NSEInputBox><input ref={field} aria-label="Direct" defaultValue="Value" /><label>Nested<textarea aria-label="Nested" defaultValue="Text" /></label><NSEButton title="Copy" /></NSEInputBox>);
+  const { container } = render(<InputBox><input ref={field} aria-label="Direct" defaultValue="Value" /><label>Nested<textarea aria-label="Nested" defaultValue="Text" /></label><NSEButton title="Copy" /></InputBox>);
   for (const name of ["Direct", "Nested"]) expect(screen.getByRole("textbox", { name }).getAttribute("data-nse-part")).toBe("field");
   expect(container.querySelector('[data-nse-control="button"]')?.getAttribute("data-nse-part")).toBe("background");
   expect((screen.getByRole("textbox", { name: "Direct" }) as HTMLInputElement).value).toBe("Value");
@@ -27,7 +27,7 @@ it("publishes grouped-field geometry and validation without replacing native inp
   expect(screen.getByRole("textbox").getAttribute("aria-invalid")).toBe("true");
 });
 it("publishes an input group's retained highlight separately from keyboard focus", () => {
-  const { container } = render(<NSEInputBox alwaysLooksFocused><input aria-label="Export" /></NSEInputBox>);
+  const { container } = render(<InputBox alwaysLooksFocused><input aria-label="Export" /></InputBox>);
   const root = container.firstElementChild!;
   expect(root.getAttribute("data-nse-role")).toBe("group");
   expect(root.hasAttribute("data-nse-highlighted")).toBe(true);

@@ -30,13 +30,13 @@ import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 /** A combo binding owns editable text; selected domain objects retain their own typed channel. */
 export function NSEComboBox<T>(props: NSEBoundValueProps<string,NSEComboBoxProps<T>,"inputValue"|"onInputValueChange"|"undoManager">) {
   const resolved=useNSEValueBinding<string,NSEComboBoxProps<T>,"inputValue"|"onInputValueChange"|"undoManager">(props,{value:"inputValue",change:"onInputValueChange",fallback:""});
-  return <NSEComboBoxControl {...resolved} onValueChange={(value,reason)=>{
+  return <ComboBoxControl {...resolved} onValueChange={(value,reason)=>{
     if(props.binding) resolved.onInputValueChange(reason==="completion" ? resolved.dataSource.labelForItem(value as T) : typeof value==="string"?value:"");
     resolved.onValueChange(value,reason);
   }} />;
 }
 
-function NSEComboBoxControl<T>(props: NSEComboBoxProps<T>) {
+function ComboBoxControl<T>(props: NSEComboBoxProps<T>) {
   const theme = useNSEThemeInteraction<HTMLSpanElement>(props.isEnabled !== false);
   const disabled = props.isEnabled === false;
   useNSEOverlayProvider();

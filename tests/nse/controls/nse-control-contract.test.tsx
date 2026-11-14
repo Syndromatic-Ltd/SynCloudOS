@@ -22,7 +22,7 @@
 import React, { useMemo, useState } from "react";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSERadioGroup, NSETextField } from "../../../src/NSE/Controls/Fields/NSEFields";
+import { RadioGroup, NSETextField } from "../../../src/NSE/Controls/Fields/NSEFields";
 import { ControlRuntimeProvider, useNSEControlCommand } from "../../../src/NSE/Controls/Core";
 import { NSEButton } from "../../../src/NSE/Controls/Buttons/NSEButton";
 
@@ -140,7 +140,7 @@ describe("NSE control contracts", () => {
       getPresentationGeneration: () => ({ registryGeneration: 0, responderGeneration: 0 }), validate,
       prepareDispatch: vi.fn(), dispatch: vi.fn(),
     } };
-    render(<ControlRuntimeProvider port={port}><NSERadioGroup label="Choice" options={[{ value: "restricted", label: "Restricted", command: { id: "radio.choose" } }]} /></ControlRuntimeProvider>);
+    render(<ControlRuntimeProvider port={port}><RadioGroup label="Choice" options={[{ value: "restricted", label: "Restricted", command: { id: "radio.choose" } }]} /></ControlRuntimeProvider>);
     await waitFor(() => expect(validate).toHaveBeenCalled());
     await waitFor(() => expect((screen.getByRole("radio", { name: "Restricted" }) as HTMLInputElement).disabled).toBe(true));
   });
@@ -152,7 +152,7 @@ describe("NSE control contracts", () => {
       validate: async () => ({ commandId: "radio.choose", responderId: "form", title: "B", enabled: false, denied: true, hidden: false, state: "off" as const, stale: false }),
       prepareDispatch: vi.fn(), dispatch: vi.fn(),
     } };
-    render(<ControlRuntimeProvider port={port}><NSERadioGroup label="Navigation" defaultValue={selected} onValueChange={change} options={[{ value: "a", label: "A" }, { value: "b", label: "B", command: { id: "radio.choose" } }, { value: "c", label: "C" }]} /></ControlRuntimeProvider>);
+    render(<ControlRuntimeProvider port={port}><RadioGroup label="Navigation" defaultValue={selected} onValueChange={change} options={[{ value: "a", label: "A" }, { value: "b", label: "B", command: { id: "radio.choose" } }, { value: "c", label: "C" }]} /></ControlRuntimeProvider>);
     const a = screen.getByRole("radio", { name: "A" }) as HTMLInputElement;
     await waitFor(() => expect((screen.getByRole("radio", { name: "B" }) as HTMLInputElement).disabled).toBe(true));
     await waitFor(() => expect(a.tabIndex).toBe(0));
@@ -201,7 +201,7 @@ describe("NSE control contracts", () => {
           action="flag.set"
           actionPayload={true}
         />
-        <NSERadioGroup
+        <RadioGroup
           label="Command radio"
           defaultValue="first"
           options={[

@@ -84,10 +84,10 @@ export interface NSESearchFieldProps {
 }
 
 export function NSESearchField(props: NSEBoundValueProps<string, NSESearchFieldProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>) {
-  return <NSESearchFieldControl {...useNSEValueBinding<string, NSESearchFieldProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:''})} />;
+  return <SearchFieldControl {...useNSEValueBinding<string, NSESearchFieldProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:''})} />;
 }
 
-function NSESearchFieldControl(props: NSESearchFieldProps) {
+function SearchFieldControl(props: NSESearchFieldProps) {
   const theme = useNSEThemeInteraction<HTMLLabelElement>(props.isEnabled !== false);
   const controlled = props.value !== undefined;
   const [stored, setStored] = useState(props.defaultValue ?? "");

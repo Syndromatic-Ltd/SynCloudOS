@@ -33,7 +33,7 @@ import { NSEWindowController } from "../Application/NSEWindowController";
 import { NSETitlebarAccessoryViewController } from "../Application/NSETitlebarAccessoryViewController";
 import { WindowTitlebarContent } from "../Windows/windowTitlebarContext";
 import { NSEImage } from "../Controls/Images/NSEImageResource";
-import { NSEControlImage } from "../Controls/Images/NSEControlImage";
+import { ControlImage } from "../Controls/Images/NSEControlImage";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { projectNSEAppearance, useNSEAppearance } from "../Appearance";
 
@@ -355,7 +355,7 @@ export function NSEPreferencesToast({ open, focusScopeId, title, panes, initialP
                                   {pane.accessory}
                                 </span>
                               ) : null}
-                              <span data-nse-part="disclosure" className="nse-prefs-chevron" aria-hidden="true"><NSEControlImage image={NSEImage.named(NSEImage.goForwardTemplateName)} /></span>
+                              <span data-nse-part="disclosure" className="nse-prefs-chevron" aria-hidden="true"><ControlImage image={NSEImage.named(NSEImage.goForwardTemplateName)} /></span>
                             </span>
                           )}
                           onClick={() => goToPane(pane.id)}
