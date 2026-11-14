@@ -92,7 +92,7 @@ The worker mirrors received pushes into the open runtime's NotificationCenter an
 
 `application.dockTile.badgeLabel` is `NSDockTile.badgeLabel`: set text or a number as a string; set `""` to reveal the notification count again. Webspring uses the existing Atmo Badge renderer. The browser's installed-app badge combines NotificationCenter's badge snapshot with app labels. Numeric labels supply a count; textual labels contribute one attention mark. The OS may choose to display only an attention mark. Labels are bounded to 64 characters and stop accepting updates after the application closes.
 
-Installed desktop windows that expose Window Controls Overlay use the real `NSEWindowTitleBar` renderer in the browser's reported draggable title area. Atmo supplies the appearance. Native window controls stay with the browser/OS. Ordinary browser tabs draw no extra title bar.
+The browser adapter detects Window Controls Overlay and reads the title area from the browser. The operating system owns its native buttons. Live installed-window titlebar placement awaits device verification.
 
 `NSEViewController.transition(from, to, crossfade, completion)` can use native View Transitions. The native backend uses the animation context's duration and completion lifetime; unsupported hosts, reduced motion and other effects retain AFX. The temporary snapshot styling is owned and removed by the transition.
 

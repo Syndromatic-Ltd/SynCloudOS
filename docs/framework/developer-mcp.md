@@ -83,7 +83,7 @@ Use entry names such as `sdk`, `nse` or `fx/animation`. An entry without a query
 
 Every NSE symbol carries `appkitCounterpart`, from the installed `docs/framework/appkit-counterparts.json`: the AppKit, Foundation or Core framework name it follows (`"NSPopUpButton"`, `"NSAppearance.Name"`), or `{ none, replacement? }` saying why it has none and what replaces it. A type such as `NSEButtonProps` takes its class's counterpart. Write NSE code the way the counterpart is written in AppKit, and prefer the replacement of an entry with none.
 
-Broad `application menu`, `settings`, `preferences` and `account` queries prioritise the public `useApplicationMenuTrigger` hook and `SynWareApplicationMenuManifest` before lower-level menu props or availability APIs. Documentation ranking favours the corresponding application-menu/Preferences sections and worked examples. Exact exported names still take precedence; equally relevant symbols from the main `sdk` entry rank before other entries.
+Broad `application menu`, `settings`, `preferences` and `account` queries prioritise `NSEToolbarItem`, `NSEApplication` and `NSEMenuBar`. Exact exported names retain priority.
 
 ### `validate`
 
@@ -151,7 +151,7 @@ Creates a conventional project folder. By default (`authoring: "separate"`), `Na
 
 `policy` maps directly to `runtime.configurationProfiles`, and `presentation` to `runtime.presentation`. Both are checked against the installed manifest schema before any files are written. Omitting `policy` preserves the normal private/default access behaviour; scaffolding never silently grants public access. With host authentication `"disabled"` or `"optional"`, the **primary** application must explicitly declare `policy: { public: true }`. The returned `nextSteps` flags this requirement whenever public access has not been requested. Do not apply it to private applications indiscriminately.
 
-For example, scaffold a deliberate public primary with `{ bundleIdentifier: "org.example.notes", name: "Notes", route: "/notes", policy: { public: true }, contentApplicationMenu: true }`. `contentApplicationMenu: true` adds `applicationMenu: { trigger: "content" }` and an `ApplicationMenuButton` component that renders the `useApplicationMenuTrigger()` trigger as an `NSEButton`, with its anchor, open state, accessible menu semantics and toggle connected, placed in the view. This is required for a fullscreen primary under `"optional"` or `"required"` authentication, so people can reach Preferences, Account, Sign In and Log Out.
+For example, scaffold a public primary with `{ bundleIdentifier: "org.example.notes", name: "Notes", route: "/notes", policy: { public: true }, applicationMenuToolbar: true }`. The scaffold adds a gear item to its main window toolbar. Apps choose which menu surfaces they expose.
 
 For a secondary windowed inspector, choose `presentation: "windowedView"` and declare only the access policy it actually needs. Omitting presentation also returns that windowed-secondary reminder; it is distinct from the desktop/tablet/mobile device presentations.
 

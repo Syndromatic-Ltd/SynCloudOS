@@ -101,7 +101,7 @@ import.meta.hot?.dispose(() => host.dispose("hot reload"));
 
 This mounts the application's real session without Webspring or a top bar. The default `application.frame: "fullscreen"` fills the page; `"declared"` honours its manifest presentation. This is not the browser's native Fullscreen API. Secondary applications must use `windowedView`, `systemSheet` or `backgroundService`, not `appView`. The site root opens the primary application's entry route; declared nested routes remain available.
 
-An authenticated fullscreen primary must also declare `applicationMenu: { trigger: "content" }` and render an anchored `useApplicationMenuTrigger()` button. Otherwise its users cannot reach Preferences, Account, Sign In or Log Out. The [application menu guide](commands-responders-undo.md) and [authentication guide](authentication.md) cover these requirements.
+An application can opt into an application menu with `NSEApplication.mainMenu`, `NSEToolbarItem.applicationMenu("gear")`, or both. The [authentication guide](authentication.md) explains the account actions.
 
 ## Add a Webspring launcher instead
 

@@ -217,8 +217,8 @@ Hooks give each client a React shape, subscribing to changes and releasing resou
 | Area | Hooks |
 | --- | --- |
 | Session | `useSCOS`, `useLifecycle`, `useEvents`, `useErrors` |
-| Commands | `useCommands`, `useApplicationMenuTrigger`, `useQuickSwitchTrigger` |
-| Documents and windows | `useDocument`, `useWindow`, `useWindowChrome`, `useWorkArea`, `useWorkAreaSnapshot` |
+| Commands | `useCommands`, `useQuickSwitchTrigger` |
+| Documents and windows | `useDocument`, `useNSEWindow`, `useNSEApplication`, `useWorkArea`, `useWorkAreaSnapshot` |
 | Routing | `useRouter`, `useRouteData`, `useRouteState` |
 | Data and identity | `usePersistence`, `useIdentity`, `useIdentitySnapshot`, `useScheduler` |
 | Environment | `useMediaQuery`, `useMediaQueries`, `useConnectivity`, `useAppearance`, `useSettingsAvailability` |

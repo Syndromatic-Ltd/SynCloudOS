@@ -94,7 +94,7 @@ Application authoring has a root entry, `@syndromatic/syncloudos`. NSE and FX ke
 | `useSynWare()` | App-bound `SCOS`, or `useSCOS()` in shared React components |
 | `useSynWareLocalisedStrings("notes")` | `useStrings()`; no hand-written app identity |
 | `useSynWareAppearance()` | `useAppearance()` |
-| Other `useSynWare…` hooks | Their unprefixed public names, such as `useCommands`, `useRouter`, `useAnimations` and `useApplicationMenuTrigger` |
+| Other `useSynWare…` hooks | Their unprefixed public names, such as `useCommands`, `useRouter`, and `useAnimations` |
 | An invented `/testing` package entry | The public `@syndromatic/syncloudos/sdk/testing` entry |
 
 `SCOS` imports inside an app folder are bound by the plugin and remain valid after `await` and in callbacks while the app is live. Shared components use `useSCOS()` to choose their nearest mounted provider. Merely reading `SCOS` does not subscribe a React component; use reactive hooks or observable controller state for values that change.
@@ -159,7 +159,7 @@ Hosts that genuinely build rendering surfaces use `createAFXLayer(surface, sched
 | `content`, `contentSources`, `registerContentSource` and `LowerContentShelfView` | `defineWidget` and `WebspringWidgetShelf` |
 | An always-present loading shelf | No widgets means no shelf; each widget declares empty behaviour and has bounded loading/error/retry states |
 | `frame.layout: "simple"` or `"defacto"` | Removed; content is full-bleed in the app frame |
-| A hard-coded cotton app body | `frame.background`, default `"system"`; use an explicit surface to retain cotton or `"none"` for app-drawn content |
+| A hard-coded cotton app body | `NSEWindow.backgroundColor` and `NSEWindow.isOpaque` |
 | Hard-coded return artwork | `branding.homeIcon`, or the generic house glyph |
 | A generic "Preferences" system entry | "System Preferences…", distinct from an app's own preferences |
 | Private preference-pane registration | `definePreferencePane` and discovered `.prefPane` folders |

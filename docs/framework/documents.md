@@ -155,7 +155,7 @@ Binary content such as images and audio lives beside the model as document resou
 
 ## Documents and windows
 
-A document can appear in one or more windows. `useWindow().client.openDocumentWindow({ documentId, title, restorationKey })` opens one. The [windows guide](windows.md) covers presentation, restoration and close behaviour.
+A document can appear in one or more windows. `SCOS.windows.openDocumentWindow({ documentId, title, restorationKey })` opens one. The [windows guide](windows.md) covers presentation, restoration and close behaviour.
 
 ## Accessibility
 

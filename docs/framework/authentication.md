@@ -24,7 +24,7 @@ The shorthand strings `"optional"` and `"required"` construct no authentication 
 - With `"optional"` (string or object), the primary bundle declares `runtime.policy.public` in its manifest, because it launches before anyone signs in.
 - With `"required"`, the sign-in window is presented before the primary application launches. The `application: { id }` host accepts the same `authentication` values as the Webspring shell; see [Getting started](getting-started.md#mount-one-application).
 
-In a single-application host the **Account** pane of Preferences, Sign In and Log Out live in the application menu. A primary that fills the page has no system top bar, so it must declare `applicationMenu: { trigger: "content" }` and render a button with `useApplicationMenuTrigger()`; with `"optional"` or `"required"` authentication, mounting rejects without it. See [Mount one application in Getting started](getting-started.md#mount-one-application).
+A single-application host uses the same application menu as Webspring. Apps expose it through their main menu bar, an application-menu toolbar item, or both. When the host enables authentication, the menu presents Sign In or Log Out for the current session. See [Mount one application in Getting started](getting-started.md#mount-one-application).
 
 Optional sign-in offers **Cancel**, including when no authentication service is configured. Cancelling returns to the presentation that requested sign-in: the Board remains on the Board, while a single-application host resumes its existing application session, route and content. It does not create or authorise a session. Required sign-in has no Cancel action.
 

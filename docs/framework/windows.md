@@ -67,17 +67,17 @@ A panel can become key, which makes it the target of keyboard commands, without 
 
 Use `useNSEWindow()` and `useNSEApplication()` in a function component rendered by an application. A class window uses `this.window`. An application shown in Webspring's stage has a real window ID. Moving that window to the floating layer keeps its controller and rendered content.
 
-`window.toggleFullScreen()` asks the host to change presentation. `window.isFullScreen` reflects host confirmation. The window's regular bounds and zoom state survive a round trip. A standard window with `collectionBehavior = ["fullScreenPrimary"]` can enter full screen. Auxiliary windows can accompany a primary window.
+`window.toggleFullScreen()` asks the host to change presentation. `window.isFullScreen` reflects host confirmation. The window's regular bounds and zoom state survive a round trip. A standard window with `collectionBehavior = ["fullScreenPrimary"]` can enter full screen.
 
 ## Open a window for a document
 
 ```tsx
-import { useWindow } from "@syndromatic/syncloudos/sdk";
+import { useSCOS } from "@syndromatic/syncloudos/sdk";
 
 export function useOpenNoteWindow() {
-  const { client } = useWindow();
+  const { windows } = useSCOS();
   return (documentId: string) =>
-    client.openDocumentWindow({
+    windows.openDocumentWindow({
       documentId,
       title: "Welcome Note",
       restorationKey: `notes.${documentId}`,
