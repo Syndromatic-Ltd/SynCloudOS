@@ -24,7 +24,7 @@ beforeEach(() => {
   project = mkdtempSync(resolve(tmpdir(), "syncloudos-mcp-test-"));
   put("package.json", JSON.stringify({ name: "consumer", version: "2.3.4", dependencies: { "@syndromatic/syncloudos": "1.0.0-beta.2" } }));
   put("vite.config.ts", 'import { synCloudOS } from "@syndromatic/syncloudos/vite"; export default {plugins:[synCloudOS({appsDirectory:"applications",webspringEntry:false})]};');
-  put("node_modules/@syndromatic/syncloudos/package.json", JSON.stringify({ name: "@syndromatic/syncloudos", version: "1.0.0-beta.2", exports: { ".": { types: "./index.d.ts" }, "./sdk": { types: "./sdk.d.ts" }, "./nse/controls": { types: "./nse-controls.d.ts" }, "./nse/styles.css": "./nse/styles.css" } }));
+  put("node_modules/@syndromatic/syncloudos/package.json", JSON.stringify({ name: "@syndromatic/syncloudos", version: "1.0.0-beta.2", exports: { ".": { types: "./index.d.ts" }, "./sdk": { types: "./sdk.d.ts" }, "./nse": { types: "./nse.d.ts" }, "./nse/controls": { types: "./nse-controls.d.ts" }, "./nse/styles.css": "./nse/styles.css" } }));
   const sdk = resolve(project, "node_modules/@syndromatic/syncloudos");
   cpSync(resolve(repository, "tests/fixtures/developer-mcp/sdk.d.ts"), resolve(sdk, "sdk.d.ts"));
   put("node_modules/@syndromatic/syncloudos/index.d.ts", "export declare const SCOS: { app: { bundleIdentifier: string; displayName: string; version: string } };\n");
@@ -72,16 +72,16 @@ describe("developer MCP tools", () => {
   });
   it.each(["application menu", "settings", "preferences", "account"])("prioritises the public application-menu entry and example for %s", async query => {
     put("node_modules/@syndromatic/syncloudos/sdk.d.ts", [
-      "export declare function useApplicationMenuTrigger(): { open(anchor: HTMLElement): void } | null;",
-      "export interface SynWareApplicationMenuManifest { trigger?: 'content'; preferences?: { commandId: string }; }",
+      "export declare const NSEToolbarItem: { applicationMenu(glyph: string): unknown };",
+      "export declare class NSEApplication { mainMenu: unknown; }",
       "export interface NSEApplicationMenuProps { settings: unknown; }",
       "export declare function getAccountAvailability(): boolean;",
     ].join("\n"));
-    put("node_modules/@syndromatic/syncloudos/docs/framework/menu.md", '# Menus\n\n## Application menu and Preferences\n\nAccount opens through System Preferences. Declare applicationMenu: { trigger: "content" }.\n\n```tsx\nconst menu = useApplicationMenuTrigger();\n```\n');
+    put("node_modules/@syndromatic/syncloudos/docs/framework/menu.md", '# Menus\n\n## Application menu and Preferences\n\nAccount opens through System Preferences. Set the application menu toolbar item.\n\n```tsx\nconst menu = NSEToolbarItem.applicationMenu("gear");\n```\n');
     put("node_modules/@syndromatic/syncloudos/docs/framework/low-level.md", "# Low-level settings and account\n\nNSEApplicationMenuProps configures menu props.\n");
     const result = await lookupSdk({ projectRoot: project, query });
-    expect(result.symbols[0].name).toBe("useApplicationMenuTrigger");
-    expect(result.symbols[1].name).toBe("SynWareApplicationMenuManifest");
+    expect(result.symbols[0].name).toBe("NSEToolbarItem");
+    expect(result.symbols[1].name).toBe("NSEApplication");
     expect(result.docs[0].file).toBe("docs/framework/menu.md");
     expect(result.docs[0].text).toContain("```tsx");
   });
@@ -101,61 +101,20 @@ describe("developer MCP tools", () => {
     await expect(scaffold({ projectRoot: project, bundleIdentifier: "org.example.bad", name: "Bad", route: "/bad", presentation: "window" })).rejects.toThrow();
     expect((await inspectProject({ projectRoot: project })).bundles).toEqual([]);
   });
-  it("scaffolds a working NSEButton content application-menu trigger only when explicitly requested", async () => {
-    const result = await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary", policy: { public: true }, contentApplicationMenu: true });
-    const manifest = parseManifest(resolve(project, result.createdPaths[0]));
-    expect(manifest.applicationMenu).toEqual({ trigger: "content" });
-    expect(readFileSync(resolve(project, "applications/Primary.app/Contents/index.tsx"), "utf8")).toContain("extends NSEApplication");
-    const code = ts.transpileModule(readFileSync(resolve(project, "applications/Primary.app/Contents/Views/ApplicationMenuButton.tsx"), "utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText;
-    const anchors: unknown[] = [];
-    let toggles = 0;
-    let port: { setAnchor(element: unknown): void; toggle(): void; label: string; open: boolean } | null = { setAnchor: element => { anchors.push(element); }, toggle: () => { toggles++; }, label: "Application menu", open: true };
-    type GeneratedButton = { type: unknown; props: { isEnabled: boolean; ref(element: unknown): void; onClick(): void } };
-    const NSEButton = function NSEButton() { return null; };
-    const module: { exports: { ApplicationMenuButton?: () => GeneratedButton } } = { exports: {} };
-    const require = createRequire(import.meta.url);
-    new Function("require", "module", "exports", code)((name: string) => name === "@syndromatic/syncloudos" ? { useApplicationMenuTrigger: () => port } : name === "@syndromatic/syncloudos/nse/controls" ? { NSEButton } : require(name), module, module.exports);
-    const render = module.exports.ApplicationMenuButton!;
-    const button = render();
-    expect(button.type).toBe(NSEButton);
-    expect(button.props).toMatchObject({ isEnabled: true, "aria-haspopup": "menu", "aria-expanded": true, title: "Application menu" });
-    button.props.ref("anchor");
-    button.props.onClick();
-    expect(anchors).toEqual(["anchor"]);
-    expect(toggles).toBe(1);
-    port = null;
-    expect(render().props.isEnabled).toBe(false);
-  });
-  it("keeps public scaffolds without a content menu explicit about authenticated fullscreen hosting", async () => {
-    const result = await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary", policy: { public: true } });
-    expect(parseManifest(resolve(project, result.createdPaths[0])).applicationMenu).toBeUndefined();
-    expect(result.nextSteps.some((step: string) => step.includes("optional") && step.includes("required") && step.includes("applicationMenu"))).toBe(true);
-  });
-  it("keeps the content-menu next step when explicit policy and presentation flags are given, but not for a windowed secondary", async () => {
-    const primary = await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary", policy: { public: true, requiresLogin: false }, presentation: "appView", contentApplicationMenu: false });
-    expect(primary.nextSteps.some((step: string) => step.includes('applicationMenu: { trigger: "content" }') && step.includes("useApplicationMenuTrigger"))).toBe(true);
-    const secondary = await scaffold({ projectRoot: project, bundleIdentifier: "org.example.secondary", name: "Secondary", route: "/secondary", policy: { public: true }, presentation: "windowedView" });
-    expect(secondary.nextSteps.some((step: string) => step.includes("applicationMenu"))).toBe(false);
-  });
-  it.each([
-    ["authentication: \"optional\", application: { bundleIdentifier: \"org.example.primary\" }", undefined],
-    ["authentication: { policy: \"required\" }, application: { bundleIdentifier: \"org.example.primary\", frame: \"fullscreen\" }", "windowedView"],
-    ["authentication: \"required\", application: { bundleIdentifier: \"org.example.primary\", frame: \"declared\" }", "appView"],
-  ])("finds a missing content-menu declaration in a literal primary mount: %s", async (options, presentation) => {
-    await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary", presentation });
-    put("src/main.tsx", `import { mountSynCloudOS as mount } from "@syndromatic/syncloudos/browser"; mount({ ${options} });`);
-    const result = await validateProject({ projectRoot: project, typescript: false });
-    expect(result.host.status).toBe("checked");
-    expect(result.findings).toContainEqual(expect.objectContaining({ file: "applications/Primary.app/Contents/Info.ts", rule: "synware.application-menu" }));
-    expect(result.ok).toBe(false);
+  it.each([false, true])("adds a toolbar item only when requested (%s)", async applicationMenuToolbar => {
+    const result = await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary", applicationMenuToolbar });
+    const module = readFileSync(resolve(project, "applications/Primary.app/Contents/index.tsx"), "utf8");
+    expect(module.includes('NSEToolbarItem.applicationMenu("gear")')).toBe(applicationMenuToolbar);
+    expect(module.includes("static override mainWindow")).toBe(applicationMenuToolbar);
+    expect(parseManifest(resolve(project, result.createdPaths[0])).runtime?.presentation).toBeUndefined();
   });
   it.each([
     ["authentication: \"disabled\", application: { bundleIdentifier: \"org.example.primary\" }", undefined, false],
     ["application: { bundleIdentifier: \"org.example.primary\" }", undefined, false],
     ["authentication: \"optional\", application: { bundleIdentifier: \"org.example.primary\", frame: \"declared\" }", "windowedView", false],
     ["authentication: \"required\", application: { bundleIdentifier: \"org.example.primary\" }", undefined, true],
-  ])("does not flag supported literal host configurations: %s", async (options, presentation, contentApplicationMenu) => {
-    await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary", presentation, contentApplicationMenu });
+  ])("does not flag supported literal host configurations: %s", async (options, presentation, applicationMenuToolbar) => {
+    await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary", presentation, applicationMenuToolbar });
     put("src/main.tsx", `import { mountSynCloudOS } from "@syndromatic/syncloudos/browser"; mountSynCloudOS({ ${options} });`);
     const result = await validateProject({ projectRoot: project, typescript: false });
     expect(result.host.status).toBe("checked");
@@ -183,7 +142,7 @@ describe("developer MCP tools", () => {
     put("src/main.tsx", "import { mountSynCloudOS } from \"@syndromatic/syncloudos/browser\"; const element = document.body, bundles = []; const host = await mountSynCloudOS({ element, bundles, application: { bundleIdentifier: \"org.example.primary\", frame: \"fullscreen\" }, authentication: \"optional\" });");
     const result = await validateProject({ projectRoot: project, typescript: false });
     expect(result.host).toMatchObject({ status: "checked", authentication: "optional", application: { bundleIdentifier: "org.example.primary", frame: "fullscreen" } });
-    expect(result.findings).toContainEqual(expect.objectContaining({ rule: "synware.application-menu" }));
+    expect(result.findings).toEqual([]);
   });
   it("leaves a shorthand authentication or application value unresolved", async () => {
     await scaffold({ projectRoot: project, bundleIdentifier: "org.example.primary", name: "Primary", route: "/primary" });
@@ -217,7 +176,7 @@ describe("developer MCP tools", () => {
     expect(result.findings).toEqual([]);
   });
   it("reports no idiom warnings for the default class scaffold", async () => {
-    await scaffold({ projectRoot: project, bundleIdentifier: "org.example.field", name: "Field", route: "/field", policy: { public: true }, contentApplicationMenu: true });
+    await scaffold({ projectRoot: project, bundleIdentifier: "org.example.field", name: "Field", route: "/field", policy: { public: true }, applicationMenuToolbar: true });
     const result = await validateProject({ projectRoot: project, typescript: false });
     expect(result.ok).toBe(true);
     expect(result.findings).toEqual([]);
@@ -485,15 +444,15 @@ describe("developer MCP tools", () => {
       const listed = await client.listTools();
       expect(listed.tools.map(tool=>tool.name).sort()).toEqual(["explain_error", "inspect_project", "lookup_sdk", "scaffold", "scaffold_theme", "validate", "validate_theme"]);
       expect(listed.tools.find(tool=>tool.name==="scaffold")?.inputSchema.required).toEqual(["name"]);
-      expect(listed.tools.find(tool=>tool.name==="scaffold")?.inputSchema.properties?.contentApplicationMenu).toMatchObject({ type: "boolean" });
+      expect(listed.tools.find(tool=>tool.name==="scaffold")?.inputSchema.properties?.applicationMenuToolbar).toMatchObject({ type: "boolean" });
       const invalidLimit = await client.callTool({ name: "lookup_sdk", arguments: { limit: 101 } });
       expect(invalidLimit.isError).toBe(true);
       const invalidPolicy = await client.callTool({ name: "scaffold", arguments: { name: "Rejected", policy: { allowEverything: true } } });
       expect(invalidPolicy.isError).toBe(true);
       expect((await inspectProject({ projectRoot: project })).bundles).toHaveLength(0);
-      const scaffolded = await client.callTool({ name: "scaffold", arguments: { bundleIdentifier: "org.example.menu", name: "Menu", route: "/menu", contentApplicationMenu: true } });
+      const scaffolded = await client.callTool({ name: "scaffold", arguments: { bundleIdentifier: "org.example.menu", name: "Menu", route: "/menu", applicationMenuToolbar: true } });
       expect(scaffolded.isError).not.toBe(true);
-      expect(parseManifest(resolve(project, "applications/Menu.app/Contents/Info.ts")).applicationMenu).toEqual({ trigger: "content" });
+      expect(readFileSync(resolve(project, "applications/Menu.app/Contents/index.tsx"), "utf8")).toContain("NSEToolbarItem.applicationMenu");
       const response = await client.callTool({name:"inspect_project",arguments:{}});
       expect(response.isError).not.toBe(true);
       expect(response.structuredContent).toMatchObject({sdk:{version:"1.0.0-beta.2"}});

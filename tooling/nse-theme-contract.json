@@ -1662,15 +1662,13 @@
         "accessory",
         "background",
         "bezel",
-        "body",
-        "centre",
         "content",
         "content-border",
         "content-view",
-        "document",
         "handle",
         "header",
         "leading",
+        "menu",
         "shadow",
         "sheet",
         "subtitle",
@@ -1709,7 +1707,6 @@
         ],
         "role": [
           "borderless",
-          "document",
           "hud",
           "modal",
           "panel",
@@ -1718,7 +1715,7 @@
           "standard"
         ],
         "style": [
-          "custom",
+          "hud",
           "panel",
           "standard"
         ],
@@ -1730,7 +1727,6 @@
           "unifiedCompact"
         ],
         "type": [
-          "custom",
           "frameless",
           "system"
         ]

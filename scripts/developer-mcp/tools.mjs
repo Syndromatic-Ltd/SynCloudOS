@@ -57,18 +57,13 @@ export async function validateProject(input={}) {
   let host=applicationHostHints(root);
   if (host.status==="checked" && host.application) {
     const primaries=bundles.filter(bundle=>bundle.bundleIdentifier && normalizeBundleIdentifier(bundle.bundleIdentifier)===normalizeBundleIdentifier(host.application.bundleIdentifier));
-    if (primaries.length!==1 || !primaries[0].ok) host={...host,status:"unresolved",reason:"The primary bundle is missing, ambiguous or invalid; its application-menu requirement could not be assessed."};
+    if (primaries.length!==1 || !primaries[0].ok) host={...host,status:"unresolved",reason:"The primary bundle is missing, ambiguous or invalid; the single-app host could not be validated."};
     else {
       const file=resolve(primaries[0].directory,"Contents/Info.ts"), primary=primaries[0].manifest;
       // With sign-in disabled the host opens the primary publicly; one that demands sign-in contradicts it.
       if (host.authentication==="disabled" && primary.runtime?.policy?.requiresLogin===true) findings.push({
         file:slash(relative(root,file)),line:1,rule:"synware.public-policy",
         message:`Primary application ${host.application.bundleIdentifier} declares runtime.policy.requiresLogin, but the host mounts it with authentication "disabled", so nobody could ever open it and mounting fails. Enable authentication, or remove requiresLogin.`,
-      });
-      const fillsPage=host.application.frame==="fullscreen" || (primary.runtime?.presentation ?? "appView")==="appView";
-      if (fillsPage && host.authentication!=="disabled" && primary.applicationMenu?.trigger!=="content") findings.push({
-        file:slash(relative(root,file)),line:1,rule:"synware.application-menu",
-        message:`Primary application ${host.application.bundleIdentifier} fills the page with ${host.authentication} authentication. Declare applicationMenu: { trigger: "content" } and render a useApplicationMenuTrigger() button so people can reach Preferences > Account, Sign In and Log Out.`,
       });
     }
   }
@@ -163,8 +158,7 @@ export async function scaffold(input) {
     ...(input.policy!==undefined ? {policy:input.policy} : {}),
     ...(input.presentation!==undefined ? {presentation:input.presentation} : {}),
   };
-  if (input.contentApplicationMenu!==undefined && typeof input.contentApplicationMenu!=="boolean") throw new Error("contentApplicationMenu must be a boolean.");
-  if (input.contentApplicationMenu) manifest.applicationMenu={trigger:"content"};
+  if (input.applicationMenuToolbar!==undefined && typeof input.applicationMenuToolbar!=="boolean") throw new Error("applicationMenuToolbar must be a boolean.");
   const validateManifest=new Ajv2020({allErrors:true,strict:false}).compile(json(resolve(context.sdkRoot,"tooling/manifest.schema.json")));
   if (kind === "application" && !validateManifest(deriveSynWareManifest({folderName:name+".app",info:manifest}))) throw new Error("Scaffold manifest is invalid: "+validateManifest.errors.map(error=>(error.instancePath || "/")+" "+error.message).join("; "));
   const header="/* SynCloudOS — Copyright © 2026 Syndromatic Ltd. All rights reserved.\n * Designed by Kavish Krishnakumar in Manchester.\n * SPDX-License-Identifier: AGPL-3.0-or-later\n */\n";
@@ -173,7 +167,7 @@ export async function scaffold(input) {
   // Class authoring (NSEApplication + NSEViewController + NSE controls) is the default. The CLI
   // and this tool share one template, so the code an agent is handed cannot drift from create-synware.
   let testFallback=false;
-  const files=Object.fromEntries(scaffoldProjectFiles({kind,name,id,bundleIdentifier,organisation:input.organisation,owners:input.owners,...(kind==="application"?{authoring:input.authoring,contentApplicationMenu:input.contentApplicationMenu===true}:{})}));
+  const files=Object.fromEntries(scaffoldProjectFiles({kind,name,id,bundleIdentifier,organisation:input.organisation,owners:input.owners,...(kind==="application"?{authoring:input.authoring,applicationMenuToolbar:input.applicationMenuToolbar===true}:{})}));
   if (kind === "application") {
     files["Contents/Info.ts"]=header+'import type { SynWareInfo } from "@syndromatic/syncloudos/sdk";\n\nexport default '+JSON.stringify(manifest,null,2)+" satisfies SynWareInfo;\n";
     files["Contents/index.tsx"]=header+files["Contents/index.tsx"];
@@ -192,7 +186,6 @@ export async function scaffold(input) {
   const nextSteps=[];
   if (input.policy?.public!==true) nextSteps.push('With authentication "disabled", the host opens the primary application publicly. With "optional", set runtime.policy.public to true if it must open before anyone signs in. Do not make private applications public unless that access is intended.');
   if (input.presentation===undefined) nextSteps.push('For a secondary windowed application, set runtime.presentation to "windowedView"; the default appView is for the primary application.');
-  if (!input.contentApplicationMenu && (input.presentation===undefined || input.presentation==="appView")) nextSteps.push('A fullscreen primary with authentication "optional" or "required" must declare applicationMenu: { trigger: "content" } and render a useApplicationMenuTrigger() button, so people can reach Preferences > Account, Sign In and Log Out. Pass contentApplicationMenu: true to scaffold both.');
   if (testFallback) nextSteps.push(`The project has no ${testFallback.join(", ")}, so Contents/__tests__/app.test.tsx is a smoke test. Install vitest, jsdom and @testing-library/react as dev dependencies to test the application with createSynWareTestHost from @syndromatic/syncloudos/sdk/testing.`);
   nextSteps.push("Review the generated manifest and run the validate tool before registering the bundle.");
   return {createdPaths,nextSteps};

@@ -67,22 +67,15 @@ export function defaultAuthoring(selected = []) {
   return selected.length ? "function" : "separate";
 }
 
-const menuButtonComponent = `export function ApplicationMenuButton() {
-  const menu = useApplicationMenuTrigger();
-  return (
-    <NSEButton ref={element => menu?.setAnchor(element)} title={menu?.label ?? "Application menu"} isEnabled={Boolean(menu)} aria-haspopup="menu" aria-expanded={menu?.open ?? false} onClick={() => menu?.toggle()} />
-  );
-}
-`;
-
-export function scaffoldFiles(bundleIdentifier, selected = [], title = titleFromFolderName(bundleIdentifier), authoring = defaultAuthoring(selected), { contentApplicationMenu = false } = {}) {
+export function scaffoldFiles(bundleIdentifier, selected = [], title = titleFromFolderName(bundleIdentifier), authoring = defaultAuthoring(selected), { applicationMenuToolbar = false } = {}) {
   if (!BUNDLE_IDENTIFIER.test(bundleIdentifier)) throw new TypeError("Use a reverse-DNS bundleIdentifier with at least two dots.");
   if (!["function", "inline", "separate"].includes(authoring)) throw new TypeError("Authoring must be function, inline or separate.");
-  if (typeof contentApplicationMenu !== "boolean") throw new TypeError("contentApplicationMenu must be a boolean.");
+  if (typeof applicationMenuToolbar !== "boolean") throw new TypeError("applicationMenuToolbar must be a boolean.");
   if (authoring !== "function") {
     if (selected.length) throw new TypeError("FX recipe scaffolds use function authoring; compose their hook-based components from a class view explicitly.");
-    return scaffoldClassFiles(bundleIdentifier, title, authoring, contentApplicationMenu);
+    return scaffoldClassFiles(bundleIdentifier, title, authoring, applicationMenuToolbar);
   }
+  if (applicationMenuToolbar) throw new TypeError("The application-menu toolbar requires class authoring.");
   const entitlements = [...new Set(selected.flatMap(name => fxRecipes[name].entitlements ?? []))];
   const hooks = selected.flatMap(name => fxRecipes[name].hook ? [fxRecipes[name].hook] : []);
   const functionName = name => `run${name[0].toUpperCase()}${name.slice(1)}`;
@@ -95,15 +88,13 @@ export default {
   displayName: ${JSON.stringify(title)},
   version: "1.0.0",
   webspring: { visible: true },
-${contentApplicationMenu ? '  applicationMenu: { trigger: "content" },\n' : ""}\
 ${entitlements.length ? `  entitlements: ${JSON.stringify(entitlements)},\n` : ""}\
 } satisfies SynWareInfo;
 `],
-    ["Contents/index.tsx", `${selected.length ? 'import { useState } from "react";\n' : ""}import { SCOS${contentApplicationMenu ? ", useApplicationMenuTrigger" : ""}${hooks.length ? `, ${hooks.join(", ")}` : ""} } from "@syndromatic/syncloudos";
+    ["Contents/index.tsx", `${selected.length ? 'import { useState } from "react";\n' : ""}import { SCOS${hooks.length ? `, ${hooks.join(", ")}` : ""} } from "@syndromatic/syncloudos";
 import { NSEStackItem, NSEStackView } from "@syndromatic/syncloudos/nse";
-${selected.length || contentApplicationMenu ? 'import { NSEButton } from "@syndromatic/syncloudos/nse/controls";\n' : ""}\
+${selected.length ? 'import { NSEButton } from "@syndromatic/syncloudos/nse/controls";\n' : ""}\
 ${recipeImports}
-${contentApplicationMenu ? `\n${menuButtonComponent}` : ""}
 export default function SynWareRoot() {
 ${selected.length ? `  const [status, setStatus] = useState("Ready");\n${selected.filter(name => fxRecipes[name].hook).map(name => `  const ${name} = ${fxRecipes[name].hook}();`).join("\n")}\n  async function run(operation: () => string | Promise<string>) {\n    setStatus("Working");\n    try { setStatus(await operation()); }\n    catch (error) { setStatus(error instanceof Error ? error.message : String(error)); }\n  }\n` : ""}\
   return (
@@ -111,7 +102,6 @@ ${selected.length ? `  const [status, setStatus] = useState("Ready");\n${selecte
       <NSEStackItem id="status" visibilityPriority={100}>
         <p>{SCOS.app.displayName} is running as {SCOS.app.bundleIdentifier}.</p>
       </NSEStackItem>
-${contentApplicationMenu ? '      <NSEStackItem id="application-menu" visibilityPriority={100}><ApplicationMenuButton /></NSEStackItem>\n' : ""}\
 ${selected.map(name => `      <NSEStackItem id="${name}" visibilityPriority={90}>\n        <NSEButton title="${fxRecipes[name].label ?? `Run ${name} example`}" onClick={() => run(() => ${functionName(name)}(${fxRecipes[name].hook ? name : ""}))} />\n      </NSEStackItem>`).join("\n")}
 ${selected.length ? '      <NSEStackItem id="result" visibilityPriority={100}><p role="status">{status}</p></NSEStackItem>\n' : ""}\
     </NSEStackView>
@@ -130,17 +120,15 @@ ${selected.length ? '      <NSEStackItem id="result" visibilityPriority={100}><p
   return files;
 }
 
-function scaffoldClassFiles(bundleIdentifier, title, authoring, contentApplicationMenu) {
-  const files = scaffoldFiles(bundleIdentifier, [], title, "function", { contentApplicationMenu });
+function scaffoldClassFiles(bundleIdentifier, title, authoring, applicationMenuToolbar) {
+  const files = scaffoldFiles(bundleIdentifier, [], title, "function");
   const separate = authoring === "separate";
   const view = `  return <section aria-label={${JSON.stringify(title)}}>
-${contentApplicationMenu ? "    <ApplicationMenuButton />\n" : ""}\
     <NSESearchField aria-label="Search" binding={controller.queryBinding} />
     <NSEButton title="Clear search" action={controller.clearSearchAction} />
   </section>;`;
-  files.set("Contents/index.tsx", `import { NSEApplication, NSEViewController, observable, bind, action, actionRef, type NSEBinding${!separate && contentApplicationMenu ? ", useApplicationMenuTrigger" : ""} } from "@syndromatic/syncloudos";
-${separate ? 'import { SearchView } from "./Views/SearchView";' : 'import { NSESearchField, NSEButton } from "@syndromatic/syncloudos/nse/controls";'}
-${!separate && contentApplicationMenu ? `\n${menuButtonComponent}` : ""}
+  files.set("Contents/index.tsx", `import { NSEApplication, NSEViewController, observable, bind, action, actionRef, type NSEBinding${applicationMenuToolbar ? ", NSEWindowController" : ""} } from "@syndromatic/syncloudos";
+${applicationMenuToolbar ? 'import { NSEToolbar, NSEToolbarItem } from "@syndromatic/syncloudos/nse";\n' : ""}${separate ? 'import { SearchView } from "./Views/SearchView";' : 'import { NSESearchField, NSEButton } from "@syndromatic/syncloudos/nse/controls";'}
 export class SearchViewController extends NSEViewController {
   @observable accessor query = "";
   readonly queryBinding: NSEBinding<string> = bind<SearchViewController, "query">(this, "query");
@@ -152,22 +140,23 @@ ${view}
   }`}
 }
 
-export default class SynWareApplication extends NSEApplication {
-  static override mainViewController = SearchViewController;
+${applicationMenuToolbar ? `class MainWindow extends NSEWindowController {
+  static override contentViewControllerClass = SearchViewController;
+  override windowDidLoad() {
+    const menu = NSEToolbarItem.applicationMenu("gear");
+    this.window.toolbar = new NSEToolbar({ identifier: "main-toolbar", items: [menu], defaultItemIdentifiers: [menu.id] });
+  }
+}\n\n` : ""}export default class SynWareApplication extends NSEApplication {
+${applicationMenuToolbar ? "  static override mainWindow = MainWindow;" : "  static override mainViewController = SearchViewController;"}
 }
 `);
   if (separate) files.set("Contents/Views/SearchView.tsx", `import { NSESearchField, NSEButton } from "@syndromatic/syncloudos/nse/controls";
-${contentApplicationMenu ? 'import { ApplicationMenuButton } from "./ApplicationMenuButton";\n' : ""}\
 import type { SearchViewController } from "../index";
 
 export function SearchView({ controller }: { readonly controller: SearchViewController }) {
 ${view}
 }
 `);
-  if (separate && contentApplicationMenu) files.set("Contents/Views/ApplicationMenuButton.tsx", `import { useApplicationMenuTrigger } from "@syndromatic/syncloudos";
-import { NSEButton } from "@syndromatic/syncloudos/nse/controls";
-
-${menuButtonComponent}`);
   files.set("Contents/__tests__/app.test.tsx", `// @vitest-environment jsdom
 import { expect, it } from "vitest";
 import { createSynWareTestHost } from "@syndromatic/syncloudos/sdk/testing";
@@ -184,9 +173,9 @@ it("hosts the class application with its bound search field", async () => {
 }
 
 /** The same folder templates are used by the CLI and developer MCP. */
-export function scaffoldProjectFiles({ kind = "application", name, organisation = "com.example", bundleIdentifier, id = kebabCase(name), owners = [], authoring = defaultAuthoring(), contentApplicationMenu = false }) {
+export function scaffoldProjectFiles({ kind = "application", name, organisation = "com.example", bundleIdentifier, id = kebabCase(name), owners = [], authoring = defaultAuthoring(), applicationMenuToolbar = false }) {
   const title = titleFromFolderName(name);
-  if (kind === "application") return scaffoldFiles(bundleIdentifier ?? scaffoldBundleIdentifier(name, organisation), [], title, authoring, { contentApplicationMenu });
+  if (kind === "application") return scaffoldFiles(bundleIdentifier ?? scaffoldBundleIdentifier(name, organisation), [], title, authoring, { applicationMenuToolbar });
   if (kind === "preferencePane") return new Map([["index.tsx", `import { definePreferencePane } from "@syndromatic/syncloudos";\n\nexport default definePreferencePane({ id: ${JSON.stringify(id)}, title: ${JSON.stringify(title)}, order: 100, view: function Preferences() { return <p>${title}</p>; } });\n`]]);
   if (kind === "widget") return new Map([["index.tsx", `import { defineWidget } from "@syndromatic/syncloudos";\n\nexport default defineWidget({ id: ${JSON.stringify(id)}, title: ${JSON.stringify(title)}, load: async () => new Date().toLocaleDateString(), view: ({ data }) => <p>{data}</p>, whenEmpty: "hide" });\n`]]);
   if (kind === "integration") {
@@ -198,7 +187,7 @@ export function scaffoldProjectFiles({ kind = "application", name, organisation 
 function main() {
   const [targetArgument, ...options] = process.argv.slice(2);
   if (!targetArgument) {
-    fail("Usage: create-synware <Name.app|Name.prefPane|Name.widget|Name.integration.ts> [--organisation com.example] [--owners bundle-identifier,...] [--fx recipe,...] [--authoring separate|inline|function] [--content-application-menu]");
+    fail("Usage: create-synware <Name.app|Name.prefPane|Name.widget|Name.integration.ts> [--organisation com.example] [--owners bundle-identifier,...] [--fx recipe,...] [--authoring separate|inline|function] [--application-menu-toolbar]");
     return;
   }
   if (!/\.(?:app|prefPane|widget|integration\.tsx?)$/u.test(targetArgument)) { fail("The target must name an .app, .prefPane, .widget or .integration.ts entry."); return; }
@@ -209,10 +198,10 @@ function main() {
   let owners = [];
   let organisation = "com.example";
   let authoring;
-  let contentApplicationMenu = false;
+  let applicationMenuToolbar = false;
   const selected = [];
   for (let index = 0; index < options.length; index += 2) {
-    if (options[index] === "--content-application-menu") { contentApplicationMenu = true; index -= 1; continue; }
+    if (options[index] === "--application-menu-toolbar") { applicationMenuToolbar = true; index -= 1; continue; }
     if (options[index] === "--owners" && options[index + 1]) { owners = options[index + 1].split(","); continue; }
     if (options[index] === "--organisation" && options[index + 1]) { organisation = options[index + 1]; continue; }
     if (options[index] === "--authoring" && ["function", "inline", "separate"].includes(options[index + 1])) { authoring = options[index + 1]; continue; }
@@ -227,9 +216,9 @@ function main() {
     fail("Refusing to scaffold into a non-empty target directory.");
     return;
   }
-  if (kind !== "application" && (authoring !== undefined || contentApplicationMenu)) { fail("--authoring and --content-application-menu apply to .app scaffolds only."); return; }
+  if (kind !== "application" && (authoring !== undefined || applicationMenuToolbar)) { fail("--authoring and --application-menu-toolbar apply to .app scaffolds only."); return; }
   if (authoring !== undefined && authoring !== "function" && selected.length) { fail("--fx recipes use function authoring; compose hook-based recipe components in class views explicitly."); return; }
-  const files = kind === "application" ? scaffoldFiles(scaffoldBundleIdentifier(name, organisation), selected, titleFromFolderName(name), authoring ?? defaultAuthoring(selected), { contentApplicationMenu }) : scaffoldProjectFiles({ kind, name, id: appId, owners });
+  const files = kind === "application" ? scaffoldFiles(scaffoldBundleIdentifier(name, organisation), selected, titleFromFolderName(name), authoring ?? defaultAuthoring(selected), { applicationMenuToolbar }) : scaffoldProjectFiles({ kind, name, id: appId, owners });
   if (kind !== "integration") mkdirSync(target, { recursive: true });
   for (const [relativePath, contents] of files) {
     const path = relativePath ? resolve(target, relativePath) : target;

@@ -583,17 +583,17 @@ Contract version 1: 72 controls, 48 colours.
 
 ### `window`
 
-- Parts: `accessory`, `background`, `bezel`, `body`, `centre`, `content`, `content-border`, `content-view`, `document`, `handle`, `header`, `leading`, `shadow`, `sheet`, `subtitle`, `title`, `titlebar-accessories`, `toolbar`, `trailing`, `window-fitting-content`
+- Parts: `accessory`, `background`, `bezel`, `content`, `content-border`, `content-view`, `handle`, `header`, `leading`, `menu`, `shadow`, `sheet`, `subtitle`, `title`, `titlebar-accessories`, `toolbar`, `trailing`, `window-fitting-content`
 - States: `key-window=false`
 - Variants:
   - `data-nse-alignment`: `center`, `end`, `start`
   - `data-nse-chrome`: `hud`, `metal`, `standard`
   - `data-nse-content-border`: `small`
   - `data-nse-edge`: `block-end`, `block-end-inline-end`, `block-end-inline-start`, `block-start`, `block-start-inline-end`, `block-start-inline-start`, `inline-end`, `inline-start`
-  - `data-nse-role`: `borderless`, `document`, `hud`, `modal`, `panel`, `popover`, `sheet`, `standard`
-  - `data-nse-style`: `custom`, `panel`, `standard`
+  - `data-nse-role`: `borderless`, `hud`, `modal`, `panel`, `popover`, `sheet`, `standard`
+  - `data-nse-style`: `hud`, `panel`, `standard`
   - `data-nse-toolbar-style`: `automatic`, `expanded`, `preference`, `unified`, `unifiedCompact`
-  - `data-nse-type`: `custom`, `frameless`, `system`
+  - `data-nse-type`: `frameless`, `system`
 
 ## Colours
 

@@ -23,7 +23,7 @@ function applicationMenuQuery(query) {
 function symbolScore(query, name) {
   if (query.toLowerCase()===name.toLowerCase()) return 2;
   if (applicationMenuQuery(query)) {
-    const preferred=["useApplicationMenuTrigger","SynWareApplicationMenuManifest","SynWareApplicationMenuTriggerPort"];
+    const preferred=["NSEToolbarItem","NSEApplication","NSEMenuBar"];
     const index=preferred.indexOf(name);
     if (index!==-1) return 1.5-index*0.1;
   }
@@ -77,7 +77,7 @@ export function docSections(sdkRoot, query, limit=3) {
         for (const text of sections) {
           const lower=text.toLowerCase();
           let score=words.filter(word=>lower.includes(word)).length;
-          if (applicationMenuQuery(query) && lower.includes("useapplicationmenutrigger")) {
+          if (applicationMenuQuery(query) && lower.includes("nsetoolbaritem.applicationmenu")) {
             score+=10;
             if (lower.includes("applicationmenu")) score+=2;
             if (lower.includes("preferences")) score+=2;

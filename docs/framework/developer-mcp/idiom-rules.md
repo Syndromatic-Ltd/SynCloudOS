@@ -89,19 +89,19 @@ Classes: **a** is a static rule (named below); **b** is an implemented framework
 | D3 sheets, second bullet: portalling loses parent chain | b | Attached sheet retains presenter context; `NSEViewController.ts` and `windowSheetSurfaces.tsx`. Not implemented as a child window. |
 | D3 sheets, third bullet: dispatcher sheet-chain blocker | b | Explicitly superseded by log's later attached-sheet section and `0ea5f73`; do not report the old child-window blocker as current. |
 | Shell: quoted-heredoc backslash corruption | c | Shell/tool transport observation; TypeScript can catch broken output, but no framework idiom rule can establish shell literal fidelity. |
-| Chrome class collision, first bullet: old frame class names | b | Current document/chrome classes in `src/NSE/Windows/Chrome`, neutral structure stylesheet (`80cb7f5`). |
+| Chrome class collision, first bullet: old frame class names | b | Current document/chrome classes in `src/NSE/Windows/WindowTitlebarView.tsx`, neutral structure stylesheet (`80cb7f5`). |
 | Chrome class collision, second bullet: one CSS owner per class | c | A complete framework CSS ownership audit is outside app-source checking. `idiom.control-internals` prevents consumer reliance on private `.nse-*` selectors, not duplicate framework owners. |
 | View-controller accessory sizing, first bullet: forced fill frame | c | Current render path replaced `NSEViewControllerView`; accessory fit/fill still requires geometry checks. |
 | View-controller accessory sizing, second bullet: host fit/fill proposal | c | Host layout/API design rather than a safe source prohibition; inspect `viewControllerRenderer.tsx` and accessory host. |
 | Menu ref callback set-state loop | c | Runtime render/launch failure is observable; statically rejecting every inline ref callback would reject valid code. |
 | App name, first bullet: three title sources | c | Bundle/app/window naming intent cannot be inferred safely from string inequality. |
-| App name, second bullet: remove `topBar.title` | b | Public top-bar authoring was removed; `src/NSE/sdkPackageEntry.ts`, `src/NSE/Windows/Chrome` and installed TypeScript declarations. |
+| App name, second bullet: move to a window-owned title | b | Public top-bar authoring was removed; `src/NSE/sdkPackageEntry.ts`, `src/NSE/Windows/WindowTitlebarView.tsx` and installed TypeScript declarations. |
 | Toolbar DOM lookup, first bullet: Publisher querySelector anchor | a | `idiom.control-internals` catches private NSE selector access; public anchors remain a distinct API concern. |
 | Toolbar DOM lookup, second bullet: toolbar item view anchor proposal | c | A public anchor API needs a contract and interaction evidence; lint must not invent an item-view accessor. |
 | Design note: File segment balance / sharing group | c | Visual design judgement; no deterministic source violation. |
 | Design note: DRAFT capsule baseline | c | Requires measured light/dark rendering. |
 | Design note: compact title should retain document context | c | Owner layout choice and phone browser evidence. |
-| App-only host, first bullet: no declared title bar | b | Standard bar for a declared frame; `src/SynCloudOSReact` application host and `src/NSE/Windows/Chrome`. |
+| App-only host, first bullet: no declared title bar | b | Standard bar for a declared frame; `src/SynCloudOSReact` application host and `src/NSE/Windows/WindowTitlebarView.tsx`. |
 | App-only host, second bullet: icon/name/document/gear bar | b | Implemented standard host bar, recorded in window-chrome work; runtime composition needs browser verification. |
 | View-menu actions, first bullet: accessory chain misses content | c | Responder ancestry/focus is runtime state; lint cannot infer which responder is key from an action name. |
 | View-menu actions, second bullet: route from first responder | c | Verify menu/toolbar routing against actual focused content; static idiom checks do not assert complete routing parity. |

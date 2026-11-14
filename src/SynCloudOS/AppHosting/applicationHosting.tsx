@@ -62,7 +62,7 @@ import type { SynWareContextValue } from "../AppSDK/appContextTypes";
 import { bindActionResponder, hasActions } from "../AppSDK/actions";
 import { trackLiveApplicationObject } from "./applicationHotReload";
 import { WindowContentBorder, WindowSheetFrame, WindowSheetHostContext, WindowTitlebarAccessories, nseContentBorderSize, WindowTitlebarHostContext, useNSEWindowSheetHost, WindowToolbar, useNSEWindowTitlebarDocument } from "./windowAccessories";
-import { NSEMountedWindowContext } from "../../NSE/Application/NSEWindowContext";
+import { MountedWindowContext } from "../../NSE/Application/NSEWindowContext";
 import { WindowApplicationMenu } from "./windowApplicationMenu";
 import { applicationSessionFor } from "./applicationSession";
 import { createNSEWindowAlertQueue, WindowAlertSheet, type WindowAlertQueue } from "./windowAlertSheet";
@@ -539,7 +539,7 @@ export function WindowControllerView({ controller }: WindowControllerViewProps) 
   // Keep the content host permanent: showing chrome must not remount an editor or its draft.
   const hasBottomAccessory = bottomBorder > 0 && bottomBarAccessory != null;
   return (
-    <NSEMountedWindowContext.Provider value={controller}>
+    <MountedWindowContext.Provider value={controller}>
     <WindowTitleSlotContext.Provider value={titleSlotHost}>
     <ActionScopeProvider appId={appRuntime.app.bundleIdentifier}>
       <ControllerResponder target={controller} kind="controller">
@@ -563,6 +563,6 @@ export function WindowControllerView({ controller }: WindowControllerViewProps) 
       </ControllerResponder>
     </ActionScopeProvider>
     </WindowTitleSlotContext.Provider>
-    </NSEMountedWindowContext.Provider>
+    </MountedWindowContext.Provider>
   );
 }

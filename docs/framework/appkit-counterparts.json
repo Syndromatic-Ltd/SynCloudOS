@@ -31,6 +31,7 @@
     "Error"
   ],
   "internalCounterparts": {
+    "NSEWindowFrameViewClass": "NSWindow.frameViewClass(for:)",
     "NSEAnimationTimingFunction": "CAMediaTimingFunction",
     "NSECollectionLayoutItem": "NSCollectionLayoutItem",
     "NSEColourList": "NSColorList",
@@ -770,6 +771,12 @@
     "NSEWindow": "NSWindow",
     "NSEWindowFrameView": "NSWindow.frameViewClass(for:)",
     "NSEWindowTitlebarPresentation": { "none": "NSE extension for attached or floating titlebar paint." },
+    "NSEToolbarGroupSubitem": "NSToolbarItemGroup.subitems",
+    "NSEToolbarItemGroupControlRepresentation": "NSToolbarItemGroup.ControlRepresentation",
+    "NSEToolbarItemGroupSelectionMode": "NSToolbarItemGroup.SelectionMode",
+    "NSEWindowCollectionBehavior": "NSWindow.CollectionBehavior",
+    "NSEWindowStyle": "NSWindow.StyleMask",
+    "NSEWindowTitleVisibility": "NSWindow.TitleVisibility",
     "NSEToolbarItemGroup": "NSToolbarItemGroup",
     "NSEWindowCloseOutcome": "NSWindowDelegate.windowShouldClose(_:)",
     "NSEWindowContentBorderEdge": "NSWindow.setContentBorderThickness(_:for:)",
