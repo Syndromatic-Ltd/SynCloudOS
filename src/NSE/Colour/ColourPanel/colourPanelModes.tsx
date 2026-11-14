@@ -20,11 +20,11 @@
 
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { GFXColour } from "../../../FX/GraphicsFX/GFXColour";
-import { NSEColourSliderPicker, NSEColourWheelPicker, type NSEColourSliderModel } from "../Pickers";
+import { ColourSliderPicker, ColourWheelPicker, type ColourSliderModel } from "../Pickers";
 import { NSEPopUpButton } from "../../Menus/NSEPopUpButton";
 import { NSESearchField } from "../../Controls/Fields/NSESearchField";
 import { NSEScrollView } from "../../Scroll";
-import { builtInColourLists, crayonRows, type NSEColourList, type NSENamedColour } from "./colourPalettes";
+import { builtInColourLists, crayonRows, type NSEColourList, type NamedColour } from "./colourPalettes";
 import type { NSEColourPickerContext } from "./colourPanelTypes";
 
 /**
@@ -43,13 +43,13 @@ function sameColour(hex: string, colour: GFXColour | null) {
   return colour !== null && GFXColour.parse(hex).withAlpha(colour.components.a).equals(colour);
 }
 
-export function NSEColourWheelMode({ colour, preview, commit }: NSEColourPickerContext) {
+export function ColourWheelMode({ colour, preview, commit }: NSEColourPickerContext) {
   return <div data-nse-part="wheel-mode">
-    <NSEColourWheelPicker colour={colour ?? black} fields={false} brightnessPlacement="beside" controlHeight={nseColourPanelControlHeight} onPreview={(next) => preview(next, "pointer")} onCommit={(next) => commit(next, "pointer")} onCancel={(opening) => preview(opening, "pointer")} />
+    <ColourWheelPicker colour={colour ?? black} fields={false} brightnessPlacement="beside" controlHeight={nseColourPanelControlHeight} onPreview={(next) => preview(next, "pointer")} onCommit={(next) => commit(next, "pointer")} onCancel={(opening) => preview(opening, "pointer")} />
   </div>;
 }
 
-const sliderModels: readonly { readonly value: NSEColourSliderModel; readonly title: string }[] = [
+const sliderModels: readonly { readonly value: ColourSliderModel; readonly title: string }[] = [
   { value: "grey", title: "Grey Scale Slider" },
   { value: "rgb", title: "RGB Sliders" },
   { value: "cmyk", title: "CMYK Sliders" },
@@ -58,19 +58,19 @@ const sliderModels: readonly { readonly value: NSEColourSliderModel; readonly ti
 
 const greyPresets = [0, 0.25, 0.5, 0.75, 1] as const;
 
-export function NSEColourSlidersMode({ colour, preview, commit }: NSEColourPickerContext) {
-  const [model, setModel] = useState<NSEColourSliderModel>("rgb");
+export function ColourSlidersMode({ colour, preview, commit }: NSEColourPickerContext) {
+  const [model, setModel] = useState<ColourSliderModel>("rgb");
   const current = colour ?? black;
   return <div data-nse-part="sliders-mode">
-    <NSEPopUpButton height={nseColourPanelControlHeight} label="Slider model" labelHidden items={sliderModels} value={model} onValueChange={(next) => setModel(next as NSEColourSliderModel)} />
-    <NSEColourSliderPicker model={model} colour={current} controlHeight={nseColourPanelControlHeight} onPreview={(next) => preview(next, "pointer")} onCommit={(next) => commit(next, "pointer")} />
+    <NSEPopUpButton height={nseColourPanelControlHeight} label="Slider model" labelHidden items={sliderModels} value={model} onValueChange={(next) => setModel(next as ColourSliderModel)} />
+    <ColourSliderPicker model={model} colour={current} controlHeight={nseColourPanelControlHeight} onPreview={(next) => preview(next, "pointer")} onCommit={(next) => commit(next, "pointer")} />
     {model === "grey" ? <div role="group" aria-label="Greys" data-nse-part="grey-presets">
       {greyPresets.map((white) => <button key={white} type="button" data-nse-part="swatch" aria-label={`${Math.round(white * 100)}% brightness`} style={{ "--nse-colour-sample": GFXColour.grayscale(white).toCSS() } as CSSProperties} onClick={() => commit(GFXColour.grayscale(white, current.components.a), "swatch")} />)}
     </div> : null}
   </div>;
 }
 
-export function NSEColourPalettesMode({ colour, commit, recents }: NSEColourPickerContext & { readonly recents: readonly GFXColour[] }) {
+export function ColourPalettesMode({ colour, commit, recents }: NSEColourPickerContext & { readonly recents: readonly GFXColour[] }) {
   const instanceId = useId().replace(/:/g, "");
   const [listId, setListId] = useState("syndromatic");
   const [query, setQuery] = useState("");
@@ -97,7 +97,7 @@ export function NSEColourPalettesMode({ colour, commit, recents }: NSEColourPick
     if (optionRect.top < scrollRect.top) scroll.scrollTop -= scrollRect.top - optionRect.top;
     else if (optionRect.bottom > scrollRect.bottom) scroll.scrollTop += optionRect.bottom - scrollRect.bottom;
   }, [selectedIndex]);
-  const choose = (entry: NSENamedColour | undefined) => {
+  const choose = (entry: NamedColour | undefined) => {
     if (entry) commit(GFXColour.parse(entry.hex).withAlpha(colour?.components.a ?? 1), "swatch");
   };
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -147,7 +147,7 @@ function drawSpectrum(context: CanvasRenderingContext2D, width: number, height: 
   context.fillRect(0, 0, width, height);
 }
 
-export function NSEColourImageMode({ colour, preview, commit }: NSEColourPickerContext) {
+export function ColourImageMode({ colour, preview, commit }: NSEColourPickerContext) {
   const [images, setImages] = useState<readonly PaletteImage[]>([spectrum]);
   const [imageId, setImageId] = useState(spectrum.id);
   const [marker, setMarker] = useState<{ readonly x: number; readonly y: number } | null>(null);
@@ -265,12 +265,12 @@ interface CrayonGradientIds {
   readonly paper: string;
 }
 
-export function NSEColourCrayonsMode({ colour, commit }: NSEColourPickerContext) {
+export function ColourCrayonsMode({ colour, commit }: NSEColourPickerContext) {
   const gradient = useId().replace(/:/g, "");
   const ids: CrayonGradientIds = { tip: `nse-crayon-tip-${gradient}`, shade: `nse-crayon-shade-${gradient}`, paper: `nse-crayon-paper-${gradient}` };
   const selected = crayonRows.flat().find((entry) => sameColour(entry.hex, colour)) ?? null;
   const buttons = useRef(new Map<string, HTMLButtonElement>());
-  const choose = (entry: NSENamedColour) => {
+  const choose = (entry: NamedColour) => {
     commit(GFXColour.parse(entry.hex).withAlpha(colour?.components.a ?? 1), "swatch");
     buttons.current.get(entry.name)?.focus({ preventScroll: true });
   };

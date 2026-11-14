@@ -18,20 +18,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export interface NSEColourTransferPayload {
+export interface ColourTransferPayload {
   readonly type: "application/x-syncloudos-colour";
   readonly value: string;
 }
 
-export type NSEColourTransferResult =
-  | Readonly<{ kind: "accepted"; payload: NSEColourTransferPayload }>
+export type ColourTransferResult =
+  | Readonly<{ kind: "accepted"; payload: ColourTransferPayload }>
   | Readonly<{ kind: "written" }>
   | Readonly<{ kind: "empty" | "denied" | "unavailable" }>
   | Readonly<{ kind: "error"; error: unknown }>;
 
-export interface NSEColourTransferAdapter {
-  read(signal?: AbortSignal): Promise<NSEColourTransferResult>;
-  write(payload: NSEColourTransferPayload, signal?: AbortSignal): Promise<NSEColourTransferResult>;
-  beginDrag?(payload: NSEColourTransferPayload, options: Readonly<{ sourceId: string }>): void | (() => void);
+export interface ColourTransferAdapter {
+  read(signal?: AbortSignal): Promise<ColourTransferResult>;
+  write(payload: ColourTransferPayload, signal?: AbortSignal): Promise<ColourTransferResult>;
+  beginDrag?(payload: ColourTransferPayload, options: Readonly<{ sourceId: string }>): void | (() => void);
   authoriseDrop?(types: readonly string[], signal: AbortSignal): boolean | Promise<boolean>;
 }

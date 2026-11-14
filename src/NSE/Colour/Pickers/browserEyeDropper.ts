@@ -20,7 +20,7 @@
 
 import { GFXColour } from "../../../FX/GraphicsFX/GFXColour";
 import { setNSEHook } from "../../Theme/contract/hookMirrorDOM";
-import { classifyEyeDropperError, type NSEEyeDropperAdapter, type NSEEyeDropperResult } from "./NSEEyeDropperAdapter";
+import { classifyEyeDropperError, type EyeDropperAdapter, type EyeDropperResult } from "./eyeDropperAdapter";
 
 interface NativeEyeDropper {
   open(options?: { signal?: AbortSignal }): Promise<{ sRGBHex: string }>;
@@ -64,7 +64,7 @@ const LOUPE_GLASS = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 10
  * is captured once and a loupe drawn over it samples the capture: the pixel
  * under the pointer at the moment of the click is the colour picked.
  */
-export function createNSEBrowserEyeDropper(view: Window): NSEEyeDropperAdapter {
+export function createNSEBrowserEyeDropper(view: Window): EyeDropperAdapter {
   return {
     availability: () => view.document ? "available" : "unavailable",
     async pick(signal) {
@@ -147,12 +147,12 @@ async function capturePage(view: Window): Promise<HTMLCanvasElement> {
   return canvas;
 }
 
-function pickFromCapture(view: Window, signal: AbortSignal | undefined): Promise<NSEEyeDropperResult> {
+function pickFromCapture(view: Window, signal: AbortSignal | undefined): Promise<EyeDropperResult> {
   const document = view.document;
   const root = document.documentElement;
   const previousCursor = root.style.cursor;
   root.style.cursor = "progress";
-  return capturePage(view).then((capture) => new Promise<NSEEyeDropperResult>((resolve) => {
+  return capturePage(view).then((capture) => new Promise<EyeDropperResult>((resolve) => {
     root.style.cursor = previousCursor;
     if (signal?.aborted) {
       resolve(cancelled);
@@ -232,7 +232,7 @@ function pickFromCapture(view: Window, signal: AbortSignal | undefined): Promise
     };
 
     let settled = false;
-    const finish = (result: NSEEyeDropperResult) => {
+    const finish = (result: EyeDropperResult) => {
       if (settled) return;
       settled = true;
       signal?.removeEventListener("abort", onAbort);

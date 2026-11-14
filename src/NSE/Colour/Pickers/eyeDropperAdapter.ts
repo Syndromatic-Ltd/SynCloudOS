@@ -20,19 +20,19 @@
 
 import type { GFXColour } from "../../../FX/GraphicsFX/public";
 
-export type NSEEyeDropperResult =
+export type EyeDropperResult =
   | Readonly<{ kind: "accepted"; colour: GFXColour }>
   | Readonly<{ kind: "cancelled" }>
   | Readonly<{ kind: "denied" }>
   | Readonly<{ kind: "unavailable" }>
   | Readonly<{ kind: "error"; error: unknown }>;
 
-export interface NSEEyeDropperAdapter {
+export interface EyeDropperAdapter {
   availability(): "available" | "unavailable";
-  pick(signal?: AbortSignal): Promise<NSEEyeDropperResult>;
+  pick(signal?: AbortSignal): Promise<EyeDropperResult>;
 }
 
-export function classifyEyeDropperError(error: unknown): NSEEyeDropperResult {
+export function classifyEyeDropperError(error: unknown): EyeDropperResult {
   if (error instanceof DOMException && error.name === "AbortError") return Object.freeze({ kind: "cancelled" });
   if (error instanceof DOMException && (error.name === "NotAllowedError" || error.name === "SecurityError")) return Object.freeze({ kind: "denied" });
   return Object.freeze({ kind: "error", error });

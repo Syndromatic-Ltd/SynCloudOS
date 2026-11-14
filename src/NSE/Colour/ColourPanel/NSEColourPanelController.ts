@@ -22,16 +22,16 @@ import type { ColourPanelCloseReason, ColourPanelService, ColourPanelServiceChan
 import { defineSyncUndoAction } from "../../../SynCloudOS/nseRuntimeContracts";
 import { GFXColour } from "../../../FX/GraphicsFX/GFXColour";
 import { parseNSEColourTransfer, serialiseNSEColourTransfer } from "../Transfer";
-import type { NSEColourChange, NSEColourPanelControllerOptions, NSEColourPanelSnapshot, NSEColourPicker, NSEColourTarget } from "./colourPanelTypes";
+import type { ColourChange, NSEColourPanelControllerOptions, NSEColourPanelSnapshot, NSEColourPicker, ColourTarget } from "./colourPanelTypes";
 import { NSEControllerLifetime } from "../../Controllers/controllerLifetime";
 
-type NSEColourPanelServicePort = Pick<
+type ColourPanelServicePort = Pick<
   ColourPanelService,
   "getSnapshot" | "subscribe" | "registerPicker" | "activateTarget" | "open" | "close" |
   "choosePicker" | "preview" | "commit" | "cancel" | "addRecent" | "setSwatches"
 >;
 
-export class NSEColourCommitUnknownStateError extends Error {
+export class ColourCommitUnknownStateError extends Error {
   readonly code = "nse-colour-commit-outcome-unknown";
 
   constructor(message: string, options?: ErrorOptions) {
@@ -40,7 +40,7 @@ export class NSEColourCommitUnknownStateError extends Error {
   }
 }
 
-export class NSEColourCommitCompensationError extends AggregateError {
+export class ColourCommitCompensationError extends AggregateError {
   readonly code = "nse-colour-commit-compensation-failed";
 
   constructor(primary: unknown, compensation: readonly unknown[]) {
@@ -53,7 +53,7 @@ const deferColourPanelObservation = Symbol("nse.deferColourPanelObservation");
 const panelObservers = new WeakMap<NSEColourPanelController, () => () => void>();
 
 export function createReactOwnedColourPanelController(
-  service: NSEColourPanelServicePort,
+  service: ColourPanelServicePort,
   options: NSEColourPanelControllerOptions,
 ): NSEColourPanelController {
   const deferred = { ...options, [deferColourPanelObservation]: true };
@@ -65,7 +65,7 @@ export function observeReactOwnedColourPanelController(controller: NSEColourPane
 }
 
 export class NSEColourPanelController {
-  readonly #service: NSEColourPanelServicePort;
+  readonly #service: ColourPanelServicePort;
   readonly #pickers = new Map<string, NSEColourPicker>();
   readonly #alphaTargets = new Set<string>();
   readonly #undoManager: NSEColourPanelControllerOptions["undoManager"];
@@ -77,7 +77,7 @@ export class NSEColourPanelController {
   readonly #lifetime: NSEControllerLifetime;
   readonly #registrations = new Set<() => void>();
 
-  constructor(runtime: Pick<SynCloudOSRuntime, "colourPanel"> | NSEColourPanelServicePort, options: NSEColourPanelControllerOptions = {}) {
+  constructor(runtime: Pick<SynCloudOSRuntime, "colourPanel"> | ColourPanelServicePort, options: NSEColourPanelControllerOptions = {}) {
     this.#lifetime = new NSEControllerLifetime(options, { kind: "NSEColourPanelController", id: "colour-panel" });
     this.#service = "colourPanel" in runtime ? runtime.colourPanel : runtime;
     this.#undoManager = options.undoManager;
@@ -151,9 +151,9 @@ export class NSEColourPanelController {
    * client shares the one instance. */
   get sharedPanelKey(): string { return this.#service.getSnapshot().runtimeId; }
 
-  activateTarget(target: NSEColourTarget): () => void {
+  activateTarget(target: ColourTarget): () => void {
     this.#lifetime.assertLive("activateTarget");
-    const adapt = (change: ColourPanelServiceChange): NSEColourChange => Object.freeze({
+    const adapt = (change: ColourPanelServiceChange): ColourChange => Object.freeze({
       previous: GFXColour.parse(change.previousCSS),
       current: GFXColour.parse(change.currentCSS),
       phase: change.phase,
@@ -222,9 +222,9 @@ export class NSEColourPanelController {
             }
           } catch (rollbackError) { compensation.push(rollbackError); }
         }
-        if (compensation.length > 0) throw new NSEColourCommitCompensationError(error, compensation);
+        if (compensation.length > 0) throw new ColourCommitCompensationError(error, compensation);
         if (unknownPublisher) {
-          throw new NSEColourCommitUnknownStateError(
+          throw new ColourCommitUnknownStateError(
             "A colour commit publisher failed before acknowledging its outcome; the affected state is unknown.",
             { cause: error },
           );
@@ -241,7 +241,7 @@ export class NSEColourPanelController {
       preview: (change) => {
         try { target.preview(adapt(change)); }
         catch (error) {
-          throw new NSEColourCommitUnknownStateError(
+          throw new ColourCommitUnknownStateError(
             "A colour preview publisher failed before acknowledging its outcome; the affected state is unknown.",
             { cause: error },
           );

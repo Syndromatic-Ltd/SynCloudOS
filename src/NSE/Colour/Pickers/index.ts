@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export * from "./NSEEyeDropperAdapter";
-export * from "./NSEColourWheelPicker";
-export * from "./NSEColourSliderPicker";
-export * from "./NSEColourSwatches";
+export * from "./eyeDropperAdapter";
+export * from "./ColourWheelPicker";
+export * from "./ColourSliderPicker";
+export * from "./ColourSwatches";
 export * from "./browserEyeDropper";
