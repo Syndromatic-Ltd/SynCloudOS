@@ -37,7 +37,7 @@ import { NSEPopUpButton } from "../../src/NSE/Menus";
 import { OverlayProvider, NSEPopup as NSECanonicalPopup } from "../../src/NSE/Overlays";
 import type { OverlayRuntimePort } from "../../src/NSE/Overlays/overlayTypes";
 import { atmoTheme } from "../../src/NSE/Appearance/atmo";
-import { NSETooltip } from "../../src/NSE/Tooltips";
+import { Tooltip } from "../../src/NSE/Tooltips";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 
 const customAppearance = createTestTheme("com.example.custom-test", "Custom test");
@@ -124,7 +124,7 @@ function CanonicalPortalSpecimens() {
       >
         Canonical portal
       </NSECanonicalPopup>
-      <NSETooltip id="p11-tooltip" open anchor={anchor} content="Projected tooltip" />
+      <Tooltip id="p11-tooltip" open anchor={anchor} content="Projected tooltip" />
       <NSEPopUpButton
         label="Canonical picker"
         items={[{ value: "one", title: "One" }]}

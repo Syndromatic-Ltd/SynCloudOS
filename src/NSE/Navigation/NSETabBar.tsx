@@ -35,7 +35,7 @@ import {
 import { createPortal } from "react-dom";
 import { NSELabelHelp } from "../Tooltips/NSELabelHelp";
 import { useNSEAppearance } from "../Appearance";
-import { useOptionalNSETooltipProvider } from "../Tooltips/NSETooltipProvider";
+import { useOptionalTooltipProvider } from "../Tooltips/TooltipProvider";
 import {
   getNSETabBarPanelId,
   getNSETabBarTabId,
@@ -221,7 +221,7 @@ export function NSETabBar({
     ...(overflowDestinations.length > 0 ? [NSETabBarMoreDestinationId] : []),
   ];
   const overflowOpen = snapshot.moreStack?.currentDestinationId === NSETabBarMoreDestinationId;
-  const tooltips = useOptionalNSETooltipProvider();
+  const tooltips = useOptionalTooltipProvider();
   const [focusedTabId, setFocusedTabId] = useState(snapshot.activeTabId);
   const [paintFocusedTabId, setPaintFocusedTabId] = useState<string | null>(null);
   const [hoveredTabId, setHoveredTabId] = useState<string | null>(null);

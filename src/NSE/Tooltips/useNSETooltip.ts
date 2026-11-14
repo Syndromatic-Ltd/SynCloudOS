@@ -19,9 +19,9 @@
  */
 
 import { createElement, useCallback, useEffect, useId, useRef, useState, type FocusEvent, type PointerEvent } from "react";
-import { NSETooltip } from "./NSETooltip";
-import { useNSETooltipProvider } from "./NSETooltipProvider";
-import type { NSETooltipBinding, NSETooltipOptions } from "./tooltipTypes";
+import { Tooltip } from "./Tooltip";
+import { useTooltipProvider } from "./TooltipProvider";
+import type { TooltipBinding, TooltipOptions } from "./tooltipTypes";
 
 function tooltipId(id: string): string {
   return `nse-tooltip-${id.replace(/[^a-zA-Z0-9_-]/g, "")}`;
@@ -38,8 +38,8 @@ export function useNSETooltip({
   delayMs = 400,
   disabled = false,
   longPressOnCoarsePointer = true,
-}: NSETooltipOptions): NSETooltipBinding {
-  const provider = useNSETooltipProvider();
+}: TooltipOptions): TooltipBinding {
+  const provider = useTooltipProvider();
   const reactId = useId();
   const id = tooltipId(reactId);
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
@@ -114,7 +114,7 @@ export function useNSETooltip({
       onFocus,
       onBlur,
     },
-    tooltip: disabled ? null : createElement(NSETooltip, {
+    tooltip: disabled ? null : createElement(Tooltip, {
       onPointerEnter: () => { surfaceHoveredRef.current = true; provider.requestOpen(id, 0); },
       onPointerLeave: () => { surfaceHoveredRef.current = false; hideWhenInactive(provider.leaveDelayMs); },
       id,

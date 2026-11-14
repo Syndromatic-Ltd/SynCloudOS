@@ -23,7 +23,7 @@ import { useNSEOverlayProvider } from "../Overlays";
 
 type TooltipTimerKind = "open" | "close";
 
-interface NSETooltipRegistration {
+interface TooltipRegistration {
   readonly id: string;
   readonly disabled: boolean;
   /** The provider observes only this branch-local anchor, never an ambient query. */
@@ -49,10 +49,10 @@ interface PendingTooltipTimer {
   readonly handle: unknown;
 }
 
-interface NSETooltipProviderContextValue {
+interface TooltipProviderContextValue {
   readonly leaveDelayMs: number;
   readonly longPressDelayMs: number;
-  register(registration: NSETooltipRegistration): () => void;
+  register(registration: TooltipRegistration): () => void;
   requestOpen(id: string, delayMs: number): void;
   requestClose(id: string, delayMs: number): void;
   cancelPendingOpen(id: string): void;
@@ -60,9 +60,9 @@ interface NSETooltipProviderContextValue {
   dismissActive(): void;
 }
 
-const NSETooltipContext = createContext<NSETooltipProviderContextValue | null>(null);
+const TooltipContext = createContext<TooltipProviderContextValue | null>(null);
 
-export interface NSETooltipProviderProps extends PropsWithChildren {
+export interface TooltipProviderProps extends PropsWithChildren {
   /** Pointer-leave grace time, owned by the injected overlay runtime scheduler. */
   readonly leaveDelayMs?: number;
   /** Touch/pen help activation delay, also owned by the injected scheduler. */
@@ -79,11 +79,11 @@ function nonNegativeFinite(value: number, name: string): number {
  * runtime. It has one timer at a time, so sibling transfer cannot leave stale
  * callbacks behind after a branch changes or the runtime aborts.
  */
-export function NSETooltipProvider({ children, leaveDelayMs = 100, longPressDelayMs = 600 }: NSETooltipProviderProps) {
+export function TooltipProvider({ children, leaveDelayMs = 100, longPressDelayMs = 600 }: TooltipProviderProps) {
   const { runtime } = useNSEOverlayProvider();
   const resolvedLeaveDelayMs = nonNegativeFinite(leaveDelayMs, "NSE tooltip leaveDelayMs");
   const resolvedLongPressDelayMs = nonNegativeFinite(longPressDelayMs, "NSE tooltip longPressDelayMs");
-  const registrationsRef = useRef(new Map<string, NSETooltipRegistration>());
+  const registrationsRef = useRef(new Map<string, TooltipRegistration>());
   const activeIdRef = useRef<string | null>(null);
   const visibleIdRef = useRef<string | null>(null);
   const pendingRef = useRef<PendingTooltipTimer | null>(null);
@@ -168,7 +168,7 @@ export function NSETooltipProvider({ children, leaveDelayMs = 100, longPressDela
     if (activeIdRef.current === id) activeIdRef.current = null;
   }, [cancelPending]);
 
-  const register = useCallback((registration: NSETooltipRegistration) => {
+  const register = useCallback((registration: TooltipRegistration) => {
     const existing = registrationsRef.current.get(registration.id);
     if (existing && existing !== registration) {
       throw new Error(`NSE tooltip IDs must be unique within one provider: ${registration.id}`);
@@ -222,7 +222,7 @@ export function NSETooltipProvider({ children, leaveDelayMs = 100, longPressDela
     return () => observer.disconnect();
   }, [dismiss, runtime]);
 
-  const value = useMemo<NSETooltipProviderContextValue>(() => ({
+  const value = useMemo<TooltipProviderContextValue>(() => ({
     leaveDelayMs: resolvedLeaveDelayMs,
     longPressDelayMs: resolvedLongPressDelayMs,
     register,
@@ -232,16 +232,16 @@ export function NSETooltipProvider({ children, leaveDelayMs = 100, longPressDela
     dismiss,
     dismissActive: () => { const id = activeIdRef.current; if (id) dismiss(id); },
   }), [cancelPendingOpen, dismiss, register, requestClose, requestOpen, resolvedLeaveDelayMs, resolvedLongPressDelayMs]);
-  return <NSETooltipContext.Provider value={value}>{children}</NSETooltipContext.Provider>;
+  return <TooltipContext.Provider value={value}>{children}</TooltipContext.Provider>;
 }
 
 /** Null where no tooltip provider is mounted, for controls that fall back to a title. */
-export function useOptionalNSETooltipProvider(): NSETooltipProviderContextValue | null {
-  return useContext(NSETooltipContext);
+export function useOptionalTooltipProvider(): TooltipProviderContextValue | null {
+  return useContext(TooltipContext);
 }
 
-export function useNSETooltipProvider(): NSETooltipProviderContextValue {
-  const context = useContext(NSETooltipContext);
+export function useTooltipProvider(): TooltipProviderContextValue {
+  const context = useContext(TooltipContext);
   if (!context) throw new Error("useNSETooltip must be used within an NSETooltipProvider.");
   return context;
 }
