@@ -180,7 +180,7 @@ Arrow Down and Arrow Up on the button open the list. Without an overlay host, a 
 | `isIndeterminate` | `boolean` | `true` without a `value` | An indeterminate bar sweeps back and forth and an indeterminate spinning indicator turns. |
 | `controlSize` | `"small" \| "regular" \| "large"` | `"regular"` | A spinning indicator is 16, 32 or 64 pixels across. |
 
-A determinate bar is a `role="progressbar"` with `aria-valuemin`, `aria-valuemax` and `aria-valuenow`; an indeterminate one has no `aria-valuenow`. A spinning indicator with a `value` fills as a ring. Indeterminate motion stops under reduced motion (the nearest `NSEAnimationEnvironmentProvider`). To hide an indicator when no work is running, don't render it.
+A determinate bar is a `role="progressbar"` with `aria-valuemin`, `aria-valuemax` and `aria-valuenow`; an indeterminate one has no `aria-valuenow`. A spinning indicator with a `value` fills as a ring. Indeterminate motion stops when the runtime requests reduced motion. To hide an indicator when no work is running, don't render it.
 
 ## Date pickers
 
@@ -208,7 +208,7 @@ A determinate bar is a `role="progressbar"` with `aria-valuemin`, `aria-valuemax
 | `datePickerStyle` | `"textFieldAndStepper" \| "textField" \| "clockAndCalendar"` | `"textFieldAndStepper"` | `NSDatePicker.Style`. `textField` edits the date as separate day, month and year fields. `clockAndCalendar` shows the month calendar, or the clock for a time. |
 | `presentsCalendarOverlay` | `boolean` | `true` | A text field opens the calendar, or the clock, in a popover. |
 | `value`, `defaultValue` | see above, or `null` | none | Controlled or uncontrolled. |
-| `minimum`, `maximum` | the value's date or time type | none | `minDate` and `maxDate`. Days outside them can't be chosen. For a date and time they are `NSEZonedDateTime`. |
+| `minimum`, `maximum` | the value's date or time type | none | `minDate` and `maxDate`. Days outside them can't be chosen. For date and time, each bound supplies `epochMilliseconds`, `timeZone` and `calendar: "gregory"`. |
 | `isEnabled`, `isEditable` | `boolean` | `true` | A non-editable picker still shows and submits its value. |
 | `name` | `string` | none | The form field name. The value is submitted as ISO 8601. |
 | `onValueChange` | `(value, phase: "preview" \| "commit") => void` | none | A text field previews while it is edited and commits on Return or blur. The graphical calendar commits every change. |
