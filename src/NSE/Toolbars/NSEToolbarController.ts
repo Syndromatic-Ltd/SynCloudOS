@@ -172,7 +172,7 @@ function presentationFor(
   };
   if (item.kind === "space") return { kind: "space", id: item.id, instanceId, width: item.width };
   if (item.kind === "flexible-space") return { kind: "flexible-space", id: item.id, instanceId, minimumWidth: item.minimumWidth };
-  return { kind: "separator", id: item.id, instanceId };
+  return { ...item, instanceId };
 }
 
 /**

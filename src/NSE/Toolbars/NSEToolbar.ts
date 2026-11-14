@@ -40,7 +40,7 @@ const paneItem = (pane: "sidebar" | "inspector"): NSEToolbarItem => ({
 export const NSEToolbarItem = Object.freeze({
   toggleSidebar: Object.freeze(paneItem("sidebar")),
   toggleInspector: Object.freeze(paneItem("inspector")),
-  sidebarTrackingSeparator: Object.freeze({ kind: "separator", id: "sidebarTrackingSeparator" } as const),
+  sidebarTrackingSeparator: Object.freeze({ kind: "separator", id: "sidebarTrackingSeparator", tracksSidebar: true } as const),
   showPreferences: Object.freeze({
     kind: "custom", id: "showPreferences", label: "Preferences…",
     minimumWidth: 80, idealWidth: 112, render: () => createElement(WindowPreferencesButton),

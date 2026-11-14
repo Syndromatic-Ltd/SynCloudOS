@@ -135,6 +135,14 @@ export function SplitViewControllerView({ controller }: { readonly controller: N
   const items = controller.splitViewItems;
   const state = snapshot.state;
   const thicknesses = usePresentedThicknesses(controller, snapshot);
+  const publishSidebarWidth = ownsTitleSlot ? titleSlot.setSidebarWidth : undefined;
+  const firstPane = snapshot.items[0];
+  const visibleSidebarWidth = snapshot.presentation === "split" && snapshot.isVertical && firstPane && dataViewPresentsContent(state)
+    ? thicknesses.get(firstPane.identifier) ?? 0 : 0;
+  useLayoutEffect(() => {
+    publishSidebarWidth?.(visibleSidebarWidth > 0.01 ? visibleSidebarWidth : 0);
+  }, [publishSidebarWidth, visibleSidebarWidth]);
+  useLayoutEffect(() => () => publishSidebarWidth?.(undefined), [publishSidebarWidth]);
   const allowsMutation = dataViewAllowsMutation(state);
   const ariaLabel = controller.title ?? "Split view";
   const paneNodes = useRef(new Map<string, HTMLDivElement>());

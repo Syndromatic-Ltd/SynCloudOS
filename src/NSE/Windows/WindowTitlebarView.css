@@ -66,6 +66,19 @@
 }
 .nse-window-titlebar-view__metal-rail { inset-inline-start: 0; inline-size: var(--nse-window-titlebar-sidebar-width); }
 .nse-window-titlebar-view__metal-body { inset-inline: var(--nse-window-titlebar-sidebar-width) 0; }
+.nse-window-titlebar-view { --nse-titlebar-native-inline-start: var(--nse-titlebar-native-left, 0px); }
+.nse-window-titlebar-view:dir(rtl) { --nse-titlebar-native-inline-start: var(--nse-titlebar-native-right, 0px); }
+.nse-window-titlebar-view__row > [data-window-sidebar-tracking-separator] { display: none; }
+.nse-window-titlebar-view:has([data-window-sidebar-tracking-item]) > .nse-window-titlebar-view__row > [data-window-sidebar-tracking-separator] {
+  display: block;
+  position: absolute;
+  z-index: 3;
+  inset-block: 6px;
+  inset-inline-start: calc(var(--nse-window-titlebar-sidebar-width) - var(--nse-floating-titlebar-inline-offset, 0px) - var(--nse-titlebar-native-inline-start));
+  inline-size: 1px;
+  background: var(--nse-window-divider, currentColor);
+  pointer-events: none;
+}
 .nse-window-titlebar-view__controls,
 .nse-window-titlebar-view__sidebar,
 .nse-window-titlebar-view__accessory {

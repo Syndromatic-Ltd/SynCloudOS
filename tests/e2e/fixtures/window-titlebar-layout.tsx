@@ -9,6 +9,8 @@ import { nseMenuModel } from "../../../src/NSE/Menus/menuTypes";
 import { MenuRuntimeProvider } from "../../../src/NSE/Menus/menuRuntimeContext";
 import { WindowTitlebarView } from "../../../src/NSE/Windows/WindowTitlebarView";
 import { NSEToolbarController } from "../../../src/NSE/Toolbars/NSEToolbarController";
+import { NSEToolbarItem } from "../../../src/NSE/Toolbars/NSEToolbar";
+import { NSEWindowFrameView } from "../../../src/NSE/Application/NSEWindowFrameView";
 import { ToolbarView } from "../../../src/NSE/Toolbars/ToolbarView";
 import { NSEUserDefaultsController } from "../../../src/NSE/Controllers";
 import { nseUnowned } from "../../../src/NSE/Controllers/ownership";
@@ -20,11 +22,19 @@ import "../../../src/NSE/public/styles.css";
 
 const params = new URLSearchParams(location.search);
 const toolbarStyle = (params.get("style") ?? "unified") as NSEWindowToolbarStyle;
+const trackingEnabled = params.has("tracking") && params.get("tracking") !== "before";
 const scheme = params.get("scheme") === "dark" ? "dark" : "light";
 document.documentElement.dataset.appearance = scheme;
 document.documentElement.style.colorScheme = scheme;
 document.documentElement.style.background = scheme === "dark" ? "#20252c" : "#e7ebef";
 const actions: string[] = [];
+class ColouredFrame extends NSEWindowFrameView {
+  static appearance = async () => ({ default: ':scope [data-nse-part="title"] { color: rgb(21, 101, 183); }' });
+}
+class FailedFrame extends NSEWindowFrameView {
+  static appearance = async () => { throw new Error("Frame stylesheet fixture failed to load"); };
+}
+const frameAppearance = params.get("frame") === "before" ? NSEWindowFrameView : ColouredFrame;
 Object.assign(window, { titlebarLayoutRequests: actions });
 const menuRuntime: ToolbarRuntimePort = { signal: new AbortController().signal, commands: {
   getPresentationGeneration: () => ({ registryGeneration: 1, responderGeneration: 1 }),
@@ -62,8 +72,10 @@ function MeasuredToolbar() {
   const [width, setWidth] = useState(0);
   const [controller] = useState(() => {
     const values = new Map<string, unknown>(), ids = Array.from({ length: 8 }, (_, index) => `action-${index + 1}`);
+    const items = ids.map((id, index) => ({ kind: "command" as const, id, commandId: id, label: `Action ${index + 1}`, paletteLabel: `Action ${index + 1}`, icon: <span>{index + 1}</span>, minimumWidth: 32, idealWidth: 32 }));
+    const configurationIds = trackingEnabled ? ["sidebarTrackingSeparator", ...ids] : ids;
     const preferences = new NSEUserDefaultsController<ToolbarPreferences>({ owner: nseUnowned, namespace: "layout-toolbar", schema: {
-      version: 1, defaults: { itemIds: ids, displayMode: "icon-only", sizeMode: "regular" },
+      version: 1, defaults: { itemIds: configurationIds, displayMode: "icon-only", sizeMode: "regular" },
       fields: { itemIds: { validate: (v: unknown): v is readonly string[] => Array.isArray(v) }, displayMode: { validate: (v: unknown): v is ToolbarPreferences["displayMode"] => v === "icon-only" }, sizeMode: { validate: (v: unknown): v is ToolbarPreferences["sizeMode"] => v === "regular" } }, migrations: [],
     }, defaults: defaultsFrom({ read: key => values.get(key) ?? null, write: (key, value) => { values.set(key, value); }, remove: key => { values.delete(key); } }) });
     const runtime: ToolbarRuntimePort = { signal: new AbortController().signal, commands: {
@@ -72,8 +84,8 @@ function MeasuredToolbar() {
       prepareDispatch: async commandId => { actions.push(commandId); return { status: "cancelled", reason: "The geometry fixture records admission requests without executing application commands." }; },
       dispatch: async commandId => ({ status: "cancelled", commandId, operationId: "layout", reason: "fixture" }),
     } };
-    return new NSEToolbarController({ owner: nseUnowned, configuration: { identifier: "layout-toolbar", owner: { kind: "window", windowControllerId: "layout" }, allowedItemIds: ids, defaultItemIds: ids, displayMode: "icon-only", sizeMode: "regular" }, preferences, runtime,
-      items: ids.map((id, index) => ({ kind: "command", id, commandId: id, label: `Action ${index + 1}`, paletteLabel: `Action ${index + 1}`, icon: <span>{index + 1}</span>, minimumWidth: 32, idealWidth: 32 })),
+    return new NSEToolbarController({ owner: nseUnowned, configuration: { identifier: "layout-toolbar", owner: { kind: "window", windowControllerId: "layout" }, allowedItemIds: configurationIds, defaultItemIds: configurationIds, displayMode: "icon-only", sizeMode: "regular" }, preferences, runtime,
+      items: trackingEnabled ? [NSEToolbarItem.sidebarTrackingSeparator, ...items] : items,
     });
   });
   useEffect(() => () => controller.dispose(), [controller]);
@@ -89,13 +101,15 @@ function Fixture() {
   const frame = useRef<HTMLDivElement>(null);
   const [nativeRect, setNativeRect] = useState<DOMRect | null>(null);
   const [drags, setDrags] = useState(0);
+  const [frameViewClass, setFrameViewClass] = useState<typeof NSEWindowFrameView | undefined>(() => params.has("frame") ? frameAppearance : undefined);
+  const [sidebarWidth, setSidebarWidth] = useState<number | undefined>(params.has("tracking") ? 200 : undefined);
   useLayoutEffect(() => {
     if (!params.has("native")) return;
     const rect = frame.current!.getBoundingClientRect();
     setNativeRect(new DOMRect(params.get("native") === "right" ? rect.right - 120 : rect.left, rect.top, 120, 70));
   }, []);
   return <div ref={frame} data-layout-fixture="" style={{ width: Number(params.get("width") ?? 900), margin: 20 }}>
-    <WindowTitlebarView document={{ title: "A long document title", subtitle: "Unsaved draft", documentEdited: true, toolbarStyle, hasToolbar: true, titlebarPresentation: params.has("floating") ? "floating" : "attached" }}
+    <WindowTitlebarView document={{ title: "A long document title", subtitle: "Unsaved draft", documentEdited: true, toolbarStyle, hasToolbar: true, frameViewClass, sidebarWidth, titlebarPresentation: params.has("floating") ? "floating" : "attached" }}
       isKeyWindow mode={scheme} material={params.has("cumulus") ? "cumulus" : "metal"} controls={nativeRect ? null : <button style={{ width: 50, height: 26 }}>Close</button>}
       leading={<button style={{ width: 60, height: 26 }}>Leading</button>}
       trailing={<select aria-label="Trailing accessory" style={{ width: 90, height: 26 }}><option>Trailing</option></select>}
@@ -104,6 +118,18 @@ function Fixture() {
       bottomAccessories={<div style={{ height: 23 }}>Bottom accessory</div>}
       moveHandleProps={{ onPointerDown: () => setDrags(value => value + 1) }} />
     <output data-drag-count="">{drags}</output>
+    {params.has("frame") ? <>
+      <WindowTitlebarView document={{ title: "Another window", subtitle: "", documentEdited: false }} isKeyWindow />
+      <button onClick={() => setFrameViewClass(() => FailedFrame)}>Fail stylesheet</button>
+    </> : null}
+    {params.has("tracking") ? <>
+      <button onClick={() => setSidebarWidth(260)}>Resize sidebar</button>
+      <button onClick={() => setSidebarWidth(undefined)}>Collapse sidebar</button>
+      {params.has("evidence") ? <div style={{ height: 135, display: "flex", marginBlockStart: 12, background: "var(--nse-window-title-background)", border: "1px solid var(--nse-window-divider)" }}>
+        <div data-fixture-sidebar="" style={{ width: sidebarWidth, boxSizing: "border-box", flex: "0 0 auto", padding: 12, borderInlineEnd: "1px solid var(--nse-window-divider)" }}>Sidebar</div>
+        <div style={{ padding: 12 }}>Document</div>
+      </div> : null}
+    </> : null}
   </div>;
 }
 createRoot(document.getElementById("root")!).render(<NSEAppearanceProvider theme={atmoTheme} colourScheme={scheme}>

@@ -1,6 +1,38 @@
 import { expect, test } from "playwright/test";
 
 const fixture = "/tests/e2e/fixtures/window-titlebar-layout.html";
+test("frame-view paint stays in its window and falls back after a failed load", async ({ page }) => {
+  await page.goto(`${fixture}?frame`);
+  const title = page.locator("[data-window-title]").filter({ hasText: "A long document title" });
+  const sibling = page.locator("[data-window-title]").filter({ hasText: "Another window" });
+  await expect(title).toHaveCSS("color", "rgb(21, 101, 183)");
+  await expect(sibling).not.toHaveCSS("color", "rgb(21, 101, 183)");
+  await page.getByRole("button", { name: "Fail stylesheet" }).click();
+  await expect(title).not.toHaveCSS("color", "rgb(21, 101, 183)");
+  await expect(page.getByRole("button", { name: "Close" })).toBeVisible();
+});
+
+test("sidebar tracking separator follows the split edge and hides on collapse", async ({ page }) => {
+  await page.goto(`${fixture}?tracking`);
+  const header = page.locator("[data-window-titlebar]");
+  const separator = header.locator("[data-window-sidebar-tracking-separator]");
+  await expect(separator).toBeVisible();
+  const edge = async () => (await separator.boundingBox())!.x - (await header.boundingBox())!.x;
+  expect(await edge()).toBeCloseTo(200, 0);
+  await page.getByRole("button", { name: "Resize sidebar" }).click();
+  await expect.poll(edge).toBeCloseTo(260, 0);
+  await page.getByRole("button", { name: "Collapse sidebar" }).click();
+  await expect(separator).toBeHidden();
+});
+test("floating sidebar tracking stays aligned to the window edge", async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.goto(`${fixture}?tracking&floating&cumulus&width=1400`);
+  const frame = page.locator("[data-layout-fixture]");
+  const separator = page.locator("[data-window-sidebar-tracking-separator]");
+  await expect(separator).toBeVisible();
+  expect((await separator.boundingBox())!.x - (await frame.boundingBox())!.x).toBeCloseTo(200, 0);
+});
+
 for (const menu of [false, true]) test(`Cumulus glass follows the title row with menu ${menu}`, async ({ page }) => {
   await page.goto(`${fixture}?cumulus${menu ? "&menu" : ""}`);
   await expect(page.getByRole("toolbar")).toBeVisible();

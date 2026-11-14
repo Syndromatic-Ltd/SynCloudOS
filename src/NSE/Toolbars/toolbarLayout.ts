@@ -96,7 +96,8 @@ export function allocateToolbarItems(
   options: ToolbarLayoutOptions,
 ): ToolbarLayout {
   const width = finiteWidth(availableWidth);
-  const presented: ToolbarPresentedItem[] = items.map((item, index) => toPresented(item, index));
+  const presented = items.map((item, index) => toPresented(item, index))
+    .filter(item => item.kind !== "separator" || !item.tracksSidebar);
   const candidates = makeEntries(presented, options);
   const idealWidth = sum(candidates);
   let visible = [...candidates];

@@ -69,6 +69,10 @@ Use `useNSEWindow()` and `useNSEApplication()` in a function component rendered 
 
 `window.toggleFullScreen()` asks the host to change presentation. `window.isFullScreen` reflects host confirmation. The window's regular bounds and zoom state survive a round trip. A standard window with `collectionBehavior = ["fullScreenPrimary"]` can enter full screen.
 
+Override `windowWillEnterFullScreen`, `windowDidEnterFullScreen`, `windowWillExitFullScreen`, and `windowDidExitFullScreen` on the window controller to coordinate content with each transition. Refused requests call `windowDidFailToEnterFullScreen` or `windowDidFailToExitFullScreen`. Host-initiated changes use the same callbacks.
+
+`window.standardWindowButton(kind)` returns the mounted HTML button for `"closeButton"`, `"miniaturizeButton"`, or `"zoomButton"` when the presentation draws it. `"zoomButton"` identifies the green control, which may toggle fullscreen. The method returns `null` when the current presentation has no such button.
+
 ## Open a window for a document
 
 ```tsx
@@ -129,7 +133,7 @@ The Developer MCP reports `idiom.layout-guide` for a raw `env(safe-area-inset-*)
 
 The system draws each title bar. Set `window.titleVisibility`, `window.titlebarAppearsTransparent`, or the `fullSizeContentView` style bit to change how chrome is placed against content. The layout guide and `window.contentLayoutRect` describe the content area available below the measured chrome.
 
-`window.titlebarPresentation = "floating"` detaches Cumulus chrome across all toolbar styles. The default is `"attached"`. Windows with `texturedBackground` use Metal and keep their bars attached. A subclass of `NSEWindowFrameView` can supply titlebar metrics and theme tokens.
+`window.titlebarPresentation = "floating"` detaches Cumulus chrome across all toolbar styles. The default is `"attached"`. Windows with `texturedBackground` use Metal and keep their bars attached. A subclass of `NSEWindowFrameView` can supply titlebar metrics and theme tokens. It can also load a stylesheet with `static override appearance = () => import("./Resources/Journal.frame.css?inline")`. SynWare validates the stylesheet and its local imports against the NSE theme contract. Use `:scope` for the title bar itself and semantic `data-nse-part` selectors for its parts. Each window scopes the stylesheet to its own title bar and uses the frame's metrics and tokens if the stylesheet fails to load.
 
 ## Key, main and focus
 

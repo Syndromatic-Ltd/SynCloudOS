@@ -1,6 +1,6 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
-import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
-import { nseWindowFrameStyle } from "../Application/NSEWindowFrameView";
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
+import { nseWindowFrameStyle, type NSEWindowFrameViewClass } from "../Application/NSEWindowFrameView";
 import { useNSEWindowChromeElement } from "../Layout/windowObstructions";
 import type { WindowTitlebarDocument, WindowTitlebarSlots } from "./windowTitlebarContext";
 import "./Chrome/nse-chrome.css";
@@ -37,21 +37,37 @@ function interactiveTarget(target: EventTarget | null, header: HTMLElement): boo
   return Boolean(interactive && interactive !== header && header.contains(interactive));
 }
 
+function useWindowFrameAppearance(Frame: NSEWindowFrameViewClass | null | undefined) {
+  const id = useId();
+  const [loaded, setLoaded] = useState<{ frame: NSEWindowFrameViewClass; css: string } | null>(null);
+  useEffect(() => {
+    if (!Frame?.appearance) return;
+    let active = true;
+    void Promise.resolve().then(() => Frame.appearance?.()).then(module => {
+      if (active && typeof module?.default === "string") setLoaded({ frame: Frame, css: module.default });
+    }, () => undefined);
+    return () => { active = false; };
+  }, [Frame]);
+  if (!loaded || loaded.frame !== Frame) return null;
+  return { id, css: `@layer nse.theme { @scope ([data-window-frame-appearance=${JSON.stringify(id)}]) to ([data-window-titlebar]) { ${loaded.css} } }` };
+}
+
 /** @internal Shared composition; the window's existing toolbar renderer owns overflow and commands. */
 export function WindowTitlebarView({ document, isKeyWindow, titleId, material = "standard", variant = "standard", mode = "light",
   controls, sidebar, leading, trailing, toolbar, bottomAccessories, menuBar, titleAction, nativeControlExclusion,
   onSlotsChange, moveHandleProps, className = "", style }: WindowTitlebarViewProps) {
   const header = useRef<HTMLElement>(null);
   useNSEWindowChromeElement(header, "top", document.titlebarAppearsTransparent === true || document.fullSizeContentView === true);
+  const [standardControls, setStandardControls] = useState<HTMLDivElement | null>(null);
   const [leadingAccessories, setLeading] = useState<HTMLDivElement | null>(null);
   const [trailingAccessories, setTrailing] = useState<HTMLDivElement | null>(null);
   const [toolbarElement, setToolbar] = useState<HTMLDivElement | null>(null);
   const [bottomElement, setBottom] = useState<HTMLDivElement | null>(null);
   const [menuElement, setMenu] = useState<HTMLDivElement | null>(null);
-  const slots = useMemo(() => ({ leadingAccessories, trailingAccessories, toolbar: toolbarElement, bottomAccessories: bottomElement, menuBar: menuElement }),
-    [leadingAccessories, trailingAccessories, toolbarElement, bottomElement, menuElement]);
+  const slots = useMemo(() => ({ standardControls, leadingAccessories, trailingAccessories, toolbar: toolbarElement, bottomAccessories: bottomElement, menuBar: menuElement }),
+    [standardControls, leadingAccessories, trailingAccessories, toolbarElement, bottomElement, menuElement]);
   useLayoutEffect(() => { onSlotsChange?.(slots); }, [onSlotsChange, slots]);
-  useLayoutEffect(() => () => { onSlotsChange?.({ leadingAccessories: null, trailingAccessories: null, toolbar: null, bottomAccessories: null, menuBar: null }); }, [onSlotsChange]);
+  useLayoutEffect(() => () => { onSlotsChange?.({ standardControls: null, leadingAccessories: null, trailingAccessories: null, toolbar: null, bottomAccessories: null, menuBar: null }); }, [onSlotsChange]);
   const [exclusion, setExclusion] = useState({ left: 0, right: 0 });
   const nativeX = nativeControlExclusion?.x, nativeY = nativeControlExclusion?.y;
   const nativeWidth = nativeControlExclusion?.width, nativeHeight = nativeControlExclusion?.height;
@@ -82,11 +98,34 @@ export function WindowTitlebarView({ document, isKeyWindow, titleId, material = 
   const separateToolbar = resolvedStyle === "expanded" || resolvedStyle === "preference";
   const hasToolbar = document.hasToolbar === true || toolbar != null;
   const presentation = material === "cumulus" ? document.titlebarPresentation ?? "attached" : "attached";
+  useLayoutEffect(() => {
+    const node = header.current;
+    const container = node?.parentElement;
+    const view = node?.ownerDocument.defaultView;
+    if (presentation !== "floating" || !node || !container || !view) return;
+    const measure = () => {
+      const bar = node.getBoundingClientRect();
+      const parent = container.getBoundingClientRect();
+      const computed = view.getComputedStyle(container);
+      const inset = parseFloat(computed.borderInlineStartWidth) + parseFloat(computed.paddingInlineStart);
+      const offset = computed.direction === "rtl" ? parent.right - bar.right : bar.left - parent.left;
+      node.style.setProperty("--nse-floating-titlebar-inline-offset", `${offset - inset}px`);
+    };
+    measure();
+    const observer = view.ResizeObserver ? new view.ResizeObserver(measure) : null;
+    observer?.observe(container);
+    observer?.observe(node);
+    return () => {
+      observer?.disconnect();
+      node.style.removeProperty("--nse-floating-titlebar-inline-offset");
+    };
+  }, [presentation]);
   const { className: moveClassName, style: moveStyle, onPointerDown, onDoubleClick, ...handleProps } = moveHandleProps ?? {};
   const toolbarSlot = <div ref={setToolbar} data-window-toolbar-slot="" data-window-no-drag=""
     className="nse-window-titlebar-view__toolbar">{toolbar}</div>;
   const sidebarWidth = sidebar?.width ?? document.sidebarWidth;
   const metalRail = material === "metal" && sidebarWidth !== undefined;
+  const frameAppearance = useWindowFrameAppearance(document.frameViewClass);
   const headerStyle = { "--nse-window-titlebar-sidebar-width": sidebarWidth === undefined ? undefined : `${sidebarWidth}px`, ...nseWindowFrameStyle(document.frameViewClass), ...moveStyle, ...style, "--nse-titlebar-native-left": `${exclusion.left}px`, "--nse-titlebar-native-right": `${exclusion.right}px` } as CSSProperties;
   return <header {...handleProps} ref={header}
     className={["nse-window-titlebar-view", material === "standard" ? `nse-window__titlebar nse-window__titlebar--${variant}` : `nse-app-topbar${material === "metal" ? " nse-app-topbar-metal" : ""}`, variant === "hud" ? "nse-window__hud-titlebar" : "", moveClassName, className].filter(Boolean).join(" ")}
@@ -97,17 +136,20 @@ export function WindowTitlebarView({ document, isKeyWindow, titleId, material = 
     data-titlebar-transparent={document.titlebarAppearsTransparent ? "true" : undefined} data-has-toolbar={hasToolbar ? "true" : "false"}
     data-window-titlebar="" data-window-hud-titlebar={variant === "hud" ? "" : undefined} data-window-panel-titlebar={variant === "panel" ? "" : undefined}
     data-window-active={isKeyWindow ? "true" : "false"} data-nse-key-window={isKeyWindow ? undefined : "false"}
+    data-window-frame-appearance={frameAppearance?.id}
     data-mode={mode} data-nse-colour-scheme-resolved={mode} data-variant={material === "metal" ? "atmoMetal" : material === "cumulus" ? "atmoCumulus" : undefined}
     onPointerDown={event => { if (!interactiveTarget(event.target, event.currentTarget)) onPointerDown?.(event); }}
     onDoubleClick={event => { if (!interactiveTarget(event.target, event.currentTarget)) onDoubleClick?.(event); }}>
+    {frameAppearance ? <style>{frameAppearance.css}</style> : null}
     {presentation === "floating" ? <div data-nse-part="floating-titlebar" className="nse-window-titlebar-view__floating-surface" aria-hidden="true" />
       : material === "cumulus" ? <div className="nse-app-topbar-base" aria-hidden="true"><span className="nse-app-topbar-base-glass" /></div> : null}
     <div ref={setMenu} data-nse-part="menu" data-window-menu-slot="" className="nse-window-titlebar-view__menu" data-window-no-drag="">{menuBar}</div>
     <div data-nse-part="content" className={`nse-window-titlebar-view__row${material === "metal" && !metalRail ? " nse-app-topbar-metal-main" : ""}`} data-window-titlebar-row="">
+      {sidebarWidth !== undefined && hasToolbar ? <span aria-hidden="true" data-window-sidebar-tracking-separator="" data-nse-part="separator" /> : null}
       {metalRail ? <span data-nse-part="sidebar" className="nse-window-titlebar-view__metal-rail nse-app-topbar-metal-rail" aria-hidden="true"><span className="nse-app-topbar-metal-grain" /></span> : null}
       {metalRail ? <span className="nse-window-titlebar-view__metal-body nse-app-topbar-metal-main" aria-hidden="true" /> : null}
       {material === "metal" ? <span className="nse-app-topbar-metal-grain" aria-hidden="true" /> : null}
-      {controls ? <div className="nse-window-titlebar-view__controls" data-window-no-drag="" data-syncloudos-focus-chrome="">{controls}</div> : null}
+      {controls ? <div ref={setStandardControls} className="nse-window-titlebar-view__controls" data-window-no-drag="" data-syncloudos-focus-chrome="">{controls}</div> : null}
       {sidebar ? <div className="nse-window-titlebar-view__sidebar" data-window-no-drag="" style={{ width: sidebar.width }}>{sidebar.content}</div> : null}
       <div ref={setLeading} data-nse-part="leading" data-layout-attribute="leading" className="nse-window-titlebar-view__accessory" data-window-no-drag="">{leading}</div>
       <h2 id={titleId} data-nse-part="title" data-document-edited={document.documentEdited ? "true" : undefined} data-window-title="" className={variant === "hud" ? "nse-window-titlebar-view__title nse-window__hud-title" : "nse-window-titlebar-view__title"} hidden={document.titleVisibility === "hidden"}>

@@ -82,7 +82,7 @@ export type NSEToolbarItem =
     }
   | { readonly kind: "space"; readonly id: string; readonly width: number }
   | { readonly kind: "flexible-space"; readonly id: string; readonly minimumWidth: number }
-  | { readonly kind: "separator"; readonly id: string };
+  | { readonly kind: "separator"; readonly id: string; readonly tracksSidebar?: true };
 
 export type ToolbarOwner =
   | { readonly kind: "window"; readonly windowControllerId: string }
@@ -166,7 +166,7 @@ export type ToolbarPresentedItem =
     }
   | { readonly kind: "space"; readonly id: string; readonly instanceId: string; readonly width: number }
   | { readonly kind: "flexible-space"; readonly id: string; readonly instanceId: string; readonly minimumWidth: number }
-  | { readonly kind: "separator"; readonly id: string; readonly instanceId: string };
+  | { readonly kind: "separator"; readonly id: string; readonly instanceId: string; readonly tracksSidebar?: true };
 
 export interface NSEToolbarSnapshot {
   readonly generation: number;

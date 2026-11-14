@@ -221,6 +221,7 @@ function ConfiguredToolbar({
       <ChromeBevel  state={toolbarChromeState} />
       <ChromeGloss  state={toolbarChromeState} />
       <ChromeInnerShadow  state={toolbarChromeState} />
+      {snapshot.items.some(item => item.kind === "separator" && item.tracksSidebar) ? <span hidden data-window-sidebar-tracking-item="" /> : null}
       {snapshot.diagnostic === "validation-failed" ? (
         <p
           role="status"
