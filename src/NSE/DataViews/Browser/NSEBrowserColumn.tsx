@@ -22,20 +22,20 @@ import { useId, useRef, useState, type KeyboardEvent } from "react";
 
 import { dataViewEventIsComposing, encodeNSEDataViewKey, type NSEDataViewKey } from "../Core";
 import { useVirtualiser } from "../Virtualisation";
-import type { NSEBrowserColumnState, NSEBrowserItemPresentation } from "./browserTypes";
+import type { BrowserColumnState, BrowserItemPresentation } from "./browserTypes";
 
-interface NSEBrowserColumnProps<T, TId extends NSEDataViewKey> {
+interface BrowserColumnProps<T, TId extends NSEDataViewKey> {
   readonly label: string;
   readonly index: number;
-  readonly state: NSEBrowserColumnState<T, TId>;
+  readonly state: BrowserColumnState<T, TId>;
   readonly expandedId: TId | null;
   readonly onActiveChange: (id: TId) => void;
-  readonly onChoose: (item: NSEBrowserItemPresentation<T, TId>) => void;
+  readonly onChoose: (item: BrowserItemPresentation<T, TId>) => void;
   readonly onBack: () => void;
   readonly disabled: boolean;
 }
 
-export function NSEBrowserColumn<T, TId extends NSEDataViewKey>({ label, index, state, expandedId, onActiveChange, onChoose, onBack, disabled }: NSEBrowserColumnProps<T, TId>) {
+export function BrowserColumn<T, TId extends NSEDataViewKey>({ label, index, state, expandedId, onActiveChange, onChoose, onBack, disabled }: BrowserColumnProps<T, TId>) {
   const instanceId = useId().replace(/:/g, "");
   const [typeahead, setTypeahead] = useState({ text: "", at: 0 });
   const activeIndex = state.activeId === null ? -1 : state.presentation.findIndex(({ id }) => Object.is(id, state.activeId));

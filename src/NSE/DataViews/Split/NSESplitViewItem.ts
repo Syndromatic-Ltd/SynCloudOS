@@ -61,7 +61,7 @@ export interface NSESplitViewItemOptions {
 export const nseSplitViewItemHost: unique symbol = Symbol("nse.splitViewItemHost");
 
 /** @internal What an item needs from its split view controller. */
-export interface NSESplitViewItemHost {
+export interface SplitViewItemHost {
   isItemCollapsed(identifier: string): boolean;
   setItemCollapsed(identifier: string, collapsed: boolean): void;
 }
@@ -76,7 +76,7 @@ export class NSESplitViewItem {
   readonly preferredThicknessFraction: number | undefined;
   readonly canCollapse: boolean;
   readonly holdingPriority: number;
-  #host: NSESplitViewItemHost | null = null;
+  #host: SplitViewItemHost | null = null;
   #collapsed: boolean;
 
   constructor(options: NSESplitViewItemOptions) {
@@ -116,7 +116,7 @@ export class NSESplitViewItem {
   }
 
   /** @internal Joins or leaves a split view controller. */
-  [nseSplitViewItemHost](host: NSESplitViewItemHost | null): void {
+  [nseSplitViewItemHost](host: SplitViewItemHost | null): void {
     if (host && this.#host && this.#host !== host) throw new TypeError(`Split view item "${this.identifier}" already belongs to a split view controller.`);
     this.#host = host;
   }

@@ -23,7 +23,7 @@ import { useRef, type PointerEvent as ReactPointerEvent } from "react";
 import { NSEPopUpButton } from "../../Menus";
 import type { NSETableColumnMenu } from "./tableTypes";
 
-export interface NSETableHeaderColumn {
+export interface TableHeaderColumn {
   readonly id: string;
   readonly title: string;
   readonly width: number;
@@ -36,7 +36,7 @@ export interface NSETableHeaderColumn {
 }
 
 export interface NSETableHeaderViewProps {
-  readonly columns: readonly NSETableHeaderColumn[];
+  readonly columns: readonly TableHeaderColumn[];
   readonly height: number;
   readonly width: number;
   readonly menu?: NSETableColumnMenu;

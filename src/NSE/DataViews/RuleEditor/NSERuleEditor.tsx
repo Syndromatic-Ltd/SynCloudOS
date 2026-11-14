@@ -25,7 +25,7 @@ import { dataViewAllowsNavigation, dataViewIsBusy, dataViewPresentsContent } fro
 import { NSEPopUpButton } from "../../Menus/NSEPopUpButton";
 import { NSEButton } from "../../Controls/Buttons/NSEButton";
 import { NSETextField } from "../../Controls/Fields/NSEFields";
-import type { NSEPredicateOperatorOption, NSEPredicateTemplate, NSERuleEditorProps, NSERuleEditorValue, NSERuleRow } from "./ruleEditorTypes";
+import type { PredicateOperatorOption, PredicateTemplate, NSERuleEditorProps, RuleEditorValue, RuleRow } from "./ruleEditorTypes";
 import "./nse-rule-editor.css";
 
 const matchOptions = Object.freeze([
@@ -34,24 +34,24 @@ const matchOptions = Object.freeze([
   Object.freeze({ value: "none", title: "none" }),
 ]);
 
-const EMPTY_VALUE: NSERuleEditorValue = Object.freeze({ root: Object.freeze({ id: "root", kind: "group", operator: "all", children: Object.freeze([]) }) });
+const EMPTY_VALUE: RuleEditorValue = Object.freeze({ root: Object.freeze({ id: "root", kind: "group", operator: "all", children: Object.freeze([]) }) });
 
-function collectIds(row: NSERuleRow, ids = new Set<string>()): Set<string> {
+function collectIds(row: RuleRow, ids = new Set<string>()): Set<string> {
   ids.add(row.id); if (row.kind === "group") for (const child of row.children) collectIds(child, ids); return ids;
 }
 
-function nextRuleId(root: NSERuleRow, prefix = "rule"): string {
+function nextRuleId(root: RuleRow, prefix = "rule"): string {
   const ids = collectIds(root); let index = 1; while (ids.has(`${prefix}-${index}`)) index += 1; return `${prefix}-${index}`;
 }
 
-function replaceAtPath(rows: readonly NSERuleRow[], path: readonly number[], replacement: NSERuleRow | null): readonly NSERuleRow[] {
+function replaceAtPath(rows: readonly RuleRow[], path: readonly number[], replacement: RuleRow | null): readonly RuleRow[] {
   const [index, ...rest] = path;
   if (index === undefined) return rows;
   if (rest.length === 0) return replacement === null ? rows.filter((_, candidate) => candidate !== index) : rows.map((row, candidate) => candidate === index ? Object.freeze(replacement) : row);
   return rows.map((row, candidate) => candidate === index && row.kind === "group" ? Object.freeze({ ...row, children: Object.freeze(replaceAtPath(row.children, rest, replacement)) }) : row);
 }
 
-function transformChildren(rows: readonly NSERuleRow[], groupPath: readonly number[], transform: (children: readonly NSERuleRow[]) => readonly NSERuleRow[]): readonly NSERuleRow[] {
+function transformChildren(rows: readonly RuleRow[], groupPath: readonly number[], transform: (children: readonly RuleRow[]) => readonly RuleRow[]): readonly RuleRow[] {
   const [index, ...rest] = groupPath;
   if (index === undefined) return Object.freeze([...transform(rows)]);
   return rows.map((row, candidate) => candidate === index && row.kind === "group"
@@ -60,15 +60,15 @@ function transformChildren(rows: readonly NSERuleRow[], groupPath: readonly numb
 }
 
 function RuleComparisonControls({ row, label, fields, operators, templates, locale, readOnly, disabled, onChange }: {
-  readonly row: Extract<NSERuleRow, { kind: "comparison" }>;
+  readonly row: Extract<RuleRow, { kind: "comparison" }>;
   readonly label: string;
   readonly fields: readonly string[];
-  readonly operators: readonly NSEPredicateOperatorOption[];
-  readonly templates: readonly NSEPredicateTemplate<unknown>[];
+  readonly operators: readonly PredicateOperatorOption[];
+  readonly templates: readonly PredicateTemplate<unknown>[];
   readonly locale: string;
   readonly readOnly: boolean;
   readonly disabled: boolean;
-  readonly onChange: (row: Extract<NSERuleRow, { kind: "comparison" }>) => void;
+  readonly onChange: (row: Extract<RuleRow, { kind: "comparison" }>) => void;
 }) {
   const template = templates.find((candidate) => candidate.field === row.field);
   const available = template?.operators ?? operators;
@@ -96,7 +96,7 @@ function RuleComparisonControls({ row, label, fields, operators, templates, loca
     onChange({ ...row, value: row.operator === "between" || row.operator === "in" ? values as never : values[0] as never });
   };
   const locked = readOnly || disabled;
-  const compatibleOptions = (candidate: NSEPredicateTemplate<unknown> | undefined, operator: string) => candidate?.acceptsTextOptions === true && ["equals", "notEquals", "contains", "beginsWith", "endsWith", "in"].includes(operator) ? row.options : undefined;
+  const compatibleOptions = (candidate: PredicateTemplate<unknown> | undefined, operator: string) => candidate?.acceptsTextOptions === true && ["equals", "notEquals", "contains", "beginsWith", "endsWith", "in"].includes(operator) ? row.options : undefined;
   return <>
     <NSEPopUpButton label={`Field ${label}`} labelHidden value={row.field} isEnabled={!locked} items={fields.map((id) => ({ value: id, title: templates.find((candidate) => candidate.field === id)?.label ?? id }))} onValueChange={(field) => {
       const nextTemplate = templates.find((candidate) => candidate.field === field);
@@ -130,7 +130,7 @@ export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onV
   const [internal, setInternal] = useState(defaultValue);
   const current = value ?? internal;
   compilePredicateExpression(current);
-  const root: Extract<NSERuleRow, { kind: "group" }> = current.root.kind === "group" ? current.root : { id: "root", kind: "group", operator: "all", children: [current.root] };
+  const root: Extract<RuleRow, { kind: "group" }> = current.root.kind === "group" ? current.root : { id: "root", kind: "group", operator: "all", children: [current.root] };
   const [pendingFocusId, setPendingFocusId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -145,13 +145,13 @@ export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onV
   const effectiveDisabled = disabled || !dataViewAllowsNavigation(effectiveState);
   const presentsContent = dataViewPresentsContent(effectiveState);
   const hostDisabled = disabled || effectiveState.kind === "disabled" || effectiveState.kind === "invalid" || (effectiveState.kind === "denied" && !effectiveState.retry);
-  const publishRoot = (nextRoot: Extract<NSERuleRow, { kind: "group" }>) => {
+  const publishRoot = (nextRoot: Extract<RuleRow, { kind: "group" }>) => {
     const next = Object.freeze({ root: Object.freeze(nextRoot) });
     compilePredicateExpression(next);
     if (value === undefined) setInternal(next);
     onChange?.(next);
   };
-  const publishChildren = (children: readonly NSERuleRow[], operator = root.operator) => publishRoot({ ...root, operator, children: Object.freeze([...children]) });
+  const publishChildren = (children: readonly RuleRow[], operator = root.operator) => publishRoot({ ...root, operator, children: Object.freeze([...children]) });
   const locked = effectiveDisabled || effectiveReadOnly;
   const addRule = (groupPath: readonly number[]) => {
     const id = nextRuleId(root);
@@ -160,16 +160,16 @@ export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onV
     const option = template?.operators[0] ?? operators[0];
     if (!option) return;
     const value = option.arity === 0 ? undefined : option.operator === "between" ? ["", ""] : option.operator === "in" ? [] : "";
-    const row: NSERuleRow = Object.freeze({ id, kind: "comparison", field, operator: option.operator, value });
+    const row: RuleRow = Object.freeze({ id, kind: "comparison", field, operator: option.operator, value });
     setPendingFocusId(id); publishChildren(transformChildren(root.children, groupPath, (children) => [...children, row]));
   };
   const addGroup = (groupPath: readonly number[]) => {
     const id = nextRuleId(root, "group");
-    const row: NSERuleRow = Object.freeze({ id, kind: "group", operator: "all", children: Object.freeze([]) });
+    const row: RuleRow = Object.freeze({ id, kind: "group", operator: "all", children: Object.freeze([]) });
     setPendingFocusId(id); publishChildren(transformChildren(root.children, groupPath, (children) => [...children, row]));
   };
   const groupIdAt = (path: readonly number[]): string => {
-    let rows: readonly NSERuleRow[] = root.children;
+    let rows: readonly RuleRow[] = root.children;
     let current = root.id;
     for (const index of path) {
       const row = rows[index];
@@ -178,7 +178,7 @@ export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onV
     }
     return current;
   };
-  const repairFocus = (rows: readonly NSERuleRow[], index: number, parentPath: readonly number[]) => setPendingFocusId(rows[index - 1]?.id ?? rows[index + 1]?.id ?? groupIdAt(parentPath));
+  const repairFocus = (rows: readonly RuleRow[], index: number, parentPath: readonly number[]) => setPendingFocusId(rows[index - 1]?.id ?? rows[index + 1]?.id ?? groupIdAt(parentPath));
   const move = (parentPath: readonly number[], index: number, delta: number) => {
     let movedId: string | null = null;
     const next = transformChildren(root.children, parentPath, (children) => {
@@ -187,7 +187,7 @@ export function NSERuleEditor({ value, defaultValue = EMPTY_VALUE, onChange, onV
     });
     if (!movedId) return; setPendingFocusId(movedId); publishChildren(next);
   };
-  const renderRows = (rows: readonly NSERuleRow[], parentPath: readonly number[] = []): ReactNode => rows.map((row, index) => {
+  const renderRows = (rows: readonly RuleRow[], parentPath: readonly number[] = []): ReactNode => rows.map((row, index) => {
     const path = [...parentPath, index];
     if (row.kind === "group") return <fieldset key={row.id} tabIndex={-1} data-rule-id={row.id} className="nse-rule-group" onKeyDown={(event) => {
       if (event.altKey && event.key === "ArrowUp") { event.preventDefault(); move(parentPath, index, -1); }

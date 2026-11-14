@@ -31,8 +31,10 @@
     "Error"
   ],
   "internalCounterparts": {
+    "NSECollectionLayoutItem": "NSCollectionLayoutItem",
     "NSEColourList": "NSColorList",
-    "NSEColourPicker": "NSColorPicker"
+    "NSEColourPicker": "NSColorPicker",
+    "NSETableHeaderView": "NSTableHeaderView"
   },
   "members": {
     "SCAuthorization.copyRights": "AuthorizationCopyRights",

@@ -21,9 +21,9 @@
 import type { PasteboardRepresentation, DragEndpoint, TransferDragOperation } from "../../../SynCloudOS/SynCloudOS";
 import type { NSEDragSessionPort } from "../../Drag/dragSessionPort";
 
-type NSETransferKey = string | number;
+type TransferKey = string | number;
 
-function stableIds<TId extends NSETransferKey>(value: readonly TId[], label: string): readonly TId[] {
+function stableIds<TId extends TransferKey>(value: readonly TId[], label: string): readonly TId[] {
   if (!Array.isArray(value)) throw new TypeError(`${label} must be a dense data array.`);
   const descriptors = Object.getOwnPropertyDescriptors(value) as unknown as PropertyDescriptorMap;
   const length = descriptors.length;
@@ -33,7 +33,7 @@ function stableIds<TId extends NSETransferKey>(value: readonly TId[], label: str
   const allowed = new Set<PropertyKey>(["length", ...Array.from({ length: length.value as number }, (_, index) => String(index))]);
   if (Reflect.ownKeys(descriptors).some((key) => !allowed.has(key))) throw new TypeError(`${label} must be a dense data array.`);
   const output: TId[] = [];
-  const seen = new Set<NSETransferKey>();
+  const seen = new Set<TransferKey>();
   for (let index = 0; index < (length.value as number); index += 1) {
     const descriptor = descriptors[String(index)];
     if (!descriptor || !("value" in descriptor) || descriptor.get || descriptor.set || !descriptor.enumerable) {
@@ -49,7 +49,7 @@ function stableIds<TId extends NSETransferKey>(value: readonly TId[], label: str
   return Object.freeze(output);
 }
 
-function dropLocation<TId extends NSETransferKey>(value: NSEDataViewDropLocation<TId>): NSEDataViewDropLocation<TId> {
+function dropLocation<TId extends TransferKey>(value: DataViewDropLocation<TId>): DataViewDropLocation<TId> {
   if (!value || typeof value !== "object") throw new TypeError("Drop location must be a data-property descriptor.");
   const descriptors = Object.getOwnPropertyDescriptors(value);
   const allowed = new Set<PropertyKey>(["targetId", "insertionIndex", "operation"]);
@@ -74,13 +74,13 @@ function dropLocation<TId extends NSETransferKey>(value: NSEDataViewDropLocation
   return Object.freeze({ targetId: targetId as TId | null, insertionIndex: insertionIndex as number, operation });
 }
 
-export interface NSEDataViewDropLocation<TId extends NSETransferKey> {
+export interface DataViewDropLocation<TId extends TransferKey> {
   readonly targetId: TId | null;
   readonly insertionIndex: number;
   readonly operation?: "above" | "on" | "below";
 }
 
-export interface NSEDataViewDropProposal<TId extends NSETransferKey> extends NSEDataViewDropLocation<TId> {
+export interface DataViewDropProposal<TId extends TransferKey> extends DataViewDropLocation<TId> {
   readonly sessionId: string;
   readonly generation: number;
   readonly signal: AbortSignal;
@@ -88,27 +88,27 @@ export interface NSEDataViewDropProposal<TId extends NSETransferKey> extends NSE
   readonly operation: "above" | "on" | "below";
 }
 
-export interface NSEDataViewDragBinding<TId extends NSETransferKey> {
+export interface NSEDataViewDragBinding<TId extends TransferKey> {
   begin(ids: readonly TId[], source: DragEndpoint): readonly PasteboardRepresentation[];
-  update(location: NSEDataViewDropLocation<TId>, target: DragEndpoint): Promise<boolean>;
-  drop(location: NSEDataViewDropLocation<TId>, target: DragEndpoint, handlers?: {
-    readonly validate?: (proposal: NSEDataViewDropProposal<TId>) => boolean | Promise<boolean>;
-    readonly accept?: (proposal: NSEDataViewDropProposal<TId>) => void | Promise<void>;
+  update(location: DataViewDropLocation<TId>, target: DragEndpoint): Promise<boolean>;
+  drop(location: DataViewDropLocation<TId>, target: DragEndpoint, handlers?: {
+    readonly validate?: (proposal: DataViewDropProposal<TId>) => boolean | Promise<boolean>;
+    readonly accept?: (proposal: DataViewDropProposal<TId>) => void | Promise<void>;
   }): Promise<boolean>;
   end(reason?: string): void;
   cancel(reason?: string): void;
   dispose(): void;
 }
 
-export function createNSEDataViewDragBinding<TId extends NSETransferKey>(options: {
+export function createNSEDataViewDragBinding<TId extends TransferKey>(options: {
   readonly manager: Pick<NSEDragSessionPort, "begin" | "updateDestination" | "claimDrop" | "cancelUnclaimed" | "performDrop" | "cancel">;
   readonly ownerSignal?: AbortSignal;
   readonly operations?: readonly TransferDragOperation[];
   readonly representations: (ids: readonly TId[]) => readonly PasteboardRepresentation[];
   readonly captureSelection: () => readonly TId[];
   readonly restoreSelection: (snapshot: readonly TId[]) => void;
-  readonly onValidateDrop?: (proposal: NSEDataViewDropProposal<TId>) => boolean | Promise<boolean>;
-  readonly onAcceptDrop?: (proposal: NSEDataViewDropProposal<TId>) => void | Promise<void>;
+  readonly onValidateDrop?: (proposal: DataViewDropProposal<TId>) => boolean | Promise<boolean>;
+  readonly onAcceptDrop?: (proposal: DataViewDropProposal<TId>) => void | Promise<void>;
 }): NSEDataViewDragBinding<TId> {
   let sessionId: string | null = null;
   let orderedIds: readonly TId[] = Object.freeze([]);
@@ -118,7 +118,7 @@ export function createNSEDataViewDragBinding<TId extends NSETransferKey>(options
   let dropClaimed = false;
   let disposed = false;
 
-  const proposal = (location: NSEDataViewDropLocation<TId>, signal: AbortSignal, proposalGeneration = generation) => Object.freeze({
+  const proposal = (location: DataViewDropLocation<TId>, signal: AbortSignal, proposalGeneration = generation) => Object.freeze({
     sessionId: sessionId!,
     generation: proposalGeneration,
     signal,

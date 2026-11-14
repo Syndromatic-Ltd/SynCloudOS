@@ -19,14 +19,14 @@
  */
 
 export { NSEBrowser } from "./NSEBrowser";
-export { NSEBrowserColumn } from "./NSEBrowserColumn";
-export { NSEBrowserRequestGate } from "./browserRequestGate";
-export { NSEBrowserDataError } from "./browserTypes";
+export { BrowserColumn } from "./NSEBrowserColumn";
+export { BrowserRequestGate } from "./browserRequestGate";
+export { BrowserDataError } from "./browserTypes";
 export type {
-  NSEBrowserColumnState,
-  NSEBrowserColumnStatus,
+  BrowserColumnState,
+  BrowserColumnStatus,
   NSEBrowserDataSource,
-  NSEBrowserItemPresentation,
-  NSEBrowserPathItem,
+  BrowserItemPresentation,
+  BrowserPathItem,
   NSEBrowserProps,
 } from "./browserTypes";

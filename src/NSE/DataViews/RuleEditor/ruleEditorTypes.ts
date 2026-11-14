@@ -23,23 +23,23 @@ import type { HTMLAttributes } from "react";
 import type { NSEFormatter, NSEFormatterResult, NSEPredicateComparisonOperator, NSEPredicateExpression, NSEPredicateLiteral, NSEPredicateSchema } from "../../../Foundation/public";
 import type { NSEDataViewState } from "../Core";
 
-export interface NSEPredicateOperatorOption {
+export interface PredicateOperatorOption {
   readonly operator: NSEPredicateComparisonOperator;
   readonly label: string;
   readonly arity: 0 | 1 | 2;
 }
 
-export interface NSEPredicateTemplate<T> {
+export interface PredicateTemplate<T> {
   readonly id: string;
   readonly field: keyof T & string;
   readonly label: string;
-  readonly operators: readonly NSEPredicateOperatorOption[];
+  readonly operators: readonly PredicateOperatorOption[];
   readonly acceptsTextOptions?: boolean;
   readonly formatter: NSEFormatter<unknown>;
   validate(value: unknown): NSEFormatterResult<unknown>;
 }
 
-export type NSERuleRow =
+export type RuleRow =
   | {
       readonly id: string;
       readonly kind: "constant";
@@ -57,19 +57,19 @@ export type NSERuleRow =
       readonly id: string;
       readonly kind: "group";
       readonly operator: "all" | "any" | "none";
-      readonly children: readonly NSERuleRow[];
+      readonly children: readonly RuleRow[];
     };
 
-export interface NSERuleEditorValue { readonly root: NSERuleRow }
+export interface RuleEditorValue { readonly root: RuleRow }
 
-export interface NSERuleEditorValidation {
+export interface RuleEditorValidation {
   readonly valid: boolean;
   readonly issues: readonly { readonly rowId: string; readonly message: string }[];
 }
 
 export interface NSEPredicateEditorProps<T> extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
   readonly schema: NSEPredicateSchema<T>;
-  readonly templates?: readonly NSEPredicateTemplate<T>[];
+  readonly templates?: readonly PredicateTemplate<T>[];
   readonly value?: NSEPredicateExpression;
   readonly defaultValue?: NSEPredicateExpression;
   readonly onChange?: (value: NSEPredicateExpression) => void;
@@ -80,13 +80,13 @@ export interface NSEPredicateEditorProps<T> extends Omit<HTMLAttributes<HTMLDivE
 }
 
 export interface NSERuleEditorProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
-  readonly value?: NSERuleEditorValue;
-  readonly defaultValue?: NSERuleEditorValue;
-  readonly onChange?: (value: NSERuleEditorValue) => void;
-  readonly onValidationChange?: (validation: NSERuleEditorValidation) => void;
+  readonly value?: RuleEditorValue;
+  readonly defaultValue?: RuleEditorValue;
+  readonly onChange?: (value: RuleEditorValue) => void;
+  readonly onValidationChange?: (validation: RuleEditorValidation) => void;
   readonly fields: readonly string[];
-  readonly operators?: readonly NSEPredicateOperatorOption[];
-  readonly templates?: readonly NSEPredicateTemplate<unknown>[];
+  readonly operators?: readonly PredicateOperatorOption[];
+  readonly templates?: readonly PredicateTemplate<unknown>[];
   readonly locale?: string;
   readonly state?: NSEDataViewState;
   readonly readOnly?: boolean;

@@ -20,13 +20,13 @@
 import {
   createNSEDataViewDragBinding,
   type NSEDataViewDragBinding,
-  type NSEDataViewDropLocation,
+  type DataViewDropLocation,
 } from "../../NSE/DataViews/Drag";
 import type { NSEColourPanelProviderProps } from "../../NSE/Colour/ColourPanel/NSEColourPanelProvider";
 import type { PasteboardRepresentation } from "../SynCloudOS";
 import type { AppDragClient, AppDragOperation, AppDragRepresentation, AppDragSession } from "./appClientTypes";
 
-type NSETransferKey = string | number;
+type TransferKey = string | number;
 type NSEDragSessionPort = NonNullable<NSEColourPanelProviderProps["drag"]>["manager"];
 type NSEDragSessionHandle = ReturnType<NSEDragSessionPort["begin"]>;
 
@@ -100,7 +100,7 @@ function createNSEDragSessionPort(drag: AppDragClient, ownerToken: unknown = Obj
   });
 }
 
-export interface SynWareNSEDataViewDropProposal<TId extends NSETransferKey> extends NSEDataViewDropLocation<TId> {
+export interface SynWareNSEDataViewDropProposal<TId extends TransferKey> extends DataViewDropLocation<TId> {
   readonly sessionId: string;
   readonly generation: number;
   readonly signal: AbortSignal;
@@ -108,7 +108,7 @@ export interface SynWareNSEDataViewDropProposal<TId extends NSETransferKey> exte
   readonly operation: "above" | "on" | "below";
 }
 
-export interface SynWareNSEDataViewDragOptions<TId extends NSETransferKey> {
+export interface SynWareNSEDataViewDragOptions<TId extends TransferKey> {
   readonly drag: AppDragClient;
   readonly ownerSignal?: AbortSignal;
   readonly operations?: readonly AppDragOperation[];
@@ -119,7 +119,7 @@ export interface SynWareNSEDataViewDragOptions<TId extends NSETransferKey> {
   readonly onAcceptDrop?: (proposal: SynWareNSEDataViewDropProposal<TId>) => void | Promise<void>;
 }
 
-export function createSynWareNSEDataViewDragBinding<TId extends NSETransferKey>(
+export function createSynWareNSEDataViewDragBinding<TId extends TransferKey>(
   options: SynWareNSEDataViewDragOptions<TId>,
 ): NSEDataViewDragBinding<TId> {
   return createNSEDataViewDragBinding({

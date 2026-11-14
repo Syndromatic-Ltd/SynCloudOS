@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export class NSEBrowserRequestGate {
+export class BrowserRequestGate {
   #generation = 0;
   #controller: AbortController | null = null;
 

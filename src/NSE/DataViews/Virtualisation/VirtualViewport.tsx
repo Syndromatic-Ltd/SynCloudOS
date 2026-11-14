@@ -39,7 +39,7 @@ export interface VirtualViewportProps extends Omit<HTMLAttributes<HTMLDivElement
   readonly viewportSize?: number;
 }
 
-function NSEMeasuredVirtualItem({
+function MeasuredVirtualItem({
   item,
   virtualiser,
   axis,
@@ -120,14 +120,14 @@ export const VirtualViewport = forwardRef<HTMLDivElement, VirtualViewportProps>(
     >
       <div data-nse-part="content" className="nse-virtual-viewport-content" style={containerStyle}>
         {virtualiser.snapshot.items.map((item) => (
-          <NSEMeasuredVirtualItem
+          <MeasuredVirtualItem
             key={item.key}
             item={item}
             virtualiser={virtualiser}
             axis={axis}
           >
             {renderItem(item)}
-          </NSEMeasuredVirtualItem>
+          </MeasuredVirtualItem>
         ))}
       </div>
       <span role="status" aria-live="polite" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clipPath: "inset(50%)" }}>

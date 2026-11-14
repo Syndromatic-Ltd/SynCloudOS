@@ -34,7 +34,7 @@ import { dataViewAllowsMutation, dataViewAnnouncement, dataViewEventIsComposing,
 import { useVirtualiser } from "../Virtualisation";
 import { nseDragCommandIds, nseDragNoPayload, useNSEDataViewDragHost } from "../../Drag";
 
-import { NSETableCell } from "./NSETableCell";
+import { TableCell } from "./NSETableCell";
 import { NSETableHeaderView } from "./NSETableHeaderView";
 import type {
   NSETableColumn,
@@ -516,7 +516,7 @@ export function NSETableView<T, TId extends string | number>({
                   ? column.render(value, entry.item, entry.id)
                   : column.format?.string(value, { locale }) ?? String(value ?? "");
                 return (
-                  <NSETableCell
+                  <TableCell
                     key={column.id}
                     id={cellId(entry.id, column.id)}
                     columnIndex={columnIndex}
@@ -532,7 +532,7 @@ export function NSETableView<T, TId extends string | number>({
                   >
                     {content}
                     {editing?.error ? <span id={`${cellId(entry.id, column.id)}-error`} hidden>{editing.error}</span> : null}
-                  </NSETableCell>
+                  </TableCell>
                 );
               })}
             </div>

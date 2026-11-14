@@ -33,7 +33,7 @@ import {
   type NSESplitViewPreferences,
 } from "../../../src/NSE/DataViews/Split";
 import { nseSplitViewLayout } from "../../../src/NSE/DataViews/Split/NSESplitViewController";
-import { NSESplitViewControllerView } from "../../../src/NSE/DataViews/Split/splitViewControllerView";
+import { SplitViewControllerView } from "../../../src/NSE/DataViews/Split/splitViewControllerView";
 import { NSEViewControllerView } from "../../../src/SynCloudOS/AppHosting/applicationHosting";
 import { createStaticPresentationTraits } from "../../fixtures/presentationTraits";
 import { defaultsFrom } from "../../fixtures/userDefaults";
@@ -112,7 +112,7 @@ describe("NSESplitViewController", () => {
   it.each(["default", "embedded", "strict"] as const)("lets the %s split renderer own valid inset bounds without competing wrapper measurements", (mode) => {
     let showDefault = true;
     class FramedSplit extends NSESplitViewController {
-      static override view = ({ controller }: { controller: NSESplitViewController }) => <section data-testid="custom-frame">{showDefault ? <NSESplitViewControllerView controller={controller} /> : <p>Custom layout only</p>}</section>;
+      static override view = ({ controller }: { controller: NSESplitViewController }) => <section data-testid="custom-frame">{showDefault ? <SplitViewControllerView controller={controller} /> : <p>Custom layout only</p>}</section>;
     }
     const Controller = mode === "default" ? NSESplitViewController : FramedSplit;
     const controller = new Controller({ id: `inset-${mode}`, splitViewItems: [item("content", "Content", () => <p>Editor</p>)] });
