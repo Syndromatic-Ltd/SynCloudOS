@@ -31,7 +31,7 @@ import { NSEColourPanel, NSEColourPanelProvider, NSEColourWell } from "../../src
 import { NSEComboBox, type NSECompletionDataSource } from "../../src/NSE/Controls/Completion";
 import type { NSECalendarMonth } from "../../src/NSE/DateTime";
 import { NSEGraphicalCalendar } from "../../src/NSE/DateTime/Calendar/graphicalCalendar";
-import { NSEOverlayProvider } from "../../src/NSE/Overlays";
+import { OverlayProvider } from "../../src/NSE/Overlays";
 import { NSEProgressIndicator } from "../../src/NSE/Progress";
 import { NSEAnimationEnvironmentProvider } from "../../src/NSE/Animation/NSEAnimationEnvironment";
 import { NSEScrollView } from "../../src/NSE/Scroll";
@@ -61,7 +61,7 @@ function OverlayHarness({ runtimeId, children }: { readonly runtimeId: string; r
     reportPlacementFailure: () => undefined,
     wrapFocusScope: (_options: unknown, node: React.ReactNode) => node,
   }), [runtimeId]);
-  return <NSEOverlayProvider runtimePort={runtimePort} defaultParentResponderId="workspace">{children}</NSEOverlayProvider>;
+  return <OverlayProvider runtimePort={runtimePort} defaultParentResponderId="workspace">{children}</OverlayProvider>;
 }
 
 it("drives 120 real wheel previews into one undo group", async () => {

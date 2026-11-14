@@ -23,7 +23,7 @@ import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 import { nseControlHooks } from "../../Theme/contract/hooks";
 import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import { useEffect, useId, useRef, useState } from "react";
-import { NSEListboxPopup, useOptionalNSEOverlayProvider } from "../../Overlays";
+import { NSEListboxPopup, useOptionalOverlayProvider } from "../../Overlays";
 import { readNSEClipboardText, writeNSEClipboardText, writeNSEDragRepresentations } from "../../Drag";
 import type { NSETokenFieldProps, NSETokenValue } from "./completionTypes";
 
@@ -45,7 +45,7 @@ function NSETokenFieldControl<T, TId extends string | number>(props: NSETokenFie
   const request = useRef<AbortController | null>(null);
   const generation = useRef(0);
   const composing = useRef(false);
-  const overlay = useOptionalNSEOverlayProvider();
+  const overlay = useOptionalOverlayProvider();
   const instanceId = useId().replace(/:/g, "");
   if ((props.dataSource || props.tokenMenu) && !overlay) throw new Error("Token completion and menus require an NSEOverlayProvider.");
   const popupId = props.id ?? `token-completion-${instanceId}`;

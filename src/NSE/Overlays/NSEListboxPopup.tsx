@@ -22,8 +22,8 @@ import { Children, Fragment, useCallback, useContext, useEffect, useId, useLayou
 import { nseFlashMenuSelection } from "../Menus/menuSelectionFlash";
 import { useNSERubberBandScroll } from "../Scroll";
 import { NSEPopup, useNSEPopupOpenState, type NSEPopupPresentation } from "./NSEPopup";
-import { useNSEOverlayProvider } from "./NSEOverlayProvider";
-import type { NSEOverlayDismissReason } from "./overlayTypes";
+import { useNSEOverlayProvider } from "./OverlayProvider";
+import type { OverlayDismissReason } from "./overlayTypes";
 import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
 
 export interface NSEListboxOption<T = unknown> {
@@ -57,7 +57,7 @@ export interface NSEListboxPopupProps<T = unknown> {
   readonly controlSize?: "regular" | "small";
   readonly virtualize?: boolean;
   readonly overscan?: number;
-  onOpenChange?(open: boolean, reason: NSEOverlayDismissReason): void;
+  onOpenChange?(open: boolean, reason: OverlayDismissReason): void;
   onSelect?(option: NSEListboxOption<T>): void;
 }
 

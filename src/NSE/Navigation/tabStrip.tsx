@@ -23,7 +23,7 @@ import { nseControlHooks } from "../Theme/contract/hooks";
 import { useId, useMemo, useRef, useState, type MutableRefObject, type ReactNode } from "react";
 
 import type { HFXFeedbackRequest } from "../Feedback";
-import { NSEListboxPopup, useOptionalNSEOverlayProvider } from "../Overlays";
+import { NSEListboxPopup, useOptionalOverlayProvider } from "../Overlays";
 import { useNSEControlCommand, useNSEControlFeedback } from "../Controls/Core";
 import { useNSETooltip, useOptionalNSETooltipProvider } from "../Tooltips";
 
@@ -186,7 +186,7 @@ export function NSETabStrip({
   const overflowRef = useRef<HTMLButtonElement>(null);
   const [overflowOpen, setOverflowOpen] = useState(false);
   const [storedSelectedId, setStoredSelectedId] = useState(() => defaultSelectedId ?? suppliedSelectedId ?? items.find((item) => !item.disabled)?.id ?? "");
-  const overlay = useOptionalNSEOverlayProvider();
+  const overlay = useOptionalOverlayProvider();
   const enabled = items.filter((item) => !item.disabled);
   const selectedId = suppliedSelectedId ?? storedSelectedId;
   const selected = enabled.find((item) => item.id === selectedId) ?? enabled[0];

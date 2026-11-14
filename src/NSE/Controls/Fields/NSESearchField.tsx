@@ -23,7 +23,7 @@ import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 import { nseControlHooks } from "../../Theme/contract/hooks";
 import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import { useEffect, useId, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
-import { NSEListboxPopup, useOptionalNSEOverlayProvider } from "../../Overlays";
+import { NSEListboxPopup, useOptionalOverlayProvider } from "../../Overlays";
 import { useNSEControlCommand, useOptionalNSEControlRuntimePort, type NSEControlCommandBinding } from "../Core";
 import { sizedControlStyle } from "../Core/nseControlsShared";
 
@@ -98,7 +98,7 @@ function NSESearchFieldControl(props: NSESearchFieldProps) {
   const pending = useRef<{ readonly abort: AbortController; readonly handle: unknown | null } | null>(null);
   const [recentOpen, setRecentOpen] = useState(false);
   const instanceId = useId().replace(/:/g, "");
-  const overlay = useOptionalNSEOverlayProvider();
+  const overlay = useOptionalOverlayProvider();
   const runtime = useOptionalNSEControlRuntimePort();
   const [storedRecents, setStoredRecents] = useState<readonly string[]>(noRecents);
   const recents = props.recentSearches ?? storedRecents;

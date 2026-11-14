@@ -19,7 +19,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { NSEPopup, reportNSEWindowSurfaceError, useNSEWindowSurfaceLifecycle, useOptionalNSEWindowSurfaceBridge, type NSEOverlayDismissReason, type NSEWindowSurfaceBridge } from "../Overlays";
+import { NSEPopup, reportNSEWindowSurfaceError, useNSEWindowSurfaceLifecycle, useOptionalNSEWindowSurfaceBridge, type OverlayDismissReason, type NSEWindowSurfaceBridge } from "../Overlays";
 import { useNSEPresentedContent } from "../Overlays/useNSEPresentedContent";
 import type { NSEToolbarController } from "./NSEToolbarController";
 import type { NSEToolbarConfigurationSheetWindowBridge } from "./toolbarTypes";
@@ -35,7 +35,7 @@ export interface NSEToolbarConfigurationSheetProps {
   readonly controller: NSEToolbarController;
   /** Optional explicit window-host seam; production hosts supply the nearest bridge by context. */
   readonly windowBridge?: NSEToolbarConfigurationSheetWindowBridge;
-  onOpenChange(open: boolean, reason: NSEOverlayDismissReason): void;
+  onOpenChange(open: boolean, reason: OverlayDismissReason): void;
 }
 
 function itemLabel(controller: NSEToolbarController, id: string): string {
@@ -75,7 +75,7 @@ export function NSEToolbarConfigurationSheet({
   const snapshot = useSyncExternalStore(subscribe, () => controller.snapshot, () => controller.snapshot);
   const ownsTransaction = useRef(false);
   const dismissalSettled = useRef(false);
-  const pendingDismiss = useRef<{ readonly reason: NSEOverlayDismissReason; readonly commit: boolean } | null>(null);
+  const pendingDismiss = useRef<{ readonly reason: OverlayDismissReason; readonly commit: boolean } | null>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const bridgeRequest = useMemo(() => Object.freeze({
     id,
@@ -86,7 +86,7 @@ export function NSEToolbarConfigurationSheet({
   const name = `Customize ${controller.configuration.identifier.replace(/[-_]+/g, " ")}`;
   const hostedBridge = useOptionalNSEWindowSurfaceBridge();
   const canonicalBridge = windowBridge?.present && windowBridge.dismiss ? windowBridge as NSEWindowSurfaceBridge : hostedBridge;
-  const settleDismiss = useCallback((reason: NSEOverlayDismissReason, commit: boolean) => {
+  const settleDismiss = useCallback((reason: OverlayDismissReason, commit: boolean) => {
     if (dismissalSettled.current) return;
     dismissalSettled.current = true;
     pendingDismiss.current = null;
@@ -153,7 +153,7 @@ export function NSEToolbarConfigurationSheet({
     }
   }, [controller]);
 
-  const dismiss = useCallback((reason: NSEOverlayDismissReason, commit: boolean) => {
+  const dismiss = useCallback((reason: OverlayDismissReason, commit: boolean) => {
     if (dismissalSettled.current || pendingDismiss.current) return;
     if (!canonicalBridge) {
       settleDismiss(reason, commit);

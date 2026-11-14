@@ -25,7 +25,7 @@ import { useNSEPresenceExiting, useNSEPresentation, type NSEPresentationSpec } f
 import {
   NSEControlRuntimeProvider,
   NSEFocusPortProvider,
-  NSEOverlayProvider,
+  OverlayProvider,
   NSETooltipProvider,
   NSEWindowSurfaceBridgeProvider,
   NSEBorderlessWindowView,
@@ -355,7 +355,7 @@ export function WindowHost({
   const chromeSlotWanted = record.chromeMode === "custom" && !chromeFailed;
   const runtimeHostedContent = (
     <WindowChromeSlotContext.Provider value={chromeSlot}>
-      <NSEOverlayProvider
+      <OverlayProvider
         runtimePort={overlayPort}
         defaultParentResponderId={controller.windowResponderId}
         portalContainer={overlayLayerNode}
@@ -369,7 +369,7 @@ export function WindowHost({
           </NSEFocusPortProvider>
         </NSEControlRuntimeProvider>
       </NSETooltipProvider>
-      </NSEOverlayProvider>
+      </OverlayProvider>
     </WindowChromeSlotContext.Provider>
   );
   const view = popoverSurface ? runtimeHostedContent : (

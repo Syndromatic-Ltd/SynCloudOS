@@ -34,7 +34,7 @@ import {
   type NSEFontPanelCommandPort,
   type NSEParagraphStyle,
 } from "../../src/NSE/Typography";
-import { NSEOverlayProvider } from "../../src/NSE/Overlays/NSEOverlayProvider";
+import { OverlayProvider } from "../../src/NSE/Overlays/OverlayProvider";
 import { NSEWindowSurfaceBridgeProvider } from "../../src/NSE/Overlays/NSEWindowSurfaceBridge";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact/SynCloudOSProvider";
 import { useRuntimeNSEOverlayPort } from "../../src/SynCloudOSReact/nseFocusPort";
@@ -69,7 +69,7 @@ function sizeField(): HTMLElement {
 
 function OverlayHarness({ runtime, children }: { readonly runtime: ReturnType<typeof createTestRuntime>; readonly children: React.ReactNode }) {
   const port = useRuntimeNSEOverlayPort("workspace");
-  return <NSEOverlayProvider runtimePort={port}>{children}</NSEOverlayProvider>;
+  return <OverlayProvider runtimePort={port}>{children}</OverlayProvider>;
 }
 
 describe("NSE typography values and manager", () => {

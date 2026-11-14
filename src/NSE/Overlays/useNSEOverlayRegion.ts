@@ -20,20 +20,20 @@
 
 import { useCallback, useRef, useSyncExternalStore } from "react";
 import { resolveNSEFocusReturnTarget } from "../Focus/focusOrigin";
-import { resolveNSEOverlayRegion, type NSEOverlayPresentationSource, type NSEOverlayRegionBounds } from "./overlayRegion";
+import { resolveNSEOverlayRegion, type OverlayPresentationSource, type OverlayRegionBounds } from "./overlayRegion";
 
 /** Read-only placement projection. The existing focus owner remains the only
  * focus authority. Capture origin before the trap moves focus; do not switch
  * halves merely because a live dialog's control now has focus. */
 export function useNSEOverlayRegion({ source, open, origin, document, direction, purpose = "contextual" }: {
-  readonly source: NSEOverlayPresentationSource | null;
+  readonly source: OverlayPresentationSource | null;
   readonly open: boolean;
   readonly origin?: HTMLElement | null;
   readonly document: Document | null;
   readonly direction?: "ltr" | "rtl";
   readonly purpose?: "contextual" | "alert";
 }) {
-  const captured = useRef<{ source: NSEOverlayPresentationSource | null; element: HTMLElement | null; bounds: NSEOverlayRegionBounds | null; direction: "ltr" | "rtl" } | null>(null);
+  const captured = useRef<{ source: OverlayPresentationSource | null; element: HTMLElement | null; bounds: OverlayRegionBounds | null; direction: "ltr" | "rtl" } | null>(null);
   if (!open) captured.current = null;
   if (open && (!captured.current || captured.current.source !== source)) {
     const ownerChanged = captured.current !== null;

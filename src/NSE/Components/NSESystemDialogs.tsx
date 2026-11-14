@@ -26,7 +26,7 @@ import { NSEFocusScope } from "../Focus";
 import { NSEButton, nseButtonToneProps, type NSEButtonTone } from "../Controls/Buttons/NSEButton";
 import { NSEAlertSurface } from "./NSEAlertSurface";
 import { NSEAlertBackdrop } from "./NSEAlertBackdrop";
-import type { NSEOverlayPresentationSource } from "../Overlays/overlayRegion";
+import type { OverlayPresentationSource } from "../Overlays/overlayRegion";
 import { useNSEAppearance } from "../Appearance";
 
 /** A system dialog takes the host's light or dark appearance unless told otherwise. */
@@ -64,7 +64,7 @@ export interface NSEAboutInfo {
 }
 
 export interface NSEAboutDialogProps {
-  readonly presentation?: NSEOverlayPresentationSource;
+  readonly presentation?: OverlayPresentationSource;
   open: boolean;
   info: NSEAboutInfo;
   /** Runtime hosts can provide a stable logical scope identity. */
@@ -141,7 +141,7 @@ export function NSEAboutDialog({
 }
 
 export interface NSEConfirmDialogProps {
-  readonly presentation?: NSEOverlayPresentationSource;
+  readonly presentation?: OverlayPresentationSource;
   open: boolean;
   /** Runtime hosts can provide a stable logical scope identity. */
   focusScopeId?: string;

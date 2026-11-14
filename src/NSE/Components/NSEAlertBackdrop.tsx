@@ -25,15 +25,15 @@ import { resolveNSEAlertBackdropMotion, resolveNSESheetBackdropMotion } from "./
 import { useNSEAppearanceProjection } from "../Appearance";
 import { resolveNSEFocusReturnTarget } from "../Focus";
 
-import { useOptionalNSEOverlayProvider } from "../Overlays/NSEOverlayProvider";
+import { useOptionalOverlayProvider } from "../Overlays/OverlayProvider";
 import { useNSEOverlayRegion } from "../Overlays/useNSEOverlayRegion";
-import { nseOverlayRegionInsets, type NSEOverlayPresentationSource } from "../Overlays/overlayRegion";
+import { nseOverlayRegionInsets, type OverlayPresentationSource } from "../Overlays/overlayRegion";
 
 type InertHTMLElement = HTMLElement & { inert?: boolean };
 
 interface NSEAlertBackdropProps {
   readonly children: ReactNode;
-  readonly presentation?: NSEOverlayPresentationSource;
+  readonly presentation?: OverlayPresentationSource;
   readonly onSafeDismiss?: () => void;
   readonly onKeyDown?: (event: KeyboardEvent<HTMLDivElement>) => void;
   readonly onKeyDownCapture?: (event: KeyboardEvent<HTMLDivElement>) => void;
@@ -56,7 +56,7 @@ export function NSEAlertBackdrop({
   "data-syncloudos-focus-scope": focusScope,
 }: NSEAlertBackdropProps) {
   const appearanceProjection = useNSEAppearanceProjection();
-  const provider = useOptionalNSEOverlayProvider();
+  const provider = useOptionalOverlayProvider();
   const { region, hostViewport } = useNSEOverlayRegion({ source: presentation ?? provider?.runtime.environment.presentation ?? null, open: true, purpose: "alert", document: typeof document === "undefined" ? null : document });
   const regionInsets = region && hostViewport ? nseOverlayRegionInsets(region, hostViewport) : null;
   const regionStyle = regionInsets ? Object.fromEntries(Object.entries(regionInsets).map(([side, value]) => [`--nse-overlay-region-${side}`, `${value}px`])) as CSSProperties : undefined;

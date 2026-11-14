@@ -54,7 +54,7 @@ export type { NSEPopoverPosition } from "./Overlays/popoverPosition";
 export { nsePopoverSpringEasing, useNSEPopoverSurface } from "./Overlays/useNSEPopoverSurface";
 export { NSEWindowSurfaceBridgeProvider } from "./Overlays/NSEWindowSurfaceBridge";
 export type { NSEWindowSurfaceRequest } from "./Overlays/NSEWindowSurfaceBridge";
-export { logicalPlacementToFloatingPlacement } from "./Overlays/computeNSEOverlayPosition";
+export { logicalPlacementToFloatingPlacement } from "./Overlays/computeOverlayPosition";
 export { registerNSEHapticFeedbackEngine } from "./Feedback/NSEHapticFeedbackManager";
 export { NSEViewDrawingEnvironmentContext } from "./Views/NSEViewDrawingEnvironment";
 // Window layout and safe areas for framework chrome, and the theme hooks system surfaces publish.

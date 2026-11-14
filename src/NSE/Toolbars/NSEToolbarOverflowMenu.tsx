@@ -29,7 +29,7 @@ import {
 } from "../Appearance/NSEChromePrimitives";
 import { NSEMenu, NSEMenuView, nseMenuModel, type NSEMenuEntry, type NSEMenuModel } from "../Menus";
 import { NSEMenuOverlay } from "../Menus/NSEMenuOverlay";
-import { useOptionalNSEOverlayProvider } from "../Overlays";
+import { useOptionalOverlayProvider } from "../Overlays";
 import type { NSEToolbarController } from "./NSEToolbarController";
 import type { NSEToolbarLayoutEntry } from "./toolbarTypes";
 
@@ -88,7 +88,7 @@ export function NSEToolbarOverflowMenu({
   tabIndex,
   onFocus,
 }: NSEToolbarOverflowMenuProps) {
-  const provider = useOptionalNSEOverlayProvider();
+  const provider = useOptionalOverlayProvider();
   const [open, setOpen] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [pressed, setPressed] = useState(false);

@@ -24,7 +24,7 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEFilePanelView } from "../../../src/NSE/FilePanels/NSEFilePanelView";
 import { NSEPopover } from "../../../src/NSE/Overlays/NSEPopover";
-import { NSEActionSheet, NSEOverlayProvider, useNSEWindowSurfaceLifecycle, type NSEWindowSurfaceBridge } from "../../../src/NSE/Overlays";
+import { NSEActionSheet, OverlayProvider, useNSEWindowSurfaceLifecycle, type NSEWindowSurfaceBridge } from "../../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 
 afterEach(() => document.body.replaceChildren());
@@ -48,7 +48,7 @@ function OverlayHarness({ children }: { readonly children: React.ReactNode }) {
     reportPlacementFailure: vi.fn(),
     wrapFocusScope: (_options: unknown, node: React.ReactNode) => node,
   }), []);
-  return <NSEOverlayProvider runtimePort={runtimePort}>{children}</NSEOverlayProvider>;
+  return <OverlayProvider runtimePort={runtimePort}>{children}</OverlayProvider>;
 }
 
 function refusingBridge() {

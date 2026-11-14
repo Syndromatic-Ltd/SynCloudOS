@@ -24,7 +24,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createMountedSynWareRuntime } from "../../src/SynCloudOS/AppSDK/appRuntimeFacade";
 import { createDragSessionManager } from "../../src/SynCloudOS/Drag";
 import { createGFXIdentifierScope } from "../../src/FX/GraphicsFX/identifierAuthority";
-import { computeNSEOverlayPosition, computeNSEViewportCornerPosition } from "../../src/NSE/Overlays/computeNSEOverlayPosition";
+import { computeOverlayPosition, computeNSEViewportCornerPosition } from "../../src/NSE/Overlays/computeOverlayPosition";
 import { createTestBundle, createTestRuntime } from "./helpers";
 
 const runtimes: ReturnType<typeof createTestRuntime>[] = [];
@@ -325,7 +325,7 @@ describe("mounted application document authority", () => {
     document.body.append(anchor, floating);
     const clearOverlay = vi.fn();
     const schedule = vi.fn((callback: () => void) => { callback(); return "overlay-sync"; });
-    const dispose = computeNSEOverlayPosition({
+    const dispose = computeOverlayPosition({
       anchor,
       floating,
       scheduler: { setTimeout: schedule, clearTimeout: clearOverlay },

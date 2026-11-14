@@ -23,7 +23,7 @@ import { createPortal } from "react-dom";
 import { LoadingSpinner } from "../Components/LoadingSpinner";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { NSEFocusScope } from "../Focus/NSEFocusPort";
-import { useNSEOverlayProvider } from "../Overlays/NSEOverlayProvider";
+import { useNSEOverlayProvider } from "../Overlays/OverlayProvider";
 import { useChronosphereEnvironment } from "./chronosphereEnvironment";
 import { ChronosphereVortexView } from "./ChronosphereVortexView";
 import { sortChronosphereEntriesNewestFirst } from "./chronosphereStackLayout";

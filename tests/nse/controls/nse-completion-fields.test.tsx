@@ -28,7 +28,7 @@ import { NSEComboBox, NSETokenField } from "../../../src/NSE/Controls/Completion
 import { NSESearchField, NSESecureTextField } from "../../../src/NSE/Controls/Fields";
 import { NSEControlRuntimeProvider, type NSEControlRuntimePort } from "../../../src/NSE/Controls/Core";
 import type { CommandId } from "../../../src/SynCloudOS/SynCloudOS";
-import { NSEOverlayProvider } from "../../../src/NSE/Overlays";
+import { OverlayProvider } from "../../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 import { NSEObject } from "../../../src/NSE/Objects/NSEObject";
 import { observable } from "../../../src/NSE/Objects/observable";
@@ -54,7 +54,7 @@ function OverlayHarness({ children }: { readonly children: React.ReactNode }) {
     reportPlacementFailure: vi.fn(),
     wrapFocusScope: (_options: unknown, node: React.ReactNode) => node,
   }), []);
-  return <NSEOverlayProvider runtimePort={runtimePort} defaultParentResponderId="workspace">{children}</NSEOverlayProvider>;
+  return <OverlayProvider runtimePort={runtimePort} defaultParentResponderId="workspace">{children}</OverlayProvider>;
 }
 
 describe("completion and field families", () => {

@@ -18,9 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { createNSEOverlayManager } from "./NSEOverlayManager";
-export { NSEOverlayProvider, useNSEOverlayProvider, useOptionalNSEOverlayProvider } from "./NSEOverlayProvider";
-export type { NSEOverlayProviderProps } from "./NSEOverlayProvider";
+export { createOverlayManager } from "./overlayManager";
+export { OverlayProvider, useNSEOverlayProvider, useOptionalOverlayProvider } from "./OverlayProvider";
+export type { OverlayProviderProps } from "./OverlayProvider";
 export { NSEStandaloneControlHost } from "./NSEStandaloneControlHost";
 export type { NSEStandaloneControlHostProps } from "./NSEStandaloneControlHost";
 export { createStandaloneNSEControlRuntime } from "./createStandaloneNSEControlRuntime";
@@ -28,8 +28,8 @@ export type {
   NSEStandaloneControlRuntime,
   NSEStandaloneControlRuntimeOptions,
 } from "./createStandaloneNSEControlRuntime";
-export { computeNSEOverlayPosition, computeNSEViewportCornerPosition, logicalPlacementToFloatingPlacement } from "./computeNSEOverlayPosition";
-export type { NSEOverlayDirection, NSEOverlayPositionOptions, NSEOverlayPositionScheduler, NSEViewportCornerPositionOptions } from "./computeNSEOverlayPosition";
+export { computeOverlayPosition, computeNSEViewportCornerPosition, logicalPlacementToFloatingPlacement } from "./computeOverlayPosition";
+export type { OverlayDirection, OverlayPositionOptions, OverlayPositionScheduler, NSEViewportCornerPositionOptions } from "./computeOverlayPosition";
 export { useNSEOverlay } from "./useNSEOverlay";
 export type { UseNSEOverlayOptions, UseNSEOverlayResult } from "./useNSEOverlay";
 export { NSEPopup, useNSEPopupOpenState } from "./NSEPopup";
@@ -47,14 +47,14 @@ export type { NSEWindowSurfaceBridge, NSEWindowSurfaceRequest, NSEWindowSurfaceD
 export { reportNSEWindowSurfaceError, useNSEWindowSurfaceLifecycle } from "./useNSEWindowSurfaceLifecycle";
 export type {
   NSELogicalPlacement,
-  NSEOverlayDismissReason,
-  NSEOverlayId,
-  NSEOverlayKind,
-  NSEOverlayManager,
-  NSEOverlayRegistration,
-  NSEOverlayRuntimePort,
-  NSEOverlaySnapshot,
-  NSEOverlayFocusScopeOptions,
+  OverlayDismissReason,
+  OverlayId,
+  OverlayKind,
+  OverlayManager,
+  OverlayRegistration,
+  OverlayRuntimePort,
+  OverlaySnapshot,
+  OverlayFocusScopeOptions,
 } from "./overlayTypes";
 export { NSEDialogSurface } from "./NSEDialogSurface";
 export type { NSEDialogSurfaceProps } from "./NSEDialogSurface";

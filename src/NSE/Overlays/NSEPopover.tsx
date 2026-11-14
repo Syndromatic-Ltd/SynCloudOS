@@ -21,8 +21,8 @@
 import { useCallback, useContext, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
 import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
 import { NSEPopup, type NSEPopupPresentation } from "./NSEPopup";
-import { useNSEOverlayProvider } from "./NSEOverlayProvider";
-import type { NSEOverlayDismissReason } from "./overlayTypes";
+import { useNSEOverlayProvider } from "./OverlayProvider";
+import type { OverlayDismissReason } from "./overlayTypes";
 import { useOptionalNSEWindowSurfaceBridge, type NSEWindowSurfaceBridge, type NSEPopoverPreferredEdge, type NSEPopoverBehavior } from "./NSEWindowSurfaceBridge";
 import { nsePopoverEdgePlacement } from "./popoverPosition";
 import { reportNSEWindowSurfaceError, useNSEWindowSurfaceLifecycle } from "./useNSEWindowSurfaceLifecycle";
@@ -77,7 +77,7 @@ export interface NSEPopoverProps {
   readonly windowBridge?: NSEPopoverWindowBridge;
   /** Keep content in the canonical overlay stack even when a physical-window bridge is available. */
   readonly surface?: "automatic" | "overlay";
-  onOpenChange(open: boolean, reason: NSEOverlayDismissReason): void;
+  onOpenChange(open: boolean, reason: OverlayDismissReason): void;
 }
 
 function useResolvedPresentation(presentation: NSEPopupPresentation | undefined): NSEPopupPresentation {

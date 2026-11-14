@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { NSEOverlayRegistration } from "./overlayTypes";
+import type { OverlayRegistration } from "./overlayTypes";
 import { isWithinNSEFocusOrigin } from "../Focus/focusOrigin";
 
 type DatasetTarget = EventTarget & { readonly dataset: DOMStringMap };
@@ -133,7 +133,7 @@ export function belongsToNearestNSEOverlayProvider(
   return owner === providerId;
 }
 
-export function isWithinNSEOverlay(path: readonly EventTarget[], registration: NSEOverlayRegistration): boolean {
+export function isWithinNSEOverlay(path: readonly EventTarget[], registration: OverlayRegistration): boolean {
   const surface = registration.surface;
   if (surface && path.some((target) => target instanceof Node && isWithinNSEFocusOrigin(surface, target))) return true;
   const hasLiveSurface = path.some((target) => target === registration.surface

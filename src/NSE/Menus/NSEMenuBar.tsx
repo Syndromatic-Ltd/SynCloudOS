@@ -20,7 +20,7 @@
 
 import { useContext, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
-import { useOptionalNSEOverlayProvider } from "../Overlays";
+import { useOptionalOverlayProvider } from "../Overlays";
 import { NSEMenuView } from "./NSEMenuView";
 import { createReactOwnedNSEMenu, type NSEMenu } from "./NSEMenu";
 import { useNSEMenuLifetime } from "./useNSEMenuLifetime";
@@ -75,7 +75,7 @@ export function NSEMenuBar({ menu: mainMenu, overlay, direction = "ltr" }: NSEMe
   const [initialFocus, setInitialFocus] = useState<"first" | "last">("first");
   const buttonRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const instanceId = useId();
-  const provider = useOptionalNSEOverlayProvider();
+  const provider = useOptionalOverlayProvider();
   if (!provider) throw new Error("NSEMenuBar requires an NSEOverlayProvider.");
   const nearestResponderId = useContext(NSEActionResponderContext);
   const focus = (index: number) => buttonRefs.current[index]?.focus({ preventScroll: true });

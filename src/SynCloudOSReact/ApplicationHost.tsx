@@ -4,7 +4,7 @@ import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useSta
 import { NSETooltipProvider } from "../NSE/Tooltips";
 import { NSEAlertBackdrop } from "../NSE/SystemUI";
 import { SCOSAlertPresenter } from "./SCOSAlertPresenter";
-import { NSEOverlayProvider, NSEWindowSurfaceBridgeProvider, useNSEDeferredDisposal } from "../NSE/NSE";
+import { OverlayProvider, NSEWindowSurfaceBridgeProvider, useNSEDeferredDisposal } from "../NSE/NSE";
 import { createReactOwnedNSEMenu } from "../NSE/Menus/NSEMenu";
 import { useNSEMenuLifetime } from "../NSE/Menus/useNSEMenuLifetime";
 import { nseMenuModel } from "../NSE/Menus/menuTypes";
@@ -210,7 +210,7 @@ export function ApplicationHost({ applicationId, authentication, home }: Applica
         style={{ position: "fixed", inset: 0, overflow: "hidden", margin: 0 }}>
         <SynCloudOSWatchdog runtime={runtime} watchdogName={`${app.packageName} application`} scope="app" app={app}
           resetKey={applicationId} fallback={() => null}>
-          <NSEOverlayProvider runtimePort={overlayPort} defaultParentResponderId={responderId}>
+          <OverlayProvider runtimePort={overlayPort} defaultParentResponderId={responderId}>
           <NSETooltipProvider>
           <NSEWindowSurfaceBridgeProvider bridge={bridge}>
           {contentMenu ? <ApplicationMenuOverlayHost menuStore={menuStore} model={menuModel} controller={menuController}
@@ -221,7 +221,7 @@ export function ApplicationHost({ applicationId, authentication, home }: Applica
           </ApplicationMenuTriggerBridge> : framedEntry}
           </NSEWindowSurfaceBridgeProvider>
           </NSETooltipProvider>
-          </NSEOverlayProvider>
+          </OverlayProvider>
         </SynCloudOSWatchdog>
       </section>
     </ResponderScope> : null}

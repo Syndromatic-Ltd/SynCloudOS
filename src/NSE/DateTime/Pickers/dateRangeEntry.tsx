@@ -20,7 +20,7 @@
 
 import { useNSEDatePickerDrawing } from "./datePickerDrawing";
 import { useEffect, useId, useReducer, useRef, useState } from "react";
-import { useOptionalNSEOverlayProvider } from "../../Overlays";
+import { useOptionalOverlayProvider } from "../../Overlays";
 import { NSEPopover } from "../../Overlays/NSEPopover";
 import { NSEGraphicalCalendar } from "../Calendar/graphicalCalendar";
 import type { NSECalendarSelection } from "../Calendar/calendarTypes";
@@ -60,7 +60,7 @@ export function NSEDateRangeEntry({ value, defaultValue = null, onValueChange, .
   const selectionStartRef = useRef<NSEDateRange["start"] | null>(null);
   const lastPublishedRef = useRef<NSEDateRange | null | undefined>(undefined);
   const instanceId = useId().replace(/:/g, "");
-  const overlay = useOptionalNSEOverlayProvider();
+  const overlay = useOptionalOverlayProvider();
 
   useEffect(() => {
     if (!controlled) return;

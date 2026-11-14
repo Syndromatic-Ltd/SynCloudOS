@@ -21,27 +21,27 @@
 import { useNSEScreenSafeAreaProperties } from "../Layout/screenSafeAreaProperties";
 import { useSyncExternalStore, createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type PropsWithChildren } from "react";
 import { createPortal } from "react-dom";
-import { createNSEOverlayManager } from "./NSEOverlayManager";
+import { createOverlayManager } from "./overlayManager";
 import { belongsToNearestNSEOverlayProvider, isWithinNSEOverlay, markNSEOverlayDocumentProviderActive, nseOverlayEventPath, retainNSEOverlayDocumentProvider } from "./overlayEventOwnership";
-import type { NSEOverlayDismissReason, NSEOverlayManager, NSEOverlayRegistration, NSEOverlayRuntimePort } from "./overlayTypes";
+import type { OverlayDismissReason, OverlayManager, OverlayRegistration, OverlayRuntimePort } from "./overlayTypes";
 import { useNSEAppearanceProjection } from "../Appearance";
 import "./nse-overlays.css";
 
-export interface NSEOverlayProviderContextValue {
-  readonly manager: NSEOverlayManager;
-  readonly runtime: NSEOverlayRuntimePort;
+export interface OverlayProviderContextValue {
+  readonly manager: OverlayManager;
+  readonly runtime: OverlayRuntimePort;
   readonly portalHost: HTMLElement | null;
   readonly defaultParentResponderId?: string;
-  register(registration: NSEOverlayRegistration): () => void;
+  register(registration: OverlayRegistration): () => void;
   retainFocusTarget(target: HTMLElement): () => void;
 }
 
-interface InternalNSEOverlayProviderContextValue extends NSEOverlayProviderContextValue {
+interface InternalNSEOverlayProviderContextValue extends OverlayProviderContextValue {
   /** Undefined mounts locally; null defers mounting; an element relocates overlays. */
   readonly portalContainer?: HTMLElement | null;
 }
 
-const NSEOverlayContext = createContext<InternalNSEOverlayProviderContextValue | null>(null);
+const OverlayContext = createContext<InternalNSEOverlayProviderContextValue | null>(null);
 
 interface MutationObserverPort {
   observe(target: Element, options: { readonly childList: boolean; readonly subtree: boolean }): void;
@@ -52,9 +52,9 @@ interface MutationObserverPortConstructor {
 }
 type BrowserWindowWithMutationObserver = Window & { readonly MutationObserver?: MutationObserverPortConstructor };
 
-export interface NSEOverlayProviderProps extends PropsWithChildren {
-  readonly manager?: NSEOverlayManager;
-  readonly runtimePort: NSEOverlayRuntimePort;
+export interface OverlayProviderProps extends PropsWithChildren {
+  readonly manager?: OverlayManager;
+  readonly runtimePort: OverlayRuntimePort;
   readonly defaultParentResponderId?: string;
   /**
    * Where this provider's overlays mount. An omitted destination inherits the
@@ -66,27 +66,27 @@ export interface NSEOverlayProviderProps extends PropsWithChildren {
   readonly portalContainer?: HTMLElement | null;
 }
 
-export function NSEOverlayProvider({
+export function OverlayProvider({
   manager: providedManager,
   runtimePort: runtime,
   defaultParentResponderId,
   portalContainer,
   children,
-}: NSEOverlayProviderProps) {
+}: OverlayProviderProps) {
   const presentation = runtime.environment.presentation;
   const traits = useSyncExternalStore(presentation.subscribe, presentation.getSnapshot, presentation.getSnapshot);
   const screenSafeArea = useNSEScreenSafeAreaProperties(traits.safeAreaInsets);
-  const parent = useContext(NSEOverlayContext);
+  const parent = useContext(OverlayContext);
   const destination = portalContainer === undefined ? parent?.portalContainer : portalContainer;
   const appearanceProjection = useNSEAppearanceProjection();
-  const managerRef = useRef<NSEOverlayManager | null>(null);
-  if (!managerRef.current) managerRef.current = providedManager ?? createNSEOverlayManager();
+  const managerRef = useRef<OverlayManager | null>(null);
+  if (!managerRef.current) managerRef.current = providedManager ?? createOverlayManager();
   const manager = providedManager ?? managerRef.current;
   const providerId = `nse-overlay-provider:${runtime.runtimeId}:${useId()}`;
   const restoredFocusTargetsRef = useRef(new Map<HTMLElement, number>());
   const [portalHost, setPortalHost] = useState<HTMLDivElement | null>(null);
 
-  const register = useCallback((registration: NSEOverlayRegistration) => {
+  const register = useCallback((registration: OverlayRegistration) => {
     return manager.register(registration);
   }, [manager]);
 
@@ -117,7 +117,7 @@ export function NSEOverlayProvider({
     };
     const unsubscribeActivation = manager.subscribe(publishActivation);
     publishActivation();
-    const dismissTopmost = (reason: NSEOverlayDismissReason, event: Event) => {
+    const dismissTopmost = (reason: OverlayDismissReason, event: Event) => {
       if (!belongsToNearestNSEOverlayProvider(event, runtime.runtimeId, providerId)) return false;
       const topmostId = manager.getSnapshot().topmostId;
       if (!topmostId) return false;
@@ -219,7 +219,7 @@ export function NSEOverlayProvider({
   );
 
   return (
-    <NSEOverlayContext.Provider value={contextValue}>
+    <OverlayContext.Provider value={contextValue}>
       <div
         data-nse-overlay-provider={providerId}
         data-syncloudos-runtime-owner={runtime.runtimeId}
@@ -234,17 +234,17 @@ export function NSEOverlayProvider({
           ? destination && createPortal(portalHostNode, destination)
           : portalHostNode}
       </div>
-    </NSEOverlayContext.Provider>
+    </OverlayContext.Provider>
   );
 }
 
-export function useNSEOverlayProvider(): NSEOverlayProviderContextValue {
-  const context = useOptionalNSEOverlayProvider();
+export function useNSEOverlayProvider(): OverlayProviderContextValue {
+  const context = useOptionalOverlayProvider();
   if (!context) throw new Error("useNSEOverlay must be used within an NSEOverlayProvider.");
   return context;
 }
 
 /** Compatibility adapters can opt into the overlay runtime only when their host supplied it. */
-export function useOptionalNSEOverlayProvider(): NSEOverlayProviderContextValue | null {
-  return useContext(NSEOverlayContext);
+export function useOptionalOverlayProvider(): OverlayProviderContextValue | null {
+  return useContext(OverlayContext);
 }

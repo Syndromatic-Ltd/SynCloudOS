@@ -20,7 +20,7 @@
 
 import { useEffect, useMemo, useState, type HTMLAttributes, type ReactNode } from "react";
 import { NSEPopup, useNSEPopupOpenState, type NSEPopupPresentation, type NSEPopupProps } from "./NSEPopup";
-import type { NSEOverlayDismissReason } from "./overlayTypes";
+import type { OverlayDismissReason } from "./overlayTypes";
 import { useOptionalNSEWindowSurfaceBridge, type NSEWindowSurfaceBridge } from "./NSEWindowSurfaceBridge";
 import { reportNSEWindowSurfaceError, useNSEWindowSurfaceLifecycle } from "./useNSEWindowSurfaceLifecycle";
 import { useNSEPresentedContent } from "./useNSEPresentedContent";
@@ -44,7 +44,7 @@ export interface NSEActionSheetProps extends Omit<HTMLAttributes<HTMLDivElement>
   /** Optional window-host seam for a real NSEModalWindowView-backed record. */
   readonly parentWindowControllerId?: string;
   readonly windowBridge?: NSEModalWindowBridge;
-  onOpenChange?(open: boolean, reason: NSEOverlayDismissReason): void;
+  onOpenChange?(open: boolean, reason: OverlayDismissReason): void;
 }
 
 export interface NSEModalWindowRequest {

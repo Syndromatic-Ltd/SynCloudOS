@@ -20,7 +20,7 @@
 
 import { useNSEDatePickerDrawing } from "./datePickerDrawing";
 import { useEffect, useId, useReducer, useRef, useState } from "react";
-import { useOptionalNSEOverlayProvider } from "../../Overlays";
+import { useOptionalOverlayProvider } from "../../Overlays";
 import { NSEPopover } from "../../Overlays/NSEPopover";
 import { NSEGraphicalCalendar } from "../Calendar/graphicalCalendar";
 import { NSEGraphicalClock } from "../Calendar/graphicalClock";
@@ -90,7 +90,7 @@ export function NSEDateTimeEntry({ value, defaultValue = null, mode = "combined"
   const triggerRef = useRef<HTMLButtonElement>(null);
   const lastPublishedRef = useRef<NSEDateTimeValue | null | undefined>(undefined);
   const instanceId = useId().replace(/:/g, "");
-  const overlay = useOptionalNSEOverlayProvider();
+  const overlay = useOptionalOverlayProvider();
   if (mode === "automatic" && !overlay) throw new Error("Automatic date-time pickers require an NSEOverlayProvider.");
   const localeHourCycle = new Intl.DateTimeFormat(props.locale, { hour: "numeric" }).resolvedOptions().hourCycle;
   const hourCycle = props.hourCycle ?? (localeHourCycle === "h11" || localeHourCycle === "h12" ? "h12" : "h24");

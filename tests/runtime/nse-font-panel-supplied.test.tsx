@@ -27,7 +27,7 @@ import { resolve } from "node:path";
 import { NSEFontLibrary } from "../../src/NSE/Typography/NSEFontLibrary";
 import { NSEFontManager } from "../../src/NSE/Typography/NSEFontManager";
 import { NSEFontPanel, type NSEFontPanelCommandPort } from "../../src/NSE/Typography/NSEFontPanel";
-import { NSEOverlayProvider } from "../../src/NSE/Overlays/NSEOverlayProvider";
+import { OverlayProvider } from "../../src/NSE/Overlays/OverlayProvider";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact/SynCloudOSProvider";
 import { useRuntimeNSEOverlayPort } from "../../src/SynCloudOSReact/nseFocusPort";
 import { typographyFontFamilies } from "../fixtures/typographyFontFamilies";
@@ -38,7 +38,7 @@ const runtimes: ReturnType<typeof createTestRuntime>[] = [];
 afterEach(async () => { cleanup(); for (const runtime of runtimes.splice(0).reverse()) await runtime.dispose("test"); });
 function Harness({ children }: { children: React.ReactNode }) {
   const port = useRuntimeNSEOverlayPort("workspace");
-  return <NSEOverlayProvider runtimePort={port} defaultParentResponderId="workspace">{children}</NSEOverlayProvider>;
+  return <OverlayProvider runtimePort={port} defaultParentResponderId="workspace">{children}</OverlayProvider>;
 }
 function mountPanel(manager: NSEFontManager) {
   const runtime = createTestRuntime(); runtimes.push(runtime);

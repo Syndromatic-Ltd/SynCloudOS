@@ -2,7 +2,7 @@ import { createTestTheme } from "../../fixtures/themes";
 import React, { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { NSEPopover } from "../../../src/NSE/Overlays/NSEPopover";
-import { NSEOverlayProvider } from "../../../src/NSE/Overlays/NSEOverlayProvider";
+import { OverlayProvider } from "../../../src/NSE/Overlays/OverlayProvider";
 import { NSEAppearanceProvider } from "../../../src/NSE/Appearance/NSEAppearanceProvider";
 
 import { NSEAnimationEnvironmentProvider } from "../../../src/NSE/Animation/NSEAnimationEnvironment";
@@ -35,7 +35,7 @@ function Fixture() {
     };
   }, [options.region]);
   return <NSEAppearanceProvider theme={appearance} colourScheme={options.dark ? "dark" : "light"}>
-    <NSEAnimationEnvironmentProvider reducedMotion={options.reducedMotion}><NSEOverlayProvider runtimePort={runtimePort}>
+    <NSEAnimationEnvironmentProvider reducedMotion={options.reducedMotion}><OverlayProvider runtimePort={runtimePort}>
       <button ref={setAnchor} id="anchor" style={{ position: "fixed", left: options.x, top: options.y, width: 80, height: 32 }}>Options</button>
       {options.mounted ? <NSEPopover id="browser-popover" open={options.open} anchor={anchor} surface="overlay" parentWindowControllerId={null} parentResponderId="fixture" title="Publish options" drawsBackground={!options.paper}
         presentation={{ mode: "automatic", placement: options.placement }} onOpenChange={() => undefined}>
@@ -45,7 +45,7 @@ function Fixture() {
           <label>Title <input aria-label="Title" defaultValue="A walk through Manchester" /></label><button className="done">Done</button>
         </div>
       </NSEPopover> : null}
-    </NSEOverlayProvider></NSEAnimationEnvironmentProvider>
+    </OverlayProvider></NSEAnimationEnvironmentProvider>
   </NSEAppearanceProvider>;
 }
 createRoot(document.getElementById("root")!).render(<Fixture />);

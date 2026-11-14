@@ -20,7 +20,7 @@
 
 import { useNSEDatePickerDrawing } from "./datePickerDrawing";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { useOptionalNSEOverlayProvider } from "../../Overlays";
+import { useOptionalOverlayProvider } from "../../Overlays";
 import { NSEPopover } from "../../Overlays/NSEPopover";
 import { clampPlainDate, comparePlainDates, daysInMonth } from "../calendarArithmetic";
 import { formatPlainDate, parsePlainDate, plainDatePlaceholder, plainDateToday } from "../dateTimeFormatting";
@@ -119,7 +119,7 @@ export function NSEDateEntry({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const hiddenRef = useRef<HTMLInputElement>(null);
   const instanceId = useId().replace(/:/g, "");
-  const overlay = useOptionalNSEOverlayProvider();
+  const overlay = useOptionalOverlayProvider();
   if (mode === "automatic" && !overlay) throw new Error("Automatic date pickers require an NSEOverlayProvider.");
   useEffect(() => {
     if (!controlled) return;

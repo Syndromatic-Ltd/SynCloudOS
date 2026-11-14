@@ -19,39 +19,39 @@
  */
 
 import { createContext, useCallback, useContext, useEffectEvent, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactElement, type ReactNode } from "react";
-import { computeNSEOverlayPosition, computeNSEViewportCornerPosition, type NSEOverlayAnchorPoint, type NSEOverlayCollisionPadding, type NSEOverlayDirection } from "./computeNSEOverlayPosition";
-import { useNSEOverlayProvider } from "./NSEOverlayProvider";
+import { computeOverlayPosition, computeNSEViewportCornerPosition, type OverlayAnchorPoint, type OverlayCollisionPadding, type OverlayDirection } from "./computeOverlayPosition";
+import { useNSEOverlayProvider } from "./OverlayProvider";
 import { useNSEOverlayRegion } from "./useNSEOverlayRegion";
 import { nseOverlayRegionInsets } from "./overlayRegion";
 import { registerNSEFocusOrigin } from "../Focus/focusOrigin";
 import type {
   NSELogicalPlacement,
-  NSEOverlayDismissReason,
-  NSEOverlayId,
-  NSEOverlayKind,
-  NSEOverlayRegistration,
+  OverlayDismissReason,
+  OverlayId,
+  OverlayKind,
+  OverlayRegistration,
 } from "./overlayTypes";
 
 export interface UseNSEOverlayOptions {
-  readonly id: NSEOverlayId;
-  readonly kind: NSEOverlayKind;
+  readonly id: OverlayId;
+  readonly kind: OverlayKind;
   /** Focus/inert policy can be modal while retaining anchored popover placement. */
   readonly modal?: boolean;
-  readonly parentId?: NSEOverlayId | null;
+  readonly parentId?: OverlayId | null;
   readonly parentScopeId?: string;
   readonly parentResponderId: string;
   readonly anchor: HTMLElement | null;
   /** Place against this viewport point instead of the anchor's box (a context menu at the pointer). */
-  readonly anchorPoint?: NSEOverlayAnchorPoint | null;
+  readonly anchorPoint?: OverlayAnchorPoint | null;
   readonly anchorRect?: Pick<DOMRectReadOnly, "x" | "y" | "width" | "height">;
   readonly open: boolean;
-  readonly dismissOn?: readonly NSEOverlayDismissReason[] | ReadonlySet<NSEOverlayDismissReason>;
+  readonly dismissOn?: readonly OverlayDismissReason[] | ReadonlySet<OverlayDismissReason>;
   readonly restoreFocus?: boolean;
   readonly placement?: NSELogicalPlacement;
-  readonly direction?: NSEOverlayDirection;
+  readonly direction?: OverlayDirection;
   readonly arrow?: HTMLElement | null;
   readonly offset?: number;
-  readonly collisionPadding?: NSEOverlayCollisionPadding;
+  readonly collisionPadding?: OverlayCollisionPadding;
   readonly positioning?: "anchor" | "viewport-block-start-inline-end";
   readonly viewportCornerBleed?: Readonly<{ blockStart: number; inlineEnd: number }>;
   readonly reRegisterOnDismiss?: boolean;
@@ -61,7 +61,7 @@ export interface UseNSEOverlayOptions {
    * the commit that clears this, so its first visible frame is its final one.
    */
   readonly contentPending?: boolean;
-  onDismiss?(reason: NSEOverlayDismissReason): void;
+  onDismiss?(reason: OverlayDismissReason): void;
 }
 
 export interface UseNSEOverlayResult {
@@ -88,20 +88,20 @@ export interface UseNSEOverlayResult {
  * dismissed while it is topmost, and its focus scope nests in the parent's so
  * a modal parent's focus trap lets focus into it.
  */
-interface NSEOverlayParent {
+interface OverlayParent {
   readonly manager: unknown;
-  readonly overlayId: NSEOverlayId;
+  readonly overlayId: OverlayId;
   readonly scopeId: string | undefined;
 }
 
-const NSEOverlayParentContext = createContext<NSEOverlayParent | null>(null);
+const OverlayParentContext = createContext<OverlayParent | null>(null);
 
 /** Internal focus membership for controllers rendered through an overlay portal. */
 export function useNSEOverlayFocusScope(): string | undefined {
-  return useContext(NSEOverlayParentContext)?.scopeId;
+  return useContext(OverlayParentContext)?.scopeId;
 }
 
-const interactiveScopeKinds: Readonly<Record<NSEOverlayKind, "menu" | "popover" | "sheet" | null>> = {
+const interactiveScopeKinds: Readonly<Record<OverlayKind, "menu" | "popover" | "sheet" | null>> = {
   menu: "menu",
   submenu: "menu",
   "context-menu": "menu",
@@ -118,15 +118,15 @@ interface ResolvedOverlayCollisionPadding {
   readonly left: number;
 }
 
-function dismissKey(reasons: readonly NSEOverlayDismissReason[] | ReadonlySet<NSEOverlayDismissReason>): string {
+function dismissKey(reasons: readonly OverlayDismissReason[] | ReadonlySet<OverlayDismissReason>): string {
   return [...reasons].sort().join("|");
 }
 
-function restoresOverlayFocus(reason: NSEOverlayDismissReason): boolean {
+function restoresOverlayFocus(reason: OverlayDismissReason): boolean {
   return reason === "escape" || reason === "programmatic" || reason === "parent-dismissed";
 }
 
-function sidePadding(padding: NSEOverlayCollisionPadding | undefined, side: "top" | "right" | "bottom" | "left"): number {
+function sidePadding(padding: OverlayCollisionPadding | undefined, side: "top" | "right" | "bottom" | "left"): number {
   if (typeof padding === "number") return padding;
   return padding?.[side] ?? 8;
 }
@@ -156,7 +156,7 @@ export function useNSEOverlay({
   onDismiss,
 }: UseNSEOverlayOptions): UseNSEOverlayResult {
   const { manager, runtime, portalHost, register, retainFocusTarget } = useNSEOverlayProvider();
-  const enclosing = useContext(NSEOverlayParentContext);
+  const enclosing = useContext(OverlayParentContext);
   const inherited = requestedParentId === undefined && enclosing?.manager === manager && enclosing.overlayId !== id ? enclosing : null;
   const parentId = requestedParentId !== undefined ? requestedParentId : inherited?.overlayId ?? null;
   const parentScopeId = requestedParentScopeId ?? inherited?.scopeId;
@@ -269,7 +269,7 @@ export function useNSEOverlay({
   // the corresponding manager record. An Effect Event reads the current
   // committed controlled state, so the scope's own teardown restoration is
   // not reclassified as a user focus-left dismissal of a closing surface.
-  const managerDismiss = useEffectEvent((reason: NSEOverlayDismissReason) => {
+  const managerDismiss = useEffectEvent((reason: OverlayDismissReason) => {
     // The manager also releases its records during owner teardown. That is
     // authority cleanup, not a request for an obsolete UI to change state.
     if (!open || runtime.signal.aborted) return;
@@ -290,9 +290,9 @@ export function useNSEOverlay({
   useLayoutEffect(() => {
     managerDismissRef.current = managerDismiss;
   });
-  const onManagerDismiss = useCallback((reason: NSEOverlayDismissReason) => managerDismissRef.current(reason), []);
+  const onManagerDismiss = useCallback((reason: OverlayDismissReason) => managerDismissRef.current(reason), []);
 
-  const registration = useMemo<NSEOverlayRegistration | null>(() => !open || !surface ? null : ({
+  const registration = useMemo<OverlayRegistration | null>(() => !open || !surface ? null : ({
     id,
     kind,
     parentId,
@@ -305,7 +305,7 @@ export function useNSEOverlay({
 
   useLayoutEffect(() => {
     if (!open || !surface || !parentRegistered || runtime.signal.aborted) return;
-    const initialRegistration: NSEOverlayRegistration = {
+    const initialRegistration: OverlayRegistration = {
       id,
       kind,
       parentId,
@@ -363,7 +363,7 @@ export function useNSEOverlay({
         onAnchorRemoved,
       });
     }
-    return computeNSEOverlayPosition({
+    return computeOverlayPosition({
       anchor,
       anchorPoint,
       anchorRect,
@@ -399,10 +399,10 @@ export function useNSEOverlay({
     wasOpenRef.current = open;
   }, [open, restoreFocusAfterClose]);
   const scopeId = scopeKind ? `nse-overlay:${id}` : undefined;
-  const parentValue = useMemo<NSEOverlayParent>(() => ({ manager, overlayId: id, scopeId }), [id, manager, scopeId]);
+  const parentValue = useMemo<OverlayParent>(() => ({ manager, overlayId: id, scopeId }), [id, manager, scopeId]);
   const withFocusScope = useCallback((children: ReactElement): ReactNode => {
-    if (!scopeKind || !scopeId) return <NSEOverlayParentContext value={parentValue}>{children}</NSEOverlayParentContext>;
-    return <NSEOverlayParentContext value={parentValue}>{runtime.wrapFocusScope({
+    if (!scopeKind || !scopeId) return <OverlayParentContext value={parentValue}>{children}</OverlayParentContext>;
+    return <OverlayParentContext value={parentValue}>{runtime.wrapFocusScope({
       scopeId,
       kind: scopeKind,
       parentScopeId,
@@ -411,7 +411,7 @@ export function useNSEOverlay({
       trapFocus: focusScopeModal,
       restoreFocus,
       asChild: true,
-    }, children)}</NSEOverlayParentContext>;
+    }, children)}</OverlayParentContext>;
   }, [focusScopeModal, parentResponderId, parentScopeId, parentValue, restoreFocus, runtime, scopeId, scopeKind]);
 
   return {

@@ -30,7 +30,7 @@ import {
   NSEControlRuntimeProvider,
   NSEApplicationNavigationChromeController,
   NSEApplicationNavigationChromeProvider,
-  NSEOverlayProvider,
+  OverlayProvider,
   NSETooltipProvider,
   NSEWindowSurfaceBridgeProvider,
   useNSEDeferredDisposal,
@@ -404,7 +404,7 @@ export function ApplicationStageView({
     };
   }, [applicationResponderId, runtime, stage.isFocused]);
   return (
-    <NSEOverlayProvider runtimePort={nseOverlayPort} defaultParentResponderId={applicationResponderId} portalContainer={overlayDestination}>
+    <OverlayProvider runtimePort={nseOverlayPort} defaultParentResponderId={applicationResponderId} portalContainer={overlayDestination}>
     <NSETooltipProvider>
     <NSEWindowSurfaceBridgeProvider bridge={stageWindowSurfaceBridge}>
     <NSEControlRuntimeProvider port={nseControlPort}>
@@ -486,7 +486,7 @@ export function ApplicationStageView({
       <div ref={attachOverlayDestination} className="webspring-app-overlay-plane" data-multiswitch-role={multiSwitchRole ?? undefined} style={stageMotion.surface.style} />
     </div>
     </NSETooltipProvider>
-    </NSEOverlayProvider>
+    </OverlayProvider>
   );
 }
 

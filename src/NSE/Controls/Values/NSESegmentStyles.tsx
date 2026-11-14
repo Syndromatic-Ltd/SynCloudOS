@@ -30,7 +30,7 @@ import { useContext, useId, useMemo, useState } from "react";
 import { NSEMenu } from "../../Menus/NSEMenu";
 import { NSEMenuOverlay } from "../../Menus/NSEMenuOverlay";
 import { NSEMenuView } from "../../Menus/NSEMenuView";
-import { useOptionalNSEOverlayProvider } from "../../Overlays";
+import { useOptionalOverlayProvider } from "../../Overlays";
 import { NSEActionResponderContext } from "../Core/useNSEControlAction";
 import { NSEButton } from "../Buttons/NSEButton";
 import { NSEToolButtonGroup } from "../Buttons/NSEButtonFamilies";
@@ -150,7 +150,7 @@ function NSETexturedSegments({ props }: { readonly props: NSESegmentedControlPro
 function NSEMenuSegment({ item, menu, props }: { readonly item: NSESegmentedItem; readonly menu: NSEMenu; readonly props: NSESegmentedControlProps }) {
   const [open, setOpen] = useState(false);
   const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
-  const provider = useOptionalNSEOverlayProvider();
+  const provider = useOptionalOverlayProvider();
   const nearestResponderId = useContext(NSEActionResponderContext);
   const baseId = `nse-segment-menu:${useId().replace(/:/g, "")}`;
   const parentResponderId = props.parentResponderId ?? nearestResponderId ?? provider?.defaultParentResponderId;
