@@ -25,7 +25,7 @@ import {
   NSEControlRuntimeProvider,
   NSEFontPanel,
   OverlayProvider,
-  NSEWindowSurfaceBridgeProvider,
+  WindowSurfaceBridgeProvider,
   useNSEDeferredDisposal,
   type NSEFontPanelCommandPort,
 } from "../NSE/NSE";
@@ -134,7 +134,7 @@ export function SystemPanelsLayer({ windowContentRegistry }: { readonly windowCo
 
   return (
     <OverlayProvider runtimePort={overlayPort} defaultParentResponderId="workspace">
-      <NSEWindowSurfaceBridgeProvider bridge={systemBridge}>
+      <WindowSurfaceBridgeProvider bridge={systemBridge}>
         <NSEControlRuntimeProvider port={controlPort}>
           <NSEColourPanelProvider service={runtime.colourPanel}>
             <NSEColourPanel />
@@ -148,7 +148,7 @@ export function SystemPanelsLayer({ windowContentRegistry }: { readonly windowCo
             />
           </NSEColourPanelProvider>
         </NSEControlRuntimeProvider>
-      </NSEWindowSurfaceBridgeProvider>
+      </WindowSurfaceBridgeProvider>
     </OverlayProvider>
   );
 }

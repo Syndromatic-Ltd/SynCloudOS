@@ -32,7 +32,7 @@ import {
 import { createElement } from "../Theme/contract/hookMirrorReact";
 import { useNSEAnimationEnvironment } from "../Animation/NSEAnimationEnvironment";
 import { nsePopoverSpringEasing, useNSEPopoverSurface } from "./useNSEPopoverSurface";
-import { NSEPopoverFrame } from "./NSEPopoverFrame";
+import { PopoverFrame } from "./NSEPopoverFrame";
 import { nseMenuChosenAttribute, nseMenuChosenFadeMs } from "../Menus/menuSelectionFlash";
 import { createPortal } from "react-dom";
 import type { OverlayAnchorPoint } from "./computeOverlayPosition";
@@ -41,7 +41,7 @@ import { useNSEOverlayProvider } from "./OverlayProvider";
 import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
 import { useNSEAppearanceProjection } from "../Appearance";
 import type {
-  NSELogicalPlacement,
+  LogicalPlacement,
   OverlayDismissReason,
   OverlayKind,
 } from "./overlayTypes";
@@ -50,9 +50,9 @@ function classNames(...values: readonly (string | false | null | undefined)[]): 
   return values.filter(Boolean).join(" ");
 }
 
-export interface NSEPopupPresentation {
+export interface PopupPresentation {
   readonly mode: "automatic" | "anchored" | "sheet" | "viewport-block-start-inline-end";
-  readonly placement?: NSELogicalPlacement;
+  readonly placement?: LogicalPlacement;
   readonly collisionPadding?: number;
   readonly viewportCornerBleed?: Readonly<{ blockStart: number; inlineEnd: number }>;
 }
@@ -71,7 +71,7 @@ export interface NSEPopupProps extends Omit<HTMLAttributes<HTMLDivElement>, "tit
   readonly parentResponderId?: string;
   readonly parentId?: string | null;
   readonly parentScopeId?: string;
-  readonly presentation?: NSEPopupPresentation;
+  readonly presentation?: PopupPresentation;
   readonly title?: ReactNode;
   readonly labelledBy?: string;
   readonly describedBy?: string;
@@ -283,7 +283,7 @@ export function NSEPopup({
       "data-nse-presentation": resolvedPresentation.mode,
       tabIndex: htmlAttributes.tabIndex ?? -1,
     },
-    hasPopoverFrame ? createElement(NSEPopoverFrame, { arrowRef: setArrow, anchored: kind === "popover" }) : null,
+    hasPopoverFrame ? createElement(PopoverFrame, { arrowRef: setArrow, anchored: kind === "popover" }) : null,
     title ? createElement("div", { id: titleId, "data-nse-part": "title", className: "nse-overlay-popup-title" }, title) : null,
     createElement("div", { "data-nse-part": "content", className: "nse-overlay-popup-content" }, children),
   );

@@ -19,9 +19,9 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { NSEPopup, reportNSEWindowSurfaceError, useNSEWindowSurfaceLifecycle, useOptionalNSEWindowSurfaceBridge, type OverlayDismissReason, type NSEWindowSurfaceBridge } from "../Overlays";
+import { NSEPopup, reportNSEWindowSurfaceError, useNSEWindowSurfaceLifecycle, useOptionalNSEWindowSurfaceBridge, type OverlayDismissReason, type WindowSurfaceBridge } from "../Overlays";
 import { useNSEPresentedContent } from "../Overlays/useNSEPresentedContent";
-import { NSEWindowFittingContent, centredWindowBounds, type NSEWindowFittingSize } from "../Overlays/NSEWindowFittingContent";
+import { WindowFittingContent, centredWindowBounds, type WindowFittingSize } from "../Overlays/NSEWindowFittingContent";
 import type { FilePanelResult, FilePanelSaveTarget } from "../../SynCloudOS/SynCloudOS";
 
 export type NSEFilePanelWindowRole = "panel" | "sheet";
@@ -37,8 +37,8 @@ export interface NSEFilePanelWindowRequest {
 export interface NSEFilePanelWindowBridge {
   open?(request: NSEFilePanelWindowRequest): void;
   close?(request: NSEFilePanelWindowRequest): void;
-  present?: NSEWindowSurfaceBridge["present"];
-  dismiss?: NSEWindowSurfaceBridge["dismiss"];
+  present?: WindowSurfaceBridge["present"];
+  dismiss?: WindowSurfaceBridge["dismiss"];
 }
 
 export interface NSEFilePanelViewProps {
@@ -93,7 +93,7 @@ export function NSEFilePanelView({
     parentWindowControllerId,
   }), [compact, id, parentWindowControllerId]);
   const hostedBridge = useOptionalNSEWindowSurfaceBridge();
-  const canonicalBridge = windowBridge?.present && windowBridge.dismiss ? windowBridge as NSEWindowSurfaceBridge : hostedBridge;
+  const canonicalBridge = windowBridge?.present && windowBridge.dismiss ? windowBridge as WindowSurfaceBridge : hostedBridge;
   const handleDidClose = useNSEWindowSurfaceLifecycle({
     bridge: canonicalBridge,
     requestId: id,
@@ -120,8 +120,8 @@ export function NSEFilePanelView({
   );
   // The window follows the panel's content rather than a fixed frame; the
   // fallback size only stands until the first measurement.
-  const [fitting, setFitting] = useState<NSEWindowFittingSize | null>(null);
-  const onFittingSize = useCallback((next: NSEWindowFittingSize) => {
+  const [fitting, setFitting] = useState<WindowFittingSize | null>(null);
+  const onFittingSize = useCallback((next: WindowFittingSize) => {
     setFitting((current) => current && current.width === next.width && current.height === next.height ? current : next);
   }, []);
   const canonicalRequest = useMemo(() => ({
@@ -134,7 +134,7 @@ export function NSEFilePanelView({
     sizing: "content" as const,
     onDidClose: handleDidClose,
   }), [anchor, compact, fitting?.height, fitting?.width, handleDidClose, id, parentWindowControllerId, title]);
-  const presentedContent = useNSEPresentedContent(<NSEWindowFittingContent onFittingSize={onFittingSize}>{content}</NSEWindowFittingContent>);
+  const presentedContent = useNSEPresentedContent(<WindowFittingContent onFittingSize={onFittingSize}>{content}</WindowFittingContent>);
   useEffect(() => {
     if (!open || !canonicalBridge) return;
     canonicalBridge.present(canonicalRequest, presentedContent).catch((error: unknown) => {

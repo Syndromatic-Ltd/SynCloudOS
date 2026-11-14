@@ -19,10 +19,10 @@
  */
 
 import { useCallback, useEffect, useRef } from "react";
-import type { NSEWindowSurfaceBridge } from "./NSEWindowSurfaceBridge";
+import type { WindowSurfaceBridge } from "./NSEWindowSurfaceBridge";
 
 export function reportNSEWindowSurfaceError(
-  bridge: NSEWindowSurfaceBridge,
+  bridge: WindowSurfaceBridge,
   error: unknown,
   requestId: string,
   operation: "present" | "dismiss",
@@ -30,8 +30,8 @@ export function reportNSEWindowSurfaceError(
   bridge.reportError?.(error, { requestId, operation });
 }
 
-export interface NSEWindowSurfaceLifecycleOptions {
-  readonly bridge: NSEWindowSurfaceBridge | null;
+export interface WindowSurfaceLifecycleOptions {
+  readonly bridge: WindowSurfaceBridge | null;
   readonly requestId: string;
   readonly open: boolean;
   onDismissRefused(): void;
@@ -47,7 +47,7 @@ export function useNSEWindowSurfaceLifecycle({
   onDismissRefused,
   onDismissConfirmed,
   onDidClose,
-}: NSEWindowSurfaceLifecycleOptions): () => void {
+}: WindowSurfaceLifecycleOptions): () => void {
   const mounted = useRef(true);
   const refused = useRef(onDismissRefused);
   const confirmed = useRef(onDismissConfirmed);

@@ -35,7 +35,7 @@ import type {
   KeyBindingHandleResult,
   KeyBindingManager,
 } from "../../SynCloudOS/SynCloudOS";
-import type { NSELogicalPlacement } from "../Overlays/overlayTypes";
+import type { LogicalPlacement } from "../Overlays/overlayTypes";
 
 /**
  * An item of an NSEMenu (NSMenuItem). A command item sends its `action` along
@@ -185,7 +185,7 @@ export interface MenuOverlayOptions {
   readonly parentResponderId: string;
   readonly parentId?: string | null;
   readonly parentScopeId?: string;
-  readonly placement?: NSELogicalPlacement;
+  readonly placement?: LogicalPlacement;
 }
 
 export interface NSEMenuRuntimePort {

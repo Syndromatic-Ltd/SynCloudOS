@@ -34,7 +34,7 @@ import type {
 import type { NSEFocusPort, NSEFocusScopeOptions } from "../Focus/NSEFocusPort";
 import type { SynCloudOSPresentationTraits } from "../../SynCloudOS/SynCloudOS";
 
-export interface NSEStandaloneControlRuntimeOptions {
+export interface StandaloneControlRuntimeOptions {
   readonly document: Document;
   readonly window: Window;
   readonly presentation: OverlayRuntimePort["environment"]["presentation"];
@@ -43,7 +43,7 @@ export interface NSEStandaloneControlRuntimeOptions {
   readonly onPlacementFailure?: OverlayRuntimePort["reportPlacementFailure"];
 }
 
-export interface NSEStandaloneControlRuntime {
+export interface StandaloneControlRuntime {
   readonly runtime: OverlayRuntimePort;
   readonly runtimePort: OverlayRuntimePort;
   readonly manager: OverlayManager;
@@ -308,7 +308,7 @@ function StandaloneFocusScope({
 // The local authority exposes the active element through the explicit
 // document supplied by the standalone host; scopes never consult globals.
 
-export function createStandaloneNSEControlRuntime(options: NSEStandaloneControlRuntimeOptions): NSEStandaloneControlRuntime {
+export function createStandaloneNSEControlRuntime(options: StandaloneControlRuntimeOptions): StandaloneControlRuntime {
   if (!options.document || !options.window || !options.presentation) throw new TypeError("Standalone NSE controls require a document, window and presentation port.");
   const runtimeId = options.runtimeId?.trim() || nextRuntimeId();
   const parentResponderId = options.parentResponderId?.trim() || `standalone:${runtimeId}`;

@@ -19,13 +19,13 @@
  */
 
 import { createContext, useContext, type PropsWithChildren, type ReactNode } from "react";
-import type { NSELogicalPlacement } from "./overlayTypes";
-import type { NSEPopupPresentation } from "./NSEPopup";
+import type { LogicalPlacement } from "./overlayTypes";
+import type { PopupPresentation } from "./NSEPopup";
 
-export type NSEPopoverPreferredEdge = "minX" | "maxX" | "minY" | "maxY";
+export type PopoverPreferredEdge = "minX" | "maxX" | "minY" | "maxY";
 export type NSEPopoverBehavior = "transient" | "semitransient" | "applicationDefined";
 
-export interface NSEWindowSurfaceRequest {
+export interface WindowSurfaceRequest {
   readonly id: string;
   readonly role: "sheet" | "panel" | "modal" | "popover";
   readonly title: string;
@@ -38,39 +38,39 @@ export interface NSEWindowSurfaceRequest {
    *  always size this way. */
   readonly sizing?: "content";
   readonly relativeTo?: Readonly<{ x: number; y: number; width: number; height: number }>;
-  readonly preferredEdge?: NSEPopoverPreferredEdge;
+  readonly preferredEdge?: PopoverPreferredEdge;
   readonly drawsBackground?: boolean;
   readonly behavior?: NSEPopoverBehavior;
-  readonly presentation?: NSEPopupPresentation;
+  readonly presentation?: PopupPresentation;
   /** Internal logical placement preserves aligned NSEPopup presentations. */
-  readonly placement?: NSELogicalPlacement;
+  readonly placement?: LogicalPlacement;
   readonly collisionPadding?: number;
   readonly labelledBy?: string;
   readonly describedBy?: string;
   readonly onDidClose?: () => void;
 }
 
-export interface NSEWindowSurfaceDismissResult {
+export interface WindowSurfaceDismissResult {
   readonly outcome: "closed" | "cancelled" | "refused" | "missing";
 }
 
-export interface NSEWindowSurfaceErrorContext {
+export interface WindowSurfaceErrorContext {
   readonly requestId: string;
   readonly operation: "present" | "dismiss";
 }
 
-export interface NSEWindowSurfaceBridge {
-  present(request: NSEWindowSurfaceRequest, content: ReactNode): Promise<string>;
-  dismiss(requestId: string): Promise<NSEWindowSurfaceDismissResult>;
-  reportError?(error: unknown, context: NSEWindowSurfaceErrorContext): void;
+export interface WindowSurfaceBridge {
+  present(request: WindowSurfaceRequest, content: ReactNode): Promise<string>;
+  dismiss(requestId: string): Promise<WindowSurfaceDismissResult>;
+  reportError?(error: unknown, context: WindowSurfaceErrorContext): void;
 }
 
-const Context = createContext<NSEWindowSurfaceBridge | null>(null);
+const Context = createContext<WindowSurfaceBridge | null>(null);
 
-export function NSEWindowSurfaceBridgeProvider({ bridge, children }: PropsWithChildren<{ readonly bridge: NSEWindowSurfaceBridge }>) {
+export function WindowSurfaceBridgeProvider({ bridge, children }: PropsWithChildren<{ readonly bridge: WindowSurfaceBridge }>) {
   return <Context.Provider value={bridge}>{children}</Context.Provider>;
 }
 
-export function useOptionalNSEWindowSurfaceBridge(): NSEWindowSurfaceBridge | null {
+export function useOptionalNSEWindowSurfaceBridge(): WindowSurfaceBridge | null {
   return useContext(Context);
 }

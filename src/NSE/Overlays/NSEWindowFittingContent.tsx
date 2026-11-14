@@ -20,7 +20,7 @@
 
 import { useLayoutEffect, useRef, type ReactNode } from "react";
 
-export type NSEWindowFittingSize = { readonly width: number; readonly height: number };
+export type WindowFittingSize = { readonly width: number; readonly height: number };
 
 /**
  * A window-hosted surface that follows its content, as NSPopover follows its
@@ -28,7 +28,7 @@ export type NSEWindowFittingSize = { readonly width: number; readonly height: nu
  * preferred width, and the window frame is that plus the window's chrome and
  * content padding. Popovers and file panels share it.
  */
-export function NSEWindowFittingContent({ onFittingSize, children }: { readonly onFittingSize: (size: NSEWindowFittingSize) => void; readonly children: ReactNode }) {
+export function WindowFittingContent({ onFittingSize, children }: { readonly onFittingSize: (size: WindowFittingSize) => void; readonly children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const node = ref.current;

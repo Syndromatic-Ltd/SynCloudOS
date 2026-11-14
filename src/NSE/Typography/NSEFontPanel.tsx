@@ -33,7 +33,7 @@ import { useNSEDeferredDisposal, type NSEDisposalScheduler } from "../interactio
 import { MenuView } from "../Menus/MenuView";
 import type { MenuItemDefinition } from "../Menus/menuTypes";
 import { useNSEOverlayProvider } from "../Overlays/OverlayProvider";
-import { NSEUtilityPanel } from "../Overlays/NSEUtilityPanel";
+import { UtilityPanel } from "../Overlays/NSEUtilityPanel";
 import { NSESegmentedControl } from "../Controls/Values/NSESegmentedControl";
 import { DocumentColourGlyph, GearGlyph, MinusGlyph, PlusGlyph, ShadowGlyph, StrikethroughGlyph, TextColourGlyph, UnderlineGlyph } from "./fontPanelIcons";
 import type { NSEFontLibrary, NSEFontLibrarySnapshot } from "./NSEFontLibrary";
@@ -540,7 +540,7 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
 
   // An inspector (NSFontPanel): it floats beside the document and stays open
   // while the user keeps typing; its close control ends the session.
-  return <NSEUtilityPanel id={`font-panel-${instanceId}`} open={effectiveOpen} title={title} anchor={anchor} parentWindowControllerId={parentWindowControllerId} contentInset="none" onClose={() => {
+  return <UtilityPanel id={`font-panel-${instanceId}`} open={effectiveOpen} title={title} anchor={anchor} parentWindowControllerId={parentWindowControllerId} contentInset="none" onClose={() => {
     endSession(fontPanelAbort("Font panel session was closed."));
     onOpenChange(false);
   }} onDismissRefused={() => onOpenChange(true)}>
@@ -675,5 +675,5 @@ export function NSEFontPanel({ open, anchor, manager, commandPort, parentRespond
       <p role="status" data-nse-part="notice">{!preset ? "No fonts available." : notice}</p>
       {status !== "idle" && status !== "executed" ? <p role="alert" data-nse-part="error">Typography command {status}.</p> : null}
     </section>)}
-  </NSEUtilityPanel>;
+  </UtilityPanel>;
 }

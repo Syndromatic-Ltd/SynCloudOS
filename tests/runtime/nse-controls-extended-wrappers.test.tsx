@@ -28,7 +28,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance";
 import { atmoTheme } from "../../src/NSE/Appearance/atmo";
 import { NSEButton, NSEImageView, NSESearchField, NSESegmentedControl } from "../../src/NSE/public/controls";
-import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
+import { StandaloneControlHost } from "../../src/NSE/Overlays";
 import { HFXHapticEngine } from "../../src/FX/HapticsFX/HFXHapticEngine";
 import { NSEFeedbackProvider } from "../../src/NSE/Feedback";
 import { DateEntry } from "../../src/NSE/DateTime/Pickers/dateEntry";
@@ -44,9 +44,9 @@ afterEach(() => {
 const presentation = createStaticPresentationPort({ width: 1024, height: 768 });
 function AppearanceHost({ children }: React.PropsWithChildren) {
   return <NSEAppearanceProvider theme={atmoTheme}>
-    <NSEStandaloneControlHost document={document} window={window} presentation={presentation} parentResponderId="application:nse-control-gallery">
+    <StandaloneControlHost document={document} window={window} presentation={presentation} parentResponderId="application:nse-control-gallery">
       {children}
-    </NSEStandaloneControlHost>
+    </StandaloneControlHost>
   </NSEAppearanceProvider>;
 }
 function renderWithAppearance(children: React.ReactNode) {

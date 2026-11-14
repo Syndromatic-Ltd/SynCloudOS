@@ -24,10 +24,10 @@ installNSEScrollIntoViewFixture();
 import React, { useMemo, useState } from "react";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { OverlayProvider, NSEActionSheet, NSEListboxPopup, NSEPopup } from "../../../src/NSE/Overlays";
+import { OverlayProvider, ActionSheet, ListboxPopup, NSEPopup } from "../../../src/NSE/Overlays";
 import { NSEPopover } from "../../../src/NSE/Overlays/NSEPopover";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
-import { NSEUtilityPanel } from "../../../src/NSE/Overlays/NSEUtilityPanel";
+import { UtilityPanel } from "../../../src/NSE/Overlays/NSEUtilityPanel";
 
 const workAreaSnapshot = Object.freeze({
   width: 1280,
@@ -124,9 +124,9 @@ describe("NSE popup family", () => {
         <NSEPopup open={open} modal parentResponderId="workspace" aria-label="Editor" onOpenChange={setOpen}>
           <button ref={setAnchor} onClick={() => setPanel(true)}>Cover colour</button>
         </NSEPopup>
-        <NSEUtilityPanel id="colours" title="Colours" open={panel} anchor={anchor} onClose={() => setPanel(false)}>
+        <UtilityPanel id="colours" title="Colours" open={panel} anchor={anchor} onClose={() => setPanel(false)}>
           <input aria-label="Inspector hex" />
-        </NSEUtilityPanel>
+        </UtilityPanel>
       </OverlayHarness>;
     }
     render(<Fixture />);
@@ -224,7 +224,7 @@ describe("NSE popup family", () => {
       return (
         <OverlayHarness>
           <button ref={setAnchor} type="button">Choose density</button>
-          <NSEListboxPopup
+          <ListboxPopup
             id="density"
             open={open}
             anchor={anchor}
@@ -273,9 +273,9 @@ describe("NSE popup family", () => {
     const onOpenChange = vi.fn();
     render(
       <OverlayHarness>
-        <NSEActionSheet id="rename-sheet" open parentResponderId="workspace" onOpenChange={onOpenChange}>
+        <ActionSheet id="rename-sheet" open parentResponderId="workspace" onOpenChange={onOpenChange}>
           <button type="button">Rename</button>
-        </NSEActionSheet>
+        </ActionSheet>
       </OverlayHarness>,
     );
     const sheet = await screen.findByRole("dialog");
@@ -290,14 +290,14 @@ describe("NSE popup family", () => {
     const bridge = { open: vi.fn(), close: vi.fn() };
     render(
       <OverlayHarness>
-        <NSEActionSheet
+        <ActionSheet
           id="hosted-action-sheet"
           open
           parentResponderId="workspace"
           parentWindowControllerId="window:document"
           windowBridge={bridge}
           onOpenChange={() => undefined}
-        >Hosted sheet</NSEActionSheet>
+        >Hosted sheet</ActionSheet>
       </OverlayHarness>,
     );
 

@@ -9,7 +9,7 @@ import { NSEImage } from '../../../../src/NSE/Controls/Images/NSEImageResource';
 import { LoginWindow } from '../../../../src/NSE/SystemUI/LoginWindow';
 import { atmoTheme } from '../../../../src/NSE/Appearance/atmo';
 import { freezeNSETheme } from '../../../../src/NSE/Theme/NSETheme';
-import { NSEStandaloneControlHost } from '../../../../src/NSE/Overlays';
+import { StandaloneControlHost } from '../../../../src/NSE/Overlays';
 import { NSEViewController, nseUpdateTraits } from '../../../../src/NSE/Application/NSEViewController';
 import { NSEViewControllerView } from '../../../../src/SynCloudOS/AppHosting/applicationHosting';
 import { NSETabViewController, NSETabViewItem } from '../../../../src/NSE/Navigation/NSETabViewController';
@@ -46,4 +46,4 @@ function Contents() {
   return <NSEAppearanceProvider theme={themes['com.example.outer']} colourScheme="light"><div id="outer"><NSEButton id="outer-button">Outer</NSEButton></div><NSEView id="inner" appearance={new NSEAppearance('aqua',{theme:themes['com.example.inner']})}><NSEButton id="inner-button" image={NSEImage.named(NSEImage.goBackTemplateName)}>Inner</NSEButton></NSEView><NSEView appearance={new NSEAppearance('aqua',{theme:themes['com.example.partial']})}><NSEButton id="partial-button">Partial</NSEButton></NSEView><NSEView appearance={new NSEAppearance('aqua',{theme:atmoTheme})}><NSEButton id="atmo-button">Atmo</NSEButton></NSEView></NSEAppearanceProvider>;
 }
 document.body.style.margin='0';
-createRoot(document.getElementById('root')!).render(<NSEStandaloneControlHost document={document} window={window} presentation={presentation}><Contents/></NSEStandaloneControlHost>);
+createRoot(document.getElementById('root')!).render(<StandaloneControlHost document={document} window={window} presentation={presentation}><Contents/></StandaloneControlHost>);

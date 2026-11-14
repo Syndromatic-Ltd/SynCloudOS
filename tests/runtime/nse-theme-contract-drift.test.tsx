@@ -7,7 +7,7 @@ import { resolve } from "node:path";
 import { themeBaselineCatalogue } from "../e2e/fixtures/theme-baseline/catalogue";
 import { supplementalThemeCatalogue } from "../e2e/fixtures/theme-additional/supplemental";
 import { additionalThemeCatalogue } from "../e2e/fixtures/theme-additional/catalogue";
-import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
+import { StandaloneControlHost } from "../../src/NSE/Overlays";
 import { NSEAppearanceProvider } from "../../src/NSE/Appearance/NSEAppearanceProvider";
 import { atmoTheme } from "../../src/NSE/Appearance/atmo";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
@@ -52,7 +52,7 @@ function collect() {
     }
   }
 }
-function Host({ children }: { children: React.ReactNode }) { return <NSEAppearanceProvider theme={atmoTheme} colourScheme="light"><NSEStandaloneControlHost document={document} window={window} presentation={presentation}>{children}</NSEStandaloneControlHost></NSEAppearanceProvider>; }
+function Host({ children }: { children: React.ReactNode }) { return <NSEAppearanceProvider theme={atmoTheme} colourScheme="light"><StandaloneControlHost document={document} window={window} presentation={presentation}>{children}</StandaloneControlHost></NSEAppearanceProvider>; }
 afterEach(cleanup);
 for (const surface of themeBaselineCatalogue) it(`renders ${surface.id}`, async () => {
   const view = render(<Host>{surface.render()}</Host>);

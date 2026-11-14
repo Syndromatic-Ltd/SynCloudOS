@@ -30,12 +30,12 @@ import {
   NSEImageView,
 } from "../../src/NSE/public/controls";
 import { ToolbarView as NSEToolbar } from "../../src/NSE/Toolbars/ToolbarView";
-import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
+import { StandaloneControlHost } from "../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 
 const presentation = createStaticPresentationPort({ width: 1024, height: 768 });
 function Host({ children }: React.PropsWithChildren) {
-  return <NSEStandaloneControlHost document={document} window={window} presentation={presentation}>{children}</NSEStandaloneControlHost>;
+  return <StandaloneControlHost document={document} window={window} presentation={presentation}>{children}</StandaloneControlHost>;
 }
 
 afterEach(() => {

@@ -28,7 +28,7 @@ import { NSEDatePicker } from "../../../src/NSE/public/controls";
 import { DateEntry } from "../../../src/NSE/DateTime/Pickers/dateEntry";
 import { TimeEntry } from "../../../src/NSE/DateTime/Pickers/timeEntry";
 import { NSE, NSEDatePicker as RootDatePicker, NSESecureTextField as RootSecureTextField, NSETabView as RootTabView } from "../../../src/NSE/NSE";
-import { NSEStandaloneControlHost } from "../../../src/NSE/Overlays";
+import { StandaloneControlHost } from "../../../src/NSE/Overlays";
 import { NSEFeedbackProvider } from "../../../src/NSE/Feedback";
 import { NSEControlRuntimeProvider } from "../../../src/NSE/Controls/Core";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
@@ -38,7 +38,7 @@ afterEach(cleanup);
 const adapterPresentation = createStaticPresentationPort({ width: 900, height: 700 });
 
 function OverlayHarness({ children }: { readonly children: React.ReactNode }) {
-  return <NSEStandaloneControlHost document={document} window={window} presentation={adapterPresentation}>{children}</NSEStandaloneControlHost>;
+  return <StandaloneControlHost document={document} window={window} presentation={adapterPresentation}>{children}</StandaloneControlHost>;
 }
 
 const routes = [

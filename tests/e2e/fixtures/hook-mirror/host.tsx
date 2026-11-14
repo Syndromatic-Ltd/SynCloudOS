@@ -3,7 +3,7 @@ import { useLayoutEffect, useRef } from "react";
 import { NSEAppearanceProvider } from "../../../../src/NSE/Appearance/NSEAppearanceProvider";
 import { atmoTheme } from "../../../../src/NSE/Appearance/atmo";
 import { NSEButton } from "../../../../src/NSE/Controls/Buttons/NSEButton";
-import { NSEStandaloneControlHost } from "../../../../src/NSE/Overlays";
+import { StandaloneControlHost } from "../../../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../../../fixtures/presentationTraits";
 import { setNSEHook } from "../../../../src/NSE/Theme/contract/hookMirrorDOM";
 import "../../../../src/NSE/public/styles.css";
@@ -25,10 +25,10 @@ function HandBuilt() {
 
 const presentation = createStaticPresentationPort({ width: 1000, height: 800, reducedMotion: true });
 createRoot(document.getElementById("root")!).render(
-  <NSEStandaloneControlHost document={document} window={window} presentation={presentation}>
+  <StandaloneControlHost document={document} window={window} presentation={presentation}>
     <NSEAppearanceProvider theme={atmoTheme} colourScheme="light">
       <NSEButton id="rendered">Save</NSEButton>
       <HandBuilt />
     </NSEAppearanceProvider>
-  </NSEStandaloneControlHost>,
+  </StandaloneControlHost>,
 );

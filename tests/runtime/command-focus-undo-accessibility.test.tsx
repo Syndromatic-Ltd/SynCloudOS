@@ -25,7 +25,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { SynCloudOSAppInfo } from "../../src/SynCloudOS/AppInfo/appInfoTypes";
 import { NSEAlertBackdrop } from "../../src/NSE/Components/NSEAlertBackdrop";
 import { MenuView } from "../../src/NSE/Menus";
-import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
+import { StandaloneControlHost } from "../../src/NSE/Overlays";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact";
 import { WebspringQuickSwitchView } from "../../src/Webspring/WebspringQuickSwitchView";
 import { createTestRuntime } from "./helpers";
@@ -53,7 +53,7 @@ describe("command, focus, undo, and overlay accessibility", () => {
   it("navigates a menu, skips disabled items, enters a submenu, dispatches, and restores its trigger", async () => {
     const onSelect = vi.fn();
     render(
-      <NSEStandaloneControlHost document={document} window={window} presentation={createStaticPresentationPort({ width: 1024, height: 768 })}>
+      <StandaloneControlHost document={document} window={window} presentation={createStaticPresentationPort({ width: 1024, height: 768 })}>
         <MenuView
           label="Actions"
           items={[
@@ -62,7 +62,7 @@ describe("command, focus, undo, and overlay accessibility", () => {
           ]}
           onSelect={onSelect}
         />
-      </NSEStandaloneControlHost>,
+      </StandaloneControlHost>,
     );
     const trigger = screen.getByRole("button", { name: "Actions" });
     fireEvent.click(trigger);

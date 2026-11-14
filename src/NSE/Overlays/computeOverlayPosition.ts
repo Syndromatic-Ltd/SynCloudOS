@@ -30,7 +30,7 @@ import {
   type Placement,
 } from "@floating-ui/dom";
 import type { OverlayRegionBounds } from "./overlayRegion";
-import type { NSELogicalPlacement } from "./overlayTypes";
+import type { LogicalPlacement } from "./overlayTypes";
 import { updateNSEPopoverFrame } from "./popoverFrame";
 import { setNSEHook } from "../Theme/contract/hookMirrorDOM";
 import { applyNSEPopoverPosition, computeNSEPopoverPosition, nsePopoverReference } from "./popoverPosition";
@@ -67,7 +67,7 @@ export interface OverlayPositionOptions {
   readonly floating: HTMLElement;
   readonly boundary?: () => OverlayRegionBounds | null;
   readonly arrow?: HTMLElement | null;
-  readonly placement?: NSELogicalPlacement;
+  readonly placement?: LogicalPlacement;
   readonly direction?: OverlayDirection;
   readonly offset?: number;
   readonly collisionPadding?: OverlayCollisionPadding;
@@ -78,7 +78,7 @@ export interface OverlayPositionOptions {
   onError?(): void;
 }
 
-export interface NSEViewportCornerPositionOptions {
+export interface ViewportCornerPositionOptions {
   readonly anchor: HTMLElement;
   readonly floating: HTMLElement;
   readonly boundary?: OverlayRegionBounds | null;
@@ -91,7 +91,7 @@ export interface NSEViewportCornerPositionOptions {
   readonly onAnchorRemoved?: () => void;
 }
 
-const logicalPlacementMap: Readonly<Record<NSELogicalPlacement, readonly [Placement, Placement]>> = {
+const logicalPlacementMap: Readonly<Record<LogicalPlacement, readonly [Placement, Placement]>> = {
   "block-start": ["top", "top"],
   "block-end": ["bottom", "bottom"],
   "inline-start": ["left", "right"],
@@ -103,7 +103,7 @@ const logicalPlacementMap: Readonly<Record<NSELogicalPlacement, readonly [Placem
 };
 
 export function logicalPlacementToFloatingPlacement(
-  placement: NSELogicalPlacement,
+  placement: LogicalPlacement,
   direction: OverlayDirection = "ltr",
 ): Placement {
   return logicalPlacementMap[placement][direction === "rtl" ? 1 : 0];
@@ -355,7 +355,7 @@ export function computeNSEViewportCornerPosition({
   direction = "ltr",
   signal,
   onAnchorRemoved,
-}: NSEViewportCornerPositionOptions): () => void {
+}: ViewportCornerPositionOptions): () => void {
   let active = true;
   let anchorRemovalReported = false;
 

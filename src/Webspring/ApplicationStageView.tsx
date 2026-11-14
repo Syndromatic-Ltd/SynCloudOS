@@ -32,7 +32,7 @@ import {
   NSEApplicationNavigationChromeProvider,
   OverlayProvider,
   TooltipProvider,
-  NSEWindowSurfaceBridgeProvider,
+  WindowSurfaceBridgeProvider,
   useNSEDeferredDisposal,
 } from "../NSE/NSE";
 import { nseMenuModel } from "../NSE/NSE";
@@ -406,7 +406,7 @@ export function ApplicationStageView({
   return (
     <OverlayProvider runtimePort={nseOverlayPort} defaultParentResponderId={applicationResponderId} portalContainer={overlayDestination}>
     <TooltipProvider>
-    <NSEWindowSurfaceBridgeProvider bridge={stageWindowSurfaceBridge}>
+    <WindowSurfaceBridgeProvider bridge={stageWindowSurfaceBridge}>
     <NSEControlRuntimeProvider port={nseControlPort}>
     <NSEApplicationNavigationChromeProvider controller={navigationChromeController} standardChromeAvailable={usesStandardTopBar}>
     <ResponderScope asChild responderId={applicationResponderId} kind="application" parentResponderId="workspace" scopeId={applicationResponderId} undoOwner={applicationUndoOwner} diagnosticsLabel={appName}>
@@ -479,7 +479,7 @@ export function ApplicationStageView({
     </ResponderScope>
     </NSEApplicationNavigationChromeProvider>
     </NSEControlRuntimeProvider>
-    </NSEWindowSurfaceBridgeProvider>
+    </WindowSurfaceBridgeProvider>
     <div ref={overlayRootRef} className="webspring-app-overlay-destination" data-multiswitch-role={multiSwitchRole ?? undefined}
       inert={overlayInactive ? true : undefined} aria-hidden={overlayInactive ? true : undefined}
       style={{ ...stageMotion.root.style, zIndex: stage.zIndex + 70, ...(staged ? { visibility: "hidden" as const } : {}) }}>

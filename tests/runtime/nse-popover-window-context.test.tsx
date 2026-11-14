@@ -10,7 +10,7 @@ import { SynWareRuntimeMount } from "../../src/SynCloudOS/AppSDK/SynWareRuntimeM
 import { useSCOS } from "../../src/SynCloudOS/AppSDK/scos/useSCOS";
 import { SynCloudOSRuntimeContext, SynWareRuntimeContext } from "../../src/SynCloudOSReact/runtimeContext";
 import { HostSiteBrandingProvider, SynCloudOSProvider } from "../../src/SynCloudOSReact";
-import { NSEWindowSurfaceBridgeProvider } from "../../src/NSE/Overlays/NSEWindowSurfaceBridge";
+import { WindowSurfaceBridgeProvider } from "../../src/NSE/Overlays/NSEWindowSurfaceBridge";
 import { createTransientWindowSurfaceBridge, WindowContentRendererRegistry, WindowLayer } from "../../src/Webspring/WindowLayer";
 import { createTestBundle, createTestRuntime, createTestRuntimeEnvironment } from "./helpers";
 
@@ -61,9 +61,9 @@ it.each(["desktop", "compact"])("hosts presentAsPopover in a real %s window whil
   root.showsDraft = !compact;
   const view = render(<div data-syncloudos-runtime-owner={runtime.runtimeId}><SynCloudOSProvider runtime={runtime}>
     <HostSiteBrandingProvider value={{ name: "Fixture", logoUrl: null, lightLogoUrl: null, darkLogoUrl: null, compactLogoUrl: null, logoAlt: "Fixture" }}>
-      <NSEWindowSurfaceBridgeProvider bridge={bridge}><SynWareRuntimeMount runtime={runtime} app={app} responderId={responderId}>
+      <WindowSurfaceBridgeProvider bridge={bridge}><SynWareRuntimeMount runtime={runtime} app={app} responderId={responderId}>
         <NSEViewControllerView controller={root} />
-      </SynWareRuntimeMount></NSEWindowSurfaceBridgeProvider>
+      </SynWareRuntimeMount></WindowSurfaceBridgeProvider>
       <WindowLayer contentRegistry={registry} />
     </HostSiteBrandingProvider>
   </SynCloudOSProvider></div>);

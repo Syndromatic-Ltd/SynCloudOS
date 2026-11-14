@@ -37,7 +37,7 @@ function Virtual() {
   const virtualiser = useVirtualiser({ count: 20, axis: "block", overscan: 1, estimateSize: 24, getKey: String, viewportRef, viewportSize: 100 });
   return <VirtualViewport ref={viewportRef} virtualiser={virtualiser} viewportSize={100} renderItem={item => <span>{item.key}</span>} />;
 }
-function Tooltip() {
+function TooltipSpecimen() {
   const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
   return <><button ref={setAnchor}>Anchor</button><Tooltip id="contract-tooltip" open anchor={anchor} content="Help" /></>;
 }
@@ -91,7 +91,7 @@ export const supplementalThemeCatalogue: readonly { id: string; ready?: string; 
   ...[true, false].map(isEnabled => ({ id: `matrix-${isEnabled}`, render: () => <NSERadioGroup label="Layout" options={[{ label: "List", value: "list" }, { label: "Grid", value: "grid" }]} defaultValue="list" isEnabled={isEnabled} /> })),
   { id: "colour-swatches", render: () => <ColourSwatches colours={[colour]} selected={colour} onSelect={noop} /> },
   { id: "virtual-viewport", render: () => <Virtual /> },
-  { id: "tooltip", render: () => <Tooltip /> },
+  { id: "tooltip", render: () => <TooltipSpecimen /> },
   ...[50, 500].flatMap(width => [false, true].map(customising => ({ id: `configured-toolbar-${width}-${customising}`, render: () => <Toolbar width={width} customising={customising} /> }))),
   { id: "configured-toolbar-borderless", render: () => <Toolbar width={500} customising={false} borderless /> },
 { id: "configured-toolbar-labelled", render: () => <Toolbar width={500} customising={false} labelled /> },

@@ -2,7 +2,7 @@ import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import { NSEAppearanceProvider } from "../../../../src/NSE/Appearance/NSEAppearanceProvider";
 import { atmoTheme } from "../../../../src/NSE/Appearance/atmo";
-import { NSEStandaloneControlHost } from "../../../../src/NSE/Overlays";
+import { StandaloneControlHost } from "../../../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../../../fixtures/presentationTraits";
 import { themeBaselineCatalogue } from "./catalogue";
 import "../../../../src/NSE/public/styles.css";
@@ -25,9 +25,9 @@ function renderSurface(id: string) {
   flushSync(() => root.render(
   <div key={id}>
   <NSEAppearanceProvider theme={atmoTheme} colourScheme={scheme}>
-    <NSEStandaloneControlHost document={document} window={window} presentation={presentation}>
+    <StandaloneControlHost document={document} window={window} presentation={presentation}>
       <main id="theme-baseline-surface" data-baseline-surface={surface.id}>{surface.render()}</main>
-    </NSEStandaloneControlHost>
+    </StandaloneControlHost>
   </NSEAppearanceProvider></div>,
   ));
 }

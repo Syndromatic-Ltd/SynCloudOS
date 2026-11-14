@@ -31,7 +31,7 @@ import { defaultHFXFeedbackPatterns, HFX_FEEDBACK_PRESET_NAMES } from "../../src
 import type { HFXFeedbackInput, HFXFeedbackPresetName, HFXFeedbackOptions } from "../../src/SynCloudOS/HapticsFX/feedbackTypes";
 import { AUFXSystemFeedbackBus } from "../../src/SynCloudOS/AudioFX/AUFXSystemFeedbackBus";
 import { createRuntimeHapticsService } from "../../src/SynCloudOS/HapticsFX/HapticsService";
-import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
+import { StandaloneControlHost } from "../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 import { NSEFeedbackProvider, useNSEFeedback } from "../../src/NSE/Feedback";
 function createFeedbackAdapter(options: HFXFeedbackOptions = {}) {
@@ -355,7 +355,7 @@ describe("HapticsFX feedback preservation", () => {
     const { vibrate, cleanupDom } = await installDom();
     const { render: baseRender, fireEvent, cleanup, waitFor } = await import("@testing-library/react");
     const engine = createRuntimeHapticsService(new AUFXSystemFeedbackBus(() => null), { navigator: { vibrate }, audio: "off" });
-    const render = (element: Parameters<typeof baseRender>[0]) => baseRender(createElement(NSEFeedbackProvider, { value: engine }, createElement(NSEStandaloneControlHost, { document, window, presentation: createStaticPresentationPort({ width: 1024, height: 768 }) }, element)));
+    const render = (element: Parameters<typeof baseRender>[0]) => baseRender(createElement(NSEFeedbackProvider, { value: engine }, createElement(StandaloneControlHost, { document, window, presentation: createStaticPresentationPort({ width: 1024, height: 768 }) }, element)));
 
     try {
       const rendered = render(createElement("div", null,
