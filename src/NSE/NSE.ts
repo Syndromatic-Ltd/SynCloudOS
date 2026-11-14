@@ -39,12 +39,12 @@ export * from "./Text";
 export * from "./TextEditing";
 export { FocusPortProvider, FocusScope, useNSEFocusPort } from "./Focus";
 export type { FocusPort, FocusScopeKind, FocusScopeOptions } from "./Focus";
-export { NSEConformanceEvidenceProvider, useNSEConformanceEvidence } from "./Developer/NSEConformanceEvidence";
-export type { NSEConformanceEvidencePort, NSEConformanceEvidenceProviderProps } from "./Developer/NSEConformanceEvidence";
+export { ConformanceEvidenceProvider, useNSEConformanceEvidence } from "./Developer/NSEConformanceEvidence";
+export type { ConformanceEvidencePort, ConformanceEvidenceProviderProps } from "./Developer/NSEConformanceEvidence";
 /** Lifecycle cleanup is part of the public interaction layer for host shells. */
 export { useNSEDeferredDisposal } from "./interactionLifecycle";
 export type { Disposable, NSEDisposalScheduler } from "./interactionLifecycle";
-import { NSEFeedbackProvider, useNSEFeedback } from "./Feedback";
+import { FeedbackProvider, useNSEFeedback } from "./Feedback";
 import * as NSEContainers from "./Containers";
 import * as NSEControllers from "./Controllers";
 export * from "./Controllers";
@@ -208,7 +208,7 @@ export const NSE = {
   Badge,
   Text: NSEText,
   TextEditing: NSETextEditing,
-  NSEFeedbackProvider,
+  FeedbackProvider,
   Material: {
     Provider: MaterialProvider,
     tokens: materialTokens,

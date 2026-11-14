@@ -19,7 +19,7 @@
  */
 
 import {
-  NSEFeedbackProvider,
+  FeedbackProvider,
   MaterialLighting,
   MaterialLightingProvider,
   SafeAreaMeasurementProvider,
@@ -108,7 +108,7 @@ export function SynCloudOSProvider({
         <ResponderHierarchyContext.Provider
           value={{ runtimeId: runtime.runtimeId, responderId: null }}
         >
-          <NSEFeedbackProvider value={runtime.haptics}>
+          <FeedbackProvider value={runtime.haptics}>
             <MaterialLightingProvider value={lighting}>
               <ViewDrawingEnvironmentContext.Provider value={drawingEnvironment}>
                 <ViewControllerRendererProvider value={ViewControllerView}>
@@ -116,7 +116,7 @@ export function SynCloudOSProvider({
                 </ViewControllerRendererProvider>
               </ViewDrawingEnvironmentContext.Provider>
             </MaterialLightingProvider>
-          </NSEFeedbackProvider>
+          </FeedbackProvider>
         </ResponderHierarchyContext.Provider>
       </AnimationEnvironmentProvider>
     </SynCloudOSRuntimeContext.Provider>

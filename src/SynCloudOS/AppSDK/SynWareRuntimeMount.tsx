@@ -21,7 +21,7 @@ import { useInsertionEffect, useLayoutEffect, useMemo, useRef, useState, useSync
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
 import type { SynCloudOSAppInfo, SynCloudOSRuntime } from "../SynCloudOS";
 import { SynWareRuntimeContext, SynCloudOSRuntimeContext, useRuntimeNSEControlPort, useRuntimeNSEFocusPort, useRuntimeNSEOverlayPort } from "../../SynCloudOSReact";
-import { ControlRuntimeProvider, FocusPortProvider, OverlayProvider, NSEConformanceEvidenceProvider, type NSEConformanceEvidencePort } from "../../NSE/NSE";
+import { ControlRuntimeProvider, FocusPortProvider, OverlayProvider, ConformanceEvidenceProvider, type ConformanceEvidencePort } from "../../NSE/NSE";
 import type { MountedSynWareRuntime } from "./appRuntimeFacade";
 import { createMountedSynWareRuntime } from "./appRuntimeFacade";
 import type { SynWareRuntime } from "./appRuntimeTypes";
@@ -98,14 +98,14 @@ function MountedAppPresentationBoundary({
   const controlPort = useRuntimeNSEControlPort();
   const trusted = getMountedAppEnvironmentClients(runtime).trusted;
   const conformance = trusted.conformance;
-  const conformanceEvidencePort = useMemo<NSEConformanceEvidencePort | null>(() => {
+  const conformanceEvidencePort = useMemo<ConformanceEvidencePort | null>(() => {
     if (!conformance || !hasTrustedBundlePrivilege(kernelRuntime, runtime.app.bundleIdentifier, "conformance", "diagnostics.view")) return null;
     return Object.freeze({
-      registerAppearanceFact: (fact: Parameters<NSEConformanceEvidencePort["registerAppearanceFact"]>[0]) => {
+      registerAppearanceFact: (fact: Parameters<ConformanceEvidencePort["registerAppearanceFact"]>[0]) => {
         const handle = conformance.registerAppearanceFact(fact);
         return () => { void handle.dispose(); };
       },
-      registerAccessibilityFinding: (finding: Parameters<NSEConformanceEvidencePort["registerAccessibilityFinding"]>[0]) => {
+      registerAccessibilityFinding: (finding: Parameters<ConformanceEvidencePort["registerAccessibilityFinding"]>[0]) => {
         const handle = conformance.registerAccessibilityFinding(finding);
         return () => { void handle.dispose(); };
       },
@@ -135,7 +135,7 @@ function MountedAppPresentationBoundary({
     <PresenceBoundary>
     <ViewActivityProvider source={animationState}>
     <AnimationEnvironmentProvider reducedMotion={reducedMotion} animator={animator} layers={appAnimations} frames={appFrames}>
-    <NSEConformanceEvidenceProvider port={conformanceEvidencePort}>
+    <ConformanceEvidenceProvider port={conformanceEvidencePort}>
       <OverlayProvider runtimePort={overlayPort} defaultParentResponderId={`application:${runtime.app.bundleIdentifier}`}>
         <ControlRuntimeProvider port={controlPort}>
           <MenuRuntimeProvider port={menuPort}>
@@ -143,7 +143,7 @@ function MountedAppPresentationBoundary({
           </MenuRuntimeProvider>
         </ControlRuntimeProvider>
       </OverlayProvider>
-    </NSEConformanceEvidenceProvider>
+    </ConformanceEvidenceProvider>
     </AnimationEnvironmentProvider>
     </ViewActivityProvider>
     </PresenceBoundary>
