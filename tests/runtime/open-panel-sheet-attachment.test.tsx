@@ -7,10 +7,10 @@ import { NSEOpenPanelWindowHost } from "../../src/SynCloudOS/AppHosting/openPane
 import { NSEOpenPanelApplicationHost } from "../../src/SynCloudOS/AppHosting/openPanelHosting";
 import { SynWareProvider } from "../../src/SynCloudOS/AppSDK/SynWareContext";
 import { NSEWindowSheetHostContext, useNSEWindowSheetHost } from "../../src/SynCloudOS/AppHosting/windowChrome";
-import { NSEWindowSurfaceBridgeProvider } from "../../src/NSE/Overlays/NSEWindowSurfaceBridge";
+import { WindowSurfaceBridgeProvider } from "../../src/NSE/Overlays/NSEWindowSurfaceBridge";
 import { createOpenPanelFileSystem, registerOpenPanelFileSystem } from "../../src/SynCloudOS/FilePanels/OpenPanelFileSystem";
 import type { NSEWindow } from "../../src/NSE/Application/NSEWindowController";
-import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
+import { StandaloneControlHost } from "../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 import { resolveNSEOpenPanelHost } from "../../src/NSE/FilePanels/openPanelHost";
 afterEach(cleanup);
@@ -30,8 +30,8 @@ it.each([[false, false, false, false], [true, false, false, false], [false, true
       <button onClick={() => { response = application ? panel.begin() : panel.beginSheetModal(window); if (immediate) panel.cancel(); }}>Import…</button>
     </NSEOpenPanelWindowHost></NSEWindowSheetHostContext.Provider><div ref={sheets.layerRef} className="nse-window-sheet-layer" data-sheet-attached={attached} /></div>;
   }
-  render(<NSEStandaloneControlHost document={document} window={globalThis.window} presentation={createStaticPresentationPort({ width: compact ? 390 : 1000, height: compact ? 844 : 720 })}>
-    <NSEWindowSurfaceBridgeProvider bridge={bridge}><SynWareProvider value={value}><NSEOpenPanelApplicationHost value={value}><Parent /></NSEOpenPanelApplicationHost></SynWareProvider></NSEWindowSurfaceBridgeProvider></NSEStandaloneControlHost>);
+  render(<StandaloneControlHost document={document} window={globalThis.window} presentation={createStaticPresentationPort({ width: compact ? 390 : 1000, height: compact ? 844 : 720 })}>
+    <WindowSurfaceBridgeProvider bridge={bridge}><SynWareProvider value={value}><NSEOpenPanelApplicationHost value={value}><Parent /></NSEOpenPanelApplicationHost></SynWareProvider></WindowSurfaceBridgeProvider></StandaloneControlHost>);
   const trigger = screen.getByRole("button", { name: "Import…" }); trigger.focus();
   if (immediate) {
     const host = resolveNSEOpenPanelHost(application ? null : window);

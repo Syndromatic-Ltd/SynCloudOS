@@ -36,7 +36,7 @@ import type {
   CommandValidationRequest,
 } from "../../SynCloudOS/SynCloudOS";
 import type { NSEMenuRuntimePort } from "../Menus/menuTypes";
-import type { NSEWindowSurfaceBridge } from "../Overlays";
+import type { WindowSurfaceBridge } from "../Overlays";
 
 /**
  * The preference-backed portion of a toolbar configuration. Ownership and the
@@ -232,8 +232,8 @@ export interface ToolbarConfigurationSheetWindowRequest {
 export interface ToolbarConfigurationSheetWindowBridge {
   open?(request: ToolbarConfigurationSheetWindowRequest): void;
   close?(request: ToolbarConfigurationSheetWindowRequest): void;
-  present?: NSEWindowSurfaceBridge["present"];
-  dismiss?: NSEWindowSurfaceBridge["dismiss"];
+  present?: WindowSurfaceBridge["present"];
+  dismiss?: WindowSurfaceBridge["dismiss"];
 }
 
 export interface ToolbarConfigurationSession {

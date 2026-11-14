@@ -4,7 +4,7 @@ import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useSta
 import { TooltipProvider } from "../NSE/Tooltips";
 import { NSEAlertBackdrop } from "../NSE/SystemUI";
 import { SCOSAlertPresenter } from "./SCOSAlertPresenter";
-import { OverlayProvider, NSEWindowSurfaceBridgeProvider, useNSEDeferredDisposal } from "../NSE/NSE";
+import { OverlayProvider, WindowSurfaceBridgeProvider, useNSEDeferredDisposal } from "../NSE/NSE";
 import { createReactOwnedNSEMenu } from "../NSE/Menus/NSEMenu";
 import { useMenuLifetime } from "../NSE/Menus/useMenuLifetime";
 import { nseMenuModel } from "../NSE/Menus/menuTypes";
@@ -212,14 +212,14 @@ export function ApplicationHost({ applicationId, authentication, home }: Applica
           resetKey={applicationId} fallback={() => null}>
           <OverlayProvider runtimePort={overlayPort} defaultParentResponderId={responderId}>
           <TooltipProvider>
-          <NSEWindowSurfaceBridgeProvider bridge={bridge}>
+          <WindowSurfaceBridgeProvider bridge={bridge}>
           {contentMenu ? <ApplicationMenuOverlayHost menuStore={menuStore} model={menuModel} controller={menuController}
             overlay={{ id: `application-host:app-menu-overlay:${applicationId}`, parentResponderId: responderId, placement: "block-end-inline-end" }}
             anchorTitle={appName} /> : null}
           {contentMenu ? <ApplicationMenuTriggerBridge menuStore={menuStore} label={appName}>
             {framedEntry}
           </ApplicationMenuTriggerBridge> : framedEntry}
-          </NSEWindowSurfaceBridgeProvider>
+          </WindowSurfaceBridgeProvider>
           </TooltipProvider>
           </OverlayProvider>
         </SynCloudOSWatchdog>

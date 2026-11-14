@@ -22,7 +22,7 @@
 import React from "react";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
-import { NSEStandaloneControlHost } from "../../../src/NSE/Overlays";
+import { StandaloneControlHost } from "../../../src/NSE/Overlays";
 import { NSEPopUpButton } from "../../../src/NSE/Menus";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 import { installNSEScrollIntoViewFixture } from "../fixtures/browser";
@@ -39,9 +39,9 @@ function desktop(matches: boolean) {
 }
 
 function Picker({ onValueChange }: { readonly onValueChange?: (value: string) => void }) {
-  return <NSEStandaloneControlHost document={document} window={window} presentation={presentation}>
+  return <StandaloneControlHost document={document} window={window} presentation={presentation}>
     <NSEPopUpButton label="Page" items={[{ value: "paper", title: "Journal Paper" }, { value: "white", title: "White Page" }]} onValueChange={onValueChange} />
-  </NSEStandaloneControlHost>;
+  </StandaloneControlHost>;
 }
 
 it("flashes the chosen row, then chooses it and fades the list out (desktop)", async () => {

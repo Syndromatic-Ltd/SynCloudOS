@@ -35,7 +35,7 @@ import {
   type NSEParagraphStyle,
 } from "../../src/NSE/Typography";
 import { OverlayProvider } from "../../src/NSE/Overlays/OverlayProvider";
-import { NSEWindowSurfaceBridgeProvider } from "../../src/NSE/Overlays/NSEWindowSurfaceBridge";
+import { WindowSurfaceBridgeProvider } from "../../src/NSE/Overlays/NSEWindowSurfaceBridge";
 import { SynCloudOSProvider } from "../../src/SynCloudOSReact/SynCloudOSProvider";
 import { useRuntimeNSEOverlayPort } from "../../src/SynCloudOSReact/nseFocusPort";
 import { SynCloudOSNSEFontPanel } from "../../src/SynCloudOSReact/SynCloudOSNSEFontPanel";
@@ -174,7 +174,7 @@ describe("hosted font panel and focused commands", () => {
     const dismiss = vi.fn(async () => ({ outcome: "closed" as const }));
     const commandPort: NSEFontPanelCommandPort = { execute: vi.fn(async () => ({ status: "executed" as const })) };
 
-    render(<SynCloudOSProvider runtime={runtime}><OverlayHarness runtime={runtime}><NSEWindowSurfaceBridgeProvider bridge={{ present, dismiss }}><NSEFontPanel open anchor={anchor} manager={manager} commandPort={commandPort} parentResponderId="workspace" onOpenChange={() => undefined} /></NSEWindowSurfaceBridgeProvider></OverlayHarness></SynCloudOSProvider>);
+    render(<SynCloudOSProvider runtime={runtime}><OverlayHarness runtime={runtime}><WindowSurfaceBridgeProvider bridge={{ present, dismiss }}><NSEFontPanel open anchor={anchor} manager={manager} commandPort={commandPort} parentResponderId="workspace" onOpenChange={() => undefined} /></WindowSurfaceBridgeProvider></OverlayHarness></SynCloudOSProvider>);
 
     await waitFor(() => expect(present).toHaveBeenCalledOnce());
     expect(document.querySelector("[data-nse-control='font-panel']")).toBeNull();
@@ -190,7 +190,7 @@ describe("hosted font panel and focused commands", () => {
       return "font-panel-window";
     });
     const dismiss = vi.fn(async () => ({ outcome: "closed" as const }));
-    const panel = render(<SynCloudOSProvider runtime={runtime}><OverlayHarness runtime={runtime}><NSEWindowSurfaceBridgeProvider bridge={{ present, dismiss }}><SynCloudOSNSEFontPanel open showsRuler direction="rtl" anchor={anchor} manager={fixtureManager()} parentResponderId="workspace" onOpenChange={() => undefined} /></NSEWindowSurfaceBridgeProvider></OverlayHarness></SynCloudOSProvider>);
+    const panel = render(<SynCloudOSProvider runtime={runtime}><OverlayHarness runtime={runtime}><WindowSurfaceBridgeProvider bridge={{ present, dismiss }}><SynCloudOSNSEFontPanel open showsRuler direction="rtl" anchor={anchor} manager={fixtureManager()} parentResponderId="workspace" onOpenChange={() => undefined} /></WindowSurfaceBridgeProvider></OverlayHarness></SynCloudOSProvider>);
     await waitFor(() => expect(hosted).not.toBeNull());
     // A window host presents the content under its own overlay host.
     const hostedView = render(<SynCloudOSProvider runtime={runtime}><OverlayHarness runtime={runtime}>{hosted}</OverlayHarness></SynCloudOSProvider>);
@@ -357,7 +357,7 @@ describe("hosted font panel and focused commands", () => {
         },
         dismiss,
       }), []);
-      return <NSEWindowSurfaceBridgeProvider bridge={bridge}><NSEFontPanel open={open} anchor={anchor} manager={fixtureManager()} commandPort={commandPort} parentResponderId="workspace" onOpenChange={setOpen} />{hosted}</NSEWindowSurfaceBridgeProvider>;
+      return <WindowSurfaceBridgeProvider bridge={bridge}><NSEFontPanel open={open} anchor={anchor} manager={fixtureManager()} commandPort={commandPort} parentResponderId="workspace" onOpenChange={setOpen} />{hosted}</WindowSurfaceBridgeProvider>;
     }
     render(<SynCloudOSProvider runtime={runtime}><OverlayHarness runtime={runtime}><Fixture /></OverlayHarness></SynCloudOSProvider>);
     await waitFor(() => expect(physicalClose).toBeTypeOf("function"));

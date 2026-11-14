@@ -19,7 +19,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { NSEPopup, reportNSEWindowSurfaceError, useNSEWindowSurfaceLifecycle, useOptionalNSEWindowSurfaceBridge, type OverlayDismissReason, type NSEWindowSurfaceBridge } from "../Overlays";
+import { NSEPopup, reportNSEWindowSurfaceError, useNSEWindowSurfaceLifecycle, useOptionalNSEWindowSurfaceBridge, type OverlayDismissReason, type WindowSurfaceBridge } from "../Overlays";
 import { useNSEPresentedContent } from "../Overlays/useNSEPresentedContent";
 import type { NSEToolbarController } from "./NSEToolbarController";
 import type { ToolbarConfigurationSheetWindowBridge } from "./toolbarTypes";
@@ -85,7 +85,7 @@ export function ToolbarConfigurationSheet({
   }), [controller.configuration.owner, id, parentWindowControllerId]);
   const name = `Customize ${controller.configuration.identifier.replace(/[-_]+/g, " ")}`;
   const hostedBridge = useOptionalNSEWindowSurfaceBridge();
-  const canonicalBridge = windowBridge?.present && windowBridge.dismiss ? windowBridge as NSEWindowSurfaceBridge : hostedBridge;
+  const canonicalBridge = windowBridge?.present && windowBridge.dismiss ? windowBridge as WindowSurfaceBridge : hostedBridge;
   const settleDismiss = useCallback((reason: OverlayDismissReason, commit: boolean) => {
     if (dismissalSettled.current) return;
     dismissalSettled.current = true;

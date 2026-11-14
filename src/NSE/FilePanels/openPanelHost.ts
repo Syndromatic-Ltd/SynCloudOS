@@ -1,6 +1,6 @@
 /* SynCloudOS — Copyright © 2026 Syndromatic Ltd. AGPL-3.0-or-later. */
 import type { NSEWindow } from "../Application/NSEWindowController";
-import type { NSEWindowSurfaceBridge } from "../Overlays/NSEWindowSurfaceBridge";
+import type { WindowSurfaceBridge } from "../Overlays/NSEWindowSurfaceBridge";
 import type { FilePanelService } from "../../SynCloudOS/nseRuntimeContracts";
 import type { OpenPanelFileSystem } from "../../SynCloudOS/nseRuntimeContracts";
 import type { IFXImageResource } from "../../FX/ImageFX/IFXImageResource";
@@ -15,7 +15,7 @@ export interface NSEOpenPanelImagePort {
 export interface NSEOpenPanelHost {
   readonly service: Pick<FilePanelService, "open" | "save" | "release" | "dispose">;
   readonly fileSystem?: OpenPanelFileSystem;
-  readonly bridge: NSEWindowSurfaceBridge;
+  readonly bridge: WindowSurfaceBridge;
   readonly signal: AbortSignal;
   readonly responderId: string;
   readonly images?: NSEOpenPanelImagePort;

@@ -29,7 +29,7 @@ export type OverlayKind =
   | "tooltip"
   | "action-sheet";
 
-export type NSELogicalPlacement =
+export type LogicalPlacement =
   | "block-start"
   | "block-end"
   | "inline-start"

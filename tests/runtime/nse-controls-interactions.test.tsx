@@ -32,7 +32,7 @@ import { atmoTheme } from "../../src/NSE/Appearance/atmo";
 import { MenuView, NSEPopUpButton } from "../../src/NSE/Menus";
 import { NSELevelIndicator, NSEStepper } from "../../src/NSE/Controls/Values";
 import { NSEComboBox } from "../../src/NSE/Controls/Completion";
-import { NSEStandaloneControlHost, NSEPopup } from "../../src/NSE/Overlays";
+import { StandaloneControlHost, NSEPopup } from "../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 
 const customAppearance = createTestTheme("com.example.custom-test", "Custom test");
@@ -44,7 +44,7 @@ afterEach(() => {
 
 const presentation = createStaticPresentationPort({ width: 1024, height: 768 });
 function InteractionHost({ children }: React.PropsWithChildren) {
-  return <NSEStandaloneControlHost document={document} window={window} presentation={presentation} parentResponderId="workspace">{children}</NSEStandaloneControlHost>;
+  return <StandaloneControlHost document={document} window={window} presentation={presentation} parentResponderId="workspace">{children}</StandaloneControlHost>;
 }
 
 describe("NSE menu and picker interactions", () => {

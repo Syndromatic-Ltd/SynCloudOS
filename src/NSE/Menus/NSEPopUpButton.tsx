@@ -22,8 +22,8 @@ import { useNSEThemeInteraction } from "../Theme/contract/useThemeInteraction";
 import { nseControlHooks } from "../Theme/contract/hooks";
 import { useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type HTMLAttributes, type ReactNode } from "react";
 import { useOptionalOverlayProvider } from "../Overlays";
-import { NSEListboxPopup, type NSEListboxOption } from "../Overlays/NSEListboxPopup";
-import type { NSEPopupPresentation } from "../Overlays/NSEPopup";
+import { ListboxPopup, type ListboxOption } from "../Overlays/NSEListboxPopup";
+import type { PopupPresentation } from "../Overlays/NSEPopup";
 import { NSEButton, type NSEButtonProps } from "../Controls/Buttons/NSEButton";
 import { classes, sizedControlStyle, useControllableState, useNSEControlFeedback } from "../Controls/Core/nseControlsShared";
 import { NSEActionResponderContext, useNSEActionBinding } from "../Controls/Core/useNSEControlAction";
@@ -88,7 +88,7 @@ export interface NSEPopUpButtonProps<Payload = unknown> extends Omit<HTMLAttribu
   /** Overlay provenance for the menu, when the nearest responder is not its parent. */
   readonly overlay?: MenuOverlayOptions;
   readonly parentResponderId?: string;
-  readonly presentation?: NSEPopupPresentation;
+  readonly presentation?: PopupPresentation;
   readonly direction?: "ltr" | "rtl";
 }
 
@@ -218,7 +218,7 @@ function PopUpButtonControl(props: NSEPopUpButtonProps) {
   const drawing = nseControlHooks({ control: "pop-up-button", enabled: !disabled && actionAvailable, highlighted: open || theme.highlighted, hovered: theme.hovered, focused: theme.focused, variants: { "control-size": controlSize, "bezel-style": bezelStyle ?? "rounded", "pulls-down": String(pullsDown) } });
   const actionHidden = action !== undefined && choiceRows.length > 0 && choiceRows.every((row) => itemCommands.get(row.rowId)?.presentation?.hidden);
   const { triggerNSEControlHaptic } = useNSEControlFeedback();
-  const listboxOptions = useMemo<readonly NSEListboxOption<string>[]>(() => rows
+  const listboxOptions = useMemo<readonly ListboxOption<string>[]>(() => rows
     .filter((row) => !(row.item.action === undefined && action !== undefined && itemCommands.get(row.rowId)?.presentation?.hidden))
     .map((row) => ({
       id: row.rowId,
@@ -230,7 +230,7 @@ function PopUpButtonControl(props: NSEPopUpButtonProps) {
       separatorBefore: row.separatorBefore,
       kind: pullsDown || row.item.action !== undefined ? "action" as const : undefined,
     })), [action, itemCommands, pullsDown, rowEnabled, rows]);
-  const select = useCallback((option: NSEListboxOption<string>) => {
+  const select = useCallback((option: ListboxOption<string>) => {
     if (option.disabled || disabled || !actionAvailable) return;
     const row = rows.find((candidate) => candidate.rowId === option.id);
     if (!row) return;
@@ -348,7 +348,7 @@ function PopUpButtonControl(props: NSEPopUpButtonProps) {
           <MenuView model={menu.model} controller={menu} open={open} labelledBy={buttonId} onOpenChange={setOpen} direction={direction} initialFocus={initialFocus} />
         </MenuOverlay>
       ) : (
-        <NSEListboxPopup
+        <ListboxPopup
           id={listboxId}
           open={open}
           anchor={anchorRef.current}

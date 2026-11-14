@@ -46,7 +46,7 @@ import { createRuntimeAnimationState, createScopedAnimationFrames } from "../Ani
 import { controllerServicesFor, installControllerServices } from "./controllerServices";
 import { MenuRuntimeProvider } from "../../NSE/applicationHostInterop";
 import { NSEViewActivityProvider } from "../../NSE/applicationHostInterop";
-import { NSEPresentedContentProvider } from "../../NSE/applicationHostInterop";
+import { PresentedContentProvider } from "../../NSE/applicationHostInterop";
 import { NSEActionScopeProvider } from "../../NSE/applicationHostInterop";
 import { useRuntimeNSEMenuPort } from "../../SynCloudOSReact";
 
@@ -518,7 +518,7 @@ export function SynWareRuntimeMount({ runtime, app, responderId, windowControlle
         <SynWareProvider value={context}><NSEOpenPanelApplicationHost value={context}>
           <FontCatalogueProvider catalogue={fontCatalogue}>
             <MountedAppPresentationBoundary runtime={mounted.mount.runtime} kernelRuntime={runtime} context={mounted.contextBase}>
-              <NSEPresentedContentProvider value={wrapPresentedContent}>{presentedChildren}</NSEPresentedContentProvider>
+              <PresentedContentProvider value={wrapPresentedContent}>{presentedChildren}</PresentedContentProvider>
             </MountedAppPresentationBoundary>
           </FontCatalogueProvider>
         </NSEOpenPanelApplicationHost></SynWareProvider>

@@ -8,7 +8,7 @@ import { computeOverlayPosition } from "../../../src/NSE/Overlays/computeOverlay
 import { NSEAnimationEnvironmentProvider } from "../../../src/NSE/Animation/NSEAnimationEnvironment";
 import { NSEViewController, nsePopoverPositioning } from "../../../src/NSE/Application/NSEViewController";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
-import { NSEWindowSurfaceBridgeProvider } from "../../../src/NSE/Overlays/NSEWindowSurfaceBridge";
+import { WindowSurfaceBridgeProvider } from "../../../src/NSE/Overlays/NSEWindowSurfaceBridge";
 
 afterEach(cleanup);
 const presentation = createStaticPresentationPort({ width: 1000, height: 720 });
@@ -47,12 +47,12 @@ describe("popover frame and presentation", () => {
     const present = vi.fn().mockResolvedValue("stable-window");
     const bridge = { present, dismiss: vi.fn().mockResolvedValue({ outcome: "closed" }) };
     const anchor = document.createElement("button"); document.body.append(anchor);
-    const fixture = () => <Harness><NSEWindowSurfaceBridgeProvider bridge={bridge}>
+    const fixture = () => <Harness><WindowSurfaceBridgeProvider bridge={bridge}>
       <NSEPopover id="stable-presentation" open anchor={anchor} parentResponderId="test" parentWindowControllerId={null}
         presentation={{ mode: "anchored", placement: "block-end" }} title="Stable" onOpenChange={() => undefined}>
         <p>Stable content</p>
       </NSEPopover>
-    </NSEWindowSurfaceBridgeProvider></Harness>;
+    </WindowSurfaceBridgeProvider></Harness>;
     const view = render(fixture());
     await waitFor(() => expect(present).toHaveBeenCalledTimes(1));
     view.rerender(fixture());
@@ -65,11 +65,11 @@ describe("popover frame and presentation", () => {
     const bridge = { present, dismiss: vi.fn().mockResolvedValue({ outcome: "closed" }) };
     const anchor = document.createElement("button"); document.body.append(anchor);
     const relativeTo = { x: 12, y: 8, width: 30, height: 16 };
-    const view = render(<Harness><NSEWindowSurfaceBridgeProvider bridge={bridge}>
+    const view = render(<Harness><WindowSurfaceBridgeProvider bridge={bridge}>
       <NSEPopover id="hosted-paper" open anchor={anchor} parentResponderId="test" parentWindowControllerId={null}
         relativeTo={relativeTo} preferredEdge="minX" behavior="semitransient" drawsBackground={false}
         title="Hosted paper" onOpenChange={() => undefined}><p>Paper content</p></NSEPopover>
-    </NSEWindowSurfaceBridgeProvider></Harness>);
+    </WindowSurfaceBridgeProvider></Harness>);
     await waitFor(() => expect(present).toHaveBeenCalled());
     expect(present.mock.calls.at(-1)?.[0]).toMatchObject({ role: "popover", relativeTo, preferredEdge: "minX", behavior: "semitransient", drawsBackground: false });
     expect(document.querySelector(".nse-popover")).toBeNull();

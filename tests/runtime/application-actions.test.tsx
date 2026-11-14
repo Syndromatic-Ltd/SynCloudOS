@@ -8,7 +8,7 @@ import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
 import { NSEActionScopeProvider, NSEControlRuntimeProvider } from "../../src/NSE/Controls/Core";
 import { NSESegmentedControl } from "../../src/NSE/Controls/Values/NSESegmentedControl";
 import { NSEPopUpButton } from "../../src/NSE/Menus/NSEPopUpButton";
-import { NSEStandaloneControlHost } from "../../src/NSE/Overlays";
+import { StandaloneControlHost } from "../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../fixtures/presentationTraits";
 import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
 import type { NSEMenuRuntimePort } from "../../src/NSE/Menus/menuTypes";
@@ -446,11 +446,11 @@ describe("actions in menus and controls", () => {
 
   function ControlsHost({ context, children }: React.PropsWithChildren<{ readonly context: SynWareContextValue }>) {
     return <SynWareProvider value={context}>
-      <NSEStandaloneControlHost document={document} window={window} presentation={createStaticPresentationPort({ width: 1024, height: 768 })} parentResponderId={responderIds.view}>
+      <StandaloneControlHost document={document} window={window} presentation={createStaticPresentationPort({ width: 1024, height: 768 })} parentResponderId={responderIds.view}>
         <NSEControlRuntimeProvider port={controlPort(context)}>
           <NSEActionScopeProvider appId={appId}>{children}</NSEActionScopeProvider>
         </NSEControlRuntimeProvider>
-      </NSEStandaloneControlHost>
+      </StandaloneControlHost>
     </SynWareProvider>;
   }
 

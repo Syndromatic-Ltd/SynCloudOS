@@ -7,7 +7,7 @@ import { NSEAlertSurface } from "../Components/NSEAlertSurface";
 import { NSEButton } from "../Controls/Buttons/NSEButton";
 import { NSEFocusScope } from "../Focus";
 import type { NSEWindowAlertRequest } from "../Application/NSEWindowController";
-import type { NSEWindowSurfaceRequest } from "../Overlays/NSEWindowSurfaceBridge";
+import type { WindowSurfaceRequest } from "../Overlays/NSEWindowSurfaceBridge";
 
 /** @internal NSE owns sheet drawing; the application host owns presentation and dismissal. */
 export function ControllerSheetSurface({ scopeId, attached, title, titleId, width, fullSizeContentView = false, onCancel, children }: {
@@ -37,7 +37,7 @@ export function ControllerSheetSurface({ scopeId, attached, title, titleId, widt
 
 /** @internal The panel host supplies geometry and dismissal; NSE draws the inherited appearance. */
 export function OpenPanelSheetSurface({ request, compact, onClose, children }: {
-  readonly request: NSEWindowSurfaceRequest;
+  readonly request: WindowSurfaceRequest;
   readonly compact: boolean;
   readonly onClose: () => void;
   readonly children: ReactNode;

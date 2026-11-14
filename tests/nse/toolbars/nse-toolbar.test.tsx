@@ -23,7 +23,7 @@ import React, { useMemo, useRef, useState } from "react";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEUserDefaultsController } from "../../../src/NSE/Controllers";
-import { OverlayProvider, type NSEWindowSurfaceDismissResult, type NSEWindowSurfaceRequest } from "../../../src/NSE/Overlays";
+import { OverlayProvider, type WindowSurfaceDismissResult, type WindowSurfaceRequest } from "../../../src/NSE/Overlays";
 import { allocateToolbarItems } from "../../../src/NSE/Toolbars/toolbarLayout";
 import { ToolbarView as NSEToolbar } from "../../../src/NSE/Toolbars/ToolbarView";
 import { ToolbarConfigurationSheet } from "../../../src/NSE/Toolbars/ToolbarConfigurationSheet";
@@ -190,9 +190,9 @@ function OverlayHarness({ children }: { readonly children: React.ReactNode }) {
   return <OverlayProvider runtimePort={runtimePort}>{children}</OverlayProvider>;
 }
 
-function hostedConfiguration(outcome: NSEWindowSurfaceDismissResult["outcome"] = "closed") {
+function hostedConfiguration(outcome: WindowSurfaceDismissResult["outcome"] = "closed") {
   const controller = createController();
-  let request: NSEWindowSurfaceRequest | undefined;
+  let request: WindowSurfaceRequest | undefined;
   let setContent!: React.Dispatch<React.SetStateAction<React.ReactNode>>;
   let dismissOutcome = outcome;
   const closeWindow = () => {
@@ -201,7 +201,7 @@ function hostedConfiguration(outcome: NSEWindowSurfaceDismissResult["outcome"] =
     setContent(null);
   };
   const bridge = {
-    present: vi.fn(async (nextRequest: NSEWindowSurfaceRequest, content: React.ReactNode) => {
+    present: vi.fn(async (nextRequest: WindowSurfaceRequest, content: React.ReactNode) => {
       request = nextRequest;
       setContent(content);
       return "window:hosted-toolbar-configuration";

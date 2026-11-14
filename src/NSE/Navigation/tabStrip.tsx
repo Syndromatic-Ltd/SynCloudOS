@@ -23,7 +23,7 @@ import { nseControlHooks } from "../Theme/contract/hooks";
 import { useId, useMemo, useRef, useState, type MutableRefObject, type ReactNode } from "react";
 
 import type { HFXFeedbackRequest } from "../Feedback";
-import { NSEListboxPopup, useOptionalOverlayProvider } from "../Overlays";
+import { ListboxPopup, useOptionalOverlayProvider } from "../Overlays";
 import { useNSEControlCommand, useNSEControlFeedback } from "../Controls/Core";
 import { useNSETooltip, useOptionalTooltipProvider } from "../Tooltips";
 
@@ -280,7 +280,7 @@ export function TabStrip({
       {visible.filter((item) => item.closable).map((item) => <button key={item.id} type="button" data-nse-part="button" data-nse-role="close" aria-label={`Close ${item.accessibleLabel ?? (typeof item.label === "string" ? item.label : item.id)}`} disabled={item.disabled} onClick={() => close(item.id)}>×</button>)}
       {overflowButton}
     </div> : null}
-    {overflow.length ? <NSEListboxPopup id={`tab-overflow-${instanceId}`} open={overflowOpen} anchor={overflowRef.current} parentResponderId={parentResponderId} options={overflow.map((item) => ({ id: item.id, label: item.label, value: item.id, disabled: item.disabled }))} selectedId={selected?.id} onOpenChange={setOverflowOpen} onSelect={(option) => { if (option.value) publishSelection(option.value, "pointer"); }} /> : null}
+    {overflow.length ? <ListboxPopup id={`tab-overflow-${instanceId}`} open={overflowOpen} anchor={overflowRef.current} parentResponderId={parentResponderId} options={overflow.map((item) => ({ id: item.id, label: item.label, value: item.id, disabled: item.disabled }))} selectedId={selected?.id} onOpenChange={setOverflowOpen} onSelect={(option) => { if (option.value) publishSelection(option.value, "pointer"); }} /> : null}
     {children?.(renderState)}
   </>;
 }

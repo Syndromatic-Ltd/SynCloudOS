@@ -24,7 +24,7 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NSEFilePanelView } from "../../../src/NSE/FilePanels/NSEFilePanelView";
 import { NSEPopover } from "../../../src/NSE/Overlays/NSEPopover";
-import { NSEActionSheet, OverlayProvider, useNSEWindowSurfaceLifecycle, type NSEWindowSurfaceBridge } from "../../../src/NSE/Overlays";
+import { ActionSheet, OverlayProvider, useNSEWindowSurfaceLifecycle, type WindowSurfaceBridge } from "../../../src/NSE/Overlays";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 
 afterEach(() => document.body.replaceChildren());
@@ -64,7 +64,7 @@ function LifecycleProbe({
   open,
   onDismissRefused,
 }: {
-  readonly bridge: NSEWindowSurfaceBridge;
+  readonly bridge: WindowSurfaceBridge;
   readonly open: boolean;
   readonly onDismissRefused: () => void;
 }) {
@@ -174,7 +174,7 @@ describe("canonical window-surface lifecycle", () => {
       return <OverlayHarness>
         <button type="button" onClick={() => setOpen(false)}>Reject action-sheet close</button>
         <output aria-label="rejected action-sheet source">{open ? "open" : "closed"}</output>
-        <NSEActionSheet id="rejected-action-sheet" open={open} parentResponderId="window:parent" parentWindowControllerId="window:parent" windowBridge={bridge} onOpenChange={setOpen}>Sheet</NSEActionSheet>
+        <ActionSheet id="rejected-action-sheet" open={open} parentResponderId="window:parent" parentWindowControllerId="window:parent" windowBridge={bridge} onOpenChange={setOpen}>Sheet</ActionSheet>
       </OverlayHarness>;
     }
     render(<Fixture />);
@@ -216,7 +216,7 @@ describe("canonical window-surface lifecycle", () => {
       reportError: vi.fn(),
     };
     const onOpenChange = vi.fn();
-    render(<NSEActionSheet id="rejected-sheet" defaultOpen parentResponderId="runtime" windowBridge={bridge} onOpenChange={onOpenChange}>Sheet</NSEActionSheet>);
+    render(<ActionSheet id="rejected-sheet" defaultOpen parentResponderId="runtime" windowBridge={bridge} onOpenChange={onOpenChange}>Sheet</ActionSheet>);
 
     await waitFor(() => expect(bridge.reportError).toHaveBeenCalledWith(failure, expect.objectContaining({ requestId: "rejected-sheet", operation: "present" })));
     expect(onOpenChange).not.toHaveBeenCalledWith(false, expect.anything());

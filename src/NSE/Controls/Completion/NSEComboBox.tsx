@@ -22,7 +22,7 @@ import { nseControlHooks } from "../../Theme/contract/hooks";
 import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import { useEffect, useId, useRef, useState } from "react";
 
-import { NSEListboxPopup, useNSEOverlayProvider } from "../../Overlays";
+import { ListboxPopup, useNSEOverlayProvider } from "../../Overlays";
 import type { NSEComboBoxProps } from "./completionTypes";
 import { useNSEValueBinding } from "../Core/useNSEValueBinding";
 import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
@@ -167,7 +167,7 @@ function NSEComboBoxControl<T>(props: NSEComboBoxProps<T>) {
         }}
       />
       {props.name ? <input type="hidden" name={props.name} value={props.value ? props.dataSource.idForItem(props.value) : props.allowsFreeform ? draft : ""} /> : null}
-      <NSEListboxPopup id={popupId} open={items.length > 0} anchor={inputRef.current} parentResponderId={props.parentResponderId} direction={props.direction} options={options} selectedId={activeItem ? props.dataSource.idForItem(activeItem) : null} labelledBy={inputId} onOpenChange={(open) => { if (!open) { setItems([]); setActive(-1); } }} onSelect={(option) => { if (option.value !== undefined) commit(option.value); }} />
+      <ListboxPopup id={popupId} open={items.length > 0} anchor={inputRef.current} parentResponderId={props.parentResponderId} direction={props.direction} options={options} selectedId={activeItem ? props.dataSource.idForItem(activeItem) : null} labelledBy={inputId} onOpenChange={(open) => { if (!open) { setItems([]); setActive(-1); } }} onSelect={(option) => { if (option.value !== undefined) commit(option.value); }} />
     </span>
   );
 }

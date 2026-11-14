@@ -22,7 +22,7 @@
 import React, { StrictMode, useEffect, useRef, useState } from "react";
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { NSEStandaloneControlHost, NSEPopup, NSEListboxPopup, createStandaloneNSEControlRuntime } from "../../../src/NSE/Overlays";
+import { StandaloneControlHost, NSEPopup, ListboxPopup, createStandaloneNSEControlRuntime } from "../../../src/NSE/Overlays";
 import { OverlayProvider, useNSEOverlayProvider, type OverlayProviderContextValue } from "../../../src/NSE/Overlays/OverlayProvider";
 import { MenuView, NSEPopUpButton } from "../../../src/NSE/Menus";
 import { NSEFeedbackProvider } from "../../../src/NSE/Feedback";
@@ -34,7 +34,7 @@ afterEach(async () => { cleanup(); await act(async () => {}); vi.restoreAllMocks
 const presentation = createStaticPresentationPort({ width: 1024, height: 768 });
 
 function Host({ children }: React.PropsWithChildren) {
-  return <NSEStandaloneControlHost document={document} window={window} presentation={presentation}>{children}</NSEStandaloneControlHost>;
+  return <StandaloneControlHost document={document} window={window} presentation={presentation}>{children}</StandaloneControlHost>;
 }
 
 function Probe({ publish }: { publish(context: OverlayProviderContextValue): void }) {
@@ -263,7 +263,7 @@ describe("standalone picker and menu keyboard contracts", () => {
     let authority: OverlayProviderContextValue | undefined;
     const publish = (value: OverlayProviderContextValue) => { authority = value; };
     const options = [{ id: "alpha", label: "Alpha" }, { id: "beta", label: "Beta" }];
-    const fixture = (show: boolean) => <Host><Probe publish={publish} />{show ? <NSEListboxPopup id="typeahead" defaultOpen options={options} /> : <span>Branch removed</span>}</Host>;
+    const fixture = (show: boolean) => <Host><Probe publish={publish} />{show ? <ListboxPopup id="typeahead" defaultOpen options={options} /> : <span>Branch removed</span>}</Host>;
     const view = render(fixture(true));
     const alpha = await screen.findByRole("option", { name: "Alpha" });
     await waitFor(() => expect(document.activeElement).toBe(alpha));
@@ -299,7 +299,7 @@ describe("standalone picker and menu keyboard contracts", () => {
 describe("virtualised standalone listbox focus", () => {
   const options = Array.from({ length: 250 }, (_, index) => ({ id: String(index), label: `Entry ${index}`, value: index }));
   it("scrolls an offscreen selected row into the virtual window before focusing it", async () => {
-    render(<Host><NSEListboxPopup id="large" defaultOpen options={options} selectedId="199" /></Host>);
+    render(<Host><ListboxPopup id="large" defaultOpen options={options} selectedId="199" /></Host>);
     const selected = await screen.findByRole("option", { name: "Entry 199" });
     await waitFor(() => expect(document.activeElement).toBe(selected));
     expect(screen.getAllByRole("option").length).toBeLessThan(30);
@@ -308,7 +308,7 @@ describe("virtualised standalone listbox focus", () => {
   });
 
   it("retains keyboard focus after End moves beyond the rendered rows", async () => {
-    render(<Host><NSEListboxPopup id="large" defaultOpen options={options} selectedId="0" /></Host>);
+    render(<Host><ListboxPopup id="large" defaultOpen options={options} selectedId="0" /></Host>);
     const first = await screen.findByRole("option", { name: "Entry 0" });
     await waitFor(() => expect(document.activeElement).toBe(first));
     fireEvent.keyDown(first, { key: "End" });

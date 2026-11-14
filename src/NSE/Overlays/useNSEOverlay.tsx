@@ -25,7 +25,7 @@ import { useNSEOverlayRegion } from "./useNSEOverlayRegion";
 import { nseOverlayRegionInsets } from "./overlayRegion";
 import { registerNSEFocusOrigin } from "../Focus/focusOrigin";
 import type {
-  NSELogicalPlacement,
+  LogicalPlacement,
   OverlayDismissReason,
   OverlayId,
   OverlayKind,
@@ -47,7 +47,7 @@ export interface UseNSEOverlayOptions {
   readonly open: boolean;
   readonly dismissOn?: readonly OverlayDismissReason[] | ReadonlySet<OverlayDismissReason>;
   readonly restoreFocus?: boolean;
-  readonly placement?: NSELogicalPlacement;
+  readonly placement?: LogicalPlacement;
   readonly direction?: OverlayDirection;
   readonly arrow?: HTMLElement | null;
   readonly offset?: number;
@@ -72,8 +72,8 @@ export interface UseNSEOverlayResult {
     readonly "data-nse-part": "surface";
     readonly "data-nse-role": "overlay";
     readonly "data-state": "open";
-    readonly "data-placement": NSELogicalPlacement;
-    readonly "data-nse-placement": NSELogicalPlacement;
+    readonly "data-placement": LogicalPlacement;
+    readonly "data-nse-placement": LogicalPlacement;
     readonly "data-nse-viewport-limited": "true" | "false";
     readonly "data-nse-content-pending"?: "true";
     readonly inert?: boolean;

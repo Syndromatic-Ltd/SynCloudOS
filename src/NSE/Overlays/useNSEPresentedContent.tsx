@@ -24,14 +24,14 @@ const PresentedContentContext = createContext<((content: ReactNode) => ReactNode
 
 /** Host-only: retain the presenting application's services when a real
  * window renders its content elsewhere in the React tree. */
-export const NSEPresentedContentProvider = PresentedContentContext.Provider;
+export const PresentedContentProvider = PresentedContentContext.Provider;
 
 /**
  * Latest content for a surface a window bridge presents. The bridge receives
  * one stable element per surface; content changes reach that element through
  * this store and re-render only it.
  */
-class NSEPresentedContentStore {
+class PresentedContentStore {
   #content: ReactNode;
   readonly #listeners = new Set<() => void>();
 
@@ -53,7 +53,7 @@ class NSEPresentedContentStore {
   }
 }
 
-function NSEPresentedContent({ store }: { readonly store: NSEPresentedContentStore }) {
+function PresentedContent({ store }: { readonly store: PresentedContentStore }) {
   return useSyncExternalStore(store.subscribe, store.get, store.get);
 }
 
@@ -67,8 +67,8 @@ function NSEPresentedContent({ store }: { readonly store: NSEPresentedContentSto
 export function useNSEPresentedContent(content: ReactNode): ReactNode {
   const wrap = useContext(PresentedContentContext);
   content = wrap ? wrap(content) : content;
-  const [store] = useState(() => new NSEPresentedContentStore(content));
-  const [element] = useState(() => <NSEPresentedContent store={store} />);
+  const [store] = useState(() => new PresentedContentStore(content));
+  const [element] = useState(() => <PresentedContent store={store} />);
   useLayoutEffect(() => {
     store.set(content);
   }, [content, store]);

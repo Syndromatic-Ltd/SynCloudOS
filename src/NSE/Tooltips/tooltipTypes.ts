@@ -19,13 +19,13 @@
  */
 
 import type { HTMLAttributes, PointerEventHandler, ReactNode } from "react";
-import type { NSELogicalPlacement } from "../Overlays";
+import type { LogicalPlacement } from "../Overlays";
 
 export type TooltipContent = ReactNode;
 
 export interface TooltipOptions {
   readonly content: TooltipContent;
-  readonly placement?: NSELogicalPlacement;
+  readonly placement?: LogicalPlacement;
   readonly delayMs?: number;
   /** Do not duplicate a description that is already persistently visible. */
   readonly disabled?: boolean;
@@ -43,7 +43,7 @@ export interface TooltipProps {
   readonly content: TooltipContent;
   readonly open: boolean;
   readonly anchor: HTMLElement | null;
-  readonly placement?: NSELogicalPlacement;
+  readonly placement?: LogicalPlacement;
   onOpenChange?(open: boolean): void;
   onPointerEnter?: PointerEventHandler<HTMLDivElement>;
   onPointerLeave?: PointerEventHandler<HTMLDivElement>;

@@ -29,12 +29,12 @@ import type {
   WindowContentFactoryRegistration,
   WindowContentRegistration,
 } from "../../SynCloudOS/SynCloudOS";
-import type { NSEWindowSurfaceRequest } from "../../NSE/hostComposition";
+import type { WindowSurfaceRequest } from "../../NSE/hostComposition";
 import { computeNSEPopoverPosition, nsePopoverEdgePlacement, nsePopoverReference, type NSEPopoverPosition } from "../../NSE/hostComposition";
 import { logicalPlacementToFloatingPlacement } from "../../NSE/hostComposition";
 import type { WindowContentRendererRegistry } from "./WindowContentRendererRegistry";
 
-export type TransientWindowSurfaceRequest = NSEWindowSurfaceRequest;
+export type TransientWindowSurfaceRequest = WindowSurfaceRequest;
 
 export type TransientWindowSurfaceDismissResult =
   | WindowCloseResult

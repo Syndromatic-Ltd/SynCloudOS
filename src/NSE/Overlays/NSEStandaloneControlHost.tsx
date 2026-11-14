@@ -24,10 +24,10 @@ import { OverlayProvider } from "./OverlayProvider";
 import type { OverlayRuntimePort } from "./overlayTypes";
 import {
   createStandaloneNSEControlRuntime,
-  type NSEStandaloneControlRuntime,
+  type StandaloneControlRuntime,
 } from "./createStandaloneNSEControlRuntime";
 
-export interface NSEStandaloneControlHostProps extends PropsWithChildren {
+export interface StandaloneControlHostProps extends PropsWithChildren {
   readonly document: Document;
   readonly window: Window;
   readonly presentation: OverlayRuntimePort["environment"]["presentation"];
@@ -39,14 +39,14 @@ export interface NSEStandaloneControlHostProps extends PropsWithChildren {
  * authority used by a mounted SynCloudOS runtime. Each host owns one manager
  * and one runtime for its lifetime; sibling hosts never share registrations.
  */
-export function NSEStandaloneControlHost({
+export function StandaloneControlHost({
   document,
   window,
   presentation,
   parentResponderId,
   children,
-}: NSEStandaloneControlHostProps) {
-  const runtimeRef = useRef<NSEStandaloneControlRuntime | null>(null);
+}: StandaloneControlHostProps) {
+  const runtimeRef = useRef<StandaloneControlRuntime | null>(null);
   if (!runtimeRef.current) {
     runtimeRef.current = createStandaloneNSEControlRuntime({
       document,

@@ -27,7 +27,7 @@ import {
   NSEFocusPortProvider,
   OverlayProvider,
   TooltipProvider,
-  NSEWindowSurfaceBridgeProvider,
+  WindowSurfaceBridgeProvider,
   BorderlessWindowView,
   HUDWindowView,
   ModalWindowView,
@@ -364,7 +364,7 @@ export function WindowHost({
         <NSEControlRuntimeProvider port={controlPort}>
           <NSEFocusPortProvider port={focusPort}>
             {childTransientBridge ? (
-              <NSEWindowSurfaceBridgeProvider bridge={childTransientBridge}>{surfaceContent}</NSEWindowSurfaceBridgeProvider>
+              <WindowSurfaceBridgeProvider bridge={childTransientBridge}>{surfaceContent}</WindowSurfaceBridgeProvider>
             ) : surfaceContent}
           </NSEFocusPortProvider>
         </NSEControlRuntimeProvider>
