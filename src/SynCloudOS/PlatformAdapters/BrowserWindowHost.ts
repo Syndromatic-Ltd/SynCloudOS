@@ -40,7 +40,7 @@ function projectStyles(source: Document, target: Document): () => void {
     }
   };
   sync();
-  const Observer = (source.defaultView as (Window & typeof globalThis) | null)?.MutationObserver;
+  const Observer = source.defaultView?.MutationObserver;
   const observer = Observer && new Observer(records => {
     const changed = new Set<Element>();
     for (const { target } of records) {

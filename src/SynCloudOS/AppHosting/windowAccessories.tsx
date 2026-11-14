@@ -34,6 +34,7 @@ import { ToolbarView } from "../../NSE/applicationHostInterop";
 import { ToolbarConfigurationSheet } from "../../NSE/applicationHostInterop";
 import type { NSETitlebarAccessoryViewController } from "../../NSE/NSE";
 import { SynWareRuntimeContext } from "../../SynCloudOSReact";
+import { AttachedSheetLayerContext } from "../../SynCloudOSReact/focusScopeContext";
 import { useSynWareContext } from "../AppSDK/SynWareContext";
 import { controllerServicesFor } from "../AppSDK/controllerServices";
 import "./window-chrome.css";
@@ -428,5 +429,7 @@ export function WindowSheetFrame({ reducedMotion, frozen = false, holdsControlle
       });
     };
   }, [host]);
-  return <div ref={frameRef} data-nse-part="sheet" className="nse-window-sheet">{children}</div>;
+  return <div ref={frameRef} data-nse-part="sheet" className="nse-window-sheet">
+    <AttachedSheetLayerContext value={host?.layer ?? null}>{children}</AttachedSheetLayerContext>
+  </div>;
 }

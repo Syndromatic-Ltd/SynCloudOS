@@ -33,6 +33,7 @@ import type { KeyBindingManager } from "../KeyBindings";
 import type { OperationCoordinator, SynCloudOSRuntimeId } from "../Runtime/runtimeInstanceTypes";
 import type { SynWareOwnedProjectionResult } from "../AppSDK/runtimeContracts";
 import type { ResponderGraph, ResponderRegistrationHandle } from "../Responders";
+import { windowResponderFor } from "../Responders/ResponderGraph";
 import type { UndoManagerRegistry } from "../Undo";
 import type { ScreenService } from "./ScreenService";
 import { WindowBoundsScheduler } from "./WindowBoundsScheduler";
@@ -1929,8 +1930,7 @@ export class WindowManager {
   #rememberCurrentWindowFocus(): void {
     const focused = this.dependencies.focus.getFocusedResponderId();
     if (!focused || !this.dependencies.responders.has(focused)) return;
-    const windowResponder = this.dependencies.responders.resolveChain(focused)
-      .find(({ kind }) => kind === "window");
+    const windowResponder = windowResponderFor(this.dependencies.responders, focused);
     if (!windowResponder || !windowResponder.id.startsWith("window:")) return;
     const windowId = windowResponder.id.slice("window:".length);
     if (this.#controllers.has(windowId)) this.#lastFocusedByWindow.set(windowId, focused);
@@ -1944,8 +1944,7 @@ export class WindowManager {
   #focusTarget(controller: WindowController): string {
     const remembered = this.#lastFocusedByWindow.get(controller.id);
     if (remembered && this.dependencies.responders.has(remembered)) {
-      const insideWindow = this.dependencies.responders.resolveChain(remembered)
-        .some(({ id }) => id === controller.windowResponderId);
+      const insideWindow = windowResponderFor(this.dependencies.responders, remembered)?.id === controller.windowResponderId;
       if (insideWindow && this.dependencies.responders.isEnabled(remembered)) return remembered;
     }
     return controller.contentState.status === "loaded"
@@ -2173,7 +2172,7 @@ export class WindowManager {
       trapFocus: true,
       restoreResponderId,
     }, responderId => {
-      const window = this.dependencies.responders.resolveChain(responderId).find(responder => responder.kind === "window");
+      const window = windowResponderFor(this.dependencies.responders, responderId);
       const candidate = window ? this.#controllers.get(window.id.slice("window:".length)) : undefined;
       return candidate !== undefined && this.#windowBlocksWindow(controller, candidate);
     });

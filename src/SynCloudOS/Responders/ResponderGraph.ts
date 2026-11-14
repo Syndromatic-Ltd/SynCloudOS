@@ -28,11 +28,24 @@ export class ResponderGraphError extends Error {
   }
 }
 
+/** A window identity comes from registered ancestry, without command fallback anchors. */
+export function windowResponderFor(responders: Pick<ResponderGraph, "get">, responderId: string): ResponderResolution | null {
+  let current: string | null = responderId;
+  const visited = new Set<string>();
+  while (current && !visited.has(current)) {
+    visited.add(current);
+    const registration = responders.get(current);
+    if (registration?.kind === "window") return registration;
+    current = registration?.parentId ?? null;
+  }
+  return null;
+}
+
 export function createResponderGraph(options: {
   readonly runtimeId: SynCloudOSRuntimeId;
   getFocusedResponderId(): string | null;
   getActiveAnchors(): ActiveResponderAnchors;
-  getActiveModalScope?(): { readonly scopeId: string; readonly parentResponderId: string; isScopeWithin?(scopeId: string): boolean } | null;
+  getActiveModalScope?(responderId: string | null): { readonly scopeId: string; readonly parentResponderId: string; isScopeWithin?(scopeId: string): boolean } | null;
   onRemoved?(ids: readonly string[]): void;
 }): ResponderGraph {
   const registrations = new Map<string, ResponderRegistration>();
@@ -156,7 +169,8 @@ export function createResponderGraph(options: {
     resolveChain(startId) {
       const result: ResponderResolution[] = [];
       const visited = new Set<string>();
-      const modal = options.getActiveModalScope?.() ?? null;
+      const first = startId ?? options.getFocusedResponderId();
+      const modal = options.getActiveModalScope?.(first) ?? null;
       const modalAncestry = new Set<string>();
       if (modal) {
         let current: string | undefined = modal.parentResponderId;
@@ -186,7 +200,7 @@ export function createResponderGraph(options: {
           current = record.parentId;
         }
       };
-      append(startId ?? options.getFocusedResponderId());
+      append(first);
       const anchors = options.getActiveAnchors();
       append(anchors.documentResponderId);
       append(anchors.windowResponderId);

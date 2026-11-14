@@ -28,6 +28,7 @@ import { createMountedShareClient } from "./mountedShareClient";
 import { createMountedFilePanelClient } from "./mountedFilePanelClient";
 import { isHiddenCommandAcceptance, markHiddenCommandAcceptance } from "../nseRuntimeContracts";
 import { normalizeBundleIdentifier } from "../Identity/bundleIdentifier.mjs";
+import { windowResponderFor } from "../Responders/ResponderGraph";
 import { createMountedServiceTerminalOperations } from "./mountedServiceTerminalOperations";
 import { registerMountedDocumentWorkflowProvider } from "./mountedDocumentWorkflowProvider";
 import { prepareMountedDocumentAssetEdit } from "./mountedDocumentAssetPreparation";
@@ -84,6 +85,7 @@ import type {
   LocalisedCommandTitle,
   DragEndpoint,
   FocusScopeHandle,
+  FocusScopeRegistration,
   ApplicationDocumentSnapshot,
   DocumentConflict,
   DocumentConflictResolution,
@@ -3658,6 +3660,57 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
     const focusRestorations = new Map<FocusScopeHandle, string | null>();
     const focusScopeIds = new Set<string>();
     let focusRestorationLive = true;
+    const openOwnedFocusScope = (scope: FocusScopeRegistration, windowResponderId?: string): FocusScopeHandle => {
+      assertLive();
+      ownResponder(scope.parentResponderId);
+      if (scope.parentScopeId !== undefined && !focusScopeIds.has(scope.parentScopeId)) {
+        throw securityError("Application focus scopes may only descend from an owned mounted scope.");
+      }
+      if (scope.restoreResponderId !== undefined) ownResponder(scope.restoreResponderId);
+      const focused = runtime.focus.getFocusedResponderId();
+      const restoreResponderId = focused && ownedResponder(runtime, app.bundleIdentifier, focused)
+        ? focused : scope.parentResponderId;
+      const inWindow = (responderId: string) => windowResponderFor(runtime.responders, responderId)?.id === windowResponderId;
+      const handle = runtime.focus.openScope(scope, windowResponderId === undefined ? undefined : (responderId) => {
+        const responder = runtime.responders.get(responderId);
+        return responderId !== scope.parentResponderId && inWindow(responderId) &&
+          (!responder || !runtime.focus.isScopeWithin(responder.scopeId, scope.id));
+      });
+      focusHandles.add(handle);
+      focusScopeIds.add(handle.id);
+      focusRestorations.set(handle, scope.restoreResponderId ?? restoreResponderId);
+      const closeOwned = (options?: { readonly restore?: boolean }) => {
+        const closingFocus = runtime.focus.getFocusedResponderId();
+        const shouldRestore = options?.restore !== false &&
+          (windowResponderId === undefined || !closingFocus || closingFocus === scope.parentResponderId || inWindow(closingFocus));
+        const restoration = focusRestorations.get(handle) ?? null;
+        let result: ReturnType<FocusScopeHandle["close"]>;
+        try { result = handle.close({ restore: false }); }
+        catch { result = { status: "missing", scopeId: handle.id, restoredResponderId: null }; }
+        focusHandles.delete(handle);
+        focusScopeIds.delete(handle.id);
+        focusRestorations.delete(handle);
+        const canRestore = result.status === "closed" && shouldRestore && focusRestorationLive && !disposed && !signal.aborted &&
+          runtime.apps.getApp(app.bundleIdentifier) === app && restoration !== null;
+        const target = !canRestore ? null
+          : restoration !== null && ownedResponder(runtime, app.bundleIdentifier, restoration) && runtime.responders.isEnabled(restoration) ? restoration
+          : ownedResponder(runtime, app.bundleIdentifier, scope.parentResponderId) && runtime.responders.isEnabled(scope.parentResponderId) ? scope.parentResponderId : null;
+        if (target === null) return result;
+        const focused = runtime.focus.requestFocus(target);
+        return result.status === "closed" && focused.status === "focused" ? { ...result, restoredResponderId: target } : result;
+      };
+      const wrapped = Object.freeze({
+        id: handle.id,
+        updatePresentation(presentation: Parameters<FocusScopeHandle["updatePresentation"]>[0]) {
+          assertLive();
+          if (!focusHandles.has(handle)) throw securityError("Focus presentation requires an owned live scope.");
+          handle.updatePresentation(presentation);
+        },
+        close: closeOwned,
+        dispose() { return closeOwned(); },
+      });
+      return wrapped;
+    };
     cleanupOnAbort(() => {
       focusRestorationLive = false;
       for (const handle of focusHandles) {
@@ -3988,50 +4041,7 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
           ownResponder(target);
           return runtime.focus.requestFocus(target, focusOptions);
         },
-        openScope(scope) {
-          assertLive();
-          ownResponder(scope.parentResponderId);
-          if (scope.parentScopeId !== undefined && !focusScopeIds.has(scope.parentScopeId)) {
-            throw securityError("Application focus scopes may only descend from an owned mounted scope.");
-          }
-           if (scope.restoreResponderId !== undefined) ownResponder(scope.restoreResponderId);
-           const focused = runtime.focus.getFocusedResponderId();
-           const restoreResponderId = focused && ownedResponder(runtime, app.bundleIdentifier, focused)
-             ? focused : scope.parentResponderId;
-           const handle = runtime.focus.openScope(scope);
-           focusHandles.add(handle);
-           focusScopeIds.add(handle.id);
-           focusRestorations.set(handle, scope.restoreResponderId ?? restoreResponderId);
-           const closeOwned = (options?: { readonly restore?: boolean }) => {
-             const shouldRestore = options?.restore !== false;
-             const restoration = focusRestorations.get(handle) ?? null;
-             let result: ReturnType<FocusScopeHandle["close"]>;
-             try { result = handle.close({ restore: false }); }
-             catch { result = { status: "missing", scopeId: handle.id, restoredResponderId: null }; }
-             focusHandles.delete(handle);
-             focusScopeIds.delete(handle.id);
-             focusRestorations.delete(handle);
-             const canRestore = result.status === "closed" && shouldRestore && focusRestorationLive && !disposed && !signal.aborted &&
-               runtime.apps.getApp(app.bundleIdentifier) === app && restoration !== null;
-             const target = !canRestore ? null
-               : restoration !== null && ownedResponder(runtime, app.bundleIdentifier, restoration) && runtime.responders.isEnabled(restoration) ? restoration
-               : ownedResponder(runtime, app.bundleIdentifier, scope.parentResponderId) && runtime.responders.isEnabled(scope.parentResponderId) ? scope.parentResponderId : null;
-             if (target === null) return result;
-             const focused = runtime.focus.requestFocus(target);
-             return result.status === "closed" && focused.status === "focused" ? { ...result, restoredResponderId: target } : result;
-           };
-           const wrapped = Object.freeze({
-             id: handle.id,
-             updatePresentation(presentation: Parameters<FocusScopeHandle["updatePresentation"]>[0]) {
-               assertLive();
-               if (!focusHandles.has(handle)) throw securityError("Focus presentation requires an owned live scope.");
-               handle.updatePresentation(presentation);
-             },
-             close: closeOwned,
-             dispose() { return closeOwned(); },
-           });
-          return wrapped;
-        },
+        openScope: (scope) => openOwnedFocusScope(scope),
         isScopeWithin(scopeId, ancestorScopeId) {
           assertLive();
           if (!focusScopeIds.has(scopeId) || !focusScopeIds.has(ancestorScopeId)) return false;
@@ -4551,6 +4561,10 @@ export function createMountedSynWareRuntime(options: CreateMountedSynWareRuntime
         observeFullScreen(listener: Parameters<MountedAppEnvironmentClients["currentWindow"]["observeFullScreen"]>[0]) {
           if (windowControllerId === undefined) return () => {};
           return cleanupOnAbort(ownedWindow(windowControllerId).observeFullScreen(event => { if (!signal.aborted) listener(event); }));
+        },
+        openSheetFocusScope(scope: FocusScopeRegistration) {
+          const window = windowControllerId === undefined ? undefined : ownedWindow(windowControllerId);
+          return openOwnedFocusScope(scope, window?.windowResponderId);
         },
       },
       speechSynthesis: createMountedAudioSpeechClient(runtime.environment.speechSynthesis, signal, deviceEntitlements, () => authoriseDeviceCapability("audio.speech")),

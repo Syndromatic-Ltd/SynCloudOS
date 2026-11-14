@@ -13,6 +13,7 @@ import { observable } from "../../src/NSE/Objects";
 import { PresentingDocumentContext } from "../../src/NSE/Overlays/presentingDocument";
 import { useNSEWindowSheetHost } from "../../src/SynCloudOS/AppHosting/windowAccessories";
 import { action } from "../../src/SynCloudOS/AppSDK/actions";
+import { standardWindow } from "../fixtures/windowTestDependencies";
 import { createClassApplicationHost, type ClassApplicationHost } from "./fixtures/classApplicationHost";
 
 const hosts: ClassApplicationHost[] = [];
@@ -70,6 +71,10 @@ it("attaches a sheet under the window's toolbar, blocks the window and refuses i
   host.mountWindows();
   let windowId!: string;
   await act(async () => { windowId = await host.openMainWindow(); });
+  const secondWindow = host.runtime.windows.create(standardWindow("sheet-independent", {
+    content: { rendererId: "application", parameters: { appId: "com.example.independent-window" } },
+  }));
+  await act(async () => { await host.runtime.windows.open(secondWindow.id, { activate: false }); });
   await act(async () => { fireEvent.click(await screen.findByRole("button", { name: "Rename…" })); });
 
   const sheet = await screen.findByRole("dialog", { name: "Rename" });
@@ -97,12 +102,44 @@ it("attaches a sheet under the window's toolbar, blocks the window and refuses i
   await act(async () => { fireEvent.click(usePaper); });
   expect(content.chosen).toBe("paper");
 
+  const secondWindowButton = document.createElement("button");
+  secondWindowButton.dataset.windowHost = secondWindow.id;
+  document.body.append(secondWindowButton);
+  expect(secondWindow.contentState.status).toBe("loaded");
+  const independentResponder = secondWindow.contentState.status === "loaded" ? secondWindow.contentState.rootResponderId : secondWindow.windowResponderId;
+  try {
+    await act(async () => {
+      host.runtime.windows.makeKey(secondWindow.id);
+      secondWindowButton.focus();
+    });
+    expect(host.runtime.windows.snapshot().keyWindowControllerId).toBe(secondWindow.id);
+    expect(document.activeElement).toBe(secondWindowButton);
+    expect(host.runtime.focus.getFocusedResponderId()).toBe(independentResponder);
+    host.runtime.commands.register({
+      id: "sheet.readIndependentWindow",
+      responderId: independentResponder,
+      title: { key: "sheet.readIndependentWindow", fallback: "Read Independent Window" },
+      payload: { description: "none", parse: () => ({ ok: true, value: undefined }) },
+      scope: "focused",
+      defaultKeyBindings: [],
+      undo: { kind: "none" },
+      validate: () => ({ enabled: true }),
+      execute: () => secondWindow.id,
+    });
+    await expect(host.runtime.commands.dispatch("sheet.readIndependentWindow")).resolves.toMatchObject({
+      status: "executed", responderId: independentResponder, value: secondWindow.id,
+    });
+  } finally {
+    secondWindowButton.remove();
+  }
+
   const refused = await act(async () => host.runtime.windows.requestClose(windowId, { reason: "control" }));
   expect(refused.outcome).not.toBe("closed");
   expect(closeChecks).toEqual([]);
 
   await act(async () => { content.presentedViewControllers[0]!.dismiss(); });
   expect(screen.queryByRole("dialog", { name: "Rename" })).toBeNull();
+  expect(host.runtime.focus.getFocusedResponderId()).toBe(independentResponder);
   expect(toolbar.inert).toBe(false);
   expect(inertAncestor(contentButton)).toBeNull();
   expect(inertAncestor(footerButton)).toBeNull();

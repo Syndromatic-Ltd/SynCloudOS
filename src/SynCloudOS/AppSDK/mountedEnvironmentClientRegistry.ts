@@ -50,6 +50,7 @@ import type {
   AppWorkAreaClient,
 } from "./appEnvironmentClientTypes";
 import type { AppTrustedClient } from "./appTrustedClientTypes";
+import type { FocusScopeHandle, FocusScopeRegistration } from "../Focus/focusTypes";
 
 /** This host-private association prevents the public context from retaining a
  * façade object. The context receives only already-projected client values. */
@@ -60,6 +61,7 @@ export interface MountedAppEnvironmentClients {
     toggleFullScreen(): void;
     isFullScreen(): boolean;
     observeFullScreen(listener: (event: import("../Windows/windowTypes").WindowFullScreenNotification) => void): () => void;
+    openSheetFocusScope(scope: FocusScopeRegistration): FocusScopeHandle;
   };
   readonly persistence: AppPersistenceClient;
   readonly scheduler: AppSchedulerClient;

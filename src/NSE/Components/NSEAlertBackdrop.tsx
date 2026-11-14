@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useEffect, useRef, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
+import { useContext, useEffect, useImperativeHandle, useRef, type CSSProperties, type KeyboardEvent, type ReactNode, type Ref } from "react";
 import "./components.css";
 import { useNSEAnimationEnvironment, useNSEPresentation } from "../Animation";
 import { resolveNSEAlertBackdropMotion, resolveNSESheetBackdropMotion } from "./NSEAlert.transitions";
@@ -33,6 +33,7 @@ import { nseOverlayRegionInsets, type OverlayPresentationSource } from "../Overl
 
 interface AlertBackdropProps {
   readonly children: ReactNode;
+  readonly ref?: Ref<HTMLDivElement>;
   readonly presentation?: OverlayPresentationSource;
   readonly onSafeDismiss?: () => void;
   readonly onKeyDown?: (event: KeyboardEvent<HTMLDivElement>) => void;
@@ -46,6 +47,7 @@ interface AlertBackdropProps {
 
 export function AlertBackdrop({
   children,
+  ref,
   presentation,
   onSafeDismiss,
   onKeyDown,
@@ -64,6 +66,7 @@ export function AlertBackdrop({
   const previousFocusRef = useRef(resolveNSEFocusReturnTarget(presentingDocument?.activeElement ?? null));
   const { reducedMotion } = useNSEAnimationEnvironment();
   const backdropRef = useRef<HTMLDivElement>(null);
+  useImperativeHandle(ref, () => backdropRef.current!, []);
   useNSEPresentation(backdropRef, motion === "sheet" ? resolveNSESheetBackdropMotion(reducedMotion) : resolveNSEAlertBackdropMotion(reducedMotion));
 
   useEffect(() => {
@@ -101,9 +104,18 @@ export function AlertBackdrop({
         }
         element.inert = inert;
       });
-      // Native focus refuses an inert target. Release background ownership
-      // before returning focus, including during StrictMode effect replay.
-      previousFocus?.focus({ preventScroll: true });
+      const restoreFocus = () => {
+        if (!previousFocus?.isConnected || previousFocus.closest("[inert]")) return;
+        const { ownerDocument } = previousFocus;
+        const active = ownerDocument.activeElement;
+        if (!active || active === ownerDocument.body || active === ownerDocument.documentElement || backdrop?.contains(active)) {
+          previousFocus.focus({ preventScroll: true });
+        }
+      };
+      // An attached sheet's host releases its content's inert state after
+      // this effect. Let that commit finish before trying to restore focus.
+      if (previousFocus?.closest("[inert]")) queueMicrotask(restoreFocus);
+      else restoreFocus();
     };
   }, []);
 

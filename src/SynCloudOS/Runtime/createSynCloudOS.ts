@@ -281,7 +281,7 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
   let appearance!: SynCloudOSRuntime["appearance"];
   let locale!: SynCloudOSRuntime["locale"];
   let responders!: SynCloudOSRuntime["responders"];
-  let focus!: SynCloudOSRuntime["focus"];
+  let focus!: ReturnType<typeof createFocusManager>;
   let commands!: SynCloudOSRuntime["commands"];
   let keyBindings!: SynCloudOSRuntime["keyBindings"];
   let documents!: DocumentController;
@@ -791,8 +791,8 @@ export function createSynCloudOS(config: SynCloudOSRuntimeConfig): SynCloudOSRun
     runtimeId,
     getFocusedResponderId: () => focus?.getFocusedResponderId() ?? null,
     getActiveAnchors: () => focus?.getActiveAnchors() ?? { runtimeResponderId: "runtime" },
-    getActiveModalScope: () => {
-      const modal = focus?.inspect().scopes.filter((scope) => scope.modal).at(-1);
+    getActiveModalScope: (responderId) => {
+      const modal = focus?.modalScopeForResponder(responderId);
       return modal ? { scopeId: modal.id, parentResponderId: modal.parentResponderId, isScopeWithin: (scopeId: string) => focus.isScopeWithin(scopeId, modal.id) } : null;
     },
     onRemoved: (ids) => focus?.handleRespondersRemoved(ids),

@@ -497,8 +497,8 @@ export function WindowControllerView({ controller }: WindowControllerViewProps) 
     const detach = internals.attach(mount);
     const reportKey = () => {
       const isKey = mount.getSnapshot()?.isKey ?? mount.windowId === null;
-      internals.setKey(isKey);
       nseSetKeyWindowModalPresenter(mount, isKey ? mount.presentModalAlert : null);
+      internals.setKey(isKey);
     };
     reportKey();
     const unsubscribe = mount.subscribe(() => { reportKey(); internals.notifySnapshotChange(); });

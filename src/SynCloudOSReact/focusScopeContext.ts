@@ -27,6 +27,9 @@ import { createContext, useContext } from "react";
  */
 export const FocusScopeIdContext = createContext<string | null>(null);
 
+/** @internal An attached sheet gets a window-local modal scope from the host. */
+export const AttachedSheetLayerContext = createContext<HTMLElement | null>(null);
+
 /** @internal The innermost focus scope around the caller, if any. */
 export function useEnclosingFocusScopeId(): string | null {
   return useContext(FocusScopeIdContext);

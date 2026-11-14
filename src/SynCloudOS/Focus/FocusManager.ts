@@ -24,7 +24,11 @@ import type { FocusCloseResult, FocusManager, FocusScopeHandle, FocusScopeRegist
 
 export class FocusScopeError extends Error { constructor(message: string) { super(message); this.name = "FocusScopeError"; } }
 
-export function createFocusManager(options: { readonly runtimeId: SynCloudOSRuntimeId; readonly responders: ResponderGraph }): FocusManager {
+interface RuntimeFocusManager extends FocusManager {
+  modalScopeForResponder(responderId: string | null): Pick<FocusScopeRegistration, "id" | "parentResponderId"> | undefined;
+}
+
+export function createFocusManager(options: { readonly runtimeId: SynCloudOSRuntimeId; readonly responders: ResponderGraph }): RuntimeFocusManager {
   const scopes = new Map<string, Omit<FocusScopeRegistration, "restoreResponderId"> & { restoreResponderId: string | null }>();
   const modalDomains = new Map<string, (responderId: string) => boolean>();
   const stack: string[] = [];
@@ -83,8 +87,20 @@ export function createFocusManager(options: { readonly runtimeId: SynCloudOSRunt
     return options.responders.isEnabled(runtimeId) && allowedByModal(runtimeId) ? runtimeId : null;
   };
 
-  const manager: FocusManager = {
+  const manager: RuntimeFocusManager = {
     runtimeId: options.runtimeId,
+    modalScopeForResponder(responderId) {
+      const responder = responderId === null ? null : options.responders.get(responderId);
+      for (const scopeId of [...stack].reverse()) {
+        const scope = scopes.get(scopeId);
+        if (!scope?.modal) continue;
+        const blocks = modalDomains.get(scopeId);
+        if (!blocks || (responder && (
+          blocks(responder.id) || responder.id === scope.parentResponderId || isScopeWithin(responder.scopeId, scopeId)
+        ))) return scope;
+      }
+      return undefined;
+    },
     openScope(registration, blocksResponder): FocusScopeHandle {
       if (disposed) throw new FocusScopeError("Focus manager is disposed.");
       if (scopes.has(registration.id)) throw new FocusScopeError(`Focus scope ${registration.id} is already open.`);

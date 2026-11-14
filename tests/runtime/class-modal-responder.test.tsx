@@ -28,7 +28,18 @@ afterEach(async () => {
 });
 
 it("withdraws the class modal presenter when the key window resigns and restores it on activation", async () => {
-  class MainWindow extends NSEWindowController { static override view = () => <p>Modal presenter</p>; }
+  const alert = new NSEAlert();
+  alert.messageText = "Use the active window";
+  let openOnBecomeKey = false;
+  let response: Promise<NSEModalResponse> | undefined;
+  class MainWindow extends NSEWindowController {
+    static override view = () => <p>Modal presenter</p>;
+    override windowDidBecomeKey() {
+      if (!openOnBecomeKey) return;
+      response = alert.runModal();
+      void response.catch(() => undefined);
+    }
+  }
   class Application extends NSEApplication { static override mainWindow = MainWindow; }
   const host = createClassApplicationHost(Application, "com.example.resigned-key-window");
   hosts.push(host);
@@ -40,18 +51,16 @@ it("withdraws the class modal presenter when the key window resigns and restores
 
   await act(async () => { host.runtime.windows.resignKey(); });
   expect(host.runtime.windows.snapshot().keyWindowControllerId).toBeNull();
-  const alert = new NSEAlert();
-  alert.messageText = "Use the active window";
   await act(async () => {
     await expect(alert.runModal()).rejects.toThrow("runModal needs an active application with a key window.");
   });
 
+  openOnBecomeKey = true;
   await act(async () => { host.runtime.windows.makeKey(windowId); });
-  let response!: Promise<NSEModalResponse>;
-  await act(async () => { response = alert.runModal(); });
   const current = host.runtime.alerts.getSnapshot().current;
   expect(current).toMatchObject({ ownerAppId: host.appId, title: "Use the active window" });
   host.runtime.alerts.dismiss(current!.id);
+  expect(response).toBeDefined();
   await expect(response).resolves.toBe(NSEModalResponse.alertFirstButtonReturn);
 });
 
