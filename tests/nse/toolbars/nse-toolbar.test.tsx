@@ -851,7 +851,7 @@ describe("NSEToolbar presentation", () => {
   });
 
   it("parents its overflow to the nearest responder when the toolbar does not name one", async () => {
-    const { NSEActionResponderContext } = await import("../../../src/NSE/Controls/Core/useNSEControlAction");
+    const { ActionResponderContext } = await import("../../../src/NSE/Controls/Core/useNSEControlAction");
     const validateMany = vi.fn(async (requests: readonly { readonly key: string; readonly commandId: string }[]) => new Map(
       requests.map((request) => [request.key, commandPresentation(request.commandId)]),
     ));
@@ -862,9 +862,9 @@ describe("NSEToolbar presentation", () => {
     });
     render(
       <OverlayHarness>
-        <NSEActionResponderContext.Provider value="view:editor">
+        <ActionResponderContext.Provider value="view:editor">
           <NSEToolbar composition="configured" controller={controller} width={150} aria-label="Document actions" />
-        </NSEActionResponderContext.Provider>
+        </ActionResponderContext.Provider>
       </OverlayHarness>,
     );
     fireEvent.click(await screen.findByRole("button", { name: "More toolbar items" }));

@@ -25,7 +25,7 @@ import { useNSEWindowChromeObstruction } from "../../NSE/NSE";
 import { Fragment, createContext, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import type { NSEAnyWindowController } from "../../NSE/applicationHostInterop";
-import { useObserve, NSEActionResponderContext } from "../../NSE/applicationHostInterop";
+import { useObserve, ActionResponderContext } from "../../NSE/applicationHostInterop";
 import { nseAttachToolbar, nseEndToolbarCustomization, nseToolbarEngine, nseToolbarTabViews } from "../../NSE/applicationHostInterop";
 import type { NSEToolbar } from "../../NSE/NSE";
 import { ToolbarView } from "../../NSE/applicationHostInterop";
@@ -151,7 +151,7 @@ export function WindowToolbar({ controller, toolbar }: { readonly controller: NS
   const appRuntime = useContext(SynWareRuntimeContext);
   const context = useSynWareContext();
   // The window controller's responder when it has actions; otherwise the application's mount.
-  const responderId = useContext(NSEActionResponderContext) ?? appRuntime?.responderId ?? null;
+  const responderId = useContext(ActionResponderContext) ?? appRuntime?.responderId ?? null;
   const overlayId = `nse-window-toolbar:${useId()}`;
   const mode = useWindowChromeMode();
   const element = useRef<HTMLDivElement | null>(null);

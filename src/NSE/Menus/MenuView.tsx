@@ -40,7 +40,7 @@ import type {
   NSEMenuRuntimePort,
 } from "./menuTypes";
 import { useNSEMenuOverlayPresentationScope } from "./menuPresentationContext";
-import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
+import { ActionResponderContext } from "../Controls/Core/useNSEControlAction";
 import "./nse-menus.css";
 
 function classNames(...values: readonly (string | false | null | undefined)[]): string {
@@ -663,7 +663,7 @@ function ItemMenu({
   ...htmlAttributes
 }: ItemMenuProps) {
   const provider = useNSEOverlayProvider();
-  const nearestResponderId = useContext(NSEActionResponderContext);
+  const nearestResponderId = useContext(ActionResponderContext);
   const generatedId = useId().replace(/:/g, "");
   const triggerId = `nse-menu-trigger:${generatedId}`;
   const menuLabel = useEquivalentValue(label, sameNode);

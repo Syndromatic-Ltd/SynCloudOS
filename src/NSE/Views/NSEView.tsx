@@ -24,7 +24,7 @@ import { useCallback, useContext, useEffect, useId, useMemo, useRef, useState, t
 import { NSEAppearanceProvider, useNSEAppearance } from "../Appearance/NSEAppearanceProvider";
 import type { NSEAppearance } from "../Appearance/NSEAppearance";
 import { useOptionalOverlayProvider } from "../Overlays";
-import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
+import { ActionResponderContext } from "../Controls/Core/useNSEControlAction";
 import { MenuView } from "../Menus/MenuView";
 import type { NSEMenu } from "../Menus/NSEMenu";
 import { MenuOverlay } from "../Menus/MenuOverlay";
@@ -158,7 +158,7 @@ function MenuHostView({ menu, toolTip, menuOverlay, longPressDelayMs, direction,
   const longPressRef = useRef<unknown | null>(null);
   const instanceId = useId();
   const provider = useOptionalOverlayProvider();
-  const nearestResponderId = useContext(NSEActionResponderContext);
+  const nearestResponderId = useContext(ActionResponderContext);
   const viewId = htmlAttributes.id ?? `nse-view-${menu.identifier}-${instanceId}`;
   if (!provider) throw new Error("An NSEView with a menu needs an NSEOverlayProvider.");
   const parentResponderId = menuOverlay?.parentResponderId ?? nearestResponderId ?? provider.defaultParentResponderId;

@@ -30,7 +30,7 @@ import { TimeEntry } from "../../../src/NSE/DateTime/Pickers/timeEntry";
 import { NSE, NSEDatePicker as RootDatePicker, NSESecureTextField as RootSecureTextField, NSETabView as RootTabView } from "../../../src/NSE/NSE";
 import { StandaloneControlHost } from "../../../src/NSE/Overlays";
 import { NSEFeedbackProvider } from "../../../src/NSE/Feedback";
-import { NSEControlRuntimeProvider } from "../../../src/NSE/Controls/Core";
+import { ControlRuntimeProvider } from "../../../src/NSE/Controls/Core";
 import { createStaticPresentationPort } from "../../fixtures/presentationTraits";
 
 afterEach(cleanup);

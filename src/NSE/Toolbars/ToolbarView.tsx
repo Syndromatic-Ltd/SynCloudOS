@@ -43,7 +43,7 @@ import {
   ChromeSurface,
   type ChromeVisualState,
 } from "../Appearance/chromePrimitives";
-import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
+import { ActionResponderContext } from "../Controls/Core/useNSEControlAction";
 import { allocateToolbarItems } from "./toolbarLayout";
 import { ToolbarOverflowMenu } from "./ToolbarOverflowMenu";
 import type { NSEToolbarController } from "./NSEToolbarController";
@@ -110,7 +110,7 @@ function ConfiguredToolbar({
   onKeyDown,
   ...htmlAttributes
 }: ToolbarConfiguredProps) {
-  const nearestResponderId = useContext(NSEActionResponderContext);
+  const nearestResponderId = useContext(ActionResponderContext);
   const generatedOverlayId = `nse-toolbar-overflow:${useId()}`;
   const interaction = {
     overflowOverlayId: requestedInteraction?.overflowOverlayId ?? generatedOverlayId,

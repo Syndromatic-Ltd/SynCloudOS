@@ -23,7 +23,7 @@ import { WindowLayoutContext, WindowLayoutModel } from "../../NSE/hostCompositio
 import React, { useCallback, useLayoutEffect, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useNSEPresenceExiting, useNSEPresentation, type PresentationSpec } from "../../NSE/Animation";
 import {
-  NSEControlRuntimeProvider,
+  ControlRuntimeProvider,
   NSEFocusPortProvider,
   OverlayProvider,
   TooltipProvider,
@@ -361,13 +361,13 @@ export function WindowHost({
         portalContainer={overlayLayerNode}
       >
         <TooltipProvider>
-        <NSEControlRuntimeProvider port={controlPort}>
+        <ControlRuntimeProvider port={controlPort}>
           <NSEFocusPortProvider port={focusPort}>
             {childTransientBridge ? (
               <WindowSurfaceBridgeProvider bridge={childTransientBridge}>{surfaceContent}</WindowSurfaceBridgeProvider>
             ) : surfaceContent}
           </NSEFocusPortProvider>
-        </NSEControlRuntimeProvider>
+        </ControlRuntimeProvider>
       </TooltipProvider>
       </OverlayProvider>
     </WindowChromeSlotContext.Provider>

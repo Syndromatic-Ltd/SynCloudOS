@@ -24,7 +24,7 @@ import { nseControlHooks } from "../../Theme/contract/hooks";
 import { useNSEThemeInteraction } from "../../Theme/contract/useThemeInteraction";
 import { useEffect, useId, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import { ListboxPopup, useOptionalOverlayProvider } from "../../Overlays";
-import { useNSEControlCommand, useOptionalNSEControlRuntimePort, type NSEControlCommandBinding } from "../Core";
+import { useNSEControlCommand, useOptionalNSEControlRuntimePort, type ControlCommandBinding } from "../Core";
 import { sizedControlStyle } from "../Core/nseControlsShared";
 
 const noRecents: readonly string[] = Object.freeze([]);
@@ -73,7 +73,7 @@ export interface NSESearchFieldProps {
   readonly width?: number | string;
   readonly parentResponderId?: string;
   readonly debounceMs?: number;
-  readonly command?: NSEControlCommandBinding<{ readonly query: string }>;
+  readonly command?: ControlCommandBinding<{ readonly query: string }>;
   onValueChange?(value: string): void;
   onSearch?(value: string): void;
   onQuery?(value: string, signal: AbortSignal): void | Promise<void>;

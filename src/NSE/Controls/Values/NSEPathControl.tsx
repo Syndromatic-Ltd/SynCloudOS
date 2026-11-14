@@ -22,7 +22,7 @@ import { forwardRef, useImperativeHandle, useMemo, useRef, type HTMLAttributes }
 import { NSEImageView } from "../Images/NSEImage";
 import { NSEWorkspace } from "../../Application/NSEWorkspace";
 import { NSEButton } from "../Buttons/NSEButton";
-import type { NSEControlActionProps } from "../Core/controlTypes";
+import type { ControlActionProps } from "../Core/controlTypes";
 
 /** NSPathControlItem: a titled, optionally illustrated component of a path. */
 export class NSEPathControlItem {
@@ -40,7 +40,7 @@ export interface NSEPathControlHandle {
   readonly pathItems: readonly NSEPathControlItem[];
   readonly clickedPathItem: NSEPathControlItem | null;
 }
-export interface NSEPathControlProps extends Omit<HTMLAttributes<HTMLElement>, "onClick">, NSEControlActionProps<NSEPathControlItem> {
+export interface NSEPathControlProps extends Omit<HTMLAttributes<HTMLElement>, "onClick">, ControlActionProps<NSEPathControlItem> {
   readonly url?: string | URL | null;
   readonly pathItems?: readonly NSEPathControlItem[];
   readonly pathStyle?: "standard";

@@ -9,7 +9,7 @@ import { createSynWareContextValue } from "../../src/SynCloudOS/AppSDK/createSyn
 import { SynWareProvider } from "../../src/SynCloudOS/AppSDK/SynWareContext";
 import { createSynWareMenuRuntime } from "../../src/SynCloudOS/AppSDK/SynWareNSEMenuPort";
 import { NSEButton } from "../../src/NSE/Controls/Buttons/NSEButton";
-import { NSEActionScopeProvider, NSEControlRuntimeProvider } from "../../src/NSE/Controls/Core";
+import { ActionScopeProvider, ControlRuntimeProvider } from "../../src/NSE/Controls/Core";
 import { NSEMenu } from "../../src/NSE/Menus/NSEMenu";
 import { NSEToolbarController } from "../../src/NSE/Toolbars/NSEToolbarController";
 import { NSEUserDefaultsController } from "../../src/NSE/Controllers/NSEUserDefaultsController";
@@ -52,7 +52,7 @@ function fixture() {
     subscribePresentation: context.commands.subscribePresentation.bind(context.commands),
   } };
   const wrapper = ({ children }: { children: React.ReactNode }) => <SynWareProvider value={context}>
-    <NSEActionScopeProvider appId={appId}><NSEControlRuntimeProvider port={controlPort}>{children}</NSEControlRuntimeProvider></NSEActionScopeProvider>
+    <ActionScopeProvider appId={appId}><ControlRuntimeProvider port={controlPort}>{children}</ControlRuntimeProvider></ActionScopeProvider>
   </SynWareProvider>;
   return { appId, runtime, context, port, wrapper, app, window, child, controllers };
 }

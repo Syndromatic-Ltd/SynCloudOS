@@ -29,37 +29,37 @@ import {
   type ReactNode,
 } from "react";
 import type { CommandDispatchResult, CommandPresentation } from "../../../SynCloudOS/SynCloudOS";
-import type { NSEControlCommandBinding, NSEControlRuntimePort } from "./controlTypes";
+import type { ControlCommandBinding, ControlRuntimePort } from "./controlTypes";
 import { subscribeNSEActionChanges } from "./actionChanges";
 import { isHiddenCommandAcceptance } from "../../../SynCloudOS/nseRuntimeContracts";
 
-const NSEControlRuntimeContext = createContext<NSEControlRuntimePort | null>(null);
+const ControlRuntimeContext = createContext<ControlRuntimePort | null>(null);
 
-export interface NSEControlRuntimeProviderProps {
-  readonly port: NSEControlRuntimePort;
+export interface ControlRuntimeProviderProps {
+  readonly port: ControlRuntimePort;
   readonly children: ReactNode;
 }
 
 /** Supplies the canonical command authority to runtime-neutral NSE controls. */
-export function NSEControlRuntimeProvider({ port, children }: NSEControlRuntimeProviderProps) {
-  return <NSEControlRuntimeContext.Provider value={port}>{children}</NSEControlRuntimeContext.Provider>;
+export function ControlRuntimeProvider({ port, children }: ControlRuntimeProviderProps) {
+  return <ControlRuntimeContext.Provider value={port}>{children}</ControlRuntimeContext.Provider>;
 }
 
-export function useOptionalNSEControlRuntimePort(): NSEControlRuntimePort | null {
-  return useContext(NSEControlRuntimeContext);
+export function useOptionalNSEControlRuntimePort(): ControlRuntimePort | null {
+  return useContext(ControlRuntimeContext);
 }
 
-export interface NSEControlCommandState<P> {
+export interface ControlCommandState<P> {
   readonly presentation: CommandPresentation | null;
   readonly validating: boolean;
-  readonly failure: NSEControlCommandFailure | null;
+  readonly failure: ControlCommandFailure | null;
   refresh(): void;
   /** No argument uses the bound payload; a supplied argument, including undefined, is freshly prepared. */
   dispatch(payload?: P): Promise<CommandDispatchResult<unknown> | null>;
 }
 
 /** Redacted control-facing indication that canonical command work failed. */
-export interface NSEControlCommandFailure {
+export interface ControlCommandFailure {
   readonly commandId: string;
   readonly stage: "validate" | "dispatch";
 }
@@ -90,14 +90,14 @@ function createAbortLease(parent: AbortSignal): AbortLease {
  * must never be used to bypass that canonical resolver.
  */
 export function useNSEControlCommand<P>(
-  binding: NSEControlCommandBinding<P> | undefined,
-  explicitPort?: NSEControlRuntimePort,
-): NSEControlCommandState<P> {
-  const contextPort = useContext(NSEControlRuntimeContext);
+  binding: ControlCommandBinding<P> | undefined,
+  explicitPort?: ControlRuntimePort,
+): ControlCommandState<P> {
+  const contextPort = useContext(ControlRuntimeContext);
   const port = explicitPort ?? contextPort;
   const [presentation, setPresentation] = useState<CommandPresentation | null>(null);
   const [validating, setValidating] = useState(false);
-  const [failure, setFailure] = useState<NSEControlCommandFailure | null>(null);
+  const [failure, setFailure] = useState<ControlCommandFailure | null>(null);
   const generation = useRef(0);
   const bindingGeneration = useRef(0);
   const validationLease = useRef<AbortLease | null>(null);

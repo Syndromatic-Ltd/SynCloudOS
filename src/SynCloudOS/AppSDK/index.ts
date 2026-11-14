@@ -205,7 +205,7 @@ export type {
 
 export { useStrings, translateSynWareText, getSynWareNamespace } from "./useStrings";
 export { action, useAction, bindActionResponder, hasActions, actionNames, refreshActionBindings } from "./actions";
-export type { NSEActionBinding, NSEActionHost, NSEActionMethod, NSEActionOptions, NSEActionState } from "./actions";
+export type { ActionBinding, ActionHost, NSEActionMethod, NSEActionOptions, NSEActionState } from "./actions";
 export type { SynCloudOSPresentationTraits } from "./appClientTypes";
 export type { AppVideoClient, AppVideoPlaybackPresentationRequest } from "./appClientTypes";
 export type { AppPlaybackMetadata, AppPlaybackAction, AppPlaybackPresentationRequest, AppPlaybackPresentationSnapshot, AppPlaybackPresentationLease, AppScreenWakeClient, AppScreenWakeSnapshot, AppScreenWakeLease } from "./playbackPresentationTypes";

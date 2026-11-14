@@ -26,10 +26,10 @@ import { ListboxPopup, type ListboxOption } from "../Overlays/NSEListboxPopup";
 import type { PopupPresentation } from "../Overlays/NSEPopup";
 import { NSEButton, type NSEButtonProps } from "../Controls/Buttons/NSEButton";
 import { classes, sizedControlStyle, useControllableState, useNSEControlFeedback } from "../Controls/Core/nseControlsShared";
-import { NSEActionResponderContext, useNSEActionBinding } from "../Controls/Core/useNSEControlAction";
+import { ActionResponderContext, useNSEActionBinding } from "../Controls/Core/useNSEControlAction";
 import type { NSEActionReference } from "../Controls/Core/actionReference";
-import type { NSEControlActionProps } from "../Controls/Core/controlTypes";
-import { useNSEControlCommand, type NSEControlCommandState } from "../Controls/Core/useNSEControlCommand";
+import type { ControlActionProps } from "../Controls/Core/controlTypes";
+import { useNSEControlCommand, type ControlCommandState } from "../Controls/Core/useNSEControlCommand";
 import { useNSEValueBinding } from "../Controls/Core/useNSEValueBinding";
 import type { NSEBoundValueProps } from "../Bindings/bindingTypes";
 import { MenuView } from "./MenuView";
@@ -54,7 +54,7 @@ export type NSEPopUpButtonItem<Payload = unknown> =
       readonly actionPayload?: NoInfer<Payload>;
     };
 
-export interface NSEPopUpButtonProps<Payload = unknown> extends Omit<HTMLAttributes<HTMLSpanElement>, "onChange" | "title">, NSEControlActionProps<Payload> {
+export interface NSEPopUpButtonProps<Payload = unknown> extends Omit<HTMLAttributes<HTMLSpanElement>, "onChange" | "title">, ControlActionProps<Payload> {
   /** The menu's items. A pull-down button with a command `menu` takes no items. */
   readonly items?: readonly NSEPopUpButtonItem[];
   /** NSPopUpButton.pullsDown: the button keeps its `title` and its items run commands. */
@@ -103,7 +103,7 @@ function ItemActionBinding({ id, action, payload, onState }: {
   readonly id: string;
   readonly action: string | NSEActionReference;
   readonly payload: unknown;
-  readonly onState: (id: string, state: NSEControlCommandState<unknown> | null) => void;
+  readonly onState: (id: string, state: ControlCommandState<unknown> | null) => void;
 }) {
   const binding = useNSEActionBinding(action, payload);
   const command = useNSEControlCommand(binding);
@@ -114,7 +114,7 @@ function ItemActionBinding({ id, action, payload, onState }: {
   return null;
 }
 
-function available(command: NSEControlCommandState<unknown> | undefined): boolean {
+function available(command: ControlCommandState<unknown> | undefined): boolean {
   const presentation = command?.presentation;
   return Boolean(presentation?.enabled && !presentation.denied && !presentation.hidden && !presentation.stale);
 }
@@ -164,10 +164,10 @@ function PopUpButtonControl(props: NSEPopUpButtonProps) {
   if (menu && items.length) throw new TypeError("NSEPopUpButton takes either items or a command menu, not both.");
   const disabled = !isEnabled;
   const provider = useOptionalOverlayProvider();
-  const nearestResponderId = useContext(NSEActionResponderContext);
+  const nearestResponderId = useContext(ActionResponderContext);
   const hasActionPayload = Object.prototype.hasOwnProperty.call(props, "actionPayload");
-  const [itemCommands, setItemCommands] = useState<ReadonlyMap<string, NSEControlCommandState<unknown>>>(() => new Map());
-  const receiveItemCommand = useCallback((rowId: string, command: NSEControlCommandState<unknown> | null) => {
+  const [itemCommands, setItemCommands] = useState<ReadonlyMap<string, ControlCommandState<unknown>>>(() => new Map());
+  const receiveItemCommand = useCallback((rowId: string, command: ControlCommandState<unknown> | null) => {
     setItemCommands((current) => {
       const next = new Map(current);
       if (command) next.set(rowId, command); else next.delete(rowId);

@@ -12,7 +12,7 @@ import { NSEButton } from '../../../src/NSE/Controls/Buttons/NSEButton';
 import { NSESearchField } from '../../../src/NSE/Controls/Fields/NSESearchField';
 import { NSESlider } from '../../../src/NSE/Controls/Values/NSESlider';
 import { NSEStepper } from '../../../src/NSE/Controls/Values/NSEStepper';
-import { NSEControlRuntimeProvider } from '../../../src/NSE/Controls/Core/useNSEControlCommand';
+import { ControlRuntimeProvider } from '../../../src/NSE/Controls/Core/useNSEControlCommand';
 
 class Values extends NSEObject {
   @observable accessor text = 'hello';
@@ -81,7 +81,7 @@ describe('bound controls', () => {
   it('cancels a held bound stepper without committing the preview',()=>{
     const owner=new Values();const timers=new Set<()=>void>();
     const port={signal:new AbortController().signal,scheduler:{setTimeout(callback:()=>void){timers.add(callback);return callback;},clearTimeout(callback:()=>void){timers.delete(callback);}},commands:{}} as any;
-    render(<NSEControlRuntimeProvider port={port}><NSEStepper aria-label="Held step" minimum={0} maximum={10} step={1} binding={bind(owner,'amount')}/></NSEControlRuntimeProvider>);
+    render(<ControlRuntimeProvider port={port}><NSEStepper aria-label="Held step" minimum={0} maximum={10} step={1} binding={bind(owner,'amount')}/></ControlRuntimeProvider>);
     const increment=screen.getByRole('button',{name:'Increment Held step'});fireEvent.pointerDown(increment,{pointerId:1});expect(owner.amount).toBe(3);
     fireEvent.pointerCancel(increment,{pointerId:1});expect(owner.amount).toBe(2);expect(timers.size).toBe(0);
   });

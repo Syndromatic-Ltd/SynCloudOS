@@ -19,7 +19,7 @@
  */
 
 import { useCallback, useContext, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
-import { NSEActionResponderContext } from "../Controls/Core/useNSEControlAction";
+import { ActionResponderContext } from "../Controls/Core/useNSEControlAction";
 import { NSEPopup, type PopupPresentation } from "./NSEPopup";
 import { useNSEOverlayProvider } from "./OverlayProvider";
 import type { OverlayDismissReason } from "./overlayTypes";
@@ -130,7 +130,7 @@ export function NSEPopover({
     placement: preferredEdge ? nsePopoverEdgePlacement[preferredEdge] : automaticPresentation.placement,
   }), [automaticPresentation, preferredEdge]);
   const hostedBridge = useOptionalNSEWindowSurfaceBridge();
-  const nearestResponder = useContext(NSEActionResponderContext);
+  const nearestResponder = useContext(ActionResponderContext);
   const { defaultParentResponderId } = useNSEOverlayProvider();
   const resolvedParentResponderId = parentResponderId ?? nearestResponder ?? defaultParentResponderId;
   const canonicalBridge = surface === "overlay" ? null : windowBridge?.present && windowBridge.dismiss ? windowBridge as WindowSurfaceBridge : hostedBridge;

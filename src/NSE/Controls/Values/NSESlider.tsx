@@ -1,4 +1,4 @@
-import { useNSEValueBinding, type NSEValueBindingControlProps } from "../Core/useNSEValueBinding";
+import { useNSEValueBinding, type ValueBindingControlProps } from "../Core/useNSEValueBinding";
 import type { NSEBoundValueProps } from "../../Bindings/bindingTypes";
 /*
  * SynCloudOS
@@ -62,7 +62,7 @@ function NSELinearSlider(props: NSEBoundValueProps<number, NSESliderProps, 'valu
   return <NSESliderControl {...useNSEValueBinding<number, NSESliderProps, 'value' | 'defaultValue' | 'onValueChange' | 'undoManager'>(props, {fallback:0,cancellable:true})} />;
 }
 
-function NSESliderControl({ __nseBindingEditor, sliderType: _sliderType, valueText, controlSize = "regular", length, thumbMaterial = "standard", wraps: _wraps, value, defaultValue, minimum: suppliedMinimum, maximum: suppliedMaximum, step = 1, orientation = "horizontal", dir, isEnabled = true, readOnly, ticks, detents, detentThreshold = step * 2, name, id, className, label, tooltip, undoManager, onValueChange, style, ...props }: NSESliderProps & NSEValueBindingControlProps<number>) {
+function NSESliderControl({ __nseBindingEditor, sliderType: _sliderType, valueText, controlSize = "regular", length, thumbMaterial = "standard", wraps: _wraps, value, defaultValue, minimum: suppliedMinimum, maximum: suppliedMaximum, step = 1, orientation = "horizontal", dir, isEnabled = true, readOnly, ticks, detents, detentThreshold = step * 2, name, id, className, label, tooltip, undoManager, onValueChange, style, ...props }: NSESliderProps & ValueBindingControlProps<number>) {
   const feedback = useNSEFeedback();
   // The value tooltip needs the app's tooltip host; without one the slider
   // still works, its value spoken by the input alone.

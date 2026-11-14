@@ -50,8 +50,8 @@ import {
   useNSEControlCommand,
   useNSEControlFormReset,
   useNSEControlValue,
-  type NSECheckboxState,
-  type NSEControlCommandBinding,
+  type CheckboxState,
+  type ControlCommandBinding,
   type NSEControlInteractionPhase,
   type NSEControlValidation,
 } from "../Core";
@@ -95,7 +95,7 @@ export interface NSEPlainTextFieldProps extends NSETextFieldChromeProps, Omit<
   value?: string;
   defaultValue?: string;
   invalid?: boolean;
-  command?: NSEControlCommandBinding<string>;
+  command?: ControlCommandBinding<string>;
   onValueChange?(value: string, phase: NSEControlInteractionPhase): void;
 }
 
@@ -108,7 +108,7 @@ export interface NSEFormattedTextFieldProps<T> extends NSETextFieldChromeProps, 
   invalid?: boolean;
   formatter: NSEFormatter<T>;
   formatterContext: NSEFormatterContext;
-  command?: NSEControlCommandBinding<T>;
+  command?: ControlCommandBinding<T>;
   onValueChange?(value: T, phase: NSEControlInteractionPhase): void;
 }
 
@@ -130,7 +130,7 @@ export interface NSETextFieldProps<T = string> extends NSETextFieldChromeProps, 
   invalid?: boolean;
   formatter?: NSEFormatter<T>;
   formatterContext?: NSEFormatterContext;
-  command?: NSEControlCommandBinding<T>;
+  command?: ControlCommandBinding<T>;
   onValueChange?(value: T, phase: NSEControlInteractionPhase): void;
 }
 
@@ -247,7 +247,7 @@ function NSETextFieldControl<T = string>(props: NSETextFieldProps<T>) {
   });
   const [draft, setDraft] = useState(() => toTextValue(currentValue.value, formatter, formatterContext));
   const [editingValidation, setEditingValidation] = useState<NSEControlValidation | undefined>();
-  const command = useNSEControlCommand(commandBinding as NSEControlCommandBinding<T | string> | undefined);
+  const command = useNSEControlCommand(commandBinding as ControlCommandBinding<T | string> | undefined);
   const effectiveValidation = editingValidation ?? validation ?? (invalid
     ? { kind: "invalid", code: "invalid", message: "This value needs attention." } as const
     : undefined);
@@ -678,7 +678,7 @@ export interface NSERadioOption {
   value: string;
   label: ReactNode;
   isEnabled?: boolean;
-  command?: NSEControlCommandBinding<{ readonly value: string }>;
+  command?: ControlCommandBinding<{ readonly value: string }>;
 }
 
 export interface NSERadioGroupProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange"> {
